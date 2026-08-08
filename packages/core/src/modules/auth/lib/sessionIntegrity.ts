@@ -2,6 +2,7 @@ import type { EntityManager } from '@mikro-orm/postgresql'
 import type { AuthContext } from '@open-mercato/shared/lib/auth/server'
 import { findOneWithDecryption, findWithDecryption } from '@open-mercato/shared/lib/encryption/find'
 import { Role, RoleAcl, Session, User, UserAcl, UserRole } from '@open-mercato/core/modules/auth/data/entities'
+import { isMachinePrincipal } from '@open-mercato/shared/lib/auth/principal'
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 const INVALID_SCOPE = Symbol('invalid-scope')
@@ -31,7 +32,10 @@ export async function resolveCanonicalStaffAuthContext(
   auth: AuthContext,
 ): Promise<AuthContext> {
   if (!auth) return null
-  if (auth.isApiKey) return auth
+  // Only people have an interactive session to re-validate against the database.
+  // Machine principals authenticate per request from their own credential, so
+  // there is no canonical staff record to reconcile.
+  if (isMachinePrincipal(auth)) return auth
 
   const subjectId = normalizeScopeId(auth.sub)
   const actorTenantId = resolveActorTenantId(auth)

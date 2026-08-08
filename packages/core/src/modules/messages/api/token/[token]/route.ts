@@ -8,6 +8,7 @@ import { Message, MessageAccessToken, MessageObject, MessageRecipient } from '..
 import { MAX_TOKEN_USE_COUNT } from '../../../commands/tokens'
 import { messageTokenResponseSchema } from '../../openapi'
 import { hashAuthToken } from '../../../../auth/lib/tokenHash'
+import { effectiveUserId } from '@open-mercato/shared/lib/auth/principal'
 
 export const metadata = {
   GET: { requireAuth: false },
@@ -79,12 +80,6 @@ async function resolveTokenAccess(em: EntityManager, token: string): Promise<Tok
   }
 }
 
-function resolveAuthenticatedUserId(auth: AuthContext): string | null {
-  if (!auth) return null
-  if (auth.isApiKey && typeof auth.userId === 'string') return auth.userId
-  return auth.sub
-}
-
 export async function GET(req: Request, { params }: { params: { token: string } }) {
   const container = await createRequestContainer()
   const commandBus = container.resolve('commandBus') as CommandBus
@@ -114,7 +109,7 @@ export async function GET(req: Request, { params }: { params: { token: string } 
     if (!auth) {
       return Response.json({ requiresAuth: true })
     }
-    if (resolveAuthenticatedUserId(auth) !== access.recipientUserId) {
+    if (effectiveUserId(auth) !== access.recipientUserId) {
       return Response.json({ error: 'Forbidden', requiresAuth: true }, { status: 403 })
     }
   }

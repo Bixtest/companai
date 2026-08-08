@@ -16,6 +16,7 @@ import {
 } from '../../../data/validators'
 import type { OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
 import { createLogger } from '@open-mercato/shared/lib/logger'
+import { effectiveUserId as resolveEffectiveUserId } from '@open-mercato/shared/lib/auth/principal'
 
 const logger = createLogger('auth').child({ component: 'sidebar-variants' })
 
@@ -57,7 +58,7 @@ function serializeVariant(record: SidebarVariantRecord) {
 export async function GET(req: Request) {
   const auth = await getAuthFromRequest(req)
   if (!auth) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const effectiveUserId = auth.isApiKey ? auth.userId : auth.sub
+  const effectiveUserId = resolveEffectiveUserId(auth)
   if (!effectiveUserId) return NextResponse.json({ error: 'No user context' }, { status: 403 })
 
   const { locale } = await resolveTranslations()
@@ -83,7 +84,7 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   const auth = await getAuthFromRequest(req)
   if (!auth) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const effectiveUserId = auth.isApiKey ? auth.userId : auth.sub
+  const effectiveUserId = resolveEffectiveUserId(auth)
   if (!effectiveUserId) return NextResponse.json({ error: 'No user context' }, { status: 403 })
 
   let parsedBody: unknown

@@ -3,6 +3,7 @@ import type { AwilixContainer } from 'awilix'
 import type { EntityManager } from '@mikro-orm/postgresql'
 import type { RbacService } from '@open-mercato/core/modules/auth/services/rbacService'
 import { hasAllFeatures } from '@open-mercato/shared/lib/auth/featureMatch'
+import { apiKeySubject } from '@open-mercato/shared/lib/auth/principal'
 
 const logger = createLogger('ai_assistant')
 
@@ -73,7 +74,7 @@ export async function authenticateMcpRequest(
       return { success: false, error: 'Invalid or expired API key' }
     }
 
-    const userId = `api_key:${apiKey.id}`
+    const userId = apiKeySubject(apiKey.id)
 
     const rbacService = container.resolve('rbacService') as {
       loadAcl: (

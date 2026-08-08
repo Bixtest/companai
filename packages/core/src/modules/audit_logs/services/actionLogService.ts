@@ -21,6 +21,7 @@ import {
 } from '@open-mercato/shared/lib/encryption/tenantDataEncryptionService'
 import { toOptionalString } from '@open-mercato/shared/lib/string/coerce'
 import { createLogger } from '@open-mercato/shared/lib/logger'
+import { parseSubject } from '@open-mercato/shared/lib/auth/principal'
 
 const logger = createLogger('audit_logs').child({ component: 'action-log-service' })
 
@@ -289,7 +290,7 @@ export class ActionLogService {
     const UUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/
     const toNullableUuid = (value: unknown) => {
       if (typeof value !== 'string' || value.length === 0) return null
-      const candidate = value.startsWith('api_key:') ? value.slice('api_key:'.length) : value
+      const candidate = parseSubject(value).id
       return UUID_REGEX.test(candidate) ? candidate : null
     }
 

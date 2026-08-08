@@ -2,7 +2,7 @@ import { cookies } from 'next/headers.js'
 import type { EntityManager } from '@mikro-orm/postgresql'
 import { verifyJwt } from './jwt'
 import { getSharedApiKeyAuthCache } from './apiKeyAuthCache'
-import { apiKeySubject, derivePrincipal, type Principal } from './principal'
+import { apiKeySubject, derivePrincipal, isMachinePrincipal, type Principal } from './principal'
 
 export type { Principal, PrincipalKind } from './principal'
 export { effectiveUserId, isHumanPrincipal, isMachinePrincipal } from './principal'
@@ -323,7 +323,10 @@ function extractApiKey(req: Request): string | null {
 }
 
 async function resolveCanonicalInteractiveAuthContext(auth: AuthContext): Promise<AuthContext> {
-  if (!auth || auth.isApiKey) return auth
+  // Runs before `withResolvedPrincipal`, on the raw JWT payload, so the kind is
+  // derived rather than read. Only interactive (human) sessions have a canonical
+  // staff record to reconcile against the database.
+  if (!auth || isMachinePrincipal(auth)) return auth
   if (typeof auth.sub !== 'string' || auth.sub.trim().length === 0) return null
 
   try {

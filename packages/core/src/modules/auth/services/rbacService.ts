@@ -7,6 +7,7 @@ import { findWithDecryption } from '@open-mercato/shared/lib/encryption/find'
 import { buildOrgScopeUserCacheTag, buildOrgScopeTenantCacheTag } from '@open-mercato/core/modules/directory/utils/organizationScope'
 import { matchFeature as sharedMatchFeature, hasAllFeatures as sharedHasAllFeatures } from '@open-mercato/shared/lib/auth/featureMatch'
 import { filterGrantsByEnabledModules, getOwningModuleId, getEnabledModuleIds } from '@open-mercato/shared/security/enabledModulesRegistry'
+import { parseSubject } from '@open-mercato/shared/lib/auth/principal'
 
 interface AclData {
   isSuperAdmin: boolean
@@ -259,7 +260,13 @@ export class RbacService {
     const cached = await this.getFromCache(cacheKey)
     if (cached) return cached
 
-    if (!userId.startsWith('api_key:')) {
+    // `userId` is a subject string, not necessarily a user id — it carries the
+    // actor's kind in a prefix. Parsed once here rather than re-tested per
+    // branch; R1.4 replaces the parameter with a resolved `Principal` so the
+    // kind arrives as data and this parse disappears.
+    const subject = parseSubject(userId)
+
+    if (subject.kind === 'human') {
       if (await this.isGlobalSuperAdmin(userId)) {
         const result = { isSuperAdmin: true, features: ['*'], organizations: null }
         await this.setCache(cacheKey, result, userId, scope)
@@ -267,8 +274,8 @@ export class RbacService {
       }
     }
 
-    if (userId.startsWith('api_key:')) {
-      const apiKeyId = userId.slice('api_key:'.length)
+    if (subject.kind === 'service') {
+      const apiKeyId = subject.id
       const em = this.em.fork()
       const key = await em.findOne(ApiKey, { id: apiKeyId, deletedAt: null })
       if (!key || (key.expiresAt && key.expiresAt.getTime() < Date.now())) {

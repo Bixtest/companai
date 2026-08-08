@@ -111,6 +111,25 @@ export function derivePrincipal(auth: PrincipalSource | null | undefined): Princ
   }
 }
 
+/** An auth context, whether or not it already carries a resolved principal. */
+type PrincipalCarrier = (PrincipalSource & { principal?: Principal | null }) | null | undefined
+
+/**
+ * Resolves the acting principal, deriving it when the context predates the
+ * field.
+ *
+ * Not every context passes through the authentication boundary that attaches
+ * `principal`: cached entries, trusted envelopes handed to the in-process AI
+ * runner, and test fixtures can all arrive without one. Reading `auth.principal`
+ * directly would silently treat those as "no principal" and, for
+ * `effectiveUserId`, hand back `null` where a real user id exists. Every helper
+ * below goes through this instead.
+ */
+function resolvePrincipal(auth: PrincipalCarrier): Principal | null {
+  if (!auth) return null
+  return auth.principal ?? derivePrincipal(auth)
+}
+
 /**
  * The user whose personal state this request should read and write — sidebar
  * layout, preferences, assignment, attribution.
@@ -121,16 +140,16 @@ export function derivePrincipal(auth: PrincipalSource | null | undefined): Princ
  * id — using a key id where a user id is expected silently writes rows nobody
  * can read back.
  */
-export function effectiveUserId(auth: { principal?: Principal | null } | null | undefined): string | null {
-  const principal = auth?.principal
+export function effectiveUserId(auth: PrincipalCarrier): string | null {
+  const principal = resolvePrincipal(auth)
   if (!principal) return null
   if (principal.kind === 'human') return principal.id
   return principal.onBehalfOfUserId
 }
 
 /** True when the actor is a person authenticating as themselves. */
-export function isHumanPrincipal(auth: { principal?: Principal | null } | null | undefined): boolean {
-  return auth?.principal?.kind === 'human'
+export function isHumanPrincipal(auth: PrincipalCarrier): boolean {
+  return resolvePrincipal(auth)?.kind === 'human'
 }
 
 /**
@@ -140,7 +159,7 @@ export function isHumanPrincipal(auth: { principal?: Principal | null } | null |
  * per kind; this helper is for the cases that only distinguish "person" from
  * "not a person", such as skipping interactive session checks.
  */
-export function isMachinePrincipal(auth: { principal?: Principal | null } | null | undefined): boolean {
-  const kind = auth?.principal?.kind
+export function isMachinePrincipal(auth: PrincipalCarrier): boolean {
+  const kind = resolvePrincipal(auth)?.kind
   return kind === 'service' || kind === 'ai_worker' || kind === 'system'
 }

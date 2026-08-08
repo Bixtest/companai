@@ -8,6 +8,7 @@ import type { CrudEventsConfig, CrudIndexerConfig, CrudEmitContext } from '@open
 import type { CommandRuntimeContext } from '@open-mercato/shared/lib/commands'
 import type { CommandLogMetadata } from '@open-mercato/shared/lib/commands'
 import type { BulkImportSuppression } from '@open-mercato/shared/lib/commands'
+import { derivePrincipal, type Principal } from '../auth/principal'
 
 export type ParsedPayload<TSchema extends z.ZodTypeAny> = {
   parsed: z.infer<TSchema>
@@ -176,19 +177,37 @@ export function snapshotsEqual(a: unknown, b: unknown): boolean {
 
 const AUTHOR_UUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/
 
+/**
+ * Authorship is attributed to people only.
+ *
+ * Deliberately **not** `effectiveUserId`: a key issued on someone's behalf
+ * resolves to that person there, but authorship of a record is not something a
+ * machine can assert for a human. A machine principal yields `null` here even
+ * when it has an owning user, which is the pre-existing behaviour and is kept
+ * unchanged — R1 moves the actor's kind into data without altering what any
+ * call site decides.
+ */
 export function normalizeAuthorUserId(
   explicitAuthorUserId: string | undefined | null,
-  auth: { isApiKey?: boolean; isSuperAdmin?: boolean; sub?: string | null } | undefined | null
+  auth:
+    | ({ isApiKey?: boolean; isSuperAdmin?: boolean; sub?: string | null } & {
+        principal?: Principal | null
+      })
+    | undefined
+    | null
 ): string | null {
+  const principal = auth ? auth.principal ?? derivePrincipal(auth) : null
+  const isHuman = principal?.kind === 'human'
+
   if (
     explicitAuthorUserId &&
     auth?.isSuperAdmin === true &&
-    auth.isApiKey !== true &&
+    isHuman &&
     AUTHOR_UUID_REGEX.test(explicitAuthorUserId)
   ) {
     return explicitAuthorUserId
   }
-  const authSub = auth?.isApiKey ? null : auth?.sub ?? null
+  const authSub = isHuman ? principal.id : null
   if (!authSub) return null
   return AUTHOR_UUID_REGEX.test(authSub) ? authSub : null
 }

@@ -15,6 +15,7 @@ import { escapeLikePattern } from '@open-mercato/shared/lib/db/escapeLikePattern
 import { assertActorCanGrantRoles } from '@open-mercato/core/modules/auth/lib/grantChecks'
 import { isOrganizationAccessAllowed } from '@open-mercato/shared/lib/auth/organizationAccess'
 import { findOneWithDecryption } from '@open-mercato/shared/lib/encryption/find'
+import { apiKeySubject } from '@open-mercato/shared/lib/auth/principal'
 
 type ApiKeyCrudCtx = CrudCtx & {
   __apiKeySecret?: { secret: string; prefix: string }
@@ -321,7 +322,7 @@ const crud = makeCrudRoute<
       if (roles) (entity as ApiKeyEntityWithMeta).__apiKeyRoles = roles
       try {
         const rbac = (ctx.container.resolve('rbacService') as RbacService)
-        await rbac.invalidateUserCache(`api_key:${entity.id}`)
+        await rbac.invalidateUserCache(apiKeySubject(entity.id))
       } catch {}
     },
     beforeDelete: async (id, ctx) => {
@@ -363,7 +364,7 @@ const crud = makeCrudRoute<
     afterDelete: async (id, ctx) => {
       try {
         const rbac = (ctx.container.resolve('rbacService') as RbacService)
-        await rbac.invalidateUserCache(`api_key:${id}`)
+        await rbac.invalidateUserCache(apiKeySubject(id))
       } catch {}
     },
   },

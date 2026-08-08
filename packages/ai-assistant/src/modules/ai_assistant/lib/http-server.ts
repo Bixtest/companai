@@ -16,6 +16,7 @@ import type { SearchService } from '@open-mercato/search/service'
 import type { RbacService } from '@open-mercato/core/modules/auth/services/rbacService'
 import type { ApiKey } from '@open-mercato/core/modules/api_keys/data/entities'
 import { findApiKeyBySecret, findSessionApiKeyWithSecret } from '@open-mercato/core/modules/api_keys/services/apiKeyService'
+import { apiKeySubject } from '@open-mercato/shared/lib/auth/principal'
 
 const logger = createLogger('ai_assistant').child({ component: 'mcp-http' })
 
@@ -62,7 +63,7 @@ async function resolveSessionContext(
       return null
     }
 
-    const acl = await rbacService.loadAcl(`api_key:${sessionKey.id}`, {
+    const acl = await rbacService.loadAcl(apiKeySubject(sessionKey.id), {
       tenantId: sessionKey.tenantId ?? null,
       organizationId: sessionKey.organizationId ?? null,
     })
@@ -115,7 +116,7 @@ async function resolveApiKeyContext(
       return null
     }
 
-    const acl = await rbacService.loadAcl(`api_key:${apiKeyRecord.id}`, {
+    const acl = await rbacService.loadAcl(apiKeySubject(apiKeyRecord.id), {
       tenantId: apiKeyRecord.tenantId ?? null,
       organizationId: apiKeyRecord.organizationId ?? null,
     })

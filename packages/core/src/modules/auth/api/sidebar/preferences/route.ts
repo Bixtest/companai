@@ -23,6 +23,7 @@ import { isCrudHttpError } from '@open-mercato/shared/lib/crud/errors'
 import { Role, RoleSidebarPreference } from '../../../data/entities'
 import type { OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
 import { z } from 'zod'
+import { effectiveUserId as resolveEffectiveUserId } from '@open-mercato/shared/lib/auth/principal'
 
 export const metadata = {
   GET: { requireAuth: true },
@@ -202,7 +203,7 @@ export async function GET(req: Request) {
   }
 
   // For API key auth, use userId (the actual user) if available
-  const effectiveUserId = auth.isApiKey ? auth.userId : auth.sub
+  const effectiveUserId = resolveEffectiveUserId(auth)
   const settings = effectiveUserId
     ? await loadSidebarPreference(em, {
         userId: effectiveUserId,
@@ -246,7 +247,7 @@ export async function PUT(req: Request) {
   const auth = await getAuthFromRequest(req)
   if (!auth) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   // For API key auth, use userId (the actual user) if available
-  const effectiveUserId = auth.isApiKey ? auth.userId : auth.sub
+  const effectiveUserId = resolveEffectiveUserId(auth)
   if (!effectiveUserId) {
     return NextResponse.json({ error: 'Cannot save preferences: no user associated with this API key' }, { status: 403 })
   }

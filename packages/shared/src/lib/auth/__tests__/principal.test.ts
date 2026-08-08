@@ -98,6 +98,21 @@ describe('effectiveUserId', () => {
     expect(effectiveUserId(null)).toBeNull()
     expect(effectiveUserId({})).toBeNull()
   })
+
+  it('derives the principal when the context never had one attached', () => {
+    // Cached entries, trusted envelopes and test fixtures can reach a call site
+    // without passing through the boundary that attaches `principal`. Reading
+    // the field directly would return null and silently detach a real user from
+    // their own preferences.
+    expect(effectiveUserId({ sub: USER_ID })).toBe(USER_ID)
+    expect(effectiveUserId({ sub: apiKeySubject(KEY_ID), isApiKey: true, keyId: KEY_ID, userId: OWNER_ID }))
+      .toBe(OWNER_ID)
+  })
+
+  it('prefers an attached principal over deriving one', () => {
+    const attached = { ...derivePrincipal({ sub: USER_ID })!, id: 'attached-wins' }
+    expect(effectiveUserId({ sub: USER_ID, principal: attached })).toBe('attached-wins')
+  })
 })
 
 describe('kind predicates', () => {
@@ -120,5 +135,10 @@ describe('kind predicates', () => {
   it('reports neither for an absent principal', () => {
     expect(isHumanPrincipal(null)).toBe(false)
     expect(isMachinePrincipal(null)).toBe(false)
+  })
+
+  it('derives when the context carries no principal', () => {
+    expect(isHumanPrincipal({ sub: USER_ID })).toBe(true)
+    expect(isMachinePrincipal({ sub: apiKeySubject(KEY_ID) })).toBe(true)
   })
 })

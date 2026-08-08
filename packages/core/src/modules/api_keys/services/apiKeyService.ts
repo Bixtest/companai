@@ -9,6 +9,7 @@ import { encryptWithAesGcm, decryptWithAesGcm } from '@open-mercato/shared/lib/e
 import { getSharedApiKeyAuthCache } from '@open-mercato/shared/lib/auth/apiKeyAuthCache'
 import { findOneWithDecryption } from '@open-mercato/shared/lib/encryption/find'
 import { createLogger } from '@open-mercato/shared/lib/logger'
+import { apiKeySubject } from '@open-mercato/shared/lib/auth/principal'
 
 const logger = createLogger('api_keys').child({ component: 'api-key-service' })
 
@@ -115,7 +116,7 @@ export async function createApiKey(
   })
   await em.persist(record).flush()
   if (opts.rbac) {
-    await opts.rbac.invalidateUserCache(`api_key:${record.id}`)
+    await opts.rbac.invalidateUserCache(apiKeySubject(record.id))
   }
   return { record, secret }
 }
@@ -131,7 +132,7 @@ export async function deleteApiKey(
   await em.persist(record).flush()
   getSharedApiKeyAuthCache().invalidateByKeyId(record.id)
   if (opts.rbac) {
-    await opts.rbac.invalidateUserCache(`api_key:${record.id}`)
+    await opts.rbac.invalidateUserCache(apiKeySubject(record.id))
   }
 }
 

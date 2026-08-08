@@ -16,6 +16,7 @@ import {
   updateSidebarVariantInputSchema,
 } from '../../../../data/validators'
 import type { OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
+import { effectiveUserId as resolveEffectiveUserId } from '@open-mercato/shared/lib/auth/principal'
 
 export const metadata = {
   GET: { requireAuth: true },
@@ -59,7 +60,7 @@ function extractIdFromUrl(req: Request): string | null {
 export async function GET(req: Request) {
   const auth = await getAuthFromRequest(req)
   if (!auth) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const effectiveUserId = auth.isApiKey ? auth.userId : auth.sub
+  const effectiveUserId = resolveEffectiveUserId(auth)
   if (!effectiveUserId) return NextResponse.json({ error: 'No user context' }, { status: 403 })
 
   const id = extractIdFromUrl(req)
@@ -84,7 +85,7 @@ export async function GET(req: Request) {
 export async function PUT(req: Request) {
   const auth = await getAuthFromRequest(req)
   if (!auth) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const effectiveUserId = auth.isApiKey ? auth.userId : auth.sub
+  const effectiveUserId = resolveEffectiveUserId(auth)
   if (!effectiveUserId) return NextResponse.json({ error: 'No user context' }, { status: 403 })
 
   const id = extractIdFromUrl(req)
@@ -125,7 +126,7 @@ export async function PUT(req: Request) {
 export async function DELETE(req: Request) {
   const auth = await getAuthFromRequest(req)
   if (!auth) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const effectiveUserId = auth.isApiKey ? auth.userId : auth.sub
+  const effectiveUserId = resolveEffectiveUserId(auth)
   if (!effectiveUserId) return NextResponse.json({ error: 'No user context' }, { status: 403 })
 
   const id = extractIdFromUrl(req)

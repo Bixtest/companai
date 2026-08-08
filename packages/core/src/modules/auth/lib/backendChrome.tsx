@@ -37,6 +37,7 @@ import {
   loadSidebarPreference,
 } from '@open-mercato/core/modules/auth/services/sidebarPreferencesService'
 import type { SidebarPreferencesSettings } from '@open-mercato/shared/modules/navigation/sidebarPreferences'
+import { effectiveUserId as resolveEffectiveUserId } from '@open-mercato/shared/lib/auth/principal'
 
 type TranslationFn = (key: string | undefined, fallback: string) => string
 
@@ -379,7 +380,7 @@ export async function resolveBackendChromePayload({
     }
   }
 
-  const effectiveUserId = auth.isApiKey ? auth.userId : auth.sub
+  const effectiveUserId = resolveEffectiveUserId(auth)
   if (effectiveUserId) {
     userPreference = await loadSidebarPreference(em, {
       userId: effectiveUserId,
