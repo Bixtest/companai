@@ -70,7 +70,16 @@ function requireString(value: unknown, label: string): string {
   throw new Error(`Invalid ${label} in workflow seed data.`)
 }
 
-async function seedWorkflowDefinition(
+/**
+ * Seeds one workflow definition from `examples/<fileName>`, idempotently: an
+ * existing row is left alone unless its structure has drifted from the seed.
+ *
+ * Exported and currently uncalled. The only in-repo callers seeded the sales
+ * pipeline and its order-approval guard rules, which were removed with the rest
+ * of the ERP domain; the helper itself is domain-agnostic and is what our own
+ * workflow seeds will use.
+ */
+export async function seedWorkflowDefinition(
   em: EntityManager,
   scope: WorkflowSeedScope,
   fileName: string,
@@ -219,7 +228,11 @@ export async function seedExampleWorkflows(
   // (see packages/core/src/modules/workflows/workflows.ts). Seeding DB rows for
   // them would shadow the code definitions in the merge layer, so they are no
   // longer seeded here. Existing tenants are migrated via Migration20260428102318.
+  // The sales pipeline definition and its order-approval guard rules were seeded
+  // here until the ERP domain was removed. Both were sales demo data — a
+  // sales_pipeline_v1 definition and guard rules bound to
+  // workflow:sales.order-approval:transition — so seeding them would create rows
+  // referencing a module that no longer exists. Copies kept in
+  // workspace/attic/patterns/ as examples of the seed file format.
   await seedGuardRules(em, scope, 'guard-rules-example.json', options.cache)
-  await seedWorkflowDefinition(em, scope, 'sales-pipeline-definition.json')
-  await seedGuardRules(em, scope, 'order-approval-guard-rules.json', options.cache)
 }
