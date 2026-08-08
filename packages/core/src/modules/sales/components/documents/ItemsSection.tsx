@@ -24,7 +24,7 @@ import { handleSectionMutationError } from "./optimisticLock";
 import type { SalesLineRecord } from "./lineItemTypes";
 import { formatMoney, normalizeNumber } from "./lineItemUtils";
 import type { SectionAction } from "@open-mercato/ui/backend/detail";
-import { extractCustomFieldValues } from "./customFieldHelpers";
+import { extractCustomFieldValues } from "@open-mercato/shared/lib/custom-fields/helpers";
 import { canonicalizeUnitCode } from "@open-mercato/shared/lib/units/unitCodes";
 import type { SalesLineUomSnapshot } from "../../lib/types";
 import { useInjectionDataWidgets } from "@open-mercato/ui/backend/injection/useInjectionDataWidgets";
