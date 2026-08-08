@@ -19,6 +19,10 @@ describe('Railway deployment state', () => {
 
     expect(loadRailwayState(path)).toEqual(state)
     expect(readFileSync(path, 'utf8')).not.toMatch(/token|password/i)
-    expect(railwayStatePath(cwd, false).endsWith('.mercato/railway.json.local')).toBe(true)
+    // Build the expected suffix with `join` rather than hardcoding forward
+    // slashes: `railwayStatePath` returns a native path, so on Windows this
+    // compared against a separator the function never produces and failed on a
+    // character unrelated to what is being asserted.
+    expect(railwayStatePath(cwd, false).endsWith(join('.mercato', 'railway.json.local'))).toBe(true)
   })
 })

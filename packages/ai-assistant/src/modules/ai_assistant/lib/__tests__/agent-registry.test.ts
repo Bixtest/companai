@@ -287,11 +287,21 @@ describe('agent-registry', () => {
 
     await loadAgentRegistry()
     const firstIds = listAgents().map((agent) => agent.id)
+    const errorsAfterFirstLoad = errorSpy.mock.calls.length
     await loadAgentRegistry()
     await loadAgentRegistry()
 
     expect(listAgents().map((agent) => agent.id)).toEqual(firstIds)
-    expect(errorSpy).toHaveBeenCalledTimes(firstIds.length === 0 ? 1 : 0)
+    // Assert the property this test is named for — repeat loads add nothing —
+    // rather than a fixed error count keyed off registry size.
+    //
+    // `loadAgentRegistry` logs an error only when the generated module cannot be
+    // imported at all; an empty-but-loadable registry logs nothing. The previous
+    // assertion (`firstIds.length === 0 ? 1 : 0`) treated those as the same
+    // thing, so it broke as soon as the registry became legitimately empty —
+    // `catalog` and `customers` were the only modules shipping `ai-agents.ts`,
+    // and both are parked. Counting the delta holds in either environment.
+    expect(errorSpy).toHaveBeenCalledTimes(errorsAfterFirstLoad)
     errorSpy.mockRestore()
   })
 })

@@ -68,25 +68,6 @@ const WORKSPACE_ALLOWLIST: Record<string, string> = {
     'exempt — per-tenant AI allowlist config (single-admin settings), not a collaborative-edit record surface. Outside Step-5 named scope.',
   'packages/ai-assistant/src/modules/ai_assistant/components/AiAssistantSettingsPageClient.tsx':
     'exempt — per-tenant AI assistant settings (single-admin config), not a collaborative-edit record surface. Outside Step-5 named scope.',
-  // --- enterprise security / sso config surfaces ---
-  'packages/enterprise/src/modules/security/backend/security/enforcement/[id]/page.tsx':
-    'exempt — tenant security-enforcement policy config (single-admin), not a collaborative-edit record surface. Outside Step-5 named scope.',
-  'packages/enterprise/src/modules/security/backend/security/enforcement/page.tsx':
-    'exempt — tenant security-enforcement policy config (single-admin), not a collaborative-edit record surface. Outside Step-5 named scope.',
-  'packages/enterprise/src/modules/security/backend/security/sudo/page.tsx':
-    'exempt — sudo-session revoke (security action on the caller\'s own elevated session), idempotent and not a collaborative-edit record surface. Outside Step-5 named scope.',
-  'packages/enterprise/src/modules/security/components/GenericProviderSetup.tsx':
-    'exempt — MFA/security provider setup config (single-admin), not a collaborative-edit record surface. Outside Step-5 named scope.',
-  'packages/enterprise/src/modules/security/components/OtpEmailProviderDetails.tsx':
-    'exempt — OTP-email provider config (single-admin), not a collaborative-edit record surface. Outside Step-5 named scope.',
-  'packages/enterprise/src/modules/security/components/PasskeyProviderDetails.tsx':
-    'exempt — passkey provider config (single-admin), not a collaborative-edit record surface. Outside Step-5 named scope.',
-  'packages/enterprise/src/modules/security/components/TotpProviderDetails.tsx':
-    'exempt — TOTP provider config (single-admin), not a collaborative-edit record surface. Outside Step-5 named scope.',
-  'packages/enterprise/src/modules/sso/backend/page.tsx':
-    'exempt — SSO config list-row delete (single-admin config), not a collaborative-edit record surface. Outside Step-5 named scope.',
-  'packages/enterprise/src/modules/sso/backend/sso/config/[id]/page.tsx':
-    'exempt — SSO provider config edit/delete (single-admin config), not a collaborative-edit record surface. Outside Step-5 named scope.',
   // --- scheduler config surfaces ---
   'packages/scheduler/src/modules/scheduler/backend/config/scheduled-jobs/[id]/page.tsx':
     'exempt — scheduled-job config (single-admin scheduling config); job edits guarded at the command layer / outside Step-5 named scope.',
@@ -106,8 +87,6 @@ const WORKSPACE_ALLOWLIST: Record<string, string> = {
     'exempt — timeline activity-log adapter; same as the resources activities adapter — the shared `ActivitiesDataAdapter` interface passes no `updatedAt` to `update`/`delete`, so no record version is available. Server routes are `makeCrudRoute` floor-covered.',
   'packages/core/src/modules/messages/components/useMessagesInboxBulkActions.ts':
     'exempt — inbox bulk markRead/markUnread/archive are status transitions; bulk delete is a non-audited single-owner inbox action (Phase-7 sweep). The per-message detail delete + action paths are now version-locked (#3260), but bulk operates over many rows with no per-record version to send.',
-  'packages/enterprise/src/modules/security/components/hooks/useMfaStatus.ts':
-    'exempt — removes the caller\'s OWN MFA method (single-owner security action), not a collaborative-edit record surface. Documented in the Phase-7 sweep ("mfa factor reset remain exempt").',
 }
 
 const packagesRoot = join(__dirname, '..', '..', '..')

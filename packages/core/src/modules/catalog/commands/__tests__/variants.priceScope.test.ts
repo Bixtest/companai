@@ -135,7 +135,10 @@ jest.mock('#generated/entities.ids.generated', () => ({
   },
 }))
 
-jest.mock('#generated/entities/catalog_product_variant', () => ({}))
+// `virtual` because the generator only emits entity modules for ENABLED
+// modules, and `catalog` is parked. The real module is never used here —
+// this mock replaces it outright — so the file need not exist on disk.
+jest.mock('#generated/entities/catalog_product_variant', () => ({}), { virtual: true })
 
 jest.mock('@open-mercato/core/modules/attachments/data/entities', () => ({
   Attachment: class Attachment {},

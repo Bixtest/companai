@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import * as React from 'react'
 import { render } from '@testing-library/react'
@@ -26,12 +26,21 @@ const shareCapital = 'PLN 80,000.00'
 const supersededIdentity = ['CT Tornado', 'CTT', '873910', 'PL8982262377', 'catchthetornado.com']
 
 const repoRoot = join(__dirname, '..', '..', '..', '..')
-const legalDocuments = [
+
+// Candidates, not a fixed list: this fork removes documents that upstream ships
+// — `packages/enterprise/LICENSE.md` went with the commercially licensed package
+// — and a hardcoded path to a deleted file fails on the read, not on the thing
+// being tested. Missing files are filtered out below, and the count is asserted
+// so the check cannot quietly degrade to scanning nothing.
+const legalDocumentCandidates = [
   'SECURITY.md',
   'apps/docs/cla.md',
   'packages/enterprise/LICENSE.md',
   '.ai/specs/LICENSE.md',
 ]
+const legalDocuments = legalDocumentCandidates.filter((relativePath) =>
+  existsSync(join(repoRoot, relativePath)),
+)
 
 function renderedText(page: React.ReactElement): string {
   render(page)
@@ -81,6 +90,12 @@ describe.each([
 })
 
 describe('legal documents', () => {
+  it('still has legal documents to check', () => {
+    // Without this, deleting every candidate would turn the check below into
+    // zero test cases and the suite would pass by scanning nothing.
+    expect(legalDocuments.length).toBeGreaterThan(0)
+  })
+
   it.each(legalDocuments)('%s no longer references the superseded entity', (relativePath) => {
     const contents = readFileSync(join(repoRoot, relativePath), 'utf8')
     for (const marker of supersededIdentity) {
