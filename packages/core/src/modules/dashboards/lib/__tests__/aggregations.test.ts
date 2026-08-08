@@ -10,11 +10,9 @@ import {
   isValidAggregate,
 } from '../aggregations'
 import { createAnalyticsRegistry } from '../../services/analyticsRegistry'
-import { analyticsConfig as salesAnalyticsConfig } from '../../../sales/analytics'
-import { analyticsConfig as customersAnalyticsConfig } from '../../../customers/analytics'
-import { analyticsConfig as catalogAnalyticsConfig } from '../../../catalog/analytics'
+import { analyticsFixtureConfigs, fixtureEntityIds } from './fixtures/analytics.fixture'
 
-const testRegistry = createAnalyticsRegistry([salesAnalyticsConfig, customersAnalyticsConfig, catalogAnalyticsConfig])
+const testRegistry = createAnalyticsRegistry(analyticsFixtureConfigs)
 
 describe('aggregations', () => {
   describe('isValidGranularity', () => {
@@ -54,26 +52,26 @@ describe('aggregations', () => {
 
   describe('isValidEntityType (via registry)', () => {
     it('returns true for valid entity types', () => {
-      expect(testRegistry.isValidEntityType('sales:orders')).toBe(true)
-      expect(testRegistry.isValidEntityType('sales:order_lines')).toBe(true)
-      expect(testRegistry.isValidEntityType('customers:entities')).toBe(true)
-      expect(testRegistry.isValidEntityType('customers:deals')).toBe(true)
-      expect(testRegistry.isValidEntityType('catalog:products')).toBe(true)
+      expect(testRegistry.isValidEntityType('fixture_primary:documents')).toBe(true)
+      expect(testRegistry.isValidEntityType('fixture_primary:document_lines')).toBe(true)
+      expect(testRegistry.isValidEntityType('fixture_secondary:entities')).toBe(true)
+      expect(testRegistry.isValidEntityType('fixture_secondary:cases')).toBe(true)
+      expect(testRegistry.isValidEntityType('fixture_tertiary:items')).toBe(true)
     })
 
     it('returns false for invalid entity types', () => {
       expect(testRegistry.isValidEntityType('invalid')).toBe(false)
-      expect(testRegistry.isValidEntityType('sales:invalid')).toBe(false)
+      expect(testRegistry.isValidEntityType('fixture_primary:invalid')).toBe(false)
       expect(testRegistry.isValidEntityType('')).toBe(false)
     })
   })
 
   describe('getEntityTypeConfig (via registry)', () => {
     it('returns config for valid entity types', () => {
-      const config = testRegistry.getEntityTypeConfig('sales:orders')
+      const config = testRegistry.getEntityTypeConfig('fixture_primary:documents')
       expect(config).not.toBeNull()
-      expect(config?.tableName).toBe('sales_orders')
-      expect(config?.dateField).toBe('placed_at')
+      expect(config?.tableName).toBe('fixture_documents')
+      expect(config?.dateField).toBe('issued_at')
     })
 
     it('returns null for invalid entity types', () => {
@@ -83,18 +81,18 @@ describe('aggregations', () => {
 
   describe('getFieldMapping (via registry)', () => {
     it('returns mapping for valid fields', () => {
-      const mapping = testRegistry.getFieldMapping('sales:orders', 'grandTotalGrossAmount')
+      const mapping = testRegistry.getFieldMapping('fixture_primary:documents', 'totalAmount')
       expect(mapping).not.toBeNull()
-      expect(mapping?.dbColumn).toBe('grand_total_gross_amount')
+      expect(mapping?.dbColumn).toBe('total_amount')
       expect(mapping?.type).toBe('numeric')
     })
 
     it('returns null for invalid fields', () => {
-      expect(testRegistry.getFieldMapping('sales:orders', 'invalidField')).toBeNull()
+      expect(testRegistry.getFieldMapping('fixture_primary:documents', 'invalidField')).toBeNull()
     })
 
     it('returns null for invalid entity types', () => {
-      expect(testRegistry.getFieldMapping('invalid', 'grandTotalGrossAmount')).toBeNull()
+      expect(testRegistry.getFieldMapping('invalid', 'totalAmount')).toBeNull()
     })
   })
 
@@ -163,8 +161,8 @@ describe('aggregations', () => {
 
   describe('buildAggregationQuery', () => {
     const baseOptions = {
-      entityType: 'sales:orders',
-      metric: { field: 'grandTotalGrossAmount', aggregate: 'sum' as const },
+      entityType: 'fixture_primary:documents',
+      metric: { field: 'totalAmount', aggregate: 'sum' as const },
       scope: { tenantId: 'tenant-123' },
       registry: testRegistry,
     }
@@ -173,8 +171,8 @@ describe('aggregations', () => {
       const result = buildAggregationQuery(baseOptions)
       expect(result).not.toBeNull()
       expect(result?.sql).toContain('SELECT')
-      expect(result?.sql).toContain('COALESCE(SUM(grand_total_gross_amount::numeric), 0)')
-      expect(result?.sql).toContain('FROM "sales_orders"')
+      expect(result?.sql).toContain('COALESCE(SUM(total_amount::numeric), 0)')
+      expect(result?.sql).toContain('FROM "fixture_documents"')
       expect(result?.sql).toContain('tenant_id = ?')
       expect(result?.params).toContain('tenant-123')
     })
@@ -193,10 +191,10 @@ describe('aggregations', () => {
       const end = new Date('2024-01-31')
       const result = buildAggregationQuery({
         ...baseOptions,
-        dateRange: { field: 'placedAt', start, end },
+        dateRange: { field: 'issuedAt', start, end },
       })
-      expect(result?.sql).toContain('placed_at >= ?')
-      expect(result?.sql).toContain('placed_at <= ?')
+      expect(result?.sql).toContain('issued_at >= ?')
+      expect(result?.sql).toContain('issued_at <= ?')
       expect(result?.params).toContain(start)
       expect(result?.params).toContain(end)
     })
@@ -213,9 +211,9 @@ describe('aggregations', () => {
     it('includes groupBy with granularity for timestamp fields', () => {
       const result = buildAggregationQuery({
         ...baseOptions,
-        groupBy: { field: 'placedAt', granularity: 'month' },
+        groupBy: { field: 'issuedAt', granularity: 'month' },
       })
-      expect(result?.sql).toContain("DATE_TRUNC('month', placed_at)")
+      expect(result?.sql).toContain("DATE_TRUNC('month', issued_at)")
       expect(result?.sql).toContain('GROUP BY')
     })
 
@@ -245,23 +243,23 @@ describe('aggregations', () => {
         ...baseOptions,
         filters: [
           { field: 'status', operator: 'eq', value: 'completed' },
-          { field: 'grandTotalGrossAmount', operator: 'gte', value: 100 },
+          { field: 'totalAmount', operator: 'gte', value: 100 },
         ],
       })
       expect(result?.sql).toContain('status = ?')
-      expect(result?.sql).toContain('grand_total_gross_amount >= ?')
+      expect(result?.sql).toContain('total_amount >= ?')
     })
 
     it('handles is_null and is_not_null operators without value', () => {
       const result = buildAggregationQuery({
         ...baseOptions,
         filters: [
-          { field: 'customerEntityId', operator: 'is_null' },
-          { field: 'channelId', operator: 'is_not_null' },
+          { field: 'ownerId', operator: 'is_null' },
+          { field: 'categoryId', operator: 'is_not_null' },
         ],
       })
-      expect(result?.sql).toContain('customer_entity_id IS NULL')
-      expect(result?.sql).toContain('channel_id IS NOT NULL')
+      expect(result?.sql).toContain('owner_id IS NULL')
+      expect(result?.sql).toContain('category_id IS NOT NULL')
     })
 
     it('returns null for invalid entity type', () => {
@@ -284,17 +282,8 @@ describe('aggregations', () => {
   describe('entity type configs (via registry)', () => {
     it('has all expected entity types', () => {
       const entityIds = testRegistry.getAllEntityConfigs().map((c) => c.entityId)
-      expect(entityIds).toEqual(
-        expect.arrayContaining([
-          'sales:orders',
-          'sales:order_lines',
-          'sales:quotes',
-          'customers:entities',
-          'customers:deals',
-          'catalog:products',
-        ]),
-      )
-      expect(entityIds).toHaveLength(6)
+      expect(entityIds).toEqual(expect.arrayContaining([...fixtureEntityIds]))
+      expect(entityIds).toHaveLength(fixtureEntityIds.length)
     })
 
     it('each config has required fields', () => {
@@ -315,14 +304,14 @@ describe('aggregations', () => {
       })
     })
 
-    it('sales:orders has expected fields', () => {
-      const mappings = testRegistry.getAllFieldMappings('sales:orders')
+    it('fixture_primary:documents has expected fields', () => {
+      const mappings = testRegistry.getAllFieldMappings('fixture_primary:documents')
       expect(mappings).not.toBeNull()
       const fields = Object.keys(mappings!)
       expect(fields).toContain('id')
-      expect(fields).toContain('grandTotalGrossAmount')
+      expect(fields).toContain('totalAmount')
       expect(fields).toContain('status')
-      expect(fields).toContain('placedAt')
+      expect(fields).toContain('issuedAt')
     })
   })
 })

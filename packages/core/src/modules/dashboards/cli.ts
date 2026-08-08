@@ -5,7 +5,6 @@ import { DashboardRoleWidgets } from '@open-mercato/core/modules/dashboards/data
 import { Role } from '@open-mercato/core/modules/auth/data/entities'
 import { loadAllWidgets } from '@open-mercato/core/modules/dashboards/lib/widgets'
 import { appendWidgetsToRoles, resolveAnalyticsWidgetIds } from '@open-mercato/core/modules/dashboards/lib/role-widgets'
-import { seedAnalyticsData } from './seed/analytics'
 import { parseCommaSeparatedList } from '@open-mercato/shared/lib/string'
 
 type Args = Record<string, string>
@@ -165,45 +164,6 @@ const enableAnalyticsWidgets: ModuleCli = {
   },
 }
 
-const seedAnalytics: ModuleCli = {
-  command: 'seed-analytics',
-  async run(rest) {
-    const args = parseArgs(rest)
-    const tenantId = args.tenant || args.tenantId || null
-    const organizationId = args.organization || args.organizationId || args.org || null
-    const months = args.months ? parseInt(args.months, 10) : 6
-    const ordersPerMonth = args.ordersPerMonth ? parseInt(args.ordersPerMonth, 10) : 50
-
-    if (!tenantId || !organizationId) {
-      console.error('Usage: mercato dashboards seed-analytics --tenant <tenantId> --organization <organizationId> [--months 6] [--ordersPerMonth 50]')
-      return
-    }
-
-    const { resolve } = await createRequestContainer()
-    const em = resolve('em') as EntityManager
-
-    console.log(`Seeding analytics data for ${months} months with ~${ordersPerMonth} orders/month...`)
-
-    try {
-      const result = await em.transactional(async (tem) =>
-        seedAnalyticsData(tem, { tenantId, organizationId }, { months, ordersPerMonth })
-      )
-
-      if (result.orders === 0) {
-        console.log('Analytics data already exists. Skipping seed.')
-      } else {
-        console.log(`Seeded analytics data:`)
-        console.log(`  - Orders: ${result.orders}`)
-        console.log(`  - Customers: ${result.customers}`)
-        console.log(`  - Products: ${result.products}`)
-        console.log(`  - Deals: ${result.deals}`)
-      }
-    } catch (error) {
-      console.error('Failed to seed analytics data:', error)
-    }
-  },
-}
-
 const debugAnalytics: ModuleCli = {
   command: 'debug-analytics',
   async run(rest) {
@@ -327,4 +287,4 @@ const debugAnalytics: ModuleCli = {
   },
 }
 
-export default [seedDefaults, enableAnalyticsWidgets, seedAnalytics, debugAnalytics]
+export default [seedDefaults, enableAnalyticsWidgets, debugAnalytics]
