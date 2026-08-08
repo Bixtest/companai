@@ -10,8 +10,8 @@ import { resolveOrganizationScopeFilter } from '@open-mercato/core/modules/direc
 import { User } from '@open-mercato/core/modules/auth/data/entities'
 import {
   resolveAuthActorId,
-  resolveCustomersRequestContext,
-} from '@open-mercato/core/modules/customers/lib/interactionRequestContext'
+  resolveScopedRequestContext,
+} from '@open-mercato/shared/lib/crud/scoped-request-context'
 import { StaffTeam, StaffTeamMember } from '../../../data/entities'
 import { createLogger } from '@open-mercato/shared/lib/logger'
 
@@ -76,7 +76,7 @@ export async function GET(request: Request) {
   const { translate } = await resolveTranslations()
   try {
     const query = querySchema.parse(Object.fromEntries(new URL(request.url).searchParams))
-    const { container, em, auth, scope: organizationScope } = await resolveCustomersRequestContext(request)
+    const { container, em, auth, scope: organizationScope } = await resolveScopedRequestContext(request)
 
     const orgFilter = resolveOrganizationScopeFilter(organizationScope, auth)
 

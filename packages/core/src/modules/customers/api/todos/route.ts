@@ -21,7 +21,7 @@ import { CustomerInteraction, CustomerTodoLink } from '../../data/entities'
 import { todoLinkWithTodoCreateSchema } from '../../data/validators'
 import { withOperationMetadata } from '../../lib/operationMetadata'
 import { resolveCustomerInteractionFeatureFlags } from '../../lib/interactionFeatureFlags'
-import { resolveCustomersRequestContext } from '../../lib/interactionRequestContext'
+import { resolveScopedRequestContext } from '@open-mercato/shared/lib/crud/scoped-request-context'
 import {
   EXAMPLE_TODO_SOURCE,
   CUSTOMER_INTERACTION_TODO_ADAPTER_SOURCE,
@@ -234,7 +234,7 @@ async function resolveCanonicalTodoTargetId(
 export async function GET(request: Request): Promise<Response> {
   try {
     const { auth, em, organizationIds, container, selectedOrganizationId } =
-      await resolveCustomersRequestContext(request)
+      await resolveScopedRequestContext(request)
     const query = querySchema.parse(Object.fromEntries(new URL(request.url).searchParams))
     const flags = await resolveCustomerInteractionFeatureFlags(container, auth.tenantId)
     if (!flags.legacyAdapters) {
@@ -324,7 +324,7 @@ export async function GET(request: Request): Promise<Response> {
 
 export async function POST(request: Request): Promise<Response> {
   try {
-    const { commandContext, container, auth, selectedOrganizationId } = await resolveCustomersRequestContext(request)
+    const { commandContext, container, auth, selectedOrganizationId } = await resolveScopedRequestContext(request)
     const flags = await resolveCustomerInteractionFeatureFlags(container, auth.tenantId)
     if (!flags.legacyAdapters) {
       return await legacyAdaptersDisabledResponse()
@@ -428,7 +428,7 @@ export async function POST(request: Request): Promise<Response> {
 
 export async function PUT(request: Request): Promise<Response> {
   try {
-    const { commandContext, container, em, auth, selectedOrganizationId } = await resolveCustomersRequestContext(request)
+    const { commandContext, container, em, auth, selectedOrganizationId } = await resolveScopedRequestContext(request)
     const flags = await resolveCustomerInteractionFeatureFlags(container, auth.tenantId)
     if (!flags.legacyAdapters) {
       return await legacyAdaptersDisabledResponse()
@@ -525,7 +525,7 @@ export async function PUT(request: Request): Promise<Response> {
 
 export async function DELETE(request: Request): Promise<Response> {
   try {
-    const { commandContext, container, em, auth, selectedOrganizationId } = await resolveCustomersRequestContext(request)
+    const { commandContext, container, em, auth, selectedOrganizationId } = await resolveScopedRequestContext(request)
     const flags = await resolveCustomerInteractionFeatureFlags(container, auth.tenantId)
     if (!flags.legacyAdapters) {
       return await legacyAdaptersDisabledResponse()

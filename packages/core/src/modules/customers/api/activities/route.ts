@@ -26,7 +26,7 @@ import {
 } from '../../lib/interactionCompatibility'
 import { withOperationMetadata } from '../../lib/operationMetadata'
 import { resolveCustomerInteractionFeatureFlags } from '../../lib/interactionFeatureFlags'
-import { resolveCustomersRequestContext } from '../../lib/interactionRequestContext'
+import { resolveScopedRequestContext } from '@open-mercato/shared/lib/crud/scoped-request-context'
 import { hydrateCanonicalInteractions } from '../../lib/interactionReadModel'
 import { resolveCanonicalActivityTargetId } from '../../lib/legacyActivityBridge'
 import { buildEmailVisibilityMikroFilter } from '../../lib/visibilityFilter'
@@ -410,7 +410,7 @@ export async function GET(request: Request): Promise<Response> {
       organizationIds,
       container,
       selectedOrganizationId,
-    } = await resolveCustomersRequestContext(request)
+    } = await resolveScopedRequestContext(request)
     const flags = await resolveCustomerInteractionFeatureFlags(container, auth.tenantId)
     if (!flags.legacyAdapters) {
       return await legacyAdaptersDisabledResponse()
@@ -500,7 +500,7 @@ export async function GET(request: Request): Promise<Response> {
 
 export async function POST(request: Request): Promise<Response> {
   try {
-    const { commandContext, container, auth, selectedOrganizationId } = await resolveCustomersRequestContext(request)
+    const { commandContext, container, auth, selectedOrganizationId } = await resolveScopedRequestContext(request)
     const flags = await resolveCustomerInteractionFeatureFlags(container, auth.tenantId)
     if (!flags.legacyAdapters) {
       return await legacyAdaptersDisabledResponse()
@@ -589,7 +589,7 @@ export async function POST(request: Request): Promise<Response> {
 
 export async function PUT(request: Request): Promise<Response> {
   try {
-    const { commandContext, container, em, auth, selectedOrganizationId } = await resolveCustomersRequestContext(request)
+    const { commandContext, container, em, auth, selectedOrganizationId } = await resolveScopedRequestContext(request)
     const flags = await resolveCustomerInteractionFeatureFlags(container, auth.tenantId)
     if (!flags.legacyAdapters) {
       return await legacyAdaptersDisabledResponse()
@@ -672,7 +672,7 @@ export async function PUT(request: Request): Promise<Response> {
 
 export async function DELETE(request: Request): Promise<Response> {
   try {
-    const { commandContext, container, em, auth, selectedOrganizationId } = await resolveCustomersRequestContext(request)
+    const { commandContext, container, em, auth, selectedOrganizationId } = await resolveScopedRequestContext(request)
     const flags = await resolveCustomerInteractionFeatureFlags(container, auth.tenantId)
     if (!flags.legacyAdapters) {
       return await legacyAdaptersDisabledResponse()

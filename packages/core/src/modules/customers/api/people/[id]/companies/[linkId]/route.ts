@@ -10,7 +10,7 @@ import type { CommandBus } from '@open-mercato/shared/lib/commands'
 import { serializeOperationMetadata } from '@open-mercato/shared/lib/commands/operationMetadata'
 import { readJsonSafe } from '@open-mercato/shared/lib/http/readJsonSafe'
 import { findOneWithDecryption } from '@open-mercato/shared/lib/encryption/find'
-import { resolveAuthActorId } from '@open-mercato/core/modules/customers/lib/interactionRequestContext'
+import { resolveAuthActorId } from '@open-mercato/shared/lib/crud/scoped-request-context'
 import { CustomerPersonCompanyLink } from '@open-mercato/core/modules/customers/data/entities'
 import {
   personCompanyLinkDeleteSchema,

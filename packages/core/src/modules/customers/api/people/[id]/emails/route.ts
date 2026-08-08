@@ -11,7 +11,7 @@ import {
 } from '@open-mercato/shared/lib/crud/mutation-guard'
 import { resolveOrganizationScopeForRequest } from '@open-mercato/core/modules/directory/utils/organizationScope'
 import { isOrganizationReadAccessAllowed } from '@open-mercato/core/modules/directory/utils/organizationScopeGuard'
-import { resolveAuthActorId } from '../../../../lib/interactionRequestContext'
+import { resolveAuthActorId } from '@open-mercato/shared/lib/crud/scoped-request-context'
 import { CustomerEntity } from '../../../../data/entities'
 import type { SendAsUserService } from '@open-mercato/core/modules/communication_channels/lib/send-as-user'
 

@@ -18,8 +18,8 @@ jest.mock('../../../lib/interactionFeatureFlags', () => ({
   resolveCustomerInteractionFeatureFlags: jest.fn(),
 }))
 
-jest.mock('../../../lib/interactionRequestContext', () => ({
-  resolveCustomersRequestContext: jest.fn(),
+jest.mock('@open-mercato/shared/lib/crud/scoped-request-context', () => ({
+  resolveScopedRequestContext: jest.fn(),
 }))
 
 jest.mock('../../../lib/interactionReadModel', () => ({

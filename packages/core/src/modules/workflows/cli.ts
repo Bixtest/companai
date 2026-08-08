@@ -122,66 +122,6 @@ const seedDemoWithRules: ModuleCli = {
 }
 
 /**
- * Seed sales pipeline example
- */
-const seedSalesPipeline: ModuleCli = {
-  command: 'seed-sales-pipeline',
-  async run(rest: string[]) {
-    const args = parseArgs(rest)
-    const tenantId = String(args.tenantId ?? args.tenant ?? args.t ?? '')
-    const organizationId = String(args.organizationId ?? args.orgId ?? args.org ?? args.o ?? '')
-
-    if (!tenantId || !organizationId) {
-      console.error('Usage: mercato workflows seed-sales-pipeline --tenant <tenantId> --org <organizationId>')
-      return
-    }
-
-    try {
-      const { resolve } = await createRequestContainer()
-      const em = resolve<EntityManager>('em')
-
-      // Read the sales pipeline workflow definition
-      const pipelinePath = path.join(__dirname, 'examples', 'sales-pipeline-definition.json')
-      const pipelineData = JSON.parse(fs.readFileSync(pipelinePath, 'utf8'))
-
-      // Check if it already exists
-      const existing = await em.findOne(WorkflowDefinition, {
-        workflowId: pipelineData.workflowId,
-        tenantId,
-        organizationId,
-      })
-
-      if (existing) {
-        console.log(`ℹ️  Sales pipeline workflow '${pipelineData.workflowId}' already exists (ID: ${existing.id})`)
-        return
-      }
-
-      // Create the workflow definition
-      const workflow = em.create(WorkflowDefinition, {
-        ...pipelineData,
-        tenantId,
-        organizationId,
-      })
-
-      await em.persist(workflow).flush()
-
-      console.log(`✅ Seeded sales pipeline workflow: ${workflow.workflowName}`)
-      console.log(`  - ID: ${workflow.id}`)
-      console.log(`  - Workflow ID: ${workflow.workflowId}`)
-      console.log(`  - Version: ${workflow.version}`)
-      console.log(`  - Steps: ${workflow.definition.steps.length}`)
-      console.log(`  - Transitions: ${workflow.definition.transitions.length}`)
-      console.log(`  - Activities: ${workflow.definition.transitions.reduce((sum, t) => sum + (t.activities?.length || 0), 0)}`)
-      console.log('')
-      console.log('Sales pipeline workflow is ready!')
-    } catch (error) {
-      console.error('Error seeding sales pipeline workflow:', error)
-      throw error
-    }
-  },
-}
-
-/**
  * Seed simple approval example
  *
  * The 'workflows.simple-approval' workflow is now code-defined
@@ -196,82 +136,6 @@ const seedSimpleApproval: ModuleCli = {
     console.log('   (see packages/core/src/modules/workflows/workflows.ts).')
     console.log('')
     console.log('   Visit /backend/definitions to view it as a Code-defined workflow.')
-  },
-}
-
-/**
- * Seed order approval example
- */
-const seedOrderApproval: ModuleCli = {
-  command: 'seed-order-approval',
-  async run(rest: string[]) {
-    const args = parseArgs(rest)
-    const tenantId = String(args.tenantId ?? args.tenant ?? args.t ?? '')
-    const organizationId = String(args.organizationId ?? args.orgId ?? args.org ?? args.o ?? '')
-
-    if (!tenantId || !organizationId) {
-      console.error('Usage: mercato workflows seed-order-approval --tenant <tenantId> --org <organizationId>')
-      return
-    }
-
-    try {
-      const { resolve } = await createRequestContainer()
-      const em = resolve<EntityManager>('em')
-      const cache = resolveBusinessRuleDiscoveryCache(resolve)
-
-      // 1. Seed order approval guard rules first
-      const guardRulesPath = path.join(__dirname, 'examples', 'order-approval-guard-rules.json')
-      const guardRulesData = JSON.parse(fs.readFileSync(guardRulesPath, 'utf8')) as Array<{
-        ruleId: string
-        ruleName: string
-        ruleType: RuleType
-        entityType: string
-        description?: string
-        eventType?: string
-        conditionExpression?: Record<string, unknown>
-        enabled?: boolean
-        priority?: number
-      }>
-
-      let rulesSeeded = 0
-      let rulesSkipped = 0
-      for (const rule of guardRulesData) {
-        const existingRule = await em.findOne(BusinessRule, {
-          ruleId: rule.ruleId,
-          tenantId,
-          organizationId,
-        })
-
-        if (existingRule) {
-          rulesSkipped++
-          continue
-        }
-
-        const newRule = em.create(BusinessRule, {
-          ...rule,
-          tenantId,
-          organizationId,
-        })
-        em.persist(newRule)
-        console.log(`  ✓ Seeded guard rule: ${rule.ruleName}`)
-        rulesSeeded++
-      }
-
-      if (rulesSeeded > 0) {
-        await em.flush()
-        await invalidateBusinessRuleDiscoveryCache(cache, tenantId, organizationId)
-      }
-
-      console.log(`✅ Seeded order approval guard rules`)
-      console.log(`  - Guard rules seeded: ${rulesSeeded}`)
-      console.log(`  - Guard rules skipped: ${rulesSkipped}`)
-      console.log('')
-      console.log('Note: The "sales.order-approval" workflow definition is now code-defined')
-      console.log('(see packages/core/src/modules/sales/workflows.ts) and no longer needs DB seeding.')
-    } catch (error) {
-      console.error('Error seeding order approval workflow:', error)
-      throw error
-    }
   },
 }
 
@@ -350,17 +214,11 @@ const seedAll: ModuleCli = {
       await seedDemoWithRules.run(rest)
       console.log('')
 
-      // Seed sales pipeline
-      await seedSalesPipeline.run(rest)
-      console.log('')
 
       // Seed simple approval
       await seedSimpleApproval.run(rest)
       console.log('')
 
-      // Seed order approval
-      await seedOrderApproval.run(rest)
-      console.log('')
 
       console.log('✅ All example workflows seeded successfully!')
     } catch (error) {
@@ -436,9 +294,7 @@ const workflowsCliCommands = [
   processActivities,
   seedDemo,
   seedDemoWithRules,
-  seedSalesPipeline,
   seedSimpleApproval,
-  seedOrderApproval,
   seedAll,
 ]
 

@@ -13,7 +13,7 @@ import {
 import { resolveOrganizationScopeForRequest } from '@open-mercato/core/modules/directory/utils/organizationScope'
 import { CustomerInteraction } from '../../../../data/entities'
 import type { InteractionUpdateInput } from '../../../../data/validators'
-import { resolveAuthActorId } from '../../../../lib/interactionRequestContext'
+import { resolveAuthActorId } from '@open-mercato/shared/lib/crud/scoped-request-context'
 import { emitCustomersEvent } from '../../../../events'
 
 export const metadata = {

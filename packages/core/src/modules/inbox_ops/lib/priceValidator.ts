@@ -51,9 +51,13 @@ export interface CatalogPricingContext {
   date: Date
 }
 
-// Minimal structural view of the `catalogPricingService` DI token. Using the engine
-// (selectBestPrice + resolver pipeline) instead of a bespoke query is mandated by
-// packages/core/src/modules/catalog/AGENTS.md and ensures tenant pricing overrides apply.
+// Minimal structural view of the `catalogPricingService` DI token.
+//
+// The catalog module was removed from this platform, so the token is never
+// registered and `tryResolve` in the extraction worker returns undefined —
+// price validation is skipped and extraction continues. This interface is kept
+// so a future pricing provider can register the same token and re-enable
+// validation without changing the worker.
 export interface CatalogPricingServiceLike {
   resolvePrice(
     rows: CatalogProductPriceLike[],

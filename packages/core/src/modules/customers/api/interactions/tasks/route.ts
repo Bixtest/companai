@@ -7,7 +7,7 @@ import { resolveTranslations } from '@open-mercato/shared/lib/i18n/server'
 import type { QueryEngine } from '@open-mercato/shared/lib/query/types'
 import { createCustomersCrudOpenApi, createPagedListResponseSchema } from '../../openapi'
 import { resolveCustomerInteractionFeatureFlags } from '../../../lib/interactionFeatureFlags'
-import { resolveCustomersRequestContext } from '../../../lib/interactionRequestContext'
+import { resolveScopedRequestContext } from '@open-mercato/shared/lib/crud/scoped-request-context'
 import { CUSTOMER_INTERACTION_TODO_ADAPTER_SOURCE } from '../../../lib/interactionCompatibility'
 import {
   filterTodoRows,
@@ -42,7 +42,7 @@ export async function GET(request: Request): Promise<Response> {
   const { translate } = await resolveTranslations()
   try {
     const { auth, em, organizationIds, container, selectedOrganizationId } =
-      await resolveCustomersRequestContext(request)
+      await resolveScopedRequestContext(request)
     const query = querySchema.parse(Object.fromEntries(new URL(request.url).searchParams))
     const flags = await resolveCustomerInteractionFeatureFlags(container, auth.tenantId)
     const exportAll = parseBooleanToken(query.all) === true

@@ -12,7 +12,7 @@ jest.mock('@open-mercato/core/modules/directory/utils/organizationScope', () => 
   resolveOrganizationScopeForRequest: jest.fn(async () => ({ selectedId: 'org-1' })),
 }))
 jest.mock('../../../../../events', () => ({ emitCustomersEvent: jest.fn(async () => {}) }))
-jest.mock('../../../../../lib/interactionRequestContext', () => ({
+jest.mock('@open-mercato/shared/lib/crud/scoped-request-context', () => ({
   resolveAuthActorId: (auth: { sub?: string }) => auth?.sub ?? 'actor',
 }))
 

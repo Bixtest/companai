@@ -12,7 +12,7 @@ import {
   runCrudMutationGuardAfterSuccess,
   validateCrudMutationGuard,
 } from '@open-mercato/shared/lib/crud/mutation-guard'
-import { resolveAuthActorId } from '@open-mercato/core/modules/customers/lib/interactionRequestContext'
+import { resolveAuthActorId } from '@open-mercato/shared/lib/crud/scoped-request-context'
 import { readJsonSafe } from '@open-mercato/shared/lib/http/readJsonSafe'
 import { serializeOperationMetadata } from '@open-mercato/shared/lib/commands/operationMetadata'
 import {

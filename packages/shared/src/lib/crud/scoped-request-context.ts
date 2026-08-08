@@ -1,3 +1,11 @@
+/**
+ * Request-scoped context resolution for API routes.
+ *
+ * Resolves the acting identity, the organisation scope, a forked EntityManager
+ * and a ready CommandRuntimeContext from an incoming Request. Nothing here is
+ * domain-specific — it previously lived in the customers module only because
+ * that is where it was first needed.
+ */
 import type { EntityManager } from '@mikro-orm/postgresql'
 import { createRequestContainer } from '@open-mercato/shared/lib/di/container'
 import { getAuthFromRequest } from '@open-mercato/shared/lib/auth/server'
@@ -8,7 +16,7 @@ import { CrudHttpError } from '@open-mercato/shared/lib/crud/errors'
 type AuthContext = NonNullable<Awaited<ReturnType<typeof getAuthFromRequest>>>
 type AuthContextWithTenant = AuthContext & { tenantId: string }
 
-export type CustomersRequestContext = {
+export type ScopedRequestContext = {
   container: Awaited<ReturnType<typeof createRequestContainer>>
   auth: AuthContextWithTenant
   em: EntityManager
@@ -27,7 +35,7 @@ export function resolveAuthActorId(
   return 'system'
 }
 
-export async function resolveCustomersRequestContext(request: Request): Promise<CustomersRequestContext> {
+export async function resolveScopedRequestContext(request: Request): Promise<ScopedRequestContext> {
   const container = await createRequestContainer()
   const auth = await getAuthFromRequest(request)
   if (!auth || !auth.tenantId) {

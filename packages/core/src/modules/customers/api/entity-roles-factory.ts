@@ -13,7 +13,7 @@ import type { RbacService } from '@open-mercato/core/modules/auth/services/rbacS
 import { CustomerEntity, CustomerEntityRole } from '../data/entities'
 import { entityRoleCreateSchema, entityRoleUpdateSchema, entityRoleDeleteSchema, type EntityRoleCreateInput, type EntityRoleUpdateInput, type EntityRoleDeleteInput } from '../data/validators'
 import { withScopedPayload } from './utils'
-import { resolveCustomersRequestContext, resolveAuthActorId } from '../lib/interactionRequestContext'
+import { resolveScopedRequestContext, resolveAuthActorId } from '@open-mercato/shared/lib/crud/scoped-request-context'
 import { deriveDisplayNameFromEmail } from '../lib/displayName'
 import { withOperationMetadata } from '../lib/operationMetadata'
 import { createLogger } from '@open-mercato/shared/lib/logger'
@@ -66,7 +66,7 @@ function buildValidationErrorResponse(error: z.ZodError, translate: Translator) 
 }
 
 async function buildContext(request: Request) {
-  const context = await resolveCustomersRequestContext(request)
+  const context = await resolveScopedRequestContext(request)
   return {
     ...context,
     ctx: context.commandContext,
@@ -75,8 +75,8 @@ async function buildContext(request: Request) {
 
 function ensureRouteOrganizationAccess(
   organizationId: string,
-  scope: Awaited<ReturnType<typeof resolveCustomersRequestContext>>['scope'],
-  auth: Awaited<ReturnType<typeof resolveCustomersRequestContext>>['auth'],
+  scope: Awaited<ReturnType<typeof resolveScopedRequestContext>>['scope'],
+  auth: Awaited<ReturnType<typeof resolveScopedRequestContext>>['auth'],
   translate: Translator,
 ) {
   if (!isOrganizationReadAccessAllowed({ scope, auth, organizationId })) {
@@ -85,8 +85,8 @@ function ensureRouteOrganizationAccess(
 }
 
 async function ensureFeatureOnOrganization(
-  container: Awaited<ReturnType<typeof resolveCustomersRequestContext>>['container'],
-  auth: Awaited<ReturnType<typeof resolveCustomersRequestContext>>['auth'],
+  container: Awaited<ReturnType<typeof resolveScopedRequestContext>>['container'],
+  auth: Awaited<ReturnType<typeof resolveScopedRequestContext>>['auth'],
   feature: string,
   organizationId: string,
   translate: Translator,
@@ -115,9 +115,9 @@ async function ensureFeatureOnOrganization(
 }
 
 async function resolveEntityRouteScope(
-  em: Awaited<ReturnType<typeof resolveCustomersRequestContext>>['em'],
-  auth: Awaited<ReturnType<typeof resolveCustomersRequestContext>>['auth'],
-  scope: Awaited<ReturnType<typeof resolveCustomersRequestContext>>['scope'],
+  em: Awaited<ReturnType<typeof resolveScopedRequestContext>>['em'],
+  auth: Awaited<ReturnType<typeof resolveScopedRequestContext>>['auth'],
+  scope: Awaited<ReturnType<typeof resolveScopedRequestContext>>['scope'],
   entityType: EntityType,
   entityId: string,
   translate: Translator,
@@ -141,9 +141,9 @@ async function resolveEntityRouteScope(
 }
 
 async function resolveRoleRouteScope(
-  em: Awaited<ReturnType<typeof resolveCustomersRequestContext>>['em'],
-  auth: Awaited<ReturnType<typeof resolveCustomersRequestContext>>['auth'],
-  scope: Awaited<ReturnType<typeof resolveCustomersRequestContext>>['scope'],
+  em: Awaited<ReturnType<typeof resolveScopedRequestContext>>['em'],
+  auth: Awaited<ReturnType<typeof resolveScopedRequestContext>>['auth'],
+  scope: Awaited<ReturnType<typeof resolveScopedRequestContext>>['scope'],
   entityType: EntityType,
   entityId: string,
   roleId: string,

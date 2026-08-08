@@ -64,8 +64,8 @@ const runCrudMutationGuardAfterSuccessMock = jest.fn()
 const findOneWithDecryptionMock = jest.fn()
 const findWithDecryptionMock = jest.fn()
 
-jest.mock('../../../../../lib/interactionRequestContext', () => ({
-  resolveCustomersRequestContext: jest.fn(async () => mockContext),
+jest.mock('@open-mercato/shared/lib/crud/scoped-request-context', () => ({
+  resolveScopedRequestContext: jest.fn(async () => mockContext),
   resolveAuthActorId: jest.fn(() => mockContext.auth.sub),
 }))
 

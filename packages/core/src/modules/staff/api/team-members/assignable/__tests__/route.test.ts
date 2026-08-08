@@ -1,7 +1,7 @@
 /** @jest-environment node */
 
 const mockFindWithDecryption = jest.fn()
-const mockResolveCustomersRequestContext = jest.fn()
+const mockResolveScopedRequestContext = jest.fn()
 const mockResolveAuthActorId = jest.fn(() => 'user-actor')
 const mockUserHasAllFeatures = jest.fn()
 
@@ -15,9 +15,9 @@ jest.mock('@open-mercato/shared/lib/i18n/server', () => ({
   })),
 }))
 
-jest.mock('@open-mercato/core/modules/customers/lib/interactionRequestContext', () => ({
-  resolveCustomersRequestContext: jest.fn((...args: unknown[]) =>
-    mockResolveCustomersRequestContext(...args),
+jest.mock('@open-mercato/shared/lib/crud/scoped-request-context', () => ({
+  resolveScopedRequestContext: jest.fn((...args: unknown[]) =>
+    mockResolveScopedRequestContext(...args),
   ),
   resolveAuthActorId: jest.fn((...args: unknown[]) => mockResolveAuthActorId(...args)),
 }))
@@ -25,11 +25,11 @@ jest.mock('@open-mercato/core/modules/customers/lib/interactionRequestContext', 
 describe('staff assignable team-members route', () => {
   beforeEach(() => {
     mockFindWithDecryption.mockReset()
-    mockResolveCustomersRequestContext.mockReset()
+    mockResolveScopedRequestContext.mockReset()
     mockResolveAuthActorId.mockReset()
     mockResolveAuthActorId.mockReturnValue('user-actor')
     mockUserHasAllFeatures.mockReset()
-    mockResolveCustomersRequestContext.mockResolvedValue({
+    mockResolveScopedRequestContext.mockResolvedValue({
       container: {
         resolve: (token: string) => {
           if (token === 'rbacService') return { userHasAllFeatures: mockUserHasAllFeatures }
@@ -154,7 +154,7 @@ describe('staff assignable team-members route', () => {
   })
 
   it('aggregates tenant-wide staff under the "All organizations" scope (no organizationId filter)', async () => {
-    mockResolveCustomersRequestContext.mockResolvedValueOnce({
+    mockResolveScopedRequestContext.mockResolvedValueOnce({
       container: {
         resolve: (token: string) => {
           if (token === 'rbacService') return { userHasAllFeatures: mockUserHasAllFeatures }

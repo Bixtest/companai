@@ -13,7 +13,7 @@ import {
   runCrudMutationGuardAfterSuccess,
   validateCrudMutationGuard,
 } from '@open-mercato/shared/lib/crud/mutation-guard'
-import { resolveAuthActorId } from '../../../lib/interactionRequestContext'
+import { resolveAuthActorId } from '@open-mercato/shared/lib/crud/scoped-request-context'
 import { withOperationMetadata } from '../../../lib/operationMetadata'
 import { createLogger } from '@open-mercato/shared/lib/logger'
 
