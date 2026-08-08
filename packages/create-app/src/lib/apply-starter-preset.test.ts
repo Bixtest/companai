@@ -93,7 +93,12 @@ test('generateModulesTs: produces valid content for empty modules', () => {
   assert.ok(content.includes("id: 'dashboards'"))
   assert.ok(content.includes("id: 'events'"))
   assert.ok(content.includes("from: '@open-mercato/events'"))
-  assert.ok(content.includes('enterpriseModulesEnabled'))
+  // Inverted from `includes`: the enterprise registration block was removed from
+  // the template with `packages/enterprise` itself, whose licence forbids
+  // redistribution. A scaffolded app must not wire modules this fork cannot
+  // ship, so the absence is the property worth asserting.
+  assert.ok(!content.includes('enterpriseModulesEnabled'))
+  assert.ok(!content.includes('@open-mercato/enterprise'))
   assert.ok(!content.includes('example_customers_sync'))
   assert.ok(!content.includes("id: 'example'"))
   assert.ok(content.includes('export const enabledModules'))

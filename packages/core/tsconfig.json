@@ -13,5 +13,38 @@
     }
   },
   "include": ["src/**/*", "generated/**/*"],
-  "exclude": ["node_modules", "dist", "**/__tests__/**"]
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/__tests__/**",
+
+    // Parked modules — disabled in apps/mercato/src/modules.ts.
+    //
+    // The generated entity-id registry deliberately covers ENABLED modules only,
+    // so `E.catalog.catalog_product` fails to compile while catalog is parked.
+    // That is a feature, not a defect: it stops enabled code taking a hard
+    // dependency on entities whose tables no longer exist. Code that must work
+    // either way uses the sanctioned optional form documented in AGENTS.md —
+    // `getEntityIds() as any` plus `E.catalog?.catalog_product` — and continues
+    // to type-check normally.
+    //
+    // Parked source, however, references its own ids directly, so type-checking
+    // it against a registry that intentionally omits them produces 579 errors
+    // that say nothing about the code. Exclude it. Restoring a module means
+    // deleting its line here and re-running the generator.
+    //
+    // Kept honest by parked-modules-typecheck-scope.test.ts, which fails if this
+    // list and the enabled-module list ever disagree.
+    "src/modules/catalog/**",
+    "src/modules/customers/**",
+    "src/modules/customer_accounts/**",
+    "src/modules/portal/**",
+    "src/modules/payment_gateways/**",
+    "src/modules/resources/**",
+    "src/modules/sales/**",
+    "src/modules/shipping_carriers/**",
+    "src/modules/staff/**",
+    "src/modules/sync_excel/**",
+    "src/modules/wms/**"
+  ]
 }

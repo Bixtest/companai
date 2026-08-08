@@ -134,12 +134,15 @@ describe('findUpgradeAction', () => {
   })
 })
 
-describe('interaction-statuses seed upgrade action', () => {
-  it('registers the customers interaction-status seed action', () => {
+describe('upgrade actions do not target parked modules', () => {
+  it('no longer registers the customers interaction-status seed action', () => {
+    // The action was removed in a423050. `customers` is parked, so an upgrade
+    // action seeding its dictionaries could never run — it would look for tables
+    // that no migration creates.
+    //
+    // Inverted rather than deleted: the assertion still has a subject, and
+    // re-introducing the action becomes a deliberate act that fails here first.
     const action = upgradeActions.find((candidate) => candidate.id === 'customers.seed-interaction-statuses')
-    expect(action).toBeDefined()
-    expect(action?.version).toBe('0.6.5')
-    expect(action?.messageKey).toBe('customers.config.upgradeActions.interactionStatuses.message')
-    expect(typeof action?.run).toBe('function')
+    expect(action).toBeUndefined()
   })
 })

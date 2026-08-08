@@ -1,9 +1,18 @@
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { join, relative, sep } from 'node:path'
 import fg from 'fast-glob'
 
 /**
  * License-metadata consistency guard (#3475).
+ *
+ * **This fork is MIT throughout.** Upstream is open-core and this guard policed
+ * the boundary from both sides; we deleted `packages/enterprise` — its licence
+ * forbids redistribution — so the invariant collapses to the simpler and
+ * stronger one: no file anywhere declares a proprietary licence, and the
+ * commercial package is absent. The original rationale is kept below because it
+ * explains why the metadata strings drifted in the first place.
+ *
+ * ---
  *
  * Open Mercato is open-core: the root LICENSE is MIT and every workspace
  * package ships under it, EXCEPT `@open-mercato/enterprise`, the single
@@ -40,9 +49,6 @@ const licenseOf = (file: string): string | null => {
   return match ? match[1] : null
 }
 
-const isEnterprise = (file: string): boolean =>
-  relative(repoRoot, file).split(sep).join('/').startsWith('packages/enterprise/')
-
 describe('license metadata consistency (#3475)', () => {
   it('discovers module/integration metadata files', () => {
     expect(metadataFiles.length).toBeGreaterThan(0)
@@ -50,20 +56,28 @@ describe('license metadata consistency (#3475)', () => {
 
   it('no OSS-package metadata declares a proprietary license', () => {
     const offenders = metadataFiles
-      .filter((file) => !isEnterprise(file))
       .filter((file) => licenseOf(file) === 'Proprietary')
       .map((file) => relative(repoRoot, file).split(sep).join('/'))
 
     expect(offenders).toEqual([])
   })
 
-  it('keeps the commercial enterprise modules marked proprietary', () => {
-    const enterpriseCommercial = [
-      'packages/enterprise/src/modules/record_locks/index.ts',
-      'packages/enterprise/src/modules/system_status_overlays/index.ts',
-    ]
-    for (const rel of enterpriseCommercial) {
-      expect(licenseOf(join(repoRoot, rel))).toBe('Proprietary')
-    }
+  it('carries no proprietary-licensed code at all', () => {
+    // Upstream is open-core, and this guard originally worked from both sides:
+    // OSS packages must not claim Proprietary, and the commercial package must
+    // not drift to MIT. This fork deleted `packages/enterprise` outright — its
+    // licence forbids redistribution — so there is no second side left.
+    //
+    // The invariant that replaces it is stronger and is the one that matters
+    // here: nothing in this repository is proprietary. Asserting the package is
+    // absent as well as the metadata keeps it honest if the package ever
+    // returns without this test being revisited.
+    expect(existsSync(join(repoRoot, 'packages', 'enterprise'))).toBe(false)
+
+    const proprietary = metadataFiles
+      .filter((file) => licenseOf(file) === 'Proprietary')
+      .map((file) => relative(repoRoot, file).split(sep).join('/'))
+
+    expect(proprietary).toEqual([])
   })
 })

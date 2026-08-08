@@ -205,7 +205,12 @@ test('standalone template dev reset clears configured Next dev distDir cache', (
     assert.equal(result.status, 0, result.stderr)
     assert.equal(fs.existsSync(distDevDir), false)
     assert.equal(fs.existsSync(legacyTurboDir), false)
-    assert.match(result.stdout, /\.mercato\/next\/dev/)
+    // Accept either separator: the script prints the native path, so on Windows
+    // this reads `.mercato\next\dev` and a forward-slash-only pattern failed on
+    // the operating system rather than on the behaviour under test. The two
+    // `existsSync` assertions above are what actually prove the cache was
+    // cleared; this one only checks the path is named in the output.
+    assert.match(result.stdout, /\.mercato[\\/]next[\\/]dev/)
   } finally {
     rmTempDir(tempDir)
   }

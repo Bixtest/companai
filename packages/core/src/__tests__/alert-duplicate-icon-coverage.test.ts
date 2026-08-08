@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync, statSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { join, relative, sep } from 'node:path'
 
 /**
@@ -97,7 +97,12 @@ describe('Alert callouts do not double the leading icon (#2759, #3027)', () => {
   })
 
   it('covers the package src roots that render <Alert> (incl. #3027 follow-up packages)', () => {
-    for (const expected of [
+    // Filtered to packages that exist: `SCAN_ROOTS` is built by walking
+    // `packages/*`, and this fork deleted `packages/enterprise`. A hardcoded
+    // entry for a deleted package fails on the deletion rather than on the
+    // coverage property being asserted. The count is checked below so the list
+    // cannot quietly shrink to nothing.
+    const expectedRoots = [
       'packages/core/src',
       'packages/ui/src',
       'packages/webhooks/src',
@@ -106,7 +111,10 @@ describe('Alert callouts do not double the leading icon (#2759, #3027)', () => {
       'packages/scheduler/src',
       'packages/sync-akeneo/src',
       'packages/ai-assistant/src',
-    ]) {
+    ].filter((root) => existsSync(join(repoRoot, root)))
+
+    expect(expectedRoots.length).toBeGreaterThanOrEqual(7)
+    for (const expected of expectedRoots) {
       expect(SCAN_ROOTS).toContain(expected)
     }
   })

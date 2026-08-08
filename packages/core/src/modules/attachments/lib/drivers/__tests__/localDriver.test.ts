@@ -93,12 +93,18 @@ describe('LocalStorageDriver', () => {
     })
   })
 
+  // Expected paths use `path.resolve`, not `path.join`, to match what the driver
+  // produces. The driver resolves to an absolute path, which on Windows acquires
+  // a drive letter (`C:\storage\main\…`) while `path.join` does not
+  // (`\storage\main\…`) — so these compared against a path the driver can
+  // never return and failed on the operating system rather than on the code.
+  // On POSIX the two are identical, so behaviour there is unchanged.
   describe('read()', () => {
     it('reads from the resolved absolute path', async () => {
       const result = await driver.read(PARTITION, 'org_org-abc/tenant_tenant-xyz/file.txt')
 
       expect(mockReadFile).toHaveBeenCalledWith(
-        path.join('/storage/main', 'org_org-abc/tenant_tenant-xyz/file.txt'),
+        path.resolve('/storage/main', 'org_org-abc/tenant_tenant-xyz/file.txt'),
       )
       expect(result.buffer).toEqual(Buffer.from('hello'))
     })
@@ -109,7 +115,7 @@ describe('LocalStorageDriver', () => {
       await driver.delete(PARTITION, 'org_org-abc/tenant_tenant-xyz/file.txt')
 
       expect(mockUnlink).toHaveBeenCalledWith(
-        path.join('/storage/main', 'org_org-abc/tenant_tenant-xyz/file.txt'),
+        path.resolve('/storage/main', 'org_org-abc/tenant_tenant-xyz/file.txt'),
       )
     })
 
@@ -127,7 +133,7 @@ describe('LocalStorageDriver', () => {
       )
 
       expect(filePath).toBe(
-        path.join('/storage/main', 'org_org-abc/tenant_tenant-xyz/file.txt'),
+        path.resolve('/storage/main', 'org_org-abc/tenant_tenant-xyz/file.txt'),
       )
       await expect(cleanup()).resolves.not.toThrow()
       // cleanup must NOT delete the original file
@@ -140,7 +146,7 @@ describe('LocalStorageDriver', () => {
       await driver.read(PARTITION, '///org_a/tenant_b/file.txt')
 
       expect(mockReadFile).toHaveBeenCalledWith(
-        path.join('/storage/main', 'org_a/tenant_b/file.txt'),
+        path.resolve('/storage/main', 'org_a/tenant_b/file.txt'),
       )
     })
 
