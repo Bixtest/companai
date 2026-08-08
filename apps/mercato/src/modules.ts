@@ -62,20 +62,66 @@ export const moduleOverrideExamples: ModuleOverrides = {
   },
 }
 
+/**
+ * PARKED MODULES — code retained, module switched off.
+ *
+ * Our platform is an operating system for companies, not an ERP. The commerce
+ * and warehouse modules are switched off here rather than deleted, because
+ * disabling buys almost everything deleting would:
+ *
+ *   - no migrations run, so a fresh database never creates their tables
+ *   - no API routes, pages, menu entries or ACL features are served
+ *   - no workers, subscribers or DI registrations are loaded
+ *
+ * Their source stays on disk, still compiled and still type-checked, so it
+ * remains available to read, to harvest patterns from, and to re-enable by
+ * uncommenting a single line. Deleting would have bought only build time, at
+ * the cost of days of analysis per module and the risk of losing something —
+ * we nearly lost `domain_mappings` that way once already.
+ *
+ * Parked (uncomment to restore):
+ *
+ *   { id: 'customers', from: '@open-mercato/core' },
+ *   { id: 'catalog', from: '@open-mercato/core' },
+ *   { id: 'sales', from: '@open-mercato/core' },
+ *   { id: 'wms', from: '@open-mercato/core' },
+ *   { id: 'shipping_carriers', from: '@open-mercato/core' },
+ *   { id: 'payment_gateways', from: '@open-mercato/core' },
+ *   { id: 'sync_excel', from: '@open-mercato/core' },
+ *   { id: 'customer_accounts', from: '@open-mercato/core' },
+ *   { id: 'portal', from: '@open-mercato/core' },
+ *   { id: 'staff', from: '@open-mercato/core' },
+ *   { id: 'resources', from: '@open-mercato/core' },
+ *   { id: 'checkout', from: '@open-mercato/checkout' },
+ *   { id: 'gateway_stripe', from: '@open-mercato/gateway-stripe' },
+ *   { id: 'sync_akeneo', from: '@open-mercato/sync-akeneo' },
+ *
+ * Restore order matters — these declare `requires`:
+ *   sales → catalog, customers, dictionaries
+ *   wms → catalog, sales, feature_toggles
+ *   sync_akeneo → integrations, data_sync, catalog, sales
+ *   portal → customer_accounts
+ *   staff → planner, resources     resources → planner
+ *
+ * `customer_accounts` owns `domain_mappings` (per-tenant custom domains), which
+ * we do want. It is not lost — the table simply is not created while parked.
+ * Extracting it into `directory` is a graft-phase task, not a blocker.
+ *
+ * `customers` is upstream's reference module for CRUD patterns; AGENTS.md points
+ * at it throughout. Parked, not deleted, precisely so it stays readable.
+ *
+ * Rationale and the decision behind it: workspace/references/parked-modules.md
+ */
 export const enabledModules: ModuleEntry[] = [
   { id: 'dashboards', from: '@open-mercato/core' },
   { id: 'auth', from: '@open-mercato/core' },
   { id: 'directory', from: '@open-mercato/core' },
-  { id: 'customers', from: '@open-mercato/core' },
   { id: 'perspectives', from: '@open-mercato/core' },
   { id: 'entities', from: '@open-mercato/core' },
   { id: 'configs', from: '@open-mercato/core' },
   { id: 'query_index', from: '@open-mercato/core' },
   { id: 'audit_logs', from: '@open-mercato/core' },
   { id: 'attachments', from: '@open-mercato/core' },
-  { id: 'catalog', from: '@open-mercato/core' },
-  { id: 'sales', from: '@open-mercato/core' },
-  { id: 'wms', from: '@open-mercato/core' },
   { id: 'api_keys', from: '@open-mercato/core' },
   { id: 'dictionaries', from: '@open-mercato/core' },
   { id: 'content', from: '@open-mercato/content' },
@@ -87,14 +133,11 @@ export const enabledModules: ModuleEntry[] = [
   { id: 'search', from: '@open-mercato/search' },
   { id: 'currencies', from: '@open-mercato/core' },
   { id: 'planner', from: '@open-mercato/core' },
-  { id: 'resources', from: '@open-mercato/core' },
-  { id: 'staff', from: '@open-mercato/core' },
   { id: 'events', from: '@open-mercato/events' },
   { id: 'notifications', from: '@open-mercato/core' },
   { id: 'progress', from: '@open-mercato/core' },
   { id: 'integrations', from: '@open-mercato/core' },
   { id: 'data_sync', from: '@open-mercato/core' },
-  { id: 'sync_excel', from: '@open-mercato/core' },
   { id: 'messages', from: '@open-mercato/core' },
   // Communication channels hub (SPEC-045d) — bridges external chat/email channels
   // (Slack, WhatsApp, Email) to the unified Messages inbox. Provider packages
@@ -104,19 +147,12 @@ export const enabledModules: ModuleEntry[] = [
   { id: 'translations', from: '@open-mercato/core' },
   { id: 'scheduler', from: '@open-mercato/scheduler' },
   { id: 'inbox_ops', from: '@open-mercato/core' },
-  { id: 'payment_gateways', from: '@open-mercato/core' },
-  { id: 'checkout', from: '@open-mercato/checkout' },
-  { id: 'gateway_stripe', from: '@open-mercato/gateway-stripe' },
   // Per-user email channels for the Communications Hub (SPEC-045d / email
   // integration spec). Each provider package registers its `ChannelAdapter`
   // at import time via `setup.ts`; the hub picks them up by `providerKey`.
   { id: 'channel_imap', from: '@open-mercato/channel-imap' },
   { id: 'channel_gmail', from: '@open-mercato/channel-gmail' },
-  { id: 'sync_akeneo', from: '@open-mercato/sync-akeneo' },
-  { id: 'shipping_carriers', from: '@open-mercato/core' },
   { id: 'webhooks', from: '@open-mercato/webhooks' },
-  { id: 'customer_accounts', from: '@open-mercato/core' },
-  { id: 'portal', from: '@open-mercato/core' },
   {
     id: 'example',
     from: '@app',
