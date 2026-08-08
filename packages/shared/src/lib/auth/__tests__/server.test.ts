@@ -55,7 +55,20 @@ describe('auth server integrity checks', () => {
     verifyJwt.mockReturnValue(auth)
     resolveCanonicalStaffAuthContext.mockResolvedValue(auth)
 
-    await expect(getAuthFromCookies()).resolves.toEqual(auth)
+    // The resolver attaches the acting principal (R1). Asserted in full rather
+    // than loosened to `objectContaining`, so an incorrect kind or a principal
+    // carrying the wrong scope still fails here.
+    await expect(getAuthFromCookies()).resolves.toEqual({
+      ...auth,
+      principal: {
+        id: auth.sub,
+        kind: 'human',
+        onBehalfOfUserId: null,
+        displayName: null,
+        tenantId: auth.tenantId,
+        organizationId: auth.orgId,
+      },
+    })
     expect(resolveCanonicalStaffAuthContext).toHaveBeenCalledWith(em, auth)
   })
 
@@ -143,7 +156,17 @@ describe('auth server integrity checks', () => {
       },
     })
 
-    await expect(getAuthFromRequest(request)).resolves.toEqual(canonicalAuth)
+    await expect(getAuthFromRequest(request)).resolves.toEqual({
+      ...canonicalAuth,
+      principal: {
+        id: canonicalAuth.sub,
+        kind: 'human',
+        onBehalfOfUserId: null,
+        displayName: null,
+        tenantId: canonicalAuth.tenantId,
+        organizationId: canonicalAuth.orgId,
+      },
+    })
   })
 
   it('validates api key context before accepting api token auth', async () => {

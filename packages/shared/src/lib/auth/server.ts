@@ -2,6 +2,10 @@ import { cookies } from 'next/headers.js'
 import type { EntityManager } from '@mikro-orm/postgresql'
 import { verifyJwt } from './jwt'
 import { getSharedApiKeyAuthCache } from './apiKeyAuthCache'
+import { apiKeySubject, derivePrincipal, type Principal } from './principal'
+
+export type { Principal, PrincipalKind } from './principal'
+export { effectiveUserId, isHumanPrincipal, isMachinePrincipal } from './principal'
 
 const TENANT_COOKIE_NAME = 'om_selected_tenant'
 const ORGANIZATION_COOKIE_NAME = 'om_selected_org'
@@ -15,12 +19,37 @@ export type AuthContext = {
   orgId: string | null
   email?: string
   roles?: string[]
+  /**
+   * Who is acting, as data. Read this instead of parsing `sub` or branching on
+   * `isApiKey` — see `./principal`.
+   *
+   * Optional only because contexts are also built from cached tokens and
+   * trusted envelopes that predate this field. Use `requirePrincipal(auth)`,
+   * which derives it on the fly when it is absent, rather than reading it
+   * directly and handling `undefined` at each call site.
+   */
+  principal?: Principal | null
+  /** @deprecated Read `principal.kind` instead. Removed in R1.4. */
   isApiKey?: boolean
+  /** @deprecated Read `effectiveUserId(auth)` instead. Removed in R1.4. */
   userId?: string
   keyId?: string
   keyName?: string
   [k: string]: unknown
 } | null
+
+/**
+ * Returns the acting principal, deriving it from the legacy fields when a
+ * context was built before principals existed.
+ *
+ * Every consumer should go through this rather than reading `auth.principal`
+ * directly, so that a context from a cache, a trusted envelope or a test never
+ * has to be special-cased.
+ */
+export function requirePrincipal(auth: AuthContext): Principal | null {
+  if (!auth) return null
+  return auth.principal ?? derivePrincipal(auth)
+}
 
 type CookieOverride = { applied: boolean; value: string | null }
 // 'error' means auth could not be determined because of a transient/unexpected
@@ -122,6 +151,23 @@ function resolveOrganizationOverride(raw: string | undefined): CookieOverride {
 function isSuperAdminAuth(auth: AuthContext | null | undefined): boolean {
   if (!auth) return false
   return (auth as Record<string, unknown>).isSuperAdmin === true
+}
+
+/**
+ * Attaches the acting principal to a resolved context.
+ *
+ * MUST run after any scope rewrite: a superadmin's tenant/organization cookies
+ * can change the effective scope, and the principal carries a copy of it.
+ * Attaching first would leave the principal describing the pre-override scope.
+ *
+ * Idempotent — a context that already carries a principal (the API-key path
+ * builds one directly) is returned unchanged.
+ */
+function withResolvedPrincipal(auth: AuthContext): AuthContext {
+  if (!auth || auth.principal) return auth
+  const principal = derivePrincipal(auth)
+  if (!principal) return auth
+  return { ...auth, principal }
 }
 
 function applySuperAdminScope(
@@ -241,10 +287,18 @@ async function resolveApiKeyAuth(secret: string): Promise<AuthContext> {
     }
 
     const auth: Exclude<AuthContext, null> = {
-      sub: `api_key:${record.id}`,
+      sub: apiKeySubject(record.id),
       tenantId: record.tenantId ?? null,
       orgId: record.organizationId ?? null,
       roles: roleNames,
+      principal: {
+        id: record.id,
+        kind: 'service',
+        onBehalfOfUserId: actualUserId,
+        displayName: record.name ?? null,
+        tenantId: record.tenantId ?? null,
+        organizationId: record.organizationId ?? null,
+      },
       isApiKey: true,
       isSuperAdmin: keyIsSuperAdmin,
       keyId: record.id,
@@ -302,7 +356,7 @@ export async function resolveAuthFromCookiesDetailed(): Promise<AuthResolution> 
     const tenantCookie = cookieStore.get(TENANT_COOKIE_NAME)?.value
     const orgCookie = cookieStore.get(ORGANIZATION_COOKIE_NAME)?.value
     return {
-      auth: applySuperAdminScope(canonicalAuth, tenantCookie, orgCookie),
+      auth: withResolvedPrincipal(applySuperAdminScope(canonicalAuth, tenantCookie, orgCookie)),
       status: 'authenticated',
     }
   } catch (err) {
@@ -343,7 +397,7 @@ export async function resolveAuthFromRequestDetailed(req: Request): Promise<Auth
         const canonicalAuth = await resolveCanonicalInteractiveAuthContext(payload)
         if (canonicalAuth) {
           return {
-            auth: applySuperAdminScope(canonicalAuth, tenantCookie, orgCookie),
+            auth: withResolvedPrincipal(applySuperAdminScope(canonicalAuth, tenantCookie, orgCookie)),
             status: 'authenticated',
           }
         }
