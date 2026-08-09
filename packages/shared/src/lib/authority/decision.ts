@@ -195,20 +195,61 @@ export function resolveDecision(input: ResolveInput): Decision {
   }
   consider('grant', 'A5', `The actor holds ${capability.id}`)
 
+  /**
+   * Whether the autonomy matrix applies at all.
+   *
+   * **The gates describe how much a worker may do unattended.** `A1` is defined
+   * as *"the worker produces a proposal; a human performs the act"* — if the
+   * actor *is* that human, acting on their own grant, `A1` has no meaning: the
+   * thing A1 asks for has already happened.
+   *
+   * Applying the matrix to direct human action was a mistake, and shadow mode
+   * caught it on its first real traffic: 45 of 45 observations were people
+   * acquiring an obligation, including a review queue for changing their own
+   * sidebar layout and a second person's approval to edit a dictionary. A
+   * control that expensive is one somebody switches off, taking the useful
+   * controls with it.
+   *
+   * So the matrix bounds **machines and delegated authority**. A person
+   * exercising a permission they hold is bounded by the other ceilings — the org
+   * graph, the record's state, the delegation they act under, and tenant policy.
+   * Four-eyes on financial acts is a *policy* statement, deliberately, because
+   * that is a decision each company makes rather than one this table imposes.
+   */
+  const boundedByAutonomyMatrix = MACHINE_KINDS.includes(actor.kind) || Boolean(actor.delegationCeiling)
+
   // 2. The effect-class floor: the most the situation permits, before anything
   //    about who is asking.
   const classFloor = maxAutonomyFor(capability.effectClass, grade)
-  consider(
-    'effect-class-floor',
-    classFloor,
-    `${capability.effectClass} act on ${grade} work permits at most ${classFloor}`,
-  )
+  if (boundedByAutonomyMatrix) {
+    consider(
+      'effect-class-floor',
+      classFloor,
+      `${capability.effectClass} act on ${grade} work permits at most ${classFloor}`,
+    )
+  } else {
+    // Recorded, not binding. The explanation should still say what kind of act
+    // this is — dropping it would make a decision about a destructive act read
+    // exactly like one about a read.
+    consider(
+      'effect-class',
+      'A5',
+      `${capability.effectClass} act. The autonomy matrix bounds machines and delegated authority; a person acting on their own grant is bounded by policy instead`,
+    )
+  }
 
   // 3. Irreversibility (invariant I8): an act nobody can undo is never resolved
   //    after the fact. Review-afterwards is only a control when there is
   //    something left to do about it.
-  if (capability.reversibility === 'irreversible') {
+  //
+  // Same asymmetry, for the same reason: "approve first" means a second person,
+  // and requiring one for every irreversible act a permitted human performs is a
+  // policy some companies want and none should have imposed on them. The
+  // obligation to record *why* still applies — see `deriveObligations`.
+  if (capability.reversibility === 'irreversible' && boundedByAutonomyMatrix) {
     consider('irreversible-cap', 'A2', 'The act cannot be undone, so it is never decided after it happens')
+  } else if (capability.reversibility === 'irreversible') {
+    consider('irreversible', 'A5', 'The act cannot be undone, so a reason is recorded with it')
   } else if (capability.reversibility === 'compensatable') {
     consider(
       'compensation-available',

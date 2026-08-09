@@ -220,10 +220,10 @@ describe('a machine with no trust record does not get the benefit of the doubt',
 })
 
 describe('irreversible acts are never decided after they happen (I8)', () => {
-  it('caps an irreversible act at approve-first even for a trusted actor', () => {
+  it('caps an irreversible act at approve-first even for a highly trusted worker', () => {
     const decision = resolveDecision(
       input({
-        actor: { kind: 'human', id: 'u', holdsCapability: true, trustCeiling: 'A5' },
+        actor: { kind: 'ai_worker', id: 'nora', holdsCapability: true, trustCeiling: 'A5' },
         capability: sendEmail,
         context: { grade: 'G0' },
       }),
@@ -258,6 +258,70 @@ describe('irreversible acts are never decided after they happen (I8)', () => {
   })
 })
 
+describe('the autonomy matrix bounds workers, not people acting on their own grant', () => {
+  // Found by shadow mode on its first real traffic: applying the matrix to
+  // direct human action put 45 of 45 observed actions into a review queue or an
+  // approval, including changing one's own sidebar layout. The gates describe
+  // worker autonomy - A1 is literally "the worker proposes; a human performs the
+  // act", which is meaningless when the actor is that human.
+
+  it('does not put an ordinary human write into a review queue', () => {
+    const decision = resolveDecision(input({ context: { grade: 'G1' } }))
+
+    expect(decision.gate).toBe('A5')
+    expect(decision.obligations.map((obligation) => obligation.kind)).not.toContain('review')
+  })
+
+  it('does not require a second person for an irreversible act a human may perform', () => {
+    const decision = resolveDecision(input({ capability: sendEmail, context: { grade: 'G2' } }))
+
+    expect(decision.gate).toBe('A5')
+    expect(decision.obligations.map((obligation) => obligation.kind)).not.toContain('approval')
+  })
+
+  it('still records what kind of act it is, so the explanation is not flattened', () => {
+    // Dropping the effect class entirely would make a decision about a
+    // destructive act read exactly like one about a read.
+    const decision = resolveDecision(input({ capability: deleteEverything }))
+
+    expect(decision.reasons.map((reason) => reason.rule)).toContain('effect-class')
+    expect(decision.reasons.find((reason) => reason.rule === 'effect-class')?.detail).toContain('E6')
+  })
+
+  it('still records why an irreversible act needs a reason', () => {
+    const decision = resolveDecision(input({ capability: sendEmail }))
+
+    expect(decision.obligations.map((obligation) => obligation.kind)).toContain('justification')
+  })
+
+  it('binds a machine by the matrix', () => {
+    const decision = resolveDecision(
+      input({
+        actor: { kind: 'ai_worker', id: 'nora', holdsCapability: true, trustCeiling: 'A5' },
+        capability: deleteEverything,
+        context: { grade: 'G1' },
+      }),
+    )
+
+    expect(decision.bindingRule).toBe('effect-class-floor')
+    expect(decision.gate).toBe('A1')
+  })
+
+  it('binds a human acting under a delegation by the matrix', () => {
+    // Delegated authority is closer to a worker's than to one's own: the person
+    // is exercising somebody else's permission, within limits that person set.
+    const decision = resolveDecision(
+      input({
+        actor: { kind: 'human', id: 'u', holdsCapability: true, delegationCeiling: 'A5' },
+        context: { grade: 'G1' },
+      }),
+    )
+
+    expect(decision.reasons.map((reason) => reason.rule)).toContain('effect-class-floor')
+    expect(decision.gate).toBe('A4')
+  })
+})
+
 describe('authority is carried, never amplified (I4)', () => {
   it('caps a worker at its invoker', () => {
     const decision = resolveDecision(
@@ -289,7 +353,12 @@ describe('obligations describe how to proceed, not why not to', () => {
   })
 
   it('queues a review at A4', () => {
-    const decision = resolveDecision(input({ context: { grade: 'G1' } }))
+    const decision = resolveDecision(
+      input({
+        actor: { kind: 'ai_worker', id: 'nora', holdsCapability: true, trustCeiling: 'A5' },
+        context: { grade: 'G1' },
+      }),
+    )
     expect(decision.gate).toBe('A4')
     expect(decision.obligations.map((obligation) => obligation.kind)).toContain('review')
   })

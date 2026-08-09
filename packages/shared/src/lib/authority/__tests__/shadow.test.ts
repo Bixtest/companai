@@ -67,11 +67,23 @@ describe('what it measures', () => {
   it('records an obligation the platform does not currently impose', () => {
     // The interesting number: not a disagreement, but the work the governance
     // layer would begin doing on the day it is switched on.
-    const comparison = compareWithResolver(input({ capability: destructive }))
+    // A worker, not a person: the autonomy matrix bounds machines and delegated
+    // authority, so an ordinary human write acquires no obligation at all.
+    const comparison = compareWithResolver(input({ actorKind: 'ai_worker', capability: destructive }))
 
     expect(comparison?.legacyAllowed).toBe(true)
     expect(comparison?.resolverAllows).toBe(true)
     expect(comparison?.wouldAddObligation).toBe(true)
+  })
+
+  it('reports nothing added for ordinary human work, which is most traffic', () => {
+    // The measurement that changed the design: before the matrix was scoped to
+    // workers, every observed human action came back with an obligation.
+    const comparison = compareWithResolver(input({ capability: destructive }))
+
+    expect(comparison?.gate).toBe('A5')
+    expect(comparison?.wouldAddObligation).toBe(false)
+    expect(comparison?.disagrees).toBe(false)
   })
 
   it('does not count an unattended act as adding an obligation', () => {
