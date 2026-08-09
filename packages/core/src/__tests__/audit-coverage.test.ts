@@ -31,6 +31,7 @@ const MODULES_REQUIRING_MANUAL_AUDIT = [
   'data_sync',
   'workflows',
   'inbox_ops',
+  'directory',
 ] as const
 
 /**

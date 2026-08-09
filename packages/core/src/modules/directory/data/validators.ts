@@ -48,3 +48,44 @@ export type TenantCreateInput = z.infer<typeof tenantCreateSchema>
 export type TenantUpdateInput = z.infer<typeof tenantUpdateSchema>
 export type OrganizationCreateInput = z.infer<typeof organizationCreateSchema>
 export type OrganizationUpdateInput = z.infer<typeof organizationUpdateSchema>
+
+/**
+ * Typed authority edges between organizations (R6).
+ *
+ * The enums are duplicated from the shared authority module rather than imported
+ * so that a validator failure names the value the caller sent. Keeping them in
+ * step is what the `organization_edges_*_ck` database constraints are for — if
+ * these ever drift, the write fails at the database rather than storing a value
+ * the resolver cannot read.
+ */
+export const organizationRelationshipTypes = [
+  'owns', 'manages', 'advises', 'serves', 'licenses', 'templates', 'supervises',
+] as const
+
+export const organizationInheritanceModes = [
+  'strict', 'flexible', 'reference_only', 'none',
+] as const
+
+export const autonomyGates = ['A0', 'A1', 'A2', 'A3', 'A4', 'A5'] as const
+
+const edgeBodySchema = z.object({
+  relationshipType: z.enum(organizationRelationshipTypes).default('owns'),
+  inheritanceMode: z.enum(organizationInheritanceModes).default('strict'),
+  authorityCeiling: z.enum(autonomyGates).default('A5'),
+  /**
+   * `null` restricts nothing; `[]` passes nothing. Kept distinct deliberately —
+   * an empty allowlist is the correct configuration for a reference-only
+   * engagement, and collapsing the two would make it unreachable.
+   */
+  moduleGrants: z.array(z.string().min(1)).nullable().optional(),
+  note: z.string().max(1000).nullable().optional(),
+})
+
+export const organizationEdgeCreateSchema = edgeBodySchema.extend({
+  parentId: z.string().uuid(),
+  childId: z.string().uuid(),
+})
+
+export const organizationEdgeUpdateSchema = edgeBodySchema.partial().extend({
+  id: z.string().uuid(),
+})
