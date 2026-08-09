@@ -22,6 +22,8 @@ import {
 import { toOptionalString } from '@open-mercato/shared/lib/string/coerce'
 import { createLogger } from '@open-mercato/shared/lib/logger'
 import { parseSubject } from '@open-mercato/shared/lib/auth/principal'
+import { digestOpaque } from '@open-mercato/shared/lib/ledger/canonical'
+import type { LedgerService } from '@open-mercato/core/modules/audit_logs/services/ledgerService'
 
 const logger = createLogger('audit_logs').child({ component: 'action-log-service' })
 
@@ -116,6 +118,12 @@ export class ActionLogService {
   constructor(
     private readonly em: EntityManager,
     private readonly tenantEncryptionService?: TenantDataEncryptionService,
+    /**
+     * Optional so that constructing this service by hand — as several tests and
+     * any downstream app running without the ledger do — keeps working. When it
+     * is present, every journal entry also extends the hash chain.
+     */
+    private readonly ledgerService?: LedgerService,
   ) {}
 
   private async decryptEntryPayload<T extends Record<string, unknown>>(entry: T): Promise<T> {
@@ -210,8 +218,76 @@ export class ActionLogService {
     const data = this.parseCreateInput(input)
     const log = this.createLogEntity(this.em, data)
     await this.em.persist(log).flush()
+    // The RAW subject, not the stored one: `normalizeInput` reduces
+    // `api_key:<uuid>` to the bare uuid, so by the time it reaches the row the
+    // fact that a machine acted is already gone. See `appendToLedger`.
+    await this.appendToLedger(log, data, typeof input?.actorUserId === 'string' ? input.actorUserId : null)
     await this.decryptEntries(log)
     return log
+  }
+
+  /**
+   * Extends the tenant's hash chain with the entry just written (R3).
+   *
+   * **Here, rather than at the call sites**, because both write paths already
+   * funnel through `log()`: the command bus reaches it via `persistLog`, and
+   * every custom route via `writeDirectWriteAuditLog`. Hooking the ledger to the
+   * journal means the chain cannot fall behind the record it proves — a module
+   * cannot audit something and forget to chain it.
+   *
+   * Runs on `this.em`, so it commits in the caller's transaction alongside the
+   * journal entry and the business write (planning 06 §3.3). A failure
+   * propagates and rolls all three back: a chain with a hole is a chain nobody
+   * can rely on, and an unprovable record is the failure this batch exists to
+   * remove.
+   *
+   * Skipped when no tenant is known. Chains are partitioned per tenant, and a
+   * tenant-less event has no chain to join.
+   */
+  private async appendToLedger(
+    log: ActionLog,
+    data: ActionLogCreateInput,
+    rawActorSubject: string | null,
+  ): Promise<void> {
+    if (!this.ledgerService || typeof this.ledgerService.append !== 'function') return
+    if (!log.tenantId) return
+
+    // Derived from the raw subject, because the stored one cannot answer the
+    // question. `action_logs.actor_user_id` is a uuid column, and the normaliser
+    // strips `api_key:` before writing it — so a key acting and a person acting
+    // look identical in the journal (upstream-issues U7).
+    //
+    // The chain must not inherit that. Whether an actor was human or machine is
+    // the distinction this whole platform is built to make, and it is recorded
+    // here where nothing narrows it away.
+    const subject = rawActorSubject ?? log.actorUserId
+    const principal = subject ? parseSubject(subject) : null
+    const context = isRecord(data.context) ? data.context : null
+    const correlationId = context && typeof context.correlationId === 'string' ? context.correlationId : null
+    const causationId = context && typeof context.causationId === 'string' ? context.causationId : null
+
+    await this.ledgerService.append({
+      tenantId: log.tenantId,
+      eventType: data.commandId,
+      actorKind: principal ? principal.kind : (log.actorUserId ? 'human' : 'system'),
+      actorId: principal ? principal.id : log.actorUserId,
+      organizationId: log.organizationId,
+      resourceKind: log.resourceKind,
+      resourceId: log.resourceId,
+      correlationId,
+      causationId,
+      // The chain records that a change happened and proves the journal entry
+      // describing it has not been altered. It never copies the content: the
+      // snapshots are customer data, subject to erasure, and a chain holding
+      // them could not honour a deletion request without destroying its own
+      // proof (planning 06 §5).
+      payload: {
+        actionLogId: log.id,
+        actionLabel: data.actionLabel ?? null,
+        snapshotBeforeDigest: data.snapshotBefore === undefined ? null : digestOpaque(data.snapshotBefore),
+        snapshotAfterDigest: data.snapshotAfter === undefined ? null : digestOpaque(data.snapshotAfter),
+      },
+    })
   }
 
   private parseCreateInput(input: ActionLogCreateInput): ActionLogCreateInput {
