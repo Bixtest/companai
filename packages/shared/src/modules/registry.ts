@@ -235,8 +235,16 @@ export type Module = {
   apis?: ModuleApi[]
   cli?: ModuleCli[]
   translations?: Record<string, Record<string, string>>
-  // Optional: per-module feature declarations discovered from acl.ts (module root)
-  features?: Array<{ id: string; title: string; module: string }>
+  // Optional: per-module feature declarations discovered from acl.ts (module root).
+  // `capability` carries the act's intrinsic risk semantics (R4) — effect class,
+  // reversibility, data classes. Optional so modules can be described one at a
+  // time; the coverage guard tracks the gap.
+  features?: Array<{
+    id: string
+    title: string
+    module: string
+    capability?: Omit<import('./capabilities').CapabilityDescriptor, 'id' | 'module'>
+  }>
   // Auto-discovered event subscribers
   subscribers?: ModuleSubscriber[]
   // Auto-discovered queue workers

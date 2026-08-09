@@ -1,14 +1,93 @@
-// Module-level features declaration for RBAC
-export const features = [
-  { id: 'auth.users.list', title: 'List users', module: 'auth' },
-  { id: 'auth.users.create', title: 'Create users', module: 'auth' },
-  { id: 'auth.users.edit', title: 'Edit users', module: 'auth' },
-  { id: 'auth.users.delete', title: 'Delete users', module: 'auth' },
-  { id: 'auth.roles.list', title: 'List roles', module: 'auth' },
-  { id: 'auth.roles.manage', title: 'Manage roles', module: 'auth' },
-  { id: 'auth.acl.manage', title: 'Manage ACLs', module: 'auth' },
-  { id: 'auth.sidebar.manage', title: 'Manage sidebar presets', module: 'auth' },
+import type { AclFeatureDeclaration } from '@open-mercato/shared/lib/capabilities/registry'
+
+export const features: AclFeatureDeclaration[] = [
+  {
+    id: 'auth.users.list',
+    title: 'List users',
+    module: 'auth',
+    capability: { effectClass: 'E0', reversibility: 'reversible', dataClasses: ['personal'] },
+  },
+  {
+    id: 'auth.users.create',
+    title: 'Create users',
+    module: 'auth',
+    capability: {
+      effectClass: 'E5',
+      reversibility: 'compensatable',
+      compensation: 'auth.users.delete',
+      dataClasses: ['personal'],
+      delegable: false,
+      note: 'Creates a principal. Every later authority question is asked about someone who exists because of this act.',
+    },
+  },
+  {
+    id: 'auth.users.edit',
+    title: 'Edit users',
+    module: 'auth',
+    capability: {
+      effectClass: 'E5',
+      reversibility: 'reversible',
+      dataClasses: ['personal'],
+      note: 'Editing a user includes editing what they are — E5 rather than E1 because identity fields are not ordinary record fields.',
+    },
+  },
+  {
+    id: 'auth.users.delete',
+    title: 'Delete users',
+    module: 'auth',
+    capability: {
+      effectClass: 'E6',
+      reversibility: 'compensatable',
+      compensation: 'auth.users.create',
+      dataClasses: ['personal'],
+      delegable: false,
+      standingApprovable: false,
+      note: 'The command carries an undo that restores the record, but sessions, ACL rows and role assignments are hard-deleted and do not come back. Compensatable, not reversible — the distinction matters to whoever has to clean up.',
+    },
+  },
+  {
+    id: 'auth.roles.list',
+    title: 'List roles',
+    module: 'auth',
+    capability: { effectClass: 'E0', reversibility: 'reversible', dataClasses: ['internal'] },
+  },
+  {
+    id: 'auth.roles.manage',
+    title: 'Manage roles',
+    module: 'auth',
+    capability: {
+      effectClass: 'E5',
+      reversibility: 'reversible',
+      dataClasses: ['internal'],
+      delegable: false,
+      standingApprovable: false,
+      note: 'Changes what a whole class of people may do, retroactively and for everyone holding the role.',
+    },
+  },
+  {
+    id: 'auth.acl.manage',
+    title: 'Manage ACLs',
+    module: 'auth',
+    capability: {
+      effectClass: 'E5',
+      reversibility: 'reversible',
+      dataClasses: ['internal'],
+      delegable: false,
+      standingApprovable: false,
+      note: 'The capability that grants capabilities. Anyone holding it holds everything it can grant, which is why it is never delegable and never covered by a standing approval.',
+    },
+  },
+  {
+    id: 'auth.sidebar.manage',
+    title: 'Manage sidebar presets',
+    module: 'auth',
+    capability: {
+      effectClass: 'E1',
+      reversibility: 'reversible',
+      dataClasses: ['internal'],
+      note: 'Navigation layout only. It hides menu entries; it grants and revokes nothing, and treating it as a permission change would be a category error in the other direction.',
+    },
+  },
 ]
 
 export default features
-
