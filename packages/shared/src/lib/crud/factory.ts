@@ -664,19 +664,20 @@ type ActionLogWriter = {
  * otherwise would put a button in the UI that cannot work. Audit is a record of
  * what happened; undo is a separate capability.
  *
- * **Failure policy — fail-open, and still so after R2b.** A failed audit write is
- * logged and swallowed here.
+ * **Fail-closed (R2b-factory).** Called from inside the transaction that performs
+ * the business write, so a failed audit write rolls that write back rather than
+ * leaving a change nobody can account for.
  *
- * R2b made the *command bus* path fail closed: it opens a transaction spanning
- * the business write and the audit write, so a failed log rolls the change back.
- * This path cannot do the same yet. `create` and `update` wrap only the entity
- * write in `em.transactional(...)`, and that transaction has already committed
- * by the time this runs; `delete` opens no transaction at all. Throwing here
- * would report a failure for a change that already happened — worse than
- * swallowing, because the caller would be actively misinformed.
+ * Two failures, treated differently — the same distinction the command bus makes:
  *
- * Closing that gap means moving this call inside the factory's transaction and
- * giving `delete` one. Tracked as **R2b-factory** in workspace/PROGRESS.md.
+ *   - the service being **absent** is legitimate. A downstream app may disable
+ *     the `audit_logs` module, and writes must still work. Tolerated silently.
+ *   - the **write failing** is not. It propagates, and the caller's transaction
+ *     rolls back.
+ *
+ * This must stay inside a transaction. Called after a commit it would report a
+ * failure for a change that already happened, which is worse than swallowing —
+ * the caller would be actively misinformed.
  */
 async function writeDirectWriteAuditLog(options: {
   container: { resolve: (name: string) => unknown }
@@ -702,26 +703,20 @@ async function writeDirectWriteAuditLog(options: {
   }
   if (!service || typeof service.log !== 'function') return
 
-  try {
-    await service.log({
-      commandId: `${options.resourceKind}.${options.action}`,
-      actionLabel: `${options.resourceKind}.${options.action}`,
-      resourceKind: options.resourceKind,
-      ...(options.resourceId ? { resourceId: options.resourceId } : {}),
-      tenantId: options.auth?.tenantId ?? undefined,
-      organizationId: options.organizationId ?? options.auth?.orgId ?? undefined,
-      actorUserId: options.auth?.sub ?? undefined,
-      ...(options.snapshotBefore ? { snapshotBefore: options.snapshotBefore } : {}),
-      ...(options.snapshotAfter ? { snapshotAfter: options.snapshotAfter } : {}),
-      context: { source: 'crud-route', undoable: false },
-    })
-  } catch (err) {
-    logger.error('Failed to write CRUD audit log entry', {
-      err,
-      resourceKind: options.resourceKind,
-      action: options.action,
-    })
-  }
+  // Deliberately not wrapped in try/catch: a failed write must reach the
+  // enclosing transaction so the business change rolls back with it.
+  await service.log({
+    commandId: `${options.resourceKind}.${options.action}`,
+    actionLabel: `${options.resourceKind}.${options.action}`,
+    resourceKind: options.resourceKind,
+    ...(options.resourceId ? { resourceId: options.resourceId } : {}),
+    tenantId: options.auth?.tenantId ?? undefined,
+    organizationId: options.organizationId ?? options.auth?.orgId ?? undefined,
+    actorUserId: options.auth?.sub ?? undefined,
+    ...(options.snapshotBefore ? { snapshotBefore: options.snapshotBefore } : {}),
+    ...(options.snapshotAfter ? { snapshotAfter: options.snapshotAfter } : {}),
+    context: { source: 'crud-route', undoable: false },
+  })
 }
 
 function normalizeInterceptorRoutePath(request: Request): string {
@@ -2376,6 +2371,22 @@ export function makeCrudRoute<TCreate = any, TUpdate = any, TList = any>(opts: C
           }
         }
 
+        // R2b-factory — audit inside the transaction that made the change, so a
+        // failed audit write rolls the record back rather than leaving a change
+        // with no account of it. Identifiers are read from the created entity
+        // rather than the actor's scope: a superadmin has no organization, and
+        // scoping to the actor put entries where nobody could see them (U4).
+        const createdIdentifiers = identifierResolver(created, 'created')
+        await writeDirectWriteAuditLog({
+          container: ctx.container,
+          auth: ctx.auth,
+          organizationId: createdIdentifiers.organizationId ?? scopeOrganizationId,
+          action: 'created',
+          resourceKind,
+          resourceId: createdIdentifiers.id ? String(createdIdentifiers.id) : null,
+          snapshotAfter: snapshotEntity(created),
+        })
+
         return created
       })
 
@@ -2414,24 +2425,6 @@ export function makeCrudRoute<TCreate = any, TUpdate = any, TList = any>(opts: C
       })
       await de.flushOrmEntityChanges()
       await invalidateCrudCache(ctx.container, resourceKind, identifiers, ctx.auth.tenantId ?? null, 'created', resourceTargets)
-
-      // R2a — audit the direct-write path. Routes declaring `actions.create.commandId`
-      // are recorded by the command bus; this one is not, and was previously
-      // unrecorded entirely. Written after the flush so the entry only exists for
-      // a write that actually committed.
-      await writeDirectWriteAuditLog({
-        container: ctx.container,
-        auth: ctx.auth,
-        // Scope to the RECORD's organization, not the actor's. A superadmin acts
-        // with `orgId = null` (all organizations), and the list query filters on
-        // `organization_id = <caller's org>` — so an actor-scoped entry written by
-        // a superadmin is invisible to everyone, including them.
-        organizationId: identifiers.organizationId ?? scopeOrganizationId,
-        action: 'created',
-        resourceKind,
-        resourceId: createdEntityId != null ? String(createdEntityId) : null,
-        snapshotAfter: snapshotEntity(entity),
-      })
 
       let payload = createConfig.response ? createConfig.response(entity) : { id: createdEntityId }
       if (interceptorRequestPayload && payload && typeof payload === 'object' && !Array.isArray(payload)) {
@@ -2727,6 +2720,20 @@ export function makeCrudRoute<TCreate = any, TUpdate = any, TList = any>(opts: C
           }
         }
 
+        // R2b-factory — see the create branch. Inside the transaction so a failed
+        // audit write rolls the update back.
+        const updatedIdentifiers = identifierResolver(updated, 'updated')
+        await writeDirectWriteAuditLog({
+          container: ctx.container,
+          auth: ctx.auth,
+          organizationId: updatedIdentifiers.organizationId ?? scopeOrganizationId,
+          action: 'updated',
+          resourceKind,
+          resourceId: updatedIdentifiers.id ? String(updatedIdentifiers.id) : null,
+          snapshotBefore: updatePreviousData,
+          snapshotAfter: snapshotEntity(updated),
+        })
+
         return updated
       })
       if (!entity) return json({ error: 'Not found' }, { status: 404 })
@@ -2765,20 +2772,6 @@ export function makeCrudRoute<TCreate = any, TUpdate = any, TList = any>(opts: C
       })
       await de.flushOrmEntityChanges()
       await invalidateCrudCache(ctx.container, resourceKind, identifiers, ctx.auth.tenantId ?? null, 'updated', resourceTargets)
-
-      // R2a — see the create branch. `updatePreviousData` is only populated when a
-      // sync subscriber for the *.updating event asked for it, so the before-image
-      // is best-effort here; the entry still records who changed what and when.
-      await writeDirectWriteAuditLog({
-        container: ctx.container,
-        auth: ctx.auth,
-        organizationId: identifiers.organizationId ?? scopeOrganizationId,
-        action: 'updated',
-        resourceKind,
-        resourceId: identifiers.id != null ? String(identifiers.id) : null,
-        snapshotBefore: updatePreviousData,
-        snapshotAfter: snapshotEntity(entity),
-      })
 
       const payload = updateConfig.response ? updateConfig.response(entity) : { success: true }
       if (interceptorRequestPayload && payload && typeof payload === 'object' && !Array.isArray(payload)) {
@@ -3025,11 +3018,36 @@ export function makeCrudRoute<TCreate = any, TUpdate = any, TList = any>(opts: C
           softDeleteField: ormCfg.softDeleteField,
         }
       )
-      const entity = await de.deleteOrmEntity({
-        entity: ormCfg.entity,
-        where,
-        soft: opts.del?.softDelete !== false,
-        softDeleteField: ormCfg.softDeleteField ?? undefined,
+      const em = (ctx.container.resolve('em') as EntityManager)
+
+      // R2b-factory — delete had no transaction at all, so a removal and its
+      // audit entry could not commit together. Wrapping both means a failed
+      // audit write rolls the deletion back, matching create and update.
+      //
+      // The before-image is the whole record: after a delete there is nothing
+      // left to describe what was removed, which makes this the one action where
+      // losing the audit entry loses the information permanently.
+      const entity = await em.transactional(async () => {
+        const removed = await de.deleteOrmEntity({
+          entity: ormCfg.entity,
+          where,
+          soft: opts.del?.softDelete !== false,
+          softDeleteField: ormCfg.softDeleteField ?? undefined,
+        })
+        if (!removed) return null
+
+        const removedIdentifiers = identifierResolver(removed, 'deleted')
+        await writeDirectWriteAuditLog({
+          container: ctx.container,
+          auth: ctx.auth,
+          organizationId: removedIdentifiers.organizationId ?? scopeOrganizationId,
+          action: 'deleted',
+          resourceKind,
+          resourceId: removedIdentifiers.id ? String(removedIdentifiers.id) : (id != null ? String(id) : null),
+          snapshotBefore: snapshotEntity(removed),
+        })
+
+        return removed
       })
       if (!entity) return json({ error: 'Not found' }, { status: 404 })
       await opts.hooks?.afterDelete?.(id!, ctx)
@@ -3056,14 +3074,8 @@ export function makeCrudRoute<TCreate = any, TUpdate = any, TList = any>(opts: C
         }
       }
 
-      // Captured inside the block below but needed by the audit write after it —
-      // a delete may run with no loaded entity, in which case there is no record
-      // organization to read and the actor's scope is all we have.
-      let deletedRecordOrganizationId: string | null = null
-
       if (entity) {
         const identifiers = identifierResolver(entity, 'deleted')
-        deletedRecordOrganizationId = identifiers.organizationId ?? null
         de.markOrmEntityChange({
           action: 'deleted',
           entity,
@@ -3074,18 +3086,6 @@ export function makeCrudRoute<TCreate = any, TUpdate = any, TList = any>(opts: C
         await de.flushOrmEntityChanges()
         await invalidateCrudCache(ctx.container, resourceKind, identifiers, ctx.auth.tenantId ?? null, 'deleted', resourceTargets)
       }
-
-      // R2a — see the create branch. The before-image is the whole record here,
-      // because after a delete there is nothing left to describe what was removed.
-      await writeDirectWriteAuditLog({
-        container: ctx.container,
-        auth: ctx.auth,
-        organizationId: deletedRecordOrganizationId ?? scopeOrganizationId,
-        action: 'deleted',
-        resourceKind,
-        resourceId: id != null ? String(id) : null,
-        snapshotBefore: snapshotEntity(entity),
-      })
 
       const payload = opts.del?.response ? opts.del.response(id) : { success: true }
       if (interceptorRequestPayload && payload && typeof payload === 'object' && !Array.isArray(payload)) {
