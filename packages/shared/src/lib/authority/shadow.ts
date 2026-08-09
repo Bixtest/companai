@@ -105,15 +105,60 @@ export function compareWithResolver(input: ShadowInput): ShadowComparison | null
 }
 
 /**
+ * Running totals, so that silence can be told apart from absence.
+ *
+ * After the autonomy matrix was scoped to workers, ordinary human traffic stopped
+ * producing any interesting line at all — and an empty log then meant either
+ * "nothing worth reporting" or "the shadow is not running". Those are opposite
+ * conclusions and I could not distinguish them when it mattered.
+ *
+ * The heartbeat makes an absence of findings itself a finding: *checks were
+ * observed, and none of them were interesting*.
+ */
+const counters = { observed: 0, disagreements: 0, obligations: 0, agreements: 0 }
+let lastHeartbeatAt = 0
+
+/** How often the heartbeat may speak. One line every five minutes is not noise. */
+export const HEARTBEAT_INTERVAL_MS = 5 * 60 * 1000
+
+export function shadowCounters(): Readonly<typeof counters> {
+  return { ...counters }
+}
+
+/** Test seam — production never needs to reset a monotonic counter. */
+export function resetShadowCounters(): void {
+  counters.observed = 0
+  counters.disagreements = 0
+  counters.obligations = 0
+  counters.agreements = 0
+  lastHeartbeatAt = 0
+}
+
+function beat(now: number): void {
+  // First observation always speaks, so a deployment proves itself immediately
+  // rather than after the first interval.
+  const due = lastHeartbeatAt === 0 || now - lastHeartbeatAt >= HEARTBEAT_INTERVAL_MS
+  if (!due) return
+  lastHeartbeatAt = now
+  logger.info('Shadow heartbeat', { ...counters })
+}
+
+/**
  * Runs the comparison and records it. Never throws, never returns a decision the
  * caller could accidentally act on.
  */
-export function recordShadowDecision(input: ShadowInput): void {
+export function recordShadowDecision(input: ShadowInput, now: number = Date.now()): void {
   if (!isShadowEnabled()) return
 
   try {
     const comparison = compareWithResolver(input)
     if (!comparison) return
+
+    counters.observed += 1
+    if (comparison.disagrees) counters.disagreements += 1
+    else if (comparison.wouldAddObligation) counters.obligations += 1
+    else counters.agreements += 1
+    beat(now)
 
     // Only the interesting cases are logged at info. Agreement is the expected
     // case and would drown the signal — it is available at debug for anyone

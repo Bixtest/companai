@@ -2,6 +2,15 @@
   "$schema": "https://turbo.build/schema.json",
   "concurrency": "32",
   "globalEnv": ["NODE_ENV"],
+  // Turbo runs tasks in a filtered environment: anything not declared here (or
+  // in a task's own `env`) never reaches the process. These are runtime knobs
+  // that change behaviour without changing build output, so they pass through
+  // without participating in the cache hash.
+  //
+  // `OM_LOG_LEVEL` was silently dropped this way — `OM_LOG_LEVEL=debug yarn
+  // start` looked like it worked and produced no debug output, which cost a
+  // diagnostic at the moment it was needed.
+  "globalPassThroughEnv": ["OM_LOG_LEVEL", "OM_AUTHORITY_SHADOW"],
   "globalDependencies": ["scripts/build-package.mjs", "scripts/watch.mjs", "scripts/lib/add-js-extension.mjs"],
   "tasks": {
     "build": {

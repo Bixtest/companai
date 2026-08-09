@@ -301,18 +301,63 @@ export class ActionLogService {
         data = schema.parse(input)
         runtimeValidationAvailable = true
       } catch (err) {
-        if (!isZodRuntimeMissing(err) && !validationWarningLogged) {
-          validationWarningLogged = true
-          logger.warn('Falling back to permissive action log payload parser', { err })
+        if (isZodRuntimeMissing(err)) {
+          // The runtime is genuinely unavailable — a build-shape problem, not a
+          // caller's mistake. Warn once and stop trying.
+          runtimeValidationAvailable = false
+          if (!validationWarningLogged) {
+            validationWarningLogged = true
+            logger.warn('Falling back to permissive action log payload parser', { err })
+          }
+        } else {
+          // A payload that fails validation is a caller's bug, and it was being
+          // reported once per process — so the first bad write warned and every
+          // one after it was silent. Every occurrence is logged now: this is the
+          // audit trail, and a defect in it that reports itself once is a defect
+          // nobody will find.
+          logger.warn('Action log payload failed validation; falling back to the permissive parser', {
+            err,
+            commandId: typeof input?.commandId === 'string' ? input.commandId : null,
+          })
         }
-        if (isZodRuntimeMissing(err)) runtimeValidationAvailable = false
         data = this.normalizeInput(input)
       }
     } else {
       data = this.normalizeInput(input)
     }
 
+    this.assertScopeSurvived(input, data)
     return data
+  }
+
+  /**
+   * Refuses to write an entry whose scope was silently discarded.
+   *
+   * `normalizeInput` nulls any tenant, organization or actor id that is not a
+   * uuid. That is reasonable for a value nobody supplied and **data loss** for
+   * one somebody did: the entry lands with no tenant, the tenant-scoped list
+   * never shows it, and — since R3 — the hash chain is partitioned by tenant, so
+   * it is never chained either. The write appears to succeed and the record is
+   * unreachable and unprovable.
+   *
+   * Fail-closed, matching the rest of this path: an action that happened without
+   * a record is worse than an action that did not happen. A caller passing a
+   * malformed scope is a bug, and it should stop the write rather than quietly
+   * produce an orphan.
+   */
+  private assertScopeSurvived(input: ActionLogCreateInput, data: ActionLogCreateInput): void {
+    const fields: Array<keyof ActionLogCreateInput> = ['tenantId', 'organizationId', 'actorUserId']
+    const dropped = fields.filter((field) => {
+      const supplied = input?.[field]
+      return typeof supplied === 'string' && supplied.length > 0 && data[field] == null
+    })
+
+    if (dropped.length === 0) return
+
+    throw new Error(
+      `[internal] Action log entry would lose ${dropped.join(', ')}: the value supplied is not a uuid. ` +
+      'Writing it would create an entry that no tenant-scoped query returns and no hash chain covers.',
+    )
   }
 
   private createLogEntity(fork: EntityManager, data: ActionLogCreateInput): ActionLog {

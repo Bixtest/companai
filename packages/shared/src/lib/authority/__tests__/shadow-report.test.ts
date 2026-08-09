@@ -121,3 +121,45 @@ describe('the rendered report', () => {
     expect(rendered).toContain('Disagreements: none')
   })
 })
+
+describe('the heartbeat separates silence from absence', () => {
+  const heartbeat = (observed: number) =>
+    JSON.stringify({ msg: 'Shadow heartbeat', observed, disagreements: 0, obligations: 0, agreements: observed })
+
+  it('reports "nothing to report" as a result when checks were observed', () => {
+    // The case that motivated the heartbeat: after the autonomy matrix was
+    // scoped to workers, ordinary traffic produced no interesting line at all,
+    // and an empty log could not be told apart from a dead shadow.
+    const report = buildShadowReport(heartbeat(240))
+
+    expect(report.observedChecks).toBe(240)
+    expect(report.linesParsed).toBe(0)
+
+    const rendered = renderShadowReport(report)
+    expect(rendered).toContain('Nothing to report, and that is a finding')
+    expect(rendered).toContain('240 permission check(s)')
+  })
+
+  it('still says it saw nothing when there is no heartbeat either', () => {
+    const rendered = renderShadowReport(buildShadowReport('unrelated log output'))
+
+    expect(rendered).toContain('not even a')
+    expect(rendered).toContain('OM_AUTHORITY_SHADOW is off')
+  })
+
+  it('takes the highest count, so a process restart cannot shrink the total', () => {
+    const report = buildShadowReport([heartbeat(10), heartbeat(90), heartbeat(30)].join('\n'))
+
+    expect(report.observedChecks).toBe(90)
+  })
+
+  it('shows the observed total alongside findings when there are some', () => {
+    const rendered = renderShadowReport(buildShadowReport([
+      heartbeat(500),
+      JSON.stringify({ msg: 'Resolver would add an obligation', capability: 'a.b', bindingRule: 'effect-class-floor', actorKind: 'ai_worker' }),
+    ].join('\n')))
+
+    expect(rendered).toContain('Permission checks observed: 500')
+    expect(rendered).toContain('would ALLOW these, with a condition')
+  })
+})
