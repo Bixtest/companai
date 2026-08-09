@@ -29,9 +29,22 @@ export type AuthContext = {
    * directly and handling `undefined` at each call site.
    */
   principal?: Principal | null
-  /** @deprecated Read `principal.kind` instead. Removed in R1.4. */
+  /**
+   * @deprecated Read `principal.kind` instead.
+   *
+   * Retained deliberately: no enabled code reads it, but parked modules
+   * (`customers`, `sales`, `staff`, `resources`) read it in ~20 places. They
+   * are not type-checked, so removing this would not fail the gate — it would
+   * fail them on restore. Remove once those are migrated or dropped.
+   */
   isApiKey?: boolean
-  /** @deprecated Read `effectiveUserId(auth)` instead. Removed in R1.4. */
+  /**
+   * @deprecated Read `effectiveUserId(auth)` instead.
+   *
+   * Set only for API keys, so it is `undefined` for a human. Several call sites
+   * read it expecting "the acting user"; untangling that needs a per-site
+   * decision, not a rename.
+   */
   userId?: string
   keyId?: string
   keyName?: string
