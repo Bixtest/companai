@@ -220,6 +220,22 @@ describe('Module Decoupling', () => {
 
   describe('2. attachments/partitions.ts — resolveDefaultPartitionCode', () => {
     it('returns privateAttachments for null, undefined, arbitrary strings, and catalog entity IDs', async () => {
+      // The precondition, asserted rather than assumed.
+      //
+      // `partitions.ts` decides its product-media set at import time from
+      // `E.catalog?.catalog_product`. This test only means anything if the
+      // reduced registry above is the one it sees — and this file has been seen
+      // to fail once, in a full parallel gate run, in a way that implies it saw
+      // a registry *with* catalog. That was never reproduced and never
+      // explained.
+      //
+      // Rather than leave the next occurrence as unexplainable as the last one,
+      // the test now states what it depends on. If this line fails, the mock did
+      // not apply and the assertions below were testing the real registry, not a
+      // catalog-free one.
+      const { E } = await import('#generated/entities.ids.generated')
+      expect((E as Record<string, unknown>).catalog).toBeUndefined()
+
       const { resolveDefaultPartitionCode } = await import(
         '@open-mercato/core/modules/attachments/lib/partitions'
       )

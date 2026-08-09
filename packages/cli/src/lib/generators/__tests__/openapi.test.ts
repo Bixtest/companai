@@ -4,6 +4,24 @@ import path from 'node:path'
 import type { ModuleEntry, PackageResolver } from '../../resolver'
 import { generateOpenApi } from '../openapi'
 
+/**
+ * These tests do real filesystem work — they build a module tree in a temp
+ * directory, run route discovery over it, and bundle. Idle, each takes 165–470ms;
+ * under `turbo run test`, where several packages' workers compete for the same
+ * disk, they have been seen to exceed jest's 5s default and fail as timeouts
+ * (U5).
+ *
+ * The default is a contract for unit tests: a test that has not finished in five
+ * seconds has hung. That is the wrong contract for a suite whose work is I/O, so
+ * it is stated explicitly here rather than inherited.
+ *
+ * Kept deliberately bounded. This is not "long enough that it can never fail" —
+ * it is roughly 60× the idle cost, so a genuine performance regression in the
+ * generator still surfaces as a failure rather than as a slow suite nobody looks
+ * at.
+ */
+jest.setTimeout(30_000)
+
 describe('resolveOpenApiGeneratorProjectRoot', () => {
   it('resolves the monorepo root from a POSIX module URL', async () => {
     const { resolveOpenApiGeneratorProjectRoot } = await import('../openapi-paths')
