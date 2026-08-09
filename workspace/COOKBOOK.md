@@ -35,6 +35,15 @@ is. Format and rules: [`references/how-to-test.md`](references/how-to-test.md).
 Assume the project is handed tomorrow to someone who knows nothing about it. They
 should need to be told one thing: *"read INDEX.md"*.
 
+**And commit them.** Since 2026-08-10 the project root is a git repository
+covering the cookbook, the journal, the lessons, the knowledge base, the backlog
+and the planning documents — everything except the Starting Kit (its own repo),
+the backups (they hold secrets) and the downloaded toolchain.
+
+It was unversioned for the first three days, which meant the most valuable thing
+here after the code had no history and no backup, while the code had both from
+the first hour. Every batch now ends with a commit in **both** repositories.
+
 ## Rule zero-five — capture the know-how, not just the history
 
 **Owner standing decision, 2026-08-09:**

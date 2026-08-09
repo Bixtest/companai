@@ -120,6 +120,7 @@ Break these and you will damage the project.
 | Set up my machine | [`workspace/references/environment.md`](workspace/references/environment.md) |
 | **Run the platform and look at it** | [`workspace/references/local-instance.md`](workspace/references/local-instance.md) |
 | **Test a batch by hand (plain English)** | [`workspace/references/how-to-test.md`](workspace/references/how-to-test.md) |
+| **History of the thinking** | This directory is a git repository — `git log` here covers the cookbook, journal, lessons and knowledge base |
 | **Running it locally (needs project-local Node 24)** | [`workspace/references/local-instance.md`](workspace/references/local-instance.md) |
 | **Which modules audit, and which deliberately do not** | [`workspace/references/audit-triage.md`](workspace/references/audit-triage.md) |
 | **Known defects we inherited** | [`workspace/references/upstream-issues.md`](workspace/references/upstream-issues.md) |
