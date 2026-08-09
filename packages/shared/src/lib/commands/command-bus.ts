@@ -212,6 +212,19 @@ function extractAliasList(source: unknown): string[] {
   return Array.from(aliases)
 }
 
+/**
+ * The transaction surface we need from an EntityManager.
+ *
+ * Declared structurally so a partial or mocked EM in tests is handled by the
+ * capability probes in `runInTransaction` rather than by a cast that would lie.
+ */
+type TransactionalEntityManager = {
+  begin?: () => Promise<void>
+  commit?: () => Promise<void>
+  rollback?: () => Promise<void>
+  isInTransaction?: () => boolean
+}
+
 export class CommandBus {
   async execute<TInput = unknown, TResult = unknown>(
     commandId: string,
@@ -248,16 +261,37 @@ export class CommandBus {
       }
     }
 
+    // R2b — the business write and its audit record commit together, or neither
+    // does.
+    //
+    // Before this, `handler.execute()` committed its own transaction and
+    // `persistLog` then opened a separate one via `em.fork()`. A crash between
+    // them left a committed change with no record, and `persistLog` additionally
+    // swallowed its own failures — so the gap was both possible and silent.
+    //
+    // `withAtomicFlush` already carries a re-entrancy guard: with a transaction
+    // active on this EntityManager it joins rather than nesting, and the
+    // outermost caller owns commit and rollback. Opening the transaction here
+    // therefore makes every handler's own atomic flush part of this one.
+    //
+    // Side effects are unaffected. `flushCrudSideEffects` runs *after* this block
+    // and stays there, so events, indexing and cache invalidation still fire only
+    // once the transaction has committed — never for a change that rolls back.
+    let result!: TResult
+    let mergedMeta: CommandLogMetadata | null = null
+    let logEntry: Awaited<ReturnType<CommandBus['persistLog']>> = null
+
+    const runWriteAndAudit = async (): Promise<void> => {
     const snapshots = await this.prepareSnapshots(handler, effectiveOptions)
     const redoLogEntry = effectiveOptions.redoLogEntry ?? null
-    const result =
+    result =
       redoLogEntry && typeof handler.redo === 'function'
         ? await handler.redo({ input: effectiveOptions.input, ctx: effectiveOptions.ctx, logEntry: redoLogEntry })
         : await handler.execute(effectiveOptions.input, effectiveOptions.ctx)
     const afterSnapshot = await this.captureAfter(handler, effectiveOptions, result)
     const snapshotsWithAfter = { ...snapshots, after: afterSnapshot }
     const logMeta = await this.buildLog(handler, effectiveOptions, result, snapshotsWithAfter)
-    let mergedMeta = this.mergeMetadata(effectiveOptions.metadata, logMeta)
+    mergedMeta = this.mergeMetadata(effectiveOptions.metadata, logMeta)
     const undoable = this.isUndoable(handler)
     if (undoable) {
       mergedMeta = mergedMeta ?? {}
@@ -289,7 +323,10 @@ export class CommandBus {
         if (inferred) mergedMeta.changes = inferred
       }
     }
-    const logEntry = await this.persistLog(commandId, effectiveOptions, mergedMeta)
+      logEntry = await this.persistLog(commandId, effectiveOptions, mergedMeta)
+    }
+
+    await this.runInTransaction(effectiveOptions.ctx, runWriteAndAudit)
 
     // Run afterExecute command interceptors
     let finalResult = result
@@ -537,6 +574,15 @@ export class CommandBus {
     if (resourceKind && SKIPPED_ACTION_LOG_RESOURCE_KINDS.has(resourceKind)) {
       return null
     }
+    // Two different failures, deliberately treated differently (R2b).
+    //
+    // The service being ABSENT is legitimate: a downstream app can disable the
+    // `audit_logs` module, and commands must still work. That is tolerated.
+    //
+    // The service being present and the WRITE failing is not. Before R2b both
+    // were swallowed here, so a committed change could exist with no record and
+    // nothing reported it. The write now happens below, outside this guard, and
+    // its failure propagates — rolling back the transaction the caller opened.
     let service: ActionLogService | null = null
     try {
       service = (options.ctx.container.resolve('actionLogService') as ActionLogService)
@@ -683,6 +729,63 @@ export class CommandBus {
           logger.debug('Cache undo-invalidation failed', { commandId: log.commandId, err })
         } catch {}
       }
+    }
+  }
+
+  /**
+   * Runs the business write and its audit record inside one transaction (R2b).
+   *
+   * Re-entrancy is handled the same way `withAtomicFlush` handles it: if a
+   * transaction is already open on this EntityManager — a command invoked from
+   * inside another command, or from a handler that opened its own — we join it
+   * and let the outermost caller own commit and rollback. Opening a nested
+   * transaction with raw begin/commit would corrupt that ownership.
+   *
+   * When no EntityManager is resolvable (tests with a partial container, or a
+   * container without the ORM registered) the work simply runs untransacted, as
+   * it did before R2b. Refusing to run would break callers that never had a
+   * database to begin with.
+   */
+  private async runInTransaction(
+    ctx: CommandRuntimeContext,
+    run: () => Promise<void>,
+  ): Promise<void> {
+    let em: TransactionalEntityManager | null = null
+    try {
+      em = (ctx.container?.resolve('em') as TransactionalEntityManager) ?? null
+    } catch {
+      em = null
+    }
+
+    // All three are probed together: an EM that can open and commit but not roll
+    // back would turn a failed audit write into a committed one — the exact
+    // outcome this transaction exists to prevent.
+    if (
+      !em ||
+      typeof em.begin !== 'function' ||
+      typeof em.commit !== 'function' ||
+      typeof em.rollback !== 'function'
+    ) {
+      await run()
+      return
+    }
+
+    if (typeof em.isInTransaction === 'function' && em.isInTransaction()) {
+      await run()
+      return
+    }
+
+    await em.begin()
+    try {
+      await run()
+      await em.commit()
+    } catch (err) {
+      try {
+        await em.rollback()
+      } catch {
+        // A rollback failure must not mask the original error.
+      }
+      throw err
     }
   }
 

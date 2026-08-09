@@ -664,11 +664,19 @@ type ActionLogWriter = {
  * otherwise would put a button in the UI that cannot work. Audit is a record of
  * what happened; undo is a separate capability.
  *
- * **Failure policy — currently fail-open, deliberately.** A failed audit write
- * is logged and swallowed, matching the command bus's existing behaviour so this
- * change alters coverage without also altering failure semantics. Making both
- * paths fail *closed*, inside the business transaction, is **R2b** — it is the
- * known gap, not an oversight.
+ * **Failure policy — fail-open, and still so after R2b.** A failed audit write is
+ * logged and swallowed here.
+ *
+ * R2b made the *command bus* path fail closed: it opens a transaction spanning
+ * the business write and the audit write, so a failed log rolls the change back.
+ * This path cannot do the same yet. `create` and `update` wrap only the entity
+ * write in `em.transactional(...)`, and that transaction has already committed
+ * by the time this runs; `delete` opens no transaction at all. Throwing here
+ * would report a failure for a change that already happened — worse than
+ * swallowing, because the caller would be actively misinformed.
+ *
+ * Closing that gap means moving this call inside the factory's transaction and
+ * giving `delete` one. Tracked as **R2b-factory** in workspace/PROGRESS.md.
  */
 async function writeDirectWriteAuditLog(options: {
   container: { resolve: (name: string) => unknown }

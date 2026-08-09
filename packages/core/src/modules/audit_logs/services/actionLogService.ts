@@ -193,11 +193,23 @@ export class ActionLogService {
     }
   }
 
+  /**
+   * Writes an audit entry on the caller's EntityManager (R2b).
+   *
+   * **It must not fork.** A fork gets its own connection and its own
+   * transaction, so a log written on one could commit while the business write
+   * that caused it rolled back — or, as happened before R2b, the business write
+   * could commit while the log was lost. The command bus now opens a transaction
+   * around the write and this call; persisting on `this.em` is what puts them
+   * in the same one.
+   *
+   * When no transaction is open this behaves exactly as the fork did: an
+   * immediate, independent write.
+   */
   async log(input: ActionLogCreateInput): Promise<ActionLog | null> {
     const data = this.parseCreateInput(input)
-    const fork = this.em.fork()
-    const log = this.createLogEntity(fork, data)
-    await fork.persist(log).flush()
+    const log = this.createLogEntity(this.em, data)
+    await this.em.persist(log).flush()
     await this.decryptEntries(log)
     return log
   }
