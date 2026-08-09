@@ -121,6 +121,17 @@ let lastHeartbeatAt = 0
 /** How often the heartbeat may speak. One line every five minutes is not noise. */
 export const HEARTBEAT_INTERVAL_MS = 5 * 60 * 1000
 
+/**
+ * A second trigger, by volume.
+ *
+ * With time alone, a burst of traffic between two beats is invisible: the first
+ * verification of this feature reported "1 permission check observed" after
+ * seventeen. The number a report shows is the total *at the last beat*, so
+ * bounding the gap by count bounds how far behind reality it can be.
+ */
+export const HEARTBEAT_EVERY_N_CHECKS = 100
+let observedAtLastBeat = 0
+
 export function shadowCounters(): Readonly<typeof counters> {
   return { ...counters }
 }
@@ -132,14 +143,19 @@ export function resetShadowCounters(): void {
   counters.obligations = 0
   counters.agreements = 0
   lastHeartbeatAt = 0
+  observedAtLastBeat = 0
 }
 
 function beat(now: number): void {
   // First observation always speaks, so a deployment proves itself immediately
   // rather than after the first interval.
-  const due = lastHeartbeatAt === 0 || now - lastHeartbeatAt >= HEARTBEAT_INTERVAL_MS
+  const due =
+    lastHeartbeatAt === 0 ||
+    now - lastHeartbeatAt >= HEARTBEAT_INTERVAL_MS ||
+    counters.observed - observedAtLastBeat >= HEARTBEAT_EVERY_N_CHECKS
   if (!due) return
   lastHeartbeatAt = now
+  observedAtLastBeat = counters.observed
   logger.info('Shadow heartbeat', { ...counters })
 }
 

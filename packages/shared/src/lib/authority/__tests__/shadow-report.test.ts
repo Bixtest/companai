@@ -137,7 +137,8 @@ describe('the heartbeat separates silence from absence', () => {
 
     const rendered = renderShadowReport(report)
     expect(rendered).toContain('Nothing to report, and that is a finding')
-    expect(rendered).toContain('240 permission check(s)')
+    // A lower bound, not a total: traffic since the last heartbeat is not in it.
+    expect(rendered).toContain('at least 240 permission')
   })
 
   it('still says it saw nothing when there is no heartbeat either', () => {
@@ -159,7 +160,7 @@ describe('the heartbeat separates silence from absence', () => {
       JSON.stringify({ msg: 'Resolver would add an obligation', capability: 'a.b', bindingRule: 'effect-class-floor', actorKind: 'ai_worker' }),
     ].join('\n')))
 
-    expect(rendered).toContain('Permission checks observed: 500')
+    expect(rendered).toContain('Permission checks observed: at least 500')
     expect(rendered).toContain('would ALLOW these, with a condition')
   })
 })
