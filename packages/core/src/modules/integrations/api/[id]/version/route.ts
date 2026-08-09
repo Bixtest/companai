@@ -15,6 +15,8 @@ import {
   runIntegrationMutationGuards,
 } from '../../guards'
 import { resolveIntegrationsOrganizationId } from '../../../lib/organization-scope'
+import { writeDirectWriteAuditLog } from '@open-mercato/shared/lib/crud/audit-write'
+import type { EntityManager } from '@mikro-orm/postgresql'
 
 const idParamsSchema = z.object({ id: z.string().min(1) })
 
@@ -122,7 +124,23 @@ export async function PUT(req: Request, ctx: { params?: Promise<{ id?: string }>
   }
 
   const before = currentState.apiVersion
-  await stateService.upsert(integration.id, { apiVersion: payloadData.apiVersion }, scope)
+
+  // R2a-custom — an API version change alters how this platform talks to the
+  // external system, so before and after are both worth recording.
+  const em = container.resolve('em') as EntityManager
+  await em.transactional(async () => {
+    await stateService.upsert(integration.id, { apiVersion: payloadData.apiVersion }, scope)
+    await writeDirectWriteAuditLog({
+      container,
+      auth,
+      organizationId,
+      action: 'updated',
+      resourceKind: 'integrations.version',
+      resourceId: integration.id,
+      snapshotBefore: { apiVersion: before ?? null },
+      snapshotAfter: { apiVersion: payloadData.apiVersion },
+    })
+  })
 
   await emitIntegrationsEvent('integrations.version.changed', {
     integrationId: integration.id,

@@ -12,6 +12,8 @@ import {
   runCrudMutationGuardAfterSuccess,
   validateCrudMutationGuard,
 } from '@open-mercato/shared/lib/crud/mutation-guard'
+import { writeDirectWriteAuditLog } from '@open-mercato/shared/lib/crud/audit-write'
+import type { EntityManager } from '@mikro-orm/postgresql'
 
 const paramsSchema = z.object({
   id: z.string().uuid(),
@@ -103,7 +105,9 @@ export async function PUT(req: Request, ctx: { params?: Promise<{ id?: string }>
   }
 
   try {
-    const schedule = await scheduleService.saveSchedule({
+    const em = container.resolve('em') as EntityManager
+    const schedule = await em.transactional(async () => {
+    const saved = await scheduleService.saveSchedule({
       id: current.id,
       integrationId: parsed.data.integrationId ?? current.integrationId,
       entityType: parsed.data.entityType ?? current.entityType,
@@ -115,6 +119,22 @@ export async function PUT(req: Request, ctx: { params?: Promise<{ id?: string }>
       isEnabled: parsed.data.isEnabled ?? current.isEnabled,
       expectedUpdatedAt: readOptimisticLockExpected(req),
     }, scope, container)
+      // R2a-custom — audited inside the transaction that saved it.
+      await writeDirectWriteAuditLog({
+        container,
+        auth,
+        organizationId: scope.organizationId,
+        action: 'updated',
+        resourceKind: 'data_sync.schedule',
+        resourceId: String(saved.id),
+        snapshotAfter: {
+          scheduleType: saved.scheduleType,
+          scheduleValue: saved.scheduleValue,
+          direction: saved.direction,
+        },
+      })
+      return saved
+    })
 
     if (guardResult?.ok && guardResult.shouldRunAfterSuccess) {
       await runCrudMutationGuardAfterSuccess(container, {
@@ -174,12 +194,26 @@ export async function DELETE(req: Request, ctx: { params?: Promise<{ id?: string
   }
 
   try {
-    const deleted = await scheduleService.deleteSchedule(
-      parsedParams.data.id,
-      scope,
-      container,
-      readOptimisticLockExpected(req),
-    )
+    const em = container.resolve('em') as EntityManager
+    const deleted = await em.transactional(async () => {
+      const removed = await scheduleService.deleteSchedule(
+        parsedParams.data.id,
+        scope,
+        container,
+        readOptimisticLockExpected(req),
+      )
+      if (removed) {
+        await writeDirectWriteAuditLog({
+          container,
+          auth,
+          organizationId: scope.organizationId,
+          action: 'deleted',
+          resourceKind: 'data_sync.schedule',
+          resourceId: String(parsedParams.data.id),
+        })
+      }
+      return removed
+    })
 
     if (!deleted) {
       return NextResponse.json({ error: 'Schedule not found' }, { status: 404 })

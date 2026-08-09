@@ -60,6 +60,10 @@ let mockCommandGuardService: { enforce: jest.Mock } | null = null
 
 const mockContainer = {
   resolve: jest.fn((token: string) => {
+      // R2a-custom: routes now wrap their write and audit entry in one
+      // transaction, so the container must supply an EntityManager that models
+      // that boundary. Inline execution is faithful for these tests.
+      if (token === 'em') return { transactional: async (work: () => Promise<unknown>) => work() }
     if (token === 'dataSyncScheduleService') return scheduleService
     if (token === 'commandOptimisticLockGuardService') return mockCommandGuardService
     return null

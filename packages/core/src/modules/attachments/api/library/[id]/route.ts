@@ -26,6 +26,7 @@ import {
   attachmentErrorSchema,
 } from '../../openapi'
 import { createLogger } from '@open-mercato/shared/lib/logger'
+import { writeDirectWriteAuditLog } from '@open-mercato/shared/lib/crud/audit-write'
 
 const logger = createLogger('attachments').child({ component: 'library' })
 
@@ -74,7 +75,8 @@ export async function GET(req: NextRequest, ctx: RouteContext) {
   if (!attachmentId) {
     return NextResponse.json({ error: 'Attachment id is required' }, { status: 400 })
   }
-  const { resolve } = await createRequestContainer()
+  const container = await createRequestContainer()
+  const { resolve } = container
   const em = resolve('em') as EntityManager
   let queryEngine: QueryEngine | null = null
   try {
@@ -144,7 +146,8 @@ export async function PATCH(req: NextRequest, ctx: RouteContext) {
   if (!parsed.success) {
     return NextResponse.json({ error: 'Invalid payload' }, { status: 400 })
   }
-  const { resolve } = await createRequestContainer()
+  const container = await createRequestContainer()
+  const { resolve } = container
   const em = resolve('em') as EntityManager
   let queryEngine: QueryEngine | null = null
   try {
@@ -181,6 +184,16 @@ export async function PATCH(req: NextRequest, ctx: RouteContext) {
           values: custom,
         })
       }
+      // R2a-custom — inside the existing transaction, alongside the metadata and
+      // custom-field writes it already guards.
+      await writeDirectWriteAuditLog({
+        container,
+        auth,
+        organizationId: record.organizationId ?? null,
+        action: 'updated',
+        resourceKind: 'attachments.attachment',
+        resourceId: String(record.id),
+      })
     })
   } catch (error) {
     logger.error('Failed to persist custom attributes', { err: error })
@@ -231,7 +244,8 @@ export async function DELETE(req: NextRequest, ctx: RouteContext) {
   if (!attachmentId) {
     return NextResponse.json({ error: 'Attachment id is required' }, { status: 400 })
   }
-  const { resolve } = await createRequestContainer()
+  const container = await createRequestContainer()
+  const { resolve } = container
   const em = resolve('em') as EntityManager
   const dataEngine = resolve('dataEngine') as DataEngine
   const storageDriverFactory = resolve('storageDriverFactory') as StorageDriverFactory
@@ -252,7 +266,21 @@ export async function DELETE(req: NextRequest, ctx: RouteContext) {
   // failed commit cannot leave a dangling record whose backing file is already gone.
   const recordPartitionCode = record.partitionCode
   const recordStoragePath = record.storagePath
-  await em.remove(record).flush()
+  const removedId = String(record.id)
+  const removedOrganizationId = record.organizationId ?? null
+  const removedSnapshot = { partitionCode: recordPartitionCode, storagePath: recordStoragePath }
+  await em.transactional(async () => {
+    await em.remove(record).flush()
+    await writeDirectWriteAuditLog({
+      container,
+      auth,
+      organizationId: removedOrganizationId,
+      action: 'deleted',
+      resourceKind: 'attachments.attachment',
+      resourceId: removedId,
+      snapshotBefore: removedSnapshot,
+    })
+  })
   await deleteDriver.delete(recordPartitionCode, recordStoragePath)
 
   if (dataEngine) {

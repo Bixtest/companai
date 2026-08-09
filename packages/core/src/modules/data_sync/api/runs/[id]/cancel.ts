@@ -10,6 +10,8 @@ import {
   runCrudMutationGuardAfterSuccess,
   validateCrudMutationGuard,
 } from '@open-mercato/shared/lib/crud/mutation-guard'
+import { writeDirectWriteAuditLog } from '@open-mercato/shared/lib/crud/audit-write'
+import type { EntityManager } from '@mikro-orm/postgresql'
 
 const paramsSchema = z.object({ id: z.string().uuid() })
 
@@ -88,11 +90,25 @@ export async function POST(req: Request, ctx: { params?: Promise<{ id?: string }
     }
   }
 
-  await syncRunService.markStatus(run.id, 'cancelled', scope)
-  await integrationStateService.upsert(run.integrationId, {
-    lastHealthStatus: 'degraded',
-    lastHealthCheckedAt: new Date(),
-  }, scope)
+  // R2a-custom — cancelling a run stops unattended data movement and marks the
+  // integration degraded. Both state changes and the audit entry commit together.
+  const em = container.resolve('em') as EntityManager
+  await em.transactional(async () => {
+    await syncRunService.markStatus(run.id, 'cancelled', scope)
+    await integrationStateService.upsert(run.integrationId, {
+      lastHealthStatus: 'degraded',
+      lastHealthCheckedAt: new Date(),
+    }, scope)
+    await writeDirectWriteAuditLog({
+      container,
+      auth,
+      organizationId: scope.organizationId,
+      action: 'updated',
+      resourceKind: 'data_sync.run',
+      resourceId: String(run.id),
+      snapshotAfter: { status: 'cancelled', integrationId: run.integrationId },
+    })
+  })
   await integrationLogService.write({
     integrationId: run.integrationId,
     runId: run.id,

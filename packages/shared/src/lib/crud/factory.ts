@@ -73,6 +73,7 @@ import { createGenericOptimisticLockReader } from './optimistic-lock'
 import { registerOptimisticLockReaderIfAbsent } from './optimistic-lock-store'
 import { createLogger } from '../logger'
 import { SKIPPED_ACTION_LOG_RESOURCE_KINDS } from '../commands/action-log-skip-list'
+import { writeDirectWriteAuditLog } from './audit-write'
 
 type RbacServiceLike = {
   getGrantedFeatures: (userId: string, opts: { tenantId: string | null; organizationId: string | null }) => Promise<string[]>
@@ -638,86 +639,6 @@ function snapshotEntity(entity: unknown): Record<string, unknown> | undefined {
   return safeClone(entity) as Record<string, unknown>
 }
 
-/**
- * Minimal shape of the audit service, resolved by DI.
- *
- * Declared structurally rather than imported: `@open-mercato/shared` must not
- * depend on `@open-mercato/core`, where `ActionLogService` lives.
- */
-type ActionLogWriter = {
-  log: (input: Record<string, unknown>) => Promise<unknown>
-}
-
-/**
- * Records a direct (non-command) CRUD write in the action log.
- *
- * **Why this exists.** `makeCrudRoute` has two write paths. Routes that declare
- * `actions.<op>.commandId` go through the command bus, which writes the audit
- * entry. Routes that supply a plain `create` / `update` / `delete` handler never
- * touched the command bus and so were **not audited at all** — 16 of 25 enabled
- * modules, including `api_keys`, where issuing and revoking a credential went
- * unrecorded (R2a; `workspace/references/upstream-issues.md` → U1).
- *
- * **Deliberately not undoable.** No `undoToken` is written, so these entries are
- * excluded by the "Undoable only" filter and offer no undo control. A command
- * carries a reverse operation; a direct handler does not, and pretending
- * otherwise would put a button in the UI that cannot work. Audit is a record of
- * what happened; undo is a separate capability.
- *
- * **Fail-closed (R2b-factory).** Called from inside the transaction that performs
- * the business write, so a failed audit write rolls that write back rather than
- * leaving a change nobody can account for.
- *
- * Two failures, treated differently — the same distinction the command bus makes:
- *
- *   - the service being **absent** is legitimate. A downstream app may disable
- *     the `audit_logs` module, and writes must still work. Tolerated silently.
- *   - the **write failing** is not. It propagates, and the caller's transaction
- *     rolls back.
- *
- * This must stay inside a transaction. Called after a commit it would report a
- * failure for a change that already happened, which is worse than swallowing —
- * the caller would be actively misinformed.
- */
-async function writeDirectWriteAuditLog(options: {
-  container: { resolve: (name: string) => unknown }
-  auth: { sub?: string | null; tenantId?: string | null; orgId?: string | null } | null | undefined
-  organizationId: string | null
-  action: 'created' | 'updated' | 'deleted'
-  resourceKind: string | null
-  resourceId: string | null
-  snapshotBefore?: Record<string, unknown> | undefined
-  snapshotAfter?: Record<string, unknown> | undefined
-}): Promise<void> {
-  if (!options.resourceKind) return
-  if (SKIPPED_ACTION_LOG_RESOURCE_KINDS.has(options.resourceKind)) return
-
-  let service: ActionLogWriter | null = null
-  try {
-    service = options.container.resolve('actionLogService') as ActionLogWriter
-  } catch {
-    // The audit_logs module can legitimately be absent (a downstream app may
-    // disable it). Coverage is best-effort against an optional peer, exactly as
-    // the command bus treats it.
-    service = null
-  }
-  if (!service || typeof service.log !== 'function') return
-
-  // Deliberately not wrapped in try/catch: a failed write must reach the
-  // enclosing transaction so the business change rolls back with it.
-  await service.log({
-    commandId: `${options.resourceKind}.${options.action}`,
-    actionLabel: `${options.resourceKind}.${options.action}`,
-    resourceKind: options.resourceKind,
-    ...(options.resourceId ? { resourceId: options.resourceId } : {}),
-    tenantId: options.auth?.tenantId ?? undefined,
-    organizationId: options.organizationId ?? options.auth?.orgId ?? undefined,
-    actorUserId: options.auth?.sub ?? undefined,
-    ...(options.snapshotBefore ? { snapshotBefore: options.snapshotBefore } : {}),
-    ...(options.snapshotAfter ? { snapshotAfter: options.snapshotAfter } : {}),
-    context: { source: 'crud-route', undoable: false },
-  })
-}
 
 function normalizeInterceptorRoutePath(request: Request): string {
   try {

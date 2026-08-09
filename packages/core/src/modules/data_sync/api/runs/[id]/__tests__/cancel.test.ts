@@ -53,6 +53,10 @@ describe('data_sync cancel run route', () => {
     })
     mockCreateRequestContainer.mockResolvedValue({
       resolve: (token: string) => {
+      // R2a-custom: routes now wrap their write and audit entry in one
+      // transaction, so the container must supply an EntityManager that models
+      // that boundary. Inline execution is faithful for these tests.
+      if (token === 'em') return { transactional: async (work: () => Promise<unknown>) => work() }
         if (token === 'dataSyncRunService') return mockSyncRunService
         if (token === 'progressService') return mockProgressService
         if (token === 'integrationStateService') return mockIntegrationStateService

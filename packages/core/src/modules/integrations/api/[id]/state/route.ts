@@ -14,6 +14,8 @@ import {
   runIntegrationMutationGuards,
 } from '../../guards'
 import { resolveIntegrationsOrganizationId } from '../../../lib/organization-scope'
+import { writeDirectWriteAuditLog } from '@open-mercato/shared/lib/crud/audit-write'
+import type { EntityManager } from '@mikro-orm/postgresql'
 
 const idParamsSchema = z.object({ id: z.string().min(1) })
 
@@ -101,14 +103,30 @@ export async function PUT(req: Request, ctx: { params?: Promise<{ id?: string }>
     throw error
   }
 
-  const state = await stateService.upsert(
-    integration.id,
-    {
-      isEnabled: payloadData.isEnabled,
-      reauthRequired: payloadData.reauthRequired,
-    },
-    stateScope,
-  )
+  // R2a-custom — enabling or disabling an integration, and flagging it for
+  // re-authentication, change what this platform may do against an external
+  // system. Recorded with the audit entry inside the same transaction.
+  const em = container.resolve('em') as EntityManager
+  const state = await em.transactional(async () => {
+    const next = await stateService.upsert(
+      integration.id,
+      {
+        isEnabled: payloadData.isEnabled,
+        reauthRequired: payloadData.reauthRequired,
+      },
+      stateScope,
+    )
+    await writeDirectWriteAuditLog({
+      container,
+      auth,
+      organizationId,
+      action: 'updated',
+      resourceKind: 'integrations.state',
+      resourceId: integration.id,
+      snapshotAfter: { isEnabled: next.isEnabled, reauthRequired: next.reauthRequired },
+    })
+    return next
+  })
 
   await emitIntegrationsEvent('integrations.state.updated', {
     integrationId: integration.id,

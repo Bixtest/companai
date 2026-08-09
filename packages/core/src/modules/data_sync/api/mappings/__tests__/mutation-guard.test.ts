@@ -10,6 +10,8 @@ const mockEm = {
   create: jest.fn(),
   persist: jest.fn(() => ({ flush: jest.fn(async () => undefined) })),
   flush: jest.fn(async () => undefined),
+  // R2a-custom: the route wraps its write and audit entry in one transaction.
+  transactional: jest.fn(async (work: () => Promise<unknown>) => work()),
 }
 
 const mockCrudMutationGuardService = {

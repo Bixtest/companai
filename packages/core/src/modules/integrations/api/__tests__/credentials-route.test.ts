@@ -63,6 +63,10 @@ describe('integrations credentials PUT route — URL validation', () => {
     ;(runIntegrationMutationGuards as jest.Mock).mockResolvedValue({ ok: true })
     ;(createRequestContainer as jest.Mock).mockResolvedValue({
       resolve: (key: string) => {
+      // R2a-custom: routes now wrap their write and audit entry in one
+      // transaction, so the container must supply an EntityManager that models
+      // that boundary. Inline execution is faithful for these tests.
+      if (key === 'em') return { transactional: async (work: () => Promise<unknown>) => work() }
         if (key === 'integrationCredentialsService') {
           return { getSchema: () => akeneoSchema, save: saveMock, resolve: jest.fn().mockResolvedValue(null), resolveUpdatedAt: jest.fn().mockResolvedValue(null) }
         }
@@ -128,6 +132,9 @@ describe('integrations credentials route — secret masking (issue #2253)', () =
     ;(runIntegrationMutationGuards as jest.Mock).mockResolvedValue({ ok: true })
     ;(createRequestContainer as jest.Mock).mockResolvedValue({
       resolve: (key: string) => {
+      // R2a-custom: the route wraps its write and audit entry in one
+      // transaction, so the container must supply an EntityManager.
+      if (key === 'em') return { transactional: async (work: () => Promise<unknown>) => work() }
         if (key === 'integrationCredentialsService') {
           return { getSchema: () => secretSchema, save: saveMock, resolve: resolveMock, resolveUpdatedAt: jest.fn().mockResolvedValue(null) }
         }

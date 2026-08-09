@@ -9,6 +9,7 @@ import {
   runCrudMutationGuardAfterSuccess,
   validateCrudMutationGuard,
 } from '@open-mercato/shared/lib/crud/mutation-guard'
+import { writeDirectWriteAuditLog } from '@open-mercato/shared/lib/crud/audit-write'
 
 const listMappingsQuerySchema = z.object({
   integrationId: z.string().min(1).optional(),
@@ -136,7 +137,19 @@ export async function POST(req: Request) {
 
   if (existing) {
     existing.mapping = parsed.data.mapping
-    await em.flush()
+    // R2a-custom — a field mapping decides how external data lands in our
+    // tables; a wrong one corrupts records silently, so changes are recorded.
+    await em.transactional(async () => {
+      await em.flush()
+    await writeDirectWriteAuditLog({
+      container,
+      auth,
+      organizationId: scope.organizationId,
+      action: 'updated',
+      resourceKind: 'data_sync.mapping',
+      resourceId: String(existing.id),
+    })
+    })
 
     if (guardResult?.ok && guardResult.shouldRunAfterSuccess) {
       await runCrudMutationGuardAfterSuccess(container, {
@@ -167,7 +180,17 @@ export async function POST(req: Request) {
     organizationId: scope.organizationId,
     tenantId: scope.tenantId,
   })
-  await em.persist(created).flush()
+  await em.transactional(async () => {
+    await em.persist(created).flush()
+    await writeDirectWriteAuditLog({
+      container,
+      auth,
+      organizationId: scope.organizationId,
+      action: 'created',
+      resourceKind: 'data_sync.mapping',
+      resourceId: String(created.id),
+    })
+  })
 
   if (guardResult?.ok && guardResult.shouldRunAfterSuccess) {
     await runCrudMutationGuardAfterSuccess(container, {

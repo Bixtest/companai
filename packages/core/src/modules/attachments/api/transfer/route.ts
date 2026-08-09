@@ -10,6 +10,7 @@ import {
   transferAttachmentsResponseSchema,
   attachmentErrorSchema,
 } from '../openapi'
+import { writeDirectWriteAuditLog } from '@open-mercato/shared/lib/crud/audit-write'
 
 const transferSchema = z.object({
   entityId: z.string().min(1),
@@ -33,7 +34,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Invalid payload' }, { status: 400 })
   }
   const { attachmentIds, entityId, fromRecordId, toRecordId } = parsed.data
-  const { resolve } = await createRequestContainer()
+  const container = await createRequestContainer()
+  const { resolve } = container
   const em = resolve('em') as any
   let AttachmentEntity: any
   try {
@@ -72,7 +74,23 @@ export async function POST(req: Request) {
       }) ?? []
     record.storageMetadata = mergeAttachmentMetadata(record.storageMetadata, { assignments: nextAssignments })
   }
-  await em.persist(records).flush()
+  // R2a-custom — one entry per attachment moved. A transfer changes where a file
+  // physically lives, so each moved record is a distinct fact worth recording
+  // rather than a single "N files moved" line.
+  await em.transactional(async () => {
+    await em.persist(records).flush()
+    for (const record of records) {
+      await writeDirectWriteAuditLog({
+        container,
+        auth,
+        organizationId: record.organizationId ?? null,
+        action: 'updated',
+        resourceKind: 'attachments.attachment',
+        resourceId: String(record.id),
+        snapshotAfter: { partitionCode: record.partitionCode, storagePath: record.storagePath },
+      })
+    }
+  })
   return NextResponse.json({ ok: true, updated: records.length })
 }
 

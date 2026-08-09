@@ -11,6 +11,8 @@ import {
   runCrudMutationGuardAfterSuccess,
   validateCrudMutationGuard,
 } from '@open-mercato/shared/lib/crud/mutation-guard'
+import { writeDirectWriteAuditLog } from '@open-mercato/shared/lib/crud/audit-write'
+import type { EntityManager } from '@mikro-orm/postgresql'
 
 export const metadata = {
   GET: { requireAuth: true, requireFeatures: ['data_sync.configure'] },
@@ -87,10 +89,31 @@ export async function POST(req: Request) {
   }
 
   try {
-    const schedule = await scheduleService.saveSchedule({
-      ...parsed.data,
-      expectedUpdatedAt: readOptimisticLockExpected(req),
-    }, scope, container)
+    // R2a-custom — a schedule decides when data is pulled from or pushed to an
+    // external system unattended. Audited in the same transaction as the save.
+    const em = container.resolve('em') as EntityManager
+    const schedule = await em.transactional(async () => {
+      const saved = await scheduleService.saveSchedule({
+        ...parsed.data,
+        expectedUpdatedAt: readOptimisticLockExpected(req),
+      }, scope, container)
+      await writeDirectWriteAuditLog({
+        container,
+        auth,
+        organizationId: scope.organizationId,
+        action: 'created',
+        resourceKind: 'data_sync.schedule',
+        resourceId: String(saved.id),
+        snapshotAfter: {
+          integrationId: saved.integrationId,
+          entityType: saved.entityType,
+          direction: saved.direction,
+          scheduleType: saved.scheduleType,
+          scheduleValue: saved.scheduleValue,
+        },
+      })
+      return saved
+    })
 
     if (guardResult?.ok && guardResult.shouldRunAfterSuccess) {
       await runCrudMutationGuardAfterSuccess(container, {

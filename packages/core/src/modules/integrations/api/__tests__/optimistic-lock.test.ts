@@ -98,6 +98,10 @@ describe('integrations write routes — optimistic-lock enforcement', () => {
     it('returns 409 conflict on a stale state version and does not upsert', async () => {
       ;(createRequestContainer as jest.Mock).mockResolvedValue({
         resolve: (key: string) => {
+      // R2a-custom: routes now wrap their write and audit entry in one
+      // transaction, so the container must supply an EntityManager that models
+      // that boundary. Inline execution is faithful for these tests.
+      if (key === 'em') return { transactional: async (work: () => Promise<unknown>) => work() }
           if (key === 'integrationStateService') return buildStateService(CURRENT_VERSION)
           throw new Error(`unexpected resolve(${key})`)
         },
@@ -116,6 +120,9 @@ describe('integrations write routes — optimistic-lock enforcement', () => {
     it('upserts when the supplied state version matches', async () => {
       ;(createRequestContainer as jest.Mock).mockResolvedValue({
         resolve: (key: string) => {
+      // R2a-custom: the route wraps its write and audit entry in one
+      // transaction, so the container must supply an EntityManager.
+      if (key === 'em') return { transactional: async (work: () => Promise<unknown>) => work() }
           if (key === 'integrationStateService') return buildStateService(CURRENT_VERSION)
           throw new Error(`unexpected resolve(${key})`)
         },
@@ -134,6 +141,9 @@ describe('integrations write routes — optimistic-lock enforcement', () => {
     it('upserts when no version header is supplied (strictly additive)', async () => {
       ;(createRequestContainer as jest.Mock).mockResolvedValue({
         resolve: (key: string) => {
+      // R2a-custom: the route wraps its write and audit entry in one
+      // transaction, so the container must supply an EntityManager.
+      if (key === 'em') return { transactional: async (work: () => Promise<unknown>) => work() }
           if (key === 'integrationStateService') return buildStateService(CURRENT_VERSION)
           throw new Error(`unexpected resolve(${key})`)
         },
@@ -162,6 +172,9 @@ describe('integrations write routes — optimistic-lock enforcement', () => {
     it('returns 409 conflict on a stale state version and does not upsert', async () => {
       ;(createRequestContainer as jest.Mock).mockResolvedValue({
         resolve: (key: string) => {
+      // R2a-custom: the route wraps its write and audit entry in one
+      // transaction, so the container must supply an EntityManager.
+      if (key === 'em') return { transactional: async (work: () => Promise<unknown>) => work() }
           if (key === 'integrationStateService') return buildStateService(CURRENT_VERSION)
           throw new Error(`unexpected resolve(${key})`)
         },
@@ -180,6 +193,9 @@ describe('integrations write routes — optimistic-lock enforcement', () => {
     it('changes the version when the supplied version matches', async () => {
       ;(createRequestContainer as jest.Mock).mockResolvedValue({
         resolve: (key: string) => {
+      // R2a-custom: the route wraps its write and audit entry in one
+      // transaction, so the container must supply an EntityManager.
+      if (key === 'em') return { transactional: async (work: () => Promise<unknown>) => work() }
           if (key === 'integrationStateService') return buildStateService(CURRENT_VERSION)
           throw new Error(`unexpected resolve(${key})`)
         },
@@ -201,6 +217,9 @@ describe('integrations write routes — optimistic-lock enforcement', () => {
     it('returns 409 conflict on a stale credentials version and does not save', async () => {
       ;(createRequestContainer as jest.Mock).mockResolvedValue({
         resolve: (key: string) => {
+      // R2a-custom: the route wraps its write and audit entry in one
+      // transaction, so the container must supply an EntityManager.
+      if (key === 'em') return { transactional: async (work: () => Promise<unknown>) => work() }
           if (key === 'integrationCredentialsService') return buildCredentialsService(CURRENT_VERSION)
           throw new Error(`unexpected resolve(${key})`)
         },
@@ -219,6 +238,9 @@ describe('integrations write routes — optimistic-lock enforcement', () => {
     it('saves when the supplied credentials version matches', async () => {
       ;(createRequestContainer as jest.Mock).mockResolvedValue({
         resolve: (key: string) => {
+      // R2a-custom: the route wraps its write and audit entry in one
+      // transaction, so the container must supply an EntityManager.
+      if (key === 'em') return { transactional: async (work: () => Promise<unknown>) => work() }
           if (key === 'integrationCredentialsService') return buildCredentialsService(CURRENT_VERSION)
           throw new Error(`unexpected resolve(${key})`)
         },
@@ -234,6 +256,9 @@ describe('integrations write routes — optimistic-lock enforcement', () => {
     it('saves a first-time credentials write when no row exists yet (no current version)', async () => {
       ;(createRequestContainer as jest.Mock).mockResolvedValue({
         resolve: (key: string) => {
+      // R2a-custom: the route wraps its write and audit entry in one
+      // transaction, so the container must supply an EntityManager.
+      if (key === 'em') return { transactional: async (work: () => Promise<unknown>) => work() }
           if (key === 'integrationCredentialsService') return buildCredentialsService(null)
           throw new Error(`unexpected resolve(${key})`)
         },

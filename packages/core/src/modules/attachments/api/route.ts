@@ -43,6 +43,7 @@ import {
 } from '../lib/upload-limits'
 import { findWithDecryption } from '@open-mercato/shared/lib/encryption/find'
 import { createLogger } from '@open-mercato/shared/lib/logger'
+import { writeDirectWriteAuditLog } from '@open-mercato/shared/lib/crud/audit-write'
 
 const logger = createLogger('attachments')
 
@@ -471,6 +472,19 @@ export async function POST(req: Request) {
           values: customFieldValues,
         })
       }
+      // R2a-custom — inside the existing transaction, so a failed audit rolls the
+      // upload record back. The file itself is already in storage at this point;
+      // rolling back the row leaves it orphaned rather than untracked-and-live,
+      // which is the safer of the two failures.
+      await writeDirectWriteAuditLog({
+        container,
+        auth,
+        organizationId: orgId ?? null,
+        action: 'created',
+        resourceKind: 'attachments.attachment',
+        resourceId: attachmentId,
+        snapshotAfter: { partitionCode: att.partitionCode, storagePath: att.storagePath },
+      })
     })
   } catch (error) {
     logger.error('Failed to persist attachment with custom attributes', { err: error })
@@ -563,7 +577,26 @@ export async function DELETE(req: Request) {
   if (orgId) deleteFilter.organizationId = orgId
   const record = await em.findOne(Attachment, deleteFilter)
   if (!record) return NextResponse.json({ error: 'Attachment not found' }, { status: 404 })
-  await em.remove(record).flush()
+  // R2a-custom — the row removal and its audit entry commit together. The
+  // storage file is deleted afterwards, so a failed audit rolls back the row and
+  // leaves the file intact rather than orphaning it.
+  const deletedSnapshot = {
+    partitionCode: record.partitionCode,
+    storagePath: record.storagePath,
+    fileName: (record as { fileName?: unknown }).fileName ?? null,
+  }
+  await em.transactional(async () => {
+    await em.remove(record).flush()
+    await writeDirectWriteAuditLog({
+      container,
+      auth,
+      organizationId: record.organizationId ?? null,
+      action: 'deleted',
+      resourceKind: 'attachments.attachment',
+      resourceId: String(record.id),
+      snapshotBefore: deletedSnapshot,
+    })
+  })
   await clearAttachmentThumbnailCache(record.partitionCode, record.id).catch((error) => {
     logger.error('Failed to cleanup cached thumbnails', { err: error })
   })

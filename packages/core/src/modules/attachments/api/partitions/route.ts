@@ -17,6 +17,7 @@ import {
   partitionListResponseSchema,
   attachmentErrorSchema,
 } from '../openapi'
+import { writeDirectWriteAuditLog } from '@open-mercato/shared/lib/crud/audit-write'
 
 const deleteSchema = z.object({
   id: z.string().uuid(),
@@ -66,9 +67,17 @@ export const metadata = {
   DELETE: { requireAuth: true, requireFeatures: ['attachments.manage'] },
 } as const
 
-async function resolveEm() {
-  const { resolve } = await createRequestContainer()
-  return resolve('em') as EntityManager
+/**
+ * Returns the request container alongside its EntityManager.
+ *
+ * Both come from the SAME container deliberately. Calling
+ * `createRequestContainer()` a second time yields a different EntityManager, so
+ * an audit write resolved that way would land outside the transaction the
+ * business write opened — defeating the point of auditing inside it.
+ */
+async function resolveScope() {
+  const container = await createRequestContainer()
+  return { container, em: container.resolve('em') as EntityManager }
 }
 
 export async function GET(req: Request) {
@@ -76,7 +85,7 @@ export async function GET(req: Request) {
   if (!auth?.sub || !auth.tenantId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
-  const em = await resolveEm()
+  const { container, em } = await resolveScope()
   await ensureDefaultPartitions(em)
   const rows = await findWithDecryption<AttachmentPartition>(
     em,
@@ -113,7 +122,7 @@ export async function POST(req: Request) {
   if (!code) {
     return NextResponse.json({ error: 'Partition code is required.' }, { status: 400 })
   }
-  const em = await resolveEm()
+  const { container, em } = await resolveScope()
   await ensureDefaultPartitions(em)
   const exists = await findOneWithDecryption(
     em,
@@ -140,7 +149,21 @@ export async function POST(req: Request) {
     tenantId: auth.tenantId,
     organizationId: auth.orgId ?? null,
   })
-  await em.persist(entry).flush()
+  // R2a-custom — a partition decides where uploaded files are stored and under
+  // which driver; creating one is a storage-topology change. Audited in the same
+  // transaction as the write.
+  await em.transactional(async () => {
+    await em.persist(entry).flush()
+    await writeDirectWriteAuditLog({
+      container,
+      auth,
+      organizationId: entry.organizationId ?? null,
+      action: 'created',
+      resourceKind: 'attachments.partition',
+      resourceId: entry.code,
+      snapshotAfter: serializePartition(entry) as Record<string, unknown>,
+    })
+  })
   return NextResponse.json({ item: serializePartition(entry) }, { status: 201 })
 }
 
@@ -165,7 +188,7 @@ export async function PUT(req: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: 'Invalid payload' }, { status: 400 })
   }
-  const em = await resolveEm()
+  const { container, em } = await resolveScope()
   const entry = await findOneWithDecryption(
     em,
     AttachmentPartition,
@@ -194,7 +217,18 @@ export async function PUT(req: Request) {
   if (parsed.data.configJson !== undefined) {
     entry.configJson = parsed.data.configJson ?? null
   }
-  await em.persist(entry).flush()
+  await em.transactional(async () => {
+    await em.persist(entry).flush()
+    await writeDirectWriteAuditLog({
+      container,
+      auth,
+      organizationId: entry.organizationId ?? null,
+      action: 'updated',
+      resourceKind: 'attachments.partition',
+      resourceId: entry.code,
+      snapshotAfter: serializePartition(entry) as Record<string, unknown>,
+    })
+  })
   return NextResponse.json({ item: serializePartition(entry) })
 }
 
@@ -215,7 +249,7 @@ export async function DELETE(req: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: 'Partition id is required' }, { status: 400 })
   }
-  const em = await resolveEm()
+  const { container, em } = await resolveScope()
   const entry = await findOneWithDecryption(
     em,
     AttachmentPartition,
@@ -235,7 +269,23 @@ export async function DELETE(req: Request) {
   if (usage > 0) {
     return NextResponse.json({ error: 'Partition is in use and cannot be removed.' }, { status: 409 })
   }
-  await em.remove(entry).flush()
+  // The before-image is the whole record: once removed there is nothing left to
+  // describe what the partition pointed at.
+  const removedSnapshot = serializePartition(entry) as Record<string, unknown>
+  const removedCode = entry.code
+  const removedOrganizationId = entry.organizationId ?? null
+  await em.transactional(async () => {
+    await em.remove(entry).flush()
+    await writeDirectWriteAuditLog({
+      container,
+      auth,
+      organizationId: removedOrganizationId,
+      action: 'deleted',
+      resourceKind: 'attachments.partition',
+      resourceId: removedCode,
+      snapshotBefore: removedSnapshot,
+    })
+  })
   return NextResponse.json({ ok: true })
 }
 

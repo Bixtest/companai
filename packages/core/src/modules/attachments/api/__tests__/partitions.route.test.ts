@@ -141,11 +141,24 @@ const mockEm = {
     return this
   }),
   flush: jest.fn(async () => {}),
+  // The route wraps its write and its audit entry in one transaction (R2a-custom),
+  // so the mock has to model that boundary. Running the callback inline is
+  // faithful enough for these tests, which assert what was written rather than
+  // rollback behaviour — that is covered by
+  // packages/shared/src/lib/crud/__tests__/factory.audit-fail-closed.test.ts.
+  transactional: jest.fn(async (work: () => Promise<unknown>) => work()),
 }
 
 jest.mock('@open-mercato/shared/lib/di/container', () => ({
   createRequestContainer: async () => ({
-    resolve: (k: string) => (k === 'em' ? mockEm : null),
+    // `actionLogService` is deliberately absent: the audit helper tolerates a
+    // missing service (the audit_logs module can be disabled downstream), so
+    // these tests exercise the route without needing an audit backend.
+    resolve: (k: string) => {
+      if (k === 'em') return mockEm
+      if (k === 'actionLogService') throw new Error('[internal] actionLogService not registered')
+      return null
+    },
   }),
 }))
 

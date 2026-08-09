@@ -22,6 +22,8 @@ import {
   runIntegrationMutationGuards,
 } from '../../guards'
 import { resolveIntegrationsOrganizationId } from '../../../lib/organization-scope'
+import { writeDirectWriteAuditLog } from '@open-mercato/shared/lib/crud/audit-write'
+import type { EntityManager } from '@mikro-orm/postgresql'
 
 const idParamsSchema = z.object({ id: z.string().min(1) })
 
@@ -177,12 +179,31 @@ export async function PUT(req: Request, ctx: { params?: Promise<{ id?: string }>
   }
 
   try {
-    // Secret fields are returned masked on GET; when the client round-trips the
-    // mask sentinel it means "unchanged", so restore the existing stored secret
-    // instead of overwriting it with the placeholder.
-    const existing = await credentialsService.resolve(integration.id, scope)
-    const credentialsToSave = mergeMaskedSecretCredentials(schema, payloadData.credentials, existing ?? {})
-    await credentialsService.save(integration.id, credentialsToSave, scope)
+    // R2a-custom — the save and its audit entry commit together. Storing the
+    // credentials that let this platform act on an external system is the single
+    // most consequential write in this module; it previously left no record at all.
+    const em = container.resolve('em') as EntityManager
+    await em.transactional(async () => {
+      // Secret fields are returned masked on GET; when the client round-trips the
+      // mask sentinel it means "unchanged", so restore the existing stored secret
+      // instead of overwriting it with the placeholder.
+      const existing = await credentialsService.resolve(integration.id, scope)
+      const credentialsToSave = mergeMaskedSecretCredentials(schema, payloadData.credentials, existing ?? {})
+      await credentialsService.save(integration.id, credentialsToSave, scope)
+
+      // Deliberately no before/after snapshot. The audit trail records THAT
+      // credentials changed, never what they are — a snapshot here would copy
+      // the secrets into a second table with a different retention policy and
+      // different read permissions, turning an audit record into a credential leak.
+      await writeDirectWriteAuditLog({
+        container,
+        auth,
+        organizationId,
+        action: 'updated',
+        resourceKind: 'integrations.credentials',
+        resourceId: integration.id,
+      })
+    })
   } catch (error) {
     if (isCredentialsEncryptionUnavailableError(error)) {
       return NextResponse.json({ error: 'Integration credentials encryption is unavailable' }, { status: 503 })

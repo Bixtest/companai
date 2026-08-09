@@ -9,6 +9,7 @@ import {
   runCrudMutationGuardAfterSuccess,
   validateCrudMutationGuard,
 } from '@open-mercato/shared/lib/crud/mutation-guard'
+import { writeDirectWriteAuditLog } from '@open-mercato/shared/lib/crud/audit-write'
 
 const idParamsSchema = z.object({ id: z.string().uuid() })
 
@@ -128,7 +129,17 @@ export async function PUT(req: Request, ctx: { params?: Promise<{ id?: string }>
   }
 
   mapping.mapping = parsedBody.data.mapping
-  await em.flush()
+  await em.transactional(async () => {
+    await em.flush()
+    await writeDirectWriteAuditLog({
+      container,
+      auth,
+      organizationId: scope.organizationId,
+      action: 'updated',
+      resourceKind: 'data_sync.mapping',
+      resourceId: String(mapping.id),
+    })
+  })
 
   if (guardResult?.ok && guardResult.shouldRunAfterSuccess) {
     await runCrudMutationGuardAfterSuccess(container, {
@@ -200,8 +211,22 @@ export async function DELETE(req: Request, ctx: { params?: Promise<{ id?: string
   }
 
   const mappingId = mapping.id
-  em.remove(mapping)
-  await em.flush()
+  // The before-image is the whole mapping: once removed there is nothing left to
+  // show how external fields used to be routed.
+  const removedMapping = mapping.mapping as unknown as Record<string, unknown>
+  await em.transactional(async () => {
+    em.remove(mapping)
+    await em.flush()
+    await writeDirectWriteAuditLog({
+      container,
+      auth,
+      organizationId: scope.organizationId,
+      action: 'deleted',
+      resourceKind: 'data_sync.mapping',
+      resourceId: String(mappingId),
+      snapshotBefore: { mapping: removedMapping },
+    })
+  })
 
   if (guardResult?.ok && guardResult.shouldRunAfterSuccess) {
     await runCrudMutationGuardAfterSuccess(container, {
