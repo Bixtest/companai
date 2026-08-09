@@ -10,6 +10,10 @@ import { rebuildHierarchyForTenant } from '@open-mercato/core/modules/directory/
 import { ensureRoles, setupInitialTenant, ensureDefaultRoleAcls, ensureCustomRoleAcls, OrgSlugExistsError, DerivedUserPasswordRequiredError } from './lib/setup-app'
 import { normalizeTenantId } from './lib/tenantAccess'
 import { parseCommaSeparatedList } from '@open-mercato/shared/lib/string'
+import { resolveDecision, explainDecision, GATE_MEANING } from '@open-mercato/shared/lib/authority/decision'
+import { getCapabilityDescriptor } from '@open-mercato/shared/lib/capabilities/registry'
+import { EFFECT_CLASS_MEANING, type AutonomyGate, type TaskGrade } from '@open-mercato/shared/modules/capabilities'
+import type { PrincipalKind } from '@open-mercato/shared/lib/auth/principal'
 import { computeEmailHash, emailHashLookupValues } from './lib/emailHash'
 import { findWithDecryption, findOneWithDecryption } from '@open-mercato/shared/lib/encryption/find'
 import { isTenantDataEncryptionEnabled } from '@open-mercato/shared/lib/encryption/toggles'
@@ -846,5 +850,92 @@ const syncRoleAcls: ModuleCli = {
   },
 }
 
+/**
+ * Explains an authority decision (R5).
+ *
+ * The resolver returns reasons rather than a boolean, and this is where that
+ * becomes visible without a UI: pick an act and an actor, and read back the
+ * gate, every rule that was consulted, which one was binding, what obligations
+ * follow, and what would change the answer.
+ *
+ * It resolves the real capability descriptors, so what it prints is what the
+ * platform actually believes about the act — not an illustration.
+ */
+const authorityExplain: ModuleCli = {
+  command: 'authority:explain',
+  async run(rest) {
+    const args: Record<string, string> = {}
+    for (let index = 0; index < rest.length; index += 1) {
+      const arg = rest[index]
+      if (!arg?.startsWith('--')) continue
+      const [key, inlineValue] = arg.replace(/^--/, '').split('=')
+      if (inlineValue !== undefined) { args[key] = inlineValue; continue }
+      const next = rest[index + 1]
+      if (next && !next.startsWith('--')) { args[key] = next; index += 1 }
+      else args[key] = 'true'
+    }
+
+    const capabilityId = args.capability ?? args.cap
+    if (!capabilityId) {
+      console.error('Usage: mercato auth authority:explain --capability <feature id> [--actor human|ai_worker|service] [--grade G0..G4] [--trust A0..A5] [--without-grant]')
+      console.error('Example: mercato auth authority:explain --capability attachments.manage --actor ai_worker')
+      process.exitCode = 1
+      return
+    }
+
+    // The registry hydrates itself from the registered modules, which the CLI
+    // bootstrap has already loaded by the time a command runs.
+    const capability = getCapabilityDescriptor(capabilityId)
+    if (!capability) {
+      console.error(`No capability descriptor for '${capabilityId}'.`)
+      console.error('Every enabled module describes every feature it declares, so this id is probably wrong or parked.')
+      process.exitCode = 1
+      return
+    }
+
+    const decision = resolveDecision({
+      actor: {
+        kind: (args.actor as PrincipalKind) ?? 'human',
+        id: args.actorId ?? 'cli',
+        holdsCapability: args['without-grant'] !== 'true',
+        ...(args.trust ? { trustCeiling: args.trust as AutonomyGate } : {}),
+        ...(args.invoker ? { invokerCeiling: args.invoker as AutonomyGate } : {}),
+        ...(args.delegation ? { delegationCeiling: args.delegation as AutonomyGate } : {}),
+      },
+      capability,
+      context: { grade: (args.grade as TaskGrade) ?? 'G1' },
+    })
+
+    console.log('')
+    console.log(`  ${capability.id}`)
+    console.log(`  ${capability.effectClass} (${EFFECT_CLASS_MEANING[capability.effectClass]}) · ${capability.reversibility}`)
+    console.log('')
+    console.log(`  Decision: ${decision.gate} — ${GATE_MEANING[decision.gate]}`)
+    console.log(`  Binding rule: ${decision.bindingRule}`)
+    console.log('')
+    console.log('  Every rule considered:')
+    for (const reason of decision.reasons) {
+      const marker = reason.rule === decision.bindingRule ? '→' : ' '
+      console.log(`  ${marker} ${reason.ceiling}  ${reason.rule.padEnd(22)} ${reason.detail}`)
+    }
+    if (decision.obligations.length) {
+      console.log('')
+      console.log('  Obligations:')
+      for (const obligation of decision.obligations) console.log(`    - ${obligation.detail}`)
+    }
+    if (decision.alternatives.length) {
+      console.log('')
+      console.log('  What would change this:')
+      for (const alternative of decision.alternatives) {
+        console.log(`    - ${alternative.change} → ${alternative.wouldYield}`)
+      }
+    }
+    console.log('')
+    console.log('  In one sentence:')
+    console.log(`  ${explainDecision(decision, capability)}`)
+    console.log('')
+  },
+}
+
 // Export the full CLI list
-export default [addUser, seedRoles, syncRoleAcls, rotateEncryptionKey, addOrganization, setupApp, listOrganizations, listTenants, listUsers, setPassword]
+export default [authorityExplain, addUser, seedRoles, syncRoleAcls, rotateEncryptionKey, addOrganization, setupApp, listOrganizations, listTenants, listUsers, setPassword]
