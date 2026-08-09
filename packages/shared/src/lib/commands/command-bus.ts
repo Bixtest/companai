@@ -32,16 +32,9 @@ import {
 import type { CommandInterceptorContext } from './command-interceptor'
 import { CommandInterceptorError } from './errors'
 import { createLogger } from '../logger'
+import { SKIPPED_ACTION_LOG_RESOURCE_KINDS } from './action-log-skip-list'
 
 const logger = createLogger('shared').child({ component: 'commands' })
-
-const SKIPPED_ACTION_LOG_RESOURCE_KINDS = new Set<string>([
-  'audit_logs.access',
-  'audit_logs.action',
-  'dashboards.layout',
-  'dashboards.user_widgets',
-  'dashboards.role_widgets',
-])
 
 function asRecord(input: unknown): Record<string, unknown> | null {
   if (!input || typeof input !== 'object' || Array.isArray(input)) return null

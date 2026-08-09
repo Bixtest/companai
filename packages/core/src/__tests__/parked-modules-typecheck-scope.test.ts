@@ -36,7 +36,9 @@ function readEnabledModuleIds(): Set<string> {
   for (const rawLine of source.split('\n')) {
     const line = rawLine.trim()
     if (line.startsWith('//') || line.startsWith('*') || line.startsWith('/*')) continue
-    const match = line.match(/^\{\s*id:\s*'([a-z0-9_]+)'/)
+    // Both entry forms: single-line `{ id: 'auth', … },` and the multi-line
+    // object used when an entry carries `overrides`.
+    const match = line.match(/^\{?\s*id:\s*'([a-z0-9_]+)'/)
     if (match) ids.add(match[1])
   }
   return ids

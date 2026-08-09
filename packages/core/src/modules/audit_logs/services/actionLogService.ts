@@ -403,7 +403,28 @@ export class ActionLogService {
       .where('action_logs.deleted_at', 'is', null) as any
 
     if (parsed.tenantId) query = query.where('action_logs.tenant_id', '=', parsed.tenantId)
-    if (parsed.organizationId) query = query.where('action_logs.organization_id', '=', parsed.organizationId)
+    // Include tenant-scoped entries alongside the requested organization's.
+    //
+    // Some records have no organization by design — an API key declares
+    // `orgField: null`, so its audit entry is scoped to the tenant only. An
+    // equality filter hid every such entry from everyone, whatever organization
+    // they were viewing, which is why the Action Log looked empty even for
+    // actions that had been recorded (R2a; upstream-issues.md → U1).
+    //
+    // Tenant scoping above still applies, so this widens visibility within a
+    // tenant and never across tenants.
+    if (parsed.organizationId) {
+      const organizationId = parsed.organizationId
+      // `eb: any` matches the existing expression-builder callbacks in this file
+      // (see the includeRelated branch below); the query object is not typed
+      // narrowly enough for the builder to infer.
+      query = query.where((eb: any) =>
+        eb.or([
+          eb('action_logs.organization_id', '=', organizationId),
+          eb('action_logs.organization_id', 'is', null),
+        ]),
+      )
+    }
 
     const actorUserIds = this.resolveActorUserIds(parsed)
     if (actorUserIds.length === 1) query = query.where('action_logs.actor_user_id', '=', actorUserIds[0])

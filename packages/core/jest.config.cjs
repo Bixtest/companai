@@ -47,7 +47,11 @@ function parkedModuleTestPatterns() {
   for (const rawLine of source.split('\n')) {
     const line = rawLine.trim()
     if (line.startsWith('//') || line.startsWith('*') || line.startsWith('/*')) continue
-    const match = line.match(/^\{\s*id:\s*'([a-z0-9_]+)'/)
+    // Matches both entry forms: the single-line `{ id: 'auth', from: … },` and
+    // the multi-line object used when an entry carries `overrides` — where the
+    // id sits on its own line. Missing the second form silently reclassifies an
+    // ENABLED module as parked, which skips its tests.
+    const match = line.match(/^\{?\s*id:\s*'([a-z0-9_]+)'/)
     if (match) enabled.add(match[1])
   }
   // A parse that finds almost nothing means the file format moved. Excluding

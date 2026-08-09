@@ -72,6 +72,7 @@ import { parseExtensionHeaders } from '../umes/extension-headers'
 import { createGenericOptimisticLockReader } from './optimistic-lock'
 import { registerOptimisticLockReaderIfAbsent } from './optimistic-lock-store'
 import { createLogger } from '../logger'
+import { SKIPPED_ACTION_LOG_RESOURCE_KINDS } from '../commands/action-log-skip-list'
 
 type RbacServiceLike = {
   getGrantedFeatures: (userId: string, opts: { tenantId: string | null; organizationId: string | null }) => Promise<string[]>
@@ -635,6 +636,84 @@ async function runGuardAfterSuccessCallbacks(
 function snapshotEntity(entity: unknown): Record<string, unknown> | undefined {
   if (!entity || typeof entity !== 'object') return undefined
   return safeClone(entity) as Record<string, unknown>
+}
+
+/**
+ * Minimal shape of the audit service, resolved by DI.
+ *
+ * Declared structurally rather than imported: `@open-mercato/shared` must not
+ * depend on `@open-mercato/core`, where `ActionLogService` lives.
+ */
+type ActionLogWriter = {
+  log: (input: Record<string, unknown>) => Promise<unknown>
+}
+
+/**
+ * Records a direct (non-command) CRUD write in the action log.
+ *
+ * **Why this exists.** `makeCrudRoute` has two write paths. Routes that declare
+ * `actions.<op>.commandId` go through the command bus, which writes the audit
+ * entry. Routes that supply a plain `create` / `update` / `delete` handler never
+ * touched the command bus and so were **not audited at all** — 16 of 25 enabled
+ * modules, including `api_keys`, where issuing and revoking a credential went
+ * unrecorded (R2a; `workspace/references/upstream-issues.md` → U1).
+ *
+ * **Deliberately not undoable.** No `undoToken` is written, so these entries are
+ * excluded by the "Undoable only" filter and offer no undo control. A command
+ * carries a reverse operation; a direct handler does not, and pretending
+ * otherwise would put a button in the UI that cannot work. Audit is a record of
+ * what happened; undo is a separate capability.
+ *
+ * **Failure policy — currently fail-open, deliberately.** A failed audit write
+ * is logged and swallowed, matching the command bus's existing behaviour so this
+ * change alters coverage without also altering failure semantics. Making both
+ * paths fail *closed*, inside the business transaction, is **R2b** — it is the
+ * known gap, not an oversight.
+ */
+async function writeDirectWriteAuditLog(options: {
+  container: { resolve: (name: string) => unknown }
+  auth: { sub?: string | null; tenantId?: string | null; orgId?: string | null } | null | undefined
+  organizationId: string | null
+  action: 'created' | 'updated' | 'deleted'
+  resourceKind: string | null
+  resourceId: string | null
+  snapshotBefore?: Record<string, unknown> | undefined
+  snapshotAfter?: Record<string, unknown> | undefined
+}): Promise<void> {
+  if (!options.resourceKind) return
+  if (SKIPPED_ACTION_LOG_RESOURCE_KINDS.has(options.resourceKind)) return
+
+  let service: ActionLogWriter | null = null
+  try {
+    service = options.container.resolve('actionLogService') as ActionLogWriter
+  } catch {
+    // The audit_logs module can legitimately be absent (a downstream app may
+    // disable it). Coverage is best-effort against an optional peer, exactly as
+    // the command bus treats it.
+    service = null
+  }
+  if (!service || typeof service.log !== 'function') return
+
+  try {
+    await service.log({
+      commandId: `${options.resourceKind}.${options.action}`,
+      actionLabel: `${options.resourceKind}.${options.action}`,
+      resourceKind: options.resourceKind,
+      ...(options.resourceId ? { resourceId: options.resourceId } : {}),
+      tenantId: options.auth?.tenantId ?? undefined,
+      organizationId: options.organizationId ?? options.auth?.orgId ?? undefined,
+      actorUserId: options.auth?.sub ?? undefined,
+      ...(options.snapshotBefore ? { snapshotBefore: options.snapshotBefore } : {}),
+      ...(options.snapshotAfter ? { snapshotAfter: options.snapshotAfter } : {}),
+      context: { source: 'crud-route', undoable: false },
+    })
+  } catch (err) {
+    logger.error('Failed to write CRUD audit log entry', {
+      err,
+      resourceKind: options.resourceKind,
+      action: options.action,
+    })
+  }
 }
 
 function normalizeInterceptorRoutePath(request: Request): string {
@@ -2328,6 +2407,24 @@ export function makeCrudRoute<TCreate = any, TUpdate = any, TList = any>(opts: C
       await de.flushOrmEntityChanges()
       await invalidateCrudCache(ctx.container, resourceKind, identifiers, ctx.auth.tenantId ?? null, 'created', resourceTargets)
 
+      // R2a — audit the direct-write path. Routes declaring `actions.create.commandId`
+      // are recorded by the command bus; this one is not, and was previously
+      // unrecorded entirely. Written after the flush so the entry only exists for
+      // a write that actually committed.
+      await writeDirectWriteAuditLog({
+        container: ctx.container,
+        auth: ctx.auth,
+        // Scope to the RECORD's organization, not the actor's. A superadmin acts
+        // with `orgId = null` (all organizations), and the list query filters on
+        // `organization_id = <caller's org>` — so an actor-scoped entry written by
+        // a superadmin is invisible to everyone, including them.
+        organizationId: identifiers.organizationId ?? scopeOrganizationId,
+        action: 'created',
+        resourceKind,
+        resourceId: createdEntityId != null ? String(createdEntityId) : null,
+        snapshotAfter: snapshotEntity(entity),
+      })
+
       let payload = createConfig.response ? createConfig.response(entity) : { id: createdEntityId }
       if (interceptorRequestPayload && payload && typeof payload === 'object' && !Array.isArray(payload)) {
         const afterInterceptors = await applyInterceptorsAfter({
@@ -2660,6 +2757,21 @@ export function makeCrudRoute<TCreate = any, TUpdate = any, TList = any>(opts: C
       })
       await de.flushOrmEntityChanges()
       await invalidateCrudCache(ctx.container, resourceKind, identifiers, ctx.auth.tenantId ?? null, 'updated', resourceTargets)
+
+      // R2a — see the create branch. `updatePreviousData` is only populated when a
+      // sync subscriber for the *.updating event asked for it, so the before-image
+      // is best-effort here; the entry still records who changed what and when.
+      await writeDirectWriteAuditLog({
+        container: ctx.container,
+        auth: ctx.auth,
+        organizationId: identifiers.organizationId ?? scopeOrganizationId,
+        action: 'updated',
+        resourceKind,
+        resourceId: identifiers.id != null ? String(identifiers.id) : null,
+        snapshotBefore: updatePreviousData,
+        snapshotAfter: snapshotEntity(entity),
+      })
+
       const payload = updateConfig.response ? updateConfig.response(entity) : { success: true }
       if (interceptorRequestPayload && payload && typeof payload === 'object' && !Array.isArray(payload)) {
         const afterInterceptors = await applyInterceptorsAfter({
@@ -2936,8 +3048,14 @@ export function makeCrudRoute<TCreate = any, TUpdate = any, TList = any>(opts: C
         }
       }
 
+      // Captured inside the block below but needed by the audit write after it —
+      // a delete may run with no loaded entity, in which case there is no record
+      // organization to read and the actor's scope is all we have.
+      let deletedRecordOrganizationId: string | null = null
+
       if (entity) {
         const identifiers = identifierResolver(entity, 'deleted')
+        deletedRecordOrganizationId = identifiers.organizationId ?? null
         de.markOrmEntityChange({
           action: 'deleted',
           entity,
@@ -2948,6 +3066,19 @@ export function makeCrudRoute<TCreate = any, TUpdate = any, TList = any>(opts: C
         await de.flushOrmEntityChanges()
         await invalidateCrudCache(ctx.container, resourceKind, identifiers, ctx.auth.tenantId ?? null, 'deleted', resourceTargets)
       }
+
+      // R2a — see the create branch. The before-image is the whole record here,
+      // because after a delete there is nothing left to describe what was removed.
+      await writeDirectWriteAuditLog({
+        container: ctx.container,
+        auth: ctx.auth,
+        organizationId: deletedRecordOrganizationId ?? scopeOrganizationId,
+        action: 'deleted',
+        resourceKind,
+        resourceId: id != null ? String(id) : null,
+        snapshotBefore: snapshotEntity(entity),
+      })
+
       const payload = opts.del?.response ? opts.del.response(id) : { success: true }
       if (interceptorRequestPayload && payload && typeof payload === 'object' && !Array.isArray(payload)) {
         const afterInterceptors = await applyInterceptorsAfter({
