@@ -22,6 +22,7 @@ import { serializeWorkflowDefinition, serializeCodeWorkflowDefinition } from './
 import { invalidateTriggerCache } from '../../lib/event-trigger-service'
 import { getAllCodeWorkflows } from '../../lib/code-registry'
 import { createLogger } from '@open-mercato/shared/lib/logger'
+import { writeDirectWriteAuditLog } from '@open-mercato/shared/lib/crud/audit-write'
 
 const logger = createLogger('workflows')
 
@@ -256,7 +257,21 @@ export async function POST(request: NextRequest) {
       updatedAt: new Date(),
     })
 
-    await em.persist(definition).flush()
+    // R2a-custom — a workflow definition is executable automation; creating one
+    // changes what the platform will do unattended. Audited in the same
+    // transaction as the write.
+    await em.transactional(async () => {
+      await em.persist(definition).flush()
+      await writeDirectWriteAuditLog({
+        container,
+        auth,
+        organizationId: organizationId ?? null,
+        action: 'created',
+        resourceKind: 'workflows.definition',
+        resourceId: String(definition.id),
+        snapshotAfter: { workflowId: definition.workflowId, version: definition.version, enabled: definition.enabled },
+      })
+    })
 
     // Newly-created embedded triggers must be visible to the wildcard event
     // subscriber immediately; invalidate the in-memory trigger cache so the

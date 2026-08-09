@@ -18,6 +18,7 @@ import { serializeCodeWorkflowDefinition } from '../../serialize'
 import { getCodeWorkflow } from '../../../../lib/code-registry'
 import { invalidateTriggerCache } from '../../../../lib/event-trigger-service'
 import { createLogger } from '@open-mercato/shared/lib/logger'
+import { writeDirectWriteAuditLog } from '@open-mercato/shared/lib/crud/audit-write'
 
 const logger = createLogger('workflows')
 
@@ -137,9 +138,28 @@ export async function POST(
       organizationId: definition.organizationId,
     }
 
-    // Hard-delete the DB override row
-    em.remove(definition)
-    await em.flush()
+    // Hard-delete the DB override row.
+    // R2a-custom — this is a HARD delete, so the before-image is the only record
+    // that the customization ever existed. Audited in the same transaction.
+    const resetDefinitionId = String(definition.id)
+    const resetSnapshot = {
+      workflowId: definition.workflowId,
+      version: definition.version,
+      enabled: definition.enabled,
+    }
+    await em.transactional(async () => {
+      em.remove(definition)
+      await em.flush()
+      await writeDirectWriteAuditLog({
+        container,
+        auth,
+        organizationId: removedSnapshot.organizationId ?? null,
+        action: 'deleted',
+        resourceKind: 'workflows.definition',
+        resourceId: resetDefinitionId,
+        snapshotBefore: resetSnapshot,
+      })
+    })
 
     // Trigger ownership falls back to the code registry, so the cached snapshot
     // still holds the embedded triggers of a row that no longer exists (#4425).

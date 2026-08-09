@@ -19,6 +19,7 @@ import { serializeWorkflowDefinition } from '../../serialize'
 import { getCodeWorkflow } from '../../../../lib/code-registry'
 import { invalidateTriggerCache } from '../../../../lib/event-trigger-service'
 import { createLogger } from '@open-mercato/shared/lib/logger'
+import { writeDirectWriteAuditLog } from '@open-mercato/shared/lib/crud/audit-write'
 
 const logger = createLogger('workflows')
 
@@ -92,7 +93,21 @@ export async function POST(request: NextRequest, context: RouteContext) {
       existingOverride.codeWorkflowId = codeDef.workflowId
       existingOverride.updatedBy = auth.sub
       existingOverride.updatedAt = new Date()
-      await em.flush()
+      // R2a-custom — customizing materialises a code-defined workflow as a DB row,
+      // which then shadows the code version. That change of ownership is exactly
+      // the kind of thing an audit trail exists to explain.
+      await em.transactional(async () => {
+        await em.flush()
+        await writeDirectWriteAuditLog({
+          container,
+          auth,
+          organizationId: existingOverride.organizationId ?? null,
+          action: 'updated',
+          resourceKind: 'workflows.definition',
+          resourceId: String(existingOverride.id),
+          snapshotAfter: { workflowId: existingOverride.workflowId, customizedFromCode: true },
+        })
+      })
       saved = existingOverride
     } else {
       const override = em.create(WorkflowDefinition, {
@@ -111,8 +126,19 @@ export async function POST(request: NextRequest, context: RouteContext) {
         createdAt: new Date(),
         updatedAt: new Date(),
       })
-      em.persist(override)
-      await em.flush()
+      await em.transactional(async () => {
+        em.persist(override)
+        await em.flush()
+        await writeDirectWriteAuditLog({
+          container,
+          auth,
+          organizationId: override.organizationId ?? null,
+          action: 'created',
+          resourceKind: 'workflows.definition',
+          resourceId: String(override.id),
+          snapshotAfter: { workflowId: override.workflowId, customizedFromCode: true },
+        })
+      })
       saved = override
     }
 

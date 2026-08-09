@@ -59,6 +59,10 @@ describe('Workflow Definitions API', () => {
       create: jest.fn(),
       persist: jest.fn(function persist(this: any) { return this }),
       flush: jest.fn(),
+      // R2a-custom: routes wrap their write and audit entry in one transaction,
+      // so the mock EntityManager has to model that boundary. Inline execution is
+      // faithful for these tests, which assert what was written and emitted.
+      transactional: jest.fn(async (work: () => Promise<unknown>) => work()),
     }
 
     mockContainer = {

@@ -44,6 +44,10 @@ const mockEm = {
   remove: jest.fn(),
   count: jest.fn(async () => 0),
   flush: jest.fn(async () => undefined),
+  // R2a-custom: routes wrap their write and audit entry in one transaction,
+  // so the mock EntityManager has to model that boundary. Inline execution is
+  // faithful for these tests, which assert what was written and emitted.
+  transactional: jest.fn(async (work: () => Promise<unknown>) => work()),
 }
 
 const mockRbacService = { userHasAllFeatures: jest.fn(async () => true) }

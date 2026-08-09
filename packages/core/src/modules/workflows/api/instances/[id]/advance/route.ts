@@ -27,6 +27,7 @@ import {
   workflowErrorSchema,
 } from '../../../openapi'
 import { createLogger } from '@open-mercato/shared/lib/logger'
+import { writeDirectWriteAuditLog } from '@open-mercato/shared/lib/crud/audit-write'
 
 const logger = createLogger('workflows')
 
@@ -231,6 +232,42 @@ export async function POST(request: NextRequest, context: RouteContext) {
         },
         { status: 400 }
       )
+    }
+
+    // R2a-custom — the one audit write in this batch that is NOT atomic with its
+    // change, deliberately.
+    //
+    // `executeTransition` above runs the transition's activities, which include
+    // CALL_API, CALL_WEBHOOK and SEND_EMAIL. Holding a database transaction
+    // across those would exhaust the connection pool under load, and an
+    // `idle_in_transaction` timeout could roll back a transition whose external
+    // side effects had already happened. That is a worse failure than a missed
+    // audit row, so the transaction is not extended to cover this.
+    //
+    // Nor does a failure here throw: the transition succeeded and its external
+    // effects are real, so reporting failure to the caller would be a lie. It is
+    // logged at error level instead, which is the honest signal — a gap in the
+    // trail that someone must reconcile.
+    try {
+      await writeDirectWriteAuditLog({
+        container,
+        auth,
+        organizationId: instance.organizationId ?? null,
+        action: 'updated',
+        resourceKind: 'workflows.instance',
+        resourceId: String(instance.id),
+        snapshotAfter: {
+          fromStepId: selectedTransition.fromStepId,
+          toStepId: selectedTransition.toStepId,
+        },
+      })
+    } catch (auditError) {
+      logger.error('Workflow instance advanced but the audit entry could not be written', {
+        err: auditError,
+        instanceId: String(instance.id),
+        fromStepId: selectedTransition.fromStepId,
+        toStepId: selectedTransition.toStepId,
+      })
     }
 
     // Reload instance to get updated state

@@ -15,6 +15,7 @@ import { WorkflowInstance } from '../../../../data/entities'
 import * as workflowExecutor from '../../../../lib/workflow-executor'
 import { workflowInstanceResponseSchema, workflowExecutionResultSchema } from '../../../openapi'
 import { createLogger } from '@open-mercato/shared/lib/logger'
+import { writeDirectWriteAuditLog } from '@open-mercato/shared/lib/crud/audit-write'
 
 const logger = createLogger('workflows')
 
@@ -109,7 +110,25 @@ export async function POST(
     instance.errorDetails = null
     instance.updatedAt = new Date()
 
-    await em.flush()
+    // R2a-custom — audits the RETRY DECISION, not the execution that follows.
+    // `executeWorkflow` below runs activities that may call external systems and
+    // take arbitrarily long; holding a database transaction across it would be a
+    // worse defect than the one being fixed. The auditable fact is that a person
+    // re-ran a failed workflow instance, and that is recorded here atomically
+    // with the status change it causes.
+    await em.transactional(async () => {
+      await em.flush()
+      await writeDirectWriteAuditLog({
+        container,
+        auth,
+        organizationId: instance.organizationId ?? null,
+        action: 'updated',
+        resourceKind: 'workflows.instance',
+        resourceId: String(instance.id),
+        snapshotBefore: { status: 'FAILED', errorMessage: previousErrorMessage },
+        snapshotAfter: { status: 'RUNNING', retryCount: instance.retryCount },
+      })
+    })
 
     let result
     try {
