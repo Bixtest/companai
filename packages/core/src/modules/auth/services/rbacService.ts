@@ -6,8 +6,10 @@ import { ApiKey } from '@open-mercato/core/modules/api_keys/data/entities'
 import { findWithDecryption } from '@open-mercato/shared/lib/encryption/find'
 import { buildOrgScopeUserCacheTag, buildOrgScopeTenantCacheTag } from '@open-mercato/core/modules/directory/utils/organizationScope'
 import { matchFeature as sharedMatchFeature, hasAllFeatures as sharedHasAllFeatures } from '@open-mercato/shared/lib/auth/featureMatch'
-import { filterGrantsByEnabledModules, getOwningModuleId, getEnabledModuleIds } from '@open-mercato/shared/security/enabledModulesRegistry'
+import { recordShadowDecision } from '@open-mercato/shared/lib/authority/shadow'
+import { getCapabilityDescriptor } from '@open-mercato/shared/lib/capabilities/registry'
 import { parseSubject } from '@open-mercato/shared/lib/auth/principal'
+import { filterGrantsByEnabledModules, getOwningModuleId, getEnabledModuleIds } from '@open-mercato/shared/security/enabledModulesRegistry'
 
 interface AclData {
   isSuperAdmin: boolean
@@ -441,6 +443,19 @@ export class RbacService {
    * // Returns true if user has 'entities.*', '*', or 'entities.records.view'
    */
   async userHasAllFeatures(userId: string, required: string[], scope: { tenantId: string | null; organizationId: string | null }): Promise<boolean> {
+    const allowed = await this.decideAllFeatures(userId, required, scope)
+    this.shadowResolver(userId, required, scope, allowed)
+    return allowed
+  }
+
+  /**
+   * The permission decision itself — unchanged, and deliberately separate from
+   * the shadow that observes it.
+   *
+   * Splitting them means the shadow physically cannot alter the answer: it runs
+   * after this returns, on a value already computed.
+   */
+  private async decideAllFeatures(userId: string, required: string[], scope: { tenantId: string | null; organizationId: string | null }): Promise<boolean> {
     if (!required.length) return true
     const acl = await this.loadAcl(userId, scope)
     if (acl.isSuperAdmin) {
@@ -451,6 +466,50 @@ export class RbacService {
     }
     if (acl.organizations && scope.organizationId && !acl.organizations.includes(scope.organizationId) && !acl.organizations.includes('__all__')) return false
     return this.hasAllFeatures(required, filterGrantsByEnabledModules(acl.features))
+  }
+
+  /**
+   * Runs the authority resolver beside the answer, and records where it differs.
+   *
+   * **This is the one place it needs to go.** All 102 call sites in the platform
+   * reach a permission decision through `userHasAllFeatures`, so instrumenting
+   * the method covers every one of them, and every future one, without touching
+   * a single caller.
+   *
+   * Synchronous and allocation-light on purpose: it runs on every permission
+   * check in the product. No database access, no organization-graph lookup —
+   * that would add a query per check for a diagnostic. The graph ceiling is
+   * therefore absent from the shadow's inputs, which means the shadow
+   * *understates* the eventual constraint. Understating is the safe direction
+   * for a measurement whose purpose is to find surprises before they are
+   * enforced.
+   */
+  private shadowResolver(
+    userId: string,
+    required: string[],
+    scope: { tenantId: string | null; organizationId: string | null },
+    allowed: boolean,
+  ): void {
+    try {
+      const principal = parseSubject(userId)
+      for (const feature of required) {
+        const capability = getCapabilityDescriptor(feature)
+        // An undescribed capability is a coverage gap, not a disagreement.
+        // Wildcards and feature ids that no module declares fall through here.
+        if (!capability) continue
+        recordShadowDecision({
+          actorKind: principal.kind,
+          actorId: principal.id,
+          legacyAllowed: allowed,
+          capability,
+          organizationId: scope.organizationId,
+          tenantId: scope.tenantId,
+        })
+      }
+    } catch {
+      // The shadow observes; it never participates. A throw here would turn a
+      // diagnostic into an outage.
+    }
   }
 
   /**
