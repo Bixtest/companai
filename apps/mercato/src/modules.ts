@@ -113,7 +113,38 @@ export const moduleOverrideExamples: ModuleOverrides = {
  * Rationale and the decision behind it: workspace/references/parked-modules.md
  */
 export const enabledModules: ModuleEntry[] = [
-  { id: 'dashboards', from: '@open-mercato/core' },
+  {
+    id: 'dashboards',
+    from: '@open-mercato/core',
+    overrides: {
+      // Ten of the dashboards module's own widgets read ERP data — sales orders,
+      // customer people and deals. Those modules are parked, so the widgets have
+      // no data source and render a red "Failed to load …" panel on the admin
+      // start page.
+      //
+      // Parking a module does not disable widgets that *other* enabled modules
+      // ship about it: the widget lives in `dashboards`, which we keep, and only
+      // its feature requirements point at the parked module. This is the
+      // sanctioned way to switch them off — one line each, reversed by deleting
+      // the line, exactly like un-parking.
+      //
+      // Restore these together with `sales` / `customers`.
+      widgets: {
+        dashboard: {
+          'dashboards:aov-kpi:widget': null,
+          'dashboards:new-customers-kpi:widget': null,
+          'dashboards:orders-by-status:widget': null,
+          'dashboards:orders-kpi:widget': null,
+          'dashboards:pipeline-summary:widget': null,
+          'dashboards:revenue-kpi:widget': null,
+          'dashboards:revenue-trend:widget': null,
+          'dashboards:sales-by-region:widget': null,
+          'dashboards:top-customers:widget': null,
+          'dashboards:top-products:widget': null,
+        },
+      },
+    },
+  },
   { id: 'auth', from: '@open-mercato/core' },
   { id: 'directory', from: '@open-mercato/core' },
   { id: 'perspectives', from: '@open-mercato/core' },
