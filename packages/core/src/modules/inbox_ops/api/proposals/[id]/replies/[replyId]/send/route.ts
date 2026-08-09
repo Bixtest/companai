@@ -5,6 +5,7 @@ import { parseBooleanWithDefault } from '@open-mercato/shared/lib/boolean'
 import { resolveDefaultEmailFromAddress } from '@open-mercato/shared/lib/email/config'
 import type { OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
 import { findOneWithDecryption } from '@open-mercato/shared/lib/encryption/find'
+import { writeDirectWriteAuditLog } from '@open-mercato/shared/lib/crud/audit-write'
 import { InboxProposalAction, InboxEmail } from '../../../../../../data/entities'
 import { draftReplyPayloadSchema } from '../../../../../../data/validators'
 import { emitInboxOpsEvent } from '../../../../../../events'
@@ -202,6 +203,40 @@ export async function POST(req: Request) {
       ...(messagesResult ? { messageRecordId: messagesResult.messageId } : {}),
     }
     await ctx.em.flush()
+
+    // R2c — an outbound message sent to a customer on the tenant's behalf, from
+    // text a model drafted. Who was contacted is exactly the kind of fact an
+    // investigation asks about; the body is not recorded, only the recipient and
+    // the provider's message id, so the message itself stays where its own
+    // permissions apply.
+    //
+    // Recorded after the fact and outside a transaction, because the email has
+    // already left. It logs rather than throws for the same reason the workflows
+    // advance route does: the send succeeded, and reporting failure would be a
+    // lie the caller cannot act on.
+    try {
+      await writeDirectWriteAuditLog({
+        container: ctx.container,
+        auth: ctx.auth,
+        organizationId: ctx.organizationId,
+        action: 'completed',
+        resourceKind: 'inbox_ops.reply',
+        resourceId: action.id,
+        snapshotAfter: {
+          proposalId: proposal.id,
+          toAddress,
+          sentMessageId,
+          messageRecordId: messagesResult?.messageId ?? null,
+        },
+        context: { source: 'inbox_ops', proposedBy: 'ai', undoable: false },
+      })
+    } catch (auditError) {
+      logger.error('Failed to record sent reply in the audit log', {
+        actionId: action.id,
+        proposalId: proposal.id,
+        err: auditError,
+      })
+    }
 
     try {
       await emitInboxOpsEvent('inbox_ops.reply.sent', {

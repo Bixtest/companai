@@ -63,6 +63,21 @@ export function deriveActionLogActionType(input: Pick<ProjectionInput, 'actionLa
     return 'edit'
   }
 
+  // Decision verbs — a human accepting, rejecting or completing something a
+  // machine proposed (`inbox_ops`). They are status transitions, so `edit` is
+  // the honest bucket. Without this they fall through to `system`, which reads
+  // as "nobody did this" and hides the entry from every action-type filter —
+  // and a human-in-the-loop approval is the last record that should be hard to
+  // find. The precise verb stays in `actionLabel`.
+  if (
+    normalizedCommandId.endsWith('.accepted') ||
+    normalizedCommandId.endsWith('.rejected') ||
+    normalizedCommandId.endsWith('.completed') ||
+    normalizedCommandId.endsWith('.failed')
+  ) {
+    return 'edit'
+  }
+
   return 'system'
 }
 

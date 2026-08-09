@@ -14,7 +14,12 @@ const mockSettings = {
   updatedAt: new Date(CURRENT_VERSION),
 }
 
-const mockEm = { flush: jest.fn(async () => undefined) }
+// `transactional` matters here: the settings write and its audit entry commit
+// together (R2c), on the EntityManager the container hands out.
+const mockEm = {
+  flush: jest.fn(async () => undefined),
+  transactional: jest.fn(async (cb: (trx: unknown) => unknown) => cb(mockEm)),
+}
 const mockFindOneWithDecryption = jest.fn()
 
 jest.mock('@open-mercato/shared/lib/encryption/find', () => ({
@@ -24,7 +29,7 @@ jest.mock('@open-mercato/shared/lib/encryption/find', () => ({
 jest.mock('../../routeHelpers', () => ({
   resolveRequestContext: jest.fn(async () => ({
     em: mockEm,
-    container: { resolve: () => null },
+    container: { resolve: (token: string) => (token === 'em' ? mockEm : null) },
     tenantId: 'tenant-1',
     organizationId: 'org-1',
     scope: { tenantId: 'tenant-1', organizationId: 'org-1' },

@@ -23,6 +23,9 @@ const mockEm = {
   begin: jest.fn(),
   commit: jest.fn(),
   rollback: jest.fn(),
+  // Audited writes open their transaction on the container's EntityManager
+  // (R2c); the mock runs the callback directly on itself.
+  transactional: jest.fn(async (cb: (trx: unknown) => unknown) => cb(mockEm)),
 }
 
 const mockContainer = {
@@ -156,7 +159,11 @@ describe('POST /api/inbox_ops/emails/[id]/reprocess', () => {
       resolved: false,
     } as unknown as InboxDiscrepancy
 
-    mockFindOneWithDecryption.mockResolvedValueOnce(email)
+    mockFindOneWithDecryption
+      .mockResolvedValueOnce(email)
+      // Re-read inside the transaction: the retirement, the status reset and the
+      // audit entry commit together (R2c), on the container's EntityManager.
+      .mockResolvedValueOnce(email)
     mockFindWithDecryption
       .mockResolvedValueOnce([proposal])
       .mockResolvedValueOnce([pendingAction, failedAction])
@@ -197,12 +204,8 @@ describe('POST /api/inbox_ops/emails/[id]/reprocess', () => {
       expect.objectContaining({ emailId: 'email-1' }),
     )
 
-    expect(mockEm.begin).toHaveBeenCalledTimes(1)
-    expect(mockEm.commit).toHaveBeenCalledTimes(1)
-    expect(mockEm.rollback).not.toHaveBeenCalled()
-    expect(mockEm.begin.mock.invocationCallOrder[0]).toBeLessThan(
-      mockEm.commit.mock.invocationCallOrder[0],
-    )
+    // One transaction spans the retirement, the status reset and the audit entry.
+    expect(mockEm.transactional).toHaveBeenCalledTimes(1)
   })
 
   it('rolls back and emits no events when the atomic flush fails', async () => {
@@ -235,7 +238,9 @@ describe('POST /api/inbox_ops/emails/[id]/reprocess', () => {
       executedByUserId: null,
     } as unknown as InboxProposalAction
 
-    mockFindOneWithDecryption.mockResolvedValueOnce(email)
+    mockFindOneWithDecryption
+      .mockResolvedValueOnce(email)
+      .mockResolvedValueOnce(email)
     mockFindWithDecryption
       .mockResolvedValueOnce([proposal])
       .mockResolvedValueOnce([pendingAction])
@@ -244,10 +249,10 @@ describe('POST /api/inbox_ops/emails/[id]/reprocess', () => {
 
     const response = await POST(makeRequest())
 
+    // A failure inside the transaction propagates: nothing is committed and no
+    // event announces a change that did not happen.
     expect(response.status).toBe(500)
-    expect(mockEm.begin).toHaveBeenCalledTimes(1)
-    expect(mockEm.rollback).toHaveBeenCalledTimes(1)
-    expect(mockEm.commit).not.toHaveBeenCalled()
+    expect(mockEm.transactional).toHaveBeenCalledTimes(1)
     expect(mockEmitInboxOpsEvent).not.toHaveBeenCalled()
   })
 })

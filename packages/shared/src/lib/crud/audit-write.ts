@@ -30,6 +30,30 @@ export type ActionLogWriter = {
 }
 
 /**
+ * The verb recorded for a direct write.
+ *
+ * The first three are the CRUD lifecycle. The rest are **decision verbs**: a
+ * human accepting, rejecting or completing something a machine proposed
+ * (`inbox_ops`). Recording those as `updated` would technically be true and
+ * practically useless — "who approved the AI's order?" is the question this
+ * platform exists to answer, and it cannot be answered from a log that says
+ * a row was updated.
+ *
+ * **Adding a verb here means classifying it** in `deriveActionLogActionType`
+ * (`packages/core/src/modules/audit_logs/lib/projections.ts`). An unclassified
+ * verb falls through to `system`, which reads as "no human did this" — the
+ * opposite of what a decision record means.
+ */
+export type DirectWriteAuditAction =
+  | 'created'
+  | 'updated'
+  | 'deleted'
+  | 'accepted'
+  | 'rejected'
+  | 'completed'
+  | 'failed'
+
+/**
  * Records a direct (non-command) CRUD write in the action log.
  *
  * **Why this exists.** `makeCrudRoute` has two write paths. Routes that declare
@@ -59,16 +83,31 @@ export type ActionLogWriter = {
  * This must stay inside a transaction. Called after a commit it would report a
  * failure for a change that already happened, which is worse than swallowing —
  * the caller would be actively misinformed.
+ *
+ * **And the transaction must be opened on the container's EntityManager.** The
+ * audit service is `.scoped()` and holds `container.resolve('em')`, which is
+ * created with `useContext: true` and therefore joins whatever transaction is
+ * active in the async context. A plain `em.fork()` is created with
+ * `useContext: false` (MikroORM's default), so a transaction opened on a fork
+ * never reaches this write: the business change would roll back and the audit
+ * row would survive it. Open the transaction on the container's EM.
  */
 export async function writeDirectWriteAuditLog(options: {
   container: { resolve: (name: string) => unknown }
   auth: { sub?: string | null; tenantId?: string | null; orgId?: string | null } | null | undefined
   organizationId: string | null
-  action: 'created' | 'updated' | 'deleted'
+  action: DirectWriteAuditAction
   resourceKind: string | null
   resourceId: string | null
   snapshotBefore?: Record<string, unknown> | undefined
   snapshotAfter?: Record<string, unknown> | undefined
+  /**
+   * Extra context merged over the default. Use it for facts about the write's
+   * origin that the resource kind alone does not carry — above all
+   * `proposedBy: 'ai'`, which is what separates a change a person decided on
+   * from one a machine suggested and a person approved.
+   */
+  context?: Record<string, unknown> | undefined
 }): Promise<void> {
   if (!options.resourceKind) return
   if (SKIPPED_ACTION_LOG_RESOURCE_KINDS.has(options.resourceKind)) return
@@ -96,6 +135,6 @@ export async function writeDirectWriteAuditLog(options: {
     actorUserId: options.auth?.sub ?? undefined,
     ...(options.snapshotBefore ? { snapshotBefore: options.snapshotBefore } : {}),
     ...(options.snapshotAfter ? { snapshotAfter: options.snapshotAfter } : {}),
-    context: { source: 'crud-route', undoable: false },
+    context: { source: 'crud-route', undoable: false, ...(options.context ?? {}) },
   })
 }

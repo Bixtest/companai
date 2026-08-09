@@ -7,6 +7,8 @@ import { findOneWithDecryption, findWithDecryption } from '@open-mercato/shared/
 import type { InboxActionExecutionContext } from '@open-mercato/shared/modules/inbox-actions'
 import { InboxProposal, InboxProposalAction, InboxDiscrepancy } from '../data/entities'
 import type { InboxActionStatus, InboxActionType, InboxProposalStatus } from '../data/entities'
+import { writeDirectWriteAuditLog } from '@open-mercato/shared/lib/crud/audit-write'
+import { createLogger } from '@open-mercato/shared/lib/logger'
 import { REQUIRED_FEATURES_MAP } from './constants'
 import { formatZodErrors } from './validation'
 import {
@@ -70,6 +72,64 @@ interface TypeExecutionResult {
 
 const ACTION_EXECUTABLE_STATUSES: InboxActionStatus[] = ['pending', 'failed']
 
+const logger = createLogger('inbox_ops').child({ component: 'execution-engine' })
+
+/**
+ * R2c — the decision record.
+ *
+ * This module is the product's core loop: an LLM reads a forwarded email and
+ * proposes actions, a human accepts or rejects each one, and accepted ones
+ * execute against other modules. The execution was already audited — every
+ * accepted action runs through the command bus, which writes its own entry with
+ * an undo token. **The decision was not.** Nothing recorded that a machine
+ * proposed the change and which person approved it, which is the one fact a
+ * governance layer exists to hold.
+ *
+ * So each decision is recorded here, next to the status transition, rather than
+ * in the four routes that reach it.
+ */
+const DECISION_RESOURCE_KIND = 'inbox_ops.proposal_action'
+const PROPOSAL_RESOURCE_KIND = 'inbox_ops.proposal'
+
+/**
+ * The EntityManager an audited write must run on.
+ *
+ * `ctx.em` is a `fork()`, and MikroORM creates forks with `useContext: false` —
+ * a transaction opened on one is invisible to the audit service, which holds the
+ * container's EM. Opening the transaction on the container's EM (created with
+ * `useContext: true`) is what puts both writes in the same transaction.
+ */
+function auditEntityManager(ctx: ExecutionContext): EntityManager {
+  return ctx.container.resolve('em') as EntityManager
+}
+
+function auditAuth(ctx: ExecutionContext) {
+  return ctx.auth ?? { sub: ctx.userId, tenantId: ctx.tenantId, orgId: ctx.organizationId }
+}
+
+/**
+ * What the decision was about, in terms safe to keep in a second table.
+ *
+ * Deliberately excludes `description` and `payload`. Both are encrypted tenant
+ * PII — extracted order lines, contact details, message text — and copying them
+ * into the action log would duplicate that content under a different retention
+ * policy and a different set of readers. The entry records the decision and
+ * points at the action; the content stays where its own permissions apply.
+ *
+ * `confidence` is kept because it is the governance-relevant part: how sure the
+ * model was about what a person went on to approve.
+ */
+function decisionSnapshot(action: InboxProposalAction): Record<string, unknown> {
+  return {
+    proposalId: action.proposalId,
+    actionType: action.actionType,
+    confidence: action.confidence,
+    requiredFeature: action.requiredFeature ?? null,
+  }
+}
+
+const AI_PROPOSAL_CONTEXT = { source: 'inbox_ops', proposedBy: 'ai', undoable: false } as const
+
 export async function executeAction(
   action: InboxProposalAction,
   ctx: ExecutionContext,
@@ -84,21 +144,42 @@ export async function executeAction(
     return { success: false, error: message, statusCode }
   }
 
-  const claimed = await em.nativeUpdate(
-    InboxProposalAction,
-    {
-      id: action.id,
-      proposalId: action.proposalId,
-      tenantId: ctx.tenantId,
+  // The claim is the moment the human's decision takes effect, so the decision
+  // is recorded with it, in one transaction. Recording it after `executeByType`
+  // instead would lose the approval entirely if the process died mid-execution —
+  // and that is exactly the case where knowing who approved what matters most.
+  const claimed = await auditEntityManager(ctx).transactional(async (trx) => {
+    const rows = await trx.nativeUpdate(
+      InboxProposalAction,
+      {
+        id: action.id,
+        proposalId: action.proposalId,
+        tenantId: ctx.tenantId,
+        organizationId: ctx.organizationId,
+        status: { $in: ACTION_EXECUTABLE_STATUSES },
+        deletedAt: null,
+      },
+      {
+        status: 'processing',
+        executionError: null,
+      },
+    )
+
+    if (rows === 0) return 0
+
+    await writeDirectWriteAuditLog({
+      container: ctx.container,
+      auth: auditAuth(ctx),
       organizationId: ctx.organizationId,
-      status: { $in: ACTION_EXECUTABLE_STATUSES },
-      deletedAt: null,
-    },
-    {
-      status: 'processing',
-      executionError: null,
-    },
-  )
+      action: 'accepted',
+      resourceKind: DECISION_RESOURCE_KIND,
+      resourceId: action.id,
+      snapshotAfter: decisionSnapshot(action),
+      context: AI_PROPOSAL_CONTEXT,
+    })
+
+    return rows
+  })
 
   if (claimed === 0) {
     return { success: false, error: 'Action already processed', statusCode: 409 }
@@ -178,6 +259,41 @@ export async function executeAction(
 
     await recalculateProposalStatus(em, freshAction.proposalId, { tenantId: ctx.tenantId, organizationId: ctx.organizationId })
 
+    // The outcome, recorded only when it fails.
+    //
+    // A successful execution needs no second entry: it ran through the command
+    // bus, which wrote its own record — `sales.orders.create` and the like,
+    // attributed to the approving user, with an undo token. Adding an
+    // `inbox_ops.executed` entry beside it would double the volume and say
+    // nothing new.
+    //
+    // A failure writes nothing anywhere, and without this the trail reads
+    // "approved, then nothing" — indistinguishable from still processing.
+    //
+    // Recorded after the fact and outside any transaction, because
+    // `executeByType` has already reached other modules and possibly external
+    // systems. It logs rather than throws for the same reason the workflows
+    // advance route does: the caller is being told the truth about the
+    // execution, and an audit failure must not turn that into a lie.
+    try {
+      await writeDirectWriteAuditLog({
+        container: ctx.container,
+        auth: auditAuth(ctx),
+        organizationId: ctx.organizationId,
+        action: 'failed',
+        resourceKind: DECISION_RESOURCE_KIND,
+        resourceId: freshAction.id,
+        snapshotAfter: { ...decisionSnapshot(freshAction), statusCode },
+        context: AI_PROPOSAL_CONTEXT,
+      })
+    } catch (auditErr) {
+      logger.error('Failed to record action execution failure in the audit log', {
+        actionId: freshAction.id,
+        proposalId: freshAction.proposalId,
+        err: auditErr,
+      })
+    }
+
     if (ctx.eventBus) {
       await ctx.eventBus.emit('inbox_ops.action.failed', {
         actionId: freshAction.id,
@@ -199,22 +315,44 @@ export async function rejectAction(
 ): Promise<void> {
   const em = ctx.em.fork()
   const rejectedAt = new Date()
-  const claimed = await em.nativeUpdate(
-    InboxProposalAction,
-    {
-      id: action.id,
-      proposalId: action.proposalId,
-      tenantId: ctx.tenantId,
+
+  // Rejection is fully transactional — unlike acceptance it triggers no work
+  // outside the database, so there is nothing to hold a transaction across. A
+  // declined proposal is as much a governed decision as an approved one: it is
+  // the record that shows a person reviewed what the model suggested.
+  const claimed = await auditEntityManager(ctx).transactional(async (trx) => {
+    const rows = await trx.nativeUpdate(
+      InboxProposalAction,
+      {
+        id: action.id,
+        proposalId: action.proposalId,
+        tenantId: ctx.tenantId,
+        organizationId: ctx.organizationId,
+        status: { $in: ACTION_EXECUTABLE_STATUSES },
+        deletedAt: null,
+      },
+      {
+        status: 'rejected',
+        executedAt: rejectedAt,
+        executedByUserId: ctx.userId,
+      },
+    )
+
+    if (rows === 0) return 0
+
+    await writeDirectWriteAuditLog({
+      container: ctx.container,
+      auth: auditAuth(ctx),
       organizationId: ctx.organizationId,
-      status: { $in: ACTION_EXECUTABLE_STATUSES },
-      deletedAt: null,
-    },
-    {
-      status: 'rejected',
-      executedAt: rejectedAt,
-      executedByUserId: ctx.userId,
-    },
-  )
+      action: 'rejected',
+      resourceKind: DECISION_RESOURCE_KIND,
+      resourceId: action.id,
+      snapshotAfter: decisionSnapshot(action),
+      context: AI_PROPOSAL_CONTEXT,
+    })
+
+    return rows
+  })
   if (claimed === 0) return
 
   const freshAction = await findOneWithDecryption(
@@ -248,32 +386,50 @@ export async function rejectProposal(
   const em = ctx.em.fork()
   const rejectedAt = new Date()
 
-  await em.nativeUpdate(
-    InboxProposalAction,
-    {
-      proposalId,
-      status: { $in: ACTION_EXECUTABLE_STATUSES },
-      tenantId: ctx.tenantId,
-      organizationId: ctx.organizationId,
-      deletedAt: null,
-    },
-    {
-      status: 'rejected',
-      executedAt: rejectedAt,
-      executedByUserId: ctx.userId,
-    },
-  )
+  // Rejecting a whole proposal declines every pending action in it at once, so
+  // the two updates and the record of the decision commit together — a partial
+  // rejection with no account of who made it is precisely the state this
+  // repair exists to prevent.
+  await auditEntityManager(ctx).transactional(async (trx) => {
+    const rows = await trx.nativeUpdate(
+      InboxProposalAction,
+      {
+        proposalId,
+        status: { $in: ACTION_EXECUTABLE_STATUSES },
+        tenantId: ctx.tenantId,
+        organizationId: ctx.organizationId,
+        deletedAt: null,
+      },
+      {
+        status: 'rejected',
+        executedAt: rejectedAt,
+        executedByUserId: ctx.userId,
+      },
+    )
 
-  await em.nativeUpdate(
-    InboxDiscrepancy,
-    {
-      proposalId,
-      resolved: false,
-      tenantId: ctx.tenantId,
+    await trx.nativeUpdate(
+      InboxDiscrepancy,
+      {
+        proposalId,
+        resolved: false,
+        tenantId: ctx.tenantId,
+        organizationId: ctx.organizationId,
+      },
+      { resolved: true },
+    )
+
+    await writeDirectWriteAuditLog({
+      container: ctx.container,
+      auth: auditAuth(ctx),
       organizationId: ctx.organizationId,
-    },
-    { resolved: true },
-  )
+      action: 'rejected',
+      resourceKind: PROPOSAL_RESOURCE_KIND,
+      resourceId: proposalId,
+      snapshotAfter: { rejectedActionCount: rows },
+      context: AI_PROPOSAL_CONTEXT,
+    })
+
+  })
 
   await recalculateProposalStatus(em, proposalId, { tenantId: ctx.tenantId, organizationId: ctx.organizationId })
 

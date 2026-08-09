@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server'
+import type { EntityManager } from '@mikro-orm/postgresql'
 import type { OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
 import { runWithCacheTenant } from '@open-mercato/cache'
 import { findOneWithDecryption } from '@open-mercato/shared/lib/encryption/find'
+import { writeDirectWriteAuditLog } from '@open-mercato/shared/lib/crud/audit-write'
 import { enforceCommandOptimisticLockWithGuards } from '@open-mercato/shared/lib/crud/optimistic-lock-command'
 import { isCrudHttpError } from '@open-mercato/shared/lib/crud/errors'
 import { InboxSettings } from '../../data/entities'
@@ -118,18 +120,60 @@ export async function PATCH(req: Request) {
       throw err
     }
 
-    if (parsed.data.workingLanguage !== undefined) {
-      settings.workingLanguage = parsed.data.workingLanguage
-    }
-    if (parsed.data.isActive !== undefined) {
-      settings.isActive = parsed.data.isActive
-    }
-    if (parsed.data.webhookSecret !== undefined) {
-      // Empty/null clears the per-tenant secret (reverts to the global key).
-      settings.webhookSecret = parsed.data.webhookSecret ? parsed.data.webhookSecret : null
-    }
+    // R2c — the change and its audit entry commit together. This route sets the
+    // per-tenant webhook signing secret, so an unrecorded change here is a change
+    // to who may inject email into the tenant.
+    //
+    // The record is loaded inside the transaction: an entity loaded on the outer
+    // EntityManager belongs to that manager's unit of work, and flushing from
+    // inside the transaction would not see it.
+    const em = ctx.container.resolve('em') as EntityManager
+    const updated = await em.transactional(async (trx) => {
+      const record = await findOneWithDecryption(
+        trx,
+        InboxSettings,
+        { id: settings.id, deletedAt: null },
+        undefined,
+        ctx.scope,
+      )
+      if (!record) return null
 
-    await ctx.em.flush()
+      const changedFields: string[] = []
+      if (parsed.data.workingLanguage !== undefined) {
+        record.workingLanguage = parsed.data.workingLanguage
+        changedFields.push('workingLanguage')
+      }
+      if (parsed.data.isActive !== undefined) {
+        record.isActive = parsed.data.isActive
+        changedFields.push('isActive')
+      }
+      if (parsed.data.webhookSecret !== undefined) {
+        // Empty/null clears the per-tenant secret (reverts to the global key).
+        record.webhookSecret = parsed.data.webhookSecret ? parsed.data.webhookSecret : null
+        changedFields.push('webhookSecret')
+      }
+
+      await trx.flush()
+
+      // Which fields changed, never their values. `webhookSecret` is a signing
+      // credential; the same reasoning as `integrations/credentials` — a snapshot
+      // would copy it into a table with different retention and different readers.
+      await writeDirectWriteAuditLog({
+        container: ctx.container,
+        auth: ctx.auth,
+        organizationId: ctx.organizationId,
+        action: 'updated',
+        resourceKind: 'inbox_ops.settings',
+        resourceId: record.id,
+        snapshotAfter: { changedFields, webhookSecretSet: Boolean(record.webhookSecret) },
+      })
+
+      return record
+    })
+
+    if (!updated) {
+      return NextResponse.json({ error: 'Settings not found' }, { status: 404 })
+    }
 
     const cache = resolveCache(ctx.container)
     await runWithCacheTenant(ctx.tenantId, () => invalidateSettingsCache(cache, ctx.tenantId))
@@ -137,12 +181,12 @@ export async function PATCH(req: Request) {
     return NextResponse.json({
       ok: true,
       settings: {
-        id: settings.id,
-        inboxAddress: settings.inboxAddress,
-        isActive: settings.isActive,
-        workingLanguage: settings.workingLanguage,
-        webhookSecretSet: Boolean(settings.webhookSecret),
-        updatedAt: settings.updatedAt instanceof Date ? settings.updatedAt.toISOString() : (settings.updatedAt ?? null),
+        id: updated.id,
+        inboxAddress: updated.inboxAddress,
+        isActive: updated.isActive,
+        workingLanguage: updated.workingLanguage,
+        webhookSecretSet: Boolean(updated.webhookSecret),
+        updatedAt: updated.updatedAt instanceof Date ? updated.updatedAt.toISOString() : (updated.updatedAt ?? null),
       },
     })
   } catch (err) {

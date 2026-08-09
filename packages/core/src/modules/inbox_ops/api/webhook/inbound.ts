@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { Webhook } from 'svix'
 import { Resend } from 'resend'
 import { createRequestContainer } from '@open-mercato/shared/lib/di/container'
+import { writeDirectWriteAuditLog } from '@open-mercato/shared/lib/crud/audit-write'
 import type { OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
 import type { EntityManager } from '@mikro-orm/postgresql'
 import type { CacheStrategy } from '@open-mercato/cache'
@@ -362,30 +363,53 @@ export async function POST(req: Request) {
   const maxTextSize = parseInt(process.env.INBOX_OPS_MAX_TEXT_SIZE || '204800', 10)
   const cleanedText = parsed.cleanedText.slice(0, maxTextSize)
 
-  const email = em.create(InboxEmail, {
-    messageId: parsed.messageId,
-    contentHash: parsed.contentHash,
-    forwardedByAddress: parsed.from.email,
-    forwardedByName: parsed.from.name || null,
-    toAddress,
-    subject: parsed.subject,
-    replyTo: parsed.replyTo,
-    inReplyTo: parsed.inReplyTo,
-    emailReferences: parsed.references,
-    rawText: parsed.rawText,
-    rawHtml: parsed.rawHtml,
-    cleanedText,
-    threadMessages: parsed.threadMessages,
-    detectedLanguage: parsed.detectedLanguage,
-    receivedAt: new Date(),
-    status: 'received' as const,
-    isActive: true,
-    organizationId: settings.organizationId,
-    tenantId: settings.tenantId,
-  })
+  // R2c — ingestion is the origin of every proposal this module later asks a
+  // human to approve, so it is recorded with the insert. There is no user here:
+  // the entry is attributed to no actor, which the audit log projects as a
+  // system action — the truth of what happened.
+  //
+  // Nothing from the message is snapshotted. Subject and body are encrypted
+  // tenant content on the email row; the entry records that an email arrived
+  // and from which address, and points at the row.
+  const containerEm = container.resolve('em') as EntityManager
+  const email = await containerEm.transactional(async (trx) => {
+    const created = trx.create(InboxEmail, {
+      messageId: parsed.messageId,
+      contentHash: parsed.contentHash,
+      forwardedByAddress: parsed.from.email,
+      forwardedByName: parsed.from.name || null,
+      toAddress,
+      subject: parsed.subject,
+      replyTo: parsed.replyTo,
+      inReplyTo: parsed.inReplyTo,
+      emailReferences: parsed.references,
+      rawText: parsed.rawText,
+      rawHtml: parsed.rawHtml,
+      cleanedText,
+      threadMessages: parsed.threadMessages,
+      detectedLanguage: parsed.detectedLanguage,
+      receivedAt: new Date(),
+      status: 'received' as const,
+      isActive: true,
+      organizationId: settings.organizationId,
+      tenantId: settings.tenantId,
+    })
 
-  em.persist(email)
-  await em.flush()
+    trx.persist(created)
+    await trx.flush()
+
+    await writeDirectWriteAuditLog({
+      container,
+      auth: { sub: null, tenantId: settings.tenantId, orgId: settings.organizationId },
+      organizationId: settings.organizationId,
+      action: 'created',
+      resourceKind: 'inbox_ops.email',
+      resourceId: created.id,
+      snapshotAfter: { source: 'webhook', fromAddress: parsed.from.email },
+    })
+
+    return created
+  })
 
   try {
     await emitInboxOpsEvent('inbox_ops.email.received', {

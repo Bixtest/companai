@@ -22,6 +22,9 @@ jest.mock('@open-mercato/shared/lib/auth/server', () => ({
 const mockEm = {
   fork: jest.fn(),
   flush: jest.fn(),
+  // Editing a proposed action records the edit in the same transaction (R2c),
+  // opened on the container's EntityManager; the mock runs it on itself.
+  transactional: jest.fn(async (cb: (trx: unknown) => unknown) => cb(mockEm)),
 }
 
 const mockContainer = {
@@ -82,6 +85,10 @@ describe('PATCH /api/inbox_ops/proposals/[id]/actions/[actionId]', () => {
     mockFindOneWithDecryption
       .mockResolvedValueOnce(action)
       .mockResolvedValueOnce(proposal)
+      // The route re-reads the action inside the transaction that records the
+      // edit: an entity belongs to the EntityManager that loaded it, and the
+      // audited write runs on the container's (R2c).
+      .mockResolvedValueOnce(action)
 
     const response = await PATCH(makeRequest({ payload: { customerName: 'New Name' } }))
     const payload = await response.json()

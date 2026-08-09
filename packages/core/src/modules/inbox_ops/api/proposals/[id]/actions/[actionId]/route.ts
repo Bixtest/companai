@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server'
+import type { EntityManager } from '@mikro-orm/postgresql'
 import type { OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
 import { runWithCacheTenant } from '@open-mercato/cache'
+import { findOneWithDecryption } from '@open-mercato/shared/lib/encryption/find'
+import { writeDirectWriteAuditLog } from '@open-mercato/shared/lib/crud/audit-write'
+import { InboxProposalAction } from '../../../../../data/entities'
 import {
   runCrudMutationGuardAfterSuccess,
   validateCrudMutationGuard,
@@ -61,8 +65,43 @@ export async function PATCH(req: Request) {
       return NextResponse.json(guardResult.body, { status: guardResult.status })
     }
 
-    action.payload = mergedPayload
-    await ctx.em.flush()
+    // R2c — editing what the model proposed, before approving it, is a governed
+    // act: the change a person ends up approving is no longer the one the model
+    // suggested. The edit and its record commit together.
+    //
+    // The payload itself is not snapshotted — it is encrypted tenant PII
+    // (extracted order lines, contact details) and belongs in the proposal, not
+    // duplicated into the audit log under different retention.
+    const em = ctx.container.resolve('em') as EntityManager
+    await em.transactional(async (trx) => {
+      const record = await findOneWithDecryption(
+        trx,
+        InboxProposalAction,
+        { id: action.id, deletedAt: null },
+        undefined,
+        { tenantId: ctx.tenantId, organizationId: ctx.organizationId },
+      )
+      if (!record) return
+
+      record.payload = mergedPayload
+      await trx.flush()
+      action.payload = mergedPayload
+
+      await writeDirectWriteAuditLog({
+        container: ctx.container,
+        auth: ctx.auth,
+        organizationId: ctx.organizationId,
+        action: 'updated',
+        resourceKind: 'inbox_ops.proposal_action',
+        resourceId: record.id,
+        snapshotAfter: {
+          proposalId: record.proposalId,
+          actionType: record.actionType,
+          editedFields: Object.keys(parsed.data.payload ?? {}).sort((left, right) => left.localeCompare(right)),
+        },
+        context: { source: 'inbox_ops', proposedBy: 'ai', undoable: false },
+      })
+    })
 
     if (guardResult?.ok && guardResult.shouldRunAfterSuccess) {
       await runCrudMutationGuardAfterSuccess(ctx.container, {

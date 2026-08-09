@@ -45,8 +45,14 @@ function createMockEm() {
     find: jest.fn(),
     nativeUpdate: jest.fn(),
     flush: jest.fn(),
+    // A real EntityManager runs the callback inside a transaction; the mock runs
+    // it directly on itself. The engine claims an action and records the human's
+    // decision in one transaction (R2c), so a mock without this reports a null
+    // failure instead of the behaviour under test.
+    transactional: jest.fn(),
   }
   em.fork.mockReturnValue(em)
+  em.transactional.mockImplementation(async (cb: (trx: unknown) => unknown) => cb(em))
   em.flush.mockResolvedValue(undefined)
   return em
 }
@@ -63,12 +69,21 @@ const mockEventBus = {
   emit: jest.fn(),
 }
 
+// The EntityManager the container hands out. Audited writes open their
+// transaction on this one rather than on `ctx.em` — see `auditEntityManager` in
+// executionEngine.ts for why a fork will not do. `makeCtx` points it at the
+// mock EM the test is asserting on.
+let containerEm: ReturnType<typeof createMockEm> | null = null
+
+function resolveMockToken(token: string): unknown {
+  if (token === 'em') return containerEm
+  if (token === 'rbacService') return mockRbacService
+  if (token === 'commandBus') return mockCommandBus
+  return null
+}
+
 const mockContainer = {
-  resolve: jest.fn((token: string) => {
-    if (token === 'rbacService') return mockRbacService
-    if (token === 'commandBus') return mockCommandBus
-    return null
-  }),
+  resolve: jest.fn(resolveMockToken),
 }
 
 const MockCustomerEntity = class {} as unknown
@@ -79,6 +94,7 @@ const MockDictionary = class {} as unknown
 const MockDictionaryEntry = class {} as unknown
 
 function makeCtx(em: ReturnType<typeof createMockEm>, overrides?: Record<string, unknown>) {
+  containerEm = em
   return {
     em,
     userId: 'user-1',
@@ -129,11 +145,7 @@ describe('executionEngine', () => {
     mockCommandBus.execute.mockResolvedValue({ result: {} })
     mockFindOneWithDecryption.mockResolvedValue(null)
     mockFindWithDecryption.mockResolvedValue([])
-    mockContainer.resolve.mockImplementation((token: string) => {
-      if (token === 'rbacService') return mockRbacService
-      if (token === 'commandBus') return mockCommandBus
-      return null
-    })
+    mockContainer.resolve.mockImplementation(resolveMockToken)
   })
 
   describe('executeAction', () => {
@@ -1662,10 +1674,8 @@ describe('executionEngine', () => {
       // container.resolve('SalesChannel') fallback
       const MockSalesChannelFallback = class {} as unknown
       mockContainer.resolve.mockImplementation((token: string) => {
-        if (token === 'rbacService') return mockRbacService
-        if (token === 'commandBus') return mockCommandBus
         if (token === 'SalesChannel') return MockSalesChannelFallback
-        return null
+        return resolveMockToken(token)
       })
 
       // findOneWithDecryption: resolveFirstChannelId (finds a channel)

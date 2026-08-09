@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
+import type { EntityManager } from '@mikro-orm/postgresql'
 import type { OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
+import { writeDirectWriteAuditLog } from '@open-mercato/shared/lib/crud/audit-write'
 import { InboxEmail } from '../../data/entities'
 import { emitInboxOpsEvent } from '../../events'
 import { resolveRequestContext, handleRouteError } from '../routeHelpers'
@@ -40,28 +42,50 @@ export async function POST(req: Request) {
     const maxTextSize = parseInt(process.env.INBOX_OPS_MAX_TEXT_SIZE || '204800', 10)
     const truncatedText = text.slice(0, maxTextSize)
 
+    // R2c — this is one of the two doors machine-proposed work enters through
+    // (the other is the inbound webhook). Recording who submitted text for
+    // extraction is what lets a later proposal be traced back to its origin.
     const submitterEmail = ctx.auth?.email || ctx.userId
-    const email = ctx.em.create(InboxEmail, {
-      forwardedByAddress: submitterEmail,
-      forwardedByName: null,
-      toAddress: 'text-extract',
-      subject: title || 'Text extraction',
-      cleanedText: truncatedText,
-      rawText: truncatedText,
-      receivedAt: new Date(),
-      status: 'received' as const,
-      isActive: true,
-      organizationId: ctx.organizationId,
-      tenantId: ctx.tenantId,
-      metadata: {
-        ...inputMetadata,
-        source: 'text_extract',
-        submittedByUserId: ctx.userId,
-      },
-    })
+    const containerEm = ctx.container.resolve('em') as EntityManager
+    const email = await containerEm.transactional(async (trx) => {
+      const created = trx.create(InboxEmail, {
+        forwardedByAddress: submitterEmail,
+        forwardedByName: null,
+        toAddress: 'text-extract',
+        subject: title || 'Text extraction',
+        cleanedText: truncatedText,
+        rawText: truncatedText,
+        receivedAt: new Date(),
+        status: 'received' as const,
+        isActive: true,
+        organizationId: ctx.organizationId,
+        tenantId: ctx.tenantId,
+        metadata: {
+          ...inputMetadata,
+          source: 'text_extract',
+          submittedByUserId: ctx.userId,
+        },
+      })
 
-    ctx.em.persist(email)
-    await ctx.em.flush()
+      trx.persist(created)
+      await trx.flush()
+
+      // The submitted text is not snapshotted: it is the message body, encrypted
+      // at rest on the email record, and copying it here would duplicate tenant
+      // content under different retention. The entry records the submission and
+      // points at the email.
+      await writeDirectWriteAuditLog({
+        container: ctx.container,
+        auth: ctx.auth,
+        organizationId: ctx.organizationId,
+        action: 'created',
+        resourceKind: 'inbox_ops.email',
+        resourceId: created.id,
+        snapshotAfter: { source: 'text_extract', characters: truncatedText.length },
+      })
+
+      return created
+    })
 
     try {
       await emitInboxOpsEvent('inbox_ops.email.received', {

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import type { OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
 import { findOneWithDecryption, findWithDecryption } from '@open-mercato/shared/lib/encryption/find'
-import { withAtomicFlush } from '@open-mercato/shared/lib/commands/flush'
+import { writeDirectWriteAuditLog } from '@open-mercato/shared/lib/crud/audit-write'
 import type { EntityManager } from '@mikro-orm/postgresql'
 import { InboxDiscrepancy, InboxEmail, InboxProposal, InboxProposalAction } from '../../../../data/entities'
 import { emitInboxOpsEvent } from '../../../../events'
@@ -52,16 +52,45 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Email is already queued for processing' }, { status: 409 })
     }
 
-    let retiredCounts = { retiredProposalCount: 0, retiredActionCount: 0 }
-    await withAtomicFlush(ctx.em, [
-      async () => {
-        retiredCounts = await retireActiveProposalsForEmail(ctx.em, email.id, ctx.userId, ctx.scope)
-      },
-      () => {
-        email.status = 'received'
-        email.processingError = null
-      },
-    ], { transaction: true })
+    // R2c — reprocessing discards every proposal the model previously produced
+    // for this email and asks it to try again. That is a decision about machine
+    // output, so it is recorded with the retirement it performs.
+    //
+    // `em.transactional` rather than `withAtomicFlush`'s begin/commit: the audit
+    // service holds the container's EntityManager, and only the transactional
+    // form binds a transaction that its writes join. The phase boundaries
+    // (SPEC-018 — flush before the next phase reads) are kept explicitly.
+    const em = ctx.container.resolve('em') as EntityManager
+    const retiredCounts = await em.transactional(async (trx) => {
+      const counts = await retireActiveProposalsForEmail(trx, email.id, ctx.userId, ctx.scope)
+      await trx.flush()
+
+      const record = await findOneWithDecryption(
+        trx,
+        InboxEmail,
+        { id: email.id, deletedAt: null },
+        undefined,
+        ctx.scope,
+      )
+      if (record) {
+        record.status = 'received'
+        record.processingError = null
+        await trx.flush()
+      }
+
+      await writeDirectWriteAuditLog({
+        container: ctx.container,
+        auth: ctx.auth,
+        organizationId: ctx.organizationId,
+        action: 'updated',
+        resourceKind: 'inbox_ops.email',
+        resourceId: email.id,
+        snapshotAfter: { reprocessed: true, ...counts },
+        context: { source: 'inbox_ops', proposedBy: 'ai', undoable: false },
+      })
+
+      return counts
+    })
 
     try {
       await emitInboxOpsEvent('inbox_ops.email.reprocessed', {
@@ -134,7 +163,7 @@ async function retireActiveProposalsForEmail(
 
   // Resolve every read before mutating: a query issued between a scalar
   // mutation and the flush can silently reset the Unit of Work (SPEC-018
-  // Problem 1). withAtomicFlush flushes once at the end, so ordering is ours.
+  // Problem 1). The caller flushes once this function returns, so ordering is ours.
   const discrepancies = await findWithDecryption(
     em,
     InboxDiscrepancy,

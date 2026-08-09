@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
+import type { EntityManager } from '@mikro-orm/postgresql'
 import type { OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
 import { findOneWithDecryption } from '@open-mercato/shared/lib/encryption/find'
+import { writeDirectWriteAuditLog } from '@open-mercato/shared/lib/crud/audit-write'
 import {
   runCrudMutationGuardAfterSuccess,
   validateCrudMutationGuard,
@@ -85,16 +87,36 @@ export async function DELETE(req: Request) {
       return NextResponse.json(guardResult.body, { status: guardResult.status })
     }
 
-    const updated = await ctx.em.nativeUpdate(
-      InboxEmail,
-      {
-        id,
+    // R2c — the soft delete and its audit entry commit together. The transaction
+    // is opened on the container's EntityManager, not `ctx.em`: the audit service
+    // holds the container's manager, and a transaction on a fork would not
+    // include it.
+    const em = ctx.container.resolve('em') as EntityManager
+    const updated = await em.transactional(async (trx) => {
+      const rows = await trx.nativeUpdate(
+        InboxEmail,
+        {
+          id,
+          organizationId: ctx.organizationId,
+          tenantId: ctx.tenantId,
+          deletedAt: null,
+        },
+        { deletedAt: new Date() },
+      )
+
+      if (rows === 0) return 0
+
+      await writeDirectWriteAuditLog({
+        container: ctx.container,
+        auth: ctx.auth,
         organizationId: ctx.organizationId,
-        tenantId: ctx.tenantId,
-        deletedAt: null,
-      },
-      { deletedAt: new Date() },
-    )
+        action: 'deleted',
+        resourceKind: 'inbox_ops.email',
+        resourceId: id,
+      })
+
+      return rows
+    })
 
     if (updated === 0) {
       return NextResponse.json({ error: 'Email not found' }, { status: 404 })

@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
+import type { EntityManager } from '@mikro-orm/postgresql'
 import type { OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
 import { runWithCacheTenant } from '@open-mercato/cache'
 import { findOneWithDecryption } from '@open-mercato/shared/lib/encryption/find'
+import { writeDirectWriteAuditLog } from '@open-mercato/shared/lib/crud/audit-write'
 import { InboxProposal, InboxProposalAction } from '../../../../../../data/entities'
 import { recalculateProposalStatus } from '../../../../../../lib/executionEngine'
 import { formatZodErrors } from '../../../../../../lib/validation'
@@ -50,25 +52,52 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ error: `Invalid body: ${formatZodErrors(parsed.error)}` }, { status: 400 })
     }
 
-    const em = ctx.em.fork()
-    const freshAction = await findOneWithDecryption(
-      em,
-      InboxProposalAction,
-      { id: action.id, deletedAt: null },
-      undefined,
-      ctx.scope,
-    )
+    // R2c — this route closes a proposed action that a person fulfilled by hand
+    // elsewhere, outside the execution engine. It is the one path where an AI
+    // proposal is resolved without the command bus recording anything, so
+    // without this the decision leaves no trace at all.
+    const em = ctx.container.resolve('em') as EntityManager
+    const freshAction = await em.transactional(async (trx) => {
+      const record = await findOneWithDecryption(
+        trx,
+        InboxProposalAction,
+        { id: action.id, deletedAt: null },
+        undefined,
+        ctx.scope,
+      )
+      if (!record) return null
+
+      record.status = 'executed'
+      record.executedAt = new Date()
+      record.executedByUserId = ctx.userId
+      record.createdEntityId = parsed.data.createdEntityId
+      record.createdEntityType = parsed.data.createdEntityType
+      record.executionError = null
+      await trx.flush()
+
+      await writeDirectWriteAuditLog({
+        container: ctx.container,
+        auth: ctx.auth,
+        organizationId: ctx.organizationId,
+        action: 'completed',
+        resourceKind: 'inbox_ops.proposal_action',
+        resourceId: record.id,
+        snapshotAfter: {
+          proposalId: record.proposalId,
+          actionType: record.actionType,
+          confidence: record.confidence,
+          createdEntityId: parsed.data.createdEntityId,
+          createdEntityType: parsed.data.createdEntityType,
+        },
+        context: { source: 'inbox_ops', proposedBy: 'ai', undoable: false },
+      })
+
+      return record
+    })
+
     if (!freshAction) {
       return NextResponse.json({ error: 'Action not found' }, { status: 404 })
     }
-
-    freshAction.status = 'executed'
-    freshAction.executedAt = new Date()
-    freshAction.executedByUserId = ctx.userId
-    freshAction.createdEntityId = parsed.data.createdEntityId
-    freshAction.createdEntityType = parsed.data.createdEntityType
-    freshAction.executionError = null
-    await em.flush()
 
     await recalculateProposalStatus(em, proposal.id, ctx.scope)
 

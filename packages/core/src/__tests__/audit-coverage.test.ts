@@ -30,6 +30,7 @@ const MODULES_REQUIRING_MANUAL_AUDIT = [
   'attachments',
   'data_sync',
   'workflows',
+  'inbox_ops',
 ] as const
 
 /**
@@ -59,6 +60,31 @@ const MUTATION_SIGNALS = [
 const NOT_ACTUALLY_MUTATIONS: Record<string, string> = {
   'data_sync/api/validate.ts':
     'Only calls credentialsService.resolve() — a read. Matched on the service name, not the operation.',
+  'inbox_ops/api/proposals/[id]/translate/route.ts':
+    'Caches a machine translation of content already stored on the proposal. A rendering of the same facts in another language changes no business data, so recording it would add volume and no answer.',
+}
+
+/**
+ * Routes whose audit entry is written somewhere else, and where.
+ *
+ * The engine is the right place for the inbox_ops decisions: `accept`,
+ * `accept-all`, `reject` and the proposal-level `reject` all funnel through
+ * `lib/executionEngine.ts`, so the record sits next to the status transition it
+ * describes instead of being copy-pasted into four routes.
+ *
+ * Each entry names the file that does the writing, and the test verifies that
+ * file actually contains an audit call — otherwise this map would be a way to
+ * silence the guard by asserting something untrue.
+ */
+const AUDITED_ELSEWHERE: Record<string, string> = {
+  'inbox_ops/api/proposals/[id]/actions/[actionId]/accept/route.ts':
+    'modules/inbox_ops/lib/executionEngine.ts',
+  'inbox_ops/api/proposals/[id]/actions/[actionId]/reject/route.ts':
+    'modules/inbox_ops/lib/executionEngine.ts',
+  'inbox_ops/api/proposals/[id]/accept-all/route.ts':
+    'modules/inbox_ops/lib/executionEngine.ts',
+  'inbox_ops/api/proposals/[id]/reject/route.ts':
+    'modules/inbox_ops/lib/executionEngine.ts',
 }
 
 function walk(dir: string, acc: string[]): void {
@@ -101,6 +127,7 @@ describe('audit coverage — custom write routes record what they change', () =>
       if (key in NOT_ACTUALLY_MUTATIONS) continue
 
       mutatingRouteCount += 1
+      if (key in AUDITED_ELSEWHERE) continue
       if (!source.includes('writeDirectWriteAuditLog')) unaudited.push(key)
     }
   }
@@ -119,6 +146,16 @@ describe('audit coverage — custom write routes record what they change', () =>
     for (const [route, reason] of Object.entries(NOT_ACTUALLY_MUTATIONS)) {
       expect(reason.length).toBeGreaterThan(20)
       expect(route).toMatch(/^[a-z_]+\/api\//)
+    }
+  })
+
+  it('every route audited elsewhere names a file that really audits', () => {
+    // Without this the map would be an unchecked way to opt out: a route could
+    // point at a file that audits nothing, and the guard would agree.
+    for (const [route, auditingFile] of Object.entries(AUDITED_ELSEWHERE)) {
+      expect(route).toMatch(/^[a-z_]+\/api\//)
+      const source = readFileSync(join(__dirname, '..', auditingFile), 'utf8')
+      expect(source).toContain('writeDirectWriteAuditLog')
     }
   })
 })

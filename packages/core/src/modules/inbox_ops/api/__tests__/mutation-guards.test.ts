@@ -7,8 +7,13 @@ const emailId = '66666666-6666-4666-8666-666666666666'
 
 const flushMock = jest.fn()
 const nativeUpdateMock = jest.fn()
+// Audited writes open a transaction on the EntityManager the container hands
+// out (R2c). The mock runs the callback directly on the same object.
+const transactionalMock = jest.fn(async (cb: (trx: unknown) => unknown) => cb(em))
 
-const container = { resolve: jest.fn() }
+const em = { flush: flushMock, nativeUpdate: nativeUpdateMock, transactional: transactionalMock }
+
+const container = { resolve: jest.fn((token: string) => (token === 'em' ? em : null)) }
 
 const ctx = {
   auth: { sub: userId, tenantId, orgId: organizationId },
@@ -16,7 +21,7 @@ const ctx = {
   tenantId,
   organizationId,
   scope: { tenantId, organizationId },
-  em: { flush: flushMock, nativeUpdate: nativeUpdateMock },
+  em,
   container,
   eventBus: null,
 }
@@ -106,6 +111,16 @@ describe('inbox_ops custom write routes wire the mutation guard', () => {
       proposal: { id: proposalId },
     })
     extractPathSegmentMock.mockReturnValue(emailId)
+    // Audited routes re-read the record inside the transaction that records the
+    // change (R2c) — an entity belongs to the EntityManager that loaded it, and
+    // the audit write runs on the container's. This stands in for that read.
+    findOneWithDecryptionMock.mockResolvedValue({
+      id: proposalId,
+      proposalId,
+      category: 'inquiry',
+      actionType: 'unknown_type',
+      payload: {},
+    })
     acceptAllActionsMock.mockResolvedValue({ results: [{ success: true }], stoppedOnFailure: false })
     emitInboxOpsEventMock.mockResolvedValue(undefined)
   })

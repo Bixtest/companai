@@ -10,6 +10,7 @@ interface MockEntityManager {
   create: jest.Mock<Record<string, unknown>, [unknown, Record<string, unknown>]>
   persist: jest.Mock<void, [unknown]>
   flush: jest.Mock<Promise<void>, []>
+  transactional: jest.Mock<Promise<unknown>, [(trx: MockEntityManager) => unknown]>
 }
 
 const mockEm: MockEntityManager = {
@@ -18,6 +19,11 @@ const mockEm: MockEntityManager = {
   create: jest.fn<Record<string, unknown>, [unknown, Record<string, unknown>]>(),
   persist: jest.fn<void, [unknown]>(),
   flush: jest.fn<Promise<void>, []>(),
+  // Ingestion records itself in the audit log inside the transaction it opens on
+  // the container's EntityManager (R2c); the mock runs the callback on itself.
+  transactional: jest.fn<Promise<unknown>, [(trx: MockEntityManager) => unknown]>(
+    async (cb) => cb(mockEm),
+  ),
 }
 
 const mockFindOneWithDecryption = jest.fn()
