@@ -173,8 +173,12 @@ export function validateCapabilityDescriptor(descriptor: CapabilityDescriptor): 
   if (!descriptor.id.includes('.')) {
     fail('Capability id must be `<module>.<action>`')
   }
-  if (!descriptor.id.startsWith(`${descriptor.module}.`)) {
-    fail(`Capability id does not belong to module '${descriptor.module}'`)
+  if (!descriptor.id.startsWith(`${descriptor.module}.`) && !descriptor.note) {
+    // Usually an accident — a descriptor pasted into the wrong module. Sometimes
+    // deliberate: a module may own a feature in a shared namespace, as
+    // `dashboards` owns `analytics.view`. The note is what distinguishes the two,
+    // and demanding one costs a sentence where guessing costs a wrong grant.
+    fail(`Capability id does not start with module '${descriptor.module}' — if that is deliberate, say why in a note`)
   }
   if (!EFFECT_CLASSES.includes(descriptor.effectClass)) {
     fail(`Unknown effect class '${descriptor.effectClass}'`)

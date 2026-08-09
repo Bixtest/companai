@@ -4,6 +4,7 @@ import {
   measureCapabilityCoverage,
   registerCapabilityDescriptors,
   clearCapabilityRegistry,
+  getAllCapabilityDescriptors,
   validateRegisteredCapabilities,
   type AclFeatureDeclaration,
 } from '@open-mercato/shared/lib/capabilities/registry'
@@ -49,21 +50,19 @@ function readEnabledModuleIds(): Set<string> {
 }
 
 /**
- * Modules whose features are fully described. Adding a module here is how R4b
- * proceeds; removing one is how coverage silently rots, so the test fails if a
- * listed module loses its descriptors.
+ * Every enabled module must describe every feature it declares.
+ *
+ * This was a list of nine modules while R4b was outstanding. It is now the whole
+ * enabled set, computed rather than enumerated — a hand-maintained list would
+ * let a new module be added without anyone noticing it described nothing.
  */
-const DESCRIBED_MODULES = [
-  'api_keys',
-  'attachments',
-  'audit_logs',
-  'auth',
-  'configs',
-  'data_sync',
-  'feature_toggles',
-  'inbox_ops',
-  'integrations',
-] as const
+function describedModules(): string[] {
+  // A module that declares no features has nothing to describe — `api_docs` has
+  // an `acl.ts` with an empty list. Excluding it here keeps the failure message
+  // meaningful; the "finds what it is guarding" assertion is what stops this
+  // filter from quietly emptying the whole set.
+  return allModuleIds().filter((moduleId) => readFeatureIds(moduleId).ids.length > 0)
+}
 
 /**
  * Reads the feature declarations out of a module's `acl.ts` without importing it.
@@ -110,10 +109,17 @@ describe('capability coverage — every described act is described coherently', 
     expect(total).toBeGreaterThanOrEqual(100)
   })
 
-  it.each(DESCRIBED_MODULES)('%s has a descriptor on every feature', (moduleId) => {
+  it('checks every enabled module that declares features', () => {
+    // The filter above could silently reduce the per-module checks to nothing if
+    // the parsing broke; this is what makes that visible.
+    expect(describedModules().length).toBeGreaterThanOrEqual(24)
+  })
+
+  it.each(describedModules())('%s has a descriptor on every feature', (moduleId) => {
     const { ids, described } = readFeatureIds(moduleId)
-    expect(ids.length).toBeGreaterThan(0)
-    expect(described.sort()).toEqual(ids.sort())
+    // The undescribed ids, not just a count — a failure should say which
+    // permission is missing risk semantics, not that some number moved.
+    expect(ids.filter((id) => !described.includes(id))).toEqual([])
   })
 
   it('reports how much of the permission surface has risk semantics', () => {
@@ -133,16 +139,19 @@ describe('capability coverage — every described act is described coherently', 
     const coverage = measureCapabilityCoverage(features)
     const percent = Math.round((coverage.described / coverage.total) * 100)
 
-    // Printed, not asserted at 100%: R4 describes the modules that perform the
-    // riskiest acts, and the rest is tracked as R4b. A guard that demanded 100%
-    // today would have to be disabled today, and a disabled guard guards nothing.
     // eslint-disable-next-line no-console
     console.log(
       `[capabilities] ${coverage.described}/${coverage.total} features described (${percent}%). ` +
       `Remaining: ${Object.keys(coverage.undescribedByModule).sort().join(', ') || 'none'}`,
     )
 
-    expect(coverage.described).toBeGreaterThanOrEqual(37)
+    // 100%, asserted, now that it is true. The per-module test above is the one
+    // that names what is missing; this is the whole-surface statement, and it is
+    // the thing R5 depends on: a resolver cannot reason about an act nobody
+    // described, and would have to treat it as ordinary — which for a
+    // destructive act is exactly the wrong default.
+    expect(coverage.undescribedByModule).toEqual({})
+    expect(coverage.described).toBe(coverage.total)
   })
 })
 
@@ -234,5 +243,70 @@ describe('the default autonomy floor', () => {
   it('never lets a security or destructive act run unattended at the highest grade', () => {
     expect(DEFAULT_AUTONOMY_FLOOR.E5.G4).toBe('A0')
     expect(DEFAULT_AUTONOMY_FLOOR.E6.G4).toBe('A0')
+  })
+})
+
+describe('the real descriptors, loaded from the modules themselves', () => {
+  // The tests above check the *rules* against invented descriptors, and the
+  // coverage report only counts declarations. Neither actually runs the
+  // validator over what ships — so a contradictory descriptor could sit in a
+  // module indefinitely with a green suite. This loads them for real.
+  const modules = allModuleIds()
+
+  beforeEach(() => clearCapabilityRegistry())
+  afterAll(() => clearCapabilityRegistry())
+
+  it.each(modules)('%s declares coherent capabilities', (moduleId) => {
+    clearCapabilityRegistry()
+    // eslint-disable-next-line @typescript-eslint/no-var-requires, global-require
+    const loaded = require(join(modulesRoot, moduleId, 'acl.ts')) as {
+      features?: AclFeatureDeclaration[]
+      default?: AclFeatureDeclaration[]
+    }
+    const features = loaded.features ?? loaded.default ?? []
+    registerCapabilityDescriptors(features)
+
+    expect(validateRegisteredCapabilities()).toEqual([])
+  })
+
+  it('classifies every act that leaves the company as E3 or higher', () => {
+    clearCapabilityRegistry()
+    for (const moduleId of modules) {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires, global-require
+      const loaded = require(join(modulesRoot, moduleId, 'acl.ts')) as {
+        features?: AclFeatureDeclaration[]
+        default?: AclFeatureDeclaration[]
+      }
+      registerCapabilityDescriptors(loaded.features ?? loaded.default ?? [])
+    }
+
+    const misclassified = getAllCapabilityDescriptors()
+      .filter((descriptor) => descriptor.externalEffect)
+      .filter((descriptor) => descriptor.effectClass < 'E3')
+      .map((descriptor) => descriptor.id)
+
+    expect(misclassified).toEqual([])
+  })
+
+  it('names a compensation for every compensatable act, pointing at a real capability', () => {
+    clearCapabilityRegistry()
+    for (const moduleId of modules) {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires, global-require
+      const loaded = require(join(modulesRoot, moduleId, 'acl.ts')) as {
+        features?: AclFeatureDeclaration[]
+        default?: AclFeatureDeclaration[]
+      }
+      registerCapabilityDescriptors(loaded.features ?? loaded.default ?? [])
+    }
+
+    const known = new Set(getAllCapabilityDescriptors().map((descriptor) => descriptor.id))
+    // A compensation pointing at a capability that does not exist is a promise
+    // nobody can keep — worse than admitting the act is irreversible, because it
+    // reads as though a remedy is available.
+    const dangling = getAllCapabilityDescriptors()
+      .filter((descriptor) => descriptor.compensation && !known.has(descriptor.compensation))
+      .map((descriptor) => `${descriptor.id} -> ${descriptor.compensation}`)
+
+    expect(dangling).toEqual([])
   })
 })

@@ -26,6 +26,8 @@ export type AclFeatureDeclaration = {
   id: string
   title: string
   module: string
+  /** Features this one implies, an existing convention in several modules. */
+  dependsOn?: string[]
   capability?: Omit<CapabilityDescriptor, 'id' | 'module'>
 }
 
@@ -63,7 +65,19 @@ let hydratedFromModules = false
 function hydrateFromModules(): void {
   if (hydratedFromModules) return
   hydratedFromModules = true
-  for (const module of getModules()) {
+
+  let modules: ReturnType<typeof getModules>
+  try {
+    modules = getModules()
+  } catch {
+    // `getModules()` throws when the app has not bootstrapped — in a CLI command,
+    // a worker, or a test. That is a legitimate state, not an error: asking what
+    // kind of act something is should never bring down the caller. Descriptors
+    // registered explicitly still resolve; there is simply nothing to discover.
+    return
+  }
+
+  for (const module of modules) {
     const features = module.features as AclFeatureDeclaration[] | undefined
     if (features?.length) registerCapabilityDescriptors(features)
   }

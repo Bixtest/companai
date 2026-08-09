@@ -243,6 +243,7 @@ export type Module = {
     id: string
     title: string
     module: string
+    dependsOn?: string[]
     capability?: Omit<import('./capabilities').CapabilityDescriptor, 'id' | 'module'>
   }>
   // Auto-discovered event subscribers
