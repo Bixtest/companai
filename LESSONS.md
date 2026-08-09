@@ -1,0 +1,785 @@
+# Lessons
+
+**Mistakes made on this project, how they were caught, and what to do instead.**
+
+Read before starting work. Every one of these was made by someone competent who
+had a reason at the time — that is precisely why they are worth writing down.
+
+Add to this file whenever something is caught. A near-miss counts.
+
+---
+
+## L1 — A confident label is not an inspection
+
+**What happened.** `customer_accounts` was on the delete list, described as
+"customer-facing identity, part of the CRM chain". It contains `domain_mappings`
+— unique hostname per tenant with a database constraint. **That is per-company
+custom domains, a platform feature we want.**
+
+**How it was caught.** The owner asked a question about it. Not by any method.
+
+**Cost if missed.** A working feature silently deleted, rediscovered months later
+as "we need to build custom domains".
+
+**What to do instead.** The
+[salvage protocol](workspace/references/salvage-analysis.md) is now mandatory and
+blocking before any deletion. Its first question is the one that catches this:
+*for each table a module owns, is this a business record, or is it configuration,
+infrastructure, identity, routing or policy?*
+
+**The general form:** *"this module is obviously about X, so it contains only X"*
+is false in any mature codebase. Modules accumulate infrastructure that happened
+to be needed there.
+
+---
+
+## L2 — A grep count is not a finding
+
+**What happened.** Counting references from kept modules into `customers` gave
+alarming numbers: `ai_assistant` 362, `auth` 86, `inbox_ops` 52. It looked like
+deep entanglement that would block removal.
+
+**Reality.** Almost all were **test fixtures and documentation examples** —
+`customers.people.view` is the example feature id used throughout the codebase to
+explain how permissions work. Real count excluding tests: 23, 1, 4.
+
+**What to do instead.** A count tells you where to look. Then **go and read the
+actual lines** before recording anything. Exclude `__tests__`, `.test.`, `.spec.`
+and comments before quoting a number.
+
+---
+
+## L3 — Verify the tool before trusting the measurement
+
+**What happened.** The script written to correct L2 returned exactly `21` for all
+nine modules. A path-resolution bug meant it measured the same directory nine
+times.
+
+**How it was caught.** The uniformity looked wrong. Nine different modules do not
+have identical counts.
+
+**Cost if missed.** Nine false findings in a permanent document.
+
+**What to do instead.** When a measurement looks too uniform, too round, or too
+convenient, **test the tool on a case where you already know the answer**.
+
+---
+
+## L4 — Never pipe build commands through a pager
+
+**What happened.** `corepack yarn typecheck 2>&1 | tail -50` reported **exit code
+0**. That was `tail`'s exit code. The type-check had actually **failed**.
+
+**Cost if missed.** A green baseline recorded for a red build — the exact
+opposite of the truth, in the document everything else is measured against.
+
+**What to do instead.** Never pipe a command whose success matters. Capture full
+output and read it. If output must be trimmed, capture the exit code separately
+first.
+
+---
+
+## L5 — Run the steps in the project's own order
+
+**What happened.** Type-check was run on a fresh checkout and failed with
+`Cannot find module '#generated/entities.ids.generated'`. It looked like the
+platform was broken.
+
+**Reality.** The project's build script is
+`build:packages → generate → build:packages → build:app`. **`generate` creates
+those files.** Type-checking before it cannot succeed.
+
+**Cost if missed.** Reporting "this platform fails to type-check on a clean
+checkout" — a false finding that would have counted against a platform we had
+just chosen.
+
+**What to do instead.** Read the project's own `build` script and follow its
+order. Its authors already solved this.
+
+---
+
+## L6 — Do not accept a degraded state on your own authority
+
+**What happened.** A native component (`cpu-features`) failed to build for want
+of a C++ compiler. It was reported as "almost certainly harmless — I'll only
+chase it if something breaks", and work continued.
+
+**Why that was wrong.** It was a quality decision taken without asking. The owner
+could simply install the compiler — and did.
+
+**What to do instead.** When something fails: report **what it is, what is lost,
+what the fix costs, and a recommendation** — then let the owner decide. Deferring
+is often right; deferring *silently* is not.
+
+**How to defer safely:** write it into the plan as a **required** step of a
+future batch, never as a note that might be forgotten.
+
+---
+
+## L7 — Judge a concept absent only in the target's vocabulary
+
+**What happened.** During assessment, three capabilities were recorded as absent
+that were in fact present:
+
+| Recorded absent | Reality |
+|---|---|
+| AI cost budgets | Present — they call it **token usage**, tracked per agent, module, session and step |
+| Scoped model policy | Present — a two-level allowlist in the database; env vars only set defaults |
+| Capability metadata | Richer than recorded — features also carry `dependsOn` |
+
+**Root cause.** Each was inferred from *our* word for the thing, or from a single
+file, without checking the data model.
+
+**What to do instead.** Before declaring anything absent: search **two or three
+words the target might use**, and check **entity/table names** — the most reliable
+vocabulary index a codebase has. A false absence is worse than a false presence:
+it silently removes a candidate's best feature from the comparison.
+
+---
+
+## L8 — A schema is not a behaviour
+
+**What happened.** A codebase was credited with transactional audit and
+correlated event tracing because the *types and columns* were there. Neither was
+real: audit ran in a separate transaction, and every correlation id was a fresh
+random value never reused.
+
+**What to do instead.** A field's existence proves intent, not behaviour. **Grep
+where it is assigned**, not where it is declared. Trace one complete path before
+crediting a property.
+
+---
+
+## L9 — Trustworthiness is per document, not per folder
+
+**What happened.** One platform's README was accurate and admirably honest about
+its own gaps. A document **in the same folder, of the same vintage** listed
+Garage, Assets Store, AI Studio and several routes as "Shipped" — none of which
+existed anywhere in the source.
+
+**What to do instead.** Verify claims from several documents before trusting any
+of them. Never generalise from one good document to a folder, a project, or a
+date.
+
+---
+
+## L10 — Report the whole picture, not the first red flag
+
+Adopted from [`skills-main`](skills-main): *"A red signal does not short-circuit
+the review… one review cycle gives the author the failing check, the conflict,
+and every code finding at once, rather than the cheapest red flag first and
+another cycle to discover the rest."*
+
+**In practice:** when a batch hits a blocker, finish analysing the batch and
+report everything together. A partial picture costs another whole cycle.
+
+---
+
+## L11 — `import type` is a dependency that breaks the build, not the app
+
+**What happened.** `query_index` imports `ProgressService` from the `progress`
+module using `import type`. TypeScript **erases** those at compile time, so the
+code runs perfectly with `progress` deleted — the runtime resolve is guarded and
+simply disables the feature.
+
+**But `yarn typecheck` fails**, because the type no longer resolves.
+
+**Why this is a trap.** A type-only dependency:
+
+- is invisible to any runtime probe — nothing imports it when the code executes;
+- **breaks the build**, so it surfaces late and looks unrelated to the deletion;
+- is easy to dismiss as "just a type" when you see it in a grep.
+
+**What to do instead.** When analysing a module for removal, grep specifically
+for `^import type.*modules/<name>` in the modules you are keeping — separately
+from ordinary imports. Checked across the whole delete list on this project:
+only one exists today. The next codebase may have many.
+
+---
+
+## L12 — Do not describe a thing before you have read it
+
+**What happened.** The attic catalogue was written *ahead* of the salvage
+analyses, so it could not fall behind the removals. Sound reasoning — but entries
+were written from module **names and sizes**, and two were simply wrong:
+
+| Catalogued as | Actually |
+|---|---|
+| `onboarding` — "onboarding request flows" | **Self-service sign-up and tenant provisioning** — the platform's front door |
+| `content` — "a small content-management module" | The **privacy and terms pages**. No CMS, no entities, no editor |
+
+Both were then reclassified from *remove* to *keep*.
+
+**Why it matters.** The catalogue's whole purpose is to let someone months from
+now ask *"did we already build this?"* A wrong entry answers **no** to a question
+whose true answer is **yes** — the most expensive failure that document can have.
+
+**What to do instead.** Write the catalogue entry **after** the analysis, from the
+code. If an entry must exist earlier, mark it **UNVERIFIED** so nobody trusts it.
+
+This is L1 in a new costume: a confident label doing the work of an inspection.
+The first time it nearly deleted custom domains; this time it nearly deleted
+tenant provisioning.
+
+---
+
+## L13 — A module-shaped analysis misses packaging-shaped dependencies
+
+**What happened.** The plan for removing `packages/enterprise` listed three steps:
+unregister it in `modules.ts`, unregister it in the create-app template, delete
+the directory. All three were done. **The install then failed immediately:**
+
+```
+Error: @open-mercato/enterprise@workspace:*: Workspace not found
+```
+
+`apps/mercato/package.json` still declared it as a workspace dependency — a
+fourth step nobody had written down.
+
+**Why it was missed.** The salvage protocol looks at *module-system* surfaces:
+registrations, imports, generated registries, ACL features, events, migrations.
+A Yarn workspace dependency is none of those. It lives in a `package.json` the
+module analysis never opens.
+
+**What to do instead.** When removing anything that is its own **package**
+(not just a module inside one), check the consuming app's `package.json` too.
+The corrected four-step checklist is in
+[`workspace/references/strip-batches.md`](workspace/references/strip-batches.md).
+
+**The general form:** an analysis framed around one system (modules) will not see
+dependencies expressed in another system (packaging, build config, CI, container
+images, infrastructure). Ask explicitly: *what other systems know this thing's
+name?*
+
+---
+
+## L14 — A green build is not a working platform
+
+**What happened.** Four commits of removals all passed the full gate — install,
+typecheck, lint, test, build. The first time we actually *started* the platform,
+tenant initialisation died:
+
+```
+❌ Initialization failed: Missing workflow seed file: sales-pipeline-definition.json
+```
+
+Commit `a423050` deleted two seed JSON files along with the CLI commands that
+used them. But `workflows/lib/seeds.ts` also loaded them — by **filename, at
+runtime**, inside `seedExampleWorkflows()`, which `setup.ts` calls during every
+tenant init.
+
+**Why every check missed it.** The reference is a string passed to
+`fs.existsSync`. There is no import to resolve, no type to check, no registry
+entry to regenerate. TypeScript cannot see it; the generator cannot see it; lint
+cannot see it. Only executing the code finds it.
+
+**The second gap: nothing governed this deletion at all.** The salvage protocol
+is written for removing a **whole module** — it asks who imports it, what
+declares it in `requires`, what it contributes to shared surfaces. Here we
+deleted *files from inside a module we are keeping*. No protocol covered that, so
+none ran.
+
+**What to do instead.**
+
+1. **Run the platform, not just the build.** Boot and click through after every
+   few removals — not at the end of the phase. Runbook:
+   [`workspace/references/local-instance.md`](workspace/references/local-instance.md).
+2. **Deleting a data file is deleting an interface.** Before removing a JSON,
+   SQL, template or fixture asset, grep for its **bare filename** across the
+   repo, not for imports of it.
+3. **Removing files from inside a kept module needs its own check** — at minimum
+   Q2 (who references it) and Q6 (string references) from the salvage protocol.
+
+**The general form:** *static analysis proves the code is consistent with itself;
+it says nothing about the code's agreement with data on disk.* Anything referenced
+by name at runtime — files, env vars, queue names, table names, feature ids — is
+invisible to the compiler and must be checked by running the thing.
+
+---
+
+## L15 — "The gate is green" can mean "the gate never got there"
+
+**What happened.** Three commits were reported with a green gate. Running the
+full suite properly afterwards found three real failures — in `core` and
+`content` — that had been sitting there the whole time.
+
+They were never *seen* because **Turbo stops at the first failing task.** The
+two known Windows-only `cli` failures aborted every run after 7 or 8 of 22
+packages. Everything downstream — including `core`, the largest package — was
+never executed. The P3 baseline's "1,773 passed, 2 failed" was a partial run
+described as if it were complete.
+
+**The compounding error.** A wrapper written as
+
+```bash
+corepack yarn test > log 2>&1; echo "EXIT=$?" >> log
+```
+
+reports the exit code of `echo`, not of `yarn`. The harness duly announced
+"completed (exit code 0)" for a run that had failed. This is **L4 wearing a
+different hat** — the failure is not piping through `tail` specifically, it is
+*reading a status that belongs to a different command.* Capture it as
+
+```bash
+{ corepack yarn test > log 2>&1; echo $? > log.rc; }
+```
+
+**What to do instead.**
+
+1. **Report coverage with the result.** Not "tests pass" but *"14 of 22 packages
+   ran; 3,538 tests passed."* A pass count without a denominator hides an
+   aborted run.
+2. **Check `Tasks: N successful, M total`.** If `N < M`, the run is incomplete
+   and the result is not a gate.
+3. **Never infer success from the absence of visible errors** — that is the
+   original sin behind half of these lessons.
+
+**The same trap, third form: a cached green.** The gate after parking reported
+`typecheck EXIT: 0 — 19 cached, 20 total`. Turbo had served a cached result from
+before the generated files changed. The true state was **579 type errors**. When
+a result decides whether work may proceed, read the cache line: `Cached: N` on
+the task you just changed the inputs of means the tool did not look.
+
+**The general form:** *a status is only evidence if it came from the run you
+think it did.* A short-circuiting runner, a cached task and `$?` after the wrong
+command all fail the same way — they hand you a true statement about something
+else.
+
+---
+
+## L16 — Parking has a cost the build does not show: generated artifacts
+
+**What happened.** Parked modules still compile, so typecheck and build stayed
+green. But the generator only emits entity modules for **enabled** modules, so
+two `catalog` tests could not resolve `#generated/entities/catalog_product_variant`
+and the suite failed to run.
+
+**Why this was not predicted.** The parking analysis reasoned about what a
+disabled module *stops doing* — no routes, no tables, no workers. It did not ask
+what other things stop being *produced for it*. Generated output is a second
+system that also keys off the enabled list.
+
+**The fix was not to skip the tests.** Both files already replaced the module
+with `jest.mock(..., () => ({}))` — they never used the real one. Adding
+`{ virtual: true }` states exactly that: this module may not exist on disk, here
+is the stub. No assertion weakened, no test skipped.
+
+**What to check when parking anything:** does any retained code import a
+*generated* artifact of the parked module? `grep "#generated/entities/<name>"`.
+Source files resolve through TypeScript path mapping and stay green; only the
+test runner's resolver notices.
+
+**The general form:** this is **L13** again — *ask what other systems know this
+thing's name.* There, packaging. Here, code generation. The list of systems is
+longer than it looks: modules, packaging, build config, codegen, CI, containers.
+
+---
+
+## L17 — Before removing an obstacle, ask whether it is a guard
+
+**What happened.** Parked code produced 579 type errors because the generated
+entity-id registry covers **enabled** modules only. The recorded fix — written
+into the plan, and reported to the owner as a recommendation — was to make the
+generator emit ids for every module on disk. It would have worked, and it would
+have been wrong.
+
+**What inspection found.** That exclusion is deliberate. It is a **compile-time
+guard**: with `catalog` parked, `E.catalog.catalog_product` fails to compile, so
+enabled code cannot take a hard dependency on entities whose tables no longer
+exist. Code that must work either way already has a sanctioned form —
+`getEntityIds() as any` plus `E.catalog?.…` — which `attachments` uses and which
+type-checks fine.
+
+Emitting the ids would have silenced an artifact by **deleting a safety
+property**, and nothing would have failed until a runtime query hit a missing
+table in production.
+
+**How it was caught.** By reading the enabled code that referenced parked entity
+ids, to check whether the guard was doing anything — rather than treating 579
+errors as noise to be suppressed. The question that did it: *does anything depend
+on this restriction existing?*
+
+**What to do instead.** When something blocks you and the obvious fix is to
+relax it, establish first **why it is there**:
+
+- Does any code rely on the restriction holding?
+- Is there already a sanctioned way to opt out? Its existence is strong evidence
+  the restriction is deliberate.
+- What fails, and how loudly, if the restriction goes?
+
+Then choose. Here the answer was to narrow the *scope of checking* (exclude code
+that does not run) rather than weaken the *rule* (emit ids that should not exist).
+
+**The general form:** *an error is not always a problem to be removed; sometimes
+it is a mechanism working.* The volume of an error says nothing about whether it
+should be silenced — 579 identical errors were one guard firing 579 times.
+
+---
+
+## L18 — Disabling a thing does not disable what others say about it
+
+**What happened.** Fourteen ERP modules were parked, and the platform was
+verified: 44/44 pages, no server errors. The owner then opened the dashboard and
+saw a red *"Failed to load new customers data"*.
+
+The `dashboards` module is **enabled** and ships **ten** analytics widgets that
+read `sales` and `customers` data. Parking those modules removed their routes,
+tables and workers — but not the widgets a *different* module ships **about**
+them. The widget lives in kept code; only its feature requirements point at the
+parked module.
+
+**Why the verification missed it.** The page sweep asked *"does this URL return
+200?"* The dashboard did. The failure was inside a widget panel, rendered
+client-side after load. **An HTTP status is not a rendered page.**
+
+**What to check when disabling anything:** not only what it provides, but what
+*other* enabled things provide about it — widgets, response enrichers, menu
+entries, subscribers, dashboard tiles, saved layouts.
+
+**A second lesson inside the fix.** The first override attempt used the widget's
+`id` where the registry matches on `entry.key` — different strings. It silently
+did nothing, and the page HTML still contained both "Customer Growth" and "Failed
+to load", which I nearly read as "the fix did not work" without knowing why. The
+server log said exactly what was wrong:
+
+```text
+label=widgets.dashboard key=dashboards.analytics.aovKpi
+msg="Override did not match any registered entry — override skipped"
+```
+
+**Read the application's own diagnostics before theorising.** A well-built
+platform usually tells you; this one did, on the first run.
+
+**The general form:** *scope boundaries are asymmetric.* Turning something off
+removes what it pushes outward, never what others have already pulled inward.
+
+---
+
+## L19 — A module's name describes its subject, not its behaviour
+
+**What happened.** Twice in two batches I classified a module from its name.
+`configs` "obviously" wrote configuration — its write routes touch no database at
+all. `inbox_ops` sounded like mail plumbing — it is the human-in-the-loop
+approval of LLM-generated proposals, the single most product-relevant module in
+the codebase, and it recorded none of its decisions.
+
+The second one nearly cost more: I was one sentence away from writing down that
+the remaining modules needed no auditing. The inspection that overturned it took
+about ten minutes.
+
+**Why it happens.** A name is a summary written by someone else for a different
+purpose. It compresses. What it drops is exactly what you need when the question
+is "does this write anything, and does anyone need to know."
+
+**The rule.** *Before recording that something needs nothing, enumerate what it
+actually does.* Grep for write handlers and mutation signals; read what survives.
+A negative finding is a claim like any other, and costs the same to verify as a
+positive one.
+
+**The general form:** the effort saved by not looking is borrowed, not saved.
+
+---
+
+## L20 — The running app serves `dist`, so source edits are invisible until you build
+
+**What happened.** R2c passed its tests, typechecked, and committed. I then asked
+for a UI check. The change did not appear — because the app loads
+`packages/core/**dist**`, the compiled output, and the running server was a
+**production build** started eighteen hours earlier. My source edits had never
+reached the process serving the page.
+
+The settings row's `updated_at` moved, which made it look like the route had run
+the new code. It had run the *old* code, which updates the same row.
+
+**Why it fooled me.** Every check I ran was against source: `tsc` reads source,
+`jest` reads source, the coverage guard greps source. Not one of them touches
+what the server executes. A green gate says the source is right; it says nothing
+about what is running.
+
+**The rule.** *Before asking anyone to look at a running system, rebuild it and
+restart it.* `yarn build:packages && yarn build:app`, then restart. And when the
+answer is "no change visible", check what the process is serving **before**
+debugging the code.
+
+**The general form:** verifying an artifact tells you nothing about a different
+artifact, however closely related. Source is not `dist`; `dist` is not the
+running process.
+
+---
+
+## L21 — A control that holds the mistake fixed proves nothing
+
+**What happened.** Two test suites failed to load. I stashed the entire working
+tree, reproduced the failure at the previous commit, and concluded it was not
+mine — recording it as an upstream issue (U6).
+
+The reproduction was sound and the conclusion was wrong. The repo requires **Node
+24**; my shell had **Node 22**. The "missing" native binary was `abi137`, which
+*is* Node 24. Both runs — before and after the stash — used the same wrong
+runtime, so the control varied the code and held the actual cause constant.
+
+**Why it happens.** A control answers exactly one question: *does the thing I
+changed cause this?* It is silent about everything it holds fixed. The
+environment is the easiest thing to hold fixed without noticing, because it is
+not in the diff.
+
+**The rule.** *When a failure looks environmental, check the environment against
+what the project declares* — `engines`, `.nvmrc`, the lockfile's platform — before
+building a case that it is somebody else's problem. One line of `package.json`
+would have ended it.
+
+**And a second-order one:** every gate result recorded before this was measured
+on an unsupported runtime. When you find the environment was wrong, the past
+results are not merely suspect — they measured a different system.
+
+---
+
+## L22 — I did not read my own runbook, and asked the user to authorise a fix I already had
+
+**What happened.** Having found that the repo needs Node 24 and the machine's
+default is Node 22, I checked for `nvm`, `fnm`, Volta and `Program Files`, found
+nothing, stopped the user to authorise a download, fetched 36 MB from nodejs.org,
+verified the checksum, and extracted it.
+
+`workspace/.toolchain/node24/` had held the identical build — v24.19.0, ABI 137 —
+since 3 August. **`local-instance.md` lists it in the "What you need once"
+table**, three lines into the file I wrote to prevent exactly this.
+
+**Why it happened.** The runbook is written for *setup*. This did not present as
+setup — it presented as a mid-batch failure, and I searched the machine the way
+you would search an unknown machine. I looked outward for something I had already
+written down.
+
+**The rule.** *When the environment surprises you, read the runbook before you
+search the system.* The whole point of rule zero — every batch updates
+`INDEX.md`, `JOURNAL.md`, `LESSONS.md` — is that the answer is written down; it
+is worthless if I only consult it when I think to.
+
+Concretely, before any "how do I get X on this machine" question:
+`grep -i X workspace/references/local-instance.md`.
+
+**The cost this time was small** — a redundant download, since removed, and a
+question the user should never have been asked. The cost of the habit is not
+small: I interrupted the user to decide something my own documentation had
+already decided, which spends their attention and their trust in the docs.
+
+**The general form:** documentation you do not read is indistinguishable from
+documentation you never wrote.
+
+---
+
+## L23 — Do not test an irreversible guarantee by triggering it on real infrastructure
+
+**What happened.** To prove the ledger's append-only trigger was real, I inserted
+a probe row and tried to `UPDATE`, `DELETE` and `TRUNCATE` it. All three were
+correctly refused — including the delete of my own probe.
+
+The probe row was now permanent, at sequence 999, in a live tenant's chain. The
+first real verification would have reported a sequence gap forever. The table
+happened to hold no real events, so resetting it cost nothing. A day later it
+would have been unrecoverable by design.
+
+**Why it happens.** Testing a guarantee usually means creating the condition it
+protects against. When the guarantee is *irreversibility*, creating that condition
+is itself irreversible — the test cannot be cleaned up, because cleanup is the
+thing being prevented.
+
+**The rule.** *Before exercising an irreversible mechanism, ask what state the
+test leaves behind and whether you can live with it.* Use a scratch tenant, a
+scratch database, or a transaction you roll back — the probe only needs to prove
+the trigger fires, and `begin; insert; update; rollback;` proves exactly that
+while leaving nothing.
+
+**The general form:** a test that cannot be undone is not a test, it is a change.
+
+---
+
+## L24 — Never re-parse what you only need to append to
+
+**What happened.** Adding a `capability` block to 76 permission declarations, I
+wrote a rewriter that took each entry apart — split the body on commas, trimmed
+the parts, reassembled them with the new field. It split inside
+`title: 'Create, edit, and delete business rules'` and corrupted five files.
+
+The typecheck caught it immediately and `git checkout` undid it, so the cost was
+ten minutes. The cost if those files had been generated rather than tracked, or
+if the corruption had been subtler than a syntax error, would not have been ten
+minutes.
+
+**Why it happens.** "Insert a field into this object literal" *feels* like a
+parsing problem, so you reach for a parser you can write in one line. Splitting on
+commas is a parser — a wrong one, which is fine right up until a value contains
+the delimiter.
+
+**The rule.** *Match the smallest edit to the smallest operation.* Appending a
+field needs the position of the closing brace, nothing more. It does not need to
+know what the other fields are, so it should not look. Use a real parser when you
+genuinely need structure; use an anchor when you only need a place.
+
+**The general form:** every piece of a file you take apart is a piece you can put
+back wrong.
+
+---
+
+## L25 — Running a package's tests from the repo root is not running them
+
+**What happened.** Two tests failed, deterministically, in a suite I had not
+touched. The error was `ENOENT: no such file or directory,
+open '<repo root>/src/modules/workflows/components/EdgeEditDialog.tsx'` — a path
+that has never existed.
+
+The tests resolve files from `process.cwd()`. Turbo runs each package's suite
+**in that package's directory**, so `src/modules/...` means
+`packages/core/src/modules/...`. I had been running
+`npx jest --config packages/core/jest.config.cjs` from the repo root, where the
+same relative path means something else entirely.
+
+Nothing was broken. My runner was standing in the wrong place.
+
+**Why it happens.** Pointing jest at a package's config *looks* like running that
+package's tests, and for most tests it is — every assertion that touches only
+imported modules behaves identically. Only the ones that read the filesystem
+notice, which is a small enough minority to look like a real regression rather
+than a setup difference.
+
+**The rule.** *Run the suite the way the project runs it.* `corepack yarn test`
+for the gate; a direct `npx jest` invocation is a convenience for one file, and
+its results are only comparable when nothing in that file touches `cwd`.
+
+Corollary: when a test fails with a path that does not exist, suspect the working
+directory before suspecting the code.
+
+**The general form:** a tool invoked differently is a different tool. This is L20
+again — source is not `dist`, the running process is not the source — wearing the
+runner's clothes.
+
+---
+
+## L26 — A killed command's children keep writing to the log you are about to read
+
+**What happened.** A loop of three gate runs hit the ten-minute tool timeout and
+was killed part-way through the second. I relaunched the remaining runs, and they
+wrote to the same log filenames.
+
+The orphaned run had not stopped. It kept writing, so one log ended up holding
+**two** turbo summaries — one clean 22/22, one 19/22 with three tasks "failed".
+Those three had not failed; they had been killed with the shell that started
+them. Read quickly, that log says the gate is flaky. It says nothing of the kind.
+
+**Why it happens.** Killing a shell does not reliably kill its grandchildren, and
+a redirect target is not owned by the process that opened it. The log looks like
+one run's output because logs usually are.
+
+**The rule.** *After a timeout, treat every artifact that run was writing as
+contaminated.* Use a fresh filename for the retry, and when a result looks
+anomalous, count the summaries in the file before believing any of them — two
+summaries means two runs.
+
+**The tell worth remembering:** tasks reported as failed with **zero** failing
+assertions underneath. A real failure names something; a killed one just stops.
+
+---
+
+## L27 — A rule written for one kind of actor will be applied to all of them unless you say otherwise
+
+**What happened.** The autonomy matrix answers *how much may this be done
+unattended*, and every one of its gates is phrased about a worker: "the worker
+produces a proposal", "the worker prepares the act". I implemented it as a
+property of the **act**, applying to whoever performed it.
+
+The result passed 27 tests and read perfectly. On its first hour of real traffic
+it demanded a review queue for a person changing their own sidebar layout, and a
+second person's approval to edit a dictionary — 45 of 45 observed human actions
+acquired an obligation.
+
+**Why it happens.** A table indexed by *act* and *situation* looks complete. The
+actor is not one of its axes, so nothing in the table prompts the question "who
+is this for?" — the omission is invisible precisely because the table looks
+total.
+
+**The rule.** *When a rule comes from a document about one kind of actor, write
+down which actors it binds — in the code, at the point it applies.* If the answer
+is "all of them", that is a decision worth one sentence. If it is not, the
+sentence is what stops the next reader re-broadening it.
+
+**What saved it** was measuring before enforcing. The design error was invisible
+to unit tests, because every test I wrote encoded the same misreading. Only real
+traffic disagreed.
+
+**The general form:** tests written from a misunderstanding confirm the
+misunderstanding. A measurement against reality is the only thing that does not.
+
+---
+
+## L28 — A tool that filters the environment will filter yours without saying so
+
+**What happened.** `OM_LOG_LEVEL=debug corepack yarn start` produced no debug
+output. The logger read the variable correctly, the shell exported it correctly,
+and the app never saw it: Turbo runs each task in a **filtered environment**, and
+anything not declared in `globalEnv` / `globalPassThroughEnv` / the task's `env`
+is dropped with no warning.
+
+It cost a diagnostic at the moment I needed one — I was trying to prove the
+shadow resolver was still running, could not, and had to fall back to inspecting
+the build.
+
+**Why it happens.** Every layer between the shell and the process looks like a
+passthrough. `yarn` passes the environment, `node` passes the environment, so the
+mental model is that environment variables simply arrive. A tool that *filters*
+by default breaks that model silently, because a missing variable is
+indistinguishable from a variable set to nothing.
+
+**The rule.** *When a flag appears to do nothing, prove it arrived before
+debugging what it does.* One log line, one `process.env` dump, one grep of the
+output at the level you asked for. And when adding a runtime flag to a repo with
+a task runner, declare it in the runner's config in the same commit — otherwise
+it works for whoever wrote it and for nobody else.
+
+**The general form:** this is L20 and L25 again — the source is not the running
+process, the runner is not the shell. Each layer between what you typed and what
+executed is a place the thing you typed can disappear.
+
+---
+
+## L29 — A dry run is a claim you can check; read its numbers against what you know
+
+**What happened.** The `actor_kind` backfill printed its plan before writing:
+5 rows inferrable as `system`, 0 as `service`, **15 that "cannot be determined"**.
+
+Fifteen undeterminable actors on an instance with exactly one admin user is not a
+plausible number, and the implausibility was the finding. The query was correct;
+the *limitation I had asserted in a comment* was wrong. Matching the `users`
+table identifies a human exactly as soundly as matching `api_keys` identifies a
+key — the same inference in the opposite direction, which I had talked myself out
+of while writing the doc comment.
+
+With it, all twenty rows resolved and none were guessed.
+
+**What it would have cost.** Applied without the dry run, it would have succeeded,
+reported nothing wrong, and left every historical human action permanently
+unattributed — in the audit trail, the one place whose whole purpose is being
+recoverable after the fact.
+
+**The rule.** *Make data migrations dry-run by default, print a breakdown, and
+check the numbers against something you independently know about the data.* One
+admin means roughly one distinct human actor. A count that disagrees with a fact
+you already hold is the cheapest bug report you will ever get.
+
+**And the second-order one:** a limitation written confidently in a comment is
+still an unverified claim. I had documented the constraint before testing whether
+it existed, and the documentation then made it feel settled.
+
+---
+
+## The pattern behind most of these
+
+Eighteen of the twenty-nine are the same mistake wearing different clothes: **a conclusion
+drawn from a proxy instead of from the thing itself.** A label instead of the
+tables. A count instead of the lines. A type instead of the runtime. A word
+instead of the schema. One document instead of several. A build instead of a
+running system. A partial run instead of a whole one. An HTTP status
+instead of a rendered page. A name instead of the routes. **The source
+instead of the running process. The diff instead of the environment.**
+
+The habit that prevents all of them: **before recording a finding, ask what
+exactly you looked at, and whether it is the thing you are claiming about.**

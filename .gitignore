@@ -1,0 +1,33 @@
+# This repository versions the project's *thinking* — the cookbook, the journal,
+# the lessons, the knowledge base, the backlog and the planning documents.
+#
+# It deliberately does not version:
+#
+#   - the Starting Kit itself, which is its own git repository
+#   - anything large, regenerable, or downloaded
+#   - anything holding a secret
+#
+# The knowledge base was unversioned until 2026-08-10, which meant twenty-nine
+# lessons, the cookbook and the backlog had no history and no backup: one bad
+# edit from gone. The code had been protected since the first day.
+
+# The Starting Kit is its own repository, with its own history.
+workspace/starting-kit/
+
+# Backups hold database dumps and copies of .env — secrets, by definition.
+workspace/.backups/
+
+# A downloaded Node runtime and a build-tools installer. Regenerable, and large.
+workspace/.toolchain/
+
+# Candidate codebases kept for reference and the archives they came from.
+open-mercato-main/
+skills-main/
+Platform/
+*.zip
+
+# Scratch space.
+workspace/attic/
+node_modules/
+.DS_Store
+Thumbs.db
