@@ -11,6 +11,8 @@ import { ensureRoles, setupInitialTenant, ensureDefaultRoleAcls, ensureCustomRol
 import { normalizeTenantId } from './lib/tenantAccess'
 import { parseCommaSeparatedList } from '@open-mercato/shared/lib/string'
 import { resolveDecision, explainDecision, GATE_MEANING } from '@open-mercato/shared/lib/authority/decision'
+import { buildShadowReport, renderShadowReport } from '@open-mercato/shared/lib/authority/shadow-report'
+import { readFileSync } from 'node:fs'
 import { getCapabilityDescriptor } from '@open-mercato/shared/lib/capabilities/registry'
 import { EFFECT_CLASS_MEANING, type AutonomyGate, type TaskGrade } from '@open-mercato/shared/modules/capabilities'
 import type { PrincipalKind } from '@open-mercato/shared/lib/auth/principal'
@@ -955,5 +957,53 @@ const authorityExplain: ModuleCli = {
   },
 }
 
+/**
+ * Summarises what shadow mode has observed.
+ *
+ * The resolver runs beside every permission check and logs the interesting
+ * cases; this turns those lines into the two numbers the enforcement decision
+ * actually rests on — what would change, and what would start needing a person.
+ */
+const authorityShadowReport: ModuleCli = {
+  command: 'authority:shadow-report',
+  async run(rest) {
+    const args: Record<string, string> = {}
+    for (let index = 0; index < rest.length; index += 1) {
+      const arg = rest[index]
+      if (!arg?.startsWith('--')) continue
+      const [key, inlineValue] = arg.replace(/^--/, '').split('=')
+      if (inlineValue !== undefined) { args[key] = inlineValue; continue }
+      const next = rest[index + 1]
+      if (next && !next.startsWith('--')) { args[key] = next; index += 1 }
+      else args[key] = 'true'
+    }
+
+    const logPath = args.log ?? args.file
+    if (!logPath) {
+      console.error('Usage: mercato auth authority:shadow-report --log <server log file>')
+      console.error('')
+      console.error('Shadow observations are written to the server log, so point this at')
+      console.error('wherever that is captured. Reading a log rather than a table is')
+      console.error('deliberate: the shadow is a temporary measurement, and giving it a')
+      console.error('schema would outlive the decision it exists to inform.')
+      process.exitCode = 1
+      return
+    }
+
+    let text: string
+    try {
+      text = readFileSync(logPath, 'utf8')
+    } catch (err) {
+      console.error(`Could not read ${logPath}: ${(err as Error).message}`)
+      process.exitCode = 1
+      return
+    }
+
+    console.log('')
+    console.log(renderShadowReport(buildShadowReport(text)))
+    console.log('')
+  },
+}
+
 // Export the full CLI list
-export default [authorityExplain, addUser, seedRoles, syncRoleAcls, rotateEncryptionKey, addOrganization, setupApp, listOrganizations, listTenants, listUsers, setPassword]
+export default [authorityExplain, authorityShadowReport, addUser, seedRoles, syncRoleAcls, rotateEncryptionKey, addOrganization, setupApp, listOrganizations, listTenants, listUsers, setPassword]
