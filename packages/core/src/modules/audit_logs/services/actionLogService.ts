@@ -31,6 +31,21 @@ let validationWarningLogged = false
 let runtimeValidationAvailable: boolean | null = null
 let decryptionWarningLogged = false
 
+/**
+ * What kind of principal acted, from the subject as the caller supplied it.
+ *
+ * Deliberately does not fall back to `human` for an unknown subject shape: null
+ * means *we do not know*, and a journal that guesses is worse than one that
+ * admits a gap. The only safe inference is the absence of any actor at all,
+ * which is the system acting.
+ */
+function resolveActorKind(rawSubject: string | null, storedActorId: string | null): string | null {
+  if (rawSubject) return parseSubject(rawSubject).kind
+  // No subject at all: nothing to attribute this to but the platform itself.
+  if (!storedActorId) return 'system'
+  return null
+}
+
 const isZodRuntimeMissing = (err: unknown) => err instanceof TypeError && typeof err.message === 'string' && err.message.includes('_zod')
 
 const SORT_FIELDS = {
@@ -216,12 +231,14 @@ export class ActionLogService {
    */
   async log(input: ActionLogCreateInput): Promise<ActionLog | null> {
     const data = this.parseCreateInput(input)
+    const rawSubject = typeof input?.actorUserId === 'string' ? input.actorUserId : null
     const log = this.createLogEntity(this.em, data)
+    // U7 — from the RAW subject, before it was narrowed to a uuid. The stored
+    // `actor_user_id` cannot answer this: `api_key:<uuid>` has already become
+    // `<uuid>` by the time it reaches the column.
+    log.actorKind = resolveActorKind(rawSubject, data.actorUserId ?? null)
     await this.em.persist(log).flush()
-    // The RAW subject, not the stored one: `normalizeInput` reduces
-    // `api_key:<uuid>` to the bare uuid, so by the time it reaches the row the
-    // fact that a machine acted is already gone. See `appendToLedger`.
-    await this.appendToLedger(log, data, typeof input?.actorUserId === 'string' ? input.actorUserId : null)
+    await this.appendToLedger(log, data, rawSubject)
     await this.decryptEntries(log)
     return log
   }

@@ -108,7 +108,16 @@ export function ActionLogDetailsDialog({ item, onClose }: { item: ActionLogItem;
                 <dt className="text-xs uppercase tracking-wide text-muted-foreground">
                   {t('audit_logs.actions.columns.user')}
                 </dt>
-                <dd className="text-sm">{item.actorUserName || item.actorUserId || noneLabel}</dd>
+                <dd className="text-sm">
+                  {item.actorUserName || item.actorUserId || noneLabel}
+                  {/* U7 — a machine acting and a person acting used to look
+                      identical here, which is the one distinction this platform
+                      exists to make. Shown only when it is known: an absent kind
+                      predates the column and must not read as "human". */}
+                  {item.actorKind ? (
+                    <span className="ml-2 text-xs text-muted-foreground">({item.actorKind})</span>
+                  ) : null}
+                </dd>
               </div>
               <div>
                 <dt className="text-xs uppercase tracking-wide text-muted-foreground">

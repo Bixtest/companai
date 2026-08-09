@@ -73,6 +73,9 @@ const auditActionItemSchema = z.object({
   executionState: z.enum(['done', 'undone', 'failed', 'redone']),
   actorUserId: z.string().uuid().nullable(),
   actorUserName: z.string().nullable(),
+  // U7 — `human` | `ai_worker` | `service` | `system`, or null for entries
+  // written before the column existed. Null means unknown, never human.
+  actorKind: z.string().nullable(),
   tenantId: z.string().uuid().nullable(),
   tenantName: z.string().nullable(),
   organizationId: z.string().uuid().nullable(),
@@ -249,6 +252,7 @@ export async function GET(req: Request) {
     executionState: entry.executionState,
     actorUserId: entry.actorUserId,
     actorUserName: entry.actorUserId ? displayMaps.users[entry.actorUserId] ?? null : null,
+    actorKind: entry.actorKind ?? null,
     tenantId: entry.tenantId,
     tenantName: entry.tenantId ? displayMaps.tenants[entry.tenantId] ?? null : null,
     organizationId: entry.organizationId,

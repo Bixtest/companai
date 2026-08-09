@@ -136,4 +136,86 @@ const ledgerVerify: ModuleCli = {
   },
 }
 
-export default [projectionsBackfill, ledgerVerify]
+/**
+ * Fills in `actor_kind` for entries written before the column existed (U7).
+ *
+ * Three inferences are sound, and this makes exactly those:
+ *
+ * - an actor id that matches a row in `api_keys` was a **service** principal
+ * - an actor id that matches a row in `users` was a **human**
+ * - **no actor at all** is the platform acting on its own: `system`
+ *
+ * The first two are the same inference in opposite directions, and both are safe
+ * for the same reason: the platform has no path by which a key's id reaches that
+ * column as a user's, or the reverse, and a uuid collision between the two
+ * tables is not a practical concern. My first version of this command claimed a
+ * human could not be distinguished from an unknown actor — that was simply
+ * wrong, and it would have left every historical human action permanently
+ * unattributed.
+ *
+ * What genuinely cannot be decided is an actor id matching **neither** table —
+ * a user deleted since, most likely. Those stay null, because null means "we do
+ * not know" and writing a guess there would turn an absence into a recorded
+ * fact, which is the defect this column exists to remove.
+ */
+const backfillActorKind: ModuleCli = {
+  command: 'backfill-actor-kind',
+  async run(rest) {
+    const args = parseArgs(rest)
+    const apply = args.apply === true || args.apply === 'true'
+
+    const container = await createRequestContainer()
+    const em = container.resolve('em') as { getConnection: () => { execute: (sql: string, params?: unknown[]) => Promise<unknown> } }
+    const connection = em.getConnection()
+
+    const counts = await connection.execute(`
+      select
+        count(*) filter (where actor_kind is null) as unknown_rows,
+        count(*) filter (where actor_kind is null and actor_user_id is null) as system_rows,
+        count(*) filter (where actor_kind is null and actor_user_id in (select id from api_keys)) as service_rows,
+        count(*) filter (where actor_kind is null and actor_user_id in (select id from users)) as human_rows
+      from action_logs
+    `) as Array<{ unknown_rows: string; system_rows: string; service_rows: string; human_rows: string }>
+
+    const summary = counts[0] ?? { unknown_rows: '0', system_rows: '0', service_rows: '0', human_rows: '0' }
+    const undecidable =
+      Number(summary.unknown_rows) -
+      Number(summary.system_rows) -
+      Number(summary.service_rows) -
+      Number(summary.human_rows)
+
+    console.log('')
+    console.log(`  Entries with no actor kind: ${summary.unknown_rows}`)
+    console.log(`    → system  (no actor at all):        ${summary.system_rows}`)
+    console.log(`    → service (id matches an api key):  ${summary.service_rows}`)
+    console.log(`    → human   (id matches a user):      ${summary.human_rows}`)
+    console.log(`    → left null (cannot be determined): ${undecidable}`)
+    console.log('')
+
+    if (!apply) {
+      console.log('  Dry run. Nothing was written. Re-run with --apply to make these changes.')
+      console.log('')
+      return
+    }
+
+    await connection.execute(`
+      update action_logs set actor_kind = 'service'
+       where actor_kind is null and actor_user_id in (select id from api_keys)
+    `)
+    // Keys before users: an id in both tables would be a data-integrity problem
+    // of its own, and treating it as a machine is the safer reading.
+    await connection.execute(`
+      update action_logs set actor_kind = 'human'
+       where actor_kind is null and actor_user_id in (select id from users)
+    `)
+    await connection.execute(`
+      update action_logs set actor_kind = 'system'
+       where actor_kind is null and actor_user_id is null
+    `)
+
+    console.log('  Applied. Rows that could not be determined were left null, which means unknown.')
+    console.log('')
+  },
+}
+
+export default [projectionsBackfill, ledgerVerify, backfillActorKind]

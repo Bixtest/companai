@@ -26,6 +26,23 @@ export class ActionLog {
   @Property({ name: 'actor_user_id', type: 'uuid', nullable: true })
   actorUserId: string | null = null
 
+  /**
+   * What kind of principal acted — `human`, `ai_worker`, `service`, `system`.
+   *
+   * `actor_user_id` is a uuid column, and the subject is narrowed to one on the
+   * way in: `api_key:<uuid>` is stored as the bare uuid. Without this column a
+   * key acting and a person acting are indistinguishable in the journal, which
+   * is the single distinction this platform exists to make (U7).
+   *
+   * Nullable, and null means **unknown** rather than human: entries written
+   * before this column existed cannot have their kind recovered from the row
+   * itself. `audit_logs backfill-actor-kind` infers what it can from the api-key
+   * table and leaves the rest null, because a guess recorded as a fact is worse
+   * than an absence.
+   */
+  @Property({ name: 'actor_kind', type: 'text', nullable: true })
+  actorKind: string | null = null
+
   @Property({ name: 'command_id', type: 'text' })
   commandId!: string
 
@@ -109,6 +126,23 @@ export class AccessLog {
 
   @Property({ name: 'actor_user_id', type: 'uuid', nullable: true })
   actorUserId: string | null = null
+
+  /**
+   * What kind of principal acted — `human`, `ai_worker`, `service`, `system`.
+   *
+   * `actor_user_id` is a uuid column, and the subject is narrowed to one on the
+   * way in: `api_key:<uuid>` is stored as the bare uuid. Without this column a
+   * key acting and a person acting are indistinguishable in the journal, which
+   * is the single distinction this platform exists to make (U7).
+   *
+   * Nullable, and null means **unknown** rather than human: entries written
+   * before this column existed cannot have their kind recovered from the row
+   * itself. `audit_logs backfill-actor-kind` infers what it can from the api-key
+   * table and leaves the rest null, because a guess recorded as a fact is worse
+   * than an absence.
+   */
+  @Property({ name: 'actor_kind', type: 'text', nullable: true })
+  actorKind: string | null = null
 
   @Property({ name: 'resource_kind', type: 'text' })
   resourceKind!: string

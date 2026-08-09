@@ -22,6 +22,7 @@ export type ActionLogItem = {
   executionState: string
   actorUserId: string | null
   actorUserName: string | null
+  actorKind?: string | null
   tenantId: string | null
   tenantName: string | null
   organizationId: string | null
