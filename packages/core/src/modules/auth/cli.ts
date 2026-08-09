@@ -877,7 +877,7 @@ const authorityExplain: ModuleCli = {
 
     const capabilityId = args.capability ?? args.cap
     if (!capabilityId) {
-      console.error('Usage: mercato auth authority:explain --capability <feature id> [--actor human|ai_worker|service] [--grade G0..G4] [--trust A0..A5] [--without-grant]')
+      console.error('Usage: mercato auth authority:explain --capability <feature id> [--actor human|ai_worker|service] [--grade G0..G4] [--trust A0..A5] [--without-grant] [--org <id> --tenant <id>]')
       console.error('Example: mercato auth authority:explain --capability attachments.manage --actor ai_worker')
       process.exitCode = 1
       return
@@ -893,6 +893,23 @@ const authorityExplain: ModuleCli = {
       return
     }
 
+    // R6: the ceiling the actor's position in the organization graph imposes,
+    // resolved from the real edges when an organization is named.
+    let graphCeiling: string | undefined
+    let graphCeilingDetail: string | undefined
+    if (args.org && args.tenant) {
+      const container = await createRequestContainer()
+      const graphService = container.resolve('authorityGraphService') as {
+        ceilingFor: (org: string, tenant: string, capability: string) => Promise<{
+          ceiling: string
+          contributingEdges: Array<{ because: string }>
+        }>
+      }
+      const graph = await graphService.ceilingFor(args.org, args.tenant, capabilityId)
+      graphCeiling = graph.ceiling
+      graphCeilingDetail = graph.contributingEdges[0]?.because
+    }
+
     const decision = resolveDecision({
       actor: {
         kind: (args.actor as PrincipalKind) ?? 'human',
@@ -901,6 +918,7 @@ const authorityExplain: ModuleCli = {
         ...(args.trust ? { trustCeiling: args.trust as AutonomyGate } : {}),
         ...(args.invoker ? { invokerCeiling: args.invoker as AutonomyGate } : {}),
         ...(args.delegation ? { delegationCeiling: args.delegation as AutonomyGate } : {}),
+        ...(graphCeiling ? { graphCeiling: graphCeiling as AutonomyGate, graphCeilingDetail } : {}),
       },
       capability,
       context: { grade: (args.grade as TaskGrade) ?? 'G1' },

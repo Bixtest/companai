@@ -96,6 +96,17 @@ export type ResolveInput = {
      * by someone who could not perform the act cannot perform it either.
      */
     invokerCeiling?: AutonomyGate
+    /**
+     * The ceiling implied by the actor's position in the organization graph (R6).
+     *
+     * Computed by `resolveGraphCeiling` over the typed edges from the root down.
+     * The same invariant as `invokerCeiling`, enforced structurally: a worker in
+     * a subsidiary cannot exceed what the edges above it permit, whatever its own
+     * grants say.
+     */
+    graphCeiling?: AutonomyGate
+    /** Why the graph ceiling is what it is — carried into the explanation. */
+    graphCeilingDetail?: string
   }
   capability: CapabilityDescriptor
   context: {
@@ -223,6 +234,15 @@ export function resolveDecision(input: ResolveInput): Decision {
     consider('invoker-ceiling', actor.invokerCeiling, `Carried from the invoker, who is capped at ${actor.invokerCeiling}`)
   }
 
+  // Position in the graph, before anything the actor was granted personally.
+  if (actor.graphCeiling) {
+    consider(
+      'graph-ceiling',
+      actor.graphCeiling,
+      actor.graphCeilingDetail ?? `The actor's place in the organization graph permits at most ${actor.graphCeiling}`,
+    )
+  }
+
   if (actor.delegationCeiling) {
     consider('delegation-ceiling', actor.delegationCeiling, `Acting under a delegation capped at ${actor.delegationCeiling}`)
   }
@@ -333,6 +353,16 @@ function deriveAlternatives(
         change: capability.compensation
           ? `${capability.compensation} were used instead, which can be compensated`
           : 'a reversible act with the same outcome existed',
+        wouldYield: withoutBinding,
+      })
+      break
+    case 'graph-ceiling':
+      alternatives.push({
+        change: 'the act were performed in an organization the edges do not restrict',
+        wouldYield: withoutBinding,
+      })
+      alternatives.push({
+        change: 'the edge above this organization were widened, which is itself a governed act',
         wouldYield: withoutBinding,
       })
       break
