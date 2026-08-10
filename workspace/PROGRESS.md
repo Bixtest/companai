@@ -1,6 +1,6 @@
 # Progress — where we are, out of how much
 
-**One line: 8 of 16 batches done, plus R2c. All six repairs (R1–R6) are in, the
+**One line: 9 of 16 batches done, plus R2c. All six repairs (R1–R6) are in, the
 resolver decides rather than observes, every gate binds, the queue those gates fill
 is now a screen a person can work, and the test gate no longer depends on how busy
 the machine is. Every inherited defect we found is fixed. Next is the approvals
@@ -411,17 +411,45 @@ section), R1.3 (dropped).
 | **6** | **R4 — Capability descriptor** | Effect class, reversibility, data classes, autonomy ceiling; **113/113 described**, guarded | ✅ **done** 2026-08-09 |
 | **7** | **R5 — Decision with reasons** | Gates A0–A5, every rule recorded, binding rule, obligations, alternatives, preflight, `authority:explain` | ✅ **done** 2026-08-09 |
 | **8** | **R6 — Typed org edges** | Typed edges, inheritance modes, per-edge ceilings, module allowlists; feeds the resolver | ✅ **done** 2026-08-09 |
-| 9 | G1 — Layered resolver + explanation trace | from Platform 1 · needs R5 | ⬜ |
-| 10 | G2 — Org edges, ceilings, inheritance modes | from Platform 1 · needs R6 | ⬜ |
+| 9 | G1 — Layered resolver + explanation trace | from Platform 1 · needs R5 | ⚠️ **re-scope first** — see below |
+| 10 | G2 — Org edges, ceilings, inheritance modes | from Platform 1 · needs R6 | ✅ **already covered by R6** 2026-08-10 |
 | 11 | G3 — Temporary delegations | from Platform 1 · needs R1 | ⬜ |
 | 12 | G4 — Project permission overlays | from Platform 1 · needs R5 | ⬜ |
 | 13 | G5 — Record lock states | from Platform 1 · **replaces** the removed enterprise locking | ⬜ |
 | 14 | G6 — Event visibility scope | from Platform 1 | ⬜ |
 | 15 | G7 — Locale direction + RTL inference | from Platform 1 | ⬜ |
-| 16 | G8 — Migration advisory lock | from Platform 1 | ⬜ |
+| 16 | G8 — Migration advisory lock | from Platform 1 | ⬜ **confirmed needed** 2026-08-10 |
 
 After batch 16 the Starting Kit is done, and **Phase K** — our own kernel, the
 actual product — begins. That is a separate plan, not counted here.
+
+### Two batches checked against the code, 2026-08-10
+
+**G2 is done — close it.** It asked for `relationship_type`, `inheritance_mode`
+and a per-edge `permission_ceiling_id`, schema only. R6 shipped all seven
+relationship types (`owns`, `manages`, `supervises`, `licenses`, `templates`,
+`serves`, `advises`), all four inheritance modes (`strict`, `flexible`,
+`reference_only`, `none`), the per-edge ceiling **and** module allowlists, which
+G2 never asked for — and it resolves rather than merely storing them
+(`packages/shared/src/lib/authority/graph.ts`). Nothing is left to graft. **Seven
+batches remain, not eight.**
+
+**G1 needs re-scoping before anyone starts it.** R5 already delivers the half that
+mattered: an explanation for every rule consulted, the binding rule, obligations
+and alternatives. What G1 adds on top is Platform 1's *shape* — eight ordered
+sources, deny-wins, a `terminal` flag separating denials that end evaluation from
+ones a later source could lift. Our resolver deliberately took a different shape:
+everything is a ceiling and the answer is the minimum, with no rule anywhere that
+raises a gate. Grafting ordered-source semantics onto that is a design decision,
+not a port, and the batch is sized as though it were a port.
+
+**G8 is genuinely needed.** The graft note said to check whether MikroORM's runner
+already takes an advisory lock before scheduling it. It does not — there is no
+locking of any kind in `node_modules/@mikro-orm/migrations`, and
+`packages/cli/src/lib/db/commands.ts:406` calls `migrator.up()` bare. A few lines,
+as predicted. (The first grep for this searched a `dist/` path that does not exist
+and returned nothing; the package keeps its files at the root. [[L28]] — prove the
+diagnostic works before believing the silence.)
 
 **Batches 2 and 7 (R1 and R5) are the spike.** Three weeks, timeboxed. If they
 sprawl, the foundation is not reshapeable and
