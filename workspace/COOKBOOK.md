@@ -546,3 +546,36 @@ yourself and write it down. Stop only for:
   the whole plan rests on.
 - **A graft cannot be expressed in the host's idioms** without distorting either
   side — say so rather than forcing it.
+- **A screen somebody will live in** — its shape is a product decision, not an
+  engineering one. Build the mechanism, then ask before designing the surface.
+
+## Rule zero-seven — defaults are yours; tastes are theirs
+
+Set 2026-08-10, when the approvals page came up and the answer was *"pick the
+best default, and give people a setting where it suits them differently."*
+
+**Choose. Do not ask which sort order somebody prefers.** A question that returns
+a shrug has cost two people time and bought nothing. Pick the answer that is
+right for most, and say why in the same place the code lives.
+
+**Then ask which half you are in:**
+
+| | |
+|---|---|
+| There is a **right answer** | Default, no setting. A knob here is an invitation to break it |
+| Organisations **legitimately differ** | Default plus a setting, and the default still has to be defensible on its own |
+| It is **authority** | No setting, ever. "Who may approve this" is not a preference |
+
+**Every setting has a price** — a thing to explain, translate, test, migrate and
+get wrong — so "make it configurable" is not the safe choice, it is a choice with
+a bill. The instruction *"give people a setting"* means **do not bake your taste
+into their product**; it does not mean *make everything adjustable*.
+
+**Write the decision down where the work is**, with the reasoning and the date.
+A default nobody can find the argument for gets reversed by the next person who
+disagrees with it, and reversed back by the one after that.
+
+**And schedule it honestly.** If a surface needs real usage to design well, say
+so and name what has to exist first — the way shadow mode had to run before
+enforcement could be switched on. "Later" with a stated precondition is a plan;
+"later" on its own is how things get forgotten.

@@ -26,7 +26,7 @@ and is argued below; anything can be pulled forward on request.
 |---|---|---|---|
 | **1** | **No data-classification floor, so an untrusted machine reads confidential data unattended** | Planning 02 §6.1 names `matrix_by_classification[resource.classification]` as a floor input; it does not exist. Reads are now exempt from the untrusted-machine ceiling — correct, because a read has no effect to approve — which leaves RBAC as the only bound on a machine reading `confidential` or `secret` data. Needs per-resource classification and a policy table with a source, not values I invent | M |
 | **2** | **A3 and A4 still do not bind, and only 3 commands declare a capability** | Hold-and-commit needs a scheduler that commits when nobody objects — the opposite of expiry — and execute-and-review needs a review record on an already-executed act. Separately, the command→capability mapping is opt-in and covers `directory.organizations.*` only; every other command is ungated. Both are visible gaps rather than silent ones | M |
-| **3** | **The approval queue is an API and a deadline, not an inbox** | Planning 02 §7.2 asks for ordering by grade then deadline risk, bulk-approve with a diff, absence-aware routing to a declared delegate, standing approvals, and one inbox combining approvals, reviews, escalations and blocked work. None of it exists. The shape of that inbox is a product decision, not an engineering one, so it wants a conversation before it is built | L |
+| **3** | **Build the approvals page** | Decided with the owner 2026-08-10 — see *The approvals page* below for the shape, the defaults and what is tunable. **Scheduled after item 2**, and the reason is in that section: a screen for a tray that is almost always empty teaches nobody anything | L |
 | **4** | **Repo-walking test guards race a sibling package's scratch directory** | `packages/shared` creates `.tmp-dynamic-loader-*` inside its own package tree while its tests run, and any guard walking `packages/` reads a file from it a moment after it is deleted. Two have been hardened after failing gate runs; eleven more walk-and-read without a guard. The root cause is the fixture's location, which cannot simply move to the OS temp dir because the loader it tests resolves real dependencies relative to the repo | S |
 | **5** | **G1–G8 — the eight grafts from Platform 1** | G1/G2/G4 need R5/R6, which now exist; the rest are independent. G2 is largely subsumed by R6 and should be re-scoped before it is started | L |
 | **6** | **Ledger correlation and causation are carried but never propagated** | `correlation_id` / `causation_id` are recorded when a caller supplies them in `context`, and nothing supplies them. Until something threads a correlation id through a request, the chain records events that cannot be assembled into a trace — which is the feature the ledger exists to enable | M |
@@ -36,6 +36,41 @@ and is argued below; anything can be pulled forward on request.
 | **10** | **Dependency pruning for parked modules** | Security scanners will flag CVEs in packages nothing routes to. Pre-production, not now | M |
 | **11** | **Orphaned-table decision — ~127 tables from modules that later got parked** | Currently: leave them, they are inert. Revisit only as a deliberate backed-up migration | S |
 | **12** | **Phase K checkpoint — revisit parking with evidence** | The scheduled date that stops 'we'll clean up later' being a lie | S |
+
+### The approvals page — decided 2026-08-10
+
+When the platform decides an act needs a second pair of eyes, the act stops and
+waits. That works today, and you can look in the tray and answer yes or no —
+through an API, which means through a terminal. Nobody in a real company will do
+that.
+
+**Owner's decisions.** Its own page in the menu. Choose sensible defaults rather
+than asking, and expose settings where people genuinely differ instead of baking
+one person's taste into the product.
+
+**Read that as a rule, not a licence.** Every setting is something to explain,
+test, document and get wrong. A knob exists where organisations legitimately
+disagree; where there is a right answer, there is a default and no knob.
+
+| Feature | Default | Tunable? |
+|---|---|---|
+| **Ordering** | Riskiest first, then closest to its deadline | **Yes, per person.** Some want fairness (oldest first), some want risk. A real disagreement |
+| **Approve several at once** | On, and it always shows how the grouped items *differ* | **On/off per tenant.** Some will forbid it outright for high-risk acts. The diff itself is never optional — a blind "approve all" is worse than no button |
+| **Cover for someone away** | Off until a deputy is named | **Yes** — it cannot work without naming somebody, so it is inherently a setting |
+| **Standing approvals** | Off | **Yes, per grantor**, with a mandatory expiry and a visible count of what it let through. The most useful and the most dangerous; planning 02 §7.1 |
+| **Expiry** | 24 hours | **Yes, per tenant.** A day suits some businesses and is absurd for others |
+| **Who may approve** | Holders of `auth.authority.approve` | **No.** That is authority, not preference |
+
+**Why after item 2, and not now.** The page is a tool for working through a tray.
+Three commands are gated today, so the tray is nearly always empty — and a screen
+designed against an empty tray is designed against a guess. Item 2 widens what is
+gated; once real traffic accumulates, the design question stops being "what might
+people need" and becomes "what is actually in here". That is the same discipline
+shadow mode used before enforcement, and it has already caught two of my design
+errors.
+
+**Not a reason to wait**: polish, or wanting the product to feel finished. If the
+tray fills up sooner than expected, this moves up.
 
 **Why this order.** Every inherited defect we have found is now closed, so the
 list leads with the honest remainder of enforcement: what it does *not* yet bind,

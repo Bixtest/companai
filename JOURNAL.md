@@ -7,6 +7,33 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-08-10 — Decision: the approvals page, and a rule about defaults
+
+The approval tray works; the screen for it does not exist. I asked, because how a
+screen behaves for somebody who opens it every morning is a product question and
+guessing produces a control people route around.
+
+**Decided:** its own page. Choose sensible defaults rather than asking about each
+one, and expose settings where organisations genuinely differ.
+
+I have read that as *"do not bake your taste into my product"* rather than *"make
+everything adjustable"*, and said so — every setting is a thing to explain,
+translate, test and get wrong, so "configurable" is not the safe option, it is an
+option with a bill. Ordering, bulk approval, deputy cover, standing approvals and
+expiry get a default and a knob; **who may approve does not**, because that is
+authority and not preference.
+
+**Scheduled after item 2**, with the reason recorded rather than left as
+"later": three commands are gated today, so the tray is nearly always empty, and
+a screen designed against an empty tray is designed against a guess. Item 2
+widens what is gated. Same discipline as running shadow mode before enforcement —
+which has already caught two design errors of mine that reasoning alone did not.
+
+Generalised into **rule zero-seven** in the cookbook, because the shape recurs:
+choose the default, name which half of the decision you are in (right answer /
+legitimate difference / authority), write down the argument, and if a surface
+needs real usage to design well then say what has to exist first.
+
 ## 2026-08-10 — An act that has to wait
 
 Enforcement could refuse an act and nothing else. `A1` and `A2` — *"the worker
