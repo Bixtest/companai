@@ -28,9 +28,11 @@ organization.
        │
 3. The command bus           the act itself, if it is still going to happen
        │
-       ├─ A1 / A2 ─────────► held in authority_pending_acts. 202. Runs on approval
+       ├─ A1 / A2 ─────────► held in authority_acts. 202. Runs on approval
        │
-       └─ A3 / A4 / A5 ────► runs now
+       ├─ A4 ──────────────► runs now, then filed in authority_act_reviews
+       │
+       └─ A3 / A5 ─────────► runs now
                               │
 4. Audit + ledger             every write recorded, and hash-chained
 ```
@@ -71,7 +73,7 @@ somebody something they did not already hold.
 | **A1** | Propose; a person performs the act | **Yes** — held for approval |
 | **A2** | Approve first | **Yes** — held for approval |
 | **A3** | Hold, then commit unless vetoed | No — needs a scheduler |
-| **A4** | Act now, review afterwards | No — needs a review record |
+| **A4** | Act now, review afterwards | **Yes** — the act runs and is filed for review |
 | **A5** | Act and log | Nothing to enforce |
 
 Where a gate is not enforced, the obligation is recorded and the act proceeds.
@@ -101,7 +103,7 @@ Not omissions — decisions, each with a backlog entry:
 | `packages/shared/src/lib/authority/graph.ts` | The org-graph rules, as pure functions |
 | `packages/shared/src/lib/authority/shadow.ts` | Observation mode |
 | `packages/core/src/modules/auth/services/authorityEnforcementService.ts` | Per-tenant mode; turns a decision into a refusal |
-| `packages/core/src/modules/auth/services/pendingActService.ts` | Acts held for approval |
+| `packages/core/src/modules/auth/services/pendingActService.ts` | Acts held for approval, and acts filed for review |
 | `packages/core/src/modules/auth/commands/interceptors.ts` | The gate that holds an act |
 | `packages/core/src/modules/directory/services/authorityGraphService.ts` | The graph, from the database |
 | `packages/core/src/modules/audit_logs/services/ledgerService.ts` | The hash chain |

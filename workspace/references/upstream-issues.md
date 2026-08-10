@@ -686,3 +686,22 @@ else in the same function.
 an absent value read as an instruction to clear. Third instance this week,
 counting the sidebar presets and this one's two fields. Worth a look wherever a
 partial update writes a relationship.
+
+### A fourth, and this one is contention rather than a race
+
+`packages/cli/src/lib/testing/__tests__/integration.test.ts` — the integration
+environment cache. Two of its cases exceed a **60-second** budget inside the full
+gate and pass in **17 seconds** when the file is run alone.
+
+Sixty seconds is not a tight budget. Exceeding it means the work is being starved,
+not merely slowed — twenty-two packages compiling and testing at once, on a
+machine whose Docker daemon had additionally been unresponsive for hours.
+
+Recorded rather than fixed, deliberately: raising an already-generous timeout
+treats the symptom, and the honest fix is either to stop these tests contending
+(run them outside the parallel gate) or to find what they are waiting on. That is
+its own piece of work — see PROGRESS item 3.
+
+**What matters for anyone reading a red gate**: check whether the failures are in
+the area you changed. Four separate flakes today, none of them related to the
+change under test.

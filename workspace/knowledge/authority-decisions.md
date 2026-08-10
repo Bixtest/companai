@@ -274,13 +274,12 @@ starts refusing requests on a Tuesday.
 | `A1` | Propose; a human performs | **Yes** — the act is held for approval |
 | `A2` | Approve first | **Yes** — the act is held for approval |
 | `A3` | Hold and commit unless vetoed | No — needs a scheduler to commit on expiry |
-| `A4` | Execute, then review | No — the act runs; the review record does not exist |
+| `A4` | Execute, then review | **Yes** — the act runs and is filed for review |
 | `A5` | Execute and log | Nothing to enforce |
 
-A3 and A4 are not "the same queue with a different timer". A3 commits when
-nobody objects, which is the opposite of expiry; A4 runs the act immediately and
-files something afterwards. Calling them done because they share a table would be
-a claim without a mechanism.
+A3 is not "the approval queue with a different timer". It executes into a hold
+window and **commits** when the window passes unless somebody objects — the
+opposite of expiry, and it needs a scheduler rather than a queue.
 
 The CLI says which is which when you switch a tenant on. Say it out loud rather
 than let somebody infer a guarantee that is not there.
@@ -466,4 +465,41 @@ Invariant I2 again: the matrix bounds machines and delegated authority, so
 grading the work harder does not start gating a person reading their own
 company's credentials. What bounds them is whether they hold the capability, and
 policy.
+
+## A4 — the act runs, and somebody still has to look
+
+*Execute and review* is the opposite shape from a held act: it has already
+happened. So it is a different table, `authority_act_reviews`, not a status on
+`authority_acts`. One table whose rows mean "not yet" or "already did" depending
+on a column is how a schema starts lying to whoever reads it next.
+
+```
+beforeExecute   gate is A4 → do not hold; carry the decision forward as metadata
+                the act runs normally
+afterExecute    file a review row: what ran, who ran it, why it was reviewable,
+                and the action-log id so a reviewer reads the change itself
+```
+
+The decision is carried from `beforeExecute` rather than re-resolved afterwards.
+Re-resolving would answer *what the rules say now*, which can differ from the
+reason the act was reviewable in the first place.
+
+**Filing never throws at the caller.** The write has already committed, and
+failing the request would tell somebody their change did not land when it did. A
+missing review row is a real gap; lying about a successful write to report it is
+a worse one. It is logged at error level instead.
+
+**No deadline, unlike a held act.** An approval nobody answers has work blocked
+behind it and must expire. A review nobody does blocks nothing, and an unreviewed
+act is exactly what somebody should still be able to find next quarter.
+
+**One endpoint, two lists.** `GET /api/auth/authority/pending-acts` returns
+`items` (not yet happened) and `reviews` (already happened). Planning 02 §9 asks
+for one inbox rather than four screens, and this is where that starts — but they
+stay distinguishable, because confusing "stop this" with "check this" in either
+direction is how a queue loses its meaning.
+
+Marking one looked-at: `POST` the same endpoint with `decision: "reviewed"`. It
+runs nothing and undoes nothing. Compensating an act is undo, which the command
+bus already provides, and is a separate deliberate step.
 

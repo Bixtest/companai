@@ -7,6 +7,36 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-08-10 — A4 binds: the act runs, and somebody still has to look
+
+*Execute and review* is the opposite shape from an act held for approval — it has
+already happened — so it went in its own table rather than as a status on the
+existing one. A table whose rows mean "not yet" or "already did" depending on a
+column is how a schema starts lying to whoever reads it next, and this one is a
+day old, which is the cheapest moment to get that right.
+
+The decision is carried from `beforeExecute` to `afterExecute` through the
+interceptor metadata rather than re-resolved after the act. Re-resolving would
+answer *what the rules say now*, which can differ from the reason the act was
+reviewable when it ran.
+
+**Filing never throws at the caller.** The write has already committed; failing
+the request would tell somebody their change did not land when it did. A missing
+review row is a real gap, and lying about a successful write to report it is a
+worse one — logged at error level instead.
+
+**And no deadline**, unlike a held act. An approval nobody answers has work
+blocked behind it and must expire. A review nobody does blocks nothing, and an
+unreviewed act is exactly the thing somebody should still be able to find next
+quarter. Same table shape, opposite retention, for a reason worth writing down.
+
+One endpoint now returns both lists, because §9 asks for one inbox rather than
+four screens — but they stay separate fields, since confusing "stop this" with
+"check this" in either direction is how a queue loses its meaning.
+
+That leaves **A3** alone: it commits when nobody objects, which needs something to
+wake up and run the act. The scheduler module is enabled, so the pieces exist.
+
 ## 2026-08-10 — Which commands are gated, decided by reading rather than guessing
 
 Three commands declared the capability they perform. Everything else was
