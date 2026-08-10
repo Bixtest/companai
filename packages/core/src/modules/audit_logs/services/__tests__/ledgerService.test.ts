@@ -38,19 +38,24 @@ function createFakeChain() {
   const rows: StoredRow[] = []
   const advisoryLocks: Array<[number, number]> = []
 
-  const execute = jest.fn(async (sql: string, params: unknown[] = []) => {
+  const executeCalls: Array<{ sql: string; ctx: unknown }> = []
+  const execute = jest.fn(async (sql: string, params: unknown[] = [], _method?: string, ctx?: unknown) => {
+    executeCalls.push({ sql, ctx })
     if (sql.includes('pg_advisory_xact_lock')) {
       advisoryLocks.push([params[0] as number, params[1] as number])
       return []
     }
     if (sql.includes('order by seq desc limit 1')) {
       const last = rows[rows.length - 1]
-      return last ? [{ seq: last.seq, hash: last.hash }] : []
+      return last ? [{ seq_text: last.seq, hash: last.hash }] : []
     }
     if (sql.includes('order by seq asc')) {
       const afterSeq = BigInt(String(params[1]))
       const limit = Number(params[2])
-      return rows.filter((row) => BigInt(row.seq) > afterSeq).slice(0, limit)
+      return rows
+        .filter((row) => BigInt(row.seq) > afterSeq)
+        .slice(0, limit)
+        .map((row) => ({ ...row, seq_text: row.seq }))
     }
     if (sql.includes('select distinct tenant_id')) {
       return [{ tenant_id: 'tenant-1' }]
@@ -60,6 +65,9 @@ function createFakeChain() {
 
   const em = {
     getConnection: () => ({ execute }),
+    // The transaction the caller opened. Both the advisory lock and the head
+    // read must run on it — see below.
+    getTransactionContext: () => TRANSACTION,
     create: (_entity: unknown, data: Record<string, unknown>) => ({ ...data }),
     persist: (entity: Record<string, unknown>) => ({
       flush: async () => {
@@ -82,8 +90,11 @@ function createFakeChain() {
     }),
   } as unknown as EntityManager
 
-  return { em, rows, advisoryLocks, execute }
+  return { em, rows, advisoryLocks, execute, executeCalls }
 }
+
+/** Stands in for the caller's open transaction. */
+const TRANSACTION = { id: 'trx-1' }
 
 const appendOne = (service: LedgerService, eventType: string, payload: Record<string, string> = {}) =>
   service.append({
@@ -117,6 +128,40 @@ describe('LedgerService.append', () => {
     expect(second.prevHash).toBe(first.hash)
     expect(third.prevHash).toBe(second.hash)
     expect([first.seq, second.seq, third.seq]).toEqual(['1', '2', '3'])
+  })
+
+  it('never aliases the sequence column to its own name', async () => {
+    // `select seq::text as seq ... order by seq desc` makes PostgreSQL order by
+    // the *text* output column: '9' beats '10'. That computed a head behind the
+    // real one, the next append claimed a position that already existed, and an
+    // ordinary write returned 500. The same alias made the verifier report an
+    // intact chain as broken.
+    //
+    // A string assertion, deliberately: the defect is in the SQL text and
+    // invisible to any fake connection, because the fake does the ordering.
+    const chain = createFakeChain()
+    const service = new LedgerService(chain.em)
+    await appendOne(service, 'a')
+    await service.verifyTenantChain('tenant-1')
+
+    for (const call of chain.executeCalls) {
+      expect(call.sql).not.toMatch(/as seq/)
+    }
+  })
+
+  it('locks and reads the head inside the caller transaction', async () => {
+    // Without the transaction context, `getConnection().execute` may take a
+    // different pooled connection: `pg_advisory_xact_lock` would then commit and
+    // release immediately, serialising nothing. That produced a real duplicate
+    // -key violation on `ledger_events_tenant_seq_uq` in ordinary use.
+    const chain = createFakeChain()
+    await appendOne(new LedgerService(chain.em), 'api_keys.key.created')
+
+    const lockCall = chain.executeCalls.find((call) => call.sql.includes('pg_advisory_xact_lock'))
+    const headCall = chain.executeCalls.find((call) => call.sql.includes('order by seq desc'))
+
+    expect(lockCall?.ctx).toBe(TRANSACTION)
+    expect(headCall?.ctx).toBe(TRANSACTION)
   })
 
   it('takes an advisory lock before reading the head, so two appends cannot claim one position', async () => {

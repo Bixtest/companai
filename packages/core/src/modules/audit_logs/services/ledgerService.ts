@@ -83,17 +83,40 @@ export class LedgerService {
       throw new Error('[internal] Ledger append requires a tenantId')
     }
 
+    // Both statements must run on the connection that owns the caller's
+    // transaction. `getConnection().execute(...)` without a transaction context
+    // may take a different pooled connection — in which case
+    // `pg_advisory_xact_lock` commits and releases immediately, serialising
+    // nothing, and the head read sees a snapshot outside the transaction.
+    //
+    // That is not theoretical: it produced a duplicate-key violation on
+    // `ledger_events_tenant_seq_uq` in ordinary use, when a second process
+    // appended between this read and the insert. The constraint did exactly what
+    // it was put there for — a race failed loudly rather than forking the chain —
+    // but the append should not have raced in the first place.
     const [lockHigh, lockLow] = advisoryLockKeys(input.tenantId)
     const connection = this.em.getConnection()
-    await connection.execute('select pg_advisory_xact_lock(?, ?)', [lockHigh, lockLow])
+    const transaction = this.em.getTransactionContext()
 
-    const head = await this.em.getConnection().execute<Array<{ seq: string; hash: string }>>(
-      'select seq::text as seq, hash from ledger_events where tenant_id = ? order by seq desc limit 1',
+    await connection.execute('select pg_advisory_xact_lock(?, ?)', [lockHigh, lockLow], 'all', transaction)
+
+    // `as seq_text`, never `as seq`.
+    //
+    // PostgreSQL resolves `ORDER BY seq` to the *output column* when one shares
+    // the name — so `select seq::text as seq ... order by seq desc` sorts
+    // lexicographically: '9' beats '10'. This query computed a head of 9 when
+    // the chain was at 10, the next append claimed a position that already
+    // existed, and the unique constraint rejected it. The user-visible symptom
+    // was a 500 on an ordinary write; the cause was an alias.
+    const head = await connection.execute<Array<{ seq_text: string; hash: string }>>(
+      'select seq::text as seq_text, hash from ledger_events where tenant_id = ? order by seq desc limit 1',
       [input.tenantId],
+      'all',
+      transaction,
     )
 
     const previous = head[0] ?? null
-    const seq = previous ? BigInt(previous.seq) + 1n : 1n
+    const seq = previous ? BigInt(previous.seq_text) + 1n : 1n
     const prevHash = previous ? previous.hash : null
     const ts = input.ts ?? new Date()
     const visibility: LedgerVisibility = input.visibility ?? 'tenant'
@@ -157,7 +180,7 @@ export class LedgerService {
 
     for (;;) {
       const rows = await connection.execute<Array<{
-        seq: string
+        seq_text: string
         prev_hash: string | null
         hash: string
         hash_version: number
@@ -171,7 +194,12 @@ export class LedgerService {
         visibility: string
         payload: Record<string, unknown>
       }>>(
-        `select seq::text as seq, prev_hash, hash, hash_version, ts, event_type, actor_kind, actor_id,
+        // Same alias trap as the head query: ordering by a text output column
+        // returned 1, 10, 2, 3 — and the verifier reported a perfectly intact
+        // chain as broken at position 2. A false alarm from an integrity tool is
+        // the worst outcome it has: it is exactly the thing nobody will believe
+        // the second time.
+        `select seq::text as seq_text, prev_hash, hash, hash_version, ts, event_type, actor_kind, actor_id,
                 organization_id, correlation_id, causation_id, visibility, payload
            from ledger_events
           where tenant_id = ? and seq > ?
@@ -183,14 +211,14 @@ export class LedgerService {
       if (rows.length === 0) break
 
       for (const row of rows) {
-        const seq = BigInt(row.seq)
+        const seq = BigInt(row.seq_text)
 
         if (seq !== expectedSeq) {
           return {
             ok: false,
             tenantId,
             checked,
-            brokenAtSeq: row.seq,
+            brokenAtSeq: row.seq_text,
             reason: `Sequence gap: expected ${expectedSeq}, found ${seq}. An event was deleted, or one was never written.`,
           }
         }
@@ -200,7 +228,7 @@ export class LedgerService {
             ok: false,
             tenantId,
             checked,
-            brokenAtSeq: row.seq,
+            brokenAtSeq: row.seq_text,
             reason: 'Predecessor hash does not match the previous event — the chain was re-linked.',
           }
         }
@@ -210,7 +238,7 @@ export class LedgerService {
             ok: false,
             tenantId,
             checked,
-            brokenAtSeq: row.seq,
+            brokenAtSeq: row.seq_text,
             reason: `Unknown hash version ${row.hash_version}; this build verifies version ${LEDGER_HASH_VERSION}.`,
           }
         }
@@ -236,7 +264,7 @@ export class LedgerService {
             ok: false,
             tenantId,
             checked,
-            brokenAtSeq: row.seq,
+            brokenAtSeq: row.seq_text,
             reason: 'Stored hash does not match the event content — this row was modified after it was written.',
           }
         }
