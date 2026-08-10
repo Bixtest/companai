@@ -382,3 +382,97 @@ export class UserConsent {
   @Property({ name: 'deleted_at', type: Date, nullable: true })
   deletedAt?: Date | null
 }
+
+/**
+ * An act the resolver would not let happen yet.
+ *
+ * When enforcement is on and the resolver gates a command at `A1` or `A2`, the
+ * command does **not** run. What it would have done is written here instead, and
+ * it runs only when somebody with the authority to approve it says so.
+ *
+ * Before this existed, enforcement could refuse an act outright and nothing
+ * else: `A1`-`A4` were recorded as obligations and did not bind, so "approve
+ * first" was a sentence in a log rather than a control.
+ *
+ * **`input` is the command's own input**, the same shape the command bus already
+ * persists to `action_logs.command_payload` for undo — so replaying an approved
+ * act is the mechanism the platform already has for redo, not a new one.
+ *
+ * Expiry is mandatory (planning 02 §7.2): a request that can sit forever turns
+ * into a queue nobody trusts, and silently blocking work is worse than saying
+ * no. An expired act cannot be approved; it has to be proposed again.
+ */
+@Entity({ tableName: 'authority_pending_acts' })
+@Index({ name: 'authority_pending_acts_queue_idx', properties: ['tenantId', 'status', 'expiresAt'] })
+@Index({ name: 'authority_pending_acts_actor_idx', properties: ['tenantId', 'actorId'] })
+export class AuthorityPendingAct {
+  @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
+  id!: string
+
+  @Property({ name: 'tenant_id', type: 'uuid' })
+  tenantId!: string
+
+  @Property({ name: 'organization_id', type: 'uuid', nullable: true })
+  organizationId?: string | null
+
+  /** The command that was held, and the capability it performs. */
+  @Property({ name: 'command_id', type: 'text' })
+  commandId!: string
+
+  @Property({ name: 'capability_id', type: 'text' })
+  capabilityId!: string
+
+  /** What the command was called with. Replayed verbatim on approval. */
+  @Property({ name: 'command_input', type: 'jsonb' })
+  commandInput!: unknown
+
+  /** Who proposed it — the actor whose authority the act was resolved against. */
+  @Property({ name: 'actor_id', type: 'text' })
+  actorId!: string
+
+  @Property({ name: 'actor_kind', type: 'text' })
+  actorKind!: string
+
+  /** The gate that held it, and the rule that produced that gate. */
+  @Property({ type: 'text' })
+  gate!: string
+
+  @Property({ name: 'binding_rule', type: 'text' })
+  bindingRule!: string
+
+  /**
+   * The whole decision, so the queue can show why without re-resolving.
+   *
+   * Re-resolving at display time would answer a different question — what the
+   * rules say *now* — and quietly disagree with the reason the act was held.
+   */
+  @Property({ type: 'jsonb' })
+  decision!: unknown
+
+  /** `pending` · `approved` · `rejected` · `expired` · `failed` */
+  @Property({ type: 'text', default: 'pending' })
+  status: string = 'pending'
+
+  @Property({ name: 'expires_at', type: Date })
+  expiresAt!: Date
+
+  @Property({ name: 'resolved_at', type: Date, nullable: true })
+  resolvedAt?: Date | null
+
+  @Property({ name: 'resolved_by_user_id', type: 'uuid', nullable: true })
+  resolvedByUserId?: string | null
+
+  @Property({ name: 'resolution_note', type: 'text', nullable: true })
+  resolutionNote?: string | null
+
+  /** Set when an approved act was run and threw. The act stays visible. */
+  @Property({ name: 'failure_reason', type: 'text', nullable: true })
+  failureReason?: string | null
+
+  @Property({ name: 'created_at', type: Date, onCreate: () => new Date() })
+  createdAt: Date = new Date()
+
+  @Property({ name: 'updated_at', type: Date, onUpdate: () => new Date(), nullable: true })
+  updatedAt?: Date
+}
+

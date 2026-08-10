@@ -1,0 +1,295 @@
+/**
+ * Acts the resolver held.
+ *
+ * The claim this file has to keep honest is narrow and load-bearing: **an act
+ * gated at A1 or A2 does not happen until somebody approves it.** So the tests
+ * are about what *runs*, not about what is stored — a queue that records
+ * everything and executes at the wrong moment is worse than no queue, because it
+ * looks like a control.
+ */
+
+import { PendingActService, PENDING_ACT_TTL_MS } from '../pendingActService'
+
+const TENANT = 'tenant-1'
+const ORG = 'org-1'
+
+type Row = Record<string, unknown>
+
+function createFakeEm(rows: Row[] = []) {
+  const flush = jest.fn(async () => {})
+  const em = {
+    create: jest.fn((_entity: unknown, data: Row) => ({ id: `act-${rows.length + 1}`, ...data })),
+    persist: jest.fn((row: Row) => {
+      rows.push(row)
+      return { flush }
+    }),
+    flush,
+    findOne: jest.fn(async (_entity: unknown, where: Row) =>
+      rows.find((row) => row.id === where.id && row.tenantId === where.tenantId) ?? null,
+    ),
+    find: jest.fn(async (_entity: unknown, where: Row) =>
+      rows.filter((row) => {
+        if (row.tenantId !== where.tenantId) return false
+        if (where.status && row.status !== where.status) return false
+        const bound = (where.expiresAt as { $lte?: Date } | undefined)?.$lte
+        if (bound && !((row.expiresAt as Date) <= bound)) return false
+        return true
+      }),
+    ),
+  }
+  return { em, rows, flush }
+}
+
+const decision = {
+  gate: 'A2',
+  allowed: true,
+  bindingRule: 'effect-class-floor',
+  reasons: [{ rule: 'effect-class-floor', ceiling: 'A2', detail: 'E5 act on G1 work permits at most A2' }],
+  obligations: [{ kind: 'approval', detail: 'A person must approve before the act executes' }],
+  alternatives: [],
+} as never
+
+function holdInput(overrides: Partial<Record<string, unknown>> = {}) {
+  return {
+    tenantId: TENANT,
+    organizationId: ORG,
+    commandId: 'directory.organizations.update',
+    capabilityId: 'directory.organizations.manage',
+    commandInput: { id: 'org-9', name: 'Renamed' },
+    actorId: 'user-1',
+    actorKind: 'human',
+    decision,
+    ...overrides,
+  } as never
+}
+
+function makeContainer(execute: jest.Mock) {
+  return { resolve: () => ({ execute }) } as never
+}
+
+describe('holding an act', () => {
+  it('records it as pending with a deadline', async () => {
+    const { em, rows } = createFakeEm()
+    const service = new PendingActService(em as never)
+
+    await service.hold(holdInput())
+
+    expect(rows).toHaveLength(1)
+    expect(rows[0].status).toBe('pending')
+    // Mandatory expiry (planning 02 §7.2): a request that can sit forever is a
+    // refusal nobody had to justify.
+    const expiresAt = rows[0].expiresAt as Date
+    expect(expiresAt.getTime()).toBeGreaterThan(Date.now())
+    expect(expiresAt.getTime()).toBeLessThanOrEqual(Date.now() + PENDING_ACT_TTL_MS + 1000)
+  })
+
+  it('keeps the whole decision, not just the gate', async () => {
+    // The queue has to say *why* an act was held. Re-resolving at display time
+    // would answer what the rules say now, and quietly disagree with the reason
+    // the act was actually held.
+    const { em, rows } = createFakeEm()
+    const service = new PendingActService(em as never)
+
+    await service.hold(holdInput())
+
+    expect(rows[0].decision).toBe(decision)
+    expect(rows[0].bindingRule).toBe('effect-class-floor')
+  })
+})
+
+describe('approving a held act', () => {
+  it('runs the command that was held', async () => {
+    const execute = jest.fn(async () => ({}))
+    const { em, rows } = createFakeEm()
+    const service = new PendingActService(em as never)
+    await service.hold(holdInput())
+
+    const result = await service.approve({
+      tenantId: TENANT,
+      id: rows[0].id as string,
+      approverUserId: 'approver-1',
+      container: makeContainer(execute),
+      auth: { sub: 'approver-1' },
+    })
+
+    expect(result.ok).toBe(true)
+    expect(execute).toHaveBeenCalledWith('directory.organizations.update', expect.objectContaining({
+      input: { id: 'org-9', name: 'Renamed' },
+    }))
+    expect(rows[0].status).toBe('approved')
+    expect(rows[0].resolvedByUserId).toBe('approver-1')
+  })
+
+  it('runs it in the organization it was proposed for, not the approver\'s', async () => {
+    // An act proposed for one organization must not land in another because the
+    // approver happened to be looking somewhere else.
+    const execute = jest.fn(async () => ({}))
+    const { em, rows } = createFakeEm()
+    const service = new PendingActService(em as never)
+    await service.hold(holdInput())
+
+    await service.approve({
+      tenantId: TENANT,
+      id: rows[0].id as string,
+      approverUserId: 'approver-1',
+      container: makeContainer(execute),
+      auth: { sub: 'approver-1' },
+    })
+
+    expect(execute.mock.calls[0][1].ctx.selectedOrganizationId).toBe(ORG)
+  })
+
+  it('marks the replay so the gate does not hold it again', async () => {
+    // Without this an approval re-resolves the act, holds it, and queues a second
+    // copy — a queue that cannot be emptied.
+    const execute = jest.fn(async () => ({}))
+    const { em, rows } = createFakeEm()
+    const service = new PendingActService(em as never)
+    await service.hold(holdInput())
+
+    await service.approve({
+      tenantId: TENANT,
+      id: rows[0].id as string,
+      approverUserId: 'approver-1',
+      container: makeContainer(execute),
+      auth: { sub: 'approver-1' },
+    })
+
+    const ctx = execute.mock.calls[0][1].ctx as Record<symbol, unknown>
+    expect(Object.getOwnPropertySymbols(ctx)).toContain(Symbol.for('open-mercato.authority.approvedActReplay'))
+  })
+
+  it('refuses an act past its deadline, and does not run it', async () => {
+    const execute = jest.fn(async () => ({}))
+    const { em, rows } = createFakeEm()
+    const service = new PendingActService(em as never)
+    await service.hold(holdInput())
+    rows[0].expiresAt = new Date(Date.now() - 1000)
+
+    const result = await service.approve({
+      tenantId: TENANT,
+      id: rows[0].id as string,
+      approverUserId: 'approver-1',
+      container: makeContainer(execute),
+      auth: { sub: 'approver-1' },
+    })
+
+    expect(result).toMatchObject({ ok: false, reason: 'expired' })
+    expect(execute).not.toHaveBeenCalled()
+    expect(rows[0].status).toBe('expired')
+  })
+
+  it('refuses to run the same act twice', async () => {
+    const execute = jest.fn(async () => ({}))
+    const { em, rows } = createFakeEm()
+    const service = new PendingActService(em as never)
+    await service.hold(holdInput())
+    const id = rows[0].id as string
+    const container = makeContainer(execute)
+
+    await service.approve({ tenantId: TENANT, id, approverUserId: 'a', container, auth: {} })
+    const second = await service.approve({ tenantId: TENANT, id, approverUserId: 'a', container, auth: {} })
+
+    expect(second).toMatchObject({ ok: false, reason: 'already-approved' })
+    expect(execute).toHaveBeenCalledTimes(1)
+  })
+
+  it('records a failure instead of leaving the act approvable again', async () => {
+    // An act that was authorised and then broke is not an unapproved one, and
+    // showing it as pending would invite somebody to approve it repeatedly.
+    const execute = jest.fn(async () => { throw new Error('constraint violated') })
+    const { em, rows } = createFakeEm()
+    const service = new PendingActService(em as never)
+    await service.hold(holdInput())
+
+    const result = await service.approve({
+      tenantId: TENANT,
+      id: rows[0].id as string,
+      approverUserId: 'approver-1',
+      container: makeContainer(execute),
+      auth: {},
+    })
+
+    expect(result).toMatchObject({ ok: false, reason: 'execution-failed' })
+    expect(rows[0].status).toBe('failed')
+    expect(rows[0].failureReason).toContain('constraint violated')
+  })
+
+  it('does not resolve an act belonging to another tenant', async () => {
+    const execute = jest.fn(async () => ({}))
+    const { em, rows } = createFakeEm()
+    const service = new PendingActService(em as never)
+    await service.hold(holdInput())
+
+    const result = await service.approve({
+      tenantId: 'tenant-2',
+      id: rows[0].id as string,
+      approverUserId: 'approver-1',
+      container: makeContainer(execute),
+      auth: {},
+    })
+
+    expect(result).toMatchObject({ ok: false, reason: 'not-found' })
+    expect(execute).not.toHaveBeenCalled()
+  })
+})
+
+describe('rejecting a held act', () => {
+  it('never runs the command', async () => {
+    const execute = jest.fn(async () => ({}))
+    const { em, rows } = createFakeEm()
+    const service = new PendingActService(em as never)
+    await service.hold(holdInput())
+
+    const result = await service.reject({
+      tenantId: TENANT,
+      id: rows[0].id as string,
+      approverUserId: 'approver-1',
+      note: 'not this one',
+    })
+
+    expect(result.ok).toBe(true)
+    expect(rows[0].status).toBe('rejected')
+    expect(rows[0].resolutionNote).toBe('not this one')
+    expect(execute).not.toHaveBeenCalled()
+  })
+
+  it('cannot reject an act that already ran', async () => {
+    const { em, rows } = createFakeEm()
+    const service = new PendingActService(em as never)
+    await service.hold(holdInput())
+    rows[0].status = 'approved'
+
+    await expect(service.reject({
+      tenantId: TENANT,
+      id: rows[0].id as string,
+      approverUserId: 'approver-1',
+    })).resolves.toMatchObject({ ok: false, reason: 'already-approved' })
+  })
+})
+
+describe('the queue', () => {
+  it('expires overdue acts before showing anybody a list', async () => {
+    // Expiry on read rather than by a scheduler: deadlines that only apply when
+    // background workers are healthy are not deadlines.
+    const { em, rows } = createFakeEm()
+    const service = new PendingActService(em as never)
+    await service.hold(holdInput())
+    rows[0].expiresAt = new Date(Date.now() - 1000)
+
+    const items = await service.list(TENANT, 'all')
+
+    expect(items[0].status).toBe('expired')
+  })
+
+  it('carries the reason and the obligations out to the reader', async () => {
+    const { em } = createFakeEm()
+    const service = new PendingActService(em as never)
+    await service.hold(holdInput())
+
+    const items = await service.list(TENANT, 'all')
+
+    expect(items[0].because).toContain('permits at most A2')
+    expect(items[0].obligations).toContain('A person must approve before the act executes')
+  })
+})

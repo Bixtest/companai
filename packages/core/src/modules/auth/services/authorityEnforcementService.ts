@@ -138,34 +138,54 @@ export class AuthorityEnforcementService {
     if (!required.length) return null
     if ((await this.modeFor(scope.tenantId)) !== 'enforce') return null
 
-    const principal = parseSubject(subject)
-
     for (const feature of required) {
-      const capability = getCapabilityDescriptor(feature)
+      const decision = await this.decideFor(subject, feature, scope)
       // An undescribed capability is a coverage gap, not a refusal. Enforcing on
       // absence would make every wildcard grant and every un-described feature a
       // denial, which is a migration failure dressed up as a security control.
-      if (!capability) continue
-
-      const graphCeiling = await this.graphCeilingFor(capability.id, scope)
-      const decision = resolveDecision({
-        actor: {
-          kind: principal.kind,
-          id: principal.id,
-          // RBAC has already said yes; this service exists to narrow that, and
-          // re-deciding the grant here would put two answers to one question in
-          // the codebase.
-          holdsCapability: true,
-          ...(graphCeiling ? { graphCeiling: graphCeiling.ceiling, graphCeilingDetail: graphCeiling.detail } : {}),
-        },
-        capability,
-        context: {},
-      })
-
-      if (!decision.allowed) return { capabilityId: capability.id, decision }
+      if (!decision) continue
+      if (!decision.allowed) return { capabilityId: feature, decision }
     }
 
     return null
+  }
+
+  /**
+   * The whole decision for one capability, or `null` when no module describes it.
+   *
+   * `refusalFor` answers "may this proceed?" and throws the rest away, which is
+   * all a boolean permission check can use. Holding an act needs the gate itself:
+   * `A0` is a refusal, `A1` and `A2` are *not yet*, and only the second kind can
+   * be queued for a person.
+   *
+   * Unlike `refusalFor` this does **not** check the tenant's mode — the caller
+   * decides what to do with a decision, and the command gate has already
+   * established that enforcement is on.
+   */
+  async decideFor(
+    subject: string,
+    feature: string,
+    scope: AuthorityScope,
+  ): Promise<Decision | null> {
+    const capability = getCapabilityDescriptor(feature)
+    if (!capability) return null
+
+    const principal = parseSubject(subject)
+    const graphCeiling = await this.graphCeilingFor(capability.id, scope)
+
+    return resolveDecision({
+      actor: {
+        kind: principal.kind,
+        id: principal.id,
+        // RBAC has already said yes; this service exists to narrow that, and
+        // re-deciding the grant here would put two answers to one question in
+        // the codebase.
+        holdsCapability: true,
+        ...(graphCeiling ? { graphCeiling: graphCeiling.ceiling, graphCeilingDetail: graphCeiling.detail } : {}),
+      },
+      capability,
+      context: {},
+    })
   }
 
   private async graphCeilingFor(

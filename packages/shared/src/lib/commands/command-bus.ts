@@ -225,6 +225,21 @@ type TransactionalEntityManager = {
   isInTransaction?: () => boolean
 }
 
+/**
+ * Carries symbol-keyed markers from a command's runtime context to the
+ * interceptor context.
+ *
+ * The interceptor context is built field by field on purpose — interceptors
+ * should not get incidental access to everything a caller happened to attach.
+ * Symbols are the deliberate exception: they cannot be produced by JSON request
+ * input, so a marker keyed by one is necessarily set by code.
+ */
+function copyContextMarkers(from: object, to: object): void {
+  for (const marker of Object.getOwnPropertySymbols(from)) {
+    ;(to as Record<symbol, unknown>)[marker] = (from as Record<symbol, unknown>)[marker]
+  }
+}
+
 export class CommandBus {
   async execute<TInput = unknown, TResult = unknown>(
     commandId: string,
@@ -246,6 +261,11 @@ export class CommandBus {
         selectedOrganizationId: options.ctx.selectedOrganizationId ?? options.ctx.auth?.orgId ?? null,
         container: options.ctx.container,
       }
+      // Symbol-keyed markers the caller put on the runtime context travel to the
+      // interceptors. Symbols cannot arrive from request input, which is why a
+      // marker that changes interceptor behaviour — "this act was already
+      // approved, do not hold it again" — is keyed by one rather than by a name.
+      copyContextMarkers(options.ctx, interceptorCtx)
       const beforeResult = await runCommandInterceptorsBefore(
         allInterceptors, commandId, options.input, interceptorCtx, userFeatures,
       )
@@ -388,6 +408,7 @@ export class CommandBus {
           selectedOrganizationId: ctx.selectedOrganizationId ?? ctx.auth?.orgId ?? null,
           container: ctx.container,
         }
+        copyContextMarkers(ctx, interceptorCtx)
         const beforeResult = await runCommandInterceptorsBeforeUndo(
           allInterceptors, log.commandId, undoCtx, interceptorCtx, userFeatures,
         )

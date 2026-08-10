@@ -129,6 +129,20 @@ export type CommandLogBuilderArgs<TInput, TResult> = {
 export interface CommandHandler<TInput = unknown, TResult = unknown> {
   readonly id: string
   readonly isUndoable?: boolean
+  /**
+   * The capability this command performs, as an `acl.ts` feature id.
+   *
+   * Read by the authority resolver, which is keyed by capability while the bus
+   * is keyed by command — without this the two cannot be connected, and a gate
+   * that says "approve first" has nothing to hold.
+   *
+   * **Opt-in, and deliberately so.** A command that declares nothing is not
+   * gated and behaves exactly as before. Deriving 153 of these from the naming
+   * convention would be 153 guesses, and a wrong one either blocks work that
+   * should proceed or waves through an act that should have waited. The
+   * uncovered set is visible rather than silently mis-mapped.
+   */
+  readonly capability?: string
   prepare?(input: TInput, ctx: CommandRuntimeContext): Promise<{ before?: unknown } | null> | { before?: unknown } | null
   execute(input: TInput, ctx: CommandRuntimeContext): Promise<TResult> | TResult
   buildLog?(args: CommandLogBuilderArgs<TInput, TResult>): Promise<CommandLogMetadata | null | undefined> | CommandLogMetadata | null | undefined

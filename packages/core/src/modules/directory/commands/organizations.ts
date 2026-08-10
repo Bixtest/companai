@@ -276,6 +276,8 @@ async function resolveUniqueSlug(em: EntityManager, tenantId: string, baseSlug: 
 
 const createOrganizationCommand: CommandHandler<Record<string, unknown>, Organization> = {
   id: 'directory.organizations.create',
+  // E5 — organizations decide the scope of nearly every grant.
+  capability: 'directory.organizations.manage',
   async execute(rawInput, ctx) {
     const { parsed, custom } = parseWithCustomFields(organizationCreateSchema, rawInput)
     const em = (ctx.container.resolve('em') as EntityManager)
@@ -490,6 +492,8 @@ const createOrganizationCommand: CommandHandler<Record<string, unknown>, Organiz
 
 const updateOrganizationCommand: CommandHandler<Record<string, unknown>, Organization> = {
   id: 'directory.organizations.update',
+  // E5 — organizations decide the scope of nearly every grant.
+  capability: 'directory.organizations.manage',
   async prepare(rawInput, ctx) {
     const { parsed } = parseWithCustomFields(organizationUpdateSchema, rawInput)
     const em = (ctx.container.resolve('em') as EntityManager)
@@ -716,6 +720,8 @@ const updateOrganizationCommand: CommandHandler<Record<string, unknown>, Organiz
 
 const deleteOrganizationCommand: CommandHandler<{ body: any; query: Record<string, string> }, Organization> = {
   id: 'directory.organizations.delete',
+  // E5 — organizations decide the scope of nearly every grant.
+  capability: 'directory.organizations.manage',
   async prepare(input, ctx) {
     const id = requireId(input, 'Organization id required')
     const em = (ctx.container.resolve('em') as EntityManager)

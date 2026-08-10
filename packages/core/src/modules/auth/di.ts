@@ -5,6 +5,7 @@ import type { CacheStrategy } from '@open-mercato/cache'
 import { AuthService } from '@open-mercato/core/modules/auth/services/authService'
 import { RbacService } from '@open-mercato/core/modules/auth/services/rbacService'
 import { AuthorityEnforcementService } from '@open-mercato/core/modules/auth/services/authorityEnforcementService'
+import { PendingActService } from '@open-mercato/core/modules/auth/services/pendingActService'
 import {
   createRbacFallbackCache,
   isRbacDefaultCacheEnabled,
@@ -47,6 +48,11 @@ export function register(container: AppContainer) {
       optional(cradle, 'moduleConfigService'),
     )).scoped().proxy(),
   })
+
+  // Scoped, so a held act is written on the request's EntityManager and rolls
+  // back with it — an act recorded as held by a request that then failed would
+  // be an approval queue entry for something nobody proposed.
+  container.register({ pendingActService: asClass(PendingActService).scoped() })
 
   // RBAC service. The bare `asClass(...).scoped()` registration matches
   // develop and is the default. Setting `OM_RBAC_DEFAULT_CACHE=on` opts

@@ -88,6 +88,18 @@ export const features: AclFeatureDeclaration[] = [
       note: 'Navigation layout only. It hides menu entries; it grants and revokes nothing, and treating it as a permission change would be a category error in the other direction.',
     },
   },
+  {
+    id: 'auth.authority.approve',
+    title: 'Approve held acts',
+    module: 'auth',
+    capability: {
+      effectClass: 'E5',
+      reversibility: 'reversible',
+      dataClasses: ['internal'],
+      delegable: false,
+      note: 'Approving a held act runs it, so this capability is worth exactly the sum of every act the queue can carry. It is classified as a permission change rather than by what any individual act does, and it is not delegable: an approver who can hand approval on has turned a control into a routing rule.',
+    },
+  },
 ]
 
 export default features
