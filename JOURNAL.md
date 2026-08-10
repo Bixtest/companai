@@ -7,6 +7,49 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-08-10 — The U4 sweep, and a bug I invented
+
+**The sweep did what it should.** `selectedOrganizationId ?? auth?.orgId` appears
+in 53 files, which sounds alarming and mostly is not. Thirty-eight are in parked
+modules. The rest fall into three shapes, and only one is dangerous:
+
+> **Never use the actor's organization as a value you store.** Comparing against
+> it is fine. Filtering by it is fine. Storing it makes the record mean
+> *"whatever scope the person who created it happened to have"* — and for a
+> superadmin, who has none, it means nothing.
+
+Four bugs have been that one sentence. The rule is now in
+[scope-tenant-organization.md](workspace/knowledge/scope-tenant-organization.md),
+where somebody will look for it.
+
+**Then I invented a bug and nearly shipped a fix for it.** I expected U3 — "an
+API key fails at use time" — to be an instance of the same pattern. I reproduced
+it twice, traced it to a comparison in the authentication path, wrote the fix,
+updated the tests, and wrote three documents explaining the finding.
+
+Every 401 was my own request. The platform accepts `X-Api-Key` or
+`Authorization: ApiKey`; I sent `Authorization: Bearer`, and read the 401 as
+confirmation of the defect I was already looking for. Sent correctly: 200.
+
+Worse, when I then tested the mechanism I had blamed — nulling a never-used key's
+organization so the comparison would have to reject it — that returned 200 too.
+The branch I built a fix around does not fire, and I still do not know why.
+
+**So I reverted the fix.** It changed which organization a new key belongs to, on
+the strength of a defect I could not demonstrate. Keeping a behaviour change no
+evidence supports is the same mistake as keeping a bandage, and harder to spot
+because it looks like diligence.
+
+U3 goes back on the backlog as *unverified*, alongside a real open question: a
+security comparison exists that I cannot explain the behaviour of. That is worth
+understanding before it starts mattering.
+
+What I never did, in an entire investigation of a 401, was make one API-key
+request I expected to **succeed**. It would have taken seconds
+([L30](LESSONS.md)).
+
+---
+
 ## 2026-08-10 — The authority graph is now something a person can change
 
 R6 shipped typed organization edges and seeded them permissively, which left the

@@ -24,6 +24,34 @@ Everything runs on the laptop. No cloud, no deployment.
 Docker Desktop must actually be running, not merely installed. `docker info`
 fails with a named-pipe error when the engine is down.
 
+### Stop the local instance before running the full gate
+
+The CLI's integration-cache tests build ephemeral environments and contend with a
+running server. With the instance up, `yarn test` fails in
+`integration cache and options` — different tests each run, always timeouts,
+always passing in isolation. It reads exactly like flakiness and is not.
+
+```bash
+netstat -ano | grep ":3000.*LISTENING"   # find it
+taskkill //PID <pid> //T //F             # stop it
+corepack yarn test                       # then run the gate
+```
+
+Verified 2026-08-10: two consecutive full-gate runs failed with the server up;
+the same package's 1,220 tests passed immediately once it was stopped.
+
+### API keys use `X-Api-Key`, never `Authorization: Bearer`
+
+```bash
+curl -H "X-Api-Key: <secret>" http://localhost:3000/api/...              # works
+curl -H "Authorization: ApiKey <secret>" http://localhost:3000/api/...   # works
+curl -H "Authorization: Bearer <secret>" http://localhost:3000/api/...   # 401, always
+```
+
+`Bearer` is the reflex and it is wrong here — `extractApiKey` accepts only the
+two forms above. A wrong scheme produces a plain 401 with no hint, which reads
+exactly like a broken credential. It cost most of an investigation.
+
 ### Environment variables must be declared in `turbo.json` or they vanish
 
 Turbo runs every task in a **filtered environment**. A variable that is not in

@@ -771,9 +771,47 @@ it existed, and the documentation then made it feel settled.
 
 ---
 
+## L30 — A reproduction you built yourself is a hypothesis, not evidence
+
+**What happened.** I set out to confirm that U3 — "an API key is rejected at use
+time" — was an instance of the U4 scoping pattern. I reproduced it twice, traced
+it to a comparison in the authentication path, wrote a fix, wrote tests, and
+wrote three documents explaining it.
+
+Every 401 was my own request. `extractApiKey` accepts `X-Api-Key` or
+`Authorization: ApiKey`. I sent `Authorization: Bearer` — the reflex — and read
+the resulting 401 as the defect I was expecting to find. Sent correctly, the key
+returns 200.
+
+Then, testing the mechanism I had "found", I nulled a never-used key's
+organization so the comparison I had blamed would have to reject it. It returned
+200 as well. The branch I built a fix around does not fire, and I still do not
+know why.
+
+**Why it happens.** I went looking for a specific bug. A 401 is consistent with
+that bug, so the first 401 confirmed it — and once confirmed, everything after
+was elaboration rather than investigation. A reproduction built to demonstrate a
+hypothesis will demonstrate it.
+
+**The rule.** *Before treating a reproduction as evidence, establish the
+negative case.* One request that should **succeed** — a known-good credential, a
+known-good header — costs seconds and would have ended this in the first minute.
+I never made a single API-key request I expected to work.
+
+**And the second half:** I reverted the fix. It changed which organization a new
+key belongs to, on the strength of a defect I could not demonstrate. Keeping a
+behaviour change that no evidence supports is the same mistake as keeping a
+bandage, pointed the other way — and it is harder to notice, because it looks
+like diligence.
+
+**The general form:** confirmation is cheap and disconfirmation is what costs.
+Spend the seconds.
+
+---
+
 ## The pattern behind most of these
 
-Eighteen of the twenty-nine are the same mistake wearing different clothes: **a conclusion
+Nineteen of the thirty are the same mistake wearing different clothes: **a conclusion
 drawn from a proxy instead of from the thing itself.** A label instead of the
 tables. A count instead of the lines. A type instead of the runtime. A word
 instead of the schema. One document instead of several. A build instead of a

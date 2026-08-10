@@ -112,3 +112,35 @@ for this reason.
 | `packages/shared/src/lib/crud/factory.ts` | `identifierResolver`, `defaultIdentifierResolver` |
 | `packages/core/src/modules/audit_logs/services/actionLogService.ts` | The organization filter, with the null-admitting `or` |
 | `packages/core/src/modules/directory/` | Tenants and organizations themselves |
+
+
+## The one rule the U4 family comes down to
+
+**Never use the actor's organization as a value you store.**
+
+```ts
+const organizationId = ctx.selectedOrganizationId ?? ctx.auth?.orgId ?? null
+```
+
+Comparing against that is fine. Filtering by it is fine. **Writing it into a
+record is not**, because it makes the record mean *"whatever scope the person who
+happened to create it had"* — and for a superadmin, who has no organization at
+all, it means nothing.
+
+Four separate bugs have been this one sentence:
+
+| Bug | What it looked like |
+|---|---|
+| R2b | Audit entries invisible in the tenant list — written with the actor's scope, and the actor was a superadmin |
+| U4 | A superadmin could not delete a currency |
+| U3 | An API key minted successfully and returned 401 forever |
+| — | (and the audit-scope loss that `assertScopeSurvived` now refuses) |
+
+**What to do instead:** take the organization from **the record**, or from an
+explicit parameter the caller supplied. If neither exists, the write has no
+organization and that must be a deliberate, documented decision — not a fallback
+that happens to produce `null`.
+
+A 2026-08-10 sweep found the expression in 53 files. Thirty-eight are in parked
+modules; of the rest, all but one use it for comparison or filtering, which is
+sound. The count is not the risk — the *shape* is.

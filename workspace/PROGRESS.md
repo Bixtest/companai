@@ -18,11 +18,11 @@ and is argued below; anything can be pulled forward on request.
 |---|---|---|---|
 | **1** | **Enforce the resolver — turn shadow mode into the decision** | Shadow mode is running and recording. This is the switch, and it must not be thrown until the evidence says what it would break. Needs the graph ceiling in the request path (cached), a per-tenant rollout, and an agreed answer for every disagreement class the shadow finds | L |
 | **2** | **`AuthorityGraphService` has no tests** | The graph rules are exhaustively tested as pure functions; the database bridge that loads a path is not. Its two failure modes — a wrong `ancestor_ids` order and an edge query that misses a hop — would both silently return `A5`, which reads as 'no constraint' rather than as an error | S |
-| **3** | **U2 — sidebar role-apply data loss** | Needs a schema-or-UX decision. Not urgent, but it can delete a customer's config | M |
-| **4** | **G1–G8 — the eight grafts from Platform 1** | G1/G2/G4 need R5/R6, which now exist; the rest are independent. G2 is largely subsumed by R6 and should be re-scoped before it is started | L |
-| **5** | **U4 sweep — audit every `selectedOrganizationId ?? auth?.orgId` site** | Third instance of one root cause in a day: scope derived from the actor breaks for the actor with no scope. A superadmin currently cannot delete a currency | M |
-| **6** | **Ledger correlation and causation are carried but never propagated** | `correlation_id` / `causation_id` are recorded when a caller supplies them in `context`, and nothing supplies them. Until something threads a correlation id through a request, the chain records events that cannot be assembled into a trace — which is the feature the ledger exists to enable | M |
-| **7** | **U3 — API key organization mismatch fails at use time, not creation** | Low impact, high annoyance. Good filler work | S |
+| **3** | **`createdBy` is used as an authorization input for API keys** | `getAuthFromRequest` resolves a key through `sessionUserId ?? createdBy` and then constrains the key by that user's organization. `sessionUserId` is identity — the key acts as that person. `createdBy` is provenance. Treating them as one thing in a security check is why U3 existed; U3's fix guards the boundary rather than the rule, and the rule is still wrong | M |
+| **4** | **U3 — unverified, and the API-key auth path is not understood** | The reported symptom does not reproduce: keys work with `X-Api-Key`, and nulling a key's organization did not reject it even though the code contains a comparison that should have. Either that branch is unreachable or something upstream differs from what it reads like. A security check nobody can explain is worth understanding before it starts mattering | M |
+| **5** | **U2 — sidebar role-apply data loss** | Needs a schema-or-UX decision. Not urgent, but it can delete a customer's config | M |
+| **6** | **G1–G8 — the eight grafts from Platform 1** | G1/G2/G4 need R5/R6, which now exist; the rest are independent. G2 is largely subsumed by R6 and should be re-scoped before it is started | L |
+| **7** | **Ledger correlation and causation are carried but never propagated** | `correlation_id` / `causation_id` are recorded when a caller supplies them in `context`, and nothing supplies them. Until something threads a correlation id through a request, the chain records events that cannot be assembled into a trace — which is the feature the ledger exists to enable | M |
 | **8** | **Verify `messages.manage` and `messages.actions` against real routes** | R4b classified both from their titles because no route enforces them today — the only two of 113 descriptors not decided by reading code. Recheck when the messages module is next touched; conservative for now, which is the safe direction but not the accurate one | S |
 | **9** | **Ledger Tier 2 — periodic signed checkpoints** | R3's chain is verifiable only by us. A signed root published to append-only storage is what lets a customer's auditor verify a range without our cooperation, and it is a stated commercial property of the design. Needs key management, so it follows the principal keypair work | L |
 | **10** | **`domain_mappings` extraction from parked `customer_accounts` into `directory`** | Per-tenant custom domains — we want it, but not until something needs it | M |
@@ -35,6 +35,13 @@ batch that lands without it widens the gap between what the platform can explain
 and what it actually does. The two audit defects follow because they are small
 and they undermine work already shipped. The grafts sit mid-list deliberately:
 they are additive, and G2 needs re-scoping against R6 before anyone starts it.
+
+**Closed 2026-08-10 (U4 sweep):** 53 call sites classified into three shapes;
+only one — using the actor's organization as a *stored value* — is the bug, and
+the rule is now written down where people will look for it. **U3 was not closed
+with it**: I claimed it was an instance of U4, and both the reproduction and the
+fix were wrong — see [upstream-issues.md → U4](references/upstream-issues.md) and
+[L30](../LESSONS.md).
 
 **Closed 2026-08-10 (authority-graph UI):** organization edges are now editable
 by a person — a guarded, audited, optimistically-locked API and a settings page

@@ -318,26 +318,6 @@ human action permanently unattributed. The dry run is what showed it: 15 rows
 
 ---
 
-## U3 — reproduced, with a recipe (2026-08-09)
-
-Confirmed while looking for a machine actor to test the resolver with:
-
-```bash
-# create a key as an admin whose organization is not pinned
-POST /api/api_keys/keys  {"name":"...","roles":["admin"]}   # 200, returns a secret
-# then use it
-GET /api/api_keys/keys   -H "Authorization: Bearer <secret>"  # 401
-```
-
-The key is created with `organizationId: null` and is rejected at every use. The
-creation call gives no hint that the credential it just minted cannot work, which
-is what makes this worse than a validation error.
-
-**Reproduced 2026-08-09** — recipe above; blocked a diagnostic I wanted, which is
-the second time this defect has cost something.
-
----
-
 ## U5 — the gate failed at random. What that turned out to be
 
 **Severity:** medium (trust in every other result) · **Status:** two causes found
@@ -389,6 +369,18 @@ this one, the test now **asserts its own precondition**: that the registry it se
 has no `catalog` key. If it ever fails again, the failure will say whether the
 mock applied — which is the one fact this investigation lacked.
 
+### A third cause, found later the same day
+
+**A running local instance breaks the gate.** The CLI's integration-cache tests
+build ephemeral environments and contend with the server for ports, database
+connections and queue state. Two consecutive full-gate runs failed in
+`integration cache and options` — different tests each time, always timeouts,
+always green in isolation — and the same package's 1,220 tests passed the moment
+the server was stopped.
+
+This is the same shape as the two causes above and deserves the same treatment:
+it is not flakiness, it is an unstated precondition. The runbook now states it.
+
 ### What was ruled out
 
 - **CPU oversubscription.** The shared `jest.config.base.cjs` already caps
@@ -396,3 +388,73 @@ mock applied — which is the one fact this investigation lacked.
   workers on eight cores. It was the first thing I assumed and it was wrong.
 - **Test order dependence within a package.** Three consecutive solo runs of the
   core suite, and two of the cli suite, were identical.
+
+---
+
+## U4 — the sweep, and what the pattern actually is
+
+**Swept 2026-08-10.** `selectedOrganizationId ?? auth?.orgId` appears in 53
+files. That number is misleading in both directions, and the useful output of
+this sweep is the classification rather than a count.
+
+### Most of them are not the bug
+
+Thirty-eight are in **parked** modules — catalog, sales, wms, staff, resources,
+customers — which do not run. Of the rest, the expression appears in three
+distinct shapes, and only one of them is dangerous:
+
+| Shape | Example | Verdict |
+|---|---|---|
+| **Comparison / logging** — "what org is the actor in, for this message" | `shared/lib/commands/scope.ts` | Fine. Already hardened for the superadmin case (#2441), with an explicit branch and an opt-in strict mode |
+| **Filter** — "narrow this query to the actor's org" | `currencies/commands/scope.ts` | Fine. `undefined` omits the filter, which for a superadmin is tenant-wide and correct |
+| **Derived value** — "the org to write into the record" | `api_keys/api/keys/route.ts` | **This is U4.** Null for a superadmin, stored, and wrong forever after |
+
+So the rule is not "never use this expression". It is:
+
+> **Never use the actor's organization as a value you store.** Comparing against
+> it is fine. Filtering by it is fine. Writing it into a record makes the record
+> mean "whatever scope the person who happened to create it had", which for the
+> actor with no scope means nothing at all.
+
+Every U4-family bug so far is that one sentence: audit entries invisible because
+they were scoped to the actor (R2b), a superadmin unable to delete a currency,
+and U3.
+
+### U3 does not reproduce, and the reason is embarrassing
+
+I set out to show that U3 — "an API key is rejected at use time" — was an
+instance of U4, and produced a recipe, a diagnosis and a fix for it. All three
+were wrong.
+
+**Every 401 I saw was my own request.** `extractApiKey` accepts `X-Api-Key` or
+`Authorization: ApiKey <secret>`. I sent `Authorization: Bearer`, which this
+platform does not use for API keys, and read the resulting 401 as evidence of a
+scoping defect. Sent correctly, a key created through the normal flow returns
+**200**.
+
+**And the defect I "found" does not fire.** `getAuthFromRequest` does contain a
+comparison requiring a key's organization to equal that of the user resolved
+through `sessionUserId ?? createdBy`. I nulled a never-used key's organization
+so that the comparison should have rejected it — and the request still returned
+200. Something upstream of that branch is not what I assumed, and rather than
+keep guessing at a bug with no symptom, I stopped.
+
+**What I did with the fix:** reverted it. It changed which organization a new key
+belongs to, on the strength of a defect I could not demonstrate. Keeping a
+behaviour change that no evidence supports is the same mistake as keeping a
+bandage, in the other direction.
+
+**U3 is therefore reopened as unverified**, with a note that the original report
+predates this session and its evidence is unknown. What *is* now documented is
+the correct header, which is the practical trap:
+
+```bash
+curl -H "X-Api-Key: <secret>" ...                 # works
+curl -H "Authorization: ApiKey <secret>" ...      # works
+curl -H "Authorization: Bearer <secret>" ...      # 401, always
+```
+
+**Left on the backlog:** `createdBy` is used as an authorization input alongside
+`sessionUserId`. Provenance and identity are different things and that comparison
+treats them as one. It is latent rather than active — but a security check nobody
+can explain is worth understanding before it starts mattering.
