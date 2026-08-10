@@ -809,9 +809,48 @@ Spend the seconds.
 
 ---
 
+## L31 — An alias that shadows a column changes what `ORDER BY` means
+
+**What happened.** The ledger's head query was
+
+```sql
+select seq::text as seq, hash from ledger_events where tenant_id = ? order by seq desc limit 1
+```
+
+PostgreSQL resolves `ORDER BY seq` to the **output column** when one shares the
+name — so this ordered by *text*, and `'9'` beat `'10'`. The head came back one
+behind the real one, the next append claimed a sequence number that already
+existed, and the unique constraint rejected it.
+
+The user-visible symptom was a **500 on creating an API key**. The cause was
+four characters of alias.
+
+The same alias in the verifier made it read the chain as 1, 10, 2, 3 and report a
+**perfectly intact chain as broken at position 2** — a false alarm from the one
+tool whose value is that people believe it.
+
+**Why it happens.** `as seq` looks like a no-op: the column is already called
+`seq`, and the cast is the only visible change. Nothing in the query says that
+naming an output column after an input column changes the meaning of a different
+clause.
+
+**The rule.** *When casting a column in a select list, never alias it back to the
+column's own name.* `seq::text as seq_text`. And when a query has both an
+`ORDER BY` and a cast, check which one the sort actually binds to — the two look
+independent and are not.
+
+**What made this expensive:** I spent an hour on a concurrency theory first. The
+duplicate-key error named a race, so I diagnosed a race, and the advisory-lock
+defect I found on the way was real — but it was not this. **A plausible cause
+found while looking for a cause is not the cause.** Ten seconds of `select … order
+by seq desc limit 1` in psql would have shown `9` sitting on top of a table whose
+maximum is 10.
+
+---
+
 ## The pattern behind most of these
 
-Nineteen of the thirty are the same mistake wearing different clothes: **a conclusion
+Twenty of the thirty-one are the same mistake wearing different clothes: **a conclusion
 drawn from a proxy instead of from the thing itself.** A label instead of the
 tables. A count instead of the lines. A type instead of the runtime. A word
 instead of the schema. One document instead of several. A build instead of a

@@ -95,6 +95,18 @@ hash is a field nobody is protecting.**
 | Verification fails after moving environments | Something locale- or platform-dependent got into the hash | Only `byCodeUnit` ordering and integer/string values are permitted in the envelope |
 | `ledger_events is append-only` from a data fix | Working as intended | Append a correcting event; never rewrite |
 | Business write rolls back with a ledger error | Fail-closed doing its job | Fix the ledger error; do not catch it |
+| `duplicate key ... ledger_events_tenant_seq_uq` | The head query returned a stale maximum | Check the sequence arithmetic before suspecting a race — see below |
+
+### Never alias `seq` to its own name
+
+`select seq::text as seq ... order by seq desc` orders by the **text** output
+column, so `'9'` beats `'10'`. That computed a head behind the real one, every
+append claimed a taken position, and an ordinary write returned 500. The same
+alias made the verifier report an intact chain as broken.
+
+Use `as seq_text`. A test asserts no query in this service aliases to `seq`,
+because the defect lives in SQL text and no mock can see it — the fake connection
+does the ordering itself.
 
 ### Two serialisers, and why
 

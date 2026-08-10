@@ -7,6 +7,45 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-08-10 — A 500 on an ordinary write, caused by four characters of SQL alias
+
+Creating an API key started returning 500. The server log named a duplicate key
+on `ledger_events_tenant_seq_uq` — the chain's own uniqueness constraint,
+rejecting an append that claimed a position already taken.
+
+**The chain was fine.** Ten events, sequence 1 through 10, no gaps.
+
+**The head query was wrong.**
+
+```sql
+select seq::text as seq, hash from ledger_events ... order by seq desc limit 1
+```
+
+PostgreSQL resolves `ORDER BY seq` to the *output column* when one shares the
+name, so this ordered by text: `'9'` beat `'10'`. Every append computed a head of
+9, tried 10, and hit the constraint. The same alias in the verifier made it read
+the chain as 1, 10, 2, 3 and report an intact chain as **broken** — a false alarm
+from the one tool whose entire value is that people believe it.
+
+Both are one four-character mistake: `as seq` instead of `as seq_text`.
+
+**What the constraint did well.** It refused the write rather than forking the
+chain, and it took the business write down with it — fail-closed, exactly as
+designed. The integrity guarantee held; what failed was arithmetic.
+
+**What I did badly.** The error named a race, so I went looking for a race, and
+found one: `getConnection().execute()` without a transaction context can take a
+different pooled connection, which means `pg_advisory_xact_lock` commits and
+releases immediately and serialises nothing. That defect is real, and I fixed it
+and tested it — but it was not this bug. I spent an hour on a plausible cause
+before checking the simplest possible fact: what the head query actually returns.
+Ten seconds in psql would have shown `9` sitting on top of a table whose maximum
+is 10 ([L31](LESSONS.md)).
+
+Both fixes ship. The chain now verifies: **10 of 10 events, 0 broken.**
+
+---
+
 ## 2026-08-10 — The U4 sweep, and a bug I invented
 
 **The sweep did what it should.** `selectedOrganizationId ?? auth?.orgId` appears
