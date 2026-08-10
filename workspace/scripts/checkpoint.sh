@@ -72,7 +72,14 @@ prune() {
 case "${1:-}" in
   --list)
     echo "Checkpoints in $BACKUP_DIR:"
-    ls -1t "$BACKUP_DIR" 2>/dev/null | sed 's/^/  /' || echo "  (none)"
+    for entry in $(ls -1t "$BACKUP_DIR" 2>/dev/null); do
+      case "$entry" in
+        *.sql.gz)
+          if gzip -t "$BACKUP_DIR/$entry" 2>/dev/null; then echo "  $entry"
+          else echo "  $entry   <-- UNREADABLE, not a restore point"; fi ;;
+        *) echo "  $entry" ;;
+      esac
+    done
     echo
     echo "Git tags:"
     git -C "$REPO_DIR" tag -l 'checkpoint/*' | sed 's/^/  /' || echo "  (none)"
@@ -113,11 +120,15 @@ echo "  code:     tag checkpoint/${LABEL}-${STAMP} -> $(git -C "$REPO_DIR" rev-p
 # run that had not reached the backup yet. A backup step that can hang is one
 # that silently does nothing exactly when somebody is about to do something
 # risky.
-if timeout "${PG_DUMP_TIMEOUT_SECONDS:-120}" docker exec "$PG_CONTAINER" pg_dump -U "$PG_USER" -d "$PG_DB" 2>/dev/null | gzip > "${BASE}.sql.gz" && [ -s "${BASE}.sql.gz" ]; then
+# Written, then *verified*. `gzip -t` is what tells a real backup from a
+# truncated one: two of today's dumps were non-empty, unreadable, and sitting in
+# the directory looking exactly like the good ones. A backup nobody can restore
+# is worse than a missing backup, because it is counted on.
+if timeout "${PG_DUMP_TIMEOUT_SECONDS:-120}" docker exec "$PG_CONTAINER" pg_dump -U "$PG_USER" -d "$PG_DB" 2>/dev/null | gzip > "${BASE}.sql.gz"   && [ -s "${BASE}.sql.gz" ]   && gzip -t "${BASE}.sql.gz" 2>/dev/null; then
   echo "  database: ${BASE##*/}.sql.gz ($(du -h "${BASE}.sql.gz" | cut -f1))"
 else
   rm -f "${BASE}.sql.gz"
-  echo "  database: FAILED — '$PG_CONTAINER' did not answer within ${PG_DUMP_TIMEOUT_SECONDS:-120}s. There is NO database backup for this checkpoint."
+  echo "  database: FAILED — no readable dump from '$PG_CONTAINER' within ${PG_DUMP_TIMEOUT_SECONDS:-120}s. There is NO database backup for this checkpoint."
 fi
 
 # 3. Env — gitignored, so invisible to git.
