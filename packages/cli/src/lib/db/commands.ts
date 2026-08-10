@@ -9,6 +9,7 @@ import { PostgreSqlDriver } from '@mikro-orm/postgresql'
 import { getSslConfig } from '@open-mercato/shared/lib/db/ssl'
 import type { PackageResolver, ModuleEntry } from '../resolver'
 import { quotePostgresIdentifier } from './identifiers'
+import { withMigrationAdvisoryLock, type AdvisoryLockClient } from './advisoryLock'
 
 const QUIET_MODE = process.env.OM_CLI_QUIET === '1' || process.env.MERCATO_QUIET === '1'
 const PROGRESS_EMOJI = ''
@@ -334,7 +335,41 @@ export async function dbGenerate(resolver: PackageResolver, options: DbOptions =
   console.log(results.join('\n'))
 }
 
-export async function dbMigrate(resolver: PackageResolver, options: DbOptions = {}): Promise<void> {
+/**
+ * Opens the connection that holds the migration lock.
+ *
+ * Deliberately its own short-lived `pg` client rather than one of the per-module
+ * ORMs: the lock is session-level, so whatever holds it must outlive every ORM
+ * the run opens and closes.
+ */
+async function createAdvisoryLockClient(): Promise<AdvisoryLockClient> {
+  const { Client } = await import('pg')
+  const sslConfig = getSslConfig()
+  return new Client({
+    connectionString: getClientUrl(),
+    ...(sslConfig ? { ssl: sslConfig } : {}),
+  }) as unknown as AdvisoryLockClient
+}
+
+export async function dbMigrate(resolver: PackageResolver, _options: DbOptions = {}): Promise<void> {
+  // Serialized against other migration runs on this database. Two containers
+  // booting from one image is the ordinary deployment, and without this both
+  // read the same empty migrations table and apply the same file twice.
+  const lockClient = await createAdvisoryLockClient()
+  return withMigrationAdvisoryLock(
+    () => lockClient,
+    () => runPendingMigrations(resolver),
+    {
+      onWaiting: () => {
+        if (!QUIET_MODE) {
+          console.log('Another migration run holds the lock. Waiting for it to finish...')
+        }
+      },
+    },
+  )
+}
+
+async function runPendingMigrations(resolver: PackageResolver): Promise<void> {
   const modules = resolver.loadEnabledModules()
   const ordered = sortModules(modules)
   const results: string[] = []

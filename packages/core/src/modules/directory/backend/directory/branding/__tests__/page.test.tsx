@@ -87,7 +87,14 @@ describe('OrganizationBrandingPage', () => {
 
     expect(await screen.findByText('Organization branding')).toBeInTheDocument()
     expect(screen.getByText('Acme')).toBeInTheDocument()
-    expect(screen.getByLabelText('Logo URL')).toHaveValue(brandingPayload.logoUrl)
+    // The input is not fed from the query directly. `page.tsx` holds `logoUrl` in
+    // local state seeded from `''` and copies the fetched value across in an
+    // effect, so there is a commit between the name appearing and the field
+    // filling. Asserting synchronously here passed on an idle machine and failed
+    // inside the full gate, landing in exactly that window.
+    await waitFor(() => {
+      expect(screen.getByLabelText('Logo URL')).toHaveValue(brandingPayload.logoUrl)
+    })
   })
 
   it('saves a pasted logo URL and refreshes the sidebar chrome', async () => {

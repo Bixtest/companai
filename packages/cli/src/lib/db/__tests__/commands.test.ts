@@ -251,6 +251,16 @@ describe('db commands', () => {
           query: discoveredTableQuery,
           end: jest.fn().mockResolvedValue(undefined),
         }))
+        // Third and last: the connection that holds the migration advisory lock.
+        // `dbGreenfield` finishes by calling `dbMigrate`, so it serializes against
+        // other migration runs like any other -- greenfield rebuilding a database
+        // while a deploy migrates it is exactly the collision the lock is for.
+        // Reports the lock as free so the run proceeds without blocking.
+        .mockImplementation(() => ({
+          connect: jest.fn().mockResolvedValue(undefined),
+          query: jest.fn().mockResolvedValue({ rows: [{ acquired: true }] }),
+          end: jest.fn().mockResolvedValue(undefined),
+        }))
       jest.doMock('pg', () => ({ Client }))
 
       const originalDatabaseUrl = process.env.DATABASE_URL
