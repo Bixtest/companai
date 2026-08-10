@@ -7,6 +7,32 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-08-10 — Which commands are gated, decided by reading rather than guessing
+
+Three commands declared the capability they perform. Everything else was
+ungated — visibly, by design, but three is not a governance layer.
+
+The temptation was a regular expression: `directory.organizations.update` →
+`directory.organizations.manage` looks like a rule. It is not. `catalog.offers.*`
+is guarded by `sales.channels.manage`; `customers.addresses.*` by
+`customers.activities.manage`; `auth.users.update` by `auth.users.edit`. A
+pattern would have got those wrong, and a wrong mapping either blocks work that
+should proceed or waves through an act that should have waited.
+
+So I read it off the routes instead — every CRUD route declares both the command
+it calls and the feature that guards it, which is evidence rather than inference.
+**117 commands, no ambiguous cases.** 21 of them are in enabled modules and now
+carry the declaration.
+
+Parked modules are left alone and the step is written into `parked-modules.md`,
+because restoring a module would otherwise quietly restore an ungated write path.
+
+A guard test checks each declared capability is a real feature id. It is a text
+scan, not a runtime check: the registry only hydrates enabled modules, so a
+runtime assertion would pass for a parked module's typo and fail on the day
+somebody restored it. And a typo here does not throw — it silently stops gating
+the command while the source still looks gated.
+
 ## 2026-08-10 — The classification control needed no new policy, only a closer read
 
 An AI worker reading integration credentials resolved exactly like one reading a

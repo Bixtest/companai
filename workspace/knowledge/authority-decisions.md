@@ -292,8 +292,19 @@ The seam is the **command bus**, not the HTTP route:
 1. A command declares `capability` — the `acl.ts` feature it performs. The
    resolver is keyed by capability and the bus by command, and without this
    declaration the two cannot be connected. **Opt-in**: an undeclared command is
-   not gated, and the gap is visible rather than guessed at. Deriving 153 of
-   these from the naming convention would be 153 guesses.
+   not gated, and the gap is visible rather than guessed at.
+
+   **Take the value from the route, never from the command id.** Every CRUD
+   route declares both the command it calls (`actions.*.commandId`) and the
+   feature that guards it (`metadata.*.requireFeatures`) — that pairing is
+   evidence. The naming convention is not: `catalog.offers.*` is guarded by
+   `sales.channels.manage`, `customers.addresses.*` by
+   `customers.activities.manage`, `auth.users.update` by `auth.users.edit`. A
+   regular expression would have got all three wrong.
+
+   21 commands across the enabled modules are mapped. Parked modules are not —
+   see [parked-modules.md](../references/parked-modules.md), because restoring a
+   module otherwise restores an ungated write path.
 2. `auth.authority-command-gate` (a `beforeExecute` interceptor) resolves the
    decision, and on `A1`/`A2` writes an `authority_pending_acts` row and throws
    `ActHeldForApprovalError` carrying the pending-act id.

@@ -24,7 +24,7 @@ and is argued below; anything can be pulled forward on request.
 
 | # | Task | Why here | Size |
 |---|---|---|---|
-| **1** | **A3 and A4 still do not bind, and only 3 commands declare a capability** | Hold-and-commit needs a scheduler that commits when nobody objects — the opposite of expiry — and execute-and-review needs a review record on an already-executed act. Separately, the command→capability mapping is opt-in and covers `directory.organizations.*` only; every other command is ungated. Both are visible gaps rather than silent ones | M |
+| **1** | **A3 and A4 still do not bind** | Hold-and-commit needs a scheduler that commits when nobody objects — the opposite of expiry — and execute-and-review needs a review record on an already-executed act. Both are their own mechanisms, not a timer on the approval queue | M |
 | **2** | **Build the approvals page** | Decided with the owner 2026-08-10 — see *The approvals page* below for the shape, the defaults and what is tunable. **Scheduled after item 2**, and the reason is in that section: a screen for a tray that is almost always empty teaches nobody anything | L |
 | **3** | **Repo-walking test guards race a sibling package's scratch directory** | `packages/shared` creates `.tmp-dynamic-loader-*` inside its own package tree while its tests run, and any guard walking `packages/` reads a file from it a moment after it is deleted. Two have been hardened after failing gate runs; eleven more walk-and-read without a guard. The root cause is the fixture's location, which cannot simply move to the OS temp dir because the loader it tests resolves real dependencies relative to the repo | S |
 | **4** | **G1–G8 — the eight grafts from Platform 1** | G1/G2/G4 need R5/R6, which now exist; the rest are independent. G2 is largely subsumed by R6 and should be re-scoped before it is started | L |
@@ -76,6 +76,20 @@ list leads with the honest remainder of enforcement: what it does *not* yet bind
 written down so nobody reads "the resolver decides" as a bigger claim than it is.
 Both are prerequisites for enforcing more than refusals. The grafts follow: they
 are additive, and G2 needs re-scoping against R6 before anyone starts it.
+
+**Closed 2026-08-10 (which commands are gated):** 21 commands across the enabled
+modules now declare the capability they perform, up from 3. Every mapping was
+read off the route that invokes the command — `actions.*.commandId` against
+`metadata.*.requireFeatures` — rather than derived from the command id. The audit
+found 117 such commands across all modules and **no ambiguous cases**, so this is
+a reading task, not a judgement one.
+
+Parked modules are deliberately not mapped: their commands never run, and the
+step is recorded in
+[parked-modules.md](references/parked-modules.md) so un-parking one does not
+quietly restore an ungated write path. A guard test checks every declared
+capability is a real feature id — a typo would not throw, it would silently stop
+gating the command.
 
 **Closed 2026-08-10 (data classification):** an act is now graded by what it
 touches. A machine reading credentials no longer resolves like one reading a

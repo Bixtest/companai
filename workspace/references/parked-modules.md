@@ -202,3 +202,33 @@ keep, so it gets a scheduled date rather than good intentions.
 - `workspace/attic/CATALOG.md` still matters, for the same reason.
 - The work moves straight to **Phase R**, and the R1/R5 spike, which is what
   actually tests whether this platform can become our product.
+
+---
+
+## When you un-park a module: declare its commands' capabilities
+
+Since 2026-08-10 the authority resolver gates **commands that declare which
+capability they perform** (`CommandHandler.capability`). A command that declares
+nothing is not gated — deliberately, so the gap is visible rather than guessed
+at.
+
+Only enabled modules have been mapped. A parked module's commands carry no
+declaration, so **restoring a module also restores an ungated write path.**
+
+**Do this as part of un-parking**, not afterwards:
+
+1. Open the module's CRUD route and read `actions.{create,update,delete}.commandId`
+   alongside `metadata.{POST,PUT,DELETE}.requireFeatures`.
+2. The feature guarding the route **is** the command's capability. Take it from
+   there — never from the command id. `module.entity.action` and `module.action`
+   look close enough to map with a regular expression, and a wrong mapping either
+   blocks work that should proceed or waves an act through that should have
+   waited.
+3. Add `capability: '<feature id>'` to the handler.
+4. `command-capability-declarations.test.ts` checks the id is real; nothing
+   checks that it is the *right* one, which is why step 2 is a reading task.
+
+The mapping for every parked module was derived once and is reproducible — the
+script is in the 2026-08-10 journal entry. There were 117 commands with exactly
+one guarding feature and no ambiguous cases, so this is mechanical, not a
+judgement call, once you are looking at the route.
