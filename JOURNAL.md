@@ -7,6 +7,58 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-08-10 — U3 was real. I had closed it twice on bad evidence
+
+A key created through the ordinary UI flow returned **401 on every request**. Not
+a corner case — the default path. An admin working tenant-wide has no selected
+organization, so creation stored `organization_id = null`, while
+`resolveApiKeyAuth` requires the key's organization to equal *its creator's*, and
+the creator has one. Every key that admin made was dead on arrival.
+
+One column proved it: 401, `update api_keys set organization_id = <creator's>`,
+200. Same key, same request.
+
+I had closed this twice. Once by misdiagnosing it (my own `Authorization: Bearer`
+header produced the 401s — [L30](LESSONS.md)), and then, worse, by treating that
+discovery as a disproof and **reverting a correct fix**. Invalidating your own
+reproduction returns an issue to *unknown*, not to *resolved* —
+[L32](LESSONS.md), the more expensive of the two.
+
+**Fixed at creation, not at authentication**, and the distinction is the whole
+decision. The comparison looks like the bug — provenance used as an authorization
+input — but it is load-bearing: `RbacService` reads a null `organization_id` as
+*unrestricted across the tenant*, so that check is the only thing stopping a
+single-organization admin from minting a tenant-wide key. Loosening it would have
+turned an availability bug into a privilege escalation. Creation now takes the
+creator's own organization, and refuses an explicit mismatch with a 422 that says
+why.
+
+Checked rather than assumed, and worth recording as a negative: **a key does not
+inherit its creator's permissions.** `loadAcl` sees a service principal and reads
+the key's own roles; the creator's user ACLs never enter. The escalation this was
+feared to be does not exist. What does exist is a machine credential whose life
+is tied to a person's record — delete the creator and every key they made dies
+silently. That is now backlog item 3.
+
+## 2026-08-10 — The authority graph bridge learns to say "I do not know"
+
+`AuthorityGraphService` had no tests, and two ways to fail that both returned
+`A5` — which reads as *nothing constrains this*. An organization it could not
+find, and an ancestor index whose order had inverted, would each have granted
+full autonomy by silence.
+
+Both now fail closed at `A0` with a stated `basis`, and the inversion is actually
+*detected*: a leaf-first index makes every real edge match the path reversed,
+which ordinary data cannot produce. Unmapped hops are reported rather than
+absorbed, so an unconstrained answer says how much of the path it actually read.
+
+Thirteen tests, including one that pins the root-first ordering of `ancestor_ids`
+at the module that produces it — the assumption cannot be typed, so it has to be
+detected on one side and pinned on the other.
+
+Found while reading that code: a sibling comparator that compared a lowercased
+name against a raw UUID. One identifier. Fixed, with a test.
+
 ## 2026-08-10 — A 500 on an ordinary write, caused by four characters of SQL alias
 
 Creating an API key started returning 500. The server log named a duplicate key

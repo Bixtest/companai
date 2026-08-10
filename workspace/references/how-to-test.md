@@ -463,6 +463,68 @@ ceiling and watch `authority:explain` change its answer.
 
 ---
 
+## Batch U3 — API keys you create actually work now
+
+**What changed, in one sentence.** An API key you created was rejected on every
+single request, forever; now it works.
+
+**Why it matters to us.** An API key is how anything outside the browser reaches
+the platform — and it is the nearest thing the system has today to a non-human
+worker. A credential that is issued successfully and then refuses to work is the
+worst shape a bug can take: nothing looks wrong at the moment you create it.
+
+**Visible change:** yes, but only if you use a key. Creating one looks the same.
+
+### Test 1 — a new key is scoped to an organization (2 minutes)
+
+1. Go to **http://localhost:3000/backend/api-keys**
+2. Click **Create**, give it any name, pick the **admin** role, and save.
+3. Copy the secret it shows you — it is shown once.
+4. Look at the **Organization** column in the list for your new key.
+
+**Should happen:** the key shows your organization's name, not a blank.
+
+**Would mean broken:** an empty Organization column. That is the old behaviour,
+and a key created that way cannot be used.
+
+---
+
+### Test 2 — the key is accepted (3 minutes)
+
+This one needs a terminal. Paste the secret you copied in place of `<secret>`:
+
+```bash
+curl -i -H "X-Api-Key: <secret>" http://localhost:3000/api/directory/organizations
+```
+
+**Should happen:** the first line reads `HTTP/1.1 200 OK`, followed by a list of
+your organizations.
+
+**Would mean broken:** `HTTP/1.1 401 Unauthorized`. That is exactly the bug this
+batch fixes.
+
+**Not a bug:** if you write `Authorization: Bearer <secret>` instead, you will
+get a 401 no matter what. This platform accepts `X-Api-Key` or
+`Authorization: ApiKey` — never `Bearer`. That trap cost me two wrong diagnoses;
+it is not something we introduced.
+
+---
+
+### Test 3 — an impossible key is refused while you are watching (2 minutes)
+
+Only if you have more than one organization. If you have one, skip this.
+
+1. At **/backend/api-keys**, create a key and choose an organization that is
+   **not** your own.
+
+**Should happen:** the save is refused with a message explaining the key would be
+rejected every time it is used.
+
+**Would mean broken:** the key saves successfully. It would then behave exactly
+like the bug above — created fine, useless afterwards.
+
+---
+
 ## Template for future batches
 
 ```markdown

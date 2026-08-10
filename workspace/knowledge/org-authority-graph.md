@@ -131,3 +131,42 @@ The `graph-ceiling` line appears among the rules with the edge's own explanation
 | `packages/core/src/modules/directory/services/authorityGraphService.ts` | loading a real path from the closure index |
 | `packages/core/src/modules/directory/data/entities.ts` | `OrganizationEdge` |
 | `packages/core/src/modules/directory/migrations/Migration20260809193000.ts` | table, constraints, seeding |
+
+## Reading a ceiling: the answer and the reason it has
+
+`AuthorityGraphService.ceilingFor()` returns a gate **and a `basis`**, because
+`A5` alone is ambiguous in the worst possible direction — it is both "nothing
+constrains this" and what a lookup that found nothing would say.
+
+| `basis` | Meaning | Ceiling |
+|---|---|---|
+| `edges` | At least one edge above the organization was read and applied | whatever the path imposes |
+| `no-ancestors` | A root organization. Nothing sits above it | `A5` |
+| `organization-unknown` | No such organization in this tenant — wrong id, deleted, or another tenant's | `A0` |
+| `path-unresolved` | The ancestor index and the recorded edges disagree about direction | `A0` |
+
+The last two **fail closed**. A ceiling this service could not establish must
+never read as a ceiling it established to be absent; that distinction is
+invariant I6 (explainability is a return value) doing actual work rather than
+decorating a log line.
+
+`unmappedHops` reports steps on the path with no edge between them. That is not
+an error — the organization tree existed long before edges did, and an absent
+edge has never meant "forbidden" — but an unconstrained answer resting on four
+unmapped hops is a different claim from one resting on none, and whoever reads
+the explanation is entitled to know which they have.
+
+### The ordering assumption, and why it is guarded
+
+`ancestor_ids` is read **root-first**: the first id is the root, the last is the
+immediate parent. `directory/lib/hierarchy.ts` builds it that way, and
+`hierarchy.ordering.test.ts` pins it there.
+
+If it ever inverts, every edge stops matching a hop, the path comes out empty,
+and an empty path resolves to `A5` — a silent grant of full autonomy caused by
+another module changing an array order. So the service looks for the signature: a
+leaf-first index makes the real edges match the hops *reversed*. Finding that, it
+returns `A0` and logs an error rather than shrugging.
+
+This is worth copying wherever one module reads another module's array order:
+**the assumption cannot be typed, so it has to be detected.**

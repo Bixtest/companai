@@ -143,7 +143,7 @@ one turned out to need a schema or UX decision. Scheduled — see PROGRESS.md.
 
 ---
 
-## U3 — API keys are rejected unless they match their creator's organization · severity **low**
+## U3 — API keys are rejected unless they match their creator's organization · severity **high** · **FIXED 2026-08-10**
 
 **Found:** 2026-08-09, while verifying R1's service-principal path.
 
@@ -155,9 +155,13 @@ regardless of the roles it carries. It looks exactly like broken authentication.
 creator's user record and returns `null` when they differ. A key with `null`
 organization created by a user who has one never matches.
 
-**Fix.** Either default the key's organization to its creator's, or reject the
-*creation* with a clear message instead of failing silently at use time. The
-current behaviour spends the debugging time at the worst moment.
+**Severity was wrong.** Filed as low because it looked like a corner case. It is
+the *default* path: an admin working tenant-wide has no selected organization, so
+every key they create through the UI comes out unscoped, and every one of them is
+dead. See the resolution below.
+
+**Fix.** Default the key's organization to its creator's, and refuse an explicit
+mismatch at creation with a message that says why. Done 2026-08-10.
 
 ---
 
@@ -420,33 +424,69 @@ Every U4-family bug so far is that one sentence: audit entries invisible because
 they were scoped to the actor (R2b), a superadmin unable to delete a currency,
 and U3.
 
-### U3 does not reproduce, and the reason is embarrassing
+### U3 — resolved, after being wrongly closed twice
 
-I set out to show that U3 — "an API key is rejected at use time" — was an
-instance of U4, and produced a recipe, a diagnosis and a fix for it. All three
-were wrong.
+**The defect is real, and it is the default path.** A key created through the
+ordinary UI flow by the admin came out with `organization_id = null` while its
+creator had an organization. First use: **401**. Setting that one column to the
+creator's organization: **200**. Same key, same request, one column.
 
-**Every 401 I saw was my own request.** `extractApiKey` accepts `X-Api-Key` or
-`Authorization: ApiKey <secret>`. I sent `Authorization: Bearer`, which this
-platform does not use for API keys, and read the resulting 401 as evidence of a
-scoping defect. Sent correctly, a key created through the normal flow returns
-**200**.
+```
+create via /api/api_keys/keys        -> 201, organizationId: null
+GET /api/directory/organizations     -> 401   (X-Api-Key, correct header)
+update api_keys set organization_id = <creator's>
+GET /api/directory/organizations     -> 200
+```
 
-**And the defect I "found" does not fire.** `getAuthFromRequest` does contain a
-comparison requiring a key's organization to equal that of the user resolved
-through `sessionUserId ?? createdBy`. I nulled a never-used key's organization
-so that the comparison should have rejected it — and the request still returned
-200. Something upstream of that branch is not what I assumed, and rather than
-keep guessing at a bug with no symptom, I stopped.
+**Why it fires on the ordinary path.** `resolveApiKeyAuth` resolves a key through
+`sessionUserId ?? createdBy` and then requires that user's organization to equal
+the key's. Creation took the key's organization from the *request scope*
+(`selectedOrganizationId ?? auth.orgId`), which for an admin working tenant-wide
+is null — while the creator's own record has an organization. The two disagree by
+construction. This is the U4 shape: the actor's request scope is not a value to
+store.
 
-**What I did with the fix:** reverted it. It changed which organization a new key
-belongs to, on the strength of a defect I could not demonstrate. Keeping a
-behaviour change that no evidence supports is the same mistake as keeping a
-bandage, in the other direction.
+**Fixed at creation**, not at authentication:
 
-**U3 is therefore reopened as unverified**, with a note that the original report
-predates this session and its evidence is unknown. What *is* now documented is
-the correct header, which is the practical trap:
+- the key's organization now defaults to **the creator's own** organization —
+  a property of the creator, which is what the comparison will be made against;
+- an explicitly requested organization that differs is refused with **422** and a
+  message saying the key would be rejected every time it is used;
+- a context with no loadable creator (CLI, service bootstrap) keeps the previous
+  derivation — not finding a creator is an absence of evidence, not a mismatch.
+
+Verified end to end against the running instance: `organizationId` is now the
+creator's, and the first request with a new key returns 200. Five tests cover the
+four branches.
+
+**Why not fix the comparison instead.** It is doing real work. For a **session
+key** it is correct outright — the key acts as that user and must not outrange
+them. For a **regular key** it is also, today, the only thing stopping a
+single-organization admin from minting a key with `organization_id = null`, which
+`RbacService` reads as *unrestricted across the tenant*. Loosening it to make a
+broken write succeed would have converted an availability bug into a privilege
+escalation.
+
+**What the comparison still costs**, and what is on the backlog because of it:
+
+| Behaviour | Consequence |
+|---|---|
+| Creator soft-deleted | Every key they ever created returns 401, silently. Offboarding an admin disables their integrations |
+| Creator moved to another organization | Same, immediately |
+| Key scope tracks a person's current attributes | A machine credential's authority changes when someone edits an unrelated user record |
+
+The durable fix is to give a regular key its own stored scope, validated against
+the creator's visibility **at creation**, and stop consulting `createdBy` at
+authentication at all — `sessionUserId` keeps its comparison because there the
+borrowed identity is the point. That is its own backlog item.
+
+**What `createdBy` does *not* do — checked, not assumed.** It does not widen the
+key's permissions. `RbacService.loadAcl` parses the subject, sees a service
+principal, and reads features from **the key's own roles**; the creator's user
+ACLs are never consulted. The escalation this was originally feared to be does
+not exist. What exists is a machine credential whose life is tied to a person's.
+
+**The header trap that cost a day** stands on its own and is worth keeping:
 
 ```bash
 curl -H "X-Api-Key: <secret>" ...                 # works
@@ -454,7 +494,7 @@ curl -H "Authorization: ApiKey <secret>" ...      # works
 curl -H "Authorization: Bearer <secret>" ...      # 401, always
 ```
 
-**Left on the backlog:** `createdBy` is used as an authorization input alongside
-`sessionUserId`. Provenance and identity are different things and that comparison
-treats them as one. It is latent rather than active — but a security check nobody
-can explain is worth understanding before it starts mattering.
+Sending `Bearer` produces a 401 indistinguishable from a scoping refusal. That is
+what made the first reproduction worthless — and concluding from a worthless
+reproduction that there was no bug is [[L32]], the more expensive of the two
+mistakes.

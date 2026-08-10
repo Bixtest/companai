@@ -807,6 +807,24 @@ like diligence.
 **The general form:** confirmation is cheap and disconfirmation is what costs.
 Spend the seconds.
 
+> **Correction, 2026-08-10.** The header mistake was real and the rule above
+> stands. The conclusion I drew from it did not: **U3 is a real defect and it
+> reproduces.** A key created through the ordinary UI flow came out with a null
+> organization while its creator had one, returned 401 on first use, and
+> returned 200 after changing that single column. The fix I reverted was the
+> right fix; it is restored, with tests and an end-to-end verification.
+>
+> Why the second experiment misled me: I nulled a key's organization and expected
+> a rejection, but the comparison is against *the creator's* organization, and at
+> that moment the fix I had just written was in the build — so the key and its
+> creator agreed and the request correctly returned 200. I read a passing check
+> as an absent one.
+>
+> This is [[L32]]: a bad reproduction disproves nothing. Discovering that my
+> evidence was worthless told me only that I had no evidence — and I converted
+> that into "there is no bug", which is a different and much stronger claim that
+> nothing supported.
+
 ---
 
 ## L31 — An alias that shadows a column changes what `ORDER BY` means
@@ -860,3 +878,63 @@ instead of the running process. The diff instead of the environment.**
 
 The habit that prevents all of them: **before recording a finding, ask what
 exactly you looked at, and whether it is the thing you are claiming about.**
+
+---
+
+## L32 — Finding your evidence was worthless is not evidence of the opposite
+
+**What happened.** I built a reproduction of U3, discovered the reproduction was
+my own header mistake ([[L30]]), and concluded the defect did not exist. I
+reverted a correct fix and reopened the issue as "does not reproduce".
+
+It reproduces. A key created through the UI by the admin came out with
+`organization_id = null` while its creator had an organization; the first
+request with it returned **401**; setting that one column to the creator's
+organization turned the identical request into **200**. Ten minutes of work,
+which I did not do, because I thought the question was closed.
+
+**Why it happens.** Disproving my own reasoning felt like the rigorous move, and
+it was — right up to the point where I let it carry a conclusion of its own.
+"My evidence is bad" and "the claim is false" are different findings. The first
+returns you to not knowing. The second is a new claim, and it needs its own
+evidence, which I never gathered.
+
+The retraction even felt *safer* than the fix, because reverting looks like
+restraint. It was not restraint: it was shipping a known-broken code path back
+into the product on the strength of an argument about my own competence.
+
+**The rule.** *When you invalidate your own reproduction, the issue returns to
+**unknown**, not to **resolved**.* Write down what would settle it, then go and
+settle it. For U3 that was one sentence: create a key the normal way and use it
+with the correct header. Neither of my two experiments was that.
+
+**The tell:** a conclusion that arrives at the same moment as an apology. The
+apology is about the process; the conclusion is about the world; and one does not
+supply the other.
+
+**The cost:** a real 401-on-every-request defect stayed in the build for a day,
+and the fix had to be written twice.
+
+---
+
+## L33 — `clearAllMocks` does not clear a queued `mockResolvedValueOnce`
+
+**What happened.** Five new tests passed alone and two failed inside their own
+file. The route under test had gained one extra `em.findOne` call — and that call
+consumed a value queued by an earlier test with `mockResolvedValueOnce` and never
+used, because that test's code path never made the query it was primed for.
+
+**Why it happens.** `jest.clearAllMocks()` empties the call log. It leaves the
+once-queue and the implementation intact; only `mockReset()` clears those. So an
+unconsumed `Once` is not discarded at the end of a test — it waits, and is
+delivered to whichever test next calls that mock. Adding a query to production
+code then silently redirects another test's leftovers into it.
+
+**The rule.** *A mock that any test primes with `Once` gets `mockReset()` in
+`beforeEach`, then its default again.* The alternative — every test consuming
+exactly what it queues — is a property no one can maintain.
+
+**The tell:** a test that passes with `-t` and fails in the suite. That is never
+the new test being wrong; it is state crossing a boundary, and the boundary is
+worth finding rather than working around. Here it was latent before my change and
+would have surfaced on whoever added the next query.

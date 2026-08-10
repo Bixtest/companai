@@ -58,6 +58,78 @@ even one with an owner.
 Ask which question you are answering: *"whose settings are these?"* or *"who is
 responsible for this?"*
 
+## API keys — three identities in one row, and which one authorizes
+
+An `api_keys` row carries three references to a person, and only one of them is
+the actor. Confusing them was U3.
+
+| Column | What it means | Does it authorize? |
+|---|---|---|
+| `session_user_id` | The key **acts as** this user. Set for session keys only | **Yes.** The key borrows a person's identity and must not outrange them |
+| `created_by` | Who minted the key. Provenance | **It should not, and it does** — see below |
+| `organization_id` | The key's own scope | **Yes.** This is the key's authority, and it is what `RbacService` reads |
+
+### What actually decides what a key may do
+
+`RbacService.loadAcl` parses the subject, sees a **service** principal, and reads
+features from **the key's own roles**. The creator's user ACLs are never
+consulted. A key does not inherit the permissions of the person who made it — the
+escalation people reach for first does not exist here.
+
+But note this line, because it is the one with teeth:
+
+```ts
+let organizations: string[] | null = key.organizationId ? [key.organizationId] : null
+```
+
+**A key with a null organization is unrestricted across the tenant.** Null is not
+"unset" here; it is "everywhere".
+
+### The comparison at authentication, and what it is for
+
+```ts
+const actualUserId = record.sessionUserId ?? record.createdBy ?? null
+if (actualUserId) {
+  const user = await em.findOne(User, { id: actualUserId, deletedAt: null })
+  if (!user) return null
+  if (user.tenantId !== record.tenantId) return null
+  if (user.organizationId !== record.organizationId) return null   // ← U3
+}
+```
+
+For a **session key** this is right: the key acts as that person, so it must not
+reach further than they do (I4 — authority carried, never amplified).
+
+For a **regular key** it is doing a different job by accident: it is the only
+thing stopping a single-organization admin from minting a null-organization —
+that is, tenant-wide — key. Useful, and in the wrong place, with three costs:
+
+- **soft-delete the creator and every key they made returns 401**, silently;
+- move the creator to another organization and the same;
+- a machine credential's life is tied to a person's record.
+
+### The rule when creating a key
+
+**Take the organization from the creator's own record, never from the request
+scope.** They must agree, because the authentication path compares them — and an
+admin working tenant-wide has no selected scope, so deriving from the request
+produces `null` against a creator who has one, and the key is dead on arrival.
+
+If someone asks for a different organization explicitly, **refuse at creation**
+with a message. A key that cannot work should fail while somebody is watching.
+
+### The header trap
+
+```bash
+curl -H "X-Api-Key: <secret>" ...                 # works
+curl -H "Authorization: ApiKey <secret>" ...      # works
+curl -H "Authorization: Bearer <secret>" ...      # 401, always
+```
+
+`Bearer` is the reflex and this platform does not accept it for API keys. The
+resulting 401 is indistinguishable from a scoping refusal, which is how U3 was
+misdiagnosed twice — see [L30 and L32](../../LESSONS.md).
+
 ## What goes wrong
 
 | Symptom | Cause | Fix |
@@ -65,6 +137,8 @@ responsible for this?"*
 | `effectiveUserId` returns `null` unexpectedly | A service principal acting for nobody — correct, not a bug | Handle `null`; do **not** fall back to the key id, which writes personal rows nobody can read back |
 | A prefixed `api_key:<uuid>` used where a user id belongs | Legacy parsing that survived | Use the helpers |
 | A cached or trusted-envelope context has no principal | It never passed the boundary that attaches one | The helpers derive it — that is why they take the whole context |
+| An API key returns 401 on every request, with correct roles | Its `organization_id` disagrees with its creator's | Compare the two columns; the key was created from a request scope rather than from the creator |
+| Every key an offboarded admin created stops working at once | The creator's user row is soft-deleted, and authentication resolves the key through it | Known; the durable fix is on the backlog |
 
 ## Where the code lives
 
@@ -73,5 +147,7 @@ responsible for this?"*
 | `packages/shared/src/lib/auth/principal.ts` | The type, the helpers, and the **only** code that knows the `api_key:` encoding |
 | `packages/shared/src/lib/auth/server.ts` | `AuthContext`, `requirePrincipal`, where the principal is attached |
 | `packages/core/src/modules/auth/services/rbacService.ts` | Grants resolved by principal kind |
+| `packages/shared/src/lib/auth/server.ts` → `resolveApiKeyAuth` | The three-identity resolution and the organization comparison |
+| `packages/core/src/modules/api_keys/api/keys/route.ts` | Where a new key's organization is decided |
 
 Design intent: [`compai/planning/01-core-architecture.md`](../../compai/planning/01-core-architecture.md) §2.1.
