@@ -242,3 +242,101 @@ believes about the act.
 | `packages/shared/src/lib/authority/decision.ts` | the resolver, obligations, alternatives, explanation |
 | `packages/shared/src/lib/authority/preflight.ts` | plan resolution and its rendering |
 | `packages/core/src/modules/auth/cli.ts` | `authority:explain` |
+
+## Enforcement — when the resolver's answer starts binding
+
+**Three modes, per tenant**, stored in `module_configs` under
+`auth` / `authority.enforcement`:
+
+| Mode | What runs | What binds |
+|---|---|---|
+| `off` | nothing | nothing |
+| `shadow` **(default)** | the resolver, beside the real answer, recording where it would differ | nothing |
+| `enforce` | the resolver, with the organization graph | **refusals** |
+
+```bash
+mercato auth authority:mode --tenant <id>                  # read
+mercato auth authority:mode --tenant <id> --set enforce    # switch
+```
+
+Per tenant, because one customer's evidence says nothing about another
+customer's graph. Default `shadow`, because enforcement is a decision an operator
+makes against their own traffic — not something that arrives with an upgrade and
+starts refusing requests on a Tuesday.
+
+### What is enforced, and what is not
+
+**Refusals bind. Obligations do not.**
+
+The resolver returns a gate from `A0` to `A5`. Only `A0` — *blocked* — is
+enforced, because it is the only outcome the platform can carry out today. `A1`
+to `A4` mean approve-first, hold-and-commit or review-afterwards, and no
+machinery yet can hold an arbitrary act and resume it once somebody approves.
+Enforcing those would mean allowing the act and calling the allowance a control.
+
+The CLI says so when you switch a tenant on. Say it out loud rather than let
+somebody infer a guarantee that is not there.
+
+### Enforcement can only narrow
+
+It runs **after** the existing RBAC check has already returned `true`:
+
+```ts
+const allowed = await this.decideAllFeatures(userId, required, scope)
+this.shadowResolver(userId, required, scope, allowed)
+if (!allowed) return false                       // RBAC refused; nothing here can widen
+return !(await this.refusedByAuthority(...))     // the resolver may subtract
+```
+
+That ordering is the guarantee, not a convention. There is no path through
+`RbacService` that lets the resolver turn a `false` into a `true`, so "could
+enforcement grant something?" is a question you answer by reading four lines.
+
+`userHasAllFeatures` is the single funnel every permission decision in the
+platform reaches, which is why the switch lives there and nowhere else.
+
+### A failure is not a denial
+
+If the graph or the tenant's mode cannot be read, the call **throws**. It does
+not return "no ceiling" and it does not return "refused".
+
+An infrastructure failure is not a permission answer — the platform already
+takes that position for session resolution — and both alternatives are worse.
+Inventing an allowance disables the control exactly when something is wrong.
+Inventing a refusal tells a person they lack a permission they hold, which they
+will believe.
+
+### Every refusal says why
+
+```json
+{"level":40,"name":"authority","component":"enforcement",
+ "capability":"directory.organizations.view",
+ "bindingRule":"graph-ceiling",
+ "because":"inheritance is none, so nothing flows down, an 'advises' relationship permits at most A2"}
+```
+
+A 403 whose reason lives only inside a resolver is precisely what R5 exists to
+abolish. Enforcement would have reintroduced it if the answer left no trace on
+the way out.
+
+### The cost per check
+
+One cached graph-ceiling read, keyed by tenant + organization + capability and
+dropped whole-tenant whenever an edge changes. The uncached answer is two
+queries; the mode read is served by `ModuleConfigService`'s own 60-second cache.
+
+**In-process caches do not hear each other.** Setting the mode from the CLI takes
+up to a minute to reach a running server, and a deployment with more than one
+process needs a shared cache (Redis) for the switch to land everywhere at once.
+
+### What would have to exist before more of this binds
+
+- **Obligations** — an approval queue that can hold an arbitrary act and resume
+  it. Today only `inbox_ops` can do this, and only for AI proposals.
+- **A data-classification floor** — planning 02 §6.1 names
+  `matrix_by_classification[resource.classification]` as a floor input, and it
+  does not exist. Until it does, an untrusted machine reading `confidential`
+  data is bounded by RBAC alone. See [principals.md](principals.md).
+- **A trust vector** — `untrusted-machine` is a placeholder standing in for the
+  whole of planning 02 §5.
+

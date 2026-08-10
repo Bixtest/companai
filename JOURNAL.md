@@ -7,6 +7,53 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-08-10 — The resolver decides
+
+R5 and R6 built a decision kernel and nothing called it. It calls now.
+
+Three modes per tenant — `off`, `shadow`, `enforce` — defaulting to shadow,
+because enforcement is a decision an operator makes against their own traffic,
+not something that arrives with an upgrade and starts refusing requests on a
+Tuesday. Verified end to end against the running instance: an organization behind
+an `inheritance: none` edge returns **403** where its parent returns **200**, and
+the log carries the reason — *"inheritance is none, so nothing flows down, an
+'advises' relationship permits at most A2"*.
+
+**Enforcement can only narrow.** It runs after RBAC has already said yes. That
+ordering is the guarantee rather than a convention: there is no path through
+`RbacService` where the resolver turns a `false` into a `true`, so "could this
+grant something?" is a question you answer by reading four lines.
+
+**Refusals bind; obligations do not.** The resolver returns a gate from A0 to A5,
+and only A0 is enforced, because it is the only outcome the platform can carry
+out. A1–A4 mean approve-first, hold-and-commit, review-afterwards — and nothing
+can yet hold an arbitrary act and resume it once somebody approves. Enforcing
+those would mean allowing the act and calling the allowance a control. The CLI
+says this out loud when you switch a tenant on, and it is backlog item 3.
+
+**Shadow mode found another design error of mine**, which is now twice. An API
+key acquired an approval obligation for *listing organizations*. A read has no
+effect to approve, and gating one produces exactly the approval fatigue planning
+02 opens by naming as the thing it exists to resolve. The cause: I had written
+the untrusted-machine ceiling as a flat A2, where §5.1 specifies a vector over
+effect classes — *"a worker can be T4 on research reads and T1 on external
+communication"* — and warns that a single number is "either uselessly
+conservative or dangerously optimistic". Mine was the conservative half. Reads
+are now exempt; everything with an effect keeps approve-first.
+
+That exemption has a cost I am not hiding: an untrusted machine can now read
+`confidential` data bounded only by RBAC. The control that belongs there is the
+data-classification floor, which planning names and nobody has built. Backlog
+item 4, with a note that its values need a source rather than my judgement.
+
+**And a bug my tests could not see.** The edge query used `= any(?)`, which the
+query builder expands into `any('a','b')` — a syntax error. Seventeen tests
+passed because the fake connection never parsed the SQL; it filtered in
+JavaScript, so every property they asserted was a property of the fake. It
+surfaced the first time an organization actually had a parent, which was the
+first time the query ran at all. Second instance of the same shape as the ledger
+alias — [L34](LESSONS.md).
+
 ## 2026-08-10 — U3 was real. I had closed it twice on bad evidence
 
 A key created through the ordinary UI flow returned **401 on every request**. Not

@@ -938,3 +938,47 @@ exactly what it queues — is a property no one can maintain.
 the new test being wrong; it is state crossing a boundary, and the boundary is
 worth finding rather than working around. Here it was latent before my change and
 would have surfaced on whoever added the next query.
+
+---
+
+## L34 — A query your tests never ran is a query you have not written yet
+
+**What happened.** `AuthorityGraphService` had seventeen tests, including six on
+the edge query, and every one of them passed against SQL Postgres refuses:
+
+```sql
+where parent_id = any(?) and child_id = any(?)
+```
+
+The query builder expands an array binding into a comma-separated list, so this
+reaches the database as `any('a','b')` — a syntax error. The correct form is
+`in (?)`, which is *built* to receive that expansion.
+
+It surfaced the first time an organization in the real instance actually had
+ancestors, which was the first time the query ran at all.
+
+**Why the tests missed it.** The fake connection matched on
+`sql.includes('from organization_edges')` and did the filtering itself in
+JavaScript. It never parsed the SQL, so every property the tests asserted — the
+tenant filter, the soft-delete filter, the chain membership — was a property of
+*the fake*, not of the query. The tests were correct and told me nothing about
+whether the statement was valid.
+
+**Why it is the second time.** [[L31]] was the same shape: a column alias that
+changed what `ORDER BY` meant, invisible to a mock that did its own ordering. The
+pattern is now clear enough to state as a rule.
+
+**The rule.** *A hand-written SQL string needs one of two things: an assertion
+about its **text**, or an execution against a real database.* A mock that
+implements the query's intent tests your understanding of the query, which is
+exactly the thing in doubt.
+
+Both fixes now carry a text assertion — the ledger asserts no query aliases to
+`seq`, the graph asserts `in (?)` and never `any(`. They look crude. They are the
+only kind of test that can see the defect.
+
+**The other half:** notice when a code path has never executed. This one shipped
+with tests, a review, and no organization anywhere with a parent — so nothing had
+ever reached line two of the function. "Covered by tests" and "has run" are
+different claims, and only one of them was true.
+

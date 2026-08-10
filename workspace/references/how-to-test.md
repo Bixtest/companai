@@ -525,6 +525,115 @@ like the bug above — created fine, useless afterwards.
 
 ---
 
+## Batch E — the platform can now refuse an act and tell you why
+
+**What changed, in one sentence.** The authority rules you can already edit on the
+authority page now actually stop things, for tenants that switch it on.
+
+**Why it matters to us.** This is the product. Everything before it was building
+a system that could *explain* a decision; this is the first time that system
+*makes* one. A refusal that cannot say why is what every other platform gives
+you.
+
+**Visible change:** none unless you switch it on. Your instance is on `shadow`,
+which observes and refuses nothing — that is deliberate and is where it should
+stay until you want to try this.
+
+**This test creates and deletes a throwaway organization.** Nothing else is
+touched, and step 6 puts everything back.
+
+### Test 1 — build something the rules should block (4 minutes)
+
+1. Go to **http://localhost:3000/backend/directory/organizations**
+2. Click **Create**. Name it `Blocked Branch`, set **Parent** to your existing
+   organization (`Acme Corp`), and save.
+3. Go to **http://localhost:3000/backend/directory/authority**
+4. Create an edge: **Parent** `Acme Corp`, **Child** `Blocked Branch`,
+   **Relationship** `advises`, **Inheritance** `none`.
+
+**Should happen:** the edge is listed. `none` means *nothing flows down from the
+parent* — you have just declared that this branch inherits no authority.
+
+**Would mean broken:** an error saving the edge, or the edge not appearing.
+
+---
+
+### Test 2 — read the decision before enforcing it (2 minutes)
+
+In a terminal:
+
+```bash
+cd workspace/starting-kit/apps/mercato && corepack yarn mercato auth authority:explain --capability directory.organizations.view --org <BLOCKED_BRANCH_ID> --tenant <YOUR_TENANT_ID>
+```
+
+Both ids are visible in the organizations list URL when you open each one.
+
+**Should happen:** `Decision: A0 — Blocked`, with a binding rule of
+`graph-ceiling` and a sentence explaining that inheritance is `none`.
+
+**Would mean broken:** `A5`, or an error. `A5` would mean the graph is not
+reaching the decision.
+
+**Nothing has been refused yet.** This command only asks.
+
+---
+
+### Test 3 — switch it on and watch it bind (4 minutes)
+
+```bash
+cd workspace/starting-kit/apps/mercato && corepack yarn mercato auth authority:mode --tenant <YOUR_TENANT_ID> --set enforce
+```
+
+Then **wait one minute** — a running server re-reads the mode on a 60-second
+cache — and in the backend, use the **organization switcher** in the top bar to
+select `Blocked Branch`.
+
+**Should happen:** pages that list organizations start returning **Forbidden**
+while that branch is selected. Switch back to `Acme Corp` and everything works
+again.
+
+**Would mean broken:** no difference at all after a minute. Check the mode with
+the same command without `--set`.
+
+---
+
+### Test 4 — the refusal explains itself (1 minute)
+
+Look at the terminal running the server. Search its output for `enforcement`.
+
+**Should happen:** a line naming the capability, the binding rule
+(`graph-ceiling`), and *why* — `inheritance is none, so nothing flows down`.
+
+**Would mean broken:** a refusal with no matching line. A 403 nobody can explain
+is the thing this whole batch exists to prevent.
+
+---
+
+### Test 5 — what it deliberately does **not** do (1 minute, read only)
+
+Set an edge's **Authority ceiling** to `A2` instead of using `none`. `A2` means
+*a person must approve before the act executes*.
+
+**Should happen:** nothing is refused. That is correct, not a bug: the platform
+has no way yet to hold an act and resume it after somebody approves, so
+enforcing `A2` would mean allowing the act and calling it a control. Only
+outright blocks bind today, and the CLI says so when you switch a tenant on.
+
+---
+
+### Test 6 — put it back (2 minutes)
+
+```bash
+cd workspace/starting-kit/apps/mercato && corepack yarn mercato auth authority:mode --tenant <YOUR_TENANT_ID> --set shadow
+```
+
+Then delete the edge on the authority page, and delete `Blocked Branch` on the
+organizations page.
+
+**Should happen:** everything behaves as it did before Test 1.
+
+---
+
 ## Template for future batches
 
 ```markdown
