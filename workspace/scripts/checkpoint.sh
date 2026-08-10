@@ -38,22 +38,33 @@ PG_CONTAINER="mercato-postgres"
 PG_USER="postgres"
 PG_DB="open-mercato"
 KEEP_NEWEST=5
+GRACE_MINUTES=1440
 
 mkdir -p "$BACKUP_DIR"
 
+# Keep the newest N sets; of what remains, delete anything past the grace
+# window. A file is only ever removed when BOTH are true.
+#
+# The rank has to be computed over **every** backup, not over the old ones
+# alone. Ranking only the stale files was the bug: the newest sets counted as
+# zero against the cap, so ten stale files survived on top of them and the
+# directory grew by a set per checkpoint with `pruned: 0` reported each time.
 prune() {
   local removed=0
-  # Keep the newest N sets plus anything under 24h old; delete the rest.
-  local stale
-  stale=$(find "$BACKUP_DIR" -maxdepth 1 -type f \( -name '*.sql.gz' -o -name '*.env' \) -mmin +1440 2>/dev/null \
+  local doomed
+  doomed=$(find "$BACKUP_DIR" -maxdepth 1 -type f \( -name '*.sql.gz' -o -name '*.env' \) 2>/dev/null \
     | sort -r \
     | awk -v keep="$((KEEP_NEWEST * 2))" 'NR > keep')
-  if [ -n "$stale" ]; then
+  if [ -n "$doomed" ]; then
     while IFS= read -r file; do
       [ -n "$file" ] || continue
+      # The grace window is the second condition, deliberately. Rolling back to
+      # something taken an hour ago is the whole point of a checkpoint, and a
+      # busy day can produce more than N of them.
+      [ -n "$(find "$file" -maxdepth 0 -mmin +$GRACE_MINUTES 2>/dev/null)" ] || continue
       rm -f "$file"
       removed=$((removed + 1))
-    done <<< "$stale"
+    done <<< "$doomed"
   fi
   echo "  pruned: $removed old file(s)"
 }

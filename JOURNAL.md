@@ -40,6 +40,13 @@ existed. **Unknown is not "none"**, and a row nobody can attribute is left alone
 rather than guessed at — the same distinction the graph ceiling makes between
 "no constraint" and "constraint I could not read".
 
+**And the checkpoint script was not pruning.** It reported `pruned: 0` after every
+run while the backup directory grew by a set each time. The cap ranked only the
+*stale* files, so the newest five sets counted as zero against it and ten old
+files survived on top of them. Ranking every backup and applying the grace window
+as a second condition fixes it; the directory now converges instead of growing.
+A tool that reports success while doing nothing is worse than one that fails.
+
 **Found on the way:** the `audit_logs` and `directory` migration snapshots had
 been stale since R3 and R6. `yarn db:generate` was emitting migrations to
 re-create `ledger_events` and `organization_edges` — tables that already exist —
