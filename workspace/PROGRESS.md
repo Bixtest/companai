@@ -1,7 +1,14 @@
 # Progress — where we are, out of how much
 
-**One line: 10 of 16 done. All six repairs (R1–R6) are in. Next: the eight
-grafts from Platform 1, G1–G8.**
+**One line: 8 of 16 batches done, plus R2c. All six repairs (R1–R6) are in. Next
+is not a batch — it is backlog item 1, enforcing the resolver, because R5 and R6
+built a decision kernel that nothing yet calls.**
+
+**Two views of the same work.** *The backlog* below is the ordered list of
+everything outstanding, first to last, and it is the authority on what happens
+next. *The 16 batches* further down is the milestone view — how much of the
+Starting Kit is finished. Work off the backlog; read the batches to know how far
+along we are.
 
 Updated at the end of every batch. If this disagrees with the code, the code wins
 and this file is broken — fix it.
