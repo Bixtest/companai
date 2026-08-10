@@ -16,7 +16,19 @@ const logger = createLogger('authority').child({ component: 'pending-acts' })
  */
 export const PENDING_ACT_TTL_MS = 24 * 60 * 60 * 1000
 
-export const PENDING_ACT_STATUSES = ['pending', 'approved', 'rejected', 'expired', 'failed'] as const
+/**
+ * How long an `A3` act sits before it runs itself.
+ *
+ * Planning 02 §8's worked example is a fifteen-minute hold on an internal
+ * publish. Fifteen minutes is long enough for somebody watching to object and
+ * short enough that the act is not effectively blocked — which is the whole
+ * point of hold-and-commit as distinct from approve-first.
+ */
+export const COMMIT_WINDOW_MS = 15 * 60 * 1000
+
+export const PENDING_ACT_STATUSES = [
+  'pending', 'holding', 'approved', 'committed', 'rejected', 'vetoed', 'expired', 'failed',
+] as const
 export type PendingActStatus = (typeof PENDING_ACT_STATUSES)[number]
 
 /**
@@ -87,6 +99,47 @@ type CommandBusLike = {
  */
 export class PendingActService {
   constructor(private readonly em: EntityManager) {}
+
+  /**
+   * Records an act that will run **by itself** once its window passes.
+   *
+   * Gate `A3`. The difference from `hold` is not the waiting, it is what the
+   * waiting ends in: an unanswered approval expires and never happens, while an
+   * unopposed hold commits and does. Somebody has to object to stop it.
+   */
+  async holdUntilCommit(input: HoldInput): Promise<AuthorityAct> {
+    const commitAt = new Date(Date.now() + COMMIT_WINDOW_MS)
+    const act = this.em.create(AuthorityAct, {
+      tenantId: input.tenantId,
+      organizationId: input.organizationId,
+      commandId: input.commandId,
+      capabilityId: input.capabilityId,
+      commandInput: input.commandInput,
+      actorId: input.actorId,
+      actorKind: input.actorKind,
+      gate: input.decision.gate,
+      bindingRule: input.decision.bindingRule,
+      decision: input.decision as unknown,
+      status: 'holding',
+      // Never reached for a holding act — the sweep commits it first. Set to the
+      // same moment so a row that somehow escapes the sweep stops rather than
+      // sitting approvable forever.
+      expiresAt: commitAt,
+      commitAt,
+      createdAt: new Date(),
+    })
+    await this.em.persist(act).flush()
+
+    logger.warn('Act held, and will commit unless somebody objects', {
+      pendingActId: act.id,
+      commandId: input.commandId,
+      capability: input.capabilityId,
+      gate: input.decision.gate,
+      commitAt: commitAt.toISOString(),
+      actorId: input.actorId,
+    })
+    return act
+  }
 
   /** Records an act that will not run until somebody approves it. */
   async hold(input: HoldInput): Promise<AuthorityAct> {
@@ -212,6 +265,72 @@ export class PendingActService {
     return { ok: true, act }
   }
 
+  /**
+   * Runs every act whose hold window has passed.
+   *
+   * Called by a scheduled sweep rather than on read, because *"commits unless
+   * vetoed"* has to happen whether or not anybody is looking — that is the
+   * difference between a hold window and a queue.
+   *
+   * Each act is committed independently: one that throws must not stop the rest,
+   * or a single bad act freezes every A3 hold behind it.
+   */
+  async commitDue(params: {
+    tenantId: string
+    container: AwilixContainer
+    systemAuth: unknown
+    now?: Date
+  }): Promise<{ committed: number; failed: number }> {
+    // Scoped to one tenant, because the sweep is scheduled per tenant. A global
+    // sweep run from a per-tenant schedule would do every tenant's work once per
+    // tenant, and each extra pass would find the acts already committed — safe,
+    // wasteful, and confusing to read in a log.
+    const due = await this.em.find(AuthorityAct, {
+      tenantId: params.tenantId,
+      status: 'holding',
+      commitAt: { $lte: params.now ?? new Date() },
+    }, { limit: 100 })
+    if (!due.length) return { committed: 0, failed: 0 }
+
+    const bus = params.container.resolve('commandBus') as CommandBusLike
+    let committed = 0
+    let failed = 0
+
+    for (const act of due) {
+      try {
+        await bus.execute(act.commandId, {
+          input: act.commandInput,
+          ctx: {
+            container: params.container,
+            auth: params.systemAuth,
+            selectedOrganizationId: act.organizationId ?? null,
+            [APPROVED_ACT_REPLAY]: act.id,
+          },
+        })
+        act.status = 'committed'
+        act.resolvedAt = new Date()
+        // No `resolvedByUserId`: nobody decided this. It happened because the
+        // window passed and nobody objected, and recording a person here would
+        // put somebody's name on a decision they never made.
+        committed += 1
+      } catch (error) {
+        act.status = 'failed'
+        act.resolvedAt = new Date()
+        act.failureReason = error instanceof Error ? error.message : String(error)
+        failed += 1
+        logger.error('A held act failed when its window passed', {
+          pendingActId: act.id,
+          commandId: act.commandId,
+          err: error,
+        })
+      }
+    }
+    await this.em.flush()
+
+    logger.warn('Hold windows passed', { tenantId: params.tenantId, committed, failed })
+    return { committed, failed }
+  }
+
   /** Refuses a held act. The command never runs. */
   async reject(params: {
     tenantId: string
@@ -221,15 +340,19 @@ export class PendingActService {
   }): Promise<{ ok: true; act: AuthorityAct } | { ok: false; reason: string }> {
     const act = await this.findById(params.tenantId, params.id)
     if (!act) return { ok: false, reason: 'not-found' }
-    if (act.status !== 'pending') return { ok: false, reason: `already-${act.status}` }
+    // A holding act can be stopped too — that is a veto, and it is the only thing
+    // that prevents an A3 act from running.
+    if (act.status !== 'pending' && act.status !== 'holding') {
+      return { ok: false, reason: `already-${act.status}` }
+    }
 
-    act.status = 'rejected'
+    act.status = act.status === 'holding' ? 'vetoed' : 'rejected'
     act.resolvedAt = new Date()
     act.resolvedByUserId = params.approverUserId ?? null
     act.resolutionNote = params.note ?? null
     await this.em.flush()
 
-    logger.warn('Held act rejected', {
+    logger.warn('Held act stopped before it ran', {
       pendingActId: act.id,
       commandId: act.commandId,
       approverUserId: params.approverUserId,

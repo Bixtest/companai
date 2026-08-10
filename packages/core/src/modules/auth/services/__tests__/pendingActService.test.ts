@@ -8,7 +8,7 @@
  * looks like a control.
  */
 
-import { ActReviewService, PendingActService, PENDING_ACT_TTL_MS } from '../pendingActService'
+import { ActReviewService, COMMIT_WINDOW_MS, PendingActService, PENDING_ACT_TTL_MS } from '../pendingActService'
 
 const TENANT = 'tenant-1'
 const ORG = 'org-1'
@@ -31,8 +31,10 @@ function createFakeEm(rows: Row[] = []) {
       rows.filter((row) => {
         if (row.tenantId !== where.tenantId) return false
         if (where.status && row.status !== where.status) return false
-        const bound = (where.expiresAt as { $lte?: Date } | undefined)?.$lte
-        if (bound && !((row.expiresAt as Date) <= bound)) return false
+        const expiryBound = (where.expiresAt as { $lte?: Date } | undefined)?.$lte
+        if (expiryBound && !((row.expiresAt as Date) <= expiryBound)) return false
+        const commitBound = (where.commitAt as { $lte?: Date } | undefined)?.$lte
+        if (commitBound && !(row.commitAt && (row.commitAt as Date) <= commitBound)) return false
         return true
       }),
     ),
@@ -382,6 +384,141 @@ describe('filing an act for review after it ran', () => {
 
     expect(outcome).toMatchObject({ ok: false, reason: 'not-found' })
     expect(rows[0].status).toBe('awaiting')
+  })
+})
+
+/**
+ * `A3` — hold and commit unless vetoed.
+ *
+ * The difference from an approval is not the waiting, it is what the waiting
+ * ends in. An unanswered approval **expires** and never happens; an unopposed
+ * hold **commits** and does. Getting those two the wrong way round would either
+ * run things nobody sanctioned or silently drop work, so the tests are about
+ * which end each one reaches.
+ */
+describe('an act held until its window passes', () => {
+  const a3Decision = { ...(decision as object), gate: 'A3' } as never
+
+  it('commits rather than expires, and says when', async () => {
+    const { em, rows } = createFakeEm()
+    const service = new PendingActService(em as never)
+
+    await service.holdUntilCommit(holdInput({ decision: a3Decision }))
+
+    expect(rows[0].status).toBe('holding')
+    const commitAt = rows[0].commitAt as Date
+    expect(commitAt.getTime()).toBeGreaterThan(Date.now())
+    expect(commitAt.getTime()).toBeLessThanOrEqual(Date.now() + COMMIT_WINDOW_MS + 1000)
+  })
+
+  it('runs when the window has passed', async () => {
+    const execute = jest.fn(async () => ({}))
+    const { em, rows } = createFakeEm()
+    const service = new PendingActService(em as never)
+    await service.holdUntilCommit(holdInput({ decision: a3Decision }))
+    rows[0].commitAt = new Date(Date.now() - 1000)
+
+    const outcome = await service.commitDue({ tenantId: TENANT, container: makeContainer(execute), systemAuth: {} })
+
+    expect(outcome).toEqual({ committed: 1, failed: 0 })
+    expect(execute).toHaveBeenCalledTimes(1)
+    expect(rows[0].status).toBe('committed')
+  })
+
+  it('does not run before the window has passed', async () => {
+    const execute = jest.fn(async () => ({}))
+    const { em, rows } = createFakeEm()
+    const service = new PendingActService(em as never)
+    await service.holdUntilCommit(holdInput({ decision: a3Decision }))
+
+    await service.commitDue({ tenantId: TENANT, container: makeContainer(execute), systemAuth: {} })
+
+    expect(execute).not.toHaveBeenCalled()
+    expect(rows[0].status).toBe('holding')
+  })
+
+  it('records no approver, because nobody made this decision', async () => {
+    // It committed because a window passed, not because a person decided.
+    // Recording an approver here would attribute a choice that was never made.
+    const execute = jest.fn(async () => ({}))
+    const { em, rows } = createFakeEm()
+    const service = new PendingActService(em as never)
+    await service.holdUntilCommit(holdInput({ decision: a3Decision }))
+    rows[0].commitAt = new Date(Date.now() - 1000)
+
+    await service.commitDue({ tenantId: TENANT, container: makeContainer(execute), systemAuth: {} })
+
+    expect(rows[0].resolvedByUserId).toBeUndefined()
+    expect(rows[0].resolvedAt).toBeInstanceOf(Date)
+  })
+
+  it('a veto stops it permanently', async () => {
+    const execute = jest.fn(async () => ({}))
+    const { em, rows } = createFakeEm()
+    const service = new PendingActService(em as never)
+    await service.holdUntilCommit(holdInput({ decision: a3Decision }))
+
+    const vetoed = await service.reject({
+      tenantId: TENANT,
+      id: rows[0].id as string,
+      approverUserId: 'objector-1',
+      note: 'not this one',
+    })
+    rows[0].commitAt = new Date(Date.now() - 1000)
+    await service.commitDue({ tenantId: TENANT, container: makeContainer(execute), systemAuth: {} })
+
+    expect(vetoed.ok).toBe(true)
+    expect(rows[0].status).toBe('vetoed')
+    expect(execute).not.toHaveBeenCalled()
+  })
+
+  it('one act that throws does not freeze every other hold behind it', async () => {
+    const execute = jest.fn()
+      .mockImplementationOnce(async () => { throw new Error('constraint violated') })
+      .mockImplementationOnce(async () => ({}))
+    const { em, rows } = createFakeEm()
+    const service = new PendingActService(em as never)
+    await service.holdUntilCommit(holdInput({ decision: a3Decision }))
+    await service.holdUntilCommit(holdInput({ decision: a3Decision }))
+    for (const row of rows) row.commitAt = new Date(Date.now() - 1000)
+
+    const outcome = await service.commitDue({ tenantId: TENANT, container: makeContainer(execute), systemAuth: {} })
+
+    expect(outcome).toEqual({ committed: 1, failed: 1 })
+    expect(rows[0].status).toBe('failed')
+    expect(rows[1].status).toBe('committed')
+  })
+
+  it('does not sweep another tenant’s acts', async () => {
+    // The schedule is per tenant. A sweep that reached across them would run one
+    // customer's work on another customer's timer.
+    const execute = jest.fn(async () => ({}))
+    const { em, rows } = createFakeEm()
+    const service = new PendingActService(em as never)
+    await service.holdUntilCommit(holdInput({ decision: a3Decision, tenantId: 'tenant-2' }))
+    rows[0].commitAt = new Date(Date.now() - 1000)
+
+    const outcome = await service.commitDue({ tenantId: TENANT, container: makeContainer(execute), systemAuth: {} })
+
+    expect(outcome).toEqual({ committed: 0, failed: 0 })
+    expect(rows[0].status).toBe('holding')
+  })
+
+  it('does not touch acts that are waiting for a person', async () => {
+    // An A1/A2 act has no commit window. Committing one would run something
+    // nobody approved, which is the exact failure this whole layer exists to
+    // prevent.
+    const execute = jest.fn(async () => ({}))
+    const { em, rows } = createFakeEm()
+    const service = new PendingActService(em as never)
+    await service.hold(holdInput())
+    rows[0].expiresAt = new Date(Date.now() - 1000)
+
+    const outcome = await service.commitDue({ tenantId: TENANT, container: makeContainer(execute), systemAuth: {} })
+
+    expect(outcome).toEqual({ committed: 0, failed: 0 })
+    expect(execute).not.toHaveBeenCalled()
+    expect(rows[0].status).toBe('pending')
   })
 })
 

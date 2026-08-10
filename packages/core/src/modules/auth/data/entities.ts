@@ -449,12 +449,41 @@ export class AuthorityAct {
   @Property({ type: 'jsonb' })
   decision!: unknown
 
-  /** `pending` · `approved` · `rejected` · `expired` · `failed` */
+  /**
+   * `pending` — waiting for a person (A1/A2)
+   * `holding` — waiting for its window to pass, then it runs itself (A3)
+   * `approved` · `committed` — it ran, by a person or by the clock
+   * `rejected` · `vetoed` — it will not run, by a person's decision
+   * `expired` — nobody answered in time; it will not run
+   * `failed` — it was authorised, ran, and threw
+   */
   @Property({ type: 'text', default: 'pending' })
   status: string = 'pending'
 
+  /**
+   * When an unanswered act stops being approvable. `A1`/`A2`.
+   *
+   * Expiry **kills** the act: it never runs, and somebody has to propose it
+   * again. That is the opposite of `commitAt` below, and the two must never be
+   * read as the same field under a different name.
+   */
   @Property({ name: 'expires_at', type: Date })
   expiresAt!: Date
+
+  /**
+   * When a held act runs by itself. `A3` — *hold and commit unless vetoed*.
+   *
+   * A scheduled sweep finds acts past this moment and **runs** them. A veto
+   * before then cancels the act permanently.
+   *
+   * A separate column from `expiresAt`, even though both are "a deadline on a
+   * held act". One means *this never happens now*; the other means *this happens
+   * now*. Sharing a column and branching on status would put the two opposite
+   * outcomes one typo apart, on a table whose entire job is deciding whether
+   * something happens.
+   */
+  @Property({ name: 'commit_at', type: Date, nullable: true })
+  commitAt?: Date | null
 
   @Property({ name: 'resolved_at', type: Date, nullable: true })
   resolvedAt?: Date | null

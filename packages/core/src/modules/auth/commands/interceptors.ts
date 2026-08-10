@@ -55,6 +55,9 @@ export class ActHeldForApprovalError extends CrudHttpError {
 /** Gates below this are refusals, above are permissions. `A1`/`A2` are "not yet". */
 const HELD_GATES = new Set(['A1', 'A2'])
 
+/** `A3` — the act waits, then runs itself unless somebody objects. */
+const COMMIT_GATE = 'A3'
+
 /** `A4` — the act happens now, and somebody looks at it afterwards. */
 const REVIEWED_GATE = 'A4'
 
@@ -74,14 +77,12 @@ const REVIEWED_GATE = 'A4'
  * - **Tenants not in `enforce`.** Shadow mode observes and changes nothing.
  * - **`A0`.** That is a refusal and `RbacService` has already made it at the
  *   route guard, before any of this runs.
- * - **`A3`.** Hold-and-commit executes into a hold window and *commits* when the
- *   window passes unless somebody objects — the opposite of expiry, and it needs
- *   a scheduler rather than a queue. Not covered; saying otherwise would be a
- *   claim without a mechanism.
+ * `A3` **is** held, but it ends differently: nobody has to answer it. A scheduled
+ * sweep runs it once its window passes, and only a veto stops it.
  *
- * `A4` **is** covered, but not here — it does not hold anything. The act runs and
- * `afterExecute` files it for review, which is why this hook records the decision
- * in the interceptor metadata on its way past.
+ * `A4` **is** covered too, and holds nothing — the act runs and `afterExecute`
+ * files it for review, which is why this hook records the decision in the
+ * interceptor metadata on its way past.
  * - **Replays of an already-approved act**, which would otherwise be held again
  *   and produce a queue that cannot be emptied.
  */
@@ -141,6 +142,26 @@ export const authorityCommandGate: CommandInterceptor = {
       // A4 runs now and is filed afterwards. Carrying the decision forward means
       // `afterExecute` files the reason the act was reviewable, not a fresh
       // resolution that might answer a different question by then.
+      if (decision?.gate === COMMIT_GATE) {
+        const held = await pendingActs.holdUntilCommit({
+          tenantId,
+          organizationId,
+          commandId: context.commandId,
+          capabilityId: capability,
+          commandInput: input,
+          actorId: parseSubject(subject).id,
+          actorKind: parseSubject(subject).kind,
+          decision,
+        })
+        const holdBinding = decision.reasons.find((reason) => reason.rule === decision.bindingRule) ?? null
+        throw new ActHeldForApprovalError({
+          pendingActId: held.id,
+          gate: decision.gate,
+          bindingRule: decision.bindingRule,
+          because: holdBinding?.detail ?? null,
+        })
+      }
+
       if (decision?.gate === REVIEWED_GATE) {
         return {
           metadata: {

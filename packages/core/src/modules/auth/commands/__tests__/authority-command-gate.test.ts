@@ -19,6 +19,7 @@ const UNMAPPED_COMMAND = 'example.todo.update'
 const CAPABILITY = 'directory.organizations.manage'
 
 const hold = jest.fn(async () => ({ id: 'act-1' }))
+const holdUntilCommit = jest.fn(async () => ({ id: 'act-2' }))
 
 function makeContext(options: {
   mode?: string
@@ -48,7 +49,7 @@ function makeContext(options: {
     container: {
       resolve: (name: string) => {
         if (name === 'authorityEnforcement') return enforcement
-        if (name === 'pendingActService') return { hold }
+        if (name === 'pendingActService') return { hold, holdUntilCommit }
         return null
       },
     },
@@ -59,6 +60,7 @@ function makeContext(options: {
 
 beforeEach(() => {
   hold.mockClear()
+  holdUntilCommit.mockClear()
 })
 
 describe('what the gate holds', () => {
@@ -68,6 +70,17 @@ describe('what the gate holds', () => {
     await expect(authorityCommandGate.beforeExecute!({ id: 'org-9' }, context as never))
       .rejects.toBeInstanceOf(ActHeldForApprovalError)
     expect(hold).toHaveBeenCalledTimes(1)
+  })
+
+  it('holds an A3 act until its window passes, rather than until somebody answers', async () => {
+    // The difference is what the waiting ends in: an unanswered approval expires
+    // and never happens; an unopposed hold commits and does.
+    const { context } = makeContext({ gate: 'A3' })
+
+    await expect(authorityCommandGate.beforeExecute!({}, context as never))
+      .rejects.toBeInstanceOf(ActHeldForApprovalError)
+    expect(holdUntilCommit).toHaveBeenCalledTimes(1)
+    expect(hold).not.toHaveBeenCalled()
   })
 
   it('holds an act at A1 too', async () => {
@@ -120,14 +133,12 @@ describe('what the gate lets through, deliberately', () => {
     expect(hold).not.toHaveBeenCalled()
   })
 
-  it('does not hold A3, which commits when nobody objects and needs a scheduler', async () => {
-    // A3 executes into a hold window and commits when the window passes — the
-    // opposite of expiry, so the approval queue's machinery does not cover it.
-    for (const gate of ['A3', 'A5']) {
-      const { context } = makeContext({ gate })
-      await expect(authorityCommandGate.beforeExecute!({}, context as never)).resolves.toBeUndefined()
-    }
+  it('lets A5 through, which is the only gate with nothing to enforce', async () => {
+    const { context } = makeContext({ gate: 'A5' })
+
+    await expect(authorityCommandGate.beforeExecute!({}, context as never)).resolves.toBeUndefined()
     expect(hold).not.toHaveBeenCalled()
+    expect(holdUntilCommit).not.toHaveBeenCalled()
   })
 
   it('does not hold A4 either — it runs, and carries its decision forward to be filed', async () => {
