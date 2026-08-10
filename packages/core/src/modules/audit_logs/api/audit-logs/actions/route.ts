@@ -10,6 +10,7 @@ import { z } from 'zod'
 import type { OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
 import { parseBooleanToken } from '@open-mercato/shared/lib/boolean'
 import { ACTION_LOG_FILTER_TYPES } from '@open-mercato/core/modules/audit_logs/lib/projections'
+import { visibleScopesFor } from '@open-mercato/shared/modules/visibility'
 
 export const metadata = {
   GET: { requireAuth: true, requireFeatures: ['audit_logs.view_self'] },
@@ -193,6 +194,30 @@ export async function GET(req: Request) {
     }
   }
 
+  const canViewPrivate = await rbac.userHasAllFeatures(
+    auth.sub,
+    ['audit_logs.view_private'],
+    { tenantId: auth.tenantId ?? null, organizationId: defaultOrganizationId ?? null },
+  )
+
+  /**
+   * Which audiences this reader may see, decided once and pushed into the query.
+   *
+   * `isActor` stays false here on purpose: it is a per-row fact, so it cannot be
+   * folded into a scope list. Own private acts come back through
+   * `visibilityActorUserId` instead, which the query turns into an OR.
+   *
+   * This runs after the tenant/organization scoping and after the feature check
+   * that allowed the request at all, so it can only take rows away.
+   */
+  const isPlatformOperator = (auth as Record<string, unknown>).isSuperAdmin === true
+  const visibilityScopes = visibleScopesFor({
+    isPlatformOperator,
+    isActor: false,
+    canViewPrivate,
+    isPortalViewer: false,
+  })
+
   let actorUserId: string | undefined = canViewTenant ? undefined : auth.sub
   let actorUserIds: string[] | undefined
   if (canViewTenant && actorQuery) {
@@ -208,6 +233,8 @@ export async function GET(req: Request) {
   const listQuery = {
     tenantId: auth.tenantId ?? undefined,
     organizationId: organizationId ?? undefined,
+    visibilityScopes,
+    visibilityActorUserId: auth.sub,
     actorUserId,
     actorUserIds,
     resourceKind,

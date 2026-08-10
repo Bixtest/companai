@@ -100,6 +100,14 @@ export class ActionLog {
   @Property({ name: 'related_resource_id', type: 'text', nullable: true })
   relatedResourceId: string | null = null
 
+  /**
+   * Who this act was recorded for, decided by the writer rather than inferred by
+   * a reader. Defaults to `tenant`, which is the audience audit records already
+   * had, so this narrows and never widens.
+   */
+  @Property({ name: 'visibility_scope', type: 'text', default: 'tenant' })
+  visibilityScope: string = 'tenant'
+
   @Property({ name: 'created_at', type: Date, onCreate: () => new Date() })
   createdAt: Date = new Date()
 

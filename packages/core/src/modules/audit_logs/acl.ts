@@ -19,6 +19,17 @@ export const features: AclFeatureDeclaration[] = [
     },
   },
   {
+    id: 'audit_logs.view_private',
+    title: 'View acts recorded as private',
+    module: 'audit_logs',
+    capability: {
+      effectClass: 'E0',
+      reversibility: 'reversible',
+      dataClasses: ['confidential', 'personal'],
+      note: 'Deliberately not implied by view_tenant. Reading acts somebody marked private is a different decision from reading ordinary ones, and a role that should see everything can be granted both.',
+    },
+  },
+  {
     id: 'audit_logs.undo_self',
     title: 'Undo own actions',
     module: 'audit_logs',

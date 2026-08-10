@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { VISIBILITY_SCOPES } from '@open-mercato/shared/modules/visibility'
 
 export const uuid = z.string().uuid()
 
@@ -30,9 +31,18 @@ export const actionLogCreateSchema = baseScopeSchema.extend({
   relatedResourceId: z.string().min(1).optional().nullable(),
   changes: recordLike,
   context: recordLike,
+  visibilityScope: z.enum(VISIBILITY_SCOPES).optional(),
 })
 
 export const actionLogListSchema = z.object({
+  /** Restricts the read to scopes this reader may see. Fail-closed when empty. */
+  visibilityScopes: z.array(z.enum(VISIBILITY_SCOPES)).optional(),
+  /**
+   * The reader's own principal id, so their own `private` acts stay visible to
+   * them without granting them everybody's. Whether a private row is readable
+   * depends on who performed it, which a scope list alone cannot express.
+   */
+  visibilityActorUserId: uuid.optional(),
   tenantId: uuid.optional(),
   organizationId: uuid.optional(),
   actorUserId: uuid.optional(),

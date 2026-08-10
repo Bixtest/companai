@@ -2,6 +2,7 @@ import type { FilterQuery } from '@mikro-orm/core'
 import type { EntityManager } from '@mikro-orm/postgresql'
 import { sql } from 'kysely'
 import { ActionLog } from '@open-mercato/core/modules/audit_logs/data/entities'
+import { DEFAULT_VISIBILITY_SCOPE } from '@open-mercato/shared/modules/visibility'
 import {
   actionLogCreateSchema,
   actionLogListSchema,
@@ -410,6 +411,9 @@ export class ActionLogService {
       primaryChangedField: projection.primaryChangedField,
       contextJson: isRecord(data.context) ? data.context : null,
       sourceKey: projection.sourceKey,
+      // Recorded at write time by the code that knows what the act was. A reader
+      // inferring this later from the payload is exactly the leak G6 removes.
+      visibilityScope: data.visibilityScope ?? DEFAULT_VISIBILITY_SCOPE,
       createdAt: new Date(),
       updatedAt: new Date(),
     })
@@ -551,6 +555,34 @@ export class ActionLogService {
       .selectFrom('action_logs')
       .selectAll()
       .where('action_logs.deleted_at', 'is', null) as any
+
+    // Audience, pushed into SQL rather than filtered afterwards.
+    //
+    // Discarding rows in JavaScript would still leak through everything that
+    // counts, pages or exports them -- and this route does all three. An empty
+    // list means the caller may read nothing, which is why it filters on an
+    // impossible value rather than skipping the clause: a missing filter must
+    // never be the same as an unrestricted one.
+    if (parsed.visibilityScopes) {
+      const scopes = parsed.visibilityScopes
+      const ownActorUserId = parsed.visibilityActorUserId
+      query = query.where((eb: any) => {
+        const clauses: any[] = []
+        // Fail closed: an empty list is "may read nothing", which must not
+        // collapse into the same SQL as "no restriction".
+        if (scopes.length) clauses.push(eb('action_logs.visibility_scope', 'in', scopes))
+        // Nobody is locked out of their own history. Readable because of who
+        // performed the act, which is a per-row fact and cannot live in the
+        // scope list.
+        if (ownActorUserId) {
+          clauses.push(eb.and([
+            eb('action_logs.visibility_scope', '=', 'private'),
+            eb('action_logs.actor_user_id', '=', ownActorUserId),
+          ]))
+        }
+        return clauses.length ? eb.or(clauses) : eb('action_logs.visibility_scope', '=', '__none__')
+      })
+    }
 
     if (parsed.tenantId) query = query.where('action_logs.tenant_id', '=', parsed.tenantId)
     // Include tenant-scoped entries alongside the requested organization's.
