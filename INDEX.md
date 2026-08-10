@@ -24,8 +24,8 @@ and can always explain why.
 | **Phase** | Building the Starting Kit |
 | **Decision made** | We are building on **Open Mercato**, a working platform we have forked permanently |
 | **Where the code is** | [`workspace/starting-kit/`](workspace/starting-kit/) |
-| **Health** | **Green.** Boots clean, zero server errors. **Gate: 22/22 tasks, 12,639 tests, 0 failed** (2026-08-10) |
-| **Current work** | **The governance layer decides.** All six repairs in; the resolver enforces per tenant; an act it gates at A1/A2 is held until a person approves it; acts are graded by the data they touch. Next: widen which commands are gated, then build the approvals screen |
+| **Health** | Boots clean, zero server errors. **Gate: 21/22 tasks** (2026-08-10). The one failure is `cli` integration-cache contention — passes alone, starves inside the parallel gate — and is [PROGRESS item 3](workspace/PROGRESS.md). Every other package green |
+| **Current work** | **The governance layer decides.** All six repairs in; the resolver enforces per tenant; an act gated at A1/A2 is held until somebody approves it, and one gated at A4 runs and is filed for review; acts are graded by the data they touch; 21 commands are gated. Next: A3 (needs a scheduler), then the approvals screen |
 | **Understand the product in 10 minutes** | [`workspace/knowledge/authority-overview.md`](workspace/knowledge/authority-overview.md) — the governance layer end to end. **This is the thing we are building** |
 | **Progress tracker** | [`workspace/PROGRESS.md`](workspace/PROGRESS.md) — every batch, what is done, what is next |
 | **The ERP is off** | 14 modules **parked**, not deleted — 136 tables instead of 263. One line each to restore: [`workspace/references/parked-modules.md`](workspace/references/parked-modules.md) |
@@ -213,4 +213,4 @@ a folder, finishes a phase, or makes a decision updates it in the same change.
 A newcomer who cannot orient themselves from this page alone means it is broken —
 fix the page, not the newcomer.
 
-*Last updated: 2026-08-10 — enforcement, held acts and data-class grading landed. Gate green: 22/22 tasks, 12,639 tests.*
+*Last updated: 2026-08-10 — enforcement, held acts, reviewed acts, data-class grading and 21 gated commands. Gate 21/22; the one failure is test-infrastructure contention, not the code.*
