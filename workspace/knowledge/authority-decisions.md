@@ -52,10 +52,26 @@ example.
 | `irreversible-cap` | **I8** — an act nobody can undo is never decided after it happens. Caps at `A2` |
 | `compensation-available` | Recorded when the act is compensatable, so the explanation says so |
 | `trust-ceiling` / `untrusted-machine` | What the actor has earned — see below |
-| `invoker-ceiling` | **I4** — authority is carried, never amplified |
-| `delegation-ceiling` | The cap on the delegation being acted under |
-| `resource-state` | What the record's own state permits |
-| `policy` | Tenant policy |
+| `invoker-ceiling` | **I4** — authority is carried, never amplified · ⚠️ **not supplied at runtime** |
+| `delegation-ceiling` | The cap on the delegation being acted under · ⚠️ **not supplied at runtime** |
+| `resource-state` | What the record's own state permits · ⚠️ **not supplied at runtime** |
+| `policy` | Tenant policy · ⚠️ **not supplied at runtime** |
+
+> **Read the warnings literally.** Every rule above is implemented and tested in
+> `resolveDecision`, and every one of them binds *when its input arrives*. Four
+> inputs never arrive. `authorityEnforcementService.decideFor` — the only
+> production decision path — passes `context: {}` and sets no trust, delegation or
+> invoker ceiling, so those rules are reachable today only through
+> `authority:explain`, where a human supplies them as a what-if.
+>
+> This is safe but not harmless. Safe, because nothing anywhere *raises* a gate:
+> an absent input can only leave the answer more permissive than the design
+> intends, never more permissive than the RBAC check that already said yes. Not
+> harmless, because **I4 is an invariant we state**, and an AI worker invoked by
+> somebody who could not perform an act is not currently capped by that person's
+> authority.
+>
+> Wiring each input is `PROGRESS.md` backlog items 4–11. Audited 2026-08-10.
 
 The **binding rule** is the *first* rule to reach the final value, not the last.
 "You do not hold this" explains more than "policy also capped it".
