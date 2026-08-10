@@ -6,6 +6,7 @@ import { writeDirectWriteAuditLog } from '@open-mercato/shared/lib/crud/audit-wr
 import type { OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
 import {
   PENDING_ACT_STATUSES,
+  type ActReviewService,
   type PendingActService,
   type PendingActStatus,
 } from '@open-mercato/core/modules/auth/services/pendingActService'
@@ -23,6 +24,7 @@ type Scope = {
   container: AppContainer
   auth: NonNullable<Awaited<ReturnType<typeof getAuthFromRequest>>>
   pendingActs: PendingActService
+  reviews: ActReviewService
 }
 
 async function resolveScope(req: Request): Promise<Scope | NextResponse> {
@@ -34,6 +36,7 @@ async function resolveScope(req: Request): Promise<Scope | NextResponse> {
     container,
     auth,
     pendingActs: container.resolve('pendingActService') as PendingActService,
+    reviews: container.resolve('actReviewService') as ActReviewService,
   }
 }
 
@@ -43,7 +46,16 @@ function isResponse(value: unknown): value is NextResponse {
 
 const statusQuerySchema = z.enum([...PENDING_ACT_STATUSES, 'all']).default('pending')
 
-/** The queue: acts the resolver held, and what became of them. */
+/**
+ * The queue.
+ *
+ * Two kinds of row, deliberately in one response: acts that have **not** happened
+ * and are waiting for somebody (`items`), and acts that **have** happened and
+ * nobody has looked at yet (`reviews`). Planning 02 §9 asks for one inbox rather
+ * than four screens, and this is where that starts — they stay distinguishable
+ * because confusing "stop this" with "check this" in either direction is how a
+ * queue loses its meaning.
+ */
 export async function GET(req: Request) {
   const scope = await resolveScope(req)
   if (isResponse(scope)) return scope
@@ -52,13 +64,18 @@ export async function GET(req: Request) {
   const parsed = statusQuerySchema.safeParse(raw)
   if (!parsed.success) return NextResponse.json({ error: 'Invalid status' }, { status: 400 })
 
-  const items = await scope.pendingActs.list(scope.tenantId, parsed.data as PendingActStatus | 'all')
-  return NextResponse.json({ items })
+  const [items, reviews] = await Promise.all([
+    scope.pendingActs.list(scope.tenantId, parsed.data as PendingActStatus | 'all'),
+    scope.reviews.list(scope.tenantId, parsed.data === 'all' ? 'all' : 'awaiting'),
+  ])
+  return NextResponse.json({ items, reviews })
 }
 
 const resolveSchema = z.object({
   id: z.string().uuid(),
-  decision: z.enum(['approve', 'reject']),
+  // `reviewed` acts on the other list: an act that already happened and has now
+  // been looked at. It runs nothing and undoes nothing.
+  decision: z.enum(['approve', 'reject', 'reviewed']),
   note: z.string().trim().max(500).optional(),
 })
 
@@ -81,6 +98,29 @@ export async function POST(req: Request) {
   }
 
   const approverUserId = typeof scope.auth.sub === 'string' ? scope.auth.sub : null
+
+  if (parsed.data.decision === 'reviewed') {
+    const outcome = await scope.reviews.markReviewed({
+      tenantId: scope.tenantId,
+      id: parsed.data.id,
+      reviewerUserId: approverUserId,
+      note: parsed.data.note ?? null,
+    })
+    await writeDirectWriteAuditLog({
+      container: scope.container,
+      auth: scope.auth,
+      organizationId: null,
+      action: 'updated',
+      resourceKind: 'authority.act_review',
+      resourceId: parsed.data.id,
+      snapshotAfter: { decision: 'reviewed', outcome: outcome.ok ? 'ok' : outcome.reason },
+    })
+    if (!outcome.ok) {
+      return NextResponse.json({ error: outcome.reason }, { status: outcome.reason === 'not-found' ? 404 : 409 })
+    }
+    return NextResponse.json({ ok: true, status: 'reviewed' })
+  }
+
   const before = await scope.pendingActs.findById(scope.tenantId, parsed.data.id)
   if (!before) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 

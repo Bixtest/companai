@@ -2,7 +2,7 @@ import type { EntityManager } from '@mikro-orm/postgresql'
 import type { AwilixContainer } from 'awilix'
 import type { Decision } from '@open-mercato/shared/lib/authority/decision'
 import { createLogger } from '@open-mercato/shared/lib/logger'
-import { AuthorityPendingAct } from '@open-mercato/core/modules/auth/data/entities'
+import { AuthorityAct, AuthorityActReview } from '@open-mercato/core/modules/auth/data/entities'
 
 const logger = createLogger('authority').child({ component: 'pending-acts' })
 
@@ -74,18 +74,23 @@ type CommandBusLike = {
  * executes only after approval"*. Both mean the same thing to this service: the
  * command does not run now, and runs later only if somebody says so.
  *
- * `A3` (hold-and-commit) and `A4` (execute-and-review) are **not** handled here.
- * A3 needs a scheduler to commit on expiry rather than expire; A4 executes
- * immediately and files a review afterwards, which is a different record with a
- * different meaning. Both are their own work, and calling them done because they
- * share a queue would be the kind of claim this project exists not to make.
+ * **`A4` is handled here too, and differently.** *Execute and review* means the
+ * act happens now and somebody looks at it afterwards, so it is filed rather than
+ * held — a different table, `authority_act_reviews`, because a row that means
+ * "already did" does not belong in one whose other rows mean "not yet".
+ *
+ * `A3` (hold-and-commit) is still not handled. It executes into a hold window and
+ * **commits** when the window passes unless somebody objects — the opposite of
+ * expiry, and it needs a scheduler rather than a queue. Calling it done because
+ * it shares a surface would be the kind of claim this project exists not to
+ * make.
  */
 export class PendingActService {
   constructor(private readonly em: EntityManager) {}
 
   /** Records an act that will not run until somebody approves it. */
-  async hold(input: HoldInput): Promise<AuthorityPendingAct> {
-    const act = this.em.create(AuthorityPendingAct, {
+  async hold(input: HoldInput): Promise<AuthorityAct> {
+    const act = this.em.create(AuthorityAct, {
       tenantId: input.tenantId,
       organizationId: input.organizationId,
       commandId: input.commandId,
@@ -126,12 +131,12 @@ export class PendingActService {
     await this.expireOverdue(tenantId)
     const where: Record<string, unknown> = { tenantId }
     if (status !== 'all') where.status = status
-    const acts = await this.em.find(AuthorityPendingAct, where, { orderBy: { createdAt: 'asc' }, limit: 200 })
+    const acts = await this.em.find(AuthorityAct, where, { orderBy: { createdAt: 'asc' }, limit: 200 })
     return acts.map((act) => toView(act))
   }
 
-  async findById(tenantId: string, id: string): Promise<AuthorityPendingAct | null> {
-    return this.em.findOne(AuthorityPendingAct, { id, tenantId })
+  async findById(tenantId: string, id: string): Promise<AuthorityAct | null> {
+    return this.em.findOne(AuthorityAct, { id, tenantId })
   }
 
   /**
@@ -154,7 +159,7 @@ export class PendingActService {
     container: AwilixContainer
     auth: unknown
     note?: string | null
-  }): Promise<{ ok: true; act: AuthorityPendingAct } | { ok: false; reason: string; act?: AuthorityPendingAct }> {
+  }): Promise<{ ok: true; act: AuthorityAct } | { ok: false; reason: string; act?: AuthorityAct }> {
     const act = await this.findById(params.tenantId, params.id)
     if (!act) return { ok: false, reason: 'not-found' }
     if (act.status !== 'pending') return { ok: false, reason: `already-${act.status}`, act }
@@ -213,7 +218,7 @@ export class PendingActService {
     id: string
     approverUserId: string | null
     note?: string | null
-  }): Promise<{ ok: true; act: AuthorityPendingAct } | { ok: false; reason: string }> {
+  }): Promise<{ ok: true; act: AuthorityAct } | { ok: false; reason: string }> {
     const act = await this.findById(params.tenantId, params.id)
     if (!act) return { ok: false, reason: 'not-found' }
     if (act.status !== 'pending') return { ok: false, reason: `already-${act.status}` }
@@ -240,7 +245,7 @@ export class PendingActService {
    * background jobs are healthy has deadlines that are not deadlines.
    */
   async expireOverdue(tenantId: string): Promise<number> {
-    const overdue = await this.em.find(AuthorityPendingAct, {
+    const overdue = await this.em.find(AuthorityAct, {
       tenantId,
       status: 'pending',
       expiresAt: { $lte: new Date() },
@@ -253,7 +258,7 @@ export class PendingActService {
   }
 }
 
-function toView(act: AuthorityPendingAct): PendingActView {
+function toView(act: AuthorityAct): PendingActView {
   const decision = act.decision as Decision | null
   const binding = decision?.reasons?.find((reason) => reason.rule === decision.bindingRule) ?? null
   return {
@@ -274,3 +279,150 @@ function toView(act: AuthorityPendingAct): PendingActView {
     failureReason: act.failureReason ?? null,
   }
 }
+
+export type ReviewInput = {
+  tenantId: string
+  organizationId: string | null
+  commandId: string
+  capabilityId: string
+  actionLogId: string | null
+  actorId: string
+  actorKind: string
+  decision: Decision
+}
+
+export type ActReviewView = {
+  id: string
+  commandId: string
+  capabilityId: string
+  actionLogId: string | null
+  actorId: string
+  actorKind: string
+  gate: string
+  bindingRule: string
+  because: string | null
+  status: string
+  createdAt: string
+  reviewedAt: string | null
+  reviewedByUserId: string | null
+  reviewNote: string | null
+}
+
+/**
+ * Acts that already happened and still want a pair of eyes.
+ *
+ * Separate from `PendingActService` because the two answer different questions.
+ * That one decides whether an act happens; this one records that one did and
+ * that nobody has looked yet. Sharing a class would put "block this" and "note
+ * this" behind the same method names, which is how the second quietly acquires
+ * the urgency of the first, or loses its own.
+ */
+export class ActReviewService {
+  constructor(private readonly em: EntityManager) {}
+
+  /**
+   * Files an executed act for review.
+   *
+   * **Never throws into the caller.** The act has already happened and committed;
+   * failing the request now would tell the caller their write did not land when
+   * it did, which is worse than a missing review row. The failure is logged
+   * loudly instead — an A4 act with no review record is a real gap, just not one
+   * worth lying about a successful write to report.
+   */
+  async record(input: ReviewInput): Promise<AuthorityActReview | null> {
+    try {
+      const review = this.em.create(AuthorityActReview, {
+        tenantId: input.tenantId,
+        organizationId: input.organizationId,
+        commandId: input.commandId,
+        capabilityId: input.capabilityId,
+        actionLogId: input.actionLogId,
+        actorId: input.actorId,
+        actorKind: input.actorKind,
+        gate: input.decision.gate,
+        bindingRule: input.decision.bindingRule,
+        decision: input.decision as unknown,
+        status: 'awaiting',
+        createdAt: new Date(),
+      })
+      await this.em.persist(review).flush()
+      logger.warn('Act executed and filed for review', {
+        reviewId: review.id,
+        commandId: input.commandId,
+        capability: input.capabilityId,
+        gate: input.decision.gate,
+        actorId: input.actorId,
+      })
+      return review
+    } catch (error) {
+      logger.error('An act ran at A4 and could not be filed for review', {
+        commandId: input.commandId,
+        capability: input.capabilityId,
+        err: error,
+      })
+      return null
+    }
+  }
+
+  /**
+   * The review queue for one tenant.
+   *
+   * No expiry sweep, unlike held acts. An approval nobody answers has work
+   * blocked behind it and must expire; a review nobody does blocks nothing, and
+   * an unreviewed act is exactly what somebody should still be able to find next
+   * quarter.
+   */
+  async list(tenantId: string, status: string | 'all' = 'awaiting'): Promise<ActReviewView[]> {
+    const where: Record<string, unknown> = { tenantId }
+    if (status !== 'all') where.status = status
+    const rows = await this.em.find(AuthorityActReview, where, { orderBy: { createdAt: 'desc' }, limit: 200 })
+    return rows.map(toReviewView)
+  }
+
+  /** Marks an act as looked at. It does not undo anything. */
+  async markReviewed(params: {
+    tenantId: string
+    id: string
+    reviewerUserId: string | null
+    note?: string | null
+  }): Promise<{ ok: true } | { ok: false; reason: string }> {
+    const review = await this.em.findOne(AuthorityActReview, { id: params.id, tenantId: params.tenantId })
+    if (!review) return { ok: false, reason: 'not-found' }
+    if (review.status !== 'awaiting') return { ok: false, reason: `already-${review.status}` }
+
+    review.status = 'reviewed'
+    review.reviewedAt = new Date()
+    review.reviewedByUserId = params.reviewerUserId ?? null
+    review.reviewNote = params.note ?? null
+    await this.em.flush()
+
+    logger.warn('Executed act reviewed', {
+      reviewId: review.id,
+      commandId: review.commandId,
+      reviewerUserId: params.reviewerUserId,
+    })
+    return { ok: true }
+  }
+}
+
+function toReviewView(review: AuthorityActReview): ActReviewView {
+  const decision = review.decision as Decision | null
+  const binding = decision?.reasons?.find((reason) => reason.rule === decision.bindingRule) ?? null
+  return {
+    id: review.id,
+    commandId: review.commandId,
+    capabilityId: review.capabilityId,
+    actionLogId: review.actionLogId ?? null,
+    actorId: review.actorId,
+    actorKind: review.actorKind,
+    gate: review.gate,
+    bindingRule: review.bindingRule,
+    because: binding?.detail ?? null,
+    status: review.status,
+    createdAt: review.createdAt.toISOString(),
+    reviewedAt: review.reviewedAt ? review.reviewedAt.toISOString() : null,
+    reviewedByUserId: review.reviewedByUserId ?? null,
+    reviewNote: review.reviewNote ?? null,
+  }
+}
+

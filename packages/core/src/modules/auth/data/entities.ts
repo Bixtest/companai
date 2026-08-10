@@ -405,7 +405,7 @@ export class UserConsent {
 @Entity({ tableName: 'authority_pending_acts' })
 @Index({ name: 'authority_pending_acts_queue_idx', properties: ['tenantId', 'status', 'expiresAt'] })
 @Index({ name: 'authority_pending_acts_actor_idx', properties: ['tenantId', 'actorId'] })
-export class AuthorityPendingAct {
+export class AuthorityAct {
   @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
   id!: string
 
@@ -468,6 +468,82 @@ export class AuthorityPendingAct {
   /** Set when an approved act was run and threw. The act stays visible. */
   @Property({ name: 'failure_reason', type: 'text', nullable: true })
   failureReason?: string | null
+
+  @Property({ name: 'created_at', type: Date, onCreate: () => new Date() })
+  createdAt: Date = new Date()
+
+  @Property({ name: 'updated_at', type: Date, onUpdate: () => new Date(), nullable: true })
+  updatedAt?: Date
+}
+
+/**
+ * An act that already happened, and that somebody still has to look at.
+ *
+ * Gate `A4` is *"execute and review"*: the act takes effect immediately and
+ * enters a review queue, where a reviewer may compensate. That is the opposite
+ * shape from `A1`/`A2`, which hold an act that has **not** happened — so it is a
+ * different table rather than a status on the same one. One table whose rows mean
+ * "not yet" or "already did" depending on a `kind` column is how a schema starts
+ * lying to the next reader.
+ *
+ * It carries the action-log id of what ran, so a reviewer can see the change
+ * itself rather than a description of it, and can undo it through the machinery
+ * that already exists.
+ *
+ * No deadline. An approval that nobody answers must expire, because work is
+ * blocked behind it; a review that nobody does blocks nothing and must **not**
+ * quietly disappear — an unreviewed act is exactly the thing somebody should
+ * still find next quarter.
+ */
+@Entity({ tableName: 'authority_act_reviews' })
+@Index({ name: 'authority_act_reviews_queue_idx', properties: ['tenantId', 'status', 'createdAt'] })
+export class AuthorityActReview {
+  @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
+  id!: string
+
+  @Property({ name: 'tenant_id', type: 'uuid' })
+  tenantId!: string
+
+  @Property({ name: 'organization_id', type: 'uuid', nullable: true })
+  organizationId?: string | null
+
+  @Property({ name: 'command_id', type: 'text' })
+  commandId!: string
+
+  @Property({ name: 'capability_id', type: 'text' })
+  capabilityId!: string
+
+  /** The audit entry for the act itself, so a reviewer reads the change. */
+  @Property({ name: 'action_log_id', type: 'uuid', nullable: true })
+  actionLogId?: string | null
+
+  @Property({ name: 'actor_id', type: 'text' })
+  actorId!: string
+
+  @Property({ name: 'actor_kind', type: 'text' })
+  actorKind!: string
+
+  @Property({ type: 'text' })
+  gate!: string
+
+  @Property({ name: 'binding_rule', type: 'text' })
+  bindingRule!: string
+
+  @Property({ type: 'jsonb' })
+  decision!: unknown
+
+  /** `awaiting` · `reviewed` · `compensated` */
+  @Property({ type: 'text', default: 'awaiting' })
+  status: string = 'awaiting'
+
+  @Property({ name: 'reviewed_at', type: Date, nullable: true })
+  reviewedAt?: Date | null
+
+  @Property({ name: 'reviewed_by_user_id', type: 'uuid', nullable: true })
+  reviewedByUserId?: string | null
+
+  @Property({ name: 'review_note', type: 'text', nullable: true })
+  reviewNote?: string | null
 
   @Property({ name: 'created_at', type: Date, onCreate: () => new Date() })
   createdAt: Date = new Date()

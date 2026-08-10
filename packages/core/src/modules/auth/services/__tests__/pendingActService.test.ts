@@ -8,7 +8,7 @@
  * looks like a control.
  */
 
-import { PendingActService, PENDING_ACT_TTL_MS } from '../pendingActService'
+import { ActReviewService, PendingActService, PENDING_ACT_TTL_MS } from '../pendingActService'
 
 const TENANT = 'tenant-1'
 const ORG = 'org-1'
@@ -293,3 +293,95 @@ describe('the queue', () => {
     expect(items[0].obligations).toContain('A person must approve before the act executes')
   })
 })
+
+/**
+ * `A4` — execute and review.
+ *
+ * The opposite shape from a held act: this one already happened. What binds is
+ * not a block but a record somebody still has to close, and the tests are about
+ * the two ways that goes wrong — losing the record, or letting a failure to file
+ * it look like a failure of the act itself.
+ */
+describe('filing an act for review after it ran', () => {
+  const reviewInput = {
+    tenantId: TENANT,
+    organizationId: ORG,
+    commandId: 'currencies.currencies.update',
+    capabilityId: 'currencies.manage',
+    actionLogId: 'log-1',
+    actorId: 'key-1',
+    actorKind: 'service',
+    decision,
+  } as never
+
+  it('records what ran, with the reason it was reviewable', async () => {
+    const { em, rows } = createFakeEm()
+    const service = new ActReviewService(em as never)
+
+    await service.record(reviewInput)
+
+    expect(rows).toHaveLength(1)
+    expect(rows[0].status).toBe('awaiting')
+    expect(rows[0].actionLogId).toBe('log-1')
+    expect(rows[0].decision).toBe(decision)
+  })
+
+  it('has no deadline, unlike a held act', async () => {
+    // An approval nobody answers has work blocked behind it and must expire. A
+    // review nobody does blocks nothing, and an unreviewed act is exactly what
+    // somebody should still be able to find next quarter.
+    const { em, rows } = createFakeEm()
+    const service = new ActReviewService(em as never)
+
+    await service.record(reviewInput)
+
+    expect(rows[0].expiresAt).toBeUndefined()
+  })
+
+  it('never throws at the caller, because the act already committed', async () => {
+    // Failing the request now would tell somebody their write did not land when
+    // it did. A missing review row is a real gap; lying about a successful write
+    // to report it is a worse one.
+    const em = {
+      create: () => { throw new Error('[internal] boom') },
+      persist: () => ({ flush: async () => {} }),
+      flush: async () => {},
+      find: async () => [],
+      findOne: async () => null,
+    }
+    const service = new ActReviewService(em as never)
+
+    await expect(service.record(reviewInput)).resolves.toBeNull()
+  })
+
+  it('closes a review once, and not twice', async () => {
+    const { em, rows } = createFakeEm()
+    const service = new ActReviewService(em as never)
+    await service.record(reviewInput)
+    const id = rows[0].id as string
+
+    const first = await service.markReviewed({ tenantId: TENANT, id, reviewerUserId: 'r-1', note: 'looks fine' })
+    const second = await service.markReviewed({ tenantId: TENANT, id, reviewerUserId: 'r-1' })
+
+    expect(first).toEqual({ ok: true })
+    expect(rows[0].status).toBe('reviewed')
+    expect(rows[0].reviewNote).toBe('looks fine')
+    expect(second).toMatchObject({ ok: false, reason: 'already-reviewed' })
+  })
+
+  it('does not close a review belonging to another tenant', async () => {
+    const { em, rows } = createFakeEm()
+    const service = new ActReviewService(em as never)
+    await service.record(reviewInput)
+
+    const outcome = await service.markReviewed({
+      tenantId: 'tenant-2',
+      id: rows[0].id as string,
+      reviewerUserId: 'r-1',
+    })
+
+    expect(outcome).toMatchObject({ ok: false, reason: 'not-found' })
+    expect(rows[0].status).toBe('awaiting')
+  })
+})
+

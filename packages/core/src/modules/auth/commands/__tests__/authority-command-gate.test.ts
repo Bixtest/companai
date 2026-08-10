@@ -120,12 +120,28 @@ describe('what the gate lets through, deliberately', () => {
     expect(hold).not.toHaveBeenCalled()
   })
 
-  it('does not hold A3 or A4, which need machinery that does not exist', async () => {
-    for (const gate of ['A3', 'A4', 'A5']) {
+  it('does not hold A3, which commits when nobody objects and needs a scheduler', async () => {
+    // A3 executes into a hold window and commits when the window passes — the
+    // opposite of expiry, so the approval queue's machinery does not cover it.
+    for (const gate of ['A3', 'A5']) {
       const { context } = makeContext({ gate })
       await expect(authorityCommandGate.beforeExecute!({}, context as never)).resolves.toBeUndefined()
     }
     expect(hold).not.toHaveBeenCalled()
+  })
+
+  it('does not hold A4 either — it runs, and carries its decision forward to be filed', async () => {
+    // Execute-and-review binds, but not by blocking. The gate stands aside and
+    // hands `afterExecute` the reason the act was reviewable, so what gets filed
+    // is that reason and not a fresh resolution answering a later question.
+    const { context } = makeContext({ gate: 'A4' })
+
+    const result = await authorityCommandGate.beforeExecute!({}, context as never)
+
+    expect(hold).not.toHaveBeenCalled()
+    expect(result).toMatchObject({
+      metadata: { reviewAfterExecute: { capability: CAPABILITY, tenantId: TENANT } },
+    })
   })
 
   it('does not hold the replay of an act somebody already approved', async () => {
