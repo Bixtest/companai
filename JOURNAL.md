@@ -40,6 +40,24 @@ session from two stored columns would be fabricating one rather than reproducing
 it. But an act proposed for one organization must not land in another because the
 approver was looking elsewhere.
 
+**Two things the unit tests could not have caught**, both found by running it:
+
+The gate read the command's capability from the registry, and at request time the
+registry it saw did not have it — so the gate concluded "this command declares
+nothing" and let the act through. The capability now travels *from the bus*, on
+the interceptor context, because the bus has already resolved the handler. For a
+gate, "declares nothing" and "I could not see the declaration" have opposite
+consequences, and the first live run took the wrong branch silently.
+
+And the held act answered **500**. My own error class carries a docstring saying
+three outcomes must stay distinguishable — you may not, it failed, and *not yet* —
+and it was collapsing into the second. Now 202 with the pending-act id: understood,
+accepted, not done. A 500 invites a retry, and each retry queues another copy.
+
+Verified end to end afterwards: the rename did not happen, the queue showed it
+with the gate and the reason, approving it ran the act, and the organization's
+parent survived — the U10 fix holding in the same request.
+
 **What still does not bind, said out loud.** A3 commits when nobody objects —
 the opposite of expiry, and it needs a scheduler. A4 runs the act and files a
 review, which is a different record. And the queue is an API with a deadline, not

@@ -741,6 +741,18 @@ executed is a place the thing you typed can disappear.
 
 ---
 
+
+> **It bit again, 2026-08-10.** Diagnosing why a gate never fired, I ran
+> `OM_LOG_LEVEL=debug corepack yarn start` and got no debug output — and read the
+> silence as "the interceptor never ran". It had run; the level had not reached
+> the app. Putting `OM_LOG_LEVEL=debug` in `apps/mercato/.env`, which dotenv
+> loads directly, produced the lines immediately and named the real defect in one
+> read.
+>
+> The rule earned a second half: **when a diagnostic produces nothing, prove the
+> diagnostic works before believing the nothing.** An empty log is evidence of an
+> empty log. ([[L3]] says the same about tools; this is the environment-shaped
+> version of it, and I have now paid for it twice.)
 ## L29 — A dry run is a claim you can check; read its numbers against what you know
 
 **What happened.** The `actor_kind` backfill printed its plan before writing:

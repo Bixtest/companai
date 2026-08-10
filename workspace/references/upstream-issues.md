@@ -617,8 +617,72 @@ The assertion is right; the budget was wrong. Now `30_000`, with a comment sayin
 why. A timeout tuned for an idle machine reports "the gate is red" when it means
 "the laptop was busy".
 
+### And a third, which named the root cause
+
+`crud-indexer-config.test.ts` failed the same way two runs later, on the same
+scratch directory. That is three walkers now, and the pattern is not the walkers:
+
+**`packages/shared` creates `.tmp-dynamic-loader-*` inside its own package tree**
+(`fs.mkdtempSync(path.join(process.cwd(), ...))`) while its tests run. Any guard
+that walks `packages/` finds those files and reads them a moment after they are
+deleted.
+
+The fixture cannot simply move to the OS temp dir: the dynamic loader it tests
+resolves real dependencies relative to the repo, which is why it is there. So the
+walkers are hardened instead — but **eleven more walk-and-read without a guard**,
+and any of them can fail a green change tomorrow. On the backlog.
+
 Related: [U5](#u5--the-test-suite-is-intermittently-red-under-parallel-execution--severity-medium),
-the same family. **Two different tests failed two consecutive gate runs, neither
-related to the change under test.** That is how a gate stops being read: not
-because it is wrong once, but because it is wrong differently each time. Both are
-fixed rather than retried.
+the same family. **Three different tests failed three gate runs, none related to
+the change under test.** That is how a gate stops being read: not because it is
+wrong once, but because it is wrong differently each time. All three are fixed
+rather than retried.
+
+---
+
+## U10 — renaming an organization moved it to the root · severity **high** · **FIXED 2026-08-10**
+
+**Found:** 2026-08-10, when an end-to-end test of the approval gate kept passing
+an act it should have held. The act was fine; the organization had moved.
+
+**What happens.** `PUT /api/directory/organizations` with `{ id, name }` —
+a rename, nothing else — **detaches the organization from its parent** and
+**orphans all of its children**.
+
+```
+create  parentId=065bd751  depth=1
+rename  {"id": ..., "name": "..."}
+after   parentId=null      depth=0
+```
+
+**Why.** Every field in the update command is guarded, except the two that
+describe the organization's *position*:
+
+```ts
+if (parsed.name !== undefined) entity.name = parsed.name
+if (resolvedSlug !== undefined) entity.slug = resolvedSlug
+if (parsed.logoUrl !== undefined) entity.logoUrl = parsed.logoUrl ?? null
+if (parsed.isActive !== undefined) entity.isActive = parsed.isActive
+entity.parentId = parentId                     // ← unconditional
+```
+
+`const parentId = parsed.parentId ?? null` collapses "not mentioned" into
+"null", and the assignment then applies it. `childIds` has the same shape one
+level up: an omitted list reaches `clearRemovedChildren` with an empty desired
+set, which detaches every child.
+
+**Why it is high, not medium.** An organization's position is not decoration. It
+decides what its members can reach — the platform's own capability note for
+`directory.organizations.manage` says *"moving one moves what its members can
+reach"* — and `ancestor_ids` is the index the authority graph resolves ceilings
+along. So a rename silently rewrote both an access boundary and the structure the
+resolver reasons over, with a 200 and no diff anybody would notice.
+
+**Fix.** Guard both, exactly like the fields above them. `parentId: null` sent
+explicitly still detaches; not mentioning it now means what it means everywhere
+else in the same function.
+
+**Same family as [U2](#u2--the-sidebar-role-apply-screen-is-one-click-from-silent-data-loss--severity-medium--fixed-2026-08-10):**
+an absent value read as an instruction to clear. Third instance this week,
+counting the sidebar presets and this one's two fields. Worth a look wherever a
+partial update writes a relationship.

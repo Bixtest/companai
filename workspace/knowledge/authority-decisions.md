@@ -300,6 +300,19 @@ The seam is the **command bus**, not the HTTP route:
 3. Approving replays `commandBus.execute` with the stored input, marked with a
    symbol the gate recognises so it is not held a second time.
 
+The capability travels **from the bus**, on the interceptor context, rather than
+being looked up again from the command registry. An interceptor that re-reads the
+registry is one bundling accident away from seeing a different instance and
+concluding the command declares nothing — and for a gate, *"declares nothing"*
+and *"I could not see the declaration"* have opposite consequences. That is not
+hypothetical: it is what happened on the first live run, and the act it should
+have held went through.
+
+A held act answers **202**, with the pending-act id and the reason. Not 403 —
+the caller may well end up performing it. Not 500, which is what a plain thrown
+error produced before and is the worst of the three: it invites a retry, and each
+retry queues another copy.
+
 Why the bus rather than the route: an act that can be *undone* is an act that can
 be *replayed*, and the platform already models exactly that — snapshots, redo,
 and command inputs already persisted and already covered by the encryption map.
