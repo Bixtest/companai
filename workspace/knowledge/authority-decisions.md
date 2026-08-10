@@ -266,16 +266,73 @@ starts refusing requests on a Tuesday.
 
 ### What is enforced, and what is not
 
-**Refusals bind. Obligations do not.**
+**Refusals bind. `A1` and `A2` now bind too. `A3` and `A4` still do not.**
 
-The resolver returns a gate from `A0` to `A5`. Only `A0` — *blocked* — is
-enforced, because it is the only outcome the platform can carry out today. `A1`
-to `A4` mean approve-first, hold-and-commit or review-afterwards, and no
-machinery yet can hold an arbitrary act and resume it once somebody approves.
-Enforcing those would mean allowing the act and calling the allowance a control.
+| Gate | Meaning | Enforced? |
+|---|---|---|
+| `A0` | Blocked | **Yes** — the route guard refuses |
+| `A1` | Propose; a human performs | **Yes** — the act is held for approval |
+| `A2` | Approve first | **Yes** — the act is held for approval |
+| `A3` | Hold and commit unless vetoed | No — needs a scheduler to commit on expiry |
+| `A4` | Execute, then review | No — the act runs; the review record does not exist |
+| `A5` | Execute and log | Nothing to enforce |
 
-The CLI says so when you switch a tenant on. Say it out loud rather than let
-somebody infer a guarantee that is not there.
+A3 and A4 are not "the same queue with a different timer". A3 commits when
+nobody objects, which is the opposite of expiry; A4 runs the act immediately and
+files something afterwards. Calling them done because they share a table would be
+a claim without a mechanism.
+
+The CLI says which is which when you switch a tenant on. Say it out loud rather
+than let somebody infer a guarantee that is not there.
+
+### How an act is held
+
+The seam is the **command bus**, not the HTTP route:
+
+1. A command declares `capability` — the `acl.ts` feature it performs. The
+   resolver is keyed by capability and the bus by command, and without this
+   declaration the two cannot be connected. **Opt-in**: an undeclared command is
+   not gated, and the gap is visible rather than guessed at. Deriving 153 of
+   these from the naming convention would be 153 guesses.
+2. `auth.authority-command-gate` (a `beforeExecute` interceptor) resolves the
+   decision, and on `A1`/`A2` writes an `authority_pending_acts` row and throws
+   `ActHeldForApprovalError` carrying the pending-act id.
+3. Approving replays `commandBus.execute` with the stored input, marked with a
+   symbol the gate recognises so it is not held a second time.
+
+Why the bus rather than the route: an act that can be *undone* is an act that can
+be *replayed*, and the platform already models exactly that — snapshots, redo,
+and command inputs already persisted and already covered by the encryption map.
+Capturing HTTP requests instead would store raw bodies (passwords among them) and
+re-run guards and interceptors on replay.
+
+### Who is accountable for an approved act
+
+The act runs **as the approver**, in the **proposer's organization**.
+
+Approval means somebody takes responsibility — planning 02 §5.2 asks for *"an
+accountable human approves, and that approval is a signed act"* — and
+reconstructing a proposer's session from two stored columns would be fabricating
+one. But the scope is the proposer's, so an act proposed for one organization
+cannot land in another because the approver was looking elsewhere.
+
+Both the approval and the resulting act are audited.
+
+### Expiry is mandatory
+
+Every held act carries a deadline (24h), and an expired act cannot be approved —
+it has to be proposed again. Planning 02 §7.2: *"expiry escalates rather than
+silently blocking work forever"*. Expiry is applied **on read** rather than by a
+scheduler, because deadlines that only hold when background workers are healthy
+are not deadlines.
+
+### What the queue is not yet
+
+Planning 02 §7.2 asks for more than a list, and none of it exists: ordering by
+grade then deadline risk, bulk-approve with a diff, absence-aware routing to a
+declared delegate, standing approvals, and a single inbox combining approvals,
+reviews, escalations and blocked work. Today there is an API and a deadline. The
+shape of the inbox is a product decision, and it is its own backlog item.
 
 ### Enforcement can only narrow
 

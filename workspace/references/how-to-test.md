@@ -776,6 +776,111 @@ disconnected and inactive.
 
 ---
 
+## Batch H — an act that has to wait
+
+**What changed, in one sentence.** When the rules say an act needs approval, the
+act now waits instead of happening anyway.
+
+**Why it matters to us.** This is the second half of the governance layer. Until
+now the platform could refuse an act outright, but "a person must approve this
+first" was a sentence it wrote in a log while doing the thing regardless.
+
+**Visible change:** none unless you turn enforcement on. Your instance is on
+`shadow`.
+
+**This test creates a throwaway organization and puts it back at the end.**
+
+### Test 1 — set up an act that needs approval (4 minutes)
+
+1. **http://localhost:3000/backend/directory/organizations** → **Create**, name it
+   `Approval Branch`, parent `Acme Corp`, save.
+2. **http://localhost:3000/backend/directory/authority** → create an edge:
+   parent `Acme Corp`, child `Approval Branch`, relationship `owns`,
+   inheritance `strict`, **Authority ceiling `A2`**.
+
+`A2` means *approve first*. You have just said that inside this branch, nobody
+acts on organizations without a second person agreeing.
+
+3. Turn enforcement on and wait a minute for the server to notice:
+
+```bash
+cd workspace/starting-kit/apps/mercato && corepack yarn mercato auth authority:mode --tenant <YOUR_TENANT_ID> --set enforce
+```
+
+---
+
+### Test 2 — the act waits (3 minutes)
+
+1. Use the **organization switcher** in the top bar to select `Approval Branch`.
+2. Go to **Directory → Organizations** and try to **rename** any organization.
+
+**Should happen:** the save does not go through, and the change has not been
+made. Reload and confirm the old name is still there.
+
+**Would mean broken:** the rename succeeds. That is the old behaviour — the
+platform saying approval was needed and proceeding anyway.
+
+---
+
+### Test 3 — it is waiting somewhere you can see (2 minutes)
+
+```bash
+curl -s -b <your session cookie jar> "http://localhost:3000/api/auth/authority/pending-acts"
+```
+
+Easier: open the URL in the browser tab where you are already signed in:
+**http://localhost:3000/api/auth/authority/pending-acts**
+
+**Should happen:** one entry, with the command, the gate `A2`, the reason the
+rules held it, and a deadline.
+
+**Would mean broken:** an empty list. The act would then have simply vanished,
+which is worse than either outcome.
+
+---
+
+### Test 4 — approving it performs the act (3 minutes)
+
+From the browser console on that page, or any HTTP client with your session:
+
+```bash
+curl -s -X POST "http://localhost:3000/api/auth/authority/pending-acts" -H "content-type: application/json" -d '{"id":"PASTE_THE_ID","decision":"approve"}'
+```
+
+**Should happen:** `{"ok":true,...}`, and the rename you attempted in Test 2 has
+now taken effect.
+
+**Would mean broken:** an error, or the rename still not applied.
+
+**Try `"decision":"reject"` instead** on a second attempt: the act should never
+happen, and the entry should read `rejected`.
+
+---
+
+### Test 5 — put it back (2 minutes)
+
+```bash
+cd workspace/starting-kit/apps/mercato && corepack yarn mercato auth authority:mode --tenant <YOUR_TENANT_ID> --set shadow
+```
+
+Then delete the edge on the authority page and `Approval Branch` on the
+organizations page.
+
+---
+
+### What this deliberately does not do yet
+
+- **Only `A1` and `A2` wait.** `A3` (commit unless vetoed) and `A4` (act now,
+  review after) still behave as before — they need machinery that does not exist,
+  and pretending otherwise would be the exact claim this project avoids.
+- **Only organization commands are gated.** Every other command is ungated until
+  it declares which capability it performs. That is deliberate: guessing the
+  mapping would either block work or wave through acts that should have waited.
+- **There is no inbox.** The queue is an API and a deadline. What it should look
+  like as a screen is a conversation we have not had.
+
+---
+
 ## Template for future batches
 
 ```markdown

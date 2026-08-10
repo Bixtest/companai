@@ -7,6 +7,46 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-08-10 — An act that has to wait
+
+Enforcement could refuse an act and nothing else. `A1` and `A2` — *"the worker
+proposes; a human performs"*, *"executes only after approval"* — were recorded as
+obligations while the act ran anyway. A control that does not control.
+
+Now an act gated at A1 or A2 **does not run**. It is held with the decision that
+held it, and executes only when somebody holding `auth.authority.approve` says
+so. Reject means never; every held act carries a 24-hour deadline, and an expired
+one has to be proposed again — planning 02 §7.2 is explicit that expiry should
+escalate rather than block work silently.
+
+**The design question was where to catch an act**, and it took most of the
+investigation. The route is universal but would store raw request bodies
+(passwords among them) and re-run guards on replay. The command bus is narrower
+but right: an act that can be *undone* is an act that can be *replayed*, and the
+platform already models that with snapshots and redo, and already persists
+command inputs under the encryption map. I went with the bus.
+
+That left a gap I had not seen: **the resolver is keyed by capability and the bus
+by command, and nothing connected them.** `module.entity.action` and
+`module.action` look close enough to map with a regular expression, which is
+exactly the R4b mistake at 153× scale — a wrong mapping either blocks work that
+should proceed or waves through an act that should have waited. So commands
+declare their capability explicitly, three of them so far, and everything else is
+visibly ungated rather than invisibly mis-gated.
+
+**Who is accountable for an approved act**: the approver, in the proposer's
+organization. Approval means taking responsibility, and rebuilding a proposer's
+session from two stored columns would be fabricating one rather than reproducing
+it. But an act proposed for one organization must not land in another because the
+approver was looking elsewhere.
+
+**What still does not bind, said out loud.** A3 commits when nobody objects —
+the opposite of expiry, and it needs a scheduler. A4 runs the act and files a
+review, which is a different record. And the queue is an API with a deadline, not
+the inbox §7.2 describes: no grade ordering, no bulk-with-diff, no absence
+routing, no standing approvals. Items 2 and 3. The inbox is a product decision
+and should be talked about before it is built.
+
 ## 2026-08-10 — A key is not a person, and a cascade that never ran
 
 **The follow-through from U3.** Authentication resolved a regular API key through

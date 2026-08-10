@@ -24,22 +24,42 @@ and is argued below; anything can be pulled forward on request.
 
 | # | Task | Why here | Size |
 |---|---|---|---|
-| **1** | **Obligations do not bind — there is no machinery to hold an act** | Enforcement refuses `A0` and records `A1`-`A4`. Approve-first, hold-and-commit and review-afterwards are the resolver's actual output for most constrained acts, and nothing can yet hold an arbitrary act and resume it once somebody approves. `inbox_ops` does this for AI proposals only. Until this exists, 'enforced' means refusals and the CLI says so out loud | L |
-| **2** | **No data-classification floor, so an untrusted machine reads confidential data unattended** | Planning 02 §6.1 names `matrix_by_classification[resource.classification]` as a floor input; it does not exist. Reads are now exempt from the untrusted-machine ceiling — correct, because a read has no effect to approve — which leaves RBAC as the only bound on a machine reading `confidential` or `secret` data. Needs per-resource classification and a policy table with a source, not values I invent | M |
-| **3** | **G1–G8 — the eight grafts from Platform 1** | G1/G2/G4 need R5/R6, which now exist; the rest are independent. G2 is largely subsumed by R6 and should be re-scoped before it is started | L |
-| **4** | **Ledger correlation and causation are carried but never propagated** | `correlation_id` / `causation_id` are recorded when a caller supplies them in `context`, and nothing supplies them. Until something threads a correlation id through a request, the chain records events that cannot be assembled into a trace — which is the feature the ledger exists to enable | M |
-| **5** | **Verify `messages.manage` and `messages.actions` against real routes** | R4b classified both from their titles because no route enforces them today — the only two of 113 descriptors not decided by reading code. Recheck when the messages module is next touched; conservative for now, which is the safe direction but not the accurate one | S |
-| **6** | **Ledger Tier 2 — periodic signed checkpoints** | R3's chain is verifiable only by us. A signed root published to append-only storage is what lets a customer's auditor verify a range without our cooperation, and it is a stated commercial property of the design. Needs key management, so it follows the principal keypair work | L |
-| **7** | **`domain_mappings` extraction from parked `customer_accounts` into `directory`** | Per-tenant custom domains — we want it, but not until something needs it | M |
-| **8** | **Dependency pruning for parked modules** | Security scanners will flag CVEs in packages nothing routes to. Pre-production, not now | M |
-| **9** | **Orphaned-table decision — ~127 tables from modules that later got parked** | Currently: leave them, they are inert. Revisit only as a deliberate backed-up migration | S |
-| **10** | **Phase K checkpoint — revisit parking with evidence** | The scheduled date that stops 'we'll clean up later' being a lie | S |
+| **1** | **No data-classification floor, so an untrusted machine reads confidential data unattended** | Planning 02 §6.1 names `matrix_by_classification[resource.classification]` as a floor input; it does not exist. Reads are now exempt from the untrusted-machine ceiling — correct, because a read has no effect to approve — which leaves RBAC as the only bound on a machine reading `confidential` or `secret` data. Needs per-resource classification and a policy table with a source, not values I invent | M |
+| **2** | **A3 and A4 still do not bind, and only 3 commands declare a capability** | Hold-and-commit needs a scheduler that commits when nobody objects — the opposite of expiry — and execute-and-review needs a review record on an already-executed act. Separately, the command→capability mapping is opt-in and covers `directory.organizations.*` only; every other command is ungated. Both are visible gaps rather than silent ones | M |
+| **3** | **The approval queue is an API and a deadline, not an inbox** | Planning 02 §7.2 asks for ordering by grade then deadline risk, bulk-approve with a diff, absence-aware routing to a declared delegate, standing approvals, and one inbox combining approvals, reviews, escalations and blocked work. None of it exists. The shape of that inbox is a product decision, not an engineering one, so it wants a conversation before it is built | L |
+| **4** | **G1–G8 — the eight grafts from Platform 1** | G1/G2/G4 need R5/R6, which now exist; the rest are independent. G2 is largely subsumed by R6 and should be re-scoped before it is started | L |
+| **5** | **Ledger correlation and causation are carried but never propagated** | `correlation_id` / `causation_id` are recorded when a caller supplies them in `context`, and nothing supplies them. Until something threads a correlation id through a request, the chain records events that cannot be assembled into a trace — which is the feature the ledger exists to enable | M |
+| **6** | **Verify `messages.manage` and `messages.actions` against real routes** | R4b classified both from their titles because no route enforces them today — the only two of 113 descriptors not decided by reading code. Recheck when the messages module is next touched; conservative for now, which is the safe direction but not the accurate one | S |
+| **7** | **Ledger Tier 2 — periodic signed checkpoints** | R3's chain is verifiable only by us. A signed root published to append-only storage is what lets a customer's auditor verify a range without our cooperation, and it is a stated commercial property of the design. Needs key management, so it follows the principal keypair work | L |
+| **8** | **`domain_mappings` extraction from parked `customer_accounts` into `directory`** | Per-tenant custom domains — we want it, but not until something needs it | M |
+| **9** | **Dependency pruning for parked modules** | Security scanners will flag CVEs in packages nothing routes to. Pre-production, not now | M |
+| **10** | **Orphaned-table decision — ~127 tables from modules that later got parked** | Currently: leave them, they are inert. Revisit only as a deliberate backed-up migration | S |
+| **11** | **Phase K checkpoint — revisit parking with evidence** | The scheduled date that stops 'we'll clean up later' being a lie | S |
 
 **Why this order.** Every inherited defect we have found is now closed, so the
 list leads with the honest remainder of enforcement: what it does *not* yet bind,
 written down so nobody reads "the resolver decides" as a bigger claim than it is.
 Both are prerequisites for enforcing more than refusals. The grafts follow: they
 are additive, and G2 needs re-scoping against R6 before anyone starts it.
+
+**Closed 2026-08-10 (obligations bind):** an act the resolver gates at `A1` or
+`A2` no longer runs. It is held in `authority_pending_acts` with the decision
+that held it, and executes only when somebody holding `auth.authority.approve`
+says so — as the approver, in the proposer's organization, audited both times.
+Rejecting means it never runs; every held act carries a 24-hour deadline and an
+expired one has to be proposed again.
+
+The seam is the **command bus**, because an act that can be undone is an act that
+can be replayed and the platform already models that. Commands opt in by
+declaring the `acl.ts` capability they perform — the resolver is keyed by
+capability and the bus by command, and deriving 153 mappings from the naming
+convention would be 153 guesses.
+
+**What still does not bind is stated rather than implied:** `A3` needs a
+scheduler that commits when nobody objects, `A4` needs a review record on an
+already-executed act, and the queue is an API with a deadline rather than the
+inbox planning 02 §7.2 describes. Both are now items 2 and 3.
+[knowledge/authority-decisions.md](knowledge/authority-decisions.md).
 
 **Closed 2026-08-10 (API keys and their creator):** a regular key's scope was
 resolved through its creator's user record on every request, so moving that
