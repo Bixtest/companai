@@ -24,18 +24,17 @@ and is argued below; anything can be pulled forward on request.
 
 | # | Task | Why here | Size |
 |---|---|---|---|
-| **1** | **No data-classification floor, so an untrusted machine reads confidential data unattended** | Planning 02 §6.1 names `matrix_by_classification[resource.classification]` as a floor input; it does not exist. Reads are now exempt from the untrusted-machine ceiling — correct, because a read has no effect to approve — which leaves RBAC as the only bound on a machine reading `confidential` or `secret` data. Needs per-resource classification and a policy table with a source, not values I invent | M |
-| **2** | **A3 and A4 still do not bind, and only 3 commands declare a capability** | Hold-and-commit needs a scheduler that commits when nobody objects — the opposite of expiry — and execute-and-review needs a review record on an already-executed act. Separately, the command→capability mapping is opt-in and covers `directory.organizations.*` only; every other command is ungated. Both are visible gaps rather than silent ones | M |
-| **3** | **Build the approvals page** | Decided with the owner 2026-08-10 — see *The approvals page* below for the shape, the defaults and what is tunable. **Scheduled after item 2**, and the reason is in that section: a screen for a tray that is almost always empty teaches nobody anything | L |
-| **4** | **Repo-walking test guards race a sibling package's scratch directory** | `packages/shared` creates `.tmp-dynamic-loader-*` inside its own package tree while its tests run, and any guard walking `packages/` reads a file from it a moment after it is deleted. Two have been hardened after failing gate runs; eleven more walk-and-read without a guard. The root cause is the fixture's location, which cannot simply move to the OS temp dir because the loader it tests resolves real dependencies relative to the repo | S |
-| **5** | **G1–G8 — the eight grafts from Platform 1** | G1/G2/G4 need R5/R6, which now exist; the rest are independent. G2 is largely subsumed by R6 and should be re-scoped before it is started | L |
-| **6** | **Ledger correlation and causation are carried but never propagated** | `correlation_id` / `causation_id` are recorded when a caller supplies them in `context`, and nothing supplies them. Until something threads a correlation id through a request, the chain records events that cannot be assembled into a trace — which is the feature the ledger exists to enable | M |
-| **7** | **Verify `messages.manage` and `messages.actions` against real routes** | R4b classified both from their titles because no route enforces them today — the only two of 113 descriptors not decided by reading code. Recheck when the messages module is next touched; conservative for now, which is the safe direction but not the accurate one | S |
-| **8** | **Ledger Tier 2 — periodic signed checkpoints** | R3's chain is verifiable only by us. A signed root published to append-only storage is what lets a customer's auditor verify a range without our cooperation, and it is a stated commercial property of the design. Needs key management, so it follows the principal keypair work | L |
-| **9** | **`domain_mappings` extraction from parked `customer_accounts` into `directory`** | Per-tenant custom domains — we want it, but not until something needs it | M |
-| **10** | **Dependency pruning for parked modules** | Security scanners will flag CVEs in packages nothing routes to. Pre-production, not now | M |
-| **11** | **Orphaned-table decision — ~127 tables from modules that later got parked** | Currently: leave them, they are inert. Revisit only as a deliberate backed-up migration | S |
-| **12** | **Phase K checkpoint — revisit parking with evidence** | The scheduled date that stops 'we'll clean up later' being a lie | S |
+| **1** | **A3 and A4 still do not bind, and only 3 commands declare a capability** | Hold-and-commit needs a scheduler that commits when nobody objects — the opposite of expiry — and execute-and-review needs a review record on an already-executed act. Separately, the command→capability mapping is opt-in and covers `directory.organizations.*` only; every other command is ungated. Both are visible gaps rather than silent ones | M |
+| **2** | **Build the approvals page** | Decided with the owner 2026-08-10 — see *The approvals page* below for the shape, the defaults and what is tunable. **Scheduled after item 2**, and the reason is in that section: a screen for a tray that is almost always empty teaches nobody anything | L |
+| **3** | **Repo-walking test guards race a sibling package's scratch directory** | `packages/shared` creates `.tmp-dynamic-loader-*` inside its own package tree while its tests run, and any guard walking `packages/` reads a file from it a moment after it is deleted. Two have been hardened after failing gate runs; eleven more walk-and-read without a guard. The root cause is the fixture's location, which cannot simply move to the OS temp dir because the loader it tests resolves real dependencies relative to the repo | S |
+| **4** | **G1–G8 — the eight grafts from Platform 1** | G1/G2/G4 need R5/R6, which now exist; the rest are independent. G2 is largely subsumed by R6 and should be re-scoped before it is started | L |
+| **5** | **Ledger correlation and causation are carried but never propagated** | `correlation_id` / `causation_id` are recorded when a caller supplies them in `context`, and nothing supplies them. Until something threads a correlation id through a request, the chain records events that cannot be assembled into a trace — which is the feature the ledger exists to enable | M |
+| **6** | **Verify `messages.manage` and `messages.actions` against real routes** | R4b classified both from their titles because no route enforces them today — the only two of 113 descriptors not decided by reading code. Recheck when the messages module is next touched; conservative for now, which is the safe direction but not the accurate one | S |
+| **7** | **Ledger Tier 2 — periodic signed checkpoints** | R3's chain is verifiable only by us. A signed root published to append-only storage is what lets a customer's auditor verify a range without our cooperation, and it is a stated commercial property of the design. Needs key management, so it follows the principal keypair work | L |
+| **8** | **`domain_mappings` extraction from parked `customer_accounts` into `directory`** | Per-tenant custom domains — we want it, but not until something needs it | M |
+| **9** | **Dependency pruning for parked modules** | Security scanners will flag CVEs in packages nothing routes to. Pre-production, not now | M |
+| **10** | **Orphaned-table decision — ~127 tables from modules that later got parked** | Currently: leave them, they are inert. Revisit only as a deliberate backed-up migration | S |
+| **11** | **Phase K checkpoint — revisit parking with evidence** | The scheduled date that stops 'we'll clean up later' being a lie | S |
 
 ### The approvals page — decided 2026-08-10
 
@@ -77,6 +76,22 @@ list leads with the honest remainder of enforcement: what it does *not* yet bind
 written down so nobody reads "the resolver decides" as a bigger claim than it is.
 Both are prerequisites for enforcing more than refusals. The grafts follow: they
 are additive, and G2 needs re-scoping against R6 before anyone starts it.
+
+**Closed 2026-08-10 (data classification):** an act is now graded by what it
+touches. A machine reading credentials no longer resolves like one reading a
+dictionary — `secret` data raises the work to G3, and `E0 / G3` permits at most
+A4, so the read happens and is reviewed.
+
+**It needed no new policy table**, which is why it had been stuck. Planning 02
+§6.1 lists `matrix_by_classification` among the floors and I had assumed a
+classification-to-gate table I would have had to invent the numbers for. §8's
+worked example settles it — *"reading confidential contracts for a G3 legal
+matter, `E0 / G3 → floor A4`"* — the classification does its work by raising the
+**task grade**, which the existing effect-class matrix already reads. The class
+to grade mapping comes from the grade table in §3, matched on the words it uses.
+
+Grades take the maximum, so a caller may raise one and cannot talk the resolver
+below what it is reading. The explanation says which classes did it.
 
 **Closed 2026-08-10 (obligations bind):** an act the resolver gates at `A1` or
 `A2` no longer runs. It is held in `authority_pending_acts` with the decision

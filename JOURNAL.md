@@ -7,6 +7,33 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-08-10 — The classification control needed no new policy, only a closer read
+
+An AI worker reading integration credentials resolved exactly like one reading a
+dictionary. Everything landed at `G1` whatever it touched, because nothing ever
+set the grade from the data.
+
+I had this on the backlog as *"needs a policy table with a source, not values I
+invent"* — planning 02 §6.1 lists `matrix_by_classification` among the floors,
+which reads like an instruction to build a classification-to-gate table. Inventing
+those numbers was the blocker.
+
+§8's worked example settles it in one line: *"reading confidential contracts for a
+G3 legal matter — `E0 / G3 → floor A4`"*. The classification was never a ceiling
+of its own; it raises the **task grade**, and the effect-class matrix — already
+written, already tested — does the rest. The class-to-grade mapping comes from
+the grade table in §3, matched on the words it already uses: *"internal records"*
+is G1, *"personal data"* is G2, *"security changes"* is G3.
+
+So: credentials now grade the work G3, and `E0 / G3` permits at most A4 — the
+read happens and enters a review queue. Grades take the maximum, so a caller can
+add weight and cannot talk the resolver below what it is reading.
+
+**Worth keeping as a habit**: when a design document names the same input twice in
+different shapes, the worked example is the one that tells you which shape was
+meant. I spent a backlog item's worth of hesitation on a table that was never
+supposed to exist.
+
 ## 2026-08-10 — Decision: the approvals page, and a rule about defaults
 
 The approval tray works; the screen for it does not exist. I asked, because how a

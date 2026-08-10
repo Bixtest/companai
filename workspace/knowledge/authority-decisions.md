@@ -403,10 +403,56 @@ process needs a shared cache (Redis) for the switch to land everywhere at once.
 
 - **Obligations** — an approval queue that can hold an arbitrary act and resume
   it. Today only `inbox_ops` can do this, and only for AI proposals.
-- **A data-classification floor** — planning 02 §6.1 names
-  `matrix_by_classification[resource.classification]` as a floor input, and it
-  does not exist. Until it does, an untrusted machine reading `confidential`
-  data is bounded by RBAC alone. See [principals.md](principals.md).
+- ~~A data-classification floor~~ — **done 2026-08-10**, and not the way it
+  looked. See below.
 - **A trust vector** — `untrusted-machine` is a placeholder standing in for the
   whole of planning 02 §5.
+
+## What an act touches decides how much it matters
+
+A capability declares the data classes it handles. Those raise the **task
+grade**, and the grade is what the effect-class matrix reads:
+
+| Class | Grade floor | The phrase in planning 02 §3 |
+|---|---|---|
+| `public` | G0 | *"no external effect, negligible value"* |
+| `internal` | G1 | *"internal records"* |
+| `confidential` | G2 | *"reputational exposure"* |
+| `personal` | G2 | *"personal data"* |
+| `secret` | G3 | *"security changes"* — credentials, mailboxes, keys |
+
+So an AI worker reading a dictionary resolves at **A5**, and the same worker
+reading integration credentials resolves at **A4** — `E0 / G3` — the read
+happens and enters a review queue.
+
+### Why it is a grade and not a ceiling of its own
+
+§6.1 lists `matrix_by_classification` among the floors, which reads like an
+instruction to build a second table mapping classes to gates. That table would
+have needed numbers with no source, which is why this sat on the backlog.
+
+§8's worked example settles it: *"Research AI worker, T4, reading confidential
+contracts for a G3 legal matter — `E0 / G3 → floor A4`"*. The classification is
+already doing its work by raising the grade. One table, already written down,
+already tested, instead of a second one somebody invented.
+
+**The general lesson**: when a design document names an input twice in different
+shapes, the worked example is the one that tells you which shape was meant.
+
+### Grades only ever go up
+
+`max(what the caller asked for, what the data requires)`. Planning 02 §5:
+*"raising a grade: any participant, no approval, always allowed"*, while lowering
+one needs authority at the original grade and is itself a recorded act.
+
+So a caller may add weight to a piece of work and **cannot talk the resolver down
+below what it is reading**. A tenant that thinks `secret` deserves G4 can say so;
+nobody can quietly make it G1.
+
+### It does not bind people
+
+Invariant I2 again: the matrix bounds machines and delegated authority, so
+grading the work harder does not start gating a person reading their own
+company's credentials. What bounds them is whether they hold the capability, and
+policy.
 
