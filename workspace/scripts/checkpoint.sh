@@ -105,11 +105,19 @@ git -C "$REPO_DIR" tag -f "checkpoint/${LABEL}-${STAMP}" >/dev/null
 echo "  code:     tag checkpoint/${LABEL}-${STAMP} -> $(git -C "$REPO_DIR" rev-parse --short HEAD)"
 
 # 2. Database — the thing git cannot restore.
-if docker exec "$PG_CONTAINER" pg_dump -U "$PG_USER" -d "$PG_DB" 2>/dev/null | gzip > "${BASE}.sql.gz"; then
+#
+# Bounded, because `docker exec` can hang indefinitely when the daemon's
+# management channel wedges while the container itself keeps serving traffic.
+# That happened on 2026-08-10: the script sat there, was killed from outside,
+# and printed only the code line — so a run that took no backup looked like a
+# run that had not reached the backup yet. A backup step that can hang is one
+# that silently does nothing exactly when somebody is about to do something
+# risky.
+if timeout "${PG_DUMP_TIMEOUT_SECONDS:-120}" docker exec "$PG_CONTAINER" pg_dump -U "$PG_USER" -d "$PG_DB" 2>/dev/null | gzip > "${BASE}.sql.gz" && [ -s "${BASE}.sql.gz" ]; then
   echo "  database: ${BASE##*/}.sql.gz ($(du -h "${BASE}.sql.gz" | cut -f1))"
 else
   rm -f "${BASE}.sql.gz"
-  echo "  database: SKIPPED — container '$PG_CONTAINER' not reachable"
+  echo "  database: FAILED — '$PG_CONTAINER' did not answer within ${PG_DUMP_TIMEOUT_SECONDS:-120}s. There is NO database backup for this checkpoint."
 fi
 
 # 3. Env — gitignored, so invisible to git.
