@@ -451,3 +451,118 @@ describe('alternatives never promise more than removing the obstacle would give'
     }
   })
 })
+
+/**
+ * What an act touches decides how much it matters.
+ *
+ * Planning 02 §5 derives a task grade as the maximum of several inputs, one of
+ * which is the data classes touched; §8's worked example — *"reading confidential
+ * contracts for a G3 legal matter, `E0 / G3 → floor A4`"* — shows the
+ * classification doing its work by raising the grade rather than through a
+ * ceiling of its own.
+ *
+ * Before this, every act resolved at `G1` whatever it touched, so a machine
+ * reading credentials resolved exactly like one reading a dictionary.
+ */
+describe('the data an act touches sets a floor under its grade', () => {
+  const readCredentials: CapabilityDescriptor = {
+    id: 'integrations.credentials.manage',
+    module: 'integrations',
+    effectClass: 'E0',
+    reversibility: 'reversible',
+    dataClasses: ['secret'],
+  }
+
+  const readDictionary: CapabilityDescriptor = {
+    id: 'dictionaries.view',
+    module: 'dictionaries',
+    effectClass: 'E0',
+    reversibility: 'reversible',
+    dataClasses: ['internal'],
+  }
+
+  const readPersonal: CapabilityDescriptor = {
+    id: 'customers.person.view',
+    module: 'customers',
+    effectClass: 'E0',
+    reversibility: 'reversible',
+    dataClasses: ['confidential', 'personal'],
+  }
+
+  it('does not let a machine read credentials as freely as a dictionary', async () => {
+    const dictionary = resolveDecision(
+      input({ actor: { kind: 'ai_worker', id: 'nora', holdsCapability: true }, capability: readDictionary }),
+    )
+    const credentials = resolveDecision(
+      input({ actor: { kind: 'ai_worker', id: 'nora', holdsCapability: true }, capability: readCredentials }),
+    )
+
+    expect(dictionary.gate).toBe('A5')
+    // secret → G3, and E0/G3 permits at most A4: the read happens and is reviewed.
+    expect(rank(credentials.gate)).toBeLessThan(rank(dictionary.gate))
+    expect(credentials.gate).toBe('A4')
+  })
+
+  it('says why the work was graded that way', () => {
+    // Without this the explanation would say "G3 work" and never say what made
+    // it G3, which is the half of an explanation people actually use.
+    const decision = resolveDecision(
+      input({ actor: { kind: 'ai_worker', id: 'nora', holdsCapability: true }, capability: readCredentials }),
+    )
+
+    const reason = decision.reasons.find((entry) => entry.rule === 'data-classification')
+    expect(reason?.detail).toContain('secret')
+    expect(reason?.detail).toContain('G3')
+  })
+
+  it('takes the strongest class, so a mild one cannot dilute a serious one', () => {
+    const decision = resolveDecision(
+      input({ actor: { kind: 'ai_worker', id: 'nora', holdsCapability: true }, capability: readPersonal }),
+    )
+
+    // confidential and personal are both G2; the pair is G2, not something less.
+    expect(decision.reasons.find((entry) => entry.rule === 'data-classification')?.detail).toContain('G2')
+  })
+
+  it('honours a higher grade the caller supplies, and ignores a lower one', () => {
+    // Planning 02 §5: raising a grade is always allowed and needs no approval;
+    // lowering one is itself a governed act. So a caller can add weight and
+    // cannot talk the resolver down below what it is reading.
+    const raised = resolveDecision(
+      input({
+        actor: { kind: 'ai_worker', id: 'nora', holdsCapability: true },
+        capability: readCredentials,
+        context: { grade: 'G4' },
+      }),
+    )
+    const lowered = resolveDecision(
+      input({
+        actor: { kind: 'ai_worker', id: 'nora', holdsCapability: true },
+        capability: readCredentials,
+        context: { grade: 'G0' },
+      }),
+    )
+
+    expect(raised.gate).toBe('A2')
+    expect(lowered.gate).toBe('A4')
+  })
+
+  it('leaves an act that touches nothing classified where it was', () => {
+    const decision = resolveDecision(
+      input({ actor: { kind: 'ai_worker', id: 'nora', holdsCapability: true } }),
+    )
+
+    expect(decision.reasons.map((entry) => entry.rule)).not.toContain('data-classification')
+  })
+
+  it('does not bind a person, who is bounded by policy instead', () => {
+    // Invariant I2 again. The matrix bounds machines and delegated authority;
+    // grading the work does not change who the matrix applies to.
+    const decision = resolveDecision(
+      input({ actor: { kind: 'human', id: 'u', holdsCapability: true }, capability: readCredentials }),
+    )
+
+    expect(decision.gate).toBe('A5')
+  })
+})
+

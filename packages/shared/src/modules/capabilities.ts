@@ -118,6 +118,64 @@ export type CapabilityDescriptor = {
 }
 
 /**
+ * The lowest task grade the data an act touches can justify.
+ *
+ * Planning 02 §5 derives a task grade as the **maximum** of several inputs, one
+ * of which is `grade_from_data_classes_touched`. This is that input.
+ *
+ * **Why a grade and not a separate ceiling.** §6.1 also lists
+ * `matrix_by_classification` among the floors, and it would have been easy to
+ * invent a classification-to-gate table. The worked example in §8 settles it:
+ * *"Research AI worker, T4, reading confidential contracts for a G3 legal
+ * matter — `E0 / G3 → floor A4`"*. The classification is doing its work by
+ * raising the **grade**, which the effect-class matrix then reads. One table,
+ * already written down, already tested — rather than a second one whose numbers
+ * I would have had to make up.
+ *
+ * **Where the values come from.** The grade table in §3, matched to the data
+ * classes by the words it uses:
+ *
+ * | Class | Grade | The phrase in §3 |
+ * |---|---|---|
+ * | `public` | G0 | *"no external effect, negligible value"* |
+ * | `internal` | G1 | *"internal records"* |
+ * | `confidential` | G2 | *"reputational exposure"* |
+ * | `personal` | G2 | *"personal data"* |
+ * | `secret` | G3 | *"security changes"* — credentials, mailboxes, keys |
+ *
+ * `secret` is G3 and not G4 deliberately: G4 is *"legal proceedings, board/M&A,
+ * security incidents, named-actor-only work"* — a description of the **matter**,
+ * not of the data. A credential is not a board matter. Grades can always be
+ * raised by any participant without approval, so a tenant that disagrees can
+ * raise it; nobody can quietly lower it.
+ */
+export const GRADE_FLOOR_BY_DATA_CLASS: Record<DataClass, TaskGrade> = {
+  public: 'G0',
+  internal: 'G1',
+  confidential: 'G2',
+  personal: 'G2',
+  secret: 'G3',
+}
+
+/**
+ * The grade floor the classes an act touches impose, or `G0` when it touches
+ * nothing classified.
+ *
+ * The maximum, because an act that reads both an internal note and a credential
+ * is as consequential as the credential. Taking anything but the maximum would
+ * let a harmless class dilute a dangerous one.
+ */
+export function gradeFloorFromDataClasses(dataClasses?: DataClass[] | null): TaskGrade {
+  if (!dataClasses?.length) return 'G0'
+  let floor: TaskGrade = 'G0'
+  for (const dataClass of dataClasses) {
+    const candidate = GRADE_FLOOR_BY_DATA_CLASS[dataClass]
+    if (candidate && TASK_GRADES.indexOf(candidate) > TASK_GRADES.indexOf(floor)) floor = candidate
+  }
+  return floor
+}
+
+/**
  * The most autonomy any actor may ever have, by effect class and task grade
  * (planning 02 §4.2).
  *

@@ -21,6 +21,8 @@
 
 import {
   AUTONOMY_GATES,
+  TASK_GRADES,
+  gradeFloorFromDataClasses,
   maxAutonomyFor,
   type AutonomyGate,
   type CapabilityDescriptor,
@@ -164,9 +166,10 @@ function lower(left: AutonomyGate, right: AutonomyGate): AutonomyGate {
  * A read has no effect to approve. Asking a person to authorise one produces
  * exactly the approval fatigue planning 02 opens by naming as the thing it
  * exists to resolve — and a control people click through is not a control.
- * Reads are bounded by whether the actor holds the capability at all (RBAC) and,
- * once it exists, by the data classification of what is being read. Neither of
- * those is an autonomy question.
+ * Reads are bounded by whether the actor holds the capability at all (RBAC) and
+ * by the data classification of what is being read — which raises the task grade
+ * and therefore the effect-class floor. Neither of those is an autonomy question,
+ * which is why neither belongs here.
  *
  * Everything with an effect keeps the T1 *Supervised* default — approve first.
  */
@@ -192,7 +195,25 @@ const MACHINE_KINDS: PrincipalKind[] = ['ai_worker', 'service']
  */
 export function resolveDecision(input: ResolveInput): Decision {
   const { actor, capability, context } = input
-  const grade: TaskGrade = context.grade ?? 'G1'
+  /**
+   * The grade the work is at, never below what the data it touches justifies.
+   *
+   * Planning 02 §5 derives a grade as the **maximum** of several inputs, one of
+   * which is the data classes touched. Taking the maximum is also what makes the
+   * direction safe: *"raising a grade: any participant, no approval, always
+   * allowed"*, while lowering one is itself a governed act. A caller can hand in
+   * a higher grade and it stands; a caller cannot talk the resolver down below
+   * what it is reading.
+   *
+   * This is the whole of the classification control. Before it, every act
+   * resolved at `G1` whatever it touched, so a machine reading credentials
+   * resolved exactly like one reading a dictionary.
+   */
+  const requestedGrade: TaskGrade = context.grade ?? 'G1'
+  const dataFloor = gradeFloorFromDataClasses(capability.dataClasses)
+  const grade: TaskGrade = TASK_GRADES.indexOf(dataFloor) > TASK_GRADES.indexOf(requestedGrade)
+    ? dataFloor
+    : requestedGrade
   const reasons: DecisionReason[] = []
 
   const consider = (rule: string, ceiling: AutonomyGate, detail: string) => {
@@ -245,6 +266,17 @@ export function resolveDecision(input: ResolveInput): Decision {
 
   // 2. The effect-class floor: the most the situation permits, before anything
   //    about who is asking.
+  if (grade !== requestedGrade) {
+    // Recorded, not binding on its own: the ceiling it produces arrives through
+    // the effect-class floor below. Without this line the explanation would say
+    // "G3 work" and never say why the work is G3.
+    consider(
+      'data-classification',
+      'A5',
+      `${capability.dataClasses?.join(', ')} data raises this to ${grade} work, whatever the caller asked for`,
+    )
+  }
+
   const classFloor = maxAutonomyFor(capability.effectClass, grade)
   if (boundedByAutonomyMatrix) {
     consider(
