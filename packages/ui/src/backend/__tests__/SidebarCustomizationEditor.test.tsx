@@ -90,6 +90,13 @@ const dict: Record<string, string> = {
   'appShell.sidebarCustomizationDragToReorder': 'Drag to reorder',
   'appShell.sidebarCustomizationVariantNew': 'Add new variant',
   'appShell.sidebarCustomizationVariantsEmpty': 'No saved variants yet',
+  'appShell.sidebarApplyToRolesTitle': 'Apply to roles',
+  'appShell.sidebarApplyToRolesDescription': 'Push this layout to a role.',
+  'appShell.sidebarRoleHasPreset': 'uses this layout',
+  'appShell.sidebarRoleWillClear': 'will lose this layout',
+  'appShell.sidebarRoleWillReplace': 'will be moved to this layout',
+  'appShell.sidebarRoleFromOtherVariant': 'uses {{name}}',
+  'appShell.sidebarRoleFromUnknownVariant': 'uses a layout from an unknown source',
 }
 
 function setApiCallSequence(responses: Array<{ url: RegExp; response: ApiCallResult<unknown> }>) {
@@ -283,5 +290,95 @@ describe('SidebarCustomizationEditor', () => {
       expect(screen.queryByText('Loading preferences…')).not.toBeInTheDocument()
     })
     expect(screen.queryByText('Staff')).not.toBeInTheDocument()
+  })
+
+  /**
+   * U2 — the switches used to reset to "no roles" on every load, so the second
+   * save asked to clear every preset. They now describe stored state, which is
+   * the only reading under which unticking can safely mean "remove".
+   */
+  describe('the Apply to roles switches', () => {
+    const VARIANT = 'variant-1'
+    const OTHER_VARIANT = 'variant-2'
+
+    function loadWithRoles() {
+      setApiCallSequence([
+        {
+          url: /\/api\/auth\/sidebar\/variants/,
+          response: okResult({
+            locale: 'en',
+            variants: [
+              { id: VARIANT, name: 'Ops layout', isActive: true, settings: {} },
+              { id: OTHER_VARIANT, name: 'Finance layout', isActive: false, settings: {} },
+            ],
+          }),
+        },
+        {
+          url: /\/api\/auth\/sidebar\/preferences/,
+          response: okResult({
+            canApplyToRoles: true,
+            roles: [
+              { id: 'role-admin', name: 'Admin', hasPreference: true, variantId: VARIANT },
+              { id: 'role-staff', name: 'Staff', hasPreference: true, variantId: OTHER_VARIANT },
+              { id: 'role-legacy', name: 'Legacy', hasPreference: true, variantId: null },
+              { id: 'role-none', name: 'Nobody', hasPreference: false, variantId: null },
+            ],
+          }),
+        },
+      ])
+      renderWithProviders(<SidebarCustomizationEditor groups={fakeGroups} />, { dict })
+    }
+
+    function switchFor(roleName: string): HTMLElement {
+      const label = screen.getByText(roleName).closest('label') as HTMLElement
+      return within(label).getByRole('switch')
+    }
+
+    it('arrives already on for the roles this layout owns', async () => {
+      loadWithRoles()
+
+      await waitFor(() => expect(screen.getByText('Admin')).toBeInTheDocument())
+
+      // This is the fix. It used to arrive off, which made the next save a
+      // request to delete the preset.
+      expect(switchFor('Admin')).toBeChecked()
+    })
+
+    it('leaves a role belonging to another layout alone, and names that layout', async () => {
+      loadWithRoles()
+
+      await waitFor(() => expect(screen.getByText('Staff')).toBeInTheDocument())
+
+      expect(switchFor('Staff')).not.toBeChecked()
+      expect(screen.getByText('uses Finance layout')).toBeInTheDocument()
+    })
+
+    it('says plainly when it cannot attribute a preset', async () => {
+      loadWithRoles()
+
+      await waitFor(() => expect(screen.getByText('Legacy')).toBeInTheDocument())
+
+      // Rows written before the source was recorded. Unknown is not "none".
+      expect(switchFor('Legacy')).not.toBeChecked()
+      expect(screen.getByText('uses a layout from an unknown source')).toBeInTheDocument()
+    })
+
+    it('warns only when unticking a preset this layout actually owns', async () => {
+      loadWithRoles()
+
+      await waitFor(() => expect(screen.getByText('Admin')).toBeInTheDocument())
+      fireEvent.click(switchFor('Admin'))
+
+      await waitFor(() => expect(screen.getByText('will lose this layout')).toBeInTheDocument())
+    })
+
+    it('warns before moving a role away from the layout it currently uses', async () => {
+      loadWithRoles()
+
+      await waitFor(() => expect(screen.getByText('Staff')).toBeInTheDocument())
+      fireEvent.click(switchFor('Staff'))
+
+      await waitFor(() => expect(screen.getByText('will be moved to this layout')).toBeInTheDocument())
+    })
   })
 })

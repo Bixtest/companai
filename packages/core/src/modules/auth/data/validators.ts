@@ -79,6 +79,10 @@ export const sidebarPreferencesInputSchema = z.object({
   itemOrder: z.record(z.string().min(1), z.array(z.string().min(1)).max(500)).optional(),
   applyToRoles: z.array(z.string().uuid()).optional(),
   clearRoleIds: z.array(z.string().uuid()).optional(),
+  // The saved layout this push comes from. Recorded on every preset it writes,
+  // and — the part that matters — the only presets `clearRoleIds` is allowed to
+  // delete are the ones that already belong to it.
+  variantId: z.string().uuid().nullable().optional(),
   scope: sidebarPreferencesScopeSchema.optional(),
 }).superRefine((value, ctx) => {
   const scopeType = value.scope?.type ?? 'user'

@@ -19,6 +19,15 @@ export type RoleSidebarPreferenceScope = {
   roleId: string
   tenantId?: string | null
   locale: string
+  /**
+   * The saved layout this preset is being pushed from.
+   *
+   * Recorded so the *Apply to roles* switches can later say which layout a role
+   * actually has. `null` or absent means the push came from an unsaved layout,
+   * and the source stays unknown — which the screen treats as "do not touch"
+   * rather than as "none".
+   */
+  variantId?: string | null
 }
 
 export type SidebarItemLike<T = Record<string, unknown>> = {
@@ -194,19 +203,58 @@ export async function saveRoleSidebarPreference(
     undefined,
     { tenantId, organizationId: null },
   )
+  const variantId = scope.variantId ?? null
   if (!pref) {
     pref = em.create(RoleSidebarPreference, {
       role: em.getReference(Role, roleId),
       tenantId,
       locale,
       settingsJson: normalized,
+      variantId,
       createdAt: new Date(),
     })
   } else {
     pref.settingsJson = normalized
+    // The preset now comes from this layout, whichever one it came from before.
+    // Leaving a stale source would let the screen claim a role still belongs to
+    // a variant that no longer produced what it holds.
+    pref.variantId = variantId
   }
   await em.flush()
   return normalized
+}
+
+/**
+ * Which saved layout each role's preset came from.
+ *
+ * Returns an entry for every role that has a preset at all — the value is `null`
+ * when the source is unknown. A role missing from the map has no preset, and the
+ * two cases must stay distinguishable: one means "nothing to lose", the other
+ * means "something to lose that nobody can attribute".
+ */
+export async function loadRoleSidebarPreferenceSources(
+  em: EntityManager,
+  options: { roleIds: string[]; tenantId?: string | null },
+): Promise<Map<string, string | null>> {
+  if (!options.roleIds.length) return new Map()
+  const tenantId = options.tenantId ?? null
+  const tenantFilter = tenantId === null ? null : { $in: [tenantId, null] }
+  const prefs = await findWithDecryption(
+    em,
+    RoleSidebarPreference,
+    { role: { $in: options.roleIds }, tenantId: tenantFilter } as FilterQuery<RoleSidebarPreference>,
+    undefined,
+    { tenantId, organizationId: null },
+  )
+  const map = new Map<string, string | null>()
+  for (const pref of prefs) {
+    const key = pref.role.id
+    // Same precedence as `loadRoleSidebarPreferences`: a tenant-specific row
+    // wins over the shared one, so the source shown matches the settings served.
+    if (tenantId !== null && map.has(key) && pref.tenantId === null) continue
+    map.set(key, pref.variantId ?? null)
+  }
+  return map
 }
 
 export function applySidebarPreference<T extends SidebarGroupLike>(

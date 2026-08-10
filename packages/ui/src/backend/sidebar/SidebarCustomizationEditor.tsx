@@ -79,6 +79,27 @@ type RoleTarget = {
   id: string
   name: string
   hasPreference: boolean
+  /**
+   * The saved layout this role's preset came from, or `null` when nobody
+   * recorded it.
+   *
+   * `hasPreference` alone says only "this role has *some* layout", which is what
+   * made the switches below unable to tell the truth: a role configured from a
+   * different layout looked identical to one configured from this one.
+   */
+  variantId: string | null
+}
+
+/**
+ * Which roles this layout currently owns.
+ *
+ * The switches show state, so they have to be derived from stored state rather
+ * than reset to empty. Resetting was the whole of U2: every load started from
+ * "no roles", so every second save asked to clear all of them.
+ */
+function rolesOwnedBy(variantId: string | null, roles: RoleTarget[]): string[] {
+  if (!variantId) return []
+  return roles.filter((role) => role.hasPreference && role.variantId === variantId).map((role) => role.id)
 }
 
 type VariantSettings = {
@@ -229,6 +250,10 @@ export function SidebarCustomizationEditor({
   const [previewGroups, setPreviewGroups] = React.useState<SidebarGroup[]>([])
   const [dirty, setDirty] = React.useState(false)
   const [availableRoleTargets, setAvailableRoleTargets] = React.useState<RoleTarget[]>([])
+  // Read by `selectVariantInternal`, which is memoised on the base snapshot and
+  // must not be rebuilt every time the role list is refreshed.
+  const availableRoleTargetsRef = React.useRef<RoleTarget[]>([])
+  React.useEffect(() => { availableRoleTargetsRef.current = availableRoleTargets }, [availableRoleTargets])
   const [selectedRoleIds, setSelectedRoleIds] = React.useState<string[]>([])
   const [canApplyToRoles, setCanApplyToRoles] = React.useState(false)
   const [addDialogOpen, setAddDialogOpen] = React.useState(false)
@@ -293,7 +318,7 @@ export function SidebarCustomizationEditor({
   }, [variantsApiPath])
 
   const loadRolesPayload = React.useCallback(async (): Promise<{ canApplyToRoles: boolean; roles: RoleTarget[] }> => {
-    const call = await apiCall<{ canApplyToRoles?: boolean; roles?: Array<{ id?: string; name?: string; hasPreference?: boolean }>; updatedAt?: string | null }>(preferencesApiPath)
+    const call = await apiCall<{ canApplyToRoles?: boolean; roles?: Array<{ id?: string; name?: string; hasPreference?: boolean; variantId?: string | null }>; updatedAt?: string | null }>(preferencesApiPath)
     if (!call.ok) {
       return { canApplyToRoles: false, roles: [] }
     }
@@ -301,14 +326,19 @@ export function SidebarCustomizationEditor({
     preferencesUpdatedAtRef.current = typeof data?.updatedAt === 'string' ? data.updatedAt : null
     const can = data?.canApplyToRoles === true
     const roles = Array.isArray(data?.roles)
-      ? (data!.roles as Array<{ id?: string; name?: string; hasPreference?: boolean }>)
+      ? (data!.roles as Array<{ id?: string; name?: string; hasPreference?: boolean; variantId?: string | null }>)
           .filter((r) => typeof r?.id === 'string' && typeof r?.name === 'string')
-          .map((r) => ({ id: r.id as string, name: r.name as string, hasPreference: r.hasPreference === true }))
+          .map((r) => ({
+            id: r.id as string,
+            name: r.name as string,
+            hasPreference: r.hasPreference === true,
+            variantId: typeof r.variantId === 'string' ? r.variantId : null,
+          }))
       : []
     return { canApplyToRoles: can, roles }
   }, [preferencesApiPath])
 
-  const selectVariantInternal = React.useCallback((variant: Variant | null, list: Variant[]) => {
+  const selectVariantInternal = React.useCallback((variant: Variant | null, list: Variant[], roles?: RoleTarget[]) => {
     const baseSnapshot = baseSnapshotRef.current ?? buildBaseSnapshot()
     baseSnapshotRef.current = baseSnapshot
     if (variant) {
@@ -334,6 +364,10 @@ export function SidebarCustomizationEditor({
       setDraft(empty)
       setPreviewGroups(applyCustomizationDraft(baseSnapshot, empty))
     }
+    // The switches belong to the layout being opened, not to whatever was on
+    // screen a moment ago. Deriving them here means opening a layout, switching
+    // to another and switching back never invents a change nobody made.
+    setSelectedRoleIds(rolesOwnedBy(variant?.id ?? null, roles ?? availableRoleTargetsRef.current))
     setDirty(false)
   }, [buildBaseSnapshot])
 
@@ -358,8 +392,7 @@ export function SidebarCustomizationEditor({
         setAvailableRoleTargets(rolesPayload.roles)
         const active = list.find((v) => v.isActive)
         const initial = active ?? list[0] ?? null
-        selectVariantInternal(initial, list)
-        setSelectedRoleIds([])
+        selectVariantInternal(initial, list, rolesPayload.roles)
       } catch (err) {
         logger.error('Failed to load sidebar variants', { err })
         setError(t('appShell.sidebarCustomizationLoadError'))
@@ -695,12 +728,18 @@ export function SidebarCustomizationEditor({
         itemOrder: settings.itemOrder,
       }
       if (canApplyToRoles) {
-        const applyToRolesPayload = [...selectedRoleIds]
-        const clearRoleIdsPayload = availableRoleTargets
-          .filter((role) => role.hasPreference && !selectedRoleIds.includes(role.id))
-          .map((role) => role.id)
-        preferencesPayload.applyToRoles = applyToRolesPayload
-        preferencesPayload.clearRoleIds = clearRoleIdsPayload
+        const pushedFromVariantId = savedVariant?.id ?? selectedVariantId ?? null
+        preferencesPayload.variantId = pushedFromVariantId
+        preferencesPayload.applyToRoles = [...selectedRoleIds]
+        // Only presets this layout owns can be detached by unticking. A role
+        // configured from another layout, or from a source nobody recorded, is
+        // not this screen's to remove — the server enforces the same rule, so a
+        // wrong list here cannot delete anything either.
+        preferencesPayload.clearRoleIds = pushedFromVariantId
+          ? availableRoleTargets
+              .filter((role) => role.variantId === pushedFromVariantId && !selectedRoleIds.includes(role.id))
+              .map((role) => role.id)
+          : []
       }
       const preferencesCall = await runMutation({
         operation: () =>
@@ -751,12 +790,15 @@ export function SidebarCustomizationEditor({
       setVariants(mergedList)
       setCanApplyToRoles(rolesPayload.canApplyToRoles)
       setAvailableRoleTargets(rolesPayload.roles)
+      // Pass the freshly-read roles rather than letting the ref catch up on the
+      // next render: the switches must show what was just saved, not what was on
+      // screen a moment before it.
       if (savedVariant) {
         const fresh = mergedList.find((v) => v.id === savedVariant!.id) ?? savedVariant
-        selectVariantInternal(fresh, mergedList)
+        selectVariantInternal(fresh, mergedList, rolesPayload.roles)
       } else {
         const active = mergedList.find((v) => v.isActive) ?? mergedList[0] ?? null
-        selectVariantInternal(active, mergedList)
+        selectVariantInternal(active, mergedList, rolesPayload.roles)
       }
       flash(
         isNewVariant
@@ -1090,7 +1132,17 @@ export function SidebarCustomizationEditor({
                         <div className="flex flex-col gap-1.5 max-w-sm">
                           {availableRoleTargets.map((role) => {
                             const checked = selectedRoleIds.includes(role.id)
-                            const willClear = role.hasPreference && !checked
+                            const belongsHere = role.hasPreference && role.variantId === selectedVariantId && selectedVariantId !== null
+                            // Only a preset this layout owns can be removed by
+                            // unticking. Anything else belongs to somebody
+                            // else's layout and is never at risk from this
+                            // screen — the badge says which it is, because the
+                            // difference is the whole of U2.
+                            const willDetach = belongsHere && !checked
+                            const willReplace = role.hasPreference && !belongsHere && checked
+                            const otherVariantName = role.hasPreference && !belongsHere
+                              ? variants.find((variant) => variant.id === role.variantId)?.name ?? null
+                              : null
                             return (
                               <label
                                 key={role.id}
@@ -1103,9 +1155,17 @@ export function SidebarCustomizationEditor({
                                 />
                                 <span className="flex-1 truncate font-medium text-foreground">{role.name}</span>
                                 {role.hasPreference ? (
-                                  <Tag variant={willClear ? 'error' : 'info'} dot={!willClear}>
-                                    {willClear ? <AlertTriangle className="size-3" aria-hidden /> : null}
-                                    {willClear ? t('appShell.sidebarRoleWillClear') : t('appShell.sidebarRoleHasPreset')}
+                                  <Tag variant={willDetach || willReplace ? 'warning' : 'info'} dot={!willDetach && !willReplace}>
+                                    {willDetach || willReplace ? <AlertTriangle className="size-3" aria-hidden /> : null}
+                                    {willDetach
+                                      ? t('appShell.sidebarRoleWillClear')
+                                      : willReplace
+                                        ? t('appShell.sidebarRoleWillReplace')
+                                        : belongsHere
+                                          ? t('appShell.sidebarRoleHasPreset')
+                                          : otherVariantName
+                                            ? t('appShell.sidebarRoleFromOtherVariant', { name: otherVariantName })
+                                            : t('appShell.sidebarRoleFromUnknownVariant')}
                                   </Tag>
                                 ) : null}
                               </label>

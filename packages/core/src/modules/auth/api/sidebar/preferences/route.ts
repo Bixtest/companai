@@ -9,6 +9,7 @@ import {
   sidebarPreferencesScopeSchema,
 } from '../../../data/validators'
 import {
+  loadRoleSidebarPreferenceSources,
   loadRoleSidebarPreferenceUpdatedAt,
   loadRoleSidebarPreferences,
   loadSidebarPreference,
@@ -94,7 +95,7 @@ function emptySettings(): EmptySettings {
 async function loadRolesPayload(
   em: EntityManager,
   options: { tenantId: string | null; locale: string },
-): Promise<Array<{ id: string; name: string; hasPreference: boolean }>> {
+): Promise<Array<{ id: string; name: string; hasPreference: boolean; variantId: string | null }>> {
   const roleScope: FilterQuery<Role> = options.tenantId
     ? { $or: [{ tenantId: options.tenantId }, { tenantId: null }] }
     : { tenantId: null }
@@ -111,11 +112,40 @@ async function loadRolesPayload(
     tenantId: options.tenantId,
     locale: options.locale,
   })
+  const sources = await loadRoleSidebarPreferenceSources(em, {
+    roleIds: roles.map((r: Role) => r.id),
+    tenantId: options.tenantId,
+  })
   return roles.map((role: Role) => ({
     id: role.id,
     name: role.name,
     hasPreference: rolePrefs.has(role.id),
+    // Which saved layout this role's preset came from, or null when nobody
+    // recorded it. `hasPreference` alone cannot tell the switches apart from
+    // presets somebody else configured, which is how U2 happened.
+    variantId: sources.get(role.id) ?? null,
   }))
+}
+
+/**
+ * Narrows a requested clear list to the presets this layout actually owns.
+ *
+ * Returns the roles whose stored preset carries `variantId`. Everything else —
+ * a preset from another layout, or one with no recorded source — is dropped
+ * silently rather than refused: the caller is not doing anything wrong by
+ * offering them, and a 400 would make an ordinary save fail on data it cannot
+ * see.
+ */
+async function filterClearsOwnedByVariant(
+  em: EntityManager,
+  options: { roleIds: string[]; tenantId: string | null; variantId: string },
+): Promise<string[]> {
+  if (!options.roleIds.length) return []
+  const sources = await loadRoleSidebarPreferenceSources(em, {
+    roleIds: options.roleIds,
+    tenantId: options.tenantId,
+  })
+  return options.roleIds.filter((roleId) => sources.get(roleId) === options.variantId)
 }
 
 async function findRoleInScope(
@@ -404,6 +434,7 @@ export async function PUT(req: Request) {
   const applyToRoles = Array.from(new Set(applyToRolesSource.map((id) => id.trim()).filter((id) => id.length > 0)))
   const clearRoleIdsSource = parsed.data.clearRoleIds ?? []
   const clearRoleIds = Array.from(new Set(clearRoleIdsSource.map((id) => id.trim()).filter((id) => id.length > 0)))
+  const variantId = parsed.data.variantId ?? null
 
   if ((applyToRoles.length > 0 || clearRoleIds.length > 0) && !canApplyToRoles) {
     return NextResponse.json({ error: 'Forbidden', requiredFeatures: [FEATURE_MANAGE] }, { status: 403 })
@@ -467,11 +498,36 @@ export async function PUT(req: Request) {
           roleId: role.id,
           tenantId: auth.tenantId ?? null,
           locale,
+          variantId,
         }, payload)
         updatedRoleIds.push(role.id)
       }
 
-      const clearTargets = clearRoleIds.filter((id) => !updatedRoleIds.includes(id) && !applyToRoles.includes(id))
+      /**
+       * U2 — this is where a routine save used to delete every role's sidebar.
+       *
+       * The client sends `clearRoleIds` for roles it believes should no longer
+       * carry this layout. Believing it was the defect: the editor reset its
+       * switches on every load, so a second save asked to clear everything, and
+       * the only thing between that and the delete was a small red badge.
+       *
+       * A preset is now only clearable **by the layout that produced it**. A
+       * role whose preset came from a different variant, or from a source nobody
+       * recorded, is not this screen's to remove — it is somebody else's
+       * configuration, and no arrangement of switches here can reach it.
+       *
+       * Server-side deliberately. A client that computes the wrong list is a bug
+       * anybody can ship; a client that computes the wrong list and is *obeyed*
+       * is how data goes missing.
+       */
+      const requestedClears = clearRoleIds.filter((id) => !updatedRoleIds.includes(id) && !applyToRoles.includes(id))
+      const clearTargets = variantId
+        ? await filterClearsOwnedByVariant(em, {
+            roleIds: requestedClears,
+            tenantId: auth.tenantId ?? null,
+            variantId,
+          })
+        : []
       filteredClearRoleIds.push(...clearTargets)
 
       if (filteredClearRoleIds.length > 0) {

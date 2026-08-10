@@ -127,6 +127,28 @@ export class RoleSidebarPreference {
   @Property({ name: 'settings_json', type: 'json', nullable: true })
   settingsJson?: unknown
 
+  /**
+   * The saved layout this preset was pushed from, when one is known.
+   *
+   * A plain id and not a relation: a variant is one person's saved layout and
+   * can be deleted, while the preset it produced must outlive it. A dangling id
+   * simply stops matching, which reads as "from a layout that is no longer
+   * here" — the truth, and better than a cascade that would delete a role's
+   * sidebar because somebody tidied up their own saved views.
+   *
+   * `null` means the source is unknown: rows written before this column existed,
+   * or a push made from an unsaved layout. Unknown is not the same as "none",
+   * and the screen says so rather than guessing.
+   *
+   * It exists because the *Apply to roles* switches cannot otherwise tell the
+   * truth. Without it, "this role has a preset" is all anyone knows, and a
+   * screen that cannot say *which* layout a role has will eventually overwrite
+   * or delete one somebody else configured.
+   */
+  @Index({ name: 'role_sidebar_preferences_variant_id_idx' })
+  @Property({ name: 'variant_id', type: 'uuid', nullable: true })
+  variantId?: string | null
+
   @Property({ name: 'created_at', type: Date, onCreate: () => new Date() })
   createdAt: Date = new Date()
 
