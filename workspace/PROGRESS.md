@@ -27,37 +27,74 @@ and is argued below; anything can be pulled forward on request.
 | # | Task | Why here | Size |
 |---|---|---|---|
 | | **Wave 1 — small, independent, closes three batches** | | |
-| **1** | **G8 — migration advisory lock** | **Verified needed 2026-08-10**: no locking of any kind in `@mikro-orm/migrations`, and `cli/src/lib/db/commands.ts:406` calls `migrator.up()` bare. Concurrent boots racing migrations is a real production failure and the fix is a few lines. Do it before hosting | S |
-| **2** | **G6 — event visibility scope** | `visibility_scope` on the event envelope (`platform`·`tenant`·`portal`·`project`·`private`). An event's audience decided when written, not re-derived per query. One column and a filter | S |
-| **3** | **G7 — locale direction policy + an RTL locale** | 111 dependency-free lines from Platform 1, plus Arabic to prove it end to end. Keep the host's i18n enforcement, take P1's policy | S |
+| **1** | **G6 — event visibility scope** | `visibility_scope` on the event envelope (`platform`·`tenant`·`portal`·`project`·`private`). An event's audience decided when written, not re-derived per query. One column and a filter | S |
+| **2** | **G7 — locale direction policy + an RTL locale** | 111 dependency-free lines from Platform 1, plus Arabic to prove it end to end. Keep the host's i18n enforcement, take P1's policy | S |
 | | **Wave 2 — the resolver actually receives its inputs** | | |
-| **4** | **Wire invoker authority (I4) into the enforcement path** | **The most serious finding of the 2026-08-10 audit.** `invokerCeiling` exists on `ResolveInput` and is documented as the rule implementing I4 — *authority is carried, never amplified* — but the only thing that ever sets it is an `authority:explain` CLI flag. At runtime an AI worker invoked by somebody who could not perform the act is **not** capped by that person's authority. We claim this invariant; it does not bind | M |
-| **5** | **Wire task grade into the enforcement path** | `decideFor` passes `context: {}`, so `context.grade` always falls back to `G1` and the grade is decided by the data-class floor alone. The G0–G4 scale is real in the resolver and absent at the call site | M |
-| **6** | **G5 — record lock states** | Supplies `resourceCeiling`, which nothing supplies today. `locked` forces A0 on writes, `restricted` caps at A2, neither liftable by trust or delegation. **Not an enhancement** — it replaces the locking removed with `packages/enterprise` | M |
-| **7** | **G3 — temporary delegations** | Supplies `delegationCeiling`. Open Mercato has none at all. The table plus the resolution logic, re-pointed at **principals** rather than users so an AI worker can hold one — which is why R1 came first | L |
-| **8** | **Trust model T0–T4** | Supplies `trustCeiling`. Until it exists every machine resolves as untrusted, capping any act with an effect at approve-first. That is the safe direction, and it is a placeholder standing where planning 02 §5 specifies earned trust. **Was never a backlog item** despite being referenced four times across `knowledge/` | L |
-| **9** | **Charter grants** | Named in the Phase G exit gate as a required resolver input. **Not in `ResolveInput` at all** — no type, no field, no code; it appears only in prose. Found 2026-08-10 | M |
-| **10** | **Budget as a resolver input** | The other exit-gate input that exists in no form whatsoever. An actor's remaining spend or quota, bounding what it may do | M |
-| **11** | **Tenant policy ceiling** | `context.policyCeiling` is read by the resolver and set by **nothing** — zero assignments outside the type definition. A tenant wanting a blanket floor has no way to express one | M |
-| **12** | **G4 — project permission overlays** | Scoping stops at the department without it. Project, case and engagement contexts are central to the SRS (FR-550, FR-560). Take the terminal-deny semantics; leave P1's `deny:`/`!` string DSL | L |
-| **13** | **G1 — re-scope, then decide** | R5 already delivers the explanation trace, binding rule, obligations and alternatives. What remains is Platform 1's *shape* — ordered sources, deny-wins, a `terminal` flag — against our deliberately different one where everything is a ceiling and the answer is the minimum. **Last in the wave**: items 4–12 may answer it, and it is a design decision currently sized as a port | ? |
+| **3** | **Wire invoker authority (I4) into the enforcement path** | **The most serious finding of the 2026-08-10 audit.** `invokerCeiling` exists on `ResolveInput` and is documented as the rule implementing I4 — *authority is carried, never amplified* — but the only thing that ever sets it is an `authority:explain` CLI flag. At runtime an AI worker invoked by somebody who could not perform the act is **not** capped by that person's authority. We claim this invariant; it does not bind | M |
+| **4** | **Wire task grade into the enforcement path** | `decideFor` passes `context: {}`, so `context.grade` always falls back to `G1` and the grade is decided by the data-class floor alone. The G0–G4 scale is real in the resolver and absent at the call site | M |
+| **5** | **G5 — record lock states** | Supplies `resourceCeiling`, which nothing supplies today. `locked` forces A0 on writes, `restricted` caps at A2, neither liftable by trust or delegation. **Not an enhancement** — it replaces the locking removed with `packages/enterprise` | M |
+| **6** | **G3 — temporary delegations** | Supplies `delegationCeiling`. Open Mercato has none at all. The table plus the resolution logic, re-pointed at **principals** rather than users so an AI worker can hold one — which is why R1 came first | L |
+| **7** | **Trust model T0–T4** | Supplies `trustCeiling`. Until it exists every machine resolves as untrusted, capping any act with an effect at approve-first. That is the safe direction, and it is a placeholder standing where planning 02 §5 specifies earned trust. **Was never a backlog item** despite being referenced four times across `knowledge/` | L |
+| **8** | **Charter grants** | Named in the Phase G exit gate as a required resolver input. **Not in `ResolveInput` at all** — no type, no field, no code; it appears only in prose. Found 2026-08-10 | M |
+| **9** | **Budget as a resolver input** | The other exit-gate input that exists in no form whatsoever. An actor's remaining spend or quota, bounding what it may do | M |
+| **10** | **Tenant policy ceiling** | `context.policyCeiling` is read by the resolver and set by **nothing** — zero assignments outside the type definition. A tenant wanting a blanket floor has no way to express one | M |
+| **11** | **G4 — project permission overlays** | Scoping stops at the department without it. Project, case and engagement contexts are central to the SRS (FR-550, FR-560). Take the terminal-deny semantics; leave P1's `deny:`/`!` string DSL | L |
+| **12** | **G1 — re-scope, then decide** | R5 already delivers the explanation trace, binding rule, obligations and alternatives. What remains is Platform 1's *shape* — ordered sources, deny-wins, a `terminal` flag — against our deliberately different one where everything is a ceiling and the answer is the minimum. **Last in the wave**: items 4–12 may answer it, and it is a design decision currently sized as a port | ? |
 | | **Wave 3 — the human surface** | | |
-| **14** | **U7 — the journal cannot tell a machine from a human** | `action_logs.actor_user_id` stores an API key's UUID with no record that it was a key, so a key acting and a person acting are indistinguishable in the record. That is invariant **I2**, and telling them apart is the premise of the product. Open since 2026-08-09, **never on the backlog** | M |
-| **15** | **Bulk approval, with a diff** | The diff is the whole feature: approving several acts without showing how they differ is a button for approving things unread, and it would be the most-used control on the page. Owner's decision 2026-08-10 — on by default, on/off per tenant, diff never optional | M |
-| **16** | **Cover for someone away, and standing approvals** | Both need a name — a deputy, a grantor — so both are inherently settings. Standing approvals need a mandatory expiry and a visible count of what they let through: the most useful control on the page and the most dangerous. Planning 02 §7.1–7.2 | L |
-| **17** | **Per-tenant approval expiry** | Decided with the owner on 2026-08-10 and recorded in the closure table as unbuilt, but it never became a numbered item. 24h is enforced in `PendingActService`; the knob is not there | S |
+| **13** | **U7 — the journal cannot tell a machine from a human** | `action_logs.actor_user_id` stores an API key's UUID with no record that it was a key, so a key acting and a person acting are indistinguishable in the record. That is invariant **I2**, and telling them apart is the premise of the product. Open since 2026-08-09, **never on the backlog** | M |
+| **14** | **Bulk approval, with a diff** | The diff is the whole feature: approving several acts without showing how they differ is a button for approving things unread, and it would be the most-used control on the page. Owner's decision 2026-08-10 — on by default, on/off per tenant, diff never optional | M |
+| **15** | **Cover for someone away, and standing approvals** | Both need a name — a deputy, a grantor — so both are inherently settings. Standing approvals need a mandatory expiry and a visible count of what they let through: the most useful control on the page and the most dangerous. Planning 02 §7.1–7.2 | L |
+| **16** | **Per-tenant approval expiry** | Decided with the owner on 2026-08-10 and recorded in the closure table as unbuilt, but it never became a numbered item. 24h is enforced in `PendingActService`; the knob is not there | S |
 | | **Wave 4 — the record can be trusted** | | |
-| **18** | **Ledger correlation and causation are carried but never propagated** | `correlation_id` / `causation_id` are recorded when a caller supplies them, and nothing supplies them. Until a correlation id is threaded through a request, the chain records events that cannot be assembled into a trace — the feature the ledger exists to enable | M |
-| **19** | **Ledger Tier 2 — periodic signed checkpoints** | R3's chain is verifiable only by us. A signed root in append-only storage is what lets a customer's auditor verify a range without our cooperation, and it is a stated commercial property of the design. Needs key management | L |
+| **17** | **Ledger correlation and causation are carried but never propagated** | `correlation_id` / `causation_id` are recorded when a caller supplies them, and nothing supplies them. Until a correlation id is threaded through a request, the chain records events that cannot be assembled into a trace — the feature the ledger exists to enable | M |
+| **18** | **Ledger Tier 2 — periodic signed checkpoints** | R3's chain is verifiable only by us. A signed root in append-only storage is what lets a customer's auditor verify a range without our cooperation, and it is a stated commercial property of the design. Needs key management | L |
 | | **Wave 5 — close the books before the server** | | |
-| **20** | **U4 — verify a superadmin can delete a currency** | The route now derives `organizationId` from `ctx.selectedOrganizationId ?? ctx.auth?.orgId ?? undefined`. For a superadmin with no organization selected that is still `undefined`, which is the original bug's shape. **Verify against the running instance before calling it fixed** | S |
-| **21** | **Verify `messages.manage` and `messages.actions` against real routes** | The only two of 113 capability descriptors classified from their titles rather than from code, because no route enforces them. Conservative today, which is the safe direction but not the accurate one | S |
-| **22** | **Phase G exit gate — the assertions and the changelog** | The gate requires a test proving the resolver honours delegations, project overlays and lock states *each*, plus `planning/CHANGELOG.md` recording what was grafted and from where. Neither is tracked anywhere | S |
-| **23** | **Close out U5, and prune dependencies, before the server** | U5 still reads "two causes found and fixed, one unexplained" — two more were found and fixed on 2026-08-10, so the record is stale. And parked modules carry CVEs a scanner will flag the moment this is hosted: "pre-production, not now" expires when we deploy | M |
+| **19** | **U4 — verify a superadmin can delete a currency** | The route now derives `organizationId` from `ctx.selectedOrganizationId ?? ctx.auth?.orgId ?? undefined`. For a superadmin with no organization selected that is still `undefined`, which is the original bug's shape. **Verify against the running instance before calling it fixed** | S |
+| **20** | **Verify `messages.manage` and `messages.actions` against real routes** | The only two of 113 capability descriptors classified from their titles rather than from code, because no route enforces them. Conservative today, which is the safe direction but not the accurate one | S |
+| **21** | **Phase G exit gate — the assertions and the changelog** | The gate requires a test proving the resolver honours delegations, project overlays and lock states *each*, plus `planning/CHANGELOG.md` recording what was grafted and from where. Neither is tracked anywhere | S |
+| **22** | **Close out U5, and prune dependencies, before the server** | U5 still reads "two causes found and fixed, one unexplained" — two more were found and fixed on 2026-08-10, so the record is stale. And parked modules carry CVEs a scanner will flag the moment this is hosted: "pre-production, not now" expires when we deploy | M |
 | | **Deferred by decision — not in this sprint** | | |
-| **24** | `domain_mappings` extraction | Per-tenant custom domains. Wanted, but nothing needs it yet | M |
-| **25** | Orphaned-table decision (~127 tables) | Leave them; they are inert. Revisit only as a deliberate backed-up migration | S |
-| **26** | Phase K checkpoint | The scheduled date that stops "we'll clean up later" being a lie | S |
+| **23** | `domain_mappings` extraction | Per-tenant custom domains. Wanted, but nothing needs it yet | M |
+| **24** | Orphaned-table decision (~127 tables) | Leave them; they are inert. Revisit only as a deliberate backed-up migration | S |
+| **25** | Phase K checkpoint | The scheduled date that stops "we'll clean up later" being a lie | S |
+
+### Closed 2026-08-10 — G8, the migration advisory lock
+
+`yarn db:migrate` now holds a Postgres session-level advisory lock (key
+`8147290361`) for the whole run. A second process waits and then finds nothing
+pending, which is the outcome we want; it announces the wait rather than blocking
+in silence, because a silent block is indistinguishable from a hang.
+
+**Verified three ways**, because the failure needs two processes and a race and so
+cannot be reproduced in a unit test:
+
+1. **Eleven unit tests** on the decisions around the lock — taken before the work
+   and released after, waits instead of failing, announces the wait once, and
+   surfaces a migration failure rather than whatever the cleanup did afterwards.
+2. **The SQL executed against real Postgres** ([[L34]] — a query your tests never
+   ran is a query you have not written yet): A acquires → `true`, B tries while A
+   holds → `false`, A releases → B acquires → `true`, zero advisory locks left.
+3. **End to end under real contention.** Lock held from another connection, then
+   `yarn db:migrate`: printed *"Another migration run holds the lock. Waiting for
+   it to finish..."*, waited 22s for the release, then completed all 30 modules,
+   exit 0 — against 6s and silence when uncontended.
+
+**A third gate-flake cause surfaced while verifying this**, unrelated to the lock
+and to the two fixed on 2026-08-10. `OrganizationBrandingPage › renders current
+organization branding` failed inside the full gate and passed three times out of
+three alone. The page seeds `logoUrl` into local state from fetched data via an
+effect, so there is a render commit between the organization name appearing and
+the input filling — and the test awaited the name, then asserted the input
+synchronously. Fixed with `waitFor`, and recorded as **trap 3** in
+`knowledge/test-gate.md`. A sweep found it was the only instance: seven test files
+use `toHaveValue`, three never wait, and all three of those render synchronously
+from props inside `await act(...)`.
+
+**Step 3 caught something step 1 and 2 could not.** The first contended run
+finished in 7s with no waiting message: the CLI runs from `packages/cli/dist`, and
+the source edit had never been built. The unit tests were green against source the
+command was not executing. Rebuild, retest, and the wait appeared. The standing
+trap in this repository, and it does not only apply to the app.
 
 ### What the 2026-08-10 audit found that was not written down
 

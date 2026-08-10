@@ -7,6 +7,59 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-08-11 — G8: one migration run at a time
+
+Two containers booting from one image against one database is the ordinary way to
+deploy, and nothing stopped both of them migrating. Both read the same empty
+`mikro_orm_migrations_<module>` table, both decide the same file is pending, both
+run it. `create table` fails on the loser and the boot dies — or a data migration
+that is not idempotent runs twice and nobody notices, which is the worse one.
+
+`yarn db:migrate` now holds a Postgres session-level advisory lock for the whole
+run. Session-level because the lock has to outlive every per-module ORM the run
+opens and closes, on its own short-lived connection for the same reason. It
+**waits** rather than failing: a second container should apply nothing and carry
+on, and by the time it holds the lock the first run has finished and its pending
+list is empty. And it says so on the way in, because a migration blocking in
+silence is indistinguishable from one that has hung, and an operator watching a
+stalled deploy will kill it.
+
+**The verification is the interesting part**, because the failure needs two
+processes and a race and cannot be reproduced in a unit test. Eleven unit tests
+pin the decisions around the lock. The SQL then ran against real Postgres — A
+acquires, B is refused while A holds, B acquires once A frees, zero locks left
+([[L34]]). Then the whole command, against a lock held from another connection.
+
+**And that last step caught what the first two could not.** The first contended
+run finished in seven seconds with no waiting message. The unit tests were green;
+the SQL was proven; the lock was genuinely held by the other connection. The CLI
+runs from `packages/cli/dist`, and I had never built it. Rebuild, retest, and the
+message appeared — 22 seconds of waiting against 6 uncontended. The standing trap
+in this repository is usually stated about the app; it is not only about the app.
+
+**Two things I had said were wrong, and the tests said so.** I checked
+`dbGreenfield` for migration calls, read the first half of the function, saw it
+deleting migration files and concluded it does not migrate. It does — the call is
+at the end. A test failed with `client.connect is not a function` and pointed
+straight at it. That is a better outcome than my claim: greenfield rebuilding a
+database while a deploy migrates it is exactly the collision the lock is for.
+
+**Then a third gate flake, unrelated to any of this.** `OrganizationBrandingPage`
+failed in the gate and passed three-for-three alone. The page seeds `logoUrl` into
+local state from fetched data through an effect, so there is a render commit
+between the organization name appearing and the input filling; the test awaited
+the name and asserted the input synchronously. Load widens the window. `waitFor`
+closes it, and it is now **trap 3** in `knowledge/test-gate.md` — the nastiest of
+the three, because the failing line is right there, the lines above it pass, and
+the product is correct.
+
+A sweep confirmed it was the only instance: seven files use `toHaveValue`, three
+never wait, and all three render synchronously from props inside `await act`.
+
+Gate: 22/22, **12,677 tests**.
+
+---
+
 ## 2026-08-10 — The gate stops depending on how busy the laptop is
 
 Two causes, both fixed, and the interesting part is that **the diagnosis I had

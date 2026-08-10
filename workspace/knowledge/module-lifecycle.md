@@ -85,6 +85,31 @@ portal → customer_accounts    staff → planner, resources    resources → pl
 The generator refuses to emit a registry when an enabled module's `requires` is
 unmet, so a wrong order fails the build rather than shipping.
 
+### Two boots migrating at once
+
+`yarn db:migrate` takes a Postgres **session-level advisory lock** (key
+`8147290361`) for the whole run, so a second process waits rather than racing.
+
+That case is ordinary rather than exotic: two containers booting from one image
+against one database. Without the lock both read the same empty
+`mikro_orm_migrations_<module>` table, both decide the same file is pending, and
+both run it — `create table` fails on the loser and the boot dies, or worse, a
+non-idempotent data migration runs twice and nothing complains.
+
+It **waits** instead of failing, because a second container should apply nothing
+and carry on: by the time it holds the lock the first run has finished and its
+pending list is empty. It says so on the way in — *"Another migration run holds
+the lock. Waiting for it to finish..."* — since a migration blocking in silence is
+indistinguishable from one that has hung, and an operator watching a stalled
+deploy will kill it.
+
+The lock is held on its own short-lived `pg` connection, not on one of the
+per-module ORMs, because it has to outlive every ORM the run opens and closes.
+Postgres releases it if the process dies, which no lock file can promise.
+
+`packages/cli/src/lib/db/advisoryLock.ts` · verified against a real database, and
+under real contention, on 2026-08-10.
+
 ## What goes wrong
 
 Three surprises, all of which cost real time:
