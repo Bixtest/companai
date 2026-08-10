@@ -24,17 +24,16 @@ and is argued below; anything can be pulled forward on request.
 
 | # | Task | Why here | Size |
 |---|---|---|---|
-| **1** | **A3 does not bind — hold-and-commit needs a scheduler** | The act executes into a hold window and **commits** when the window passes unless somebody objects. That is the opposite of expiry, so the approval queue's machinery does not cover it: something has to wake up and run the act. `@open-mercato/scheduler` is enabled, so the pieces exist | M |
-| **2** | **Build the approvals page** | Decided with the owner 2026-08-10 — see *The approvals page* below for the shape, the defaults and what is tunable. **Scheduled after item 2**, and the reason is in that section: a screen for a tray that is almost always empty teaches nobody anything | L |
-| **3** | **The gate is not reliably green on a loaded machine** | Two problems, same family. *Repo-walking guards*: `packages/shared` creates `.tmp-dynamic-loader-*` inside its own package tree while its tests run, and any guard walking `packages/` reads a file from it a moment after it is deleted — two hardened, eleven more walk-and-read unguarded. *Contention*: `cli/src/lib/testing/__tests__/integration.test.ts` passes in 17s alone and exceeds its 60s budget inside the 22-package gate. Neither is ever related to the change under test, which is how a gate stops being read | M |
-| **4** | **G1–G8 — the eight grafts from Platform 1** | G1/G2/G4 need R5/R6, which now exist; the rest are independent. G2 is largely subsumed by R6 and should be re-scoped before it is started | L |
-| **5** | **Ledger correlation and causation are carried but never propagated** | `correlation_id` / `causation_id` are recorded when a caller supplies them in `context`, and nothing supplies them. Until something threads a correlation id through a request, the chain records events that cannot be assembled into a trace — which is the feature the ledger exists to enable | M |
-| **6** | **Verify `messages.manage` and `messages.actions` against real routes** | R4b classified both from their titles because no route enforces them today — the only two of 113 descriptors not decided by reading code. Recheck when the messages module is next touched; conservative for now, which is the safe direction but not the accurate one | S |
-| **7** | **Ledger Tier 2 — periodic signed checkpoints** | R3's chain is verifiable only by us. A signed root published to append-only storage is what lets a customer's auditor verify a range without our cooperation, and it is a stated commercial property of the design. Needs key management, so it follows the principal keypair work | L |
-| **8** | **`domain_mappings` extraction from parked `customer_accounts` into `directory`** | Per-tenant custom domains — we want it, but not until something needs it | M |
-| **9** | **Dependency pruning for parked modules** | Security scanners will flag CVEs in packages nothing routes to. Pre-production, not now | M |
-| **10** | **Orphaned-table decision — ~127 tables from modules that later got parked** | Currently: leave them, they are inert. Revisit only as a deliberate backed-up migration | S |
-| **11** | **Phase K checkpoint — revisit parking with evidence** | The scheduled date that stops 'we'll clean up later' being a lie | S |
+| **1** | **Build the approvals page** | Decided with the owner 2026-08-10 — see *The approvals page* below for the shape, the defaults and what is tunable. **Scheduled after item 2**, and the reason is in that section: a screen for a tray that is almost always empty teaches nobody anything | L |
+| **2** | **The gate is not reliably green on a loaded machine** | Two problems, same family. *Repo-walking guards*: `packages/shared` creates `.tmp-dynamic-loader-*` inside its own package tree while its tests run, and any guard walking `packages/` reads a file from it a moment after it is deleted — two hardened, eleven more walk-and-read unguarded. *Contention*: `cli/src/lib/testing/__tests__/integration.test.ts` passes in 17s alone and exceeds its 60s budget inside the 22-package gate. Neither is ever related to the change under test, which is how a gate stops being read | M |
+| **3** | **G1–G8 — the eight grafts from Platform 1** | G1/G2/G4 need R5/R6, which now exist; the rest are independent. G2 is largely subsumed by R6 and should be re-scoped before it is started | L |
+| **4** | **Ledger correlation and causation are carried but never propagated** | `correlation_id` / `causation_id` are recorded when a caller supplies them in `context`, and nothing supplies them. Until something threads a correlation id through a request, the chain records events that cannot be assembled into a trace — which is the feature the ledger exists to enable | M |
+| **5** | **Verify `messages.manage` and `messages.actions` against real routes** | R4b classified both from their titles because no route enforces them today — the only two of 113 descriptors not decided by reading code. Recheck when the messages module is next touched; conservative for now, which is the safe direction but not the accurate one | S |
+| **6** | **Ledger Tier 2 — periodic signed checkpoints** | R3's chain is verifiable only by us. A signed root published to append-only storage is what lets a customer's auditor verify a range without our cooperation, and it is a stated commercial property of the design. Needs key management, so it follows the principal keypair work | L |
+| **7** | **`domain_mappings` extraction from parked `customer_accounts` into `directory`** | Per-tenant custom domains — we want it, but not until something needs it | M |
+| **8** | **Dependency pruning for parked modules** | Security scanners will flag CVEs in packages nothing routes to. Pre-production, not now | M |
+| **9** | **Orphaned-table decision — ~127 tables from modules that later got parked** | Currently: leave them, they are inert. Revisit only as a deliberate backed-up migration | S |
+| **10** | **Phase K checkpoint — revisit parking with evidence** | The scheduled date that stops 'we'll clean up later' being a lie | S |
 
 ### The approvals page — decided 2026-08-10
 
@@ -76,6 +75,28 @@ list leads with the honest remainder of enforcement: what it does *not* yet bind
 written down so nobody reads "the resolver decides" as a bigger claim than it is.
 Both are prerequisites for enforcing more than refusals. The grafts follow: they
 are additive, and G2 needs re-scoping against R6 before anyone starts it.
+
+**Closed 2026-08-10 (A3 binds — every gate now does):** an act gated at *hold and
+commit unless vetoed* is held and then **runs itself** once its fifteen-minute
+window passes. Only a veto stops it.
+
+`commit_at` is a separate column from `expires_at` on purpose: an unanswered
+approval **expires** and never happens, an unopposed hold **commits** and does.
+Same table, opposite outcomes, and one column read differently by status would put
+them a typo apart.
+
+A scheduled sweep runs due acts, registered per tenant, every 60s. Not on read —
+that would make an act commit when somebody happened to open a queue, which is
+approve-first wearing a timer's clothes. Without a scheduler, A3 acts wait for a
+person and setup says so in a warning.
+
+Nobody's name goes on an auto-committed act: it happened because a window passed,
+not because a person chose. And one act that throws does not freeze the rest, or a
+single bad act stops every hold behind it.
+
+**A test caught a real bug**: the sweep queried across all tenants while the
+schedule is registered per tenant, so every tenant's work would have run once per
+tenant.
 
 **Closed 2026-08-10 (A4 binds):** an act gated at *execute and review* now runs
 and is **filed for review** — what ran, who ran it, why it was reviewable, and

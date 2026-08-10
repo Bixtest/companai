@@ -30,9 +30,11 @@ organization.
        │
        ├─ A1 / A2 ─────────► held in authority_acts. 202. Runs on approval
        │
+       ├─ A3 ──────────────► held. Runs itself in 15 min unless somebody vetoes
+       │
        ├─ A4 ──────────────► runs now, then filed in authority_act_reviews
        │
-       └─ A3 / A5 ─────────► runs now
+       └─ A5 ──────────────► runs now
                               │
 4. Audit + ledger             every write recorded, and hash-chained
 ```
@@ -72,13 +74,16 @@ somebody something they did not already hold.
 | **A0** | Blocked | **Yes** |
 | **A1** | Propose; a person performs the act | **Yes** — held for approval |
 | **A2** | Approve first | **Yes** — held for approval |
-| **A3** | Hold, then commit unless vetoed | No — needs a scheduler |
+| **A3** | Hold, then commit unless vetoed | **Yes** — held, then run by a scheduled sweep |
 | **A4** | Act now, review afterwards | **Yes** — the act runs and is filed for review |
 | **A5** | Act and log | Nothing to enforce |
 
-Where a gate is not enforced, the obligation is recorded and the act proceeds.
-**Say that out loud whenever it comes up.** A control that is claimed and absent
-is worse than one that is absent and known.
+**Every gate now binds.** What each one means still differs sharply — an
+unanswered A2 expires and never happens, while an unopposed A3 commits and does —
+and those differences are the design, not an implementation detail.
+
+Where anything is *not* enforced, say so out loud. A control that is claimed and
+absent is worse than one that is absent and known.
 
 ## What is deliberately not built yet
 
@@ -104,7 +109,8 @@ Not omissions — decisions, each with a backlog entry:
 | `packages/shared/src/lib/authority/shadow.ts` | Observation mode |
 | `packages/core/src/modules/auth/services/authorityEnforcementService.ts` | Per-tenant mode; turns a decision into a refusal |
 | `packages/core/src/modules/auth/services/pendingActService.ts` | Acts held for approval, and acts filed for review |
-| `packages/core/src/modules/auth/commands/interceptors.ts` | The gate that holds an act |
+| `packages/core/src/modules/auth/commands/interceptors.ts` | The gate that holds an act, and files A4 acts for review |
+| `packages/core/src/modules/auth/workers/commit-held-acts.ts` | The sweep that runs A3 acts when their window passes |
 | `packages/core/src/modules/directory/services/authorityGraphService.ts` | The graph, from the database |
 | `packages/core/src/modules/audit_logs/services/ledgerService.ts` | The hash chain |
 

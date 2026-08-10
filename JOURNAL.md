@@ -7,6 +7,41 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-08-10 — A3 binds, and every gate now does
+
+*Hold and commit unless vetoed* is the gate that needed something to wake up. The
+act does not run when proposed; it runs by itself once its fifteen-minute window
+passes, and only an objection stops it.
+
+**The interesting part is how close it is to its opposite.** An unanswered
+approval expires and never happens. An unopposed hold commits and does. Same
+table, same waiting, opposite ends — so `commit_at` is a separate column from
+`expires_at` rather than one field read differently by status. Sharing a column
+would put "this never happens" and "this happens" a single typo apart, on a table
+whose entire job is deciding whether something happens.
+
+A scheduled sweep runs due acts every minute. Not on read, which would make an act
+commit when somebody happened to open a queue — approve-first wearing a timer's
+clothes. Not an in-process timer either: a timer dies with the process that set
+it, and an act that never commits because a server restarted is indistinguishable
+from one somebody vetoed.
+
+**Nobody's name goes on an auto-committed act.** It happened because a window
+passed, so `resolved_by_user_id` stays null. Recording an approver would attribute
+a decision nobody made; recording the proposer would claim they acted at a moment
+they did not.
+
+**And a test caught a real bug.** Three failed because my fake EM required a
+tenant filter the sweep did not supply — which was not a harness problem but the
+harness telling me the sweep queried across every tenant while the schedule is
+registered per tenant. Each tenant's timer would have done every other tenant's
+work. Scoped, with a test that holds it.
+
+Two other failures were my own stale claims — a gate test asserting A3 needs
+machinery that does not exist, which stopped being true in the same commit. That
+is the third time this week a test has failed because it described the world
+before the change, and each time it has been the test doing its job.
+
 ## 2026-08-10 — A4 binds: the act runs, and somebody still has to look
 
 *Execute and review* is the opposite shape from an act held for approval — it has

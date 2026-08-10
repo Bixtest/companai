@@ -273,13 +273,12 @@ starts refusing requests on a Tuesday.
 | `A0` | Blocked | **Yes** — the route guard refuses |
 | `A1` | Propose; a human performs | **Yes** — the act is held for approval |
 | `A2` | Approve first | **Yes** — the act is held for approval |
-| `A3` | Hold and commit unless vetoed | No — needs a scheduler to commit on expiry |
+| `A3` | Hold and commit unless vetoed | **Yes** — held, then run by a scheduled sweep |
 | `A4` | Execute, then review | **Yes** — the act runs and is filed for review |
 | `A5` | Execute and log | Nothing to enforce |
 
-A3 is not "the approval queue with a different timer". It executes into a hold
-window and **commits** when the window passes unless somebody objects — the
-opposite of expiry, and it needs a scheduler rather than a queue.
+Every gate now binds. What each one *means* still differs sharply, and the
+differences are the point — see below.
 
 The CLI says which is which when you switch a tenant on. Say it out loud rather
 than let somebody infer a guarantee that is not there.
@@ -502,4 +501,52 @@ direction is how a queue loses its meaning.
 Marking one looked-at: `POST` the same endpoint with `decision: "reviewed"`. It
 runs nothing and undoes nothing. Compensating an act is undo, which the command
 bus already provides, and is a separate deliberate step.
+
+## A3 — hold and commit unless vetoed
+
+The act does not run when it is proposed. It runs **by itself** once its window
+passes, and only an objection stops it.
+
+| | A1 / A2 | A3 |
+|---|---|---|
+| Waiting ends when | somebody answers | the clock says so |
+| Nobody answers | it **expires** — never runs | it **commits** — runs |
+| To stop it | do nothing | veto it |
+| Status | `pending` → `approved`/`rejected`/`expired` | `holding` → `committed`/`vetoed` |
+
+Same table, opposite outcomes. That is why `commit_at` is a **separate column**
+from `expires_at` rather than one field read differently by status: one means
+*this never happens now*, the other means *this happens now*, and sharing a column
+would put them a single typo apart on a table whose whole job is deciding whether
+something happens.
+
+**Window: 15 minutes** (planning 02 §8's worked example is a fifteen-minute hold
+on an internal publish). Long enough for somebody watching to object, short enough
+that the act is not effectively blocked — which is the whole distinction from
+approve-first.
+
+### It needs something that wakes up
+
+A scheduled sweep (`auth:commit-held-acts`, every 60s, registered per tenant) runs
+due acts. Not on read: that would make an act commit when somebody happened to
+open a queue, which is approve-first wearing a timer's clothes. Not an in-process
+timer either — a timer dies with the process that set it, and an act that never
+commits because a server restarted is indistinguishable from one somebody vetoed.
+
+**Without a scheduler**, A3 acts wait indefinitely and a person has to resolve
+them. Setup logs a warning saying exactly that rather than leaving it to be
+discovered.
+
+### Who is accountable for an act nobody approved
+
+The **system**. Nobody decided it — it happened because a window passed and
+nobody objected, so `resolved_by_user_id` stays null. Recording a person there
+would put somebody's name on a decision they never made; recording the proposer
+would claim they acted at a moment they did not.
+
+### One bad act does not freeze the rest
+
+Each due act is committed independently. A single act that throws is marked
+`failed` and the sweep carries on — otherwise one broken act stops every other
+hold behind it, which is the failure mode that makes people switch a sweep off.
 
