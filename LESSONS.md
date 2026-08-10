@@ -994,3 +994,35 @@ with tests, a review, and no organization anywhere with a parent — so nothing 
 ever reached line two of the function. "Covered by tests" and "has run" are
 different claims, and only one of them was true.
 
+
+---
+
+## L35 — A file that exists in two places has one owner; find out which before writing
+
+**What happened.** The approvals page needed thirty-four new user-facing strings.
+The platform has locale files at `apps/mercato/src/i18n/*.json`, so I seeded them
+there — and, for good measure, into the create-app template's copy.
+
+Both are real files. Neither is where auth strings live. The auth module owns
+`packages/core/src/modules/auth/i18n/{en,de,es,pl}.json`, and every key the page
+sits beside — `auth.nav.roles`, `settings.sections.auth` — was already there.
+
+**Why it nearly stuck.** The app-level files *worked*. Nothing would have failed:
+`t(key, fallback)` renders the fallback when a key is missing, so a string in the
+wrong file and a string in no file look identical at runtime. The mistake would
+only have surfaced when somebody deleted the app-level entries as orphans, or
+when a module was extracted and left its own strings behind.
+
+**The tell I had and ignored.** `grep` for the neighbouring key found it in the
+module file. I had run something close to that and read the answer as *"this key
+exists"* rather than *"this is where this kind of key lives"*.
+
+**The rule.** *Before adding an entry to a shared file, find an existing entry of
+the same kind and add yours where that one is.* Not where a plausible file is —
+where its neighbours already are. The question is never "does this file work"; a
+duplicate always works, right up until one copy is edited.
+
+**A second thing it bought.** Looking at the right files showed all four locales
+fully translated, 252 keys each, with no English placeholders. Seeding English
+into `de.json` would have been the first — and once one is there, the file stops
+being a coverage signal for every key after it. The strings shipped translated.

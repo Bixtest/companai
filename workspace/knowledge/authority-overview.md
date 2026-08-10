@@ -94,8 +94,10 @@ Not omissions — decisions, each with a backlog entry:
   at approve-first. That is a placeholder pointing in the safe direction.
 - **Delegations, charters, standing approvals.** The resolver reads them if
   supplied; nothing supplies them.
-- **The approvals inbox.** There is an API and a deadline. The screen is
-  scheduled — see `PROGRESS.md` → *The approvals page*.
+- ~~**The approvals inbox.**~~ **Built 2026-08-10** —
+  `/backend/authority/approvals`, in Settings → Authority. See
+  [approvals-queue.md](approvals-queue.md). Bulk approval with a diff, deputy
+  cover and standing approvals are still absent, each with its own backlog entry.
 - **Correlation across acts.** The ledger carries the fields; nothing threads
   them, so acts cannot yet be assembled into a trace.
 
@@ -111,6 +113,7 @@ Not omissions — decisions, each with a backlog entry:
 | `packages/core/src/modules/auth/services/pendingActService.ts` | Acts held for approval, and acts filed for review |
 | `packages/core/src/modules/auth/commands/interceptors.ts` | The gate that holds an act, and files A4 acts for review |
 | `packages/core/src/modules/auth/workers/commit-held-acts.ts` | The sweep that runs A3 acts when their window passes |
+| `packages/core/src/modules/auth/backend/authority/approvals/page.tsx` | The queue, as a person meets it |
 | `packages/core/src/modules/directory/services/authorityGraphService.ts` | The graph, from the database |
 | `packages/core/src/modules/audit_logs/services/ledgerService.ts` | The hash chain |
 

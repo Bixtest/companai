@@ -28,6 +28,7 @@ mechanism it stands on.
 | 3. [capabilities.md](capabilities.md) | *"What kind of act is this?"* — effect class, reversibility, data classes |
 | 4. [authority-decisions.md](authority-decisions.md) | *"How much autonomy?"* — the resolver, the gates, enforcement, held acts |
 | 5. [org-authority-graph.md](org-authority-graph.md) | *"What does the org structure permit?"* — typed edges and ceilings |
+| 6. [approvals-queue.md](approvals-queue.md) | *"A gate stopped an act — now what?"* — the queue, and the two halves that must never merge |
 
 ### The platform underneath — what we inherited
 
@@ -86,6 +87,7 @@ someone's model of it.
 | [module-lifecycle.md](module-lifecycle.md) | Enabled, parked, deleted — what each actually changes |
 | [overrides.md](overrides.md) | Turning off another module's contract without editing its source |
 | [principals.md](principals.md) | Who is acting: human, service, and the AI worker we are adding |
+| [approvals-queue.md](approvals-queue.md) | Where held acts go, what each gate offers a reader, and which settings deliberately do not exist |
 
 ## Template
 

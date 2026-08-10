@@ -1,9 +1,10 @@
 # Progress — where we are, out of how much
 
-**One line: 8 of 16 batches done, plus R2c. All six repairs (R1–R6) are in, and
-the resolver now decides rather than observes. Every inherited defect we found is
-fixed. Next is backlog item 1, then the eight grafts G1–G8 — the remaining
-batches.**
+**One line: 8 of 16 batches done, plus R2c. All six repairs (R1–R6) are in, the
+resolver decides rather than observes, every gate binds, and the queue those gates
+fill is now a screen a person can work. Every inherited defect we found is fixed.
+Next is backlog item 1 — gate stability — then the eight grafts G1–G8, the
+remaining batches.**
 
 **Two views of the same work.** *The backlog* below is the ordered list of
 everything outstanding, first to last, and it is the authority on what happens
@@ -24,16 +25,49 @@ and is argued below; anything can be pulled forward on request.
 
 | # | Task | Why here | Size |
 |---|---|---|---|
-| **1** | **Build the approvals page** | Decided with the owner 2026-08-10 — see *The approvals page* below for the shape, the defaults and what is tunable. **Scheduled after item 2**, and the reason is in that section: a screen for a tray that is almost always empty teaches nobody anything | L |
-| **2** | **The gate is not reliably green on a loaded machine** | Two problems, same family. *Repo-walking guards*: `packages/shared` creates `.tmp-dynamic-loader-*` inside its own package tree while its tests run, and any guard walking `packages/` reads a file from it a moment after it is deleted — two hardened, eleven more walk-and-read unguarded. *Contention*: `cli/src/lib/testing/__tests__/integration.test.ts` passes in 17s alone and exceeds its 60s budget inside the 22-package gate. Neither is ever related to the change under test, which is how a gate stops being read | M |
-| **3** | **G1–G8 — the eight grafts from Platform 1** | G1/G2/G4 need R5/R6, which now exist; the rest are independent. G2 is largely subsumed by R6 and should be re-scoped before it is started | L |
-| **4** | **Ledger correlation and causation are carried but never propagated** | `correlation_id` / `causation_id` are recorded when a caller supplies them in `context`, and nothing supplies them. Until something threads a correlation id through a request, the chain records events that cannot be assembled into a trace — which is the feature the ledger exists to enable | M |
-| **5** | **Verify `messages.manage` and `messages.actions` against real routes** | R4b classified both from their titles because no route enforces them today — the only two of 113 descriptors not decided by reading code. Recheck when the messages module is next touched; conservative for now, which is the safe direction but not the accurate one | S |
-| **6** | **Ledger Tier 2 — periodic signed checkpoints** | R3's chain is verifiable only by us. A signed root published to append-only storage is what lets a customer's auditor verify a range without our cooperation, and it is a stated commercial property of the design. Needs key management, so it follows the principal keypair work | L |
-| **7** | **`domain_mappings` extraction from parked `customer_accounts` into `directory`** | Per-tenant custom domains — we want it, but not until something needs it | M |
-| **8** | **Dependency pruning for parked modules** | Security scanners will flag CVEs in packages nothing routes to. Pre-production, not now | M |
-| **9** | **Orphaned-table decision — ~127 tables from modules that later got parked** | Currently: leave them, they are inert. Revisit only as a deliberate backed-up migration | S |
-| **10** | **Phase K checkpoint — revisit parking with evidence** | The scheduled date that stops 'we'll clean up later' being a lie | S |
+| **1** | **The gate is not reliably green on a loaded machine** | Two problems, same family. *Repo-walking guards*: `packages/shared` creates `.tmp-dynamic-loader-*` inside its own package tree while its tests run, and any guard walking `packages/` reads a file from it a moment after it is deleted — two hardened, eleven more walk-and-read unguarded. *Contention*: `cli/src/lib/testing/__tests__/integration.test.ts` passes in 17s alone and exceeds its 60s budget inside the 22-package gate. Neither is ever related to the change under test, which is how a gate stops being read. **It was green on 2026-08-10, twice** — which is what intermittent means, not evidence it is fixed | M |
+| **2** | **Bulk approval, with a diff** | Left out of the approvals page deliberately. The diff is the whole feature: a button that approves several acts without showing how they differ is a button for approving things unread, and it would be the most-used control on the page. Owner's decision 2026-08-10: on by default, on/off per tenant, diff never optional | M |
+| **3** | **Cover for someone away, and standing approvals** | The other two absences from the approvals page. Both need a name (a deputy, a grantor), so both are inherently settings; standing approvals need a mandatory expiry and a visible count of what they let through. Planning 02 §7.1–7.2. The most useful controls on the page and the most dangerous — neither belongs in a first version | L |
+| **4** | **G1–G8 — the eight grafts from Platform 1** | G1/G2/G4 need R5/R6, which now exist; the rest are independent. G2 is largely subsumed by R6 and should be re-scoped before it is started | L |
+| **5** | **Ledger correlation and causation are carried but never propagated** | `correlation_id` / `causation_id` are recorded when a caller supplies them in `context`, and nothing supplies them. Until something threads a correlation id through a request, the chain records events that cannot be assembled into a trace — which is the feature the ledger exists to enable | M |
+| **6** | **Verify `messages.manage` and `messages.actions` against real routes** | R4b classified both from their titles because no route enforces them today — the only two of 113 descriptors not decided by reading code. Recheck when the messages module is next touched; conservative for now, which is the safe direction but not the accurate one | S |
+| **7** | **Ledger Tier 2 — periodic signed checkpoints** | R3's chain is verifiable only by us. A signed root published to append-only storage is what lets a customer's auditor verify a range without our cooperation, and it is a stated commercial property of the design. Needs key management, so it follows the principal keypair work | L |
+| **8** | **`domain_mappings` extraction from parked `customer_accounts` into `directory`** | Per-tenant custom domains — we want it, but not until something needs it | M |
+| **9** | **Dependency pruning for parked modules** | Security scanners will flag CVEs in packages nothing routes to. Pre-production, not now | M |
+| **10** | **Orphaned-table decision — ~127 tables from modules that later got parked** | Currently: leave them, they are inert. Revisit only as a deliberate backed-up migration | S |
+| **11** | **Phase K checkpoint — revisit parking with evidence** | The scheduled date that stops 'we'll clean up later' being a lie | S |
+
+### Closed 2026-08-10 — the approvals page is built
+
+`/backend/authority/approvals`, in **Settings → Authority**, guarded by
+`auth.authority.approve` — the same capability that lets somebody resolve an act.
+Splitting the two would create a role that watches work pile up and can do nothing
+about it, and a held act carries what somebody was trying to do, which is not
+neutral information.
+
+**Why it moved ahead of the gate work.** The table below scheduled it after item 1
+on the argument that a screen designed against a nearly-empty tray is designed
+against a guess. That argument was sound when three commands were gated. The
+capability mapping has since gated 117, and A3 and A4 both bind, so the tray now
+fills from ordinary use and the premise no longer holds. Recorded rather than done
+quietly, because the reason a thing was scheduled matters as much as the schedule.
+
+**What shipped, against what was decided:**
+
+| Decided | Shipped |
+|---|---|
+| Ordering: riskiest first, tunable per person | **Yes.** Gate order as the risk proxy, deadline as the tie-break; the choice is stored in that browser and nowhere else |
+| Approve several at once, with a mandatory diff | **No — item 2.** The diff is the feature; the button without it is worse than no button |
+| Cover for someone away; standing approvals | **No — item 3** |
+| Expiry 24h, tunable per tenant | Enforced at 24h by `PendingActService`; **the tenant knob is not built** |
+| Who may approve: holders of `auth.authority.approve`, not tunable | **Yes** |
+
+**The one structural decision the page makes.** Acts that have not happened and
+acts that already have never share a row, a verb, or a colour. *Waiting* offers
+approve and reject; *to review* offers only "I have looked at this" — and an A3
+act, which runs itself when its window passes, offers a veto and no approval,
+because approving it would change nothing except the timing. Three of the eight
+new tests exist only to hold that separation.
 
 ### The approvals page — decided 2026-08-10
 
@@ -59,16 +93,13 @@ disagree; where there is a right answer, there is a default and no knob.
 | **Expiry** | 24 hours | **Yes, per tenant.** A day suits some businesses and is absurd for others |
 | **Who may approve** | Holders of `auth.authority.approve` | **No.** That is authority, not preference |
 
-**Why after item 2, and not now.** The page is a tool for working through a tray.
-Three commands are gated today, so the tray is nearly always empty — and a screen
-designed against an empty tray is designed against a guess. Item 2 widens what is
-gated; once real traffic accumulates, the design question stops being "what might
-people need" and becomes "what is actually in here". That is the same discipline
-shadow mode used before enforcement, and it has already caught two of my design
-errors.
-
-**Not a reason to wait**: polish, or wanting the product to feel finished. If the
-tray fills up sooner than expected, this moves up.
+**~~Why after item 2, and not now.~~** *Superseded 2026-08-10 — built. The
+argument was that three commands were gated, so the tray was nearly always empty,
+and a screen designed against an empty tray is designed against a guess. The
+capability mapping gated 117 commands and A3/A4 began binding, which is exactly
+the "if the tray fills up sooner than expected, this moves up" case the paragraph
+below reserved. Kept rather than deleted: the reasoning was right, and it is the
+input that changed.*
 
 **Why this order.** Every inherited defect we have found is now closed, so the
 list leads with the honest remainder of enforcement: what it does *not* yet bind,

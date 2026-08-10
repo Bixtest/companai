@@ -7,6 +7,58 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-08-10 — The approvals queue becomes a screen
+
+Enforcement has held acts since it landed. Answering them meant calling an API,
+which means a terminal, which means nobody. `/backend/authority/approvals` is
+where a person now works through the tray.
+
+**Two lists, and they never borrow each other's verbs.** *Waiting* holds acts
+that have **not** happened — approving runs one, rejecting means it never runs.
+*To review* holds acts that **already did** — nothing on that half changes what
+happened; the only open question is whether anybody looked. Offering "Approve" on
+something that already ran, or "I have looked at this" on something still waiting,
+would make every row ambiguous, and a reader who cannot tell the halves apart
+clicks through both. Three of the eight new tests exist only to hold that line.
+
+**A3 gets a veto and no approval button.** *Hold and commit unless vetoed* runs
+on its own when the window passes, so "Approve and run" would be a button that
+changes nothing but the timing. The only act with an effect is stopping it, so
+that is the only button.
+
+**The gate identifier never appears alone.** "A2" is precise and empty. Each row
+carries the plain sentence — *needs your approval before it runs* — beside the
+tag, and the resolver's own reason underneath it. The queue that shows only codes
+is the queue that gets clicked through.
+
+**Ordering is a taste, so it is stored per person.** Riskiest first by default,
+oldest first on request, kept in that browser and nowhere else. Storing it
+server-side would quietly make one person's preference everybody's — the reading
+of the owner's *"a setting where organisations genuinely differ"* that keeps the
+setting count honest.
+
+**Pulled forward, and the reason is that its premise expired.** `PROGRESS` had
+scheduled this after the gate-stability work, arguing that a screen designed
+against a nearly-empty tray is designed against a guess. That was true when three
+commands were gated. The capability mapping has since gated 117, and A3 and A4
+both bind — the tray now fills from ordinary use, so the argument for waiting no
+longer holds.
+
+**What is deliberately absent**, each with a backlog entry rather than a
+half-built control: bulk approval with a diff, routing to a deputy, standing
+approvals. A first version without them is usable. One shipping a blind "approve
+all" would be worse than no page.
+
+**One wrong turn worth recording.** I put the new strings in the *app's* locale
+files. The auth module owns its own `i18n/` — four fully translated files, no
+English placeholders — and app-level files are the app's. Reverted, and the
+strings landed with real German, Spanish and Polish rather than English standing
+in for them ([[L35]]).
+
+Gate green end to end: 22/22 tasks, 12,664 tests, no flakes this run.
+
+---
+
 ## 2026-08-10 — A3 binds, and every gate now does
 
 *Hold and commit unless vetoed* is the gate that needed something to wake up. The

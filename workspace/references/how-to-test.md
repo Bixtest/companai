@@ -868,16 +868,145 @@ organizations page.
 
 ---
 
+### What this deliberately did not do yet — *superseded, see below*
+
+*Written when Batch H shipped. All three limits have since been lifted; kept so
+the record shows what was true when.*
+
+- ~~**Only `A1` and `A2` wait.**~~ **A3 and A4 now bind too** — A3 holds an act
+  and then runs it when its fifteen-minute window passes unless somebody stops it;
+  A4 runs the act and files it for review.
+- ~~**Only organization commands are gated.**~~ **117 commands are now mapped** to
+  the capability they perform.
+- ~~**There is no inbox.**~~ **There is now a screen** — see the batch below.
+
+---
+
+## Batch — the approvals screen
+
+**What changed, in one sentence.** The queue of acts waiting for a person is now
+a page you can open and work through, instead of an API you had to call from a
+terminal.
+
+**Why it matters to us.** A control nobody can operate is not a control. Everything
+the governance layer decides ends up here, in front of a human being, and this is
+the first version of that place.
+
+**Visible change:** a new **Approvals** entry under **Settings → Authority**, at
+**http://localhost:3000/backend/authority/approvals**.
+
+---
+
+### Test 1 — the page is there and says what it is for (2 minutes)
+
+1. Open **http://localhost:3000/backend/authority/approvals**
+
+**Should happen:** a page titled **Approvals**, with two sections — *Waiting for a
+decision* and *Already happened, not yet looked at*. Both will say nothing is
+there. That is correct on a quiet instance.
+
+**Would mean broken:** a 404, or a red error box saying the queue could not be
+loaded.
+
+**If you do not see it in the menu**, look under **Settings** (the gear), group
+**Authority**. It is not in the main sidebar.
+
+---
+
+### Test 2 — make something appear in it (5 minutes)
+
+This reuses Batch H's setup. If you still have `Approval Branch` and its `A2`
+edge, skip to step 3.
+
+1. **http://localhost:3000/backend/directory/organizations** → **Create**, name it
+   `Approval Branch`, parent `Acme Corp`, save.
+2. **http://localhost:3000/backend/directory/authority** → create an edge: parent
+   `Acme Corp`, child `Approval Branch`, relationship `owns`, inheritance
+   `strict`, **Authority ceiling `A2`**.
+3. Turn enforcement on, then wait a minute:
+
+```bash
+cd workspace/starting-kit/apps/mercato && corepack yarn mercato auth authority:mode --tenant <YOUR_TENANT_ID> --set enforce
+```
+
+4. Use the **organization switcher** in the top bar to pick `Approval Branch`.
+5. **Directory → Organizations** → rename any organization and save.
+6. Go back to **http://localhost:3000/backend/authority/approvals**
+
+**Should happen:** one card under *Waiting for a decision*. It shows
+`directory.organizations.manage`, a tag reading **A2**, the sentence *"Needs your
+approval before it runs"*, and a **Why** line giving the rule that held it. Two
+buttons: **Approve and run** and **Reject**.
+
+**Would mean broken:** the rename went through (enforcement is not on — give it
+another minute and retry), or the section is still empty (the act vanished, which
+is the worst of the three outcomes).
+
+---
+
+### Test 3 — rejecting means it never happens (2 minutes)
+
+1. Click **Reject** on that card.
+
+**Should happen:** a green message *"Rejected. It will not run."*, the card
+disappears, and the organization still has its **old** name when you reload
+**Directory → Organizations**.
+
+**Would mean broken:** the rename took effect anyway.
+
+---
+
+### Test 4 — approving performs the act (3 minutes)
+
+1. Repeat the rename from Test 2 so a new card appears.
+2. Click **Approve and run**.
+
+**Should happen:** a green message *"Approved, and the act ran."*, the card
+disappears, and the new name **is** applied when you reload Directory →
+Organizations.
+
+**Would mean broken:** the message appears but the name did not change. That is
+the one failure that matters most on this page — an approval that silently does
+nothing leaves you believing the act ran.
+
+---
+
+### Test 5 — the sort order is yours, and it sticks (2 minutes)
+
+1. With at least one card showing, click **Oldest first** at the top right.
+2. Reload the page.
+
+**Should happen:** **Oldest first** is still the selected button.
+
+**Would mean broken:** it snaps back to *Most constrained first*.
+
+**Note:** this is stored in *your browser only*, on purpose — how you want your
+own queue sorted is a preference, not a company policy. A colleague on another
+machine keeps their own.
+
+---
+
+### Test 6 — put it back (2 minutes)
+
+```bash
+cd workspace/starting-kit/apps/mercato && corepack yarn mercato auth authority:mode --tenant <YOUR_TENANT_ID> --set shadow
+```
+
+Then delete the edge on the authority page and `Approval Branch` on the
+organizations page.
+
+---
+
 ### What this deliberately does not do yet
 
-- **Only `A1` and `A2` wait.** `A3` (commit unless vetoed) and `A4` (act now,
-  review after) still behave as before — they need machinery that does not exist,
-  and pretending otherwise would be the exact claim this project avoids.
-- **Only organization commands are gated.** Every other command is ungated until
-  it declares which capability it performs. That is deliberate: guessing the
-  mapping would either block work or wave through acts that should have waited.
-- **There is no inbox.** The queue is an API and a deadline. What it should look
-  like as a screen is a conversation we have not had.
+- **No approving several at once.** It is coming with a diff showing how the
+  grouped acts differ. A bulk button without that diff is a button for approving
+  things unread, which is worse than no button.
+- **No cover for someone away, and no standing approvals.** Both need somebody
+  named — a deputy, a grantor — so both are settings, and both are their own
+  piece of work.
+- **The 24-hour expiry is fixed.** It was decided that tenants should be able to
+  change it; that knob is not built.
 
 ---
 
