@@ -540,3 +540,85 @@ Sending `Bearer` produces a 401 indistinguishable from a scoping refusal. That i
 what made the first reproduction worthless — and concluding from a worthless
 reproduction that there was no bug is [[L32]], the more expensive of the two
 mistakes.
+
+---
+
+## U8 — a user-deletion cascade that had never run once · severity **medium** · **FIXED 2026-08-10**
+
+**Found:** 2026-08-10, while looking for an event to hang API-key revocation on.
+
+**What happens.** `communication_channels/subscribers/user-deleted-cascade.ts`
+subscribes to `auth.user.deleted` to disconnect a departed user's email and
+calendar channels: stop the polling worker, deactivate the channel, orphan the
+encrypted credentials. Its first line is:
+
+```ts
+if (!payload || typeof payload.userId !== 'string' || !payload.userId) return
+```
+
+`emitCrudSideEffects` emits `{ id, organizationId, tenantId }`. There is no
+`userId`. **The handler returned early on every real event**, so a deleted user's
+channels stayed connected, kept polling, and kept their credentials.
+
+**Why nothing caught it.** Every test in the suite constructs
+`{ userId: 'user-1', tenantId: 'tenant-1' }` — a payload the platform does not
+produce. Seven tests, all green, all verifying the handler against an invented
+contract. Same shape as [L34](../../LESSONS.md): a code path with tests and no
+execution.
+
+**Severity.** Medium rather than high because the channel rows are inert without
+a running poller for that tenant, and because deletion is rare. It is a data
+retention and privacy failure rather than an access-control one — but "we
+disconnect a departed user's mailbox" was a claim the code made and did not keep.
+
+**Fix.** Read `payload.id`, still accepting `userId` so a hand-rolled emitter
+does not hit the same wall from the other side, and two tests written against
+the shape the platform actually emits.
+
+**Worth checking elsewhere:** any other subscriber to a CRUD event that names the
+record something other than `id`. This is the only one today.
+
+---
+
+## U9 — a repo-walking test guard that races sibling packages · severity **low** · **FIXED 2026-08-10**
+
+**Found:** 2026-08-10, as a gate failure that had nothing to do with the change
+under test.
+
+`packages/ui/src/primitives/__tests__/no-deprecated-notice.test.ts` walks every
+source file under `apps/` and `packages/` looking for deprecated `<Notice>` JSX.
+During a parallel gate run, `@open-mercato/shared` creates and removes
+`.tmp-dynamic-loader-*` scratch directories for its own tests. The walk listed a
+file inside one and read it a moment after it was deleted:
+
+```
+ENOENT: ...\packages\shared\.tmp-dynamic-loader-EzNndM\src\modules\probe\data\entities.ts
+```
+
+The failure names the `<Notice>` guard and has nothing to do with `<Notice>`.
+Passes on its own, fails in the gate — the shape of every flake that eventually
+teaches people to re-run rather than read.
+
+**Fix.** Skip `.tmp-*` directories, and treat a file that vanishes between being
+listed and being read as what it is — a live working tree, not a violation. The
+platform's other repo-walking guard (`escapeLikePattern.test.ts`) already wraps
+its whole walk in try/catch; this brings the two into line rather than inventing
+a convention.
+
+### And a second one, found on the next run
+
+`mcp-client.integration.test.ts` spawns a real Node process and completes an MCP
+handshake, then asserts exactly one server process started. On an idle machine it
+takes about **six seconds**; jest's default timeout is **five**. It passes alone
+because the suite's setup time is not counted against the test — and fails under
+a parallel gate, where twenty-two packages compile and test at once.
+
+The assertion is right; the budget was wrong. Now `30_000`, with a comment saying
+why. A timeout tuned for an idle machine reports "the gate is red" when it means
+"the laptop was busy".
+
+Related: [U5](#u5--the-test-suite-is-intermittently-red-under-parallel-execution--severity-medium),
+the same family. **Two different tests failed two consecutive gate runs, neither
+related to the change under test.** That is how a gate stops being read: not
+because it is wrong once, but because it is wrong differently each time. Both are
+fixed rather than retried.

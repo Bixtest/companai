@@ -7,6 +7,52 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-08-10 — A key is not a person, and a cascade that never ran
+
+**The follow-through from U3.** Authentication resolved a regular API key through
+`createdBy` and required that person's organization to equal the key's — so
+moving somebody to another team silently killed every key they had ever created.
+Provenance was being used as identity.
+
+The rule is now the narrower one that actually matters: **a key may not be
+broader than its creator.** A null organization means *unrestricted across the
+tenant* to `RbacService`, so a key with none, minted by somebody confined to one
+organization, is an amplification and is refused — invariant I4. A key scoped to
+an organization its creator has since left is a service credential doing exactly
+what it was made for, and keeps working. Session keys keep exact equality,
+because there the borrowed identity is the whole point.
+
+**What the old behaviour did that was worth keeping** is now explicit rather than
+a side effect of a lookup failing: `api_keys` revokes a deleted user's keys on
+`auth.user.deleted`. Offboarding becomes a visible, audited act — the key list
+shows them revoked — instead of a fleet of credentials that mysteriously start
+returning 401. Authentication still refuses a key whose user has gone, because an
+event bus is not a place to put the last line of a security control.
+
+**And then, looking for an event to hang that on, I found U8.**
+`communication_channels` has a cascade that disconnects a departed user's email
+and calendar channels, stops the poller and orphans the credentials. Its first
+line reads `payload.userId`. The platform emits `payload.id`. **It had never run
+once** — a departed user's mailbox stayed connected and polling.
+
+Seven tests covered it. Every one of them constructed
+`{ userId: 'user-1', tenantId: 'tenant-1' }` — a payload nothing in the platform
+produces. That is [L34](LESSONS.md) again from a third direction: not SQL text
+this time but an event contract, and the same failure, a test that verifies the
+handler's *intent* against a shape somebody imagined.
+
+I wrote my own subscriber against the real payload and put the shape in a typed
+comment, because the next person to add a cascade will copy whichever one they
+find first.
+
+**The gate then failed on something unrelated** — a `<Notice>` guard that walks
+every source file in the repo, reading one from a sibling package's scratch
+directory a moment after that package's own tests deleted it. Passes alone, fails
+in the gate: the shape of every flake that teaches people to re-run instead of
+read. Skipping `.tmp-*` and tolerating a file that vanishes mid-walk brings it
+into line with the platform's other repo-walking guard, which already does both.
+[U9](workspace/references/upstream-issues.md).
+
 ## 2026-08-10 — U2: a screen that showed an action and behaved like a declaration
 
 The *Apply to roles* switches on Sidebar customization reset to "no roles" on

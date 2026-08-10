@@ -707,6 +707,75 @@ and save — that is an explicit act, and the badge says so first.
 
 ---
 
+## Batch K — API keys stop caring where their creator sits
+
+**What changed, in one sentence.** An API key no longer breaks when the person
+who created it is moved to another organization.
+
+**Why it matters to us.** A key is the platform's nearest thing to a non-human
+worker. Tying its working life to a person's current record meant an ordinary HR
+change silently revoked integrations, with a 401 that explained nothing.
+
+**Visible change:** none in normal use. Keys that worked still work.
+
+### Test 1 — a key survives its creator moving (5 minutes)
+
+Only if you have two organizations. If you have one, skip to Test 2.
+
+1. Create an API key at **http://localhost:3000/backend/api-keys** and copy the
+   secret.
+2. Confirm it works:
+
+```bash
+curl -i -H "X-Api-Key: PASTE_SECRET" http://localhost:3000/api/directory/organizations
+```
+
+3. Now move **your own user** to the other organization at
+   **http://localhost:3000/backend/users** — edit yourself, change Organization,
+   save.
+4. Run the same curl again.
+
+**Should happen:** `200` both times.
+
+**Would mean broken:** `401` after the move. That was the old behaviour.
+
+5. Move yourself back.
+
+---
+
+### Test 2 — deleting a person revokes their keys (4 minutes)
+
+**Do this with a throwaway user, not your own account.**
+
+1. Create a user at **http://localhost:3000/backend/users** — any name, give them
+   the `admin` role.
+2. Sign in as them in a private window and create an API key. Copy the secret.
+3. Confirm the key works with the curl above.
+4. Back in your own session, **delete that user**.
+5. Run the curl again.
+
+**Should happen:** `401`. And at **/backend/api-keys** the key is gone from the
+list — revoked, not silently broken.
+
+**Would mean broken:** the key still returns `200`. A departed person's
+credentials must stop working.
+
+---
+
+### Test 3 — the mailbox cascade that never ran (2 minutes, only if you use channels)
+
+If you have connected an email or calendar channel under
+**http://localhost:3000/backend/communication-channels**, deleting its owner now
+actually disconnects it. It did not before — the code was there and had never
+executed once.
+
+**Should happen:** after deleting the owning user, the channel shows as
+disconnected and inactive.
+
+**Skip this** if you have no channels connected; there is nothing to see.
+
+---
+
 ## Template for future batches
 
 ```markdown

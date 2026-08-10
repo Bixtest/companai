@@ -66,7 +66,7 @@ the actor. Confusing them was U3.
 | Column | What it means | Does it authorize? |
 |---|---|---|
 | `session_user_id` | The key **acts as** this user. Set for session keys only | **Yes.** The key borrows a person's identity and must not outrange them |
-| `created_by` | Who minted the key. Provenance | **It should not, and it does** — see below |
+| `created_by` | Who minted the key. Provenance | **Only to stop the key outranging its creator** — see below |
 | `organization_id` | The key's own scope | **Yes.** This is the key's authority, and it is what `RbacService` reads |
 
 ### What actually decides what a key may do
@@ -87,26 +87,40 @@ let organizations: string[] | null = key.organizationId ? [key.organizationId] :
 
 ### The comparison at authentication, and what it is for
 
+The rule differs by which identity the key carries, because the two mean
+different things:
+
 ```ts
-const actualUserId = record.sessionUserId ?? record.createdBy ?? null
-if (actualUserId) {
-  const user = await em.findOne(User, { id: actualUserId, deletedAt: null })
-  if (!user) return null
-  if (user.tenantId !== record.tenantId) return null
-  if (user.organizationId !== record.organizationId) return null   // ← U3
-}
+const outrangesCreator = isSessionKey
+  ? keyOrganizationId !== creatorOrganizationId          // identity: must match
+  : keyOrganizationId === null && creatorOrganizationId !== null   // provenance: must not exceed
 ```
 
-For a **session key** this is right: the key acts as that person, so it must not
-reach further than they do (I4 — authority carried, never amplified).
+For a **session key**, equality. The key acts as that person, so anywhere it can
+reach that they cannot is impersonation with extra privileges.
 
-For a **regular key** it is doing a different job by accident: it is the only
-thing stopping a single-organization admin from minting a null-organization —
-that is, tenant-wide — key. Useful, and in the wrong place, with three costs:
+For a **regular key**, only *"may not be broader than its creator"*. A null
+organization means **unrestricted across the tenant** to `RbacService`, so a key
+with none, minted by somebody confined to one organization, is an amplification
+(I4). Anything else — a key scoped to an organization its creator has since left
+— is a service credential doing exactly what it was created for, and nobody
+changing desks should revoke it.
 
-- **soft-delete the creator and every key they made returns 401**, silently;
-- move the creator to another organization and the same;
-- a machine credential's life is tied to a person's record.
+Equality used to be the rule for both. That is what made a key's working life
+depend on a person's current record: move them, and every key they ever created
+returned 401 silently, forever.
+
+### What happens when the person leaves
+
+Two mechanisms, deliberately:
+
+1. **`api_keys` subscribes to `auth.user.deleted` and revokes the keys that user
+   created.** Offboarding becomes an explicit, visible, auditable act — the key
+   list shows them revoked — rather than a fleet of credentials that mysteriously
+   begin failing.
+2. **Authentication still refuses a key whose user has gone.** Fail-closed
+   backstop for whatever the cascade missed, because an event bus is not a place
+   to put the last line of a security control.
 
 ### The rule when creating a key
 
@@ -137,8 +151,8 @@ misdiagnosed twice — see [L30 and L32](../../LESSONS.md).
 | `effectiveUserId` returns `null` unexpectedly | A service principal acting for nobody — correct, not a bug | Handle `null`; do **not** fall back to the key id, which writes personal rows nobody can read back |
 | A prefixed `api_key:<uuid>` used where a user id belongs | Legacy parsing that survived | Use the helpers |
 | A cached or trusted-envelope context has no principal | It never passed the boundary that attaches one | The helpers derive it — that is why they take the whole context |
-| An API key returns 401 on every request, with correct roles | Its `organization_id` disagrees with its creator's | Compare the two columns; the key was created from a request scope rather than from the creator |
-| Every key an offboarded admin created stops working at once | The creator's user row is soft-deleted, and authentication resolves the key through it | Known; the durable fix is on the backlog |
+| An API key returns 401 on every request, with correct roles | Its `organization_id` is null while its creator has one — it would outrange them | Give the key an organization; creation now does this automatically |
+| Every key an offboarded user created stops working | Deliberate. They were revoked when the user was deleted | Reissue under somebody who is still here |
 
 ## Where the code lives
 
