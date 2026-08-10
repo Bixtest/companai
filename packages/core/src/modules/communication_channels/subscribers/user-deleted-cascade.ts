@@ -37,9 +37,23 @@ export const metadata = {
   id: 'communication_channels:user-deleted-cascade',
 }
 
+/**
+ * The payload `emitCrudSideEffects` actually emits for `auth.user.deleted`.
+ *
+ * **The deleted user's id arrives as `id`, not `userId`.** This handler read
+ * `payload.userId` and returned early when it was missing — which it always was
+ * — so the cascade had never run once since it was written. Every test
+ * constructed a `{ userId }` payload the platform does not produce, so nothing
+ * could catch it.
+ *
+ * `userId` is still accepted, because a hand-rolled emitter may use it and
+ * refusing a valid-looking payload would repeat the same failure in the other
+ * direction.
+ */
 type AuthUserDeletedPayload = {
-  userId: string
-  tenantId?: string
+  id?: string
+  userId?: string
+  tenantId?: string | null
   organizationId?: string | null
 }
 
@@ -51,7 +65,12 @@ export default async function handler(
   payload: AuthUserDeletedPayload,
   ctx: SubscriberContext,
 ): Promise<void> {
-  if (!payload || typeof payload.userId !== 'string' || !payload.userId) {
+  const userId = typeof payload?.id === 'string' && payload.id
+    ? payload.id
+    : typeof payload?.userId === 'string' && payload.userId
+      ? payload.userId
+      : null
+  if (!userId) {
     return
   }
   // tenantId MUST be present: an unscoped cascade would touch rows in arbitrary
@@ -67,7 +86,7 @@ export default async function handler(
     em,
     CommunicationChannel,
     {
-      userId: payload.userId,
+      userId,
       tenantId: payload.tenantId,
       ...(payload.organizationId !== undefined
         ? { organizationId: payload.organizationId ?? null }

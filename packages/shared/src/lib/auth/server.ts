@@ -3,6 +3,9 @@ import type { EntityManager } from '@mikro-orm/postgresql'
 import { verifyJwt } from './jwt'
 import { getSharedApiKeyAuthCache } from './apiKeyAuthCache'
 import { apiKeySubject, derivePrincipal, isMachinePrincipal, type Principal } from './principal'
+import { createLogger } from '@open-mercato/shared/lib/logger'
+
+const logger = createLogger('auth').child({ component: 'api-key-auth' })
 
 export type { Principal, PrincipalKind } from './principal'
 export { effectiveUserId, isHumanPrincipal, isMachinePrincipal } from './principal'
@@ -261,12 +264,33 @@ async function resolveApiKeyAuth(secret: string): Promise<AuthContext> {
       }
     }
 
-    // For session keys, use sessionUserId; for regular keys, use createdBy
+    /**
+     * The two identities in an api_keys row, and what each one may decide.
+     *
+     * `sessionUserId` is **identity**: the key acts as that person, so it must
+     * not outlive them and must not outrange them. All three checks below are
+     * correct for it.
+     *
+     * `createdBy` is **provenance**: who minted a service credential that then
+     * carries its own roles and its own organization. Treating provenance as
+     * identity is what made a key's working life depend on a person's record —
+     * move that person to another organization and every key they ever created
+     * returned 401, silently, for the rest of its life.
+     */
+    const isSessionKey = Boolean(record.sessionUserId)
     const actualUserId = record.sessionUserId ?? record.createdBy ?? null
 
     if (actualUserId) {
       const user = await em.findOne(User, { id: actualUserId, deletedAt: null })
       if (!user) {
+        // Deliberately fail-closed, and deliberately still here for regular
+        // keys. A credential whose owner no longer exists is one nobody is
+        // accountable for; `api_keys` also revokes them on `auth.user.deleted`,
+        // and this is the backstop for anything that cascade missed.
+        logger.warn('API key rejected: the user it resolves through no longer exists', {
+          keyId: record.id,
+          isSessionKey,
+        })
         cache.setMiss(secret)
         return null
       }
@@ -274,7 +298,31 @@ async function resolveApiKeyAuth(secret: string): Promise<AuthContext> {
         cache.setMiss(secret)
         return null
       }
-      if ((user.organizationId ?? null) !== (record.organizationId ?? null)) {
+      /**
+       * Invariant **I4** — authority is carried, never amplified.
+       *
+       * For a session key, equality is the rule: it acts as this person and may
+       * not reach anywhere they cannot.
+       *
+       * For a regular key, the rule is narrower and states what actually
+       * matters: **a key may not be broader than its creator**. A null
+       * organization means *unrestricted across the tenant* to `RbacService`,
+       * so a key with none, minted by somebody confined to one organization,
+       * would be an amplification. Anything else — a key scoped to an
+       * organization its creator has since left — is a service credential doing
+       * exactly what it was created to do, and nothing about a person changing
+       * desks should revoke it.
+       */
+      const keyOrganizationId = record.organizationId ?? null
+      const creatorOrganizationId = user.organizationId ?? null
+      const outrangesCreator = isSessionKey
+        ? keyOrganizationId !== creatorOrganizationId
+        : keyOrganizationId === null && creatorOrganizationId !== null
+      if (outrangesCreator) {
+        logger.warn('API key rejected: it would reach further than the user it resolves through', {
+          keyId: record.id,
+          isSessionKey,
+        })
         cache.setMiss(secret)
         return null
       }

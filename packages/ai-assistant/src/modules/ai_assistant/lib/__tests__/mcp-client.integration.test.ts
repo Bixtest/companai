@@ -3,6 +3,19 @@ import os from 'node:os'
 import path from 'node:path'
 import { McpClient } from '../mcp-client'
 
+/**
+ * Spawns a real Node process and completes an MCP handshake, so it is bound by
+ * how busy the machine is rather than by anything in the code under test. On an
+ * idle machine it takes about six seconds; under a parallel gate — twenty-two
+ * packages compiling and testing at once — it exceeded jest's 5s default and
+ * failed a green change.
+ *
+ * The assertion is fine; only the budget was wrong. A timeout tuned for an idle
+ * machine is a test that reports "the gate is red" when it means "the laptop was
+ * busy", and that is how people learn to re-run instead of read.
+ */
+const SPAWN_HANDSHAKE_TIMEOUT_MS = 30_000
+
 describe('McpClient stdio integration', () => {
   it('starts exactly one SDK-managed server process for one stdio client connection', async () => {
     const previousSpawnLog = process.env.MCP_SPAWN_LOG
@@ -49,5 +62,5 @@ await server.connect(new StdioServerTransport());
       }
       fs.rmSync(logPath, { force: true })
     }
-  })
+  }, SPAWN_HANDSHAKE_TIMEOUT_MS)
 })

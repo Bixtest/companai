@@ -27,6 +27,11 @@ function collectSourceFiles(start: string, out: string[]) {
   const entries = fs.readdirSync(start, { withFileTypes: true })
   for (const entry of entries) {
     if (IGNORED_DIRS.has(entry.name)) continue
+    // Sibling packages create `.tmp-*` scratch directories while their own
+    // tests run. Walking another package's scratch during a parallel gate finds
+    // files that are deleted a moment later — which failed this guard with an
+    // ENOENT that had nothing to do with `<Notice>`.
+    if (entry.name.startsWith('.tmp-')) continue
     const full = path.join(start, entry.name)
     if (entry.isDirectory()) {
       collectSourceFiles(full, out)
@@ -52,7 +57,14 @@ describe('Deprecated <Notice> JSX guard', () => {
     for (const file of files) {
       if (ALLOWED_FILES.has(file)) continue
       if (/__tests__/.test(file)) continue
-      const contents = fs.readFileSync(file, 'utf8')
+      // This guard walks a live working tree, so a file can vanish between
+      // being listed and being read. That is not a violation of anything.
+      let contents: string
+      try {
+        contents = fs.readFileSync(file, 'utf8')
+      } catch {
+        continue
+      }
       if (!noticeUsageRegex.test(contents)) continue
 
       const lines = contents.split('\n')

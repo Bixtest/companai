@@ -87,4 +87,34 @@ describe('user-deleted-cascade subscriber behaviour', () => {
     await handler({ userId: 'user-1', tenantId: 'tenant-1' }, makeCtx({ find, flush }))
     expect(flush).not.toHaveBeenCalled()
   })
+
+  /**
+   * The shape the platform actually emits.
+   *
+   * Every test above hands the handler a `{ userId }` payload, which
+   * `emitCrudSideEffects` has never produced — the deleted user's id arrives as
+   * `id`. So the handler returned early on every real event and the cascade had
+   * never run, while the suite stayed green. These two hold the contract rather
+   * than the intent.
+   */
+  it('runs on the payload emitCrudSideEffects emits, where the user id is `id`', async () => {
+    const channel = makeChannel({ id: 'ch-a', userId: 'user-1' })
+    const find = jest.fn().mockResolvedValue([channel])
+    const flush = jest.fn()
+
+    await handler({ id: 'user-1', tenantId: 'tenant-1' } as never, makeCtx({ find, flush }))
+
+    expect(channel.status).toBe('disconnected')
+    expect(flush).toHaveBeenCalled()
+  })
+
+  it('still accepts a hand-rolled payload that names it `userId`', async () => {
+    const channel = makeChannel({ id: 'ch-a', userId: 'user-1' })
+    const find = jest.fn().mockResolvedValue([channel])
+    const flush = jest.fn()
+
+    await handler({ userId: 'user-1', tenantId: 'tenant-1' } as never, makeCtx({ find, flush }))
+
+    expect(channel.status).toBe('disconnected')
+  })
 })
