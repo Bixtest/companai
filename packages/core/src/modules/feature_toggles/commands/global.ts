@@ -86,6 +86,8 @@ async function loadOverrideSnapshots(em: EntityManager, toggleId: string): Promi
 
 const createToggleCommand: CommandHandler<ToggleCreateInput, { toggleId: string }> = {
   id: 'feature_toggles.global.create',
+  // Capability taken from the route that invokes this command, not from the id.
+  capability: 'feature_toggles.global.manage',
   async execute(rawInput, ctx) {
     assertGlobalToggleSuperAdmin(ctx)
     const parsed = toggleCreateSchema.parse(rawInput)
@@ -205,6 +207,8 @@ const createToggleCommand: CommandHandler<ToggleCreateInput, { toggleId: string 
 
 const updateToggleCommand: CommandHandler<ToggleUpdateInput, { toggleId: string }> = {
   id: 'feature_toggles.global.update',
+  // Capability taken from the route that invokes this command, not from the id.
+  capability: 'feature_toggles.global.manage',
   async prepare(rawInput, ctx) {
     const parsed = toggleUpdateSchema.parse(rawInput)
     const em = (ctx.container.resolve('em') as EntityManager)
@@ -337,6 +341,8 @@ const updateToggleCommand: CommandHandler<ToggleUpdateInput, { toggleId: string 
 const deleteToggleCommand: CommandHandler<{ body?: Record<string, unknown>; query?: Record<string, unknown> }, { toggleId: string }> =
 {
   id: 'feature_toggles.global.delete',
+  // Capability taken from the route that invokes this command, not from the id.
+  capability: 'feature_toggles.global.manage',
   async prepare(input, ctx) {
     const id = requireId(input, 'Feature toggle id required')
     const em = (ctx.container.resolve('em') as EntityManager)

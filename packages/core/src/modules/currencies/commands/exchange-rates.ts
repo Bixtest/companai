@@ -104,6 +104,8 @@ async function validateCurrenciesExist(
 
 const createExchangeRateCommand: CommandHandler<ExchangeRateCreateInput, { exchangeRateId: string }> = {
   id: 'currencies.exchange_rates.create',
+  // Capability taken from the route that invokes this command, not from the id.
+  capability: 'currencies.rates.manage',
   async execute(input, ctx) {
     const parsed = exchangeRateCreateSchema.parse(input)
     ensureCurrencyCommandScope(ctx, parsed)
@@ -205,6 +207,8 @@ const createExchangeRateCommand: CommandHandler<ExchangeRateCreateInput, { excha
 
 const updateExchangeRateCommand: CommandHandler<ExchangeRateUpdateInput, { exchangeRateId: string }> = {
   id: 'currencies.exchange_rates.update',
+  // Capability taken from the route that invokes this command, not from the id.
+  capability: 'currencies.rates.manage',
   async prepare(input, ctx) {
     requireId(input.id, 'Exchange rate ID is required')
     const em = ctx.container.resolve('em') as EntityManager
@@ -343,6 +347,8 @@ const updateExchangeRateCommand: CommandHandler<ExchangeRateUpdateInput, { excha
 
 const deleteExchangeRateCommand: CommandHandler<ExchangeRateDeleteInput, { exchangeRateId: string }> = {
   id: 'currencies.exchange_rates.delete',
+  // Capability taken from the route that invokes this command, not from the id.
+  capability: 'currencies.rates.manage',
   async prepare(input, ctx) {
     requireId(input.id, 'Exchange rate ID is required')
     const em = ctx.container.resolve('em') as EntityManager

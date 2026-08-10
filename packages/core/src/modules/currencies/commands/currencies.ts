@@ -98,6 +98,8 @@ async function enforceBaseCurrency(
 
 const createCurrencyCommand: CommandHandler<CurrencyCreateInput, { currencyId: string }> = {
   id: 'currencies.currencies.create',
+  // Capability taken from the route that invokes this command, not from the id.
+  capability: 'currencies.manage',
   async execute(input, ctx) {
     const parsed = currencyCreateSchema.parse(input)
     ensureCurrencyCommandScope(ctx, parsed)
@@ -211,6 +213,8 @@ const createCurrencyCommand: CommandHandler<CurrencyCreateInput, { currencyId: s
 
 const updateCurrencyCommand: CommandHandler<CurrencyUpdateInput, { currencyId: string }> = {
   id: 'currencies.currencies.update',
+  // Capability taken from the route that invokes this command, not from the id.
+  capability: 'currencies.manage',
   async prepare(input, ctx) {
     requireId(input.id, 'Currency ID is required')
     const em = ctx.container.resolve('em') as EntityManager
@@ -345,6 +349,8 @@ const updateCurrencyCommand: CommandHandler<CurrencyUpdateInput, { currencyId: s
 
 const deleteCurrencyCommand: CommandHandler<CurrencyDeleteInput, { currencyId: string }> = {
   id: 'currencies.currencies.delete',
+  // Capability taken from the route that invokes this command, not from the id.
+  capability: 'currencies.manage',
   async prepare(input, ctx) {
     requireId(input.id, 'Currency ID is required')
     const em = ctx.container.resolve('em') as EntityManager

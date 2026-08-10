@@ -137,6 +137,8 @@ export const roleCrudIndexer: CrudIndexerConfig = {
 
 const createRoleCommand: CommandHandler<Record<string, unknown>, Role> = {
   id: 'auth.roles.create',
+  // Capability taken from the route that invokes this command, not from the id.
+  capability: 'auth.roles.manage',
   async execute(rawInput, ctx) {
     const rawBody = rawInput && typeof rawInput === 'object' ? rawInput as Record<string, unknown> : {}
     if ('tenantId' in rawBody && rawBody.tenantId === null) {
@@ -299,6 +301,8 @@ const createRoleCommand: CommandHandler<Record<string, unknown>, Role> = {
 
 const updateRoleCommand: CommandHandler<Record<string, unknown>, Role> = {
   id: 'auth.roles.update',
+  // Capability taken from the route that invokes this command, not from the id.
+  capability: 'auth.roles.manage',
   async prepare(rawInput, ctx) {
     const { parsed } = parseWithCustomFields(updateSchema, rawInput)
     const em = (ctx.container.resolve('em') as EntityManager)
@@ -469,6 +473,8 @@ const updateRoleCommand: CommandHandler<Record<string, unknown>, Role> = {
 
 const deleteRoleCommand: CommandHandler<{ body?: Record<string, unknown>; query?: Record<string, unknown> }, Role> = {
   id: 'auth.roles.delete',
+  // Capability taken from the route that invokes this command, not from the id.
+  capability: 'auth.roles.manage',
   async prepare(input, ctx) {
     const id = requireId(input, 'Role id required')
     const em = (ctx.container.resolve('em') as EntityManager)

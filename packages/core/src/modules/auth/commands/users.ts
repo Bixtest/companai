@@ -195,6 +195,8 @@ type CreateUserResult = { user: User; warning?: 'invite_email_failed' }
 
 const createUserCommand: CommandHandler<Record<string, unknown>, CreateUserResult> = {
   id: 'auth.users.create',
+  // Capability taken from the route that invokes this command, not from the id.
+  capability: 'auth.users.create',
   async execute(rawInput, ctx) {
     const { parsed, custom } = parseWithCustomFields(createSchema, rawInput)
     const em = (ctx.container.resolve('em') as EntityManager)
@@ -503,6 +505,8 @@ function isUniqueViolation(error: unknown): boolean {
 
 const updateUserCommand: CommandHandler<Record<string, unknown>, User> = {
   id: 'auth.users.update',
+  // Capability taken from the route that invokes this command, not from the id.
+  capability: 'auth.users.edit',
   async prepare(rawInput, ctx) {
     const { parsed } = parseWithCustomFields(updateSchema, rawInput)
     const em = (ctx.container.resolve('em') as EntityManager)
@@ -756,6 +760,8 @@ const updateUserCommand: CommandHandler<Record<string, unknown>, User> = {
 
 const deleteUserCommand: CommandHandler<{ body?: Record<string, unknown>; query?: Record<string, unknown> }, User> = {
   id: 'auth.users.delete',
+  // Capability taken from the route that invokes this command, not from the id.
+  capability: 'auth.users.delete',
   async prepare(input, ctx) {
     const id = requireId(input, 'User id required')
     const em = (ctx.container.resolve('em') as EntityManager)
