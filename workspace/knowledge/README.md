@@ -12,6 +12,36 @@ and [`LESSONS.md`](../../LESSONS.md).
 | [`JOURNAL.md`](../../JOURNAL.md) | *"How did we get here?"* |
 | [`references/`](../references/) | *"What is the plan for this phase?"* |
 
+## What is here, and the order to read it
+
+**If you are new: read [authority-overview.md](authority-overview.md) first.** It
+is the governance layer end to end — the part of this project that does not exist
+anywhere else — and every other entry below is a piece of it or a platform
+mechanism it stands on.
+
+### The governance layer — what we are building
+
+| Read | Answers |
+|---|---|
+| 1. [authority-overview.md](authority-overview.md) | *"What happens when somebody tries to do something?"* — start here |
+| 2. [principals.md](principals.md) | *"Who is acting?"* — person, service, AI worker, and the API-key traps |
+| 3. [capabilities.md](capabilities.md) | *"What kind of act is this?"* — effect class, reversibility, data classes |
+| 4. [authority-decisions.md](authority-decisions.md) | *"How much autonomy?"* — the resolver, the gates, enforcement, held acts |
+| 5. [org-authority-graph.md](org-authority-graph.md) | *"What does the org structure permit?"* — typed edges and ceilings |
+
+### The platform underneath — what we inherited
+
+| Read | Answers |
+|---|---|
+| [audited-writes.md](audited-writes.md) | *"How do I make a write that gets recorded?"* — and why it fails closed |
+| [ledger.md](ledger.md) | *"How do we prove the record was not altered?"* |
+| [scope-tenant-organization.md](scope-tenant-organization.md) | *"Which tenant and organization does this belong to?"* — and the one rule behind four bugs |
+| [module-lifecycle.md](module-lifecycle.md) | *"How do I add, park or restore a module?"* |
+| [overrides.md](overrides.md) | *"How do I change a module's behaviour without forking it?"* |
+
+Read the first group in order and you understand the product. Read the second
+when you need it — each is self-contained.
+
 ## Who this is for — including something that does not exist yet
 
 Three readers, in order of how soon they arrive:

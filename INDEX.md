@@ -24,8 +24,9 @@ and can always explain why.
 | **Phase** | Building the Starting Kit |
 | **Decision made** | We are building on **Open Mercato**, a working platform we have forked permanently |
 | **Where the code is** | [`workspace/starting-kit/`](workspace/starting-kit/) |
-| **Health** | **Green.** Boots clean, 44/44 admin pages, zero server errors. typecheck 20/20 · lint 1/1 · build 20/20 · **test 22/22 tasks, 12,283 passed, 0 failed** |
-| **Current work** | **All six repairs in**, resolver running in shadow mode, and the audit trail can now tell a machine from a person. Next: enforcement, once the shadow has seen enough traffic |
+| **Health** | **Green.** Boots clean, zero server errors. **Gate: 22/22 tasks, 12,639 tests, 0 failed** (2026-08-10) |
+| **Current work** | **The governance layer decides.** All six repairs in; the resolver enforces per tenant; an act it gates at A1/A2 is held until a person approves it; acts are graded by the data they touch. Next: widen which commands are gated, then build the approvals screen |
+| **Understand the product in 10 minutes** | [`workspace/knowledge/authority-overview.md`](workspace/knowledge/authority-overview.md) — the governance layer end to end. **This is the thing we are building** |
 | **Progress tracker** | [`workspace/PROGRESS.md`](workspace/PROGRESS.md) — every batch, what is done, what is next |
 | **The ERP is off** | 14 modules **parked**, not deleted — 136 tables instead of 263. One line each to restore: [`workspace/references/parked-modules.md`](workspace/references/parked-modules.md) |
 | **Actually deleted** | Only `packages/enterprise`, because its licence forbids redistribution |
@@ -41,6 +42,7 @@ Read these and you will understand the project. About an hour.
 | 2 | [`compai/planning/09-starting-kit.md`](compai/planning/09-starting-kit.md) | **In plain English** — what the platform gives us and what we still have to build |
 | 3 | [`compai/planning/08-host-selection-and-migration-plan.md`](compai/planning/08-host-selection-and-migration-plan.md) | Why we chose this platform and what happens next |
 | 4 | [`workspace/COOKBOOK.md`](workspace/COOKBOOK.md) | How the work is actually done |
+| 5 | [`workspace/knowledge/authority-overview.md`](workspace/knowledge/authority-overview.md) | **The governance layer, end to end** — the part that does not exist anywhere else |
 
 Then, before touching anything: [`LESSONS.md`](LESSONS.md) — the mistakes already
 made and how they were caught. It will save you from repeating them.
@@ -78,6 +80,71 @@ companai/                      ← you are here
 
 ⚠️ **Naming trap:** the outer folder is `companai`, the inner one is `compai`.
 Different spellings, not a typo you should "fix" — paths depend on both.
+
+## 4b. How to pick up the work — the loop
+
+Every batch runs the same way. Nothing here is optional.
+
+**1. Find out what is next.**
+[`workspace/PROGRESS.md`](workspace/PROGRESS.md) → *The backlog*. It is ordered;
+take item 1 unless you have a reason not to. If you have a reason, say it and
+re-order the list — the list is the memory, not you.
+
+**2. Set up your shell.** Every session, every terminal:
+
+```bash
+export PATH="/c/Users/Ramzi/Downloads/companai/workspace/.toolchain/node24:$PATH"
+```
+
+Wrong Node produces results that describe the laptop, not the platform. See
+[`workspace/references/environment.md`](workspace/references/environment.md).
+
+**3. Take a restore point if the work could not be undone** — a migration, a
+bulk update, anything touching the database:
+
+```bash
+./workspace/scripts/checkpoint.sh <short-label>
+```
+
+It says plainly if it could not back the database up. Believe it when it does.
+
+**4. Do the work.** Read the knowledge entry for the area first
+([`workspace/knowledge/`](workspace/knowledge/) has a reading order). Write the
+tests that would have caught the bug, not the tests that pass.
+
+**5. Run the gate. All of it, with the local server stopped:**
+
+```bash
+cd workspace/starting-kit
+corepack yarn generate && corepack yarn build:packages && corepack yarn typecheck && corepack yarn lint && corepack yarn test
+```
+
+A running instance makes the suite flaky — that cost a day to work out. Never
+pipe these through `head` or `tail`; you throw away the exit code.
+
+**6. If you changed anything the app serves, rebuild it.** The app serves
+`packages/*/dist`, not your source. Source edits are invisible until:
+
+```bash
+corepack yarn build:packages && corepack yarn build:app --force
+```
+
+then restart the server. This one has caught us more than once.
+
+**7. Commit in both repositories.** They are separate:
+
+- `workspace/starting-kit/` — the code
+- the project root — the thinking: journal, lessons, backlog, knowledge
+
+**8. Update the documentation in the same change.** Not afterwards. A batch that
+leaves `PROGRESS.md`, the knowledge base or `how-to-test.md` stale is not
+finished — that is COOKBOOK Rule zero, and it is the rule this project is most
+serious about.
+
+**9. Write the owner's test instructions.**
+[`workspace/references/how-to-test.md`](workspace/references/how-to-test.md) —
+click by click, with the expected result and the failure signature. Say plainly
+when a change is invisible.
 
 ## 5. The rules that matter most
 
@@ -133,6 +200,9 @@ Break these and you will damage the project.
 | Avoid a known trap | [`LESSONS.md`](LESSONS.md) |
 | **Check if we already built something** | [`workspace/attic/CATALOG.md`](workspace/attic/CATALOG.md) |
 | Turn a parked module back on | [`workspace/references/parked-modules.md`](workspace/references/parked-modules.md) |
+| **Understand the governance layer** | [`workspace/knowledge/authority-overview.md`](workspace/knowledge/authority-overview.md) |
+| **See what the rules would say about an act** | `corepack yarn mercato auth authority:explain --capability <id> --actor ai_worker` |
+| **Check or change a tenant's enforcement mode** | `corepack yarn mercato auth authority:mode --tenant <id> [--set off\|shadow\|enforce]` |
 | Assess a new platform | [`compai/planning/method/platform-assessment-methodology.md`](compai/planning/method/platform-assessment-methodology.md) |
 
 ## 7. Maintaining this page
@@ -143,4 +213,4 @@ a folder, finishes a phase, or makes a decision updates it in the same change.
 A newcomer who cannot orient themselves from this page alone means it is broken —
 fix the page, not the newcomer.
 
-*Last updated: 2026-08-09 — R2 complete. Gate green: 22/22 tasks, 12,283 tests.*
+*Last updated: 2026-08-10 — enforcement, held acts and data-class grading landed. Gate green: 22/22 tasks, 12,639 tests.*
