@@ -4,7 +4,7 @@ import type { EntityManager, FilterQuery } from '@mikro-orm/postgresql'
 import { makeCrudRoute } from '@open-mercato/shared/lib/crud/factory'
 import type { CrudCtx } from '@open-mercato/shared/lib/crud/factory'
 import type { RbacService } from '@open-mercato/core/modules/auth/services/rbacService'
-import { Role } from '@open-mercato/core/modules/auth/data/entities'
+import { Role, User } from '@open-mercato/core/modules/auth/data/entities'
 import { Organization } from '@open-mercato/core/modules/directory/data/entities'
 import { ApiKey } from '../../data/entities'
 import { createApiKeySchema } from '../../data/validators'
@@ -299,7 +299,60 @@ const crud = makeCrudRoute<
       scopedCtx.__apiKeyRoleIds = roleIds
 
       const allowedIds = ctx.organizationScope?.allowedIds ?? null
-      const organizationId = input.organizationId ?? ctx.selectedOrganizationId ?? auth.orgId ?? null
+
+      /**
+       * U3 — a key whose organization does not match its creator's is rejected
+       * at *every use*, not at creation.
+       *
+       * `resolveApiKeyAuth` resolves a key through `sessionUserId ?? createdBy`
+       * and then requires that user's organization to equal the key's. Deriving
+       * the key's organization from the *request scope* instead makes the two
+       * disagree exactly when the creator has an organization but the request
+       * carries no selected one — which is the ordinary case for an admin
+       * working tenant-wide. The key is minted, a secret is returned, and every
+       * request made with it returns 401 forever.
+       *
+       * Reproduced 2026-08-10: a key created through the UI came out with a null
+       * organization while its creator had one; it returned 401 on first use,
+       * and setting that one column to the creator's organization turned the
+       * same request into a 200.
+       *
+       * So the creator's own organization is what the key defaults to. That is
+       * also the U4 rule — the actor's *request scope* is not a value to store,
+       * because it makes the record mean "whatever scope the person happened to
+       * be looking at". The creator's organization is a property of the creator,
+       * and it is the one the authentication path will compare against.
+       *
+       * An organization asked for explicitly is honoured up to the point where
+       * it would produce a dead key, and refused there in words. A key that
+       * cannot work should fail when someone is watching.
+       *
+       * The authentication comparison is deliberately left alone. For a session
+       * key it is correct — the key acts as that user and must not outrange
+       * them. For a regular key it constrains a machine credential by a person's
+       * current attributes, which is a different question and is on the backlog.
+       */
+      const creatorId = auth.sub ?? null
+      const creator = creatorId ? await em.findOne(User, { id: creatorId, deletedAt: null }) : null
+      const creatorOrganizationId = creator ? creator.organizationId ?? null : null
+      const requestedOrganizationId = input.organizationId ?? null
+
+      // A creator that cannot be loaded is an absence of evidence, not evidence
+      // of a mismatch: keep the previous derivation rather than blocking every
+      // context that does not carry a full user record (CLI, service bootstrap).
+      const organizationId = creator
+        ? requestedOrganizationId ?? creatorOrganizationId
+        : requestedOrganizationId ?? ctx.selectedOrganizationId ?? auth.orgId ?? null
+
+      if (creator && requestedOrganizationId !== null && requestedOrganizationId !== creatorOrganizationId) {
+        throw json({
+          error: translate(
+            'api_keys.errors.organizationMustMatchCreator',
+            'This key would belong to a different organization than the person creating it, and would be rejected every time it is used. Create it for your own organization instead.',
+          ),
+        }, { status: 422 })
+      }
+
       const isSuperAdmin = await resolveIsSuperAdmin(scopedCtx)
       if (
         !isOrganizationAccessAllowed({

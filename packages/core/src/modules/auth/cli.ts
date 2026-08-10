@@ -853,6 +853,31 @@ const syncRoleAcls: ModuleCli = {
 }
 
 /**
+ * Puts a graph ceiling that no edge produced into words.
+ *
+ * `A5` from an unmapped path and `A5` from a root organization are the same
+ * number and different facts, and so are `A0` from a deliberate edge and `A0`
+ * from an organization nobody could find. Whoever reads this output is trying to
+ * understand a refusal; a bare gate with no sentence behind it is the thing R5
+ * exists to abolish.
+ */
+function describeGraphBasis(graph: {
+  basis: string
+  unmappedHops: Array<{ parentId: string; childId: string }>
+}): string | undefined {
+  if (graph.basis === 'organization-unknown') {
+    return 'no such organization in this tenant, so no authority could be established for it'
+  }
+  if (graph.basis === 'path-unresolved') {
+    return 'the ancestor index and the recorded edges disagree about direction, so the path could not be assembled'
+  }
+  if (graph.unmappedHops.length > 0) {
+    return `${graph.unmappedHops.length} step(s) above this organization have no edge recorded, and an absent edge constrains nothing`
+  }
+  return undefined
+}
+
+/**
  * Explains an authority decision (R5).
  *
  * The resolver returns reasons rather than a boolean, and this is where that
@@ -905,11 +930,15 @@ const authorityExplain: ModuleCli = {
         ceilingFor: (org: string, tenant: string, capability: string) => Promise<{
           ceiling: string
           contributingEdges: Array<{ because: string }>
+          basis: string
+          unmappedHops: Array<{ parentId: string; childId: string }>
         }>
       }
       const graph = await graphService.ceilingFor(args.org, args.tenant, capabilityId)
       graphCeiling = graph.ceiling
-      graphCeilingDetail = graph.contributingEdges[0]?.because
+      // A ceiling with no explanation is the failure mode R6 exists to avoid, so
+      // every basis that produces no contributing edge says so in words instead.
+      graphCeilingDetail = graph.contributingEdges[0]?.because ?? describeGraphBasis(graph)
     }
 
     const decision = resolveDecision({

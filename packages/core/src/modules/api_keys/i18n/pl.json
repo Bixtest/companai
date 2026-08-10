@@ -6,6 +6,7 @@
   "api_keys.errors.forbidden": "Brak uprawnień",
   "api_keys.errors.notFound": "Nie znaleziono",
   "api_keys.errors.organizationOutOfScope": "Organizacja poza zakresem",
+  "api_keys.errors.organizationMustMatchCreator": "Ten klucz należałby do innej organizacji niż osoba, która go tworzy, i byłby odrzucany przy każdym użyciu. Utwórz go dla własnej organizacji.",
   "api_keys.errors.roleNotFound": "Nie znaleziono roli {identifier}",
   "api_keys.errors.roleWrongTenant": "Rola {role} należy do innego najemcy",
   "api_keys.errors.tenantRequired": "Wymagany jest kontekst najemcy",

@@ -6,6 +6,7 @@
   "api_keys.errors.forbidden": "Prohibido",
   "api_keys.errors.notFound": "No encontrado",
   "api_keys.errors.organizationOutOfScope": "Organización fuera del ámbito",
+  "api_keys.errors.organizationMustMatchCreator": "Esta clave pertenecería a una organización distinta de la persona que la crea y sería rechazada cada vez que se use. Créela para su propia organización.",
   "api_keys.errors.roleNotFound": "Rol {identifier} no encontrado",
   "api_keys.errors.roleWrongTenant": "El rol {role} pertenece a otro inquilino",
   "api_keys.errors.tenantRequired": "Se requiere contexto de inquilino",

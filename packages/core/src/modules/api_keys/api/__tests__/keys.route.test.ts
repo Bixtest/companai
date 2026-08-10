@@ -119,6 +119,17 @@ beforeAll(async () => {
 describe('API Keys route', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    // `clearAllMocks` empties the call log but keeps queued `...Once` values, so
+    // a queue an earlier test did not consume is handed to the next one. Every
+    // mock below that any test primes with `Once` is reset outright, then given
+    // its default again — otherwise adding a query to the route under test
+    // silently redirects another test's leftovers into it.
+    mockEm.findOne.mockReset()
+    mockResolveScope.mockReset()
+    mockRbac.loadAcl.mockReset()
+    mockGetAuthFromCookies.mockReset()
+    mockGetAuthFromRequest.mockReset()
+    mockDataEngine.deleteOrmEntity.mockReset()
     mockDataEngine.__queue.length = 0
     mockFindOneWithDecryption.mockReset()
     mockFindOneWithDecryption.mockResolvedValue(null)
@@ -579,5 +590,121 @@ describe('API Keys route', () => {
     expect(response.status).toBe(404)
     expect(await response.json()).toEqual({ error: 'Not found' })
     expect(mockDataEngine.deleteOrmEntity).not.toHaveBeenCalled()
+  })
+
+  /**
+   * U3 — the key that authenticates as nobody.
+   *
+   * `resolveApiKeyAuth` resolves a key through `sessionUserId ?? createdBy` and
+   * then requires that user's organization to equal the key's. A key whose
+   * organization was taken from the request scope instead of from its creator
+   * disagrees with that comparison the moment an admin works tenant-wide: it is
+   * created successfully, hands back a secret, and returns 401 on every request
+   * for the rest of its life.
+   *
+   * Reproduced against the running instance on 2026-08-10 — 401 on first use,
+   * and 200 after changing that one column.
+   */
+  describe('the organization a new key is created in', () => {
+    const CREATOR_ORGANIZATION = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'
+
+    function creatorHasOrganization(organizationId: string | null) {
+      mockEm.findOne.mockImplementation(async (_entity: unknown, criteria: Record<string, unknown> = {}) => {
+        if ((criteria as { id?: unknown }).id === 'user-1') {
+          return { id: 'user-1', organizationId, tenantId: '123e4567-e89b-12d3-a456-426614174000' }
+        }
+        return null
+      })
+    }
+
+    async function createKey(body: Record<string, unknown>) {
+      return postHandler(
+        new Request('http://localhost/api/api_keys/keys', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ name: 'Integration key', roles: ['manager'], ...body }),
+        }),
+      )
+    }
+
+    it("takes the creator's organization rather than the scope they happened to be viewing", async () => {
+      creatorHasOrganization(CREATOR_ORGANIZATION)
+      // The request carries a different selected organization, which is what the
+      // route used to store — and what made the key unusable.
+      mockResolveScope.mockResolvedValue({
+        selectedId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+        filterIds: null,
+        allowedIds: null,
+      })
+
+      const response = await createKey({})
+
+      expect(response.status).toBe(201)
+      expect(mockDataEngine.createOrmEntity.mock.calls[0][0].data).toMatchObject({
+        organizationId: CREATOR_ORGANIZATION,
+      })
+    })
+
+    it('creates an unscoped key for a creator who has no organization of their own', async () => {
+      // A superadmin with no organization gets a key with none either — which
+      // matches, and is the only value that will pass the comparison at use.
+      creatorHasOrganization(null)
+      mockRbac.loadAcl.mockResolvedValue({ isSuperAdmin: true })
+      mockResolveScope.mockResolvedValue({
+        selectedId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+        filterIds: null,
+        allowedIds: null,
+      })
+
+      const response = await createKey({})
+
+      expect(response.status).toBe(201)
+      expect(mockDataEngine.createOrmEntity.mock.calls[0][0].data).toMatchObject({
+        organizationId: null,
+      })
+    })
+
+    it('refuses an explicit organization that would make the key unusable, and says so', async () => {
+      creatorHasOrganization(CREATOR_ORGANIZATION)
+      mockRbac.loadAcl.mockResolvedValue({ isSuperAdmin: true })
+
+      const response = await createKey({ organizationId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' })
+
+      // 422, not 403: the request is not forbidden, it is impossible. A silent
+      // permanent failure becomes an immediate, explicable one.
+      expect(response.status).toBe(422)
+      expect((await response.json()).error).toContain('rejected every time it is used')
+      expect(mockDataEngine.createOrmEntity).not.toHaveBeenCalled()
+    })
+
+    it('accepts an explicit organization that matches the creator', async () => {
+      creatorHasOrganization(CREATOR_ORGANIZATION)
+      mockResolveScope.mockResolvedValue({
+        selectedId: null,
+        filterIds: null,
+        allowedIds: [CREATOR_ORGANIZATION],
+      })
+
+      const response = await createKey({ organizationId: CREATOR_ORGANIZATION })
+
+      expect(response.status).toBe(201)
+      expect(mockDataEngine.createOrmEntity.mock.calls[0][0].data).toMatchObject({
+        organizationId: CREATOR_ORGANIZATION,
+      })
+    })
+
+    it('keeps the previous derivation when the creator cannot be loaded', async () => {
+      // CLI and service bootstrap contexts have no staff record behind `sub`.
+      // Not finding a creator is an absence of evidence, not a mismatch, and
+      // must not turn every such context into a refusal.
+      mockEm.findOne.mockResolvedValue(null)
+
+      const response = await createKey({})
+
+      expect(response.status).toBe(201)
+      expect(mockDataEngine.createOrmEntity.mock.calls[0][0].data).toMatchObject({
+        organizationId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+      })
+    })
   })
 })
