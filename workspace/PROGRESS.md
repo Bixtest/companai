@@ -27,36 +27,87 @@ and is argued below; anything can be pulled forward on request.
 | # | Task | Why here | Size |
 |---|---|---|---|
 | | **Wave 1 — small, independent, closes three batches** | | |
-| **1** | **G6 — event visibility scope** | `visibility_scope` on the event envelope (`platform`·`tenant`·`portal`·`project`·`private`). An event's audience decided when written, not re-derived per query. One column and a filter | S |
-| **2** | **G7 — locale direction policy + an RTL locale** | 111 dependency-free lines from Platform 1, plus Arabic to prove it end to end. Keep the host's i18n enforcement, take P1's policy | S |
+| **1** | **G7 — locale direction policy + an RTL locale** | 111 dependency-free lines from Platform 1, plus Arabic to prove it end to end. Keep the host's i18n enforcement, take P1's policy | S |
 | | **Wave 2 — the resolver actually receives its inputs** | | |
-| **3** | **Wire invoker authority (I4) into the enforcement path** | **The most serious finding of the 2026-08-10 audit.** `invokerCeiling` exists on `ResolveInput` and is documented as the rule implementing I4 — *authority is carried, never amplified* — but the only thing that ever sets it is an `authority:explain` CLI flag. At runtime an AI worker invoked by somebody who could not perform the act is **not** capped by that person's authority. We claim this invariant; it does not bind | M |
-| **4** | **Wire task grade into the enforcement path** | `decideFor` passes `context: {}`, so `context.grade` always falls back to `G1` and the grade is decided by the data-class floor alone. The G0–G4 scale is real in the resolver and absent at the call site | M |
-| **5** | **G5 — record lock states** | Supplies `resourceCeiling`, which nothing supplies today. `locked` forces A0 on writes, `restricted` caps at A2, neither liftable by trust or delegation. **Not an enhancement** — it replaces the locking removed with `packages/enterprise` | M |
-| **6** | **G3 — temporary delegations** | Supplies `delegationCeiling`. Open Mercato has none at all. The table plus the resolution logic, re-pointed at **principals** rather than users so an AI worker can hold one — which is why R1 came first | L |
-| **7** | **Trust model T0–T4** | Supplies `trustCeiling`. Until it exists every machine resolves as untrusted, capping any act with an effect at approve-first. That is the safe direction, and it is a placeholder standing where planning 02 §5 specifies earned trust. **Was never a backlog item** despite being referenced four times across `knowledge/` | L |
-| **8** | **Charter grants** | Named in the Phase G exit gate as a required resolver input. **Not in `ResolveInput` at all** — no type, no field, no code; it appears only in prose. Found 2026-08-10 | M |
-| **9** | **Budget as a resolver input** | The other exit-gate input that exists in no form whatsoever. An actor's remaining spend or quota, bounding what it may do | M |
-| **10** | **Tenant policy ceiling** | `context.policyCeiling` is read by the resolver and set by **nothing** — zero assignments outside the type definition. A tenant wanting a blanket floor has no way to express one | M |
-| **11** | **G4 — project permission overlays** | Scoping stops at the department without it. Project, case and engagement contexts are central to the SRS (FR-550, FR-560). Take the terminal-deny semantics; leave P1's `deny:`/`!` string DSL | L |
-| **12** | **G1 — re-scope, then decide** | R5 already delivers the explanation trace, binding rule, obligations and alternatives. What remains is Platform 1's *shape* — ordered sources, deny-wins, a `terminal` flag — against our deliberately different one where everything is a ceiling and the answer is the minimum. **Last in the wave**: items 4–12 may answer it, and it is a design decision currently sized as a port | ? |
+| **2** | **Wire invoker authority (I4) into the enforcement path** | **The most serious finding of the 2026-08-10 audit.** `invokerCeiling` exists on `ResolveInput` and is documented as the rule implementing I4 — *authority is carried, never amplified* — but the only thing that ever sets it is an `authority:explain` CLI flag. At runtime an AI worker invoked by somebody who could not perform the act is **not** capped by that person's authority. We claim this invariant; it does not bind | M |
+| **3** | **Wire task grade into the enforcement path** | `decideFor` passes `context: {}`, so `context.grade` always falls back to `G1` and the grade is decided by the data-class floor alone. The G0–G4 scale is real in the resolver and absent at the call site | M |
+| **4** | **G5 — record lock states** | Supplies `resourceCeiling`, which nothing supplies today. `locked` forces A0 on writes, `restricted` caps at A2, neither liftable by trust or delegation. **Not an enhancement** — it replaces the locking removed with `packages/enterprise` | M |
+| **5** | **G3 — temporary delegations** | Supplies `delegationCeiling`. Open Mercato has none at all. The table plus the resolution logic, re-pointed at **principals** rather than users so an AI worker can hold one — which is why R1 came first | L |
+| **6** | **Trust model T0–T4** | Supplies `trustCeiling`. Until it exists every machine resolves as untrusted, capping any act with an effect at approve-first. That is the safe direction, and it is a placeholder standing where planning 02 §5 specifies earned trust. **Was never a backlog item** despite being referenced four times across `knowledge/` | L |
+| **7** | **Charter grants** | Named in the Phase G exit gate as a required resolver input. **Not in `ResolveInput` at all** — no type, no field, no code; it appears only in prose. Found 2026-08-10 | M |
+| **8** | **Budget as a resolver input** | The other exit-gate input that exists in no form whatsoever. An actor's remaining spend or quota, bounding what it may do | M |
+| **9** | **Tenant policy ceiling** | `context.policyCeiling` is read by the resolver and set by **nothing** — zero assignments outside the type definition. A tenant wanting a blanket floor has no way to express one | M |
+| **10** | **G4 — project permission overlays** | Scoping stops at the department without it. Project, case and engagement contexts are central to the SRS (FR-550, FR-560). Take the terminal-deny semantics; leave P1's `deny:`/`!` string DSL | L |
+| **11** | **G1 — re-scope, then decide** | R5 already delivers the explanation trace, binding rule, obligations and alternatives. What remains is Platform 1's *shape* — ordered sources, deny-wins, a `terminal` flag — against our deliberately different one where everything is a ceiling and the answer is the minimum. **Last in the wave**: items 4–12 may answer it, and it is a design decision currently sized as a port | ? |
 | | **Wave 3 — the human surface** | | |
-| **13** | **U7 — the journal cannot tell a machine from a human** | `action_logs.actor_user_id` stores an API key's UUID with no record that it was a key, so a key acting and a person acting are indistinguishable in the record. That is invariant **I2**, and telling them apart is the premise of the product. Open since 2026-08-09, **never on the backlog** | M |
-| **14** | **Bulk approval, with a diff** | The diff is the whole feature: approving several acts without showing how they differ is a button for approving things unread, and it would be the most-used control on the page. Owner's decision 2026-08-10 — on by default, on/off per tenant, diff never optional | M |
-| **15** | **Cover for someone away, and standing approvals** | Both need a name — a deputy, a grantor — so both are inherently settings. Standing approvals need a mandatory expiry and a visible count of what they let through: the most useful control on the page and the most dangerous. Planning 02 §7.1–7.2 | L |
-| **16** | **Per-tenant approval expiry** | Decided with the owner on 2026-08-10 and recorded in the closure table as unbuilt, but it never became a numbered item. 24h is enforced in `PendingActService`; the knob is not there | S |
+| **12** | **U7 — the journal cannot tell a machine from a human** | `action_logs.actor_user_id` stores an API key's UUID with no record that it was a key, so a key acting and a person acting are indistinguishable in the record. That is invariant **I2**, and telling them apart is the premise of the product. Open since 2026-08-09, **never on the backlog** | M |
+| **13** | **Bulk approval, with a diff** | The diff is the whole feature: approving several acts without showing how they differ is a button for approving things unread, and it would be the most-used control on the page. Owner's decision 2026-08-10 — on by default, on/off per tenant, diff never optional | M |
+| **14** | **Cover for someone away, and standing approvals** | Both need a name — a deputy, a grantor — so both are inherently settings. Standing approvals need a mandatory expiry and a visible count of what they let through: the most useful control on the page and the most dangerous. Planning 02 §7.1–7.2 | L |
+| **15** | **Per-tenant approval expiry** | Decided with the owner on 2026-08-10 and recorded in the closure table as unbuilt, but it never became a numbered item. 24h is enforced in `PendingActService`; the knob is not there | S |
 | | **Wave 4 — the record can be trusted** | | |
-| **17** | **Ledger correlation and causation are carried but never propagated** | `correlation_id` / `causation_id` are recorded when a caller supplies them, and nothing supplies them. Until a correlation id is threaded through a request, the chain records events that cannot be assembled into a trace — the feature the ledger exists to enable | M |
-| **18** | **Ledger Tier 2 — periodic signed checkpoints** | R3's chain is verifiable only by us. A signed root in append-only storage is what lets a customer's auditor verify a range without our cooperation, and it is a stated commercial property of the design. Needs key management | L |
+| **16** | **Ledger correlation and causation are carried but never propagated** | `correlation_id` / `causation_id` are recorded when a caller supplies them, and nothing supplies them. Until a correlation id is threaded through a request, the chain records events that cannot be assembled into a trace — the feature the ledger exists to enable | M |
+| **17** | **Ledger Tier 2 — periodic signed checkpoints** | R3's chain is verifiable only by us. A signed root in append-only storage is what lets a customer's auditor verify a range without our cooperation, and it is a stated commercial property of the design. Needs key management | L |
 | | **Wave 5 — close the books before the server** | | |
-| **19** | **U4 — verify a superadmin can delete a currency** | The route now derives `organizationId` from `ctx.selectedOrganizationId ?? ctx.auth?.orgId ?? undefined`. For a superadmin with no organization selected that is still `undefined`, which is the original bug's shape. **Verify against the running instance before calling it fixed** | S |
-| **20** | **Verify `messages.manage` and `messages.actions` against real routes** | The only two of 113 capability descriptors classified from their titles rather than from code, because no route enforces them. Conservative today, which is the safe direction but not the accurate one | S |
-| **21** | **Phase G exit gate — the assertions and the changelog** | The gate requires a test proving the resolver honours delegations, project overlays and lock states *each*, plus `planning/CHANGELOG.md` recording what was grafted and from where. Neither is tracked anywhere | S |
-| **22** | **Close out U5, and prune dependencies, before the server** | U5 still reads "two causes found and fixed, one unexplained" — two more were found and fixed on 2026-08-10, so the record is stale. And parked modules carry CVEs a scanner will flag the moment this is hosted: "pre-production, not now" expires when we deploy | M |
+| **18** | **U4 — verify a superadmin can delete a currency** | The route now derives `organizationId` from `ctx.selectedOrganizationId ?? ctx.auth?.orgId ?? undefined`. For a superadmin with no organization selected that is still `undefined`, which is the original bug's shape. **Verify against the running instance before calling it fixed** | S |
+| **19** | **Verify `messages.manage` and `messages.actions` against real routes** | The only two of 113 capability descriptors classified from their titles rather than from code, because no route enforces them. Conservative today, which is the safe direction but not the accurate one | S |
+| **20** | **Phase G exit gate — the assertions and the changelog** | The gate requires a test proving the resolver honours delegations, project overlays and lock states *each*, plus `planning/CHANGELOG.md` recording what was grafted and from where. Neither is tracked anywhere | S |
+| **21** | **Close out U5, and prune dependencies, before the server** | U5 still reads "two causes found and fixed, one unexplained" — two more were found and fixed on 2026-08-10, so the record is stale. And parked modules carry CVEs a scanner will flag the moment this is hosted: "pre-production, not now" expires when we deploy | M |
 | | **Deferred by decision — not in this sprint** | | |
-| **23** | `domain_mappings` extraction | Per-tenant custom domains. Wanted, but nothing needs it yet | M |
-| **24** | Orphaned-table decision (~127 tables) | Leave them; they are inert. Revisit only as a deliberate backed-up migration | S |
-| **25** | Phase K checkpoint | The scheduled date that stops "we'll clean up later" being a lie | S |
+| **22** | `domain_mappings` extraction | Per-tenant custom domains. Wanted, but nothing needs it yet | M |
+| **23** | Orphaned-table decision (~127 tables) | Leave them; they are inert. Revisit only as a deliberate backed-up migration | S |
+| **24** | Phase K checkpoint | The scheduled date that stops "we'll clean up later" being a lie | S |
+
+### Closed 2026-08-11 — G6, the audience of a recorded act
+
+`action_logs.visibility_scope` records who an act was written for — `platform`,
+`tenant`, `portal`, `project`, `private` — decided by the code performing the act
+rather than inferred later by a report reading its payload. Inference is where
+leaks come from: a query that has to guess will guess wrong once, and once is
+enough when the guess is whether a private act belongs in a shared timeline.
+
+**Nothing that was visible became hidden.** The column is `not null default
+'tenant'`, and `tenant` is exactly the audience every existing row already had —
+all 56 rows in the local instance backfilled to it. This shipped a vocabulary, not
+a new restriction. Defaulting to `private` would have emptied every audit view on
+the day it landed, which is a much larger change wearing this one's clothes.
+
+**The filter is SQL, not a post-fetch discard**, because `count()` and
+`loadEntries()` share one builder and discarding rows in JavaScript would still
+leak through totals, paging and export.
+
+**Two design problems surfaced while building it, both caught before they shipped:**
+
+1. **`tenant` returning `true` unconditionally would have leaked internal activity
+   to customers.** A portal reader and a back-office reader are different
+   audiences sharing one table. The line belongs on `tenant` (a customer may not
+   read a tenant's internal acts), not on `portal` — which genuinely has two
+   audiences, since hiding portal activity from staff would leave *their* trail
+   incomplete.
+2. **`private` cannot be expressed as a scope list.** Whether a private row is
+   readable depends on who performed it, which is a per-row fact. The filter is
+   `scope in (...) OR (scope = 'private' AND actor_user_id = me)` — so nobody is
+   locked out of their own history without being handed everybody else's.
+
+**`project` fails closed.** Deciding it needs project membership, which arrives
+with G4. Returning `true` would make the scope a label rather than a control.
+Nothing writes `project` today, so this is inert rather than restrictive.
+
+**Verified against real Postgres**, not only against fakes ([[L34]] — the test
+harness mocks Kysely, so it answers questions about my understanding of the
+builder rather than about the database). Planting a private act on a row with a
+real actor: its owner sees 56 of 56, a stranger sees 55, and the fail-closed
+predicate returns 0.
+
+**The first verification run was wrong and said so.** It picked an arbitrary row
+whose `actor_user_id` was null, so `actor_user_id = null` matched nothing and the
+owner appeared to be denied their own act. The probe was faulty, not the
+predicate — re-run against a row that actually had an actor, it was right. Worth
+recording because the failure looked exactly like a real bug.
+
+`audit_logs.view_private` is a separate grant, deliberately not implied by
+`view_tenant`: reading acts somebody marked private is a different decision from
+reading ordinary ones. `admin` holds it through `audit_logs.*`; `employee` does
+not.
 
 ### Closed 2026-08-10 — G8, the migration advisory lock
 

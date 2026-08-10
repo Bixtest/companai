@@ -183,6 +183,42 @@ size, so any addition has to be deliberate.
 | `command_id` looks like `Q8svLX…:v1` in psql | Encrypted at rest — `audit_logs:action_log` is in the tenant encryption map | Expected. The API decrypts on read; do not "fix" it |
 | Undo button on something unreversible | An `undoToken` was written for a non-command write | Do not set one on the direct path |
 
+## Who a recorded act was written for
+
+Every `action_logs` row carries a **`visibility_scope`**, set by the code that
+performed the act rather than inferred afterwards by whatever is reading it.
+
+| Scope | Audience | Enforced? |
+|---|---|---|
+| `tenant` | Back-office readers in the tenant. **The default** | Yes — hidden from portal readers |
+| `portal` | Customer-facing activity. Seen by *both* the customer and tenant staff | Yes |
+| `platform` | Concerns the installation, not any one tenant | Yes — platform operators only |
+| `private` | The actor, plus holders of `audit_logs.view_private` | Yes |
+| `project` | A project's members | **No — fails closed** until G4 supplies membership. Nothing writes it |
+
+**To narrow an act**, pass `visibilityScope` when logging it. Say nothing and it
+is `tenant`, which is the audience audit records have always had — so this
+vocabulary narrows and never widens, like every other ceiling in the platform.
+
+**Two things that are easy to get wrong here**, both of which we did first:
+
+- **The customer/staff line lives on `tenant`, not on `portal`.** `portal` has two
+  legitimate audiences (hiding customer activity from staff would leave the staff
+  trail incomplete). What must not leak is the tenant's *internal* activity to a
+  customer — so that is where the check belongs.
+- **`private` cannot be expressed as a list of scopes.** Whether a private row is
+  readable depends on who performed it, which is per-row. The query is
+  `scope in (...) OR (scope = 'private' AND actor_user_id = me)`. AND-ing the
+  actor across the whole predicate instead silently narrows every reader's
+  timeline to their own acts.
+
+The filter is pushed into SQL rather than applied to fetched rows, because
+`count()` and `loadEntries()` share one builder and a post-fetch discard would
+still leak through totals, paging and export.
+
+`packages/shared/src/modules/visibility.ts` holds the vocabulary and the decision
+as pure functions; `visibleScopesFor()` is what a route hands to the query.
+
 ## Where the code lives
 
 | Path | What |

@@ -7,6 +7,53 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-08-11 — G6: an act now records who it was written for
+
+Audit rows had a tenant and an organization and no notion of audience, so anyone
+holding `audit_logs.view_tenant` read everything. `visibility_scope` fixes the
+tense: the code performing an act decides who it was for, at the moment it is
+recorded, instead of a report inferring sensitivity from a payload afterwards.
+
+Backfilled to `tenant`, which is precisely what every existing row already had.
+This is a vocabulary, not a restriction — defaulting to `private` would have
+emptied every audit view on the day it shipped.
+
+**Writing it turned up two things I had not thought through.**
+
+The first was a leak I put in myself. I wrote `case 'tenant': return true` —
+obviously right, since a tenant reader may read tenant records. Then I got to
+`portal` and found I had written an expression that evaluated to `true` either
+way, which is the kind of nonsense that only shows up when you try to explain it.
+Working out what `portal` should mean exposed the real problem: a portal reader is
+a *customer*, and `tenant` returning `true` unconditionally would hand them the
+tenant's internal activity. The line belongs on `tenant`, not on `portal` — which
+genuinely does have two audiences, because hiding portal activity from staff would
+leave their own trail incomplete.
+
+The second was that `private` cannot be a scope list at all. Whether a private row
+is readable depends on **who performed it**, and that is per-row. So the filter is
+`scope in (...) OR (scope = 'private' AND actor_user_id = me)`, and the nesting
+matters: ANDing the actor across the whole predicate instead would silently narrow
+every reader's timeline to their own acts.
+
+**And the verification was wrong before the code was.** Executed against real
+Postgres, the owner of a planted private act appeared *not* to see it. That looks
+exactly like a bug in the predicate. It was my probe: it grabbed an arbitrary row
+whose `actor_user_id` was null, so `actor_user_id = null` matched nothing. Re-run
+against a row that had an actor — 56 of 56 for the owner, 55 for a stranger.
+
+Worth writing down because the instinct at that moment is to go and change the
+code. [[L30]] again, from the other end: a reproduction you built yourself is a
+hypothesis, and that includes the one that appears to confirm a failure.
+
+`project` fails closed until G4 gives it membership to check. Nothing writes it,
+so it is inert — but a scope that returns `true` because we cannot decide it yet
+would be a label pretending to be a control.
+
+Gate: 22/22, **12,699 tests**.
+
+---
+
 ## 2026-08-11 — G8: one migration run at a time
 
 Two containers booting from one image against one database is the ordinary way to
