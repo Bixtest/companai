@@ -12,7 +12,6 @@
 
 import { ActHeldForApprovalError, authorityCommandGate } from '../interceptors'
 import { APPROVED_ACT_REPLAY } from '@open-mercato/core/modules/auth/services/pendingActService'
-import { commandRegistry } from '@open-mercato/shared/lib/commands/registry'
 
 const TENANT = 'tenant-1'
 const GATED_COMMAND = 'directory.organizations.update'
@@ -43,6 +42,7 @@ function makeContext(options: {
   }
   const context: Record<string | symbol, unknown> = {
     commandId: options.commandId ?? GATED_COMMAND,
+    capability: (options.commandId ?? GATED_COMMAND) === GATED_COMMAND ? CAPABILITY : null,
     auth: options.auth === undefined ? { sub: 'user-1', tenantId: TENANT, orgId: 'org-1' } : options.auth,
     selectedOrganizationId: 'org-1',
     container: {
@@ -56,23 +56,6 @@ function makeContext(options: {
   if (options.markReplay) context[APPROVED_ACT_REPLAY] = 'act-1'
   return { context, enforcement }
 }
-
-beforeAll(() => {
-  commandRegistry.register({
-    id: GATED_COMMAND,
-    capability: CAPABILITY,
-    execute: async () => ({}),
-  })
-  commandRegistry.register({
-    id: UNMAPPED_COMMAND,
-    execute: async () => ({}),
-  })
-})
-
-afterAll(() => {
-  commandRegistry.unregister(GATED_COMMAND)
-  commandRegistry.unregister(UNMAPPED_COMMAND)
-})
 
 beforeEach(() => {
   hold.mockClear()
@@ -103,6 +86,10 @@ describe('what the gate holds', () => {
       pendingActId: 'act-1',
       gate: 'A2',
       because: 'because',
+      // 202: understood and accepted, but not done yet. A 403 would claim the
+      // caller may never do this; a 500 invites a retry, and each retry queues
+      // another copy of the same act.
+      status: 202,
     })
   })
 })

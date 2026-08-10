@@ -257,6 +257,7 @@ export class CommandBus {
     if (allInterceptors.length) {
       const interceptorCtx: CommandInterceptorContext = {
         commandId,
+        capability: handler.capability ?? null,
         auth: options.ctx.auth ?? null,
         selectedOrganizationId: options.ctx.selectedOrganizationId ?? options.ctx.auth?.orgId ?? null,
         container: options.ctx.container,

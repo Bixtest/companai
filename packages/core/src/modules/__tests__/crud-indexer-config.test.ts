@@ -27,7 +27,11 @@ function listSourceFiles(dir: string): string[] {
   for (const entry of entries) {
     const fullPath = path.join(dir, entry.name)
     if (entry.isDirectory()) {
-      if (!ignoredDirs.has(entry.name)) {
+      // Sibling packages create `.tmp-*` scratch trees while their own tests
+      // run. Walking one during a parallel gate finds files that are deleted a
+      // moment later, and this guard fails with an ENOENT that has nothing to do
+      // with indexers.
+      if (!ignoredDirs.has(entry.name) && !entry.name.startsWith('.tmp-')) {
         files.push(...listSourceFiles(fullPath))
       }
       continue
@@ -125,7 +129,14 @@ describe('CRUD route indexing configuration', () => {
     const missing = scanRoots
       .flatMap(listSourceFiles)
       .flatMap((file) => {
-        const source = fs.readFileSync(file, 'utf8')
+        // A live working tree: a file can vanish between being listed and being
+        // read, and that is not a violation of anything.
+        let source: string
+        try {
+          source = fs.readFileSync(file, 'utf8')
+        } catch {
+          return []
+        }
         return findMakeCrudRouteCalls(source)
           .filter((call) => /list\s*:\s*{[\s\S]*?entityId\s*:/.test(call.body))
           .filter((call) => !/indexer\s*:/.test(call.body))

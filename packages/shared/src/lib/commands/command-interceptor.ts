@@ -43,6 +43,16 @@ export interface CommandInterceptor {
 export interface CommandInterceptorContext {
   /** The resolved command ID being executed */
   commandId: string
+  /**
+   * The capability the resolved handler declares, when it declares one.
+   *
+   * Supplied by the bus from the handler it has already resolved, rather than
+   * looked up again from the registry: an interceptor that re-reads the registry
+   * is one bundling accident away from seeing a different instance and silently
+   * concluding the command declares nothing. For a gate, "declares nothing" and
+   * "I could not see the declaration" have opposite consequences.
+   */
+  capability?: string | null
   /** Current user auth context */
   auth: AuthContext | null
   /** Selected organization ID */

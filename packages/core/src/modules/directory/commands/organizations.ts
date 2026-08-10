@@ -532,6 +532,11 @@ const updateOrganizationCommand: CommandHandler<Record<string, unknown>, Organiz
       await ensureParentExists(em, tenantId, parentId)
     }
 
+    // Same shape as `parentId` above: an omitted `childIds` used to reach
+    // `clearRemovedChildren` with an empty desired set, which detaches every
+    // child. Only a caller that actually names the children is stating what the
+    // set should be.
+    const childIdsSupplied = parsed.childIds !== undefined
     const normalizedChildIds = normalizeChildIds(parsed.childIds ?? [], [parsed.id, parentId ?? ''])
     if (normalizedChildIds.some((id) => id === parentId)) throw new CrudHttpError(400, { error: 'Child cannot equal parent' })
     if (Array.isArray(existing.ancestorIds) && normalizedChildIds.some((id) => existing.ancestorIds.includes(id))) {
@@ -576,7 +581,13 @@ const updateOrganizationCommand: CommandHandler<Record<string, unknown>, Organiz
             if (resolvedSlug !== undefined) entity.slug = resolvedSlug
             if (parsed.logoUrl !== undefined) entity.logoUrl = parsed.logoUrl ?? null
             if (parsed.isActive !== undefined) entity.isActive = parsed.isActive
-            entity.parentId = parentId
+            // U10: guarded like every field above it, and for the same reason.
+            // Assigning unconditionally made an omitted `parentId` mean "move
+            // this organization to the root" — so renaming a branch silently
+            // detached it, taking its position in the authority graph with it.
+            // Sending `parentId: null` explicitly still detaches; not mentioning
+            // it now means what it means everywhere else.
+            if (parsed.parentId !== undefined) entity.parentId = parentId
           },
         })
         if (!organization) throw new CrudHttpError(404, { error: 'Not found' })
@@ -584,8 +595,10 @@ const updateOrganizationCommand: CommandHandler<Record<string, unknown>, Organiz
 
         const recordId = String(organization.id)
         const desiredChildIds = new Set(normalizedChildIds.filter((id) => id !== recordId))
-        await clearRemovedChildren(em, tenantId, recordId, desiredChildIds)
-        await assignChildren(em, tenantId, recordId, desiredChildIds)
+        if (childIdsSupplied) {
+          await clearRemovedChildren(em, tenantId, recordId, desiredChildIds)
+          await assignChildren(em, tenantId, recordId, desiredChildIds)
+        }
         const childParentsAfter = await loadChildParentSnapshots(em, tenantId, combinedChildIds)
         setUndoMeta(organization, { childParentsBefore, childParentsAfter })
 
