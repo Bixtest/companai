@@ -1,8 +1,9 @@
 # Progress — where we are, out of how much
 
 **One line: 8 of 16 batches done, plus R2c. All six repairs (R1–R6) are in, and
-the resolver now decides rather than observes. Next is backlog item 1, U2 — after
-which the eight grafts, G1–G8, are the remaining batches.**
+the resolver now decides rather than observes. Every inherited defect we found is
+fixed. Next is backlog item 1, then the eight grafts G1–G8 — the remaining
+batches.**
 
 **Two views of the same work.** *The backlog* below is the ordered list of
 everything outstanding, first to last, and it is the authority on what happens
@@ -23,26 +24,41 @@ and is argued below; anything can be pulled forward on request.
 
 | # | Task | Why here | Size |
 |---|---|---|---|
-| **1** | **U2 — sidebar role-apply data loss** | Needs a schema-or-UX decision. Not urgent, but it can delete a customer's config | M |
-| **2** | **A regular API key's scope is still a live comparison against a person** | U3 is fixed at creation, so the key and its creator now agree by construction. The comparison itself remains: soft-delete the creator, or move them to another organization, and every key they made returns 401 with no explanation. The durable fix is a scope stored on the key and validated against the creator's visibility at creation, with `createdBy` dropped from the authentication path — `sessionUserId` keeps its comparison, because there the borrowed identity is the point | M |
-| **3** | **Obligations do not bind — there is no machinery to hold an act** | Enforcement refuses `A0` and records `A1`-`A4`. Approve-first, hold-and-commit and review-afterwards are the resolver's actual output for most constrained acts, and nothing can yet hold an arbitrary act and resume it once somebody approves. `inbox_ops` does this for AI proposals only. Until this exists, 'enforced' means refusals and the CLI says so out loud | L |
-| **4** | **No data-classification floor, so an untrusted machine reads confidential data unattended** | Planning 02 §6.1 names `matrix_by_classification[resource.classification]` as a floor input; it does not exist. Reads are now exempt from the untrusted-machine ceiling — correct, because a read has no effect to approve — which leaves RBAC as the only bound on a machine reading `confidential` or `secret` data. Needs per-resource classification and a policy table with a source, not values I invent | M |
-| **5** | **G1–G8 — the eight grafts from Platform 1** | G1/G2/G4 need R5/R6, which now exist; the rest are independent. G2 is largely subsumed by R6 and should be re-scoped before it is started | L |
-| **6** | **Ledger correlation and causation are carried but never propagated** | `correlation_id` / `causation_id` are recorded when a caller supplies them in `context`, and nothing supplies them. Until something threads a correlation id through a request, the chain records events that cannot be assembled into a trace — which is the feature the ledger exists to enable | M |
-| **7** | **Verify `messages.manage` and `messages.actions` against real routes** | R4b classified both from their titles because no route enforces them today — the only two of 113 descriptors not decided by reading code. Recheck when the messages module is next touched; conservative for now, which is the safe direction but not the accurate one | S |
-| **8** | **Ledger Tier 2 — periodic signed checkpoints** | R3's chain is verifiable only by us. A signed root published to append-only storage is what lets a customer's auditor verify a range without our cooperation, and it is a stated commercial property of the design. Needs key management, so it follows the principal keypair work | L |
-| **9** | **`domain_mappings` extraction from parked `customer_accounts` into `directory`** | Per-tenant custom domains — we want it, but not until something needs it | M |
-| **10** | **Dependency pruning for parked modules** | Security scanners will flag CVEs in packages nothing routes to. Pre-production, not now | M |
-| **11** | **Orphaned-table decision — ~127 tables from modules that later got parked** | Currently: leave them, they are inert. Revisit only as a deliberate backed-up migration | S |
-| **12** | **Phase K checkpoint — revisit parking with evidence** | The scheduled date that stops 'we'll clean up later' being a lie | S |
+| **1** | **A regular API key's scope is still a live comparison against a person** | U3 is fixed at creation, so the key and its creator now agree by construction. The comparison itself remains: soft-delete the creator, or move them to another organization, and every key they made returns 401 with no explanation. The durable fix is a scope stored on the key and validated against the creator's visibility at creation, with `createdBy` dropped from the authentication path — `sessionUserId` keeps its comparison, because there the borrowed identity is the point | M |
+| **2** | **Obligations do not bind — there is no machinery to hold an act** | Enforcement refuses `A0` and records `A1`-`A4`. Approve-first, hold-and-commit and review-afterwards are the resolver's actual output for most constrained acts, and nothing can yet hold an arbitrary act and resume it once somebody approves. `inbox_ops` does this for AI proposals only. Until this exists, 'enforced' means refusals and the CLI says so out loud | L |
+| **3** | **No data-classification floor, so an untrusted machine reads confidential data unattended** | Planning 02 §6.1 names `matrix_by_classification[resource.classification]` as a floor input; it does not exist. Reads are now exempt from the untrusted-machine ceiling — correct, because a read has no effect to approve — which leaves RBAC as the only bound on a machine reading `confidential` or `secret` data. Needs per-resource classification and a policy table with a source, not values I invent | M |
+| **4** | **G1–G8 — the eight grafts from Platform 1** | G1/G2/G4 need R5/R6, which now exist; the rest are independent. G2 is largely subsumed by R6 and should be re-scoped before it is started | L |
+| **5** | **Ledger correlation and causation are carried but never propagated** | `correlation_id` / `causation_id` are recorded when a caller supplies them in `context`, and nothing supplies them. Until something threads a correlation id through a request, the chain records events that cannot be assembled into a trace — which is the feature the ledger exists to enable | M |
+| **6** | **Verify `messages.manage` and `messages.actions` against real routes** | R4b classified both from their titles because no route enforces them today — the only two of 113 descriptors not decided by reading code. Recheck when the messages module is next touched; conservative for now, which is the safe direction but not the accurate one | S |
+| **7** | **Ledger Tier 2 — periodic signed checkpoints** | R3's chain is verifiable only by us. A signed root published to append-only storage is what lets a customer's auditor verify a range without our cooperation, and it is a stated commercial property of the design. Needs key management, so it follows the principal keypair work | L |
+| **8** | **`domain_mappings` extraction from parked `customer_accounts` into `directory`** | Per-tenant custom domains — we want it, but not until something needs it | M |
+| **9** | **Dependency pruning for parked modules** | Security scanners will flag CVEs in packages nothing routes to. Pre-production, not now | M |
+| **10** | **Orphaned-table decision — ~127 tables from modules that later got parked** | Currently: leave them, they are inert. Revisit only as a deliberate backed-up migration | S |
+| **11** | **Phase K checkpoint — revisit parking with evidence** | The scheduled date that stops 'we'll clean up later' being a lie | S |
 
-**Why this order.** Enforcement has landed, so the list now leads with the two
-defects that can lose a customer's data or silently kill their integrations —
-both small, both undermining work already shipped. Items 3 and 4 are the honest
-remainder of enforcement: what it does *not* yet bind, written down so nobody
-reads "the resolver decides" as a bigger claim than it is. The grafts sit
-mid-list deliberately: they are additive, and G2 needs re-scoping against R6
-before anyone starts it.
+**Why this order.** The two data-loss defects are closed, so the list now leads
+with the last one that can silently kill a customer's integrations. Items 2 and 3
+are the honest remainder of enforcement: what it does *not* yet bind, written
+down so nobody reads "the resolver decides" as a bigger claim than it is. The
+grafts sit mid-list deliberately: they are additive, and G2 needs re-scoping
+against R6 before anyone starts it.
+
+**Closed 2026-08-10 (U2):** a routine save on *Sidebar customization* could
+delete every role's sidebar configuration. A preset stored a copy of the settings
+and no reference to the layout that produced it, so the switches could not tell
+the truth and reset to "no roles" on every load — making the second save a
+request to clear everything.
+
+`role_sidebar_preferences.variant_id` records where a preset came from, the
+switches now arrive showing stored state, and — the part that actually closes it
+— **the server only lets a layout delete the presets it produced**. A role
+configured from another layout, or from before the column existed, is not this
+screen's to remove no matter what the client sends. Twelve tests.
+[upstream-issues.md → U2](references/upstream-issues.md).
+
+**Also closed on the way:** the `audit_logs` and `directory` migration snapshots
+had been stale since R3 and R6, so `yarn db:generate` emitted migrations trying
+to re-create tables that already existed. Both now match the schema that shipped.
 
 **Closed 2026-08-10 (enforcement):** the resolver decides. Three modes per
 tenant (`off` / `shadow` / `enforce`, default shadow), the organization graph in

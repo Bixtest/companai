@@ -7,6 +7,45 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-08-10 — U2: a screen that showed an action and behaved like a declaration
+
+The *Apply to roles* switches on Sidebar customization reset to "no roles" on
+every load, while a save treated the list as a complete statement of which roles
+should have this layout. So the second save asked to clear every preset, and the
+only thing between that and the delete was a small red badge.
+
+**The obvious fix was wrong, and I had already checked that.** Pre-ticking roles
+with `hasPreference` looks like two lines. But a preset stored a *copy* of the
+settings and no reference to the layout that produced them, so `hasPreference`
+means only "this role has some layout" — pre-ticking on that basis would tick
+roles configured from a different layout and silently overwrite them on save. A
+worse failure, because the screen would look right while doing it.
+
+**So: `role_sidebar_preferences.variant_id`.** A preset records where it came
+from, and the switches can finally say which layout a role actually has. No
+foreign key, deliberately: a variant is one person's saved layout and may be
+deleted, while the preset it produced must outlive it. A dangling id stops
+matching and reads as "from a layout no longer here" — true, where a cascade
+would delete a role's sidebar because somebody tidied their own saved views.
+
+**The guarantee is server-side.** `clearRoleIds` can only delete presets whose
+stored `variant_id` matches the layout being saved; everything else is dropped
+from the list. Fixing the switches fixes the screen — but a client that computes
+the wrong list is a bug anyone can ship, and a client that computes the wrong
+list *and is obeyed* is how data goes missing. Seven route tests hold that half.
+
+Three states now, not two: *uses this layout* · *uses Finance layout* · *uses a
+layout from an unknown source*. The third is for rows written before the column
+existed. **Unknown is not "none"**, and a row nobody can attribute is left alone
+rather than guessed at — the same distinction the graph ceiling makes between
+"no constraint" and "constraint I could not read".
+
+**Found on the way:** the `audit_logs` and `directory` migration snapshots had
+been stale since R3 and R6. `yarn db:generate` was emitting migrations to
+re-create `ledger_events` and `organization_edges` — tables that already exist —
+which would have failed on anyone else's machine and looked like our bug. Both
+snapshots now match the schema that shipped.
+
 ## 2026-08-10 — The resolver decides
 
 R5 and R6 built a decision kernel and nothing called it. It calls now.

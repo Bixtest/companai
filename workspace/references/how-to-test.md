@@ -634,6 +634,79 @@ organizations page.
 
 ---
 
+## Batch U2 — the sidebar screen no longer forgets what it did
+
+**What changed, in one sentence.** The **Apply to roles** switches now show which
+roles already use the layout you are looking at, instead of resetting to none
+every time you open the page.
+
+**Why it mattered.** Because they reset, a second save — changing one label, say
+— asked the server to remove every role's sidebar configuration, and did. If you
+ever wondered why your role presets disappeared, this was why.
+
+**Visible change:** yes, immediately, on
+**http://localhost:3000/backend/sidebar-customization**.
+
+### Test 1 — the switches remember (3 minutes)
+
+1. Go to **http://localhost:3000/backend/sidebar-customization**
+2. Pick a saved layout on the left (or create one and save it).
+3. Under **Apply to roles**, turn on `admin` and save.
+4. **Reload the page** and select the same layout again.
+
+**Should happen:** `admin` is **on**, with a quiet badge reading *uses this
+layout*.
+
+**Would mean broken:** the switch is off, or shows a warning badge. That is the
+old behaviour and the next save would delete the preset.
+
+---
+
+### Test 2 — a second save changes nothing it was not asked to (3 minutes)
+
+1. From the state above, rename any sidebar group and click **Save**.
+2. Reload, and re-select the layout.
+
+**Should happen:** `admin` is still on and still says *uses this layout*.
+
+**Would mean broken:** `admin` turns off. Previously this save deleted the
+preset.
+
+---
+
+### Test 3 — another layout's roles are not yours to remove (4 minutes)
+
+Only if you have two saved layouts. If you have one, create a second.
+
+1. Select layout **B**, turn on `employee`, save.
+2. Select layout **A** again.
+
+**Should happen:** `employee` shows as **off**, with a badge naming layout B —
+*uses B*. Turning it **on** changes the badge to *will be moved to this layout*,
+which is a fair warning for a deliberate act.
+
+**Would mean broken:** `employee` shows as on, or shows *will lose this layout*.
+Either would mean layout A believes it owns a preset that layout B configured.
+
+**Worth knowing:** even if the screen got this wrong, the server would refuse.
+A layout can only delete presets it created — that rule is enforced behind the
+API, not just in the page.
+
+---
+
+### Test 4 — presets from before today (1 minute, read only)
+
+Any role preset created before this change has no recorded source, and will show
+*uses a layout from an unknown source*.
+
+**Should happen:** it stays off, and no save from this screen removes it.
+
+**This is deliberate.** Nothing recorded where those came from, and deleting on a
+guess is the failure being fixed. To bring one under a layout's control, tick it
+and save — that is an explicit act, and the badge says so first.
+
+---
+
 ## Template for future batches
 
 ```markdown

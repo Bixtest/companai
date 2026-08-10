@@ -83,7 +83,7 @@ leverage point exists for them, which is why this is the expensive half.
 
 ---
 
-## U2 — The sidebar role-apply screen is one click from silent data loss · severity **medium**
+## U2 — The sidebar role-apply screen is one click from silent data loss · severity **medium** · **FIXED 2026-08-10**
 
 **Found:** 2026-08-09, by the owner noticing the role toggles reset after a save.
 
@@ -139,7 +139,49 @@ failure than the current one, because the screen would look correct while doing 
 risk-free things immediately, but do not start down a long path mid-batch. This
 one turned out to need a schema or UX decision. Scheduled — see PROGRESS.md.
 
-**Until then:** re-tick the roles every time you save this screen.
+---
+
+### Resolution, 2026-08-10 — option 1, and a little of option 2
+
+**`role_sidebar_preferences.variant_id`.** A preset now records the saved layout
+it came from, so the switches can say which layout a role actually has instead of
+only "some layout". That was the whole obstacle: without it, no arrangement of
+the UI could distinguish a preset this screen owns from somebody else's.
+
+Deliberately **no foreign key**. A variant is one person's saved layout and may
+be deleted; the preset it produced must survive that. A dangling id stops
+matching and reads as "from a layout that is no longer here", which is true. A
+cascade would delete a role's sidebar because somebody tidied up their own saved
+views.
+
+**Three states, not two.** The switch for a role now shows:
+
+| Situation | Switch | Badge |
+|---|---|---|
+| Preset came from this layout | **on** | *uses this layout* |
+| …and you turn it off | off | *will lose this layout* |
+| Preset came from another layout | off | *uses Finance layout* |
+| …and you turn it on | on | *will be moved to this layout* |
+| Preset from before this column existed | off | *uses a layout from an unknown source* |
+| No preset at all | off | — |
+
+Unknown is not "none". A row nobody attributed is left alone.
+
+**The guarantee is server-side.** `clearRoleIds` can only delete presets whose
+stored `variant_id` matches the layout being saved. Everything else is dropped
+from the list — silently, because offering them is not an error and a 400 would
+break an ordinary save on data the caller cannot see.
+
+That is what actually closes the hole. Pre-ticking the switches fixes the screen;
+a client that computes the wrong list is a bug anybody can ship, and a client
+that computes the wrong list **and is obeyed** is how data goes missing. Seven
+route tests hold the server side, five the editor.
+
+**Option 3 was rejected** — dropping `clearRoleIds` entirely removes the only way
+to detach a role, and a screen that can only add is its own kind of trap.
+
+**A push from an unsaved layout clears nothing**, because nothing can own a
+preset it never recorded.
 
 ---
 
