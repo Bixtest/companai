@@ -4,6 +4,7 @@ import type { EntityManager } from '@mikro-orm/postgresql'
 import type { CacheStrategy } from '@open-mercato/cache'
 import { AuthService } from '@open-mercato/core/modules/auth/services/authService'
 import { RbacService } from '@open-mercato/core/modules/auth/services/rbacService'
+import { AuthorityEnforcementService } from '@open-mercato/core/modules/auth/services/authorityEnforcementService'
 import {
   createRbacFallbackCache,
   isRbacDefaultCacheEnabled,
@@ -12,9 +13,41 @@ import {
 
 export { resetRbacFallbackCache }
 
+/**
+ * Reads one registration without requiring it to exist.
+ *
+ * The enforcement service needs the organization graph (directory) and the
+ * per-tenant config store (configs). Both are ordinary modules a deployment may
+ * have switched off, and lean bootstraps — CLI scripts, test containers —
+ * register neither. Auth is the optional *consumer* here, so per the
+ * cross-module rules it owns the glue and degrades rather than hard-requiring a
+ * peer.
+ *
+ * Degrading means: no graph ceiling, and the default mode. Never a refusal
+ * invented from an absent dependency.
+ */
+function optional<T>(cradle: Record<string, unknown>, name: string): T | null {
+  try {
+    return (cradle[name] as T) ?? null
+  } catch {
+    return null
+  }
+}
+
 export function register(container: AppContainer) {
   // Register or override core auth service
   container.register({ authService: asClass(AuthService).scoped() })
+
+  container.register({
+    // `.proxy()` hands the resolver the cradle object itself. Without it this
+    // container's CLASSIC injection mode reads the parameter list and goes
+    // looking for a registration literally named `cradle`.
+    authorityEnforcement: asFunction((cradle: Record<string, unknown>) => new AuthorityEnforcementService(
+      optional(cradle, 'authorityGraphService'),
+      optional(cradle, 'moduleConfigService'),
+    )).scoped().proxy(),
+  })
+
   // RBAC service. The bare `asClass(...).scoped()` registration matches
   // develop and is the default. Setting `OM_RBAC_DEFAULT_CACHE=on` opts
   // into the in-process LRU fallback for deployments that don't wire a
@@ -24,9 +57,9 @@ export function register(container: AppContainer) {
   // registration wins when `RbacService` reaches for it.
   if (isRbacDefaultCacheEnabled()) {
     container.register({
-      rbacService: asFunction((cradle: { em: EntityManager; cache?: CacheStrategy }) => {
-        return new RbacService(cradle.em, cradle.cache ?? createRbacFallbackCache())
-      }).scoped(),
+      rbacService: asFunction((cradle: { em: EntityManager; cache?: CacheStrategy; authorityEnforcement?: AuthorityEnforcementService }) => {
+        return new RbacService(cradle.em, cradle.cache ?? createRbacFallbackCache(), cradle.authorityEnforcement ?? null)
+      }).scoped().proxy(),
     })
   } else {
     container.register({ rbacService: asClass(RbacService).scoped() })

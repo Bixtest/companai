@@ -42,7 +42,31 @@ type EdgeFixture = {
  * fixed answer. A fake that ignores the tenant filter would pass a test that a
  * cross-tenant leak also passes.
  */
-function createFakeGraph(organizations: OrganizationFixture[], edges: EdgeFixture[]) {
+function createFakeCache() {
+  const entries = new Map<string, { value: unknown; tags: string[] }>()
+  const cache = {
+    get: jest.fn(async (key: string) => entries.get(key)?.value ?? null),
+    set: jest.fn(async (key: string, value: unknown, options?: { tags?: string[] }) => {
+      entries.set(key, { value, tags: options?.tags ?? [] })
+    }),
+    has: jest.fn(async (key: string) => entries.has(key)),
+    delete: jest.fn(async (key: string) => entries.delete(key)),
+    deleteByTags: jest.fn(async (tags: string[]) => {
+      let removed = 0
+      for (const [key, entry] of entries) {
+        if (entry.tags.some((tag) => tags.includes(tag))) {
+          entries.delete(key)
+          removed += 1
+        }
+      }
+      return removed
+    }),
+    clear: jest.fn(async () => { entries.clear() }),
+  }
+  return { cache, entries }
+}
+
+function createFakeGraph(organizations: OrganizationFixture[], edges: EdgeFixture[], cache?: unknown) {
   const queries: Array<{ sql: string; params: unknown[] }> = []
 
   const execute = jest.fn(async (sql: string, params: unknown[] = []) => {
@@ -73,7 +97,8 @@ function createFakeGraph(organizations: OrganizationFixture[], edges: EdgeFixtur
   })
 
   const em = { getConnection: () => ({ execute }) } as unknown as EntityManager
-  return { service: new AuthorityGraphService(em), queries, execute }
+  const service = new AuthorityGraphService(em, cache as ConstructorParameters<typeof AuthorityGraphService>[1])
+  return { service, queries, execute }
 }
 
 describe('AuthorityGraphService', () => {
@@ -234,6 +259,26 @@ describe('AuthorityGraphService', () => {
       }
     })
 
+    it('binds the chain with `in (?)`, which is what an array binding expands into', async () => {
+      // This one is a string assertion because the defect it guards lives in SQL
+      // text and no mock can see it: the fake connection never parses the query,
+      // so `= any(?)` passed every test here and failed against Postgres the
+      // first time an organization actually had ancestors. The query builder
+      // expands an array binding into a comma-separated list, and `any('a','b')`
+      // is a syntax error where `in ('a','b')` is the intended form.
+      const { service, queries } = createFakeGraph(
+        [{ id: TEAM, tenantId: TENANT, ancestorIds: [SUBSIDIARY] }],
+        [{ tenantId: TENANT, parentId: SUBSIDIARY, childId: TEAM, relationshipType: 'owns' }],
+      )
+
+      await service.ceilingFor(TEAM, TENANT, 'directory.organizations.manage')
+
+      const edgeQuery = queries.find((query) => query.sql.includes('from organization_edges'))!
+      expect(edgeQuery.sql).toContain('parent_id in (?)')
+      expect(edgeQuery.sql).toContain('child_id in (?)')
+      expect(edgeQuery.sql).not.toContain('any(')
+    })
+
     it('blocks a capability an edge does not pass down', async () => {
       const { service } = createFakeGraph(
         [{ id: TEAM, tenantId: TENANT, ancestorIds: [SUBSIDIARY] }],
@@ -263,6 +308,98 @@ describe('AuthorityGraphService', () => {
       const result = await service.ceilingFor(GROUP, TENANT, 'directory.organizations.manage')
 
       expect(result).toMatchObject({ ceiling: 'A5', basis: 'no-ancestors' })
+    })
+  })
+
+  /**
+   * Enforcement asks for a ceiling on every permission check, and the uncached
+   * answer is two queries. What the cache must not do is outlive the graph it
+   * describes, or preserve a momentary failure.
+   */
+  describe('the cached path', () => {
+    const CAPABILITY = 'directory.organizations.manage'
+
+    function graphWithCache() {
+      const { cache, entries } = createFakeCache()
+      const built = createFakeGraph(
+        [{ id: TEAM, tenantId: TENANT, ancestorIds: [SUBSIDIARY] }],
+        [{ tenantId: TENANT, parentId: SUBSIDIARY, childId: TEAM, relationshipType: 'advises' }],
+        cache,
+      )
+      return { ...built, cache, entries }
+    }
+
+    it('reads the graph once and serves the second caller from memory', async () => {
+      const { service, queries } = graphWithCache()
+
+      const first = await service.cachedCeilingFor(TEAM, TENANT, CAPABILITY)
+      const second = await service.cachedCeilingFor(TEAM, TENANT, CAPABILITY)
+
+      expect(first.ceiling).toBe('A2')
+      expect(second).toEqual(first)
+      expect(queries).toHaveLength(2)
+    })
+
+    it('tags every entry with its tenant, so one edge change clears the tenant', async () => {
+      const { service, queries } = graphWithCache()
+
+      await service.cachedCeilingFor(TEAM, TENANT, CAPABILITY)
+      await service.invalidateTenant(TENANT)
+      await service.cachedCeilingFor(TEAM, TENANT, CAPABILITY)
+
+      expect(queries).toHaveLength(4)
+    })
+
+    it('does not cache an organization it could not find', async () => {
+      // A0 from a lookup miss is a momentary condition — an organization created
+      // a second ago, a replica behind. Storing it would turn one bad read into
+      // five minutes of refusals.
+      const { cache } = createFakeCache()
+      const { service } = createFakeGraph([], [], cache)
+
+      const result = await service.cachedCeilingFor(TEAM, TENANT, CAPABILITY)
+
+      expect(result.basis).toBe('organization-unknown')
+      expect(cache.set).not.toHaveBeenCalled()
+    })
+
+    it('does not cache an unresolvable path either', async () => {
+      const { cache } = createFakeCache()
+      const { service } = createFakeGraph(
+        [{ id: TEAM, tenantId: TENANT, ancestorIds: [SUBSIDIARY, GROUP] }],
+        [{ tenantId: TENANT, parentId: GROUP, childId: SUBSIDIARY, relationshipType: 'owns' }],
+        cache,
+      )
+
+      const result = await service.cachedCeilingFor(TEAM, TENANT, CAPABILITY)
+
+      expect(result.basis).toBe('path-unresolved')
+      expect(cache.set).not.toHaveBeenCalled()
+    })
+
+    it('ignores a cached value of the wrong shape rather than trusting it', async () => {
+      const { cache, entries } = createFakeCache()
+      const { service } = createFakeGraph(
+        [{ id: TEAM, tenantId: TENANT, ancestorIds: [SUBSIDIARY] }],
+        [{ tenantId: TENANT, parentId: SUBSIDIARY, childId: TEAM, relationshipType: 'advises' }],
+        cache,
+      )
+      entries.set(`authority:graph:${TENANT}:${TEAM}:${CAPABILITY}`, { value: { ceiling: 'A5' }, tags: [] })
+
+      const result = await service.cachedCeilingFor(TEAM, TENANT, CAPABILITY)
+
+      // A half-written or older-format entry must not be able to raise a ceiling.
+      expect(result.ceiling).toBe('A2')
+    })
+
+    it('still answers when no cache is wired at all', async () => {
+      const { service } = createFakeGraph(
+        [{ id: TEAM, tenantId: TENANT, ancestorIds: [SUBSIDIARY] }],
+        [{ tenantId: TENANT, parentId: SUBSIDIARY, childId: TEAM, relationshipType: 'advises' }],
+      )
+
+      await expect(service.cachedCeilingFor(TEAM, TENANT, CAPABILITY)).resolves.toMatchObject({ ceiling: 'A2' })
+      await expect(service.invalidateTenant(TENANT)).resolves.toBeUndefined()
     })
   })
 })

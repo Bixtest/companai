@@ -48,9 +48,15 @@ const mockEm = {
   transactional: async (cb: (trx: unknown) => unknown) => cb(mockEm),
 }
 
+const mockInvalidateTenant = jest.fn(async () => {})
+
 jest.mock('@open-mercato/shared/lib/di/container', () => ({
   createRequestContainer: jest.fn(async () => ({
-    resolve: (token: string) => (token === 'em' ? mockEm : null),
+    resolve: (token: string) => {
+      if (token === 'em') return mockEm
+      if (token === 'authorityGraphService') return { invalidateTenant: mockInvalidateTenant }
+      return null
+    },
   })),
 }))
 
@@ -202,6 +208,59 @@ describe('reading, changing and removing', () => {
     }))
 
     expect(response.status).toBe(404)
+  })
+})
+
+/**
+ * Enforcement reads the graph ceiling through a cache, so an edge change that
+ * does not drop that cache is an authority change the platform keeps ignoring
+ * for as long as the TTL lasts. Lowering a ceiling is precisely the act someone
+ * performs when they need it to take effect now.
+ */
+describe('an edge change drops the cached ceilings of its tenant', () => {
+  beforeEach(() => {
+    mockInvalidateTenant.mockClear()
+    edges = [{
+      id: EDGE,
+      tenantId: TENANT,
+      parentId: GROUP,
+      childId: SUBSIDIARY,
+      relationshipType: 'owns',
+      inheritanceMode: 'strict',
+      authorityCeiling: 'A5',
+      moduleGrants: null,
+      note: null,
+      deletedAt: null,
+      updatedAt: new Date('2026-08-10T00:00:00Z'),
+    }]
+  })
+
+  it('after a ceiling is lowered', async () => {
+    await PATCH(request('http://localhost/api/directory/organization-edges', {
+      method: 'PATCH',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ id: EDGE, authorityCeiling: 'A1' }),
+    }))
+
+    expect(mockInvalidateTenant).toHaveBeenCalledWith(TENANT)
+  })
+
+  it('after an edge is removed', async () => {
+    await DELETE(request(`http://localhost/api/directory/organization-edges?id=${EDGE}`, { method: 'DELETE' }))
+
+    expect(mockInvalidateTenant).toHaveBeenCalledWith(TENANT)
+  })
+
+  it('not when the write was refused, because nothing changed', async () => {
+    edges[0].tenantId = OTHER_TENANT
+
+    await PATCH(request('http://localhost/api/directory/organization-edges', {
+      method: 'PATCH',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ id: EDGE, authorityCeiling: 'A0' }),
+    }))
+
+    expect(mockInvalidateTenant).not.toHaveBeenCalled()
   })
 })
 

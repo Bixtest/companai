@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import type { EntityManager } from '@mikro-orm/postgresql'
 import { getAuthFromRequest } from '@open-mercato/shared/lib/auth/server'
-import { createRequestContainer } from '@open-mercato/shared/lib/di/container'
+import { createRequestContainer, type AppContainer } from '@open-mercato/shared/lib/di/container'
+import { createLogger } from '@open-mercato/shared/lib/logger'
 import { writeDirectWriteAuditLog } from '@open-mercato/shared/lib/crud/audit-write'
 import { enforceCommandOptimisticLockWithGuards } from '@open-mercato/shared/lib/crud/optimistic-lock-command'
 import { isCrudHttpError } from '@open-mercato/shared/lib/crud/errors'
@@ -33,6 +34,8 @@ export const metadata = {
   PATCH: { requireAuth: true, requireFeatures: ['directory.organizations.manage'] },
   DELETE: { requireAuth: true, requireFeatures: ['directory.organizations.manage'] },
 }
+
+const logger = createLogger('directory').child({ component: 'organization-edges' })
 
 const RESOURCE_KIND = 'directory.organization_edge'
 
@@ -159,6 +162,7 @@ export async function POST(req: Request) {
     return edge
   })
 
+  await invalidateAuthorityGraph(scope)
   return NextResponse.json({ edge: serialize(created) }, { status: 201 })
 }
 
@@ -220,6 +224,7 @@ export async function PATCH(req: Request) {
   })
 
   if (!updated) return NextResponse.json({ error: 'Edge not found' }, { status: 404 })
+  await invalidateAuthorityGraph(scope)
   return NextResponse.json({ edge: serialize(updated) })
 }
 
@@ -254,7 +259,32 @@ export async function DELETE(req: Request) {
   })
 
   if (!removed) return NextResponse.json({ error: 'Edge not found' }, { status: 404 })
+  await invalidateAuthorityGraph(scope)
   return NextResponse.json({ ok: true })
+}
+
+/**
+ * Drops the tenant's cached authority ceilings after an edge changes.
+ *
+ * **After the transaction commits, never inside it.** A cache cleared inside a
+ * transaction that then rolls back leaves the next reader to repopulate it from
+ * the old rows — the invalidation succeeds and achieves nothing.
+ *
+ * Failure here is logged and swallowed. A stale ceiling is bounded by the TTL;
+ * a 500 on a write that already committed is not recoverable by anyone.
+ */
+async function invalidateAuthorityGraph(scope: { container: AppContainer; tenantId: string }): Promise<void> {
+  try {
+    const graph = scope.container.resolve('authorityGraphService') as {
+      invalidateTenant: (tenantId: string) => Promise<void>
+    }
+    await graph.invalidateTenant(scope.tenantId)
+  } catch (error) {
+    logger.warn('Could not drop cached authority ceilings after an edge change', {
+      tenantId: scope.tenantId,
+      err: error,
+    })
+  }
 }
 
 const edgeSchema = z.object({

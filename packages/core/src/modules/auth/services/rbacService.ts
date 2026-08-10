@@ -7,9 +7,13 @@ import { findWithDecryption } from '@open-mercato/shared/lib/encryption/find'
 import { buildOrgScopeUserCacheTag, buildOrgScopeTenantCacheTag } from '@open-mercato/core/modules/directory/utils/organizationScope'
 import { matchFeature as sharedMatchFeature, hasAllFeatures as sharedHasAllFeatures } from '@open-mercato/shared/lib/auth/featureMatch'
 import { recordShadowDecision } from '@open-mercato/shared/lib/authority/shadow'
+import { createLogger } from '@open-mercato/shared/lib/logger'
+import type { AuthorityEnforcementService } from '@open-mercato/core/modules/auth/services/authorityEnforcementService'
 import { getCapabilityDescriptor } from '@open-mercato/shared/lib/capabilities/registry'
 import { parseSubject } from '@open-mercato/shared/lib/auth/principal'
 import { filterGrantsByEnabledModules, getOwningModuleId, getEnabledModuleIds } from '@open-mercato/shared/security/enabledModulesRegistry'
+
+const authorityLogger = createLogger('authority').child({ component: 'enforcement' })
 
 interface AclData {
   isSuperAdmin: boolean
@@ -34,7 +38,11 @@ export class RbacService {
   private cache: CacheStrategy | null = null
   private globalSuperAdminCache = new Map<string, boolean>()
 
-  constructor(private em: EntityManager, cache?: CacheStrategy) {
+  constructor(
+    private em: EntityManager,
+    cache?: CacheStrategy,
+    private authorityEnforcement?: AuthorityEnforcementService | null,
+  ) {
     this.cache = cache || null
   }
 
@@ -445,7 +453,41 @@ export class RbacService {
   async userHasAllFeatures(userId: string, required: string[], scope: { tenantId: string | null; organizationId: string | null }): Promise<boolean> {
     const allowed = await this.decideAllFeatures(userId, required, scope)
     this.shadowResolver(userId, required, scope, allowed)
-    return allowed
+    if (!allowed) return false
+    return !(await this.refusedByAuthority(userId, required, scope))
+  }
+
+  /**
+   * The authority resolver, when the tenant has switched it on.
+   *
+   * Reached only after `decideAllFeatures` has already returned **true**, so
+   * this can subtract an allowance and cannot add one. The ordering is the
+   * guarantee: there is no path here that turns a `false` into a `true`.
+   *
+   * A refusal is logged with the rule that produced it. A 403 whose reason lives
+   * only inside a resolver is the thing R5 exists to abolish, and enforcement
+   * would reintroduce it if the answer left no trace on the way out.
+   */
+  private async refusedByAuthority(
+    userId: string,
+    required: string[],
+    scope: { tenantId: string | null; organizationId: string | null },
+  ): Promise<boolean> {
+    if (!this.authorityEnforcement) return false
+
+    const refusal = await this.authorityEnforcement.refusalFor(userId, required, scope)
+    if (!refusal) return false
+
+    authorityLogger.warn('Refused by the authority resolver', {
+      capability: refusal.capabilityId,
+      bindingRule: refusal.decision.bindingRule,
+      because: refusal.decision.reasons.find((reason) => reason.rule === refusal.decision.bindingRule)?.detail,
+      actorId: parseSubject(userId).id,
+      actorKind: parseSubject(userId).kind,
+      tenantId: scope.tenantId,
+      organizationId: scope.organizationId,
+    })
+    return true
   }
 
   /**

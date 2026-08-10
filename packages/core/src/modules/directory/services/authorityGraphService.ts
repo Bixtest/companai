@@ -1,4 +1,5 @@
 import type { EntityManager } from '@mikro-orm/postgresql'
+import type { CacheStrategy } from '@open-mercato/cache'
 import {
   orderEdgesAlongPath,
   resolveGraphCeiling,
@@ -69,7 +70,10 @@ type EdgeRow = {
  * `ancestor_ids` as the resolution index.
  */
 export class AuthorityGraphService {
-  constructor(private readonly em: EntityManager) {}
+  constructor(
+    private readonly em: EntityManager,
+    private readonly cache?: CacheStrategy,
+  ) {}
 
   /**
    * The ceiling that this organization's position imposes on one capability.
@@ -79,6 +83,9 @@ export class AuthorityGraphService {
    * and the two failure shapes below return `A0` rather than the unconstrained
    * default, because a ceiling this service could not establish must never read
    * as a ceiling it established to be absent.
+   *
+   * Two queries per call, which is why enforcement reads it through the cache
+   * below rather than calling this directly on every permission check.
    */
   async ceilingFor(
     organizationId: string,
@@ -120,12 +127,17 @@ export class AuthorityGraphService {
 
     const chain = [...ancestorIds, organizationId]
     const edgeRows = await this.em.getConnection().execute<EdgeRow[]>(
+      // `in (?)` rather than `= any(?)`: the query builder expands an array
+      // binding into a comma-separated list, which `in (...)` is built to take
+      // and `any(...)` is not — `any('a','b')` is a syntax error. The chain
+      // always holds at least two ids by the time this runs (the caller returned
+      // early on an empty ancestor list), so the list is never empty.
       `select parent_id, child_id, relationship_type, inheritance_mode, authority_ceiling, module_grants
          from organization_edges
         where tenant_id = ?
           and deleted_at is null
-          and parent_id = any(?)
-          and child_id = any(?)`,
+          and parent_id in (?)
+          and child_id in (?)`,
       [tenantId, chain, chain],
     )
 
@@ -179,6 +191,76 @@ export class AuthorityGraphService {
       unmappedHops: findUnmappedHops(path, chain),
     }
   }
+
+  /**
+   * The same ceiling, memoised for the request path.
+   *
+   * Enforcement asks this question on **every permission check**, and the
+   * uncached answer costs two queries. The graph changes when somebody edits an
+   * edge or moves an organization, which is rare enough that a cache with
+   * explicit invalidation is honest rather than a guess with a timeout on it.
+   *
+   * `invalidateTenant` below is called by both writers, so the TTL is a backstop
+   * and not the mechanism.
+   *
+   * **The two failure shapes are never cached.** Both mean "this could not be
+   * established", both fail closed at `A0`, and storing either would turn a
+   * momentary condition — an organization created a second ago, a half-applied
+   * structural change — into five minutes of refusals.
+   */
+  async cachedCeilingFor(
+    organizationId: string,
+    tenantId: string,
+    capabilityId: string,
+  ): Promise<OrganizationCeilingResult> {
+    if (!this.cache) return this.ceilingFor(organizationId, tenantId, capabilityId)
+
+    const key = `authority:graph:${tenantId}:${organizationId}:${capabilityId}`
+    const cached = await this.cache.get(key)
+    if (isCeilingResult(cached)) return cached
+
+    const result = await this.ceilingFor(organizationId, tenantId, capabilityId)
+    if (result.basis !== 'organization-unknown' && result.basis !== 'path-unresolved') {
+      await this.cache.set(key, result as unknown as Parameters<CacheStrategy['set']>[1], {
+        ttl: CEILING_CACHE_TTL_MS,
+        tags: [authorityGraphTenantTag(tenantId)],
+      })
+    }
+    return result
+  }
+
+  /**
+   * Drops every cached ceiling for one tenant.
+   *
+   * Deliberately whole-tenant rather than per-organization: an edge added above
+   * a group changes the ceiling of everything beneath it, and a moved
+   * organization rewrites the ancestor index of its whole subtree. Working out
+   * exactly which keys those touch is more code than re-reading them, and being
+   * wrong means serving an authority answer the graph no longer supports.
+   */
+  async invalidateTenant(tenantId: string): Promise<void> {
+    if (!this.cache) return
+    await this.cache.deleteByTags([authorityGraphTenantTag(tenantId)])
+  }
+}
+
+const CEILING_CACHE_TTL_MS = 5 * 60 * 1000
+
+export function authorityGraphTenantTag(tenantId: string): string {
+  return `authority:graph:tenant:${tenantId}`
+}
+
+/** A cache can hand back anything; only a value of the right shape is a hit. */
+function isCeilingResult(value: unknown): value is OrganizationCeilingResult {
+  if (typeof value !== 'object' || value === null) return false
+  const candidate = value as Partial<OrganizationCeilingResult>
+  return (
+    typeof candidate.ceiling === 'string' &&
+    typeof candidate.basis === 'string' &&
+    typeof candidate.capabilityBlocked === 'boolean' &&
+    Array.isArray(candidate.contributingEdges) &&
+    Array.isArray(candidate.unmappedHops)
+  )
 }
 
 /** Hops in the chain that no edge on the resolved path covers. */

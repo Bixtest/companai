@@ -1103,4 +1103,70 @@ describe('RbacService', () => {
       expect(em.findOne).toHaveBeenCalledTimes(callsAfterFirst) // No new queries
     })
   })
+
+  /**
+   * Enforcement can only narrow.
+   *
+   * `userHasAllFeatures` is the single funnel every permission decision in the
+   * platform reaches, so this is the one place where a mistake would widen
+   * authority everywhere at once. The ordering — RBAC first, resolver second,
+   * and only ever to subtract — is what makes that impossible rather than
+   * unlikely, and these tests are written against that ordering.
+   */
+  describe('the authority resolver, when a tenant has switched it on', () => {
+    const scope = { tenantId: 'tenant-1', organizationId: 'org-1' }
+
+    function withEnforcement(refusal: unknown) {
+      const enforcement = { refusalFor: jest.fn(async () => refusal) }
+      return {
+        enforcement,
+        service: new RbacService(em as any, cache, enforcement as any),
+      }
+    }
+
+    function grantEverything() {
+      em.findOne.mockImplementation(async (entity: unknown) => {
+        if (entity === User) return baseUser
+        if (entity === UserAcl) return { isSuperAdmin: false, featuresJson: ['directory.*'], organizationsJson: null }
+        return null
+      })
+      em.find.mockResolvedValue([])
+    }
+
+    it('lets an allowed act through when the resolver refuses nothing', async () => {
+      grantEverything()
+      const { service: guarded } = withEnforcement(null)
+
+      await expect(guarded.userHasAllFeatures('user-1', ['directory.organizations.view'], scope)).resolves.toBe(true)
+    })
+
+    it('removes an allowance the resolver refuses', async () => {
+      grantEverything()
+      const { service: guarded } = withEnforcement({
+        capabilityId: 'directory.organizations.manage',
+        decision: { allowed: false, gate: 'A0', bindingRule: 'graph-ceiling', reasons: [], obligations: [], alternatives: [] },
+      })
+
+      await expect(guarded.userHasAllFeatures('user-1', ['directory.organizations.manage'], scope)).resolves.toBe(false)
+    })
+
+    it('never asks the resolver about something RBAC already refused', async () => {
+      // Two reasons. It cannot change the answer — a refusal stays a refusal —
+      // so the query would be spent for nothing. And an enforcement layer that
+      // runs on denied requests is one call-order change away from being able to
+      // grant, which is the property this design exists to prevent.
+      em.findOne.mockResolvedValue(null)
+      em.find.mockResolvedValue([])
+      const { enforcement, service: guarded } = withEnforcement(null)
+
+      await expect(guarded.userHasAllFeatures('nobody', ['directory.organizations.manage'], scope)).resolves.toBe(false)
+      expect(enforcement.refusalFor).not.toHaveBeenCalled()
+    })
+
+    it('behaves exactly as before when no enforcement service is wired', async () => {
+      grantEverything()
+
+      await expect(service.userHasAllFeatures('user-1', ['directory.organizations.view'], scope)).resolves.toBe(true)
+    })
+  })
 })

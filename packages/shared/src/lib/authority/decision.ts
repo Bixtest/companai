@@ -24,6 +24,7 @@ import {
   maxAutonomyFor,
   type AutonomyGate,
   type CapabilityDescriptor,
+  type EffectClass,
   type TaskGrade,
 } from '../../modules/capabilities'
 import type { PrincipalKind } from '../auth/principal'
@@ -152,8 +153,32 @@ function lower(left: AutonomyGate, right: AutonomyGate): AutonomyGate {
  * own authority, and the floors above still apply to them. That asymmetry is
  * invariant **I2** — it lives in data the resolver reads, not in a branch that
  * treats one kind of actor as special.
+ *
+ * **Why this is a vector and not a number.** Planning 02 §5.1 is explicit that
+ * trust is stored per effect class, because *"a worker can be T4 on research
+ * reads and T1 on external communication"* — and that a single global trust
+ * number is "either uselessly conservative or dangerously optimistic". A flat
+ * ceiling was the uselessly-conservative half: shadow mode observed an API key
+ * acquire an approval obligation for **listing organizations**, a read.
+ *
+ * A read has no effect to approve. Asking a person to authorise one produces
+ * exactly the approval fatigue planning 02 opens by naming as the thing it
+ * exists to resolve — and a control people click through is not a control.
+ * Reads are bounded by whether the actor holds the capability at all (RBAC) and,
+ * once it exists, by the data classification of what is being read. Neither of
+ * those is an autonomy question.
+ *
+ * Everything with an effect keeps the T1 *Supervised* default — approve first.
  */
-const UNTRUSTED_MACHINE_CEILING: AutonomyGate = 'A2'
+const UNTRUSTED_MACHINE_CEILING: Record<EffectClass, AutonomyGate> = {
+  E0: 'A5',
+  E1: 'A2',
+  E2: 'A2',
+  E3: 'A2',
+  E4: 'A2',
+  E5: 'A2',
+  E6: 'A2',
+}
 
 const MACHINE_KINDS: PrincipalKind[] = ['ai_worker', 'service']
 
@@ -262,10 +287,13 @@ export function resolveDecision(input: ResolveInput): Decision {
   if (actor.trustCeiling) {
     consider('trust-ceiling', actor.trustCeiling, `The actor's earned autonomy for acts of this kind is ${actor.trustCeiling}`)
   } else if (MACHINE_KINDS.includes(actor.kind)) {
+    const untrustedCeiling = UNTRUSTED_MACHINE_CEILING[capability.effectClass]
     consider(
       'untrusted-machine',
-      UNTRUSTED_MACHINE_CEILING,
-      'No trust record for this worker, so it acts only with prior approval',
+      untrustedCeiling,
+      untrustedCeiling === 'A5'
+        ? 'No trust record for this worker. Reading is not an act it needs approval to perform'
+        : 'No trust record for this worker, so it acts only with prior approval',
     )
   }
 
@@ -441,7 +469,10 @@ export function explainDecision(decision: Decision, capability: CapabilityDescri
   parts.push(
     decision.allowed
       ? `${GATE_MEANING[decision.gate]}.`
-      : `Blocked. ${binding?.detail ?? 'No rule permitted this act.'}`,
+      // The rule details are written as clauses, not sentences, so the one that
+      // gets promoted to the opening line is the only one that needs a stop
+      // added — without it the next sentence runs straight into it.
+      : `Blocked. ${endSentence(binding?.detail ?? 'No rule permitted this act')}`,
   )
 
   if (decision.allowed && binding) {
@@ -465,6 +496,10 @@ export function explainDecision(decision: Decision, capability: CapabilityDescri
   if (capability.note) parts.push(`(${capability.note})`)
 
   return parts.join(' ')
+}
+
+function endSentence(text: string): string {
+  return /[.!?]$/.test(text) ? text : `${text}.`
 }
 
 export { AUTONOMY_GATES }

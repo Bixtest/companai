@@ -46,6 +46,13 @@ const deleteEverything: CapabilityDescriptor = {
   reversibility: 'irreversible',
 }
 
+const readOnly: CapabilityDescriptor = {
+  id: 'directory.organizations.view',
+  module: 'directory',
+  effectClass: 'E0',
+  reversibility: 'reversible',
+}
+
 function input(overrides: Partial<ResolveInput> = {}): ResolveInput {
   return {
     actor: { kind: 'human', id: 'user-1', holdsCapability: true, ...(overrides.actor ?? {}) },
@@ -194,6 +201,44 @@ describe('a machine with no trust record does not get the benefit of the doubt',
 
     expect(decision.reasons.map((reason) => reason.rule)).not.toContain('untrusted-machine')
     expect(rank(decision.gate)).toBeGreaterThan(rank('A2'))
+  })
+
+  it('does not make an untrusted machine ask permission to read', () => {
+    // Shadow mode caught this on real traffic: an API key listing organizations
+    // acquired an approval obligation. A read has no effect to approve, and a
+    // control that expensive is one somebody switches off — which is the
+    // approval fatigue planning 02 exists to resolve, not to cause.
+    const decision = resolveDecision(
+      input({ actor: { kind: 'service', id: 'key-1', holdsCapability: true }, capability: readOnly }),
+    )
+
+    expect(decision.gate).toBe('A5')
+    expect(decision.obligations).toEqual([])
+  })
+
+  it('still records the rule for a read, with a reason that says why it did not bind', () => {
+    // The rule firing at A5 is not the same as the rule being absent. An
+    // explanation that silently omits the trust question cannot be read back as
+    // "trust was considered and did not constrain this".
+    const decision = resolveDecision(
+      input({ actor: { kind: 'ai_worker', id: 'nora', holdsCapability: true }, capability: readOnly }),
+    )
+
+    const trustReason = decision.reasons.find((reason) => reason.rule === 'untrusted-machine')
+    expect(trustReason).toBeDefined()
+    expect(trustReason!.ceiling).toBe('A5')
+    expect(trustReason!.detail).toContain('Reading is not an act')
+  })
+
+  it('keeps approve-first for every class of act that has an effect', () => {
+    // Only E0 is exempt. The exemption is about acts with no effect, not about
+    // machines being trusted — so widening it by accident should fail here.
+    for (const capability of [reversibleWrite, sendEmail, issueInvoice, deleteEverything]) {
+      const decision = resolveDecision(
+        input({ actor: { kind: 'ai_worker', id: 'nora', holdsCapability: true }, capability }),
+      )
+      expect(rank(decision.gate)).toBeLessThanOrEqual(rank('A2'))
+    }
   })
 
   it('uses a real trust ceiling once one exists, in either direction', () => {

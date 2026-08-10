@@ -12,6 +12,14 @@ import { normalizeTenantId } from './lib/tenantAccess'
 import { parseCommaSeparatedList } from '@open-mercato/shared/lib/string'
 import { resolveDecision, explainDecision, GATE_MEANING } from '@open-mercato/shared/lib/authority/decision'
 import { buildShadowReport, renderShadowReport } from '@open-mercato/shared/lib/authority/shadow-report'
+import {
+  DEFAULT_ENFORCEMENT_MODE,
+  ENFORCEMENT_CONFIG_KEY,
+  ENFORCEMENT_CONFIG_MODULE,
+  ENFORCEMENT_MODES,
+  isEnforcementMode,
+  type EnforcementMode,
+} from '@open-mercato/core/modules/auth/services/authorityEnforcementService'
 import { readFileSync } from 'node:fs'
 import { getCapabilityDescriptor } from '@open-mercato/shared/lib/capabilities/registry'
 import { EFFECT_CLASS_MEANING, type AutonomyGate, type TaskGrade } from '@open-mercato/shared/modules/capabilities'
@@ -1034,5 +1042,90 @@ const authorityShadowReport: ModuleCli = {
   },
 }
 
+/**
+ * Reads and sets how much of the resolver a tenant has switched on.
+ *
+ * The switch is deliberately not a UI toggle. Enforcement changes what the
+ * platform refuses, and the honest path to it is: read your own shadow report,
+ * decide what the disagreements mean, then set the mode with the evidence in
+ * front of you. A checkbox in a settings page invites the opposite order.
+ */
+const authorityMode: ModuleCli = {
+  command: 'authority:mode',
+  async run(rest) {
+    const args: Record<string, string> = {}
+    for (let index = 0; index < rest.length; index += 1) {
+      const arg = rest[index]
+      if (!arg?.startsWith('--')) continue
+      const [key, inlineValue] = arg.replace(/^--/, '').split('=')
+      if (inlineValue !== undefined) { args[key] = inlineValue; continue }
+      const next = rest[index + 1]
+      if (next && !next.startsWith('--')) { args[key] = next; index += 1 }
+      else args[key] = 'true'
+    }
+
+    const tenantId = args.tenant ?? null
+    if (!tenantId) {
+      console.error('Usage: mercato auth authority:mode --tenant <id> [--set off|shadow|enforce]')
+      console.error('')
+      console.error('Without --set it reports the current mode. The mode is per tenant:')
+      console.error('the evidence from one customer says nothing about another customer\'s graph.')
+      process.exitCode = 1
+      return
+    }
+
+    const container = await createRequestContainer()
+    let moduleConfig: {
+      getValue: <T>(m: string, n: string, o?: { defaultValue?: T | null; scope?: { tenantId?: string | null } }) => Promise<T | null>
+      setValue: (m: string, n: string, v: unknown, s?: { tenantId?: string | null }) => Promise<unknown>
+    }
+    try {
+      moduleConfig = container.resolve('moduleConfigService') as typeof moduleConfig
+    } catch {
+      console.error('The configs module is not enabled, so there is nowhere to store a per-tenant mode.')
+      process.exitCode = 1
+      return
+    }
+
+    if (args.set !== undefined) {
+      if (!isEnforcementMode(args.set)) {
+        console.error(`'${args.set}' is not a mode. Use one of: ${ENFORCEMENT_MODES.join(', ')}`)
+        process.exitCode = 1
+        return
+      }
+      await moduleConfig.setValue(ENFORCEMENT_CONFIG_MODULE, ENFORCEMENT_CONFIG_KEY, args.set, { tenantId })
+      console.log('')
+      console.log(`  ${tenantId} → ${args.set}`)
+      console.log(`  ${MODE_MEANING[args.set]}`)
+      if (args.set === 'enforce') {
+        console.log('')
+        console.log('  Enforced: refusals. The resolver can now remove an allowance RBAC gave.')
+        console.log('  Not enforced: obligations. A1-A4 mean approve-first, hold-and-commit or')
+        console.log('  review-afterwards, and nothing yet can hold an arbitrary act and resume')
+        console.log('  it once somebody approves. Those are recorded and do not bind.')
+      }
+      console.log('')
+      return
+    }
+
+    const stored = await moduleConfig.getValue<string>(
+      ENFORCEMENT_CONFIG_MODULE,
+      ENFORCEMENT_CONFIG_KEY,
+      { defaultValue: DEFAULT_ENFORCEMENT_MODE, scope: { tenantId } },
+    )
+    const mode = isEnforcementMode(stored) ? stored : DEFAULT_ENFORCEMENT_MODE
+    console.log('')
+    console.log(`  ${tenantId} → ${mode}${isEnforcementMode(stored) ? '' : ' (default; nothing stored)'}`)
+    console.log(`  ${MODE_MEANING[mode]}`)
+    console.log('')
+  },
+}
+
+const MODE_MEANING: Record<EnforcementMode, string> = {
+  off: 'The resolver does not run. Nothing is measured and nothing is refused.',
+  shadow: 'The resolver runs beside the answer and records where it would differ. Nothing is refused.',
+  enforce: 'The resolver can refuse an act RBAC allowed. Refusals are logged with the rule that produced them.',
+}
+
 // Export the full CLI list
-export default [authorityExplain, authorityShadowReport, addUser, seedRoles, syncRoleAcls, rotateEncryptionKey, addOrganization, setupApp, listOrganizations, listTenants, listUsers, setPassword]
+export default [authorityExplain, authorityShadowReport, authorityMode, addUser, seedRoles, syncRoleAcls, rotateEncryptionKey, addOrganization, setupApp, listOrganizations, listTenants, listUsers, setPassword]
