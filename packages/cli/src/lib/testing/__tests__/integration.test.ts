@@ -99,6 +99,33 @@ const resolveBuildCacheFingerprint = async (
 
 describe('integration cache and options', () => {
   const REUSE_ENV_TEST_TIMEOUT_MS = 60000
+
+  /**
+   * A two-file tree standing in for the repository, for the tests that do not
+   * care what is in it.
+   *
+   * `tryReuseExistingEnvironment` decides whether sources changed since the
+   * environment started, and with the real defaults that means stat-ing roughly
+   * 8,700 files one at a time. Measured: ~1.5s idle, ~13s with four other test
+   * packages running. Five tests each paying that made this file's runtime a
+   * function of machine load rather than of anything it asserts, which is how a
+   * test starts failing for reasons unrelated to the change under test.
+   *
+   * The tests below assert reuse *decisions*. `defaultBuildInputWalk` keeps the
+   * real input paths covered, deliberately and once.
+   */
+  let fixtureRoot = ''
+  let fixtureBuildCache: { inputPaths: string[]; projectRoot: string }
+
+  beforeAll(async () => {
+    fixtureRoot = await mkdtemp(path.join(os.tmpdir(), 'om-int-reuse-fixture-'))
+    await writeFile(path.join(fixtureRoot, 'source.ts'), 'export const stable = true\n', 'utf8')
+    fixtureBuildCache = { inputPaths: [fixtureRoot], projectRoot: fixtureRoot }
+  })
+
+  afterAll(async () => {
+    if (fixtureRoot) await rm(fixtureRoot, { recursive: true, force: true })
+  })
   const ephemeralEnvFilePath = path.join(projectRootDirectory, '.ai', 'qa', 'ephemeral-env.json')
   const ephemeralLegacyEnvFilePath = path.join(projectRootDirectory, '.ai', 'qa', 'ephemeral-env.md')
   const originalCacheTtl = process.env[CACHE_TTL_ENV_VAR]
@@ -171,6 +198,7 @@ describe('integration cache and options', () => {
         captureScreenshots: true,
         logPrefix: 'integration',
         forceRebuild: false,
+        buildCache: fixtureBuildCache,
       })
 
       expect(environment).not.toBeNull()
@@ -212,6 +240,7 @@ describe('integration cache and options', () => {
         captureScreenshots: true,
         logPrefix: 'integration',
         forceRebuild: false,
+        buildCache: fixtureBuildCache,
       })
 
       expect(environment).not.toBeNull()
@@ -247,6 +276,7 @@ describe('integration cache and options', () => {
         captureScreenshots: false,
         logPrefix: 'integration',
         forceRebuild: false,
+        buildCache: fixtureBuildCache,
       })
 
       expect(environment).not.toBeNull()
@@ -280,6 +310,7 @@ describe('integration cache and options', () => {
         captureScreenshots: true,
         logPrefix: 'integration',
         forceRebuild: false,
+        buildCache: fixtureBuildCache,
       })
 
       expect(environment).not.toBeNull()
@@ -317,6 +348,7 @@ describe('integration cache and options', () => {
         captureScreenshots: false,
         logPrefix: 'integration',
         forceRebuild: false,
+        buildCache: fixtureBuildCache,
       })
 
       expect(environment).not.toBeNull()
@@ -359,6 +391,50 @@ describe('integration cache and options', () => {
       fetchSpy.mockRestore()
     }
   })
+
+  it('walks the real default build inputs and rebuilds when they postdate the environment', async () => {
+    /**
+     * The one test that does not narrow the walk, so the real
+     * `APP_BUILD_INPUT_PATHS` stay covered — a suite where every test supplies a
+     * fixture would pass with those defaults pointing at nothing.
+     *
+     * It stays cheap because the staleness check returns on the *first* file
+     * newer than the environment: backdating `startedAt` to 2020 means the answer
+     * arrives after roughly one stat rather than 8,700. The TTL is widened past
+     * that age on purpose, so a null here can only mean "sources changed" — which
+     * is what the log assertion pins down.
+     */
+    const baseUrl = 'http://127.0.0.1:5001'
+    process.env[CACHE_TTL_ENV_VAR] = String(60 * 60 * 24 * 365 * 20)
+    const fetchSpy = mockHealthyReadinessFetch()
+    const logSpy = jest.spyOn(console, 'log').mockImplementation(() => {})
+
+    try {
+      await writeFile(ephemeralEnvFilePath, `${JSON.stringify({
+        status: 'running',
+        baseUrl,
+        port: 5001,
+        databaseUrl: 'postgres://integration:integration@127.0.0.1:5432/open_mercato',
+        queueBaseDir: '/tmp/open-mercato-queue',
+        source: 'integration',
+        captureScreenshots: true,
+        startedAt: '2020-01-01T00:00:00.000Z',
+      }, null, 2)}\n`, 'utf8')
+
+      const environment = await tryReuseExistingEnvironment({
+        verbose: false,
+        captureScreenshots: true,
+        logPrefix: 'integration',
+        forceRebuild: false,
+      })
+
+      expect(environment).toBeNull()
+      expect(logSpy.mock.calls.flat().join('\n')).toContain('Source files changed')
+    } finally {
+      logSpy.mockRestore()
+      fetchSpy.mockRestore()
+    }
+  }, REUSE_ENV_TEST_TIMEOUT_MS)
 
   it('does not reuse an existing ephemeral environment when source requirement does not match', async () => {
     const baseUrl = 'http://127.0.0.1:5001'

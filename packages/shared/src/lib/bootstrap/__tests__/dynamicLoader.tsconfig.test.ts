@@ -27,8 +27,38 @@ const GENERATED_MODULES: Record<string, string> = {
   `,
 }
 
+/**
+ * Where the throwaway app root goes, and why it is not `process.cwd()`.
+ *
+ * These fixtures used to be created inside `packages/shared`, which is a source
+ * tree that other packages' guard tests walk. Each one exists for a few seconds
+ * and is then deleted, so a guard that listed a directory and then read a file
+ * from it could be handed a path that had ceased to exist a moment earlier —
+ * a failure with nothing to do with the change under test, in a package the
+ * change never touched. That is how a gate stops being read.
+ *
+ * `node_modules/.cache` satisfies both constraints at once. It is inside the
+ * repository, so the fixture's `@mikro-orm/decorators/legacy` import still
+ * resolves by walking up to the root `node_modules`; and no guard walks
+ * `node_modules`, so nothing can race against files that live there.
+ */
+function findRepoRoot(): string {
+  // Walked rather than counted: a hardcoded `../../../../../..` is correct until
+  // somebody moves this file, and then it silently writes outside the repository.
+  let current = __dirname
+  while (!fs.existsSync(path.join(current, 'yarn.lock'))) {
+    const parent = path.dirname(current)
+    if (parent === current) throw new Error('[internal] repository root not found above the test directory')
+    current = parent
+  }
+  return current
+}
+
+const FIXTURE_PARENT = path.join(findRepoRoot(), 'node_modules', '.cache', 'open-mercato-dynamic-loader-tests')
+
 function writeFixture(): string {
-  const appRoot = fs.mkdtempSync(path.join(process.cwd(), '.tmp-dynamic-loader-'))
+  fs.mkdirSync(FIXTURE_PARENT, { recursive: true })
+  const appRoot = fs.mkdtempSync(path.join(FIXTURE_PARENT, 'app-'))
   const generatedDir = path.join(appRoot, '.mercato', 'generated')
   const entityDir = path.join(appRoot, 'src', 'modules', 'probe', 'data')
   fs.mkdirSync(generatedDir, { recursive: true })

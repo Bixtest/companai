@@ -21,6 +21,17 @@ type EphemeralRuntimeOptions = {
   reuseExisting?: boolean
   requiredExistingSource?: string
   environmentOverrides?: NodeJS.ProcessEnv
+  /**
+   * Narrows which files the staleness check walks. Production callers omit it and
+   * get every app and package source path, which is the point of the check.
+   *
+   * It exists because that walk stats roughly 8,700 files one at a time: ~1.5s on
+   * an idle machine and ~13s with four other test packages running, so a suite
+   * that repeats it degrades with machine load rather than with anything it
+   * asserts. `BuildCacheOptions` already carries these overrides one level down
+   * (`hasBuildInputChangesSince`); this only threads them up.
+   */
+  buildCache?: BuildCacheOptions
 }
 
 export type EphemeralEnvironmentHandle = {
@@ -2041,7 +2052,7 @@ export async function tryReuseExistingEnvironment(options: EphemeralRuntimeOptio
       return null
     }
 
-    const sourceChangedSinceStart = await hasBuildInputChangesSince(startedAtMs)
+    const sourceChangedSinceStart = await hasBuildInputChangesSince(startedAtMs, options.buildCache)
     if (sourceChangedSinceStart) {
       console.log(
         `[${options.logPrefix}] Source files changed since the current ephemeral environment started. Rebuilding.`,

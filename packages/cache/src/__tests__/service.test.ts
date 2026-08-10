@@ -4,6 +4,7 @@ import {
   purgeConfiguredCachePatternsAcrossTenantScopes,
 } from '../service'
 import fs from 'node:fs'
+import os from 'node:os'
 import path from 'node:path'
 import { DEFAULT_JSON_FILE_CACHE_PATH, DEFAULT_SQLITE_CACHE_PATH } from '../defaults'
 import type { CacheStrategy } from '../types'
@@ -130,7 +131,11 @@ describe('Cache Service', () => {
     })
 
     it('purges matching logical keys across tenant scopes without a tenant database', async () => {
-      const root = fs.mkdtempSync(path.join(process.cwd(), '.cache-maintenance-'))
+      // Not `process.cwd()`: that is `packages/cache`, a source tree other
+      // packages' guard tests walk. This directory is created and deleted within
+      // one test, so a guard that listed it and then read from it could be handed
+      // a path that had just ceased to exist.
+      const root = fs.mkdtempSync(path.join(os.tmpdir(), 'om-cache-maintenance-'))
       const jsonFilePath = path.join(root, 'cache.json')
       const options = { strategy: 'jsonfile' as const, jsonFilePath }
       try {
