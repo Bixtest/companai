@@ -1026,3 +1026,42 @@ duplicate always works, right up until one copy is edited.
 fully translated, 252 keys each, with no English placeholders. Seeding English
 into `de.json` would have been the first — and once one is there, the file stops
 being a coverage signal for every key after it. The strings shipped translated.
+
+---
+
+## L36 — A diagnosis you wrote down is a hypothesis with a date on it
+
+**What happened.** The backlog carried a precise-sounding account of why the gate
+flaked: a test creates `.tmp-dynamic-loader-*` inside `packages/shared`, guards
+walking `packages/` read from it after it is deleted, *"two hardened, eleven more
+walk-and-read unguarded."*
+
+Eleven files to harden. Clear scope, obvious next move.
+
+So I planted a fixture-shaped directory in `packages/shared` and ran the three
+suites that walk it. **All 6,905 tests passed.** Nothing breaks while the
+directory is there. The failure needs the *deletion*, which means the readers were
+never the thing to fix — the two writers were. Two edits, not eleven.
+
+**Why the note was wrong.** Nothing in it was invented. It was written while
+chasing a different problem, from a real failure, and every clause was individually
+plausible. What it lacked was the one experiment that separates *"a directory
+appears and disappears here"* from *"eleven readers cannot cope with that"* — and
+by the time I read it back, it had hardened from an observation into a work plan.
+
+**The same shape, twice in one batch.** The second cause was a slow test, and my
+first theory was its source fingerprint. Measuring it first: ~1 second on an idle
+machine, against a 60-second budget. Too small to explain the symptom. Had I
+skipped the measurement I would have optimised it, watched the flake continue, and
+had one fewer suspect and no idea why.
+
+**The rule.** *Before acting on a diagnosis you recorded earlier, re-derive its
+key claim.* Especially your own, especially when it is specific, and above all
+when it names a number — a count like "eleven" reads as though somebody counted,
+and the note cannot tell you whether anybody did.
+
+**The cheap test is usually available.** Planting a directory took ten minutes.
+Timing a walk took two. Both were faster than the work they redirected, and both
+turned a plan into a measurement. Related: [[L30]] — a reproduction you built
+yourself is a hypothesis, not evidence; this is its mirror, where the hypothesis
+arrived pre-built and carrying your own handwriting.

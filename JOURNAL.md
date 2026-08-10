@@ -7,6 +7,70 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-08-10 — The gate stops depending on how busy the laptop is
+
+Two causes, both fixed, and the interesting part is that **the diagnosis I had
+written down was wrong.**
+
+`PROGRESS` said: two guards hardened, *eleven more walk-and-read unguarded*. That
+framed the work as hardening eleven readers. So I planted a fixture-shaped
+directory inside `packages/shared` and ran core, ui and cli against it — **6,905
+tests, all green.** Nothing breaks while the directory exists. The failure only
+happens when it is *deleted* out from under a walker.
+
+Which inverts the fix. Thirteen readers were never the problem; two writers were.
+`dynamicLoader.tsconfig.test.ts` was creating scratch app roots inside
+`packages/shared`, and `cache/service.test.ts` inside `packages/cache`. Both now
+write outside any source tree — the loader fixture to `node_modules/.cache`,
+because it needs repo-relative resolution for its `@mikro-orm` import, and the
+cache fixture to `os.tmpdir()`, because it needs nothing.
+
+**A backlog note is a hypothesis with a date on it.** Mine was written while
+chasing something else, was plausible, and would have sent me to harden eleven
+files that did not need it. Ten minutes of planting a directory settled it
+([[L36]]).
+
+**The second cause I nearly guessed at too.** Five tests in the CLI integration
+file were slow, and my first theory was the source fingerprint. Then I measured
+it: 8,715 files, 262ms to walk, 777ms to stat, on an idle machine. About a second
+— nowhere near a 60-second budget. The theory was too small to explain the
+symptom, and if I had "fixed" it I would have declared victory over nothing.
+
+So I built the load instead: four heavy test packages running concurrently, then
+timed the file against them.
+
+| | Before | After |
+|---|---|---|
+| Worst single test | 13,023 ms | **2,467 ms** |
+| Whole file | 37.0 s | **9.8 s** |
+
+Eight-fold degradation under only four of the gate's twenty-two packages — which
+is what makes 60s reachable, and it is a *measurement* rather than the arithmetic
+I would otherwise have offered.
+
+The fix threads overrides that already existed one level down
+(`hasBuildInputChangesSince` has always taken `BuildCacheOptions`;
+`tryReuseExistingEnvironment` just never passed any) so those tests point the walk
+at a two-file fixture. They assert reuse decisions, not that the repository
+contains 8,700 files.
+
+**And coverage went up.** Fixturing all five would have left the real default
+paths untested — they could point at nothing and every test would still pass. So
+one new test keeps them, cheaply: backdate `startedAt` to 2020 and the staleness
+check returns on the *first* file it stats instead of the 8,700th. Same code path,
+one three-thousandth of the I/O.
+
+The recurrence guard was verified the only way a guard can be — by putting the bug
+back and watching it go red and name the file.
+
+**What I did not fix, said plainly.** The walking guards are still unguarded.
+Nothing writes into `packages/` during a gate run now, so nothing races; if some
+future build step does, the class returns. Measured, not eliminated.
+
+Gate: 22/22 tasks, **12,666 tests**, 5m57s idle.
+
+---
+
 ## 2026-08-10 — The approvals queue becomes a screen
 
 Enforcement has held acts since it landed. Answering them meant calling an API,

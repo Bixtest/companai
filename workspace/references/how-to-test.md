@@ -1010,6 +1010,24 @@ organizations page.
 
 ---
 
+## Batch — the test gate stops flaking
+
+**What changed, in one sentence.** Our own automated checks were occasionally
+failing for reasons that had nothing to do with what we had changed; that is
+fixed.
+
+**Why it matters to us.** Those checks are what stop a bad change reaching you. A
+check that cries wolf gets ignored, and an ignored check protects nothing.
+
+**Visible change: none.** Nothing in the product looks or behaves differently.
+This is entirely about the machinery that runs before a change ships.
+
+**Nothing to test.** There is no screen, button, or page to look at. If you want
+the evidence, it is the two measured before/after tables in `PROGRESS.md` under
+*"the gate stops depending on machine load"*.
+
+---
+
 ## Template for future batches
 
 ```markdown
