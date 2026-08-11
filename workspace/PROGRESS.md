@@ -29,7 +29,7 @@ and is argued below; anything can be pulled forward on request.
 | | **Wave 1 — small, independent, closes three batches** | | |
 | | **Wave 2 — the resolver actually receives its inputs** | | |
 | **1** | **Task grade needs a *matter* to come from — blocked on G4** | **Investigated 2026-08-11 and reclassified, not done.** The audit was right that `decideFor` passes `context: {}` — but there is nothing to pass. A grade describes *the work*, not the act: G4 is "legal proceedings, board/M&A, security incidents", a property of the matter. The platform has no matter until project/case context arrives with **G4 (item 8)**, so the only honest grade source today is the data-class floor, which already applies. Wiring a seam nothing can fill would be the claimed-and-absent control this sprint exists to remove. **Precondition: G4.** A real defect found while investigating is fixed below | M |
-| **2** | **G5 — record lock states** | Supplies `resourceCeiling`, which nothing supplies today. `locked` forces A0 on writes, `restricted` caps at A2, neither liftable by trust or delegation. **Not an enhancement** — it replaces the locking removed with `packages/enterprise` | M |
+| **2** | **G5 — record lock states** | Supplies `resourceCeiling`, which nothing supplies today. `locked` forces A0 on writes, `restricted` caps at A2, neither liftable by trust or delegation. **Not an enhancement** — it replaces the locking removed with `packages/enterprise`. **Design question resolved 2026-08-11, see below** | M |
 | **3** | **G3 — temporary delegations** | Supplies `delegationCeiling`. Open Mercato has none at all. The table plus the resolution logic, re-pointed at **principals** rather than users so an AI worker can hold one — which is why R1 came first | L |
 | **4** | **Trust model T0–T4** | Supplies `trustCeiling`. Until it exists every machine resolves as untrusted, capping any act with an effect at approve-first. That is the safe direction, and it is a placeholder standing where planning 02 §5 specifies earned trust. **Was never a backlog item** despite being referenced four times across `knowledge/` | L |
 | **5** | **Charter grants** | Named in the Phase G exit gate as a required resolver input. **Not in `ResolveInput` at all** — no type, no field, no code; it appears only in prose. Found 2026-08-10 | M |
@@ -57,6 +57,36 @@ and is argued below; anything can be pulled forward on request.
 | **23** | `domain_mappings` extraction | Per-tenant custom domains. Wanted, but nothing needs it yet | M |
 | **24** | Orphaned-table decision (~127 tables) | Leave them; they are inert. Revisit only as a deliberate backed-up migration | S |
 | **25** | Phase K checkpoint | The scheduled date that stops "we'll clean up later" being a lie | S |
+
+### G5 — the blocking design question, answered before the batch starts
+
+**The question.** A lock is per record, so the resolver has to know *which record*
+an act targets. `decideFor(subject, feature, scope)` knows none of that, and the
+command bus carries `capability` but **no entity type** — so the obvious design
+(key the lock on `entity_type + record_id`) needs a second per-command
+declaration, which is another 117-command mapping exercise like R4b.
+
+**The answer: key the lock on `(tenant_id, record_id)` alone.** Record ids are v4
+UUIDs, so they are unique across tables in any practical sense, and the gate can
+read `payload.id` from a command it is already intercepting. No new declaration,
+and it works for every command whose payload carries an id rather than only the
+ones somebody remembered to annotate.
+
+Store the command id alongside as a **display hint** — a human reading a list of
+locks needs to know what the thing is — but never key on it, or two capabilities
+touching one record produce two locks.
+
+**Why the collision risk is acceptable**: two tables would have to share a v4
+UUID, and the consequence if they ever did is that an unrelated record is
+*over*-restricted. Wrong in the safe direction, which is the only direction this
+system tolerates being wrong in.
+
+**Scope when it is built**: vocabulary and the effect-class-aware ceiling
+(`locked` exempts `E0` reads, or a locked record could not be looked at), the
+table and migration, a service, the `resourceCeiling` wiring through `decideFor`,
+the gate reading `payload.id`, an ACL feature for who may lock, and a way to
+actually set a lock — a lock nobody can apply is inert, which is the mistake this
+sprint keeps catching.
 
 ### Fixed 2026-08-11 — a caller could buy autonomy by calling the work trivial
 
