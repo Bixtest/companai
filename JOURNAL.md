@@ -7,6 +7,49 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-08-11 — The task-grade item could not be done, and was worth doing anyway
+
+The audit said the resolver never receives a task grade: `decideFor` passes
+`context: {}`, so every act resolves at the `G1` default and only the data-class
+floor can raise it. All true.
+
+**What I found is that there is nothing to pass.** A grade describes *the work*,
+not the act — `G4` is "legal proceedings, board/M&A, security incidents", which is
+a property of the matter somebody is working on. This platform has no matter.
+Project, case and engagement context arrives with **G4**, and until it does the
+only honest source of a grade is the data classification, which already applies.
+
+So I did not wire it. Building the seam — a symbol on the command context, say —
+and calling the item closed would have produced exactly the thing this sprint
+exists to remove: a control named in a table with nothing behind it. The item is
+reclassified with its precondition instead.
+
+**And the investigation paid for itself.** `resolveDecision` took the maximum of
+the requested grade and the data floor, and *not* of the `G1` baseline. A caller
+passing `G0` therefore landed below the default — which buys more autonomy, not
+less. `E4` permits `A3` at `G0` against `A2` at `G1`; `E6` permits `A2` against
+`A1`. The one input a caller controls could widen the answer, in a resolver whose
+whole premise is that nothing widens. The doc comment two lines above even said
+*"a caller cannot talk the resolver down"*, which was true of the data floor and
+false of the baseline.
+
+**Two corrections to my own first reading**, both from the code rather than from
+me. I wrote the tests with a `human` actor and every gate came back `A5` — because
+the effect-class matrix bounds **machines and delegated authority only**; people
+are bounded by the graph, the record and policy instead. That narrowed the bug
+honestly: exploitable by an AI worker or a delegated actor, not by an ordinary
+user. And my first test file used the ACL declaration shape rather than the
+flattened descriptor the resolver actually takes, which failed loudly rather than
+passing vacuously.
+
+**The fix was verified by reverting it.** Two of the six tests fail without it.
+A guard nobody has watched fail is a guard nobody should trust — the same
+discipline as the recurrence guard last week.
+
+Gate: 22/22, **12,722 tests**.
+
+---
+
 ## 2026-08-11 — I4 stops being a claim
 
 *Authority is carried, never amplified.* The platform has said that since the

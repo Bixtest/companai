@@ -28,7 +28,7 @@ and is argued below; anything can be pulled forward on request.
 |---|---|---|---|
 | | **Wave 1 — small, independent, closes three batches** | | |
 | | **Wave 2 — the resolver actually receives its inputs** | | |
-| **1** | **Wire task grade into the enforcement path** | `decideFor` passes `context: {}`, so `context.grade` always falls back to `G1` and the grade is decided by the data-class floor alone. The G0–G4 scale is real in the resolver and absent at the call site | M |
+| **1** | **Task grade needs a *matter* to come from — blocked on G4** | **Investigated 2026-08-11 and reclassified, not done.** The audit was right that `decideFor` passes `context: {}` — but there is nothing to pass. A grade describes *the work*, not the act: G4 is "legal proceedings, board/M&A, security incidents", a property of the matter. The platform has no matter until project/case context arrives with **G4 (item 8)**, so the only honest grade source today is the data-class floor, which already applies. Wiring a seam nothing can fill would be the claimed-and-absent control this sprint exists to remove. **Precondition: G4.** A real defect found while investigating is fixed below | M |
 | **2** | **G5 — record lock states** | Supplies `resourceCeiling`, which nothing supplies today. `locked` forces A0 on writes, `restricted` caps at A2, neither liftable by trust or delegation. **Not an enhancement** — it replaces the locking removed with `packages/enterprise` | M |
 | **3** | **G3 — temporary delegations** | Supplies `delegationCeiling`. Open Mercato has none at all. The table plus the resolution logic, re-pointed at **principals** rather than users so an AI worker can hold one — which is why R1 came first | L |
 | **4** | **Trust model T0–T4** | Supplies `trustCeiling`. Until it exists every machine resolves as untrusted, capping any act with an effect at approve-first. That is the safe direction, and it is a placeholder standing where planning 02 §5 specifies earned trust. **Was never a backlog item** despite being referenced four times across `knowledge/` | L |
@@ -57,6 +57,40 @@ and is argued below; anything can be pulled forward on request.
 | **23** | `domain_mappings` extraction | Per-tenant custom domains. Wanted, but nothing needs it yet | M |
 | **24** | Orphaned-table decision (~127 tables) | Leave them; they are inert. Revisit only as a deliberate backed-up migration | S |
 | **25** | Phase K checkpoint | The scheduled date that stops "we'll clean up later" being a lie | S |
+
+### Fixed 2026-08-11 — a caller could buy autonomy by calling the work trivial
+
+Found while investigating the task-grade item, and it is the reason that
+investigation was worth doing even though the item could not be closed.
+
+`resolveDecision` took the maximum of the **requested grade** and the
+**data-class floor**. It did not take the maximum with the `G1` baseline every act
+otherwise starts at — so a caller passing `G0` landed *below* the default. And a
+lower grade buys **more** autonomy, not less:
+
+| Effect class | Ceiling at `G0` | Ceiling at `G1` |
+|---|---|---|
+| `E1` | `A5` | `A4` |
+| `E2` | `A4` | `A3` |
+| `E4` | `A3` | `A2` |
+| `E6` | `A2` | `A1` |
+
+So the one input a caller controls could widen the answer, in a resolver whose
+entire premise is that nothing widens. The function's own doc comment claimed
+*"a caller cannot talk the resolver down"* — true of the data floor, false of the
+baseline.
+
+**Scope, stated accurately.** The effect-class matrix bounds **machines and
+delegated authority only** — a person exercising a permission they hold is bounded
+by the org graph, the record's state and tenant policy instead. So this was
+exploitable by an AI worker or a delegated actor, not by an ordinary user. It was
+also latent: the only caller that has ever set a grade is the `authority:explain`
+what-if flag. It would have stopped being latent the moment anything supplied a
+real one.
+
+Now `max(baseline, dataFloor, requested)`. **The fix was verified by reverting
+it** — two of the six new tests fail without it, so the guard can fail, which is
+the only thing that makes a passing guard mean anything.
 
 ### Closed 2026-08-11 — I4 binds: authority is carried, never amplified
 

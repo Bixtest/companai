@@ -43,6 +43,28 @@ become advisory and "what is the most this could ever be" would have no answer.
 A test asserts this as a property across every combination of inputs, not as an
 example.
 
+### Two things about the grade that surprise people
+
+**A grade can only ever be raised.** The effective grade is the maximum of three
+inputs: the `G1` baseline every act starts at, the floor the data classification
+imposes, and whatever the caller asked for. Planning 02 §5 puts it plainly —
+raising a grade needs no approval from anybody, lowering one does — and the
+maximum is how that becomes structural rather than a rule somebody remembers.
+
+Until 2026-08-11 the maximum was taken over only the last two, so a caller passing
+`G0` landed *below* the baseline. That direction matters more than it looks: a
+**lower** grade buys **more** autonomy (`E4` permits `A3` at `G0` against `A2` at
+`G1`), so the one input a caller controls could widen the answer.
+
+**The effect-class matrix bounds machines and delegated authority only.** A person
+exercising a permission they hold is not bounded by it — shadow mode caught that
+on its first real traffic, where 45 of 45 observations were people acquiring an
+obligation for things like changing their own sidebar layout. Their ceilings come
+from the org graph, the record's state, any delegation, and tenant policy instead.
+
+So when you reason about a grade, ask *who is acting* first. For a human the grade
+usually changes nothing.
+
 ### The rules, in order
 
 | Rule | What it says |
