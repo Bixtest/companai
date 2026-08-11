@@ -86,6 +86,23 @@ const REVIEWED_GATE = 'A4'
  * - **Replays of an already-approved act**, which would otherwise be held again
  *   and produce a queue that cannot be emptied.
  */
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+
+/**
+ * The id of the record a command acts on, when it names one.
+ *
+ * Requires a well-formed UUID rather than accepting any `id`, because a lock is
+ * keyed on the id alone: a slug or a numeric id from some other command's
+ * payload could otherwise collide with a genuine record's lock and constrain the
+ * wrong thing. A create has no id, and nothing is looked up for it.
+ */
+function readRecordId(input: unknown): string | null {
+  if (!input || typeof input !== 'object') return null
+  const candidate = (input as { id?: unknown }).id
+  if (typeof candidate !== 'string') return null
+  return UUID_PATTERN.test(candidate) ? candidate : null
+}
+
 export const authorityCommandGate: CommandInterceptor = {
   id: 'auth.authority-command-gate',
   targetCommand: '*',
@@ -139,7 +156,20 @@ export const authorityCommandGate: CommandInterceptor = {
     const onBehalfOfUserId = (auth?.principal as { onBehalfOfUserId?: string | null } | undefined)?.onBehalfOfUserId
       ?? (auth?.userId as string | null | undefined)
       ?? null
-    const decision = await enforcement.decideFor(subject, capability, { tenantId, organizationId }, { onBehalfOfUserId })
+    // The record being acted on, when the command names one.
+    //
+    // `payload.id` rather than an entity type plus an id: the bus carries a
+    // capability and no entity type, so keying a lock on both would need a
+    // per-command declaration across every command. Record ids are v4 UUIDs, so
+    // the id alone identifies a record in any practical sense — see PROGRESS
+    // under *G5, the blocking design question*.
+    const recordId = readRecordId(input)
+    const decision = await enforcement.decideFor(
+      subject,
+      capability,
+      { tenantId, organizationId },
+      { onBehalfOfUserId, recordId },
+    )
     if (!decision || !HELD_GATES.has(decision.gate)) {
       logger.debug('Gate permits the act to run now', {
         commandId: context.commandId,

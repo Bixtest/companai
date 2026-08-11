@@ -117,6 +117,8 @@ export type ResolveInput = {
     grade?: TaskGrade
     /** Ceiling implied by the record's state — locked, restricted, open. */
     resourceCeiling?: AutonomyGate
+    /** Why the record's state is what it is — carried into the explanation. */
+    resourceCeilingDetail?: string
     /** Tenant policy floor, if one applies to this act. */
     policyCeiling?: AutonomyGate
   }
@@ -372,7 +374,15 @@ export function resolveDecision(input: ResolveInput): Decision {
   }
 
   if (context.resourceCeiling) {
-    consider('resource-state', context.resourceCeiling, `The record's state permits at most ${context.resourceCeiling}`)
+    // The supplied detail when there is one, because it carries the reason
+    // somebody gave when locking the record. "Locked pending the Q3 audit" tells
+    // a reader what to do next; "the record's state permits at most A0" tells
+    // them only that they are stuck.
+    consider(
+      'resource-state',
+      context.resourceCeiling,
+      context.resourceCeilingDetail ?? `The record's state permits at most ${context.resourceCeiling}`,
+    )
   }
 
   if (context.policyCeiling) {

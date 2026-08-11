@@ -581,3 +581,64 @@ export class AuthorityActReview {
   updatedAt?: Date
 }
 
+/**
+ * A record frozen or restricted, whatever anybody's authority.
+ *
+ * **Keyed on `(tenant_id, record_id)` and nothing else.** The obvious design
+ * keys on entity type as well, but the command bus carries a `capability` and no
+ * entity type, so that would need a second per-command declaration across every
+ * command — the R4b mapping exercise again. Record ids are v4 UUIDs, so keying on
+ * the id alone is unique in any practical sense, and the gate can read
+ * `payload.id` from a command it is already intercepting.
+ *
+ * `command_hint` exists so a person reading a list of locks knows what the thing
+ * is. It is **never** part of the key: two capabilities touching one record must
+ * produce one lock, not two.
+ *
+ * If two tables ever did share a UUID, an unrelated record would be
+ * *over*-restricted — wrong in the only direction this system tolerates.
+ */
+@Entity({ tableName: 'record_locks' })
+// No `@Index` here: the unique constraint on (tenant_id, record_id) already
+// creates the index every read in `RecordLockService` uses, and a second index on
+// the same columns costs a write on every lock change to answer nothing new.
+export class RecordLock {
+  @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
+  id!: string
+
+  @Property({ name: 'tenant_id', type: 'uuid' })
+  tenantId!: string
+
+  @Property({ name: 'organization_id', type: 'uuid', nullable: true })
+  organizationId?: string | null
+
+  /** The locked record's own id. See the note above on why this is the key. */
+  @Property({ name: 'record_id', type: 'uuid' })
+  recordId!: string
+
+  /** `open`, `restricted` or `locked`. */
+  @Property({ name: 'lock_state', type: 'text' })
+  lockState!: string
+
+  /**
+   * Why, in the words of whoever locked it.
+   *
+   * Carried into the refusal the resolver returns, because "you may not edit
+   * this" is a support ticket and "locked pending the Q3 audit" is an answer.
+   */
+  @Property({ type: 'text', nullable: true })
+  reason?: string | null
+
+  /** What kind of thing this is, for display only — never keyed on. */
+  @Property({ name: 'command_hint', type: 'text', nullable: true })
+  commandHint?: string | null
+
+  @Property({ name: 'locked_by_user_id', type: 'uuid', nullable: true })
+  lockedByUserId?: string | null
+
+  @Property({ name: 'created_at', type: Date, onCreate: () => new Date() })
+  createdAt: Date = new Date()
+
+  @Property({ name: 'updated_at', type: Date, onCreate: () => new Date(), onUpdate: () => new Date() })
+  updatedAt: Date = new Date()
+}

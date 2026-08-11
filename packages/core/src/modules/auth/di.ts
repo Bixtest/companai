@@ -5,6 +5,7 @@ import type { CacheStrategy } from '@open-mercato/cache'
 import { AuthService } from '@open-mercato/core/modules/auth/services/authService'
 import { RbacService } from '@open-mercato/core/modules/auth/services/rbacService'
 import { AuthorityEnforcementService } from '@open-mercato/core/modules/auth/services/authorityEnforcementService'
+import { RecordLockService } from '@open-mercato/core/modules/auth/services/recordLockService'
 import { ActReviewService, PendingActService } from '@open-mercato/core/modules/auth/services/pendingActService'
 import {
   createRbacFallbackCache,
@@ -62,12 +63,25 @@ export function register(container: AppContainer) {
           })
         },
       },
+      {
+        // Same lazy shape as the invoker reader above, and for a plainer reason:
+        // this service is built inside the request container and must not open an
+        // EntityManager of its own.
+        async stateFor(recordId: string, scope) {
+          const locks = optional(cradle, 'recordLockService') as
+            | { stateFor: (id: string, scope: unknown) => Promise<{ state: string; reason: string | null } | null> }
+            | null
+          if (!locks) return null
+          return locks.stateFor(recordId, scope) as never
+        },
+      },
     )).scoped().proxy(),
   })
 
   // Scoped, so a held act is written on the request's EntityManager and rolls
   // back with it — an act recorded as held by a request that then failed would
   // be an approval queue entry for something nobody proposed.
+  container.register({ recordLockService: asClass(RecordLockService).scoped() })
   container.register({ pendingActService: asClass(PendingActService).scoped() })
   container.register({ actReviewService: asClass(ActReviewService).scoped() })
 

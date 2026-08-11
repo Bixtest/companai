@@ -89,6 +89,18 @@ export const features: AclFeatureDeclaration[] = [
     },
   },
   {
+    id: 'auth.records.lock',
+    title: 'Lock and unlock records',
+    module: 'auth',
+    capability: {
+      effectClass: 'E5',
+      reversibility: 'reversible',
+      dataClasses: ['internal'],
+      delegable: false,
+      note: 'Locking a record refuses every write to it whatever authority the writer holds, which makes this a permission change rather than an ordinary edit. Not delegable, for the same reason approval is not: somebody who can pass on the power to freeze work has turned a control into a routing rule. Unlocking is the same capability — splitting them would create a role that can stop work and never restart it.',
+    },
+  },
+  {
     id: 'auth.authority.approve',
     title: 'Approve held acts',
     module: 'auth',

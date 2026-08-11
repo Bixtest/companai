@@ -3,6 +3,7 @@ import { getCapabilityDescriptor } from '@open-mercato/shared/lib/capabilities/r
 import { parseSubject } from '@open-mercato/shared/lib/auth/principal'
 import type { AutonomyGate } from '@open-mercato/shared/modules/capabilities'
 import { createLogger } from '@open-mercato/shared/lib/logger'
+import { recordLockCeiling, recordLockReason, type RecordLockState } from '@open-mercato/shared/modules/record-locks'
 
 const logger = createLogger('authority').child({ component: 'enforcement' })
 
@@ -66,6 +67,19 @@ type ModuleConfigReader = {
  * cycle. The DI registration hands over an object that resolves `rbacService`
  * from the cradle at call time, which is late enough to break it.
  */
+/**
+ * The state the record being acted on is in.
+ *
+ * A reader for the same reason as the others: this service is constructed inside
+ * the request container and must not reach for an `EntityManager` of its own.
+ */
+type RecordLockReader = {
+  stateFor: (
+    recordId: string,
+    scope: AuthorityScope,
+  ) => Promise<{ state: RecordLockState; reason: string | null } | null>
+}
+
 type InvokerAuthorityReader = {
   holdsCapability: (
     userId: string,
@@ -111,6 +125,7 @@ export class AuthorityEnforcementService {
     private readonly graph: GraphCeilingReader | null,
     private readonly moduleConfig: ModuleConfigReader | null,
     private readonly invokerAuthority: InvokerAuthorityReader | null = null,
+    private readonly recordLocks: RecordLockReader | null = null,
   ) {}
 
   /**
@@ -183,7 +198,7 @@ export class AuthorityEnforcementService {
     subject: string,
     feature: string,
     scope: AuthorityScope,
-    options: { onBehalfOfUserId?: string | null } = {},
+    options: { onBehalfOfUserId?: string | null; recordId?: string | null } = {},
   ): Promise<Decision | null> {
     const capability = getCapabilityDescriptor(feature)
     if (!capability) return null
@@ -197,6 +212,7 @@ export class AuthorityEnforcementService {
       principal.id,
       options.onBehalfOfUserId ?? null,
     )
+    const resourceCeiling = await this.resourceCeilingFor(capability, scope, options.recordId ?? null)
 
     return resolveDecision({
       actor: {
@@ -210,8 +226,37 @@ export class AuthorityEnforcementService {
         ...(invokerCeiling ? { invokerCeiling } : {}),
       },
       capability,
-      context: {},
+      context: {
+        ...(resourceCeiling
+          ? { resourceCeiling: resourceCeiling.ceiling, resourceCeilingDetail: resourceCeiling.detail }
+          : {}),
+      },
     })
+  }
+
+  /**
+   * The ceiling the record's own state imposes (G5).
+   *
+   * Unlike every other input here, this is not about the actor at all — a locked
+   * contract is locked for everybody. It arrives as a ceiling like the rest, so
+   * no amount of trust, delegation or standing approval reaches past it: the
+   * resolver takes a minimum and nothing in it widens.
+   *
+   * Reads are exempt, which `recordLockCeiling` decides rather than this method —
+   * a locked record nobody may look at is one nobody can review before deciding
+   * to unlock it.
+   */
+  private async resourceCeilingFor(
+    capability: ReturnType<typeof getCapabilityDescriptor>,
+    scope: AuthorityScope,
+    recordId: string | null,
+  ): Promise<{ ceiling: AutonomyGate; detail: string } | null> {
+    if (!capability || !recordId || !this.recordLocks) return null
+    const lock = await this.recordLocks.stateFor(recordId, scope)
+    if (!lock) return null
+    const ceiling = recordLockCeiling(lock.state, capability.effectClass)
+    if (!ceiling) return null
+    return { ceiling, detail: recordLockReason(lock.state, lock.reason) }
   }
 
   /**
