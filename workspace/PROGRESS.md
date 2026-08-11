@@ -29,7 +29,7 @@ and is argued below; anything can be pulled forward on request.
 | | **Wave 1 — small, independent, closes three batches** | | |
 | | **Wave 2 — the resolver actually receives its inputs** | | |
 | **1** | **Task grade needs a *matter* to come from — blocked on G4** | **Investigated 2026-08-11 and reclassified, not done.** The audit was right that `decideFor` passes `context: {}` — but there is nothing to pass. A grade describes *the work*, not the act: G4 is "legal proceedings, board/M&A, security incidents", a property of the matter. The platform has no matter until project/case context arrives with **G4 (item 8)**, so the only honest grade source today is the data-class floor, which already applies. Wiring a seam nothing can fill would be the claimed-and-absent control this sprint exists to remove. **Precondition: G4.** A real defect found while investigating is fixed below | M |
-| **2** | **Trust model T0–T4** | Supplies `trustCeiling`. Until it exists every machine resolves as untrusted, capping any act with an effect at approve-first. That is the safe direction, and it is a placeholder standing where planning 02 §5 specifies earned trust. **Was never a backlog item** despite being referenced four times across `knowledge/` | L |
+| **2** | **Trust model T0–T4** | Supplies `trustCeiling`. Until it exists every machine resolves as untrusted, capping any act with an effect at approve-first. **Evidence audit 2026-08-11 — 2 of the 5 promotion criteria are computable, 3 are not. See below; the scope decision is the owner's** | L |
 | **3** | **Charter grants** | Named in the Phase G exit gate as a required resolver input. **Not in `ResolveInput` at all** — no type, no field, no code; it appears only in prose. Found 2026-08-10 | M |
 | **4** | **Budget as a resolver input** | The other exit-gate input that exists in no form whatsoever. An actor's remaining spend or quota, bounding what it may do | M |
 | **5** | **Tenant policy ceiling** | `context.policyCeiling` is read by the resolver and set by **nothing** — zero assignments outside the type definition. A tenant wanting a blanket floor has no way to express one | M |
@@ -57,6 +57,33 @@ and is argued below; anything can be pulled forward on request.
 | **21** | `domain_mappings` extraction | Per-tenant custom domains. Wanted, but nothing needs it yet | M |
 | **22** | Orphaned-table decision (~127 tables) | Leave them; they are inert. Revisit only as a deliberate backed-up migration | S |
 | **23** | Phase K checkpoint | The scheduled date that stops "we'll clean up later" being a lie | S |
+
+### The trust model — what the evidence can actually support
+
+Planning 02 §5 is unusually specific, and its first line is the constraint:
+**"Trust is computed evidence, not a setting someone types."** Promotion requires
+*all* of five criteria and then a human decision. Audited against this platform:
+
+| Promotion criterion | Computable today? |
+|---|---|
+| ≥ 50 completed acts in the capability group | **Yes** — `action_logs` carries the actor and the command |
+| Reviewer override rate < 5% | **Yes** — `execution_state = 'undone'` records a reversal, against `authority_act_reviews` |
+| Zero open incidents of severity ≥ medium | **No** — there is no incident model |
+| Evaluation suite passing at the role's bar | **No** — evaluation suites do not exist |
+| No charter change since the window opened | **No** — charters do not exist (backlog item 3) |
+
+Demotion is the easier half, and that asymmetry is invariant **I9**: an override
+rate crossing its threshold is computable and can act immediately.
+
+**Why this is not simply "build the computable half".** Promotion **widens**
+machine authority — today every machine is capped at approve-first for anything
+with an effect, and a trust tier lifts that cap. This is the one place in the
+sprint where shipping a partial control does *not* point in the safe direction.
+A trust level somebody sets by typing `T4` is precisely what the specification's
+first line forbids, and it would be the most dangerous knob in the product.
+
+Recorded 2026-08-11. The scope decision is the owner's: it is a governance
+decision about the governance product, not a sequencing choice.
 
 ### Closed 2026-08-11 — G3, authority lent for a while
 
