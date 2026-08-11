@@ -7,6 +7,58 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-08-11 — G5: the first ceiling that is not about the actor
+
+Every other input to the resolver asks *who is acting*. This one asks what is
+being acted on. A contract under dispute, a payroll run that has closed, a case
+file somebody froze pending review — none of those are properties of an actor, and
+no trust level or delegation should reach past them.
+
+`locked` refuses every write; `restricted` makes writes need approval. Neither can
+be lifted by anything about the actor, and that holds structurally rather than by
+a check: it arrives as a ceiling into a resolver that takes a minimum.
+
+It also restores something we removed. Excluding `packages/enterprise` in S2 took
+record locking out of the platform entirely, so this is not an enhancement.
+
+**Reads are exempt, deliberately.** A record nobody may read is one nobody can
+review before deciding whether to unlock it, and freezing a contract should not
+hide it from the people arguing about it. Who may read is already RBAC's question
+and the data classification's.
+
+**The design question was answered before the batch started**, and that turned out
+to be the right order: the bus carries a capability and no entity type, so keying
+a lock on both would have needed a per-command declaration across every command —
+the R4b exercise again. Keyed on the record id alone instead, with the gate
+requiring a well-formed UUID before it looks anything up, because a slug or a
+numeric id from some other payload could collide with a real lock and constrain
+the wrong record.
+
+**Two things the batch caught in itself, and both were mine.**
+
+The refusal read *"the record's state permits at most A0"* — which tells the
+person who hit it nothing they can act on. The reason somebody typed when locking
+the record was being computed and then dropped, because the resolver's context
+took a gate and no detail. Now it carries one, and a refusal reads *"locked
+pending the Q3 audit"*. I only noticed because a test asserted the reason appeared,
+which it would not have done if I had tested only the gate.
+
+And `db:generate` found an index declared on the entity that my migration never
+created. The unique constraint on `(tenant_id, record_id)` already provides
+exactly that index, so the honest fix was to delete both the decorator and the
+partial index I had written rather than add a second index costing a write on
+every lock change to answer nothing new.
+
+**What I did not build is a page.** Locking is an API guarded by a new
+`auth.records.lock` capability — enough that a lock can be applied and therefore
+means something, which is the line this sprint keeps drawing. A control belongs on
+each record's own screen, and that is per-entity work rather than one screen. It
+is item 17 rather than a sentence in a commit message.
+
+Gate: 22/22, **12,742 tests**.
+
+---
+
 ## 2026-08-11 — The task-grade item could not be done, and was worth doing anyway
 
 The audit said the resolver never receives a task grade: `decideFor` passes

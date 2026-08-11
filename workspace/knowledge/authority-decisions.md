@@ -76,14 +76,13 @@ usually changes nothing.
 | `trust-ceiling` / `untrusted-machine` | What the actor has earned — see below |
 | `invoker-ceiling` | **I4** — authority is carried, never amplified · ✅ **binds since 2026-08-11** |
 | `delegation-ceiling` | The cap on the delegation being acted under · ⚠️ **not supplied at runtime** |
-| `resource-state` | What the record's own state permits · ⚠️ **not supplied at runtime** |
+| `resource-state` | What the record's own state permits · ✅ **binds since 2026-08-11** |
 | `policy` | Tenant policy · ⚠️ **not supplied at runtime** |
 
 > **Read the warnings literally.** Every rule above is implemented and tested in
-> `resolveDecision`, and every one of them binds *when its input arrives*. Three
-> inputs still never arrive: `authorityEnforcementService.decideFor` — the only
-> production decision path — passes `context: {}` and sets no trust, delegation,
-> record-state or policy ceiling, so those rules are reachable today only through
+> `resolveDecision`, and every one of them binds *when its input arrives*. Two
+> inputs still never arrive: `authorityEnforcementService.decideFor` sets no trust
+> and no policy ceiling, so those two rules are reachable today only through
 > `authority:explain`, where a human supplies them as a what-if.
 >
 > This is safe, because nothing anywhere *raises* a gate: an absent input can only
@@ -93,6 +92,10 @@ usually changes nothing.
 > **`invoker-ceiling` was the exception and no longer is.** Since 2026-08-11 the
 > enforcement path resolves whoever an actor is acting for and caps the act at
 > what that person could have done — so an API key can no longer exceed its owner.
+>
+> **`resource-state` binds too**, from the same date: a record can be `restricted`
+> (writes need approval) or `locked` (writes refused), and neither is liftable by
+> anything about the actor. Reads are exempt on purpose.
 >
 > Wiring the rest is `PROGRESS.md` backlog items 1–10. Audited 2026-08-10.
 
