@@ -122,6 +122,16 @@ export type ResolveInput = {
   }
 }
 
+/**
+ * The grade an act is at when nothing says otherwise.
+ *
+ * `G1` — *"internal records"* — rather than `G0`, because `G0` is *"no external
+ * effect, negligible value"* and an act nobody has classified has not earned that
+ * description. Assuming the cheapest grade for unclassified work would hand out
+ * autonomy for the absence of information.
+ */
+const BASELINE_TASK_GRADE: TaskGrade = 'G1'
+
 const GATE_RANK: Record<AutonomyGate, number> = {
   A0: 0, A1: 1, A2: 2, A3: 3, A4: 4, A5: 5,
 }
@@ -202,18 +212,31 @@ export function resolveDecision(input: ResolveInput): Decision {
    * which is the data classes touched. Taking the maximum is also what makes the
    * direction safe: *"raising a grade: any participant, no approval, always
    * allowed"*, while lowering one is itself a governed act. A caller can hand in
-   * a higher grade and it stands; a caller cannot talk the resolver down below
-   * what it is reading.
+   * a higher grade and it stands; a caller cannot talk the resolver down — not
+   * below what the data justifies, and not below the baseline every act starts
+   * at.
    *
    * This is the whole of the classification control. Before it, every act
    * resolved at `G1` whatever it touched, so a machine reading credentials
    * resolved exactly like one reading a dictionary.
    */
-  const requestedGrade: TaskGrade = context.grade ?? 'G1'
   const dataFloor = gradeFloorFromDataClasses(capability.dataClasses)
-  const grade: TaskGrade = TASK_GRADES.indexOf(dataFloor) > TASK_GRADES.indexOf(requestedGrade)
-    ? dataFloor
-    : requestedGrade
+  // The maximum of three, and `BASELINE_TASK_GRADE` is the one that was missing.
+  //
+  // Taking the maximum of the request and the data floor alone let a caller pass
+  // `G0` and land *below* the `G1` every act gets by default -- and a lower grade
+  // buys more autonomy, not less: at `G0` an `E4` act is capped at `A3` where
+  // `G1` caps it at `A2`, and `E6` at `A2` where `G1` gives `A1`. So the one
+  // input a caller controls could widen the answer, in a resolver whose whole
+  // premise is that nothing widens.
+  //
+  // Latent until 2026-08-11 because the only caller that ever set a grade was the
+  // `authority:explain` what-if flag. Found while wiring a real one.
+  const requestedGrade: TaskGrade = context.grade ?? BASELINE_TASK_GRADE
+  const grade: TaskGrade = [BASELINE_TASK_GRADE, dataFloor, requestedGrade]
+    .reduce((highest, candidate) => (
+      TASK_GRADES.indexOf(candidate) > TASK_GRADES.indexOf(highest) ? candidate : highest
+    ), BASELINE_TASK_GRADE)
   const reasons: DecisionReason[] = []
 
   const consider = (rule: string, ceiling: AutonomyGate, detail: string) => {
