@@ -8,6 +8,7 @@
  */
 import * as React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { locales } from '@open-mercato/shared/lib/i18n/config'
 
 const mockUseQuery = jest.fn()
 const mockUseMutation = jest.fn()
@@ -103,7 +104,12 @@ describe('TranslationManager locale tabs (issue #3318)', () => {
     render(<TranslationManager mode="embedded" entityType="" recordId="" />)
 
     const tabs = screen.getAllByRole('tab')
-    expect(tabs.map((tab) => tab.textContent)).toEqual(['EN', 'PL', 'ES', 'DE'])
+    // Derived from the configured locales rather than listed here: the point of
+    // this assertion is that the shared Tabs primitive renders one trigger per
+    // locale, not which locales exist. Hardcoding them made adding Arabic fail a
+    // test about markup.
+    expect(tabs.map((tab) => tab.textContent))
+      .toEqual(locales.map((locale) => locale.toUpperCase()))
     // Proves the shared Tabs primitive is rendering the triggers (not a hand-rolled <button>).
     tabs.forEach((tab) => expect(tab).toHaveAttribute('data-slot', 'tabs-trigger'))
   })

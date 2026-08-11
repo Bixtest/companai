@@ -5,6 +5,7 @@ import { AppProviders } from '@/components/AppProviders'
 
 import { detectLocale, loadDictionary } from '@open-mercato/shared/lib/i18n/server'
 import { resolveForcedLocale } from '@open-mercato/shared/lib/i18n/locale'
+import { resolveTextDirection } from '@open-mercato/shared/lib/i18n/direction'
 
 export const metadata: Metadata = {
   title: 'Open Mercato',
@@ -20,12 +21,16 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const locale = await detectLocale()
+  // Decided here rather than left to the browser: given `lang="ar"` and no
+  // `dir`, a browser renders Arabic left-to-right without erroring -- the
+  // letters right, the layout inside out, and nothing to notice.
+  const direction = resolveTextDirection(locale)
   const dict = await loadDictionary(locale)
   const localeLocked = resolveForcedLocale(process.env) !== null
   const demoModeEnabled = process.env.DEMO_MODE !== 'false'
   const noticeBarsEnabled = process.env.OM_INTEGRATION_TEST !== 'true'
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html lang={locale} dir={direction} suppressHydrationWarning>
       <head>
         <script
           key="om-theme-init"

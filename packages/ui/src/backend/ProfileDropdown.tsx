@@ -29,6 +29,9 @@ const localeLabels: Record<Locale, string> = {
   de: 'Deutsch',
   es: 'Español',
   pl: 'Polski',
+  // Endonyms throughout: a language is listed the way its own speakers write it,
+  // which is also the only spelling a reader looking for it will recognise.
+  ar: 'العربية',
 }
 
 export function ProfileDropdown({
