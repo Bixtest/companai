@@ -705,3 +705,41 @@ its own piece of work — see PROGRESS item 3.
 **What matters for anyone reading a red gate**: check whether the failures are in
 the area you changed. Four separate flakes today, none of them related to the
 change under test.
+
+## U11 — authority edges are seeded once and never maintained · severity **high**
+
+**Found:** 2026-08-11, while the owner was following my own test instructions.
+
+**What happens.** `Migration20260809193000` creates `organization_edges` and seeds
+one row per organization that had a parent **at migration time**. Nothing creates
+an edge afterwards:
+
+- creating an organization with a parent does **not** create an edge
+- moving an organization to a different parent does **not** create or update one
+
+Verified by grep: `OrganizationEdge` is constructed in exactly one place,
+`api/organization-edges/route.ts` (a POST). There is no subscriber, no command
+hook, no `setup.ts` step.
+
+**Why it matters.** The graph ceiling is one of the resolver's inputs. Without an
+edge there is no ceiling, so **the organization hierarchy silently stops
+constraining anything for every organization created after 2026-08-09**. It fails
+in the permissive direction, which is the safe one — and it means a control the
+platform claims to have does nothing for new data.
+
+The live instance shows it exactly: `Approval Branch` has `parent_id` set to
+`Acme Corp` and **no edge row**. The only three rows in the table are soft-deleted
+leftovers pointing at organizations that no longer exist.
+
+**Two things travel with it.**
+
+- The authority page's empty state says *"One is created automatically for each
+  parent-child link between organizations."* That is **false**, and it is the
+  sentence that makes the bug invisible — a reader concludes their tree is too
+  shallow rather than that the feature is not running.
+- My own `how-to-test.md` Test 2 tells the reader to open that page and *"create
+  an edge"*. **The page has no create control.** It edits existing rows only, so
+  with nothing seeded it is permanently empty and the feature is unreachable
+  without `curl`.
+
+**Status:** open at time of writing; fix in progress the same day.
