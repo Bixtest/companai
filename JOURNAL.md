@@ -7,6 +7,47 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-08-11 — A deployment guide, and what it is honest about
+
+The owner asked for handover documentation good enough that somebody who has
+never seen this system can put it on a VPS subdomain behind Plesk.
+`references/deployment.md` is that: what you are actually deploying (four things,
+and only the first is obvious), the server prerequisites, Postgres including the
+two extensions people forget, the environment, the build order, migrations, the
+first tenant, workers, the nginx block, and a verification checklist.
+
+**Every command in it was checked against the repository**, and two were wrong
+when I first wrote them. `mercato auth setup` needs `--orgName` and `--password`,
+which I had left out — the usage string in `auth/cli.ts` said so. A guide that
+almost works is worse than no guide, because the reader assumes they broke it.
+
+**The important line is at the top, and it is a limitation.** None of the
+Plesk-specific steps have been run on a Plesk server. The build, migrate and start
+sequence is the one used daily and is safe to trust; the systemd unit and the
+nginx directives are the standard way to run a long-lived Node service behind
+Plesk, written by somebody who knows the shape of the problem. That is a
+well-informed first run, not a transcript, and saying so is the difference between
+documentation and a claim.
+
+**One judgement call worth flagging:** do not use Plesk's Node.js extension for
+this. It runs Passenger, which wants to own the process, and this app is started
+by its own CLI that supervises Next plus worker processes. Systemd plus an nginx
+proxy lets Plesk do what it is good at — TLS — and keeps the supervisor intact.
+
+**Three things the guide surfaces that were nowhere on the backlog**, now items
+21 and 22: nobody has verified the Plesk path; there is no zero-downtime deploy,
+backup schedule, monitoring or secret rotation; and the `CUSTOM_DOMAIN_*` and
+`ACME_EMAIL` variables exist in `.env.example` while the `domain_mappings` work
+that would honour them is deferred — so a reader would otherwise have set them and
+waited for something that is not there.
+
+The guide also carries the `Upgrade`/`Connection` proxy headers, which are not
+optional: the platform pushes live updates over SSE, and without them
+notifications and progress bars silently never arrive. That is exactly the class
+of thing a first deployment loses an afternoon to.
+
+---
+
 ## 2026-08-11 — G7: the interface can now run right-to-left
 
 The platform could always do this and had never decided to. Radix takes `dir`,

@@ -31,6 +31,7 @@ and can always explain why.
 | **The ERP is off** | 14 modules **parked**, not deleted — 136 tables instead of 263. One line each to restore: [`workspace/references/parked-modules.md`](workspace/references/parked-modules.md) |
 | **Actually deleted** | Only `packages/enterprise`, because its licence forbids redistribution |
 | **Run it yourself** | [`workspace/references/local-instance.md`](workspace/references/local-instance.md) — laptop only, no cloud |
+| **Deploy it to a server** | [`workspace/references/deployment.md`](workspace/references/deployment.md) — VPS, domain or subdomain, Plesk. Build order, database, env, workers, nginx, and what it deliberately does not cover |
 
 ## 3. The five things to read, in order
 
@@ -194,6 +195,7 @@ Break these and you will damage the project.
 | **Take a restore point before risky work** | `./workspace/scripts/checkpoint.sh <label>` — see COOKBOOK Rule zero-four |
 | Know the codebase's true health | [`workspace/salvage/P3-baseline.md`](workspace/salvage/P3-baseline.md) |
 | **Learn how the platform works** | [`workspace/knowledge/`](workspace/knowledge/) |
+| **Put it on a server** | [`workspace/references/deployment.md`](workspace/references/deployment.md) |
 | **Know how far along we are** | [`workspace/PROGRESS.md`](workspace/PROGRESS.md) |
 | **See every outstanding task, in order** | [`workspace/PROGRESS.md`](workspace/PROGRESS.md) → *The backlog* |
 | See what happened and when | [`JOURNAL.md`](JOURNAL.md) |

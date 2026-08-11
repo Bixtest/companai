@@ -51,11 +51,13 @@ and is argued below; anything can be pulled forward on request.
 | **18** | **Verify `messages.manage` and `messages.actions` against real routes** | The only two of 113 capability descriptors classified from their titles rather than from code, because no route enforces them. Conservative today, which is the safe direction but not the accurate one | S |
 | **19** | **Have the Arabic reviewed by a native speaker** | `ar` ships as a real locale so the direction policy is testable rather than theoretical, and the `auth` dictionary I wrote is unreviewed. Untranslated keys fall back to English and are harmless; *wrong* translations are not. Blocks nothing until a customer sees Arabic | S |
 | **20** | **Phase G exit gate — the assertions and the changelog** | The gate requires a test proving the resolver honours delegations, project overlays and lock states *each*, plus `planning/CHANGELOG.md` recording what was grafted and from where. Neither is tracked anywhere | S |
-| **21** | **Close out U5, and prune dependencies, before the server** | U5 still reads "two causes found and fixed, one unexplained" — two more were found and fixed on 2026-08-10, so the record is stale. And parked modules carry CVEs a scanner will flag the moment this is hosted: "pre-production, not now" expires when we deploy | M |
+| **21** | **Verify the deployment guide on a real Plesk VPS** | `references/deployment.md` is written from the repository and the working local instance, and its build/migrate/start sequence is the one used daily — but **the Plesk steps have never been executed on a Plesk server**. Somebody has to do the first run and correct it. Cheapest before hosting, not after | M |
+| **22** | **Production hardening the guide names and does not solve** | Each is listed under *what this guide does not cover*: no zero-downtime deploy (`systemctl restart` drops connections), no backup schedule or monitoring, secrets in a plain `.env` with no rotation, no shared attachment storage for a second instance. None blocks a single-VPS deployment; all of them block a second one | L |
+| **23** | **Close out U5, and prune dependencies, before the server** | U5 still reads "two causes found and fixed, one unexplained" — two more were found and fixed on 2026-08-10, so the record is stale. And parked modules carry CVEs a scanner will flag the moment this is hosted: "pre-production, not now" expires when we deploy | M |
 | | **Deferred by decision — not in this sprint** | | |
-| **22** | `domain_mappings` extraction | Per-tenant custom domains. Wanted, but nothing needs it yet | M |
-| **23** | Orphaned-table decision (~127 tables) | Leave them; they are inert. Revisit only as a deliberate backed-up migration | S |
-| **24** | Phase K checkpoint | The scheduled date that stops "we'll clean up later" being a lie | S |
+| **24** | `domain_mappings` extraction | Per-tenant custom domains. Wanted, but nothing needs it yet | M |
+| **25** | Orphaned-table decision (~127 tables) | Leave them; they are inert. Revisit only as a deliberate backed-up migration | S |
+| **26** | Phase K checkpoint | The scheduled date that stops "we'll clean up later" being a lie | S |
 
 ### Closed 2026-08-11 — G7, text direction, and Wave 1 is done
 
