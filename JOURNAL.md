@@ -7,6 +7,54 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-08-11 — Tenant policy, and three things found on the way
+
+Every other input the resolver reads is a property of the platform. This one is a
+company's decision — four-eyes on payments, no unattended external email — which
+is exactly rule zero-seven's "organisations legitimately differ" row, and the
+first time in this sprint that a setting has clearly earned its place.
+
+Declarative rules, because planning §10 defers a policy engine by name. A rule is
+a match and a ceiling: no conditions, no expressions, no evaluation order to
+reason about. Stored beside the enforcement mode in the same per-tenant config,
+because a policy is a handful of rules rather than a growing table and the person
+who sets one sets the other.
+
+**An unreadable policy applies nothing.** That loosens, which is the uncomfortable
+direction — but inventing a restriction the tenant never wrote would refuse real
+work because of a typo, and a configuration failure is not a permission answer.
+
+**Three things turned up that were not this task**, and all three are fixed here
+rather than noted for later.
+
+The first is a repeat of a bug I fixed three batches ago. `policyCeilingDetail`
+did not exist on the resolver's context, so the tenant's own wording was computed
+and silently dropped — precisely what `resourceCeilingDetail` had done for record
+locks. Two occurrences make it a pattern worth stating: **when a ceiling carries a
+reason, check the context type has somewhere to put it.** A refusal now quotes the
+tenant back instead of reciting a gate.
+
+The second is my own habit. A gate run failed in core, and I could not say why,
+because I had piped `yarn test` through `tail -4` and thrown the failure away
+before reading it. Core alone then passed 5,054 tests and a second full run passed
+12,826. **The cause is unknown and is recorded as unknown** — three flake causes
+have been found and fixed, and this may be a fourth or one of those recurring
+somewhere unswept. The habit is fixed; the run is gone.
+
+The third was cheap: charter and budget were both investigated before being
+assumed buildable, and both turned out blocked on subsystems that do not exist —
+`ai_worker` is a type with no producer, and nothing meters spend. Recorded with
+preconditions rather than half-built.
+
+**The resolver is now complete for everything that can be supplied.** The audit
+five days ago found six of ten inputs unsupplied. All six that could be supplied
+from what exists now are, and the two that remain are blocked on Phase K work in a
+direction that is safe.
+
+Gate: 22/22, **12,826 tests**, and the server boots.
+
+---
+
 ## 2026-08-11 — The trust model, and the gaps it refuses to hide
 
 This is the only input to the resolver that **widens**. Every other ceiling can

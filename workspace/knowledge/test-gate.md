@@ -16,7 +16,7 @@ the time and returns none of the confidence.
 |---|---|
 | Command | `yarn test` (Turbo fans out to each package's `test` script) |
 | Packages | 22 |
-| Tests | **12,770** (2026-08-11) |
+| Tests | **12,826** (2026-08-11) |
 | Wall time | **~6 minutes** on an idle machine |
 | Runner | Jest, `jest-environment-node` by default; `@jest-environment jsdom` per file for React |
 
@@ -144,6 +144,24 @@ the server.** Ninety seconds, and it is the only thing that tests the wiring.
 `packages/core/src/__tests__/di-classic-constructor-names.test.ts` now catches the
 common shape of it statically, but a static guard cannot see registrations made in
 other packages — booting can.
+
+## Capture the whole run, always
+
+`yarn test | tail -4` is enough to see *that* the gate passed and useless the
+moment it does not: Jest prints failure detail well above the summary, so piping
+through `tail` throws away the only thing worth having.
+
+```bash
+# Right: keep everything, then grep it
+corepack yarn test > gate.log 2>&1
+grep -E "✕|● [A-Za-z].*›|Failed:|Tasks:" gate.log
+```
+
+On 2026-08-11 a core suite failed inside the gate, passed 5,054 tests alone
+immediately afterwards, and passed again in a second full run — and the cause is
+**unknown**, because the first run had been piped through `tail -4`. A flake you
+did not capture is a flake you cannot fix, and it stays on the list of things that
+might still be there.
 
 ## Diagnosing a red gate
 

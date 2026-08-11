@@ -24,7 +24,7 @@ and can always explain why.
 | **Phase** | Building the Starting Kit |
 | **Decision made** | We are building on **Open Mercato**, a working platform we have forked permanently |
 | **Where the code is** | [`workspace/starting-kit/`](workspace/starting-kit/) |
-| **Health** | **Green.** Boots clean, zero server errors. **Gate: 22/22 tasks, 12,802 tests, ~7 min** (2026-08-11). The two causes of intermittent false reds are fixed and measured — see [`knowledge/test-gate.md`](workspace/knowledge/test-gate.md) for what they were and how to diagnose the next one |
+| **Health** | **Green.** Boots clean, zero server errors. **Gate: 22/22 tasks, 12,826 tests, ~7 min** (2026-08-11). The two causes of intermittent false reds are fixed and measured — see [`knowledge/test-gate.md`](workspace/knowledge/test-gate.md) for what they were and how to diagnose the next one |
 | **Current work** | **The governance layer decides, every autonomy gate binds, and a person can work the queue.** All six repairs in; the resolver enforces per tenant; A1/A2 hold an act until somebody approves it, A3 holds it until its window passes unless vetoed, A4 runs it and files it for review; acts are graded by the data they touch; 117 commands mapped to capabilities; the queue is a screen at **Settings → Authority → Approvals**. Next: gate stability, then the eight grafts |
 | **Understand the product in 10 minutes** | [`workspace/knowledge/authority-overview.md`](workspace/knowledge/authority-overview.md) — the governance layer end to end. **This is the thing we are building** |
 | **Progress tracker** | [`workspace/PROGRESS.md`](workspace/PROGRESS.md) — every batch, what is done, what is next |
@@ -215,4 +215,4 @@ a folder, finishes a phase, or makes a decision updates it in the same change.
 A newcomer who cannot orient themselves from this page alone means it is broken —
 fix the page, not the newcomer.
 
-*Last updated: 2026-08-10 — the approvals queue is a screen at `/backend/authority/approvals`, and the test gate no longer depends on machine load. Every autonomy gate binds: refuse, hold-for-approval, hold-and-commit, execute-and-review. Gate green: 22/22 tasks, 12,802 tests, ~7 min.*
+*Last updated: 2026-08-10 — the approvals queue is a screen at `/backend/authority/approvals`, and the test gate no longer depends on machine load. Every autonomy gate binds: refuse, hold-for-approval, hold-and-commit, execute-and-review. Gate green: 22/22 tasks, 12,826 tests, ~7 min.*

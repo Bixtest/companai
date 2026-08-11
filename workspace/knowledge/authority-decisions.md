@@ -77,13 +77,18 @@ usually changes nothing.
 | `invoker-ceiling` | **I4** — authority is carried, never amplified · ✅ **binds since 2026-08-11** |
 | `delegation-ceiling` | The cap on the delegation being acted under · ✅ **binds since 2026-08-11** |
 | `resource-state` | What the record's own state permits · ✅ **binds since 2026-08-11** |
-| `policy` | Tenant policy · ⚠️ **not supplied at runtime** |
+| `policy` | Tenant policy · ✅ **binds since 2026-08-11** |
 
 > **Read the warnings literally.** Every rule above is implemented and tested in
-> `resolveDecision`, and every one of them binds *when its input arrives*. **One
-> input still never arrives**: `authorityEnforcementService.decideFor` sets no
-> tenant policy ceiling, so that rule is reachable today only through
-> `authority:explain`, where a human supplies it as a what-if.
+> `resolveDecision`, and **every rule in the table above now binds in the request
+> path**. The audit of 2026-08-10 found six of ten inputs unsupplied; all six that
+> could be supplied from what exists now are.
+>
+> Two inputs remain unmodelled rather than unsupplied — **charter grants** and
+> **budget** — and both are blocked on subsystems that do not exist (an AI worker
+> entity and the Charter compiler; spend metering). Both would *narrow*, so their
+> absence leaves answers more permissive than the design intends but never more
+> permissive than the RBAC check that already ran.
 >
 > **`delegation-ceiling` binds since 2026-08-11**, and note what acting under a
 > delegation also does: it puts the actor under the effect-class matrix, which
