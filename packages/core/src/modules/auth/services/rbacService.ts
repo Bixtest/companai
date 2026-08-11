@@ -43,10 +43,16 @@ export class RbacService {
     cache?: CacheStrategy,
     private authorityEnforcement?: AuthorityEnforcementService | null,
     /**
-     * Lent authority, consulted live. Optional so a lean bootstrap without the
-     * delegation service simply has no delegations rather than failing to start.
+     * Lent authority, consulted live.
+     *
+     * **The parameter name is the registration name, and that is load-bearing.**
+     * The default registration is `asClass(RbacService)`, and the container runs
+     * in Awilix CLASSIC mode: it reads the constructor's parameter *names* and
+     * resolves each one by name. Calling this `delegations` made every boot fail
+     * with `Could not resolve 'delegations'`, because the registration is
+     * `delegationService`.
      */
-    private delegations?: {
+    private delegationService?: {
       activeFor: (
         granteePrincipalId: string,
         capabilityId: string,
@@ -497,12 +503,12 @@ export class RbacService {
     required: string[],
     scope: { tenantId: string | null; organizationId: string | null },
   ): Promise<boolean> {
-    if (!required.length || !scope.tenantId || !this.delegations) return false
+    if (!required.length || !scope.tenantId || !this.delegationService) return false
     const principalId = parseSubject(userId).id
     if (!principalId) return false
 
     for (const feature of required) {
-      const delegation = await this.delegations.activeFor(principalId, feature, scope)
+      const delegation = await this.delegationService.activeFor(principalId, feature, scope)
       if (!delegation) return false
     }
     return true
