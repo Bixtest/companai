@@ -5,6 +5,7 @@ import type { AutonomyGate } from '@open-mercato/shared/modules/capabilities'
 import { createLogger } from '@open-mercato/shared/lib/logger'
 import { recordLockCeiling, recordLockReason, type RecordLockState } from '@open-mercato/shared/modules/record-locks'
 import { DEFAULT_TRUST_TIER, TRUST_TIER_NAMES, trustCeilingFor, type TrustTier } from '@open-mercato/shared/modules/trust'
+import { parseAuthorityPolicy, policyCeilingFor } from '@open-mercato/shared/modules/authority-policy'
 
 const GATE_ORDER: AutonomyGate[] = ['A0', 'A1', 'A2', 'A3', 'A4', 'A5']
 
@@ -22,6 +23,13 @@ export type EnforcementMode = (typeof ENFORCEMENT_MODES)[number]
 
 export const ENFORCEMENT_CONFIG_MODULE = 'auth'
 export const ENFORCEMENT_CONFIG_KEY = 'authority.enforcement'
+
+/**
+ * Where a tenant's own authority rules live — beside the enforcement mode, in the
+ * same module config, because they are the same kind of decision made by the same
+ * person.
+ */
+const AUTHORITY_POLICY_CONFIG_KEY = 'authority_policy'
 
 /**
  * What a tenant gets before anybody chooses.
@@ -251,6 +259,7 @@ export class AuthorityEnforcementService {
     const resourceCeiling = await this.resourceCeilingFor(capability, scope, options.recordId ?? null)
     const delegation = await this.delegationCeilingFor(capability, scope, principal.id)
     const trust = await this.trustCeilingFor(capability, scope, principal.id)
+    const policy = await this.policyCeilingFor(capability, scope.tenantId)
 
     return resolveDecision({
       actor: {
@@ -270,6 +279,7 @@ export class AuthorityEnforcementService {
         ...(resourceCeiling
           ? { resourceCeiling: resourceCeiling.ceiling, resourceCeilingDetail: resourceCeiling.detail }
           : {}),
+        ...(policy ? { policyCeiling: policy.ceiling, policyCeilingDetail: policy.detail } : {}),
       },
     })
   }
@@ -297,6 +307,38 @@ export class AuthorityEnforcementService {
     const ceiling = recordLockCeiling(lock.state, capability.effectClass)
     if (!ceiling) return null
     return { ceiling, detail: recordLockReason(lock.state, lock.reason) }
+  }
+
+  /**
+   * The ceiling this tenant's own policy imposes.
+   *
+   * Stored beside the enforcement mode, in the same per-tenant config the mode
+   * already uses — no new table, because a policy is a handful of declarative
+   * rules rather than a growing collection of records.
+   *
+   * An unreadable policy yields **no ceiling**, and a warning. The alternative is
+   * inventing a restriction the tenant never wrote, which would refuse real work
+   * on the strength of a typo. That loosens rather than tightens, and it is the
+   * same position this service takes everywhere else: a configuration failure is
+   * not a permission answer.
+   */
+  private async policyCeilingFor(
+    capability: ReturnType<typeof getCapabilityDescriptor>,
+    tenantId: string | null,
+  ): Promise<{ ceiling: AutonomyGate; detail: string } | null> {
+    if (!capability || !this.moduleConfig || !tenantId) return null
+    const stored = await this.moduleConfig.getValue<unknown>(
+      ENFORCEMENT_CONFIG_MODULE,
+      AUTHORITY_POLICY_CONFIG_KEY,
+      { defaultValue: null, scope: { tenantId } },
+    )
+    if (stored == null) return null
+    const policy = parseAuthorityPolicy(stored)
+    if (!policy.rules.length) {
+      logger.warn('Authority policy stored but unreadable; no policy ceiling applied', { tenantId })
+      return null
+    }
+    return policyCeilingFor(policy, capability)
   }
 
   /**

@@ -121,6 +121,14 @@ export type ResolveInput = {
     resourceCeilingDetail?: string
     /** Tenant policy floor, if one applies to this act. */
     policyCeiling?: AutonomyGate
+    /**
+     * Which rule the tenant wrote, and why — carried into the explanation.
+     *
+     * Without it a refusal reads "tenant policy permits at most A2", which tells
+     * somebody they are blocked and nothing about who decided that or where to
+     * go. With it, the tenant's own words come back: *"four-eyes on payments"*.
+     */
+    policyCeilingDetail?: string
   }
 }
 
@@ -386,7 +394,11 @@ export function resolveDecision(input: ResolveInput): Decision {
   }
 
   if (context.policyCeiling) {
-    consider('policy', context.policyCeiling, `Tenant policy permits at most ${context.policyCeiling}`)
+    consider(
+      'policy',
+      context.policyCeiling,
+      context.policyCeilingDetail ?? `Tenant policy permits at most ${context.policyCeiling}`,
+    )
   }
 
   const gate = reasons.reduce<AutonomyGate>((current, reason) => lower(current, reason.ceiling), 'A5')
