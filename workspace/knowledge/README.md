@@ -38,7 +38,8 @@ mechanism it stands on.
 | [ledger.md](ledger.md) | *"How do we prove the record was not altered?"* |
 | [scope-tenant-organization.md](scope-tenant-organization.md) | *"Which tenant and organization does this belong to?"* — and the one rule behind four bugs |
 | [module-lifecycle.md](module-lifecycle.md) | *"How do I add, park or restore a module?"* |
-| [test-gate.md](test-gate.md) | *"Why did the gate go red in a package I never touched?"* — the two traps, and how to diagnose one |
+| [test-gate.md](test-gate.md) | *"Why did the gate go red in a package I never touched?"* — the three traps, and how to diagnose one |
+| [i18n-and-direction.md](i18n-and-direction.md) | *"Where do strings live, and how do I add a language?"* — including right-to-left |
 | [overrides.md](overrides.md) | *"How do I change a module's behaviour without forking it?"* |
 
 Read the first group in order and you understand the product. Read the second
@@ -89,7 +90,8 @@ someone's model of it.
 | [overrides.md](overrides.md) | Turning off another module's contract without editing its source |
 | [principals.md](principals.md) | Who is acting: human, service, and the AI worker we are adding |
 | [approvals-queue.md](approvals-queue.md) | Where held acts go, what each gate offers a reader, and which settings deliberately do not exist |
-| [test-gate.md](test-gate.md) | How `yarn test` runs, the two causes of a false red, and the rules that keep it honest |
+| [test-gate.md](test-gate.md) | How `yarn test` runs, the three causes of a false red, and the rules that keep it honest |
+| [i18n-and-direction.md](i18n-and-direction.md) | Per-module dictionaries, adding a locale, and deciding text direction |
 
 ## Template
 

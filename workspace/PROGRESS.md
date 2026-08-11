@@ -1,6 +1,6 @@
 # Progress — where we are, out of how much
 
-**One line: 9 of 16 batches done, plus R2c. All six repairs (R1–R6) are in, the
+**One line: 12 of 16 batches done, plus R2c. All six repairs (R1–R6) are in, the
 resolver decides rather than observes, every gate binds, the queue those gates fill
 is now a screen a person can work, and the test gate no longer depends on how busy
 the machine is. Every inherited defect we found is fixed. Next is the approvals
@@ -27,35 +27,89 @@ and is argued below; anything can be pulled forward on request.
 | # | Task | Why here | Size |
 |---|---|---|---|
 | | **Wave 1 — small, independent, closes three batches** | | |
-| **1** | **G7 — locale direction policy + an RTL locale** | 111 dependency-free lines from Platform 1, plus Arabic to prove it end to end. Keep the host's i18n enforcement, take P1's policy | S |
 | | **Wave 2 — the resolver actually receives its inputs** | | |
-| **2** | **Wire invoker authority (I4) into the enforcement path** | **The most serious finding of the 2026-08-10 audit.** `invokerCeiling` exists on `ResolveInput` and is documented as the rule implementing I4 — *authority is carried, never amplified* — but the only thing that ever sets it is an `authority:explain` CLI flag. At runtime an AI worker invoked by somebody who could not perform the act is **not** capped by that person's authority. We claim this invariant; it does not bind | M |
-| **3** | **Wire task grade into the enforcement path** | `decideFor` passes `context: {}`, so `context.grade` always falls back to `G1` and the grade is decided by the data-class floor alone. The G0–G4 scale is real in the resolver and absent at the call site | M |
-| **4** | **G5 — record lock states** | Supplies `resourceCeiling`, which nothing supplies today. `locked` forces A0 on writes, `restricted` caps at A2, neither liftable by trust or delegation. **Not an enhancement** — it replaces the locking removed with `packages/enterprise` | M |
-| **5** | **G3 — temporary delegations** | Supplies `delegationCeiling`. Open Mercato has none at all. The table plus the resolution logic, re-pointed at **principals** rather than users so an AI worker can hold one — which is why R1 came first | L |
-| **6** | **Trust model T0–T4** | Supplies `trustCeiling`. Until it exists every machine resolves as untrusted, capping any act with an effect at approve-first. That is the safe direction, and it is a placeholder standing where planning 02 §5 specifies earned trust. **Was never a backlog item** despite being referenced four times across `knowledge/` | L |
-| **7** | **Charter grants** | Named in the Phase G exit gate as a required resolver input. **Not in `ResolveInput` at all** — no type, no field, no code; it appears only in prose. Found 2026-08-10 | M |
-| **8** | **Budget as a resolver input** | The other exit-gate input that exists in no form whatsoever. An actor's remaining spend or quota, bounding what it may do | M |
-| **9** | **Tenant policy ceiling** | `context.policyCeiling` is read by the resolver and set by **nothing** — zero assignments outside the type definition. A tenant wanting a blanket floor has no way to express one | M |
-| **10** | **G4 — project permission overlays** | Scoping stops at the department without it. Project, case and engagement contexts are central to the SRS (FR-550, FR-560). Take the terminal-deny semantics; leave P1's `deny:`/`!` string DSL | L |
-| **11** | **G1 — re-scope, then decide** | R5 already delivers the explanation trace, binding rule, obligations and alternatives. What remains is Platform 1's *shape* — ordered sources, deny-wins, a `terminal` flag — against our deliberately different one where everything is a ceiling and the answer is the minimum. **Last in the wave**: items 4–12 may answer it, and it is a design decision currently sized as a port | ? |
+| **1** | **Wire invoker authority (I4) into the enforcement path** | **The most serious finding of the 2026-08-10 audit.** `invokerCeiling` exists on `ResolveInput` and is documented as the rule implementing I4 — *authority is carried, never amplified* — but the only thing that ever sets it is an `authority:explain` CLI flag. At runtime an AI worker invoked by somebody who could not perform the act is **not** capped by that person's authority. We claim this invariant; it does not bind | M |
+| **2** | **Wire task grade into the enforcement path** | `decideFor` passes `context: {}`, so `context.grade` always falls back to `G1` and the grade is decided by the data-class floor alone. The G0–G4 scale is real in the resolver and absent at the call site | M |
+| **3** | **G5 — record lock states** | Supplies `resourceCeiling`, which nothing supplies today. `locked` forces A0 on writes, `restricted` caps at A2, neither liftable by trust or delegation. **Not an enhancement** — it replaces the locking removed with `packages/enterprise` | M |
+| **4** | **G3 — temporary delegations** | Supplies `delegationCeiling`. Open Mercato has none at all. The table plus the resolution logic, re-pointed at **principals** rather than users so an AI worker can hold one — which is why R1 came first | L |
+| **5** | **Trust model T0–T4** | Supplies `trustCeiling`. Until it exists every machine resolves as untrusted, capping any act with an effect at approve-first. That is the safe direction, and it is a placeholder standing where planning 02 §5 specifies earned trust. **Was never a backlog item** despite being referenced four times across `knowledge/` | L |
+| **6** | **Charter grants** | Named in the Phase G exit gate as a required resolver input. **Not in `ResolveInput` at all** — no type, no field, no code; it appears only in prose. Found 2026-08-10 | M |
+| **7** | **Budget as a resolver input** | The other exit-gate input that exists in no form whatsoever. An actor's remaining spend or quota, bounding what it may do | M |
+| **8** | **Tenant policy ceiling** | `context.policyCeiling` is read by the resolver and set by **nothing** — zero assignments outside the type definition. A tenant wanting a blanket floor has no way to express one | M |
+| **9** | **G4 — project permission overlays** | Scoping stops at the department without it. Project, case and engagement contexts are central to the SRS (FR-550, FR-560). Take the terminal-deny semantics; leave P1's `deny:`/`!` string DSL | L |
+| **10** | **G1 — re-scope, then decide** | R5 already delivers the explanation trace, binding rule, obligations and alternatives. What remains is Platform 1's *shape* — ordered sources, deny-wins, a `terminal` flag — against our deliberately different one where everything is a ceiling and the answer is the minimum. **Last in the wave**: items 4–12 may answer it, and it is a design decision currently sized as a port | ? |
 | | **Wave 3 — the human surface** | | |
-| **12** | **U7 — the journal cannot tell a machine from a human** | `action_logs.actor_user_id` stores an API key's UUID with no record that it was a key, so a key acting and a person acting are indistinguishable in the record. That is invariant **I2**, and telling them apart is the premise of the product. Open since 2026-08-09, **never on the backlog** | M |
-| **13** | **Bulk approval, with a diff** | The diff is the whole feature: approving several acts without showing how they differ is a button for approving things unread, and it would be the most-used control on the page. Owner's decision 2026-08-10 — on by default, on/off per tenant, diff never optional | M |
-| **14** | **Cover for someone away, and standing approvals** | Both need a name — a deputy, a grantor — so both are inherently settings. Standing approvals need a mandatory expiry and a visible count of what they let through: the most useful control on the page and the most dangerous. Planning 02 §7.1–7.2 | L |
-| **15** | **Per-tenant approval expiry** | Decided with the owner on 2026-08-10 and recorded in the closure table as unbuilt, but it never became a numbered item. 24h is enforced in `PendingActService`; the knob is not there | S |
+| **11** | **U7 — the journal cannot tell a machine from a human** | `action_logs.actor_user_id` stores an API key's UUID with no record that it was a key, so a key acting and a person acting are indistinguishable in the record. That is invariant **I2**, and telling them apart is the premise of the product. Open since 2026-08-09, **never on the backlog** | M |
+| **12** | **Bulk approval, with a diff** | The diff is the whole feature: approving several acts without showing how they differ is a button for approving things unread, and it would be the most-used control on the page. Owner's decision 2026-08-10 — on by default, on/off per tenant, diff never optional | M |
+| **13** | **Cover for someone away, and standing approvals** | Both need a name — a deputy, a grantor — so both are inherently settings. Standing approvals need a mandatory expiry and a visible count of what they let through: the most useful control on the page and the most dangerous. Planning 02 §7.1–7.2 | L |
+| **14** | **Per-tenant approval expiry** | Decided with the owner on 2026-08-10 and recorded in the closure table as unbuilt, but it never became a numbered item. 24h is enforced in `PendingActService`; the knob is not there | S |
 | | **Wave 4 — the record can be trusted** | | |
-| **16** | **Ledger correlation and causation are carried but never propagated** | `correlation_id` / `causation_id` are recorded when a caller supplies them, and nothing supplies them. Until a correlation id is threaded through a request, the chain records events that cannot be assembled into a trace — the feature the ledger exists to enable | M |
-| **17** | **Ledger Tier 2 — periodic signed checkpoints** | R3's chain is verifiable only by us. A signed root in append-only storage is what lets a customer's auditor verify a range without our cooperation, and it is a stated commercial property of the design. Needs key management | L |
+| **15** | **Ledger correlation and causation are carried but never propagated** | `correlation_id` / `causation_id` are recorded when a caller supplies them, and nothing supplies them. Until a correlation id is threaded through a request, the chain records events that cannot be assembled into a trace — the feature the ledger exists to enable | M |
+| **16** | **Ledger Tier 2 — periodic signed checkpoints** | R3's chain is verifiable only by us. A signed root in append-only storage is what lets a customer's auditor verify a range without our cooperation, and it is a stated commercial property of the design. Needs key management | L |
 | | **Wave 5 — close the books before the server** | | |
-| **18** | **U4 — verify a superadmin can delete a currency** | The route now derives `organizationId` from `ctx.selectedOrganizationId ?? ctx.auth?.orgId ?? undefined`. For a superadmin with no organization selected that is still `undefined`, which is the original bug's shape. **Verify against the running instance before calling it fixed** | S |
-| **19** | **Verify `messages.manage` and `messages.actions` against real routes** | The only two of 113 capability descriptors classified from their titles rather than from code, because no route enforces them. Conservative today, which is the safe direction but not the accurate one | S |
+| **17** | **U4 — verify a superadmin can delete a currency** | The route now derives `organizationId` from `ctx.selectedOrganizationId ?? ctx.auth?.orgId ?? undefined`. For a superadmin with no organization selected that is still `undefined`, which is the original bug's shape. **Verify against the running instance before calling it fixed** | S |
+| **18** | **Verify `messages.manage` and `messages.actions` against real routes** | The only two of 113 capability descriptors classified from their titles rather than from code, because no route enforces them. Conservative today, which is the safe direction but not the accurate one | S |
+| **19** | **Have the Arabic reviewed by a native speaker** | `ar` ships as a real locale so the direction policy is testable rather than theoretical, and the `auth` dictionary I wrote is unreviewed. Untranslated keys fall back to English and are harmless; *wrong* translations are not. Blocks nothing until a customer sees Arabic | S |
 | **20** | **Phase G exit gate — the assertions and the changelog** | The gate requires a test proving the resolver honours delegations, project overlays and lock states *each*, plus `planning/CHANGELOG.md` recording what was grafted and from where. Neither is tracked anywhere | S |
 | **21** | **Close out U5, and prune dependencies, before the server** | U5 still reads "two causes found and fixed, one unexplained" — two more were found and fixed on 2026-08-10, so the record is stale. And parked modules carry CVEs a scanner will flag the moment this is hosted: "pre-production, not now" expires when we deploy | M |
 | | **Deferred by decision — not in this sprint** | | |
 | **22** | `domain_mappings` extraction | Per-tenant custom domains. Wanted, but nothing needs it yet | M |
 | **23** | Orphaned-table decision (~127 tables) | Leave them; they are inert. Revisit only as a deliberate backed-up migration | S |
 | **24** | Phase K checkpoint | The scheduled date that stops "we'll clean up later" being a lie | S |
+
+### Closed 2026-08-11 — G7, text direction, and Wave 1 is done
+
+The platform already had the *capability* — every Radix primitive takes `dir`, and
+the CSS logical properties follow it — and no **policy**: four LTR locales shipped,
+so nothing ever decided, and `<html>` carried a `lang` with no `dir`.
+
+That absence is not neutral. Given `lang="ar"` and no `dir`, a browser renders
+Arabic left-to-right: letters right, layout inside out, nothing logged.
+
+`inferTextDirection()` decides on the **language subtag** rather than the whole
+tag, because direction is a property of the script — `ar`, `ar-EG` and
+`ar-Arab-EG` all run the same way and a list of full tags would be endless and
+still incomplete. Ten RTL subtags, and everything unrecognised falls back to
+`ltr`: the safe direction rather than the neutral one, since guessing `rtl` would
+mirror the interface for every locale we failed to parse.
+
+**Arabic ships as a real locale**, which is what makes the policy testable rather
+than theoretical. Proven over HTTP against the built app:
+
+| Request | Response |
+|---|---|
+| `Accept-Language: en` | `<html lang="en" dir="ltr">` |
+| `Accept-Language: ar` | `<html lang="ar" dir="rtl">` |
+
+with Arabic strings actually rendering. Its dictionaries are **partial by design**:
+a module with no `ar.json` contributes nothing and each string falls back to its
+inline English, so an untranslated surface degrades to readable-but-English rather
+than to blank. The `auth` module is translated; **the Arabic is unreviewed by a
+native speaker and should be before any customer sees it** — item 22.
+
+### The tunable the graft asked for, and why it is not here
+
+`graft-batches.md` says to add `text_direction_policy` to tenant configuration.
+**Deliberately not built**, and rule zero-seven is the reason: *"there is a right
+answer → default, no setting. A knob here is an invitation to break it."* Text
+direction follows the language essentially universally, so this is the first row
+of that table, not the second.
+
+`resolveTextDirection(locale, policy)` still **accepts** a policy and is tested for
+it, so the seam exists the day a caller genuinely has one — but no configuration
+key was added, because a key nothing reads is exactly the "claimed and absent"
+control the 2026-08-10 audit was about. Recorded here rather than silently
+skipped, per rule zero-seven's *write the decision down where the work is*.
+
+**One test failed for the right reason.** `TranslationManager.primitives` asserted
+the locale tabs were exactly `['EN','PL','ES','DE']`, so adding Arabic broke a test
+about *markup*. It now derives the expectation from the configured locales — the
+assertion was always meant to prove the shared Tabs primitive renders one trigger
+per locale, not which locales exist.
+
+**Wave 1 is complete**: G8, G6 and G7, three batches closed, and the two that
+needed a decision (`project` fails closed until G4; no direction knob) are recorded
+with their reasoning rather than left to be rediscovered.
 
 ### Closed 2026-08-11 — G6, the audience of a recorded act
 
@@ -588,9 +642,9 @@ section), R1.3 (dropped).
 | 11 | G3 — Temporary delegations | from Platform 1 · needs R1 | ⬜ |
 | 12 | G4 — Project permission overlays | from Platform 1 · needs R5 | ⬜ |
 | 13 | G5 — Record lock states | from Platform 1 · **replaces** the removed enterprise locking | ⬜ |
-| 14 | G6 — Event visibility scope | from Platform 1 | ⬜ |
-| 15 | G7 — Locale direction + RTL inference | from Platform 1 | ⬜ |
-| 16 | G8 — Migration advisory lock | from Platform 1 | ⬜ **confirmed needed** 2026-08-10 |
+| 14 | G6 — Event visibility scope | from Platform 1 | ✅ **done** 2026-08-11 |
+| 15 | G7 — Locale direction + RTL inference | from Platform 1 | ✅ **done** 2026-08-11 |
+| 16 | G8 — Migration advisory lock | from Platform 1 | ✅ **done** 2026-08-11 |
 
 After batch 16 the Starting Kit is done, and **Phase K** — our own kernel, the
 actual product — begins. That is a separate plan, not counted here.

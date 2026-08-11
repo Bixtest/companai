@@ -7,6 +7,48 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-08-11 — G7: the interface can now run right-to-left
+
+The platform could always do this and had never decided to. Radix takes `dir`,
+the CSS logical properties follow it, and `<html>` shipped with a `lang` and
+nothing else — which is fine while every locale runs left-to-right, and silently
+wrong the moment one does not. A browser handed `lang="ar"` and no `dir` renders
+Arabic left-to-right: letters right, layout inside out, nothing to notice.
+
+Direction is decided on the **language subtag**, never the whole tag, because it
+is a property of the script: `ar`, `ar-EG` and `ar-Arab-EG` all run the same way,
+and a list of full tags would be endless and still incomplete. Anything
+unrecognised falls back to `ltr` — the safe direction rather than the neutral one,
+since a `rtl` default would mirror the interface for every locale we failed to
+parse.
+
+**Arabic ships**, because that is the difference between a policy and a claim.
+Proven over HTTP against the built app: `Accept-Language: en` returns
+`dir="ltr"`, `ar` returns `<html lang="ar" dir="rtl">`, with Arabic actually
+rendering. Its dictionaries are partial on purpose — a module without `ar.json`
+falls back to inline English, so untranslated surfaces degrade to readable rather
+than blank. The Arabic I wrote is unreviewed by a native speaker, which is on the
+backlog rather than glossed over.
+
+**I did not build the setting the graft asked for.** `graft-batches.md` wants
+`text_direction_policy` in tenant configuration. Rule zero-seven's own table says
+otherwise: *there is a right answer → default, no setting.* Direction follows
+language essentially universally. The resolver still accepts a policy and is
+tested for it, so the seam is there when something genuinely has one — but adding
+a configuration key nothing reads would have been precisely the "claimed and
+absent" control I spent yesterday's audit cataloguing.
+
+**And the compiler did the interesting work.** Adding `ar` to the `Locale` union
+failed the build in two places that enumerate locales by hand, which is the type
+system enforcing completeness rather than a chore. A test then failed for the
+right reason too: `TranslationManager.primitives` asserted the tabs were exactly
+`['EN','PL','ES','DE']`, so a locale addition broke an assertion about *markup*.
+It now derives from the configured locales, which is what it always meant.
+
+Wave 1 done — G8, G6, G7. Gate: 22/22, **12,708 tests**.
+
+---
+
 ## 2026-08-11 — G6: an act now records who it was written for
 
 Audit rows had a tenant and an organization and no notion of audience, so anyone
