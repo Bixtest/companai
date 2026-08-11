@@ -177,6 +177,19 @@ open-ended one mid-batch wrecks the batch. The rule sits between them.
 like two lines" is a guess, and acting on it is how a small fix becomes a long
 path halfway through.
 
+**Relatedness is not a test — only size is.** Reaffirmed by the owner 2026-08-11:
+
+> *"Always fix whatever mistakes, bugs, or enhancements you find as you work even
+> if unrelated to the specific task you are working on. Unless it is a complex fix,
+> then you add it to your cookbook to fix in future instead of counting on memory."*
+
+So "that is not what this batch is about" is **not** a reason to leave something
+broken. A stale comment noticed in passing, a redundant index, a test asserting a
+hardcoded list — all fixed in the batch that found them. What defers a finding is
+that it is *large*, never that it is off-topic. Several of the best fixes in this
+project arrived that way: the stale "only A0 is enforced" comment, the redundant
+`record_locks` index, the locale list hardcoded into a markup test.
+
 | Test | Fix now | Defer |
 |---|---|---|
 | Scope | One file, or a handful of identical edits | Touches a contract, a schema, or a design decision |
