@@ -29,7 +29,7 @@ and is argued below; anything can be pulled forward on request.
 | | **Wave 1 — small, independent, closes three batches** | | |
 | | **Wave 2 — the resolver actually receives its inputs** | | |
 | **1** | **Task grade needs a *matter* to come from — blocked on G4** | **Investigated 2026-08-11 and reclassified, not done.** The audit was right that `decideFor` passes `context: {}` — but there is nothing to pass. A grade describes *the work*, not the act: G4 is "legal proceedings, board/M&A, security incidents", a property of the matter. The platform has no matter until project/case context arrives with **G4 (item 8)**, so the only honest grade source today is the data-class floor, which already applies. Wiring a seam nothing can fill would be the claimed-and-absent control this sprint exists to remove. **Precondition: G4.** A real defect found while investigating is fixed below | M |
-| **2** | **G3 — temporary delegations** | Supplies `delegationCeiling`. Open Mercato has none at all. The table plus the resolution logic, re-pointed at **principals** rather than users so an AI worker can hold one — which is why R1 came first | L |
+| **2** | **G3 — temporary delegations** | Supplies `delegationCeiling`. Open Mercato has none at all. The table plus the resolution logic, re-pointed at **principals** rather than users so an AI worker can hold one — which is why R1 came first. **Three design findings recorded 2026-08-11, see below — one of them is a correctness requirement** | L |
 | **3** | **Trust model T0–T4** | Supplies `trustCeiling`. Until it exists every machine resolves as untrusted, capping any act with an effect at approve-first. That is the safe direction, and it is a placeholder standing where planning 02 §5 specifies earned trust. **Was never a backlog item** despite being referenced four times across `knowledge/` | L |
 | **4** | **Charter grants** | Named in the Phase G exit gate as a required resolver input. **Not in `ResolveInput` at all** — no type, no field, no code; it appears only in prose. Found 2026-08-10 | M |
 | **5** | **Budget as a resolver input** | The other exit-gate input that exists in no form whatsoever. An actor's remaining spend or quota, bounding what it may do | M |
@@ -57,6 +57,41 @@ and is argued below; anything can be pulled forward on request.
 | **22** | `domain_mappings` extraction | Per-tenant custom domains. Wanted, but nothing needs it yet | M |
 | **23** | Orphaned-table decision (~127 tables) | Leave them; they are inert. Revisit only as a deliberate backed-up migration | S |
 | **24** | Phase K checkpoint | The scheduled date that stops "we'll clean up later" being a lie | S |
+
+### G3 — three findings before the batch starts
+
+Recorded now because they change the shape of the work, and one of them is a
+correctness requirement rather than a preference.
+
+**1. A delegation has to *grant*, not only cap.** `ResolveInput.actor` already
+carries `delegationCeiling`, so the obvious reading is that G3 supplies that field
+and stops. It does not work: the route guard refuses on RBAC before the resolver
+is ever consulted, so a delegated capability the grantee does not already hold
+never reaches a ceiling. A delegation that only caps is a delegation that can only
+*reduce* what somebody already had, which is the opposite of the feature.
+
+**2. Granting means touching the one layer built so nothing turns a `false` into
+a `true`.** `userHasAllFeatures` is `decideAllFeatures(...) && !refusedByAuthority(...)`,
+and its comment states the ordering as the guarantee. That guarantee is about the
+**resolver**, though, not about RBAC: RBAC already has two grant sources, role ACLs
+and user ACLs, so a third that is time-bounded is consistent with its design rather
+than a violation of it. The rule that must survive is the narrower one — *the
+authority resolver never widens* — and a delegation grant belongs in
+`decideAllFeatures`, above it, never in `refusedByAuthority`.
+
+**3. The ACL is cached for five minutes, and that is a correctness problem here.**
+`RbacService` caches resolved ACLs with a 5-minute TTL. A delegation whose whole
+point is a time window and an explicit `revoked_at` cannot be served from a cache
+that keeps granting for five minutes after revocation. So the batch must either
+invalidate on grant and revoke, or check delegations outside the cached ACL.
+**Revocation has to be immediate** — a revoke that takes effect "within five
+minutes" is not a revoke, and this is the one place that cannot be filed as a
+performance note.
+
+**What this means for sizing.** The graft calls G3 *risk high* and it is right, but
+not for the reason listed: the table and the resolution logic are
+straightforward, and the risk is that this is the first change to the grant path.
+It wants its own run rather than a tail end of one.
 
 ### Closed 2026-08-11 — G5, a record's own state as a ceiling
 
