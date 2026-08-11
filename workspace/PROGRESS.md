@@ -29,8 +29,8 @@ and is argued below; anything can be pulled forward on request.
 | | **Wave 1 — small, independent, closes three batches** | | |
 | | **Wave 2 — the resolver actually receives its inputs** | | |
 | **1** | **Task grade needs a *matter* to come from — blocked on G4** | **Investigated 2026-08-11 and reclassified, not done.** The audit was right that `decideFor` passes `context: {}` — but there is nothing to pass. A grade describes *the work*, not the act: G4 is "legal proceedings, board/M&A, security incidents", a property of the matter. The platform has no matter until project/case context arrives with **G4 (item 8)**, so the only honest grade source today is the data-class floor, which already applies. Wiring a seam nothing can fill would be the claimed-and-absent control this sprint exists to remove. **Precondition: G4.** A real defect found while investigating is fixed below | M |
-| **2** | **Charter grants** | Named in the Phase G exit gate as a required resolver input. **Not in `ResolveInput` at all** — no type, no field, no code; it appears only in prose. Found 2026-08-10 | M |
-| **3** | **Budget as a resolver input** | The other exit-gate input that exists in no form whatsoever. An actor's remaining spend or quota, bounding what it may do | M |
+| **2** | **Charter grants — blocked on workers and the compiler** | **Investigated 2026-08-11, see below.** A charter is a worker's grant set, and planning 03 is explicit that runtime reads a *compiled* set that is **never hand-edited**. Two preconditions are missing: `ai_worker` exists as a type but **nothing ever creates one** — `derivePrincipal` yields only `human` or `service` — and the Charter compiler is Phase K. **Preconditions: an AI worker entity, and the Charter compiler** | L |
+| **3** | **Budget as a resolver input — blocked on spend tracking** | **Investigated 2026-08-11.** `budget.state_ceiling(actor, context)` needs three things this platform has none of: a notion of what an act costs, accumulated spend per actor, and a limit. Nothing tracks spend or quota anywhere. **Precondition: a metering model** | L |
 | **4** | **Tenant policy ceiling** | `context.policyCeiling` is read by the resolver and set by **nothing** — zero assignments outside the type definition. A tenant wanting a blanket floor has no way to express one | M |
 | **5** | **G4 — project permission overlays** | Scoping stops at the department without it. Project, case and engagement contexts are central to the SRS (FR-550, FR-560). Take the terminal-deny semantics; leave P1's `deny:`/`!` string DSL | L |
 | **6** | **G1 — re-scope, then decide** | R5 already delivers the explanation trace, binding rule, obligations and alternatives. What remains is Platform 1's *shape* — ordered sources, deny-wins, a `terminal` flag — against our deliberately different one where everything is a ceiling and the answer is the minimum. **Last in the wave**: items 4–12 may answer it, and it is a design decision currently sized as a port | ? |
@@ -56,6 +56,37 @@ and is argued below; anything can be pulled forward on request.
 | **20** | `domain_mappings` extraction | Per-tenant custom domains. Wanted, but nothing needs it yet | M |
 | **21** | Orphaned-table decision (~127 tables) | Leave them; they are inert. Revisit only as a deliberate backed-up migration | S |
 | **22** | Phase K checkpoint | The scheduled date that stops "we'll clean up later" being a lie | S |
+
+### Charter and budget — why both wait, and on what
+
+Investigated 2026-08-11 rather than assumed, because both are named in the Phase G
+exit gate and neither exists in any form.
+
+**Charter grants.** Planning 03 §1 makes the central claim plainly: *"Nothing at
+runtime reads the Charter. Runtime reads the compiled Grant Set — flat, fast,
+derived, **never hand-edited**."* The whole design exists to stop real permissions
+living in a table nobody can explain. Building a hand-written grant table now would
+be that exact failure, wearing the name of the thing meant to prevent it.
+
+And there is nobody to charter. **`ai_worker` is a type with no producer**:
+`derivePrincipal` yields `human` for a session and `service` for an API key, and
+nothing anywhere constructs an `ai_worker`. A charter for a principal kind the
+platform never instantiates would be a table with no rows and a ceiling that never
+applies.
+
+**Budget.** `budget.state_ceiling(actor, context)` needs what an act costs,
+what an actor has spent, and a limit. The platform meters none of the three. This
+is not a small gap — metering is a subsystem, not a column.
+
+**Both differ from the trust question in one important way**: a charter grant and a
+budget ceiling both *narrow*. Their absence leaves answers more permissive than the
+design intends but never more permissive than the RBAC check that already ran, so
+waiting is safe. Trust was the opposite, which is why that one needed a decision
+and these two need a precondition.
+
+**What this leaves.** After tenant policy, **every resolver input that can be
+supplied from what exists is supplied.** The remainder are blocked on subsystems
+that are Phase K work: workers, charters, metering, incidents, evaluations.
 
 ### Closed 2026-08-11 — the trust model, with its gaps recorded on every grant
 
