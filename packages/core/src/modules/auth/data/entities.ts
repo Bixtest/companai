@@ -717,3 +717,62 @@ export class AuthorityDelegation {
   @Property({ name: 'updated_at', type: Date, onCreate: () => new Date(), onUpdate: () => new Date() })
   updatedAt: Date = new Date()
 }
+
+/**
+ * How much autonomy a principal has earned, per capability group.
+ *
+ * **Per group, not global**, per planning 02 §5.1: a worker can be trusted with
+ * research reads and supervised on external communication, and a single number
+ * would be either uselessly conservative or dangerously optimistic. The group is
+ * the capability's module, which is a grouping the platform already has rather
+ * than a taxonomy invented for this table.
+ *
+ * **A missing row means `T0`.** Absence is the bottom of the scale, never a
+ * default in the middle — this is the one record whose absence must not grant
+ * anything.
+ *
+ * `evidence_json` is the snapshot the promotion was granted on, and
+ * `unverified_json` the criteria nobody could check at the time. Both are kept
+ * because "why does this worker have T3?" is the question this table exists to
+ * answer, and an answer that requires re-deriving year-old evidence is no answer.
+ */
+@Entity({ tableName: 'authority_trust_grants' })
+export class AuthorityTrustGrant {
+  @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
+  id!: string
+
+  @Property({ name: 'tenant_id', type: 'uuid' })
+  tenantId!: string
+
+  @Property({ name: 'principal_id', type: 'text' })
+  principalId!: string
+
+  @Property({ name: 'principal_kind', type: 'text' })
+  principalKind!: string
+
+  /** The capability's module — `directory`, `auth`, `sales`. */
+  @Property({ name: 'capability_group', type: 'text' })
+  capabilityGroup!: string
+
+  @Property({ type: 'text' })
+  tier!: string
+
+  @Property({ name: 'evidence_json', type: 'jsonb', nullable: true })
+  evidenceJson?: unknown
+
+  @Property({ name: 'unverified_json', type: 'jsonb', nullable: true })
+  unverifiedJson?: unknown
+
+  @Property({ name: 'granted_by_user_id', type: 'uuid', nullable: true })
+  grantedByUserId?: string | null
+
+  /** Why the last change happened — a person's words, or a demotion trigger. */
+  @Property({ type: 'text', nullable: true })
+  reason?: string | null
+
+  @Property({ name: 'created_at', type: Date, onCreate: () => new Date() })
+  createdAt: Date = new Date()
+
+  @Property({ name: 'updated_at', type: Date, onCreate: () => new Date(), onUpdate: () => new Date() })
+  updatedAt: Date = new Date()
+}

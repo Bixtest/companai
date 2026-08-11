@@ -89,6 +89,18 @@ export const features: AclFeatureDeclaration[] = [
     },
   },
   {
+    id: 'auth.trust.promote',
+    title: 'Promote a principal to a higher trust tier',
+    module: 'auth',
+    capability: {
+      effectClass: 'E5',
+      reversibility: 'reversible',
+      dataClasses: ['internal'],
+      delegable: false,
+      note: 'The only act in the platform that raises how much a machine may do on its own. Everything else narrows. Evidence gates the decision but does not make it, and three of the five criteria the specification names cannot be checked here yet -- so a promotion records what went unverified. Not delegable: handing on the power to raise autonomy is how graduated trust becomes a formality.',
+    },
+  },
+  {
     id: 'auth.delegations.manage',
     title: 'Lend and revoke authority',
     module: 'auth',

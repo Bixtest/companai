@@ -7,6 +7,7 @@ import { RbacService } from '@open-mercato/core/modules/auth/services/rbacServic
 import { AuthorityEnforcementService } from '@open-mercato/core/modules/auth/services/authorityEnforcementService'
 import { RecordLockService } from '@open-mercato/core/modules/auth/services/recordLockService'
 import { DelegationService } from '@open-mercato/core/modules/auth/services/delegationService'
+import { TrustService } from '@open-mercato/core/modules/auth/services/trustService'
 import { ActReviewService, PendingActService } from '@open-mercato/core/modules/auth/services/pendingActService'
 import {
   createRbacFallbackCache,
@@ -76,6 +77,10 @@ export function register(container: AppContainer) {
           return locks.stateFor(recordId, scope) as never
         },
       },
+      // Argument order matters and is not obvious from the call site: the
+      // constructor takes (graph, moduleConfig, invokerAuthority, recordLocks,
+      // delegations, trust). These are positional readers, so swapping two of
+      // them type-checks perfectly and silently asks the wrong service.
       {
         async activeFor(granteePrincipalId: string, capabilityId: string, scope) {
           const delegations = optional(cradle, 'delegationService') as
@@ -83,6 +88,18 @@ export function register(container: AppContainer) {
             | null
           if (!delegations) return null
           return delegations.activeFor(granteePrincipalId, capabilityId, scope) as never
+        },
+      },
+      {
+        async tierFor(principalId: string, capabilityGroup: string, scope) {
+          const trust = optional(cradle, 'trustService') as
+            | { tierFor: (id: string, group: string, scope: unknown) => Promise<string> }
+            | null
+          // `T0` rather than null: absence is the bottom of the scale, and the
+          // resolver reads `T0` as "no trust record" and falls through to the
+          // untrusted-machine default.
+          if (!trust) return 'T0' as never
+          return trust.tierFor(principalId, capabilityGroup, scope) as never
         },
       },
     )).scoped().proxy(),
@@ -93,6 +110,7 @@ export function register(container: AppContainer) {
   // be an approval queue entry for something nobody proposed.
   container.register({ recordLockService: asClass(RecordLockService).scoped() })
   container.register({ delegationService: asClass(DelegationService).scoped() })
+  container.register({ trustService: asClass(TrustService).scoped() })
   container.register({ pendingActService: asClass(PendingActService).scoped() })
   container.register({ actReviewService: asClass(ActReviewService).scoped() })
 

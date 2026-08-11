@@ -4,6 +4,7 @@ import { parseSubject } from '@open-mercato/shared/lib/auth/principal'
 import type { AutonomyGate } from '@open-mercato/shared/modules/capabilities'
 import { createLogger } from '@open-mercato/shared/lib/logger'
 import { recordLockCeiling, recordLockReason, type RecordLockState } from '@open-mercato/shared/modules/record-locks'
+import { DEFAULT_TRUST_TIER, TRUST_TIER_NAMES, trustCeilingFor, type TrustTier } from '@open-mercato/shared/modules/trust'
 
 const GATE_ORDER: AutonomyGate[] = ['A0', 'A1', 'A2', 'A3', 'A4', 'A5']
 
@@ -90,6 +91,21 @@ type RecordLockReader = {
  * different callers, and coupling them would mean the resolver could only ever
  * be consulted from inside a permission check.
  */
+/**
+ * What a principal has earned for acts of this kind.
+ *
+ * The one reader here whose answer can *widen* a decision — every other input
+ * narrows. Safe because the value it returns is still only a ceiling among
+ * ceilings, and because nothing can write it without evidence and a person.
+ */
+type TrustReader = {
+  tierFor: (
+    principalId: string,
+    capabilityGroup: string,
+    scope: AuthorityScope,
+  ) => Promise<TrustTier>
+}
+
 type DelegationReader = {
   activeFor: (
     granteePrincipalId: string,
@@ -145,6 +161,7 @@ export class AuthorityEnforcementService {
     private readonly invokerAuthority: InvokerAuthorityReader | null = null,
     private readonly recordLocks: RecordLockReader | null = null,
     private readonly delegations: DelegationReader | null = null,
+    private readonly trust: TrustReader | null = null,
   ) {}
 
   /**
@@ -233,6 +250,7 @@ export class AuthorityEnforcementService {
     )
     const resourceCeiling = await this.resourceCeilingFor(capability, scope, options.recordId ?? null)
     const delegation = await this.delegationCeilingFor(capability, scope, principal.id)
+    const trust = await this.trustCeilingFor(capability, scope, principal.id)
 
     return resolveDecision({
       actor: {
@@ -245,6 +263,7 @@ export class AuthorityEnforcementService {
         ...(graphCeiling ? { graphCeiling: graphCeiling.ceiling, graphCeilingDetail: graphCeiling.detail } : {}),
         ...(invokerCeiling ? { invokerCeiling } : {}),
         ...(delegation ? { delegationCeiling: delegation.ceiling } : {}),
+        ...(trust ? { trustCeiling: trust.ceiling } : {}),
       },
       capability,
       context: {
@@ -278,6 +297,30 @@ export class AuthorityEnforcementService {
     const ceiling = recordLockCeiling(lock.state, capability.effectClass)
     if (!ceiling) return null
     return { ceiling, detail: recordLockReason(lock.state, lock.reason) }
+  }
+
+  /**
+   * The ceiling this principal's earned trust permits.
+   *
+   * Returns `null` at `T0`, deliberately. `T0` is where everybody starts and is
+   * exactly what the untrusted-machine default already says, so supplying it
+   * would replace a rule that explains itself — *"no trust record for this
+   * worker"* — with one that says `T0` and means the same thing. The resolver
+   * falls through to the clearer message.
+   *
+   * Trust is read per **capability group**, which is the capability's module:
+   * a worker can be trusted with research reads and supervised on external
+   * communication (planning 02 §5.1).
+   */
+  private async trustCeilingFor(
+    capability: ReturnType<typeof getCapabilityDescriptor>,
+    scope: AuthorityScope,
+    principalId: string,
+  ): Promise<{ ceiling: AutonomyGate; tier: TrustTier } | null> {
+    if (!capability || !this.trust || !principalId) return null
+    const tier = await this.trust.tierFor(principalId, capability.module, scope)
+    if (tier === DEFAULT_TRUST_TIER) return null
+    return { ceiling: trustCeilingFor(tier, capability.effectClass), tier }
   }
 
   /**
