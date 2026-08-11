@@ -46,6 +46,22 @@ export function register(container: AppContainer) {
     authorityEnforcement: asFunction((cradle: Record<string, unknown>) => new AuthorityEnforcementService(
       optional(cradle, 'authorityGraphService'),
       optional(cradle, 'moduleConfigService'),
+      {
+        // Resolved inside the call, not here. `rbacService` is constructed with
+        // `authorityEnforcement` as a dependency, so touching it at construction
+        // time would close a cycle; reading it when the question is actually
+        // asked breaks that.
+        async holdsCapability(userId: string, featureId: string, scope) {
+          const rbac = optional(cradle, 'rbacService') as
+            | { userHasAllFeatures: (userId: string, features: string[], scope: unknown) => Promise<boolean> }
+            | null
+          if (!rbac) return false
+          return rbac.userHasAllFeatures(userId, [featureId], {
+            tenantId: scope.tenantId ?? null,
+            organizationId: scope.organizationId ?? null,
+          })
+        },
+      },
     )).scoped().proxy(),
   })
 

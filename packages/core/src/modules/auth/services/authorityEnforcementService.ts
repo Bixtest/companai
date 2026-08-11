@@ -59,6 +59,22 @@ type ModuleConfigReader = {
 }
 
 /**
+ * Whether the person an actor is acting *for* holds the capability themselves.
+ *
+ * A reader rather than the RBAC service itself, because `rbacService` is
+ * constructed with this service as a dependency — injecting it back would be a
+ * cycle. The DI registration hands over an object that resolves `rbacService`
+ * from the cradle at call time, which is late enough to break it.
+ */
+type InvokerAuthorityReader = {
+  holdsCapability: (
+    userId: string,
+    featureId: string,
+    scope: AuthorityScope,
+  ) => Promise<boolean>
+}
+
+/**
  * Turns the authority resolver from an observer into a decision.
  *
  * **It can only ever narrow.** This runs after the existing RBAC check has
@@ -70,16 +86,16 @@ type ModuleConfigReader = {
  *
  * ## What enforcement covers today, and what it does not
  *
- * The resolver returns a gate, `A0` through `A5`. Only `A0` — *blocked* — is
- * enforced, because it is the only outcome the platform can currently carry out.
- * `A1` to `A4` attach obligations (approve first, hold and commit, review
- * afterwards) and there is no machinery yet that can hold an arbitrary act and
- * resume it once somebody approves. Claiming to enforce those would mean
- * allowing the act and calling the allowance a control.
+ * The resolver returns a gate, `A0` through `A5`, and **every one of them now
+ * binds**. `A0` refuses here; `A1` and `A2` hold the act until somebody approves
+ * it; `A3` holds it until its window passes unless vetoed; `A4` runs it and files
+ * it for review. The command gate in `commands/interceptors.ts` carries out the
+ * last four.
  *
- * So: refusals bind, obligations are recorded and do not. That gap is a backlog
- * item, and it is stated in the operator-facing output rather than left for
- * somebody to discover.
+ * *(This comment said "only `A0` is enforced" until 2026-08-11, which stopped
+ * being true when the command gate landed on 2026-08-10. A stale comment about a
+ * control is worse than none, because it is read as a limitation and worked
+ * around.)*
  *
  * ## Why a failure here is not a denial
  *
@@ -94,6 +110,7 @@ export class AuthorityEnforcementService {
   constructor(
     private readonly graph: GraphCeilingReader | null,
     private readonly moduleConfig: ModuleConfigReader | null,
+    private readonly invokerAuthority: InvokerAuthorityReader | null = null,
   ) {}
 
   /**
@@ -166,12 +183,20 @@ export class AuthorityEnforcementService {
     subject: string,
     feature: string,
     scope: AuthorityScope,
+    options: { onBehalfOfUserId?: string | null } = {},
   ): Promise<Decision | null> {
     const capability = getCapabilityDescriptor(feature)
     if (!capability) return null
 
     const principal = parseSubject(subject)
     const graphCeiling = await this.graphCeilingFor(capability.id, scope)
+    const invokerCeiling = await this.invokerCeilingFor(
+      capability,
+      scope,
+      graphCeiling,
+      principal.id,
+      options.onBehalfOfUserId ?? null,
+    )
 
     return resolveDecision({
       actor: {
@@ -182,10 +207,68 @@ export class AuthorityEnforcementService {
         // the codebase.
         holdsCapability: true,
         ...(graphCeiling ? { graphCeiling: graphCeiling.ceiling, graphCeilingDetail: graphCeiling.detail } : {}),
+        ...(invokerCeiling ? { invokerCeiling } : {}),
       },
       capability,
       context: {},
     })
+  }
+
+  /**
+   * Invariant **I4** — authority is carried, never amplified.
+   *
+   * An API key acts for the person who owns it, and an AI worker acts for
+   * whoever set it going. Without this, that key could do things its owner
+   * cannot: the key passes its own RBAC check, the resolver sees a `service`
+   * principal with no invoker, and the person behind it is never consulted.
+   *
+   * So the invoker is resolved **as themselves** — their own grant, their own
+   * position in the graph, the same capability — and whatever gate that produces
+   * becomes a ceiling on the act. If they may not perform it at all, the answer
+   * is `A0` and the act is refused.
+   *
+   * Only one level deep, and that is not a shortcut: a human's
+   * `onBehalfOfUserId` is always null, so the chain is at most
+   * machine → person by construction.
+   */
+  private async invokerCeilingFor(
+    capability: ReturnType<typeof getCapabilityDescriptor>,
+    scope: AuthorityScope,
+    graphCeiling: { ceiling: AutonomyGate; detail: string } | null,
+    actorId: string,
+    onBehalfOfUserId: string | null,
+  ): Promise<AutonomyGate | null> {
+    if (!capability) return null
+    // Nobody to carry authority from: the actor answers only to itself.
+    if (!onBehalfOfUserId) return null
+    // A person acting as themselves is not carrying anybody's authority, and
+    // capping them by their own decision would double-apply every rule.
+    if (onBehalfOfUserId === actorId) return null
+
+    if (!this.invokerAuthority) {
+      // A lean bootstrap with no RBAC registered. Skipped rather than refused:
+      // this service takes the position that an infrastructure gap is not a
+      // permission answer, and inventing `A0` here would deny acts nobody
+      // decided to deny.
+      logger.warn('Cannot check invoker authority; no reader registered', { capability: capability.id })
+      return null
+    }
+
+    const holds = await this.invokerAuthority.holdsCapability(onBehalfOfUserId, capability.id, scope)
+
+    const decision = resolveDecision({
+      actor: {
+        kind: 'human',
+        id: onBehalfOfUserId,
+        holdsCapability: holds,
+        // The same position in the organization graph: the invoker is being
+        // judged in the scope the act is happening in, not in some other one.
+        ...(graphCeiling ? { graphCeiling: graphCeiling.ceiling, graphCeilingDetail: graphCeiling.detail } : {}),
+      },
+      capability,
+      context: {},
+    })
+    return decision.gate
   }
 
   private async graphCeilingFor(

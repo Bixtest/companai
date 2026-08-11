@@ -133,7 +133,13 @@ export const authorityCommandGate: CommandInterceptor = {
     }
 
     const organizationId = context.selectedOrganizationId ?? (auth?.orgId as string | null | undefined) ?? null
-    const decision = await enforcement.decideFor(subject, capability, { tenantId, organizationId })
+    // Who this actor is acting *for*. An API key carries its owner; a person
+    // acting as themselves carries nobody. Invariant I4 caps the act at whatever
+    // that person could have done.
+    const onBehalfOfUserId = (auth?.principal as { onBehalfOfUserId?: string | null } | undefined)?.onBehalfOfUserId
+      ?? (auth?.userId as string | null | undefined)
+      ?? null
+    const decision = await enforcement.decideFor(subject, capability, { tenantId, organizationId }, { onBehalfOfUserId })
     if (!decision || !HELD_GATES.has(decision.gate)) {
       logger.debug('Gate permits the act to run now', {
         commandId: context.commandId,
