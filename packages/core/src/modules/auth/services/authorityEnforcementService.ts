@@ -6,6 +6,8 @@ import { createLogger } from '@open-mercato/shared/lib/logger'
 import { recordLockCeiling, recordLockReason, type RecordLockState } from '@open-mercato/shared/modules/record-locks'
 import { DEFAULT_TRUST_TIER, TRUST_TIER_NAMES, trustCeilingFor, type TrustTier } from '@open-mercato/shared/modules/trust'
 import { parseAuthorityPolicy, policyCeilingFor } from '@open-mercato/shared/modules/authority-policy'
+import { projectCeilingFor, type ProjectOverlay } from '@open-mercato/shared/modules/project-overlays'
+import type { TaskGrade } from '@open-mercato/shared/modules/capabilities'
 
 const GATE_ORDER: AutonomyGate[] = ['A0', 'A1', 'A2', 'A3', 'A4', 'A5']
 
@@ -106,6 +108,21 @@ type RecordLockReader = {
  * narrows. Safe because the value it returns is still only a ceiling among
  * ceilings, and because nothing can write it without evidence and a person.
  */
+/**
+ * The matter an act belongs to, and what it permits there.
+ *
+ * Supplies **two** inputs rather than one: the project's own ceiling, and the
+ * task grade — which had no source at all until a matter existed to read one
+ * from.
+ */
+type ProjectReader = {
+  contextFor: (
+    recordId: string,
+    principalId: string,
+    scope: AuthorityScope,
+  ) => Promise<{ grade: TaskGrade | null; overlay: ProjectOverlay | null } | null>
+}
+
 type TrustReader = {
   tierFor: (
     principalId: string,
@@ -170,6 +187,7 @@ export class AuthorityEnforcementService {
     private readonly recordLocks: RecordLockReader | null = null,
     private readonly delegations: DelegationReader | null = null,
     private readonly trust: TrustReader | null = null,
+    private readonly projects: ProjectReader | null = null,
   ) {}
 
   /**
@@ -260,6 +278,7 @@ export class AuthorityEnforcementService {
     const delegation = await this.delegationCeilingFor(capability, scope, principal.id)
     const trust = await this.trustCeilingFor(capability, scope, principal.id)
     const policy = await this.policyCeilingFor(capability, scope.tenantId)
+    const project = await this.projectContextFor(capability, scope, principal.id, options.recordId ?? null)
 
     return resolveDecision({
       actor: {
@@ -280,6 +299,18 @@ export class AuthorityEnforcementService {
           ? { resourceCeiling: resourceCeiling.ceiling, resourceCeilingDetail: resourceCeiling.detail }
           : {}),
         ...(policy ? { policyCeiling: policy.ceiling, policyCeilingDetail: policy.detail } : {}),
+        // The project supplies two things. Its ceiling joins `resourceCeiling`
+        // rather than getting a rule of its own — both are statements about the
+        // thing being acted on, and the resolver takes the lower.
+        ...(project?.ceiling
+          ? {
+              resourceCeiling: this.lowerOf(resourceCeiling?.ceiling, project.ceiling.ceiling),
+              resourceCeilingDetail: this.lowerOf(resourceCeiling?.ceiling, project.ceiling.ceiling) === project.ceiling.ceiling
+                ? project.ceiling.detail
+                : resourceCeiling?.detail,
+            }
+          : {}),
+        ...(project?.grade ? { grade: project.grade } : {}),
       },
     })
   }
@@ -307,6 +338,38 @@ export class AuthorityEnforcementService {
     const ceiling = recordLockCeiling(lock.state, capability.effectClass)
     if (!ceiling) return null
     return { ceiling, detail: recordLockReason(lock.state, lock.reason) }
+  }
+
+  /**
+   * The project an act belongs to, if any — its rules and its grade.
+   *
+   * Reached through the record: `authority_project_records` maps a record into a
+   * matter, and the gate already reads `payload.id` for record locks. No command
+   * had to declare anything.
+   *
+   * **Only a member's overlay applies.** A non-member acting on a project's
+   * record is governed by everything else — the graph, policy, the record's own
+   * lock — but not by rules written for people working inside the matter.
+   */
+  private async projectContextFor(
+    capability: ReturnType<typeof getCapabilityDescriptor>,
+    scope: AuthorityScope,
+    principalId: string,
+    recordId: string | null,
+  ): Promise<{ ceiling: { ceiling: AutonomyGate; detail: string } | null; grade: TaskGrade | null } | null> {
+    if (!capability || !this.projects || !recordId) return null
+    const context = await this.projects.contextFor(recordId, principalId, scope)
+    if (!context) return null
+    return {
+      ceiling: context.overlay ? projectCeilingFor(context.overlay, capability) : null,
+      grade: context.grade,
+    }
+  }
+
+  /** The lower of two gates, treating an absent one as no constraint. */
+  private lowerOf(left: AutonomyGate | undefined, right: AutonomyGate): AutonomyGate {
+    if (!left) return right
+    return GATE_ORDER.indexOf(left) <= GATE_ORDER.indexOf(right) ? left : right
   }
 
   /**

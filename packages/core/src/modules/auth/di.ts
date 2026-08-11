@@ -8,6 +8,7 @@ import { AuthorityEnforcementService } from '@open-mercato/core/modules/auth/ser
 import { RecordLockService } from '@open-mercato/core/modules/auth/services/recordLockService'
 import { DelegationService } from '@open-mercato/core/modules/auth/services/delegationService'
 import { TrustService } from '@open-mercato/core/modules/auth/services/trustService'
+import { ProjectService } from '@open-mercato/core/modules/auth/services/projectService'
 import { ActReviewService, PendingActService } from '@open-mercato/core/modules/auth/services/pendingActService'
 import {
   createRbacFallbackCache,
@@ -102,6 +103,15 @@ export function register(container: AppContainer) {
           return trust.tierFor(principalId, capabilityGroup, scope) as never
         },
       },
+      {
+        async contextFor(recordId: string, principalId: string, scope) {
+          const projects = optional(cradle, 'projectService') as
+            | { contextFor: (recordId: string, principalId: string, scope: unknown) => Promise<unknown | null> }
+            | null
+          if (!projects) return null
+          return projects.contextFor(recordId, principalId, scope) as never
+        },
+      },
     )).scoped().proxy(),
   })
 
@@ -111,6 +121,7 @@ export function register(container: AppContainer) {
   container.register({ recordLockService: asClass(RecordLockService).scoped() })
   container.register({ delegationService: asClass(DelegationService).scoped() })
   container.register({ trustService: asClass(TrustService).scoped() })
+  container.register({ projectService: asClass(ProjectService).scoped() })
   container.register({ pendingActService: asClass(PendingActService).scoped() })
   container.register({ actReviewService: asClass(ActReviewService).scoped() })
 

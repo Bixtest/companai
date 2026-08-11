@@ -776,3 +776,113 @@ export class AuthorityTrustGrant {
   @Property({ name: 'updated_at', type: Date, onCreate: () => new Date(), onUpdate: () => new Date() })
   updatedAt: Date = new Date()
 }
+
+/**
+ * A matter: a case, an engagement, an acquisition, a property.
+ *
+ * The platform scopes by tenant and organisation, which describes *structure*.
+ * Work is not organised that way — a legal case pulls people from several
+ * departments and needs its own rules about who may do what inside it (SRS
+ * FR-550, FR-560).
+ *
+ * `grade` is the second reason this table exists. A task grade describes the
+ * **work**, not the act, and until there was a matter to read one from every act
+ * resolved at the `G1` baseline. A project is that matter.
+ */
+@Entity({ tableName: 'authority_projects' })
+export class AuthorityProject {
+  @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
+  id!: string
+
+  @Property({ name: 'tenant_id', type: 'uuid' })
+  tenantId!: string
+
+  @Property({ name: 'organization_id', type: 'uuid', nullable: true })
+  organizationId?: string | null
+
+  @Property({ type: 'text' })
+  name!: string
+
+  /**
+   * How consequential the work in this project is, `G0`–`G4`.
+   *
+   * Nullable, and null means "say nothing" rather than `G0`: a project nobody has
+   * graded should leave the act at its ordinary baseline, not declare it
+   * negligible.
+   */
+  @Property({ type: 'text', nullable: true })
+  grade?: string | null
+
+  @Property({ name: 'closed_at', type: Date, nullable: true })
+  closedAt?: Date | null
+
+  @Property({ name: 'created_at', type: Date, onCreate: () => new Date() })
+  createdAt: Date = new Date()
+
+  @Property({ name: 'updated_at', type: Date, onCreate: () => new Date(), onUpdate: () => new Date() })
+  updatedAt: Date = new Date()
+}
+
+/**
+ * Somebody who works in a project, and the rules that apply to them there.
+ *
+ * `permission_overlay` **only narrows**. It cannot grant a member something they
+ * do not already hold — that is what makes it an overlay rather than a second
+ * permission system, and it preserves the property the whole resolver rests on.
+ */
+@Entity({ tableName: 'authority_project_memberships' })
+export class AuthorityProjectMembership {
+  @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
+  id!: string
+
+  @Property({ name: 'tenant_id', type: 'uuid' })
+  tenantId!: string
+
+  @Property({ name: 'project_id', type: 'uuid' })
+  projectId!: string
+
+  /** Text, not uuid: an API key acting is `api_key:<id>`, and a member may be one. */
+  @Property({ name: 'principal_id', type: 'text' })
+  principalId!: string
+
+  @Property({ name: 'principal_kind', type: 'text' })
+  principalKind!: string
+
+  @Property({ name: 'permission_overlay', type: 'jsonb', nullable: true })
+  permissionOverlay?: unknown
+
+  @Property({ name: 'created_at', type: Date, onCreate: () => new Date() })
+  createdAt: Date = new Date()
+
+  @Property({ name: 'updated_at', type: Date, onCreate: () => new Date(), onUpdate: () => new Date() })
+  updatedAt: Date = new Date()
+}
+
+/**
+ * Which project a record belongs to.
+ *
+ * This is what lets the resolver know an act is happening inside a project at
+ * all. The command gate already reads `payload.id` for record locks, so mapping a
+ * **record** into a project reuses an identifier the gate has rather than adding a
+ * declaration to every command — the same reasoning that shaped G5.
+ *
+ * One project per record: a record in two matters would give two overlays and no
+ * rule for choosing between them.
+ */
+@Entity({ tableName: 'authority_project_records' })
+export class AuthorityProjectRecord {
+  @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
+  id!: string
+
+  @Property({ name: 'tenant_id', type: 'uuid' })
+  tenantId!: string
+
+  @Property({ name: 'project_id', type: 'uuid' })
+  projectId!: string
+
+  @Property({ name: 'record_id', type: 'uuid' })
+  recordId!: string
+
+  @Property({ name: 'created_at', type: Date, onCreate: () => new Date() })
+  createdAt: Date = new Date()
+}
