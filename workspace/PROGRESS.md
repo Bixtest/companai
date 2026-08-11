@@ -28,35 +28,86 @@ and is argued below; anything can be pulled forward on request.
 |---|---|---|---|
 | | **Wave 1 — small, independent, closes three batches** | | |
 | | **Wave 2 — the resolver actually receives its inputs** | | |
-| **1** | **Task grade needs a *matter* to come from — blocked on G4** | **Investigated 2026-08-11 and reclassified, not done.** The audit was right that `decideFor` passes `context: {}` — but there is nothing to pass. A grade describes *the work*, not the act: G4 is "legal proceedings, board/M&A, security incidents", a property of the matter. The platform has no matter until project/case context arrives with **G4 (item 8)**, so the only honest grade source today is the data-class floor, which already applies. Wiring a seam nothing can fill would be the claimed-and-absent control this sprint exists to remove. **Precondition: G4.** A real defect found while investigating is fixed below | M |
-| **2** | **Charter grants — blocked on workers and the compiler** | **Investigated 2026-08-11, see below.** A charter is a worker's grant set, and planning 03 is explicit that runtime reads a *compiled* set that is **never hand-edited**. Two preconditions are missing: `ai_worker` exists as a type but **nothing ever creates one** — `derivePrincipal` yields only `human` or `service` — and the Charter compiler is Phase K. **Preconditions: an AI worker entity, and the Charter compiler** | L |
-| **3** | **Budget as a resolver input — blocked on spend tracking** | **Investigated 2026-08-11.** `budget.state_ceiling(actor, context)` needs three things this platform has none of: a notion of what an act costs, accumulated spend per actor, and a limit. Nothing tracks spend or quota anywhere. **Precondition: a metering model** | L |
-| **4** | **G4 — project permission overlays** | Scoping stops at the department without it. Project, case and engagement contexts are central to the SRS (FR-550, FR-560). Take the terminal-deny semantics; leave P1's `deny:`/`!` string DSL. **Design decided 2026-08-11, see below — it also unblocks item 1** | L |
-| **5** | **G1 — re-scope, then decide** | R5 already delivers the explanation trace, binding rule, obligations and alternatives. What remains is Platform 1's *shape* — ordered sources, deny-wins, a `terminal` flag — against our deliberately different one where everything is a ceiling and the answer is the minimum. **Last in the wave**: items 4–12 may answer it, and it is a design decision currently sized as a port | ? |
+| **1** | **Charter grants — blocked on workers and the compiler** | **Investigated 2026-08-11, see below.** A charter is a worker's grant set, and planning 03 is explicit that runtime reads a *compiled* set that is **never hand-edited**. Two preconditions are missing: `ai_worker` exists as a type but **nothing ever creates one** — `derivePrincipal` yields only `human` or `service` — and the Charter compiler is Phase K. **Preconditions: an AI worker entity, and the Charter compiler** | L |
+| **2** | **Budget as a resolver input — blocked on spend tracking** | **Investigated 2026-08-11.** `budget.state_ceiling(actor, context)` needs three things this platform has none of: a notion of what an act costs, accumulated spend per actor, and a limit. Nothing tracks spend or quota anywhere. **Precondition: a metering model** | L |
+| **3** | **G1 — re-scope, then decide** | R5 already delivers the explanation trace, binding rule, obligations and alternatives. What remains is Platform 1's *shape* — ordered sources, deny-wins, a `terminal` flag — against our deliberately different one where everything is a ceiling and the answer is the minimum. **Last in the wave**: items 4–12 may answer it, and it is a design decision currently sized as a port | ? |
 | | **Wave 3 — the human surface** | | |
-| **6** | **U7 — the journal cannot tell a machine from a human** | `action_logs.actor_user_id` stores an API key's UUID with no record that it was a key, so a key acting and a person acting are indistinguishable in the record. That is invariant **I2**, and telling them apart is the premise of the product. Open since 2026-08-09, **never on the backlog** | M |
-| **7** | **Bulk approval, with a diff** | The diff is the whole feature: approving several acts without showing how they differ is a button for approving things unread, and it would be the most-used control on the page. Owner's decision 2026-08-10 — on by default, on/off per tenant, diff never optional | M |
-| **8** | **Cover for someone away, and standing approvals** | Both need a name — a deputy, a grantor — so both are inherently settings. Standing approvals need a mandatory expiry and a visible count of what they let through: the most useful control on the page and the most dangerous. Planning 02 §7.1–7.2 | L |
-| **9** | **Per-tenant approval expiry** | Decided with the owner on 2026-08-10 and recorded in the closure table as unbuilt, but it never became a numbered item. 24h is enforced in `PendingActService`; the knob is not there | S |
+| **4** | **U7 — the journal cannot tell a machine from a human** | `action_logs.actor_user_id` stores an API key's UUID with no record that it was a key, so a key acting and a person acting are indistinguishable in the record. That is invariant **I2**, and telling them apart is the premise of the product. Open since 2026-08-09, **never on the backlog** | M |
+| **5** | **Bulk approval, with a diff** | The diff is the whole feature: approving several acts without showing how they differ is a button for approving things unread, and it would be the most-used control on the page. Owner's decision 2026-08-10 — on by default, on/off per tenant, diff never optional | M |
+| **6** | **Cover for someone away, and standing approvals** | Both need a name — a deputy, a grantor — so both are inherently settings. Standing approvals need a mandatory expiry and a visible count of what they let through: the most useful control on the page and the most dangerous. Planning 02 §7.1–7.2 | L |
+| **7** | **Per-tenant approval expiry** | Decided with the owner on 2026-08-10 and recorded in the closure table as unbuilt, but it never became a numbered item. 24h is enforced in `PendingActService`; the knob is not there | S |
 | | **Wave 4 — the record can be trusted** | | |
-| **10** | **Ledger correlation and causation are carried but never propagated** | `correlation_id` / `causation_id` are recorded when a caller supplies them, and nothing supplies them. Until a correlation id is threaded through a request, the chain records events that cannot be assembled into a trace — the feature the ledger exists to enable | M |
-| **11** | **Ledger Tier 2 — periodic signed checkpoints** | R3's chain is verifiable only by us. A signed root in append-only storage is what lets a customer's auditor verify a range without our cooperation, and it is a stated commercial property of the design. Needs key management | L |
+| **8** | **Ledger correlation and causation are carried but never propagated** | `correlation_id` / `causation_id` are recorded when a caller supplies them, and nothing supplies them. Until a correlation id is threaded through a request, the chain records events that cannot be assembled into a trace — the feature the ledger exists to enable | M |
+| **9** | **Ledger Tier 2 — periodic signed checkpoints** | R3's chain is verifiable only by us. A signed root in append-only storage is what lets a customer's auditor verify a range without our cooperation, and it is a stated commercial property of the design. Needs key management | L |
 | | **Wave 5 — close the books before the server** | | |
-| **12** | **U4 — verify a superadmin can delete a currency** | The route now derives `organizationId` from `ctx.selectedOrganizationId ?? ctx.auth?.orgId ?? undefined`. For a superadmin with no organization selected that is still `undefined`, which is the original bug's shape. **Verify against the running instance before calling it fixed** | S |
-| **13** | **Verify `messages.manage` and `messages.actions` against real routes** | The only two of 113 capability descriptors classified from their titles rather than from code, because no route enforces them. Conservative today, which is the safe direction but not the accurate one | S |
-| **14** | **Screens for delegations and record locks** | Both G3 and G5 ship a working API and no page. Locking belongs on each record's own screen (per-entity work); delegations want one screen — who lent what to whom, until when, and a revoke button. Until then both are operator actions | M |
-| **15** | **A lock control on each record's screen** | G5 ships the ceiling and an API to set it, so a lock can be applied and binds. What it does not ship is a way to apply one without calling the API — the natural home is a control on each record's own screen, which is per-entity work rather than one screen. Until then, locking is an operator action | M |
-| **16** | **Have the Arabic reviewed by a native speaker** | `ar` ships as a real locale so the direction policy is testable rather than theoretical, and the `auth` dictionary I wrote is unreviewed. Untranslated keys fall back to English and are harmless; *wrong* translations are not. Blocks nothing until a customer sees Arabic | S |
-| **22** | **Phase G exit gate — the assertions and the changelog** | The gate requires a test proving the resolver honours delegations, project overlays and lock states *each*, plus `planning/CHANGELOG.md` recording what was grafted and from where. Neither is tracked anywhere | S |
-| **17** | **Verify the deployment guide on a real Plesk VPS** | `references/deployment.md` is written from the repository and the working local instance, and its build/migrate/start sequence is the one used daily — but **the Plesk steps have never been executed on a Plesk server**. Somebody has to do the first run and correct it. Cheapest before hosting, not after | M |
+| **10** | **U4 — verify a superadmin can delete a currency** | The route now derives `organizationId` from `ctx.selectedOrganizationId ?? ctx.auth?.orgId ?? undefined`. For a superadmin with no organization selected that is still `undefined`, which is the original bug's shape. **Verify against the running instance before calling it fixed** | S |
+| **11** | **Verify `messages.manage` and `messages.actions` against real routes** | The only two of 113 capability descriptors classified from their titles rather than from code, because no route enforces them. Conservative today, which is the safe direction but not the accurate one | S |
+| **12** | **Screens for delegations and record locks** | Both G3 and G5 ship a working API and no page. Locking belongs on each record's own screen (per-entity work); delegations want one screen — who lent what to whom, until when, and a revoke button. Until then both are operator actions | M |
+| **13** | **A lock control on each record's screen** | G5 ships the ceiling and an API to set it, so a lock can be applied and binds. What it does not ship is a way to apply one without calling the API — the natural home is a control on each record's own screen, which is per-entity work rather than one screen. Until then, locking is an operator action | M |
+| **14** | **Have the Arabic reviewed by a native speaker** | `ar` ships as a real locale so the direction policy is testable rather than theoretical, and the `auth` dictionary I wrote is unreviewed. Untranslated keys fall back to English and are harmless; *wrong* translations are not. Blocks nothing until a customer sees Arabic | S |
+| **20** | **Phase G exit gate — the assertions and the changelog** | The gate requires a test proving the resolver honours delegations, project overlays and lock states *each*, plus `planning/CHANGELOG.md` recording what was grafted and from where. Neither is tracked anywhere | S |
+| **15** | **Verify the deployment guide on a real Plesk VPS** | `references/deployment.md` is written from the repository and the working local instance, and its build/migrate/start sequence is the one used daily — but **the Plesk steps have never been executed on a Plesk server**. Somebody has to do the first run and correct it. Cheapest before hosting, not after | M |
 | **17** | **Production hardening the guide names and does not solve** | Each is listed under *what this guide does not cover*: no zero-downtime deploy (`systemctl restart` drops connections), no backup schedule or monitoring, secrets in a plain `.env` with no rotation, no shared attachment storage for a second instance. None blocks a single-VPS deployment; all of them block a second one | L |
-| **18** | **Close out U5, and prune dependencies, before the server** | U5 still reads "two causes found and fixed, one unexplained" — two more were found and fixed on 2026-08-10, so the record is stale. And parked modules carry CVEs a scanner will flag the moment this is hosted: "pre-production, not now" expires when we deploy | M |
+| **16** | **Close out U5, and prune dependencies, before the server** | U5 still reads "two causes found and fixed, one unexplained" — two more were found and fixed on 2026-08-10, so the record is stale. And parked modules carry CVEs a scanner will flag the moment this is hosted: "pre-production, not now" expires when we deploy | M |
 | | **Deferred by decision — not in this sprint** | | |
-| **19** | `domain_mappings` extraction | Per-tenant custom domains. Wanted, but nothing needs it yet | M |
-| **20** | Orphaned-table decision (~127 tables) | Leave them; they are inert. Revisit only as a deliberate backed-up migration | S |
-| **21** | Phase K checkpoint | The scheduled date that stops "we'll clean up later" being a lie | S |
+| **17** | `domain_mappings` extraction | Per-tenant custom domains. Wanted, but nothing needs it yet | M |
+| **18** | Orphaned-table decision (~127 tables) | Leave them; they are inert. Revisit only as a deliberate backed-up migration | S |
+| **19** | Phase K checkpoint | The scheduled date that stops "we'll clean up later" being a lie | S |
 
-### G4 — how an act knows which project it is in
+### Closed 2026-08-11 — G4, and the task grade it unblocked
+
+Scoping stopped at the department. A legal case, a client engagement or an
+acquisition pulls people from several departments and needs its own rules inside
+it (SRS FR-550, FR-560), and the platform had no way to say so.
+
+**Three tables, and the third is what makes it work.**
+`authority_project_records` maps a record into a matter, which is how the resolver
+learns an act is happening inside one — the gate already reads `payload.id` for
+record locks, so no command had to declare anything. **One project per record**,
+enforced by a unique constraint: a record in two matters would give two overlays
+and no rule for choosing.
+
+**Terminal deny needed no special case.** Platform 1 implements it by ending
+evaluation; here a deny is `A0`, and since every rule takes a minimum and nothing
+raises, `A0` already cannot be lifted by a later source. The property comes from
+the invariant rather than from an evaluation-order rule somebody has to remember —
+which is also why the tests assert it holds whichever order the rules are written
+in.
+
+**Typed grants, not Platform 1's `deny:`/`!` string DSL.** A mini-language in a
+string column is a parser nobody wrote a test for.
+
+**Only a member's overlay applies.** A non-member acting on a project's record is
+still governed by everything else — the graph, tenant policy, the record's own
+lock — but not by rules written for people working inside the matter.
+
+**A closed project still governs its records.** Closing a matter does not
+un-govern what is in it; if anything the rules matter more once nobody is watching
+it day to day.
+
+### And this closes the task grade item
+
+A grade describes *the work*, and until there was a matter to read one from, every
+act resolved at the `G1` baseline — which is why that item was reclassified as
+blocked on G4 rather than deferred vaguely. **It now binds**: an act on a project's
+record resolves at the project's grade.
+
+An ungraded project says **nothing** rather than `G0`. A project nobody graded must
+not declare its work negligible, because a *lower* grade buys **more** autonomy —
+the defect fixed in the resolver earlier the same day, and not worth reintroducing
+one layer up. The same care is in `ProjectService.parseGrade`: an unreadable grade
+is `null`, never `G0`.
+
+**Verified against real Postgres**: the one-project-per-record constraint refusing
+a duplicate, and a machine principal (`api_key:abc`) stored as a member with an
+overlay.
+
+**What is deliberately not built: a page**, and the wider "Project Brain" of
+FR-550 — goals, participants, decisions, documents, knowledge. This is the
+*authority* half of a project: enough for a matter to govern the work inside it.
+The rest is product surface, and it is Phase K.
+
+### G4 — the design question, answered before the batch started
 
 **The question.** A project overlay only means something if the resolver can tell
 that *this act* is happening inside *that project*. Nothing in the platform says

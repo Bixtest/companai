@@ -7,6 +7,45 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-08-11 — G4: work gets its own scope, and the grade finally has a source
+
+Scoping stopped at the department. A legal case pulls people from several
+departments and needs its own rules inside it, and the platform had no way to say
+so.
+
+**The design question was the same shape as G5's, and answering it first paid off
+again.** An overlay only means something if the resolver can tell that this act is
+inside that project — and nothing said so. A project holds records; an act names a
+record through `payload.id`, which the gate already reads for record locks. So a
+record-to-project table gives the resolver the matter for free, and no command had
+to declare anything.
+
+**Terminal deny turned out to need no code at all.** Platform 1 implements it by
+ending evaluation early. Here a deny is `A0`, and because every rule takes a
+minimum and nothing anywhere raises a ceiling, `A0` already cannot be lifted by
+anything later. The property falls out of the invariant — which is a better place
+for it than an evaluation-order rule somebody has to remember, and the tests
+assert it holds whichever order the rules are written in.
+
+**And this closed the task-grade item.** A grade describes the work rather than
+the act, and I reclassified it days ago as blocked on G4 precisely because there
+was no matter to read one from. There is now, so it binds: an act on a project's
+record resolves at that project's grade.
+
+The care that item needed carried over intact. An ungraded project says **nothing**
+rather than `G0`, and an unreadable grade parses to `null` rather than `G0` —
+because a *lower* grade buys **more** autonomy, which was the defect I fixed in the
+resolver earlier the same day. It would have been easy to reintroduce it one layer
+up, in a service that had every reason to default a missing value.
+
+**One habit fixed after it cost me.** I ran this gate capturing full output, after
+the previous batch where `tail -4` destroyed a failure I still cannot explain.
+22/22 and 12,845 tests, with the log intact this time.
+
+Server booted before calling it done, per [[L37]].
+
+---
+
 ## 2026-08-11 — Tenant policy, and three things found on the way
 
 Every other input the resolver reads is a property of the platform. This one is a
