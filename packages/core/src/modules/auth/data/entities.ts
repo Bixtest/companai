@@ -642,3 +642,78 @@ export class RecordLock {
   @Property({ name: 'updated_at', type: Date, onCreate: () => new Date(), onUpdate: () => new Date() })
   updatedAt: Date = new Date()
 }
+
+/**
+ * Authority lent for a while, and taken back.
+ *
+ * **Both ends are principals, not users**, which is the whole reason R1 came
+ * first: an AI worker can hold a delegation and can grant one, and neither is
+ * representable if the columns say `user_id`.
+ *
+ * `reason` is **not nullable**. A delegation without one is the grant nobody can
+ * evaluate later — "why does Sam have approval rights?" is the question this
+ * table exists to answer, and a nullable column is a question mark somebody will
+ * skip past.
+ *
+ * `expires_at` is not nullable either. A delegation with no end is a role grant
+ * wearing a costume, and the failure this feature prevents is precisely the grant
+ * nobody revisits.
+ */
+@Entity({ tableName: 'authority_delegations' })
+export class AuthorityDelegation {
+  @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
+  id!: string
+
+  @Property({ name: 'tenant_id', type: 'uuid' })
+  tenantId!: string
+
+  /** `null` scopes the delegation to the whole tenant rather than one organization. */
+  @Property({ name: 'organization_id', type: 'uuid', nullable: true })
+  organizationId?: string | null
+
+  @Property({ name: 'grantor_principal_id', type: 'text' })
+  grantorPrincipalId!: string
+
+  @Property({ name: 'grantor_kind', type: 'text' })
+  grantorKind!: string
+
+  @Property({ name: 'grantee_principal_id', type: 'text' })
+  granteePrincipalId!: string
+
+  @Property({ name: 'grantee_kind', type: 'text' })
+  granteeKind!: string
+
+  @Property({ name: 'capability_id', type: 'text' })
+  capabilityId!: string
+
+  /**
+   * A cap the grantor chose, at or below what they hold themselves.
+   *
+   * `null` means "whatever the grantor could do", which the resolver works out
+   * rather than trusting a stored number that would go stale the moment the
+   * grantor's own authority changed.
+   */
+  @Property({ name: 'authority_ceiling', type: 'text', nullable: true })
+  authorityCeiling?: string | null
+
+  @Property({ name: 'starts_at', type: Date })
+  startsAt!: Date
+
+  @Property({ name: 'expires_at', type: Date })
+  expiresAt!: Date
+
+  @Property({ name: 'revoked_at', type: Date, nullable: true })
+  revokedAt?: Date | null
+
+  @Property({ name: 'revoked_by_user_id', type: 'uuid', nullable: true })
+  revokedByUserId?: string | null
+
+  @Property({ type: 'text' })
+  reason!: string
+
+  @Property({ name: 'created_at', type: Date, onCreate: () => new Date() })
+  createdAt: Date = new Date()
+
+  @Property({ name: 'updated_at', type: Date, onCreate: () => new Date(), onUpdate: () => new Date() })
+  updatedAt: Date = new Date()
+}

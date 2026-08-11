@@ -5,6 +5,8 @@ import type { AutonomyGate } from '@open-mercato/shared/modules/capabilities'
 import { createLogger } from '@open-mercato/shared/lib/logger'
 import { recordLockCeiling, recordLockReason, type RecordLockState } from '@open-mercato/shared/modules/record-locks'
 
+const GATE_ORDER: AutonomyGate[] = ['A0', 'A1', 'A2', 'A3', 'A4', 'A5']
+
 const logger = createLogger('authority').child({ component: 'enforcement' })
 
 /**
@@ -80,6 +82,22 @@ type RecordLockReader = {
   ) => Promise<{ state: RecordLockState; reason: string | null } | null>
 }
 
+/**
+ * Lent authority in force for this actor, if any.
+ *
+ * Read here as well as in the grant path. Two lookups rather than one threaded
+ * value, deliberately: the two questions are asked at different layers and by
+ * different callers, and coupling them would mean the resolver could only ever
+ * be consulted from inside a permission check.
+ */
+type DelegationReader = {
+  activeFor: (
+    granteePrincipalId: string,
+    capabilityId: string,
+    scope: AuthorityScope,
+  ) => Promise<{ grantorPrincipalId: string; authorityCeiling: AutonomyGate | null; reason: string; expiresAt: Date } | null>
+}
+
 type InvokerAuthorityReader = {
   holdsCapability: (
     userId: string,
@@ -126,6 +144,7 @@ export class AuthorityEnforcementService {
     private readonly moduleConfig: ModuleConfigReader | null,
     private readonly invokerAuthority: InvokerAuthorityReader | null = null,
     private readonly recordLocks: RecordLockReader | null = null,
+    private readonly delegations: DelegationReader | null = null,
   ) {}
 
   /**
@@ -213,6 +232,7 @@ export class AuthorityEnforcementService {
       options.onBehalfOfUserId ?? null,
     )
     const resourceCeiling = await this.resourceCeilingFor(capability, scope, options.recordId ?? null)
+    const delegation = await this.delegationCeilingFor(capability, scope, principal.id)
 
     return resolveDecision({
       actor: {
@@ -224,6 +244,7 @@ export class AuthorityEnforcementService {
         holdsCapability: true,
         ...(graphCeiling ? { graphCeiling: graphCeiling.ceiling, graphCeilingDetail: graphCeiling.detail } : {}),
         ...(invokerCeiling ? { invokerCeiling } : {}),
+        ...(delegation ? { delegationCeiling: delegation.ceiling } : {}),
       },
       capability,
       context: {
@@ -257,6 +278,46 @@ export class AuthorityEnforcementService {
     const ceiling = recordLockCeiling(lock.state, capability.effectClass)
     if (!ceiling) return null
     return { ceiling, detail: recordLockReason(lock.state, lock.reason) }
+  }
+
+  /**
+   * The ceiling lent authority imposes (G3).
+   *
+   * Two rules, both narrowing. The grantor cannot lend more than they hold, which
+   * is invariant **I4** again in a different costume \u2014 so the grantor is resolved
+   * as themselves and their gate becomes the ceiling. And a grantor may lend
+   * *less* by naming an explicit cap, which is taken when it is lower.
+   *
+   * A stored ceiling is never used on its own. It would go stale the moment the
+   * grantor's own authority changed, and a delegation quietly outliving its
+   * grantor's permissions is exactly the failure this feature exists to prevent.
+   */
+  private async delegationCeilingFor(
+    capability: ReturnType<typeof getCapabilityDescriptor>,
+    scope: AuthorityScope,
+    granteePrincipalId: string,
+  ): Promise<{ ceiling: AutonomyGate } | null> {
+    if (!capability || !this.delegations || !granteePrincipalId) return null
+    const delegation = await this.delegations.activeFor(granteePrincipalId, capability.id, scope)
+    if (!delegation) return null
+
+    const grantorGate = await this.invokerCeilingFor(
+      capability,
+      scope,
+      await this.graphCeilingFor(capability.id, scope),
+      granteePrincipalId,
+      delegation.grantorPrincipalId,
+    )
+
+    const candidates: AutonomyGate[] = []
+    if (grantorGate) candidates.push(grantorGate)
+    if (delegation.authorityCeiling) candidates.push(delegation.authorityCeiling)
+    if (!candidates.length) return null
+
+    const ceiling = candidates.reduce((lowest, candidate) => (
+      GATE_ORDER.indexOf(candidate) < GATE_ORDER.indexOf(lowest) ? candidate : lowest
+    ))
+    return { ceiling }
   }
 
   /**

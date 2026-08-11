@@ -42,6 +42,17 @@ export class RbacService {
     private em: EntityManager,
     cache?: CacheStrategy,
     private authorityEnforcement?: AuthorityEnforcementService | null,
+    /**
+     * Lent authority, consulted live. Optional so a lean bootstrap without the
+     * delegation service simply has no delegations rather than failing to start.
+     */
+    private delegations?: {
+      activeFor: (
+        granteePrincipalId: string,
+        capabilityId: string,
+        scope: { tenantId: string | null; organizationId: string | null },
+      ) => Promise<unknown | null>
+    } | null,
   ) {
     this.cache = cache || null
   }
@@ -451,10 +462,50 @@ export class RbacService {
    * // Returns true if user has 'entities.*', '*', or 'entities.records.view'
    */
   async userHasAllFeatures(userId: string, required: string[], scope: { tenantId: string | null; organizationId: string | null }): Promise<boolean> {
-    const allowed = await this.decideAllFeatures(userId, required, scope)
+    const fromAcl = await this.decideAllFeatures(userId, required, scope)
+    // Delegations are consulted **only after** the ordinary ACL has said no.
+    //
+    // Two reasons, and the second is the important one. A permission somebody
+    // genuinely holds never pays for the extra query, because this path is the
+    // one that was about to return 403 anyway. And delegations are never cached:
+    // `loadAcl` caches for five minutes, and a delegation whose whole point is a
+    // window and an explicit revoke cannot live in a cache that keeps granting
+    // for five minutes after somebody revokes it. A revoke that takes effect
+    // "within five minutes" is not a revoke.
+    const allowed = fromAcl || await this.grantedByDelegation(userId, required, scope)
     this.shadowResolver(userId, required, scope, allowed)
     if (!allowed) return false
     return !(await this.refusedByAuthority(userId, required, scope))
+  }
+
+  /**
+   * Whether lent authority covers what the actor's own grants do not.
+   *
+   * This is the **only** thing in this service that can turn a `false` into a
+   * `true`, and it is deliberately here rather than one layer down: RBAC has
+   * always had more than one grant source \u2014 role ACLs and user ACLs \u2014 so a third
+   * that expires is consistent with its design. What must never gain that power
+   * is `refusedByAuthority`, because the authority resolver narrows and the whole
+   * system rests on it never doing anything else.
+   *
+   * **Every** required feature must be covered. A delegation for one of three
+   * capabilities does not authorise an act that needs all three, and returning
+   * true because one matched would be the widest bug in the platform.
+   */
+  private async grantedByDelegation(
+    userId: string,
+    required: string[],
+    scope: { tenantId: string | null; organizationId: string | null },
+  ): Promise<boolean> {
+    if (!required.length || !scope.tenantId || !this.delegations) return false
+    const principalId = parseSubject(userId).id
+    if (!principalId) return false
+
+    for (const feature of required) {
+      const delegation = await this.delegations.activeFor(principalId, feature, scope)
+      if (!delegation) return false
+    }
+    return true
   }
 
   /**

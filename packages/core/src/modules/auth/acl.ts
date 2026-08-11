@@ -89,6 +89,18 @@ export const features: AclFeatureDeclaration[] = [
     },
   },
   {
+    id: 'auth.delegations.manage',
+    title: 'Lend and revoke authority',
+    module: 'auth',
+    capability: {
+      effectClass: 'E5',
+      reversibility: 'reversible',
+      dataClasses: ['internal'],
+      delegable: false,
+      note: 'Granting a delegation hands somebody else a capability for a window, so this is worth the sum of everything that can be delegated. Emphatically not itself delegable: somebody who can delegate the power to delegate has created a chain nobody can see the end of, which is the failure mode this whole feature exists to close.',
+    },
+  },
+  {
     id: 'auth.records.lock',
     title: 'Lock and unlock records',
     module: 'auth',

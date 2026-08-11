@@ -6,6 +6,7 @@ import { AuthService } from '@open-mercato/core/modules/auth/services/authServic
 import { RbacService } from '@open-mercato/core/modules/auth/services/rbacService'
 import { AuthorityEnforcementService } from '@open-mercato/core/modules/auth/services/authorityEnforcementService'
 import { RecordLockService } from '@open-mercato/core/modules/auth/services/recordLockService'
+import { DelegationService } from '@open-mercato/core/modules/auth/services/delegationService'
 import { ActReviewService, PendingActService } from '@open-mercato/core/modules/auth/services/pendingActService'
 import {
   createRbacFallbackCache,
@@ -75,6 +76,15 @@ export function register(container: AppContainer) {
           return locks.stateFor(recordId, scope) as never
         },
       },
+      {
+        async activeFor(granteePrincipalId: string, capabilityId: string, scope) {
+          const delegations = optional(cradle, 'delegationService') as
+            | { activeFor: (id: string, capabilityId: string, scope: unknown) => Promise<unknown | null> }
+            | null
+          if (!delegations) return null
+          return delegations.activeFor(granteePrincipalId, capabilityId, scope) as never
+        },
+      },
     )).scoped().proxy(),
   })
 
@@ -82,6 +92,7 @@ export function register(container: AppContainer) {
   // back with it — an act recorded as held by a request that then failed would
   // be an approval queue entry for something nobody proposed.
   container.register({ recordLockService: asClass(RecordLockService).scoped() })
+  container.register({ delegationService: asClass(DelegationService).scoped() })
   container.register({ pendingActService: asClass(PendingActService).scoped() })
   container.register({ actReviewService: asClass(ActReviewService).scoped() })
 
@@ -94,8 +105,13 @@ export function register(container: AppContainer) {
   // registration wins when `RbacService` reaches for it.
   if (isRbacDefaultCacheEnabled()) {
     container.register({
-      rbacService: asFunction((cradle: { em: EntityManager; cache?: CacheStrategy; authorityEnforcement?: AuthorityEnforcementService }) => {
-        return new RbacService(cradle.em, cradle.cache ?? createRbacFallbackCache(), cradle.authorityEnforcement ?? null)
+      rbacService: asFunction((cradle: { em: EntityManager; cache?: CacheStrategy; authorityEnforcement?: AuthorityEnforcementService; delegationService?: DelegationService }) => {
+        return new RbacService(
+          cradle.em,
+          cradle.cache ?? createRbacFallbackCache(),
+          cradle.authorityEnforcement ?? null,
+          cradle.delegationService ?? null,
+        )
       }).scoped().proxy(),
     })
   } else {
