@@ -7,6 +7,63 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-08-11 — G3: authority you can lend, and take back
+
+The platform had only permanent grants. Covering somebody's approvals for a
+fortnight meant granting a role and remembering to remove it — and the grant
+nobody removes is how permissions accumulate until nobody can say why anyone has
+what they have. A delegation is that same grant with an end date and a reason
+attached.
+
+**All three findings I recorded before starting held up**, which is the strongest
+argument yet for answering the design questions first. Each one changed the build:
+
+A delegation had to **grant**, not only cap. The obvious reading — fill in
+`delegationCeiling` and stop — fails because the route guard refuses on RBAC
+before the resolver ever runs. A cap-only delegation could reduce authority
+somebody already had and never lend any.
+
+Which meant touching the grant path, the one layer built so nothing turns a
+`false` into a `true`. That guarantee turns out to be about the **resolver**, not
+about RBAC: RBAC has always had two grant sources, so a third that expires is
+consistent with its design. The rule that had to survive — *the authority resolver
+never widens* — does. The resolver still runs afterwards and still refuses; a
+delegation gets somebody past the grant, not past everything.
+
+And the caching problem was real. `loadAcl` caches for five minutes, and a revoke
+that takes effect "within five minutes" is not a revoke. So delegations are a live
+query — but only after the ordinary ACL has already said no, which is the request
+that was about to return 403 anyway. The hot path never pays.
+
+**The negative tests are the ones that matter here.** Every required capability
+needs its own delegation, because returning true when one of three matched would
+be the widest bug available in this codebase. A delegation does not rescue an act
+the resolver refuses. It is not consulted when the actor already holds the
+capability. And it is looked up by *principal id*, not by the subject string —
+`api_key:abc` would never match a row written against `abc`, and the delegation
+would silently do nothing.
+
+**Two rules are judgements rather than mechanics**, so they are written down where
+the work is. The **latest expiry wins** when several apply, because
+newest-created would let a hasty short delegation silently shorten an agreed long
+one. And **ninety days is the maximum**, because a delegation with no practical
+end is a role grant wearing a costume — it can be re-granted, and that is the
+point: re-granting is a decision somebody makes; letting one run for a year is a
+decision nobody makes.
+
+**Checkpointed before touching the grant path**, and verified the dump was
+readable before starting rather than trusting that it existed. Verified afterwards
+against real Postgres too: the check constraint rejects a backwards window, and
+`api_key:abc-123` stores as a grantee — which is exactly why those columns are
+`text` and not `uuid`.
+
+No page. That is now item 16 alongside G5's, rather than a sentence in a commit
+message.
+
+Gate: 22/22, **12,768 tests**.
+
+---
+
 ## 2026-08-11 — G5: the first ceiling that is not about the actor
 
 Every other input to the resolver asks *who is acting*. This one asks what is

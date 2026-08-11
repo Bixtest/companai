@@ -29,36 +29,98 @@ and is argued below; anything can be pulled forward on request.
 | | **Wave 1 — small, independent, closes three batches** | | |
 | | **Wave 2 — the resolver actually receives its inputs** | | |
 | **1** | **Task grade needs a *matter* to come from — blocked on G4** | **Investigated 2026-08-11 and reclassified, not done.** The audit was right that `decideFor` passes `context: {}` — but there is nothing to pass. A grade describes *the work*, not the act: G4 is "legal proceedings, board/M&A, security incidents", a property of the matter. The platform has no matter until project/case context arrives with **G4 (item 8)**, so the only honest grade source today is the data-class floor, which already applies. Wiring a seam nothing can fill would be the claimed-and-absent control this sprint exists to remove. **Precondition: G4.** A real defect found while investigating is fixed below | M |
-| **2** | **G3 — temporary delegations** | Supplies `delegationCeiling`. Open Mercato has none at all. The table plus the resolution logic, re-pointed at **principals** rather than users so an AI worker can hold one — which is why R1 came first. **Three design findings recorded 2026-08-11, see below — one of them is a correctness requirement** | L |
-| **3** | **Trust model T0–T4** | Supplies `trustCeiling`. Until it exists every machine resolves as untrusted, capping any act with an effect at approve-first. That is the safe direction, and it is a placeholder standing where planning 02 §5 specifies earned trust. **Was never a backlog item** despite being referenced four times across `knowledge/` | L |
-| **4** | **Charter grants** | Named in the Phase G exit gate as a required resolver input. **Not in `ResolveInput` at all** — no type, no field, no code; it appears only in prose. Found 2026-08-10 | M |
-| **5** | **Budget as a resolver input** | The other exit-gate input that exists in no form whatsoever. An actor's remaining spend or quota, bounding what it may do | M |
-| **6** | **Tenant policy ceiling** | `context.policyCeiling` is read by the resolver and set by **nothing** — zero assignments outside the type definition. A tenant wanting a blanket floor has no way to express one | M |
-| **7** | **G4 — project permission overlays** | Scoping stops at the department without it. Project, case and engagement contexts are central to the SRS (FR-550, FR-560). Take the terminal-deny semantics; leave P1's `deny:`/`!` string DSL | L |
-| **8** | **G1 — re-scope, then decide** | R5 already delivers the explanation trace, binding rule, obligations and alternatives. What remains is Platform 1's *shape* — ordered sources, deny-wins, a `terminal` flag — against our deliberately different one where everything is a ceiling and the answer is the minimum. **Last in the wave**: items 4–12 may answer it, and it is a design decision currently sized as a port | ? |
+| **2** | **Trust model T0–T4** | Supplies `trustCeiling`. Until it exists every machine resolves as untrusted, capping any act with an effect at approve-first. That is the safe direction, and it is a placeholder standing where planning 02 §5 specifies earned trust. **Was never a backlog item** despite being referenced four times across `knowledge/` | L |
+| **3** | **Charter grants** | Named in the Phase G exit gate as a required resolver input. **Not in `ResolveInput` at all** — no type, no field, no code; it appears only in prose. Found 2026-08-10 | M |
+| **4** | **Budget as a resolver input** | The other exit-gate input that exists in no form whatsoever. An actor's remaining spend or quota, bounding what it may do | M |
+| **5** | **Tenant policy ceiling** | `context.policyCeiling` is read by the resolver and set by **nothing** — zero assignments outside the type definition. A tenant wanting a blanket floor has no way to express one | M |
+| **6** | **G4 — project permission overlays** | Scoping stops at the department without it. Project, case and engagement contexts are central to the SRS (FR-550, FR-560). Take the terminal-deny semantics; leave P1's `deny:`/`!` string DSL | L |
+| **7** | **G1 — re-scope, then decide** | R5 already delivers the explanation trace, binding rule, obligations and alternatives. What remains is Platform 1's *shape* — ordered sources, deny-wins, a `terminal` flag — against our deliberately different one where everything is a ceiling and the answer is the minimum. **Last in the wave**: items 4–12 may answer it, and it is a design decision currently sized as a port | ? |
 | | **Wave 3 — the human surface** | | |
-| **9** | **U7 — the journal cannot tell a machine from a human** | `action_logs.actor_user_id` stores an API key's UUID with no record that it was a key, so a key acting and a person acting are indistinguishable in the record. That is invariant **I2**, and telling them apart is the premise of the product. Open since 2026-08-09, **never on the backlog** | M |
-| **10** | **Bulk approval, with a diff** | The diff is the whole feature: approving several acts without showing how they differ is a button for approving things unread, and it would be the most-used control on the page. Owner's decision 2026-08-10 — on by default, on/off per tenant, diff never optional | M |
-| **11** | **Cover for someone away, and standing approvals** | Both need a name — a deputy, a grantor — so both are inherently settings. Standing approvals need a mandatory expiry and a visible count of what they let through: the most useful control on the page and the most dangerous. Planning 02 §7.1–7.2 | L |
-| **12** | **Per-tenant approval expiry** | Decided with the owner on 2026-08-10 and recorded in the closure table as unbuilt, but it never became a numbered item. 24h is enforced in `PendingActService`; the knob is not there | S |
+| **8** | **U7 — the journal cannot tell a machine from a human** | `action_logs.actor_user_id` stores an API key's UUID with no record that it was a key, so a key acting and a person acting are indistinguishable in the record. That is invariant **I2**, and telling them apart is the premise of the product. Open since 2026-08-09, **never on the backlog** | M |
+| **9** | **Bulk approval, with a diff** | The diff is the whole feature: approving several acts without showing how they differ is a button for approving things unread, and it would be the most-used control on the page. Owner's decision 2026-08-10 — on by default, on/off per tenant, diff never optional | M |
+| **10** | **Cover for someone away, and standing approvals** | Both need a name — a deputy, a grantor — so both are inherently settings. Standing approvals need a mandatory expiry and a visible count of what they let through: the most useful control on the page and the most dangerous. Planning 02 §7.1–7.2 | L |
+| **11** | **Per-tenant approval expiry** | Decided with the owner on 2026-08-10 and recorded in the closure table as unbuilt, but it never became a numbered item. 24h is enforced in `PendingActService`; the knob is not there | S |
 | | **Wave 4 — the record can be trusted** | | |
-| **13** | **Ledger correlation and causation are carried but never propagated** | `correlation_id` / `causation_id` are recorded when a caller supplies them, and nothing supplies them. Until a correlation id is threaded through a request, the chain records events that cannot be assembled into a trace — the feature the ledger exists to enable | M |
-| **14** | **Ledger Tier 2 — periodic signed checkpoints** | R3's chain is verifiable only by us. A signed root in append-only storage is what lets a customer's auditor verify a range without our cooperation, and it is a stated commercial property of the design. Needs key management | L |
+| **12** | **Ledger correlation and causation are carried but never propagated** | `correlation_id` / `causation_id` are recorded when a caller supplies them, and nothing supplies them. Until a correlation id is threaded through a request, the chain records events that cannot be assembled into a trace — the feature the ledger exists to enable | M |
+| **13** | **Ledger Tier 2 — periodic signed checkpoints** | R3's chain is verifiable only by us. A signed root in append-only storage is what lets a customer's auditor verify a range without our cooperation, and it is a stated commercial property of the design. Needs key management | L |
 | | **Wave 5 — close the books before the server** | | |
-| **15** | **U4 — verify a superadmin can delete a currency** | The route now derives `organizationId` from `ctx.selectedOrganizationId ?? ctx.auth?.orgId ?? undefined`. For a superadmin with no organization selected that is still `undefined`, which is the original bug's shape. **Verify against the running instance before calling it fixed** | S |
-| **16** | **Verify `messages.manage` and `messages.actions` against real routes** | The only two of 113 capability descriptors classified from their titles rather than from code, because no route enforces them. Conservative today, which is the safe direction but not the accurate one | S |
+| **14** | **U4 — verify a superadmin can delete a currency** | The route now derives `organizationId` from `ctx.selectedOrganizationId ?? ctx.auth?.orgId ?? undefined`. For a superadmin with no organization selected that is still `undefined`, which is the original bug's shape. **Verify against the running instance before calling it fixed** | S |
+| **15** | **Verify `messages.manage` and `messages.actions` against real routes** | The only two of 113 capability descriptors classified from their titles rather than from code, because no route enforces them. Conservative today, which is the safe direction but not the accurate one | S |
+| **16** | **Screens for delegations and record locks** | Both G3 and G5 ship a working API and no page. Locking belongs on each record's own screen (per-entity work); delegations want one screen — who lent what to whom, until when, and a revoke button. Until then both are operator actions | M |
 | **17** | **A lock control on each record's screen** | G5 ships the ceiling and an API to set it, so a lock can be applied and binds. What it does not ship is a way to apply one without calling the API — the natural home is a control on each record's own screen, which is per-entity work rather than one screen. Until then, locking is an operator action | M |
-| **18** | **Have the Arabic reviewed by a native speaker** | `ar` ships as a real locale so the direction policy is testable rather than theoretical, and the `auth` dictionary I wrote is unreviewed. Untranslated keys fall back to English and are harmless; *wrong* translations are not. Blocks nothing until a customer sees Arabic | S |
-| **25** | **Phase G exit gate — the assertions and the changelog** | The gate requires a test proving the resolver honours delegations, project overlays and lock states *each*, plus `planning/CHANGELOG.md` recording what was grafted and from where. Neither is tracked anywhere | S |
-| **19** | **Verify the deployment guide on a real Plesk VPS** | `references/deployment.md` is written from the repository and the working local instance, and its build/migrate/start sequence is the one used daily — but **the Plesk steps have never been executed on a Plesk server**. Somebody has to do the first run and correct it. Cheapest before hosting, not after | M |
-| **20** | **Production hardening the guide names and does not solve** | Each is listed under *what this guide does not cover*: no zero-downtime deploy (`systemctl restart` drops connections), no backup schedule or monitoring, secrets in a plain `.env` with no rotation, no shared attachment storage for a second instance. None blocks a single-VPS deployment; all of them block a second one | L |
-| **21** | **Close out U5, and prune dependencies, before the server** | U5 still reads "two causes found and fixed, one unexplained" — two more were found and fixed on 2026-08-10, so the record is stale. And parked modules carry CVEs a scanner will flag the moment this is hosted: "pre-production, not now" expires when we deploy | M |
+| **17** | **Have the Arabic reviewed by a native speaker** | `ar` ships as a real locale so the direction policy is testable rather than theoretical, and the `auth` dictionary I wrote is unreviewed. Untranslated keys fall back to English and are harmless; *wrong* translations are not. Blocks nothing until a customer sees Arabic | S |
+| **24** | **Phase G exit gate — the assertions and the changelog** | The gate requires a test proving the resolver honours delegations, project overlays and lock states *each*, plus `planning/CHANGELOG.md` recording what was grafted and from where. Neither is tracked anywhere | S |
+| **18** | **Verify the deployment guide on a real Plesk VPS** | `references/deployment.md` is written from the repository and the working local instance, and its build/migrate/start sequence is the one used daily — but **the Plesk steps have never been executed on a Plesk server**. Somebody has to do the first run and correct it. Cheapest before hosting, not after | M |
+| **19** | **Production hardening the guide names and does not solve** | Each is listed under *what this guide does not cover*: no zero-downtime deploy (`systemctl restart` drops connections), no backup schedule or monitoring, secrets in a plain `.env` with no rotation, no shared attachment storage for a second instance. None blocks a single-VPS deployment; all of them block a second one | L |
+| **20** | **Close out U5, and prune dependencies, before the server** | U5 still reads "two causes found and fixed, one unexplained" — two more were found and fixed on 2026-08-10, so the record is stale. And parked modules carry CVEs a scanner will flag the moment this is hosted: "pre-production, not now" expires when we deploy | M |
 | | **Deferred by decision — not in this sprint** | | |
-| **22** | `domain_mappings` extraction | Per-tenant custom domains. Wanted, but nothing needs it yet | M |
-| **23** | Orphaned-table decision (~127 tables) | Leave them; they are inert. Revisit only as a deliberate backed-up migration | S |
-| **24** | Phase K checkpoint | The scheduled date that stops "we'll clean up later" being a lie | S |
+| **21** | `domain_mappings` extraction | Per-tenant custom domains. Wanted, but nothing needs it yet | M |
+| **22** | Orphaned-table decision (~127 tables) | Leave them; they are inert. Revisit only as a deliberate backed-up migration | S |
+| **23** | Phase K checkpoint | The scheduled date that stops "we'll clean up later" being a lie | S |
 
-### G3 — three findings before the batch starts
+### Closed 2026-08-11 — G3, authority lent for a while
+
+The platform had no way to do this. Role and user ACLs are both permanent until
+somebody edits them, so covering a colleague for a fortnight meant granting a role
+and remembering to remove it. Nobody remembers, and the grant becomes permanent by
+neglect — which is the failure this closes.
+
+**Both ends are principals, not users**, which is why R1 came first. Verified in
+the database rather than assumed: `api_key:abc-123` stores as a grantee, which is
+unrepresentable if the columns say `uuid`.
+
+**All three findings recorded before the batch held up**, and each one shaped the
+result:
+
+1. **A delegation grants, it does not only cap.** The route guard refuses on RBAC
+   before the resolver runs, so a cap-only delegation could have reduced authority
+   and never lent any.
+2. **The grant belongs in `decideAllFeatures`, never in `refusedByAuthority`.**
+   RBAC has always had two grant sources; a third that expires is consistent with
+   its design. The authority resolver still narrows and still refuses afterwards —
+   a delegation gets somebody past the grant, not past everything.
+3. **Delegations are never cached.** `loadAcl` caches for five minutes, and a
+   revoke that takes effect "within five minutes" is not a revoke. They are a live
+   query, and the cost is bounded by *where* it is asked: only after the ordinary
+   ACL has already said no — the path that was about to return 403 anyway. A
+   permission somebody genuinely holds never pays for it.
+
+**Rules that are decisions rather than mechanics:**
+
+- **The latest expiry wins** when several apply. Newest-created would let a hasty
+  short delegation silently shorten an agreed long one; most-permissive would make
+  the answer depend on a ceiling rather than on the grant.
+- **Ninety days maximum.** A delegation with no practical end is a role grant
+  wearing a costume. It can be re-granted — that is the point: re-granting is a
+  decision somebody makes, letting one run for a year is a decision nobody makes.
+- **`reason` and `expires_at` are `not null`.** A delegation nobody explained
+  cannot be evaluated by whoever finds it.
+- **Expiry is exclusive.** "Until the 17th" has stopped granting when the 17th
+  arrives.
+- **A revoke beats an open window**, and re-revoking keeps the original timestamp:
+  when something stopped granting is a fact about the past.
+- **A stored ceiling is never used alone.** The grantor is resolved as themselves
+  and their gate caps the delegation, because a stored number goes stale the moment
+  the grantor's own authority changes — I4 again in a different costume.
+- **The grantor is always the caller**, never a request field. Accepting one would
+  let anybody lend authority they do not hold by naming somebody who does.
+
+**Verified against real Postgres**: the check constraint rejecting a backwards
+window with `23514`, and a machine principal id storing correctly.
+
+**Twenty-six tests**, and the ones worth naming are negative: every required
+capability needs its own delegation (granting because one of three matched would
+be the widest bug available here), a delegation does not rescue an act the resolver
+refuses, and it is not consulted at all when the actor already holds the
+capability.
+
+**What is deliberately not built: a page.** Delegations are an API
+(`/api/auth/authority/delegations`) guarded by `auth.delegations.manage`, which is
+itself not delegable — somebody who can delegate the power to delegate has created
+a chain nobody can see the end of. A screen is item 17's sibling and is listed
+below.
+
+### G3 — the three findings, kept for the reasoning
 
 Recorded now because they change the shape of the work, and one of them is a
 correctness requirement rather than a preference.

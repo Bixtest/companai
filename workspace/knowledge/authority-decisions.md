@@ -75,7 +75,7 @@ usually changes nothing.
 | `compensation-available` | Recorded when the act is compensatable, so the explanation says so |
 | `trust-ceiling` / `untrusted-machine` | What the actor has earned — see below |
 | `invoker-ceiling` | **I4** — authority is carried, never amplified · ✅ **binds since 2026-08-11** |
-| `delegation-ceiling` | The cap on the delegation being acted under · ⚠️ **not supplied at runtime** |
+| `delegation-ceiling` | The cap on the delegation being acted under · ✅ **binds since 2026-08-11** |
 | `resource-state` | What the record's own state permits · ✅ **binds since 2026-08-11** |
 | `policy` | Tenant policy · ⚠️ **not supplied at runtime** |
 
@@ -84,6 +84,11 @@ usually changes nothing.
 > inputs still never arrive: `authorityEnforcementService.decideFor` sets no trust
 > and no policy ceiling, so those two rules are reachable today only through
 > `authority:explain`, where a human supplies them as a what-if.
+>
+> **`delegation-ceiling` binds since 2026-08-11**, and note what acting under a
+> delegation also does: it puts the actor under the effect-class matrix, which
+> otherwise bounds machines only. Borrowed authority is treated like a machine's,
+> deliberately.
 >
 > This is safe, because nothing anywhere *raises* a gate: an absent input can only
 > leave the answer more permissive than the design intends, never more permissive
