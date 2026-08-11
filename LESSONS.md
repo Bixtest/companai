@@ -1065,3 +1065,47 @@ Timing a walk took two. Both were faster than the work they redirected, and both
 turned a plan into a measurement. Related: [[L30]] — a reproduction you built
 yourself is a hypothesis, not evidence; this is its mirror, where the hypothesis
 arrived pre-built and carrying your own handwriting.
+
+---
+
+## L37 — The gate does not boot the application
+
+**What happened.** G3 added a dependency to `RbacService`. Typecheck passed, lint
+passed, **12,768 tests passed**, `build:packages` and `build:app` both succeeded.
+The server then refused to start:
+
+```text
+Failed to start local scheduler: Could not resolve 'delegations'.
+Resolution path: localSchedulerService -> rbacService -> delegations
+```
+
+The container runs in Awilix **CLASSIC** mode, and the default registration is
+`asClass(RbacService)`. CLASSIC reads the constructor's parameter *names* and
+resolves each one by name. I named the parameter `delegations`; the registration
+is `delegationService`. **In CLASSIC mode a parameter name is a dependency name**,
+so renaming a parameter renames a dependency — and nothing in the gate looks at
+that, because no test constructs a real container.
+
+**This is the second time this trap has bitten.** The first was a destructuring
+factory needing `.proxy()`, which produced `di-classic-proxy.test.ts`. The lesson
+was recorded and the guard was written — and it guarded the *other* half of the
+same trap, so this half went straight through it.
+
+**The wider point, which is the one worth keeping.** The gate proves the code
+agrees with itself. It does not prove the application starts. Type checking,
+linting and unit tests all operate on code in isolation; dependency injection,
+migrations against a real schema, and route registration only happen at boot. A
+green gate is evidence about the code, not about the system.
+
+**The rule.** *After any change to DI wiring, a service constructor, or module
+registration, start the server before saying it works.* It takes ninety seconds
+and it is the only thing that tests the wiring.
+
+**And the guard has to be watched failing.** I wrote
+`di-classic-constructor-names.test.ts`, ran it, and it passed — with the bug still
+in the tree. It passed again after a fix. It took **three** rounds of
+instrumenting before it caught anything: a doc comment inside the parameter list
+contained brackets, which threw off the bracket matcher, so the parser silently
+dropped every parameter after the third. A guard that has never been seen to fail
+is not a guard; it is a decoration that makes people confident. Related: [[L34]],
+where a mock made six tests assert nothing.

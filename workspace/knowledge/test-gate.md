@@ -16,7 +16,7 @@ the time and returns none of the confidence.
 |---|---|
 | Command | `yarn test` (Turbo fans out to each package's `test` script) |
 | Packages | 22 |
-| Tests | **12,677** (2026-08-11) |
+| Tests | **12,770** (2026-08-11) |
 | Wall time | **~6 minutes** on an idle machine |
 | Runner | Jest, `jest-environment-node` by default; `@jest-environment jsdom` per file for React |
 
@@ -120,6 +120,30 @@ drive the update themselves.
 **Note what makes this one nastier than traps 1 and 2:** the failing assertion is
 in the file you are looking at, the two lines above it pass, and the product is
 correct. Nothing points at load until you notice it only fails in company.
+
+## What the gate does not check
+
+**It never starts the application.** Every step operates on code in isolation:
+type checking, linting and unit tests all pass on a tree whose dependency
+injection is broken, and both build steps succeed too. Three things only happen at
+boot:
+
+| Not checked by the gate | Fails at |
+|---|---|
+| DI wiring — whether every dependency actually resolves | `yarn start` |
+| Migrations against the real schema | `yarn db:migrate` |
+| Route registration and page metadata | first request |
+
+On 2026-08-11 a constructor parameter named `delegations` against a registration
+named `delegationService` passed 12,768 tests and could not boot ([[L37]]). The
+container runs in Awilix **CLASSIC** mode, where **a constructor parameter name is
+a dependency name**.
+
+**So: after any change to DI, a service constructor, or module registration, start
+the server.** Ninety seconds, and it is the only thing that tests the wiring.
+`packages/core/src/__tests__/di-classic-constructor-names.test.ts` now catches the
+common shape of it statically, but a static guard cannot see registrations made in
+other packages — booting can.
 
 ## Diagnosing a red gate
 

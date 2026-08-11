@@ -108,6 +108,17 @@ result:
 **Verified against real Postgres**: the check constraint rejecting a backwards
 window with `23514`, and a machine principal id storing correctly.
 
+**And it did not boot.** The gate was green — typecheck, lint, 12,768 tests, both
+builds — and the server refused to start: `Could not resolve 'delegations'`. The
+container runs in Awilix CLASSIC mode, where a constructor parameter name *is* a
+dependency name, and the new parameter was called `delegations` against a
+registration called `delegationService`. Renamed, and
+`di-classic-constructor-names.test.ts` now catches the shape — after three rounds
+of instrumenting, because the first two versions passed with the bug in the tree
+(a doc comment inside the parameter list broke the bracket matcher). Recorded as
+[[L37]]: **the gate proves the code agrees with itself, not that the application
+starts.**
+
 **Twenty-six tests**, and the ones worth naming are negative: every required
 capability needs its own delegation (granting because one of three matched would
 be the widest bug available here), a delegation does not rescue an act the resolver

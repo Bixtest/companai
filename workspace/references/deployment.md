@@ -314,7 +314,10 @@ curl -s -H 'Accept-Language: ar' https://app.example.com/login | grep -oE '<html
 Then sign in at `https://app.example.com/backend` with the admin created in §7,
 and confirm **Settings → Authority → Approvals** loads.
 
-`journalctl -u mercato -f` is where startup errors go.
+`journalctl -u mercato -f` is where startup errors go — and it is worth watching
+on the first boot after any deploy, because dependency-injection failures surface
+**only** at startup. A build can be entirely green and the service still refuse to
+start ([[L37]]).
 
 ## 11. Redeploying a change
 

@@ -60,7 +60,38 @@ against real Postgres too: the check constraint rejects a backwards window, and
 No page. That is now item 16 alongside G5's, rather than a sentence in a commit
 message.
 
-Gate: 22/22, **12,768 tests**.
+**And then it did not boot.** The gate was green — typecheck, lint, 12,768 tests,
+both builds — and `yarn start` died with `Could not resolve 'delegations'`.
+
+The container runs in Awilix CLASSIC mode, and the default registration is
+`asClass(RbacService)`. CLASSIC reads constructor parameter *names* and resolves
+each by name. I called the parameter `delegations`; the registration is
+`delegationService`. **In CLASSIC mode a parameter name is a dependency name**, so
+I had renamed a dependency without meaning to.
+
+This is the second time this trap has bitten, and the first time produced a guard
+— `di-classic-proxy.test.ts` — which guards the *destructuring factory* half. This
+was the `asClass` half, and it went straight through.
+
+**Writing the new guard took three attempts, and the failures are the lesson.** I
+wrote it, ran it, and it passed — with the bug still in the tree. Fixed a bracket
+matcher, ran it, passed again. It took instrumenting the thing by hand to find
+that a doc comment inside the parameter list contained brackets, which closed the
+parameter list early and silently dropped every parameter after the third. Only
+then did it fail, and name the offender exactly.
+
+A guard nobody has watched fail is not a guard. It is a decoration that makes
+people confident — the same shape as [[L34]], where a mock made six tests assert
+nothing about the SQL they were supposedly covering.
+
+**The wider finding is [[L37]]: the gate does not boot the application.** Type
+checking, linting and unit tests all operate on code in isolation. Dependency
+injection, migrations against a real schema and route registration happen only at
+startup. A green gate is evidence about the code, not about the system — and after
+any change to DI, a service constructor or module registration, the only thing
+that tests the wiring is starting the server.
+
+Gate: 22/22, **12,770 tests**, and the server boots.
 
 ---
 
