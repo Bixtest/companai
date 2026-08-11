@@ -73,17 +73,17 @@ usually changes nothing.
 | `effect-class-floor` | The R4 matrix: what this class of act permits at this task grade |
 | `irreversible-cap` | **I8** — an act nobody can undo is never decided after it happens. Caps at `A2` |
 | `compensation-available` | Recorded when the act is compensatable, so the explanation says so |
-| `trust-ceiling` / `untrusted-machine` | What the actor has earned — see below |
+| `trust-ceiling` / `untrusted-machine` | What the actor has earned · ✅ **binds since 2026-08-11** — see [trust.md](trust.md) |
 | `invoker-ceiling` | **I4** — authority is carried, never amplified · ✅ **binds since 2026-08-11** |
 | `delegation-ceiling` | The cap on the delegation being acted under · ✅ **binds since 2026-08-11** |
 | `resource-state` | What the record's own state permits · ✅ **binds since 2026-08-11** |
 | `policy` | Tenant policy · ⚠️ **not supplied at runtime** |
 
 > **Read the warnings literally.** Every rule above is implemented and tested in
-> `resolveDecision`, and every one of them binds *when its input arrives*. Two
-> inputs still never arrive: `authorityEnforcementService.decideFor` sets no trust
-> and no policy ceiling, so those two rules are reachable today only through
-> `authority:explain`, where a human supplies them as a what-if.
+> `resolveDecision`, and every one of them binds *when its input arrives*. **One
+> input still never arrives**: `authorityEnforcementService.decideFor` sets no
+> tenant policy ceiling, so that rule is reachable today only through
+> `authority:explain`, where a human supplies it as a what-if.
 >
 > **`delegation-ceiling` binds since 2026-08-11**, and note what acting under a
 > delegation also does: it puts the actor under the effect-class matrix, which

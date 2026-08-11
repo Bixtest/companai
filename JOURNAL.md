@@ -7,6 +7,57 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-08-11 — The trust model, and the gaps it refuses to hide
+
+This is the only input to the resolver that **widens**. Every other ceiling can
+only take autonomy away, which makes them safe whatever they contain. Trust lifts
+the cap that otherwise holds every machine at approve-first, so it is safe for a
+different reason entirely: promotion is hard, demotion is easy.
+
+**The specification's first line is the whole constraint** — *"trust is computed
+evidence, not a setting someone types"* — and auditing it against this platform
+found only **two of the five** promotion criteria computable. There is no incident
+model, no evaluation suites, no charters.
+
+That made the scope a genuine product decision rather than a sequencing one, so I
+asked rather than assumed: shipping a partial control here does not point in the
+safe direction, which is the opposite of every other gap in this sprint. The
+answer was **gated promotion** — refuse on what can be checked, and carry what
+cannot.
+
+**So a promotion records its own gaps.** Three "not verified" notes go onto the
+grant *and* into the audit trail. A gap in a design document is one nobody reads
+again; a gap on the record is one whoever reads it later has to weigh. And it is
+why a human approval is still required: the evidence gates the decision, it does
+not make it.
+
+**Three places where the failure direction was the whole design.** A missing row
+means `T0`. An unreadable tier parses to `T0` — this is the one field in the
+system where a parsing failure could *grant* something, so it fails to the bottom
+of the scale rather than to a middling default. And `T0` supplies no ceiling at
+all, because it says exactly what the untrusted-machine rule already says, and
+replacing an explanation with a code that means the same thing is a loss.
+
+**Demotion runs on reversal, not on a schedule.** A sweep would leave a worker at
+its old tier for however long the interval is, and that window is precisely what
+the specification is trying to close.
+
+**One mistake worth recording.** I wired the trust reader into the DI registration
+in the wrong position — the constructor takes six positional readers, and I put
+trust where delegations belongs. It type-checked perfectly, because both are
+objects with one async method. Caught by reading the argument list against the
+constructor rather than by any tool, and the call site now carries a comment
+naming the order. Positional readers that all look alike are a trap the compiler
+cannot see.
+
+**And I booted the server before calling it done**, which [[L37]] exists to
+enforce. All three authority APIs resolve and are guarded, against a 404 control
+that makes those 401s mean something.
+
+Gate: 22/22, **12,802 tests**.
+
+---
+
 ## 2026-08-11 — G3: authority you can lend, and take back
 
 The platform had only permanent grants. Covering somebody's approvals for a

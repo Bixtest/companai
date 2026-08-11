@@ -42,6 +42,7 @@ mechanism it stands on.
 | [i18n-and-direction.md](i18n-and-direction.md) | *"Where do strings live, and how do I add a language?"* — including right-to-left |
 | [record-locks.md](record-locks.md) | *"How do I freeze a record so nobody can change it?"* — and why reads still work |
 | [delegations.md](delegations.md) | *"How do I let somebody cover for me for two weeks?"* — lending authority with an end date |
+| [trust.md](trust.md) | *"How does an AI worker earn the right to act on its own?"* — and lose it |
 | [overrides.md](overrides.md) | *"How do I change a module's behaviour without forking it?"* |
 
 Read the first group in order and you understand the product. Read the second
@@ -96,6 +97,7 @@ someone's model of it.
 | [i18n-and-direction.md](i18n-and-direction.md) | Per-module dictionaries, adding a locale, and deciding text direction |
 | [record-locks.md](record-locks.md) | Freezing and restricting a record, and the one ceiling that is about the record rather than the actor |
 | [delegations.md](delegations.md) | Temporary grants: the two layers they act on, and why they are never cached |
+| [trust.md](trust.md) | Earned autonomy T0–T4, the evidence behind it, and the asymmetry that makes it safe |
 
 ## Template
 
