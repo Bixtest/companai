@@ -92,13 +92,14 @@ Not omissions — decisions, each with a backlog entry:
 - **A trust model.** Planning describes tiers T0–T4 earned from evidence. Until
   it exists, every machine resolves as untrusted, which caps acts with an effect
   at approve-first. That is a placeholder pointing in the safe direction.
-- **Six of the resolver's ten inputs.** Task grade, trust, delegation, invoker
-  authority, record lock state and tenant policy are all read by the resolver and
-  supplied by nothing at runtime; charter grants and budget are not modelled at
-  all. Audited 2026-08-10 — the full table is in `PROGRESS.md`, and the wiring is
-  backlog items 4–11. **I4 is the one to know about**: we state that authority is
-  carried and never amplified, and today nothing caps a worker by the authority of
-  whoever invoked it.
+- **Five of the resolver's ten inputs.** Task grade, trust, delegation, record
+  lock state and tenant policy are all read by the resolver and supplied by
+  nothing at runtime; charter grants and budget are not modelled at all. Audited
+  2026-08-10 — the full table is in `PROGRESS.md`, and the wiring is backlog items
+  1–10. Each absence can only make the answer *more* permissive than the design
+  intends, never more permissive than the RBAC check that already ran.
+  **Invoker authority (I4) was the sixth and now binds** — an API key cannot
+  exceed the person it belongs to.
 - ~~**The approvals inbox.**~~ **Built 2026-08-10** —
   `/backend/authority/approvals`, in Settings → Authority. See
   [approvals-queue.md](approvals-queue.md). Bulk approval with a diff, deputy

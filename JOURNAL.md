@@ -7,6 +7,55 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-08-11 — I4 stops being a claim
+
+*Authority is carried, never amplified.* The platform has said that since the
+resolver landed. The rule was implemented, tested, and listed in a table of
+resolver rules — and nothing supplied its input outside a CLI what-if flag. It was
+the one finding from yesterday's audit that was not merely incomplete but
+**wrong**: a control named in documentation and absent from the request path.
+
+The concrete hole: an API key passes its own RBAC check, the resolver sees a
+`service` principal with no invoker, and the person who owns the key is never
+consulted. So a key could do what its owner could not.
+
+R1 had already built the piece that was missing — `onBehalfOfUserId` on the
+principal. The wiring resolves that person **as themselves**: their own grant,
+their own position in the organization graph, the same capability. Whatever gate
+that produces becomes a ceiling. If they may not perform the act, the answer is
+`A0` and it is refused.
+
+**The dependency had to go in backwards**, which was the only real design problem.
+`rbacService` is constructed *with* `authorityEnforcement`, so injecting RBAC into
+the enforcement service closes a cycle. It takes a reader instead — the same shape
+as the graph and module-config readers already there — and DI resolves
+`rbacService` from the cradle *inside the call*, which is late enough to break it.
+
+**Absence is still not a refusal.** With no reader registered, the check is
+skipped with a warning rather than answering `A0`. That is the position this
+service already takes when the graph cannot be read, and the alternative invents a
+denial nobody decided.
+
+**And a stale comment went with it.** The class doc claimed *"Only `A0` is
+enforced — `A1` to `A4` attach obligations and there is no machinery yet"*. True
+when written, false since the command gate landed on 2026-08-10. A stale comment
+about a control is worse than none: it reads as a limitation and gets designed
+around.
+
+The two tests I would most easily have skipped are the ones worth having — that
+this never *raises* a gate, and that a person acting as themselves is not capped
+by their own decision (which would apply every rule twice and put a confusing
+second reason in every explanation).
+
+Five of the resolver's ten inputs are still unsupplied, and every one of them can
+only make an answer more permissive than the design intends — never more permissive
+than the RBAC check that already said yes. They are backlog items 1–10. This one
+was different because it was claimed.
+
+Gate: 22/22, **12,716 tests**.
+
+---
+
 ## 2026-08-11 — A deployment guide, and what it is honest about
 
 The owner asked for handover documentation good enough that somebody who has
