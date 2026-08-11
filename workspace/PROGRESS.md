@@ -31,7 +31,7 @@ and is argued below; anything can be pulled forward on request.
 | **1** | **Task grade needs a *matter* to come from — blocked on G4** | **Investigated 2026-08-11 and reclassified, not done.** The audit was right that `decideFor` passes `context: {}` — but there is nothing to pass. A grade describes *the work*, not the act: G4 is "legal proceedings, board/M&A, security incidents", a property of the matter. The platform has no matter until project/case context arrives with **G4 (item 8)**, so the only honest grade source today is the data-class floor, which already applies. Wiring a seam nothing can fill would be the claimed-and-absent control this sprint exists to remove. **Precondition: G4.** A real defect found while investigating is fixed below | M |
 | **2** | **Charter grants — blocked on workers and the compiler** | **Investigated 2026-08-11, see below.** A charter is a worker's grant set, and planning 03 is explicit that runtime reads a *compiled* set that is **never hand-edited**. Two preconditions are missing: `ai_worker` exists as a type but **nothing ever creates one** — `derivePrincipal` yields only `human` or `service` — and the Charter compiler is Phase K. **Preconditions: an AI worker entity, and the Charter compiler** | L |
 | **3** | **Budget as a resolver input — blocked on spend tracking** | **Investigated 2026-08-11.** `budget.state_ceiling(actor, context)` needs three things this platform has none of: a notion of what an act costs, accumulated spend per actor, and a limit. Nothing tracks spend or quota anywhere. **Precondition: a metering model** | L |
-| **4** | **G4 — project permission overlays** | Scoping stops at the department without it. Project, case and engagement contexts are central to the SRS (FR-550, FR-560). Take the terminal-deny semantics; leave P1's `deny:`/`!` string DSL | L |
+| **4** | **G4 — project permission overlays** | Scoping stops at the department without it. Project, case and engagement contexts are central to the SRS (FR-550, FR-560). Take the terminal-deny semantics; leave P1's `deny:`/`!` string DSL. **Design decided 2026-08-11, see below — it also unblocks item 1** | L |
 | **5** | **G1 — re-scope, then decide** | R5 already delivers the explanation trace, binding rule, obligations and alternatives. What remains is Platform 1's *shape* — ordered sources, deny-wins, a `terminal` flag — against our deliberately different one where everything is a ceiling and the answer is the minimum. **Last in the wave**: items 4–12 may answer it, and it is a design decision currently sized as a port | ? |
 | | **Wave 3 — the human surface** | | |
 | **6** | **U7 — the journal cannot tell a machine from a human** | `action_logs.actor_user_id` stores an API key's UUID with no record that it was a key, so a key acting and a person acting are indistinguishable in the record. That is invariant **I2**, and telling them apart is the premise of the product. Open since 2026-08-09, **never on the backlog** | M |
@@ -55,6 +55,34 @@ and is argued below; anything can be pulled forward on request.
 | **19** | `domain_mappings` extraction | Per-tenant custom domains. Wanted, but nothing needs it yet | M |
 | **20** | Orphaned-table decision (~127 tables) | Leave them; they are inert. Revisit only as a deliberate backed-up migration | S |
 | **21** | Phase K checkpoint | The scheduled date that stops "we'll clean up later" being a lie | S |
+
+### G4 — how an act knows which project it is in
+
+**The question.** A project overlay only means something if the resolver can tell
+that *this act* is happening inside *that project*. Nothing in the platform says
+so: there is no project concept at all, the command bus carries a capability, and
+`selectedOrganizationId` is a different axis entirely.
+
+**The answer, and it follows G5's precedent.** A project holds **records**, and an
+act names a record through `payload.id`. So `project_records` maps a record into a
+project, and the gate — which already reads `payload.id` for record locks — gets
+the project for free. No new declaration across 117 commands, and one identifier
+serves both features.
+
+**What that buys beyond permissions.** A project is a *matter*, and a matter is
+where a **task grade** comes from. Item 1 was reclassified as blocked on G4 for
+exactly this reason: with a grade on the project, an act on that project's record
+resolves at that grade rather than at the `G1` baseline. G4 unblocks it rather
+than merely preceding it.
+
+**Terminal deny needs no special case.** P1 makes a project deny *end* evaluation
+rather than fall through. Here a deny is `A0`, and because every rule takes a
+minimum and nothing anywhere raises, `A0` already cannot be lifted by a later
+source. The semantics arrive from the invariant — no evaluation-order rule for
+anybody to remember.
+
+**Typed grants, not P1's `deny:` / `!` string DSL** — the graft says so, and a
+mini-language inside a string column is a parser nobody wrote a test for.
 
 ### Closed 2026-08-11 — tenant policy, and the resolver's last supplyable input
 
