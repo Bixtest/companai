@@ -1112,6 +1112,55 @@ where a mock made six tests assert nothing.
 
 ---
 
+## L43 — adding an enum value makes old conditionals silently partial
+
+**What happened.** Giving `ai_worker` a producer meant a new principal kind could
+finally appear at runtime. Every existing `kind === 'service'` check then became
+wrong — not syntactically, semantically. They all meant *"resolve this actor's
+permissions from its API key row"*, and there were suddenly **two** kinds that
+needed it.
+
+`RbacService` tested only for `service`, so an AI worker fell through to the
+**human** branch and put a prefixed subject into a uuid column:
+
+```text
+DriverException: invalid input syntax for type uuid:
+  "ai_worker:28c2b7f3-529e-4591-812c-c16bfcc1f738"
+```
+
+**Nothing caught it.** Every unit test passed. Typecheck passed — the comparison
+is valid TypeScript, it is just no longer complete. The bug existed only at the
+seam between a new enum value and old conditionals, and only surfaced when a real
+request hit a real database.
+
+**The rule.** When adding a value to a union that is switched on across a
+codebase, **grep for every comparison against its siblings before writing the
+producer**, and ask of each: *does this mean "is exactly X", or does it mean "is
+one of the kinds that behaves like X"?* The second is the common case and the
+dangerous one.
+
+```bash
+grep -rn "=== 'service'" --include=*.ts packages apps | grep -v node_modules
+```
+
+Three sites, one of which was a 500. Two minutes of grep against an hour of
+debugging.
+
+**Then replace the comparison with a named predicate**, so the next value added
+is a question somebody has to answer rather than a runtime surprise:
+
+```ts
+export function isApiKeyBackedKind(kind: PrincipalKind | null | undefined): boolean {
+  return kind === 'service' || kind === 'ai_worker'
+}
+```
+
+**And do not reach for the nearest existing predicate.** `isMachinePrincipal()`
+already existed and looked right — but it also covers `system`, the platform
+acting from a CLI with no key row at all. Using it would have compiled, passed,
+and failed differently later. The predicate has to answer the question the call
+site is actually asking.
+
 ## L42 — a roadmap entry is a claim about the past, not the present
 
 **What happened.** The roadmap listed **U7** — *"the journal cannot tell a machine

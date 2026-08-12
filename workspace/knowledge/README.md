@@ -42,6 +42,7 @@ mechanism it stands on.
 | [i18n-and-direction.md](i18n-and-direction.md) | *"Where do strings live, and how do I add a language?"* — including right-to-left |
 | [record-locks.md](record-locks.md) | *"How do I freeze a record so nobody can change it?"* — and why reads still work |
 | [delegations.md](delegations.md) | *"How do I let somebody cover for me for two weeks?"* — lending authority with an end date |
+| [ai-workers.md](ai-workers.md) | *"How does an AI employee get an identity the rules can bound?"* — the credential that makes a machine a machine |
 | [denials.md](denials.md) | *"How do I stop one person doing one thing?"* — without stripping their role and everything else with it |
 | [trust.md](trust.md) | *"How does an AI worker earn the right to act on its own?"* — and lose it |
 | [projects.md](projects.md) | *"How do I give a case or an engagement its own rules?"* — and where a task grade comes from |

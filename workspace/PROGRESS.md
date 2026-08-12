@@ -65,8 +65,8 @@ claim about the past, not the present. Verified 2026-08-12.
 | | Item | Verified state | Done |
 |---|---|---|---|
 | **14** | Correlation and causation ids | **Done 2026-08-12.** Correlation from the request container (one per request, by construction); causation parked on the runtime context under a **symbol**, so nothing arriving over HTTP can forge a causal chain. Both degrade to `null` rather than throwing — a missing id costs a trace, a throw would cost the write. 10 tests | ☑ |
-| **16** | Finish command → capability mapping | 30 of 56 live commands gated (54%). Open | ☐ |
-| **13** | Give `ai_worker` a producer | Only a type guard mentions the kind. **Nothing creates one.** Open | ☐ |
+| **16** | Finish command → capability mapping | **Done 2026-08-12. 54% → 98%** (55 of 56). Every capability referenced is one its module already declares — none invented. The one exception is the external-token path, documented in code, and a guard test fails if a new command arrives without a decision | ☑ |
+| **13** | Give `ai_worker` a producer | **Done 2026-08-12.** A credential marked `principal_kind = ai_worker` issues an `ai_worker:` subject. Verified live: the journal and the ledger both record `ai_worker` for a real act, with a correlation id. Found and fixed a 500 on the way — adding a kind made every `=== 'service'` check silently partial | ☑ |
 | **15** | Spend metering, then budget as a ceiling | The AI chat route tracks stream usage; nothing aggregates it, no ceiling reads it. Open | ☐ |
 | **19** | Phase G exit gate | Not started | ☐ |
 | **17** | Prune parked-module dependencies | Not started | ☐ |
