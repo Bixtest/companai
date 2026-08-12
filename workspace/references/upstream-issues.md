@@ -207,6 +207,76 @@ mismatch at creation with a message that says why. Done 2026-08-10.
 
 ---
 
+## U15 — a public endpoint that emailed the upstream vendor · **FIXED 2026-08-12** · severity **high**
+
+**Removed, not configured.** The whole feature is gone: the widget, the demo
+notice bar beside it (which linked to the supplier's GitHub), the public
+endpoint, its email template, their tests, and the seven orphaned translation
+keys in each of four locales.
+
+**Mirrored into `packages/create-app/template` in the same change**, which the
+repo requires and which mattered more than usual here — a template still
+scaffolding the widget would have put it back into every app generated from it.
+
+**`DEMO_MODE` now gates nothing in the app layer.** It survives where it means
+something else entirely: locking attachment partitions, and a branch in tenant
+setup. Those are separate behaviours and were left alone.
+
+**Found:** 2026-08-12, while removing the "Feedback" bubble the owner asked to
+delete. The bubble was the visible half; this is the other one.
+
+**What it is.** `POST /api/onboarding/demo-feedback` — the endpoint that bubble
+posts to.
+
+```ts
+export const metadata = { POST: { requireAuth: false, … } }   // public
+const adminEmail = process.env.ADMIN_EMAIL || 'piotr@catchthetornado.com'
+await sendEmail({ to: adminEmail, … })
+```
+
+Three facts together:
+
+1. **It is unauthenticated.** Anyone who can reach the host can call it.
+2. **It sends email**, so it is a spam and abuse vector as well as a data path.
+3. **Its default recipient is a named personal address at the upstream vendor.**
+   Whatever a user types into that box goes to a third party unless
+   `ADMIN_EMAIL` happens to be set.
+
+**Mitigations that exist**: the route applies `checkAuthRateLimit`, and our own
+`deployment.md` does list `ADMIN_EMAIL` among the variables to set. So a
+deployment following our guide does not mail the vendor. It is still a public
+email-sending endpoint, and the hardcoded fallback is still in the code.
+
+**Why it is not merely a white-label item.** A "Contact us" link that points at
+the supplier is embarrassing. An unauthenticated endpoint that emails an outside
+individual whatever somebody types is a different category, and it should not
+ship in a product whose entire premise is knowing who did what and where it
+went.
+
+**The fix is deletion, not configuration**, and the owner has already authorised
+removing this feature: the widget, the demo notice bar, the endpoint, its email
+template and their tests, mirrored into the `create-app` template in the same
+change so the two do not drift.
+
+---
+
+## U16 — our public legal pages name another company · severity **medium**
+
+**Found:** the same sweep.
+
+`packages/content/src/modules/content/frontend/privacy/page.tsx` and
+`terms/page.tsx` are **public frontend pages** and both tell the reader to
+contact `info@openmercato.com`.
+
+Legal pages are the one place a reader is entitled to assume the named party is
+the one they are dealing with. Ours currently name somebody else, which is worse
+than having no page: it is a statement about who is responsible for their data.
+
+Belongs to the white-label batch, but flagged here rather than only in
+`whitelabel.md` because it is a correctness problem, not a branding one.
+
+---
+
 ## O1 — a denial lifted from the CLI left no record · **FIXED 2026-08-12** · ours, not upstream · severity **high**
 
 **Fixed and verified live.** The audit write moved out of the API route and into

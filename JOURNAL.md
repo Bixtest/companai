@@ -7,6 +7,52 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-08-12 (night) — the bubble had a back end
+
+**The owner asked me to delete the "Feedback" bubble** that points at the
+upstream supplier. Following it to its back end is what made the task worth
+doing:
+
+```ts
+export const metadata = { POST: { requireAuth: false, … } }
+const adminEmail = process.env.ADMIN_EMAIL || '<a personal vendor address>'
+await sendEmail({ to: adminEmail, … })
+```
+
+**Unauthenticated, sends email, defaults to a named individual outside the
+organisation.** Anyone able to reach the host could make it send mail, and
+whatever a user typed went to a third party unless `ADMIN_EMAIL` was set.
+
+Honest about the mitigations: the route rate-limits, and our own
+`deployment.md` already lists `ADMIN_EMAIL`, so a deployment following our guide
+would not have mailed the vendor. It is still a public email-sending endpoint
+pointed outside the organisation, in a product whose premise is knowing where
+things went.
+
+**Removed rather than configured around** — widget, the demo notice bar beside it
+(which linked to the supplier's GitHub), endpoint, email template, tests, and 28
+orphaned translation keys across four locales. Mirrored into
+`packages/create-app/template` in the same change, which mattered more than the
+rule usually does: a template still scaffolding the widget would have put it back
+into every app generated from it.
+
+`DEMO_MODE` now gates nothing in the app layer. It survives where it means
+something genuinely different — locking attachment partitions, a branch in tenant
+setup — and those were left alone. **Deleting a flag is not the same as deleting
+a feature**, and conflating them would have changed two behaviours nobody asked
+about.
+
+**U16, found in the same sweep and not fixed:** our public `/privacy` and
+`/terms` pages tell readers to contact `info@openmercato.com`. That is a
+different category from a logo — legal pages are the one place a reader is
+entitled to assume the named party is who they are dealing with. It goes to the
+**top** of the white-label list rather than into the general pile.
+
+**Gate: 22/22 tasks, 12,907 tests, exit 0.** The drop from 12,910 is exactly the
+deleted demo-feedback tests.
+
+---
+
 ## 2026-08-12 (evening) — O1 fixed, and the platform gets a name
 
 **The session was interrupted mid-flight.** Nothing was lost: both repos were

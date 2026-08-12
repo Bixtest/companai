@@ -81,8 +81,10 @@ is quick and never decorative. It should feel calm and expensive.
 | CLI banner | `🧩 Open Mercato CLI` box, printed on every command | `packages/cli` |
 | Repo/dirs | `open-mercato-main/`, `starting-kit/` paths, `.mercato/` generated dir | Cosmetic but pervasive |
 | Env/config | `OM_*` env var prefix, `om_selected_org` cookie | Renaming cookies logs everybody out once |
-| Demo widget | *"Contact us"* feedback bubble | Gated by `DEMO_MODE`; see roadmap item 8 |
+| ~~Demo widget~~ | *"Contact us"* feedback bubble | **Removed 2026-08-12** — it was the visible half of U15, a public endpoint that emailed the vendor |
 | Docs site | `apps/docs` is upstream's documentation | Either replace or drop |
+| **Public legal pages** | `/privacy` and `/terms` tell readers to contact `info@openmercato.com` | **Do this first.** Legal pages are the one place a reader is entitled to assume the named party is who they are dealing with. Tracked as [U16](upstream-issues.md) |
+| Checkout example seeds | `ops@`, `donations@`, `events@open-mercato.com` in `packages/checkout/seed/examples.ts` | Parked module; harmless until unparked |
 | Default dashboard | Ships an **Example module** *Todos* widget — demo content on the admin start page | The `example` module is a demo module; consider parking it rather than hiding the widget |
 | Dashboard/browser title | Every backend page's tab reads `Open Mercato` | Highest-visibility single string |
 
