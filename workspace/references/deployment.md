@@ -173,8 +173,13 @@ cd /var/www/vhosts/example.com/app.example.com-src/workspace/starting-kit
 corepack yarn build:packages   # compile the packages
 corepack yarn generate         # build the module registry from those packages
 corepack yarn build:packages   # again -- generation can change what packages export
-corepack yarn build:app        # compile the Next app against the registry
+corepack yarn build:app --force  # compile the Next app against the registry
 ```
+
+**`--force` is not optional.** Turbo caches `build:app`, and its hash does not
+always pick up a change to `packages/*/dist` — so a plain `build:app` can report
+success and redeploy the previous bundle. A deploy that silently ships the last
+release is the worst kind, because everything looks fine ([[L38]]).
 
 `corepack yarn build` runs exactly that sequence if you prefer one command.
 
@@ -324,7 +329,7 @@ start ([[L37]]).
 ```bash
 git pull
 corepack yarn install --immutable
-corepack yarn build:packages && corepack yarn generate && corepack yarn build:packages && corepack yarn build:app
+corepack yarn build:packages && corepack yarn generate && corepack yarn build:packages && corepack yarn build:app --force
 corepack yarn db:migrate
 sudo systemctl restart mercato
 ```

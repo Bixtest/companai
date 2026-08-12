@@ -163,6 +163,26 @@ immediately afterwards, and passed again in a second full run — and the cause 
 did not capture is a flake you cannot fix, and it stays on the list of things that
 might still be there.
 
+## The build lies more often than the tests do
+
+`yarn test` runs from **source**, so a green gate is honest about the code.
+`yarn build:app` compiles against **built packages**, and Turbo will happily
+replay a cached bundle after `packages/*/dist` changed — reporting success while
+shipping nothing:
+
+```text
+Cached:   1 cached, 1 total     ← the app was not rebuilt
+```
+
+**So after changing any package, force it:**
+
+```bash
+corepack yarn build:packages && corepack yarn build:app --force
+```
+
+The tell is instrumentation that produces *no output whatsoever*. That is almost
+never a subtle bug — it means the code is not running ([[L38]]).
+
 ## Diagnosing a red gate
 
 1. **Is the failure in a package your change touched?** If not, suspect these

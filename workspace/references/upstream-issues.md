@@ -742,4 +742,23 @@ leftovers pointing at organizations that no longer exist.
   with nothing seeded it is permanently empty and the feature is unreachable
   without `curl`.
 
-**Status:** open at time of writing; fix in progress the same day.
+**Fixed 2026-08-11.** `rebuildHierarchyForTenant` now ensures an edge for every
+parent-child link and retires edges whose link is gone. That function is already
+called after every structural change (seven call sites), so there is one place to
+be right rather than seven to remember. New edges seed permissively
+(`owns`/`strict`/`A5`) exactly as the migration seeded the originals — an edge
+appearing at a low ceiling would restrict people the moment somebody added an
+organization, a worse surprise than the bug. An existing ceiling is never
+modified: that is somebody's decision, and resetting it on a re-parent would
+silently *widen* authority.
+
+The page's empty state is corrected, and `how-to-test.md` no longer tells the
+reader to create an edge on a page that cannot.
+
+**Verified live**: renaming an organization now produces
+`Acme Corp -> Approval Branch | owns strict A5`.
+
+**It took four attempts, and three failed for a reason that had nothing to do
+with the fix** — `yarn build:app` was a Turbo cache hit, so the running app never
+received any of them. That is [[L38]], and it is the more consequential finding of
+the two.

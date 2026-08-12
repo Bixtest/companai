@@ -1109,3 +1109,51 @@ contained brackets, which threw off the bracket matcher, so the parser silently
 dropped every parameter after the third. A guard that has never been seen to fail
 is not a guard; it is a decoration that makes people confident. Related: [[L34]],
 where a mock made six tests assert nothing.
+
+---
+
+## L38 — `yarn build:app` can be a cache hit that serves last week's code
+
+**What happened.** Fixing U11 took four attempts, and three of them failed for the
+same invisible reason.
+
+I changed `packages/core`, ran `yarn build:packages && yarn build:app`, restarted
+the server, and tested. Nothing happened. I added `em.persist()` — nothing. I
+added `console.log` instrumentation and rebuilt — and **the log lines never
+appeared**, which is what finally gave it away: the code could not be running,
+because it was never bundled.
+
+```text
+Tasks:    1 successful, 1 total
+Cached:   1 cached, 1 total          ← the app was NOT rebuilt
+```
+
+Turbo had cached `build:app`. The new code was demonstrably in
+`packages/core/dist` — four occurrences of the debug string — and absent from
+`apps/mercato/.mercato/next/server/chunks/`. With `--force`:
+
+```text
+Cached:   0 cached, 1 total          ← 5m32s, and the code shipped
+```
+
+**Why the cache is wrong here.** `build:app` compiles the Next application against
+the *built packages*. Turbo's hash for that task did not pick up the change to
+`packages/core/dist`, so it replayed a stale bundle while reporting success.
+
+**The rule.** *After changing any package, rebuild the app with `--force`:*
+
+```bash
+corepack yarn build:packages && corepack yarn build:app --force
+```
+
+**What this costs beyond the four attempts.** Every boot check in this project
+that used a plain `build:app` may have booted a stale bundle — so "the server
+starts and the route resolves" proved less than it appeared to. The **gate is
+unaffected**: Jest runs from source, so test results were always honest. It is the
+*runtime* verification that was weaker than claimed, which is recorded rather than
+quietly re-run.
+
+**The tell to remember**: instrumentation that produces *no output at all* is
+rarely a subtle bug. It usually means the code is not running. [[L28]] says prove
+the diagnostic works before believing its silence; this is the same lesson from
+the other side — the silence was real, and it was about deployment, not logic.
