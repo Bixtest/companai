@@ -1,8 +1,15 @@
 # The roadmap — everything left, in order
 
-**One line: the Starting Kit is feature-complete. 16 of 16 batches are in, every
-resolver input that can be supplied is supplied, and what remains is the
-verification nobody has done yet plus the surfaces we deliberately deferred.**
+**One line: the governance layer is built and verified. What remains is what
+**Hermes** needs before it can act as an AI employee, what a server needs before
+this is hosted, and the screens that make the whole thing operable by a person.**
+
+**Arabic is dropped from this milestone** at the owner's instruction.
+
+**The integration control plane is not part of this milestone.** The research is
+sound and about a third of it we already built; its own estimate for a
+production version is 220–380 person-weeks. Full reasoning:
+[`references/integration-research-verdict.md`](references/integration-research-verdict.md).
 
 **This is the only plan.** If a task is not on this list it is not tracked, and
 the owner should not be the one who remembers it (COOKBOOK rule zero-three).
@@ -41,55 +48,61 @@ human or test has looked.
 | 7 | ✅ | **O1 — a denial lifted from the CLI left no record** | **My defect, made and fixed 2026-08-12.** The audit write moved from the route into `DenialService`, so every caller is recorded and the route no longer double-writes. Verified by planting a denial and lifting it from the console: audit rows 2 → 3, no user, `context_json` recording `origin: server-console, actorKind: system`. Six tests, including that a repeat lift writes nothing and an absent `audit_logs` module does not block the lift | S |
 | 8 | ✅ | **U15 — the demo feedback feature, removed** | Started as "`DEMO_MODE` fails open"; the endpoint behind the bubble turned out to be **public** (`requireAuth: false`), to send email, and to default to a named personal address at the upstream vendor. Deleted outright per the owner's standing permission: widget, demo notice bar, endpoint, email template, tests, and 28 orphaned translation keys — mirrored into the create-app template so it cannot be scaffolded back | M |
 | 9 | ✅ | **U16 — real privacy policy and terms** | Done 2026-08-12. The owner offered "short generic ones, or rebrand theirs"; the first was taken, because rebranding would bind our users under a licence grant and governing law drafted for a Polish company nobody here has read. Written from scratch, naming **the operator** as responsible rather than us, and stating that the activity record outlives a closed account — the one clause this product cannot promise away. Contact on `corprorate.com`. **Worth a lawyer before commercial use** | S |
-| 10 | | **Re-verify the boot checks that used a cached build** | [[L38]]: `yarn build:app` was a Turbo cache hit, so earlier "the server boots and the route resolves" checks may have run stale bundles. The gate is unaffected — Jest runs from source | S |
-| 11 | 🔒 | **Native review of the Arabic** | `ar` ships so the RTL policy is testable. Untranslated keys fall back to English and are harmless; *wrong* translations are not | S |
+| 10 | ✅ | **Re-verify the boot checks that used a cached build** | Done 2026-08-12. Several `build:packages --force` + `build:app --force` cycles today, each followed by a restart and a walk through the running instance. Routing, chrome, content pages and API docs all checked against a build known not to be cached ([[L38]]) | S |
+| 11 | 💤 | **Native review of the Arabic** | Dropped from this milestone by the owner, 2026-08-12. `ar` still ships and falls back to English, which is harmless; only *wrong* translations would not be | S |
 
-## Phase 3 — the surfaces we deferred on purpose
+## Phase 3 — what Hermes needs before it arrives
 
-Each of these shipped an API and no screen, deliberately, so the control would
-bind before it was pretty. None is a surprise; all are recorded at the time.
+**Hermes is the AI engine that lands next, inside the Starting Kit.** These are
+not tidy-ups: each one is something that becomes permanently wrong, or
+permanently missing, the moment a machine starts acting.
+
+| # | | Task | Why it cannot wait for Hermes | Size |
+|---|---|---|---|---|
+| 12 | ⏳ | **U7 — the journal must tell a machine from a human** | `action_logs.actor_user_id` stores an API key's UUID with no record that it *was* a key. Hermes acts through keys. Every act it performs becomes indistinguishable from a person's — and **retroactively unfixable**, because the information was never captured. Invariant **I2**, and the premise of the product | M |
+| 13 | | **Give `ai_worker` a producer** | The principal kind exists and **nothing creates one**. Until something does, no ceiling, delegation, trust grant or denial can target a machine, and the effect-class matrix — which exists to bound machines — never engages. Also the precondition for charter grants | M |
+| 14 | | **Correlation and causation ids** | One Hermes task is many acts. Without a correlation id the ledger records events that cannot be assembled into *"what did the agent do for this request"* — which is the question a customer will ask first | M |
+| 15 | | **Spend metering, then budget as a ceiling** | Hermes calls models, and models cost money. Today nothing meters spend, so no budget can bound it. This was blocked on "an AI actor exists"; Hermes *is* that actor | M |
+| 16 | | **Finish command → capability mapping** | 54% of live commands are gated. The 46% ungated matters far more when the actor is a machine than when it is a person who can be asked afterwards | M |
+
+## Phase 4 — before it goes on a server
 
 | # | | Task | Why | Size |
 |---|---|---|---|---|
-| 12 | | **Screens for delegations, record locks, trust, projects and denials** | Five features with working APIs and no page. Locking belongs on each record's own screen (per-entity work); a denial belongs on the person's record as well as in a list; the other three want one screen each | L |
-| 13 | | **Bulk approval, with a diff** | The diff is the feature. A button that approves several acts without showing how they differ is a button for approving things unread | M |
-| 14 | | **Deputy cover and standing approvals** | Both need a name — a deputy, a grantor — so both are inherently settings. Standing approvals need a mandatory expiry and a visible count of what they let through | L |
-| 15 | | **Per-tenant approval expiry** | Decided with the owner and recorded as unbuilt. 24h is enforced in `PendingActService`; the knob is not there | S |
+| 17 | | **Prune parked-module dependencies** | 14 parked modules still carry their dependencies. A scanner flags their CVEs the moment this is reachable from the internet | M |
+| 18 | | **Production hardening** | No backup schedule, no monitoring, secrets in a plain `.env` with no rotation, no zero-downtime deploy, no shared attachment storage for a second instance | L |
+| 19 | | **Phase G exit gate** | Our own discipline gate: a test proving the resolver honours delegations, project overlays and lock states *each*, plus a changelog of what was grafted and from where | S |
+| 20 | 🔒 | **Run the deployment guide on a real Plesk VPS** | Not one step has ever been executed on Plesk | M |
 
-## Phase 4 — the record can be trusted
+## Phase 5 — operable by a human
 
-| # | | Task | Why | Size |
-|---|---|---|---|---|
-| 16 | | **U7 — the journal cannot tell a machine from a human** | `action_logs.actor_user_id` stores an API key's UUID with no record that it was a key. That is invariant **I2**, and telling them apart is the premise of the product | M |
-| 17 | | **Ledger correlation and causation** | Both fields are recorded when a caller supplies them, and nothing supplies them. Until something threads a correlation id, the chain records events that cannot be assembled into a trace | M |
-| 18 | | **Ledger Tier 2 — signed checkpoints** | R3's chain is verifiable only by us. A signed root in append-only storage lets a customer's auditor verify a range without our cooperation | L |
+The governance layer works through APIs. A control nobody can see is a control
+nobody uses.
 
-## Phase 5 — before it goes on a server
-
-| # | | Task | Why | Size |
-|---|---|---|---|---|
-| 19 | | **Phase G exit gate — assertions and changelog** | The gate wants a test proving the resolver honours delegations, project overlays and lock states *each*, plus `planning/CHANGELOG.md` recording what was grafted and from where | S |
-| 20 | 🔒 | **Run the deployment guide on a real Plesk VPS** | `references/deployment.md` is derived from the repo and the working local instance. **No Plesk step has ever been executed** | M |
-| 21 | | **Production hardening the guide names** | No zero-downtime deploy, no backup schedule or monitoring, secrets in a plain `.env` with no rotation, no shared attachment storage for a second instance | L |
-| 22 | | **Close out U5, and prune parked-module dependencies** | U5's record is stale — two more flake causes were found and fixed since. And parked modules carry CVEs a scanner will flag the moment this is hosted | M |
-
-## Blocked — the preconditions do not exist
-
-| # | | Task | Precondition |
+| # | | Task | Size |
 |---|---|---|---|
-| 23 | ⛔ | **Charter grants** | An AI worker entity (`ai_worker` is a type with no producer) **and** the Charter compiler. Phase K |
-| 24 | ⛔ | **Budget as a resolver input** | Spend metering: what an act costs, what an actor has spent, a limit. None exist |
+| 21 | | **Screens for delegations, record locks, trust, projects and denials** | L |
+| 22 | | **Bulk approval, with a diff** — the diff is the feature | M |
+| 23 | | **Deputy cover and standing approvals** | L |
+| 24 | | **Per-tenant approval expiry** | S |
 
-Both would *narrow*, so their absence leaves answers more permissive than the
-design intends but never more permissive than the RBAC check that already ran.
+## Decisions waiting on the owner
+
+| | Question | My recommendation |
+|---|---|---|
+| A | The `example` / `example_customers_sync` modules put a demo *Todos* widget on the dashboard, but `example` is the reference implementation our whole `AGENTS.md` tree points at | **Park them.** Product comes out clean, reference stays readable |
+| B | `apps/docs` is upstream's documentation **content**, not just their branding | **Drop it.** Renaming would ship somebody else's docs under our name |
+| C | Real legal review of the new privacy/terms before commercial use | Worth a lawyer; fine for internal use now |
 
 ## Deferred by decision
 
 | # | | Task | Why it waits |
 |---|---|---|---|
-| 25 | 💤 | `domain_mappings` extraction | Per-tenant custom domains. Wanted, nothing needs it yet |
-| 26 | 💤 | Orphaned-table decision (~127 tables) | Inert. Revisit only as a deliberate backed-up migration |
-| 27 | 💤 | Phase K checkpoint | The scheduled date that stops "we'll clean up later" being a lie |
+| 25 | 💤 | Ledger Tier 2 — signed checkpoints | A customer's-auditor feature. No customer yet |
+| 26 | 💤 | `domain_mappings` extraction | Per-tenant custom domains. Nothing needs it |
+| 27 | 💤 | Orphaned-table decision (~127 tables) | Inert |
+| 28 | 💤 | Charter grants | Needs 13 first, then the Charter compiler. Phase K |
+| 29 | 💤 | **The universal integration control plane** | See [`references/integration-research-verdict.md`](references/integration-research-verdict.md). Its own estimate is **220–380 person-weeks**. Post-hosting, and only if a customer needs it |
 
 ---
 
