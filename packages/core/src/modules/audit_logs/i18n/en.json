@@ -62,5 +62,8 @@
   "audit_logs.version_history.status.failed": "Failed",
   "audit_logs.version_history.status.redone": "Redone",
   "audit_logs.version_history.status.undone": "Undone",
-  "audit_logs.version_history.title": "Version History"
+  "audit_logs.version_history.title": "Version History",
+  "audit_logs.actions.actorKind.ai_worker": "AI worker",
+  "audit_logs.actions.actorKind.service": "API key",
+  "audit_logs.actions.actorKind.system": "System"
 }

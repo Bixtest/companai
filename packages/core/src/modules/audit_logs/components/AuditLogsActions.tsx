@@ -148,7 +148,27 @@ export function AuditLogsActions({
     {
       accessorKey: 'actorUserId',
       header: t('audit_logs.actions.columns.user'),
-      cell: (info) => info.row.original.actorUserName || info.getValue() || noneLabel,
+      // U7 — a person shows as their name; anything else says what it was.
+      //
+      // The kind was already recorded and already returned by the API, and this
+      // column showed only the id, so a key acting looked exactly like a person
+      // whose name had not loaded. Telling a machine from a human is the single
+      // distinction this platform exists to make, and it was invisible on the
+      // one screen built to answer "who did this".
+      cell: (info) => {
+        const row = info.row.original
+        const who = row.actorUserName || info.getValue() || noneLabel
+        const kind = row.actorKind
+        if (!kind || kind === 'human') return who
+        return (
+          <span className="inline-flex items-center gap-2">
+            <span>{who}</span>
+            <span className="rounded-sm border border-border px-1.5 py-0.5 text-xs text-muted-foreground">
+              {t(`audit_logs.actions.actorKind.${kind}`, kind)}
+            </span>
+          </span>
+        )
+      },
       meta: { priority: 3 },
     },
     {

@@ -62,5 +62,8 @@
   "audit_logs.version_history.status.failed": "Fallido",
   "audit_logs.version_history.status.redone": "Rehecho",
   "audit_logs.version_history.status.undone": "Deshecho",
-  "audit_logs.version_history.title": "Historial de versiones"
+  "audit_logs.version_history.title": "Historial de versiones",
+  "audit_logs.actions.actorKind.ai_worker": "Trabajador IA",
+  "audit_logs.actions.actorKind.service": "Clave API",
+  "audit_logs.actions.actorKind.system": "Sistema"
 }

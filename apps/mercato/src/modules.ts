@@ -184,7 +184,27 @@ export const enabledModules: ModuleEntry[] = [
   { id: 'channel_imap', from: '@open-mercato/channel-imap' },
   { id: 'channel_gmail', from: '@open-mercato/channel-gmail' },
   { id: 'webhooks', from: '@open-mercato/webhooks' },
-  {
+  { id: 'ratelimit_probe', from: '@app' },
+]
+
+/**
+ * The reference modules, off unless a developer asks for them.
+ *
+ * `example` is the implementation the whole `AGENTS.md` tree points at — CRUD,
+ * events, widgets, overrides, custom fields, notifications, commands. It is
+ * genuinely worth keeping, so it is **not parked**: the code stays, its tests
+ * keep running, and every documentation link still resolves to real code.
+ *
+ * What it must not do is appear in a customer's product. Enabled, it puts
+ * "General tasks", "Phase M — Mutation Lifecycle" and "Phase E-H extensions" in
+ * the admin sidebar and a demo *Todos* widget on the dashboard.
+ *
+ * So: `OM_ENABLE_EXAMPLES=true` for anyone working **on** the platform, and off
+ * by default for anyone working **in** it. `example_customers_sync` follows it,
+ * because it exists to demonstrate cross-module sync with `example`.
+ */
+if (parseBooleanWithDefault(process.env.OM_ENABLE_EXAMPLES, false)) {
+  enabledModules.push({
     id: 'example',
     from: '@app',
     overrides: {
@@ -201,9 +221,8 @@ export const enabledModules: ModuleEntry[] = [
         },
       },
     },
-  },
-  { id: 'ratelimit_probe', from: '@app' },
-]
+  })
+}
 
 // Official modules activated via official-modules.json / official-modules.local.json
 // (managed by `yarn official-modules`; backed by the external/official-modules submodule).
