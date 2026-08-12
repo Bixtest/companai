@@ -1,4 +1,5 @@
 import { asFunction, createContainer, asValue, AwilixContainer, InjectionMode, type Resolver } from 'awilix'
+import { randomUUID } from 'node:crypto'
 import { RequestContext } from '@mikro-orm/core'
 import { getOrm } from '@open-mercato/shared/lib/db/mikro'
 import { EntityManager } from '@mikro-orm/postgresql'
@@ -166,6 +167,25 @@ export async function createRequestContainer(): Promise<AppContainer> {
   // Core registrations
   container.register({
     em: asValue(em),
+    /**
+     * One id shared by every act performed during this request.
+     *
+     * The ledger has carried a `correlation_id` column since R3 and **nothing
+     * ever supplied one**, so the chain recorded events that could not be
+     * assembled into a trace. One request can produce many acts — a command,
+     * its sub-commands, the side effects they trigger — and *"what did this
+     * actor do for this request"* is the first question anybody asks of an
+     * audit trail. Without a shared id it is unanswerable.
+     *
+     * Registered here rather than threaded through `CommandRuntimeContext`
+     * because contexts are constructed ad hoc at dozens of call sites, and
+     * every one of them already carries the container. One place to set it,
+     * one place to read it.
+     *
+     * A container is created per request, so the id is per request by
+     * construction.
+     */
+    correlationId: asValue(randomUUID()),
     queryEngine: asValue(new BasicQueryEngine(em, undefined, () => {
       try { return container.resolve('tenantEncryptionService') as any } catch { return null }
     })),

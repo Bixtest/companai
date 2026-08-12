@@ -266,6 +266,41 @@ function resolveHandlerCapability(
   }
 }
 
+/**
+ * The id shared by every act in this request, and the act that caused this one.
+ *
+ * **Correlation** comes from the request container — one value per request, set
+ * where the container is built. **Causation** is the log id of the act currently
+ * executing, parked on the runtime context so a command that dispatches another
+ * command passes its own identity down without every author having to thread it.
+ *
+ * A symbol key, deliberately: request input cannot produce one, so nothing
+ * arriving over HTTP can forge a causation chain.
+ *
+ * Both resolve to `null` rather than throwing. A missing correlation id costs a
+ * trace; a throw here would cost the write.
+ */
+const CAUSATION_ID = Symbol.for('om.commands.causationId')
+
+function resolveCorrelationId(ctx: CommandRuntimeContext): string | null {
+  try {
+    const value = ctx.container?.resolve('correlationId')
+    return typeof value === 'string' && value ? value : null
+  } catch {
+    return null
+  }
+}
+
+function resolveCausationId(ctx: CommandRuntimeContext): string | null {
+  const value = (ctx as unknown as Record<symbol, unknown>)[CAUSATION_ID]
+  return typeof value === 'string' && value ? value : null
+}
+
+function markCurrentAct(ctx: CommandRuntimeContext, logId: string | null): void {
+  if (!logId) return
+  ;(ctx as unknown as Record<symbol, unknown>)[CAUSATION_ID] = logId
+}
+
 export class CommandBus {
   async execute<TInput = unknown, TResult = unknown>(
     commandId: string,
@@ -675,10 +710,28 @@ export class CommandBus {
       if ('context' in metadata && metadata.context !== undefined && metadata.context !== null) payload.context = metadata.context
     }
 
+    // The trace, merged last so a command that sets its own context keeps it and
+    // still gains the ids. `actionLogService` reads both out of `context` when it
+    // appends to the hash chain.
+    const correlationId = resolveCorrelationId(options.ctx)
+    const causationId = resolveCausationId(options.ctx)
+    if (correlationId || causationId) {
+      payload.context = {
+        ...(asRecord(payload.context) ?? {}),
+        ...(correlationId ? { correlationId } : {}),
+        ...(causationId ? { causationId } : {}),
+      }
+    }
+
     const redoEnvelope = wrapRedoPayload('commandPayload' in payload ? (payload.commandPayload as unknown) : undefined, options.input)
     payload.commandPayload = redoEnvelope
 
-    return await service.log(payload as ActionLogCreateInput)
+    const written = await service.log(payload as ActionLogCreateInput)
+
+    // Anything this command goes on to dispatch was caused by this act.
+    markCurrentAct(options.ctx, (written as { id?: string } | null)?.id ?? null)
+
+    return written
   }
 
   private isUndoable(handler: CommandHandler<unknown, unknown>): boolean {
