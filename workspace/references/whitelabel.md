@@ -36,14 +36,37 @@ the product's thesis in one mark.
 re-branding piecemeal. When the batch runs, these replace the login mark, the tab
 icon and the sidebar header first, because those are what an evaluator sees.
 
-## Decide first, before any of it
+## Decided
 
-1. **The product name.** Everything below depends on it.
-2. **Whether the fork stays mergeable with upstream.** Renaming the
+**The product is called `Companai`.** Owner, 2026-08-12. Everything below now has
+a target to rename to.
+
+**The look is Mac/Apple.** Owner preference, and a useful constraint rather than
+a vague one: generous whitespace, restrained colour, real hierarchy through type
+and spacing instead of borders and boxes, soft depth over hard lines, motion that
+is quick and never decorative. It should feel calm and expensive.
+
+**Standing permissions, given 2026-08-12:**
+
+- **Add any library, icon set, font or asset** that is genuinely unrestricted
+  (MIT, Apache-2.0, ISC, BSD, CC0, SIL OFL for fonts) **and vendored into our own
+  codebase** — nothing loaded from somebody else's CDN at runtime. Ask for
+  anything that is not.
+- **Decide what to hide or delete outright.** Named explicitly: the *"Feedback" /
+  "Contact us"* bubble, which points at the upstream supplier and has no business
+  in our product. That one is a deletion, not a setting.
+
+## Still to decide
+
+1. **Whether the fork stays mergeable with upstream.** Renaming the
    `@open-mercato/*` packages makes pulling upstream fixes painful. There is a
-   real choice here between *fully ours* and *able to take their security
-   patches*, and it should be made deliberately rather than discovered.
-3. **The public domain**, for links in emails and docs.
+   real choice between *fully ours* and *able to take their security patches*,
+   and it should be made deliberately rather than discovered.
+   **My recommendation:** keep the package namespace for now and rename
+   everything a user or evaluator can see. The internal names cost us nothing
+   while upstream is still fixing bugs we would otherwise fix ourselves; the
+   visible ones cost us the whole impression.
+2. **The public domain**, for links in emails and docs.
 
 ---
 
@@ -60,5 +83,7 @@ icon and the sidebar header first, because those are what an evaluator sees.
 | Env/config | `OM_*` env var prefix, `om_selected_org` cookie | Renaming cookies logs everybody out once |
 | Demo widget | *"Contact us"* feedback bubble | Gated by `DEMO_MODE`; see roadmap item 8 |
 | Docs site | `apps/docs` is upstream's documentation | Either replace or drop |
+| Default dashboard | Ships an **Example module** *Todos* widget — demo content on the admin start page | The `example` module is a demo module; consider parking it rather than hiding the widget |
+| Dashboard/browser title | Every backend page's tab reads `Open Mercato` | Highest-visibility single string |
 
 *Add rows as they are noticed. Do not act on them yet.*

@@ -7,6 +7,47 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-08-12 (evening) — O1 fixed, and the platform gets a name
+
+**The session was interrupted mid-flight.** Nothing was lost: both repos were
+committed clean beforehand. The server had not died either — the task tracker
+lost its handle, and the platform's own single-instance guard correctly refused
+my duplicate start, naming the pid still serving. A small thing that worked
+exactly as it should.
+
+**O1 fixed the same day I made it.** The audit write moved out of the API route
+into `DenialService`, so no caller can forget it, and the route stopped writing
+its own — which would have filed every act twice.
+
+Verified by planting a denial straight into the database, so the CLI lift was the
+**only** path exercised: audit rows went 2 → 3, with `actor_user_id` null and
+`context_json` carrying `{"origin": "server-console", "actorKind": "system"}`.
+
+The decision inside it: a console act has no `sub`, and that is the fact worth
+**recording** rather than a gap to paper over. R1's principal vocabulary already
+had the word. Marking it a `system` actor with its origin is honest; leaving the
+field empty would make it read like an anonymous human, which is worse than no
+entry at all.
+
+One imperfection left deliberately and written down: the shared helper stamps
+`source: "crud-route"` on every direct write, so a console act carries that label
+beside its accurate origin. Changing the helper's default would touch every
+direct write in the platform, which is not a thing to do in passing.
+
+**The product has a name: `Companai`.** With it came the Mac/Apple direction,
+permission to vendor any genuinely unrestricted asset, and permission to delete
+supplier-facing things outright — the feedback bubble named explicitly. All of it
+is in `references/whitelabel.md` rather than only in memory.
+
+I recorded a recommendation on the one open white-label question: **keep the
+`@open-mercato/*` package names and rename everything a user can see.** The
+internal names cost nothing while upstream is still fixing bugs we would
+otherwise fix ourselves; the visible ones cost the entire first impression.
+
+**Gate: 22/22 tasks, 12,910 tests, exit 0.** Lint: 0 errors.
+
+---
+
 ## 2026-08-12 (evening) — the question was wrong, and what was under it was worse
 
 **U13 verified fixed**: the authority graph now reads *Acme Corp → Approval

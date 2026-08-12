@@ -207,7 +207,40 @@ mismatch at creation with a message that says why. Done 2026-08-10.
 
 ---
 
-## O1 — a denial lifted from the CLI leaves no record · **ours, not upstream** · severity **high**
+## O1 — a denial lifted from the CLI left no record · **FIXED 2026-08-12** · ours, not upstream · severity **high**
+
+**Fixed and verified live.** The audit write moved out of the API route and into
+`DenialService`, so every caller is recorded rather than only the ones that
+remember to. The route no longer writes its own entry, which would have filed
+each act twice.
+
+Verified by planting a denial directly in the database — so the CLI lift was the
+only code path exercised — and lifting it from the console:
+
+```text
+audit rows for authority.denial:  2  ->  3
+actor_user_id:                    null            (a console act has no user)
+context_json: {"origin": "server-console", "actorKind": "system", ...}
+```
+
+**A console act has no `sub`, and that is the fact worth recording** rather than
+a gap to paper over. R1's principal vocabulary already had the word: it is a
+`system` actor, marked with where it came from, instead of an entry that looks
+like an anonymous human.
+
+Six tests cover it, including that a repeat lift writes **nothing** (lifting is
+idempotent, and a second entry would claim the permission came back twice) and
+that an absent `audit_logs` module does not stop the lift — refusing to restore
+somebody's access because nothing is listening would turn a missing log into an
+outage.
+
+**One cosmetic imperfection left**, not chased: the shared helper stamps
+`source: "crud-route"` on every direct write, so a console act carries that
+label alongside its accurate `origin`. Misleading in isolation, harmless beside
+the origin field, and changing the helper's default would touch every direct
+write in the platform.
+
+### The original finding
 
 **Found:** 2026-08-12, reading the audit log while a gate ran. **This is a defect
 I introduced the same morning**, in the denials feature itself.
