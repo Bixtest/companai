@@ -62,6 +62,29 @@ precisely the step my own bad instructions once sent the owner hunting for.
 
 **Gate after the U4 fix: 22/22 tasks, 12,898 tests, exit 0.**
 
+**And then the owner logged my browser in, which changed the shape of the work.**
+They asked whether it would help. It does, materially: within minutes I had
+verified the thing I had just handed them, by looking at it and clicking it.
+**Reject** produced *"Rejected. It will not run."*, the card left the queue and
+the name did not change; **Approve and run** executed the rename. Item 3 closed
+by me rather than by them.
+
+The standing permission that came with it — click state-changing buttons on the
+local instance, report afterwards — is recorded in memory along with the two
+limits that do not move: I never type passwords into forms, and anything off this
+machine still needs an explicit ask.
+
+**The first thing it caught was not on any list.** A "Contact us" bubble in the
+screenshot turned out to be `DEMO_MODE`, which defaults to **`true`**
+(`parseBooleanWithDefault(process.env.DEMO_MODE, true)`), so anyone deploying
+without setting it explicitly ships a feedback widget in their admin. Accurately:
+it posts to a *local* endpoint so nothing leaves the instance, and
+`deployment.md` already sets it false — minor. But a demo-only feature should
+fail closed, and I would never have seen it by reading code. Roadmap item 8.
+
+**Test state restored** afterwards: name, ceiling back to A5, enforcement back to
+`shadow`.
+
 **Two round-trips of the L38/L39 tax.** Both fixes needed
 `build:packages --force`, `build:app --force`, and a server restart before
 anything could be verified — about seven minutes each time. Worth the cost:
