@@ -17,6 +17,25 @@ the batch, to catch what noticing missed.
 
 ---
 
+## Assets we already have
+
+`companai-logo/` at the project root — added by the owner 2026-08-11, committed
+2026-08-12 so it has history and a backup like everything else here.
+
+| File | Use |
+|---|---|
+| `companai.svg` | The master. Scales to any size |
+| `companai.png` | 239 KB raster, for anywhere SVG is awkward |
+| `companai.ico` | Browser tab / favicon |
+
+A **C** formed from two figures — one with a solid head, one with a networked
+sphere and circuit traces. A human and a machine making the same letter, which is
+the product's thesis in one mark.
+
+**Nothing has been applied yet**, deliberately — see the note above about not
+re-branding piecemeal. When the batch runs, these replace the login mark, the tab
+icon and the sidebar header first, because those are what an evaluator sees.
+
 ## Decide first, before any of it
 
 1. **The product name.** Everything below depends on it.
