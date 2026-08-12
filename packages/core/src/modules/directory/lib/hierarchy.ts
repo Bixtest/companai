@@ -1,5 +1,5 @@
 import type { EntityManager } from '@mikro-orm/postgresql'
-import { Organization } from '@open-mercato/core/modules/directory/data/entities'
+import { Organization, OrganizationEdge } from '@open-mercato/core/modules/directory/data/entities'
 
 export type ComputedOrganizationNode = {
   id: string
@@ -195,5 +195,79 @@ export async function rebuildHierarchyForTenant(em: EntityManager, tenantId: str
   }
 
   await em.flush()
+  await ensureAuthorityEdges(em, tenantId, organizations)
   return hierarchy
+}
+
+/**
+ * Every parent-child link has an authority edge, and every edge has a live link.
+ *
+ * **The bug this closes (U11).** `Migration20260809193000` seeded one edge per
+ * organization that had a parent *at migration time*, and nothing created one
+ * afterwards. So every organization created since — or moved to a new parent —
+ * had no edge, and the organization hierarchy silently stopped constraining
+ * anything for it. It failed permissively, which is the safe direction and also
+ * the invisible one.
+ *
+ * This runs from `rebuildHierarchyForTenant`, which is already called after every
+ * structural change to the tree (seven call sites), so there is one place to get
+ * right rather than seven to remember.
+ *
+ * **New edges are seeded permissively** — `owns` / `strict` / `A5` — exactly as the
+ * migration seeded the originals. An edge that appeared with a low ceiling would
+ * silently restrict people the moment somebody added an organization, which is a
+ * worse surprise than the one being fixed. `A5` imposes nothing; somebody lowers
+ * it deliberately.
+ *
+ * **An existing edge is never modified.** Its ceiling is somebody's decision, and
+ * a re-parent must not quietly reset it.
+ */
+async function ensureAuthorityEdges(
+  em: EntityManager,
+  tenantId: string,
+  organizations: Organization[],
+): Promise<void> {
+  const wanted = new Map<string, { parentId: string; childId: string }>()
+  for (const org of organizations) {
+    if (!org.parentId) continue
+    wanted.set(`${org.parentId}:${org.id}`, { parentId: String(org.parentId), childId: String(org.id) })
+  }
+
+  const existing = await em.find(OrganizationEdge, { tenantId, deletedAt: null })
+  const have = new Set(existing.map((edge) => `${edge.parentId}:${edge.childId}`))
+
+  let created = 0
+  for (const [key, link] of wanted) {
+    if (have.has(key)) continue
+    // `persist` explicitly rather than relying on `em.create` auto-persisting.
+    // Every other service here does the same, and the first version of this
+    // function did not -- the rebuild ran, stamped every organization, and
+    // created no edge, silently.
+    const edge = em.create(OrganizationEdge, {
+      tenantId,
+      parentId: link.parentId,
+      childId: link.childId,
+      relationshipType: 'owns',
+      inheritanceMode: 'strict',
+      authorityCeiling: 'A5',
+      moduleGrants: null,
+      note: 'created automatically from the organization tree',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      deletedAt: null,
+    })
+    em.persist(edge)
+    created += 1
+  }
+
+  // Edges whose link no longer exists are retired rather than deleted: an edge
+  // somebody lowered is a decision, and if the tree is restored the record of
+  // that decision should still be findable.
+  for (const edge of existing) {
+    if (wanted.has(`${edge.parentId}:${edge.childId}`)) continue
+    edge.deletedAt = new Date()
+    edge.updatedAt = new Date()
+  }
+
+  if (created || existing.length) await em.flush()
 }

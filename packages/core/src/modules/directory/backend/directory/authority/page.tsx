@@ -123,7 +123,7 @@ export default function AuthorityGraphPage() {
             <p className="text-sm text-muted-foreground">
               {t(
                 'directory.authority.empty',
-                'No authority edges yet. One is created automatically for each parent-child link between organizations, so this stays empty until the organization tree has more than one level.',
+                'No authority edges yet. One appears here for each parent-child link between organizations, so this stays empty while every organization sits at the top level. New edges start at A5, which restricts nothing until you lower one.',
               )}
             </p>
           ) : (
