@@ -7,6 +7,52 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-08-12 (later still) — U12 answered, and rule zero-eight paid on its first outing
+
+**U12 needed a decision, not just a migration**, which is why it was not folded
+into the U4 fix. Both constraints are now partial unique indexes carrying
+`where deleted_at is null`, so a deleted row stops reserving its value. The
+entities drop `@Unique` — it cannot express a partial index — and the migration
+becomes the source of truth, which is the arrangement
+`users_tenant_email_hash_uniq` already uses here. Precedent, not invention.
+
+Verified live: `XTS`, blocked since 2026-08-09, creates again, and a **live**
+duplicate is still refused.
+
+**The decision.** Making the index partial created a case that could not exist
+before: undoing a delete after somebody reused the value. Restoring would give
+two live rows sharing one value and there is no correct automatic winner —
+renaming invents data, overwriting destroys it, and doing nothing silently claims
+to have worked. So both delete commands check first and refuse with a **409**
+naming the conflict, rather than letting the index raise a violation that
+surfaces as a 500 and explains nothing.
+
+**The generator caught a gap in my own work.** Running `db:generate` as a
+schema-diff probe showed it wanted to create `authority_denials` — because I
+hand-wrote that migration this morning and never updated the auth ORM snapshot.
+Kept the snapshot updates, discarded the generated migrations, and both modules
+now report *no changes*. Worth remembering: **a hand-written migration is only
+half the change.**
+
+**Rule zero-eight earned its place within an hour of being written.** While the
+gate ran I opened the authority graph and found every row rendering as
+`065bd751-… → cc563521-…` instead of *Acme Corp → Approval Branch*. **The one
+screen that governs authority could not be operated** — nobody can tell which
+link they are about to restrict.
+
+Not a missing feature: the page already maps ids to names. The lookup asked for
+`pageSize=200` where the API caps it at 100, so it returned **400** on every load
+and every name fell back to a UUID. One line to fix, high severity, and on no
+list. I would never have found it reading code.
+
+It leaves two things behind, both recorded in `ux-findings.md`: the page
+**degrades silently** when that lookup fails, which is precisely why it survived,
+and three pages in parked modules make the same over-max request.
+
+**Gate: 22/22 tasks, 12,904 tests, exit 0.** Lint: 0 errors.
+
+---
+
 ## 2026-08-12 (later) — U4 was still broken, and reproducing it found another
 
 **Phase 2 of the roadmap is verifying things nobody has checked.** U4 went first

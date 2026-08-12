@@ -207,7 +207,76 @@ mismatch at creation with a message that says why. Done 2026-08-10.
 
 ---
 
-## U12 — a soft-deleted row keeps its unique code forever · severity **medium**
+## U13 — the authority graph showed raw UUIDs · **FIXED 2026-08-12** · severity **high**
+
+**Found:** 2026-08-12, exploring the platform while a gate ran (COOKBOOK rule
+zero-eight). It was on no list.
+
+**What happened.** Every row of **Settings → Authority graph** rendered as
+
+```text
+065bd751-ada0-4469-a571-879950a1be51
+→ cc563521-c10e-40ff-9875-9dccb645f45d
+```
+
+instead of *Acme Corp → Approval Branch*. **The one screen that governs
+authority could not be operated**: nobody can tell which link they are about to
+restrict, and lowering the wrong ceiling silently restricts the wrong people.
+
+**Why.** Not a missing feature — the page already maps ids to names through
+`nameOf`, falling back to the id. The fallback was firing on every row, because
+the lookup asked for more than the API allows:
+
+```ts
+'/api/directory/organizations?pageSize=200'   // max is 100
+```
+
+`viewSchema` caps `pageSize` at 100 and the route returns **400** when it is
+exceeded, so `orgsQuery` failed on every load, `orgsQuery.data` stayed
+`undefined`, and every name fell back to a UUID.
+
+| `pageSize` | Result |
+|---|---|
+| 50, 100 | `200 OK`, 2 items |
+| 101, 150, 200 | `400`, 0 items |
+
+**Fixed** by asking for 100. One line.
+
+**Two things it leaves behind**, both recorded in
+[ux-findings.md](ux-findings.md): the page **degrades silently** when that lookup
+fails rather than saying anything is wrong (X5) — which is why this survived
+unnoticed — and three pages in **parked** modules make the same over-max request
+(X6), harmless only because those modules do not run.
+
+**Worth generalising.** The API behaved correctly; the caller asked for something
+the contract forbids and never checked. `AGENTS.md` already says *"Keep pageSize
+at or below 100"*, so the rule existed and was simply not followed.
+
+---
+
+## U12 — a soft-deleted row keeps its unique code forever · **FIXED 2026-08-12** · severity **medium**
+
+**Fixed and verified live.** Both constraints are now partial unique indexes
+carrying `where deleted_at is null`, so a deleted row no longer reserves its
+value. Verified against the running instance: a soft-deleted `XTS` from
+2026-08-09 had blocked creating `XTS`; after the migration the create succeeded,
+and a **live** duplicate was still correctly refused.
+
+The entities drop their `@Unique` decorators — the decorator cannot express a
+partial index — and `Migration20260812120000` becomes the source of truth, the
+same arrangement `users_tenant_email_hash_uniq` already uses.
+
+**The undo question, answered.** Making the index partial created a case that
+could not previously exist: undoing a delete when somebody has since reused the
+code. Both delete commands now check for a live row first and refuse with a
+**409** naming the conflict, rather than letting the index raise a raw violation
+that surfaces as a 500. Restoring would mean two live rows sharing one value, and
+choosing which survives is not a decision an undo may take on its own — renaming
+invents data, overwriting destroys it, and doing nothing silently lies about
+having worked. Six tests cover it.
+
+### The original finding
+
 
 **Found:** 2026-08-12, while reproducing U4 against the running instance.
 

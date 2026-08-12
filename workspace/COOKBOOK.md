@@ -122,6 +122,8 @@ A batch that changes something and leaves them stale is not finished.
 | [`../JOURNAL.md`](../JOURNAL.md) | A decision, a completed phase, or a surprising finding |
 | [`../LESSONS.md`](../LESSONS.md) | **Immediately** when a mistake or near-miss is caught |
 | [`PROGRESS.md`](PROGRESS.md) | **The roadmap** — everything left, in order. The only plan |
+| [`references/ux-findings.md`](references/ux-findings.md) | Things that work but look or read badly — collected, not scheduled |
+| [`references/whitelabel.md`](references/whitelabel.md) | Everywhere the original still shows through — for one deliberate batch later |
 | [`references/how-to-test.md`](references/how-to-test.md) | Every batch — the owner's click-by-click steps |
 | [`knowledge/`](knowledge/) | Every batch — what you learned about **how the platform works** |
 
@@ -664,6 +666,55 @@ yourself and write it down. Stop only for:
   side — say so rather than forcing it.
 - **A screen somebody will live in** — its shape is a product decision, not an
   engineering one. Build the mechanism, then ask before designing the surface.
+
+## Rule zero-eight — use the waiting time, and keep the side-lists
+
+A gate run is six minutes. `build:app --force` is another five. Across a session
+that is a large fraction of the elapsed time, and sitting idle through it is
+waste.
+
+**When a process is running, go and use the platform.** The owner logs the
+in-app browser in, so this is available whenever the session is live. Test what
+was just written, and test things nobody wrote recently — **treat the platform as
+a whole**, not only the parts this batch touched. Debugging is always worth
+doing; the `DEMO_MODE` fail-open default was found in a screenshot taken while a
+build ran, and was on nobody's list.
+
+### The balance, which is the hard part
+
+**The Starting Kit roadmap is the priority.** Everything below is what to do with
+time that would otherwise be spent watching a progress bar — not a reason to
+detour mid-task.
+
+So: **find, record, keep going.** Do not stop the main task to fix a UI
+annoyance. Write it down and carry on. The two exceptions are the ones already in
+rule zero-two — genuinely small and risk-free fixes go in at once — and anything
+that makes the current task's result wrong.
+
+### The three side-lists
+
+Findings go to whichever file fits, never into memory and never into the roadmap
+unless they earn a place there:
+
+| What | Where |
+|---|---|
+| Something is broken or wrong | [references/upstream-issues.md](references/upstream-issues.md), and the roadmap if it blocks us |
+| It looks or reads badly | [references/ux-findings.md](references/ux-findings.md) |
+| It says *Open Mercato* and one day must not | [references/whitelabel.md](references/whitelabel.md) |
+
+**On white-labelling.** The platform is MIT licensed, so re-branding it entirely
+is permitted. The work is not urgent and must not be started piecemeal — a
+half-rebranded product is worse than an honest fork. What *is* useful now is
+noticing, in passing, every place the original shows through: names, logos, URLs,
+email templates, page titles, `package.json` names, CLI banners, seeded data.
+Collect them so that when the time comes it is one deliberate batch rather than
+an archaeology project.
+
+**On UI and UX.** There is a lot wrong. Recording it costs seconds; fixing it
+mid-batch costs the batch. The list becomes its own phase once the Starting Kit
+is finished.
+
+---
 
 ## Rule zero-seven — defaults are yours; tastes are theirs
 
