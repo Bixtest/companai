@@ -1,8 +1,8 @@
 # The roadmap — everything left, in order
 
-**One line: the Starting Kit is built. 16 of 16 batches are in, every resolver
-input that can be supplied is supplied, and what remains is one feature, the
-verification nobody has done yet, and the surfaces we deliberately deferred.**
+**One line: the Starting Kit is feature-complete. 16 of 16 batches are in, every
+resolver input that can be supplied is supplied, and what remains is the
+verification nobody has done yet plus the surfaces we deliberately deferred.**
 
 **This is the only plan.** If a task is not on this list it is not tracked, and
 the owner should not be the one who remembers it (COOKBOOK rule zero-three).
@@ -24,8 +24,8 @@ The record of everything already done, with the reasoning:
 
 | # | | Task | Why | Size |
 |---|---|---|---|---|
-| 1 | ⏳ | **Explicit deny** | Owner chose this 2026-08-11. Platform 1 can deny one person a permission their role grants; we cannot, so the only way to take one away is to remove the whole role. Only ever *takes* permissions away, so it fits the existing design and cannot make anything less safe. This is the last of G1 | M |
-| 2 | ⏳ | **Full gate green, captured in full** | Outstanding since the U11 fix: the mock was corrected after the last full run. Must be run with output captured to a file — never piped through `tail` ([[L38]], and the flake whose evidence that destroyed) | S |
+| 1 | ✅ | **Explicit deny** | Done 2026-08-12. One permission taken from one person, without touching their role. Subtracts only — consulted after the grant check has already said yes, and a test asserts it is not even *called* when the ACL said no. Applies to superadmins, with a CLI lift as the out-of-band way back. This closes G1. See [`knowledge/denials.md`](knowledge/denials.md) | M |
+| 2 | ✅ | **Full gate green, captured in full** | Done 2026-08-12: **22/22 tasks, 12,851 tests, 6m09s, zero cached**. 12,845 + the 6 new U11 edge tests = 12,851, so the new guards demonstrably ran. Output captured whole to a file — never through `tail` ([[L38]], and the flake whose evidence that destroyed) | S |
 
 ## Phase 2 — verify what nobody has checked
 
@@ -47,7 +47,7 @@ bind before it was pretty. None is a surprise; all are recorded at the time.
 
 | # | | Task | Why | Size |
 |---|---|---|---|---|
-| 8 | | **Screens for delegations, record locks, trust and projects** | Four features with working APIs and no page. Locking belongs on each record's own screen (per-entity work); the other three want one screen each | L |
+| 8 | | **Screens for delegations, record locks, trust, projects and denials** | Five features with working APIs and no page. Locking belongs on each record's own screen (per-entity work); a denial belongs on the person's record as well as in a list; the other three want one screen each | L |
 | 9 | | **Bulk approval, with a diff** | The diff is the feature. A button that approves several acts without showing how they differ is a button for approving things unread | M |
 | 10 | | **Deputy cover and standing approvals** | Both need a name — a deputy, a grantor — so both are inherently settings. Standing approvals need a mandatory expiry and a visible count of what they let through | L |
 | 11 | | **Per-tenant approval expiry** | Decided with the owner and recorded as unbuilt. 24h is enforced in `PendingActService`; the knob is not there | S |
@@ -104,7 +104,7 @@ Kept because it is how the Starting Kit was scoped, and it is now complete.
 | 6 | **R4 — Capability descriptor** | ✅ 2026-08-09 |
 | 7 | **R5 — Decision with reasons** | ✅ 2026-08-09 |
 | 8 | **R6 — Typed org edges** | ✅ 2026-08-09 |
-| 9 | **G1 — Layered resolver + explanation trace** | ✅ shape delivered by R5; **explicit deny is roadmap item 1** |
+| 9 | **G1 — Layered resolver + explanation trace** | ✅ shape delivered by R5; explicit deny closed it 2026-08-12 |
 | 10 | **G2 — Org edges, ceilings, inheritance** | ✅ covered by R6 — verified 2026-08-10 |
 | 11 | **G3 — Temporary delegations** | ✅ 2026-08-11 |
 | 12 | **G4 — Project permission overlays** | ✅ 2026-08-11 |

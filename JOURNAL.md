@@ -7,6 +7,57 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-08-12 — one roadmap, and the last of G1
+
+**The owner stopped me on process, and was right.** *"You already had a plan, then
+you had 5 waves, and now this."* Three overlapping views of the same work is not a
+plan — it is three plans, which is none, and it means tasks get picked off
+whichever list happens to be open. `PROGRESS.md` is now the roadmap and nothing
+else: 23 items, ordered, from here to the finish line, each tagged with whether it
+needs the owner, is blocked on something that does not exist yet, or was deferred
+deliberately. The 1,400 lines of closures and findings moved to
+`references/completed-work.md`, where the reasoning stays findable without
+competing with the plan. Rule zero-three now says this outright.
+
+**The gate ran green in full for the first time since the U11 fix**: 22/22 tasks,
+12,851 tests, 6m09s, zero cached. The arithmetic is worth recording — 12,845
+before plus the 6 new authority-edge tests is exactly 12,851, so the new guards
+demonstrably ran rather than being silently skipped, which is the failure L38 was
+written about.
+
+**Then explicit deny, which closes G1.** Permissions arrive through roles, so
+stopping one person doing one thing meant removing their whole role — and with it
+nine things they still needed — or inventing a bespoke role, which is how an
+organisation ends up with forty roles nobody can describe.
+
+Three decisions in it are worth keeping:
+
+**It can only ever subtract, and the ordering is what guarantees that.** Denials
+are consulted after the grant check has already returned true, so no arrangement
+of denial rows can permit an act the ACL refused. A test asserts the denial
+service is not even *called* when the ACL said no — if somebody moves that call
+earlier, the test fails rather than the property quietly disappearing.
+
+**It applies to superadmins, and that has a price I paid rather than dodged.** A
+control the most powerful account ignores is a suggestion. But it means somebody
+can withhold `auth.*` from the only account that could give it back, so the
+recovery path is a CLI command, out of band by design: recovering from a lockout
+should require reaching the server, not persistence in a browser. The alternative
+— exempting the deny-management capability from denial — would have been a
+special case, which is the bandage rule zero-one forbids.
+
+**Permanent is allowed here and forbidden for delegations**, and the asymmetry is
+the philosophy in miniature. A grant with no end is a role grant wearing a
+costume. A subtraction with no end is a standing decision, and forcing it to lapse
+would hand a permission back to somebody nobody re-authorised.
+
+**One documentation bug fixed in passing**: I had written `mercato auth
+denials:lift` into two doc comments before building the command, and the command
+I actually built is `auth denials --lift`. A doc that names a command which does
+not exist is worse than no doc, because somebody trusts it during an outage.
+
+---
+
 ## 2026-08-11 — G4: work gets its own scope, and the grade finally has a source
 
 Scoping stopped at the department. A legal case pulls people from several

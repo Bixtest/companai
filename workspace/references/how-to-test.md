@@ -1028,6 +1028,109 @@ the evidence, it is the two measured before/after tables in `PROGRESS.md` under
 
 ---
 
+## Batch — taking one permission away from one person
+
+**What changed, in one sentence.** You can now stop one person doing one thing,
+without removing their role and everything else that came with it.
+
+**Why it matters to us.** Before this, if somebody should stop approving refunds,
+your only options were to strip their whole role — taking away the nine other
+things they still need — or to invent a role just for them. Do that a few times
+and you have forty roles and nobody knows what any of them mean.
+
+**Visible change in the browser: none.** There is no screen for this yet. The
+rules, the API and the command-line tool are all built and tested; the page is
+roadmap item 8, alongside the screens for delegations, record locks and
+projects. I am saying this plainly rather than sending you looking for a button
+that is not there.
+
+**So what can you actually check?** One thing, and it is the important one: that
+withholding a permission works and that giving it back works. It takes about
+four minutes and uses the terminal, not the browser.
+
+### Test 1 — nothing is withheld from anybody yet (1 minute)
+
+Open a terminal in `workspace/starting-kit` and run:
+
+```bash
+corepack yarn mercato auth denials --tenant <your-tenant-id>
+```
+
+If you do not know your tenant id, run `corepack yarn mercato auth list-tenants`
+first and copy the id from the output.
+
+**Expected result:** `Nothing is withheld from anybody in this tenant.`
+
+**If instead** you get `Usage: mercato auth denials …`, you left out `--tenant`.
+
+### Test 2 — take a permission away (2 minutes)
+
+This one uses the API, because the command-line tool deliberately only *lists*
+and *lifts* — creating a denial is an act that should be recorded against a named
+person, and the CLI has no logged-in person.
+
+1. Sign in at `http://localhost:3000/backend` as the admin.
+2. Open your browser's developer tools (**F12**), go to the **Console** tab.
+3. Paste this and press Enter, replacing `<user-id>` with the id of a user you
+   want to test on — **use a test user, not your own admin account**:
+
+```javascript
+await fetch('/api/auth/authority/denials', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'withhold', subjectPrincipalId: '<user-id>', subjectKind: 'human', featurePattern: 'currencies.manage', reason: 'testing the denial feature' }) }).then(r => r.json())
+```
+
+**Expected result:** an object with an `item` containing the denial, including
+its `id`, `featurePattern: "currencies.manage"` and your reason.
+
+**Failure signature to watch for:** `{"error":"a denial must record why"}` means
+the `reason` was blank — that check is deliberate and is working.
+
+### Test 3 — it is listed, and it says why (1 minute)
+
+Back in the terminal:
+
+```bash
+corepack yarn mercato auth denials --tenant <your-tenant-id>
+```
+
+**Expected result:** one entry showing the user id, `may not currencies.manage
+(permanent)`, and `testing the denial feature` underneath.
+
+`permanent` is correct here — we did not set an expiry, and for a denial that is
+allowed. A permission somebody removed on purpose should not quietly come back on
+its own.
+
+### Test 4 — give it back (1 minute)
+
+Copy the denial id from the list above, then:
+
+```bash
+corepack yarn mercato auth denials --tenant <your-tenant-id> --lift <denial-id>
+```
+
+**Expected result:** `Lifted <id> at <timestamp>`, and a note that it takes
+effect on the next request.
+
+Run the plain list command again: the entry is still there, now marked
+`lifted <date>`. **That is correct, not a bug.** The list is a record of what was
+withheld and when it came back, not only of what is in force right now.
+
+### What this deliberately does not do yet
+
+- **No screen.** Roadmap item 8.
+- **No way to see it on the user's own page.** When the screens are built, a
+  withheld permission should be visible on the person's record, not only in a
+  separate list.
+
+### One thing worth knowing
+
+A denial applies to superadmins too. That is deliberate — a control the most
+powerful account ignores is a suggestion, not a control. It does mean it is
+possible to withhold something from the only account that could give it back,
+which is exactly why the `--lift` command exists on the server and does not need
+you to be logged in.
+
+---
+
 ## Template for future batches
 
 ```markdown
