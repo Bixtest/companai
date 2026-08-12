@@ -69,7 +69,13 @@ export default function AuthorityGraphPage() {
 
   const orgsQuery = useQuery({
     queryKey: ['directory', 'organizations', 'lookup'],
-    queryFn: async () => (await apiCallOrThrow<{ items: Organization[] }>('/api/directory/organizations?pageSize=200')).result,
+    // **100 is the maximum the API accepts**, and asking for more is not merely
+    // ignored — the request fails with a 400, this query returns nothing, and
+    // `nameOf` below falls back to raw UUIDs. The page then renders
+    // `065bd751-… → cc563521-…` for every row, which makes the one screen that
+    // governs authority impossible to operate: nobody can tell which link they
+    // are about to restrict.
+    queryFn: async () => (await apiCallOrThrow<{ items: Organization[] }>('/api/directory/organizations?pageSize=100')).result,
   })
 
   const nameOf = React.useCallback(

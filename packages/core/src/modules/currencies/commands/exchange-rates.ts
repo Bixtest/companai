@@ -409,6 +409,25 @@ const deleteExchangeRateCommand: CommandHandler<ExchangeRateDeleteInput, { excha
     const em = (ctx.container.resolve('em') as EntityManager).fork()
     const record = await em.findOne(ExchangeRate, { id: before.id })
     if (!record) return
+
+    // Same conflict as the currency undo, for the same reason — see the note
+    // there. A rate for the same pair, date and source may have been entered
+    // while this one was deleted.
+    const liveDuplicate = await em.findOne(ExchangeRate, {
+      organizationId: record.organizationId,
+      tenantId: record.tenantId,
+      fromCurrencyCode: record.fromCurrencyCode,
+      toCurrencyCode: record.toCurrencyCode,
+      date: record.date,
+      source: record.source,
+      deletedAt: null,
+    })
+    if (liveDuplicate) {
+      throw new CrudHttpError(409, {
+        error: `Cannot restore this rate because another rate now covers ${record.fromCurrencyCode}/${record.toCurrencyCode} for the same date and source.`,
+      })
+    }
+
     record.deletedAt = null
     record.isActive = before.isActive
     record.updatedAt = new Date()

@@ -5,10 +5,13 @@ import { Entity, Index, PrimaryKey, Property, Unique } from '@mikro-orm/decorato
   name: 'currencies_scope_idx',
   properties: ['organizationId', 'tenantId'],
 })
-@Unique({
-  name: 'currencies_code_scope_unique',
-  properties: ['organizationId', 'tenantId', 'code'],
-})
+// Code uniqueness is per scope **over live rows only**, enforced by a partial
+// unique index (`currencies_code_scope_unique`) on
+// `(organization_id, tenant_id, code) WHERE deleted_at IS NULL`, owned by raw SQL
+// in Migration20260812120000. A `@Unique` decorator cannot express a partial
+// index, so the entity omits it and the migration is the source of truth —
+// mirroring `users_tenant_email_hash_uniq`. A blanket constraint made a deleted
+// currency reserve its code forever (U12).
 export class Currency {
   @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
   id!: string
@@ -66,10 +69,8 @@ export class Currency {
   name: 'exchange_rates_pair_idx',
   properties: ['fromCurrencyCode', 'toCurrencyCode', 'date'],
 })
-@Unique({
-  name: 'exchange_rates_pair_datetime_source_unique',
-  properties: ['organizationId', 'tenantId', 'fromCurrencyCode', 'toCurrencyCode', 'date', 'source'],
-})
+// Pair uniqueness is **over live rows only** — same reasoning and same
+// migration as `currencies_code_scope_unique` above.
 export class ExchangeRate {
   @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
   id!: string

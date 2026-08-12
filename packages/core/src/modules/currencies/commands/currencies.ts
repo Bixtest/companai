@@ -434,6 +434,24 @@ const deleteCurrencyCommand: CommandHandler<CurrencyDeleteInput, { currencyId: s
     const em = (ctx.container.resolve('em') as EntityManager).fork()
     const record = await em.findOne(Currency, { id: before.id })
     if (!record) return
+
+    // Somebody may have reused the code while this one was deleted — possible
+    // since U12 stopped a deleted row reserving its code, and impossible before.
+    // Refuse rather than let the partial unique index raise a raw violation:
+    // restoring it would mean two live currencies with one code, and choosing
+    // which of them wins is not a decision an undo may take on its own.
+    const liveWithSameCode = await em.findOne(Currency, {
+      code: record.code,
+      organizationId: record.organizationId,
+      tenantId: record.tenantId,
+      deletedAt: null,
+    })
+    if (liveWithSameCode) {
+      throw new CrudHttpError(409, {
+        error: `Cannot restore currency ${record.code} because another currency now uses that code. Remove or rename it first.`,
+      })
+    }
+
     record.deletedAt = null
     record.isActive = before.isActive
     record.updatedAt = new Date()
