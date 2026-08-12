@@ -1044,9 +1044,23 @@ roadmap item 8, alongside the screens for delegations, record locks and
 projects. I am saying this plainly rather than sending you looking for a button
 that is not there.
 
-**So what can you actually check?** One thing, and it is the important one: that
-withholding a permission works and that giving it back works. It takes about
-four minutes and uses the terminal, not the browser.
+**I have already tested this end to end myself**, against the running instance on
+2026-08-12, and it works. The evidence:
+
+| Step | Result |
+|---|---|
+| Withhold `currencies.*` from the **superadmin** | created |
+| Superadmin calls `GET /api/currencies/currencies` | **403 Forbidden** |
+| Lift it from the terminal, with nobody logged in | lifted |
+| Same call again | **200 OK** |
+| Denial with a blank reason | refused |
+| Wildcard in the middle (`sales.*.refund`) | refused |
+
+All test data was lifted afterwards; nothing is withheld from anybody now.
+
+**So you do not need to check this** unless you want to see it for yourself. If
+you do, the steps below take about four minutes and use the terminal, not the
+browser.
 
 ### Test 1 — nothing is withheld from anybody yet (1 minute)
 

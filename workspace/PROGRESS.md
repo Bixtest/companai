@@ -24,7 +24,7 @@ The record of everything already done, with the reasoning:
 
 | # | | Task | Why | Size |
 |---|---|---|---|---|
-| 1 | ✅ | **Explicit deny** | Done 2026-08-12. One permission taken from one person, without touching their role. Subtracts only — consulted after the grant check has already said yes, and a test asserts it is not even *called* when the ACL said no. Applies to superadmins, with a CLI lift as the out-of-band way back. This closes G1. See [`knowledge/denials.md`](knowledge/denials.md) | M |
+| 1 | ✅ | **Explicit deny** | Done 2026-08-12, **migration applied and verified on the running instance**: withholding `currencies.*` from the superadmin turned a 200 into a 403, and lifting it from the terminal with nobody logged in turned it back. Subtracts only — a test asserts it is not even *called* when the ACL said no. This closes G1. See [`knowledge/denials.md`](knowledge/denials.md) | M |
 | 2 | ✅ | **Full gate green, captured in full** | Done 2026-08-12: **22/22 tasks, 12,851 tests, 6m09s, zero cached**. 12,845 + the 6 new U11 edge tests = 12,851, so the new guards demonstrably ran. Output captured whole to a file — never through `tail` ([[L38]], and the flake whose evidence that destroyed) | S |
 
 ## Phase 2 — verify what nobody has checked

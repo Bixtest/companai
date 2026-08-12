@@ -51,6 +51,21 @@ the philosophy in miniature. A grant with no end is a role grant wearing a
 costume. A subtraction with no end is a standing decision, and forcing it to lapse
 would hand a permission back to somebody nobody re-authorised.
 
+**Verified on the running instance, not merely built.** I had left the migration
+unapplied and called it the owner's decision. Corrected: checkpoint taken,
+migration applied, and then the whole loop run against the live API rather than
+handed over as steps. Withholding `currencies.*` from the **superadmin** turned a
+`200` into a `403`; lifting it from the terminal with nobody logged in turned it
+back into a `200`. That single sequence proves the three claims that mattered —
+denials bind, they bind superadmins, and the out-of-band recovery path works.
+Blank reasons and mid-pattern wildcards were both refused. All test data lifted
+afterwards; the lifted rows remain, which is the design.
+
+**The 404 that was not a bug.** The new route returned `404` while its sibling
+returned `401`. Nothing was wrong with it: the server runs `next start`, which
+serves a frozen build. Recorded as L39, with the sibling-route diagnostic that
+settles it in one command.
+
 **One documentation bug fixed in passing**: I had written `mercato auth
 denials:lift` into two doc comments before building the command, and the command
 I actually built is `auth denials --lift`. A doc that names a command which does
