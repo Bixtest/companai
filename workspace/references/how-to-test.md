@@ -1145,6 +1145,46 @@ you to be logged in.
 
 ---
 
+## Batch — a superadmin can delete a currency again (U4)
+
+**What changed, in one sentence.** Deleting a currency failed with a cryptic
+error for the top-level administrator account; it works now.
+
+**Why it matters to us.** Not for currencies in particular — for the pattern. The
+same shape of bug had already appeared three times: *code that works out "which
+organisation is this for?" from the person doing it breaks for the one person who
+belongs to all of them.* This was the fourth, and finding it live rather than by
+reading code is how we know the other three are actually fixed too.
+
+**I tested it myself**, against the running instance:
+
+| Step | Before the fix | After |
+|---|---|---|
+| Superadmin deletes a currency | `400` and an error naming `organizationId` | **`{"ok":true}`** |
+| The row in the database | untouched | soft-deleted, marked inactive |
+
+**Nothing is required from you.** No screen changed. If you want to see it, the
+Currencies page under Settings now deletes without error — but there was never a
+visible symptom other than the failure itself.
+
+### One thing I found while testing, which is *not* fixed
+
+If you delete a currency and later try to create it again with the same code, it
+will refuse and say the code *"already exists for this organization"* — while
+showing you a list that does not contain it. The deleted row is still holding the
+code.
+
+That is a real bug (recorded as **U12**) and it is next but one on the roadmap. I
+did not fix it in the same change because it needs a database migration and a
+decision about what "undo a deletion" should do if somebody has reused the code
+in the meantime — and mixing that into a one-line fix would have made both harder
+to undo if either went wrong.
+
+**If it bites you before I get to it:** use a different code, or tell me and I
+will bring the fix forward.
+
+---
+
 ## Template for future batches
 
 ```markdown

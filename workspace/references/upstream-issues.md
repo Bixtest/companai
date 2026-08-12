@@ -207,7 +207,86 @@ mismatch at creation with a message that says why. Done 2026-08-10.
 
 ---
 
-## U4 — A superadmin cannot delete a currency · severity **medium**
+## U12 — a soft-deleted row keeps its unique code forever · severity **medium**
+
+**Found:** 2026-08-12, while reproducing U4 against the running instance.
+
+**What happens.** Delete a currency, then try to create it again with the same
+code. It is refused with *"Currency code already exists for this
+organization."* — and the currency is not in any list, because it is deleted.
+The code is unusable from then on, permanently.
+
+**Why.** The application check is correct and excludes deleted rows:
+
+```ts
+const existing = await em.findOne(Currency, {
+  code: parsed.code, organizationId, tenantId, deletedAt: null,
+})
+```
+
+The **database constraint is not**:
+
+```text
+"currencies_code_scope_unique" UNIQUE CONSTRAINT, btree (organization_id, tenant_id, code)
+```
+
+No `WHERE deleted_at IS NULL`. So the application says "no duplicate, go ahead",
+the insert violates the constraint, and the error is mapped back to the same
+conflict message — which now names a row the user cannot see. **The misleading
+message is half the bug**: it sends somebody looking for a currency that is not
+there.
+
+**Reproduced.** A soft-deleted `XTS` row from 2026-08-09 blocked creating `XTS`
+on 2026-08-12. `select … where code='XTS'` returned exactly one row, with
+`deleted_at` set.
+
+**Two tables have this shape**, both in currencies:
+
+| Table | Constraint |
+|---|---|
+| `currencies` | `currencies_code_scope_unique` on `(organization_id, tenant_id, code)` |
+| `exchange_rates` | `exchange_rates_pair_datetime_source_unique` |
+
+**The fix** is a migration replacing each with a partial unique index carrying
+`where deleted_at is null` — the shape `users_tenant_email_hash_uniq` already
+uses in this codebase, so there is precedent to copy rather than a pattern to
+invent.
+
+**Not fixed inline, deliberately.** It is a schema migration with one genuine
+question attached — what should happen when an *undo* of a delete collides with
+a row created in the meantime — and bundling it into the U4 fix would have made
+both harder to review and to revert. It is **roadmap item 5**.
+
+---
+
+## U4 — A superadmin cannot delete a currency · **FIXED 2026-08-12** · severity **medium**
+
+**Fixed and verified live.** Reproduced first — `DELETE
+/api/currencies/currencies?id=…` returned `400 expected string, received
+undefined` at `organizationId`, three days after it was recorded — then fixed,
+rebuilt, and re-run against the running instance: `{"ok":true}`, with
+`deleted_at` and `is_active = false` both set on the row.
+
+**The fix, and why it is not a hole.** `currencyDeleteSchema` required
+`organizationId`, and **nothing read it**. Every use of `parsed.organizationId`
+in the module is in a *create* path. The delete finds its record through
+`buildCurrencyCommandWhere(ctx, …)` and enforces the boundary with
+`ensureOrganizationScope` against the **loaded record** — both take scope from
+`ctx`, which a request body cannot forge. So the requirement gated nothing and
+rejected exactly the actor who legitimately has no organization. It is now
+`z.uuid().optional()` in `currencyDeleteSchema` and `exchangeRateDeleteSchema`.
+
+Ten tests guard it, including that `tenantId` stays required and that a
+malformed organization id is still rejected — optional must not mean
+unvalidated.
+
+**The rule this adds to the U4 family**, stated the other way round from the
+sweep's version: *never **require** the actor's organization from an actor who
+has none.* The sweep asked where the value is wrongly **stored**; this is where
+it is wrongly **demanded**.
+
+### The original finding
+
 
 **Found:** 2026-08-09, while verifying R2b against the running platform.
 

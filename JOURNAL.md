@@ -7,6 +7,48 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-08-12 (later) — U4 was still broken, and reproducing it found another
+
+**Phase 2 of the roadmap is verifying things nobody has checked.** U4 went first
+because the route still derived its organization in the shape the original bug
+had. It was not a stale record: `DELETE /api/currencies/currencies?id=…` returned
+`400 expected string, received undefined` at `organizationId`, three days after
+it was written down.
+
+**The fix was to delete a requirement, not to add a fallback.** `organizationId`
+was mandatory in `currencyDeleteSchema` and **nothing read it** — every use of
+`parsed.organizationId` in the module is in a create path. The delete finds its
+record through `buildCurrencyCommandWhere(ctx, …)` and enforces the boundary with
+`ensureOrganizationScope` against the *loaded record*, both taking scope from
+`ctx`, which a request body cannot forge. So the field gated nothing and rejected
+the one actor who honestly has none. Adding a fallback would have been the U4
+antipattern itself — deriving a value from an actor who has no scope.
+
+That is worth stating as the other half of the family rule. The sweep asked
+*where is the actor's organization wrongly stored?* This is *where is it wrongly
+demanded?*
+
+**Reproducing it turned up U12.** Creating a currency whose code had been deleted
+fails with "already exists for this organization" — naming a row the user cannot
+see. The application check correctly excludes soft-deleted rows;
+`currencies_code_scope_unique` does not carry `where deleted_at is null`, so the
+insert violates the constraint and the error is mapped back to a message about a
+row that is not there. Deleting a currency makes its code permanently unusable.
+`exchange_rates` has the same shape.
+
+**Not fixed inline, and that was a judgement rather than a dodge.** It needs a
+migration and an answer for what an undo-of-delete does when it collides with a
+row created in the meantime. Bundling it into the U4 fix would have made both
+harder to review and to revert. Recorded as U12 and placed at roadmap item 5,
+immediately after this phase.
+
+**Two round-trips of the L38/L39 tax.** Both fixes needed
+`build:packages --force`, `build:app --force`, and a server restart before
+anything could be verified — about seven minutes each time. Worth the cost:
+without it I would have been reading code and guessing.
+
+---
+
 ## 2026-08-12 — one roadmap, and the last of G1
 
 **The owner stopped me on process, and was right.** *"You already had a plan, then
