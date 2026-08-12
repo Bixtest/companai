@@ -32,6 +32,7 @@ attached, do it and note it here as done rather than queueing it.
 | X4 | Backend footer | `Version 0.0.0-dev` shown to end users | low |
 | X5 | Authority graph | When the organization lookup fails the page **silently** renders raw UUIDs instead of saying anything is wrong. That is how X6 stayed invisible. A failed lookup should show an error, not degrade into unreadable output | medium |
 | X6 | Parked modules (catalog, sales) | Three live-page queries request `pageSize=200`, above the API maximum of 100 — the same defect fixed on the authority page. They do not run today, so they are harmless until one of those modules is unparked | low |
+| X8 | Audit log | Action labels are inconsistent: command-bus writes render as *"Create currency"*, direct writes as raw ids like `authority.denial.created`. Mine — the denials routes use `writeDirectWriteAuditLog`, which has no translated label | low |
 | X7 | Demo feedback bubble | The fixed "Feedback"/"Contact us" pill overlaps table rows at the bottom of long lists | low |
 
 ## Fixed already

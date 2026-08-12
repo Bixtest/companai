@@ -37,10 +37,11 @@ human or test has looked.
 | 3 | ✅ | **The approvals page, end to end** | Done 2026-08-12, **through the screen itself**. The owner logged the in-app browser in, so the card, both buttons and both outcomes were verified by clicking: **Reject** → *"Rejected. It will not run."*, card gone, name unchanged; **Approve and run** → the rename executed. Test state restored afterwards (name, ceiling back to A5, enforcement back to `shadow`) | S |
 | 4 | ✅ | **U4 — a superadmin could not delete a currency** | Reproduced live 2026-08-12 (`400 expected string, received undefined`), fixed, and re-verified (`{"ok":true}`). `currencyDeleteSchema` required an `organizationId` that **nothing reads** — the boundary is enforced by `ensureOrganizationScope` against the loaded record — so it gated nothing and rejected the one actor who has no organization. Now optional in the currency and exchange-rate delete schemas, with 10 tests | S |
 | 5 | ✅ | **U12 — a deleted row kept its unique code forever** | Done 2026-08-12. Both constraints are now partial unique indexes (`where deleted_at is null`); entities drop `@Unique` since it cannot express a partial index, and the migration owns it — the `users_tenant_email_hash_uniq` pattern. Verified live: the `XTS` code blocked since 2026-08-09 creates again, and a **live** duplicate is still refused. The undo collision it creates is refused with a 409 naming the conflict, 6 tests | M |
-| 6 | ⏳ | **U14 — map live commands to capabilities, starting with `messages`** | Answering the `messages.*` question found something bigger. `messages.actions` **is** enforced by a route (the premise was wrong); `messages.manage` is not, and says so honestly. But the command gate is keyed by capability, and **only 21 of 56 live commands declare one — 38%**. Worst instance: `messages.email` is E3, irreversible, external-effect, yet `compose`/`reply`/`forward` declare no capability, so **the governance layer cannot hold a message send**. Everything gated today is reversible admin work. See [U14](references/upstream-issues.md) | M |
-| 7 | 🔒 | **Native review of the Arabic** | `ar` ships so the RTL policy is testable. Untranslated keys fall back to English and are harmless; *wrong* translations are not | S |
+| 6 | ⏳ | **U14 — map live commands to capabilities** | The command gate is keyed by capability, and a command declaring none is not gated. **Was 21 of 56 live commands (38%); five unambiguous message commands now mapped, so 46%.** What is left needs a decision, not typing: `compose`/`reply`/`forward` carry a message from draft to *sent*, and a static `capability:` must choose between under-classifying an external send (E1) and over-classifying internal notes (E3). **My recommendation is E3** — permitting is the direction this design never takes — but splitting the send into its own command is the better fix. See [U14](references/upstream-issues.md) | M |
+| 7 | | **O1 — a denial lifted from the CLI leaves no record** | **My defect, made 2026-08-12 and found the same day.** The API audits both withhold and lift; the CLI recovery path calls the service directly and writes nothing. Verified: two denials created, two lifted, `action_logs` holds two rows. Asymmetric in the wrong direction — removing authority is recorded, giving it back is not. Needs the audit write moved into the service, with a `system` principal for the console | S |
 | 8 | | **`DEMO_MODE` defaults to `true`** | Spotted in a screenshot 2026-08-12: `parseBooleanWithDefault(process.env.DEMO_MODE, true)` in the backend layout, so anyone deploying without setting it explicitly ships a feedback widget in their admin. Minor — it posts to a *local* endpoint, nothing leaves the instance, and `deployment.md` already sets `DEMO_MODE=false` — but a demo-only feature should fail closed | S |
-| 9 | | **Re-verify the boot checks that used a cached build** | [[L38]]: `yarn build:app` was a Turbo cache hit, so earlier "the server boots and the route resolves" checks may have run stale bundles. The gate is unaffected — Jest runs from source | S |
+| 9 | 🔒 | **Native review of the Arabic** | `ar` ships so the RTL policy is testable. Untranslated keys fall back to English and are harmless; *wrong* translations are not | S |
+| 10 | | **Re-verify the boot checks that used a cached build** | [[L38]]: `yarn build:app` was a Turbo cache hit, so earlier "the server boots and the route resolves" checks may have run stale bundles. The gate is unaffected — Jest runs from source | S |
 
 ## Phase 3 — the surfaces we deferred on purpose
 
@@ -49,34 +50,34 @@ bind before it was pretty. None is a surprise; all are recorded at the time.
 
 | # | | Task | Why | Size |
 |---|---|---|---|---|
-| 10 | | **Screens for delegations, record locks, trust, projects and denials** | Five features with working APIs and no page. Locking belongs on each record's own screen (per-entity work); a denial belongs on the person's record as well as in a list; the other three want one screen each | L |
-| 11 | | **Bulk approval, with a diff** | The diff is the feature. A button that approves several acts without showing how they differ is a button for approving things unread | M |
-| 12 | | **Deputy cover and standing approvals** | Both need a name — a deputy, a grantor — so both are inherently settings. Standing approvals need a mandatory expiry and a visible count of what they let through | L |
-| 13 | | **Per-tenant approval expiry** | Decided with the owner and recorded as unbuilt. 24h is enforced in `PendingActService`; the knob is not there | S |
+| 11 | | **Screens for delegations, record locks, trust, projects and denials** | Five features with working APIs and no page. Locking belongs on each record's own screen (per-entity work); a denial belongs on the person's record as well as in a list; the other three want one screen each | L |
+| 12 | | **Bulk approval, with a diff** | The diff is the feature. A button that approves several acts without showing how they differ is a button for approving things unread | M |
+| 13 | | **Deputy cover and standing approvals** | Both need a name — a deputy, a grantor — so both are inherently settings. Standing approvals need a mandatory expiry and a visible count of what they let through | L |
+| 14 | | **Per-tenant approval expiry** | Decided with the owner and recorded as unbuilt. 24h is enforced in `PendingActService`; the knob is not there | S |
 
 ## Phase 4 — the record can be trusted
 
 | # | | Task | Why | Size |
 |---|---|---|---|---|
-| 14 | | **U7 — the journal cannot tell a machine from a human** | `action_logs.actor_user_id` stores an API key's UUID with no record that it was a key. That is invariant **I2**, and telling them apart is the premise of the product | M |
-| 15 | | **Ledger correlation and causation** | Both fields are recorded when a caller supplies them, and nothing supplies them. Until something threads a correlation id, the chain records events that cannot be assembled into a trace | M |
-| 16 | | **Ledger Tier 2 — signed checkpoints** | R3's chain is verifiable only by us. A signed root in append-only storage lets a customer's auditor verify a range without our cooperation | L |
+| 15 | | **U7 — the journal cannot tell a machine from a human** | `action_logs.actor_user_id` stores an API key's UUID with no record that it was a key. That is invariant **I2**, and telling them apart is the premise of the product | M |
+| 16 | | **Ledger correlation and causation** | Both fields are recorded when a caller supplies them, and nothing supplies them. Until something threads a correlation id, the chain records events that cannot be assembled into a trace | M |
+| 17 | | **Ledger Tier 2 — signed checkpoints** | R3's chain is verifiable only by us. A signed root in append-only storage lets a customer's auditor verify a range without our cooperation | L |
 
 ## Phase 5 — before it goes on a server
 
 | # | | Task | Why | Size |
 |---|---|---|---|---|
-| 17 | | **Phase G exit gate — assertions and changelog** | The gate wants a test proving the resolver honours delegations, project overlays and lock states *each*, plus `planning/CHANGELOG.md` recording what was grafted and from where | S |
-| 18 | 🔒 | **Run the deployment guide on a real Plesk VPS** | `references/deployment.md` is derived from the repo and the working local instance. **No Plesk step has ever been executed** | M |
-| 19 | | **Production hardening the guide names** | No zero-downtime deploy, no backup schedule or monitoring, secrets in a plain `.env` with no rotation, no shared attachment storage for a second instance | L |
-| 20 | | **Close out U5, and prune parked-module dependencies** | U5's record is stale — two more flake causes were found and fixed since. And parked modules carry CVEs a scanner will flag the moment this is hosted | M |
+| 18 | | **Phase G exit gate — assertions and changelog** | The gate wants a test proving the resolver honours delegations, project overlays and lock states *each*, plus `planning/CHANGELOG.md` recording what was grafted and from where | S |
+| 19 | 🔒 | **Run the deployment guide on a real Plesk VPS** | `references/deployment.md` is derived from the repo and the working local instance. **No Plesk step has ever been executed** | M |
+| 20 | | **Production hardening the guide names** | No zero-downtime deploy, no backup schedule or monitoring, secrets in a plain `.env` with no rotation, no shared attachment storage for a second instance | L |
+| 21 | | **Close out U5, and prune parked-module dependencies** | U5's record is stale — two more flake causes were found and fixed since. And parked modules carry CVEs a scanner will flag the moment this is hosted | M |
 
 ## Blocked — the preconditions do not exist
 
 | # | | Task | Precondition |
 |---|---|---|---|
-| 21 | ⛔ | **Charter grants** | An AI worker entity (`ai_worker` is a type with no producer) **and** the Charter compiler. Phase K |
-| 22 | ⛔ | **Budget as a resolver input** | Spend metering: what an act costs, what an actor has spent, a limit. None exist |
+| 22 | ⛔ | **Charter grants** | An AI worker entity (`ai_worker` is a type with no producer) **and** the Charter compiler. Phase K |
+| 23 | ⛔ | **Budget as a resolver input** | Spend metering: what an act costs, what an actor has spent, a limit. None exist |
 
 Both would *narrow*, so their absence leaves answers more permissive than the
 design intends but never more permissive than the RBAC check that already ran.
@@ -85,9 +86,9 @@ design intends but never more permissive than the RBAC check that already ran.
 
 | # | | Task | Why it waits |
 |---|---|---|---|
-| 23 | 💤 | `domain_mappings` extraction | Per-tenant custom domains. Wanted, nothing needs it yet |
-| 24 | 💤 | Orphaned-table decision (~127 tables) | Inert. Revisit only as a deliberate backed-up migration |
-| 25 | 💤 | Phase K checkpoint | The scheduled date that stops "we'll clean up later" being a lie |
+| 24 | 💤 | `domain_mappings` extraction | Per-tenant custom domains. Wanted, nothing needs it yet |
+| 25 | 💤 | Orphaned-table decision (~127 tables) | Inert. Revisit only as a deliberate backed-up migration |
+| 26 | 💤 | Phase K checkpoint | The scheduled date that stops "we'll clean up later" being a lie |
 
 ---
 

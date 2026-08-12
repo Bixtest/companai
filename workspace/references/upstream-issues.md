@@ -207,6 +207,45 @@ mismatch at creation with a message that says why. Done 2026-08-10.
 
 ---
 
+## O1 — a denial lifted from the CLI leaves no record · **ours, not upstream** · severity **high**
+
+**Found:** 2026-08-12, reading the audit log while a gate ran. **This is a defect
+I introduced the same morning**, in the denials feature itself.
+
+**What happens.** `POST /api/auth/authority/denials` writes an audit entry for
+both `withhold` and `lift`. The CLI recovery path —
+`mercato auth denials --lift <id>` — calls `DenialService.lift()` directly and
+**writes nothing**.
+
+Verified against the running instance: two denials created through the API, two
+lifted through the CLI, and `action_logs` holds **two rows, both creations**.
+
+**Why it matters more than it looks.** The CLI is the documented recovery path
+for the case where a denial has locked out the only account that could lift it —
+so it is exactly the moment somebody restores a withheld permission with no
+authenticated user and no oversight. *"Somebody gave a permission back and there
+is no record of who or when"* is precisely the failure this platform exists to
+make impossible. It is also asymmetric in the wrong direction: the act that
+**removes** authority is recorded, the act that **returns** it is not.
+
+**Why it happened.** The audit write lives in the route, not the service, so
+every other caller of the service silently inherits no audit. The route was
+written first and the CLI added afterwards.
+
+**The fix, and the decision in it.** Moving the audit write into
+`DenialService.lift()` covers every caller, but the CLI has no authenticated
+user — which is the whole point of it being out of band. R1's principal
+abstraction already has the vocabulary: a console lift is a **`system`** actor.
+So the service should record the act with an explicit system principal and a
+note that it came from the server console, rather than either omitting the entry
+or inventing a human.
+
+**Not fixed inline**, because it needs that principal decision applied
+consistently and a check that the route does not then write twice. Roadmap
+item 7.
+
+---
+
 ## U14 — the resolver binds 38% of live commands · severity **high**
 
 **Found:** 2026-08-12, answering the `messages.*` question on the roadmap. The
@@ -260,6 +299,49 @@ administrative work.
 open by design, because refusing every unmapped command would break the platform.
 The work is mapping commands to capabilities, module by module, and `messages`
 is where it should start.
+
+**Partly closed 2026-08-12: 38% → 46%.** Five message commands had an
+unambiguous capability and now declare one — `actions.execute`,
+`actions.record_terminal` and `confirmations.confirm` map to `messages.actions`;
+the two draft-attachment commands map to `messages.attach_files`. All 300
+messages tests still pass.
+
+### What is left, and the design question in it
+
+Fifteen message commands remain, and the interesting ones are
+`compose` / `reply` / `forward` / `update_draft` — the commands that carry a
+message from draft to sent.
+
+**Tracing the send confirms the gate can reach it.** The transition is
+`isDraft = false; status = 'sent'`, which emits `messages.message.sent`, which a
+subscriber turns into a queued job, which the worker delivers by email. Five
+hops, and the gate sits at the first — but holding the command does prevent the
+send, because nothing downstream fires until the command commits. So this is a
+mapping gap, not a structural one.
+
+**The question is which capability to declare**, and a `capability:` is static
+while the answer is not:
+
+| Choice | Consequence |
+|---|---|
+| `messages.compose` (E1) | Correct for an internal message. **Under-classifies an external send** — the irreversible act stays effectively ungated |
+| `messages.email` (E3, irreversible, external) | Correct for an external send. **Over-classifies internal messaging**, which in `enforce` mode could hold ordinary internal notes for approval |
+
+`messages.compose`'s own note states the intended split: *"Internal composition
+only. Sending outside needs messages.email, which is classified separately and
+much higher."* The design assumes two acts; the code has one command.
+
+**Recommendation: declare `messages.email`.** Everything in this system is a
+ceiling and the answer is the minimum, so over-classifying restricts and
+under-classifying permits — and permitting is the direction this design never
+takes. Over-restriction is visible and correctable; an ungated external send is
+silent.
+
+**The better fix, if it is worth the work:** split the send transition into its
+own command, or let a command resolve its capability from its input. Either
+makes the classification honest instead of choosing which way to be wrong. That
+is a decision with product consequences — whether internal messages may be held
+— so it is worth naming rather than settling quietly.
 
 **Placed at roadmap item 6**, taking the slot the question that found it
 occupied.

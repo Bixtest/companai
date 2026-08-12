@@ -7,6 +7,54 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-08-12 (evening) — the question was wrong, and what was under it was worse
+
+**U13 verified fixed**: the authority graph now reads *Acme Corp → Approval
+Branch* instead of two UUIDs.
+
+**Item 6 asked me to check two capability descriptors. Both turned out fine**,
+and the checking found something much larger. `messages.actions` **is** enforced
+by a route — the roadmap's premise was wrong. `messages.manage` is not, and its
+own note already says so honestly.
+
+**U14.** The command gate is keyed by capability, and `interceptors.ts` states
+plainly that a command declaring none is not gated — *"the gap is visible rather
+than guessed at"*. The mechanism was documented. **Nobody had measured the gap.**
+Counting live modules only: **21 of 56 commands, 38%.** Twenty of the thirty-five
+misses were in `messages`.
+
+Five had an unambiguous answer and now declare one, taking it to **46%**. What
+remains is a design question rather than typing: `compose`/`reply`/`forward`
+carry a message from draft to *sent*, and a static `capability:` must choose
+between under-classifying an external send and over-classifying internal notes.
+I recommend the higher classification — permitting is the direction this design
+never takes — and noted that splitting the send into its own command is the
+better fix. That is a product decision, so it is named rather than settled
+quietly.
+
+**Tracing it was worth doing.** The send is five hops from the gate — command →
+event → subscriber → queue → worker → `sendEmail()` — which looked structural at
+first. It is not: nothing downstream fires until the command commits, so holding
+the command does prevent the send. A mapping gap, not an architectural one, and
+the difference matters for how it gets fixed.
+
+**O1 — and this one is mine.** Reading the audit log while the gate ran, I found
+two `authority.denial` rows for two creations and **nothing for the two lifts**.
+The API audits both; the CLI recovery path calls the service directly and writes
+nothing. So the act that **removes** authority is recorded and the act that
+**returns** it is not — in the feature I built this morning, on the path
+documented for when somebody is locked out.
+
+It happened because the audit write lives in the route rather than the service,
+so every other caller inherits silence. Not fixed inline: it needs R1's `system`
+principal applied to a console actor, and a check that the route does not then
+write twice. Roadmap item 7.
+
+**Rule zero-eight has now found three things in one afternoon** — U13, U14 and
+O1 — none of which was on any list, all while a build or gate was running.
+
+---
+
 ## 2026-08-12 (later still) — U12 answered, and rule zero-eight paid on its first outing
 
 **U12 needed a decision, not just a migration**, which is why it was not folded
