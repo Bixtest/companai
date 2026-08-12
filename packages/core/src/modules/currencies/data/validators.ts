@@ -59,7 +59,16 @@ export const currencyUpdateSchema = z.object({
 
 export const currencyDeleteSchema = z.object({
   id: z.uuid(),
-  organizationId: z.uuid(),
+  /**
+   * Optional, because a superadmin acting tenant-wide legitimately has none.
+   *
+   * This field is **never read** by the delete command — the record is found
+   * through `buildCurrencyCommandWhere(ctx, …)` and the boundary is enforced by
+   * `ensureOrganizationScope` against the *loaded record*, both of which take
+   * their scope from `ctx`. Requiring it here gated nothing and rejected exactly
+   * the one actor who cannot supply it (U4).
+   */
+  organizationId: z.uuid().optional(),
   tenantId: z.uuid(),
 })
 
@@ -126,7 +135,8 @@ export const exchangeRateUpdateSchema = z
 
 export const exchangeRateDeleteSchema = z.object({
   id: z.uuid(),
-  organizationId: z.uuid(),
+  /** Optional for the same reason as `currencyDeleteSchema` — see the note there. */
+  organizationId: z.uuid().optional(),
   tenantId: z.uuid(),
 })
 
