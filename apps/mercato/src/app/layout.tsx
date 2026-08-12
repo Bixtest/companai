@@ -9,9 +9,18 @@ import { resolveTextDirection } from '@open-mercato/shared/lib/i18n/direction'
 
 export const metadata: Metadata = {
   title: 'Companai',
-  description: 'AI-supportive, modular ERP foundation for product & service companies',
+  // Not upstream's "modular ERP foundation" — that describes a different
+  // product. Companai is an operating platform where people and AI workers act
+  // under one org model, one task model and one authority system.
+  description: 'One organisation, one task model, one authority system — for people and AI workers alike.',
   icons: {
-    icon: '/companai.svg',
+    // The SVG is the master and what modern browsers use. The `.ico` is the
+    // fallback for the places that still insist on one — older browsers, some
+    // bookmark and feed readers.
+    icon: [
+      { url: '/companai.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico', sizes: 'any' },
+    ],
   },
 }
 

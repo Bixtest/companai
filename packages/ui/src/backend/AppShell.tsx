@@ -760,7 +760,14 @@ function AppShellBody({ productName, logo, email, canManageUpgradeActions = fals
               className={`flex items-center gap-3 rounded-xl transition-colors hover:bg-muted ${compact ? 'p-2 justify-center' : 'p-3'}`}
               aria-label={t('appShell.goToDashboard')}
             >
-              <Image src={resolvedLogo?.src ?? "/companai.svg"} alt={resolvedLogo?.alt ?? resolvedBrandName} width={40} height={40} className="rounded-full shrink-0" unoptimized={resolvedLogoBypassesOptimization ? true : undefined} />
+              {/*
+                No circular crop, and `object-contain` rather than the default
+                stretch. `rounded-full` masked a circle out of the brand mark and
+                the square box squashed it: Companai's logo is 448x473, and a
+                tenant's uploaded logo can be any shape at all. Cropping somebody's
+                logo into a circle and stretching it is two defects, not a style.
+              */}
+              <Image src={resolvedLogo?.src ?? "/companai.svg"} alt={resolvedLogo?.alt ?? resolvedBrandName} width={40} height={40} className="shrink-0 object-contain" unoptimized={resolvedLogoBypassesOptimization ? true : undefined} />
               {!compact && <span className="truncate text-sm font-medium text-foreground">{resolvedBrandName}</span>}
             </Link>
           </div>
@@ -893,7 +900,7 @@ function AppShellBody({ productName, logo, email, canManageUpgradeActions = fals
                 className={`flex items-center gap-3 rounded-xl transition-colors hover:bg-muted ${compact ? 'p-2 justify-center' : 'p-3'}`}
                 aria-label={t('appShell.goToDashboard')}
               >
-                <Image src={resolvedLogo?.src ?? "/companai.svg"} alt={resolvedLogo?.alt ?? resolvedBrandName} width={40} height={40} className="rounded-full shrink-0" unoptimized={resolvedLogoBypassesOptimization ? true : undefined} />
+                <Image src={resolvedLogo?.src ?? "/companai.svg"} alt={resolvedLogo?.alt ?? resolvedBrandName} width={40} height={40} className="shrink-0 object-contain" unoptimized={resolvedLogoBypassesOptimization ? true : undefined} />
                 {!compact && <span className="truncate text-sm font-medium text-foreground">{resolvedBrandName}</span>}
               </Link>
             </div>
@@ -959,7 +966,7 @@ function AppShellBody({ productName, logo, email, canManageUpgradeActions = fals
               className={`flex items-center gap-3 rounded-xl transition-colors hover:bg-muted ${compact ? 'p-2 justify-center' : 'p-3'}`}
               aria-label={t('appShell.goToDashboard')}
             >
-              <Image src={resolvedLogo?.src ?? "/companai.svg"} alt={resolvedLogo?.alt ?? resolvedBrandName} width={40} height={40} className="rounded-full shrink-0" unoptimized={resolvedLogoBypassesOptimization ? true : undefined} />
+              <Image src={resolvedLogo?.src ?? "/companai.svg"} alt={resolvedLogo?.alt ?? resolvedBrandName} width={40} height={40} className="shrink-0 object-contain" unoptimized={resolvedLogoBypassesOptimization ? true : undefined} />
               {!compact && <span className="truncate text-sm font-medium text-foreground">{resolvedBrandName}</span>}
             </Link>
           </div>
