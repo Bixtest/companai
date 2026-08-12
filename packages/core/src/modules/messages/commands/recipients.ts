@@ -97,6 +97,7 @@ async function emitRecipientMutationEvent(
 
 const markReadCommand: CommandHandler<unknown, { ok: true }> = {
   id: 'messages.recipients.mark_read',
+  capability: 'messages.view',
   async prepare(rawInput, ctx) {
     const input = recipientMutationSchema.parse(rawInput)
     const em = (ctx.container.resolve('em') as EntityManager).fork()
@@ -142,6 +143,7 @@ const markReadCommand: CommandHandler<unknown, { ok: true }> = {
 
 const markUnreadCommand: CommandHandler<unknown, { ok: true }> = {
   id: 'messages.recipients.mark_unread',
+  capability: 'messages.view',
   async prepare(rawInput, ctx) {
     const input = recipientMutationSchema.parse(rawInput)
     const em = (ctx.container.resolve('em') as EntityManager).fork()
@@ -187,6 +189,7 @@ const markUnreadCommand: CommandHandler<unknown, { ok: true }> = {
 
 const archiveRecipientCommand: CommandHandler<unknown, { ok: true }> = {
   id: 'messages.recipients.archive',
+  capability: 'messages.view',
   async prepare(rawInput, ctx) {
     const input = recipientMutationSchema.parse(rawInput)
     const em = (ctx.container.resolve('em') as EntityManager).fork()
@@ -232,6 +235,7 @@ const archiveRecipientCommand: CommandHandler<unknown, { ok: true }> = {
 
 const unarchiveRecipientCommand: CommandHandler<unknown, { ok: true }> = {
   id: 'messages.recipients.unarchive',
+  capability: 'messages.view',
   async prepare(rawInput, ctx) {
     const input = recipientMutationSchema.parse(rawInput)
     const em = (ctx.container.resolve('em') as EntityManager).fork()

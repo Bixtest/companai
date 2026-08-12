@@ -1029,6 +1029,7 @@ const forwardMessageCommand: CommandHandler<unknown, { id: string; externalEmail
 
 const deleteForActorCommand: CommandHandler<unknown, { ok: true }> = {
   id: 'messages.messages.delete_for_actor',
+  capability: 'messages.view',
   async prepare(rawInput, ctx) {
     const input = deleteForActorCommandSchema.parse(rawInput)
     const em = (ctx.container.resolve('em') as EntityManager).fork()

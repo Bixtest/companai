@@ -145,6 +145,7 @@ async function resolveConversationScope(
 
 const archiveConversationForActorCommand: CommandHandler<unknown, { ok: true; affectedCount: number }> = {
   id: 'messages.conversation.archive_for_actor',
+  capability: 'messages.view',
   async execute(rawInput, ctx) {
     const input = conversationCommandSchema.parse(rawInput)
     const em = (ctx.container.resolve('em') as EntityManager).fork()
@@ -188,6 +189,7 @@ const archiveConversationForActorCommand: CommandHandler<unknown, { ok: true; af
 
 const markConversationUnreadForActorCommand: CommandHandler<unknown, { ok: true; affectedCount: number }> = {
   id: 'messages.conversation.mark_unread_for_actor',
+  capability: 'messages.view',
   async execute(rawInput, ctx) {
     const input = conversationCommandSchema.parse(rawInput)
     const em = (ctx.container.resolve('em') as EntityManager).fork()
@@ -230,6 +232,7 @@ const markConversationUnreadForActorCommand: CommandHandler<unknown, { ok: true;
 
 const unarchiveConversationForActorCommand: CommandHandler<unknown, { ok: true; affectedCount: number }> = {
   id: 'messages.conversation.unarchive_for_actor',
+  capability: 'messages.view',
   async execute(rawInput, ctx) {
     const input = conversationCommandSchema.parse(rawInput)
     const em = (ctx.container.resolve('em') as EntityManager).fork()
@@ -272,6 +275,7 @@ const unarchiveConversationForActorCommand: CommandHandler<unknown, { ok: true; 
 
 const markConversationReadForActorCommand: CommandHandler<unknown, { ok: true; affectedCount: number }> = {
   id: 'messages.conversation.mark_read_for_actor',
+  capability: 'messages.view',
   async execute(rawInput, ctx) {
     const input = conversationCommandSchema.parse(rawInput)
     const em = (ctx.container.resolve('em') as EntityManager).fork()
@@ -317,6 +321,7 @@ type DeletedTarget = { messageId: string; target: 'sender' | 'recipient' }
 
 const deleteConversationForActorCommand: CommandHandler<unknown, { ok: true; affectedCount: number }> = {
   id: 'messages.conversation.delete_for_actor',
+  capability: 'messages.view',
   async execute(rawInput, ctx) {
     const input = conversationCommandSchema.parse(rawInput)
     const em = (ctx.container.resolve('em') as EntityManager).fork()

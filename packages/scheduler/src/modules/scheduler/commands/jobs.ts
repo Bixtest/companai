@@ -180,6 +180,7 @@ function ensureCanManageSystemScopedJob(
  */
 const createScheduleCommand: CommandHandler<ScheduleCreateInput, { id: string }> = {
   id: 'scheduler.jobs.create',
+  capability: 'scheduler.jobs.manage',
 
   async execute(input, ctx) {
     ensureTenantScope(ctx, input.tenantId)
@@ -278,6 +279,7 @@ const createScheduleCommand: CommandHandler<ScheduleCreateInput, { id: string }>
  */
 const updateScheduleCommand: CommandHandler<ScheduleUpdateInput, { ok: boolean }> = {
   id: 'scheduler.jobs.update',
+  capability: 'scheduler.jobs.manage',
 
   async prepare(input, ctx) {
     const em = ctx.container.resolve<EntityManager>('em')
@@ -408,6 +410,7 @@ const updateScheduleCommand: CommandHandler<ScheduleUpdateInput, { ok: boolean }
  */
 const deleteScheduleCommand: CommandHandler<{ id: string }, { ok: boolean }> = {
   id: 'scheduler.jobs.delete',
+  capability: 'scheduler.jobs.manage',
 
   async prepare(input, ctx) {
     const em = ctx.container.resolve<EntityManager>('em')

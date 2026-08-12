@@ -170,6 +170,7 @@ async function restoreAvailabilityRuleFromSnapshot(em: EntityManager, snapshot: 
 
 const replaceWeeklyAvailabilityCommand: CommandHandler<PlannerAvailabilityWeeklyReplaceInput, { ok: true }> = {
   id: 'planner.availability.weekly.replace',
+  capability: 'planner.manage_availability',
   async prepare(input, ctx) {
     const parsed = plannerAvailabilityWeeklyReplaceSchema.parse(input)
     ensureTenantScope(ctx, parsed.tenantId)

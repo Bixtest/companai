@@ -15,6 +15,7 @@ const logger = createLogger('scheduler').child({ component: 'test-echo' })
  */
 const testEchoCommand: CommandHandler<Record<string, unknown>, { echoed: Record<string, unknown>; timestamp: string }> = {
   id: 'scheduler.test.echo',
+  capability: 'scheduler.jobs.trigger',
 
   async execute(input) {
     const timestamp = new Date().toISOString()

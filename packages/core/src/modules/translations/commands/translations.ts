@@ -70,6 +70,7 @@ async function loadTranslationSnapshot(
 
 const saveTranslationCommand: CommandHandler<SaveInput, { rowId: string }> = {
   id: 'translations.translation.save',
+  capability: 'translations.manage',
 
   async prepare(input, ctx) {
     ensureTenantScope(ctx, input.tenantId)
@@ -214,6 +215,7 @@ const saveTranslationCommand: CommandHandler<SaveInput, { rowId: string }> = {
 
 const deleteTranslationCommand: CommandHandler<DeleteInput, { deleted: boolean }> = {
   id: 'translations.translation.delete',
+  capability: 'translations.manage',
 
   async prepare(input, ctx) {
     ensureTenantScope(ctx, input.tenantId)

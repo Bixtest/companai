@@ -13,6 +13,12 @@ const consumeTokenSchema = z.object({
 })
 
 const consumeTokenCommand: CommandHandler<unknown, { messageId: string; recipientUserId: string }> = {
+  // **Deliberately ungated (item 16).** This is the external-recipient path: a
+  // token from an emailed link is exchanged for access, and the token *is* the
+  // credential. The caller has no session and no ACL, so there is no capability
+  // to check — gating it would not add a control, it would break external
+  // access entirely. The token's own limits (hash comparison, use count) are the
+  // control here.
   id: 'messages.tokens.consume',
   async execute(rawInput, ctx) {
     const input = consumeTokenSchema.parse(rawInput)

@@ -71,6 +71,7 @@ const reorderDictionaryEntriesCommand: CommandHandler<
   { dictionaryId: string; updatedIds: string[] }
 > = {
   id: 'dictionaries.entries.reorder',
+  capability: 'dictionaries.manage',
   async prepare(rawInput, ctx) {
     const parsed = reorderDictionaryEntriesCommandSchema.parse(rawInput)
     const scope: DictionaryScope = { tenantId: parsed.tenantId, organizationId: parsed.organizationId }
@@ -252,6 +253,7 @@ const setDefaultDictionaryEntryCommand: CommandHandler<
   { dictionaryId: string; entryId: string; clearedIds: string[] }
 > = {
   id: 'dictionaries.entries.set_default',
+  capability: 'dictionaries.manage',
   async prepare(rawInput, ctx) {
     const parsed = setDefaultDictionaryEntryCommandSchema.parse(rawInput)
     const scope: DictionaryScope = { tenantId: parsed.tenantId, organizationId: parsed.organizationId }

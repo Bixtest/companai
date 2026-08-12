@@ -78,6 +78,7 @@ export const todoCrudIndexer: CrudIndexerConfig<Todo> = {
 
 const createTodoCommand: CommandHandler<Record<string, unknown>, Todo> = {
   id: 'example.todos.create',
+  capability: 'example.todos.manage',
   isUndoable: true,
   async execute(rawInput, ctx) {
     const { parsed, custom } = parseWithCustomFields(todoCreateSchema, rawInput)
@@ -188,6 +189,7 @@ const createTodoCommand: CommandHandler<Record<string, unknown>, Todo> = {
 
 const updateTodoCommand: CommandHandler<Record<string, unknown>, Todo> = {
   id: 'example.todos.update',
+  capability: 'example.todos.manage',
   isUndoable: true,
   async prepare(rawInput, ctx) {
     const { parsed } = parseWithCustomFields(todoUpdateSchema, rawInput)
@@ -330,6 +332,7 @@ const updateTodoCommand: CommandHandler<Record<string, unknown>, Todo> = {
 
 const deleteTodoCommand: CommandHandler<{ body?: Record<string, unknown>; query?: Record<string, unknown> }, Todo> = {
   id: 'example.todos.delete',
+  capability: 'example.todos.manage',
   isUndoable: true,
   async prepare(input, ctx) {
     const id = requireId(input, 'Todo id required')

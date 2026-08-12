@@ -108,6 +108,7 @@ async function restoreAvailabilityRuleFromSnapshot(em: EntityManager, snapshot: 
 
 const createAvailabilityRuleCommand: CommandHandler<PlannerAvailabilityRuleCreateInput, { ruleId: string }> = {
   id: 'planner.availability.create',
+  capability: 'planner.manage_availability',
   async execute(input, ctx) {
     const parsed = plannerAvailabilityRuleCreateSchema.parse(input)
     ensureTenantScope(ctx, parsed.tenantId)
@@ -186,6 +187,7 @@ const createAvailabilityRuleCommand: CommandHandler<PlannerAvailabilityRuleCreat
 
 const updateAvailabilityRuleCommand: CommandHandler<PlannerAvailabilityRuleUpdateInput, { ruleId: string }> = {
   id: 'planner.availability.update',
+  capability: 'planner.manage_availability',
   async prepare(input, ctx) {
     const parsed = plannerAvailabilityRuleUpdateSchema.parse(input)
     const em = (ctx.container.resolve('em') as EntityManager)
@@ -268,6 +270,7 @@ const updateAvailabilityRuleCommand: CommandHandler<PlannerAvailabilityRuleUpdat
 
 const deleteAvailabilityRuleCommand: CommandHandler<{ id?: string }, { ruleId: string }> = {
   id: 'planner.availability.delete',
+  capability: 'planner.manage_availability',
   async prepare(input, ctx) {
     const id = input?.id
     if (!id) return {}
