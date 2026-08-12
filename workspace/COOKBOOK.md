@@ -22,7 +22,7 @@ A batch that changes something and leaves them stale is not finished.
 | [`../INDEX.md`](../INDEX.md) | A folder appears, a phase completes, a decision is made |
 | [`../JOURNAL.md`](../JOURNAL.md) | A decision, a completed phase, or a surprising finding |
 | [`../LESSONS.md`](../LESSONS.md) | **Immediately** when a mistake or near-miss is caught |
-| [`PROGRESS.md`](PROGRESS.md) | Every batch — which one we are on, out of how many |
+| [`PROGRESS.md`](PROGRESS.md) | **The roadmap** — everything left, in order. The only plan |
 | [`references/how-to-test.md`](references/how-to-test.md) | Every batch — the owner's click-by-click steps |
 | [`knowledge/`](knowledge/) | Every batch — what you learned about **how the platform works** |
 
@@ -226,9 +226,13 @@ mechanism that remembers a task.
 
 **What this requires.**
 
-1. **One ordered backlog**, in [PROGRESS.md](PROGRESS.md) → *The backlog*. Every
-   outstanding item, first to last, with why it sits where it does. Not a set of
-   notes scattered through prose.
+1. **One roadmap, and only one**: [PROGRESS.md](PROGRESS.md). Every outstanding
+   item, first to last, with why it sits where it does. Not a set of notes
+   scattered through prose, and **not a second view that competes with it** —
+   a plan plus five waves plus a backlog is three plans, which is none.
+   Completed work moves out to
+   [references/completed-work.md](references/completed-work.md) so the roadmap
+   stays short enough that somebody actually reads it.
 2. **Nothing leaves a batch undone without landing there.** A deferral, a
    discovered defect, a "we should also…" — it goes on the list in the same edit
    that discovers it, or it does not exist.

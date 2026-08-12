@@ -64,7 +64,7 @@ companai/                      ← you are here
 │
 ├── workspace/                 BUILDING — this is where work happens
 │   ├── COOKBOOK.md            the development cookbook — read before touching code
-│   ├── PROGRESS.md            which batch we are on, out of 16
+│   ├── PROGRESS.md            THE ROADMAP — everything left, in order. The only plan
 │   ├── knowledge/             HOW THE PLATFORM WORKS — reusable know-how
 │   ├── references/            the detail behind the cookbook
 │   ├── salvage/               one report per module analysed — what each contains
@@ -74,10 +74,16 @@ companai/                      ← you are here
 │   ├── .toolchain/            our own Node 24 — do not use the system Node
 │   └── starting-kit/          THE CODEBASE
 │
-├── Platform/                  Candidate 1 — assessed, not chosen. Reference only.
-├── open-mercato-main/         Candidate 2 — the original, unmodified. Reference only.
+├── Platform/                  Candidate 1 — assessed, not chosen. Source of the G1–G8 grafts
+├── open-mercato-main/         Candidate 2 — the original, unmodified. Diff against it
 └── skills-main/               The agent methodology our process is based on
 ```
+
+**The three folders at the bottom are gitignored on purpose.** They are read-only
+reference trees, not our code — `Platform/` is where the authority ideas came
+from, and `open-mercato-main/` is the pristine upstream to diff against when you
+need to know whether we changed something or inherited it. **Every line of code we
+own lives in `workspace/starting-kit/` and nowhere else.**
 
 ⚠️ **Naming trap:** the outer folder is `companai`, the inner one is `compai`.
 Different spellings, not a typo you should "fix" — paths depend on both.
@@ -87,9 +93,10 @@ Different spellings, not a typo you should "fix" — paths depend on both.
 Every batch runs the same way. Nothing here is optional.
 
 **1. Find out what is next.**
-[`workspace/PROGRESS.md`](workspace/PROGRESS.md) → *The backlog*. It is ordered;
-take item 1 unless you have a reason not to. If you have a reason, say it and
-re-order the list — the list is the memory, not you.
+[`workspace/PROGRESS.md`](workspace/PROGRESS.md) is the roadmap and the only plan.
+It is ordered; take item 1 unless you have a reason not to. If you have a reason,
+say it and re-order the list — the list is the memory, not you. Never work on
+something that is not on it; add it first.
 
 **2. Set up your shell.** Every session, every terminal:
 
@@ -196,8 +203,8 @@ Break these and you will damage the project.
 | Know the codebase's true health | [`workspace/salvage/P3-baseline.md`](workspace/salvage/P3-baseline.md) |
 | **Learn how the platform works** | [`workspace/knowledge/`](workspace/knowledge/) |
 | **Put it on a server** | [`workspace/references/deployment.md`](workspace/references/deployment.md) |
-| **Know how far along we are** | [`workspace/PROGRESS.md`](workspace/PROGRESS.md) |
-| **See every outstanding task, in order** | [`workspace/PROGRESS.md`](workspace/PROGRESS.md) → *The backlog* |
+| **See everything left to do, in order** | [`workspace/PROGRESS.md`](workspace/PROGRESS.md) — the roadmap, and the only plan |
+| **See what is already done, and why** | [`workspace/references/completed-work.md`](workspace/references/completed-work.md) |
 | See what happened and when | [`JOURNAL.md`](JOURNAL.md) |
 | Avoid a known trap | [`LESSONS.md`](LESSONS.md) |
 | **Check if we already built something** | [`workspace/attic/CATALOG.md`](workspace/attic/CATALOG.md) |
