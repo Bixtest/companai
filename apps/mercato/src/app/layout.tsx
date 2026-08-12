@@ -27,7 +27,6 @@ export default async function RootLayout({
   const direction = resolveTextDirection(locale)
   const dict = await loadDictionary(locale)
   const localeLocked = resolveForcedLocale(process.env) !== null
-  const demoModeEnabled = process.env.DEMO_MODE !== 'false'
   const noticeBarsEnabled = process.env.OM_INTEGRATION_TEST !== 'true'
   return (
     <html lang={locale} dir={direction} suppressHydrationWarning>
@@ -50,7 +49,7 @@ export default async function RootLayout({
         />
       </head>
       <body className="antialiased" suppressHydrationWarning data-gramm="false">
-        <AppProviders locale={locale} dict={dict} localeLocked={localeLocked} demoModeEnabled={demoModeEnabled} noticeBarsEnabled={noticeBarsEnabled}>
+        <AppProviders locale={locale} dict={dict} localeLocked={localeLocked} noticeBarsEnabled={noticeBarsEnabled}>
           {children}
         </AppProviders>
       </body>

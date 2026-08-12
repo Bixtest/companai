@@ -81,7 +81,6 @@ describe('RootLayout', () => {
     const appProviders = findElementByType(tree, AppProviders)
 
     expect(appProviders).not.toBeNull()
-    expect(appProviders?.props.demoModeEnabled).toBe(true)
     expect(appProviders?.props.noticeBarsEnabled).toBe(false)
   })
 
@@ -95,7 +94,6 @@ describe('RootLayout', () => {
     const appProviders = findElementByType(tree, AppProviders)
 
     expect(appProviders).not.toBeNull()
-    expect(appProviders?.props.demoModeEnabled).toBe(false)
     expect(appProviders?.props.noticeBarsEnabled).toBe(true)
   })
 })

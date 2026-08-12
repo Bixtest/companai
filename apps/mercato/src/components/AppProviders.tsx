@@ -17,11 +17,10 @@ type AppProvidersProps = {
   locale: Locale
   dict: Dict
   localeLocked: boolean
-  demoModeEnabled: boolean
   noticeBarsEnabled: boolean
 }
 
-export function AppProviders({ children, locale, dict, localeLocked, demoModeEnabled, noticeBarsEnabled }: AppProvidersProps) {
+export function AppProviders({ children, locale, dict, localeLocked, noticeBarsEnabled }: AppProvidersProps) {
   return (
     <I18nProvider locale={locale} dict={dict} localeLocked={localeLocked}>
       <ClientBootstrapProvider>
@@ -29,7 +28,7 @@ export function AppProviders({ children, locale, dict, localeLocked, demoModeEna
           <ThemeProvider>
             <QueryProvider>
               <FrontendLayout footer={<AuthFooter />}>{children}</FrontendLayout>
-              {noticeBarsEnabled ? <GlobalNoticeBars demoModeEnabled={demoModeEnabled} /> : null}
+              {noticeBarsEnabled ? <GlobalNoticeBars /> : null}
             </QueryProvider>
           </ThemeProvider>
         </ComponentOverridesBootstrap>

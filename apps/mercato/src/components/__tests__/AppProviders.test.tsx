@@ -35,8 +35,8 @@ jest.mock('@/components/ComponentOverridesBootstrap', () => ({
 }))
 
 jest.mock('@/components/GlobalNoticeBars', () => ({
-  GlobalNoticeBars: ({ demoModeEnabled }: { demoModeEnabled: boolean }) => (
-    <div data-testid="global-notice-bars" data-demo-mode={demoModeEnabled ? 'true' : 'false'} />
+  GlobalNoticeBars: () => (
+    <div data-testid="global-notice-bars" />
   ),
 }))
 
@@ -45,17 +45,17 @@ describe('AppProviders', () => {
 
   it('renders GlobalNoticeBars when notice bars are enabled', () => {
     render(
-      <AppProviders locale="en" dict={dict} demoModeEnabled={true} noticeBarsEnabled={true}>
+      <AppProviders locale="en" dict={dict} noticeBarsEnabled={true}>
         <div>content</div>
       </AppProviders>,
     )
 
-    expect(screen.getByTestId('global-notice-bars')).toHaveAttribute('data-demo-mode', 'true')
+    expect(screen.getByTestId('global-notice-bars')).toBeInTheDocument()
   })
 
   it('does not render GlobalNoticeBars when notice bars are disabled', () => {
     render(
-      <AppProviders locale="en" dict={dict} demoModeEnabled={true} noticeBarsEnabled={false}>
+      <AppProviders locale="en" dict={dict} noticeBarsEnabled={false}>
         <div>content</div>
       </AppProviders>,
     )

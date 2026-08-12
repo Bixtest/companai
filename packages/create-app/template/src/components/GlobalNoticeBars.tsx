@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button'
 import { IconButton } from '@open-mercato/ui/primitives/icon-button'
 import { useT } from '@open-mercato/shared/lib/i18n/context'
 
-const DEMO_NOTICE_COOKIE = 'om_demo_notice_ack'
 const COOKIE_NOTICE_COOKIE = 'om_cookie_notice_ack'
 
 function getCookie(name: string): string | null {
@@ -22,27 +21,18 @@ function setCookie(name: string, value: string, days = 365) {
   document.cookie = `${name}=${value}; path=/; max-age=${maxAge}; SameSite=Lax`
 }
 
-export function GlobalNoticeBars({ demoModeEnabled }: { demoModeEnabled: boolean }) {
+export function GlobalNoticeBars() {
   const t = useT()
-  const [showDemoNotice, setShowDemoNotice] = useState(false)
   const [showCookieNotice, setShowCookieNotice] = useState(false)
 
   useEffect(() => {
-    if (demoModeEnabled && !getCookie(DEMO_NOTICE_COOKIE)) {
-      setShowDemoNotice(true)
-    }
     if (!getCookie(COOKIE_NOTICE_COOKIE)) {
       setShowCookieNotice(true)
     }
-  }, [demoModeEnabled])
+  }, [])
 
-  const activeBars = [showDemoNotice, showCookieNotice].filter(Boolean).length
+  const activeBars = [showCookieNotice].filter(Boolean).length
   if (activeBars === 0) return null
-
-  const handleDismissDemo = () => {
-    setCookie(DEMO_NOTICE_COOKIE, 'ack')
-    setShowDemoNotice(false)
-  }
 
   const handleDismissCookies = () => {
     setCookie(COOKIE_NOTICE_COOKIE, 'dismissed')
@@ -56,48 +46,6 @@ export function GlobalNoticeBars({ demoModeEnabled }: { demoModeEnabled: boolean
 
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-4 z-banner flex flex-col items-center gap-3 px-4">
-      {showDemoNotice ? (
-        <div className="pointer-events-auto w-full max-w-[calc(100vw-2rem)] sm:max-w-4xl rounded-lg border border-status-warning-border bg-status-warning-bg/90 p-4 shadow-lg backdrop-blur supports-[backdrop-filter]:bg-status-warning-bg/80">
-          <div className="flex items-start gap-3">
-            <div className="flex-1 text-sm text-status-warning-text space-y-1">
-              <p className="font-medium">{t('notices.demo.title', 'Demo Environment')}</p>
-              <p>
-                {t('notices.demo.description', 'This instance is provided for demo purposes only. Data may be reset at any time and is not retained for any guaranteed period.')}
-              </p>
-              <p>
-                {t('notices.demo.superadminQuestion', 'Need persistent superadmin access?')}{' '}
-                <a
-                  href="https://github.com/open-mercato"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="underline font-medium hover:text-status-warning-icon"
-                >
-                  {t('notices.demo.installLink', 'Install Open Mercato locally')}
-                </a>
-                . {t('notices.demo.reviewLinks', 'Review our')}{' '}
-                <Link className="underline font-medium hover:text-status-warning-icon" href="/terms">
-                  {t('common.terms')}
-                </Link>{' '}
-                {t('notices.demo.and', 'and')}{' '}
-                <Link className="underline font-medium hover:text-status-warning-icon" href="/privacy">
-                  {t('common.privacy')}
-                </Link>
-                .
-              </p>
-            </div>
-            <IconButton
-              type="button"
-              variant="ghost"
-              size="lg"
-              onClick={handleDismissDemo}
-              className="shrink-0 text-status-warning-text hover:text-status-warning-icon"
-              aria-label={t('notices.demo.dismiss', 'Dismiss demo notice')}
-            >
-              <X className="size-4" />
-            </IconButton>
-          </div>
-        </div>
-      ) : null}
 
       {showCookieNotice ? (
         <div className="pointer-events-auto w-full max-w-[calc(100vw-2rem)] sm:max-w-4xl rounded-lg border border-border bg-background/95 p-4 shadow-lg backdrop-blur supports-[backdrop-filter]:bg-background/80">
