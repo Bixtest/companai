@@ -69,7 +69,7 @@ export function acquireServerStartLock(
       if (existingLock && existingLock.pid !== process.pid && isProcessAlive(existingLock.pid)) {
         const portSuffix = existingLock.port ? ` on port ${existingLock.port}` : ''
         throw new Error(
-          `[server] Another Open Mercato production server is already running for ${appDir} (pid ${existingLock.pid}${portSuffix}). Stop it before starting another instance.`,
+          `[server] Another Companai production server is already running for ${appDir} (pid ${existingLock.pid}${portSuffix}). Stop it before starting another instance.`,
         )
       }
 

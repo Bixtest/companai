@@ -5,7 +5,7 @@ export const metadata: ModuleInfo = {
   title: 'Worktime / Availabilities',
   version: '0.1.0',
   description: 'Availability schedules, rulesets, and shared planning rules.',
-  author: 'Open Mercato Team',
+  author: 'Companai Team',
   license: 'MIT',
   ejectable: true,
 }

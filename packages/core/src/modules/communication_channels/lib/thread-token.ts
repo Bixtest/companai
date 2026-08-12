@@ -9,7 +9,7 @@ const logger = createLogger('communication_channels').child({ component: 'thread
 
 /**
  * Per-thread crypto token used by the layered thread-matcher to attach
- * inbound replies to the originating Open Mercato message thread, even
+ * inbound replies to the originating Companai message thread, even
  * when the recipient's mail client strips RFC 5322 headers.
  *
  * Token format: `om_<22b64url>_<11b64url>` — 16 random bytes followed by

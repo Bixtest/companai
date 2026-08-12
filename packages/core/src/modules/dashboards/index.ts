@@ -5,7 +5,7 @@ export const metadata: ModuleInfo = {
   title: 'Admin Dashboards',
   version: '0.1.0',
   description: 'Configurable admin dashboard with module-provided widgets.',
-  author: 'Open Mercato Team',
+  author: 'Companai Team',
   license: 'MIT',
 }
 

@@ -5,7 +5,7 @@ export const metadata: ModuleInfo = {
   title: 'Query Indexes',
   version: '0.1.0',
   description: 'Hybrid query layer with full-text and vector search capabilities.',
-  author: 'Open Mercato Team',
+  author: 'Companai Team',
   license: 'MIT',
 }
 

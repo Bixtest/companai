@@ -873,7 +873,7 @@ export async function run(argv = process.argv) {
   if (first === 'init') {
     const { execSync } = await import('child_process')
 
-    console.log('🚀 Initializing Open Mercato app...\n')
+    console.log('🚀 Initializing Companai app...\n')
 
     try {
       const initArgs = parts.slice(1).filter(Boolean)
@@ -2048,7 +2048,7 @@ export async function run(argv = process.argv) {
             cleanup()
           })
 
-          console.log('[server] Starting Open Mercato in dev mode...')
+          console.log('[server] Starting Companai in dev mode...')
 
           // Ensure module-package-sources.css exists before Next.js starts
           const { createResolver: createResolverForSources } = await import('./lib/resolver')
@@ -2432,7 +2432,7 @@ export async function run(argv = process.argv) {
             cleanup()
           })
 
-          console.log('[server] Starting Open Mercato in production mode...')
+          console.log('[server] Starting Companai in production mode...')
 
           const nextBin = resolveInstalledBinary(nodeModulesBases, 'next/dist/bin/next')
           const mercatoBin = resolveInstalledBinary(nodeModulesBases, '@open-mercato/cli/bin/mercato')
@@ -2561,7 +2561,7 @@ export async function run(argv = process.argv) {
   if (appCli.length) all.push({ id: 'app', cli: appCli } as any)
 
   const quietBanner = process.env.OM_CLI_QUIET === '1'
-  const banner = '🧩 Open Mercato CLI'
+  const banner = '🧩 Companai CLI'
   if (!quietBanner) {
     const header = [
       '╔═══════════════════════╗',

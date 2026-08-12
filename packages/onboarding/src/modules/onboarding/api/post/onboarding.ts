@@ -156,8 +156,8 @@ export async function POST(req: Request) {
       : translate('onboarding.email.marketingConsentNo', 'Marketing consent: No')
     const subject = translate('onboarding.email.subject', 'Confirm your email to finish onboarding')
     const emailCopy = {
-      preview: translate('onboarding.email.preview', 'Confirm your email to activate your Open Mercato workspace'),
-      heading: translate('onboarding.email.heading', 'Welcome to Open Mercato'),
+      preview: translate('onboarding.email.preview', 'Confirm your email to activate your Companai workspace'),
+      heading: translate('onboarding.email.heading', 'Welcome to Companai'),
       greeting: translate('onboarding.email.greeting', 'Hi {firstName},', { firstName }),
       body: translate(
         'onboarding.email.body',
@@ -170,7 +170,7 @@ export async function POST(req: Request) {
         "The link will expire in 24 hours. If you didn't request this, you can safely ignore this message.",
       ),
       marketingConsent: marketingConsentText,
-      footer: translate('onboarding.email.footer', 'Open Mercato · Onboarding service'),
+      footer: translate('onboarding.email.footer', 'Companai · Onboarding service'),
     }
     const emailReact = VerificationEmail({ verifyUrl, copy: emailCopy })
     try {

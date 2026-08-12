@@ -8,7 +8,7 @@ import { cn } from '@open-mercato/shared/lib/utils'
 
 /**
  * iOS-style segmented control per Figma `Switch / Chart / Cryptocurrency`
- * (component set id `199963:1442` in DS Open Mercato). Renders a single
+ * (component set id `199963:1442` in DS Companai). Renders a single
  * track with N items where exactly one is selected at a time. Selecting
  * a new item fires `onValueChange`.
  *

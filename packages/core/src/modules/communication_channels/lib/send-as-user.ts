@@ -34,7 +34,7 @@ export type SendAsUserInput = {
   inReplyTo?: string
   references?: string[]
   /**
-   * Open Mercato `messages.message` id of the message being replied to. When
+   * Companai `messages.message` id of the message being replied to. When
    * set, the composed message joins that message's thread (the messages module
    * derives `threadId` from the parent), so a CRM reply continues the existing
    * conversation instead of starting a new thread. Optional — omitted for new

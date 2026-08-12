@@ -7,7 +7,7 @@ import { expectId, readJsonSafe } from './generalFixtures'
 /**
  * Shared harness for verifying Undo/Redo correctness against the real command bus.
  *
- * Every mutating Open Mercato API response carries the operation metadata in the
+ * Every mutating Companai API response carries the operation metadata in the
  * `x-om-operation` header (`omop:<urlencoded JSON>`) containing the `undoToken` and the
  * audit log `id` (used as `logId` for redo). These helpers extract that envelope and drive
  * the real undo/redo endpoints so tests can assert full state restoration per TC-UNDO-001.

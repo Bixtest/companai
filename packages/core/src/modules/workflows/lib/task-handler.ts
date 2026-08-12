@@ -7,7 +7,7 @@
  * - Reassigning tasks
  * - Escalating overdue tasks
  *
- * Functional API (no classes) following Open Mercato conventions.
+ * Functional API (no classes) following Companai conventions.
  */
 
 import { EntityManager } from '@mikro-orm/core'

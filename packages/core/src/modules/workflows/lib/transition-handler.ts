@@ -7,7 +7,7 @@
  * - Integrating with business rules engine for pre/post conditions
  * - Executing activities on transition
  *
- * Functional API (no classes) following Open Mercato conventions.
+ * Functional API (no classes) following Companai conventions.
  */
 
 import { EntityManager } from '@mikro-orm/core'

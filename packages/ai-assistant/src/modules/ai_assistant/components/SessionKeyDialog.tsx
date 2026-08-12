@@ -62,7 +62,7 @@ export default function SessionKeyDialog({ open, onOpenChange }: Props) {
     }
   }, [open])
 
-  const llmInstructions = `You have access to Open Mercato MCP tools for managing business data (customers, orders, products, etc.).
+  const llmInstructions = `You have access to Companai MCP tools for managing business data (customers, orders, products, etc.).
 
 IMPORTANT: Include "_sessionToken" in EVERY tool call:
 {

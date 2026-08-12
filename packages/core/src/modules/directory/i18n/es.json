@@ -23,7 +23,7 @@
   "directory.branding.nav": "Marca de la organización",
   "directory.branding.previewAlt": "Vista previa del logo de {{name}}",
   "directory.branding.title": "Marca de la organización",
-  "directory.branding.url.hint": "Usa una URL de imagen externa o deja el campo vacío para volver al logo predeterminado de Open Mercato.",
+  "directory.branding.url.hint": "Usa una URL de imagen externa o deja el campo vacío para volver al logo predeterminado de Companai.",
   "directory.branding.url.label": "URL del logo",
   "directory.branding.url.placeholder": "https://example.com/logo.svg",
   "directory.nav.group": "Directorio",

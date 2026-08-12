@@ -57,7 +57,7 @@ export default async function ApiDocsViewerPage() {
     : {
         openapi: '3.1.0',
         info: {
-          title: 'Open Mercato API',
+          title: 'Companai API',
           version: APP_VERSION,
           description: 'Auto-generated OpenAPI definition for all enabled modules.',
         },
@@ -70,13 +70,13 @@ export default async function ApiDocsViewerPage() {
 
   return (
     <ApiDocsExplorer
-      title={doc.info?.title ?? 'Open Mercato API'}
+      title={doc.info?.title ?? 'Companai API'}
       version={doc.info?.version ?? APP_VERSION}
       description={doc.info?.description}
       operations={operations}
       tagOrder={tagOrder}
       servers={doc.servers ?? []}
-      docsUrl="https://docs.openmercato.com"
+      docsUrl="https://docs.corprorate.com"
       jsonSpecUrl="/api/docs/openapi"
       markdownSpecUrl="/api/docs/markdown"
     />

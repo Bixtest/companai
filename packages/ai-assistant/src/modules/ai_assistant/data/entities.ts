@@ -20,7 +20,7 @@ import type {
  * Each write creates a new row with `version = latest + 1`. Rows are never
  * updated in place — history is preserved so operators can roll back by
  * reading an earlier `version`. Column set is tenant/org-scoped per the
- * standard Open Mercato RBAC contract.
+ * standard Companai RBAC contract.
  *
  * `sections` holds additive text keyed by prompt section id. The runtime
  * composes the final `systemPrompt` via `composeSystemPromptWithOverride`

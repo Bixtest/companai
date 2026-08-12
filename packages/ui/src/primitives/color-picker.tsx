@@ -14,7 +14,7 @@ interface EyeDropperAPI { open(): Promise<EyeDropperResult> }
 interface WindowWithEyeDropper extends Window { EyeDropper?: new () => EyeDropperAPI }
 
 /**
- * Color picker per Figma `Color Picker` frame (DS Open Mercato
+ * Color picker per Figma `Color Picker` frame (DS Companai
  * `167184:38583`, doc page `553:22078`). 4-section layout 316×334:
  *
  *   1. Choose Color  — header row ("Choose color" label + hex preview

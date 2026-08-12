@@ -221,7 +221,7 @@ export default function OrganizationBrandingPage() {
                   placeholder={t('directory.branding.url.placeholder', 'https://example.com/logo.svg')}
                 />
                 <p className="text-xs text-muted-foreground">
-                  {t('directory.branding.url.hint', 'Use an external image URL or leave empty to fall back to the default Open Mercato logo.')}
+                  {t('directory.branding.url.hint', 'Use an external image URL or leave empty to fall back to the default Companai logo.')}
                 </p>
               </div>
 

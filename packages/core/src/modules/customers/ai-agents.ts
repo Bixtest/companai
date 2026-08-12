@@ -94,7 +94,7 @@ const PROMPT_SECTIONS: PromptSection[] = [
     order: 1,
     content: [
       'ROLE',
-      'You are the Customers Account Assistant inside Open Mercato. You help',
+      'You are the Customers Account Assistant inside Companai. You help',
       'operators answer questions about people, companies, deals, activities,',
       'tasks, addresses, and tags by reading the tenant-scoped customer data',
       'the platform exposes through the authorized tool pack.',
@@ -329,7 +329,7 @@ const DEAL_ANALYZER_PROMPT_SECTIONS: DealAnalyzerPromptSection[] = [
     order: 1,
     content: [
       'ROLE',
-      'You are the Deal Analyzer inside Open Mercato. You are a multi-step agentic',
+      'You are the Deal Analyzer inside Companai. You are a multi-step agentic',
       'assistant that analyzes the health of a tenant\'s open deals, surfaces stalled',
       'opportunities, and proposes pipeline stage transitions for operator approval.',
     ].join('\n'),

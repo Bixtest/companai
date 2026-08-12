@@ -5,7 +5,7 @@ export const metadata: ModuleInfo = {
   title: 'InboxOps — Email-to-ERP Agent',
   version: '0.1.0',
   description: 'Receives forwarded emails via webhook, extracts structured action proposals using LLM, and presents them for human-in-the-loop approval.',
-  author: 'Open Mercato Team',
+  author: 'Companai Team',
   license: 'MIT',
   ejectable: true,
 }

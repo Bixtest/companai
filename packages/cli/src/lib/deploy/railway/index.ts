@@ -108,7 +108,7 @@ function readAppPackage(cwd: string): {
   nodeEngine?: string
 } {
   const packagePath = resolve(cwd, 'package.json')
-  if (!existsSync(packagePath)) throw new Error('Run this command from an Open Mercato app root.')
+  if (!existsSync(packagePath)) throw new Error('Run this command from an Companai app root.')
   const parsed: unknown = JSON.parse(readFileSync(packagePath, 'utf8'))
   if (!parsed || typeof parsed !== 'object') throw new Error('Invalid package.json.')
   const record = parsed as Record<string, unknown>
@@ -121,7 +121,7 @@ function readAppPackage(cwd: string): {
       : {}),
   }
   if (!Object.keys(dependencies).some((key) => key.startsWith('@open-mercato/'))) {
-    throw new Error('The current package does not declare Open Mercato dependencies.')
+    throw new Error('The current package does not declare Companai dependencies.')
   }
   return {
     name: typeof record.name === 'string' && record.name.trim() ? record.name : basename(cwd),
@@ -270,7 +270,7 @@ async function ensureProject(input: {
     }>(railwayOperations.projectCreate, {
       input: {
         name: input.state.projectName,
-        description: 'Open Mercato deployment managed by mercato deploy railway',
+        description: 'Companai deployment managed by mercato deploy railway',
         workspaceId: input.workspaceId,
       },
     })
@@ -1427,7 +1427,7 @@ export async function runRailwayDeploy(
 
     console.log('Step 10: Deployment complete')
     console.log('')
-    console.log('Open Mercato deployed to Railway')
+    console.log('Companai deployed to Railway')
     console.log(`  Project:     https://railway.com/project/${projectId}`)
     console.log(`  Environment: ${options.environment}`)
     console.log(`  Source:      ${source.mode}`)

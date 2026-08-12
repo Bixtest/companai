@@ -36,7 +36,7 @@ import { Kbd } from './kbd'
  *   <CommandMenuSeparator> — visual divider between groups.
  *   <CommandMenuFooter> — bottom bar with shortcut hints + help link.
  *
- * Figma source: DS Open Mercato `Command Menu` page (4152:24764) —
+ * Figma source: DS Companai `Command Menu` page (4152:24764) —
  * Search Input [1.1] (4187:559), Items [1.1] (4171:15653), Footer [1.1]
  * (4172:16590).
  *

@@ -83,7 +83,7 @@ function buildReplyState(thread: EmailThread, fallbackRecipient: string | null):
   }
 }
 
-/** Read the Open Mercato `messageId` off a delivery event payload, if present. */
+/** Read the Companai `messageId` off a delivery event payload, if present. */
 function readEventMessageId(event: unknown): string | null {
   const payload = (event as { payload?: unknown } | undefined)?.payload
   const messageId = (payload as { messageId?: unknown } | undefined)?.messageId

@@ -208,7 +208,7 @@ export async function POST(req: Request) {
       }),
       validUntil: translate('sales.quotes.email.validUntil', 'Valid until: {date}', { date: validUntilFormatted }),
       cta: translate('sales.quotes.email.cta', 'View quote'),
-      footer: translate('sales.quotes.email.footer', 'Open Mercato'),
+      footer: translate('sales.quotes.email.footer', 'Companai'),
     }
 
     // Side effect after commit: an email failure must not roll back the send state.

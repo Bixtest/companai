@@ -52,7 +52,7 @@ export type EmptyStateProps = VariantProps<typeof emptyStateVariants> & {
   actions?: React.ReactNode
   /**
    * Optional Figma-style illustration (preferred for new code) — typically a
-   * scaled SVG sourced from the DS Open Mercato illustrations library. When
+   * scaled SVG sourced from the DS Companai illustrations library. When
    * provided, takes precedence over `icon`. Rendered without any icon-box
    * wrapping so the illustration's own circular background shows through.
    */

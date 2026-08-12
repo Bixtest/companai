@@ -7,7 +7,7 @@
  * fallbacks all share the same view of which hosts are platform-owned.
  */
 export function platformDomains(): string[] {
-  return (process.env.PLATFORM_DOMAINS ?? 'localhost,openmercato.com')
+  return (process.env.PLATFORM_DOMAINS ?? 'localhost,corprorate.com')
     .split(',')
     .map((s) => s.trim().toLowerCase())
     .filter(Boolean)

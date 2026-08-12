@@ -5,7 +5,7 @@ export const metadata: ModuleInfo = {
   title: 'Notifications',
   version: '0.1.0',
   description: 'In-app notifications with module-extensible types and actions.',
-  author: 'Open Mercato Team',
+  author: 'Companai Team',
   license: 'MIT',
 }
 

@@ -48,7 +48,7 @@ import { useT } from '@open-mercato/shared/lib/i18n/context'
  *                                    matching the Figma assembled
  *                                    example icon style.
  *
- * Figma source: DS Open Mercato `Notifications` page (`4096:21398`) —
+ * Figma source: DS Companai `Notifications` page (`4096:21398`) —
  * `Notifications Items [1.1]` (`4308:731`, 8 variants — 4 designs
  * × 2 states: default + hover/selected), `Notifications Header [1.1]`
  * (`4308:1004`), `Notifications Footer [1.1]` (`4308:5526`),

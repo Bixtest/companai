@@ -12,7 +12,7 @@ export async function GET() {
   const baseUrl = resolveApiDocsBaseUrl()
   const docModules = await attachOpenApiDocsToModules(modules, apiRoutes)
   const rawDoc = buildOpenApiDocument(docModules, {
-    title: t('api.docs.title', 'Open Mercato API'),
+    title: t('api.docs.title', 'Companai API'),
     version: APP_VERSION,
     description: t('api.docs.description', 'Auto-generated OpenAPI definition for all enabled modules.'),
     servers: [{ url: baseUrl, description: t('api.docs.serverDescription', 'Default environment') }],

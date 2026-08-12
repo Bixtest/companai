@@ -1405,7 +1405,7 @@ function appendRuntimeTaskPlanPrompt(systemPrompt: string, agent: Pick<AiAgentDe
 }
 
 /**
- * Server-side helper that runs an Open Mercato agent in chat mode via the
+ * Server-side helper that runs an Companai agent in chat mode via the
  * Vercel AI SDK and returns a streaming `Response` ready to be emitted from a
  * route handler. Shares the same policy gate and tool resolution path as the
  * HTTP dispatcher — a caller using this helper can never bypass the agent's
@@ -1851,7 +1851,7 @@ function resolveStructuredOutput<TSchema>(
 }
 
 /**
- * Server-side helper that runs an Open Mercato agent in structured-output mode
+ * Server-side helper that runs an Companai agent in structured-output mode
  * via the Vercel AI SDK. Shares the same policy gate, tool resolution path,
  * system-prompt composition, and model resolution as {@link runAiAgentText} —
  * object-mode and chat-mode CANNOT diverge.

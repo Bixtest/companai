@@ -5,7 +5,7 @@ export const metadata: ModuleInfo = {
   title: 'Feature Toggles',
   version: '0.1.0',
   description: 'Global feature flags with tenant-level overrides.',
-  author: 'Open Mercato Team',
+  author: 'Companai Team',
   license: 'MIT',
 }
 

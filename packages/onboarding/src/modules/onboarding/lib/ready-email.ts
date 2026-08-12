@@ -28,18 +28,18 @@ export async function sendWorkspaceReadyEmail(args: {
   const baseUrl = getSecurityEmailBaseUrl()
   const loginUrl = `${baseUrl}/login?tenant=${encodeURIComponent(args.tenantId)}`
   const firstName = request.firstName?.trim() || request.organizationName?.trim() || request.email
-  const subject = translate('onboarding.readyEmail.subject', 'Your Open Mercato workspace is ready')
+  const subject = translate('onboarding.readyEmail.subject', 'Your Companai workspace is ready')
   const emailCopy = {
     preview: translate('onboarding.readyEmail.preview', 'Your workspace is ready. Use your secure login link to sign in.'),
     heading: translate('onboarding.readyEmail.heading', 'Your workspace is ready'),
     greeting: translate('onboarding.readyEmail.greeting', 'Hi {firstName},', { firstName }),
     body: translate(
       'onboarding.readyEmail.body',
-      'Your Open Mercato workspace for {organizationName} has finished preparing. Use the secure link below to sign in.',
+      'Your Companai workspace for {organizationName} has finished preparing. Use the secure link below to sign in.',
       { organizationName: request.organizationName },
     ),
     cta: translate('onboarding.readyEmail.cta', 'Open login'),
-    footer: translate('onboarding.readyEmail.footer', 'Open Mercato · Onboarding service'),
+    footer: translate('onboarding.readyEmail.footer', 'Companai · Onboarding service'),
   }
 
   await sendEmail({

@@ -18,8 +18,10 @@ const forbiddenStarterStatusColor =
   /\b(?:(?:hover:|dark:hover:)?(?:bg|border|text)|(?:dark:)?marker:text|dark:(?:bg|border|text))-(?:amber|blue|emerald|slate)-\d+(?:\/\d+)?/g
 
 describe('starter chrome design-system coverage', () => {
-  it.each(componentPairs)('%s StartPageContent and GlobalNoticeBars use semantic status tokens', (_label, componentsDir) => {
-    for (const fileName of ['StartPageContent.tsx', 'GlobalNoticeBars.tsx']) {
+  // `StartPageContent.tsx` was in this list until the demo start page was
+  // removed and `/` began routing straight to the login.
+  it.each(componentPairs)('%s GlobalNoticeBars uses semantic status tokens', (_label, componentsDir) => {
+    for (const fileName of ['GlobalNoticeBars.tsx']) {
       const filePath = path.join(componentsDir, fileName)
       const source = fs.readFileSync(filePath, 'utf8')
 

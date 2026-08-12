@@ -125,7 +125,7 @@ async function buildEmailCopy(sentAt: Date) {
   const dict = await loadDictionary(defaultLocale)
   const t = createFallbackTranslator(dict)
   return {
-    preview: t('messages.email.preview', 'You received a message in Open Mercato'),
+    preview: t('messages.email.preview', 'You received a message in Companai'),
     heading: t('messages.email.heading', 'New message'),
     from: t('messages.email.from', 'From'),
     sentAt: t('messages.email.sentAt', 'Sent'),
@@ -133,7 +133,7 @@ async function buildEmailCopy(sentAt: Date) {
     viewCta: t('messages.email.viewCta', 'View message'),
     attachmentsLabel: t('messages.email.attachments', 'Attachments'),
     objectsLabel: t('messages.email.objects', 'Related records'),
-    footer: t('messages.email.footer', 'Open Mercato messages'),
+    footer: t('messages.email.footer', 'Companai messages'),
   }
 }
 

@@ -5,7 +5,7 @@ export const metadata: ModuleInfo = {
   title: 'Messages',
   version: '0.1.0',
   description: 'Internal messaging system with attachments, actions, and email forwarding.',
-  author: 'Open Mercato Team',
+  author: 'Companai Team',
   license: 'MIT',
 }
 

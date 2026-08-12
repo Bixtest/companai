@@ -12,7 +12,7 @@ type VersionResponse = z.infer<typeof versionResponseSchema>
 
 function readDeployedVersion(): string {
   // Explicit override wins: deployments that bundle a different version than the
-  // running app's package.json (or want to pin the Open Mercato platform version)
+  // running app's package.json (or want to pin the Companai platform version)
   // set OM_VERSION / OPEN_MERCATO_VERSION.
   const explicit = process.env.OM_VERSION || process.env.OPEN_MERCATO_VERSION
   if (explicit && explicit.length > 0) return explicit
@@ -45,10 +45,10 @@ export default GET
 
 export const openApi: OpenApiRouteDoc = {
   tag: 'API Documentation',
-  summary: 'Deployed Open Mercato version',
+  summary: 'Deployed Companai version',
   methods: {
     GET: {
-      summary: 'Return the deployed Open Mercato version',
+      summary: 'Return the deployed Companai version',
       tags: ['API Documentation'],
       responses: [
         {

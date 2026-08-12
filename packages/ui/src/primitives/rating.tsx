@@ -9,7 +9,7 @@ import { useT } from '@open-mercato/shared/lib/i18n/context'
 
 /**
  * 1-to-N star / heart / dot rating per Figma `Rating & Review [1.0]`
- * (DS Open Mercato componentSet `199969:1797`). Two distinct modes:
+ * (DS Companai componentSet `199969:1797`). Two distinct modes:
  *
  * - **Read-only display** — no `onChange` prop. Renders `role="img"` with
  *   an `aria-label` like "4.5 out of 5 stars". Used in product reviews,

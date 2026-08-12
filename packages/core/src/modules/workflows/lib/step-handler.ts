@@ -6,7 +6,7 @@
  * - Executing step logic based on step type (START, END, AUTOMATED, USER_TASK)
  * - Completing step instances when exiting
  *
- * Functional API (no classes) following Open Mercato conventions.
+ * Functional API (no classes) following Companai conventions.
  */
 
 import { EntityManager } from '@mikro-orm/core'

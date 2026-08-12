@@ -1337,7 +1337,7 @@ export function SidebarCustomizationEditor({
                 </span>
                 <SidebarPreview
                   groups={previewGroups}
-                  productName={t('appShell.productName', 'Open Mercato')}
+                  productName={t('appShell.productName', 'Companai')}
                   pickFirstActive
                 />
               </div>
@@ -1607,7 +1607,7 @@ function SidebarPreview({
         <div className="mb-2">
           <div className="flex items-center gap-3 rounded-xl p-3">
             <Image
-              src="/open-mercato.svg"
+              src="/companai.svg"
               alt={productName}
               width={40}
               height={40}

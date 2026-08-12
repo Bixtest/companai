@@ -13,7 +13,7 @@ export interface RecordCardProps {
 }
 
 /**
- * Renders an Open Mercato record card based on the `kind` discriminator.
+ * Renders an Companai record card based on the `kind` discriminator.
  * Used by the AI chat transcript to upgrade fenced ```open-mercato:<kind>```
  * blocks into rich, interactive widgets.
  */

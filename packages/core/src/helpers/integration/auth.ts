@@ -102,15 +102,6 @@ async function dismissGlobalNoticesIfPresent(page: Page): Promise<void> {
     }
   }
 
-  const feedbackDialog = page.getByRole('dialog', { name: /Talk to Open Mercato team/i }).first();
-  if (await feedbackDialog.isVisible().catch(() => false)) {
-    const closeButton = feedbackDialog.getByRole('button', { name: /close/i }).first();
-    if (await closeButton.isVisible().catch(() => false)) {
-      await closeButton.click().catch(() => {});
-    } else {
-      await page.keyboard.press('Escape').catch(() => {});
-    }
-  }
 }
 
 async function recoverClientSideErrorPageIfPresent(page: Page): Promise<void> {

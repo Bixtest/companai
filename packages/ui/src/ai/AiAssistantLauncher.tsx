@@ -18,7 +18,7 @@
  *     picker. Cmd+K stays reserved for global search; Cmd+J stays reserved
  *     for the legacy OpenCode command palette. Browsers normally use
  *     Cmd/Ctrl+L for "focus address bar"; we `preventDefault()` so the
- *     launcher wins when an Open Mercato page has focus.
+ *     launcher wins when an Companai page has focus.
  */
 
 import * as React from 'react'
@@ -132,8 +132,8 @@ interface HealthResponse {
 
 const DEFAULT_AGENTS_ENDPOINT = '/api/ai_assistant/ai/agents'
 const DEFAULT_HEALTH_ENDPOINT = '/api/ai_assistant/health'
-const AI_ASSISTANT_DOCS_URL = 'https://docs.openmercato.com/framework/ai-assistant/overview'
-const AI_ASSISTANT_SETTINGS_DOCS_URL = 'https://docs.openmercato.com/framework/ai-assistant/settings'
+const AI_ASSISTANT_DOCS_URL = 'https://docs.corprorate.com/framework/ai-assistant/overview'
+const AI_ASSISTANT_SETTINGS_DOCS_URL = 'https://docs.corprorate.com/framework/ai-assistant/settings'
 export const AI_ASSISTANT_LAUNCHER_OPEN_EVENT = 'om:open-ai-assistant-launcher'
 
 function isMutationCapable(policy: string | null | undefined): boolean {
@@ -390,7 +390,7 @@ export function AiAssistantLauncher({
   // document level and ignore events from text-entry targets so it never
   // interferes with typing inside inputs/textarea. Browsers normally focus
   // the address bar on Cmd/Ctrl+L; `preventDefault()` reclaims the combo
-  // when an Open Mercato page has focus.
+  // when an Companai page has focus.
   React.useEffect(() => {
     if (disableGlobalShortcut) return
     if (typeof window === 'undefined') return

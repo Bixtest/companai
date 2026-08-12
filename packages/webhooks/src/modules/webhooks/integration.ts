@@ -13,8 +13,8 @@ export const integration: IntegrationDefinition = {
   icon: 'webhook',
   package: '@open-mercato/webhooks',
   version: '1.0.0',
-  author: 'Open Mercato Team',
-  company: 'Open Mercato',
+  author: 'Companai Team',
+  company: 'Companai',
   license: 'MIT',
   tags: ['webhooks', 'automation', 'events', 'standard-webhooks'],
   detailPage: {

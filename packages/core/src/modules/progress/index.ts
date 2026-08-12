@@ -5,7 +5,7 @@ export const metadata: ModuleInfo = {
   title: 'Progress',
   version: '0.1.0',
   description: 'Generic server-side progress tracking for long-running operations',
-  author: 'Open Mercato Team',
+  author: 'Companai Team',
   license: 'MIT',
   ejectable: true,
 }

@@ -5,7 +5,7 @@ export const metadata: ModuleInfo = {
   title: 'Table perspectives',
   version: '0.1.0',
   description: 'Shared persistence for DataTable perspectives (columns, filters, saved views).',
-  author: 'Open Mercato Team',
+  author: 'Companai Team',
   license: 'MIT',
   ejectable: true,
 }

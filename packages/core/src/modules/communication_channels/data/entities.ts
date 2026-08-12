@@ -424,7 +424,7 @@ export class MessageReaction {
 
 /**
  * Per-thread HMAC-signed opaque token used by the layered thread-matcher to
- * reliably attach inbound replies to the originating Open Mercato message
+ * reliably attach inbound replies to the originating Companai message
  * thread, even when the recipient's mail client strips RFC 5322 headers.
  *
  * Created lazily on the first outbound message in a thread by the

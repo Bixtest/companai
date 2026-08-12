@@ -200,7 +200,7 @@ export default function OnboardingPageClient({ onboardingEnabled }: Props) {
               <p className="mt-2 text-sm text-muted-foreground">
                 {translate(
                   'onboarding.disabled.description',
-                  'Workspace creation is currently handled manually. Contact the Open Mercato team or your administrator to request access before continuing.',
+                  'Workspace creation is currently handled manually. Contact the Companai team or your administrator to request access before continuing.',
                 )}
               </p>
               <div className="mt-4 flex justify-center">
@@ -215,9 +215,9 @@ export default function OnboardingPageClient({ onboardingEnabled }: Props) {
         ) : null}
         <CardHeader className="flex flex-col gap-4 p-10 text-center">
           <div className="flex flex-col items-center gap-3">
-            <Image alt="Open Mercato" src="/open-mercato.svg" width={120} height={120} priority />
+            <Image alt="Companai" src="/companai.svg" width={120} height={120} priority />
             <CardTitle className="text-2xl font-semibold">
-              {translate('onboarding.title', 'Create your Open Mercato workspace')}
+              {translate('onboarding.title', 'Create your Companai workspace')}
             </CardTitle>
             <CardDescription>
               {translate('onboarding.subtitle', 'Tell us a bit about you and we will set everything up.')}
@@ -382,7 +382,7 @@ export default function OnboardingPageClient({ onboardingEnabled }: Props) {
               <span>
                 {translate(
                   'onboarding.form.marketingLabel',
-                  "I consent to receiving direct marketing from Open Mercato sp. z o.o. by email at the address I provide. I'm aware that I can withdraw my consent at any time (e.g., via the unsubscribe link), and that Open Mercato sp. z o.o. may also process my email address under its legitimate interests to manage its mailing list, keep proof of my consent, and record opt-outs. See our {termsLink} and {privacyLink}.",
+                  "I consent to receiving direct marketing from Companai sp. z o.o. by email at the address I provide. I'm aware that I can withdraw my consent at any time (e.g., via the unsubscribe link), and that Companai sp. z o.o. may also process my email address under its legitimate interests to manage its mailing list, keep proof of my consent, and record opt-outs. See our {termsLink} and {privacyLink}.",
                 )
                   .split(/{termsLink}|{privacyLink}/)
                   .map((part, index, parts) => (
@@ -406,7 +406,7 @@ export default function OnboardingPageClient({ onboardingEnabled }: Props) {
             <p className="text-xs leading-relaxed text-muted-foreground">
               {translate(
                 'onboarding.form.legalEntity',
-                'Open Mercato sp. z o.o., with its registered office at ul. Wyspa Słodowa 7, 50-266 Wrocław, Poland, entered into the Register of Entrepreneurs of the National Court Register (KRS) maintained by the District Court for Wrocław-Fabryczna in Wrocław, 6th Commercial Division of the National Court Register, under KRS No. 0001253104, VAT No. (NIP) PL8982336029, REGON 545230330, with a share capital of PLN 80,000.00, fully paid.',
+                'Companai sp. z o.o., with its registered office at ul. Wyspa Słodowa 7, 50-266 Wrocław, Poland, entered into the Register of Entrepreneurs of the National Court Register (KRS) maintained by the District Court for Wrocław-Fabryczna in Wrocław, 6th Commercial Division of the National Court Register, under KRS No. 0001253104, VAT No. (NIP) PL8982336029, REGON 545230330, with a share capital of PLN 80,000.00, fully paid.',
               )}
             </p>
             <Button

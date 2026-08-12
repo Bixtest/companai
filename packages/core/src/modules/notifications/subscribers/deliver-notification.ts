@@ -166,9 +166,9 @@ export default async function handle(payload: NotificationCreatedPayload, ctx: R
         preview: t('notifications.delivery.email.preview', 'New notification'),
         heading: t('notifications.delivery.email.heading', 'You have a new notification'),
         bodyIntro: t('notifications.delivery.email.bodyIntro', 'Review the notification details and take any required actions.'),
-        actionNotice: t('notifications.delivery.email.actionNotice', 'Actions are available in Open Mercato and are read-only in this email.'),
+        actionNotice: t('notifications.delivery.email.actionNotice', 'Actions are available in Companai and are read-only in this email.'),
         openCta: t('notifications.delivery.email.openCta', 'Open notification center'),
-        footer: t('notifications.delivery.email.footer', 'Open Mercato notifications'),
+        footer: t('notifications.delivery.email.footer', 'Companai notifications'),
       }
 
       try {

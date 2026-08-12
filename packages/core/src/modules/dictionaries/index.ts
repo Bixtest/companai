@@ -5,7 +5,7 @@ export const metadata: ModuleInfo = {
   title: 'Shared Dictionaries',
   version: '0.1.0',
   description: 'Organization-scoped dictionaries for reusable enumerations and appearance presets.',
-  author: 'Open Mercato Team',
+  author: 'Companai Team',
   license: 'MIT',
 }
 

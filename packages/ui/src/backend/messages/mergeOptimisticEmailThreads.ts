@@ -2,7 +2,7 @@ import type { EmailThread, EmailThreadMessage } from './EmailThreadsPanel'
 
 /**
  * An optimistic (client-side, not-yet-server-confirmed) outbound message plus
- * the key of the thread it belongs to. `message.messageId` is the Open Mercato
+ * the key of the thread it belongs to. `message.messageId` is the Companai
  * Message id returned by the send API — it is the reconciliation key against the
  * server-fetched threads.
  */

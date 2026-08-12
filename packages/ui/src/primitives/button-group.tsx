@@ -7,7 +7,7 @@ import { cn } from '@open-mercato/shared/lib/utils'
 
 /**
  * Joined / connected button group per Figma `Button Group [1.1]`
- * (component set id `199961:1616` in DS Open Mercato). Renders an outer
+ * (component set id `199961:1616` in DS Companai). Renders an outer
  * rounded border with N children that touch each other to share an
  * internal separator line. Use for related actions on the same row
  * (Save / Save & New / overflow ellipsis) or compact view-mode toggles.

@@ -1078,14 +1078,14 @@ function sanitizeGeneratedModuleSpecifier(importPath: string): string {
 // Defense in depth: when src/modules.ts registers a module from a third-party
 // npm scope (anything outside @app / @open-mercato/*), verify the resolved
 // pkgBase directory exists. If it doesn't, the package referenced via `from:`
-// is almost certainly not an Open Mercato module (or the id is wrong), and
+// is almost certainly not an Companai module (or the id is wrong), and
 // silently emitting an empty module registration would hide the misconfig.
 function verifyThirdPartyModuleShape(entry: { id: string; from?: string }, pkgBase: string): void {
   const from = entry.from
   if (!from || from === '@app' || from.startsWith('@open-mercato/')) return
   if (fs.existsSync(pkgBase)) return
   throw new Error(
-    `Module '${entry.id}' is registered with from: '${from}' but no Open Mercato module shape was found at '${pkgBase}'. ` +
+    `Module '${entry.id}' is registered with from: '${from}' but no Companai module shape was found at '${pkgBase}'. ` +
       `Ensure the package ships a 'modules/${entry.id}' subtree (either under 'dist/modules/' or 'src/modules/'), or correct the 'from' value in src/modules.ts.`,
   )
 }

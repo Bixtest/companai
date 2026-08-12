@@ -9,7 +9,7 @@ type PortalCardProps = {
 /**
  * Portal-styled card container.
  * Clean card with subtle border and minimal shadow, matching the
- * Open Mercato design language.
+ * Companai design language.
  */
 export function PortalCard({ children, className }: PortalCardProps) {
   return (

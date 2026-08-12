@@ -7,7 +7,7 @@
  * - Handles timeouts
  * - Variable interpolation from workflow context
  *
- * Functional API (no classes) following Open Mercato conventions.
+ * Functional API (no classes) following Companai conventions.
  */
 
 import { EntityManager } from '@mikro-orm/core'
@@ -937,7 +937,7 @@ async function executeWait(config: any): Promise<any> {
 /**
  * CALL_API activity handler
  *
- * Makes authenticated HTTP request to internal Open Mercato APIs
+ * Makes authenticated HTTP request to internal Companai APIs
  * - Automatically creates one-time API key for authentication
  * - Injects tenant/organization context headers
  * - Validates URL security (SSRF prevention)

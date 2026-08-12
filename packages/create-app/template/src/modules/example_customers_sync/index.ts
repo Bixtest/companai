@@ -5,7 +5,7 @@ export const metadata: ModuleInfo = {
   title: 'Example Customers Sync',
   version: '0.1.0',
   description: 'Optional sync bridge between canonical customer interactions and the example todo module.',
-  author: 'Open Mercato Team',
+  author: 'Companai Team',
   license: 'MIT',
 }
 

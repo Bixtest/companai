@@ -47,7 +47,7 @@ export function buildMessagesInboxFilters({
     {
       id: 'hasObjects',
       label: t('messages.filters.hasObjects', 'Has related records'),
-      tooltip: t('messages.filters.hasObjectsTooltip', 'Shows messages that have Open Mercato records attached — such as orders, quotes, or customers.'),
+      tooltip: t('messages.filters.hasObjectsTooltip', 'Shows messages that have Companai records attached — such as orders, quotes, or customers.'),
       type: 'select',
       options: [
         { value: '', label: t('messages.filters.all', 'All') },

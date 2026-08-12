@@ -175,7 +175,7 @@ export async function runMcpDevServer(): Promise<void> {
     log('Error: API key not found in .mcp.json')
     log('')
     log('To get an API key:')
-    log('  1. Log into Open Mercato as an admin')
+    log('  1. Log into Companai as an admin')
     log('  2. Go to Settings > API Keys')
     log('  3. Create a new key with the required permissions')
     log('')

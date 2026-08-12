@@ -42,7 +42,7 @@ function assertNode24Runtime(): void {
   throw new Error(
     [
       'Unsupported Node.js runtime.',
-      `Cause: Detected Node ${detectedNodeVersion}, but Open Mercato requires Node 24.x.`,
+      `Cause: Detected Node ${detectedNodeVersion}, but Companai requires Node 24.x.`,
       'What to do: switch your shell to Node 24 (for example `nvm use 24`), run `yarn install`, then retry.',
     ].join(' '),
   )

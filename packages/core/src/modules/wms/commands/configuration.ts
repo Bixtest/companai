@@ -3,7 +3,7 @@
 // =============================================================================
 //
 // All warehouse / zone / location / inventory-profile / lot CRUD commands in
-// this file follow the standard Open Mercato undoable pattern: each handler
+// this file follow the standard Companai undoable pattern: each handler
 // declares `prepare` (snapshot before), `captureAfter` (snapshot after) and
 // `undo` (restore from snapshot) so the generic command-bus undo flow works
 // out of the box, mirroring `catalog/commands/categories.ts`.

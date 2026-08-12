@@ -23,7 +23,7 @@ import { cn } from '@open-mercato/shared/lib/utils'
  * inherits role="dialog", aria-modal, focus trap, ESC to close,
  * outside-click to dismiss).
  *
- * Figma source: DS Open Mercato `Drawer` page (`486:7366`) —
+ * Figma source: DS Companai `Drawer` page (`486:7366`) —
  * `Drawer Header [1.1]` (`3187:2897`) covers 4 header variants
  * (title only / title + leading icon / title + description /
  * title + description + leading icon badge); `Drawer Footer [1.1]`

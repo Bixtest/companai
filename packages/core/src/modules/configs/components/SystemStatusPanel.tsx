@@ -15,7 +15,7 @@ import type {
 } from '../lib/system-status.types'
 
 const API_PATH = '/api/configs/system-status'
-const ENV_GUIDE_URL = 'https://docs.openmercato.com/docs/framework/operations/system-status#managing-variables'
+const ENV_GUIDE_URL = 'https://docs.corprorate.com/docs/framework/operations/system-status#managing-variables'
 
 const STATUS_LABEL_KEYS: Record<SystemStatusState, string> = {
   enabled: 'configs.systemStatus.state.enabled',

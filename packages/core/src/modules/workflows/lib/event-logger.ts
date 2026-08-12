@@ -7,7 +7,7 @@
  * - Log transition events
  * - Query event history
  *
- * Functional API (no classes) following Open Mercato conventions.
+ * Functional API (no classes) following Companai conventions.
  */
 
 import { EntityManager } from '@mikro-orm/core'

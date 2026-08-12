@@ -195,7 +195,7 @@ export async function POST(req: Request, context: RouteContext): Promise<Respons
 
   try {
     const converted = await adapter.convertOutbound({
-      body: body.body ?? 'Test message from Open Mercato',
+      body: body.body ?? 'Test message from Companai',
       bodyFormat: 'text',
     })
     const result = await adapter.sendMessage({

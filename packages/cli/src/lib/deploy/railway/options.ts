@@ -134,7 +134,7 @@ export function parseRailwayDeployOptions(
 export function railwayDeployHelp(): string {
   return `Usage: mercato deploy railway [options]
 
-Deploy an Open Mercato standalone app to Railway.
+Deploy an Companai standalone app to Railway.
 
   --project <name>                 Railway project name
   --env <name>                     Environment name (default: production)

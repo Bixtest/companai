@@ -11,8 +11,8 @@ export const integration: IntegrationDefinition = {
   providerKey: 'excel',
   icon: 'file-spreadsheet',
   version: '1.0.0',
-  author: 'Open Mercato Team',
-  company: 'Open Mercato',
+  author: 'Companai Team',
+  company: 'Companai',
   license: 'MIT',
   tags: ['excel', 'csv', 'file-upload', 'import', 'spreadsheet'],
   detailPage: {

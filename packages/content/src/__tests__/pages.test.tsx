@@ -1,115 +1,97 @@
 /**
  * @jest-environment jsdom
  */
-
-import * as React from 'react'
-import { render, screen, within } from '@testing-library/react'
+/**
+ * The legal pages are ours, and say only what we can stand behind (U16).
+ *
+ * **What these replaced.** This file used to assert the pages contained
+ * upstream's full policy, and a sibling — `legal-entity.test.tsx` — asserted
+ * they named **Open Mercato sp. z o.o.**, its registration identifiers, its
+ * registered address and its share capital. Those were upstream's guards on
+ * upstream's legal disclosures. Inherited into a fork they asserted that we
+ * impersonate another company, so that file is gone.
+ *
+ * The pages were **rewritten short and generic**, not renamed. Rebranding
+ * somebody else's terms would have bound our users under a licence grant,
+ * liability caps and governing law drafted for a different business in a
+ * different jurisdiction — a document that reads as ours and is wrong.
+ *
+ * These tests guard the two properties that matter and would be easy to lose:
+ * **no other company is named**, and **the operator is identified as the
+ * responsible party** rather than the software vendor.
+ */
+import React from 'react'
+import { render, screen } from '@testing-library/react'
+import '@testing-library/jest-dom'
 import PrivacyPage from '../modules/content/frontend/privacy/page'
 import TermsPage from '../modules/content/frontend/terms/page'
 
-function isOpenMercatoPlatformLink(href: string | null): boolean {
-  if (typeof href !== 'string' || href.trim().length === 0) {
-    return false
-  }
+jest.mock('next/link', () => ({
+  __esModule: true,
+  default: ({ children, href }: { children: React.ReactNode; href: string }) => <a href={href}>{children}</a>,
+}))
 
-  try {
-    const parsed = new URL(href, 'https://openmercato.test')
-    return parsed.hostname === 'openmercato.com' || parsed.hostname.endsWith('.openmercato.com')
-  } catch {
-    return false
-  }
-}
+jest.mock('next/image', () => ({
+  __esModule: true,
+  default: ({ alt }: { alt: string }) => <img alt={alt} />,
+}))
 
-jest.mock('next/link', () => {
-  const React = require('react')
-  return React.forwardRef(({ children, href, ...rest }: any, ref: React.ForwardedRef<HTMLAnchorElement>) => (
-    <a href={typeof href === 'string' ? href : href?.toString?.()} ref={ref} {...rest}>
-      {children}
-    </a>
-  ))
+describe.each([
+  ['Privacy Policy', PrivacyPage],
+  ['Terms of Service', TermsPage],
+])('%s', (_title, Page) => {
+  it('names no other company', () => {
+    // The original defect: these pages named a real Polish company, its
+    // address and its registration details. Any reappearance is a regression
+    // worth failing loudly for.
+    render(<Page />)
+
+    const text = document.body.textContent ?? ''
+    expect(text).not.toMatch(/sp\. z o\.o\./i)
+    expect(text).not.toMatch(/open ?mercato/i)
+    expect(text).not.toMatch(/openmercato\.com/i)
+  })
+
+  it('points contact at our own domain', () => {
+    render(<Page />)
+
+    expect(document.body.innerHTML).toContain('corprorate.com')
+  })
+
+  it('identifies the operator as the responsible party', () => {
+    // Not the software vendor. Whoever runs an installation decides what goes
+    // into it and how long it is kept, and saying otherwise would be a claim
+    // we cannot support for somebody else's deployment.
+    render(<Page />)
+
+    expect(document.body.textContent ?? '').toMatch(/operator/i)
+  })
+
+  it('links to its counterpart', () => {
+    render(<Page />)
+
+    const hrefs = Array.from(document.querySelectorAll('a')).map((a) => a.getAttribute('href'))
+    expect(hrefs.some((href) => href === '/privacy' || href === '/terms')).toBe(true)
+  })
 })
 
-jest.mock('next/image', () => (props: any) => <img alt={props.alt} {...props} />)
-
-describe('PrivacyPage', () => {
-  beforeEach(() => {
+describe('Privacy Policy', () => {
+  it('explains why the activity record outlives an account', () => {
+    // The one clause specific to this product. Companai exists to make actions
+    // attributable, so "delete everything about me" cannot mean erasing the
+    // record other people relied on — and a policy implying otherwise would
+    // promise something the platform must not do.
     render(<PrivacyPage />)
-  })
 
-  it('renders "Privacy Policy" as the page title', () => {
-    const heading = screen.getByRole('heading', { level: 1 })
-    expect(heading.textContent).toBe('Privacy Policy')
-  })
-
-  it('displays the last-updated date in the intro', () => {
-    expect(screen.getByText('Last Updated: January 1, 2026')).toBeTruthy()
-  })
-
-  it('renders breadcrumb with Home link and current page label', () => {
-    const breadcrumbNav = screen.getByRole('navigation', { name: 'Breadcrumb' })
-    const homeLink = within(breadcrumbNav).getByText('Home')
-    expect(homeLink.closest('a')).toHaveAttribute('href', '/')
-    const currentLabel = within(breadcrumbNav).getByText('Privacy Policy')
-    expect(currentLabel.tagName).toBe('SPAN')
-  })
-
-  it('contains key privacy policy sections', () => {
-    expect(screen.getByText('1. Information We Collect')).toBeTruthy()
-    expect(screen.getByText('2. Purposes of Processing')).toBeTruthy()
-    expect(screen.getByText('3. Legal Bases for Processing')).toBeTruthy()
-    expect(screen.getByText('4. Data Recipients and Transfers')).toBeTruthy()
-    expect(screen.getByText('5. Data Retention')).toBeTruthy()
-    expect(screen.getByText('6. Data Security')).toBeTruthy()
-    expect(screen.getByText('7. Your Rights Under GDPR')).toBeTruthy()
-    expect(screen.getByText('8. Your Rights Under CCPA')).toBeTruthy()
-    expect(screen.getByText('9. How to Exercise Your Rights and Contact Us')).toBeTruthy()
-    expect(screen.getByText('10. Updates to Privacy Policy')).toBeTruthy()
-  })
-
-  it('includes a link to the Terms of Service', () => {
-    const article = document.querySelector('article')
-    const termsLinks = within(article!).getAllByRole('link').filter((link) => link.getAttribute('href') === '/terms')
-    expect(termsLinks.length).toBeGreaterThan(0)
-  })
-
-  it('includes an external link to the platform site', () => {
-    const article = document.querySelector('article')
-    const externalLinks = within(article!).getAllByRole('link').filter((link) => isOpenMercatoPlatformLink(link.getAttribute('href')))
-    expect(externalLinks.length).toBeGreaterThan(0)
+    expect(screen.getByText(/what other people relied on/i)).toBeInTheDocument()
   })
 })
 
-describe('TermsPage', () => {
-  beforeEach(() => {
+describe('Terms of Service', () => {
+  it('states that automation does not move responsibility', () => {
+    // The governance claim, in the one place a user might look for it.
     render(<TermsPage />)
-  })
 
-  it('renders "Terms of Service" as the page title', () => {
-    const heading = screen.getByRole('heading', { level: 1 })
-    expect(heading.textContent).toBe('Terms of Service')
-  })
-
-  it('displays the effective date in the intro', () => {
-    expect(screen.getByText('Effective as of January 1, 2026')).toBeTruthy()
-  })
-
-  it('renders breadcrumb with Home link and current page label', () => {
-    const breadcrumbNav = screen.getByRole('navigation', { name: 'Breadcrumb' })
-    const homeLink = within(breadcrumbNav).getByText('Home')
-    expect(homeLink.closest('a')).toHaveAttribute('href', '/')
-    const currentLabel = within(breadcrumbNav).getByText('Terms of Service')
-    expect(currentLabel.tagName).toBe('SPAN')
-  })
-
-  it('contains key terms of service sections', () => {
-    expect(screen.getByText('1. Definitions')).toBeTruthy()
-    expect(screen.getByText('2. Scope of Services')).toBeTruthy()
-    expect(screen.getByText('3. Formation of Agreement')).toBeTruthy()
-  })
-
-  it('includes a link to the Privacy Policy', () => {
-    const article = document.querySelector('article')
-    const privacyLinks = within(article!).getAllByRole('link').filter((link) => link.getAttribute('href') === '/privacy')
-    expect(privacyLinks.length).toBeGreaterThan(0)
+    expect(screen.getByText(/does not transfer responsibility/i)).toBeInTheDocument()
   })
 })

@@ -5,7 +5,7 @@ export const metadata: ModuleInfo = {
   title: 'Customer Relationship Management',
   version: '0.1.0',
   description: 'Core CRM capabilities for people, companies, deals, and activities.',
-  author: 'Open Mercato Team',
+  author: 'Companai Team',
   license: 'MIT',
   ejectable: true,
 }

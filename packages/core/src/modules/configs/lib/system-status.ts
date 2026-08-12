@@ -59,7 +59,7 @@ const CATEGORY_METADATA: Record<
   },
 }
 
-const SYSTEM_STATUS_DOC_BASE = 'https://docs.openmercato.com/docs/framework/operations/system-status'
+const SYSTEM_STATUS_DOC_BASE = 'https://docs.corprorate.com/docs/framework/operations/system-status'
 const DEFAULT_SQLITE_CACHE_PATH = './.mercato/cache/cache.db'
 
 function maskConnectionCredentials(raw: string | undefined): string | undefined {

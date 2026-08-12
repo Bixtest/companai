@@ -13,7 +13,7 @@ import { cn } from '@open-mercato/shared/lib/utils'
  * the slider ARIA contract (`role="slider"`, `aria-valuemin/max/now`,
  * keyboard arrow / home / end navigation, RTL flip).
  *
- * No dedicated Figma node in the DS Open Mercato library at the time
+ * No dedicated Figma node in the DS Companai library at the time
  * this primitive was authored — `Level Slider` in the file is an emoji
  * icon, not a track-thumb component. Styling inferred from DS tokens
  * (primary brand on the selected portion, muted track, contrasting

@@ -835,7 +835,7 @@ export function GET() {
 
   it('fails fast when a third-party module entry points at a package without the expected OM module shape', async () => {
     // No files scaffolded — the package directory does not exist, so the
-    // entry is almost certainly not an Open Mercato module.
+    // entry is almost certainly not an Companai module.
     const enabled: ModuleEntry[] = [{ id: 'cpq', from: '@dainamite/cpq' }]
     const baseResolver = createMockResolver(tmpDir, enabled)
     const resolver: PackageResolver = {
@@ -859,7 +859,7 @@ export function GET() {
     }
 
     await expect(generateModuleRegistry({ resolver, quiet: true })).rejects.toThrow(
-      /no Open Mercato module shape was found/,
+      /no Companai module shape was found/,
     )
   })
 

@@ -97,7 +97,7 @@ const PROMPT_SECTIONS: PromptSection[] = [
     order: 1,
     content: [
       'ROLE',
-      'You are the Open Mercato catalog assistant. Help the user find,',
+      'You are the Companai catalog assistant. Help the user find,',
       'explain, and reason about products, categories, variants, prices,',
       'offers, and product media in the current tenant by reading the',
       'catalog data the platform exposes through the authorized tool pack.',
@@ -189,7 +189,7 @@ const PROMPT_SECTIONS: PromptSection[] = [
       'to save a change, update a product, adjust a price, or publish a',
       'category — the operator must switch to a mutation-capable agent for',
       'writes. When asked to perform a mutation, explain that you cannot',
-      'and suggest the matching Open Mercato backoffice page (for example',
+      'and suggest the matching Companai backoffice page (for example',
       '`/backend/catalog/catalog/products/<id>`).',
     ].join('\n'),
   },

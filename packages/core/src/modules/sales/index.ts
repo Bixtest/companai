@@ -7,7 +7,7 @@ export const metadata: ModuleInfo = {
   version: '0.1.0',
   description:
     'Quoting, ordering, fulfillment, and billing capabilities built on modular pricing and tax pipelines.',
-  author: 'Open Mercato Team',
+  author: 'Companai Team',
   license: 'MIT',
   requires: ['catalog', 'customers', 'dictionaries'],
   ejectable: true,

@@ -8,10 +8,10 @@ import { resolveForcedLocale } from '@open-mercato/shared/lib/i18n/locale'
 import { resolveTextDirection } from '@open-mercato/shared/lib/i18n/direction'
 
 export const metadata: Metadata = {
-  title: 'Open Mercato',
+  title: 'Companai',
   description: 'AI-supportive, modular ERP foundation for product & service companies',
   icons: {
-    icon: '/open-mercato.svg',
+    icon: '/companai.svg',
   },
 }
 

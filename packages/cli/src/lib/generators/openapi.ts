@@ -374,7 +374,7 @@ for (const [apiPath, mod] of routeEntries) {
 }
 
 const doc = buildOpenApiDocument([...modules.values()], {
-  title: 'Open Mercato API',
+  title: 'Companai API',
   version: '1.0.0',
   description: 'Auto-generated OpenAPI specification',
   servers: [{ url: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000' }],
@@ -715,7 +715,7 @@ export async function generateOpenApi(options: GenerateOpenApiOptions): Promise<
     doc = {
       openapi: '3.1.0',
       info: {
-        title: 'Open Mercato API',
+        title: 'Companai API',
         version: '1.0.0',
         description: 'Auto-generated OpenAPI specification',
       },

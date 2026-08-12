@@ -11,7 +11,7 @@ import { cn } from '@open-mercato/shared/lib/utils'
  * native OS scrollbars (which render inconsistently across macOS / Windows /
  * Linux).
  *
- * No dedicated Figma node — DS Open Mercato library did not ship a `ScrollArea`
+ * No dedicated Figma node — DS Companai library did not ship a `ScrollArea`
  * master component at the time this primitive was authored. Styling is inferred
  * from the DS scrollbar token decisions used elsewhere (muted-foreground thumb,
  * transparent track, hover state, `rounded-full` thumb shape).

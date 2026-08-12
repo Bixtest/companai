@@ -124,7 +124,7 @@ export async function loadRichOpenApiSpec(): Promise<OpenApiDocument | null> {
 
     if (modulesWithApis.length > 0) {
       const doc = buildOpenApiDocument(modules, {
-        title: 'Open Mercato API',
+        title: 'Companai API',
         version: '1.0.0',
         servers: [{ url: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000' }],
       })
@@ -190,7 +190,7 @@ async function loadRawOpenApiSpec(): Promise<OpenApiDocument | null> {
 
     if (modulesWithApis.length > 0) {
       const doc = buildOpenApiDocument(modules, {
-        title: 'Open Mercato API',
+        title: 'Companai API',
         version: '1.0.0',
         servers: [{ url: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000' }],
       })
@@ -289,7 +289,7 @@ async function parseApiEndpointsFromModules(): Promise<ApiEndpoint[]> {
 
       // Generate OpenAPI spec from modules
       const doc = buildOpenApiDocument(modules, {
-        title: 'Open Mercato API',
+        title: 'Companai API',
         version: '1.0.0',
         servers: [{ url: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000' }],
       })

@@ -158,7 +158,7 @@ export async function POST(req: Request) {
             orderNumber,
           }),
           cta: translate('sales.quotes.accept.adminEmail.cta', 'View order'),
-          footer: translate('sales.quotes.accept.adminEmail.footer', 'Open Mercato'),
+          footer: translate('sales.quotes.accept.adminEmail.footer', 'Companai'),
         }
 
         await sendEmail({

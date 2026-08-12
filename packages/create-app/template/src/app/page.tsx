@@ -1,29 +1,17 @@
-import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { getAuthFromCookies } from '@open-mercato/shared/lib/auth/server'
-import { isAutoLoginEnabled } from '@open-mercato/core/modules/auth/lib/autologin'
 
-// The home route is a pure router: it never renders. Unless the visitor has
-// dismissed the start page, it sends them there; otherwise into the app
-// (backend when authenticated, login otherwise).
+// The home route is a pure router: it never renders. Signed in, you land in the
+// app; otherwise at the login.
+//
+// Two demo affordances used to live here and are gone. It sent every visitor to
+// `/start` — a role picker and an onboarding pitch — until a dismissal cookie
+// was set. And with `OM_AUTOLOGIN_*` configured it signed unauthenticated
+// visitors in automatically, from a password held in an environment variable.
+// A platform whose purpose is knowing who did what has no business logging
+// somebody in without asking who they are.
 export default async function Home() {
   const auth = await getAuthFromCookies()
-
-  // Demo autologin: when OM_AUTOLOGIN_* credentials are configured and there is
-  // no active session, hand off to the autologin route which signs the visitor
-  // in and drops them into the app. Fully gated behind env vars — with them
-  // unset, behavior below is unchanged. The route falls back to /login when the
-  // credentials are invalid, so a misconfigured demo can never loop.
-  if (!auth && isAutoLoginEnabled()) {
-    redirect('/api/auth/autologin')
-  }
-
-  const cookieStore = await cookies()
-  const startPageDismissed = cookieStore.get('start_page_dismissed')?.value === '1'
-
-  if (!startPageDismissed) {
-    redirect('/start')
-  }
 
   redirect(auth ? '/backend' : '/login')
 }

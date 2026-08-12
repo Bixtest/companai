@@ -7,7 +7,7 @@
  * - Completing workflows with final status
  * - Triggering compensation on failure
  *
- * Functional API (no classes) following Open Mercato conventions.
+ * Functional API (no classes) following Companai conventions.
  */
 
 import { EntityManager, LockMode } from '@mikro-orm/core'

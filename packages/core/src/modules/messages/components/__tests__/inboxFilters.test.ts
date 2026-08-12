@@ -36,7 +36,7 @@ describe('buildMessagesInboxFilters', () => {
     const hasAttachments = filters.find((f) => f.id === 'hasAttachments')
     const hasActions = filters.find((f) => f.id === 'hasActions')
 
-    expect(hasObjects?.tooltip).toBe('Shows messages that have Open Mercato records attached — such as orders, quotes, or customers.')
+    expect(hasObjects?.tooltip).toBe('Shows messages that have Companai records attached — such as orders, quotes, or customers.')
     expect(hasAttachments?.tooltip).toBeUndefined()
     expect(hasActions?.tooltip).toBe('Shows messages where one or more attached records require a response (approval, rejection, or review).')
   })

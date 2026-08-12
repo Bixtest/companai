@@ -338,7 +338,7 @@ const ingestInboundMessageCommand: CommandHandler<IngestInboundMessageInput, Ing
     //     digests). Substitute a placeholder instead of failing ingest.
     const MAX_COMPOSE_BODY = 50_000
     const TRUNCATE_MARKER =
-      '\n\n[…message truncated by Open Mercato — full body preserved in ExternalMessage.rawPayload]'
+      '\n\n[…message truncated by Companai — full body preserved in ExternalMessage.rawPayload]'
     const rawBody = m.body ?? ''
     const truncatedBody =
       rawBody.length > MAX_COMPOSE_BODY

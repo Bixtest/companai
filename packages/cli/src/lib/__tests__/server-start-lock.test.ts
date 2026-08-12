@@ -60,7 +60,7 @@ describe('server start lock', () => {
     }))
 
     expect(() => acquireServerStartLock(tempDir, { port: '5002' })).toThrow(
-      `Another Open Mercato production server is already running for ${tempDir}`,
+      `Another Companai production server is already running for ${tempDir}`,
     )
   })
 })

@@ -5,6 +5,6 @@ export const metadata: ModuleInfo = {
   title: 'Example Module',
   version: '0.1.0',
   description: 'Demonstrates pages, APIs, entities and DI.',
-  author: 'Open Mercato Team',
+  author: 'Companai Team',
   license: 'MIT',
 }

@@ -74,7 +74,7 @@ const emitInboundSchema = z.object({
   inReplyTo: z.string().max(500).optional(),
   references: z.array(z.string().max(500)).max(50).optional(),
   /**
-   * Open Mercato `messages.message` thread id this inbound message belongs to.
+   * Companai `messages.message` thread id this inbound message belongs to.
    * When set, a `messages.message` row is created with this `threadId` so the
    * hub-thread inheritance join can resolve a Person from a sibling message.
    */

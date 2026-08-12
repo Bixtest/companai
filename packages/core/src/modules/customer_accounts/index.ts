@@ -5,7 +5,7 @@ export const metadata: ModuleInfo = {
   title: 'Customer Identity & Portal Authentication',
   version: '0.1.0',
   description: 'Customer-facing authentication with two-tier identity model and full RBAC.',
-  author: 'Open Mercato Team',
+  author: 'Companai Team',
   license: 'MIT',
   ejectable: true,
 }

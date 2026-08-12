@@ -17,7 +17,7 @@ export function getApiDocsResources(): ApiDocResource[] {
     {
       label: 'Official documentation',
       description: 'Guides and tutorials covering setup, modules, and customization.',
-      href: 'https://docs.openmercato.com/',
+      href: 'https://docs.corprorate.com/',
       external: true,
       actionLabel: 'Open docs',
     },

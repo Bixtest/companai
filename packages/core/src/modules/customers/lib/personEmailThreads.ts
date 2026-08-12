@@ -21,7 +21,7 @@ export type EmailThreadDirection = 'inbound' | 'outbound'
 
 export type PersonEmailMessage = {
   id: string
-  /** Open Mercato `messages.message` id — used as `parentMessageId` when replying so the reply joins this thread. */
+  /** Companai `messages.message` id — used as `parentMessageId` when replying so the reply joins this thread. */
   messageId: string | null
   /** RFC2822 Message-ID of this email — used as `In-Reply-To` on a reply. */
   rfcMessageId: string | null

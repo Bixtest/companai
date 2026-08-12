@@ -9,7 +9,7 @@ import { cn } from '@open-mercato/shared/lib/utils'
  * Determinate progress bar — both linear and circular. Linear is the
  * default `Progress` export; circular is `CircularProgress`.
  *
- * Figma source: DS Open Mercato `Progress Bar` page (`450:17758`):
+ * Figma source: DS Companai `Progress Bar` page (`450:17758`):
  * `Progress Bar [1.1]` (`450:17821`), `Progress Bar Label [1.1]`
  * (`515:3758`), `Progress Bar Line [1.1]` (`450:17810`, 5 tone
  * variants: muted / accent / destructive / warning / success),

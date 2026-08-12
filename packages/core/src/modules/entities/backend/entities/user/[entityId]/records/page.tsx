@@ -286,11 +286,11 @@ function RecordsPageInner({ params }: { params: { entityId?: string } }) {
         <ContextHelp bulb title="API: Manage Records via cURL" className="mb-4">
           <p className="mb-2">
             Interact with this custom entity via the backend API using cURL. Use API keys for machine-to-machine access—mint one from the{' '}
-            <a className="underline" target="_blank" rel="noreferrer" href="https://docs.openmercato.com/user-guide/api-keys">
+            <a className="underline" target="_blank" rel="noreferrer" href="https://docs.corprorate.com/user-guide/api-keys">
               Managing API keys guide
             </a>{' '}
             or the{' '}
-            <a className="underline" target="_blank" rel="noreferrer" href="https://docs.openmercato.com/cli/api-keys">
+            <a className="underline" target="_blank" rel="noreferrer" href="https://docs.corprorate.com/cli/api-keys">
               API keys CLI documentation
             </a>{' '}
             before running these calls.
@@ -304,11 +304,11 @@ export ENTITY_ID="${entityId}"
 export RECORD_ID="<record uuid>"`}</code></pre>
               <p className="text-muted-foreground mt-1">
                 Need a new key? Follow the{' '}
-                <a className="underline" target="_blank" rel="noreferrer" href="https://docs.openmercato.com/user-guide/api-keys">
+                <a className="underline" target="_blank" rel="noreferrer" href="https://docs.corprorate.com/user-guide/api-keys">
                   Managing API keys
                 </a>{' '}
                 walkthrough or mint one via{' '}
-                <a className="underline" target="_blank" rel="noreferrer" href="https://docs.openmercato.com/cli/api-keys">
+                <a className="underline" target="_blank" rel="noreferrer" href="https://docs.corprorate.com/cli/api-keys">
                   mercato api_keys add
                 </a>
                 .

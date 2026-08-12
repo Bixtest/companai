@@ -43,7 +43,7 @@ import { cn } from '@open-mercato/shared/lib/utils'
  *                                     ("Pending review", "Approved")
  *                                     or stacked in the indented row.
  *
- * Figma source: DS Open Mercato `Activity Feed` page (`164611:26451`)
+ * Figma source: DS Companai `Activity Feed` page (`164611:26451`)
  * — `Activity Feed [1.1]` (`166035:46833`, 5 entry variants: plain,
  * file attachments, comment, avatar stack, task-status pills);
  * `Activity Feed File Items [1.1]` (`165967:4028`); `Activity Feed

@@ -59,9 +59,9 @@ export async function runAgenticInit(args: string[]): Promise<number> {
   const targetDir = resolve('.')
   const options = parseArgs(args)
 
-  // Validate this is an Open Mercato app directory
+  // Validate this is an Companai app directory
   if (!existsSync(join(targetDir, 'src', 'modules.ts'))) {
-    console.error('❌  Not an Open Mercato app directory (src/modules.ts not found)')
+    console.error('❌  Not an Companai app directory (src/modules.ts not found)')
     return 1
   }
 
