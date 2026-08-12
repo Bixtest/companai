@@ -207,6 +207,65 @@ mismatch at creation with a message that says why. Done 2026-08-10.
 
 ---
 
+## U14 — the resolver binds 38% of live commands · severity **high**
+
+**Found:** 2026-08-12, answering the `messages.*` question on the roadmap. The
+question turned out to be the wrong one, and the answer underneath it matters
+much more.
+
+**The original question**, and its answer: `messages.actions` and
+`messages.manage` were the only 2 of 113 capability descriptors classified from
+their titles rather than from code. Checked:
+
+- **`messages.actions` is enforced** — `POST /api/messages/[id]/actions/[actionId]`
+  declares `requireFeatures: ['messages.actions']`. The premise that no route
+  enforces it was wrong.
+- **`messages.manage` is not enforced anywhere**, and its descriptor already says
+  so in its own note. Honest, and still true.
+
+**What that uncovered.** The command gate is keyed by **capability**, and
+`commands/interceptors.ts` says plainly that a command declaring none is not
+gated — *"the gap is visible rather than guessed at"*. The mechanism was
+documented. **The size of the gap had never been measured.**
+
+Measured, counting only modules that actually run (14 parked modules excluded):
+
+| | |
+|---|---|
+| Commands declaring a capability | **21** |
+| Commands declaring none | **35** |
+| **Share the resolver can bind** | **38%** |
+
+| Ungated, by live module | |
+|---|---|
+| `messages` | 20 |
+| `planner` | 4 |
+| `scheduler` | 4 |
+| `example` | 3 |
+| `dictionaries` | 2 |
+| `translations` | 2 |
+
+**The worst instance.** `messages.email` is classified **E3, irreversible,
+`externalEffect: true`** — the strongest classification in the module, on the
+grounds that a sent message cannot be recalled. And `messages.messages.compose`,
+`.reply` and `.forward` declare **no capability**, so nothing maps that
+classification onto an act. **The governance layer cannot hold a message send**,
+whatever ceiling applies to the actor.
+
+That is the product's premise failing on its most irreversible act. Everything
+gated today — auth, currencies, directory, feature toggles — is reversible
+administrative work.
+
+**Not a defect in the gate.** The gate behaves exactly as documented and fails
+open by design, because refusing every unmapped command would break the platform.
+The work is mapping commands to capabilities, module by module, and `messages`
+is where it should start.
+
+**Placed at roadmap item 6**, taking the slot the question that found it
+occupied.
+
+---
+
 ## U13 — the authority graph showed raw UUIDs · **FIXED 2026-08-12** · severity **high**
 
 **Found:** 2026-08-12, exploring the platform while a gate ran (COOKBOOK rule
