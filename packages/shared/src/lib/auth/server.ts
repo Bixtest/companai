@@ -2,7 +2,7 @@ import { cookies } from 'next/headers.js'
 import type { EntityManager } from '@mikro-orm/postgresql'
 import { verifyJwt } from './jwt'
 import { getSharedApiKeyAuthCache } from './apiKeyAuthCache'
-import { apiKeySubject, derivePrincipal, isMachinePrincipal, type Principal } from './principal'
+import { aiWorkerSubject, apiKeySubject, derivePrincipal, isMachinePrincipal, type Principal } from './principal'
 import { createLogger } from '@open-mercato/shared/lib/logger'
 
 const logger = createLogger('auth').child({ component: 'api-key-auth' })
@@ -347,14 +347,20 @@ async function resolveApiKeyAuth(secret: string): Promise<AuthContext> {
       }
     }
 
+    // A credential marked as an AI worker acts as one. Same key machinery —
+    // revocation, org scope, rate limits, roles — and a different principal
+    // kind, which is the only thing the governance layer needs to bound a
+    // machine differently from a service integration.
+    const actsAsAiWorker = record.principalKind === 'ai_worker'
+
     const auth: Exclude<AuthContext, null> = {
-      sub: apiKeySubject(record.id),
+      sub: actsAsAiWorker ? aiWorkerSubject(record.id) : apiKeySubject(record.id),
       tenantId: record.tenantId ?? null,
       orgId: record.organizationId ?? null,
       roles: roleNames,
       principal: {
         id: record.id,
-        kind: 'service',
+        kind: actsAsAiWorker ? 'ai_worker' : 'service',
         onBehalfOfUserId: actualUserId,
         displayName: record.name ?? null,
         tenantId: record.tenantId ?? null,

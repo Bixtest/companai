@@ -32,6 +32,26 @@ export class ApiKey {
   @Property({ name: 'key_prefix', type: 'text' })
   keyPrefix!: string
 
+  /**
+   * What kind of actor this credential is — `service` (default) or `ai_worker`.
+   *
+   * **This is what gave `ai_worker` a producer.** The kind existed in the
+   * principal vocabulary and nothing could create one, so no ceiling,
+   * delegation, trust grant or denial could target a machine and the
+   * effect-class matrix never engaged.
+   *
+   * An AI worker needs a credential, and this is already one: revocable,
+   * org-scoped, rate-limited, role-bearing. Marking a key changes the subject it
+   * issues (`ai_worker:<id>` rather than `api_key:<id>`) and therefore what the
+   * resolver, the journal and the ledger record — without a second auth path to
+   * secure and keep in step.
+   *
+   * Nullable, and null means `service`: every key issued before this column
+   * existed is exactly what it always was.
+   */
+  @Property({ name: 'principal_kind', type: 'text', nullable: true })
+  principalKind: string | null = null
+
   @Property({ name: 'roles_json', type: 'json', nullable: true })
   rolesJson?: string[] | null
 

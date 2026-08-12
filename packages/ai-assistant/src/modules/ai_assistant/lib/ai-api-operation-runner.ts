@@ -21,7 +21,7 @@ import {
 } from '@open-mercato/shared/modules/registry'
 import { hasAllFeatures } from '@open-mercato/shared/security/features'
 import type { AiToolDefinition, McpToolContext } from './types'
-import { parseSubject } from '@open-mercato/shared/lib/auth/principal'
+import { isApiKeyBackedKind, parseSubject } from '@open-mercato/shared/lib/auth/principal'
 
 export type AiApiHttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
 
@@ -112,7 +112,7 @@ function buildAuthEnvelope(ctx: AiToolExecutionContext): TrustedAuthContextEnvel
   // the access-log schema rejects a non-UUID `actorUserId`. This matches real
   // HTTP api-key auth, where `keyId` is the api key record id.
   const subject = parseSubject(userId)
-  const apiKeyId = subject.kind === 'service' ? subject.id : undefined
+  const apiKeyId = isApiKeyBackedKind(subject.kind) ? subject.id : undefined
   const auth: AuthContext = {
     sub: userId,
     userId,

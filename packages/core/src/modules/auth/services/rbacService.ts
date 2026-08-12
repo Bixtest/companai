@@ -10,7 +10,7 @@ import { recordShadowDecision } from '@open-mercato/shared/lib/authority/shadow'
 import { createLogger } from '@open-mercato/shared/lib/logger'
 import type { AuthorityEnforcementService } from '@open-mercato/core/modules/auth/services/authorityEnforcementService'
 import { getCapabilityDescriptor } from '@open-mercato/shared/lib/capabilities/registry'
-import { parseSubject } from '@open-mercato/shared/lib/auth/principal'
+import { isApiKeyBackedKind, parseSubject } from '@open-mercato/shared/lib/auth/principal'
 import { filterGrantsByEnabledModules, getOwningModuleId, getEnabledModuleIds } from '@open-mercato/shared/security/enabledModulesRegistry'
 
 const authorityLogger = createLogger('authority').child({ component: 'enforcement' })
@@ -314,7 +314,10 @@ export class RbacService {
       }
     }
 
-    if (subject.kind === 'service') {
+    // Both service keys and AI workers resolve their permissions from the key
+    // row they authenticate with. Testing for 'service' alone sent an AI worker
+    // down the human branch, where its subject reached a uuid column.
+    if (isApiKeyBackedKind(subject.kind)) {
       const apiKeyId = subject.id
       const em = this.em.fork()
       const key = await em.findOne(ApiKey, { id: apiKeyId, deletedAt: null })

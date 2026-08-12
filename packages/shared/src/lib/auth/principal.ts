@@ -19,9 +19,11 @@
 /**
  * The kinds of actor the platform can represent.
  *
- * `ai_worker` is declared but not yet produced — no authentication path creates
- * one today. It exists so consumers switch over a complete set now, rather than
- * being rewritten when AI workers become principals in their own right.
+ * All four are produced. `ai_worker` was the last to gain a producer: a
+ * credential marked as belonging to an AI worker issues an `ai_worker:` subject,
+ * so the resolver, the journal and the ledger all see a machine where they
+ * previously saw a service. Until that existed the kind was a type with no
+ * inhabitants, and nothing could bound a machine differently from a person.
  */
 export type PrincipalKind = 'human' | 'ai_worker' | 'service' | 'system'
 
@@ -51,9 +53,30 @@ export type Principal = {
  */
 const API_KEY_SUBJECT_PREFIX = 'api_key:'
 
+/**
+ * The prefix that makes an actor an **AI worker** rather than a service.
+ *
+ * `ai_worker` was a principal kind with **nothing that could produce one**: no
+ * subject could encode it, so no ceiling, delegation, trust grant or denial
+ * could ever target a machine, and the effect-class matrix — which exists to
+ * bound machines — never engaged. The kind was a type with no inhabitants.
+ *
+ * An AI worker authenticates with a credential, and the credential we already
+ * have is an API key: revocable, org-scoped, rate-limited, role-bearing. A key
+ * marked as belonging to an AI worker issues this subject instead, so the whole
+ * platform sees `ai_worker` where it previously saw `service` — the journal, the
+ * ledger, the resolver and the approvals queue, all without a second auth path.
+ */
+const AI_WORKER_SUBJECT_PREFIX = 'ai_worker:'
+
 /** Builds the legacy `sub` for an API key principal. */
 export function apiKeySubject(apiKeyId: string): string {
   return `${API_KEY_SUBJECT_PREFIX}${apiKeyId}`
+}
+
+/** Builds the `sub` for a credential that acts as an AI worker. */
+export function aiWorkerSubject(apiKeyId: string): string {
+  return `${AI_WORKER_SUBJECT_PREFIX}${apiKeyId}`
 }
 
 /**
@@ -63,6 +86,9 @@ export function apiKeySubject(apiKeyId: string): string {
  * reader of the encoding; call sites should prefer `auth.principal`.
  */
 export function parseSubject(subject: string): { kind: PrincipalKind; id: string } {
+  if (subject.startsWith(AI_WORKER_SUBJECT_PREFIX)) {
+    return { kind: 'ai_worker', id: subject.slice(AI_WORKER_SUBJECT_PREFIX.length) }
+  }
   if (subject.startsWith(API_KEY_SUBJECT_PREFIX)) {
     return { kind: 'service', id: subject.slice(API_KEY_SUBJECT_PREFIX.length) }
   }
@@ -99,13 +125,18 @@ export function derivePrincipal(auth: PrincipalSource | null | undefined): Princ
   // `isApiKey` and the prefix are two encodings of the same fact. Honour either,
   // so a context built by an older path still resolves correctly.
   const isService = parsed.kind === 'service' || auth.isApiKey === true
-  const id = isService ? auth.keyId ?? parsed.id : parsed.id
+  const isAiWorker = parsed.kind === 'ai_worker'
+  // Both are credentials rather than people, so both resolve their identity from
+  // the key and carry the user they were issued on behalf of. Only the *kind*
+  // differs — and that difference is the one the whole governance layer turns on.
+  const isMachine = isService || isAiWorker
+  const id = isMachine ? auth.keyId ?? parsed.id : parsed.id
 
   return {
     id,
-    kind: isService ? 'service' : 'human',
-    onBehalfOfUserId: isService ? auth.userId ?? null : null,
-    displayName: (isService ? auth.keyName : auth.email) ?? null,
+    kind: isAiWorker ? 'ai_worker' : isService ? 'service' : 'human',
+    onBehalfOfUserId: isMachine ? auth.userId ?? null : null,
+    displayName: (isMachine ? auth.keyName : auth.email) ?? null,
     tenantId: auth.tenantId ?? null,
     organizationId: auth.orgId ?? null,
   }
@@ -159,6 +190,25 @@ export function isHumanPrincipal(auth: PrincipalCarrier): boolean {
  * per kind; this helper is for the cases that only distinguish "person" from
  * "not a person", such as skipping interactive session checks.
  */
+/**
+ * Whether this kind of actor is backed by an **API key row**.
+ *
+ * Narrower than `isMachinePrincipal`, and the difference matters: `system` is a
+ * machine but has no credential behind it — the platform acting on its own
+ * behalf, from a CLI or a scheduled job. Looking one up in `api_keys` finds
+ * nothing.
+ *
+ * This exists because adding `ai_worker` made every `kind === 'service'` check
+ * silently incomplete. Those checks meant *"resolve this actor's permissions
+ * from its key"* and now had a second kind to cover; the one in `RbacService`
+ * fell through to the human branch and put `ai_worker:<uuid>` into a uuid
+ * column, which is a 500 rather than a wrong answer. A named predicate makes
+ * the next kind a compile-time question instead of a runtime surprise.
+ */
+export function isApiKeyBackedKind(kind: PrincipalKind | null | undefined): boolean {
+  return kind === 'service' || kind === 'ai_worker'
+}
+
 export function isMachinePrincipal(auth: PrincipalCarrier): boolean {
   const kind = resolvePrincipal(auth)?.kind
   return kind === 'service' || kind === 'ai_worker' || kind === 'system'

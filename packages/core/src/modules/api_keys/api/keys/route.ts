@@ -120,6 +120,10 @@ const crud = makeCrudRoute<
         rolesJson: roleIds,
         createdBy: ctx.auth?.sub ?? null,
         expiresAt: input.expiresAt ?? null,
+        // Null rather than 'service' when unset: null is what every existing row
+        // holds, and writing a default here would make new rows differ from old
+        // ones for no reason. Both read as a service.
+        principalKind: input.principalKind ?? null,
       }
     },
     response: (entity) => {
