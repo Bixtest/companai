@@ -51,6 +51,41 @@ human or test has looked.
 | 10 | ✅ | **Re-verify the boot checks that used a cached build** | Done 2026-08-12. Several `build:packages --force` + `build:app --force` cycles today, each followed by a restart and a walk through the running instance. Routing, chrome, content pages and API docs all checked against a build known not to be cached ([[L38]]) | S |
 | 11 | 💤 | **Native review of the Arabic** | Dropped from this milestone by the owner, 2026-08-12. `ar` still ships and falls back to English, which is harmless; only *wrong* translations would not be | S |
 
+## The finish line — a checklist
+
+**Everything below is mine and none of it needs the owner.** Plesk is dropped
+from this milestone; hosting verification happens when there is a server.
+
+*Kept here rather than in COOKBOOK.md because rule zero-three says one list, and
+this is that list. The cookbook is how the work is done; this is what is left.*
+
+Each item is **verified before it is started** — [[L42]]: a roadmap entry is a
+claim about the past, not the present. Verified 2026-08-12.
+
+| | Item | Verified state | Done |
+|---|---|---|---|
+| **14** | Correlation and causation ids | **Done 2026-08-12.** Correlation from the request container (one per request, by construction); causation parked on the runtime context under a **symbol**, so nothing arriving over HTTP can forge a causal chain. Both degrade to `null` rather than throwing — a missing id costs a trace, a throw would cost the write. 10 tests | ☑ |
+| **16** | Finish command → capability mapping | 30 of 56 live commands gated (54%). Open | ☐ |
+| **13** | Give `ai_worker` a producer | Only a type guard mentions the kind. **Nothing creates one.** Open | ☐ |
+| **15** | Spend metering, then budget as a ceiling | The AI chat route tracks stream usage; nothing aggregates it, no ceiling reads it. Open | ☐ |
+| **19** | Phase G exit gate | Not started | ☐ |
+| **17** | Prune parked-module dependencies | Not started | ☐ |
+| **18** | Production hardening | Not started | ☐ |
+| **21** | Screens for delegations, locks, trust, projects, denials | APIs exist, no pages | ☐ |
+| **22** | Bulk approval with a diff | Not started | ☐ |
+| **23** | Deputy cover and standing approvals | Not started | ☐ |
+| **24** | Per-tenant approval expiry | Not started | ☐ |
+
+**The order, and why:** 14 first — contained, and every later item benefits from
+acts being traceable. Then 16 (mechanical, and it closes the gap Hermes widens),
+13 (needs design), 15 (needs 13 to exist first). Then 19, 17, 18 — cheapest to
+most invasive. Screens last, because they are the only ones a person can work
+around.
+
+**Done means:** the gate is green, it is verified against the running instance
+where that is possible, and the documentation says what it does.
+
+
 ## Phase 3 — what Hermes needs before it arrives
 
 **Hermes is the AI engine that lands next, inside the Starting Kit.** These are
@@ -59,7 +94,7 @@ permanently missing, the moment a machine starts acting.
 
 | # | | Task | Why it cannot wait for Hermes | Size |
 |---|---|---|---|---|
-| 12 | ⏳ | **U7 — the journal must tell a machine from a human** | `action_logs.actor_user_id` stores an API key's UUID with no record that it *was* a key. Hermes acts through keys. Every act it performs becomes indistinguishable from a person's — and **retroactively unfixable**, because the information was never captured. Invariant **I2**, and the premise of the product | M |
+| 12 | ✅ | **U7 — the journal tells a machine from a human** | **Was already done** (`ce7fb61`) and the roadmap was carrying the original finding as current state — the [[L36]] trap. Verified live 2026-08-12 with a real API key: the machine write recorded `actor_kind = service` against the key's id, the human write `actor_kind = human` against the person's. The one genuine gap was that the audit **screen** never showed it, so a key acting looked like a person whose name had not loaded. Now rendered as a tag beside the actor, in four locales |  S |
 | 13 | | **Give `ai_worker` a producer** | The principal kind exists and **nothing creates one**. Until something does, no ceiling, delegation, trust grant or denial can target a machine, and the effect-class matrix — which exists to bound machines — never engages. Also the precondition for charter grants | M |
 | 14 | | **Correlation and causation ids** | One Hermes task is many acts. Without a correlation id the ledger records events that cannot be assembled into *"what did the agent do for this request"* — which is the question a customer will ask first | M |
 | 15 | | **Spend metering, then budget as a ceiling** | Hermes calls models, and models cost money. Today nothing meters spend, so no budget can bound it. This was blocked on "an AI actor exists"; Hermes *is* that actor | M |
@@ -90,7 +125,7 @@ nobody uses.
 
 | | Question | My recommendation |
 |---|---|---|
-| A | The `example` / `example_customers_sync` modules put a demo *Todos* widget on the dashboard, but `example` is the reference implementation our whole `AGENTS.md` tree points at | **Park them.** Product comes out clean, reference stays readable |
+| A | ✅ **Settled 2026-08-12.** The owner pushed back on parking the `example` modules and was right: the damage was presentational, not technical, while the module is the reference every `AGENTS.md` points at. **Kept, and gated behind `OM_ENABLE_EXAMPLES` (default off)** — the code stays, its tests keep running, every doc link still resolves, and a customer sees none of it |
 | B | `apps/docs` is upstream's documentation **content**, not just their branding | **Drop it.** Renaming would ship somebody else's docs under our name |
 | C | Real legal review of the new privacy/terms before commercial use | Worth a lawyer; fine for internal use now |
 

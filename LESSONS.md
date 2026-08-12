@@ -1112,6 +1112,42 @@ where a mock made six tests assert nothing.
 
 ---
 
+## L42 — a roadmap entry is a claim about the past, not the present
+
+**What happened.** The roadmap listed **U7** — *"the journal cannot tell a machine
+from a human"* — as the single most important thing left before Hermes. I said so
+to the owner in strong terms: *"the only one on the list that can't be fixed
+later."*
+
+It had been fixed. Commit `ce7fb61`, *"U7: the journal records what kind of
+principal acted"*, in an earlier session. Every row in `action_logs` was already
+classified — 67 `human`, 6 `system` — and a live test with a real API key
+confirmed a machine write records `actor_kind = service`.
+
+**What the entry actually contained** was the *original finding*, copied forward
+unchanged while the fix landed elsewhere. It read as a present-tense description
+of a defect and was a past-tense description of a discovery.
+
+**The check that would have caught it** costs one command:
+
+```bash
+git log --oneline -- <the file the finding names>
+```
+
+**The rule.** Before acting on any recorded finding — especially one being used
+to justify priority — verify it against the code, not the note. This is [[L36]]
+(*a recorded diagnosis is a hypothesis*) in its second form: L36 was about a
+diagnosis that was wrong when written; this is about one that was right when
+written and has since been fixed.
+
+**And the tell was there.** The entity file already carried a doc comment
+mentioning U7 by name and describing a backfill command. I read past it because I
+had arrived expecting to build something.
+
+**What was genuinely missing** was smaller and different: the audit *screen* never
+displayed the kind it had been recording for weeks. The record existed and nobody
+could see it — worth finding, and not what the entry said.
+
 ## L41 — a global rename invented a legal entity
 
 **What happened.** Re-branding the platform, I ran a protected find-and-replace:
