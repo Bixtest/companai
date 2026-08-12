@@ -886,3 +886,70 @@ export class AuthorityProjectRecord {
   @Property({ name: 'created_at', type: Date, onCreate: () => new Date() })
   createdAt: Date = new Date()
 }
+
+/**
+ * A permission taken away from one person, without touching anybody else.
+ *
+ * Permissions arrive through roles, so before this the only way to stop one
+ * person doing one thing was to remove their whole role — taking away nine
+ * other things they still needed — or to invent a bespoke role, which is how an
+ * organisation ends up with forty roles and no idea what any of them mean.
+ *
+ * **`subject_principal_id` is `text`, not `uuid`**, for the same reason as
+ * delegations: an API key acting is `api_key:<id>`, and a `uuid` column would
+ * make machine actors undeniable, which is the opposite of what R1 was for.
+ *
+ * **`reason` is not null.** A permission that vanished with no reason cannot be
+ * safely lifted six months later by somebody who was not there.
+ *
+ * **`expires_at` is nullable**, unlike a delegation's. An unbounded *grant* is a
+ * role grant wearing a costume, but an unbounded *subtraction* is a legitimate
+ * standing decision that should not silently lapse.
+ */
+@Entity({ tableName: 'authority_denials' })
+export class AuthorityDenial {
+  @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
+  id!: string
+
+  @Property({ name: 'tenant_id', type: 'uuid' })
+  tenantId!: string
+
+  /** `null` withholds the permission across the whole tenant. */
+  @Property({ name: 'organization_id', type: 'uuid', nullable: true })
+  organizationId?: string | null
+
+  @Property({ name: 'subject_principal_id', type: 'text' })
+  subjectPrincipalId!: string
+
+  @Property({ name: 'subject_kind', type: 'text' })
+  subjectKind!: string
+
+  /** The permission withheld. Wildcards allowed, and only at the end. */
+  @Property({ name: 'feature_pattern', type: 'text' })
+  featurePattern!: string
+
+  @Property({ name: 'starts_at', type: Date })
+  startsAt!: Date
+
+  /** `null` is permanent — a standing decision, not an oversight. */
+  @Property({ name: 'expires_at', type: Date, nullable: true })
+  expiresAt?: Date | null
+
+  @Property({ name: 'lifted_at', type: Date, nullable: true })
+  liftedAt?: Date | null
+
+  @Property({ name: 'lifted_by_user_id', type: 'uuid', nullable: true })
+  liftedByUserId?: string | null
+
+  @Property({ name: 'created_by_user_id', type: 'uuid', nullable: true })
+  createdByUserId?: string | null
+
+  @Property({ type: 'text' })
+  reason!: string
+
+  @Property({ name: 'created_at', type: Date, onCreate: () => new Date() })
+  createdAt: Date = new Date()
+
+  @Property({ name: 'updated_at', type: Date, onCreate: () => new Date(), onUpdate: () => new Date() })
+  updatedAt: Date = new Date()
+}

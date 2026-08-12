@@ -7,6 +7,7 @@ import { RbacService } from '@open-mercato/core/modules/auth/services/rbacServic
 import { AuthorityEnforcementService } from '@open-mercato/core/modules/auth/services/authorityEnforcementService'
 import { RecordLockService } from '@open-mercato/core/modules/auth/services/recordLockService'
 import { DelegationService } from '@open-mercato/core/modules/auth/services/delegationService'
+import { DenialService } from '@open-mercato/core/modules/auth/services/denialService'
 import { TrustService } from '@open-mercato/core/modules/auth/services/trustService'
 import { ProjectService } from '@open-mercato/core/modules/auth/services/projectService'
 import { ActReviewService, PendingActService } from '@open-mercato/core/modules/auth/services/pendingActService'
@@ -120,6 +121,7 @@ export function register(container: AppContainer) {
   // be an approval queue entry for something nobody proposed.
   container.register({ recordLockService: asClass(RecordLockService).scoped() })
   container.register({ delegationService: asClass(DelegationService).scoped() })
+  container.register({ denialService: asClass(DenialService).scoped() })
   container.register({ trustService: asClass(TrustService).scoped() })
   container.register({ projectService: asClass(ProjectService).scoped() })
   container.register({ pendingActService: asClass(PendingActService).scoped() })
@@ -134,12 +136,13 @@ export function register(container: AppContainer) {
   // registration wins when `RbacService` reaches for it.
   if (isRbacDefaultCacheEnabled()) {
     container.register({
-      rbacService: asFunction((cradle: { em: EntityManager; cache?: CacheStrategy; authorityEnforcement?: AuthorityEnforcementService; delegationService?: DelegationService }) => {
+      rbacService: asFunction((cradle: { em: EntityManager; cache?: CacheStrategy; authorityEnforcement?: AuthorityEnforcementService; delegationService?: DelegationService; denialService?: DenialService }) => {
         return new RbacService(
           cradle.em,
           cradle.cache ?? createRbacFallbackCache(),
           cradle.authorityEnforcement ?? null,
           cradle.delegationService ?? null,
+          cradle.denialService ?? null,
         )
       }).scoped().proxy(),
     })

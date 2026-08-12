@@ -113,6 +113,18 @@ export const features: AclFeatureDeclaration[] = [
     },
   },
   {
+    id: 'auth.denials.manage',
+    title: 'Withhold a permission from one person',
+    module: 'auth',
+    capability: {
+      effectClass: 'E5',
+      reversibility: 'reversible',
+      dataClasses: ['internal'],
+      delegable: false,
+      note: 'Withholding only ever takes a permission away, so this cannot be used to grant anything -- but it can be used to stop somebody working, including somebody senior, which is why it sits at E5 alongside delegation rather than lower. It applies to superadmins too: a control the most powerful account ignores is a suggestion. Not delegable, because the power to disable people is not something to lend for a fortnight.',
+    },
+  },
+  {
     id: 'auth.records.lock',
     title: 'Lock and unlock records',
     module: 'auth',

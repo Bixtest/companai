@@ -1127,5 +1127,90 @@ const MODE_MEANING: Record<EnforcementMode, string> = {
   enforce: 'The resolver can refuse an act RBAC allowed. Refusals are logged with the rule that produced them.',
 }
 
+/**
+ * The way back when somebody withholds a permission they needed.
+ *
+ * A denial applies to superadmins too, deliberately -- so it is possible to
+ * withhold `auth.*` from the only account that could lift it, and then the
+ * screen is no longer a way out. This command is that way out, and it is out of
+ * band on purpose: recovering from a lockout should require reaching the server,
+ * not merely being persistent in a browser.
+ *
+ * It writes through the same service the API does, so a lift performed here is
+ * the same recorded act with the same audit trail, not a database edit.
+ */
+const authorityDenials: ModuleCli = {
+  command: 'denials',
+  async run(rest) {
+    const args: Record<string, string> = {}
+    for (let index = 0; index < rest.length; index += 1) {
+      const arg = rest[index]
+      if (!arg?.startsWith('--')) continue
+      const [key, inlineValue] = arg.replace(/^--/, '').split('=')
+      if (inlineValue !== undefined) { args[key] = inlineValue; continue }
+      const next = rest[index + 1]
+      if (next && !next.startsWith('--')) { args[key] = next; index += 1 }
+      else args[key] = 'true'
+    }
+
+    const tenantId = args.tenant ?? null
+    if (!tenantId) {
+      console.error('Usage: mercato auth denials --tenant <id> [--lift <denial-id>]')
+      console.error('')
+      console.error('Without --lift it lists every denial in the tenant, in force or not.')
+      console.error('This is the recovery path when a denial has locked out the account')
+      console.error('that would otherwise lift it -- denials apply to superadmins too.')
+      process.exitCode = 1
+      return
+    }
+
+    const container = await createRequestContainer()
+    const denials = container.resolve('denialService') as {
+      list: (scope: { tenantId: string }) => Promise<Array<{
+        id: string
+        subjectPrincipalId: string
+        featurePattern: string
+        expiresAt: Date | null
+        liftedAt: Date | null
+        reason: string
+      }>>
+      lift: (id: string, scope: { tenantId: string }, by: string | null) => Promise<{ id: string; liftedAt: Date | null } | null>
+    }
+
+    if (args.lift !== undefined && args.lift !== 'true') {
+      const lifted = await denials.lift(args.lift, { tenantId }, null)
+      if (!lifted) {
+        console.error(`No denial ${args.lift} in tenant ${tenantId}.`)
+        process.exitCode = 1
+        return
+      }
+      console.log('')
+      console.log(`  Lifted ${lifted.id} at ${lifted.liftedAt?.toISOString() ?? 'now'}`)
+      console.log('  Denials are never cached, so this takes effect on the next request.')
+      console.log('')
+      return
+    }
+
+    const items = await denials.list({ tenantId })
+    console.log('')
+    if (!items.length) {
+      console.log('  Nothing is withheld from anybody in this tenant.')
+      console.log('')
+      return
+    }
+    for (const item of items) {
+      const state = item.liftedAt
+        ? `lifted ${item.liftedAt.toISOString().slice(0, 10)}`
+        : item.expiresAt
+          ? `until ${item.expiresAt.toISOString().slice(0, 10)}`
+          : 'permanent'
+      console.log(`  ${item.id}`)
+      console.log(`    ${item.subjectPrincipalId} may not ${item.featurePattern} (${state})`)
+      console.log(`    ${item.reason}`)
+    }
+    console.log('')
+  },
+}
+
 // Export the full CLI list
-export default [authorityExplain, authorityShadowReport, authorityMode, addUser, seedRoles, syncRoleAcls, rotateEncryptionKey, addOrganization, setupApp, listOrganizations, listTenants, listUsers, setPassword]
+export default [authorityExplain, authorityShadowReport, authorityMode, authorityDenials, addUser, seedRoles, syncRoleAcls, rotateEncryptionKey, addOrganization, setupApp, listOrganizations, listTenants, listUsers, setPassword]

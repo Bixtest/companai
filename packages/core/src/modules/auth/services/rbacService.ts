@@ -59,6 +59,19 @@ export class RbacService {
         scope: { tenantId: string | null; organizationId: string | null },
       ) => Promise<unknown | null>
     } | null,
+    /**
+     * Permissions withheld from one person, consulted live.
+     *
+     * Same naming rule as above — the parameter name **is** the registration
+     * name under Awilix CLASSIC. This one is `denialService`.
+     */
+    private denialService?: {
+      blocking: (
+        subjectPrincipalId: string,
+        required: readonly string[],
+        scope: { tenantId: string | null; organizationId: string | null },
+      ) => Promise<{ feature: string; denial: { reason: string; expiresAt: Date | null } } | null>
+    } | null,
   ) {
     this.cache = cache || null
   }
@@ -481,7 +494,51 @@ export class RbacService {
     const allowed = fromAcl || await this.grantedByDelegation(userId, required, scope)
     this.shadowResolver(userId, required, scope, allowed)
     if (!allowed) return false
+    if (await this.withheldFromThisPerson(userId, required, scope)) return false
     return !(await this.refusedByAuthority(userId, required, scope))
+  }
+
+  /**
+   * Whether somebody has had one of these permissions taken away.
+   *
+   * Reached only after the grant path has already returned **true**, which is
+   * what makes this a subtraction and nothing else. There is no branch here that
+   * can return `false` in a way that permits an act — the worst a bug in this
+   * method can do is refuse something that should have been allowed, and that is
+   * the direction every control in this platform fails in.
+   *
+   * **It applies to superadmins.** `decideAllFeatures` short-circuits for them
+   * and returns `true`, and this still runs afterwards, on purpose: a control the
+   * most powerful account ignores is a suggestion. The recovery path when
+   * somebody withholds something they needed is
+   * `mercato auth denials --tenant <id> --lift <denial-id>`, out of band by
+   * design.
+   *
+   * A refusal is logged with its reason. A 403 whose cause lives only inside a
+   * function is exactly what R5 exists to abolish.
+   */
+  private async withheldFromThisPerson(
+    userId: string,
+    required: string[],
+    scope: { tenantId: string | null; organizationId: string | null },
+  ): Promise<boolean> {
+    if (!this.denialService || !required.length || !scope.tenantId) return false
+    const principalId = parseSubject(userId).id
+    if (!principalId) return false
+
+    const blocking = await this.denialService.blocking(principalId, required, scope)
+    if (!blocking) return false
+
+    authorityLogger.warn('Withheld from this account', {
+      feature: blocking.feature,
+      because: blocking.denial.reason,
+      until: blocking.denial.expiresAt?.toISOString() ?? null,
+      actorId: principalId,
+      actorKind: parseSubject(userId).kind,
+      tenantId: scope.tenantId,
+      organizationId: scope.organizationId,
+    })
+    return true
   }
 
   /**
