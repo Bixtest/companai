@@ -1112,6 +1112,46 @@ where a mock made six tests assert nothing.
 
 ---
 
+## L39 — a 404 on a route you just wrote is usually a stale server, not a bug
+
+**What happened.** I finished the denials API, saw it built into
+`packages/core/dist/modules/auth/api/authority/denials/`, saw it registered twice
+in `modules.generated.ts`, and curled it. **404.** The delegations route beside it
+answered `401` — the correct answer for "exists, needs auth".
+
+Nothing was wrong with the route. The server was running `next start`, which
+serves a build made before the route existed and never re-reads anything.
+
+**The diagnostic that settles it in one command.** Curl a *sibling* route in the
+same directory:
+
+```text
+api/auth/authority/delegations GET: 401   <- server is fine, auth is fine
+api/auth/authority/denials     GET: 404   <- this route is not in the build
+```
+
+A `404` on the new one and a `401` on the old one is conclusive: the routing
+works, the new route simply is not there. If both had returned 404 the problem
+would have been auth or the path.
+
+**The rule.** Before believing a new route is broken, establish which of three
+things you are looking at:
+
+| Symptom | Meaning |
+|---|---|
+| New route 404, sibling 401 | Stale build. Rebuild and **restart** |
+| Both 404 | Wrong path, or the whole module is not registered |
+| New route 401 | It works — you are just not logged in |
+
+**And check how the server runs before assuming a rebuild is enough.** `yarn dev`
+picks up rebuilt packages; **`next start` does not** — it must be stopped and
+started again. Check with `Get-CimInstance Win32_Process -Filter "Name='node.exe'"`
+rather than guessing.
+
+This is L38's sibling. L38 is *the build did not happen*; this is *the build
+happened and the process is still serving the old one*. Both present as "my
+change had no effect", and both waste an hour if you start by doubting the code.
+
 ## L38 — `yarn build:app` can be a cache hit that serves last week's code
 
 **What happened.** Fixing U11 took four attempts, and three of them failed for the
