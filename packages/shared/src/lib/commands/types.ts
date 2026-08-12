@@ -141,8 +141,30 @@ export interface CommandHandler<TInput = unknown, TResult = unknown> {
    * convention would be 153 guesses, and a wrong one either blocks work that
    * should proceed or waves through an act that should have waited. The
    * uncovered set is visible rather than silently mis-mapped.
+   *
+   * **A function, when one command performs two different acts.** `messages`
+   * forced this: saving a draft and sending it are the same command with an
+   * `isSending` flag, and their classifications are not close — an internal
+   * draft is `E1` and reversible, a sent message is `E3`, irreversible and
+   * externally visible. A static value has to pick one and be wrong the other
+   * way. Under-classifying leaves an irreversible external act ungated;
+   * over-classifying writes something false into the record, and a record that
+   * says a draft save was irreversible is worth less than no record.
+   *
+   * Return `null` to leave a particular call ungated, exactly as omitting the
+   * field does. Keep the function pure and cheap — it runs on every dispatch,
+   * before anything else, and it must not be where a decision hides.
+   *
+   * **The parameter is `never`, not `TInput`, and that is deliberate.** A
+   * function taking `TInput` would make `CommandHandler<TInput>` no longer
+   * assignable to `CommandHandler<unknown>` — parameters are contravariant —
+   * and `registerCommand` takes the latter, so every handler in the platform
+   * would stop compiling. `never` is assignable to any parameter type, so a
+   * classifier written as `(input: unknown) => …` or against a concrete shape
+   * both fit. The cost is that authors annotate their own parameter instead of
+   * having it inferred, which is a small price for not re-typing the registry.
    */
-  readonly capability?: string
+  readonly capability?: string | ((input: never) => string | null)
   prepare?(input: TInput, ctx: CommandRuntimeContext): Promise<{ before?: unknown } | null> | { before?: unknown } | null
   execute(input: TInput, ctx: CommandRuntimeContext): Promise<TResult> | TResult
   buildLog?(args: CommandLogBuilderArgs<TInput, TResult>): Promise<CommandLogMetadata | null | undefined> | CommandLogMetadata | null | undefined

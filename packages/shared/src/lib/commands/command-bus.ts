@@ -240,6 +240,32 @@ function copyContextMarkers(from: object, to: object): void {
   }
 }
 
+/**
+ * The capability a handler declares, resolved for this particular call.
+ *
+ * A string is returned as-is. A function is asked, because one command can
+ * perform two acts of different consequence — saving a draft and sending it.
+ *
+ * A classifier that throws yields `null`, which is exactly what declaring no
+ * capability does: the command runs ungated. That is the deliberate choice. The
+ * gate only ever narrows, so losing it costs a restriction; letting the throw
+ * escape would fail a write the user asked for because of an attribute that
+ * exists to hold writes back.
+ */
+function resolveHandlerCapability(
+  handler: { capability?: string | ((input: never) => string | null) },
+  input: unknown,
+): string | null {
+  const declared = handler.capability
+  if (typeof declared === 'string') return declared || null
+  if (typeof declared !== 'function') return null
+  try {
+    return declared(input as never) || null
+  } catch {
+    return null
+  }
+}
+
 export class CommandBus {
   async execute<TInput = unknown, TResult = unknown>(
     commandId: string,
@@ -257,7 +283,16 @@ export class CommandBus {
     if (allInterceptors.length) {
       const interceptorCtx: CommandInterceptorContext = {
         commandId,
-        capability: handler.capability ?? null,
+        // A handler may declare its capability as a function when one command
+        // performs two acts of different consequence — see the note on
+        // `CommandHandler.capability`. Resolved here, the single place the
+        // authority gate reads it from, so no other caller has to know.
+        //
+        // A throw is swallowed on purpose: a broken classifier must not stop the
+        // command. It degrades to ungated, which is the behaviour of every
+        // command that declares nothing at all, rather than taking the platform
+        // down over an attribute that only ever narrows.
+        capability: resolveHandlerCapability(handler, options.input),
         auth: options.ctx.auth ?? null,
         selectedOrganizationId: options.ctx.selectedOrganizationId ?? options.ctx.auth?.orgId ?? null,
         container: options.ctx.container,

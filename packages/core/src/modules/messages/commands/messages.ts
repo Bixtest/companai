@@ -253,8 +253,29 @@ async function buildComposeResultFromExisting(
   }
 }
 
+/**
+ * Which act this call actually performs (U14).
+ *
+ * Saving a draft and sending it are the same command with a flag, and their
+ * classifications are not close: an internal draft is `E1` and reversible, a
+ * sent message is `E3`, irreversible and externally visible. Declaring either
+ * one statically would be wrong half the time — under-classifying leaves an
+ * irreversible external act ungated, and over-classifying writes into the record
+ * that saving a draft was irreversible, which is worse than saying nothing.
+ *
+ * **Only an explicit `isDraft: true` gets the lower classification.** Compose
+ * itself defaults an absent flag to sending (`input.isDraft ?? false`), so
+ * defaulting the other way here would under-classify exactly the acts that
+ * matter most.
+ */
+function messageActCapability(input: unknown): string {
+  const isDraft = (input as { isDraft?: unknown } | null | undefined)?.isDraft
+  return isDraft === true ? 'messages.compose' : 'messages.email'
+}
+
 const composeMessageCommand: CommandHandler<unknown, { id: string; threadId: string | null; externalEmail: string | null; isDraft: boolean; recipientUserIds: string[]; deduplicated?: boolean }> = {
   id: 'messages.messages.compose',
+  capability: messageActCapability,
   async execute(rawInput, ctx) {
     const input = composeCommandSchema.parse(rawInput)
     if (input.objects?.length) {
@@ -476,6 +497,7 @@ const composeMessageCommand: CommandHandler<unknown, { id: string; threadId: str
 
 const updateDraftCommand: CommandHandler<unknown, { ok: true; id: string }> = {
   id: 'messages.messages.update_draft',
+  capability: messageActCapability,
   async prepare(rawInput, ctx) {
     const input = updateDraftCommandSchema.parse(rawInput)
     const em = (ctx.container.resolve('em') as EntityManager).fork()
@@ -689,6 +711,7 @@ const updateDraftCommand: CommandHandler<unknown, { ok: true; id: string }> = {
 
 const replyMessageCommand: CommandHandler<unknown, { id: string; externalEmail: string | null; recipientUserIds: string[] }> = {
   id: 'messages.messages.reply',
+  capability: messageActCapability,
   async execute(rawInput, ctx) {
     const input = replyCommandSchema.parse(rawInput)
     const em = (ctx.container.resolve('em') as EntityManager).fork()
@@ -854,6 +877,7 @@ const replyMessageCommand: CommandHandler<unknown, { id: string; externalEmail: 
 
 const forwardMessageCommand: CommandHandler<unknown, { id: string; externalEmail: string | null; recipientUserIds: string[] }> = {
   id: 'messages.messages.forward',
+  capability: messageActCapability,
   async execute(rawInput, ctx) {
     const input = forwardCommandSchema.parse(rawInput)
     const em = (ctx.container.resolve('em') as EntityManager).fork()
