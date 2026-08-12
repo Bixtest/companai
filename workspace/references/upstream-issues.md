@@ -349,7 +349,46 @@ item 7.
 
 ---
 
-## U14 — the resolver binds 38% of live commands · severity **high**
+## U14 — the resolver binds 54% of live commands, and the send is now one of them · severity **high**
+
+**Progress 2026-08-12: 38% → 46% → 54%**, and the last step is the one that
+mattered — `messages.email` now binds to an actual act.
+
+**The problem was not laziness, it was that neither answer was true.** Saving a
+draft and sending it are the same command with a flag:
+
+| | Classification |
+|---|---|
+| Save a draft | `messages.compose` — `E1`, reversible, internal |
+| Send it | `messages.email` — `E3`, irreversible, externally visible |
+
+A static `capability:` had to pick one. Under-classifying leaves an irreversible
+external act ungated; over-classifying writes into the audit record that saving a
+draft was irreversible — **and a record that says something false is worth less
+than no record at all**, which is the whole reason this platform exists.
+
+**So `capability` may now be a function of the input.** One call site reads it
+(`command-bus.ts`), so the change is contained, and a plain string still behaves
+exactly as before. `messages` compose/update_draft/reply/forward now classify per
+call: only an explicit `isDraft: true` gets the lower one, because compose itself
+defaults an absent flag to sending.
+
+**Two things it taught, both kept:**
+
+- **A classifier that throws yields `null`, not an error.** The gate only ever
+  narrows, so losing it costs a restriction; letting the throw escape would fail
+  a write the user asked for because of the attribute whose entire purpose is
+  holding writes back — turning a classification bug into an outage.
+- **The parameter is typed `never`, not `TInput`.** Typing it `TInput` made
+  `CommandHandler<TInput>` stop being assignable to `CommandHandler<unknown>` —
+  parameters are contravariant — and `registerCommand` takes the latter, so
+  **every handler in the platform stopped compiling**. Caught by `typecheck`,
+  which is exactly what it is for.
+
+**Still ungated (26 of 56):** 11 in `messages` (per-actor read/archive state,
+mostly `E0`-shaped), 4 `planner`, 4 `scheduler`, 3 `example`, 2 `dictionaries`,
+2 `translations`. None is an irreversible external act — that was the one worth
+chasing.
 
 **Found:** 2026-08-12, answering the `messages.*` question on the roadmap. The
 question turned out to be the wrong one, and the answer underneath it matters

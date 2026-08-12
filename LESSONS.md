@@ -1112,6 +1112,46 @@ where a mock made six tests assert nothing.
 
 ---
 
+## L40 — widening a type in a parameter position breaks every implementor
+
+**What happened.** `CommandHandler.capability` was `string`. To let one command
+classify itself per call I widened it to
+`string | ((input: TInput) => string | null)` — additive, backwards compatible,
+and it compiled in `shared`.
+
+Then the workspace typecheck produced **eight errors across four modules**, all
+the same shape:
+
+```text
+Argument of type 'CommandHandler<Record<string, unknown>, Role>' is not
+assignable to parameter of type 'CommandHandler<unknown, unknown>'.
+```
+
+**Why.** Adding a function whose parameter is the class's own generic makes the
+whole type **contravariant** in that generic. `CommandHandler<TInput>` stopped
+being assignable to `CommandHandler<unknown>`, and `registerCommand` takes
+exactly that — so **every command handler in the platform** stopped compiling.
+Nothing was wrong with any of them.
+
+**The fix is one word:** type the parameter `never`.
+
+```ts
+readonly capability?: string | ((input: never) => string | null)
+```
+
+`never` is assignable to any parameter type, so the variance disappears and a
+classifier written against `unknown` or a concrete shape both still fit. The cost
+is that authors annotate their own parameter instead of having it inferred.
+
+**The rule.** Before adding a **function-valued** field to a widely-implemented
+interface, ask what it does to variance. A field that only *returns* the generic
+is safe; one that *accepts* it flips the whole type and the blast radius is every
+implementor, not the one you were editing.
+
+**And run the workspace typecheck, not the package one.** `yarn workspace
+@open-mercato/shared build` passed cleanly — the breakage was entirely in the
+consumers, and only `yarn typecheck` across all packages saw it.
+
 ## L39 — a 404 on a route you just wrote is usually a stale server, not a bug
 
 **What happened.** I finished the denials API, saw it built into

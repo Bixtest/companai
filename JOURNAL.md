@@ -7,6 +7,44 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-08-12 (late) — U14 closes, and the Starting Kit has no known functional gaps
+
+**Neither obvious answer was true**, which is why this one was worth doing
+carefully. Saving a draft and sending it are the same command with a flag, and
+the two acts are `E1 reversible internal` and `E3 irreversible external`. A
+static `capability:` had to pick one: under-classify and the irreversible
+external act stays ungated; over-classify and the audit record asserts that
+saving a draft was irreversible. **A record that says something false is worth
+less than no record**, and that is the premise of the whole product, so
+over-classifying was not the "safe" option it looked like.
+
+So `capability` may now be a **function of the input**. One call site reads it,
+a plain string behaves exactly as before, and the four messages commands classify
+per call — only an explicit `isDraft: true` takes the lower one, because compose
+itself defaults an absent flag to sending.
+
+**38% → 54% of live commands gated**, and `messages.email` finally binds to a
+real act. The 26 that remain are per-actor read state, planner, scheduler,
+example, dictionaries and translations — **no irreversible external act among
+them**, which was the thing worth chasing.
+
+**Two decisions kept.** A classifier that throws yields `null` rather than
+propagating: the gate only narrows, so losing it costs a restriction, while
+letting the throw escape would fail a write because of the attribute whose entire
+purpose is holding writes back. And the parameter is typed `never` — typing it
+`TInput` made every handler in the platform stop compiling (L40), which the
+workspace typecheck caught and the package build did not.
+
+**Gate: 22/22 tasks, 12,914 tests, exit 0.** Lint: 0 errors.
+
+**Phase 1 and Phase 2 are now complete except the Arabic review**, which is the
+owner's and blocks nothing. There are no known functional gaps in the Starting
+Kit. What remains is Phase 3 onward — the deferred screens, the ledger work, and
+the pre-hosting items — plus the white-label batch, which now has a name to
+rename to.
+
+---
+
 ## 2026-08-12 (night) — the bubble had a back end
 
 **The owner asked me to delete the "Feedback" bubble** that points at the
