@@ -40,6 +40,9 @@ attached, do it and note it here as done rather than queueing it.
 | Where | What | When |
 |---|---|---|
 | Authority → edges | Empty state claimed an edge is "created automatically for each parent-child link" while none was. Reworded, and U11 made the claim true | 2026-08-11 |
+| App shell logo | Rendered with `rounded-full` and `object-fit: fill` — a circle masked out of a mark that fills its canvas, then squashed 448×473 into a 40×40 box. Three call sites. **It did the same to any tenant's uploaded logo**, so this was a general defect, not a Companai one | 2026-08-12 |
+| Page metadata | `description` still advertised upstream's product — a "modular ERP foundation". Replaced with what Companai actually is | 2026-08-12 |
+| Favicon | The `.ico` sat in `public/` unreferenced; only the SVG was declared | 2026-08-12 |
 | Authority graph | Every row showed raw UUIDs instead of organization names, because the page asked for `pageSize=200` and the API caps it at 100 — so the lookup 400'd on every load and `nameOf` fell back to the id. One-line fix. **The screen that governs authority was unreadable** | 2026-08-12 |
 
 ---

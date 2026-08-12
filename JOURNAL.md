@@ -7,6 +7,41 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-08-12 (late night) — looking at the rebrand, not just testing it
+
+The owner asked me to rebuild and check the white-labelling in the browser. Every
+routing claim held — `/` redirects to the login, `/start` and the autologin route
+both 404, the backend and API docs render zero *mercato* mentions, and the terms
+page carries no company name, no registration identifiers and contact on
+`corprorate.com`.
+
+**Three defects were only findable by looking**, and all three had passed a green
+gate:
+
+**The logo was cropped and squashed.** `AppShell` applied `rounded-full` — masking
+a *circle* out of a mark that fills its canvas — and `object-fit: fill`, stretching
+448×473 into a 40×40 box. Three call sites. What makes it worth recording is that
+it was never a Companai problem: that treatment **crops and stretches any tenant's
+uploaded logo**, which is two defects wearing the costume of a style.
+
+**The `.ico` was dead weight** — I had copied it into `public/` and never
+referenced it, because `layout.tsx` named only the SVG. Placing a file is not
+wiring it up.
+
+**The description still sold upstream's product** — a "modular ERP foundation".
+The rename caught every occurrence of the *name* and none of the *positioning*,
+which is the same blind spot as L41 in a milder form: a global replace sees
+strings, not meaning.
+
+**What I could not check, and said so:** the login page. I am signed in, and I do
+not type passwords into forms, so I cannot reach it. Its source matches the
+content-header pattern that renders correctly — verified by analogy, not by eye,
+and recorded that way rather than rounded up.
+
+**Gate: 22/22 tasks, 12,867 tests, exit 0.**
+
+---
+
 ## 2026-08-12 (night) — Companai, and the rename that invented a company
 
 **The product has a name and wears it.** 169 files: tab title, favicon, app
