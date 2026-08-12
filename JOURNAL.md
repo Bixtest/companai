@@ -7,6 +7,54 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-08-12 (night) — Companai, and the rename that invented a company
+
+**The product has a name and wears it.** 169 files: tab title, favicon, app
+shell, API docs, content pages, CLI, four locales, and the `create-app` template
+throughout so generated apps are not born branded. The owner's decision — keep
+the internal `@open-mercato/*` names, rename everything a user can see — was
+enforced by protecting the namespace *inside the rename script*, rather than
+trusting myself to avoid it by hand.
+
+**The legal pages were replaced, not renamed**, and the owner accepted the
+reasoning after offering both options. 667 lines of another company's privacy
+policy and terms — registered address, KRS, NIP, REGON, share capital, governing
+law. Rebranding would have bound our users under a licence drafted for a Polish
+company nobody here has read. The replacements are short, name **the operator**
+as responsible rather than us, and say the activity record outlives a closed
+account: the one clause this product cannot promise away, because that record is
+what other people relied on.
+
+**And then I did the exact thing I had just refused to do.** The blanket rename
+turned that company into **"Companai sp. z o.o."** — a limited company that does
+not exist — still carrying their real registration numbers, inside a GDPR consent
+statement, in four locales. Materially worse than the original, which at least
+named a company that is real and accountable.
+
+I had protected the *identifier* namespace, which is the mechanical risk, and
+missed the *semantic* one: **text that is about the old name looks identical to
+text that merely uses it**. It also rewrote my own doc comments into asserting
+the opposite of their point.
+
+**What caught it was upstream's own test.** `consent-controller-locales.test.ts`
+existed to guard their registration identifiers; inherited into a fork it had
+been quietly asserting that we impersonate them, and when my rename broke it, it
+became the alarm. Recorded as **L41**, with the grep list — legal forms,
+registration ids, addresses, `consent`/`controller`/`terms` — and a rule I did
+not have: **read an inherited test failure before updating it.** A guard from
+upstream can be the thing that catches a fork misusing their identity.
+
+**The demo surface is gone.** `/start` and its 44 keys per locale; the feedback
+bubble and its public endpoint; the demo notice bar; and autologin — which signed
+visitors in **from a password in an environment variable**. That one was unset
+and inert, and removing it was still right: a platform whose purpose is knowing
+who acted has no business logging somebody in without asking who they are.
+`DEMO_MODE` survives only where it means something else entirely.
+
+**Gate: 22/22 tasks, 12,867 tests, exit 0.** Lint: 0 errors.
+
+---
+
 ## 2026-08-12 (late) — U14 closes, and the Starting Kit has no known functional gaps
 
 **Neither obvious answer was true**, which is why this one was worth doing

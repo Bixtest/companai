@@ -260,7 +260,82 @@ change so the two do not drift.
 
 ---
 
-## U16 — our public legal pages name another company · severity **medium**
+## U17 — the rename invented a legal entity · **FIXED 2026-08-12** · **ours** · severity **high**
+
+**Found:** by a failing test, minutes after I caused it.
+
+**What happened.** The white-label rename replaced `Open Mercato` with
+`Companai` everywhere a user could see it, protecting the `@open-mercato/*`
+package namespace. It did not protect prose that names the old company as a
+**legal person**, so the onboarding consent strings became, in four locales:
+
+```text
+Companai sp. z o.o., registered office ul. Wyspa Słodowa 7, Wrocław,
+KRS 0001253104, NIP PL8982336029, REGON 545230330,
+share capital PLN 80,000.00, fully paid.
+```
+
+A limited company that does not exist, carrying a real third party's
+registration identifiers, **inside a GDPR marketing-consent statement**. Worse
+than the original, which at least named a real and accountable company.
+
+**How it surfaced.** `consent-controller-locales.test.ts` — **upstream's own
+guard on their registration identifiers**. Inherited into a fork it had been
+asserting we impersonate them; when the rename broke it, it became the alarm.
+That is worth remembering: a guard inherited from upstream can be the thing that
+catches a fork misusing their identity, so read those failures before updating
+them.
+
+**Fixed** by rewriting `onboarding.form.legalEntity` and
+`onboarding.form.marketingLabel` in all four locales to name **Companai**
+plainly — no legal form we do not have, no registration identifier at all — and
+to say the operator of the installation is responsible, matching the rewritten
+privacy page. The 20 orphaned `demoFeedback.*` keys per locale went too; that
+feature was removed in U15.
+
+Recorded as **L41**, with the grep list to run before the next global rename.
+
+---
+
+## U16 — our public legal pages named another company · **REPLACED 2026-08-12** · severity **medium**
+
+**Not renamed. Replaced.** Both pages carried complete legal documents for
+**Open Mercato sp. z o.o.** — a real Polish company, with its registered
+address, its data-controller details, its licence grant, liability caps and
+governing law. 204 lines of privacy policy and 463 of terms.
+
+**Find-and-replace would have been the worst option available**, and it is worth
+being precise about why. Today a reader can see the document belongs to somebody
+else. After a rename it would read as **ours**: an authoritative-looking policy,
+drafted for another company's jurisdiction and processing activities, telling our
+users who holds their data and on what legal basis. That is fabricating a legal
+record, and it is a worse failure than having no page.
+
+Both pages now say plainly that no policy has been published for this
+deployment, that its absence is not a statement either way, and that the
+operator must replace them before anybody outside the organisation sees them.
+
+**Closed 2026-08-12 with short, generic pages written from scratch.** The owner
+offered two options — write short generic ones, or rebrand upstream's — and the
+first was taken. Rebranding would have bound our users under a licence grant,
+liability caps and governing law drafted for a Polish company nobody here has
+read, which is the one version that is actively wrong rather than merely thin.
+
+The new pages state only what is true of the software and what follows from how
+it is deployed. Two choices worth keeping:
+
+- **The operator is named as the responsible party, not us.** Whoever runs an
+  installation decides what goes into it and how long it is kept. Claiming
+  otherwise would assert facts about somebody else's deployment.
+- **The privacy policy says the activity record outlives a closed account.**
+  That is the one clause specific to this product: Companai exists to make
+  actions attributable, so "delete everything about me" cannot mean erasing the
+  record other people relied on. A policy implying otherwise would promise
+  something the platform must not do.
+
+Contact is `privacy@corprorate.com` / `legal@corprorate.com`. **Still worth a
+lawyer's eye before commercial use** — they are a sound starting point for an
+internal deployment, not advice.
 
 **Found:** the same sweep.
 

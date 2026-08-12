@@ -56,17 +56,73 @@ is quick and never decorative. It should feel calm and expensive.
   "Contact us"* bubble, which points at the upstream supplier and has no business
   in our product. That one is a deletion, not a setting.
 
+**Mergeability: decided.** Owner approved 2026-08-12 — **keep the internal
+`@open-mercato/*` package names, rename everything a user can see.** Renaming
+the packages would make pulling upstream security fixes painful, and nobody
+outside the codebase ever sees them.
+
+## Done — first pass, 2026-08-12
+
+| | |
+|---|---|
+| Browser tab, metadata, favicon | `Companai`, `/companai.svg`, `favicon.ico` from the supplied `.ico` |
+| Sidebar / app shell product name | `appShell.productName` in all four locales |
+| Start page, API docs title, example modules | renamed |
+| Public content pages | header, footer, copyright, logo |
+| Upstream assets | `open-mercato.svg` and `catch-the-tornado-logo.png` deleted from both `public/` trees |
+| `create-app` template | mirrored throughout, so generated apps are not born branded |
+
+**66 files, and the package namespace was left alone** — protected explicitly in
+the rename so `@open-mercato/...` imports were never touched.
+
+**The legal pages were not renamed. They were replaced.** See U16 below.
+
+**Domain: `corprorate.com`.** Owner, 2026-08-12.
+
+> ⚠️ **The spelling is deliberate — do not "fix" it.** It reads like a typo for
+> *corporate* and is not one; the owner confirmed it unprompted. Anybody
+> tempted to correct it across the codebase should stop and ask first.
+
+Contact addresses in use: `privacy@corprorate.com`, `legal@corprorate.com`.
+Documentation links point at `docs.corprorate.com`.
+
+## The demo surface — swept 2026-08-12
+
+The owner's instruction was plain: *"we don't need demo related stuff there."*
+What that meant, item by item.
+
+**Removed:**
+
+| | |
+|---|---|
+| The `/start` landing page | role picker, onboarding pitch, welcome message. `/` now goes to the login |
+| Demo autologin | `OM_AUTOLOGIN_*` signed visitors in **from a password in an environment variable**. Route, lib, tests and `.env.example` entries all gone |
+| The feedback bubble and its endpoint | U15 |
+| The demo notice bar | linked to the supplier's GitHub |
+
+**Left, and why** — `DEMO_MODE` survives in exactly two places, and in both it
+means something other than "this is a demo shop window":
+
+- `attachments/lib/partitions.ts` — locks partition mutations. A protection
+  *for* a public demo, dormant unless the flag is set.
+- `auth/lib/setup-app.ts` — decides whether to keep demo credentials during
+  init, and only when `SELF_SERVICE_ONBOARDING_ENABLED=true`.
+
+Both are inert for us. Removing the flag would change upstream plumbing that has
+real semantics in those spots, for no benefit.
+
 ## Still to decide
 
-1. **Whether the fork stays mergeable with upstream.** Renaming the
-   `@open-mercato/*` packages makes pulling upstream fixes painful. There is a
-   real choice between *fully ours* and *able to take their security patches*,
-   and it should be made deliberately rather than discovered.
-   **My recommendation:** keep the package namespace for now and rename
-   everything a user or evaluator can see. The internal names cost us nothing
-   while upstream is still fixing bugs we would otherwise fix ourselves; the
-   visible ones cost us the whole impression.
-2. **The public domain**, for links in emails and docs.
+1. **The `example` and `example_customers_sync` modules.** They put a demo
+   *Todos* widget on the admin dashboard, which is demo content in the product.
+   But `example` is also the reference implementation the whole `AGENTS.md` tree
+   points at for CRUD, events, widgets and overrides. **My recommendation: park
+   it** rather than delete — the project already parks 14 modules, so it leaves
+   the product clean while keeping the reference readable. Worth confirming
+   because it makes the documentation point at parked code.
+2. **`apps/docs`** is still upstream's documentation site — their content, not
+   just their branding. Replace it or drop it; renaming would leave us shipping
+   somebody else's docs under our name.
 
 ---
 
@@ -81,9 +137,10 @@ is quick and never decorative. It should feel calm and expensive.
 | CLI banner | `🧩 Open Mercato CLI` box, printed on every command | `packages/cli` |
 | Repo/dirs | `open-mercato-main/`, `starting-kit/` paths, `.mercato/` generated dir | Cosmetic but pervasive |
 | Env/config | `OM_*` env var prefix, `om_selected_org` cookie | Renaming cookies logs everybody out once |
+| ~~Demo start page~~ | `/` sent every visitor to `/start` — a role picker, an onboarding pitch and a welcome message | **Removed 2026-08-12.** `/` now routes straight to the login, or the app when signed in. A product's front door is the login, not a tour |
 | ~~Demo widget~~ | *"Contact us"* feedback bubble | **Removed 2026-08-12** — it was the visible half of U15, a public endpoint that emailed the vendor |
 | Docs site | `apps/docs` is upstream's documentation | Either replace or drop |
-| **Public legal pages** | `/privacy` and `/terms` tell readers to contact `info@openmercato.com` | **Do this first.** Legal pages are the one place a reader is entitled to assume the named party is who they are dealing with. Tracked as [U16](upstream-issues.md) |
+| ~~Public legal pages~~ | `/privacy` and `/terms` carried another company's policy | **Replaced with honest placeholders 2026-08-12**, not renamed — see [U16](upstream-issues.md). **They still need real text from the owner.** |
 | Checkout example seeds | `ops@`, `donations@`, `events@open-mercato.com` in `packages/checkout/seed/examples.ts` | Parked module; harmless until unparked |
 | Default dashboard | Ships an **Example module** *Todos* widget — demo content on the admin start page | The `example` module is a demo module; consider parking it rather than hiding the widget |
 | Dashboard/browser title | Every backend page's tab reads `Open Mercato` | Highest-visibility single string |

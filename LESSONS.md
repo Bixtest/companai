@@ -1112,6 +1112,50 @@ where a mock made six tests assert nothing.
 
 ---
 
+## L41 — a global rename invented a legal entity
+
+**What happened.** Re-branding the platform, I ran a protected find-and-replace:
+`Open Mercato` → `Companai`, guarding the `@open-mercato/*` package namespace so
+imports could not break. That guard worked. What it did not occur to me to guard
+was **prose that names the old company as a legal person**.
+
+The onboarding consent strings came out like this, in four locales:
+
+```text
+onboarding.form.legalEntity
+  Companai sp. z o.o., registered office ul. Wyspa Słodowa 7, Wrocław,
+  KRS No. 0001253104, NIP PL8982336029, REGON 545230330,
+  share capital PLN 80,000.00, fully paid.
+```
+
+**A limited company that does not exist, wearing a real third party's
+registration numbers, inside a GDPR consent statement.** Worse than what it
+replaced: the original at least named a company that is real and accountable.
+
+It also rewrote **my own doc comments** — the ones explaining that these pages
+belonged to *another* company — so they asserted the opposite of their point.
+
+**Why the guard was not enough.** I protected the *identifier* namespace, which
+is the mechanical risk, and missed the *semantic* one: text that is **about** the
+old name looks identical to text that merely **uses** it.
+
+**The rule.** Before a global rename, grep the old name for the shapes that make
+it a legal or factual claim, and handle those by hand:
+
+| Grep for | Because |
+|---|---|
+| `sp. z o.o.`, `Ltd`, `GmbH`, `Inc`, `LLC` | a legal form makes it an entity claim |
+| registration ids — `KRS`, `NIP`, `VAT`, `REGON` | these identify a real company |
+| a street address, a registry court | same |
+| `consent`, `controller`, `terms`, `privacy` | renaming changes who is liable |
+| `previously`, `upstream`, `originally`, `fork` | prose *about* the old name |
+
+**And rename tests last, deliberately.** Three suites failed because they
+asserted our own renamed strings — trivial. A fourth, `consent-controller-locales`,
+was upstream's guard **on their own registration identifiers**, and it failing was
+the only reason I looked. A guard inherited from upstream can be the thing that
+catches a fork impersonating them; read those failures before updating them.
+
 ## L40 — widening a type in a parameter position breaks every implementor
 
 **What happened.** `CommandHandler.capability` was `string`. To let one command
