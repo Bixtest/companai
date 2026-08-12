@@ -42,6 +42,26 @@ row created in the meantime. Bundling it into the U4 fix would have made both
 harder to review and to revert. Recorded as U12 and placed at roadmap item 5,
 immediately after this phase.
 
+**The approvals queue, verified through the API rather than handed over.** I had
+written that this item "needs the owner" because it is a screen I cannot see.
+That was the wrong reason, and checking it changed the size of the ask. The real
+limit is narrower: I do not type passwords into forms, so I cannot log a browser
+in. Everything on the other side of that line I can do.
+
+So I did: set enforcement to `enforce`, lowered the Approval Branch ceiling to
+A2, and drove three acts through the API. The first was held with its reason
+(*the edge caps authority at A2*) and the rename did not happen. The second I
+approved, and the rename executed. The third I rejected, and it never did. One
+act is parked in the queue for the owner, so their part is now three minutes of
+looking and one click rather than twenty minutes of setup.
+
+**A good incidental**: `Approval Branch`'s authority edge already existed,
+annotated *"created automatically from the organization tree"* and timestamped
+this morning. That is the U11 fix working on the live instance — and it is
+precisely the step my own bad instructions once sent the owner hunting for.
+
+**Gate after the U4 fix: 22/22 tasks, 12,898 tests, exit 0.**
+
 **Two round-trips of the L38/L39 tax.** Both fixes needed
 `build:packages --force`, `build:app --force`, and a server restart before
 anything could be verified — about seven minutes each time. Worth the cost:
