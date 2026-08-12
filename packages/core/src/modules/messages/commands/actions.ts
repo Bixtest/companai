@@ -128,6 +128,8 @@ function snapshotActionState(message: Message): ActionStateSnapshot {
 
 const recordTerminalActionCommand: CommandHandler<unknown, { ok: true }> = {
   id: 'messages.actions.record_terminal',
+  // U14: the gate is keyed by capability, so a command without one is not gated.
+  capability: 'messages.actions',
   async prepare(rawInput, ctx) {
     const input = recordTerminalActionSchema.parse(rawInput)
     const em = (ctx.container.resolve('em') as EntityManager).fork()
@@ -224,6 +226,9 @@ const executeActionCommand: CommandHandler<
   { ok: true; actionId: string; result: Record<string, unknown>; operationLogEntry: unknown | null }
 > = {
   id: 'messages.actions.execute',
+  // Runs whatever the message declares, which is why messages.actions is E2 and
+  // irreversible rather than an ordinary write.
+  capability: 'messages.actions',
   async execute(rawInput, ctx) {
     const input = executeActionSchema.parse(rawInput)
     const em = (ctx.container.resolve('em') as EntityManager).fork()

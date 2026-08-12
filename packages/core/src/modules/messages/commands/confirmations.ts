@@ -33,6 +33,9 @@ function toDate(value: string | null | undefined): Date | null {
 
 const confirmMessageCommand: CommandHandler<unknown, ConfirmMessageResult> = {
   id: 'messages.confirmations.confirm',
+  // A confirmation is an action the message declared, so it carries the same
+  // classification as executing one.
+  capability: 'messages.actions',
   async prepare(rawInput, ctx) {
     const input = confirmMessageSchema.parse(rawInput)
     const tenantId = input.tenantId ?? ctx.auth?.tenantId ?? null

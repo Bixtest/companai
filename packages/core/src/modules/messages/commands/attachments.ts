@@ -43,6 +43,7 @@ async function requireEditableDraftMessage(em: EntityManager, scope: MessageScop
 
 const linkDraftAttachmentsCommand: CommandHandler<unknown, { ok: true }> = {
   id: 'messages.attachments.link_to_draft',
+  capability: 'messages.attach_files',
   async prepare(rawInput, ctx) {
     const input = linkDraftAttachmentsSchema.parse(rawInput)
     const em = (ctx.container.resolve('em') as EntityManager).fork()
@@ -131,6 +132,7 @@ const linkDraftAttachmentsCommand: CommandHandler<unknown, { ok: true }> = {
 
 const unlinkDraftAttachmentsCommand: CommandHandler<unknown, { ok: true }> = {
   id: 'messages.attachments.unlink_from_draft',
+  capability: 'messages.attach_files',
   async prepare(rawInput, ctx) {
     const input = unlinkDraftAttachmentsSchema.parse(rawInput)
     const em = (ctx.container.resolve('em') as EntityManager).fork()
