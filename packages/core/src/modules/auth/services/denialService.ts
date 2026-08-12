@@ -5,6 +5,10 @@ import {
   findBlockingDenial,
   type DenialRecord,
 } from '@open-mercato/shared/modules/denials'
+import { writeDirectWriteAuditLog } from '@open-mercato/shared/lib/crud/audit-write'
+
+/** Matches the API route's kind so both paths land in one place in the log. */
+const RESOURCE_KIND = 'authority.denial'
 
 export type DenialScope = {
   tenantId?: string | null
@@ -39,7 +43,60 @@ export type WithholdInput = {
  * (nothing withheld) an empty index scan.
  */
 export class DenialService {
-  constructor(private readonly em: EntityManager) {}
+  constructor(
+    private readonly em: EntityManager,
+    /**
+     * The audit writer, injected so **every** caller is recorded — not only the
+     * ones that remember to.
+     *
+     * **The parameter name is the registration name** and that is load-bearing:
+     * the container runs in Awilix CLASSIC mode and resolves each constructor
+     * parameter by name (L37). It must stay `actionLogService`.
+     *
+     * Optional because the `audit_logs` module can legitimately be absent in a
+     * downstream app, exactly as the command bus treats it.
+     */
+    private readonly actionLogService?: { log: (input: Record<string, unknown>) => Promise<unknown> } | null,
+  ) {}
+
+  /**
+   * Records the act, wherever it came from.
+   *
+   * **This lives in the service rather than in the route on purpose (O1).** The
+   * audit write used to sit in the API route, so the CLI recovery path —
+   * `mercato auth denials --lift` — called `lift()` directly and wrote nothing.
+   * The result was the worst possible asymmetry for a governance product: taking
+   * a permission away was recorded, and giving it back was not, on the one path
+   * used when somebody is locked out and there is no authenticated user to blame.
+   *
+   * A console act has no `sub`. That is not a gap to paper over — it is the
+   * fact worth recording, so it is marked as a `system` actor from the server
+   * console rather than left to look like an anonymous human.
+   */
+  private async record(
+    action: 'created' | 'updated',
+    record: DenialRecord,
+    scope: DenialScope,
+    actorUserId: string | null,
+    snapshotAfter: Record<string, unknown>,
+  ): Promise<void> {
+    const writer = this.actionLogService
+    if (!writer || typeof writer.log !== 'function') return
+
+    await writeDirectWriteAuditLog({
+      // The helper only ever resolves `actionLogService`, and we already hold it.
+      container: { resolve: (name: string) => (name === 'actionLogService' ? writer : undefined) },
+      auth: { sub: actorUserId, tenantId: scope.tenantId ?? null, orgId: scope.organizationId ?? null },
+      organizationId: record.organizationId ?? scope.organizationId ?? null,
+      action,
+      resourceKind: RESOURCE_KIND,
+      resourceId: record.id,
+      snapshotAfter,
+      context: actorUserId
+        ? undefined
+        : { origin: 'server-console', actorKind: 'system' },
+    })
+  }
 
   /**
    * The denial that stops this act, or `null`.
@@ -117,7 +174,16 @@ export class DenialService {
       updatedAt: new Date(),
     })
     await this.em.persist(created).flush()
-    return this.toRecord(created)
+
+    const record = this.toRecord(created)
+    await this.record('created', record, scope, input.createdByUserId ?? null, {
+      subjectPrincipalId: record.subjectPrincipalId,
+      featurePattern: record.featurePattern,
+      startsAt: record.startsAt,
+      expiresAt: record.expiresAt,
+      reason: record.reason,
+    })
+    return record
   }
 
   /**
@@ -135,6 +201,16 @@ export class DenialService {
       row.liftedAt = new Date()
       row.liftedByUserId = liftedByUserId
       await this.em.flush()
+
+      // Only on the transition. Lifting is idempotent, and a second call must not
+      // add a second entry claiming a permission was returned twice.
+      const lifted = this.toRecord(row)
+      await this.record('updated', lifted, scope, liftedByUserId, {
+        liftedAt: lifted.liftedAt,
+        featurePattern: lifted.featurePattern,
+        subjectPrincipalId: lifted.subjectPrincipalId,
+      })
+      return lifted
     }
     return this.toRecord(row)
   }

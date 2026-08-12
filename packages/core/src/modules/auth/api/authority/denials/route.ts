@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { getAuthFromRequest } from '@open-mercato/shared/lib/auth/server'
 import { createRequestContainer } from '@open-mercato/shared/lib/di/container'
-import { writeDirectWriteAuditLog } from '@open-mercato/shared/lib/crud/audit-write'
 import type { OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
 import { denialProblem } from '@open-mercato/shared/modules/denials'
 import type { DenialService } from '@open-mercato/core/modules/auth/services/denialService'
@@ -21,7 +20,6 @@ import type { DenialService } from '@open-mercato/core/modules/auth/services/den
  */
 
 const FEATURE_MANAGE = 'auth.denials.manage'
-const RESOURCE_KIND = 'authority.denial'
 
 export const metadata = {
   GET: { requireAuth: true, requireFeatures: [FEATURE_MANAGE] },
@@ -80,15 +78,9 @@ export async function POST(req: Request): Promise<NextResponse> {
     const lifted = await denials.lift(parsed.data.id, scope, auth.sub ?? null)
     if (!lifted) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
-    await writeDirectWriteAuditLog({
-      container,
-      auth,
-      organizationId: auth.orgId ?? null,
-      action: 'updated',
-      resourceKind: RESOURCE_KIND,
-      resourceId: parsed.data.id,
-      snapshotAfter: { liftedAt: lifted.liftedAt, featurePattern: lifted.featurePattern },
-    })
+    // The audit entry is written by `DenialService.lift` itself, so the CLI
+    // recovery path is recorded too (O1). Writing one here as well would file
+    // the same act twice.
     return NextResponse.json({ item: lifted })
   }
 
@@ -113,22 +105,7 @@ export async function POST(req: Request): Promise<NextResponse> {
     createdByUserId: auth.sub ?? null,
   }, scope)
 
-  await writeDirectWriteAuditLog({
-    container,
-    auth,
-    organizationId: parsed.data.organizationId ?? auth.orgId ?? null,
-    action: 'created',
-    resourceKind: RESOURCE_KIND,
-    resourceId: withheld.id,
-    snapshotAfter: {
-      subjectPrincipalId: withheld.subjectPrincipalId,
-      featurePattern: withheld.featurePattern,
-      startsAt: withheld.startsAt,
-      expiresAt: withheld.expiresAt,
-      reason: withheld.reason,
-    },
-  })
-
+  // Audited by the service — see the note on the lift branch above.
   return NextResponse.json({ item: withheld })
 }
 
