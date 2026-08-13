@@ -101,9 +101,25 @@ withheld — an empty index scan.
 
 ## What does not exist yet
 
-**No screen.** The API and CLI work; there is no page. It is roadmap item 8,
-together with the screens for delegations, record locks, trust and projects.
+**No create form.** Withholding a permission is still an API call — see *Where
+to see it* below for what the screen does and does not do. Of the five
+governance screens, only record locks remains unbuilt, and it belongs on each
+record's own page rather than on a list of its own.
 
 Related: [`delegations.md`](delegations.md) — the mirror image, and worth reading
 next to this one. [`authority-overview.md`](authority-overview.md) — where this
 sits in the whole governance layer.
+
+## Where to see it
+
+`/backend/authority/denials`, gated on `auth.denials.manage`. Seeing a denial
+and lifting it are the same capability on purpose: a role that could watch
+somebody be locked out without being able to help is not a useful role, and the
+reason text is not neutral information about a colleague.
+
+Lifted and expired denials stay listed, for the same reason as delegations.
+
+The page states the lockout escape route in plain text, because a denial
+applies to superadmins too -- it is possible to withhold something from the
+only account that could give it back. The way out is on the server:
+`mercato auth denials --tenant <id> --lift <denial-id>`.

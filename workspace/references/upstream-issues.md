@@ -9,6 +9,64 @@ as "that's just how the platform works".
 
 ---
 
+## U19 — seven pages gated on permissions nobody declared · severity **medium**
+
+**Found:** 2026-08-13, while building the governance screens — by making the
+mistake myself and having it silently work.
+
+**What it is.** Page and route metadata gates access with
+`requireFeatures: ['some.feature']`. Seven of those strings across the codebase
+name a feature that appears in **no** `acl.ts`:
+
+| Feature named in a guard | Where |
+|---|---|
+| `customers.view` | `customers/api/todos/route.ts` |
+| `customers.widgets.new-customers` | `customers/api/dashboard/widgets/new-customers/route.ts` |
+| `customers.widgets.new-deals` | `customers/api/dashboard/widgets/new-deals/route.ts` |
+| `customers.widgets.next-interactions` | `customers/api/dashboard/widgets/next-interactions/route.ts` |
+| `dashboards.admin.assign-widgets` | `dashboards/api/widgets/catalog.ts` |
+| `workflows.create` | `workflows/backend/definitions/create/page.meta.ts` |
+| `workflows.view_instances` | `workflows/backend/instances/[id]/page.meta.ts` |
+
+(207 distinct features are used in guards; 248 are declared. Two further hits —
+`sales.view`, `sales.refund` — are a documentation example, not real gates.)
+
+**Why it is not harmless.** Wildcard grants are part of the ACL contract:
+`admin` holds `customers.*`, and `customers.*` matches `customers.view` whether
+or not anybody declared it. So these pages work — **for administrators only**,
+by accident. Nobody can grant `customers.view` to a narrower role, because it
+does not exist to grant. The permission is real to the guard and invisible to
+the permission editor.
+
+It also defeats the capability registry. An undeclared feature has no effect
+class, no reversibility and no data classes, so the resolver cannot reason about
+it and treats the act as ordinary. That is the exact failure
+`capability-coverage.test.ts` was written to prevent — it guards the
+*descriptors* that exist, and cannot see a guard that references one that does
+not.
+
+**How I found it.** I invented `auth.trust.manage` for a new page. It is not a
+real feature. The page worked when I tested it, because `auth.*` matched. Only
+reading `acl.ts` for an unrelated reason showed the name was wrong — nothing
+would have failed, in tests or in the browser.
+
+**What fixing it takes.** Two parts, and only the second is mechanical:
+
+1. **A guard test** asserting every `requireFeatures` string resolves to a
+   declared feature or a wildcard over one. Cheap, and it stops the class of
+   mistake permanently.
+2. **Seven judgement calls.** Each undeclared name needs either a real
+   declaration in `acl.ts` — with an effect class, reversibility and data
+   classes chosen deliberately — or a correction to an existing feature it
+   should have named. `customers.view` looks like it wants
+   `customers.people.view`, but guessing is how the wrong permission ships.
+
+Deferred rather than fixed on the spot: this is seven security decisions, not a
+typo sweep, and rule zero-two says a fix stops being "small and risk-free" the
+moment it needs judgement per case.
+
+---
+
 ## U1 — Most modules write nothing to the audit trail · severity **high** · **FIXED 2026-08-09**
 
 **Found:** 2026-08-09, by the owner noticing an empty Action Log after creating
@@ -257,6 +315,45 @@ went.
 removing this feature: the widget, the demo notice bar, the endpoint, its email
 template and their tests, mirrored into the `create-app` template in the same
 change so the two do not drift.
+
+---
+
+## U18 — the dependency audit, and what it actually said · **2026-08-13**
+
+**The roadmap entry was wrong, and the correction matters more than the fix.**
+
+It read: *"parked modules carry CVEs a scanner will flag the moment this is
+hosted."* Plausible — 14 modules are parked and still carry their dependencies.
+It was not true.
+
+**What the audit actually found:**
+
+| | Count | What it really is |
+|---|---|---|
+| **high** | 1 | `nanoid < 3.3.17` — custom generators can loop indefinitely when size is zero. Reached via `postcss`, part of the **build toolchain**, not any module |
+| **moderate** | 27 | All `@react-email/*`, and all the same advisory: **"Package no longer supported."** Deprecation notices, not vulnerabilities |
+
+**Neither came from a parked module.** `@react-email` is a direct dependency of
+`apps/mercato` — the live app, used to render real emails. `nanoid` is
+transitive through the Next/Tailwind toolchain. Parking a module changes what
+runs, not what is installed, and none of the parked modules contributed a single
+advisory.
+
+**Fixed:** `nanoid` pinned to `3.3.17` in the workspace `resolutions` block —
+the pattern this repo already uses for fifteen other packages, and compatible
+with `postcss`'s `^3.3.16` requirement. `yarn npm audit --severity high` now
+reports **no suggestions**.
+
+**Not fixed, and not a security problem:** the 27 `@react-email` deprecations.
+The package family is unmaintained, which is a real maintenance risk and a real
+reason to replace it eventually — but it is a *supply-chain ageing* signal, not
+a vulnerability, and swapping the email rendering stack is its own piece of work
+with its own testing. Recorded rather than rushed.
+
+**The lesson**, which is [[L42]] a third time: a roadmap entry describing a risk
+is a hypothesis about the past. Two minutes of `yarn npm audit` replaced a
+plausible story about parked modules with the true one, and the true one had a
+different fix in a different place.
 
 ---
 

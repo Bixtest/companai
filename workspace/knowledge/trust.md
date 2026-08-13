@@ -107,3 +107,18 @@ think the lower tier had been earned on it.
 | `packages/core/src/modules/auth/services/trustService.ts` | Storage, and the evidence aggregate |
 | `packages/core/src/modules/auth/api/authority/trust/route.ts` | The API |
 | `packages/core/src/modules/auth/services/authorityEnforcementService.ts` | `trustCeilingFor` — where it reaches the resolver |
+
+## Where to see it
+
+`/backend/authority/trust`, gated on `auth.trust.promote`.
+
+**The screen reads and never writes, and that is a design decision rather than
+an unfinished one.** Promotion is refused unless the evidence passes, and the
+evidence is completed acts and how many a reviewer reversed -- not an
+administrator's opinion. A "Promote" button would spend most of its life
+returning 409, which teaches people the screen is broken rather than that the
+bar has not been met. Granting stays on the API, where the check lives.
+
+Criteria that could not be checked are shown, not hidden: a promotion can pass
+with unverified criteria, and they are recorded on the grant precisely so
+nobody later reads "not checked" as "checked and passed".

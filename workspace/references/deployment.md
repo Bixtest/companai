@@ -339,21 +339,102 @@ sudo systemctl restart mercato
 `pg_dump` and verify the dump is readable (`gzip -t`) before trusting it — we have
 had two truncated backups that looked fine.
 
-## 12. What this guide does not cover
+## 12. Operating it
+
+Everything here uses capabilities the platform already has. It is the difference
+between *deployed* and *operable*, and none of it needs new code.
+
+### Back it up
+
+The database holds everything: records, the journal, and the hash chain that
+proves the journal has not been altered. Losing it loses the ability to answer
+what happened, which is the product.
+
+```bash
+# nightly, as the app user — keep 30 days
+pg_dump -Fc "$DATABASE_URL" > /var/backups/companai/$(date +%F).dump
+find /var/backups/companai -name '*.dump' -mtime +30 -delete
+```
+
+Add it to `cron` or a systemd timer. **Then restore one**, onto a scratch
+database, before you rely on it — a backup nobody has restored is a belief, not
+a backup.
+
+Also back up **`.env`**. It holds the keys that decrypt tenant data; a database
+restored without them is ciphertext.
+
+### Watch it
+
+| Signal | Where | Why it matters |
+|---|---|---|
+| App responds | `GET /login` returns 200 | The cheapest liveness check that exercises rendering |
+| Workers alive | `mercato queue worker --all` process present | Silent failure here stalls email and indexing with no error surface |
+| Scheduler alive | `mercato scheduler start` process present | Same, for anything time-based |
+| Postgres connections | `pg_stat_activity` count vs `max_connections` | Web + worker pools are additive; exhaustion starves the request path (see `packages/shared/AGENTS.md`) |
+| Disk | `/var/lib/postgresql`, attachments dir | The ledger only grows |
+| Error rate | app logs, `OM_LOG_LEVEL=info` | Structured JSON; ship to whatever you already run |
+
+There is a **System Status** page in the admin under Settings that reports which
+strategies are active (cache, queue, rate limit) and flags single-instance-only
+choices. Read it once after deploying.
+
+### Rotate the encryption key
+
+This exists and is scriptable:
+
+```bash
+corepack yarn mercato auth rotate-encryption-key --tenant <tenantId>
+```
+
+Prefer `--tenant`. Rotating across all tenants with one old key is possible and
+the command warns about it, because a single old key normally belongs to one
+tenant.
+
+Rotate on the ordinary triggers: somebody with access leaves, a key is exposed,
+or on a schedule your policy sets. **Take a backup first** — rotation rewrites
+encrypted columns.
+
+### Attachments, if you run more than one instance
+
+Two app instances on one filesystem will not share locally-stored attachments.
+The S3 module handles it and ships disabled:
+
+```bash
+OM_ENABLE_STORAGE_S3=true
+OM_INTEGRATION_STORAGE_S3_BUCKET=…
+OM_INTEGRATION_STORAGE_S3_REGION=…
+OM_INTEGRATION_STORAGE_S3_ACCESS_KEY_ID=…
+OM_INTEGRATION_STORAGE_S3_SECRET_ACCESS_KEY=…
+```
+
+Also switch the single-instance strategies named in §6 — cache and queue to
+Redis, rate limit to Redis — or two instances will disagree about ACLs and run
+the same scheduled job twice.
+
+### Restarting
+
+`systemctl restart` drops in-flight connections. For a single instance that is a
+few seconds at a quiet hour. Anything better is blue/green and is genuinely a
+separate piece of work — see §13.
+
+## 13. What this guide does not cover
 
 Stated rather than left to be discovered:
 
 - **Nothing here has been run on a real Plesk server.** See the note at the top.
 - **No zero-downtime deploy.** `systemctl restart` drops connections. Blue/green
   or a second instance behind nginx is a separate piece of work.
-- **No horizontal scaling recipe.** §6 says which strategies to change; it does
-  not cover session affinity, shared file storage for attachments
-  (`ATTACHMENTS_*` / S3), or a load balancer.
-- **No backup schedule, monitoring or alerting.** Only the manual `pg_dump` above.
+- **No horizontal scaling recipe.** §12 covers shared attachment storage and the
+  strategies to switch; it does not cover session affinity or a load balancer.
+- **No *automated* backup verification.** §12 gives the schedule and the restore
+  step; nothing checks that a restore still works. That check is worth writing
+  before this holds real data.
 - **No CDN or asset offload.** Next serves its own static assets through the proxy.
-- **Dependency CVEs in parked modules are not pruned** — sprint item 21. A scanner
-  pointed at this box will flag packages nothing routes to.
-- **Secrets live in a plain `.env` file.** No vault, no rotation procedure.
+- **`@react-email` is unmaintained** (27 deprecation notices). Not a
+  vulnerability, and the one real advisory is fixed — see
+  [U18](upstream-issues.md). Replacing the email rendering stack is its own work.
+- **Secrets live in a plain `.env` file.** No vault. A rotation *procedure* now
+  exists (§12) but nothing enforces a schedule.
 - **Custom per-tenant domains** (`PLATFORM_PRIMARY_HOST`, `CUSTOM_DOMAIN_*`,
   `ACME_EMAIL`) exist in the env surface but the `domain_mappings` extraction is
   deferred — sprint item 22. Treat those variables as not yet supported.

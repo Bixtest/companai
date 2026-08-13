@@ -100,3 +100,15 @@ permissions is the exact failure this feature prevents.
 | `packages/core/src/modules/auth/services/rbacService.ts` | `grantedByDelegation` — the grant half |
 | `packages/core/src/modules/auth/services/authorityEnforcementService.ts` | `delegationCeilingFor` — the cap half |
 | `packages/core/src/modules/auth/api/authority/delegations/route.ts` | The API |
+
+## Where to see it
+
+`/backend/authority/delegations`, gated on `auth.delegations.manage`.
+
+Revoked and expired delegations stay on the page. This is a record of what
+authority was lent, not a list of what is in force -- "who could approve
+payments last March" is the question it actually gets asked.
+
+No create form. Granting needs a person picker and a capability picker, and
+guessing at those would be worse than leaving the API as the path; the page
+says so rather than leaving the absence unexplained.

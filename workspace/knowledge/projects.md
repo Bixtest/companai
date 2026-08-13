@@ -86,3 +86,25 @@ Phase K work. This is enough for a matter to govern the work inside it.
 | `packages/shared/src/modules/project-overlays.ts` | The overlay rules, as pure functions |
 | `packages/core/src/modules/auth/services/projectService.ts` | Projects, members, record assignment |
 | `packages/core/src/modules/auth/services/authorityEnforcementService.ts` | `projectContextFor` — where both inputs reach the resolver |
+
+## Where to see it
+
+`/backend/authority/projects`, gated on `auth.projects.manage` -- a capability
+added when the screen was built, because none existed. `admin: ['auth.*']`
+already covers it, so no ACL sync is needed for existing tenants.
+
+Read-only, matching the route. Creating a project, adding a member with a
+narrowed overlay and assigning records to it are three acts with three
+different blast radii; one POST covering all three would have an effect class
+that depends on its body, which is the shape this platform refuses everywhere
+else.
+
+**Counts come from `ProjectService.summaries()`, deliberately separate from
+`contextFor()`.** `contextFor` is on the decision path and must stay at two
+indexed reads -- anything that counts rows must never be reachable from the
+resolver. `summaries()` uses two grouped queries rather than one per project,
+so fifty matters cost two round trips rather than a hundred.
+
+An ungraded project renders as *saying nothing*, never as `G0`. That is the
+whole reason `grade` is nullable: reading the blank as "negligible" would
+quietly lower every act inside the matter.

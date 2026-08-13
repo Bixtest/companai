@@ -1112,6 +1112,124 @@ where a mock made six tests assert nothing.
 
 ---
 
+## L46 — a wildcard grant makes a made-up permission work
+
+**What happened.** Building the trust screen I wrote
+`requireFeatures: ['auth.trust.manage']`. There is no such feature. The real one
+is `auth.trust.promote`.
+
+The page worked. It loaded, it rendered, it was correctly gated in the sense
+that a signed-out visitor was refused. Nothing failed — not the typecheck, not
+the gate, not the browser. I only caught it because I opened `acl.ts` for an
+unrelated reason and the name I remembered writing was not in it.
+
+**Why it worked.** Wildcard grants are part of the ACL contract: `admin` holds
+`auth.*`, and `auth.*` matches `auth.trust.manage` exactly as happily as it
+matches a real feature. The matcher has no idea which strings are declared. So
+**every typo in a `requireFeatures` string is invisible to the one account most
+likely to be testing it.**
+
+**What it costs when it ships.** The page is then gated on a permission that
+exists nowhere: it cannot be granted to a narrower role, cannot be revoked, does
+not appear in the permission editor, and carries no effect class — so the
+resolver treats acts behind it as ordinary. It works for administrators and for
+nobody else, forever, silently.
+
+**The general shape.** *A permissive fallback that matches by pattern will
+validate a name that means nothing.* Testing as the most privileged account is
+what hides it — the wildcard is doing the matching, so the specific string is
+never exercised. This is the same family as L38 and L45: the thing that made it
+convenient (a cache, a wildcard) is the thing that made the check meaningless.
+
+**What to do.** When writing any `requireFeatures`, read the feature back out of
+the module's `acl.ts` — do not trust that the page loading means the name is
+real. And test a gate as a **narrow** role at least once, never only as admin.
+
+Sweeping for it found seven more across the codebase, all upstream's — recorded
+as U19 and roadmap item 21b. A guard test asserting every `requireFeatures`
+string resolves to a declared feature is the permanent fix; the existing
+`capability-coverage.test.ts` cannot see this, because it checks the
+descriptors that exist rather than the guards that reference ones that do not.
+
+---
+
+## L45 — `yarn typecheck` is Turbo-cached, so a green one can be stale
+
+**What happened.** After pinning `nanoid`, a typecheck surfaced an error in
+`packages/checkout` that had nothing to do with my change:
+
+```text
+PayPage.tsx(1367,70): Property 'ar' is missing in type
+  '{ en: string; pl: string; es: string; de: string; }'
+  but required in type 'Record<Locale, string>'
+```
+
+The file was untouched by me. The error was real, it had been there since `ar`
+was added in G7 — and **every typecheck I had run that day reported zero
+errors.**
+
+The reason:
+
+```text
+Tasks:    17 successful, 20 total
+Cached:   16 cached, 20 total
+```
+
+**Sixteen of twenty packages were served from cache.** Installing a dependency
+invalidated them, and the first package to actually re-run failed. My repeated
+"0 type errors" were mostly a cache reporting yesterday's answer.
+
+**This is [[L38]] again in a different tool.** There it was `build:app` serving a
+stale bundle; here it is `typecheck` serving a stale verdict. The pattern is the
+same: **a Turbo-cached task reports the last result, not the current one**, and
+the output says so in a line that is easy to skim past.
+
+**The rule.**
+
+- Read the `Cached:` line, every time. `Cached: 16 cached, 20 total` is not a
+  pass — it is one pass and sixteen memories.
+- Before claiming a clean typecheck in a commit message or to the owner, run
+  **`yarn typecheck --force`** at least once and quote `Cached: 0`.
+- `yarn test` has been reporting `Cached: 0 cached, 22 total` throughout, so the
+  gate numbers stand. It was only typecheck that was quietly cached.
+
+**Worth noting the parked-module angle.** The error was in `checkout`, which does
+not run. So nothing was broken in the product — but the same cache was hiding
+whatever else might be in the other fifteen, and I would not have known.
+
+## L44 — a test can assert a field that does not exist, and look fine
+
+**What happened.** Writing the Phase G exit-gate test I assumed the resolver took
+a `projectCeiling` in its context, alongside `resourceCeiling`. It does not — a
+project overlay and a record's lock state are both statements about *this
+record*, so `AuthorityEnforcementService` merges them with `lowerOf` into a
+single `resourceCeiling` **before** the resolver sees either.
+
+So `context: { projectCeiling: 'A2' }` set nothing at all.
+
+**The dangerous part is why it did not error.** Jest strips types rather than
+checking them, so an excess property on a typed object compiles and runs. The
+test failed only because the gate came back `A5` and I had asserted `A0`. **Had
+the expected value happened to match the unconstrained answer, it would have
+passed while testing nothing** — a green assertion about a field that does not
+exist.
+
+**The rule.** When a test asserts on a field you have not personally read in the
+type, check the type first:
+
+```bash
+grep -n "resourceCeiling\|policyCeiling" packages/shared/src/lib/authority/decision.ts
+```
+
+And prefer assertions that would fail if the input were ignored — a baseline
+comparison (`toBeLessThan(baseline)`) rather than an absolute value. An absolute
+value can coincide with the un-constrained answer; a narrowing cannot.
+
+**The unexpected benefit.** Getting it wrong is how I learned the architecture:
+that two of the three exit criteria are one input by the time they reach the
+resolver, and the distinction lives one layer up. The test now says so, which
+is more useful than the version I set out to write.
+
 ## L43 — adding an enum value makes old conditionals silently partial
 
 **What happened.** Giving `ai_worker` a producer meant a new principal kind could

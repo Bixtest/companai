@@ -7,6 +7,50 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-08-13 — four governance screens, and one capability that did not exist
+
+Item 21 asked for screens over the governance features that shipped with an API
+and no page. Four are now built — delegations, denials, trust, projects — and
+each one turned out to be a design decision rather than a rendering job.
+
+**None of them has a create form, for four different reasons.** Delegations need
+a person picker and a capability picker, and guessing at those is worse than
+leaving the API as the path. Denials can already be lifted from the list, which
+is the control that matters. Trust promotion is refused unless the *evidence*
+passes, so a Promote button would spend its life returning 409 and teach people
+the screen is broken rather than that the bar has not been met. Projects are
+three separate acts -- create, add a member with an overlay, assign records --
+with three different blast radii, and one form covering all three would have an
+effect class that depends on its body. Each page says which of these applies to
+it, so the absence reads as a decision instead of an omission.
+
+**Every list keeps what ended.** Revoked delegations, lifted denials, closed
+projects. The question these get asked is *"why could Sam not do that in
+March"*, and a list of what is in force today cannot answer it.
+
+**Projects had no capability at all.** Not a missing screen -- a missing
+permission. `auth.projects.manage` is new, at E5 alongside delegation and
+denial: a project grades the work inside it and can narrow what its members may
+do there, so setting one up changes the rules for every record assigned to it.
+Not delegable, because the power to define where the rules are looser is not
+something to lend for a fortnight. Existing tenants need no ACL sync -- admin
+already holds `auth.*`, and the wildcard covers it.
+
+The counts on that page come from a new `ProjectService.summaries()` kept
+deliberately apart from `contextFor()`. `contextFor` sits on the decision path
+at two indexed reads; anything that counts rows must never become reachable
+from the resolver.
+
+**What is left of item 21 is record locks**, and it belongs on each record's own
+screen rather than a list of its own -- per-entity work, the biggest of the
+five.
+
+Verified the way everything here now is: `yarn test` at 22/22 with `Cached: 0`,
+`yarn typecheck --force` at 20/20 with `Cached: 0`. The forced typecheck is not
+optional any more -- see L45.
+
+---
+
 ## 2026-08-12 (late night) — looking at the rebrand, not just testing it
 
 The owner asked me to rebuild and check the white-labelling in the browser. Every

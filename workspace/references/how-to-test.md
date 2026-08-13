@@ -1185,6 +1185,75 @@ will bring the fix forward.
 
 ---
 
+## Batch — four governance screens
+
+**What changed, in one sentence.** Delegations, denials, trust and projects each
+had a working API and no page; now each has one, reachable from Settings under
+**Authority**.
+
+**Why it matters to us.** These are the controls that make the governance layer
+usable by somebody who is not holding a terminal. A revoke you need `curl` for
+is a revoke most people will never perform.
+
+**Visible change:** four new entries in the settings sidebar under *Authority*.
+
+**Before you start:** you must be signed in at `http://localhost:3000/backend`.
+The pages are gated, so an account without the capability sees a refusal rather
+than an empty list — that is correct behaviour, not a fault.
+
+### Test 1 — the four pages load (3 minutes)
+
+1. Go to `http://localhost:3000/backend/authority/delegations`
+2. Go to `http://localhost:3000/backend/authority/denials`
+3. Go to `http://localhost:3000/backend/authority/trust`
+4. Go to `http://localhost:3000/backend/authority/projects`
+
+**Expected on each:** a title, a sentence explaining what the feature is, and
+then — almost certainly — a message saying nothing has been set up yet. On a
+fresh tenant *every one of these should be empty*, and each empty state says
+what that means rather than showing a blank box. For example, trust should say
+every worker sits at the bottom tier and may only propose work.
+
+**Failure signature:** a raw translation key on screen (`auth.nav.trust` instead
+of *Earned trust*) means the locale file did not ship. A 403 means the account
+lacks the capability. A spinner that never resolves means the API route is not
+registered — check the server log.
+
+### Test 2 — the tier and grade scales read as English (2 minutes)
+
+1. On `/backend/authority/trust`, scroll to **What the tiers mean**
+2. On `/backend/authority/projects`, look at any project's second line
+
+**Expected:** five tiers from *Shadow* to *Autonomous*, each with a plain
+sentence. On projects, an ungraded matter must say *"Not graded — acts here stay
+at their ordinary level"*, **not** `G0`. That distinction matters: reading a
+blank grade as G0 would quietly lower every act inside the matter.
+
+### Test 3 — the sidebar entries are there (1 minute)
+
+1. Open **Settings**
+2. Find the **Authority** group
+
+**Expected:** Approvals, Delegations, Withheld permissions, Earned trust,
+Projects — in that order.
+
+### What this deliberately does not do yet
+
+**None of the four can create anything.** That is a decision, and each page
+states its own reason at the bottom. Delegations need a person picker and a
+capability picker. Trust promotion is refused unless the evidence passes, so a
+button would mostly return an error. Projects are three separate acts with three
+different consequences. Denials can be lifted from the list, which is the
+control that actually matters.
+
+**Record locks still has no screen.** It is the fifth and it belongs on each
+record's own page, not on a list of its own.
+
+**Arabic is not translated** for the two newest entries — the sidebar falls back
+to the English label. Arabic was dropped from this milestone deliberately.
+
+---
+
 ## Template for future batches
 
 ```markdown
