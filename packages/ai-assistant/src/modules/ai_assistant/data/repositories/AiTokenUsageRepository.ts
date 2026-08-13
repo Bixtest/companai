@@ -4,7 +4,12 @@ import { AiTokenUsageEvent, AiTokenUsageDaily } from '../entities'
 export interface CreateTokenUsageEventInput {
   tenantId: string
   organizationId?: string | null
-  userId: string
+  /** Null when a machine acted on its own — there is nobody to attribute it to. */
+  userId: string | null
+  /** `human`, `ai_worker` or `service`. */
+  actorKind?: string | null
+  /** The principal id; text, because a credential id is not always a uuid. */
+  actorId?: string | null
   agentId: string
   moduleId: string
   sessionId: string
@@ -55,6 +60,8 @@ export class AiTokenUsageRepository {
       tenantId: input.tenantId,
       organizationId: input.organizationId ?? null,
       userId: input.userId,
+      actorKind: input.actorKind ?? null,
+      actorId: input.actorId ?? null,
       agentId: input.agentId,
       moduleId: input.moduleId,
       sessionId: input.sessionId,

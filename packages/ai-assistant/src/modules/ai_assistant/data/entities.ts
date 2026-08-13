@@ -411,8 +411,33 @@ export class AiTokenUsageEvent {
   @Property({ name: 'organization_id', type: 'uuid', nullable: true })
   organizationId?: string | null
 
-  @Property({ name: 'user_id', type: 'uuid' })
-  userId!: string
+  /**
+   * The person this consumption is attributable to.
+   *
+   * **Nullable**: a machine acting on its own has nobody to attribute it to,
+   * and inventing a sponsor would be a fiction. Before this the column was
+   * `not null` and the chat route passed `auth.sub` straight in — which for a
+   * credential is `ai_worker:<uuid>`, not a uuid at all.
+   */
+  @Property({ name: 'user_id', type: 'uuid', nullable: true })
+  userId: string | null = null
+
+  /**
+   * What kind of actor burned these tokens — `human`, `ai_worker` or `service`.
+   *
+   * Without it a machine consuming tokens autonomously is indistinguishable
+   * from a person using the assistant, and the first question anybody asks of a
+   * spend table is *"how much did the machines cost us?"*.
+   */
+  @Property({ name: 'actor_kind', type: 'text', nullable: true })
+  actorKind: string | null = null
+
+  /**
+   * The principal id. `text`, not `uuid`: a credential id is not always a bare
+   * uuid, and forcing that is exactly what made `user_id` a latent 500.
+   */
+  @Property({ name: 'actor_id', type: 'text', nullable: true })
+  actorId: string | null = null
 
   @Property({ name: 'agent_id', type: 'text' })
   agentId!: string

@@ -1,3 +1,4 @@
+import { parseSubject } from '@open-mercato/shared/lib/auth/principal'
 import { createLogger } from '@open-mercato/shared/lib/logger'
 import type { AwilixContainer } from 'awilix'
 import type { EntityManager } from '@mikro-orm/postgresql'
@@ -59,10 +60,24 @@ export async function recordTokenUsage(
     const now = new Date()
     const day = now.toISOString().slice(0, 10)
 
+    // `authContext.userId` is a **subject**, not a user id: a bare uuid for a
+    // person, `api_key:<id>` or `ai_worker:<id>` for a credential. It was being
+    // written straight into a `uuid not null` column, which worked only because
+    // no machine had ever run an agent. Giving `ai_worker` a producer made that
+    // reachable.
+    //
+    // Narrowed here rather than at the eight call sites that build the context:
+    // this is the only place the value meets a typed column, and the only place
+    // that needs to know the difference.
+    const actor = parseSubject(input.authContext.userId)
+    const isPerson = actor.kind === 'human'
+
     await repo.createEvent({
       tenantId,
       organizationId: input.authContext.organizationId ?? null,
-      userId: input.authContext.userId,
+      userId: isPerson ? actor.id : null,
+      actorKind: actor.kind,
+      actorId: actor.id,
       agentId: input.agentId,
       moduleId: input.moduleId,
       sessionId: input.sessionId,
