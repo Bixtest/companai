@@ -70,7 +70,7 @@ const todoDeleteBodySchema = z.object({
 })
 
 export const metadata = {
-  GET: { requireAuth: true, requireFeatures: ['customers.view'] },
+  GET: { requireAuth: true, requireFeatures: ['customers.interactions.view'] },
   POST: { requireAuth: true, requireFeatures: ['customers.interactions.manage'] },
   PUT: { requireAuth: true, requireFeatures: ['customers.interactions.manage'] },
   DELETE: { requireAuth: true, requireFeatures: ['customers.interactions.manage'] },
