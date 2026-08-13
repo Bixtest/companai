@@ -27,6 +27,63 @@ The record of everything already done, with the reasoning:
 
 ---
 
+## The list — one line each, ticked as they finish
+
+**This is the section to read.** Everything below it is the same items with the
+reasoning attached; nothing here is tracked anywhere else. Order is my working
+order, top to bottom. Last updated 2026-08-13.
+
+### Left to do — the Starting Kit
+
+- [ ] **22** — Bulk approval with a diff; the diff *is* the feature ← **next**
+- [ ] **23** — Deputy cover and standing approvals
+- [ ] **15b** — Budget as a ceiling, not just a meter
+- [ ] **21c** — A lock control on each record's own screen (per-entity; the largest)
+- [ ] **24b** — A screen for the two per-tenant authority settings
+
+### Left to do — after the Starting Kit closes
+
+- [ ] **20** 🔒 — Run the deployment guide on a real Plesk VPS *(owner said: not now)*
+- [ ] **27** 💤 — Dashboard widgets of our own, so the start page shows governance
+- [ ] **25** 💤 — Ledger Tier 2, signed checkpoints *(no customer needs it yet)*
+- [ ] **26** 💤 — `domain_mappings` extraction *(nothing needs it)*
+- [ ] **29** 💤 — Integration control plane *(220–380 person-weeks; not this milestone)*
+- [ ] **11** 💤 — Native review of the Arabic *(dropped from this milestone)*
+
+### Waiting on you — I cannot close these
+
+- [ ] **B** 🔒 — Drop `apps/docs`? It is upstream's documentation *content*. My recommendation: drop it
+- [ ] **C** 🔒 — A lawyer on the privacy/terms before commercial use. Fine for internal use now
+
+### Done
+
+- [x] **1** — Explicit deny
+- [x] **2** — Full gate green, captured in full
+- [x] **3** — The approvals page, end to end
+- [x] **4** — U4: a superadmin could not delete a currency
+- [x] **5** — U12: a deleted row kept its unique code forever
+- [x] **6** — U14: map live commands to capabilities
+- [x] **7** — O1: a denial lifted from the CLI left no record
+- [x] **8** — U15: the demo feedback feature, removed
+- [x] **9** — U16: real privacy policy and terms
+- [x] **10** — Re-verify the boot checks that had used a cached build
+- [x] **12** — U7: the journal tells a machine from a human
+- [x] **13** — Give `ai_worker` a producer
+- [x] **14** — Correlation and causation ids
+- [x] **15** — Spend metering
+- [x] **16** — Command → capability mapping, 54% → 98%
+- [x] **17** — Dependency advisories
+- [x] **18** — Production hardening
+- [x] **19** — Phase G exit gate
+- [x] **21** — Five governance screens
+- [x] **21b** — U19: guards naming permissions nobody declared
+- [x] **24** — Per-tenant approval expiry
+
+**Done means:** the gate is green and uncached, it is verified against the
+running instance where that is possible, and the documentation says what it does.
+
+---
+
 ## Phase 1 — finish the Starting Kit
 
 | # | | Task | Why | Size |

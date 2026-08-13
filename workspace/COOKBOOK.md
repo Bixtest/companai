@@ -341,6 +341,21 @@ mechanism that remembers a task.
    without a reason is a guess wearing a schedule.
 4. **Say the order out loud when reporting**, so the owner can overrule cheaply.
    Delegated does not mean invisible.
+5. **The list must be scannable in ten seconds.** PROGRESS.md opens with
+   *"The list"* — one line per task, a checkbox each, in working order, ticked as
+   they finish. Everything below it is the same items with the reasoning
+   attached.
+
+   **Why this became a rule (owner, 2026-08-13):** *"I am still not able to chase
+   you around with the tasks you pick and work on."* The roadmap was complete and
+   unreadable — each row had grown a paragraph explaining itself, which is right
+   for the record and useless for answering *what is left?* at a glance. Detail is
+   not a substitute for an index; a plan the owner cannot scan is a plan only I
+   can see, which defeats the point of rule zero-three.
+
+   The one-liner and the detailed row are the **same item in one file**, never a
+   second list — a summary that can drift from its source is the competing view
+   this rule already forbids. Tick the box in the same edit that ticks the row.
 
 **The ordering heuristic that keeps earning its place:** *change the mechanism
 before multiplying the call sites.* Landing a behaviour change on a small,
