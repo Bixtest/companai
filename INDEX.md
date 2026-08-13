@@ -19,15 +19,21 @@ and can always explain why.
 
 ## 2. Where the project stands today
 
+> **Returning to this project after time away? Read
+> [`where_we_left.md`](where_we_left.md) first.** It is the one status document
+> kept current, and it says what is left, how to run this, and which traps cost
+> hours. Everything in this index is background behind it.
+
 | | |
 |---|---|
+| **Start here on return** | [`where_we_left.md`](where_we_left.md) — status, what is left, how to pick it up |
 | **Phase** | Building the Starting Kit |
 | **Decision made** | We are building on **Open Mercato**, a working platform we have forked permanently |
 | **Where the code is** | [`workspace/starting-kit/`](workspace/starting-kit/) |
 | **Health** | **Green.** Boots clean, zero server errors. **Gate: 22/22 tasks, 12,898 tests, `Cached: 0`** (2026-08-13). Typecheck 20/20, also uncached — `--force` is mandatory, it is Turbo-cached too (L45). See [`knowledge/test-gate.md`](workspace/knowledge/test-gate.md) for diagnosing an intermittent red |
 | **Current work** | **The governance layer decides, every autonomy gate binds, and a person can work the queue.** All six repairs in; the resolver enforces per tenant; A1/A2 hold an act until somebody approves it, A3 holds it until its window passes unless vetoed, A4 runs it and files it for review; acts are graded by the data they touch; 117 commands mapped to capabilities; the queue is a screen at **Settings → Authority → Approvals**. Next: gate stability, then the eight grafts |
 | **Understand the product in 10 minutes** | [`workspace/knowledge/authority-overview.md`](workspace/knowledge/authority-overview.md) — the governance layer end to end. **This is the thing we are building** |
-| **Progress tracker** | [`workspace/PROGRESS.md`](workspace/PROGRESS.md) — every batch, what is done, what is next |
+| **Progress tracker** | [`workspace/PROGRESS.md`](workspace/PROGRESS.md) — the *reasoning* behind each item. **Its status views disagree with each other** (three overlapping checklists accumulated across sessions); trust [`where_we_left.md`](where_we_left.md) for what is actually left |
 | **The ERP is off** | 14 modules **parked**, not deleted — 136 tables instead of 263. One line each to restore: [`workspace/references/parked-modules.md`](workspace/references/parked-modules.md) |
 | **Actually deleted** | Only `packages/enterprise`, because its licence forbids redistribution |
 | **Run it yourself** | [`workspace/references/local-instance.md`](workspace/references/local-instance.md) — laptop only, no cloud |
