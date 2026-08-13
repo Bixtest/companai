@@ -124,7 +124,17 @@ export function register(container: AppContainer) {
   container.register({ denialService: asClass(DenialService).scoped() })
   container.register({ trustService: asClass(TrustService).scoped() })
   container.register({ projectService: asClass(ProjectService).scoped() })
-  container.register({ pendingActService: asClass(PendingActService).scoped() })
+  container.register({
+    // `asFunction(...).proxy()` rather than `asClass`: CLASSIC injection reads
+    // the constructor's parameter names, and the second one is `moduleConfig`,
+    // for which there is no registration — the service is registered as
+    // `moduleConfigService`. `asClass` would resolve it to `undefined` and every
+    // tenant would silently keep the default window (L37).
+    pendingActService: asFunction((cradle: Record<string, unknown>) => new PendingActService(
+      cradle.em as never,
+      optional(cradle, 'moduleConfigService'),
+    )).scoped().proxy(),
+  })
   container.register({ actReviewService: asClass(ActReviewService).scoped() })
 
   // RBAC service. The bare `asClass(...).scoped()` registration matches

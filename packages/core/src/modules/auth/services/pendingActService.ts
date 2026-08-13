@@ -16,6 +16,77 @@ const logger = createLogger('authority').child({ component: 'pending-acts' })
  */
 export const PENDING_ACT_TTL_MS = 24 * 60 * 60 * 1000
 
+/** Where a tenant's own approval window lives, beside its enforcement mode. */
+export const PENDING_ACT_TTL_CONFIG_MODULE = 'auth'
+export const PENDING_ACT_TTL_CONFIG_KEY = 'authority.pending_act_ttl_hours'
+
+/**
+ * The range a tenant may choose within, and why it is a range rather than a
+ * free number.
+ *
+ * **The floor exists because the setting can stop work.** A TTL near zero
+ * expires acts faster than anyone can answer them, which does not look like a
+ * misconfiguration to the person affected — it looks like the platform
+ * refusing their work for no stated reason. One hour is the shortest window in
+ * which a human can plausibly be asked and reply.
+ *
+ * **The ceiling exists because the setting can defeat its own purpose.**
+ * Expiry is a design requirement (planning 02 §7.2) precisely so that an
+ * unanswered request escalates instead of blocking forever; a tenant setting
+ * ninety days would technically satisfy "has an expiry" while restoring the
+ * failure the requirement forbids. Thirty days is generous for a slow approval
+ * chain and still finite.
+ *
+ * A value outside the range is clamped rather than refused: refusing would
+ * leave the tenant on a default they did not choose and did not know they were
+ * on, whereas clamping moves them to the nearest thing they can have and says
+ * so in the log.
+ */
+export const PENDING_ACT_TTL_MIN_HOURS = 1
+export const PENDING_ACT_TTL_MAX_HOURS = 24 * 30
+
+type ModuleConfigReader = {
+  getValue: <T>(
+    moduleId: string,
+    name: string,
+    options?: { defaultValue?: T | null; scope?: { tenantId?: string | null } },
+  ) => Promise<T | null>
+}
+
+/**
+ * A stored TTL turned into milliseconds, or the default when it cannot be.
+ *
+ * Exported because the clamping is the interesting part and deserves testing
+ * without a database behind it.
+ */
+export function resolveTtlMs(stored: unknown, tenantId: string): number {
+  if (stored == null) return PENDING_ACT_TTL_MS
+
+  const hours = typeof stored === 'number' ? stored : Number(stored)
+  if (!Number.isFinite(hours)) {
+    // Unreadable means the default, never zero. Coercing junk to 0 would expire
+    // every act the moment it was held.
+    logger.warn('Unreadable pending-act TTL; using the default', {
+      tenantId,
+      stored,
+      usingHours: PENDING_ACT_TTL_MS / 3_600_000,
+    })
+    return PENDING_ACT_TTL_MS
+  }
+
+  const clamped = Math.min(Math.max(hours, PENDING_ACT_TTL_MIN_HOURS), PENDING_ACT_TTL_MAX_HOURS)
+  if (clamped !== hours) {
+    logger.warn('Pending-act TTL outside the permitted range; clamped', {
+      tenantId,
+      requestedHours: hours,
+      usingHours: clamped,
+      minHours: PENDING_ACT_TTL_MIN_HOURS,
+      maxHours: PENDING_ACT_TTL_MAX_HOURS,
+    })
+  }
+  return clamped * 3_600_000
+}
+
 /**
  * How long an `A3` act sits before it runs itself.
  *
@@ -98,7 +169,45 @@ type CommandBusLike = {
  * make.
  */
 export class PendingActService {
-  constructor(private readonly em: EntityManager) {}
+  /**
+   * `moduleConfig` is optional because the configs module can be absent, and an
+   * approval queue that stops working when a *settings* module is missing would
+   * be a worse failure than one that uses its default window.
+   */
+  constructor(
+    private readonly em: EntityManager,
+    private readonly moduleConfig: ModuleConfigReader | null = null,
+  ) {}
+
+  /**
+   * How long this tenant's held acts stay approvable.
+   *
+   * Per tenant because approval speed is a property of the organisation, not of
+   * the platform: a four-person company answers in an hour, a regulated one may
+   * need a week, and an instance-wide number makes whoever configures it first
+   * decide for everybody.
+   *
+   * Read at hold time rather than cached. A tenant that shortens its window
+   * should affect acts held from then on, and acts already waiting keep the
+   * window they were promised — an approval deadline that moves under somebody
+   * is not a deadline.
+   */
+  private async ttlMsFor(tenantId: string): Promise<number> {
+    if (!this.moduleConfig) return PENDING_ACT_TTL_MS
+    try {
+      const stored = await this.moduleConfig.getValue<number>(
+        PENDING_ACT_TTL_CONFIG_MODULE,
+        PENDING_ACT_TTL_CONFIG_KEY,
+        { defaultValue: null, scope: { tenantId } },
+      )
+      return resolveTtlMs(stored, tenantId)
+    } catch (err) {
+      // Fail to the default, never to no expiry: a config lookup that throws
+      // must not be able to produce an act that waits forever.
+      logger.warn('Could not read the pending-act TTL; using the default', { tenantId, err })
+      return PENDING_ACT_TTL_MS
+    }
+  }
 
   /**
    * Records an act that will run **by itself** once its window passes.
@@ -143,6 +252,7 @@ export class PendingActService {
 
   /** Records an act that will not run until somebody approves it. */
   async hold(input: HoldInput): Promise<AuthorityAct> {
+    const ttlMs = await this.ttlMsFor(input.tenantId)
     const act = this.em.create(AuthorityAct, {
       tenantId: input.tenantId,
       organizationId: input.organizationId,
@@ -155,7 +265,7 @@ export class PendingActService {
       bindingRule: input.decision.bindingRule,
       decision: input.decision as unknown,
       status: 'pending',
-      expiresAt: new Date(Date.now() + PENDING_ACT_TTL_MS),
+      expiresAt: new Date(Date.now() + ttlMs),
       createdAt: new Date(),
     })
     await this.em.persist(act).flush()
