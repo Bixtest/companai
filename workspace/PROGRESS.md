@@ -77,7 +77,8 @@ claim about the past, not the present. Verified 2026-08-12.
 | **21b** | Guards naming permissions nobody declared (U19) | **Done 2026-08-13.** Three real cases, not the seven I first reported — the scan’s regex excluded hyphens and invented four. All three meant an already-declared feature (`customers.interactions.view`, `workflows.definitions.create`, `workflows.instances.view`), so they were corrections rather than new security decisions. Safe because no role held the phantom names — both modules grant by wildcard. Guard test added and verified to fail by reintroducing the original mistake | ☑ |
 | **22** | Bulk approval with a diff | Not started | ☐ |
 | **23** | Deputy cover and standing approvals | Not started | ☐ |
-| **24** | Per-tenant approval expiry | Not started | ☐ |
+| **24** | Per-tenant approval expiry | **Done 2026-08-13** — `auth.pending_act_ttl_hours`, read per tenant at hold time (not cached: shortening the window must not move a deadline somebody was already promised). Clamped to 1h–30d rather than refused: too short stops work without looking like a misconfiguration to the person affected, too long restores the failure mandatory expiry exists to prevent. Junk and `Infinity` fall back to the default, never to 0 or to no expiry. Set in `module_configs`, matching its sibling `authority.enforcement` — neither has a UI yet (see 24b) | ☑ |
+| **24b** | A screen for the tenant authority settings | Enforcement mode and the approval window are both real per-tenant settings with no surface but the config table. Small, and natural to do beside the other Authority screens | ☐ |
 
 **The order, and why:** 14 first — contained, and every later item benefits from
 acts being traceable. Then 16 (mechanical, and it closes the gap Hermes widens),

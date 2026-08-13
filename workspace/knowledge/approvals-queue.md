@@ -93,3 +93,50 @@ marker, approving would queue a second copy and the queue could never be emptied
 
 `compai/planning/02-authority-and-autonomy.md` §7.1–7.2 (approval flows, standing
 approvals, delegation) and §9 (one inbox rather than four screens).
+
+## How long an act stays approvable
+
+Twenty-four hours by default, and per tenant since 2026-08-13.
+
+**Why it expires at all.** Planning 02 §7.2 requires it: *expiry escalates
+rather than silently blocking work forever*. An act that can sit in a queue
+indefinitely turns into a queue nobody trusts, and a request nobody answers is a
+refusal that never had to be justified.
+
+**Why per tenant.** Approval speed is a property of the organisation, not of the
+platform. A four-person company answers in an hour; a regulated one may need a
+week. An instance-wide number makes whoever configures it first decide for
+everybody.
+
+Set `auth` / `authority.pending_act_ttl_hours` in `module_configs`, scoped to
+the tenant — the same place and shape as `authority.enforcement`. Neither has a
+screen yet; that is roadmap item 24b.
+
+**The value is clamped to 1 hour – 30 days, not refused.**
+
+- The floor exists because this setting can *stop work*. A TTL near zero expires
+  acts faster than anyone can answer, and that does not present as a
+  misconfiguration to the person affected — it looks like the platform refusing
+  their work for no stated reason.
+- The ceiling exists because the setting can defeat its own purpose. Ninety days
+  technically "has an expiry" while restoring exactly the failure the
+  requirement forbids.
+- Clamping beats refusing: a refused value leaves the tenant on a default they
+  did not choose and do not know they are on.
+
+Unreadable values (`'soon'`, `{}`, `Infinity`) fall back to the **default**,
+never to `0` and never to no expiry — `new Date(Date.now() + Infinity)` is an
+Invalid Date, and an act with one is never collected by `expireOverdue`.
+
+**Read at hold time, deliberately not cached.** A tenant that shortens its
+window affects acts held from then on; acts already waiting keep the window they
+were promised. An approval deadline that moves under somebody is not a deadline.
+
+**One wiring note.** `PendingActService` is registered with
+`asFunction(...).proxy()` rather than `asClass`. The container uses Awilix
+CLASSIC injection, which resolves by constructor *parameter name* — the
+parameter is `moduleConfig` and the registration is `moduleConfigService`, so
+`asClass` would inject `undefined` and every tenant would silently keep the
+default with nothing going red (L37). `pendingActService.di.test.ts` exists to
+fail if that is ever undone.
+
