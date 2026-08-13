@@ -1185,28 +1185,29 @@ will bring the fix forward.
 
 ---
 
-## Batch — four governance screens
+## Batch — five governance screens
 
-**What changed, in one sentence.** Delegations, denials, trust and projects each
-had a working API and no page; now each has one, reachable from Settings under
-**Authority**.
+**What changed, in one sentence.** Delegations, denials, trust, projects and
+frozen records each had a working API and no page; now each has one, reachable
+from Settings under **Authority**.
 
 **Why it matters to us.** These are the controls that make the governance layer
 usable by somebody who is not holding a terminal. A revoke you need `curl` for
 is a revoke most people will never perform.
 
-**Visible change:** four new entries in the settings sidebar under *Authority*.
+**Visible change:** five new entries in the settings sidebar under *Authority*.
 
 **Before you start:** you must be signed in at `http://localhost:3000/backend`.
 The pages are gated, so an account without the capability sees a refusal rather
 than an empty list — that is correct behaviour, not a fault.
 
-### Test 1 — the four pages load (3 minutes)
+### Test 1 — the five pages load (4 minutes)
 
 1. Go to `http://localhost:3000/backend/authority/delegations`
 2. Go to `http://localhost:3000/backend/authority/denials`
 3. Go to `http://localhost:3000/backend/authority/trust`
 4. Go to `http://localhost:3000/backend/authority/projects`
+5. Go to `http://localhost:3000/backend/authority/record-locks`
 
 **Expected on each:** a title, a sentence explaining what the feature is, and
 then — almost certainly — a message saying nothing has been set up yet. On a
@@ -1235,19 +1236,38 @@ blank grade as G0 would quietly lower every act inside the matter.
 2. Find the **Authority** group
 
 **Expected:** Approvals, Delegations, Withheld permissions, Earned trust,
-Projects — in that order.
+Projects, Frozen records — in that order.
+
+### Test 4 — a frozen record can be thawed from the list (3 minutes)
+
+Only possible if something is actually locked. On a fresh tenant the page will
+be empty, and that is the correct result — do not lock a record just to make
+the page interesting.
+
+1. Go to `http://localhost:3000/backend/authority/record-locks`
+2. If anything is listed, read its state line and its reason
+3. Press **Unlock** on one
+
+**Expected:** a green message saying writes are accepted again from the next
+request, and the row disappears. A locked record refuses *writes* only —
+reading it always worked and still does.
+
+**Failure signature:** the row staying after a success message means the list
+did not refetch. An error mentioning authority means the account lacks
+`auth.records.lock`.
 
 ### What this deliberately does not do yet
 
-**None of the four can create anything.** That is a decision, and each page
+**None of the five can create anything.** That is a decision, and each page
 states its own reason at the bottom. Delegations need a person picker and a
 capability picker. Trust promotion is refused unless the evidence passes, so a
 button would mostly return an error. Projects are three separate acts with three
 different consequences. Denials can be lifted from the list, which is the
 control that actually matters.
 
-**Record locks still has no screen.** It is the fifth and it belongs on each
-record's own page, not on a list of its own.
+**Freezing a record is still API-only.** The list shows what is frozen and can
+thaw it; *setting* a lock belongs on each record's own screen next to the thing
+being frozen, which is per-entity work across every entity — roadmap item 21c.
 
 **Arabic is not translated** for the two newest entries — the sidebar falls back
 to the English label. Arabic was dropped from this milestone deliberately.

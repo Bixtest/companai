@@ -90,3 +90,28 @@ rows would need every reader to filter them out, which is one more place to forg
 | `packages/core/src/modules/auth/api/authority/record-locks/route.ts` | The API |
 | `packages/core/src/modules/auth/services/authorityEnforcementService.ts` | `resourceCeilingFor` — where it reaches the resolver |
 | `packages/core/src/modules/auth/commands/interceptors.ts` | `readRecordId` — where the record id comes from |
+
+## Where to see it
+
+`/backend/authority/record-locks`, gated on `auth.records.lock` — the same
+capability that sets a lock, because its declaration already argues that
+splitting lock from unlock would create a role that can stop work and never
+restart it. Reading the list falls under the same argument: a lock refuses
+writes from everybody, so somebody who can see one without lifting it can only
+watch.
+
+**This page is half the feature, and says so on itself.** Setting a lock belongs
+on each record's own screen, next to the thing being frozen — per-entity work
+across every entity, still to be built. What was missing and is now here is the
+opposite question: a lock applies to *everybody*, so when a record refuses
+writes and nobody remembers freezing it, there was nowhere at all to look. That
+question is tenant-wide, so it gets a tenant-wide page.
+
+**No history section**, unlike delegations and denials. `setState` writes the
+current state rather than appending a row, so an unlocked record keeps nothing.
+Showing "recently unlocked" would mean inventing a history the table does not
+have.
+
+Unlocking is `setState(recordId, 'open')` rather than deleting a row: `open` is
+the absence of a restriction, and `list()` never returns one.
+

@@ -50,3 +50,33 @@ attached, do it and note it here as done rather than queueing it.
 
 *Add rows as they are noticed. This list is not the roadmap; nothing here is
 scheduled until the Starting Kit is finished.*
+
+## System status showed a raw translation key · **FIXED 2026-08-13**
+
+**Found:** 2026-08-13, browser-verifying the governance screens — on a page I
+had no reason to open, which is the argument for rule zero-eight.
+
+`/backend/config/system-status` rendered two raw keys where the DATABASE_URL row
+should have had a name:
+
+```
+configs.systemStatus.variables.databaseUrl.label
+configs.systemStatus.variables.databaseUrl.description
+```
+
+Forty-six sibling `configs.systemStatus.variables.*` keys were present in all
+four locales; only this one variable had none, in any of them. So it was a gap
+rather than a translation backlog — the row was always going to render its own
+key, in every language, on the page an administrator opens to check the
+database is configured.
+
+**Fixed on the spot** under rule zero-two: two strings per locale, matching the
+established pattern, no behaviour change. Written for all four locales rather
+than English alone, since the other 46 exist everywhere and leaving three
+languages showing a raw key would be a worse inconsistency than the one I found.
+
+Worth noting the fallback did **not** save this. Elsewhere a missing key falls
+back to an English default passed at the call site; here the value is looked up
+from a variable descriptor with no default to fall back to, so the key itself
+reaches the screen.
+
