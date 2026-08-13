@@ -31,3 +31,5 @@ workspace/attic/
 node_modules/
 .DS_Store
 Thumbs.db
+copy-aissistant-reparsepoints.ps1
+verify-aissistant-copy.ps1
