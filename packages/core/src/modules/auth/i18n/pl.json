@@ -92,6 +92,7 @@
   "auth.nav.denials": "Odebrane uprawnienia",
   "auth.nav.group": "Uwierzytelnianie",
   "auth.nav.projects": "Projekty",
+  "auth.nav.recordLocks": "Zamrożone rekordy",
   "auth.nav.roles": "Role",
   "auth.nav.roles.create": "Utwórz rolę",
   "auth.nav.trust": "Zdobyte zaufanie",

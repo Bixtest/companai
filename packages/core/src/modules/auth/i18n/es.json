@@ -92,6 +92,7 @@
   "auth.nav.denials": "Permisos retirados",
   "auth.nav.group": "Autenticación",
   "auth.nav.projects": "Proyectos",
+  "auth.nav.recordLocks": "Registros congelados",
   "auth.nav.roles": "Roles",
   "auth.nav.roles.create": "Crear rol",
   "auth.nav.trust": "Confianza ganada",

@@ -92,6 +92,7 @@
   "auth.nav.denials": "Entzogene Berechtigungen",
   "auth.nav.group": "Authentifizierung",
   "auth.nav.projects": "Projekte",
+  "auth.nav.recordLocks": "Eingefrorene Datensätze",
   "auth.nav.roles": "Rollen",
   "auth.nav.roles.create": "Rolle erstellen",
   "auth.nav.trust": "Erworbenes Vertrauen",
