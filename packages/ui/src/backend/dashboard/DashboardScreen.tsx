@@ -58,6 +58,19 @@ type LayoutResponse = {
   allowedWidgetIds: string[]
   canConfigure: boolean
   context: LayoutContext
+  /**
+   * How many widgets this installation actually has, after module overrides.
+   *
+   * The client registry cannot answer this: `ClientBootstrap` registers the raw
+   * generated entries, while `enabledModules` overrides — which can disable a
+   * widget outright — are applied only on the server. An app that switches its
+   * widgets off therefore looked, to the browser, like an app that still had
+   * them, and the empty dashboard told people to add one that did not exist.
+   *
+   * Optional so an older server that omits it still works: the client falls
+   * back to its own count, which is the previous behaviour.
+   */
+  registeredWidgetCount?: number
 }
 
 type WidgetModule = DashboardWidgetModule<any>
@@ -130,7 +143,10 @@ export function DashboardScreen() {
       const normalizedLayout = sortLayout(data.layout?.items ?? [])
       setLayout(normalizedLayout)
       setWidgetCatalog(data.widgets ?? [])
-      setHasRegisteredWidgets(registeredWidgetCount > 0 || (data.widgets ?? []).length > 0)
+      // Server first: it is the only side that has applied module overrides.
+      setHasRegisteredWidgets(
+        (data.registeredWidgetCount ?? registeredWidgetCount) > 0 || (data.widgets ?? []).length > 0,
+      )
       setAllowedWidgetIds(data.allowedWidgetIds ?? [])
       setCanConfigure(!!data.canConfigure)
       if (data.context) {

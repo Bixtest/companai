@@ -171,6 +171,14 @@ export async function GET(req: Request) {
   const response = {
     layout: { items },
     allowedWidgetIds: allowedIds,
+    // Deliberately the post-override, *pre-ACL* count: it answers "does this
+    // installation have any widgets at all", which is a different question from
+    // "may this person see one". The browser cannot work it out for itself —
+    // client bootstrap registers the raw generated entries and never sees the
+    // `enabledModules` overrides that can switch a widget off — so an app with
+    // its widgets disabled looked, to the client, exactly like an app that had
+    // them, and the empty dashboard invited people to add one that was gone.
+    registeredWidgetCount: widgets.length,
     canConfigure,
     context: {
       ...scope,

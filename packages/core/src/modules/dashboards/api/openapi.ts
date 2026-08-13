@@ -48,6 +48,11 @@ export const dashboardLayoutStateSchema = z.object({
   canConfigure: z.boolean(),
   context: dashboardContextSchema,
   widgets: z.array(dashboardWidgetSummarySchema),
+  // How many widgets exist in this installation after module overrides, before
+  // ACL filtering. Lets a client tell "nothing is installed" from "nothing is
+  // permitted" — it cannot compute the former itself, because client bootstrap
+  // never sees the overrides that disable a widget.
+  registeredWidgetCount: z.number().int().min(0),
 })
 
 export const dashboardLayoutItemUpdateSchema = dashboardLayoutItemPatchSchema.omit({ id: true })
