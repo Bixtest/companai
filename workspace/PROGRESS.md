@@ -74,7 +74,7 @@ claim about the past, not the present. Verified 2026-08-12.
 | **18** | Production hardening | **Done 2026-08-13.** Two of the four claimed gaps were already closed: `storage_s3` exists (gated behind `OM_ENABLE_STORAGE_S3`) and `mercato auth rotate-encryption-key` exists. What was missing was a **runbook**, now §12 of `deployment.md`: backup schedule with a restore step, what to monitor and why, the rotation procedure, and multi-instance attachment storage. Zero-downtime deploy stays a stated gap — it is blue/green, genuinely separate work | ☑ |
 | **21** | Governance screens | **Done 2026-08-13** — all five: delegations, denials, trust, projects, frozen records. Each lists what is in force *and*, where the table keeps one, what ended — the question these get asked is "why could Sam not do that in March". None has a create form and each states its own reason. Projects needed a new capability (`auth.projects.manage`), a read route and a `summaries()` aggregate kept off the resolver path. **The per-record lock control is deliberately not here — see 21c** | ☑ |
 | **21c** | A lock control on each record's own screen | The other half of record locks. Freezing belongs next to the thing being frozen, which is per-entity work across every entity in the platform — not one screen, and much the largest of the six. The tenant-wide list (item 21) covers the question that had nowhere to go; this covers setting one without the API | ☐ |
-| **21b** | Seven guards name permissions nobody declared (U19) | **Found 2026-08-13.** `requireFeatures` gates seven pages on features absent from every `acl.ts`. They work only because `admin` holds a wildcard that happens to match — nobody can grant them to a narrower role, and the resolver cannot reason about them. Two parts: a guard test (cheap, stops the class permanently) and seven judgement calls about what each should actually be. Not a typo sweep | ☐ |
+| **21b** | Guards naming permissions nobody declared (U19) | **Done 2026-08-13.** Three real cases, not the seven I first reported — the scan’s regex excluded hyphens and invented four. All three meant an already-declared feature (`customers.interactions.view`, `workflows.definitions.create`, `workflows.instances.view`), so they were corrections rather than new security decisions. Safe because no role held the phantom names — both modules grant by wildcard. Guard test added and verified to fail by reintroducing the original mistake | ☑ |
 | **22** | Bulk approval with a diff | Not started | ☐ |
 | **23** | Deputy cover and standing approvals | Not started | ☐ |
 | **24** | Per-tenant approval expiry | Not started | ☐ |
@@ -123,6 +123,16 @@ nobody uses.
 | 22 | | **Bulk approval, with a diff** — the diff is the feature | M |
 | 23 | | **Deputy cover and standing approvals** | L |
 | 24 | | **Per-tenant approval expiry** | S |
+
+## Phase 5b — the start page shows what the platform is for
+
+| # | | Task | Why | Size |
+|---|---|---|---|---|
+| 27 | | **Dashboard widgets of our own** | The admin start page is empty and will stay empty. All ten of upstream's widgets read sales orders, customer people and deals; those modules are parked, so `modules.ts` disables the widgets rather than let them render ten red "Failed to load" panels. That is correct for an ERP dashboard we do not want — but it leaves the first screen of a governance product blank. The widgets this product should have are its own: **acts awaiting approval**, **what ran recently and under whose authority**, **spend against budget** (needs 15b), **delegations expiring soon**. Approved by the owner 2026-08-13 as a roadmap item, explicitly *not* to be slipped into the current work | M |
+
+**Not a blocker for the Starting Kit.** The empty state now tells the truth
+(see below), so the screen is honest rather than misleading. This is about making
+it useful.
 
 ## Decisions waiting on the owner
 

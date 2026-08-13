@@ -1112,6 +1112,59 @@ where a mock made six tests assert nothing.
 
 ---
 
+## L47 — when a diagnosis has more than one candidate, instrument before asserting
+
+**What happened.** The owner reported that an empty dashboard said *Use "Add a
+widget"* with no such control. I read the condition:
+
+```tsx
+{editing && availableWidgets.length > 0 && (
+```
+
+saw the first clause, decided the panel only appears in edit mode, and shipped a
+string change telling people to press **Customize** first. The owner replied that
+pressing Customize does nothing — their screenshot showed the button already
+reading **Done**, so `editing` was true all along and the clause that mattered was
+the second one. My fix would have pointed at a button that does nothing.
+
+Then I guessed twice more, confidently, and was wrong both times: first that the
+module registry was being replaced by an i18n-only re-registration, then that a
+module-level `widgetEntriesPromise` cache had resolved empty. Neither was true.
+
+**What actually settled it** was a temporary diagnostic route reporting each
+stage on the running server:
+
+| Stage | Count |
+|---|---|
+| Raw entries in the registry | 10 |
+| After `applyDashboardWidgetOverridesToEntries` | **0** |
+| Override error | `null` |
+| Loading one entry directly | works |
+
+Which named the cause in one request: our own `enabledModules` override in
+`apps/mercato/src/modules.ts` disables all ten widgets, because they read parked
+ERP modules. Working as designed — plus a real upstream defect, that client
+bootstrap registers the raw entries and never sees those overrides, so the
+browser believed widgets existed and picked the wrong empty-state message.
+
+**The rule.** Reading code tells you what it *would* do. It cannot tell you which
+of several possible states the running system is in. When a symptom has more
+than one candidate explanation, the cost of instrumenting — here about four
+minutes of rebuild — is smaller than the cost of one confident wrong answer, and
+far smaller than three of them.
+
+**The tell:** if I am about to say "the cause is X" and I have not observed X, I
+am guessing. That is the moment to add a probe, not to write a sentence.
+
+**What it cost.** More than the time. Being wrong twice in one session made the
+owner doubt the rest of the work, and they were right to — accuracy is not a
+per-answer property, it is a reputation, and the second wrong answer devalues
+every correct one before it. The related failure is L46's sibling: I quoted a
+security finding of "seven" from a scan without opening a single hit, and it was
+three.
+
+---
+
 ## L46 — a wildcard grant makes a made-up permission work
 
 **What happened.** Building the trust screen I wrote
@@ -1145,11 +1198,18 @@ convenient (a cache, a wildcard) is the thing that made the check meaningless.
 the module's `acl.ts` — do not trust that the page loading means the name is
 real. And test a gate as a **narrow** role at least once, never only as admin.
 
-Sweeping for it found seven more across the codebase, all upstream's — recorded
-as U19 and roadmap item 21b. A guard test asserting every `requireFeatures`
-string resolves to a declared feature is the permanent fix; the existing
-`capability-coverage.test.ts` cannot see this, because it checks the
-descriptors that exist rather than the guards that reference ones that do not.
+Sweeping for it found three more, all inherited — U19, now fixed, along with a
+guard test asserting every `requireFeatures` string resolves to a declared
+feature. `capability-coverage.test.ts` cannot see this: it checks the
+descriptors that exist, not the guards that reference ones that do not.
+
+**My first sweep said seven, and I reported that number before checking one.**
+Four were false — the regex harvesting declared ids excluded hyphens, so real
+features like `customers.widgets.next-interactions` looked missing. The
+correction is in U19, and the guard test now uses one shared id pattern for
+both declarations and usages, so a gap in the pattern hides a finding rather
+than inventing one. Overstating a security finding by more than double is its
+own failure, and it was avoidable by opening two files.
 
 ---
 

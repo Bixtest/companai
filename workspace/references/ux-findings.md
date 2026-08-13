@@ -79,4 +79,3 @@ Worth noting the fallback did **not** save this. Elsewhere a missing key falls
 back to an English default passed at the call site; here the value is looked up
 from a variable descriptor with no default to fall back to, so the key itself
 reaches the screen.
-

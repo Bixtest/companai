@@ -9,61 +9,78 @@ as "that's just how the platform works".
 
 ---
 
-## U19 — seven pages gated on permissions nobody declared · severity **medium**
+## U19 — three guards named permissions nobody declared · severity **medium** · **FIXED 2026-08-13**
 
 **Found:** 2026-08-13, while building the governance screens — by making the
 mistake myself and having it silently work.
 
+**Corrected 2026-08-13: this said seven. It was three.** See *"What I got wrong"*
+below; the original count came from a scan whose regex was broken, and four of
+the seven were genuinely declared all along.
+
 **What it is.** Page and route metadata gates access with
-`requireFeatures: ['some.feature']`. Seven of those strings across the codebase
-name a feature that appears in **no** `acl.ts`:
+`requireFeatures: ['some.feature']`. Three of those strings named a feature that
+appeared in no `acl.ts`:
 
-| Feature named in a guard | Where |
-|---|---|
-| `customers.view` | `customers/api/todos/route.ts` |
-| `customers.widgets.new-customers` | `customers/api/dashboard/widgets/new-customers/route.ts` |
-| `customers.widgets.new-deals` | `customers/api/dashboard/widgets/new-deals/route.ts` |
-| `customers.widgets.next-interactions` | `customers/api/dashboard/widgets/next-interactions/route.ts` |
-| `dashboards.admin.assign-widgets` | `dashboards/api/widgets/catalog.ts` |
-| `workflows.create` | `workflows/backend/definitions/create/page.meta.ts` |
-| `workflows.view_instances` | `workflows/backend/instances/[id]/page.meta.ts` |
+| Guard named | Where | Now reads |
+|---|---|---|
+| `customers.view` | `customers/api/todos/route.ts` (GET) | `customers.interactions.view` |
+| `workflows.create` | `workflows/backend/definitions/create/page.meta.ts` | `workflows.definitions.create` |
+| `workflows.view_instances` | `workflows/backend/instances/page.meta.ts` and `[id]/page.meta.ts` | `workflows.instances.view` |
 
-(207 distinct features are used in guards; 248 are declared. Two further hits —
-`sales.view`, `sales.refund` — are a documentation example, not real gates.)
+**Why it was not harmless.** Wildcard grants are part of the ACL contract:
+`admin` holds `workflows.*`, and `workflows.*` matches `workflows.view_instances`
+whether or not anybody declared it. So these pages worked — **for
+administrators only**, by accident. Nobody could grant `workflows.view_instances`
+to a narrower role, because it did not exist to grant. The permission was real to
+the guard and invisible to the permission editor.
 
-**Why it is not harmless.** Wildcard grants are part of the ACL contract:
-`admin` holds `customers.*`, and `customers.*` matches `customers.view` whether
-or not anybody declared it. So these pages work — **for administrators only**,
-by accident. Nobody can grant `customers.view` to a narrower role, because it
-does not exist to grant. The permission is real to the guard and invisible to
-the permission editor.
-
-It also defeats the capability registry. An undeclared feature has no effect
+It also defeated the capability registry. An undeclared feature has no effect
 class, no reversibility and no data classes, so the resolver cannot reason about
-it and treats the act as ordinary. That is the exact failure
-`capability-coverage.test.ts` was written to prevent — it guards the
-*descriptors* that exist, and cannot see a guard that references one that does
-not.
+it and treats the act as ordinary. That is exactly what
+`capability-coverage.test.ts` exists to prevent — it guards the *descriptors*
+that exist and cannot see a guard referencing one that does not.
 
 **How I found it.** I invented `auth.trust.manage` for a new page. It is not a
-real feature. The page worked when I tested it, because `auth.*` matched. Only
-reading `acl.ts` for an unrelated reason showed the name was wrong — nothing
-would have failed, in tests or in the browser.
+real feature; the real one is `auth.trust.promote`. The page worked when I
+tested it, because `auth.*` matched. Only reading `acl.ts` for an unrelated
+reason showed the name was wrong.
 
-**What fixing it takes.** Two parts, and only the second is mechanical:
+**The fix, and why it was smaller than estimated.** Every one of the three
+mapped to an **already-declared** feature that the guard plainly meant — the
+deprecated todos route is a compatibility bridge to `/api/customers/interactions`
+whose own writes already used `customers.interactions.manage`, and the workflows
+pages sit under `definitions/` and `instances/` next to declared
+`workflows.definitions.create` and `workflows.instances.view`. So these were
+corrections, not new security decisions, which is why they went in immediately
+rather than staying deferred.
 
-1. **A guard test** asserting every `requireFeatures` string resolves to a
-   declared feature or a wildcard over one. Cheap, and it stops the class of
-   mistake permanently.
-2. **Seven judgement calls.** Each undeclared name needs either a real
-   declaration in `acl.ts` — with an effect class, reversibility and data
-   classes chosen deliberately — or a correction to an existing feature it
-   should have named. `customers.view` looks like it wants
-   `customers.people.view`, but guessing is how the wrong permission ships.
+Safe to change because no role was ever seeded with the phantom names — both
+modules grant by wildcard, so every account that could reach these pages before
+still can, and narrow roles can now be granted them for the first time.
 
-Deferred rather than fixed on the spot: this is seven security decisions, not a
-typo sweep, and rule zero-two says a fix stops being "small and risk-free" the
-moment it needs judgement per case.
+**The permanent half:** `packages/core/src/__tests__/require-features-declared.test.ts`
+asserts every `requireFeatures` string resolves to a declared feature or a
+wildcard over one. Verified to fail by reintroducing `auth.trust.manage` — it
+names the feature and the file.
+
+### What I got wrong
+
+The first scan reported **seven**. Four were false: the regex harvesting declared
+ids used the character class `[a-z0-9_.]`, which excludes hyphens, so genuinely
+declared features like `customers.widgets.next-interactions` and
+`dashboards.admin.assign-widgets` looked missing. I reported the number of seven
+before spot-checking a single one of them.
+
+Two lessons, and the second is the one that matters:
+
+1. A scan is a claim, not a result. Open two or three hits by hand before
+   quoting a count.
+2. **A one-sided pattern invents findings.** The fix in the guard test is to
+   write the id pattern once and use it for *both* declarations and usages —
+   anything it fails to match is then invisible on both sides and cannot produce
+   a false alarm. A guard that cries wolf gets suppressed, which would be worse
+   than not having one.
 
 ---
 

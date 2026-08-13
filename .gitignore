@@ -33,3 +33,5 @@ node_modules/
 Thumbs.db
 copy-aissistant-reparsepoints.ps1
 verify-aissistant-copy.ps1
+aissistant-package/
+aissistant-package-exact/
