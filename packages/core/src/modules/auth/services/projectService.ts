@@ -9,6 +9,17 @@ import { TASK_GRADES, type TaskGrade } from '@open-mercato/shared/modules/capabi
 
 export type ProjectScope = { tenantId?: string | null }
 
+/** One project as an administrator needs to see it, not as the resolver reads it. */
+export type ProjectSummary = {
+  id: string
+  name: string
+  grade: TaskGrade | null
+  closedAt: Date | null
+  updatedAt: Date
+  memberCount: number
+  recordCount: number
+}
+
 export type ProjectContext = {
   projectId: string
   name: string
@@ -153,6 +164,48 @@ export class ProjectService {
   async listProjects(scope: ProjectScope): Promise<AuthorityProject[]> {
     if (!scope.tenantId) return []
     return this.em.find(AuthorityProject, { tenantId: scope.tenantId }, { orderBy: { updatedAt: 'desc' } })
+  }
+
+  /**
+   * Every project with how many people work in it and how much it governs.
+   *
+   * Separate from `listProjects` and deliberately not folded into it: this runs
+   * two aggregates and belongs to the admin screen, whereas `contextFor` is on
+   * the decision path and must stay at two indexed reads. Anything that counts
+   * rows must never be reachable from the resolver.
+   *
+   * Counted in two grouped queries rather than per project, because a tenant
+   * with fifty matters would otherwise issue a hundred round trips to render
+   * one page.
+   */
+  async summaries(scope: ProjectScope): Promise<ProjectSummary[]> {
+    const projects = await this.listProjects(scope)
+    if (projects.length === 0) return []
+
+    const projectIds = projects.map((project) => project.id)
+    const [memberships, records] = await Promise.all([
+      this.em.find(AuthorityProjectMembership, { projectId: { $in: projectIds } }, { fields: ['projectId'] }),
+      this.em.find(AuthorityProjectRecord, { projectId: { $in: projectIds } }, { fields: ['projectId'] }),
+    ])
+
+    const tally = (rows: { projectId: string }[]) =>
+      rows.reduce<Record<string, number>>((counts, row) => {
+        counts[row.projectId] = (counts[row.projectId] ?? 0) + 1
+        return counts
+      }, {})
+
+    const memberCounts = tally(memberships)
+    const recordCounts = tally(records)
+
+    return projects.map((project) => ({
+      id: project.id,
+      name: project.name,
+      grade: this.parseGrade(project.grade),
+      closedAt: project.closedAt ?? null,
+      updatedAt: project.updatedAt,
+      memberCount: memberCounts[project.id] ?? 0,
+      recordCount: recordCounts[project.id] ?? 0,
+    }))
   }
 
   private parseGrade(value: string | null | undefined): TaskGrade | null {

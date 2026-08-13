@@ -137,6 +137,18 @@ export const features: AclFeatureDeclaration[] = [
     },
   },
   {
+    id: 'auth.projects.manage',
+    title: 'Set up projects and who works in them',
+    module: 'auth',
+    capability: {
+      effectClass: 'E5',
+      reversibility: 'reversible',
+      dataClasses: ['internal'],
+      delegable: false,
+      note: 'A project grades the work inside it and can narrow what its members may do there, so setting one up changes the rules that apply to every record assigned to it. It only ever narrows -- a membership overlay cannot hand a member something they do not already hold -- which is why this sits at E5 with the other permission changes rather than above them. Not delegable: the power to define where the rules are looser is not something to lend.',
+    },
+  },
+  {
     id: 'auth.authority.approve',
     title: 'Approve held acts',
     module: 'auth',

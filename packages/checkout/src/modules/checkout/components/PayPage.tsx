@@ -1369,6 +1369,9 @@ export function PayPageFooter({ payload, themeTokens }: PayPageFooterProps) {
     pl: t('common.languages.polish', 'Polski'),
     es: t('common.languages.spanish', 'Español'),
     de: t('common.languages.german', 'Deutsch'),
+    // Missed when `ar` was added in G7, and hidden for weeks by a Turbo cache
+    // hit on this package's typecheck — see L45.
+    ar: t('common.languages.arabic', 'العربية'),
   }), [t])
 
   const setLocale = React.useCallback(async (nextLocale: Locale) => {
