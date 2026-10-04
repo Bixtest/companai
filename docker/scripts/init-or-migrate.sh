@@ -28,6 +28,12 @@ run_command_with_cli_recovery() {
   # "already seeded" marker, leaving the database half-seeded while the app looked
   # healthy (defect B-15, tests in __tests__/).
   #
+  # This file read `$?` in four places. Two were broken this way - the two read after
+  # an `fi` - and the other two sat inside an `else` branch, where `$?` really is the
+  # failed condition's status, so they were right only by accident of where they were
+  # written. All four now use the shape below, so copying a neighbouring line cannot
+  # reintroduce the defect.
+  #
   # `|| STATUS=$?` is also deliberate: this script runs under `set -e`, and a bare
   # failing command on its own line would abort the script before the status is read.
   # A command on the left of `||` is exempt from `set -e`.
