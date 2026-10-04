@@ -46,17 +46,22 @@ seed_prebuilt
 # transient causes (database briefly unavailable) can self-heal, and the error
 # stays readable at the end of `docker compose logs app`.
 run_setup() {
-  set -e
-  yarn install
+  # NOTE: the `set -e` that used to be the first line here did NOT do what it looked
+  # like. errexit is ignored for a function invoked as a condition, and this one is
+  # called as `if ! (run_setup)` - so a failing step simply fell through to the next
+  # one, the function ended on a successful `cd`, and the failure banner below never
+  # fired. Measured 2026-10-04 in both sh and bash. Each step is therefore checked
+  # explicitly; do not replace these with a `set -e`.
+  yarn install || return 1
 
   # Build packages, then generate (writes packages/core/generated/), then rebuild so core gets dist/generated/
-  yarn build:packages
-  yarn generate
-  yarn build:packages
+  yarn build:packages || return 1
+  yarn generate || return 1
+  yarn build:packages || return 1
 
-  cd /app/apps/mercato
-  INIT_COMMAND="yarn mercato init" sh /app/docker/scripts/init-or-migrate.sh
-  cd /app
+  cd /app/apps/mercato || return 1
+  INIT_COMMAND="yarn mercato init" sh /app/docker/scripts/init-or-migrate.sh || return 1
+  cd /app || return 1
 }
 
 if ! (run_setup); then

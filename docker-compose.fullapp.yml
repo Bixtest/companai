@@ -12,6 +12,8 @@ services:
       # as a BC fallback resolved by the opencode entrypoint script.
       OM_AI_PROVIDER: ${OM_AI_PROVIDER:-openai}
       OM_AI_MODEL: ${OM_AI_MODEL:-gpt-5-mini}
+      # Sprint 0: point AI calls at the local llama.cpp server (OpenAI-compatible).
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-}
       OPENCODE_PROVIDER: ${OPENCODE_PROVIDER:-}
       OPENCODE_MODEL: ${OPENCODE_MODEL:-}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
@@ -132,7 +134,12 @@ services:
           echo "ERROR: init-or-migrate.sh not found. Please rebuild the container: docker compose build --no-cache app"
           exit 1
         fi
-        INIT_COMMAND='yarn mercato init' sh /app/docker/scripts/init-or-migrate.sh
+        if ! INIT_COMMAND='yarn mercato init' sh /app/docker/scripts/init-or-migrate.sh; then
+          echo "ERROR: database initialization/migration failed - refusing to start the app."
+          echo "       Starting anyway would serve a half-initialized database that looks healthy."
+          echo "       The init marker is only written on success, so restarting after a fix re-runs init."
+          exit 1
+        fi
         yarn start
     volumes:
       - init_marker:/tmp/init-marker
@@ -140,7 +147,14 @@ services:
       - mcp_shared:/run/mcp-shared:ro
     working_dir: /app/apps/mercato
     ports:
-      - "${APP_PORT:-3000}:${CONTAINER_PORT:-3000}"
+      # Bind to loopback by default — Sprint 0's "done when" says the dashboard must
+      # be reachable on localhost ONLY, nothing on the LAN. Publishing on 0.0.0.0
+      # (the compose default) puts the platform, with DEMO_MODE and self-service
+      # onboarding on, in front of the whole local network. In-network traffic is
+      # unaffected: the other services reach this one over the docker network, not
+      # through the published port. For a cloud deploy set APP_BIND=0.0.0.0 (or drop
+      # the bind) in that environment's .env — same file, one value different.
+      - "${APP_BIND:-127.0.0.1}:${APP_PORT:-3000}:${CONTAINER_PORT:-3000}"
     # Traefik labels are declared in docker-compose.fullapp.traefik.yml so
     # external reverse proxies (Dokploy, etc.) that also watch the Docker
     # socket don't accidentally pick them up.
@@ -151,7 +165,11 @@ services:
       NODE_ENV: development
       # Prevents V8 from growing toward total host RAM before GC kicks in.
       # Override in .env to tune for your host: --max-old-space-size=6144 suits 16 GB+ servers.
-      NODE_OPTIONS: ${NODE_OPTIONS:---max-old-space-size=3072}
+      # NOTE: deliberately reads APP_NODE_OPTIONS, NOT NODE_OPTIONS. A developer
+      # machine (or tooling) that exports NODE_OPTIONS on the host would otherwise
+      # be interpolated straight into the container, where the path does not exist
+      # and node aborts at startup. Same reason `mcp` reads MCP_NODE_OPTIONS.
+      NODE_OPTIONS: ${APP_NODE_OPTIONS:---max-old-space-size=3072}
       DEPLOY_ENV: ${DEPLOY_ENV:-local}
       PORT: ${CONTAINER_PORT:-3000}
       # Bind on all interfaces so Docker's published-port forwarding can reach
@@ -182,6 +200,8 @@ services:
       ENABLE_CRUD_API_CACHE: ${ENABLE_CRUD_API_CACHE:-true}
       OM_AI_PROVIDER: ${OM_AI_PROVIDER:-openai}
       OM_AI_MODEL: ${OM_AI_MODEL:-gpt-5-mini}
+      # Sprint 0: point AI calls at the local llama.cpp server (OpenAI-compatible).
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-}
       OPENCODE_PROVIDER: ${OPENCODE_PROVIDER:-}
       OPENCODE_MODEL: ${OPENCODE_MODEL:-}
       # Point OpenCode clients at the sibling opencode service (the code default
@@ -283,6 +303,108 @@ services:
     networks:
       - mercato-network-fullapp
 
+  # ---------------------------------------------------------------------------
+  # Local model server — Sprint 0 ("the running trio"). See workspace/COOKBOOK.md,
+  # Sprint 0 step 3.2. llama.cpp's OpenAI-compatible server; CPU image (simplest
+  # thing that proves the pipes connect). The GGUF is mounted read-only from
+  # ./models (gitignored) and named by MODEL_FILE. Reachable in-network at
+  # http://model:8080/v1 — that is what OPENAI_BASE_URL points at.
+  #
+  # -c 65536 is REQUIRED, not a tuning choice. Hermes refuses any model whose
+  # served context window is below 64,000 tokens ("needs at least 64K tokens for
+  # reliable tool use"); Qwen2.5's GGUF advertises a 32,768 window, so the server
+  # must be started with a larger one. Do not lower this without reading
+  # agent/agent_init.py::_enforce_minimum_context in the Hermes image.
+  # -n caps tokens generated per request (Sprint 0 smoke-test setting).
+  # ---------------------------------------------------------------------------
+  model:
+    image: ghcr.io/ggml-org/llama.cpp:server
+    container_name: mercato-model-${DEPLOY_ENV:-local}
+    restart: unless-stopped
+    ports:
+      # Loopback by default — same reason as the app service above. The model is
+      # reached in-network at http://model:8080/v1 (that is what OPENAI_BASE_URL
+      # and Hermes use), so nothing needs the host port except manual testing.
+      - "${MODEL_BIND:-127.0.0.1}:${MODEL_PORT:-8080}:8080"
+    volumes:
+      - ./models:/models:ro
+    command:
+      - -m
+      - /models/${MODEL_FILE:-Qwen2.5-7B-Instruct-Q4_K_M.gguf}
+      - --port
+      - "8080"
+      - --host
+      - 0.0.0.0
+      - -c
+      - "65536"
+      # Qwen2.5's GGUF declares n_ctx_train = 32768, and llama.cpp CAPS the slot
+      # context at that value — "-c 65536" alone silently yields n_ctx_slot=32768
+      # ("the slot context (65536) exceeds the training context of the model
+      # (32768) - capping"). YaRN RoPE scaling is what actually admits 64K.
+      - --rope-scaling
+      - yarn
+      - --rope-scale
+      - "2"
+      - --yarn-orig-ctx
+      - "32768"
+      - -n
+      - "512"
+      # Threads. llama.cpp defaults -t to the number of PHYSICAL cores (4 here)
+      # and -tb to -t; the container is given all 8 logical CPUs. Measured on
+      # this laptop (Qwen2.5-7B Q4_K_M, 64K ctx, direct /completion call):
+      #   default (4/4): ingest 13.2 tok/s, gen 3.9 tok/s
+      #   8/8          : ingest 17.7 tok/s, gen 3.0 tok/s  (extra gen threads hurt)
+      #   4/8          : ingest 19.3 tok/s, gen 4.6 tok/s  <- this config
+      # Prompt ingest is compute-bound and wants all 8; generation is
+      # memory-bandwidth-bound, where extra threads cost more than they save.
+      - -t
+      - "4"
+      - -tb
+      - "8"
+    networks:
+      - mercato-network-fullapp
+
+  # ---------------------------------------------------------------------------
+  # Hermes agent — Sprint 0 ("the running trio"). See workspace/COOKBOOK.md,
+  # Sprint 0 step 3.4. Uses the PREBUILT image (nousresearch/hermes-agent), so
+  # there is nothing to build here. Bridge networking + an explicit published
+  # port — this is the fix for blocker B-01 (the upstream compose uses
+  # network_mode: host, which Docker Desktop for Windows does not do properly).
+  #
+  # State lives on a NAMED VOLUME, deliberately not a host bind mount.
+  # Hermes keeps its state in SQLite in WAL mode. A host bind mount on Docker
+  # Desktop for Windows is a cross-VM filesystem (virtiofs/9p), where SQLite's
+  # WAL shared-memory is not coherent across the VM boundary — Hermes refuses
+  # WAL there and warns that concurrent writers can SILENTLY CORRUPT the
+  # database. A named volume is a native filesystem, so WAL is safe. Hermes'
+  # own remedy text names this exact fix ("move the database onto a native
+  # volume"). It also keeps Sprint 0 from writing into a personal Hermes home.
+  #
+  # To point this at a host directory instead, replace the volume below with
+  # `${HERMES_HOME}:/opt/data` — but read the warning above first, and set
+  # `database.journal_mode: delete` in that home's config.yaml.
+  #
+  # Model + MCP wiring is applied with Hermes' own CLI (never by hand-editing
+  # config.yaml — Hermes owns that file and rewrites it). See COOKBOOK.md
+  # Sprint 0 step 3.5.
+  # ---------------------------------------------------------------------------
+  hermes:
+    image: nousresearch/hermes-agent:latest
+    container_name: hermes-${DEPLOY_ENV:-local}
+    restart: unless-stopped
+    command: ["gateway", "run"]
+    ports:
+      # Loopback by default — same reason as the app service above.
+      - "${HERMES_BIND:-127.0.0.1}:${HERMES_PORT:-8642}:8642"
+    volumes:
+      - hermes_data:/opt/data
+    environment:
+      HERMES_UID: ${HERMES_UID:-10000}
+      HERMES_GID: ${HERMES_GID:-10000}
+      MCP_SERVER_API_KEY: ${MCP_SERVER_API_KEY:-}
+    networks:
+      - mercato-network-fullapp
+
   localstack:
     image: localstack/localstack:latest
     container_name: mercato-localstack-${DEPLOY_ENV:-local}
@@ -320,6 +442,10 @@ volumes:
     name: mercato-attachments-storage-${DEPLOY_ENV:-local}
   mcp_shared:
     name: mercato-mcp-shared-${DEPLOY_ENV:-local}
+  # Hermes agent state. Native filesystem so SQLite WAL is safe (see the hermes
+  # service comment above).
+  hermes_data:
+    name: mercato-hermes-data-${DEPLOY_ENV:-local}
 
 networks:
   mercato-network-fullapp:
