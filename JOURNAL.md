@@ -7,6 +7,388 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-10-04 — part 1 of 8 (newest first) — the infrastructure answer, and a defect whose recorded cause was wrong
+
+**The owner asked two things: whether we have everything needed to deploy and test the codebase, and
+to leave no gaps, flaws, bugs or incomplete work while getting there.**
+
+**The infrastructure answer is: built and proven, but not running — and the agent cannot start it.**
+The Sprint 0 stack is complete and was proven working earlier today (eight services healthy, 21
+platform tools discovered). Nothing is missing: the compose file, the model file, `.env` and Node 24
+are all in place, and the database is provided by the stack rather than installed on Windows. What is
+*not* in place is a running Docker engine. Chasing that produced the session's most useful finding:
+
+```
+$ docker desktop start
+PROGRAM BLOCKED BY SECURITY POLICY - the sandbox prevented a program on the configured
+Program Blacklist from starting:
+  - wsl.exe (C:\WINDOWS\System32\wsl.exe)
+```
+
+Docker Desktop's startup path runs `wsl.exe`, and this machine's security policy blocks it for
+anything the agent launches. The block is not approvable and must not be worked around. **So "start
+Docker Desktop" is a permanent owner step, not a one-off** — and `AutoStart` is off, so it recurs on
+every restart. Recorded as **B-04**, rewritten, precisely so a later session does not read it as the
+agent having failed.
+
+**Then the defect, and the uncomfortable part: the recorded cause was wrong.** B-15 said `mercato
+init` "printed `❌ Initialization failed` yet **exited 0**", so the fix looked like it belonged in the
+CLI. It does not. The CLI's catch block returns 1 and `bin.ts` calls `process.exit(code ?? 0)`, and
+the CLI's **own tests assert `toBe(1)`** — two independent routes, both saying the CLI was honest.
+The dishonest code was `init-or-migrate.sh`, in two lines:
+
+```sh
+if sh -lc "${COMMAND}" >"${LOG_FILE}" 2>&1; then
+  return 0
+fi
+STATUS=$?          # always 0
+```
+
+The exit status of an `if` with no `else` whose condition failed is **0**, so every failure was
+reported to the caller as success and the "already seeded" marker was written anyway. The same
+mistake appeared **a second time** at the bottom of the same script, and a third variant lived in
+`dev-entrypoint.sh`, where a function opening with `set -e` was called as `if ! (run_setup)` —
+and **errexit is ignored for a function invoked as a condition**, so that guard was dead code.
+Three defects, one family, all measured in both `sh` and `bash`.
+
+**All three are fixed, and the fix is proven rather than asserted.** Two tests that need no Docker:
+`init-or-migrate.test.sh` (**7 passed / 3 failed** against the unfixed script, **10 / 0** after) and
+`compose-init-guard.test.sh`, which extracts the *real* `command:` block out of the compose file and
+runs it against stubs (**3 failed** on the old text, **6 passed** on the new). Both were deliberately
+run against the broken code first — a regression test that passes before the fix is not testing the
+fix. **One recorded instruction was deliberately not followed:** B-15 said to treat "a printed
+failure" as failure too, but the string `❌ Initialization failed:` also wraps the *"database already
+has users"* message, which must be treated as **success** — a text match would have broken that
+recovery path. The status capture was the fix; the tests pin the already-seeded path as a success.
+
+**A correction I had to make to my own work, twice in one session.** The `.wslconfig` I applied
+earlier today capped WSL at **12 GB**. A measurement already sitting in the runbook settles it — the
+*model container alone* uses **~10 GiB** of a Docker VM that was **15.56 GiB** — so the cap would have
+starved the stack, and the symptom would have been containers OOM-killed mid-run, which reads as a
+code bug. Raised to 16 GB, the ceiling the stack was proven to work at. The file now records the
+budget and notes that a ceiling is a ceiling, not a reservation.
+
+**The blockers list had drifted.** B-01, B-02, B-03 and B-04 were still listed as 🔴 OPEN while the
+same file's Resolved table said all four were cleared — in a file whose own rule is "a blocker is a
+claim about now, not about last time". Rewritten: five open, and only **B-04** actually stops work.
+
+**What this means for the owner.** One action: start Docker Desktop. Everything else in the
+deployment path is either proven or now has a test.
+
+---
+
+## 2026-10-04 — part 2 of 8 (newest first) — the deployment path is proven: domains, directories, databases, phpMyAdmin
+
+**The owner asked to keep going until he could add domains, put code in directories, create linked
+databases and open phpMyAdmin — so he could test his own WordPress sites and then a Docker platform on a
+subdomain.** The environment was already built; what was missing was proof that a *site* can be served.
+
+**What was in the way, and what I did about it.** Coolify's API exists and can create services, but it
+needs a Sanctum token, and 2FA now blocks scripted UI login. I could have minted a token by writing into
+`personal_access_tokens` — and decided not to. The asymmetry settled it: if my proof stack were wrong we
+lose a round-trip, but if I corrupted the auth tables of a dashboard the owner had just secured with 2FA,
+he could be locked out. **So I proved the environment with compose and documented Coolify's own path,
+rather than doing surgery on an auth system to save a click.**
+
+**What is now proven with real traffic.** A throwaway stack (`/opt/companai-teststack`) reusing Coolify's
+*own* Traefik and its `coolify` network:
+
+- `Host: wp.test` → WordPress, redirecting to its installer.
+- `Host: pma.test` → a **full phpMyAdmin login**: `pma.test / mariadb | phpMyAdmin 5.2.3`,
+  `Server: mariadb:3306`, both databases listed, live session.
+- `Host: app.test` → a separate container; and `Host: wp.test` **+ `/files/hello.txt`** → that same
+  container, *not* WordPress. That is the "code in a directory under a domain" case.
+- A second database created beside the first, written to, and read back **by name** from another container.
+
+**The most useful thing found, though, was in Coolify's source.** The Domains field is not just a
+hostname: `fqdnLabelsForTraefik` parses `scheme://host[:port][/path]`, and **the scheme decides TLS** —
+`https://` adds `tls=true` and a Let's Encrypt resolver, `http://` adds neither. So for `.test` names you
+must write `http://`, and a **path in the domain entry is Coolify's own built-in way** to serve code from
+a directory. That turns the owner's requirement from something to be engineered into something to be
+typed.
+
+**Verification.** An independent critic agent re-measured all eleven claims from scratch and refuted
+none; it found two extra things on its own — a phantom port 8080, and Coolify's catchall router not
+taking effect. Both are recorded.
+
+**And I caught a false negative of my own.** I first reported that phpMyAdmin could not reach the
+database. It could. My test used `/dev/tcp`, which does not exist in `dash`, so the probe failed and I
+nearly wrote that up as a finding. Re-tested with the PHP runtime phpMyAdmin itself uses: OPEN. Written
+up as [[L62]] — a failing probe is not a finding until you know the probe works.
+
+---
+
+## 2026-10-04 — part 3 of 8 (newest first) — 2FA verified, the exposed password tested, and the WSL cap applied
+
+**The owner asked "what's next?" and reported 2FA done.** Instead of accepting it, I re-measured, and
+the round produced three things worth recording.
+
+**1. 2FA is genuinely on, confirmed two independent ways.** The database says
+`users.two_factor_confirmed_at = 2026-10-04 12:44:46` with a secret and recovery codes present. And a
+*live* login attempt now returns `302 -> /two-factor-challenge`. Two routes, same answer — which is the
+standard this project is held to.
+
+**2. The exposed password is still live.** That same login attempt is what proved it: Fortify only
+reaches the 2FA step when the credentials pass, so `302 -> /two-factor-challenge` means the password
+that was typed into a chat message **still authenticates**. 2FA is the only thing protecting the
+account. It stays an open item and is now the owner's single remaining action.
+
+**3. The `.wslconfig` deferral was based on a premise that turned out to be false.** The plan had
+parked this change because "it restarts the dev environment". Measured before acting: Docker Desktop is
+installed but **not running**, and the only WSL distro is idle. A `.wslconfig` only applies when WSL
+next starts, so there was nothing to disturb and no `wsl --shutdown` was needed. The file was written
+(12 GB / 4 CPU / 4 GB swap). `wsl.exe` is also blocked by this machine's security policy, so the
+restart could not have been run from here anyway.
+
+**And I got a number wrong, then caught it.** I justified the cap with "WSL2's default ceiling is 80% of
+RAM on Windows 10". Microsoft's current documentation says **50% of total memory**, no Windows 10/11
+split; 80% is a stale figure still repeated across the web. The change was still worth making — 16 GB
+of WSL plus a 6 GB VM is 22 GB of 32 — but the number carrying the argument was wrong, and it is
+corrected in the file header, the runbook and the plan. Written up as [[L61]]: if a number is the
+reason to act, read the vendor's current page.
+
+**Verdict on the build:** the environment is complete. What remains is one 30-second owner action (the
+password), one untested behaviour (a real *host* reboot — the auto-start policy reads
+`Start / delay 30` but has never been exercised), and decisions that belong to the application phase.
+
+---
+
+## 2026-10-04 — part 4 of 8 (newest first) — the hosting environment is built, and it is real
+
+**The instruction was: engineer the environment, don't ruin the laptop, and keep a supervisor on
+every step.** So this was done in phases, each one verified by an independent agent before the next
+began. Two of those verifications found real defects — which is the whole reason for having them.
+
+**The install stopped and waited for a person.** The autoinstall seed *was* found — the VM console
+showed subiquity walking through every `apply_autoinstall_config` step — but it then asked
+`Continue with autoinstall? (yes/no)` and sat there for eight minutes with the CPU at zero. The seed
+alone does not suppress that prompt; only `autoinstall` on the kernel command line does. Answering it
+needed a keystroke, and **the obvious way to send one does not work**: `Msvm_Keyboard.TypeText`
+returns `ReturnValue = 0` and types nothing. What works is pressing keys by their **virtual-key
+code**. We only found that because of the control we ran — pressing **Enter and nothing else** made a
+third prompt line appear, which proved input was arriving and isolated the fault to `TypeText`. Had
+we not run that control, the conclusion would have been "keyboard input does not work on this VM",
+and the fix would have been remastering the ISO. That is a much larger change to solve a problem
+that did not exist. **L59.**
+
+**Reading a screen that has no screenshot API.** Hyper-V has no `Get-VMScreenshot`. The console image
+comes from a WMI call that returns a raw RGB565 framebuffer. We rendered it to PNG and read it — and
+that is how the blocking prompt was found at all, and how we confirmed the `yes` landed.
+
+**The supervisor found a defect in what I had just declared done.** I had set the hard disk first in
+the boot order and reported it as verified. It was not: `BootType -eq "Drive"` matches a **DVD** as
+well as a hard disk, and the entry I moved to the front was the *empty DVD drive*. The VM still
+booted (an empty DVD falls through), so nothing looked wrong — but re-inserting any ISO would have
+booted the installer again, exactly the loop the plan set out to prevent. Fixed by discriminating on
+the device type. **This is the class of error the plan's "verify before proceeding" rule exists to
+catch, and it was caught by someone re-measuring rather than by me re-reading my own work.**
+
+**Coolify is up, and its installer is honest about what it checks.** Docker 29.8.2 and Coolify 4.3.23
+went in cleanly; six containers, all genuinely healthy; dashboard on 8000, Traefik on 80/443. We
+proved persistence properly — **rebooted the guest and all six came back**, including the sentinel
+whose `RestartPolicy=no` looked like a defect but turns out to be by design (the Coolify app manages
+it). And the pre-seeded admin account **failed validation**, in Coolify's own words: the email must
+pass `email:rfc,dns` (the domain has to actually resolve) and the password must contain a symbol. So
+the account is left for the owner to create in the browser — it is his identity, and 2FA is
+browser-only in any case. The three variables that claimed otherwise are now commented out rather
+than left lying in the config.
+
+**A small thing with outsized consequences: the address moves.** After the reboot the VM's DHCP
+address had changed from `172.19.120.91` to `172.19.122.65`, so SSH failed and the VM looked dead for
+three minutes. It was not. The stable address is the **static** `172.28.50.2` on the second NIC — and
+the only reason the host cannot use it yet is that **Phase 6 has not been run**. That turns a
+two-command firewall step from a nicety into the thing that makes the environment pleasant to use.
+
+**Where it stands.** The environment exists and works: a real Ubuntu 24.04.5 guest on its own disk,
+Docker and Coolify running, containers that survive a reboot, the dashboard reachable from the laptop,
+82.74 GB still free (the stop line is 60). It is written up in
+[`library/development/RUNBOOK-platform-server.md`](library/development/RUNBOOK-platform-server.md).
+**Two things are left and both need the owner:** one elevated run for Phase 6, and creating the
+Coolify account. Neither is blocking anything else.
+
+**Both were done the same afternoon.** The owner ran the elevated script and created his account. And
+then the interesting part: **the link was proved with traffic rather than a config read.** It would
+have been easy to tick the box on the two `Get-Net*` outputs. Instead a listener was started on the
+host bound to `172.28.50.1:8080` and the guest was pointed at it — `HTTP 200`, with the host's own log
+recording the client as `172.28.50.2`. That is the difference between "the rule exists" and "the path
+works", and only the second one is worth anything.
+
+**The same check also caught a criterion in my own plan that was wrong.** It said "the VM pings the
+host". Ping returns 100% packet loss — Windows Firewall drops inbound ICMP by default and the rule
+deliberately allows only TCP 8080. Nothing is broken; the test was. Had we trusted it, we would have
+gone hunting a fault that did not exist.
+
+**And one false alarm of my own, worth recording as L60.** Checking which SSH account Coolify would
+use, I queried its `servers` table and read `user = coolify`, found no such account on the machine,
+and concluded the connection was misconfigured. It was not. **`user` is a reserved word in Postgres**
+— bare `select user` returns `current_user`, so I had read the *database role* back, not the column.
+The real value is `root`, and `root@host.docker.internal` connects. The wrong answer was plausible
+enough to have gone unnoticed: `coolify` is exactly what you would expect in a Coolify database, and
+every neighbouring column was correct. What broke the story was *trying* the connection instead of
+describing it. **The rule: when a value looks like it might be about the tool rather than the subject,
+check that you selected what you meant — and settle a finding that would send someone off to fix
+something by a second, independent route.**
+
+**A pleasant side effect:** Phase 6 gives the host a *stable* address for the guest. `172.28.50.2`
+never changes, so the dashboard is now bookmarkable at `http://172.28.50.2:8000` — while the DHCP
+address had already moved once that day.
+
+---
+
+## 2026-10-04 — part 5 of 8 (newest first) — a verified backup, and the model 46% faster
+
+**The owner asked for a full codebase zip before any further change, and it had to be flawless.**
+Saved to `C:\Users\Ramzi\Downloads\companai\starting-kit-codebase-backup-2026-10-04.zip`:
+
+- **4,889,632,988 bytes** (4.55 GB); **SHA-256 `8fb277ba5eab8d62a5947c290a57d52aec3248ed01a1daee7394b9203172c31c`**.
+- **23,249 files**, 5,105,209,091 bytes uncompressed.
+- **Excludes only two things, both regenerable:** `node_modules/` (deps — `npm ci`) and
+  `apps/mercato/.mercato/` (the Turbopack cache already known corrupt, blocker **B-08**). Everything
+  else is in, including `models/` (the 4.4 GB GGUF) and `.git/`.
+- **Verified three ways:** `7z t` → *"Everything is Ok"*; the archive's file list diffed against the
+  on-disk list → **0 missing, 0 extra**; and the byte totals agree exactly on both routes
+  (5,105,209,091). Not assumed — measured.
+- **A note on the project's own rule.** Rule zero-four says *source is not copied, because git is a
+  better restore point*. It is right in general — but the tree has **5 uncommitted files**
+  (`.dockerignore`, `.gitignore`, `Dockerfile`, `docker-compose.fullapp.yml`, `package.json`) and the
+  last commit is **2026-08-13**, so no tag captures the present state. The zip is genuinely useful
+  here, and the owner asked for it explicitly.
+- **The tool mattered.** `bsdtar` (the Windows `tar.exe`) archived at **~220 KB/s** — hours for this
+  tree. **7-Zip did it in ~3 min 52 s** (~12–24 MB/s, multi-threaded). Both are installed; use 7-Zip.
+
+**Then the model.** Answering the owner's question — *"isn't Qwen2.5-7B too big for fast testing?"* —
+**yes, on this laptop's CPU**, and the first fix was free. The container is given **8** CPUs but
+llama.cpp defaulted `-t` to the **4 physical** cores, so half the machine sat idle. Measured with a
+direct `/completion` call: ingest **13.2 tok/s**, generation **3.9 tok/s** at the default. Set
+`-t 4 -tb 8` (more threads for the compute-bound prompt ingest, fewer for the memory-bound
+generation) → ingest **19.3 tok/s (+46%)**, generation **4.6 tok/s**. Recorded as **L58**. The
+remaining levers, in order: don't ship all 21 tool schemas when only testing the model; then a
+smaller model (3B ≈2.3× faster). **GPU offload is not the fix** — the Quadro M2000M has 4 GiB, which
+cannot hold the model *and* the 64K KV cache.
+
+**One accuracy correction to an earlier claim.** The loopback port fix was *written* into the compose
+but the running containers predated it: `docker ps` showed `0.0.0.0:8080`. Recreating the model
+service applied it — it now reads `127.0.0.1:8080->8080/tcp`. **App and Hermes are still on `0.0.0.0`**
+(they have not been recreated yet).
+
+---
+
+## 2026-10-04 — part 6 of 8 (newest first) — the trio runs; five defects fall out of it
+
+**Sprint 0's stack is up.** `docker compose -f docker-compose.fullapp.yml up -d` brings up eight
+services — platform app, `mcp`, `opencode`, `postgres`, `redis`, `meilisearch`, the local
+`model` server and `hermes` — all healthy, on one file, parameterised only by `DEPLOY_ENV`.
+
+**Then the proof, and the defects.** Bringing it up honestly turned out to be the whole exercise:
+five separate faults sat between "the file parses" and "the agent can call a platform tool", and
+each one *looked* like success from the outside. All five are now fixed and written up as **L52–L57**
+in [`LESSONS.md`](LESSONS.md):
+
+- **A default that was not a default.** `NODE_OPTIONS: ${NODE_OPTIONS:-…}` interpolated the *host's*
+  Windows-only preload path into the app container, which crash-looped. The neighbouring `mcp`
+  service survived only because it used a differently-named variable. Fixed by renaming to
+  `APP_NODE_OPTIONS` — **never default a compose value from a variable the host may own** (L52).
+- **A marker that lied.** The database had **zero users**, while `/tmp/init-marker/.seeded` told every
+  later run "already seeded". `mercato init` had *printed* `❌ Initialization failed`, and the script
+  wrote the marker anyway; because the compose command did not check the init step, the app then
+  started and looked perfectly healthy (L53, L57). Tracked as **B-15**. *(Corrected 2026-10-04: this
+  entry first said the CLI "still exited 0" — it did not, and that wrong cause aimed the fix at the
+  wrong file. The real fault was in `init-or-migrate.sh`; see part 1 of 8.)*
+- **A config file the program owns.** I hand-wrote Hermes' `config.yaml`; Hermes **overwrote it on
+  startup**, so its log contained not one MCP line. Configure Hermes only through `hermes config
+  set` / `hermes mcp add` (L54).
+- **The wrong auth form.** Hermes stores `Authorization: Bearer …`; the platform's MCP accepts only
+  `x-api-key: …` or `Authorization: ApiKey …` (`lib/auth.ts:157-192`). One header, and **arrow (1)
+  connected: 21 platform tools discovered** (L55).
+- **A capacity flag that was silently capped.** Hermes requires a **64K** context window; `-c 65536`
+  *looked* like the fix, but llama.cpp logged `the slot context (65536) exceeds the training context
+  of the model (32768) - capping` and served 32768. YaRN RoPE scaling is what actually admits 64K —
+  confirmed from the server's own log, not from the flag (L56).
+
+**Two design corrections, both mine.** Sprint 0 had been mounting the owner's **personal** Hermes
+home (`~/.hermes` — 555 MB of state) into a disposable container, and Hermes warned that WAL-mode
+SQLite on a Windows bind mount *can silently corrupt the database*. It now has its own named volume,
+the fix Hermes' own message names, and **the owner's config was verified undamaged**. Separately,
+`.env` was setting `MCP_SERVER_API_KEY`, which **does not set the MCP's key** — the `mcp` service
+generates its own — and because `opencode` prefers the env var, that stale value was making opencode
+authenticate with the wrong key. Removed.
+
+**A finding worth acting on, not a defect.** CPU-only, this laptop ingests Hermes' prompt at ~13
+tokens/s and that prompt is ~15,700 tokens, so one agent turn spends ~20 minutes just reading its
+prompt. That is the honest cost of the 64K floor on a CPU 7B — the answer is GPU offload (the
+machine has a Quadro M2000M) or a smaller tool surface.
+
+---
+
+## 2026-10-04 — part 7 of 8 (newest first) — a specification corrected
+
+**The owner caught an inaccuracy.** Sprint 0's research table had recorded the laptop as
+"RAM 31.9 GB, 8 cores". Both numbers were measured, but both are the operating system's
+*derived* readings: 31.89 GB is the memory Windows can *use* once the integrated graphics
+reserve their share, and "8" is the **thread** count, not the core count. The specification is
+**32 GB RAM** (2 × 16 GB DDR4-2133) and **4 cores / 8 threads** (Intel i7-6820HQ), on a
+**Dell Precision 7510** (hostname `BIXMASERVER`).
+
+Corrected in `workspace/COOKBOOK.md` (Sprint 0, Step 1) and `library/development/README.md` —
+which now carries the machine's measured specification for handover — and written up as **L50**
+in `LESSONS.md`: *a true number attached to the wrong word is still a false claim.*
+
+---
+
+## 2026-10-04 — part 8 of 8 (newest first) — the analysis programme closes, and a development hub opens
+
+**The 12-batch analysis programme finished.** Batches 0–12 mapped the vision (468 statements
+across eight documents) against Hermes and the Starting Kit, and turned the result into a
+development plan. The headline: **of 140 requirements, the platform covers 20, partly covers
+50, misses 64, and conflicts with Hermes on 3; Hermes is the wrong place to look for 85 by
+design.** The one-line answer: **the platform half is bought, the agent half is borrowed, and
+the product half — the model spine and the data-level security — is neither, and must be
+built.** The plan lives at
+[`library/analysis/findings/12-development-plan.md`](library/analysis/findings/12-development-plan.md).
+
+**Then the owner gave six instructions, and this is the day they were answered.** The point of
+all six was the same: **stop letting things live in reports and in memory.** So:
+
+**A development hub now exists — [`library/development/`](library/development/README.md).** Four documents, and
+it is the place to start:
+
+- **`BACKLOG.md`** — **the one roadmap.** It unifies the five remaining Starting-Kit items with
+  the four product phases, and adds a **"do not lose this"** list for the remarks that used to
+  live only in a report — the phase tests not yet written, the vocabulary register, the five
+  missing resolver inputs. `workspace/PROGRESS.md` and `where_we_left.md` are now banners
+  pointing here; both had already flagged themselves as broken or stale.
+- **`ARCHITECTURE.md`** — how the Starting Kit, Hermes and the model server run together, and
+  **the dockerisation decision**.
+- **`README.md`** — the reading order, what to study first by role, and the handover sequence.
+- **`QUESTIONS.md`** — a temporary file holding every open question for the owner. **It was
+  answered the same day and deleted**, exactly as promised.
+
+**All of it now lives in the library, not at the root.** The hub was first written at
+`development/`, then moved to **`library/development/`** — the owner's rule is that generated
+documentation belongs in the library, in the right shelf, beside `ai/` and `analysis/`.
+
+**The owner answered the questions the same day, and every recommendation was adopted:** the
+**object list** starts from the union of 36 and is pruned by the specification; **Hermes** is the
+agent runtime and **OpenCode is removed**; the first model is a small instruct model; the laptop
+budget is 16 GB; the **secrets** rule is confirmed (tenant secrets never enter a Hermes home);
+**RLS** is confirmed as a derived backstop; and the **model default** is default-deny.
+
+**The dockerisation decision, taken.** The owner asked me to decide when. **Answer: now — as
+Sprint 0**, in parallel with the kernel specification. The reason it is cheap: the Starting Kit
+**already ships a dockerised, `DEPLOY_ENV`-parameterised stack** (`docker-compose.fullapp.yml`)
+that brings up the app, its MCP server and an agent runtime. So this is *finishing* something
+that exists — adding Hermes and the model server, and proving the two arrows work. And
+local-first plus cloud-ready comes free, because the same file already targets both.
+
+**Two rules were promoted from the analysis programme into the cookbook:** rule zero-nine
+(*measure from the artefact, not the description of it* — the extract beats the document, and
+every number gets two routes) and rule zero-ten (*research, validate, write the steps, then
+build* — the owner's instruction that no sprint starts without knowing what already exists).
+
+**What is next.** Sprint 0 (the running trio) and the Business Model Kernel specification.
+
+---
+
 ## 2026-08-13 — four governance screens, and one capability that did not exist
 
 Item 21 asked for screens over the governance features that shipped with an API

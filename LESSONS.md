@@ -1544,3 +1544,601 @@ quietly re-run.
 rarely a subtle bug. It usually means the code is not running. [[L28]] says prove
 the diagnostic works before believing its silence; this is the same lesson from
 the other side — the silence was real, and it was about deployment, not logic.
+
+---
+
+## L48 — a capability that exists is not coverage
+
+**What happened.** The analysis programme mapped 140 requirements against our
+platform and Hermes, and marked each `COVERED` / `PARTIAL` / `MISSING`. The
+critic pass attacked every `COVERED` cell — **30 of them** — and the attack kept
+landing:
+
+| Marked `COVERED` | What was actually true |
+|---|---|
+| The authorization resolver | It exists, but it is in **`shadow`** — RBAC still decides. A resolver that decides nothing covers nothing |
+| Hybrid search | It runs, but it is **not tenancy-filtered** — an unfiltered vector search is a security hole, not a feature |
+| The UI shell | The shell is real; the **Widget it is supposed to host** does not exist |
+
+Three of the strongest "shortcuts" in the register were **half-built**: the kernel
+is free, the *enforcement* is the work; the shell is free, the *object* is not.
+
+**Why it happens.** A capability that exists *looks* like coverage, and the file
+behind it makes the claim feel measured. But **existing, being enabled, and doing
+the job are three different things**, and only the third is coverage. The trap is
+that the first two are checkable with a grep, and the third is not.
+
+**The rule.** *For every "we already have this", ask what the requirement needs
+that this cannot do.* A thing that is off, unwired, or only half the job is
+`PARTIAL` at best. This is [[L8]] (*a schema is not a behaviour*) and [[L17]]
+(*before removing an obstacle, ask whether it is a guard*) in the shape of an
+assessment: the artifact is not the behaviour.
+
+**The general form:** an inventory is not a capability. What you *have* is what
+runs and does the job; everything else is a build wearing a green tick.
+
+---
+
+## L49 — a number written without measuring it
+
+**What happened.** The analysis programme's batch 9 produced a 140-row matrix and
+a headline count. I wrote the tally **by hand**, from memory, as I summarised:
+`COVERED 15 · PARTIAL 55 · MISSING 38`. Then I parsed the file I had just
+written. The real numbers were **`COVERED 20 · PARTIAL 50 · MISSING 64`**.
+
+Four domain-header counts were wrong too, and three rows labelled `CONFLICT` had
+`COVERED` sitting in their verdict cells. The *rows* were right; the *summary of
+the rows* was invented.
+
+**Why it happens.** A summary count feels like arithmetic, and arithmetic feels
+safe. But the number was never derived — it was estimated from the shape of the
+document, and estimation is invisible when it is written in the same font as the
+count. A count that nobody derived is a guess with a number's authority.
+
+**The rule.** *Never write a summary count by hand. Parse the artefact you just
+wrote.* If the artefact is a file, the count is a `grep -c`, not a memory. And
+check the parts add up to the whole — the domain headers and the row count and
+the verdict columns must reconcile, or one of them is wrong.
+
+**The general form:** this is [[L2]] (*a grep count is not a finding*) turned on
+your own output, and [[L36]] (*a diagnosis you wrote down is a hypothesis*) in
+numerical clothing. **A number is evidence only if it came from the thing it
+describes.** The fix is one command; the cost of skipping it is a wrong figure in
+a permanent document — the same failure this programme found in someone else's
+documentation and criticised.
+
+---
+
+## L50 — quote the specification, not a derived reading
+
+**What happened.** Sprint 0's research table recorded the laptop as
+"**31.9 GB RAM**, 8 logical cores". Both numbers were measured — but both are the
+operating system's *derived* readings, not the machine's specification. The
+installed parts are **32 GB RAM** (2 × 16 GB DDR4-2133) and a **4-core /
+8-thread** Intel i7-6820HQ. The owner caught it: *"'RAM: 31.9 GB, 8 cores' is not
+my laptop specifications."*
+
+**Why it happens.** The OS reports what it can *use*, not what is *installed*: it
+deducts the memory the integrated graphics reserve (32 GB installed → 31.89 GB
+"total physical"), and it reports *logical processors* (threads) under a heading
+that reads like cores. A derived reading is a real number, which is exactly what
+lets it pass a casual check — but it is not the answer to "what are the machine's
+specifications?".
+
+**The rule.** *When you state a machine's specification, name the installed
+part.* Memory = the installed capacity, from the DIMMs — not the OS's usable
+total. CPU = cores **and** threads, never threads alone labelled "cores". The
+evidence is `Win32_PhysicalMemory` (sum of DIMM capacities) and
+`Win32_Processor` (`NumberOfCores` vs `NumberOfLogicalProcessors`) — **not**
+`Win32_ComputerSystem.TotalPhysicalMemory`.
+
+**The general form:** this is rule zero-nine (*measure from the artefact, not the
+description of it*) applied to the machine itself, and [[L49]] (*a number written
+without measuring it*) with the twist that this number **was** measured — it was
+just the wrong quantity for the noun. **A true number attached to the wrong word
+is still a false claim.**
+
+---
+
+## L51 — an absence is a claim too
+
+**What happened.** Writing Sprint 0's model-server step, I asserted the machine
+had **"no NVIDIA GPU"** and told the reader to use the CPU image. I had not
+enumerated the GPUs. I then measured: the machine has **two** adapters — Intel HD
+530 **and an NVIDIA Quadro M2000M**. The absence I wrote down was simply false.
+
+**Why it happens.** Stating what a thing *lacks* feels like a weaker, safer claim
+than stating what it *has* — so it gets less scrutiny. But "there is no X" is a
+claim about the whole system, and it is falsified by a single X. It is, if
+anything, *harder* to prove than a presence. It is also invisible: a wrong
+presence is a wrong fact, but a wrong absence quietly closes a door the reader
+never knew was open (here: GPU acceleration).
+
+**The rule.** *Do not write an absence you have not enumerated.* Before "there is
+no X", run the check that would find X if it existed — and say where you looked.
+This is [[L1]] (*a confident label is not an inspection*) aimed at the empty set:
+"nothing there" is a finding, and a finding needs an inspection behind it.
+
+**The general form:** [[L50]] was a true number on the wrong noun; this is a
+**negative** on no evidence at all. Both are the same defect — a claim that
+outran its measurement — and both were caught by the owner, not by me.
+
+---
+
+## L52 — `${VAR:-default}` is not a default, it is a pass-through
+
+**What happened.** The app container crash-looped on
+`Cannot find module 'C:/Program Files/WorkBuddyAI/…/node-language-shim.cjs'`. The
+compose read `NODE_OPTIONS: ${NODE_OPTIONS:---max-old-space-size=3072}`, which
+*looks* like "use the sensible default". It is not: when the **host shell** has
+`NODE_OPTIONS` set — and this machine exports a Windows-only preload path —
+compose interpolates the host's value straight into the container, where the path
+does not exist and `node` aborts before running a single line of the entrypoint.
+The neighbouring `mcp` service was immune only because it read a **differently
+named** variable (`MCP_NODE_OPTIONS`).
+
+**Why it happens.** The construct reads as "fallback", so the eye sees a safe
+default and stops. But `${VAR:-x}` means *"the ambient value if there is one,
+otherwise x"* — the ambient value is the **primary**, and `x` is the leftover. Any
+name that a build host, a developer's shell, or a CI runner might set turns a
+"default" into an uncontrolled input.
+
+**The rule.** *Never default a compose value from a variable the host might own.*
+Use a project-specific name (`APP_NODE_OPTIONS`, `MCP_NODE_OPTIONS`) so the
+ambient environment cannot reach the container at all. If you must read a
+generic name, read it and **print what you resolved** before trusting it.
+
+**The general form:** a default that can be overridden by the environment is not a
+default — it is an unvalidated input wearing a default's clothes. Measured three
+ways before believing it: the host shell, `docker compose config`, and
+`docker inspect` of the live container.
+
+---
+
+## L53 — a marker written on *reported* success is a lie the next run believes
+
+**What happened.** The database had **zero users**, yet
+`/tmp/init-marker/.seeded` existed, so `init-or-migrate.sh` took its "Subsequent
+run: migrations only" branch forever and never seeded anything. `mercato init` had
+**printed** `❌ Initialization failed`, and the marker was written anyway.
+
+**CORRECTION, 2026-10-04.** This lesson first said the CLI "still **exited 0**".
+**That was wrong, and it aimed the fix at the wrong file.** Two routes agree that
+the CLI was always honest:
+
+- the catch block logs the message and `return 1` (`packages/cli/src/mercato.ts:1322-1324`),
+  and `bin.ts` ends with `process.exit(code ?? 0)`;
+- the CLI's own tests assert it — `expect(exitCode).toBe(1)` at
+  `packages/cli/src/__tests__/mercato.test.ts:373` and `:419`.
+
+**The script that read it was the dishonest one:**
+
+```sh
+if sh -lc "${COMMAND}" >"${LOG_FILE}" 2>&1; then
+  return 0
+fi
+STATUS=$?          # always 0
+```
+
+The exit status of an `if` with no `else` whose condition failed is **0**, so
+`run_command_with_cli_recovery` reported **every** failure to its caller as
+success. Fixed at all three sites; the trap itself is written up as [[L63]].
+
+**Why it happens.** A sentinel file is a promise made to a future run, and it is
+written at the moment the writer is least able to judge. "The command returned 0"
+is treated as "the work is done", but the two are different claims: one is about a
+process, the other about the world. The world here was an empty `users` table.
+
+**The rule.** *A marker must be written only after the effect is verified, not
+after the command returns.* And before trusting any status, **verify that you
+actually read the one you think you read** — a status captured in the wrong place
+is worse than no status at all, because it arrives looking like evidence. Any
+"already done" sentinel must also be re-checkable against the thing it claims.
+
+**The general form:** this is [[L48]] (*a capability that exists is not coverage*)
+turned inward — a *reported* success is not a *measured* one. The marker is now a
+known defect (**B-15**), not a curiosity. *The follow-on lesson is the harder one:
+the first diagnosis of this defect was itself unmeasured, and it was believed for a
+day.*
+
+---
+
+## L54 — never hand-write a file the program owns
+
+**What happened.** To point Hermes at our model and our MCP, I wrote its
+`config.yaml` by hand. Hermes **overwrote it on startup** — the file is its own
+state, carrying a `_config_version` it migrates, and it rewrites it from its
+internal model. My `model:` and `mcp_servers:` blocks simply vanished, which is
+why Hermes never contacted the MCP and its log contained not one MCP line.
+
+**Why it happens.** Editing a config file is the obvious move and it *looks* like
+it worked — the file on disk contains your text right up until the program starts.
+The failure is silent and delayed: you find out only by noticing an **absence**
+(no MCP lines) rather than an error.
+
+**The rule.** *If a program ships a CLI for its configuration, that CLI is the
+only writer.* `hermes config set`, `hermes mcp add` — then verify with
+`hermes config get`. Do not infer that a hand edit took effect because the file
+still reads the way you left it; **re-read it after the program has started.**
+
+**The general form:** [[L51]] (*an absence is a claim too*) — the damage here was
+not a wrong value, it was a **missing** one, and a missing thing has no error
+message.
+
+---
+
+## L55 — the accepted form of a credential lives in the code, not in the client's prompt
+
+**What happened.** Hermes' `mcp add --auth header` flow asks for an
+"API key / Bearer token" and stores `Authorization: Bearer <key>`. The platform's
+MCP accepts exactly **two** forms (`lib/auth.ts:157-192`): `x-api-key: <secret>`,
+or `Authorization: ApiKey <secret>` — note **`ApiKey `**, not `Bearer `.
+`Bearer` is neither, so every call returned
+`401 {"error":"API key required (x-api-key header)"}`. The fix was one header.
+
+**Why it happens.** "Bearer token" is so standard that both sides assume it. But
+the *label on the client's prompt* is a guess about the server; only the server's
+own header-parsing code is a fact. The 401 message was the server telling us
+precisely which header it wanted, and it was easy to read past it as a generic
+auth error.
+
+**The rule.** *Read the server's header parser before wiring a client.* And treat
+an error body that **names the required header** as an instruction, not a symptom.
+
+**The general form:** [[L50]] (*quote the specification, not a derived reading*) —
+a prompt string is a derived reading; the parser is the specification.
+
+---
+
+## L56 — a flag that looks like it sets capacity may be silently capped
+
+**What happened.** Hermes refuses any model whose served context is below 64,000
+tokens. Adding `-c 65536` to llama.cpp looked like the fix — and the server
+started happily. It was **not** the fix: llama.cpp logged
+`the slot context (65536) exceeds the training context of the model (32768) -
+capping` and served `n_ctx_slot = 32768`. The server accepted the flag, discarded
+the part it did not like, and reported success. Only the **startup log** revealed
+it. YaRN RoPE scaling was what actually admitted 64K.
+
+**Why it happens.** "It started" is read as "it is configured". A capped value
+produces no error, no warning dialog and no non-zero exit — just a quieter,
+smaller system than the one you think you built. The evidence sits in one log line
+that scrolls past during a 60-second model load.
+
+**The rule.** *After setting a capacity, read back the capacity the component
+reports — from its own log, not from your config.* The config states an intention;
+the log states a fact.
+
+**The general form:** [[L49]] (*a number written without measuring it*) with a
+mask: the number was written **and accepted**, which feels like measurement. It
+was not — nothing had confirmed the value took.
+
+---
+
+## L57 — a failure that falls through still looks healthy
+
+**What happened.** The compose `command` for the app runs
+`init-or-migrate.sh` and then `yarn start` — with **no `set -e`**. When
+initialisation failed, the shell simply carried on to `yarn start`. The container
+reported `Up`, served HTTP, started all its queue workers and its scheduler, and
+answered `/` with a `307 → /login`. Every outward signal said "healthy". It had
+never been initialised.
+
+**Why it happens.** We read health from the *liveness* of the process, and a
+process that fell through a failure is perfectly alive. The defect is invisible
+from outside because the fall-through is what makes it look well.
+
+**The rule.** *When a startup sequence has a must-succeed step, make it fail the
+startup.* `set -e`, or an explicit exit — otherwise "it came up" says nothing about
+whether the step ran.
+
+**The general form:** this is the same defect as [[L53]] seen from the other side.
+There, a marker claimed work that had not happened; here, a **running process**
+does. Both substitute a signal about the program for a fact about the world.
+
+---
+
+## L58 — a default tuned for a different machine than the one you gave it
+
+**What happened.** The model server ran at **~13 tokens/s** ingesting its prompt,
+which made every agent turn take ~20 minutes. The container had **8** CPUs. But
+llama.cpp's `-t` default is the number of **physical** cores — and this laptop is
+**4 physical / 8 logical** — so the server quietly used **4 threads** and left
+half the machine idle. `docker exec … nproc` said 8; the server's own log said
+`n_threads = 4`. Nothing was broken; the default was simply sized for a machine
+we were not running on.
+
+**Why it happens.** The default is a *reasonable guess about the host*, made by
+the tool, for a host it cannot see. We hand it a container and assume the guess
+still holds. It does not — the container is not the laptop.
+
+**The measurement, and why one number would have misled.** Both phases had to be
+measured separately, because they answer to opposite resources:
+
+| `-t` / `-tb` | prompt ingest | generation |
+|---|---|---|
+| 4 / 4 (default) | 13.2 tok/s | 3.9 tok/s |
+| 8 / 8 | 17.7 tok/s | **3.0** tok/s |
+| **4 / 8** | **19.3** tok/s | **4.6** tok/s |
+
+Ingest is compute-bound, so more threads help. Generation is memory-bandwidth-
+bound, so more threads *hurt* (sync overhead beats the extra parallelism). Had we
+only measured "tokens per second" on a generation test, we would have concluded
+8 threads was a regression and reverted the real fix.
+
+**The rule.** *Read the tool's default, and check it against the resource you
+actually gave it — not the resource of the machine you are sitting at.* And when
+one setting governs two phases, **measure both**, because they need not move
+together.
+
+**The general form:** [[L49]] again — a number (here, a default) accepted without
+being measured against the situation it was going to run in.
+
+
+## L59 — a zero return value means "request accepted", not "effect happened"
+
+**What happened.** The unattended Ubuntu install on the Hyper-V VM stopped at
+
+```
+An autoinstall file was found … add 'autoinstall' to your kernel command line to avoid this
+Continue with autoinstall? (yes/no)
+```
+
+and sat there for **eight minutes** with the CPU at 0 % and the virtual disk still
+at 4 MB. To answer it we called the Hyper-V keyboard API:
+
+```powershell
+$kb.TypeText("yes")     # → ReturnValue = 0   (success)
+$kb.PressKey(13); $kb.ReleaseKey(13)
+```
+
+Both calls returned `0`. The VM did nothing. We had already tried this once, so we
+assumed the *approach* was wrong. It was not — **`TypeText` is the part that does
+nothing.** Replacing it with per-character virtual-key presses fixed it instantly:
+
+```powershell
+$kb.PressKey(89); $kb.ReleaseKey(89)   # Y
+$kb.PressKey(69); $kb.ReleaseKey(69)   # E
+$kb.PressKey(83); $kb.ReleaseKey(83)   # S
+$kb.PressKey(13); $kb.ReleaseKey(13)   # Enter
+```
+
+The screen then read `Continue with autoinstall? (yes/no)` / `yes` /
+`start: subiquity/Install/install/configure_apt`, and the disk began to fill.
+
+**Why it happens.** `ReturnValue = 0` on a WMI method means *the management
+service accepted the request*. It says nothing about whether the guest received,
+understood, or acted on it. `TypeText` crosses a boundary — host → VMBus → guest
+keyboard driver → tty — and reports success at the **first** hop.
+
+**How we caught it, which is the reusable part.** Two probes, in order:
+
+1. **A single harmless character** (`TypeText("y")`), then re-capture the screen.
+   Byte-identical → the call had no observable effect. (It had also reported `0`.)
+2. **A control that must change the screen if input works at all** — press
+   **Enter** and nothing else. A *third* `Continue with autoinstall? (yes/no)`
+   line appeared. An empty answer re-prompts, so the extra line is proof that
+   input reaches the guest. That isolated the fault to `TypeText` and cleared the
+   whole delivery path in one step.
+
+Without probe 2 we would have concluded "keyboard input does not work on this VM"
+and gone off to remaster the ISO — a much larger, riskier change to fix a problem
+that did not exist.
+
+**The readback, since it is not obvious.** Hyper-V has **no `Get-VMScreenshot`
+cmdlet**. The console image comes from a WMI call —
+`Msvm_VirtualSystemManagementService.GetVirtualSystemThumbnailImage` — which
+returns a raw **RGB565** framebuffer (here 640×480×2 = 614 400 bytes, plus a
+4-byte header). Render it to PNG and *read the screen*. Note the trap: the
+header's width/height describe the **guest's** display mode (2304×1120), not the
+thumbnail you asked for, so size the buffer from the byte count, not the header.
+
+**The rule.** *A success return is a claim about the API, not about the world.*
+Before you drive anything with an input path, prove it moves something you can
+**see** — and use a control that has no other explanation. Then trust it.
+
+**The general form:** [[L3]] and [[L49]] again — a returned number accepted as a
+measurement of something it never measured.
+
+
+## L60 — `select user` asks the database who *you* are, not what the column says
+
+**What happened.** To find out which SSH account Coolify would use to reach its own server, I queried
+its `servers` table:
+
+```sql
+select id, name, ip, user, (private_key_id is not null) as has_key from servers;
+--  0 | localhost | host.docker.internal | coolify | t
+```
+
+I read `user = coolify`, checked whether a `coolify` account existed on the machine, found it did
+**not**, tried the connection as that user, got `Permission denied`, and concluded that Coolify's
+localhost server was misconfigured and would fail the moment it was used.
+
+All of that was wrong. **`user` is a reserved keyword in PostgreSQL** — bare `user` is an alias for
+`current_user`. The query returned the *database session role* (`coolify`, the Postgres user created
+by the install), not the column. The real column value is **`root`**, and `root@host.docker.internal`
+connects fine. The corrected query quotes the identifier:
+
+```sql
+select id, name, ip, "user" from servers;   -- 0 | localhost | host.docker.internal | root
+```
+
+**Why it is worth a lesson.** The wrong value was *plausible*. `coolify` is exactly the kind of answer
+you expect from a Coolify database, and every neighbouring column was correct, so nothing looked
+wrong. It was only caught because the next step — actually *trying* the SSH connection — did not fit
+the story: `coolify@` failed but `root@` succeeded, and both could not be true of a correctly-read
+column.
+
+**The tell.** The suspicious value was **identical to something else I already knew** (the database
+username). A column whose value happens to equal the name of the thing you are querying is worth a
+second look.
+
+**The rule.** *When a value looks like it might be about the tool rather than the subject, confirm you
+selected what you meant.* Quote identifiers that are also SQL keywords — `user`, `order`, `table`,
+`end`, `limit`, `default`, `group`. And when a "finding" would send someone off to fix something,
+settle it with a **second, independent route** before reporting it: here, performing the connection
+rather than describing it.
+
+**The general form:** [[L1]] and [[L2]] again — a value read as a fact about the subject when it was
+a fact about the reader. In a build that must not break the machine, the cost of this one was a
+false alarm; had it been acted on, it would have meant "fixing" a connection that was already working.
+
+
+
+---
+
+## L61 — When a widely-repeated number justifies an action, read the vendor's current doc
+
+**What happened.** WSL2 runs as a small VM and is given a share of the host's RAM by default. I wrote,
+into a config file, a runbook and the plan, that the default is **"80% of RAM on Windows 10"** — and
+used it to justify capping WSL at 12 GB on a 32 GB laptop that also runs a 6 GB Hyper-V VM.
+
+**It is wrong.** Microsoft's current `.wslconfig` reference states a single default of **50% of total
+memory**, with no Windows 10 / Windows 11 split. The 80% figure is an older value that is still
+repeated in blog posts, Stack Overflow answers and AI-generated summaries — and a web search returns
+those first, which is how it got in.
+
+**Why it is worth a lesson.** The *action* was still correct: 16 GB of WSL plus a 6 GB VM is 22 GB of
+32, and lowering the ceiling to 12 GB is a reasonable margin either way. So nothing broke, and the
+error was invisible — a wrong number inside a right decision. That is exactly the kind that survives
+review.
+
+**The tell.** The number was **load-bearing** (it was the reason to act) and it came from a **secondary
+source** (a search result) rather than the vendor's own reference page.
+
+**The rule.** *If a number is the justification for changing something, fetch it from the vendor's
+current documentation and quote the sentence.* A figure that is merely descriptive can come from
+anywhere; a figure you are about to act on cannot. Corollary: when a claim is widely repeated, that is
+evidence it is **old**, not evidence it is right.
+
+**The general form:** [[L1]] again — a confident label is not an inspection. Here the confident label
+was a percentage, and the inspection was one fetch of the page that defines it.
+
+---
+
+## L62 — A failing probe is not a finding until you know the probe works
+
+**What happened.** I needed to show that the phpMyAdmin container could reach the MariaDB container by
+name. I ran a TCP test inside the phpMyAdmin container and got:
+
+```
+TCP-3306-CLOSED
+```
+
+That looked like a real result: the database was unreachable and phpMyAdmin would never work. I was one
+keystroke from writing it up.
+
+**It was false.** The test was `(echo > /dev/tcp/mariadb/3306)`. **`/dev/tcp` is a bash feature, and the
+container's `sh` is `dash`, which does not implement it.** The command could never have succeeded,
+whatever the network did. The same container also resolved `mariadb` to `10.0.1.8` and answered a real
+`mysqli` connection, listing both databases.
+
+**Why it is worth a lesson.** A probe that fails looks exactly like a subject that is broken. The failure
+was in the instrument, and the instrument was silently incapable of success. This is the same shape as
+[[L3]] — verify the tool before trusting the measurement — but with a nastier property: the broken tool
+did not error, it returned a clean negative.
+
+**The rule.** *Before believing a negative result, make the probe succeed on a case you know is positive.*
+If you cannot get the instrument to say "yes" anywhere, it has not told you "no" about anything.
+
+**Practical corollaries from the same hour:**
+- **Use the subject's own runtime as the probe.** The definitive test was `php -r 'new mysqli(...)'` —
+  the same PHP that phpMyAdmin itself uses. It cannot disagree with the thing it is measuring.
+- **Two client names, one tool.** MariaDB 11 has no `mysql` binary; the client is `mariadb`. An
+  `executable file not found` is a naming fact, not a database fault.
+- **`getent hosts` may show only IPv6** while `getent ahostsv4` shows the working IPv4 address. Check
+  both families before concluding a name resolves badly.
+
+**The general form:** a measurement has two parts — the subject and the instrument — and a bad reading
+implicates both equally. [[L1]] says a confident label is not an inspection; this says an inspection is
+not an inspection either, until the instrument is proven.
+
+---
+
+## L63 — `$?` after `fi` is always 0, so a failure read there is a success
+
+**What happened.** `init-or-migrate.sh` reported every failed database initialisation to its caller
+as a success, so it wrote its "already seeded" marker anyway and the app came up looking healthy on a
+half-seeded database ([[L53]], **B-15**). The whole defect is two lines:
+
+```sh
+if sh -lc "${COMMAND}" >"${LOG_FILE}" 2>&1; then
+  return 0
+fi
+STATUS=$?          # <-- 0, always
+```
+
+**Why it happens.** The exit status of an `if` compound command with **no `else`**, whose condition
+was false, is **0** — because no command in either branch ran, and the shell has nothing to report.
+The condition's own failure is *not* propagated. So `STATUS=$?` reads the status of the `if`, not of
+the command that failed. It looks completely natural, it is the obvious place to put the line, and it
+is silently wrong every single time. Measured directly, in both `sh` and `bash`:
+
+```sh
+f() { if sh -c "exit 7"; then return 0; fi; STATUS=$?; echo "$STATUS"; }   # prints 0
+```
+
+**The rule.** *Never read `$?` after `fi`. Capture the status where the command is.* The safe shapes
+are `cmd || STATUS=$?` (with `STATUS=0` set first), or `$?` as the first thing inside an `else`
+branch. Prefer the `||` form: it says what it means, and it is also exempt from `set -e` — see
+[[L64]].
+
+**The general form:** a status is only evidence if you know *which command's* status you read. This is
+[[L62]] applied to shell plumbing rather than to a probe: the instrument was never measuring the
+subject. When one instance of a pattern is found, **grep the file for the others** — this defect
+appeared **three** times in one 100-line script, and fixing only the first left the bug half-alive.
+
+---
+
+## L64 — `set -e` is ignored inside a function called as a condition
+
+**What happened.** `dev-entrypoint.sh` guarded its expensive setup with a function whose first line
+was `set -e`, and called it as `if ! (run_setup); then`. The intent — and the comment in the file —
+was that any failing step would abort the setup and print a "SETUP FAILED" banner. It did not. A
+failing `yarn install`, `build`, `generate` or `init` fell through to the next line, the function
+ended on a successful `cd`, returned 0, and the banner never printed. The guard was dead code that
+read as protection.
+
+**Why it happens.** POSIX exempts the condition of an `if` from errexit — that is deliberate, so that
+`if grep -q x file` is not fatal. The exemption applies to the whole command in the condition
+position, *including a function called there*: the `set -e` inside the function does not re-arm it.
+Measured, in both `sh` and `bash`:
+
+```sh
+f() { set -e; false; echo "NOT ABORTED"; }
+if ! (f); then echo "guard fired"; else echo "guard did NOT fire"; fi   # guard did NOT fire
+```
+
+**The rule.** *Do not rely on `set -e` for a function that is invoked as a condition.* Check each
+step explicitly (`cmd || return 1`), or restructure so the function is called as a plain command.
+And when a guard is meant to protect something, **make it prove it fires** — a guard that cannot fail
+is a comment.
+
+**The general form:** `set -e` is not a safety net, it is a mode with exceptions — conditions,
+`&&`/`||` lists, and `!` all switch it off. Treat "the script would have stopped" as a claim to be
+tested, exactly like any other. Same family as [[L63]]: the mechanism looked right and was inert.
+
+---
+
+## L65 — a test that cannot tell pass from fail proves nothing
+
+**What happened.** Writing the regression test for **B-15**, the first run reported the *happy path*
+failing and the *bug* passing — the exact inverse of the truth. The harness was broken: `mktemp -d`
+on Git Bash returns a Windows path (`C:\Users\...`), `sh -lc "C:\Users\..."` eats the backslashes and
+reports "No such file or directory", so **every** stub failed to run, and "failed" happened to look
+like the expected result in one case. Separately, a second run appeared to hang and was killed at
+120 s — it was not hung, it was slow, and the timeout was mine.
+
+**Why it happens.** A test that fails looks like a test doing its job. Nothing in the output says
+*which* of the two things went wrong — the product, or the instrument — and the reader is strongly
+motivated to accept the convenient reading. [[L62]] in a different costume.
+
+**The rule.** *A harness must first prove it can distinguish the two outcomes, before its verdict on
+anything is worth reading.* Concretely, every test here now opens with a self-check: run a stub that
+exits 0 and one that exits 1, and abort if they are not seen as 0 and 1. And **a regression test must
+be run against the unfixed code first** — if it passes there, it is not testing the fix.
+
+**The general form:** mutation-prove the instrument before believing its reading of the subject.
+Applied here, both tests were run against the pre-fix code and failed there (3 and 3 cases
+respectively) before being trusted on the fixed code (0 and 0).
