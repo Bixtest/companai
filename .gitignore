@@ -35,3 +35,65 @@ copy-aissistant-reparsepoints.ps1
 verify-aissistant-copy.ps1
 aissistant-package/
 aissistant-package-exact/
+
+# Server credentials. Three files naming hosts and connection details.
+# They were untracked, but nothing stopped `git add -A` from committing them —
+# this file never named the folder. It does now. (Checked 2026-10-03.)
+keys/
+
+# A 30 MB archive of a host tree that contains a .env. Large, and a secret.
+# The rule above already says large and secret things are not versioned; this
+# file simply never matched any pattern. (Checked 2026-10-03.)
+*.tgz
+
+# A document from the SIBLING project, copied into this root. It is not ours:
+# it is byte-identical to konsult/aissistant-package/documentation/cursor/companai.md
+# and it reads as if it were a vision statement for our product. Left in place so
+# it can be read and judged, but it must never be committed. See library/ai/README.md.
+companai.md
+
+# The Hermes runtime source, extracted into the library for reading. 17,570 files
+# of somebody else's code. The rule at the top of this file already excludes
+# vendored code; this is the largest instance of it, and the one most likely to be
+# committed by accident. (Checked 2026-10-03.)
+library/ai/hermes-agent-main/
+
+# TAKEN, 2026-10-04 — the owner said yes. The hand-written parts are versioned;
+# the copies are ignored. This supersedes the 2026-10-03 note below, which left
+# the decision open on purpose.
+#
+# VERSIONED (ours, small, not rebuildable from anywhere): library/analysis/,
+# library/development/, library/INDEX.md, library/PROVENANCE.md,
+# library/MANIFEST.txt, library/.build_library.py, library/canonical-*.md,
+# library/ai/README.md, library/ai/ai-first/, library/ai/tiny_models/, and the
+# loose *.md files in library/ai/.
+#
+# IGNORED, by the rules that follow this comment:
+#   - the 16 numbered shelves (01-.. to 16-..): byte-for-byte copies of material
+#     on E:, and .build_library.py rebuilds them deterministically. Do NOT put
+#     anything hand-written inside a numbered shelf — the script deletes it.
+#   - library/ai/hermes-agent-main/ and its .zip: another product's source, 17,570
+#     files and an 88 MB archive.
+#   - library/ai/hermes-docs/: 32 MB of the SIBLING project's documentation.
+#
+# CORRECTION — the 2026-10-03 note was wrong on one point and it matters. It said
+# `library/ai/ai-first/` and `library/ai/hermes-docs/` are "regenerable by the
+# build script". They are NOT. The script's PRESERVE set is {"ai", "analysis"}: it
+# skips `ai/` entirely and has no source for it. So `ai-first/` is ignored as a
+# *copy* — it is byte-identical to material on E: — and not because it can be
+# rebuilt. The consequence, stated plainly: **ignoring it means it has no
+# history.** That is accepted for a copy of an external source, and it is exactly
+# why `ai/README.md`, which is ours and explains the split, IS versioned.
+#
+# The lesson at the top of this file — the knowledge base had no history and no
+# backup, one bad edit from gone — no longer applies to `library/analysis/`.
+library/[0-9][0-9]-*/
+library/ai/hermes-agent-main.zip
+library/ai/hermes-docs/
+
+# Hyper-V build artefacts for the Coolify hosting environment. Large, regenerable,
+# and one of them is a secret: the cloud-init seed carries the VM's credentials.
+# A 4 GB Ubuntu ISO, the seed ISO, and a dynamically-expanding VHDX. None of this
+# belongs in a repository of the project's thinking. (Added 2026-10-04 with
+# library/development/PLAN-coolify-laptop-implementation.md.)
+vms/

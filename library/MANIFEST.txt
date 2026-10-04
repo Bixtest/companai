@@ -1,0 +1,82 @@
+staged unique paths : 577
+kept after dedupe   : 521
+duplicates removed  : 56
+name collisions     : 0
+
+-- documents per folder --
+   12  01-policy-and-plan
+   23  02-architecture-contracts
+   25  03-uxaios-product-and-paths
+   42  04-agent-analysis
+   49  05-platform-audit-and-srs
+   30  06-certification
+   16  07-canonical-hardening
+   66  08-formalize-blueprint
+   18  09-reboot-vision
+   21  10-uxaios-interface-vision
+  139  11-active-workstreams
+    6  12-vision-extras
+    6  13-design-conversations
+    2  14-reference-collections
+    5  15-agent-rules
+   61  16-konsult-product-docs
+
+-- duplicates removed (kept copy is in the lower-numbered folder) --
+03-uxaios-product-and-paths/007-milestone-taxonomy.md
+03-uxaios-product-and-paths/IMPLEMENTATION_PLAN.md
+12-vision-extras/AI-FIRST-PLATFORM-POLICY.md
+12-vision-extras/STABILIZATION-LOG.md
+12-vision-extras/architecture/ci-release-gate.md
+12-vision-extras/architecture/decisions/001-authentication-and-request-identity.md
+12-vision-extras/architecture/decisions/002-project-workspace-model.md
+12-vision-extras/architecture/decisions/003-module-package-trust-and-loading.md
+12-vision-extras/architecture/decisions/004-audit-events-vs-operational-telemetry.md
+12-vision-extras/architecture/decisions/005-integration-extension-package-type.md
+12-vision-extras/architecture/decisions/006-canonical-sql-migration-source.md
+12-vision-extras/architecture/decisions/007-milestone-taxonomy.md
+12-vision-extras/architecture/decisions/008-uxaios-integrated-platform.md
+12-vision-extras/architecture/decisions/README.md
+12-vision-extras/architecture/deployment-operations.md
+12-vision-extras/architecture/garage-ingredient-types.md
+12-vision-extras/architecture/integration-extension-contract.md
+12-vision-extras/architecture/knowledge-cell-contract.md
+12-vision-extras/architecture/module-integration-and-ai.md
+12-vision-extras/architecture/module-loader-contract.md
+12-vision-extras/architecture/performance-and-observability.md
+12-vision-extras/architecture/readiness-and-health.md
+12-vision-extras/architecture/release-0-edit-flow-contracts.md
+12-vision-extras/architecture/release-0-foundation.md
+12-vision-extras/architecture/theme-stack-composition.md
+12-vision-extras/architecture/ui-portability-tags.md
+12-vision-extras/development-cookbook.md
+12-vision-extras/module-integration-and-ai.md
+12-vision-extras/platform-dictionary.md
+12-vision-extras/uxaios/ARCHITECTURE.md
+12-vision-extras/uxaios/DASHBOARD-ASSET-ANALYSIS.md
+12-vision-extras/uxaios/IMPLEMENTATION-COOKBOOK.md
+12-vision-extras/uxaios/PATH-1-COOKBOOK.md
+12-vision-extras/uxaios/PATH-1-PRODUCT-MILESTONE.md
+12-vision-extras/uxaios/PERFORMANCE-BUDGETS.md
+12-vision-extras/uxaios/PHASE-C-ACCEPTANCE.md
+12-vision-extras/uxaios/PHASE-C-FOUNDATION.md
+12-vision-extras/uxaios/PHASE-C-HANDOFF.md
+12-vision-extras/uxaios/PHASE-D-MODULES.md
+12-vision-extras/uxaios/PLATFORM-FEATURE-INVENTORY-EXPANSION-PLAN.md
+12-vision-extras/uxaios/PLATFORM-FEATURE-INVENTORY.md
+12-vision-extras/uxaios/PLATFORM-FEATURE-SPECS-BATCH-01.md
+12-vision-extras/uxaios/PLATFORM-FEATURE-SPECS-BATCH-02.md
+12-vision-extras/uxaios/PLATFORM-FEATURE-SPECS-BATCH-03.md
+12-vision-extras/uxaios/PLATFORM-FEATURE-SPECS-BATCH-04.md
+12-vision-extras/uxaios/PLATFORM-FEATURE-SPECS-BATCH-05.md
+12-vision-extras/uxaios/PLATFORM-FEATURE-SPECS-BATCH-06.md
+12-vision-extras/uxaios/PLATFORM-PAGE-MAP.md
+12-vision-extras/uxaios/README.md
+12-vision-extras/uxaios/STABILIZATION-LOG.md
+12-vision-extras/uxaios/VISION.md
+12-vision-extras/uxaios/development-cookbook.md
+14-reference-collections/PLATFORM-FEATURE-INVENTORY.md
+14-reference-collections/STABILIZATION-LOG.md
+14-reference-collections/pages-to-spaces.md
+16-konsult-product-docs/FRESH-INSTANCE.md
+
+-- name collisions (same filename, different content) --
