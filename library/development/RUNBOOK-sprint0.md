@@ -24,8 +24,8 @@ running trio". This page is the short one.
 | Docker Desktop | **Installed, but the engine is DOWN** — see below |
 | The Coolify server | A **separate** Hyper-V VM, not this stack — see [`RUNBOOK-platform-server.md`](RUNBOOK-platform-server.md) |
 
-**Nothing is missing. The only thing standing between here and a running stack is that Docker
-Desktop is not started — and the agent cannot start it.** Measured 2026-10-04:
+**Nothing is missing for the stack. The only thing standing between here and a running stack is that
+Docker Desktop is not started — and the agent cannot start it.** Measured 2026-10-04:
 
 ```
 $ docker desktop start
