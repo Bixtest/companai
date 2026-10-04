@@ -142,11 +142,17 @@ and `run_command_with_cli_recovery` **reported every failure as success**. Measu
 `sh -c 'exit 7'` inside that shape captures `0`, in both `sh` and `bash`. The same mistake appeared a
 second time at the bottom of the script, where a failed migration also exited 0.
 
+**How many sites, exactly** (re-measured 2026-10-04 after an independent critic checked it): the
+original script read `$?` in **four** places. **Two** were broken — the two read *after* an `fi` — and
+the other two sat inside an `else` branch, where `$?` really is the failed condition's status, so they
+were correct only by accident of where they were written. All four now use one explicit shape, so the
+pattern cannot be reintroduced by copying a neighbouring line.
+
 **Three defects were fixed, all measured 2026-10-04:**
 
 | # | Where | Defect | Now |
 |---|---|---|---|
-| 1 | `docker/scripts/init-or-migrate.sh` | `STATUS=$?` read after `fi` → every failure reported as success, marker written anyway | all three sites now `STATUS=0; cmd \|\| STATUS=$?` |
+| 1 | `docker/scripts/init-or-migrate.sh` | `STATUS=$?` read after `fi` → every failure reported as success, marker written anyway | all **4** status reads now `STATUS=0; cmd \|\| STATUS=$?` |
 | 2 | `docker-compose.fullapp.yml`, `packages/create-app/template/docker-compose.fullapp.yml` | init ran unchecked, so `yarn start` followed a failed init and the app looked healthy | init is now checked; on failure it prints why and exits 1 **without** starting the app |
 | 3 | `docker/scripts/dev-entrypoint.sh` | `run_setup()` began with `set -e`, but it is called as `if ! (run_setup)` — and **errexit is ignored for a function invoked as a condition**, so the guard never fired and the failure banner below it was dead code | each step is now checked explicitly with `\|\| return 1` |
 
@@ -162,12 +168,29 @@ sh docker/scripts/__tests__/compose-init-guard.test.sh
 sh docker/scripts/__tests__/compose-init-guard.test.sh packages/create-app/template/docker-compose.fullapp.yml
 ```
 
-Both were **mutation-proven** — run against the unfixed code first, to show they fail:
+Both were **mutation-proven** — run against the unfixed code first, to show they fail. Measured
+2026-10-04:
 
-| | before the fix | after the fix |
+| Mutation | Result | What it shows |
 |---|---|---|
-| `init-or-migrate.test.sh` | **7 passed, 3 failed** | **10 passed, 0 failed** |
-| `compose-init-guard.test.sh` | **3 passed, 3 failed** | **6 passed, 0 failed** |
+| `init-or-migrate.test.sh` against the **original file** (both broken sites) | **7 passed, 3 failed** | the suite sees the defect |
+| `init-or-migrate.test.sh` against a copy with **only the top site** reverted | **8 passed, 2 failed** | one reverted site is caught by one case |
+| `init-or-migrate.test.sh` against the fixed file | **10 passed, 0 failed** | the fix holds |
+| `compose-init-guard.test.sh` against the **pre-fix** block | **3 passed, 3 failed** | the suite sees the defect |
+| `compose-init-guard.test.sh` against both fixed files | **6 passed, 0 failed** each | the fix holds |
+
+**The second row is the one worth keeping.** Reverting only the top-level status read leaves the
+migration path broken, and the suite still reports 8 green — so a test that exercised only the
+first-run path would have called the bug fixed while the "subsequent run" path stayed wrong. That is
+why the suite covers both paths. *(Caught by an independent critic re-measuring this table, which
+originally quoted the 7/3 figure as though it belonged to a single-site mutation. It did not.)*
+
+**How strong this proof is, stated plainly.** The tests exercise `mercato.run()` directly and the
+compose block's real text; they do **not** run `yarn mercato init` end to end on this host, because
+they cannot — the CLI's `assertNode24Runtime()` refuses anything below Node 24, and this machine has
+only Node 22 (**N-11**). So the *status handling* is proven, and the *init itself* still has to be
+seen failing and succeeding against a real database once the Docker engine is up (**B-04**). Do not
+read "10 passed" as "the fresh-install path has been walked".
 
 **The recorded fix was also re-scoped, deliberately.** It said to treat "a non-zero **or a printed
 failure**" as failure. With the exit status now correct, matching on printed text is redundant — and
@@ -278,7 +301,7 @@ ones) somewhere queryable. A product decision first — tracked as a backlog ite
 | 🟢 | **B-02** — the admin password is typed by the owner | Cleared 2026-10-04 as a *blocker*: the arrow-(1) proof was taken from the container logs, the MCP's own tool list and the database, so no login was needed. The standing arrangement itself continues — see "Not blockers" above |
 | 🟢 | **B-03** — no local model file | Cleared 2026-10-04: `Qwen2.5-7B-Instruct-Q4_K_M.gguf`, 4,683,074,240 bytes, `GGUF` magic verified |
 | 🟢 | **B-04 (first occurrence)** — Docker Desktop's engine was not running | Cleared 2026-10-04: the owner started it and the engine reported Server **29.8.1**. **It recurred the same day** — `AutoStart` is off, so the engine is down again whenever the machine restarts. It is open again above, now with the finding that the agent cannot start it |
-| 🟢 | **B-15 half 1** — a failed database init was reported to its caller as success, so the "already seeded" marker was written and the app came up looking healthy on a half-seeded database | Fixed 2026-10-04. The recorded cause was **wrong** (the CLI does exit 1 — see the corrected diagnosis under **B-15**). The real cause was `STATUS=$?` read after `fi` in `init-or-migrate.sh`, where the status of an `if` with no `else` is always 0. Fixed at all three sites, in **both** copies of the script. Half 2 (why the seeding transaction aborts at all) is still open |
+| 🟢 | **B-15 half 1** — a failed database init was reported to its caller as success, so the "already seeded" marker was written and the app came up looking healthy on a half-seeded database | Fixed 2026-10-04. The recorded cause was **wrong** (the CLI does exit 1 — see the corrected diagnosis under **B-15**). The real cause was `STATUS=$?` read after `fi` in `init-or-migrate.sh`, where the status of an `if` with no `else` is always 0. The script read `$?` in **four** places and **two** were broken; all four now use one explicit shape, in **both** copies of the script. Half 2 (why the seeding transaction aborts at all) is still open |
 | 🟢 | **The compose started the app after a failed init** | Fixed 2026-10-04 in `docker-compose.fullapp.yml` **and** `packages/create-app/template/docker-compose.fullapp.yml`: the init step is now checked, and on failure the block prints why and exits 1 **without** running `yarn start`. Mutation-proven — the guard test fails 3 cases against the old text and passes 6 against the new |
 | 🟢 | **`dev-entrypoint.sh`'s failure guard was dead code** | Fixed 2026-10-04. `run_setup()` opened with `set -e`, but the function is invoked as `if ! (run_setup)`, and **errexit is ignored for a function invoked as a condition** — so a failing `yarn install` / `build` / `generate` / `init` fell through, the function ended on a successful `cd`, and the "SETUP FAILED" banner below never printed. Measured in both `sh` and `bash`. Each step is now checked with `\|\| return 1` |
 | 🟢 | **B-06** — the app image would not build: `/packages/enterprise/package.json: not found` | Cleared 2026-10-04: `packages/enterprise` was deleted as **commercially licensed** (commit `7f9fa5d`) but the removal was **incomplete** — it left **3 Dockerfile `COPY` lines** and a `lint:ds` reference behind. All removed; verified nothing depends on the package (no `package.json`, clean `yarn.lock`) |

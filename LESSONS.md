@@ -1722,7 +1722,8 @@ STATUS=$?          # always 0
 
 The exit status of an `if` with no `else` whose condition failed is **0**, so
 `run_command_with_cli_recovery` reported **every** failure to its caller as
-success. Fixed at all three sites; the trap itself is written up as [[L63]].
+success. The script read `$?` in **four** places and **two** of them were broken; all four now use
+one explicit shape. The trap itself is written up as [[L63]].
 
 **Why it happens.** A sentinel file is a promise made to a future run, and it is
 written at the moment the writer is least able to judge. "The command returned 0"
@@ -2086,8 +2087,10 @@ branch. Prefer the `||` form: it says what it means, and it is also exempt from 
 
 **The general form:** a status is only evidence if you know *which command's* status you read. This is
 [[L62]] applied to shell plumbing rather than to a probe: the instrument was never measuring the
-subject. When one instance of a pattern is found, **grep the file for the others** — this defect
-appeared **three** times in one 100-line script, and fixing only the first left the bug half-alive.
+subject. When one instance of a pattern is found, **grep the file for the others** — this script read
+`$?` in **four** places and **two** of them were broken (the two read after an `fi`); the other two
+sat in an `else` branch and were correct only by accident of where they were written. Fixing the
+first alone left the bug half-alive.
 
 ---
 
