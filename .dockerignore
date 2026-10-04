@@ -22,9 +22,22 @@ coverage
 .turbo
 **/.turbo
 
+# Local GGUF models (Sprint 0 model server). The GGUF is ~4.7 GB; sending it
+# into the build context breaks the layer commit ("failed to stat active key").
+# It is mounted into the `model` container at runtime, not copied into an image.
+models/
+*.gguf
+
 # Generated files (will be regenerated)
 apps/mercato/.mercato/generated
 packages/core/generated
+
+# Local Next.js / Turbopack build cache. MUST NOT enter the image.
+# Tailwind v4 auto-scans source files; with .gitignore also absent from the
+# image it reads these binary cache files (~14k files, many non-UTF8) as CSS
+# sources and emits corrupted class names, failing `next build` with
+# "CssSyntaxError: Missed semicolon". Excluding it keeps the context clean.
+apps/mercato/.mercato
 
 # Local development files
 .env
