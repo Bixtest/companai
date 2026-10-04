@@ -295,7 +295,7 @@ ones) somewhere queryable. A product decision first — tracked as a backlog ite
 
 | # | Was | Cleared by |
 |---|---|---|
-| 🟢 | **The object list was unknown** (30 / 33 / 34) — it blocked the Business Model Kernel specification | Decided 2026-10-04: start from the **union of 36**, prune in the spec |
+| 🟢 | **The object list was unknown** (30 / 33 / 34) — it blocked the Business Model Kernel specification | Decided 2026-10-04: start from the **union of 37**, prune in the spec *(the union was mis-stated as 36 until 2026-10-04 — corrected)* |
 | 🟢 | **Two agent runtimes** (opencode + Hermes) — a "second copy" | Decided 2026-10-04: **Hermes takes the agent slot.** OpenCode is **not yet removed** — that is blocked on rewiring the platform chat (**B-05**, **N-8**) |
 | 🟢 | **B-01** — Hermes used `network_mode: host` | Cleared 2026-10-04: Hermes's official Docker guide uses **bridge networking + a published port**; the `hermes` service is written that way |
 | 🟢 | **B-02** — the admin password is typed by the owner | Cleared 2026-10-04 as a *blocker*: the arrow-(1) proof was taken from the container logs, the MCP's own tool list and the database, so no login was needed. The standing arrangement itself continues — see "Not blockers" above |

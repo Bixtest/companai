@@ -368,7 +368,7 @@ it is the place to start:
 documentation belongs in the library, in the right shelf, beside `ai/` and `analysis/`.
 
 **The owner answered the questions the same day, and every recommendation was adopted:** the
-**object list** starts from the union of 36 and is pruned by the specification; **Hermes** is the
+**object list** starts from the union of 37 and is pruned by the specification; **Hermes** is the
 agent runtime and **OpenCode is removed**; the first model is a small instruct model; the laptop
 budget is 16 GB; the **secrets** rule is confirmed (tenant secrets never enter a Hermes home);
 **RLS** is confirmed as a derived backstop; and the **model default** is default-deny.

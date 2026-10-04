@@ -2145,3 +2145,32 @@ be run against the unfixed code first** — if it passes there, it is not testin
 **The general form:** mutation-prove the instrument before believing its reading of the subject.
 Applied here, both tests were run against the pre-fix code and failed there (3 and 3 cases
 respectively) before being trusted on the fixed code (0 and 0).
+
+---
+
+## L66 — when a sentence states a total *and* its components, the components are the second route
+
+**What happened.** The vision's object lists are Doc 3 §38 = 30, README §16 = 33, Doc 3 §150 = 34.
+The union was recorded — in the analysis reports, the development plan, the backlog and the owner's
+own decision record — as **36**. It is **37**. The sentence that carried the figure had the proof of
+its own error inside it:
+
+> "the union of all three is **36 distinct objects** (30 ∪ 33 ∪ 34 = 30 + LegalEntity + Function +
+> Dependency + the four contracts)"
+
+`30 + 3 + 4` is 37. The stated total and the stated components disagreed, and the total was the
+wrong one. Re-measured twice — counting the added items per list, and extracting the three lists
+programmatically from the source files and de-duplicating two ways — both routes gave 37. The slip
+had been copied into **14 places across 8 files** and had reached a decision record.
+
+**Why it happens.** A total is the part people read and copy; the components are skimmed as
+decoration. So the wrong total travels and the right components stay put. This is why the error
+survived: nobody had a reason to add up a sum that was already answered.
+
+**The rule.** *A stated total is not evidence — the components are.* Whenever a document gives a
+count **and** the things it counts, add them up; if they disagree, the arithmetic is the finding.
+And a figure that has been copied into several documents is **more** suspect, not less: copying is
+not checking, and each copy is a chance to lose the context that would have caught it.
+
+**The general form:** read the derivation, not the result. This is [[L61]] (check the source, not
+the repeated number) applied to our own writing rather than a vendor's.

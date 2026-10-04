@@ -74,7 +74,7 @@ those as the plan.** The others are kept for their reasoning and point here.
 
 **Decided 2026-10-04** — the owner answered the questions file, which is now **deleted**:
 
-- ✅ **The object list** — start from the **union of 36 objects**, and let the Business Model Kernel specification prune it. *(This unblocks the specification.)*
+- ✅ **The object list** — start from the **union of 37 objects**, and let the Business Model Kernel specification prune it. *(This unblocks the specification. **Corrected 2026-10-04** — the union was mis-stated as 36 in this file and nine others; the vision's three lists are 30/33/34 and their union is 30 + 3 + 4 = **37**. The decision itself is unchanged.)*
 - ✅ **A1 — the agent runtime** — **Hermes**, and **OpenCode is removed** from the stack.
 - ✅ **A2 — the first model** — a small instruction model (~7–8B); Sprint 0 tests the plumbing.
 - ✅ **A3 — the laptop budget** — assume 16 GB RAM; the model server takes about half.
