@@ -125,8 +125,11 @@ curl --noproxy '*' -s -o /dev/null -w "%{http_code}\n" http://<VM-IP>:80/     # 
    **2FA is ON (enabled by the owner 2026-10-04 12:44:46)** — `two_factor_confirmed_at` is set, a
    `two_factor_secret` and recovery codes exist, and a live login attempt with the password now stops
    at `/two-factor-challenge` instead of granting a session. Two independent confirmations.
-   **Still to do: change the password.** Tested 2026-10-04: the exposed password `bixma2025AB?`
+   **Still to do: change the password.** Tested 2026-10-04: the previously exposed password
    **still authenticates** — 2FA is the only thing blocking it. See §6a Task 2.
+   *(The password itself was written out in this file until 2026-10-04. It has been redacted. Note
+   that redacting the text does **not** remove it from this repository's git history, and it was also
+   sent in a chat message — so **changing it is the fix**, not deleting the text. That is Task 2.)*
 2. **The Coolify onboarding wizard** — three steps: *Server connection*, *Docker environment*,
    *Project structure*. The first two are already satisfied (`localhost` server, Docker validated);
    the third creates a project + environment, which is what you need before deploying anything.
@@ -190,10 +193,11 @@ Same **Profile** page → the **Password** section → fill in **Current passwor
 current one.
 
 **Why it still matters, measured 2026-10-04:** a login attempt with the current password
-(`bixma2025AB?`) **succeeded at the credential check** — it only stopped because 2FA asked for the
-6-digit code. So the password that was typed into a chat message is still live. 2FA is doing the
-protecting right now; the password itself is still exposed. Change it and the exposure stops
-mattering.
+**succeeded at the credential check** — it only stopped because 2FA asked for the 6-digit code. So a
+password that has been written into this repository's history and sent in a chat message is still
+live. 2FA is doing the protecting right now; the password itself is still exposed. Change it and the
+exposure stops mattering. *(The literal password was redacted from this file on 2026-10-04. Redacting
+the text does not remove it from git history — changing the password is the fix.)*
 
 ### Task 3 — The ⚠ triangle on the `localhost` server card
 
@@ -233,37 +237,47 @@ Remove-Item "C:\Users\Ramzi\Downloads\companai\vms\ubuntu-24.04.5-live-server-am
 
 ---
 
-## 6b. `.wslconfig` — the WSL2 resource cap (**applied 2026-10-04**)
+## 6b. `.wslconfig` — the WSL2 resource cap (**applied and verified 2026-10-04**)
 
 **What it does.** WSL2 (which is where Docker Desktop's engine runs) is a small virtual machine. It is
 given a large slice of your RAM by default — Microsoft's documented default is **50% of total memory**
 (some older WSL builds used 80%, and that older figure is still repeated widely online). This machine
 has 32 GB, so that is about **16 GB** — and the `Platform-Server` VM also takes up to 6 GB. Worst case
-22 GB of 32, leaving ~10 GB for Windows. The file lowers WSL2's ceiling to 12 GB, so the worst case
-becomes 18 GB and Windows keeps ~14 GB.
+22 GB of 32, leaving ~10 GB for Windows. The file caps WSL2 at **16 GB**, which is *the default it was
+already getting* — the point is that it is now **explicit and reviewable** rather than whatever the
+installed WSL build happens to choose.
 
-**Be clear about what this is:** a safety margin, not a repair. Nothing was observed going wrong —
-free RAM was 8.5 GB when measured, with Docker Desktop not running. The point is to stop a bad case
-later, when you are running Docker builds *and* the Coolify VM *and* the browser *and* the rest.
+**A correction to this section, made 2026-10-04.** It first said `memory=12GB`, and the reason was
+wrong. 12 GB would have *starved* the stack: a measurement already on this page shows the local model
+container alone using **~10 GiB** of a Docker VM that was **15.56 GiB**. Cutting the VM to 12 GB would
+have caused out-of-memory kills mid-run, which read like a bug in our own code. Raised to **16 GB**,
+which is the size the stack was actually proven at. Budget: Windows ~10, the Coolify VM up to 6, WSL
+up to 16 → worst case 22 of 32. **A ceiling is not a reservation** — WSL only takes what it uses.
 
 **What was measured before writing it:** Windows 10 Pro 19045 · 32 GB RAM · 8 logical CPUs (i7-6820HQ)
-· Docker Desktop 4.93.0 installed **but not running** · only WSL distro is `docker-desktop` · no
-pre-existing `.wslconfig` (so nothing of yours was overwritten) · Platform-Server VM = 4 GB startup /
-6 GB assigned, dynamic memory on.
+· Docker Desktop 4.93.0 · only WSL distro is `docker-desktop` · no pre-existing `.wslconfig` (so
+nothing of yours was overwritten) · Platform-Server VM = 4 GB startup / 6 GB assigned, dynamic memory
+on.
 
-**What was written** — `C:\Users\Ramzi\.wslconfig`:
+**What is in `C:\Users\Ramzi\.wslconfig`:**
 
 ```ini
 [wsl2]
-memory=12GB
+memory=16GB
 processors=4
 swap=4GB
 ```
 
-**Why now, and what it cost you.** Nothing was disturbed: Docker Desktop and WSL were both idle, and
-a `.wslconfig` only takes effect the next time WSL starts. **No restart was needed and none was
-performed** — note that `wsl.exe` is blocked by this machine's security policy, so the restart could
-not have been run from here anyway.
+**Verified, not assumed — 2026-10-04 evening.** The file only takes effect when WSL next starts, so it
+sat untested until Docker Desktop was restarted. It has now been restarted, and the Docker machine
+reports exactly what the file asks for:
+
+| | File says | Docker machine reports |
+|---|---|---|
+| CPUs | `processors=4` | **4** |
+| Memory | `memory=16GB` | **15.62 GiB** (16 GB = 15.62 GiB) |
+
+So the cap is **active and correct**, and the earlier "NOT YET EXERCISED" caveat no longer applies.
 
 **If you want different numbers:** edit that file. Keep `memory` plus the VM's 6 GB comfortably under
 32 GB. To remove the cap entirely, delete the file — WSL2 returns to its default ceiling.

@@ -7,12 +7,20 @@ wondering why something is not moving.**
 **The rule:** a blocker is reported the same way a question is — in plain English, with **what
 clears it** and **whose move it is**. If the move is the owner's, it says so.
 
-**Checked:** 2026-10-04, 16:30. **Every blocker is re-checked each session** — a blocker is a
+**Checked:** 2026-10-04, 20:45. **Every blocker is re-checked each session** — a blocker is a
 claim about now, not about last time.
 
-**Open right now: 5** — B-04 (the Docker engine is down, and only the owner can start it), B-05
-(OpenCode is load-bearing), B-15 half 2 (why the seeding transaction aborts), B-16 (no embeddings
-endpoint), B-17 (no audit trail of agent tool calls). Of these, **only B-04 stops work today.**
+**Open right now: 4** — B-05 (OpenCode is load-bearing), B-15 half 2 (why the seeding transaction
+aborts), B-16 (no embeddings endpoint), B-17 (no audit trail of agent tool calls). **None of them
+stops Sprint 0**, and none stops the owner doing anything.
+
+**Cleared since the last check:** **B-04** — the owner started Docker Desktop and the whole stack
+was verified running the same evening: 8 services, 7 healthy, 21 AI tools discovered, the app serving
+on `http://localhost:3000`, loopback only. *(B-04 will recur on the next restart while `AutoStart` is
+off — see [`NEEDS-YOU.md`](NEEDS-YOU.md) item 6.)*
+
+**Everything that needs the owner is in one document: [`NEEDS-YOU.md`](NEEDS-YOU.md).** This file is
+about what stops *work*; that file is the numbered action list.
 
 **Fixed 2026-10-04 and moved to the Resolved table:** B-01, B-02, B-03, **B-15 half 1** (a failed
 database init was reported as success — the entry was re-scoped after the recorded diagnosis turned
@@ -28,42 +36,6 @@ out to be wrong), the compose that started the app after a failed init, and a de
 ---
 
 ## Open blockers
-
-### 🔴 B-04 — the Docker engine is not running, and **the agent cannot start it**
-
-**What.** Measured 2026-10-04, 15:55. The Docker **client** is installed (29.8.1) but the
-**engine** is down: `docker version` cannot reach the server —
-`npipe:////./pipe/dockerDesktopLinuxEngine` is not found. `com.docker.service` is `Stopped`;
-no `Docker Desktop.exe` / `com.docker.backend` process is running; Docker's own
-`settings-store.json` has `"AutoStart": false`, so this is the normal state after a reboot,
-not a fault.
-
-**Why it blocks.** Every build step needs the engine — `docker compose up`, pulling images,
-building the app image. Note the trap: `docker compose config` **parses without the engine**,
-which is why a "the stack parses" check passes while nothing can actually run.
-
-**What clears it.** **The owner starts Docker Desktop** (double-click it, or from the Start
-menu / tray) and waits for it to report ready; then `docker version` prints a `Server:` block.
-
-**Whose move.** The owner's — and only the owner's. **The agent cannot do it.** Measured
-2026-10-04: `docker desktop start` fails because Docker Desktop's startup path invokes
-**`wsl.exe`, which this machine's security policy blocks** for any program the agent launches:
-
-```
-PROGRAM BLOCKED BY SECURITY POLICY - the sandbox prevented a program on the configured
-Program Blacklist from starting:
-  - wsl.exe (C:\WINDOWS\System32\wsl.exe)
-```
-
-That block is not approvable and must not be worked around. It applies to the agent only —
-Docker Desktop started by the owner is unaffected. **So "start Docker Desktop" is a permanent
-owner step, not a one-off.** Recorded here so a later session does not read it as the agent
-having failed.
-
-**Optional, so this stops recurring:** turn on *Settings → General → Start Docker Desktop when
-you sign in*, which is what `AutoStart: false` currently disables.
-
----
 
 ### 🟠 B-05 — OpenCode cannot be removed in Sprint 0: the platform's own chat is built on it
 
@@ -301,6 +273,7 @@ ones) somewhere queryable. A product decision first — tracked as a backlog ite
 | 🟢 | **B-02** — the admin password is typed by the owner | Cleared 2026-10-04 as a *blocker*: the arrow-(1) proof was taken from the container logs, the MCP's own tool list and the database, so no login was needed. The standing arrangement itself continues — see "Not blockers" above |
 | 🟢 | **B-03** — no local model file | Cleared 2026-10-04: `Qwen2.5-7B-Instruct-Q4_K_M.gguf`, 4,683,074,240 bytes, `GGUF` magic verified |
 | 🟢 | **B-04 (first occurrence)** — Docker Desktop's engine was not running | Cleared 2026-10-04: the owner started it and the engine reported Server **29.8.1**. **It recurred the same day** — `AutoStart` is off, so the engine is down again whenever the machine restarts. It is open again above, now with the finding that the agent cannot start it |
+| 🟢 | **B-04 (second occurrence)** — the engine was down again | **Cleared 2026-10-04, evening:** the owner started Docker Desktop and the full stack was verified running — **8 services up, 7 healthy, 21 AI tools discovered**, the app serving on `http://localhost:3000`, **loopback only**. Measured with `docker version` reporting a `Server:` block, not with `docker compose config`. **This recurs on every restart while `AutoStart` is off, and the agent cannot start it** (Docker Desktop's startup runs `wsl.exe`, blocked by this machine's Program Blacklist — not approvable, must not be worked around). So "start Docker Desktop" is a **permanent owner step**: the optional fix is turning on auto-start, [`NEEDS-YOU.md`](NEEDS-YOU.md) item 6 |
 | 🟢 | **B-15 half 1** — a failed database init was reported to its caller as success, so the "already seeded" marker was written and the app came up looking healthy on a half-seeded database | Fixed 2026-10-04. The recorded cause was **wrong** (the CLI does exit 1 — see the corrected diagnosis under **B-15**). The real cause was `STATUS=$?` read after `fi` in `init-or-migrate.sh`, where the status of an `if` with no `else` is always 0. The script read `$?` in **four** places and **two** were broken; all four now use one explicit shape, in **both** copies of the script. Half 2 (why the seeding transaction aborts at all) is still open |
 | 🟢 | **The compose started the app after a failed init** | Fixed 2026-10-04 in `docker-compose.fullapp.yml` **and** `packages/create-app/template/docker-compose.fullapp.yml`: the init step is now checked, and on failure the block prints why and exits 1 **without** running `yarn start`. Mutation-proven — the guard test fails 3 cases against the old text and passes 6 against the new |
 | 🟢 | **`dev-entrypoint.sh`'s failure guard was dead code** | Fixed 2026-10-04. `run_setup()` opened with `set -e`, but the function is invoked as `if ! (run_setup)`, and **errexit is ignored for a function invoked as a condition** — so a failing `yarn install` / `build` / `generate` / `init` fell through, the function ended on a successful `cd`, and the "SETUP FAILED" banner below never printed. Measured in both `sh` and `bash`. Each step is now checked with `\|\| return 1` |

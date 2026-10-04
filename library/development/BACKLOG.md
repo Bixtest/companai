@@ -72,6 +72,11 @@ those as the plan.** The others are kept for their reasoning and point here.
 
 ### Waiting on the owner — I cannot close these
 
+> **Everything that needs the owner is gathered in one document: [`NEEDS-YOU.md`](NEEDS-YOU.md).**
+> The list below is the *roadmap* view — what is parked and why. `NEEDS-YOU.md` is the *action* view:
+> numbered, with literal steps and a way to answer all of it at once. If the two disagree,
+> `NEEDS-YOU.md` is the one to read.
+
 **Decided 2026-10-04** — the owner answered the questions file, which is now **deleted**:
 
 - ✅ **The object list** — start from the **union of 37 objects**, and let the Business Model Kernel specification prune it. *(This unblocks the specification. **Corrected 2026-10-04** — the union was mis-stated as 36 in this file and nine others; the vision's three lists are 30/33/34 and their union is 30 + 3 + 4 = **37**. The decision itself is unchanged.)*
