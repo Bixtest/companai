@@ -2174,3 +2174,11 @@ not checking, and each copy is a chance to lose the context that would have caug
 
 **The general form:** read the derivation, not the result. This is [[L61]] (check the source, not
 the repeated number) applied to our own writing rather than a vendor's.
+
+**And its inverse, found the same day.** The first draft of the Business Model Kernel specification
+tallied its own status register as `22 settled · 11 partly · 7 open`. The measured figures are
+`22 · 10 · 8`. **The sum was right — 40 either way — and the split was wrong.** So "it adds up" is
+not a check: a wrong split hides behind a correct total just as easily as a wrong total hides behind
+correct components. Both halves of a figure need deriving, and the half nobody re-derives is the one
+that is wrong. This is also why the critic pass that caught it is written into the document itself
+rather than mentioned in a message.
