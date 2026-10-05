@@ -2084,7 +2084,7 @@ gets the new code and tests. Repo 1 (root, branch `master`) gets the docs. **Nev
 | Layer | File (under `workspace/starting-kit/`) | What it already gives us |
 |---|---|---|
 | **The vision's Widget** | — | **Nothing.** `find packages/shared/src/lib -iname "*widget*"` → **0 files**. The contract, the IR and the registry exist in the vision (Doc 5 §10–15, §33–35, §112–114, §195, and the 40 rules of Part LXXIII) — **specified, not built.** |
-| **The host (V-23)** | `packages/shared/src/modules/widgets/` + `packages/ui/src` | The **UI injection framework** the plan names as the host. **Measured 2026-10-05:** the `shared` side is **1,359 lines** (`injection.ts`, `injection-loader.ts`, `injection-position.ts`, `component-registry.ts`, `injection-progress.ts`, + 4 test files); the `ui` side is **2,563 lines across 20** injection/widget files. It gives `InjectionWidgetMetadata` (`id`, `title?`, `description?`, `features?`, `priority?`, `enabled?`, `requiredModules?`, `requiredFields?`), injection positions and placements, and a component registry. **This is a React component-injection system** — the renderer, not the object. *(Correction: the shortcut register attributes the "1,359-line" figure to `packages/ui`; measured, 1,359 is the `shared` directory and `packages/ui` is 2,563. The code wins — recorded here.)* |
+| **The host (V-23)** | `packages/shared/src/modules/widgets/` + `packages/ui/src` | The **UI injection framework** the plan names as the host. **Measured 2026-10-05, definitions named so they reproduce:** the `shared` side is **1,359 lines** (the **five source files** `injection.ts`, `injection-loader.ts`, `injection-position.ts`, `component-registry.ts`, `injection-progress.ts`; the 4 test files are **excluded**, and including them makes it 1,821); the `ui` side is **2,563 lines across 20 files** whose **path** matches `widget` or `injection` (`find packages/ui/src \( -iname "*widget*" -o -iname "*injection*" \) -type f`). It gives `InjectionWidgetMetadata` (`id`, `title?`, `description?`, `features?`, `priority?`, `enabled?`, `requiredModules?`, `requiredFields?`), injection positions and placements, and a component registry. **This is a React component-injection system** — the renderer, not the object. *(Correction: the shortcut register attributes the "1,359-line" figure to `packages/ui`; measured, 1,359 is the `shared` directory and `packages/ui` is 2,563. The code wins — recorded here.)* |
 | **The name clash — already known** | `packages/core/src/modules/*/widgets/injection/*/widget.ts(x)`; `compai/planning/CHANGELOG.md` §"the four vocabulary collisions" | The kit **already calls its dashboard tiles "widgets"** — a TSX component with a metadata id and slots. That is a **different object** from the vision's Widget. **Recorded, never resolved.** The analysis's recommendation (batch 4 §15b, carried to batch 9): keep "widget" for the kit's tile, call the vision object a **"Business Widget"**. |
 | The canonical model | `packages/shared/src/lib/kernel/` (G-01) | Canonical ids (`canonical-id.ts`), `ModelDescriptor`, and `contentVersion` — the pure content hash a Widget's version reuses. |
 | The IR and the compiler | `packages/shared/src/lib/business-ir/` (G-02) | `BusinessQueryIR`/`BusinessCommandIR` and `compileQuery`. A Widget's `source` names a **Function**, and a Function already carries compiled IR. |
@@ -2104,7 +2104,7 @@ gets the new code and tests. Repo 1 (root, branch `master`) gets the docs. **Nev
 
 **Alternative considered — build a new renderer.** **Rejected, and the plan already decided it.** V-23 is a **KEEP** in the shortcut register, described as *"the host a vision Widget can render into"*. Building a second renderer duplicates something bought and working.
 
-**Alternative considered — resolve the naming collision by renaming the kit's tile.** **Rejected in favour of the analysis's own recommendation.** The kit's word is in **363 files** (`packages/core/src` + `packages/ui/src` alone, measured 2026-10-05) and its public module API; the vision's object is **new and has no callers**. Renaming the cheap side is the cheap move. **Our call (reported):** the vision object is a **`BusinessWidget`**; the kit's tile stays `widget`. **Recorded as *our* call so the owner can overrule it in one line** (rule zero-zero case 3, rule zero-seven).
+**Alternative considered — resolve the naming collision by renaming the kit's tile.** **Rejected in favour of the analysis's own recommendation.** The kit's word is in **363 files** (the `.ts`/`.tsx` files under `packages/core/src` and `packages/ui/src` alone whose **content** contains the case-sensitive word `widget`; measured 2026-10-05, and the definition matters — case-insensitive over all extensions gives 458) and in its public module API; the vision's object is **new and has no callers**. Renaming the cheap side is the cheap move. **Our call (reported):** the vision object is a **`BusinessWidget`**; the kit's tile stays `widget`. **Recorded as *our* call so the owner can overrule it in one line** (rule zero-zero case 3, rule zero-seven).
 
 **Alternative considered — persist the registry to the database now.** **Deferred, with the same two reasons as G-03 and a named trigger.** (i) This project tests DB code against a **mocked** EntityManager, so a migration here would be **unprovable**. (ii) The registry's shape is driven by the **`@`/`#` reference layer (G-09)**, which will query it. **Trigger: G-09.** Until then the registry is a **value** — built, tested and serialisable — exactly as G-01 and G-03 built their objects before persisting them.
 
@@ -2138,6 +2138,72 @@ gets the new code and tests. Repo 1 (root, branch `master`) gets the docs. **Nev
 5. **`document.ts` — the round-trip.** `WidgetDocument` (`companai.business-widget`, version 1), export/import, **byte-stable**, empty round-trip — the pattern G-01 and G-03 both proved.
 6. **Tests, beside the code.** The decisive one: **a published Function placed in a Widget runs from the Widget's own inputs with no AI** (through `runFunction`, asserting the exact `QueryOptions`). Plus: the IR is semantic (type-level probe, **falsified first**); the placement derives inputs from `parameterSchema`; the registry answers the graph questions and reports collisions; the document round-trips.
 7. **Measure and record.** Run the `shared` suite, `tsc --noEmit` for `shared`/`cli`/`core`, and both test-including configs; record the counts in Step 4. Then the **critic pass** (Step 5).
+
+## Step 4 — Done when
+
+*Filled after the build, from measurement, not in advance. Measured 2026-10-05.*
+
+| | Criterion | Status |
+|---|---|---|
+| ✅ | The Widget is a first-class typed object with a contract and an IR | **Done.** `types.ts` carries §10's parts and §195's manifest (id, version, name, purpose, typed inputs and outputs, actions, events, dependencies, permissions, collaboration, persistence, rendering, `ai`, and `presentation` now a defined shape, no longer opaque). `ir.ts` carries the semantic IR. The document carries both, so a Widget cannot be stored as one half. |
+| ✅ | The IR is semantic: no frontend vocabulary | **Done, and falsified first.** `WidgetIR` is `type`, `title`, `source`, `inputs`, `actions`, and has nowhere to put `className`, `style`, `props` or `children`. A type-level probe with four `@ts-expect-error` directives proves it: planting `className` on the IR makes `tsc` report `TS2578 Unused '@ts-expect-error' directive` (exit 1), and removing it returns exit 0. |
+| ✅ | The placement chain Function → Widget is real (§160) | **Done.** `placeFunction(fn, options)` derives the Widget's inputs from the Function's `parameterSchema`, names the Function in `source`, and **refuses** anything G-03's `isRunnable` rejects. |
+| ✅ | The registry answers the object-graph questions | **Done.** `registry.ts`: canonical id against instance id, `whereUsed`, `dependenciesOf`, `dependentsOf`, and collisions **reported, never merged**. |
+| ✅ | The round-trip is byte-stable | **Done.** `document.ts` (`companai.business-widget`, version 1), export/import, and an empty round-trip, the pattern G-01 and G-03 both proved. |
+| ✅ | **A published Function placed in a Widget runs from the Widget's own inputs with no AI** | **Done.** `placement-run.test.ts`: a real Function is placed, then run through the Widget's own inputs, asserting the **exact `QueryOptions`** that arrived. |
+| ✅ | The no-LLM guarantee holds by two routes | **Done.** Route 1 behavioural (the run above); route 2 structural (the transitive import graph of the module holds no AI import). **Route 2 was falsified, not asserted:** an AI import planted in `user-function/lifecycle.ts`, deliberately *outside* this folder, made the graph check fail naming `lifecycle.ts -> ai` while the directory scan stayed green. |
+| ✅ | The critic pass names what it attacked and finds nothing | **Done, after one build round and one critic pass.** Four findings, all fixed: three defects in the code, and one in the documents (two published numbers whose definitions had not been written down). Named below. |
+
+**Measured 2026-10-05, from the artefacts:**
+
+- `business-widget` **6 suites / 68 tests pass.**
+- The **shared package: 188 suites / 2178 tests**, of which **187 suites / 2170 tests pass.** The one failing suite is the **known environmental** `bootstrap/dynamicLoader.tsconfig.test.ts` (8 tests), unchanged by this work.
+- **`tsc --noEmit` clean** in `shared`, `cli` **and** `core`; and clean for the new test-including config `tsconfig.business-widget-tests.json`.
+- **Falsified, not asserted:** planting `className` on `WidgetIR` made `tsc -p tsconfig.business-widget-tests.json` report `TS2578` (exit 1); restoring returned exit 0 (md5 back to `a5a79809ed9803e5d7b853c9c42aba97`). Planting `import { generateText } from 'ai'` in `user-function/lifecycle.ts` made the graph check fail naming `lifecycle.ts -> ai` while the directory scan stayed green, 1 suite failed / 6 passed; restoring returned all green (md5 back to `5953850a131434c023891c39ec91ef32`). **Both were re-run at HEAD, not carried from the build round** (the critic pass had since edited `ir.ts`, so its earlier md5 no longer applied).
+
+**That environmental failure, re-proven for this change by two fresh routes (the third is on record from G-01):**
+
+1. **Nothing outside the new folder references it.** A search for `business-widget` across `packages/` returns only G-07's own files. The change is additive: one new directory and one new tsconfig.
+2. **Excluding the new folder changes nothing but our own counts.** The full suite with `business-widget` ignored is **182 suites / 2110 tests**, with the **same** 1 suite / 8 tests failing. So G-07 adds exactly 6 suites and 68 tests and leaves the failure untouched. The suite imports only `node:fs`, `path`, `child_process` and `url`, and it fails at process spawn, before any project code runs.
+
+## Step 5 — The critic pass: what it attacked, and what it found
+
+**Pass 1 — the claims as stated.** Attacks: (a) can the IR carry frontend vocabulary? (b) can a Widget become a second source of truth (does it hold data)? (c) can a Widget's inputs drift from its Function? (d) does the registry's "same content" agree with the document's? (e) does the no-LLM check actually fail if an AI import is added? (f) is every number re-measured from the artefact? **Three defects found.**
+
+### The three defects, each fixed and permanently covered
+
+1. **A user-supplied input with no matching IR input could be imported.** The contract can declare an input with `source: 'user'` (a form field), and if the IR had no matching input the importer accepted it, producing a field that can never be drawn. Same class as G-03's silently-dropped sort. **Fixed:** `CONTROL_REQUIRING_SOURCES` names the sources that must have a control (`user`, `function_parameter`), and `document.ts` now checks **both directions**: every control-requiring contract input must have an IR input, and every IR input must be declared in the contract. *Covered by:* a new suite in `document.test.ts`, "the two halves must agree about the inputs".
+
+2. **The registry and the document disagreed about "the same content".** The registry compared **raw** widget content; the document compared **canonicalised** content. So two Widgets that round-trip to the same bytes could be reported as a collision, or two that differ only in the order of a set-like field could be reported as different. **Fixed:** one notion, `contentOf(widget) = stableStringify(canonicaliseWidget(widget))`, shared by both. *Covered by:* `registry.test.ts`, "treats reordered set-like fields as the same content, not a collision".
+
+3. **Two over-broad declarations.** `FRONTEND_VOCABULARY` contained `ts`, which would flag a legitimate value (a filename, a currency, a set of initials); and the placement set `scope: 'organization'` on a Widget that is owned by a Function, a contradiction. **Fixed:** `ts` removed from the vocabulary, and the contradictory `scope` removed. *Covered by:* the semantic scan in `ir.test.ts` and the placement tests.
+
+### Also found during the build, before the critic pass
+
+- **The document validated `control` on the wrong half.** `control` lives on the IR's inputs, not the contract's; the importer looked for it on the contract, so a placed Widget threw "unknown control undefined" on import. **Fixed:** the document carries **both** halves, so `exportWidget(widget, ir)` and `importWidget` returns `{ widget, ir }`. This is what the plan's own done-when means by "a contract **and** an IR".
+- **A test asserted the wrong thing.** One IR test checked membership against a two-element array instead of the full control list. **Fixed** to assert against `WIDGET_CONTROLS`.
+
+### A fourth finding: two published numbers were right, but their definitions were not written down
+
+**Attack: take every number this sprint published and re-measure it from the artefact.** Three of the four reproduce exactly once the definition is named, and the definitions had been left implicit, so a reader re-measuring would get a different figure and conclude the document lied.
+
+- **`1,359` (the `shared` injection framework)** is the **five non-test** `.ts` files. Including the tests gives **1,821**. The Step 1 cell listed the test files in the same breath, implying they were counted. **Fixed:** the cell now says the tests are excluded.
+- **`2,563 across 20` (the `ui` side)** is the union of files whose **path** matches `widget` or `injection`. Matching the word in **content** instead gives 103 files / 32,461 lines. **Fixed:** the definition is now in the cell.
+- **`363` (the kit's use of the word `widget`)** is the `.ts`/`.tsx` files under `core/src` + `ui/src` whose **content** contains the **case-sensitive** word. Case-insensitive over all extensions gives **458**, and a word-boundary match gives **290**. **Fixed:** the definition is now written beside the number, in both the COOKBOOK and the CHANGELOG.
+- **The two falsification md5s** were the one genuine error: `ir.ts` was edited by this very critic pass (dropping `'ts'`), so the hash recorded at the build round no longer described the file. **Fixed:** both falsifications were **re-run at HEAD** and the true hashes written back (`ir.ts` `a5a79809…`, `lifecycle.ts` `5953850a…`).
+
+**The lesson, and it is the owner's own rule:** a number is only as good as the definition printed next to it. "Measured from the artefact" is not enough if the artefact's boundary is unstated.
+
+### OPEN — and it needs the owner's eye, not mine
+
+**A verified Function's definition can still be edited without invalidating its verification.** Carried from G-03. **Status: OPEN, trigger named.** **Not fixed here, deliberately:** G-07's placement **creates** a Widget from a Function; it does not **mutate** the Function, so no new editing operation is reachable through this work. **Trigger: the first editing operation** (whichever item adds "change a saved Function"). The fix is the one G-03 named: record the definition's fingerprint in the verification record and refuse to run when it no longer matches.
+
+### Our calls, reported so they can be overruled cheaply (rule zero-zero)
+
+1. **The name.** The vision's object is a **`BusinessWidget`**; the kit's existing dashboard tile keeps the word `widget`. The kit's word is in 363 files and in its public module API; the vision's object is new and has no callers, so renaming the cheap side is the cheap move. **Reported so the owner can overrule it in one line.**
+2. **The document carries both halves.** A Widget document is a contract **and** an IR, not one or the other, because the contract's inputs and the IR's inputs must agree and only the document can hold both to check that.
+3. **The registry is a value, not a database row.** Deferred with the same two reasons as G-03 (DB code is tested against a mock here, so a migration would be unprovable; and the registry's shape is driven by the `@`/`#` reference layer). **Trigger: G-09.**
+4. **Widget permissions are declared metadata only.** Rule 16 says a widget permission never replaces business authorization. G-07 records the requirement and does not fake the enforcement; **G-04** is where it lands.
 
 ---
 

@@ -222,10 +222,13 @@ is a typed business object with a contract, an IR and a registry. Batch 4 §15b 
 "widget" for the kit's tile and calling the vision object a **"Business Widget"**, and that
 recommendation was carried to batch 9 but never formally taken. **G-07 takes it as its own call:**
 the vision object is a **`BusinessWidget`** (`packages/shared/src/lib/business-widget/`); the kit's
-tile keeps the word `widget` unchanged. The reason is cost, not taste — the kit's word is in dozens
-of files and its public module API, the vision's object has no callers, so renaming the cheap side
-is the cheap move. **Recorded as our call, not an owner decision, so it can be overruled in one
-line** (COOKBOOK rules zero-zero and zero-seven).
+tile keeps the word `widget` unchanged. The reason is cost, not taste — the kit's word is in **363
+files** (the `.ts`/`.tsx` files under `packages/core/src` and `packages/ui/src` alone whose content
+contains the case-sensitive word `widget`, measured 2026-10-05) and its public module API, the
+vision's object has no callers, so renaming the cheap side is the cheap move. **Recorded as
+our call, not an owner decision, so it can be overruled in one line** (COOKBOOK rules zero-zero and
+zero-seven). **Built 2026-10-05:** the call is now implemented, not just recorded — the code lives in
+`packages/shared/src/lib/business-widget/` and the type is `BusinessWidget`.
 
 ### Added — the build order, as a gate
 
