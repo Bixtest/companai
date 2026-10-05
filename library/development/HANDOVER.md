@@ -488,12 +488,12 @@ He has said this more than once, so it is worth repeating:
 **Two groups below. Group A was measured on 2026-10-05. Group B is quoted from older documents
 and was *not* re-measured — treat it as a starting point, not a fact.**
 
-**Group A — measured 2026-10-05 (revision 2):**
+**Group A — measured 2026-10-05 (revision 6):**
 
 | | |
 |---|---|
-| **Repo 1** (thinking/docs) | `master`, HEAD **`30bde42`**, **clean** |
-| **Repo 2** (code) | `main`, HEAD **`962ae2a`**, **clean** |
+| **Repo 1** (thinking/docs) | `master`, HEAD **`a72fdfe`** — the commit that carries the G-03 docs, **clean** |
+| **Repo 2** (code) | `main`, HEAD **`cafe7d6`** — the commit that carries the G-03 code, **clean** |
 | **Codebase shape** | **21 packages, 1 app** (`apps/mercato`) — a monorepo (Yarn 4.17.1 + Turbo) |
 | **Documentation** | `library/` holds **3,441 markdown files**; `LESSONS.md` 2,746 lines (L1–L82); `JOURNAL.md` 3,242 lines; `COOKBOOK.md` 1,187 lines |
 | **The studies** | analysis programme **complete** (batches 0–12, 13 reports); Paperclip + Hermes study **complete** (11 batches, 3,940 lines, 53 lessons) |
