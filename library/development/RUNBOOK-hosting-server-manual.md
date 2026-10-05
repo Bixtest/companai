@@ -206,7 +206,7 @@ curl --noproxy '*' -s -o /dev/null -w '%{http_code}\n' http://172.28.50.2/
 browser / the internet
         │
         ▼
-   Cloudflare  ──────────────►  (optional) a tunnel, when the VM has no public address
+   Cloudflare  ──────────────►  (optional) a tunnel, because the VM has no public address of its own
         │
         ▼
   Traefik  :80 / :443        container `coolify-proxy` — routes by the Host header
@@ -254,7 +254,8 @@ platform's). A container must be on `coolify` to be routed by Traefik.
 ## 4. DNS — read this before you plan anything
 
 **There is no DNS server on this VM.** Nothing is listening on port 53. Plesk shipped one; this stack
-deliberately does not, because DNS belongs where the domain's nameservers already point.
+deliberately does not, because the phone book belongs at the registrar that already owns the name — not
+on the machine that serves the site. (§"Does adding a DNS server to the VM help?" below says why.)
 
 So "adding a domain" is really **two separate jobs**, and only one of them is on this server:
 
@@ -266,16 +267,93 @@ So "adding a domain" is really **two separate jobs**, and only one of them is on
 Nothing on the server can do job 1. If a name does not resolve, no amount of Coolify configuration will
 make it work — and that is the most common reason "it doesn't work yet".
 
-### The problem to solve first: this VM has no public address
+### The problem to solve first: nothing can reach in
 
-The VM is behind your laptop, behind NAT, on Internal switches. Public DNS has to point at something the
-internet can reach. Two ways:
+**The VM has no public address of its own** — it sits behind your laptop, behind NAT, on Internal
+switches. The *network* does have one public address, and it is worth knowing exactly what it is and
+what it does. All of the following was measured on 2026-10-05:
 
-- **Port forwarding on your router** — needs a static public IP or dynamic DNS, and exposes the machine
-  directly. **Not recommended.**
+| Question | Answer | How it was measured |
+|---|---|---|
+| the network's public address | **`151.177.174.17`** | asked three independent services from inside the VM — `api.ipify.org`, `ifconfig.me`, `ipinfo.io`. All three agree. |
+| whose address it is | Tele2 Sweden, Malmö (`AS1257`); reverse DNS `c151-177-174-17.bredband.tele2.se` | `ipinfo.io` |
+| a real address, or a shared one? | **real** — not CGNAT | CGNAT would be in `100.64.0.0/10`; this address is not |
+| does anything reach **in** through it? | **No** | port 80 probed from **three independent outside hosts** — `api.hackertarget.com`, `api.allorigins.win`, `r.jina.ai`. All three failed to connect. The laptop's own attempt also failed, but that one is corroborating rather than decisive: the laptop sits behind the *same* router, and hairpin routing often fails even when a forward does exist. |
+
+**A public address is not the same as an open door.** The router owns that address, and today it passes
+nothing inbound to the laptop. So a DNS record pointing at `151.177.174.17` would give you a name that
+*resolves* and a site that *does not load* — the classic half-finished domain.
+
+Two ways to change that, and only one is safe:
+
+- **Port forwarding on your router** — tell the router to pass incoming traffic to the laptop, then tell
+  the laptop to pass it on to the VM. Needs a router configuration nobody has set up, needs the address
+  to stay put (it is a home broadband address and can move), and **exposes the laptop directly to the
+  internet. Not recommended.**
 - **Cloudflare Tunnel** — the VM dials *out* to Cloudflare, so **nothing is opened inbound and no router
-  change is needed**. This is the chosen route. It needs a domain whose DNS is on Cloudflare, plus a
-  tunnel token. **See §12** — this is already proven to work here.
+  change is needed**. Cloudflare's own documentation confirms a tunnel needs only *outbound* port
+  `7844`. This is the chosen route, and **it is already proven working here** — see §12.
+
+### Does adding a DNS server to the VM help? No — and here is why
+
+**Job 1 from the table above happens on Cloudflare's (or GoDaddy's) servers, on the internet. It does not
+happen on this VM, and it cannot.**
+
+DNS is the internet's phone book: it turns a name into an address. To be the phone book for
+`yourdomain.com`, you must tell your registrar *"the phone book for this name lives at this server"* —
+and that server must be reachable by everyone on the internet. A DNS server on the VM fails that test:
+
+- The VM's only address is `172.28.50.2`, which exists **inside this laptop and nowhere else**. Listing
+  it at the registrar would tell the whole internet to look up your domain at an address it cannot
+  reach — like publishing your home address as "the third door on the left in my hallway".
+- Nothing reaches this network inbound anyway — measured above, three ways from outside.
+- It is technically possible (install `BIND` or `dnsmasq`) and would buy you nothing but a thing to keep
+  alive and keep patched.
+
+Plesk shipped a DNS server because Plesk was often the *authoritative* server for its own domains, on a
+machine with a real public address. Neither of those is true here.
+
+**Where a DNS server *would* help:** giving names to machines inside the laptop network. That is already
+done, for free, with the Windows hosts file — see "Testing locally", below.
+
+### Many domains on one address — yes, and how it differs from Plesk
+
+**Yes.** One address can serve as many names as you like, across as many different domains as you like,
+each with its own subdomains. Nothing about that needs extra hardware or extra addresses, and it is how
+Plesk worked.
+
+It works because names are told apart **by the name, not by the address**: the visitor's browser says "I
+want `shop.example.com`", and the proxy picks the container for that name. That is already proven on this
+VM — see §6, where `wp.test/files` was served by a *different* container than the one answering the root,
+purely on the strength of the `Host:` header.
+
+Two honest corrections to the Plesk picture:
+
+- **In Plesk, one program did both jobs** — it ran the phone book *and* hosted the sites. Here they are
+  split: the phone book lives at GoDaddy or Cloudflare, the "which site" decision lives in this VM's
+  proxy. So adding a domain is **two steps in two places**, not one. That is not a downgrade; it is just
+  where the pieces are.
+- **If you keep GoDaddy's nameservers, Cloudflare cannot serve the site.** Cloudflare's documentation is
+  explicit: on the **Free and Pro** plans the *primary (full) setup is the only one available*, which
+  means the domain's **nameservers must be moved to Cloudflare**. The alternative that keeps GoDaddy's
+  nameservers ("partial / CNAME setup") is **Business and Enterprise only** — i.e. paid.
+
+**The practical recipe for many GoDaddy domains:**
+
+1. Pick one domain as the main one, add it to Cloudflare, and change its nameservers at GoDaddy.
+2. For each further domain, do the same. All of them fit in one free Cloudflare account.
+3. Create **one** tunnel (§12). It serves every name in every one of those domains.
+4. In the tunnel's **Routes → Add route → Published application**, add one route per hostname
+   (`app.domain1.com`, `shop.domain2.com`, …), each pointing at the same service URL.
+5. In Coolify, put those same hostnames in the resource's **Domains** field (§5).
+
+Note that with the tunnel the names do not even share an address — they share the *tunnel*, which is the
+same outcome with nothing exposed. Sharing an address only enters the picture if you take the
+port-forward route instead.
+
+> **Not yet executed end to end here, and flagged as such.** No domain has been put on Cloudflare yet, so
+> steps 1–5 are derived from Cloudflare's own documentation plus this VM's measured behaviour. The first
+> real domain is the test; §12 is where the proof gets recorded.
 
 ### Adding DNS records
 
@@ -386,6 +464,11 @@ Then Traefik gets the certificate, using Let's Encrypt. This needs two things to
 
 - the name **resolves publicly** (so Let's Encrypt can reach it), and
 - ports **80 or 443** are reachable from the internet.
+
+> **Neither is true on this VM today, and both were measured (2026-10-05).** The network's public address
+> is `151.177.174.17`, but nothing reaches it inbound — port 80 was probed from three independent outside
+> hosts and all three failed to connect. So **Case 2 cannot work here until a router port-forward
+> exists**. Case 1 needs none of that, which is exactly why it is the chosen route.
 
 Write the domain with **`https://`** — that is what adds `tls.certresolver=letsencrypt`. Then:
 

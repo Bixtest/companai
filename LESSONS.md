@@ -2452,3 +2452,64 @@ behaviour was identical to the default.
 transport. And when the honest answer turns out to be "this knob is a no-op here", the right move is to
 **remove it and say so**, not to leave it set at a value that looks deliberate. A setting that does
 nothing is worse than an absent one, because it tells the next reader a story that is not true.
+
+---
+
+## L76 — a public address is not an open door, and DNS lives where the name is owned
+
+Two questions arrived together, both of the form "can we just add a thing to make this work?":
+*does a DNS server on the VM help?* and *can many domains share one address?* The second is a plain
+yes. The first is a no, and answering it well required correcting an assumption that earlier documents
+in this repo had already written down.
+
+**What was assumed.** "This VM has no public address" — repeated in the manual, in the architecture
+diagram, and in the deployment runbook's not-proven list. It reads as a fact about the network. It is
+really a fact about the *VM*, and it hid a second, different fact underneath it.
+
+**What was measured.** The VM's own address is `172.28.50.2` — private, and it exists only inside the
+laptop's Hyper-V Internal switch. But the *network* the laptop sits on has a real public address,
+`151.177.174.17`, confirmed by three independent services asked from inside the VM (`api.ipify.org`,
+`ifconfig.me`, `ipinfo.io` — all agree), with reverse DNS `c151-177-174-17.bredband.tele2.se` and
+`ipinfo.io` placing it in Malmö, Sweden, AS1257 Tele2. It is **not** CGNAT: CGNAT would live in
+`100.64.0.0/10`, and this address does not.
+
+That measurement alone would have flipped the conclusion from "DNS cannot point at us" to "DNS *could*
+point straight at us". It would have been wrong to stop there, because it answers a different question
+than the one that matters. **Having a public address and being reachable from the internet are two
+different facts**, and only the second one decides whether a DNS record pointing at that address does
+anything useful.
+
+**The measurement that decides it.** Port 80 on `151.177.174.17`, probed from three independent vantage
+points *outside* this network: `api.hackertarget.com`, `api.allorigins.win`, `r.jina.ai`. All three failed
+to connect. The laptop's own attempt failed too, but that one proves little by itself — the laptop sits
+behind the *same* router, and hairpin routing commonly fails even when a forward does exist. The outside
+hosts are what decide it; the local test only corroborates. The router owns the address and forwards
+nothing inbound. So a record pointing at it yields a name that resolves and a site that does not load —
+the half-finished domain, produced by measuring the wrong layer and believing it.
+
+**Why the DNS-server idea cannot work here, stated once.** DNS is the internet's phone book. To be the
+phone book for a name you must tell the registrar "look this name up *here*", and *here* must be
+reachable by everyone. The VM's only address is `172.28.50.2`, which exists inside one laptop. Listing
+it at the registrar would direct the whole internet at an address it cannot reach. Plesk shipped a DNS
+server because Plesk was often the authoritative server for its own zones, on a host with a real public
+address; neither condition holds here. Installing one is possible and buys nothing but a thing to keep
+alive.
+
+**And the ownership fact that decides the Cloudflare path.** Cloudflare's own docs, not a blog: a
+*primary (full) setup is the most common and the only one available for Free or Pro plans*, which means
+the domain's nameservers must move to Cloudflare. The setup that keeps the registrar's nameservers
+("partial / CNAME") is Business and Enterprise only. So "I have many domains on GoDaddy" is a yes for
+sharing one address, and simultaneously a *two-step, two-place* job per domain — add to Cloudflare, then
+move nameservers — because the phone book and the site are not in the same place.
+
+**The rule.** *Reachability is measured from outside, never inferred from an address.* An address that
+looks public says nothing about whether a packet gets in; the router in between is the thing that
+decides, and it is not visible from the machine. Ask an outside host to connect, from more than one
+outside host.
+
+**The general form:** the same discipline as [[L73]] and [[L75]] — *the thing you can see is not
+necessarily the thing that acts.* Here it was an address that existed without admitting anything, in
+front of a name that resolved without reaching anything. Two layers, two truths, and the convenient one
+was the one already written down. Corollary: when a document says "X has no public address", check
+whether it means X, or the network X sits on — the two support opposite conclusions, and only one of
+them is the question anyone actually asked.

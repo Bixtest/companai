@@ -56,10 +56,19 @@ that script added, identified by a marker comment, and never touches your own en
 A real domain **cannot** point at `172.28.50.2` — that address only exists on this laptop. Public DNS
 has to point somewhere the internet can reach, and this VM is behind NAT.
 
+**Measured 2026-10-05 — the network does have a real public address, and it still does not help.** The
+address is `151.177.174.17` (Tele2 Sweden, Malmö; confirmed by three independent services asked from
+inside the VM; **not** CGNAT). But nothing reaches it **inbound**: port 80 was probed from three
+independent outside hosts — `api.hackertarget.com`, `api.allorigins.win`, `r.jina.ai` — and all three
+failed to connect. The laptop's own attempt failed too, but that proves little by itself: it sits behind
+the same router, and hairpin routing commonly fails even when a forward exists. The router owns the
+address and forwards nothing to the laptop. So a record pointing at it would give a name that resolves
+and a site that does not load.
+
 Two ways to fix that, and the plan already chose the second:
 
-- **Port forwarding** on your router to this laptop. Requires a static public IP or dynamic DNS, and it
-  exposes the machine directly.
+- **Port forwarding** on your router to this laptop. Needs a router configuration nobody has set up, and
+  the address is a home broadband one that can move. It also exposes the machine directly.
 - **Cloudflare Tunnel** — the VM dials *out* to Cloudflare, so nothing is opened inbound and no router
   change is needed. This is the route in the plan. It needs: a domain whose DNS is on Cloudflare, plus a
   tunnel token. **Not started** — that is your open item #5.
@@ -250,8 +259,9 @@ databases `wp_site1` and `site2db`.
 4. **Let's Encrypt at the origin.** Cloudflare terminates TLS for the tunnel, so the browser sees a
    valid certificate and nothing at the origin needed one. Whether Coolify's Traefik can obtain its
    *own* Let's Encrypt certificate for a directly addressed domain is still untested — it needs a
-   publicly resolvable name and port 80 or 443 reachable from the internet, which this VM does not
-   have.
+   publicly resolvable name and port 80 or 443 reachable from the internet, and **the second half is now
+   measured false** (three independent outside hosts failed to reach port 80 on `151.177.174.17`). So
+   this path needs a router port-forward before it can be tested at all.
 5. **A real host reboot.** The VM's auto-start reads `Start / delay 30` but has never been exercised.
 6. **The visitor's IP reaching the application.** Measured, and it does *not*. Traefik replaces
    `X-Forwarded-For` with the `coolify` bridge gateway, so the app's rate limiter cannot tell callers
