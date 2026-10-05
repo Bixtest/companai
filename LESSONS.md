@@ -165,7 +165,8 @@ date.
 
 ## L10 — Report the whole picture, not the first red flag
 
-Adopted from [`skills-main`](skills-main): *"A red signal does not short-circuit
+Adopted from the sibling project's **`skills-main`** skills tree — an external folder
+(`konsult/aikonsult/suplimentery/skills-main`), not a path inside this repository: *"A red signal does not short-circuit
 the review… one review cycle gives the author the failing check, the conflict,
 and every code finding at once, rather than the cheapest red flag first and
 another cycle to discover the rest."*
@@ -2644,3 +2645,102 @@ complaint, and the wrong one *fails at request time in a different component* (a
 browser, an error in Traefik's ACME log) rather than at the moment you type it. Corollary: when a
 control panel offers a free-text field with a scheme in it, assume the scheme is load-bearing until the
 parser proves otherwise.
+
+---
+
+## L80 — A line-number citation means nothing without the tree it came from
+
+**Caught 2026-10-05, by a separate hostile audit pass — not by re-reading my own note.**
+
+The Paperclip + Hermes study's synthesis cited `acp_adapter/session.py:544` for the claim *"restore
+loads every message with no limit"*. The citation was taken from the sibling project's dossier, where it
+is correct. But that same file exists in **two** Hermes trees on this machine:
+
+| Tree | The file | Line 544 |
+|---|---|---|
+| `library/ai/hermes-agent-main/` (581 lines) — **the tree the study names as its source** | `acp_adapter/session.py` | `"credential_pool": runtime.get("credential_pool"),` — **unrelated**. The restore is at **line 474** |
+| `aissistant-package/hermes/` — the sibling's vendored copy | `acp_adapter/session.py` | `history = db.get_messages_as_conversation(` — **correct** |
+
+So the citation was right in one tree and wrong in the other, and the study pointed at the wrong one.
+
+**The rule.** *A `file:line` citation is only complete when it names which checkout the line number
+belongs to.* The moment the same file exists twice — a vendored copy, a fork, a zip extract, an older
+revision, a `node_modules` copy — the line number is a **different claim in each**. A bare path reads as
+"the obvious one", and the obvious one is not always the one you measured.
+
+**How to check it.** Resolve the path from the document's own base directory and read the line:
+
+```bash
+sed -n '544p' library/ai/hermes-agent-main/acp_adapter/session.py
+```
+
+If the line does not say what the sentence claims, the citation is broken — even though it was copied
+from a document where it worked.
+
+**The general form:** the same family as [[L3]] — *the measurement is only valid against the artefact
+you actually named.* When a number is inherited from somebody else's document, you have measured
+nothing until you re-take it in your own tree.
+
+---
+
+## L81 — A count can silently exclude the very thing it sits above
+
+**Caught 2026-10-05, same audit.**
+
+I wrote, in the handover document: *"`library/` holds **3,121 markdown files**."* That was a real
+measurement, correctly taken. It was also wrong. On the same day I had created
+`library/ai/source-docs/` — 318 markdown files — **inside `library/`**. The 3,121 was
+`find library -name '*.md'` *minus* that folder. The true total was **3,439**. The number measured a
+different thing than the sentence named.
+
+Worse, the same figure appeared in **three** places in that file (2,440 twice, 3,121 once), and the
+sweep updated only the ones I was looking at — so the document then disagreed with itself.
+
+**The rule.** *Measure with the exact command that matches the words you are about to write, and
+re-measure every copy of the figure, not just the one in front of you.* If the sentence says "library
+holds", the command must say `library` and nothing else. A `-not -path` filter, a `-maxdepth`, or an
+exclusion is a **different claim** and needs different words.
+
+**How to check it.**
+
+```bash
+find library -name '*.md' | wc -l          # the words say "library", so measure "library"
+grep -rn '2,440\|3,121' --include=*.md .   # find the copies you forgot
+```
+
+**The general form:** this is the project's oldest recurring defect — *seven wrong figures in two days,
+every one from measuring a different thing than the claim named.* It keeps happening because the
+measurement *succeeds*: you get a number, it looks authoritative, and the only thing wrong is that it
+answers a slightly different question.
+
+---
+
+## L82 — "Exactly one" is an enumeration, not a feeling
+
+**Caught 2026-10-05, same audit.**
+
+The synthesis said *"**exactly one item is open for the owner**"* and repeated it three times, because it
+read well and felt true. It had checked the obvious place. A hostile pass then walked every section and
+found a second candidate — a section instructing *"decide one mental model for frequency and document
+it"*, stamped as a lesson rather than as a question.
+
+The claim was over-stated. What was actually meant was *"only one item is **genuinely** yours"* — and
+proving that means walking the whole set and classifying each member, not sampling it.
+
+**The rule.** *"Only one", "never", "always", "none" and "the only one" are enumerations. Either walk
+the entire set and say how many you examined, or soften the claim.* A universal statement is the easiest
+kind to write and the easiest to falsify.
+
+**How to check it.** Count it, and put the count in the document:
+
+```bash
+grep -c 'OPEN — needs you' the-file.md    # if the claim is "one", the count must be 1
+```
+
+**The general form:** the same discipline as [[L1]] — *a confident label is not an inspection.* "Exactly
+one" is a label. The inspection is the walk.
+
+**And the fix is worth copying.** When the audit found the second candidate, the honest repair was not to
+promote it to a second question but to state the classification rule and name the items that were
+**deliberately not** the owner's. A claim of "one" is defensible only when it comes with the list of
+things it is a claim *about*.

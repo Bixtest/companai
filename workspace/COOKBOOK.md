@@ -827,6 +827,14 @@ Of 140 requirements, the platform half was bought and the agent half borrowed �
 only the product half had to be built. A sprint that skips step 1 rebuilds
 something that exists.
 
+**And for the agent half, step 1 now has a written source.** The completed study at
+[`../library/paperclip-hermes-study/`](../library/paperclip-hermes-study/) read Paperclip, Hermes and the
+sibling's integration forensically across eleven batches and turned them into lessons — what to take,
+what to reject, and the target shape. **Start any sprint that touches AI staff, roles, tasks,
+delegation, triggers or shared conversations at its synthesis**
+([`findings/10-lessons-and-target-design.md`](../library/paperclip-hermes-study/findings/10-lessons-and-target-design.md)).
+It carries **lessons, not decisions**: it shortens step 1, it does not replace step 2.
+
 **Why the steps are written per sprint, not all at once.** A detailed step for
 code that does not exist yet is a **guess**, because the step depends on the
 interfaces the build will reveal. So:
@@ -1136,7 +1144,7 @@ the proof that the two halves are joined.**
 | 🟡 | Arrow **(2)** works **with no cloud key** | **Proven for the model server** (it answers with no cloud key set). The platform is *configured* at it (`OPENAI_BASE_URL=http://model:8080/v1`, read back from the container env), but no platform-side AI call has been observed — exercising the platform's AI chat needs the owner's login (**B-02**). |
 | ✅ | The dashboard is reachable on **localhost only** — nothing on the LAN | **Met.** All three published ports bind `127.0.0.1` (`APP_BIND` / `MODEL_BIND` / `HERMES_BIND` override it for a cloud deploy). Verified with `docker compose config` → `host_ip: 127.0.0.1`. |
 | ✅ | **The same file, unchanged, is what deploys to the cloud** — only env values differ | **Met by design.** One compose file; every environment-specific value is a `${VAR}`. `DEPLOY_ENV` names the environment. |
-| ✅ | A one-page runbook exists | **Met:** [`../../library/development/RUNBOOK-sprint0.md`](../../library/development/RUNBOOK-sprint0.md). |
+| ✅ | A one-page runbook exists | **Met:** [`../../library/development/RUNBOOK-sprint0.md`](../library/development/RUNBOOK-sprint0.md). |
 
 **The one thing left to prove:** a Hermes agent *calling* a platform tool. The wire is sound end to
 end (proven directly), so what remains is **tool-choice reliability from a CPU-only 7B at 64K
@@ -1153,9 +1161,9 @@ environment** and a runbook.
 
 **Built 2026-10-04.** A separate environment from Sprint 0: an Ubuntu Server 24.04 VM on Hyper-V
 running Docker + Coolify, so a site can be *cloud-checked* on this laptop and shared with testers.
-**Operate it from [`../../library/development/RUNBOOK-platform-server.md`](../../library/development/RUNBOOK-platform-server.md)** —
+**Operate it from [`../../library/development/RUNBOOK-platform-server.md`](../library/development/RUNBOOK-platform-server.md)** —
 that is the one page to read. Built per
-[`../../library/development/PLAN-coolify-laptop-implementation.md`](../../library/development/PLAN-coolify-laptop-implementation.md).
+[`../../library/development/PLAN-coolify-laptop-implementation.md`](../library/development/PLAN-coolify-laptop-implementation.md).
 
 Two things to know before touching it:
 

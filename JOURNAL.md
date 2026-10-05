@@ -7,6 +7,58 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-10-05 — the agent study is finished, and the scattered documents have one home
+
+**The owner asked for two things: finish the forensic study of Paperclip and Hermes — batches 04 to
+10 — and gather the documents scattered across the laptop into one place in the library.**
+
+**The study is complete: 11 of 11 batches, 3,931 lines.** Its deliverable is the synthesis at
+[`library/paperclip-hermes-study/findings/10-lessons-and-target-design.md`](library/paperclip-hermes-study/findings/10-lessons-and-target-design.md)
+— every lesson with its evidence and its consequence, and each of the owner's twelve named concerns
+(assistant agents, solo agents, roles, delegation, event triggers, recurring work, meetings, joining an
+existing thread, skills, memory, models, MCP) answered in four voices: what Paperclip does, what Hermes
+does, what the sibling's integration did, and what we should do.
+
+**Three findings changed what we would build.**
+
+1. **"Session resume is broken" is our defect, not Hermes'.** The capability exists — Hermes continues a
+   transcript through `POST /api/sessions/{id}/chat`. Batch 07 contradicted the claim, and it is now
+   recorded as *not an issue* so nobody re-raises it.
+2. **The warm-session hazard is stronger than the dossier said.** The sibling's own note said a write
+   underneath a session Hermes already holds *"may not be seen"*. Measured: **it will not be seen.**
+   History loads only on a cold restore, and warm sessions are never evicted on a timer. This is the one
+   place our architecture can beat both: because Hermes runs **in-process** for us, we can write
+   *through* the runtime's session path instead of underneath it — which a pure HTTP control plane
+   cannot do.
+3. **A new defect in the sibling's proof script.** It calls `SessionDB.list_sessions`, which does not
+   exist on either Hermes tree — only `list_sessions_rich` does.
+
+**And the study found the gap that matters most: neither system has a meeting.** Paperclip has no room,
+channel or meeting entity at all — every conversation is 1:1 or one thread against one task, and an
+agent is pulled into a thread only by assigning it work. Hermes, meanwhile, already ships **hosted
+rooms** with a 128-member limit and replica takeover. That combination is our opening.
+
+**One decision came back to the owner.** The study carries lessons, not decisions — with exactly one
+exception: whether an assistant agent is *identity* (it belongs to Alice) or *context* (it acts as Alice
+for Alice's work). Paperclip chose context. It is item 8 in
+[`library/development/NEEDS-YOU.md`](library/development/NEEDS-YOU.md).
+
+**The scattered documents now have one home.** `library/ai/source-docs/` holds the one set with no other
+consolidated home — upstream Paperclip's 317-file documentation — beside a **tracked register** saying
+where every other scattered set already lives and why it was not copied. The copies follow the project's
+standing rule and are gitignored; **exactly one file is tracked.**
+
+**The work was audited by a separate hostile pass, which found four defects — all fixed.** An
+over-stated *"exactly one item is open"*; a code citation that was correct in one Hermes tree and wrong
+in the other; and two stale library file counts (the file said 2,440 and then 3,121 against a real
+**3,439**). The four are now lessons in [`LESSONS.md`](LESSONS.md) — **L80 to L82**.
+
+**Verification.** All 299 local links across the 13 changed documents resolve. All ten per-batch line
+counts were re-measured and are correct. The 521-document shelf count was re-measured and is correct.
+Committed as `59c109a`.
+
+---
+
 ## 2026-10-04 — part 1 of 8 (newest first) — the infrastructure answer, and a defect whose recorded cause was wrong
 
 **The owner asked two things: whether we have everything needed to deploy and test the codebase, and

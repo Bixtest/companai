@@ -206,8 +206,8 @@ guessing. See `COOKBOOK.md` rule zero-nine.
 ```text
 companai/                       ← repo 1 root (thinking + docs).  You are here.
 ├── INDEX.md                    the map of every folder — start here after this file
-├── JOURNAL.md                  what happened, in order, with dates (3,190 lines)
-├── LESSONS.md                  mistakes made, how they were caught (2,646 lines, L1–L79)
+├── JOURNAL.md                  what happened, in order, with dates (3,242 lines)
+├── LESSONS.md                  mistakes made, how they were caught (2,745 lines, L1–L82)
 ├── where_we_left.md            ⚠️ stale (2026-08-13) — traps only
 │                               (THIS FILE is not at the root — it lives at
 │                                library/development/HANDOVER.md, below)
@@ -397,7 +397,7 @@ documents and was *not* re-measured — treat it as a starting point, not a fact
 | **Repo 1** (thinking/docs) | `master`, HEAD **`c127030`**. Working tree has **14 entries — 12 pre-existing (the owner's), 2 mine** (see below) |
 | **Repo 2** (code) | `main`, HEAD **`962ae2a`**, **clean** |
 | **Codebase shape** | **21 packages, 1 app** (`apps/mercato`) — a monorepo (Yarn 4.17.1 + Turbo) |
-| **Documentation** | `library/` holds **3,439 markdown files**; `LESSONS.md` 2,646 lines (L1–L79); `JOURNAL.md` 3,190 lines |
+| **Documentation** | `library/` holds **3,439 markdown files**; `LESSONS.md` 2,745 lines (L1–L82); `JOURNAL.md` 3,242 lines |
 | **Open blockers** | **3** — B-05, B-16, B-17. **None stops Sprint 0** (see [`BLOCKERS.md`](BLOCKERS.md)) |
 
 **Group B — quoted from older documents, not re-measured:**
