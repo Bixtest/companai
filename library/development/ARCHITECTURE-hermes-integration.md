@@ -409,16 +409,92 @@ spine; security precedes broad tools; deterministic Functions never call a model
 **The runtime boundary (B-05) is the owner's.** It is the same item as *"OpenCode cannot be
 removed yet"*: what occupies the agent slot, and how it is isolated.
 
-This document does **not** close it. It narrows it, and it recommends a shape:
+This document does **not** close it. It narrows it, and it recommends a shape. The owner raised
+three challenges on 2026-10-05. Each is answered below from the source, not from argument.
 
-- **Recommended:** one product, one repository, one deployment workflow, with a supervised private
-  Python runtime behind the internal port. Not a separately administered Hermes product, and not a
-  literal single process.
-- **Why not in-process:** Node 24/TypeScript and Python are different runtimes. A native bridge
-  adds lifecycle and crash-coupling complexity with no measured benefit. A monorepo does not make
-  anything faster by itself.
-- **What would change the answer:** a benchmark showing that the process boundary is the
-  bottleneck. Until then, the boundary is the safe default, and it is reversible.
+### 11.1 The three challenges
+
+**Challenge 1 — "didn't the Hermes documentation give an idea which way to go?"**
+It did, and more than an idea. Four independent readings agree, and they are the reason this is no
+longer a matter of taste.
+
+| Route | What it says |
+|---|---|
+| **Hermes' own integration guide** | `programmatic-integration.md` lists the three protocols for driving Hermes from another program. For a custom web host that wants every feature it names the **TUI gateway JSON-RPC**. The only in-process option it offers is `import run_agent.AIAgent` directly, which requires the host to be Python. Ours is Node. |
+| **Hermes' own front end** | `web/` is a Vite/React **TypeScript** app. `hermes serve` exposes `/api/ws` and `/api/pty` for the desktop client. `docker-compose.yml` runs `gateway` and `dashboard` as two services. And the strongest form: Hermes' own **Desktop** app, the most integrated client it ships, **spawns** its backend as a child process (`apps/desktop/electron/backend-child.ts`, "the backend IS spawned into its own session/process-group"; it attaches to a backend that is already running and spawns one when there is none). Hermes never puts its own UI inside its Python process. |
+| **Hermes' own source** | `gateway/platforms/api_server.py`'s `_answer_through_live_bot_chat` hands a turn to the process that holds the live session, and its own comment names the failure a second writer would cause: *"the open chat never shows the message or the reply, its live context never learns of them, and the two transcripts interleave in state.db"*. **Scope, stated honestly:** it fires only when a live owner is advertised; the mechanism is a ticket file in a shared directory that the owner polls every 0.5s, not a clean RPC; and with no live owner the server falls back to reading and writing `state.db` itself. So the accurate claim is narrower than "the gap is closed": Hermes has a **first-class concept of "the process holding the live session" plus a protocol for handing turns to it**. That is the capability the study wanted, and it is a boundary protocol rather than a shared address space. |
+| **Our own documents** | `ARCHITECTURE.md` §5 (add the Hermes **service**), `BLOCKERS.md` **B-01** (a published port, not `network_mode: host`), Sprint 0's definition of done (platform + Hermes + model server). |
+
+**Challenge 2 — "once built and deployed, will the crash threat still exist? And isn't two
+platforms worse, since the going-down can happen in two places now?"**
+Two halves, and they have different answers.
+
+- *"Fiddly to build"* is a **build cost**, and it does go away when the thing is built. That half is
+  conceded.
+- *"Can take the whole site down"* is **not** a build cost. It is what sharing one address space
+  means, and it is permanent: a fatal fault anywhere in a shared process ends the process.
+
+On the second half the owner is right that two processes have **more failure events**. The trade is
+not more against less, it is **frequency against blast radius**:
+
+| Shape | Failure events | Blast radius |
+|---|---|---|
+| One process | fewer | **total** — the agent takes the business platform down with it |
+| Two processes | more | **partial** — the assistant is down, the product is up |
+
+For a multi-tenant product holding a customer's business records, a total outage is worse than a
+degraded feature. So the failure being added is a small one and the failure being avoided is a total
+one. Also worth stating plainly: what is proposed is **not two platforms**. It is one product, one
+repository, one deploy command and one lifecycle, with one internal process boundary.
+
+**Which half of that is measured, and which is not.** The *blast radius* half is measured in the
+current stack: in `docker-compose.fullapp.yml` the app's `depends_on` lists postgres, redis and
+meilisearch, and **not** OpenCode and **not** Hermes, so the site boots and serves with the agent
+down. The *frequency* half (that two processes fail more often) is reasoning, not measurement, and
+is stated here as such. One related gap is real and belongs on the list rather than in the argument:
+the `hermes` service has `restart: unless-stopped` but **no healthcheck**, so today a wedged runtime
+is invisible to the platform. That is a fix, not a reason to merge the processes.
+
+**Challenge 3 — "isn't one place more organic, given we are tailoring Hermes for our own needs?"**
+Partly right, and the part that is right matters most.
+
+- **Right: the front end should be one place, and it should be ours.** We do not ship Hermes'
+  dashboard. Hermes becomes headless and the Starting Kit owns the interface. That is exactly what
+  Hermes itself does (its dashboard is a separate app it can drop), and it removes the duplication
+  the owner can actually see.
+- **Not right: tailoring does not imply co-location.** Most tailoring is not even source level.
+  Hermes exposes a supported extension surface: `config.yaml` (its own example file is 124,215
+  bytes), `plugins/` with `ctx.register_tool` and `ctx.register_middleware`, `optional-skills/` with
+  `hermes skills install`, and the toolset configuration. Where source level *is* needed (a fork
+  that deletes features and adds our toolsets), that is still a **source** activity, and running in
+  one process is a **process** choice. The two are independent: an edited fork runs in a container
+  exactly as an unedited one does.
+- **And in-process is not on the menu anyway.** Node 24 cannot execute Python. "Building it inside"
+  means one of: a TypeScript rewrite of the agent loop (throwing away the thing we chose Hermes
+  for), a native Python-in-Node bridge (the fiddly one), or a supervised process. The third gives
+  the owner "one place" in every sense that matters, one repository, one command, one lifecycle, one
+  log, without the crash coupling, and it is what Sprint 0's compose already does.
+
+### 11.2 The recommendation
+
+- **Recommended:** one product, one repository, one deployment workflow, one interface (ours), with
+  a supervised private Python runtime behind the internal port. Not a separately administered
+  Hermes product, and not a literal single process.
+- **Why not in-process:** Node 24/TypeScript and Python are different runtimes. A native bridge adds
+  lifecycle and crash-coupling complexity with no measured benefit, and unlike a build cost it never
+  goes away. A monorepo does not make anything faster by itself.
+- **Why the hop is not the bottleneck people fear:** on the direct streaming path the interactive
+  turn crosses the boundary as **one** connection, not a round trip per token. The API server's SSE
+  queue is an in-process `asyncio.Queue` and deltas go straight to the socket, so there is no
+  per-token database trip, and tool calls execute in-process with their events on the same stream.
+  The one extra request is an **approval**: a turn that parks for a human decision carries a second
+  client-to-server call (`POST /v1/runs/{id}/approval`). That is per-approval, not per-token.
+  **The caveat, measured:** the *live-owner* lane does not stream. It awaits the settled receipt on
+  the 0.5s poll and emits a single completion, so choosing live-session ownership currently costs
+  token streaming. That is a real trade to decide when the adapter is built, not a defect in the
+  boundary.
+- **What would change the answer:** a benchmark showing the process boundary is the bottleneck.
+  Until then the boundary is the safe default, and it is reversible.
 
 **Deferred, each with the trigger that brings it back:**
 
@@ -471,5 +547,28 @@ manager (`pm`) at a pinned 3.14.7, and never uses the apt Python for the runtime
 recorded in §0 rather than quietly fixed, because the wrong version of it had already been written
 down and acted on.
 
+**Four routes for the boundary claim** in §11.1, which is why it is stated as fact rather than
+preference: Hermes' own integration guide (the protocol table and the Python-only in-process
+option); Hermes' own front-end shape (`web/` is TypeScript, `hermes serve` gives `/api/ws`, and
+`docker-compose.yml` runs two services); Hermes' own source (`_answer_through_live_bot_chat` and the
+comment inside it); and our own documents (`ARCHITECTURE.md` §5, `BLOCKERS.md` B-01, Sprint 0's
+definition of done). The routes were read independently, and the fourth is the one that shows this
+was already decided before the question was asked.
+
+**Two hostile passes were run against §11, and both changed it.** The first pass broke four things,
+and they were corrected rather than defended: the claim that Hermes "closes" the warm-session gap
+was too broad (the lane fires only when a live owner is advertised, and the mechanism is a shared
+ticket file polled at 0.5s); "the interactive path has no extra round trip" missed the approval call;
+the frequency-versus-blast-radius trade was presented as if both halves were measured when only the
+blast-radius half is; and the statement that tailoring is a source-level activity was wrong in the
+common case (the supported surface is `plugins/`, `optional-skills/` and `config.yaml`). A second
+pass then checked the corrections: all held, and it added three refinements (the approval request,
+the exact size of the config example, and that the Desktop attaches before it spawns). The desktop
+spawn fact and the missing Hermes healthcheck were both found *by* those passes, not by the first
+draft.
+
 **What this document does not claim.** No performance figure, no throughput, no concurrency limit
-and no operational guarantee. None was measured, and none should be assumed from this design.
+and no operational guarantee. None was measured, and none should be assumed from this design. In
+particular, the claim that the process boundary is *not* the bottleneck is an inference from how the
+streaming API is shaped, not a benchmark, and it is listed in §11.2 as the thing that would change
+the recommendation if measured otherwise.

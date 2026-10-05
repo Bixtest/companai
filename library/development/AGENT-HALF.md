@@ -107,8 +107,47 @@ deleting — which is precisely the spam example: `A5` to *filter*, `A1` to *cle
 
 The agent record carries a **binding**, not an embedded runtime. The study's L-01 says why: a control
 plane defines `invoke/status/cancel` and never owns the runtime. **Our version keeps the port
-boundary** so the runtime stays testable with a mock — but **Hermes is in-process, not a network
-service**, which is the one structural advantage our base has over Paperclip's (study §5.1).
+boundary** so the runtime stays testable with a mock.
+
+**Correction, 2026-10-05. This section used to say "Hermes is in-process, not a network service"
+and called that "the one structural advantage our base has over Paperclip's (study §5.1)". That
+claim was never measured, and our own documents contradict it.** Four independent readings of the
+source now agree:
+
+1. **Hermes' own integration guide** (`hermes-agent-main/website/docs/developer-guide/programmatic-integration.md`)
+   lists the three protocols for driving Hermes from another program. For a custom web host that
+   wants every feature, it names the TUI gateway JSON-RPC. The only in-process option it offers is
+   "import `run_agent.AIAgent` directly", which requires the host to be Python. Ours is Node.
+2. **Hermes' own front end is a separate application.** `web/` is a Vite/React TypeScript app;
+   `hermes serve` exposes `/api/ws` and `/api/pty` for the desktop client; `docker-compose.yml`
+   runs `gateway` and `dashboard` as two services. Hermes does not put its own UI inside its Python
+   process.
+3. **Hermes already has a boundary protocol for the problem the study used to justify
+   "in-process".** The study's D-05 (the warm-session gap) was the stated reason. Hermes' API server
+   has a first-class concept of the process that holds the live session and a lane to hand a turn to
+   it (`_answer_through_live_bot_chat`), and its own comment names the failure a second writer would
+   cause. Running the turn in the receiving process would make it "a second writer beside the lease
+   holder: the open chat never shows the message or the reply, its live context never learns of them,
+   and the two transcripts interleave in state.db". Stated honestly: that lane fires only when a
+   live owner is advertised, and otherwise the server reads and writes `state.db` itself. So the
+   capability the study wanted exists, and it is a **boundary protocol**, not a shared address
+   space.
+4. **Our own architecture already decided it.** [`ARCHITECTURE.md`](ARCHITECTURE.md) §5 says to add
+   the **Hermes service** and the **model server** service to the compose stack; `BLOCKERS.md`
+   **B-01** records that "the `hermes` service is written that way" with a published port; and
+   Sprint 0's definition of done is one command that brings up "platform + Hermes + model server".
+
+**So the accurate statement is: Hermes is a supervised runtime process behind the port, not an
+in-process library.** What the study meant by "in-process" was that Hermes is *ours* rather than a
+third-party service reached over the network, and that reading survives. The literal reading (one
+operating-system process) does not: Node 24 cannot execute Python, so a single process would need
+either a TypeScript rewrite of the agent loop or a native Python-in-Node bridge, and neither has a
+measured benefit.
+
+**The boundary choice itself is B-05, and it is the owner's.** This correction records what the
+source says. It does not close B-05. The full comparison, the three challenges the owner raised and
+the recommendation are in
+[`ARCHITECTURE-hermes-integration.md`](ARCHITECTURE-hermes-integration.md) §11.
 
 ---
 
