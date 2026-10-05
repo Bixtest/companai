@@ -17,6 +17,7 @@ of a hundred files to open first.
 
 | # | Read | Why |
 |---|---|---|
+| 0 | [`HANDOVER.md`](HANDOVER.md) | **The handover** — what exists, where, and the traps nobody can discover (two repos, two products called Companai, gitignored `vms/`, the host VM). Read this first if you know nothing |
 | 1 | [`../INDEX.md`](../../INDEX.md) | The map of every folder. What this project is, in one paragraph |
 | 2 | **This file** | How to develop here, and the order to read things |
 | 3 | [`BACKLOG.md`](BACKLOG.md) | **What is left**, in order, one line each — the single plan |
@@ -118,6 +119,7 @@ See COOKBOOK rule zero-ten.
 
 | File | What it is |
 |---|---|
+| [`HANDOVER.md`](HANDOVER.md) | **The handover** — the front door for a newcomer who knows nothing: what exists, where it is, the two-repository layout, the traps, the host VM, the standing rules, and what is proven vs not |
 | [`README.md`](README.md) | **This file** — the front door, the reading order, the handover, the sprint process |
 | [`BACKLOG.md`](BACKLOG.md) | **The one roadmap** — everything left, in order, with the "do not lose this" list and the deferrals |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | How the Starting Kit + Hermes + the model server run together, and the dockerisation decision (Sprint 0) |

@@ -1,0 +1,469 @@
+# Handover — start here if you have just inherited this project
+
+**You know nothing about this project, this codebase, or these documents. This page is
+written for exactly that person.** Read it top to bottom once (about 20 minutes), then
+follow §2 to actually get working. Everything else in the project is reachable from here.
+
+**Written 2026-10-05. Owner: Ramzi. Development machine: `BIXMASERVER` (Windows 10 Pro).**
+
+> This is the **handover**. It is not a status page and not a roadmap — it is the one
+> document that tells you what exists, where it is, and in what order to open it.
+> For *what is left*, read [`BACKLOG.md`](BACKLOG.md). For *what happened*, read
+> [`../../JOURNAL.md`](../../JOURNAL.md). For *what to avoid*, read [`../../LESSONS.md`](../../LESSONS.md).
+
+---
+
+## 1. The 60-second version
+
+**What we are building.** An **operating system for companies** where human employees and AI
+employees work side by side — one org chart, one task model, one set of rules about who may do
+what. A business describes itself in plain language; the platform proposes a complete structure
+(departments, roles, workflows, knowledge, AI workers); a human approves it; then the platform
+*runs* that company day to day.
+
+**The thing that makes it different is not the AI.** It is the **governance layer** — one place
+that decides whether any actor, human or machine, may take any action, and can always explain
+why. Every act is checked against every ceiling that applies, and the answer is always the
+*minimum* of them: **nothing anywhere can raise a gate.** That property is the product. It is
+built, and it works.
+
+**What already exists, in three pieces** (see [`ARCHITECTURE.md`](ARCHITECTURE.md)):
+
+| Piece | What it is | Where |
+|---|---|---|
+| **The Starting Kit** | The platform/product. A permanent fork of **Open Mercato 0.6.7**, rebranded to Companai. The governance layer (authority, approvals, delegations, denials, trust, projects, record locks, the ledger) is **ours** and does not exist upstream | [`../../workspace/starting-kit/`](../../workspace/starting-kit/) |
+| **Hermes** | The **agent runtime** — the thing that will hold the AI-employee half. It is *borrowed* (a sibling project's code), not ours | [`../ai/hermes-agent-main/`](../ai/hermes-agent-main/) |
+| **The model server** | Local inference (llama.cpp) serving a quantised Qwen2.5-7B model on `:8080`. No cloud dependency | described in [`ARCHITECTURE.md`](ARCHITECTURE.md) §5 |
+
+Two arrows connect them: **(1)** the agent reaches the platform's tools over MCP, authorised by
+our own gate; **(2)** the agent asks the model server for inference. Both were proven working on
+2026-10-04.
+
+**One-line summary of where we are** (from the analysis programme): *the platform half is
+**bought**, the agent half is **borrowed**, and the product half — the model spine and the
+data-level security — is **neither**, and must be built.*
+
+---
+
+## 2. Day one — the exact sequence
+
+**Do these in order. Do not skip the lessons.**
+
+**1. Read these eight files** (about two hours total). They are ordered so each one assumes the last:
+
+| # | Read | Why |
+|---|---|---|
+| 1 | [`../../INDEX.md`](../../INDEX.md) | The map of every folder, and the rules that matter most |
+| 2 | **This file** | What exists, where, and the traps |
+| 3 | [`BACKLOG.md`](BACKLOG.md) | **What is left**, in order, one line each — the single plan |
+| 4 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | How the three pieces run together |
+| 5 | [`../../compai/planning/00-product-thesis.md`](../../compai/planning/00-product-thesis.md) | **What we are building**, and the 15 rules that must never be broken |
+| 6 | [`../analysis/findings/12-development-plan.md`](../analysis/findings/12-development-plan.md) | **The plan** — phases, order, why |
+| 7 | [`../../workspace/COOKBOOK.md`](../../workspace/COOKBOOK.md) | **How the work is done** — read before touching code |
+| 8 | [`../../LESSONS.md`](../../LESSONS.md) | 79 mistakes already made, so you do not repeat them |
+
+**Then, before you write any code:** [`../../workspace/knowledge/authority-overview.md`](../../workspace/knowledge/authority-overview.md)
+— the governance layer end to end. **That layer is the product.** Everything else is plumbing.
+
+**2. Set up your shell — every terminal, every session.** Node 24 is project-local and mandatory:
+
+```bash
+export PATH="/c/Users/Ramzi/Downloads/companai/workspace/.toolchain/node24:$PATH"
+```
+
+Wrong Node produces results that describe *the laptop*, not *the platform*. See
+[`../../workspace/references/environment.md`](../../workspace/references/environment.md).
+
+**3. Check both repositories are clean.** There are **two** git repositories (see §3). Nothing
+should be half-finished on disk:
+
+```bash
+cd /c/Users/Ramzi/Downloads/companai               && git status --short   # thinking + docs
+cd /c/Users/Ramzi/Downloads/companai/workspace/starting-kit && git status --short   # the code
+```
+
+**4. Bring up the stack.** One command starts the platform, the agent runtime and the model
+server together — see [`ARCHITECTURE.md`](ARCHITECTURE.md) §5. **Docker Desktop must be running
+first, and only the owner can start it** (see §5).
+
+**5. Run the gate, and read the `Cached:` line.** A green result *from cache* is not a green
+result. `--force` for anything you are about to make a claim about:
+
+```bash
+cd workspace/starting-kit
+corepack yarn generate && corepack yarn build:packages && corepack yarn typecheck && corepack yarn lint && corepack yarn test
+```
+
+Never pipe these through `head` or `tail` — you throw away the exit code.
+
+**6. Take the first item from [`BACKLOG.md`](BACKLOG.md).** **Verify it is still true against the
+code before starting** — the roadmap has been wrong about what is already done **three times**.
+
+### What to study first, by role
+
+| If your job is… | Study first |
+|---|---|
+| **Understanding the product** | `00-product-thesis.md` → `findings/01-vision-frame.md` → `findings/12-development-plan.md` |
+| **Writing code** | `COOKBOOK.md` → `workspace/knowledge/` (20 concept files) → `workspace/references/environment.md` |
+| **Running it** | `ARCHITECTURE.md` → `workspace/references/local-instance.md` |
+| **Hosting / domains** | [`RUNBOOK-adding-a-domain-step-by-step.md`](RUNBOOK-adding-a-domain-step-by-step.md) → [`RUNBOOK-hosting-server-manual.md`](RUNBOOK-hosting-server-manual.md) |
+| **Testing it** | `workspace/references/how-to-test.md` → `workspace/knowledge/test-gate.md` |
+| **Picking up the analysis** | [`../analysis/PLAN.md`](../analysis/PLAN.md) → [`../analysis/LOG.md`](../analysis/LOG.md) → the `findings/` reports |
+
+---
+
+## 3. The traps a newcomer cannot discover
+
+**These are the things that will waste your first day if nobody tells you. Nobody can find them
+by reading the code — they are facts about the layout and the history.**
+
+### 3a. There are **two** git repositories, not one
+
+| Repo | Path | Branch | Holds |
+|---|---|---|---|
+| **Repo 1 — thinking & docs** | `C:\Users\Ramzi\Downloads\companai` | `master` | `INDEX.md`, `JOURNAL.md`, `LESSONS.md`, `library/`, `compai/`, `workspace/` (the non-code parts) |
+| **Repo 2 — the code** | `...\companai\workspace\starting-kit` | `main` | **every line of code we own** — 21 packages, 1 app |
+
+**Every batch ends with a commit in *both* repositories, and files are staged explicitly by
+path.** `git add -A` once swept **10,448 of the owner's unrelated files** into a commit. Never
+use it here.
+
+### 3b. **Two different products are called "Companai"**
+
+One is ours. One is a **sibling project** that happens to share the name. If you are about to
+read a "Companai" document, **check its path first**:
+
+- `aissistant-package/` at the root — ⚠️ **NOT OURS.** The sibling's codebase (a Paperclip fork). Do not edit, do not deploy from it.
+- `companai.md` at the root — ⚠️ **NOT OURS.** A sibling document. It *reads* as a vision statement for our product. It is not one. It is the most misleading file in the folder.
+- `library/ai/hermes-docs/` — a sibling's docs. **Lessons only, never decisions.**
+
+Full evidence and the glossary: [`../analysis/findings/00-inventory.md`](../analysis/findings/00-inventory.md)
+and [`../ai/README.md`](../ai/README.md). **Read the AI README before using any AI document.**
+
+### 3c. **Naming traps — do not "fix" these**
+
+- The outer folder is **`companai`**, the inner one is **`compai`**. Different spellings, both
+  real. Paths depend on both.
+- The owner's domain is **`corprorate.com`** — the misspelling is **deliberate and
+  owner-confirmed.** Do not correct it.
+- Item numbers (`15b`, `21c`, `24b`) are **not a sequence** — they grew by insertion. A gap does
+  not mean something is missing.
+
+### 3d. `vms/` is **gitignored** — and that matters
+
+`.gitignore` line 99 excludes `vms/`, because it holds the VM credentials, a 4 GB ISO and a seed
+ISO. **Consequence:** anything written there is **untracked** and dies with the laptop's disk.
+
+**This was already fixed for the deployment scripts.** Their durable copy lives at
+[`../../workspace/scripts/vm-platform/`](../../workspace/scripts/vm-platform/), and
+`check-in-step.sh` proves the tracked copy still matches the working copy:
+
+```bash
+sh workspace/scripts/vm-platform/check-in-step.sh   # prints "in step", exit 0
+```
+
+**If you add a script to `vms/`, copy it into `workspace/scripts/vm-platform/` in the same
+batch** — and check it for secrets *before* copying, not after.
+
+### 3e. Node 24 is project-local, and the export is mandatory
+
+`workspace/.toolchain/node24` is a private Node 24 install. **The system Node is 22 and the
+platform refuses to run on it.** Every command in every terminal begins with the export in §2.
+This is not optional and not a preference.
+
+### 3f. `where_we_left.md` and `PROGRESS.md` are stale — by their own admission
+
+- [`../../where_we_left.md`](../../where_we_left.md) is a **2026-08-13 snapshot**, self-labelled
+  out of date. Keep it only for its *traps*, *"things that look broken and are not"* and *"how to
+  work here"* sections — those are still accurate.
+- `workspace/PROGRESS.md` has **three overlapping checklists that disagree with each other.**
+  Trust [`BACKLOG.md`](BACKLOG.md) for status; use `PROGRESS.md` only for the *reasoning* behind
+  an item.
+- [`BLOCKERS.md`](BLOCKERS.md) **is** current and re-checked each session.
+
+### 3g. Things that look broken and are **not**
+
+- **The admin dashboard is empty.** Deliberate — upstream's widgets all read parked modules, so
+  they are disabled rather than render ten red panels. Fixing it properly is backlog item **27**.
+- **Fourteen modules are parked, not deleted.** Switched off in `apps/mercato/src/modules.ts`;
+  they create no tables and serve no routes, but stay readable and restorable in seconds. See
+  `workspace/references/parked-modules.md`.
+- **Only `packages/enterprise` was ever actually deleted** — its licence forbids redistribution.
+
+### 3h. The one rule that matters most
+
+**Every claim comes with an observation attached, not an argument.** The work that held up was
+verified by *watching it happen* — loading the page, breaking the test to see it fail, reading
+the database, reading the `Cached:` line. **The work that had to be retracted was reasoned from
+reading code.** If you are about to say "the cause is X" and have not observed X, you are
+guessing. See `COOKBOOK.md` rule zero-nine.
+
+---
+
+## 4. Where everything lives — the folder map
+
+```text
+companai/                       ← repo 1 root (thinking + docs).  You are here.
+├── INDEX.md                    the map of every folder — start here after this file
+├── JOURNAL.md                  what happened, in order, with dates (3,190 lines)
+├── LESSONS.md                  mistakes made, how they were caught (2,646 lines, L1–L79)
+├── where_we_left.md            ⚠️ stale (2026-08-13) — traps only
+│                               (THIS FILE is not at the root — it lives at
+│                                library/development/HANDOVER.md, below)
+│
+├── library/                    EVERYTHING DOCUMENTED, IN ONE PLACE (2,440 markdown files)
+│   ├── INDEX.md                what each shelf is, and the reading order
+│   ├── PROVENANCE.md           where every shelf came from, how to rebuild it
+│   ├── development/            ← DEVELOPMENT MANAGEMENT — the hub
+│   │   ├── HANDOVER.md         **THIS FILE**
+│   │   ├── README.md           the front door: reading order, the sprint process
+│   │   ├── BACKLOG.md          **THE ONE ROADMAP** — everything left, in order
+│   │   ├── ARCHITECTURE.md     how Starting Kit + Hermes + model server run together
+│   │   ├── BLOCKERS.md         anything stopping progress, with what clears it
+│   │   ├── NEEDS-YOU.md        **numbered list of owner-only actions** (see §8)
+│   │   ├── RUNBOOK-*.md        hosting: the manual, the domain walkthrough, Sprint 0
+│   │   └── SPEC-business-model-kernel.md   the product spec (Draft 1; 18 items open)
+│   ├── ai/                     READ ITS README FIRST — two products are called Companai
+│   │   ├── ai-first/           THE DIRECTION — what we will actually build
+│   │   ├── hermes-docs/        a sibling's docs. Lessons only, never decisions
+│   │   └── hermes-agent-main/  the Hermes runtime source — where it disagrees with docs, it wins
+│   ├── analysis/               THE ANALYSIS PROGRAMME — complete, all 12 batches
+│   │   ├── PLAN.md             the batch plan with tickboxes — all DONE
+│   │   ├── LOG.md              one dated line per batch
+│   │   └── findings/           one report per batch — **batch 12 is THE DEVELOPMENT PLAN**
+│   └── canonical-architecture-v2-hybrid-ai-coolify.md   the hosting architecture
+│
+├── compai/                     THINKING — no code
+│   ├── brainstorming/          where the idea came from
+│   └── planning/               the design (12 documents) — see its own README
+│
+├── workspace/                  BUILDING — where work happens
+│   ├── COOKBOOK.md             **the development cookbook — read before touching code**
+│   ├── PROGRESS.md             ⚠️ superseded by BACKLOG.md; keeps the reasoning
+│   ├── knowledge/              HOW THE PLATFORM WORKS — 20 concept files
+│   ├── references/             the detail behind the cookbook (environment, deployment, testing…)
+│   ├── scripts/                checkpoint.sh, and vm-platform/ (the tracked VM scripts)
+│   ├── .toolchain/node24       our own Node 24 — **use this, not the system Node**
+│   └── starting-kit/           ← repo 2: THE CODEBASE (21 packages, 1 app)
+│
+├── vms/                        ⚠️ GITIGNORED — the hosting VM's credentials, ISO, scripts
+├── keys/                       ⚠️ server credentials — not documentation, keep private
+├── aissistant-package/         ⚠️ NOT OURS — the sibling's codebase
+└── companai.md                 ⚠️ NOT OURS — a sibling document
+```
+
+---
+
+## 5. The two machines, and how work flows between them
+
+**This is the part that confuses everyone, because there are two computers and only one of them
+is where you work.**
+
+| | **The laptop** (`BIXMASERVER`) | **The hosting VM** (`Platform-Server`) |
+|---|---|---|
+| What | Dell Precision 7510, Windows 10 Pro, i7-6820HQ (4c/8t), 32 GB RAM | Ubuntu 24.04.5, a Hyper-V virtual machine |
+| Reachable at | where you are | **`172.28.50.2` — and only from this laptop** |
+| Holds | the code, the docs, Docker Desktop (Sprint 0 stack) | Coolify 4.3.23, Traefik v3.6.25, the hosted sites |
+| Who can reach it | you | **only the laptop.** Hyper-V Internal switch `AI-Private`, no physical adapter |
+
+**The VM is invisible to the LAN and to any cloud agent.** That is deliberate. **Deploying happens
+from the laptop; visiting happens through a tunnel.** Keep those two paths visibly separate so
+nobody confuses them.
+
+**The network *does* have a real public IP — `151.177.174.17`** (Tele2 Sweden, confirmed by three
+independent services from inside the VM). But **a public address is not an open door:** port 80
+on that IP was probed from **three independent outside hosts** and all three failed to connect.
+So nothing reaches the VM inbound today. **The working path to the outside is a Cloudflare
+Tunnel**, which needs only *outbound* port 7844 — no inbound port, no router change.
+
+**The hosting stack, in one line each:**
+
+- **Coolify** — the control panel. You add a *resource* (a Git app, a Docker image, or a Compose
+  file) and give it a **Domains** field. Coolify then writes Traefik labels for you.
+- **Traefik** — the proxy. It reads the `Host:` header on each request and sends it to the right
+  container. Entrypoints `http` (80) and `https` (443) are **separate sockets**.
+- **The tunnel** — `cloudflared`, installed. It makes outbound connections to Cloudflare, which
+  publishes your domain and forwards to the tunnel. The public SSL certificate is **Cloudflare's**.
+
+**Two jobs, two places — do not mix them up:**
+
+1. **Make the name resolve** → at the registrar / Cloudflare (the owner's job).
+2. **Tell Traefik which container answers** → in Coolify (our job).
+
+**There is no DNS server on the VM**, and none is needed. Nothing listens on port 53. Plesk
+shipped one; this stack deliberately does not.
+
+**The scheme trap.** In Coolify's Domains field, **`http://` and `https://` are not cosmetic** —
+they pick which listener the router binds to. Behind the tunnel, use **`http://`**. Typing
+`https://` binds the router to port 443 and adds a redirect, while the tunnel arrives on port 80
+→ a redirect loop and a certificate job that cannot succeed. (This was measured; recorded as L79.)
+
+**The hosting runbooks — read these if your task is domains or hosting:**
+
+| File | What it covers |
+|---|---|
+| [`RUNBOOK-hosting-server-manual.md`](RUNBOOK-hosting-server-manual.md) | **The operator manual** — connecting from the laptop, DNS, directories, databases, phpMyAdmin, SSL, WordPress, deploying another Docker platform |
+| [`RUNBOOK-adding-a-domain-step-by-step.md`](RUNBOOK-adding-a-domain-step-by-step.md) | **The practical walkthrough** — GoDaddy → Cloudflare → tunnel → SSL → a live site, with all three site types |
+| [`RUNBOOK-platform-server.md`](RUNBOOK-platform-server.md) | The VM itself — how it was built, owner tasks, rollback, rebuild from scratch |
+| [`RUNBOOK-deploying-a-site.md`](RUNBOOK-deploying-a-site.md) | The proxy and the deployment proof in depth — what is and is not proven |
+| [`RUNBOOK-sprint0.md`](RUNBOOK-sprint0.md) | Sprint 0 — running the kit on the laptop |
+
+### The owner's two hard rules about the machine
+
+1. **"So we don't ruin the laptop."** Prefer reversible actions; take a checkpoint before anything
+   that touches the database (`./workspace/scripts/checkpoint.sh <label>`).
+2. **The admin password is the owner's, and he types it.** It is **never written to a file and
+   never typed into a login form by an agent.** This was committed to and honoured throughout —
+   do not quietly relax it. Anything needing a click-through of the running platform needs him at
+   the keyboard. Where a proof is needed, take it from container logs, the MCP's own tool list, or
+   the database instead.
+
+**Docker Desktop must be running for the Sprint 0 stack, and only the owner can start it.**
+Docker Desktop's startup runs `wsl.exe`, which this machine's security policy blocks for anything
+an agent launches — the block is **not approvable and must not be worked around.** `AutoStart` is
+off, so this recurs on every restart. It is a **permanent owner step** ([`NEEDS-YOU.md`](NEEDS-YOU.md) item 6).
+
+---
+
+## 6. The rules that bind
+
+**Full text in [`../../workspace/COOKBOOK.md`](../../workspace/COOKBOOK.md).** These are the ones
+you must not break:
+
+**The nine standing rules** (from `where_we_left.md` §7, still accurate):
+
+1. **Never assume a decision the owner did not make.** A direction counts only when he was asked
+   plainly and answered. If a better way exists, come back with a labelled **COUNTER-OPINION**.
+   **But when the right answer is clear, just do it** — consulting too much is its own failure.
+2. **One roadmap.** Never a second view that competes with it.
+3. **No bandages.** Production and security standards, or it goes on the list.
+4. **Fix small risk-free things immediately** — but establish the size *before* deciding, not after.
+5. **Checkpoint before risky work.**
+6. **Capture know-how in `workspace/knowledge/`** every batch. It becomes the agent's brain.
+7. **Found issues go on the roadmap**, in the same edit that discovers them.
+8. **Use the waiting time.** While builds run, use the platform. Never derail the main task.
+9. **Testing instructions are click-by-click**, with verified URLs and expected results. Say
+   plainly when a change is invisible.
+
+**Plus, the project's own hard rules:**
+
+- **Every claim comes with an observation attached, not an argument** (§3h). Measure from the
+  artefact, not the description of it.
+- **Documentation is updated in the same change as the work**, not afterwards. A batch that
+  leaves the docs stale is not finished. This is COOKBOOK Rule zero.
+- **Switch things off; do not delete them.** If something must be deleted, it gets a written
+  analysis first — we already nearly lost the custom-domains feature because a module was
+  labelled "CRM".
+- **Reports are written for someone who was not there.** Full sentences, and the *why*, not just
+  the *what*.
+- **We never take updates from the original project again.** It is our code now.
+- **`present_files` / commit in both repos, staged by path** — never `git add -A`.
+
+### How to talk to the owner
+
+He has said this more than once, so it is worth repeating:
+
+- **Reply in English.** Always.
+- **Plain, everyday words.** He is not a developer — no jargon, no "word salad". One short
+  sentence of background at most.
+- **Do not ask him to adjudicate technical decisions.** *"You are asking me highly technical
+  questions that I have no clue what they are … and demanding me to have the call about it."*
+  When a problem has an obvious safe default, **apply it, commit it, and tell him what changed
+  and how to undo it** (`git revert <sha>`). Reserve his judgment for what is genuinely his: a
+  **name, a domain, a cost, a preference.**
+- **One specific thing at a time**, answerable in a word or a sentence. Give the answer, then at
+  most one question.
+- **A question he is holding is not yours to close.** If a decision is his, ask him or leave it
+  explicitly open — never resolve it yourself and write it down as settled.
+
+---
+
+## 7. Current state — measured, not assumed
+
+**Two groups below. Group A I measured today (2026-10-05). Group B is quoted from older
+documents and was *not* re-measured — treat it as a starting point, not a fact.**
+
+**Group A — measured 2026-10-05:**
+
+| | |
+|---|---|
+| **Repo 1** (thinking/docs) | `master`, HEAD **`c127030`**. Working tree has **14 entries — 12 pre-existing (the owner's), 2 mine** (see below) |
+| **Repo 2** (code) | `main`, HEAD **`962ae2a`**, **clean** |
+| **Codebase shape** | **21 packages, 1 app** (`apps/mercato`) — a monorepo (Yarn 4.17.1 + Turbo) |
+| **Documentation** | `library/` holds **2,440 markdown files**; `LESSONS.md` 2,646 lines (L1–L79); `JOURNAL.md` 3,190 lines |
+| **Open blockers** | **3** — B-05, B-16, B-17. **None stops Sprint 0** (see [`BLOCKERS.md`](BLOCKERS.md)) |
+
+**Group B — quoted from older documents, not re-measured:**
+
+| | |
+|---|---|
+| **Starting Kit milestone** | *~80% done; the governance layer is complete and has screens.* **Source:** [`../../where_we_left.md`](../../where_we_left.md) — **a 2026-08-13 snapshot, self-labelled out of date** |
+| **Last gate run** | *Green, `Cached: 0`.* **But the two status documents disagree on the test count** (`where_we_left.md` says 12,924; `INDEX.md` says 12,898, both dated 2026-08-13). **Do not quote either — re-run the gate and read the number yourself.** |
+| **Sprint 0 stack** | *Built and proven working (8 services, 7 healthy, 21 AI tools discovered), but not running* — needs Docker Desktop started. **Source:** [`BLOCKERS.md`](BLOCKERS.md) B-04, 2026-10-04 |
+| **Hosting VM** | *Built and proven; directory-based hosting works, proven over public HTTPS. Coolify admin password still needs changing.* **Source:** the hosting runbooks |
+
+**The uncommitted changes in repo 1, split honestly.** Measured 2026-10-05 after this handover was
+written — **14 entries in total:**
+
+- **12 are pre-existing and the owner's** — `INDEX.md`, `compai/planning/07-open-questions.md`,
+  `compai/planning/CHANGELOG.md`, three deleted `integration_research/` files,
+  `library/development/NEEDS-YOU.md`, `where_we_left.md`, `workspace/COOKBOOK.md`,
+  `workspace/PROGRESS.md`, plus untracked `compai/planning/platforms/…/05-harvest…md` and
+  `library/kit-docs/`.
+- **2 are mine, and are part of this handover batch** — `library/development/HANDOVER.md` (new)
+  and `library/development/README.md` (modified).
+- I also edited **`INDEX.md`**, which was **already one of the owner's 12 modified files** — so my
+  change to it is mixed in with his.
+
+**Do not sweep the owner's 12 into your commit** — stage by path, and leave them for him.
+
+### What is **proven** vs **not proven**
+
+**Proven** (by observation, on the dates shown):
+
+- The governance layer decides, every autonomy gate binds, and a person can work the queue
+  (Settings → Authority → Approvals).
+- Hermes connects to the platform's MCP and discovers all 21 tools; the local model answers with
+  a 65,536-token context.
+- Directory-based hosting on the VM: each hostname serves its own directory; a file in one
+  returns **404** on the other; a host-side edit appears live with no rebuild; the whole chain
+  fetched from the laptop over public HTTPS (`200`, certificate valid).
+
+**Not proven** (do not claim these):
+
+- A **named tunnel on the owner's own domain** — only the temporary `trycloudflare` tunnels have
+  been exercised.
+- **Let's Encrypt at the origin** — the public certificate so far is Cloudflare's.
+- A **real reboot** of the VM, and the **visitor's IP reaching the app**.
+- The **GoDaddy → Cloudflare nameserver move** — the only thing still blocking the real domain,
+  and it is the owner's action.
+
+---
+
+## 8. What is left, and whose move it is
+
+- **What is left, in order** → [`BACKLOG.md`](BACKLOG.md). One roadmap. Read §"The list" and
+  nothing else for *"what is left"*.
+- **What needs the owner** → [`NEEDS-YOU.md`](NEEDS-YOU.md) — a numbered action list. **The most
+  urgent item is changing the Coolify admin password** (item 5); it is the only thing standing
+  between an agent and the 2FA wall on the hosting panel.
+- **What is stopping work** → [`BLOCKERS.md`](BLOCKERS.md) — re-checked each session, because a
+  blocker is a claim about *now*.
+- **The product specification** → [`SPEC-business-model-kernel.md`](SPEC-business-model-kernel.md)
+  — Draft 1 written, **18 items open**. This is the vision's own gate, and the first real build
+  move.
+
+---
+
+## 9. Maintaining this page
+
+**This page is part of the work, not documentation about the work.** Whoever changes the
+repository layout, the machine arrangement, or the front-door documents updates it in the same
+change.
+
+A newcomer who cannot orient themselves from this page plus [`../../INDEX.md`](../../INDEX.md)
+alone means this page is broken — **fix the page, not the newcomer.**
+
+*Last updated: 2026-10-05 — first version. Records the two-repository layout, the two-products
+trap, the gitignored `vms/` and its fix, the host VM, the standing rules, and the honest split
+between what is proven and what is not.*
