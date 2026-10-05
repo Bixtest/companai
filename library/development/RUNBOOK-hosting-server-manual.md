@@ -642,7 +642,7 @@ disk, and with 2FA on nobody can click through its UI).
 |---|---|
 | Where | `/opt/companai-platform` on the VM |
 | Files | `docker-compose.fullapp.yml` (the kit's own, verbatim), `docker-compose.wan.yml` (the only difference), `.env` (mode 600) |
-| Scripts | `make-env.sh`, `deploy.sh`, `set-host.sh`, `verify.sh` |
+| Scripts | `make-env.sh`, `deploy.sh`, `set-host.sh`, `verify.sh` — **also tracked in the project** at [`workspace/scripts/vm-platform/`](../../workspace/scripts/vm-platform/README.md), so they survive this laptop |
 | Running | `app`, `postgres`, `redis`, `meilisearch` |
 | Not running | `opencode`, `mcp`, `model`, `hermes`, `localstack` — see §11a |
 

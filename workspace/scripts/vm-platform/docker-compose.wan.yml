@@ -1,0 +1,70 @@
+# Additive override for the WAN deployment on the Platform-Server VM.
+#
+# Used together with the kit's own compose file, which sits next to this one
+# verbatim (sha256 e391ba6d958dee5eafc3076226a2a2e29a66b0f5eb7661c699fee89daa50b26c):
+#
+#   docker compose -f docker-compose.fullapp.yml -f docker-compose.wan.yml \
+#     up -d --no-build app postgres redis meilisearch
+#
+# Nothing in the kit's file is edited. This adds two things.
+#
+# 1. The `coolify` network on the app.
+#    Traefik already runs on this VM as `coolify-proxy`, attached to the
+#    `coolify` bridge (10.0.1.0/24). The app lives on the kit's own
+#    `mercato-network-wan` bridge. Without a shared network the proxy cannot
+#    reach the app at all.
+#    Both networks are listed because Compose REPLACES a service's network list
+#    rather than merging it — measured, not assumed: listing only `coolify`
+#    here drops the app off its own bridge and it can no longer resolve
+#    `mercato-postgres-wan`.
+#
+# 2. The Traefik labels that route the platform's hostname to the app.
+#    `coolify-proxy` runs with `--providers.docker.exposedbydefault=false`, so
+#    a container is invisible to it until it carries `traefik.enable=true`.
+#    The hostname is read from PLATFORM_HOST / PLATFORM_HOST_ALT in .env, so
+#    moving to the real domain is a one-line change — see set-host.sh.
+#    `traefik.docker.network=coolify` is required because the container is on
+#    two networks and Traefik would otherwise guess the wrong one.
+#
+# Deliberately NOT set here: RATE_LIMIT_TRUST_PROXY_DEPTH.
+#
+# It was set to 2 at first, on the assumption that the request arrives through
+# two proxies so the app would recover the visitor's address. That was wrong,
+# and measuring it took a probe container behind the same Traefik. What a
+# request from the public internet actually carries:
+#
+#     Cf-Connecting-Ip: 151.177.174.17   <- the real visitor
+#     X-Forwarded-For:  10.0.1.1         <- Traefik REPLACED it with the
+#                                           coolify bridge gateway
+#     RemoteAddr:       10.0.1.2         <- Traefik's own container
+#
+# The app's limiter (packages/shared/src/lib/ratelimit/helpers.ts, getClientIp)
+# reads only X-Forwarded-For, and with a single entry every depth behaves the
+# same: 2 indexes off the end and returns null, 1 returns the gateway, 0
+# returns null by design. null falls back to one shared bucket
+# (RATE_LIMIT_FALLBACK_KEY), so setting the variable changes nothing.
+#
+# Consequence, for the record: the per-IP login limit (20/min) is shared by all
+# visitors. The per-account limit (5/min per email) still works, so this is a
+# nuisance rather than a hole — but the real client address is available in
+# CF-Connecting-Ip, so a one-line change in the app would fix it properly.
+# Fixing it here instead would mean telling Coolify's Traefik to trust the
+# tunnel, which is a Coolify-managed static config change and not worth making
+# unilaterally. See RUNBOOK-deploying-a-site.md.
+
+services:
+  app:
+    networks:
+      - mercato-network-fullapp
+      - coolify
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=coolify"
+      - "traefik.http.routers.companai.entrypoints=http"
+      - "traefik.http.routers.companai.rule=Host(`${PLATFORM_HOST}`) || Host(`${PLATFORM_HOST_ALT}`)"
+      - "traefik.http.routers.companai.service=companai"
+      - "traefik.http.services.companai.loadbalancer.server.port=${CONTAINER_PORT:-3000}"
+
+networks:
+  coolify:
+    external: true

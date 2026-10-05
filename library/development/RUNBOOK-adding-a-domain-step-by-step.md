@@ -537,9 +537,9 @@ Then delete the route in the tunnel's **Routes** tab, so Cloudflare stops sendin
 
 ## Appendix A — `new-site.sh`, in full
 
-The helper from Part 8 is on the VM at `/opt/sites/new-site.sh`. It is reproduced here **because that
-copy is not version-controlled** — the VM's copy lives only on the VM. If the VM is rebuilt, recreate it
-from this text:
+The helper from Part 8 is on the VM at `/opt/sites/new-site.sh`. It is reproduced here so this document
+is self-sufficient, and it is also tracked in the project at
+`workspace/scripts/vm-platform/new-site.sh`. If the VM is rebuilt, recreate it from this text:
 
 ```bash
 sudo mkdir -p /opt/sites && sudo chown ramzi:ramzi /opt/sites
@@ -629,20 +629,30 @@ echo "serves  : http://$host/"
 
 ---
 
-## Appendix B — flagged: the VM's scripts are not in git
+## Appendix B — the VM's scripts are now saved in the project
 
-Found while writing this document, and worth knowing:
+Found while writing this document: the deployment scripts lived **only** on this laptop and on the VM, in
+a folder git ignores (`vms/` — `.gitignore` line 99, because the same folder holds the VM's credentials
+and a 4 GB ISO, so it has to stay ignored). `git check-ignore` and `git ls-files` confirmed every one was
+ignored and **none** tracked. If either disk died the deployment logic was gone: the runbooks describe
+*what* the scripts do, not the code itself.
 
-| Script | Where it lives | In git? |
-|---|---|---|
-| `/opt/sites/new-site.sh` | VM + `vms/new-site.sh` on the laptop | **no** — `vms/` is gitignored (`.gitignore` line 99) |
-| `make-env.sh`, `deploy.sh`, `set-host.sh`, `verify.sh` | VM (`/opt/companai-platform/`) + `vms/` | **no** — same reason |
+**Fixed** — they are now tracked in
+[`workspace/scripts/vm-platform/`](../../../workspace/scripts/vm-platform/README.md), with a README
+explaining each one. **No secrets are in that folder**, checked rather than assumed:
 
-`git check-ignore` confirms all five are ignored, and `git ls-files` confirms **none** are tracked. So the
-whole deployment scripting layer exists only on this laptop and on the VM. **If the laptop's disk dies,
-the scripts are gone** — the VM would keep running, but rebuilding it would mean rewriting them from the
-runbooks. `new-site.sh` is now preserved above; the other four are described in
-`RUNBOOK-platform-server.md` and the manual but are not stored as files anywhere durable.
+- the VM's login password: **absent**
+- the Coolify admin password: **absent**
+- the only long hex string present is the **sha256 of `docker-compose.fullapp.yml`**, and it matches the
+  file it names — a checksum, not a secret
+- `.env` itself is **not** there, and must never be added
 
-That is a decision for you, not for me to make unilaterally — moving them into a tracked folder (with the
-secrets left out) would fix it.
+Two files were deliberately left out, because they are **copies of the kit's own files** already tracked
+in the `starting-kit` repository; duplicating them would create a second source of truth for identical
+bytes.
+
+Drift between the tracked copy and the laptop's working copy is now detectable in one command:
+
+```bash
+sh workspace/scripts/vm-platform/check-in-step.sh
+```
