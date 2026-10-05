@@ -171,6 +171,27 @@ It is not the product, and it is not the kernel. It is the **workbench** — the
 the product is built on. Its output is a working environment and a one-page "how to run it",
 not a feature.
 
+### Noted for later — the platform must be reachable from a domain
+
+**Owner's requirement, given 2026-10-05 and explicitly deferred** — his words: *"No need to do it
+now, but take note."*
+
+- At some point the **main platform must be deployed inside the WAN / hosting VM** we built, so that it
+  is reachable from **a domain or subdomain** rather than only from `localhost`.
+- The owner **sets the domain names himself** — "a couple later today". They are his to add, not ours.
+- **People in other countries will check and test it.** So the path has to work from outside this
+  machine and outside this network — a different requirement from Sprint 0's, which is deliberately
+  loopback-only (item 4 above).
+- **This is a note, not a task started.** Nothing in Sprint 0 depends on it, no work has begun, and no
+  domain has been assigned yet.
+
+**Why it is worth recording now.** Sprint 0's definition of done stops at "reachable on localhost; no
+service exposed to the LAN". A domain-reachable deployment is the next boundary after it, and it is
+where the compose file's `DEPLOY_ENV` branch stops being a claim and gets exercised for real. The
+related WordPress-and-subdomain request (**item 12**) is separate and still to be discussed — the owner
+wants **directory-based hosting**, not WordPress-as-Docker: he adds the domain, creates a directory,
+uploads his own backup into it, imports the database through phpMyAdmin, then tests.
+
 ---
 
 ## 6. Decisions taken — 2026-10-04
