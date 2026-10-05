@@ -55,7 +55,7 @@ And two things are **broken today**, neither of which the analysis found:
    structurally NULL for a read-only tool, so only the log is discriminating). **Two caveats, both
    stated:** one study already in this repository reads the flag the other way
    (`library/ai/qwen-hermes-tool-calling-report.md`: *"enabled by default"*), and a model that never
-   emits a well-formed call would produce the same three NULL checks. **So this is a claim with a
+   emits a well-formed call would also produce no MCP log line. **So this is a claim with a
    named test, not a settled defect:** read `chat_template` from `http://model:8080/props`. §4.1
    states it that way.
 2. **The MCP service was never given `OPENAI_BASE_URL`.** The embedding lane therefore calls
@@ -84,7 +84,7 @@ And two things are **broken today**, neither of which the analysis found:
 | "The product architecture already calls for a provider-neutral `ModelRuntime` abstraction... Treat llama.cpp as one adapter behind that boundary" (implied to be future work) | `packages/ai-assistant/src/modules/ai_assistant/lib/model-factory.ts` is a working **7-tier** resolution chain; `packages/shared/src/lib/ai/llm-provider.ts` is the port; `llm-provider-registry.ts` is the registry; `llm-adapters/{openai,anthropic,google}.ts` are the adapters; `openai-compatible-presets.ts` carries **11 presets** | **ALREADY BUILT, in large part.** The abstraction exists. What is missing is the llama.cpp entry and the embedding seam. |
 | "Existing documents show distinct configuration paths; proposed target, not current fact" (its confidence table, row 4: *"Low / not established"*) | The **chat** lane already resolves through one `model-factory.ts`. The tenant allowlist is already an intersection of an env allowlist and a per-tenant DB row | **CORRECTED.** One policy path exists for the chat lane. The *embedding* lane is separate, and it runs through `EmbeddingService`, not the factory. |
 | "The recorded local endpoint provides chat but the platform's vector integration expects embeddings" | Two independent defects, and the analysis named only the second. See §6 | **SHARPENED into a measured root cause.** |
-| "Tool behaviour depends on the selected model's chat template/parser and exact server version" | True, and **a flag is absent from the deployment and from every development document**. Hermes' docs say `--jinja` is required. **But our own prior study reads it the other way** — `library/ai/qwen-hermes-tool-calling-report.md:50`: *"current server documentation has `--jinja` enabled by default"* | **FLAG ABSENT; THE CONFLICT IS NAMED, NOT RESOLVED.** §4.1 gives the one command that settles it. |
+| "Tool behaviour depends on the selected model's chat template/parser and exact server version" | True, and **a flag was absent from the deployment and from the development documents as they stood before this change**. Hermes' docs say `--jinja` is required. **But our own prior study reads it the other way** — `library/ai/qwen-hermes-tool-calling-report.md:50`: *"current server documentation has `--jinja` enabled by default"* | **FLAG WAS ABSENT; THE CONFLICT IS NAMED, NOT RESOLVED.** §4.1 gives the one command that settles it |
 | "Hermes cannot run a model itself" needs qualification (its own correction) | Confirmed and strengthened. `hermes_cli/local_runtime/` is **19 Python modules plus a JSON catalog (20 files; 4,307 lines of Python)**, with `enabled: False` by default | **CONFIRMED.** See §6.3. |
 
 ### 1.3 The premise that actually needed correcting
@@ -311,12 +311,12 @@ explains the same observation more completely, and one test separates the two re
   would still have **reached the platform** and failed *there*, on the missing `agentId`. It did not
   reach the platform at all.
 - **If the server is ignoring `tools`**, the model's choice is emitted as **text**, Hermes does not
-  recognise it as a call, and **nothing reaches the platform** — which is exactly what the three
-  checks found.
+  recognise it as a call, and **nothing reaches the platform** — which is exactly what the one
+  discriminating check found.
 
 So the recorded outcome **is consistent with the `--jinja` diagnosis** and is not fully explained by
 "the model chose wrong". It is still not proof: a model that never emits a well-formed call would
-produce the same three NULL checks. **The `props` check is what settles it.**
+also produce no MCP log line. **The `props` check is what settles it.**
 
 **The change, if the check says it is needed.** One entry in the `model` service command:
 
@@ -510,7 +510,7 @@ term?
 | Model | `Qwen2.5-7B-Instruct-Q4_K_M.gguf` | `MODEL_FILE` default |
 | Context | `-c 65536` **plus** YaRN RoPE scaling | the compose command |
 | Threads | `-t 4 -tb 8` | measured, see §7 |
-| Tool calling | **missing `--jinja`** | §4.1 |
+| Tool calling | **`--jinja` is absent from the deployed command** (it is documented as added by this change, but the compose file itself was not touched — no code changed here) | §4.1 |
 
 **Why YaRN is not optional.** The compose comment states the measured reason: Qwen2.5's GGUF
 declares `n_ctx_train = 32768`, and llama.cpp **caps** the slot at that value. `-c 65536` alone
@@ -738,12 +738,13 @@ Per the COOKBOOK's zero-one rule: **a deferral must name its trigger.**
 - **Every number has two routes.** The 21 packages and the `0.6.7` version: a directory count and a
   manifest read. The 11 presets: the export array and a count of the definitions. B-16's cause: the
   compose service blocks **and** the installed SDK's own dist. The embedding asymmetry: the type
-  union **and** the client switch. The `--jinja` absence: three compose files, the COOKBOOK, and
-  `library/development/`.
+  union **and** the client switch. The `--jinja` absence: three compose files, and the COOKBOOK and
+  `library/development/` **as they stood before this change** — a search today finds the flag in
+  them, because this change put it there.
 - **The defects were found by reading, then confirmed by reading somewhere else.** `--jinja` was
   found in Hermes' docs, then searched for in our deployment, and then the **recorded symptom** was
-  found in the COOKBOOK's Step 4 table — three independent NULL checks that match the diagnosis
-  exactly. B-16's base URL was found in the compose and then confirmed in the SDK's own dist.
+  found in the COOKBOOK's Step 4 table — no call reached the platform, which matches the diagnosis.
+  B-16's base URL was found in the compose and then confirmed in the SDK's own dist.
 - **Three hostile passes were run, and they falsified nine of this document's own claims.** All were
   corrected rather than defended, and the corrections are visible in the text rather than quietly
   applied. **The third pass caught the subtlest one: the change that carried this document made one
