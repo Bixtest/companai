@@ -101,6 +101,9 @@ companai/                      ← you are here
 │       ├── BACKLOG.md         **THE ONE ROADMAP** — everything left, in order
 │       ├── AGENT-HALF.md      **the agent half** — five agent kinds, the responsibility rule, and where every lesson lands
 │       ├── ARCHITECTURE.md    how the Starting Kit + Hermes + the model server run together
+│       ├── ARCHITECTURE-hermes-integration.md  **the full Hermes integration design** — platform to
+│       │                      platform, function to function, and multi-tenant. The deliverable that
+│       │                      supersedes the process recommendation in `analysis/`
 │       ├── BLOCKERS.md        anything stopping progress, with what clears it
 │       ├── NEEDS-YOU.md       owner-only actions, numbered
 │       └── RUNBOOK-*.md       hosting: the server manual, the domain walkthrough, Sprint 0

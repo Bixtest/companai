@@ -9,7 +9,7 @@ remembers a task** (COOKBOOK rule zero-three).
 predates the whole analysis programme), and remarks buried in reports. **This file replaces
 those as the plan.** The others are kept for their reasoning and point here.
 
-**Last updated:** 2026-10-05 (**G-07 — the Widget contract, the Widget IR and the registry — is built and measured** (6 suites / 68 tests; the Function → Widget chain runs with **no AI**). **The four-item critical path is complete:** `spec ✅ → G-01 ✅ → G-02 ✅ → G-03 ✅`. What remains on it is the owner's reading of the spec, and the Hermes profile decision **B-05**, which stays parked until the agent gateway. **G-07's completion has fired two parked triggers:** **V-04** (the Hermes ops console) is now due for the owner's decision, and the Function's database row is now startable).
+**Last updated:** 2026-10-05 (**The Hermes integration design is written** — [`ARCHITECTURE-hermes-integration.md`](ARCHITECTURE-hermes-integration.md): platform to platform, function to function, and multi-tenant. It supersedes the process recommendation in `analysis/` and records four corrections to it. **G-07 — the Widget contract, the Widget IR and the registry — is built and measured** (6 suites / 68 tests; the Function → Widget chain runs with **no AI**). **The four-item critical path is complete:** `spec ✅ → G-01 ✅ → G-02 ✅ → G-03 ✅`. What remains on it is the owner's reading of the spec, and the Hermes profile decision **B-05**, which stays parked until the agent gateway. **G-07's completion has fired two parked triggers:** **V-04** (the Hermes ops console) is now due for the owner's decision, and the Function's database row is now startable).
 
 | Tag | Meaning |
 |---|---|

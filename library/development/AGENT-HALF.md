@@ -308,7 +308,7 @@ only agent item on the critical path**, because everything else needs to know wh
 | Item | Status | Note |
 |---|---|---|
 | Kernel-spec items 2, 26, 27, 28 (identity resolution · Hermes boundary · profile strategy · session bridge) | **OPEN — spec** | This decision **narrows** them; it does not close them. Item 27 in particular now has a shape: the five kinds tell us how many profiles we need and how they are isolated |
-| The `B-05` Hermes boundary | **OPEN — owner** | Unchanged by this decision |
+| The `B-05` Hermes boundary | **OPEN — owner** | Unchanged by this decision. **Narrowed 2026-10-05** by [`ARCHITECTURE-hermes-integration.md`](ARCHITECTURE-hermes-integration.md) §11: one typed port owned by `ai-assistant`, with a private Python runtime behind it, and the reasons not to embed stated there. **Also note the incumbent:** OpenCode still occupies the agent slot (`api/chat/route.ts` is wired to it), so the integration is a displacement with a live passenger, not an addition |
 | Which gate each action class gets by default | **OPEN — design** | `A1` for anything destructive, `A5` for anything read-only, is the obvious default; the full matrix is design work, not an owner question |
 | Whether a *context* agent may hold its own permissions **in addition to** the user it acts as | **OPEN — design** | The owner's answer implies "no, it borrows" — but it should be stated, not assumed |
 
