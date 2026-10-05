@@ -11,6 +11,7 @@ Companions, for depth rather than for the basics:
 
 | Document | What it holds |
 |---|---|
+| [`RUNBOOK-adding-a-domain-step-by-step.md`](RUNBOOK-adding-a-domain-step-by-step.md) | **the practical, ordered walkthrough** — GoDaddy → Cloudflare → tunnel → SSL → a live site. Start here if your job is "get my domain working" |
 | [`RUNBOOK-platform-server.md`](RUNBOOK-platform-server.md) | the machine itself — how it was built, rollback, the rebuild-from-scratch route |
 | [`RUNBOOK-deploying-a-site.md`](RUNBOOK-deploying-a-site.md) | the longer treatment of the proxy, the proof stack, and what is and is not proven |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | why this stack exists and what it is for |
@@ -410,13 +411,19 @@ parsed as `scheme://host[:port][/path]`:
 
 | You type | What Coolify does |
 |---|---|
-| `https://app.example.com` | routes on **https**, with `tls=true` and `tls.certresolver=letsencrypt` → **a real certificate is requested** |
-| `http://app.test` | routes on **http**, **no certificate, no Let's Encrypt** |
-| `http://app.test/files` | same, but the route is limited to the `/files` path — `PathPrefix('/files')` |
+| `http://app.example.com` | one router on **`entryPoints=http`** (port 80). No TLS, no redirect. **This is what you want behind the tunnel.** |
+| `https://app.example.com` | a router on **`entryPoints=https`** (port 443) with `tls=true` and `tls.certresolver=letsencrypt`, **plus** an http router on port 80 that redirects to https when **Force HTTPS** is on |
+| `http://app.test/files` | same as the first row, but the route is limited to the `/files` path — `PathPrefix('/files')` |
 | `http://app.test:3000` | routes to port **3000 inside the container** |
 
-**Two consequences that catch people out:**
+**Three consequences that catch people out:**
 
+- **Behind the tunnel, write `http://`, not `https://`.** The tunnel connects to `http://localhost:80`, so
+  the router that matters is the one on the **http** entrypoint. With `https://` you get a doomed Let's
+  Encrypt job (nothing reaches this VM inbound — §4) and, if **Force HTTPS** is on, a **redirect loop**:
+  port 80 → `301` to https → Cloudflare → browser → back through the tunnel → port 80 → `301` again. The
+  public HTTPS is **Cloudflare's**, not Traefik's. Detail and the measured source:
+  [`RUNBOOK-adding-a-domain-step-by-step.md`](RUNBOOK-adding-a-domain-step-by-step.md) Part 3.
 - **For `.test` names, always write `http://`.** Let's Encrypt cannot validate a name that does not exist
   publicly, so `https://` on a `.test` name tries and fails to get a certificate.
 - **Always include the scheme.** The parser reads the scheme to find the host. The helper's own examples
@@ -544,13 +551,30 @@ Then set its **Domains** field (`http://wp.test` for local testing, `https://wp.
 **Proven 2026-10-04:** `Host: wp.test` returned `302 → /wp-admin/install.php`, and that path returned
 `200` with `<title>WordPress › Installation</title>` — the installer.
 
-### The other kind of WordPress you asked about
+### Directory-based hosting — now built, and proven
 
-You also described wanting **directory-based hosting**: add the domain, create a directory, upload your
-own backup into it, import the database through phpMyAdmin, then test. That is a *different* thing from
-WordPress-as-a-container, and it is **not what this stack does by default**. If you want it, say so —
-it is a small piece of work (a static/nginx resource with a mounted directory, plus a database), but it
-should be built deliberately rather than assumed.
+You described wanting **directory-based hosting**: add the domain, create a directory, upload your own
+codebase or backup into it, import the database through phpMyAdmin, then test. That is a *different*
+thing from WordPress-as-a-container.
+
+**It now exists on this VM, built and proven 2026-10-05.** One directory per site, mounted into a small
+PHP container, routed by name:
+
+```text
+/opt/sites/<site-name>/public/     <- your codebase goes here, live immediately
+```
+
+```bash
+ssh -i ./id_ed25519 ramzi@172.28.50.2 '/opt/sites/new-site.sh myshop shop.example.com'
+```
+
+Measured: each hostname serves **its own** directory; a file in one site returns `404` on another; a
+host-side edit appears live with **no rebuild**; and the whole chain was fetched publicly over **HTTPS**
+with a valid certificate. The two example sites (`demo-site`, `second-site`) are left running.
+
+**The full step-by-step — GoDaddy, Cloudflare, the tunnel, SSL, and all three site types — is
+[`RUNBOOK-adding-a-domain-step-by-step.md`](RUNBOOK-adding-a-domain-step-by-step.md).** Use that one for
+this work; this section is only the pointer.
 
 ---
 

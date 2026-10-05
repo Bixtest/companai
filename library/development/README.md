@@ -37,6 +37,7 @@ around it.
 | **Understanding the product** | `00-product-thesis.md` → `findings/01-vision-frame.md` → `findings/12-development-plan.md` |
 | **Writing code** | `COOKBOOK.md` → `workspace/knowledge/` (20 concept files) → `workspace/references/environment.md` |
 | **Running it** | `ARCHITECTURE.md` → `workspace/references/local-instance.md` → `workspace/references/deployment.md` |
+| **Putting a domain on a site** | `RUNBOOK-adding-a-domain-step-by-step.md` → `RUNBOOK-hosting-server-manual.md` §4 |
 | **Testing it** | `workspace/references/how-to-test.md` → `workspace/knowledge/test-gate.md` |
 | **Picking up the analysis** | `library/analysis/PLAN.md` → `library/analysis/LOG.md` → the `findings/` reports |
 
@@ -121,6 +122,7 @@ See COOKBOOK rule zero-ten.
 | [`BACKLOG.md`](BACKLOG.md) | **The one roadmap** — everything left, in order, with the "do not lose this" list and the deferrals |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | How the Starting Kit + Hermes + the model server run together, and the dockerisation decision (Sprint 0) |
 | [`BLOCKERS.md`](BLOCKERS.md) | **Anything stopping progress**, with what clears it. **Read this before wondering why something is not moving** |
+| [`RUNBOOK-adding-a-domain-step-by-step.md`](RUNBOOK-adding-a-domain-step-by-step.md) | **The practical walkthrough** — GoDaddy → Cloudflare → tunnel → SSL → a live site, with all three site types (Docker platform, WordPress container, your own codebase in a directory) and databases + phpMyAdmin. **Start here for "get my domain working"** |
 | [`RUNBOOK-hosting-server-manual.md`](RUNBOOK-hosting-server-manual.md) | **Operating the hosting server** — connecting from the laptop, domains and DNS, directories, databases, phpMyAdmin, SSL, WordPress, deploying another Docker platform. **The entry point for that work, for a person or an agent** |
 | [`RUNBOOK-platform-server.md`](RUNBOOK-platform-server.md) | the hosting VM itself — how it was built, the owner's tasks, rollback, rebuild from scratch |
 | [`RUNBOOK-deploying-a-site.md`](RUNBOOK-deploying-a-site.md) | the proxy and the deployment proof in depth, and what is and is not proven |

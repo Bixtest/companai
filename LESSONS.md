@@ -2513,3 +2513,134 @@ front of a name that resolved without reaching anything. Two layers, two truths,
 was the one already written down. Corollary: when a document says "X has no public address", check
 whether it means X, or the network X sits on — the two support opposite conclusions, and only one of
 them is the question anyone actually asked.
+
+---
+
+## L77 — an empty variable is a value, and it will be sent
+
+Building the "site in a directory" proof, I wanted to check that the platform's own hostname still
+routed through Traefik. I extracted the hostname like this:
+
+```bash
+TUNHOST=$(grep -oE 'https://[a-z0-9-]+\.trycloudflare\.com' /tmp/cf-site.log | head -1 | sed 's|https://||')
+curl -H "Host: $TUNHOST" http://127.0.0.1/
+```
+
+The log had moved — `grep` printed `No such file or directory` to stderr, returned nothing on stdout, and
+`TUNHOST` became the empty string. The curl then sent **`Host: `** with nothing after it, Traefik found
+no router, and returned `404` with a 19-byte body. Which is exactly what a genuine routing regression
+looks like.
+
+I was one step from writing down "the platform's public hostname no longer routes" — a false alarm about
+a working system, produced entirely by my own broken lookup. Re-run with the hostname spelled out by
+hand, the same request returned `307` with 474,333 bytes.
+
+**The rule.** *An empty string is not the absence of an answer — it is an answer, and it flows into
+whatever you feed it.* When a shell variable is built from a command substitution, a failure in that
+command produces `""`, and `""` is silently valid as a header, a path segment, a filename or a filter.
+The downstream tool cannot tell "the lookup found nothing" from "the lookup never ran", so it reports on
+the empty value as though it were real data.
+
+**Guards that cost nothing:**
+
+- `set -u` in any script, so an unset variable is an error rather than `""`.
+- Check the source exists and the substitution is non-empty before using it:
+  `[ -n "$TUNHOST" ] || { echo "hostname lookup failed"; exit 1; }`
+- Prefer reading the value from a place you know exists. Here the authoritative source was the running
+  container's own label (`docker inspect … .Config.Labels`), not a log file in `/tmp`.
+- When a result surprises you, **re-run it with the input written out literally** before believing it.
+  A hard-coded value and a computed one are different experiments.
+
+**The general form:** the same family as [[L73]] — a filter that answers "nothing" as confidently as
+"here it is". L73 was about a search pattern that could not match; this is about its output being used
+as an input. Both produce a confident, specific, wrong reading. The tell is the same: the answer arrived
+too easily, and nothing in it referenced the thing you were actually asking about.
+
+---
+
+## L78 — `pkill -f` matches its own command line, and will kill you
+
+Cleaning up a proof tunnel, I ran this over SSH:
+
+```bash
+ssh ramzi@172.28.50.2 "sudo pkill -f 'http-host-header demo.test'; sleep 2; pgrep -af cloudflared"
+```
+
+The command returned **no output at all** — not even the parts that ran before the `pkill`. The reason:
+`pkill -f` matches against the **full command line of every process**, and the shell running my script
+had a command line that *contained the literal string* `http-host-header demo.test`. So `pkill` matched
+its own parent shell and killed the session that was executing it. The tunnel did die — and so did the
+output, the exit code, and any chance of seeing what happened next.
+
+**The rule.** *A pattern used to find processes is also matched against the process doing the finding.*
+Any `-f` (full-command-line) match on a string that appears in the command you are currently running is
+self-referential, and the self-match is usually fatal because it is the parent.
+
+**Fixes, cheapest first:**
+
+- Break the literal with a character class so the pattern no longer matches its own text:
+  `pkill -f 'http-host-header demo[.]test'` — the regex still matches the target, but the string in the
+  command line no longer matches the pattern.
+- Match something narrower than the whole line — a PID from `pgrep`, or an exact process name.
+- Or avoid the shell entirely: `systemctl stop <unit>` for anything service-managed.
+
+**The general form:** this is the same trap as a `grep` whose pattern appears in its own output file, or
+a build that scans a directory it is writing into. Whenever a search and its subject share a namespace,
+the search will find itself. Ask "could this pattern match the thing running it?" before running it —
+and when a command returns *nothing at all*, including output you expected to appear before the
+suspicious line, suspect the process was killed rather than that it silently succeeded.
+
+---
+
+## L79 — the scheme in a domain field is not cosmetic; it picks which listener the router binds to
+
+Writing the step-by-step guide for putting a domain on a site, I told the owner to type
+`https://shop.yourdomain.com` into Coolify's **Domains** field, on the reasoning that `https://` is what
+asks for a real certificate. That advice was wrong, and reading the running source showed why.
+
+**What the field actually does.** `fqdnLabelsForTraefik` in `bootstrap/helpers/docker.php`, read from the
+running Coolify 4.3.23, branches on the parsed scheme:
+
+| You type | Labels produced |
+|---|---|
+| `https://host` | router on **`entryPoints=https`**, `tls=true`, `tls.certresolver=letsencrypt` — **plus** an http router whose middleware is `redirect-to-https` when Force HTTPS is on |
+| `http://host` | one router on **`entryPoints=http`**. No TLS, no redirect. |
+
+The scheme is not decoration. It selects the **listener** the router is attached to, and Traefik's
+entrypoints are separate sockets. A router on `entryPoints=https` is bound to port 443 and will never
+match a request that arrives on port 80.
+
+**Why it mattered here.** Every site on this VM is reached through a Cloudflare tunnel that connects to
+`http://localhost:80`. So only the **http** router is reachable. Typing `https://` produced two failures
+at once:
+
+1. **A redirect loop** (with Force HTTPS on): tunnel → port 80 → `301` to `https://…` → Cloudflare →
+   browser → back through the tunnel → port 80 → `301` again, until the browser reports *too many
+   redirects*.
+2. **A doomed certificate job**: `tls.certresolver=letsencrypt` makes Traefik attempt issuance, which
+   cannot succeed because the HTTP-01 challenge needs the name reachable from the internet — and nothing
+   reaches this VM inbound. The certificate was never needed: **Cloudflare terminates the TLS the visitor
+   sees.**
+
+The correct value is `http://`, which reads as a downgrade and is in fact the only configuration that
+works: the public padlock comes from Cloudflare, and the origin hop is plain HTTP on port 80.
+
+**The rule.** *When a value looks like a cosmetic prefix, find the code that parses it before choosing
+one.* A scheme, a trailing slash, a leading `www`, an `@` — these read as presentation and are frequently
+used as **branch selectors** in the layer that consumes them. Here `https` vs `http` decided which
+socket the route lived on, which decided whether the request could ever arrive.
+
+**How to check it, rather than reason about it.** Read the function from the **running** container, not
+from documentation or memory:
+
+```bash
+docker exec coolify sh -lc \
+  'grep -n "function fqdnLabelsForTraefik" -A 60 /var/www/html/bootstrap/helpers/docker.php'
+```
+
+**The general form:** the same discipline as [[L75]] — follow the value to the line that consumes it.
+The specific trap here is that the two settings differ by one character, are both accepted without
+complaint, and the wrong one *fails at request time in a different component* (a redirect loop in the
+browser, an error in Traefik's ACME log) rather than at the moment you type it. Corollary: when a
+control panel offers a free-text field with a scheme in it, assume the scheme is load-bearing until the
+parser proves otherwise.
