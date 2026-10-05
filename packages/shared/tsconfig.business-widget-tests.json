@@ -1,0 +1,8 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": ["jest", "node"]
+  },
+  "include": ["src/lib/business-widget/**/*", "src/lib/user-function/**/*"],
+  "exclude": ["node_modules", "dist"]
+}
