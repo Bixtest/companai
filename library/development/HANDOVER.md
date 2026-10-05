@@ -109,6 +109,7 @@ code before starting** — the roadmap has been wrong about what is already done
 | **Hosting / domains** | [`RUNBOOK-adding-a-domain-step-by-step.md`](RUNBOOK-adding-a-domain-step-by-step.md) → [`RUNBOOK-hosting-server-manual.md`](RUNBOOK-hosting-server-manual.md) |
 | **Testing it** | `workspace/references/how-to-test.md` → `workspace/knowledge/test-gate.md` |
 | **Picking up the analysis** | [`../analysis/PLAN.md`](../analysis/PLAN.md) → [`../analysis/LOG.md`](../analysis/LOG.md) → the `findings/` reports |
+| **Designing the agent half** (AI staff, roles, tasks, delegation, triggers, meetings) | [`../paperclip-hermes-study/findings/10-lessons-and-target-design.md`](../paperclip-hermes-study/findings/10-lessons-and-target-design.md) — **the synthesis**: what we take from Paperclip and Hermes, what we reject, and the target shape. Then its [`PLAN.md`](../paperclip-hermes-study/PLAN.md) for how it was derived |
 
 ---
 
@@ -211,7 +212,7 @@ companai/                       ← repo 1 root (thinking + docs).  You are here
 │                               (THIS FILE is not at the root — it lives at
 │                                library/development/HANDOVER.md, below)
 │
-├── library/                    EVERYTHING DOCUMENTED, IN ONE PLACE (2,440 markdown files)
+├── library/                    EVERYTHING DOCUMENTED, IN ONE PLACE (3,439 markdown files, measured 2026-10-05)
 │   ├── INDEX.md                what each shelf is, and the reading order
 │   ├── PROVENANCE.md           where every shelf came from, how to rebuild it
 │   ├── development/            ← DEVELOPMENT MANAGEMENT — the hub
@@ -226,11 +227,17 @@ companai/                       ← repo 1 root (thinking + docs).  You are here
 │   ├── ai/                     READ ITS README FIRST — two products are called Companai
 │   │   ├── ai-first/           THE DIRECTION — what we will actually build
 │   │   ├── hermes-docs/        a sibling's docs. Lessons only, never decisions
-│   │   └── hermes-agent-main/  the Hermes runtime source — where it disagrees with docs, it wins
+│   │   ├── hermes-agent-main/  the Hermes runtime source — where it disagrees with docs, it wins
+│   │   ├── paperclip-master/   upstream Paperclip — the subject of the agent study
+│   │   └── source-docs/        ONE PLACE for the scattered source docs (register inside)
 │   ├── analysis/               THE ANALYSIS PROGRAMME — complete, all 12 batches
 │   │   ├── PLAN.md             the batch plan with tickboxes — all DONE
 │   │   ├── LOG.md              one dated line per batch
 │   │   └── findings/           one report per batch — **batch 12 is THE DEVELOPMENT PLAN**
+│   ├── paperclip-hermes-study/ THE AGENT STUDY — complete, all 11 batches
+│   │   ├── PLAN.md             the batch plan with tickboxes — all DONE, each with its result
+│   │   ├── LOG.md              one dated line per batch
+│   │   └── findings/           one report per batch — **batch 10 is THE SYNTHESIS** (see §2)
 │   └── canonical-architecture-v2-hybrid-ai-coolify.md   the hosting architecture
 │
 ├── compai/                     THINKING — no code
@@ -390,7 +397,7 @@ documents and was *not* re-measured — treat it as a starting point, not a fact
 | **Repo 1** (thinking/docs) | `master`, HEAD **`c127030`**. Working tree has **14 entries — 12 pre-existing (the owner's), 2 mine** (see below) |
 | **Repo 2** (code) | `main`, HEAD **`962ae2a`**, **clean** |
 | **Codebase shape** | **21 packages, 1 app** (`apps/mercato`) — a monorepo (Yarn 4.17.1 + Turbo) |
-| **Documentation** | `library/` holds **2,440 markdown files**; `LESSONS.md` 2,646 lines (L1–L79); `JOURNAL.md` 3,190 lines |
+| **Documentation** | `library/` holds **3,439 markdown files**; `LESSONS.md` 2,646 lines (L1–L79); `JOURNAL.md` 3,190 lines |
 | **Open blockers** | **3** — B-05, B-16, B-17. **None stops Sprint 0** (see [`BLOCKERS.md`](BLOCKERS.md)) |
 
 **Group B — quoted from older documents, not re-measured:**
@@ -464,6 +471,15 @@ change.
 A newcomer who cannot orient themselves from this page plus [`../../INDEX.md`](../../INDEX.md)
 alone means this page is broken — **fix the page, not the newcomer.**
 
-*Last updated: 2026-10-05 — first version. Records the two-repository layout, the two-products
+*Last updated: 2026-10-05 — **the agent study is complete and is now part of the folder map.** The
+Paperclip + Hermes study finished all eleven batches; the map gained
+`library/paperclip-hermes-study/`, the `ai/` block gained `paperclip-master/` and `source-docs/`, and
+§2 gained a role: *designing the agent half*. The library file count was re-measured in **both** places
+it appears in this file (both said 2,440; the real figure is **3,439** — the earlier 3,121 I first
+wrote here counted the library *minus* the new `ai/source-docs/` copies, which was wrong because that
+folder sits inside `library/`). Its synthesis is the reference for the agent half, and it leaves exactly one decision
+open — see §3.1 of [`../paperclip-hermes-study/findings/10-lessons-and-target-design.md`](../paperclip-hermes-study/findings/10-lessons-and-target-design.md).*
+
+*Earlier, 2026-10-05 — first version. Records the two-repository layout, the two-products
 trap, the gitignored `vms/` and its fix, the host VM, the standing rules, and the honest split
 between what is proven and what is not.*

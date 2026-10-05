@@ -98,12 +98,28 @@ stack is built, not something we must add.**
 code, **not from a run**. The one measurement that would upgrade it is standing the trio up
 and watching the two arrows work — which is exactly what **Sprint 0** (§5) is for.
 
+### The agent half — where its design comes from
+
+The table above is the **platform half**, and it is largely bought. The **agent half** — how AI
+employees get roles, tasks, delegation, triggers and conversations — is designed from evidence, not
+guesswork. The completed study
+[`../paperclip-hermes-study/`](../paperclip-hermes-study/) read Paperclip, Hermes and the sibling's
+integration forensically across eleven batches; its synthesis,
+[`../paperclip-hermes-study/findings/10-lessons-and-target-design.md`](../paperclip-hermes-study/findings/10-lessons-and-target-design.md),
+is the reference for that half: what we take, what we reject, and the target shape.
+
+**It is evidence, not a decision.** It hands back exactly one open item — whether an assistant agent
+is *identity* (it belongs to Alice) or *context* (it acts as Alice). Where this document and that one
+disagree about *what to build*, this document governs; where this document is silent, that one has the
+reasoning.
+
 ---
 
 ## 4. The three boundaries that make it work
 
-These are not preferences. They are the decisions from batch 10, and the architecture must
-obey them.
+These are not preferences. They are the decisions from **batch 10 of the analysis programme**
+([`../analysis/findings/`](../analysis/findings/)) — not to be confused with batch 10 of the
+Paperclip + Hermes study above, which is the synthesis. The architecture must obey these.
 
 1. **One door per message.** A business message arrives through the platform (our channels);
    agent-facing chat goes through Hermes's adapters. A customer's message is answered once.
@@ -250,3 +266,8 @@ provider, per `model-factory.ts`. Those can be dropped independently of the serv
 Nothing in this document. The remaining open items for the owner live in the **backlog**
 ([`BACKLOG.md`](BACKLOG.md), *waiting on the owner*) — chiefly the object list, which the
 Business Model Kernel specification settles.
+
+One more is open from the agent study, and it is a product promise rather than a technical question:
+**are assistant agents *identity* (the agent belongs to a named person) or *context* (the agent acts
+as that person for their work)?** Paperclip chose context. See §3.1 of
+[`../paperclip-hermes-study/findings/10-lessons-and-target-design.md`](../paperclip-hermes-study/findings/10-lessons-and-target-design.md).

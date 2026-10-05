@@ -107,3 +107,10 @@ vms/
 # Upstream Paperclip, extracted from paperclip-master.zip on 2026-10-05 (9,056 files,
 # 132 MB). Reference material for the agent/task study. Not our code, not tracked.
 library/ai/paperclip-master/
+
+# One place for the scattered source documents the study reads — created 2026-10-05 at
+# the owner's request. The copies (317 markdown files from upstream Paperclip's doc set)
+# are somebody else's documentation, so they follow the 2026-10-04 rule above: the copies
+# are ignored, the register is not. README.md is the register and is tracked.
+library/ai/source-docs/*
+!library/ai/source-docs/README.md

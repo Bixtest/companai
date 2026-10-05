@@ -11,6 +11,7 @@ place to look:
 - [`ai/`](ai/) — the AI-first direction, the sibling project's Hermes documentation, and the Hermes runtime source. **Read [`ai/README.md`](ai/README.md) first** — two different products are called Companai.
 - [`analysis/`](analysis/) — the 12-batch analysis programme that checks AI-FIRST against HERMES and STARTING-KIT.
 - [`development/`](development/) — **the development management hub**: the one roadmap, the architecture of the running system, and the handover. Start here if you are working on the project.
+- [`paperclip-hermes-study/`](paperclip-hermes-study/) — **the completed 11-batch forensic study** of Paperclip and Hermes, and the lessons for our own agent architecture. **Read [`paperclip-hermes-study/findings/10-lessons-and-target-design.md`](paperclip-hermes-study/findings/10-lessons-and-target-design.md) first** — it is the synthesis.
 
 Before this, the material lived in about a dozen folders: some inside `companai`,
 some only on the external drive (`E:`), some inside the live codebase. If the
@@ -88,6 +89,8 @@ times**; `hermes-docs/` mentions them 137, 230, 251 and 8 times.
 | [`ai/hermes-docs/`](ai/hermes-docs/) | A **sibling project's** documentation — Paperclip-based, also called Companai. 351 files | For **lessons and failure modes only**. Never as decisions we inherit |
 | [`ai/hermes-agent-main/`](ai/hermes-agent-main/) | The Hermes agent runtime source itself (Nous Research) | **The artefact.** Where any document disagrees with it, the code wins |
 | [`ai/PAPERCLIP_HERMES_LLAMA_SERVER_SSOT.md`](ai/PAPERCLIP_HERMES_LLAMA_SERVER_SSOT.md) · [`ai/qwen-hermes-tool-calling-report.md`](ai/qwen-hermes-tool-calling-report.md) · `ai/tiny_models/` · `ai/integration_research/` | The sibling project's local-model and integration work | Same rule — evidence about tooling, not about our platform |
+| [`ai/paperclip-master/`](ai/paperclip-master/) | **Upstream Paperclip**, extracted from `paperclip-master.zip` — 8,299 files, version `0.3.1` | The subject of the study below. Where its docs disagree with its code, the code wins |
+| [`ai/source-docs/`](ai/source-docs/) | The **one place** the scattered source documents were gathered — upstream Paperclip's 317-file doc set — with a register of where every other scattered set lives | Read [`ai/source-docs/README.md`](ai/source-docs/README.md) first. The register is tracked; the copies are not |
 
 ---
 
@@ -105,7 +108,32 @@ Where the work of checking AI-FIRST against HERMES and STARTING-KIT happens. It 
 
 ---
 
-## 5. The development hub — `development/`
+## 5. The Paperclip + Hermes study — `paperclip-hermes-study/`
+
+**A completed 11-batch forensic study** (2026-10-05) of how AI workers get roles, tasks,
+delegation, triggers and conversations — read from Paperclip, Hermes and the sibling's integration,
+and turned into lessons for our own agent architecture. **It is our own work, not copied material.**
+
+| File | What it is |
+|---|---|
+| [`paperclip-hermes-study/findings/10-lessons-and-target-design.md`](paperclip-hermes-study/findings/10-lessons-and-target-design.md) | **Read this first.** The synthesis: every lesson with its evidence and its consequence, the owner's twelve concerns each answered in four voices, and the target design |
+| [`paperclip-hermes-study/README.md`](paperclip-hermes-study/README.md) | Why the study exists, the rule that governs it, and the three inputs |
+| [`paperclip-hermes-study/PLAN.md`](paperclip-hermes-study/PLAN.md) | The batch plan and results. **Complete: 11 of 11** |
+| [`paperclip-hermes-study/LOG.md`](paperclip-hermes-study/LOG.md) | One dated line per batch completed |
+| [`paperclip-hermes-study/findings/`](paperclip-hermes-study/findings/) | One findings file per batch, `00`–`10` — 3,931 lines |
+
+**What it hands back.** Lessons, not decisions. **Exactly one decision is left open for the owner** —
+whether an assistant agent is *identity* (it belongs to Alice) or *context* (it acts as Alice) — and
+it is marked as such in §3.1 of the synthesis.
+
+**The study does not repeat prior work.** Hermes was already forensically analysed twice; the study
+**audits** those claims against the source instead (and found one contradicted — "session resume is
+broken" is our adapter's defect, not Hermes'). What was genuinely new is **upstream Paperclip**,
+which had no analysis anywhere.
+
+---
+
+## 6. The development hub — `development/`
 
 Where the project's own work is managed. **Unlike the sixteen shelves above, these are living
 documents we write and update** — not copied sources. **Start here if you are working on the
@@ -124,7 +152,7 @@ the platform works; `analysis/` holds the evidence. The hub holds the **plan and
 
 ---
 
-## 6. Relevant, but deliberately not copied
+## 7. Relevant, but deliberately not copied
 
 These are already inside `companai` and stay where they are. Copying them would
 have created a second version that drifts.
@@ -132,7 +160,7 @@ have created a second version that drifts.
 | Where | What it is |
 |---|---|
 | [`../INDEX.md`](../INDEX.md) | The project's own start page |
-| [`../where_we_left.md`](../where_we_left.md) | The one status document kept current |
+| [`../where_we_left.md`](../where_we_left.md) | A status document — **stale.** [`development/BACKLOG.md`](development/BACKLOG.md) is the one plan kept current |
 | [`../compai/planning/`](../compai/planning/) | The design: product thesis, core architecture, authority and autonomy, worker charter, context graph, addressing, attribution, host selection, starting kit — plus `platforms/` with the assessments of each candidate platform, including the Graph Portal Platform assessment and the UXAIOS harvest notes |
 | [`../compai/brainstorming/`](../compai/brainstorming/) | Where the idea came from |
 | [`../workspace/knowledge/`](../workspace/knowledge/) | How the platform actually works — the governance layer, authority, approvals, delegations, denials, record locks, the ledger, the test gate |
@@ -143,7 +171,7 @@ have created a second version that drifts.
 
 ---
 
-## 7. What is not in here
+## 8. What is not in here
 
 Left out on purpose, with the reason:
 
@@ -155,7 +183,7 @@ Left out on purpose, with the reason:
 
 ---
 
-## 8. Keeping this honest
+## 9. Keeping this honest
 
 Two files sit alongside this one:
 

@@ -78,12 +78,18 @@ companai/                      ← you are here
 │   ├── ai/                    READ ITS README FIRST — two different products are called Companai
 │   │   ├── ai-first/          THE DIRECTION — what we will actually build. Mentions Companai 0 times
 │   │   ├── hermes-docs/       a SIBLING project's docs (Paperclip-based). Lessons only, never decisions
-│   │   └── hermes-agent-main/ the Hermes runtime source itself — where it disagrees with docs, it wins
+│   │   ├── hermes-agent-main/ the Hermes runtime source itself — where it disagrees with docs, it wins
+│   │   ├── paperclip-master/  upstream Paperclip — the subject of the agent study
+│   │   └── source-docs/       THE ONE PLACE the scattered source documents were gathered (register inside)
 │   ├── analysis/              THE ANALYSIS BEFORE DEVELOPMENT — **COMPLETE, all 12 batches**
 │   │   ├── PLAN.md            the batch plan with tickboxes — all 12 DONE
 │   │   ├── README.md          how the programme runs, and the rules
 │   │   ├── LOG.md             one dated line per batch completed
 │   │   └── findings/          one report per batch — **batch 12 is THE DEVELOPMENT PLAN**
+│   ├── paperclip-hermes-study/ THE AGENT STUDY — **COMPLETE, all 11 batches**
+│   │   ├── PLAN.md            the batch plan with tickboxes — all 11 DONE
+│   │   ├── LOG.md             one dated line per batch completed
+│   │   └── findings/          one report per batch — **batch 10 is THE SYNTHESIS: lessons + target design**
 │   └── development/           DEVELOPMENT MANAGEMENT — where the work is tracked
 │       ├── HANDOVER.md        **the front door for a newcomer — read this first**
 │       ├── README.md          the reading order, the sprint process
@@ -263,6 +269,9 @@ Break these and you will damage the project.
 | **Know what we are building, in what order, and why** | [`library/analysis/findings/12-development-plan.md`](library/analysis/findings/12-development-plan.md) — **THE DEVELOPMENT PLAN.** The deliverable the whole analysis exists for: four phases, the critical path (G-01 → G-02 → G-03), the first three things to build, and every decision that is the owner's |
 | **See the analysis plan, and what is being checked** | [`library/analysis/PLAN.md`](library/analysis/PLAN.md) — 12 batches with tickboxes, **all DONE**. Start here if you want the programme itself |
 | **Know what has been analysed so far** | [`library/analysis/LOG.md`](library/analysis/LOG.md) — one dated line per batch, and [`library/analysis/findings/`](library/analysis/findings/) for the reports |
+| **Understand the agent half (AI staff, roles, tasks, delegation, triggers, meetings)** | [`library/paperclip-hermes-study/findings/10-lessons-and-target-design.md`](library/paperclip-hermes-study/findings/10-lessons-and-target-design.md) — **THE SYNTHESIS.** What we take from Paperclip and Hermes, what we reject, and how we do it better. **One decision is left open for the owner** |
+| **See the agent study's batch plan and progress** | [`library/paperclip-hermes-study/PLAN.md`](library/paperclip-hermes-study/PLAN.md) — 11 batches with tickboxes, **all DONE**, each with its result |
+| **Find a source document the study cites** | [`library/ai/source-docs/README.md`](library/ai/source-docs/README.md) — the register of where every scattered source document set lives, and what is copied where |
 | **Understand the vision we are aiming at** | [`library/analysis/findings/01-vision-frame.md`](library/analysis/findings/01-vision-frame.md) — what the platform is meant to be, its rules, and what it deliberately has not decided |
 | **Understand the two-Companai trap** | [`library/ai/README.md`](library/ai/README.md) — two different products share the name. Read before using any AI document |
 | **Find any documentation at all** | [`library/INDEX.md`](library/INDEX.md) — every design, vision, audit and product document in one place, with a reading order |
@@ -302,7 +311,17 @@ a folder, finishes a phase, or makes a decision updates it in the same change.
 A newcomer who cannot orient themselves from this page alone means it is broken —
 fix the page, not the newcomer.
 
-*Last updated: 2026-10-05 — **outdated information swept out of this page.** The owner's rule:
+*Last updated: 2026-10-05 — **the agent study is complete, and the scattered source documents now have one home.** The Paperclip + Hermes study finished all eleven batches; its synthesis
+([`library/paperclip-hermes-study/findings/10-lessons-and-target-design.md`](library/paperclip-hermes-study/findings/10-lessons-and-target-design.md))
+is now the reference for the agent half of the platform — what we take, what we reject, and how we
+do it better — and the map and the §6 lookup table point at it. A new folder,
+[`library/ai/source-docs/`](library/ai/source-docs/README.md), gathers the source documents the study
+cites: **its register is tracked, the copies are not** (the project's standing rule). `library/INDEX.md`
+gained a section for the study and was renumbered 1–9; and its "deliberately not copied" table no
+longer calls `where_we_left.md` "the one status document kept current" — the same stale-info fix
+applied to this page earlier the same day.*
+
+*Earlier, 2026-10-05 — **outdated information swept out of this page.** The owner's rule:
 "outdated info is wrong info". Fixed: the page no longer sends a returning reader to
 `where_we_left.md` as "the one status document kept current" (it is a 2026-08-13 snapshot, stale by
 its own admission); the Health row no longer quotes a stale test count as current (the two status

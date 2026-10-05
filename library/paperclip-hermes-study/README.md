@@ -15,7 +15,12 @@ architecture.
 > documentations relevant to their integrations, then inspired by that we develop that part in our
 > own architecture that does it even better than each and both combined."
 
-**Written 2026-10-05.**
+**Written 2026-10-05. Completed 2026-10-05 — all eleven batches.**
+
+> **Status: complete (11 of 11).** Every batch has its findings file; the trackers are
+> [`PLAN.md`](PLAN.md) (tickboxes and results) and [`LOG.md`](LOG.md) (one dated line each). **The
+> deliverable to read is [`findings/10-lessons-and-target-design.md`](findings/10-lessons-and-target-design.md)**
+> — the synthesis. It hands back **exactly one decision** to the owner; everything else is a lesson.
 
 ---
 
@@ -58,6 +63,7 @@ file it came from.
 | **Hermes (source)** | `library/ai/hermes-agent-main/` | ⚠️ gitignored — the artefact; where it disagrees with docs, it wins |
 | **The integration** | `aissistant-package/` — 92,729 files (incl. vendored deps) | ⚠️ NOT OURS — the sibling's codebase |
 | **Existing docs** | `library/ai/PAPERCLIP_HERMES_LLAMA_SERVER_SSOT.md` (1,474 lines), `library/ai/hermes-docs/` (351 files incl. the **23,842-line `reboot/` dossier**), `library/ai/ai-first/AI_Native_Business_Platform_Hermes_Forensic_Analysis_and_Architecture.md` (4,254 lines) | ⚠️ sibling material — lessons only |
+| **The scattered copies** | `library/ai/source-docs/` — the one place the source documents were gathered (Paperclip's 317-file doc set), with a register of where every other set lives | See [`../ai/source-docs/README.md`](../ai/source-docs/README.md) |
 
 **What is already covered, and must not be redone:**
 

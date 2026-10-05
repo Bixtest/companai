@@ -18,7 +18,11 @@ across other documents. If it needs you, it is here or it is not tracked.
 
 ---
 
-## Part 1 — Decisions I need (4)
+## Part 1 — Decisions I need (5)
+
+> **Numbering note.** Items are numbered once and **never reused**, so that a number you have already
+> quoted keeps meaning the same thing. Item 8 was appended here on 2026-10-05; items 5–7 below are
+> unchanged. *(Item 5 is still the Coolify password.)*
 
 ### 1. Reset the local dev database? — **DECIDE** · *recommend YES*
 
@@ -78,6 +82,34 @@ objects and folded them into others:
 **If you disagree with either.** Say so — it is two rows and a version bump, about ten minutes. This  
 is the only part of the specification that is genuinely arguable, and it is flagged as such inside  
 the document.
+
+---
+
+### 8. Are assistant agents *identity* or *context*? — **DECIDE** · *not blocking today*
+
+**The question.** You said *"some will be connected as specific users' assistants."* That can mean two
+different products:
+
+- **Identity** — the agent **belongs** to Alice. It is hers; Bob cannot see it or talk to it.
+- **Context** — the agent is a shared company agent that **acts as Alice** for Alice's work. Bob can
+  see it; he just cannot act as Alice through it.
+
+**What Paperclip does.** It chose **context**, deliberately. Its own note says the per-person
+conversation is *"not private messages"*, and an agent has **no owner column at all**.
+
+**What each choice means for you.**
+
+| If you choose | Then |
+|---|---|
+| **Identity** | We add an owner to the agent record, and a visibility rule with it. More control and more surface — and "hire me a personal assistant" becomes a real feature |
+| **Context** | Cheaper, and closer to how Paperclip and Hermes already work. But your phrase *"specific users' assistants"* will read to a user as **private**, and it will not be |
+
+**Why it is not urgent.** Nothing in Sprint 0 or the current backlog depends on it. It is needed
+**before the agent half is designed**, which comes after the Business Model Kernel specification. It
+is listed now only because this file's promise is that anything needing you is in here.
+
+**How to answer.** *"8 identity"* or *"8 context"*. Full reasoning: §3.1 of
+[`../paperclip-hermes-study/findings/10-lessons-and-target-design.md`](../paperclip-hermes-study/findings/10-lessons-and-target-design.md).
 
 ---
 

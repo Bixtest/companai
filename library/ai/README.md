@@ -89,6 +89,29 @@ not statements about our platform.
 **`hermes-agent-main/`** — the Hermes runtime source itself. This one is neither: it
 is the artefact. Where any document disagrees with it, **the code wins**.
 
+**`paperclip-master/`** — **upstream Paperclip**, extracted from `paperclip-master.zip`
+(8,299 files, version `0.3.1`). Also an artefact, and a third body of work: not ours, and
+not the sibling's either — the sibling runs a *fork* of it. Its `doc/` set is the subject
+of the completed study below.
+
+**`source-docs/`** — **one place for the scattered source documents.** The study's evidence
+was spread across five trees on this laptop, several of them gitignored. This folder gathers
+the one set with no other home (upstream Paperclip's 317-file documentation) and holds a
+**register** saying where every other set already lives. Read
+[`source-docs/README.md`](source-docs/README.md) before hunting for a document.
+
+---
+
+## Where the two-voices rule was actually applied
+
+The rule below is easy to state and hard to follow. The completed
+[`../paperclip-hermes-study/`](../paperclip-hermes-study/) is the worked example: eleven
+batches that read Paperclip, Hermes and the sibling's integration and kept the three voices
+separate throughout — source code, sibling documents, and our own inference, never blended.
+Its synthesis
+([`findings/10-lessons-and-target-design.md`](../paperclip-hermes-study/findings/10-lessons-and-target-design.md))
+carries **lessons, not decisions**, and leaves exactly one decision to the owner.
+
 ---
 
 ## The rule that follows

@@ -33,3 +33,48 @@
   built-in agents where the code defines four). Spot-checked by hand against the source — verified.
   Also learned: **every manifest reports version `0.3.1`**, so the "newest upstream" is the same
   major version as the sibling's fork.
+
+- **2026-10-05 — batches 04–09 done.** Six batches, run in three pairs.
+
+  **04 (collaboration, 380 lines) and 05 (triggers, 213 lines).** Paperclip has **no meeting, room or
+  channel entity** — Agent Chat is an *issue*, and agents are called by assignment or comment, never
+  by `@mention`. And **a wake is a database row**: every trigger funnels through one typed call, and
+  recurrence is **cron → issue → wake**, so a schedule produces work items rather than invisible
+  invocations. The DOT-2 self-healing loop is documented as a cautionary tale.
+
+  **06 (the gateway, 279 lines).** Paperclip **ships** a Hermes gateway — a thin HTTP/SSE client over
+  four endpoints, with the adapter never importing Hermes code. The generic seam is
+  `execute(context) → result` with a single `AdapterExecutionResult` envelope. **MCP governance is
+  the strongest part of the system.**
+
+  **07 (Hermes capabilities — audit, 214 lines).** A 45-row verification table: **~40 verified, 1
+  contradicted, 2 not checked.** The contradiction is the important one: **"session resume is broken"
+  is our adapter's defect, not Hermes'.** Also found **Hermes ships hosted rooms** (128-member limit,
+  replica takeover) — the most under-used asset in the study.
+
+  **08 (a new agent into an existing thread — audit, 459 lines).** Mechanism confirmed in code. The
+  two "unproven" items were attacked and both moved: **the warm-session hazard is stronger than the
+  dossier's "may not be seen" — it will not be seen**, because history loads only on a cold restore
+  and warm sessions are never evicted on a timer; and **"compression drops unknown messages" is
+  refuted**. **A new defect was found:** the sibling's proof script calls `SessionDB.list_sessions`,
+  which does not exist on either Hermes tree.
+
+  **09 (the sibling's integration — audit, 447 lines).** **Four generations of Hermes wiring coexist
+  in one tree.** The adopted-container incident is a naming collision; the knowledge side-car trusts
+  a **claimed** actor — their own P0; and hire is a mandatory shell script, which is why hire/fire is
+  unreachable from the product UI.
+
+- **2026-10-05 — batch 10 done. The programme is complete (11 of 11).** `10-lessons-and-target-design.md`
+  (408 lines) is the synthesis: every lesson with its evidence and its consequence, the owner's
+  **twelve concerns each answered in four voices**, and a register of **23 TAKE / 14 REJECT /
+  12 DO-DIFFERENTLY / 4 NOT-AN-ISSUE**. **Exactly one item is open for the owner** — whether an
+  assistant agent is *identity* or *context*. The target design names our one structural advantage:
+  **Hermes in-process means we can write through the runtime's own session path and close the
+  warm-session gap a pure HTTP control plane cannot.**
+
+- **2026-10-05 — the scattered source documents were consolidated, at the owner's request.**
+  `library/ai/source-docs/` now holds the one set with no other home — **upstream Paperclip's
+  documentation, 317 markdown files, 5.4 MB** — beside a **tracked register** (`README.md`) that lists
+  where every other scattered set already lives and why it was not copied. The copies follow the
+  project's standing rule (`gitignore`: the copies are ignored, the hand-written parts are versioned),
+  so **exactly one file is tracked**; 75 images (14.9 MB) were dropped to keep the library markdown-only.

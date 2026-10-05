@@ -37,10 +37,11 @@ around it.
 |---|---|
 | **Understanding the product** | `00-product-thesis.md` → `findings/01-vision-frame.md` → `findings/12-development-plan.md` |
 | **Writing code** | `COOKBOOK.md` → `workspace/knowledge/` (20 concept files) → `workspace/references/environment.md` |
-| **Running it** | `ARCHITECTURE.md` → `workspace/references/local-instance.md` → `workspace/references/deployment.md` |
+| **Running it** | `ARCHITECTURE.md` → `workspace/references/local-instance.md` → [`RUNBOOK-hosting-server-manual.md`](RUNBOOK-hosting-server-manual.md) ⚠️ `workspace/references/deployment.md` is the **old Plesk** guide and is superseded |
 | **Putting a domain on a site** | `RUNBOOK-adding-a-domain-step-by-step.md` → `RUNBOOK-hosting-server-manual.md` §4 |
 | **Testing it** | `workspace/references/how-to-test.md` → `workspace/knowledge/test-gate.md` |
 | **Picking up the analysis** | `library/analysis/PLAN.md` → `library/analysis/LOG.md` → the `findings/` reports |
+| **Designing the agent half** (AI staff, roles, tasks, delegation, triggers, meetings) | [`../paperclip-hermes-study/findings/10-lessons-and-target-design.md`](../paperclip-hermes-study/findings/10-lessons-and-target-design.md) — the synthesis — then its [`PLAN.md`](../paperclip-hermes-study/PLAN.md) |
 
 ---
 
@@ -146,4 +147,5 @@ that is deleted once answered — never left buried in a report.**
 | What happened, and when? | [`../JOURNAL.md`](../../JOURNAL.md) (newest first) |
 | What mistakes were made? | [`../LESSONS.md`](../../LESSONS.md) |
 | What did the analysis find? | [`../library/analysis/`](../analysis/) — 12 batches |
-| What is actually deployed? | [`../workspace/references/deployment.md`](../../workspace/references/deployment.md) |
+| What should the agent half look like? | [`../library/paperclip-hermes-study/findings/10-lessons-and-target-design.md`](../paperclip-hermes-study/findings/10-lessons-and-target-design.md) — the completed 11-batch study of Paperclip + Hermes, and the lessons for our own agent architecture |
+| What is actually deployed? | [`RUNBOOK-hosting-server-manual.md`](RUNBOOK-hosting-server-manual.md) — ⚠️ `workspace/references/deployment.md` is the **old Plesk** guide and is superseded |

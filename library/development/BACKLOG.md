@@ -94,6 +94,7 @@ Full reasoning: [`ARCHITECTURE.md`](ARCHITECTURE.md) §6.
 
 - [ ] 🔒 **V-04** — adopt Hermes's ops console beside our own UI? *(decide after the Widget contract, G-07)*
 - [ ] 🔒 **The 7 `V`-HOLDs** — V-09 licensing · V-10 multi-agent boards · V-11 computer-use · V-12 locales · V-13 MCPs · S-04 skills *(each has a trigger in the deferred table below)*
+- [ ] **A-1 — are assistant agents *identity* or *context*?** Does an assistant **belong** to a named person (the agent is Alice's, and invisible to Bob), or does it **act as** that person for their work, staying a shared agent? **Paperclip chose context.** This is the **only** decision the completed agent study hands back, and it is needed before the agent half is designed. See §3.1 of [`../paperclip-hermes-study/findings/10-lessons-and-target-design.md`](../paperclip-hermes-study/findings/10-lessons-and-target-design.md)
 
 **Done means:** the gate is green and uncached, it is verified against the running instance
 where that is possible, and the documentation says what it does.
