@@ -474,9 +474,12 @@ that lets a tenant or an agent override without touching code; an env allowlist 
   preset's `defaultModels` array — code, not data, and not tenant-aware. The DB entities cover
   *permission* (`ai_tenant_model_allowlist`) but not *capability declaration* (context window,
   tool support, modality, qualification status).
-- **Capability declarations.** The vision's rule — *"a model only advertises capabilities after
-  qualification"* — has no home yet. `LlmModelInfo` carries `contextWindow` and free-form `tags`,
-  and nothing else.
+- **Capability declarations.** The **prior analysis's** rule — *"A model only advertises capabilities
+  after qualification"* (`llama/01-target-architecture.md:87`) — has no home yet. **Note the
+  attribution:** that sentence is the analysis's, not the vision's. The vision's §11 registry lists
+  the capability fields (`vision`, `tool_calling`, `structured_output`, `embedding`, `reasoning`,
+  `coding`) plus `availability` and `status`, so it has a *place* for the answer; it states no gate.
+  `LlmModelInfo` carries `contextWindow` and free-form `tags`, and nothing else.
 - **Cost control.** Token counts are recorded. Budgets, ceilings and per-tenant quotas are not.
 
 **These three are real, and they are the substance of the "Model Broker" the vision describes.**
@@ -719,13 +722,20 @@ are downstream of the default and are named in §10.
 
 Per the COOKBOOK's zero-one rule: **a deferral must name its trigger.**
 
+**First, the four changes in §4 themselves.** This document changed no code, so all four are
+**documented and not applied**. The two that are one line each get their own row:
+
+| Deferred | Trigger | Why it waits |
+|---|---|---|
+| **The two one-line deployment edits** — `--jinja` on the `model` service (§4.1) and `OPENAI_BASE_URL` on the `mcp` service (§4.3) | **the next time `docker-compose.fullapp.yml` is touched** | Both are written into the COOKBOOK and neither is in the compose file, because no code changed here. The `--jinja` flag is free and safe to apply now; the base URL only becomes useful once there is an embedding endpoint to point at, so it travels with §4.4 |
+
 | Deferred | Trigger | Why it waits |
 |---|---|---|
 | **The `llamacpp` chat preset** (§4.2) | **the next `model`-service change** | It is one entry and it is safe now; it rides along with `--jinja` rather than being its own change |
 | **The `openai-compatible` embedding provider** (§4.4) | **the first time an embedding is needed for real** | It is the largest of the four changes, and B-16 is not blocking anything today |
 | **The embedding model choice** (§4.4) | **before the first durable index is built** | The dimension is a data migration once an index exists |
 | **A first-class model registry object** (§5) | **the first tenant that needs capability declarations** | Today `defaultModels` plus `ai_tenant_model_allowlist` covers permission; capability has no consumer yet |
-| **Capability qualification** (§5) | **the first capability claim anyone acts on** | The vision's rule is that a model advertises a capability only after qualification. Nothing qualifies capabilities today |
+| **Capability qualification** (§5) | **the first capability claim anyone acts on** | The **prior analysis's** rule — a model advertises a capability only after qualification (`llama/01-target-architecture.md:87`) — has no home. The vision's registry has `status` and `availability` fields but states no gate. Nothing qualifies capabilities today |
 | **Budgets and per-tenant quotas** (§5) | **the first real spend** | Token counts are recorded (`ai_token_usage_event`, `ai_token_usage_daily`); nothing enforces a ceiling |
 | **Generating Hermes' provider config from the platform registry** (§5.1) | **the second deployment, or the first config drift** | Today it is set by hand per deployment. The `llama/` analysis calls the hand-set state an acceptable transitional bridge |
 | **Router mode / multiple resident models** | **a measured need for more than one model at once** | `models_max: 4` exists in Hermes' runtime, but router mode multiplies KV-cache memory. Do not enable it speculatively |
@@ -748,7 +758,7 @@ Per the COOKBOOK's zero-one rule: **a deferral must name its trigger.**
   found in Hermes' docs, then searched for in our deployment, and then the **recorded symptom** was
   found in the COOKBOOK's Step 4 table — no call reached the platform, which matches the diagnosis.
   B-16's base URL was found in the compose and then confirmed in the SDK's own dist.
-- **Four hostile passes were run, and they falsified ten of this document's own claims.** All were
+- **Six hostile passes were run, and they falsified twelve of this document's own claims.** All were
   corrected rather than defended, and the corrections are visible in the text rather than quietly
   applied. **Two of the passes taught the same lesson twice:** the change that carried this document
   made one of its own sentences false, and then the fix for that was applied to the sections named
@@ -767,6 +777,8 @@ Per the COOKBOOK's zero-one rule: **a deferral must name its trigger.**
   | *"`--jinja` is absent from the deployment and from the development documents"* | **This change made that sentence false about the tree it ships in** — the same commit adds the flag to the COOKBOOK, `RUNBOOK-sprint0.md` and `BACKLOG.md`. The claim was right about the tree *before* the change and wrong about the tree *after* it | **FIXED** — the tense is now explicit, and the sentence says which documents carry the fix |
   | *"three independent checks agree nothing reached the platform"* | The COOKBOOK's own ledger caveat removes two of the three: a read-only tool writes no `action_logs` row and API-key usage is never recorded, so both are NULL regardless. **Only the MCP log line discriminates** | **FIXED** — and it is a weaker claim than the first draft made, which is the point |
   | *"Four of those five already have a working implementation"* (about the vision's asks) | **Four things were enumerated, not five** — the arithmetic only worked if "Model Broker / Policy Layer" was silently counted twice | **FIXED** — now "Three of those four", with each one named |
+  | *"The vision's rule — a model only advertises capabilities after qualification"* | **Misattributed.** That sentence is the **prior analysis's** (`llama/01-target-architecture.md:87`). The vision contains no occurrence of "qualification" at all; its §11 registry lists the capability fields plus `availability` and `status`, but states no gate | **FIXED** — attributed to the analysis, and the vision's actual position stated |
+  | *§4.3, one of the "four changes", appears in no §10 row* | It was therefore neither applied nor deferred-with-trigger, which breaks §10's own quoted rule | **FIXED** — the two one-line deployment edits now have a row |
 
 - **The lesson, and it is the project's own rule paying off again.** The first draft's `--jinja`
   claim came from a repository-wide search that **timed out**. A check that did not finish is not a
