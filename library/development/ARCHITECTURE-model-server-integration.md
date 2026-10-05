@@ -113,6 +113,9 @@ is version **0.6.7**.
 
 ### 2.1 The chat lane — a real control plane
 
+Files named `lib/...` in this table are under
+`packages/ai-assistant/src/modules/ai_assistant/lib/`; the two given in full are in `packages/shared`.
+
 | Piece | File | What it does |
 |---|---|---|
 | The port | `packages/shared/src/lib/ai/llm-provider.ts` | `LlmProvider` — `id`, `name`, `envKeys`, `defaultModel`, `defaultModels`, `isConfigured`, `resolveApiKey`, `getConfiguredEnvKey`, `createModel`. **Chat only: there is no `embed` method.** |
@@ -527,7 +530,7 @@ preference: Hermes refuses a local endpoint below its floor.
 **The floor, measured from Hermes' own source:**
 
 ```python
-# hermes_cli/local_runtime/context_policy.py
+# hermes_cli/local_runtime/context_policy.py — FLOOR at line 16, TARGET_WINDOW at line 26
 FLOOR = 64 * 1024          # = target; one internal constant
 TARGET_WINDOW = 144 * 1024
 ```
@@ -563,7 +566,9 @@ container, which is the one container that was never told where the model is.**
 corrected, two things are still missing. **Measured:** the `model` service command carries no
 `--embeddings` flag, and the loaded model is `Qwen2.5-7B-Instruct-Q4_K_M`, a chat model;
 [`BLOCKERS.md`](BLOCKERS.md) records the same observation from the other direction (*"serves
-`/v1/chat/completions` but **no `/v1/embeddings`**"*). **Reasoned, not measured:** serving embeddings
+`/v1/chat/completions` but **no `/v1/embeddings`**"*), and `RUNBOOK-sprint0.md` recorded it too — as
+*"llama.cpp serves no `/v1/embeddings`"* — until **this same change rewrote that entry** into the
+two-defect form it carries now. **Reasoned, not measured:** serving embeddings
 needs both the endpoint enabled **and** a model whose pooling type supports it, which is why the
 clean answer is a **dedicated embedding model** on its own port (§4.4) rather than a flag on the chat
 model. This is the half the `llama/` analysis did name, and it is real.
@@ -585,12 +590,13 @@ than the analysis knew:
 | The modules | `__init__.py`, `binaries.py`, `bootstrap.py`, `capabilities.py`, `catalog.py` + `catalog.json`, `context_policy.py`, `detect.py`, `devices.py`, `endpoint.py`, `estimator.py`, `gguf.py`, `growth.py`, `hardware.py`, `hf_browse.py`, `load_progress.py`, `presets.py`, `processes.py`, `recovery.py`, `supervisor.py` |
 | The default | `"enabled": False` — *"Off = detection-only (Hermes still finds an external llama-server you run)"* |
 | The config | `backend: auto`, `models_max: 4` (*"Router process: how many models may be resident at once"*), `port: 0` (*pick a free port at spawn*) |
-| The provider | `LLAMACPP_PROVIDER_ID = "llamacpp"`, name `"Local"`, transport `openai_chat`, **`api_key_env_vars=()`** — no key |
+| The provider | `hermes_cli/providers.py:500,529` — **note, outside `local_runtime/`**: `LLAMACPP_PROVIDER_ID = "llamacpp"`, name `"Local"`, transport `openai_chat`, **`api_key_env_vars=()`** — no key |
 | Availability | *"The desktop Local Models interface is enabled for canary builds. Other desktop builds require the `--local` launch flag."* |
 
 **So the precise statement is:** Hermes can install, supervise and route a llama.cpp runtime, but
 that capability is a **desktop/canary feature**, and its `llamacpp` provider resolves only when
-Hermes itself has staged models or a managed endpoint. In a headless Compose deployment with an
+Hermes itself has staged models or a managed endpoint (the resolver is `_llamacpp_pdef()`,
+`hermes_cli/providers.py:514`). In a headless Compose deployment with an
 externally managed server, it is not the path — which is why Sprint 0 correctly uses a named custom
 provider instead.
 
@@ -759,16 +765,19 @@ Per the COOKBOOK's zero-one rule: **a deferral must name its trigger.**
   found in Hermes' docs, then searched for in our deployment, and then the **recorded symptom** was
   found in the COOKBOOK's Step 4 table — no call reached the platform, which matches the diagnosis.
   B-16's base URL was found in the compose and then confirmed in the SDK's own dist.
-- **Seven hostile passes were run, and they falsified fifteen of this document's own claims.** All
-  were corrected rather than defended, and the corrections are visible in the text rather than
-  quietly applied. **The passes taught three lessons, each learned the hard way:**
-  1. **The change that carries a document can make its own sentences false.** This one did — see the
-     `--jinja` scope row below.
+- **Eight hostile passes were run. They falsified fifteen of this document's own claims, and reversed
+  one correction that had been wrong — the table below lists all sixteen.** All were corrected rather
+  than defended, and the corrections are visible in the text rather than quietly applied. **The passes
+  taught three lessons, each learned the hard way:**
+  1. **The change that carries a document can make its own sentences false.** It did, in two places —
+     the `--jinja` scope row, and the runbook rows below. The runbook case is the sharper one: the
+     change rewrote the very line a later pass went looking for, so that pass "corrected" a sentence
+     that had been **true**, and its own justification was false.
   2. **A fix is not done until every place the claim is carried says the same thing.** One fix was
      applied to the sections named and left in three others.
-  3. **Attribution is where a careful document quietly goes wrong.** Three claims were credited to
-     "the vision" that are not in the vision at all. The fix for one of them was made and the
-     identical error one section away was left standing — which is lesson 2 again.
+  3. **Attribution is where a careful document quietly goes wrong.** **Two** claims were credited to
+     "the vision" that are not in the vision at all, and the same pass that fixed one of them left an
+     identical error one section away — which is lesson 2 again.
 
   | The first draft said | What was measured | Status |
   |---|---|---|
@@ -785,8 +794,9 @@ Per the COOKBOOK's zero-one rule: **a deferral must name its trigger.**
   | *"The vision's rule — a model only advertises capabilities after qualification"* | **Misattributed.** That sentence is the **prior analysis's** (`llama/01-target-architecture.md:87`). The vision contains no occurrence of "qualification" at all; its §11 registry lists the capability fields plus `availability` and `status`, but states no gate | **FIXED** — attributed to the analysis, and the vision's actual position stated |
   | *§4.3, one of the "four changes", appears in no §10 row* | It was therefore neither applied nor deferred-with-trigger, which breaks §10's own quoted rule | **FIXED** — the two one-line deployment edits now have a row |
   | *"the vision's target is 'generate Hermes provider configuration from the platform-managed profile'"* | **Misattributed.** That sentence is the **prior analysis's** (`llama/04-integration-choice.md:80`). The vision contains no occurrence of "configuration" at all | **FIXED** — credited to the analysis |
-  | *"the runbook records … 'llama.cpp serves no `/v1/embeddings`'"* | **Wrong document.** `RUNBOOK-sprint0.md` contains no occurrence of "embeddings". The observation is in `BLOCKERS.md:313` | **FIXED** — cited to `BLOCKERS.md` |
+  | *"the runbook records … 'llama.cpp serves no `/v1/embeddings`'"* | **The seventh pass called this a "wrong document", and that was wrong.** The runbook *did* record that phrase — at line 161, verified with `git blame`: **this same change (commit `111171a`) rewrote that entry**, which is why the phrase is gone from the runbook the pass read. The observation is also in `BLOCKERS.md:313`, so the pass found a real second source and then deleted a real first one | **RESTORED** — the body cites both, and the runbook's own history is stated |
   | *"Its Phase 0 says: 'do not assume the ideal Broker already exists in code'"* | **Wrong section.** That sentence is under `llama/03-adoption-plan.md`'s *"Open research before implementation"*, not Phase 0 | **FIXED** — now "its own open-research list" |
+  | *"`RUNBOOK-sprint0.md` contains no occurrence of 'embeddings'"* — the justification the seventh pass wrote for the runbook row two above | **False, and the eighth pass caught it.** Before this change the runbook said *"llama.cpp serves no `/v1/embeddings`"* (line 161); after it, it says *"no embedding model"*. The claim was checked against the **post-change** file only — and the change that made it look true is the one being described. **This is lesson 1 in its purest form: a change made the first draft's true sentence look false, and the pass then "corrected" a true claim** | **FIXED** — that row is reverted and the body restored |
 
 - **The lesson, and it is the project's own rule paying off again.** The first draft's `--jinja`
   claim came from a repository-wide search that **timed out**. A check that did not finish is not a

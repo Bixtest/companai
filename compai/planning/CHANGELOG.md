@@ -286,13 +286,20 @@ after reading the eight documents in `llama/` and then verifying them against th
 
 ### Method note — the hostile passes
 
-Two separate passes whose only job was to break the document **falsified seven of its own claims**,
-all corrected rather than defended. The worst was the first draft's *"`--jinja` appears nowhere in the
+**Eight separate passes whose only job was to break the document falsified fifteen of its own claims
+and reversed one correction that had been wrong — sixteen changes in all**, all corrected rather than
+defended. The worst was the first draft's *"`--jinja` appears nowhere in the
 repository"*, which came from a repository-wide search that **timed out** — a check that did not finish
 is not a check, and the claim built on it was wrong in the direction that flattered the finding. The
-pass also caught a **dangling cross-reference** and, more usefully, **strengthened** the `--jinja`
-finding by locating the COOKBOOK's Step 4 table, which records the symptom the first draft said was
-unrecorded.
+passes also caught a **dangling cross-reference**, **strengthened** the `--jinja` finding by locating
+the COOKBOOK's Step 4 table, and corrected **two claims credited to "the vision" that are not in the
+vision at all**. The last pass caught the sharpest one: the **fix** for a wrong-document citation was
+itself wrong — the change had rewritten the very line the pass went looking for, so the pass
+"corrected" a sentence that had been true. **Three lessons, each learned the hard way:** the change
+that carries a document can make its own sentences false; a fix is not done until every place the claim
+is carried says the same thing; and attribution is where a careful document quietly goes wrong. The
+full table is in
+[`ARCHITECTURE-model-server-integration.md`](../../library/development/ARCHITECTURE-model-server-integration.md) §11.
 
 ---
 
