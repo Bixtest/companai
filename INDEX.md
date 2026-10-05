@@ -13,6 +13,10 @@ the map.** Everything else is reachable from here.
 > **Handing the work to an agent? Paste
 > [`library/development/START-PROMPT.md`](library/development/START-PROMPT.md)** — it is the
 > first message for a fresh session: what to read, the rules it may not break, and the first task.
+>
+> **Just want the short list of what to open?**
+> [`library/development/BOOKMARKS.md`](library/development/BOOKMARKS.md) — the handful of documents
+> that matter, the end-game documents, and which folders are in git and which are not.
 
 ---
 
@@ -43,9 +47,10 @@ and can always explain why.
 | **Start here on return** | [`library/development/HANDOVER.md`](library/development/HANDOVER.md) — the front door; then [`library/development/BACKLOG.md`](library/development/BACKLOG.md) for what is left. ⚠️ `where_we_left.md` is **stale (2026-08-13)** — traps only |
 | **Phase** | Building the Starting Kit |
 | **Decision made** | We are building on **Open Mercato**, a working platform we have forked permanently |
+| **Decisions taken by the owner** | **B-05 (the Hermes boundary):** one product, one repository, one deployment, one interface (ours), with Hermes as a **supervised private runtime process behind the internal port**; Hermes is **headless**. **The model default (item 13):** per-tenant policy is the destination, cloud-first is the interim. Both decided **2026-10-05**. See [`ARCHITECTURE-hermes-integration.md`](library/development/ARCHITECTURE-hermes-integration.md) §11 and [`ARCHITECTURE-model-server-integration.md`](library/development/ARCHITECTURE-model-server-integration.md) §9 |
 | **Where the code is** | [`workspace/starting-kit/`](workspace/starting-kit/) |
 | **Health** | **Green when last measured** (2026-08-13). ⚠️ **Not re-measured since** — and the two status documents **disagree** on the test count (12,924 vs 12,898). **Re-run the gate and read the `Cached:` line yourself**; `--force` is mandatory, it is Turbo-cached (L45). See [`knowledge/test-gate.md`](workspace/knowledge/test-gate.md) |
-| **Current work** | **The governance layer decides, every autonomy gate binds, and a person can work the queue.** All six repairs in; the resolver enforces per tenant; A1/A2 hold an act until somebody approves it, A3 holds it until its window passes unless vetoed, A4 runs it and files it for review; acts are graded by the data they touch; 117 commands mapped to capabilities; the queue is a screen at **Settings → Authority → Approvals**. Next: gate stability, then the eight grafts |
+| **Current work** | **The four-item critical path is complete** — `spec ✅ → G-01 ✅ → G-02 ✅ → G-03 ✅` — and **`G-07` (the Widget contract) is built**: a published Function, placed in a Widget, runs from the Widget's own inputs with **no AI**. The governance layer decides, every autonomy gate binds, and a person can work the queue at **Settings → Authority → Approvals**. **Next: the first unbuilt item in [`library/development/BACKLOG.md`](library/development/BACKLOG.md)** — at the time of writing `S0` (a re-run of the local trio, which needs the owner to start Docker Desktop) then `G-12` (business backup and restore) |
 | **Understand the product in 10 minutes** | [`workspace/knowledge/authority-overview.md`](workspace/knowledge/authority-overview.md) — the governance layer end to end. **This is the thing we are building** |
 | **Progress tracker** | [`library/development/BACKLOG.md`](library/development/BACKLOG.md) — **the one roadmap.** ⚠️ [`workspace/PROGRESS.md`](workspace/PROGRESS.md) is **superseded** and its status views disagree with each other; use it only for the *reasoning* behind an item |
 | **The ERP is off** | 14 modules **parked**, not deleted — 136 tables instead of 263. One line each to restore: [`workspace/references/parked-modules.md`](workspace/references/parked-modules.md) |
@@ -277,9 +282,12 @@ Break these and you will damage the project.
 | I want to… | Go to |
 |---|---|
 | **Understand the whole project from zero (just inherited it)** | [`library/development/HANDOVER.md`](library/development/HANDOVER.md) — **the handover**: what exists, where, and the traps nobody can discover. **Starting a fresh agent session? Paste [`library/development/START-PROMPT.md`](library/development/START-PROMPT.md)** |
+| **See the short list of what to open first** | [`library/development/BOOKMARKS.md`](library/development/BOOKMARKS.md) — the handful of documents that matter, the end-game documents, and which folders are in git and which are not |
 | **Start working on this project (or pick it up after a handover)** | [`library/development/README.md`](library/development/README.md) — **the development hub**: the reading order, what to study first, and the handover sequence |
 | **See everything left to do, in one place** | [`library/development/BACKLOG.md`](library/development/BACKLOG.md) — **the one roadmap.** The old lists in `workspace/PROGRESS.md` are superseded by it |
 | **Understand how the three pieces run together** | [`library/development/ARCHITECTURE.md`](library/development/ARCHITECTURE.md) — Starting Kit + Hermes + the model server, and the dockerisation decision |
+| **Understand how Hermes attaches (the runtime boundary)** | [`library/development/ARCHITECTURE-hermes-integration.md`](library/development/ARCHITECTURE-hermes-integration.md) — **the full Hermes integration design**, and the owner's **B-05** decision (§11) |
+| **Understand how models attach, and the model default** | [`library/development/ARCHITECTURE-model-server-integration.md`](library/development/ARCHITECTURE-model-server-integration.md) — llama.cpp as one preset entry, the two defects, and the owner's **model-default** decision (§9) |
 | **Know what we are building, in what order, and why** | [`library/analysis/findings/12-development-plan.md`](library/analysis/findings/12-development-plan.md) — **THE DEVELOPMENT PLAN.** The deliverable the whole analysis exists for: four phases, the critical path (G-01 → G-02 → G-03), the first three things to build, and every decision that is the owner's |
 | **See the analysis plan, and what is being checked** | [`library/analysis/PLAN.md`](library/analysis/PLAN.md) — 12 batches with tickboxes, **all DONE**. Start here if you want the programme itself |
 | **Know what has been analysed so far** | [`library/analysis/LOG.md`](library/analysis/LOG.md) — one dated line per batch, and [`library/analysis/findings/`](library/analysis/findings/) for the reports |
@@ -325,7 +333,23 @@ a folder, finishes a phase, or makes a decision updates it in the same change.
 A newcomer who cannot orient themselves from this page alone means it is broken —
 fix the page, not the newcomer.
 
-*Last updated: 2026-10-05 — **the model layer is designed, and the work turned out to be four small
+*Last updated: 2026-10-05 — **the model layer's one owner decision is taken, and the navigation
+layer a new agent needs now exists.** The owner **decided the long-term default** (item 13):
+**per-tenant policy is the destination, cloud-first is the interim** — see
+[`library/development/ARCHITECTURE-model-server-integration.md`](library/development/ARCHITECTURE-model-server-integration.md)
+§9. It turns three pieces of work from *nice* to *required*: the model registry, the Hermes
+**agent / persona / profile** mapping, and platform-managed local models (§6.4). Two further owner
+requirements were recorded: the open-source lane must **not reserve a vendor's settings** (§4.2),
+and the platform must be able to **choose which local model runs** (§6.4). A new
+[`library/development/BOOKMARKS.md`](library/development/BOOKMARKS.md) gathers the end-game
+documents and the handful of pages to open first, and names which folders are in git and which are
+not. The two analysis folders the design rests on (`llama/`, `analysis/`) are now **tracked**; the
+Hermes source at the root is now **ignored**, matching its library twin. Docs updated in the same
+change: the model-layer document (§3.4, §9, §4.2, new §6.4, §10, §0, §11), `BACKLOG.md` (a new
+`ML-` track), `NEEDS-YOU.md` (item 13 decided), `HANDOVER.md` (rev 7), `AGENT-HALF.md`,
+`compai/planning/CHANGELOG.md`, `library/INDEX.md`, `library/development/README.md`, and this page.*
+
+*Earlier, 2026-10-05 — **the model layer is designed, and the work turned out to be four small
 changes.** [`library/development/ARCHITECTURE-model-server-integration.md`](library/development/ARCHITECTURE-model-server-integration.md)
 settles how Companai calls hosted models and how it runs open-weight ones, and it corrects the
 premise of the prior `llama/` analysis: that analysis assumed the model control plane would have to be

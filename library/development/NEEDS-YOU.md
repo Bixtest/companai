@@ -18,14 +18,14 @@ across other documents. If it needs you, it is here or it is not tracked.
 
 ---
 
-## Part 1 — Decisions I need (**one open: item 13** — items 1, 2 and 8 closed, item 4 is "nothing needed")
+## Part 1 — Decisions I need (**none open** — items 1, 2, 8 and 13 closed; item 4 is "nothing needed")
 
 > **Numbering note.** Items are numbered once and **never reused**, so that a number you have already
 > quoted keeps meaning the same thing. Item 8 was appended here on 2026-10-05 and answered the same
 > day. Items 1 and 2 were closed the same day by measurement — see each item. Item 4 is a "know" item,
 > not a decision: the specification's pruning is mine, and nothing is waiting on your signature.
-> **Item 13 was added 2026-10-05** with the model-layer work: it is the one genuinely yours in that
-> piece, and it has a recommended answer and a safe default if you say nothing.
+> **Item 13 was added 2026-10-05** with the model-layer work, and **you decided it the same day**:
+> per-tenant policy as the destination, cloud-first as the interim. **Nothing in this Part is open.**
 > *(Item 5, the Coolify password, is in Part 2 — it is a thing to do, not a decision to make.)*
 
 ### 1. Reset the local dev database? — ✅ **DONE 2026-10-05** *(no longer needs you)*
@@ -130,33 +130,39 @@ responsible when the agent acts?"*
 
 ---
 
-### 13. What should the long-term default for models be — cloud, local, or per-tenant policy? — **DECIDE** · *I recommend C, with A as the interim*
+### 13. What should the long-term default for models be — cloud, local, or per-tenant policy? — ✅ **DECIDED 2026-10-05** *(no longer needs you)*
+
+**Your decision: per-tenant policy is the destination, cloud-first is the interim.** Recorded
+2026-10-05. It is the answer I recommended, and it is now the plan.
 
 **Background in one line.** The platform can already call hosted models (OpenAI, Anthropic, Google,
 DeepInfra, Groq, Together, Fireworks, Azure, LiteLLM, OpenRouter, Requesty) and can already run an
-open-weight model on its own machine (llama.cpp, Qwen2.5-7B today). What is not decided is **which
+open-weight model on its own machine (llama.cpp, Qwen2.5-7B today). What was not decided was **which
 one should be the default.**
 
 | | What it means in practice | What it costs |
 |---|---|---|
-| **A. Cloud first, local as fallback** | Tenants get hosted models by default; the local server handles offline, private and cheap-repetitive work | Best quality and speed today. Per-token spend. Data leaves the machine |
+| **A. Cloud first, local as fallback** — **the interim** | Tenants get hosted models by default; the local server handles offline, private and cheap-repetitive work | Best quality and speed today. Per-token spend. Data leaves the machine |
 | **B. Local first, cloud as fallback** | The local server is the default; cloud is a policy-gated escalation | No per-token spend, data stays in the rack. **On today's hardware a turn takes 20 minutes or more** |
-| **C. Per-tenant policy** | Each tenant declares *local only / local preferred / cloud allowed / approved providers only*, and the platform enforces it **before** the request leaves | This is what the vision already specifies. It needs a model registry and budget controls that do not exist yet |
+| **C. Per-tenant policy** — **the destination** | Each tenant declares *local only / local preferred / cloud allowed / approved providers only*, and the platform enforces it **before** the request leaves | This is what the vision already specifies. It needs a model registry and budget controls that do not exist yet |
 
-**I recommend C, with A as the interim default.** C is not a new direction — the vision's own §32
-lists those tenant modes and says the broker enforces them before any request reaches a provider.
-But C is not buildable today (no registry, no budgets), and B would ship a product where a turn takes
-20 minutes. So: **A now, C as the destination.**
+**What your decision sets in motion, and this is the part that matters.** Three pieces of work moved
+from *nice* to *required*:
 
-**What this does not decide**, and I am not asking about them: which specific open-weight model
+- **The model registry stops being optional.** A per-tenant policy cannot be enforced by a broker
+  that cannot read it.
+- **The agent mapping gets its reason.** You are mapping Hermes' **agents, personas and profiles**
+  onto the platform's tenants and roles, so the policy has something to attach to.
+- **The platform must manage the local model** — which model runs, per deployment and per new
+  release. Written up as a requirement in the model document, §6.4.
+
+**What your decision does not cover**, and none of it needs you now: which specific open-weight model
 becomes the standard, whether to buy GPU hardware, and whether self-hosting is a customer-facing
 promise or an internal capability. All three sit downstream of this answer.
 
 **Where it is written down.** [`ARCHITECTURE-model-server-integration.md`](ARCHITECTURE-model-server-integration.md)
-§9 — including the measurements behind the speed figures, and §10's deferred list with triggers.
-
-**If you say nothing, I will proceed on A as the interim** and leave C as the recorded destination.
-That is a safe default and it is cheap to change later.
+— §9 (the decision and what follows), §6.4 (the local-model management requirement), and §10 (the
+deferrals the decision moves).
 
 ---
 
@@ -278,6 +284,7 @@ So you can see these are genuinely done and not re-appearing.
 | **A failed database init was reported as success**                     | **Fixed and proven** against the unfixed code first                                                                  |
 | **The "36 objects" figure**                                            | **Corrected to 37** in 14 places across 8 files — including your own decision record. The sentence carried its own disproof |
 | **The Hermes runtime boundary (B-05) was open** — the last owner decision in the specification | **You approved it 2026-10-05.** One product, one repository, one deployment, one interface (ours), with Hermes as a **supervised private runtime process behind the internal port**; Hermes is **headless**. The spec's 40-row register is now **36 settled · 1 derived · 3 deferred · 0 open** |
+| **The long-term model default was open** — item **13** | **You decided it 2026-10-05.** **Per-tenant policy is the destination, cloud-first is the interim.** It turned three pieces of work from *nice* to *required*: the model registry, the Hermes agent/persona/profile mapping, and platform-managed local models. See [`ARCHITECTURE-model-server-integration.md`](ARCHITECTURE-model-server-integration.md) §9 |
 
 ---
 

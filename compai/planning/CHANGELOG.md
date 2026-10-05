@@ -278,6 +278,11 @@ after reading the eight documents in `llama/` and then verifying them against th
 
 ### What the decision does *not* cover
 
+> **Update, later the same day.** The first bullet below **was decided by the owner on 2026-10-05** —
+> per-tenant policy as the destination, cloud-first as the interim. See the section *"The model default
+> decided: per-tenant policy, with cloud-first as the interim"* at the end of this file. The rest of
+> this entry stands as written on the day.
+
 - **The long-term default** — all-local, cloud-first, or per-tenant policy. It is the owner's, it is
   **item 13** in `NEEDS-YOU.md`, and it is recommended rather than closed.
 - **Which open-weight model becomes the standard, GPU hardware, and whether self-hosting is a
@@ -350,6 +355,45 @@ missing Hermes healthcheck were found by those passes, not by the first draft.**
 - **Hermes is the runtime** (the 2026-10-04 decision) — this settles its *shape*, not its identity.
 - **The port boundary and the envelope** (`ARCHITECTURE-hermes-integration.md` §4) — unchanged.
 - **The order** — the adapter is still built only after the security gateway exists (Doc 8 §230).
+
+---
+
+## 2026-10-05 — **The model default decided: per-tenant policy, with cloud-first as the interim**
+
+The last open decision in the model layer. The owner **approved the recommendation**, after the eighth
+and ninth hostile passes on the integration document.
+
+### Decided — the long-term default
+
+| Decision | What it means | Origin |
+|---|---|---|
+| **Per-tenant policy is the destination; cloud-first is the interim** | Each tenant declares *local only / local preferred / cloud allowed / approved providers only*, and the broker enforces it **before** the request leaves. Until the registry and the budgets exist, cloud-first is the default | the owner, 2026-10-05 — item 13 of [`NEEDS-YOU.md`](../../library/development/NEEDS-YOU.md) |
+
+### Required as a consequence — no longer optional
+
+| Now required | Why the decision makes it so | Where |
+|---|---|---|
+| **The model registry, capability declarations and budgets** | A per-tenant policy cannot be enforced by a broker that cannot read it | [`ARCHITECTURE-model-server-integration.md`](../../library/development/ARCHITECTURE-model-server-integration.md) §5, §9, §10 |
+| **The Hermes mapping — agents, personas and profiles onto tenants and roles** | A per-tenant policy needs something to attach to | [`AGENT-HALF.md`](../../library/development/AGENT-HALF.md) §5 |
+| **Platform-managed local models** | C's *local only* and *local preferred* tenants are only honest if the platform can say **which** model runs locally | [`ARCHITECTURE-model-server-integration.md`](../../library/development/ARCHITECTURE-model-server-integration.md) §6.4 |
+
+### Required by the owner, stated the same day
+
+| Requirement | In his words | Where it lands |
+|---|---|---|
+| **The open-source lane must not reserve a vendor's settings** | *"make sure llama integration for open source models does not reserve any api setting like openAI for example"* | §4.2 — the local lane gets `LLAMACPP_*`, never `OPENAI_*`, and the rule is general to every provider |
+| **The platform must choose which local model runs** | *"develop managing llama models (what models run there) from the main platform… depending on the server we deploy the platform in and its resources… and on what new models are released in the world"* | §6.4 — four pieces: a deployment model record, a hardware profile, a growable catalog, and a driven swap |
+
+### Backlog — a third track
+
+**`ML-1`–`ML-4`** were added to [`BACKLOG.md`](../../library/development/BACKLOG.md) as the model-layer
+track, and the **model registry's deferral trigger fired**: build it with the local catalog so the
+registry has real data on day one instead of being an empty abstraction.
+
+### Method note
+
+Both new requirements came from the owner; the design work is ours. **Nothing was built** — this is a
+design and documentation change, and the code repo was not touched.
 
 ---
 

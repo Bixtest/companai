@@ -5,7 +5,7 @@ written for exactly that person — and this revision is written for an agent th
 continue the development work.** Read it top to bottom once (about 20 minutes), then
 follow §2 to actually get working. Everything else in the project is reachable from here.
 
-**Written 2026-10-05, revision 2. Owner: Ramzi. Development machine: `BIXMASERVER` (Windows 10 Pro).**
+**Written 2026-10-05, revision 8. Owner: Ramzi. Development machine: `BIXMASERVER` (Windows 10 Pro).**
 
 > This is the **handover**. It is not a status page and not a roadmap — it is the one
 > document that tells you what exists, where it is, and in what order to open it.
@@ -58,7 +58,7 @@ built, and it works.
 |---|---|---|
 | **The Starting Kit** | The platform/product. A permanent fork of **Open Mercato 0.6.7**, rebranded to Companai. The governance layer (authority, approvals, delegations, denials, trust, projects, record locks, the ledger) is **ours** and does not exist upstream | [`../../workspace/starting-kit/`](../../workspace/starting-kit/) |
 | **Hermes** | The **agent runtime** — the thing that will hold the AI-employee half. It is *borrowed* (a sibling project's code), not ours | [`../ai/hermes-agent-main/`](../ai/hermes-agent-main/) |
-| **The model server** | Local inference (llama.cpp) serving a quantised Qwen2.5-7B model on `:8080`. No cloud dependency. **The full model-layer design is [`ARCHITECTURE-model-server-integration.md`](ARCHITECTURE-model-server-integration.md)** (2026-10-05): the platform already owns a model control plane, llama.cpp needs one preset entry, and the one owner decision is the long-term default | [`ARCHITECTURE.md`](ARCHITECTURE.md) §5, and the integration document |
+| **The model server** | Local inference (llama.cpp) serving a quantised Qwen2.5-7B model on `:8080`. No cloud dependency. **The full model-layer design is [`ARCHITECTURE-model-server-integration.md`](ARCHITECTURE-model-server-integration.md)** (2026-10-05): the platform already owns a model control plane, llama.cpp needs one preset entry, and **the owner decided the long-term default on 2026-10-05 — per-tenant policy as the destination, cloud-first as the interim** (§9), which requires a platform-managed local model (§6.4) | [`ARCHITECTURE.md`](ARCHITECTURE.md) §5, and the integration document |
 
 Two arrows connect them: **(1)** the agent reaches the platform's tools over MCP, authorised by
 our own gate; **(2)** the agent asks the model server for inference. Both were proven working on
@@ -75,6 +75,9 @@ and must be built.*
 **Do these in order. Do not skip the lessons.**
 
 **1. Read these eight files** (about two hours total). They are ordered so each one assumes the last:
+
+> **In a hurry?** [`BOOKMARKS.md`](BOOKMARKS.md) is the one-page short list: the handful of
+> documents that matter, the **end-game / vision** documents, and which folders are in git.
 
 | # | Read | Why |
 |---|---|---|
@@ -136,8 +139,9 @@ optionally delete the 3.8 GB ISO (item 7).
 
 **7. Take the first item from [`BACKLOG.md`](BACKLOG.md).** **`P0-spec` is done:** draft 2 of the
 Business Model Kernel specification ([`SPEC-business-model-kernel.md`](SPEC-business-model-kernel.md))
-was written **2026-10-05** and passes the vision's own 40-item gate — **35 SETTLED · 1 DERIVED · 3
-DEFERRED-with-trigger · 1 OPEN — owner**, tallied by parsing the 40 rows. **What is left is ratification**
+was written **2026-10-05** and passes the vision's own 40-item gate — **36 SETTLED · 1 DERIVED · 3
+DEFERRED-with-trigger · 0 OPEN — owner**, tallied by parsing the 40 rows (the last open row, **B-05**,
+was approved by the owner on 2026-10-05). **What is left is ratification**
 (item 4 of [`NEEDS-YOU.md`](NEEDS-YOU.md)).
 
 **`G-01` (the Business Model Kernel + `G-08`) is now built** — **2026-10-05**, committed in the code repo
@@ -166,9 +170,15 @@ module and the check failed, naming the file). **Four defects were found by thre
 four are fixed** — including one in the compiler (`modelVersionOf` could not see a field being
 **retyped**, so a stale Function reported itself *fresh*) and one that let a **sort** be silently
 dropped. **One hole is OPEN with a named trigger** (see BACKLOG). **Deliberately not built:** a database
-row (trigger: **G-07**) and placement in the interface (that **is** G-07). **The next build item is
-`G-07` (the Widget contract)** — which now owns two things: the Widget contract, and a Function's
-placement. `G-03` also unblocked `G-17` and `G-19` further.
+row (trigger: **G-07** — **now fired**; the row is startable, and our call is to write it at **G-09** in
+one migration with the registry's own row) and placement in the interface (that **is** G-07).
+
+**`G-07` (the Widget contract, the Widget IR and the registry) is now built** — **2026-10-05**. A
+published Function, placed in a Widget, **runs from the Widget's own inputs with no AI** — the vision's
+own reusable chain, made real. **The next build item is the first unbuilt item in
+[`BACKLOG.md`](BACKLOG.md) §"The list"** — at the time of writing, **`S0`** (a re-run of the local
+dockerised trio, which needs the owner to start Docker Desktop first) and then **`G-12`** (business
+backup and restore). `G-03` also unblocked `G-17` and `G-19` further.
 
 **Verify an item's status is still true before starting it** — the roadmap has been
 wrong about what is already done **four times**.
@@ -279,6 +289,25 @@ the database, reading the `Cached:` line. **The work that had to be retracted wa
 reading code.** If you are about to say "the cause is X" and have not observed X, you are
 guessing. See `COOKBOOK.md` rule zero-nine.
 
+### 3i. Folders on disk that are **not** in git
+
+**The repository versions our thinking, not everything on disk.** A few folders the design depends
+on were sitting in the working tree **untracked**, so a fresh clone would not have had them. Named
+here so nobody assumes a folder travels with the repository when it only exists on this laptop:
+
+- `llama/` (the eight documents the model-layer design was built from) and `analysis/` (the earlier
+  Hermes / Starting Kit study) are **ours and are now tracked** (2026-10-05). Before that they were
+  untracked, and both are cited by the development documents, so the citations pointed at files a
+  clone would not have.
+- `hermes-agent-main/` at the repository root is the **Hermes runtime source** (somebody else's
+  code, ~17,000 files). It is **ignored** (2026-10-05), matching its twin `library/ai/hermes-agent-main/`.
+- `library/ai/hermes-agent-main/`, `library/ai/hermes-docs/`, `library/ai/paperclip-master/`,
+  `library/kit-docs/` and the 16 numbered shelves are **ignored by design** — rebuildable or
+  external. The rule and the reasons are commented in `.gitignore`.
+- `vms/` and `keys/` are ignored because they hold **secrets** (§3d).
+
+**The full, honest list is [`BOOKMARKS.md`](BOOKMARKS.md) §5.**
+
 ---
 
 ## 4. Where everything lives — the folder map
@@ -297,6 +326,7 @@ companai/                       ← repo 1 root (thinking + docs).  You are here
 │   ├── PROVENANCE.md           where every shelf came from, how to rebuild it
 │   ├── development/            ← DEVELOPMENT MANAGEMENT — the hub
 │   │   ├── HANDOVER.md         **THIS FILE**
+│   │   ├── BOOKMARKS.md        the pages to open first — the short list, and what is in git
 │   │   ├── START-PROMPT.md     **the message that starts a new session**
 │   │   ├── README.md           the front door: reading order, the sprint process
 │   │   ├── BACKLOG.md          **THE ONE ROADMAP** — everything left, in order
@@ -339,6 +369,9 @@ companai/                       ← repo 1 root (thinking + docs).  You are here
 │
 ├── vms/                        ⚠️ GITIGNORED — the hosting VM's credentials, ISO, scripts
 ├── keys/                       ⚠️ server credentials — not documentation, keep private
+├── llama/                      OUR model-layer analysis — the 8 documents the design was built from (tracked 2026-10-05)
+├── analysis/                   OUR earlier Hermes / Starting Kit study — 5 findings + a forensic baseline (tracked 2026-10-05)
+├── hermes-agent-main/          the Hermes runtime source at the root (⚠️ IGNORED — vendored code; its twin is in library/ai/)
 ├── aissistant-package/         ⚠️ NOT OURS — the sibling's codebase
 └── companai.md                 ⚠️ NOT OURS — a sibling document
 ```
@@ -504,10 +537,11 @@ and was *not* re-measured — treat it as a starting point, not a fact.**
 | **The studies** | analysis programme **complete** (batches 0–12, 13 reports); Paperclip + Hermes study **complete** (11 batches, 3,940 lines, 53 lessons) |
 | **The specification** | **Draft 2** — of its 40 rows, **36 SETTLED · 1 DERIVED · 3 DEFERRED-with-trigger · 0 OPEN — owner**. The gate is passed; only ratification remains |
 | **The runtime boundary (B-05)** | **DECIDED 2026-10-05 by the owner.** One product, one repository, one deployment, one interface (ours), with Hermes as a **supervised private runtime process behind the internal port**; Hermes is **headless**. Reasoning in [`ARCHITECTURE-hermes-integration.md`](ARCHITECTURE-hermes-integration.md) §11. The Hermes **profile** topology is deferred with the trigger **the agent gateway** |
+| **The model default (item 13)** | **DECIDED 2026-10-05 by the owner: per-tenant policy is the destination, cloud-first is the interim.** It turns three pieces of work from *nice* to *required* — the model registry, the Hermes **agent / persona / profile** mapping, and platform-managed local models. Reasoning in [`ARCHITECTURE-model-server-integration.md`](ARCHITECTURE-model-server-integration.md) §9 |
 | **The running stack** | **8 containers up** (app, mcp, hermes, model, opencode, postgres, redis, meilisearch); `/login` answers **200** |
 | **The local database** | **Clean and complete** — 3 users, 1 tenant, 1 organisation, 5 feature toggles, 5 `action_logs` rows. Rebuilt from scratch on the fixed image 2026-10-05, init ran green |
 | **Open blockers** | **3** — B-05 (OpenCode is load-bearing), B-16 (no embeddings endpoint), B-17 (no audit trail of agent tool calls). **None stops the build** (see [`BLOCKERS.md`](BLOCKERS.md)). **B-05's design face is now closed** (the boundary is decided); what stays open is *when* OpenCode goes, tracked as **N-8**. **B-16 was root-caused 2026-10-05** — it is two defects, the first being a missing `OPENAI_BASE_URL` on the `mcp` service |
-| **Waiting on the owner** | **4** — Coolify password (item 5), Docker Desktop auto-start (item 6), the ISO (item 7, optional), and the model layer's long-term default (**item 13**, with a recommended answer and a safe default) |
+| **Waiting on the owner** | **3** — Coolify password (item 5), Docker Desktop auto-start (item 6), the ISO (item 7, optional). **Item 13, the model layer's long-term default, was decided by the owner on 2026-10-05** (per-tenant policy as the destination, cloud-first as the interim), so it is no longer waiting |
 
 **Group B — quoted from older documents, not re-measured:**
 
@@ -546,18 +580,20 @@ and was *not* re-measured — treat it as a starting point, not a fact.**
 
 - **What is left, in order** → [`BACKLOG.md`](BACKLOG.md). One roadmap. Read §"The list" and
   nothing else for *"what is left"*. **The four-item critical path is complete:** `P0-spec` (draft 2),
-  `G-01`, `G-02` and `G-03` are all built as of 2026-10-05. **The next build item is `G-07` (the
-  Widget contract)** — it now owns both the Widget contract and a User Function's **placement** in the
-  interface.
+  `G-01`, `G-02` and `G-03` are all built as of 2026-10-05, and **`G-07` (the Widget contract) is built
+  too**. **The next build item is the first unbuilt item in `BACKLOG.md` §"The list"** — at the time of
+  writing, `S0` (a re-run of the local trio, which needs the owner to start Docker Desktop first) and
+  then `G-12` (business backup and restore).
 - **What needs the owner** → [`NEEDS-YOU.md`](NEEDS-YOU.md) — a numbered action list. **Three
   items open**, and none blocks the build. The most urgent is changing the Coolify admin password
   (item 5); it is the only thing standing between an agent and the 2FA wall on the hosting panel.
 - **What is stopping work** → [`BLOCKERS.md`](BLOCKERS.md) — re-checked each session, because a
   blocker is a claim about *now*. **Three open, none blocking.**
 - **The product specification** → [`SPEC-business-model-kernel.md`](SPEC-business-model-kernel.md)
-  — **Draft 2 written 2026-10-05, and the vision's own 40-item gate is passed**: **35 SETTLED · 1
-  DERIVED · 3 DEFERRED-with-trigger · 1 OPEN — owner** (the tally is parsed from the 40 rows, not
-  written by hand — `LESSONS.md` **L49**). One code gap surfaced: the ledger carries no
+  — **Draft 2 written 2026-10-05, and the vision's own 40-item gate is passed**: **36 SETTLED · 1
+  DERIVED · 3 DEFERRED-with-trigger · 0 OPEN — owner** (the tally is parsed from the 40 rows, not
+  written by hand — `LESSONS.md` **L49**; the last open row, **B-05**, was approved on 2026-10-05). One
+  code gap surfaced: the ledger carries no
   `policy_version`/`decision_id` (assigned to **G-16**). **Only ratification remains** (item 4 of
   [`NEEDS-YOU.md`](NEEDS-YOU.md)). **§10a records that `G-01` has now run the specification's central
   claims as measurements** — the ID grammar, the contract, the versions and the round-trip are tested,
@@ -565,6 +601,12 @@ and was *not* re-measured — treat it as a starting point, not a fact.**
 - **How the agent half is designed** → [`AGENT-HALF.md`](AGENT-HALF.md) — the five kinds of agent,
   the rule that decides who is answerable when an agent acts, and where every lesson from the
   Paperclip + Hermes study lands in the four phases.
+- **The model layer** → [`ARCHITECTURE-model-server-integration.md`](ARCHITECTURE-model-server-integration.md)
+  — **the owner decided the long-term default on 2026-10-05**: per-tenant policy is the destination,
+  cloud-first is the interim (§9). Three pieces of work follow from it and are now marked **required**:
+  the model registry, the Hermes **agent / persona / profile** mapping, and **platform-managed local
+  models** (§6.4). It also records two stated requirements: the open-source lane must not reserve a
+  vendor's settings (§4.2), and the platform must be able to choose which local model runs (§6.4).
 
 ---
 
@@ -581,7 +623,24 @@ alone means this page is broken — **fix the page, not the newcomer.**
 from an older document are not equally current, and mixing them in one table is how this page
 goes wrong. If two older documents disagree on a number, say so — never average them.
 
-*Last updated: 2026-10-05, revision 6 — **`G-03` is built: User Functions exist, and the four-item
+*Last updated: 2026-10-05, revision 8 — **the navigation layer a new agent needs now exists, and two
+analysis folders the design cites are now tracked.** [`BOOKMARKS.md`](BOOKMARKS.md) is the new
+one-page short list: the handful of documents that matter, the **end-game / vision** documents, the
+two integration designs, and an honest list of which folders are in git. New **§3i** names the
+folders that were sitting untracked — `llama/` and `analysis/` are now tracked, and the Hermes
+source at the root is now ignored. §2 step 1 points at the short list, and §4's folder map gained
+the new file and the root folders. Docs updated in the same change as the work (COOKBOOK rule zero).*
+
+*Earlier, 2026-10-05, revision 7 — **the model layer's one owner decision is taken: per-tenant
+policy is the destination, cloud-first is the interim** (item 13,
+[`ARCHITECTURE-model-server-integration.md`](ARCHITECTURE-model-server-integration.md) §9). It turns
+three pieces of work from *nice* to *required*: the model registry, the Hermes **agent / persona /
+profile** mapping, and platform-managed local models (§6.4). Two further owner requirements were
+recorded: the open-source lane must not reserve a vendor's settings (§4.2), and the platform must be
+able to choose which local model runs (§6.4). §1's model row, §7's decided and waiting rows, and §8
+were updated in the same change as the design (COOKBOOK rule zero).*
+
+*Earlier, 2026-10-05, revision 6 — **`G-03` is built: User Functions exist, and the four-item
 critical path (`spec → G-01 → G-02 → G-03`) is complete. The next build item is `G-07` (the Widget
 contract), which now also owns a Function's placement.** §2 step 7 and §8 were updated in the same
 change as the code (COOKBOOK rule zero). A Function is compiled IR made durable: an enforced lifecycle

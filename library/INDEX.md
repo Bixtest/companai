@@ -142,11 +142,14 @@ project.**
 | File | What it is |
 |---|---|
 | [`development/HANDOVER.md`](development/HANDOVER.md) | **The handover — read this first.** What exists, where, the two repositories, the traps nobody can discover, the host VM, the rules, and what is proven vs not. **§0 is written for an agent taking over** |
+| [`development/BOOKMARKS.md`](development/BOOKMARKS.md) | **The pages to open first** — the handful of documents that matter, the **end-game / vision** documents, the two integration designs, and an honest list of which folders are in git and which are not |
 | [`development/START-PROMPT.md`](development/START-PROMPT.md) | **The message that starts a new session** — paste it to the agent taking over: what to read first, the rules it may not break, and the first task |
 | [`development/README.md`](development/README.md) | **The front door.** The reading order, what to study first by role, the handover sequence, and the sprint process |
 | [`development/BACKLOG.md`](development/BACKLOG.md) | **The one roadmap.** Everything left, in order, one line each — unifying the Starting Kit work and the product phases. Plus the "do not lose this" list and the deferrals |
 | [`development/AGENT-HALF.md`](development/AGENT-HALF.md) | **The agent half** — the five kinds of agent, the responsibility rule, and where every one of the study's 53 lessons lands in the phases |
 | [`development/ARCHITECTURE.md`](development/ARCHITECTURE.md) | How the Starting Kit, Hermes and the model server run together, and the dockerisation decision |
+| [`development/ARCHITECTURE-hermes-integration.md`](development/ARCHITECTURE-hermes-integration.md) | **The Hermes integration design** — platform to platform, function to function, and multi-tenant, with the owner's **B-05** runtime-boundary decision (§11) |
+| [`development/ARCHITECTURE-model-server-integration.md`](development/ARCHITECTURE-model-server-integration.md) | **The model layer** — llama.cpp as one preset entry, the embedding lane, the two defects root-caused, and the owner's **model-default** decision (§9) |
 | [`development/BLOCKERS.md`](development/BLOCKERS.md) | Anything stopping progress, with what clears it |
 | [`development/NEEDS-YOU.md`](development/NEEDS-YOU.md) | **The owner-only action list** — numbered, with literal steps and a way to answer all of it at once |
 | [`development/SPEC-business-model-kernel.md`](development/SPEC-business-model-kernel.md) | The product specification (**Draft 2**, 2026-10-05) — passes the vision's own 40-item gate (35 settled · 1 derived · 3 deferred with triggers · 1 open — owner). Awaiting ratification |

@@ -33,9 +33,11 @@ are settled: **llama.cpp stays a separate service** (already true, and forced by
 boundary); **the platform already owns the model control plane** (a 7-tier resolution chain, 11
 OpenAI-compatible presets, a tenant model allowlist, per-agent overrides and token metering all
 exist in `packages/ai-assistant`), so llama.cpp needs **one preset entry**, not a project; and the
-**embedding lane is a separate, closed lane** that is where **B-16** actually lives. **One decision
-is the owner's** and is recommended rather than closed: the long-term default (§9 of that document,
-and item 13 in [`NEEDS-YOU.md`](NEEDS-YOU.md)).
+**embedding lane is a separate, closed lane** that is where **B-16** actually lives. **The owner
+decided the long-term default on 2026-10-05** — per-tenant policy is the destination, cloud-first is
+the interim (§9 of that document, and item 13 in [`NEEDS-YOU.md`](NEEDS-YOU.md)). It turns three
+pieces of work from *nice* to *required*: the model registry, the Hermes **agent / persona / profile**
+mapping, and platform-managed local models.
 
 ---
 

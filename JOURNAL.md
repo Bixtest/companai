@@ -7,6 +7,49 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-10-05 (latest) — the model default is decided, and the documentation a new agent needs now exists
+
+**The owner approved the model-layer recommendation and asked for four things: follow it, map the
+Hermes agents / personas / profiles onto tenants and roles, record two requirements for the
+open-source lane, and sweep the documentation so a new agent gets the full picture.**
+
+**The decision: per-tenant policy is the destination, cloud-first is the interim.** Recorded as
+[`library/development/ARCHITECTURE-model-server-integration.md`](library/development/ARCHITECTURE-model-server-integration.md)
+**§9**, "DECIDED by the owner, 2026-10-05". It turns three pieces of work from *nice* to *required*:
+the model registry, the Hermes **agent / persona / profile** mapping, and platform-managed local
+models. Item 13 of [`NEEDS-YOU.md`](library/development/NEEDS-YOU.md) is closed.
+
+**The two owner requirements.** First, the open-source lane must **not reserve a vendor's settings**
+(the example given: OpenAI's), because we will integrate several suppliers and open-weight models;
+written into **§4.2**, and general to every provider. Second, the platform must be able to **choose
+which local (llama) model runs**, per the deployment's hardware and per new model releases; written
+into a new **§6.4**, "Managing the local model from the platform". The Hermes mapping intent is in
+[`library/development/AGENT-HALF.md`](library/development/AGENT-HALF.md) §5.
+
+**The critic passes on the model document converged: eight passes, sixteen changes, and the tenth
+pass found nothing new.** The sharpest finding was a "fix" that was itself wrong — a previous pass
+called a runbook sentence false when the same change had rewritten the entry it was looking for. Two
+routes disagreed, and that disagreement exposed it. Every finding was corrected in the text, none
+defended.
+
+**A new navigation layer now exists.** [`library/development/BOOKMARKS.md`](library/development/BOOKMARKS.md)
+is the one-page short list: the documents that matter, the **end-game / vision** documents, the two
+integration designs, and an honest list of which folders are in git and which are not. The root
+[`INDEX.md`](INDEX.md), [`library/INDEX.md`](library/INDEX.md),
+[`library/development/README.md`](library/development/README.md) and `HANDOVER.md` (revision 8) all
+point at it. This session's reasoning is written down in
+[`library/development/THREAD-2026-10-05.md`](library/development/THREAD-2026-10-05.md).
+
+**Two folders the design cites were sitting untracked, and that is fixed.** `llama/` (the eight
+documents the model-layer design was built from) and `analysis/` (the earlier Hermes / Starting Kit
+study) are now **tracked**; the Hermes source at the repository root is now **ignored**, matching its
+library twin. An our-call, reversible with `git rm -r --cached analysis llama`.
+
+**No code changed, so the code repository has no commit.** Committed in Repo 1 (docs), staged by
+explicit path, never `git add -A`.
+
+---
+
 ## 2026-10-05 — the agent study is finished, and the scattered documents have one home
 
 **The owner asked for two things: finish the forensic study of Paperclip and Hermes — batches 04 to

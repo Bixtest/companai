@@ -9,7 +9,7 @@ remembers a task** (COOKBOOK rule zero-three).
 predates the whole analysis programme), and remarks buried in reports. **This file replaces
 those as the plan.** The others are kept for their reasoning and point here.
 
-**Last updated:** 2026-10-05 (**B-05 is DECIDED — the owner approved the runtime boundary.** One product, one repository, one deployment, one interface (ours), with Hermes as a **supervised private runtime process behind the internal port**; Hermes is **headless**. The reasoning, the owner's three challenges and the two hostile passes are in [`ARCHITECTURE-hermes-integration.md`](ARCHITECTURE-hermes-integration.md) §11. **The Hermes integration design is written** — platform to platform, function to function, and multi-tenant. It supersedes the process recommendation in `analysis/` and records four corrections to it. **G-07 — the Widget contract, the Widget IR and the registry — is built and measured** (6 suites / 68 tests; the Function → Widget chain runs with **no AI**). **The four-item critical path is complete:** `spec ✅ → G-01 ✅ → G-02 ✅ → G-03 ✅`. What remains on it is the owner's reading of the spec. **The Hermes profile topology is now deferred with a named trigger: the agent gateway** — a profile topology cannot be tested before there is an agent to place in one. **G-07's completion has fired two parked triggers:** **V-04** (the Hermes ops console) is now due for the owner's decision, and the Function's database row is now startable).
+**Last updated:** 2026-10-05 (**THE MODEL DEFAULT IS DECIDED — the owner chose per-tenant policy as the destination, cloud-first as the interim** — item 13, [`ARCHITECTURE-model-server-integration.md`](ARCHITECTURE-model-server-integration.md) §9. It turns three pieces of work from *nice* to *required*: the model registry, the Hermes **agent / persona / profile** mapping, and platform-managed local models (§6.4). Two further owner requirements were recorded: the open-source lane must not reserve a vendor's settings (§4.2), and the platform must be able to choose which local model runs (§6.4). **B-05 is DECIDED — the owner approved the runtime boundary.** One product, one repository, one deployment, one interface (ours), with Hermes as a **supervised private runtime process behind the internal port**; Hermes is **headless**. The reasoning, the owner's three challenges and the two hostile passes are in [`ARCHITECTURE-hermes-integration.md`](ARCHITECTURE-hermes-integration.md) §11. **The Hermes integration design is written** — platform to platform, function to function, and multi-tenant. It supersedes the process recommendation in `analysis/` and records four corrections to it. **G-07 — the Widget contract, the Widget IR and the registry — is built and measured** (6 suites / 68 tests; the Function → Widget chain runs with **no AI**). **The four-item critical path is complete:** `spec ✅ → G-01 ✅ → G-02 ✅ → G-03 ✅`. What remains on it is the owner's reading of the spec. **The Hermes profile topology is now deferred with a named trigger: the agent gateway** — a profile topology cannot be tested before there is an agent to place in one. **G-07's completion has fired two parked triggers:** **V-04** (the Hermes ops console) is now due for the owner's decision, and the Function's database row is now startable).
 
 | Tag | Meaning |
 |---|---|
@@ -24,11 +24,13 @@ those as the plan.** The others are kept for their reasoning and point here.
 
 **Order is my working order, top to bottom.** The reasoning is below.
 
-**Two tracks, one list.** `G-` and `S-` items are the **product half** — the plan in
+**Three tracks, one list.** `G-` and `S-` items are the **product half** — the plan in
 [`../analysis/findings/12-development-plan.md`](../analysis/findings/12-development-plan.md). `AH-`
 items are the **agent half** — how AI workers get roles, tasks, delegation, triggers and conversations.
-**The agent half is not a phase of its own**: it is woven into the four phases at the point its
-dependencies allow. All twelve items, and where every one of the study's 53 lessons lands, are in
+`ML-` items are the **model layer** — required by the owner's decision on the long-term default
+(item 13), waiting on the trigger named in the deferral table. **Neither the agent half nor the model
+layer is a phase of its own**: both are woven into the four phases at the point their dependencies
+allow. All twelve agent items, and where every one of the study's 53 lessons lands, are in
 [`AGENT-HALF.md`](AGENT-HALF.md).
 
 ### Now — the workbench and the gate
@@ -80,6 +82,18 @@ dependencies allow. All twelve items, and where every one of the study's 53 less
 - [ ] **AH-4** — **Routines produce work items** — schedule → **task** → wake, so every scheduled run has a visible task, a thread and an origin ⛔ *needs AH-3*
 - [ ] **AH-10** — **System agents** — admin-created agents that replace or augment a system function (cron, backup, cleanup) ⛔ *needs G-12, G-18*
 
+### The model layer — required by the owner's decision, but not next
+
+**A third track, `ML-`, for the model layer.** These are required by the **destination** (per-tenant
+policy, item 13), not by the next build — so they wait for the trigger in the deferral table, but they
+are no longer optional, which is why they are on this list and not only in the model document. Detail:
+[`ARCHITECTURE-model-server-integration.md`](ARCHITECTURE-model-server-integration.md) §5, §6.4, §10.
+
+- [ ] **ML-1** — **The deployment model record and the hardware profile** — the platform's answer to *"which model runs here, and what fits?"* (§6.4 pieces 1–2). ⏰ **trigger: the first deployment whose model is not the laptop's**
+- [ ] **ML-2** — **The growable model catalog** — registered models as **data**, so a newly-released GGUF is recorded rather than code-edited. **This is the model registry's first real consumer**, so build it with the registry (§6.4 piece 3, §5)
+- [ ] **ML-3** — **The platform-driven model swap** — update the record, fetch the file, restart the `model` service. **A swap is a restart, not a hot reload** (§6.4 piece 4)
+- [ ] **ML-4** — **Budgets and per-tenant quotas** — required **before any tenant is placed on C**, because a policy that can spend must be able to stop (§5)
+
 ### The Starting Kit — what is left before that milestone closes
 
 - [ ] **22** — Bulk approval with a diff; **the diff is the feature**
@@ -116,6 +130,11 @@ dependencies allow. All twelve items, and where every one of the study's 53 less
 - ✅ **B — drop `apps/docs`** *(answered 2026-10-05)* — the kit's own documentation website (**471
   files**) moved out of the codebase in commit `2c8fda5` (*"Move apps/docs out of the codebase"*);
   `apps/` now holds only `apps/mercato`. Recoverable from the kit's upstream if ever wanted back.
+- ✅ **The long-term model default** *(answered 2026-10-05 — item 13)* — **per-tenant policy as the
+  destination, cloud-first as the interim.** It turns three pieces of work from *nice* to *required*:
+  the model registry, the Hermes **agent / persona / profile** mapping, and platform-managed local
+  models (**ML-1**–**ML-3**). Reasoning:
+  [`ARCHITECTURE-model-server-integration.md`](ARCHITECTURE-model-server-integration.md) §9.
 
 Full reasoning: [`ARCHITECTURE.md`](ARCHITECTURE.md) §6.
 
@@ -178,7 +197,8 @@ each is now here, where it will be seen.
 | **The `llamacpp` chat preset** (one entry in `openai-compatible-presets.ts`) | Today the local server is reached by relabelling it `OM_AI_PROVIDER=openai`, so the UI shows OpenAI's catalog while the server serves Qwen2.5. The clean fix is one data entry, the same shape as the `ollama` and `lm-studio` presets already there | **The next `model`-service change** — it rides along with `--jinja` rather than being its own change ([`ARCHITECTURE-model-server-integration.md`](ARCHITECTURE-model-server-integration.md) §4.2) |
 | **The embedding lane's missing seam** (`openai-compatible` provider + the `mcp` service's `OPENAI_BASE_URL`) | **B-16 traced 2026-10-05** to two defects: the `mcp` service never got the base URL (so the call went to OpenAI with the placeholder key), and `EmbeddingProviderId` is a closed 6-value union with no OpenAI-compatible member | **The first time an embedding is needed for real** — it is not blocking anything today (§4.3, §4.4) |
 | **The embedding model choice** (which GGUF, and its dimension) | The dimension is not a free choice: `detectConfigChange()` sets `requiresReindex` when it moves, and changing an embedding model is a **data migration**, not a setting | **Before the first durable index is built** — after that it is a migration (§4.4) |
-| **A first-class model registry, capability qualification and budgets** | The vision asks for a Model Registry, capability declarations and per-tenant quotas. Measured: permission is already covered (`ai_tenant_model_allowlist`, per-agent overrides) and token counts are recorded (`ai_token_usage_event`, `ai_token_usage_daily`), but nothing declares a *capability* and nothing enforces a *ceiling* | **The first capability claim anyone acts on**, and **the first real spend** (§5, §10) |
+| **A first-class model registry, capability qualification and budgets** | The vision asks for a Model Registry, capability declarations and per-tenant quotas. Measured: permission is already covered (`ai_tenant_model_allowlist`, per-agent overrides) and token counts are recorded (`ai_token_usage_event`, `ai_token_usage_daily`), but nothing declares a *capability* and nothing enforces a *ceiling* | ⏰ **The trigger has fired, 2026-10-05.** The owner made **per-tenant policy the destination** (item 13), and a policy cannot be enforced by a broker that cannot read it. **Build it with the model catalog (ML-2).** *Budgets* additionally wait on **the first real spend**, and are required **before any tenant is placed on C** (§5, §10) |
+| **The four pieces of §6.4** — the deployment model record, the hardware profile, the growable catalog, the platform-driven swap | The owner asked for platform-managed local models on 2026-10-05, and C's *local only* and *local preferred* tenants need it. But there is nothing to manage until there is a second deployment | **The first deployment whose model is not the laptop's** — writing the fields before a second hardware profile exists would be guessing at them (§6.4, **ML-1**–**ML-3**) |
 | **Generating Hermes' provider config from the platform registry** | Today it is set by hand, per deployment, through Hermes' CLI — so the platform registry and Hermes' config are two authorities that can drift | **The second deployment, or the first config drift** (§5.1) |
 | **Router mode / more than one resident model**, and **a `deepseek` preset** | Router mode multiplies KV-cache memory for no measured benefit; DeepSeek-the-model is already reachable through DeepInfra and OpenRouter, so only DeepSeek's own endpoint needs an entry | **A measured need** for either (§7.4, §10) |
 

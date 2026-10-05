@@ -58,6 +58,13 @@ companai.md
 # committed by accident. (Checked 2026-10-03.)
 library/ai/hermes-agent-main/
 
+# The same Hermes runtime source ALSO sits at the repository root — a second extract
+# of the same vendored code. The rule above already excludes vendored code; this
+# pattern simply never matched the root copy, so it showed up as untracked and could
+# have been swept in by a wildcard add. (Checked 2026-10-05, while building
+# library/development/BOOKMARKS.md and naming what is and is not in git.)
+hermes-agent-main/
+
 # TAKEN, 2026-10-04 — the owner said yes. The hand-written parts are versioned;
 # the copies are ignored. This supersedes the 2026-10-03 note below, which left
 # the decision open on purpose.
@@ -67,6 +74,12 @@ library/ai/hermes-agent-main/
 # library/MANIFEST.txt, library/.build_library.py, library/canonical-*.md,
 # library/ai/README.md, library/ai/ai-first/, library/ai/tiny_models/, and the
 # loose *.md files in library/ai/.
+#
+# ADDED 2026-10-05: `analysis/` and `llama/` at the repository root are also
+# VERSIONED. Both are our own authored analysis (the earlier Hermes / Starting Kit
+# study, and the eight documents the model-layer design was built from), small, and
+# not rebuildable. The development documents cite them, so a clone without them had
+# broken citations. Nothing here names them, which is why they were untracked.
 #
 # IGNORED, by the rules that follow this comment:
 #   - the 16 numbered shelves (01-.. to 16-..): byte-for-byte copies of material

@@ -1,0 +1,11 @@
+# Work log — Hermes in the Starting Kit product
+
+**2026-10-05 — Batch 00 complete.** Mapped authoritative product-vs-sibling boundaries and prior coverage. The first-party 12-batch programme compares AI-first vision / Starting Kit / Hermes; the 11-batch Paperclip-Hermes study audits the sibling integration. This work synthesizes rather than repeats. Recorded provenance, dirty repository status and documentation-only limits.
+
+**2026-10-05 — Batch 01 complete.** Read the project map, AI-first guide/design-control topics, development architecture, agent-half plan and backlog. The product is canonical-business-model-centric; Hermes supplies an execution kernel, while the platform owns business truth and authorization. Paperclip lessons are mapped into the current agent-half phases. Identified a tension between literal “in-process” language and the Python/Node plus Compose architecture; Hermes boundary/profile strategy B-05 remains open.
+
+**2026-10-05 — Batch 02 complete.** Examined sibling Paperclip/Hermes architecture decision, current ACP adapter and shared-runtime compose excerpt, provisioning service, recovery/gap records, and completed forensic study. The sibling illustrates control-plane/runtime contracts, profile homes, run envelopes and lifecycle integration, but also records naming/container generations, version drift, insecure knowledge actor identity, tenancy gaps, interrupted callback validation and operational debt. Its live tree is heavily modified from HEAD.
+
+**2026-10-05 — Batch 03 complete.** Mapped Hermes and Paperclip-derived agent capabilities to Open Mercato modules: Business Model Kernel / Business IR, security kernel and AI assistant, worker queue/events/scheduler, knowledge/content/search, identities/onboarding, and Widgets/Functions. Distinguished existing package foundations from roadmap work. In light of the product docs, refined the earlier generic worker recommendation to an internal runtime port; the local Python worker/process is a likely implementation boundary, but literal “in-process” needs owner clarification.
+
+**2026-10-05 — Batch 04 complete.** Wrote integrated recommendation, adoption sequence, decision register, verification gates and non-goals. No code, source documentation, sibling repository or runtime state was changed.

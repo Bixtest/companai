@@ -63,6 +63,11 @@ And two things are **broken today**, neither of which the analysis found:
    `api.openai.com` with the placeholder key `local` and fails with `invalid_api_key` — which is
    **the exact text of the recorded blocker B-16.** The request never reached llama.cpp at all.
 
+**And one thing is now decided.** The long-term default — cloud, local, or per-tenant — was the one
+question this document left to the owner. **He decided it on 2026-10-05: per-tenant policy is the
+destination, cloud-first is the interim** (§9). The decision turns three pieces of work from *nice*
+into *required*, including a platform-managed local model (§6.4).
+
 ---
 
 ## 1. What the prior analysis got right, and what it got wrong
@@ -230,11 +235,12 @@ These are **our calls**, and they are cheap to overrule:
 3. **The embedding lane gets a way to be pointed at a local OpenAI-compatible server**, and the
    `mcp` service gets `OPENAI_BASE_URL` — the two halves of B-16.
 
-### 3.4 The one thing this document does not decide
+### 3.4 The one thing this document does not decide — and the owner has now decided it
 
 **What the long-term default should be: all-local, cloud-first with local fallback, or
-policy-per-tenant.** That is a product and cost decision, it is the owner's, and §9 states it as a
-recommendation with the trade in plain words. It is **not** closed here.
+policy-per-tenant.** That is a product and cost decision, and it was the owner's. **He decided it on
+2026-10-05: per-tenant policy is the destination, cloud-first is the interim.** §9 records the
+decision, and what follows from it.
 
 ---
 
@@ -348,6 +354,17 @@ wrong in three visible ways:
    server actually serves Qwen2.5-7B.
 2. The provider name shown to an operator is **"OpenAI"** for a machine in their own rack.
 3. It is exactly the config drift the `llama/` analysis warns about: one endpoint, two authorities.
+
+**And it is now a stated requirement, not a preference.** The owner's instruction, 2026-10-05:
+*the llama integration for open-source models must not reserve any API setting that belongs to a
+vendor — OpenAI or any other.* A local server answering to `OPENAI_API_KEY` and `OPENAI_BASE_URL` is
+exactly that: the open-source lane squatting on a vendor's name. Two things follow, and both are
+cheap:
+
+- **The local lane gets its own names.** `LLAMACPP_API_KEY` and `LLAMACPP_BASE_URL`, never `OPENAI_*`.
+  The preset below is what does this.
+- **The rule is general, not about OpenAI.** Every provider gets its own preset with its own env keys
+  (§5), so no vendor's name is ever a routing hint for somebody else's model.
 
 **The change.** One entry in `openai-compatible-presets.ts`, mirroring the two local presets already
 there:
@@ -607,6 +624,57 @@ single-user desktop install of Hermes. It is not a multi-tenant control plane, a
 one would put model lifecycle in the hands of the component whose job is to reason, not to govern.
 The `llama/` analysis reached the same conclusion.
 
+### 6.4 Managing the local model from the platform — the owner's requirement, 2026-10-05
+
+**The requirement, in the owner's words:** *"develop managing llama models (what models run there)
+from the main platform, so we change llama models per need — depending on the server we deploy the
+platform in and its resources, and depending on what new models are released in the world."*
+
+**What already exists, measured.** One half is already there, and it is the easy half:
+`docker-compose.fullapp.yml` reads the model from an environment variable —
+`-m /models/${MODEL_FILE:-Qwen2.5-7B-Instruct-Q4_K_M.gguf}`. So a deployment can already choose its
+model file without editing the compose, and §6.1's context and YaRN settings already target a 64K
+floor.
+
+**What is missing, and it is the whole point of the requirement.** The platform cannot answer "which
+model does this deployment serve?", and cannot change it. There is no record, no screen, and no way
+for the platform to act on the answer. Three concrete gaps:
+
+| Gap | Measured |
+|---|---|
+| **No record** | Nothing in the database or the registry says which GGUF this deployment runs. The choice lives only in a `.env` file on the host |
+| **No hardware awareness** | Nothing knows the deployment's RAM, cores or GPU, so nothing can say which models are *viable* on it. §7.1 records that the owner's laptop is CPU-only with 4 cores |
+| **No path for a new model** | Adding a newly-released GGUF is a manual file drop into `./models`, an env edit, and a restart. Nothing in the platform mediates it |
+
+**The design, in four pieces — none of it is built.** Each piece is small; together they are the
+capability the owner asked for:
+
+1. **A deployment model record.** One row (or one setting) saying: this deployment serves *this*
+   model file, with *this* context, on *this* hardware class. It is the platform's answer to "what
+   runs there".
+2. **A hardware profile.** The deployment declares, or the platform detects, its RAM, cores and GPU.
+   Given that, the platform can say which registered models are viable and flag the ones that are not.
+   **This is what makes "depending on the server we deploy in" true rather than aspirational.**
+3. **A model catalog that can grow.** The registered models are **data, not code**, so a newly
+   released GGUF is added by recording it (name, file, size, context, hardware floor) and fetching the
+   file, not by editing a preset array or a compose file. **This is what makes "depending on what new
+   models are released" true.**
+4. **A swap procedure the platform can drive.** Changing the served model means: update the record,
+   fetch the file if absent, restart the `model` service with the new `MODEL_FILE`. The platform
+   should drive this or emit the exact commands — because the model server is a separate container
+   with a read-only `/models` mount, and **a swap is a restart, not a hot reload**.
+
+**Why this is the same work as §5's model registry, and should be built with it.** A model catalog
+with capability and hardware fields *is* the Model Registry the vision asks for (its §11), seen from
+the local side. Building the local catalog first gives the registry its first real consumer and its
+first real data, which is cheaper than building an abstract registry with nothing to put in it.
+**The deferral in §10 has therefore moved** — see its updated trigger.
+
+**What stays the owner's, and is not decided here:** which model becomes the standard, and whether
+the platform auto-downloads models or only ever reads what an operator placed on disk. The first is
+downstream of §9; the second is a cost and trust question, because an auto-download is a network
+dependency and a supply-chain surface.
+
 ---
 
 ## 7. Performance — what is measured, and what is not
@@ -693,11 +761,12 @@ place, because it is the part that keeps the product safe:
 
 ---
 
-## 9. What is not decided, and it is the owner's
+## 9. The long-term default — **DECIDED by the owner, 2026-10-05**
 
-**One decision. Stated as a recommendation, not closed.**
+**The decision: per-tenant policy is the destination; cloud-first is the interim.** It is the
+recommendation this document made in draft, and the owner approved it on 2026-10-05.
 
-**The question:** what should the **long-term default** be?
+**The question, and the three answers, unchanged:**
 
 | Option | What it means in practice | What it costs |
 |---|---|---|
@@ -705,9 +774,7 @@ place, because it is the part that keeps the product safe:
 | **B. Local-first, cloud as fallback** | The local server is the default. Cloud is policy-gated escalation for hard reasoning | No per-token spend, data stays in the rack. **On today's hardware, hour-scale turns** (§7.1) |
 | **C. Per-tenant policy** | Each tenant declares *local only / local preferred / cloud allowed / approved providers only*, and the broker enforces it before the request leaves | The vision's actual target (`03_Local_First...` §32). Needs the registry and budget work in §10 |
 
-**Our recommendation: C, with A as the interim default.**
-
-Reasoning, in one line each:
+**Why C, and why A meanwhile:**
 
 - **The vision already specifies C.** `03_Local_First...` §32 lists seven tenant modes, among them
   *local only*, *local preferred*, *cloud allowed* and *approved providers only*, and states that
@@ -715,15 +782,25 @@ Reasoning, in one line each:
   direction, it is the stated one.
 - **A is the only honest default while the hardware is this slow.** B would ship a product where a
   turn takes 20 minutes.
-- **C is not buildable today**, because it needs the model registry and budget controls in §10. So
-  A is the interim, and C is the destination.
+- **C is not buildable today**, because it needs the model registry and budget controls in §10. So A
+  is the interim, and C is the destination.
 
-**What this does not decide:** which specific open-weight model becomes the standard, whether to buy
-GPU hardware, and whether self-hosting is a customer-facing promise or an internal capability. Those
-are downstream of the default and are named in §10.
+**What the decision sets in motion — this is the part that matters, and it is new.** Choosing C is
+not a preference; it turns three pieces of work from *nice* into *required*:
 
-**One question for the owner, if it is wanted:** is the long-term default **C with an interim of A**
-(the recommendation), or should the interim be **B** — local-first even at today's speed?
+1. **The model registry stops being optional.** C is enforced by the broker, and a broker cannot
+   enforce a policy it cannot read. §5's three gaps — the first-class registry, capability
+   declarations, and budgets — are what C is built on, so their triggers move (see §10).
+2. **The agent mapping gets its reason.** The owner's next piece of work is mapping Hermes'
+   **agents, personas and profiles** onto the platform's tenants and roles, so that a per-tenant
+   policy has something to attach to. See [`AGENT-HALF.md`](AGENT-HALF.md).
+3. **Platform-managed local models become a requirement.** C includes *local only* and *local
+   preferred* tenants, which is only honest if the platform can say **which** model runs locally, per
+   deployment and per new release. See §6.4.
+
+**What the decision does not cover:** which specific open-weight model becomes the standard, whether
+to buy GPU hardware, and whether self-hosting is a customer-facing promise or an internal
+capability. Those are downstream and are named in §10.
 
 ---
 
@@ -743,9 +820,10 @@ Per the COOKBOOK's zero-one rule: **a deferral must name its trigger.**
 | **The `llamacpp` chat preset** (§4.2) | **the next `model`-service change** | It is one entry and it is safe now; it rides along with `--jinja` rather than being its own change |
 | **The `openai-compatible` embedding provider** (§4.4) | **the first time an embedding is needed for real** | It is the largest of the four changes, and B-16 is not blocking anything today |
 | **The embedding model choice** (§4.4) | **before the first durable index is built** | The dimension is a data migration once an index exists |
-| **A first-class model registry object** (§5) | **the first tenant that needs capability declarations** | Today `defaultModels` plus `ai_tenant_model_allowlist` covers permission; capability has no consumer yet |
+| **A first-class model registry object** (§5) | ⏰ **the trigger has fired, 2026-10-05.** The owner made **per-tenant policy the destination** (§9) and asked the platform to **manage the local model** (§6.4). Both need a registry to read, and §6.4's local catalog is its first real data. **Build the two together.** | Today `defaultModels` plus `ai_tenant_model_allowlist` covers permission; capability has no consumer yet — C gives it one |
 | **Capability qualification** (§5) | **the first capability claim anyone acts on** | The **prior analysis's** rule — a model advertises a capability only after qualification (`llama/01-target-architecture.md:87`) — has no home. The vision's registry has `status` and `availability` fields but states no gate. Nothing qualifies capabilities today |
-| **Budgets and per-tenant quotas** (§5) | **the first real spend** | Token counts are recorded (`ai_token_usage_event`, `ai_token_usage_daily`); nothing enforces a ceiling |
+| **Budgets and per-tenant quotas** (§5) | **the first real spend**, and **before any tenant is placed on C** — a per-tenant policy that can spend must be able to stop | Token counts are recorded (`ai_token_usage_event`, `ai_token_usage_daily`); nothing enforces a ceiling |
+| **The four pieces of §6.4** — the deployment model record, the hardware profile, the growable model catalog, the platform-driven swap | **the first deployment whose model is not the laptop's** — that is, the first real server. Building it before a second hardware profile exists would be guessing at the fields | The owner asked for it on 2026-10-05 and it is required by C's *local only* and *local preferred* tenants; but it has nothing to manage until there is a second deployment. Its catalog is built with the registry row above |
 | **Generating Hermes' provider config from the platform registry** (§5.1) | **the second deployment, or the first config drift** | Today it is set by hand per deployment. The `llama/` analysis calls the hand-set state an acceptable transitional bridge |
 | **Router mode / multiple resident models** | **a measured need for more than one model at once** | `models_max: 4` exists in Hermes' runtime, but router mode multiplies KV-cache memory. Do not enable it speculatively |
 | **GPU offload** | **new hardware** | Not fixable on the Quadro M2000M (§7.3) |
@@ -806,8 +884,11 @@ Per the COOKBOOK's zero-one rule: **a deferral must name its trigger.**
   hostile pass found it by re-running the search scoped.
 - **The prior analysis was verified, not accepted.** Four of its claims were corrected or sharpened
   and one was confirmed (§1.2). Its recommendation survived.
-- **Nothing here is closed that belongs to the owner.** §9 states one decision and recommends an
-  answer; it does not record it as taken.
+- **The one decision that was the owner's has been taken, by him.** §9 records it as **decided**
+  (2026-10-05), not as a recommendation. Nothing else here is closed that belongs to him.
+- **Two requirements were added by the owner on 2026-10-05**, after this document's first version:
+  the open-source lane must not reserve a vendor's settings (§4.2), and the platform must manage which
+  local model runs (§6.4). Both are written as requirements with their own deferral triggers.
 - **No code, deployment or runtime was changed to write this.** It is a design document.
 
 **The four changes in §4 are our calls and are cheap to overrule.** If any of them is wrong, the

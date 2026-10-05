@@ -15,6 +15,9 @@ of a hundred files to open first.
 
 **About two hours, and you will understand what is built, what is left, and why.**
 
+**In a hurry? [`BOOKMARKS.md`](BOOKMARKS.md) is the short list** — the handful of documents that
+matter, the end-game documents, and which folders are in git, on one page.
+
 **If you are an agent starting a fresh session, the message to send is
 [`START-PROMPT.md`](START-PROMPT.md).** It tells you to read the list below, states the rules you
 may not break, and names the first task — so the reading happens first, not after you have already
@@ -126,12 +129,17 @@ See COOKBOOK rule zero-ten.
 | File | What it is |
 |---|---|
 | [`HANDOVER.md`](HANDOVER.md) | **The handover** — the front door for a newcomer who knows nothing: what exists, where it is, the two-repository layout, the traps, the host VM, the standing rules, and what is proven vs not. §0 is written for an agent taking over |
+| [`BOOKMARKS.md`](BOOKMARKS.md) | **The pages to open first** — the handful of documents that matter, the **end-game / vision** documents, the two integration designs, and an honest list of which folders are in git and which are not |
 | [`START-PROMPT.md`](START-PROMPT.md) | **The message that starts a new session** — paste it to the agent taking over: what to read first, the rules it may not break, and the first task |
 | [`README.md`](README.md) | **This file** — the front door, the reading order, the handover, the sprint process |
 | [`BACKLOG.md`](BACKLOG.md) | **The one roadmap** — everything left, in order, with the "do not lose this" list and the deferrals |
 | [`AGENT-HALF.md`](AGENT-HALF.md) | **The agent half** — the five kinds of agent, the rule that decides who is answerable when one acts, and **where every one of the study's 53 lessons lands in the phases** |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | How the Starting Kit + Hermes + the model server run together, and the dockerisation decision (Sprint 0) |
+| [`ARCHITECTURE-hermes-integration.md`](ARCHITECTURE-hermes-integration.md) | **The Hermes integration design** — platform to platform, function to function, and multi-tenant, with the owner's **B-05** runtime-boundary decision (§11) |
+| [`ARCHITECTURE-model-server-integration.md`](ARCHITECTURE-model-server-integration.md) | **The model layer** — llama.cpp as one preset entry, the embedding lane, the two defects root-caused, and the owner's **model-default** decision (§9) |
 | [`BLOCKERS.md`](BLOCKERS.md) | **Anything stopping progress**, with what clears it. **Read this before wondering why something is not moving** |
+| [`NEEDS-YOU.md`](NEEDS-YOU.md) | **The owner-only action list** — numbered, with literal steps and a way to answer all of it at once |
+| [`SPEC-business-model-kernel.md`](SPEC-business-model-kernel.md) | **The product specification** (Draft 2) — passes the vision's own 40-item gate; only the owner's ratification remains |
 | [`RUNBOOK-adding-a-domain-step-by-step.md`](RUNBOOK-adding-a-domain-step-by-step.md) | **The practical walkthrough** — GoDaddy → Cloudflare → tunnel → SSL → a live site, with all three site types (Docker platform, WordPress container, your own codebase in a directory) and databases + phpMyAdmin. **Start here for "get my domain working"** |
 | [`RUNBOOK-hosting-server-manual.md`](RUNBOOK-hosting-server-manual.md) | **Operating the hosting server** — connecting from the laptop, domains and DNS, directories, databases, phpMyAdmin, SSL, WordPress, deploying another Docker platform. **The entry point for that work, for a person or an agent** |
 | [`RUNBOOK-platform-server.md`](RUNBOOK-platform-server.md) | the hosting VM itself — how it was built, the owner's tasks, rollback, rebuild from scratch |

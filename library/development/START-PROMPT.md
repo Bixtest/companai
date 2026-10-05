@@ -28,7 +28,9 @@ written for exactly you: a newcomer who knows nothing. It tells you what exists,
 traps nobody can discover by reading the code, the two git repositories, the rules that bind, and
 what is proven versus what is only claimed. Then read the eight files it lists in §2. Do not start
 any work before you have done this — the first hour is reading, and it is the cheapest hour you
-will spend.
+will spend. **In a hurry, `library/development/BOOKMARKS.md` is the one-page short list** — the
+documents that matter, the end-game and vision documents, and which folders are in git and which
+are not.
 
 **2. Then set up your shell. This is mandatory in every terminal, every session:**
 
@@ -71,25 +73,39 @@ ask him to adjudicate technical decisions:** when a problem has an obvious safe 
 the work, and tell him what changed and how to undo it. Reserve his judgment for what is genuinely
 his — a name, a domain, a cost, a preference.
 
-**4. Your first task.** Read `library/development/BACKLOG.md` §"The list". The workbench is already
-up (the stack is running and the database is clean — verify it yourself). **The four-item critical path
-is complete.** `P0-spec` is done — draft 2 of the Business Model Kernel specification
-(`library/development/SPEC-business-model-kernel.md`) was written 2026-10-05 and passes the vision's own
-40-item gate (only ratification remains). **`G-01` — the Business Model Kernel (+ `G-08`, the
-relationship fabric) — is built** (2026-10-05, code repo `ee406e8`): the canonical model is a view over
-the platform's own declarations, and the plan's test (the export/reimport round-trip is empty) passes.
-**`G-02` — the Business IR and the compiler — is built** (2026-10-05): §51's ten stages run as named
-steps, a `list` read compiles to the `QueryOptions` the engine already runs, and the plan's test — **the
-rename test** — passes both directions. **`G-03` — User Functions — is built** (2026-10-05): the
-product's distinctive feature, where a saved business operation is **created with AI assistance and runs
-with no AI at all** — proven by two routes, one of them an import-graph test that was itself falsified.
-**The next build item is `G-07` — the Widget contract**, which now owns both the Widget contract and a
-User Function's **placement** in the interface. `G-03` also unblocked `G-17` and `G-19` further.
+**4. Your first task.** Read `library/development/BACKLOG.md` §"The list". **The four-item critical
+path is complete:** `spec ✅ → G-01 ✅ → G-02 ✅ → G-03 ✅`. `P0-spec` is done — draft 2 of the
+Business Model Kernel specification (`library/development/SPEC-business-model-kernel.md`) passes the
+vision's own 40-item gate (**only the owner's ratification remains**). **`G-01`** (the Business Model
+Kernel, code repo `ee406e8`) is a view over the platform's own declarations, with the export/reimport
+round-trip empty. **`G-02`** (the Business IR and the compiler) runs §51's ten stages as named steps
+and passes the **rename test** both directions. **`G-03`** (User Functions) is the product's
+distinctive feature, created with AI assistance and running with **no AI at all**, proven by two
+routes one of which was falsified. **`G-07`** (the Widget contract, IR and registry) is built, and a
+published Function placed in a Widget runs from the Widget's own inputs with no AI.
 
-**Two things G-03 leaves deliberately undone, both with named triggers** — read them in `BACKLOG.md`
-before planning anything adjacent: a Function's **database row** (trigger: `G-07`) and a verified
-Function's definition being editable without invalidating its verification (trigger: the first editing
-operation).
+**Take the first unbuilt item in `BACKLOG.md` §"The list".** Do not assume the order has not changed
+since this prompt was written; read the list and take item 1 unless you have a reason not to. At the
+time of writing the first unbuilt items are **`S0`** — a re-run of the local dockerised trio, which
+needs **the owner to start Docker Desktop first** (the agent cannot; **B-04**) — and then **`G-12`**
+(business backup and restore, which depends on nothing and is the safety net).
+
+**Two things are now decided, and they shape what you build next.** **B-05, the Hermes runtime
+boundary:** one product, one repository, one deployment, one interface (ours), with Hermes as a
+**supervised private runtime process behind the internal port**, and Hermes **headless**. **The
+long-term model default (item 13): per-tenant policy is the destination, cloud-first is the
+interim.** The second turns three pieces of work from *nice* to *required* — the model registry, the
+Hermes **agent / persona / profile** mapping, and platform-managed local models — tracked as the
+**`ML-`** items in `BACKLOG.md`. Two further owner requirements are recorded in
+`library/development/ARCHITECTURE-model-server-integration.md`: the open-source lane must **not
+reserve a vendor's settings** (§4.2), and the platform must be able to **choose which local model
+runs** (§6.4).
+
+**Items left deliberately undone, each with a named trigger** — read them in `BACKLOG.md` before
+planning anything adjacent: a Function's **database row** (trigger: `G-09`, to be built in one
+migration with the registry's own row), a verified Function's definition being editable without
+invalidating its verification (trigger: the first editing operation), and the Widget registry's
+**database row** (trigger: `G-09`).
 
 Work it in the project's four-step sprint process — **no code before step 3**. Steps 1–3 are
 documents and measurement; only step 4 writes code:
