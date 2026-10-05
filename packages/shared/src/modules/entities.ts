@@ -9,6 +9,37 @@ export type { CustomFieldKind }
 
 export type EntityId = string // format: '<module>:<entity>' e.g., 'auth:user'
 
+/**
+ * The declared attributes of a relationship (Business Model Kernel RQ-05).
+ *
+ * Relationships are first-class metadata, so the things that matter about an
+ * edge are declared rather than implied by a join. The four fields the platform
+ * already had — `cardinality`, `required`, `description`, `join` — stay where
+ * they are on `EntityExtension`, because they are load-bearing for the query
+ * engine and the generator. What is added here is the rest, grouped so it can
+ * never be mistaken for one of them.
+ *
+ * **Every field is optional, and an absent field is a declared gap.** The
+ * kernel reports absence rather than inventing a default — a default would be
+ * exactly the undocumented convention the vision forbids.
+ */
+export type RelationshipAttributes = {
+  /** Which side owns the edge. Absent = not yet declared. */
+  ownership?: 'source' | 'target' | 'shared'
+  /** Whether traversal is permitted in each direction. */
+  allowedTraversal?: { fromTo: boolean; toFrom: boolean }
+  /** What happens to the edge (and rows) when one side is deleted. */
+  deleteBehaviour?: 'restrict' | 'cascade' | 'orphan' | 'soft'
+  /** How security classification flows along the edge. */
+  securityInheritance?: 'none' | 'from-source' | 'strictest'
+  /**
+   * Whether reading through this edge can multiply rows — the "multiplicity
+   * risk" the vision names. A `one-to-many` edge read from the many side is a
+   * classic double-count. Absent = not yet assessed.
+   */
+  multiplicityRisk?: 'none' | 'row-multiplication'
+}
+
 export type EntityExtension = {
   // Base entity to extend, e.g., 'auth:user'
   base: EntityId
@@ -23,6 +54,9 @@ export type EntityExtension = {
   cardinality?: 'one-to-one' | 'one-to-many' | 'many-to-one' | 'many-to-many'
   required?: boolean
   description?: string
+  // Kernel relationship attributes (RQ-05). Additive and optional: existing
+  // declarations are unaffected, and an absent block means "not yet declared".
+  attributes?: RelationshipAttributes
 }
 
 export type CustomFieldDefinition = {

@@ -8,10 +8,19 @@ export function linkable(moduleId: string, entities: string[]): Record<string, E
   return Object.fromEntries(entities.map((e) => [e, entityId(moduleId, e)]))
 }
 
+/**
+ * Declare a relationship between two entities (Business Model Kernel RQ-05).
+ *
+ * `opts` is **additive**: the original four fields are unchanged, and the kernel
+ * attributes live under `attributes` so an existing declaration needs no edit.
+ * Everything is optional — an attribute left out is a **declared gap** the
+ * kernel reports, never a default it invents.
+ */
 export function defineLink(
   base: EntityId,
   extension: EntityId,
-  opts: Pick<EntityExtension, 'join' | 'cardinality' | 'required' | 'description'>
+  opts: Pick<EntityExtension, 'join' | 'cardinality' | 'required' | 'description'> &
+    Partial<Pick<EntityExtension, 'attributes'>>
 ): EntityExtension {
   return { base, extension, ...opts }
 }
