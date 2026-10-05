@@ -60,7 +60,7 @@ data-level security — is **neither**, and must be built.*
 | 5 | [`../../compai/planning/00-product-thesis.md`](../../compai/planning/00-product-thesis.md) | **What we are building**, and the 15 rules that must never be broken |
 | 6 | [`../analysis/findings/12-development-plan.md`](../analysis/findings/12-development-plan.md) | **The plan** — phases, order, why |
 | 7 | [`../../workspace/COOKBOOK.md`](../../workspace/COOKBOOK.md) | **How the work is done** — read before touching code |
-| 8 | [`../../LESSONS.md`](../../LESSONS.md) | 79 mistakes already made, so you do not repeat them |
+| 8 | [`../../LESSONS.md`](../../LESSONS.md) | 82 mistakes already made, so you do not repeat them |
 
 **Then, before you write any code:** [`../../workspace/knowledge/authority-overview.md`](../../workspace/knowledge/authority-overview.md)
 — the governance layer end to end. **That layer is the product.** Everything else is plumbing.
@@ -109,7 +109,7 @@ code before starting** — the roadmap has been wrong about what is already done
 | **Hosting / domains** | [`RUNBOOK-adding-a-domain-step-by-step.md`](RUNBOOK-adding-a-domain-step-by-step.md) → [`RUNBOOK-hosting-server-manual.md`](RUNBOOK-hosting-server-manual.md) |
 | **Testing it** | `workspace/references/how-to-test.md` → `workspace/knowledge/test-gate.md` |
 | **Picking up the analysis** | [`../analysis/PLAN.md`](../analysis/PLAN.md) → [`../analysis/LOG.md`](../analysis/LOG.md) → the `findings/` reports |
-| **Designing the agent half** (AI staff, roles, tasks, delegation, triggers, meetings) | [`../paperclip-hermes-study/findings/10-lessons-and-target-design.md`](../paperclip-hermes-study/findings/10-lessons-and-target-design.md) — **the synthesis**: what we take from Paperclip and Hermes, what we reject, and the target shape. Then its [`PLAN.md`](../paperclip-hermes-study/PLAN.md) for how it was derived |
+| **Designing the agent half** (AI staff, roles, tasks, delegation, triggers, meetings) | [`AGENT-HALF.md`](AGENT-HALF.md) — **the model and the plan**: the five kinds of agent, the rule that decides who is answerable when one acts, and where every one of the study's lessons lands. Then [`../paperclip-hermes-study/findings/10-lessons-and-target-design.md`](../paperclip-hermes-study/findings/10-lessons-and-target-design.md) — **the synthesis** — for the evidence behind each lesson, and its [`PLAN.md`](../paperclip-hermes-study/PLAN.md) for how it was derived |
 
 ---
 
@@ -222,8 +222,9 @@ companai/                       ← repo 1 root (thinking + docs).  You are here
 │   │   ├── ARCHITECTURE.md     how Starting Kit + Hermes + model server run together
 │   │   ├── BLOCKERS.md         anything stopping progress, with what clears it
 │   │   ├── NEEDS-YOU.md        **numbered list of owner-only actions** (see §8)
+│   │   ├── AGENT-HALF.md       **THE AGENT HALF** — five agent kinds, the responsibility rule, and where every lesson lands
 │   │   ├── RUNBOOK-*.md        hosting: the manual, the domain walkthrough, Sprint 0
-│   │   └── SPEC-business-model-kernel.md   the product spec (Draft 1; 18 items open)
+│   │   └── SPEC-business-model-kernel.md   the product spec (Draft 1; 18 rows partly or wholly open)
 │   ├── ai/                     READ ITS README FIRST — two products are called Companai
 │   │   ├── ai-first/           THE DIRECTION — what we will actually build
 │   │   ├── hermes-docs/        a sibling's docs. Lessons only, never decisions
@@ -457,8 +458,12 @@ written — **14 entries in total:**
 - **What is stopping work** → [`BLOCKERS.md`](BLOCKERS.md) — re-checked each session, because a
   blocker is a claim about *now*.
 - **The product specification** → [`SPEC-business-model-kernel.md`](SPEC-business-model-kernel.md)
-  — Draft 1 written, **18 items open**. This is the vision's own gate, and the first real build
-  move.
+  — Draft 1 written; of its 40 rows, **22 are settled, 10 partly, 8 open** (the spec's own tally
+  counts by the first status token, so read its note before quoting it). This is the vision's own
+  gate, and the first real build move.
+- **How the agent half is designed** → [`AGENT-HALF.md`](AGENT-HALF.md) — the five kinds of agent,
+  the rule that decides who is answerable when an agent acts, and where every lesson from the
+  Paperclip + Hermes study lands in the four phases.
 
 ---
 
@@ -471,14 +476,23 @@ change.
 A newcomer who cannot orient themselves from this page plus [`../../INDEX.md`](../../INDEX.md)
 alone means this page is broken — **fix the page, not the newcomer.**
 
-*Last updated: 2026-10-05 — **the agent study is complete and is now part of the folder map.** The
-Paperclip + Hermes study finished all eleven batches; the map gained
-`library/paperclip-hermes-study/`, the `ai/` block gained `paperclip-master/` and `source-docs/`, and
-§2 gained a role: *designing the agent half*. The library file count was re-measured in **both** places
+*Last updated: 2026-10-05 — **the agent half is now designed and wired into the plan.** The owner
+answered the one open decision (item 8 of `NEEDS-YOU.md`): agents are not one thing but **five
+kinds** — *personal · role · context · independent · system* — and every action an agent takes is
+answerable to a **person**. That decision needs **no new authorization model**, because the
+platform already has `ai_worker` for identity and the `A0`–`A5` gates for autonomy. It is written
+up in the new [`AGENT-HALF.md`](AGENT-HALF.md), which also maps all 53 of the study's lessons to
+the phase each lands in; the map above and §2 gained it, and `BACKLOG.md` gained the `AH-` items
+(two tracks, one list). The study itself remains complete (11 of 11 batches); its synthesis
+[`../paperclip-hermes-study/findings/10-lessons-and-target-design.md`](../paperclip-hermes-study/findings/10-lessons-and-target-design.md)
+is the evidence behind `AGENT-HALF.md`. The library file count was re-measured in **both** places
 it appears in this file (both said 2,440; the real figure is **3,439** — the earlier 3,121 I first
 wrote here counted the library *minus* the new `ai/source-docs/` copies, which was wrong because that
-folder sits inside `library/`). Its synthesis is the reference for the agent half, and it leaves exactly one decision
-open — see §3.1 of [`../paperclip-hermes-study/findings/10-lessons-and-target-design.md`](../paperclip-hermes-study/findings/10-lessons-and-target-design.md).*
+folder sits inside `library/`).*
+
+*Earlier, 2026-10-05 — the agent study finished: all eleven batches, its synthesis now the reference
+for the agent half, and a new `library/ai/source-docs/` shelf gathering the scattered source
+documents (its register tracked, its copies not).*
 
 *Earlier, 2026-10-05 — first version. Records the two-repository layout, the two-products
 trap, the gitignored `vms/` and its fix, the host VM, the standing rules, and the honest split

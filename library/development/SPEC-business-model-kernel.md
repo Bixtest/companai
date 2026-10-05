@@ -370,7 +370,7 @@ what this draft does and does not cover.**
 | 1 | Tenant isolation model | **PARTLY** — §5.4 defines `Tenant`; the enforcement point is **OPEN — spec** |
 | 2 | Identity model | **PARTLY** — §5.4 defines `User`/`Agent`; principal resolution is **OPEN — spec** |
 | 3 | Organization hierarchy | **PARTLY** — §5.4 + Doc 5 §7 party model; depth/recursion **OPEN — spec** |
-| 4 | Agent model | **SETTLED** — §5.4 |
+| 4 | Agent model | **SETTLED** — §5.4, and **in detail by the owner's decision of 2026-10-05**: five kinds (*personal · role · context · independent · system*), an owner, a visibility scope, a runtime binding and an autonomy gate → [`AGENT-HALF.md`](AGENT-HALF.md) §1.4 |
 | 5 | Permission model | **SETTLED** — §4.1 + §5.4 |
 | 6 | Business Model Kernel schema | **THIS DOCUMENT** — §3 |
 | 7 | Stable-ID policy | **DERIVED** — Doc 3 §39; exact ID grammar **OPEN — spec** |
@@ -397,7 +397,7 @@ what this draft does and does not cover.**
 | 28 | Hermes session bridge | **OPEN — spec** |
 | 29 | MCP domain API | **OPEN — spec** |
 | 30 | Tool policy | **PARTLY** — §5.4 defines `Tool`; the policy shape **OPEN — spec** |
-| 31 | Human approval model | **DERIVED** — Doc 3 §54; the gate itself **OPEN — spec** |
+| 31 | Human approval model | **SETTLED 2026-10-05** — the approval rule is the platform's **existing `A0`–`A5` gates**, assigned per action class, plus the rule that **the accountable party is always a person** → [`AGENT-HALF.md`](AGENT-HALF.md) §1.2 |
 | 32 | Document ingestion/security | **PARTLY** — §5.4 + §7 Rule 1 mark documents untrusted; pipeline **OPEN — spec** |
 | 33 | Analytics projection strategy | **PARTLY** — §5.4 defines `Projection`; strategy **OPEN — spec** |
 | 34 | Event/outbox strategy | **OPEN — spec** |
@@ -412,6 +412,14 @@ what this draft does and does not cover.**
 40 rows, and cross-checked by counting the status tokens directly in the table — both routes give
 22 settled/derived. This tally was **wrong in the first draft of this file** — it said 11 partly and
 7 open — and was corrected by measurement, which is `LESSONS.md` **L66** applied to this document.)
+
+**How this tally counts — and what it under-reports.** A row is counted by its **first** status token.
+So a row that reads `**DERIVED** — …; the gate itself **OPEN — spec**` counts as *settled*, even though
+its own text names something open. Measured 2026-10-05: **11 of the 40 rows contain `OPEN — spec`
+somewhere while being counted as settled or partly.** **"8 open" therefore means "8 rows whose *first*
+token is `OPEN`"** — not "8 things are unresolved". The count is honest about its rule and easy to
+misread; the rule is written down here so that nobody does. *(The 2026-10-05 agent-model decision is the
+worked example: it closed the open gate inside row 31, and the tally did not move.)*
 
 **The honest reading of that tally.** This draft **settles the object list and the contract** — the
 two things the plan actually asked P0-spec to settle — and it does **not** yet meet the vision's own
@@ -431,7 +439,7 @@ Each with a status and a next move.
 | The 18 partly/open items in §8 | **OPEN — spec** | Draft 2 of this document |
 | The ID grammar for stable IDs | **OPEN — spec** | Draft 2 — Doc 3 §39 gives examples (`invoice`, `invoice.outstanding_amount`) but no grammar |
 | The policy decision language | **OPEN — spec** | Draft 2 — needs the security kernel (batch 5, vision Doc 8) |
-| The Hermes boundary items (26, 27, 28, 35, 38) | **OPEN — owner** | These are the `B-05` boundary. Not this document's to close |
+| The Hermes boundary items (26, 27, 28, 35, 38) | **OPEN — owner** | These are the `B-05` boundary. Not this document's to close. **Narrowed 2026-10-05** by the agent-model decision: the five agent kinds tell us **how many Hermes profiles we need and how they are isolated** (item 27), and a *context* agent that acts as a user is the concrete case the session bridge (item 28) must serve → [`AGENT-HALF.md`](AGENT-HALF.md) |
 | Whether `View` and `Projection` should stay distinct | **DEFERRED** | Trigger: the first generated UI (Doc 3 §76). If they never diverge, merge them |
 | Whether the `CORE` set is right | **DEFERRED** | Trigger: the first capability package. Doc 5 §6 lists 26 candidates and says *"not all need to be implemented immediately"* |
 | Ratification of this specification | **OPEN — owner** | Ramzi reads it, or delegates the review |

@@ -94,6 +94,7 @@ companai/                      ← you are here
 │       ├── HANDOVER.md        **the front door for a newcomer — read this first**
 │       ├── README.md          the reading order, the sprint process
 │       ├── BACKLOG.md         **THE ONE ROADMAP** — everything left, in order
+│       ├── AGENT-HALF.md      **the agent half** — five agent kinds, the responsibility rule, and where every lesson lands
 │       ├── ARCHITECTURE.md    how the Starting Kit + Hermes + the model server run together
 │       ├── BLOCKERS.md        anything stopping progress, with what clears it
 │       ├── NEEDS-YOU.md       owner-only actions, numbered
@@ -269,7 +270,7 @@ Break these and you will damage the project.
 | **Know what we are building, in what order, and why** | [`library/analysis/findings/12-development-plan.md`](library/analysis/findings/12-development-plan.md) — **THE DEVELOPMENT PLAN.** The deliverable the whole analysis exists for: four phases, the critical path (G-01 → G-02 → G-03), the first three things to build, and every decision that is the owner's |
 | **See the analysis plan, and what is being checked** | [`library/analysis/PLAN.md`](library/analysis/PLAN.md) — 12 batches with tickboxes, **all DONE**. Start here if you want the programme itself |
 | **Know what has been analysed so far** | [`library/analysis/LOG.md`](library/analysis/LOG.md) — one dated line per batch, and [`library/analysis/findings/`](library/analysis/findings/) for the reports |
-| **Understand the agent half (AI staff, roles, tasks, delegation, triggers, meetings)** | [`library/paperclip-hermes-study/findings/10-lessons-and-target-design.md`](library/paperclip-hermes-study/findings/10-lessons-and-target-design.md) — **THE SYNTHESIS.** What we take from Paperclip and Hermes, what we reject, and how we do it better. **One decision is left open for the owner** |
+| **Understand the agent half (AI staff, roles, tasks, delegation, triggers, meetings)** | [`library/development/AGENT-HALF.md`](library/development/AGENT-HALF.md) — **the model and the plan**: the five kinds of agent, the rule that decides who is answerable when one acts, and where every lesson lands. Then [`library/paperclip-hermes-study/findings/10-lessons-and-target-design.md`](library/paperclip-hermes-study/findings/10-lessons-and-target-design.md) — **THE SYNTHESIS** — for the evidence: what we take from Paperclip and Hermes, what we reject, and how we do it better |
 | **See the agent study's batch plan and progress** | [`library/paperclip-hermes-study/PLAN.md`](library/paperclip-hermes-study/PLAN.md) — 11 batches with tickboxes, **all DONE**, each with its result |
 | **Find a source document the study cites** | [`library/ai/source-docs/README.md`](library/ai/source-docs/README.md) — the register of where every scattered source document set lives, and what is copied where |
 | **Understand the vision we are aiming at** | [`library/analysis/findings/01-vision-frame.md`](library/analysis/findings/01-vision-frame.md) — what the platform is meant to be, its rules, and what it deliberately has not decided |
@@ -311,7 +312,15 @@ a folder, finishes a phase, or makes a decision updates it in the same change.
 A newcomer who cannot orient themselves from this page alone means it is broken —
 fix the page, not the newcomer.
 
-*Last updated: 2026-10-05 — **the agent study is complete, and the scattered source documents now have one home.** The Paperclip + Hermes study finished all eleven batches; its synthesis
+*Last updated: 2026-10-05 — **the agent half is designed and wired into the plan.** The owner answered
+the one open decision: agents are **five kinds** (*personal · role · context · independent · system*),
+and every action an agent takes is answerable to a **person**. It needs no new authorization model —
+the platform already has `ai_worker` for identity and the `A0`–`A5` gates for autonomy. The write-up
+is the new [`library/development/AGENT-HALF.md`](library/development/AGENT-HALF.md), which also maps
+every lesson of the study to the phase it lands in; the folder map and the §6 table point at it, and
+`library/development/BACKLOG.md` gained the `AH-` items (two tracks, one list).*
+
+*Earlier, 2026-10-05 — **the agent study is complete, and the scattered source documents now have one home.** The Paperclip + Hermes study finished all eleven batches; its synthesis
 ([`library/paperclip-hermes-study/findings/10-lessons-and-target-design.md`](library/paperclip-hermes-study/findings/10-lessons-and-target-design.md))
 is now the reference for the agent half of the platform — what we take, what we reject, and how we
 do it better — and the map and the §6 lookup table point at it. A new folder,

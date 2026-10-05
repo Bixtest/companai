@@ -8,9 +8,9 @@ owner asked directly: *"how will starting-kit + Hermes + llama server be working
 **Status:** design, grounded in what the code already shows. Where a claim rests on reading
 code rather than running it, it says so.
 
-**Read this with:** [`../library/analysis/findings/12-development-plan.md`](../analysis/findings/12-development-plan.md)
-(the plan), [`../library/analysis/findings/09-overlap-matrix.md`](../analysis/findings/09-overlap-matrix.md)
-(who covers what), and [`../library/analysis/findings/10-contested-ownership.md`](../analysis/findings/10-contested-ownership.md)
+**Read this with:** [`../analysis/findings/12-development-plan.md`](../analysis/findings/12-development-plan.md)
+(the plan), [`../analysis/findings/09-overlap-matrix.md`](../analysis/findings/09-overlap-matrix.md)
+(who covers what), and [`../analysis/findings/10-contested-ownership.md`](../analysis/findings/10-contested-ownership.md)
 (who owns what).
 
 ---
@@ -108,10 +108,12 @@ integration forensically across eleven batches; its synthesis,
 [`../paperclip-hermes-study/findings/10-lessons-and-target-design.md`](../paperclip-hermes-study/findings/10-lessons-and-target-design.md),
 is the reference for that half: what we take, what we reject, and the target shape.
 
-**It is evidence, not a decision.** It hands back exactly one open item — whether an assistant agent
-is *identity* (it belongs to Alice) or *context* (it acts as Alice). Where this document and that one
-disagree about *what to build*, this document governs; where this document is silent, that one has the
-reasoning.
+**It is evidence, not a decision.** The study's one open item — whether an assistant agent is *identity*
+(it belongs to Alice) or *context* (it acts as Alice) — was **answered by the owner on 2026-10-05**, and
+the answer was **neither**: there are **five kinds** of agent (*personal · role · context · independent ·
+system*) plus a rule that decides who is answerable when one acts. **The model, and where each piece
+lands in the plan, is [`AGENT-HALF.md`](AGENT-HALF.md).** Where this document and that one disagree about
+*what to build*, this document governs; where this document is silent, that one has the reasoning.
 
 ---
 

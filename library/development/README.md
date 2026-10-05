@@ -23,7 +23,7 @@ of a hundred files to open first.
 | 3 | [`BACKLOG.md`](BACKLOG.md) | **What is left**, in order, one line each — the single plan |
 | 4 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | How the three big pieces run together |
 | 5 | [`../compai/planning/00-product-thesis.md`](../../compai/planning/00-product-thesis.md) | **What we are building**, and the 15 rules that must never be broken |
-| 6 | [`../library/analysis/findings/12-development-plan.md`](../analysis/findings/12-development-plan.md) | **The plan** — phases, order, why |
+| 6 | [`../analysis/findings/12-development-plan.md`](../analysis/findings/12-development-plan.md) | **The plan** — phases, order, why |
 | 7 | [`../workspace/COOKBOOK.md`](../../workspace/COOKBOOK.md) | **How the work is done** — read before touching code |
 | 8 | [`../LESSONS.md`](../../LESSONS.md) | The mistakes already made, so you do not repeat them |
 
@@ -41,7 +41,7 @@ around it.
 | **Putting a domain on a site** | `RUNBOOK-adding-a-domain-step-by-step.md` → `RUNBOOK-hosting-server-manual.md` §4 |
 | **Testing it** | `workspace/references/how-to-test.md` → `workspace/knowledge/test-gate.md` |
 | **Picking up the analysis** | `library/analysis/PLAN.md` → `library/analysis/LOG.md` → the `findings/` reports |
-| **Designing the agent half** (AI staff, roles, tasks, delegation, triggers, meetings) | [`../paperclip-hermes-study/findings/10-lessons-and-target-design.md`](../paperclip-hermes-study/findings/10-lessons-and-target-design.md) — the synthesis — then its [`PLAN.md`](../paperclip-hermes-study/PLAN.md) |
+| **Designing the agent half** (AI staff, roles, tasks, delegation, triggers, meetings) | [`AGENT-HALF.md`](AGENT-HALF.md) — **the model and the plan** — then [`../paperclip-hermes-study/findings/10-lessons-and-target-design.md`](../paperclip-hermes-study/findings/10-lessons-and-target-design.md) for the evidence behind each lesson |
 
 ---
 
@@ -123,6 +123,7 @@ See COOKBOOK rule zero-ten.
 | [`HANDOVER.md`](HANDOVER.md) | **The handover** — the front door for a newcomer who knows nothing: what exists, where it is, the two-repository layout, the traps, the host VM, the standing rules, and what is proven vs not |
 | [`README.md`](README.md) | **This file** — the front door, the reading order, the handover, the sprint process |
 | [`BACKLOG.md`](BACKLOG.md) | **The one roadmap** — everything left, in order, with the "do not lose this" list and the deferrals |
+| [`AGENT-HALF.md`](AGENT-HALF.md) | **The agent half** — the five kinds of agent, the rule that decides who is answerable when one acts, and **where every one of the study's 53 lessons lands in the phases** |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | How the Starting Kit + Hermes + the model server run together, and the dockerisation decision (Sprint 0) |
 | [`BLOCKERS.md`](BLOCKERS.md) | **Anything stopping progress**, with what clears it. **Read this before wondering why something is not moving** |
 | [`RUNBOOK-adding-a-domain-step-by-step.md`](RUNBOOK-adding-a-domain-step-by-step.md) | **The practical walkthrough** — GoDaddy → Cloudflare → tunnel → SSL → a live site, with all three site types (Docker platform, WordPress container, your own codebase in a directory) and databases + phpMyAdmin. **Start here for "get my domain working"** |
@@ -146,6 +147,6 @@ that is deleted once answered — never left buried in a report.**
 | How does the platform work? | [`../workspace/knowledge/`](../../workspace/knowledge/) — 20 concept files |
 | What happened, and when? | [`../JOURNAL.md`](../../JOURNAL.md) (newest first) |
 | What mistakes were made? | [`../LESSONS.md`](../../LESSONS.md) |
-| What did the analysis find? | [`../library/analysis/`](../analysis/) — 12 batches |
-| What should the agent half look like? | [`../library/paperclip-hermes-study/findings/10-lessons-and-target-design.md`](../paperclip-hermes-study/findings/10-lessons-and-target-design.md) — the completed 11-batch study of Paperclip + Hermes, and the lessons for our own agent architecture |
+| What did the analysis find? | [`../analysis/`](../analysis/) — 12 batches |
+| What should the agent half look like? | [`../paperclip-hermes-study/findings/10-lessons-and-target-design.md`](../paperclip-hermes-study/findings/10-lessons-and-target-design.md) — the completed 11-batch study of Paperclip + Hermes, and the lessons for our own agent architecture |
 | What is actually deployed? | [`RUNBOOK-hosting-server-manual.md`](RUNBOOK-hosting-server-manual.md) — ⚠️ `workspace/references/deployment.md` is the **old Plesk** guide and is superseded |

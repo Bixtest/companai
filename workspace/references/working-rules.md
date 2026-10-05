@@ -1,6 +1,6 @@
 # Working Rules
 
-Adopted from [`skills-main`](../../skills-main) — the agent methodology Open
+Adopted from `skills-main` — the agent methodology Open
 Mercato was itself built with. Each rule below says what we took and why it
 applies to us.
 

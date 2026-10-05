@@ -9,7 +9,7 @@ remembers a task** (COOKBOOK rule zero-three).
 predates the whole analysis programme), and remarks buried in reports. **This file replaces
 those as the plan.** The others are kept for their reasoning and point here.
 
-**Last updated:** 2026-10-04.
+**Last updated:** 2026-10-05.
 
 | Tag | Meaning |
 |---|---|
@@ -24,6 +24,13 @@ those as the plan.** The others are kept for their reasoning and point here.
 
 **Order is my working order, top to bottom.** The reasoning is below.
 
+**Two tracks, one list.** `G-` and `S-` items are the **product half** — the plan in
+[`../analysis/findings/12-development-plan.md`](../analysis/findings/12-development-plan.md). `AH-`
+items are the **agent half** — how AI workers get roles, tasks, delegation, triggers and conversations.
+**The agent half is not a phase of its own**: it is woven into the four phases at the point its
+dependencies allow. All twelve items, and where every one of the study's 53 lessons lands, are in
+[`AGENT-HALF.md`](AGENT-HALF.md).
+
 ### Now — the workbench and the gate
 
 - [ ] **S0** ⏳ — **Stand up the local dockerised trio** (platform + Hermes + model server). **Built and proven 2026-10-04** — eight services healthy, all **21** platform tools discovered, five defects found and fixed (JOURNAL, part 6). What is left is a **re-run to confirm it still comes up**, and that needs the owner to start Docker Desktop first: the agent cannot (Docker Desktop's startup path runs `wsl.exe`, which this machine's security policy blocks — **B-04**). Plan: [`ARCHITECTURE.md`](ARCHITECTURE.md) §5. **Steps:** COOKBOOK, *Sprint 0*
@@ -34,6 +41,7 @@ those as the plan.** The others are kept for their reasoning and point here.
 ### Phase 1 — the spine
 
 - [ ] **G-01** — The Business Model Kernel (+ **G-08** relationship fabric) ⛔ *needs P0-spec*
+- [ ] **AH-1** — **The agent as a kernel object** — `kind` (*personal · role · context · independent · system*), `owner`, `actsAs`, `role`, runtime binding, autonomy gate ⛔ *needs G-01*. **The only agent-half item on the critical path** → [`AGENT-HALF.md`](AGENT-HALF.md) §1.4
 - [ ] **G-02** — Business IR + the compiler ⛔ *needs G-01*
 - [ ] **G-10** — Dependency tracking + change propagation ⛔ *needs G-01*
 
@@ -47,6 +55,9 @@ those as the plan.** The others are kept for their reasoning and point here.
 - [ ] **G-14** — Break-glass and separation of duties ⛔ *needs G-04*
 - [ ] **G-15** — PostgreSQL Row-Level Security *(parallel — depends on nothing)*
 - [ ] **S-02** — Wire the resolver as the **enforcement point** *(5 missing inputs + `policy_version`/`decision_id`)*
+- [ ] **AH-2** — **The responsibility rule** — autonomy per **action class** on the existing `A0`–`A5` gates, so one agent can be `A5` to *filter* and `A1` to *clean*. **The accountable party is always a person** ⛔ *needs G-04* → [`AGENT-HALF.md`](AGENT-HALF.md) §1.2
+- [ ] **AH-8** — **MCP governance** — binding precedence (narrowest-first), changed-tool quarantine, argument-bound approvals ⛔ *needs G-04*
+- [ ] **AH-11** — **ESTOP wired to our own pause** — one sentinel file, fails safe on corruption *(depends on nothing)*
 
 ### Phase 3 — the product surface
 
@@ -54,11 +65,19 @@ those as the plan.** The others are kept for their reasoning and point here.
 - [ ] **G-09** — The `@`/`#` reference and resolution layer ⛔ *needs G-01*
 - [ ] **G-03** — User Functions ⛔ *needs G-02*
 - [ ] **G-17** — Schema-constrained generation ⛔ *needs G-02*
+- [ ] **AH-5** — **The room** — a first-class shared space: its own id, participants, agenda, lifecycle, and a **speaker-labelled** log. **Neither Paperclip nor Hermes has this object** — it is our opening ⛔ *needs G-01* → [`AGENT-HALF.md`](AGENT-HALF.md) §3.3
+- [ ] **AH-6** — **Mentions / participants** — pull a specific agent into a thread **without** assigning it work, gated by the same permissions as assignment ⛔ *needs AH-5*
+- [ ] **AH-12** — **The warm-session acceptance test** — prove the *next turn* sees a write made while the runtime holds the session. **The sibling never wrote this test**; it is the acceptance test for AH-5 ⛔ *needs AH-5*
+- [ ] **AH-7** — **Hire / fire as a product operation**, not an ops script ⛔ *needs AH-1*
+- [ ] **AH-9** — **Skills** — description-indexed, loaded on demand, with a **derived** trust level ⛔ *needs AH-1*
 
 ### Phase 4 — the hygiene
 
 - [ ] **G-19** — A proprietary ERP benchmark ⛔ *needs G-01/G-02*
 - [ ] **G-20** — Freshness, lineage and continuous linting ⛔ *needs G-01*
+- [ ] **AH-3** — **The durable wake queue** — every trigger is a **database row**, not an in-memory timer, so a deploy does not lose queued work ⛔ *needs S-05*
+- [ ] **AH-4** — **Routines produce work items** — schedule → **task** → wake, so every scheduled run has a visible task, a thread and an origin ⛔ *needs AH-3*
+- [ ] **AH-10** — **System agents** — admin-created agents that replace or augment a system function (cron, backup, cleanup) ⛔ *needs G-12, G-18*
 
 ### The Starting Kit — what is left before that milestone closes
 
@@ -67,7 +86,6 @@ those as the plan.** The others are kept for their reasoning and point here.
 - [ ] **15b** — Budget as a ceiling, not just a meter
 - [ ] **21c** — A lock control on each record's own screen *(the largest — per-entity work)*
 - [ ] **24b** — A screen for the two per-tenant authority settings
-- [ ] **B** 🔒 — Drop `apps/docs`? *(my recommendation: drop it)*
 - [ ] **C** 🔒 — A lawyer on the privacy/terms before commercial use
 
 ### Waiting on the owner — I cannot close these
@@ -77,7 +95,7 @@ those as the plan.** The others are kept for their reasoning and point here.
 > numbered, with literal steps and a way to answer all of it at once. If the two disagree,
 > `NEEDS-YOU.md` is the one to read.
 
-**Decided 2026-10-04** — the owner answered the questions file, which is now **deleted**:
+**Decided — the owner answered the questions file, which is now deleted:**
 
 - ✅ **The object list** — start from the **union of 37 objects**, and let the Business Model Kernel specification prune it. *(This unblocks the specification. **Corrected 2026-10-04** — the union was mis-stated as 36 in this file and nine others; the vision's three lists are 30/33/34 and their union is 30 + 3 + 4 = **37**. The decision itself is unchanged.)*
 - ✅ **A1 — the agent runtime** — **Hermes**, and **OpenCode is removed** from the stack.
@@ -87,6 +105,16 @@ those as the plan.** The others are kept for their reasoning and point here.
 - ✅ **C-18 RLS** — confirmed: the app guard is authoritative; the database lock is a backstop **derived from the same policy**.
 - ✅ **C-8 model default** — confirmed: none until chosen (default-deny), with a reviewed exception path.
 - ✅ **B2 — the old roadmaps** — retired; this backlog is the plan.
+- ✅ **A-1 — the agent model** *(answered 2026-10-05)* — **not identity *or* context: five kinds**, plus an
+  **approval rule** that decides who is answerable. Personal assistant (one user) · role assistant (a
+  role) · context agent (shared, acts as a user) · independent agent (a worker in its own right) ·
+  system agent (admin-created; cron, backup, cleanup). **The rule:** for each action the agent either
+  acts automatically or needs the relevant user's approval — *and that choice is what identifies
+  responsibility*. The human verifies and approves; the agent is never the accountable party.
+  **Written up in [`AGENT-HALF.md`](AGENT-HALF.md)**, with every piece mapped to the phase it lands in.
+- ✅ **B — drop `apps/docs`** *(answered 2026-10-05)* — the kit's own documentation website (**471
+  files**) moved out of the codebase in commit `2c8fda5` (*"Move apps/docs out of the codebase"*);
+  `apps/` now holds only `apps/mercato`. Recoverable from the kit's upstream if ever wanted back.
 
 Full reasoning: [`ARCHITECTURE.md`](ARCHITECTURE.md) §6.
 
@@ -94,7 +122,6 @@ Full reasoning: [`ARCHITECTURE.md`](ARCHITECTURE.md) §6.
 
 - [ ] 🔒 **V-04** — adopt Hermes's ops console beside our own UI? *(decide after the Widget contract, G-07)*
 - [ ] 🔒 **The 7 `V`-HOLDs** — V-09 licensing · V-10 multi-agent boards · V-11 computer-use · V-12 locales · V-13 MCPs · S-04 skills *(each has a trigger in the deferred table below)*
-- [ ] **A-1 — are assistant agents *identity* or *context*?** Does an assistant **belong** to a named person (the agent is Alice's, and invisible to Bob), or does it **act as** that person for their work, staying a shared agent? **Paperclip chose context.** This is the **only** decision the completed agent study hands back, and it is needed before the agent half is designed. See §3.1 of [`../paperclip-hermes-study/findings/10-lessons-and-target-design.md`](../paperclip-hermes-study/findings/10-lessons-and-target-design.md)
 
 **Done means:** the gate is green and uncached, it is verified against the running instance
 where that is possible, and the documentation says what it does.
@@ -150,7 +177,7 @@ each is now here, where it will be seen.
 ## The record of what is done
 
 - The **Starting Kit** build — [`../workspace/references/completed-work.md`](../../workspace/references/completed-work.md)
-- The **analysis programme** (batches 0–12) — [`../library/analysis/LOG.md`](../analysis/LOG.md)
-  and [`../library/analysis/findings/`](../analysis/findings/)
+- The **analysis programme** (batches 0–12) — [`../analysis/LOG.md`](../analysis/LOG.md)
+  and [`../analysis/findings/`](../analysis/findings/)
 
 *If this file disagrees with the code, the code wins and this file is broken — fix it.*

@@ -6,9 +6,13 @@ It reads every findings file `00`–`09` and answers the third of the three ques
 itself: *what do we take, what do we reject, and how do we do it better on our own base?*
 
 **Governing rule, from [`../PLAN.md`](../PLAN.md): carry lessons, never decisions.** Almost everything
-below is a lesson. The handful of items that are genuinely the owner's to decide are marked
-**OPEN — needs you** and nothing else is. Where a lesson implies a change to our architecture, it is
-stated as a consequence, not as a plan.
+below is a lesson. The one item that was genuinely the owner's to decide (§3.1) was **answered on
+2026-10-05** — so **nothing in this file is now waiting on anyone.** Where a lesson implies a change to
+our architecture, it is stated as a consequence, not as a plan.
+
+**Where these lessons are carried forward.** Into
+[`../../development/AGENT-HALF.md`](../../development/AGENT-HALF.md), which maps every item below to the
+development phase where it lands. **This file is the evidence; that one is the plan.**
 
 **Status vocabulary used throughout.** Every point carries one, so nothing is left hanging:
 
@@ -93,11 +97,15 @@ synthesis** — it is what [`../PLAN.md`](../PLAN.md) §"Definition of done" req
 | **Paperclip** | **"Assistant" is a relationship to *work*, not ownership of an agent.** A person gets a persistent conversation per agent, and the agent stays company-owned. Its own doc is explicit: *"these are separate conversations, not private messages"* (`doc/plans/2026-09-10-agent-chat.md`). The agent is never *Alice's*; it acts for Alice on Alice's work. |
 | **Hermes** | No concept of an assistant at all. A "profile" is a runtime identity with its own home, memory, skills and credentials — not a person's property. |
 | **The integration** | Did not add ownership either. The sibling wired a per-person surface in the UI, but the underlying agent remained a shared runtime identity addressed by `HERMES_HOME` per turn (`aissistant-package/docker-compose.yml:348-389`). |
-| **Us** | We must decide **identity vs context** and say which we built. *Identity* = the agent belongs to Alice and is invisible to Bob. *Context* = the agent is shared but acts *as* Alice for Alice's work, as Paperclip does. |
+| **Us** | **Decided 2026-10-05 — neither of the two options I offered.** The owner gave **five kinds**: *personal assistant* (one user, invisible to others) · *role assistant* (a role; all its holders see it) · *context agent* (shared, acts as a user) · *independent agent* (a worker in its own right) · *system agent* (admin-created; cron, backup, cleanup). **Plus the part I had not asked for and which matters more: an approval rule.** For each action the agent either acts automatically or needs the relevant user's approval — *and that choice is what identifies who is responsible.* The human verifies and approves; the agent is never the accountable party. |
 
-**Status: OPEN — needs you.** This is one of the few genuine owner decisions, because it is a product
-promise, not a technical one. If we choose *identity*, we must add an owner column that Paperclip
-deliberately does not have — and we must add the visibility rule with it (see §4, L-08).
+**Status: ANSWERED 2026-10-05 — and my question was the wrong shape.** It forced a choice between two
+of the owner's five kinds and missed the accountability rule, which is the load-bearing half. Two of
+the five (independent, system) are not assistants at all. **The full model, and where each piece lands
+in the development plan, is [`../../development/AGENT-HALF.md`](../../development/AGENT-HALF.md).**
+The lesson for this file: *a question with two options can hide the real answer.* The owner also
+confirmed the answer reaches further than "which kind" — it settles the **agent model** and the
+**human-approval gate** among the vision's own 40 items (kernel spec §8, items 4 and 31).
 
 ### 2. Solo agents — "some will work on their own"
 
@@ -375,11 +383,12 @@ surface is a cautionary tale about building recovery subsystems before the load 
 
 ## 6. What is open, and what is not verified
 
-**Open — needs you (one item only).** Every other point in this file is a *lesson* — a problem, its
-evidence, and a consequence — not a decision waiting on you. This was checked section by section, and
-one exception survived: **§3.1**. (Two points that read like decisions are deliberately **not** yours:
-§3.6 and D-12, *which* frequency model to adopt — a design task with an obvious safe default — and
-§3.11, the model registry — the same.)
+**Open — needs you: nothing.** §3.1 was the one exception, and the owner answered it on 2026-10-05.
+Every point in this file is now a *lesson* — a problem, its evidence, and a consequence — and the
+whole register is carried forward into the development plan by
+[`../../development/AGENT-HALF.md`](../../development/AGENT-HALF.md). (Two points that read like
+decisions were deliberately **not** the owner's: §3.6 and D-12, *which* frequency model to adopt — a
+design task with an obvious safe default — and §3.11, the model registry — the same.)
 
 - **§3.1 — are assistant agents *identity* (the agent belongs to Alice) or *context* (the agent acts
   as Alice for Alice's work)?** Paperclip chose context. If we want identity we add an owner column

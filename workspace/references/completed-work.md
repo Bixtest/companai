@@ -903,7 +903,7 @@ a reading task, not a judgement one.
 
 Parked modules are deliberately not mapped: their commands never run, and the
 step is recorded in
-[parked-modules.md](references/parked-modules.md) so un-parking one does not
+[parked-modules.md](parked-modules.md) so un-parking one does not
 quietly restore an ungated write path. A guard test checks every declared
 capability is a real feature id — a typo would not throw, it would silently stop
 gating the command.
@@ -941,7 +941,7 @@ convention would be 153 guesses.
 scheduler that commits when nobody objects, `A4` needs a review record on an
 already-executed act, and the queue is an API with a deadline rather than the
 inbox planning 02 §7.2 describes. Both are now items 2 and 3.
-[knowledge/authority-decisions.md](knowledge/authority-decisions.md).
+[knowledge/authority-decisions.md](../knowledge/authority-decisions.md).
 
 **Closed 2026-08-10 (API keys and their creator):** a regular key's scope was
 resolved through its creator's user record on every request, so moving that
@@ -960,7 +960,7 @@ backstop. Fifteen tests.
 departed user's email and calendar channels. It read `payload.userId`; the
 platform emits `payload.id`. **It had never run once** — seven green tests, every
 one of them constructing a payload the platform does not produce.
-[upstream-issues.md → U8](references/upstream-issues.md).
+[upstream-issues.md → U8](upstream-issues.md).
 
 **Closed 2026-08-10 (U2):** a routine save on *Sidebar customization* could
 delete every role's sidebar configuration. A preset stored a copy of the settings
@@ -973,7 +973,7 @@ switches now arrive showing stored state, and — the part that actually closes 
 — **the server only lets a layout delete the presets it produced**. A role
 configured from another layout, or from before the column existed, is not this
 screen's to remove no matter what the client sends. Twelve tests.
-[upstream-issues.md → U2](references/upstream-issues.md).
+[upstream-issues.md → U2](upstream-issues.md).
 
 **Also closed on the way:** the `audit_logs` and `directory` migration snapshots
 had been stale since R3 and R6, so `yarn db:generate` emitted migrations trying
@@ -994,15 +994,15 @@ Shadow mode paid for itself twice more: it found that an API key acquired an
 approval obligation for *listing organizations*, which corrected the
 untrusted-machine rule from a flat ceiling into the per-effect-class vector
 planning 02 §5.1 always specified.
-[knowledge/authority-decisions.md](knowledge/authority-decisions.md).
+[knowledge/authority-decisions.md](../knowledge/authority-decisions.md).
 
 **Closed 2026-08-10 (U3, for real this time):** an API key created through the
 ordinary UI flow came out unscoped while its creator had an organization, and was
 rejected on every request — 401 always, from the default path, not a corner case.
 Creation now takes the creator's own organization and refuses an explicit
 mismatch with a message. Verified end to end; five tests. I had closed this twice
-before on bad evidence — see [L30 and L32](../LESSONS.md) and
-[upstream-issues.md → U3](references/upstream-issues.md).
+before on bad evidence — see [L30 and L32](../../LESSONS.md) and
+[upstream-issues.md → U3](upstream-issues.md).
 
 **Closed 2026-08-10 (authority graph bridge):** thirteen tests for
 `AuthorityGraphService` and the ancestor-index ordering contract it depends on.
@@ -1015,18 +1015,18 @@ constrains this'. Unmapped hops on the path are reported rather than absorbed.
 only one — using the actor's organization as a *stored value* — is the bug, and
 the rule is now written down where people will look for it. **U3 was not closed
 with it**: I claimed it was an instance of U4, and both the reproduction and the
-fix were wrong — see [upstream-issues.md → U4](references/upstream-issues.md) and
-[L30](../LESSONS.md).
+fix were wrong — see [upstream-issues.md → U4](upstream-issues.md) and
+[L30](../../LESSONS.md).
 
 **Closed 2026-08-10 (authority-graph UI):** organization edges are now editable
 by a person — a guarded, audited, optimistically-locked API and a settings page
 that says what each value means. R6's mechanism is no longer reachable only
-through SQL. [knowledge/org-authority-graph.md](knowledge/org-authority-graph.md).
+through SQL. [knowledge/org-authority-graph.md](../knowledge/org-authority-graph.md).
 
 **Closed 2026-08-10 (U7):** `action_logs.actor_kind` — the journal can finally
 tell a machine from a person, written from the same raw subject the ledger reads,
 with a dry-run-first backfill that recovers what is recoverable and leaves the
-rest null. [upstream-issues.md → U7](references/upstream-issues.md).
+rest null. [upstream-issues.md → U7](upstream-issues.md).
 
 **Closed 2026-08-09 (three small ones):** the audit journal now refuses to write
 an entry whose scope was silently discarded; shadow mode has a heartbeat, so an
@@ -1048,38 +1048,38 @@ would change, and what would start needing a person.
 **Closed 2026-08-09 (shadow mode):** the resolver now runs beside every
 permission check and records where it would differ, hooked at the single method
 all 102 call sites reach. 526 ns per call, measured. Nothing enforced yet.
-[knowledge/authority-decisions.md](knowledge/authority-decisions.md).
+[knowledge/authority-decisions.md](../knowledge/authority-decisions.md).
 
 **Closed 2026-08-09 (U5):** the gate's random failures — two were my own
-invocation error ([L25](../LESSONS.md)), one was a real defect (an I/O-bound
+invocation error ([L25](../../LESSONS.md)), one was a real defect (an I/O-bound
 suite on a 5s unit-test timeout), one has never been reproduced and the test now
 asserts its own precondition so the next occurrence explains itself. Three
 consecutive clean gate runs afterwards, 22/22 and 12,466 tests each.
-[upstream-issues.md → U5](references/upstream-issues.md).
+[upstream-issues.md → U5](upstream-issues.md).
 
 **Closed in R6 (2026-08-09):** typed organization edges — relationship types,
 inheritance modes, per-edge authority ceilings and capability allowlists, feeding
 the resolver as a ceiling. Seeded so nothing changed on landing.
-[knowledge/org-authority-graph.md](knowledge/org-authority-graph.md).
+[knowledge/org-authority-graph.md](../knowledge/org-authority-graph.md).
 
 **Closed in R5 (2026-08-09):** the resolver — authority as a decision with
 reasons (I6), with I4 and I8 enforced, preflight for plans, and a CLI that
 explains any act. Not yet wired into enforcement, deliberately.
-[knowledge/authority-decisions.md](knowledge/authority-decisions.md).
+[knowledge/authority-decisions.md](../knowledge/authority-decisions.md).
 
 **Closed in R4 + R4b (2026-08-09):** capability descriptors — effect classes
 E0–E6, reversibility, the autonomy floor matrix, a registry, and a guard that
 now demands 100% coverage and validates the descriptors as they ship.
-[knowledge/capabilities.md](knowledge/capabilities.md).
+[knowledge/capabilities.md](../knowledge/capabilities.md).
 
 **Closed in R3 (2026-08-09):** the hash-chained ledger — every audited write
 extends a per-tenant chain, append-only enforced by a database trigger,
 verifiable with `mercato audit_logs ledger:verify`.
-[knowledge/ledger.md](knowledge/ledger.md).
+[knowledge/ledger.md](../knowledge/ledger.md).
 
 **Closed in R2c (2026-08-09):** auditing `inbox_ops` — 14 write points, the
 decision recorded in the same transaction as the status change it describes.
-[audit-triage.md](references/audit-triage.md).
+[audit-triage.md](audit-triage.md).
 
 **Closed and not to be re-raised:** **R2 in full** — audit coverage across all
 four custom-route modules, both write paths failing closed, and a build-time
@@ -1146,7 +1146,7 @@ diagnostic works before believing the silence.)
 
 **Batches 2 and 7 (R1 and R5) are the spike.** Three weeks, timeboxed. If they
 sprawl, the foundation is not reshapeable and
-[`08 §9a`](../compai/planning/08-host-selection-and-migration-plan.md) applies —
+[`08 §9a`](../../compai/planning/08-host-selection-and-migration-plan.md) applies —
 we would have learned it in three weeks rather than a year.
 
 ## Batch 3 — T, the test debt, and why the count grew
@@ -1200,7 +1200,7 @@ foundation.
 
 **Cost, measured:** 3,472 tests across 520 suites — 42% of core's suite. **PARK
 now means frozen, not maintained.** See
-[`references/parked-modules.md`](references/parked-modules.md) for what that
+[`references/parked-modules.md`](parked-modules.md) for what that
 implies at restore time.
 
 ### And a licence gap the new test caught immediately
@@ -1227,7 +1227,7 @@ The first fully green gate in this project.
 ## Scheduled — inherited defects awaiting a decision
 
 Tracked so they cannot be lost. Full detail:
-[`references/upstream-issues.md`](references/upstream-issues.md).
+[`references/upstream-issues.md`](upstream-issues.md).
 
 | | Defect | Severity | Blocked on |
 |---|---|---|---|

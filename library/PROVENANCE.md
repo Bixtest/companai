@@ -152,3 +152,27 @@ Both guards were tested, not just written:
 | `ai/` and `analysis/` survive a rebuild | `--check` against the real library | The 16 shelves are listed as *would delete*; `ai/` and `analysis/` as *preserving*. `ai/` still held its 17,570 files afterwards |
 | A missing source stops the run | A copy of the script pointed at a scratch folder with a dummy shelf and one deliberately bogus source path | Refused with exit 2, listed the missing path, left the dummy shelf untouched, created nothing |
 
+---
+
+## 7. Dead links inside the copied shelves are expected — ours are not
+
+The shelves are **byte-for-byte copies**, and their internal links were written for the
+**original** repository layout — a sibling repo's `../ops/`, `../docker-compose.yml`,
+`../COOKBOOK.md`. Those paths do not exist here, so a link inside a copied shelf is
+usually dead. **That is a property of the copy, not a defect in the library**, and it is
+why the copies are not edited to "fix" it.
+
+**Measured 2026-10-05**, and kept separate on purpose:
+
+| Where | Internal links checked | Broken |
+|---|---:|---:|
+| **Our own hand-written documents** — `library/development/`, `library/analysis/`, `library/paperclip-hermes-study/`, `workspace/`, `compai/`, and the root `*.md` | 792 | **0** |
+| The 16 copied shelves, `library/01-`…`library/16-` | 907 | **347** — all pointing at the original repo layout |
+
+**The rule that follows:** a dead link in a **numbered shelf** is expected; a dead link in
+one of **our own** documents is a defect — report it, and fix it in the same change that
+finds it. *(`workspace/references/completed-work.md`, `workspace/references/working-rules.md`
+and one RUNBOOK had 24 such links written as if the file sat a directory higher; all 24 were
+repaired on 2026-10-05.)*
+
+

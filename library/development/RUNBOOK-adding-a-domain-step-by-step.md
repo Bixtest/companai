@@ -638,7 +638,7 @@ ignored and **none** tracked. If either disk died the deployment logic was gone:
 *what* the scripts do, not the code itself.
 
 **Fixed** — they are now tracked in
-[`workspace/scripts/vm-platform/`](../../../workspace/scripts/vm-platform/README.md), with a README
+[`workspace/scripts/vm-platform/`](../../workspace/scripts/vm-platform/README.md), with a README
 explaining each one. **No secrets are in that folder**, checked rather than assumed:
 
 - the VM's login password: **absent**

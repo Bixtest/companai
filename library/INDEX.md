@@ -143,6 +143,7 @@ project.**
 |---|---|
 | [`development/README.md`](development/README.md) | **The front door.** The reading order, what to study first by role, the handover sequence, and the sprint process |
 | [`development/BACKLOG.md`](development/BACKLOG.md) | **The one roadmap.** Everything left, in order, one line each — unifying the Starting Kit work and the product phases. Plus the "do not lose this" list and the deferrals |
+| [`development/AGENT-HALF.md`](development/AGENT-HALF.md) | **The agent half** — the five kinds of agent, the responsibility rule, and where every one of the study's 53 lessons lands in the phases |
 | [`development/ARCHITECTURE.md`](development/ARCHITECTURE.md) | How the Starting Kit, Hermes and the model server run together, and the dockerisation decision |
 | [`development/BLOCKERS.md`](development/BLOCKERS.md) | Anything stopping progress, with what clears it |
 
