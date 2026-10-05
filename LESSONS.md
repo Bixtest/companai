@@ -2182,3 +2182,84 @@ not a check: a wrong split hides behind a correct total just as easily as a wron
 correct components. Both halves of a figure need deriving, and the half nobody re-derives is the one
 that is wrong. This is also why the critic pass that caught it is written into the document itself
 rather than mentioned in a message.
+
+---
+
+## L67 — catching an error does not un-abort a database transaction
+
+**What happened.** `mercato init` died with `current transaction is aborted, commands ignored until
+end of transaction block`. The statement that actually failed was nowhere in the app log, because the
+code that runs it wraps it in `try { ... } catch {}`. The Postgres server had it: a scope lookup
+`select "organization_id", "tenant_id" from "feature_toggles" where "id" = $1` against a **global**
+table that has neither column.
+
+**Why it happens.** In Postgres a failed statement puts the whole transaction into the aborted state,
+and every later statement in that transaction is then rejected whatever it is. A `catch {}` is a
+JavaScript construct; it has no power over the server's transaction state. So the pattern *"fire a
+speculative query, swallow the failure, carry on"* is safe only when the query is **not** inside a
+transaction — and a query inside a command handler almost always is.
+
+**The rule.** *When a caught error and a later, unrelated-looking error share a connection, the first
+is the cause and the second is the symptom.* To diagnose: read the failing statement from the
+**database**, not from the app — `log_min_error_statement` is already `error` by default, so the
+server logs it; grep the server log for `STATEMENT:`, which the app log will never contain. To
+prevent: do not run a query that can fail inside a transaction without knowing it can succeed — here,
+ask the schema which columns exist (the codebase's own `columnExists` does exactly that) instead of
+selecting them blind.
+
+**Proven, not guessed:** both errors were logged on the **same backend PID**, so it was demonstrably
+one connection and one transaction.
+
+**The general form:** a swallowed exception is not a neutral act — it hides the first link of a causal
+chain, and every later failure in that chain then reads as a separate bug.
+
+---
+
+## L68 — a fix that is not built into the artefact you are running is not a fix
+
+**What happened.** B-15 half 1 was diagnosed and fixed in source on 2026-10-04 16:51, and the fix was
+verified with two test suites. On 2026-10-05 the reset still produced a half-seeded database with an
+"already seeded" marker — because the running image had been built at **03:08 the same day**, ~11.7
+hours *before* the fix, and was still executing the old script. Diffing the script out of the
+container against the repo copy is what showed it.
+
+**Why it happens.** The repo is the thing being edited; the container is the thing being run. Every
+tool that reports — tests, lint, a diff, a commit — reports on the edited thing. Nothing in the normal
+workflow reports on the run thing, so "fixed and tested" and "fixed and running" drift apart silently,
+and the drift is invisible exactly when the fix matters most.
+
+**The rule.** *Before concluding a fix is in effect, read the artefact that is actually running.*
+Concretely: `docker inspect <image> --format '{{.Created}}'` against the commit dates of the fixes;
+and when the running code is what matters, diff the file **out of the container** against the repo
+copy. A build that has not been run is a hypothesis.
+
+**The general form:** [[L61]] says read the source, not the repeated number. This is its counterpart
+for anything deployed — read the artefact, not the repository.
+
+---
+
+## L69 — fixing one copy of a duplicated pattern is not fixing the pattern
+
+**What happened.** The B-18 bug was a blind scope lookup — `select "organization_id", "tenant_id"
+from "<table>"` against a global table that has neither column. It was found in
+`query_index/di.ts`, fixed there, rebuilt, and **verified present in the running container**. The
+reset then failed in exactly the same way: same statement, same abort, same place in the log.
+
+That identical failure is what exposed the real shape of the problem: the lookup had been
+copy-pasted into **five** places across two packages, and the copies carried comments pointing at
+each other (*"same pattern as vector_upsert.ts"*). The three in the search subscribers were the ones
+actually firing, because they register at startup.
+
+**Why it happens.** A fix is naturally scoped to the file you were reading. Verifying the fix
+*reached the artefact* feels like the end of the job — and it is, for that file. Nothing in the
+process asks "where else is this written?", so a pattern that exists N times gets fixed once, and the
+one remaining copy produces a failure indistinguishable from "the fix did not work".
+
+**The rule.** *Before fixing a defect, search for the shape of the defect, not the site of the
+symptom* — grep the distinctive line, count the copies, and fix them at one shared place if you can.
+And: **a fix that is confirmed deployed and still fails identically is evidence that you fixed the
+wrong copy.** That is a signal to widen the search, not to doubt the fix.
+
+**The general form:** the identical-failure-after-a-verified-fix is a *measurement*, and it points at
+duplication. [[L62]] says a failing probe proves nothing until you know the probe works; this is its
+counterpart — a fix that provably deployed and changed nothing tells you where to look next.

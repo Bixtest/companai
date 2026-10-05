@@ -7,12 +7,18 @@ wondering why something is not moving.**
 **The rule:** a blocker is reported the same way a question is — in plain English, with **what
 clears it** and **whose move it is**. If the move is the owner's, it says so.
 
-**Checked:** 2026-10-04, 20:45. **Every blocker is re-checked each session** — a blocker is a
+**Checked:** 2026-10-05, 04:05. **Every blocker is re-checked each session** — a blocker is a
 claim about now, not about last time.
 
-**Open right now: 4** — B-05 (OpenCode is load-bearing), B-15 half 2 (why the seeding transaction
-aborts), B-16 (no embeddings endpoint), B-17 (no audit trail of agent tool calls). **None of them
-stops Sprint 0**, and none stops the owner doing anything.
+**Open right now: 4** — B-05 (OpenCode is load-bearing), B-16 (no embeddings endpoint), B-17 (no audit
+trail of agent tool calls), **B-18 (the app image cannot be rebuilt, so no source fix written after
+2026-10-04 03:08 has ever actually run)**. **B-18 is the one that bites:** it is why the 2026-10-05
+database reset produced a half-seeded database that reported itself healthy. The other three stop
+nothing.
+
+**Resolved 2026-10-05 — B-15 is now fully closed, both halves.** Half 2 was never a seeding bug. The
+failing statement was read straight off the Postgres server and traced to a scope lookup in
+`packages/core/src/modules/query_index/di.ts`; see *The real cause of the abort* under **B-15**.
 
 **Cleared since the last check:** **B-04** — the owner started Docker Desktop and the whole stack
 was verified running the same evening: 8 services, 7 healthy, 21 AI tools discovered, the app serving
@@ -77,16 +83,22 @@ aliases for the LLM provider (see `model-factory.ts`), and *can* be dropped inde
 ❌ Initialization failed: current transaction is aborted, commands ignored until end of transaction block
 ```
 
-**Two halves, and they have different owners.**
+**Two halves.**
 
-**Half 1 — the failure was being reported as success. FIXED 2026-10-04.** It is no longer possible
-to get a half-seeded database with a marker claiming it is fine. See the corrected diagnosis below.
+**Half 1 — the failure was being reported as success. FIXED in the source 2026-10-04 — but that fix
+was never in the image that was running.** On 2026-10-05 the running `open-mercato/app:local` image
+was measured to have been built **2026-10-04T03:08Z**, i.e. **before** the fix landed (commit
+`1eddf11`, 2026-10-04 14:51Z). The container was therefore still executing the buggy script, which is
+exactly why the 2026-10-05 database reset wrote the "already seeded" marker again while the init was
+failing. Measured by diffing the script inside the container against the repo copy: the container's
+`run_command_with_cli_recovery` still had `STATUS=$?` read after `fi`. **A source fix that is not
+built is not a fix** — see the new blocker **B-18**.
 
-**Half 2 — *why* the feature-toggle seeding transaction aborts. STILL OPEN.** The underlying SQL
-error is not in the app log; it has to be reproduced with the transaction error surfaced, and that
-needs the Docker engine (**B-04**). This half does not block the trio.
+**Half 2 — *why* the feature-toggle seeding transaction aborts. SOLVED 2026-10-05.** The underlying
+SQL error was never in the app log because the code catches it and says nothing; it was read straight
+off the Postgres server instead. It was never a seeding bug. See *The real cause of the abort* below.
 
-**Whose move.** Mine, when the engine is up.
+**Whose move.** Nobody's — both halves are now understood and the fixes are written.
 
 ---
 
@@ -169,6 +181,122 @@ failure**" as failure. With the exit status now correct, matching on printed tex
 worse, the string `❌ Initialization failed:` also wraps the *"database already has users"* message,
 which must be treated as **success**. A text match would have broken that recovery path. So the fix
 is the status capture only, and the tests pin the already-seeded path as a success.
+
+---
+
+#### The real cause of the abort — found 2026-10-05, read off the database itself
+
+The app log never contained the failing SQL, because the code that runs it catches the error and says
+nothing. The Postgres server was asked instead (`log_min_error_statement` is already `error`), and it
+had the statement:
+
+```
+ERROR:     column "organization_id" does not exist at character 8
+STATEMENT: select "organization_id", "tenant_id" from "feature_toggles" where "id" = $1
+```
+
+One statement explains the whole failure.
+
+**What is asking.** `packages/core/src/modules/query_index/di.ts`, in the CRUD→query-index
+subscribers. When the event payload carries no org/tenant, the handler looks them up from the entity's
+own table:
+
+```ts
+const row = await db
+  .selectFrom(table as any)
+  .select(['organization_id' as any, 'tenant_id' as any])
+  .where('id' as any, '=', id)
+  .executeTakeFirst()
+```
+
+**Why it fails here.** `feature_toggles` is a **global** table — deliberately. Its migration creates it
+with no `organization_id` and no `tenant_id` (`Migration20251229215803.ts`) and no later migration adds
+them; `featureToggleIdentifiers()` in the module returns `organizationId: null, tenantId: null` on
+purpose. So the lookup asks a global table for scope columns it was never meant to have.
+
+**Why that kills the command.** The lookup runs on the **same connection as the command's open
+transaction** — measured, not assumed: both errors were logged on the *same backend PID* (`[29178]` in
+one run, `[29381]` in the other). A failed statement aborts a Postgres transaction; the `catch {}`
+swallows the *error* but cannot un-abort the *transaction*. The command then writes its audit row, and
+that write is the next statement in the poisoned transaction:
+
+```
+ERROR:     current transaction is aborted, commands ignored until end of transaction block
+STATEMENT: insert into "action_logs" (...) values (...)
+```
+
+**Why it looks intermittent — the first create always escapes.** Three runs were measured and the
+result was identical each time: the **first** toggle created in a fresh process succeeds, the
+**second** fails. The subscribers are registered asynchronously — the DI waits for the event bus, then
+for a `custom_field_defs` query, before subscribing — so the first command finishes before they are
+attached. Evidence, not theory: `action_logs` holds exactly **3** rows, for `feature_toggles_ui`,
+`sales_channels_enabled` and `support_contact_settings` (the first create of each of the three runs),
+while `feature_toggles` holds **5**. *(The race is the explanation that fits all three runs; the exact
+interleaving was not instrumented.)*
+
+**The fix, 2026-10-05 — and how the first attempt was caught being incomplete.** The lookup had been
+**copy-pasted into five places**, and the copies even carried comments pointing at each other
+(*"same pattern as vector_upsert.ts"*):
+
+| Where | Copies |
+|---|---|
+| `packages/core/src/modules/query_index/di.ts` | 2 (CRUD upsert, CRUD delete) |
+| `packages/search/src/modules/search/subscribers/fulltext_upsert.ts` | 1 |
+| `packages/search/src/modules/search/subscribers/vector_upsert.ts` | 1 |
+| `packages/search/src/modules/search/subscribers/vector_delete.ts` | 1 |
+
+The **first** fix touched only the two in `query_index/di.ts`. It was rebuilt, re-verified as present
+in the running container, and the reset **failed identically** — same statement, same abort. That is
+how the other three were found: by trusting the result rather than the fix. The search subscribers are
+registered at startup, so they were the ones actually firing.
+
+The fix is now one exported `resolveRecordScope` in `packages/shared/src/lib/query/engine.ts` — it
+asks the schema which scope columns exist (mirroring `BasicQueryEngine.columnExists`) and returns
+nulls for a global table **without issuing a select at all**. All five call sites use it, so the
+pattern cannot be reintroduced by copying a neighbour.
+
+**Proven, not asserted:** a new test at
+`packages/shared/src/lib/query/__tests__/resolve-record-scope.test.ts` was **mutation-proven** — run
+against the old blind select it reports **2 failed, 3 passed**, and against the fix **5 passed, 0
+failed**. The failing case asserts that *no* select is issued against a global table, which is exactly
+the call the old code made. The existing `query_index` DI test was repaired to mock the resolver
+rather than the removed helper, and still passes (its subject is the DI bridge, not the lookup).
+
+**This is not a seeding-only bug.** Any CRUD command on a **global** table that emits CRUD side effects
+— creating a feature toggle from the admin UI, for instance — reaches the same poisoned transaction.
+The seed is just where it was noticed.
+
+---
+
+### 🔴 B-18 — the app image cannot be built, so no fix written after 2026-10-04 03:08 has ever run
+
+**What.** The running `open-mercato/app:local` image was built **2026-10-04T03:08Z**. Three commits
+landed after that — `0e5acf9`, `1eddf11` (the B-15 half-1 fix) and `cbceb78` — and none of them is in
+the image. **A source fix that is not built is not a fix**: this is why the 2026-10-05 reset wrote the
+"already seeded" marker again.
+
+**Two separate things stop a rebuild, and both come from the approved removal of `apps/docs`.**
+
+1. **Fixed 2026-10-05.** `Dockerfile` copied `apps/docs/package.json` at two places (lines 17 and 87).
+   `apps/docs` is gone, so `COPY` fails before the build gets anywhere. Both lines removed.
+2. **Measured 2026-10-05, and this is the one that bites.** `yarn.lock` still carries
+   `"open-mercato-docs@workspace:apps/docs"`, so `yarn install --immutable` refuses:
+
+   ```
+   YN0028: The lockfile would have been modified by this install, which is explicitly forbidden.
+   ERROR: process "/bin/sh -c yarn install --immutable" did not complete successfully: exit code: 1
+   ```
+
+   The build dies at `builder 31/38`, about 20 seconds in. Fixing this means regenerating `yarn.lock`
+   with the docs workspace gone — which needs Yarn 4.17.1, which this host does not have (**N-11**).
+
+**Also affected, not yet touched:** `.github/workflows/ci.yml:832` still builds `apps/docs/Dockerfile`
+in CI, so that job will fail there too.
+
+**Why it blocks.** Nothing can be rebuilt, so nothing fixed in source reaches the running stack — and
+the fresh-install path cannot be re-walked.
+
+**Whose move.** Mine.
 
 ---
 
