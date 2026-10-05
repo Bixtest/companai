@@ -317,7 +317,20 @@ a folder, finishes a phase, or makes a decision updates it in the same change.
 A newcomer who cannot orient themselves from this page alone means it is broken —
 fix the page, not the newcomer.
 
-*Last updated: 2026-10-05 — **the handover is rewritten for an agent taking over, and there is now a
+*Last updated: 2026-10-05 — **the Business Model Kernel specification is finished, and it passes the
+vision's own gate.** [`library/development/SPEC-business-model-kernel.md`](library/development/SPEC-business-model-kernel.md)
+is now **Draft 2**: it closes all 18 items Draft 1 left partly or wholly open and adds five normative
+sections (§12–§16: ID grammar, tool policy, approval token, outbox, capability manifest). Parsed from
+the 40 rows of the vision's Appendix-D test: **35 settled · 1 derived · 3 deferred with named triggers ·
+1 open — the owner's Hermes boundary**. The gate is passed; **only the owner's ratification remains**
+([`NEEDS-YOU.md`](library/development/NEEDS-YOU.md) item 4). The first build item is now **`G-01` — the
+Business Model Kernel itself**. Docs updated in the same change: `BACKLOG.md`, `HANDOVER.md` (rev 3),
+`NEEDS-YOU.md`, `START-PROMPT.md`, `workspace/COOKBOOK.md` (Sprint P0-spec), `AGENT-HALF.md`, and
+`library/INDEX.md`. Two **code gaps** found while writing it are logged for later: `PrincipalKind` has
+4 values against the vision's 5, and the audit ledger carries no `policy_version`/`decision_id`
+(assigned to **G-16**).*
+
+*Earlier, 2026-10-05 — **the handover is rewritten for an agent taking over, and there is now a
 start prompt.** [`library/development/HANDOVER.md`](library/development/HANDOVER.md) gained **§0** (the
 agent's first moves, and what it may not do), **§6c** (where the project's memory lives — the curated
 project memory, the daily session logs, and **50 reusable techniques** in `~/.workbuddy-ai/skills/`),
