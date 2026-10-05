@@ -2326,3 +2326,32 @@ needs no dependencies, call the underlying command directly instead of the alias
 and say so in a comment: the alias is more maintainable, the direct call is far cheaper. You cannot have
 both, and this was found by measuring rather than by assuming — the assumption was that `yarn run` is
 dependency-free.
+
+## L72 — before adding a gate, find the gate that already exists
+
+**What happened.** The two copies of `init-or-migrate.sh` needed a parity guard ([[L70]]). The obvious
+move was to invent one — a new CI step, or a bespoke shell test beside the other docker-script tests.
+Neither was needed. `ci.yml` already had a step called **"Check create-app template parity (always,
+unfiltered)"** running `yarn workspace create-mercato-app test`, and
+`packages/create-app/src/lib/` already held a whole family of `template-*.test.ts` parity guards — one
+of which asserts byte-identity between a template file and its monorepo source, in exactly the shape
+required.
+
+It surfaced only because a grep for the *concept* ("template-sync") hit the file — after two earlier
+greps for the *names I expected* (`"template:sync"`, `"scripts/__tests__"`, `"node --test"`) had missed
+it and left me believing no such gate existed. The near-miss was a duplicated CI gate that would have
+looked perfectly reasonable and run forever.
+
+**Why it happens.** You decide what the guard should be *before* looking for whether it exists, then
+search for the thing you decided on. Searches are built from your own vocabulary, so they tend to
+confirm the plan instead of testing it. The existing mechanism is usually named after the **concept** it
+serves, not after the words you would have chosen.
+
+**The rule.** *Before building a gate, enumerate the gates that already run.* Read the CI workflow's
+step **names** end to end, and list the test files in the directory where a guard of that kind would
+live. Only then decide whether to add one. A step literally named "…parity (always, unfiltered)" is not
+something to rediscover — it is something to extend.
+
+**The general form:** the same discipline as [[L51]] — *"nothing enforces this"* is a claim about the
+repo and needs the same evidence as any other. The honest finding here was narrower and more useful
+than the first guess: nothing enforced **this file**, while the mechanism to enforce it already existed.

@@ -365,8 +365,10 @@ ones) somewhere queryable. A product decision first — tracked as a backlog ite
   these four**, and since 2026-10-05 a `docker-scripts` job in `.github/workflows/ci.yml` runs them on
   every push and PR — the job installs nothing, because they need no Docker, no database and no
   `node_modules`. **Note the four, not two:** `init-or-migrate.sh` exists in two copies
-  (`docker/scripts/` and `packages/create-app/template/docker/scripts/`) and *both* are tested, because
-  nothing in the repo keeps the two copies in step — see **N-14**.
+  (`docker/scripts/` and `packages/create-app/template/docker/scripts/`) and *both* are tested. Those
+  runs catch **behaviour** drift only; byte-parity between the two copies is asserted separately, by
+  `packages/create-app/src/lib/template-docker-scripts.test.ts`, which the existing unfiltered
+  *Check create-app template parity* CI step already runs — see **N-14**.
 
 ---
 
