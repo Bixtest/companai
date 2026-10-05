@@ -77,9 +77,12 @@ of the Business Model Kernel specification (`library/development/SPEC-business-m
 written 2026-10-05 and passes the vision's own 40-item gate (only ratification remains). **`G-01` — the
 Business Model Kernel (+ `G-08`, the relationship fabric) — is now built** (2026-10-05, code repo
 `ee406e8`): the canonical model is a view over the platform's own declarations, and the plan's test (the
-export/reimport round-trip is empty) passes. **The next build item is `G-02` — the Business IR + the
-compiler** — which `G-01` unblocks, along with `AH-1`, `G-04`, `G-05`, `G-07`, `G-09`, `G-10`, `G-20`
-and `AH-5`.
+export/reimport round-trip is empty) passes. **`G-02` — the Business IR and the compiler — is now built**
+(2026-10-05): §51's ten stages run as named steps, a `list` read compiles to the `QueryOptions` the engine
+already runs, and the plan's test — **the rename test** — passes both directions (the old IR against a
+renamed model **fails**; the rename-aware entry says **requires recompilation**). **The next build item is
+`G-03` — User Functions** — *a User Function **is** compiled IR made durable* (RQ-24), so `G-02` is exactly
+what unblocks it. `G-02` also unblocked `G-17` and `G-19`.
 
 Work it in the project's four-step sprint process — **no code before step 3**. Steps 1–3 are
 documents and measurement; only step 4 writes code:

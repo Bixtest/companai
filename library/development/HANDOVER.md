@@ -143,9 +143,17 @@ DEFERRED-with-trigger · 1 OPEN — owner**, tallied by parsing the 40 rows. **W
 **`G-01` (the Business Model Kernel + `G-08`) is now built** — **2026-10-05**, committed in the code repo
 as `ee406e8`. The canonical model is a **view** over the declarations the platform already keeps, so
 there is one source of truth; the plan's test (**the export/reimport round-trip is empty**) passes, with
-a non-empty-export guard so the empty diff is not vacuous. **The next build item is `G-02` (the Business
-IR + compiler)**, which `G-01` unblocks — along with `AH-1`, `G-04`, `G-05`, `G-07`, `G-09`, `G-10`,
-`G-20` and `AH-5`. **Verify an item's status is still true before starting it** — the roadmap has been
+a non-empty-export guard so the empty diff is not vacuous.
+
+**`G-02` (the Business IR + the compiler) is now built** — **2026-10-05**. The typed **read** and
+**write** shapes the AI produces instead of SQL (spec §6), and the compiler that turns a read into the
+physical query the platform already runs — **§51's ten stages, named one-for-one**. **The plan's test —
+the rename test — passes both directions and at two levels:** the old IR compiled against a renamed
+model **fails** (never a silent compile), and the rename-aware entry says **requires recompilation** and
+names the destination, using **G-01's own** rename planner. **The IR has no scope field**, so it cannot
+widen its own reach. **The next build item is `G-03` (User Functions)** — *a User Function **is** compiled
+IR made durable* (RQ-24), so `G-02` is exactly what unblocks it. `G-02` also unblocked `G-17` and `G-19`.
+**Verify an item's status is still true before starting it** — the roadmap has been
 wrong about what is already done **four times**.
 
 ### What to study first, by role
@@ -514,8 +522,9 @@ and was *not* re-measured — treat it as a starting point, not a fact.**
 ## 8. What is left, and whose move it is
 
 - **What is left, in order** → [`BACKLOG.md`](BACKLOG.md). One roadmap. Read §"The list" and
-  nothing else for *"what is left"*. **`P0-spec` is done (draft 2, 2026-10-05) and `G-01` is built
-  (2026-10-05, code repo `ee406e8`); the next build item is `G-02` (the Business IR + compiler).**
+  nothing else for *"what is left"*. **`P0-spec` is done (draft 2, 2026-10-05), `G-01` is built
+  (2026-10-05, code repo `ee406e8`) and `G-02` is built (2026-10-05); the next build item is `G-03`
+  (User Functions).**
 - **What needs the owner** → [`NEEDS-YOU.md`](NEEDS-YOU.md) — a numbered action list. **Three
   items open**, and none blocks the build. The most urgent is changing the Coolify admin password
   (item 5); it is the only thing standing between an agent and the 2FA wall on the hosting panel.
@@ -548,7 +557,15 @@ alone means this page is broken — **fix the page, not the newcomer.**
 from an older document are not equally current, and mixing them in one table is how this page
 goes wrong. If two older documents disagree on a number, say so — never average them.
 
-*Last updated: 2026-10-05, revision 4 — **`G-01` is built: the Business Model Kernel exists in the
+*Last updated: 2026-10-05, revision 5 — **`G-02` is built: the Business IR and the compiler exist, and
+the next build item is `G-03` (User Functions).** §2 step 7, §7's spec row and §8 were updated in the
+same change as the code (COOKBOOK rule zero). The compiler runs §51's ten stages as named steps, compiles
+a `list` read into the `QueryOptions` the engine already runs, and the plan's test — **the rename test —
+passes both directions**: the old IR against a renamed model **fails**, and the rename-aware entry says
+**requires recompilation** and names the destination. The IR has **no scope field**, so it cannot widen
+its own reach.*
+
+*Earlier, 2026-10-05, revision 4 — **`G-01` is built: the Business Model Kernel exists in the
 code repo (`ee406e8`), and the next build item is `G-02`.** §2 step 7, §7's spec row and §8 were
 updated in the same change as the code (COOKBOOK rule zero). The kernel is a view over the platform's
 own declarations, its round-trip test passes, and a drift guard proves the kernel's view equals the

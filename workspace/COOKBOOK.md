@@ -1538,6 +1538,266 @@ layer (G-04). Its output is the **canonical model and its proof** — the thing 
 
 ---
 
+# Sprint G-02 — the Business IR and the compiler
+
+**Written 2026-10-05. Second item of the four-item critical path (`G-01 → G-02 → G-03`).**
+
+**Why it is now safe to start:** `G-01` is built and measured — the canonical model, its §12.1
+stable-ID grammar, its round-trip and its drift guard all pass (Sprint G-01, Step 4). Item: `G-02` in
+[`../library/development/BACKLOG.md`](../library/development/BACKLOG.md).
+
+**What it is** (plan §2 phase 1, verbatim): *the **IR** exists and the compiler turns IR into schema;
+SQL is a target, never the source.*
+**Done when:** the IR exists and the compiler turns IR into schema; **SQL is a target, never the source.**
+**Test** (plan §2 phase 1, verbatim): **the rename test (batch 9 §6 #1)** — *rename a field; the IR
+either recompiles cleanly or says "requires recompilation". If it silently produces wrong SQL, the IR
+is not real.*
+
+## Step 1 — Research: what already exists
+
+**Measured 2026-10-05 by reading the real code — not from a report about it** (rule zero-nine). The
+point of this step is the same as G-01's: most of the plumbing is built, and G-02's job is to put a
+*typed request shape* in front of it rather than to rebuild it.
+
+| Layer | File (all under `workspace/starting-kit/`) | What it already gives us |
+|---|---|---|
+| **The IR itself** | — | **Nothing.** `BusinessQueryIR` / `BusinessCommandIR` / `TaskContract` / `ResultContract` are *named* in the spec §6 with the source "Doc 3 §50/§53" — **specified, not built.** A search over `packages/` for all four → **0 files.** |
+| Read compile target | `packages/shared/src/lib/query/types.ts` (181 lines) | `QueryOptions` — `fields`, `filters` (`Filter[]` **or** a Mongo-style `Where`), `sort`, `page`, `tenantId`, `organizationId`, `joins`, `customFieldSources`. **Row-oriented: there is no `groupBy` and no aggregate.** This is what a `list` IR must compile *to*. |
+| Read engine | `packages/shared/src/lib/query/engine.ts` (1,515 lines) | `BasicQueryEngine.query(entity, opts)`. `resolveEntityTableName(em, entity)`; its fail-closed sibling `resolveRegisteredEntityTableName` returns **`null` rather than guessing** a table — the posture the compiler copies. |
+| Join / path layer | `packages/shared/src/lib/query/join-utils.ts` (373 lines) | `resolveJoins`, `buildJoinChain` (**detects a circular join**), `partitionFilters`, `applyJoinFilters`, `normalizeFilters` (DNF expansion with a **complexity cap**). The physical join the IR must compile to. |
+| Write compile target | `packages/shared/src/lib/crud/mutation-guard.ts` | `CrudMutationGuardValidateInput` — `operation: 'create'\|'update'\|'delete'\|'custom'`, `resourceKind`, `resourceId`, `mutationPayload`. `factory.ts` (3,036 lines) is the CRUD engine behind it. |
+| **The AI's write path today** | `packages/ai-assistant/.../prepare-mutation.ts` (460 lines) | **The vision's §53 Command IR is already ~80% present.** `AiPendingAction` carries a **`computeMutationIdempotencyKey`** (SHA-256 over tenant/org/agent/conversation/tool/input), a **field diff** (= §54's *impact analysis*), and a **pending-action preview card** (= §54's *human confirmation*). What it does **not** have: a **business command** with typed `inputs` — it is keyed by `toolName` + free-form `normalizedInput`. |
+| **The AI's read path today** | `packages/ai-assistant/.../codemode-tools.ts` (1,044 lines) | The AI calls **`api.request({method, path, query?, body?})`** — **not raw SQL.** So "the AI never writes raw SQL" (§49/§52) is *already true in code*; the IR's job is to give that call a **typed, validated shape**. |
+| Scope enforcement | `packages/ai-assistant/.../scope-injection.ts` (48 lines) | `applyContextScopeToQuery` / `applyContextScopeToBody` **delete any AI-supplied `tenantId`/`organizationId`** and re-apply them **from context only**, fail-closed when the context has none. Also drops `__proto__`/`constructor`/`prototype`. **The compiler must reuse this rule, not reinvent it.** |
+| Entity resolution | `packages/shared/src/lib/entities/naming.ts`; `engine.ts` | Entities are addressed by `EntityId` = `'<module>:<entity>'`. `tableNameFromEntityId` / `resolveEntityTableName` map id → table. **There is no name→id resolver** in the query layer. |
+| Field kinds | `packages/shared/src/modules/entities/kinds.ts` (23 lines) | **13** kinds: `text multiline integer float boolean select currency relation attachment dictionary phone date datetime`. The vocabulary the IR's **type checking** must use. |
+| The model to compile against | `packages/shared/src/lib/kernel/` (G-01) | `ModelDescriptor` — entities keyed by canonical id, each with `fields[]` and `relationships[]`; `planFieldRename(before, after) → RenamePlan` with `status: 'clean' \| 'requires_recompilation'`. **The rename test's engine is already built.** |
+
+**Three measured gaps — and they scope this sprint.**
+
+1. **No metric or measure concept exists.** Search `packages/shared/src` + `packages/core/src` for
+   `Metric`/`Measure` type declarations → **0 files**; `dsl.ts` exports no `defineMetric`. The vision's
+   IR carries `measures`, and its filters and sorts may reference a `metric` — so §51's **"metric
+   expansion" stage has nothing to expand from today.**
+2. **The query layer is row-oriented.** `QueryOptions` has no `groupBy` and no aggregate. The vision's
+   IR carries `grain`, `dimensions` and `measures` — **analytical**. So an aggregate IR cannot compile
+   to today's `QueryOptions`. This is a **capability gap, not an error**: the IR is right; the physical
+   target cannot yet run it.
+3. **The model is deliberately not physical.** G-01's canonical id is *not* the platform `EntityId`
+   (`auth:user` → `user`), and `KernelRelationship` carries no join columns. Both are **physical
+   bindings**, and G-01's whole point is to sit **above** the physical database. So the compiler must
+   be handed a **binding** (canonical → platform entity, canonical relationship → join columns) rather
+   than reading one out of the model — and it must **never guess** one (the model's own rule: *the kind
+   of an id is declared, never guessed*).
+
+**Two routes, both agreeing, that no IR exists:** (a) a search over `packages/` for the four contract
+names → **0 files**; (b) the spec §6 names all four with the source "Doc 3 §50/§53" — i.e. they are
+**specified, not built**. Both agree.
+
+**Two routes, both agreeing, that the AI does not write SQL:** (a) `codemode-tools.ts` exposes
+`api.request` and **no SQL tool**; (b) the generated tool surface is API-backed (`api-backed-tool.ts`,
+`api-endpoint-index.ts`). Both agree.
+
+**What we reuse:** the G-01 model and its rename planner; `QueryOptions` as the compile target; the join
+utilities' path and cycle rules; the scope-injection rule; the field-kind vocabulary. **What G-02
+genuinely builds:** the **IR types** (§50/§53), the **compiler** with §51's stages as named,
+individually-testable steps, the **bindings** that join canonical to physical, and the **rename test at
+the IR level**.
+
+## Step 2 — Validate: is this the best approach?
+
+**Alternative considered — a textual DSL the AI writes, then a parser.** **Rejected, for now.** §49 is
+explicit: the *initial* implementation is *"JSON Schema + typed runtime models + canonical IDs +
+structured model/tool calling"*, and a textual DSL *"can be added later for debugging and power
+users"*. JSON IR first.
+
+**Alternative considered — compile the IR straight to SQL.** **Rejected.** §52 *demotes* SQL; and the
+platform **already** has a query engine that turns `QueryOptions` into SQL with tenant scoping, joins
+and custom fields. Compiling to SQL would duplicate that engine and make the compiler untestable
+without a database. Compiling to `QueryOptions` **reuses** it.
+
+**Alternative considered — put the IR in a new persisted module.** **Rejected.** Spec rule **R2** says a
+*contract* is not an *object*: the IR describes the shape of a request, it does not persist. (A User
+Function *is* compiled IR made durable — but that is **G-03**.)
+
+**Approach chosen — a pure IR plus a stage-by-stage compiler that compiles to the existing
+`QueryOptions`, validated against the G-01 model, with the rename test as the proof.**
+
+- **Pure, so it tests without a database** — the same choice G-01 made, and the reason both run on this
+  host.
+- **The stages are the vision's, named one-for-one** (§51), each returning either a value or a typed
+  diagnostic. A stage that is not implemented reports a **gap** rather than silently passing.
+- **Two severities, because "wrong" and "not yet possible" are different things.** `error` = the IR is
+  invalid, **reject**. `gap` = the IR is valid but the platform cannot execute it yet; the compile
+  **succeeds** and the gap is reported. This is what turns the compiler into a **measurement
+  instrument** for what the platform can and cannot do — the project's own habit (rule zero-nine).
+- **The IR carries no scope.** There is no `tenantId`/`organizationId` field in the IR type at all, and
+  the compiler injects scope from the operating context — the fail-closed rule `scope-injection.ts`
+  already applies. An IR that *tried* to carry scope could not, because the type has nowhere to put it.
+
+**What would break it, and the defence:**
+
+1. **A renamed or removed field silently compiles.** This is the plan's exact test. **Defence:** the
+   compiler resolves **every** reference against the model and **fails closed** on any it cannot
+   resolve; and the rename-aware entry (`recompileQuery`) consumes G-01's `RenamePlan`, so a moved
+   field is reported as **"requires recompilation"** with the rename's own plain-language reason — not
+   as a bare "not found".
+2. **The IR could widen scope.** **Defence:** no scope field exists in the type; scope is injected from
+   context only.
+3. **A negative-only test suite proves nothing.** **Defence:** assert the **positive** path first — a
+   real IR compiles to a real `QueryOptions` — before the negative ones, and assert the plan's
+   **provenance** names the model version it compiled against.
+4. **A gap hidden as a pass.** **Defence:** every unimplemented stage reports a `gap` diagnostic, and a
+   test asserts the gaps are *present* for an aggregate IR rather than the compile silently "passing".
+
+**The ordering rule:** the IR types first, then the model index (resolution), then the compiler, then
+the rename-aware recompile, then the bindings. The rename test is the last thing built and the first
+thing that proves the whole.
+
+**Deferred, with its trigger (rule zero-one).** `TaskContract` — the declared shape of a task handed to
+a subagent (Doc 3 §27) — is **one of the spec's four contracts but is neither a read nor a write**, so
+it is not G-02's. It belongs to the **delegation boundary**, and C-15's rename (*authority* delegation
+vs *task* delegation) is still settling. **Trigger: AH-2 (the responsibility rule) is built.** Named
+here so it is not silently dropped.
+
+## Step 3 — The steps
+
+**Every command runs from `workspace/starting-kit/`. Nothing in `packages/shared/src/lib/kernel/` is
+modified — G-02 *consumes* the model, it does not extend it.** New code lands in
+`packages/shared/src/lib/business-ir/` (pure, no DB) with its tests beside it.
+
+**3.1 — Preconditions.**
+- Confirm the baseline is green: `cd packages/shared && npx jest src/lib/kernel` → 5 suites / 51 tests.
+- Confirm the two git repos are clean and stage **by explicit path** (never `git add -A`).
+- Take a checkpoint before touching anything: `./workspace/scripts/checkpoint.sh g02-start`.
+
+**3.2 — The IR types** — `packages/shared/src/lib/business-ir/types.ts`.
+- `BusinessQueryIR` with the §50 fields, **verbatim**: `operation`, `entity`, `grain`, `dimensions`,
+  `measures`, `filters`, `relationships`, `timeRange`, `timeBasis`, `currencyBasis`, `sort`, `limit`.
+- `BusinessCommandIR` with the §53 fields, **verbatim**: `command`, `inputs`, `requested_by`,
+  `idempotency_key`.
+- `ResultContract` — the declared shape of a result, **including provenance** (§51's last line).
+- **Every reference is a canonical id** (§12.1), so the IR is stable across renames and unambiguous
+  across modules. A **single-segment** reference (the vision's own example writes `"country"`) resolves
+  **relative to the subject entity** — a declared rule, tested, not a guess.
+- **There is no scope field.** `tenantId`/`organizationId` do not exist in the type (see Step 2).
+- `IrDiagnostic` — `{ stage, severity: 'error' | 'gap', code, message, path? }`.
+
+**3.3 — The model index** — `packages/shared/src/lib/business-ir/model-index.ts`.
+- `createModelIndex(model: ModelDescriptor)` — the **schema-resolution** stage's lookup: entity by
+  canonical id, field by canonical id, relationship by canonical id, and a metric lookup (empty today —
+  the gap is real and the index must say so rather than pretend).
+- Resolution helpers that implement the **relative-leaf rule** and report **ambiguity as an error**,
+  never a silent pick.
+- Pure and stateless: two indexes over the same model are independent.
+
+**3.4 — The bindings** — `packages/shared/src/lib/business-ir/bindings.ts`.
+- `PhysicalBindings` — canonical entity id → `{ platformEntityId, table? }`; canonical relationship id
+  → `{ fromField, toField }` (the join columns, which the model deliberately does not carry).
+- `createBindingsFromDeclarations(input)` — builds them from the **same declarations** G-01 reads, using
+  the **same** `canonicalEntityId` / `relationshipIdOf` functions, so the mapping is **declared, not
+  guessed**. Two module-qualified ids that collapse to one canonical id are **reported as a collision**,
+  not silently merged (the G-01 posture).
+
+**3.5 — The compiler** — `packages/shared/src/lib/business-ir/compile.ts`.
+- `compileQuery(ir, model, ctx, bindings)` → `{ ok: true, plan } | { ok: false, diagnostics }`.
+- The §51 stages as **named functions**, in the vision's order: `resolveSchema`, `checkTypes`,
+  `resolveValues`, `validatePaths`, `expandMeasures`, `normaliseTimeCurrency`, `injectAuthorization`,
+  `injectScope`, `planPhysical`, `validateSqlSafety`. Each returns a value **or** a diagnostic; a stage
+  not implemented returns a `gap`, never a silent pass.
+- **`planPhysical` compiles a `list` IR to a real `QueryOptions`** (`fields`, `filters`, `sort`, `page`,
+  `joins`) — the same shape the engine already runs. An `aggregate` IR compiles to a logical plan and
+  reports the **row-oriented gap** (finding 2 above).
+- **Scope injection reuses the existing rule**: the IR has no scope; the compiler adds `tenantId` /
+  `organizationId` **from `ctx` only**, and reports an `error` when the context has none (fail closed).
+- **Provenance** — the plan records the **model version it compiled against** (a content version over
+  the model, reusing G-01's `contentVersion`) and the list of stages it passed. Deterministic: **no
+  timestamps**, or the plan stops being reproducible.
+
+**3.6 — The rename test** — `packages/shared/src/lib/business-ir/recompile.ts` + test.
+- `recompileQuery(ir, before, after, ctx, bindings)` — the plan's test, implemented.
+- Compile an IR that references `customer.country` against model **A** → **clean**.
+- Rename the field in model **B** → `planFieldRename(A, B)` says `requires_recompilation`; compiling the
+  **same** IR against **B** must return **`requires_recompilation`** with the rename's reason — it must
+  **not** silently compile to the old (or a wrong) column.
+- Update the IR to the new id → compiles **cleanly** against **B**.
+- **Both directions asserted.** A silent pass on the second is a **failure**, which is the whole point
+  of the test.
+
+**3.7 — Critic pass.** A separate pass whose only job is to break the above, and it must **name what it
+attacked**: (a) does a renamed field silently compile? (b) can the IR carry or widen scope? (c) is the
+"requires recompilation" answer produced by the rename engine, or by a lucky string comparison? (d) does
+a `gap` hide a failure — is the compile really `ok: true` only when no `error` exists? (e) is every
+claimed number (13 field kinds, 0 metric files, 0 IR files) re-measured from the artefact, not recalled?
+**If it says "looks good" without listing attacks, it has not run.** Loop until a fresh pass finds
+nothing.
+
+**3.8 — Update the dependent documents in the same change** (rule zero): `BACKLOG.md` (the `G-02` line,
+and every item that reads "needs G-02"), the spec's §10 (record what G-02 proved), and this cookbook's
+Step 4 table. Docs stale in the same change is a defect.
+
+**3.9 — Commit in both repositories, staged by explicit path.** Repo 2 (`starting-kit`, branch `main`)
+gets the new IR and compiler and tests. Repo 1 (root, branch `master`) gets the docs. **Never `git add -A`.**
+
+## Step 4 — Done when
+
+*Filled from measurement after the build.*
+
+| | Criterion | Status |
+|---|---|---|
+| ✅ | The IR types exist with §50/§53's fields verbatim | **PASS** — `types.ts`: `BusinessQueryIR` carries all twelve §50 fields; `BusinessCommandIR` all four §53 fields. Every reference is a canonical id; a bare leaf resolves **relative to the subject**, a declared rule. |
+| ✅ | The compiler turns a `list` IR into a real `QueryOptions` | **PASS** — dimensions → `fields`, filters → `filters` (with the operator vocabulary mapped), sort → `sort`, limit → `page.pageSize`, relationships → `joins`. Asserted field-by-field. |
+| ✅ | **The rename test: a field rename either recompiles cleanly or says "requires recompilation"** | **PASS, both directions and two levels.** *Floor:* the old IR against the renamed model **fails** (`UNKNOWN_FIELD`) — it can never silently compile. *Ceiling:* `recompileQuery` returns `requires_recompilation`, names the field and its destination, and takes its reasons from **G-01's `planFieldRename`**. An IR updated to the new id recompiles **cleanly**; a label-only change is **clean**; a change that misses the IR is **clean**. |
+| ✅ | The IR cannot carry scope; scope is injected from context only (fail closed) | **PASS, two routes.** *Runtime:* scope smuggled onto the IR is ignored, the context wins; a missing tenant **fails the compile**. *Type-level:* `tsconfig.business-ir-tests.json` + a **falsification probe** prove the `@ts-expect-error` on the scope line is genuinely used — i.e. the type really forbids it. |
+| ✅ | Every unimplemented stage reports a `gap`, never a silent pass | **PASS** — four stages report gaps, each naming its owner: `inject_authorization` (G-04), `plan_physical` (row-oriented target), `normalise_time_currency` (no currency basis), `validate_sql_safety` (no SQL emitted). A test asserts an IR with **both** an error and a gap fails **and still reports the gap**. |
+| ✅ | The plan carries provenance naming the model version it compiled against | **PASS** — `provenance.modelVersion` (G-01's `contentVersion` over the model), `stages` (all ten on a clean compile), `gaps`. Deterministic: no timestamps. A test proves the version **changes** when the model changes and is **stable** when it does not. |
+| ✅ | The critic pass names what it attacked and finds nothing | **PASS** — six attacks, all executable, in `__tests__/critic.test.ts`; listed below. |
+
+**The measured evidence (rule zero-nine — from the artefacts, not the description):**
+
+| Check | Result |
+|---|---|
+| business-ir suite | **4 suites / 47 tests pass** (`npx jest src/lib/business-ir`) |
+| kernel suite (G-01, untouched) | **5 suites / 51 tests pass** |
+| Shared package | **174 suites / 1952 tests** — **173 suites / 1944 tests pass** |
+| Drift guard (`core`) | **4/4 pass** |
+| `packages/shared` typecheck | `tsc --noEmit` → **exit 0** |
+| `packages/cli` typecheck | `tsc --noEmit` → **exit 0** |
+| `packages/core` typecheck | `tsc --noEmit` → **exit 0** |
+| Type check **including the tests** | `tsc -p tsconfig.business-ir-tests.json` → **exit 0**, and a planted unused `@ts-expect-error` makes it **fail** (so the check is real) |
+
+**The eight failures, and why they are not ours.** `src/lib/bootstrap/__tests__/dynamicLoader.tsconfig.test.ts`
+fails 8 tests with `spawnSync <node.exe> EBUSY`. **Two routes agree it is environmental:** (a) the suite
+imports only `node:fs`, `node:path`, `node:child_process`, `node:url` — **nothing of ours** — and spawns a
+node subprocess; (b) it fails at **process spawn**, before any of our code runs. G-01 reached the same
+conclusion with a third route (a stashed clean tree).
+
+**Critic pass — what it attacked (a pass that says "looks good" has not run):**
+
+1. *Does a renamed field compile silently?* — **No.** The old IR against the new model returns `ok: false`
+   with `UNKNOWN_FIELD`; it never yields a plan. Tested as "the floor".
+2. *Can the IR carry or widen scope?* — **No, three ways.** The type has no scope field (proven by a
+   falsification-checked `@ts-expect-error`); a smuggled `tenantId`/`organizationId` is ignored; a filter
+   on a tenant-like field fails because no such field is declared.
+3. *Is "requires recompilation" the model's answer, or a lucky string compare?* — **The model's.** The
+   reasons come from `planFieldRename` and are asserted to contain its wording (`disappeared`). And the
+   answer is not "always stale": an IR that references nothing that moved is `clean`.
+4. *Does a `gap` hide a failure?* — **No.** `ok: true` **iff** no diagnostic has severity `error`; an IR
+   with both an error and a gap fails **and still reports the gap**. On a clean compile all **ten** §51
+   stages are accounted for.
+5. *Does the compiler mutate what it is given?* — **No.** The IR and the model are byte-identical after a
+   compile, asserted on a snapshot.
+6. *Are the numbers re-measured from the artefact?* — **Yes, by two routes.** *0 IR files* and *0 metric
+   declarations* were each measured twice: a source search **and** `git grep` against `HEAD` (the tree
+   before this sprint). *13 field kinds* counted from `kinds.ts`. Both routes agree.
+
+**What this sprint is not:** not execution, not authorization, and not the Widget IR. The compiler
+**plans**; the query engine runs; G-04 will inject the authorized projection. Its output is the **IR, the
+compiler and the rename proof** — the durable asset G-03 makes into User Functions (RQ-24: *the IR is the
+durable asset; SQL is a derivative*).
+
+---
+
 # The hosting environment — `Platform-Server` (Coolify)
 
 **Built 2026-10-04.** A separate environment from Sprint 0: an Ubuntu Server 24.04 VM on Hyper-V

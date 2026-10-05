@@ -9,7 +9,7 @@ remembers a task** (COOKBOOK rule zero-three).
 predates the whole analysis programme), and remarks buried in reports. **This file replaces
 those as the plan.** The others are kept for their reasoning and point here.
 
-**Last updated:** 2026-10-05 (draft 2 of the Business Model Kernel specification is written; the spec's gate is passed, ratification pending).
+**Last updated:** 2026-10-05 (G-02 — the Business IR and the compiler — is built and measured; the four-item critical path is now three-quarters done: `spec → G-01 → G-02 → **G-03**`).
 
 | Tag | Meaning |
 |---|---|
@@ -42,7 +42,7 @@ dependencies allow. All twelve items, and where every one of the study's 53 less
 
 - [x] **G-01** ✅ — The Business Model Kernel (+ **G-08** relationship fabric) → plan §5.2. **BUILT 2026-10-05.** The canonical, versioned, typed business model **above** the physical database, as a **view** over the declarations the platform already keeps — it holds **no copy**, so there is no second source of truth. New code in `packages/shared/src/lib/kernel/`: **`canonical-id.ts`** (the spec §12.1 grammar — `segment('.'segment)*`, `[a-z][a-z0-9_]*`; the *kind* of an id is **declared, never guessed**), **`model.ts`** (`buildModelDescriptor` + the §4.1 21-item contract; relationships carry their declared attributes; a content-derived **version** per object so "versions" is real, not an empty field; relationship-id **collisions are reported, never silently merged**), **`round-trip.ts`** (the plan's test — `export`/`import`, a versioned envelope, byte-stable), **`rename.ts`** (`clean` vs `requires_recompilation`, with plain-language reasons), **`from-modules.ts`** (the **live wiring** — reads the registered modules' real declarations). Two edits: `modules/entities.ts` (+ optional `RelationshipAttributes`, additive) and `modules/dsl.ts` (`defineLink` accepts an optional `attributes` block — the original call shape unchanged). **Measured:** kernel **5 suites / 51 tests pass**; **shared package 170 suites / 1909 tests pass**; **`tsc --noEmit` clean in both `shared` and `cli`**; the **4 existing `defineLink` call sites** still type-check. **The plan's test — "the export/reimport round-trip is empty" — PASSES**, and the test first proves the export is **non-empty** (it carries the 4 real `communication_channels` relationships), so the empty diff is not vacuous. **The rename test passes both ways** (a label rename is clean; a key rename reports "requires recompilation"). **Gap found and measured in the code:** of 34 enabled modules, only **4** declare `entityExtensions` — **3 are empty stubs**, so **one module** carries the platform's whole relationship model today. **Boundary:** the *plain-language → model* path is **G-02's** compiler; G-01 is the canonical model itself and its guarantees. *(One unrelated suite, `bootstrap/dynamicLoader.tsconfig`, fails with `spawnSync … EBUSY` — **proven environmental**: it fails identically on a clean tree with G-01 stashed.)*
 - [ ] **AH-1** — **The agent as a kernel object** — `kind` (*personal · role · context · independent · system*), `owner`, `actsAs`, `role`, runtime binding, autonomy gate ⛔ *needs G-01 ✅ done — startable*. **The only agent-half item on the critical path** → [`AGENT-HALF.md`](AGENT-HALF.md) §1.4
-- [ ] **G-02** — Business IR + the compiler ⛔ *needs G-01 ✅ done — startable*
+- [x] **G-02** ✅ — Business IR + the compiler → plan §2 phase 1. **BUILT 2026-10-05.** The typed **read** and **write** shapes the AI produces instead of SQL (spec §6, Doc 3 §49–§53), and the **compiler** that turns a read into the physical query the platform already runs. New code in `packages/shared/src/lib/business-ir/`: **`types.ts`** (`BusinessQueryIR` — §50's fields **verbatim**; `BusinessCommandIR` — §53's; the §51 **ten stages** as a declared union; diagnostics carrying **two severities**, because *"wrong"* and *"not yet possible"* are different things), **`model-index.ts`** (schema resolution against the G-01 model — a bare leaf resolves **relative to the subject**, a declared rule, never a guess), **`bindings.ts`** (the **declared** canonical→physical mapping, using **G-01's own** `canonicalEntityId` so the two cannot disagree; collisions **reported**, not merged), **`compile.ts`** (§51's stages one-for-one, each returning a value **or** a diagnostic; a `list` IR compiles to a real `QueryOptions`), **`recompile.ts`** (**the plan's test**). **The IR has no scope field** — `tenantId`/`organizationId` do not exist in the type, so an IR cannot widen its own reach; the compiler injects scope from the context only, fail-closed. **The plan's test — the rename test — PASSES, both directions and at two levels:** the *floor* is that the old IR compiled against the renamed model **fails** (`UNKNOWN_FIELD`, never a silent compile); the *ceiling* is `recompileQuery` saying **requires recompilation** and naming the destination, using **G-01's own `planFieldRename`** rather than a string comparison in the compiler. **Measured:** business-ir **4 suites / 47 tests pass**; kernel **5 suites / 51** (G-01 untouched); shared package **174 suites / 1952 tests**, **173 / 1944 passing**; `tsc --noEmit` **clean in `shared`, `cli` and `core`**; core **drift guard 4/4**. **Three platform gaps measured, each with an owner:** (1) **no metric or measure concept exists** (0 declarations at HEAD, two routes) so §51's *metric expansion* has nothing to expand from — a named measure is refused, not reinterpreted; (2) the **query layer is row-oriented** (`QueryOptions` has no `groupBy`/aggregate) so an `aggregate` IR compiles **logically** and reports the gap; (3) `KernelField.filterable` coerces absent→`false`, so a compiler cannot tell *"declared not filterable"* from *"not declared"* — **OPEN**, trigger = the first consumer that must tell them apart (G-05 or G-04). **Also found:** `packages/shared/tsconfig.json` **excludes `**/__tests__/**`**, so G-01's *"tsc clean"* never covered its tests; G-02 adds `tsconfig.business-ir-tests.json` **plus a falsification probe** proving that config really reports an unused `@ts-expect-error`. **Deferred with a trigger (rule zero-one):** `TaskContract` — one of the spec's four contracts, but neither a read nor a write — belongs to the delegation boundary; **trigger: AH-2**. *(The 8 `dynamicLoader.tsconfig` `EBUSY` failures are **environmental** — proven by two routes: the suite imports nothing of ours, and it fails at process spawn.)*
 - [ ] **G-10** — Dependency tracking + change propagation ⛔ *needs G-01 ✅ done — startable*
 
 ### Phase 2 — the security floor
@@ -63,8 +63,8 @@ dependencies allow. All twelve items, and where every one of the study's 53 less
 
 - [ ] **G-07** — The Widget contract / Widget IR / registry ⛔ *needs G-01 ✅ done — startable*
 - [ ] **G-09** — The `@`/`#` reference and resolution layer ⛔ *needs G-01 ✅ done — startable*
-- [ ] **G-03** — User Functions ⛔ *needs G-02*
-- [ ] **G-17** — Schema-constrained generation ⛔ *needs G-02*
+- [ ] **G-03** — User Functions ⛔ *needs G-02 ✅ done — startable*
+- [ ] **G-17** — Schema-constrained generation ⛔ *needs G-02 ✅ done — startable*
 - [ ] **AH-5** — **The room** — a first-class shared space: its own id, participants, agenda, lifecycle, and a **speaker-labelled** log. **Neither Paperclip nor Hermes has this object** — it is our opening ⛔ *needs G-01 ✅ done — startable* → [`AGENT-HALF.md`](AGENT-HALF.md) §3.3
 - [ ] **AH-6** — **Mentions / participants** — pull a specific agent into a thread **without** assigning it work, gated by the same permissions as assignment ⛔ *needs AH-5*
 - [ ] **AH-12** — **The warm-session acceptance test** — prove the *next turn* sees a write made while the runtime holds the session. **The sibling never wrote this test**; it is the acceptance test for AH-5 ⛔ *needs AH-5*
@@ -73,7 +73,7 @@ dependencies allow. All twelve items, and where every one of the study's 53 less
 
 ### Phase 4 — the hygiene
 
-- [ ] **G-19** — A proprietary ERP benchmark ⛔ *needs G-02*
+- [ ] **G-19** — A proprietary ERP benchmark ⛔ *needs G-02 ✅ done — startable*
 - [ ] **G-20** — Freshness, lineage and continuous linting ⛔ *needs G-01 ✅ done — startable*
 - [ ] **AH-3** — **The durable wake queue** — every trigger is a **database row**, not an in-memory timer, so a deploy does not lose queued work ⛔ *needs S-05*
 - [ ] **AH-4** — **Routines produce work items** — schedule → **task** → wake, so every scheduled run has a visible task, a thread and an origin ⛔ *needs AH-3*
@@ -169,7 +169,7 @@ each is now here, where it will be seen.
 | **V-11** — computer-use + browser automation | Must sit behind our approval gate | The approval gate is the enforcement point (phase 2) |
 | **V-12** — 17 localised languages | Translation quality unverified | A quality review passes |
 | **V-13** — the 65-entry MCP catalogue | Each entry needs vetting | Each is vetted before enabling (never a trust root) |
-| **Phase 3's Widget layer** | Needs the kernel and the IR | G-02 is done |
+| **Phase 3's Widget layer** | Needs the kernel and the IR | **Trigger has fired** — G-01 (kernel) and G-02 (IR) are both done; G-07 is now startable |
 | **Cross-tenant authority** | A conscious deferral in the design | A customer needs AI acting into a supplier's tenant |
 
 ---

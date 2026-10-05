@@ -552,6 +552,46 @@ when G-02 exists.
 
 ---
 
+## 10b. G-02 has now run that measurement — **added 2026-10-05**
+
+**§6's four contracts are now two-thirds built, and the compiler path is executable.** G-02 (the
+Business IR and the compiler) was built and measured on 2026-10-05. What moved from *stated* to
+*tested*:
+
+| This specification said | G-02 measured |
+|---|---|
+| §6 — `BusinessQueryIR` (operation, entity, grain, dimensions, measures, filters, relationships, time range, time basis, currency basis, sort, limit) | Implemented **verbatim** in `packages/shared/src/lib/business-ir/types.ts`. Every reference is a **canonical id** (§12.1); a bare leaf resolves **relative to the subject entity** — a declared rule, tested, not a guess. |
+| §6 — `BusinessCommandIR` (command, inputs, requested-by, idempotency key) | Implemented verbatim. The platform **already honours** the idempotency half: `prepare-mutation.ts` computes exactly such a key and records a field diff (impact analysis) and a preview card (human confirmation) — Doc 3 §53–§54 were ~80% present as `AiPendingAction`. |
+| §6 — the compiler path is **normative** (Doc 3 §51) | Implemented as **ten named stages**, in the vision's order, each returning a value or a diagnostic. Six run and pass; four report a **gap** with the item that owns them. |
+| §6 — *"the AI never writes raw SQL"* (Doc 3 §49, §52) | **Already true in code**: the AI calls `api.request(...)` (`codemode-tools.ts`). G-02 gives that call a **typed, validated shape** and compiles a `list` read into the **same `QueryOptions` the engine already runs** — SQL stays a compile target. |
+| The plan's test — *the rename test* (batch 9 §6 #1) | **Passes, both directions, at two levels.** The **floor**: the old IR compiled against the renamed model **fails** (`UNKNOWN_FIELD`) — it can never silently compile. The **ceiling**: `recompileQuery` says **requires recompilation** and names where the field went, using G-01's own `planFieldRename` — not a string comparison done in the compiler. |
+
+**Three things G-02 measured about the platform, and each is a gap with an owner:**
+
+1. **No metric or measure concept exists.** Zero `Metric`/`Measure` declarations at HEAD (both routes:
+   a source search and `git grep HEAD`). So §51's *metric expansion* stage has nothing to expand from,
+   and a named measure is **refused with a message that says so** rather than quietly reinterpreted.
+2. **The query layer is row-oriented.** `QueryOptions` has no `groupBy` and no aggregate, so an
+   `aggregate` IR compiles **logically** and reports the gap. The IR is right; the physical target cannot
+   run it yet.
+3. **The kernel loses one distinction.** `KernelField.filterable` coerces an absent declaration to
+   `false`, so a compiler cannot tell "declared not filterable" from "not declared". **OPEN** — trigger:
+   the first consumer that must tell them apart (G-05 classification, or G-04 authorization). Recorded
+   here rather than fixed, because it is a G-01 model question and would change the exported document.
+
+**Measured:** business-ir **4 suites / 47 tests pass**; kernel **5 suites / 51 tests pass** (G-01
+untouched); the **shared package 174 suites / 1952 tests**, with **173 suites / 1944 tests passing**;
+`tsc --noEmit` **clean** in `shared`, `cli` **and** `core`; the core **drift guard 4/4**. The eight
+failing tests are the **known environmental** `dynamicLoader.tsconfig` `EBUSY` failures — proven
+independent by two routes: the suite imports nothing of ours and fails at process spawn.
+
+**A measurement the build exposed, about G-01's own verification:** `packages/shared/tsconfig.json`
+**excludes `**/__tests__/**`**, so G-01's "`tsc --noEmit` clean" never type-checked its tests. G-02 adds
+`tsconfig.business-ir-tests.json` and a **falsification probe** proving that config really reports an
+unused `@ts-expect-error` — so the claim "the IR type forbids scope" is checked, not asserted.
+
+---
+
 ## 11. Critic pass — this document attacked
 
 Run as a stranger would, looking for what is wrong rather than what is right. **A pass that says
