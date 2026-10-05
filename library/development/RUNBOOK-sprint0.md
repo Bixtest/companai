@@ -10,22 +10,23 @@ running trio". This page is the short one.
 
 ---
 
-## Is the infrastructure ready? — checked 2026-10-04, 16:00
+## Is the infrastructure ready? — checked 2026-10-05
 
-**Short answer: built and proven, but not running — and only you can start it.**
+**Short answer: built, proven, and running right now.** Eight containers are up, the app answers on
+`http://localhost:3000`, and the database initialised cleanly.
 
 | Piece | State |
 |---|---|
-| The compose stack (`docker-compose.fullapp.yml`) | **Built and proven working** 2026-10-04 — 8 services healthy, and Hermes discovered all **21** platform tools |
+| The compose stack (`docker-compose.fullapp.yml`) | **Running** — **8 containers up** (`app`, `mcp`, `hermes`, `model`, `opencode`, `postgres`, `redis`, `meilisearch`), measured 2026-10-05. It was proven working 2026-10-04: 8 services healthy, and Hermes discovered all **21** platform tools |
 | The local model file | **Present** — `models/Qwen2.5-7B-Instruct-Q4_K_M.gguf`, 4.68 GB |
 | `workspace/starting-kit/.env` | **Present** |
 | Node 24 | **Inside the container only.** Measured 2026-10-04: this host has **Node 22.22.2** and **no yarn**, while the kit requires Node **24.x**. Nothing to install *for the stack* — the container carries both — but the host **cannot** run the codebase natively. See **N-11** in [`BACKLOG.md`](BACKLOG.md) |
-| The database | **Provided by the stack** — nothing is installed on Windows, and nothing needs to be |
-| Docker Desktop | **Installed, but the engine is DOWN** — see below |
+| The database | **Provided by the stack, and clean** — 3 users, 1 tenant, 1 organisation, 5 feature toggles, 5 `action_logs` rows. Rebuilt from scratch on the fixed image 2026-10-05; the init ran every step green |
+| Docker Desktop | **Running** — engine `29.8.1`. ⚠️ But it does **not** auto-start; see below |
 | The Coolify server | A **separate** Hyper-V VM, not this stack — see [`RUNBOOK-platform-server.md`](RUNBOOK-platform-server.md) |
 
-**Nothing is missing for the stack. The only thing standing between here and a running stack is that
-Docker Desktop is not started — and the agent cannot start it.** Measured 2026-10-04:
+**The catch: Docker Desktop does not auto-start, and the agent cannot start it.** When the machine
+is restarted the whole stack is down until the owner starts Docker Desktop. Measured 2026-10-04:
 
 ```
 $ docker desktop start
@@ -38,7 +39,7 @@ Docker Desktop's startup path runs `wsl.exe`, and this machine's security policy
 anything the agent launches. The block is not approvable and must not be worked around. **So
 "start Docker Desktop" is a permanent owner step, not a one-off** — it applies every time the
 machine has been restarted, because `AutoStart` is off. Full detail: **B-04** in
-[`BLOCKERS.md`](BLOCKERS.md).
+[`BLOCKERS.md`](BLOCKERS.md); the fix is [`NEEDS-YOU.md`](NEEDS-YOU.md) item 6.
 
 > **Do not confuse "parses" with "runs".** `docker compose config` succeeds with the engine down, so
 > a passing parse proves nothing about whether anything can start.

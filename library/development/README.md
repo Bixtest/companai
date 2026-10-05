@@ -15,6 +15,11 @@ of a hundred files to open first.
 
 **About two hours, and you will understand what is built, what is left, and why.**
 
+**If you are an agent starting a fresh session, the message to send is
+[`START-PROMPT.md`](START-PROMPT.md).** It tells you to read the list below, states the rules you
+may not break, and names the first task — so the reading happens first, not after you have already
+formed a picture.
+
 | # | Read | Why |
 |---|---|---|
 | 0 | [`HANDOVER.md`](HANDOVER.md) | **The handover** — what exists, where, and the traps nobody can discover (two repos, two products called Companai, gitignored `vms/`, the host VM). Read this first if you know nothing |
@@ -120,7 +125,8 @@ See COOKBOOK rule zero-ten.
 
 | File | What it is |
 |---|---|
-| [`HANDOVER.md`](HANDOVER.md) | **The handover** — the front door for a newcomer who knows nothing: what exists, where it is, the two-repository layout, the traps, the host VM, the standing rules, and what is proven vs not |
+| [`HANDOVER.md`](HANDOVER.md) | **The handover** — the front door for a newcomer who knows nothing: what exists, where it is, the two-repository layout, the traps, the host VM, the standing rules, and what is proven vs not. §0 is written for an agent taking over |
+| [`START-PROMPT.md`](START-PROMPT.md) | **The message that starts a new session** — paste it to the agent taking over: what to read first, the rules it may not break, and the first task |
 | [`README.md`](README.md) | **This file** — the front door, the reading order, the handover, the sprint process |
 | [`BACKLOG.md`](BACKLOG.md) | **The one roadmap** — everything left, in order, with the "do not lose this" list and the deferrals |
 | [`AGENT-HALF.md`](AGENT-HALF.md) | **The agent half** — the five kinds of agent, the rule that decides who is answerable when one acts, and **where every one of the study's 53 lessons lands in the phases** |

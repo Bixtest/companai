@@ -265,11 +265,12 @@ provider, per `model-factory.ts`. Those can be dropped independently of the serv
 
 ## 7. What is still open
 
-Nothing in this document. The remaining open items for the owner live in the **backlog**
-([`BACKLOG.md`](BACKLOG.md), *waiting on the owner*) — chiefly the object list, which the
-Business Model Kernel specification settles.
+**Nothing in this document.** The remaining open items for the owner live in the **backlog**
+([`BACKLOG.md`](BACKLOG.md), *waiting on the owner*).
 
-One more is open from the agent study, and it is a product promise rather than a technical question:
-**are assistant agents *identity* (the agent belongs to a named person) or *context* (the agent acts
-as that person for their work)?** Paperclip chose context. See §3.1 of
-[`../paperclip-hermes-study/findings/10-lessons-and-target-design.md`](../paperclip-hermes-study/findings/10-lessons-and-target-design.md).
+The one item that was open from the agent study — **are assistant agents *identity* (the agent
+belongs to a named person) or *context* (the agent acts as that person for their work)?** Paperclip
+chose context — was **answered by the owner on 2026-10-05**, and the answer was **neither**: there
+are **five kinds** of agent, plus a rule that decides who is answerable when one acts. See §3.1 of
+[`../paperclip-hermes-study/findings/10-lessons-and-target-design.md`](../paperclip-hermes-study/findings/10-lessons-and-target-design.md),
+and the model and plan in [`AGENT-HALF.md`](AGENT-HALF.md).

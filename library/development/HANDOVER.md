@@ -1,15 +1,40 @@
 # Handover — start here if you have just inherited this project
 
 **You know nothing about this project, this codebase, or these documents. This page is
-written for exactly that person.** Read it top to bottom once (about 20 minutes), then
+written for exactly that person — and this revision is written for an agent that will
+continue the development work.** Read it top to bottom once (about 20 minutes), then
 follow §2 to actually get working. Everything else in the project is reachable from here.
 
-**Written 2026-10-05. Owner: Ramzi. Development machine: `BIXMASERVER` (Windows 10 Pro).**
+**Written 2026-10-05, revision 2. Owner: Ramzi. Development machine: `BIXMASERVER` (Windows 10 Pro).**
 
 > This is the **handover**. It is not a status page and not a roadmap — it is the one
 > document that tells you what exists, where it is, and in what order to open it.
 > For *what is left*, read [`BACKLOG.md`](BACKLOG.md). For *what happened*, read
 > [`../../JOURNAL.md`](../../JOURNAL.md). For *what to avoid*, read [`../../LESSONS.md`](../../LESSONS.md).
+> **The message that starts a new session is [`START-PROMPT.md`](START-PROMPT.md).**
+
+---
+
+## 0. If you are an agent taking over
+
+**What you are inheriting.** A project that has finished *thinking* and is ready to *build*. The
+analysis is complete, the agent study is complete, the specification has a first draft, and the
+plan is settled. **Nothing is blocked.** What is left is the build, and the first item is named in
+§2 step 7.
+
+**Five things to do before you touch anything:**
+
+1. **Read this page, then the eight files in §2 step 1.** Do not skip the lessons.
+2. **Set the environment export** (§2 step 2). Every terminal, every session.
+3. **Confirm both repositories are clean** (§2 step 3), and that the stack is up (§2 step 4).
+4. **Read the project's memory** (§6c) — it holds the rules that were learned the hard way, and
+   **50 reusable techniques** the previous sessions wrote from this very project.
+5. **Take the first backlog item** (§2 step 7) and work it in the four-step sprint process
+   (README §"The sprint process") — **no code before step 3.**
+
+**What you may not do.** The admin password is the owner's and he types it; you never write it to a
+file or type it into a form. You never `git add -A`. You never take an irreversible action without
+a checkpoint. You never close a decision that is his — see §6b.
 
 ---
 
@@ -39,9 +64,9 @@ Two arrows connect them: **(1)** the agent reaches the platform's tools over MCP
 our own gate; **(2)** the agent asks the model server for inference. Both were proven working on
 2026-10-04.
 
-**One-line summary of where we are** (from the analysis programme): *the platform half is
-**bought**, the agent half is **borrowed**, and the product half — the model spine and the
-data-level security — is **neither**, and must be built.*
+**One-line summary of where we are:** *the platform half is **bought**, the agent half is
+**borrowed**, and the product half — the model spine and the data-level security — is **neither**,
+and must be built.*
 
 ---
 
@@ -64,6 +89,7 @@ data-level security — is **neither**, and must be built.*
 
 **Then, before you write any code:** [`../../workspace/knowledge/authority-overview.md`](../../workspace/knowledge/authority-overview.md)
 — the governance layer end to end. **That layer is the product.** Everything else is plumbing.
+For the agent half, read [`AGENT-HALF.md`](AGENT-HALF.md) — the model and the plan.
 
 **2. Set up your shell — every terminal, every session.** Node 24 is project-local and mandatory:
 
@@ -74,7 +100,7 @@ export PATH="/c/Users/Ramzi/Downloads/companai/workspace/.toolchain/node24:$PATH
 Wrong Node produces results that describe *the laptop*, not *the platform*. See
 [`../../workspace/references/environment.md`](../../workspace/references/environment.md).
 
-**3. Check both repositories are clean.** There are **two** git repositories (see §3). Nothing
+**3. Check both repositories are clean.** There are **two** git repositories (see §3a). Nothing
 should be half-finished on disk:
 
 ```bash
@@ -82,9 +108,16 @@ cd /c/Users/Ramzi/Downloads/companai               && git status --short   # thi
 cd /c/Users/Ramzi/Downloads/companai/workspace/starting-kit && git status --short   # the code
 ```
 
-**4. Bring up the stack.** One command starts the platform, the agent runtime and the model
-server together — see [`ARCHITECTURE.md`](ARCHITECTURE.md) §5. **Docker Desktop must be running
-first, and only the owner can start it** (see §5).
+**4. Confirm the stack is up.** It was running when this page was written — eight containers,
+the app on `http://localhost:3000`, loopback only:
+
+```bash
+docker ps                     # expect 8 containers
+curl -s --noproxy '*' -o /dev/null -w '%{http_code}\n' http://localhost:3000/login   # expect 200
+```
+
+If nothing is running, **Docker Desktop must be started first, and only the owner can start it**
+(see §5). Then bring the stack up per [`ARCHITECTURE.md`](ARCHITECTURE.md) §5.
 
 **5. Run the gate, and read the `Cached:` line.** A green result *from cache* is not a green
 result. `--force` for anything you are about to make a claim about:
@@ -96,8 +129,15 @@ corepack yarn generate && corepack yarn build:packages && corepack yarn typechec
 
 Never pipe these through `head` or `tail` — you throw away the exit code.
 
-**6. Take the first item from [`BACKLOG.md`](BACKLOG.md).** **Verify it is still true against the
-code before starting** — the roadmap has been wrong about what is already done **three times**.
+**6. Check what needs the owner before you plan around it.** [`NEEDS-YOU.md`](NEEDS-YOU.md) is a
+numbered action list. As of 2026-10-05 only **three** items are open, and none of them blocks the
+build: change the Coolify password (item 5), turn on Docker Desktop auto-start (item 6), and
+optionally delete the 3.8 GB ISO (item 7).
+
+**7. Take the first item from [`BACKLOG.md`](BACKLOG.md).** Today that is **`P0-spec` — draft 2 of
+the Business Model Kernel specification**: 18 of the vision's 40 required rows are still partly or
+wholly open, each listed with its status in the spec's §8. **Verify it is still true against the
+code before starting** — the roadmap has been wrong about what is already done **four times**.
 
 ### What to study first, by role
 
@@ -109,7 +149,7 @@ code before starting** — the roadmap has been wrong about what is already done
 | **Hosting / domains** | [`RUNBOOK-adding-a-domain-step-by-step.md`](RUNBOOK-adding-a-domain-step-by-step.md) → [`RUNBOOK-hosting-server-manual.md`](RUNBOOK-hosting-server-manual.md) |
 | **Testing it** | `workspace/references/how-to-test.md` → `workspace/knowledge/test-gate.md` |
 | **Picking up the analysis** | [`../analysis/PLAN.md`](../analysis/PLAN.md) → [`../analysis/LOG.md`](../analysis/LOG.md) → the `findings/` reports |
-| **Designing the agent half** (AI staff, roles, tasks, delegation, triggers, meetings) | [`AGENT-HALF.md`](AGENT-HALF.md) — **the model and the plan**: the five kinds of agent, the rule that decides who is answerable when one acts, and where every one of the study's lessons lands. Then [`../paperclip-hermes-study/findings/10-lessons-and-target-design.md`](../paperclip-hermes-study/findings/10-lessons-and-target-design.md) — **the synthesis** — for the evidence behind each lesson, and its [`PLAN.md`](../paperclip-hermes-study/PLAN.md) for how it was derived |
+| **Designing the agent half** (AI staff, roles, tasks, delegation, triggers, meetings) | [`AGENT-HALF.md`](AGENT-HALF.md) — **the model and the plan** — then [`../paperclip-hermes-study/findings/10-lessons-and-target-design.md`](../paperclip-hermes-study/findings/10-lessons-and-target-design.md) — **the synthesis** — for the evidence behind each lesson, and its [`PLAN.md`](../paperclip-hermes-study/PLAN.md) for how it was derived |
 
 ---
 
@@ -152,7 +192,7 @@ and [`../ai/README.md`](../ai/README.md). **Read the AI README before using any 
 
 ### 3d. `vms/` is **gitignored** — and that matters
 
-`.gitignore` line 99 excludes `vms/`, because it holds the VM credentials, a 4 GB ISO and a seed
+`.gitignore` line 105 excludes `vms/`, because it holds the VM credentials, a 4 GB ISO and a seed
 ISO. **Consequence:** anything written there is **untracked** and dies with the laptop's disk.
 
 **This was already fixed for the deployment scripts.** Their durable copy lives at
@@ -190,6 +230,9 @@ This is not optional and not a preference.
   they create no tables and serve no routes, but stay readable and restorable in seconds. See
   `workspace/references/parked-modules.md`.
 - **Only `packages/enterprise` was ever actually deleted** — its licence forbids redistribution.
+- **The MCP logs `Failed to index 21 tools … Invalid OpenAI API key`.** Not a fault: there is no
+  embeddings endpoint locally (**B-16**). All 21 tools register and are callable; only semantic
+  search over tools is degraded.
 
 ### 3h. The one rule that matters most
 
@@ -207,16 +250,17 @@ guessing. See `COOKBOOK.md` rule zero-nine.
 companai/                       ← repo 1 root (thinking + docs).  You are here.
 ├── INDEX.md                    the map of every folder — start here after this file
 ├── JOURNAL.md                  what happened, in order, with dates (3,242 lines)
-├── LESSONS.md                  mistakes made, how they were caught (2,745 lines, L1–L82)
+├── LESSONS.md                  mistakes made, how they were caught (2,746 lines, L1–L82)
 ├── where_we_left.md            ⚠️ stale (2026-08-13) — traps only
 │                               (THIS FILE is not at the root — it lives at
 │                                library/development/HANDOVER.md, below)
 │
-├── library/                    EVERYTHING DOCUMENTED, IN ONE PLACE (3,439 markdown files, measured 2026-10-05)
+├── library/                    EVERYTHING DOCUMENTED, IN ONE PLACE (3,441 markdown files, measured 2026-10-05)
 │   ├── INDEX.md                what each shelf is, and the reading order
 │   ├── PROVENANCE.md           where every shelf came from, how to rebuild it
 │   ├── development/            ← DEVELOPMENT MANAGEMENT — the hub
 │   │   ├── HANDOVER.md         **THIS FILE**
+│   │   ├── START-PROMPT.md     **the message that starts a new session**
 │   │   ├── README.md           the front door: reading order, the sprint process
 │   │   ├── BACKLOG.md          **THE ONE ROADMAP** — everything left, in order
 │   │   ├── ARCHITECTURE.md     how Starting Kit + Hermes + model server run together
@@ -231,11 +275,11 @@ companai/                       ← repo 1 root (thinking + docs).  You are here
 │   │   ├── hermes-agent-main/  the Hermes runtime source — where it disagrees with docs, it wins
 │   │   ├── paperclip-master/   upstream Paperclip — the subject of the agent study
 │   │   └── source-docs/        ONE PLACE for the scattered source docs (register inside)
-│   ├── analysis/               THE ANALYSIS PROGRAMME — complete, all 12 batches
+│   ├── analysis/               THE ANALYSIS PROGRAMME — complete, batches 0–12 (13 batch reports)
 │   │   ├── PLAN.md             the batch plan with tickboxes — all DONE
 │   │   ├── LOG.md              one dated line per batch
 │   │   └── findings/           one report per batch — **batch 12 is THE DEVELOPMENT PLAN**
-│   ├── paperclip-hermes-study/ THE AGENT STUDY — complete, all 11 batches
+│   ├── paperclip-hermes-study/ THE AGENT STUDY — complete, all 11 batches, 3,940 lines
 │   │   ├── PLAN.md             the batch plan with tickboxes — all DONE, each with its result
 │   │   ├── LOG.md              one dated line per batch
 │   │   └── findings/           one report per batch — **batch 10 is THE SYNTHESIS** (see §2)
@@ -246,7 +290,7 @@ companai/                       ← repo 1 root (thinking + docs).  You are here
 │   └── planning/               the design (12 documents) — see its own README
 │
 ├── workspace/                  BUILDING — where work happens
-│   ├── COOKBOOK.md             **the development cookbook — read before touching code**
+│   ├── COOKBOOK.md             **the development cookbook — read before touching code** (1,187 lines)
 │   ├── PROGRESS.md             ⚠️ superseded by BACKLOG.md; keeps the reasoning
 │   ├── knowledge/              HOW THE PLATFORM WORKS — 20 concept files
 │   ├── references/             the detail behind the cookbook (environment, deployment, testing…)
@@ -330,15 +374,16 @@ they pick which listener the router binds to. Behind the tunnel, use **`http://`
 Docker Desktop's startup runs `wsl.exe`, which this machine's security policy blocks for anything
 an agent launches — the block is **not approvable and must not be worked around.** `AutoStart` is
 off, so this recurs on every restart. It is a **permanent owner step** ([`NEEDS-YOU.md`](NEEDS-YOU.md) item 6).
+*It is running as this page is written.*
 
 ---
 
 ## 6. The rules that bind
 
-**Full text in [`../../workspace/COOKBOOK.md`](../../workspace/COOKBOOK.md).** These are the ones
-you must not break:
+**Full text in [`../../workspace/COOKBOOK.md`](../../workspace/COOKBOOK.md)** — eleven rules,
+`zero-zero` to `zero-ten`. These are the ones you must not break:
 
-**The nine standing rules** (from `where_we_left.md` §7, still accurate):
+### 6a. The nine standing rules
 
 1. **Never assume a decision the owner did not make.** A direction counts only when he was asked
    plainly and answered. If a better way exists, come back with a labelled **COUNTER-OPINION**.
@@ -353,10 +398,13 @@ you must not break:
 9. **Testing instructions are click-by-click**, with verified URLs and expected results. Say
    plainly when a change is invisible.
 
-**Plus, the project's own hard rules:**
+### 6b. The project's own hard rules
 
 - **Every claim comes with an observation attached, not an argument** (§3h). Measure from the
   artefact, not the description of it.
+- **Reach every important answer by two genuinely different routes**, and make them agree.
+  **Re-running your own check is not a second route.** If they disagree, say so — never average.
+- **Bounce every conclusion off a critic whose only job is to prove it wrong.**
 - **Documentation is updated in the same change as the work**, not afterwards. A batch that
   leaves the docs stale is not finished. This is COOKBOOK Rule zero.
 - **Switch things off; do not delete them.** If something must be deleted, it gets a written
@@ -367,7 +415,19 @@ you must not break:
 - **We never take updates from the original project again.** It is our code now.
 - **`present_files` / commit in both repos, staged by path** — never `git add -A`.
 
-### How to talk to the owner
+### 6c. Where the project's memory lives — read this, it is not in the repo
+
+The repository holds the *project*. The accumulated **memory and technique** live outside it, and
+a new agent that does not know they exist will re-learn them the hard way:
+
+| What | Where | What is in it |
+|---|---|---|
+| **Project memory (curated)** | `C:\.workbuddy-ai\memory\MEMORY.md` | How to work with this owner, the project in one screen, and the hard rules — learned the hard way |
+| **Daily session logs** | `C:\.workbuddy-ai\memory\2026-10-03.md`, `…-04.md`, `…-05.md` | What each session did, what it measured, and what it left open |
+| **Standing preferences (all projects)** | `~/.workbuddy-ai/MEMORY.md` | The two techniques, how to ask questions, reply language. Archived to `~/.workbuddy-ai/archive/MEMORY-to-2026-09-21.md` |
+| **Reusable techniques — 50 of them** | `~/.workbuddy-ai\skills\` | Each is a hard-won method from *this* project: proving a deploy reached the running process, catching a file that is imported but never committed, measuring before a blanket fix, and so on. **Load the matching one before starting a task it covers** |
+
+### 6d. How to talk to the owner
 
 He has said this more than once, so it is worth repeating:
 
@@ -383,23 +443,31 @@ He has said this more than once, so it is worth repeating:
   most one question.
 - **A question he is holding is not yours to close.** If a decision is his, ask him or leave it
   explicitly open — never resolve it yourself and write it down as settled.
+- **Every point you raise carries a status**: **FIXED** (and how you re-checked) · **WILL DO X** ·
+  **OPEN — needs you** · **NOT AN ISSUE** (raised, then measured false). A point without a status
+  is not a finding.
 
 ---
 
 ## 7. Current state — measured, not assumed
 
-**Two groups below. Group A I measured today (2026-10-05). Group B is quoted from older
-documents and was *not* re-measured — treat it as a starting point, not a fact.**
+**Two groups below. Group A was measured on 2026-10-05. Group B is quoted from older documents
+and was *not* re-measured — treat it as a starting point, not a fact.**
 
-**Group A — measured 2026-10-05:**
+**Group A — measured 2026-10-05 (revision 2):**
 
 | | |
 |---|---|
-| **Repo 1** (thinking/docs) | `master`, HEAD **`c127030`**. Working tree has **14 entries — 12 pre-existing (the owner's), 2 mine** (see below) |
+| **Repo 1** (thinking/docs) | `master`, HEAD **`30bde42`**, **clean** |
 | **Repo 2** (code) | `main`, HEAD **`962ae2a`**, **clean** |
 | **Codebase shape** | **21 packages, 1 app** (`apps/mercato`) — a monorepo (Yarn 4.17.1 + Turbo) |
-| **Documentation** | `library/` holds **3,439 markdown files**; `LESSONS.md` 2,745 lines (L1–L82); `JOURNAL.md` 3,242 lines |
-| **Open blockers** | **3** — B-05, B-16, B-17. **None stops Sprint 0** (see [`BLOCKERS.md`](BLOCKERS.md)) |
+| **Documentation** | `library/` holds **3,441 markdown files**; `LESSONS.md` 2,746 lines (L1–L82); `JOURNAL.md` 3,242 lines; `COOKBOOK.md` 1,187 lines |
+| **The studies** | analysis programme **complete** (batches 0–12, 13 reports); Paperclip + Hermes study **complete** (11 batches, 3,940 lines, 53 lessons) |
+| **The specification** | Draft 1 — of its 40 rows, **22 settled/derived · 10 partly · 8 open** |
+| **The running stack** | **8 containers up** (app, mcp, hermes, model, opencode, postgres, redis, meilisearch); `/login` answers **200** |
+| **The local database** | **Clean and complete** — 3 users, 1 tenant, 1 organisation, 5 feature toggles, 5 `action_logs` rows. Rebuilt from scratch on the fixed image 2026-10-05, init ran green |
+| **Open blockers** | **3** — B-05 (OpenCode is load-bearing), B-16 (no embeddings endpoint), B-17 (no audit trail of agent tool calls). **None stops the build** (see [`BLOCKERS.md`](BLOCKERS.md)) |
+| **Waiting on the owner** | **3** — Coolify password (item 5), Docker Desktop auto-start (item 6), the ISO (item 7, optional) |
 
 **Group B — quoted from older documents, not re-measured:**
 
@@ -407,23 +475,7 @@ documents and was *not* re-measured — treat it as a starting point, not a fact
 |---|---|
 | **Starting Kit milestone** | *~80% done; the governance layer is complete and has screens.* **Source:** [`../../where_we_left.md`](../../where_we_left.md) — **a 2026-08-13 snapshot, self-labelled out of date** |
 | **Last gate run** | *Green, `Cached: 0`.* **But the two status documents disagree on the test count** (`where_we_left.md` says 12,924; `INDEX.md` says 12,898, both dated 2026-08-13). **Do not quote either — re-run the gate and read the number yourself.** |
-| **Sprint 0 stack** | *Built and proven working (8 services, 7 healthy, 21 AI tools discovered), but not running* — needs Docker Desktop started. **Source:** [`BLOCKERS.md`](BLOCKERS.md) B-04, 2026-10-04 |
-| **Hosting VM** | *Built and proven; directory-based hosting works, proven over public HTTPS. Coolify admin password still needs changing.* **Source:** the hosting runbooks |
-
-**The uncommitted changes in repo 1, split honestly.** Measured 2026-10-05 after this handover was
-written — **14 entries in total:**
-
-- **12 are pre-existing and the owner's** — `INDEX.md`, `compai/planning/07-open-questions.md`,
-  `compai/planning/CHANGELOG.md`, three deleted `integration_research/` files,
-  `library/development/NEEDS-YOU.md`, `where_we_left.md`, `workspace/COOKBOOK.md`,
-  `workspace/PROGRESS.md`, plus untracked `compai/planning/platforms/…/05-harvest…md` and
-  `library/kit-docs/`.
-- **2 are mine, and are part of this handover batch** — `library/development/HANDOVER.md` (new)
-  and `library/development/README.md` (modified).
-- I also edited **`INDEX.md`**, which was **already one of the owner's 12 modified files** — so my
-  change to it is mixed in with his.
-
-**Do not sweep the owner's 12 into your commit** — stage by path, and leave them for him.
+| **Hosting VM** | *Built and proven; directory-based hosting works, proven over public HTTPS.* **Source:** the hosting runbooks |
 
 ### What is **proven** vs **not proven**
 
@@ -433,6 +485,8 @@ written — **14 entries in total:**
   (Settings → Authority → Approvals).
 - Hermes connects to the platform's MCP and discovers all 21 tools; the local model answers with
   a 65,536-token context.
+- The local stack runs: 8 containers, the app serving on `http://localhost:3000`, loopback only,
+  on a database that initialised cleanly.
 - Directory-based hosting on the VM: each hostname serves its own directory; a file in one
   returns **404** on the other; a host-side edit appears live with no rebuild; the whole chain
   fetched from the laptop over public HTTPS (`200`, certificate valid).
@@ -451,12 +505,12 @@ written — **14 entries in total:**
 ## 8. What is left, and whose move it is
 
 - **What is left, in order** → [`BACKLOG.md`](BACKLOG.md). One roadmap. Read §"The list" and
-  nothing else for *"what is left"*.
-- **What needs the owner** → [`NEEDS-YOU.md`](NEEDS-YOU.md) — a numbered action list. **The most
-  urgent item is changing the Coolify admin password** (item 5); it is the only thing standing
-  between an agent and the 2FA wall on the hosting panel.
+  nothing else for *"what is left"*. **The first item is `P0-spec` draft 2.**
+- **What needs the owner** → [`NEEDS-YOU.md`](NEEDS-YOU.md) — a numbered action list. **Three
+  items open**, and none blocks the build. The most urgent is changing the Coolify admin password
+  (item 5); it is the only thing standing between an agent and the 2FA wall on the hosting panel.
 - **What is stopping work** → [`BLOCKERS.md`](BLOCKERS.md) — re-checked each session, because a
-  blocker is a claim about *now*.
+  blocker is a claim about *now*. **Three open, none blocking.**
 - **The product specification** → [`SPEC-business-model-kernel.md`](SPEC-business-model-kernel.md)
   — Draft 1 written; of its 40 rows, **22 are settled, 10 partly, 8 open** (the spec's own tally
   counts by the first status token, so read its note before quoting it). This is the vision's own
@@ -476,24 +530,18 @@ change.
 A newcomer who cannot orient themselves from this page plus [`../../INDEX.md`](../../INDEX.md)
 alone means this page is broken — **fix the page, not the newcomer.**
 
-*Last updated: 2026-10-05 — **the agent half is now designed and wired into the plan.** The owner
-answered the one open decision (item 8 of `NEEDS-YOU.md`): agents are not one thing but **five
-kinds** — *personal · role · context · independent · system* — and every action an agent takes is
-answerable to a **person**. That decision needs **no new authorization model**, because the
-platform already has `ai_worker` for identity and the `A0`–`A5` gates for autonomy. It is written
-up in the new [`AGENT-HALF.md`](AGENT-HALF.md), which also maps all 53 of the study's lessons to
-the phase each lands in; the map above and §2 gained it, and `BACKLOG.md` gained the `AH-` items
-(two tracks, one list). The study itself remains complete (11 of 11 batches); its synthesis
-[`../paperclip-hermes-study/findings/10-lessons-and-target-design.md`](../paperclip-hermes-study/findings/10-lessons-and-target-design.md)
-is the evidence behind `AGENT-HALF.md`. The library file count was re-measured in **both** places
-it appears in this file (both said 2,440; the real figure is **3,439** — the earlier 3,121 I first
-wrote here counted the library *minus* the new `ai/source-docs/` copies, which was wrong because that
-folder sits inside `library/`).*
+**When you update it, keep §7's two-group split.** A figure you just measured and a figure copied
+from an older document are not equally current, and mixing them in one table is how this page
+goes wrong. If two older documents disagree on a number, say so — never average them.
 
-*Earlier, 2026-10-05 — the agent study finished: all eleven batches, its synthesis now the reference
-for the agent half, and a new `library/ai/source-docs/` shelf gathering the scattered source
-documents (its register tracked, its copies not).*
+*Last updated: 2026-10-05, revision 2 — **rewritten for an agent taking over the development.**
+Added §0 (the agent's first moves), §6c (where the project's memory and the 50 reusable techniques
+live), and the `START-PROMPT.md` pointer. §7 re-measured: both repos clean at `30bde42` /
+`962ae2a`, the library at 3,441 files, the study at 3,940 lines, the stack up with 8 containers and
+a cleanly-initialised database, and **the open-items list re-measured rather than repeated — four
+rows that read as open were already done** (the database reset, `apps/docs`, the CI wiring, and
+the init proof), which is why `NEEDS-YOU.md` now shows three owner items, not seven.*
 
-*Earlier, 2026-10-05 — first version. Records the two-repository layout, the two-products
-trap, the gitignored `vms/` and its fix, the host VM, the standing rules, and the honest split
-between what is proven and what is not.*
+*Earlier, 2026-10-05, revision 1 — first version. Recorded the two-repository layout, the
+two-products trap, the gitignored `vms/` and its fix, the host VM, the standing rules, and the
+honest split between what is proven and what is not.*

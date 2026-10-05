@@ -9,6 +9,10 @@ the map.** Everything else is reachable from here.
 > you what exists, where it is, and the traps nobody can find by reading the code
 > (two repositories, two products called Companai, the gitignored `vms/` folder, the
 > host VM, the mandatory Node-24 export). Then come back here for the folder map.
+>
+> **Handing the work to an agent? Paste
+> [`library/development/START-PROMPT.md`](library/development/START-PROMPT.md)** — it is the
+> first message for a fresh session: what to read, the rules it may not break, and the first task.
 
 ---
 
@@ -91,7 +95,8 @@ companai/                      ← you are here
 │   │   ├── LOG.md             one dated line per batch completed
 │   │   └── findings/          one report per batch — **batch 10 is THE SYNTHESIS: lessons + target design**
 │   └── development/           DEVELOPMENT MANAGEMENT — where the work is tracked
-│       ├── HANDOVER.md        **the front door for a newcomer — read this first**
+│       ├── HANDOVER.md        **the front door for a newcomer — read this first** (§0 is for an agent taking over)
+│       ├── START-PROMPT.md    **the message that starts a new session** — paste it to the agent
 │       ├── README.md          the reading order, the sprint process
 │       ├── BACKLOG.md         **THE ONE ROADMAP** — everything left, in order
 │       ├── AGENT-HALF.md      **the agent half** — five agent kinds, the responsibility rule, and where every lesson lands
@@ -263,7 +268,7 @@ Break these and you will damage the project.
 
 | I want to… | Go to |
 |---|---|
-| **Understand the whole project from zero (just inherited it)** | [`library/development/HANDOVER.md`](library/development/HANDOVER.md) — **the handover**: what exists, where, and the traps nobody can discover |
+| **Understand the whole project from zero (just inherited it)** | [`library/development/HANDOVER.md`](library/development/HANDOVER.md) — **the handover**: what exists, where, and the traps nobody can discover. **Starting a fresh agent session? Paste [`library/development/START-PROMPT.md`](library/development/START-PROMPT.md)** |
 | **Start working on this project (or pick it up after a handover)** | [`library/development/README.md`](library/development/README.md) — **the development hub**: the reading order, what to study first, and the handover sequence |
 | **See everything left to do, in one place** | [`library/development/BACKLOG.md`](library/development/BACKLOG.md) — **the one roadmap.** The old lists in `workspace/PROGRESS.md` are superseded by it |
 | **Understand how the three pieces run together** | [`library/development/ARCHITECTURE.md`](library/development/ARCHITECTURE.md) — Starting Kit + Hermes + the model server, and the dockerisation decision |
@@ -312,7 +317,17 @@ a folder, finishes a phase, or makes a decision updates it in the same change.
 A newcomer who cannot orient themselves from this page alone means it is broken —
 fix the page, not the newcomer.
 
-*Last updated: 2026-10-05 — **the agent half is designed and wired into the plan.** The owner answered
+*Last updated: 2026-10-05 — **the handover is rewritten for an agent taking over, and there is now a
+start prompt.** [`library/development/HANDOVER.md`](library/development/HANDOVER.md) gained **§0** (the
+agent's first moves, and what it may not do), **§6c** (where the project's memory lives — the curated
+project memory, the daily session logs, and **50 reusable techniques** in `~/.workbuddy-ai/skills/`),
+and a re-measured §7. The new
+[`library/development/START-PROMPT.md`](library/development/START-PROMPT.md) is the ready-to-paste
+first message for a fresh session. Three documents that contradicted the running system were corrected
+in the same change: the Sprint-0 runbook said the stack was down (**it is up — 8 containers**), and
+`ARCHITECTURE.md` §7 still listed the agent-model decision as open (**it was answered 2026-10-05**).*
+
+*Earlier, 2026-10-05 — **the agent half is designed and wired into the plan.** The owner answered
 the one open decision: agents are **five kinds** (*personal · role · context · independent · system*),
 and every action an agent takes is answerable to a **person**. It needs no new authorization model —
 the platform already has `ai_worker` for identity and the `A0`–`A5` gates for autonomy. The write-up

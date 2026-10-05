@@ -141,11 +141,16 @@ project.**
 
 | File | What it is |
 |---|---|
+| [`development/HANDOVER.md`](development/HANDOVER.md) | **The handover — read this first.** What exists, where, the two repositories, the traps nobody can discover, the host VM, the rules, and what is proven vs not. **§0 is written for an agent taking over** |
+| [`development/START-PROMPT.md`](development/START-PROMPT.md) | **The message that starts a new session** — paste it to the agent taking over: what to read first, the rules it may not break, and the first task |
 | [`development/README.md`](development/README.md) | **The front door.** The reading order, what to study first by role, the handover sequence, and the sprint process |
 | [`development/BACKLOG.md`](development/BACKLOG.md) | **The one roadmap.** Everything left, in order, one line each — unifying the Starting Kit work and the product phases. Plus the "do not lose this" list and the deferrals |
 | [`development/AGENT-HALF.md`](development/AGENT-HALF.md) | **The agent half** — the five kinds of agent, the responsibility rule, and where every one of the study's 53 lessons lands in the phases |
 | [`development/ARCHITECTURE.md`](development/ARCHITECTURE.md) | How the Starting Kit, Hermes and the model server run together, and the dockerisation decision |
 | [`development/BLOCKERS.md`](development/BLOCKERS.md) | Anything stopping progress, with what clears it |
+| [`development/NEEDS-YOU.md`](development/NEEDS-YOU.md) | **The owner-only action list** — numbered, with literal steps and a way to answer all of it at once |
+| [`development/SPEC-business-model-kernel.md`](development/SPEC-business-model-kernel.md) | The product specification (Draft 1) — the vision's own gate, and the first real build move |
+| `development/RUNBOOK-*.md` | The hosting runbooks — the server manual, the domain walkthrough, Sprint 0, and the deployment proof |
 
 **The rule that keeps it clean:** the hub **points at** the other documents, it does not copy
 them. `../workspace/COOKBOOK.md` says how the work is done; `../workspace/knowledge/` says how
