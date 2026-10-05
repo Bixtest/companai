@@ -103,3 +103,7 @@ library/kit-docs/
 # belongs in a repository of the project's thinking. (Added 2026-10-04 with
 # library/development/PLAN-coolify-laptop-implementation.md.)
 vms/
+
+# Upstream Paperclip, extracted from paperclip-master.zip on 2026-10-05 (9,056 files,
+# 132 MB). Reference material for the agent/task study. Not our code, not tracked.
+library/ai/paperclip-master/
