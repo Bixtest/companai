@@ -31,8 +31,8 @@ Read this first. Four corrections and one omission. Each was measured, not argue
 
 | The prior analysis said | Measured on 2026-10-05 | Status |
 |---|---|---|
-| "Hermes is Python 3.14+"; "the dependency manifest targets Python 3.14" | `pyproject.toml`: `requires-python = ">=3.11,<3.15"`. `.python-version`: `3.14`. The file's own comment: *"3.14 is the newest python we know we have wheels for. we only support 3.14, BUT we need to allow old hermes installs on <3.14"* | **CORRECTED.** It is **not "3.14+"**: there is a hard upper bound. Hermes **targets 3.14** and **accepts 3.11 to 3.14**. The base image is `debian:13.4` with distro `python3`, so the shipped container is not automatically 3.14. |
-| "Recover the exact Hermes source commit/tag" (Phase 0) | There is **no commit to recover**. The snapshot has no `.git`, and `pyproject.toml` declares `version = "0.0.0"` | **SHARPENED, and it is worse than stated.** Pinning is not "not yet done", it is **currently impossible**. A pin has to be created (see §9 Phase 0), not found. |
+| "Hermes is Python 3.14+"; "the dependency manifest targets Python 3.14" | **Four sources agree that it is 3.14, and only 3.14.** `pyproject.toml`: `requires-python = ">=3.11,<3.15"`, whose own comment reads *"3.14 is the newest python we know we have wheels for. we only support 3.14, BUT we need to allow old hermes installs on <3.14 to get thru their update step on old python"*. `.python-version`: `3.14`. The image manifest `pm/lock.json` pins **CPython 3.14.7** for every platform (`python-build-standalone`, release 20260901: x86_64 and aarch64, glibc and musl, darwin, termux). And the core dependencies (openai, httpx, rich, tenacity, fire, certifi, python-dotenv, truststore) each carry the marker `python_version >= '3.14'` | **CORRECTED, and corrected twice: my own first pass was wrong too.** It is **not "3.14+"**: `<3.15` is a hard upper bound. It is also **not "3.11 to 3.14"**: the `>=3.11` floor is an **updater escape hatch**, not a supported runtime, and the conditional dependency markers are the mechanism that makes 3.14 a **requirement** rather than a preference (on 3.11 to 3.13 those packages are simply not installed). And the container **is** 3.14: the image installs Python through its own package manager (`pm`), not from apt, at a pinned **3.14.7**. **State it as: the runtime requirement is Python 3.14 only.** |
+| "Recover the exact Hermes source commit/tag" (Phase 0) | There is **no source revision to recover**: the snapshot has no `.git`, and `pyproject.toml` declares `version = "0.0.0"`. But the **dependencies are pinned**: `uv.lock`, `pm/uv.lock`, and `pm/lock.json`, which pins **CPython 3.14.7** by URL for every platform | **SHARPENED, and split in two.** The **source revision cannot be recovered**; it must be **created** (see §9 Phase 0). The **dependency set is already pinned by the project itself**, which is half the work and makes the reproducibility problem narrower than it first appears: today we can pin *what runs*, but not yet *which Hermes* it is. |
 | "Security / Phase 2: enforce ai_worker identity" (as future work) | `packages/shared/src/lib/auth/principal.ts` already exports `aiWorkerSubject()` and `derivePrincipal()`, and `server.ts` mints the subject via an `actsAsAiWorker` flag. `packages/shared/src/lib/auth/__tests__/ai-worker-principal.test.ts` asserts `{ kind: 'ai_worker', displayName: 'Hermes' }` | **CORRECTED.** The agent-as-principal seam is **already built**. The work is to **extend and enforce** it, not to invent it. |
 | "Inspection found no Hermes adapter/runtime package" (true) and "add a tool bridge" (Phase 3, as future work) | No Hermes adapter exists. But `ai_assistant/lib/in-process-client.ts` is **already a working in-process tool bridge**: it authenticates either by API key or by a pre-authenticated auth context, and exposes the platform's tool registry through `McpClientInterface`. Sprint 0 proved **21 MCP tools** discovered by a live agent over that boundary | **CORRECTED.** The **bridge is largely built**; what is missing is the **runtime** behind it. |
 | *(nothing at all)* | **OpenCode currently occupies the agent runtime slot.** The platform's chat route is wired to it, which is why the project records B-05 as *"OpenCode cannot be removed in Sprint 0: the platform's own chat is built on it"* | **MISSING, and it is the most important omission.** Hermes does not arrive on empty ground. Integration is a **displacement**, not an addition. §7 is new. |
@@ -445,8 +445,9 @@ Every factual claim above was read from the source on 2026-10-05, not taken from
   module's README verbatim: *"Both stacks coexist: OpenCode Code Mode keeps powering the Command
   Palette and `/api/chat` unchanged; the new typed framework adds focused, mutation-capable agents
   alongside it."*
-- **Hermes**: `hermes-agent-main`, `pyproject.toml` (`requires-python`, `version`), `.python-version`,
-  `LICENSE`, `Dockerfile`, and the top-level tree. It has **no `.git`**.
+- **Hermes**: `hermes-agent-main`, `pyproject.toml` (`requires-python`, `version`, the
+  `python_version` dependency markers), `.python-version`, `pm/lock.json`, `LICENSE`, `Dockerfile`,
+  and the top-level tree. It has **no `.git`**.
 - **The product's plan**: `BLOCKERS.md` (B-05 and the resolved two-runtime row), `AGENT-HALF.md`
   (the five agent kinds), `SPEC-business-model-kernel.md` (§8 row 26 and §9).
 - **The prior analysis**: all six files in `analysis/`, read in full.
@@ -454,8 +455,21 @@ Every factual claim above was read from the source on 2026-10-05, not taken from
 **Three routes, not two, for the claim that decides the schedule.** That the agent slot is already
 occupied was confirmed three independent ways: from `BLOCKERS.md`'s own definition of B-05; from the
 resolved row recording that Hermes takes the slot while OpenCode is not yet removed; and from the
-chat route's source, which imports the OpenCode client and reads its URL. The Python bound was
-confirmed twice: from `pyproject.toml`'s `requires-python` and from `.python-version`.
+chat route's source, which imports the OpenCode client and reads its URL.
+
+**And four routes for the Python version**, which is why it is stated flatly: `pyproject.toml`'s
+`requires-python`; `.python-version`; `pm/lock.json`'s pinned `cpython-3.14.7` for every platform;
+and the `python_version >= '3.14'` marker on the core dependencies. **The first two alone would have
+supported a wrong answer** (a range that looks like "3.11 to 3.14"), and it took the third and
+fourth to show the floor is an updater escape hatch and the requirement is 3.14 exactly. That is the
+reason the marker column exists.
+
+**One claim in this document was wrong in its first draft, and was corrected by the owner's own
+challenge.** The first draft said the container "is not automatically 3.14" because the base image
+is Debian with the distro Python. Measured: the image installs Python through its own package
+manager (`pm`) at a pinned 3.14.7, and never uses the apt Python for the runtime. The correction is
+recorded in §0 rather than quietly fixed, because the wrong version of it had already been written
+down and acted on.
 
 **What this document does not claim.** No performance figure, no throughput, no concurrency limit
 and no operational guarantee. None was measured, and none should be assumed from this design.
