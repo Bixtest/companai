@@ -51,8 +51,9 @@ And two things are **broken today**, neither of which the analysis found:
    ignores the `tools` parameter entirely"* and tool calls degrade to raw JSON in the message text.
    Our deployment command does not set it. **And the COOKBOOK's Step 4 table records the symptom:**
    a real agent turn in which the model enumerated all 21 tools, chose one, and **nothing reached
-   the platform** (three independent checks agree). **Two caveats, both stated:** one study already
-   in this repository reads the flag the other way
+   the platform** (the MCP's own log shows no call; the other two checks the COOKBOOK cites are
+   structurally NULL for a read-only tool, so only the log is discriminating). **Two caveats, both
+   stated:** one study already in this repository reads the flag the other way
    (`library/ai/qwen-hermes-tool-calling-report.md`: *"enabled by default"*), and a model that never
    emits a well-formed call would produce the same three NULL checks. **So this is a claim with a
    named test, not a settled defect:** read `chat_template` from `http://model:8080/props`. §4.1
@@ -84,7 +85,7 @@ And two things are **broken today**, neither of which the analysis found:
 | "Existing documents show distinct configuration paths; proposed target, not current fact" (its confidence table, row 4: *"Low / not established"*) | The **chat** lane already resolves through one `model-factory.ts`. The tenant allowlist is already an intersection of an env allowlist and a per-tenant DB row | **CORRECTED.** One policy path exists for the chat lane. The *embedding* lane is separate, and it runs through `EmbeddingService`, not the factory. |
 | "The recorded local endpoint provides chat but the platform's vector integration expects embeddings" | Two independent defects, and the analysis named only the second. See §6 | **SHARPENED into a measured root cause.** |
 | "Tool behaviour depends on the selected model's chat template/parser and exact server version" | True, and **a flag is absent from the deployment and from every development document**. Hermes' docs say `--jinja` is required. **But our own prior study reads it the other way** — `library/ai/qwen-hermes-tool-calling-report.md:50`: *"current server documentation has `--jinja` enabled by default"* | **FLAG ABSENT; THE CONFLICT IS NAMED, NOT RESOLVED.** §4.1 gives the one command that settles it. |
-| "Hermes cannot run a model itself" needs qualification (its own correction) | Confirmed and strengthened. `hermes_cli/local_runtime/` is **19 Python modules plus a JSON catalog (20 files, 4,307 lines)**, with `enabled: False` by default | **CONFIRMED.** See §6.3. |
+| "Hermes cannot run a model itself" needs qualification (its own correction) | Confirmed and strengthened. `hermes_cli/local_runtime/` is **19 Python modules plus a JSON catalog (20 files; 4,307 lines of Python)**, with `enabled: False` by default | **CONFIRMED.** See §6.3. |
 
 ### 1.3 The premise that actually needed correcting
 
@@ -247,10 +248,16 @@ says four edits.
 
 Its troubleshooting table repeats it: *"**llama.cpp** | Add `--jinja` to the startup command"*.
 
-**What we measured, with the scope stated exactly.** `--jinja` is **absent from the deployment and
-from the development documents**: not in `docker-compose.fullapp.yml`, not in
-`docker-compose.fullapp.dev.yml`, not in `packages/create-app/template/docker-compose.fullapp.yml`,
-not in `workspace/COOKBOOK.md`, and not in any other document in `library/development/`.
+**What we measured, with the scope and the tense stated exactly.** **Before this change**, `--jinja`
+was absent from the deployment and from the development documents: not in
+`docker-compose.fullapp.yml`, not in `docker-compose.fullapp.dev.yml`, not in
+`packages/create-app/template/docker-compose.fullapp.yml`, not in `workspace/COOKBOOK.md`, and not
+anywhere in `library/development/`.
+
+**This change is what adds it** — to the COOKBOOK's `model` service block (step 3.2), to
+`RUNBOOK-sprint0.md` and to `BACKLOG.md`. **So read that sentence as a statement about the tree as it
+stood, not about the tree now.** The documents you are reading are the ones that carry the fix, and a
+search today will find the flag in them.
 
 **It is *not* absent from the repository, and saying so would be wrong.** The string appears in the
 prior study material, for example `library/ai/qwen-hermes-tool-calling-report.md` (five places,
@@ -288,8 +295,12 @@ turn, and the COOKBOOK's Step 4 table records its outcome in detail:
 - `hermes mcp test mercato` → *✓ Connected*, *✓ Tools discovered: 21*.
 - In the turn, the model **enumerated all 21 tools by name** and then *"picked the wrong tool
   (`meta_describe_agent`, which needs an `agentId`) and never called `context_whoami`"*.
-- **Nothing reached the platform**, and this is the load-bearing part: *"three checks agree nothing
-  reached the platform"* — `api_keys.last_used_at` NULL, `action_logs` unchanged, no MCP log line.
+- **Nothing reached the platform.** The COOKBOOK cites *"three checks"* — `api_keys.last_used_at`
+  NULL, `action_logs` unchanged, no MCP log line. **But the same cell carries its own ledger caveat,
+  and it removes two of the three:** a *read-only* tool writes no `action_logs` row, and the platform
+  never records API-key usage, so both are NULL **whether or not a call happened**. **The
+  discriminating check is the MCP's own log line, and there is none.** That is the one that counts,
+  and the first draft of this document over-counted it as three.
 - A **direct authenticated `tools/call`** to `context_whoami` returns **HTTP 200** with real data,
   so the wire and the credentials are sound.
 
@@ -596,7 +607,7 @@ It does not say "local is fast". These are the numbers we have.
 | Hermes' prompt | **~15,700 tokens** (system prompt + 21 MCP tool schemas) |
 | Prompt ingest | **~12 to 13 tok/s** at default threads, declining as context grows (the runbook records *"~12 tokens/s and falls"*; the direct measurement in §7.2 records **13.2**) |
 | Generation | **~0.8 to 4.6 tok/s** depending on thread split |
-| A real agent turn | **20 minutes or more**, hour-scale in the worst case |
+| A real agent turn | **~20 minutes just to ingest the prompt**, and the COOKBOOK measures **~41 minutes per turn**; hour-scale in the worst case |
 | Memory | the model container reaches **~10 GiB of the Docker VM's 15.56 GiB** |
 
 ### 7.2 The thread split, measured directly
@@ -733,19 +744,22 @@ Per the COOKBOOK's zero-one rule: **a deferral must name its trigger.**
   found in Hermes' docs, then searched for in our deployment, and then the **recorded symptom** was
   found in the COOKBOOK's Step 4 table — three independent NULL checks that match the diagnosis
   exactly. B-16's base URL was found in the compose and then confirmed in the SDK's own dist.
-- **A hostile pass was run, and it falsified several of this document's own claims.** All were
+- **Three hostile passes were run, and they falsified nine of this document's own claims.** All were
   corrected rather than defended, and the corrections are visible in the text rather than quietly
-  applied:
+  applied. **The third pass caught the subtlest one: the change that carried this document made one
+  of its own sentences false** (see the `--jinja` scope row below).
 
   | The first draft said | What was measured | Status |
   |---|---|---|
   | "`--jinja` appears **nowhere** in the repository" | False. It appears in `library/ai/qwen-hermes-tool-calling-report.md` (five places), in `library/ai/hermes-docs/reboot/work/R6-LLAMA-SERVER-SSOT-REVIEW.md:33`, and in Hermes' own `local_runtime/supervisor.py:188`. And the first document **contradicts** our reading: it says `--jinja` is now default-on | **FIXED, and it changed the finding.** The claim is now scoped to the deployment and the development docs, the conflict is stated, and §4.1 gives the one command that settles it |
-  | "the runbook records no outcome for the real agent turn" | False. The COOKBOOK's Step 4 table records it in detail, including three NULL checks that **support** the diagnosis | **FIXED, and it strengthened the finding** — see §4.1 |
+  | "the runbook records no outcome for the real agent turn" | False. The COOKBOOK's Step 4 table records it in detail — an agent turn where the model picked a tool and no call reached the platform | **FIXED, and it strengthened the finding** — see §4.1 |
   | "a 6-tier resolution chain" | The chain has **seven** tiers, and the document's own list numbered seven | **FIXED** |
   | "6 generated entities" | The directory holds **10** | **FIXED** — scoped to the six that govern the model layer |
   | "Both lanes already resolve through one `model-factory.ts`" | The embedding lane runs through `EmbeddingService`, not the factory — which the same row's own Status cell already said | **FIXED** |
   | SDK quote read `loadSetting(...)` | The call is `loadOptionalSetting(...)`, at line 8259 | **FIXED** |
   | "See §5.3" | No §5.3 exists; the Hermes managed-runtime section is §6.3 | **FIXED** |
+  | *"`--jinja` is absent from the deployment and from the development documents"* | **This change made that sentence false about the tree it ships in** — the same commit adds the flag to the COOKBOOK, `RUNBOOK-sprint0.md` and `BACKLOG.md`. The claim was right about the tree *before* the change and wrong about the tree *after* it | **FIXED** — the tense is now explicit, and the sentence says which documents carry the fix |
+  | *"three independent checks agree nothing reached the platform"* | The COOKBOOK's own ledger caveat removes two of the three: a read-only tool writes no `action_logs` row and API-key usage is never recorded, so both are NULL regardless. **Only the MCP log line discriminates** | **FIXED** — and it is a weaker claim than the first draft made, which is the point |
 
 - **The lesson, and it is the project's own rule paying off again.** The first draft's `--jinja`
   claim came from a repository-wide search that **timed out**. A check that did not finish is not a
