@@ -91,6 +91,12 @@ library/[0-9][0-9]-*/
 library/ai/hermes-agent-main.zip
 library/ai/hermes-docs/
 
+# The upstream Open Mercato documentation site, copied in on 2026-08-07: 471 files,
+# 63 MB. It is upstream's docs content, not ours — the project's own position
+# (where_we_left.md item B) is that upstream's docs must not ship under our name.
+# Kept on disk for reference; not tracked. (Added 2026-10-05.)
+library/kit-docs/
+
 # Hyper-V build artefacts for the Coolify hosting environment. Large, regenerable,
 # and one of them is a secret: the cloud-init seed carries the VM's credentials.
 # A 4 GB Ubuntu ISO, the seed ISO, and a dynamically-expanding VHDX. None of this

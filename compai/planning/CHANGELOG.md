@@ -190,6 +190,47 @@ explicit do-not-carry list in §4.9.
 
 ---
 
+## 2026-10-04 — Analysis programme: the contested-ownership decisions adopted
+
+Source: the 12-batch analysis programme ([`library/analysis/`](../../library/analysis/)),
+batches 9–12. These are the design decisions the programme settled — above all the five
+contested items the register marked **"the owner's to decide"**, adopted 2026-10-04. Full
+reasoning: [`findings/10`](../../library/analysis/findings/10-contested-ownership.md) and the
+development plan [`findings/12`](../../library/analysis/findings/12-development-plan.md).
+
+### Decided — ownership boundaries
+
+| Change | Where | Origin |
+|---|---|---|
+| **The agent runtime is Hermes** — Q6 closed | [07](07-open-questions.md) | batch 9 map · batch 11 S-01 |
+| **Approvals split by scope** — our gate owns business actions; risk-graded | [02 §4.4](02-authority-and-autonomy.md) | batch 10 C-1 |
+| **Scheduling split by scope** — our scheduler owns business jobs; valid only if enforced | [01 §2.1](01-core-architecture.md) | batch 10 C-3 |
+| **Memory vs knowledge split by the six categories** — build only the authorization boundary | [04 §9](04-context-graph-and-tags.md) | batch 10 C-6 |
+| **Chat channels split by scope** — ours is the business inbox | [05](05-addressing-and-mentions.md) | batch 10 C-11 |
+| **Delegation renamed** — ours is *authority* delegation; Hermes's is *task* delegation | [05 §4.1](05-addressing-and-mentions.md) | batch 10 C-15 |
+
+### Added — the four vocabulary collisions
+
+*Capability*, *delegation*, *project* and *widget* each name **two different things** — ours
+and Hermes's. Recorded so a reader can tell which is meant, and so no document uses them
+interchangeably.
+
+### Added — the build order, as a gate
+
+The development plan fixes the order: **the Business Model Kernel specification first
+(RQ-140 — the vision's own implementation gate), then the spine (G-01 → G-02 → G-03), the
+security floor, the product surface, the hygiene.** By the vision's own rule (§29), no
+implementation begins before the kernel specification exists.
+
+### Validated without change
+
+- **The "do not build" list** (12 items) — each is the *runtime* half of something Hermes
+  runs, or the *second* copy of something we run.
+- **The `V`-register** (23 entries: 16 KEEP, 7 HOLD) — value we hold that the vision does
+  not ask for.
+
+---
+
 ## Appendix — Batch A: noted as a rubric flaw
 
 [Rubric](method/platform-evaluation-rubric.md) scores *absent* and *present-but-wrong-shaped*

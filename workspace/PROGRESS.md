@@ -1,5 +1,12 @@
 # The roadmap — everything left, in order
 
+> ⚠️ **Superseded 2026-10-04.** The single roadmap is now
+> [`../library/development/BACKLOG.md`](../library/development/BACKLOG.md), which unifies this file's
+> remaining Starting-Kit items with the product phases from the analysis programme. This
+> file is kept for the **reasoning** behind each item, and because `where_we_left.md`
+> already flagged it as carrying **three overlapping lists that disagree**. Do not add a
+> fourth view here — update the backlog instead.
+
 **One line: the governance layer is built and verified. What remains is what
 **Hermes** needs before it can act as an AI employee, what a server needs before
 this is hosted, and the screens that make the whole thing operable by a person.**

@@ -761,3 +761,419 @@ disagrees with it, and reversed back by the one after that.
 so and name what has to exist first — the way shadow mode had to run before
 enforcement could be switched on. "Later" with a stated precondition is a plan;
 "later" on its own is how things get forgotten.
+
+---
+
+## Rule zero-nine — measure from the artefact, not the description of it
+
+**Added 2026-10-04, out of the analysis programme** (`library/analysis/`). It is
+the rule that programme kept re-learning, and it earned its place.
+
+**When a document and the thing it describes disagree, the thing wins.** A
+document is a claim to check, never a fact to cite. The owner's own directive for
+Hermes states it exactly: *"the extract is the authority; the documents are the
+claims."* Applied across the programme, it caught **8 wrong claims in a sibling
+project's Hermes documentation** (batch 8) and **5 overstated claims in the
+vision itself** (batch 9).
+
+### The two habits that make it work
+
+**1. Read the code, not the folder's reputation.** A folder that holds one
+accurate document is not thereby accurate — trustworthiness is per document, not
+per folder ([[L9]]). When a claim matters, find the file behind it. A cell with no
+file is `PARTIAL` at best.
+
+**2. Reach every number by two routes.** A single derivation repeats its own
+mistake. The programme's requirement count (**140**) was confirmed two ways —
+grouping the source registers, and counting the matrix rows — and the two agreed.
+**When two routes disagree, find out why. Never average them, and never quietly
+pick the nicer one.** If you cannot reconcile them, that is the finding, and it
+goes in the report.
+
+### The test
+
+> **Ask what you actually looked at, and whether it is the thing you are claiming
+> about.** A label instead of the tables. A count instead of the lines. A type
+> instead of the runtime. A document instead of the code. A build instead of a
+> running system.
+
+This is [[L48]] and [[L49]] made into a standing rule. It costs a minute and it is
+the difference between a finding and a guess.
+
+---
+
+## Rule zero-ten — research, validate, write the steps, *then* build
+
+**Owner standing decision, 2026-10-04:**
+
+> *"Before working on any sprint of tasks, heavily research it and validate its
+> development plan. Is there anything in Hermes or the Starting Kit that can
+> provide added value on top of that task? Is this the best approach to it? Then
+> fully write the cookbook steps for that sprint in detail that a junior developer
+> can follow and execute."*
+
+**Every sprint runs in four steps, and no code is written before step 3.**
+
+| Step | What | Output |
+|---|---|---|
+| **1. Research** | What already exists for this task — in Hermes, in the Starting Kit, in the `V`-register? Is there a shortcut? | a short note: what we reuse, what we build |
+| **2. Validate** | Is this the best approach? What would break it? Is there a cheaper way to the same outcome? | a decision, with the alternative it beat |
+| **3. Write the cookbook steps** | The full step-by-step for **this sprint only** | a new section in this cookbook |
+| **4. Build** | Do the work against the running stack, test it, record it | the change, tested and committed |
+
+**Why this is not optional.** The analysis programme (batches 0–12) found the same
+thing every time: **the cheapest win was almost always something already built.**
+Of 140 requirements, the platform half was bought and the agent half borrowed —
+only the product half had to be built. A sprint that skips step 1 rebuilds
+something that exists.
+
+**Why the steps are written per sprint, not all at once.** A detailed step for
+code that does not exist yet is a **guess**, because the step depends on the
+interfaces the build will reveal. So:
+
+- **The skeleton is written for every sprint up front** — one line each, in
+  [`../library/development/BACKLOG.md`](../library/development/BACKLOG.md). This is what makes a
+  handover at any moment possible.
+- **The full detail is written just before each sprint** — when it can be right.
+
+**The handover test.** Ask: *could a developer who was not here pick up the next
+sprint and follow it without asking a question?* If not, the steps are not written
+yet — and the skeleton is what tells them which sprint is next.
+
+---
+
+# Sprint 0 — the running trio (the workbench)
+
+**Written 2026-10-04. This is the first sprint.** It is not a feature — it is the **workbench**:
+the platform, Hermes and the model server running together on the laptop, so that every later
+sprint is built against a real system instead of a description of one.
+
+**Why it comes first, and why it is cheap:** [`../library/development/ARCHITECTURE.md`](../library/development/ARCHITECTURE.md) §5.
+In short — the stack is **already dockerised** and already targets both the laptop and the cloud
+from **one file**, so this is *finishing* something that exists.
+
+## Step 1 — Research: what already exists
+
+**Measured 2026-10-04, on the owner's machine — not assumed.** It is a **Dell Precision 7510**
+(hostname `BIXMASERVER`), confirmed by the owner as the machine Sprint 0 runs on.
+
+| What | State | Evidence |
+|---|---|---|
+| The machine | ✅ measured | **Dell Precision 7510** — Intel **i7-6820HQ** (**4 cores / 8 threads**), **32 GB RAM** (2 × 16 GB DDR4-2133, SK Hynix), Windows 10 Pro |
+| Headroom | ✅ ample | **126 GB free** of 476 GB on `C:` |
+| Docker + Compose | ✅ present | Docker **29.8.0**, Compose **v5.5.1** |
+| The platform stack | ✅ dockerised, parses | `docker compose config` → services `app`, `mcp`, `opencode`, `postgres`, `redis`, `meilisearch` |
+| Hermes | ✅ has its own compose | `../library/ai/hermes-agent-main/docker-compose.yml` → `gateway` + `dashboard`, `network_mode: host`, volume `~/.hermes:/opt/data` |
+| The model server | ❌ not present | no llama.cpp service anywhere in the stack |
+| The model file | ❌ not present | no GGUF on the machine |
+
+**What we reuse:** the whole `fullapp.yml` stack and Hermes's image. **What we add:** a `model`
+service and a `hermes` service. **What we remove:** *nothing* — `opencode` **stays** (the removal
+check failed; see step 3.6 and blocker **B-05**).
+
+**From the `V`-register:** **V-01** (auxiliary models with automatic fallback) is what makes the
+local-first claim practical — the model server slots underneath it. Nothing else in the register
+is needed for this sprint.
+
+**Measure the target machine before step 3.** The specification above belongs to the machine this
+documentation was written from. Confirm the machine you will actually run on, from its installed
+parts (Windows PowerShell):
+
+```powershell
+Get-CimInstance Win32_PhysicalMemory | Measure-Object Capacity -Sum    # installed RAM (bytes)
+Get-CimInstance Win32_Processor | Select-Object Name, NumberOfCores, NumberOfLogicalProcessors
+Get-PSDrive C | Select-Object Used, Free
+```
+
+## Step 2 — Validate: is this the best approach?
+
+**Alternative considered — three separate compose files**, joined by hand (host ports, a shared
+network). **Rejected:** three commands, three sets of env, and the cloud story becomes three
+deploys. **One file, one command** is the entire point.
+
+**Alternative considered — do not dockerise**, run all three natively. **Rejected:** the owner's
+condition is that the cloud deploy is **guaranteed** once local works, and only a single
+containerised file gives that.
+
+**Approach chosen:** **extend `docker-compose.fullapp.yml`** with a `model` and a `hermes`
+service, bridge networking throughout, `DEPLOY_ENV` kept so local and cloud stay one file.
+
+**What would break it:** Hermes's `network_mode: host`
+([`../library/development/BLOCKERS.md`](../library/development/BLOCKERS.md) **B-01**). The fix is step 3.4.
+
+## Step 3 — The steps
+
+**Every command runs from `workspace/starting-kit/`.**
+
+**3.1 — Preconditions.** Docker Desktop **running** — not merely installed (blocker **B-04**:
+the client is present, the engine was not running on 2026-10-04). Node 24 on the path for any host
+command:
+```bash
+export PATH="/c/Users/Ramzi/Downloads/companai/workspace/.toolchain/node24:$PATH"
+```
+
+**3.2 — The model server.** Add a `model` service to `docker-compose.fullapp.yml`. **Verified
+2026-10-04:**
+
+- **Image:** `ghcr.io/ggml-org/llama.cpp:server` — the official `server` variant ships only
+  `llama-server`. **Use the plain (CPU) image for Sprint 0** — it is the simplest thing that proves
+  the pipes connect. *(Measured 2026-10-04: the machine **also has an NVIDIA Quadro M2000M**, besides
+  Intel HD 530. A `-cuda` image could be faster, but it needs WSL2 GPU passthrough and a compatible
+  driver — revisit only if answers are too slow. **They are too slow — see the timing note below.**)*
+- **Port:** `8080`, published on the host so you can test it directly.
+- **Volume:** a host folder holding the `.gguf`, mounted read-only at `/models`.
+- **Context window: `-c 65536` *and* YaRN RoPE scaling — both are required.** Hermes refuses any
+  model whose served window is below **64,000 tokens** ("needs at least 64K tokens for reliable tool
+  use"; `agent/agent_init.py::_enforce_minimum_context`, `MINIMUM_CONTEXT_LENGTH = 64000`).
+  Qwen2.5's GGUF declares `n_ctx_train = 32768`, and **llama.cpp caps the slot context at that
+  value** — so `-c 65536` **on its own silently yields `n_ctx_slot = 32768`**:
+  `the slot context (65536) exceeds the training context of the model (32768) - capping`. The RoPE
+  flags are what actually admit 64K. **Read the server's own startup log to confirm
+  `n_ctx_slot = 65536`; do not trust the flag.**
+
+```yaml
+  model:
+    image: ghcr.io/ggml-org/llama.cpp:server
+    container_name: mercato-model-${DEPLOY_ENV:-local}
+    restart: unless-stopped
+    ports:
+      # loopback by default — in-network callers use http://model:8080/v1
+      - "${MODEL_BIND:-127.0.0.1}:${MODEL_PORT:-8080}:8080"
+    volumes:
+      - ./models:/models:ro
+    command:
+      - -m
+      - /models/${MODEL_FILE}
+      - --port
+      - "8080"
+      - --host
+      - 0.0.0.0
+      - -c
+      - "65536"          # required by Hermes' 64K floor — see above
+      - --rope-scaling
+      - yarn             # without this, llama.cpp caps the slot at n_ctx_train (32768)
+      - --rope-scale
+      - "2"
+      - --yarn-orig-ctx
+      - "32768"
+      - -n
+      - "512"
+      # Threads. llama.cpp defaults -t to PHYSICAL cores (4 here) and -tb to -t,
+      # ignoring the 8 logical CPUs the container is given. Measured 2026-10-04
+      # (see the speed note below): -t 4 -tb 8 is the best split.
+      - -t
+      - "4"
+      - -tb
+      - "8"
+    networks:
+      - mercato-network-fullapp
+```
+
+It serves an **OpenAI-compatible** endpoint at `http://model:8080/v1`. The GGUF itself is decision
+**A2** (a small instruct model, ~7–8B, `Q4_K_M` quantisation) and is a multi-GB download — blocker
+**B-03**. **Confirm the image tag resolves when you pull it — do not assume it.**
+
+> **Measured speed — a real Sprint 0 finding (2026-10-04).** On this laptop, CPU-only, the agent loop
+> is **slow enough to matter**: Hermes' prompt is **~15,700 tokens** (its system prompt plus the 21 MCP
+> tool schemas), and llama.cpp reads it at only **~13 tokens/s** — so a single agent turn spends
+> **~20 minutes just ingesting its prompt** before generating a token. The 64K KV cache also takes the
+> model container to **~10 GiB of the Docker VM's 15.56 GiB**. This is the price of Hermes' 64K floor,
+> not a misconfiguration.
+>
+> **Measured with a direct `/completion` call (1207-token prompt, 64-token generation):**
+>
+> | `-t` / `-tb` | prompt ingest | generation |
+> |---|---|---|
+> | 4 / 4 (llama.cpp default) | 13.2 tok/s | 3.9 tok/s |
+> | 8 / 8 | 17.7 tok/s | 3.0 tok/s |
+> | **4 / 8 (what we ship)** | **19.3 tok/s** | **4.6 tok/s** |
+>
+> Prompt ingest is compute-bound and wants all 8 logical CPUs (`-tb 8`); generation is
+> memory-bandwidth-bound, where extra threads cost more than they save (`-t 4`). The default wastes
+> half the machine.
+>
+> **Ranked fixes for "make testing fast":** (1) the thread split above — free, +46% ingest, **done**;
+> (2) **test the two arrows separately** — the 15,700-token prompt is mostly tool schemas, so a
+> "think"-only test is ~200 tokens and takes seconds; (3) **a smaller model** for day-to-day iteration
+> (Qwen2.5-3B ≈2.3× faster, 1.5B ≈4.6× faster), keeping the 7B for final checks. **GPU offload is not
+> the fix:** the Quadro M2000M has only **4 GiB**, which cannot hold the model (~4.4 GB) *plus* the
+> 64K KV cache (~3.7 GB), so offload would be partial at best on a 2015 Maxwell chip.
+
+**3.3 — Point the platform at it.** **Verified in the code 2026-10-04:** the OpenAI-compatible
+preset reads its endpoint from **`OPENAI_BASE_URL`** (`openai-compatible-presets.ts` → `OPENAI_PRESET`),
+and the provider is chosen by **`OM_AI_PROVIDER`** (`model-factory.ts`). So set, in `.env`:
+
+```bash
+OM_AI_PROVIDER=openai
+OPENAI_BASE_URL=http://model:8080/v1
+OPENAI_API_KEY=local          # any non-empty value; llama.cpp ignores it
+OM_AI_MODEL=<the model id you loaded>
+```
+
+The `OPENCODE_*` variables are **legacy aliases** (see `model-factory.ts`) and are not needed here.
+Nothing else in the platform changes.
+
+**3.4 — The Hermes service.** **Verified 2026-10-04:** Hermes ships a **prebuilt image** —
+`nousresearch/hermes-agent:latest` — so there is **nothing to build**. Add a `hermes` service with
+**bridge networking and an explicit published port — not `network_mode: host`** (this is the fix for
+**B-01**; the official Docker guide's compose uses bridge + `ports: 8642:8642`).
+
+**Give Hermes its own named volume — do not bind-mount a host folder.** Hermes keeps its state in
+SQLite in **WAL mode**. A host bind mount on Docker Desktop for Windows is a **cross-VM filesystem**
+(virtiofs/9p), where SQLite's WAL shared-memory is not coherent across the VM boundary; Hermes
+**errors on it** and warns that concurrent writers can *silently corrupt the database*. A named
+volume is a native filesystem, so WAL is safe — this is the remedy Hermes' own message names.
+
+```yaml
+  hermes:
+    image: nousresearch/hermes-agent:latest
+    container_name: hermes-${DEPLOY_ENV:-local}
+    restart: unless-stopped
+    command: ["gateway", "run"]
+    ports:
+      - "${HERMES_PORT:-8642}:8642"
+    volumes:
+      - hermes_data:/opt/data        # named volume, NOT a host path — see above
+    environment:
+      MCP_SERVER_API_KEY: ${MCP_SERVER_API_KEY:-}
+    networks:
+      - mercato-network-fullapp
+```
+
+…and declare it under `volumes:` as `hermes_data: name: mercato-hermes-data-${DEPLOY_ENV:-local}`.
+
+**Configure Hermes through its own CLI — never by hand-editing `config.yaml`.** Hermes **owns** that
+file (it carries a `_config_version` and is rewritten on startup), so a hand-written `model:` or
+`mcp_servers:` block is **silently discarded** — the file still *reads* the way you left it until the
+process starts, then your edits are gone and the log contains no error. The binary is
+`/opt/hermes/bin/hermes` (it is **not** on `PATH` for `sh -lc`). Point its model at the container
+name — *not* `localhost`, which would be the Hermes container itself:
+
+```bash
+H=/opt/hermes/bin/hermes
+$H config set providers.mercato-local.base_url http://model:8080/v1 --force
+$H config set providers.mercato-local.api_key local --force
+$H config set model.provider mercato-local      # a named `providers:` entry — see the note below
+$H config set model.default Qwen2.5-7B-Instruct-Q4_K_M
+$H config set model.context_length 65536        # only true because the server really serves 64K
+$H config get model                             # read it back — do not assume it took
+```
+
+> **Two traps here, both measured 2026-10-04.**
+> **(a)** `model.provider: llamacpp` looks like the right answer — the docs list `llamacpp` as an
+> alias for `custom`. It is not: `llamacpp` routes to Hermes' **managed** local runtime, which
+> expects a server *Hermes* supervises, and fails with *"The local model server is turned off."*
+> Use an explicit **named `providers:` entry** (the code's own "Rung 3: a configured named custom
+> provider") and set `model.provider` to that name.
+> **(b)** `model.context_length` is a **claim about the server**. Set it only to a value the server
+> actually serves — confirmed from llama.cpp's startup log (`n_ctx_slot`), not from the flag you
+> passed. Declaring a window the server does not have is the defect [[L49]] names.
+
+**3.5 — Connect Hermes to the platform (arrow 1).** Use Hermes' **MCP command** — again, not a hand
+edit:
+
+```bash
+$H mcp add mercato --url http://mcp:3001/mcp --auth header
+# then correct the header — see below — and enable it:
+$H config set mcp_servers.mercato.headers.x-api-key <the key>
+$H config set mcp_servers.mercato.enabled true
+$H mcp test mercato
+```
+
+**The header is `x-api-key`, NOT `Authorization: Bearer`.** Verified in the platform's own code
+(`packages/ai-assistant/…/lib/auth.ts:157-192`): it accepts **exactly two** forms —
+**`x-api-key: <secret>`** or **`Authorization: ApiKey <secret>`** (note `ApiKey `, *not* `Bearer `).
+Hermes' `mcp add --auth header` flow asks for an *"API key / Bearer token"* and stores
+`Authorization: Bearer …`, which is **neither** form, so every call fails with
+`401 {"error":"API key required (x-api-key header)"}`. Adding the `x-api-key` header fixes it.
+
+**The key is generated by the platform — read it, do not set it.** The `mcp` service always
+provisions its own key (`mercato ai_assistant mcp:ensure-api-key --file
+/run/mcp-shared/mcp-api-key`, in `docker/scripts/mcp-entrypoint.sh`). **Do NOT set
+`MCP_SERVER_API_KEY` in `.env`** — that command has no env-key option, so the value would be a
+*different* string from the real key; and because the `opencode` service prefers the env var over the
+file, a value there makes opencode authenticate with the wrong key and get 401. Read the real one:
+
+```bash
+docker exec mercato-mcp-local cat /run/mcp-shared/mcp-api-key
+```
+
+This is the wire the agent uses to **do** things in the business.
+
+**A successful test looks like this** (measured 2026-10-04):
+`✓ Connected (2567ms)` and `✓ Tools discovered: 21`.
+
+**3.6 — OpenCode: the check was run, and it FAILED — do NOT remove it (2026-10-04).** The check
+(grep the compose and env for `OPENCODE_*`, confirm nothing else reads them) found that the
+platform's **own chat route is wired to the OpenCode service**: `api/chat/route.ts` imports
+`createOpenCodeClient` / `opencode-handlers`, and `opencode-handlers.ts` calls `OPENCODE_URL`
+(`http://localhost:4096`). **So OpenCode stays** — deleting it breaks the platform's AI chat.
+Removal needs a prerequisite (rewire the chat to the app's LLM registry) and is tracked as **N-8**
+in [`../library/development/BACKLOG.md`](../library/development/BACKLOG.md); see blockers **B-05**
+and **B-04** in [`../library/development/BLOCKERS.md`](../library/development/BLOCKERS.md).
+
+**3.7 — Bring it up.**
+```bash
+docker compose -f docker-compose.fullapp.yml up -d
+```
+The first run **builds the app image — several minutes**. Run it in the background; do not watch it.
+
+**3.8 — Prove arrow (2) — the model.** Ask the model server directly for a completion. It must
+answer **with no cloud key set**.
+
+**3.9 — Prove arrow (1) — the platform tools.** Have a Hermes agent **list a platform tool and
+call it**, then read the **ledger** and confirm the call was recorded and authorized. **This is
+the proof that the two halves are joined.**
+
+## Step 4 — Done when
+
+**Status, measured 2026-10-04:**
+
+| | Criterion | Status |
+|---|---|---|
+| ✅ | One command brings up **platform + Hermes + model** together | **Met.** `up -d` brings up 8 services; all healthy. |
+| 🟡 | Arrow **(1)** works, and the call is **visible in the ledger** | **"List" proven; "call" proven at the platform, not yet through the agent.** Hermes connects and discovers **21 platform tools** (`hermes mcp test mercato` → `✓ Connected`, `✓ Tools discovered: 21`), and an agent turn **enumerated all 21 by name**. In that turn the 7B model picked the wrong tool (`meta_describe_agent`, which needs an `agentId`) and never called `context_whoami` — **three checks agree nothing reached the platform** (`api_keys.last_used_at` NULL, `action_logs` unchanged, no MCP log line). A **direct authenticated `tools/call` to `context_whoami` returns HTTP 200** with real data, so the wire is sound and the failure is the model's tool choice. **Ledger caveat:** a *read-only* tool writes nothing to `action_logs`, and the platform does **not** record API-key usage (`last_used_at` stays NULL) — the only record is the MCP's own log. |
+| 🟡 | Arrow **(2)** works **with no cloud key** | **Proven for the model server** (it answers with no cloud key set). The platform is *configured* at it (`OPENAI_BASE_URL=http://model:8080/v1`, read back from the container env), but no platform-side AI call has been observed — exercising the platform's AI chat needs the owner's login (**B-02**). |
+| ✅ | The dashboard is reachable on **localhost only** — nothing on the LAN | **Met.** All three published ports bind `127.0.0.1` (`APP_BIND` / `MODEL_BIND` / `HERMES_BIND` override it for a cloud deploy). Verified with `docker compose config` → `host_ip: 127.0.0.1`. |
+| ✅ | **The same file, unchanged, is what deploys to the cloud** — only env values differ | **Met by design.** One compose file; every environment-specific value is a `${VAR}`. `DEPLOY_ENV` names the environment. |
+| ✅ | A one-page runbook exists | **Met:** [`../../library/development/RUNBOOK-sprint0.md`](../../library/development/RUNBOOK-sprint0.md). |
+
+**The one thing left to prove:** a Hermes agent *calling* a platform tool. The wire is sound end to
+end (proven directly), so what remains is **tool-choice reliability from a CPU-only 7B at 64K
+context** — measured at **~0.8 tokens/s generation and ~41 minutes per turn**, which is also why it
+is expensive to iterate on. The honest next step is **GPU offload** (the machine has a Quadro
+M2000M) or a **smaller tool surface**, not another prompt tweak.
+
+**What this sprint is not:** not a feature, and not the kernel. Its output is a **working
+environment** and a runbook.
+
+---
+
+# The hosting environment — `Platform-Server` (Coolify)
+
+**Built 2026-10-04.** A separate environment from Sprint 0: an Ubuntu Server 24.04 VM on Hyper-V
+running Docker + Coolify, so a site can be *cloud-checked* on this laptop and shared with testers.
+**Operate it from [`../../library/development/RUNBOOK-platform-server.md`](../../library/development/RUNBOOK-platform-server.md)** —
+that is the one page to read. Built per
+[`../../library/development/PLAN-coolify-laptop-implementation.md`](../../library/development/PLAN-coolify-laptop-implementation.md).
+
+Two things to know before touching it:
+
+- **`eth1` is the stable address (`172.28.50.2`).** `eth0` is DHCP on the Hyper-V Default Switch and
+  **its address changes across reboots** — never hard-code it. `Get-VMNetworkAdapter -VMName
+  "Platform-Server"` reports the current one from the host.
+- **One step needs Administrator** (Phase 6: host IP `172.28.50.1` + a firewall rule allowing 8080
+  from the VM only). `vms/phase6-ai-network-build.ps1` and its undo script are written and reviewed;
+  they are idempotent and remove only what they created.
+
+**Three rules this build added, worth carrying to any VM or console work:**
+
+1. **A success return is a claim about the API, not about the world.** `Msvm_Keyboard.TypeText`
+   returns `0` and types nothing; the working path is `PressKey`/`ReleaseKey` with virtual-key codes.
+   Prove an input path with a control that must change something you can *see* — pressing Enter alone
+   produced a third prompt line, which is what isolated the fault. ([[L59]])
+2. **"Drive" is not "hard disk".** `BootType -eq "Drive"` matches a DVD too; a first attempt at
+   "hard disk first" moved the empty DVD to the front. Discriminate on the device type.
+3. **Re-read after a pause.** A read taken immediately after a write reported a detach that had
+   already happened; and a guest reboot silently moved the VM's IP. Neither was a fault — both were
+   stale or changed state believed on a single reading.

@@ -1,7 +1,14 @@
 # START HERE
 
 **You have just been handed this project and know nothing about it. This page is
-the only thing you need to read first.** Everything else is reachable from here.
+the map.** Everything else is reachable from here.
+
+> **New to the project? Read the handover first:
+> [`library/development/HANDOVER.md`](library/development/HANDOVER.md).** It is written
+> for someone who knows nothing about the project, codebase or documents, and it tells
+> you what exists, where it is, and the traps nobody can find by reading the code
+> (two repositories, two products called Companai, the gitignored `vms/` folder, the
+> host VM, the mandatory Node-24 export). Then come back here for the folder map.
 
 ---
 
@@ -20,24 +27,27 @@ and can always explain why.
 ## 2. Where the project stands today
 
 > **Returning to this project after time away? Read
-> [`where_we_left.md`](where_we_left.md) first.** It is the one status document
-> kept current, and it says what is left, how to run this, and which traps cost
-> hours. Everything in this index is background behind it.
+> [`library/development/HANDOVER.md`](library/development/HANDOVER.md) first, then
+> [`library/development/BACKLOG.md`](library/development/BACKLOG.md)** for what is left.
+>
+> ⚠️ **`where_we_left.md` is no longer kept current.** It is a **2026-08-13 snapshot**, stale by
+> its own admission. It is still worth reading for its *traps*, *"things that look broken and are
+> not"* and *"how to work here"* sections — and for nothing else. **Do not trust it for status.**
 
 | | |
 |---|---|
-| **Start here on return** | [`where_we_left.md`](where_we_left.md) — status, what is left, how to pick it up |
+| **Start here on return** | [`library/development/HANDOVER.md`](library/development/HANDOVER.md) — the front door; then [`library/development/BACKLOG.md`](library/development/BACKLOG.md) for what is left. ⚠️ `where_we_left.md` is **stale (2026-08-13)** — traps only |
 | **Phase** | Building the Starting Kit |
 | **Decision made** | We are building on **Open Mercato**, a working platform we have forked permanently |
 | **Where the code is** | [`workspace/starting-kit/`](workspace/starting-kit/) |
-| **Health** | **Green.** Boots clean, zero server errors. **Gate: 22/22 tasks, 12,898 tests, `Cached: 0`** (2026-08-13). Typecheck 20/20, also uncached — `--force` is mandatory, it is Turbo-cached too (L45). See [`knowledge/test-gate.md`](workspace/knowledge/test-gate.md) for diagnosing an intermittent red |
+| **Health** | **Green when last measured** (2026-08-13). ⚠️ **Not re-measured since** — and the two status documents **disagree** on the test count (12,924 vs 12,898). **Re-run the gate and read the `Cached:` line yourself**; `--force` is mandatory, it is Turbo-cached (L45). See [`knowledge/test-gate.md`](workspace/knowledge/test-gate.md) |
 | **Current work** | **The governance layer decides, every autonomy gate binds, and a person can work the queue.** All six repairs in; the resolver enforces per tenant; A1/A2 hold an act until somebody approves it, A3 holds it until its window passes unless vetoed, A4 runs it and files it for review; acts are graded by the data they touch; 117 commands mapped to capabilities; the queue is a screen at **Settings → Authority → Approvals**. Next: gate stability, then the eight grafts |
 | **Understand the product in 10 minutes** | [`workspace/knowledge/authority-overview.md`](workspace/knowledge/authority-overview.md) — the governance layer end to end. **This is the thing we are building** |
-| **Progress tracker** | [`workspace/PROGRESS.md`](workspace/PROGRESS.md) — the *reasoning* behind each item. **Its status views disagree with each other** (three overlapping checklists accumulated across sessions); trust [`where_we_left.md`](where_we_left.md) for what is actually left |
+| **Progress tracker** | [`library/development/BACKLOG.md`](library/development/BACKLOG.md) — **the one roadmap.** ⚠️ [`workspace/PROGRESS.md`](workspace/PROGRESS.md) is **superseded** and its status views disagree with each other; use it only for the *reasoning* behind an item |
 | **The ERP is off** | 14 modules **parked**, not deleted — 136 tables instead of 263. One line each to restore: [`workspace/references/parked-modules.md`](workspace/references/parked-modules.md) |
 | **Actually deleted** | Only `packages/enterprise`, because its licence forbids redistribution |
-| **Run it yourself** | [`workspace/references/local-instance.md`](workspace/references/local-instance.md) — laptop only, no cloud |
-| **Deploy it to a server** | [`workspace/references/deployment.md`](workspace/references/deployment.md) — VPS, domain or subdomain, Plesk. Build order, database, env, workers, nginx, and what it deliberately does not cover |
+| **Run it yourself** | [`workspace/references/local-instance.md`](workspace/references/local-instance.md) — on this laptop. **The hosted path is separate: see the hosting runbooks below** |
+| **Deploy it to a server** | [`library/development/RUNBOOK-hosting-server-manual.md`](library/development/RUNBOOK-hosting-server-manual.md) — **the hosting VM (`Platform-Server`), domains, directories, databases, SSL**. ⚠️ [`workspace/references/deployment.md`](workspace/references/deployment.md) describes the **old Plesk** approach and is superseded |
 
 ## 3. The five things to read, in order
 
@@ -62,6 +72,27 @@ companai/                      ← you are here
 ├── JOURNAL.md                 what happened, in order, with dates
 ├── LESSONS.md                 mistakes made, how they were caught, how to avoid them
 │
+├── library/                   EVERYTHING IN ONE PLACE — the documentation, the AI material, the analysis
+│   ├── INDEX.md               what each shelf is, and the reading order. See §6
+│   ├── PROVENANCE.md          where every shelf came from, and how to rebuild it
+│   ├── ai/                    READ ITS README FIRST — two different products are called Companai
+│   │   ├── ai-first/          THE DIRECTION — what we will actually build. Mentions Companai 0 times
+│   │   ├── hermes-docs/       a SIBLING project's docs (Paperclip-based). Lessons only, never decisions
+│   │   └── hermes-agent-main/ the Hermes runtime source itself — where it disagrees with docs, it wins
+│   ├── analysis/              THE ANALYSIS BEFORE DEVELOPMENT — **COMPLETE, all 12 batches**
+│   │   ├── PLAN.md            the batch plan with tickboxes — all 12 DONE
+│   │   ├── README.md          how the programme runs, and the rules
+│   │   ├── LOG.md             one dated line per batch completed
+│   │   └── findings/          one report per batch — **batch 12 is THE DEVELOPMENT PLAN**
+│   └── development/           DEVELOPMENT MANAGEMENT — where the work is tracked
+│       ├── HANDOVER.md        **the front door for a newcomer — read this first**
+│       ├── README.md          the reading order, the sprint process
+│       ├── BACKLOG.md         **THE ONE ROADMAP** — everything left, in order
+│       ├── ARCHITECTURE.md    how the Starting Kit + Hermes + the model server run together
+│       ├── BLOCKERS.md        anything stopping progress, with what clears it
+│       ├── NEEDS-YOU.md       owner-only actions, numbered
+│       └── RUNBOOK-*.md       hosting: the server manual, the domain walkthrough, Sprint 0
+│
 ├── compai/                    THINKING — no code
 │   ├── brainstorming/         where the idea came from (3 documents)
 │   └── planning/              the design (12 documents) — see its own README
@@ -70,26 +101,58 @@ companai/                      ← you are here
 │
 ├── workspace/                 BUILDING — this is where work happens
 │   ├── COOKBOOK.md            the development cookbook — read before touching code
-│   ├── PROGRESS.md            THE ROADMAP — everything left, in order. The only plan
+│   ├── PROGRESS.md            ⚠️ SUPERSEDED by library/development/BACKLOG.md — keeps the reasoning only
 │   ├── knowledge/             HOW THE PLATFORM WORKS — reusable know-how
 │   ├── references/            the detail behind the cookbook
 │   ├── salvage/               one report per module analysed — what each contains
 │   ├── attic/                 rescued code patterns + CATALOG.md (little here: we park, not delete)
-│   ├── scripts/               checkpoint.sh — restore points before risky work
+│   ├── scripts/               checkpoint.sh, and vm-platform/ (the tracked VM scripts)
 │   ├── .backups/              database + env snapshots (newest 5 kept, auto-pruned)
 │   ├── .toolchain/            our own Node 24 — do not use the system Node
-│   └── starting-kit/          THE CODEBASE
+│   └── starting-kit/          THE CODEBASE (repo 2)
 │
-├── Platform/                  Candidate 1 — assessed, not chosen. Source of the G1–G8 grafts
-├── open-mercato-main/         Candidate 2 — the original, unmodified. Diff against it
-└── skills-main/               The agent methodology our process is based on
+├── aissistant-package/        ⚠️ NOT OURS — the SIBLING project's codebase (Paperclip fork).
+│                              A legacy copy, merged into konsult/ on 2026-08-17. DO NOT EDIT,
+│                              do not deploy from it. Authoritative copy: konsult/aissistant-package/
+├── companai.md                ⚠️ NOT OURS — a sibling document, copied in. Byte-identical to
+│                              konsult/aissistant-package/documentation/cursor/companai.md.
+│                              It reads as a vision statement for OUR product. It is not one
+├── companai-logo/             Brand assets
+├── keys/                      Server credentials — NOT documentation, keep private. Now gitignored
+├── host-sync.tgz              30 MB host archive containing a .env — large, and a secret. Gitignored
+├── paperclip-master.zip       ⚠️ NOT OURS — upstream Paperclip (the newest version), 9,056 files.
+│                              Reference material for the agent/task study. Not our code
+├── vms/                       ⚠️ GITIGNORED — the hosting VM's credentials, ISO and scripts
+│
+├── Platform/                  ⚠️ NOT PRESENT today — see the note below
+├── open-mercato-main/         ⚠️ NOT PRESENT today — see the note below
+└── skills-main/               ⚠️ NOT PRESENT today — see the note below
 ```
 
-**The three folders at the bottom are gitignored on purpose.** They are read-only
-reference trees, not our code — `Platform/` is where the authority ideas came
-from, and `open-mercato-main/` is the pristine upstream to diff against when you
-need to know whether we changed something or inherited it. **Every line of code we
-own lives in `workspace/starting-kit/` and nowhere else.**
+⚠️ **Checked 2026-10-03 (batch 0 of the analysis programme).** Three corrections to
+what this map said before:
+
+- `aissistant-package/` was described as "a legacy mirror of the codebase", which
+  reads as a mirror of *ours*. It is the **sibling's** codebase — the other product
+  also called Companai. See [`library/ai/README.md`](library/ai/README.md).
+- `companai.md` was not on the map at all. It is a sibling document, and it is the
+  most misleading file in this folder. Labelled above.
+- `integration_research/` and `tiny_models/` moved into `library/ai/` when everything
+  was consolidated. They are no longer at the root.
+
+**Two products are called Companai.** If you are about to read a "Companai" document,
+check its path first. Full evidence and the glossary: [`library/analysis/findings/00-inventory.md`](library/analysis/findings/00-inventory.md).
+
+⚠️ **Checked 2026-10-03:** `Platform/`, `open-mercato-main/` and `skills-main/`
+are not in this folder, and were not found on the external drive either. The
+other folders above have been checked against the folder as it is now.
+
+**The three folders at the bottom were gitignored on purpose, when they were
+here.** They are read-only reference trees, not our code — `Platform/` is where
+the authority ideas came from, and `open-mercato-main/` is the pristine upstream
+to diff against when you need to know whether we changed something or inherited
+it. **Every line of code we own lives in `workspace/starting-kit/` and nowhere
+else.**
 
 ⚠️ **Naming trap:** the outer folder is `companai`, the inner one is `compai`.
 Different spellings, not a typo you should "fix" — paths depend on both.
@@ -99,10 +162,11 @@ Different spellings, not a typo you should "fix" — paths depend on both.
 Every batch runs the same way. Nothing here is optional.
 
 **1. Find out what is next.**
-[`workspace/PROGRESS.md`](workspace/PROGRESS.md) is the roadmap and the only plan.
-It is ordered; take item 1 unless you have a reason not to. If you have a reason,
+[`library/development/BACKLOG.md`](library/development/BACKLOG.md) is the roadmap and the only
+plan. It is ordered; take item 1 unless you have a reason not to. If you have a reason,
 say it and re-order the list — the list is the memory, not you. Never work on
 something that is not on it; add it first.
+*(`workspace/PROGRESS.md` is superseded by it and kept only for the reasoning behind an item.)*
 
 **2. Set up your shell.** Every session, every terminal:
 
@@ -192,6 +256,17 @@ Break these and you will damage the project.
 
 | I want to… | Go to |
 |---|---|
+| **Understand the whole project from zero (just inherited it)** | [`library/development/HANDOVER.md`](library/development/HANDOVER.md) — **the handover**: what exists, where, and the traps nobody can discover |
+| **Start working on this project (or pick it up after a handover)** | [`library/development/README.md`](library/development/README.md) — **the development hub**: the reading order, what to study first, and the handover sequence |
+| **See everything left to do, in one place** | [`library/development/BACKLOG.md`](library/development/BACKLOG.md) — **the one roadmap.** The old lists in `workspace/PROGRESS.md` are superseded by it |
+| **Understand how the three pieces run together** | [`library/development/ARCHITECTURE.md`](library/development/ARCHITECTURE.md) — Starting Kit + Hermes + the model server, and the dockerisation decision |
+| **Know what we are building, in what order, and why** | [`library/analysis/findings/12-development-plan.md`](library/analysis/findings/12-development-plan.md) — **THE DEVELOPMENT PLAN.** The deliverable the whole analysis exists for: four phases, the critical path (G-01 → G-02 → G-03), the first three things to build, and every decision that is the owner's |
+| **See the analysis plan, and what is being checked** | [`library/analysis/PLAN.md`](library/analysis/PLAN.md) — 12 batches with tickboxes, **all DONE**. Start here if you want the programme itself |
+| **Know what has been analysed so far** | [`library/analysis/LOG.md`](library/analysis/LOG.md) — one dated line per batch, and [`library/analysis/findings/`](library/analysis/findings/) for the reports |
+| **Understand the vision we are aiming at** | [`library/analysis/findings/01-vision-frame.md`](library/analysis/findings/01-vision-frame.md) — what the platform is meant to be, its rules, and what it deliberately has not decided |
+| **Understand the two-Companai trap** | [`library/ai/README.md`](library/ai/README.md) — two different products share the name. Read before using any AI document |
+| **Find any documentation at all** | [`library/INDEX.md`](library/INDEX.md) — every design, vision, audit and product document in one place, with a reading order |
+| **Know where the documentation came from** | [`library/PROVENANCE.md`](library/PROVENANCE.md) — the source of every shelf, what was left out, how to rebuild it |
 | Understand the product idea | [`compai/planning/00-product-thesis.md`](compai/planning/00-product-thesis.md) |
 | See the design in detail | [`compai/planning/README.md`](compai/planning/README.md) |
 | Know what the platform already does | [`compai/planning/09-starting-kit.md`](compai/planning/09-starting-kit.md) |
@@ -208,8 +283,7 @@ Break these and you will damage the project.
 | **Take a restore point before risky work** | `./workspace/scripts/checkpoint.sh <label>` — see COOKBOOK Rule zero-four |
 | Know the codebase's true health | [`workspace/salvage/P3-baseline.md`](workspace/salvage/P3-baseline.md) |
 | **Learn how the platform works** | [`workspace/knowledge/`](workspace/knowledge/) |
-| **Put it on a server** | [`workspace/references/deployment.md`](workspace/references/deployment.md) |
-| **See everything left to do, in order** | [`workspace/PROGRESS.md`](workspace/PROGRESS.md) — the roadmap, and the only plan |
+| **Put it on a server (hosting, domains, SSL)** | [`library/development/RUNBOOK-hosting-server-manual.md`](library/development/RUNBOOK-hosting-server-manual.md) — the hosting VM. For a domain end to end: [`RUNBOOK-adding-a-domain-step-by-step.md`](library/development/RUNBOOK-adding-a-domain-step-by-step.md). ⚠️ `workspace/references/deployment.md` is the **old Plesk** guide and is superseded |
 | **See what is already done, and why** | [`workspace/references/completed-work.md`](workspace/references/completed-work.md) |
 | See what happened and when | [`JOURNAL.md`](JOURNAL.md) |
 | Avoid a known trap | [`LESSONS.md`](LESSONS.md) |
@@ -228,4 +302,55 @@ a folder, finishes a phase, or makes a decision updates it in the same change.
 A newcomer who cannot orient themselves from this page alone means it is broken —
 fix the page, not the newcomer.
 
-*Last updated: 2026-08-10 — the approvals queue is a screen at `/backend/authority/approvals`, and the test gate no longer depends on machine load. Every autonomy gate binds: refuse, hold-for-approval, hold-and-commit, execute-and-review. Gate green: 22/22 tasks, 12,845 tests, ~7 min.*
+*Last updated: 2026-10-05 — **outdated information swept out of this page.** The owner's rule:
+"outdated info is wrong info". Fixed: the page no longer sends a returning reader to
+`where_we_left.md` as "the one status document kept current" (it is a 2026-08-13 snapshot, stale by
+its own admission); the Health row no longer quotes a stale test count as current (the two status
+documents disagree — re-run the gate); the **Plesk** deployment reference is now marked superseded
+and points at the hosting runbooks instead; and the map, the work loop and the §6 table no longer
+call `workspace/PROGRESS.md` "the only plan" — **`library/development/BACKLOG.md` is the one
+roadmap.** The map also now lists `library/development/HANDOVER.md`, the `vms/` folder and
+`paperclip-master.zip`.*
+
+*Earlier, 2026-10-05 — **there is now a handover document**, at
+[`library/development/HANDOVER.md`](library/development/HANDOVER.md). It is the front door for a
+newcomer: what exists, where it is, the two-repository layout, the two-products-called-Companai
+trap, the gitignored `vms/` folder, the host VM (`Platform-Server`, `172.28.50.2`, reachable only
+from the laptop), the mandatory Node-24 export, the standing rules, and the honest split between
+what is proven and what is not. This page remains the folder map.*
+
+*Earlier, 2026-10-04 — **a development management hub now exists**, at
+[`library/development/`](library/development/README.md): one roadmap ([`BACKLOG.md`](library/development/BACKLOG.md)),
+the architecture of the three pieces ([`ARCHITECTURE.md`](library/development/ARCHITECTURE.md)), and
+the handover order. The old roadmaps (`workspace/PROGRESS.md`, `where_we_left.md`) are
+superseded by the backlog and kept only for their reasoning. Also: **the analysis programme is
+complete, all 12 batches done, and the development plan exists.** Twelve batches mapped the vision against Hermes and the
+starting-kit and turned the result into a plan:
+[`library/analysis/findings/12-development-plan.md`](library/analysis/findings/12-development-plan.md).
+The headline: **of 140 requirements, the starting-kit covers 20, partly covers 50, misses 64,
+and conflicts with Hermes on 3; Hermes is the wrong place to look for 85 by design.** The
+one-line answer: **the platform half is bought, the agent half is borrowed, and the product
+half — the model spine and the data-level security — is neither, and must be built.** The
+first move is not code: it is the **Business Model Kernel specification**, the vision's own
+gate. See [`library/analysis/LOG.md`](library/analysis/LOG.md) for the batch-by-batch record.*
+
+*Earlier, 2026-10-03 — **the analysis programme was re-scoped, and its first vision
+batch is done.** The focus is now three things only: understand the vision
+([`library/ai/ai-first/`](library/ai/ai-first/)), measure Hermes and the starting-kit from
+their code, and use the rest of the library only to understand Hermes — fact-checked.
+Everything else is out of scope for now. See
+[`library/analysis/PLAN.md`](library/analysis/PLAN.md) and
+[`library/analysis/findings/01-vision-frame.md`](library/analysis/findings/01-vision-frame.md).
+The headline finding: our own design and the vision were written without knowledge of each
+other and **agree on eight core rules** — but they differ on what sits at the centre, so
+they are compared, not merged.*
+
+*Earlier, 2026-10-03 — **analysis batch 0 done.** The names are settled and every input is
+pinned: see [`library/analysis/findings/00-inventory.md`](library/analysis/findings/00-inventory.md).
+It confirms that **two different products are called Companai**, and it found a sibling
+document sitting in this root (`companai.md`) plus two folders that could have leaked
+secrets into git — both now gitignored. Also fixed: the library's rebuild command would
+have deleted `library/ai/` and `library/analysis/`; it no longer can. The documentation
+library itself was added earlier: 521 documents in `library/`, nothing stored twice.*
+
+*Earlier, 2026-08-10 — the approvals queue is a screen at `/backend/authority/approvals`, and the test gate no longer depends on machine load. Every autonomy gate binds: refuse, hold-for-approval, hold-and-commit, execute-and-review. Gate green: 22/22 tasks, 12,845 tests, ~7 min.*

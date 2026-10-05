@@ -41,10 +41,15 @@ The deep research favours Hatchet for speed and Temporal for durability.
 *Settled by:* the crash/recovery/long-wait test suite the research already
 specifies. Do not decide by reading documentation.
 
-**Q6 — Agent runtime.** Build minimal, or adopt Hermes/equivalent behind
+**Q6 — Agent runtime.** ~~Build minimal, or adopt Hermes/equivalent behind
 `AgentRuntimeProvider`? The gateway pattern ([01 §4](01-core-architecture.md))
 means the choice is genuinely reversible — which argues for adopting fast and
-revisiting.
+revisiting.~~
+
+**CLOSED 2026-10-04 — adopt Hermes as the agent runtime.** Confirmed by the analysis
+programme, not by preference: Hermes is the agent runtime and the starting-kit is not
+(140-requirement map, `findings/09`). The decision is recorded in the closed table below
+and in the development plan (`findings/12`, §6).
 
 **Q7 — Entity resolution.** `#customer/acme` depends on knowing two records are
 the same organisation. Matching, merge, split, confidence and manual override are
@@ -150,3 +155,27 @@ Recorded so they are not silently reopened.
 | Are hashtags strings? | No — entity tags resolve to canonical entities ([04 §1](04-context-graph-and-tags.md)) |
 | Can a mention escalate privilege? | No — mentions carry but never amplify authority ([05 §4.1](05-addressing-and-mentions.md)) |
 | Does the CV drift from reality? | It cannot — it is the compiled source of runtime grants ([03 §1](03-worker-charter.md)) |
+| **Q6** — build or adopt the agent runtime? | **Adopt Hermes.** The 140-requirement map shows Hermes *is* the runtime and the starting-kit is not (`findings/09`); the gateway pattern keeps it reversible |
+
+---
+
+## The contested-ownership decisions — recorded 2026-10-04
+
+Source: the analysis programme, batch 10 (`findings/10-contested-ownership.md`). **These
+were settled by the owner** — the five items the register marked "Ramzi's to decide". They
+are **gates, not preferences**: the development plan (`findings/12`) obeys them.
+
+| Item | Decision | What follows |
+|---|---|---|
+| **Approvals** | **Split by scope** — our gate owns *business* actions | Hermes's mode is `manual`, never `smart`; **risk-graded** — only actions above a risk class wait for a person |
+| **Scheduling** | **Split by scope** — our scheduler owns *business* jobs | `allow_agent_scheduling` off by default; **valid only if the boundary is enforced** by a gate on job creation — else one scheduler |
+| **Memory vs knowledge** | **Split by the six categories** — build **only the authorization boundary** | Hermes owns agent memory + session history; we own business truth, tenant knowledge, procedural skills. **No parallel memory, no second knowledge base** |
+| **Chat channels** | **Split by scope** — ours is the business inbox | Our channels own business messages; Hermes's adapters own agent-facing chat |
+| **Delegation (by name)** | **Split + rename** | Ours is *authority delegation* (human→human); Hermes's is *task delegation / subagents*; the words are not interchangeable |
+
+**Two things this changes in the design documents themselves:**
+
+1. **Q6 is closed** (above) — the agent runtime is Hermes.
+2. **The vocabulary register gains four entries** — *Capability*, *delegation*, *project*,
+   *widget* each name two different things. See the development plan (`findings/12`, §6)
+   and batch 10 §3.

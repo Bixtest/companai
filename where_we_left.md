@@ -1,6 +1,13 @@
 # Where we left off
 
-**Read this file first. It is the only status document you should trust.**
+> ⚠️ **This snapshot is from 2026-08-13 and is now out of date.** It predates the whole
+> 12-batch analysis programme (2026-10-03/04) and the development plan. **For current
+> status, read [`library/development/BACKLOG.md`](library/development/BACKLOG.md) and
+> [`library/development/README.md`](library/development/README.md) instead.** This file is kept because
+> its "traps", "things that look broken and are not" and "how to work here" sections are
+> still accurate and still useful.
+
+**Originally: read this file first. It was the status document to trust.**
 
 Written 2026-08-13, when work paused here to build a related product in a
 separate codebase. Everything below was verified on the day it was written, not
