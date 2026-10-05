@@ -37,7 +37,7 @@ import type { KernelField, ModelDescriptor } from '../kernel/model'
 import { createModelIndex } from './model-index'
 import type { ModelMetric } from './model-index'
 import type { PhysicalBindings } from './bindings'
-import { IR_STAGES } from './types'
+import { IR_STAGES, collectParameterReferences } from './types'
 import type {
   BusinessQueryIR,
   CompileContext,
@@ -121,6 +121,24 @@ export function compileQuery(
       `Unknown operation ${JSON.stringify(ir.operation)} — expected list, count or aggregate.`,
       'operation',
     )
+  }
+
+  /* ---- a placeholder is not a value ------------------------------ */
+
+  // §47's parameters are resolved *before* the compiler, by `bind.ts`. If one is
+  // still here, binding was skipped — and compiling it would put a marker into a
+  // filter and let the engine compare it as a literal. Refuse, so "an unbound
+  // placeholder never reaches the database as a value" is true even when the
+  // compiler is called directly, bypassing the runner.
+  const stray = collectParameterReferences(ir)[0]
+  if (stray) {
+    err(
+      'resolve_values',
+      'PARAMETER_NOT_BOUND',
+      `The IR still carries the placeholder "${stray.name}" at ${stray.path}. Parameters must be bound before compiling — a placeholder is not a value.`,
+      stray.path,
+    )
+    return { ok: false, diagnostics }
   }
 
   /* ---- stage 1: schema resolution -------------------------------- */
@@ -397,8 +415,8 @@ export function compileQuery(
   const physical: QueryOptions = {
     fields: dimensionIds.length > 0 ? [...dimensionIds] : undefined,
     filters: filters.length > 0 ? filters : undefined,
-    sort: compileSort(ir, entityId, index),
-    page: ir.limit !== undefined ? { pageSize: ir.limit } : undefined,
+    sort: compileSort(ir, entityId, index, err, gap),
+    page: typeof ir.limit === 'number' ? { pageSize: ir.limit } : undefined,
     joins: joinEdges.length > 0 ? joinEdges : undefined,
     ...(ctx?.tenantId ? { tenantId: ctx.tenantId } : {}),
     ...(ctx?.organizationId ? { organizationId: ctx.organizationId } : {}),
@@ -594,44 +612,123 @@ function aggregateAllowed(aggregate: IrAggregateOp, field: KernelField): boolean
   }
 }
 
+/**
+ * The sort, compiled.
+ *
+ * **An unresolvable sort is an error, not something to skip.** It used to be
+ * skipped — `if (!fieldId) continue` — and that quietly broke the compiler's
+ * central property: *a reference the model does not contain fails the compile.* A
+ * sort naming a field that does not exist (or a placeholder, or a typo) produced a
+ * **successful compile with no sort at all**, so a caller would get rows in an
+ * arbitrary order and no indication why. Silent degradation is the failure mode
+ * this compiler exists to make impossible, so it fails closed here too.
+ */
 function compileSort(
   ir: BusinessQueryIR,
   entityId: string,
   index: ReturnType<typeof createModelIndex>,
+  err: (stage: IrStage, code: string, message: string, path?: string) => void,
+  gap: (stage: IrStage, code: string, message: string, path?: string) => void,
 ): Sort[] | undefined {
   if (!ir.sort || ir.sort.length === 0) return undefined
   const out: Sort[] = []
-  for (const entry of ir.sort) {
-    const ref = entry.field
-    if (!ref) continue
-    const fieldId = index.resolveFieldId(ref, entityId)
-    if (!fieldId) continue
+
+  for (const [position, entry] of ir.sort.entries()) {
+    if (!entry.field && entry.metric) {
+      // A metric sort. No metrics are declared, so this cannot be honoured — and
+      // saying so is honest rather than dropping it.
+      gap(
+        'expand_measures',
+        'METRIC_NOT_DECLARED',
+        `Sort by metric ${JSON.stringify(entry.metric)} cannot be honoured: the model declares no metrics.`,
+        `sort[${position}]`,
+      )
+      continue
+    }
+    if (!entry.field) {
+      err(
+        'resolve_values',
+        'SORT_NEEDS_FIELD',
+        `Sort entry ${position} names neither a field nor a metric.`,
+        `sort[${position}]`,
+      )
+      continue
+    }
+    const fieldId = index.resolveFieldId(entry.field, entityId)
+    if (!fieldId) {
+      err(
+        'resolve_values',
+        'UNKNOWN_FIELD',
+        `Sort references ${JSON.stringify(entry.field)}, which is not a declared field of ${entityId}.`,
+        `sort[${position}]`,
+      )
+      continue
+    }
     out.push({
       field: fieldId,
       dir: entry.direction === 'asc' ? SortDir.Asc : SortDir.Desc,
     })
   }
+
   return out.length > 0 ? out : undefined
 }
 
 /**
- * A content version over the whole model.
+ * The model's content version — what a compiled plan was built against.
+ *
+ * **This must cover everything the compiler reads, or it answers the wrong
+ * question.** An earlier version of this function hashed only ids and semantic
+ * versions. That looked sufficient and was not: a field's **kind** is not part of
+ * its id, so retyping `unread_count` from `integer` to `text` left the version
+ * byte-identical. A stored Function would then report itself **fresh** against a
+ * model on which its `>` filter is no longer legal. Measured, not theorised: both
+ * models hashed to `f462abf0` while their `fieldKind`s differed.
  *
  * Reuses G-01's `contentVersion`, so "did the model change?" is answered by the
- * same function that answers it for a single object. Deterministic — no clock,
- * no randomness — so a plan is reproducible.
+ * same function that answers it for a single object. Deterministic — no clock, no
+ * randomness — so a plan is reproducible.
+ *
+ * So the hash covers every attribute the compiler consults — the field's kind and
+ * its `required` / `multi` / `filterable` flags, the entity's grain, and a
+ * relationship's endpoints, cardinality and optionality.
+ *
+ * **Presentation is excluded on purpose.** Labels and descriptions are not read by
+ * the compiler, so a typo fixed in a label must not invalidate every saved
+ * operation. Excluding them is what keeps a version bump *meaningful*.
+ *
+ * **Sorted, because a content version must not depend on declaration order.** Two
+ * models that are the same model, declared in a different order, are the same
+ * model — and G-01's `exportModel` sorts for exactly this reason.
  */
 export function modelVersionOf(model: ModelDescriptor): string {
   return contentVersion({
-    entities: Object.values(model.entities ?? {}).map((e) => ({
-      id: e.id,
-      version: e.version,
-      fields: (e.fields ?? []).map((f) => f.id),
-    })),
-    relationships: Object.values(model.relationships ?? {}).map((r) => ({
-      id: r.id,
-      version: r.version,
-    })),
+    entities: Object.values(model.entities ?? {})
+      .map((entity) => ({
+        id: entity.id,
+        version: entity.version,
+        grain: entity.grain,
+        fields: (entity.fields ?? [])
+          .map((field) => ({
+            id: field.id,
+            version: field.version,
+            fieldKind: field.fieldKind,
+            required: field.required,
+            multi: field.multi,
+            filterable: field.filterable,
+          }))
+          .sort((a, b) => a.id.localeCompare(b.id)),
+      }))
+      .sort((a, b) => a.id.localeCompare(b.id)),
+    relationships: Object.values(model.relationships ?? {})
+      .map((relationship) => ({
+        id: relationship.id,
+        version: relationship.version,
+        fromEntityId: relationship.fromEntityId,
+        toEntityId: relationship.toEntityId,
+        cardinality: relationship.cardinality,
+        optionality: relationship.optionality,
+      }))
+      .sort((a, b) => a.id.localeCompare(b.id)),
   })
 }
 

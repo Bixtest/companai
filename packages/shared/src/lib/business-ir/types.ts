@@ -57,6 +57,78 @@ export type IrFilterOperator =
 /** An amount with its currency — the vision's example filter value (§50). */
 export type IrMoney = { amount: number; currency: string }
 
+/**
+ * **§47's placeholder** — "a value is supplied here when the Function runs".
+ *
+ * It is part of the IR's own vocabulary, not an afterthought: a saved Function is
+ * not one fixed query but *"customers in {country} whose balance is above
+ * {threshold}"*, so the IR has to be able to say "a value goes here". It appears
+ * in a filter value, a time-range bound, or the limit.
+ *
+ * It is **resolved before compilation** (`bind.ts`), and the compiler refuses one
+ * that is still present — see the guard in `compile.ts`. A placeholder is never a
+ * value.
+ */
+export type IrParameterReference = { $param: string }
+
+/** The marker key, as a value so both the IR and the binder read the same one. */
+export const PARAM_MARKER = '$param' as const
+
+/** Whether a value is a placeholder marker. */
+export function isParameterReference(value: unknown): value is IrParameterReference {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    !Array.isArray(value) &&
+    typeof (value as Record<string, unknown>)[PARAM_MARKER] === 'string'
+  )
+}
+
+/** Where in the IR a placeholder was found. */
+export type ParameterReference = { name: string; path: string }
+
+/**
+ * Every placeholder the IR carries, and where it sits.
+ *
+ * **The walk is deep, and that is deliberate.** A placeholder can sit inside a
+ * money value — `{ amount: {$param: 'threshold'}, currency: 'GBP' }` is exactly
+ * the vision's §50 example — and the compiler unwraps a money value to its
+ * `amount` before comparing it. A shallow scan would miss that marker, so the
+ * guard would not fire and the marker would reach the engine as a literal value.
+ * Scanning at any depth means a new nested shape cannot reintroduce that.
+ *
+ * One implementation, used by three callers: the binder, the compiler's guard, and
+ * anything that wants to show a person which parameters a Function will ask for.
+ */
+export function collectParameterReferences(ir: BusinessQueryIR): ParameterReference[] {
+  const found: ParameterReference[] = []
+
+  const scan = (value: unknown, path: string): void => {
+    if (isParameterReference(value)) {
+      found.push({ name: value[PARAM_MARKER], path })
+      return
+    }
+    if (Array.isArray(value)) {
+      value.forEach((item, index) => scan(item, `${path}[${index}]`))
+      return
+    }
+    if (value !== null && typeof value === 'object') {
+      for (const [key, nested] of Object.entries(value as Record<string, unknown>)) {
+        scan(nested, `${path}.${key}`)
+      }
+    }
+  }
+
+  for (const [index, filter] of (ir.filters ?? []).entries()) {
+    scan((filter as IrFilter).value, `filters[${index}].value`)
+  }
+  scan(ir.timeRange?.from, 'timeRange.from')
+  scan(ir.timeRange?.to, 'timeRange.to')
+  scan(ir.limit, 'limit')
+
+  return found
+}
+
 /** A filter on a declared field. */
 export type IrFieldFilter = {
   field: string
@@ -89,10 +161,16 @@ export type IrSort = {
   direction?: 'asc' | 'desc'
 }
 
-/** A time window, optionally over a named time field. */
+/**
+ * A time window, optionally over a named time field.
+ *
+ * A bound may be a placeholder: *"since {start}"* is one of the most natural
+ * parameters a saved report has, so the type says so rather than leaving the
+ * binder's support for it unexpressible.
+ */
 export type IrTimeRange = {
-  from?: string
-  to?: string
+  from?: string | IrParameterReference
+  to?: string | IrParameterReference
   field?: string
 }
 
@@ -114,7 +192,8 @@ export type BusinessQueryIR = {
   /** Which currency the amounts are stated in. */
   currencyBasis?: string
   sort?: IrSort[]
-  limit?: number
+  /** How many rows. A placeholder is allowed, so *"the top {n}"* is expressible. */
+  limit?: number | IrParameterReference
   offset?: number
 }
 

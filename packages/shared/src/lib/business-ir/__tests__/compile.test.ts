@@ -313,6 +313,192 @@ describe('compileQuery — a traversed relationship becomes a join', () => {
   })
 })
 
+/* ---- a placeholder is not a value ---------------------------------- */
+
+describe('compileQuery — a placeholder is refused, so it can never become a literal', () => {
+  it('refuses an IR that still carries a placeholder in a filter value', () => {
+    // Reached by calling the compiler directly, bypassing the runner's binder.
+    // Without this guard a marker would land in a filter and the engine would
+    // compare it as a value — the exact defect the binder exists to prevent.
+    const result = mustFail({
+      operation: 'list',
+      entity: 'external_conversation',
+      filters: [{ field: 'unread_count', operator: 'gt', value: { $param: 'min_unread' } }],
+    })
+    expect(result.diagnostics[0].code).toBe('PARAMETER_NOT_BOUND')
+    expect(result.diagnostics[0].message).toContain('min_unread')
+    expect(result.diagnostics[0].message).toContain('filters[0].value')
+  })
+
+  it('refuses a placeholder in a time bound and in the limit', () => {
+    const timeBound = mustFail({
+      operation: 'list',
+      entity: 'external_conversation',
+      timeRange: { from: { $param: 'since' }, field: 'last_message_at' },
+    })
+    expect(timeBound.diagnostics[0].code).toBe('PARAMETER_NOT_BOUND')
+    expect(timeBound.diagnostics[0].message).toContain('timeRange.from')
+
+    const limited = mustFail({
+      operation: 'list',
+      entity: 'external_conversation',
+      limit: { $param: 'top' },
+    })
+    expect(limited.diagnostics[0].code).toBe('PARAMETER_NOT_BOUND')
+    expect(limited.diagnostics[0].message).toContain('limit')
+  })
+
+  it('refuses a sort field that is not declared, instead of silently dropping the sort', () => {
+    // The measured defect: this used to compile to a plan with NO sort at all, so
+    // a caller got rows in an arbitrary order and no indication why.
+    const result = mustFail({
+      operation: 'list',
+      entity: 'external_conversation',
+      sort: [{ field: 'no_such_field', direction: 'desc' }],
+    })
+    expect(result.diagnostics.some((d) => d.code === 'UNKNOWN_FIELD')).toBe(true)
+    const error = result.diagnostics.find((d) => d.code === 'UNKNOWN_FIELD')
+    expect(error?.message).toContain('no_such_field')
+    expect(error?.path).toBe('sort[0]')
+  })
+
+  it('refuses a sort carrying a placeholder', () => {
+    const result = mustFail({
+      operation: 'list',
+      entity: 'external_conversation',
+      sort: [{ field: { $param: 'order_by' } as never, direction: 'desc' }],
+    })
+    expect(result.ok).toBe(false)
+  })
+
+  it('refuses a sort that names neither a field nor a metric', () => {
+    const result = mustFail({
+      operation: 'list',
+      entity: 'external_conversation',
+      sort: [{ direction: 'asc' }],
+    })
+    expect(result.diagnostics.some((d) => d.code === 'SORT_NEEDS_FIELD')).toBe(true)
+  })
+
+  it('reports a metric sort as a gap, because no metrics are declared', () => {
+    const result = compileQuery(
+      { operation: 'list', entity: 'external_conversation', sort: [{ metric: 'revenue' }] },
+      MODEL,
+      CTX,
+      BINDINGS,
+    )
+    // A gap, not an error: the IR is valid, the platform cannot serve it yet.
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+    expect(result.diagnostics.some((d) => d.code === 'METRIC_NOT_DECLARED')).toBe(true)
+  })
+
+  it('refuses a placeholder nested inside a money value', () => {
+    // A money value is unwrapped to its `amount` before comparison, so a marker
+    // there would have become the compared value.
+    const result = mustFail({
+      operation: 'list',
+      entity: 'external_conversation',
+      filters: [
+        {
+          field: 'unread_count',
+          operator: 'gt',
+          value: { amount: { $param: 'threshold' }, currency: 'GBP' },
+        },
+      ],
+    })
+    expect(result.diagnostics[0].code).toBe('PARAMETER_NOT_BOUND')
+    expect(result.diagnostics[0].message).toContain('filters[0].value.amount')
+  })
+
+  it('refuses a placeholder in a reference position, by failing to resolve it', () => {
+    // `dimensions` is a reference position, not a value position, so the
+    // placeholder guard does not fire — resolution refuses it instead. Either way
+    // the compile fails, which is the property that matters.
+    const result = mustFail({
+      operation: 'list',
+      entity: 'external_conversation',
+      dimensions: [{ $param: 'a_dimension' } as never],
+    })
+    expect(result.ok).toBe(false)
+  })
+
+  it('compiles the same IR once the placeholder is replaced by a value', () => {
+    const result = mustCompile({
+      operation: 'list',
+      entity: 'external_conversation',
+      filters: [{ field: 'unread_count', operator: 'gt', value: 3 }],
+    })
+    expect(result.plan.physical.filters).toEqual([
+      { field: 'external_conversation.unread_count', op: 'gt', value: 3 },
+    ])
+  })
+})
+
+/* ---- the model version must cover what the compiler reads ---------- */
+
+describe('modelVersionOf — a version that answers the question it is asked', () => {
+  const withUnreadKind = (kind: string): ModelDescriptor =>
+    buildModelDescriptor({
+      customEntities: DECLARATIONS.customEntities,
+      customFieldSets: [
+        {
+          entity: 'communication_channels:external_conversation',
+          source: 'communication_channels',
+          fields: DECLARATIONS.customFieldSets[0].fields.map((field) =>
+            field.key === 'unread_count' ? { ...field, kind: kind as never } : field,
+          ),
+        },
+      ],
+      extensions: DECLARATIONS.extensions,
+    })
+
+  it('changes when a field is retyped', () => {
+    // The measured defect: a field's *kind* is not part of its *id*, so a version
+    // built from ids alone was blind to a retype — and a Function whose `>` filter
+    // had just become illegal still reported itself fresh.
+    const before = withUnreadKind('integer')
+    const after = withUnreadKind('text')
+    expect(modelVersionOf(before)).not.toBe(modelVersionOf(after))
+  })
+
+  it('changes when a field is added or removed', () => {
+    const fewerFields = buildModelDescriptor({
+      customEntities: DECLARATIONS.customEntities,
+      customFieldSets: [
+        {
+          entity: 'communication_channels:external_conversation',
+          source: 'communication_channels',
+          fields: DECLARATIONS.customFieldSets[0].fields.filter((field) => field.key !== 'is_open'),
+        },
+      ],
+      extensions: DECLARATIONS.extensions,
+    })
+    expect(modelVersionOf(fewerFields)).not.toBe(modelVersionOf(MODEL))
+    expect(modelVersionOf(withUnreadKind('text'))).not.toBe(modelVersionOf(MODEL))
+  })
+
+  it('does not change when a declaration is merely reordered', () => {
+    const reordered = buildModelDescriptor({
+      customEntities: DECLARATIONS.customEntities,
+      customFieldSets: [
+        {
+          entity: 'communication_channels:external_conversation',
+          source: 'communication_channels',
+          fields: [...DECLARATIONS.customFieldSets[0].fields].reverse(),
+        },
+      ],
+      extensions: [...DECLARATIONS.extensions].reverse(),
+    })
+    expect(modelVersionOf(reordered)).toBe(modelVersionOf(buildModelDescriptor(DECLARATIONS)))
+  })
+
+  it('is stable across calls', () => {
+    expect(modelVersionOf(MODEL)).toBe(modelVersionOf(MODEL))
+    expect(modelVersionOf(MODEL)).toMatch(/^[0-9a-f]{8}$/)
+  })
+})
+
 /* ---- the operator vocabulary --------------------------------------- */
 
 describe('isKnownOperator', () => {
