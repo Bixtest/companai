@@ -151,8 +151,25 @@ physical query the platform already runs — **§51's ten stages, named one-for-
 the rename test — passes both directions and at two levels:** the old IR compiled against a renamed
 model **fails** (never a silent compile), and the rename-aware entry says **requires recompilation** and
 names the destination, using **G-01's own** rename planner. **The IR has no scope field**, so it cannot
-widen its own reach. **The next build item is `G-03` (User Functions)** — *a User Function **is** compiled
-IR made durable* (RQ-24), so `G-02` is exactly what unblocks it. `G-02` also unblocked `G-17` and `G-19`.
+widen its own reach.
+
+**`G-03` (User Functions) is now built** — **2026-10-05. This completes the four-item critical path:**
+`spec ✅ → G-01 ✅ → G-02 ✅ → G-03 ✅`. A User Function is *"a validated, reusable business operation
+created by the user with AI assistance and executable without AI once published"* — the product's
+distinctive feature. It is **compiled IR made durable** (RQ-24): the artifact, an **enforced** lifecycle
+(only `published`/`active` run), **objective verification** that calls G-02's compiler rather than
+re-implementing it, a fingerprint, a **document** whose round-trip is empty, and **zero-AI execution**.
+**The plan's decisive test — "switch the model off and run a Function" — is met by two routes:** the
+runner **has no AI argument at all**, and an **import-graph test** proves nothing it reaches imports the
+AI side. That structural route was **falsified, not asserted** (an AI import was planted outside the
+module and the check failed, naming the file). **Four defects were found by three critic passes and all
+four are fixed** — including one in the compiler (`modelVersionOf` could not see a field being
+**retyped**, so a stale Function reported itself *fresh*) and one that let a **sort** be silently
+dropped. **One hole is OPEN with a named trigger** (see BACKLOG). **Deliberately not built:** a database
+row (trigger: **G-07**) and placement in the interface (that **is** G-07). **The next build item is
+`G-07` (the Widget contract)** — which now owns two things: the Widget contract, and a Function's
+placement. `G-03` also unblocked `G-17` and `G-19` further.
+
 **Verify an item's status is still true before starting it** — the roadmap has been
 wrong about what is already done **four times**.
 
@@ -522,9 +539,10 @@ and was *not* re-measured — treat it as a starting point, not a fact.**
 ## 8. What is left, and whose move it is
 
 - **What is left, in order** → [`BACKLOG.md`](BACKLOG.md). One roadmap. Read §"The list" and
-  nothing else for *"what is left"*. **`P0-spec` is done (draft 2, 2026-10-05), `G-01` is built
-  (2026-10-05, code repo `ee406e8`) and `G-02` is built (2026-10-05); the next build item is `G-03`
-  (User Functions).**
+  nothing else for *"what is left"*. **The four-item critical path is complete:** `P0-spec` (draft 2),
+  `G-01`, `G-02` and `G-03` are all built as of 2026-10-05. **The next build item is `G-07` (the
+  Widget contract)** — it now owns both the Widget contract and a User Function's **placement** in the
+  interface.
 - **What needs the owner** → [`NEEDS-YOU.md`](NEEDS-YOU.md) — a numbered action list. **Three
   items open**, and none blocks the build. The most urgent is changing the Coolify admin password
   (item 5); it is the only thing standing between an agent and the 2FA wall on the hosting panel.
@@ -557,7 +575,18 @@ alone means this page is broken — **fix the page, not the newcomer.**
 from an older document are not equally current, and mixing them in one table is how this page
 goes wrong. If two older documents disagree on a number, say so — never average them.
 
-*Last updated: 2026-10-05, revision 5 — **`G-02` is built: the Business IR and the compiler exist, and
+*Last updated: 2026-10-05, revision 6 — **`G-03` is built: User Functions exist, and the four-item
+critical path (`spec → G-01 → G-02 → G-03`) is complete. The next build item is `G-07` (the Widget
+contract), which now also owns a Function's placement.** §2 step 7 and §8 were updated in the same
+change as the code (COOKBOOK rule zero). A Function is compiled IR made durable: an enforced lifecycle
+in which only `published`/`active` run, objective verification that calls G-02's compiler instead of
+re-implementing it, a byte-stable document whose round-trip is empty, and **execution with no AI
+argument at all**. **Three critic passes found four defects, all fixed** — one in the compiler (the
+model version could not see a field being retyped) and one that let a sort be silently dropped. **One
+hole is OPEN with a named trigger**, and a database row and the interface placement are deliberately
+left to **G-07**.*
+
+*Earlier, 2026-10-05, revision 5 — **`G-02` is built: the Business IR and the compiler exist, and
 the next build item is `G-03` (User Functions).** §2 step 7, §7's spec row and §8 were updated in the
 same change as the code (COOKBOOK rule zero). The compiler runs §51's ten stages as named steps, compiles
 a `list` read into the `QueryOptions` the engine already runs, and the plan's test — **the rename test —

@@ -1798,6 +1798,273 @@ durable asset; SQL is a derivative*).
 
 ---
 
+# Sprint G-03 — User Functions
+
+**Written 2026-10-05. Third item of the four-item critical path (`spec → G-01 → G-02 → G-03`). This is
+the product's distinctive feature.**
+
+**Why it is now safe to start:** `G-02` is built and measured — the Business IR exists, the compiler runs
+§51's ten stages, and the rename test passes both directions (Sprint G-02, Step 4). Item: `G-03` in
+[`../library/development/BACKLOG.md`](../library/development/BACKLOG.md).
+
+**What it is** (vision, Doc 3 Part VIII §39, verbatim):
+
+> **A validated, reusable business operation created by the user with AI assistance and executable
+> without AI once published.**
+
+**Done when** (plan §2 phase 3, verbatim): *a User Function — validated AI-authored work — **runs with no
+LLM call*** (RQ-22, RQ-25).
+**Test** (plan §2 phase 3, verbatim): **"Switch the model off and run a Function. If it still runs, it is
+deterministic software"** — *the vision's own decisive property.*
+
+## Step 1 — Research: what already exists
+
+**Measured 2026-10-05 by reading the real code — not from a report about it** (rule zero-nine).
+
+| Layer | File (all under `workspace/starting-kit/`) | What it already gives us |
+|---|---|---|
+| **The Function itself** | — | **Nothing.** `git grep -iE 'userFunction\|user_function\|UserFunction' HEAD -- packages` → **0 files.** The concept exists in the vision (Doc 3 Part VIII §39–§51) and in the spec (its object list names `Function`), i.e. **specified, not built.** |
+| **The durable asset** | `packages/shared/src/lib/business-ir/` (G-02) | The **IR and its compiler**. `compileQuery` turns a read into the `QueryOptions` the engine runs; `recompileQuery` answers **requires recompilation** using G-01's rename planner. A Function *is* this, made durable (RQ-24). |
+| The model and its version | `packages/shared/src/lib/kernel/` (G-01) | `ModelDescriptor`; **`contentVersion`** — the pure content hash, reusable for a Function's **fingerprint**; `planFieldRename`. |
+| Where execution ends | `packages/shared/src/lib/query/types.ts` | `QueryEngine.query(entity, opts) → QueryResult`. A Function's execution terminates here, and nowhere else. |
+| **The nearest neighbour** | `packages/core/src/modules/workflows/` (**41,568 lines**) | A generic engine with a **definition + user-customisation** pattern that is *exactly* the shape a Function needs: `workflow_definitions` carries a **`code_workflow_id`** (its code-declared origin), an integer **`version`**, a **jsonb `definition`**, `tenant_id` / `organization_id`, `enabled`, `effective_from/to`, and soft delete. Plus `api/definitions/[id]/customize` and `reset-to-code` routes. **The platform already knows how to store a user-customised, versioned artifact.** |
+| The UI host | `packages/core/src/modules/widgets/lib/injection.ts` → `@open-mercato/shared/modules/widgets/injection-loader` | The **injection framework (V-23)** the plan names as the host for a Function's *placement*. That is **G-07's** territory, not G-03's. |
+| **The test convention** | `packages/core/jest.config.cjs`, `jest.setup.ts`, `business_rules/api/__tests__/*` | **DB-backed code is tested with a mocked `EntityManager`** (`createMockEntityManager`), **not a live database.** So a migration cannot be *proven* on this host — and this project does not ship unproven claims. |
+
+**The measured gap.** Nothing in code implements a User Function. The vision's Part VIII supplies the
+whole shape: §41 the **artifact**, §44 the **lifecycle** (`DRAFT → GENERATED → VALIDATED → VERIFIED →
+PUBLISHED → ACTIVE → DEPRECATED → ARCHIVED`), §46 the **objective verification** (*"not: the user saw
+something that looked right"*), §43 the **execution fingerprint**, §47 the **zero-AI execution**, and
+§50/§51 the two **Function types** (deterministic query, deterministic command).
+
+**A real conflict between two documents, and how it resolves.** The BACKLOG says `G-03` needs **only**
+`G-02`; the plan §5.2 says User Functions *"need the IR (G-02) **and** the Widget/reference layer **to be
+usable by a person**"*. The plan's **own** critical-path diagram (§4) shows `G-02 → G-03` and
+`G-01 → G-07` as **separate branches**, and the plan's **own** done-when for the phase is *"a User
+Function ... runs with no LLM call"* — no interface. **The two agree once "the core" and "usable by a
+person" are separated:** the core needs G-02; being *placed in the interface* needs G-07. **This sprint
+builds the core and records the placement as G-07's.** Reported as our call so it can be overruled
+cheaply (COOKBOOK rule zero-zero, case 3).
+
+**Two routes, both agreeing, that no Function exists:** (a) the `git grep` above, at `HEAD` → **0 files**;
+(b) the spec's object list names `Function` and the vision devotes a whole Part to it — **specified, not
+built**. Both agree.
+
+**What we reuse:** G-02's IR, compiler and recompile entry; G-01's model, `contentVersion` and rename
+planner; `QueryEngine` as the single execution terminus; and the workflows module's **storage pattern**
+(copy the shape when persistence lands, do not import the engine). **What G-03 genuinely builds:** the
+**Function artifact**, its **enforced lifecycle**, its **objective verification**, its **fingerprint**,
+**parameter binding**, and **zero-AI execution**.
+
+## Step 2 — Validate: is this the best approach?
+
+**Alternative considered — build on the `workflows` engine.** **Rejected.** The shortcut register itself
+calls `workflows` *"a generic engine"* and the nearest neighbour only. The vision is explicit that a User
+Function *"is not a code function"* and is closer to a **saved business capability**. A workflow engine
+models steps, instances and tasks; a Function models **one validated operation**. Importing 41,568 lines
+and a different mental model to express "show me overdue German customers" would be the tail wagging the
+dog. Its **storage pattern** is worth copying later; its **engine** is not.
+
+**Alternative considered — persist a row now (entity + migration + repository).** **Deferred, with two
+reasons and a trigger.** (i) This project tests DB code against a **mocked** EntityManager, so a migration
+here would be **unprovable** — and an unprovable migration is exactly the kind of claim this project
+refuses. (ii) The Function's shape (`presentation_definition`, `parameter_schema`, placement) is driven by
+**G-07**, so a schema written today would likely be rewritten. **Trigger: G-07 lands.**
+
+**Alternative considered — make durability a *document* rather than a row.** **Chosen.** RQ-24 says *the
+IR is the durable asset*, and a durable asset is something that can be **written down and read back**.
+G-01 already proved the pattern: a versioned envelope, byte-stable on a round-trip. So a Function is a
+**document** (`companai.user-function`), exportable and re-importable, and a database table is merely
+**one place to keep it**. This satisfies RQ-24 **without** a database and **without** pre-empting G-07.
+
+**Approach chosen — the Function artifact as a typed, verified, executable document.**
+
+- **The artifact** (§41), typed: id, tenant, name, description, UI metadata, `operation_type`,
+  `business_ir`, `parameter_schema`, the referenced entities/fields/metrics/commands/workflows, required
+  permissions, `business_model_version`, `dependency_versions`, `compiler_version`, execution and
+  confirmation policy, `result_schema`, presentation, audit policy, who created and verified it, timestamps,
+  version and status.
+- **The lifecycle** (§44) as an **enforced** state machine — an illegal transition is refused with a value,
+  not a log line.
+- **Objective verification** (§46) — *"not: the user saw something that looked right"*. The checks are
+  **executed**: IR valid, entities valid, fields valid, relationships valid, tenant scope valid, plan
+  valid — reusing G-02's compiler, which already fails closed on each of them.
+- **The fingerprint** (§43) — a content hash over the IR, the compiled plan and the dependency versions,
+  so a Function that has drifted is **detectable** rather than merely suspected.
+- **Parameter binding** (§47's *"platform resolves parameters"*) — the IR may carry placeholders; binding
+  them is validated against the parameter schema, and the compiler then sees a **concrete** IR, so G-02
+  needs no change.
+- **Zero-AI execution** (§47) — resolve parameters → check the lifecycle → compile → execute against the
+  `QueryEngine`. **No model, no prompt, no interpretation.**
+
+**What would break it, and the defence:**
+
+1. **A Function executes while its references are unresolved.** **Defence:** it must pass verification and
+   the compiler, both of which fail closed.
+2. **An unverified or unpublished Function runs.** **Defence:** the lifecycle gate — only `PUBLISHED` and
+   `ACTIVE` execute.
+3. **A stale Function silently runs against a changed model.** **Defence:** the fingerprint plus G-02's
+   `recompileQuery`: a model that moved either recompiles cleanly (allowed, and the plan is refreshed) or
+   says **requires recompilation** (refused, with the reason).
+4. **"No LLM call" is asserted rather than shown.** **Defence: two routes.** (a) The run entry point takes
+   **no AI dependency at all** — there is nowhere to pass a model. (b) An **import-graph test** asserts the
+   module imports nothing from the AI side, so the property is checked structurally and cannot rot.
+
+**The ordering rule:** the artifact type first, then the lifecycle, then verification, then the
+fingerprint, then parameter binding, then execution — because each depends on the one before.
+
+## Step 3 — The steps
+
+**Every command runs from `workspace/starting-kit/`. Nothing in `packages/shared/src/lib/kernel/` or
+`business-ir/` is modified — G-03 *consumes* both.** New code lands in
+`packages/shared/src/lib/user-function/` (pure, no DB) with its tests beside it.
+
+**3.1 — Preconditions.**
+- Confirm the baseline is green: `cd packages/shared && npx jest src/lib/business-ir src/lib/kernel` → 9 suites / 98 tests.
+- Confirm the two git repos are clean and stage **by explicit path** (never `git add -A`).
+- Take a checkpoint before touching anything: `./workspace/scripts/checkpoint.sh g03-start`.
+
+**3.2 — The Function artifact** — `packages/shared/src/lib/user-function/types.ts`.
+- `UserFunction` with §41's fields. The two the vision stresses: **`business_ir`** (the durable asset) and
+  **`business_model_version`** (what it was compiled against). `presentation_definition` and the UI
+  metadata are typed as opaque now — they are **G-07's** shape, and inventing them here would pre-empt it.
+- `FunctionStatus` — §44's eight states.
+- `ParameterSchema` — `{ name, kind, required, default? }[]`, using the platform's own **13 field kinds**
+  so a parameter's type check uses the same vocabulary as a field's.
+- `FunctionOperationType` — §50/§51's two: a deterministic **query**, a deterministic **command**.
+- `VerificationCheck` / `VerificationReport` — the §46 checks, each `pass` or `fail` **with its reason**.
+
+**3.3 — The lifecycle** — `packages/shared/src/lib/user-function/lifecycle.ts`.
+- `canTransition(from, to)` and `transition(fn, to)` → `{ ok, function } | { ok: false, reason }`.
+- §44's order is **forward-only** except for the two documented moves the vision implies: `DEPRECATED` and
+  `ARCHIVED`. An illegal transition is **refused with a value**.
+- `isRunnable(status)` — only `PUBLISHED` and `ACTIVE`. This is what makes "an unverified Function cannot
+  run" true by construction rather than by a caller remembering.
+
+**3.4 — Objective verification** — `packages/shared/src/lib/user-function/verify.ts`.
+- `verifyFunction(fn, model, bindings, ctx)` → `VerificationReport`, running §46's checks by **calling
+  G-02's compiler** and reading its diagnostics, rather than re-implementing the checks. One rule, one
+  implementation.
+- A failed check names **which** check and **why**, in plain language.
+- **The positive case first:** a well-formed Function reports every check as passed — so the report is not
+  vacuously green or vacuously red.
+
+**3.5 — The fingerprint** — `packages/shared/src/lib/user-function/fingerprint.ts`.
+- `functionFingerprint(fn)` — a content hash over the IR, the compiled plan and the dependency versions,
+  using G-01's `contentVersion` so "did this change?" is answered by the same function everywhere.
+- `checkFreshness(fn, model)` → `fresh` · `recompiled` (the model moved but the IR still compiles) ·
+  `requires_recompilation` (with G-02's reasons). Deterministic: **no timestamps in the hash**, or it stops
+  being reproducible.
+
+**3.6 — Parameter binding** — `packages/shared/src/lib/business-ir/bind.ts` *(lives beside the IR it
+binds, because it rewrites IR values)*.
+- The marker is `{ '$param': '<name>' }` in a **filter value**, a **time-range bound**, or **limit**.
+- `bindParameters(ir, values, schema)` → `{ ok: true, ir } | { ok: false, errors }`. Validates presence,
+  type (against the parameter's kind) and rejects unknown parameters — **an unbound placeholder is an
+  error, never passed through**, because passing it through would let a placeholder reach the compiler as a
+  literal value.
+- The output is a **concrete** IR, so G-02's compiler is unchanged.
+
+**3.6b — The durable document** — `packages/shared/src/lib/user-function/document.ts`.
+- `exportFunction(fn)` / `importFunction(doc)` — a **versioned envelope** (`companai.user-function`,
+  version 1), byte-stable, exactly as G-01 did for the model. This is what makes the Function durable
+  **without** a database (Step 2), and it is the artefact RQ-24 means by *"the IR is the durable asset"*.
+- **Assert non-empty first**, then assert the round-trip is empty — the same discipline G-01 used, so an
+  empty diff on an empty export cannot pass for a proof.
+- `importFunction` validates the envelope **and** every canonical id inside the IR, so a document that
+  cannot be referenced by the rest of the platform is refused loudly.
+
+**3.7 — Zero-AI execution** — `packages/shared/src/lib/user-function/run.ts`.
+- `runFunction(fn, params, ctx, model, bindings, engine)` → `{ ok, rows, plan, provenance }` or
+  `{ ok: false, reason }`. Steps, in order: **lifecycle gate → bind parameters → freshness check → compile
+  → execute**. There is **no AI argument**, so "switch the model off" is not a runtime condition to test
+  for: there is nothing to switch off.
+- The only outward call is `engine.query(entity, plan.physical)` — the platform's existing read path.
+
+**3.8 — The no-LLM proof** — `packages/shared/src/lib/user-function/__tests__/no-llm.test.ts`.
+- **Route 1 (behavioural):** run a Function end to end with a **fake engine** and no AI infrastructure in
+  scope; assert the exact `QueryOptions` that reached the engine.
+- **Route 2 (structural):** read every source file in `user-function/` and assert **none** imports from the
+  AI side (`ai-assistant`, `ai-sdk`, `openai`, `llm-*`, `model-*`). This is the checkable form of "switch
+  the model off", and it fails if someone later adds an AI import.
+- Both must pass. One alone is a story.
+
+**3.9 — Critic pass.** A separate pass whose only job is to break the above, and it must **name what it
+attacked**: (a) can an unverified Function run? (b) can a stale Function run silently? (c) can an unbound
+placeholder reach the compiler as a literal? (d) does the freshness check use G-02's answer, or its own?
+(e) does the no-LLM test actually fail if an AI import is added — **plant one and watch it fail**?
+(f) is every number re-measured from the artefact? **If it says "looks good" without listing attacks, it
+has not run.** Loop until a fresh pass finds nothing.
+
+**3.10 — Update the dependent documents in the same change** (rule zero): `BACKLOG.md` (the `G-03` line,
+the G-07/G-09 relationship, and the "needs G-03" items), the spec's §10c (record what G-03 proved), and
+this cookbook's Step 4 table. Docs stale in the same change is a defect.
+
+**3.11 — Commit in both repositories, staged by explicit path.** Repo 2 (`starting-kit`, branch `main`)
+gets the new code and tests. Repo 1 (root, branch `master`) gets the docs. **Never `git add -A`.**
+
+## Step 4 — Done when
+
+*Filled after the build, from measurement — not in advance. Measured 2026-10-05.*
+
+| | Criterion | Status |
+|---|---|---|
+| ✅ | The Function artifact exists with §41's fields | **Done.** `user-function/types.ts` — every §41 field, plus `verification` (below). `presentation`, `resultSchema`, the policies and `ui` are carried as **opaque** values, because their shape is **G-07's** and inventing it here would pre-empt that decision. |
+| ✅ | The lifecycle is enforced: only PUBLISHED/ACTIVE run | **Done.** `lifecycle.ts` — §44's eight states, forward one step, `archived` from any. `isRunnable` is the single answer. **Strengthened:** `transition` to `verified` **requires a passing verification report**, so `verified` cannot be a label somebody typed; and `importFunction` refuses a document claiming a post-verification status with no record, so the guarantee holds across the document boundary too. |
+| ✅ | Verification is objective and reuses G-02's compiler | **Done.** `verify.ts` runs §46's checks by **calling the compiler** and reading its diagnostics — no second implementation. `authorization_valid` is reported **`not_checked`**, not `passed`, because **G-04 does not exist**; the third outcome exists precisely so "could not check" is not a lie in either direction. |
+| ✅ | A stale Function is detected, and a moved model recompiles or is refused | **Done.** `checkFreshness` returns `fresh` · `recompiled` · `requires_recompilation`, and the refusal comes from **G-02's `recompileQuery`** (which uses G-01's `planFieldRename`) — not a string comparison written here. Given the previous model it names the destination. |
+| ✅ | An unbound parameter is an error, never passed through | **Done, and enforced twice.** `bind.ts` returns `{ok:false}` with no `ir` at all on failure; and `compile.ts` now carries a guard that **refuses a placeholder outright**, so a marker cannot reach the database as a literal even when the compiler is called directly, bypassing the runner. |
+| ✅ | **A Function runs with no LLM call — by two routes** | **Done.** Route 1 (behavioural): a real Function runs end to end through a fake engine, asserting the **exact `QueryOptions`** that arrived. Route 2 (structural): the **transitive import graph** of `run.ts` contains no AI import. **Route 2 was falsified, not asserted** — an AI import was planted in `business-ir/compile.ts` (deliberately *outside* `user-function/`), and the graph check failed naming `compile.ts -> ai` while the directory check stayed green. |
+| ✅ | The critic pass names what it attacked and finds nothing | **Done, after three passes.** Pass 1 found 2 defects, pass 2 found 2 more, pass 3 (blast radius) found none. All four are fixed and now permanently covered. Named below. |
+
+**Measured 2026-10-05, from the artefacts:**
+
+- `user-function` **7 suites / 133 tests pass**; `business-ir` **4 suites / 60 tests** (G-02 grew from 47 by the compiler tests these fixes required); `kernel` **5 suites / 51 tests** (G-01 untouched).
+- The **shared package: 182 suites / 2110 tests, all passing.**
+- **`tsc --noEmit` clean** in `shared`, `cli` **and** `core`; and clean for **both** test-including configs (`tsconfig.business-ir-tests.json`, `tsconfig.user-function-tests.json`).
+- Core's **kernel drift guard passes** (12 suites / 61 tests in `core/src/modules/entities/lib/__tests__`).
+- The type-level probe **"there is nowhere to pass a model"** was falsified: a planted *valid* call makes `tsc` report `TS2578 Unused '@ts-expect-error' directive` (exit 1), and removing it returns exit 0. So the claim is checked, not asserted.
+
+## Step 5 — The critic pass: what it attacked, and what it found
+
+**Pass 1 — the claims as stated.** Attacks: (a) can an unverified Function run? (b) can a stale Function run silently? (c) can an unbound placeholder reach the compiler as a literal? (d) does freshness use G-02's answer or its own? (e) does the no-LLM test actually fail if an AI import is added? (f) is every number re-measured from the artefact? **Two defects found.**
+
+**Pass 2 — shapes pass 1 did not try.** Attacks: markers in *reference* positions; a marker nested inside a money value; a forged document; a retyped field; a removed relationship; a removed entity; whether `tenantId` on the artifact is load-bearing. **Two more defects found.**
+
+**Pass 3 — the blast radius.** The fixes reached into G-02's compiler, so the whole `shared` suite and `cli`/`core` were re-run. **Nothing found.**
+
+### The four defects, each fixed and permanently covered
+
+1. **A placeholder nested inside a money value reached the engine as a literal.** `{amount: {$param: 'threshold'}, currency: 'GBP'}` is the vision's own §50 example, and the compiler **unwraps a money value to its `amount`** before comparing it. The walk that finds placeholders only looked at the top of a filter value, so it missed this one — and the guard could not fire. **Fixed:** the walk is now **deep**, and the binder substitutes at **any depth**. *Covered by:* `bind.test.ts` and `compile.test.ts`.
+
+2. **The model version could not see a field being retyped.** `modelVersionOf` hashed only **ids and semantic versions**, and a field's *kind* is not part of its *id*. Measured: two models whose `unread_count` was `integer` and `text` respectively both hashed to **`f462abf0`**. So a stored Function reported itself **fresh** against a model on which its `>` filter had just become illegal. **Fixed:** the version now covers every attribute the compiler reads (kind, `required`, `multi`, `filterable`, grain, a relationship's endpoints/cardinality/optionality), **sorted** so declaration order cannot change it, and **excluding labels** so fixing a typo does not invalidate every saved operation. *Covered by:* `compile.test.ts` (four cases) and `fingerprint.test.ts` (retype, removed relationship, removed entity).
+
+3. **An unresolvable sort was silently dropped.** `compileSort` did `if (!fieldId) continue`, so a sort naming a field that does not exist produced a **successful compile with no sort at all** — rows in an arbitrary order, and no indication why. That is precisely the "silently produces a wrong plan" failure the compiler exists to prevent. **Fixed:** it now fails closed (`UNKNOWN_FIELD` with the path), and a metric sort reports a **gap** rather than vanishing. *Covered by:* `compile.test.ts`.
+
+4. **A forged document could claim to have been verified.** `transition` refuses to *mark* a Function verified on a failing report — but a **document** is read, not walked, so a doctored one claiming `active` with no record imported cleanly and then ran. **Fixed:** `importFunction` requires a verification record for any status only reachable *through* `verified` (`verified`, `published`, `active`, `deprecated` — **not** `archived`, which is reachable from anywhere), and requires the record to actually list what was not checked. *Covered by:* `document.test.ts`.
+
+### One further finding, and one hole closed by a test I wrote
+
+- **`tenantId` on the artifact was decorative.** Nothing read it, so tenant A's Function ran happily in tenant B's context. **Fixed:** `runFunction` refuses a mismatched tenant (`WRONG_TENANT`) before it touches anything. *Covered by:* `run.test.ts`.
+- **The sample value initially hid a real mismatch.** `sampleValuesFor` first chose its sample to satisfy the *operator* — so an integer parameter feeding an `exists` filter was sampled as `true`, the compile passed, and verification reported a Function that could not actually run. Caught by a test, not by reading. **Fixed:** the sample is **always a real value of the declared kind**; only the *list-ness* follows the operator, so a genuine kind/operator conflict now **fails** and is reported. *Covered by:* `verify.test.ts` and `bind.test.ts`.
+
+### OPEN — and it needs the owner's eye, not mine
+
+**A verified Function's definition can be edited without invalidating its verification.** `transition` records what was verified, but nothing ties that record to *which* definition was verified, so object surgery that swaps the IR leaves the Function `active` with a stale verification.
+
+**Status: OPEN — trigger named.** **Not fixed, deliberately:** there is **no editing operation in G-03** at all (a Function is created and stored; nothing mutates one), so the hole is **not reachable through any API we have built** — only by a caller mutating an object directly. **Trigger: the first editing operation** (G-07's placement work, or whichever item adds "change a saved Function"). The fix is small when it is needed: record the definition's fingerprint in the verification record and refuse to run when it no longer matches.
+
+### Our calls, reported so they can be overruled cheaply (rule zero-zero)
+
+1. **We modified G-02's `compile.ts` three times**, against this sprint's own "consume both, modify neither". Each was **forced by a measured defect**, not a preference: the placeholder guard (defect 1's defence), the `pageSize` type guard (`limit` can now be a placeholder), and `modelVersionOf` (defect 2). The cookbook's instruction was written before the measurement; the measurement won.
+2. **`limit` and a time-range bound now accept a placeholder** in the IR *type*. The binder already handled both; the type denied it, so those code paths were unreachable from typed code and unchecked. Widening them is what made defect 1 findable.
+3. **`transition` to `verified` requires a passing report**, and the artifact gained a `verification` field. A strengthening beyond this cookbook's Step 3.3.
+4. **`ARCHIVED` is reachable from any state** — restated from Step 3.2, because §44's chain has no exit.
+5. **`tenantId` on the artifact is now enforced**, and `WRONG_TENANT` is a new refusal code.
+6. **Verification compiles the IR bound to sample values.** This is a design decision with a stated limit: it proves the IR compiles *for a value of each declared kind*, not for every value. That limit is the same one the binder enforces at run time, so the two cannot disagree.
+
+---
+
 # The hosting environment — `Platform-Server` (Coolify)
 
 **Built 2026-10-04.** A separate environment from Sprint 0: an Ubuntu Server 24.04 VM on Hyper-V

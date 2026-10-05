@@ -592,6 +592,32 @@ unused `@ts-expect-error` — so the claim "the IR type forbids scope" is checke
 
 ---
 
+## 10c. G-03 has now run that measurement — **added 2026-10-05**
+
+**§6's four contracts are now three-quarters built, and the vision's decisive property is tested.** G-03 (User Functions) was built and measured on 2026-10-05. It is the product's distinctive feature and the last item of the four-item critical path.
+
+| This specification said | G-03 measured |
+|---|---|
+| §6 — a **Function** is one of the 31 objects, and §41 fixes its shape | Implemented in `user-function/types.ts` — every §41 field. **Two are load-bearing and now have tests:** `business_ir` (the durable asset, RQ-24) and `business_model_version` (what it was compiled against). `presentation_definition` and the UI metadata are carried as **opaque** values, because typing them would pre-empt **G-07**. |
+| §6 — `TaskContract` and `ResultContract` | **`ResultContract` is carried** as an opaque `resultSchema`. **`TaskContract` is not built** — it is the *agent* half, deferred to **AH-2** with its trigger. |
+| §6 — the IR is the durable asset (RQ-24) | **Tested as a document**, not asserted: `companai.user-function`, version 1, byte-stable, and the round-trip is **empty** — with the export first proven **non-empty**, so the empty diff is not vacuous. This makes a Function durable **without a database**; a table is merely one place to keep it. |
+| §12.1 — every reference is a canonical id | **Enforced on import**: a document whose IR names a non-canonical entity, field, relationship or command is **refused loudly**, so a Function that the rest of the platform could not reference cannot be stored and fail later. |
+| §4 — *"declared or it does not exist"* (I11) | **Applied to the Function's own lifecycle.** §44's chain is an **enforced** state machine, and `verified` **cannot be reached without a passing verification report** — so the state means what it says rather than being a label somebody typed. |
+| The vision's decisive property (plan §2 phase 3) — *"switch the model off and run a Function"* | **Met by two routes.** (1) The runner **has no AI argument at all** — there is nowhere to pass a model. (2) An **import-graph test** asserts nothing the runner reaches imports the AI side. The structural route was **falsified, not asserted**: an AI import planted in `business-ir/compile.ts` (*outside* the module under test) made the check fail, naming `compile.ts -> ai`, while a plain directory scan stayed green. |
+
+**Four defects the critic passes found, all fixed and permanently covered — and one of them is in this specification's own territory:**
+
+1. **`modelVersionOf` could not see a field being retyped.** It hashed **ids and semantic versions only**, and a field's *kind* is not part of its *id*. **Measured:** two models whose `unread_count` was `integer` and `text` respectively both hashed to **`f462abf0`**. So a stored Function reported itself **fresh** against a model on which its `>` filter had just become illegal. **Fixed:** the version now covers every attribute the compiler reads — kind, `required`, `multi`, `filterable`, grain, a relationship's endpoints/cardinality/optionality — **sorted**, so declaration order cannot change it, and **excluding labels**, so fixing a typo does not invalidate every saved operation. **This is §12.1's property 3 extended: a version must cover what it claims to cover.**
+2. **An unresolvable sort was silently dropped.** A sort naming a field that does not exist produced a **successful compile with no sort at all**. **Fixed:** it fails closed. *This is the failure mode §51's compiler exists to prevent, and it was in the compiler.*
+3. **A placeholder nested inside a money value could reach the database as a literal.** `{amount: {$param: 'threshold'}, currency: 'GBP'}` is §50's own example, and the compiler unwraps a money value to its `amount`. **Fixed:** the placeholder walk is now **deep**, and `compile.ts` **refuses** a stray placeholder outright — so "a placeholder is not a value" holds even when the compiler is called directly.
+4. **A forged document could claim a post-verification status.** **Fixed:** `importFunction` requires a verification record for any status only reachable *through* `verified`.
+
+**One hole is OPEN, with a trigger named — and it is deliberately not closed:** a verified Function's definition can be edited without invalidating its verification. **Unreachable today**, because G-03 has **no editing operation**; only direct object surgery gets there. **Trigger: the first editing operation.** The fix is small then (record the definition's fingerprint in the verification record and refuse on a mismatch). Recorded rather than guessed at, because *who owns a decision* is not the same as *what would be convenient* (COOKBOOK rule zero-zero).
+
+**Measured:** user-function **7 suites / 133 tests pass**; business-ir **4 suites / 60**; kernel **5 suites / 51** (G-01 untouched); the **shared package 182 suites / 2110 tests, all passing**; `tsc --noEmit` **clean** in `shared`, `cli` **and** `core`, and clean for both **test-including** configs; core's **drift guard green**.
+
+---
+
 ## 11. Critic pass — this document attacked
 
 Run as a stranger would, looking for what is wrong rather than what is right. **A pass that says

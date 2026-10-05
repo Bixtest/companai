@@ -72,17 +72,24 @@ the work, and tell him what changed and how to undo it. Reserve his judgment for
 his — a name, a domain, a cost, a preference.
 
 **4. Your first task.** Read `library/development/BACKLOG.md` §"The list". The workbench is already
-up (the stack is running and the database is clean — verify it yourself). **`P0-spec` is done** — draft 2
-of the Business Model Kernel specification (`library/development/SPEC-business-model-kernel.md`) was
-written 2026-10-05 and passes the vision's own 40-item gate (only ratification remains). **`G-01` — the
-Business Model Kernel (+ `G-08`, the relationship fabric) — is now built** (2026-10-05, code repo
-`ee406e8`): the canonical model is a view over the platform's own declarations, and the plan's test (the
-export/reimport round-trip is empty) passes. **`G-02` — the Business IR and the compiler — is now built**
-(2026-10-05): §51's ten stages run as named steps, a `list` read compiles to the `QueryOptions` the engine
-already runs, and the plan's test — **the rename test** — passes both directions (the old IR against a
-renamed model **fails**; the rename-aware entry says **requires recompilation**). **The next build item is
-`G-03` — User Functions** — *a User Function **is** compiled IR made durable* (RQ-24), so `G-02` is exactly
-what unblocks it. `G-02` also unblocked `G-17` and `G-19`.
+up (the stack is running and the database is clean — verify it yourself). **The four-item critical path
+is complete.** `P0-spec` is done — draft 2 of the Business Model Kernel specification
+(`library/development/SPEC-business-model-kernel.md`) was written 2026-10-05 and passes the vision's own
+40-item gate (only ratification remains). **`G-01` — the Business Model Kernel (+ `G-08`, the
+relationship fabric) — is built** (2026-10-05, code repo `ee406e8`): the canonical model is a view over
+the platform's own declarations, and the plan's test (the export/reimport round-trip is empty) passes.
+**`G-02` — the Business IR and the compiler — is built** (2026-10-05): §51's ten stages run as named
+steps, a `list` read compiles to the `QueryOptions` the engine already runs, and the plan's test — **the
+rename test** — passes both directions. **`G-03` — User Functions — is built** (2026-10-05): the
+product's distinctive feature, where a saved business operation is **created with AI assistance and runs
+with no AI at all** — proven by two routes, one of them an import-graph test that was itself falsified.
+**The next build item is `G-07` — the Widget contract**, which now owns both the Widget contract and a
+User Function's **placement** in the interface. `G-03` also unblocked `G-17` and `G-19` further.
+
+**Two things G-03 leaves deliberately undone, both with named triggers** — read them in `BACKLOG.md`
+before planning anything adjacent: a Function's **database row** (trigger: `G-07`) and a verified
+Function's definition being editable without invalidating its verification (trigger: the first editing
+operation).
 
 Work it in the project's four-step sprint process — **no code before step 3**. Steps 1–3 are
 documents and measurement; only step 4 writes code:
