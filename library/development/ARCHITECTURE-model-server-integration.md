@@ -464,7 +464,9 @@ the four changes, and it is still small.
 | LM Studio | Preset (local) | `LM_STUDIO_API_KEY`, base URL overridable |
 
 **So "call OpenAI, DeepSeek, etc. over an API" needs no new architecture.** DeepSeek-the-*model* is
-reachable today through DeepInfra or OpenRouter. DeepSeek-the-*provider* (its own endpoint at
+reachable today: DeepInfra's preset catalog lists `deepseek-ai/DeepSeek-V3.2-Exp` directly, and
+OpenRouter — a router — can reach it by model id, though its preset here lists only Llama 3.3 70B.
+DeepSeek-the-*provider* (its own endpoint at
 `api.deepseek.com`) needs **one preset entry**, exactly like §4.2 — which is the same one-line shape
 for every provider not already listed.
 
@@ -794,7 +796,7 @@ Per the COOKBOOK's zero-one rule: **a deferral must name its trigger.**
   | *"The vision's rule — a model only advertises capabilities after qualification"* | **Misattributed.** That sentence is the **prior analysis's** (`llama/01-target-architecture.md:87`). The vision contains no occurrence of "qualification" at all; its §11 registry lists the capability fields plus `availability` and `status`, but states no gate | **FIXED** — attributed to the analysis, and the vision's actual position stated |
   | *§4.3, one of the "four changes", appears in no §10 row* | It was therefore neither applied nor deferred-with-trigger, which breaks §10's own quoted rule | **FIXED** — the two one-line deployment edits now have a row |
   | *"the vision's target is 'generate Hermes provider configuration from the platform-managed profile'"* | **Misattributed.** That sentence is the **prior analysis's** (`llama/04-integration-choice.md:80`). The vision contains no occurrence of "configuration" at all | **FIXED** — credited to the analysis |
-  | *"the runbook records … 'llama.cpp serves no `/v1/embeddings`'"* | **The seventh pass called this a "wrong document", and that was wrong.** The runbook *did* record that phrase — at line 161, verified with `git blame`: **this same change (commit `111171a`) rewrote that entry**, which is why the phrase is gone from the runbook the pass read. The observation is also in `BLOCKERS.md:313`, so the pass found a real second source and then deleted a real first one | **RESTORED** — the body cites both, and the runbook's own history is stated |
+  | *"the runbook records … 'llama.cpp serves no `/v1/embeddings`'"* | **The seventh pass called this a "wrong document", and that was wrong.** The runbook *did* record that phrase — at line 161 of the file **before** this change (`git show 111171a~1:library/development/RUNBOOK-sprint0.md`) — and `git blame` attributes the rewrite of that entry to commit `111171a` itself, which is why the phrase is gone from the runbook the pass read. The observation is also in `BLOCKERS.md:313`, so the pass found a real second source and then deleted a real first one | **RESTORED** — the body cites both, and the runbook's own history is stated |
   | *"Its Phase 0 says: 'do not assume the ideal Broker already exists in code'"* | **Wrong section.** That sentence is under `llama/03-adoption-plan.md`'s *"Open research before implementation"*, not Phase 0 | **FIXED** — now "its own open-research list" |
   | *"`RUNBOOK-sprint0.md` contains no occurrence of 'embeddings'"* — the justification the seventh pass wrote for the runbook row two above | **False, and the eighth pass caught it.** Before this change the runbook said *"llama.cpp serves no `/v1/embeddings`"* (line 161); after it, it says *"no embedding model"*. The claim was checked against the **post-change** file only — and the change that made it look true is the one being described. **This is lesson 1 in its purest form: a change made the first draft's true sentence look false, and the pass then "corrected" a true claim** | **FIXED** — that row is reverted and the body restored |
 
