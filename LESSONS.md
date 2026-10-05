@@ -2355,3 +2355,100 @@ something to rediscover — it is something to extend.
 **The general form:** the same discipline as [[L51]] — *"nothing enforces this"* is a claim about the
 repo and needs the same evidence as any other. The honest finding here was narrower and more useful
 than the first guess: nothing enforced **this file**, while the mechanism to enforce it already existed.
+
+---
+
+## L73 — the filter decides what you can see, and it answers "nothing" just as confidently as "here it is"
+
+Twice in one deployment session I concluded something was wrong with a file when the file was fine.
+Both times the fault was in how I looked, and both times the raw output would have shown it in one line.
+
+**First instance.** A Traefik routing rule in a compose override read
+``Host(`a`) || Host(`b`)``. I checked it with `grep "companai.rule"` and saw only
+``Host(`a`)``, and spent several minutes building a theory about how Compose's interpolation was eating
+the `||`. Dumping the full labels block showed the value was simply **folded across two lines** by the
+YAML writer. `grep` prints matching *lines*; the value's second line did not match. The rule had been
+correct the whole time.
+
+**Second instance.** Measuring what a request from the public internet carries, I grepped for
+`Cf-Connecting:` — with a colon, because I was thinking of the header as "the connecting header". The
+real header is `Cf-Connecting-Ip:`. No match. I concluded the visitor's IP never reaches the app, and
+started designing a fix for a problem that did not exist. The IP *was* there; I had written a pattern
+that could not match it. (The related finding — that `X-Forwarded-For` really is unusable — was true,
+and survived.)
+
+**The rule.** *When a search comes back empty, or a value looks truncated, dump the raw thing before
+theorising.* Specifically: `cat -A`, or the whole block, or the whole response — unfiltered. A filter
+you wrote is a hypothesis about the shape of the data, and if the hypothesis is wrong the filter returns
+"nothing" rather than "your hypothesis is wrong". Absence of a match is not evidence of absence; it is
+evidence that your pattern did not match.
+
+**Why it keeps happening.** The filter is chosen from the *same mental model* that produced the wrong
+belief in the first place, so it confirms the belief instead of testing it. This is [[L46]] wearing
+different clothes: the search is built from your own vocabulary, so it cannot surprise you. The fix is
+to look at something you did not construct — the raw file, the raw response, the actual bytes.
+
+**The general form:** *never let a filtered view be the evidence for a claim about absence or
+truncation.* Both of these were cheap to check and expensive to get wrong — one sent me chasing a
+non-existent bug, the other nearly sent me changing a correct configuration.
+
+---
+
+## L74 — `docker compose config` prints every secret in plaintext
+
+Running `docker compose config` to check that interpolation had worked did what it says on the tin: it
+rendered the fully resolved configuration. Which means it printed the database password inside
+`DATABASE_URL`, plus `JWT_SECRET`, `NEXTAUTH_SECRET`, `MEILISEARCH_API_KEY` and the superadmin password,
+into the terminal and from there into the session transcript.
+
+**The rule.** *Treat `docker compose config` as a command that discloses secrets.* It is the right tool
+for checking that variables resolve — but resolve them against a throwaway `.env`, or pipe the output
+through a filter that keeps only the keys you are actually checking. Never run it against a live
+deployment's `.env` and dump the output.
+
+**What made it recoverable.** The database had not been seeded yet, so rotating cost one `rm` and one
+re-run of the generator — no data to lose. Had this happened a week later it would have meant either
+accepting exposed credentials or rebuilding the database. The lesson is not "be careful"; it is
+**check the deployment's secrets against the kit's public defaults before first boot, and do the risky
+inspection then** — the moment before seeding is the only moment when a mistake here is free.
+
+**A related measurement from the same session:** `docker compose -f base.yml -f override.yml config`
+proved that Compose **replaces** a service's `networks` list rather than merging it. Listing only the
+new network in an override silently drops the service off its original bridge, and it then cannot
+resolve its own database by name. The override must repeat the base's networks. (This is the opposite
+of `environment` and `labels`, which do merge — the difference is worth knowing rather than guessing.)
+
+---
+
+## L75 — a header that arrives at the proxy is not a header the application reads
+
+The platform behind Cloudflare could not tell its visitors apart: the login rate limiter bucketed
+everyone together. The instinct was to tune the proxy. Before doing that I traced the value to the code
+that consumes it, and the answer changed completely.
+
+Three facts, each measured rather than assumed:
+
+1. **What arrives** — a probe container behind the same Traefik showed `Cf-Connecting-Ip: 151.177.174.17`
+   (the real visitor), `X-Forwarded-For: 10.0.1.1` (Traefik had *replaced* it with the docker bridge
+   gateway), and `RemoteAddr: 10.0.1.2` (Traefik itself).
+2. **What the app reads** — `packages/shared/src/lib/ratelimit/helpers.ts`, `getClientIp`, reads
+   `x-forwarded-for` only. It never looks at `CF-Connecting-IP`.
+3. **What the app does with the result** — `null` falls back to a single shared key
+   (`RATE_LIMIT_FALLBACK_KEY`), so limiting still applies, but globally.
+
+So the real client address **is** present at the application, in a header it does not read. Every
+setting of the knob I had intended to tune — `0`, `1`, `2` — yields either no address or the same
+internal one for everybody. Tuning the proxy would have been work in the wrong layer, and my first
+draft of the override carried a confident comment asserting that depth 2 recovered the visitor's
+address. It did not; depth 2 indexes off the end of a one-entry list and returns nothing.
+
+**The rule.** *Follow a value from where it appears to the line of code that consumes it before changing
+any configuration.* "The proxy can see it" and "the app can use it" are different claims, and only the
+second one decides whether a setting matters. Corollary: a knob that is accepted without complaint, and
+plausibly named, may still do nothing at all — `parseTrustProxyDepth` happily accepted `2` and the
+behaviour was identical to the default.
+
+**The general form:** the same discipline as [[L31]] and [[L69]] — read the consumer, not the
+transport. And when the honest answer turns out to be "this knob is a no-op here", the right move is to
+**remove it and say so**, not to leave it set at a value that looks deliberate. A setting that does
+nothing is worse than an absent one, because it tells the next reader a story that is not true.

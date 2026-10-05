@@ -224,6 +224,16 @@ databases `wp_site1` and `site2db`.
 | phpMyAdmin really works through the proxy | full HTTP login; title `pma.test / mariadb | phpMyAdmin 5.2.3`; both databases listed; live session |
 | WordPress serves its installer | `200`, `<title>WordPress › Installation</title>` |
 
+### Proven ✅ (measured 2026-10-05, when the platform itself was deployed)
+
+| Claim | Evidence |
+|---|---|
+| **The platform is reachable from the public internet** | `GET https://<quick-tunnel>/login` from the laptop → `200`, 484,571 bytes, 0.40 s, `CF-Ray: …-ARN`, `Server: cloudflare`, `<title>Companai</title>` |
+| **The public response really is this VM's container** | With a unique cache-buster, the public body and the VM's own `127.0.0.1:3000` body were byte-identical — 484,658 bytes, `sha256 e257ec25…` — and the response carried `CF-Cache-Status: DYNAMIC`, so it was not an edge cache |
+| **The browser-facing certificate is real** | The public URL is `https://` and Cloudflare terminates TLS with a publicly trusted certificate; `CF-Visitor: {"scheme":"https"}` reached the origin |
+| **Nothing is exposed on the VM's own interfaces** | The app publishes on `127.0.0.1:3000` only (`ss` confirms loopback); the proxy is reached over the docker network, not a published port |
+| **A tunnel needs no router change and no inbound port** | `cloudflared` dials out; the VM has no inbound exposure and its own connectivity pre-checks all passed |
+
 ### NOT proven — do not assume these
 
 1. **Coolify's own service deployment.** I proved the *environment* and the *proxy*, using the same
@@ -233,10 +243,19 @@ databases `wp_site1` and `site2db`.
    test.** Everything it depends on — image pulls, the network, the proxy, hostname routing — is proven.
 2. **phpMyAdmin against a Coolify-managed database.** Proven against a MariaDB on the same network, which
    is the same mechanism, but not against a database created *by Coolify*. That needs one to exist first.
-3. **Cloudflare Tunnel / any public access.** Not started. No real domain can reach this VM yet.
-4. **TLS certificates.** Untested, and untestable locally: Let's Encrypt needs a publicly resolvable
-   name. Every local test therefore used `http://`.
+3. **A tunnel on *your* domain.** Public access is proven, but only through a Cloudflare *quick*
+   tunnel — an ephemeral `*.trycloudflare.com` name that changes every time `cloudflared` restarts and
+   that nobody controls. The named tunnel on your own domain needs a Cloudflare account and a domain
+   whose DNS is on Cloudflare. Neither exists yet; that is your open item.
+4. **Let's Encrypt at the origin.** Cloudflare terminates TLS for the tunnel, so the browser sees a
+   valid certificate and nothing at the origin needed one. Whether Coolify's Traefik can obtain its
+   *own* Let's Encrypt certificate for a directly addressed domain is still untested — it needs a
+   publicly resolvable name and port 80 or 443 reachable from the internet, which this VM does not
+   have.
 5. **A real host reboot.** The VM's auto-start reads `Start / delay 30` but has never been exercised.
+6. **The visitor's IP reaching the application.** Measured, and it does *not*. Traefik replaces
+   `X-Forwarded-For` with the `coolify` bridge gateway, so the app's rate limiter cannot tell callers
+   apart. Consequence and the fix are in §10.
 
 ---
 
@@ -250,3 +269,133 @@ Coolify's own source but has not been walked through by a human yet.
 So when you deploy your first real site: if the name resolves and Coolify deploys it, the environment is
 doing its job — and anything that then goes wrong is a project problem, which is exactly the
 distinction you asked for.
+
+---
+
+## 10. The platform itself, on this VM
+
+The platform is deployed and serving. It is **not** a Coolify-managed resource — Coolify cannot deploy
+an image that exists only on disk, and with 2FA on nobody can click through its UI. It is a plain
+compose stack beside Coolify, using Coolify's own Traefik as the proxy, exactly as the proof stack in
+§7 does. That is deliberate: it is the mechanism already proven to work here.
+
+### What is running
+
+| Service | Container | Notes |
+|---|---|---|
+| app | `companai-platform-app-1` | Next.js, the platform itself |
+| postgres | `mercato-postgres-wan` | `pgvector/pgvector:pg17-trixie`, no published port |
+| redis | `mercato-redis-wan` | cache |
+| meilisearch | `mercato-meilisearch-wan` | search |
+
+`opencode`, `mcp`, `model`, `hermes` and `localstack` — the other services the kit's compose file
+defines — are **not** started. `model` needs a multi-gigabyte GGUF that is not on this VM, `opencode`
+needs an image built from the repo, and the app does not depend on any of them. So the AI assistant
+features are off; the platform itself is complete.
+
+### Where the files are
+
+On the VM, in `/opt/companai-platform` (kept out of git — the same rule as `vms/`, which is ignored):
+
+| File | What it is |
+|---|---|
+| `docker-compose.fullapp.yml` | the kit's own production compose, copied **verbatim** — sha256 `e391ba6d…` |
+| `docker-compose.wan.yml` | the only file that differs: adds the `coolify` network and the Traefik route |
+| `docker/redis/redis.conf` | the kit's redis config, copied verbatim |
+| `.env` | this deployment's settings and secrets, mode `600`, generated by `make-env.sh` |
+| `make-env.sh` · `deploy.sh` · `set-host.sh` · `verify.sh` | the four operations below |
+
+A copy of the same four scripts and both compose files lives in `vms/platform/` on the laptop, which is
+gitignored, so they can be edited locally and copied over. `.env` is **not** copied back — it stays on
+the VM.
+
+### The four commands
+
+Run them on the VM, in `/opt/companai-platform`:
+
+```bash
+./make-env.sh <hostname>   # once only, before the first start — writes .env
+./deploy.sh                # start (or re-start) the stack; safe to re-run
+./set-host.sh <hostname>   # point the platform at a different name
+./verify.sh [public-url]   # print the evidence that it is really serving
+```
+
+`make-env.sh` **refuses to overwrite an existing `.env`.** That is not fussiness: its secrets are baked
+into the seeded database on first boot, and `TENANT_DATA_ENCRYPTION_FALLBACK_KEY` encrypts tenant
+fields, so changing it later leaves the existing rows unreadable.
+
+### Reading the login details
+
+The first-boot log prints them, and they are in `.env`:
+
+```bash
+grep OM_INIT_SUPERADMIN /opt/companai-platform/.env
+```
+
+The superadmin is `admin@companai.local`. **Treat that password as exposed** — the app prints it to the
+container log by design, so it is in `docker logs` as well as the file. Change it after the first
+login: sign in, then **Profile → Password**.
+
+### Putting it on your own domain
+
+Right now it answers on an ephemeral Cloudflare quick tunnel. When you have the domain:
+
+1. In Cloudflare, create a tunnel for the domain and point a DNS record at it.
+2. Run `cloudflared tunnel run --token <token>` on the VM instead of the quick-tunnel command.
+3. `cd /opt/companai-platform && ./set-host.sh your.domain.com` — one command; it rewrites the six
+   host-derived values in `.env` and recreates the app container. The database is untouched.
+4. `./verify.sh https://your.domain.com`.
+
+To find the current tunnel address, or restart it:
+
+```bash
+grep -oE 'https://[a-z0-9-]+\.trycloudflare\.com' /tmp/cf-platform.log | head -1   # the address
+pgrep -a cloudflared                                                              # is it running
+```
+
+A quick tunnel's address **changes every restart**, and the platform's `.env` still names the old one.
+After any restart, re-run `./set-host.sh <new-address>`. `APP_ALLOWED_ORIGINS` already carries
+`*.trycloudflare.com`, so the site keeps loading either way — only the app's own idea of its address
+goes stale.
+
+### The one thing that does not work properly
+
+**The application cannot see the visitor's IP address.** Measured with a probe container behind the
+same Traefik, a request from the public internet arrives carrying:
+
+```
+Cf-Connecting-Ip: 151.177.174.17   <- the real visitor
+X-Forwarded-For:  10.0.1.1         <- Traefik replaced it with the coolify bridge gateway
+RemoteAddr:       10.0.1.2         <- Traefik's own container
+```
+
+The app's rate limiter reads only `X-Forwarded-For`, and finds no usable address at any setting, so it
+falls back to **one shared bucket**. In practice: the per-account limit (5 login attempts per minute
+per email) still works, but the per-IP limit (20 per minute) is shared by *everyone using the site*.
+With a handful of testers that is a nuisance, not a hole — but if several people try to log in in the
+same minute, one of them can be told to wait.
+
+Setting `RATE_LIMIT_TRUST_PROXY_DEPTH` does not help: measured, `0` and `2` both yield no address, and
+`1` yields the gateway. The real fix is one line in the app — read `CF-Connecting-Ip`, which *is*
+present. Doing it from the proxy side instead would mean telling Coolify's Traefik to trust the tunnel,
+which is a Coolify-managed static config change and was not worth making unilaterally.
+
+### Two things to be aware of, security-wise
+
+- **`DEMO_MODE` and self-service onboarding are on**, which is the kit's own default and what makes the
+  site useful to show people. It also means anyone who finds the address can register. Say the word and
+  it becomes a closed instance.
+- **All secrets are unique to this deployment** — verified against the kit's defaults, which are public
+  (database `postgres`, `JWT_SECRET=JWT`, a documented encryption fallback key, superadmin `password`).
+  None of those are in use here.
+
+### Turning it off
+
+```bash
+cd /opt/companai-platform
+docker compose -f docker-compose.fullapp.yml -f docker-compose.wan.yml down    # keep data
+docker compose -f docker-compose.fullapp.yml -f docker-compose.wan.yml down -v # delete data too
+```
+
+To bring the throwaway proof stack back instead: `docker start teststack-wordpress teststack-phpmyadmin
+teststack-mariadb teststack-static`.

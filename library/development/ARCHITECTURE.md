@@ -171,26 +171,37 @@ It is not the product, and it is not the kernel. It is the **workbench** — the
 the product is built on. Its output is a working environment and a one-page "how to run it",
 not a feature.
 
-### Noted for later — the platform must be reachable from a domain
+### The platform is deployed, and reachable from outside this network
 
-**Owner's requirement, given 2026-10-05 and explicitly deferred** — his words: *"No need to do it
-now, but take note."*
+**Owner's requirement, given 2026-10-05** — his words: *"No need to do it now, but take note."* He then
+approved preparing it: *"this way you have environment fully ready to update and test as you proceed
+with development."*
 
-- At some point the **main platform must be deployed inside the WAN / hosting VM** we built, so that it
-  is reachable from **a domain or subdomain** rather than only from `localhost`.
-- The owner **sets the domain names himself** — "a couple later today". They are his to add, not ours.
-- **People in other countries will check and test it.** So the path has to work from outside this
-  machine and outside this network — a different requirement from Sprint 0's, which is deliberately
-  loopback-only (item 4 above).
-- **This is a note, not a task started.** Nothing in Sprint 0 depends on it, no work has begun, and no
-  domain has been assigned yet.
+- The **main platform is deployed inside the WAN / hosting VM** and is reachable **from outside this
+  machine and outside this network** — proven end-to-end from the public internet, not assumed. The
+  evidence and the operating commands are in
+  [`RUNBOOK-deploying-a-site.md`](RUNBOOK-deploying-a-site.md) §10.
+- It currently answers on an **ephemeral Cloudflare quick tunnel**. The owner **sets the domain names
+  himself** — "a couple later today" — and moving onto one is a single command (`set-host.sh`).
+- **People in other countries will check and test it.** The path therefore had to work from the public
+  internet, which is a different requirement from Sprint 0's, which is deliberately loopback-only
+  (item 4 above). Sprint 0's boundary is unchanged and intact: the VM's app publishes on `127.0.0.1`
+  only, and the proxy reaches it over the docker network rather than a published port.
+- **Status: deployed and proven; not yet on the owner's own domain.** The only thing still missing is
+  his domain plus a Cloudflare tunnel token. Nothing else is waiting on us.
+- **One known limitation, measured rather than guessed:** the application cannot see the visitor's IP
+  address. Traefik replaces `X-Forwarded-For` with the docker bridge gateway, and the app's rate limiter
+  reads only that header — so the per-IP login limit is shared by every visitor. The real address does
+  arrive, in `CF-Connecting-Ip`, which the limiter does not read. See §10.
 
-**Why it is worth recording now.** Sprint 0's definition of done stops at "reachable on localhost; no
-service exposed to the LAN". A domain-reachable deployment is the next boundary after it, and it is
-where the compose file's `DEPLOY_ENV` branch stops being a claim and gets exercised for real. The
-related WordPress-and-subdomain request (**item 12**) is separate and still to be discussed — the owner
-wants **directory-based hosting**, not WordPress-as-Docker: he adds the domain, creates a directory,
-uploads his own backup into it, imports the database through phpMyAdmin, then tests.
+**Why it was worth recording at the time.** Sprint 0's definition of done stops at "reachable on
+localhost; no service exposed to the LAN". A domain-reachable deployment is the next boundary after it,
+and it is where the compose file's `DEPLOY_ENV` branch stops being a claim and gets exercised for real —
+which is exactly what happened: `DEPLOY_ENV=wan` now names the image tag, the containers, the volumes
+and the docker network. The related WordPress-and-subdomain request (**item 12**) is separate and still
+to be discussed — the owner wants **directory-based hosting**, not WordPress-as-Docker: he adds the
+domain, creates a directory, uploads his own backup into it, imports the database through phpMyAdmin,
+then tests.
 
 ---
 
