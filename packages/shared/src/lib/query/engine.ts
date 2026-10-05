@@ -146,6 +146,76 @@ export function resolveEntityTableName(em: EntityManager | undefined, entity: En
   return fallback
 }
 
+/**
+ * Which scope columns (`organization_id`, `tenant_id`) a table actually has.
+ *
+ * Only positives are cached, mirroring `BasicQueryEngine.columnExists`: a table can
+ * gain a scope column during a process's lifetime (init runs migrations and seeds in
+ * one process), so a cached "no" would be a lie that outlives the schema.
+ */
+const scopeColumnCache = new Map<string, true>()
+
+async function scopeColumnsForTable(db: any, table: string): Promise<string[]> {
+  const candidates = ['organization_id', 'tenant_id']
+  const known = candidates.filter((column) => scopeColumnCache.has(`${table}.${column}`))
+  try {
+    const rows = await db
+      .selectFrom('information_schema.columns' as any)
+      .select(['column_name' as any])
+      .where('table_name' as any, '=', table)
+      .where('column_name' as any, 'in', candidates)
+      .execute()
+    const found = (rows ?? []).map((row: any) => String(row.column_name))
+    for (const column of found) scopeColumnCache.set(`${table}.${column}`, true)
+    return Array.from(new Set([...known, ...found]))
+  } catch {
+    return known
+  }
+}
+
+/**
+ * The `organization_id` / `tenant_id` of one row, or nulls when the table has neither.
+ *
+ * Read the note on the select below before reusing this shape anywhere else: asking a
+ * global table for scope columns it does not have does not merely fail, it **aborts the
+ * caller's Postgres transaction**, so every later statement in that transaction fails
+ * even though the error here is caught. `feature_toggles` is global by design and has
+ * neither column, which is how `mercato init` came to die halfway through seeding
+ * feature toggle defaults (defect B-18).
+ *
+ * This used to be copy-pasted, with the same blind `select([...])`, into the
+ * query-index subscribers and the search subscribers; the copies carried comments
+ * pointing at each other. It lives here once so the next caller cannot reintroduce it.
+ */
+export async function resolveRecordScope(
+  em: EntityManager | undefined,
+  entityType: string,
+  recordId: string,
+): Promise<{ organizationId: string | null; tenantId: string | null }> {
+  const empty = { organizationId: null, tenantId: null }
+  if (!em || !entityType || !recordId) return empty
+  try {
+    const db = (em as any).getKysely?.()
+    if (!db) return empty
+    const table = resolveEntityTableName(em, entityType as EntityId)
+    const columns = await scopeColumnsForTable(db, table)
+    // A global table has neither column: stop here rather than issue a select that
+    // would abort whatever transaction we are standing in.
+    if (columns.length === 0) return empty
+    const row = await db
+      .selectFrom(table as any)
+      .select(columns.map((column) => column as any))
+      .where('id' as any, '=', recordId)
+      .executeTakeFirst()
+    return {
+      organizationId: row?.organization_id == null ? null : String(row.organization_id),
+      tenantId: row?.tenant_id == null ? null : String(row.tenant_id),
+    }
+  } catch {
+    return empty
+  }
+}
+
 function buildFilterableCustomFieldJoins(
   sources: QueryCustomFieldSource[] | undefined,
 ): Array<{

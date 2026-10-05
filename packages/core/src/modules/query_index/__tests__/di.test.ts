@@ -1,6 +1,11 @@
 jest.mock('@open-mercato/shared/lib/query/engine', () => ({
   BasicQueryEngine: jest.fn().mockImplementation(() => ({})),
   resolveEntityTableName: jest.fn(() => 'customers_people'),
+  // The scope lookup itself moved to the shared resolver (defect B-18), so this test
+  // now covers only the DI bridge: it must call the resolver and forward what it
+  // returns. The resolver's own behaviour, including the global-table case, is covered
+  // in packages/shared/src/lib/query/__tests__/resolveRecordScope.test.ts.
+  resolveRecordScope: jest.fn(async () => ({ organizationId: 'org-1', tenantId: 'tenant-1' })),
 }))
 
 import { register } from '../di'

@@ -1,5 +1,5 @@
 import type { AppContainer } from '@open-mercato/shared/lib/di/container'
-import { BasicQueryEngine, resolveEntityTableName } from '@open-mercato/shared/lib/query/engine'
+import { BasicQueryEngine, resolveRecordScope } from '@open-mercato/shared/lib/query/engine'
 import { HybridQueryEngine } from './lib/engine'
 import { markDeleted } from './lib/indexer'
 import type { EventBus } from '@open-mercato/events'
@@ -71,17 +71,11 @@ export function register(container: AppContainer) {
         const id = String(payload?.id || payload?.recordId || '')
         if (!id) return
         if (!orgId || !tenantId) {
-          try {
-            const db = (em as any).getKysely()
-            const table = resolveEntityTableName(em, entityType)
-            const row = await db
-              .selectFrom(table as any)
-              .select(['organization_id' as any, 'tenant_id' as any])
-              .where('id' as any, '=', id)
-              .executeTakeFirst() as { organization_id: string | null; tenant_id: string | null } | undefined
-            orgId = row?.organization_id ?? orgId
-            tenantId = row?.tenant_id ?? tenantId
-          } catch {}
+          // Scope comes from the shared resolver. A global table has neither scope
+          // column, and a blind select on one aborts the surrounding transaction (B-18).
+          const scope = await resolveRecordScope(em, entityType, id)
+          orgId = scope.organizationId ?? orgId
+          tenantId = scope.tenantId ?? tenantId
         }
         // Optional: only index when custom field definitions exist for this entity (org/global)
         try {
@@ -124,17 +118,11 @@ export function register(container: AppContainer) {
         const id = String(payload?.id || payload?.recordId || '')
         if (!id) return
         if (!orgId || !tenantId) {
-          try {
-            const db = (em as any).getKysely()
-            const table = resolveEntityTableName(em, entityType)
-            const row = await db
-              .selectFrom(table as any)
-              .select(['organization_id' as any, 'tenant_id' as any])
-              .where('id' as any, '=', id)
-              .executeTakeFirst() as { organization_id: string | null; tenant_id: string | null } | undefined
-            orgId = row?.organization_id ?? orgId
-            tenantId = row?.tenant_id ?? tenantId
-          } catch {}
+          // Scope comes from the shared resolver. A global table has neither scope
+          // column, and a blind select on one aborts the surrounding transaction (B-18).
+          const scope = await resolveRecordScope(em, entityType, id)
+          orgId = scope.organizationId ?? orgId
+          tenantId = scope.tenantId ?? tenantId
         }
         try {
           const bus = ctx.resolve('eventBus') as any

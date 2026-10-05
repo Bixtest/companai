@@ -1,4 +1,4 @@
-import { resolveEntityTableName } from '@open-mercato/shared/lib/query/engine'
+import { resolveRecordScope } from '@open-mercato/shared/lib/query/engine'
 import type { Queue } from '@open-mercato/queue'
 import type { VectorIndexJobPayload } from '../../../queue/vector-indexing'
 import { resolveAutoIndexingEnabled } from '../lib/auto-indexing'
@@ -31,20 +31,13 @@ export default async function handle(payload: Payload, ctx: HandlerContext) {
     em = null
   }
 
+  // Resolve missing scope from DB if needed — via the shared resolver, which checks
+  // the table has the columns first. A blind select on a global table aborts the
+  // surrounding transaction even though the error is caught (defect B-18).
   if ((organizationId == null || tenantId == null) && em) {
-    try {
-      const db = em.getKysely()
-      const table = resolveEntityTableName(em, entityType)
-      const row = await db
-        .selectFrom(table as any)
-        .select(['organization_id' as any, 'tenant_id' as any])
-        .where('id' as any, '=', recordId)
-        .executeTakeFirst() as { organization_id?: string | null; tenant_id?: string | null } | undefined
-      if (organizationId == null) organizationId = row?.organization_id ?? organizationId
-      if (tenantId == null) tenantId = row?.tenant_id ?? tenantId
-    } catch {
-      // Ignore lookup errors
-    }
+    const scope = await resolveRecordScope(em, entityType, recordId)
+    if (organizationId == null) organizationId = scope.organizationId ?? organizationId
+    if (tenantId == null) tenantId = scope.tenantId ?? tenantId
   }
 
   if (!tenantId) return

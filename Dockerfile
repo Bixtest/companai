@@ -14,7 +14,6 @@ RUN corepack enable
 # Copy workspace manifests first so dependency installs stay cached across source-only changes.
 COPY package.json yarn.lock .yarnrc.yml turbo.json ./
 COPY tsconfig.base.json tsconfig.json ./
-COPY apps/docs/package.json ./apps/docs/
 COPY apps/mercato/package.json ./apps/mercato/
 COPY packages/ai-assistant/package.json ./packages/ai-assistant/
 COPY packages/cache/package.json ./packages/cache/
@@ -84,7 +83,6 @@ RUN corepack enable
 # Copy workspace manifests first so dependency installs stay cached across source-only changes.
 COPY package.json yarn.lock .yarnrc.yml turbo.json ./
 COPY tsconfig.base.json tsconfig.json ./
-COPY apps/docs/package.json ./apps/docs/
 COPY apps/mercato/package.json ./apps/mercato/
 COPY packages/ai-assistant/package.json ./packages/ai-assistant/
 COPY packages/cache/package.json ./packages/cache/
