@@ -71,7 +71,7 @@ is gitignored, so they are never committed.
 |---|---|
 | VM user / password | `CREDENTIALS.local.txt` (`ramzi`) |
 | VM SSH key | `vms/id_ed25519` (private) + `id_ed25519.pub` |
-| Coolify admin | **not created yet — see §6** |
+| Coolify admin | `CREDENTIALS.local.txt` — `admin` / `vpersonmail@gmail.com`, **created 2026-10-04** (this row said "not created yet" until 2026-10-05; §6 records the creation). 2FA is on. The password still needs changing — §6a Task 2 |
 
 ---
 

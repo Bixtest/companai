@@ -121,6 +121,10 @@ See COOKBOOK rule zero-ten.
 | [`BACKLOG.md`](BACKLOG.md) | **The one roadmap** — everything left, in order, with the "do not lose this" list and the deferrals |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | How the Starting Kit + Hermes + the model server run together, and the dockerisation decision (Sprint 0) |
 | [`BLOCKERS.md`](BLOCKERS.md) | **Anything stopping progress**, with what clears it. **Read this before wondering why something is not moving** |
+| [`RUNBOOK-hosting-server-manual.md`](RUNBOOK-hosting-server-manual.md) | **Operating the hosting server** — connecting from the laptop, domains and DNS, directories, databases, phpMyAdmin, SSL, WordPress, deploying another Docker platform. **The entry point for that work, for a person or an agent** |
+| [`RUNBOOK-platform-server.md`](RUNBOOK-platform-server.md) | the hosting VM itself — how it was built, the owner's tasks, rollback, rebuild from scratch |
+| [`RUNBOOK-deploying-a-site.md`](RUNBOOK-deploying-a-site.md) | the proxy and the deployment proof in depth, and what is and is not proven |
+| [`RUNBOOK-sprint0.md`](RUNBOOK-sprint0.md) | Sprint 0 — running the kit on the laptop |
 
 **Why there is no questions file.** There was one (`QUESTIONS.md`); the owner answered it on
 2026-10-04 and it was deleted, as promised. Its answers are now in [`ARCHITECTURE.md`](ARCHITECTURE.md)
