@@ -728,8 +728,10 @@ recorded — but they can be removed if space gets tight.
 **Do:**
 - check `df -h /` before pulling images;
 - prove each change with a `curl` before moving on;
-- keep the 3.8 GB installer ISO — it is the only rebuild route (there is 69 GB free on C:, measured
-  2026-10-05).
+- **the 3.8 GB installer ISO is gone** — the owner deleted it on 2026-10-06 (`NEEDS-YOU.md` item 7).
+  Re-download it from `https://releases.ubuntu.com/24.04.5/` before rebuilding the VM; the SHA-256 is in
+  [`RUNBOOK-platform-server.md`](RUNBOOK-platform-server.md) §6a Task 5. **`C:` has 86 GB free** as of
+  2026-10-06.
 
 ---
 

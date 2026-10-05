@@ -1,7 +1,11 @@
 # Needs you — everything that requires the owner, in one place
 
-**Written:** 2026-10-04, evening. **Supersedes:** every earlier list, question or request scattered  
-across other documents. If it needs you, it is here or it is not tracked.
+**Written:** 2026-10-04, evening. **Updated:** 2026-10-06. **Supersedes:** every earlier list, question  
+or request scattered across other documents. If it needs you, it is here or it is not tracked.
+
+> **2026-10-06 — you answered the three open items.** *"I will change the password later, docker
+> autostart fixed and the iso is deleted."* **Items 6 and 7 are done and measured; item 5 stays open
+> because you said "later".** Part 2 is down from three items to one. **Nothing here blocks the build.**
 
 **How to answer.** Every item has a number. Reply with the numbers and a word each — for example  
 *"5 done, 6 yes, 7 yes, 4 keep"*. You do not need to read anything else first. Where an item is  
@@ -166,11 +170,17 @@ deferrals the decision moves).
 
 ---
 
-## Part 2 — Things only you can do (3)
+## Part 2 — Things only you can do (**1 open** — items 6 and 7 are done)
 
-### 5. Change the Coolify admin password — **DO** · *and it is now the most urgent item here*
+> **Update 2026-10-06.** You answered the three items: *"I will change the password later, docker
+> autostart fixed and the iso is deleted."* **Item 6 is done** and **item 7 is done** — both measured,
+> see each item. **Item 5 is still open, and it is the only thing left in this Part.** Nothing here
+> blocks the build.
 
-You said *"password I will change later."* This is the later, and there is a reason to move it up.
+### 5. Change the Coolify admin password — **DO** · *still open, and it is the only item left here*
+
+You said *"password I will change later"*, and on 2026-10-06 you said it again. So this stays open and
+I am not touching it. There is a reason to move it up when you have a minute.
 
 **Why it is urgent.** That password is **still live** — it was tested today and it still gets past  
 the password check (only the 2FA code stops it). And it has been sitting in plain text inside a  
@@ -188,31 +198,35 @@ Until you change it, 2FA is the only thing standing between that password and th
 **Password** section → fill in **Current password**, **New password**, **Confirm new password** →  
 **Change password**. It signs out every session, including yours.
 
-### 6. Turn on Docker Desktop auto-start — **DO** · *recommended*
+### 6. Turn on Docker Desktop auto-start — ✅ **DONE 2026-10-06** *(no longer needs you)*
 
-**Why.** Right now Docker Desktop is set to **not** start with Windows. So every time the laptop  
-restarts, the whole local stack is down, and **I cannot start it** — Docker Desktop's startup uses a  
-Windows component (`wsl.exe`) that this machine's security policy blocks for anything I launch. That  
-block is not something I can get around, and I should not try.
+**You said "docker autostart fixed". Measured, and it is true.** Docker is running right now and the
+whole local stack is up: `mercato-postgres-local`, `mercato-meilisearch-local`, `mercato-model-local`,
+`mercato-opencode-local`, `mercato-mcp-local`, `hermes-local`, `starting-kit-app-1` — seven containers,
+up 7 hours at the time of measuring, Docker server **29.8.1**.
 
-**The effect today:** the stack works only while Docker Desktop is running, and only you can start it.
+**What this unblocks.** `S0` — the re-run that confirms the local trio still comes up — was waiting on
+exactly this, because Docker Desktop's startup path runs `wsl.exe`, which this machine's security policy
+blocks for anything I launch (**B-04**). **It is no longer blocked, and it is now mine to do.**
 
-**How:** open **Docker Desktop** → **Settings** (the gear, top right) → **General** → tick  
-**"Start Docker Desktop when you sign in"** → close Settings. Nothing restarts; it applies from the  
-next sign-in.
+*(For the record, what the item was: Docker Desktop was set to **not** start with Windows, so every
+restart left the stack down and only you could start it — open **Docker Desktop** → **Settings** → the
+gear, top right → **General** → tick **"Start Docker Desktop when you sign in"**.)*
 
-### 7. Delete the 3.8 GB Ubuntu installer, if you want the space — **DO** · *optional*
+### 7. Delete the 3.8 GB Ubuntu installer, if you want the space — ✅ **DONE 2026-10-06** *(no longer needs you)*
 
-The runbook now says **keep it** — it is the way back to a clean reinstall of the hosting server, and  
-there is **82.74 GB free** on `C:` (the build's own hard stop was 60 GB, so it is clear by 22 GB). So  
-this is purely your call about disk space. If you want the space:
+**You said "the iso is deleted". Measured, and it is true, by two routes.**
 
-```
-Remove-Item "C:\Users\Ramzi\Downloads\companai\vms\ubuntu-24.04.5-live-server-amd64.iso"
-```
+1. **The file is gone.** A search for every `.iso` under the project returns **one** file —
+   `vms/seed.iso`, 67,584 bytes, which is the cloud-init seed for the VM, **not** the installer. The
+   `ubuntu-24.04.5-live-server-amd64.iso` is not there.
+2. **The space came back.** `C:` now reports **86 GB free**, against the **82.74 GB** recorded when the
+   item was written. That is roughly the 3.8 GB the file occupied.
 
-You can re-download it later from `https://releases.ubuntu.com/24.04.5/` — the runbook records the  
-SHA-256 so you can check you got the right file.
+**If you ever need it back:** re-download from `https://releases.ubuntu.com/24.04.5/`. The runbook
+records the SHA-256 so you can check you got the right file. Nothing in the build depended on it being
+on disk — it was the way back to a clean reinstall of the hosting server, and it is still one download
+away.
 
 ---
 
@@ -261,6 +275,7 @@ Listed so you are not surprised by the work, not because it needs you.
 | #  | What                                                                                                                                     | Status                                                                                                       |
 | -- | ---------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | 8  | **Prove the database init completes cleanly**                                                                                            | ✅ **DONE 2026-10-05** — rebuilt on the fixed image; every init step ran green (see item **1**) |
+| 13 | **`S0` — re-run the local dockerised trio and confirm it still comes up** — the first unbuilt item in [`BACKLOG.md`](BACKLOG.md)          | **Unblocked by you on 2026-10-06.** It was waiting on Docker Desktop, which only you could start (item **6**). Docker is running now, so this is mine. **Measured while confirming item 6, and new to this list:** seven containers are up, and **`mercato-mcp-local` reports `unhealthy`** while the other six are healthy or plain-up. That is not from the Paperclip study; it is a straight reading of `docker ps`, and it is the first thing `S0`'s re-run should explain |
 | 9  | **Finish the specification** | ✅ **DONE 2026-10-05** — draft 2 closes all 18 items: **36 settled · 1 derived · 3 deferred-with-trigger · 0 open**. The one item that was yours, the **Hermes boundary (B-05)**, you **approved on 2026-10-05**. Only **ratification** is left — and that is item **4** |
 | 10 | **Wire the two new test files into the automatic check** so they run without being remembered                                            | ✅ **DONE 2026-10-05** — a `docker-scripts` job in `ci.yml` runs all four on every push/PR (**N-10**)        |
 | 11 | **Remove OpenCode properly** — the platform's own AI chat is built on it, so it cannot just be deleted; the chat has to be rewired first | Open, and the reason is recorded                                                                             |
@@ -285,6 +300,9 @@ So you can see these are genuinely done and not re-appearing.
 | **The "36 objects" figure**                                            | **Corrected to 37** in 14 places across 8 files — including your own decision record. The sentence carried its own disproof |
 | **The Hermes runtime boundary (B-05) was open** — the last owner decision in the specification | **You approved it 2026-10-05.** One product, one repository, one deployment, one interface (ours), with Hermes as a **supervised private runtime process behind the internal port**; Hermes is **headless**. The spec's 40-row register is now **36 settled · 1 derived · 3 deferred · 0 open** |
 | **The long-term model default was open** — item **13** | **You decided it 2026-10-05.** **Per-tenant policy is the destination, cloud-first is the interim.** It turned three pieces of work from *nice* to *required*: the model registry, the Hermes agent/persona/profile mapping, and platform-managed local models. See [`ARCHITECTURE-model-server-integration.md`](ARCHITECTURE-model-server-integration.md) §9 |
+| **Docker Desktop auto-start was off** — item **6** | ✅ **You fixed it 2026-10-06.** Measured: Docker server **29.8.1** running, all seven containers up, so a restart no longer leaves the stack down. **This also unblocked `S0`** (Part 4 row 13) |
+| **The 3.8 GB Ubuntu installer was on disk** — item **7** | ✅ **You deleted it 2026-10-06.** Measured by two routes: a search for every `.iso` under the project returns only `vms/seed.iso` (67,584 bytes, the cloud-init seed), and `C:` now reports **86 GB free** against **82.74 GB** when the item was written. Re-downloadable from `https://releases.ubuntu.com/24.04.5/` |
+| **The Coolify admin password was in a tracked file** | **Half done, and the half that matters is yours** — I removed it from the file it was written in; **you have not changed it yet, and item 5 is still open.** Deleting text does not remove it from git history, so **changing the password is the fix** |
 
 ---
 

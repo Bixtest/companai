@@ -12,6 +12,7 @@ place to look:
 - [`analysis/`](analysis/) — the 12-batch analysis programme that checks AI-FIRST against HERMES and STARTING-KIT.
 - [`development/`](development/) — **the development management hub**: the one roadmap, the architecture of the running system, and the handover. Start here if you are working on the project.
 - [`paperclip-hermes-study/`](paperclip-hermes-study/) — **the completed 11-batch forensic study** of Paperclip and Hermes, and the lessons for our own agent architecture. **Read [`paperclip-hermes-study/findings/10-lessons-and-target-design.md`](paperclip-hermes-study/findings/10-lessons-and-target-design.md) first** — it is the synthesis.
+- [`paperclip-value-study/`](paperclip-value-study/) — **the value scan** (2026-10-05/06): a second, wider pass over upstream Paperclip asking a different question — *is any of it worth taking, learning from, or deliberately rejecting?* **Read [`paperclip-value-study/findings/07-synthesis.md`](paperclip-value-study/findings/07-synthesis.md) first** — it is the answer, and the whole point of the study.
 
 Before this, the material lived in about a dozen folders: some inside `companai`,
 some only on the external drive (`E:`), some inside the live codebase. If the
@@ -130,6 +131,33 @@ it is marked as such in §3.1 of the synthesis.
 **audits** those claims against the source instead (and found one contradicted — "session resume is
 broken" is our adapter's defect, not Hermes'). What was genuinely new is **upstream Paperclip**,
 which had no analysis anywhere.
+
+### 5b. The value scan — `paperclip-value-study/`
+
+**A second, wider pass over the same upstream product, completed 2026-10-06 at the owner's request.**
+The study above answered *"how do AI workers get work?"* This one asks a different question: **what does
+Paperclip ship, how does it work, and is any of it worth taking, learning from, or deliberately
+rejecting?** Every candidate is cross-checked against five baselines before it is allowed to be called
+new — the vision, the Starting Kit's built capabilities, the agent half, the first study's synthesis, and
+the backlog. **It documents only where there is value**, which is the owner's instruction and the whole
+point of the study.
+
+| File | What it is |
+|---|---|
+| [`paperclip-value-study/findings/07-synthesis.md`](paperclip-value-study/findings/07-synthesis.md) | **Read this first, and read nothing else unless you want the evidence.** The answer: six things worth acting on, four backlog items confirmed correct, eight rejections with reasons, and the trap list |
+| [`paperclip-value-study/PLAN.md`](paperclip-value-study/PLAN.md) | Why the study exists, the rule it runs under, the five baselines, and the twelve batches |
+| [`paperclip-value-study/LOG.md`](paperclip-value-study/LOG.md) | One dated line per batch completed, including the extraction verification and the defect it found |
+| [`paperclip-value-study/findings/`](paperclip-value-study/findings/) | Six evidence files, `01`–`06`, each naming the batches it covers — plus `07`, the synthesis |
+
+**What it changed.** Four documents, no code: **`ML-4`'s wording** in the backlog (it promised a mid-run
+stop we have not built), **four new items on the "do not lose this" list (`N-15` to `N-18`)** — the
+orchestration boundary before `AH-3` is built, the self-modification gate, the memory control plane and the
+plugin capability model — and **the extraction record** (the archive holds **8,300 files**; one file the
+first extraction lost has been restored from the archive, byte-for-byte).
+
+**It also corrected itself, visibly.** The critic pass found two claims in its own findings that were
+false ("we have nothing" about the agent-learning prohibition and about memory), and both are corrected
+in place with the measurement that disproved them.
 
 ---
 

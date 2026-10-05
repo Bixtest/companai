@@ -69,6 +69,7 @@ The product is three pieces: the **Starting Kit** (bought), **Hermes** (borrowed
 |---|---|
 | [`../analysis/`](../analysis/) | **The analysis programme** — 12 batches plus batch 0, checking AI-FIRST against Hermes and the Starting Kit. Batch 12 is the development plan |
 | [`../paperclip-hermes-study/`](../paperclip-hermes-study/) | **The agent study** — 11 batches on how AI workers get roles, tasks, delegation, triggers and conversations. Batch 10 is the synthesis |
+| [`../paperclip-value-study/`](../paperclip-value-study/) | **The value scan** — a second, wider pass over the same upstream product, asking a different question: *is any of it worth taking, learning from, or deliberately rejecting?* Batch 12 is the answer. **Read [`findings/07-synthesis.md`](../paperclip-value-study/findings/07-synthesis.md) and nothing else** unless you want the evidence |
 | [`../../workspace/knowledge/`](../../workspace/knowledge/) | **How the platform actually works** — the governance layer, authority, approvals, delegations, denials, record locks, the ledger, the test gate |
 | [`../../workspace/references/`](../../workspace/references/) | The detail behind the cookbook: environment, parked modules, deployment, how to test |
 
@@ -142,6 +143,7 @@ decision, or changes what is tracked in git updates it in the same change.
 If a newcomer cannot find the five things that matter from this page, this page is broken. Fix
 the page, not the newcomer.
 
-*Last updated: 2026-10-05 — created, with the model-layer decision (per-tenant policy as the
-destination, cloud-first as the interim) recorded, the end-game documents gathered in one place,
-and the untracked folders named honestly.*
+*Last updated: 2026-10-06 — the Paperclip value scan added to §4, with its synthesis named as the
+one page to read. Previously 2026-10-05: created, with the model-layer decision (per-tenant policy
+as the destination, cloud-first as the interim) recorded, the end-game documents gathered in one
+place, and the untracked folders named honestly.*

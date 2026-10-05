@@ -7,7 +7,64 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
-## 2026-10-05 (latest) — the model default is decided, and the documentation a new agent needs now exists
+## 2026-10-06 (latest) — the second Paperclip pass, and a file the extractor had lost
+
+**The owner asked for a second, wider study of Paperclip: extract the archive, read it again — every
+functionality, code, idea, flow and concept — and find anything that adds value or inspires an idea,
+documenting it only if there is.**
+
+**The answer is yes, and it is not where Paperclip's own README points.** Almost everything Paperclip
+*advertises*, we already have or already plan. What is worth taking is **how** it does the things we have
+only described. The study ([`library/paperclip-value-study/`](library/paperclip-value-study/), 12 batches)
+ends at [`findings/07-synthesis.md`](library/paperclip-value-study/findings/07-synthesis.md): **six things
+worth acting on, four of our items confirmed correct, eight rejections with a reason each, and a trap
+list.**
+
+**Two findings changed words we had already written.** First, **`ML-4` promised a mid-run stop we have not
+built.** Paperclip built exactly this, and its design records spend *first* and judges it *after*, so
+crossing a budget pauses the scope and blocks future admission while the code that cancels work already in
+flight is an **optional hook** that one service of six supplies. Our item now says what it can deliver.
+Second, **we had never drawn the orchestration boundary** Paperclip drew explicitly and refused to cross
+(*"a second orchestration system inside the product"*). It is now **N-15**, to be written before `AH-3` is
+built.
+
+**The strongest idea in the study is the responsible-user intersection:** an agent acts *on behalf of* a
+person, and its authority is the intersection of its own permissions and that person's, decided **inside
+the single decider** rather than at each call site. We already hold the rule in our own words; this is the
+place to put it. It lands on **`S-02`**. `AH-8` and `AH-9` were confirmed correct, and both now carry the
+mechanism that was missing from our item text.
+
+**Three genuinely new ideas**, all on the "do not lose this" list rather than the roadmap — the fourth new
+item is the boundary rule above (**N-15**). They are: the **self-modification gate** (**N-16** — a diff, an
+accepted interaction, and application only in a separate run, with an evidence floor), the **memory control
+plane** (**N-17** — extending the tenant-scoped provider we already designed to a policy over several), and
+the **plugin capability model** (**N-18**).
+
+**The study's own evidence base had a defect, and measuring found it.** The first extraction produced
+8,299 files against the archive's 8,300, and the first pass attributed the gap to *"a single symlink
+Windows will not create"*. That was wrong: the archive holds **two** symlinks and **both are present** in
+the tree, and the real gap was **one missing file** —
+`packages/db/src/migrations/0118_pipeline_case_agent_fanout.sql`, 346 bytes. Restored from the archive
+byte-for-byte. The tree and the archive now agree **exactly** at **8,300 files / 132,839,980 bytes**, by
+two independent routes.
+
+**The critic pass also found two false claims in the study's own findings** — both "we have nothing"
+statements about things we do in fact have (the agent-learning prohibition, and a designed tenant-scoped
+memory provider). Both are corrected in place, with the measurement that disproved them, rather than
+quietly edited.
+
+**The owner answered the three open items.** Docker Desktop auto-start is **on** and Docker is running
+(seven containers up, server 29.8.1), so **`S0` is unblocked** — and it now has one thing to explain:
+`mercato-mcp-local` reports `unhealthy` while the other six are healthy. The 3.8 GB installer is
+**deleted**, confirmed two ways (no `.iso` remains but the 67 KB cloud-init seed, and `C:` is at 86 GB free
+against 82.74 GB). The Coolify password stays open by his choice.
+
+**No code changed, so the code repository has no commit.** Committed in Repo 1 (docs), staged by explicit
+path, never `git add -A`.
+
+---
+
+## 2026-10-05 — the model default is decided, and the documentation a new agent needs now exists
 
 **The owner approved the model-layer recommendation and asked for four things: follow it, map the
 Hermes agents / personas / profiles onto tenants and roles, record two requirements for the
@@ -125,6 +182,11 @@ anything the agent launches. The block is not approvable and must not be worked 
 Docker Desktop" is a permanent owner step, not a one-off** — and `AutoStart` is off, so it recurs on
 every restart. Recorded as **B-04**, rewritten, precisely so a later session does not read it as the
 agent having failed.
+
+> **Update, 2026-10-06.** The owner turned Docker Desktop **auto-start on**, so the second half of that
+> is no longer true: it no longer recurs on every restart. **The first half still is** — the agent
+> cannot start Docker Desktop, and never will, because that is a security-policy block and not a
+> setting. See `NEEDS-YOU.md` item 6 and `RUNBOOK-sprint0.md`.
 
 **Then the defect, and the uncomfortable part: the recorded cause was wrong.** B-15 said `mercato
 init` "printed `❌ Initialization failed` yet **exited 0**", so the fix looked like it belonged in the

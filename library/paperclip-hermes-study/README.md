@@ -59,7 +59,7 @@ file it came from.
 
 | Input | Where it is | Status |
 |---|---|---|
-| **Paperclip (newest)** | `library/ai/paperclip-master/` — extracted from `paperclip-master.zip`, 9,056 files, 132 MB | ⚠️ gitignored — reference tree, not ours |
+| **Paperclip (newest)** | `library/ai/paperclip-master/` — extracted from `paperclip-master.zip`, 8,300 files, 132 MB (the zip lists 9,056 *entries*; 756 are folders) | ⚠️ gitignored — reference tree, not ours |
 | **Hermes (source)** | `library/ai/hermes-agent-main/` | ⚠️ gitignored — the artefact; where it disagrees with docs, it wins |
 | **The integration** | `aissistant-package/` — 92,729 files (incl. vendored deps) | ⚠️ NOT OURS — the sibling's codebase |
 | **Existing docs** | `library/ai/PAPERCLIP_HERMES_LLAMA_SERVER_SSOT.md` (1,474 lines), `library/ai/hermes-docs/` (351 files incl. the **23,842-line `reboot/` dossier**), `library/ai/ai-first/AI_Native_Business_Platform_Hermes_Forensic_Analysis_and_Architecture.md` (4,254 lines) | ⚠️ sibling material — lessons only |

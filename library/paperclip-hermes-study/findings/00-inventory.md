@@ -20,15 +20,28 @@ Every number below was measured this session, not recalled.
 
 | # | Input | Path | Measured | Tracked in git? |
 |---|---|---|---|---|
-| 1 | **Paperclip — newest** | `library/ai/paperclip-master/` | **8,299 files, 667 of them markdown**; 132 MB extracted | ❌ **gitignored** (added this session) — reference tree, not ours |
+| 1 | **Paperclip — newest** | `library/ai/paperclip-master/` | **8,300 files, 667 of them markdown**; 132 MB extracted | ❌ **gitignored** (added this session) — reference tree, not ours |
 | 2 | **Paperclip — the zip** | `paperclip-master.zip` | 45,058,177 bytes (45 MB); the zip lists 9,056 entries | ❌ gitignored |
 | 3 | **Hermes — the runtime source** | `library/ai/hermes-agent-main/` | git tracks **0** files in it | ❌ gitignored — the artefact |
 | 4 | **The integration** | `aissistant-package/` | **92,729 files** total, of which **1,510 are `node_modules` directories** | ❌ **NOT OURS** — the sibling's codebase |
 
-**Note on the two file counts for Paperclip.** The zip lists 9,056 entries; 8,299 files landed on
-disk. The difference is directory entries and the symlinks that failed to extract (`unzip` reported
-`symlink error: File exists`). **The count to use is 8,299.** Anyone quoting 9,056 is quoting the
-archive, not the tree.
+**Note on the file counts for Paperclip.** The zip lists **9,056 entries**, which is **8,300 files plus
+756 directory entries**. **The count to use is 8,300.** Anyone quoting 9,056 is quoting the archive's
+*entries*, not its files.
+
+> **Corrected 2026-10-06 by the second study.** This note used to say **8,299** files, and to explain the
+> gap as *"symlinks that failed to extract"*. **Both were wrong**, and the second study measured it:
+> - The archive contains **two** symlinks (`.claude/skills/company-creator` and `.claude/skills/paperclip`),
+>   and **both landed on disk** — Windows extracted them as ordinary files holding their target paths
+>   (36 and 22 bytes). Nothing failed to extract.
+> - The real gap was **one missing file**: `packages/db/src/migrations/0118_pipeline_case_agent_fanout.sql`,
+>   **346 bytes**, whose neighbours `0117` and `0119` were both present. It has been **restored from the
+>   archive, byte-for-byte**.
+> - Re-measured by two routes — a filesystem walk, and a name-by-name diff of the archive against the
+>   tree — the tree now matches the archive **exactly**: **8,300 files / 132,839,980 bytes**, zero missing,
+>   zero extra, zero size mismatches. The markdown count of **667** is unchanged.
+>
+> Full working: [`../../paperclip-value-study/LOG.md`](../../paperclip-value-study/LOG.md), batch 0.
 
 ---
 

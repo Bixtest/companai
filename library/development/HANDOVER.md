@@ -5,7 +5,7 @@ written for exactly that person — and this revision is written for an agent th
 continue the development work.** Read it top to bottom once (about 20 minutes), then
 follow §2 to actually get working. Everything else in the project is reachable from here.
 
-**Written 2026-10-05, revision 8. Owner: Ramzi. Development machine: `BIXMASERVER` (Windows 10 Pro).**
+**Written 2026-10-05, revision 9 (2026-10-06). Owner: Ramzi. Development machine: `BIXMASERVER` (Windows 10 Pro).**
 
 > This is the **handover**. It is not a status page and not a roadmap — it is the one
 > document that tells you what exists, where it is, and in what order to open it.
@@ -194,6 +194,7 @@ wrong about what is already done **four times**.
 | **Testing it** | `workspace/references/how-to-test.md` → `workspace/knowledge/test-gate.md` |
 | **Picking up the analysis** | [`../analysis/PLAN.md`](../analysis/PLAN.md) → [`../analysis/LOG.md`](../analysis/LOG.md) → the `findings/` reports |
 | **Designing the agent half** (AI staff, roles, tasks, delegation, triggers, meetings) | [`AGENT-HALF.md`](AGENT-HALF.md) — **the model and the plan** — then [`../paperclip-hermes-study/findings/10-lessons-and-target-design.md`](../paperclip-hermes-study/findings/10-lessons-and-target-design.md) — **the synthesis** — for the evidence behind each lesson, and its [`PLAN.md`](../paperclip-hermes-study/PLAN.md) for how it was derived |
+| **Deciding whether to take an idea from upstream Paperclip** | [`../paperclip-value-study/findings/07-synthesis.md`](../paperclip-value-study/findings/07-synthesis.md) — **the answer of the second, wider pass.** Six things worth acting on, four of our items confirmed correct, eight rejections with a reason each, and the trap list |
 
 ---
 
@@ -342,7 +343,7 @@ companai/                       ← repo 1 root (thinking + docs).  You are here
 │   │   ├── ai-first/           THE DIRECTION — what we will actually build
 │   │   ├── hermes-docs/        a sibling's docs. Lessons only, never decisions
 │   │   ├── hermes-agent-main/  the Hermes runtime source — where it disagrees with docs, it wins
-│   │   ├── paperclip-master/   upstream Paperclip — the subject of the agent study
+│   │   ├── paperclip-master/   upstream Paperclip — the subject of **both** studies below
 │   │   └── source-docs/        ONE PLACE for the scattered source docs (register inside)
 │   ├── analysis/               THE ANALYSIS PROGRAMME — complete, batches 0–12 (13 batch reports)
 │   │   ├── PLAN.md             the batch plan with tickboxes — all DONE
@@ -352,6 +353,10 @@ companai/                       ← repo 1 root (thinking + docs).  You are here
 │   │   ├── PLAN.md             the batch plan with tickboxes — all DONE, each with its result
 │   │   ├── LOG.md              one dated line per batch
 │   │   └── findings/           one report per batch — **batch 10 is THE SYNTHESIS** (see §2)
+│   ├── paperclip-value-study/  THE VALUE SCAN — complete, all 12 batches
+│   │   ├── PLAN.md             the batches, the rule ("document only where there is value"), the five baselines
+│   │   ├── LOG.md              one dated line per batch, including the extraction verification
+│   │   └── findings/           01–06 evidence, **07 is THE ANSWER** (see §2)
 │   └── canonical-architecture-v2-hybrid-ai-coolify.md   the hosting architecture
 │
 ├── compai/                     THINKING — no code
@@ -623,7 +628,20 @@ alone means this page is broken — **fix the page, not the newcomer.**
 from an older document are not equally current, and mixing them in one table is how this page
 goes wrong. If two older documents disagree on a number, say so — never average them.
 
-*Last updated: 2026-10-05, revision 8 — **the navigation layer a new agent needs now exists, and two
+*Last updated: 2026-10-06, revision 9 — **the second Paperclip pass is done, and it changed four
+documents without changing any code.** A new study, [`../paperclip-value-study/`](../paperclip-value-study/),
+read upstream Paperclip through a **wider lens** than the agent study: not *"how do AI workers get
+work"* but *"is any of this worth taking, learning from, or deliberately rejecting?"* Its
+[`findings/07-synthesis.md`](../paperclip-value-study/findings/07-synthesis.md) is the answer. It
+found **six things worth acting on** and **confirmed four of our items were right** (`AH-3`, `AH-8`,
+`AH-9`, `ML-4`). Two of the six **changed words we had already written**: **`ML-4` promised a mid-run
+stop we have not built**, and **we had never drawn the orchestration boundary** Paperclip drew
+explicitly and refused to cross. §2's reading table and §4's folder map gained the new study.
+**Also: the owner answered the three open items** — Docker Desktop auto-start is **on** and the 3.8 GB
+installer is **deleted** (both measured), so **`S0` is unblocked**; the Coolify password stays open by
+his choice. Docs updated in the same change as the work (COOKBOOK rule zero).*
+
+*Earlier, 2026-10-05, revision 8 — **the navigation layer a new agent needs now exists, and two
 analysis folders the design cites are now tracked.** [`BOOKMARKS.md`](BOOKMARKS.md) is the new
 one-page short list: the handful of documents that matter, the **end-game / vision** documents, the
 two integration designs, and an honest list of which folders are in git. New **§3i** names the

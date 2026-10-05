@@ -22,11 +22,16 @@ running trio". This page is the short one.
 | `workspace/starting-kit/.env` | **Present** |
 | Node 24 | **Inside the container only.** Measured 2026-10-04: this host has **Node 22.22.2** and **no yarn**, while the kit requires Node **24.x**. Nothing to install *for the stack* — the container carries both — but the host **cannot** run the codebase natively. See **N-11** in [`BACKLOG.md`](BACKLOG.md) |
 | The database | **Provided by the stack, and clean** — 3 users, 1 tenant, 1 organisation, 5 feature toggles, 5 `action_logs` rows. Rebuilt from scratch on the fixed image 2026-10-05; the init ran every step green |
-| Docker Desktop | **Running** — engine `29.8.1`. ⚠️ But it does **not** auto-start; see below |
+| Docker Desktop | **Running** — engine `29.8.1`, seven containers up (measured 2026-10-06). ✅ **Auto-start is ON** — the owner turned it on 2026-10-06, so a restart no longer leaves the stack down. **One container reports `unhealthy`:** `mercato-mcp-local`. That is the first thing `S0`'s re-run must explain |
 | The Coolify server | A **separate** Hyper-V VM, not this stack — see [`RUNBOOK-platform-server.md`](RUNBOOK-platform-server.md) |
 
-**The catch: Docker Desktop does not auto-start, and the agent cannot start it.** When the machine
-is restarted the whole stack is down until the owner starts Docker Desktop. Measured 2026-10-04:
+**✅ RESOLVED 2026-10-06 — the owner turned Docker Desktop auto-start on, so this is no longer a
+per-restart owner step.** The paragraph below is kept because the *agent* still cannot start Docker
+Desktop: that part has not changed and never will, because it is a security-policy block. What changed
+is that Docker Desktop now starts itself when the owner signs in.
+
+**What the problem was.** Docker Desktop did not auto-start, so when the machine was restarted the whole
+stack was down until the owner started it. Measured 2026-10-04:
 
 ```
 $ docker desktop start
@@ -36,10 +41,10 @@ Program Blacklist from starting:
 ```
 
 Docker Desktop's startup path runs `wsl.exe`, and this machine's security policy blocks that for
-anything the agent launches. The block is not approvable and must not be worked around. **So
-"start Docker Desktop" is a permanent owner step, not a one-off** — it applies every time the
-machine has been restarted, because `AutoStart` is off. Full detail: **B-04** in
-[`BLOCKERS.md`](BLOCKERS.md); the fix is [`NEEDS-YOU.md`](NEEDS-YOU.md) item 6.
+anything the agent launches. The block is not approvable and must not be worked around. **So "start
+Docker Desktop" is a permanent owner step *for the agent* — but it is no longer a step the owner has to
+remember, because auto-start is now on.** Full detail: **B-04** in [`BLOCKERS.md`](BLOCKERS.md);
+[`NEEDS-YOU.md`](NEEDS-YOU.md) item 6 is **done**.
 
 > **Do not confuse "parses" with "runs".** `docker compose config` succeeds with the engine down, so
 > a passing parse proves nothing about whether anything can start.

@@ -88,7 +88,7 @@ companai/                      ← you are here
 │   │   ├── ai-first/          THE DIRECTION — what we will actually build. Mentions Companai 0 times
 │   │   ├── hermes-docs/       a SIBLING project's docs (Paperclip-based). Lessons only, never decisions
 │   │   ├── hermes-agent-main/ the Hermes runtime source itself — where it disagrees with docs, it wins
-│   │   ├── paperclip-master/  upstream Paperclip — the subject of the agent study
+│   │   ├── paperclip-master/  upstream Paperclip — the subject of **both** studies below
 │   │   └── source-docs/       THE ONE PLACE the scattered source documents were gathered (register inside)
 │   ├── analysis/              THE ANALYSIS BEFORE DEVELOPMENT — **COMPLETE, all 12 batches**
 │   │   ├── PLAN.md            the batch plan with tickboxes — all 12 DONE
@@ -99,6 +99,10 @@ companai/                      ← you are here
 │   │   ├── PLAN.md            the batch plan with tickboxes — all 11 DONE
 │   │   ├── LOG.md             one dated line per batch completed
 │   │   └── findings/          one report per batch — **batch 10 is THE SYNTHESIS: lessons + target design**
+│   ├── paperclip-value-study/ THE VALUE SCAN — **COMPLETE, all 12 batches**
+│   │   ├── PLAN.md            the batches, the rule ("document only where there is value"), the five baselines
+│   │   ├── LOG.md             one dated line per batch, including the extraction verification
+│   │   └── findings/          01–06 evidence, **07 is THE ANSWER: what to take, what we already have, what to reject**
 │   └── development/           DEVELOPMENT MANAGEMENT — where the work is tracked
 │       ├── HANDOVER.md        **the front door for a newcomer — read this first** (§0 is for an agent taking over)
 │       ├── START-PROMPT.md    **the message that starts a new session** — paste it to the agent
@@ -145,7 +149,11 @@ companai/                      ← you are here
 ├── companai-logo/             Brand assets
 ├── keys/                      Server credentials — NOT documentation, keep private. Now gitignored
 ├── host-sync.tgz              30 MB host archive containing a .env — large, and a secret. Gitignored
-├── paperclip-master.zip       ⚠️ NOT OURS — upstream Paperclip (the newest version), 9,056 files.
+├── paperclip-master.zip       ⚠️ NOT OURS — upstream Paperclip (the newest version), 8,300 files.
+│                              (The zip lists 9,056 *entries*; 756 of them are folders, and one
+│                              file is a symlink Windows will not create, so 8,299 land on disk.
+│                              Anyone quoting 9,056 is quoting the entry count — see
+│                              library/paperclip-hermes-study/findings/00-inventory.md.)
 │                              Reference material for the agent/task study. Not our code
 ├── vms/                       ⚠️ GITIGNORED — the hosting VM's credentials, ISO and scripts
 │
@@ -293,6 +301,7 @@ Break these and you will damage the project.
 | **Know what has been analysed so far** | [`library/analysis/LOG.md`](library/analysis/LOG.md) — one dated line per batch, and [`library/analysis/findings/`](library/analysis/findings/) for the reports |
 | **Understand the agent half (AI staff, roles, tasks, delegation, triggers, meetings)** | [`library/development/AGENT-HALF.md`](library/development/AGENT-HALF.md) — **the model and the plan**: the five kinds of agent, the rule that decides who is answerable when one acts, and where every lesson lands. Then [`library/paperclip-hermes-study/findings/10-lessons-and-target-design.md`](library/paperclip-hermes-study/findings/10-lessons-and-target-design.md) — **THE SYNTHESIS** — for the evidence: what we take from Paperclip and Hermes, what we reject, and how we do it better |
 | **See the agent study's batch plan and progress** | [`library/paperclip-hermes-study/PLAN.md`](library/paperclip-hermes-study/PLAN.md) — 11 batches with tickboxes, **all DONE**, each with its result |
+| **Know what of upstream Paperclip is worth taking, and what to avoid** | [`library/paperclip-value-study/findings/07-synthesis.md`](library/paperclip-value-study/findings/07-synthesis.md) — **THE ANSWER** of the second, wider pass: six things worth acting on, four backlog items confirmed correct, eight rejections with reasons, and the trap list |
 | **Find a source document the study cites** | [`library/ai/source-docs/README.md`](library/ai/source-docs/README.md) — the register of where every scattered source document set lives, and what is copied where |
 | **Understand the vision we are aiming at** | [`library/analysis/findings/01-vision-frame.md`](library/analysis/findings/01-vision-frame.md) — what the platform is meant to be, its rules, and what it deliberately has not decided |
 | **Understand the two-Companai trap** | [`library/ai/README.md`](library/ai/README.md) — two different products share the name. Read before using any AI document |
@@ -333,7 +342,26 @@ a folder, finishes a phase, or makes a decision updates it in the same change.
 A newcomer who cannot orient themselves from this page alone means it is broken —
 fix the page, not the newcomer.
 
-*Last updated: 2026-10-05 — **the model layer's one owner decision is taken, and the navigation
+*Last updated: 2026-10-06 — **the second Paperclip pass is done, and it found six things worth
+acting on.** A new study, [`library/paperclip-value-study/`](library/paperclip-value-study/), read
+upstream Paperclip again through a **wider lens** than the agent study: not *"how do AI workers get
+work"* but *"is any of this worth taking, learning from, or deliberately rejecting?"* Its
+[`findings/07-synthesis.md`](library/paperclip-value-study/findings/07-synthesis.md) is the answer:
+the **responsible-user intersection** (the strongest idea), **two warnings that change words we had
+already written** (`ML-4` promised a mid-run stop we have not built; and the orchestration boundary
+before `AH-3`), the **concurrency rules to write down**, the **self-modification gate**, the
+**memory control plane**, and a **trap list** we would have walked into twice. Four of our backlog
+items were **confirmed correct**, and eight things were **rejected with a reason** so nobody
+re-opens them. The study also found and fixed a defect in its own evidence base: the extraction had
+lost one file (`packages/db/src/migrations/0118_pipeline_case_agent_fanout.sql`, 346 bytes), now
+restored from the archive, so the tree matches the archive **exactly** at **8,300 files /
+132,839,980 bytes** by two independent routes. Docs updated in the same change:
+[`library/development/BACKLOG.md`](library/development/BACKLOG.md) (`ML-4`'s wording corrected, **four
+new items on the "do not lose this" list, `N-15` to `N-18`**, and `S0` unblocked), `NEEDS-YOU.md` (items 6
+and 7 closed by the owner), `BOOKMARKS.md`, `library/INDEX.md`, `library/development/README.md`,
+`HANDOVER.md`, and this page.*
+
+*Earlier, 2026-10-05 — **the model layer's one owner decision is taken, and the navigation
 layer a new agent needs now exists.** The owner **decided the long-term default** (item 13):
 **per-tenant policy is the destination, cloud-first is the interim** — see
 [`library/development/ARCHITECTURE-model-server-integration.md`](library/development/ARCHITECTURE-model-server-integration.md)

@@ -50,6 +50,7 @@ around it.
 | **Testing it** | `workspace/references/how-to-test.md` → `workspace/knowledge/test-gate.md` |
 | **Picking up the analysis** | `library/analysis/PLAN.md` → `library/analysis/LOG.md` → the `findings/` reports |
 | **Designing the agent half** (AI staff, roles, tasks, delegation, triggers, meetings) | [`AGENT-HALF.md`](AGENT-HALF.md) — **the model and the plan** — then [`../paperclip-hermes-study/findings/10-lessons-and-target-design.md`](../paperclip-hermes-study/findings/10-lessons-and-target-design.md) for the evidence behind each lesson |
+| **Deciding whether to take an idea from upstream Paperclip** | [`../paperclip-value-study/findings/07-synthesis.md`](../paperclip-value-study/findings/07-synthesis.md) — **the answer**, not the evidence. What is worth taking, what we already have, and what is rejected with a reason |
 
 ---
 
@@ -163,4 +164,5 @@ that is deleted once answered — never left buried in a report.**
 | What mistakes were made? | [`../LESSONS.md`](../../LESSONS.md) |
 | What did the analysis find? | [`../analysis/`](../analysis/) — 12 batches |
 | What should the agent half look like? | [`../paperclip-hermes-study/findings/10-lessons-and-target-design.md`](../paperclip-hermes-study/findings/10-lessons-and-target-design.md) — the completed 11-batch study of Paperclip + Hermes, and the lessons for our own agent architecture |
+| Is any of upstream Paperclip worth taking? | [`../paperclip-value-study/findings/07-synthesis.md`](../paperclip-value-study/findings/07-synthesis.md) — the second, wider pass: six things worth acting on, four items confirmed, eight rejected with reasons, and the trap list |
 | What is actually deployed? | [`RUNBOOK-hosting-server-manual.md`](RUNBOOK-hosting-server-manual.md) — ⚠️ `workspace/references/deployment.md` is the **old Plesk** guide and is superseded |

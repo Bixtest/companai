@@ -158,7 +158,7 @@ Status of each task, so nothing is left vague:
 | 2 | Change the Coolify password | **OPEN — the exposed password still logs in** | **You** |
 | 3 | The ⚠ triangle on the `localhost` card | **NOT AN ISSUE** — Traefik update notice only | nobody |
 | 4 | Create a project | **WILL DO when you deploy** — not needed yet | **You**, later |
-| 5 | Delete the 3.8 GB ISO | **KEEP IT** — it is the reinstall route, 83 GB free | nobody |
+| 5 | Delete the 3.8 GB ISO | ✅ **DONE 2026-10-06 — the owner deleted it** (see §6a Task 5). Re-download from `releases.ubuntu.com/24.04.5/` if the VM ever needs rebuilding | done |
 | 6 | `.wslconfig` resource cap | **FIXED 2026-10-04** — see §6b | done |
 
 ### Task 1 — Turn on 2FA — ✅ DONE 2026-10-04 12:44:46
@@ -224,16 +224,19 @@ So the ⚠ is the Traefik version notice and nothing else.
 
 **Projects → New**. A project is just a folder that holds applications — creating one deploys nothing.
 
-### Task 5 — The 3.8 GB installer ISO — **KEEP IT**
+### Task 5 — The 3.8 GB installer ISO — ✅ **DELETED 2026-10-06 by the owner**
 
-Recommendation: **do not delete it.** It is the media you need to rebuild the VM if the disk is ever
-lost, and C: has **83 GB free** (measured 2026-10-04), so the 3.8 GB is not costing you anything you
-need. Re-downloading it would take far longer than the space is worth.
+**This task is closed. There is nothing to do.** The owner deleted the installer on 2026-10-06
+(`NEEDS-YOU.md` item 7), and it is confirmed by two routes: a search for every `.iso` under the project
+now returns **one** file, `vms/seed.iso` (67,584 bytes — the cloud-init seed, not the installer), and
+`C:` reports **86 GB free** against the **82.74 GB** recorded at the end of the build.
 
-If you ever do want the space back:
-```powershell
-Remove-Item "C:\Users\Ramzi\Downloads\companai\vms\ubuntu-24.04.5-live-server-amd64.iso"
-```
+**If the VM ever needs rebuilding, re-download it first:**
+`https://releases.ubuntu.com/24.04.5/` — SHA-256
+`97f3d7ffb032c3eb3b23d2c8be9cc76e60c2c1f2c0146ba5ba9fe01cafae0fd8`, so you can check you got the
+right file. Nothing in the build depended on it being on disk.
+
+*(The old advice here was "keep it". That was right when it was written and is now superseded.)*
 
 ---
 
@@ -369,7 +372,7 @@ Nothing in this build modified Windows, Docker Desktop, or any pre-existing file
 | 4 | **"Drive" is not "hard disk".** A first attempt to put the hard disk first in the boot order moved the empty **DVD** first instead, leaving a latent path where a re-inserted ISO would boot the installer again. Fixed by discriminating on the device type. After the guest's first boot Ubuntu inserted its own EFI entry at the front, so the order is now `File (Ubuntu shim) → HardDiskDrive → DvdDrive`. **The DVD is last, which is the property that matters.** |
 | 5 | **The DHCP address moves.** See §2. |
 | 6 | **`Get-NetFirewallRule` returns nothing in this session** even though 620 rules exist (`netsh` sees them). Use `netsh advfirewall firewall show rule name=all` for firewall facts. |
-| 7 | **The ISO is still on disk** (3.8 GB, `vms\ubuntu-24.04.5-live-server-amd64.iso`). Kept as the route back to a clean reinstall; delete it whenever you want the space back. SHA-256 `97f3d7ffb032c3eb3b23d2c8be9cc76e60c2c1f2c0146ba5ba9fe01cafae0fd8`. |
+| 7 | **The ISO was deleted 2026-10-06 by the owner** (it was 3.8 GB, `vms\ubuntu-24.04.5-live-server-amd64.iso`). Verified: only `vms/seed.iso` (67,584 bytes) remains, and `C:` is at **86 GB free**. Re-download from `https://releases.ubuntu.com/24.04.5/` if the VM ever needs rebuilding; SHA-256 `97f3d7ffb032c3eb3b23d2c8be9cc76e60c2c1f2c0146ba5ba9fe01cafae0fd8`. |
 | 8 | **Coolify's installer warns about disk** (it wants 30 GB total / 20 GB free; the VM has 23/13). It only warns and continues. Docker + Coolify consumed **~3.2 GB**. |
 | 9 | **`coolify-proxy` publishes port 8080 but serves nothing** (a phantom publish). Cosmetic. |
 | 10 | **Traefik logs absolutely nothing** — `docker logs coolify-proxy` is **0 lines**. Traefik's default level is ERROR and access logs are off, and no errors have occurred. **Consequence: if a site later fails to route, the proxy cannot tell you why.** Read the container's `traefik.*` labels with `docker inspect` instead, or enable access logs. |
@@ -391,7 +394,7 @@ registration is therefore **only reachable from this laptop**.
 | VHDX file on disk | 8.29 GB of a 24 GB maximum (dynamic — it only grows as used) |
 | Guest `/` | 23 GB total, 9.1 GB used, 13 GB free |
 | Docker + Coolify | ~3.2 GB |
-| Reclaimable | 3.8 GB (the ISO, §9.7) |
+| Reclaimable | 3.8 GB (the ISO) — **claimed 2026-10-06**: the owner deleted it, and `C:` now reports **86 GB free**. See §9.7 |
 
 If the guest ever needs more room: stop the VM, `Resize-VHD -Path <vhdx> -SizeBytes 32GB`, start it,
 then grow the partition inside (`growpart` + `resize2fs`).

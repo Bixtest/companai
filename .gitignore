@@ -117,8 +117,9 @@ library/kit-docs/
 # library/development/PLAN-coolify-laptop-implementation.md.)
 vms/
 
-# Upstream Paperclip, extracted from paperclip-master.zip on 2026-10-05 (9,056 files,
-# 132 MB). Reference material for the agent/task study. Not our code, not tracked.
+# Upstream Paperclip, extracted from paperclip-master.zip on 2026-10-05 (8,300 files,
+# 132 MB; the zip lists 9,056 *entries* — 756 are folders). Reference material for the
+# agent/task study. Not our code, not tracked.
 library/ai/paperclip-master/
 
 # One place for the scattered source documents the study reads — created 2026-10-05 at
