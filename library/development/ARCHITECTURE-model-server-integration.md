@@ -32,7 +32,8 @@ Its recommendation is: *"Choose product-native model management with an external
 process."* That is correct and this document keeps it.
 
 But it was written by reading documents, and it assumed the control plane would have to be built.
-Its Phase 0 says: *"do not assume the ideal Broker already exists in code."* **Measured: it does.**
+Its own open-research list says: *"do not assume the ideal Broker already exists in code."*
+**Measured: it does.**
 The platform already ships a model factory, a provider registry, eleven OpenAI-compatible presets,
 a tenant model allowlist, per-agent overrides and token metering. So the recommendation is right and
 **the work is far smaller than the analysis implies.**
@@ -494,10 +495,10 @@ id is reserved for its **managed** runtime and fails with *"The local model serv
 when pointed at an external server. The COOKBOOK already records this trap.
 
 **The honest gap.** Today that configuration is set **by hand, per deployment**, through Hermes'
-CLI. The vision's target is *"generate Hermes provider configuration from the platform-managed
-profile."* Until that generator exists, the platform registry and Hermes' config are **two
-authorities that can drift**. This is deferred in §10 with its trigger, and it is the same
-"incremental bridge" the `llama/` analysis names.
+CLI. **The prior analysis's** target is *"Generate Hermes provider configuration from the
+platform-managed profile"* (`llama/04-integration-choice.md:80`). Until that generator exists, the
+platform registry and Hermes' config are **two authorities that can drift**. This is deferred in §10
+with its trigger, and it is the same "incremental bridge" the `llama/` analysis names.
 
 ---
 
@@ -560,12 +561,12 @@ container, which is the one container that was never told where the model is.**
 
 **Defect 2 — there is no embedding model, and the endpoint is not enabled.** Even with the base URL
 corrected, two things are still missing. **Measured:** the `model` service command carries no
-`--embeddings` flag, and the loaded model is `Qwen2.5-7B-Instruct-Q4_K_M`, a chat model; the
-runbook records the same observation from the other direction (*"llama.cpp serves no
-`/v1/embeddings`"*). **Reasoned, not measured:** serving embeddings needs both the endpoint enabled
-**and** a model whose pooling type supports it, which is why the clean answer is a **dedicated
-embedding model** on its own port (§4.4) rather than a flag on the chat model. This is the half the
-`llama/` analysis did name, and it is real.
+`--embeddings` flag, and the loaded model is `Qwen2.5-7B-Instruct-Q4_K_M`, a chat model;
+[`BLOCKERS.md`](BLOCKERS.md) records the same observation from the other direction (*"serves
+`/v1/chat/completions` but **no `/v1/embeddings`**"*). **Reasoned, not measured:** serving embeddings
+needs both the endpoint enabled **and** a model whose pooling type supports it, which is why the
+clean answer is a **dedicated embedding model** on its own port (§4.4) rather than a flag on the chat
+model. This is the half the `llama/` analysis did name, and it is real.
 
 **Why this matters beyond B-16.** The recorded severity is "nothing critical: only semantic search
 over tools is degraded." That is true today. But the **same lane** serves the vector drivers
@@ -758,12 +759,16 @@ Per the COOKBOOK's zero-one rule: **a deferral must name its trigger.**
   found in Hermes' docs, then searched for in our deployment, and then the **recorded symptom** was
   found in the COOKBOOK's Step 4 table — no call reached the platform, which matches the diagnosis.
   B-16's base URL was found in the compose and then confirmed in the SDK's own dist.
-- **Six hostile passes were run, and they falsified twelve of this document's own claims.** All were
-  corrected rather than defended, and the corrections are visible in the text rather than quietly
-  applied. **Two of the passes taught the same lesson twice:** the change that carried this document
-  made one of its own sentences false, and then the fix for that was applied to the sections named
-  and **not propagated** to the same claim in three others. **A fix is not done until every place the
-  claim is carried says the same thing.**
+- **Seven hostile passes were run, and they falsified fifteen of this document's own claims.** All
+  were corrected rather than defended, and the corrections are visible in the text rather than
+  quietly applied. **The passes taught three lessons, each learned the hard way:**
+  1. **The change that carries a document can make its own sentences false.** This one did — see the
+     `--jinja` scope row below.
+  2. **A fix is not done until every place the claim is carried says the same thing.** One fix was
+     applied to the sections named and left in three others.
+  3. **Attribution is where a careful document quietly goes wrong.** Three claims were credited to
+     "the vision" that are not in the vision at all. The fix for one of them was made and the
+     identical error one section away was left standing — which is lesson 2 again.
 
   | The first draft said | What was measured | Status |
   |---|---|---|
@@ -779,6 +784,9 @@ Per the COOKBOOK's zero-one rule: **a deferral must name its trigger.**
   | *"Four of those five already have a working implementation"* (about the vision's asks) | **Four things were enumerated, not five** — the arithmetic only worked if "Model Broker / Policy Layer" was silently counted twice | **FIXED** — now "Three of those four", with each one named |
   | *"The vision's rule — a model only advertises capabilities after qualification"* | **Misattributed.** That sentence is the **prior analysis's** (`llama/01-target-architecture.md:87`). The vision contains no occurrence of "qualification" at all; its §11 registry lists the capability fields plus `availability` and `status`, but states no gate | **FIXED** — attributed to the analysis, and the vision's actual position stated |
   | *§4.3, one of the "four changes", appears in no §10 row* | It was therefore neither applied nor deferred-with-trigger, which breaks §10's own quoted rule | **FIXED** — the two one-line deployment edits now have a row |
+  | *"the vision's target is 'generate Hermes provider configuration from the platform-managed profile'"* | **Misattributed.** That sentence is the **prior analysis's** (`llama/04-integration-choice.md:80`). The vision contains no occurrence of "configuration" at all | **FIXED** — credited to the analysis |
+  | *"the runbook records … 'llama.cpp serves no `/v1/embeddings`'"* | **Wrong document.** `RUNBOOK-sprint0.md` contains no occurrence of "embeddings". The observation is in `BLOCKERS.md:313` | **FIXED** — cited to `BLOCKERS.md` |
+  | *"Its Phase 0 says: 'do not assume the ideal Broker already exists in code'"* | **Wrong section.** That sentence is under `llama/03-adoption-plan.md`'s *"Open research before implementation"*, not Phase 0 | **FIXED** — now "its own open-research list" |
 
 - **The lesson, and it is the project's own rule paying off again.** The first draft's `--jinja`
   claim came from a repository-wide search that **timed out**. A check that did not finish is not a
