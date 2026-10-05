@@ -373,6 +373,38 @@ jobs:
         # scripts/logger-console-allowlist.json.
         run: yarn logger:check-console:ci
 
+  # ── Docker script tests ─────────────────────────────────────────────────────
+  # Unit tests for the shell that decides whether a database needs initialising
+  # (docker/scripts/init-or-migrate.sh, plus the compose init guard and the
+  # create-app compose template). Pure `sh` — no Docker daemon, no database, no
+  # node_modules — so this job installs nothing and costs seconds.
+  #
+  # `init-or-migrate.sh` exists twice — `docker/scripts/` and
+  # `packages/create-app/template/docker/scripts/` — and both are exercised here.
+  # Nothing syncs or compares the two copies (scripts/template-sync.ts covers
+  # only docker/redis/redis.conf), so the second invocation is the only thing
+  # standing between a one-copy edit and every scaffolded app shipping it.
+  # Note this catches *behaviour* drift, not byte drift: a copy left behind at
+  # older-but-still-correct behaviour passes both runs.
+  #
+  # The files are invoked directly instead of through the `test:docker-scripts`
+  # alias in package.json, because Yarn 4 refuses to run a script before an
+  # install has happened ("Couldn't find the node_modules state file"), which
+  # would drag a full `yarn install` into a job that needs none of it. Keep this
+  # list in step with the alias.
+  docker-scripts:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Run the database-readiness script tests
+        run: |
+          sh docker/scripts/__tests__/init-or-migrate.test.sh
+          sh docker/scripts/__tests__/init-or-migrate.test.sh packages/create-app/template/docker/scripts/init-or-migrate.sh
+          sh docker/scripts/__tests__/compose-init-guard.test.sh
+          sh docker/scripts/__tests__/compose-init-guard.test.sh packages/create-app/template/docker-compose.fullapp.yml
+
   # ── Quality checks ──────────────────────────────────────────────────────────
   # Typechecking and unit tests. Runs in parallel with ephemeral-integration
   # so typecheck cost does not add to the integration wall time.
@@ -824,15 +856,6 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
-
-      - name: Build docs Dockerfile
-        uses: docker/build-push-action@v7
-        with:
-          context: .
-          file: apps/docs/Dockerfile
-          push: false
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
 
       - name: Build fullapp (main app)
         uses: docker/build-push-action@v7
