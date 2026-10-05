@@ -146,10 +146,12 @@ conversations, participants, messages and pending actions):
 | `ai_token_usage_event` | Per-event token usage |
 | `ai_token_usage_daily` | Rolled-up daily token usage |
 
-**This is the finding that changes the size of the job.** The vision asks for a *Model Registry*, a
-*Model Broker / Policy Layer*, per-tenant model policy and cost visibility. **Four of those five
-already have a working implementation**, and the fifth (the registry as a first-class object) is
-half-there in `defaultModels` plus the DB entities.
+**This is the finding that changes the size of the job.** The vision asks for four things: a *Model
+Registry*, a *Model Broker / Policy Layer*, per-tenant model policy, and cost visibility. **Three of
+those four already have a working implementation** — the broker/policy layer is `model-factory.ts`
+plus the registry; per-tenant policy is `ai_tenant_model_allowlist` plus the per-agent overrides; and
+cost visibility is the token-usage entities. **The fourth**, the registry as a first-class object, is
+half-there in each preset's `defaultModels` plus the DB entities.
 
 ### 2.2 The embedding lane — a second, separate, closed lane
 
@@ -249,15 +251,16 @@ says four edits.
 Its troubleshooting table repeats it: *"**llama.cpp** | Add `--jinja` to the startup command"*.
 
 **What we measured, with the scope and the tense stated exactly.** **Before this change**, `--jinja`
-was absent from the deployment and from the development documents: not in
+was absent from both the deployment and the development documents: not in
 `docker-compose.fullapp.yml`, not in `docker-compose.fullapp.dev.yml`, not in
 `packages/create-app/template/docker-compose.fullapp.yml`, not in `workspace/COOKBOOK.md`, and not
 anywhere in `library/development/`.
 
-**This change is what adds it** — to the COOKBOOK's `model` service block (step 3.2), to
-`RUNBOOK-sprint0.md` and to `BACKLOG.md`. **So read that sentence as a statement about the tree as it
-stood, not about the tree now.** The documents you are reading are the ones that carry the fix, and a
-search today will find the flag in them.
+**The deployment is still without it.** This change touches no compose file, because no code changed
+here; it **documents** the fix. So the two halves moved differently, and the sentence above means:
+the flag is absent from the running stack, and this change is what puts it into the documents —
+the COOKBOOK's `model` service block (step 3.2), `RUNBOOK-sprint0.md` and `BACKLOG.md`. **Read the
+absence as a statement about the tree as it stood, not about the documents you are reading.**
 
 **It is *not* absent from the repository, and saying so would be wrong.** The string appears in the
 prior study material, for example `library/ai/qwen-hermes-tool-calling-report.md` (five places,
@@ -745,10 +748,12 @@ Per the COOKBOOK's zero-one rule: **a deferral must name its trigger.**
   found in Hermes' docs, then searched for in our deployment, and then the **recorded symptom** was
   found in the COOKBOOK's Step 4 table — no call reached the platform, which matches the diagnosis.
   B-16's base URL was found in the compose and then confirmed in the SDK's own dist.
-- **Three hostile passes were run, and they falsified nine of this document's own claims.** All were
+- **Four hostile passes were run, and they falsified ten of this document's own claims.** All were
   corrected rather than defended, and the corrections are visible in the text rather than quietly
-  applied. **The third pass caught the subtlest one: the change that carried this document made one
-  of its own sentences false** (see the `--jinja` scope row below).
+  applied. **Two of the passes taught the same lesson twice:** the change that carried this document
+  made one of its own sentences false, and then the fix for that was applied to the sections named
+  and **not propagated** to the same claim in three others. **A fix is not done until every place the
+  claim is carried says the same thing.**
 
   | The first draft said | What was measured | Status |
   |---|---|---|
@@ -761,6 +766,7 @@ Per the COOKBOOK's zero-one rule: **a deferral must name its trigger.**
   | "See §5.3" | No §5.3 exists; the Hermes managed-runtime section is §6.3 | **FIXED** |
   | *"`--jinja` is absent from the deployment and from the development documents"* | **This change made that sentence false about the tree it ships in** — the same commit adds the flag to the COOKBOOK, `RUNBOOK-sprint0.md` and `BACKLOG.md`. The claim was right about the tree *before* the change and wrong about the tree *after* it | **FIXED** — the tense is now explicit, and the sentence says which documents carry the fix |
   | *"three independent checks agree nothing reached the platform"* | The COOKBOOK's own ledger caveat removes two of the three: a read-only tool writes no `action_logs` row and API-key usage is never recorded, so both are NULL regardless. **Only the MCP log line discriminates** | **FIXED** — and it is a weaker claim than the first draft made, which is the point |
+  | *"Four of those five already have a working implementation"* (about the vision's asks) | **Four things were enumerated, not five** — the arithmetic only worked if "Model Broker / Policy Layer" was silently counted twice | **FIXED** — now "Three of those four", with each one named |
 
 - **The lesson, and it is the project's own rule paying off again.** The first draft's `--jinja`
   claim came from a repository-wide search that **timed out**. A check that did not finish is not a
