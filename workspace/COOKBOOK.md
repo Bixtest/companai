@@ -1326,6 +1326,218 @@ and the honest statement of which items are settled, which are deferred, and whi
 
 ---
 
+# Sprint G-01 — the Business Model Kernel (+ G-08 relationship fabric)
+
+**Written 2026-10-05. This is the first code sprint, and the first item of the four-item critical path
+(`G-01 → G-02 → G-03`, with G-08 folded into G-01).**
+
+**Why it is now safe to start:** `P0-spec` is done — the vision's own 40-item gate is passed and no
+DEFERRED item is a G-01 dependency (Sprint P0-spec, Step 4). Item: `G-01` in
+[`../library/development/BACKLOG.md`](../library/development/BACKLOG.md).
+
+**What it is** (plan §5.2, verbatim): *the canonical, versioned, typed business model **above** the
+physical database — the single source of truth (RQ-01). Relationships become first-class metadata with
+declared attributes (RQ-05).*
+
+**Done when:** a business described in plain language produces a canonical object graph with stable
+IDs, declared contracts and versions; relationships carry their attributes.
+**Test:** the export/reimport round-trip is empty; the rename test (batch 9 §6 #1).
+
+## Step 1 — Research: what already exists
+
+**Measured 2026-10-05 by reading the real code — not from a report about it** (rule zero-nine). The
+whole point of this step is that the plumbing is largely built, and G-01's job is to put a *model* on
+top of it rather than to rebuild it.
+
+| Layer | File (all under `workspace/starting-kit/`) | What it already gives us |
+|---|---|---|
+| Authoring DSL | `packages/shared/src/modules/dsl.ts` (36 lines) | `entityId()`, `linkable()`, **`defineLink(base, extension, {join, cardinality, required, description})`**, `defineFields()`, `cf.*`. Relationships already take a join, cardinality, optionality, a description. |
+| Type model | `packages/shared/src/modules/entities.ts` (107 lines) | `EntityId` = `'<module>:<entity>'`. `EntityExtension`, `CustomFieldDefinition` (28+ fields), `CustomFieldSet`, `CustomEntitySpec`. |
+| Registry | `packages/shared/src/modules/registry.ts:230–272` | `Module` already carries `entityExtensions[]`, `customFieldSets[]`, `customEntities[]`. |
+| Generator | `packages/cli/src/lib/generators/module-registry.ts` (4,127 lines) | Discovers each module's `data/extensions.ts` + `ce.ts` and emits them into `modules.runtime.generated.ts`. |
+| **Sync installer** | `packages/core/src/modules/entities/lib/install-from-ce.ts` (328 lines) | **The declared→runtime bridge, already built.** Aggregates declared specs per entity, computes an **md5 checksum** of the declared shape, idempotently upserts entity + field definitions per tenant. Supports `dryRun` / `createOnly` / `force`. |
+| Version token | `packages/core/src/modules/entities/lib/definitions-version.ts` (103 lines) | Already computes an **aggregate optimistic-lock version** for an entity's definition schema. |
+| Runtime store | `packages/core/src/modules/entities/` | Tables `custom_field_defs` (definitions), `custom_field_values` (EAV values), `custom_entity`, `custom_field_entity_config`; admin APIs `definitions`, `definitions.batch`, `entities`, `relations/options`. |
+| Projection target | `packages/shared/src/lib/query/engine.ts` (1,515 lines) + `query_index` module | Entity-extension joins (`resolveJoins`, `buildFilterableCustomFieldJoins`) and `cf:<key>` projection/filtering already work. |
+| Security primitives | `packages/shared/src/lib/authority/decision.ts` (582), `auth/principal.ts` (215), `authority/graph.ts` (182) | `Decision` (gate·allowed·reasons·bindingRule·obligations·alternatives), `PrincipalKind`, `resolveGraphCeiling`. |
+
+**The measured gap — and it is the finding that scopes this sprint.** Of **34 enabled modules**, only
+**4** declare `entityExtensions` at all. Read from the generated artefact
+(`apps/mercato/.mercato/generated/modules.runtime.generated.ts` → 4 matches) and confirmed by reading
+all four source files:
+
+- `business_rules/data/extensions.ts` → `const entityExtensions: any[] = []` — **empty**
+- `workflows/data/extensions.ts` → empty
+- `inbox_ops/data/extensions.ts` → empty
+- `communication_channels/data/extensions.ts` → **the only real one: 4 relationships**
+
+So the plan's *"`defineLink` appears in one file"* is **confirmed and sharper than stated: one module
+out of 34, and the other three are empty stubs.** Relationships exist as a *mechanism* but carry
+almost no *business model*. **G-08 is therefore not a rebuild** — the plumbing is there; what is
+missing is the model expressed on top of it, and the guarantees (stable IDs, contracts, round-trip,
+security inheritance).
+
+**Two routes, both agreeing, for a claim the spec makes:** no transactional **outbox** exists.
+(a) `rg -i outbox` over `packages/` + `apps/` → 0 files; (b) same search scoped to migrations → 0.
+That gap is **G-16's**, not G-01's — recorded here so it is not re-measured.
+
+**Nothing named "canonical ID" exists.** Searching `packages/` for `canonicalId|canonical_id|businessId`
+→ 0 files. The spec's §12.1 ID grammar has no collision with anything present.
+
+**From the `V`-register:** nothing new is needed for G-01 — the security primitives above are the
+`V`-register items (V-14/V-16) already implemented, and G-01 consumes them rather than duplicating.
+
+**What we reuse:** the DSL, the type model, the registry, the generator, the checksummed installer and
+its dry-run, the definitions version token, the query engine's join resolution, the `Decision`
+primitive. **What G-01 genuinely builds:** the **model-expression layer** on top — the canonical
+objects of spec §5.4, the §12.1 stable-ID grammar, the §4.1 21-item contract, the round-trip and rename
+tests, and G-08's declared relationship attributes.
+
+**Baseline test run (host, no Docker needed):** `packages/shared` jest runs green —
+`npx jest --config jest.config.cjs src/modules/__tests__/dsl.test.ts` → **6 passed, 5.9 s.** A code
+sprint can therefore be tested on the host; the Docker stack (blocker **B-04**, needs Docker Desktop
+running) is not required for the unit-level tests this sprint adds.
+
+## Step 2 — Validate: is this the best approach?
+
+**Alternative considered — build a new `kernel` module with its own tables.** **Rejected.** It would
+create a *second* source of truth beside `custom_field_defs`, which is precisely what the vision
+forbids (Doc 4 §54: search is a projection, never a second database; Doc 8 §110: a projection declares
+its source). The spec's own §12.3 names `query_index` as the projection target and the existing
+definitions store as the runtime store. A new module would also re-open the "whole-ERP EAV" failure
+Doc 2 warns against.
+
+**Alternative considered — express the kernel purely as TypeScript types, no runtime.** **Rejected.**
+The plan's test is the **export/reimport round-trip is empty**, which is a *runtime* property. Types
+alone cannot satisfy it.
+
+**Approach chosen — a thin model layer over the existing store, with the round-trip as the proof.**
+Concretely: (1) a **canonical ID** module implementing the §12.1 grammar (`segment ('.' segment)*`,
+`[a-z][a-z0-9_]*`) with parse/format/validate and the four ID kinds (entity, field, relationship,
+metric); (2) a **model descriptor** built by *reading* what the installer already aggregates
+(`getAggregatedCustomEntityConfigs()`) plus declared extensions, so there is one source and no
+duplication; (3) an **export → import round-trip** that must be a no-op; (4) a **rename test** proving
+a rename recompiles cleanly or says "requires recompilation" (§7).
+
+**What would break it:** if the canonical layer *holds* its own copy of definitions rather than
+*reading* the existing ones, the two copies drift and we have built the very second source of truth we
+rejected. **The defence is a test that compares the canonical view against the installer's aggregated
+view and fails if they disagree** — the round-trip is not enough on its own. This is the same
+"mirrored file drifts" hazard the project has already paid for, and it is written into step 3.4.
+
+**The second thing that would break it:** the round-trip being *trivially* empty because it exports
+nothing. **The defence is to assert the export is non-empty** — it must contain the 4 real relationships
+in `communication_channels` and the declared fields — before asserting the reimport is a no-op. An
+"empty diff" on an empty export proves nothing.
+
+**The ordering rule:** build the ID grammar first, then the model descriptor, then the round-trip.
+Everything later (G-02's compiler, G-04's authorization) keys off canonical IDs, so the grammar is the
+foundation and must be tested before anything consumes it.
+
+## Step 3 — The steps
+
+**Every command runs from `workspace/starting-kit/`. Nothing in `packages/core/src/modules/entities/`
+is modified — the kernel reads from it.** New code lands in `packages/shared/src/lib/kernel/` (pure,
+no DB) with its tests beside it, so it is testable without a database.
+
+**3.1 — Preconditions.**
+- Confirm the baseline is green: `cd packages/shared && npx jest --config jest.config.cjs src/modules/__tests__/dsl.test.ts` → 6 passed.
+- Confirm the two git repos are clean and stage **by explicit path** (never `git add -A`).
+- Take a checkpoint before touching anything: `./workspace/scripts/checkpoint.sh g01-start`.
+
+**3.2 — The canonical ID grammar** — `packages/shared/src/lib/kernel/canonical-id.ts`.
+- Implement `segment ::= [a-z][a-z0-9_]*` and `id ::= segment ('.' segment)*`, per spec §12.1.
+- Four constructors: `entityIdOf(name)`, `fieldIdOf(entity, field)`, `relationshipIdOf(entity, rel)`, `metricIdOf(entity, metric)` — each validating its segments.
+- Three readers: `parseCanonicalId(id)` → `{ kind, segments }`, `isCanonicalId(id)` → boolean, `assertCanonicalId(id)`.
+- **Boundary to respect:** this is a *naming* rule, not a foreign-key scheme. Physical PKs stay UUIDs; the canonical ID is the *semantic* identity. Do not couple them.
+- Tests: valid/invalid segments; the §12.1 examples (`invoice`, `invoice.outstanding_amount`, `invoice.customer`); `invoice.customer` ≠ `customer.invoice`; a rename never rewrites the ID.
+
+**3.3 — The model descriptor** — `packages/shared/src/lib/kernel/model.ts`.
+- Define the kernel object types the spec's §5.4 names, at minimum: `Entity`, `Field`, `Relationship`, `ValueObject`, `Enum`, `Metric`, `Rule`, `Constraint`. Each carries the §4.1 **21-item contract** fields (id, version, lifecycle, provenance, classification, etc.) — declare them once in a shared `KernelObjectContract` type and intersect.
+- `Relationship` must carry the **declared attributes** RQ-05 asks for: `cardinality`, `optionality`, `ownership`, `allowedTraversal`, `deleteBehaviour`, `securityInheritance`, `multiplicityRisk`. Map the four already-declared `EntityExtension` fields onto the first two and the description; the rest start explicit (`undefined` is a *declared* absence, never an implicit default).
+- **`buildModelDescriptor(input)` reads** from (a) the installer's `getAggregatedCustomEntityConfigs()` for declared entity/field sets and (b) the merged `entityExtensions` from the generated module registry. It **holds no copy** — it returns a view.
+- **Versions are real, not an empty field** *(added during the build)*. Give every object a **content-derived version** (a pure FNV-1a over the object's own declaration, excluding the version itself) so a changed declaration changes the version and an unchanged one does not. Deterministic, so the round-trip stays empty. Without this, "declared contracts and versions" would be satisfied by a field that is always empty.
+- **Report relationship-id collisions, never merge them** *(added during the build)*. Two declared edges from one entity to the same extension collapse to one id; collect them into `relationshipIdCollisions` rather than letting one overwrite the other — that is the "two things share one id" case §12.1 forbids.
+
+**3.3b — The live wiring** — `packages/shared/src/lib/kernel/from-modules.ts` *(added during the build)*.
+- A kernel that takes declarations as an argument but is never given the real ones is a library with no caller. `collectDeclarations()` reads each registered module's `entityExtensions` / `customFieldSets` / `customEntities`; `buildModelFromModules()` is the single entry point from "what the modules declare" to the canonical model.
+- **It reads the same registry the installer reads** — `getModules()` — so the kernel is a *view* of one source, not a second source. No database, no side effects, testable in a unit test.
+- `tryBuildModelFromModules()` returns `null` when the registry is not ready (registration has not happened) — distinct from an **empty model**, which is a tenant with no entities. The two must not be conflated.
+
+**3.4 — The drift guard (the thing that stops the second source of truth).**
+- A test that drives **both readers from one registered module set** and compares them object by object: the installer's `getAggregatedCustomEntityConfigs()` against the kernel's `buildModelFromModules()`. They read the same registry, so they must agree; any entity or field in one and not the other fails the test with both sides printed.
+- **It lives in `core`, not `shared`** *(decided during the build)*, because it needs the installer, and `shared` must not depend on `core`. Location: `packages/core/src/modules/entities/lib/__tests__/kernel-drift-guard.test.ts`.
+- This is the project's "mirrored file stays in step" discipline applied to the model layer. The companion check in `shared` — that `buildModelDescriptor` **holds no copy** (two builds are equal and independent, and mutating one cannot affect the next) — is the other half.
+
+**3.5 — The export/import round-trip** — `packages/shared/src/lib/kernel/round-trip.ts` + test.
+- `exportModel(descriptor)` → a stable, sorted JSON document (sorted keys, sorted arrays, canonical IDs as the keys) so the bytes are reproducible.
+- `importModel(document)` → a descriptor.
+- **Assert non-empty first:** the export must contain the **4** relationships from `communication_channels` and the declared field sets — otherwise the test is proving nothing.
+- **Then assert the round-trip is empty:** `exportModel(importModel(exportModel(d))) === exportModel(d)`, byte for byte.
+- Second route for the same property: import twice and confirm the second import is also a no-op (`importModel` is idempotent) — two genuinely different checks, not the same check twice.
+
+**3.6 — The rename test.**
+- Rename a field's *label*: the canonical ID is unchanged and the round-trip stays empty.
+- Attempt to rename a field's *key* (the ID segment): the model **reports "requires recompilation"** rather than silently rewriting the ID (spec §12.1 property 3; I14 — authority objects are superseded, never edited).
+- Both outcomes are asserted; a silent pass on the second is a failure.
+
+**3.7 — The relationship attributes** (G-08's half).
+- Extend the existing DSL **additively**: `defineLink` gains an optional attributes block. **Do not change existing call sites** — the 4 live relationships in `communication_channels` and the 3 empty stubs must still type-check unchanged. This is the "widen a shared matcher without capturing what it must not" hazard: measure the blast radius (all 4 files) before and after.
+- Re-run `npx jest` for `packages/shared` and for the CLI generator's `module-entities` / `structural-contracts` suites to prove nothing else moved.
+
+**3.8 — Critic pass.** A separate pass whose only job is to break the above, and it must **name what it attacked**: (a) does the descriptor secretly hold a copy? (b) is the round-trip empty only because the export is empty? (c) does a rename silently rewrite an ID? (d) do the 4 existing `defineLink` call sites still type-check? (e) is any claimed number (4 relationships, 34 modules) re-measured from the artefact rather than recalled? **If it says "looks good" without listing attacks, it has not run.** Loop until a fresh pass finds nothing.
+
+**3.9 — Update the dependent documents in the same change** (rule zero): `BACKLOG.md` (the `G-01` line), the spec's §10 (definition of done — record what G-01 proved), and this cookbook's Step 4 table. Docs stale in the same change is a defect.
+
+**3.10 — Commit in both repositories, staged by explicit path.** Repo 2 (`starting-kit`, branch `main`) gets the new kernel code and tests. Repo 1 (root, branch `master`) gets the docs. **Never `git add -A`.**
+
+## Step 4 — Done when
+
+*Fill this table only after the build, from measurement — not in advance.*
+
+| | Criterion | Status |
+|---|---|---|
+| ✅ | The canonical ID grammar is implemented and matches spec §12.1 | **PASS** — `canonical-id.ts`; 14 tests incl. the §12.1 examples and the `invoice.customer` ≠ `customer.invoice` property |
+| ✅ | The model descriptor reads from the existing store and holds no copy (drift guard passes) | **PASS** — two checks. (a) `model.ts` holds no module-level state; a mutation-isolation test builds twice and proves one result cannot affect the next. (b) **The real drift guard**: a `core` test drives the installer's `getAggregatedCustomEntityConfigs()` and the kernel's `buildModelFromModules()` from **one registered module set** and asserts they see the same entities, fields and relationships — **4/4 pass** |
+| ✅ | The export is **non-empty** (contains the 4 `communication_channels` relationships + declared fields) | **PASS** — asserted *before* the emptiness check; the fixture is the real 4 declarations read from `communication_channels/data/extensions.ts` |
+| ✅ | The export/import round-trip is **empty**, by two routes | **PASS** — route 1: `export(import(export(m))) === export(m)` byte for byte; route 2: `import` is idempotent (a second import is also a no-op) |
+| ✅ | The rename test: a label rename is clean; a key rename reports "requires recompilation" | **PASS** — both outcomes asserted; the silent pass on a key rename is treated as a failure |
+| ✅ | `Relationship` carries its declared attributes (G-08) | **PASS** — optional `attributes` block; absent attributes stay absent, never defaulted |
+| ✅ | The 4 existing `defineLink` call sites still type-check unchanged | **PASS** — the original `dsl.test.ts` passes unmodified; `tsc --noEmit` clean in `shared` **and** `cli`; the generator only casts and passes `EntityExtension[]` through (`module-registry.ts:3163`) |
+| ✅ | The critic pass names what it attacked and finds nothing | **PASS** — attacks run and named in the section below |
+| ✅ | Versions are real, not an empty field | **PASS** *(added during the build)* — every object carries a content-derived version; changing the declaration changes it, leaving it alone does not |
+
+**The measured evidence (rule zero-nine — from the artefacts, not the description):**
+
+| Check | Result |
+|---|---|
+| Kernel suite | **5 suites / 51 tests pass** (`npx jest src/lib/kernel`) |
+| Shared package | **170 suites / 1909 tests pass** (`npx jest`) |
+| Drift guard (`core`) | **4/4 pass** (`kernel-drift-guard.test.ts`) |
+| `packages/shared` typecheck | `tsc --noEmit` → **exit 0** |
+| `packages/cli` typecheck | `tsc --noEmit` → **exit 0** |
+| CLI generator (`module-entities`) | **4/4 pass** |
+
+**The one failure, and why it is not ours.** `packages/shared` also contains
+`src/lib/bootstrap/__tests__/dynamicLoader.tsconfig.test.ts`, whose 8 tests fail with
+`spawnSync … EBUSY` — the test spawns a node subprocess and this environment refuses. **Proven
+environmental, not caused by G-01:** with G-01's changes **stashed** (a clean tree), the same test fails
+identically. That is the second route; the first is that the failure is at process spawn, before any
+kernel code runs.
+
+**Critic pass — what it attacked (a pass that says "looks good" has not run):**
+
+1. *Does the descriptor secretly hold a copy?* — No. No module-level mutable state in `kernel/*.ts`; a mutation-isolation test proves it.
+2. *Is the round-trip empty only because the export is empty?* — No. The export is asserted non-empty first (4 relationships + fields).
+3. *Does a rename silently rewrite an id?* — No. A key rename is detected as `requires_recompilation`; the old id is never mutated.
+4. *Do the 4 existing `defineLink` call sites still type-check?* — Yes. Original `dsl.test.ts` unchanged and passing; both package typechecks clean.
+5. *Is every number re-measured from the artefact?* — Yes. The "4 of 34 modules" figure was read from `modules.runtime.generated.ts` (4 matches) **and** by reading all four source files.
+
+**What this sprint is not:** not the IR, not the compiler (that is G-02), and not the authorization
+layer (G-04). Its output is the **canonical model and its proof** — the thing every later item keys off.
+
+---
+
 # The hosting environment — `Platform-Server` (Coolify)
 
 **Built 2026-10-04.** A separate environment from Sprint 0: an Ubuntu Server 24.04 VM on Hyper-V

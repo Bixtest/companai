@@ -40,15 +40,15 @@ dependencies allow. All twelve items, and where every one of the study's 53 less
 
 ### Phase 1 — the spine
 
-- [ ] **G-01** ⏳ — The Business Model Kernel (+ **G-08** relationship fabric) *(P0-spec is done; this is the first build item)*
-- [ ] **AH-1** — **The agent as a kernel object** — `kind` (*personal · role · context · independent · system*), `owner`, `actsAs`, `role`, runtime binding, autonomy gate ⛔ *needs G-01*. **The only agent-half item on the critical path** → [`AGENT-HALF.md`](AGENT-HALF.md) §1.4
-- [ ] **G-02** — Business IR + the compiler ⛔ *needs G-01*
-- [ ] **G-10** — Dependency tracking + change propagation ⛔ *needs G-01*
+- [x] **G-01** ✅ — The Business Model Kernel (+ **G-08** relationship fabric) → plan §5.2. **BUILT 2026-10-05.** The canonical, versioned, typed business model **above** the physical database, as a **view** over the declarations the platform already keeps — it holds **no copy**, so there is no second source of truth. New code in `packages/shared/src/lib/kernel/`: **`canonical-id.ts`** (the spec §12.1 grammar — `segment('.'segment)*`, `[a-z][a-z0-9_]*`; the *kind* of an id is **declared, never guessed**), **`model.ts`** (`buildModelDescriptor` + the §4.1 21-item contract; relationships carry their declared attributes; a content-derived **version** per object so "versions" is real, not an empty field; relationship-id **collisions are reported, never silently merged**), **`round-trip.ts`** (the plan's test — `export`/`import`, a versioned envelope, byte-stable), **`rename.ts`** (`clean` vs `requires_recompilation`, with plain-language reasons), **`from-modules.ts`** (the **live wiring** — reads the registered modules' real declarations). Two edits: `modules/entities.ts` (+ optional `RelationshipAttributes`, additive) and `modules/dsl.ts` (`defineLink` accepts an optional `attributes` block — the original call shape unchanged). **Measured:** kernel **5 suites / 51 tests pass**; **shared package 170 suites / 1909 tests pass**; **`tsc --noEmit` clean in both `shared` and `cli`**; the **4 existing `defineLink` call sites** still type-check. **The plan's test — "the export/reimport round-trip is empty" — PASSES**, and the test first proves the export is **non-empty** (it carries the 4 real `communication_channels` relationships), so the empty diff is not vacuous. **The rename test passes both ways** (a label rename is clean; a key rename reports "requires recompilation"). **Gap found and measured in the code:** of 34 enabled modules, only **4** declare `entityExtensions` — **3 are empty stubs**, so **one module** carries the platform's whole relationship model today. **Boundary:** the *plain-language → model* path is **G-02's** compiler; G-01 is the canonical model itself and its guarantees. *(One unrelated suite, `bootstrap/dynamicLoader.tsconfig`, fails with `spawnSync … EBUSY` — **proven environmental**: it fails identically on a clean tree with G-01 stashed.)*
+- [ ] **AH-1** — **The agent as a kernel object** — `kind` (*personal · role · context · independent · system*), `owner`, `actsAs`, `role`, runtime binding, autonomy gate ⛔ *needs G-01 ✅ done — startable*. **The only agent-half item on the critical path** → [`AGENT-HALF.md`](AGENT-HALF.md) §1.4
+- [ ] **G-02** — Business IR + the compiler ⛔ *needs G-01 ✅ done — startable*
+- [ ] **G-10** — Dependency tracking + change propagation ⛔ *needs G-01 ✅ done — startable*
 
 ### Phase 2 — the security floor
 
-- [ ] **G-05** — Classification metadata on entities and fields ⛔ *needs G-01*
-- [ ] **G-04** — The data-axis authorization layer ⛔ *needs G-01*
+- [ ] **G-05** — Classification metadata on entities and fields ⛔ *needs G-01 ✅ done — startable*
+- [ ] **G-04** — The data-axis authorization layer ⛔ *needs G-01 ✅ done — startable*
 - [ ] **G-06** — AI Input/Output Guards + context firewall ⛔ *needs G-05* — **the largest security gap**
 - [ ] **G-16** — A security-event taxonomy ⛔ *needs G-05*
 - [ ] **G-13** — Aggregation / inference controls ⛔ *needs G-04*
@@ -61,11 +61,11 @@ dependencies allow. All twelve items, and where every one of the study's 53 less
 
 ### Phase 3 — the product surface
 
-- [ ] **G-07** — The Widget contract / Widget IR / registry ⛔ *needs G-01*
-- [ ] **G-09** — The `@`/`#` reference and resolution layer ⛔ *needs G-01*
+- [ ] **G-07** — The Widget contract / Widget IR / registry ⛔ *needs G-01 ✅ done — startable*
+- [ ] **G-09** — The `@`/`#` reference and resolution layer ⛔ *needs G-01 ✅ done — startable*
 - [ ] **G-03** — User Functions ⛔ *needs G-02*
 - [ ] **G-17** — Schema-constrained generation ⛔ *needs G-02*
-- [ ] **AH-5** — **The room** — a first-class shared space: its own id, participants, agenda, lifecycle, and a **speaker-labelled** log. **Neither Paperclip nor Hermes has this object** — it is our opening ⛔ *needs G-01* → [`AGENT-HALF.md`](AGENT-HALF.md) §3.3
+- [ ] **AH-5** — **The room** — a first-class shared space: its own id, participants, agenda, lifecycle, and a **speaker-labelled** log. **Neither Paperclip nor Hermes has this object** — it is our opening ⛔ *needs G-01 ✅ done — startable* → [`AGENT-HALF.md`](AGENT-HALF.md) §3.3
 - [ ] **AH-6** — **Mentions / participants** — pull a specific agent into a thread **without** assigning it work, gated by the same permissions as assignment ⛔ *needs AH-5*
 - [ ] **AH-12** — **The warm-session acceptance test** — prove the *next turn* sees a write made while the runtime holds the session. **The sibling never wrote this test**; it is the acceptance test for AH-5 ⛔ *needs AH-5*
 - [ ] **AH-7** — **Hire / fire as a product operation**, not an ops script ⛔ *needs AH-1*
@@ -73,8 +73,8 @@ dependencies allow. All twelve items, and where every one of the study's 53 less
 
 ### Phase 4 — the hygiene
 
-- [ ] **G-19** — A proprietary ERP benchmark ⛔ *needs G-01/G-02*
-- [ ] **G-20** — Freshness, lineage and continuous linting ⛔ *needs G-01*
+- [ ] **G-19** — A proprietary ERP benchmark ⛔ *needs G-02*
+- [ ] **G-20** — Freshness, lineage and continuous linting ⛔ *needs G-01 ✅ done — startable*
 - [ ] **AH-3** — **The durable wake queue** — every trigger is a **database row**, not an in-memory timer, so a deploy does not lose queued work ⛔ *needs S-05*
 - [ ] **AH-4** — **Routines produce work items** — schedule → **task** → wake, so every scheduled run has a visible task, a thread and an origin ⛔ *needs AH-3*
 - [ ] **AH-10** — **System agents** — admin-created agents that replace or augment a system function (cron, backup, cleanup) ⛔ *needs G-12, G-18*

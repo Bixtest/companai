@@ -283,11 +283,11 @@ Twelve items, `AH-1`–`AH-12`, each with the phase it can start in and what it 
 
 | Item | Phase | Waits for |
 |---|---|---|
-| `AH-1` — the agent object (kind, owner, `actsAs`, role, runtime, autonomy) | 1 | `G-01` |
+| `AH-1` — the agent object (kind, owner, `actsAs`, role, runtime, autonomy) | 1 | `G-01` ✅ done |
 | `AH-2` — the responsibility rule on the `A0`–`A5` gates | 2 | `G-04` |
 | `AH-8` — MCP governance (precedence, quarantine, argument-bound approval) | 2 | `G-04` |
 | `AH-11` — ESTOP wired to our pause | 2 | nothing |
-| `AH-5` — the room: a first-class shared space with a speaker-labelled log | 3 | `G-01` |
+| `AH-5` — the room: a first-class shared space with a speaker-labelled log | 3 | `G-01` ✅ done |
 | `AH-6` — mentions/participants | 3 | `AH-5` |
 | `AH-12` — the warm-session acceptance test | 3 | `AH-5` |
 | `AH-7` — hire/fire as a product operation | 3 | `AH-1` |

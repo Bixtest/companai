@@ -138,9 +138,15 @@ optionally delete the 3.8 GB ISO (item 7).
 Business Model Kernel specification ([`SPEC-business-model-kernel.md`](SPEC-business-model-kernel.md))
 was written **2026-10-05** and passes the vision's own 40-item gate — **35 SETTLED · 1 DERIVED · 3
 DEFERRED-with-trigger · 1 OPEN — owner**, tallied by parsing the 40 rows. **What is left is ratification**
-(item 4 of [`NEEDS-YOU.md`](NEEDS-YOU.md)) — and **the first build item is now `G-01` (the Business
-Model Kernel)**, which draft 2 unblocks. **Verify `P0-spec`'s status is still true before starting on
-`G-01`** — the roadmap has been wrong about what is already done **four times**.
+(item 4 of [`NEEDS-YOU.md`](NEEDS-YOU.md)).
+
+**`G-01` (the Business Model Kernel + `G-08`) is now built** — **2026-10-05**, committed in the code repo
+as `ee406e8`. The canonical model is a **view** over the declarations the platform already keeps, so
+there is one source of truth; the plan's test (**the export/reimport round-trip is empty**) passes, with
+a non-empty-export guard so the empty diff is not vacuous. **The next build item is `G-02` (the Business
+IR + compiler)**, which `G-01` unblocks — along with `AH-1`, `G-04`, `G-05`, `G-07`, `G-09`, `G-10`,
+`G-20` and `AH-5`. **Verify an item's status is still true before starting it** — the roadmap has been
+wrong about what is already done **four times**.
 
 ### What to study first, by role
 
@@ -508,8 +514,8 @@ and was *not* re-measured — treat it as a starting point, not a fact.**
 ## 8. What is left, and whose move it is
 
 - **What is left, in order** → [`BACKLOG.md`](BACKLOG.md). One roadmap. Read §"The list" and
-  nothing else for *"what is left"*. **`P0-spec` is done (draft 2, 2026-10-05); the first build item
-  is now `G-01` (the Business Model Kernel).**
+  nothing else for *"what is left"*. **`P0-spec` is done (draft 2, 2026-10-05) and `G-01` is built
+  (2026-10-05, code repo `ee406e8`); the next build item is `G-02` (the Business IR + compiler).**
 - **What needs the owner** → [`NEEDS-YOU.md`](NEEDS-YOU.md) — a numbered action list. **Three
   items open**, and none blocks the build. The most urgent is changing the Coolify admin password
   (item 5); it is the only thing standing between an agent and the 2FA wall on the hosting panel.
@@ -520,7 +526,9 @@ and was *not* re-measured — treat it as a starting point, not a fact.**
   DERIVED · 3 DEFERRED-with-trigger · 1 OPEN — owner** (the tally is parsed from the 40 rows, not
   written by hand — `LESSONS.md` **L49**). One code gap surfaced: the ledger carries no
   `policy_version`/`decision_id` (assigned to **G-16**). **Only ratification remains** (item 4 of
-  [`NEEDS-YOU.md`](NEEDS-YOU.md)), which unblocks `G-01`.
+  [`NEEDS-YOU.md`](NEEDS-YOU.md)). **§10a records that `G-01` has now run the specification's central
+  claims as measurements** — the ID grammar, the contract, the versions and the round-trip are tested,
+  not merely stated.
 - **How the agent half is designed** → [`AGENT-HALF.md`](AGENT-HALF.md) — the five kinds of agent,
   the rule that decides who is answerable when an agent acts, and where every lesson from the
   Paperclip + Hermes study lands in the four phases.
@@ -540,7 +548,13 @@ alone means this page is broken — **fix the page, not the newcomer.**
 from an older document are not equally current, and mixing them in one table is how this page
 goes wrong. If two older documents disagree on a number, say so — never average them.
 
-*Last updated: 2026-10-05, revision 3 — **`P0-spec` done: draft 2 of the specification passes the
+*Last updated: 2026-10-05, revision 4 — **`G-01` is built: the Business Model Kernel exists in the
+code repo (`ee406e8`), and the next build item is `G-02`.** §2 step 7, §7's spec row and §8 were
+updated in the same change as the code (COOKBOOK rule zero). The kernel is a view over the platform's
+own declarations, its round-trip test passes, and a drift guard proves the kernel's view equals the
+installer's view.*
+
+*Earlier, 2026-10-05, revision 3 — **`P0-spec` done: draft 2 of the specification passes the
 vision's 40-item gate, and the first build item is now `G-01`.** §2 step 7, §4's folder map, §7's spec
 row and §8 were updated in the same change as the specification itself (COOKBOOK rule zero). The spec's
 tally is parsed from the 40 rows — `35 SETTLED · 1 DERIVED · 3 DEFERRED-with-trigger · 1 OPEN — owner` —

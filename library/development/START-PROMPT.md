@@ -74,8 +74,12 @@ his — a name, a domain, a cost, a preference.
 **4. Your first task.** Read `library/development/BACKLOG.md` §"The list". The workbench is already
 up (the stack is running and the database is clean — verify it yourself). **`P0-spec` is done** — draft 2
 of the Business Model Kernel specification (`library/development/SPEC-business-model-kernel.md`) was
-written 2026-10-05 and passes the vision's own 40-item gate (only ratification remains). **The first
-build item is now `G-01` — the Business Model Kernel** (+ `G-08`, the relationship fabric).
+written 2026-10-05 and passes the vision's own 40-item gate (only ratification remains). **`G-01` — the
+Business Model Kernel (+ `G-08`, the relationship fabric) — is now built** (2026-10-05, code repo
+`ee406e8`): the canonical model is a view over the platform's own declarations, and the plan's test (the
+export/reimport round-trip is empty) passes. **The next build item is `G-02` — the Business IR + the
+compiler** — which `G-01` unblocks, along with `AH-1`, `G-04`, `G-05`, `G-07`, `G-09`, `G-10`, `G-20`
+and `AH-5`.
 
 Work it in the project's four-step sprint process — **no code before step 3**. Steps 1–3 are
 documents and measurement; only step 4 writes code:

@@ -524,6 +524,34 @@ a measurement.
 
 ---
 
+## 10a. G-01 has now run that measurement — **added 2026-10-05**
+
+**The specification is no longer only read against the code; its central claims are now executed.**
+G-01 (the Business Model Kernel) was built and measured on 2026-10-05. What moved from *stated* to
+*tested*:
+
+| This specification said | G-01 measured |
+|---|---|
+| §12.1 — the ID grammar `segment('.'segment)*`, `[a-z][a-z0-9_]*` | Implemented and tested (`canonical-id.ts`; **14 tests**, incl. the §12.1 examples and the `invoice.customer` ≠ `customer.invoice` property). |
+| §4.1 / §4.2 — the 21-item contract, applied to every object | Declared once (`KernelObjectContract`) and intersected; every object in the model carries it. |
+| §5.4 — relationships are first-class metadata carrying declared attributes | Implemented; the four attributes the platform does not yet declare are **absent, not defaulted**, and a test asserts that. |
+| §5.2 / §7 — "declared contracts **and versions**" | Every object now carries a **content-derived version** — change the declaration and it changes; leave it and it does not. Tested. |
+| §12.3 — the model is a **view** over the declared source, never a second store | `buildModelDescriptor` holds no copy (tested by mutation-isolation); the **live wiring** reads the registered modules. |
+| The plan's test — *the export/reimport round-trip is empty* | **Passes**, with a **non-empty-export guard** so the empty diff is not vacuous. |
+| The rename test (batch 9 §6 #1) | **Passes both ways** — a label rename is `clean`; a key rename reports `requires_recompilation`. |
+
+**Measured:** kernel **5 suites / 51 tests pass**; the **shared package 170 suites / 1909 tests pass**;
+`tsc --noEmit` **clean** in both `shared` and `cli`. **The one code gap this document surfaced** (the
+ledger's missing `policy_version` / `decision_id`) is untouched by G-01 and remains assigned to **G-16**,
+as §9 says.
+
+**What G-01 does *not* prove, and this document should not be read as claiming:** the *plain-language →
+model* path is **G-02's** compiler, not G-01's. G-01 produces the canonical model from declarations; the
+sentence "a business described in plain language produces a canonical object graph" is completed only
+when G-02 exists.
+
+---
+
 ## 11. Critic pass — this document attacked
 
 Run as a stranger would, looking for what is wrong rather than what is right. **A pass that says
