@@ -215,6 +215,18 @@ development plan [`findings/12`](../../library/analysis/findings/12-development-
 and Hermes's. Recorded so a reader can tell which is meant, and so no document uses them
 interchangeably.
 
+**`widget` — resolved by a reported default, 2026-10-05 (Sprint G-07).** The `widget` collision is
+the one case that is *kit vs vision*, not *ours vs Hermes's*: the Starting Kit already calls its
+dashboard tiles "widgets" (a TSX component with a metadata id and slots), while the vision's Widget
+is a typed business object with a contract, an IR and a registry. Batch 4 §15b recommended keeping
+"widget" for the kit's tile and calling the vision object a **"Business Widget"**, and that
+recommendation was carried to batch 9 but never formally taken. **G-07 takes it as its own call:**
+the vision object is a **`BusinessWidget`** (`packages/shared/src/lib/business-widget/`); the kit's
+tile keeps the word `widget` unchanged. The reason is cost, not taste — the kit's word is in dozens
+of files and its public module API, the vision's object has no callers, so renaming the cheap side
+is the cheap move. **Recorded as our call, not an owner decision, so it can be overruled in one
+line** (COOKBOOK rules zero-zero and zero-seven).
+
 ### Added — the build order, as a gate
 
 The development plan fixes the order: **the Business Model Kernel specification first

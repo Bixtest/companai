@@ -2065,6 +2065,82 @@ gets the new code and tests. Repo 1 (root, branch `master`) gets the docs. **Nev
 
 ---
 
+# Sprint G-07 — the Widget contract, the Widget IR, and the registry
+
+**Written 2026-10-05. The next item after the four-item critical path, which is complete (`spec ✅ → G-01 ✅ → G-02 ✅ → G-03 ✅`).** Item: `G-07` in [`../library/development/BACKLOG.md`](../library/development/BACKLOG.md).
+
+**Why it is now safe to start:** `G-01` is built (the canonical model and its ids) and `G-02` is built (the IR and the compiler). The plan's own dependency line is `G-01 → G-07`. **And G-03 has handed G-07 a second, concrete job:** a User Function is *"created by the user … and executable without AI once published"*, and **being usable by a person** — placed in the interface, given a form from its `parameterSchema` — is a **placement** concern, which G-03 deliberately did not build. G-03 carried `presentation` and `ui` as **opaque** values for exactly this reason.
+
+**What it is** (plan §2 phase 3, verbatim): **a Widget is a first-class typed object with a contract and an IR** (RQ-40/41/42).
+
+**Done when** (plan §2 phase 3, verbatim): *a Widget is a first-class typed object with a contract and an IR.*
+
+**Test.** The plan names **one** test for the whole phase — *"switch the model off and run a Function"* — and **G-03 already met it**. So G-07 must name its **own**, and Step 2 does: **a published Function, placed in a Widget, runs from the Widget's own inputs with no AI** — the vision's own *"most important reusable chain"* (§160), made real.
+
+## Step 1 — Research: what already exists
+
+**Measured 2026-10-05 by reading the real code and the real vision text** (rule zero-nine), not from a report about either.
+
+| Layer | File (under `workspace/starting-kit/`) | What it already gives us |
+|---|---|---|
+| **The vision's Widget** | — | **Nothing.** `find packages/shared/src/lib -iname "*widget*"` → **0 files**. The contract, the IR and the registry exist in the vision (Doc 5 §10–15, §33–35, §112–114, §195, and the 40 rules of Part LXXIII) — **specified, not built.** |
+| **The host (V-23)** | `packages/shared/src/modules/widgets/` + `packages/ui/src` | The **UI injection framework** the plan names as the host. **Measured 2026-10-05:** the `shared` side is **1,359 lines** (`injection.ts`, `injection-loader.ts`, `injection-position.ts`, `component-registry.ts`, `injection-progress.ts`, + 4 test files); the `ui` side is **2,563 lines across 20** injection/widget files. It gives `InjectionWidgetMetadata` (`id`, `title?`, `description?`, `features?`, `priority?`, `enabled?`, `requiredModules?`, `requiredFields?`), injection positions and placements, and a component registry. **This is a React component-injection system** — the renderer, not the object. *(Correction: the shortcut register attributes the "1,359-line" figure to `packages/ui`; measured, 1,359 is the `shared` directory and `packages/ui` is 2,563. The code wins — recorded here.)* |
+| **The name clash — already known** | `packages/core/src/modules/*/widgets/injection/*/widget.ts(x)`; `compai/planning/CHANGELOG.md` §"the four vocabulary collisions" | The kit **already calls its dashboard tiles "widgets"** — a TSX component with a metadata id and slots. That is a **different object** from the vision's Widget. **Recorded, never resolved.** The analysis's recommendation (batch 4 §15b, carried to batch 9): keep "widget" for the kit's tile, call the vision object a **"Business Widget"**. |
+| The canonical model | `packages/shared/src/lib/kernel/` (G-01) | Canonical ids (`canonical-id.ts`), `ModelDescriptor`, and `contentVersion` — the pure content hash a Widget's version reuses. |
+| The IR and the compiler | `packages/shared/src/lib/business-ir/` (G-02) | `BusinessQueryIR`/`BusinessCommandIR` and `compileQuery`. A Widget's `source` names a **Function**, and a Function already carries compiled IR. |
+| **The Function** | `packages/shared/src/lib/user-function/` (G-03) | The artifact with **`parameterSchema`** (`FunctionParameter = { name, kind: CustomFieldKind, required, default?, label?, description? }`), `references`, and `runFunction` (zero-AI). **`presentation?` and `ui?` are carried as `unknown` — declared opaque, for this sprint to define.** |
+| The parameter kinds | `packages/shared/src/modules/entities/kinds.ts` | `CUSTOM_FIELD_KINDS` — the platform's **13 field kinds**. A Function parameter is already one of these, so a Widget's input control maps from a **declared** kind, never a guess. |
+| The registry's nearest neighbour | `packages/core/src/modules/dashboards/`; `packages/core/generated/entities/dashboard_*_widgets` | A **dashboard-widget** registry exists — which tile sits on whose dashboard. It is the kit's registry of *tiles*, **not** the vision's Object Registry, so it is not reusable as the vision's; it is the pattern to read for how the kit stores a placement. |
+
+**The measured gap.** Nothing in code implements the vision's Widget, its IR, or its registry. The vision supplies the whole shape: §10 the contract, §11–15 its parts (inputs, outputs, actions, events, dependencies), §33–35 the **semantic** IR (*"do not encode React props, CSS classes, DOM structure"*), §112–114 the registry (a canonical `widget_id`, a separate `widget_instance_id`, and an object graph that answers *where is this used / what does it depend on*), §195 the minimum manifest, and §160 the chain **Function → Widget**.
+
+**Two routes, both agreeing, that no Widget exists:** (a) the `find` above, over `shared/src/lib` → **0 files**; (b) the plan lists G-07 in the **"must be built"** column while naming V-23 in the **"needs from our platform"** column. Both agree: **the host exists, the object does not.**
+
+**What we reuse:** the **host** (V-23's injection metadata, so a Widget can be *rendered* without G-07 touching React); G-01's canonical ids and `contentVersion`; G-03's `parameterSchema` and `runFunction`; the 13 declared field kinds. **What G-07 genuinely builds:** the **Widget contract**, the **Widget IR** (semantic), the **registry**, and the **placement** that turns a Function into a Widget.
+
+## Step 2 — Validate: is this the best approach?
+
+**Alternative considered — make the vision's Widget *be* the kit's injection widget.** **Rejected.** The kit's widget is a **TSX component**; the vision's rule 6 forbids the Widget IR from being frontend source, and rule 20 forbids AI from emitting UI code. If the Widget *were* a component, "AI proposes a Widget" would mean "AI writes TSX" — the one thing the vision rules out. **The host renders; the Widget is data.** They meet at the metadata boundary, not by identity.
+
+**Alternative considered — build a new renderer.** **Rejected, and the plan already decided it.** V-23 is a **KEEP** in the shortcut register, described as *"the host a vision Widget can render into"*. Building a second renderer duplicates something bought and working.
+
+**Alternative considered — resolve the naming collision by renaming the kit's tile.** **Rejected in favour of the analysis's own recommendation.** The kit's word is in **363 files** (`packages/core/src` + `packages/ui/src` alone, measured 2026-10-05) and its public module API; the vision's object is **new and has no callers**. Renaming the cheap side is the cheap move. **Our call (reported):** the vision object is a **`BusinessWidget`**; the kit's tile stays `widget`. **Recorded as *our* call so the owner can overrule it in one line** (rule zero-zero case 3, rule zero-seven).
+
+**Alternative considered — persist the registry to the database now.** **Deferred, with the same two reasons as G-03 and a named trigger.** (i) This project tests DB code against a **mocked** EntityManager, so a migration here would be **unprovable**. (ii) The registry's shape is driven by the **`@`/`#` reference layer (G-09)**, which will query it. **Trigger: G-09.** Until then the registry is a **value** — built, tested and serialisable — exactly as G-01 and G-03 built their objects before persisting them.
+
+**Alternative considered — make the Widget a *document*, like the Function.** **Chosen.** Same discipline that worked twice: a versioned envelope, byte-stable on a round-trip, no database. It satisfies *"Widgets are versioned"* (rule 25) and *"definitions are distinct from instances"* (rule 7) **without** a migration.
+
+**Approach chosen — the Widget as a typed contract, a semantic IR, and a registry, with a Function's placement as the first concrete producer.**
+
+- **The contract** (§10, §195): id, version, name, description, purpose, typed inputs, typed outputs, actions, events, dependencies (entities / fields / relationships / metrics / Functions / Commands / Workflows / Policies / Knowledge / Skills / other widgets), permissions (read / interact / execute / share), collaboration, persistence, rendering, `ai`, and **presentation** — the field G-03 left opaque.
+- **The IR** (§33–35): a **semantic** description of what to present and how the user interacts — `type`, `title`, `source`, `inputs` (`id`, `type`, `control`), `actions`. **No React props, no CSS, no DOM.** Enforced by a **type-level** test, not a comment.
+- **The registry** (§112–114): first-class entries (`object_type`, `object_id`, `version`, `owner`, `scope`, `status`, `dependencies`, `permissions`), a **canonical identity** distinct from an instance, and the object-graph questions answered as **values**.
+- **The placement** (§160): given a **published** Function, produce a Widget whose **inputs are derived from the Function's `parameterSchema`** and whose `source` names that Function — so **running the Widget runs the Function with no AI**. This is where G-03's opaque `presentation`/`ui` become **defined**.
+
+**What would break it, and the defence:**
+
+1. **A Widget IR that carries frontend code.** **Defence:** the IR is **semantic by construction** (no `className`, `style`, `props`, `children`), and a **type-level probe** proves those fields cannot exist — the same falsifiable technique G-02 and G-03 used.
+2. **A Widget that becomes a second source of business truth.** **Defence:** the Widget holds **no data** — its `source` names a **Function** (compiled IR) or a canonical entity id; rule 2 (*"not an independent data silo"*) and rule 11 (*"canonical EntityRef, not copied data"*).
+3. **A Widget whose inputs drift from its Function.** **Defence:** the placement **derives** the inputs from `parameterSchema` in one direction only; a Function whose parameters change produces a **different** Widget contract, caught by the version.
+4. **A Widget permission treated as authorization.** **Defence:** the contract carries permissions as **declared metadata only**; rule 16 is explicit that widget permissions **never replace** business authorization, and **G-04** is where that is enforced. G-07 records the requirement; it does not fake the enforcement.
+5. **A placement that runs an unpublishable Function.** **Defence:** placement accepts only a Function that is **`published`/`active`** (G-03's own gate) and **runs it through `runFunction`** — the zero-AI path — never a second execution route.
+
+**The ordering rule:** the contract type first, then the IR, then the placement (Function → contract + IR), then the registry, then the document round-trip — because each depends on the one before.
+
+## Step 3 — The steps
+
+**Every command runs from `workspace/starting-kit/`.** Nothing in `packages/shared/src/lib/kernel/`, `business-ir/` or `user-function/` is modified — **G-07 consumes all three.** New code lands in `packages/shared/src/lib/business-widget/` (pure, no DB) with its tests beside it.
+
+1. **`types.ts` — the contract.** `BusinessWidget` carrying §10's parts and §195's manifest: `WidgetStatus`, `WidgetPermissions` (`read`/`interact`/`execute`/`share`), `WidgetDependencies`, `WidgetReference`, and **`presentation`** as a *defined* shape (no longer `unknown`). Every id that names a model object is a **canonical id** (G-01).
+2. **`ir.ts` — the semantic IR.** `WidgetIR` with `type`, `title`, `source`, `inputs`, `actions`; `WidgetInput` (`id`, `type: CustomFieldKind`, `control`, `required`, `label?`); `WidgetControl` as a **closed union** of semantic controls (`text_input`, `number_input`, `money_input`, `boolean_toggle`, `entity_picker`, `date_range`, …). **No frontend vocabulary** — asserted by a type-level test.
+3. **`placement.ts` — the Function → Widget chain (§160).** `placeFunction(fn, options)` → `{ widget, ir }`; the inputs are **derived from `fn.parameterSchema`**; the `control` is chosen from the parameter's **declared kind**; a Function that is not runnable (G-03's `isRunnable`) is **refused**.
+4. **`registry.ts` — the registry (§112–114).** `WidgetRegistry`: `register`, `get` (by canonical id **and version**), `instances` (canonical id vs instance id), and the object-graph answers — `whereUsed`, `dependsOn`, `dependents`. Collisions are **reported, never silently merged** — the rule G-01 and G-02 both follow.
+5. **`document.ts` — the round-trip.** `WidgetDocument` (`companai.business-widget`, version 1), export/import, **byte-stable**, empty round-trip — the pattern G-01 and G-03 both proved.
+6. **Tests, beside the code.** The decisive one: **a published Function placed in a Widget runs from the Widget's own inputs with no AI** (through `runFunction`, asserting the exact `QueryOptions`). Plus: the IR is semantic (type-level probe, **falsified first**); the placement derives inputs from `parameterSchema`; the registry answers the graph questions and reports collisions; the document round-trips.
+7. **Measure and record.** Run the `shared` suite, `tsc --noEmit` for `shared`/`cli`/`core`, and both test-including configs; record the counts in Step 4. Then the **critic pass** (Step 5).
+
+---
+
 # The hosting environment — `Platform-Server` (Coolify)
 
 **Built 2026-10-04.** A separate environment from Sprint 0: an Ubuntu Server 24.04 VM on Hyper-V

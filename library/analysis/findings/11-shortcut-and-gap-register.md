@@ -174,7 +174,7 @@ The owner's standing rule: things that **add value beyond the vision**. Batch 7 
 | **V-20** | **Shadow mode + a shadow report** | `shadow.ts`, `shadow-report.ts` | a migration instrument for turning a resolver into an enforcement point | **KEEP** |
 | **V-21** | The **migration advisory lock** (drift-guarded migrations) | `packages/cli` (batch 6 §5) | prevents two boots racing on a migration | **KEEP** |
 | **V-22** | **5 locales with RTL handled** | `ar, de, en, es, pl` (batch 6 §12) | reach the vision does not specify | **KEEP** |
-| **V-23** | The **1,359-line UI injection framework** (hooks, navigate guards) | `packages/ui` (batch 6 §13) | the **host** a vision Widget can render into — more than a spot-injector | **KEEP** |
+| **V-23** | The **1,359-line UI injection framework** (hooks, navigate guards) | `packages/ui` (batch 6 §13) | the **host** a vision Widget can render into — more than a spot-injector | **KEEP** *(corrected 2026-10-05, Sprint G-07: the **1,359 lines are `packages/shared/src/modules/widgets/`**; `packages/ui/src` is **2,563 lines across 20** injection/widget files. The framework spans both packages.)* |
 
 **The consolidated `V`-register is now 23 entries: 16 KEEP, 7 HOLD, 0 DROP.** The most valuable remains **V-01** — auxiliary models with fallback, which is what makes the vision's local-first claim practical.
 
