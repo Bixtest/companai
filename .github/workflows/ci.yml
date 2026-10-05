@@ -381,11 +381,12 @@ jobs:
   #
   # `init-or-migrate.sh` exists twice — `docker/scripts/` and
   # `packages/create-app/template/docker/scripts/` — and both are exercised here.
-  # Nothing syncs or compares the two copies (scripts/template-sync.ts covers
-  # only docker/redis/redis.conf), so the second invocation is the only thing
-  # standing between a one-copy edit and every scaffolded app shipping it.
-  # Note this catches *behaviour* drift, not byte drift: a copy left behind at
-  # older-but-still-correct behaviour passes both runs.
+  # Note these runs catch *behaviour* drift only: a copy left behind at
+  # older-but-still-correct behaviour passes both. Byte-parity between the two copies
+  # is a separate assertion, in
+  # packages/create-app/src/lib/template-docker-scripts.test.ts (run by the "Check
+  # create-app template parity" step in the `test` job); scripts/template-sync.ts
+  # declares the mirror so that `yarn template:sync:fix` can repair the drift.
   #
   # The files are invoked directly instead of through the `test:docker-scripts`
   # alias in package.json, because Yarn 4 refuses to run a script before an

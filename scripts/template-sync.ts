@@ -116,6 +116,20 @@ const EXPLICIT_TEMPLATE_FILE_MAPPINGS = [
     templateFile: path.join(ROOT, 'packages', 'create-app', 'template', 'docker', 'redis', 'redis.conf'),
     rel: 'docker/redis/redis.conf',
   },
+  {
+    // The database-readiness script the app runs on first boot. It exists twice and
+    // the standalone copy is what every scaffolded app actually ships, so a fix
+    // applied to one copy only must not be able to leave the other behind. Paired
+    // with the byte-parity assertion in
+    // packages/create-app/src/lib/template-docker-scripts.test.ts, which fails the PR;
+    // this mapping is what lets `yarn template:sync:fix` repair the drift.
+    //
+    // Note template/docker/scripts/dev-entrypoint.sh is deliberately NOT listed: the
+    // monorepo and standalone copies are different programs that share a name.
+    sourceFile: path.join(ROOT, 'docker', 'scripts', 'init-or-migrate.sh'),
+    templateFile: path.join(ROOT, 'packages', 'create-app', 'template', 'docker', 'scripts', 'init-or-migrate.sh'),
+    rel: 'docker/scripts/init-or-migrate.sh',
+  },
 ] as const
 const TEMPLATE_ONLY_RELATIVE_FILES = new Set<string>([
   'app/api/healthz/__tests__/route.test.ts',
