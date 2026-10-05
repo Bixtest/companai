@@ -35,7 +35,7 @@ for any item above"*): **met by draft 2** — see §8.
 | Partly | 10 | **0** |
 | Open (wholly) | 8 | **0** |
 | Deferred, with a trigger | 0 | **6** |
-| Open — owner (his to close) | (inside the 8) | **0** *of the former 18* — the remaining owner items are the `B-05` Hermes boundary, listed in §9 |
+| Open — owner (his to close) | (inside the 8) | **0** — the last one, the `B-05` Hermes boundary, was **approved by the owner on 2026-10-05** (§8 row 26) |
 
 *Counted by parsing the 40 rows of §8, not by hand — `LESSONS.md` **L49**.*
 
@@ -428,19 +428,19 @@ that draft 1 marked **PARTLY** or **OPEN** are the ones this draft closes, and t
 | 23 | Knowledge model | **SETTLED** — §5.4 + §7 Rule 1 |
 | 24 | Memory scopes | **SETTLED** — §7 Rule 1 |
 | 25 | Skill lifecycle | **SETTLED** — `Skill` §5.4; the states are Doc 8 §186 (*DRAFT → SCAN → VALIDATE → EVALUATE → APPROVE → PUBLISH*), and a Skill is never the source of authority (Doc 8 §87). ▲ *was PARTLY* |
-| 26 | Hermes adapter boundary | **OPEN — owner** — this is the Hermes boundary, **B-05**, and the vision says the adapter comes **only after the security gateway exists** (Doc 8 §230). Not this document's to close. |
-| 27 | Hermes profile strategy | **DERIVED** — Doc 8 §84 (*"Hermes profile is not tenant identity"*) + §91; **the number and isolation of profiles follows from the five agent kinds** ([`AGENT-HALF.md`](AGENT-HALF.md) §1.4). The operational choice remains **OPEN — owner** |
-| 28 | Hermes session bridge | **SETTLED (shape) / OPEN — owner (isolation)** — the shape is Doc 8 §150 (*never reuse a human session for a background worker*) and §152 (*durable state is external to Hermes*); the concrete case is a **context agent that acts as a user** ([`AGENT-HALF.md`](AGENT-HALF.md) §1.4). Choosing the profile is the owner's. ▲ *was OPEN — spec* |
+| 26 | Hermes adapter boundary | **SETTLED — approved by the owner 2026-10-05.** One product, one repository, one deployment, one interface (ours), with Hermes as a **supervised private runtime process behind the internal port**. Hermes is **headless**. The reasoning, the owner's three challenges and the two hostile passes are in [`ARCHITECTURE-hermes-integration.md`](ARCHITECTURE-hermes-integration.md) §11. The vision's own ordering still holds: the adapter is built **only after the security gateway exists** (Doc 8 §230), so this settles the *shape*, not the *schedule*. ▲ *was OPEN — owner* |
+| 27 | Hermes profile strategy | **DERIVED (rule) / DEFERRED (operational choice)** — Doc 8 §84 (*"Hermes profile is not tenant identity"*) + §91; **the number and isolation of profiles follows from the five agent kinds** ([`AGENT-HALF.md`](AGENT-HALF.md) §1.4). The operational choice is **deferred with a trigger: the agent gateway**, because a profile topology cannot be tested before there is an agent to place in one. ▲ *was DERIVED with the choice OPEN — owner* |
+| 28 | Hermes session bridge | **SETTLED (shape) / DEFERRED (isolation choice)** — the shape is Doc 8 §150 (*never reuse a human session for a background worker*) and §152 (*durable state is external to Hermes*); the concrete case is a **context agent that acts as a user** ([`AGENT-HALF.md`](AGENT-HALF.md) §1.4). Which profile that agent gets is the same deferred choice as row 27, with the same trigger. ▲ *was OPEN — spec* |
 | 29 | MCP domain API | **SETTLED** — Doc 8 §88–89 (`finance.mcp`, `sales.mcp` … never one `execute_sql`). **Measured: the platform already exposes 21 named tools over MCP**, all discovered by Hermes (container log `Tools registered toolCount=21`; COOKBOOK Sprint 0). ▲ *was OPEN — spec* |
 | 30 | Tool policy | **SETTLED** — the envelope and trust tiers are **§13**, derived from Doc 8 §88, §90, §156; the platform's **agent mutation policy** (read-only / confirm-required / destructive-confirm-required) is the existing mechanism (batch 5 §14a G-20). ▲ *was PARTLY* |
 | 31 | Human approval model | **SETTLED** — the approval rule is the platform's **`A0`–`A5` gates assigned per action class**, plus *the accountable party is always a person* ([`AGENT-HALF.md`](AGENT-HALF.md) §1.2). **The binding shape is §14** — a token bound to a `command_hash`, re-checked on confirm (Doc 8 §59; the platform's `pending-action-recheck.ts` already re-runs every check and surfaces `schema_drift`). |
 | 32 | Document ingestion/security | **SETTLED** — the Document field set and the no-downgrade rule are **§12.2**, derived from Doc 8 §145–146; documents are untrusted data, never instruction (§7 Rule 1, Doc 8 §66). ▲ *was PARTLY* |
 | 33 | Analytics projection strategy | **SETTLED** — a projection is derived, declared and security-inherited (Doc 8 §110); search is a projection and never a second database (Doc 4 §54); the platform's `query_index` is the target. ▲ *was PARTLY* |
 | 34 | Event/outbox strategy | **SETTLED** — the atomic `{ state · audit · outbox }` commit is **§15**, derived from Doc 4 §52. **Measured twice: no outbox exists in the code today** (no file matches `outbox`; no outbox table in the live database). ▲ *was OPEN — spec* |
-| 35 | Durable workflow strategy | **SETTLED (rule) / DEFERRED (mechanism)** — the rule is Doc 8 §152 (*durable state belongs to our workflow engine, external to Hermes*); the mechanism is deferred with the Hermes boundary (**B-05**). ▲ *was PARTLY* |
+| 35 | Durable workflow strategy | **SETTLED (rule) / DEFERRED (mechanism)** — the rule is Doc 8 §152 (*durable state belongs to our workflow engine, external to Hermes*). The mechanism is deferred **on its own trigger: the first durable run lands** (Phase 5 of [`ARCHITECTURE-hermes-integration.md`](ARCHITECTURE-hermes-integration.md) §9). It no longer waits on the boundary, which is now decided. ▲ *was PARTLY* |
 | 36 | Observability model | **SETTLED** — the telemetry set is Doc 8 §166, and anomaly detection is **supplementary, never a replacement** (Doc 8 §167). The platform's access/action logs + hash-chained ledger are the existing substrate (batch 5 §14a G-16/G-17). ▲ *was OPEN — spec* |
 | 37 | Evaluation benchmark | **DEFERRED** — the shape is Doc 8 §160–165 (the adversarial matrix, the prompt-attack matrix, property-based tests, the **capability closure test**, security differential testing). **Trigger: the first security item lands (G-05), so the benchmark measures a real control rather than a plan.** ▲ *was OPEN — spec* |
-| 38 | Hermes version compatibility harness | **DEFERRED** — named in **N-11**; **trigger: the Hermes adapter is built (after §26 is closed)**, because a harness for a boundary that does not exist yet is a guess. ▲ *was OPEN — spec* |
+| 38 | Hermes version compatibility harness | **DEFERRED** — named in **N-11**; **trigger: the Hermes adapter is built** (row 26 is now settled, so the boundary it would harness is defined). A harness for a boundary that does not exist yet is still a guess. ▲ *was OPEN — spec* |
 | 39 | Capability package format | **SETTLED** — the `CapabilityManifest` is **§16**, derived verbatim from Doc 8 §141; today the platform has `Module`/`Capability` objects and per-module `acl.ts` but no manifest. ▲ *was PARTLY* |
 | 40 | Frontend model-builder lifecycle | **DEFERRED** — the rule is Doc 8 §229 (Functions/Widgets/Workspace are **clients of the policy kernel**); the lifecycle needs the IR. **Trigger: G-02 (Business IR + compiler) is done.** ▲ *was OPEN — spec* |
 
@@ -448,25 +448,26 @@ that draft 1 marked **PARTLY** or **OPEN** are the ones this draft closes, and t
 
 | First status in the row | Count | Which rows |
 |---|---|---|
-| **SETTLED** | **35** | 33 rows whose first bold token is `SETTLED`, **+ 2** (rows 28 and 35, whose first token is `SETTLED (shape)` / `SETTLED (rule)`) |
+| **SETTLED** | **36** | 34 rows whose first bold token is `SETTLED`, **+ 2** (rows 28 and 35, whose first token is `SETTLED (shape)` / `SETTLED (rule)`) |
 | **DERIVED** | **1** | 27 |
 | **DEFERRED** (trigger named) | **3** | 37, 38, 40 |
-| **OPEN — owner** | **1** | 26 |
-| **Total** | **40** | 35 + 1 + 3 + 1 |
+| **OPEN — owner** | **0** | none |
+| **Total** | **40** | 36 + 1 + 3 |
 
 **How the count was taken, and verified.** Two routes, agreeing: (a) the rows were parsed
 programmatically and the first status token of each of the 40 was counted; (b) the counts were read
-back against the rows by number. Both give `35 · 1 · 3 · 1 = 40`. **Rows 28 and 35 carry a second
-status** — *"SETTLED (rule) / DEFERRED (mechanism)"* and *"SETTLED (shape) / OPEN — owner
-(isolation)"* — and are counted on the **rule**, because a rule this document can fix is this
-document's to fix; the **mechanism** they leave open is the same single `B-05` Hermes boundary already
-counted in row 26. **They are not three separate owner decisions — they are one.**
+back against the rows by number. Both give `36 · 1 · 3 · 0 = 40`. **Rows 28 and 35 carry a second
+status** — *"SETTLED (rule) / DEFERRED (mechanism)"* and *"SETTLED (shape) / DEFERRED (isolation
+choice)"* — and are counted on the **rule**, because a rule this document can fix is this document's
+to fix. The choices those rows leave open are **deferred with named triggers** (the first durable run,
+and the agent gateway) rather than left ownerless.
 
 **The honest reading.** Every one of the 40 rows now has an answer and a citation; **3 are deferred
-with a named trigger; 1 (the Hermes boundary) is the owner's and is left open on purpose.** Draft 1's
-own bar was *"it meets the plan's test and not the vision's."* Draft 2's bar is the vision's —
-*"the project should not rely on undocumented conventions for any item above"* — and **it is met**:
-no row is left to convention; each is decided, derived, or explicitly deferred with its trigger.
+with a named trigger, and none is left open.** The last owner decision, the Hermes boundary, was
+**approved by the owner on 2026-10-05** and is now row 26's `SETTLED`. Draft 1's own bar was *"it
+meets the plan's test and not the vision's."* Draft 2's bar is the vision's — *"the project should not
+rely on undocumented conventions for any item above"* — and **it is met**: no row is left to
+convention; each is decided, derived, or explicitly deferred with its trigger.
 
 **Status: SETTLED** — the gate is passed, with the one owner-side remainder (26) named and unclosed
 on purpose.
@@ -481,9 +482,9 @@ rule zero-one). Every open item below is now one of exactly two kinds: **deferre
 
 | Item | Status | Why it is not settled here, and what brings it back |
 |---|---|---|
-| **The Hermes boundary** (§8 rows 26, and the mechanism halves of 28 and 35) | **OPEN — owner** | It is **B-05**: which Hermes profile, and how it is isolated, is the owner's operational call. **Narrowed 2026-10-05** by the agent-model decision: the five agent kinds tell us **how many profiles we need and how they are isolated**, and a *context* agent that acts as a user is the concrete case the session bridge must serve → [`AGENT-HALF.md`](AGENT-HALF.md). **Trigger: the owner's decision, or the point at which G-04 (data-axis authorization) is done and the gateway exists.** |
+| **The Hermes boundary** (§8 row 26) | **SETTLED — approved by the owner 2026-10-05** | The shape is one product, one repository, one deployment, one interface (ours), with Hermes as a **supervised private runtime process behind the internal port**; Hermes is **headless**. What remains is the **profile topology**, deferred with the trigger **the agent gateway** → [`ARCHITECTURE-hermes-integration.md`](ARCHITECTURE-hermes-integration.md) §11.2. |
 | **The evaluation benchmark** (§8 row 37) | **DEFERRED** | The *shape* is fixed (Doc 8 §160–165). Writing the tests before a control exists would benchmark a plan, not a control. **Trigger: the first security item lands (G-05).** |
-| **The Hermes version-compatibility harness** (§8 row 38) | **DEFERRED** | A harness for a boundary that does not exist yet is a guess (already **N-11**). **Trigger: the Hermes adapter is built — i.e. after the Hermes boundary (row 26) is closed.** |
+| **The Hermes version-compatibility harness** (§8 row 38) | **DEFERRED** | A harness for a boundary that does not exist yet is a guess (already **N-11**). **Trigger: the Hermes adapter is built** — the boundary is now decided (row 26), so the harness has a defined target. |
 | **The frontend model-builder lifecycle** (§8 row 40) | **DEFERRED** | It needs the IR to exist before a builder can be specified around it — the vision itself puts Functions/Widgets *after* the kernel (Doc 8 §229). **Trigger: G-02 (Business IR + compiler) is done.** |
 | **The audit-record shape drift** — our ledger is hash-chained but does **not** carry `policy_version` / `decision_id` | **OPEN — spec, with a named next move** | Measured 2026-10-05, two routes: the ledger service has no `policy` or `decision` column, and the live `ledger_events` table has none either. Doc 8 §118 requires both. **This is the one *code* gap this document surfaces** — it is a finding, and it belongs to **G-16** (the security-event taxonomy) rather than to this specification. **Next move: add the two columns when G-16 is built.** |
 | **Whether `View` and `Projection` should stay distinct** | **DEFERRED** | Trigger: the first generated UI (Doc 3 §76). If they never diverge, merge them |
@@ -513,7 +514,7 @@ to G-16; and the one genuine open item is the owner's Hermes boundary.
 
 | The vision's bar | Result |
 |---|---|
-| Every one of the 40 items is specified, not left to convention | **MET** — §8: 35 SETTLED · 1 DERIVED · 3 DEFERRED-with-trigger · 1 OPEN — owner. No row is left to convention. |
+| Every one of the 40 items is specified, not left to convention | **MET** — §8: 36 SETTLED · 1 DERIVED · 3 DEFERRED-with-trigger · 0 OPEN — owner. No row is left to convention. |
 | The 18 formerly-open items are closed | **MET** — each is closed in §8; the ledger finding is the only *code* gap surfaced, and it is assigned to G-16. |
 
 **And the honest limit, stated as draft 1 stated it.** This document **fixes the answers**; it does not
@@ -629,11 +630,11 @@ tried to break.
 | 1 | *"31 is a tidy number — did you prune to reach it?"* | **No, and the arithmetic is shown.** 37 − 2 − 4 = 31, and §3.2 names the two and the four with their rules. Each prune cites the vision's own text. |
 | 2 | *"You pruned `LegalEntity` and `Dependency`, which the README explicitly lists. Are you overriding the vision?"* | **Partly, and it is flagged as such.** Both are **R3/R4** prunes of *objects*, not of *concepts* — §3.2 says where each concept went. **But this is the most contestable decision in the document** and it is marked SETTLED-by-this-document rather than DERIVED. **Unresolved by this pass** — a reviewer could reasonably rule the other way. It is stated, reasoned and reversible (a `Version` bump and two rows). |
 | 3 | *"Is the 37 right, or is that your own slip?"* | Re-measured twice from the source files, both routes agreeing. The originating "36" was the slip, and it contained its own disproof. See §1 and `LESSONS.md` **L66**. |
-| 4 | *"Draft 1's tally was wrong. How do I know draft 2's is right?"* | **By two routes this time, not one.** Draft 2's tally was **parsed from the rows programmatically** and the counts read back by row number; both give `35 · 1 · 3 · 1 = 40`. Draft 1's was written by hand — which is exactly why it was wrong (`L49`). |
+| 4 | *"Draft 1's tally was wrong. How do I know draft 2's is right?"* | **By two routes this time, not one.** Draft 2's tally was **parsed from the rows programmatically** and the counts read back by row number; both give `36 · 1 · 3 · 0 = 40`. Draft 1's was written by hand — which is exactly why it was wrong (`L49`). |
 | 5 | *"Does this document meet the gate it claims to be?"* | **Draft 2 says yes, and shows the count.** §8 and §10 both state it, with the count parsed. **The attack that landed on draft 1** — *"it meets the plan's test and not the vision's"* — is answered by closing the 18 items, not by arguing. |
 | 6 | *"Are the four collisions genuinely distinct, or padding?"* | Each pair splits cleanly into a **description** and an **artefact** (or a **noun** and a **mechanism**), and §4.1 says which is which. If they were synonyms, declaring one would suffice — and then the other would be an undocumented convention, which Appendix D forbids. |
 | 7 | *"Every claim about your code — did you read it, or quote a report about it?"* | **Read it, on 2026-10-05.** This attack changed three claims. (a) The vision's five `actor.type` values do **not** match our four `PrincipalKind` values — found by reading `principal.ts:28`, not by citing batch 5, and recorded as the mapping gap in §12.4. (b) The ledger's shape was **checked against the live database**, not the report — no `policy_version`/`decision_id`, now a finding in §9. (c) The MCP tool count was **read from the running container's log** (`toolCount=21`), not quoted. **Two of these three went against draft 1.** |
-| 8 | *"Did you close an item that is really the owner's?"* | **One, and it is stated.** The Hermes boundary (§8 row 26) is left **OPEN — owner**. The trigger-bearing DEFERRED items (37, 38, 40) are genuine deferrals, not owner decisions in disguise. **A question the owner holds is not this document's to close** (COOKBOOK rule zero-zero). |
+| 8 | *"Did you close an item that is really the owner's?"* | **One, and it was asked rather than assumed.** The Hermes boundary (§8 row 26) was left **OPEN — owner** in draft 2, and the owner **approved it on 2026-10-05**, so row 26 is now `SETTLED` **by his answer** rather than by this document. The trigger-bearing DEFERRED items (37, 38, 40) are genuine deferrals, not owner decisions in disguise. **A question the owner holds is not this document's to close** (COOKBOOK rule zero-zero). |
 | 9 | *"Is any of the five new sections an invention rather than a derivation?"* | Each cites its source: §12.1 ← Doc 3 §39 + Doc 8 §222; §12.2 ← Doc 8 §145–146; §13 ← Doc 8 §88/§90/§156; §14 ← Doc 8 §59; §15 ← Doc 4 §52; §16 ← Doc 8 §141. **No section invents a rule the vision does not state.** |
 
 **What this pass could not break:** the object list and its arithmetic (§3); the 40-row count (§8,

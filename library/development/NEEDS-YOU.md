@@ -223,7 +223,7 @@ Listed so you are not surprised by the work, not because it needs you.
 | #  | What                                                                                                                                     | Status                                                                                                       |
 | -- | ---------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | 8  | **Prove the database init completes cleanly**                                                                                            | ✅ **DONE 2026-10-05** — rebuilt on the fixed image; every init step ran green (see item **1**) |
-| 9  | **Finish the specification** | ✅ **DONE 2026-10-05** — draft 2 closes all 18 items: 35 settled · 1 derived · 3 deferred-with-trigger · 1 open (the Hermes boundary, which is yours). Only **ratification** is left — and that is item **4** |
+| 9  | **Finish the specification** | ✅ **DONE 2026-10-05** — draft 2 closes all 18 items: **36 settled · 1 derived · 3 deferred-with-trigger · 0 open**. The one item that was yours, the **Hermes boundary (B-05)**, you **approved on 2026-10-05**. Only **ratification** is left — and that is item **4** |
 | 10 | **Wire the two new test files into the automatic check** so they run without being remembered                                            | ✅ **DONE 2026-10-05** — a `docker-scripts` job in `ci.yml` runs all four on every push/PR (**N-10**)        |
 | 11 | **Remove OpenCode properly** — the platform's own AI chat is built on it, so it cannot just be deleted; the chat has to be rewired first | Open, and the reason is recorded                                                                             |
 | 12 | **Deploy a WordPress site and a Docker app to a subdomain on the hosting server, and prove the database-plus-phpMyAdmin path**           | This is the thing you asked for. The runbook and the procedure exist; it needs the hosting server VM running |
@@ -245,6 +245,7 @@ So you can see these are genuinely done and not re-appearing.
 | **`.wslconfig` memory cap — "not yet exercised"**                      | **Verified.** The Docker machine now reports 4 CPUs and 15.62 GiB, exactly matching the file                         |
 | **A failed database init was reported as success**                     | **Fixed and proven** against the unfixed code first                                                                  |
 | **The "36 objects" figure**                                            | **Corrected to 37** in 14 places across 8 files — including your own decision record. The sentence carried its own disproof |
+| **The Hermes runtime boundary (B-05) was open** — the last owner decision in the specification | **You approved it 2026-10-05.** One product, one repository, one deployment, one interface (ours), with Hermes as a **supervised private runtime process behind the internal port**; Hermes is **headless**. The spec's 40-row register is now **36 settled · 1 derived · 3 deferred · 0 open** |
 
 ---
 

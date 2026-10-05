@@ -14,6 +14,13 @@ claim about now, not about last time.
 trail of agent tool calls). **None of the three stops Sprint 0** — they are all "the product cannot do
 this yet", not "work is stuck".
 
+**B-05 has two faces, and one of them closed on 2026-10-05.** The **design** face (which runtime
+boundary, and how it is isolated) was **approved by the owner** on 2026-10-05: one product, one
+repository, one deployment, one interface (ours), with Hermes as a supervised private runtime process
+behind the internal port. The **blocker** face (OpenCode is still load-bearing, so it cannot be deleted
+yet) is **unchanged and still open**, tracked as **N-8**. The decision is recorded in the B-05 entry
+below and in [`ARCHITECTURE-hermes-integration.md`](ARCHITECTURE-hermes-integration.md) §11.
+
 **Resolved 2026-10-05 — B-15 is now fully closed, both halves.** Half 2 was never a seeding bug. The
 failing statement was read straight off the Postgres server and traced to a scope lookup in
 `packages/core/src/modules/query_index/di.ts`; see *The real cause of the abort* under **B-15**.
@@ -71,6 +78,22 @@ compose edit. Tracked as **N-8** in [`BACKLOG.md`](BACKLOG.md).
 **Note — two different "opencodes".** The legacy `OPENCODE_*` **env vars** are only back-compat
 aliases for the LLM provider (see `model-factory.ts`), and *can* be dropped independently. The
 `opencode` **service** is the one that is load-bearing.
+
+**Decided 2026-10-05 — the design face, by the owner.** The owner approved the recommended runtime
+boundary: **one product, one repository, one deployment, one interface (ours), with Hermes as a
+supervised private runtime process behind the internal port.** Hermes is **headless**; the Starting Kit
+owns every surface a user sees. Not a separately administered Hermes product, and not a literal single
+process. Four independent readings of the source support it: Hermes' own integration guide (the
+protocol table, and the only in-process option being a Python import), Hermes' own front-end shape
+(including its Desktop client spawning its backend as a child process), Hermes' own live-session
+hand-off lane, and our own `ARCHITECTURE.md` §5, **B-01** and Sprint 0's definition of done. The
+reasoning, the owner's three challenges and the two hostile passes that corrected it are in
+[`ARCHITECTURE-hermes-integration.md`](ARCHITECTURE-hermes-integration.md) §11.
+
+**What this does *not* close.** The `opencode` service is still load-bearing, so it stays until **N-8**
+rewires the platform chat. The decision settles *what replaces it and how the replacement is shaped*,
+not *when the old one goes*. It also does not decide the Hermes **profile** topology, which is
+deferred with a named trigger (§11.2 of the same document).
 
 **Whose move.** Mine, later; it is a code migration.
 

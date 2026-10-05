@@ -20,8 +20,9 @@ SaaS product.
    study in `analysis/hermes-integration/`. This document **adopts its direction, corrects four of
    its facts, and supplies the one thing it omits entirely** (the incumbent runtime).
 
-**One decision is deliberately not made here.** The runtime boundary, the project's **B-05**, is
-the owner's. §11 states exactly what is open and what would close it.
+**The one decision this document deliberately left open was taken by the owner on 2026-10-05.** The
+runtime boundary, the project's **B-05**, is now **decided**: see §11. What remains deferred is named
+there with its trigger.
 
 ---
 
@@ -406,11 +407,24 @@ spine; security precedes broad tools; deterministic Functions never call a model
 
 ## 11. What is open, and whose it is
 
-**The runtime boundary (B-05) is the owner's.** It is the same item as *"OpenCode cannot be
-removed yet"*: what occupies the agent slot, and how it is isolated.
+**The runtime boundary (B-05) — DECIDED by the owner, 2026-10-05.** It is the same item as *"OpenCode
+cannot be removed yet"*: what occupies the agent slot, and how it is isolated.
 
-This document does **not** close it. It narrows it, and it recommends a shape. The owner raised
-three challenges on 2026-10-05. Each is answered below from the source, not from argument.
+**What the owner approved.** One product, one repository, one deployment, one interface (ours), with
+Hermes as a **supervised private runtime process behind the internal port**. Hermes is **headless**;
+the Starting Kit owns every surface a user sees. Not a separately administered Hermes product, and
+not a literal single process.
+
+**What the approval does *not* cover**, so it is not read as wider than it is:
+
+- **When OpenCode goes.** It is still load-bearing (`api/chat/route.ts` is wired to it), so it stays
+  until **N-8** rewires the platform chat. The decision settles *what replaces it*, not *when*.
+- **The Hermes profile topology.** Deferred with the trigger **the agent gateway**, because a profile
+  topology cannot be tested before there is an agent to place in one.
+- **Any performance claim.** None was measured, here or in the prior analysis.
+
+The owner raised three challenges before approving. Each is answered below from the source, not from
+argument.
 
 ### 11.1 The three challenges
 
@@ -475,11 +489,11 @@ Partly right, and the part that is right matters most.
   the owner "one place" in every sense that matters, one repository, one command, one lifecycle, one
   log, without the crash coupling, and it is what Sprint 0's compose already does.
 
-### 11.2 The recommendation
+### 11.2 The shape, as approved
 
-- **Recommended:** one product, one repository, one deployment workflow, one interface (ours), with
-  a supervised private Python runtime behind the internal port. Not a separately administered
-  Hermes product, and not a literal single process.
+- **Approved by the owner 2026-10-05:** one product, one repository, one deployment workflow, one
+  interface (ours), with a supervised private Python runtime behind the internal port. Not a
+  separately administered Hermes product, and not a literal single process.
 - **Why not in-process:** Node 24/TypeScript and Python are different runtimes. A native bridge adds
   lifecycle and crash-coupling complexity with no measured benefit, and unlike a build cost it never
   goes away. A monorepo does not make anything faster by itself.
@@ -500,6 +514,7 @@ Partly right, and the part that is right matters most.
 
 | Deferred | Trigger |
 |---|---|
+| The Hermes **profile topology** (§5.3) | the **agent gateway** exists, so a profile can be tested rather than guessed |
 | The Hermes version-compatibility harness | the adapter exists (already tracked as N-11) |
 | The runtime-state database row | **G-09**, so it is written once, with the registry's own row |
 | The performance benchmark | Phase 3's exit gate, when there is something to measure |

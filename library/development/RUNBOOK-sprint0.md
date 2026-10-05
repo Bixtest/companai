@@ -161,7 +161,9 @@ docker compose -f docker-compose.fullapp.yml down -v   # ALSO delete the databas
   no `/v1/embeddings`. All 21 tools still register and are callable; only semantic tool search is
   degraded. Tracked as **B-16**.
 - **OpenCode is still in the stack, deliberately.** The platform's own chat route is built on it, so
-  removing it breaks the chat. See **B-05** / **N-8**.
+  removing it breaks the chat. See **B-05** / **N-8**. *(B-05's design face was **decided 2026-10-05**:
+  what replaces it is a supervised private Hermes runtime behind the internal port, with Hermes
+  headless. What is *not* decided is **when** OpenCode goes; that stays **N-8**.)*
 
 ## Check the database logic without starting anything
 

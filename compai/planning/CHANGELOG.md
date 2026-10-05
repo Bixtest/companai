@@ -246,6 +246,56 @@ implementation begins before the kernel specification exists.
 
 ---
 
+## 2026-10-05 — **B-05 decided: the runtime boundary**
+
+The last owner decision in the specification. The owner **approved** the recommended shape after
+raising three challenges against it.
+
+### Decided — the boundary
+
+| Change | Where | Origin |
+|---|---|---|
+| **The runtime boundary is a supervised private process behind one typed port.** One product, one repository, one deployment, one interface (ours). Hermes is **headless**; the Starting Kit owns every surface a user sees. Not a separately administered Hermes product, and not a literal single process | [`ARCHITECTURE-hermes-integration.md`](../../library/development/ARCHITECTURE-hermes-integration.md) §11 | the owner's approval, 2026-10-05 |
+
+### Corrected — a false claim in our own plan
+
+| Change | Where | Origin |
+|---|---|---|
+| **"Hermes is in-process, not a network service" was never measured, and it is false.** Four independent readings of the source agree it is a supervised process: Hermes' own integration guide (its only in-process option is a Python import); Hermes' own front-end shape, including its Desktop client **spawning** its backend as a child process; Hermes' own live-session hand-off lane; and our own `ARCHITECTURE.md` §5, `B-01` and Sprint 0 | [`AGENT-HALF.md`](../../library/development/AGENT-HALF.md) §1.5 | measured 2026-10-05, against the source |
+
+### Answered — the owner's three challenges
+
+| Challenge | Answer |
+|---|---|
+| *"Didn't the Hermes documentation give an idea which way to go?"* | It did. Four independent routes agree, and one of them is our own architecture document, which had already decided it |
+| *"Once built, does the crash threat stay? Isn't two places worse?"* | The build cost goes away; the crash coupling does not, because it is what sharing one address space means. Two processes trade **more failure events** for a **smaller blast radius**. The blast-radius half is **measured** (the app's `depends_on` excludes Hermes, so the site boots with the agent down); the frequency half is reasoning and is recorded as such |
+| *"Isn't one place more organic, given we are tailoring Hermes?"* | Right about the **front end** (one interface, ours, Hermes headless). Not right about the **process**: tailoring is mostly config/plugin/skill level, and source-level where needed; neither implies co-location. And in-process is not available anyway, because Node cannot execute Python |
+
+### What the decision does *not* cover
+
+- **When OpenCode goes.** It is still load-bearing (`api/chat/route.ts` is wired to it), so it stays
+  until **N-8** rewires the platform chat. The decision settles *what replaces it*, not *when*.
+- **The Hermes profile topology.** Deferred with the trigger **the agent gateway**, because a profile
+  topology cannot be tested before there is an agent to place in one.
+- **Any performance claim.** None was measured, here or in the prior analysis.
+
+### Method note — the two hostile passes
+
+A separate pass whose only job was to break the conclusion **broke four of its claims**, which were
+corrected rather than defended: the warm-session claim was too broad; "no extra round trip" missed the
+approval call; the frequency-versus-blast-radius trade was presented as if both halves were measured
+when only one is; and "tailoring is source level" was wrong in the common case. A second pass
+confirmed the corrections and added three refinements. **The Desktop-spawns-its-backend fact and the
+missing Hermes healthcheck were found by those passes, not by the first draft.**
+
+### Validated without change
+
+- **Hermes is the runtime** (the 2026-10-04 decision) — this settles its *shape*, not its identity.
+- **The port boundary and the envelope** (`ARCHITECTURE-hermes-integration.md` §4) — unchanged.
+- **The order** — the adapter is still built only after the security gateway exists (Doc 8 §230).
+
+---
+
 ## Appendix — Batch A: noted as a rubric flaw
 
 [Rubric](method/platform-evaluation-rubric.md) scores *absent* and *present-but-wrong-shaped*

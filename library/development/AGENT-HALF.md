@@ -144,9 +144,11 @@ operating-system process) does not: Node 24 cannot execute Python, so a single p
 either a TypeScript rewrite of the agent loop or a native Python-in-Node bridge, and neither has a
 measured benefit.
 
-**The boundary choice itself is B-05, and it is the owner's.** This correction records what the
-source says. It does not close B-05. The full comparison, the three challenges the owner raised and
-the recommendation are in
+**The boundary choice itself is B-05, and it is now settled — by the owner, on 2026-10-05.** The
+approved shape is one product, one repository, one deployment, one interface (ours), with Hermes as a
+supervised private runtime process behind the internal port. Hermes is headless. The full comparison,
+the three challenges the owner raised, the two hostile passes that corrected this document's first
+draft, and the shape itself are in
 [`ARCHITECTURE-hermes-integration.md`](ARCHITECTURE-hermes-integration.md) §11.
 
 ---
@@ -179,8 +181,9 @@ belongs in the plan rather than in a note.)*
 register in the spec's §8 was parsed: **35 settled · 1 derived · 3 deferred with named triggers · 1 open
 — owner**. The three deferred rows are the vision's phase 7–9 items (Hermes version-compat, the
 evaluation benchmark, the capability-package format) and each names the trigger that unblocks it; the
-one open row is the Hermes boundary (**B-05**), which is the owner's decision, not the spec's. **The
-vision's 40-item gate is therefore passed.** This section is kept, unchanged below, as the record of
+one open row is the Hermes boundary (**B-05**), which is the owner's decision, not the spec's. *(That
+last row was **approved by the owner on 2026-10-05**, so the register now reads **36 · 1 · 3 · 0**.)*
+**The vision's 40-item gate is therefore passed.** This section is kept, unchanged below, as the record of
 *why draft 2 was needed* — the "22/10/8" figures above are draft 1's, and the counting defect it names
 was fixed in draft 2 by the status rule at the spec's §0.
 
@@ -346,8 +349,8 @@ only agent item on the critical path**, because everything else needs to know wh
 
 | Item | Status | Note |
 |---|---|---|
-| Kernel-spec items 2, 26, 27, 28 (identity resolution · Hermes boundary · profile strategy · session bridge) | **OPEN — spec** | This decision **narrows** them; it does not close them. Item 27 in particular now has a shape: the five kinds tell us how many profiles we need and how they are isolated |
-| The `B-05` Hermes boundary | **OPEN — owner** | Unchanged by this decision. **Narrowed 2026-10-05** by [`ARCHITECTURE-hermes-integration.md`](ARCHITECTURE-hermes-integration.md) §11: one typed port owned by `ai-assistant`, with a private Python runtime behind it, and the reasons not to embed stated there. **Also note the incumbent:** OpenCode still occupies the agent slot (`api/chat/route.ts` is wired to it), so the integration is a displacement with a live passenger, not an addition |
+| Kernel-spec items 2, 27, 28 (identity resolution · profile strategy · session bridge) | **SETTLED (rule) / DEFERRED (choice)** | Item **26** (the Hermes boundary) closed on 2026-10-05. Items 27 and 28 keep a settled *rule* and a deferred *choice* (the profile topology), with the trigger named: **the agent gateway** |
+| The `B-05` Hermes boundary | **SETTLED — approved by the owner, 2026-10-05** | One product, one repository, one deployment, one interface (ours), with Hermes as a **supervised private runtime process behind the internal port**. Hermes is **headless**; the Starting Kit owns every surface a user sees. The reasoning, the owner's three challenges and the two hostile passes that corrected it are in [`ARCHITECTURE-hermes-integration.md`](ARCHITECTURE-hermes-integration.md) §11. **The incumbent is unchanged:** OpenCode still occupies the agent slot (`api/chat/route.ts` is wired to it), so the integration is still a **displacement with a live passenger**, tracked as **N-8** |
 | Which gate each action class gets by default | **OPEN — design** | `A1` for anything destructive, `A5` for anything read-only, is the obvious default; the full matrix is design work, not an owner question |
 | Whether a *context* agent may hold its own permissions **in addition to** the user it acts as | **OPEN — design** | The owner's answer implies "no, it borrows" — but it should be stated, not assumed |
 

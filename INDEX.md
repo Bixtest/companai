@@ -323,7 +323,21 @@ a folder, finishes a phase, or makes a decision updates it in the same change.
 A newcomer who cannot orient themselves from this page alone means it is broken —
 fix the page, not the newcomer.
 
-*Last updated: 2026-10-05 — **`G-01` is built: the Business Model Kernel exists in the code.** The
+*Last updated: 2026-10-05 — **`B-05` is DECIDED: the owner approved the runtime boundary.** One
+product, one repository, one deployment, one interface (ours), with Hermes as a **supervised private
+runtime process behind the internal port**; Hermes is **headless**. The owner challenged the
+recommendation with three questions first, and all three were answered from the source rather than
+argued; two hostile passes then broke four of the document's own claims, which were corrected rather
+than defended. Four independent readings of the source agree on the shape: Hermes' own integration
+guide, Hermes' own front-end shape (its Desktop client spawns its backend as a child process), Hermes'
+own live-session hand-off lane, and our own `ARCHITECTURE.md` §5, `B-01` and Sprint 0. **The spec's
+40-row register is now `36 settled · 1 derived · 3 deferred · 0 open`.** What the decision does *not*
+cover: *when* OpenCode goes (**N-8**), and the Hermes **profile** topology (deferred, trigger: the
+agent gateway). Docs updated in the same change: `ARCHITECTURE-hermes-integration.md` §11,
+`AGENT-HALF.md`, `BLOCKERS.md`, `SPEC-business-model-kernel.md`, `BACKLOG.md`, `ARCHITECTURE.md`,
+`HANDOVER.md`, `NEEDS-YOU.md`, `RUNBOOK-sprint0.md`, `workspace/COOKBOOK.md` and this page.*
+
+*Earlier, 2026-10-05 — **`G-01` is built: the Business Model Kernel exists in the code.** The
 canonical, versioned model now sits above the physical database as a **view over the declarations the
 platform already keeps** — it holds no copy, so there is one source of truth. New code in
 `packages/shared/src/lib/kernel/` (canonical IDs, the model and its contract, the export/import
@@ -341,7 +355,9 @@ vision's own gate.** [`library/development/SPEC-business-model-kernel.md`](libra
 is now **Draft 2**: it closes all 18 items Draft 1 left partly or wholly open and adds five normative
 sections (§12–§16: ID grammar, tool policy, approval token, outbox, capability manifest). Parsed from
 the 40 rows of the vision's Appendix-D test: **35 settled · 1 derived · 3 deferred with named triggers ·
-1 open — the owner's Hermes boundary**. The gate is passed; **only the owner's ratification remains**
+1 open — the owner's Hermes boundary**. *(That last row was **approved by the owner on 2026-10-05**,
+so the register now reads **36 settled · 1 derived · 3 deferred · 0 open**.)* The gate is passed;
+**only the owner's ratification remains**
 ([`NEEDS-YOU.md`](library/development/NEEDS-YOU.md) item 4). The first build item is now **`G-01` — the
 Business Model Kernel itself**. Docs updated in the same change: `BACKLOG.md`, `HANDOVER.md` (rev 3),
 `NEEDS-YOU.md`, `START-PROMPT.md`, `workspace/COOKBOOK.md` (Sprint P0-spec), `AGENT-HALF.md`, and

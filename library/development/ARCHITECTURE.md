@@ -258,6 +258,15 @@ requires first **rewiring the platform chat to the app's own LLM registry**
 (`model-factory.ts` + `llm-provider-registry` already exist), which is a code migration, not a
 compose edit. Tracked as **N-8** in [`BACKLOG.md`](BACKLOG.md). See blocker **B-05**.
 
+**Decided 2026-10-05 — what replaces it, and its shape.** The owner approved the runtime boundary:
+**one product, one repository, one deployment, one interface (ours), with Hermes as a supervised
+private runtime process behind the internal port.** Hermes is **headless**; this platform owns every
+surface a user sees. So §5 of this document (add the **Hermes service** to the compose stack) is the
+**confirmed shape**, not a draft. The reasoning, the owner's three challenges and the two hostile
+passes are in [`ARCHITECTURE-hermes-integration.md`](ARCHITECTURE-hermes-integration.md) §11.
+**What is *not* settled by that decision:** *when* OpenCode goes (that is **N-8**), and the Hermes
+**profile** topology, which is deferred with the trigger **the agent gateway**.
+
 *(The legacy `OPENCODE_*` **env vars** are a separate thing — only back-compat aliases for the LLM
 provider, per `model-factory.ts`. Those can be dropped independently of the service.)*
 

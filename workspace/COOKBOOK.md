@@ -877,7 +877,11 @@ from **one file**, so this is *finishing* something that exists.
 
 **What we reuse:** the whole `fullapp.yml` stack and Hermes's image. **What we add:** a `model`
 service and a `hermes` service. **What we remove:** *nothing* — `opencode` **stays** (the removal
-check failed; see step 3.6 and blocker **B-05**).
+check failed; see step 3.6 and blocker **B-05**). **B-05's design face was decided 2026-10-05:** what
+replaces OpenCode is a **supervised private Hermes runtime behind the internal port**, with Hermes
+**headless** (the Starting Kit owns every surface a user sees). *When* OpenCode goes is a separate,
+still-open item (**N-8**). See
+[`../library/development/ARCHITECTURE-hermes-integration.md`](../library/development/ARCHITECTURE-hermes-integration.md) §11.
 
 **From the `V`-register:** **V-01** (auxiliary models with automatic fallback) is what makes the
 local-first claim practical — the model server slots underneath it. Nothing else in the register
@@ -1120,6 +1124,14 @@ Removal needs a prerequisite (rewire the chat to the app's LLM registry) and is 
 in [`../library/development/BACKLOG.md`](../library/development/BACKLOG.md); see blockers **B-05**
 and **B-04** in [`../library/development/BLOCKERS.md`](../library/development/BLOCKERS.md).
 
+**B-05 is now decided, and it does not change this step.** On 2026-10-05 the owner approved the runtime
+boundary: one product, one repository, one deployment, one interface (ours), with Hermes as a
+**supervised private runtime process behind the internal port**. Hermes is **headless**. That settles
+**what replaces OpenCode**, not **when** — so the instruction above still stands exactly as written:
+**do not remove `opencode` in Sprint 0.** The reasoning, the owner's three challenges and the two
+hostile passes that corrected them are in
+[`../library/development/ARCHITECTURE-hermes-integration.md`](../library/development/ARCHITECTURE-hermes-integration.md) §11.
+
 **3.7 — Bring it up.**
 ```bash
 docker compose -f docker-compose.fullapp.yml up -d
@@ -1191,7 +1203,7 @@ lives, not to invent one.** Measured 2026-10-05, reading the artefacts.
 | **Event/outbox strategy** (row 34) | The vision is exact: Doc 4 §52 — *"database transaction { current state · audit · outbox event } all commit atomically."* **Measured: no outbox exists in the code** (searched by name and by the related dedup mechanisms — nothing). | Doc 4 §52; measured 2026-10-05 (below) |
 | **Observability model** (row 36) | The vision §166 lists what to monitor (denial rate, cross-tenant attempts, sensitive-field access…) and §167 says anomaly detection is **supplementary, never a replacement**; we already have access/action logs + the hash-chained ledger. | Vision Doc 8 §166–167; `audit_logs/services/` (batch 5 §14a G-16/G-17) |
 | **Evaluation benchmark** (row 37) | The vision §160–165: the adversarial matrix, the prompt-attack matrix, property-based tests, the **capability closure test**, security differential testing. Named but not written. | Vision Doc 8 §160–165 |
-| **Hermes version harness** (row 38) | The vision §230: the Hermes adapter comes **only after the gateway exists**; the boundary items (26/27/35) are the `B-05` boundary. Draft 1 already marks these **OPEN — owner**. | Vision Doc 8 §230; [`../library/development/BLOCKERS.md`](../library/development/BLOCKERS.md) **B-05** |
+| **Hermes version harness** (row 38) | The vision §230: the Hermes adapter comes **only after the gateway exists**. **The boundary itself (row 26) was approved by the owner on 2026-10-05** — a supervised private runtime process behind the internal port, Hermes headless — so this is now **DEFERRED with a real trigger: the adapter exists**, rather than waiting on a decision. | Vision Doc 8 §230; [`../library/development/ARCHITECTURE-hermes-integration.md`](../library/development/ARCHITECTURE-hermes-integration.md) §11 |
 | **Capability package format** (row 39) | The vision §141 gives the **`CapabilityManifest`** in full (entities · fields · relationships · actions · commands · queries · workflows · metrics · permissions · policies · data_classifications · audit_events · external_integrations · MCP_tools · security_tests). We have `Module`/`Capability` objects and per-module `acl.ts`, but no manifest. | Vision Doc 8 §141 |
 | **Frontend model-builder lifecycle** (row 40) | The vision §229 (Functions/Widgets/Workspace as **clients of the policy kernel**) + Doc 3's User-Function lifecycle. Deferred by the plan until G-02. | Vision Doc 8 §229; Doc 3 |
 | **Skill lifecycle** (row 25) | The vision §186 (skill lifecycle) + §87 (*skills are not the canonical source of authority*); our `Skill` object is defined in §5.4, states are the gap. | Vision Doc 8 §87, §186 |
@@ -1222,6 +1234,9 @@ sprint — the specification should cite them as the platform's mechanism rather
 **Alternative considered — close all 18 items to `SETTLED`.** Rejected: it would mean inventing answers
 the vision has not decided (the Hermes boundary is **B-05**, the owner's) and pretending to settle
 things whose triggers have not fired. **That is exactly the error draft 1 caught and refused.**
+*(Since then the owner has **approved the boundary, on 2026-10-05**, so row 26 is settled by his
+answer rather than invented. The rejection above still stands for the other items, whose triggers
+have still not fired.)*
 
 **Alternative considered — leave the 18 as they are and start G-01.** Rejected: the vision forbids
 implementation before the gate is met (RQ-140), and the plan's critic pass (§12 #5) names this as the
