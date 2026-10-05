@@ -4,7 +4,7 @@
 across other documents. If it needs you, it is here or it is not tracked.
 
 **How to answer.** Every item has a number. Reply with the numbers and a word each — for example  
-*"1 yes, 2 yes, 3 no, 4 keep"*. You do not need to read anything else first. Where an item is  
+*"5 done, 6 yes, 7 yes, 4 keep"*. You do not need to read anything else first. Where an item is  
 **not** a decision, it says so, and you can ignore it.
 
 **Legend**
@@ -18,12 +18,13 @@ across other documents. If it needs you, it is here or it is not tracked.
 
 ---
 
-## Part 1 — Decisions I need (1 open — item 3 · items 1, 2 and 8 closed 2026-10-05)
+## Part 1 — Decisions I need (none open — items 1, 2 and 8 closed, item 4 is "nothing needed")
 
 > **Numbering note.** Items are numbered once and **never reused**, so that a number you have already
 > quoted keeps meaning the same thing. Item 8 was appended here on 2026-10-05 and answered the same
-> day. Items 1 and 2 were closed the same day by measurement — see each item. *(Item 5 is still the
-> Coolify password.)*
+> day. Items 1 and 2 were closed the same day by measurement — see each item. Item 4 is a "know" item,
+> not a decision: the specification's pruning is mine, and nothing is waiting on your signature.
+> *(Item 5, the Coolify password, is in Part 2 — it is a thing to do, not a decision to make.)*
 
 ### 1. Reset the local dev database? — ✅ **DONE 2026-10-05** *(no longer needs you)*
 
@@ -77,7 +78,9 @@ me."* Here is the honest answer.
 
 **Ratification is mostly not your job.** You already made the decision that mattered: *start from the  
 union of the objects and let the specification prune it.* Pruning is therefore mine, and I did it.  
-Nothing is waiting on your signature.
+Nothing is waiting on your signature. **Draft 2 is now written** (2026-10-05) and it closes the last  
+18 open items, so the specification's gate is passed and implementation may begin — there is no further  
+writing step waiting on you.
 
 **The one thing you might disagree with.** Of the 37 candidate objects, I removed two as separate  
 objects and folded them into others:
@@ -220,7 +223,7 @@ Listed so you are not surprised by the work, not because it needs you.
 | #  | What                                                                                                                                     | Status                                                                                                       |
 | -- | ---------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | 8  | **Prove the database init completes cleanly**                                                                                            | ✅ **DONE 2026-10-05** — rebuilt on the fixed image; every init step ran green (see item **1**) |
-| 9  | **Finish the specification** — 18 of the vision's 40 required items are still partly or wholly undefined                                 | Draft 1 is written and committed; the rest is the next piece of work                                         |
+| 9  | **Finish the specification** | ✅ **DONE 2026-10-05** — draft 2 closes all 18 items: 35 settled · 1 derived · 3 deferred-with-trigger · 1 open (the Hermes boundary, which is yours). Only **ratification** is left — and that is item **4** |
 | 10 | **Wire the two new test files into the automatic check** so they run without being remembered                                            | ✅ **DONE 2026-10-05** — a `docker-scripts` job in `ci.yml` runs all four on every push/PR (**N-10**)        |
 | 11 | **Remove OpenCode properly** — the platform's own AI chat is built on it, so it cannot just be deleted; the chat has to be rewired first | Open, and the reason is recorded                                                                             |
 | 12 | **Deploy a WordPress site and a Docker app to a subdomain on the hosting server, and prove the database-plus-phpMyAdmin path**           | This is the thing you asked for. The runbook and the procedure exist; it needs the hosting server VM running |

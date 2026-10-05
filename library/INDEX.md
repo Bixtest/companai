@@ -149,7 +149,7 @@ project.**
 | [`development/ARCHITECTURE.md`](development/ARCHITECTURE.md) | How the Starting Kit, Hermes and the model server run together, and the dockerisation decision |
 | [`development/BLOCKERS.md`](development/BLOCKERS.md) | Anything stopping progress, with what clears it |
 | [`development/NEEDS-YOU.md`](development/NEEDS-YOU.md) | **The owner-only action list** — numbered, with literal steps and a way to answer all of it at once |
-| [`development/SPEC-business-model-kernel.md`](development/SPEC-business-model-kernel.md) | The product specification (Draft 1) — the vision's own gate, and the first real build move |
+| [`development/SPEC-business-model-kernel.md`](development/SPEC-business-model-kernel.md) | The product specification (**Draft 2**, 2026-10-05) — passes the vision's own 40-item gate (35 settled · 1 derived · 3 deferred with triggers · 1 open — owner). Awaiting ratification |
 | `development/RUNBOOK-*.md` | The hosting runbooks — the server manual, the domain walkthrough, Sprint 0, and the deployment proof |
 
 **The rule that keeps it clean:** the hub **points at** the other documents, it does not copy

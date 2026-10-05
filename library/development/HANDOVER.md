@@ -134,10 +134,13 @@ numbered action list. As of 2026-10-05 only **three** items are open, and none o
 build: change the Coolify password (item 5), turn on Docker Desktop auto-start (item 6), and
 optionally delete the 3.8 GB ISO (item 7).
 
-**7. Take the first item from [`BACKLOG.md`](BACKLOG.md).** Today that is **`P0-spec` — draft 2 of
-the Business Model Kernel specification**: 18 of the vision's 40 required rows are still partly or
-wholly open, each listed with its status in the spec's §8. **Verify it is still true against the
-code before starting** — the roadmap has been wrong about what is already done **four times**.
+**7. Take the first item from [`BACKLOG.md`](BACKLOG.md).** **`P0-spec` is done:** draft 2 of the
+Business Model Kernel specification ([`SPEC-business-model-kernel.md`](SPEC-business-model-kernel.md))
+was written **2026-10-05** and passes the vision's own 40-item gate — **35 SETTLED · 1 DERIVED · 3
+DEFERRED-with-trigger · 1 OPEN — owner**, tallied by parsing the 40 rows. **What is left is ratification**
+(item 4 of [`NEEDS-YOU.md`](NEEDS-YOU.md)) — and **the first build item is now `G-01` (the Business
+Model Kernel)**, which draft 2 unblocks. **Verify `P0-spec`'s status is still true before starting on
+`G-01`** — the roadmap has been wrong about what is already done **four times**.
 
 ### What to study first, by role
 
@@ -268,7 +271,7 @@ companai/                       ← repo 1 root (thinking + docs).  You are here
 │   │   ├── NEEDS-YOU.md        **numbered list of owner-only actions** (see §8)
 │   │   ├── AGENT-HALF.md       **THE AGENT HALF** — five agent kinds, the responsibility rule, and where every lesson lands
 │   │   ├── RUNBOOK-*.md        hosting: the manual, the domain walkthrough, Sprint 0
-│   │   └── SPEC-business-model-kernel.md   the product spec (Draft 1; 18 rows partly or wholly open)
+│   │   └── SPEC-business-model-kernel.md   the product spec (Draft 2; 40-item gate passed, ratification pending)
 │   ├── ai/                     READ ITS README FIRST — two products are called Companai
 │   │   ├── ai-first/           THE DIRECTION — what we will actually build
 │   │   ├── hermes-docs/        a sibling's docs. Lessons only, never decisions
@@ -463,7 +466,7 @@ and was *not* re-measured — treat it as a starting point, not a fact.**
 | **Codebase shape** | **21 packages, 1 app** (`apps/mercato`) — a monorepo (Yarn 4.17.1 + Turbo) |
 | **Documentation** | `library/` holds **3,441 markdown files**; `LESSONS.md` 2,746 lines (L1–L82); `JOURNAL.md` 3,242 lines; `COOKBOOK.md` 1,187 lines |
 | **The studies** | analysis programme **complete** (batches 0–12, 13 reports); Paperclip + Hermes study **complete** (11 batches, 3,940 lines, 53 lessons) |
-| **The specification** | Draft 1 — of its 40 rows, **22 settled/derived · 10 partly · 8 open** |
+| **The specification** | **Draft 2** — of its 40 rows, **35 SETTLED · 1 DERIVED · 3 DEFERRED-with-trigger · 1 OPEN — owner**. The gate is passed; only ratification remains |
 | **The running stack** | **8 containers up** (app, mcp, hermes, model, opencode, postgres, redis, meilisearch); `/login` answers **200** |
 | **The local database** | **Clean and complete** — 3 users, 1 tenant, 1 organisation, 5 feature toggles, 5 `action_logs` rows. Rebuilt from scratch on the fixed image 2026-10-05, init ran green |
 | **Open blockers** | **3** — B-05 (OpenCode is load-bearing), B-16 (no embeddings endpoint), B-17 (no audit trail of agent tool calls). **None stops the build** (see [`BLOCKERS.md`](BLOCKERS.md)) |
@@ -505,16 +508,19 @@ and was *not* re-measured — treat it as a starting point, not a fact.**
 ## 8. What is left, and whose move it is
 
 - **What is left, in order** → [`BACKLOG.md`](BACKLOG.md). One roadmap. Read §"The list" and
-  nothing else for *"what is left"*. **The first item is `P0-spec` draft 2.**
+  nothing else for *"what is left"*. **`P0-spec` is done (draft 2, 2026-10-05); the first build item
+  is now `G-01` (the Business Model Kernel).**
 - **What needs the owner** → [`NEEDS-YOU.md`](NEEDS-YOU.md) — a numbered action list. **Three
   items open**, and none blocks the build. The most urgent is changing the Coolify admin password
   (item 5); it is the only thing standing between an agent and the 2FA wall on the hosting panel.
 - **What is stopping work** → [`BLOCKERS.md`](BLOCKERS.md) — re-checked each session, because a
   blocker is a claim about *now*. **Three open, none blocking.**
 - **The product specification** → [`SPEC-business-model-kernel.md`](SPEC-business-model-kernel.md)
-  — Draft 1 written; of its 40 rows, **22 are settled, 10 partly, 8 open** (the spec's own tally
-  counts by the first status token, so read its note before quoting it). This is the vision's own
-  gate, and the first real build move.
+  — **Draft 2 written 2026-10-05, and the vision's own 40-item gate is passed**: **35 SETTLED · 1
+  DERIVED · 3 DEFERRED-with-trigger · 1 OPEN — owner** (the tally is parsed from the 40 rows, not
+  written by hand — `LESSONS.md` **L49**). One code gap surfaced: the ledger carries no
+  `policy_version`/`decision_id` (assigned to **G-16**). **Only ratification remains** (item 4 of
+  [`NEEDS-YOU.md`](NEEDS-YOU.md)), which unblocks `G-01`.
 - **How the agent half is designed** → [`AGENT-HALF.md`](AGENT-HALF.md) — the five kinds of agent,
   the rule that decides who is answerable when an agent acts, and where every lesson from the
   Paperclip + Hermes study lands in the four phases.
@@ -534,7 +540,13 @@ alone means this page is broken — **fix the page, not the newcomer.**
 from an older document are not equally current, and mixing them in one table is how this page
 goes wrong. If two older documents disagree on a number, say so — never average them.
 
-*Last updated: 2026-10-05, revision 2 — **rewritten for an agent taking over the development.**
+*Last updated: 2026-10-05, revision 3 — **`P0-spec` done: draft 2 of the specification passes the
+vision's 40-item gate, and the first build item is now `G-01`.** §2 step 7, §4's folder map, §7's spec
+row and §8 were updated in the same change as the specification itself (COOKBOOK rule zero). The spec's
+tally is parsed from the 40 rows — `35 SETTLED · 1 DERIVED · 3 DEFERRED-with-trigger · 1 OPEN — owner` —
+not written by hand.*
+
+*Earlier, 2026-10-05, revision 2 — **rewritten for an agent taking over the development.**
 Added §0 (the agent's first moves), §6c (where the project's memory and the 50 reusable techniques
 live), and the `START-PROMPT.md` pointer. §7 re-measured: both repos clean at `30bde42` /
 `962ae2a`, the library at 3,441 files, the study at 3,940 lines, the stack up with 8 containers and

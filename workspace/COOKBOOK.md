@@ -1157,6 +1157,175 @@ environment** and a runbook.
 
 ---
 
+# Sprint P0-spec — draft 2 of the Business Model Kernel specification
+
+**Written 2026-10-05. This is the vision's own implementation gate (RQ-140): no product code may be
+written before this document exists.** It is a **document sprint**, not a code sprint — the work is
+writing and measuring, and the tests it must pass are the vision's 40 Appendix-D items.
+
+**Why it is next, and why nothing else can precede it:** the plan says so
+([`../library/analysis/findings/12-development-plan.md`](../library/analysis/findings/12-development-plan.md) §4) and the
+vision says so in its own words (§29: *"If those answers are not clear, the implementation phase
+should not yet begin."*). Draft 1 settled the object list, the contract and the taxonomy. **18 of the
+40 items are still partly or wholly open, and closing them is this sprint.** Item: `P0-spec` in
+[`../library/development/BACKLOG.md`](../library/development/BACKLOG.md).
+
+## Step 1 — Research: what already exists
+
+**The whole point of step 1 is that most of these 18 answers already exist — in the vision, in our own
+governance layer, or in both — and the specification's job is to *name* the answer and cite where it
+lives, not to invent one.** Measured 2026-10-05, reading the artefacts.
+
+| The 18 open items (§8) | What already answers them | Where |
+|---|---|---|
+| **ID grammar** (row 7) | The vision gives the shape in its **build order phase 0**: *"immutable primitives: IDs, TenantRef, EntityRef, ActorRef, Version, Timestamp, Provenance, Correlation ID, Lifecycle state"* — and Doc 3 §39 gives the examples (`invoice`, `invoice.outstanding_amount`). **What is missing is the grammar, not the concept.** | Vision Doc 8 §222 (batch 5 §13a); Doc 3 §39 |
+| **Policy decision language** (row 14) | **Two sources agreeing.** The vision gives the nine decision classes (`DENY · ALLOW · ALLOW_WITH_FILTER · ALLOW_WITH_REDACTION · ALLOW_WITH_LIMITS · REQUIRE_APPROVAL · REQUIRE_STEP_UP_AUTH · REQUIRE_HUMAN · ESCALATE`). **Our resolver already returns a `Decision`** with `gate`, `allowed`, `reasons[]`, `bindingRule`, `obligations[]`, `alternatives[]` — the same axis, already tested. | Vision Doc 8 §24; `packages/shared/src/lib/authority/decision.ts` (batch 5 §14a G-01) |
+| **Principal resolution** (row 2) | The vision's **build order phase 1** names the five principal kinds and the `actor.type` enum (`HumanUser · Agent · Service · Integration · System`); our code already has **`PrincipalKind`** and the five agent kinds the owner decided on 2026-10-05. | Vision Doc 8 §38, §223; `packages/shared/src/lib/auth/principal.ts`; [`../library/development/AGENT-HALF.md`](../library/development/AGENT-HALF.md) §1.4 |
+| **Tenant-enforcement point** (row 1) | The vision's **SecurityContext** carries `tenant_id` and the rule *"tenant context must be explicit"*; our query engine already enforces tenant scope and **fails closed** when the principal has no resolvable tenant. | Vision Doc 8 §14, §38; `packages/shared/src/lib/query/types.ts` (batch 5 §14a G-18) |
+| **Hermes session bridge** (row 28) | **Two sources.** The vision says *"Hermes profile is not tenant identity"* (§84) and *"do not reuse a human session for a background worker"* (§150); the owner's 2026-10-05 decision names the concrete case — a **context agent that acts as a user**. | Vision Doc 8 §84, §150; [`AGENT-HALF.md`](../library/development/AGENT-HALF.md) §1.4 |
+| **MCP domain API** (row 29) | **Both agree, verbatim in spirit.** The vision (§89) prefers `finance.mcp`, `sales.mcp` … over one `execute_sql`; the platform **already exposes 21 named tools** over MCP, all discovered by Hermes. | Vision Doc 8 §88–89; Sprint 0 measurement (COOKBOOK above) |
+| **Tool policy shape** (row 30) | The vision's tool envelope: *which server · tool · tenant · actor · agent · data class · actions · destination*, plus plugin trust tiers (`PLATFORM_FIRST_PARTY → UNTRUSTED`); we already have an **agent mutation policy** (read-only / confirm-required / destructive-confirm-required) + tool allow-lists. | Vision Doc 8 §88, §90, §156; `ai-assistant/…/lib/agent-policy.ts` (batch 5 §14a G-20) |
+| **Human-approval gate** (row 31) | **Answered 2026-10-05.** The approval rule is our existing **`A0`–`A5` gates assigned per action class**, plus *the accountable party is always a person*. Draft 1 already recorded it; only the gate *binding* shape is left, and the vision gives it: `ApprovalToken` bound to a `command_hash` (§59, §156). | [`AGENT-HALF.md`](../library/development/AGENT-HALF.md) §1.2; Vision Doc 8 §59 |
+| **Document ingestion pipeline** (row 32) | The vision §145–146: a Document carries *tenant · owner · classification · source · content trust · version · checksum · created_by · effective dates · retention · AI processing policy*, and **extraction must not downgrade classification**. Nothing in the code. | Vision Doc 8 §145–146 |
+| **Analytics projection strategy** (row 33) | The vision §110 (projection security) + Doc 4 §54 (*search is a projection, not a second database*); the platform already has `query_index` as a projection target. | Vision Doc 8 §110; Doc 4 §54 |
+| **Event/outbox strategy** (row 34) | The vision is exact: Doc 4 §52 — *"database transaction { current state · audit · outbox event } all commit atomically."* **Measured: no outbox exists in the code** (searched by name and by the related dedup mechanisms — nothing). | Doc 4 §52; measured 2026-10-05 (below) |
+| **Observability model** (row 36) | The vision §166 lists what to monitor (denial rate, cross-tenant attempts, sensitive-field access…) and §167 says anomaly detection is **supplementary, never a replacement**; we already have access/action logs + the hash-chained ledger. | Vision Doc 8 §166–167; `audit_logs/services/` (batch 5 §14a G-16/G-17) |
+| **Evaluation benchmark** (row 37) | The vision §160–165: the adversarial matrix, the prompt-attack matrix, property-based tests, the **capability closure test**, security differential testing. Named but not written. | Vision Doc 8 §160–165 |
+| **Hermes version harness** (row 38) | The vision §230: the Hermes adapter comes **only after the gateway exists**; the boundary items (26/27/35) are the `B-05` boundary. Draft 1 already marks these **OPEN — owner**. | Vision Doc 8 §230; [`../library/development/BLOCKERS.md`](../library/development/BLOCKERS.md) **B-05** |
+| **Capability package format** (row 39) | The vision §141 gives the **`CapabilityManifest`** in full (entities · fields · relationships · actions · commands · queries · workflows · metrics · permissions · policies · data_classifications · audit_events · external_integrations · MCP_tools · security_tests). We have `Module`/`Capability` objects and per-module `acl.ts`, but no manifest. | Vision Doc 8 §141 |
+| **Frontend model-builder lifecycle** (row 40) | The vision §229 (Functions/Widgets/Workspace as **clients of the policy kernel**) + Doc 3's User-Function lifecycle. Deferred by the plan until G-02. | Vision Doc 8 §229; Doc 3 |
+| **Skill lifecycle** (row 25) | The vision §186 (skill lifecycle) + §87 (*skills are not the canonical source of authority*); our `Skill` object is defined in §5.4, states are the gap. | Vision Doc 8 §87, §186 |
+| **Organization hierarchy** (row 3) | **Two sources.** Doc 5 §7 proposes the party model (**avoid separate identity silos**); our code already has `resolveGraphCeiling` over typed org edges and `LegalEntity` in the vision's own build order. | Doc 5 §7; `packages/shared/src/lib/authority/graph.ts` (batch 5 §14a G-11) |
+
+**Two facts measured for this sprint, by two routes each:**
+
+1. **No transactional outbox exists.** Route (a): search the codebase for `outbox` — no file.
+   Route (b): search for the mechanisms an outbox is usually built from (`processed_events`,
+   `event_deliveries`, dedup tables) — none. **Both routes agree: row 34 is genuinely open, not
+   merely unspecified.**
+2. **The resolver already returns the vision's decision shape.** Route (a): read `decision.ts` —
+   `Decision` carries `gate`, `allowed`, `reasons[]`, `bindingRule`, `obligations[]`, `alternatives[]`.
+   Route (b): batch 5 §14a G-01 records the same from the file, independently. **Both agree.**
+
+**What we reuse:** the vision's own answers (cited above) for ~15 of the 18; our resolver, principal
+model, tenant guard and ledger for the rest. **What we genuinely build new in this sprint:** *nothing
+in code* — the output is the written specification. **What must be *written down* for the first time:**
+the ID grammar, the tool-policy shape, the approval-token binding, the outbox contract, the capability
+manifest — each of which the vision sketches and this document fixes.
+
+**From the `V`-register:** **V-14** (explanation-as-a-value), **V-15** (trust tiers), **V-16** (the
+autonomy matrix) and **V-20** (shadow mode) are all *already-implemented answers* to items in this
+sprint — the specification should cite them as the platform's mechanism rather than inventing a new one.
+
+## Step 2 — Validate: is this the best approach?
+
+**Alternative considered — close all 18 items to `SETTLED`.** Rejected: it would mean inventing answers
+the vision has not decided (the Hermes boundary is **B-05**, the owner's) and pretending to settle
+things whose triggers have not fired. **That is exactly the error draft 1 caught and refused.**
+
+**Alternative considered — leave the 18 as they are and start G-01.** Rejected: the vision forbids
+implementation before the gate is met (RQ-140), and the plan's critic pass (§12 #5) names this as the
+one way to violate the gate — *"if a reader skips the spec and starts G-01, the plan violates RQ-140."*
+
+**Approach chosen — settle by *kind*, with the vision's own build order as the ordering rule.** Each
+of the 18 gets exactly one of four statuses, and the status is chosen by a stated rule, not by mood:
+
+| Status | Rule |
+|---|---|
+| **SETTLED** | The vision or our own code already answers it, and citing which is enough. |
+| **DERIVED** | The vision answers it in words; this document turns those words into a normative rule. |
+| **DEFERRED** | It cannot be decided before something else exists — **and the trigger that brings it back is named.** |
+| **OPEN — owner** | It is genuinely the owner's call (the Hermes boundary), and is left open rather than closed. |
+
+**The ordering rule is the vision's own build order (Doc 8 §222–232), which separates two kinds of
+item.** Items in **phases 0–3** (the immutable primitives, identity, multi-tenancy, the policy kernel)
+**must be settled now**, because phase 1 of the product (G-01) sits on them. Items in **phases 7–9**
+(the agent gateway, the Hermes adapter, Functions/Widgets) **are deferred with a trigger**, because the
+vision itself says they come *after* the gateway exists — settling them now would be exactly the
+"guess written as a decision" the cookbook forbids.
+
+**What would break it:** if an item marked DEFERRED turns out to be a *dependency* of G-01, the
+specification would let implementation start on an unstated assumption. The defence is to check each
+DEFERRED item against G-01's own definition of done — and to say, in the document, which DEFERRED items
+G-01 needs and which it does not. **That check is step 3.2 below.**
+
+**The second thing that would break it:** writing a *count* by hand again. Draft 1's own tally was
+wrong once (22/11/7 → 22/10/8); the fix is **L49** — *never write a summary count by hand, parse the
+artefact you just wrote.* Draft 2's tally is parsed, not typed.
+
+## Step 3 — The steps
+
+**Every step is a document edit, not a command — this is a specification sprint. But every claim about
+the *code* is measured, not asserted (rule zero-nine).**
+
+**3.1 — Re-read the source, not the summary.** Draft 2's answers must quote the vision, not the batch
+report about the vision. For each of the 18 items, open the cited section in
+`library/ai/ai-first/` (Doc 3, Doc 4, Doc 5, Doc 6 = Doc 8) and take the answer from there.
+
+**3.2 — Sort the 18 by the vision's build order, and check each DEFERRED item against G-01.** Produce
+the four-column table: *item · build-order phase · status · why*. Any DEFERRED item that G-01 actually
+needs is a **finding** — it means either the deferral or G-01's scope is wrong, and both are fixable.
+
+**3.3 — Write §8's replacement table: all 40 rows, each with a final status and a citation.** No row
+may say only "OPEN — spec" any more; every row must say *where* its answer is (a section, a file, or
+the trigger that brings it back). Count the result by **parsing the table**, never by hand (L49).
+
+**3.4 — Add the five new normative sections** the 18 items need, each short and testable:
+- **the ID grammar** (phase 0) — one BNF-style rule + examples, derived from Doc 3 §39 and §222;
+- **the tool policy** — the envelope + the trust tiers (Doc 8 §88, §90);
+- **the approval token** — bound to a `command_hash`, re-checked on confirm (Doc 8 §59; our
+  `pendingActService` already re-runs every check — cite it);
+- **the outbox** — the atomic `{ state · audit · outbox }` commit (Doc 4 §52), with the *measured*
+  fact that none exists today;
+- **the capability manifest** — the `CapabilityManifest` shape (Doc 8 §141).
+
+**3.5 — Verify every code claim against the running stack.** Anything draft 2 says about the code
+(the resolver's shape, the tenant guard, the ledger, the MCP tools) must be **re-read from the file or
+the container**, not quoted from a batch report. Where possible, read it from the running system
+(`docker exec`), because the artefact beats the description of it.
+
+**3.6 — Critic pass.** Read the document as a stranger whose job is to prove it wrong, and **name what
+was attacked** — a pass that says "looks good" without listing the attacks has not run. The attacks to
+run at minimum: (a) *does any row still say only "OPEN"?* (b) *is any status chosen by mood rather than
+the rule in step 2?* (c) *does any DEFERRED item block G-01?* (d) *does the tally parse to 40?*
+(e) *is any answer an invention rather than a citation?*
+
+**3.7 — Update the dependent documents in the same change** (COOKBOOK rule zero): `BACKLOG.md`
+(the `P0-spec` line and **N-12**), `NEEDS-YOU.md` (item 9), `INDEX.md` and `HANDOVER.md` §7/§8 (the
+spec's tally), and the spec's own header (DRAFT 1 → DRAFT 2). **A batch that leaves the docs stale is
+not finished.**
+
+**3.8 — Commit in both repositories, staged by explicit path.** Repo 1 (root) gets the spec and the
+documentation; repo 2 (`starting-kit`) gets nothing this sprint unless 3.5 changes a file — because
+**this sprint writes no product code.** Never `git add -A`.
+
+## Step 4 — Done when
+
+**Status, measured 2026-10-05** — every row below was read from `library/development/SPEC-business-model-kernel.md`
+by parsing it, not asserted. The commands used are shown under the table.
+
+| | Criterion | Status |
+|---|---|---|
+| ✅ | Every one of the 40 rows has a final status **and a citation** — no row says only "OPEN — spec" | **PASS** — parsing §8 finds 40 numbered rows and **0** whose only content is `OPEN — spec`; all 40 carry a citation (§, Doc, file, or a named trigger) |
+| ✅ | The 18 formerly-open items are each SETTLED, DERIVED, DEFERRED-with-trigger, or OPEN — owner | **PASS** — §9 states all 18 are closed in §8; what remains is 7 rows, each DEFERRED-with-trigger or OPEN — owner |
+| ✅ | No DEFERRED item is a dependency of G-01 | **PASS** — the 3 DEFERRED rows are **37** (evaluation benchmark), **38** (Hermes version harness), **40** (frontend model-builder). Their triggers are G-05, the Hermes adapter, and G-02 — all *after* G-01; BACKLOG line 43 shows G-01 needs only P0-spec |
+| ✅ | The tally is **parsed from the table**, and comes to 40 | **PASS** — parsed: **35 SETTLED · 1 DERIVED · 3 DEFERRED · 1 OPEN** = 40. Two routes agree (see below) |
+| ✅ | Every claim about the code is re-read from the file or container, not quoted from a report | **PASS** — the two code gaps (`PrincipalKind` = 4 values; ledger has no `policy_version`/`decision_id`) were read from `principal.ts` and `ledgerService.ts` and re-checked against the live DB |
+| ✅ | The critic pass names what it attacked, and what it could not break | **PASS** — §11 has **9** named attacks, each with an outcome |
+| ✅ | The dependent documents are updated in the same change | **PASS** — BACKLOG (`P0-spec` + `N-12`), HANDOVER (§7 row, folder map, summary, closing block), NEEDS-YOU (item 9), START-PROMPT (step 4), `library/INDEX.md`, AGENT-HALF (superseded note) |
+
+**The two routes used for the tally (rule zero-two):**
+
+- **Route 1 — read the spec's own tally line** (§8): `35 SETTLED · 1 DERIVED · 3 DEFERRED · 1 OPEN — owner`.
+- **Route 2 — re-parse the 40 rows from the raw table** and count each row's first status token:
+  `33 SETTLED** + 2 SETTLED = 35`, `1 DERIVED** = 1`, `3 DEFERRED`, `1 OPEN` → **40 rows, same split.**
+  Both routes agree, so the number is recorded rather than rounded.
+
+**What this sprint is not:** not code, and not the kernel. Its output is a **ratifiable specification** —
+and the honest statement of which items are settled, which are deferred, and which are the owner's.
+
+---
+
 # The hosting environment — `Platform-Server` (Coolify)
 
 **Built 2026-10-04.** A separate environment from Sprint 0: an Ubuntu Server 24.04 VM on Hyper-V

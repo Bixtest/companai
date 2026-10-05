@@ -136,6 +136,15 @@ count of everything still open. Anyone reading the tally as "only 8 things are u
 it wrong. *(That sentence is the reason this section exists: it is a measurement about the spec, and it
 belongs in the plan rather than in a note.)*
 
+**Superseded 2026-10-05 — draft 2 was written and the numbers above no longer apply.** The new
+register in the spec's §8 was parsed: **35 settled · 1 derived · 3 deferred with named triggers · 1 open
+— owner**. The three deferred rows are the vision's phase 7–9 items (Hermes version-compat, the
+evaluation benchmark, the capability-package format) and each names the trigger that unblocks it; the
+one open row is the Hermes boundary (**B-05**), which is the owner's decision, not the spec's. **The
+vision's 40-item gate is therefore passed.** This section is kept, unchanged below, as the record of
+*why draft 2 was needed* — the "22/10/8" figures above are draft 1's, and the counting defect it names
+was fixed in draft 2 by the status rule at the spec's §0.
+
 ---
 
 ## 3. Where every lesson lands

@@ -72,17 +72,18 @@ the work, and tell him what changed and how to undo it. Reserve his judgment for
 his — a name, a domain, a cost, a preference.
 
 **4. Your first task.** Read `library/development/BACKLOG.md` §"The list". The workbench is already
-up (the stack is running and the database is clean — verify it yourself). The first real build item is
-**`P0-spec` — draft 2 of the Business Model Kernel specification**
-(`library/development/SPEC-business-model-kernel.md`). Draft 1 settled the object list, the contract
-and the taxonomy; **18 of the vision's 40 required rows are still partly or wholly open**, and each is
-listed with its status in the spec's §8. Closing them is what lets implementation begin.
+up (the stack is running and the database is clean — verify it yourself). **`P0-spec` is done** — draft 2
+of the Business Model Kernel specification (`library/development/SPEC-business-model-kernel.md`) was
+written 2026-10-05 and passes the vision's own 40-item gate (only ratification remains). **The first
+build item is now `G-01` — the Business Model Kernel** (+ `G-08`, the relationship fabric).
 
-Work it in the project's four-step sprint process — **no code before step 3**:
+Work it in the project's four-step sprint process — **no code before step 3**. Steps 1–3 are
+documents and measurement; only step 4 writes code:
 
 1. **Research** — what already exists for this, in Hermes, in the Starting Kit, in the `V`-register?
 2. **Validate** — is this the best approach, and what would break it?
-3. **Write the cookbook steps** for this sprint only, in `workspace/COOKBOOK.md`.
+3. **Write the cookbook steps** for this sprint only, in `workspace/COOKBOOK.md` — the exact commands,
+   the files to touch, and the "done when" test. **No code is written in steps 1–3.**
 4. **Build** it, test it against the running stack, and record it.
 
 **5. Before you finish your turn, tell the owner, in plain English:**
