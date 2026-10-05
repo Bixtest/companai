@@ -2240,8 +2240,8 @@ for anything deployed — read the artefact, not the repository.
 
 ## L69 — fixing one copy of a duplicated pattern is not fixing the pattern
 
-**What happened.** The B-18 bug was a blind scope lookup — `select "organization_id", "tenant_id"
-from "<table>"` against a global table that has neither column. It was found in
+**What happened.** The **B-15 half-2** bug was a blind scope lookup — `select "organization_id",
+"tenant_id" from "<table>"` against a global table that has neither column. It was found in
 `query_index/di.ts`, fixed there, rebuilt, and **verified present in the running container**. The
 reset then failed in exactly the same way: same statement, same abort, same place in the log.
 
@@ -2263,3 +2263,66 @@ wrong copy.** That is a signal to widen the search, not to doubt the fix.
 **The general form:** the identical-failure-after-a-verified-fix is a *measurement*, and it points at
 duplication. [[L62]] says a failing probe proves nothing until you know the probe works; this is its
 counterpart — a fix that provably deployed and changed nothing tells you where to look next.
+
+## L70 — running a test against each copy of a duplicated file does not make the copies agree
+
+**What happened.** `init-or-migrate.sh` — the script that decides whether a database needs initialising
+— exists twice in the repo: `docker/scripts/` and `packages/create-app/template/docker/scripts/`. Both
+copies had to be fixed by hand for B-15. While wiring the tests into CI, the obvious improvement was to
+run the test against *both* copies rather than just one, and that is now done.
+
+It is not enough, and the reason is worth stating precisely. The test asserts **behaviour** — exit codes,
+and whether the marker is written. So:
+
+- a copy that has been **broken** fails its run → caught;
+- a copy left behind at **older-but-still-correct behaviour** passes its run → **not caught**.
+
+So if someone improves one copy and forgets the other, CI stays green and the stale copy ships into every
+app scaffolded by `create-app`. The two copies are byte-identical today (`sha256 838969fe…`) **only
+because both were edited by hand**.
+
+**Why it happens.** "Test both copies" *feels* like it closes a duplication hole. It closes the half
+where a copy is broken; it does nothing about the half where the copies have diverged. Two files can each
+be self-consistently correct and still disagree with each other — and a behaviour test is structurally
+unable to see that, because each run only ever looks at one file.
+
+**The rule.** *Duplication needs a comparison, not more test runs.* A parity check is a different kind of
+assertion from a behaviour check: it compares the artefacts **to each other** — a `diff`, a hash, or a
+sync tool that owns the mirror. If two files are supposed to be identical, something must assert that
+they *are*; running the same test twice is not that thing.
+
+**The general form:** before claiming a duplicated pattern is covered, ask what the assertion actually
+*compares*. If every check looks at one copy at a time, nothing is comparing them. [[L69]] says fix the
+pattern rather than the copy; this is the same defect one layer up — **the guard was also written per
+copy.** Tracked as **N-14**.
+
+## L71 — Yarn 4 will not run a script before an install has happened
+
+**What happened.** Adding a CI job for the Docker-free shell tests, the natural step was
+`yarn test:docker-scripts`, because that alias in `package.json` is the single source of truth for what
+the tests are. The job deliberately needs no dependencies — the tests are pure `sh` — so it was written
+without a `yarn install`.
+
+**Measured, in a clean `node:24` container with the repo's real `package.json`, `.yarnrc.yml` and
+`yarn.lock`, and no `node_modules`:**
+
+```
+Usage Error: Couldn't find the node_modules state file - running an install might help (findPackageLocation)
+```
+
+So `yarn run` needs the install state to be present even for a script that touches no dependency. The job
+would have dragged a full `yarn install` (minutes, on a large monorepo) into a job that needs none of it.
+Fixed by invoking the same files directly with `sh`, and keeping that list in step with the alias.
+
+(A smaller surprise on the same errand: with *no* lockfile at all, Yarn fails even earlier with
+`This package doesn't seem to be present in your lockfile`.)
+
+**Why it happens.** "Running a script" sounds dependency-free — it is just a shell command out of
+`package.json`. But Yarn Berry resolves the workspace and needs its install state present before it will
+dispatch a script, so the install is a precondition regardless of what the script itself does.
+
+**The rule.** *In a Yarn Berry repo, a CI job that runs a yarn script must install first — so if the job
+needs no dependencies, call the underlying command directly instead of the alias.* Pick one deliberately
+and say so in a comment: the alias is more maintainable, the direct call is far cheaper. You cannot have
+both, and this was found by measuring rather than by assuming — the assumption was that `yarn run` is
+dependency-free.

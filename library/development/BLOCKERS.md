@@ -7,18 +7,22 @@ wondering why something is not moving.**
 **The rule:** a blocker is reported the same way a question is — in plain English, with **what
 clears it** and **whose move it is**. If the move is the owner's, it says so.
 
-**Checked:** 2026-10-05, 04:05. **Every blocker is re-checked each session** — a blocker is a
+**Checked:** 2026-10-05, 06:53. **Every blocker is re-checked each session** — a blocker is a
 claim about now, not about last time.
 
-**Open right now: 4** — B-05 (OpenCode is load-bearing), B-16 (no embeddings endpoint), B-17 (no audit
-trail of agent tool calls), **B-18 (the app image cannot be rebuilt, so no source fix written after
-2026-10-04 03:08 has ever actually run)**. **B-18 is the one that bites:** it is why the 2026-10-05
-database reset produced a half-seeded database that reported itself healthy. The other three stop
-nothing.
+**Open right now: 3** — B-05 (OpenCode is load-bearing), B-16 (no embeddings endpoint), B-17 (no audit
+trail of agent tool calls). **None of the three stops Sprint 0** — they are all "the product cannot do
+this yet", not "work is stuck".
 
 **Resolved 2026-10-05 — B-15 is now fully closed, both halves.** Half 2 was never a seeding bug. The
 failing statement was read straight off the Postgres server and traced to a scope lookup in
 `packages/core/src/modules/query_index/di.ts`; see *The real cause of the abort* under **B-15**.
+
+**Resolved 2026-10-05 — B-18 is closed, re-measured this session rather than assumed.** The image *was*
+rebuilt, the running containers *are* that image, and the fix is *inside the artefact that is running* —
+not merely present in the source. Five measurements are recorded in the **B-18** row of the Resolved
+table below. B-18 was the blocker that mattered: it is why the 2026-10-05 reset first produced a
+half-seeded database that reported itself healthy.
 
 **Cleared since the last check:** **B-04** — the owner started Docker Desktop and the whole stack
 was verified running the same evening: 8 services, 7 healthy, 21 AI tools discovered, the app serving
@@ -85,14 +89,15 @@ aliases for the LLM provider (see `model-factory.ts`), and *can* be dropped inde
 
 **Two halves.**
 
-**Half 1 — the failure was being reported as success. FIXED in the source 2026-10-04 — but that fix
-was never in the image that was running.** On 2026-10-05 the running `open-mercato/app:local` image
-was measured to have been built **2026-10-04T03:08Z**, i.e. **before** the fix landed (commit
+**Half 1 — the failure was being reported as success. FIXED in the source 2026-10-04, and since
+2026-10-05 genuinely present in the running image.** On 2026-10-05 the running `open-mercato/app:local`
+image was measured to have been built **2026-10-04T03:08Z**, i.e. **before** the fix landed (commit
 `1eddf11`, 2026-10-04 14:51Z). The container was therefore still executing the buggy script, which is
 exactly why the 2026-10-05 database reset wrote the "already seeded" marker again while the init was
 failing. Measured by diffing the script inside the container against the repo copy: the container's
-`run_command_with_cli_recovery` still had `STATUS=$?` read after `fi`. **A source fix that is not
-built is not a fix** — see the new blocker **B-18**.
+`run_command_with_cli_recovery` still had `STATUS=$?` read after `fi`. **A source fix that is not built
+is not a fix** — that was blocker **B-18**, now closed: the image was rebuilt 2026-10-05 06:29 +0200,
+and the in-image `init-or-migrate.sh` now hashes `838969fe…`, byte-identical to the repo copy.
 
 **Half 2 — *why* the feature-toggle seeding transaction aborts. SOLVED 2026-10-05.** The underlying
 SQL error was never in the app log because the code catches it and says nothing; it was read straight
@@ -268,38 +273,6 @@ The seed is just where it was noticed.
 
 ---
 
-### 🔴 B-18 — the app image cannot be built, so no fix written after 2026-10-04 03:08 has ever run
-
-**What.** The running `open-mercato/app:local` image was built **2026-10-04T03:08Z**. Three commits
-landed after that — `0e5acf9`, `1eddf11` (the B-15 half-1 fix) and `cbceb78` — and none of them is in
-the image. **A source fix that is not built is not a fix**: this is why the 2026-10-05 reset wrote the
-"already seeded" marker again.
-
-**Two separate things stop a rebuild, and both come from the approved removal of `apps/docs`.**
-
-1. **Fixed 2026-10-05.** `Dockerfile` copied `apps/docs/package.json` at two places (lines 17 and 87).
-   `apps/docs` is gone, so `COPY` fails before the build gets anywhere. Both lines removed.
-2. **Measured 2026-10-05, and this is the one that bites.** `yarn.lock` still carries
-   `"open-mercato-docs@workspace:apps/docs"`, so `yarn install --immutable` refuses:
-
-   ```
-   YN0028: The lockfile would have been modified by this install, which is explicitly forbidden.
-   ERROR: process "/bin/sh -c yarn install --immutable" did not complete successfully: exit code: 1
-   ```
-
-   The build dies at `builder 31/38`, about 20 seconds in. Fixing this means regenerating `yarn.lock`
-   with the docs workspace gone — which needs Yarn 4.17.1, which this host does not have (**N-11**).
-
-**Also affected, not yet touched:** `.github/workflows/ci.yml:832` still builds `apps/docs/Dockerfile`
-in CI, so that job will fail there too.
-
-**Why it blocks.** Nothing can be rebuilt, so nothing fixed in source reaches the running stack — and
-the fresh-install path cannot be re-walked.
-
-**Whose move.** Mine.
-
----
-
 ### 🟡 B-16 — the MCP's tool-search index cannot be built (no embeddings endpoint)
 
 **What.** On startup the MCP logs:
@@ -382,12 +355,18 @@ ones) somewhere queryable. A product decision first — tracked as a backlog ite
 
   ```sh
   sh docker/scripts/__tests__/init-or-migrate.test.sh
+  sh docker/scripts/__tests__/init-or-migrate.test.sh packages/create-app/template/docker/scripts/init-or-migrate.sh
   sh docker/scripts/__tests__/compose-init-guard.test.sh
   sh docker/scripts/__tests__/compose-init-guard.test.sh packages/create-app/template/docker-compose.fullapp.yml
   ```
 
   They must be run with **`sh`** and are safe to run at any time — no database, no containers, and
-  they only write inside a scratch directory under `/tmp`.
+  they only write inside a scratch directory under `/tmp`. **`yarn test:docker-scripts` runs exactly
+  these four**, and since 2026-10-05 a `docker-scripts` job in `.github/workflows/ci.yml` runs them on
+  every push and PR — the job installs nothing, because they need no Docker, no database and no
+  `node_modules`. **Note the four, not two:** `init-or-migrate.sh` exists in two copies
+  (`docker/scripts/` and `packages/create-app/template/docker/scripts/`) and *both* are tested, because
+  nothing in the repo keeps the two copies in step — see **N-14**.
 
 ---
 
@@ -415,3 +394,5 @@ ones) somewhere queryable. A product decision first — tracked as a backlog ite
 | 🟢 | **B-12** — a hand-written Hermes `config.yaml` is silently discarded | Cleared 2026-10-04: Hermes **owns and rewrites** that file. Configure it only through its own CLI (`hermes config set`, `hermes mcp add`). |
 | 🟢 | **B-13** — Hermes could not authenticate to the platform's MCP: HTTP 401 `{"error":"API key required (x-api-key header)"}` | Cleared 2026-10-04. `lib/auth.ts:157-192` accepts exactly **`x-api-key: <secret>`** or **`Authorization: ApiKey <secret>`**. Hermes' `mcp add --auth header` writes `Authorization: Bearer …` — **neither** form. Fixed by adding the `x-api-key` header. **Arrow (1) transport proven:** `hermes mcp test mercato` → `✓ Connected (2567ms)`, `✓ Tools discovered: 21`. |
 | 🟢 | **B-14** — Hermes refused the local model: "context window of 32,768 tokens, which is below the minimum 64,000" | Cleared 2026-10-04. Hermes enforces `MINIMUM_CONTEXT_LENGTH = 64000` (`agent/agent_init.py::_enforce_minimum_context`). Adding `-c 65536` to llama.cpp was **not enough** — llama.cpp logged `the slot context (65536) exceeds the training context of the model (32768) - capping` and served `n_ctx_slot = 32768`. Fixed with YaRN RoPE scaling (`--rope-scaling yarn --rope-scale 2 --yarn-orig-ctx 32768`) → `n_ctx_slot = 65536`, plus `hermes config set model.context_length 65536`. |
+| 🟢 | **B-15** — `mercato init` failed partway through, leaving a half-seeded database that reported itself healthy | **Cleared 2026-10-05, both halves.** *Half 1:* the failure was reported to its caller as success because `$?` was read after `fi`; all four status reads in **both** copies of `init-or-migrate.sh` now use one explicit shape. *Half 2:* it was never a seeding bug — a blind scope lookup on the global `feature_toggles` table aborted the surrounding transaction, and five copies of that lookup now share one `resolveRecordScope`. The 2026-10-05 reset then ran every init step green. **The full diagnosis is kept in place below, as the reference record.** |
+| 🟢 | **B-18** — the app image could not be rebuilt, so no source fix written after 2026-10-04 03:08 had ever actually run | **Cleared 2026-10-05.** Two independent build blockers, both fallout from the approved removal of `apps/docs`. **(1)** `Dockerfile` copied `apps/docs/package.json` at two places (lines 17 and 87) — both removed. **(2)** `yarn.lock` still carried `"open-mercato-docs@workspace:apps/docs"`, so `yarn install --immutable` refused with `YN0028: The lockfile would have been modified by this install, which is explicitly forbidden`, killing the build at `builder 31/38` about 20 seconds in. Regenerated with Yarn 4.17.1 in a `node:24` container: **1,030 lockfile entries removed, 138 added** (31,041 → 20,952 lines). **(3)** The third casualty, found last and fixed this session: `.github/workflows/ci.yml` still built `apps/docs/Dockerfile` — that step is gone. **Re-measured 2026-10-05, five ways, because a fix that is not built is not a fix:** the image `open-mercato/app:local` is built **2026-10-05 06:29:28 +0200**, after every fix commit; both running app containers (`starting-kit-app-1`, `mercato-mcp-local`) report image **`sha256:2daca52e…`**, the same ID as the tag; `resolveRecordScope` is present in the **running container's** `packages/shared/dist/lib/query/engine.js`, `packages/search/dist/modules/search/subscribers/vector_upsert.js` and `packages/core/dist/modules/query_index/di.js`; the in-image `init-or-migrate.sh` hashes **`838969fe…`**, byte-identical to the repo copy; and the database's **last** error is `2026-10-05 04:13:01 UTC` — *before* the 04:30 reset, so there have been none since. |
