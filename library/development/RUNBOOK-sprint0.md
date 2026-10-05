@@ -157,9 +157,19 @@ docker compose -f docker-compose.fullapp.yml down -v   # ALSO delete the databas
   aborts** — that is B-15 half 2. **If the database looks empty, check the marker:**
   `docker exec starting-kit-app-1 ls -la /tmp/init-marker/` — delete it and restart to force a real
   init. Tracked as **B-15** in [`BLOCKERS.md`](BLOCKERS.md).
-- **The MCP's vector tool-search index does not build** (`Invalid OpenAI API key`) — llama.cpp serves
-  no `/v1/embeddings`. All 21 tools still register and are callable; only semantic tool search is
-  degraded. Tracked as **B-16**.
+- **The MCP's vector tool-search index does not build** (`Invalid OpenAI API key`). **Root-caused
+  2026-10-05, and the old description was half the story:** that error text is **OpenAI's own code**,
+  so the call never reached our server. The **`mcp` service is missing `OPENAI_BASE_URL`** (it is set
+  for `app` and `opencode`, not for `mcp`) — which is where the tool-search index runs. The second,
+  also-real defect is that the `model` service has no embedding model. All 21 tools still register
+  and are callable; only semantic tool search is degraded. Tracked as **B-16**; full trace in
+  [`ARCHITECTURE-model-server-integration.md`](ARCHITECTURE-model-server-integration.md) §6.2.
+- **The `model` service command now carries `--jinja`.** Hermes' own docs say llama.cpp needs it for
+  native tool calling, and without it the server ignores the `tools` parameter. **Two caveats:** a
+  study already in this repo reads it the other way (it says newer builds enable it by default), and
+  the flag is free either way. **Settle it from the running server:**
+  `curl -s http://model:8080/props | jq '.chat_template'` — a template, not `null`. See §4.1 of the
+  same document.
 - **OpenCode is still in the stack, deliberately.** The platform's own chat route is built on it, so
   removing it breaks the chat. See **B-05** / **N-8**. *(B-05's design face was **decided 2026-10-05**:
   what replaces it is a supervised private Hermes runtime behind the internal port, with Hermes

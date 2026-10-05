@@ -246,6 +246,56 @@ implementation begins before the kernel specification exists.
 
 ---
 
+## 2026-10-05 — **The model layer: llama.cpp, the providers, and the embedding lane**
+
+The companion decision to B-05. B-05 settled *who reasons*; this settles *what they reason on*. Written
+as [`ARCHITECTURE-model-server-integration.md`](../../library/development/ARCHITECTURE-model-server-integration.md),
+after reading the eight documents in `llama/` and then verifying them against the code.
+
+### Decided — the model layer (our calls, cheap to overrule)
+
+| Change | Where | Origin |
+|---|---|---|
+| **llama.cpp stays a separate service, and that is already settled, not chosen.** The app is Node 24; llama.cpp is C++. Sprint 0 already runs `model` as its own container reached over HTTP. The language boundary decided it, exactly as it decided B-05 | the integration document §3.2 | measured 2026-10-05 |
+| **llama.cpp gets one preset entry, not a project.** The platform already ships a 7-tier resolution chain, a provider registry, **11** OpenAI-compatible presets, a tenant model allowlist, per-agent overrides and token metering. The preset file's own design goal is *"one entry, zero new adapter files, zero changes to route handlers"* | §4.2 | measured in `packages/ai-assistant` |
+| **`--jinja` is added to the `model` service command.** Hermes' own docs: without it *"llama-server ignores the `tools` parameter entirely"* | §4.1 | Hermes' `integrations/providers.md` |
+| **The embedding lane gets a seam, and the `mcp` service gets `OPENAI_BASE_URL`** | §4.3, §4.4 | B-16, root-caused |
+
+### Corrected — the prior analysis's central assumption
+
+| The analysis said | Measured on 2026-10-05 | Status |
+|---|---|---|
+| *"do not assume the ideal Broker already exists in code"* | It does. `model-factory.ts` is a working 7-tier chain with allowlist enforcement and fallback; the port, registry, three adapters and 11 presets all exist; six generated entities carry the model governance | **CORRECTED.** The recommendation survives; the *size of the job* was wrong by an order of magnitude |
+| *"the platform's vector integration expects embeddings"* | True, and it is **two** defects. The second is that the embedding lane is a **closed 6-value union** with per-provider clients and no OpenAI-compatible member, unlike the chat lane | **SHARPENED** |
+| *"tool behaviour depends on the chat template and server version"* | True, and there is a named flag absent from the deployment and from every development document | **FLAG ABSENT; the conflict with our own prior study is named, not resolved** |
+
+### Found — two defects, neither in the prior analysis
+
+| Defect | The measurement |
+|---|---|
+| **The model service has no `--jinja`** | Hermes' docs carry a caution block; the flag is absent from all three compose files, the COOKBOOK and `library/development/`. **And the COOKBOOK's Step 4 table records the matching symptom:** an agent turn where the model enumerated all 21 tools, chose one, and **nothing reached the platform** (three independent NULL checks). A model that merely chose badly would still have reached the platform |
+| **B-16 is a missing environment variable, not an absent capability** | The recorded error is OpenAI's own `invalid_api_key`, so the call never reached our server. `OPENAI_BASE_URL` is set for `opencode` (line 16) and `app` (line 204) and **absent from `mcp`** (lines 48–113) — which is where the tool-search index runs. Confirmed by a second route: `@ai-sdk/openai` reads `OPENAI_BASE_URL` as its default `baseURL` (`dist/index.js:8259`). The second, also-real defect is that the `model` service has no embedding model |
+
+### What the decision does *not* cover
+
+- **The long-term default** — all-local, cloud-first, or per-tenant policy. It is the owner's, it is
+  **item 13** in `NEEDS-YOU.md`, and it is recommended rather than closed.
+- **Which open-weight model becomes the standard, GPU hardware, and whether self-hosting is a
+  customer-facing promise.** All three sit downstream of that answer.
+- **No performance claim.** The measurements are one 2015 laptop and transfer to nothing.
+
+### Method note — the hostile passes
+
+Two separate passes whose only job was to break the document **falsified seven of its own claims**,
+all corrected rather than defended. The worst was the first draft's *"`--jinja` appears nowhere in the
+repository"*, which came from a repository-wide search that **timed out** — a check that did not finish
+is not a check, and the claim built on it was wrong in the direction that flattered the finding. The
+pass also caught a **dangling cross-reference** and, more usefully, **strengthened** the `--jinja`
+finding by locating the COOKBOOK's Step 4 table, which records the symptom the first draft said was
+unrecorded.
+
+---
+
 ## 2026-10-05 — **B-05 decided: the runtime boundary**
 
 The last owner decision in the specification. The owner **approved** the recommended shape after

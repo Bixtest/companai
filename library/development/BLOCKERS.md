@@ -14,6 +14,11 @@ claim about now, not about last time.
 trail of agent tool calls). **None of the three stops Sprint 0** — they are all "the product cannot do
 this yet", not "work is stuck".
 
+**B-16 was traced to its root on 2026-10-05, and the recorded description was half the story.** The
+error text is OpenAI's own `invalid_api_key`, so the request never reached our model server: the
+**`mcp` service is missing `OPENAI_BASE_URL`**. The "no embeddings endpoint" half is also real, but it
+is the *second* defect. Both are in the B-16 entry below, with the two routes that measured them.
+
 **B-05 has two faces, and one of them closed on 2026-10-05.** The **design** face (which runtime
 boundary, and how it is isolated) was **approved by the owner** on 2026-10-05: one product, one
 repository, one deployment, one interface (ours), with Hermes as a supervised private runtime process
@@ -315,6 +320,36 @@ still indexes.
 **What clears it.** Either serve embeddings locally (a second llama.cpp instance with an embedding GGUF,
 e.g. `nomic-embed-text`), or point `vector.embedding` at a provider that has one. A Sprint-0-adjacent
 decision, not a code change.
+
+**ROOT CAUSE, TRACED 2026-10-05 — and it is TWO defects, not one.** The recorded text above is
+`Invalid OpenAI API key`, which is **OpenAI's own error code** (it comes from the
+`apiCode === 'invalid_api_key'` branch of `packages/search/src/vector/services/embedding.ts`).
+llama.cpp does not emit that code. **So the request reached OpenAI, which means it never reached our
+server at all.** Two independent causes:
+
+1. **The `mcp` service was never given `OPENAI_BASE_URL`.** In `docker-compose.fullapp.yml` the
+   variable is set for `opencode` (line 16) and `app` (line 204) and is **absent from the `mcp`
+   service block** (lines 48–113), which has `OPENAI_API_KEY` at line 87. Confirmed by a second
+   route: `@ai-sdk/openai`'s own dist reads `OPENAI_BASE_URL` as the default `baseURL`
+   (`dist/index.js:8259`), so `EmbeddingService`'s `createOpenAI({ apiKey })` falls back to
+   `https://api.openai.com/v1` — with key `local`. **The tool-search index runs in the MCP, which
+   is the one container that was never told where the model is.** The fix is one line of YAML.
+2. **The loaded model cannot embed.** Even with the base URL corrected, `Qwen2.5-7B-Instruct` is a
+   chat model, and the `model` service command carries no `--embeddings`. This is the half the
+   `llama/` analysis named, and it is real.
+
+**And a second seam is missing.** `EmbeddingProviderId` is a **closed 6-value union**
+(`openai | google | mistral | cohere | bedrock | ollama`) with per-provider hardcoded clients and
+**no OpenAI-compatible member** — unlike the chat lane, which has 11 presets and a base-URL override.
+So pointing embeddings at a local llama.cpp server needs **one new union member**, not just a URL.
+
+**Severity, stated honestly.** Today the effect is a degraded tool search. But the *same lane* serves
+the `pgvector` / `qdrant` / `chromadb` drivers the product's retrieval is built on, and the failure
+mode is a **warning, not a gate** — so a silent embedding failure would be a degraded product, not a
+degraded log line.
+
+**Full design:** [`ARCHITECTURE-model-server-integration.md`](ARCHITECTURE-model-server-integration.md)
+§6.2 and §4.4.
 
 **Whose move.** Mine, later.
 

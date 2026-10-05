@@ -962,6 +962,14 @@ export PATH="/c/Users/Ramzi/Downloads/companai/workspace/.toolchain/node24:$PATH
       - 0.0.0.0
       - -c
       - "65536"          # required by Hermes' 64K floor — see above
+      # Tool calling. Hermes' own docs (integrations/providers.md) carry a caution: without
+      # --jinja, llama-server IGNORES the `tools` parameter, and Hermes then sees the model's
+      # tool call as plain text instead of a call. NOTE: our own prior study
+      # (library/ai/qwen-hermes-tool-calling-report.md) reads it the other way and says newer
+      # builds enable it by DEFAULT. Settle it by reading the running server, not the flag:
+      #   curl -s http://model:8080/props | jq '.chat_template'   # a template, not null
+      # It is free and it removes a dependency on a build default, so we set it explicitly.
+      - --jinja
       - --rope-scaling
       - yarn             # without this, llama.cpp caps the slot at n_ctx_train (32768)
       - --rope-scale
@@ -984,6 +992,15 @@ export PATH="/c/Users/Ramzi/Downloads/companai/workspace/.toolchain/node24:$PATH
 It serves an **OpenAI-compatible** endpoint at `http://model:8080/v1`. The GGUF itself is decision
 **A2** (a small instruct model, ~7–8B, `Q4_K_M` quantisation) and is a multi-GB download — blocker
 **B-03**. **Confirm the image tag resolves when you pull it — do not assume it.**
+
+> **This server does chat. It does not do embeddings.** The tool-search index needs a second
+> endpoint, and B-16 records the failure. **The full trace is in
+> [`../library/development/ARCHITECTURE-model-server-integration.md`](../library/development/ARCHITECTURE-model-server-integration.md)
+> §6.2**, and it is two defects, not one: the `mcp` service was never given `OPENAI_BASE_URL`
+> (so the embedding call went to `api.openai.com` with the placeholder key), **and** this server
+> has no embedding model. Fixing it means a second `llama-server` with an embedding GGUF, plus a
+> way for the embedding lane to be pointed at it. **Neither is part of Sprint 0** — the four
+> changes, with their triggers, are in §4 of that document.
 
 > **Measured speed — a real Sprint 0 finding (2026-10-04).** On this laptop, CPU-only, the agent loop
 > is **slow enough to matter**: Hermes' prompt is **~15,700 tokens** (its system prompt plus the 21 MCP
@@ -1024,6 +1041,30 @@ OM_AI_MODEL=<the model id you loaded>
 
 The `OPENCODE_*` variables are **legacy aliases** (see `model-factory.ts`) and are not needed here.
 Nothing else in the platform changes.
+
+> **This works, and it is a workaround — the recommended fix is deferred.**
+> `OM_AI_PROVIDER=openai` relabels a local llama.cpp server as "OpenAI". The endpoint is right, but
+> the model dropdown then shows OpenAI's catalog (GPT-5 Mini, GPT-5, GPT-4o-mini, GPT-4o) while the
+> server actually serves Qwen2.5, and an operator sees "OpenAI" for a machine in their own rack.
+> The clean answer is **one entry** in `openai-compatible-presets.ts`, exactly the shape of the
+> `ollama` and `lm-studio` presets already there:
+>
+> ```ts
+> { id: 'llamacpp', name: 'llama.cpp (local)', baseURL: 'http://model:8080/v1',
+>   baseURLEnvKeys: ['LLAMACPP_BASE_URL'], envKeys: ['LLAMACPP_API_KEY'],
+>   defaultModel: '', defaultModels: [] }
+> ```
+>
+> **Sharp edge, recorded not hidden:** a preset activates only when its key env var is non-empty
+> (`isConfigured()` → `resolveApiKey() !== null`). A keyless llama.cpp server therefore still needs
+> a placeholder, the same convention as `OPENAI_API_KEY=local` above.
+> **Trigger: the next `model`-service change.** See
+> [`../library/development/ARCHITECTURE-model-server-integration.md`](../library/development/ARCHITECTURE-model-server-integration.md) §4.2.
+
+> **And the `mcp` service needs the base URL too.** `OPENAI_BASE_URL` is currently set for
+> `opencode` and `app` and **not** for `mcp` — which is where the tool-search index runs, and why
+> B-16's error says `Invalid OpenAI API key`. **One line:**
+> `OPENAI_BASE_URL: ${OPENAI_BASE_URL:-}` in the `mcp` service's `environment:` block.
 
 **3.4 — The Hermes service.** **Verified 2026-10-04:** Hermes ships a **prebuilt image** —
 `nousresearch/hermes-agent:latest` — so there is **nothing to build**. Add a `hermes` service with

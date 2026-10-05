@@ -18,12 +18,14 @@ across other documents. If it needs you, it is here or it is not tracked.
 
 ---
 
-## Part 1 — Decisions I need (none open — items 1, 2 and 8 closed, item 4 is "nothing needed")
+## Part 1 — Decisions I need (**one open: item 13** — items 1, 2 and 8 closed, item 4 is "nothing needed")
 
 > **Numbering note.** Items are numbered once and **never reused**, so that a number you have already
 > quoted keeps meaning the same thing. Item 8 was appended here on 2026-10-05 and answered the same
 > day. Items 1 and 2 were closed the same day by measurement — see each item. Item 4 is a "know" item,
 > not a decision: the specification's pruning is mine, and nothing is waiting on your signature.
+> **Item 13 was added 2026-10-05** with the model-layer work: it is the one genuinely yours in that
+> piece, and it has a recommended answer and a safe default if you say nothing.
 > *(Item 5, the Coolify password, is in Part 2 — it is a thing to do, not a decision to make.)*
 
 ### 1. Reset the local dev database? — ✅ **DONE 2026-10-05** *(no longer needs you)*
@@ -125,6 +127,36 @@ in the development plan**.
 it missed the part that matters most: **the accountability rule.** Two of the five kinds (independent,
 system) are not assistants at all, and without the approval rule there is no answer to *"who is
 responsible when the agent acts?"*
+
+---
+
+### 13. What should the long-term default for models be — cloud, local, or per-tenant policy? — **DECIDE** · *I recommend C, with A as the interim*
+
+**Background in one line.** The platform can already call hosted models (OpenAI, Anthropic, Google,
+DeepInfra, Groq, Together, Fireworks, Azure, LiteLLM, OpenRouter, Requesty) and can already run an
+open-weight model on its own machine (llama.cpp, Qwen2.5-7B today). What is not decided is **which
+one should be the default.**
+
+| | What it means in practice | What it costs |
+|---|---|---|
+| **A. Cloud first, local as fallback** | Tenants get hosted models by default; the local server handles offline, private and cheap-repetitive work | Best quality and speed today. Per-token spend. Data leaves the machine |
+| **B. Local first, cloud as fallback** | The local server is the default; cloud is a policy-gated escalation | No per-token spend, data stays in the rack. **On today's hardware a turn takes 20 minutes or more** |
+| **C. Per-tenant policy** | Each tenant declares *local only / local preferred / cloud allowed / approved providers only*, and the platform enforces it **before** the request leaves | This is what the vision already specifies. It needs a model registry and budget controls that do not exist yet |
+
+**I recommend C, with A as the interim default.** C is not a new direction — the vision's own §32
+lists those tenant modes and says the broker enforces them before any request reaches a provider.
+But C is not buildable today (no registry, no budgets), and B would ship a product where a turn takes
+20 minutes. So: **A now, C as the destination.**
+
+**What this does not decide**, and I am not asking about them: which specific open-weight model
+becomes the standard, whether to buy GPU hardware, and whether self-hosting is a customer-facing
+promise or an internal capability. All three sit downstream of this answer.
+
+**Where it is written down.** [`ARCHITECTURE-model-server-integration.md`](ARCHITECTURE-model-server-integration.md)
+§9 — including the measurements behind the speed figures, and §10's deferred list with triggers.
+
+**If you say nothing, I will proceed on A as the interim** and leave C as the recorded destination.
+That is a safe default and it is cheap to change later.
 
 ---
 

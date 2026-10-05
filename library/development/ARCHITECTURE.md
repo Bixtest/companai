@@ -21,10 +21,21 @@ code rather than running it, it says so.
 |---|---|---|
 | **The Starting Kit** | The **platform** — the business system, the governance layer, the database, the screens. This is the product. | `workspace/starting-kit/` |
 | **Hermes** | The **agent runtime** — the agent loop, tools, skills, sessions, subagents, model routing. Borrowed, not built. | `library/ai/hermes-agent-main/` |
-| **The model server** | **Inference** — a local, OpenAI-compatible endpoint (llama.cpp) so the product can run without sending data to a cloud model. | to be added as a service |
+| **The model server** | **Inference** — a local, OpenAI-compatible endpoint (llama.cpp) so the product can run without sending data to a cloud model. | `model` service in `docker-compose.fullapp.yml`; the full design is [`ARCHITECTURE-model-server-integration.md`](ARCHITECTURE-model-server-integration.md) |
 
 **The one sentence that keeps them apart:** *the platform owns the business truth and the
 authorization; Hermes owns the agent's work; the model server owns nothing but answers.*
+
+**Decided 2026-10-05 — the model layer, and how small the work turned out to be.** The integration
+design for models is written and measured:
+[`ARCHITECTURE-model-server-integration.md`](ARCHITECTURE-model-server-integration.md). Three things
+are settled: **llama.cpp stays a separate service** (already true, and forced by the language
+boundary); **the platform already owns the model control plane** (a 7-tier resolution chain, 11
+OpenAI-compatible presets, a tenant model allowlist, per-agent overrides and token metering all
+exist in `packages/ai-assistant`), so llama.cpp needs **one preset entry**, not a project; and the
+**embedding lane is a separate, closed lane** that is where **B-16** actually lives. **One decision
+is the owner's** and is recommended rather than closed: the long-term default (§9 of that document,
+and item 13 in [`NEEDS-YOU.md`](NEEDS-YOU.md)).
 
 ---
 

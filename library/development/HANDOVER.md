@@ -58,7 +58,7 @@ built, and it works.
 |---|---|---|
 | **The Starting Kit** | The platform/product. A permanent fork of **Open Mercato 0.6.7**, rebranded to Companai. The governance layer (authority, approvals, delegations, denials, trust, projects, record locks, the ledger) is **ours** and does not exist upstream | [`../../workspace/starting-kit/`](../../workspace/starting-kit/) |
 | **Hermes** | The **agent runtime** — the thing that will hold the AI-employee half. It is *borrowed* (a sibling project's code), not ours | [`../ai/hermes-agent-main/`](../ai/hermes-agent-main/) |
-| **The model server** | Local inference (llama.cpp) serving a quantised Qwen2.5-7B model on `:8080`. No cloud dependency | described in [`ARCHITECTURE.md`](ARCHITECTURE.md) §5 |
+| **The model server** | Local inference (llama.cpp) serving a quantised Qwen2.5-7B model on `:8080`. No cloud dependency. **The full model-layer design is [`ARCHITECTURE-model-server-integration.md`](ARCHITECTURE-model-server-integration.md)** (2026-10-05): the platform already owns a model control plane, llama.cpp needs one preset entry, and the one owner decision is the long-term default | [`ARCHITECTURE.md`](ARCHITECTURE.md) §5, and the integration document |
 
 Two arrows connect them: **(1)** the agent reaches the platform's tools over MCP, authorised by
 our own gate; **(2)** the agent asks the model server for inference. Both were proven working on
@@ -264,9 +264,12 @@ This is not optional and not a preference.
   they create no tables and serve no routes, but stay readable and restorable in seconds. See
   `workspace/references/parked-modules.md`.
 - **Only `packages/enterprise` was ever actually deleted** — its licence forbids redistribution.
-- **The MCP logs `Failed to index 21 tools … Invalid OpenAI API key`.** Not a fault: there is no
-  embeddings endpoint locally (**B-16**). All 21 tools register and are callable; only semantic
-  search over tools is degraded.
+- **The MCP logs `Failed to index 21 tools … Invalid OpenAI API key`.** **Root-caused 2026-10-05, and
+  the old description was half the story** (**B-16**). That error text is OpenAI's own code, so the
+  call never reached our server: the **`mcp` service is missing `OPENAI_BASE_URL`** (it is set for
+  `app` and `opencode` and not for `mcp`). The second, also-real defect is that the `model` service
+  has no embedding model. All 21 tools register and are callable; only semantic search over tools is
+  degraded. See [`ARCHITECTURE-model-server-integration.md`](ARCHITECTURE-model-server-integration.md) §6.2.
 
 ### 3h. The one rule that matters most
 
@@ -298,6 +301,8 @@ companai/                       ← repo 1 root (thinking + docs).  You are here
 │   │   ├── README.md           the front door: reading order, the sprint process
 │   │   ├── BACKLOG.md          **THE ONE ROADMAP** — everything left, in order
 │   │   ├── ARCHITECTURE.md     how Starting Kit + Hermes + model server run together
+│   │   ├── ARCHITECTURE-hermes-integration.md      the Hermes boundary design (B-05, decided 2026-10-05)
+│   │   ├── ARCHITECTURE-model-server-integration.md  the model layer: llama.cpp, providers, embeddings (2026-10-05)
 │   │   ├── BLOCKERS.md         anything stopping progress, with what clears it
 │   │   ├── NEEDS-YOU.md        **numbered list of owner-only actions** (see §8)
 │   │   ├── AGENT-HALF.md       **THE AGENT HALF** — five agent kinds, the responsibility rule, and where every lesson lands
@@ -501,8 +506,8 @@ and was *not* re-measured — treat it as a starting point, not a fact.**
 | **The runtime boundary (B-05)** | **DECIDED 2026-10-05 by the owner.** One product, one repository, one deployment, one interface (ours), with Hermes as a **supervised private runtime process behind the internal port**; Hermes is **headless**. Reasoning in [`ARCHITECTURE-hermes-integration.md`](ARCHITECTURE-hermes-integration.md) §11. The Hermes **profile** topology is deferred with the trigger **the agent gateway** |
 | **The running stack** | **8 containers up** (app, mcp, hermes, model, opencode, postgres, redis, meilisearch); `/login` answers **200** |
 | **The local database** | **Clean and complete** — 3 users, 1 tenant, 1 organisation, 5 feature toggles, 5 `action_logs` rows. Rebuilt from scratch on the fixed image 2026-10-05, init ran green |
-| **Open blockers** | **3** — B-05 (OpenCode is load-bearing), B-16 (no embeddings endpoint), B-17 (no audit trail of agent tool calls). **None stops the build** (see [`BLOCKERS.md`](BLOCKERS.md)). **B-05's design face is now closed** (the boundary is decided); what stays open is *when* OpenCode goes, tracked as **N-8** |
-| **Waiting on the owner** | **3** — Coolify password (item 5), Docker Desktop auto-start (item 6), the ISO (item 7, optional) |
+| **Open blockers** | **3** — B-05 (OpenCode is load-bearing), B-16 (no embeddings endpoint), B-17 (no audit trail of agent tool calls). **None stops the build** (see [`BLOCKERS.md`](BLOCKERS.md)). **B-05's design face is now closed** (the boundary is decided); what stays open is *when* OpenCode goes, tracked as **N-8**. **B-16 was root-caused 2026-10-05** — it is two defects, the first being a missing `OPENAI_BASE_URL` on the `mcp` service |
+| **Waiting on the owner** | **4** — Coolify password (item 5), Docker Desktop auto-start (item 6), the ISO (item 7, optional), and the model layer's long-term default (**item 13**, with a recommended answer and a safe default) |
 
 **Group B — quoted from older documents, not re-measured:**
 

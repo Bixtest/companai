@@ -104,6 +104,8 @@ companai/                      ← you are here
 │       ├── ARCHITECTURE-hermes-integration.md  **the full Hermes integration design** — platform to
 │       │                      platform, function to function, and multi-tenant. The deliverable that
 │       │                      supersedes the process recommendation in `analysis/`
+│       ├── ARCHITECTURE-model-server-integration.md  **the model layer** — llama.cpp, the provider
+│       │                      presets, the embedding lane, and the two defects found (2026-10-05)
 │       ├── BLOCKERS.md        anything stopping progress, with what clears it
 │       ├── NEEDS-YOU.md       owner-only actions, numbered
 │       └── RUNBOOK-*.md       hosting: the server manual, the domain walkthrough, Sprint 0
@@ -323,7 +325,26 @@ a folder, finishes a phase, or makes a decision updates it in the same change.
 A newcomer who cannot orient themselves from this page alone means it is broken —
 fix the page, not the newcomer.
 
-*Last updated: 2026-10-05 — **`B-05` is DECIDED: the owner approved the runtime boundary.** One
+*Last updated: 2026-10-05 — **the model layer is designed, and the work turned out to be four small
+changes.** [`library/development/ARCHITECTURE-model-server-integration.md`](library/development/ARCHITECTURE-model-server-integration.md)
+settles how Companai calls hosted models and how it runs open-weight ones, and it corrects the
+premise of the prior `llama/` analysis: that analysis assumed the model control plane would have to be
+built, and **it already exists in the code** — a 7-tier resolution chain (`model-factory.ts`), a
+provider registry, **11** OpenAI-compatible presets, a tenant model allowlist, per-agent overrides and
+token metering. So **llama.cpp is one preset entry, not a project.** Two defects were found and
+measured, both of which the prior analysis missed: the `model` service command has **no `--jinja`**
+(Hermes' own docs say llama.cpp then ignores the `tools` parameter, and the COOKBOOK's Step 4 table
+records exactly that symptom — an agent turn where the model picked a tool and **nothing reached the
+platform**), and **B-16 was root-caused** to a missing `OPENAI_BASE_URL` on the `mcp` service, which
+is why its error text is OpenAI's own `invalid_api_key` rather than anything from our server. Two
+hostile passes ran and falsified **seven** of the document's own claims, all corrected rather than
+defended. **One decision is the owner's** and is recommended, not closed: the long-term default
+(**item 13** in `NEEDS-YOU.md`). Docs updated in the same change: the new integration document,
+`BLOCKERS.md` (B-16), `BACKLOG.md` (seven new deferred rows, each with its trigger), `NEEDS-YOU.md`
+(item 13), `ARCHITECTURE.md`, `HANDOVER.md`, `RUNBOOK-sprint0.md`, `workspace/COOKBOOK.md` (steps 3.2
+and 3.3) and this page.*
+
+*Earlier, 2026-10-05 — **`B-05` is DECIDED: the owner approved the runtime boundary.** One
 product, one repository, one deployment, one interface (ours), with Hermes as a **supervised private
 runtime process behind the internal port**; Hermes is **headless**. The owner challenged the
 recommendation with three questions first, and all three were answered from the source rather than
