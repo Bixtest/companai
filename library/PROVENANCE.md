@@ -26,7 +26,7 @@ byte-for-byte copy of its source.
 | `13-design-conversations` | `E:\brainstorming\projecting\ai-datasets` | 6 | 6 |
 | `14-reference-collections` | `E:\brainstorming\projecting\bookmarks\backend_references` (top level only) | 5 | 2 |
 | `15-agent-rules` | `E:\brainstorming\projecting\agent_rules` | 5 | 5 |
-| `16-konsult-product-docs` | `C:\Users\Ramzi\Downloads\konsult\aissistant-package` — `docs\`, `documentation\`, and 13 top-level files | 62 | 61 |
+| `16-konsult-product-docs` | `E:\sep-26-2026\major-importand-codebases\konsult\aissistant-package` (moved off `C:\Users\Ramzi\Downloads\konsult\` on 2026-10-04) — `docs\`, `documentation\`, and 13 top-level files | 62 | 61 |
 | | **Total** | **577** | **521** |
 
 The 4 loose files folded into `12-vision-extras` are

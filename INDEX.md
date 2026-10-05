@@ -123,11 +123,14 @@ companai/                      ← you are here
 │   ├── .toolchain/            our own Node 24 — do not use the system Node
 │   └── starting-kit/          THE CODEBASE (repo 2)
 │
-├── aissistant-package/        ⚠️ NOT OURS — the SIBLING project's codebase (Paperclip fork).
+├── aissistant-package/        ⚠️ NOT OURS — the SIBLING project's codebase: a fork of Paperclip
+│                              0.3.1 with Hermes wired in (host/packages/adapters/hermes/).
 │                              A legacy copy, merged into konsult/ on 2026-08-17. DO NOT EDIT,
-│                              do not deploy from it. Authoritative copy: konsult/aissistant-package/
+│                              do not deploy from it. **The authoritative copy moved to the E:
+│                              drive with the other archived codebases (2026-10-04):**
+│                              E:\sep-26-2026\major-importand-codebases\konsult\aissistant-package
 ├── companai.md                ⚠️ NOT OURS — a sibling document, copied in. Byte-identical to
-│                              konsult/aissistant-package/documentation/cursor/companai.md.
+│                              <that moved copy>\documentation\cursor\companai.md.
 │                              It reads as a vision statement for OUR product. It is not one
 ├── companai-logo/             Brand assets
 ├── keys/                      Server credentials — NOT documentation, keep private. Now gitignored
