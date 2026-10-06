@@ -24,8 +24,8 @@ const container = {
   }),
 }
 
-const validateCrudMutationGuardMock = jest.fn()
-const runCrudMutationGuardAfterSuccessMock = jest.fn()
+const runRouteMutationGuardsMock = jest.fn()
+const runAfterSuccessMock = jest.fn(async () => undefined)
 const withAtomicFlushMock = jest.fn(async (_em: unknown, phases: Array<() => unknown>) => {
   for (const phase of phases) {
     await phase()
@@ -49,9 +49,20 @@ jest.mock('@open-mercato/shared/lib/di/container', () => ({
   createRequestContainer: jest.fn(async () => container),
 }))
 
-jest.mock('@open-mercato/shared/lib/crud/mutation-guard', () => ({
-  validateCrudMutationGuard: (...args: unknown[]) => validateCrudMutationGuardMock(...args),
-  runCrudMutationGuardAfterSuccess: (...args: unknown[]) => runCrudMutationGuardAfterSuccessMock(...args),
+/**
+ * Only the *registry call* is stubbed. The module wrapper
+ * (`beginPerspectivesMutationGuard`) runs for real, so a mutation that breaks the
+ * wrapper's block path or its after-success runner — including the two-guard
+ * shape on the POST route — is visible to these tests.
+ *
+ * D2-wide (2026-10-06): this suite used to mock the **deprecated**
+ * `@open-mercato/shared/lib/crud/mutation-guard` pair. That is the wrong target
+ * now — the routes no longer import it — and, more importantly, mocking the
+ * wrapper or the deprecated pair would make the migration's own mutations
+ * invisible. Stub the registry call only.
+ */
+jest.mock('@open-mercato/shared/lib/crud/route-mutation-guard', () => ({
+  runRouteMutationGuards: (...args: unknown[]) => runRouteMutationGuardsMock(...args),
 }))
 
 jest.mock('@open-mercato/shared/lib/commands/flush', () => ({
@@ -70,11 +81,23 @@ import { POST } from '../route'
 import { DELETE as DELETE_PERSONAL } from '../[perspectiveId]/route'
 import { DELETE as DELETE_ROLE } from '../roles/[roleId]/route'
 
+const guardAllow = (metadata: Record<string, unknown> = { token: 'guard' }) => ({
+  ok: true as const,
+  metadata,
+  runAfterSuccess: runAfterSuccessMock,
+})
+const guardDeny = (errorBody: Record<string, unknown>, errorStatus = 409) => ({
+  ok: false as const,
+  errorStatus,
+  errorBody,
+  response: new Response(),
+})
+
 describe('perspectives custom write mutation guards', () => {
   beforeEach(() => {
     container.resolve.mockClear()
-    validateCrudMutationGuardMock.mockReset()
-    runCrudMutationGuardAfterSuccessMock.mockReset()
+    runRouteMutationGuardsMock.mockReset()
+    runAfterSuccessMock.mockReset()
     withAtomicFlushMock.mockReset()
     saveUserPerspectiveMock.mockReset()
     saveRolePerspectivesMock.mockReset()
@@ -83,12 +106,8 @@ describe('perspectives custom write mutation guards', () => {
     rbacService.userHasAllFeatures.mockReset()
     em.find.mockReset()
     em.findOne.mockReset()
-    validateCrudMutationGuardMock.mockResolvedValue({
-      ok: true,
-      shouldRunAfterSuccess: true,
-      metadata: { token: 'guard' },
-    })
-    runCrudMutationGuardAfterSuccessMock.mockResolvedValue(undefined)
+    runRouteMutationGuardsMock.mockResolvedValue(guardAllow())
+    runAfterSuccessMock.mockResolvedValue(undefined)
     withAtomicFlushMock.mockImplementation(async (_em: unknown, phases: Array<() => unknown>) => {
       for (const phase of phases) {
         await phase()
@@ -127,46 +146,30 @@ describe('perspectives custom write mutation guards', () => {
     )
 
     expect(response.status).toBe(200)
-    expect(validateCrudMutationGuardMock).toHaveBeenCalledWith(
-      container,
+    expect(runRouteMutationGuardsMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        tenantId,
-        organizationId,
-        userId,
-        resourceKind: 'perspectives.perspective',
-        resourceId: perspectiveId,
-        operation: 'custom',
-        mutationPayload: expect.objectContaining({ perspectiveId, name: 'Pipeline' }),
+        auth: { userId, tenantId, organizationId },
+        input: expect.objectContaining({
+          resourceKind: 'perspectives.perspective',
+          resourceId: perspectiveId,
+          operation: 'custom',
+          mutationPayload: expect.objectContaining({ perspectiveId, name: 'Pipeline' }),
+        }),
       }),
     )
     expect(withAtomicFlushMock).toHaveBeenCalledWith(em, expect.any(Array), { transaction: true })
     expect(saveUserPerspectiveMock).toHaveBeenCalled()
-    expect(validateCrudMutationGuardMock.mock.invocationCallOrder[0]).toBeLessThan(
+    expect(runRouteMutationGuardsMock.mock.invocationCallOrder[0]).toBeLessThan(
       saveUserPerspectiveMock.mock.invocationCallOrder[0],
     )
-    expect(runCrudMutationGuardAfterSuccessMock).toHaveBeenCalledWith(
-      container,
-      expect.objectContaining({
-        tenantId,
-        organizationId,
-        userId,
-        resourceKind: 'perspectives.perspective',
-        resourceId: perspectiveId,
-        operation: 'custom',
-        metadata: { token: 'guard' },
-      }),
-    )
+    expect(runAfterSuccessMock).toHaveBeenCalled()
     expect(saveUserPerspectiveMock.mock.invocationCallOrder[0]).toBeLessThan(
-      runCrudMutationGuardAfterSuccessMock.mock.invocationCallOrder[0],
+      runAfterSuccessMock.mock.invocationCallOrder[0],
     )
   })
 
   it('short-circuits the save route when the mutation guard rejects', async () => {
-    validateCrudMutationGuardMock.mockResolvedValueOnce({
-      ok: false,
-      status: 409,
-      body: { error: { code: 'RECORD_LOCKED' } },
-    })
+    runRouteMutationGuardsMock.mockResolvedValue(guardDeny({ error: { code: 'RECORD_LOCKED' } }))
 
     const response = await POST(
       new Request(`http://localhost/api/perspectives/${encodeURIComponent(tableId)}`, {
@@ -185,7 +188,7 @@ describe('perspectives custom write mutation guards', () => {
     await expect(response.json()).resolves.toEqual({ error: { code: 'RECORD_LOCKED' } })
     expect(withAtomicFlushMock).not.toHaveBeenCalled()
     expect(saveUserPerspectiveMock).not.toHaveBeenCalled()
-    expect(runCrudMutationGuardAfterSuccessMock).not.toHaveBeenCalled()
+    expect(runAfterSuccessMock).not.toHaveBeenCalled()
   })
 
   it('wraps role perspective mutations from the save route with mutation guards', async () => {
@@ -208,17 +211,16 @@ describe('perspectives custom write mutation guards', () => {
     )
 
     expect(response.status).toBe(200)
-    expect(validateCrudMutationGuardMock).toHaveBeenNthCalledWith(
+    expect(runRouteMutationGuardsMock).toHaveBeenNthCalledWith(
       2,
-      container,
       expect.objectContaining({
-        tenantId,
-        organizationId,
-        userId,
-        resourceKind: 'perspectives.role_perspective',
-        resourceId: roleId,
-        operation: 'custom',
-        mutationPayload: expect.objectContaining({ tableId, applyToRoles: [roleId] }),
+        auth: { userId, tenantId, organizationId },
+        input: expect.objectContaining({
+          resourceKind: 'perspectives.role_perspective',
+          resourceId: roleId,
+          operation: 'custom',
+          mutationPayload: expect.objectContaining({ tableId, applyToRoles: [roleId] }),
+        }),
       }),
     )
     expect(saveRolePerspectivesMock).toHaveBeenCalledWith(em, cache, expect.objectContaining({
@@ -227,30 +229,18 @@ describe('perspectives custom write mutation guards', () => {
       organizationId,
       input: expect.objectContaining({ roleIds: [roleId], setDefault: true }),
     }))
-    expect(runCrudMutationGuardAfterSuccessMock).toHaveBeenCalledWith(
-      container,
-      expect.objectContaining({
-        tenantId,
-        organizationId,
-        userId,
-        resourceKind: 'perspectives.role_perspective',
-        resourceId: roleId,
-        operation: 'custom',
-        metadata: { token: 'guard' },
-      }),
-    )
+    // Both guard objects share the one module-level after-success runner, so it
+    // runs once per guard that wrote — here the personal guard always runs and
+    // the role guard runs because the role write produced rows.
+    expect(runAfterSuccessMock).toHaveBeenCalledTimes(2)
   })
 
   it('short-circuits role perspective mutations from the save route when the role guard rejects', async () => {
     rbacService.userHasAllFeatures.mockResolvedValueOnce(true)
     em.find.mockResolvedValueOnce([{ id: roleId, tenantId, deletedAt: null }])
-    validateCrudMutationGuardMock
-      .mockResolvedValueOnce({ ok: true, shouldRunAfterSuccess: true, metadata: { token: 'personal' } })
-      .mockResolvedValueOnce({
-        ok: false,
-        status: 409,
-        body: { error: { code: 'ROLE_PERSPECTIVE_LOCKED' } },
-      })
+    runRouteMutationGuardsMock
+      .mockResolvedValueOnce(guardAllow({ token: 'personal' }))
+      .mockResolvedValueOnce(guardDeny({ error: { code: 'ROLE_PERSPECTIVE_LOCKED' } }))
 
     const response = await POST(
       new Request(`http://localhost/api/perspectives/${encodeURIComponent(tableId)}`, {
@@ -271,7 +261,7 @@ describe('perspectives custom write mutation guards', () => {
     expect(withAtomicFlushMock).not.toHaveBeenCalled()
     expect(saveUserPerspectiveMock).not.toHaveBeenCalled()
     expect(saveRolePerspectivesMock).not.toHaveBeenCalled()
-    expect(runCrudMutationGuardAfterSuccessMock).not.toHaveBeenCalled()
+    expect(runAfterSuccessMock).not.toHaveBeenCalled()
   })
 
   it('does not run role after-success for clear-only save route no-ops', async () => {
@@ -300,15 +290,9 @@ describe('perspectives custom write mutation guards', () => {
       organizationId,
       roleIds: [roleId],
     }))
-    expect(runCrudMutationGuardAfterSuccessMock).toHaveBeenCalledTimes(1)
-    expect(runCrudMutationGuardAfterSuccessMock).toHaveBeenCalledWith(
-      container,
-      expect.objectContaining({ resourceKind: 'perspectives.perspective' }),
-    )
-    expect(runCrudMutationGuardAfterSuccessMock).not.toHaveBeenCalledWith(
-      container,
-      expect.objectContaining({ resourceKind: 'perspectives.role_perspective' }),
-    )
+    // The personal guard still runs its after-success; the role guard does not,
+    // because the clear removed zero rows. One shared runner call == personal only.
+    expect(runAfterSuccessMock).toHaveBeenCalledTimes(1)
   })
 
   it('wraps personal perspective deletes with mutation guards', async () => {
@@ -320,31 +304,19 @@ describe('perspectives custom write mutation guards', () => {
     )
 
     expect(response.status).toBe(200)
-    expect(validateCrudMutationGuardMock).toHaveBeenCalledWith(
-      container,
+    expect(runRouteMutationGuardsMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        tenantId,
-        organizationId,
-        userId,
-        resourceKind: 'perspectives.perspective',
-        resourceId: perspectiveId,
-        operation: 'delete',
-        mutationPayload: { tableId, perspectiveId },
+        auth: { userId, tenantId, organizationId },
+        input: expect.objectContaining({
+          resourceKind: 'perspectives.perspective',
+          resourceId: perspectiveId,
+          operation: 'delete',
+          mutationPayload: { tableId, perspectiveId },
+        }),
       }),
     )
     expect(deleteUserPerspectiveMock).toHaveBeenCalled()
-    expect(runCrudMutationGuardAfterSuccessMock).toHaveBeenCalledWith(
-      container,
-      expect.objectContaining({
-        tenantId,
-        organizationId,
-        userId,
-        resourceKind: 'perspectives.perspective',
-        resourceId: perspectiveId,
-        operation: 'delete',
-        metadata: { token: 'guard' },
-      }),
-    )
+    expect(runAfterSuccessMock).toHaveBeenCalled()
   })
 
   it('does not run after-success for personal perspective delete no-ops', async () => {
@@ -359,7 +331,7 @@ describe('perspectives custom write mutation guards', () => {
 
     expect(response.status).toBe(200)
     expect(deleteUserPerspectiveMock).toHaveBeenCalled()
-    expect(runCrudMutationGuardAfterSuccessMock).not.toHaveBeenCalled()
+    expect(runAfterSuccessMock).not.toHaveBeenCalled()
   })
 
   it('wraps role perspective clears with mutation guards', async () => {
@@ -371,16 +343,15 @@ describe('perspectives custom write mutation guards', () => {
     )
 
     expect(response.status).toBe(200)
-    expect(validateCrudMutationGuardMock).toHaveBeenCalledWith(
-      container,
+    expect(runRouteMutationGuardsMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        tenantId,
-        organizationId,
-        userId,
-        resourceKind: 'perspectives.role_perspective',
-        resourceId: roleId,
-        operation: 'delete',
-        mutationPayload: { tableId, roleId },
+        auth: { userId, tenantId, organizationId },
+        input: expect.objectContaining({
+          resourceKind: 'perspectives.role_perspective',
+          resourceId: roleId,
+          operation: 'delete',
+          mutationPayload: { tableId, roleId },
+        }),
       }),
     )
     expect(clearRolePerspectivesMock).toHaveBeenCalledWith(em, cache, expect.objectContaining({
@@ -389,18 +360,7 @@ describe('perspectives custom write mutation guards', () => {
       organizationId,
       roleIds: [roleId],
     }))
-    expect(runCrudMutationGuardAfterSuccessMock).toHaveBeenCalledWith(
-      container,
-      expect.objectContaining({
-        tenantId,
-        organizationId,
-        userId,
-        resourceKind: 'perspectives.role_perspective',
-        resourceId: roleId,
-        operation: 'delete',
-        metadata: { token: 'guard' },
-      }),
-    )
+    expect(runAfterSuccessMock).toHaveBeenCalled()
   })
 
   it('does not run after-success for role perspective clear no-ops', async () => {
@@ -420,6 +380,6 @@ describe('perspectives custom write mutation guards', () => {
       organizationId,
       roleIds: [roleId],
     }))
-    expect(runCrudMutationGuardAfterSuccessMock).not.toHaveBeenCalled()
+    expect(runAfterSuccessMock).not.toHaveBeenCalled()
   })
 })

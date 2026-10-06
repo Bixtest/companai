@@ -4,10 +4,7 @@ import { getAuthFromRequest } from '@open-mercato/shared/lib/auth/server'
 import { createRequestContainer } from '@open-mercato/shared/lib/di/container'
 import { withAtomicFlush } from '@open-mercato/shared/lib/commands/flush'
 import { isCrudHttpError, isUniqueViolation } from '@open-mercato/shared/lib/crud/errors'
-import {
-  runCrudMutationGuardAfterSuccess,
-  validateCrudMutationGuard,
-} from '@open-mercato/shared/lib/crud/mutation-guard'
+import { beginPerspectivesMutationGuard } from '../mutation-guard'
 import { perspectiveSaveSchema } from '@open-mercato/core/modules/perspectives/data/validators'
 import {
   loadPerspectivesState,
@@ -218,44 +215,47 @@ export async function POST(req: Request, ctx: { params: { tableId: string } }) {
   }
 
   const guardResourceId = parsed.data.perspectiveId ?? tableId
-  const guardResult = await validateCrudMutationGuard(container, {
-    tenantId: auth.tenantId ?? '',
+  const guard = await beginPerspectivesMutationGuard({
+    container,
+    req,
+    tenantId: auth.tenantId,
     organizationId: auth.orgId ?? null,
     userId: auth.sub,
     resourceKind: 'perspectives.perspective',
     resourceId: guardResourceId,
     operation: 'custom',
-    requestMethod: req.method,
-    requestHeaders: req.headers,
     mutationPayload: { ...parsed.data, tableId },
   })
-  if (guardResult && !guardResult.ok) {
-    return NextResponse.json(guardResult.body, { status: guardResult.status })
+  if (guard.blockedResponse) {
+    return guard.blockedResponse
   }
 
-  let roleGuardResult: Awaited<ReturnType<typeof validateCrudMutationGuard>> | null = null
-  if (hasRoleOps) {
-    roleGuardResult = await validateCrudMutationGuard(container, {
-      tenantId: auth.tenantId ?? '',
-      organizationId: auth.orgId ?? null,
-      userId: auth.sub,
-      resourceKind: 'perspectives.role_perspective',
-      resourceId: targetRoleIds.join(','),
-      operation: 'custom',
-      requestMethod: req.method,
-      requestHeaders: req.headers,
-      mutationPayload: {
-        tableId,
-        applyToRoles,
-        clearRoleIds,
-        name: parsed.data.name,
-        settings: parsed.data.settings,
-        setRoleDefault: parsed.data.setRoleDefault ?? false,
-      },
-    })
-  }
-  if (roleGuardResult && !roleGuardResult.ok) {
-    return NextResponse.json(roleGuardResult.body, { status: roleGuardResult.status })
+  // A second, independent guard: the POST guards TWO resources in one request
+  // when the payload carries role operations. It is collected separately and
+  // keeps its own after-success condition (see `beginPerspectivesMutationGuard`
+  // — do not collapse the two).
+  const roleGuard = hasRoleOps
+    ? await beginPerspectivesMutationGuard({
+        container,
+        req,
+        tenantId: auth.tenantId,
+        organizationId: auth.orgId ?? null,
+        userId: auth.sub,
+        resourceKind: 'perspectives.role_perspective',
+        resourceId: targetRoleIds.join(','),
+        operation: 'custom',
+        mutationPayload: {
+          tableId,
+          applyToRoles,
+          clearRoleIds,
+          name: parsed.data.name,
+          settings: parsed.data.settings,
+          setRoleDefault: parsed.data.setRoleDefault ?? false,
+        },
+      })
+    : null
+  if (roleGuard?.blockedResponse) {
+    return roleGuard.blockedResponse
   }
 
   let saved: Awaited<ReturnType<typeof saveUserPerspective>> | null = null
@@ -317,33 +317,11 @@ export async function POST(req: Request, ctx: { params: { tableId: string } }) {
     throw err
   }
 
-  if (guardResult?.ok && guardResult.shouldRunAfterSuccess) {
-    await runCrudMutationGuardAfterSuccess(container, {
-      tenantId: auth.tenantId ?? '',
-      organizationId: auth.orgId ?? null,
-      userId: auth.sub,
-      resourceKind: 'perspectives.perspective',
-      resourceId: guardResourceId,
-      operation: 'custom',
-      requestMethod: req.method,
-      requestHeaders: req.headers,
-      metadata: guardResult.metadata ?? null,
-    })
-  }
+  await guard.runAfterSuccess(guardResourceId)
 
   const didWriteRolePerspectives = applyToRoles.length > 0 || clearedRolePerspectiveCount > 0
-  if (didWriteRolePerspectives && roleGuardResult?.ok && roleGuardResult.shouldRunAfterSuccess) {
-    await runCrudMutationGuardAfterSuccess(container, {
-      tenantId: auth.tenantId ?? '',
-      organizationId: auth.orgId ?? null,
-      userId: auth.sub,
-      resourceKind: 'perspectives.role_perspective',
-      resourceId: targetRoleIds.join(','),
-      operation: 'custom',
-      requestMethod: req.method,
-      requestHeaders: req.headers,
-      metadata: roleGuardResult.metadata ?? null,
-    })
+  if (didWriteRolePerspectives && roleGuard) {
+    await roleGuard.runAfterSuccess(targetRoleIds.join(','))
   }
 
   return NextResponse.json({
