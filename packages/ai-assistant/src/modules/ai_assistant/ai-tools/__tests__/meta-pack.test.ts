@@ -61,6 +61,17 @@ describe('meta.list_agents', () => {
   })
 
   it('returns an empty array when the registry is empty (never throws)', async () => {
+    // Seed an EMPTY array rather than calling `resetAgentRegistryForTests()` and
+    // hoping nothing is declared.
+    //
+    // `resetAgentRegistryForTests()` only clears the in-memory map and sets
+    // `loaded = false`; the next `getAgent`/`listAgents` lazily runs
+    // `loadAgentRegistry()`, which imports the REAL generated registry. So the
+    // "empty" this test needs is a world in which the registry has genuinely been
+    // loaded and found to hold nothing — which is what `seedAgentRegistryForTests([])`
+    // expresses, and it is the only form of this premise that survives an agent
+    // being declared for real.
+    seedAgentRegistryForTests([])
     const ctx = makeCtx()
     const result = (await tool.handler({}, ctx as any)) as Record<string, unknown>
     expect(result.agents).toEqual([])

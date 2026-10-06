@@ -193,6 +193,15 @@ describe('WS-C integration — tool-pack coverage', () => {
     const tool = findTool(metaAiTools, 'meta.list_agents')
 
     it('returns { agents: [], total: 0 } when the registry is empty', async () => {
+      // Seed an EMPTY array so the registry is genuinely loaded-and-empty.
+      //
+      // Relying on `resetAgentRegistryForTests()` alone no longer produces an
+      // empty registry: it only clears the in-memory map, and the next call
+      // lazily loads the REAL generated `ai-agents.generated.ts` — which now
+      // declares `business_ir.query_author`. Seeding `[]` is the honest way to
+      // say "loaded, and it holds nothing", and it is what makes this assertion
+      // about the tool's graceful path rather than about the world's contents.
+      seedAgentRegistryForTests([])
       const result = (await tool.handler({}, makeCtx() as any)) as {
         agents: unknown[]
         total: number

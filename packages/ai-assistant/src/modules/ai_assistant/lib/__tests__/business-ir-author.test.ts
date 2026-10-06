@@ -303,12 +303,39 @@ describe('authorBusinessQueryIr — the model→IR wire (G-17)', () => {
   })
 
   it('reports an agent error rather than throwing when the runtime refuses the agent', async () => {
-    // No agent seeded: the runtime throws. The caller gets a value, not a crash.
+    // Force a REAL refusal for a STATED reason, rather than relying on the agent
+    // being absent from the registry.
+    //
+    // This test used to seed nothing and let `checkAgentPolicy` answer
+    // `agent_unknown`. That worked only while `business_ir.query_author` was
+    // undeclared — and it no longer is: the agent is now shipped in
+    // `ai-agents.ts`, so the registry (which this suite does not mock, by design)
+    // genuinely contains it and `loadAgentRegistry()` finds it. The assertion was
+    // measuring the world's state, not the wire's behaviour, so it passed for a
+    // reason that had just stopped being true.
+    //
+    // What the test is actually *about* is: "when the runtime refuses, the caller
+    // gets a value, not a crash." So declare the id as a chat-mode agent with no
+    // output schema, and ask for object mode —
+    // `checkAgentPolicy` answers `execution_mode_not_supported`, a deliberate
+    // refusal that holds whoever else declares the id later.
+    seedAgentRegistryForTests([
+      makeAgent({
+        id: BUSINESS_IR_AGENT_ID,
+        moduleId: 'ai_assistant',
+        executionMode: 'chat',
+        mutationPolicy: 'read-only',
+        // No `output` — object mode cannot be served by this declaration.
+      }),
+    ])
+
     const result = await authorBusinessQueryIr({ prompt: 'anything', authContext: baseAuth })
 
     expect(result.ok).toBe(false)
     if (result.ok) throw new Error('unreachable')
     expect(result.reason).toBe('agent_error')
+    // The refusal must happen BEFORE the model is asked anything: a wire that
+    // calls the model and then discards the answer would pass the assertion above.
     expect(generateObjectMock).not.toHaveBeenCalled()
   })
 })
