@@ -9,16 +9,39 @@ const OPTIMISTIC_LOCK_HEADER = 'x-om-ext-optimistic-lock-expected-updated-at'
 const deleteByTags = jest.fn(async () => {})
 const commandBusExecute = jest.fn()
 const runWithCacheTenantMock = jest.fn(async (_tenantId: string | null, fn: () => unknown) => await fn())
-const validateMutation = jest.fn(async () => ({ ok: true, shouldRunAfterSuccess: false, metadata: null }))
-const afterMutationSuccess = jest.fn(async () => {})
 const container = {
   resolve: jest.fn((name: string) => {
     if (name === 'em') return {}
     if (name === 'cache') return { deleteByTags }
     if (name === 'commandBus') return { execute: commandBusExecute }
-    if (name === 'crudMutationGuardService') return { validateMutation, afterMutationSuccess }
     throw new Error(`Unexpected container resolve: ${name}`)
   }),
+}
+
+// The route now runs the registry guard set through the module wrapper. Stub
+// ONLY the registry call — never the wrapper — so a mutation that disables the
+// wrapper's block path is visible to these tests.
+const guardRunAfterSuccess = jest.fn(async () => {})
+const mockRunRouteMutationGuards = jest.fn()
+jest.mock('@open-mercato/shared/lib/crud/route-mutation-guard', () => ({
+  runRouteMutationGuards: (...args: unknown[]) => mockRunRouteMutationGuards(...args),
+}))
+
+function guardAllow() {
+  return {
+    ok: true,
+    modifiedPayload: undefined,
+    runAfterSuccess: guardRunAfterSuccess,
+  }
+}
+
+function guardDeny(status: number, body: Record<string, unknown>) {
+  return {
+    ok: false,
+    errorStatus: status,
+    errorBody: body,
+    response: new Response(JSON.stringify(body), { status }),
+  }
 }
 
 const getAuthFromRequestMock = jest.fn()
@@ -85,8 +108,8 @@ beforeEach(() => {
   })
   findOneWithDecryptionMock.mockResolvedValue(makeOrganization())
   commandBusExecute.mockResolvedValue({ result: makeOrganization({ logoUrl: 'https://example.com/logo.svg' }) })
-  validateMutation.mockResolvedValue({ ok: true, shouldRunAfterSuccess: false, metadata: null })
-  afterMutationSuccess.mockResolvedValue(undefined)
+  mockRunRouteMutationGuards.mockResolvedValue(guardAllow())
+  guardRunAfterSuccess.mockClear()
 })
 
 describe('/api/directory/organization-branding', () => {
@@ -284,8 +307,37 @@ describe('/api/directory/organization-branding', () => {
     expect(commandBusExecute).toHaveBeenCalledTimes(1)
   })
 
+  it('calls the registry with the route scope and runs after-success when allowed', async () => {
+    const response = await PUT(new Request('http://localhost/api/directory/organization-branding', {
+      method: 'PUT',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ logoUrl: 'https://example.com/logo.svg' }),
+    }))
+
+    expect(response.status).toBe(200)
+    expect(mockRunRouteMutationGuards).toHaveBeenCalledTimes(1)
+    expect(mockRunRouteMutationGuards.mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        container,
+        req: expect.any(Request),
+        auth: { userId: 'user-1', tenantId, organizationId },
+        input: {
+          resourceKind: 'directory.organization',
+          resourceId: organizationId,
+          operation: 'update',
+          mutationPayload: { logoUrl: 'https://example.com/logo.svg' },
+        },
+      }),
+    )
+    expect(guardRunAfterSuccess).toHaveBeenCalledTimes(1)
+    expect(deleteByTags).toHaveBeenCalledWith([
+      `nav:sidebar:organization:${organizationId}`,
+      `nav:sidebar:tenant:${tenantId}`,
+    ])
+  })
+
   it('blocks the branding update when the mutation guard denies it', async () => {
-    validateMutation.mockResolvedValue({ ok: false, status: 423, body: { error: 'Record is locked' } })
+    mockRunRouteMutationGuards.mockResolvedValue(guardDeny(423, { error: 'Record is locked' }))
 
     const response = await PUT(new Request('http://localhost/api/directory/organization-branding', {
       method: 'PUT',
@@ -296,12 +348,13 @@ describe('/api/directory/organization-branding', () => {
     expect(response.status).toBe(423)
     expect(commandBusExecute).not.toHaveBeenCalled()
     expect(deleteByTags).not.toHaveBeenCalled()
+    expect(guardRunAfterSuccess).not.toHaveBeenCalled()
     const body = await response.json() as { error?: string }
     expect(body.error).toBe('Record is locked')
   })
 
-  it('runs the mutation-guard after-success hook when requested', async () => {
-    validateMutation.mockResolvedValue({ ok: true, shouldRunAfterSuccess: true, metadata: { reason: 'test' } })
+  it('does NOT run after-success when the guard blocks the update', async () => {
+    mockRunRouteMutationGuards.mockResolvedValue(guardDeny(422, { error: 'Nope' }))
 
     const response = await PUT(new Request('http://localhost/api/directory/organization-branding', {
       method: 'PUT',
@@ -309,14 +362,7 @@ describe('/api/directory/organization-branding', () => {
       body: JSON.stringify({ logoUrl: 'https://example.com/logo.svg' }),
     }))
 
-    expect(response.status).toBe(200)
-    expect(afterMutationSuccess).toHaveBeenCalledWith(
-      expect.objectContaining({
-        resourceKind: 'directory.organization',
-        resourceId: organizationId,
-        operation: 'update',
-        metadata: { reason: 'test' },
-      }),
-    )
+    expect(response.status).toBe(422)
+    expect(guardRunAfterSuccess).not.toHaveBeenCalled()
   })
 })

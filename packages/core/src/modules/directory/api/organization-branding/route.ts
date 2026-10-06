@@ -7,16 +7,13 @@ import type { OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
 import { getAuthFromRequest } from '@open-mercato/shared/lib/auth/server'
 import { createRequestContainer } from '@open-mercato/shared/lib/di/container'
 import { isCrudHttpError } from '@open-mercato/shared/lib/crud/errors'
-import {
-  runCrudMutationGuardAfterSuccess,
-  validateCrudMutationGuard,
-} from '@open-mercato/shared/lib/crud/mutation-guard'
 import { enforceCommandOptimisticLock } from '@open-mercato/shared/lib/crud/optimistic-lock-command'
 import { findOneWithDecryption } from '@open-mercato/shared/lib/encryption/find'
 import { resolveTranslations } from '@open-mercato/shared/lib/i18n/server'
 import { Organization } from '@open-mercato/core/modules/directory/data/entities'
 import { organizationUpdateSchema } from '@open-mercato/core/modules/directory/data/validators'
 import { resolveOrganizationScopeForRequest } from '@open-mercato/core/modules/directory/utils/organizationScope'
+import { beginDirectoryMutationGuard } from '@open-mercato/core/modules/directory/api/mutation-guard'
 import '@open-mercato/core/modules/directory/commands/organizations'
 import { createLogger } from '@open-mercato/shared/lib/logger'
 
@@ -202,19 +199,23 @@ export async function PUT(req: Request) {
 
     // Mutation-guard contract for custom write routes: validate before the write,
     // then run the after-success hook once the command persists.
-    const guardResult = await validateCrudMutationGuard(resolved.container, {
+    // D2-wide: routed through `beginDirectoryMutationGuard`, which runs the full
+    // registry guard set (plus the bridged legacy DI service) — the deprecated
+    // `validateCrudMutationGuard()` pair resolved only the DI-registered
+    // `crudMutationGuardService` and silently skipped registry guards.
+    const guard = await beginDirectoryMutationGuard({
+      container: resolved.container,
+      req,
       tenantId: resolved.tenantId,
       organizationId: resolved.organizationId,
-      userId: resolved.auth.sub,
+      userId: resolved.auth.sub ?? '',
       resourceKind: 'directory.organization',
       resourceId: resolved.organizationId,
       operation: 'update',
-      requestMethod: req.method,
-      requestHeaders: req.headers,
       mutationPayload: { logoUrl: parsed.data.logoUrl ?? null },
     })
-    if (guardResult && !guardResult.ok) {
-      return NextResponse.json(guardResult.body, { status: guardResult.status })
+    if (guard.blockedResponse) {
+      return guard.blockedResponse
     }
 
     const commandBus = resolved.container.resolve('commandBus') as CommandBus
@@ -237,19 +238,10 @@ export async function PUT(req: Request) {
       },
     )
 
-    if (guardResult?.ok && guardResult.shouldRunAfterSuccess) {
-      await runCrudMutationGuardAfterSuccess(resolved.container, {
-        tenantId: resolved.tenantId,
-        organizationId: resolved.organizationId,
-        userId: resolved.auth.sub,
-        resourceKind: 'directory.organization',
-        resourceId: resolved.organizationId,
-        operation: 'update',
-        requestMethod: req.method,
-        requestHeaders: req.headers,
-        metadata: guardResult.metadata ?? null,
-      })
-    }
+    // The registry already limits this to guards whose `validate()` returned
+    // `shouldRunAfterSuccess`, so calling it unconditionally is a no-op when no
+    // guard asked for it — the route no longer applies that gate by hand.
+    await guard.runAfterSuccess()
 
     await invalidateSidebarBrandingCache(resolved.container, resolved.organizationId, resolved.tenantId)
     return NextResponse.json(toResponsePayload(result, resolved.tenantId))
