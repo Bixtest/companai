@@ -346,6 +346,46 @@ The superadmin is `admin@companai.local`. **Treat that password as exposed** —
 container log by design, so it is in `docker logs` as well as the file. Change it after the first
 login: sign in, then **Profile → Password**.
 
+**Sign in through the page, not with a JSON probe.** The login route
+(`/api/auth/login`) parses **only** `application/x-www-form-urlencoded` bodies. Its
+`parseLoginForm()` has one branch for that content type and otherwise calls
+`req.formData()` — there is **no `application/json` branch**. So:
+
+| what you send | what you get |
+| --- | --- |
+| form-encoded, right password | **200** `{"ok":true, token…, redirect:"/backend"}` |
+| form-encoded, wrong/unknown account | **401** `{"ok":false,"error":"Invalid email or password"}` |
+| **JSON body** | **400** `{"ok":false,"error":"Invalid email or password"}` |
+
+That last row is the trap. A JSON POST falls into `req.formData()`, which throws, the
+`catch` returns every field as `""`, and the schema then rejects the empty email →
+**400** carrying the *same wording* as the 401 branch. A `curl` with
+`-H 'content-type: application/json'` therefore looks exactly like a rejected
+password and will send you hunting for a login bug that does not exist. This was
+chased for a full session before the content type was checked. **Measure with the
+same shape the browser uses** (`new FormData(form)`), or use the page itself.
+
+Measured 2026-10-06 against the deployed build, form-encoded:
+
+```
+admin@companai.local   -> 200  roles=["superadmin"]   <- the account that works
+admin@acme.com         -> 401
+employee@acme.com      -> 401
+superadmin@acme.com    -> 401
+```
+
+The three `@acme.com` rows exist in the `users` table with passwords set, but their
+stored hashes do not match the seeded companai password, so they are not usable logins
+as shipped. Note the first row's stored `email` is **encrypted ciphertext**
+(`…:v1`) — it is found by `email_hash`, not by the `email` column, which is why the
+email that resolves it is `admin@companai.local` and not the literal stored text. Do
+not "repair" that column; it is the encryption working as designed.
+
+**Anonymous `/backend` is a redirect chain, not an error.** `/backend` with no session
+returns **307 → `/api/auth/session/refresh?redirect=/backend`** → **307 →
+`/login?redirect=%2Fbackend`** → **200**. Probing the middle hop directly and reading
+its status is another way to mistake normal behaviour for a fault.
+
 ### Putting it on your own domain
 
 Right now it answers on an ephemeral Cloudflare quick tunnel. When you have the domain:
