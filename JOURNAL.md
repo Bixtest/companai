@@ -30,7 +30,7 @@ log.** Everything else (HANDOVER, START-PROMPT, README, BOOKMARKS, BACKLOG) poin
 
 ---
 
-### ▶ NOW — D2-wide continues with `workflows` (9 deprecated guard calls in 3 files)
+### ▶ NOW — D2-wide continues with `inbox_ops` (8 deprecated guard calls in 4 files)
 
 > **If you are a new agent, read only this block to know your job.** Everything below the box is the
 > history and the queue; this is the work in hand.
@@ -39,41 +39,45 @@ log.** Everything else (HANDOVER, START-PROMPT, README, BOOKMARKS, BACKLOG) poin
 happens (who may change what). Most of the codebase still calls an **old, deprecated** version of it
 that **silently skips the real guard registry** — a security hole. The fix, module by module, is to
 repoint those calls at the new registry. **This is tracked as "D2-wide".** `entities`, `data_sync`,
-`dictionaries` and `dashboards` are already done; **151 deprecated call sites remain across 59 files**,
-of which **45 calls in 9 enabled modules** are live (the rest are parked and recorded, not migrated).
+`dictionaries`, `dashboards` and `workflows` are already done; **142 deprecated call sites remain across
+58 files**, of which **36 calls in 8 enabled modules** are live (the rest are parked and recorded, not
+migrated).
 
-**Your job now — one module: `workflows` (9 calls / 3 files).** Do it exactly the way the previous four
+**Your job now — one module: `inbox_ops` (8 calls / 4 files).** Do it exactly the way the previous five
 were done, and the pattern is already written down (do not invent a new one):
 
-1. **Read the worked example**: `BUILD-ORDER.md` §2e, "Progress — `dashboards` DONE and PROVEN" — it has
-   the How / Tests / Proof / count table. The three before it (`data_sync`, `dictionaries`) are identical
-   in shape.
-2. **Create `packages/core/src/modules/workflows/api/mutation-guard.ts`** — a `beginWorkflowsMutationGuard(ctx)`
-   wrapper (copy `dashboards/api/mutation-guard.ts` and rename).
-3. **Repoint the 3 route files** from `validateCrudMutationGuard()` / `runCrudMutationGuardAfterSuccess()`
+1. **Read the worked example**: `BUILD-ORDER.md` §2e, "Progress — `workflows` DONE and PROVEN" — it has
+   the How / Tests / Proof / count table. The four before it (`data_sync`, `dictionaries`, `dashboards`)
+   are identical in shape.
+2. **Create `packages/core/src/modules/inbox_ops/api/mutation-guard.ts`** — a `beginInboxOpsMutationGuard(ctx)`
+   wrapper (copy `workflows/api/mutation-guard.ts` and rename).
+3. **Repoint the 4 route files** from `validateCrudMutationGuard()` / `runCrudMutationGuardAfterSuccess()`
    to `runRouteMutationGuards()` through the wrapper.
 4. **Repair the tests** — re-point their mocks from the deprecated DI pair to the registry wrapper.
-5. **Prove it**: disable the block path → the tests must go RED; neuter `runAfterSuccess` → RED; restore the
-   wrapper and confirm it is **md5-identical** to the version you had; then recount.
+5. **Prove it**: stub **only** the registry call `runRouteMutationGuards` — **never** the module wrapper,
+   or the mutation is invisible (§2e, "A proof defect found and fixed"); then disable the block path →
+   the tests must go RED; neuter `runAfterSuccess` → RED; restore the wrapper and confirm it is
+   **md5-identical**.
 6. **Recount and record**: the count command is in `BACKLOG.md` item **D2-wide**; expected result
-   **151 → 142**. Then update `BUILD-ORDER.md` §2e and `BACKLOG.md`, and commit **in both repos**.
+   **142 → 134**. Then update `BUILD-ORDER.md` §2e and `BACKLOG.md`, and commit **in both repos**.
 
-**Definition of done:** `workflows` measures **0** deprecated call sites; its route tests are green;
-the two mutation proofs went RED; the repo-wide count is **142**; the docs say so.
+**Definition of done:** `inbox_ops` measures **0** deprecated call sites; its route tests are green;
+the two mutation proofs went RED; the repo-wide count is **134**; the docs say so.
 
 **Then, in order (nothing dropped):**
 
 | # | The item | Why here |
 |---|---|---|
-| **1** | ✅ **The owner's three directives — DONE** | Directive 1's map was later found **incomplete** and completed (§4.4). |
+| **1** | ✅ **The owner's three directives — DONE** | Directive 1's map was later found **incomplete**; completed in Part I §4.4 + Part II. |
 | **2** | ✅ **D2-wide: `dashboards` — DONE** (code `a05ea2c`) | 10 calls / 4 files → 5 guard objects; count 161 → 151; mutation-proven twice. |
-| **3** | ✅ **Directive 1 completed** (docs `807ab40`) | Map §4.4 now covers **every** AI-touching item; verified **41 ids, 0 missing**. |
+| **3** | ✅ **Directive 1 completed** (docs `807ab40`, `365c4e4`) | Map §4.4 covers **every** AI-touching item; Part II works the three joints in depth. |
 | **4** | ✅ **Test defect (a): `explicit-sort-comparators` — DONE** (code `d5567c7`) | **16 sites, not 2** — read from the test's own output. Audit 4/4; 336 tests green. |
-| **5** | ✅ **Test defect (b): `module-decoupling` — DONE** (code `fe7c3e5`) | File-scoped isolation; **full suite now 602 suites / 5123 tests, 0 failures**. |
-| **6** | **◀ D2-wide: `workflows`** (9 calls / 3 files) — **THE ACTIVE TASK** | See the six steps above. |
-| **7** | **The rest of D2-wide, enabled modules** — `inbox_ops` (8), `perspectives` (8), `translations` (6), `planner` (4), `query_index` (4), `auth` (2), `directory` (2), `feature_toggles` (2) | Largest cluster first, each with its own mutation proof. |
-| **8** | **D3** — add the `escalate` outcome to `MutationGuardResult` | The last guard-engine gap; needs D2-wide's shape settled first. |
-| **9** | **The Metadata Registry** service (GAP A / C5) | The remaining foundation item; everything stacked on it inherits it. |
+| **5** | ✅ **Test defect (b): `module-decoupling` — DONE** (code `fe7c3e5`) | File-scoped isolation; **full suite 602 suites / 5123 tests, 0 failures**. |
+| **6** | ✅ **D2-wide: `workflows` — DONE** (code `d3af1b1`) | 9 calls / 3 files → 4 guard objects; count 151 → 142; mutation-proven (5 RED / 3 RED). |
+| **7** | **◀ D2-wide: `inbox_ops`** (8 calls / 4 files) — **THE ACTIVE TASK** | See the six steps above. |
+| **8** | **The rest of D2-wide, enabled modules** — `perspectives` (8), `translations` (6), `planner` (4), `query_index` (4), `auth` (2), `directory` (2), `feature_toggles` (2) | Largest cluster first, each with its own mutation proof. |
+| **9** | **D3** — add the `escalate` outcome to `MutationGuardResult` | The last guard-engine gap; needs D2-wide's shape settled first. |
+| **10** | **The Metadata Registry** service (GAP A / C5) | The remaining foundation item; everything stacked on it inherits it. |
 
 **Where the reasoning lives:** the order is `BUILD-ORDER.md` §2e; the live counts are in `BACKLOG.md`;
 the per-item status is in `BACKLOG.md`. **This box is the only place that says "we are doing X now."**
@@ -82,7 +86,7 @@ the per-item status is in `BACKLOG.md`. **This box is the only place that says "
 
 1. **Document how Hermes serves / is served, per development item** — including the Llama
    integration, the multi-tenant-vs-one-tenant challenge, multi-agents, integrations and MCP.
-   Written for a new developer, with no learning curve. → being built as
+   Written for a new developer, with no learning curve. → built as
    [`library/development/ARCHITECTURE-hermes-service-map.md`](library/development/ARCHITECTURE-hermes-service-map.md).
 2. **Restructure the handover docs** so they do not carry "what is next", and put the live task in
    **this** section. → done for `START-PROMPT.md`, `HANDOVER.md`, `README.md`, `BOOKMARKS.md`.
@@ -91,12 +95,11 @@ the per-item status is in `BACKLOG.md`. **This box is the only place that says "
    Updating the front end lets the owner test the micros as work proceeds. → recorded in
    [`WORKING-RULES.md`](library/development/WORKING-RULES.md) and the COOKBOOK.
 
-**All three are done.** The six-row table above is the queue that followed them; the row marked
-**◀ THE ACTIVE TASK** is the work in hand. The milestones reached on the way: `dashboards` migrated to
-the registry (`a05ea2c`); directive 1's map completed to cover every item (`807ab40`); the two
-test-suite defects fixed so the suite is green (`d5567c7`, `fe7c3e5`).
-| **8** | **D3** — add the `escalate` outcome to `MutationGuardResult` | The last guard-engine gap; needs D2-wide's shape settled first (the registry is where the outcome is returned). |
-| **9** | **The Metadata Registry** service (GAP A / C5) | The remaining foundation item; everything stacked on it inherits it. |
+**All three are done.** The table above is the queue that followed them; the row marked
+**◀ THE ACTIVE TASK** is the work in hand. The milestones reached on the way: `dashboards` and
+`workflows` migrated to the registry (`a05ea2c`, `d3af1b1`); directive 1's map completed to cover every
+item and to work the three joints in depth (`807ab40`, `365c4e4`); the two test-suite defects fixed so
+the suite is green (`d5567c7`, `fe7c3e5`).
 
 **Where the reasoning lives:** the order is `BUILD-ORDER.md` §2e; the live counts are in
 `BACKLOG.md`; the per-item status is in `BACKLOG.md`. **This box is the only place that says "we are
@@ -106,6 +109,17 @@ doing X now."**
 
 ### ✅ Done recently (ticked, then moved down here)
 
+- **2026-10-06 — `workflows` D2-wide migration** (code `d3af1b1`). 9 calls / 3 files → 4 guard objects;
+  count **151 → 142**; workflows measures 0. Fourth enabled module. **The proof's first attempt was
+  wrong and is recorded:** the tests mocked the *module wrapper*, so both mutations left the suite green
+  — the mutation never ran. Fixed by stubbing only the registry call `runRouteMutationGuards` and adding
+  a dedicated suite; the mutations then bit (block path disabled → **5 RED**; `runAfterSuccess` neutered
+  → **3 RED**; wrapper restored md5-identical `b969e361b9c727e61f3365f0f9cae1b0`). Whole `workflows`
+  module 45 suites / 650 tests green; core `tsc --noEmit` exit 0. Full entry below.
+- **2026-10-06 — directive 1 deepened: Part II of the Hermes service map** (docs `365c4e4`). The owner
+  asked for a plan a junior developer can execute flawlessly; Part II works the three real joints in
+  depth — agent identity (`AH-1`), the tool door + authorization (`S-02`/`AH-8`), and "Hermes learns as
+  you go" (`AH-9`) — plus the D2-wide walkthrough, every path read from source. Full entry below.
 - **2026-10-06 — directive 1 completed: the Hermes service map now covers *every* item** (docs below).
   Added §4.4 to `ARCHITECTURE-hermes-service-map.md` — the owner's directive was "every bit of
   development in our log where needed", and the first pass named only 11 items while the BACKLOG holds
@@ -131,6 +145,47 @@ doing X now."**
   `a3b58ad`). Full entry below.
 - **2026-10-06 — D0** — the generated guard registry now delivers guards, mutation-proven
   (code `d225602`). Full entry below.
+
+---
+
+## 2026-10-06 (newest) — `workflows` retired, and a mutation proof that was proving nothing
+
+**The active task from the box: `workflows` D2-wide (9 deprecated guard calls in 3 files). Done, proven
+and committed (`d3af1b1`, code repo).**
+
+**What was done, plainly.** The three route files that write workflow definitions
+(`definitions/[id]/route.ts` PUT + DELETE, `definitions/[id]/customize`, `definitions/[id]/reset-to-code`)
+called the **deprecated** guard pair, which resolves only the single DI-registered service and silently
+skips the real guard registry. They now go through a new module wrapper
+`workflows/api/mutation-guard.ts` → `beginWorkflowsMutationGuard(ctx)`, which calls
+`runRouteMutationGuards()` — the same shape as `entities`, `data_sync`, `dictionaries`, `dashboards`.
+**9 calls in 3 files → 4 guard objects.** Count **151 → 142**, measured two independent ways (`grep` and
+`git grep`), and `workflows` now measures **0**.
+
+**The part worth recording — my first proof was worthless, and the mutation is what caught it.** I
+repaired the four existing test suites and, to keep them simple, mocked the **module wrapper** so each
+test saw a pass-through guard. Then I ran the two mutations the pattern requires: disable the block path,
+and neuter `runAfterSuccess`. **Both stayed green.** A green mutation does not mean "the code is fine" —
+it means **the test is not exercising the code you mutated**. Because the wrapper was mocked, the mutated
+block path never ran at all.
+
+The fix is the pattern now written into the docs: stub **only** the registry call
+(`runRouteMutationGuards`), and let the module wrapper run for real. That meant adding a dedicated suite
+(`api/__tests__/mutation-guard.route.test.ts`) that drives the actual routes with a blocked verdict and
+with a passing verdict, and asserts the id is re-bound to the row the write produced. With the wrapper
+in the path, the mutations bite: **block path disabled → 5 RED; `runAfterSuccess` neutered → 3 RED;
+wrapper restored md5-identical (`b969e361b9c727e61f3365f0f9cae1b0`)**.
+
+**Also this session — the map's Part II, and a heading defect I introduced and fixed.** Per the owner's
+"deep enough for a junior developer", `ARCHITECTURE-hermes-service-map.md` gained Part II: the three real
+joints worked in full (agent identity `AH-1`; the tool door + authorization `S-02`/`AH-8`; skills+memory
+`AH-9`) plus the D2-wide walkthrough (§10–§13), every path read from source. My insert left §9 sitting
+*after* §10–§13; a grep caught the order and it was moved back before Part II, with the duplicated
+verification block removed (docs `365c4e4`).
+
+**Evidence.** `workflows` api **7 suites / 118 tests green**; whole `workflows` module **45 suites /
+650 tests green**; core `tsc --noEmit` **exit 0**. **Next active task: `inbox_ops` (8 calls / 4 files);
+expected count 142 → 134.**
 
 ---
 

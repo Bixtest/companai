@@ -48,7 +48,7 @@ stacking.* That is exactly what he asked for.
 | Accounts management | **BUILT** | `packages/core/src/modules/auth/` — api, backend, commands, components, data, di.ts, emails, encryption.ts, events.ts, frontend, `i18n`, lib, **migrations (20+)**, services, setup.ts, workers |
 | Roles & permissions | **BUILT** (two-table ACL) | `RoleAcl` (`role_acls`) + `UserAcl` (`user_acls`), `featuresJson: string[]`, wildcard matching, `isSuperAdmin` |
 | Languages / i18n | **BUILT** | `shared/src/lib/i18n`; per-module `i18n` folders; `translations` module; `dictionaries` module |
-| The guard engine ("this") | **PARTLY BUILT — D0 FIXED 2026-10-06, the rest open** | `MutationGuard` + `runMutationGuards()` exist and run. **D0 fixed:** the generated registry now delivers guards from an enabled module (`entities`), mutation-proven end to end (§2c). **Still open:** the **route path** — **151 call sites** still call the `@deprecated` resolver and bypass the registry (**D2-wide**, §2c/§2e; was 198 real call sites, `entities`, `data_sync`, `dictionaries` and `dashboards` now migrated); and the guard result is binary, with no `escalate` outcome (**D3**) |
+| The guard engine ("this") | **PARTLY BUILT — D0 FIXED 2026-10-06, the rest open** | `MutationGuard` + `runMutationGuards()` exist and run. **D0 fixed:** the generated registry now delivers guards from an enabled module (`entities`), mutation-proven end to end (§2c). **Still open:** the **route path** — **142 call sites** still call the `@deprecated` resolver and bypass the registry (**D2-wide**, §2c/§2e; was 198 real call sites, `entities`, `data_sync`, `dictionaries`, `dashboards` and `workflows` now migrated); and the guard result is binary, with no `escalate` outcome (**D3**) |
 | Structural write hook | **BUILT — and now registry-based** | `beginEntitiesMutationGuard` is called at **every** entity/field-definition write path, carrying `resourceKind` (`entities.entity`, `entities.field_definition`) + `operation`. As of 2026-10-06 (`d225602`) it runs the **registry** (`runRouteMutationGuards`), not the deprecated single-service resolver |
 
 So the honest statement is: **the foundation is built; of the foundation's gaps, D0 and D1 are now closed**
@@ -82,7 +82,7 @@ called `validateCrudMutationGuard()`, which the code itself marks `@deprecated` 
 
 Effect today: **the authoritative write path for tables and columns — the exact path the structural
 grammar must govern — was the one path not running the full guard set.** The entities path is fixed; the
-**wider sweep of 151 call sites is open** (§2c) — `data_sync` (19), `entities/encryption.ts` (2), `dictionaries` (16) and `dashboards` (10) are now retired — with the plan in §2e.
+**wider sweep of 142 call sites is open** (§2c) — `data_sync` (19), `entities/encryption.ts` (2), `dictionaries` (16), `dashboards` (10) and `workflows` (9) are now retired — with the plan in §2e.
 
 **D3 — the guard result is binary; there is no "escalate".** `MutationGuardResult.ok` is a boolean. A
 guard can **allow** or **block** — it cannot say *"allowed, but a person must review"*. The owner's
@@ -200,7 +200,7 @@ between (A) and (B) is made against a stated need rather than against "the file 
 | `auth` | ENABLED | 2 / 1 | identity (P1) | **A — integrate now** | live: invite resend |
 | `directory` | ENABLED | 2 / 1 | tenancy/org (P2) | **A — integrate now** | live: org branding write |
 | `feature_toggles` | ENABLED | 2 / 1 | flags (P14) | **A — integrate now** | live: override writes |
-| `workflows` | ENABLED | 9 / 3 | workflow engine (P8) | **A — integrate now** | live: definition customize/reset writes |
+| `workflows` | ENABLED | 9 / 3 → 0 | workflow engine (P8) | **✅ DONE `d3af1b1`** | live: definition customize/reset writes — **retired and proven (§2e)** |
 | `customers` | parked | 74 / 25 | CRM (B1) — reference module | **B — park till later** | not needed now; upstream's CRUD reference; graft-phase |
 | `customer_accounts` | parked | 10 / 4 | CRM portals (B14) | **B — park till later** | owns `domain_mappings` (wanted) — extract to `directory` in the graft phase |
 | `wms` | parked | 6 / 3 | inventory (B4) | **B — park till later** | ERP pack, off by decision |
@@ -211,17 +211,17 @@ between (A) and (B) is made against a stated need rather than against "the file 
 | `payment_gateways` | parked | 2 / 1 | payments (B11) | **B — park till later** | ERP pack, off by decision |
 
 **Totals (re-measured after `dashboards`, 2026-10-06, by a per-module grep walk).** ENABLED at baseline
-**93 calls / 38 files** (13 modules). **Four modules are now DONE:** `entities` (was 3/2), `data_sync`
-(19/7), `dictionaries` (16/6), `dashboards` (10/4) → **65 calls retired**. Enabled integrate-now work still to do: **45 calls**
-(`workflows` 9, `inbox_ops` 8, `perspectives` 8, `translations` 6, `planner` 4,
+**93 calls / 38 files** (13 modules). **Five modules are now DONE:** `entities` (was 3/2), `data_sync`
+(19/7), `dictionaries` (16/6), `dashboards` (10/4), `workflows` (9/3) → **74 calls retired**. Enabled integrate-now work still to do: **36 calls**
+(`inbox_ops` 8, `perspectives` 8, `translations` 6, `planner` 4,
 `query_index` 4, `auth` 2, `directory` 2, `feature_toggles` 2). **Parked 106 calls / 40 files** (8 modules)
-— disconnect/park, recorded as graft-phase. **Whole tree now: 151 real deprecated call sites**
-(198 baseline − 19 − 2 − 16 − 10 = 151; measured, and the per-module recount shows `entities`, `data_sync`,
-`dictionaries` and `dashboards` all at **0**). **Count calls, not lines** — see the corrected count command in
+— disconnect/park, recorded as graft-phase. **Whole tree now: 142 real deprecated call sites**
+(198 baseline − 19 − 2 − 16 − 10 − 9 = 142; measured, and the per-module recount shows `entities`, `data_sync`,
+`dictionaries`, `dashboards` and `workflows` all at **0**). **Count calls, not lines** — see the corrected count command in
 [`BACKLOG.md`](BACKLOG.md) item **D2-wide**.
 
 **The order inside D2-wide:** enabled modules first (they are the live hole), largest cluster first
-(`data_sync` ✅ → `dictionaries` ✅ → `dashboards` ✅ → `workflows` → the rest), each with its own mutation proof exactly as
+(`data_sync` ✅ → `dictionaries` ✅ → `dashboards` ✅ → `workflows` ✅ → `inbox_ops` → the rest), each with its own mutation proof exactly as
 the entities fix was proven (§2c). Then the parked set is recorded — **not migrated** — as graft-phase work
 in [`CORE-MODULES-REGISTER.md`](CORE-MODULES-REGISTER.md) and the backlog.
 
@@ -255,13 +255,24 @@ in [`CORE-MODULES-REGISTER.md`](CORE-MODULES-REGISTER.md) and the backlog.
 | **A behaviour point handled, not silently changed** | The `roles/widgets` and `users/widgets` routes each have **two mutually-exclusive branches** — empty id list → remove-and-return, otherwise upsert. Both branches call `guard.runAfterSuccess()`, so the after-success is bound to whichever branch actually ran; the guard itself is created once, before the branch, so a blocked guard stops either branch. |
 | **Count re-measured** | Repo-wide deprecated non-comment call sites **161 → 151** (−10, exactly this module). Per-module recount shows `dashboards` at **0**. |
 
+**Progress — `workflows` DONE and PROVEN (2026-10-06, code commit `d3af1b1`).**
+
+| What | Detail |
+|---|---|
+| **How it was solved** | A new module wrapper `workflows/api/mutation-guard.ts` (`beginWorkflowsMutationGuard()`) mirrors `entities`/`data_sync`/`dictionaries`/`dashboards`: every write goes through `runRouteMutationGuards()`. All 9 deprecated calls in 3 route files were rewritten — `definitions/[id]/route.ts` (PUT ×2 sites + DELETE ×1), `definitions/[id]/customize/route.ts` (×1), `definitions/[id]/reset-to-code/route.ts` (×1). **9 calls → 4 guard objects.** |
+| **Tests** | 4 test files repaired, not deleted — they mocked the deprecated DI pair and were falsified by the change; re-pointed at the registry wrapper with the same intent. A new suite `api/__tests__/mutation-guard.route.test.ts` is the guard proof: it asserts the block path short-circuits all five write sites, the after-success runs only after a committed write, the after-success is re-bound to the row id the write produced, and the registry receives the verified tenant/org/actor. |
+| **A proof defect found and fixed while proving it** | The first attempt mocked the **module wrapper** in each test, so both mutations left the suite green — the mutation was invisible because the mutated code never ran. The working pattern (now recorded): stub **only** the registry call `runRouteMutationGuards`, let the module wrapper run for real. This is why the new dedicated suite exists. |
+| **Proof** | Two mutations of the wrapper: disabling the **block path** → **5 tests RED**; neutering **runAfterSuccess** → **3 tests RED**. Wrapper restored **md5-identical** (`b969e361b9c727e61f3365f0f9cae1b0`). `workflows` api = **7 suites / 118 tests green**; whole `workflows` module = **45 suites / 650 tests green**; `core` `tsc --noEmit` **exit 0**. |
+| **A behaviour point handled, not silently changed** | `definitions/[id]/route.ts` PUT has **two mutually-exclusive branches** — a `code:<workflowId>` id (materialise/revive an override row) or a plain DB row update. The guard is collected **once, before the branch**; whichever branch runs calls `guard.runAfterSuccess()`. The `code:` branch validates against the synthetic id but re-binds the after-success to the row id the write produced. |
+| **Count re-measured (two independent routes)** | Repo-wide deprecated non-comment call sites **151 → 142** (−9, exactly this module). Both `grep … | grep -vE` and `git grep` agree. Per-module recount shows `workflows` at **0**. |
+
 **The remaining count, re-measured after `dashboards` (2026-10-06).** Deprecated **call sites** left,
 excluding the 2 definitions in `mutation-guard.ts` and all comment lines: **151** (baseline **198**;
 `data_sync` retired 19, `entities/encryption` retired 2, `dictionaries` retired 16, `dashboards` retired 10 — a per-module grep walk
 confirms each figure). Enabled
-modules still to do: **`workflows` (9) → `inbox_ops` (8) →
+modules still to do: **`inbox_ops` (8) →
 `perspectives` (8) → `translations` (6) → `planner` (4) → `query_index` (4) → `auth` (2) → `directory` (2) →
-`feature_toggles` (2) = 45 calls**. Then the parked set (106 calls) is recorded, not migrated.
+`feature_toggles` (2) = 36 calls**. Then the parked set (106 calls) is recorded, not migrated.
 
 **"How it is solved, when, and where it is documented" — stated plainly, per the owner's reporting
 standard:**
@@ -434,7 +445,7 @@ one page, each with a named home. Details: [`BLUEPRINT-GAP-ANALYSIS.md`](BLUEPRI
 > run an agent later. The first item that actually crosses the Hermes port is **G-17**, in §4.2.
 0. ~~**D0** — make the generated guard registry real.~~ ✅ **FIXED 2026-10-06, proven (§2c).** The
    registry now delivers guards from an enabled module, and the delivery chain is mutation-proven.
-   **D2-wide (151 deprecated call sites remaining; 198 at baseline) is the remaining delivery work — see §2e.**
+   **D2-wide (142 deprecated call sites remaining; 198 at baseline) is the remaining delivery work — see §2e.**
 1. **D1 — ✅ FIXED 2026-10-06, proven.** The tier mapping / defaults / structural fallback are now a
    **setting** a superadmin can change (`module_configs`: module `request_outcome`, name
    `structureChangeTiers`), seeded from the dictionary and read through a function — not a hardcoded
@@ -443,7 +454,7 @@ one page, each with a named home. Details: [`BLUEPRINT-GAP-ANALYSIS.md`](BLUEPRI
    §2d. *(Still open under SD-4: the full `(object · verb · actorType · role · level)` grammar beyond the
    tier fallback, and the manage screen SD-5.)*
 2. **D2 (entities scope) — ✅ DONE 2026-10-06** (§2c). **D2-wide — OPEN, and now PLANNED (§2e):** retire
-   the deprecated `validateCrudMutationGuard()` pair at the **151 remaining call sites** (198 at baseline; §2c). *Not* a
+   the deprecated `validateCrudMutationGuard()` pair at the **142 remaining call sites** (198 at baseline; §2c). *Not* a
    blind sweep: each module is mapped to the core need it serves and given one decision — **(A)**
    customise & integrate directly (55 live calls in 10 enabled modules still to do; 93 enabled calls / 106 parked at baseline), **(B)** disconnect & park till
    later (the 40 parked files, 106 calls), or **(C)** already connected (`entities`). Enabled modules
@@ -545,7 +556,7 @@ top of it.**
 
 **What this does *not* change:** accounts management, roles/permissions and languages are genuinely
 built (measured, §1), and the structural grammar is still the right design. The work is still edits to
-an existing system. **D0 and D1 are now fixed and proven (§2c, §2d);** what remains is **D2-wide** (151
+an existing system. **D0 and D1 are now fixed and proven (§2c, §2d);** what remains is **D2-wide** (142
 deprecated call sites remaining, planned per-module in §2e) and D3.
 
 ---
@@ -556,7 +567,7 @@ deprecated call sites remaining, planned per-module in §2e) and D3.
   **D0 and D1 are fixed** (the registry delivers, §2c; the tiers are a setting, §2d) **and D2 now has four
   modules retired** (`entities`, `data_sync`, `dictionaries`, `dashboards`) — with all of them proven, not asserted.
 - **D2-wide is the live remaining defect:** **151 non-test call sites** still bypass the
-  registry via the deprecated resolver (baseline **198**, measured 2026-10-06 by a per-module grep walk; §2c) — **45 calls in 9
+  registry via the deprecated resolver (baseline **198**, measured 2026-10-06 by a per-module grep walk; §2c) — **36 calls in 8
   enabled modules** (integrate now, §2e), **106 calls parked** (disconnect & park). The
   `entities` file is already done, as the worked example. **The plan is per-module (§2e), not a blind
   sweep.** Counted, so it cannot slip out of view.
