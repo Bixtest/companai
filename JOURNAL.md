@@ -7,7 +7,37 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
-## 2026-10-06 (latest) — G-17 built: the AI that emits the Business IR, and two of my own errors caught by falsifying them
+## 2026-10-06 (latest) — the live model was asked, and it can: G-17's open question answered
+
+**The one claim G-17 would not make has been measured, and the answer is yes.** The stack was up (all
+eight containers healthy), so the local model was asked for real: **`Qwen2.5-7B-Instruct-Q4_K_M`, 6 of 6
+requests produced an object our own schema accepts** — across six *different* IR shapes (filtered list,
+`count`, bucketed `aggregate`, text `like` search, sort+limit, grouped average). Each reply was judged by
+`businessQueryIrSchema`, not by eye. It also picked **sensible semantics** — `count` for "how many",
+`aggregate` for "total per month" — which no schema can check.
+
+**The negative control is the part that makes the 6/6 mean something.** Asked with a *loose* prompt, the
+same model produced **nonsense** — invented nested `income`/`savings`/`debt` objects, plus a `tenant_id`
+key. The schema **rejected it** and named why: a bad `operation`, a missing required field, and
+`Unrecognized keys: "finances", "tenant_id"`. **So the model can go off-script, and the schema catches
+it — including the exact tenant-widening the design exists to refuse.** Without this, "6 of 6" would
+only have shown that the schema accepts everything.
+
+**Two limits, stated so the result is not over-read.** It is **not a reliability rate** (six requests,
+one run each, `temperature: 0` — it shows the model *can*, not how often it fails), and it went
+**straight to the model server**, not through the platform's agent path. The model's *ability* and the
+platform's *wire* are proven **separately** — which is exactly why the stubbed tests did not become
+redundant.
+
+**New artifact:** `packages/shared/src/lib/business-ir/__tests__/live.smoke.test.ts` — skips cleanly with
+a loud message when no model server is running, because a measurement is not a gate.
+
+**Still open:** the same request driven through the *live app* end to end (needs an authenticated
+session).
+
+---
+
+## 2026-10-06 — G-17 built: the AI that emits the Business IR, and two of my own errors caught by falsifying them
 
 **The join the vision was missing is now made.** The platform could compile and run a Business IR; it
 could call a model with a schema; **nothing pointed the one at the other.** Now:

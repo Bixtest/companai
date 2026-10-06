@@ -2507,12 +2507,73 @@ nailed the rule: the alias form passes, `declare const c: AssertEqual<A,B>` pass
   only the top.
 - The full `business-ir` suite: **78/78**, 5 suites.
 
-**What is NOT done, stated plainly.** The **live smoke test has not been run** — no prompt has been
-sent to the local model to ask whether it can actually emit a valid IR. Everything above uses a
-**stubbed** model, and that is deliberate: the wire is provably correct, and whether a given locally-
-hosted model is clever enough to produce IR-shaped JSON is a *separate* question that only a live run
-answers. It needs the running stack (the platform server / a configured provider). **Until it is run,
-"our local model can emit a valid IR" is unproven** — do not read this table as saying otherwise.
+**What is NOT done, stated plainly.** ~~The **live smoke test has not been run**~~ — **IT WAS RUN
+2026-10-06, and the answer is yes.** See the boxed measurement below; the paragraph is kept because it
+was true when written, and because the *stub-vs-live* distinction it draws is the one that mattered.
+
+### The live smoke test — measured 2026-10-06
+
+**The question step 4 carried in: can our local quantised model actually emit a valid IR?** The stack
+was up (all eight containers healthy), the model server answered on `:8080`, and the app was pointed at
+`Qwen2.5-7B-Instruct-Q4_K_M` through the OpenAI-compatible endpoint. So it was asked for real.
+
+**Result: 6 of 6 requests produced an object the platform's own schema accepts.** Run as
+`packages/shared/src/lib/business-ir/__tests__/live.smoke.test.ts`, which validates each reply against
+`businessQueryIrSchema` — the schema is the judge, not a human eyeballing JSON. The six were chosen to
+exercise *different IR shapes*, not six ways of asking one thing:
+
+| Request | What it exercised | Time | Verdict |
+|---|---|---|---|
+| *"list invoices over 10,000 EUR for each customer, newest first, at most 50"* | the vision's own §50 example: filter + dimension + sort + limit | 23 s | ✅ |
+| *"how many open support tickets are there"* | `count`, not `list` | 16 s | ✅ |
+| *"total revenue per month this year"* | `aggregate`, bucketed over time | 26 s | ✅ |
+| *"customers whose name contains "acme""* | a text operator (`like` with wildcards) | 17 s | ✅ |
+| *"the 10 newest orders"* | sort + limit, no filters | 15 s | ✅ |
+| *"average invoice value by country"* | `aggregate`, grouped | 12 s | ✅ |
+
+**The model chose sensible *semantics*, not just valid syntax** — `count` for "how many", `aggregate`
+for "total per month", `like` + `%acme%` for "contains". That is worth noting because it is the part a
+schema cannot check.
+
+**The negative control, without which "6 of 6" would mean nothing.** Asked with a *loose* prompt and no
+field list, the same model produced **complete nonsense** — invented nested `income`/`savings`/`debt`
+objects and a `tenant_id` key, nothing like an IR. Fed to the schema, it was **rejected**, with the
+exact reasons named:
+
+> `Invalid option: expected one of "list"|"count"|"aggregate"` ·
+> `Invalid input: expected string, received undefined` ·
+> `Unrecognized keys: "finances", "tenant_id"`
+
+So the model **can** go off-script, and the schema **catches it** — including the attempted `tenant_id`,
+which is exactly the widening the `.strict()` design exists to refuse. **The 6/6 is a real pass, not a
+schema that accepts everything.**
+
+**Two honest limits on this measurement.**
+1. **It is not a reliability rate.** Six requests, one run each, at `temperature: 0`. It shows the model
+   *can* do it, not how often it fails. A real rate needs many runs per shape, and that is a bigger
+   measurement than G-17 needed.
+2. **It went straight to the model server**, not through `generateObject` and the app's agent path. What
+   is proven is *the model can produce this shape*; the wire that feeds it through the platform is
+   proven separately, by the stubbed tests. Both halves are proven — they were just proven apart, which
+   is why the stubbed tests did not become redundant.
+
+**A second real defect, found by the critic pass on the smoke test itself.** The first version returned
+early from each test when no server was present — which Jest reports as **passed**. Pointed at a dead
+port it printed **"6 passed"**: a green tick over a run that contacted no model. That is the single
+worst outcome a measurement file can produce, and it was caught only because the test was deliberately
+run with no server to see what it did. **Fixed** by deciding reachability at file-load time and
+`describe.skip`ping the whole suite: the same dead port now reports **"6 skipped"**. (`IR_SMOKE_REQUIRE=1`
+turns a missing server into a failure, for a CI job whose purpose is this measurement.) *A test that
+cannot tell "passed" from "did not run" is worse than no test.*
+
+**A third, smaller defect the same probe surfaced:** the reachability probe used `curl -o /dev/null`,
+which is a *shell* path — `curl.exe` on Windows cannot write to it, so the probe failed **even when the
+server was up**, and the suite skipped while the model was running. Fixed with `curl -f` and no output
+redirection (exit code is the signal). Measured both ways: dead port → skipped; live server → 6 passed.
+
+**The one thing still not done:** the same request driven through the *live app* end to end (HTTP in,
+IR out). Everything needed for it exists; it needs an authenticated session against the running app.
+Recorded as NEEDS-YOU Part 4 item 15.
 
 **A pre-existing failure, not caused by this work.** `agent-runtime-object.test.ts` fails 4 of its 8
 cases on an unmodified tree: its mock of `llm-provider-registry` no longer matches the path

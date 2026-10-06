@@ -156,18 +156,54 @@ clean. The rule was already written down in `shared/src/modules/overrides.ts` �
 must NOT take a runtime dependency on `@open-mercato/ai-assistant` (the dependency direction is the
 other way around)"*. The wire now lives in `ai-assistant`.
 
-### 4c. What is still open — the honest limit, unchanged in spirit from §2c
+### 4c. The live-model question — ANSWERED 2026-10-06
 
-**No live model call has been made.** Every proof in 4a uses a **stubbed** model. The wire is
-demonstrably correct; **whether the local quantised model can actually emit a valid IR is still
-unproven** and still needs the running stack. That is recorded as a named open item (NEEDS-YOU Part 4
-item 15), not left implied.
+**The claim this document refused to make in §2c is now measured, and the answer is yes.**
 
-### 4d. A pre-existing failure found on the way
+The stack was up (eight containers healthy), the model server answered on `:8080`, and the app pointed
+at **`Qwen2.5-7B-Instruct-Q4_K_M`** via the OpenAI-compatible endpoint. The model was asked for six
+different IR shapes and **all six came back as objects the platform's own `businessQueryIrSchema`
+accepts** — the schema was the judge, not a human reading JSON.
+
+| Request | Shape exercised | Time | Verdict |
+|---|---|---|---|
+| *"list invoices over 10,000 EUR for each customer, newest first, at most 50"* | filter + dimension + sort + limit (the vision's §50 example) | 23 s | ✅ |
+| *"how many open support tickets are there"* | `count` | 16 s | ✅ |
+| *"total revenue per month this year"* | `aggregate` bucketed over time | 26 s | ✅ |
+| *"customers whose name contains "acme""* | text operator (`like`) | 17 s | ✅ |
+| *"the 10 newest orders"* | sort + limit | 15 s | ✅ |
+| *"average invoice value by country"* | grouped `aggregate` | 12 s | ✅ |
+
+The model also chose **sensible semantics** — `count` for "how many", `aggregate` for "total per
+month", `like` + `%acme%` for "contains" — which a schema cannot check and which is worth recording
+separately from the syntactic pass.
+
+**The negative control (without it, "6 of 6" would be worthless).** Given a *loose* prompt with no field
+list, the same model produced **nonsense** — invented nested `income`/`savings`/`debt` objects plus a
+`tenant_id` key. The schema **rejected it**, naming the reasons: a bad `operation`, a missing required
+field, and **`Unrecognized keys: "finances", "tenant_id"`**. So the model can go off-script and the
+schema catches it — including the exact tenant-widening the `.strict()` design exists to refuse.
+
+**Two limits, stated so the result is not over-read.**
+1. **Not a reliability rate.** Six requests, one run each, `temperature: 0`. It shows the model *can*,
+   not how often it fails.
+2. **It went straight to the model server**, not through `generateObject` and the app's agent path. The
+   model's *ability* and the platform's *wire* are each proven — separately. That is exactly why the
+   stubbed tests were not made redundant by this run.
+
+**Still open:** the same request driven through the live app end to end (HTTP in, IR out), which needs
+an authenticated session. NEEDS-YOU Part 4 item 15.
+
+### 4d. What remains open — the honest limit
+
+The document's §2c limit is now **discharged for the model question**; what remains is the app-level
+end-to-end run above. Nothing about the *wire* is unproven.
+
+### 4e. A pre-existing failure found on the way
 
 `agent-runtime-object.test.ts` fails **4 of 8** cases on a tree with none of my changes in it: its mock
 of `llm-provider-registry` no longer matches the path `model-factory` takes, so `resolveModel` throws
 `no_provider_configured`. Proven pre-existing by running the untouched file. Recorded as NEEDS-YOU
 Part 4 item 14 — to be **repaired, not deleted**, since the four cases are ones that should pass.
 
-**Next:** the live smoke test (needs the stack), then G-21.
+**Next:** the live app-level end-to-end run, then G-21.
