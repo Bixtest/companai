@@ -10,6 +10,7 @@ const mockFlush = jest.fn()
 const mockNativeUpdate = jest.fn()
 const mockValidateCrudMutationGuard = jest.fn()
 const mockRunCrudMutationGuardAfterSuccess = jest.fn()
+const mockRunRouteMutationGuards = jest.fn()
 const mockCheckAuthRateLimit = jest.fn()
 
 const mockEm: any = {
@@ -70,9 +71,11 @@ jest.mock('@open-mercato/shared/lib/ratelimit/helpers', () => ({
   rateLimitErrorSchema: {},
 }))
 
-jest.mock('@open-mercato/shared/lib/crud/mutation-guard', () => ({
-  validateCrudMutationGuard: jest.fn((...args: unknown[]) => mockValidateCrudMutationGuard(...args)),
-  runCrudMutationGuardAfterSuccess: jest.fn((...args: unknown[]) => mockRunCrudMutationGuardAfterSuccess(...args)),
+// D2-wide: stub ONLY the registry call `runRouteMutationGuards`. Stubbing the
+// module wrapper (`beginAuthMutationGuard`) instead would make the mutation
+// invisible — the exact proof defect recorded in BUILD-ORDER §2e.
+jest.mock('@open-mercato/shared/lib/crud/route-mutation-guard', () => ({
+  runRouteMutationGuards: jest.fn((...args: unknown[]) => mockRunRouteMutationGuards(...args)),
 }))
 
 const mockFindOneWithDecryption = jest.fn()
@@ -87,6 +90,26 @@ const userId = 'c0c0c0c0-c0c0-4c0c-8c0c-c0c0c0c0c0c0'
 const actorId = 'd0d0d0d0-d0d0-4d0d-8d0d-d0d0d0d0d0d0'
 const orgId = 'e0e0e0e0-e0e0-4e0e-8e0e-e0e0e0e0e0e0'
 const originalEnv = process.env
+
+/** The registry's passed result — what the route gets on a clean guard run. */
+function guardAllow(overrides: Record<string, unknown> = {}) {
+  return {
+    ok: true,
+    modifiedPayload: undefined,
+    runAfterSuccess: jest.fn(async () => undefined),
+    ...overrides,
+  }
+}
+
+/** The registry's blocked result — what the route gets when a guard refuses. */
+function guardDeny() {
+  return {
+    ok: false,
+    errorStatus: 423,
+    errorBody: { error: 'Record locked' },
+    response: new Response(null, { status: 423 }),
+  }
+}
 
 function makeRequest(
   body: Record<string, unknown>,
@@ -128,7 +151,7 @@ describe('POST /api/auth/users/resend-invite', () => {
     })
     mockLoadAcl.mockResolvedValue({ isSuperAdmin: false })
     mockCheckAuthRateLimit.mockResolvedValue({ error: null })
-    mockValidateCrudMutationGuard.mockResolvedValue(null)
+    mockRunRouteMutationGuards.mockResolvedValue(guardAllow())
     mockFindOne.mockResolvedValue(makeUser())
     mockFindOneWithDecryption.mockResolvedValue(makeUser())
     mockCreate.mockReturnValue({ id: 'new-token-row' })
@@ -238,16 +261,51 @@ describe('POST /api/auth/users/resend-invite', () => {
   })
 
   test('rejects when mutation guard blocks', async () => {
-    mockValidateCrudMutationGuard.mockResolvedValueOnce({
-      ok: false,
-      status: 423,
-      body: { error: 'Record locked' },
-    })
+    mockRunRouteMutationGuards.mockResolvedValueOnce(guardDeny())
 
     const res = await POST(makeRequest({ id: userId }))
     expect(res.status).toBe(423)
     const body = await res.json()
     expect(body.error).toBe('Record locked')
+    expect(mockFlush).not.toHaveBeenCalled()
+    expect(mockSendEmail).not.toHaveBeenCalled()
+  })
+
+  test('calls the registry with the route auth/scope and runs after-success when allowed', async () => {
+    const allow = guardAllow()
+    mockRunRouteMutationGuards.mockResolvedValueOnce(allow)
+
+    const res = await POST(makeRequest({ id: userId }))
+    expect(res.status).toBe(200)
+
+    // The registry call carries the guard context the deprecated pair used to
+    // take as explicit fields — the wrapper passes `req`, and the registry
+    // derives method/headers from it.
+    const call = mockRunRouteMutationGuards.mock.calls[0]?.[0] as Record<string, unknown>
+    expect(call).toBeDefined()
+    const authArg = call.auth as Record<string, unknown>
+    // The target user's organization is carried through (the route prefers the
+    // user's own org over the actor's) — asserted, not assumed.
+    expect(authArg).toMatchObject({ userId: actorId, tenantId: tenantA, organizationId: orgId })
+    const inputArg = call.input as Record<string, unknown>
+    expect(inputArg).toMatchObject({
+      resourceKind: 'auth.user',
+      resourceId: userId,
+      operation: 'custom',
+    })
+    expect(call.req).toBeInstanceOf(Request)
+
+    // After-success runs only once the write committed.
+    expect(allow.runAfterSuccess).toHaveBeenCalledTimes(1)
+    expect(mockFlush).toHaveBeenCalledTimes(1)
+  })
+
+  test('does NOT run after-success when the guard blocks', async () => {
+    const deny = guardDeny()
+    mockRunRouteMutationGuards.mockResolvedValueOnce(deny)
+
+    const res = await POST(makeRequest({ id: userId }))
+    expect(res.status).toBe(423)
     expect(mockFlush).not.toHaveBeenCalled()
   })
 
