@@ -49,12 +49,13 @@ log.** Everything else (HANDOVER, START-PROMPT, README, BOOKMARKS, BACKLOG) poin
 
 | # | The item | Why here |
 |---|---|---|
-| **1** | **The three directives above** | They change how every later item is documented and what "ready" means — do them first so nothing has to be re-filed. |
-| **2** | **D2-wide: `dashboards`** (10 calls / 4 files) — the next enabled module | Continues the in-hand defect: 161 call sites still bypass the guard registry; `dashboards` is the largest enabled cluster left and the build-order names it next. (**measured 2026-10-06:** `layout/route.ts` 2, `layout/[itemId]/route.ts` 2, `roles/widgets/route.ts` 3, `users/widgets/route.ts` 3) |
-| **3** | **The pre-existing `explicit-sort-comparators` test failure** | **NOT mine, and verified pre-existing** — it fails identically at `a3b58ad`, before any D2-wide commit; neither `c6c3151` nor `43e4e5d` touched the two flagged files (`shared/src/lib/user-function/document.ts:261`, `fingerprint.ts:74`). It is a **test-suite defect, not a product defect**, and it makes the suite non-green for everything after it, so it is fixed before the suite is next trusted. |
-| **4** | **The rest of D2-wide, enabled modules** — `workflows` (9), `inbox_ops` (8), `perspectives` (8), `translations` (6), `planner` (4), `query_index` (4), `auth` (2), `directory` (2), `feature_toggles` (2) | Largest cluster first, each with its own mutation proof. |
-| **5** | **D3** — add the `escalate` outcome to `MutationGuardResult` | The last guard-engine gap; needs D2-wide's shape settled first (the registry is where the outcome is returned). |
-| **6** | **The Metadata Registry** service (GAP A / C5) | The remaining foundation item; everything stacked on it inherits it. |
+| **1** | ✅ **The three directives above — DONE** | They changed how every later item is documented and what "ready" means. |
+| **2** | ✅ **D2-wide: `dashboards` — DONE** (code `a05ea2c`) | 10 calls / 4 files → 5 guard objects; count 161 → 151; 5 suites / 19 tests green; mutation-proven twice. |
+| **3** | **Two test-suite defects, checked against the baseline** — (a) `explicit-sort-comparators` (pre-existing, fails identically at `a3b58ad`; flagged files untouched by any D2-wide commit); (b) `module-decoupling` — **order-dependent flake**, reproduces at the baseline under full-suite parallel load but passes in a pair run, so it is a **test-harness defect, not a product defect**. | Both make the suite non-green for everything after them, so they are fixed before the suite is next trusted. **Neither is a product defect** — verified by running each with the dashboards work stashed. |
+| **4** | **D2-wide: `workflows`** (9 calls / 3 files) — next enabled module | Largest enabled cluster left after dashboards. |
+| **5** | **The rest of D2-wide, enabled modules** — `inbox_ops` (8), `perspectives` (8), `translations` (6), `planner` (4), `query_index` (4), `auth` (2), `directory` (2), `feature_toggles` (2) | Largest cluster first, each with its own mutation proof. |
+| **6** | **D3** — add the `escalate` outcome to `MutationGuardResult` | The last guard-engine gap; needs D2-wide's shape settled first (the registry is where the outcome is returned). |
+| **7** | **The Metadata Registry** service (GAP A / C5) | The remaining foundation item; everything stacked on it inherits it. |
 
 **Where the reasoning lives:** the order is `BUILD-ORDER.md` §2e; the live counts are in
 `BACKLOG.md`; the per-item status is in `BACKLOG.md`. **This box is the only place that says "we are
@@ -64,6 +65,12 @@ doing X now."**
 
 ### ✅ Done recently (ticked, then moved down here)
 
+- **2026-10-06 — the owner's three directives** (docs `54459c1`): the `★ ACTIVE TASK` convention in
+  this file; the Hermes/Llama service map; the front-end rule in `WORKING-RULES.md` + COOKBOOK rule 5.
+  Full entry below.
+- **2026-10-06 — `dashboards` D2-wide migration** (code `a05ea2c`). 10 calls / 4 files → 5 guard objects;
+  count **161 → 151**. Four test suites repaired and mutation-proven (block path disabled → 4 red;
+  `runAfterSuccess` neutered → 4 red; wrapper restored md5-identical). Full entry below.
 - **2026-10-06 — `dictionaries` D2-wide migration** (code `43e4e5d`, docs `7987f2a`). 16 calls / 6
   files → 9 guard objects; 15 suites / 74 tests green; core `tsc --noEmit` exit 0; two mutations
   proved the tests bite (block-path disabled → 6 red; `runAfterSuccess` neutered → 8 red). Repo-wide
@@ -75,6 +82,77 @@ doing X now."**
   `a3b58ad`). Full entry below.
 - **2026-10-06 — D0** — the generated guard registry now delivers guards, mutation-proven
   (code `d225602`). Full entry below.
+
+---
+
+## 2026-10-06 (latest) — the owner's three directives, and D2-wide reaches `dashboards`
+
+**The owner set three directives this turn, and asked me to sort the priorities and connect them to
+the development chain.** This entry records the chain, what shipped, and what it measured.
+
+**Directive 1 — document how Hermes serves every piece.** Built as
+[`library/development/ARCHITECTURE-hermes-service-map.md`](library/development/ARCHITECTURE-hermes-service-map.md):
+for **every** AI-touching development item, whether Hermes appears as **an agent** or as **setting
+wiring**, where **Llama** sits, and the measured status. It answers the four challenges the owner
+named — the one-tenant/multi-tenant mismatch, multi-agents, integrations, and MCP — and is written so
+a new developer can execute without a learning curve. **Built from the source, not a summary:** the
+11 model presets were enumerated (`openai`, `deepinfra`, `groq`, `together`, `fireworks`, `azure`,
+`litellm`, `ollama`, `openrouter`, `requesty`, `lm-studio`) and **none is llama.cpp** — confirmed by
+two routes (the id list, and a search for `localhost:8080`/`llama-server`), which is why "integrate
+Llama" is *one preset entry*, not a project. Also measured: the `mcp` service in
+`docker-compose.fullapp.yml` has **no `OPENAI_BASE_URL`** (defect #2 from the model-server doc), and
+the chat route is still wired to OpenCode.
+
+**Directive 2 — take "what is next" out of the handover docs, put it in one box.** Done:
+`HANDOVER.md`, `START-PROMPT.md`, `README.md` and `BOOKMARKS.md` no longer carry a task; they point
+at the new **`★ ACTIVE TASK`** section at the **top of this file**, which carries the convention
+(*tick it, move it down, post the next one*). A task stated anywhere else is now stale by definition.
+
+**Directive 3 — the front-end rule.** Recorded as a standing rule in
+[`library/development/WORKING-RULES.md`](library/development/WORKING-RULES.md) and as **rule 5 of
+COOKBOOK "the rules that override everything"**: *if a piece can be fully functional on its own, wire
+it into the running interface in the same batch, locking or switching off the parts that still need
+work.* The owner's reason, kept verbatim: *"Updating the front end helps me testing the micros as you
+work."*
+
+**Then the development chain continued with `dashboards`.** The third enabled module retired from
+the deprecated guard resolver: **10 call sites across 4 files → 5 guard objects**, via a new
+`beginDashboardsMutationGuard()` (`dashboards/api/mutation-guard.ts`) matching the proven wrapper
+shape. **Two of the routes write in one of two mutually-exclusive branches** ("clear the override"
+then return, or "upsert the override"), and each ran its own after-success call; because
+`validate()` is a pure predicate, collecting the guard set once and invoking `runAfterSuccess()` in
+whichever branch is taken is equivalent, and it evaluates the guard set once instead of twice.
+
+**Proven, not assumed.** 5 suites / 19 tests green (4 repaired from the deprecated-pair mock to the
+registry mock, including the two tenant-isolation tests, which now assert `runRouteMutationGuards`
+was **not** called on a rejected cross-tenant write). Core `tsc --noEmit` **exit 0**. Two mutations
+proved the tests bite: disabling the block path → **4 red** (one per file); neutering `runAfterSuccess`
+→ **4 red**; the wrapper was restored **md5-identical** (`76fb8b374e2528f3420879eac8e0e1d4`).
+Repo-wide count **161 → 151 (−10 exactly)**, and `dashboards` re-measured at **0**.
+
+**One correction to my own account, caught by measuring rather than retelling.** I first wrote the
+count as 163 in this session's working notes; the true call-site count is **161**, because the raw
+grep also matches the **two declarations** of the deprecated pair in `mutation-guard.ts`
+(`export async function validateCrudMutationGuard(`). The file count is **67**, not 69 — the naive
+file list also includes the declaration file and a file whose only match is a docstring line. That
+161 was then **re-measured to 151 after `dashboards`**, at **59 files** — both figures corrected in
+every place they appear (HANDOVER, BUILD-ORDER, BACKLOG, the Active-task box). **This is the
+"measure, don't retell" rule working exactly as written.**
+
+**The full suite was run after the change, and read honestly.** `packages/core` = **600 suites passed /
+2 failed, 5121 tests passed / 2 failed**. The two failures were **both checked against the baseline,
+not assumed**:
+- `explicit-sort-comparators` — **pre-existing**, fails identically with the dashboards work stashed
+  (the known next-but-two chain item; the flagged files are untouched by any D2-wide commit).
+- `module-decoupling` — **NOT pre-existing, and NOT caused by this change.** It *passes* both with and
+  without the dashboards work when run as a pair; it fails only under **full-suite parallel load**
+  (a module-registry state leak across jest workers — the failure is
+  `resolveDefaultPartitionCode('catalog:catalog_product')` returning `productsMedia` when the catalog
+  suites are scheduled alongside it). Recorded as an **order-dependent flake**, reproducible at the
+  baseline, so it is a test-harness defect, not a product defect — and it is now on the chain.
+
+**The commit is `a05ea2c`** (repo `workspace/starting-kit`, branch `main`); the docs batch that records
+it is this file plus BUILD-ORDER/BACKLOG/HANDOVER.
 
 ---
 
