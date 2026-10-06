@@ -2,8 +2,8 @@ const tenantId = '11111111-1111-4111-8111-111111111111'
 const organizationId = '22222222-2222-4222-8222-222222222222'
 const userId = '33333333-3333-4333-8333-333333333333'
 
-const validateCrudMutationGuardMock = jest.fn()
-const runCrudMutationGuardAfterSuccessMock = jest.fn()
+const runRouteMutationGuardsMock = jest.fn()
+const runAfterSuccessMock = jest.fn(async () => undefined)
 const setValueMock = jest.fn()
 
 const container = {
@@ -26,9 +26,19 @@ jest.mock('@open-mercato/core/modules/translations/api/context', () => ({
   resolveTranslationsActorId: jest.fn(() => userId),
 }))
 
-jest.mock('@open-mercato/shared/lib/crud/mutation-guard', () => ({
-  validateCrudMutationGuard: (...args: unknown[]) => validateCrudMutationGuardMock(...args),
-  runCrudMutationGuardAfterSuccess: (...args: unknown[]) => runCrudMutationGuardAfterSuccessMock(...args),
+/**
+ * Only the *registry call* is stubbed. The module wrapper
+ * (`beginTranslationsMutationGuard`) runs for real, so a mutation that breaks the
+ * wrapper's block path or its after-success runner is visible to these tests.
+ *
+ * D2-wide (2026-10-06): this suite used to mock the **deprecated**
+ * `@open-mercato/shared/lib/crud/mutation-guard` pair. That is the wrong target
+ * now — the route no longer imports it — and, more importantly, mocking the
+ * wrapper or the deprecated pair would make the migration's own mutations
+ * invisible. Stub the registry call only.
+ */
+jest.mock('@open-mercato/shared/lib/crud/route-mutation-guard', () => ({
+  runRouteMutationGuards: (...args: unknown[]) => runRouteMutationGuardsMock(...args),
 }))
 
 import PUT from '../locales'
@@ -40,27 +50,39 @@ const makeRequest = () =>
     body: JSON.stringify({ locales: ['en', 'fr'] }),
   })
 
+const guardAllow = (metadata: Record<string, unknown> = { token: 'guard' }) => ({
+  ok: true as const,
+  metadata,
+  runAfterSuccess: runAfterSuccessMock,
+})
+const guardDeny = (errorBody: Record<string, unknown>, errorStatus = 409) => ({
+  ok: false as const,
+  errorStatus,
+  errorBody,
+  response: new Response(),
+})
+
 describe('translations locales route mutation guard', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    validateCrudMutationGuardMock.mockResolvedValue({ ok: true, shouldRunAfterSuccess: true, metadata: { token: 'guard' } })
-    runCrudMutationGuardAfterSuccessMock.mockResolvedValue(undefined)
+    runRouteMutationGuardsMock.mockResolvedValue(guardAllow())
+    runAfterSuccessMock.mockResolvedValue(undefined)
     setValueMock.mockResolvedValue(undefined)
   })
 
-  it('runs the mutation guard and after-success hook when updating supported locales', async () => {
+  it('runs the registry guard and after-success hook when updating supported locales', async () => {
     const response = await PUT(makeRequest())
 
     expect(response.status).toBe(200)
-    expect(validateCrudMutationGuardMock).toHaveBeenCalledWith(
-      container,
+    expect(runRouteMutationGuardsMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        tenantId,
-        organizationId,
-        userId,
-        resourceKind: 'translations.locales',
-        operation: 'custom',
-        requestMethod: 'PUT',
+        container,
+        auth: expect.objectContaining({ userId, tenantId, organizationId }),
+        input: expect.objectContaining({
+          resourceKind: 'translations.locales',
+          resourceId: 'supported_locales',
+          operation: 'custom',
+        }),
       }),
     )
     expect(setValueMock).toHaveBeenCalledWith(
@@ -69,24 +91,35 @@ describe('translations locales route mutation guard', () => {
       ['en', 'fr'],
       { tenantId },
     )
-    expect(runCrudMutationGuardAfterSuccessMock).toHaveBeenCalledWith(
-      container,
-      expect.objectContaining({
-        resourceKind: 'translations.locales',
-        operation: 'custom',
-        metadata: { token: 'guard' },
-      }),
+    expect(runAfterSuccessMock).toHaveBeenCalledTimes(1)
+  })
+
+  it('deduplicates and normalises locales before the write (behaviour preserved)', async () => {
+    const request = new Request('http://localhost/api/translations/locales', {
+      method: 'PUT',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ locales: ['EN', 'fr', 'en '] }),
+    })
+
+    const response = await PUT(request)
+
+    expect(response.status).toBe(200)
+    expect(setValueMock).toHaveBeenCalledWith(
+      'translations',
+      'supported_locales',
+      ['en', 'fr'],
+      { tenantId },
     )
   })
 
   it('aborts the locale update before persisting when the guard blocks the write', async () => {
-    validateCrudMutationGuardMock.mockResolvedValue({ ok: false, status: 409, body: { error: 'Conflict' } })
+    runRouteMutationGuardsMock.mockResolvedValue(guardDeny({ error: 'Conflict' }))
 
     const response = await PUT(makeRequest())
 
     expect(response.status).toBe(409)
     await expect(response.json()).resolves.toEqual({ error: 'Conflict' })
     expect(setValueMock).not.toHaveBeenCalled()
-    expect(runCrudMutationGuardAfterSuccessMock).not.toHaveBeenCalled()
+    expect(runAfterSuccessMock).not.toHaveBeenCalled()
   })
 })

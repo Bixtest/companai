@@ -5,8 +5,8 @@ const entityType = 'catalog:product'
 const entityId = '44444444-4444-4444-8444-444444444444'
 const rowId = '55555555-5555-4555-8555-555555555555'
 
-const validateCrudMutationGuardMock = jest.fn()
-const runCrudMutationGuardAfterSuccessMock = jest.fn()
+const runRouteMutationGuardsMock = jest.fn()
+const runAfterSuccessMock = jest.fn(async () => undefined)
 const commandBusExecuteMock = jest.fn()
 
 const db = {
@@ -46,9 +46,20 @@ jest.mock('@open-mercato/core/modules/translations/api/context', () => ({
   resolveTranslationsActorId: jest.fn(() => userId),
 }))
 
-jest.mock('@open-mercato/shared/lib/crud/mutation-guard', () => ({
-  validateCrudMutationGuard: (...args: unknown[]) => validateCrudMutationGuardMock(...args),
-  runCrudMutationGuardAfterSuccess: (...args: unknown[]) => runCrudMutationGuardAfterSuccessMock(...args),
+/**
+ * Only the *registry call* is stubbed. The module wrapper
+ * (`beginTranslationsMutationGuard`) runs for real, so a mutation that breaks the
+ * wrapper's block path or its after-success runner — including the id re-binding
+ * on the PUT route — is visible to these tests.
+ *
+ * D2-wide (2026-10-06): this suite used to mock the **deprecated**
+ * `@open-mercato/shared/lib/crud/mutation-guard` pair. That is the wrong target
+ * now — the routes no longer import it — and, more importantly, mocking the
+ * wrapper or the deprecated pair would make the migration's own mutations
+ * invisible. Stub the registry call only.
+ */
+jest.mock('@open-mercato/shared/lib/crud/route-mutation-guard', () => ({
+  runRouteMutationGuards: (...args: unknown[]) => runRouteMutationGuardsMock(...args),
 }))
 
 import { PUT, DELETE } from '../route'
@@ -68,6 +79,18 @@ const makeDeleteRequest = () =>
 
 const routeParams = { params: { entityType, entityId } }
 
+const guardAllow = (metadata: Record<string, unknown> = { token: 'guard' }) => ({
+  ok: true as const,
+  metadata,
+  runAfterSuccess: runAfterSuccessMock,
+})
+const guardDeny = (errorBody: Record<string, unknown>, errorStatus = 409) => ({
+  ok: false as const,
+  errorStatus,
+  errorBody,
+  response: new Response(),
+})
+
 describe('translations entity write routes mutation guard', () => {
   beforeEach(() => {
     jest.clearAllMocks()
@@ -83,97 +106,91 @@ describe('translations entity write routes mutation guard', () => {
       created_at: new Date('2026-04-11T08:00:00.000Z'),
       updated_at: new Date('2026-04-11T08:00:00.000Z'),
     })
-    validateCrudMutationGuardMock.mockResolvedValue({ ok: true, shouldRunAfterSuccess: true, metadata: { token: 'guard' } })
-    runCrudMutationGuardAfterSuccessMock.mockResolvedValue(undefined)
+    runRouteMutationGuardsMock.mockResolvedValue(guardAllow())
+    runAfterSuccessMock.mockResolvedValue(undefined)
     commandBusExecuteMock.mockResolvedValue({ result: { rowId }, logEntry: null })
   })
 
-  it('runs the mutation guard and after-success hook when saving translations (PUT)', async () => {
+  it('runs the registry guard and after-success hook when saving translations (PUT)', async () => {
     const response = await PUT(makePutRequest(), routeParams)
 
     expect(response.status).toBe(200)
-    expect(validateCrudMutationGuardMock).toHaveBeenCalledWith(
-      container,
+    expect(runRouteMutationGuardsMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        tenantId,
-        organizationId,
-        userId,
-        resourceKind: 'translations.translation',
-        resourceId: `${entityType}:${entityId}`,
-        operation: 'update',
-        requestMethod: 'PUT',
+        container,
+        auth: expect.objectContaining({ userId, tenantId, organizationId }),
+        input: expect.objectContaining({
+          resourceKind: 'translations.translation',
+          resourceId: `${entityType}:${entityId}`,
+          operation: 'update',
+        }),
       }),
     )
     expect(commandBusExecuteMock).toHaveBeenCalledTimes(1)
-    expect(runCrudMutationGuardAfterSuccessMock).toHaveBeenCalledWith(
-      container,
+    // The guard is validated against the composite id, but the after-success is
+    // re-bound to the generated row id the write produced.
+    expect(runRouteMutationGuardsMock).toHaveBeenCalledTimes(2)
+    expect(runRouteMutationGuardsMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        tenantId,
-        organizationId,
-        userId,
-        resourceKind: 'translations.translation',
-        resourceId: `${entityType}:${entityId}`,
-        operation: 'update',
-        metadata: { token: 'guard' },
+        input: expect.objectContaining({
+          resourceKind: 'translations.translation',
+          resourceId: rowId,
+          operation: 'update',
+        }),
       }),
     )
+    expect(runAfterSuccessMock).toHaveBeenCalledTimes(1)
   })
 
-  it('skips the after-success hook when the guard does not request it (PUT)', async () => {
-    validateCrudMutationGuardMock.mockResolvedValue({ ok: true, shouldRunAfterSuccess: false, metadata: null })
+  it('does not re-collect the guard when the write produces the id that was validated (PUT)', async () => {
+    // The write returns the composite id it was validated against — the common
+    // path for an update, where no new row is materialised.
+    commandBusExecuteMock.mockResolvedValue({ result: { rowId: `${entityType}:${entityId}` }, logEntry: null })
 
     const response = await PUT(makePutRequest(), routeParams)
 
     expect(response.status).toBe(200)
-    expect(commandBusExecuteMock).toHaveBeenCalledTimes(1)
-    expect(runCrudMutationGuardAfterSuccessMock).not.toHaveBeenCalled()
+    expect(runRouteMutationGuardsMock).toHaveBeenCalledTimes(1)
+    expect(runAfterSuccessMock).toHaveBeenCalledTimes(1)
   })
 
   it('aborts the save before mutating when the guard blocks the write (PUT)', async () => {
-    validateCrudMutationGuardMock.mockResolvedValue({ ok: false, status: 409, body: { error: 'Conflict' } })
+    runRouteMutationGuardsMock.mockResolvedValue(guardDeny({ error: 'Conflict' }))
 
     const response = await PUT(makePutRequest(), routeParams)
 
     expect(response.status).toBe(409)
     await expect(response.json()).resolves.toEqual({ error: 'Conflict' })
     expect(commandBusExecuteMock).not.toHaveBeenCalled()
-    expect(runCrudMutationGuardAfterSuccessMock).not.toHaveBeenCalled()
+    expect(runAfterSuccessMock).not.toHaveBeenCalled()
   })
 
-  it('runs the mutation guard and after-success hook when deleting translations (DELETE)', async () => {
+  it('runs the registry guard and after-success hook when deleting translations (DELETE)', async () => {
     const response = await DELETE(makeDeleteRequest(), routeParams)
 
     expect(response.status).toBe(204)
-    expect(validateCrudMutationGuardMock).toHaveBeenCalledWith(
-      container,
+    expect(runRouteMutationGuardsMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        tenantId,
-        organizationId,
-        userId,
-        resourceKind: 'translations.translation',
-        resourceId: `${entityType}:${entityId}`,
-        operation: 'delete',
-        requestMethod: 'DELETE',
+        container,
+        auth: expect.objectContaining({ userId, tenantId, organizationId }),
+        input: expect.objectContaining({
+          resourceKind: 'translations.translation',
+          resourceId: `${entityType}:${entityId}`,
+          operation: 'delete',
+        }),
       }),
     )
     expect(commandBusExecuteMock).toHaveBeenCalledTimes(1)
-    expect(runCrudMutationGuardAfterSuccessMock).toHaveBeenCalledWith(
-      container,
-      expect.objectContaining({
-        resourceKind: 'translations.translation',
-        resourceId: `${entityType}:${entityId}`,
-        operation: 'delete',
-      }),
-    )
+    expect(runAfterSuccessMock).toHaveBeenCalledTimes(1)
   })
 
   it('aborts the delete before mutating when the guard blocks the write (DELETE)', async () => {
-    validateCrudMutationGuardMock.mockResolvedValue({ ok: false, status: 409, body: { error: 'Conflict' } })
+    runRouteMutationGuardsMock.mockResolvedValue(guardDeny({ error: 'Conflict' }))
 
     const response = await DELETE(makeDeleteRequest(), routeParams)
 
     expect(response.status).toBe(409)
     expect(commandBusExecuteMock).not.toHaveBeenCalled()
-    expect(runCrudMutationGuardAfterSuccessMock).not.toHaveBeenCalled()
+    expect(runAfterSuccessMock).not.toHaveBeenCalled()
   })
 })
