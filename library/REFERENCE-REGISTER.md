@@ -79,13 +79,13 @@ library/paperclip-value-study library/kit-docs llama workspace/knowledge workspa
 | `development/ARCHITECTURE-structure-permissions.md` | The structure-change permission grammar | #1 §3 |
 | `development/ARCHITECTURE-request-outcomes.md` | The request-outcome taxonomy (D3's home) | #1 §3; #2a §2 D3 |
 | `development/ARCHITECTURE-hermes-integration.md` | How Hermes plugs in | #1 §4 |
-| `development/ARCHITECTURE-hermes-service-map.md` | **The Hermes/Llama map, per development item** — how Hermes serves or is served at every AI joint (agent vs setting), and where Llama sits | #1 §4; #2a §2 (Phase 0) |
+| `development/ARCHITECTURE-hermes-service-map.md` | **The Hermes/Llama map, per development item** — how Hermes serves or is served at every AI joint (agent vs setting), and where Llama sits | #1 §4; #2a §2 (Phase 0); **#2b §"Phase 2/3/4 + the model layer" — every AI-touching item carries a `★ Hermes:` line back to this map (added 2026-10-06)** |
 | `development/ARCHITECTURE-model-server-integration.md` | The model/server boundary | #1 §4 |
 | `development/AGENT-HALF.md` | The agent half of the product (the AH- series) | #1 §4 |
 | `development/SPECIFICATIONS-DICTIONARY.md` | **The binding standard** — every term, one meaning | #1 §5; #2a §1 |
 | `development/CORE-BOUNDARY.md` | The three rings: uncustomisable core / configurable / packs | #1 §5 |
-| `development/CORE-MODULES-REGISTER.md` | Every core module decided: build / adapt / connect | #1 §5; #2a §3 |
-| `development/BLUEPRINT-GAP-ANALYSIS.md` | The four gaps A–D between the blueprint and us | #1 §5; #2a §3 |
+| `development/CORE-MODULES-REGISTER.md` | Every core module decided: build / adapt / connect | #1 §5; #2a §3; **#2b §"The core-module gaps" — every `M`/`P` item is now a backlog item or cross-referenced (added 2026-10-06)** |
+| `development/BLUEPRINT-GAP-ANALYSIS.md` | The four gaps A–D between the blueprint and us | #1 §5; #2a §3; **#2b §"The core-module gaps" — GAP A–D each now a tracked backlog item (added 2026-10-06)** |
 | `development/SPEC-business-model-kernel.md` | The business-model kernel spec | #1 §5 |
 | `development/RUNBOOK-adding-a-domain-step-by-step.md` | How to add a domain | #1 §6 |
 | `development/RUNBOOK-deploying-a-site.md` | How to deploy | #1 §6 |

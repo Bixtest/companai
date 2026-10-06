@@ -30,10 +30,30 @@ log.** Everything else (HANDOVER, START-PROMPT, README, BOOKMARKS, BACKLOG) poin
 
 ---
 
-### ▶ NOW — D2-wide continues with `inbox_ops` (8 deprecated guard calls in 4 files)
+### ▶ NOW — D2-wide continues with `perspectives` (8 deprecated guard calls in 3 files)
 
 > **If you are a new agent, read only this block to know your job.** Everything below the box is the
 > history and the queue; this is the work in hand.
+
+**What happened before this box (2026-10-06, this session).** The owner raised two integration
+concerns about the plan documents themselves, and they were **both measured true and fixed** — so the
+task below can be executed without a hidden gap:
+
+- **Q1 — "did you reflect the Hermes map in the backlog tasks integration?"** **Measured: no.** The map
+  named **43** item IDs; `BACKLOG.md` named the map **0** times. **Fixed:** every AI-touching item now
+  carries a **`★ Hermes:`** line naming the map section, the map is in the backlog's governing-document
+  table, and a **re-measurable check** is in `BACKLOG.md` **§A**. Names of the map in the backlog:
+  **0 → 8 direct, 82 marker lines**.
+- **Q2 — "are the blueprint/core-modules lessons documented in the backlog?"** **Measured: no** — only a
+  banner-table row each; `grep` for `M1…M5`, `P1…P18`, `GAP A…GAP D` against the item list returned
+  **0** (2 stray hits). **Fixed:** a new backlog section **"The core-module gaps"** gives every register
+  `M`/`P` item and every blueprint **GAP A–D** a tracked row or an explicit cross-reference — **13 of 13
+  present (was 2)**.
+- **The rule written so it cannot rot:** `WORKING-RULES.md` §1 gains **rule 6** ("the Hermes service map
+  is the starting thread; every AI-touching item must link to it"), with the same rule stated in
+  `BUILD-ORDER.md` and the map's reach row updated in `REFERENCE-REGISTER.md`.
+- **No code changed this session.** The `perspectives` task below was **postponed** on the owner's own
+  instruction (*"postpone if needed to fullfill what I requested above"*) and is now the active task.
 
 **What the task is, in plain words.** The platform has a guard system that checks every write before it
 happens (who may change what). Most of the codebase still calls an **old, deprecated** version of it
@@ -75,6 +95,7 @@ the two mutation proofs went RED; the repo-wide count is **126**; the docs say s
 | **5** | ✅ **Test defect (b): `module-decoupling` — DONE** (code `fe7c3e5`) | File-scoped isolation; **full suite 602 suites / 5123 tests, 0 failures**. |
 | **6** | ✅ **D2-wide: `workflows` — DONE** (code `d3af1b1`) | 9 calls / 3 files → 4 guard objects; count 151 → 142; mutation-proven (5 RED / 3 RED). |
 | **7** | ✅ **D2-wide: `inbox_ops` — DONE** (code `d89b8f6`) | 8 calls / 4 files → 4 guard objects; count 142 → 134; mutation-proven (4 RED / 4 RED). |
+| **7b** | ✅ **The owner's two integration concerns — DONE** (this session, docs only) | The Hermes map named **43** items and the backlog named the map **0** times; the register/blueprint items had **0** per-item backlog rows. **Both measured true and fixed** — `★ Hermes:` lines on every AI-touching item, a new "core-module gaps" section, rule 6 in WORKING-RULES, and a re-measurable check in `BACKLOG.md` §A. **No code changed.** |
 | **8** | **◀ D2-wide: `perspectives`** (8 calls / 3 files) — **THE ACTIVE TASK** | See the six steps above. **Note the shape:** `api/[tableId]/route.ts` holds **4** of the 8 calls and evaluates the guard **twice** in one request (a second, role-scoped guard). Read it before copying — it is not a flat 1-call-per-route like `inbox_ops`. |
 | **9** | **The rest of D2-wide, enabled modules** — `translations` (6), `planner` (4), `query_index` (4), `auth` (2), `directory` (2), `feature_toggles` (2) | Largest cluster first, each with its own mutation proof. |
 | **10** | **D3** — add the `escalate` outcome to `MutationGuardResult` | The last guard-engine gap; needs D2-wide's shape settled first. |

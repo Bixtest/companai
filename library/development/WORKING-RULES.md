@@ -17,7 +17,7 @@ owner** — how to report, what not to close, and what to do with the front end.
 ## 1. The rules that outrank everything
 
 These are also written at the top of `workspace/COOKBOOK.md` ("The three rules that override
-everything", now five). They are repeated here because a rule a newcomer has to find is a rule that
+everything", now six). They are repeated here because a rule a newcomer has to find is a rule that
 gets broken.
 
 1. **Nothing is deleted before it is analysed.** Every file or module headed for removal gets a
@@ -32,6 +32,20 @@ gets broken.
    quietly pick the nicer number.
 5. **If it is ready to be switched on in the front end, switch it on** *(owner, 2026-10-06)* — see
    §2.4 below for the full statement.
+6. **The Hermes service map is the starting thread — and every AI-touching item must link to it**
+   *(owner, 2026-10-06)*. Before developing **anything**, read
+   [`ARCHITECTURE-hermes-service-map.md`](ARCHITECTURE-hermes-service-map.md) for that item: it says
+   whether a human's request has to be understood (**an agent run**) or an admin turns a knob
+   (**wiring**), and how Hermes serves it or is served by it. **The link must run both ways:** every
+   AI-touching item in [`BACKLOG.md`](BACKLOG.md) carries a `★ Hermes:` line naming the map section,
+   and every item the map names is reachable from the backlog. **A missing link is a defect, not a
+   style slip** — it is how a later agent quietly develops an item without its Hermes joint. **Told to
+   the owner on 2026-10-06 after he measured the gap: the map named 43 items and the backlog named the
+   map 0 times.** Re-measure with the commands in [`BACKLOG.md`](BACKLOG.md) **§A**.
+   **The same rule covers the other two lessons documents:** [`CORE-MODULES-REGISTER.md`](CORE-MODULES-REGISTER.md)
+   (the M/P items) and [`BLUEPRINT-GAP-ANALYSIS.md`](BLUEPRINT-GAP-ANALYSIS.md) (gaps A–D) — **each item
+   they define must exist as a backlog item or be cross-referenced from one**, never left as a document
+   nothing acts on.
 
 *(The COOKBOOK also carries the numbered engineering rules — zero-zero through zero-ten — that govern
 **how** the work is done: the specifications dictionary is binding, "it exists" is not "it is built",

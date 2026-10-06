@@ -23,9 +23,24 @@ govern the section they sit in. **If you add a document and it is not referenced
 or in the vision page, it is a loose document — and a loose document is a liability.**
 
 **The owner's standing rules bind this order too:** [`WORKING-RULES.md`](WORKING-RULES.md) gathers
-them in one page — the five that outrank everything (including *"if it is ready to be switched on in
-the front end, switch it on"*), how to report, and the rule that **the task in hand lives only in the
-`★ ACTIVE TASK` box at the top of [`../../JOURNAL.md`](../../JOURNAL.md)** — never in this file.
+them in one page — the six that outrank everything (including *"if it is ready to be switched on in
+the front end, switch it on"*, and *"the Hermes service map is the starting thread"*), how to report,
+and the rule that **the task in hand lives only in the `★ ACTIVE TASK` box at the top of
+[`../../JOURNAL.md`](../../JOURNAL.md)** — never in this file.
+
+**★ The Hermes rule, stated here because this file sets the order and the order must carry it.**
+Before developing **anything**, read
+[`ARCHITECTURE-hermes-service-map.md`](ARCHITECTURE-hermes-service-map.md) for that item — it says
+whether the work is an **agent run** (a human's request has to be understood) or **wiring** (an admin
+turns a knob). **Both directions of the link must hold:** every AI-touching item in
+[`BACKLOG.md`](BACKLOG.md) carries a `★ Hermes:` line naming the map section, and **every item the map
+names is reachable from the backlog** — this file's **Phase 0 `In depth →` line above already does
+this** for the foundation items (§4.1: *"every Phase 0 item is 'n/a' for Hermes on purpose"*).
+**Measured broken on 2026-10-06** (the map named 43 items; the backlog named the map 0 times) — fixed
+the same day. **Re-measure with the commands in [`BACKLOG.md`](BACKLOG.md) §A.** **The same rule covers
+[`CORE-MODULES-REGISTER.md`](CORE-MODULES-REGISTER.md) (the M/P items) and
+[`BLUEPRINT-GAP-ANALYSIS.md`](BLUEPRINT-GAP-ANALYSIS.md) (gaps A–D)** — every item they define is either
+a backlog item or cross-referenced from one (backlog **§"The core-module gaps"**).
 
 **Asked by:** the owner — *"shouldnt we already build that so we apply the standards as we go … I feel
 core requirements like accounts management, permissions, this, languages, etc… should be the first to
