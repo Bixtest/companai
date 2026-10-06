@@ -5,10 +5,7 @@ import { createRequestContainer } from '@open-mercato/shared/lib/di/container'
 import type { EntityManager } from '@mikro-orm/postgresql'
 import { findOneWithDecryption } from '@open-mercato/shared/lib/encryption/find'
 import { SyncMapping } from '@open-mercato/core/modules/data_sync/data/entities'
-import {
-  runCrudMutationGuardAfterSuccess,
-  validateCrudMutationGuard,
-} from '@open-mercato/shared/lib/crud/mutation-guard'
+import { beginDataSyncMutationGuard } from '../../mutation-guard'
 import { writeDirectWriteAuditLog } from '@open-mercato/shared/lib/crud/audit-write'
 
 const idParamsSchema = z.object({ id: z.string().uuid() })
@@ -113,20 +110,16 @@ export async function PUT(req: Request, ctx: { params?: Promise<{ id?: string }>
     return NextResponse.json({ error: 'Mapping not found' }, { status: 404 })
   }
 
-  const guardResult = await validateCrudMutationGuard(container, {
-    tenantId: scope.tenantId,
-    organizationId: scope.organizationId,
-    userId: auth.sub,
+  const guard = await beginDataSyncMutationGuard({
+    container,
+    auth,
+    req,
     resourceKind: 'data_sync.mapping',
     resourceId: mapping.id,
     operation: 'update',
-    requestMethod: req.method,
-    requestHeaders: req.headers,
     mutationPayload: parsedBody.data,
   })
-  if (guardResult && !guardResult.ok) {
-    return NextResponse.json(guardResult.body, { status: guardResult.status })
-  }
+  if (guard.blockedResponse) return guard.blockedResponse
 
   mapping.mapping = parsedBody.data.mapping
   await em.transactional(async () => {
@@ -141,19 +134,7 @@ export async function PUT(req: Request, ctx: { params?: Promise<{ id?: string }>
     })
   })
 
-  if (guardResult?.ok && guardResult.shouldRunAfterSuccess) {
-    await runCrudMutationGuardAfterSuccess(container, {
-      tenantId: scope.tenantId,
-      organizationId: scope.organizationId,
-      userId: auth.sub,
-      resourceKind: 'data_sync.mapping',
-      resourceId: mapping.id,
-      operation: 'update',
-      requestMethod: req.method,
-      requestHeaders: req.headers,
-      metadata: guardResult.metadata ?? null,
-    })
-  }
+  await guard.runAfterSuccess()
 
   return NextResponse.json({
     id: mapping.id,
@@ -195,20 +176,16 @@ export async function DELETE(req: Request, ctx: { params?: Promise<{ id?: string
     return NextResponse.json({ error: 'Mapping not found' }, { status: 404 })
   }
 
-  const guardResult = await validateCrudMutationGuard(container, {
-    tenantId: scope.tenantId,
-    organizationId: scope.organizationId,
-    userId: auth.sub,
+  const guard = await beginDataSyncMutationGuard({
+    container,
+    auth,
+    req,
     resourceKind: 'data_sync.mapping',
     resourceId: mapping.id,
     operation: 'delete',
-    requestMethod: req.method,
-    requestHeaders: req.headers,
     mutationPayload: null,
   })
-  if (guardResult && !guardResult.ok) {
-    return NextResponse.json(guardResult.body, { status: guardResult.status })
-  }
+  if (guard.blockedResponse) return guard.blockedResponse
 
   const mappingId = mapping.id
   // The before-image is the whole mapping: once removed there is nothing left to
@@ -228,19 +205,7 @@ export async function DELETE(req: Request, ctx: { params?: Promise<{ id?: string
     })
   })
 
-  if (guardResult?.ok && guardResult.shouldRunAfterSuccess) {
-    await runCrudMutationGuardAfterSuccess(container, {
-      tenantId: scope.tenantId,
-      organizationId: scope.organizationId,
-      userId: auth.sub,
-      resourceKind: 'data_sync.mapping',
-      resourceId: mappingId,
-      operation: 'delete',
-      requestMethod: req.method,
-      requestHeaders: req.headers,
-      metadata: guardResult.metadata ?? null,
-    })
-  }
+  await guard.runAfterSuccess()
 
   return NextResponse.json({ deleted: true })
 }

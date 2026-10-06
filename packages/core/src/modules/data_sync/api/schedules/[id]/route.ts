@@ -8,10 +8,7 @@ import { isCrudHttpError } from '@open-mercato/shared/lib/crud/errors'
 import { updateSyncScheduleSchema } from '../../../data/validators'
 import type { SyncScheduleService } from '../../../lib/sync-schedule-service'
 import { serializeSchedule } from '../serialize'
-import {
-  runCrudMutationGuardAfterSuccess,
-  validateCrudMutationGuard,
-} from '@open-mercato/shared/lib/crud/mutation-guard'
+import { beginDataSyncMutationGuard } from '../../mutation-guard'
 import { writeDirectWriteAuditLog } from '@open-mercato/shared/lib/crud/audit-write'
 import type { EntityManager } from '@mikro-orm/postgresql'
 
@@ -89,20 +86,16 @@ export async function PUT(req: Request, ctx: { params?: Promise<{ id?: string }>
     return NextResponse.json({ error: 'Schedule not found' }, { status: 404 })
   }
 
-  const guardResult = await validateCrudMutationGuard(container, {
-    tenantId: auth.tenantId,
-    organizationId: scope.organizationId,
-    userId: auth.sub,
+  const guard = await beginDataSyncMutationGuard({
+    container,
+    auth,
+    req,
     resourceKind: 'data_sync.schedule',
     resourceId: current.id,
     operation: 'update',
-    requestMethod: req.method,
-    requestHeaders: req.headers,
     mutationPayload: parsed.data,
   })
-  if (guardResult && !guardResult.ok) {
-    return NextResponse.json(guardResult.body, { status: guardResult.status })
-  }
+  if (guard.blockedResponse) return guard.blockedResponse
 
   try {
     const em = container.resolve('em') as EntityManager
@@ -136,19 +129,7 @@ export async function PUT(req: Request, ctx: { params?: Promise<{ id?: string }>
       return saved
     })
 
-    if (guardResult?.ok && guardResult.shouldRunAfterSuccess) {
-      await runCrudMutationGuardAfterSuccess(container, {
-        tenantId: auth.tenantId,
-        organizationId: scope.organizationId,
-        userId: auth.sub,
-        resourceKind: 'data_sync.schedule',
-        resourceId: schedule.id,
-        operation: 'update',
-        requestMethod: req.method,
-        requestHeaders: req.headers,
-        metadata: guardResult.metadata ?? null,
-      })
-    }
+    await guard.runAfterSuccess()
     return NextResponse.json(serializeSchedule(schedule))
   } catch (error) {
     if (isCrudHttpError(error)) {
@@ -178,20 +159,16 @@ export async function DELETE(req: Request, ctx: { params?: Promise<{ id?: string
   const scheduleService = container.resolve('dataSyncScheduleService') as SyncScheduleService
   const scope = { organizationId: auth.orgId as string, tenantId: auth.tenantId }
 
-  const guardResult = await validateCrudMutationGuard(container, {
-    tenantId: auth.tenantId,
-    organizationId: scope.organizationId,
-    userId: auth.sub,
+  const guard = await beginDataSyncMutationGuard({
+    container,
+    auth,
+    req,
     resourceKind: 'data_sync.schedule',
     resourceId: parsedParams.data.id,
     operation: 'delete',
-    requestMethod: req.method,
-    requestHeaders: req.headers,
     mutationPayload: null,
   })
-  if (guardResult && !guardResult.ok) {
-    return NextResponse.json(guardResult.body, { status: guardResult.status })
-  }
+  if (guard.blockedResponse) return guard.blockedResponse
 
   try {
     const em = container.resolve('em') as EntityManager
@@ -219,19 +196,7 @@ export async function DELETE(req: Request, ctx: { params?: Promise<{ id?: string
       return NextResponse.json({ error: 'Schedule not found' }, { status: 404 })
     }
 
-    if (guardResult?.ok && guardResult.shouldRunAfterSuccess) {
-      await runCrudMutationGuardAfterSuccess(container, {
-        tenantId: auth.tenantId,
-        organizationId: scope.organizationId,
-        userId: auth.sub,
-        resourceKind: 'data_sync.schedule',
-        resourceId: parsedParams.data.id,
-        operation: 'delete',
-        requestMethod: req.method,
-        requestHeaders: req.headers,
-        metadata: guardResult.metadata ?? null,
-      })
-    }
+    await guard.runAfterSuccess()
 
     return NextResponse.json({ deleted: true })
   } catch (error) {

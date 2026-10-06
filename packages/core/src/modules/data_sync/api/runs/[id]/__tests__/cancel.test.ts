@@ -27,6 +27,18 @@ const mockCrudMutationGuardService = {
   afterMutationSuccess: jest.fn(),
 }
 
+// D2 (2026-10-06): the cancel route now runs the REGISTRY-based guard wrapper
+// (`runRouteMutationGuards`) instead of the deprecated single-service pair. The
+// wrapper is what runs `custom`-operation guards, which the legacy DI service
+// never covered. The test's intent is unchanged — a blocked guard stops the
+// cancellation; a passing guard runs its after-success after the write commits.
+const mockRunRouteMutationGuards = jest.fn()
+const mockRunAfterSuccess = jest.fn(async () => undefined)
+
+jest.mock('@open-mercato/shared/lib/crud/route-mutation-guard', () => ({
+  runRouteMutationGuards: (...args: unknown[]) => mockRunRouteMutationGuards(...args),
+}))
+
 jest.mock('@open-mercato/shared/lib/auth/server', () => ({
   getAuthFromRequest: jest.fn((request: Request) => mockGetAuthFromRequest(request)),
 }))
@@ -67,6 +79,11 @@ describe('data_sync cancel run route', () => {
     })
     mockCrudMutationGuardService.validateMutation.mockResolvedValue({ ok: true, shouldRunAfterSuccess: true, metadata: null })
     mockCrudMutationGuardService.afterMutationSuccess.mockResolvedValue(undefined)
+    mockRunRouteMutationGuards.mockResolvedValue({
+      ok: true,
+      modifiedPayload: undefined,
+      runAfterSuccess: mockRunAfterSuccess,
+    })
     mockSyncRunService.getRun.mockResolvedValue({
       id: '11111111-1111-4111-8111-111111111111',
       integrationId: 'sync_excel',
@@ -126,22 +143,22 @@ describe('data_sync cancel run route', () => {
       organizationId: 'org-1',
       tenantId: 'tenant-1',
     })
-    expect(mockCrudMutationGuardService.validateMutation).toHaveBeenCalledWith(expect.objectContaining({
-      resourceKind: 'data_sync.run',
-      resourceId: '11111111-1111-4111-8111-111111111111',
-      operation: 'custom',
+    expect(mockRunRouteMutationGuards).toHaveBeenCalledWith(expect.objectContaining({
+      input: expect.objectContaining({
+        resourceKind: 'data_sync.run',
+        resourceId: '11111111-1111-4111-8111-111111111111',
+        operation: 'custom',
+      }),
     }))
-    expect(mockCrudMutationGuardService.afterMutationSuccess).toHaveBeenCalledWith(expect.objectContaining({
-      resourceKind: 'data_sync.run',
-      resourceId: '11111111-1111-4111-8111-111111111111',
-    }))
+    expect(mockRunAfterSuccess).toHaveBeenCalled()
   })
 
   it('short-circuits the cancellation when the mutation guard blocks it', async () => {
-    mockCrudMutationGuardService.validateMutation.mockResolvedValueOnce({
+    mockRunRouteMutationGuards.mockResolvedValueOnce({
       ok: false,
-      status: 403,
-      body: { error: 'Blocked by guard' },
+      errorStatus: 403,
+      errorBody: { error: 'Blocked by guard' },
+      response: Response.json({ error: 'Blocked by guard' }, { status: 403 }),
     })
 
     const response = await postHandler(
@@ -153,6 +170,6 @@ describe('data_sync cancel run route', () => {
     await expect(response.json()).resolves.toEqual({ error: 'Blocked by guard' })
     expect(mockSyncRunService.markStatus).not.toHaveBeenCalled()
     expect(mockProgressService.markCancelled).not.toHaveBeenCalled()
-    expect(mockCrudMutationGuardService.afterMutationSuccess).not.toHaveBeenCalled()
+    expect(mockRunAfterSuccess).not.toHaveBeenCalled()
   })
 })

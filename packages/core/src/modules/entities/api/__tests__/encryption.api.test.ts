@@ -45,11 +45,30 @@ jest.mock('@open-mercato/shared/lib/auth/server', () => ({
   getAuthFromRequest: () => ({ sub: 'u-1', tenantId: 't-1', orgId: 'o-1', roles: ['admin'] }),
 }))
 
+// D2 (2026-10-06): the encryption-map route now runs the REGISTRY-based guard
+// wrapper (`runRouteMutationGuards`, via `beginEntitiesMutationGuard`) instead of
+// the deprecated single-service pair. The registry wrapper is what now covers the
+// `create` operation (the legacy DI service only ever handled update/delete). The
+// test's intent is unchanged — a blocked guard stops the write; a passing guard
+// runs its after-success after persistence.
+const mockRunRouteMutationGuards = jest.fn()
+const mockRunAfterSuccess = jest.fn(async () => undefined)
+
+jest.mock('@open-mercato/shared/lib/crud/route-mutation-guard', () => ({
+  runRouteMutationGuards: (...args: unknown[]) => mockRunRouteMutationGuards(...args),
+}))
+
 describe('entities/encryption API', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockGuardService = null
     delete process.env.OM_OPTIMISTIC_LOCK
+    // Default: the registry guard passes. Individual tests override with block().
+    mockRunRouteMutationGuards.mockResolvedValue({
+      ok: true,
+      modifiedPayload: undefined,
+      runAfterSuccess: mockRunAfterSuccess,
+    })
   })
 
   it('returns empty map when none exists', async () => {
@@ -138,10 +157,12 @@ describe('entities/encryption API', () => {
   })
 
   it('blocks the write when the mutation guard rejects it', async () => {
-    mockGuardService = {
-      validateMutation: jest.fn(async () => ({ ok: false, status: 403, body: { error: 'blocked' } })),
-      afterMutationSuccess: jest.fn(async () => {}),
-    }
+    mockRunRouteMutationGuards.mockResolvedValueOnce({
+      ok: false,
+      errorStatus: 403,
+      errorBody: { error: 'blocked' },
+      response: Response.json({ error: 'blocked' }, { status: 403 }),
+    })
     mockMapRepo.findOne.mockResolvedValue(null)
     const payload = { entityId: 'auth:user', fields: [{ field: 'email', hashField: null }] }
     const res = await POST(new Request('http://x/api/entities/encryption', {
@@ -152,11 +173,13 @@ describe('entities/encryption API', () => {
     expect(res.status).toBe(403)
     const json = await res.json()
     expect(json).toMatchObject({ error: 'blocked' })
-    expect(mockGuardService.validateMutation).toHaveBeenCalledWith(
+    expect(mockRunRouteMutationGuards).toHaveBeenCalledWith(
       expect.objectContaining({
-        resourceKind: 'entities.encryption_map',
-        operation: 'create',
-        userId: 'u-1',
+        auth: expect.objectContaining({ userId: 'u-1' }),
+        input: expect.objectContaining({
+          resourceKind: 'entities.encryption_map',
+          operation: 'create',
+        }),
       }),
     )
     // Guard-blocked write must not persist.
@@ -165,10 +188,11 @@ describe('entities/encryption API', () => {
   })
 
   it('runs the mutation-guard after-success hook on a successful write', async () => {
-    mockGuardService = {
-      validateMutation: jest.fn(async () => ({ ok: true, shouldRunAfterSuccess: true, metadata: { trace: 'x' } })),
-      afterMutationSuccess: jest.fn(async () => {}),
-    }
+    mockRunRouteMutationGuards.mockResolvedValueOnce({
+      ok: true,
+      modifiedPayload: undefined,
+      runAfterSuccess: mockRunAfterSuccess,
+    })
     mockMapRepo.findOne.mockResolvedValue(null)
     const payload = { entityId: 'auth:user', fields: [{ field: 'email', hashField: null }] }
     const res = await POST(new Request('http://x/api/entities/encryption', {
@@ -177,12 +201,6 @@ describe('entities/encryption API', () => {
       headers: { 'content-type': 'application/json' },
     }))
     expect(res.status).toBe(200)
-    expect(mockGuardService.afterMutationSuccess).toHaveBeenCalledWith(
-      expect.objectContaining({
-        resourceKind: 'entities.encryption_map',
-        operation: 'create',
-        metadata: { trace: 'x' },
-      }),
-    )
+    expect(mockRunAfterSuccess).toHaveBeenCalled()
   })
 })

@@ -14,6 +14,17 @@ const mockCrudMutationGuardService = {
   afterMutationSuccess: jest.fn(),
 }
 
+// D2 (2026-10-06): the schedule route now runs the REGISTRY-based guard wrapper
+// (`runRouteMutationGuards`) instead of the deprecated single-service pair. The
+// wrapper runs every registered guard plus the bridged legacy service, and it is
+// what now covers `create` (the legacy service only ever handled update/delete).
+const mockRunRouteMutationGuards = jest.fn()
+const mockRunAfterSuccess = jest.fn(async () => undefined)
+
+jest.mock('@open-mercato/shared/lib/crud/route-mutation-guard', () => ({
+  runRouteMutationGuards: (...args: unknown[]) => mockRunRouteMutationGuards(...args),
+}))
+
 jest.mock('@open-mercato/shared/lib/auth/server', () => ({
   getAuthFromRequest: jest.fn((req: Request) => mockGetAuthFromRequest(req)),
 }))
@@ -81,33 +92,38 @@ describe('data_sync schedule create mutation guard', () => {
     })
     mockCrudMutationGuardService.validateMutation.mockResolvedValue({ ok: true, shouldRunAfterSuccess: true, metadata: null })
     mockCrudMutationGuardService.afterMutationSuccess.mockResolvedValue(undefined)
+    mockRunRouteMutationGuards.mockResolvedValue({
+      ok: true,
+      modifiedPayload: undefined,
+      runAfterSuccess: mockRunAfterSuccess,
+    })
   })
 
   it('runs the guard before the write and the after-success hook after it', async () => {
     const res = await POST(request())
     expect(res.status).toBe(201)
-    expect(mockCrudMutationGuardService.validateMutation).toHaveBeenCalledWith(expect.objectContaining({
-      resourceKind: 'data_sync.schedule',
-      operation: 'create',
+    expect(mockRunRouteMutationGuards).toHaveBeenCalledWith(expect.objectContaining({
+      input: expect.objectContaining({
+        resourceKind: 'data_sync.schedule',
+        operation: 'create',
+      }),
     }))
     expect(mockScheduleService.saveSchedule).toHaveBeenCalled()
-    expect(mockCrudMutationGuardService.afterMutationSuccess).toHaveBeenCalledWith(expect.objectContaining({
-      resourceKind: 'data_sync.schedule',
-      resourceId: SCHEDULE_ID,
-    }))
+    expect(mockRunAfterSuccess).toHaveBeenCalled()
   })
 
   it('short-circuits the write when the guard blocks the mutation', async () => {
-    mockCrudMutationGuardService.validateMutation.mockResolvedValueOnce({
+    mockRunRouteMutationGuards.mockResolvedValueOnce({
       ok: false,
-      status: 403,
-      body: { error: 'Blocked by guard' },
+      errorStatus: 403,
+      errorBody: { error: 'Blocked by guard' },
+      response: Response.json({ error: 'Blocked by guard' }, { status: 403 }),
     })
 
     const res = await POST(request())
     expect(res.status).toBe(403)
     await expect(res.json()).resolves.toEqual({ error: 'Blocked by guard' })
     expect(mockScheduleService.saveSchedule).not.toHaveBeenCalled()
-    expect(mockCrudMutationGuardService.afterMutationSuccess).not.toHaveBeenCalled()
+    expect(mockRunAfterSuccess).not.toHaveBeenCalled()
   })
 })

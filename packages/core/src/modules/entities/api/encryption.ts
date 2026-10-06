@@ -6,10 +6,7 @@ import { EncryptionMap } from '@open-mercato/core/modules/entities/data/entities
 import { upsertEncryptionMapSchema } from '@open-mercato/core/modules/entities/data/validators'
 import { CrudHttpError, isCrudHttpError } from '@open-mercato/shared/lib/crud/errors'
 import { enforceCommandOptimisticLock } from '@open-mercato/shared/lib/crud/optimistic-lock-command'
-import {
-  runCrudMutationGuardAfterSuccess,
-  validateCrudMutationGuard,
-} from '@open-mercato/shared/lib/crud/mutation-guard'
+import { beginEntitiesMutationGuard } from './definitions.mutation-guard'
 import type { OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
 
 const ENCRYPTION_MAP_RESOURCE_KIND = 'entities.encryption_map'
@@ -106,20 +103,23 @@ export async function POST(req: Request) {
 
     // Mutation-guard contract for custom write routes. The resource is the
     // encryption map for this entity scoped to the tenant/organization.
-    const guardResult = await validateCrudMutationGuard(container, {
-      tenantId,
-      organizationId,
-      userId: auth.sub,
+    //
+    // D2 (2026-10-06): this used to call the `@deprecated`
+    // `validateCrudMutationGuard()`, which resolves ONLY the single
+    // DI-registered `crudMutationGuardService` and silently bypasses every guard
+    // in the global mutation-guard store — so an `entities.encryption_map` guard
+    // would never run on this path. It now goes through the same registry-based
+    // wrapper the rest of the `entities` write path uses.
+    const guard = await beginEntitiesMutationGuard({
+      container,
+      auth,
+      req,
       resourceKind: ENCRYPTION_MAP_RESOURCE_KIND,
       resourceId: existing?.id ?? payload.entityId,
       operation: existing ? 'update' : 'create',
-      requestMethod: req.method,
-      requestHeaders: req.headers,
       mutationPayload: payload,
     })
-    if (guardResult && !guardResult.ok) {
-      return NextResponse.json(guardResult.body, { status: guardResult.status })
-    }
+    if (guard.blockedResponse) return guard.blockedResponse
 
     let saved: any
     if (existing) {
@@ -140,19 +140,7 @@ export async function POST(req: Request) {
       saved = map
     }
 
-    if (guardResult?.ok && guardResult.shouldRunAfterSuccess) {
-      await runCrudMutationGuardAfterSuccess(container, {
-        tenantId,
-        organizationId,
-        userId: auth.sub,
-        resourceKind: ENCRYPTION_MAP_RESOURCE_KIND,
-        resourceId: saved?.id ?? payload.entityId,
-        operation: existing ? 'update' : 'create',
-        requestMethod: req.method,
-        requestHeaders: req.headers,
-        metadata: guardResult.metadata ?? null,
-      })
-    }
+    await guard.runAfterSuccess()
 
     try {
       const svc = container.resolve('tenantEncryptionService') as { invalidateMap?: (e: string, t: string | null, o: string | null) => Promise<void> }
