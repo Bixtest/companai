@@ -16,6 +16,7 @@ import {
   getOpenCodeProviderConfiguredEnvKey,
   isOpenCodeProviderConfigured,
 } from '@open-mercato/shared/lib/ai/opencode-provider'
+import { beginAiAssistantMutationGuard } from '../mutation-guard'
 import { AiAgentRuntimeOverrideRepository, AiAgentRuntimeOverrideValidationError } from '../../data/repositories/AiAgentRuntimeOverrideRepository'
 import { AiTenantModelAllowlistRepository } from '../../data/repositories/AiTenantModelAllowlistRepository'
 import { isBaseurlAllowlisted, readBaseurlAllowlist } from '../../lib/baseurl-allowlist'
@@ -702,6 +703,25 @@ export async function PUT(req: NextRequest) {
 
     const em = container.resolve<EntityManager>('em')
     const repo = new AiAgentRuntimeOverrideRepository(em)
+
+    const guard = await beginAiAssistantMutationGuard({
+      container,
+      req,
+      tenantId: auth.tenantId,
+      organizationId: auth.orgId ?? null,
+      userId: auth.sub,
+      resourceKind: 'ai_assistant.settings',
+      resourceId: agentId ?? 'default',
+      operation: 'update',
+      mutationPayload: {
+        agentId: agentId ?? null,
+        providerId: providerId ?? null,
+        modelId: modelId ?? null,
+        baseURL: baseURL ?? null,
+      },
+    })
+    if (guard.blockedResponse) return guard.blockedResponse
+
     const upsertInput = {
       agentId: agentId ?? null,
       ...(Object.prototype.hasOwnProperty.call(bodyResult.data, 'providerId')
@@ -724,6 +744,7 @@ export async function PUT(req: NextRequest) {
       upsertInput,
       { tenantId: auth.tenantId ?? '', organizationId: auth.orgId ?? null, userId: auth.sub },
     )
+    await guard.runAfterSuccess()
     return NextResponse.json({
       id: row.id,
       tenantId: row.tenantId,
@@ -788,11 +809,26 @@ export async function DELETE(req: NextRequest) {
 
     const em = container.resolve<EntityManager>('em')
     const repo = new AiAgentRuntimeOverrideRepository(em)
+
+    const guard = await beginAiAssistantMutationGuard({
+      container,
+      req,
+      tenantId: auth.tenantId,
+      organizationId: auth.orgId ?? null,
+      userId: auth.sub,
+      resourceKind: 'ai_assistant.settings',
+      resourceId: bodyResult.data.agentId ?? 'default',
+      operation: 'delete',
+      mutationPayload: { agentId: bodyResult.data.agentId ?? null },
+    })
+    if (guard.blockedResponse) return guard.blockedResponse
+
     const cleared = await repo.clearDefault({
       tenantId: auth.tenantId ?? '',
       organizationId: auth.orgId ?? null,
       agentId: bodyResult.data.agentId ?? null,
     })
+    await guard.runAfterSuccess()
     return NextResponse.json({ cleared })
   } catch (error) {
     logger.error('AI Settings — DELETE error', { err: error })

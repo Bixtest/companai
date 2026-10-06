@@ -7,6 +7,7 @@ import { createRequestContainer } from '@open-mercato/shared/lib/di/container'
 import type { EntityManager } from '@mikro-orm/postgresql'
 import type { RbacService } from '@open-mercato/core/modules/auth/services/rbacService'
 import { llmProviderRegistry } from '@open-mercato/shared/lib/ai/llm-provider-registry'
+import { beginAiAssistantMutationGuard } from '../../mutation-guard'
 import { AiTenantModelAllowlistRepository } from '../../../data/repositories/AiTenantModelAllowlistRepository'
 import {
   canonicalProviderId,
@@ -163,6 +164,20 @@ export async function PUT(req: NextRequest) {
 
     const em = container.resolve<EntityManager>('em')
     const repo = new AiTenantModelAllowlistRepository(em)
+
+    const guard = await beginAiAssistantMutationGuard({
+      container,
+      req,
+      tenantId: auth.tenantId,
+      organizationId: auth.orgId ?? null,
+      userId: auth.sub,
+      resourceKind: 'ai_assistant.allowlist',
+      resourceId: 'tenant',
+      operation: 'update',
+      mutationPayload: { allowedProviders, allowedModelsByProvider },
+    })
+    if (guard.blockedResponse) return guard.blockedResponse
+
     const row = await repo.upsert(
       { allowedProviders, allowedModelsByProvider },
       {
@@ -171,6 +186,7 @@ export async function PUT(req: NextRequest) {
         userId: auth.sub,
       },
     )
+    await guard.runAfterSuccess()
     return NextResponse.json({
       id: row.id,
       tenantId: row.tenantId,
@@ -209,10 +225,24 @@ export async function DELETE(req: NextRequest) {
 
     const em = container.resolve<EntityManager>('em')
     const repo = new AiTenantModelAllowlistRepository(em)
+
+    const guard = await beginAiAssistantMutationGuard({
+      container,
+      req,
+      tenantId: auth.tenantId,
+      organizationId: auth.orgId ?? null,
+      userId: auth.sub,
+      resourceKind: 'ai_assistant.allowlist',
+      resourceId: 'tenant',
+      operation: 'delete',
+    })
+    if (guard.blockedResponse) return guard.blockedResponse
+
     const cleared = await repo.clear({
       tenantId: auth.tenantId ?? '',
       organizationId: auth.orgId ?? null,
     })
+    await guard.runAfterSuccess()
     return NextResponse.json({ cleared })
   } catch (error) {
     logger.error('AI Settings Allowlist — DELETE error', { err: error })

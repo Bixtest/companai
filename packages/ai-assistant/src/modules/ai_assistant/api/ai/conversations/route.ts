@@ -9,6 +9,7 @@ import {
   aiChatConversationListQuerySchema,
 } from '../../../data/validators'
 import { hasRequiredFeatures } from '../../../lib/auth'
+import { beginAiAssistantMutationGuard } from '../../mutation-guard'
 import {
   createConversationStorage,
   serializeAiChatConversation,
@@ -219,6 +220,27 @@ export async function POST(req: NextRequest): Promise<Response> {
     const beforeRow = parseResult.data.conversationId
       ? await repo.getById(parseResult.data.conversationId, ctx)
       : null
+
+    const guard = await beginAiAssistantMutationGuard({
+      container,
+      req,
+      tenantId: callerCtx.tenantId,
+      organizationId: callerCtx.organizationId,
+      userId: callerCtx.userId,
+      resourceKind: 'ai_assistant.conversation',
+      // The row may be created server-side, so the guard is evaluated against
+      // the caller-supplied id when present (the idempotent path) and against a
+      // stable 'new' marker otherwise — the guard set is collected for the
+      // resource KIND, so an as-yet-unpersisted row is still governed.
+      resourceId: parseResult.data.conversationId ?? 'new',
+      operation: 'create',
+      mutationPayload: {
+        conversationId: parseResult.data.conversationId ?? null,
+        agentId: parseResult.data.agentId,
+      },
+    })
+    if (guard.blockedResponse) return guard.blockedResponse
+
     const row = await repo.createOrGet(
       {
         conversationId: parseResult.data.conversationId,
@@ -228,6 +250,7 @@ export async function POST(req: NextRequest): Promise<Response> {
       },
       ctx,
     )
+    await guard.runAfterSuccess()
     const status = beforeRow ? 200 : 201
     return NextResponse.json(serializeAiChatConversation(row), { status })
   } catch (error) {

@@ -5,6 +5,7 @@ import { getAuthFromRequest } from '@open-mercato/shared/lib/auth/server'
 import { createRequestContainer } from '@open-mercato/shared/lib/di/container'
 import type { RbacService } from '@open-mercato/core/modules/auth/services/rbacService'
 import { hasRequiredFeatures } from '../../../../../../lib/auth'
+import { beginAiAssistantMutationGuard } from '../../../../../mutation-guard'
 import {
   AiChatConversationAccessError,
   AiChatParticipantNotFoundError,
@@ -106,6 +107,20 @@ export async function DELETE(req: NextRequest, context: RouteContext): Promise<R
 
   try {
     const repo = createConversationStorage(container)
+
+    const guard = await beginAiAssistantMutationGuard({
+      container,
+      req,
+      tenantId: auth.tenantId,
+      organizationId: auth.orgId ?? null,
+      userId: auth.sub,
+      resourceKind: 'ai_assistant.conversation',
+      resourceId: parseResult.data.conversationId,
+      operation: 'custom',
+      mutationPayload: { participantUserId: parseResult.data.userId, action: 'revoke' },
+    })
+    if (guard.blockedResponse) return guard.blockedResponse
+
     await repo.revokeParticipant(
       parseResult.data.conversationId,
       parseResult.data.userId,
@@ -136,6 +151,7 @@ export async function DELETE(req: NextRequest, context: RouteContext): Promise<R
     } catch {
       // non-fatal
     }
+    await guard.runAfterSuccess()
     return new NextResponse(null, { status: 204 })
   } catch (err) {
     if (err instanceof AiChatParticipantNotFoundError) {

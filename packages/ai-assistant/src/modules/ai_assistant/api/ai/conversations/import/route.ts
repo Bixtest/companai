@@ -6,6 +6,7 @@ import { createRequestContainer } from '@open-mercato/shared/lib/di/container'
 import type { RbacService } from '@open-mercato/core/modules/auth/services/rbacService'
 import { aiChatConversationImportSchema } from '../../../../data/validators'
 import { hasRequiredFeatures } from '../../../../lib/auth'
+import { beginAiAssistantMutationGuard } from '../../../mutation-guard'
 import {
   createConversationStorage,
   serializeAiChatConversation,
@@ -89,6 +90,23 @@ export async function POST(req: NextRequest): Promise<Response> {
     }
 
     const repo = createConversationStorage(container)
+
+    const guard = await beginAiAssistantMutationGuard({
+      container,
+      req,
+      tenantId: auth.tenantId,
+      organizationId: auth.orgId ?? null,
+      userId: auth.sub,
+      resourceKind: 'ai_assistant.conversation',
+      resourceId: parseResult.data.conversation.conversationId,
+      operation: 'create',
+      mutationPayload: {
+        conversationId: parseResult.data.conversation.conversationId,
+        messageCount: parseResult.data.messages.length,
+      },
+    })
+    if (guard.blockedResponse) return guard.blockedResponse
+
     const result = await repo.importLocalConversation(
       {
         conversation: {
@@ -106,6 +124,7 @@ export async function POST(req: NextRequest): Promise<Response> {
         userId: auth.sub,
       },
     )
+    await guard.runAfterSuccess()
     return NextResponse.json({
       conversation: serializeAiChatConversation(result.conversation),
       importedMessageCount: result.importedMessageCount,

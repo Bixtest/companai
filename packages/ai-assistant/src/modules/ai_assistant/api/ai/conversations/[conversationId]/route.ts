@@ -10,6 +10,7 @@ import {
   aiChatConversationUpdateSchema,
 } from '../../../../data/validators'
 import { hasRequiredFeatures } from '../../../../lib/auth'
+import { beginAiAssistantMutationGuard } from '../../../mutation-guard'
 import {
   createConversationStorage,
   serializeAiChatConversation,
@@ -268,6 +269,20 @@ export async function PATCH(req: NextRequest, context: RouteContext): Promise<Re
   try {
     const container = await createRequestContainer()
     const repo = createConversationStorage(container)
+
+    const guard = await beginAiAssistantMutationGuard({
+      container,
+      req,
+      tenantId: callerCtx.tenantId,
+      organizationId: callerCtx.organizationId,
+      userId: callerCtx.userId,
+      resourceKind: 'ai_assistant.conversation',
+      resourceId: callerCtx.conversationId,
+      operation: 'update',
+      mutationPayload: parseResult.data as Record<string, unknown>,
+    })
+    if (guard.blockedResponse) return guard.blockedResponse
+
     const row = await repo.update(
       callerCtx.conversationId,
       parseResult.data,
@@ -278,6 +293,7 @@ export async function PATCH(req: NextRequest, context: RouteContext): Promise<Re
         canManageConversations: callerCtx.canManageConversations,
       },
     )
+    await guard.runAfterSuccess()
     return NextResponse.json(serializeAiChatConversation(row))
   } catch (error) {
     if (error instanceof Error && error.name === 'AiChatConversationAccessError') {
@@ -310,12 +326,26 @@ export async function DELETE(req: NextRequest, context: RouteContext): Promise<R
   try {
     const container = await createRequestContainer()
     const repo = createConversationStorage(container)
+
+    const guard = await beginAiAssistantMutationGuard({
+      container,
+      req,
+      tenantId: callerCtx.tenantId,
+      organizationId: callerCtx.organizationId,
+      userId: callerCtx.userId,
+      resourceKind: 'ai_assistant.conversation',
+      resourceId: callerCtx.conversationId,
+      operation: 'delete',
+    })
+    if (guard.blockedResponse) return guard.blockedResponse
+
     await repo.softDelete(callerCtx.conversationId, {
       tenantId: callerCtx.tenantId,
       organizationId: callerCtx.organizationId,
       userId: callerCtx.userId,
       canManageConversations: callerCtx.canManageConversations,
     })
+    await guard.runAfterSuccess()
     return NextResponse.json({ ok: true })
   } catch (error) {
     if (error instanceof Error && error.name === 'AiChatConversationAccessError') {

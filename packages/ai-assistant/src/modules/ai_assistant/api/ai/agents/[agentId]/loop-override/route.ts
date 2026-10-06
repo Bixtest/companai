@@ -8,6 +8,7 @@ import type { RbacService } from '@open-mercato/core/modules/auth/services/rbacS
 import type { EntityManager } from '@mikro-orm/postgresql'
 import { getAgent, loadAgentRegistry } from '../../../../../lib/agent-registry'
 import { hasRequiredFeatures } from '../../../../../lib/auth'
+import { beginAiAssistantMutationGuard } from '../../../../mutation-guard'
 import {
   AiAgentRuntimeOverrideRepository,
   AiAgentRuntimeOverrideValidationError,
@@ -288,6 +289,20 @@ export async function PUT(req: NextRequest, context: RouteContext): Promise<Resp
 
     const em = authResult.container.resolve<EntityManager>('em')
     const repo = new AiAgentRuntimeOverrideRepository(em)
+
+    const guard = await beginAiAssistantMutationGuard({
+      container: authResult.container,
+      req,
+      tenantId: authResult.tenantId,
+      organizationId: authResult.organizationId,
+      userId: authResult.userId,
+      resourceKind: 'ai_assistant.agent_override',
+      resourceId: agent.id,
+      operation: 'update',
+      mutationPayload: { agentId: agent.id, fields: Object.keys(bodyResult.data) },
+    })
+    if (guard.blockedResponse) return guard.blockedResponse
+
     const row = await repo.upsertDefault(
       {
         agentId: agent.id,
@@ -307,6 +322,7 @@ export async function PUT(req: NextRequest, context: RouteContext): Promise<Resp
       },
     )
 
+    await guard.runAfterSuccess()
     return NextResponse.json({
       ok: true,
       agentId: agent.id,
@@ -361,6 +377,21 @@ export async function DELETE(req: NextRequest, context: RouteContext): Promise<R
       return NextResponse.json({ ok: true, agentId: agent.id, cleared: false })
     }
 
+    // Guard runs only on the path that actually writes: a no-op clear has
+    // nothing for a guard to govern (the `inbox_ops` 404 precedent).
+    const guard = await beginAiAssistantMutationGuard({
+      container: authResult.container,
+      req,
+      tenantId: authResult.tenantId,
+      organizationId: authResult.organizationId,
+      userId: authResult.userId,
+      resourceKind: 'ai_assistant.agent_override',
+      resourceId: agent.id,
+      operation: 'delete',
+      mutationPayload: { agentId: agent.id },
+    })
+    if (guard.blockedResponse) return guard.blockedResponse
+
     await repo.upsertDefault(
       {
         agentId: agent.id,
@@ -379,6 +410,7 @@ export async function DELETE(req: NextRequest, context: RouteContext): Promise<R
       },
     )
 
+    await guard.runAfterSuccess()
     return NextResponse.json({ ok: true, agentId: agent.id, cleared: true })
   } catch (error) {
     logger.error('AI Loop Override DELETE — Failure', { err: error })

@@ -8,6 +8,7 @@ import type { RbacService } from '@open-mercato/core/modules/auth/services/rbacS
 import type { EntityManager } from '@mikro-orm/postgresql'
 import { getAgent, loadAgentRegistry } from '../../../../../lib/agent-registry'
 import { hasRequiredFeatures } from '../../../../../lib/auth'
+import { beginAiAssistantMutationGuard } from '../../../../mutation-guard'
 import { AiAgentPromptOverrideRepository } from '../../../../../data/repositories/AiAgentPromptOverrideRepository'
 import type { AiAgentPromptOverride } from '../../../../../data/entities'
 import { findReservedKeys } from '../../../../../lib/prompt-override-merge'
@@ -280,6 +281,20 @@ export async function POST(req: NextRequest, context: RouteContext): Promise<Res
 
     const em = authResult.container.resolve<EntityManager>('em')
     const repo = new AiAgentPromptOverrideRepository(em)
+
+    const guard = await beginAiAssistantMutationGuard({
+      container: authResult.container,
+      req,
+      tenantId: authResult.tenantId,
+      organizationId: authResult.organizationId,
+      userId: authResult.userId,
+      resourceKind: 'ai_assistant.agent_override',
+      resourceId: agent.id,
+      operation: 'update',
+      mutationPayload: { agentId: agent.id, notes: bodyResult.data.notes ?? null },
+    })
+    if (guard.blockedResponse) return guard.blockedResponse
+
     const saved = await repo.save(
       {
         agentId: agent.id,
@@ -293,6 +308,7 @@ export async function POST(req: NextRequest, context: RouteContext): Promise<Res
       },
     )
 
+    await guard.runAfterSuccess()
     return NextResponse.json({
       ok: true,
       agentId: agent.id,

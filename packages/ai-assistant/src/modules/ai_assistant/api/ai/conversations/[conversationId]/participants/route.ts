@@ -9,6 +9,7 @@ import { findOneWithDecryption } from '@open-mercato/shared/lib/encryption/find'
 import type { RbacService } from '@open-mercato/core/modules/auth/services/rbacService'
 import { User } from '@open-mercato/core/modules/auth/data/entities'
 import { hasRequiredFeatures } from '../../../../../lib/auth'
+import { beginAiAssistantMutationGuard } from '../../../../mutation-guard'
 import {
   createConversationStorage,
   AiChatConversationAccessError,
@@ -261,6 +262,20 @@ export async function POST(req: NextRequest, context: RouteContext): Promise<Res
     }
 
     const repo = createConversationStorage(container)
+
+    const guard = await beginAiAssistantMutationGuard({
+      container,
+      req,
+      tenantId: callerCtx.tenantId,
+      organizationId: callerCtx.organizationId,
+      userId: callerCtx.userId,
+      resourceKind: 'ai_assistant.conversation',
+      resourceId: callerCtx.conversationId,
+      operation: 'custom',
+      mutationPayload: { participantUserId: targetUserId, role: parseResult.data.role },
+    })
+    if (guard.blockedResponse) return guard.blockedResponse
+
     const participant = await repo.addParticipant(
       callerCtx.conversationId,
       targetUserId,
@@ -288,6 +303,7 @@ export async function POST(req: NextRequest, context: RouteContext): Promise<Res
     } catch {
       // non-fatal
     }
+    await guard.runAfterSuccess()
     return NextResponse.json(
       {
         participant: {

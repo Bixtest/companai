@@ -12,6 +12,7 @@ import {
   isKnownMutationPolicy,
   isMutationPolicyEscalation,
 } from '../../../../../lib/agent-policy'
+import { beginAiAssistantMutationGuard } from '../../../../mutation-guard'
 import { AiAgentMutationPolicyOverrideRepository } from '../../../../../data/repositories/AiAgentMutationPolicyOverrideRepository'
 import type { AiAgentMutationPolicyOverride } from '../../../../../data/entities'
 import type {
@@ -299,6 +300,24 @@ export async function POST(req: NextRequest, context: RouteContext): Promise<Res
 
     const em = authResult.container.resolve<EntityManager>('em')
     const repo = new AiAgentMutationPolicyOverrideRepository(em)
+
+    const guard = await beginAiAssistantMutationGuard({
+      container: authResult.container,
+      req,
+      tenantId: authResult.tenantId,
+      organizationId: authResult.organizationId,
+      userId: authResult.userId,
+      resourceKind: 'ai_assistant.agent_override',
+      resourceId: agent.id,
+      operation: 'update',
+      mutationPayload: {
+        agentId: agent.id,
+        mutationPolicy: bodyResult.data.mutationPolicy,
+        notes: bodyResult.data.notes ?? null,
+      },
+    })
+    if (guard.blockedResponse) return guard.blockedResponse
+
     const saved = await repo.set(
       {
         agentId: agent.id,
@@ -312,6 +331,7 @@ export async function POST(req: NextRequest, context: RouteContext): Promise<Res
       },
     )
 
+    await guard.runAfterSuccess()
     return NextResponse.json({
       ok: true,
       agentId: agent.id,
@@ -360,11 +380,26 @@ export async function DELETE(req: NextRequest, context: RouteContext): Promise<R
 
     const em = authResult.container.resolve<EntityManager>('em')
     const repo = new AiAgentMutationPolicyOverrideRepository(em)
+
+    const guard = await beginAiAssistantMutationGuard({
+      container: authResult.container,
+      req,
+      tenantId: authResult.tenantId,
+      organizationId: authResult.organizationId,
+      userId: authResult.userId,
+      resourceKind: 'ai_assistant.agent_override',
+      resourceId: agent.id,
+      operation: 'delete',
+      mutationPayload: { agentId: agent.id },
+    })
+    if (guard.blockedResponse) return guard.blockedResponse
+
     const cleared = await repo.clear(agent.id, {
       tenantId: authResult.tenantId,
       organizationId: authResult.organizationId,
     })
 
+    await guard.runAfterSuccess()
     return NextResponse.json({
       ok: true,
       agentId: agent.id,
