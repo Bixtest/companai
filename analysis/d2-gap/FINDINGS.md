@@ -1,7 +1,7 @@
 # D2-gap — measured across every enabled module
 
 **Measured:** 2026-10-06. **Tool:** `analysis/d2-gap/measure.js` (re-runnable; `--json` for machines).
-**Repo:** `workspace/starting-kit`, HEAD **`1f1b60e`** (the `messages` registry-bypass fix is in; before it, `0af50c8` with `ai_assistant`, and `4ef5812` with `audit_logs`).
+**Repo:** `workspace/starting-kit`, HEAD **`1f1b60e`** (the `messages` registry-bypass fix is in; before it, `0af50c8` with `ai_assistant`, and `4ef5812` with `audit_logs`). The `communication_channels` correction below changed **only the tool**, not the repo — so the HEAD is unchanged.
 
 ## What D2-gap is, and why it is a defect
 
@@ -12,28 +12,42 @@ would reach data no authorization describes (Hermes map §4.4 (b)).
 
 ## The headline
 
-| | baseline (HEAD `5af76bc`) | after `audit_logs` (`4ef5812`) | after `ai_assistant` (`0af50c8`) | **now (HEAD `1f1b60e`)** |
-|---|---|---|---|---|
-| enabled modules with a source tree | **35** | **35** | **35** | **35** |
-| write verbs across those modules | **256** | **256** | **256** | **256** |
-| **unguarded write verbs (the `D2-gap`)** | **160** | **158** | **143** | **122** |
-| auth-flow verbs set aside by design | 8 | 8 | 8 | 8 |
-| guarded verbs | 88 | 90 | 113 | **134** |
+| | baseline (HEAD `5af76bc`) | after `audit_logs` (`4ef5812`) | after `ai_assistant` (`0af50c8`) | after `messages` (`1f1b60e`) | **now (tool fix, HEAD `1f1b60e`)** |
+|---|---|---|---|---|---|
+| enabled modules with a source tree | **35** | **35** | **35** | **35** | **35** |
+| write verbs across those modules | **256** | **256** | **256** | **256** | **256** |
+| **unguarded write verbs (the `D2-gap`)** | **160** | **158** | **143** | **122** | **111** |
+| auth-flow verbs set aside by design | 8 | 8 | 8 | 8 | 8 |
+| guarded verbs (registry / crud / wrapper / local / re-export) | 88 | 90 | 105 | 126 | **137** |
+| *guarded + auth-flow (the two "not a write to guard" buckets)* | *96* | *98* | *113* | *134* | ***145*** |
 
 **Each column differs from the one before it by exactly the modules fixed so far** — `audit_logs` (2
 verbs), `ai_assistant` (15 verbs), then `messages` (17) + `integrations` (4), which moved to the new
-**local-helper** class rather than becoming wrapper-guarded — see the `messages` section below: they
-were never D2-gap at all. Every figure is recorded because the number a document quotes
+**local-helper** class rather than becoming wrapper-guarded; then `communication_channels` (11 verbs),
+which likewise was **already guarded** and only needed the **tool** to learn its helper name — check
+the `communication_channels` section: the label said 15 unguarded, the artefact said 11 of those were
+guarded all along. Every figure is recorded because the number a document quotes
 must say **which HEAD it was measured at** — carrying a "before" figure forward as if it were current
 is how the `auth`-onward file-count slip happened.
 
+> **A label correction, made by the closure check itself (2026-10-06).** The "guarded verbs" row
+> previously read **88 · 90 · 113 · 134**, and a first draft of this edit read **145**. The closure
+> against the unchanged 256 proves those two middle columns (and the new one) were **auth-flow
+> double-counts**: 113 = 105 guarded + 8 auth-flow, 134 = 126 + 8, 145 = 137 + 8. Every column must sum
+> to 256 with the 8 counted **once**: `guarded-only + 0 (deprecated) + 8 (auth-flow) + unguarded = 256`.
+> The correct guarded-only series is **88 · 90 · 105 · 126 · 137** (88 and 90 were already right; the
+> drift started at the `ai_assistant` column). Both numbers are now shown, labelled, so the figure can
+> never be quoted without its meaning. **Nothing about the code or the unguarded counts changed** — this
+> is the same figure-discipline rule the row itself is about, applied to the row.
+
 **Guarded by mechanism (computed by the tool, not assumed):** 65 through a module wrapper, 0 through
 `runRouteMutationGuards` directly, 35 through `makeCrudRoute`/`crud.` (the CRUD factory runs
-`collectAndRunGuards()`), **21 through a module-local guard helper** (`messages` 17 + `integrations` 4 —
-the new `GUARDED_LOCAL` class), 5 through a re-export of a guarded factory, **0 through the deprecated
-pair** (D2-wide left none enabled). **Closure — every write verb is accounted for:** 65 + 0 + 35 + 21 +
-5 + 0 + 8 (auth-flow, set aside) + 122 (unguarded) = **256**. *(A first draft of this line carried
-33/26/29 forward from memory; the tool reads 50/35/5, and the closure check is what caught it.)*
+`collectAndRunGuards()`), **32 through a module-local guard helper** (`messages` 17 + `integrations` 4 +
+`communication_channels` 11 — the `GUARDED_LOCAL` class), 5 through a re-export of a guarded factory,
+**0 through the deprecated pair** (D2-wide left none enabled). **Closure — every write verb is
+accounted for:** 65 + 0 + 35 + 32 + 5 + 0 + 8 (auth-flow, set aside) + 111 (unguarded) = **256**. *(A
+first draft of this line carried 33/26/29 forward from memory; the tool reads 50/35/5, and the closure
+check is what caught it.)*
 
 > ⚠ **What `GUARDED_LOCAL` does and does not prove.** It records that the route calls a module-local
 > guard helper — **not** that the helper reaches the registry. `messages`, `integrations`,
@@ -45,13 +59,13 @@ pair** (D2-wide left none enabled). **Closure — every write verb is accounted 
 ## Per module (verbs)
 
 `W` = module wrapper · `R` = `runRouteMutationGuards` · `C` = `makeCrudRoute`/`crud.` ·
-`D` = deprecated pair (D2-wide) · `GAP` = unguarded.
+`L` = module-local guard helper (`GUARDED_LOCAL`) · `D` = deprecated pair (D2-wide) · `GAP` = unguarded.
 
-| module | files | verbs | W | R | C | D | **GAP** |
-|---|---|---|---|---|---|---|---|
-| ai_assistant | 19 | 24 | 15 | 0 | 0 | 0 | **9** ✅ *fixed `0af50c8`; was 24* |
-| messages | 11 | 17 | 0 | 0 | 0 | 0 | **0** ✅ *fixed `1f1b60e` (registry-bypass, not a D2-gap); was 17* |
-| communication_channels | 15 | 15 | 0 | 0 | 0 | 0 | **15** |
+| module | files | verbs | W | R | C | L | D | **GAP** |
+|---|---|---|---|---|---|---|---|---|
+| ai_assistant | 19 | 24 | 15 | 0 | 0 | 0 | 0 | **9** ✅ *fixed `0af50c8`; was 24* |
+| messages | 11 | 17 | 0 | 0 | 0 | 17 | 0 | **0** ✅ *fixed `1f1b60e` (registry-bypass, not a D2-gap); was 17* |
+| communication_channels | 15 | 15 | 0 | 0 | 0 | 11 | 0 | **4** ✅ *tool fix (11 were already guarded); was 15* |
 | auth | 21 | 27 | 1 | 0 | 6 | 0 | **12** |
 | business_rules | 5 | 11 | 0 | 0 | 0 | 0 | **11** |
 | inbox_ops | 14 | 14 | 4 | 0 | 0 | 0 | **10** |
@@ -79,7 +93,7 @@ pair** (D2-wide left none enabled). **Closure — every write verb is accounted 
 | translations | 1 | 2 | 2 | 0 | 0 | 0 | **0** |
 | api_keys | 1 | 2 | 0 | 0 | 2 | 0 | **0** |
 
-## The two fixes so far
+## The findings so far
 
 ### `audit_logs` — the first module fixed (`4ef5812`)
 
@@ -219,6 +233,54 @@ guard — so a helper that regresses to legacy-only is invisible to the tool and
 by mutating **one** helper (`staff`) back to legacy-only → exactly that helper's 2 registry-path tests
 went red, the other 12 stayed green.
 
+## `communication_channels` — the label was wrong again; the tool, not the code, was defective
+
+`communication_channels` was measured as the **largest remaining `D2-gap` module: 15 unguarded verbs /
+15 files** (12 POST, 2 DELETE, 1 PUT — one verb per file). The literal fix would have wrapped all 15
+files. **Measuring the premise first showed it was false for 11 of them.**
+
+**11 of the 15 verbs already call `validateRouteMutationGuard`** — the module's own helper in
+`lib/route-mutation-guard.ts`. That helper is **not** the legacy-only shape: it calls
+`runRouteMutationGuards`, which spreads `getAllMutationGuardInstances()` (the registry) **and** pushes
+the bridged legacy guard. Where `messages`' helper was wrong and needed **fixing**, this one was already
+right — the only defect was that the **scan did not know its name**.
+
+**Two routes agree that those 11 are guarded:**
+
+1. **The artefact, route by route.** 11 files reference `validateRouteMutationGuard`; each exports
+   exactly **one** write verb and holds exactly **one** `await validateRouteMutationGuard(` call —
+   11 verbs / 11 calls, 1:1. The other 4 files hold 4 verbs and no such call. **11 + 4 = 15 files,
+   11 + 4 = 15 verbs.**
+2. **The tool's own rows**, read back from `--json` and matched against each file's text: the same
+   **11 / 4** split. *(My first hand-count said "12 guarded, 3 unguarded" — a slip; the two machine
+   routes corrected it. Do not carry the 12 forward.)*
+
+**And the helper really is registry-backed** — proven by its own test, not by reading the line:
+`lib/__tests__/route-mutation-guard.test.ts` registers a **real** guard via `registerMutationGuards`,
+then asserts `validateRouteMutationGuard` **blocks** on it (422) and **fires its `afterSuccess`**. A
+legacy-only helper could not pass that test — there is no legacy service registered in it.
+
+**The remaining 4 verbs, each named and set aside on evidence — none is a `D2-gap`:**
+
+| route | why it is not a resource write to guard |
+|---|---|
+| `post/oauth/[provider]/initiate` | **0 DB writes.** Issues an OAuth authorize URL + sets a state cookie. An outgoing redirect, not a mutation. |
+| `post/webhook/[provider]` | `requireAuth: false` — the **signature verification IS the auth**. **0 DB writes**; verifies a per-tenant signature, then **enqueues** an inbound job. There is no `(userId, tenantId)` scope for a mutation guard to read. |
+| `post/webhooks/gmail` | Same shape: a **Google-signed JWT** is the auth, no session. **0 DB writes**; enqueues a history-sync job; 204. |
+| `post/test-seed` | **Does write — but is gated off in production.** `isTestChannelSeedingEnabled()` (env `OM_ENABLE_TEST_CHANNEL_SEEDING`, unset by default) returns **404 at line 97 — before any write**. Every write (commandBus, `em.create`, `INSERT INTO messages`, link, mapping) is **after** the gate; verified by line order. A test surface, not a product write path. |
+
+**Measured after (tool fix only; no code change, HEAD unchanged at `1f1b60e`):**
+`communication_channels` **15 → 4** unguarded (11 moved to `GUARDED_LOCAL`); **total 122 → 111**;
+local class **21 → 32**; guarded **134 → 145**. **Closure: 65 + 0 + 35 + 32 + 5 + 0 + 8 + 111 = 256.**
+`communication_channels` **58 suites / 558 tests green** (incl. the guard test above).
+
+**The lesson this repeats — now a standing rule for this sweep:** the `D2-gap` label is a *four-symbol
+string scan*. It can read a guarded route as `GAP` (this module, `messages`) and — before the
+`GUARDED_LOCAL` header was written — a legacy-only helper as guarded. **Measure the premise the label
+names (`check-the-premise-before-the-blanket-fix`) before spending files on the fix it implies.** When a
+module ships its own guard helper, teach the tool the helper's name **only after proving the helper
+reaches the registry** — the `messages` fix proved the name alone is not enough.
+
 ## Method, so this can be re-run and cannot rot
 
 ```bash
@@ -238,3 +300,9 @@ with the record.
   is printed on every run.
 - The script classifies by **what the file references**, not by tracing the call graph. A file that
   references a guard but returns before calling it would read as guarded. Not observed here.
+- **`GUARDED_LOCAL` depends on `LOCAL_GUARD_HELPERS` being complete.** A module with its own guard
+  helper that is **not** listed reads as `GAP` even though it is guarded — this is exactly what happened
+  to `communication_channels` (11 verbs mis-labelled until `validateRouteMutationGuard` was added to the
+  map). **When a new module is measured, check whether it ships a guard helper before trusting a `GAP`.**
+  The five known helpers: `runMessageMutationGuards`, `runIntegrationMutationGuards`,
+  `runPaymentGatewayMutationGuards`, `runStaffMutationGuards`, `validateRouteMutationGuard`.

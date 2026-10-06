@@ -106,6 +106,14 @@ const LOCAL_GUARD_HELPERS = {
   integrations: /\brunIntegrationMutationGuards\s*\(/,
   payment_gateways: /\brunPaymentGatewayMutationGuards\s*\(/,
   staff: /\brunStaffMutationGuards\s*\(/,
+  // `communication_channels` guards its routes through `validateRouteMutationGuard`
+  // (lib/route-mutation-guard.ts), which is NOT legacy-only: it calls
+  // `runRouteMutationGuards` -> `getAllMutationGuardInstances()` + the bridged
+  // legacy guard. Proven by lib/__tests__/route-mutation-guard.test.ts, which
+  // registers a real guard and asserts the helper BLOCKS on it and fires its
+  // afterSuccess. Added after the D2-gap label read 15 unguarded here while the
+  // artefact showed 11 of the 15 already calling this helper.
+  communication_channels: /\bvalidateRouteMutationGuard\s*\(/,
 };
 
 function walk(dir, out = []) {
