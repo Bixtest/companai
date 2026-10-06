@@ -28,10 +28,11 @@ test runs against the **real generated file** and the **real store**, and is **m
 emptying the entries → 4 red; no-op registration → 3 red; neutering the guard → 1 red, the right one.
 
 **Then the honest part — the defect is bigger than the registry.** While fixing the entities path (D2),
-a sweep found **~201 non-test call sites across ~76 files** still calling the `@deprecated`
-`validateCrudMutationGuard()` pair, which bypasses the registry entirely — including **enabled** modules
-(`auth`, `dashboards`, `dictionaries`, `directory`, `inbox_ops`, `perspectives`, `translations`,
-`workflows`, `data_sync`, `planner`, `payment_gateways`). So the registry is now populated and
+a sweep found **199 non-test call sites across 78 files** still calling the `@deprecated`
+`validateCrudMutationGuard()` pair, which bypasses the registry entirely — **93 of those calls (38
+files) in ENABLED** modules (`auth`, `dashboards`, `data_sync`, `dictionaries`, `directory`, `entities`,
+`feature_toggles`, `inbox_ops`, `perspectives`, `planner`, `query_index`, `translations`, `workflows`),
+the rest in parked modules. So the registry is now populated and
 **delivering**, and most routes still **do not consume it**. That is the same class of defect one layer
 up: the owner's *"guarded for some, forgotten for others"* — present, measured, and now counted. It is
 recorded as **`D2-wide`** in the backlog and in the build order, so it cannot slip.

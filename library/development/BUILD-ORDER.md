@@ -22,7 +22,7 @@ stacking.* That is exactly what he asked for.
 | Accounts management | **BUILT** | `packages/core/src/modules/auth/` — api, backend, commands, components, data, di.ts, emails, encryption.ts, events.ts, frontend, `i18n`, lib, **migrations (20+)**, services, setup.ts, workers |
 | Roles & permissions | **BUILT** (two-table ACL) | `RoleAcl` (`role_acls`) + `UserAcl` (`user_acls`), `featuresJson: string[]`, wildcard matching, `isSuperAdmin` |
 | Languages / i18n | **BUILT** | `shared/src/lib/i18n`; per-module `i18n` folders; `translations` module; `dictionaries` module |
-| The guard engine ("this") | **PARTLY BUILT — D0 FIXED 2026-10-06, the rest open** | `MutationGuard` + `runMutationGuards()` exist and run. **D0 fixed:** the generated registry now delivers guards from an enabled module (`entities`), mutation-proven end to end (§2c). **Still open:** the **route path** — ~201 call sites in ~76 files still call the `@deprecated` resolver and bypass the registry (**D2-wide**, §2c); and the guard result is binary, with no `escalate` outcome (**D3**) |
+| The guard engine ("this") | **PARTLY BUILT — D0 FIXED 2026-10-06, the rest open** | `MutationGuard` + `runMutationGuards()` exist and run. **D0 fixed:** the generated registry now delivers guards from an enabled module (`entities`), mutation-proven end to end (§2c). **Still open:** the **route path** — 199 call sites in 78 files still call the `@deprecated` resolver and bypass the registry (**D2-wide**, §2c); and the guard result is binary, with no `escalate` outcome (**D3**) |
 | Structural write hook | **BUILT — and now registry-based** | `beginEntitiesMutationGuard` is called at **every** entity/field-definition write path, carrying `resourceKind` (`entities.entity`, `entities.field_definition`) + `operation`. As of 2026-10-06 (`d225602`) it runs the **registry** (`runRouteMutationGuards`), not the deprecated single-service resolver |
 
 So the honest statement is: **the foundation is built; the foundation's last four gaps are not** — and
@@ -42,7 +42,7 @@ this exists, the structural permission cannot be *configured* — only hard-code
 because everything in the grammar (S11) and the tier fallback (S12) reads from it.**
 
 **D2 — the entities path runs on the deprecated resolver.** *(PARTLY FIXED 2026-10-06 — see §2c; the
-entities write path now uses the registry, but ~201 other call sites do not.)* `definitions.mutation-guard.ts`
+entities write path now uses the registry, but 199 other call sites do not.)* `definitions.mutation-guard.ts`
 called `validateCrudMutationGuard()`, which the code itself marks `@deprecated` with a warning:
 
 > *"Resolves ONLY the single DI-registered `crudMutationGuardService`, so it silently bypasses every
@@ -51,7 +51,7 @@ called `validateCrudMutationGuard()`, which the code itself marks `@deprecated` 
 
 Effect today: **the authoritative write path for tables and columns — the exact path the structural
 grammar must govern — was the one path not running the full guard set.** The entities path is fixed; the
-**wider sweep of ~201 call sites across ~76 files is open** (§2c).
+**wider sweep of 199 call sites across 78 files is open** (§2c).
 
 **D3 — the guard result is binary; there is no "escalate".** `MutationGuardResult.ok` is a boolean. A
 guard can **allow** or **block** — it cannot say *"allowed, but a person must review"*. The owner's
@@ -101,14 +101,27 @@ looks identical to a healthy system.
 
 **What remains, and it is now a named, counted item — `D2-wide`:**
 
-A sweep found **~201 non-test call sites across ~76 files** still calling the deprecated
+A sweep found **199 non-test call sites across 78 files** still calling the deprecated
 `validateCrudMutationGuard()` / `runCrudMutationGuardAfterSuccess()` pair — i.e. still **bypassing the
-registry**. They include **enabled** modules: `auth`, `dashboards`, `dictionaries`, `directory`,
-`feature_toggles`, `inbox_ops`, `perspectives`, `query_index`, `translations`, `workflows`, `data_sync`,
-`planner`, `payment_gateways`. **So the registry is now populated and delivering — and most routes still
-do not consume it.** That is the same class of defect D0 was, one layer up, and it is the honest scope of
-D2: not "point the entities path at the registry" (done) but **"retire the deprecated resolver across the
-platform, module by module, each with its own proof."** Counted so it cannot slip.
+registry**. The raw grep is **203 / 80 files**; subtract the 2 declarations in `mutation-guard.ts` and
+the 2 docstring mentions in `route-mutation-guard.ts` and the true migration target is **199 / 78**.
+(An earlier draft of this document said "~201 / ~76" — that was **understated and is now corrected**;
+the count was re-measured twice, by grep and by walking each file's text.)
+
+Of the 199, **93 calls in 38 files are in ENABLED modules** (`auth`, `dashboards`, `data_sync`,
+`dictionaries`, `directory`, `entities`, `feature_toggles`, `inbox_ops`, `perspectives`, `planner`,
+`query_index`, `translations`, `workflows`); **106 calls in 40 files are in parked modules** (they do
+not run, but they are upstream code we must not diverge from carelessly). **So the registry is now
+populated and delivering — and most routes still do not consume it.** That is the same class of defect
+D0 was, one layer up, and it is the honest scope of D2: not "point the entities path at the registry"
+(done) but **"retire the deprecated resolver across the platform, module by module, each with its own
+proof."** Counted so it cannot slip.
+
+**Enabled-module count, corrected.** The count of enabled modules quoted elsewhere as "37" was wrong —
+it matched commented-out parked lines. Measured two ways (scan of the `enabledModules` array literal,
+and a non-comment `id:` sweep), the config declares **35 static enabled modules**; `example` +
+`example_customers_sync` join only under `OM_ENABLE_EXAMPLES=true`, `storage_s3` only under
+`OM_ENABLE_STORAGE_S3=true`.
 
 
 ---
@@ -172,11 +185,11 @@ one page, each with a named home. Details: [`BLUEPRINT-GAP-ANALYSIS.md`](BLUEPRI
 **PHASE 0 — Foundation completion (do first, small, unblocks everything)**
 0. ~~**D0** — make the generated guard registry real.~~ ✅ **FIXED 2026-10-06, proven (§2c).** The
    registry now delivers guards from an enabled module, and the delivery chain is mutation-proven.
-   **D2-wide (the ~201 deprecated call sites) is the remaining delivery work — see below.**
+   **D2-wide (the 199 deprecated call sites in 78 files) is the remaining delivery work — see below.**
 1. **D1** — structural-permission settings table (object · verb · actorType · role · level), with the
    tier fallback loaded from the dictionary's defaults.
 2. **D2 (entities scope) — ✅ DONE 2026-10-06** (§2c). **D2-wide — OPEN:** retire the deprecated
-   `validateCrudMutationGuard()` pair at the **~201 remaining call sites in ~76 files** (§2c), so every
+   `validateCrudMutationGuard()` pair at the **199 remaining call sites in 78 files** (§2c), so every
    route runs the same guard set as the generic CRUD path. Module by module, each with its own proof.
 3. **D3** — add the `escalate` outcome to `MutationGuardResult` and route it into the existing
    pending-approval machinery (`authority_pending_acts`).
@@ -254,8 +267,8 @@ top of it.**
 
 **What this does *not* change:** accounts management, roles/permissions and languages are genuinely
 built (measured, §1), and the structural grammar is still the right design. The work is still edits to
-an existing system. **D0 is now fixed and proven (§2c);** what remains is D1, **D2-wide** (the ~201
-deprecated call sites, §2c) and D3.
+an existing system. **D0 is now fixed and proven (§2c);** what remains is D1, **D2-wide** (the 199
+deprecated call sites in 78 files, §2c) and D3.
 
 ---
 
@@ -263,8 +276,9 @@ deprecated call sites, §2c) and D3.
 
 - This order is **Phase 0 → 3**. Phase 0's gaps are **D1, D2-wide, D3, and the Metadata Registry**;
   **D0 is fixed, and D2's entities scope is done** (§2c) — with both proven, not asserted.
-- **D2-wide is the live remaining defect:** **~201 non-test call sites in ~76 files** still bypass the
-  registry via the deprecated resolver (§2c). Counted, so it cannot slip out of view.
+- **D2-wide is the live remaining defect:** **199 non-test call sites in 78 files** still bypass the
+  registry via the deprecated resolver (§2c) — **93 calls in 38 files in enabled modules**, the rest in
+  parked modules. Counted, so it cannot slip out of view.
 - It is linked from [`SPECIFICATIONS-DICTIONARY.md`](SPECIFICATIONS-DICTIONARY.md) (Part E and Part F),
   [`BACKLOG.md`](BACKLOG.md) (the Phase 2 banner), [`HANDOVER.md`](HANDOVER.md) (Tier B #B1c),
   [`INDEX.md`](../../INDEX.md) (reading order #1b and the folder map), and
