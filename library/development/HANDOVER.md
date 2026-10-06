@@ -131,7 +131,7 @@ reading it "for context" is how the direction gets buried (see [`../WHAT-WE-ARE-
 | B1 | [`SPECIFICATIONS-DICTIONARY.md`](SPECIFICATIONS-DICTIONARY.md) | **The standard every change is checked against** — the project's MVC. **Read before making any architectural change.** The two clauses that may never be skipped: the permissions question (S2) and the tier question (S4/item 17). §C.2b: the tiers/defaults/fallbacks are a **superadmin setting**, not hardcoded |
 | B1a | [`CORE-BOUNDARY.md`](CORE-BOUNDARY.md) | **What is uncustomisable core vs configurable vs domain packs** — the answer to *"what must nobody be able to change?"* Ring 1 (identity, tenancy, the resource envelope, the policy engine, audit, localization resolution, the contract shapes) moves only by platform release |
 | B1b | [`ARCHITECTURE-structure-permissions.md`](ARCHITECTURE-structure-permissions.md) | **What the AI may do to the platform's own structure** — the object × verb × actor grammar (S11/S12), and why it plugs onto the existing mutation guard |
-| B1c | [`BUILD-ORDER.md`](BUILD-ORDER.md) | **The order — contracts, then foundation, then stack.** The owner's instruction (2026-10-06): fix the sequence so foundational items are not deferred. **Phase −1** = the architecture contracts; **Phase 0** = the foundation completion. **D0 ✅ fixed and proven 2026-10-06** — the generated guard registry now delivers guards (mutation-proven, §2c). **D1 ✅ fixed and proven 2026-10-06** — the tier mapping / defaults / fallbacks are a superadmin setting (`module_configs`), seeded from the dictionary, failing closed (§2d). **The live remaining defect is `D2-wide`:** **110 call sites** in **44 files** still bypass the registry via the `@deprecated` resolver (baseline 198; `entities`, `data_sync`, `dictionaries`, `dashboards`, `workflows`, `inbox_ops`, `perspectives`, `translations`, `planner`, `query_index` and `auth` now retired). **The plan is per-module, not a blind sweep — build-order §2e; the exact module being worked now is in the JOURNAL's Active-task box** |
+| B1c | [`BUILD-ORDER.md`](BUILD-ORDER.md) | **The order — contracts, then foundation, then stack.** The owner's instruction (2026-10-06): fix the sequence so foundational items are not deferred. **Phase −1** = the architecture contracts; **Phase 0** = the foundation completion. **D0 ✅ fixed and proven 2026-10-06** — the generated guard registry now delivers guards (mutation-proven, §2c). **D1 ✅ fixed and proven 2026-10-06** — the tier mapping / defaults / fallbacks are a superadmin setting (`module_configs`), seeded from the dictionary, failing closed (§2d). **The live remaining defect is `D2-wide`:** **108 call sites** in **41 files** still bypass the registry via the `@deprecated` resolver (baseline 198; `entities`, `data_sync`, `dictionaries`, `dashboards`, `workflows`, `inbox_ops`, `perspectives`, `translations`, `planner`, `query_index`, `auth` and `directory` now retired). **The plan is per-module, not a blind sweep — build-order §2e; the exact module being worked now is in the JOURNAL's Active-task box** |
 | B1d | [`CORE-MODULES-REGISTER.md`](CORE-MODULES-REGISTER.md) | **What core modules exist, and whether they are REALLY built** — two-route verified, honest verdicts (COMPLETE / BUILT-UNEVEN / SHELL / ABSENT). Finance & procurement are ABSENT |
 | B1e | [`BLUEPRINT-GAP-ANALYSIS.md`](BLUEPRINT-GAP-ANALYSIS.md) | **What the universal platform blueprint exposed in our plan** — four gaps (resource envelope, core/pack boundary, i18n/a11y contracts, a contracts phase), and what to adapt vs adopt from the generic standard |
 | B2 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | How the three pieces run together, and the dockerisation decision |
@@ -220,7 +220,7 @@ Use [`BACKLOG.md`](BACKLOG.md) for *what is left as a whole* and [`BUILD-ORDER.m
 path `spec ✅ → G-01 ✅ → G-02 ✅ → G-03 ✅` is complete, and `G-07` (the Widget contract), `G-17` (the AI
 emits the Business IR), and `G-21` (the request-outcome taxonomy and its gate) are done. The
 **live defect family** is the guard layer: **D0** ✅ (the generated registry now delivers guards),
-**D1** ✅ (the tier mapping is a superadmin setting), and **D2-wide** in progress — **110 call sites**
+**D1** ✅ (the tier mapping is a superadmin setting), and **D2-wide** in progress — **108 call sites**
 still bypass the registry via the `@deprecated` resolver, being retired module by module (`entities`,
 `data_sync`, `dictionaries`, `dashboards`, `workflows`, `inbox_ops`, `perspectives`, `translations`,
 `planner` and `query_index` done). **D3** (the `escalate` outcome) and the **Metadata Registry**
@@ -362,7 +362,7 @@ here so nobody assumes a folder travels with the repository when it only exists 
 ```text
 companai/                       ← repo 1 root (thinking + docs).  You are here.
 ├── INDEX.md                    the map of every folder — start here after this file
-├── JOURNAL.md                  what happened, in order, with dates (4,523 lines; newest first)
+├── JOURNAL.md                  what happened, in order, with dates (4,591 lines; newest first)
 ├── LESSONS.md                  mistakes made, how they were caught (3,007 lines, L1–L89)
 ├── where_we_left.md            ⚠️ stale (2026-08-13) — traps only
 │                               (THIS FILE is not at the root — it lives at
@@ -591,7 +591,7 @@ and was *not* re-measured — treat it as a starting point, not a fact.**
 | **Repo 1** (thinking/docs) | `master`, HEAD **`a72fdfe`** — the commit that carries the G-03 docs, **clean** |
 | **Repo 2** (code) | `main`, HEAD **`cafe7d6`** — the commit that carries the G-03 code, **clean** |
 | **Codebase shape** | **21 packages, 1 app** (`apps/mercato`) — a monorepo (Yarn 4.17.1 + Turbo) |
-| **Documentation** | `library/` holds **3,470 markdown files**; `LESSONS.md` 3,007 lines (L1–L89); `JOURNAL.md` 4,523 lines; `COOKBOOK.md` 2,948 lines |
+| **Documentation** | `library/` holds **3,470 markdown files**; `LESSONS.md` 3,091 lines (L1–L91); `JOURNAL.md` 4,591 lines; `COOKBOOK.md` 2,948 lines |
 | **The studies** | analysis programme **complete** (batches 0–12, 13 reports); Paperclip + Hermes study **complete** (11 batches, 3,940 lines, 53 lessons) |
 | **The specification** | **Draft 2** — of its 40 rows, **36 SETTLED · 1 DERIVED · 3 DEFERRED-with-trigger · 0 OPEN — owner**. The gate is passed; only ratification remains |
 | **The runtime boundary (B-05)** | **DECIDED 2026-10-05 by the owner.** One product, one repository, one deployment, one interface (ours), with Hermes as a **supervised private runtime process behind the internal port**; Hermes is **headless**. Reasoning in [`ARCHITECTURE-hermes-integration.md`](ARCHITECTURE-hermes-integration.md) §11. The Hermes **profile** topology is deferred with the trigger **the agent gateway** |
@@ -643,7 +643,7 @@ and was *not* re-measured — treat it as a starting point, not a fact.**
   2026-10-06), and the order it comes from is [`BUILD-ORDER.md`](BUILD-ORDER.md). **Done so far:**
   the four-item critical path (`P0-spec`, `G-01`, `G-02`, `G-03`), plus `G-07`, `G-17` and `G-21` and
   the foundation items `D0`, `D1` (`S0` also done). **The live defect family in progress is `D2-wide`**
-  — 110 call sites still bypass the guard registry, being retired module by module.
+  — 108 call sites still bypass the guard registry, being retired module by module.
   **What is left to do, in one place, is `BACKLOG.md`; what is being done *now* is the JOURNAL box.**
   **The "one of three endings" is the owner's core features_pack (2026-10-06):** a prompt can end
   as a **one-time answer** (nothing saved), a **model proposal** (the prompt needs new structure — a

@@ -3056,3 +3056,36 @@ call sites, and (b) a walk of every write verb (does the file export `POST`/`PUT
 its guard mechanism — `makeCrudRoute`/`collectAndRunGuards`, the module wrapper, or **nothing**. Report
 (b) beside (a) in the progress note. If a header or note names a file as unguarded, that name must have
 come from step (b) on the same day.
+
+---
+
+## L91 — a **comment** can fail a code guard: scanners that regex raw file text do not strip comments
+
+**What happened (2026-10-06, the `directory` migration).** The new wrapper
+`directory/api/mutation-guard.ts` carried a header JSDoc that *explained*, in prose, that
+`organization-edges` PATCH calls `enforceCommandOptimisticLockWithGuards()` and that the wrapper's own
+route uses the synchronous `enforceCommandOptimisticLock()`. Both are true statements **about other
+files**. But `src/__tests__/optimistic-lock-command-coverage.test.ts` scans every source file with
+`readFileSync(...)` and tests the raw text against `/enforceCommandOptimisticLock\s*\(/` — **it never
+strips comments**. So the wrapper was reported as a *direct call site that bypasses the record_locks
+seam*, and the full suite went **1 suite / 1 test RED** — caused entirely by a comment, in a file that
+calls neither helper.
+
+**The trap underneath the trap.** The first fix attempt made it worse: the explanatory comment was
+rewritten to *quote the regex*, and the quote itself contained `enforceCommandOptimisticLock(` — so the
+"fix" reproduced the failure. A comment that documents a scanner is subject to that scanner.
+
+**The rule.** Before writing a symbol's **call syntax** (`name(`) into a comment, a doc, or a test
+fixture, check whether any code guard regexes raw file text for it. If one does, **name the symbol
+without the parentheses** and say why in the comment (this is what the `directory` wrapper now does).
+**A green full-suite run is the only proof a code guard is satisfied** — a targeted test run of the
+changed module would have missed this entirely, because the guard lives in `src/__tests__/`, not in the
+module. **Always run the whole suite after adding a file whose comments name other helpers**, and prefer
+`grep -rn "<symbol>("`-style checks to confirm the name does not appear in a scanned position.
+
+**Corollary for counts (same family as L90).** Several of this repo's guards measure by **text**, not by
+AST: the optimistic-lock coverage guard, and the D2-wide count's `grep -vE ":[0-9]+:\s*(//|\*|/\*)"`
+filter which drops comment lines. Text-based measurement is cheap and auditable but it reads **prose as
+code**. When a count or a guard looks wrong, the first question is not "is the code wrong?" but "is the
+instrument reading a different thing than the claim names?" — which is the same failure mode as L90, one
+layer down.

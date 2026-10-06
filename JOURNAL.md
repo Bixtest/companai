@@ -30,56 +30,66 @@ log.** Everything else (HANDOVER, START-PROMPT, README, BOOKMARKS, BACKLOG) poin
 
 ---
 
-### ▶ NOW — D2-wide continues with `directory` (2 deprecated guard calls, 1 file)
+### ▶ NOW — D2-wide continues with `feature_toggles` (2 deprecated guard calls, 1 file)
 
 > **If you are a new agent, read only this block to know your job.** Everything below the box is the
 > history and the queue; this is the work in hand.
 
-**What happened before this box (2026-10-06, this session).** `auth` — the active task this box
-carried last — is **DONE and PROVEN**. Count **112 → 110**; files **45 → 44**. It added three findings:
-**(1) the module is far bigger than its 2 calls suggest** — `auth` has **18 files exporting a write
-verb**, of which **only 3 are guarded**; the other **12 resource-write verbs across 10 files call no
-guard at all** (`users/acl`, `roles/acl`, `sidebar/preferences`, `sidebar/variants`, `sidebar/variants/[id]`,
-five `authority/*`) — that is **`D2-gap`**, the largest measured, recorded not fixed; **(2) the wrapper
-header's first draft named a wrong `D2-gap` set from memory** and was corrected against the walk
-(`users/route.ts` **is** guarded via `makeCrudRoute`; `authority/projects/route.ts` exports **GET only**);
-**(3) the mutation guard is not what protects this route** — `assertActorCanAccessUserTarget()` is.
+**What happened before this box (2026-10-06, this session).** `directory` — the active task this box
+carried last — is **DONE and PROVEN**. Count **110 → 108**; files **42 → 41**. It added two findings, both
+found by **running tests, not by reading**: **(1) a `*/` inside a block comment** — the wrapper header
+contained the literal `` `get/*/lookup.ts` ``, and the `*/` inside the glob closed the JSDoc early so the
+file would not parse; **(2) a comment failed a code guard, and the fix nearly repeated it** —
+`optimistic-lock-command-coverage.test.ts` regexes **raw file text** for `enforceCommandOptimisticLock(`
+and does not strip comments, so the wrapper's header *naming* that helper in prose was reported as a
+bypassing direct call site and turned the full suite **1 test RED**, from a comment, in a file that calls
+neither helper. Recorded as **L91**. It also confirmed `directory` has **almost no `D2-gap`** — 3 unguarded
+verbs in 1 file (`organization-edges`), all protected by other controls whose names are recorded, against
+`auth`'s 12.
 
 **What the task is, in plain words.** The platform has a guard system that checks every write before it
 happens (who may change what). Some code still calls an **old, deprecated** version of it that
 **silently skips the real guard registry** — a security hole. The fix, module by module, is to repoint
-those calls at the new registry. **This is tracked as "D2-wide".** Eleven modules are now done
+those calls at the new registry. **This is tracked as "D2-wide".** Twelve modules are now done
 (`entities`, `data_sync`, `dictionaries`, `dashboards`, `workflows`, `inbox_ops`, `perspectives`,
-`translations`, `planner`, `query_index`, `auth`); **110 deprecated call sites remain across 44 files**, of which
-**4 calls in 2 enabled modules** are live (`directory` 2, `feature_toggles` 2); the rest are
+`translations`, `planner`, `query_index`, `auth`, `directory`); **108 deprecated call sites remain across 41 files**, of which
+**2 calls in 1 enabled module** are live (`feature_toggles` 2); the rest are
 parked and recorded, not migrated.
 
-**Your job now — one module: `directory` (2 calls / 1 file).** Do it exactly the way the previous eleven
-were done, and the pattern is already written down (do not invent a new one):
+**Your job now — one module: `feature_toggles` (2 calls / 1 file) — THE LAST ENABLED ONE.** Do it exactly
+the way the previous twelve were done, and the pattern is already written down (do not invent a new one):
 
-1. **Read the worked example**: `BUILD-ORDER.md` §2e, "Progress — `auth` DONE and PROVEN" — it
-   is the most recent and carries the three findings above. The ten before it are identical in shape.
-2. **Create `packages/core/src/modules/directory/api/mutation-guard.ts`** — a
-   `beginDirectoryMutationGuard(ctx)` wrapper (copy `auth/api/mutation-guard.ts` and rename).
+1. **Read the worked example**: `BUILD-ORDER.md` §2e, "Progress — `directory` DONE and PROVEN" — it
+   is the most recent and carries the two findings above. The eleven before it are identical in shape.
+2. **Create `packages/core/src/modules/feature_toggles/api/mutation-guard.ts`** — a
+   `beginFeatureTogglesMutationGuard(ctx)` wrapper (copy `directory/api/mutation-guard.ts` and rename).
+   **While you are in the header: never write a symbol's call syntax (`name(`) in prose, and never put a
+   path glob containing `*/` inside a block comment** (L91 — both bit `directory`).
 3. **Repoint the route file(s)** from `validateCrudMutationGuard()` / `runCrudMutationGuardAfterSuccess()`
    to `runRouteMutationGuards()` through the wrapper. **Walk every `.ts` file under `api/` — do not glob
    only for `route.ts`** (the `translations` + `planner` + `query_index` lesson: a named-export handler
    is a route too). **First measure the file count** — the plan says **1 file**; re-derive it.
    **And walk the module's OTHER write verbs** — `auth`'s lesson is that a small `D2-wide` number can
-   sit on top of a large `D2-gap`; record `directory`'s unguarded count next to its guarded one.
+   sit on top of a large `D2-gap`; record `feature_toggles`' unguarded count next to its guarded one.
+   (Note: `feature_toggles/commands/global.ts` is already in the optimistic-lock allowlist — confirm
+   whether that module has other write verbs too.)
 4. **Repair the tests** — re-point their mocks from the deprecated DI pair to **only** the registry call
    `runRouteMutationGuards`.
 5. **Prove it**: stub **only** the registry call `runRouteMutationGuards` — **never** the module wrapper,
    or the mutation is invisible (§2e, "A proof defect found and fixed"); then disable the block path →
    the tests must go RED; neuter `runAfterSuccess` → RED; restore the wrapper and confirm it is
    **md5-identical**. Then **mutate the route file too** (the `query_index` + `auth` strengthening).
-   **Read the test COUNT, not just the exit code** — an empty run exits 0 (L88).
+   **Read the test COUNT, not just the exit code** — an empty run exits 0 (L88). **Then run the WHOLE
+   suite** — a targeted module run misses guards that live in `src/__tests__/` (L91).
 6. **Recount and record**: the count command is in `BACKLOG.md` item **D2-wide**; expected result
-   **110 → 108** (verify: `directory` is 2 calls). Then update `BUILD-ORDER.md` §2e and `BACKLOG.md`, and
-   commit **in both repos**.
+   **108 → 106** (verify: `feature_toggles` is 2 calls). **Derive the file count from the commits, not by
+   carrying it forward** — the `auth` row drifted by one exactly that way, corrected this session. Then
+   update `BUILD-ORDER.md` §2e and `BACKLOG.md`, and commit **in both repos**.
 
-**Definition of done:** `directory` measures **0** deprecated call sites; its route tests are green; the
-two mutation proofs went RED; the repo-wide count is **110**; the docs say so.
+**Definition of done:** `feature_toggles` measures **0** deprecated call sites; its route tests are green;
+the two mutation proofs went RED; the repo-wide count is **106**; the docs say so. **Then every ENABLED
+module is migrated** — the only D2-wide work left is the parked set (106 calls), which is *recorded, not
+migrated*, and `D2-gap` remains an open backlog item per module.
 
 **Then, in order (nothing dropped):**
 
@@ -97,10 +107,10 @@ two mutation proofs went RED; the repo-wide count is **110**; the docs say so.
 | **9** | ✅ **D2-wide: `translations` — DONE** (code `a2f8d5f`) | 6 calls / 2 files → **2 guard objects** (the plan's "4" was wrong: one guard per route). Count **126 → 120** (files **47**, not 49). **Found: `put/locales.ts` is not a `route.ts`** — a file-name scan misses it. **First real use of the id re-binding** on after-success. Mutation-proven (**3 RED / 3 RED**). |
 | **10** | ✅ **D2-wide: `planner` — DONE** (code `641d3af`) | 4 calls / 2 files → **2 guard objects** (the plan's figure held on re-measurement — the first module where it did). Count **120 → 116** (files **47 → 45**). **Found: neither handler is a `route.ts`** (both are named `POST` exports) — a file-name scan misses both. Handled the `shouldRunAfterSuccess` gate without re-implementing it (the registry already applies it). **No `D2-gap`** — all 5 write verbs guarded. Mutation-proven (**2 RED / 2 RED** — every test covered). |
 | **11** | ✅ **D2-wide: `query_index` — DONE** (code `cc5a237`) | 4 calls / 2 files → **2 guard objects** (the plan's figure held again). Count **116 → 112** (files **45 → 43**). **Neither handler is a `route.ts`** (`reindex.ts`, `purge.ts` — named `POST` exports); the test mocked the **deprecated DI service**, re-pointed to stub only `runRouteMutationGuards`. **Proof went past the wrapper:** each route mutated in turn → each reddened only its own test. **No `D2-gap`** — both write verbs guarded. Mutation-proven (**2 RED / 2 RED**, disjoint). |
-| **11a** | ✅ **D2-wide: `auth` — DONE** (code `aeeaad0`) | 2 calls / 1 file → **1 guard object**; count **112 → 110** (files **45 → 44**). **The plan's figure held.** **The module is far bigger than its 2 calls suggest:** 18 files export a write verb, **only 3 are guarded** — **12 unguarded resource-writes across 10 files** is the **worst `D2-gap` measured**, recorded not fixed. **A wrong `D2-gap` claim in the header's first draft was caught and corrected against the walk** (`users/route.ts` **is** guarded via `makeCrudRoute`; `authority/projects/route.ts` is **GET only**). Mutation-proven (**2 RED / 1 RED**, plus route-file mutations 2 RED / 1 RED). |
-| **11b** | **◀ D2-wide: `directory`** (2 calls / 1 file) — **THE ACTIVE TASK** | See the six steps above. **Walk every `.ts` under `api/`, not just `route.ts`; re-derive the file count; and record the module's unguarded count too** (the `auth` lesson). Expected **110 → 108**. |
-| **11c** | **The rest of D2-wide, enabled modules** — `feature_toggles` (2) | Each with its own mutation proof. |
-| **12** | **D2-gap** — the write routes that call **no** guard at all (measured: `workflows` 13/19, `auth` **12/13**, `inbox_ops` 10/14, `perspectives` 0/3, `translations` 0/3, `planner` 0/2, `query_index` 0/2) | Do it module by module alongside D2-wide; record the per-module unguarded count next to the D2-wide count. |
+| **11a** | ✅ **D2-wide: `auth` — DONE** (code `aeeaad0`) | 2 calls / 1 file → **1 guard object**; count **112 → 110** (files **43 → 42** — *the docs first said 45 → 44; corrected this session, see the file-count note below*). **The plan's figure held.** **The module is far bigger than its 2 calls suggest:** 18 files export a write verb, **only 3 are guarded** — **12 unguarded resource-writes across 10 files** is the **worst `D2-gap` measured**, recorded not fixed. **A wrong `D2-gap` claim in the header's first draft was caught and corrected against the walk** (`users/route.ts` **is** guarded via `makeCrudRoute`; `authority/projects/route.ts` is **GET only**). Mutation-proven (**2 RED / 1 RED**, plus route-file mutations 2 RED / 1 RED). |
+| **11b** | ✅ **D2-wide: `directory` — DONE** (code `d682c09`) | 2 calls / 1 file → **1 guard object**; count **110 → 108** (files **42 → 41**). **The plan's figure held.** **Almost no `D2-gap`:** the module's entire gap is **3 unguarded verbs in 1 file** (`organization-edges` POST/PATCH/DELETE) against `auth`'s 12 — and all three are protected by other controls (`requireFeatures`, a verified-tenant `resolveScope`, `assertOrganizationsInTenant()`, audit rows, the OSS optimistic-lock floor). **Two traps caught by running tests, not reading:** a `*/` inside a block comment closed the JSDoc early; and a comment **naming** `enforceCommandOptimisticLock(` failed a code guard that regexes raw text (L91). Mutation-proven (**2 RED / 1 RED**, plus route-file mutations 2 RED / 1 RED). |
+| **11c** | **◀ D2-wide: `feature_toggles`** (2 calls / 1 file) — **THE ACTIVE TASK, AND THE LAST ENABLED MODULE** | See the six steps above. **Walk every `.ts` under `api/`, not just `route.ts`; re-derive the file count; record the module's unguarded count too.** Expected **108 → 106**. |
+| **12** | **D2-gap** — the write routes that call **no** guard at all (measured: `workflows` 13/19, `auth` **12/13**, `inbox_ops` 10/14, **`directory` 3/4**, `perspectives` 0/3, `translations` 0/3, `planner` 0/2, `query_index` 0/2) | Do it module by module alongside D2-wide; record the per-module unguarded count next to the D2-wide count. |
 | **13** | **D3** — add the `escalate` outcome to `MutationGuardResult` | The last guard-engine gap; needs D2-wide's shape settled first. |
 | **14** | **The Metadata Registry** service (GAP A / C5) | The remaining foundation item; everything stacked on it inherits it. |
 
@@ -122,11 +132,12 @@ the per-item status is in `BACKLOG.md`. **This box is the only place that says "
 
 **All three are done.** The table above is the queue that followed them; the row marked
 **◀ THE ACTIVE TASK** is the work in hand. The milestones reached on the way: `dashboards`, `workflows`,
-`inbox_ops`, `perspectives`, `translations`, `planner`, `query_index` and `auth` migrated to the registry (`a05ea2c`, `d3af1b1`, `d89b8f6`,
-`e26642c`, `a2f8d5f`, `641d3af`, `cc5a237`, `aeeaad0`); directive 1's map completed to cover every
+`inbox_ops`, `perspectives`, `translations`, `planner`, `query_index`, `auth` and `directory` migrated to the registry (`a05ea2c`, `d3af1b1`, `d89b8f6`,
+`e26642c`, `a2f8d5f`, `641d3af`, `cc5a237`, `aeeaad0`, `d682c09`); directive 1's map completed to cover every
 item and to work the three joints in depth (`807ab40`, `365c4e4`); the two test-suite defects fixed so
 the suite is green (`d5567c7`, `fe7c3e5`); the two integration concerns fixed in the docs (this session,
-docs `c0b26d2`).
+docs `c0b26d2`); the D2-wide **file count corrected** against the commits (this session) and **L91**
+recorded.
 
 **Where the reasoning lives:** the order is `BUILD-ORDER.md` §2e; the live counts are in
 `BACKLOG.md`; the per-item status is in `BACKLOG.md`. **This box is the only place that says "we are
@@ -136,8 +147,65 @@ doing X now."**
 
 ### ✅ Done recently (ticked, then moved down here)
 
+- **2026-10-06 — `directory` D2-wide migration** (code `d682c09`). 2 calls / 1 file → **1 guard object**;
+  count **110 → 108** (files **42 → 41**); `directory` measures 0. Twelfth enabled module. **Almost no
+  `D2-gap`** — the module's entire gap is **3 unguarded verbs in 1 file** (`organization-edges`
+  POST/PATCH/DELETE), against `auth`'s 12, and all three are protected by other controls that are now
+  named: `requireFeatures: ['directory.organizations.manage']`, a verified-tenant `resolveScope()`,
+  `assertOrganizationsInTenant()` ("the tenant boundary for this table"), audit rows, and the OSS
+  optimistic-lock floor. **A naming trap recorded:** `enforceCommandOptimisticLockWithGuards` does **not**
+  run mutation guards — its `...WithGuards` suffix means the *command optimistic-lock* guard service, so a
+  `grep -i guard` shows the file as "guarded" when it is not mutation-guarded. **Two traps caught by
+  running tests, not by reading:** **(1)** the wrapper header contained the literal `` `get/*/lookup.ts` ``
+  — the `*/` inside the glob **closed the JSDoc early** and the file would not parse; **(2)** the header
+  *named* `enforceCommandOptimisticLock(` in prose, and `optimistic-lock-command-coverage.test.ts` regexes
+  **raw file text** without stripping comments — so the wrapper was reported as a bypassing direct call
+  site and the full suite went **1 test RED**, from a **comment**, in a file that calls neither helper. The
+  first rewrite quoted the regex and **contained the call syntax again**, reproducing the failure. Fixed by
+  naming both helpers without parentheses; recorded as **L91**. **A full-suite run caught this** — a
+  targeted module run would not have. **Counts re-measured two independent ways, and the FILE COUNT WAS
+  CORRECTED** (see below).
+- **2026-10-06 — the D2-wide FILE COUNT was wrong in the docs, and was corrected** (docs, this session).
+  `auth` was recorded as files **45 → 44** and `query_index`/`planner` as ending at **43**/**45**.
+  Re-measured at **every commit** (`git grep <commit>`), the true chain is
+  **78 → 77 → 69 → 63 → 59 → 56 → 52 → 49 → 47 → 45 → 43 → 42 → 41**: every per-module **delta** was
+  right, but the `auth` row re-used `query_index`'s *before* value (45) as its *after* value, and the error
+  propagated into `BUILD-ORDER.md`, `HANDOVER.md` and this file. **The site counts were always right**
+  (200 → 108, verified at every commit). **No filter ever produced 44** — it was arithmetic drift, not a
+  measurement. **The rule: derive the chain from the commits, never carry a number forward.**
+- **2026-10-06 — `directory` D2-wide migration** (code `d682c09`). 2 calls / 1 file → **1 guard object**;
+  count **110 → 108** (files **42 → 41**); `directory` measures 0. Twelfth enabled module — **and the
+  cleanest so far on `D2-gap`.** Walked every write verb and named its guard: `organization-branding` PUT
+  → the new wrapper; `organizations` and `tenants` POST/PUT/DELETE → **`makeCrudRoute` →
+  `collectAndRunGuards()`** (the registry, `factory.ts:615-618`); `organization-switcher` is **GET only**
+  (checked). **The entire gap is 3 unguarded verbs in 1 file** (`organization-edges` POST/PATCH/DELETE) —
+  against `auth`'s 12 — and all three are protected by other controls: `requireFeatures:
+  ['directory.organizations.manage']`, a verified-tenant `resolveScope()` (401), `assertOrganizationsInTenant()`
+  ("the tenant boundary for this table" — both endpoint orgs must be in the caller's tenant), a self-edge
+  and tree-inversion refusal, a `writeDirectWriteAuditLog()` row per verb, and the OSS optimistic-lock
+  floor on PATCH. **A naming trap recorded:** `enforceCommandOptimisticLockWithGuards` does **not** run
+  mutation guards — its `...WithGuards` suffix means the *command optimistic-lock* guard service; a
+  `grep -i guard` shows the file as "guarded" when it is not mutation-guarded. **Tests:** 1 suite repaired
+  (`organization-branding/__tests__/route.test.ts`) — it stubbed the **DI `crudMutationGuardService`**,
+  now stubbed to **only** the registry call `runRouteMutationGuards`, wrapper running for real; **13 tests
+  green** including three guard-shaped (the registry call's shape; deny → 423, no flush; "does NOT run
+  after-success when blocked"). **Mutations bit:** block path disabled → **2 RED**; `runAfterSuccess`
+  neutered → **1 RED**; wrapper restored md5-identical `9427d68151ecff5823587b65dd937f8e`. **Critic pass
+  mutated the ROUTE file:** block return removed → **2 RED**; after-success call removed → **1 RED**; all
+  files restored byte-identical. **Two traps, both caught by running tests:** **(1)** a `*/` inside the
+  header's literal `` `get/*/lookup.ts` `` **closed the JSDoc early** and the file would not parse;
+  **(2)** the header *named* `enforceCommandOptimisticLock(` in prose, and
+  `optimistic-lock-command-coverage.test.ts` regexes **raw file text** without stripping comments — so the
+  wrapper was reported as a bypassing direct call site and the **full suite went 1 test RED**, from a
+  comment, in a file that calls neither helper. The first rewrite quoted the regex and **contained the call
+  syntax again**, reproducing it. Fixed by dropping the parentheses; recorded as **L91**. **A targeted
+  module run would have missed (2) entirely** — the guard lives in `src/__tests__/`. `directory` module
+  **27 suites / 194 tests green**; **whole core suite 603 suites / 5136 tests green**; core `tsc --noEmit`
+  exit 0. Full entry below.
+
 - **2026-10-06 — `auth` D2-wide migration** (code `aeeaad0`). 2 calls / 1 file → **1 guard object**;
-  count **112 → 110** (files **45 → 44**); `auth` measures 0. Eleventh enabled module. **The real finding
+  count **112 → 110** (files **43 → 42**; the docs first said `45 → 44` — corrected, see above);
+  `auth` measures 0. Eleventh enabled module. **The real finding
   is not the 2 calls — it is what sits under them.** `auth` has **18 files exporting a write verb**, and
   **only 3 are guarded** (`users/resend-invite` → this wrapper; `users/route.ts` and `roles/route.ts` →
   `makeCrudRoute` → `collectAndRunGuards()`). **12 resource-write verbs across 10 files call no guard at
@@ -164,7 +232,8 @@ doing X now."**
   `tsc --noEmit` exit 0. Full entry below.
 
 - **2026-10-06 — `query_index` D2-wide migration** (code `cc5a237`). 4 calls / 2 files → **2 guard objects**;
-  count **116 → 112** (files **45 → 43**); `query_index` measures 0. Tenth enabled module. **Neither handler
+  count **116 → 112** (files **45 → 43** — this pair was correct; only the *next* module's row drifted, see
+  the file-count correction above); `query_index` measures 0. Tenth enabled module. **Neither handler
   is a `route.ts`** — `reindex.ts` and `purge.ts` both export a **named** `POST` with
   `metadata = { POST: { requireAuth: true, requireFeatures: [...] } }`, so a `route.ts`-only glob finds
   neither file; found by walking every `.ts` under `api/`. **The test mocked the deprecated DI service**
