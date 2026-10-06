@@ -43,13 +43,22 @@ direction gets buried.
 
 **Tier B — the spine: how it runs, how the work is done, and the plan:**
 
-    g. library/development/ARCHITECTURE.md
-    h. library/development/ARCHITECTURE-hermes-integration.md    (the B-05 runtime boundary, §11)
-    i. library/development/ARCHITECTURE-model-server-integration.md   (the model-default, §9)
-    j. library/development/SPEC-business-model-kernel.md
-    k. library/analysis/findings/12-development-plan.md
-    l. workspace/COOKBOOK.md                  <- how the work is done. Read before touching code
-    m. LESSONS.md                             <- 82 mistakes already made
+    g. library/development/SPECIFICATIONS-DICTIONARY.md   <- THE STANDARD every change is checked
+                                                              against (the project's "MVC"). Read before
+                                                              any architectural change; S2 + tiers bind
+    h. library/development/BUILD-ORDER.md     <- the order: contracts, then foundation, then the stack.
+                                                 Phase 0 = four named guard-engine gaps (D0-D3)
+    i. library/development/CORE-BOUNDARY.md   <- what is UNCUSTOMISABLE core vs configurable vs packs
+    j. library/development/CORE-MODULES-REGISTER.md  <- what core modules exist and whether they are
+                                                 REALLY built (two-route verified)
+    k. library/development/BLUEPRINT-GAP-ANALYSIS.md <- what the universal blueprint exposed in our plan
+    l. library/development/ARCHITECTURE.md
+    m. library/development/ARCHITECTURE-hermes-integration.md    (the B-05 runtime boundary, §11)
+    n. library/development/ARCHITECTURE-model-server-integration.md   (the model-default, §9)
+    o. library/development/ARCHITECTURE-structure-permissions.md  <- object × verb × actor grammar (S11/S12)
+    p. library/development/SPEC-business-model-kernel.md
+    q. workspace/COOKBOOK.md                  <- how the work is done. Read before touching code
+    r. LESSONS.md                             <- mistakes already made
 
 **Tier C — open only where the work needs it:** `AGENT-HALF.md` (before any agent-half work),
 `THREAD-2026-10-05.md` (why the session decided what it did), `NEEDS-YOU.md` / `BLOCKERS.md`,
@@ -98,6 +107,14 @@ already cost this project time:
 - **Update the documentation in the same change as the work.** A batch that leaves the docs stale is
   not finished.
 - **A decision that is the owner's is not yours to close.** Ask, or leave it explicitly open.
+- **Rule zero-zero-one: the dictionary binds.** No architectural change without checking
+  `SPECIFICATIONS-DICTIONARY.md`. The permissions question (S2) and the tier question (S4/item 17) may
+  never be skipped. Where a doc and the code disagree, the **disagreement is the defect** — fix it, do
+  not pick a side.
+- **A module is not "built" because a file exists.** Mark nothing COMPLETE without the **two-route
+  check** (read the artefact, and reach the same fact by an independent path). The guard engine proved
+  this: it *looked* built and its central registry was **empty** (D0).
+- **Do not stack on an unfinished foundation.** Follow `BUILD-ORDER.md`; Phase 0 (D0–D3) closes first.
 
 **HOW TO TALK TO THE OWNER.** Reply in **English**, always. Plain, everyday words — he is not a
 developer, so no jargon. One specific thing at a time, answerable in a word or a sentence. **Do not
@@ -105,27 +122,24 @@ ask him to adjudicate technical decisions:** when a problem has an obvious safe 
 the work, and tell him what changed and how to undo it. Reserve his judgment for what is genuinely
 his — a name, a domain, a cost, a preference.
 
-**4. Your first task.** Read `library/development/BACKLOG.md` §"The list". **The four-item critical
-path is complete:** `spec ✅ → G-01 ✅ → G-02 ✅ → G-03 ✅`. `P0-spec` is done — draft 2 of the
-Business Model Kernel specification (`library/development/SPEC-business-model-kernel.md`) passes the
-vision's own 40-item gate (**only the owner's ratification remains**). **`G-01`** (the Business Model
-Kernel, code repo `ee406e8`) is a view over the platform's own declarations, with the export/reimport
-round-trip empty. **`G-02`** (the Business IR and the compiler) runs §51's ten stages as named steps
-and passes the **rename test** both directions. **`G-03`** (User Functions) is the product's
-distinctive feature, created with AI assistance and running with **no AI at all**, proven by two
-routes one of which was falsified. **`G-07`** (the Widget contract, IR and registry) is built, and a
-published Function placed in a Widget runs from the Widget's own inputs with no AI.
+**4. Your first task.** Read `library/development/BUILD-ORDER.md` and take the first item in **Phase 0**.
+**As of 2026-10-06 the first item is `D0` — make the generated guard registry actually deliver guards,
+and prove it.** The generated registry `apps/mercato/.mercato/generated/guards.generated.ts` is a shell
+(`export const guardEntries: GuardEntry[] = []`, zero entries) and it *is* imported by the app
+(`apps/mercato/src/bootstrap.ts:44`), so guards are hand-wired per route instead of delivered centrally.
+**A guard that claims to run and does not is worse than no guard.** Determine the root cause (generator
+not scanning, or the app never re-run through `mercato generate registry`), fix it, and **prove the
+entry list is non-empty** — the fix is not done until the artefact shows real entries.
 
-**Take the first unbuilt item in `BACKLOG.md` §"The list".** Do not assume the order has not changed
-since this prompt was written; read the list and take item 1 unless you have a reason not to. **At
-the time of writing the first unbuilt item is `G-17`** — *schema-constrained generation*, **the AI that
-produces the Business IR**, which is the vision's own missing join. **This was chosen over `G-12`** (the
-safety net) on 2026-10-06: `G-12` depends on nothing and loses nothing by waiting, while every remaining
-item — including the simplest one-time answer — waits on the AI being able to emit the IR. `G-17`'s
-**first artifact is a runtime parser / zod schema mirroring `business-ir/types.ts`**, because the type
-exists but nothing checks the *shape* of incoming IR. Read the `G-17` and `G-12` rows in `BACKLOG.md`
-before you start. **`G-21`** (the request-outcome taxonomy above) depends on `G-17` and narrows it: the
-IR must be emittable for **all three** prompt endings, not the read path alone.
+Then proceed through Phase 0 in order: **D1** (the structural-permission settings table) · **D2** (move
+the entities write path off the `@deprecated` `validateCrudMutationGuard` onto the full registry) ·
+**D3** (add the `escalate` outcome to `MutationGuardResult`) · the **Metadata Registry** service.
+
+**Context that shaped the order** (read it, it is why the order is what it is): the four-item critical
+path `spec ✅ → G-01 ✅ → G-02 ✅ → G-03 ✅` is complete; `G-07`, `G-17` and `G-21` are done as recorded
+in `BACKLOG.md`. What is now first is not a feature but a **defect**: the platform *looked* finished in
+the guard layer and was not. `library/development/BLUEPRINT-GAP-ANALYSIS.md` explains the rest of the
+receiving plan, and `CORE-MODULES-REGISTER.md` says honestly which modules are truly built.
 
 **Keep the eye on the prize while you build.** The whole product is one loop: *a need → the AI
 understands it → the AI writes a **Business IR** → the platform **validates** it → it **runs** → the

@@ -48,6 +48,11 @@ formed a picture.
 | B5 | [`../analysis/findings/12-development-plan.md`](../analysis/findings/12-development-plan.md) | **The plan** — phases, order, why |
 | B6 | [`../workspace/COOKBOOK.md`](../../workspace/COOKBOOK.md) | **How the work is done** — read before touching code |
 | B7 | [`../LESSONS.md`](../../LESSONS.md) | The mistakes already made, so you do not repeat them |
+| B8 | [`SPECIFICATIONS-DICTIONARY.md`](SPECIFICATIONS-DICTIONARY.md) | **The standard every architectural change is checked against** — S1–S12, plus §C.2b (tiers are a superadmin *setting*, not hardcoded) |
+| B9 | [`BUILD-ORDER.md`](BUILD-ORDER.md) | **The order — foundation before stack.** Phase −1 (architecture contracts) → Phase 0 (D0–D3 + metadata registry) → the stack on top |
+| B10 | [`CORE-BOUNDARY.md`](CORE-BOUNDARY.md) | **What may never be customised** — the three rings, and the C1–C11 core the architecture depends on |
+| B11 | [`CORE-MODULES-REGISTER.md`](CORE-MODULES-REGISTER.md) | **Every core module, measured** — industry baseline mapped to our modules, verdicts, counts, and the five genuine absences (M1–M5) |
+| B12 | [`BLUEPRINT-GAP-ANALYSIS.md`](BLUEPRINT-GAP-ANALYSIS.md) | **What the Universal Platform Blueprint exposes we had not planned** — the four gaps A–D, and what we adopt vs adapt |
 
 **Tier C — supporting, opened only where the work needs it.** [`AGENT-HALF.md`](AGENT-HALF.md) (before any
 agent-half work); [`THREAD-2026-10-05.md`](THREAD-2026-10-05.md) (why the session decided what it did);
@@ -132,13 +137,13 @@ So every sprint runs in **four steps, and no code is written before step 3:**
 
 | Step | What | Output |
 |---|---|---|
+| **0. Contract check** | **The architecture phase that must precede the build (Phase −1, from the blueprint study).** Before a sprint starts, confirm the interfaces it depends on are *frozen contracts* — the resource envelope, the metadata registry, the actor/context model, the naming grammar. **A sprint that would invent one of these stops and fixes the contract first.** | a note: which contracts this sprint consumes, and confirmation they exist |
 | **1. Research** | What already exists for this task — in Hermes, in the Starting Kit, in the `V`-register? Is there a shortcut? | a short note: what we can reuse, and what we must build |
 | **2. Validate** | Is this the best approach? What would break it? Is there a cheaper way to the same outcome? | a decision, with the alternative it beat |
 | **3. Write the cookbook steps** | The full step-by-step for **this sprint only** — enough for a junior developer to follow without asking | a new section in [`../../workspace/COOKBOOK.md`](../../workspace/COOKBOOK.md) |
 | **4. Build** | Do the work against the running stack, test it, record it | the change, tested and committed |
 
-**The first sprint's steps are already written** — see *Sprint 0 — the running trio* in the
-cookbook. That is the pattern every later sprint follows.
+**Sprint 0 (`S0`) is done** — the stack was coming up degraded and was fixed (redis exited, no `restart:` policy); all eight containers are now healthy. The **first real development sprint is D0**, in Phase 0 of [`BUILD-ORDER.md`](BUILD-ORDER.md): make the generated guard registry actually deliver guards, and prove it. The four items on the **critical path** — `spec → G-01 → G-02 → G-03` — are complete, and `G-07` (the Widget contract) is built and proven end to end.
 
 **Why the cookbook is written per sprint, not all up front** — the owner's question, answered:
 detailed steps for code that does not exist yet are **guesses**, because the steps depend on
@@ -157,6 +162,11 @@ See COOKBOOK rule zero-ten.
 | [`START-PROMPT.md`](START-PROMPT.md) | **The message that starts a new session** — paste it to the agent taking over: what to read first, the rules it may not break, and the first task |
 | [`README.md`](README.md) | **This file** — the front door, the reading order, the handover, the sprint process |
 | [`BACKLOG.md`](BACKLOG.md) | **The one roadmap** — everything left, in order, with the "do not lose this" list and the deferrals |
+| [`SPECIFICATIONS-DICTIONARY.md`](SPECIFICATIONS-DICTIONARY.md) | **The standard every architectural change is checked against** — S1–S12, the B-protocol, §C.2b (tiers as a superadmin setting), and the structure-permission grammar |
+| [`BUILD-ORDER.md`](BUILD-ORDER.md) | **The order — foundation before stack** — Phase −1 contracts, Phase 0 (the four guard-engine gaps D0–D3 + metadata registry), then the stack |
+| [`CORE-BOUNDARY.md`](CORE-BOUNDARY.md) | **What may never be customised** — the three rings, C1–C11, the enforcement mechanisms, and the 20 adopted blueprint rules |
+| [`CORE-MODULES-REGISTER.md`](CORE-MODULES-REGISTER.md) | **The core-module audit** — industry baseline, our modules measured with two-route verdicts, the five genuine absences, and the honesty log |
+| [`BLUEPRINT-GAP-ANALYSIS.md`](BLUEPRINT-GAP-ANALYSIS.md) | **The blueprint gap study** — four gaps (resource envelope + metadata registry, core/pack boundary, i18n/RTL/a11y contract, architecture-contracts phase), with adapt-vs-adopt |
 | [`AGENT-HALF.md`](AGENT-HALF.md) | **The agent half** — the five kinds of agent, the rule that decides who is answerable when one acts, and **where every one of the study's 53 lessons lands in the phases** |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | How the Starting Kit + Hermes + the model server run together, and the dockerisation decision (Sprint 0) |
 | [`ARCHITECTURE-hermes-integration.md`](ARCHITECTURE-hermes-integration.md) | **The Hermes integration design** — platform to platform, function to function, and multi-tenant, with the owner's **B-05** runtime-boundary decision (§11) |

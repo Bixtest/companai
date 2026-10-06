@@ -112,13 +112,19 @@ reading it "for context" is how the direction gets buried (see [`../WHAT-WE-ARE-
 
 | # | Read | Why |
 |---|---|---|
-| B1 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | How the three pieces run together, and the dockerisation decision |
-| B2 | [`ARCHITECTURE-hermes-integration.md`](ARCHITECTURE-hermes-integration.md) | **How Hermes attaches**, and the owner's **B-05** runtime-boundary decision (§11) |
-| B3 | [`ARCHITECTURE-model-server-integration.md`](ARCHITECTURE-model-server-integration.md) | **How models attach**, and the owner's **model-default** decision (§9) |
-| B4 | [`SPEC-business-model-kernel.md`](SPEC-business-model-kernel.md) | **The product specification** — the vision's own 40-item gate; ratification only remains |
-| B5 | [`../analysis/findings/12-development-plan.md`](../analysis/findings/12-development-plan.md) | **The plan** — phases, order, why |
-| B6 | [`../../workspace/COOKBOOK.md`](../../workspace/COOKBOOK.md) | **How the work is done** — read before touching code |
-| B7 | [`../../LESSONS.md`](../../LESSONS.md) | 82 mistakes already made, so you do not repeat them |
+| B1 | [`SPECIFICATIONS-DICTIONARY.md`](SPECIFICATIONS-DICTIONARY.md) | **The standard every change is checked against** — the project's MVC. **Read before making any architectural change.** The two clauses that may never be skipped: the permissions question (S2) and the tier question (S4/item 17). §C.2b: the tiers/defaults/fallbacks are a **superadmin setting**, not hardcoded |
+| B1a | [`CORE-BOUNDARY.md`](CORE-BOUNDARY.md) | **What is uncustomisable core vs configurable vs domain packs** — the answer to *"what must nobody be able to change?"* Ring 1 (identity, tenancy, the resource envelope, the policy engine, audit, localization resolution, the contract shapes) moves only by platform release |
+| B1b | [`ARCHITECTURE-structure-permissions.md`](ARCHITECTURE-structure-permissions.md) | **What the AI may do to the platform's own structure** — the object × verb × actor grammar (S11/S12), and why it plugs onto the existing mutation guard |
+| B1c | [`BUILD-ORDER.md`](BUILD-ORDER.md) | **The order — contracts, then foundation, then stack.** The owner's instruction (2026-10-06): fix the sequence so foundational items are not deferred. **Phase −1** = the architecture contracts; **Phase 0** = the foundation completion. **D0 ✅ fixed and proven 2026-10-06** — the generated guard registry now delivers guards (mutation-proven, §2c). **The live remaining defect is `D2-wide`:** ~201 call sites in ~76 files still bypass the registry via the `@deprecated` resolver |
+| B1d | [`CORE-MODULES-REGISTER.md`](CORE-MODULES-REGISTER.md) | **What core modules exist, and whether they are REALLY built** — two-route verified, honest verdicts (COMPLETE / BUILT-UNEVEN / SHELL / ABSENT). Finance & procurement are ABSENT |
+| B1e | [`BLUEPRINT-GAP-ANALYSIS.md`](BLUEPRINT-GAP-ANALYSIS.md) | **What the universal platform blueprint exposed in our plan** — four gaps (resource envelope, core/pack boundary, i18n/a11y contracts, a contracts phase), and what to adapt vs adopt from the generic standard |
+| B2 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | How the three pieces run together, and the dockerisation decision |
+| B3 | [`ARCHITECTURE-hermes-integration.md`](ARCHITECTURE-hermes-integration.md) | **How Hermes attaches**, and the owner's **B-05** runtime-boundary decision (§11) |
+| B4 | [`ARCHITECTURE-model-server-integration.md`](ARCHITECTURE-model-server-integration.md) | **How models attach**, and the owner's **model-default** decision (§9) |
+| B5 | [`SPEC-business-model-kernel.md`](SPEC-business-model-kernel.md) | **The product specification** — the vision's own 40-item gate; ratification only remains |
+| B6 | [`../analysis/findings/12-development-plan.md`](../analysis/findings/12-development-plan.md) | **The plan** — phases, order, why |
+| B7 | [`../../workspace/COOKBOOK.md`](../../workspace/COOKBOOK.md) | **How the work is done** — read before touching code |
+| B8 | [`../../LESSONS.md`](../../LESSONS.md) | 82 mistakes already made, so you do not repeat them |
 
 **Tier C — supporting, opened only where the work needs it.**
 

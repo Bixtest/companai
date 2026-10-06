@@ -2744,3 +2744,73 @@ one" is a label. The inspection is the walk.
 promote it to a second question but to state the classification rule and name the items that were
 **deliberately not** the owner's. A claim of "one" is defensible only when it comes with the list of
 things it is a claim *about*.
+
+---
+
+## L83 — a file that exists is not a mechanism that runs
+
+**Caught 2026-10-06, during the core-module audit.**
+
+The claim was that the mutation-guard engine was *live and auto-wired for every module*. It rested on
+the fact that the app imports a generated registry: `apps/mercato/src/bootstrap.ts:44` imports
+`guardEntries` from `.mercato/generated/guards.generated.ts`, and the CLI generator has a step that
+scans each module's `data/guards.ts` and populates it. Every part of that sentence is true — and the
+mechanism was dead. The running file said:
+
+```ts
+export const guardEntries: GuardEntry[] = [];
+```
+
+**Zero entries.** The generator scans `data/guards.ts`; only **three** modules ship one, and none of
+them were in the registry. The guards that actually ran did so through hand-written per-route calls on
+roughly four to six routes. So "the registry exists and is wired" was true, and "guards run for every
+module automatically" was false. This is **D0** — it now leads Phase 0 of the build order.
+
+**Why the first instrument missed it.** The evidence offered was the *import* — the wiring diagram. That
+proves the door is installed, not that anything walks through it.
+
+**What to do instead.** Measure the **behaviour**, not the structure. Two counts that share no failure
+mode:
+
+1. Read the generated artefact and count what it actually contains.
+2. Find something that would only agree if the claim were true — here, the generator's **own test**,
+   which asserts that a module shipping `data/guards.ts` *must* appear in the output. When the registry
+   is empty and a module ships a guards file, the test's premise is violated. That second route is what
+   turned a suspicion into a finding.
+
+**The general form:** *"it exists" is not "it is built."* The same sentence is the owner's whole reason
+for asking: *"we can't compromise core architecture just because something already exists."* When you
+report something as built, say **what you ran** and **what it produced** — not what file imports what.
+
+---
+
+## L84 — counting empty folders is not counting tests
+
+**Caught 2026-10-06, the same audit, by a second pass.**
+
+A sub-agent was asked to inventory 34 modules and report, per module, the number of tests. It reported
+**"0 unit tests"** for every module it named. The second pass counted the actual files and got
+**15, 21, 5, 12, 11, 13, 7, 9, 14** for the same modules — a completely different answer.
+
+**What went wrong.** The agent looked at a directory tree, saw that the test sub-directories it checked
+were empty, and generalised. The tests were not in the sub-directories it looked at; they were one level
+up. It measured **the wrong place** and reported it as **the wrong quantity** — exactly the failure the
+owner has now caught seven times in two days: *measuring a different thing than the claim names.*
+
+**What to do instead.** Count **files that match the thing you are counting**:
+
+```bash
+# the count is files whose name says "test", not folders that might contain tests
+find packages/core/src/modules/<mod> -name '*.test.ts' -o -name '*.spec.ts' | wc -l
+```
+
+Then spot-check one module by hand and confirm the number is real before trusting the sweep.
+
+**The general form:** [[L82]] said *"exactly one" is an enumeration, not a feeling.* This is its twin:
+**a count is an enumeration too.** State the predicate you counted, and prove it on one member, or the
+number is a guess wearing a number's clothes.
+
+**The good news, worth recording.** Both defects in this audit were caught by the **same discipline** —
+a second pass whose only job was to break the first. Neither survived contact with an independent
+instrument. That is the loop working as designed.
+

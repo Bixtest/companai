@@ -111,6 +111,90 @@ used.
 
 ---
 
+## Rule zero-zero-one — the specifications dictionary is binding
+
+**Every architectural change is checked against
+[`../library/development/SPECIFICATIONS-DICTIONARY.md`](../library/development/SPECIFICATIONS-DICTIONARY.md)
+before it lands. No exceptions.**
+
+The dictionary is this project's standard the way MVC is a standard — it fixes how
+changes to the platform's architecture are made, so permissions get set for the
+tables that exist today **and** the ones created tomorrow.
+
+**The two that may never be skipped:**
+
+1. **The permissions question (S2).** New data structure — a table, a column, a
+   field-type change — does not land until **both permission blocks** are set: the
+   **data permission** (who may read/write the values) and the **structural
+   permission** (who may add/edit/remove/reference the object — S11). Either a person
+   decides, or the default applies (full permission to the superadmin role, plus the
+   permission records created). "We forgot" is not a state this platform allows.
+2. **The tier question (S4/item 17).** Every structure change is assigned a review
+   tier from the dictionary's mapping. An unlisted kind fails closed to the
+   strictest tier. *(The tier is now the **default beneath** the structural permission
+   — S11 decides when it is set; the tier decides when it is not.)*
+
+**A change that skips either one is not done.** When the dictionary and the code
+disagree, **the disagreement is the defect** — fix it before moving on. Update the
+dictionary first, then the code, so the standard leads the implementation.
+
+**A third clause was added 2026-10-06 (§C.2b):** the tier mapping, its defaults and its
+fallbacks are **not hardcoded**. They are a **setting a superadmin can change** — stored in
+the `module_configs` table and read through a function, seeded from the dictionary. They still
+fail closed, and changing them is itself a gated, audited act. If you find a tier table written
+into a source file, that is the defect.
+
+---
+
+## Rule zero-zero-two — "it exists" is not "it is built"
+
+**Owner's instruction, 2026-10-06:** *"we can't compromise core architecture just because
+something already exists … while getting busy with the big picture a lot of critical
+requirements are slipping out of our view."*
+
+A file being present, a table existing, a route responding — **none of these means the thing
+works.** Before you mark anything done, or build on top of it, **measure the behaviour from the
+running system or an independent instrument.** The canonical example: the guard registry
+(`guards.generated.ts`) **exists** and is imported by the app — and it exports **zero guards**.
+"Present" was true; "working" was false. That is **D0**, and it is why a whole build phase was
+inserted before the stack.
+
+**The rule:** every claim of "built" carries **two observations that share no failure mode** —
+typically (a) read the artefact, and (b) an independent path that would only agree if the claim
+were true (the generator's own test, a live request, a count from a second source). **Re-running
+your own check is not a second route.** If the two disagree, the disagreement is the finding —
+report it, never average it.
+
+---
+
+## Rule zero-zero-three — foundation before stack
+
+**The order is in [`../library/development/BUILD-ORDER.md`](../library/development/BUILD-ORDER.md).**
+Phase −1 freezes the architecture contracts; Phase 0 closes the four named gaps in the guard
+engine (**D0–D3**) and builds the metadata registry; everything else stacks on top.
+
+**Do not build on an unfinished foundation.** If a sprint needs an interface that Phase −1 or
+Phase 0 has not yet frozen — the resource envelope, the metadata registry, the actor/context
+model, the naming grammar — **stop and fix the foundation first**, then resume. Stacking on an
+unknown is how "critical requirements slip out of view."
+
+---
+
+## Rule zero-zero-four — the core boundary is not customisable
+
+**See [`../library/development/CORE-BOUNDARY.md`](../library/development/CORE-BOUNDARY.md).**
+The platform has **three rings**: Ring 1 is the **uncustomisable core** (C1–C11 — the guard
+engine, the permission model, the audit ledger, the ID/canonicalisation layer, tenancy isolation,
+the metadata registry, and so on), Ring 2 is **configurable** (tiers, settings, flags,
+entitlements, custom fields), Ring 3 is **domain packs**.
+
+**Nobody — not a tenant, not an AI, not us in a hurry — changes Ring 1 to make one feature
+easier.** Changing it collapses the system for everything built around it. If a task appears to
+need a Ring 1 change, that is a signal the task is designed wrong; find the configurable path in
+Ring 2.
+
+---
+
 ## Rule zero — keep the project findable
 
 **Every batch ends by updating the three orientation files at the project root.**
@@ -121,6 +205,7 @@ A batch that changes something and leaves them stale is not finished.
 | [`../INDEX.md`](../INDEX.md) | A folder appears, a phase completes, a decision is made |
 | [`../JOURNAL.md`](../JOURNAL.md) | A decision, a completed phase, or a surprising finding |
 | [`../LESSONS.md`](../LESSONS.md) | **Immediately** when a mistake or near-miss is caught |
+| [`../library/development/SPECIFICATIONS-DICTIONARY.md`](../library/development/SPECIFICATIONS-DICTIONARY.md) | **Whenever a standard changes, or a new kind of change is added** — the dictionary leads, the code follows (Rule zero-zero-one) |
 | [`PROGRESS.md`](PROGRESS.md) | **The roadmap** — everything left, in order. The only plan |
 | [`references/ux-findings.md`](references/ux-findings.md) | Things that work but look or read badly — collected, not scheduled |
 | [`references/whitelabel.md`](references/whitelabel.md) | Everywhere the original still shows through — for one deliberate batch later |
@@ -466,6 +551,13 @@ the restore-time consequence: [references/parked-modules.md](references/parked-m
 
 3. **The gate is green before the next batch starts.** Install, typecheck, lint,
    test, build — all pass, or the batch is not done. No batch begins on a red tree.
+
+**Added 2026-10-06 — the same rank, from the owner's own instruction:**
+
+4. **Two routes or it is not a finding.** Any number or conclusion the owner will act on is
+   derived **twice, by methods that share no failure mode**, and the two must agree. Re-running
+   your own check is not a second route. If they disagree, report the disagreement — never
+   average, never quietly pick the nicer number. (Rules zero-zero-two and zero-nine.)
 
 ---
 

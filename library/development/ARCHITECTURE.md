@@ -149,6 +149,14 @@ Paperclip + Hermes study above, which is the synthesis. The architecture must ob
 **The rule that ties them together:** *anything the user would see, or that touches business
 data, is ours.* Hermes is the agent; the platform is the company.
 
+**And the standard that governs every change to all of it:**
+[`SPECIFICATIONS-DICTIONARY.md`](SPECIFICATIONS-DICTIONARY.md) — the project's MVC. Every
+architectural change is checked against it before it lands, and the two clauses that may never be
+skipped are **the permissions question** (new data structure gets permissions decided before it
+lands — never forgotten for tomorrow's tables) and **the tier question** (which review tier the
+change sits in; item 17). Read it before making any structural change; update it before writing
+the code that implements the change.
+
 ---
 
 ## 5. The dockerisation decision — **Sprint 0**

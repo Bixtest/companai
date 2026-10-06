@@ -7,7 +7,205 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
-## 2026-10-06 (latest) — G-21 built: the three endings a prompt can have, and the gate on the dangerous one
+## 2026-10-06 (latest) — D0 fixed and proven; the real defect was bigger than the registry
+
+**D0 is done (code `d225602`).** The generated guard registry now delivers guards, and the delivery
+chain is proven by mutation — not merely green. The build started with D0, as agreed, after the
+documentation sweep (item 3) and the blueprint study (item 2b) were closed.
+
+**Root cause, by two routes that share no failure mode.** (1) The running app's
+`guards.generated.ts` exported `guardEntries: []`. (2) The generator's **own** test builds a module that
+ships `data/guards.ts` and asserts it must appear — and it passes. **So the generator was never the
+bug.** The cause was supply: the only modules shipping a `data/guards.ts` were `customers` and
+`customer_accounts`, and **both are parked** ("ERP is off"), with the `example` template off by default.
+No enabled module contributed a guard, so an empty registry was *correct* — and looked exactly like a
+healthy system. That is why nothing caught it.
+
+**The fix.** An enabled module (`entities`) now ships real structural guards: a custom field may not
+claim a system column (`id`/`created_at`/`updated_at`/`deleted_at` — `records.ts` silently strips those
+from writes, so such a field could never hold a value), and field keys must be snake_case. The delivery
+test runs against the **real generated file** and the **real store**, and is **mutation-proven**:
+emptying the entries → 4 red; no-op registration → 3 red; neutering the guard → 1 red, the right one.
+
+**Then the honest part — the defect is bigger than the registry.** While fixing the entities path (D2),
+a sweep found **~201 non-test call sites across ~76 files** still calling the `@deprecated`
+`validateCrudMutationGuard()` pair, which bypasses the registry entirely — including **enabled** modules
+(`auth`, `dashboards`, `dictionaries`, `directory`, `inbox_ops`, `perspectives`, `translations`,
+`workflows`, `data_sync`, `planner`, `payment_gateways`). So the registry is now populated and
+**delivering**, and most routes still **do not consume it**. That is the same class of defect one layer
+up: the owner's *"guarded for some, forgotten for others"* — present, measured, and now counted. It is
+recorded as **`D2-wide`** in the backlog and in the build order, so it cannot slip.
+
+**The entities path is the worked example (D2, entities scope — done).** `beginEntitiesMutationGuard`
+now calls `runRouteMutationGuards()` — the registry wrapper the `@deprecated` docstring itself names as
+the replacement — with the legacy service preserved via `bridgeLegacyGuard()`, so nothing was lost. Its
+existing test had to be **repaired**: it mocked the deprecated pair, and the change falsified that
+premise. Re-pointed to the registry wrapper; same intent; mutation-proven red.
+
+**Proof, all measured this turn:** generator structural-contracts **104/104** · `entities` **222/222** ·
+guard-delivery **5/5** · `core` and `app` `tsc --noEmit` **exit 0** · every mutated file restored
+**md5-identical**.
+
+**Also closed this session:** the owner's three earlier requests — (1) tiers/defaults/fallbacks are now
+a **superadmin setting** in `module_configs`, not a hardcoded table (dictionary §C.2b); (2) the
+core-module audit (`CORE-MODULES-REGISTER.md`) and the blueprint gap study
+(`BLUEPRINT-GAP-ANALYSIS.md`, `CORE-BOUNDARY.md`); (3) the documentation sweep (handover, start prompt,
+cookbook, lessons, index).
+
+---
+
+## 2026-10-06 — Build order: the owner is right, and the measurement says so
+
+**The owner asked whether the permissions infrastructure should be built *now*, applying the standards
+as we go, rather than stacked and edited later — and told me to fix the order so it is not deferred.**
+He named accounts management, permissions and languages as things that must come first because
+everything is built on top of them.
+
+**He is right. And the honest news is better in one way and worse in another:** the foundation is
+**largely already built** (accounts, permissions, languages), so this is not "stop and build
+foundations from scratch" — it is "finish the foundation's last four gaps before stacking." But one of
+those gaps, **D0**, is a **live defect**: the generated guard registry is empty and guards are wired by
+hand. **The owner's feared defect class — some things guarded, others forgotten — already exists in the
+guard layer.**
+
+**Measured, from the code:**
+- **Accounts management — BUILT.** `packages/core/src/modules/auth/` is a full module (api, backend,
+  commands, components, data, di.ts, emails, encryption.ts, events.ts, frontend, **i18n**, lib, **20+
+  migrations**, services, setup.ts, workers).
+- **Roles & permissions — BUILT** as a two-table ACL (`role_acls` / `user_acls`, `featuresJson:
+  string[]`, wildcard matching, `isSuperAdmin`).
+- **Languages — BUILT** (`shared/src/lib/i18n`, per-module `i18n`, `translations`, `dictionaries`).
+- **The guard engine ("this") — the mechanism is real, but the central registry is NOT delivering
+  guards.** `MutationGuard` + `runMutationGuards()` exist and **are used** — but by **hand, per route**
+  (~4–6 route files call `runMutationGuards(...)` explicitly). The **generated registry is empty**:
+  `apps/mercato/.mercato/generated/guards.generated.ts` is a shell — `export const guardEntries:
+  GuardEntry[] = []` — and only **3** modules even ship a `data/guards.ts` (`customers`,
+  `customer_accounts`, `create-app` template). That empty file **is** imported by the app
+  (`apps/mercato/src/bootstrap.ts:44`), so the wiring exists and the list it carries is empty.
+- **The structural write hook — BUILT.** `beginEntitiesMutationGuard` is called at **every**
+  entity/field-definition write path (`definitions.ts`, `definitions.batch.ts`, `definitions.restore.ts`,
+  `entities.ts`), carrying `resourceKind` (`entities.entity`, `entities.field_definition`) + `operation`.
+  That is the `(object, verb)` half of the owner's grammar, already in flight.
+
+**So the order is: finish four named gaps in the foundation, then stack.** Written up in
+[`BUILD-ORDER.md`](library/development/BUILD-ORDER.md):
+- **D0 — the generated guard registry is EMPTY (a live defect).** Found by a critic pass **after** I had
+  claimed the engine was "live and auto-wired" — the claim was **false** and is corrected in the table
+  above. A guard that claims to run and does not is worse than no guard. This comes first because
+  D1/D2/D3 all assume guards actually run.
+- **D1** — structural rules are `.ts` code, not data; there is **no settings table** for the grammar to
+  read. (Everything else reads from it.)
+- **D2** — the entities path calls `validateCrudMutationGuard()`, which the code itself marks
+  **`@deprecated`** for *"silently bypass[ing] every guard in the global mutation-guard store."* The
+  authoritative path for tables and columns is the one path **not** running the central guard set.
+- **D3** — `MutationGuardResult.ok` is a **boolean**; there is no `escalate`. A guard can allow or block,
+  but cannot say *"allowed, but a person must review"* — the owner's grammar needs that third outcome.
+
+**Order: D0 → D1 → D2 → D3 (Phase 0), then Phase 1 (S2 gate, tier mapping into code, core-function delete
+guard, the manage screen), then Phase 2 (S7/G-21, S3, S8, S6), then Phase 3 (data-access coverage and
+row scope).**
+
+**Both owner decisions are now settled and recorded** (dictionary Part E): **Q1 accepted** — the tier
+mapping is the default *beneath* the structural grammar and **bulk-applies** to it wherever no explicit
+setting exists; **Q2 fallback accepted** — unset falls back to the tier table, and the fallback **carries
+the standards' default values** (never silent, never "never"). SD-3 is unblocked.
+
+**Correction to my own earlier framing, stated for the record — and it is the second time in one turn
+that a critic pass beat me.** Last turn I called the guard system "a socket waiting to be used"; when I
+went to correct that, I swung too far the other way and claimed it was "live and auto-wired for every
+module" running in "nine-plus modules." **A critic pass falsified that**: the generated registry is
+**empty** (`guardEntries: []`), only **3** modules ship a `data/guards.ts`, and guards actually run via
+**hand-written per-route calls** in a handful of routes. The honest state is: **the guard *mechanism* is
+real and used; the *central delivery* is broken.** Which — note this — is **exactly the defect class the
+owner is trying to prevent** ("permissions for some tables, then forgetting others"). It happened, in
+the guard layer, and went unnoticed until measured. That is the strongest support for his instruction,
+and it is why **D0** now leads the order.
+
+**Wired into:** `SPECIFICATIONS-DICTIONARY.md` (Part E settled, Part F added), `BACKLOG.md` (banner +
+SD-3/SD-4 updated), `HANDOVER.md` (B1c), `INDEX.md` (reading order #1b + folder map).
+
+## 2026-10-06 — The structure-permission grammar: the owner's idea beats what item 17 set
+
+**The owner proposed a better shape, and it is better.** Not one tier per *kind of change*, but a
+**permission per object, per verb, per actor**: for this table, may the AI add a column? Edit one? Drop
+one? May it do it straight, or does it need review, or approval? May this column be *referenced* by
+another table? Managed with a roles-and-permissions-style surface keyed on the user's role, the actor
+type (human or AI), and the permission.
+
+**Why it is better, said plainly.** It is **finer** (it can say "add columns, yes; drop them, no" — item
+17's table cannot), it is **uniform** (structural permissions become the same *shape* as the data
+permissions, so there is one mental model rather than two), and the **actor type is first-class** — which
+matters, because the whole reason this question exists is that an AI can now propose changes to the
+platform's own shape.
+
+**And it is affordable, because the socket already exists — measured.** `entities.entity` and
+`entities.field_definition` are already named resource kinds (`definitions.mutation-guard.ts:9-10`). A
+column is already a row with settings (`custom_field_defs`). And a generic guard already takes a resource
+kind, an operation and an actor and can **block** (`MutationGuard`, `mutation-guard-registry.ts:9`). So the
+idea costs: a **settings block**, one new guard outcome (**escalate** — today it is binary allow/block),
+and the **actor-type input**. Pending-approval machinery already exists on both sides
+(`authority_pending_acts`; the AI's `pending-action-*` set).
+
+**The grammar** (and the owner's sharpest point, the **reference** verb — a column others may reference
+becomes public API, and changing it later breaks dependents, so it earns its own permission):
+`(object, verb, actorType, role, level)`.
+
+**Item 17 is not discarded — it is demoted.** The tier table survives as the **default beneath** the
+mechanism: with no explicit structural permission, the kind's tier decides; both fail closed.
+
+**What I checked and corrected:** the owner's premise — "now that every database column has its permission
+setting" — is the **destination, not the current state**. There is **no per-column permission today**
+(grepped: empty). The idea is a design, and an honest one, but the premise it builds on is still to be
+built. Recorded as such.
+
+**Written:** [`library/development/ARCHITECTURE-structure-permissions.md`](library/development/ARCHITECTURE-structure-permissions.md).
+**Amended:** the dictionary — new **S11** (explicit per-object structural permissions) and **S12** (the
+actor type is part of every structural decision); **S2** now installs **two** blocks on a new surface
+(data + structural); item 17's table noted as the default. New backlog items **SD-4** (the grammar) and
+**SD-5** (the manage screen).
+
+---
+
+## 2026-10-06 — The specifications dictionary: the standard that stops the platform decaying as it grows
+
+**Why this exists.** The owner's concern, in his words: permissions get set for the tables that exist
+today and forgotten for the tables created tomorrow, "and similar gaps and bugs generating flaws". He
+asked for a standard like MVC — a bible that every architectural change is checked against, inherited
+into gates and guards so it cannot be forgotten.
+
+**What was written:** [`library/development/SPECIFICATIONS-DICTIONARY.md`](library/development/SPECIFICATIONS-DICTIONARY.md).
+**Ten uncompromisable standards** (S1–S10), a **change protocol** in eight steps nothing may skip, and the
+two clauses the owner named: **the permissions question** (new data structure does not land until its
+permissions are decided — default: full grant to superadmin plus permission records) and **the tier
+question** (item 17, resolved).
+
+**Two findings, measured this session.**
+1. **The conflict engine already blocks the build.** `detectConflicts` is called by the module-registry
+   generator, which `throw`s on any error (`module-registry.ts:3284`) — so structural clashes already stop
+   a build. It is simply not yet pointed at an AI-proposed change. I first wrote "not wired"; that was too
+   strong and is corrected in the dictionary.
+2. **Item 17 is answered by being absorbed, not by being picked.** `CHANGE_KIND_TIER` is an empty frozen
+   object, so every structure change currently fails closed to the strictest tier. That is safe, but noisy.
+   The owner's instruction turns the tiers into a **standard** — derived from the vision's own three tiers,
+   failing closed on anything unrecognised — with a first mapping proposed in the dictionary's Part E.
+
+**The rule that makes it binding:** **Rule zero-zero-one** in the COOKBOOK. Every architectural change is
+checked against the dictionary before it lands; the permissions question and the tier question may never be
+skipped; and when the dictionary and the code disagree, **the disagreement is the defect**.
+
+**The owner's confirmed decision (2026-10-06):** when a prompt asks for what a user may not see, the
+platform **tells them it was blocked** — strict without disrupting the flow, and never letting a partial
+answer read as a complete one.
+
+**Also measured this session (feeds S4):** the data-permission idea is **already half-built** — a per-table
+gate (`aclFeatures`, fails closed) and a per-column policy (`fieldPolicy`) exist; the own/team/global row
+scope does not; coverage is **6 of 67** tables. And there is **no unguarded door**: every path the AI can
+use to reach data is checked, and its sandbox cannot fake its scope. Full write-up:
+[`analysis/owner-workthrough-data-permissions.md`](analysis/owner-workthrough-data-permissions.md).
+
+---
+
+## 2026-10-06 — G-21 built: the three endings a prompt can have, and the gate on the dangerous one
 
 **The last item the owner's features_pack named now exists as code.** Not every prompt becomes a
 Function. He described three endings — a one-time answer, a step of architecture (LMS/CRM), a saved

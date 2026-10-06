@@ -17,7 +17,7 @@ errors.
 |---|---:|---|
 | [`WHAT-WE-ARE-BUILDING.md`](WHAT-WE-ARE-BUILDING.md) | 1 file | **The product in plain English. Start here.** |
 | [`ai/ai-first/`](ai/ai-first/) | 9 files | **THE DIRECTION** — the architecture we are actually building toward. Read [`ai/ai-first/README.md`](ai/ai-first/README.md) first |
-| [`development/`](development/) | 21 files | **The live hub** — the one roadmap, the running architecture, the handover, the rules, and the request-outcome taxonomy. Start here to *work* |
+| [`development/`](development/) | 29 files | **The live hub** — the one roadmap, the running architecture, the handover, the rules, the build order, the core-boundary, and the tier-0 audits. Start here to *work* |
 | [`analysis/`](analysis/) | ~20 files | Our 12-batch check of the direction against what we already have |
 | `01-` … `16-` shelves | ~600 files | Our product documentation: policy, contracts, SRS, audits, certification, blueprints, the shipped product docs |
 | [`paperclip-hermes-study/`](paperclip-hermes-study/) · [`paperclip-value-study/`](paperclip-value-study/) | ~24 files | **Our own** studies *of* two other products — the distilled lessons |
@@ -28,6 +28,7 @@ errors.
 |---|---:|---|---|
 | [`ai/`](ai/) (except `ai-first/`) | ~26,000 files | Hermes docs + source, upstream **Paperclip** source, a sibling project's docs | **Lessons and evidence only.** Never a decision we inherit |
 | [`ai/source-docs/`](ai/source-docs/) | register + copies | Upstream Paperclip's documentation set | Reference |
+| [`universal_application_platform_framework_blueprint.md`](universal_application_platform_framework_blueprint.md) | 1 file, 5,565 lines | **Generic platform-engineering standards** — 18 irreducible primitives, the resource envelope, the metadata registry, the actor/context model, the three control/data/experience planes, true core vs domain packs, implementation order, and 20 non-negotiable rules | **Standards to adapt, never a spec to adopt wholesale.** What it exposed we had not planned is in [`development/BLUEPRINT-GAP-ANALYSIS.md`](development/BLUEPRINT-GAP-ANALYSIS.md); what it confirms is uncustomisable is in [`development/CORE-BOUNDARY.md`](development/CORE-BOUNDARY.md) |
 
 > **The rule, in one sentence:** read **our vision** to know what to build; open the **imported
 > material** only when a specific feature can learn something from it, and then only as evidence.

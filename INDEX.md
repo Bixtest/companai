@@ -84,11 +84,16 @@ Read these and you will understand the project. About an hour.
 
 | # | Read | Why |
 |---|---|---|
-| 1 | [`compai/planning/00-product-thesis.md`](compai/planning/00-product-thesis.md) | What we are building and the 15 rules that must never be broken |
-| 2 | [`compai/planning/09-starting-kit.md`](compai/planning/09-starting-kit.md) | **In plain English** — what the platform gives us and what we still have to build |
-| 3 | [`compai/planning/08-host-selection-and-migration-plan.md`](compai/planning/08-host-selection-and-migration-plan.md) | Why we chose this platform and what happens next |
-| 4 | [`workspace/COOKBOOK.md`](workspace/COOKBOOK.md) | How the work is actually done |
-| 5 | [`workspace/knowledge/authority-overview.md`](workspace/knowledge/authority-overview.md) | **The governance layer, end to end** — the part that does not exist anywhere else |
+| 1 | [`library/development/SPECIFICATIONS-DICTIONARY.md`](library/development/SPECIFICATIONS-DICTIONARY.md) | **The standard every architectural change is checked against** — the project's MVC. S2 (permissions on change) and S4 (the tier question, item 17) may never be skipped |
+| 1b | [`library/development/BUILD-ORDER.md`](library/development/BUILD-ORDER.md) | **The order — foundation before stack.** Phase 0 = four named gaps (D0/D1/D2/D3) in the guard engine, then the stack builds on top. **D0 is a live defect: the generated guard registry is empty in the running app.** Measured: accounts, permissions and languages are already built |
+| 1c | [`library/development/CORE-BOUNDARY.md`](library/development/CORE-BOUNDARY.md) | **What nobody may change, and why the system collapses if they do** — the three rings (uncustomisable core · configurable · domain packs), and the C1–C11 items the architecture depends on |
+| 1d | [`library/development/CORE-MODULES-REGISTER.md`](library/development/CORE-MODULES-REGISTER.md) | **Every core module, measured, with an honest verdict** — what is *really* built vs what merely exists. The audit that found the empty guard registry. Five genuine absences named (M1–M5) |
+| 1e | [`library/development/BLUEPRINT-GAP-ANALYSIS.md`](library/development/BLUEPRINT-GAP-ANALYSIS.md) | **What the Universal Platform Blueprint exposes we had not planned** — the four gaps (A resource envelope + metadata registry, B core/pack boundary, C i18n/RTL/a11y as contract, D architecture-contracts phase), and what we adopt vs adapt |
+| 2 | [`compai/planning/00-product-thesis.md`](compai/planning/00-product-thesis.md) | What we are building and the 15 rules that must never be broken |
+| 3 | [`compai/planning/09-starting-kit.md`](compai/planning/09-starting-kit.md) | **In plain English** — what the platform gives us and what we still have to build |
+| 4 | [`compai/planning/08-host-selection-and-migration-plan.md`](compai/planning/08-host-selection-and-migration-plan.md) | Why we chose this platform and what happens next |
+| 5 | [`workspace/COOKBOOK.md`](workspace/COOKBOOK.md) | How the work is actually done (**Rule zero-zero-one** binds the dictionary) |
+| 6 | [`workspace/knowledge/authority-overview.md`](workspace/knowledge/authority-overview.md) | **The governance layer, end to end** — the part that does not exist anywhere else |
 
 Then, before touching anything: [`LESSONS.md`](LESSONS.md) — the mistakes already
 made and how they were caught. It will save you from repeating them.
@@ -128,6 +133,17 @@ companai/                      ← you are here
 │       ├── START-PROMPT.md    **the message that starts a new session** — paste it to the agent
 │       ├── README.md          the reading order, the sprint process
 │       ├── BACKLOG.md         **THE ONE ROADMAP** — everything left, in order
+│       ├── SPECIFICATIONS-DICTIONARY.md  **the standard every change is checked against** —
+│       │                                 the project's MVC; read before any architectural change
+│       ├── BUILD-ORDER.md               **the order — foundation before stack**; Phase 0 = the
+│       │                                 four named guard-engine gaps (D0/D1/D2/D3)
+│       ├── CORE-BOUNDARY.md             **what may never be customised** — the three rings and
+│       │                                 the C1–C11 uncustomisable core
+│       ├── CORE-MODULES-REGISTER.md     **every core module, measured** — verdicts, counts, and
+│       │                                 the five genuine absences (M1–M5)
+│       ├── BLUEPRINT-GAP-ANALYSIS.md    the four gaps the Universal Platform Blueprint exposes
+│       ├── ARCHITECTURE-structure-permissions.md  **what the AI may do structurally** — the
+│       │                      object×verb×actor grammar (S11/S12), on the existing MutationGuard
 │       ├── AGENT-HALF.md      **the agent half** — five agent kinds, the responsibility rule, and where every lesson lands
 │       ├── ARCHITECTURE.md    how the Starting Kit + Hermes + the model server run together
 │       ├── ARCHITECTURE-hermes-integration.md  **the full Hermes integration design** — platform to
