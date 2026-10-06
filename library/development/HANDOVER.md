@@ -1,5 +1,14 @@
 # Handover — start here if you have just inherited this project
 
+> **WHERE THE ACTIVE TASK LIVES (read this first, it is the one live fact).**
+> **The task being worked on right now is `workflows` — the D2-wide guard-resolver migration, 9
+> deprecated calls across 3 files.** Its plain-English description, the exact six steps to do it, and
+> the current queue are in the **`★ ACTIVE TASK` box at the top of [`../../JOURNAL.md`](../../JOURNAL.md)**.
+> **That box is the single source of truth for "what is being worked on now".** No other document —
+> not this page, not START-PROMPT, not README, not BOOKMARKS, not BACKLOG — may state a live task;
+> they all point to the box. If this line and the box ever disagree, **the box wins** (owner's
+> instruction, 2026-10-06).
+
 **You know nothing about this project, this codebase, or these documents. This page is
 written for exactly that person — and this revision is written for an agent that will
 continue the development work.** Read it top to bottom once (about 20 minutes), then

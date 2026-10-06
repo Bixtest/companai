@@ -1,5 +1,14 @@
 # Start prompt — paste this to the agent that takes over
 
+> **WHERE THE ACTIVE TASK LIVES (read this first, it is the one live fact).**
+> **The task being worked on right now is `workflows` — the D2-wide guard-resolver migration, 9
+> deprecated calls across 3 files.** Its plain-English description, the exact six steps to do it, and
+> the current queue are in the **`★ ACTIVE TASK` box at the top of [`../../JOURNAL.md`](../../JOURNAL.md)**.
+> **That box is the single source of truth for "what is being worked on now".** No other document —
+> not this prompt, not HANDOVER, not README, not BOOKMARKS, not BACKLOG — may state a live task; they
+> all point to the box. (Owner's instruction, 2026-10-06. If you are reading this months later, the
+> task below has almost certainly changed — **go to the box**, do not trust this line.)
+
 **What this file is.** The ready-to-paste first message for the agent that inherits this project and
 continues the development. It is short on purpose: it tells the agent what to read, how to set up,
 and the rules it may not break — and **nothing about "what is next", because what is next changes
