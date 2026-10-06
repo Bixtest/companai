@@ -623,7 +623,7 @@ design is: **learning is a candidate, never an authority.**
 
 ## 13. The D2-wide walkthrough — the item being built *now* (a worked example of the pattern)
 
-**Why this is here.** The active task (`workflows`) is a D2-wide migration, and the pattern must be
+**Why this is here.** The active task (`translations`) is a D2-wide migration, and the pattern must be
 followed exactly. This is that pattern, end to end, with the real files. **It is the same shape as
 Joints I–III: read the source, follow the precedent, prove by mutation.**
 
@@ -632,11 +632,12 @@ Joints I–III: read the source, follow the precedent, prove by mutation.**
 bypass the guard registry**. The replacement is `runRouteMutationGuards()` from
 `packages/shared/src/lib/crud/route-mutation-guard.ts`.
 
-**The pattern, proven four times (`entities`, `data_sync`, `dictionaries`, `dashboards`):**
+**The pattern, proven seven times (`entities`, `data_sync`, `dictionaries`, `dashboards`, `workflows`,
+`inbox_ops`, `perspectives`):**
 
 1. **Create a module wrapper** `packages/core/src/modules/<module>/api/mutation-guard.ts` exposing
    `begin<Module>MutationGuard(ctx)` → `{ blockedResponse: NextResponse | null, runAfterSuccess }`.
-   Copy the most recent one (`dashboards/api/mutation-guard.ts`) and rename; keep the md5 so you can
+   Copy the most recent one (`perspectives/api/mutation-guard.ts`) and rename; keep the md5 so you can
    prove you restored it byte-identically.
 2. **Repoint the route files**: `const guard = await beginX(...); if (guard.blockedResponse) return
    guard.blockedResponse; ...write...; await guard.runAfterSuccess()`.
@@ -651,13 +652,20 @@ bypass the guard registry**. The replacement is `runRouteMutationGuards()` from
    declaration file). **Count calls, not lines** — the two declarations in `mutation-guard.ts` inflate it.
 6. **Record** in `BUILD-ORDER.md` §2e and `BACKLOG.md`, and commit **in both repos** (never `git add -A`).
 
-**The current numbers:** 151 call sites / 59 files / 9 enabled modules (45 calls). `workflows` is next
-(9 calls / 3 files); expected count after: **142**.
+**The current numbers:** **126 call sites / 49 files / 6 enabled modules (20 calls).** `translations` is
+next (6 calls / 2 files); expected count after: **120**.
 
-**The one behaviour point to watch** (from the `dashboards` run): a route with **two mutually-exclusive
-branches** (e.g. "clear the override and return" vs "upsert") must create the guard **once, before the
-branch**, and call `guard.runAfterSuccess()` in **whichever branch runs** — collecting the guard set once
-is safe **because `MutationGuard.validate` is a pure predicate**.
+**Two behaviour points to watch** (each cost a previous run something):
+- **A route with two mutually-exclusive branches** (from the `dashboards` run): it must create the guard
+  **once, before the branch**, and call `guard.runAfterSuccess()` in **whichever branch runs** —
+  collecting the guard set once is safe **because `MutationGuard.validate` is a pure predicate**.
+- **A route that guards two resources in one request** (from the `perspectives` run): the POST on
+  `perspectives/[tableId]` collects a **second**, role-scoped guard when the payload carries role ops.
+  Each guard object is evaluated independently and keeps **its own** after-success condition — never
+  collapse the two into one, and never let one guard's after-success stand in for the other's.
+- **A module may have NO `D2-gap`** — `perspectives` measured all 3 of its write routes guarded. Do not
+  assume every module the sweep touches is partially open; **measure it** (`workflows` 13/19 and
+  `inbox_ops` 10/14 were, `perspectives` 0/3 was not).
 
 ---
 

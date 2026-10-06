@@ -30,59 +30,48 @@ log.** Everything else (HANDOVER, START-PROMPT, README, BOOKMARKS, BACKLOG) poin
 
 ---
 
-### ▶ NOW — D2-wide continues with `perspectives` (8 deprecated guard calls in 3 files)
+### ▶ NOW — D2-wide continues with `translations` (6 deprecated guard calls in 2 files)
 
 > **If you are a new agent, read only this block to know your job.** Everything below the box is the
 > history and the queue; this is the work in hand.
 
-**What happened before this box (2026-10-06, this session).** The owner raised two integration
-concerns about the plan documents themselves, and they were **both measured true and fixed** — so the
-task below can be executed without a hidden gap:
-
-- **Q1 — "did you reflect the Hermes map in the backlog tasks integration?"** **Measured: no.** The map
-  named **43** item IDs; `BACKLOG.md` named the map **0** times. **Fixed:** every AI-touching item now
-  carries a **`★ Hermes:`** line naming the map section, the map is in the backlog's governing-document
-  table, and a **re-measurable check** is in `BACKLOG.md` **§A**. Names of the map in the backlog:
-  **0 → 8 direct, 82 marker lines**.
-- **Q2 — "are the blueprint/core-modules lessons documented in the backlog?"** **Measured: no** — only a
-  banner-table row each; `grep` for `M1…M5`, `P1…P18`, `GAP A…GAP D` against the item list returned
-  **0** (2 stray hits). **Fixed:** a new backlog section **"The core-module gaps"** gives every register
-  `M`/`P` item and every blueprint **GAP A–D** a tracked row or an explicit cross-reference — **13 of 13
-  present (was 2)**.
-- **The rule written so it cannot rot:** `WORKING-RULES.md` §1 gains **rule 6** ("the Hermes service map
-  is the starting thread; every AI-touching item must link to it"), with the same rule stated in
-  `BUILD-ORDER.md` and the map's reach row updated in `REFERENCE-REGISTER.md`.
-- **No code changed this session.** The `perspectives` task below was **postponed** on the owner's own
-  instruction (*"postpone if needed to fullfill what I requested above"*) and is now the active task.
+**What happened before this box (2026-10-06, this session).** `perspectives` — the active task this box
+carried last — is **DONE and PROVEN**, in code commit **`e26642c`**. The previous session's two
+integration concerns (the Hermes map not being reflected in the backlog; the register/blueprint items
+having no per-item backlog rows) were also both **measured true and fixed** in the docs. Neither left a
+gap for the task below.
 
 **What the task is, in plain words.** The platform has a guard system that checks every write before it
 happens (who may change what). Most of the codebase still calls an **old, deprecated** version of it
 that **silently skips the real guard registry** — a security hole. The fix, module by module, is to
 repoint those calls at the new registry. **This is tracked as "D2-wide".** `entities`, `data_sync`,
-`dictionaries`, `dashboards`, `workflows` and `inbox_ops` are already done; **134 deprecated call sites
-remain across 52 files**, of which **28 calls in 7 enabled modules** are live (the rest are parked and
-recorded, not migrated).
+`dictionaries`, `dashboards`, `workflows`, `inbox_ops` and `perspectives` are already done; **126
+deprecated call sites remain across 49 files**, of which **20 calls in 6 enabled modules** are live (the
+rest are parked and recorded, not migrated).
 
-**Your job now — one module: `perspectives` (8 calls / 3 files).** Do it exactly the way the previous six
-were done, and the pattern is already written down (do not invent a new one):
+**Your job now — one module: `translations` (6 calls / 2 files).** Do it exactly the way the previous
+seven were done, and the pattern is already written down (do not invent a new one):
 
-1. **Read the worked example**: `BUILD-ORDER.md` §2e, "Progress — `inbox_ops` DONE and PROVEN" — it has
-   the How / Tests / Proof / count table. The five before it (`data_sync`, `dictionaries`, `dashboards`,
-   `workflows`) are identical in shape.
-2. **Create `packages/core/src/modules/perspectives/api/mutation-guard.ts`** — a `beginPerspectivesMutationGuard(ctx)`
-   wrapper (copy `inbox_ops/api/mutation-guard.ts` and rename).
-3. **Repoint the route files** from `validateCrudMutationGuard()` / `runCrudMutationGuardAfterSuccess()`
-   to `runRouteMutationGuards()` through the wrapper.
-4. **Repair the tests** — re-point their mocks from the deprecated DI pair to the registry wrapper.
+1. **Read the worked example**: `BUILD-ORDER.md` §2e, "Progress — `perspectives` DONE and PROVEN" — it
+   has the How / Tests / Proof / count table, and it is the most recent. The six before it
+   (`data_sync`, `dictionaries`, `dashboards`, `workflows`, `inbox_ops`) are identical in shape.
+2. **Create `packages/core/src/modules/translations/api/mutation-guard.ts`** — a
+   `beginTranslationsMutationGuard(ctx)` wrapper (copy `inbox_ops/api/mutation-guard.ts` and rename).
+3. **Repoint the route files** — `api/[entityType]/[entityId]/route.ts` and `api/put/locales.ts` — from
+   `validateCrudMutationGuard()` / `runCrudMutationGuardAfterSuccess()` to `runRouteMutationGuards()`
+   through the wrapper.
+4. **Repair the tests** — `api/[entityType]/[entityId]/__tests__/mutation-guard.test.ts` and
+   `api/put/__tests__/locales-mutation-guard.test.ts` — re-point their mocks from the deprecated DI
+   pair to the registry call.
 5. **Prove it**: stub **only** the registry call `runRouteMutationGuards` — **never** the module wrapper,
    or the mutation is invisible (§2e, "A proof defect found and fixed"); then disable the block path →
    the tests must go RED; neuter `runAfterSuccess` → RED; restore the wrapper and confirm it is
    **md5-identical**.
 6. **Recount and record**: the count command is in `BACKLOG.md` item **D2-wide**; expected result
-   **134 → 126**. Then update `BUILD-ORDER.md` §2e and `BACKLOG.md`, and commit **in both repos**.
+   **126 → 120**. Then update `BUILD-ORDER.md` §2e and `BACKLOG.md`, and commit **in both repos**.
 
-**Definition of done:** `perspectives` measures **0** deprecated call sites; its route tests are green;
-the two mutation proofs went RED; the repo-wide count is **126**; the docs say so.
+**Definition of done:** `translations` measures **0** deprecated call sites; its route tests are green;
+the two mutation proofs went RED; the repo-wide count is **120**; the docs say so.
 
 **Then, in order (nothing dropped):**
 
@@ -95,11 +84,13 @@ the two mutation proofs went RED; the repo-wide count is **126**; the docs say s
 | **5** | ✅ **Test defect (b): `module-decoupling` — DONE** (code `fe7c3e5`) | File-scoped isolation; **full suite 602 suites / 5123 tests, 0 failures**. |
 | **6** | ✅ **D2-wide: `workflows` — DONE** (code `d3af1b1`) | 9 calls / 3 files → 4 guard objects; count 151 → 142; mutation-proven (5 RED / 3 RED). |
 | **7** | ✅ **D2-wide: `inbox_ops` — DONE** (code `d89b8f6`) | 8 calls / 4 files → 4 guard objects; count 142 → 134; mutation-proven (4 RED / 4 RED). |
-| **7b** | ✅ **The owner's two integration concerns — DONE** (this session, docs only) | The Hermes map named **43** items and the backlog named the map **0** times; the register/blueprint items had **0** per-item backlog rows. **Both measured true and fixed** — `★ Hermes:` lines on every AI-touching item, a new "core-module gaps" section, rule 6 in WORKING-RULES, and a re-measurable check in `BACKLOG.md` §A. **No code changed.** |
-| **8** | **◀ D2-wide: `perspectives`** (8 calls / 3 files) — **THE ACTIVE TASK** | See the six steps above. **Note the shape:** `api/[tableId]/route.ts` holds **4** of the 8 calls and evaluates the guard **twice** in one request (a second, role-scoped guard). Read it before copying — it is not a flat 1-call-per-route like `inbox_ops`. |
-| **9** | **The rest of D2-wide, enabled modules** — `translations` (6), `planner` (4), `query_index` (4), `auth` (2), `directory` (2), `feature_toggles` (2) | Largest cluster first, each with its own mutation proof. |
-| **10** | **D3** — add the `escalate` outcome to `MutationGuardResult` | The last guard-engine gap; needs D2-wide's shape settled first. |
-| **11** | **The Metadata Registry** service (GAP A / C5) | The remaining foundation item; everything stacked on it inherits it. |
+| **7b** | ✅ **The owner's two integration concerns — DONE** | The Hermes map named **43** items and the backlog named the map **0** times; the register/blueprint items had **0** per-item backlog rows. **Both measured true and fixed** — `★ Hermes:` lines on every AI-touching item, a new "core-module gaps" section, rule 6 in WORKING-RULES, and a re-measurable check in `BACKLOG.md` §A. **No code changed.** |
+| **8** | ✅ **D2-wide: `perspectives` — DONE** (code `e26642c`) | 8 calls / 3 files → 4 guard objects; count **134 → 126** (files 52 → 49); mutation-proven (**2 RED / 5 RED**). **The new shape:** the POST route guards **two resources in one request** (personal + role-scoped), each with its own after-success condition. **The first module with NO `D2-gap`** — all 3 write routes guarded. |
+| **9** | **◀ D2-wide: `translations`** (6 calls / 2 files) — **THE ACTIVE TASK** | See the six steps above. Two route files, two test files; `api/put/locales.ts` is a non-`route.ts` handler — check how the guard is collected there before copying. |
+| **10** | **The rest of D2-wide, enabled modules** — `planner` (4), `query_index` (4), `auth` (2), `directory` (2), `feature_toggles` (2) | Largest cluster first, each with its own mutation proof. |
+| **11** | **D2-gap** — the write routes that call **no** guard at all (measured: `workflows` 13/19, `inbox_ops` 10/14, `perspectives` 0/3) | Do it module by module alongside D2-wide; record the per-module unguarded count next to the D2-wide count. |
+| **12** | **D3** — add the `escalate` outcome to `MutationGuardResult` | The last guard-engine gap; needs D2-wide's shape settled first. |
+| **13** | **The Metadata Registry** service (GAP A / C5) | The remaining foundation item; everything stacked on it inherits it. |
 
 **Where the reasoning lives:** the order is `BUILD-ORDER.md` §2e; the live counts are in `BACKLOG.md`;
 the per-item status is in `BACKLOG.md`. **This box is the only place that says "we are doing X now."**
@@ -118,10 +109,12 @@ the per-item status is in `BACKLOG.md`. **This box is the only place that says "
    [`WORKING-RULES.md`](library/development/WORKING-RULES.md) and the COOKBOOK.
 
 **All three are done.** The table above is the queue that followed them; the row marked
-**◀ THE ACTIVE TASK** is the work in hand. The milestones reached on the way: `dashboards` and
-`workflows` migrated to the registry (`a05ea2c`, `d3af1b1`); directive 1's map completed to cover every
+**◀ THE ACTIVE TASK** is the work in hand. The milestones reached on the way: `dashboards`, `workflows`,
+`inbox_ops` and `perspectives` migrated to the registry (`a05ea2c`, `d3af1b1`, `d89b8f6`, `e26642c`);
+directive 1's map completed to cover every
 item and to work the three joints in depth (`807ab40`, `365c4e4`); the two test-suite defects fixed so
-the suite is green (`d5567c7`, `fe7c3e5`).
+the suite is green (`d5567c7`, `fe7c3e5`); the two integration concerns fixed in the docs (this session,
+docs `c0b26d2`).
 
 **Where the reasoning lives:** the order is `BUILD-ORDER.md` §2e; the live counts are in
 `BACKLOG.md`; the per-item status is in `BACKLOG.md`. **This box is the only place that says "we are
@@ -131,6 +124,20 @@ doing X now."**
 
 ### ✅ Done recently (ticked, then moved down here)
 
+- **2026-10-06 — `perspectives` D2-wide migration** (code `e26642c`). 8 calls / 3 files → 4 guard objects;
+  count **134 → 126** (files **52 → 49**); `perspectives` measures 0. Seventh enabled module. **Two things
+  made it different from the six before it.** (1) **The POST route guards two resources in one request** —
+  a personal perspective and, when the payload carries role ops, a role perspective with
+  `resourceId = targetRoleIds.join(',')`; each is a separate guard object evaluated independently, each
+  keeping its own after-success condition (personal unconditional, matching the old always-true
+  `shouldRunAfterSuccess`; role only when `applyToRoles.length > 0 || clearedRolePerspectiveCount > 0`).
+  The `hasRoleOps`/`targetRoleIds`/`applyToRoles`/`clearRoleIds` definitions were verified **byte-identical
+  to HEAD** so nothing shifted silently. (2) **It is the first module with NO `D2-gap`** — all **3** write
+  routes are guarded; the only unguarded route is `GET` on `[tableId]`, which reads. Mutations bit:
+  block path disabled → **2 RED** (both deny-path tests); `runAfterSuccess` neutered → **5 RED** (every
+  allow-path test plus the clear-only no-op that counts one call); wrapper restored md5-identical
+  `acbd7125327bfdb0a79c12f2028b3888`. `perspectives` module 7 suites / 44 tests green; core and shared
+  `tsc --noEmit` exit 0. Full entry below.
 - **2026-10-06 — `inbox_ops` D2-wide migration** (code `d89b8f6`). 8 calls / 4 files → 4 guard objects;
   count **142 → 134**; `inbox_ops` measures 0. Sixth enabled module. Straightforward because the module
   already had a dedicated guard suite — it just mocked the **old** module, so it was repointed to stub
