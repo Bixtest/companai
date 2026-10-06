@@ -2327,6 +2327,147 @@ gets the new code and tests. Repo 1 (root, branch `master`) gets the docs. **Nev
 
 ---
 
+# Sprint G-17 — the AI that emits the Business IR
+
+**Written 2026-10-06. Steps 1–2 (research, validate) done; step 3 is this section; step 4 not started.**
+The first build item after the four-item critical path, chosen by the owner's "keep the eye on the goal".
+
+**Why it is now safe to start:** it depends only on **G-02 ✅** (the IR and its compiler, built) and
+**G-03 ✅** (`runFunction`, for the end-to-end test). Item: `G-17` in
+[`../library/development/BACKLOG.md`](../library/development/BACKLOG.md); the full step 1–2 record is
+[`../library/development/PLAN-G17-ir-generation.md`](../library/development/PLAN-G17-ir-generation.md).
+
+**What it is** (plan §2 phase 3; `BACKLOG` G-17): *schema-constrained generation — **the AI that
+produces the Business IR**.* The vision's decisive loop (*need → **AI writes the IR** → validate → run
+→ confirm → save as Function → zero-AI*) has everything **downstream of the IR** built; this is the
+missing join.
+
+**Done when:** a natural-language request produces a **Business IR** that (a) validates against a
+runtime schema, and (b) **compiles** through the existing `compileQuery`, with **no JavaScript written
+by the model** — i.e. the model's output is a typed IR, not code.
+**Test:** the prompt from the vision (§45) — *"show me customers in Germany whose invoices are over 30
+days overdue and whose outstanding balance is above €10,000"* — yields an IR whose shape is checked and
+whose compile step succeeds (or reports only *gaps*), with the model never emitting executable code.
+
+## Step 1 — Research: what already exists (measured 2026-10-06, from the code)
+
+**The headline, and it corrects an earlier claim in `BACKLOG`.** The earlier row said *"no
+constrained-generation exists; the first artifact is a parser from scratch."* That was measured against
+the **wrong vocabulary** — it grepped for the OpenAI wire fields (`response_format`, `json_schema`). The
+platform calls models through the **AI SDK**, where the constraint is `generateObject({ schema: <zod> })`,
+and **that is already built and in use.** *(Deep-dive: `PLAN-G17-ir-generation.md` §1.)*
+
+| Layer | File (all under `workspace/starting-kit/`) | What it already gives us |
+|---|---|---|
+| **Constrained generation** | `packages/ai-assistant/.../lib/ai-sdk.ts` | Re-exports **`generateObject`** from `ai` (installed **v7.0.4**, `generateObject` present with `FlexibleSchema`). This is the schema-constrained call |
+| **It is used today** | `packages/ai-assistant/.../api/route/route.ts:138,178` | `generateObject({ model, schema: RouteResultSchema, prompt })` — a live route (`export async function POST`) |
+| **The zod pattern** | `api/route/route.ts:32` | `RouteResultSchema = z.object({ intent: z.enum([...]), toolName: z.string().optional(), confidence: z.number().min(0).max(1), reasoning: z.string() })` |
+| **A first-class object endpoint** | `api/ai/run-object/route.ts` | *"Run an AI agent in structured-output (object) mode"* → **`runAiAgentObject`**, with policy, tool-whitelist and attachment checks |
+| **The schema override (the join)** | `.../lib/agent-runtime.ts:1831,1866` | Resolution order: **`override.schemaName`/`override.schema`** → `agent.output` → throw. **An agent can be handed our IR zod schema as its structured output** |
+| **`zod` is available** | `packages/ai-assistant/package.json:117` | `"zod": "^4.4.3"` |
+| **The IR type** | `packages/shared/src/lib/business-ir/types.ts` | `BusinessQueryIR` (§50 verbatim), `BusinessCommandIR` (§53), `IR_STAGES` (the §51 ten stages) — **types only, no runtime schema** |
+| **The compiler** | `packages/shared/src/lib/business-ir/compile.ts` | `compileQuery` — §51 stages, returns a value or a diagnostic. **The test target** |
+
+**Three measured gaps — and they scope this sprint.**
+
+1. **No zod schema for the IR.** Zero zod imports in `business-ir/`, `kernel/`, `user-function/`. The
+   IR is a TS type; **nothing checks the *shape* of an incoming IR at runtime.** This is what the sprint
+   adds.
+2. **No agent emits an IR.** `packages/ai-assistant` names `BusinessQueryIR`/`BusinessCommandIR`/
+   `compileQuery`/`runFunction` **nowhere** (zero hits). The model's paths to data are the code-mode
+   tools and the CRUD tools — **never the IR**.
+3. **No schema-mutation IR kind.** The IR is `list | count | aggregate` + `BusinessCommandIR`. There is
+   no "add entity/field/capability" kind — that is **G-21**'s dependency (outcome 2), scoped there.
+
+**Two routes, both agreeing, that the join is missing:** (a) `ai-assistant` imports nothing from
+`business-ir` (**zero hits**, re-checked 2026-10-06); (b) the model's only data paths are code-mode JS
+and CRUD tools — neither produces an IR.
+
+**Two routes, both agreeing, that the mechanism exists:** (a) `generateObject` with a zod `schema` is
+called in `route.ts` (a live `POST`); (b) `runAiAgentObject` takes an explicit output-schema override
+(`agent-runtime.ts:1831`). Both agree: **the tool is there; our IR is simply not plugged into it.**
+
+## Step 2 — Validate: the approach, and what would break it
+
+**Approach.** Write the IR's zod schema to **mirror `business-ir/types.ts`**, prove the two agree with a
+conformance test, then give the schema to **one agent** through the existing `runAiAgentObject({ output })`
+override. Three deeds:
+
+1. **`business-ir/schema.ts`** — zod mirroring `BusinessQueryIR` (+ `BusinessCommandIR`): the §50 field
+   set, `IrOperation`, the operator vocabulary, `IrMoney`, `IrParameterReference`.
+2. **A conformance test** — every field in the type is in the schema, and the schema **rejects** what
+   the type forbids. It must **fail** when the two diverge, or it is a print, not a guard.
+3. **One IR-emitting agent**, wired via the override, plus an end-to-end test: NL prompt → IR →
+   `compileQuery` succeeds (or reports only gaps).
+
+**What would break it (checked against the code, and what is honestly unproven):**
+
+| Risk | Answer |
+|---|---|
+| Does `generateObject` constrain the model, or only parse? | The AI SDK treats the schema as the **expected output shape** and surfaces `NoObjectGeneratedError` when the model does not conform. **Proven to exist; not yet proven against our local llama.cpp in this project** |
+| **Can our local quantised model emit a valid IR?** | **UNKNOWN — this is step 4's measurement, and the one claim this sprint does not make.** A small model may fail; a larger one may be required (the model family / routing is the `ML-` track) |
+| Streaming vs object mode | `runAiAgentObject` supports `mode: 'generate' \| 'stream'`. **Start with `generate`** (smaller surface) |
+| Does the mirrored schema drift from the type? | The conformance test is the guard; it must fail on drift |
+| All three G-21 paths | Read + command IR ship **now**; the **schema-mutation** kind is **G-21**'s, not this sprint's |
+
+## Step 3 — the exact steps for this sprint (no code before this is written)
+
+**The sprint writes three files and touches the BACKLOG.** Run in this order.
+
+```bash
+export PATH="/c/Users/Ramzi/Downloads/companai/workspace/.toolchain/node24:$PATH"
+cd /c/Users/Ramzi/Downloads/companai/workspace/starting-kit
+```
+
+**S1 — write the IR schema.** New file `packages/shared/src/lib/business-ir/schema.ts`.
+- Mirror `types.ts` field-for-field: `BusinessQueryIR` (operation/subjectEntity/grain/dimensions/
+  measures/filters/relationships/timeRange/timeBasis/currencyBasis/sort/limit/offset), `BusinessCommandIR`
+  (command/inputs/requested_by/idempotency_key), the sub-shapes (`IrFilter`, `IrMeasure`, `IrSort`,
+  `IrTimeRange`, `IrMoney`, `IrParameterReference`), and `IrOperation`.
+- **Export `z.infer` types and assert they equal the `types.ts` types** — so a drift is a **type error**,
+  not a silent gap.
+- **Done when:** `tsc --noEmit` is clean and the inferred types match.
+
+**S2 — write the conformance test.** New file
+`packages/shared/src/lib/business-ir/__tests__/schema.conformance.test.ts`.
+- Prove: (a) a valid IR parses; (b) an IR missing a required field is **rejected**; (c) an IR with a
+  wrong-typed field is **rejected**; (d) an unknown extra key does not silently pass into a compiled
+  query (decide `.strict()` vs `.passthrough()` and **state why** — default to strict, matching the
+  model's "neither guess nor widen" posture).
+- **Falsify the test:** temporarily remove one field from the schema and **watch the conformance test
+  fail** — a test that cannot fail is not a guard.
+- **Done when:** the suite passes clean, and the falsification probe proves it can fail.
+
+**S3 — wire one IR-emitting agent.** Where agents are declared (the ai-assistant agent registry), add
+one whose `output` is `{ schemaName: 'BusinessQueryIR', schema: <the zod schema> }`. Use the existing
+`runAiAgentObject` path (`api/ai/run-object`).
+- **Done when:** the endpoint returns an object that validates against the schema.
+
+**S4 — the end-to-end test.** A test that calls the IR-emitting agent with a fixed prompt (use a
+**stubbed model** returning a canned IR for the unit test, so it does not depend on the live model), then
+feeds the result to **`compileQuery`** and asserts it compiles (or reports only *gaps*, per G-02's
+two-severity diagnostics).
+- Separately, a **live smoke test** against the running stack to answer the one unproven question: *can
+  our local model emit a valid IR?* Record the answer either way — a "no" is a measurement, not a
+  failure, and it feeds the `ML-` model-routing track.
+
+**S5 — record and update docs, in the same change.**
+- `BACKLOG.md`: tick `G-17` (or record what step 4 measured, including the local-model answer).
+- `PLAN-G17-ir-generation.md`: append the step 4 result.
+- This section: add the outcome.
+- `JOURNAL.md`: an entry; `library/development/README.md` if a new doc is added.
+- `.workbuddy-ai/memory/2026-10-06.md`: a one-paragraph note.
+
+**Two repositories, two commits.** Docs (this file, BACKLOG, PLAN, JOURNAL) in the project repo; the
+code (`schema.ts`, tests, agent) in `workspace/starting-kit`. **Never `git add -A`.**
+
+## Step 4 — (not yet done)
+
+*Build, test, record.* The one thing to carry in: **the local model's ability to emit a valid IR is the
+open question, and step 4 answers it with a measurement, not an assumption.**
+
+---
+
 # The hosting environment — `Platform-Server` (Coolify)
 
 **Built 2026-10-04.** A separate environment from Sprint 0: an Ubuntu Server 24.04 VM on Hyper-V

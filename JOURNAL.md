@@ -7,7 +7,40 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
-## 2026-10-06 (latest) — The three things a prompt can become, and a wrong reading of mine corrected
+## 2026-10-06 (latest) — G-17 begins: the AI that emits the Business IR, and a wrong claim corrected
+
+**The documentation was perfected first, at the owner's request** — the tier decision recorded, and the
+reading order unified across all four entry points into three tiers (A: direction + live decisions; B:
+the spine; C: supporting, opened only where the work needs it). Then G-17 began.
+
+**G-17's step 1 research corrected a wrong claim in G-17's own `BACKLOG` row.** The row said *"no
+constrained-generation exists; the first artifact is a parser from scratch."* That was measured against
+the **wrong vocabulary** — it grepped for the OpenAI wire fields (`response_format`, `json_schema`). The
+platform calls models through the **AI SDK v7**, where the constraint is `generateObject({ schema:
+<zod> })`, and **that is already built and in use**: `ai-sdk.ts` re-exports `generateObject`;
+`api/route/route.ts:138` calls it with a zod `RouteResultSchema`; and there is a first-class object
+endpoint (`api/ai/run-object` → **`runAiAgentObject`**) that takes a **structured-output schema
+override** (`agent-runtime.ts:1831`). **So G-17 is not "build constrained generation"; it is "write the
+IR's zod schema and point one agent at it."**
+
+**What is genuinely missing, measured:** the IR has **no zod schema** (zero zod imports in
+`business-ir/`, `kernel/`, `user-function/` — it is a TS type only, so nothing checks an incoming IR's
+*shape*); nothing in `ai-assistant` imports `business-ir` (**zero hits** — the missing join, re-confirmed
+by two routes); and there is **no schema-mutation IR kind** (that is G-21's, not this sprint's).
+
+**The sprint is scoped and the cookbook written** (`workspace/COOKBOOK.md`, *Sprint G-17*), in the
+project's four-step process: write `business-ir/schema.ts` mirroring `types.ts`, prove the two agree
+with a conformance test that **can fail**, wire one agent through the existing override, and test the
+end-to-end path with a stubbed model. **Step 4 (build) is next** — and its one unproven claim is
+**whether our local quantised model can emit a valid IR**, which is a measurement, not an assumption.
+
+**Files:** `library/development/PLAN-G17-ir-generation.md` (new, the step 1–2 record),
+`library/development/BACKLOG.md` (G-17 row corrected + header), `workspace/COOKBOOK.md` (Sprint G-17),
+`library/development/README.md` (new doc indexed).
+
+---
+
+## 2026-10-06 — The three things a prompt can become, and a wrong reading of mine corrected
 
 **The owner described his core features_pack: not every prompt becomes a Function.** A prompt can end as
 **(1) a one-time answer** (analyse, report into a datagrid/form/report, save nothing), **(2) a model
