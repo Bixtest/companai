@@ -30,40 +30,42 @@ log.** Everything else (HANDOVER, START-PROMPT, README, BOOKMARKS, BACKLOG) poin
 
 ---
 
-### ▶ NOW — D2-wide continues with `query_index` (4 deprecated guard calls in 2 files)
+### ▶ NOW — D2-wide continues with `auth` (2 deprecated guard calls, 1 file)
 
 > **If you are a new agent, read only this block to know your job.** Everything below the box is the
 > history and the queue; this is the work in hand.
 
-**What happened before this box (2026-10-06, this session).** `planner` — the active task this box
-carried last — is **DONE and PROVEN**. Count **120 → 116**; files **47 → 45**. Three things it settled
-that later modules must inherit: (1) **the plan's figure can be right** — `planner` re-measured exactly
-4 calls / 2 files → 2 guard objects, the first module in the sweep whose number survived unchanged; the
-`translations` lesson (L87) says re-derive the figure, not that it must be wrong. (2) **Neither
-`planner` handler is a `route.ts`** — both export a **named** `POST` with `metadata = { POST: {...} }`,
-so a `route.ts`-only glob finds neither file and reports the module clean while leaving both live write
-routes deprecated. (3) **A hand-rolled `shouldRunAfterSuccess` gate does not need re-implementing** —
-the registry already applies it internally, so calling `runAfterSuccess()` unconditionally is a no-op.
+**What happened before this box (2026-10-06, this session).** `query_index` — the active task this box
+carried last — is **DONE and PROVEN**. Count **116 → 112**; files **45 → 43**. It confirmed the two
+traps `planner` and `translations` had already found, and added a strengthening to the proof: **(1)
+neither `query_index` handler is a `route.ts`** — `reindex.ts` and `purge.ts` are both **named `POST`
+exports** with `metadata = { POST: {...} }`, so a `route.ts`-only glob finds neither; **(2) the test
+mocked the deprecated DI service** (`crudMutationGuardService`), which is the wrong target now and makes
+a mutation invisible — re-pointed to stub **only** `runRouteMutationGuards`; **(3) the proof went past
+the wrapper** — after the two wrapper mutations (2 RED deny / 2 RED allow), the **route files** were each
+mutated in turn and each reddened only its own test, so the routes are provably wired, not just the
+wrapper.
 
 **What the task is, in plain words.** The platform has a guard system that checks every write before it
-happens (who may change what). Most of the codebase still calls an **old, deprecated** version of it
-that **silently skips the real guard registry** — a security hole. The fix, module by module, is to
-repoint those calls at the new registry. **This is tracked as "D2-wide".** `entities`, `data_sync`,
-`dictionaries`, `dashboards`, `workflows`, `inbox_ops`, `perspectives`, `translations` and `planner`
-are already done; **116 deprecated call sites remain across 45 files**, of which **10 calls in 4 enabled
-modules** are live (`query_index` 4, `auth` 2, `directory` 2, `feature_toggles` 2); the rest are
+happens (who may change what). Some code still calls an **old, deprecated** version of it that
+**silently skips the real guard registry** — a security hole. The fix, module by module, is to repoint
+those calls at the new registry. **This is tracked as "D2-wide".** Ten modules are now done
+(`entities`, `data_sync`, `dictionaries`, `dashboards`, `workflows`, `inbox_ops`, `perspectives`,
+`translations`, `planner`, `query_index`); **112 deprecated call sites remain across 43 files**, of which
+**6 calls in 3 enabled modules** are live (`auth` 2, `directory` 2, `feature_toggles` 2); the rest are
 parked and recorded, not migrated.
 
-**Your job now — one module: `query_index` (4 calls / 2 files).** Do it exactly the way the previous nine
+**Your job now — one module: `auth` (2 calls / 1 file).** Do it exactly the way the previous ten
 were done, and the pattern is already written down (do not invent a new one):
 
-1. **Read the worked example**: `BUILD-ORDER.md` §2e, "Progress — `planner` DONE and PROVEN" — it
-   is the most recent and carries the three findings above. The eight before it are identical in shape.
-2. **Create `packages/core/src/modules/query_index/api/mutation-guard.ts`** — a
-   `beginQueryIndexMutationGuard(ctx)` wrapper (copy `planner/api/mutation-guard.ts` and rename).
-3. **Repoint the route files** from `validateCrudMutationGuard()` / `runCrudMutationGuardAfterSuccess()`
+1. **Read the worked example**: `BUILD-ORDER.md` §2e, "Progress — `query_index` DONE and PROVEN" — it
+   is the most recent and carries the three findings above. The nine before it are identical in shape.
+2. **Create `packages/core/src/modules/auth/api/mutation-guard.ts`** — a
+   `beginAuthMutationGuard(ctx)` wrapper (copy `query_index/api/mutation-guard.ts` and rename).
+3. **Repoint the route file(s)** from `validateCrudMutationGuard()` / `runCrudMutationGuardAfterSuccess()`
    to `runRouteMutationGuards()` through the wrapper. **Walk every `.ts` file under `api/` — do not glob
-   only for `route.ts`** (the `translations` + `planner` lesson: a named-export handler is a route too).
+   only for `route.ts`** (the `translations` + `planner` + `query_index` lesson: a named-export handler
+   is a route too). **First measure the file count** — the plan says **1 file**; re-derive it.
 4. **Repair the tests** — re-point their mocks from the deprecated DI pair to **only** the registry call
    `runRouteMutationGuards`.
 5. **Prove it**: stub **only** the registry call `runRouteMutationGuards` — **never** the module wrapper,
@@ -71,7 +73,7 @@ were done, and the pattern is already written down (do not invent a new one):
    the tests must go RED; neuter `runAfterSuccess` → RED; restore the wrapper and confirm it is
    **md5-identical**. **Read the test COUNT, not just the exit code** — an empty run exits 0 (L88).
 6. **Recount and record**: the count command is in `BACKLOG.md` item **D2-wide**; expected result
-   **116 → 112** (verify: `query_index` is 4 calls). Then update `BUILD-ORDER.md` §2e and `BACKLOG.md`, and
+   **112 → 110** (verify: `auth` is 2 calls). Then update `BUILD-ORDER.md` §2e and `BACKLOG.md`, and
    commit **in both repos**.
 
 **Definition of done:** `query_index` measures **0** deprecated call sites; its route tests are green; the
@@ -92,9 +94,10 @@ two mutation proofs went RED; the repo-wide count is **112**; the docs say so.
 | **8** | ✅ **D2-wide: `perspectives` — DONE** (code `e26642c`) | 8 calls / 3 files → 4 guard objects; count **134 → 126** (files 52 → 49); mutation-proven (**2 RED / 5 RED**). **The new shape:** the POST route guards **two resources in one request** (personal + role-scoped), each with its own after-success condition. **The first module with NO `D2-gap`** — all 3 write routes guarded. |
 | **9** | ✅ **D2-wide: `translations` — DONE** (code `a2f8d5f`) | 6 calls / 2 files → **2 guard objects** (the plan's "4" was wrong: one guard per route). Count **126 → 120** (files **47**, not 49). **Found: `put/locales.ts` is not a `route.ts`** — a file-name scan misses it. **First real use of the id re-binding** on after-success. Mutation-proven (**3 RED / 3 RED**). |
 | **10** | ✅ **D2-wide: `planner` — DONE** (code `641d3af`) | 4 calls / 2 files → **2 guard objects** (the plan's figure held on re-measurement — the first module where it did). Count **120 → 116** (files **47 → 45**). **Found: neither handler is a `route.ts`** (both are named `POST` exports) — a file-name scan misses both. Handled the `shouldRunAfterSuccess` gate without re-implementing it (the registry already applies it). **No `D2-gap`** — all 5 write verbs guarded. Mutation-proven (**2 RED / 2 RED** — every test covered). |
-| **11** | **◀ D2-wide: `query_index`** (4 calls / 2 files) — **THE ACTIVE TASK** | See the six steps above. **Walk every `.ts` under `api/`, not just `route.ts`.** Expected **116 → 112**. |
-| **11b** | **The rest of D2-wide, enabled modules** — `auth` (2), `directory` (2), `feature_toggles` (2) | Each with its own mutation proof. |
-| **12** | **D2-gap** — the write routes that call **no** guard at all (measured: `workflows` 13/19, `inbox_ops` 10/14, `perspectives` 0/3, `translations` 0/3) | Do it module by module alongside D2-wide; record the per-module unguarded count next to the D2-wide count. |
+| **11** | ✅ **D2-wide: `query_index` — DONE** (code `cc5a237`) | 4 calls / 2 files → **2 guard objects** (the plan's figure held again). Count **116 → 112** (files **45 → 43**). **Neither handler is a `route.ts`** (`reindex.ts`, `purge.ts` — named `POST` exports); the test mocked the **deprecated DI service**, re-pointed to stub only `runRouteMutationGuards`. **Proof went past the wrapper:** each route mutated in turn → each reddened only its own test. **No `D2-gap`** — both write verbs guarded. Mutation-proven (**2 RED / 2 RED**, disjoint). |
+| **11b** | **◀ D2-wide: `auth`** (2 calls / 1 file) — **THE ACTIVE TASK** | See the six steps above. **Walk every `.ts` under `api/`, not just `route.ts`; re-derive the file count.** Expected **112 → 110**. |
+| **11c** | **The rest of D2-wide, enabled modules** — `directory` (2), `feature_toggles` (2) | Each with its own mutation proof. |
+| **12** | **D2-gap** — the write routes that call **no** guard at all (measured: `workflows` 13/19, `inbox_ops` 10/14, `perspectives` 0/3, `translations` 0/3, `planner` 0/2, `query_index` 0/2) | Do it module by module alongside D2-wide; record the per-module unguarded count next to the D2-wide count. |
 | **13** | **D3** — add the `escalate` outcome to `MutationGuardResult` | The last guard-engine gap; needs D2-wide's shape settled first. |
 | **14** | **The Metadata Registry** service (GAP A / C5) | The remaining foundation item; everything stacked on it inherits it. |
 
@@ -116,8 +119,8 @@ the per-item status is in `BACKLOG.md`. **This box is the only place that says "
 
 **All three are done.** The table above is the queue that followed them; the row marked
 **◀ THE ACTIVE TASK** is the work in hand. The milestones reached on the way: `dashboards`, `workflows`,
-`inbox_ops`, `perspectives`, `translations` and `planner` migrated to the registry (`a05ea2c`, `d3af1b1`, `d89b8f6`,
-`e26642c`, `a2f8d5f`, and `planner` (`641d3af`)); directive 1's map completed to cover every
+`inbox_ops`, `perspectives`, `translations`, `planner` and `query_index` migrated to the registry (`a05ea2c`, `d3af1b1`, `d89b8f6`,
+`e26642c`, `a2f8d5f`, `641d3af`, `cc5a237`); directive 1's map completed to cover every
 item and to work the three joints in depth (`807ab40`, `365c4e4`); the two test-suite defects fixed so
 the suite is green (`d5567c7`, `fe7c3e5`); the two integration concerns fixed in the docs (this session,
 docs `c0b26d2`).
@@ -130,6 +133,26 @@ doing X now."**
 
 ### ✅ Done recently (ticked, then moved down here)
 
+- **2026-10-06 — `query_index` D2-wide migration** (code `cc5a237`). 4 calls / 2 files → **2 guard objects**;
+  count **116 → 112** (files **45 → 43**); `query_index` measures 0. Tenth enabled module. **Neither handler
+  is a `route.ts`** — `reindex.ts` and `purge.ts` both export a **named** `POST` with
+  `metadata = { POST: { requireAuth: true, requireFeatures: [...] } }`, so a `route.ts`-only glob finds
+  neither file; found by walking every `.ts` under `api/`. **The test mocked the deprecated DI service**
+  (`crudMutationGuardService.validateMutation` / `afterMutationSuccess`) — the wrong target now, and the
+  exact shape that makes a mutation invisible; re-pointed to stub **only** the registry call
+  `runRouteMutationGuards`, wrapper running for real. Its 6 tests assert the registry call's
+  `{ container, req, auth, input }` shape, both deny paths, both allow paths, and the call ORDER
+  (guard < emit < after-success) the original suite asserted. **Mutations bit:** block path disabled →
+  **2 RED** (both deny-path tests); `runAfterSuccess` neutered → **2 RED** (both allow-path tests) —
+  disjoint, 2+2 of 6; the two "queues without inline delivery" tests assert neither path and correctly
+  stay green. Wrapper restored md5-identical `b9f437fe0d7bac77bdc5125414582c9e`. **A critic pass went
+  further and mutated the ROUTE files, not the wrapper, one at a time:** removing `if (guard.blockedResponse)
+  return …` from `reindex.ts` → the reindex deny test **RED** (purge stayed green); removing
+  `await guard.runAfterSuccess()` from `purge.ts` → the purge allow test **RED** (reindex stayed green).
+  All three files restored byte-identical. `query_index` module **21 suites / 125 tests green**; **whole
+  core suite 603 suites / 5133 tests green**; core `tsc --noEmit` exit 0. **Scope:** exactly **2 write
+  verbs and both are guarded → no `D2-gap`** (like `perspectives`, `translations`, `planner`). Full entry
+  below.
 - **2026-10-06 — `planner` D2-wide migration** (code `641d3af`). 4 calls / 2 files → **2 guard objects**; count
   **120 → 116** (files **47 → 45**); `planner` measures 0. Ninth enabled module. **The plan's figure held
   for the first time** — 4 calls / 2 files → 2 objects, re-derived by walking every `.ts` under `api/`
