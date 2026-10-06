@@ -11,10 +11,7 @@ import {
   resolveWidgetAssignmentTargetAccess,
 } from '@open-mercato/core/modules/dashboards/lib/widgetAssignmentScope'
 import { hasFeature } from '@open-mercato/shared/security/features'
-import {
-  runCrudMutationGuardAfterSuccess,
-  validateCrudMutationGuard,
-} from '@open-mercato/shared/lib/crud/mutation-guard'
+import { beginDashboardsMutationGuard } from '../../mutation-guard'
 import type { OpenApiMethodDoc, OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
 import {
   dashboardsTag,
@@ -144,20 +141,18 @@ export async function PUT(req: Request) {
     return NextResponse.json({ error: 'Role not found' }, { status: 404 })
   }
 
-  const guardResult = await validateCrudMutationGuard(container, {
-    tenantId: tenantId ?? '',
+  const guard = await beginDashboardsMutationGuard({
+    container,
+    tenantId,
     organizationId,
     userId: String(auth.sub),
+    req,
     resourceKind: RESOURCE_KIND,
     resourceId: parsed.data.roleId,
     operation: 'update',
-    requestMethod: req.method,
-    requestHeaders: req.headers,
     mutationPayload: { roleId: parsed.data.roleId, widgetIds },
   })
-  if (guardResult && !guardResult.ok) {
-    return NextResponse.json(guardResult.body, { status: guardResult.status })
-  }
+  if (guard.blockedResponse) return guard.blockedResponse
 
   let record = await em.findOne(DashboardRoleWidgets, {
     roleId: parsed.data.roleId,
@@ -170,19 +165,7 @@ export async function PUT(req: Request) {
     if (record) {
       await em.remove(record).flush()
     }
-    if (guardResult?.ok && guardResult.shouldRunAfterSuccess) {
-      await runCrudMutationGuardAfterSuccess(container, {
-        tenantId: tenantId ?? '',
-        organizationId,
-        userId: String(auth.sub),
-        resourceKind: RESOURCE_KIND,
-        resourceId: parsed.data.roleId,
-        operation: 'update',
-        requestMethod: req.method,
-        requestHeaders: req.headers,
-        metadata: guardResult.metadata ?? null,
-      })
-    }
+    await guard.runAfterSuccess()
     return NextResponse.json({ ok: true, widgetIds: [] })
   }
 
@@ -199,19 +182,7 @@ export async function PUT(req: Request) {
   }
   await em.flush()
 
-  if (guardResult?.ok && guardResult.shouldRunAfterSuccess) {
-    await runCrudMutationGuardAfterSuccess(container, {
-      tenantId: tenantId ?? '',
-      organizationId,
-      userId: String(auth.sub),
-      resourceKind: RESOURCE_KIND,
-      resourceId: parsed.data.roleId,
-      operation: 'update',
-      requestMethod: req.method,
-      requestHeaders: req.headers,
-      metadata: guardResult.metadata ?? null,
-    })
-  }
+  await guard.runAfterSuccess()
 
   return NextResponse.json({ ok: true, widgetIds })
 }
