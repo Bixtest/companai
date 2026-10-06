@@ -11,6 +11,27 @@ page is right and the document needs fixing.
 
 ---
 
+## ★ This is source of truth #1 of two
+
+**The project has exactly two sources of truth. Every other document is reached *from* one of them,
+inside the section where it matters — never from a list at the bottom.**
+
+| # | The document | It answers | Read it when |
+|---|---|---|---|
+| **1 — this page** | [`WHAT-WE-ARE-BUILDING.md`](WHAT-WE-ARE-BUILDING.md) | **What are we building, and why** (the vision and the architecture) | you need the *big picture* before doing anything |
+| **2 — the plan** | [`development/BUILD-ORDER.md`](development/BUILD-ORDER.md) (the order) + [`development/BACKLOG.md`](development/BACKLOG.md) (the live status) | **Where are we, what is next, what is incomplete, what needs fixing** | you are about to do a piece of work |
+
+**The rule, and it is the one the owner asked for (2026-10-06):** *a document that is not referenced
+from the section of a source of truth where it is relevant is a loose document — and a loose document
+is a liability, not an asset.* So throughout this page, each section ends with a **`In depth →`**
+line naming the documents that govern **that section**. Those lines are the binding, not decoration.
+
+**Two facts about scope, so this page is not mistaken for a status report:** it is about the *idea*
+(this page is stable); it is **not** the status (that moves — go to source of truth #2). §6 below is
+a deliberately short snapshot and always defers to the plan.
+
+---
+
 ## 1. The product, in one paragraph
 
 **We are building a platform where a business describes what it needs, in ordinary words, and the
@@ -23,6 +44,21 @@ platform** — a screen, an operation over real data, a report — that behaves 
 the product from then on, with **no AI involved in running it**.
 
 That is the whole idea. Everything else is how we make it safe, fast, and honest.
+
+> **In depth →** the product thesis and its 15 unbreakable rules:
+> [`../compai/planning/00-product-thesis.md`](../compai/planning/00-product-thesis.md).
+> The direction we are building toward (nine documents, read its README first):
+> [`ai/ai-first/`](ai/ai-first/). What the platform already does:
+> [`../compai/planning/09-starting-kit.md`](../compai/planning/09-starting-kit.md).
+> Why this base was chosen:
+> [`../compai/planning/08-host-selection-and-migration-plan.md`](../compai/planning/08-host-selection-and-migration-plan.md).
+> **The whole planning set, self-indexing** — the thesis, the architecture, the method, and the
+> platform evaluations it rests on: [`../compai/planning/README.md`](../compai/planning/README.md).
+> **Our own read of that direction** — what the vision says, checked against what we have:
+> the vision's frame [`analysis/findings/01-vision-frame.md`](analysis/findings/01-vision-frame.md),
+> its model and runtime [`analysis/findings/02-vision-model-and-runtime.md`](analysis/findings/02-vision-model-and-runtime.md),
+> and the plan the whole analysis programme produced
+> [`analysis/findings/12-development-plan.md`](analysis/findings/12-development-plan.md).
 
 ---
 
@@ -48,6 +84,20 @@ platform **compiles** the businesses' actual needs into features.
 
 > **The north star, in one line:** the business model is the source of truth, and the platform
 > continuously turns it into working software.
+
+> **In depth →** why the classical module model is being replaced, and how the platform's core is
+> **kept uncustomisable so it cannot collapse**:
+> [`development/CORE-BOUNDARY.md`](development/CORE-BOUNDARY.md) (the three rings).
+> The industry module baseline mapped to ours, measured honestly:
+> [`development/CORE-MODULES-REGISTER.md`](development/CORE-MODULES-REGISTER.md).
+> What we scanned in upstream Paperclip before rejecting it — governance and the human boundary
+> [`paperclip-value-study/findings/01-governance-and-the-human-boundary.md`](paperclip-value-study/findings/01-governance-and-the-human-boundary.md),
+> the work system [`paperclip-value-study/findings/02-the-work-system-and-execution.md`](paperclip-value-study/findings/02-the-work-system-and-execution.md),
+> money and operations [`paperclip-value-study/findings/03-money-and-operations.md`](paperclip-value-study/findings/03-money-and-operations.md),
+> org agents and training [`paperclip-value-study/findings/04-org-agents-and-training.md`](paperclip-value-study/findings/04-org-agents-and-training.md),
+> extensibility and isolation [`paperclip-value-study/findings/05-extensibility-and-isolation.md`](paperclip-value-study/findings/05-extensibility-and-isolation.md),
+> the ideas left unbuilt [`paperclip-value-study/findings/06-the-unbuilt-ideas.md`](paperclip-value-study/findings/06-the-unbuilt-ideas.md),
+> and the six things worth acting on [`paperclip-value-study/findings/07-synthesis.md`](paperclip-value-study/findings/07-synthesis.md).
 
 ---
 
@@ -125,6 +175,26 @@ things at once: the request can be **checked** before it runs, it can be **saved
 it can **survive a change to the database** — because the business meaning is stored, not the
 SQL.
 
+> **In depth →** the three endings and the gate on the dangerous one, in full:
+> [`development/ARCHITECTURE-request-outcomes.md`](development/ARCHITECTURE-request-outcomes.md)
+> (this is `G-21`, the owner's core features_pack). The plan that built it:
+> [`development/PLAN-G21-request-outcomes.md`](development/PLAN-G21-request-outcomes.md).
+> The product specification the loop is gated
+> against: [`development/SPEC-business-model-kernel.md`](development/SPEC-business-model-kernel.md).
+> The plan for the missing front half (the AI that emits the IR):
+> [`development/PLAN-G17-ir-generation.md`](development/PLAN-G17-ir-generation.md).
+> The standard every change to this loop is checked against:
+> [`development/SPECIFICATIONS-DICTIONARY.md`](development/SPECIFICATIONS-DICTIONARY.md).
+> **Our own read of the vision this loop comes from** — what exists, inventoried
+> [`analysis/findings/00-inventory.md`](analysis/findings/00-inventory.md);
+> the runtime and data the loop rests on
+> [`analysis/findings/03-vision-runtime-and-data.md`](analysis/findings/03-vision-runtime-and-data.md);
+> the security kernel that guards the gate
+> [`analysis/findings/05-vision-security-kernel.md`](analysis/findings/05-vision-security-kernel.md);
+> where the parts overlap and who owns what
+> [`analysis/findings/09-overlap-matrix.md`](analysis/findings/09-overlap-matrix.md) and
+> [`analysis/findings/10-contested-ownership.md`](analysis/findings/10-contested-ownership.md).
+
 ---
 
 ## 4. What the platform actually is, once it is built
@@ -147,6 +217,31 @@ Around all five sits **governance and security**: who may see what, what an AI i
 whose behalf, and a record of everything that happened. That part is not the product — it is the
 floor the product stands on. It is already largely built.
 
+> **In depth →** how the three big pieces (platform, Hermes agent runtime, model server) run
+> together: [`development/ARCHITECTURE.md`](development/ARCHITECTURE.md). How agents attach and the
+> runtime boundary: [`development/ARCHITECTURE-hermes-integration.md`](development/ARCHITECTURE-hermes-integration.md).
+> How models attach: [`development/ARCHITECTURE-model-server-integration.md`](development/ARCHITECTURE-model-server-integration.md).
+> The agent half (AI staff, roles, delegation, answerability):
+> [`development/AGENT-HALF.md`](development/AGENT-HALF.md). What the AI may do to the platform's own
+> structure: [`development/ARCHITECTURE-structure-permissions.md`](development/ARCHITECTURE-structure-permissions.md).
+> Governance end to end: [`../workspace/knowledge/authority-overview.md`](../workspace/knowledge/authority-overview.md).
+> **How the platform actually works, as a self-indexing set** — the governance layer and every
+> mechanism under it: [`../workspace/knowledge/README.md`](../workspace/knowledge/README.md).
+> **What we learned from the agent study** — how Paperclip is built
+> [`paperclip-hermes-study/findings/01-paperclip-architecture.md`](paperclip-hermes-study/findings/01-paperclip-architecture.md),
+> its agents [`paperclip-hermes-study/findings/02-paperclip-agents.md`](paperclip-hermes-study/findings/02-paperclip-agents.md),
+> tasks and delegation [`paperclip-hermes-study/findings/03-paperclip-tasks-and-delegation.md`](paperclip-hermes-study/findings/03-paperclip-tasks-and-delegation.md),
+> collaboration [`paperclip-hermes-study/findings/04-paperclip-collaboration.md`](paperclip-hermes-study/findings/04-paperclip-collaboration.md),
+> triggers [`paperclip-hermes-study/findings/05-paperclip-triggers.md`](paperclip-hermes-study/findings/05-paperclip-triggers.md),
+> the Paperclip–Hermes gateway [`paperclip-hermes-study/findings/06-paperclip-hermes-gateway.md`](paperclip-hermes-study/findings/06-paperclip-hermes-gateway.md),
+> Hermes capabilities verified [`paperclip-hermes-study/findings/07-hermes-capabilities-verified.md`](paperclip-hermes-study/findings/07-hermes-capabilities-verified.md),
+> adding an agent to a live thread [`paperclip-hermes-study/findings/08-new-agent-into-existing-thread.md`](paperclip-hermes-study/findings/08-new-agent-into-existing-thread.md),
+> how the sibling project did it [`paperclip-hermes-study/findings/09-aissistant-integration.md`](paperclip-hermes-study/findings/09-aissistant-integration.md).
+> **Our own read of the vision's model/runtime and workspace** —
+> [`analysis/findings/04-vision-workspace.md`](analysis/findings/04-vision-workspace.md),
+> and what Hermes already does [`analysis/findings/07-hermes-capability-map.md`](analysis/findings/07-hermes-capability-map.md)
+> and [`analysis/findings/08-hermes-fact-check.md`](analysis/findings/08-hermes-fact-check.md).
+
 ---
 
 ## 5. What this platform is *not*
@@ -165,6 +260,13 @@ Said plainly, because the mistakes are easy to make:
 - **The AI does not run the business.** The AI **builds**, once. The business runs on deterministic
   software. A published Function must never call a model at runtime.
 
+> **In depth →** the two traps this section guards against are written up in full: the **two-products-
+> called-Companai** trap — [`ai/README.md`](ai/README.md); and *what of upstream Paperclip is worth
+> taking, and what is deliberately rejected* —
+> [`paperclip-value-study/findings/07-synthesis.md`](paperclip-value-study/findings/07-synthesis.md).
+> The lessons from the agent study:
+> [`paperclip-hermes-study/findings/10-lessons-and-target-design.md`](paperclip-hermes-study/findings/10-lessons-and-target-design.md).
+
 ---
 
 ## 6. Where we actually are (as of 2026-10-06)
@@ -181,8 +283,35 @@ Kept short, and kept honest — the authoritative, always-current version is
   startable item** — `G-17`, "schema-constrained generation".
 - **The stack runs.** Eight containers, healthy, on the owner's machine.
 
+> **What the base already does, measured:** the starting-kit's capabilities, mapped —
+> [`analysis/findings/06-starting-kit-capability-map.md`](analysis/findings/06-starting-kit-capability-map.md).
+> **What is free and what must be built:** the shortcut and gap register —
+> [`analysis/findings/11-shortcut-and-gap-register.md`](analysis/findings/11-shortcut-and-gap-register.md).
+
 So: the *whole back half* of the loop is real and tested. The *front half* — the AI feeding it — is
 the next thing to build.
+
+> **In depth → this section is a snapshot; the live version is source of truth #2.** The order in
+> which the remaining foundation is finished: [`development/BUILD-ORDER.md`](development/BUILD-ORDER.md).
+> Every item left, in order, with counts: [`development/BACKLOG.md`](development/BACKLOG.md).
+> What the Universal Platform Blueprint exposed we had not planned:
+> [`development/BLUEPRINT-GAP-ANALYSIS.md`](development/BLUEPRINT-GAP-ANALYSIS.md).
+> What is measured and true vs merely present — the module audit:
+> [`development/CORE-MODULES-REGISTER.md`](development/CORE-MODULES-REGISTER.md).
+> What happened and when: [`../JOURNAL.md`](../JOURNAL.md). What is blocked:
+> [`development/BLOCKERS.md`](development/BLOCKERS.md). What needs the owner:
+> [`development/NEEDS-YOU.md`](development/NEEDS-YOU.md).
+> **How to actually run and deploy this** — standing the platform up
+> [`development/RUNBOOK-platform-server.md`](development/RUNBOOK-platform-server.md) and
+> [`development/RUNBOOK-hosting-server-manual.md`](development/RUNBOOK-hosting-server-manual.md);
+> the first sprint [`development/RUNBOOK-sprint0.md`](development/RUNBOOK-sprint0.md);
+> deploying a site [`development/RUNBOOK-deploying-a-site.md`](development/RUNBOOK-deploying-a-site.md);
+> adding a domain [`development/RUNBOOK-adding-a-domain-step-by-step.md`](development/RUNBOOK-adding-a-domain-step-by-step.md).
+> The Coolify stand-up, planned and then critiqued:
+> [`development/PLAN-coolify-laptop-implementation.md`](development/PLAN-coolify-laptop-implementation.md)
+> and [`development/REVIEW-coolify-laptop-architecture.md`](development/REVIEW-coolify-laptop-architecture.md).
+> The trail of how we got here: [`development/THREAD-2026-10-05.md`](development/THREAD-2026-10-05.md),
+> [`development/BOOKMARKS.md`](development/BOOKMARKS.md), and [`../where_we_left.md`](../where_we_left.md).
 
 ---
 
@@ -198,10 +327,18 @@ These are the documents that **are** the project. Read them first, and treat the
 | Where | What it is |
 |---|---|
 | [`WHAT-WE-ARE-BUILDING.md`](WHAT-WE-ARE-BUILDING.md) | **This page.** The product in plain English. |
+| [`REFERENCE-REGISTER.md`](REFERENCE-REGISTER.md) | **The map.** Every hand-written document, and the section of a source of truth that reaches it. This is where you check that nothing is loose. |
 | [`ai/ai-first/`](ai/ai-first/) | **THE DIRECTION.** The architecture we are actually building toward. Read `README.md` in that folder first. |
 | [`development/`](development/) | **The live hub** — the roadmap, the architecture of the running system, the handover, the rules. Start here to *work*. |
-| [`analysis/`](analysis/) | Our own 12-batch check of the direction against what we already have. |
-| `01-policy-and-plan/` … `16-konsult-product-docs/` | Our product documentation shelves: the policy, the specification, the audits, the product vision. |
+| [`analysis/`](analysis/) | Our own 12-batch check of the direction against what we already have. Its own `README.md`, `PLAN.md` and `LOG.md`, with one report per batch under `findings/`. |
+| [`paperclip-hermes-study/`](paperclip-hermes-study/) · [`paperclip-value-study/`](paperclip-value-study/) | **Our own two studies** *of* the imported products. Each has its own `README.md`, `PLAN.md`, `LOG.md` and a `findings/` series; each ends in a synthesis. |
+| [`../llama/`](../llama/) | Our own analysis of the **model layer** — how we call hosted models, how we run open-weight ones locally, and what the constraints are. Feeds the model-layer items in the plan. |
+| [`universal_application_platform_framework_blueprint.md`](universal_application_platform_framework_blueprint.md) | The **Universal Platform Blueprint** — an external standards document we adapt (not adopt). Its four exposed gaps are tracked in [`development/BLUEPRINT-GAP-ANALYSIS.md`](development/BLUEPRINT-GAP-ANALYSIS.md). |
+| [`canonical-architecture-v2-hybrid-ai-coolify.md`](canonical-architecture-v2-hybrid-ai-coolify.md) · [`canonical-optimized-windows10-coolify-web-ai-architecture.md`](canonical-optimized-windows10-coolify-web-ai-architecture.md) | Two **canonical architecture candidates** for the deployed shape. |
+| [`kit-docs/`](kit-docs/) ([`README.md`](kit-docs/README.md), [`cla.md`](kit-docs/cla.md), [`docs/framework/widget-injection.md`](kit-docs/docs/framework/widget-injection.md)) | The **starting-kit's own documentation** — what the base we build on offers. |
+| [`INDEX.md`](INDEX.md) · [`PROVENANCE.md`](PROVENANCE.md) | The library's own index, and where every copied shelf came from. |
+| [`development/START-PROMPT.md`](development/START-PROMPT.md) | The prompt that boots a fresh session with the right context. |
+| `01-policy-and-plan/` … `16-konsult-product-docs/` | Our product documentation shelves: the policy, the specification, the audits, the product vision. Copied, not hand-written — see [`PROVENANCE.md`](PROVENANCE.md). |
 
 ### (b) Someone else's material — consult it **only** when a specific task needs it
 
@@ -221,6 +358,9 @@ decision we inherit, and it is never "ours".
 > **Read our vision to know what to build. Open the imported material only when a specific feature
 > you are building can learn something from it — and then only for that feature, and only as
 > evidence.**
+
+Our first impressions of the direction, written before any deep analysis and marked as such:
+[`analysis/findings/first-reading-notes.md`](analysis/findings/first-reading-notes.md).
 
 Do not read the imported material "to get context". It is how the actual direction got buried
 before. The vision is nine documents; the imported pile is tens of thousands of files. **Ours first,

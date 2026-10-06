@@ -4,6 +4,27 @@
 to set; anything can be pulled forward on request. **The owner should never be the person who
 remembers a task** (COOKBOOK rule zero-three).
 
+## ★ This is source of truth #2 of two (with `BUILD-ORDER.md`)
+
+**The project has exactly two sources of truth. This file is one of them.**
+
+| # | The document | It answers |
+|---|---|---|
+| **1** | [`../WHAT-WE-ARE-BUILDING.md`](../WHAT-WE-ARE-BUILDING.md) | **What are we building, and why** (the vision and architecture) |
+| **2 — this file** | **`BACKLOG.md`** (live status) **+ [`BUILD-ORDER.md`](BUILD-ORDER.md)** (the order) | **Where are we, what is next, what is incomplete, what needs fixing** |
+
+**How this pair is split, so there is no ambiguity:** `BUILD-ORDER.md` is *the shape of the work* —
+which phase comes before which, and why (it changes rarely). **This file** is *the live state* — the
+tick-box per item, the counts, and the next thing to do (it changes every working session).
+**When the two disagree about order, `BUILD-ORDER.md` wins; when they disagree about status, this
+file wins.**
+
+**The rule the owner set (2026-10-06):** *every other document must be referenced from inside the
+section of a source of truth where it is relevant — never from a list at the top or a footer.* So
+each track and each item below names **the document that governs it**, inline, in its own line.
+**The map that proves this is complete** — every hand-written document, and the section that reaches
+it — is [`../REFERENCE-REGISTER.md`](../REFERENCE-REGISTER.md).
+
 **Why this file exists.** Before it, "what is left" was spread across `workspace/PROGRESS.md`
 (three overlapping views that disagree), `where_we_left.md` (a snapshot from 2026-08-13, which
 predates the whole analysis programme), and remarks buried in reports. **This file replaces
@@ -26,12 +47,30 @@ those as the plan.** The others are kept for their reasoning and point here.
 
 **Three tracks, one list.** `G-` and `S-` items are the **product half** — the plan in
 [`../analysis/findings/12-development-plan.md`](../analysis/findings/12-development-plan.md). `AH-`
-items are the **agent half** — how AI workers get roles, tasks, delegation, triggers and conversations.
-`ML-` items are the **model layer** — required by the owner's decision on the long-term default
-(item 13), waiting on the trigger named in the deferral table. **Neither the agent half nor the model
-layer is a phase of its own**: both are woven into the four phases at the point their dependencies
-allow. All twelve agent items, and where every one of the study's 53 lessons lands, are in
-[`AGENT-HALF.md`](AGENT-HALF.md).
+items are the **agent half** — how AI workers get roles, tasks, delegation, triggers and conversations
+(governed by [`AGENT-HALF.md`](AGENT-HALF.md)). `ML-` items are the **model layer** — required by the
+owner's decision on the long-term default (item 13), waiting on the trigger named in the deferral
+table (governed by [`ARCHITECTURE-model-server-integration.md`](ARCHITECTURE-model-server-integration.md)).
+**Neither the agent half nor the model layer is a phase of its own**: both are woven into the four
+phases at the point their dependencies allow. All twelve agent items, and where every one of the
+study's 53 lessons lands, are in [`AGENT-HALF.md`](AGENT-HALF.md).
+
+**The documents that govern groups of items here** (referenced again at each group, so you never
+have to leave the section you are in):
+
+| Group of items | Governing document |
+|---|---|
+| The plan, phases, and the analysis behind them | [`../analysis/findings/12-development-plan.md`](../analysis/findings/12-development-plan.md) |
+| The order — what comes before what, and the guard-engine gaps (D0–D3) | [`BUILD-ORDER.md`](BUILD-ORDER.md) |
+| The standard every architectural change is checked against | [`SPECIFICATIONS-DICTIONARY.md`](SPECIFICATIONS-DICTIONARY.md) |
+| What may never be customised (S9 core functions, structural grammar) | [`CORE-BOUNDARY.md`](CORE-BOUNDARY.md) |
+| The AI's structural permissions (S11/S12, SD-4/SD-5) | [`ARCHITECTURE-structure-permissions.md`](ARCHITECTURE-structure-permissions.md) |
+| The request outcomes and the Save gate (G-21, S7) | [`ARCHITECTURE-request-outcomes.md`](ARCHITECTURE-request-outcomes.md) |
+| The agent half (all `AH-` items) | [`AGENT-HALF.md`](AGENT-HALF.md) |
+| The model layer (all `ML-` items) | [`ARCHITECTURE-model-server-integration.md`](ARCHITECTURE-model-server-integration.md) |
+| What we take from / reject in Paperclip (items citing lessons) | [`../paperclip-value-study/findings/07-synthesis.md`](../paperclip-value-study/findings/07-synthesis.md) |
+| What the platform's own modules really are (M1–M5 absences) | [`CORE-MODULES-REGISTER.md`](CORE-MODULES-REGISTER.md) |
+| What the Blueprint exposed we had not planned (gaps A–D) | [`BLUEPRINT-GAP-ANALYSIS.md`](BLUEPRINT-GAP-ANALYSIS.md) |
 
 ### Now — the workbench and the gate
 

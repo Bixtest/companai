@@ -1,6 +1,27 @@
 # BUILD ORDER — what must exist before anything is stacked on it
 
 **Written:** 2026-10-06
+
+## ★ This is source of truth #2 of two (with `BACKLOG.md`)
+
+**The project has exactly two sources of truth. This file is one half of the second.**
+
+| # | The document | It answers |
+|---|---|---|
+| **1** | [`../WHAT-WE-ARE-BUILDING.md`](../WHAT-WE-ARE-BUILDING.md) | **What are we building, and why** (the vision and architecture) |
+| **2** | **this file** (the order) **+ [`BACKLOG.md`](BACKLOG.md)** (the live status) | **Where are we, what is next, what is incomplete, what needs fixing** |
+
+**This file is the *shape* of the work** — which phase must be finished before the next is stacked
+on it, and why. It changes rarely. **[`BACKLOG.md`](BACKLOG.md) is the *live state*** — the tick-box
+per item, the counts, the next thing to do. It changes every working session. **When the two disagree
+about order, this file wins; when they disagree about status, `BACKLOG.md` wins.**
+
+**The rule the owner set (2026-10-06):** *every other document must be referenced from inside the
+section of a source of truth where it is relevant — never from a list at the top or a footer.* The
+`In depth →` lines below, one per section, are therefore binding: they name the documents that
+govern the section they sit in. **If you add a document and it is not referenced from a section here
+or in the vision page, it is a loose document — and a loose document is a liability.**
+
 **Asked by:** the owner — *"shouldnt we already build that so we apply the standards as we go … I feel
 core requirements like accounts management, permissions, this, languages, etc… should be the first to
 build … fix the order perfectly right so this is not forgotten and push 'till later'."*
@@ -332,6 +353,14 @@ This is the sequence. Each phase is *unlocked* by the one above it; nothing in a
 started while a higher one is open, because it would have to be edited afterwards — the exact thing the
 owner wants to avoid.
 
+> **In depth →** every phase below is a section of this file; its detailed reasoning lives in
+> [`BLUEPRINT-GAP-ANALYSIS.md`](BLUEPRINT-GAP-ANALYSIS.md) §5 (phases −1 to 7), the owner's live status
+> is in [`BACKLOG.md`](BACKLOG.md), and the module-level view is
+> [`CORE-MODULES-REGISTER.md`](CORE-MODULES-REGISTER.md) §5 (build tiers). The per-phase plans and
+> records — the graft, strip, repair and salvage batches, the deployment and environment notes, and
+> the parked-modules list — are the set at
+> [`../../workspace/references/`](../../workspace/references/).
+
 **PHASE −1 — Architecture contracts (NEW — before all code; blueprint §121)**
 
 The blueprint's §121 puts *"define before coding heavily"* first, and it is the direct antidote to this
@@ -346,6 +375,10 @@ one page, each with a named home. Details: [`BLUEPRINT-GAP-ANALYSIS.md`](BLUEPRI
 - **API conventions** · **tenant model** · **IDs / naming**.
 
 **PHASE 0 — Foundation completion (do first, small, unblocks everything)**
+
+> **In depth →** the guard engine and its four gaps: this file §2/§2b/§2c/§2d/§2e. The owning
+> specification: [`SPECIFICATIONS-DICTIONARY.md`](SPECIFICATIONS-DICTIONARY.md) §C.2b (tiers as a
+> setting) and S2/S4. The live counts: [`BACKLOG.md`](BACKLOG.md) Phase 2 banner + the `D2-wide` item.
 0. ~~**D0** — make the generated guard registry real.~~ ✅ **FIXED 2026-10-06, proven (§2c).** The
    registry now delivers guards from an enabled module, and the delivery chain is mutation-proven.
    **D2-wide (the 199 deprecated call sites in 78 files) is the remaining delivery work — see §2e.**
@@ -371,6 +404,13 @@ one page, each with a named home. Details: [`BLUEPRINT-GAP-ANALYSIS.md`](BLUEPRI
    task appears, and nothing was silently allowed.*
 
 **PHASE 1 — The standards become enforcement, not text**
+
+> **In depth →** the standard being enforced: [`SPECIFICATIONS-DICTIONARY.md`](SPECIFICATIONS-DICTIONARY.md)
+> (S2, S4, §C.1, §C.3, §C.2b). The structural grammar design:
+> [`ARCHITECTURE-structure-permissions.md`](ARCHITECTURE-structure-permissions.md). What "core functions
+> cannot be deleted" protects: [`CORE-BOUNDARY.md`](CORE-BOUNDARY.md) §2, §5. The owner's request-outcome
+> pack: [`ARCHITECTURE-request-outcomes.md`](ARCHITECTURE-request-outcomes.md).
+
 5. **SD-1 / S2** — the permissions gate on new data structures: when a table/column/field-type change
    lands, force the permissions question; default = full grant to superadmin + create the records.
 6. **SD-3** — make the tier mapping/defaults/fallbacks a **superadmin setting** (`module_configs`, module
@@ -382,6 +422,13 @@ one page, each with a named home. Details: [`BLUEPRINT-GAP-ANALYSIS.md`](BLUEPRI
    `customers`; the blueprint makes lifecycle generic.
 
 **PHASE 2 — Experience contracts completed + standing rebuilds**
+
+> **In depth →** the localization/RTL/a11y contract: [`BLUEPRINT-GAP-ANALYSIS.md`](BLUEPRINT-GAP-ANALYSIS.md)
+> GAP C. What the module audit says about the missing dashboard screens and the thin i18n surface:
+> [`CORE-MODULES-REGISTER.md`](CORE-MODULES-REGISTER.md) §2 (P13, P15). How the AI behaves on being
+> blocked / noticing / model routing: [`AGENT-HALF.md`](AGENT-HALF.md) and
+> [`ARCHITECTURE-model-server-integration.md`](ARCHITECTURE-model-server-integration.md).
+
 10. **GAP C — localization / RTL / accessibility hardened to contract**: logical CSS properties, root
     direction, WCAG 2.2 AA baseline, the 11-dimension component matrix (§88), IANA-tz scheduling rule.
 11. **Dashboard / perspective screens** (register: tables+APIs exist, **zero UI pages**).
@@ -392,6 +439,12 @@ one page, each with a named home. Details: [`BLUEPRINT-GAP-ANALYSIS.md`](BLUEPRI
 16. **S6** — declared model routing (one picture; every job declares a model).
 
 **PHASE 3 — Data-access depth (the owner's Message A idea, on the built engine)**
+
+> **In depth →** the data-axis authorization design and the coverage gap (6 of 67 tables):
+> [`CORE-MODULES-REGISTER.md`](CORE-MODULES-REGISTER.md) §2 (P10) and
+> [`SPECIFICATIONS-DICTIONARY.md`](SPECIFICATIONS-DICTIONARY.md) (S4). The IR the AI path is wired
+> through: [`ARCHITECTURE-request-outcomes.md`](ARCHITECTURE-request-outcomes.md).
+
 17. Coverage: extend `aclFeatures` from 6 of 67 tables to all tables, with an aggregate rule so a new
     table cannot be added un-gated. *(Enforced by SD-1, which is why SD-1 is Phase 1.)*
 18. Per-user / own / team row scope (today scope is tenant + organization only).
