@@ -258,7 +258,7 @@ between (A) and (B) is made against a stated need rather than against "the file 
 the entities fix was proven (§2c). Then the parked set is recorded — **not migrated** — as graft-phase work
 in [`CORE-MODULES-REGISTER.md`](CORE-MODULES-REGISTER.md) and the backlog.
 
-## 2f. `D2-gap` — the write routes that call NO guard (measured 2026-10-06; two modules fixed)
+## 2f. `D2-gap` — the write routes that call NO guard (measured 2026-10-06; THREE fixes: two D2-gap modules + one registry-bypass class)
 
 **Why it exists.** `D2-wide` (above) retires the **deprecated** resolver at call sites that still *call*
 a guard. `D2-gap` is the **other half**: write routes that call **no guard of any kind** — not the module
@@ -278,18 +278,18 @@ comparable with the backlog record.
 |---|---|
 | enabled modules with a source tree | **35** |
 | write verbs across those modules | **256** |
-| **unguarded write verbs (the `D2-gap`)** | **143 now** — **158 before the `ai_assistant` fix** (HEAD `4ef5812`), **160 before the `audit_logs` fix** |
+| **unguarded write verbs (the `D2-gap`)** | **122 now** — **143 before the `messages` registry-bypass fix** (HEAD `1f1b60e`), **158 before the `ai_assistant` fix**, **160 before the `audit_logs` fix** |
 | auth-flow verbs set aside by design | 8 |
-| guarded verbs | 113 (65 wrapper · 35 `makeCrudRoute`/`crud.` · 5 re-exported guarded factory · 0 deprecated) |
+| guarded verbs | 134 (65 wrapper · 35 `makeCrudRoute`/`crud.` · 21 module-local helper · 5 re-exported guarded factory · 0 deprecated) |
 
-**The split is computed by the tool, not assumed, and every verb is accounted for:** 65 + 35 + 5 + 0 +
-8 (auth-flow) + 143 (unguarded) = **256**. *(A first draft carried 33/26/29 forward from memory; the tool
+**The split is computed by the tool, not assumed, and every verb is accounted for:** 65 + 0 (registry) + 35 + 21 (local helper) + 5 + 0 +
+8 (auth-flow) + 122 (unguarded) = **256**. *(A first draft carried 33/26/29 forward from memory; the tool
 reads 50/35/5, and the closure check is what caught it.)*
 
 **Both figures are recorded because the number must name the HEAD it was measured at** — the rule that
 would have prevented the `auth`-onward file-count slip. `audit_logs` (§ below) accounts for the −2.
 
-**Per module (unguarded verbs):** `ai_assistant` **9 (FIXED, below)** · `messages` 17 · `communication_channels` 15 ·
+**Per module (unguarded verbs):** `ai_assistant` **9 (FIXED, below)** · `messages` **0 (FIXED — registry-bypass, below)** · `communication_channels` 15 ·
 `auth` **12** · `business_rules` 11 · `inbox_ops` 10 · `workflows` **10** · `notifications` 10 ·
 `attachments` 8 · `search` 7 · `webhooks` 7 · `configs` 4 · `currencies` 4 · `entities` 4 ·
 `integrations` 4 · `progress` 3 · `directory` 3 · `dashboards` 2 · `audit_logs` **0 (FIXED, below)** ·
@@ -340,7 +340,25 @@ calling it would read as guarded (not observed).
 | **What is NOT replaced** | `metadata.requireFeatures`, the inline `rbacService.loadAcl()` check, Zod validation, tenant scoping and ownership rules all stay exactly as they are. The wrapper is **additional** policy. |
 | **Tests** | New suite `api/__tests__/d2-gap-guard.test.ts`, **30 tests**, each asserting the guard is really wired in (registry called once per route with the right `resourceKind`/`resourceId`/`operation`; guard before the write; a blocking guard stops the write; `afterSuccess` after commit; the class-(b)/(c) set-aside routes never reach the guard). |
 | **Proof** | **Three disjoint mutations, restored byte-identical after each** (wrapper md5 `8f65c25513d5fc8aa8f1d04d6767711b`, conversation-item route md5 `55b1cc1f2aad9e89128a793ba56d8c85`): (1) sever the wrapper's **`afterSuccess`** joint → exactly the **4 `afterSuccess`** tests RED; (2) neuter the wrapper's **block** path → exactly the **9 block** tests RED, nothing else; (3) remove the guard call from **one route file** (`conversations/[conversationId]` PATCH) → exactly that route's **2 PATCH** tests RED, the DELETE test on the same file staying green. `ai_assistant` **99 suites / 1306 tests green** (2 suites fail only on a pre-existing `isolated-vm` native-binding absence on this Windows box — `codemode-tools.test.ts` and its sibling — unrelated to this change); app-level `typecheck` **exit 0**. |
-| **Next module** | **`messages` (17 unguarded verbs).** |
+| **Next module** | **`communication_channels` (15 unguarded verbs).** |
+
+
+**Progress — `messages` — a REGISTRY-BYPASS, not a D2-gap (2026-10-06, code commit `1f1b60e`).**
+
+| What | Detail |
+|---|---|
+| **What the label said** | `messages` was measured as **17 unguarded verbs / 11 files** — the largest D2-gap module left. The literal fix (the one `audit_logs` and `ai_assistant` took) would wrap all 11 files in a second guard layer. |
+| **What the premise actually was** | **False.** Every one of the 17 verbs **already calls a guard** — `runMessageMutationGuards()` — so the D2-gap definition (*"call no guard whatsoever … checked by nothing"*) did not describe them. The tool read them as GAP only because the file references **none of the four symbols** it scans for. **Measured before fixing, so 11 files were not spent on a fix for a defect that was not there.** |
+| **The real defect** | `messages/api/guards.ts` built `runMutationGuards([legacyGuard], …)` — a **one-element array** — so `getAllMutationGuardInstances()` (the global store) was **never consulted**. **Same one-way failure as the deprecated `validateCrudMutationGuard()` pair** (D2-wide), reached through a module-local helper. |
+| **The same defect in six more places** | Found by grepping **every `bridgeLegacyGuard` call site**, not the four symbols: `integrations` · `payment_gateways` (parked) · `staff` · `sales/quotes/convert` (inline) · `sales/quotes/send` (inline) · `configs/api/cache` (inline). The `*.mutation-guard.ts` wrappers were **never affected** — they call `runRouteMutationGuards`, which includes the registry. |
+| **The fix** | All seven now build the array the way `collectAndRunGuards()` in `crud/factory.ts` does: registry instances first, then the bridged legacy service. |
+| **Latent, not live** | Only `customer_accounts`, `customers`, `entities` ship a `data/guards.ts`, and none registers a guard for these modules' resource kinds — so **no write was reachable by a guard a bypass could skip**. Closed before one exists, not after. |
+| **Test evidence** | `modules/__tests__/local-guard-helpers-registry.test.ts` — cross-module; drives all four helpers through the **real** store with a **real** guard, asserts it is **called** and can **block**; the container has **no legacy service**, so the registry is the only guard that can run. **16 tests.** |
+| **Mutation proof** | Mutating **one** helper (`staff`) back to legacy-only → **exactly that helper's 2 registry-path tests RED, the other 12 green** — localises **per-helper**. Restored byte-identical (md5 `88a91c25b1c3f8c6cd9042ef457764fa`). |
+| **Tool corrected** | New fifth class **`GUARDED_LOCAL`** (listed by name), so the figure stops over-claiming. **Its header records the limit:** it proves a guard **call**, not a *registry* guard — a helper that regresses to legacy-only is invisible to it and must be re-read by hand. |
+| **Result** | `messages` **17 → 0**, `integrations` **4 → 0**; total **143 → 122**; guarded **113 → 134**. |
+| **Green** | core **605 suites / 5159 tests**, core `tsc --noEmit` **exit 0**. |
+| **Next module** | **`communication_channels` (15 unguarded verbs).** |
 
 
 **Progress — `data_sync` DONE and PROVEN (2026-10-06, code commit `c6c3151`).**

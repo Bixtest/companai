@@ -13,8 +13,28 @@
  *   GUARDED_WRAPPER   references begin<Module>MutationGuard -> this module's wrapper
  *   GUARDED_REGISTRY  references runRouteMutationGuards directly
  *   GUARDED_CRUD      built by makeCrudRoute (runs collectAndRunGuards itself)
+ *   GUARDED_LOCAL     calls a module-local guard helper (see LOCAL_GUARD_HELPERS)
  *   GUARDED_DEPRECATED references only the @deprecated pair -> D2-wide territory
  *   UNGUARDED         exports a write verb and references no guard at all -> D2-gap
+ *
+ * GUARDED_LOCAL exists because "references none of the four shared symbols" is
+ * NOT the same claim as "checked by nothing". `messages` proved it: every one
+ * of its 17 write verbs calls `runMessageMutationGuards()`, a module-local
+ * helper — so the D2-gap definition ("no guard whatsoever … checked by
+ * nothing") was measurably FALSE for them, yet a four-symbol scan reads them as
+ * GAP. A tool that cannot tell those apart over-claims, so the class is named
+ * in LOCAL_GUARD_HELPERS rather than left in the GAP column.
+ *
+ * ⚠ THE LIMIT OF THIS BUCKET — it proves a guard CALL, not a REGISTRY guard.
+ * Four helpers (`messages`, `integrations`, `payment_gateways`, `staff`) were
+ * first written to run the legacy bridge ALONE — `runMutationGuards([legacyGuard])`
+ * — which silently skips `getAllMutationGuardInstances()`. That is the SAME
+ * one-way failure as the deprecated pair (D2-wide), just reached locally. All
+ * four (plus two inline copies in `sales/api/quotes/{convert,send}` and one in
+ * `configs/api/cache`) have been re-pointed at the registry. The tool cannot
+ * detect a helper that regresses to legacy-only — that is a call-graph fact, not
+ * a string — so `pending` here means "a helper exists AND was last read by hand".
+ * Re-read the LOCAL_GUARD_HELPERS bodies when this number matters.
  *
  * Usage: node measure.js [--json]
  */
@@ -69,6 +89,24 @@ const RE_REGISTRY = /runRouteMutationGuards\s*\(/;
 // `crud.POST` / `makeCrudRoute(...)` / `createCrudRoute` — the factory runs the guard set itself.
 const RE_CRUD = /makeCrudRoute\b|createCrudRoute\b|\bcrud\.(?:POST|PUT|PATCH|DELETE)\b/;
 const RE_DEPRECATED = /validateCrudMutationGuard\s*\(|runCrudMutationGuardAfterSuccess\s*\(/;
+
+/**
+ * Module-local guard helpers — write routes that call one of these reach a
+ * guard through a module-owned wrapper rather than through the four shared
+ * symbols. Each entry is `moduleId` -> the helper call name(s) to look for.
+ *
+ * A helper belongs here ONLY if it actually runs guards. `messages`' helper was
+ * first written to run the legacy bridge only (which silently skipped the
+ * registry) — it has since been re-pointed at the registry, and this entry
+ * records that the routes reach the guard set. Re-check this list whenever a
+ * listed module's helper changes.
+ */
+const LOCAL_GUARD_HELPERS = {
+  messages: /\brunMessageMutationGuards\s*\(/,
+  integrations: /\brunIntegrationMutationGuards\s*\(/,
+  payment_gateways: /\brunPaymentGatewayMutationGuards\s*\(/,
+  staff: /\brunStaffMutationGuards\s*\(/,
+};
 
 function walk(dir, out = []) {
   for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -141,6 +179,7 @@ function classify(file, moduleId) {
     wrapper: RE_WRAPPER.test(code),
     registry: RE_REGISTRY.test(code),
     crud: RE_CRUD.test(code),
+    local: Object.values(LOCAL_GUARD_HELPERS).some((re) => re.test(code)),
     deprecated: RE_DEPRECATED.test(code),
     reexport: RE_REEXPORT.test(code),
   };
@@ -149,6 +188,7 @@ function classify(file, moduleId) {
   if (g.wrapper) cls = 'GUARDED_WRAPPER';
   else if (g.registry) cls = 'GUARDED_REGISTRY';
   else if (g.crud) cls = 'GUARDED_CRUD';
+  else if (g.local) cls = 'GUARDED_LOCAL';
   else if (g.reexport) cls = 'GUARDED_REEXPORT';
   else if (g.deprecated) cls = 'GUARDED_DEPRECATED';
   else cls = 'UNGUARDED';
@@ -194,6 +234,7 @@ for (const id of enabled) {
     wrapperVerbs: sum((r) => r.cls === 'GUARDED_WRAPPER'),
     registryVerbs: sum((r) => r.cls === 'GUARDED_REGISTRY'),
     crudVerbs: sum((r) => r.cls === 'GUARDED_CRUD'),
+    localVerbs: sum((r) => r.cls === 'GUARDED_LOCAL'),
     reexportVerbs: sum((r) => r.cls === 'GUARDED_REEXPORT'),
     deprecatedVerbs: sum((r) => r.cls === 'GUARDED_DEPRECATED'),
     authFlowVerbs: sum((r) => r.cls === 'AUTH_FLOW_SET_ASIDE'),
@@ -201,6 +242,7 @@ for (const id of enabled) {
       wrapper: sum((r) => r.cls === 'GUARDED_WRAPPER'),
       registry: sum((r) => r.cls === 'GUARDED_REGISTRY'),
       crud: sum((r) => r.cls === 'GUARDED_CRUD'),
+      local: sum((r) => r.cls === 'GUARDED_LOCAL'),
       reexport: sum((r) => r.cls === 'GUARDED_REEXPORT'),
       deprecated: sum((r) => r.cls === 'GUARDED_DEPRECATED'),
       unguarded: sum((r) => r.cls === 'UNGUARDED'),
@@ -217,10 +259,10 @@ if (process.argv.includes('--json')) {
 console.log(`ENABLED MODULES: ${enabled.length}`);
 if (missing.length) console.log(`  (no source dir found: ${missing.join(', ')})`);
 console.log('');
-console.log('Counted in VERBS (the unit the backlog records). W=wrapper R=registry C=crud D=deprecated.');
+console.log('Counted in VERBS (the unit the backlog records). W=wrapper R=registry C=crud L=local D=deprecated.');
 console.log('');
-console.log('module'.padEnd(24), 'wr'.padStart(3), 'verb'.padStart(4), 'W'.padStart(3), 'R'.padStart(3), 'C'.padStart(3), 'D'.padStart(3), 'GAP'.padStart(4));
-console.log('-'.repeat(52));
+console.log('module'.padEnd(24), 'wr'.padStart(3), 'verb'.padStart(4), 'W'.padStart(3), 'R'.padStart(3), 'C'.padStart(3), 'L'.padStart(3), 'D'.padStart(3), 'GAP'.padStart(4));
+console.log('-'.repeat(56));
 let totalGap = 0, totalWrite = 0;
 for (const id of enabled) {
   const s = perModule[id];
@@ -233,11 +275,12 @@ for (const id of enabled) {
     String(s.wrapperVerbs).padStart(3),
     String(s.registryVerbs).padStart(3),
     String(s.crudVerbs).padStart(3),
+    String(s.localVerbs).padStart(3),
     String(s.deprecatedVerbs).padStart(3),
     String(s.unguardedVerbs).padStart(4),
   );
 }
-console.log('-'.repeat(52));
+console.log('-'.repeat(56));
 console.log(`write verbs: ${totalWrite}, unguarded verbs (D2-gap): ${totalGap}`);
 const totalSetAside = enabled.reduce((a, id) => a + (perModule[id]?.authFlowVerbs || 0), 0);
 console.log(`(plus ${totalSetAside} auth-flow verbs set aside by design — login/logout/reset/session/profile/locale/feature-check)`);
