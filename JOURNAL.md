@@ -7,7 +7,41 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
-## 2026-10-06 (latest) — the second Paperclip pass, and a file the extractor had lost
+## 2026-10-06 (latest) — Sprint 0 re-run: the stack comes up whole, and why it did not
+
+**The owner's answer unblocked `S0`, so the re-run happened — and it immediately found a real defect.**
+The owner had reported the stack "up" and Docker Desktop auto-start "fixed". Measured independently:
+Docker server **29.8.1** running, but **`mercato-redis-local` had exited (255)** and, behind it,
+**`mercato-mcp-local` was `unhealthy`** with a healthcheck `FailingStreak` of **1446** and a log reading
+`getaddrinfo ENOTFOUND mercato-redis-local`. So the count read "seven up" — and eight *rows* existed all
+along. **A row count is not health.**
+
+**Root cause, measured three ways.** `redis` was the **only** service in
+`docker-compose.fullapp.yml` with **no `restart:` policy** — every other service carries
+`restart: unless-stopped` (verified directly from `docker inspect .HostConfig.RestartPolicy`, not from the
+file's prose). `mcp`, `app` and `opencode` all declare `depends_on: redis: condition: service_healthy`, so
+with redis down the MCP could never finish starting.
+
+**The fix and the proof.** Added `restart: unless-stopped` to the `redis` service (with the reasoning in a
+comment), ran `docker compose up -d redis`, then `docker restart mercato-mcp-local`. Verified by two
+independent routes: **(1)** all **8 containers healthy** — MCP `FailingStreak 0`, log
+`Tools registered toolCount=21`, `Server listening port=3001`; **(2)** the app's `/login` returns **200**
+and the model's `/v1/models` returns **200**, with **no redis errors** in the app log.
+
+**What the defect taught.** The documentation had carried "8 containers up" for two days as an
+*observation*. It was a **measurement of the wrong thing** — a count, when the claim should have been
+about health. The claim was corrected everywhere it lived: `HANDOVER.md` (§0 check now demands the
+**Status** column, not a count; §7 Group A; §7 "proven"), `RUNBOOK-sprint0.md`, `NEEDS-YOU.md`,
+`BACKLOG.md`, `BLOCKERS.md` (resolved table), `INDEX.md`, and a new `workspace/COOKBOOK.md` section.
+The fix itself is one line in the code repo.
+
+**What the re-run did *not* do.** It did not touch **B-16** (no embeddings endpoint — still open, still
+root-caused as two defects), and it did not exercise a **real host reboot**; the restart policy is the
+mechanism that makes a reboot safe, and it is now correct in the file, but the reboot itself is not proven.
+
+---
+
+## 2026-10-06 — the second Paperclip pass, and a file the extractor had lost
 
 **The owner asked for a second, wider study of Paperclip: extract the archive, read it again — every
 functionality, code, idea, flow and concept — and find anything that adds value or inspires an idea,

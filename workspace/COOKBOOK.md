@@ -1210,6 +1210,70 @@ environment** and a runbook.
 
 ---
 
+## Sprint 0 — the re-run (2026-10-06): the stack comes up whole, and why it did not
+
+**Why the re-run.** `S0` in [`../library/development/BACKLOG.md`](../library/development/BACKLOG.md)
+is "**a re-run to confirm it still comes up**" — the workbench was built and proven on 2026-10-04, and
+a workbench nobody re-checks is a claim, not a fact. It was blocked only because Docker Desktop had to
+be started by hand; the owner turned auto-start on (2026-10-06), so it became runnable.
+
+**What the re-run found — a real defect in the running stack, and it was already live.**
+
+When the re-run started, the stack was **not** whole. `docker ps -a` showed **eight** defined
+containers but only **seven** running, and `mercato-mcp-local` reported **`unhealthy`**:
+
+```
+mercato-redis-local      Exited (255) 12 hours ago
+mercato-mcp-local        Up 12 hours (unhealthy)     ← FailingStreak 1446
+```
+
+**The cause, measured three ways.** `mercato-redis-local` is the **only** service in
+`docker-compose.fullapp.yml` with **no `restart:` policy** — every other service carries
+`restart: unless-stopped` (`docker inspect .HostConfig.RestartPolicy` → redis `no`, all others
+`unless-stopped`). Its log shows a plain `SIGTERM` shutdown, no crash — consistent with a host/Docker
+restart while redis had nothing telling it to come back. The `mcp` service declares
+`depends_on: redis: condition: service_healthy`, so its server never finishes starting: its log shows
+`getaddrinfo ENOTFOUND mercato-redis-local` then `API key provisioning FAILED … Retrying in 300s`,
+and its healthcheck (`wget http://127.0.0.1:3001/health`) fails with `connection refused`.
+
+**So `mercato-mcp-local` unhealthy was a symptom of the dead redis, not a fault in the MCP.** That is
+what `S0`'s re-run existed to explain, and it is now answered.
+
+**The fix (mine, small, reversible).** Add the missing restart policy to the redis service in
+`docker-compose.fullapp.yml`:
+
+```yaml
+  redis:
+    image: redis:7-alpine
+    container_name: mercato-redis-${DEPLOY_ENV:-local}
+    restart: unless-stopped      # ← added; every other service already had it
+```
+
+Then `docker compose -f docker-compose.fullapp.yml up -d redis` (recreates redis) and
+`docker restart mercato-mcp-local` (so it stops retrying the dead redis and re-provisions its key).
+**To undo:** delete the one `restart:` line and `docker restart` the two services.
+
+**Done when — measured 2026-10-06, two independent routes:**
+
+| Route | Observation |
+|---|---|
+| **Container states** | All **eight** services **healthy**: `mercato-redis-local` (healthy), `mercato-mcp-local` (**healthy**, `failing=0`, was 1446), app/meilisearch/model/opencode/postgres all healthy, hermes up. |
+| **The MCP's own log** | `[ai_assistant:mcp-http] Tools registered toolCount=21`, `Endpoint ready …http://localhost:3001/mcp`, `Health endpoint ready …/health`, `Server listening port=3001`. |
+| **The app itself** | `http://localhost:3000/login` → **200**; no `redis` / `ECONNREFUSED` lines in the app log since the restart. |
+| **The model server** | `http://localhost:8080/v1/models` → **200**. |
+
+**One caveat, stated plainly.** The MCP log still carries
+`Failed to index 21 tools: … vector ([vector.embedding] Invalid OpenAI API key)` — that is
+**B-16** (the embeddings lane), a **pre-existing known blocker**, not a regression: the vector
+strategy is degraded while the fulltext strategy indexes, and all 21 tools register and are callable.
+
+**What the re-run did *not* do.** It did not re-prove arrow (1)'s *live tool call* from a Hermes
+agent, which remains where 2026-10-04 left it (the wire is sound; the CPU-only 7B's tool choice is
+the open question). Re-proving that needs an agent turn at ~40 minutes of ingest, and it is not what
+`S0`'s re-run asked for.
+
+---
+
 # Sprint P0-spec — draft 2 of the Business Model Kernel specification
 
 **Written 2026-10-05. This is the vision's own implementation gate (RQ-140): no product code may be

@@ -434,6 +434,7 @@ ones) somewhere queryable. A product decision first — tracked as a backlog ite
 
 | # | Was | Cleared by |
 |---|---|---|
+| 🟢 | **`mercato-redis-local` had no `restart:` policy, so it stayed dead after a host restart, taking the MCP down with it** — found and fixed during the `S0` re-run, 2026-10-06 | **Fixed.** It was the **only** service in `docker-compose.fullapp.yml` without `restart: unless-stopped`, so a SIGTERM (host/Docker restart) left it down while every other container came back. `mercato-mcp-local` then reported `unhealthy` — a *symptom*, not a fault of its own: it declares `depends_on: redis: service_healthy` and its log showed `getaddrinfo ENOTFOUND mercato-redis-local`. One line added; both services restarted; **all eight containers healthy**, MCP `failing=0`. Record: `workspace/COOKBOOK.md`, *Sprint 0 — the re-run* |
 | 🟢 | **The object list was unknown** (30 / 33 / 34) — it blocked the Business Model Kernel specification | Decided 2026-10-04: start from the **union of 37**, prune in the spec *(the union was mis-stated as 36 until 2026-10-04 — corrected)* |
 | 🟢 | **Two agent runtimes** (opencode + Hermes) — a "second copy" | Decided 2026-10-04: **Hermes takes the agent slot.** OpenCode is **not yet removed** — that is blocked on rewiring the platform chat (**B-05**, **N-8**) |
 | 🟢 | **B-01** — Hermes used `network_mode: host` | Cleared 2026-10-04: Hermes's official Docker guide uses **bridge networking + a published port**; the `hermes` service is written that way |

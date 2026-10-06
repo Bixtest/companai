@@ -12,17 +12,17 @@ running trio". This page is the short one.
 
 ## Is the infrastructure ready? — checked 2026-10-05
 
-**Short answer: built, proven, and running right now.** Eight containers are up, the app answers on
-`http://localhost:3000`, and the database initialised cleanly.
+**Short answer: built, proven, and running right now.** Eight containers are up and all healthy
+(re-verified 2026-10-06), the app answers on `http://localhost:3000`, and the database initialised cleanly.
 
 | Piece | State |
 |---|---|
-| The compose stack (`docker-compose.fullapp.yml`) | **Running** — **8 containers up** (`app`, `mcp`, `hermes`, `model`, `opencode`, `postgres`, `redis`, `meilisearch`), measured 2026-10-05. It was proven working 2026-10-04: 8 services healthy, and Hermes discovered all **21** platform tools |
+| The compose stack (`docker-compose.fullapp.yml`) | **Running — 8 containers up and all healthy**, measured 2026-10-06 after the redis restart-policy fix (app, mcp, hermes, model, opencode, postgres, redis, meilisearch). Proven working 2026-10-04: 8 services healthy, and Hermes discovered all **21** platform tools. **Caution:** on 2026-10-05/06 eight *rows* were present while `redis` had exited and `mcp` was unhealthy — `docker ps` counts rows, not health; read the **Status** column |
 | The local model file | **Present** — `models/Qwen2.5-7B-Instruct-Q4_K_M.gguf`, 4.68 GB |
 | `workspace/starting-kit/.env` | **Present** |
 | Node 24 | **Inside the container only.** Measured 2026-10-04: this host has **Node 22.22.2** and **no yarn**, while the kit requires Node **24.x**. Nothing to install *for the stack* — the container carries both — but the host **cannot** run the codebase natively. See **N-11** in [`BACKLOG.md`](BACKLOG.md) |
 | The database | **Provided by the stack, and clean** — 3 users, 1 tenant, 1 organisation, 5 feature toggles, 5 `action_logs` rows. Rebuilt from scratch on the fixed image 2026-10-05; the init ran every step green |
-| Docker Desktop | **Running** — engine `29.8.1`, seven containers up (measured 2026-10-06). ✅ **Auto-start is ON** — the owner turned it on 2026-10-06, so a restart no longer leaves the stack down. **One container reports `unhealthy`:** `mercato-mcp-local`. That is the first thing `S0`'s re-run must explain |
+| Docker Desktop | **Running** — engine `29.8.1`. ✅ **Auto-start is ON** — the owner turned it on 2026-10-06, so a restart no longer leaves the stack down. ✅ **The one `unhealthy` container is explained and fixed (2026-10-06):** `mercato-mcp-local` was unhealthy because `mercato-redis-local` had exited (255) and the MCP's `depends_on: redis: service_healthy` never cleared — `redis` was the only service in the compose file without a `restart:` policy. Fixed with `restart: unless-stopped`; all 8 containers now healthy. Detail: [`../../workspace/COOKBOOK.md`](../../workspace/COOKBOOK.md) §"Sprint 0 — the re-run" |
 | The Coolify server | A **separate** Hyper-V VM, not this stack — see [`RUNBOOK-platform-server.md`](RUNBOOK-platform-server.md) |
 
 **✅ RESOLVED 2026-10-06 — the owner turned Docker Desktop auto-start on, so this is no longer a

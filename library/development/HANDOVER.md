@@ -115,9 +115,12 @@ cd /c/Users/Ramzi/Downloads/companai/workspace/starting-kit && git status --shor
 the app on `http://localhost:3000`, loopback only:
 
 ```bash
-docker ps                     # expect 8 containers
+docker ps --format '{{.Names}}\t{{.Status}}'   # expect 8 containers, every one "(healthy)" — a COUNT is not enough
 curl -s --noproxy '*' -o /dev/null -w '%{http_code}\n' http://localhost:3000/login   # expect 200
 ```
+
+**Do not trust the count.** On 2026-10-06 eight rows were present while `redis` had exited and
+`mcp` was unhealthy — `docker ps` counted rows, not health. Read the **Status** column.
 
 If nothing is running, **Docker Desktop must be started first, and only the owner can start it**
 (see §5). Then bring the stack up per [`ARCHITECTURE.md`](ARCHITECTURE.md) §5.
@@ -543,7 +546,7 @@ and was *not* re-measured — treat it as a starting point, not a fact.**
 | **The specification** | **Draft 2** — of its 40 rows, **36 SETTLED · 1 DERIVED · 3 DEFERRED-with-trigger · 0 OPEN — owner**. The gate is passed; only ratification remains |
 | **The runtime boundary (B-05)** | **DECIDED 2026-10-05 by the owner.** One product, one repository, one deployment, one interface (ours), with Hermes as a **supervised private runtime process behind the internal port**; Hermes is **headless**. Reasoning in [`ARCHITECTURE-hermes-integration.md`](ARCHITECTURE-hermes-integration.md) §11. The Hermes **profile** topology is deferred with the trigger **the agent gateway** |
 | **The model default (item 13)** | **DECIDED 2026-10-05 by the owner: per-tenant policy is the destination, cloud-first is the interim.** It turns three pieces of work from *nice* to *required* — the model registry, the Hermes **agent / persona / profile** mapping, and platform-managed local models. Reasoning in [`ARCHITECTURE-model-server-integration.md`](ARCHITECTURE-model-server-integration.md) §9 |
-| **The running stack** | **8 containers up** (app, mcp, hermes, model, opencode, postgres, redis, meilisearch); `/login` answers **200** |
+| **The running stack** | **8 containers up, all healthy** (app, mcp, hermes, model, opencode, postgres, redis, meilisearch); `/login` answers **200**. **Re-measured 2026-10-06** — the earlier "8 containers up" was a **count that hid a dead container**: `redis` had exited (255) and `mcp` was unhealthy behind it, yet `docker ps` still showed eight rows. Fixed and proven 2026-10-06 (see [`../../workspace/COOKBOOK.md`](../../workspace/COOKBOOK.md) §"Sprint 0 — the re-run") |
 | **The local database** | **Clean and complete** — 3 users, 1 tenant, 1 organisation, 5 feature toggles, 5 `action_logs` rows. Rebuilt from scratch on the fixed image 2026-10-05, init ran green |
 | **Open blockers** | **3** — B-05 (OpenCode is load-bearing), B-16 (no embeddings endpoint), B-17 (no audit trail of agent tool calls). **None stops the build** (see [`BLOCKERS.md`](BLOCKERS.md)). **B-05's design face is now closed** (the boundary is decided); what stays open is *when* OpenCode goes, tracked as **N-8**. **B-16 was root-caused 2026-10-05** — it is two defects, the first being a missing `OPENAI_BASE_URL` on the `mcp` service |
 | **Waiting on the owner** | **3** — Coolify password (item 5), Docker Desktop auto-start (item 6), the ISO (item 7, optional). **Item 13, the model layer's long-term default, was decided by the owner on 2026-10-05** (per-tenant policy as the destination, cloud-first as the interim), so it is no longer waiting |
@@ -564,8 +567,9 @@ and was *not* re-measured — treat it as a starting point, not a fact.**
   (Settings → Authority → Approvals).
 - Hermes connects to the platform's MCP and discovers all 21 tools; the local model answers with
   a 65,536-token context.
-- The local stack runs: 8 containers, the app serving on `http://localhost:3000`, loopback only,
-  on a database that initialised cleanly.
+- The local stack runs: **8 containers, all healthy** (re-verified 2026-10-06 after the redis
+  restart-policy fix), the app serving on `http://localhost:3000`, loopback only, on a database
+  that initialised cleanly.
 - Directory-based hosting on the VM: each hostname serves its own directory; a file in one
   returns **404** on the other; a host-side edit appears live with no rebuild; the whole chain
   fetched from the laptop over public HTTPS (`200`, certificate valid).
@@ -696,6 +700,8 @@ live), and the `START-PROMPT.md` pointer. §7 re-measured: both repos clean at `
 a cleanly-initialised database, and **the open-items list re-measured rather than repeated — four
 rows that read as open were already done** (the database reset, `apps/docs`, the CI wiring, and
 the init proof), which is why `NEEDS-YOU.md` now shows three owner items, not seven.*
+*(Correction, 2026-10-06: "8 containers" was a row count, not health — `redis` had in fact exited.
+See §7 Group A, "The running stack", and COOKBOOK §"Sprint 0 — the re-run".)*
 
 *Earlier, 2026-10-05, revision 1 — first version. Recorded the two-repository layout, the
 two-products trap, the gitignored `vms/` and its fix, the host VM, the standing rules, and the
