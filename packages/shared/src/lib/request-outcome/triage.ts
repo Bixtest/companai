@@ -39,44 +39,34 @@ import type {
   RequestOutcomeProposal,
   StructureChange,
 } from './types'
-import { UNRECOGNISED_CHANGE_TIER } from './types'
 import type { TierSettings } from './tier-source'
 import { DEFAULT_TIER_SETTINGS, resolveTier } from './tier-source'
 
-/**
- * The tiers a named change kind is known to sit in.
- *
- * **This was an empty frozen object until D1 (2026-10-06).** It is now a *seed*,
- * not the mechanism: the live mapping is a **setting** a superadmin can change
- * (`tier-source.ts`, dictionary §C.2b), and {@link tierForChange} reads that when a
- * {@link TierSettings} is supplied. The constant is kept, and kept **empty on
- * purpose**, because it documents the honest state — the mapping from a *change
- * kind* to a tier is not decided anywhere yet, so **every** structure change lands
- * in {@link UNRECOGNISED_CHANGE_TIER} unless a setting says otherwise.
- *
- * That is a safe default, not a missing feature: an unrecognised change sounding an
- * alarm a person must answer is the behaviour we want until the mapping is decided.
- * The setting is where it goes now; this constant is only the seed it is built from.
- *
- * @deprecated since D1 — read the setting through `tier-source.ts` instead. Kept so
- * the pure default is still nameable and one place, not scattered.
- */
-const CHANGE_KIND_TIER: Readonly<Record<string, ChangeRiskTier>> = Object.freeze({})
+/* ------------------------------------------------------------------ *
+ * The tier for a change — one lookup, and it cannot leak
+ * ------------------------------------------------------------------ */
 
 /**
  * The tier for a change, failing closed when the kind is not recognised.
  *
- * **Pure, and now injectable.** Given no `settings`, it uses the seed mapping
- * (`CHANGE_KIND_TIER`, empty) and therefore lands everything unrecognised on
- * {@link UNRECOGNISED_CHANGE_TIER}. Given settings — loaded once by the caller from
- * `module_configs` via `loadTierSettings()` — it reads the live mapping. The purity
- * promise of this module is kept: no database is touched *here*; the read happens
- * before the call, and only the already-validated value crosses this boundary.
+ * **Pure, and injectable.** Given no `settings`, it uses
+ * {@link DEFAULT_TIER_SETTINGS} — the seed, whose map is empty — so every
+ * unrecognised kind lands on the strictest tier. Given settings, loaded once by the
+ * caller from `module_configs` via `loadTierSettings()`, it reads the live mapping.
+ * The purity promise of this module is kept: no database is touched *here*; the read
+ * happens before the call, and only the already-validated value crosses the boundary.
+ *
+ * **One lookup, so there is one place to get it right.** The seed's map used to be
+ * read with a bare `CHANGE_KIND_TIER[kind] ?? UNRECOGNISED_CHANGE_TIER` — which has a
+ * prototype-chain hole: a kind named `__proto__` returns `Object.prototype` (truthy,
+ * and not a tier). That was fixed in `tier-source.ts`, and this function now routes
+ * through the same {@link resolveTier}, so the two cannot diverge.
  */
 export function tierForChange(change: StructureChange, settings?: TierSettings): ChangeRiskTier {
-  if (settings) return resolveTier(change.kind, settings)
-  return CHANGE_KIND_TIER[change.kind] ?? UNRECOGNISED_CHANGE_TIER
+  return resolveTier(change.kind, settings ?? DEFAULT_TIER_SETTINGS)
 }
+
+
 
 /**
  * Decide which ending a request gets.

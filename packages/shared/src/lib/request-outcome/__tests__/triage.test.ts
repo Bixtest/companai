@@ -133,6 +133,18 @@ describe('it fails closed', () => {
       expect(tierForChange({ kind, summary: kind })).toBe(UNRECOGNISED_CHANGE_TIER)
     }
   })
+
+  it('a prototype key as a change kind still returns a real tier, not Object.prototype', () => {
+    // The seed lookup used to be `map[kind] ?? default`; for `__proto__` that returns
+    // Object.prototype (truthy, and not a tier). Found by a critic pass, fixed in
+    // tier-source.ts, and tierForChange now routes through the same resolveTier — so
+    // this asserts the two cannot diverge.
+    for (const kind of ['__proto__', 'constructor', 'toString', 'hasOwnProperty', 'valueOf']) {
+      const tier = tierForChange({ kind, summary: kind })
+      expect(['safe', 'review_required', 'explicit_approval']).toContain(tier)
+      expect(tier).toBe(UNRECOGNISED_CHANGE_TIER)
+    }
+  })
 })
 
 describe('the tier vocabulary is the vision\'s, unchanged', () => {
