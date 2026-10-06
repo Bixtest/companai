@@ -44,18 +44,28 @@ type WorkflowsMutationGuardHandle = {
 /**
  * Runs the structural mutation guards for every `workflows` write.
  *
- * D2-wide (2026-10-06): this module used to call the `@deprecated`
- * `validateCrudMutationGuard()` / `runCrudMutationGuardAfterSuccess()` pair at 9
- * call sites across 3 route files. That pair resolves ONLY the single
- * DI-registered `crudMutationGuardService` and silently bypasses every guard in
- * the global mutation-guard store, so a module that shipped `data/guards.ts`
- * guards for `workflows.*` would have them silently ignored.
+ * D2-wide (2026-10-06): the **three definition-write routes** used to call the
+ * `@deprecated` `validateCrudMutationGuard()` / `runCrudMutationGuardAfterSuccess()`
+ * pair at 9 call sites. That pair resolves ONLY the single DI-registered
+ * `crudMutationGuardService` and silently bypasses every guard in the global
+ * mutation-guard store, so a module that shipped `data/guards.ts` guards for
+ * `workflows.*` would have them silently ignored.
  *
- * Every `workflows` write now goes through `runRouteMutationGuards()`, the
+ * Those three routes now go through `runRouteMutationGuards()`, the
  * registry-based wrapper the deprecation notice names as the replacement. That
  * runs every registered guard plus the bridged legacy service
  * (`bridgeLegacyGuard()`), so the legacy behaviour is preserved exactly while
  * registry guards start being enforced.
+ *
+ * **Scope, stated honestly — this wrapper is NOT used by every `workflows` write
+ * route.** 13 other write routes in this module (`instances/**`, `tasks/**`,
+ * `signals`, `events`, `definitions/route` POST) have **no mutation guard at
+ * all** — not this one, and not the deprecated pair either. That is a
+ * **pre-existing gap** measured on 2026-10-06 (each of those routes shows
+ * `deprecated_calls_at_parent = 0` at `d3af1b1~1`), and it is tracked separately
+ * as an open item in `BACKLOG.md`; it is not introduced by, and not fixed by,
+ * this migration. Do not read this file as evidence that `workflows` writes are
+ * guarded.
  *
  * Same wrapper shape as the `entities` worked example
  * (`entities/api/definitions.mutation-guard.ts`, `d225602`), the `data_sync`
