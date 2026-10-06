@@ -71,7 +71,7 @@ export function functionContent(fn: UserFunction): Record<string, unknown> {
     businessCommandIr: fn.businessCommandIr ?? null,
     parameterSchema: fn.parameterSchema ?? [],
     references: fn.references ?? emptyReferences(),
-    requiredPermissions: [...(fn.requiredPermissions ?? [])].sort(),
+    requiredPermissions: [...(fn.requiredPermissions ?? [])].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0)),
     businessModelVersion: fn.businessModelVersion,
     dependencyVersions: fn.dependencyVersions ?? {},
     compilerVersion: fn.compilerVersion,

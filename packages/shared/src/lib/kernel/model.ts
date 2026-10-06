@@ -349,7 +349,7 @@ function stableKey(value: unknown): string {
   return JSON.stringify(value, (_k, v) => {
     if (v && typeof v === 'object' && !Array.isArray(v)) {
       const out: Record<string, unknown> = {}
-      for (const key of Object.keys(v as Record<string, unknown>).sort()) {
+      for (const key of Object.keys(v as Record<string, unknown>).sort((a, b) => (a < b ? -1 : a > b ? 1 : 0))) {
         out[key] = (v as Record<string, unknown>)[key]
       }
       return out
@@ -397,11 +397,11 @@ export function findEntityIdCollisions(
   }
   return Array.from(byCanonical.entries())
     .filter(([, ids]) => new Set(ids).size > 1)
-    .map(([canonicalId, moduleEntityIds]) => ({ canonicalId, moduleEntityIds: [...new Set(moduleEntityIds)].sort() }))
+    .map(([canonicalId, moduleEntityIds]) => ({ canonicalId, moduleEntityIds: [...new Set(moduleEntityIds)].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0)) }))
 }
 
 function sortRecord<T>(record: Record<string, T>): Record<string, T> {
   const sorted: Record<string, T> = {}
-  for (const key of Object.keys(record).sort()) sorted[key] = record[key]
+  for (const key of Object.keys(record).sort((a, b) => (a < b ? -1 : a > b ? 1 : 0))) sorted[key] = record[key]
   return sorted
 }

@@ -249,7 +249,7 @@ export function createWidgetRegistry(): WidgetRegistry {
       if (widget.id === widgetId) continue
       if ((widget.dependencies?.widgets ?? []).includes(widgetId)) dependents.add(widget.id)
     }
-    return [...dependents].sort()
+    return [...dependents].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0))
   }
 
   return {

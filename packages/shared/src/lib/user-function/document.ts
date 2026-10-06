@@ -232,7 +232,7 @@ function canonicalise(fn: UserFunction): UserFunction {
 }
 
 function sorted(values: readonly string[]): string[] {
-  return [...values].sort()
+  return [...values].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0))
 }
 
 /** A deep copy through JSON, so an imported Function shares nothing with the document. */
@@ -258,7 +258,7 @@ function stableStringify(value: unknown): string {
   return JSON.stringify(value, (_key, val) => {
     if (val && typeof val === 'object' && !Array.isArray(val)) {
       const out: Record<string, unknown> = {}
-      for (const key of Object.keys(val as Record<string, unknown>).sort()) {
+      for (const key of Object.keys(val as Record<string, unknown>).sort((a, b) => (a < b ? -1 : a > b ? 1 : 0))) {
         out[key] = (val as Record<string, unknown>)[key]
       }
       return out

@@ -82,7 +82,7 @@ export function exportModel(model: ModelDescriptor): ModelDocument {
     relationshipIdCollisions: (model.relationshipIdCollisions ?? [])
       .slice()
       .sort((a, b) => a.id.localeCompare(b.id))
-      .map((c) => ({ id: c.id, declarations: [...c.declarations].sort() })),
+      .map((c) => ({ id: c.id, declarations: [...c.declarations].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0)) })),
   }
 }
 
@@ -239,7 +239,7 @@ function stableStringify(value: unknown): string {
   return JSON.stringify(value, (_key, val) => {
     if (val && typeof val === 'object' && !Array.isArray(val)) {
       const sorted: Record<string, unknown> = {}
-      for (const key of Object.keys(val as Record<string, unknown>).sort()) {
+      for (const key of Object.keys(val as Record<string, unknown>).sort((a, b) => (a < b ? -1 : a > b ? 1 : 0))) {
         sorted[key] = (val as Record<string, unknown>)[key]
       }
       return sorted
@@ -250,6 +250,6 @@ function stableStringify(value: unknown): string {
 
 function sortRecord<T>(record: Record<string, T>): Record<string, T> {
   const sorted: Record<string, T> = {}
-  for (const key of Object.keys(record).sort()) sorted[key] = record[key]
+  for (const key of Object.keys(record).sort((a, b) => (a < b ? -1 : a > b ? 1 : 0))) sorted[key] = record[key]
   return sorted
 }

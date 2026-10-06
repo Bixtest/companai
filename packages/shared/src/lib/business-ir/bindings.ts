@@ -93,7 +93,7 @@ export function createBindingsFromDeclarations(
   const entityIdCollisions: PhysicalBindings['entityIdCollisions'] = []
   for (const [canonicalId, ids] of byCanonical) {
     if (ids.size > 1) {
-      entityIdCollisions.push({ canonicalId, platformEntityIds: [...ids].sort() })
+      entityIdCollisions.push({ canonicalId, platformEntityIds: [...ids].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0)) })
     }
   }
   entityIdCollisions.sort((a, b) => a.canonicalId.localeCompare(b.canonicalId))
@@ -122,7 +122,7 @@ export function createBindingsFromDeclarations(
     }
     relationships[relationship.id] = { ...join }
   }
-  unboundRelationships.sort()
+  unboundRelationships.sort((a, b) => (a < b ? -1 : a > b ? 1 : 0))
 
   return {
     entities: sortRecord(entities),
@@ -134,6 +134,6 @@ export function createBindingsFromDeclarations(
 
 function sortRecord<T>(record: Record<string, T>): Record<string, T> {
   const sorted: Record<string, T> = {}
-  for (const key of Object.keys(record).sort()) sorted[key] = record[key]
+  for (const key of Object.keys(record).sort((a, b) => (a < b ? -1 : a > b ? 1 : 0))) sorted[key] = record[key]
   return sorted
 }

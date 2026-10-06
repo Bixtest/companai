@@ -54,8 +54,8 @@ export function planFieldRename(before: ModelDescriptor, after: ModelDescriptor)
   const beforeIds = collectFieldIds(before)
   const afterIds = collectFieldIds(after)
 
-  const removedFieldIds = [...beforeIds].filter((id) => !afterIds.has(id)).sort()
-  const addedFieldIds = [...afterIds].filter((id) => !beforeIds.has(id)).sort()
+  const removedFieldIds = [...beforeIds].filter((id) => !afterIds.has(id)).sort((a, b) => (a < b ? -1 : a > b ? 1 : 0))
+  const addedFieldIds = [...afterIds].filter((id) => !beforeIds.has(id)).sort((a, b) => (a < b ? -1 : a > b ? 1 : 0))
 
   const reasons: string[] = []
   const likelyRenames: Array<{ from: string; to: string }> = []
@@ -137,6 +137,6 @@ function groupByEntity(ids: readonly string[]): Map<string, string[]> {
     list.push(id)
     grouped.set(entity, list)
   }
-  for (const list of grouped.values()) list.sort()
+  for (const list of grouped.values()) list.sort((a, b) => (a < b ? -1 : a > b ? 1 : 0))
   return grouped
 }
