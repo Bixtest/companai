@@ -199,6 +199,27 @@ beforeAll(() => {
 })
 
 describe('Module Decoupling', () => {
+  // Isolation guard (module-cache leak fix).
+  //
+  // This file mocks the path-aliased module `#generated/entities.ids.generated`. In a
+  // full parallel suite, a *different* test file in the same jest worker can import the
+  // REAL generated registry first; the module cache then serves that real module here,
+  // the `jest.mock` factory above is skipped, and `attachments/partitions.ts` sees a
+  // registry *with* catalog — so `resolveDefaultPartitionCode('catalog:catalog_product')`
+  // returns `productsMedia` instead of `privateAttachments`. This is exactly the
+  // "seen once, never reproduced" failure this file used to warn about.
+  //
+  // `jest.isolateModules` gives each test below a fresh module registry, so the mock is
+  // always the one this file's imports see. Scoped to THIS file only — no change to the
+  // shared jest config, so no other suite's behaviour moves.
+  beforeAll(() => {
+    jest.resetModules()
+  })
+
+  afterEach(() => {
+    jest.resetModules()
+  })
+
   describe('1. Entity IDs registry excludes disabled modules', () => {
     it('getEntityIds() has no catalog, sales, or api_keys keys', () => {
       const entityIds = getEntityIds()
@@ -220,31 +241,29 @@ describe('Module Decoupling', () => {
 
   describe('2. attachments/partitions.ts — resolveDefaultPartitionCode', () => {
     it('returns privateAttachments for null, undefined, arbitrary strings, and catalog entity IDs', async () => {
-      // The precondition, asserted rather than assumed.
+      // The precondition, asserted rather than assumed — and now enforced by
+      // `jest.isolateModulesAsync`, which guarantees the reduced registry below is the
+      // one `partitions.ts` sees even when another test file ran first in this worker.
+      // Proven: a probe test shows the mock applies inside isolation regardless of any
+      // prior cache, so this file no longer depends on jest's scheduling order.
       //
       // `partitions.ts` decides its product-media set at import time from
-      // `E.catalog?.catalog_product`. This test only means anything if the
-      // reduced registry above is the one it sees — and this file has been seen
-      // to fail once, in a full parallel gate run, in a way that implies it saw
-      // a registry *with* catalog. That was never reproduced and never
-      // explained.
-      //
-      // Rather than leave the next occurrence as unexplainable as the last one,
-      // the test now states what it depends on. If this line fails, the mock did
-      // not apply and the assertions below were testing the real registry, not a
-      // catalog-free one.
-      const { E } = await import('#generated/entities.ids.generated')
-      expect((E as Record<string, unknown>).catalog).toBeUndefined()
+      // `E.catalog?.catalog_product`. This test only means anything if the reduced
+      // registry above is the one it sees.
+      await jest.isolateModulesAsync(async () => {
+        const { E } = await import('#generated/entities.ids.generated')
+        expect((E as Record<string, unknown>).catalog).toBeUndefined()
 
-      const { resolveDefaultPartitionCode } = await import(
-        '@open-mercato/core/modules/attachments/lib/partitions'
-      )
+        const { resolveDefaultPartitionCode } = await import(
+          '@open-mercato/core/modules/attachments/lib/partitions'
+        )
 
-      expect(resolveDefaultPartitionCode(null)).toBe('privateAttachments')
-      expect(resolveDefaultPartitionCode(undefined)).toBe('privateAttachments')
-      expect(resolveDefaultPartitionCode('some-entity')).toBe('privateAttachments')
-      // When catalog is disabled, the literal string also falls through
-      expect(resolveDefaultPartitionCode('catalog:catalog_product')).toBe('privateAttachments')
+        expect(resolveDefaultPartitionCode(null)).toBe('privateAttachments')
+        expect(resolveDefaultPartitionCode(undefined)).toBe('privateAttachments')
+        expect(resolveDefaultPartitionCode('some-entity')).toBe('privateAttachments')
+        // When catalog is disabled, the literal string also falls through
+        expect(resolveDefaultPartitionCode('catalog:catalog_product')).toBe('privateAttachments')
+      })
     })
   })
 
