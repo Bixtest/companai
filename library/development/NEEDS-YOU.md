@@ -261,6 +261,37 @@ away.
 
 ---
 
+## Part 2b — The newest version is deployed, and the login works — **KNOW**
+
+**Deployed 2026-10-06, and signed in end to end to prove it.** The newest build (code `5af76bc`,
+the completed D2-wide sweep) is running on the laptop VM, and I walked the whole browser journey
+against it: open `/backend` anonymously → redirected to the login page → submit the form → back at
+`/backend` with a live session, **200, `Companai` title**.
+
+**Where to test it:** `https://car-compilation-applications-rochester.trycloudflare.com`
+
+Sign in with **`admin@companai.local`** and the password in
+`/opt/companai-platform/.env` (`grep OM_INIT_SUPERADMIN /opt/companai-platform/.env`). That is the
+**only** account that works on this deployment — the three `@acme.com` accounts listed in Part 3 are
+the *local* machine's logins and do not work on the VM.
+
+**Two things to know about that address.**
+
+1. **It changes if the tunnel restarts.** It is an ephemeral Cloudflare quick tunnel. If the link
+   stops working, the tunnel restarted and the address moved — say so and I will re-point it
+   (`./set-host.sh <new-address>`). Putting it on a real domain removes this; that is *"Putting it on
+   your own domain"* in `RUNBOOK-deploying-a-site.md`.
+2. **Anyone who finds it can register.** `DEMO_MODE` and self-service onboarding are on — the kit's
+   default, and what makes it useful to show people. Say the word and it becomes a closed instance.
+
+**One correction to an earlier report of mine.** I had said the login was broken and returning
+`400`. That was **my error, not the platform's** — I was testing it by posting JSON, and the login
+route only accepts form-encoded bodies (which is what the page sends). Measured properly, it returns
+`200` with a working session. The trap is now written down in
+`RUNBOOK-deploying-a-site.md` so nobody repeats it. **Nothing here needs you.**
+
+---
+
 ## Part 3 — The local platform's logins — **KNOW**
 
 You asked: *"I don't know starting kit credentials if there are accounts existing there already."*  
