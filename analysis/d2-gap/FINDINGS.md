@@ -1,7 +1,7 @@
 # D2-gap — measured across every enabled module
 
 **Measured:** 2026-10-06. **Tool:** `analysis/d2-gap/measure.js` (re-runnable; `--json` for machines).
-**Repo:** `workspace/starting-kit`, HEAD **`4ef5812`** (the `audit_logs` fix is in).
+**Repo:** `workspace/starting-kit`, HEAD **`0af50c8`** (the `ai_assistant` fix is in; before it, `4ef5812` with the `audit_logs` fix).
 
 ## What D2-gap is, and why it is a defect
 
@@ -12,23 +12,24 @@ would reach data no authorization describes (Hermes map §4.4 (b)).
 
 ## The headline
 
-| | before `audit_logs` fix (HEAD `5af76bc`) | **now (HEAD `4ef5812`)** |
-|---|---|---|
-| enabled modules with a source tree | **35** | **35** |
-| write verbs across those modules | **256** | **256** |
-| **unguarded write verbs (the `D2-gap`)** | **160** | **158** |
-| auth-flow verbs set aside by design | 8 | 8 |
-| guarded verbs | 88 | 90 |
+| | baseline (HEAD `5af76bc`) | after `audit_logs` (`4ef5812`) | **now (HEAD `0af50c8`)** |
+|---|---|---|---|
+| enabled modules with a source tree | **35** | **35** | **35** |
+| write verbs across those modules | **256** | **256** | **256** |
+| **unguarded write verbs (the `D2-gap`)** | **160** | **158** | **143** |
+| auth-flow verbs set aside by design | 8 | 8 | 8 |
+| guarded verbs | 88 | 90 | **113** |
 
-**The two figures differ by exactly the one module fixed so far** (`audit_logs`, 2 verbs). Both are
-recorded because the number a document quotes must say **which HEAD it was measured at** — carrying a
-"before" figure forward as if it were current is how the `auth`-onward file-count slip happened.
+**Each column differs from the one before it by exactly the modules fixed so far** — `audit_logs` (2
+verbs) then `ai_assistant` (15 verbs). Every figure is recorded because the number a document quotes
+must say **which HEAD it was measured at** — carrying a "before" figure forward as if it were current
+is how the `auth`-onward file-count slip happened.
 
-**Guarded by mechanism (computed by the tool, not assumed):** 50 through a module wrapper, 0 through
+**Guarded by mechanism (computed by the tool, not assumed):** 65 through a module wrapper, 0 through
 `runRouteMutationGuards` directly, 35 through `makeCrudRoute`/`crud.` (the CRUD factory runs
 `collectAndRunGuards()`), 5 through a re-export of a guarded factory, **0 through the deprecated pair**
-(D2-wide left none enabled). **Closure — every write verb is accounted for:** 50 + 35 + 5 + 0 + 8
-(auth-flow, set aside) + 158 (unguarded) = **256**. *(A first draft of this line carried 33/26/29 forward
+(D2-wide left none enabled). **Closure — every write verb is accounted for:** 65 + 35 + 5 + 0 + 8
+(auth-flow, set aside) + 143 (unguarded) = **256**. *(A first draft of this line carried 33/26/29 forward
 from memory; the tool reads 50/35/5, and the closure check is what caught it.)*
 
 ## Per module (verbs)
@@ -38,7 +39,7 @@ from memory; the tool reads 50/35/5, and the closure check is what caught it.)*
 
 | module | files | verbs | W | R | C | D | **GAP** |
 |---|---|---|---|---|---|---|---|
-| ai_assistant | 19 | 24 | 0 | 0 | 0 | 0 | **24** |
+| ai_assistant | 19 | 24 | 15 | 0 | 0 | 0 | **9** ✅ *fixed `0af50c8`; was 24* |
 | messages | 11 | 17 | 0 | 0 | 0 | 0 | **17** |
 | communication_channels | 15 | 15 | 0 | 0 | 0 | 0 | **15** |
 | auth | 21 | 27 | 1 | 0 | 6 | 0 | **12** |
@@ -67,6 +68,43 @@ from memory; the tool reads 50/35/5, and the closure check is what caught it.)*
 | query_index | 2 | 2 | 2 | 0 | 0 | 0 | **0** |
 | translations | 1 | 2 | 2 | 0 | 0 | 0 | **0** |
 | api_keys | 1 | 2 | 0 | 0 | 2 | 0 | **0** |
+
+## The two fixes so far
+
+### `audit_logs` — the first module fixed (`4ef5812`)
+
+Both write routes (`audit-logs/actions/undo` POST, `actions/redo` POST) called **no guard of any
+kind**. New wrapper `beginAuditLogsMutationGuard`; both routes now run `runRouteMutationGuards()`.
+**2 unguarded verbs → 0.** The design decision: the guard is evaluated against the **log entry's own
+`resourceKind`** (fallback `audit_logs.action_log`), because what is guarded is the *reversal or replay
+of a write to that resource* — a guard registered against e.g. `directory.organization` must see the
+**undo of an organization write**. **7 tests; three disjoint mutations proved they bite; wrapper
+byte-identical.**
+
+### `ai_assistant` — the second and largest module fixed (`0af50c8`)
+
+**24 unguarded verbs across 19 files — the largest `D2-gap` measured, and the Hermes-facing module.**
+New wrapper `beginAiAssistantMutationGuard`; the 10 **resource-write** files now run
+`runRouteMutationGuards()`. **24 unguarded verbs → 9.**
+
+The 24 verbs are **not all the same thing**, and wrapping them all would have been wrong — the same
+call the `auth` migration made. They split three ways:
+
+| class | verbs | decision |
+|---|---|---|
+| **(a) resource writes** — settings, allowlist, agent overrides, conversations, participants | **15** | **guarded** via `beginAiAssistantMutationGuard` |
+| **(b) session/flow** — `ai/chat`, `ai/run-object`, `route`, `chat`, `session-key`, `mcp-key`, `tools/execute` | 7 | **set aside by name** |
+| **(c) pending-action gate** — `ai/actions/[id]/confirm`, `ai/actions/[id]/cancel` | 2 | **set aside by name** |
+
+**15 + 7 + 2 = 24.** Class (b) is chat completion, transport and **credential minting** — governed by
+rate limits, short-TTL keys and per-tool feature checks, the `auth` login/logout category. Class (c) is
+the **AI mutation-approval gate**: `confirm` calls `runPendingActionRechecks()`, which re-verifies
+status, expiry, agent registration, features, **mutation policy**, tool whitelist, tenant scope, record
+version and schema drift before the wrapped tool runs — a **dedicated** mechanism for exactly these
+writes. `resourceKind` is shaped `ai_assistant.<entity>` (settings / allowlist / agent_override /
+conversation). The `loop-override` DELETE guard runs **only on the path that actually writes** — a no-op
+clear has nothing for a guard to govern (the `inbox_ops` precedent). **Every route's own authorization
+is untouched. 30 tests; three disjoint mutations proved they bite; every file byte-identical.**
 
 ## Reconciliation against the figures already recorded
 
