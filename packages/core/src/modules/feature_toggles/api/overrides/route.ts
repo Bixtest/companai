@@ -6,10 +6,7 @@ import { serializeOperationMetadata } from '@open-mercato/shared/lib/commands/op
 import { getOverrides } from '../../lib/queries'
 import { isCrudHttpError } from '@open-mercato/shared/lib/crud/errors'
 import { enforceCommandOptimisticLockWithGuards } from '@open-mercato/shared/lib/crud/optimistic-lock-command'
-import {
-  runCrudMutationGuardAfterSuccess,
-  validateCrudMutationGuard,
-} from '@open-mercato/shared/lib/crud/mutation-guard'
+import { beginFeatureTogglesMutationGuard } from '../mutation-guard'
 import { logCrudAccess } from '@open-mercato/shared/lib/crud/factory'
 import { FeatureToggleOverride } from '../../data/entities'
 import { buildContext } from '../../lib/utils'
@@ -111,29 +108,35 @@ export async function PUT(req: Request) {
       })
     }
 
-    // Run the CRUD mutation guard lifecycle so this custom write route honors
-    // module-level guard injections (and after-success hooks) like every other
-    // mutating endpoint. The override either updates an existing row or creates a
-    // new one, so the resource id falls back to the toggle id when no row exists.
+    // Run the registry mutation-guard lifecycle so this custom write route
+    // honours module-level guard injections (and after-success hooks) like every
+    // other mutating endpoint. D2-wide: routed through
+    // `beginFeatureTogglesMutationGuard`, which runs the full registry guard set
+    // (plus the bridged legacy DI service) — the deprecated
+    // `validateCrudMutationGuard()` pair resolved only the DI-registered
+    // `crudMutationGuardService` and silently skipped registry guards. The
+    // override either updates an existing row or creates a new one, so the
+    // resource id validated is the existing row's id when present, else the
+    // toggle id.
     const guardUserId = ctx.auth?.userId ?? ctx.auth?.sub ?? null
     if (!guardUserId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     const guardResourceKind = 'feature_toggles.feature_toggle_override'
     const guardResourceId = existingOverride?.id ?? parsed.data.toggleId
-    const guardResult = await validateCrudMutationGuard(ctx.container, {
+    const guard = await beginFeatureTogglesMutationGuard({
+      container: ctx.container,
+      req,
       tenantId: scope.tenantId,
       organizationId: organizationId ?? null,
       userId: guardUserId,
       resourceKind: guardResourceKind,
       resourceId: guardResourceId,
       operation: 'update',
-      requestMethod: req.method,
-      requestHeaders: req.headers,
       mutationPayload: parsed.data,
     })
-    if (guardResult && !guardResult.ok) {
-      return NextResponse.json(guardResult.body, { status: guardResult.status })
+    if (guard.blockedResponse) {
+      return guard.blockedResponse
     }
 
     const commandBus = ctx.container.resolve('commandBus') as CommandBus
@@ -147,19 +150,12 @@ export async function PUT(req: Request) {
       ctx,
     })
 
-    if (guardResult?.ok && guardResult.shouldRunAfterSuccess) {
-      await runCrudMutationGuardAfterSuccess(ctx.container, {
-        tenantId: scope.tenantId,
-        organizationId: organizationId ?? null,
-        userId: guardUserId,
-        resourceKind: guardResourceKind,
-        resourceId: result?.overrideToggleId ?? guardResourceId,
-        operation: 'update',
-        requestMethod: req.method,
-        requestHeaders: req.headers,
-        metadata: guardResult.metadata ?? null,
-      })
-    }
+    // The registry already limits this to guards whose `validate()` returned
+    // `shouldRunAfterSuccess`, so calling it unconditionally is a no-op when no
+    // guard asked for it — the route no longer applies that gate by hand. The
+    // produced id (`overrideToggleId`) is passed so the after-success hook runs
+    // against the row the write actually made, not the id validated.
+    await guard.runAfterSuccess(result?.overrideToggleId ?? guardResourceId)
 
     const response = NextResponse.json({
       ok: true,
