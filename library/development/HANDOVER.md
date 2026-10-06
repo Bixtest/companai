@@ -361,8 +361,8 @@ here so nobody assumes a folder travels with the repository when it only exists 
 ```text
 companai/                       ← repo 1 root (thinking + docs).  You are here.
 ├── INDEX.md                    the map of every folder — start here after this file
-├── JOURNAL.md                  what happened, in order, with dates (4,452 lines; newest first)
-├── LESSONS.md                  mistakes made, how they were caught (2,970 lines, L1–L88)
+├── JOURNAL.md                  what happened, in order, with dates (4,470 lines; newest first)
+├── LESSONS.md                  mistakes made, how they were caught (3,007 lines, L1–L89)
 ├── where_we_left.md            ⚠️ stale (2026-08-13) — traps only
 │                               (THIS FILE is not at the root — it lives at
 │                                library/development/HANDOVER.md, below)
@@ -590,7 +590,7 @@ and was *not* re-measured — treat it as a starting point, not a fact.**
 | **Repo 1** (thinking/docs) | `master`, HEAD **`a72fdfe`** — the commit that carries the G-03 docs, **clean** |
 | **Repo 2** (code) | `main`, HEAD **`cafe7d6`** — the commit that carries the G-03 code, **clean** |
 | **Codebase shape** | **21 packages, 1 app** (`apps/mercato`) — a monorepo (Yarn 4.17.1 + Turbo) |
-| **Documentation** | `library/` holds **3,470 markdown files**; `LESSONS.md` 2,970 lines (L1–L88); `JOURNAL.md` 4,452 lines; `COOKBOOK.md` 2,948 lines |
+| **Documentation** | `library/` holds **3,470 markdown files**; `LESSONS.md` 3,007 lines (L1–L89); `JOURNAL.md` 4,470 lines; `COOKBOOK.md` 2,948 lines |
 | **The studies** | analysis programme **complete** (batches 0–12, 13 reports); Paperclip + Hermes study **complete** (11 batches, 3,940 lines, 53 lessons) |
 | **The specification** | **Draft 2** — of its 40 rows, **36 SETTLED · 1 DERIVED · 3 DEFERRED-with-trigger · 0 OPEN — owner**. The gate is passed; only ratification remains |
 | **The runtime boundary (B-05)** | **DECIDED 2026-10-05 by the owner.** One product, one repository, one deployment, one interface (ours), with Hermes as a **supervised private runtime process behind the internal port**; Hermes is **headless**. Reasoning in [`ARCHITECTURE-hermes-integration.md`](ARCHITECTURE-hermes-integration.md) §11. The Hermes **profile** topology is deferred with the trigger **the agent gateway** |

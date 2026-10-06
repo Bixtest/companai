@@ -2968,3 +2968,40 @@ reassuring direction, that is the moment to look hardest, not the moment to tick
 
 **Check it with a count, always:** `Tests: N passed` where N is the number you expected. Zero tests
 passing is not a passing suite.
+
+## L89 — a plan that inherits a count is right by luck, not by method; a `route.ts` glob is not a route audit
+
+**Caught 2026-10-06, migrating `planner` in `D2-wide` — the ninth module, one after L87.**
+
+Two findings, and the second is the important one.
+
+**1. The plan's number can be right — and that changes nothing about L87.** The queued task said
+`planner` was **4 calls / 2 files → 2 guard objects**, and walking every `.ts` file under `api/`
+confirmed exactly that. This is the **first module in the sweep whose figure survived re-measurement
+unchanged** — and it is recorded *because* it is the exception, not because it validates the method. The
+rule from L87 is "re-derive the figure", not "the figure is wrong". A plan that happens to be right is
+right by luck; the re-derivation is what makes it knowledge. Had this module been the first one measured,
+the earlier modules' errors would have looked like anomalies instead of the pattern.
+
+**2. The named-export trap recurred, and it is now confirmed as a class, not a one-off.** `planner`'s
+two write routes are **`availability-weekly.ts`** and **`availability-date-specific.ts`** — neither is a
+`route.ts`. Both export a **named** `POST` with `metadata = { POST: { requireAuth: true } }`. A sweep
+that globs only for files named `route.ts` finds **neither file**, and reports the module clean while
+leaving **both** live write routes on the deprecated resolver.
+
+That makes two modules out of nine with a write route a name-based scan cannot see:
+`translations/put/locales.ts` (L87) and `planner`'s two files. **Two independent confirmations make it a
+class.** The general rule, stated once and to be applied every time: **enumerate a module's write routes
+by what the file *contains* — does it export `POST`/`PUT`/`PATCH`/`DELETE`, by name or as default? —
+never by what the file is *called*.** In this codebase both conventions are in live use (`route.ts` and
+named exports with a `metadata` object), so the name is not a signal at all.
+
+**What it would have cost.** The failure is silent and reads as success: the deprecated-call count for
+the module would show 0 (the routes are not scanned), the module would be marked done, and two live
+writes would still bypass every registry guard. Nothing in the test suite or the count would catch it,
+because both would be measuring the files that were found.
+
+**How to check it, concretely.** After migrating a module, confirm the migration's arithmetic against
+the **files**, not the plan: `before − after == this module's real count`, and the file count must fall
+by the number of files actually repointed. Here: 120 → 116 calls (−4) and 47 → 45 files (−2), matching
+the two routes changed.
