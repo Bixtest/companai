@@ -50,6 +50,7 @@ task, because a task changes every session (owner's instruction, 2026-10-06).
 | B5 | [`../analysis/findings/12-development-plan.md`](../analysis/findings/12-development-plan.md) | **The plan** — phases, order, why |
 | B6 | [`../workspace/COOKBOOK.md`](../../workspace/COOKBOOK.md) | **How the work is done** — read before touching code |
 | B7 | [`../LESSONS.md`](../../LESSONS.md) | The mistakes already made, so you do not repeat them |
+| B7a | [`JOURNEY.md`](JOURNEY.md) | **The journey, start to today, told forward** — the product idea, what has been built phase by phase, and the through-lines that shaped every decision. [`JOURNAL.md`](../../JOURNAL.md) is the same story newest-first, with dates and measurements; this is the readable version |
 | B8 | [`SPECIFICATIONS-DICTIONARY.md`](SPECIFICATIONS-DICTIONARY.md) | **The standard every architectural change is checked against** — S1–S12, plus §C.2b (tiers are a superadmin *setting*, not hardcoded) |
 | B9 | [`BUILD-ORDER.md`](BUILD-ORDER.md) | **The order — foundation before stack.** Phase −1 (architecture contracts) → Phase 0 (D0–D3 + metadata registry) → the stack on top |
 | B10 | [`CORE-BOUNDARY.md`](CORE-BOUNDARY.md) | **What may never be customised** — the three rings, and the C1–C11 core the architecture depends on |
@@ -165,6 +166,7 @@ See COOKBOOK rule zero-ten.
 | [`HANDOVER.md`](HANDOVER.md) | **The handover** — the front door for a newcomer who knows nothing: what exists, where it is, the two-repository layout, the traps, the host VM, the standing rules, and what is proven vs not. §0 is written for an agent taking over |
 | [`BOOKMARKS.md`](BOOKMARKS.md) | **The pages to open first** — the handful of documents that matter, the **end-game / vision** documents, the two integration designs, and an honest list of which folders are in git and which are not |
 | [`START-PROMPT.md`](START-PROMPT.md) | **The message that starts a new session** — paste it to the agent taking over: what to read first and the rules it may not break. It carries **no task**; it sends the agent to the `★ ACTIVE TASK` box in [`../../JOURNAL.md`](../../JOURNAL.md) |
+| [`JOURNEY.md`](JOURNEY.md) | **The journey, told forward** — Act 0 to today: the product idea, what has been built and proven phase by phase, and the through-lines. Written so a newcomer who was not here can still understand *why* each thing was done. The complement to `JOURNAL.md` (which is newest-first) |
 | [`WORKING-RULES.md`](WORKING-RULES.md) | **The owner's standing rules, in one page** — the five that outrank everything (including "two routes or it is not a finding" and the front-end rule), how to report, and how to ask. Read once, at the start |
 | [`README.md`](README.md) | **This file** — the front door, the reading order, the handover, the sprint process |
 | [`BACKLOG.md`](BACKLOG.md) | **The one roadmap** — everything left, in order, with the "do not lose this" list and the deferrals |
@@ -202,6 +204,7 @@ that is deleted once answered — never left buried in a report.**
 | How is the work done? | [`../workspace/COOKBOOK.md`](../../workspace/COOKBOOK.md) |
 | How does the platform work? | [`../workspace/knowledge/`](../../workspace/knowledge/) — 20 concept files |
 | What happened, and when? | [`../JOURNAL.md`](../../JOURNAL.md) (newest first) |
+| How did we get here, and why? | [`JOURNEY.md`](JOURNEY.md) — the same story told forward, so a newcomer understands the decisions, not just the dates |
 | What mistakes were made? | [`../LESSONS.md`](../../LESSONS.md) |
 | What did the analysis find? | [`../analysis/`](../analysis/) — 12 batches |
 | What should the agent half look like? | [`../paperclip-hermes-study/findings/10-lessons-and-target-design.md`](../paperclip-hermes-study/findings/10-lessons-and-target-design.md) — the completed 11-batch study of Paperclip + Hermes, and the lessons for our own agent architecture |

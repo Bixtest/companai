@@ -1,13 +1,13 @@
 # Start prompt — paste this to the agent that takes over
 
 > **WHERE THE ACTIVE TASK LIVES (read this first, it is the one live fact).**
-> **The task being worked on right now is `perspectives` — the D2-wide guard-resolver migration, 8
-> deprecated calls across 3 files.** Its plain-English description, the exact six steps to do it, and
-> the current queue are in the **`★ ACTIVE TASK` box at the top of [`../../JOURNAL.md`](../../JOURNAL.md)**.
+> **The task being worked on right now is named in ONE place, and it is not this prompt:** the
+> **`★ ACTIVE TASK` box at the top of [`../../JOURNAL.md`](../../JOURNAL.md)**. Open it to see the
+> module in hand, its plain-English description, the exact six steps to do it, and the current queue.
 > **That box is the single source of truth for "what is being worked on now".** No other document —
 > not this prompt, not HANDOVER, not README, not BOOKMARKS, not BACKLOG — may state a live task; they
 > all point to the box. (Owner's instruction, 2026-10-06. If you are reading this months later, the
-> task below has almost certainly changed — **go to the box**, do not trust this line.)
+> task will have changed many times — **go to the box**, do not trust this line.)
 
 **What this file is.** The ready-to-paste first message for the agent that inherits this project and
 continues the development. It is short on purpose: it tells the agent what to read, how to set up,
@@ -70,6 +70,10 @@ direction gets buried.
     p. library/development/SPEC-business-model-kernel.md
     q. workspace/COOKBOOK.md                  <- how the work is done. Read before touching code
     r. LESSONS.md                             <- mistakes already made
+    s. library/development/JOURNEY.md         <- how the project got here, in order. Read it to
+                                                 follow the project as if you had been here since day
+                                                 one — the arc, the turning points, the reversals.
+                                                 (JOURNAL.md is the same story newest-first, with dates.)
 
 **Tier C — open only where the work needs it:** `AGENT-HALF.md` (before any agent-half work),
 `THREAD-2026-10-05.md` (why the session decided what it did), `NEEDS-YOU.md` / `BLOCKERS.md`,

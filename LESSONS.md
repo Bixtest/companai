@@ -2814,3 +2814,86 @@ number is a guess wearing a number's clothes.
 a second pass whose only job was to break the first. Neither survived contact with an independent
 instrument. That is the loop working as designed.
 
+---
+
+## L85 — a test that mocks the layer you are changing proves nothing
+
+**Caught 2026-10-06, while migrating `workflows` off the deprecated guard resolver (D2-wide).**
+
+The work was: replace a deprecated resolver call inside a per-module wrapper
+(`beginWorkflowsMutationGuard`) with a registry call, then prove the change by **mutation** — disable
+the block path and the tests must go red; neuter the after-success and they must go red too.
+
+**Both mutations left the suite green.** The tests mocked the **module wrapper** — the exact file being
+changed — so the mutated line never executed. A green suite was read as "the guard works"; it proved the
+mutation was invisible, which is the opposite.
+
+**Why it happens.** When you inherit tests for a piece you are about to change, the instinct is to keep
+the existing mock and re-point the assertions. But the mock target *is* the subject. If the test's
+`jest.mock` names the file you are editing, the test can never fail for the reason you care about.
+
+**What to do instead.** Stub **only the layer underneath**, and let the layer you are changing run for
+real:
+
+```ts
+// WRONG — the wrapper is the thing under test; mocking it makes your mutation a no-op
+jest.mock('../mutation-guard', () => ({ beginWorkflowsMutationGuard: jest.fn(...) }))
+
+// RIGHT — stub the registry call; the module wrapper runs for real
+jest.mock('@open-mercato/shared/lib/crud/route-mutation-guard', () => ({
+  runRouteMutationGuards: (...args: unknown[]) => runRouteMutationGuardsMock(...args),
+}))
+```
+
+**The rule.** *Before you trust a mutation proof, name the file the mutation edits and confirm the test
+actually executes it.* A mock that severs the path between the test and the mutated line turns every
+"RED" into a guaranteed green — and a guaranteed green is the most convincing lie in the toolkit. This is
+[[L21]] (*a control that holds the mistake fixed proves nothing*) one layer down: a test that skips the
+changed code holds nothing at all.
+
+**The general form:** a proof must exercise the thing that changed. If it exercises a stand-in for that
+thing, it is a proof of the stand-in.
+
+---
+
+## L86 — a tracked count is a claim about the artefact, not a running total you trust
+
+**Caught 2026-10-06, across the seven-module `D2-wide` guard-resolver migration.**
+
+A platform-wide migration tracked a count that had to tick down — `198 → 177 → 161 → 151 → 142 → 134
+→ 126` deprecated call sites. Each tick was quoted in the plan, the tracker item, the handover and the
+journal. Two failures recurred, both in the number itself:
+
+1. **The "before" was carried forward, not re-derived.** The "before" on module N is the "after" of
+   module N−1; a wrong figure propagates silently. Fixed by re-running the **same** classifier against
+   the clean tree (`git stash push -u`; classify; `git stash pop`) and requiring the delta to equal
+   **exactly this module's** call count.
+2. **The two counting tools disagreed by one (`126` vs `127`).** The script stripped only *trailing*
+   `//` comments, so it still counted lines whose content *begins* with `//`, `*` or `/*` (JSDoc
+   continuations). Both tools must drop leading-comment lines.
+
+There was also the twin of [[L84]] in the **same** migration, one level up: a *file* count of `55` came
+from an ad-hoc command that used a **different comment rule** than the two agreed methods, so it was not
+comparable to them. Re-running the **agreed** classifier gave `52`, and the delta then matched the three
+repointed files.
+
+**Why it happens.** Once a number is written it reads as measured, and the next tick is tempting to
+compute rather than measure. A number that is only ever *incremented* is a summary, not an observation —
+the same defect as [[L49]], in slow motion over seven commits.
+
+**What to do instead.** For every tick: re-derive the "before" from the tree with the **agreed** tool,
+measure the "after" the same way, and check `before − after == this module's count`. If the arithmetic
+does not match the artefact, the artefact is right and the number is wrong. Two tools, one of them a
+different program, must agree.
+
+**The companion fact — a count can be right and still mislead.** A module reaching **0** on this count
+is *not* "the module is guarded". The count only sees routes that *used to call* the deprecated
+resolver; a route that calls **no guard at all** is invisible to it. Measured: `workflows` **13 of 19**
+write routes unguarded, `inbox_ops` **10 of 14**, `perspectives` **0 of 3**. So the scope sentence goes
+**either way** and must be measured, not assumed — *"0"* is a claim about the resolver, never about
+coverage ([[L48]]).
+
+**The general form:** a number is an observation with a date, a tool and a predicate. Re-take the
+observation every time you quote it, and never let a count stand in for the property you actually care
+about.
+

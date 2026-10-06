@@ -41,6 +41,7 @@ mechanism it stands on.
 | [test-gate.md](test-gate.md) | *"Why did the gate go red in a package I never touched?"* — the three traps, and how to diagnose one |
 | [i18n-and-direction.md](i18n-and-direction.md) | *"Where do strings live, and how do I add a language?"* — including right-to-left |
 | [record-locks.md](record-locks.md) | *"How do I freeze a record so nobody can change it?"* — and why reads still work |
+| [guard-migration.md](guard-migration.md) | *"How do I move a module off the deprecated guard resolver?"* — the per-module migration, the two-mutation proof, and the two ways a proof comes back falsely green |
 | [delegations.md](delegations.md) | *"How do I let somebody cover for me for two weeks?"* — lending authority with an end date |
 | [ai-workers.md](ai-workers.md) | *"How does an AI employee get an identity the rules can bound?"* — the credential that makes a machine a machine |
 | [denials.md](denials.md) | *"How do I stop one person doing one thing?"* — without stripping their role and everything else with it |
@@ -99,6 +100,7 @@ someone's model of it.
 | [test-gate.md](test-gate.md) | How `yarn test` runs, the three causes of a false red, and the rules that keep it honest |
 | [i18n-and-direction.md](i18n-and-direction.md) | Per-module dictionaries, adding a locale, and deciding text direction |
 | [record-locks.md](record-locks.md) | Freezing and restricting a record, and the one ceiling that is about the record rather than the actor |
+| [guard-migration.md](guard-migration.md) | Retiring the deprecated guard resolver per module: the wrapper, the two-mutation proof, the two-method count, and the scope question |
 | [delegations.md](delegations.md) | Temporary grants: the two layers they act on, and why they are never cached |
 | [denials.md](denials.md) | The mirror image: a subtraction that can never grant, applies to superadmins, and may be permanent |
 | [trust.md](trust.md) | Earned autonomy T0–T4, the evidence behind it, and the asymmetry that makes it safe |

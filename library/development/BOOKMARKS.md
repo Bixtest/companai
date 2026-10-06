@@ -18,16 +18,17 @@ the single place that says what is being worked on **now** is the **`★ ACTIVE 
 
 ## 1. If you have five minutes
 
-Read these five, in this order. They tell you what the product is, how the work is done, and
-where it stands.
+Read these six, in this order. They tell you what the product is, how the work is done, and
+where it stands — and how we got here.
 
 | # | Read | Why |
 |---|---|---|
 | 1 | [`../WHAT-WE-ARE-BUILDING.md`](../WHAT-WE-ARE-BUILDING.md) | **The product in plain English** — the idea, the decisive loop, what it is *not*, and which library documents are ours vs imported. **Start here** |
 | 2 | [`../../INDEX.md`](../../INDEX.md) | The map of every folder, in one page |
 | 3 | [`HANDOVER.md`](HANDOVER.md) | The handover: what exists, where, the traps nobody can discover, and what is proven vs not |
-| 4 | [`BACKLOG.md`](BACKLOG.md) | **What is left**, in order, one line each. The one roadmap |
-| 5 | [`../../workspace/COOKBOOK.md`](../../workspace/COOKBOOK.md) | **How the work is done** — read before touching code |
+| 4 | [`JOURNEY.md`](JOURNEY.md) | **The journey told forward** — Act 0 to today: the idea, what has been built and proven phase by phase, and the through-lines. Read this to understand the *why* behind the decisions, as if you had been here since day one |
+| 5 | [`BACKLOG.md`](BACKLOG.md) | **What is left**, in order, one line each. The one roadmap |
+| 6 | [`../../workspace/COOKBOOK.md`](../../workspace/COOKBOOK.md) | **How the work is done** — read before touching code |
 
 **Handing the work to an agent?** Paste [`START-PROMPT.md`](START-PROMPT.md). It is the first
 message for a fresh session: what to read and the rules it may not break. For **what to do now**,

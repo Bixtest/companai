@@ -103,7 +103,7 @@ made and how they were caught. It will save you from repeating them.
 ```text
 companai/                      ← you are here
 ├── INDEX.md                   this page — always start here
-├── JOURNAL.md                 what happened, in order, with dates
+├── JOURNAL.md                 what happened, in order, with dates (newest first)
 ├── LESSONS.md                 mistakes made, how they were caught, how to avoid them
 │
 ├── library/                   EVERYTHING IN ONE PLACE — the documentation, the AI material, the analysis
@@ -131,6 +131,8 @@ companai/                      ← you are here
 │   └── development/           DEVELOPMENT MANAGEMENT — where the work is tracked
 │       ├── HANDOVER.md        **the front door for a newcomer — read this first** (§0 is for an agent taking over)
 │       ├── START-PROMPT.md    **the message that starts a new session** — paste it to the agent
+│       ├── JOURNEY.md         **the journey told forward** — Act 0 to today: the idea, what was built
+│       │                      and proven phase by phase, and the through-lines. The complement to JOURNAL
 │       ├── README.md          the reading order, the sprint process
 │       ├── BACKLOG.md         **THE ONE ROADMAP** — everything left, in order
 │       ├── SPECIFICATIONS-DICTIONARY.md  **the standard every change is checked against** —
@@ -328,6 +330,7 @@ Break these and you will damage the project.
 | **Understand the whole project from zero (just inherited it)** | [`library/development/HANDOVER.md`](library/development/HANDOVER.md) — **the handover**: what exists, where, and the traps nobody can discover. **Starting a fresh agent session? Paste [`library/development/START-PROMPT.md`](library/development/START-PROMPT.md)** |
 | **See the short list of what to open first** | [`library/development/BOOKMARKS.md`](library/development/BOOKMARKS.md) — the handful of documents that matter, the end-game documents, and which folders are in git and which are not |
 | **Start working on this project (or pick it up after a handover)** | [`library/development/README.md`](library/development/README.md) — **the development hub**: the reading order, what to study first, and the handover sequence |
+| **Understand the full journey, as if I had been here since day one** | [`library/development/JOURNEY.md`](library/development/JOURNEY.md) — **the journey told forward**: Act 0 to today, phase by phase, with the through-lines that explain *why* each decision was taken. `JOURNAL.md` is the dated newest-first log; this is the story |
 | **See everything left to do, in one place** | [`library/development/BACKLOG.md`](library/development/BACKLOG.md) — **the one roadmap.** The old lists in `workspace/PROGRESS.md` are superseded by it |
 | **Understand how the three pieces run together** | [`library/development/ARCHITECTURE.md`](library/development/ARCHITECTURE.md) — Starting Kit + Hermes + the model server, and the dockerisation decision |
 | **Understand how Hermes attaches (the runtime boundary)** | [`library/development/ARCHITECTURE-hermes-integration.md`](library/development/ARCHITECTURE-hermes-integration.md) — **the full Hermes integration design**, and the owner's **B-05** decision (§11) |
@@ -362,6 +365,7 @@ Break these and you will damage the project.
 | **Put it on a server (hosting, domains, SSL)** | [`library/development/RUNBOOK-hosting-server-manual.md`](library/development/RUNBOOK-hosting-server-manual.md) — the hosting VM. For a domain end to end: [`RUNBOOK-adding-a-domain-step-by-step.md`](library/development/RUNBOOK-adding-a-domain-step-by-step.md). ⚠️ `workspace/references/deployment.md` is the **old Plesk** guide and is superseded |
 | **See what is already done, and why** | [`workspace/references/completed-work.md`](workspace/references/completed-work.md) |
 | See what happened and when | [`JOURNAL.md`](JOURNAL.md) |
+| **Understand how we got here, and why** | [`library/development/JOURNEY.md`](library/development/JOURNEY.md) — the journey told forward, so the reasoning is visible, not just the dates |
 | Avoid a known trap | [`LESSONS.md`](LESSONS.md) |
 | **Check if we already built something** | [`workspace/attic/CATALOG.md`](workspace/attic/CATALOG.md) |
 | Turn a parked module back on | [`workspace/references/parked-modules.md`](workspace/references/parked-modules.md) |

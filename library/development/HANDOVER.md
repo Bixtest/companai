@@ -1,12 +1,12 @@
 # Handover — start here if you have just inherited this project
 
 > **WHERE THE ACTIVE TASK LIVES (read this first, it is the one live fact).**
-> **The task being worked on right now is `perspectives` — the D2-wide guard-resolver migration, 8
-> deprecated calls across 3 files.** Its plain-English description, the exact six steps to do it, and
-> the current queue are in the **`★ ACTIVE TASK` box at the top of [`../../JOURNAL.md`](../../JOURNAL.md)**.
+> **The task being worked on right now is named in ONE place, and it is not this page:** the
+> **`★ ACTIVE TASK` box at the top of [`../../JOURNAL.md`](../../JOURNAL.md)**. Open it to see the
+> module in hand, its plain-English description, the exact steps to do it, and the current queue.
 > **That box is the single source of truth for "what is being worked on now".** No other document —
 > not this page, not START-PROMPT, not README, not BOOKMARKS, not BACKLOG — may state a live task;
-> they all point to the box. If this line and the box ever disagree, **the box wins** (owner's
+> they all point to the box. If any of them seems to disagree with the box, **the box wins** (owner's
 > instruction, 2026-10-06).
 
 **You know nothing about this project, this codebase, or these documents. This page is
@@ -137,7 +137,8 @@ reading it "for context" is how the direction gets buried (see [`../WHAT-WE-ARE-
 | B5 | [`SPEC-business-model-kernel.md`](SPEC-business-model-kernel.md) | **The product specification** — the vision's own 40-item gate; ratification only remains |
 | B6 | [`../analysis/findings/12-development-plan.md`](../analysis/findings/12-development-plan.md) | **The plan** — phases, order, why |
 | B7 | [`../../workspace/COOKBOOK.md`](../../workspace/COOKBOOK.md) | **How the work is done** — read before touching code |
-| B8 | [`../../LESSONS.md`](../../LESSONS.md) | 82 mistakes already made, so you do not repeat them |
+| B8 | [`../../LESSONS.md`](../../LESSONS.md) | 86 mistakes already made, so you do not repeat them |
+| B8a | [`JOURNEY.md`](JOURNEY.md) | **How the project got here, in order** — the arc from the first brainstorm to the guard migration in hand, written forward. Read it to follow any conversation about this project as if you had been here since day one. **`JOURNAL.md` is the same story newest-first, with the dates and measurements; this is the readable version** |
 
 **Tier C — supporting, opened only where the work needs it.**
 
@@ -356,8 +357,8 @@ here so nobody assumes a folder travels with the repository when it only exists 
 ```text
 companai/                       ← repo 1 root (thinking + docs).  You are here.
 ├── INDEX.md                    the map of every folder — start here after this file
-├── JOURNAL.md                  what happened, in order, with dates (3,242 lines)
-├── LESSONS.md                  mistakes made, how they were caught (2,746 lines, L1–L82)
+├── JOURNAL.md                  what happened, in order, with dates (4,434 lines; newest first)
+├── LESSONS.md                  mistakes made, how they were caught (2,899 lines, L1–L86)
 ├── where_we_left.md            ⚠️ stale (2026-08-13) — traps only
 │                               (THIS FILE is not at the root — it lives at
 │                                library/development/HANDOVER.md, below)
@@ -369,6 +370,7 @@ companai/                       ← repo 1 root (thinking + docs).  You are here
 │   │   ├── HANDOVER.md         **THIS FILE**
 │   │   ├── BOOKMARKS.md        the pages to open first — the short list, and what is in git
 │   │   ├── START-PROMPT.md     **the message that starts a new session**
+│   │   ├── JOURNEY.md          **how the project got here, in order** — the story, forward
 │   │   ├── README.md           the front door: reading order, the sprint process
 │   │   ├── BACKLOG.md          **THE ONE ROADMAP** — everything left, in order
 │   │   ├── ARCHITECTURE.md     how Starting Kit + Hermes + model server run together
@@ -578,7 +580,7 @@ and was *not* re-measured — treat it as a starting point, not a fact.**
 | **Repo 1** (thinking/docs) | `master`, HEAD **`a72fdfe`** — the commit that carries the G-03 docs, **clean** |
 | **Repo 2** (code) | `main`, HEAD **`cafe7d6`** — the commit that carries the G-03 code, **clean** |
 | **Codebase shape** | **21 packages, 1 app** (`apps/mercato`) — a monorepo (Yarn 4.17.1 + Turbo) |
-| **Documentation** | `library/` holds **3,441 markdown files**; `LESSONS.md` 2,746 lines (L1–L82); `JOURNAL.md` 3,242 lines; `COOKBOOK.md` 1,187 lines |
+| **Documentation** | `library/` holds **3,470 markdown files**; `LESSONS.md` 2,899 lines (L1–L86); `JOURNAL.md` 4,434 lines; `COOKBOOK.md` 2,948 lines |
 | **The studies** | analysis programme **complete** (batches 0–12, 13 reports); Paperclip + Hermes study **complete** (11 batches, 3,940 lines, 53 lessons) |
 | **The specification** | **Draft 2** — of its 40 rows, **36 SETTLED · 1 DERIVED · 3 DEFERRED-with-trigger · 0 OPEN — owner**. The gate is passed; only ratification remains |
 | **The runtime boundary (B-05)** | **DECIDED 2026-10-05 by the owner.** One product, one repository, one deployment, one interface (ours), with Hermes as a **supervised private runtime process behind the internal port**; Hermes is **headless**. Reasoning in [`ARCHITECTURE-hermes-integration.md`](ARCHITECTURE-hermes-integration.md) §11. The Hermes **profile** topology is deferred with the trigger **the agent gateway** |
