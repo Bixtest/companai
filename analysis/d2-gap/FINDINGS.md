@@ -174,6 +174,13 @@ describe them**. The scan read them as GAP only because the file references **no
 symbols** it looks for. This is the trap the project's own skill
 `check-the-premise-before-the-blanket-fix` names.
 
+> **Arithmetic to expect, so it is not re-derived:** the module has **17 write verbs but only 15
+> `runMessageMutationGuards(` call sites**. That is not a gap — two files
+> (`[id]/conversation/{read,archive}/route.ts`) export **two verbs each that share one call site**: a
+> private `runConversation*Mutation()` helper holding the single guard call, with `PUT` and `DELETE`
+> both delegating to it. All 17 verbs reach the guard. Verified twice: the per-file `verbs` vs
+> `guard-calls` counts, and reading both files end to end.
+
 **But the code was still defective, in a different way.** `messages/api/guards.ts` built
 `runMutationGuards([legacyGuard], …)` — a **one-element array**. `runMutationGuards` filters only the
 array it is handed, so `getAllMutationGuardInstances()` (the global guard store) was **never
