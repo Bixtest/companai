@@ -1,7 +1,6 @@
 /** @jest-environment node */
 
-const validateCrudMutationGuardMock = jest.fn()
-const runCrudMutationGuardAfterSuccessMock = jest.fn()
+const runRouteMutationGuardsMock = jest.fn()
 
 type Where = Record<string, unknown>
 
@@ -44,9 +43,12 @@ jest.mock('@open-mercato/shared/lib/auth/server', () => ({
   }),
 }))
 
-jest.mock('@open-mercato/shared/lib/crud/mutation-guard', () => ({
-  validateCrudMutationGuard: (...args: unknown[]) => validateCrudMutationGuardMock(...args),
-  runCrudMutationGuardAfterSuccess: (...args: unknown[]) => runCrudMutationGuardAfterSuccessMock(...args),
+// D2 (2026-10-06): the entities write path now runs the REGISTRY-based guard
+// wrapper (`runRouteMutationGuards`) instead of the deprecated single-service
+// pair. The mock is re-pointed here; the test's intent is unchanged — a blocked
+// guard must stop the write, and a passing guard must run its after-success.
+jest.mock('@open-mercato/shared/lib/crud/route-mutation-guard', () => ({
+  runRouteMutationGuards: (...args: unknown[]) => runRouteMutationGuardsMock(...args),
 }))
 
 jest.mock('@open-mercato/core/modules/entities/data/entities', () => ({
@@ -96,8 +98,21 @@ import { POST as DEFINITIONS_POST, DELETE as DEFINITIONS_DELETE } from '../defin
 import { POST as DEFINITIONS_BATCH_POST } from '../definitions.batch'
 import { POST as DEFINITIONS_RESTORE_POST } from '../definitions.restore'
 
-const allow = () => validateCrudMutationGuardMock.mockResolvedValue({ ok: true, shouldRunAfterSuccess: true, metadata: { token: 'guard' } })
-const block = () => validateCrudMutationGuardMock.mockResolvedValue({ ok: false, status: 423, body: { error: 'blocked by guard' } })
+const afterSuccess = jest.fn(async () => undefined)
+
+const allow = () =>
+  runRouteMutationGuardsMock.mockResolvedValue({
+    ok: true,
+    modifiedPayload: undefined,
+    runAfterSuccess: afterSuccess,
+  })
+const block = () =>
+  runRouteMutationGuardsMock.mockResolvedValue({
+    ok: false,
+    errorStatus: 423,
+    errorBody: { error: 'blocked by guard' },
+    response: Response.json({ error: 'blocked by guard' }, { status: 423 }),
+  })
 
 const jsonRequest = (url: string, method: string, body: unknown) =>
   new Request(url, {
@@ -111,7 +126,6 @@ describe('entities write routes — mutation guard lifecycle (issue #3226)', () 
     jest.clearAllMocks()
     mockEm.find.mockResolvedValue([] as unknown[])
     mockEm.findOne.mockResolvedValue(null)
-    runCrudMutationGuardAfterSuccessMock.mockResolvedValue(undefined)
   })
 
   describe('POST /api/entities/entities', () => {
@@ -121,12 +135,15 @@ describe('entities write routes — mutation guard lifecycle (issue #3226)', () 
       block()
       const response = await ENTITIES_POST(jsonRequest('http://x/api/entities/entities', 'POST', body))
       expect(response.status).toBe(423)
-      expect(validateCrudMutationGuardMock).toHaveBeenCalledWith(
-        container,
-        expect.objectContaining({ resourceKind: 'entities.entity', operation: 'create', tenantId: 'tenant-1' }),
+      expect(runRouteMutationGuardsMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          container,
+          auth: expect.objectContaining({ tenantId: 'tenant-1' }),
+          input: expect.objectContaining({ resourceKind: 'entities.entity', operation: 'create' }),
+        }),
       )
       expect(mockEm.flush).not.toHaveBeenCalled()
-      expect(runCrudMutationGuardAfterSuccessMock).not.toHaveBeenCalled()
+      expect(afterSuccess).not.toHaveBeenCalled()
     })
 
     it('runs the after-success hook once the write succeeds', async () => {
@@ -134,10 +151,7 @@ describe('entities write routes — mutation guard lifecycle (issue #3226)', () 
       const response = await ENTITIES_POST(jsonRequest('http://x/api/entities/entities', 'POST', body))
       expect(response.status).toBe(200)
       expect(mockEm.flush).toHaveBeenCalled()
-      expect(runCrudMutationGuardAfterSuccessMock).toHaveBeenCalledWith(
-        container,
-        expect.objectContaining({ resourceKind: 'entities.entity', operation: 'create' }),
-      )
+      expect(afterSuccess).toHaveBeenCalled()
     })
   })
 
@@ -149,9 +163,10 @@ describe('entities write routes — mutation guard lifecycle (issue #3226)', () 
       mockEm.findOne.mockResolvedValue({ id: 'ent-1', updatedAt: new Date() })
       const response = await ENTITIES_DELETE(jsonRequest('http://x/api/entities/entities', 'DELETE', body))
       expect(response.status).toBe(423)
-      expect(validateCrudMutationGuardMock).toHaveBeenCalledWith(
-        container,
-        expect.objectContaining({ resourceKind: 'entities.entity', operation: 'delete' }),
+      expect(runRouteMutationGuardsMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          input: expect.objectContaining({ resourceKind: 'entities.entity', operation: 'delete' }),
+        }),
       )
       expect(mockEm.flush).not.toHaveBeenCalled()
     })
@@ -162,7 +177,7 @@ describe('entities write routes — mutation guard lifecycle (issue #3226)', () 
       const response = await ENTITIES_DELETE(jsonRequest('http://x/api/entities/entities', 'DELETE', body))
       expect(response.status).toBe(200)
       expect(mockEm.flush).toHaveBeenCalled()
-      expect(runCrudMutationGuardAfterSuccessMock).toHaveBeenCalled()
+      expect(afterSuccess).toHaveBeenCalled()
     })
   })
 
@@ -173,9 +188,10 @@ describe('entities write routes — mutation guard lifecycle (issue #3226)', () 
       block()
       const response = await DEFINITIONS_POST(jsonRequest('http://x/api/entities/definitions', 'POST', body))
       expect(response.status).toBe(423)
-      expect(validateCrudMutationGuardMock).toHaveBeenCalledWith(
-        container,
-        expect.objectContaining({ resourceKind: 'entities.field_definition', operation: 'create' }),
+      expect(runRouteMutationGuardsMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          input: expect.objectContaining({ resourceKind: 'entities.field_definition', operation: 'create' }),
+        }),
       )
       expect(mockEm.flush).not.toHaveBeenCalled()
     })
@@ -185,7 +201,7 @@ describe('entities write routes — mutation guard lifecycle (issue #3226)', () 
       const response = await DEFINITIONS_POST(jsonRequest('http://x/api/entities/definitions', 'POST', body))
       expect(response.status).toBe(200)
       expect(mockEm.flush).toHaveBeenCalled()
-      expect(runCrudMutationGuardAfterSuccessMock).toHaveBeenCalled()
+      expect(afterSuccess).toHaveBeenCalled()
     })
   })
 
@@ -205,7 +221,7 @@ describe('entities write routes — mutation guard lifecycle (issue #3226)', () 
       mockEm.findOne.mockResolvedValue({ id: 'def-1', updatedAt: new Date() })
       const response = await DEFINITIONS_DELETE(jsonRequest('http://x/api/entities/definitions', 'DELETE', body))
       expect(response.status).toBe(200)
-      expect(runCrudMutationGuardAfterSuccessMock).toHaveBeenCalled()
+      expect(afterSuccess).toHaveBeenCalled()
     })
   })
 
@@ -216,9 +232,10 @@ describe('entities write routes — mutation guard lifecycle (issue #3226)', () 
       block()
       const response = await DEFINITIONS_BATCH_POST(jsonRequest('http://x/api/entities/definitions/batch', 'POST', body))
       expect(response.status).toBe(423)
-      expect(validateCrudMutationGuardMock).toHaveBeenCalledWith(
-        container,
-        expect.objectContaining({ resourceKind: 'entities.field_definition', operation: 'custom' }),
+      expect(runRouteMutationGuardsMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          input: expect.objectContaining({ resourceKind: 'entities.field_definition', operation: 'custom' }),
+        }),
       )
       expect(mockEm.begin).not.toHaveBeenCalled()
       expect(mockEm.flush).not.toHaveBeenCalled()
@@ -229,7 +246,7 @@ describe('entities write routes — mutation guard lifecycle (issue #3226)', () 
       const response = await DEFINITIONS_BATCH_POST(jsonRequest('http://x/api/entities/definitions/batch', 'POST', body))
       expect(response.status).toBe(200)
       expect(mockEm.commit).toHaveBeenCalled()
-      expect(runCrudMutationGuardAfterSuccessMock).toHaveBeenCalled()
+      expect(afterSuccess).toHaveBeenCalled()
     })
   })
 
@@ -249,7 +266,7 @@ describe('entities write routes — mutation guard lifecycle (issue #3226)', () 
       mockEm.findOne.mockResolvedValue({ id: 'def-1', updatedAt: new Date() })
       const response = await DEFINITIONS_RESTORE_POST(jsonRequest('http://x/api/entities/definitions/restore', 'POST', body))
       expect(response.status).toBe(200)
-      expect(runCrudMutationGuardAfterSuccessMock).toHaveBeenCalled()
+      expect(afterSuccess).toHaveBeenCalled()
     })
   })
 })

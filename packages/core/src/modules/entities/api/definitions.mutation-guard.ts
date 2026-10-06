@@ -1,10 +1,7 @@
 import { NextResponse } from 'next/server'
 import type { AwilixContainer } from 'awilix'
 import type { AuthContext } from '@open-mercato/shared/lib/auth/server'
-import {
-  runCrudMutationGuardAfterSuccess,
-  validateCrudMutationGuard,
-} from '@open-mercato/shared/lib/crud/mutation-guard'
+import { runRouteMutationGuards } from '@open-mercato/shared/lib/crud/route-mutation-guard'
 
 export const ENTITY_DEFINITION_RESOURCE_KIND = 'entities.entity'
 export const FIELD_DEFINITION_RESOURCE_KIND = 'entities.field_definition'
@@ -32,6 +29,20 @@ function resolveActorUserId(auth: AuthenticatedContext): string {
   return auth.userId ?? auth.sub
 }
 
+/**
+ * Runs the structural mutation guards for every entity / field-definition write.
+ *
+ * D2 (2026-10-06): this used to call the `@deprecated` `validateCrudMutationGuard()`,
+ * which resolves ONLY the single DI-registered `crudMutationGuardService` and
+ * silently bypasses every guard in the global mutation-guard store. The effect
+ * was that a module could ship `data/guards.ts` guards for `entities.entity` /
+ * `entities.field_definition` and they would never run on this path.
+ *
+ * It now goes through `runRouteMutationGuards()`, the registry-based wrapper the
+ * deprecation notice names as the replacement. That runs every registered guard
+ * plus the bridged legacy service (`bridgeLegacyGuard()`), so the legacy
+ * behaviour is preserved exactly while the registry guards start being enforced.
+ */
 export async function beginEntitiesMutationGuard(
   ctx: EntitiesMutationGuardContext,
 ): Promise<EntitiesMutationGuardHandle> {
@@ -41,40 +52,32 @@ export async function beginEntitiesMutationGuard(
     return { blockedResponse: null, runAfterSuccess: async () => undefined }
   }
 
-  const guardResult = await validateCrudMutationGuard(ctx.container, {
-    tenantId,
-    organizationId: ctx.auth.orgId ?? null,
-    userId,
-    resourceKind: ctx.resourceKind,
-    resourceId: ctx.resourceId,
-    operation: ctx.operation,
-    requestMethod: ctx.req.method,
-    requestHeaders: ctx.req.headers,
-    mutationPayload: ctx.mutationPayload ?? null,
+  const guardResult = await runRouteMutationGuards({
+    container: ctx.container,
+    req: ctx.req,
+    auth: {
+      userId,
+      tenantId,
+      organizationId: ctx.auth.orgId ?? null,
+    },
+    input: {
+      resourceKind: ctx.resourceKind,
+      resourceId: ctx.resourceId,
+      operation: ctx.operation,
+      mutationPayload: ctx.mutationPayload ?? null,
+    },
   })
 
-  if (guardResult && !guardResult.ok) {
+  if (!guardResult.ok) {
     return {
-      blockedResponse: NextResponse.json(guardResult.body, { status: guardResult.status }),
+      blockedResponse: NextResponse.json(guardResult.errorBody, { status: guardResult.errorStatus }),
       runAfterSuccess: async () => undefined,
     }
   }
 
   return {
     blockedResponse: null,
-    runAfterSuccess: async () => {
-      if (!guardResult?.ok || !guardResult.shouldRunAfterSuccess) return
-      await runCrudMutationGuardAfterSuccess(ctx.container, {
-        tenantId,
-        organizationId: ctx.auth.orgId ?? null,
-        userId,
-        resourceKind: ctx.resourceKind,
-        resourceId: ctx.resourceId,
-        operation: ctx.operation,
-        requestMethod: ctx.req.method,
-        requestHeaders: ctx.req.headers,
-        metadata: guardResult.metadata ?? null,
-      })
-    },
+    runAfterSuccess: guardResult.runAfterSuccess,
   }
 }
+
