@@ -150,7 +150,9 @@ export function parseTierSettings(raw: unknown): TierSettings | null {
 
   const rawMap = obj.changeKindTier
   if (!rawMap || typeof rawMap !== 'object') return null
-  const changeKindTier: Record<string, ChangeRiskTier> = {}
+  // A NULL-PROTOTYPE map: nothing here can collide with `__proto__`/`constructor`,
+  // so a hostile key cannot land on Object.prototype or be read back from it.
+  const changeKindTier: Record<string, ChangeRiskTier> = Object.create(null)
   for (const [kind, tier] of Object.entries(rawMap as Record<string, unknown>)) {
     if (!isTier(tier)) return null // one bad row invalidates the whole setting — fail closed
     changeKindTier[kind] = tier
@@ -170,9 +172,24 @@ export function parseTierSettings(raw: unknown): TierSettings | null {
  * `triage.ts` stays the pure function its header promises, and its existing
  * exhaustive tests keep working unchanged. Given no settings (or ones that failed
  * validation), it uses {@link DEFAULT_TIER_SETTINGS}, which fails closed.
+ *
+ * **Own-keys only — a critic pass found this mattered.** A plain `map[kind]` reads
+ * the *prototype chain*: `map['__proto__']` returns `Object.prototype`, and
+ * `map['constructor']` returns a function — both **truthy**, so `?? default` would
+ * keep them and hand back a non-tier value for a kind that was never set. A change
+ * kind is a string from a database or a classifier, so it can be anything, including
+ * `__proto__`. Indexing only **own** keys makes an unset kind (even a hostile one)
+ * fall to the default, which is how it must behave.
  */
 export function resolveTier(kind: string, settings: TierSettings = DEFAULT_TIER_SETTINGS): ChangeRiskTier {
-  return settings.changeKindTier[kind] ?? settings.defaultTier
+  const map = settings.changeKindTier
+  if (Object.prototype.hasOwnProperty.call(map, kind)) {
+    const tier = map[kind]
+    // Belt and braces: parseTierSettings already rejects non-tier values, but a
+    // setting built by hand (not through the parser) must not be trusted either.
+    if (tier === 'safe' || tier === 'review_required' || tier === 'explicit_approval') return tier
+  }
+  return settings.defaultTier
 }
 
 /* ------------------------------------------------------------------ *

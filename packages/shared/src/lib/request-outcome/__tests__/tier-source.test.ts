@@ -145,6 +145,43 @@ describe('a malformed setting is treated as NO setting (fail closed)', () => {
   })
 })
 
+describe('a hostile setting cannot soften the default by tricking the lookup', () => {
+  it('__proto__ and constructor as change kinds still fail closed when unset', () => {
+    // A change kind is a string from a database or a classifier, so it can be
+    // anything — including a prototype key. Before the fix, `map['__proto__']` read
+    // Object.prototype (truthy), so `?? default` kept a non-tier value instead of
+    // falling back. Now only OWN keys are read, so an unset hostile key falls to the
+    // default — the seed's strictest.
+    for (const hostile of ['__proto__', 'constructor', 'toString', 'hasOwnProperty']) {
+      expect(resolveTier(hostile)).toBe(UNRECOGNISED_CHANGE_TIER)
+      expect(resolveTier(hostile, DEFAULT_TIER_SETTINGS)).toBe(UNRECOGNISED_CHANGE_TIER)
+    }
+  })
+
+  it('a map with a literal __proto__ OWN key does not leak the prototype, and other keys are unaffected', () => {
+    // JSON.parse gives a real own `__proto__` key (it does not set the prototype the
+    // way `obj.__proto__ = x` does). parseTierSettings builds a null-prototype map,
+    // so reading it can never reach Object.prototype. The point of this test is that
+    // a hostile key in the SETTING cannot poison lookups for OTHER keys.
+    const parsed = parseTierSettings(
+      JSON.parse('{"changeKindTier":{"__proto__":"safe","real_kind":"review_required"},"defaultTier":"explicit_approval","fallbackLevel":"approval"}'),
+    )
+    expect(parsed).not.toBeNull()
+    if (!parsed) return
+    // An unrelated, unset kind still fails closed — the pollution did not spread.
+    expect(resolveTier('some_other_kind', parsed)).toBe(UNRECOGNISED_CHANGE_TIER)
+    // A real key in the same map is honoured.
+    expect(resolveTier('real_kind', parsed)).toBe('review_required')
+    // Object.prototype must be untouched.
+    expect(({} as Record<string, unknown>).constructor).toBe(Object)
+  })
+
+  it('the seed is frozen, so no caller can mutate the platform default', () => {
+    expect(Object.isFrozen(DEFAULT_TIER_SETTINGS)).toBe(true)
+    expect(Object.isFrozen(DEFAULT_TIER_SETTINGS.changeKindTier)).toBe(true)
+  })
+})
+
 describe('the reader is wired to the right key and returns a valid setting when the store is good', () => {
   it('reads module request_outcome / structureChangeTiers, and parses it back', async () => {
     const calls: Array<{ moduleId: string; name: string }> = []
