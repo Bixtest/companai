@@ -7,6 +7,48 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-10-06 (later still) — D2-wide: the owner set HOW, not just WHAT
+
+**The owner's two directives this turn.** (1) *Do not state an issue without saying how it was or will be
+solved, when, and where it is documented* — an open-ended concern is a source of confusion, not a report.
+(2) On the deprecated guard resolver: *"mapping existing modules to core needs may provide a shortcut to
+retire the resolver and with every module you decide if you customize and integrate directly or just
+disconnect and park till later."*
+
+**The answer to "did we fully process the blueprint?"** Yes, and it is documented in three places, each
+measured: [`BLUEPRINT-GAP-ANALYSIS.md`](library/development/BLUEPRINT-GAP-ANALYSIS.md) (four gaps A–D, each
+with what-the-blueprint-says / what-we-have / what-to-add / where-in-the-order);
+[`CORE-MODULES-REGISTER.md`](library/development/CORE-MODULES-REGISTER.md) (P1–P18 + B1–B14 with
+two-route verdicts); [`CORE-BOUNDARY.md`](library/development/CORE-BOUNDARY.md) (Ring 1 core / Ring 2
+configurable / Ring 3 packs, the direct answer to the uncustomisable-core question). All three feed
+[`BUILD-ORDER.md`](library/development/BUILD-ORDER.md) §3. Nothing from the blueprint is left undocumented;
+gaps A–D are each assigned a phase.
+
+**What changed on D2-wide.** It was a counted item ("199 call sites, module by module") but the count had
+drifted in my retelling and — more importantly — the item carried no *decision method*. It now carries
+both. **The count, re-measured this turn by two routes that share no failure mode** (the doc's own count
+command, and a per-file walk of every affected module): **199 call sites / 78 files**. Split: **93 calls /
+38 files ENABLED** (a live defect — they run today and bypass the registry), **106 / 40 parked**. The
+`entities` path is already retired for real and sits *inside* the 199 as the worked example.
+
+**Two corrections I had to make to myself, recorded because they are the method working.** Mid-turn I
+"re-measured" and got 352, and briefly wrote that 199 was wrong. It was not: a name-only grep also counts
+**import and docstring lines**, so 356 measured *names mentioned*, while 199 measures *calls made* — two
+different questions. Then I "corrected" the enabled split 93/38 → 92/37, also wrongly: my per-module loop
+had missed the `workflows` API subdirectories (real: 9 calls / 3 files). A **critic pass that re-measured
+every single table row** — not just the total — caught it. Restored to the original figures, which were
+right. Neither wrong number reached a file except in this turn's own draft, now fixed; the calls-vs-names
+ambiguity is written into BUILD-ORDER §2c so it is not re-derived.
+
+**The plan (BUILD-ORDER §2e).** D2-wide is a **module-to-core-need mapping**; each affected module is
+tagged **(A) customise & integrate directly now**, **(B) disconnect & park till later**, or **(C) already
+connected**. Enabled modules first (largest cluster first: `data_sync` → `dictionaries` → `dashboards`),
+each with its own mutation proof; parked modules are recorded as graft-phase — their deprecated calls are
+**dormant, not live**, which is the shortcut the owner spotted. **That is the honest statement of how
+D2-wide will be solved, when, and where it is written down.**
+
+---
+
 ## 2026-10-06 (latest) — D1: the tier mapping stopped being code and became a setting
 
 **D1 is done (code `558cfab`).** The owner's instruction was *"concerning tiers, default ones and
