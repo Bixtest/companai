@@ -11,10 +11,7 @@ import { parseScopedCommandInput } from '@open-mercato/shared/lib/api/scoped'
 import { findWithDecryption } from '@open-mercato/shared/lib/encryption/find'
 import { plannerAvailabilityDateSpecificReplaceSchema } from '../data/validators'
 import { serializeOperationMetadata } from '@open-mercato/shared/lib/commands/operationMetadata'
-import {
-  runCrudMutationGuardAfterSuccess,
-  validateCrudMutationGuard,
-} from '@open-mercato/shared/lib/crud/mutation-guard'
+import { beginPlannerMutationGuard } from './mutation-guard'
 import { PlannerAvailabilityRule } from '../data/entities'
 import { parseAvailabilityRuleWindow } from '../lib/availabilitySchedule'
 import { assertAvailabilityWriteAccess, resolveAvailabilityActorId } from './access'
@@ -100,25 +97,21 @@ export async function POST(req: Request) {
         }
       }
     }
-    const guardInput = {
+    const guard = await beginPlannerMutationGuard({
+      container: ctx.container,
       tenantId: input.tenantId,
       organizationId: input.organizationId,
       userId: resolveAvailabilityActorId(ctx.auth),
+      req,
       resourceKind: 'planner.availability',
       resourceId: input.subjectId,
-      operation: 'custom' as const,
-      requestMethod: req.method,
-      requestHeaders: req.headers,
-    }
-    const guardResult = await validateCrudMutationGuard(ctx.container, { ...guardInput, mutationPayload: input })
-    if (guardResult && !guardResult.ok) {
-      return NextResponse.json(guardResult.body, { status: guardResult.status })
-    }
+      operation: 'custom',
+      mutationPayload: input,
+    })
+    if (guard.blockedResponse) return guard.blockedResponse
     const commandBus = ctx.container.resolve('commandBus') as CommandBus
     const { logEntry } = await commandBus.execute('planner.availability.date-specific.replace', { input, ctx })
-    if (guardResult?.ok && guardResult.shouldRunAfterSuccess) {
-      await runCrudMutationGuardAfterSuccess(ctx.container, { ...guardInput, metadata: guardResult.metadata ?? null })
-    }
+    await guard.runAfterSuccess()
     const response = NextResponse.json({ ok: true })
     if (logEntry?.undoToken && logEntry?.id && logEntry?.commandId) {
       response.headers.set(
