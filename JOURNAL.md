@@ -7,7 +7,64 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
-## 2026-10-06 (latest) — Sprint 0 re-run: the stack comes up whole, and why it did not
+## 2026-10-06 (latest) — The three things a prompt can become, and a wrong reading of mine corrected
+
+**The owner described his core features_pack: not every prompt becomes a Function.** A prompt can end as
+**(1) a one-time answer** (analyse, report into a datagrid/form/report, save nothing), **(2) a model
+proposal** (the prompt needs new *structure* — a field, an entity, a whole new service like LMS or CRM),
+or **(3) a saved Function** (walked to *flawless*, named, placed in a grouping, then runs with **no AI**,
+"like a standard item menu in the traditional platforms"). He asked me to grill it and **verify it is
+well established in the development plans**.
+
+**The grilling found that my own previous claim was wrong — and it is the exact error my method warns
+about.** In the same-day gap-register pass I had written that the vision "never names a prompt-caused
+schema change". Re-measured from the source: **it does name it.** `Doc 04 §33` (line 997) —
+*"When the user says: **Add Vehicle.** the first operation is: draft Business Model change — not ALTER
+TABLE"*; `Doc 04 §34` — the full `User/AI request → Model Proposal → … → Publish Model Version` pipeline;
+`AI_Native… §122` — `User requirement → … → Activate capability` (the LMS/CRM case); and `§123` — *"Both
+can originate from natural language, but they go through different command paths."* I had measured the
+wrong document. **Retracted and corrected in place.**
+
+**What is genuinely absent, measured three independent ways.** The **one-time answer is named nowhere.**
+(a) the vision folder — every `ephemeral|one-time|ad-hoc` hit is about *system* state (prompt caches,
+worker state, processing state), not a prompt outcome; (b) the whole library (~26,000 files) — every
+substantive hit belongs to an imported project or a Cancel button; (c) the nearest counter-example, read
+in full — `Doc 03 §40` (*"Do NOT save only: raw SQL / the prompt / the returned data"*) is about **what**
+to save when you save, not **whether** to save. And the **triage** — the rule that decides which ending a
+prompt gets — exists as **one sentence** (`AI_Native… §123`) with **no backlog item and no home**, while
+`save as function` returns only the two loop lines (`BACKLOG` 70, `HANDOVER` 616), neither naming
+outcomes 1 or 2.
+
+**So: two of three outcomes are covered, one is absent, and the triage is homeless.** That is now
+**G-21**, with the design in [`library/development/ARCHITECTURE-request-outcomes.md`](library/development/ARCHITECTURE-request-outcomes.md)
+— six grilled questions, each with a decision taken and written down. Two things the grilling settled
+that the vision had left open: **(i)** the **"flawless" bar** is not a feeling — it is `Doc 03 §46`'s
+objective checks (`IR valid · entities valid · … · sample result valid`), enforced by G-02's compiler, so
+the Save button should be *disabled* until they pass; **(ii)** the **grouping** (`§61`'s
+`Destination: Finance → Accounts Receivable`) is decided to be a **declared canonical path**, not free
+text, so a menu cannot be spelled two ways and `§63`'s *"pattern → vendor module"* becomes detectable.
+
+**A critic pass then caught my own invented scheme, and I replaced it with the vision's.** I had split
+outcome 2 into a hand-drawn "small/large". A hostile re-read found `Doc 04 §130–§132` already tiers
+*changes* into **safe / review-required / explicit-approval**. My approximation was weaker than the rule
+sitting next to it, so G-21 now uses the vision's three tiers.
+
+**Documentation changed in the same pass:** `BACKLOG.md` (**G-21** added; **G-17**'s row narrowed to all
+three paths; header), `WHAT-WE-ARE-BUILDING.md` (the loop diagram now **branches**, because it previously
+implied every need ends in a saved Function — the exact misreading the owner warned about),
+`HANDOVER.md` (the decisive-loop line shows the branch), `README.md` (new doc indexed),
+`NEEDS-YOU.md` (**item 14** — one genuine owner question: which tier an LMS/CRM-sized capability lands
+in), and the gap register (**§7b**: the wrong reading corrected, the real gap recorded).
+
+**One open question for the owner, no more:** *when a prompt asks for a whole new service, is that
+review-required or explicit-approval?* Recommended: **explicit-approval**. Everything else was decided
+and written down so it can be changed by saying so.
+
+**Next:** G-17 (unchanged) — now scoped to emit the IR for **all three** paths, not the read path alone.
+
+---
+
+## 2026-10-06 — Sprint 0 re-run: the stack comes up whole, and why it did not
 
 **The owner's answer unblocked `S0`, so the re-run happened — and it immediately found a real defect.**
 The owner had reported the stack "up" and Docker Desktop auto-start "fixed". Measured independently:

@@ -218,6 +218,39 @@ The owner's standing rule: things that **add value beyond the vision**. Batch 7 
 - **S-01 (the agent runtime that would drive G-17) is borrowed, not wired.** The register already says so ("the largest real shortcut"); what is now measurable is that its "still needed" column — *the integration boundary + our gate* — is **not a tracked BACKLOG item**. G-17 supplies the *mechanism*; nothing on the roadmap owns the *wiring of an agent that authors Functions*.
 - **The one-line location.** Everything **downstream of the IR** is built and proven; the single missing join is the AI **emitting** the IR, which is **G-17** — startable, sized **M**, sitting late in phase 3, with its runtime currently borrowed from Hermes.
 
+### 7b. Addendum, 2026-10-06 (second) — the request-outcome taxonomy, and a correction to my own reading
+
+The owner set out a **core features_pack**: not every prompt becomes a permanent Function. A prompt can
+end as **(1) a one-time answer**, **(2) a model proposal** (new structure — a field, an entity, a whole
+new service like LMS/CRM), or **(3) a saved Function** (named, grouped, zero-AI). He asked whether this
+is well established in the plans. I measured the vision directly.
+
+- **CORRECTION — a claim of mine in the same-day §7a pass was wrong.** I had recorded that the vision
+  "never names a prompt-caused schema change". That was **wrong, and it is the class of error my own
+  method warns about: I measured a different thing than the claim named.** The vision names it, plainly:
+  **Doc 04 §33** (line 997) — *"When the user says: **Add Vehicle.** the first operation is: draft
+  Business Model change — not ALTER TABLE"*; **Doc 04 §34** — the full `User / AI request → Model
+  Proposal → … → Publish Model Version` pipeline; **`AI_Native…` §122** — `User requirement → … →
+  Activate capability` (the LMS/CRM case); and **§123** — *"Both can originate from natural language,
+  but they go through different command paths"*. The earlier reading is retracted.
+- **What is genuinely absent — outcome 1.** A one-time, never-saved answer is **named nowhere.** Three
+  independent routes: (a) the vision folder — every `ephemeral|one-time|ad-hoc` hit is about **system**
+  state (Doc 04 line 300 *"Ephemeral processing state"*, Doc 06 line 5068, `AI_Native…` lines 608/2667
+  on prompt-cache/worker state); (b) the whole library (~26,000 files) — every substantive hit belongs
+  to an imported project (Hermes session persistence, Paperclip drafts, ComfyUI previews) or to Cancel
+  buttons; (c) the nearest counter-example, read in full — Doc 03 **§40** (*"Do NOT save only: raw SQL /
+  the prompt / the returned data"*) is about **what** to save when you save, not **whether** to save.
+- **What is genuinely absent — the triage as a tracked thing.** `AI_Native…` §123 states the principle
+  once; search of `library/development/*.md` for `prompt outcome | three outcomes | request type |
+  triage` returns **nothing**, and `save as function` returns only the two loop lines (`BACKLOG` 70,
+  `HANDOVER` 616), neither naming outcomes 1 or 2.
+- **Where it now lives.** **G-21** (backlog), with the design, the six grilled questions and the
+  decisions in [`../../development/ARCHITECTURE-request-outcomes.md`](../../development/ARCHITECTURE-request-outcomes.md).
+  The **§46 objective checks** (Doc 03 §46 — `IR valid · entities valid · … · sample result valid`) are
+  named as the **machine-checked bar** for offering "Save as Function"; the **grouping** is decided to be
+  a **declared canonical path**, not free text; and outcome 2 is split into **two sizes** with different
+  approvers. **G-17's scope is narrowed accordingly** — it must emit the IR for all **three** paths.
+
 ---
 
 ## 8. Definition of done

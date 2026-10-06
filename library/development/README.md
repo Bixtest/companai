@@ -143,6 +143,7 @@ See COOKBOOK rule zero-ten.
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | How the Starting Kit + Hermes + the model server run together, and the dockerisation decision (Sprint 0) |
 | [`ARCHITECTURE-hermes-integration.md`](ARCHITECTURE-hermes-integration.md) | **The Hermes integration design** — platform to platform, function to function, and multi-tenant, with the owner's **B-05** runtime-boundary decision (§11) |
 | [`ARCHITECTURE-model-server-integration.md`](ARCHITECTURE-model-server-integration.md) | **The model layer** — llama.cpp as one preset entry, the embedding lane, the two defects root-caused, and the owner's **model-default** decision (§9) |
+| [`ARCHITECTURE-request-outcomes.md`](ARCHITECTURE-request-outcomes.md) | **The three things a prompt can become** — the owner's core features_pack: a one-time answer, a model proposal (new structure), or a saved Function — and the triage (`G-21`) that decides which, with the gate that stops the AI reshaping the database on its own |
 | [`BLOCKERS.md`](BLOCKERS.md) | **Anything stopping progress**, with what clears it. **Read this before wondering why something is not moving** |
 | [`NEEDS-YOU.md`](NEEDS-YOU.md) | **The owner-only action list** — numbered, with literal steps and a way to answer all of it at once |
 | [`SPEC-business-model-kernel.md`](SPEC-business-model-kernel.md) | **The product specification** (Draft 2) — passes the vision's own 40-item gate; only the owner's ratification remains |

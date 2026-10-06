@@ -613,10 +613,19 @@ and was *not* re-measured — treat it as a starting point, not a fact.**
   too**, and **`S0` is done (2026-10-06)**. **The next build item is the first unbuilt item in
   `BACKLOG.md` §"The list"** — at the time of writing that is `G-12` (business backup and restore).
   **A measured vision check on 2026-10-06 put one item in competition with it:** the AI-first vision's
-  decisive loop is `AI → Business IR → validation → user verifies → Save as Function → zero-AI run`;
-  everything **downstream of the IR** is built and proven (G-01/G-02/G-03/G-07), but the AI that should
+  decisive loop is `AI → Business IR → validation → user verifies → ONE OF THREE ENDINGS`; everything
+  **downstream of the IR** is built and proven (G-01/G-02/G-03/G-07), but the AI that should
   **emit** the IR is not wired — that is **`G-17`** (schema-constrained generation), startable now.
-  **Which goes first — `G-12` or `G-17` — is the owner's call.** Finding: `G-17`'s row + gap register §7a.
+  **The "one of three endings" is the owner's core features_pack (also 2026-10-06):** a prompt can end
+  as a **one-time answer** (nothing saved), a **model proposal** (the prompt needs new structure — a
+  field, an entity, a whole new service like LMS/CRM — and goes through the same validate → impact →
+  approve → migrate gate, never on the AI's own initiative), or a **saved Function** (walked to
+  provable correctness, named, placed in a grouping, then runs with zero AI). Two of the three are
+  already in the vision; the **one-time answer is named nowhere** and the **triage has no home** —
+  now **`G-21`**, with the design and six grilled questions in
+  [`ARCHITECTURE-request-outcomes.md`](ARCHITECTURE-request-outcomes.md).
+  **Which goes first — `G-12` or `G-17` — is the owner's call** (I recommend `G-17`; `G-12` loses
+  nothing by waiting). Finding: `G-17`'s row + gap register §7a.
 - **What needs the owner** → [`NEEDS-YOU.md`](NEEDS-YOU.md) — a numbered action list. **Three
   items open**, and none blocks the build. The most urgent is changing the Coolify admin password
   (item 5); it is the only thing standing between an agent and the 2FA wall on the hosting panel.

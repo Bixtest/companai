@@ -74,15 +74,38 @@ part of this loop, or protection around it.
           v
    the person looks at the result
           |
-          v
-   the person says "yes, that is right"
-          |
-          v
-     SAVED AS A FUNCTION                 <- durable, versioned, reusable
-          |
-          v
-   from now on it runs with ZERO AI      <- fast, free, ordinary software
+          +---------------------+---------------------+
+          |                     |                     |
+          v                     v                     v
+    ONE-TIME ANSWER      A MODEL PROPOSAL      SAVED AS A FUNCTION
+    "just answer me"     "I need new           "yes, that is right"
+          |              structure"                   |
+          |                     |                     v
+          |                     v              durable, versioned,
+          |              goes through the      reusable - and from
+          |              SAME gate as any      now on it runs with
+          |              other change:         ZERO AI (fast, free,
+          |              validate -> impact    ordinary software)
+          |              -> approve -> migrate
+          |                     |
+          v                     v
+     nothing is saved     a person approves
+     (the answer was      it, or it does not
+     the deliverable)     happen at all
 ```
+
+**The two rules the picture is really drawing:** a one-time answer **saves nothing**; a model proposal
+**never changes the database on the AI's own initiative** — it goes through the same validate → impact →
+approve → migrate gate as any other change, and without a person's approval it does not happen.
+
+**Not every prompt becomes a permanent Function — there are three endings, and the platform
+chooses which with the person.** That distinction is the owner's, and it matters: a saved Function
+is the *rarest* of the three, not the default. A question that only needs an answer is answered and
+forgotten; a need that asks for new structure (a new field, a new entity, a whole new service like
+LMS or CRM) goes down the same careful change path as anything else and **never happens on the AI's
+own initiative**; only a need that has been walked to *provably correct* is offered as a Function to
+save. See [`development/ARCHITECTURE-request-outcomes.md`](development/ARCHITECTURE-request-outcomes.md)
+for how the three are told apart and what gates each one.
 
 **Two words you will see constantly, and what they mean in plain English:**
 
