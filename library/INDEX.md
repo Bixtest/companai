@@ -1,47 +1,70 @@
 # The documentation library
 
-**One place for all the writing behind this project.** The design, the vision, the
-audits, the plans and the product documentation — **521 documents across sixteen
-shelves**, gathered from wherever they were scattered, with nothing stored twice.
-(Add this index, the provenance note and the manifest and the folder holds 524 files.)
+**Read [`WHAT-WE-ARE-BUILDING.md`](WHAT-WE-ARE-BUILDING.md) first.** It is the product in plain
+English, and it is the one page that keeps the eye on the prize. Everything below is detail.
 
-The library also now holds everything else we work from, so there is genuinely one
-place to look:
+---
 
-- [`ai/`](ai/) — the AI-first direction, the sibling project's Hermes documentation, and the Hermes runtime source. **Read [`ai/README.md`](ai/README.md) first** — two different products are called Companai.
-- [`analysis/`](analysis/) — the 12-batch analysis programme that checks AI-FIRST against HERMES and STARTING-KIT.
-- [`development/`](development/) — **the development management hub**: the one roadmap, the architecture of the running system, and the handover. Start here if you are working on the project.
-- [`paperclip-hermes-study/`](paperclip-hermes-study/) — **the completed 11-batch forensic study** of Paperclip and Hermes, and the lessons for our own agent architecture. **Read [`paperclip-hermes-study/findings/10-lessons-and-target-design.md`](paperclip-hermes-study/findings/10-lessons-and-target-design.md) first** — it is the synthesis.
-- [`paperclip-value-study/`](paperclip-value-study/) — **the value scan** (2026-10-05/06): a second, wider pass over upstream Paperclip asking a different question — *is any of it worth taking, learning from, or deliberately rejecting?* **Read [`paperclip-value-study/findings/07-synthesis.md`](paperclip-value-study/findings/07-synthesis.md) first** — it is the answer, and the whole point of the study.
+## 0. Two kinds of material live here — and they are not equal
 
-Before this, the material lived in about a dozen folders: some inside `companai`,
-some only on the external drive (`E:`), some inside the live codebase. If the
-external drive was not plugged in, most of the thinking was simply gone.
+This library gathers **our own writing** *and* **other projects' material we studied**. They must
+never be read the same way. Keeping them apart is deliberate; mixing them up has already caused real
+errors.
+
+### (a) Ours — the direction, the plan, the product
+
+| Folder | Roughly | What it is |
+|---|---:|---|
+| [`WHAT-WE-ARE-BUILDING.md`](WHAT-WE-ARE-BUILDING.md) | 1 file | **The product in plain English. Start here.** |
+| [`ai/ai-first/`](ai/ai-first/) | 9 files | **THE DIRECTION** — the architecture we are actually building toward. Read [`ai/ai-first/README.md`](ai/ai-first/README.md) first |
+| [`development/`](development/) | 20 files | **The live hub** — the one roadmap, the running architecture, the handover, the rules. Start here to *work* |
+| [`analysis/`](analysis/) | ~20 files | Our 12-batch check of the direction against what we already have |
+| `01-` … `16-` shelves | ~600 files | Our product documentation: policy, contracts, SRS, audits, certification, blueprints, the shipped product docs |
+| [`paperclip-hermes-study/`](paperclip-hermes-study/) · [`paperclip-value-study/`](paperclip-value-study/) | ~24 files | **Our own** studies *of* two other products — the distilled lessons |
+
+### (b) Theirs — imported study material, **evidence only**
+
+| Folder | Roughly | What it is | The rule |
+|---|---:|---|---|
+| [`ai/`](ai/) (except `ai-first/`) | ~26,000 files | Hermes docs + source, upstream **Paperclip** source, a sibling project's docs | **Lessons and evidence only.** Never a decision we inherit |
+| [`ai/source-docs/`](ai/source-docs/) | register + copies | Upstream Paperclip's documentation set | Reference |
+
+> **The rule, in one sentence:** read **our vision** to know what to build; open the **imported
+> material** only when a specific feature can learn something from it, and then only as evidence.
+> Do not read it "for context" — it is how the direction got buried before. Ours is nine documents;
+> the imported pile is tens of thousands of files.
+
+Read [`ai/README.md`](ai/README.md) before using anything in `ai/` — **two different products are
+both called Companai**, and one of them is not ours.
 
 ---
 
 ## 1. Read these first
 
-Eight documents. If you read only these, you will understand what the platform is
-meant to be and where it currently stands.
+Five documents. If you read only these, you will understand what the platform is, what we are
+building toward, and where it currently stands.
 
 | # | Read | What it gives you |
 |---|---|---|
-| 1 | [`07-canonical-hardening/PRODUCT-VISION.md`](07-canonical-hardening/PRODUCT-VISION.md) | The product in one document. It names the product **UXAIOS**: "a secure, graph-native interface operating layer for complex organizations" — and says what it is *not* |
-| 2 | [`01-policy-and-plan/AI-FIRST-PLATFORM-POLICY.md`](01-policy-and-plan/AI-FIRST-PLATFORM-POLICY.md) | The authoritative product and engineering policy. Every module author is bound by it |
-| 3 | [`05-platform-audit-and-srs/03-srs.md`](05-platform-audit-and-srs/03-srs.md) | The requirements specification — what the platform must do, and for whom |
-| 4 | [`05-platform-audit-and-srs/14-graph-portal-architecture.md`](05-platform-audit-and-srs/14-graph-portal-architecture.md) | The core structural idea: a directed graph of portals, where every relationship carries its own inheritance, delegation, billing and permission rules |
-| 5 | [`05-platform-audit-and-srs/15-ai-first-operating-model.md`](05-platform-audit-and-srs/15-ai-first-operating-model.md) | How AI is allowed to work: as a permission-aware layer that can never see or do more than the person asking |
-| 6 | [`07-canonical-hardening/PLATFORM-BLUEPRINT.md`](07-canonical-hardening/PLATFORM-BLUEPRINT.md) | The blueprint. It is honest about being a hybrid: intended architecture, current code structure, and only the parts actually verified |
-| 7 | [`10-uxaios-interface-vision/01-UXAIOS-VISION-IN-PLAIN-ENGLISH.md`](10-uxaios-interface-vision/01-UXAIOS-VISION-IN-PLAIN-ENGLISH.md) | The interface idea explained with no jargon at all, starting from why today's software makes you click through pages |
-| 8 | [`07-canonical-hardening/OPEN-DECISIONS.md`](07-canonical-hardening/OPEN-DECISIONS.md) | **What is still undecided.** Read this before assuming anything is settled |
+| 1 | [`WHAT-WE-ARE-BUILDING.md`](WHAT-WE-ARE-BUILDING.md) | **The product in plain English** — the idea, the decisive loop, what we are not, and how to use this library |
+| 2 | [`ai/ai-first/README.md`](ai/ai-first/README.md) | **The direction** — the architecture we are actually building toward, and the reading order for the nine vision documents |
+| 3 | [`development/HANDOVER.md`](development/HANDOVER.md) | **The handover** — what exists, where it is, the two repositories, the traps, and what is proven vs claimed. **§0 is written for an agent taking over** |
+| 4 | [`development/BACKLOG.md`](development/BACKLOG.md) | **The one roadmap** — everything left, in order. The always-current status lives here, not in this index |
+| 5 | [`07-canonical-hardening/OPEN-DECISIONS.md`](07-canonical-hardening/OPEN-DECISIONS.md) | **What is still undecided** — read before assuming anything is settled |
+
+Then, if you want the product detail behind the direction: [`01-policy-and-plan/AI-FIRST-PLATFORM-POLICY.md`](01-policy-and-plan/AI-FIRST-PLATFORM-POLICY.md)
+(the binding policy), [`05-platform-audit-and-srs/03-srs.md`](05-platform-audit-and-srs/03-srs.md)
+(the requirements), and [`07-canonical-hardening/PRODUCT-VISION.md`](07-canonical-hardening/PRODUCT-VISION.md)
+(an earlier, interface-centric framing named **UXAIOS** — useful, but it is a facet, not the whole
+direction).
 
 ---
 
-## 2. The shelves
+## 2. Our product shelves
 
-Sixteen folders, in reading order. Each one is a shelf, not a copy — no document
-appears in two places.
+These sixteen folders are **ours** — our product documentation, in reading order. Each one is a
+shelf, not a copy — no document appears in two places. (The imported study material — `ai/`,
+`ai/source-docs/` — is **not** here; it is covered in §0 and §3, and is evidence only.)
 
 ### The platform we intend to build
 
@@ -163,7 +186,7 @@ in place with the measurement that disproved them.
 
 ## 6. The development hub — `development/`
 
-Where the project's own work is managed. **Unlike the sixteen shelves above, these are living
+Where the project's own work is managed. **Unlike the sixteen product shelves in §2, these are living
 documents we write and update** — not copied sources. **Start here if you are working on the
 project.**
 

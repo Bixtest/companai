@@ -14,15 +14,16 @@ away, who needs the end game and the current state in a few minutes.
 
 ## 1. If you have five minutes
 
-Read these four, in this order. They tell you what the product is, how the work is done, and
+Read these five, in this order. They tell you what the product is, how the work is done, and
 where it stands.
 
 | # | Read | Why |
 |---|---|---|
-| 1 | [`../../INDEX.md`](../../INDEX.md) | The map of every folder, in one page. Start here |
-| 2 | [`HANDOVER.md`](HANDOVER.md) | The handover: what exists, where, the traps nobody can discover, and what is proven vs not |
-| 3 | [`BACKLOG.md`](BACKLOG.md) | **What is left**, in order, one line each. The one roadmap |
-| 4 | [`../../workspace/COOKBOOK.md`](../../workspace/COOKBOOK.md) | **How the work is done** — read before touching code |
+| 1 | [`../WHAT-WE-ARE-BUILDING.md`](../WHAT-WE-ARE-BUILDING.md) | **The product in plain English** — the idea, the decisive loop, what it is *not*, and which library documents are ours vs imported. **Start here** |
+| 2 | [`../../INDEX.md`](../../INDEX.md) | The map of every folder, in one page |
+| 3 | [`HANDOVER.md`](HANDOVER.md) | The handover: what exists, where, the traps nobody can discover, and what is proven vs not |
+| 4 | [`BACKLOG.md`](BACKLOG.md) | **What is left**, in order, one line each. The one roadmap |
+| 5 | [`../../workspace/COOKBOOK.md`](../../workspace/COOKBOOK.md) | **How the work is done** — read before touching code |
 
 **Handing the work to an agent?** Paste [`START-PROMPT.md`](START-PROMPT.md). It is the first
 message for a fresh session: what to read, the rules it may not break, and the first task.
@@ -41,7 +42,7 @@ the way it is.
 | [`../analysis/findings/01-vision-frame.md`](../analysis/findings/01-vision-frame.md) | The vision framed against our own design: where they agree, where they differ, and what is deliberately left undecided |
 | [`../analysis/findings/12-development-plan.md`](../analysis/findings/12-development-plan.md) | **THE DEVELOPMENT PLAN.** The deliverable the whole analysis exists for: four phases, the critical path, the first three things to build, and every decision that is the owner's |
 | [`../paperclip-hermes-study/findings/10-lessons-and-target-design.md`](../paperclip-hermes-study/findings/10-lessons-and-target-design.md) | **THE SYNTHESIS** for the agent half: what we take from Paperclip and Hermes, what we reject, and how we do it better |
-| [`../../workspace/knowledge/authority-overview.md`](../../workspace/knowledge/authority-overview.md) | **The governance layer, end to end.** This is the product. Everything else is plumbing around it |
+| [`../../workspace/knowledge/authority-overview.md`](../../workspace/knowledge/authority-overview.md) | **The governance layer, end to end** — the floor the product stands on. The product itself is the business model being compiled into working software (see [`../WHAT-WE-ARE-BUILDING.md`](../WHAT-WE-ARE-BUILDING.md)) |
 
 **One warning before you read any AI document:** **two different products are called Companai.**
 Read [`../ai/README.md`](../ai/README.md) first, or you will mix them up.

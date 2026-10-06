@@ -1,5 +1,14 @@
 # The `ai/` folder — two different bodies of work
 
+> **Most of this folder is NOT ours.** It is imported study material — documentation and source
+> code from other projects (Hermes, upstream Paperclip, a sibling product). It is **evidence and
+> lessons only**, never a decision we inherit.
+>
+> **Our direction is one subfolder: [`ai-first/`](ai-first/).** If you are here to know *what we are
+> building*, read [`../WHAT-WE-ARE-BUILDING.md`](../WHAT-WE-ARE-BUILDING.md) first, then
+> [`ai-first/README.md`](ai-first/README.md). Everything else in `ai/` is something we studied —
+> open it only when a specific feature can learn from it.
+
 **Read this before using anything in here.** This folder holds two sets of documents
 that look related and are not. Getting them mixed up will produce wrong conclusions.
 

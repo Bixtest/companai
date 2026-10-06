@@ -25,19 +25,24 @@ formed a picture.
 
 | # | Read | Why |
 |---|---|---|
-| 0 | [`HANDOVER.md`](HANDOVER.md) | **The handover** — what exists, where, and the traps nobody can discover (two repos, two products called Companai, gitignored `vms/`, the host VM). Read this first if you know nothing |
-| 1 | [`../INDEX.md`](../../INDEX.md) | The map of every folder. What this project is, in one paragraph |
-| 2 | **This file** | How to develop here, and the order to read things |
-| 3 | [`BACKLOG.md`](BACKLOG.md) | **What is left**, in order, one line each — the single plan |
-| 4 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | How the three big pieces run together |
-| 5 | [`../compai/planning/00-product-thesis.md`](../../compai/planning/00-product-thesis.md) | **What we are building**, and the 15 rules that must never be broken |
-| 6 | [`../analysis/findings/12-development-plan.md`](../analysis/findings/12-development-plan.md) | **The plan** — phases, order, why |
-| 7 | [`../workspace/COOKBOOK.md`](../../workspace/COOKBOOK.md) | **How the work is done** — read before touching code |
-| 8 | [`../LESSONS.md`](../../LESSONS.md) | The mistakes already made, so you do not repeat them |
+| 0 | [`../WHAT-WE-ARE-BUILDING.md`](../WHAT-WE-ARE-BUILDING.md) | **The product in plain English** — the idea, the decisive loop, what it is *not*, and which documents in the library are ours versus imported study material. **Read this first.** |
+| 1 | [`HANDOVER.md`](HANDOVER.md) | **The handover** — what exists, where, and the traps nobody can discover (two repos, two products called Companai, gitignored `vms/`, the host VM). Read this if you know nothing |
+| 2 | [`../INDEX.md`](../../INDEX.md) | The map of every folder. What this project is, in one paragraph |
+| 3 | **This file** | How to develop here, and the order to read things |
+| 4 | [`BACKLOG.md`](BACKLOG.md) | **What is left**, in order, one line each — the single plan |
+| 5 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | How the three big pieces run together |
+| 6 | [`../compai/planning/00-product-thesis.md`](../../compai/planning/00-product-thesis.md) | The earlier product thesis and the 15 rules that must never be broken |
+| 7 | [`../analysis/findings/12-development-plan.md`](../analysis/findings/12-development-plan.md) | **The plan** — phases, order, why |
+| 8 | [`../workspace/COOKBOOK.md`](../../workspace/COOKBOOK.md) | **How the work is done** — read before touching code |
+| 9 | [`../LESSONS.md`](../../LESSONS.md) | The mistakes already made, so you do not repeat them |
 
-**Then, before you write any code:** [`../workspace/knowledge/authority-overview.md`](../../workspace/knowledge/authority-overview.md)
-— the governance layer, end to end. **That layer is the product.** Everything else is plumbing
-around it.
+**The direction is the nine documents in [`../ai/ai-first/`](../ai/ai-first/)** — read
+[`../ai/ai-first/README.md`](../ai/ai-first/README.md) for the order. **Then, before you write any
+code:** [`../workspace/knowledge/authority-overview.md`](../../workspace/knowledge/authority-overview.md)
+— the governance layer, end to end. **Governance is the floor the product stands on; the product
+itself is the business model being compiled into working software.** Everything in the library that
+is *not* ours (`../ai/` except `ai-first/`, `../ai/source-docs/`) is imported study material —
+evidence only, opened when a specific feature can learn from it.
 
 ### What to study first, by role
 

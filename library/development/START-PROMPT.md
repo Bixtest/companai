@@ -23,14 +23,17 @@ You are taking over an existing project and will continue its development. Every
 
 You know nothing about it yet, and that is expected — it is written down for you.
 
-**1. Before you do anything else, read `library/development/HANDOVER.md` top to bottom.** It is
-written for exactly you: a newcomer who knows nothing. It tells you what exists, where it is, the
-traps nobody can discover by reading the code, the two git repositories, the rules that bind, and
-what is proven versus what is only claimed. Then read the eight files it lists in §2. Do not start
-any work before you have done this — the first hour is reading, and it is the cheapest hour you
-will spend. **In a hurry, `library/development/BOOKMARKS.md` is the one-page short list** — the
-documents that matter, the end-game and vision documents, and which folders are in git and which
-are not.
+**1. Before you do anything else, read `library/WHAT-WE-ARE-BUILDING.md` — it is short, and it is the
+product in plain English.** It tells you what we are building (the AI builds a capability once, then
+it runs with no AI), the loop that makes it work, what the platform is *not*, and — most importantly
+— **which documents in the library are ours and which are only imported study material.** Then read
+`library/development/HANDOVER.md` top to bottom. It is written for exactly you: a newcomer who knows
+nothing. It tells you what exists, where it is, the traps nobody can discover by reading the code,
+the two git repositories, the rules that bind, and what is proven versus what is only claimed. Then
+read the eight files it lists in §2. Do not start any work before you have done this — the first
+hour is reading, and it is the cheapest hour you will spend. **In a hurry,
+`library/development/BOOKMARKS.md` is the one-page short list** — the documents that matter, the
+end-game and vision documents, and which folders are in git and which are not.
 
 **2. Then set up your shell. This is mandatory in every terminal, every session:**
 
@@ -85,10 +88,21 @@ routes one of which was falsified. **`G-07`** (the Widget contract, IR and regis
 published Function placed in a Widget runs from the Widget's own inputs with no AI.
 
 **Take the first unbuilt item in `BACKLOG.md` §"The list".** Do not assume the order has not changed
-since this prompt was written; read the list and take item 1 unless you have a reason not to. At the
-time of writing the first unbuilt items are **`S0`** — a re-run of the local dockerised trio, which
-needs **the owner to start Docker Desktop first** (the agent cannot; **B-04**) — and then **`G-12`**
-(business backup and restore, which depends on nothing and is the safety net).
+since this prompt was written; read the list and take item 1 unless you have a reason not to. **At
+the time of writing the first unbuilt items are `G-12`** (business backup and restore — the safety
+net, depends on nothing) **and `G-17`** (schema-constrained generation — **the AI that produces the
+Business IR**, which is the vision's own missing join). **`S0` is done.** Both `G-12` and `G-17` are
+startable; **which goes first is the owner's call** (he asked on 2026-10-06 to "keep the eye on the
+goal", which points at `G-17` — but `G-12` is the safety net). Read the two rows in `BACKLOG.md`
+before choosing.
+
+**Keep the eye on the prize while you build.** The whole product is one loop: *a need → the AI
+understands it → the AI writes a **Business IR** → the platform **validates** it → it **runs** → the
+person **confirms** it → it is **saved as a Function** → from then on it runs with **zero AI**. When
+you build a feature, ask which part of that loop it serves. **Consult the imported material in the
+library (`ai/` except `ai-first/`, `ai/source-docs/`) only when the specific feature in front of you
+can learn something from it** — never "for context". Our direction is `ai/ai-first/`, and
+`library/WHAT-WE-ARE-BUILDING.md` explains the split.
 
 **Two things are now decided, and they shape what you build next.** **B-05, the Hermes runtime
 boundary:** one product, one repository, one deployment, one interface (ours), with Hermes as a

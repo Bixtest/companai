@@ -7,6 +7,13 @@ follow §2 to actually get working. Everything else in the project is reachable 
 
 **Written 2026-10-05, revision 9 (2026-10-06). Owner: Ramzi. Development machine: `BIXMASERVER` (Windows 10 Pro).**
 
+> **What we are building, in one line:** a platform that turns a business's plain-language needs into
+> **real working software** — the AI builds a capability once, the platform checks and saves it, and
+> from then on it runs with **no AI**. The business model is the source of truth; governance is the
+> floor, not the product. **The full plain-English version is
+> [`../WHAT-WE-ARE-BUILDING.md`](../WHAT-WE-ARE-BUILDING.md) — read it before a long stretch of work;**
+> it also says which documents in the library are *ours* and which are only imported study material.
+
 > This is the **handover**. It is not a status page and not a roadmap — it is the one
 > document that tells you what exists, where it is, and in what order to open it.
 > For *what is left*, read [`BACKLOG.md`](BACKLOG.md). For *what happened*, read
@@ -22,8 +29,13 @@ analysis is complete, the agent study is complete, the specification has a first
 plan is settled. **Nothing is blocked.** What is left is the build, and the first item is named in
 §2 step 7.
 
-**Five things to do before you touch anything:**
+**Six things to do before you touch anything:**
 
+0. **Read [`../WHAT-WE-ARE-BUILDING.md`](../WHAT-WE-ARE-BUILDING.md) — the product in plain English.**
+   It is short, it keeps the eye on the prize, and it tells you which documents are *ours* (the
+   direction) and which are *imported study material* (evidence only). Do not skip it — the imported
+   material in the library is twenty times the size of our own writing, and reading it "for context"
+   is how the direction gets buried.
 1. **Read this page, then the eight files in §2 step 1.** Do not skip the lessons.
 2. **Set the environment export** (§2 step 2). Every terminal, every session.
 3. **Confirm both repositories are clean** (§2 step 3), and that the stack is up (§2 step 4).
@@ -49,7 +61,8 @@ what. A business describes itself in plain language; the platform proposes a com
 **The thing that makes it different is not the AI.** It is the **governance layer** — one place
 that decides whether any actor, human or machine, may take any action, and can always explain
 why. Every act is checked against every ceiling that applies, and the answer is always the
-*minimum* of them: **nothing anywhere can raise a gate.** That property is the product. It is
+*minimum* of them: **nothing anywhere can raise a gate.** That property is what makes the platform
+safe to hand to an AI — the floor under the product, not the product itself. It is
 built, and it works.
 
 **What already exists, in three pieces** (see [`ARCHITECTURE.md`](ARCHITECTURE.md)):
@@ -91,7 +104,9 @@ and must be built.*
 | 8 | [`../../LESSONS.md`](../../LESSONS.md) | 82 mistakes already made, so you do not repeat them |
 
 **Then, before you write any code:** [`../../workspace/knowledge/authority-overview.md`](../../workspace/knowledge/authority-overview.md)
-— the governance layer end to end. **That layer is the product.** Everything else is plumbing.
+— the governance layer end to end. **Governance is the floor the product stands on, not the product itself**
+(the product is the business model being compiled into working software — see
+[`../WHAT-WE-ARE-BUILDING.md`](../WHAT-WE-ARE-BUILDING.md)).
 For the agent half, read [`AGENT-HALF.md`](AGENT-HALF.md) — the model and the plan.
 
 **2. Set up your shell — every terminal, every session.** Node 24 is project-local and mandatory:

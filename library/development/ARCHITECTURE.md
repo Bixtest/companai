@@ -19,7 +19,7 @@ code rather than running it, it says so.
 
 | Component | What it is | Where it lives |
 |---|---|---|
-| **The Starting Kit** | The **platform** — the business system, the governance layer, the database, the screens. This is the product. | `workspace/starting-kit/` |
+| **The Starting Kit** | The **platform** — the business system, the governance layer, the database, the screens. This is *ours*, and it is where the product lives (the business model compiled into working software — see [`../WHAT-WE-ARE-BUILDING.md`](../WHAT-WE-ARE-BUILDING.md)). | `workspace/starting-kit/` |
 | **Hermes** | The **agent runtime** — the agent loop, tools, skills, sessions, subagents, model routing. Borrowed, not built. | `library/ai/hermes-agent-main/` |
 | **The model server** | **Inference** — a local, OpenAI-compatible endpoint (llama.cpp) so the product can run without sending data to a cloud model. | `model` service in `docker-compose.fullapp.yml`; the full design is [`ARCHITECTURE-model-server-integration.md`](ARCHITECTURE-model-server-integration.md) |
 

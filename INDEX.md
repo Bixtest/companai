@@ -3,7 +3,12 @@
 **You have just been handed this project and know nothing about it. This page is
 the map.** Everything else is reachable from here.
 
-> **New to the project? Read the handover first:
+> **Wondering what we are actually building? Read
+> [`library/WHAT-WE-ARE-BUILDING.md`](library/WHAT-WE-ARE-BUILDING.md) first.** It is the product in
+> plain English — the idea, the loop that makes it work, what it is *not*, and which documents in
+> the library are ours versus imported study material.
+>
+> **New to the project? Read the handover next:
 > [`library/development/HANDOVER.md`](library/development/HANDOVER.md).** It is written
 > for someone who knows nothing about the project, codebase or documents, and it tells
 > you what exists, where it is, and the traps nobody can find by reading the code
@@ -22,15 +27,24 @@ the map.** Everything else is reachable from here.
 
 ## 1. What we are building, in one paragraph
 
-An **operating system for companies** where human employees and AI employees work
-side by side — same org chart, same tasks, same rules about who may do what. A
-business describes itself in plain language; the platform researches it, proposes
-a complete structure (departments, roles, workflows, knowledge, AI workers), a
-human approves it, and then the platform *runs* that company day to day.
+**A platform where a business describes what it needs, and the platform turns that description into
+real working software — then runs that software with no AI.**
 
-The thing that makes it different is not the AI. It is the **governance layer** —
-one place that decides whether any actor, human or machine, may take any action,
-and can always explain why.
+An AI helps **build** a capability (a screen, an operation over real data, a report) from a
+plain-language request. The platform **checks** it against a single canonical **business model**,
+the person **confirms** it is what they meant, and it is **saved as a Function** that runs from then
+on — fast, free, deterministic, and with **no AI in the loop**. That is how the platform grows real
+functionality that replaces the classical idea of fixed ERP modules.
+
+The thing that makes it different is not a chatbot. It is that **the business model is the source of
+truth, and the platform continuously compiles it into working software**. Governance — one place
+that decides whether any actor, human or machine, may take any action, and can always explain why —
+is the **floor** the product stands on, not the product itself.
+
+> **The full version of this, in plain English, is
+> [`library/WHAT-WE-ARE-BUILDING.md`](library/WHAT-WE-ARE-BUILDING.md). Read it before any long
+> stretch of work** — it is the page that keeps the eye on the prize, and the one that tells you
+> which documents in the library are *ours* and which are only imported study material.
 
 ## 2. Where the project stands today
 
