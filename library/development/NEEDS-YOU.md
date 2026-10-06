@@ -287,8 +287,10 @@ the *local* machine's logins and do not work on the VM.
 **One correction to an earlier report of mine.** I had said the login was broken and returning
 `400`. That was **my error, not the platform's** — I was testing it by posting JSON, and the login
 route only accepts form-encoded bodies (which is what the page sends). Measured properly, it returns
-`200` with a working session. The trap is now written down in
-`RUNBOOK-deploying-a-site.md` so nobody repeats it. **Nothing here needs you.**
+`200` with a working session. A later cross-check also showed the `400` is not exclusive to JSON: it
+is returned whenever the *input* fails validation, including a password under six characters, and it
+prints the same words as a genuine credential rejection. Both traps are now written down in
+`RUNBOOK-deploying-a-site.md` so nobody repeats them. **Nothing here needs you.**
 
 ---
 

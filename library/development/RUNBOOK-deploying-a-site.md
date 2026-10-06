@@ -349,42 +349,72 @@ login: sign in, then **Profile → Password**.
 **Sign in through the page, not with a JSON probe.** The login route
 (`/api/auth/login`) parses **only** `application/x-www-form-urlencoded` bodies. Its
 `parseLoginForm()` has one branch for that content type and otherwise calls
-`req.formData()` — there is **no `application/json` branch**. So:
+`req.formData()` — there is **no `application/json` branch**. A JSON POST therefore falls
+into `req.formData()`, which throws; the `catch` returns every field as `""`; the schema
+then rejects the empty email → **400**.
 
-| what you send | what you get |
-| --- | --- |
-| form-encoded, right password | **200** `{"ok":true, token…, redirect:"/backend"}` |
-| form-encoded, wrong/unknown account | **401** `{"ok":false,"error":"Invalid email or password"}` |
-| **JSON body** | **400** `{"ok":false,"error":"Invalid email or password"}` |
+But **`400` does not mean "you sent JSON"**. It means *the schema rejected the request*
+for any reason, and the body always carries the same wording as the credential failure:
 
-That last row is the trap. A JSON POST falls into `req.formData()`, which throws, the
-`catch` returns every field as `""`, and the schema then rejects the empty email →
-**400** carrying the *same wording* as the 401 branch. A `curl` with
-`-H 'content-type: application/json'` therefore looks exactly like a rejected
-password and will send you hunting for a login bug that does not exist. This was
-chased for a full session before the content type was checked. **Measure with the
+| what you send | what you get | why |
+| --- | --- | --- |
+| form-encoded, right password | **200** `{"ok":true, token…, redirect:"/backend"}` | verified |
+| form-encoded, wrong password, **6+ chars** | **401** `{"ok":false,"error":"Invalid email or password"}` | schema passes, credentials fail |
+| form-encoded, unknown account | **401** (same body) | schema passes, no user found |
+| form-encoded, password **under 6 chars** | **400** (same body) | fails the password schema |
+| **JSON body** | **400** (same body) | `req.formData()` throws → empty fields → schema fails |
+
+So `400` and `401` differ **only** in whether the request got past input validation — both
+print *"Invalid email or password"*, and the `400` is not a credential verdict. That is the
+trap: a JSON `curl`, or a probe that types a short password, looks exactly like a rejected
+account and will send you hunting for a login bug that does not exist. **Measure with the
 same shape the browser uses** (`new FormData(form)`), or use the page itself.
+
+**Watch the rate limiter when you probe.** `LOGIN` is limited to **5 attempts per minute
+per email** and **20 per minute per IP**, with a 60-second block. A batch of probes can hit
+**429** `{"error":"Too many requests…"}` mid-run, and every attempt after that fails for a
+reason that has nothing to do with the credentials. Space attempts out, or a failed batch
+will tell you nothing.
 
 Measured 2026-10-06 against the deployed build, form-encoded:
 
 ```
-admin@companai.local   -> 200  roles=["superadmin"]   <- the account that works
-admin@acme.com         -> 401
-employee@acme.com      -> 401
-superadmin@acme.com    -> 401
+admin@companai.local + correct password -> 200  roles=["superadmin"]   <- the account that works
+admin@companai.local + wrong 8-char pw  -> 401
+admin@acme.com                          -> 401
+employee@acme.com                       -> 401
+superadmin@acme.com                     -> 401
 ```
 
-The three `@acme.com` rows exist in the `users` table with passwords set, but their
-stored hashes do not match the seeded companai password, so they are not usable logins
-as shipped. Note the first row's stored `email` is **encrypted ciphertext**
-(`…:v1`) — it is found by `email_hash`, not by the `email` column, which is why the
-email that resolves it is `admin@companai.local` and not the literal stored text. Do
-not "repair" that column; it is the encryption working as designed.
+The three `@acme.com` rows exist in the `users` table with passwords set, but their stored
+hashes do not match the seeded companai password, so they are not usable logins as shipped.
+
+**The superadmin's `email` column holds ciphertext — that is not corruption.** The row's
+stored `email` reads as `BZsYRrHCbmPWTs9D:…:v1`, i.e. an encrypted payload, while
+`email_hash` holds `v2:6e4637820806d93cb…`. Lookup goes through **`email_hash`**, so the
+account is found even though the plaintext column looks like garbage:
+
+```
+HMAC-SHA256("admin@companai.local", key=the deployment's encryption fallback key)
+  = v2:6e4637820806d93cb1161f48c3604701e74e9f3a9c887234c2629b5b34e9f3e1   <- matches the row
+```
+
+(It is a **keyed HMAC**, not a bare SHA-256 — `hashForLookup` in
+`packages/shared/src/lib/encryption/aes.ts` keys it with `LOOKUP_HASH_PEPPER`, falling back
+to `TENANT_DATA_ENCRYPTION_FALLBACK_KEY`. A plain `sha256sum` of the email will **not**
+match, so do not use that as your test.) Consequently:
+
+- **Do not "repair" the `email` column.** An earlier session rewrote it to plaintext and
+  concluded the corruption was the login bug. It was not.
+- **Do not conclude the account is missing** because
+  `select … where email='admin@companai.local'` returns 0 rows. Query `email_hash` instead.
+  Adding `@acme.com` rows to a `users` table that already has these three will not give you
+  a working login.
 
 **Anonymous `/backend` is a redirect chain, not an error.** `/backend` with no session
 returns **307 → `/api/auth/session/refresh?redirect=/backend`** → **307 →
-`/login?redirect=%2Fbackend`** → **200**. Probing the middle hop directly and reading
-its status is another way to mistake normal behaviour for a fault.
+`/login?redirect=%2Fbackend`** → **200**. Probing the middle hop directly and reading its
+status is another way to mistake normal behaviour for a fault.
 
 ### Putting it on your own domain
 
