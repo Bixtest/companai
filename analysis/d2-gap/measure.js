@@ -1,0 +1,248 @@
+#!/usr/bin/env node
+/**
+ * D2-gap measurement — walk every write verb in every ENABLED module's api/
+ * tree and classify how it is guarded.
+ *
+ * Why a script and not a grep: the question is per-ROUTE-FILE ("does this file
+ * export a write verb, and does that code path reach a guard?"), and a raw text
+ * grep of the guard names answers a different question — it counts mentions,
+ * including comments (the `planner` lesson: neither handler was a `route.ts`)
+ * and misses files whose handler is a bare `export async function POST`.
+ *
+ * Classification, in the order the backlog specifies:
+ *   GUARDED_WRAPPER   references begin<Module>MutationGuard -> this module's wrapper
+ *   GUARDED_REGISTRY  references runRouteMutationGuards directly
+ *   GUARDED_CRUD      built by makeCrudRoute (runs collectAndRunGuards itself)
+ *   GUARDED_DEPRECATED references only the @deprecated pair -> D2-wide territory
+ *   UNGUARDED         exports a write verb and references no guard at all -> D2-gap
+ *
+ * Usage: node measure.js [--json]
+ */
+const fs = require('fs');
+const path = require('path');
+
+const REPO = process.argv.find((a) => a.startsWith('--repo='))?.slice(7)
+  || 'C:/Users/Ramzi/Downloads/companai/workspace/starting-kit';
+
+// The ENABLED set, read from the app's own registry rather than typed by hand.
+function readEnabledModules() {
+  const file = path.join(REPO, 'apps/mercato/src/modules.ts');
+  const src = fs.readFileSync(file, 'utf8');
+  const start = src.indexOf('export const enabledModules');
+  const end = src.indexOf('enabledModules.push(', start);
+  const block = src.slice(start, end === -1 ? undefined : end);
+  const ids = new Set();
+  for (const m of block.matchAll(/id:\s*'([a-z_0-9]+)'/g)) ids.add(m[1]);
+  // conditional pushes that are unconditional in practice for this app
+  return [...ids].sort();
+}
+
+// Where a module's source lives: core by default, but packages carry some.
+function resolveModuleDir(id) {
+  const candidates = [
+    path.join(REPO, 'packages/core/src/modules', id),
+    path.join(REPO, 'packages', id, 'src/modules', id),
+  ];
+  // package-backed modules (@open-mercato/content, /events, /search, ...)
+  const pkgs = fs.readdirSync(path.join(REPO, 'packages')).filter((p) => !p.startsWith('.'));
+  for (const p of pkgs) {
+    candidates.push(path.join(REPO, 'packages', p, 'src/modules', id));
+  }
+  for (const c of candidates) {
+    try { if (fs.statSync(c).isDirectory()) return c; } catch { /* keep looking */ }
+  }
+  return null;
+}
+
+// Does the file EXPORT a write verb, however it is spelled?
+//   export async function POST(...)
+//   export const POST = async (...) => ...
+//   export const POST = crud.POST            <- the one a naive regex misses
+//   export { POST, PUT } from './x'          <- a re-export
+//   export default ... with a POST in it     <- not a write verb; ignored
+const ANY_WRITE_EXPORT = /(?:^|\n)\s*export\s+(?:async\s+)?(?:function|const|let|var|\{)[^\n]*\b(POST|PUT|PATCH|DELETE)\b/;
+// A re-export of the verb (`export { POST } from '...'`) inherits the source's guard.
+const RE_REEXPORT = /(?:^|\n)\s*export\s*\{[^}]*(POST|PUT|PATCH|DELETE)[^}]*\}\s*from/;
+
+const RE_WRAPPER = /begin[A-Za-z]*MutationGuard\s*\(/;
+const RE_REGISTRY = /runRouteMutationGuards\s*\(/;
+// `crud.POST` / `makeCrudRoute(...)` / `createCrudRoute` — the factory runs the guard set itself.
+const RE_CRUD = /makeCrudRoute\b|createCrudRoute\b|\bcrud\.(?:POST|PUT|PATCH|DELETE)\b/;
+const RE_DEPRECATED = /validateCrudMutationGuard\s*\(|runCrudMutationGuardAfterSuccess\s*\(/;
+
+function walk(dir, out = []) {
+  for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+    const p = path.join(dir, e.name);
+    if (e.isDirectory()) {
+      if (e.name === '__tests__' || e.name === 'node_modules') continue;
+      walk(p, out);
+    } else if (e.name.endsWith('.ts') && !e.name.endsWith('.test.ts') && !e.name.endsWith('.d.ts')) {
+      out.push(p);
+    }
+  }
+  return out;
+}
+
+function stripComments(src) {
+  // Remove block and line comments so a guard name in prose is not counted.
+  return src
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/(^|[^:])\/\/[^\n]*/g, '$1');
+}
+
+/**
+ * Count the WRITE VERBS a file exports — the unit the backlog records.
+ * `directory/organization-edges/route.ts` is ONE file with THREE unguarded
+ * verbs (POST, PATCH, DELETE); the backlog records "3", so the script must too.
+ * Reading a file as "1" was a unit error, caught by comparing against the
+ * recorded figures rather than by re-reading my own output.
+ */
+function writeVerbs(code) {
+  const verbs = new Set();
+  for (const m of code.matchAll(/(?:^|\n)\s*export\s+(?:async\s+)?(?:function|const|let|var|\{)([^\n]*)/g)) {
+    const line = m[1];
+    for (const v of line.matchAll(/\b(POST|PUT|PATCH|DELETE)\b/g)) verbs.add(v[1]);
+  }
+  return [...verbs];
+}
+
+/**
+ * Auth-flow endpoints are NOT counted as D2-gap. They change session/credential
+ * state and are guarded by their own mechanisms (rate limits, token checks,
+ * one-shot reset tokens). The backlog measured `auth` as "12 unguarded
+ * resource-writes" and set these eight aside by name; counting them would
+ * inflate the figure. Kept identical to the backlog's list so the two agree.
+ */
+const AUTH_FLOW_PATHS = [
+  'auth/api/feature-check.ts',
+  'auth/api/locale/route.ts',
+  'auth/api/login.ts',
+  'auth/api/logout.ts',
+  'auth/api/profile/route.ts',
+  'auth/api/reset.ts',
+  'auth/api/reset/confirm.ts',
+  'auth/api/session/refresh.ts',
+];
+
+function isAuthFlow(relPath) {
+  return AUTH_FLOW_PATHS.some((p) => relPath.endsWith(p.replace(/\//g, '/')));
+}
+
+function classify(file, moduleId) {
+  const raw = fs.readFileSync(file, 'utf8');
+  const code = stripComments(raw);
+  const isRoute = /[\\/]api[\\/]/.test(file);
+  if (!isRoute) return null;
+
+  const exportsWrite = ANY_WRITE_EXPORT.test(code);
+  if (!exportsWrite) return null;
+
+  const g = {
+    wrapper: RE_WRAPPER.test(code),
+    registry: RE_REGISTRY.test(code),
+    crud: RE_CRUD.test(code),
+    deprecated: RE_DEPRECATED.test(code),
+    reexport: RE_REEXPORT.test(code),
+  };
+
+  let cls;
+  if (g.wrapper) cls = 'GUARDED_WRAPPER';
+  else if (g.registry) cls = 'GUARDED_REGISTRY';
+  else if (g.crud) cls = 'GUARDED_CRUD';
+  else if (g.reexport) cls = 'GUARDED_REEXPORT';
+  else if (g.deprecated) cls = 'GUARDED_DEPRECATED';
+  else cls = 'UNGUARDED';
+
+  const rel = path.relative(REPO, file).replace(/\\/g, '/');
+  // An auth-flow endpoint is unguarded by the mutation-guard system on purpose.
+  if (cls === 'UNGUARDED' && isAuthFlow(rel)) cls = 'AUTH_FLOW_SET_ASIDE';
+
+  // Verbs this file exports. A guarded file's verbs are guarded by whatever
+  // mechanism it uses; an UNGUARDED file's verbs are the D2-gap exposure.
+  const verbs = writeVerbs(code);
+
+  return {
+    file: rel,
+    module: moduleId,
+    cls,
+    verbs,
+    verbCount: verbs.length,
+    g,
+  };
+}
+
+const enabled = readEnabledModules();
+const perModule = {};
+const rows = [];
+const missing = [];
+
+for (const id of enabled) {
+  const dir = resolveModuleDir(id);
+  if (!dir) { missing.push(id); continue; }
+  const files = walk(dir);
+  for (const f of files) {
+    const r = classify(f, id);
+    if (r) rows.push(r);
+  }
+  const mine = rows.filter((r) => r.module === id);
+  const sum = (f) => mine.filter(f).reduce((a, r) => a + r.verbCount, 0);
+  perModule[id] = {
+    writeFiles: mine.length,
+    writeVerbs: sum(() => true),
+    unguardedFiles: mine.filter((r) => r.cls === 'UNGUARDED').length,
+    unguardedVerbs: sum((r) => r.cls === 'UNGUARDED'),
+    wrapperVerbs: sum((r) => r.cls === 'GUARDED_WRAPPER'),
+    registryVerbs: sum((r) => r.cls === 'GUARDED_REGISTRY'),
+    crudVerbs: sum((r) => r.cls === 'GUARDED_CRUD'),
+    reexportVerbs: sum((r) => r.cls === 'GUARDED_REEXPORT'),
+    deprecatedVerbs: sum((r) => r.cls === 'GUARDED_DEPRECATED'),
+    authFlowVerbs: sum((r) => r.cls === 'AUTH_FLOW_SET_ASIDE'),
+    fields: {
+      wrapper: sum((r) => r.cls === 'GUARDED_WRAPPER'),
+      registry: sum((r) => r.cls === 'GUARDED_REGISTRY'),
+      crud: sum((r) => r.cls === 'GUARDED_CRUD'),
+      reexport: sum((r) => r.cls === 'GUARDED_REEXPORT'),
+      deprecated: sum((r) => r.cls === 'GUARDED_DEPRECATED'),
+      unguarded: sum((r) => r.cls === 'UNGUARDED'),
+      authFlow: sum((r) => r.cls === 'AUTH_FLOW_SET_ASIDE'),
+    },
+  };
+}
+
+if (process.argv.includes('--json')) {
+  console.log(JSON.stringify({ enabled, perModule, rows, missing }, null, 2));
+  process.exit(0);
+}
+
+console.log(`ENABLED MODULES: ${enabled.length}`);
+if (missing.length) console.log(`  (no source dir found: ${missing.join(', ')})`);
+console.log('');
+console.log('Counted in VERBS (the unit the backlog records). W=wrapper R=registry C=crud D=deprecated.');
+console.log('');
+console.log('module'.padEnd(24), 'wr'.padStart(3), 'verb'.padStart(4), 'W'.padStart(3), 'R'.padStart(3), 'C'.padStart(3), 'D'.padStart(3), 'GAP'.padStart(4));
+console.log('-'.repeat(52));
+let totalGap = 0, totalWrite = 0;
+for (const id of enabled) {
+  const s = perModule[id];
+  if (!s || s.writeVerbs === 0) continue;
+  totalGap += s.unguardedVerbs; totalWrite += s.writeVerbs;
+  console.log(
+    id.padEnd(24),
+    String(s.writeFiles).padStart(3),
+    String(s.writeVerbs).padStart(4),
+    String(s.wrapperVerbs).padStart(3),
+    String(s.registryVerbs).padStart(3),
+    String(s.crudVerbs).padStart(3),
+    String(s.deprecatedVerbs).padStart(3),
+    String(s.unguardedVerbs).padStart(4),
+  );
+}
+console.log('-'.repeat(52));
+console.log(`write verbs: ${totalWrite}, unguarded verbs (D2-gap): ${totalGap}`);
+const totalSetAside = enabled.reduce((a, id) => a + (perModule[id]?.authFlowVerbs || 0), 0);
+console.log(`(plus ${totalSetAside} auth-flow verbs set aside by design — login/logout/reset/session/profile/locale/feature-check)`);
+console.log('');
+console.log('UNGUARDED FILES (with the verbs each exposes):');
+for (const r of rows.filter((r) => r.cls === 'UNGUARDED')) {
+  console.log('  ' + r.module.padEnd(22) + r.verbs.join(',').padEnd(20) + r.file);
+}

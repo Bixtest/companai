@@ -30,38 +30,65 @@ log.** Everything else (HANDOVER, START-PROMPT, README, BOOKMARKS, BACKLOG) poin
 
 ---
 
-### ▶ NOW — D2-wide: **every ENABLED module is migrated.** The sweep is complete; next is `D2-gap` / `D3` / the Metadata Registry
+### ▶ NOW — `D2-gap`: the write routes that call **no** guard. First module (`audit_logs`) DONE; next is `ai_assistant`
 
 > **If you are a new agent, read only this block to know your job.** Everything below the box is the
 > history and the queue; this is the work in hand.
 
-**What happened before this box (2026-10-06, this session).** `feature_toggles` — the active task this
-box carried last, and **the last ENABLED module** — is **DONE and PROVEN**. Count **108 → 106**; files
-**41 → 40**. It retired the final 2 deprecated calls (`api/overrides/route.ts` PUT ×2 sites) through a
-new `beginFeatureTogglesMutationGuard`, and introduced the **id-rebind** into this wrapper
-(`runAfterSuccess(idOverride)`) because the PUT validates against `existingOverride?.id ?? toggleId`
-but the command may **create** a row whose generated id differs — exactly the `translations`/`dashboards`
-shape. It is the **second module with no `D2-gap` at all** (`overrides` PUT → this wrapper; `global`
-POST/PUT/DELETE → `makeCrudRoute` → `collectAndRunGuards()`; `check/*` is read-only — checked).
-**With this, every enabled module is migrated: the D2-wide sweep is complete.**
+**What happened before this box (2026-10-06, this session).** The `D2-wide` sweep of **every enabled
+module** is COMPLETE (`feature_toggles`, code `5af76bc`). We have now **measured `D2-gap` across every
+enabled module** (`analysis/d2-gap/measure.js`, FINDINGS.md) and **fixed the first module**.
 
-**What the task was, in plain words.** The platform has a guard system that checks every write before it
-happens (who may change what). Some code still called an **old, deprecated** version of it that
-**silently skips the real guard registry** — a security hole. The fix, module by module, was to repoint
-those calls at the new registry. **This is tracked as "D2-wide".** Thirteen modules are now done
-(`entities`, `data_sync`, `dictionaries`, `dashboards`, `workflows`, `inbox_ops`, `perspectives`,
-`translations`, `planner`, `query_index`, `auth`, `directory`, `feature_toggles`). **106 deprecated call
-sites remain across 40 files — all of them are parked, dormant modules** (recorded, not migrated; a
-parked module's call is not live, so retiring it there needs no code change until it is un-parked).
+**What `D2-gap` is, in plain words.** The platform checks every write before it happens (who may change
+what). `D2-wide` fixed the code that still called an **old, deprecated** version of that check — which
+**silently skips the real guard registry**. `D2-gap` is the other half: write routes that call **no
+check of any kind at all** — not the new one, not the old one. A write there is guarded by **nothing**,
+so it is exactly the surface a Hermes tool call reaches with no authorization describing it (Hermes map
+§4.4 (b); `S-02`). **A module can read "0 remaining on `D2-wide`" and still be wide open** — that phrase
+means "no deprecated resolver left", never "the module is guarded".
 
-**Your job now — no more enabled modules to migrate.** D2-wide's remaining work is the **parked set**
-(106 calls / 40 files), which is *recorded, not migrated*. The next real work is on the backlog's own
-order (see the queue below). **Recommended next, and the reason:** pick up **`D2-gap`** — the write
-routes that call **no** guard at all (a *different* defect from a route on the deprecated resolver) —
-because it is the sibling of the work just finished and the worst measured instance is large
-(`workflows` 13/19, `auth` 12/13, `inbox_ops` 10/14). Do it **module by module**, the same protocol:
-measure from the artefact, name the control that actually protects each route, prove the fix with two
-mutations, and update the count in both repos.
+**The measurement (re-runnable, so it cannot rot):** 35 enabled modules · **256 write verbs** ·
+**158 unguarded now** (**160 before the `audit_logs` fix**) · 8 auth-flow verbs set aside · 90 guarded
+(50 wrapper · 35 crud · 5 re-export; closure 50+35+5+0+8+158 = 256).
+Per module, unguarded: `ai_assistant`
+**24** · `messages` 17 · `communication_channels` 15 · `auth` 12 · `business_rules` 11 · `inbox_ops` 10 ·
+`workflows` **10** · `notifications` 10 · `attachments` 8 · `search` 7 · `webhooks` 7 · `configs`/
+`currencies`/`entities`/`integrations` 4 · `progress` 3 · `directory` 3 · `dashboards` 2 · `onboarding`/
+`data_sync`/`scheduler` 1 · **0** for `dictionaries`, `feature_toggles`, `perspectives`, `planner`,
+`query_index`, `translations`, `api_keys` — and **`audit_logs` 0 (now FIXED)**.
+
+**Fix 1 of the sweep — `audit_logs` DONE and PROVEN (code `4ef5812`).** Both write routes
+(`audit-logs/actions/undo` POST, `actions/redo` POST) called **no guard at all**. New wrapper
+`beginAuditLogsMutationGuard`; both routes now run `runRouteMutationGuards()`. **2 unguarded verbs →
+0.** The one design decision: the guard is evaluated against the **log entry's own `resourceKind`**
+(fallback `audit_logs.action_log`), because undo/redo **reverse or replay a write to that resource** — a
+guard for e.g. `directory.organization` must see the **undo of an organization write**, or the one path
+that can **reverse** a protected change is the one path no guard describes. `resourceKind` is read from
+the row, never guessed. The routes' own authorization is untouched. **7 new tests; three disjoint
+mutations proved they bite** (undo block path → block test RED; undo guard call → the 4 undo-guard tests
+RED; redo guard call → redo test RED), wrapper restored byte-identical; `audit_logs` 16 suites / 108
+tests green; core `tsc --noEmit` exit 0.
+
+**What the box carried before this (context).** `D2-wide`'s remaining work is the **parked set** (106
+calls / 40 files), *recorded, not migrated* — a parked module's call is not live, so retiring it there
+needs no code change until it is un-parked. `D2-gap` is the live defect, and it is what we work now.
+
+**Your job now — work `D2-gap` module by module, largest first.** The measurement names the shape of
+each fix: route the unguarded writes through a per-module wrapper, so the module has **one** guard
+chokepoint rather than two mechanisms. **Next module: `ai_assistant` (24 unguarded verbs)** — the
+Hermes-facing module, so it is where this defect and the Hermes tool door meet most directly. Then
+`messages` (17) → `communication_channels` (15) → `auth` (12) → `business_rules` (11) → `inbox_ops` (10)
+→ `workflows` (10) → `notifications` (10) → the rest. Protocol for each: **measure from the artefact**
+(re-run `measure.js` and read the module's own routes); **name the control that actually protects each
+route today** (many are protected by other means — record it, do not over-claim); **prove the fix with
+two mutations** (block path, then after-success) and restore byte-identical; **update the count in both
+repos**; **tell the owner in plain English what was done.**
+
+**A trap that has now bitten three migrations — carry it forward:** not every write handler is a
+`route.ts`. `translations/put/locales.ts`, `planner/*` and `query_index/{reindex,purge}.ts` all export
+**named** verbs. **Walk every `.ts` under `api/`, never glob for `route.ts`** — a name-scan reports a
+module clean while leaving live write routes unguarded.
+
 
 **Then, in order (nothing dropped):**
 
@@ -82,7 +109,8 @@ mutations, and update the count in both repos.
 | **11a** | ✅ **D2-wide: `auth` — DONE** (code `aeeaad0`) | 2 calls / 1 file → **1 guard object**; count **112 → 110** (files **43 → 42** — *the docs first said 45 → 44; corrected this session, see the file-count note below*). **The plan's figure held.** **The module is far bigger than its 2 calls suggest:** 18 files export a write verb, **only 3 are guarded** — **12 unguarded resource-writes across 10 files** is the **worst `D2-gap` measured**, recorded not fixed. **A wrong `D2-gap` claim in the header's first draft was caught and corrected against the walk** (`users/route.ts` **is** guarded via `makeCrudRoute`; `authority/projects/route.ts` is **GET only**). Mutation-proven (**2 RED / 1 RED**, plus route-file mutations 2 RED / 1 RED). |
 | **11b** | ✅ **D2-wide: `directory` — DONE** (code `d682c09`) | 2 calls / 1 file → **1 guard object**; count **110 → 108** (files **42 → 41**). **The plan's figure held.** **Almost no `D2-gap`:** the module's entire gap is **3 unguarded verbs in 1 file** (`organization-edges` POST/PATCH/DELETE) against `auth`'s 12 — and all three are protected by other controls (`requireFeatures`, a verified-tenant `resolveScope`, `assertOrganizationsInTenant()`, audit rows, the OSS optimistic-lock floor). **Two traps caught by running tests, not reading:** a `*/` inside a block comment closed the JSDoc early; and a comment **naming** `enforceCommandOptimisticLock(` failed a code guard that regexes raw text (L91). Mutation-proven (**2 RED / 1 RED**, plus route-file mutations 2 RED / 1 RED). |
 | **11c** | ✅ **D2-wide: `feature_toggles` — DONE** (code `5af76bc`) | 2 calls / 1 file → **1 guard object**; count **108 → 106** (files **41 → 40**). **The plan's figure held.** **The LAST ENABLED MODULE — the sweep is complete.** **No `D2-gap`:** `overrides` PUT → this wrapper; `global` POST/PUT/DELETE → `makeCrudRoute` → `collectAndRunGuards()`; `check/*` is read-only (checked). **First wrapper in the sweep to carry `runAfterSuccess(idOverride)` into a route whose validated id can differ from the written id** (the override may be *created*, returning a generated `overrideToggleId`) — the `translations`/`dashboards` shape, proven with 2 registry calls on the rebind. Mutation-proven (**2 RED / 2 RED**, disjoint; plus route-file mutations 2 RED / 2 RED). |
-| **12** | **D2-gap** — the write routes that call **no** guard at all (measured: `workflows` 13/19, `auth` **12/13**, `inbox_ops` 10/14, `directory` 3/4, `feature_toggles` 0/4, `perspectives` 0/3, `translations` 0/3, `planner` 0/2, `query_index` 0/2) | **The recommended next task.** Do it module by module alongside the rest; record the per-module unguarded count next to the D2-wide count. |
+| **12** | **D2-gap** — the write routes that call **no** guard at all. **MEASURED across every enabled module 2026-10-06** (`analysis/d2-gap/measure.js`): 256 write verbs, **158 unguarded now** (160 before the `audit_logs` fix). Per module: `ai_assistant` **24**, `messages` 17, `communication_channels` 15, `auth` 12, `business_rules` 11, `inbox_ops` 10, `workflows` **10** *(record said 13 — the record was wrong; `tasks/route.ts` and `events` export no write verb)*, `notifications` 10, `attachments` 8, `search` 7, `webhooks` 7, then 4/4/4/4, 3/3, 2, 1/1/1, and **0** for `dictionaries`, `feature_toggles`, `perspectives`, `planner`, `query_index`, `translations`, `api_keys`, **`audit_logs`**. | **The recommended task — now in progress.** Do it module by module, largest first; record the per-module unguarded count next to the D2-wide count. |
+| **12a** | ✅ **D2-gap: `audit_logs` — DONE** (code `4ef5812`) | **The FIRST `D2-gap` module.** Both write routes (`undo` POST, `redo` POST) called **no guard at all**; 2 unguarded verbs → 0. New `beginAuditLogsMutationGuard`. **The design decision:** guard against the **log entry's own `resourceKind`** (fallback `audit_logs.action_log`) — undo/redo reverse or replay a write *to that resource*, so a guard for `directory.organization` must see the undo of an organization write, or the one path that can reverse a protected change is the one path no guard describes. Redo guard runs **after** `resolveRedoInput` (policy not evaluated for a request that will 400). 7 new tests; **3 disjoint mutations** proved they bite; wrapper byte-identical; 16 suites / 108 tests green. |
 | **13** | **D3** — add the `escalate` outcome to `MutationGuardResult` | The last guard-engine gap; D2-wide's shape is now settled, so it is unblocked. |
 | **14** | **The Metadata Registry** service (GAP A / C5) | The remaining foundation item; everything stacked on it inherits it. |
 
@@ -120,6 +148,24 @@ doing X now."**
 
 ### ✅ Done recently (ticked, then moved down here)
 
+- **2026-10-06 — `D2-gap` MEASURED across every enabled module, and the FIRST module fixed** (code
+  `4ef5812`; analysis `analysis/d2-gap/`). The sweep: 35 enabled modules · **256 write verbs** ·
+  **158 unguarded now / 160 before the fix** · 8 auth-flow verbs set aside · 90 guarded
+  (50 wrapper · 35 crud · 5 re-export). Per module: `ai_assistant` **24**,
+  `messages` 17, `communication_channels` 15, `auth` 12, `business_rules` 11, `inbox_ops` 10,
+  `workflows` **10**, `notifications` 10, `attachments` 8, `search` 7, `webhooks` 7, then 4/4/4/4, 3/3,
+  2, 1/1/1, and 0 for seven modules. **8 of 9 previously-recorded modules agree exactly; the ninth
+  record was wrong** — `workflows` was recorded "13 of 19", measures **10**, because two counted files
+  (`tasks/route.ts`, `events`) export **no write verb** (checked twice: today's file and `git show
+  d3af1b1:…`). **Two unit errors in my own first pass, both fixed in the tool and both found by
+  comparison, not by re-running:** files counted where the backlog counts **verbs**
+  (`organization-edges` = 1 file / 3 verbs), and a guarded CRUD re-export misread as unguarded
+  (`export const POST = crud.POST`, in `auth`). **`audit_logs` FIXED and PROVEN:** both write routes
+  (`undo`, `redo`) called no guard at all → 2 unguarded verbs → 0, via a new `beginAuditLogsMutationGuard`;
+  guarded against the **log entry's own `resourceKind`** (fallback `audit_logs.action_log`) so the path
+  that *reverses* a protected write is described by a guard; 7 new tests, **3 disjoint mutations** proved
+  they bite, wrapper restored byte-identical; 16 suites / 108 tests green; core `tsc --noEmit` exit 0.
+  Full detail: `analysis/d2-gap/FINDINGS.md`, `BUILD-ORDER.md` §2f, `BACKLOG.md` item **D2-gap**.
 - **2026-10-06 — `feature_toggles` D2-wide migration** (code `5af76bc`). 2 calls / 1 file → **1 guard
   object**; count **108 → 106** (files **41 → 40**); `feature_toggles` measures 0. **Thirteenth and LAST
   enabled module — the D2-wide sweep of enabled modules is complete.** **The plan's figure held.** **No
@@ -343,6 +389,94 @@ doing X now."**
   `a3b58ad`). Full entry below.
 - **2026-10-06 — D0** — the generated guard registry now delivers guards, mutation-proven
   (code `d225602`). Full entry below.
+
+---
+
+## 2026-10-06 (newest) — `D2-gap` measured across every enabled module, and its first module fixed (`audit_logs`)
+
+**The task this box now carries.** With the `D2-wide` sweep of enabled modules complete, the next live
+defect is **`D2-gap`** — write routes that call **no guard at all** (neither the registry, nor the
+deprecated pair, nor `makeCrudRoute`). This session: **measure it across every enabled module**, then
+**fix it module by module, largest first.**
+
+**Why it is a defect, in one line.** A write that calls no guard is a write **no Hermes authorization can
+ever reach** (Hermes map §4.4 (b)) — so it is precisely where a tool call touches data that no
+authorization describes. And "0 remaining on `D2-wide`" does **not** mean "the module is guarded" — a
+module can be finished there and still wide open here.
+
+**The measurement — built as a re-runnable tool, not a one-off number.** `analysis/d2-gap/measure.js`
+(+ `--json`), FINDINGS.md in the same folder. It reads the enabled set from
+`apps/mercato/src/modules.ts` (**not** a hand-typed list), **strips comments before looking for guards**
+(so a guard *named in prose* is not counted — the L91 lesson), **counts verbs not files**, and sets the
+eight auth-flow endpoints aside **by name** so the figure stays comparable with the backlog record.
+Headline: **35 enabled modules · 256 write verbs · 158 unguarded now (160 before the `audit_logs` fix) ·
+90 guarded** (50 wrapper · 35 `makeCrudRoute`/`crud.` · 5 re-exported guarded factory · 0 deprecated; the
+closure 50+35+5+0+8+158 = 256 balances).
+**Both figures are recorded because the number must name the HEAD it was measured at** — the rule that
+would have prevented the `auth`-onward file-count slip. `audit_logs` accounts for the −2.
+
+**Reconciled against what was already recorded — and the point is the one that disagreed.** Eight of the
+nine previously-recorded modules matched **exactly** (`inbox_ops` 10/14, `auth` 12, `directory` 3-in-1-file,
+and the five zeros). The ninth did not: **`workflows` was recorded as "13 of 19" and measures 10.** The
+record listed `api/tasks/route.ts` and `api/events` subscribe/unsubscribe as unguarded write routes —
+**neither exports a write verb**, checked twice by routes that share no failure mode (read the file today;
+`git show d3af1b1:…` shows no write verb then either). They were never write routes; the record counted
+*files* as if they were. **Corrected to 10, not carried forward.**
+
+**Two unit errors in my own first pass — both caught by comparing, neither visible by re-reading my own
+output.** (1) It counted **files** where the backlog counts **verbs**: `directory/organization-edges/route.ts`
+is one file with three unguarded verbs (POST/PATCH/DELETE), so `directory` read 1 and the record's 3 was
+right. (2) The export-detection regex required the verb to immediately follow `const X =`, so
+`export const POST = crud.POST` — the CRUD-factory pattern used by `auth/users/route.ts` and
+`auth/roles/route.ts` — was misread as **unguarded**; `auth` read 20, corrected to 12, matching the record.
+**The method that caught both:** line the figures up against what a **different person** had already
+written down — the same discipline the project's own LESSONS demand.
+
+**Fix 1 of the sweep — `audit_logs` DONE and PROVEN (code `4ef5812`).** Both write routes in the module —
+`audit-logs/actions/undo` (POST) and `actions/redo` (POST) — called **no guard of any kind**: no wrapper,
+no `runRouteMutationGuards()`, not the deprecated pair, and they are not built by `makeCrudRoute`. A guard
+set shipped for `audit_logs` would have been **silently skipped**, and a Hermes-authorized undo would have
+reached the command bus with nothing checking it. **2 unguarded verbs → 0**, via a new
+`packages/core/src/modules/audit_logs/api/mutation-guard.ts` (`beginAuditLogsMutationGuard`).
+
+**Why this module first.** Undo and redo **replay a registered command** — the most privilege-sensitive
+write on the platform — and the routes already carry a dense hand-written authorization story (feature
+requirements, actor-vs-tenant undo rights, fail-closed tenant scope, org-scope resolution, the "only the
+latest undoable row" re-lookup; issues #2398, #2685). **None of that is replaced.** The missing piece was
+the **registry chokepoint**: today a future guard for this module cannot run, and the structural grammar
+(SD-4) never sees these writes.
+
+**The one design decision — and it is a real choice, not a nicety.** The guard is evaluated against the
+**log entry's own `resourceKind`** (falling back to `audit_logs.action_log`), because what is guarded is
+the *reversal or replay of a write to that resource*: a guard registered against, say,
+`directory.organization` must see the **undo of an organization write** — otherwise the one path that can
+**reverse** a protected change is the one path no guard describes. Evaluating against the wrong key would
+either fire guards that have no business seeing this write, or (worse) silently match none and look
+guarded while doing nothing. The value is **read from the row, never guessed**; a null `resourceKind` is
+guarded as the log table itself.
+
+**Second deliberate placement — the redo route.** The guard runs **after** `resolveRedoInput` (which 400s
+"Redo data unavailable" when the redo payload is missing), so policy is only evaluated for a request that
+can actually proceed. Discovered by reading the route, not assumed.
+
+**Test evidence.** New suite `api/__tests__/d2-gap-guard.test.ts`, **7 tests**, every one asserting the
+guard is really wired in: registry called once with the row's own resource; the guard runs before the
+command; a block prevents the command; fallback to the log-table kind for a null-resource row; **two
+negatives** that the guard is NOT reached on 401/400; redo guard + afterSuccess.
+
+**Proof — three disjoint mutations, each restored byte-identical.** (1) disable the undo **block path** →
+exactly the **block** test RED. (2) remove the **undo guard call** → the **4 undo-guard** tests RED, and
+the 3 that do not depend on it stay green. (3) remove the **redo guard call** → exactly the **redo** test
+RED. Routes restored **byte-identical**: undo md5 `256401137b7e0f54fd2b7482232ea477`, redo md5
+`fd6e65e603256293549d5e98818c5735`. `audit_logs` = **16 suites / 108 tests green**; core `tsc --noEmit`
+**exit 0**.
+
+**What the box posts next.** **`ai_assistant` (24 unguarded verbs)** — the Hermes-facing module, where this
+defect and the Hermes tool door meet most directly — then `messages` (17), `communication_channels` (15),
+`auth` (12), and down the measured list. **A trap carried forward:** not every write handler is a
+`route.ts` (`translations/put/locales.ts`, `planner/*`, `query_index/{reindex,purge}.ts` export **named**
+verbs). **Walk every `.ts` under `api/`, never glob for `route.ts`** — a name-scan reports a module clean
+while leaving live write routes unguarded.
 
 ---
 
