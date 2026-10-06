@@ -2934,3 +2934,37 @@ Then check the tick: `before − after == this module's real count`.
 **The general form:** an inherited estimate is a hypothesis. The plan tells you *what* to do; only the
 source tells you *how much*. Read the thing you are about to change, count it yourself, and let the plan
 be wrong out loud rather than silently.
+
+## L88 — an empty test run exits 0, so a path that matches nothing looks like a pass
+
+**Caught 2026-10-06, while critic-passing the `translations` `D2-wide` migration.**
+
+The suite's own directory is named `[entityType]/[entityId]`. Passing that path to Jest **unescaped**
+gives:
+
+```
+npx jest --config jest.config.cjs 'src/.../[entityType]/[entityId]/__tests__/mutation-guard.test.ts'
+→ No tests found, exiting with code 0
+```
+
+Jest reads `[entityType]` as a **glob character class**, matches nothing, and — this is the trap —
+**exits 0**. Read quickly, "no failures, exit 0" is a pass. It is the opposite: **nothing ran.**
+
+Instead of finding this, I nearly recorded a *false green* against a mutation I had deliberately planted
+to be caught. Two mutations in a row "passed" and that should itself have been the alarm: a mutation
+that changes behaviour **cannot** leave a biting suite green. The signal was there and I read it as
+success.
+
+**The general form — a runner that reports "nothing to do" as success is indistinguishable from a
+runner that reports success.** Any tool whose empty-input behaviour is exit 0 must be checked for
+**work done**, not just exit status. The safest habit for a path containing `[ ]`: use
+`--runTestsByPath`, which takes the literal path. Failing that, escape the brackets, or assert the
+runner reported a non-zero test count.
+
+**What to do instead.** When a mutation leaves a suite green, **do not record the proof** — first
+re-run the exact same invocation and read the **test count**. A bite that fails to bite is evidence
+about the *invocation* before it is evidence about the *test*. And when a result is surprising in the
+reassuring direction, that is the moment to look hardest, not the moment to tick the box.
+
+**Check it with a count, always:** `Tests: N passed` where N is the number you expected. Zero tests
+passing is not a passing suite.

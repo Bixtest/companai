@@ -87,7 +87,7 @@ two mutation proofs went RED; the repo-wide count is **116**; the docs say so.
 | **7** | ✅ **D2-wide: `inbox_ops` — DONE** (code `d89b8f6`) | 8 calls / 4 files → 4 guard objects; count 142 → 134; mutation-proven (4 RED / 4 RED). |
 | **7b** | ✅ **The owner's two integration concerns — DONE** | The Hermes map named **43** items and the backlog named the map **0** times; the register/blueprint items had **0** per-item backlog rows. **Both measured true and fixed** — `★ Hermes:` lines on every AI-touching item, a new "core-module gaps" section, rule 6 in WORKING-RULES, and a re-measurable check in `BACKLOG.md` §A. **No code changed.** |
 | **8** | ✅ **D2-wide: `perspectives` — DONE** (code `e26642c`) | 8 calls / 3 files → 4 guard objects; count **134 → 126** (files 52 → 49); mutation-proven (**2 RED / 5 RED**). **The new shape:** the POST route guards **two resources in one request** (personal + role-scoped), each with its own after-success condition. **The first module with NO `D2-gap`** — all 3 write routes guarded. |
-| **9** | ✅ **D2-wide: `translations` — DONE** (code `a2f8d5f`) | 6 calls / 2 files → **2 guard objects** (the plan's "4" was wrong: one guard per route). Count **126 → 120** (files **47**, not 49). **Found: `put/locales.ts` is not a `route.ts`** — a file-name scan misses it. **First real use of the id re-binding** on after-success. Mutation-proven (**3 RED / 4 RED**). |
+| **9** | ✅ **D2-wide: `translations` — DONE** (code `a2f8d5f`) | 6 calls / 2 files → **2 guard objects** (the plan's "4" was wrong: one guard per route). Count **126 → 120** (files **47**, not 49). **Found: `put/locales.ts` is not a `route.ts`** — a file-name scan misses it. **First real use of the id re-binding** on after-success. Mutation-proven (**3 RED / 3 RED**). |
 | **10** | **◀ D2-wide: `planner`** (4 calls / 2 files) — **THE ACTIVE TASK** | See the six steps above. **Walk every `.ts` under `api/`, not just `route.ts`.** |
 | **11** | **The rest of D2-wide, enabled modules** — `query_index` (4), `auth` (2), `directory` (2), `feature_toggles` (2) | Largest cluster first, each with its own mutation proof. |
 | **12** | **D2-gap** — the write routes that call **no** guard at all (measured: `workflows` 13/19, `inbox_ops` 10/14, `perspectives` 0/3, `translations` 0/3) | Do it module by module alongside D2-wide; record the per-module unguarded count next to the D2-wide count. |
@@ -138,7 +138,7 @@ doing X now."**
   the first real use of `runAfterSuccess(resourceIdOverride)`: the old code passed the composite
   `${entityType}:${entityId}` to the after-success instead of the row id the write produced; the wrapper
   now re-binds to `result.rowId` (both branches tested). Mutations bit: block path disabled → **3 RED**;
-  `runAfterSuccess` neutered → **4 RED**; wrapper restored md5-identical
+  `runAfterSuccess` neutered → **3 RED**; wrapper restored md5-identical
   `cab5084e343f9f7a076e0ae8427ccc52`. `translations` module 16 suites / 215 tests green; **whole core suite
   603 suites / 5133 tests green**; core `tsc --noEmit` exit 0. **Scope: no `D2-gap`** — all 3 write verbs
   guarded. Full entry below.
