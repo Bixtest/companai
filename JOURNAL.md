@@ -30,7 +30,10 @@ log.** Everything else (HANDOVER, START-PROMPT, README, BOOKMARKS, BACKLOG) poin
 
 ---
 
-### ▶ NOW — the owner's three directives of 2026-10-06, then the D2-wide chain
+### ▶ NOW — fix the two test-suite defects, then D2-wide continues with `workflows`
+
+**The owner's three directives of 2026-10-06 are done** (see the ticked rows below). **`dashboards`
+is done** (code `a05ea2c`). **The active task is now row 3: the two test-suite failures — `explicit-sort-comparators` (pre-existing) and `module-decoupling` (order-dependent flake)** — because a non-green suite cannot be trusted for the modules after it. Then **row 4: `workflows`** (9 calls / 3 files).
 
 **The owner's three directives (this is the chain he asked me to sort and connect):**
 
