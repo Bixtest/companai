@@ -4,10 +4,7 @@ import { createRequestContainer } from '@open-mercato/shared/lib/di/container'
 import type { OpenApiMethodDoc, OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
 import { queryIndexTag, queryIndexErrorSchema, queryIndexOkSchema, queryIndexPurgeRequestSchema } from './openapi'
 import { recordIndexerLog } from '@open-mercato/shared/lib/indexers/status-log'
-import {
-  runCrudMutationGuardAfterSuccess,
-  validateCrudMutationGuard,
-} from '@open-mercato/shared/lib/crud/mutation-guard'
+import { beginQueryIndexMutationGuard } from './mutation-guard'
 
 export const metadata = {
   POST: { requireAuth: true, requireFeatures: ['query_index.purge'] },
@@ -28,19 +25,19 @@ export async function POST(req: Request) {
   const bus = container.resolve('eventBus') as any
 
   const guardUserId = typeof auth.sub === 'string' ? auth.sub : ''
-  const guardResult = await validateCrudMutationGuard(container, {
+  const guard = await beginQueryIndexMutationGuard({
+    container,
     tenantId: auth.tenantId,
     organizationId: auth.orgId,
     userId: guardUserId,
+    req,
     resourceKind: 'query_index',
     resourceId: entityType,
     operation: 'custom',
-    requestMethod: req.method,
-    requestHeaders: req.headers,
     mutationPayload: { entityType },
   })
-  if (guardResult && !guardResult.ok) {
-    return NextResponse.json(guardResult.body, { status: guardResult.status })
+  if (guard.blockedResponse) {
+    return guard.blockedResponse
   }
 
   await recordIndexerLog(
@@ -71,19 +68,7 @@ export async function POST(req: Request) {
         organizationId: auth.orgId ?? null,
       },
     ).catch(() => undefined)
-    if (guardResult?.ok && guardResult.shouldRunAfterSuccess) {
-      await runCrudMutationGuardAfterSuccess(container, {
-        tenantId: auth.tenantId,
-        organizationId: auth.orgId,
-        userId: guardUserId,
-        resourceKind: 'query_index',
-        resourceId: entityType,
-        operation: 'custom',
-        requestMethod: req.method,
-        requestHeaders: req.headers,
-        metadata: guardResult.metadata ?? null,
-      })
-    }
+    await guard.runAfterSuccess()
   } catch (error) {
     await recordIndexerLog(
       { em: em ?? undefined },
