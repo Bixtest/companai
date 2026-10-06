@@ -1,8 +1,8 @@
 # Start prompt — paste this to the agent that takes over
 
 > **WHERE THE ACTIVE TASK LIVES (read this first, it is the one live fact).**
-> **The task being worked on right now is `inbox_ops` — the D2-wide guard-resolver migration, 8
-> deprecated calls across 4 files.** Its plain-English description, the exact six steps to do it, and
+> **The task being worked on right now is `perspectives` — the D2-wide guard-resolver migration, 8
+> deprecated calls across 3 files.** Its plain-English description, the exact six steps to do it, and
 > the current queue are in the **`★ ACTIVE TASK` box at the top of [`../../JOURNAL.md`](../../JOURNAL.md)**.
 > **That box is the single source of truth for "what is being worked on now".** No other document —
 > not this prompt, not HANDOVER, not README, not BOOKMARKS, not BACKLOG — may state a live task; they

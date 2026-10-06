@@ -39,19 +39,19 @@ log.** Everything else (HANDOVER, START-PROMPT, README, BOOKMARKS, BACKLOG) poin
 happens (who may change what). Most of the codebase still calls an **old, deprecated** version of it
 that **silently skips the real guard registry** — a security hole. The fix, module by module, is to
 repoint those calls at the new registry. **This is tracked as "D2-wide".** `entities`, `data_sync`,
-`dictionaries`, `dashboards` and `workflows` are already done; **142 deprecated call sites remain across
-56 files**, of which **36 calls in 8 enabled modules** are live (the rest are parked and recorded, not
-migrated).
+`dictionaries`, `dashboards`, `workflows` and `inbox_ops` are already done; **134 deprecated call sites
+remain across 52 files**, of which **28 calls in 7 enabled modules** are live (the rest are parked and
+recorded, not migrated).
 
-**Your job now — one module: `inbox_ops` (8 calls / 4 files).** Do it exactly the way the previous five
+**Your job now — one module: `perspectives` (8 calls / 3 files).** Do it exactly the way the previous six
 were done, and the pattern is already written down (do not invent a new one):
 
-1. **Read the worked example**: `BUILD-ORDER.md` §2e, "Progress — `workflows` DONE and PROVEN" — it has
-   the How / Tests / Proof / count table. The four before it (`data_sync`, `dictionaries`, `dashboards`)
-   are identical in shape.
-2. **Create `packages/core/src/modules/inbox_ops/api/mutation-guard.ts`** — a `beginInboxOpsMutationGuard(ctx)`
-   wrapper (copy `workflows/api/mutation-guard.ts` and rename).
-3. **Repoint the 4 route files** from `validateCrudMutationGuard()` / `runCrudMutationGuardAfterSuccess()`
+1. **Read the worked example**: `BUILD-ORDER.md` §2e, "Progress — `inbox_ops` DONE and PROVEN" — it has
+   the How / Tests / Proof / count table. The five before it (`data_sync`, `dictionaries`, `dashboards`,
+   `workflows`) are identical in shape.
+2. **Create `packages/core/src/modules/perspectives/api/mutation-guard.ts`** — a `beginPerspectivesMutationGuard(ctx)`
+   wrapper (copy `inbox_ops/api/mutation-guard.ts` and rename).
+3. **Repoint the route files** from `validateCrudMutationGuard()` / `runCrudMutationGuardAfterSuccess()`
    to `runRouteMutationGuards()` through the wrapper.
 4. **Repair the tests** — re-point their mocks from the deprecated DI pair to the registry wrapper.
 5. **Prove it**: stub **only** the registry call `runRouteMutationGuards` — **never** the module wrapper,
@@ -59,10 +59,10 @@ were done, and the pattern is already written down (do not invent a new one):
    the tests must go RED; neuter `runAfterSuccess` → RED; restore the wrapper and confirm it is
    **md5-identical**.
 6. **Recount and record**: the count command is in `BACKLOG.md` item **D2-wide**; expected result
-   **142 → 134**. Then update `BUILD-ORDER.md` §2e and `BACKLOG.md`, and commit **in both repos**.
+   **134 → 126**. Then update `BUILD-ORDER.md` §2e and `BACKLOG.md`, and commit **in both repos**.
 
-**Definition of done:** `inbox_ops` measures **0** deprecated call sites; its route tests are green;
-the two mutation proofs went RED; the repo-wide count is **134**; the docs say so.
+**Definition of done:** `perspectives` measures **0** deprecated call sites; its route tests are green;
+the two mutation proofs went RED; the repo-wide count is **126**; the docs say so.
 
 **Then, in order (nothing dropped):**
 
@@ -74,10 +74,11 @@ the two mutation proofs went RED; the repo-wide count is **134**; the docs say s
 | **4** | ✅ **Test defect (a): `explicit-sort-comparators` — DONE** (code `d5567c7`) | **16 sites, not 2** — read from the test's own output. Audit 4/4; 336 tests green. |
 | **5** | ✅ **Test defect (b): `module-decoupling` — DONE** (code `fe7c3e5`) | File-scoped isolation; **full suite 602 suites / 5123 tests, 0 failures**. |
 | **6** | ✅ **D2-wide: `workflows` — DONE** (code `d3af1b1`) | 9 calls / 3 files → 4 guard objects; count 151 → 142; mutation-proven (5 RED / 3 RED). |
-| **7** | **◀ D2-wide: `inbox_ops`** (8 calls / 4 files) — **THE ACTIVE TASK** | See the six steps above. |
-| **8** | **The rest of D2-wide, enabled modules** — `perspectives` (8), `translations` (6), `planner` (4), `query_index` (4), `auth` (2), `directory` (2), `feature_toggles` (2) | Largest cluster first, each with its own mutation proof. |
-| **9** | **D3** — add the `escalate` outcome to `MutationGuardResult` | The last guard-engine gap; needs D2-wide's shape settled first. |
-| **10** | **The Metadata Registry** service (GAP A / C5) | The remaining foundation item; everything stacked on it inherits it. |
+| **7** | ✅ **D2-wide: `inbox_ops` — DONE** (code `d89b8f6`) | 8 calls / 4 files → 4 guard objects; count 142 → 134; mutation-proven (4 RED / 4 RED). |
+| **8** | **◀ D2-wide: `perspectives`** (8 calls / 3 files) — **THE ACTIVE TASK** | See the six steps above. **Note the shape:** `api/[tableId]/route.ts` holds **4** of the 8 calls and evaluates the guard **twice** in one request (a second, role-scoped guard). Read it before copying — it is not a flat 1-call-per-route like `inbox_ops`. |
+| **9** | **The rest of D2-wide, enabled modules** — `translations` (6), `planner` (4), `query_index` (4), `auth` (2), `directory` (2), `feature_toggles` (2) | Largest cluster first, each with its own mutation proof. |
+| **10** | **D3** — add the `escalate` outcome to `MutationGuardResult` | The last guard-engine gap; needs D2-wide's shape settled first. |
+| **11** | **The Metadata Registry** service (GAP A / C5) | The remaining foundation item; everything stacked on it inherits it. |
 
 **Where the reasoning lives:** the order is `BUILD-ORDER.md` §2e; the live counts are in `BACKLOG.md`;
 the per-item status is in `BACKLOG.md`. **This box is the only place that says "we are doing X now."**
@@ -109,6 +110,14 @@ doing X now."**
 
 ### ✅ Done recently (ticked, then moved down here)
 
+- **2026-10-06 — `inbox_ops` D2-wide migration** (code `d89b8f6`). 8 calls / 4 files → 4 guard objects;
+  count **142 → 134**; `inbox_ops` measures 0. Sixth enabled module. Straightforward because the module
+  already had a dedicated guard suite — it just mocked the **old** module, so it was repointed to stub
+  **only** the registry call `runRouteMutationGuards` and let the wrapper run for real. Mutations bit
+  cleanly: block path disabled → **4 RED**; `runAfterSuccess` neutered → **4 RED**; wrapper restored
+  md5-identical `9490fbfc2b3515ef67a7131b941342d2`. `inbox_ops` api 15 suites / 107 tests green; whole
+  module 35 suites / 395 tests green; core `tsc --noEmit` exit 0. **Scope recorded in the wrapper
+  header:** 4 of the module's 14 write routes are guarded; **10 call no guard at all** (`D2-gap`). Full entry below.
 - **2026-10-06 — `workflows` D2-wide migration** (code `d3af1b1`). 9 calls / 3 files → 4 guard objects;
   count **151 → 142**; workflows measures 0. Fourth enabled module. **The proof's first attempt was
   wrong and is recorded:** the tests mocked the *module wrapper*, so both mutations left the suite green
@@ -148,6 +157,64 @@ doing X now."**
   `a3b58ad`). Full entry below.
 - **2026-10-06 — D0** — the generated guard registry now delivers guards, mutation-proven
   (code `d225602`). Full entry below.
+
+---
+
+## 2026-10-06 (newest) — `inbox_ops` retired: the sixth module, and the pattern held
+
+**The active task from the box: `inbox_ops` D2-wide (8 deprecated guard calls in 4 files). Done, proven
+and committed (`d89b8f6`, code repo).**
+
+**What was done, plainly.** Four custom write routes in `inbox_ops` called the **deprecated** guard
+pair (`validateCrudMutationGuard()` / `runCrudMutationGuardAfterSuccess()`), which resolves only the
+single DI-registered service and silently skips the real guard registry. They now go through a new
+module wrapper `inbox_ops/api/mutation-guard.ts` → `beginInboxOpsMutationGuard(ctx)`, which calls
+`runRouteMutationGuards()` — the same shape as the five modules before it. **8 calls in 4 files → 4
+guard objects.** Count **142 → 134**, measured two independent ways (`grep … | grep -vE` and `git grep`
+classified by a script), and `inbox_ops` now measures **0**.
+
+The four routes, each read before and after:
+
+| Route | Verb | `resourceKind` | `operation` |
+|---|---|---|---|
+| `proposals/[id]/categorize` | POST | `inbox_ops:inbox_proposal` | `update` |
+| `proposals/[id]/actions/[actionId]` | PATCH | `inbox_ops:inbox_proposal_action` | `update` |
+| `proposals/[id]/accept-all` | POST | `inbox_ops:inbox_proposal` | `custom` |
+| `emails/[id]` | DELETE | `inbox_ops:inbox_email` | `delete` |
+
+**One behaviour point kept, not silently dropped.** The email DELETE returns **404 before** the
+after-success when the row was already gone (the old code sat `runCrudMutationGuardAfterSuccess()` below
+the 404 return). The new code keeps that ordering by simply **not** calling `guard.runAfterSuccess()` on
+the 404 path — the hook runs only after a committed write. That path has its own test, and it stayed
+green under both mutations, which is correct: it asserts the hook did *not* run.
+
+**The proof — and why it was easier this time.** `inbox_ops` already shipped a dedicated guard suite
+(`api/__tests__/mutation-guards.test.ts`, 9 tests) covering all four routes on both verdicts. Its only
+defect was the one recorded in the `workflows` entry: it **mocked the deprecated module**, the wrong
+target now. Repointed to stub **only** the registry call `runRouteMutationGuards` and let the module
+wrapper run for real. Then the mutations bit, exactly as they must:
+
+- disabling the wrapper's **block path** → **4 tests RED** (every deny-path test);
+- neutering **`runAfterSuccess`** → **4 tests RED** (every allow-path test);
+- wrapper restored **md5-identical** (`9490fbfc2b3515ef67a7131b941342d2`).
+
+**Verified:** `inbox_ops/api` = **15 suites / 107 tests green**; whole `inbox_ops` module = **35 suites /
+395 tests green**; `core` `tsc --noEmit` **exit 0**.
+
+**Scope, stated honestly (and measured, not assumed).** `inbox_ops` has **14** routes exporting a write
+verb. This wrapper covers **4**. The other **10** call **no guard at all** — `extract`,
+`emails/[id]/reprocess`, `proposals/[id]/translate`, `proposals/[id]/reject`,
+`proposals/[id]/actions/[actionId]/{accept,complete,reject}`,
+`proposals/[id]/replies/[replyId]/send`, `settings`, `webhook/inbound`. That is the **`D2-gap`** sibling
+concern, and the figure is now written into the wrapper's own header so the next reader does not have to
+re-derive it. Same lesson as `workflows`: **"0 remaining on `D2-wide`" means "no deprecated resolver
+left", NOT "the module is guarded".**
+
+**Also this session (before the migration): committed the outstanding corrections from the previous
+turn.** The `workflows` wrapper's comment-only scope edit (`9c9ccbf`) and the docs corrections
+(`5abf1f5`) — the false coverage claim, the `58 → 56` file count, and the stale proof hash, now stated
+as "the hash the proof restored" vs "the hash in the tree now" with the reason. Nothing was left
+uncommitted between turns.
 
 ---
 
