@@ -3005,3 +3005,54 @@ because both would be measuring the files that were found.
 the **files**, not the plan: `before − after == this module's real count`, and the file count must fall
 by the number of files actually repointed. Here: 120 → 116 calls (−4) and 47 → 45 files (−2), matching
 the two routes changed.
+
+## L90 — a small `D2-wide` number can sit on top of a large `D2-gap`; a claim written into code must be measured, not remembered
+
+**Caught 2026-10-06, migrating `auth` in `D2-wide` — the eleventh module.**
+
+Three findings, and the first two are the ones that would have cost something.
+
+**1. The plan said "1 file" and that was true — and it was the single most misleading true number in the
+sweep.** `auth` had **2 deprecated calls in 1 file**, exactly as the plan said. But the module has **18
+files exporting a write verb**. "One file" invites the reader to conclude the module is nearly clean. The
+opposite is true: **only 3 of the 18 are guarded at all** — `users/resend-invite` (the migrated route),
+and `users/route.ts` + `roles/route.ts` (guarded via `makeCrudRoute` → `collectAndRunGuards()`). The
+other **12 resource-write verbs across 10 files call no guard whatsoever**: `users/acl` (PUT),
+`roles/acl` (PUT), `sidebar/preferences` (PUT, DELETE), `sidebar/variants` (POST),
+`sidebar/variants/[id]` (PUT, DELETE), and five `authority/*` routes (POST each).
+
+That is **`D2-gap`**, not `D2-wide`, and `auth` carries the **worst ratio measured** — worse than
+`workflows` (13/19) and `inbox_ops` (10/14), which previously looked like the bad cases. **The general
+rule:** a module's `D2-wide` count measures only the calls that *used the deprecated resolver*. It says
+**nothing** about the writes that never called any guard. **Measure both, every module, or the small
+number hides the big hole.** The `D2-wide` sweep is a tidy-up; `D2-gap` is where writes are actually
+unprotected, and a module can be "done" on the first while being worst-in-class on the second.
+
+**2. A wrong claim written from memory was caught only because it was checked against the walk.** The
+wrapper header's **first draft** documented the `D2-gap` inventory — and named a **different, wrong**
+set of files. It listed `users/route.ts` as unguarded (it is guarded, via `makeCrudRoute`); it counted
+`authority/projects` as a write route (**it exports GET only**); and it miscounted the `sidebar/variants`
+verbs. Every one of those was plausible and none was measured. The correction came from walking the
+files and reading each export — the same walk that produced the right answer, run *after* the wrong one
+had already been written into the source.
+
+**Why this is a lesson and not just a typo:** the claim lived in a **JSDoc block in production code**,
+where a future reader treats it as documentation. A wrong note in a comment is not caught by the
+compiler, the tests, or the count — it is caught by nothing, and it is read by the person who came to
+that file precisely because they do not know the answer. **The rule:** a factual claim about the
+codebase written into a comment, a doc, or a commit message is a **measurement**, and it must be taken
+from the artefact before it is written — never recalled. If it cannot be measured at the time, say
+"unverified" rather than a number.
+
+**3. On the migrated route itself, the guard is not the protection.** `resend-invite`'s real defence
+against touching a foreign user is `assertActorCanAccessUserTarget()` (`lib/grantChecks.ts:130`), called
+**before** the guard. The migration is still correct — it removes the **bypass** and means the module's
+next guard is enforced — but a reader who assumed the mutation guard was the security control would
+over-read the change. **Name the control that actually holds, or the change is credited for work it is
+not doing.**
+
+**How to check it, concretely.** After migrating any module, run two counts, not one: (a) the deprecated
+call sites, and (b) a walk of every write verb (does the file export `POST`/`PUT`/`PATCH`/`DELETE`?) with
+its guard mechanism — `makeCrudRoute`/`collectAndRunGuards`, the module wrapper, or **nothing**. Report
+(b) beside (a) in the progress note. If a header or note names a file as unguarded, that name must have
+come from step (b) on the same day.

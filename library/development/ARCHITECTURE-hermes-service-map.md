@@ -149,7 +149,7 @@ measured, not assumed.
 |---|---|---|---|---|
 | **D0 — the guard registry delivers guards** | **n/a** (pure platform) | Hermes is not involved. This is the platform's own authorization floor — **the thing that will authorize every Hermes tool call later**. No agent runs. | n/a | ✅ FIXED, mutation-proven |
 | **D1 — tiers/defaults/fallbacks are a setting** | **n/a** (pure platform) | The tier a *structural change* takes. When the AI later proposes a schema change (a "model proposal"), **this setting decides how much approval it needs**. Hermes is served *by* this rule, not a party to it. | n/a | ✅ FIXED |
-| **D2-wide — retire the deprecated guard resolver** | **n/a** (pure platform), but **enabling** | Every route the AI will ever reach must run the **registry** guard set. Until this is done, a tool call reaching an enabled module **bypasses the guard set** — which would be an authority bypass for a Hermes call. So D2-wide is a **precondition** for granting Hermes any tool in an affected module. | n/a | **IN PROGRESS** — 112 call sites / 43 files left (was 198); ten modules retired — see §13 |
+| **D2-wide — retire the deprecated guard resolver** | **n/a** (pure platform), but **enabling** | Every route the AI will ever reach must run the **registry** guard set. Until this is done, a tool call reaching an enabled module **bypasses the guard set** — which would be an authority bypass for a Hermes call. So D2-wide is a **precondition** for granting Hermes any tool in an affected module. | n/a | **IN PROGRESS** — 110 call sites / 44 files left (was 198); eleven modules retired — see §13 |
 | **D3 — the `escalate` outcome** | **n/a** (pure platform) | The guard result must be able to say *"this needs a human"*, not only allow/deny. That outcome is what a Hermes tool call will receive when a proposed action needs **approval** rather than rejection. | n/a | OPEN |
 | **The Metadata Registry** (GAP A / C5) | **n/a** (pure platform) | The declarative registry the AI will *read* to know what objects exist. It is **how Hermes learns the shape of the business** without being handed a database handle. | n/a | OPEN |
 
@@ -654,10 +654,10 @@ bypass the guard registry**. The replacement is `runRouteMutationGuards()` from
    declaration file). **Count calls, not lines** — the two declarations in `mutation-guard.ts` inflate it.
 6. **Record** in `BUILD-ORDER.md` §2e and `BACKLOG.md`, and commit **in both repos** (never `git add -A`).
 
-**The current numbers:** **112 call sites / 43 files** — of which **6 calls are in the 3 enabled
-modules still to do** and **106 are parked**. Ten modules are retired (`entities`, `data_sync`,
+**The current numbers:** **110 call sites / 44 files** — of which **4 calls are in the 2 enabled
+modules still to do** and **106 are parked**. Eleven modules are retired (`entities`, `data_sync`,
 `dictionaries`, `dashboards`, `workflows`, `inbox_ops`, `perspectives`, `translations`, `planner`,
-`query_index`). **Which module is next is
+`query_index`, `auth`). **Which module is next is
 stated only in the `★ ACTIVE TASK` box** at the top of [`../../JOURNAL.md`](../../JOURNAL.md).
 
 **Two behaviour points to watch** (each cost a previous run something):
