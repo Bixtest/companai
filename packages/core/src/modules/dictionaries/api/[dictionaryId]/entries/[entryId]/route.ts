@@ -5,10 +5,7 @@ import { resolveDictionariesRouteContext, resolveDictionaryActorId } from '@open
 import { updateDictionaryEntrySchema } from '@open-mercato/core/modules/dictionaries/data/validators'
 import { CrudHttpError, isCrudHttpError } from '@open-mercato/shared/lib/crud/errors'
 import { enforceCommandOptimisticLockWithGuards } from '@open-mercato/shared/lib/crud/optimistic-lock-command'
-import {
-  runCrudMutationGuardAfterSuccess,
-  validateCrudMutationGuard,
-} from '@open-mercato/shared/lib/crud/mutation-guard'
+import { beginDictionariesMutationGuard } from '@open-mercato/core/modules/dictionaries/api/mutation-guard'
 import type { CommandBus } from '@open-mercato/shared/lib/commands'
 import { serializeOperationMetadata } from '@open-mercato/shared/lib/commands/operationMetadata'
 import type { OpenApiMethodDoc, OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
@@ -88,20 +85,18 @@ export async function PATCH(req: Request, ctx: { params?: { dictionaryId?: strin
     const rawBody = await req.json().catch(() => ({}))
     const payload = updateDictionaryEntrySchema.parse(rawBody)
     const guardUserId = resolveDictionaryActorId(context.auth)
-    const guardResult = await validateCrudMutationGuard(context.container, {
+    const guard = await beginDictionariesMutationGuard({
+      container: context.container,
       tenantId: context.tenantId,
       organizationId: context.organizationId,
       userId: guardUserId,
+      req,
       resourceKind: 'dictionaries.entry',
       resourceId: entry.id,
       operation: 'update',
-      requestMethod: req.method,
-      requestHeaders: req.headers,
       mutationPayload: payload,
     })
-    if (guardResult && !guardResult.ok) {
-      return NextResponse.json(guardResult.body, { status: guardResult.status })
-    }
+    if (guard.blockedResponse) return guard.blockedResponse
     // These nested routes don't use the CRUD factory, so invoke the command bus explicitly.
     const commandBus = (context.container.resolve('commandBus') as CommandBus)
     const input = { ...(payload as Record<string, unknown>), id: entryId }
@@ -114,19 +109,7 @@ export async function PATCH(req: Request, ctx: { params?: { dictionaryId?: strin
     if (!updatedEntryId) {
       throw new CrudHttpError(500, { error: context.translate('dictionaries.errors.entry_update_failed', 'Failed to update dictionary entry') })
     }
-    if (guardResult?.ok && guardResult.shouldRunAfterSuccess) {
-      await runCrudMutationGuardAfterSuccess(context.container, {
-        tenantId: context.tenantId,
-        organizationId: context.organizationId,
-        userId: guardUserId,
-        resourceKind: 'dictionaries.entry',
-        resourceId: updatedEntryId,
-        operation: 'update',
-        requestMethod: req.method,
-        requestHeaders: req.headers,
-        metadata: guardResult.metadata ?? null,
-      })
-    }
+    await guard.runAfterSuccess(updatedEntryId)
     const updated = await findOneWithDecryption(
       context.em.fork(),
       DictionaryEntry,
@@ -192,38 +175,24 @@ export async function DELETE(req: Request, ctx: { params?: { dictionaryId?: stri
     })
 
     const guardUserId = resolveDictionaryActorId(context.auth)
-    const guardResult = await validateCrudMutationGuard(context.container, {
+    const guard = await beginDictionariesMutationGuard({
+      container: context.container,
       tenantId: context.tenantId,
       organizationId: context.organizationId,
       userId: guardUserId,
+      req,
       resourceKind: 'dictionaries.entry',
       resourceId: entry.id,
       operation: 'delete',
-      requestMethod: req.method,
-      requestHeaders: req.headers,
       mutationPayload: null,
     })
-    if (guardResult && !guardResult.ok) {
-      return NextResponse.json(guardResult.body, { status: guardResult.status })
-    }
+    if (guard.blockedResponse) return guard.blockedResponse
     const commandBus = (context.container.resolve('commandBus') as CommandBus)
     const { logEntry } = await commandBus.execute('dictionaries.entries.delete', {
       input: { body: { id: entry.id } },
       ctx: context.ctx,
     })
-    if (guardResult?.ok && guardResult.shouldRunAfterSuccess) {
-      await runCrudMutationGuardAfterSuccess(context.container, {
-        tenantId: context.tenantId,
-        organizationId: context.organizationId,
-        userId: guardUserId,
-        resourceKind: 'dictionaries.entry',
-        resourceId: entry.id,
-        operation: 'delete',
-        requestMethod: req.method,
-        requestHeaders: req.headers,
-        metadata: guardResult.metadata ?? null,
-      })
-    }
+    await guard.runAfterSuccess(entry.id)
     const response = NextResponse.json({ ok: true })
     if (logEntry?.undoToken && logEntry?.id && logEntry?.commandId) {
       response.headers.set(

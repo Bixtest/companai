@@ -4,10 +4,7 @@ import { Dictionary } from '@open-mercato/core/modules/dictionaries/data/entitie
 import { resolveDictionariesRouteContext, resolveDictionaryActorId } from '@open-mercato/core/modules/dictionaries/api/context'
 import { CrudHttpError, isCrudHttpError } from '@open-mercato/shared/lib/crud/errors'
 import { enforceCommandOptimisticLockWithGuards } from '@open-mercato/shared/lib/crud/optimistic-lock-command'
-import {
-  runCrudMutationGuardAfterSuccess,
-  validateCrudMutationGuard,
-} from '@open-mercato/shared/lib/crud/mutation-guard'
+import { beginDictionariesMutationGuard } from '@open-mercato/core/modules/dictionaries/api/mutation-guard'
 import type { OpenApiMethodDoc, OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
 import {
   resolveDictionaryEntrySortMode,
@@ -126,20 +123,18 @@ export async function PATCH(req: Request, ctx: { params?: { dictionaryId?: strin
     })
 
     const guardUserId = resolveDictionaryActorId(context.auth)
-    const guardResult = await validateCrudMutationGuard(context.container, {
+    const guard = await beginDictionariesMutationGuard({
+      container: context.container,
       tenantId: context.tenantId,
       organizationId: context.organizationId,
       userId: guardUserId,
+      req,
       resourceKind: 'dictionaries.dictionary',
       resourceId: dictionary.id,
       operation: 'update',
-      requestMethod: req.method,
-      requestHeaders: req.headers,
       mutationPayload: payload,
     })
-    if (guardResult && !guardResult.ok) {
-      return NextResponse.json(guardResult.body, { status: guardResult.status })
-    }
+    if (guard.blockedResponse) return guard.blockedResponse
 
     if (isProtectedCurrencyDictionary(dictionary)) {
       if (payload.key && payload.key.trim().toLowerCase() !== dictionary.key) {
@@ -195,19 +190,7 @@ export async function PATCH(req: Request, ctx: { params?: { dictionaryId?: strin
     dictionary.updatedAt = new Date()
     await context.em.flush()
 
-    if (guardResult?.ok && guardResult.shouldRunAfterSuccess) {
-      await runCrudMutationGuardAfterSuccess(context.container, {
-        tenantId: context.tenantId,
-        organizationId: context.organizationId,
-        userId: guardUserId,
-        resourceKind: 'dictionaries.dictionary',
-        resourceId: dictionary.id,
-        operation: 'update',
-        requestMethod: req.method,
-        requestHeaders: req.headers,
-        metadata: guardResult.metadata ?? null,
-      })
-    }
+    await guard.runAfterSuccess()
 
     return NextResponse.json({
       id: dictionary.id,
@@ -247,20 +230,18 @@ export async function DELETE(req: Request, ctx: { params?: { dictionaryId?: stri
     })
 
     const guardUserId = resolveDictionaryActorId(context.auth)
-    const guardResult = await validateCrudMutationGuard(context.container, {
+    const guard = await beginDictionariesMutationGuard({
+      container: context.container,
       tenantId: context.tenantId,
       organizationId: context.organizationId,
       userId: guardUserId,
+      req,
       resourceKind: 'dictionaries.dictionary',
       resourceId: dictionary.id,
       operation: 'delete',
-      requestMethod: req.method,
-      requestHeaders: req.headers,
       mutationPayload: null,
     })
-    if (guardResult && !guardResult.ok) {
-      return NextResponse.json(guardResult.body, { status: guardResult.status })
-    }
+    if (guard.blockedResponse) return guard.blockedResponse
 
     if (isProtectedCurrencyDictionary(dictionary)) {
       throw new CrudHttpError(400, { error: context.translate('dictionaries.errors.currency_protected', 'The currency dictionary cannot be modified or deleted.') })
@@ -270,19 +251,7 @@ export async function DELETE(req: Request, ctx: { params?: { dictionaryId?: stri
     dictionary.deletedAt = dictionary.deletedAt ?? new Date()
     await context.em.flush()
 
-    if (guardResult?.ok && guardResult.shouldRunAfterSuccess) {
-      await runCrudMutationGuardAfterSuccess(context.container, {
-        tenantId: context.tenantId,
-        organizationId: context.organizationId,
-        userId: guardUserId,
-        resourceKind: 'dictionaries.dictionary',
-        resourceId: dictionary.id,
-        operation: 'delete',
-        requestMethod: req.method,
-        requestHeaders: req.headers,
-        metadata: guardResult.metadata ?? null,
-      })
-    }
+    await guard.runAfterSuccess()
 
     return NextResponse.json({ ok: true })
   } catch (err) {

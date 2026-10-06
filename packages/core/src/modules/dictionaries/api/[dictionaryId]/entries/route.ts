@@ -5,10 +5,7 @@ import { Dictionary, DictionaryEntry } from '@open-mercato/core/modules/dictiona
 import { resolveDictionariesRouteContext, resolveDictionaryActorId } from '@open-mercato/core/modules/dictionaries/api/context'
 import { createDictionaryEntrySchema } from '@open-mercato/core/modules/dictionaries/data/validators'
 import { CrudHttpError, isCrudHttpError } from '@open-mercato/shared/lib/crud/errors'
-import {
-  runCrudMutationGuardAfterSuccess,
-  validateCrudMutationGuard,
-} from '@open-mercato/shared/lib/crud/mutation-guard'
+import { beginDictionariesMutationGuard } from '@open-mercato/core/modules/dictionaries/api/mutation-guard'
 import type { CommandBus } from '@open-mercato/shared/lib/commands'
 import { serializeOperationMetadata } from '@open-mercato/shared/lib/commands/operationMetadata'
 import type { OpenApiMethodDoc, OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
@@ -177,20 +174,18 @@ export async function POST(req: Request, ctx: { params?: { dictionaryId?: string
     const { dictionaryId } = paramsSchema.parse({ dictionaryId: ctx.params?.dictionaryId })
     const payload = createDictionaryEntrySchema.parse(await req.json().catch(() => ({})))
     const guardUserId = resolveDictionaryActorId(context.auth)
-    const guardResult = await validateCrudMutationGuard(context.container, {
+    const guard = await beginDictionariesMutationGuard({
+      container: context.container,
       tenantId: context.tenantId,
       organizationId: context.organizationId,
       userId: guardUserId,
+      req,
       resourceKind: DICTIONARY_ENTRY_RESOURCE,
       resourceId: dictionaryId,
       operation: 'create',
-      requestMethod: req.method,
-      requestHeaders: req.headers,
       mutationPayload: payload,
     })
-    if (guardResult && !guardResult.ok) {
-      return NextResponse.json(guardResult.body, { status: guardResult.status })
-    }
+    if (guard.blockedResponse) return guard.blockedResponse
     // These nested routes do not use makeCrudRoute, so we invoke the command bus directly.
     const commandBus = (context.container.resolve('commandBus') as CommandBus)
     const { result, logEntry } = await commandBus.execute('dictionaries.entries.create', {
@@ -202,19 +197,7 @@ export async function POST(req: Request, ctx: { params?: { dictionaryId?: string
     if (!createdEntryId) {
       throw new CrudHttpError(500, { error: context.translate('dictionaries.errors.entry_create_failed', 'Failed to create dictionary entry') })
     }
-    if (guardResult?.ok && guardResult.shouldRunAfterSuccess) {
-      await runCrudMutationGuardAfterSuccess(context.container, {
-        tenantId: context.tenantId,
-        organizationId: context.organizationId,
-        userId: guardUserId,
-        resourceKind: DICTIONARY_ENTRY_RESOURCE,
-        resourceId: createdEntryId,
-        operation: 'create',
-        requestMethod: req.method,
-        requestHeaders: req.headers,
-        metadata: guardResult.metadata ?? null,
-      })
-    }
+    await guard.runAfterSuccess(createdEntryId)
     const entry = await findOneWithDecryption(
       context.em.fork(),
       DictionaryEntry,

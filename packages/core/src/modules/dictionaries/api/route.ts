@@ -2,10 +2,7 @@ import { NextResponse } from 'next/server'
 import { Dictionary } from '@open-mercato/core/modules/dictionaries/data/entities'
 import { resolveDictionariesRouteContext, resolveDictionaryActorId } from '@open-mercato/core/modules/dictionaries/api/context'
 import { CrudHttpError, isCrudHttpError } from '@open-mercato/shared/lib/crud/errors'
-import {
-  runCrudMutationGuardAfterSuccess,
-  validateCrudMutationGuard,
-} from '@open-mercato/shared/lib/crud/mutation-guard'
+import { beginDictionariesMutationGuard } from '@open-mercato/core/modules/dictionaries/api/mutation-guard'
 import type { OpenApiMethodDoc, OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
 import {
   DEFAULT_DICTIONARY_ENTRY_SORT_MODE,
@@ -109,37 +106,23 @@ export async function POST(req: Request) {
     })
 
     const guardUserId = resolveDictionaryActorId(context.auth)
-    const guardResult = await validateCrudMutationGuard(context.container, {
+    const guard = await beginDictionariesMutationGuard({
+      container: context.container,
       tenantId: context.tenantId,
       organizationId: context.organizationId,
       userId: guardUserId,
+      req,
       resourceKind: 'dictionaries.dictionary',
       resourceId: dictionary.id,
       operation: 'create',
-      requestMethod: req.method,
-      requestHeaders: req.headers,
       mutationPayload: payload,
     })
-    if (guardResult && !guardResult.ok) {
-      return NextResponse.json(guardResult.body, { status: guardResult.status })
-    }
+    if (guard.blockedResponse) return guard.blockedResponse
 
     context.em.persist(dictionary)
     await context.em.flush()
 
-    if (guardResult?.ok && guardResult.shouldRunAfterSuccess) {
-      await runCrudMutationGuardAfterSuccess(context.container, {
-        tenantId: context.tenantId,
-        organizationId: context.organizationId,
-        userId: guardUserId,
-        resourceKind: 'dictionaries.dictionary',
-        resourceId: dictionary.id,
-        operation: 'create',
-        requestMethod: req.method,
-        requestHeaders: req.headers,
-        metadata: guardResult.metadata ?? null,
-      })
-    }
+    await guard.runAfterSuccess()
 
     return NextResponse.json({
       id: dictionary.id,

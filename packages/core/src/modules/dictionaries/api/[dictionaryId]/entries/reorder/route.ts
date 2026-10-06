@@ -13,10 +13,7 @@ import type { OpenApiMethodDoc, OpenApiRouteDoc } from '@open-mercato/shared/lib
 import { serializeOperationMetadata } from '@open-mercato/shared/lib/commands/operationMetadata'
 import { findOneWithDecryption } from '@open-mercato/shared/lib/encryption/find'
 import { readJsonSafe } from '@open-mercato/shared/lib/http/readJsonSafe'
-import {
-  runCrudMutationGuardAfterSuccess,
-  validateCrudMutationGuard,
-} from '@open-mercato/shared/lib/crud/mutation-guard'
+import { beginDictionariesMutationGuard } from '../../../mutation-guard'
 import {
   dictionaryIdParamsSchema,
   dictionariesErrorSchema,
@@ -65,20 +62,18 @@ export async function POST(req: Request, ctx: { params?: { dictionaryId?: string
 
     const payload = reorderDictionaryEntriesSchema.parse(await readJsonSafe(req, {}))
     const guardUserId = resolveDictionaryActorId(context.auth)
-    const guardResult = await validateCrudMutationGuard(context.container, {
+    const guard = await beginDictionariesMutationGuard({
+      container: context.container,
       tenantId: context.tenantId,
       organizationId: context.organizationId,
       userId: guardUserId,
+      req,
       resourceKind: 'dictionaries.dictionary',
       resourceId: dictionaryId,
       operation: 'custom',
-      requestMethod: req.method,
-      requestHeaders: req.headers,
       mutationPayload: payload,
     })
-    if (guardResult && !guardResult.ok) {
-      return NextResponse.json(guardResult.body, { status: guardResult.status })
-    }
+    if (guard.blockedResponse) return guard.blockedResponse
 
     const commandInput = reorderDictionaryEntriesCommandSchema.parse({
       dictionaryId,
@@ -96,19 +91,7 @@ export async function POST(req: Request, ctx: { params?: { dictionaryId?: string
       },
     )
 
-    if (guardResult?.ok && guardResult.shouldRunAfterSuccess) {
-      await runCrudMutationGuardAfterSuccess(context.container, {
-        tenantId: context.tenantId,
-        organizationId: context.organizationId,
-        userId: guardUserId,
-        resourceKind: 'dictionaries.dictionary',
-        resourceId: dictionaryId,
-        operation: 'custom',
-        requestMethod: req.method,
-        requestHeaders: req.headers,
-        metadata: guardResult.metadata ?? null,
-      })
-    }
+    await guard.runAfterSuccess(dictionaryId)
 
     const response = NextResponse.json({ ok: true })
     if (logEntry?.undoToken && logEntry.id && logEntry.commandId) {
