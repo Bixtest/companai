@@ -12,6 +12,7 @@ import type { ActionLog } from '@open-mercato/core/modules/audit_logs/data/entit
 import { z } from 'zod'
 import type { OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
 import { createLogger } from '@open-mercato/shared/lib/logger'
+import { beginAuditLogsMutationGuard } from '../../../mutation-guard'
 
 const logger = createLogger('audit_logs').child({ component: 'redo' })
 
@@ -102,6 +103,14 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Redo target not available' }, { status: 400 })
   }
 
+  // D2-gap (2026-10-06): redo re-EXECUTES the original command, so like undo it
+  // called no mutation guard and a guard set shipped for `audit_logs` was
+  // silently skipped on a path that can re-apply a protected write. The guard is
+  // run below, once the redo input has resolved — so policy is only evaluated
+  // for a request that can actually proceed, and the guard still runs BEFORE the
+  // command executes. Evaluated against the log entry's own resource kind: the
+  // operation is the replay of a write to that resource. See `api/mutation-guard.ts`.
+
   try {
     const ctx = await createRuntimeContext(container, auth, req)
     const contextRecord = log.contextJson && typeof log.contextJson === 'object' ? (log.contextJson as Record<string, unknown>) : null
@@ -131,6 +140,18 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Redo data unavailable for this action' }, { status: 400 })
     }
     const commandInput = resolvedInput
+    const guard = await beginAuditLogsMutationGuard({
+      container,
+      req,
+      tenantId: auth.tenantId ?? null,
+      organizationId: log.organizationId ?? organizationId,
+      userId: auth.sub,
+      resourceKind: log.resourceKind ?? 'audit_logs.action_log',
+      resourceId: log.resourceId ?? log.id,
+      operation: 'custom',
+      mutationPayload: { redoLogId: log.id, commandId: log.commandId },
+    })
+    if (guard.blockedResponse) return guard.blockedResponse
     const { logEntry } = await commandBus.execute(log.commandId, {
       input: commandInput,
       ctx,
@@ -138,6 +159,7 @@ export async function POST(req: Request) {
       redoLogEntry: log,
     })
     await logs.markRedone(log.id)
+    await guard.runAfterSuccess()
     const actionLog = asActionLog(logEntry)
     const response = NextResponse.json({
       ok: true,

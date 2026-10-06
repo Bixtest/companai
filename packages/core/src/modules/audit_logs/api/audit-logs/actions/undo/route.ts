@@ -10,6 +10,7 @@ import type { AwilixContainer } from 'awilix'
 import { z } from 'zod'
 import type { OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
 import { createLogger } from '@open-mercato/shared/lib/logger'
+import { beginAuditLogsMutationGuard } from '../../../mutation-guard'
 
 const logger = createLogger('audit_logs').child({ component: 'undo' })
 
@@ -115,9 +116,29 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Undo token not available' }, { status: 400 })
   }
 
+  // D2-gap (2026-10-06): this route called no mutation guard at all, so a guard
+  // set shipped for `audit_logs` was silently skipped on the one path that can
+  // REVERSE a protected write. The guard runs here — after the row is loaded and
+  // authorized, before the command executes — evaluated against the log entry's
+  // OWN resource kind, because the operation being guarded is the reversal of a
+  // write to that resource. See `api/mutation-guard.ts`.
+  const guard = await beginAuditLogsMutationGuard({
+    container,
+    req,
+    tenantId: auth.tenantId ?? null,
+    organizationId: target.organizationId ?? organizationId,
+    userId: auth.sub,
+    resourceKind: target.resourceKind ?? 'audit_logs.action_log',
+    resourceId: target.resourceId ?? target.id,
+    operation: 'custom',
+    mutationPayload: { undoToken, logId: target.id },
+  })
+  if (guard.blockedResponse) return guard.blockedResponse
+
   try {
     const ctx = await createRuntimeContext(container, auth, req)
     await commandBus.undo(undoToken, ctx)
+    await guard.runAfterSuccess()
     return NextResponse.json({ ok: true, logId: target.id })
   } catch (err) {
     logger.error('Undo failed', { err })
