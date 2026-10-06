@@ -5,10 +5,7 @@ import { runWithCacheTenant } from '@open-mercato/cache'
 import { findOneWithDecryption } from '@open-mercato/shared/lib/encryption/find'
 import { writeDirectWriteAuditLog } from '@open-mercato/shared/lib/crud/audit-write'
 import { InboxProposalAction } from '../../../../../data/entities'
-import {
-  runCrudMutationGuardAfterSuccess,
-  validateCrudMutationGuard,
-} from '@open-mercato/shared/lib/crud/mutation-guard'
+import { beginInboxOpsMutationGuard } from '../../../../mutation-guard'
 import { actionEditSchema, validateActionPayloadForType } from '../../../../../data/validators'
 import { emitInboxOpsEvent } from '../../../../../events'
 import { resolveCache, invalidateCountsCache } from '../../../../../lib/cache'
@@ -50,20 +47,18 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ error: payloadValidation.error }, { status: 400 })
     }
 
-    const guardResult = await validateCrudMutationGuard(ctx.container, {
+    const guard = await beginInboxOpsMutationGuard({
+      container: ctx.container,
       tenantId: ctx.tenantId,
       organizationId: ctx.organizationId,
       userId: ctx.userId,
+      req,
       resourceKind: 'inbox_ops:inbox_proposal_action',
       resourceId: action.id,
       operation: 'update',
-      requestMethod: req.method,
-      requestHeaders: req.headers,
       mutationPayload: parsed.data,
     })
-    if (guardResult && !guardResult.ok) {
-      return NextResponse.json(guardResult.body, { status: guardResult.status })
-    }
+    if (guard.blockedResponse) return guard.blockedResponse
 
     // R2c — editing what the model proposed, before approving it, is a governed
     // act: the change a person ends up approving is no longer the one the model
@@ -103,19 +98,7 @@ export async function PATCH(req: Request) {
       })
     })
 
-    if (guardResult?.ok && guardResult.shouldRunAfterSuccess) {
-      await runCrudMutationGuardAfterSuccess(ctx.container, {
-        tenantId: ctx.tenantId,
-        organizationId: ctx.organizationId,
-        userId: ctx.userId,
-        resourceKind: 'inbox_ops:inbox_proposal_action',
-        resourceId: action.id,
-        operation: 'update',
-        requestMethod: req.method,
-        requestHeaders: req.headers,
-        metadata: guardResult.metadata ?? null,
-      })
-    }
+    await guard.runAfterSuccess()
 
     const cache = resolveCache(ctx.container)
     await runWithCacheTenant(ctx.tenantId, () => invalidateCountsCache(cache, ctx.tenantId))

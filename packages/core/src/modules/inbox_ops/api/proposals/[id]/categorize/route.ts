@@ -5,10 +5,7 @@ import { runWithCacheTenant } from '@open-mercato/cache'
 import { findOneWithDecryption } from '@open-mercato/shared/lib/encryption/find'
 import { writeDirectWriteAuditLog } from '@open-mercato/shared/lib/crud/audit-write'
 import { InboxProposal } from '../../../../data/entities'
-import {
-  runCrudMutationGuardAfterSuccess,
-  validateCrudMutationGuard,
-} from '@open-mercato/shared/lib/crud/mutation-guard'
+import { beginInboxOpsMutationGuard } from '../../../mutation-guard'
 import { categorizeProposalSchema } from '../../../../data/validators'
 import { resolveCache, invalidateCountsCache } from '../../../../lib/cache'
 import {
@@ -35,20 +32,18 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: `Invalid category: ${issues}` }, { status: 400 })
     }
 
-    const guardResult = await validateCrudMutationGuard(ctx.container, {
+    const guard = await beginInboxOpsMutationGuard({
+      container: ctx.container,
       tenantId: ctx.tenantId,
       organizationId: ctx.organizationId,
       userId: ctx.userId,
+      req,
       resourceKind: 'inbox_ops:inbox_proposal',
       resourceId: proposal.id,
       operation: 'update',
-      requestMethod: req.method,
-      requestHeaders: req.headers,
       mutationPayload: parsed.data,
     })
-    if (guardResult && !guardResult.ok) {
-      return NextResponse.json(guardResult.body, { status: guardResult.status })
-    }
+    if (guard.blockedResponse) return guard.blockedResponse
 
     const previousCategory = proposal.category || null
 
@@ -82,19 +77,7 @@ export async function POST(req: Request) {
       })
     })
 
-    if (guardResult?.ok && guardResult.shouldRunAfterSuccess) {
-      await runCrudMutationGuardAfterSuccess(ctx.container, {
-        tenantId: ctx.tenantId,
-        organizationId: ctx.organizationId,
-        userId: ctx.userId,
-        resourceKind: 'inbox_ops:inbox_proposal',
-        resourceId: proposal.id,
-        operation: 'update',
-        requestMethod: req.method,
-        requestHeaders: req.headers,
-        metadata: guardResult.metadata ?? null,
-      })
-    }
+    await guard.runAfterSuccess()
 
     const cache = resolveCache(ctx.container)
     await runWithCacheTenant(ctx.tenantId, () => invalidateCountsCache(cache, ctx.tenantId))

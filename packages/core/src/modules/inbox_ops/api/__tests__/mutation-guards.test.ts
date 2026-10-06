@@ -26,8 +26,8 @@ const ctx = {
   eventBus: null,
 }
 
-const validateCrudMutationGuardMock = jest.fn()
-const runCrudMutationGuardAfterSuccessMock = jest.fn()
+const runRouteMutationGuardsMock = jest.fn()
+const runAfterSuccessMock = jest.fn(async () => undefined)
 
 const resolveProposalMock = jest.fn()
 const resolveActionAndProposalMock = jest.fn()
@@ -38,9 +38,19 @@ const findOneWithDecryptionMock = jest.fn()
 
 class UnauthorizedError extends Error {}
 
-jest.mock('@open-mercato/shared/lib/crud/mutation-guard', () => ({
-  validateCrudMutationGuard: (...args: unknown[]) => validateCrudMutationGuardMock(...args),
-  runCrudMutationGuardAfterSuccess: (...args: unknown[]) => runCrudMutationGuardAfterSuccessMock(...args),
+/**
+ * Only the *registry call* is stubbed. The module wrapper
+ * (`beginInboxOpsMutationGuard`) runs for real, so a mutation that breaks the
+ * wrapper's block path or its after-success runner is visible to these tests.
+ *
+ * D2-wide (2026-10-06): this suite used to mock the **deprecated**
+ * `@open-mercato/shared/lib/crud/mutation-guard` pair. That is the wrong target
+ * now — the routes no longer import it — and, more importantly, mocking the
+ * wrapper or the deprecated pair would make the migration's own mutations
+ * invisible. Stub the registry call only.
+ */
+jest.mock('@open-mercato/shared/lib/crud/route-mutation-guard', () => ({
+  runRouteMutationGuards: (...args: unknown[]) => runRouteMutationGuardsMock(...args),
 }))
 
 jest.mock('@open-mercato/cache', () => ({
@@ -87,8 +97,13 @@ import { PATCH as actionPatch } from '../proposals/[id]/actions/[actionId]/route
 import { POST as acceptAllPost } from '../proposals/[id]/accept-all/route'
 import { DELETE as emailDelete } from '../emails/[id]/route'
 
-const guardAllow = { ok: true, shouldRunAfterSuccess: true, metadata: { token: 'guard' } }
-const guardDeny = { ok: false, status: 423, body: { error: 'locked' } }
+const guardAllow = () => ({ ok: true as const, runAfterSuccess: runAfterSuccessMock })
+const guardDeny = () => ({
+  ok: false as const,
+  errorStatus: 423,
+  errorBody: { error: 'locked' },
+  response: new Response(),
+})
 
 function jsonRequest(url: string, method: string, body?: unknown): Request {
   return new Request(url, {
@@ -101,8 +116,7 @@ function jsonRequest(url: string, method: string, body?: unknown): Request {
 describe('inbox_ops custom write routes wire the mutation guard', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    validateCrudMutationGuardMock.mockResolvedValue(guardAllow)
-    runCrudMutationGuardAfterSuccessMock.mockResolvedValue(undefined)
+    runRouteMutationGuardsMock.mockResolvedValue(guardAllow())
     flushMock.mockResolvedValue(undefined)
     nativeUpdateMock.mockResolvedValue(1)
     resolveProposalMock.mockResolvedValue({ id: proposalId, category: 'inquiry' })
@@ -132,28 +146,24 @@ describe('inbox_ops custom write routes wire the mutation guard', () => {
       )
 
       expect(response.status).toBe(200)
-      const validateOrder = validateCrudMutationGuardMock.mock.invocationCallOrder[0]
+      const validateOrder = runRouteMutationGuardsMock.mock.invocationCallOrder[0]
       const flushOrder = flushMock.mock.invocationCallOrder[0]
       expect(validateOrder).toBeLessThan(flushOrder)
-      expect(validateCrudMutationGuardMock).toHaveBeenCalledWith(
-        container,
+      expect(runRouteMutationGuardsMock).toHaveBeenCalledWith(
         expect.objectContaining({
-          tenantId,
-          organizationId,
-          userId,
-          resourceKind: 'inbox_ops:inbox_proposal',
-          resourceId: proposalId,
-          operation: 'update',
+          auth: { userId, tenantId, organizationId },
+          input: expect.objectContaining({
+            resourceKind: 'inbox_ops:inbox_proposal',
+            resourceId: proposalId,
+            operation: 'update',
+          }),
         }),
       )
-      expect(runCrudMutationGuardAfterSuccessMock).toHaveBeenCalledWith(
-        container,
-        expect.objectContaining({ resourceKind: 'inbox_ops:inbox_proposal', resourceId: proposalId }),
-      )
+      expect(runAfterSuccessMock).toHaveBeenCalled()
     })
 
     it('returns the guard rejection and does not mutate', async () => {
-      validateCrudMutationGuardMock.mockResolvedValue(guardDeny)
+      runRouteMutationGuardsMock.mockResolvedValue(guardDeny())
 
       const response = await categorizePost(
         jsonRequest(`http://localhost/api/inbox_ops/proposals/${proposalId}/categorize`, 'POST', { category: 'order' }),
@@ -161,7 +171,7 @@ describe('inbox_ops custom write routes wire the mutation guard', () => {
 
       expect(response.status).toBe(423)
       expect(flushMock).not.toHaveBeenCalled()
-      expect(runCrudMutationGuardAfterSuccessMock).not.toHaveBeenCalled()
+      expect(runAfterSuccessMock).not.toHaveBeenCalled()
     })
   })
 
@@ -176,25 +186,23 @@ describe('inbox_ops custom write routes wire the mutation guard', () => {
       )
 
       expect(response.status).toBe(200)
-      const validateOrder = validateCrudMutationGuardMock.mock.invocationCallOrder[0]
+      const validateOrder = runRouteMutationGuardsMock.mock.invocationCallOrder[0]
       const flushOrder = flushMock.mock.invocationCallOrder[0]
       expect(validateOrder).toBeLessThan(flushOrder)
-      expect(validateCrudMutationGuardMock).toHaveBeenCalledWith(
-        container,
+      expect(runRouteMutationGuardsMock).toHaveBeenCalledWith(
         expect.objectContaining({
-          resourceKind: 'inbox_ops:inbox_proposal_action',
-          resourceId: actionId,
-          operation: 'update',
+          input: expect.objectContaining({
+            resourceKind: 'inbox_ops:inbox_proposal_action',
+            resourceId: actionId,
+            operation: 'update',
+          }),
         }),
       )
-      expect(runCrudMutationGuardAfterSuccessMock).toHaveBeenCalledWith(
-        container,
-        expect.objectContaining({ resourceKind: 'inbox_ops:inbox_proposal_action', resourceId: actionId }),
-      )
+      expect(runAfterSuccessMock).toHaveBeenCalled()
     })
 
     it('returns the guard rejection and does not mutate', async () => {
-      validateCrudMutationGuardMock.mockResolvedValue(guardDeny)
+      runRouteMutationGuardsMock.mockResolvedValue(guardDeny())
 
       const response = await actionPatch(
         jsonRequest(
@@ -206,7 +214,7 @@ describe('inbox_ops custom write routes wire the mutation guard', () => {
 
       expect(response.status).toBe(423)
       expect(flushMock).not.toHaveBeenCalled()
-      expect(runCrudMutationGuardAfterSuccessMock).not.toHaveBeenCalled()
+      expect(runAfterSuccessMock).not.toHaveBeenCalled()
     })
   })
 
@@ -217,22 +225,23 @@ describe('inbox_ops custom write routes wire the mutation guard', () => {
       )
 
       expect(response.status).toBe(200)
-      const validateOrder = validateCrudMutationGuardMock.mock.invocationCallOrder[0]
+      const validateOrder = runRouteMutationGuardsMock.mock.invocationCallOrder[0]
       const executeOrder = acceptAllActionsMock.mock.invocationCallOrder[0]
       expect(validateOrder).toBeLessThan(executeOrder)
-      expect(validateCrudMutationGuardMock).toHaveBeenCalledWith(
-        container,
+      expect(runRouteMutationGuardsMock).toHaveBeenCalledWith(
         expect.objectContaining({
-          resourceKind: 'inbox_ops:inbox_proposal',
-          resourceId: proposalId,
-          operation: 'custom',
+          input: expect.objectContaining({
+            resourceKind: 'inbox_ops:inbox_proposal',
+            resourceId: proposalId,
+            operation: 'custom',
+          }),
         }),
       )
-      expect(runCrudMutationGuardAfterSuccessMock).toHaveBeenCalled()
+      expect(runAfterSuccessMock).toHaveBeenCalled()
     })
 
     it('returns the guard rejection and does not execute actions', async () => {
-      validateCrudMutationGuardMock.mockResolvedValue(guardDeny)
+      runRouteMutationGuardsMock.mockResolvedValue(guardDeny())
 
       const response = await acceptAllPost(
         jsonRequest(`http://localhost/api/inbox_ops/proposals/${proposalId}/accept-all`, 'POST'),
@@ -240,7 +249,7 @@ describe('inbox_ops custom write routes wire the mutation guard', () => {
 
       expect(response.status).toBe(423)
       expect(acceptAllActionsMock).not.toHaveBeenCalled()
-      expect(runCrudMutationGuardAfterSuccessMock).not.toHaveBeenCalled()
+      expect(runAfterSuccessMock).not.toHaveBeenCalled()
     })
   })
 
@@ -251,22 +260,23 @@ describe('inbox_ops custom write routes wire the mutation guard', () => {
       )
 
       expect(response.status).toBe(200)
-      const validateOrder = validateCrudMutationGuardMock.mock.invocationCallOrder[0]
+      const validateOrder = runRouteMutationGuardsMock.mock.invocationCallOrder[0]
       const updateOrder = nativeUpdateMock.mock.invocationCallOrder[0]
       expect(validateOrder).toBeLessThan(updateOrder)
-      expect(validateCrudMutationGuardMock).toHaveBeenCalledWith(
-        container,
+      expect(runRouteMutationGuardsMock).toHaveBeenCalledWith(
         expect.objectContaining({
-          resourceKind: 'inbox_ops:inbox_email',
-          resourceId: emailId,
-          operation: 'delete',
+          input: expect.objectContaining({
+            resourceKind: 'inbox_ops:inbox_email',
+            resourceId: emailId,
+            operation: 'delete',
+          }),
         }),
       )
-      expect(runCrudMutationGuardAfterSuccessMock).toHaveBeenCalled()
+      expect(runAfterSuccessMock).toHaveBeenCalled()
     })
 
     it('returns the guard rejection and does not delete', async () => {
-      validateCrudMutationGuardMock.mockResolvedValue(guardDeny)
+      runRouteMutationGuardsMock.mockResolvedValue(guardDeny())
 
       const response = await emailDelete(
         jsonRequest(`http://localhost/api/inbox_ops/emails/${emailId}`, 'DELETE'),
@@ -274,7 +284,7 @@ describe('inbox_ops custom write routes wire the mutation guard', () => {
 
       expect(response.status).toBe(423)
       expect(nativeUpdateMock).not.toHaveBeenCalled()
-      expect(runCrudMutationGuardAfterSuccessMock).not.toHaveBeenCalled()
+      expect(runAfterSuccessMock).not.toHaveBeenCalled()
     })
 
     it('does not run the after-success hook when the email was already deleted', async () => {
@@ -285,7 +295,7 @@ describe('inbox_ops custom write routes wire the mutation guard', () => {
       )
 
       expect(response.status).toBe(404)
-      expect(runCrudMutationGuardAfterSuccessMock).not.toHaveBeenCalled()
+      expect(runAfterSuccessMock).not.toHaveBeenCalled()
     })
   })
 })

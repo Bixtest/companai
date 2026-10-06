@@ -3,11 +3,8 @@ import type { EntityManager } from '@mikro-orm/postgresql'
 import type { OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
 import { findOneWithDecryption } from '@open-mercato/shared/lib/encryption/find'
 import { writeDirectWriteAuditLog } from '@open-mercato/shared/lib/crud/audit-write'
-import {
-  runCrudMutationGuardAfterSuccess,
-  validateCrudMutationGuard,
-} from '@open-mercato/shared/lib/crud/mutation-guard'
 import { InboxEmail } from '../../../data/entities'
+import { beginInboxOpsMutationGuard } from '../../mutation-guard'
 import {
   resolveRequestContext,
   extractPathSegment,
@@ -73,19 +70,17 @@ export async function DELETE(req: Request) {
 
     const ctx = await resolveRequestContext(req)
 
-    const guardResult = await validateCrudMutationGuard(ctx.container, {
+    const guard = await beginInboxOpsMutationGuard({
+      container: ctx.container,
       tenantId: ctx.tenantId,
       organizationId: ctx.organizationId,
       userId: ctx.userId,
+      req,
       resourceKind: 'inbox_ops:inbox_email',
       resourceId: id,
       operation: 'delete',
-      requestMethod: req.method,
-      requestHeaders: req.headers,
     })
-    if (guardResult && !guardResult.ok) {
-      return NextResponse.json(guardResult.body, { status: guardResult.status })
-    }
+    if (guard.blockedResponse) return guard.blockedResponse
 
     // R2c — the soft delete and its audit entry commit together. The transaction
     // is opened on the container's EntityManager, not `ctx.em`: the audit service
@@ -122,19 +117,7 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ error: 'Email not found' }, { status: 404 })
     }
 
-    if (guardResult?.ok && guardResult.shouldRunAfterSuccess) {
-      await runCrudMutationGuardAfterSuccess(ctx.container, {
-        tenantId: ctx.tenantId,
-        organizationId: ctx.organizationId,
-        userId: ctx.userId,
-        resourceKind: 'inbox_ops:inbox_email',
-        resourceId: id,
-        operation: 'delete',
-        requestMethod: req.method,
-        requestHeaders: req.headers,
-        metadata: guardResult.metadata ?? null,
-      })
-    }
+    await guard.runAfterSuccess()
 
     return NextResponse.json({ ok: true })
   } catch (err) {
