@@ -8,8 +8,10 @@ import { collectCrudCacheStats, purgeCrudCacheSegment } from '@open-mercato/shar
 import {
   bridgeLegacyGuard,
   runMutationGuards,
+  type MutationGuard,
   type MutationGuardInput,
 } from '@open-mercato/shared/lib/crud/mutation-guard-registry'
+import { getAllMutationGuardInstances } from '@open-mercato/shared/lib/crud/mutation-guard-store'
 import {
   configsTag,
   cacheStatsResponseSchema,
@@ -118,10 +120,16 @@ export async function POST(req: Request) {
       requestHeaders: req.headers,
       mutationPayload: { action, ...(segment ? { segment } : {}) },
     }
+    // Every guard from the global store, plus the bridged legacy service — the
+    // same set `makeCrudRoute` writes enforce. Previously this ran only the
+    // legacy bridge and silently skipped registry guards (the same defect as
+    // `messages/api/guards.ts`); closed now.
+    const allGuards: MutationGuard[] = [...getAllMutationGuardInstances()]
     const guard = bridgeLegacyGuard(container)
+    if (guard) allGuards.push(guard)
     let afterSuccessCallbacks: Awaited<ReturnType<typeof runMutationGuards>>['afterSuccessCallbacks'] = []
-    if (guard) {
-      const guardResult = await runMutationGuards([guard], guardInput, {
+    if (allGuards.length) {
+      const guardResult = await runMutationGuards(allGuards, guardInput, {
         userFeatures: resolveUserFeatures(auth),
       })
       if (!guardResult.ok) {

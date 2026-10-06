@@ -5,6 +5,7 @@ import {
   type MutationGuard,
   type MutationGuardInput,
 } from '@open-mercato/shared/lib/crud/mutation-guard-registry'
+import { getAllMutationGuardInstances } from '@open-mercato/shared/lib/crud/mutation-guard-store'
 
 type GuardAfterCallback = {
   guard: MutationGuard
@@ -28,12 +29,22 @@ export async function runMessageMutationGuards(
   modifiedPayload?: Record<string, unknown>
   afterSuccessCallbacks: GuardAfterCallback[]
 }> {
+  // Run every guard from the global mutation-guard store, plus the bridged
+  // legacy DI service — the same set `makeCrudRoute` writes enforce
+  // (`collectAndRunGuards()` in `crud/factory.ts`). Previously this ran ONLY
+  // the legacy bridge, which silently skipped every registry guard: a write
+  // here would not have been checked by any guard registered for a
+  // `messages.*` resource. No `messages` guard is registered today, so the
+  // hole was latent — but it is the exact shape the deprecated
+  // `validateCrudMutationGuard()` pair has, and it is now closed.
+  const allGuards: MutationGuard[] = [...getAllMutationGuardInstances()]
   const legacyGuard = bridgeLegacyGuard(container)
-  if (!legacyGuard) {
+  if (legacyGuard) allGuards.push(legacyGuard)
+  if (allGuards.length === 0) {
     return { ok: true, afterSuccessCallbacks: [] }
   }
 
-  return runMutationGuards([legacyGuard], input, { userFeatures })
+  return runMutationGuards(allGuards, input, { userFeatures })
 }
 
 export async function runMessageMutationGuardAfterSuccess(

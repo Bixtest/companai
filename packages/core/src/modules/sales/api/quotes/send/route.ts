@@ -13,6 +13,7 @@ import {
   type MutationGuard,
   type MutationGuardInput,
 } from '@open-mercato/shared/lib/crud/mutation-guard-registry'
+import { getAllMutationGuardInstances } from '@open-mercato/shared/lib/crud/mutation-guard-store'
 import type { EntityManager } from '@mikro-orm/postgresql'
 import crypto from 'node:crypto'
 import { withScopedPayload } from '../../utils'
@@ -50,12 +51,19 @@ async function runGuards(
   errorStatus?: number
   afterSuccessCallbacks: Array<{ guard: MutationGuard; metadata: Record<string, unknown> | null }>
 }> {
+  // Run every guard from the global mutation-guard store, plus the bridged
+  // legacy DI service — the same set `makeCrudRoute` writes enforce. Previously
+  // this ran ONLY the legacy bridge, silently skipping every registry guard
+  // (the same defect as `messages/api/guards.ts`); no `sales.quote` guard is
+  // registered today, so the hole was latent — closed now.
+  const allGuards: MutationGuard[] = [...getAllMutationGuardInstances()]
   const legacyGuard = bridgeLegacyGuard(ctx.container)
-  if (!legacyGuard) {
+  if (legacyGuard) allGuards.push(legacyGuard)
+  if (allGuards.length === 0) {
     return { ok: true, afterSuccessCallbacks: [] }
   }
 
-  return runMutationGuards([legacyGuard], input, {
+  return runMutationGuards(allGuards, input, {
     userFeatures: resolveUserFeatures(ctx.auth),
   })
 }
