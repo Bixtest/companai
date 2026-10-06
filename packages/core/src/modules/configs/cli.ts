@@ -4,6 +4,11 @@ import { runWithCacheTenant, type CacheStrategy } from '@open-mercato/cache'
 import { createRequestContainer } from '@open-mercato/shared/lib/di/container'
 import type { ModuleConfigService } from './lib/module-config-service'
 import { parseBooleanToken } from '@open-mercato/shared/lib/boolean'
+import {
+  DEFAULT_TIER_SETTINGS,
+  TIER_SETTINGS_MODULE,
+  TIER_SETTINGS_NAME,
+} from '@open-mercato/shared/lib/request-outcome/tier-source'
 import { DEFAULT_NOTIFICATION_DELIVERY_CONFIG, NOTIFICATIONS_DELIVERY_CONFIG_KEY } from '../notifications/lib/deliveryConfig'
 import { Tenant } from '../directory/data/entities'
 import {
@@ -324,6 +329,16 @@ const restoreDefaults: ModuleCli = {
             moduleId: 'notifications',
             name: NOTIFICATIONS_DELIVERY_CONFIG_KEY,
             value: DEFAULT_NOTIFICATION_DELIVERY_CONFIG,
+          },
+          // D1 — the tier mapping / defaults / fallbacks are a setting a superadmin
+          // may change (owner, 2026-10-06; dictionary §C.2b). The dictionary's table
+          // is the SEED; this writes it so the live setting exists on a fresh
+          // install. `restoreDefaults` only fills a missing row unless `force`, so a
+          // superadmin's edited value is NOT overwritten by a re-run without force.
+          {
+            moduleId: TIER_SETTINGS_MODULE,
+            name: TIER_SETTINGS_NAME,
+            value: DEFAULT_TIER_SETTINGS,
           },
         ],
         { force: true },

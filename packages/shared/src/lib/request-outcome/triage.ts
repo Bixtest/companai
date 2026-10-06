@@ -40,25 +40,41 @@ import type {
   StructureChange,
 } from './types'
 import { UNRECOGNISED_CHANGE_TIER } from './types'
+import type { TierSettings } from './tier-source'
+import { DEFAULT_TIER_SETTINGS, resolveTier } from './tier-source'
 
 /**
  * The tiers a named change kind is known to sit in.
  *
- * **Empty on purpose, and that is the honest state.** The vision gives the three
- * *tiers* (Doc 04 §130–§132) but the mapping from a *change kind* to a tier is not
- * decided anywhere yet, and inventing one here would be exactly the parallel scheme
- * the architecture document already rejected once. So today **every** structure
- * change lands in {@link UNRECOGNISED_CHANGE_TIER}.
+ * **This was an empty frozen object until D1 (2026-10-06).** It is now a *seed*,
+ * not the mechanism: the live mapping is a **setting** a superadmin can change
+ * (`tier-source.ts`, dictionary §C.2b), and {@link tierForChange} reads that when a
+ * {@link TierSettings} is supplied. The constant is kept, and kept **empty on
+ * purpose**, because it documents the honest state — the mapping from a *change
+ * kind* to a tier is not decided anywhere yet, so **every** structure change lands
+ * in {@link UNRECOGNISED_CHANGE_TIER} unless a setting says otherwise.
  *
- * That is a safe default, not a missing feature: an unrecognised change sounding
- * an alarm a person must answer is the behaviour we want until the mapping is
- * decided. When it is, this is the single place it goes — and a test asserts that
- * a change tiered `safe` here still requires confirmation.
+ * That is a safe default, not a missing feature: an unrecognised change sounding an
+ * alarm a person must answer is the behaviour we want until the mapping is decided.
+ * The setting is where it goes now; this constant is only the seed it is built from.
+ *
+ * @deprecated since D1 — read the setting through `tier-source.ts` instead. Kept so
+ * the pure default is still nameable and one place, not scattered.
  */
 const CHANGE_KIND_TIER: Readonly<Record<string, ChangeRiskTier>> = Object.freeze({})
 
-/** The tier for a change, failing closed when the kind is not recognised. */
-export function tierForChange(change: StructureChange): ChangeRiskTier {
+/**
+ * The tier for a change, failing closed when the kind is not recognised.
+ *
+ * **Pure, and now injectable.** Given no `settings`, it uses the seed mapping
+ * (`CHANGE_KIND_TIER`, empty) and therefore lands everything unrecognised on
+ * {@link UNRECOGNISED_CHANGE_TIER}. Given settings — loaded once by the caller from
+ * `module_configs` via `loadTierSettings()` — it reads the live mapping. The purity
+ * promise of this module is kept: no database is touched *here*; the read happens
+ * before the call, and only the already-validated value crosses this boundary.
+ */
+export function tierForChange(change: StructureChange, settings?: TierSettings): ChangeRiskTier {
+  if (settings) return resolveTier(change.kind, settings)
   return CHANGE_KIND_TIER[change.kind] ?? UNRECOGNISED_CHANGE_TIER
 }
 
@@ -67,8 +83,15 @@ export function tierForChange(change: StructureChange): ChangeRiskTier {
  *
  * The order of the branches **is** the rule, and each returns a reason a person can
  * read. See the file header for why structure is checked first.
+ *
+ * `settings` is optional and defaults to the seed, so every existing caller keeps
+ * its exact behaviour (an unrecognised change still fails closed). A caller that has
+ * loaded the live tier setting — e.g. an AI route that already resolved the
+ * container — may pass it so the proposal reflects the configured mapping.
  */
-export function triageRequest(need: RequestNeed): RequestOutcomeProposal {
+export function triageRequest(need: RequestNeed, settings?: TierSettings): RequestOutcomeProposal {
+  const tierSettings = settings ?? DEFAULT_TIER_SETTINGS
+
   /* ---- 1. New structure: the dangerous axis, decided first ---------------- */
 
   if (need.requiresNewStructure) {
@@ -79,7 +102,7 @@ export function triageRequest(need: RequestNeed): RequestOutcomeProposal {
       kind: 'unclassified',
       summary: 'A structure change was requested but not described.',
     }
-    const tier = tierForChange(change)
+    const tier = resolveTier(change.kind, tierSettings)
 
     return {
       outcome: 'model_proposal',
@@ -127,13 +150,18 @@ export function triageRequest(need: RequestNeed): RequestOutcomeProposal {
   // `ephemeral_answer` here would be a guess in the one place a guess is worst:
   // an unclassified request could be *anything*, including a structure change.
   // So it is treated as needing a person, and the reason says exactly that.
+  //
+  // The tier is the *configured default*, not the hardcoded constant — because the
+  // owner's rule (dictionary §C.2b) is that the default is itself a setting. It
+  // still fails closed: `DEFAULT_TIER_SETTINGS.defaultTier` is the strictest tier,
+  // so even with no setting at all this branch cannot land on `safe`.
   return {
     outcome: 'model_proposal',
     reason:
       'This request was not classified: it declares no read, no write and no structure change, so the ' +
       'platform cannot say which ending it has. It is held as a proposal rather than guessed at, ' +
       'because an unclassified request could be a structure change and those are never assumed safe.',
-    tier: UNRECOGNISED_CHANGE_TIER,
+    tier: tierSettings.defaultTier,
     requiresConfirmation: true,
   }
 }
