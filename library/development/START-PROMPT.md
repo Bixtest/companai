@@ -69,7 +69,10 @@ direction gets buried.
     o. library/development/ARCHITECTURE-structure-permissions.md  <- object × verb × actor grammar (S11/S12)
     p. library/development/SPEC-business-model-kernel.md
     q. workspace/COOKBOOK.md                  <- how the work is done. Read before touching code
-    r. LESSONS.md                             <- mistakes already made
+    r. LESSONS.md                             <- mistakes already made. **Read before you start, and
+                                                 add to it before you finish** — see the binding rule
+                                                 below. Every entry is a trap you would otherwise
+                                                 walk into
     s. library/development/JOURNEY.md         <- how the project got here, in order. Read it to
                                                  follow the project as if you had been here since day
                                                  one — the arc, the turning points, the reversals.
@@ -117,6 +120,12 @@ These are the ones that have already cost this project time:
   "looks good" without naming what it tried to break has not done its job.
 - **Never `git add -A`.** Stage by explicit path. A wildcard once swept 10,448 unrelated files into
   a commit. Every batch ends with a commit **in both repositories**.
+- **`LESSONS.md` binds, both ways.** **Read it before you start** — every entry is a mistake this
+  project already made, each with the general form, so you do not repeat it. **And add to it**: when
+  you are caught by a mistake that was invisible from the code, append a numbered lesson (the next
+  number, with the symptom, the general form, and how it was caught) **in the same change as the
+  work** — that file is how the next agent learns from yours. A session that hit a new trap and
+  wrote nothing to `LESSONS.md` is not finished.
 - **Never write the admin password to a file, and never type it into a login form.** It is the
   owner's, and he types it.
 - **Take a checkpoint before anything you could not undo:** `./workspace/scripts/checkpoint.sh <label>`

@@ -48,7 +48,9 @@ that carries it (step 7, and the owner's instruction of 2026-10-06).
    is how the direction gets buried.
 1. **Read this page, then §2 step 1 — tier A first, then tier B.** Six files fix the direction and the
    live decisions; seven more are the spine. **Tier C is opened only when the work needs it** — do not
-   read the imported material "for context". Do not skip the lessons.
+   read the imported material "for context". **And read [`../../LESSONS.md`](../../LESSONS.md) — do not
+   skip the lessons.** Every numbered entry is a mistake this project already made, written in its
+   general form; it is a reading list you act on, not history.
 2. **Set the environment export** (§2 step 2). Every terminal, every session.
 3. **Confirm both repositories are clean** (§2 step 3), and that the stack is up (§2 step 4).
 4. **Read the project's memory** (§6c) — it holds the rules that were learned the hard way, and
@@ -59,7 +61,9 @@ that carries it (step 7, and the owner's instruction of 2026-10-06).
 
 **What you may not do.** The admin password is the owner's and he types it; you never write it to a
 file or type it into a form. You never `git add -A`. You never take an irreversible action without
-a checkpoint. You never close a decision that is his — see §6b.
+a checkpoint. You never close a decision that is his — see §6b. **And you may not leave a new trap
+unrecorded: a mistake that was invisible from the code goes into [`../../LESSONS.md`](../../LESSONS.md)
+in the same change as the work** (rule 7, §6 — the file binds in both directions).
 
 ---
 
@@ -526,6 +530,12 @@ off, so this recurs on every restart. It is a **permanent owner step** ([`NEEDS-
 - **Bounce every conclusion off a critic whose only job is to prove it wrong.**
 - **Documentation is updated in the same change as the work**, not afterwards. A batch that
   leaves the docs stale is not finished. This is COOKBOOK Rule zero.
+- **`LESSONS.md` binds both ways — read it before you start, and add to it before you finish.**
+  Every numbered entry is a mistake this project already made, in its general form. When a trap
+  catches you — a defect whose cause was invisible from the code — append the next-numbered lesson
+  **in the same change as the work**. **A session that hit a new trap and added nothing to
+  [`../../LESSONS.md`](../../LESSONS.md) is not finished.** (Stated as a standing rule 2026-10-06
+  after the owner asked whether the file was wired in or loose; see [`WORKING-RULES.md`](WORKING-RULES.md) §1 rule 7.)
 - **Switch things off; do not delete them.** If something must be deleted, it gets a written
   analysis first — we already nearly lost the custom-domains feature because a module was
   labelled "CRM".

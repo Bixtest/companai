@@ -46,6 +46,15 @@ gets broken.
    (the M/P items) and [`BLUEPRINT-GAP-ANALYSIS.md`](BLUEPRINT-GAP-ANALYSIS.md) (gaps A–D) — **each item
    they define must exist as a backlog item or be cross-referenced from one**, never left as a document
    nothing acts on.
+7. **`LESSONS.md` binds both ways — read it, and add to it** *(the rule, made explicit 2026-10-06 after
+   the owner asked whether the file was wired in or loose).* **Read [`../../LESSONS.md`](../../LESSONS.md)
+   before you start** — every numbered entry is a mistake this project has already made, written in its
+   general form so the next agent does not repeat it. **And write to it**: when a trap catches you —
+   *a defect whose cause was invisible from the code* — append the next-numbered lesson (the symptom,
+   the general form, how it was caught) **in the same change as the work**, because that file is how a
+   future agent learns from yours. **A session that hit a new trap and added nothing to `LESSONS.md` is
+   not finished** — the same standard as updating the docs (rule at §2.1) and capturing the know-how
+   (COOKBOOK rule zero-five).
 
 *(The COOKBOOK also carries the numbered engineering rules — zero-zero through zero-ten — that govern
 **how** the work is done: the specifications dictionary is binding, "it exists" is not "it is built",

@@ -22,9 +22,10 @@ It started as three brainstorming documents: a comparison of two AI-agent workpl
 of permissively-licensed building blocks, and a functional specification of the product written as if
 we would build all of it ourselves. Source: [`../compai/brainstorming/`](../compai/brainstorming/).
 
-Then the idea was turned into four concepts and **sixteen invariants that everything else must
-respect** (`compai/planning/00-product-thesis.md` §3, July–August 2026) — numbered `I1`, `I1a`,
-`I2`…`I15`:
+Then the idea was turned into four concepts and **fifteen invariants that everything else must
+respect** (`compai/planning/00-product-thesis.md` §3, July–August 2026) — numbered `I1`–`I15`, plus one
+inserted sub-rule `I1a` (so sixteen headings in the file, fifteen numbered invariants — the count the
+rest of the documentation uses):
 
 - **task grades and the autonomy ladder** — how much an AI worker may do on its own;
 - the **Worker Charter** — an AI worker's "CV", compiled into runtime permissions;
