@@ -38,6 +38,13 @@ config declares **35 static enabled modules**. Both are now corrected in every d
 document's §7 checklist also showed the owner's fallback question as open when **he had already answered
 it** (Q2: fall back to the tier table, standards-loaded) — settled and written in.
 
+**The honest boundary, found by a critic pass on this work.** The setting is **written** on install and
+**read by nothing at request time yet** — there is no production caller of `loadTierSettings`, because
+**`triageRequest` itself has no production caller**: G-21 was built as a *library* with no route wired to
+it. So D1's setting sits at exactly the maturity of its consumer. "The tier mapping is a setting" is
+**true**; "the platform reads tiers at runtime" is **not yet true**. It is the same shape as the D0 defect
+(*a file that exists is not a mechanism that runs*), one layer up — recorded, not hidden.
+
 **Next:** **D2-wide** (retire the deprecated resolver, module by module, each mutation-proven), then **D3**
 (the `escalate` outcome). The order is in [`library/development/BUILD-ORDER.md`](library/development/BUILD-ORDER.md).
 

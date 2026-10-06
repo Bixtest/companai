@@ -173,6 +173,21 @@ and does not overwrite an edited one without `force`.
 seed→JSON→read round-trip test — the value the CLI writes survives serialisation and reading, and still
 fails closed.
 
+**The honest boundary — what D1 does NOT yet do (found by a critic pass on this very work).** The setting
+is **written** on install and **read by nothing at request time yet**. A grep for `loadTierSettings` /
+`resolveTierWithReader` finds no production caller; the only production import of the whole
+`request-outcome` library is the seed line in `configs/cli.ts`. The reason is one layer down: **`triageRequest`
+itself has no production caller** — G-21 was built as a *library* (taxonomy, gate, triage, all tested)
+with no route wired to it. So D1's setting sits at **exactly the maturity of the thing that consumes it**.
+
+This matters because it is the same shape as the D0 defect (*L83: a file that exists is not a mechanism
+that runs*), one layer up again. So the claim is stated precisely: **D1 built the setting the grammar will
+read, and proved it fails closed; it is not yet live because G-21 is not yet live.** "The tier mapping is
+a setting" is **true** (it is a real setting, changeable, seeded, fail-closed). "The platform reads tiers
+at runtime" is **not yet true** — nothing calls the triage at runtime. Wiring the triage to a request path
+is G-21's remaining work, and the call sites that will call `loadTierSettings` land with it. Recorded in
+BACKLOG under G-21 and SD-4 so it cannot be mistaken for done.
+
 **What D1 did not finish, and it is named.** The full `(object · verb · actorType · role · level)` grammar
 beyond the tier fallback is **SD-4** (it needs D3's `escalate` outcome to be useful), and the manage screen
 is **SD-5**. D1 delivered the **setting** the grammar reads from — the piece that had to exist first.
