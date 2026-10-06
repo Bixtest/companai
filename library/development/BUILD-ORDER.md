@@ -165,8 +165,21 @@ and does not overwrite an edited one without `force`.
 |---|---|
 | `shared` `tsc --noEmit` | **exit 0** |
 | `core` `tsc --noEmit` | **exit 0** |
-| `request-outcome` suites | **58/58** (new `tier-source.test.ts` = 27 tests) |
+| `request-outcome` suites | **62/62** (new `tier-source.test.ts` = 30 tests) |
 | **Mutation proof** — soften `DEFAULT_TIER_SETTINGS.defaultTier` `explicit_approval` → `safe` | **7 tests RED**, the right ones; restored **md5-identical** (`791b1d1746fcdc3d35b70199c0d7101f`) |
+| **Mutation proof** — revert `resolveTier` to a naive `map[kind] ?? default` | **1 test RED** (the hostile-key case); restored **md5-identical** (`e0c5b6a7ccf46d42b142eae092fef1c7`) |
+
+**A critic pass found a real defect in the fix, and it was the same defect twice.** `resolveTier` was
+first written as `map[kind] ?? settings.defaultTier`. That reads the **prototype chain**: for a change kind
+named `__proto__` it returns `Object.prototype` — which is **truthy**, so `??` keeps it and hands back a
+value that is **not a tier at all**. A change kind is a string from a database or a classifier, so it can
+be anything. **The fix:** `resolveTier` reads **own keys only** (`Object.prototype.hasOwnProperty.call`)
+and re-validates the tier value; `parseTierSettings` builds a **null-prototype** map so a hostile key can
+never reach `Object.prototype`. **Then a second pass found the identical lookup still in `tier.ts`**
+(`CHANGE_KIND_TIER[kind] ?? …`) — masked only because the seed map is empty — and it was routed through the
+same `resolveTier`, so the two lookups cannot diverge. Both are guarded by tests and mutation-proven
+(§ table above, second mutation row). This is the pattern the whole method exists for: **a green suite on
+the first draft hid a fail-open path**, and only a pass whose job was to break it found it.
 
 **Two routes for the "it is a setting" claim** (they share no failure mode): (1) the injected-reader tests
 — a *different* stored value produces a *different* tier out of the same pure function; (2) the
