@@ -178,10 +178,15 @@ one migration with the registry's own row) and placement in the interface (that 
 
 **`G-07` (the Widget contract, the Widget IR and the registry) is now built** — **2026-10-05**. A
 published Function, placed in a Widget, **runs from the Widget's own inputs with no AI** — the vision's
-own reusable chain, made real. **The next build item is the first unbuilt item in
-[`BACKLOG.md`](BACKLOG.md) §"The list"** — at the time of writing, **`S0`** (a re-run of the local
-dockerised trio, which needs the owner to start Docker Desktop first) and then **`G-12`** (business
-backup and restore). `G-03` also unblocked `G-17` and `G-19` further.
+own reusable chain, made real. **`S0` is now `DONE` too** (2026-10-06 — the re-run found the stack was
+not coming up whole: `redis` had no `restart:` policy; fixed, all eight containers healthy).
+**The next build item is the first unbuilt item in [`BACKLOG.md`](BACKLOG.md) §"The list"** — at the
+time of writing that is **`G-12`** (business backup and restore). **But one vision item now competes for
+that slot:** the owner asked on 2026-10-06 to *"keep the eye on the goal"*, and a measured check found
+that **everything downstream of the Business IR is built, while the AI that should *emit* the IR is not
+wired** — that is **`G-17`** (schema-constrained generation), which is measured, startable, and depends
+only on the now-done `G-02`. **Whether `G-12` or `G-17` goes first is the owner's call**; the finding is
+written out in `G-17`'s row and in the gap register §7a.
 
 **Verify an item's status is still true before starting it** — the roadmap has been
 wrong about what is already done **four times**.
@@ -589,10 +594,14 @@ and was *not* re-measured — treat it as a starting point, not a fact.**
 
 - **What is left, in order** → [`BACKLOG.md`](BACKLOG.md). One roadmap. Read §"The list" and
   nothing else for *"what is left"*. **The four-item critical path is complete:** `P0-spec` (draft 2),
-  `G-01`, `G-02` and `G-03` are all built as of 2026-10-05, and **`G-07` (the Widget contract) is built
-  too**. **The next build item is the first unbuilt item in `BACKLOG.md` §"The list"** — at the time of
-  writing, `S0` (a re-run of the local trio, which needs the owner to start Docker Desktop first) and
-  then `G-12` (business backup and restore).
+  `G-01`, `G-02` and `G-03` are all built as of 2026-10-05, **`G-07` (the Widget contract) is built
+  too**, and **`S0` is done (2026-10-06)**. **The next build item is the first unbuilt item in
+  `BACKLOG.md` §"The list"** — at the time of writing that is `G-12` (business backup and restore).
+  **A measured vision check on 2026-10-06 put one item in competition with it:** the AI-first vision's
+  decisive loop is `AI → Business IR → validation → user verifies → Save as Function → zero-AI run`;
+  everything **downstream of the IR** is built and proven (G-01/G-02/G-03/G-07), but the AI that should
+  **emit** the IR is not wired — that is **`G-17`** (schema-constrained generation), startable now.
+  **Which goes first — `G-12` or `G-17` — is the owner's call.** Finding: `G-17`'s row + gap register §7a.
 - **What needs the owner** → [`NEEDS-YOU.md`](NEEDS-YOU.md) — a numbered action list. **Three
   items open**, and none blocks the build. The most urgent is changing the Coolify admin password
   (item 5); it is the only thing standing between an agent and the 2FA wall on the hosting panel.

@@ -183,7 +183,6 @@ The owner's standing rule: things that **add value beyond the vision**. Batch 7 
 ## 7. Critic pass — challenge the shortcut count
 
 **The attack, named.** The specific failure this batch could commit is: **call something a shortcut when it needs a week of work.** A shortcut that needs a week of work is not a shortcut. So I took every entry in §2 and asked: **how much is *actually* left, and is the remaining work the *hard* part?**
-
 **Downgraded — five "shortcuts" that are really half-built:**
 
 | Was a shortcut | The attack | Downgraded to |
@@ -208,6 +207,16 @@ The owner's standing rule: things that **add value beyond the vision**. Batch 7 
 **The count after the critic:** **20 shortcuts → 13 genuine + 5 half-built + 2 held-for-review.** The two-line summary the owner needs: **the platform half is bought; the agent half is borrowed; the *product* half — the model spine and the data-level security — is neither, and must be built.**
 
 **And one honest limit, stated plainly.** **Every shortcut above rests on code we can read, not on behaviour we can run.** We cannot run Hermes or our own gate here (no database, no container). So a "live and tested" claim means **the tests exist and the module is enabled** — it does not mean we watched it work. The one measurement that would upgrade all of them is the **dockerised instance** (the owner's standing note).
+
+### 7a. Addendum, 2026-10-06 — the register re-measured now that the spine is built
+
+*This batch was written 2026-10-04, when **nothing** of the business-model spine existed. Three of its gaps are now built (G-01, G-02, G-03 — plus G-07), so the register's own claims can be checked against code instead of against the plan. This addendum changes no verdict; it converts two "nothing exists" statements into measurements, and it locates the one join that is still missing.*
+
+- **G-02 and G-03 are built and proven** — the IR, its compiler, and zero-AI Function execution exist in `packages/shared/src/lib/business-ir/` and `user-function/`, each with a falsified-structural test. So the register's "the spine must be built" is now **half done**: everything **downstream of the IR** exists.
+- **G-17 ("Schema-constrained generation for IR/extraction", RQ-94) is the missing join, and it is now precisely measurable.** Confirmed by two independent routes: (1) **who imports the IR** — only `business-widget/` and its tests; the AI assistant package names `BusinessIR`/`compileQuery`/`runFunction` **nowhere**; (2) **what the AI can actually emit** — today the only paths from the model to data are the **code-mode** meta-tools (`lib/codemode-tools.ts`: the model writes JavaScript run in an `isolated-vm` sandbox calling `api.request()`) and the per-module **CRUD tools** (`customers.*`, `catalog.*`, `inbox_ops.*`). The model writes **arbitrary JavaScript against the REST API, never the IR** — the exact thing the vision forbids (doc 03 Part XXXIV).
+- **Two sub-findings make G-17's first step concrete.** (a) No `json_schema`/`response_format`/grammar/constrained-decoding exists anywhere in the model layer (`shared/src/lib/ai`, the AI client factories) — models are called with **no output-shape constraint**. (b) `BusinessQueryIR` is a **TypeScript type only** — there is **no zod schema and no runtime parser**; the compiler checks IR against the *model*, but nothing checks the *shape* of incoming IR. So **the first artifact of G-17 is a runtime parser/schema mirroring `business-ir/types.ts`**, and G-17 depends only on **G-02 (✅)** — it is **startable today**.
+- **S-01 (the agent runtime that would drive G-17) is borrowed, not wired.** The register already says so ("the largest real shortcut"); what is now measurable is that its "still needed" column — *the integration boundary + our gate* — is **not a tracked BACKLOG item**. G-17 supplies the *mechanism*; nothing on the roadmap owns the *wiring of an agent that authors Functions*.
+- **The one-line location.** Everything **downstream of the IR** is built and proven; the single missing join is the AI **emitting** the IR, which is **G-17** — startable, sized **M**, sitting late in phase 3, with its runtime currently borrowed from Hermes.
 
 ---
 
