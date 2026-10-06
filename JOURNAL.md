@@ -56,7 +56,7 @@ is done** (code `a05ea2c`). **The active task is now row 3: the two test-suite f
 | **2** | ✅ **D2-wide: `dashboards` — DONE** (code `a05ea2c`) | 10 calls / 4 files → 5 guard objects; count 161 → 151; 5 suites / 19 tests green; mutation-proven twice. |
 | **3** | ✅ **Directive 1 completed** (code `—`, docs below): the Hermes service map's §4.4 now covers **every** AI-touching item in the log — the earlier version named only 11 items while the BACKLOG holds ~20. Verified: **41 backlog ids, 0 missing**. | The owner's directive 1 was **"for every bit of development in our log where needed"**; the first pass did not meet that bar. Measured and closed. |
 | **4** | ✅ **Test-suite defect (a): `explicit-sort-comparators` — DONE** (code `d5567c7`) | **Not 2 sites but 16** across 6 files (a summary said 2 — wrong). Fixed all; audit 4/4 green; 336 touched-package tests green; 7/7 equivalence probes identical. |
-| **5** | **Test-suite defect (b): `module-decoupling` — OPEN, needs the owner's call** | **Order-dependent flake**: passes alone 3/3, fails only under full-suite parallel load (a jest worker module-cache leak — the real `entities.ids.generated` wins over the test's mock). Two fix options are the owner's choice; see the question in the report. |
+| **5** | ✅ **Test-suite defect (b): `module-decoupling` — DONE** (code `fe7c3e5`) | Owner chose file-scoped isolation. **Full core suite now 602 suites / 5123 tests, 0 failures** — the first fully green run. Fix scoped to the one file; cannot mask a bug (the test's own `E.catalog` precondition assertion still fires). |
 | **6** | **D2-wide: `workflows`** (9 calls / 3 files) — next enabled module | Largest enabled cluster left after dashboards. |
 | **7** | **The rest of D2-wide, enabled modules** — `inbox_ops` (8), `perspectives` (8), `translations` (6), `planner` (4), `query_index` (4), `auth` (2), `directory` (2), `feature_toggles` (2) | Largest cluster first, each with its own mutation proof. |
 | **8** | **D3** — add the `escalate` outcome to `MutationGuardResult` | The last guard-engine gap; needs D2-wide's shape settled first (the registry is where the outcome is returned). |
@@ -132,13 +132,19 @@ identifiers, not display strings, and `localeCompare` would make the order local
 is byte-identical to the default string sort; and the touched shared packages = **24 suites / 336 tests
 green**, shared `tsc --noEmit` exit 0, audit 4/4. Code commit `d5567c7`.
 
-**The second test-suite defect (`module-decoupling`) is OPEN, and it is the owner's call.** Established by
-measurement: it **passes alone 3/3** and **passes in a pair run**, but fails under **full-suite parallel
-load** — the real `#generated/entities.ids.generated` wins over the test's `jest.mock` inside a shared
-jest worker, so `partitions.ts` sees a catalog registry and returns `productsMedia`. The test file itself
-already documents this exact symptom as *"seen once, never reproduced, never explained."* It is a
-**test-harness defect, not a product defect.** Two fix options exist and both are reasonable — the choice
-is put to the owner because the trade-off (global config isolation vs. one file's self-isolation) is his.
+**The second test-suite defect (`module-decoupling`) is now FIXED too (code `fe7c3e5`).** Established by
+measurement: it **passes alone 3/3** and in pair runs, but failed under **full-suite parallel load** — the
+real `#generated/entities.ids.generated` wins over the test's `jest.mock` inside a shared jest worker, so
+`partitions.ts` sees a catalog registry and returns `productsMedia`. The test file itself already
+documented this exact symptom as *"seen once, never reproduced, never explained."* **It is a test-harness
+defect, not a product defect** — `partitions.ts` is correct by design (it includes the catalog product id
+only when catalog is enabled). **Owner chose file-scoped isolation.** The fix wraps the mock-dependent
+test in `jest.isolateModulesAsync(...)`, giving it a fresh module registry so the mock always applies — no
+change to the shared jest config. **It cannot mask a real bug:** the test still asserts its own
+precondition `expect(E.catalog).toBeUndefined()` inside the isolation, so if the mock ever fails to apply
+it fails there first. **Result: the full core suite is now 602 suites / 5123 tests, 0 failures — the first
+fully green run.** A probe test confirmed the mock applies inside `isolateModulesAsync` regardless of
+prior cache, so the file no longer depends on scheduling order.
 
 ---
 
