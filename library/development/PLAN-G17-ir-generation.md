@@ -199,11 +199,87 @@ an authenticated session. NEEDS-YOU Part 4 item 15.
 The document's §2c limit is now **discharged for the model question**; what remains is the app-level
 end-to-end run above. Nothing about the *wire* is unproven.
 
-### 4e. A pre-existing failure found on the way
+### 4e. A failure found on the way — now green, but the cause is UNATTRIBUTED
 
-`agent-runtime-object.test.ts` fails **4 of 8** cases on a tree with none of my changes in it: its mock
-of `llm-provider-registry` no longer matches the path `model-factory` takes, so `resolveModel` throws
-`no_provider_configured`. Proven pre-existing by running the untouched file. Recorded as NEEDS-YOU
-Part 4 item 14 — to be **repaired, not deleted**, since the four cases are ones that should pass.
+`agent-runtime-object.test.ts` failed **4 of 8** cases on a tree with none of my changes in it: its mock
+of `llm-provider-registry` no longer matched the path `model-factory` takes, so `resolveModel` threw
+`no_provider_configured`. Proven pre-existing by running the untouched file.
 
-**Next:** the live app-level end-to-end run, then G-21.
+**It now passes 8/8 — but do not read that as a fix.** The obvious explanation (*declaring the IR agent
+fixed it*) was **tested and disproved**: swapping the generated registry back to its empty form left the
+suite at **8/8**. The generated registry sidecar was regenerated for the first time in the same window,
+which is a plausible cause and an unproven one. **The item stays open** rather than being closed on a
+plausible story — NEEDS-YOU Part 4 item 14. *A fix you cannot attribute is a coincidence.*
+
+---
+
+## 5. Step 5 — the agent declared (done 2026-10-06, later the same day)
+
+**Why this step exists.** Steps 1–4 built the schema, the wire and the model proof — but the agent was
+**never declared**. `grep business_ir` had no non-test hits, and `ai-agents.generated.ts` was an empty
+stub. A wire with nothing registered cannot run in the app, so the app-level run in §4d *could not*
+succeed. Declaring it closes a real gap in G-17; it is not added scope.
+
+### 5a. What was built
+
+`packages/ai-assistant/src/modules/ai_assistant/ai-agents.ts` — module-root agent contribution,
+declaring `business_ir.query_author`:
+
+| Field | Value | Why |
+|---|---|---|
+| `executionMode` | `'object'` | the model decodes against the IR's own shape |
+| `allowedTools` | `[]` | the vision forbids the model reaching data directly (doc 03 Part XXXIV) — the IR is the only output channel |
+| `output.schema` | the **shared** `businessQueryIrSchema` | not a private copy; if the two ever diverge, the test fails |
+| `output.schemaName` | `BUSINESS_QUERY_IR_SCHEMA_NAME` | imported, not re-typed |
+| `id` | `BUSINESS_IR_AGENT_ID` | imported from the wire, so caller and registry cannot drift |
+| `readOnly` / `mutationPolicy` | `true` / `'read-only'` | it authors a query, never a write |
+
+### 5b. Getting it picked up failed SILENTLY twice — the reusable lesson
+
+1. **The generator never ran.** `node .../@open-mercato/cli/dist/index.js generate` exited **0** with no
+   output. That file only *exports* the entry function; the real entrypoint is `packages/cli/bin/mercato`.
+   **`exit 0` with no output is not success.**
+2. **My first explanation was wrong, and measuring beat guessing.** I assumed a stale build hid the
+   file; importing the scanner's own `resolveModuleFile` showed it resolving the source file correctly.
+   So I patched a temporary trace into the *built* extension — it fired for `ai_assistant` with the path
+   resolved, and the registry then carried the entry. Patch removed and restored byte-for-byte
+   (`md5sum -c`).
+
+**Proven by two routes:** the generated file's import + config entry, **and** a runtime probe through the
+real `loadAgentRegistry()` returning the agent with `executionMode: 'object'`, `allowedTools: []`,
+`readOnly: true`, `schemaName: 'BusinessQueryIR'`.
+
+### 5c. Three tests the declaration FALSIFIED, all the same way
+
+`business-ir-author.test.ts` ("No agent seeded"), `meta-pack.test.ts` and `ws-c-tool-pack-coverage.test.ts`
+("registry is empty") each used **emptiness as a stand-in for "nothing is declared"**. The trap:
+`resetAgentRegistryForTests()` only clears a map and sets `loaded = false`, and the next read **lazily
+reloads the real registry** — so the premise died one call later, silently. **`reset` did not mean
+"empty".**
+
+Repaired by moving the claim, not deleting it:
+- the wire test now seeds the id as a chat-mode agent with **no** output schema, so object mode is
+  refused with `execution_mode_not_supported` — a **deliberate** refusal that survives whoever declares
+  the id later; the `generateObjectMock.not.toHaveBeenCalled()` guard is kept;
+- the two empty-registry tests seed an explicit `seedAgentRegistryForTests([])`.
+
+**Each repair was seen RED** under two different mutations (rethrow the wire's catch; make the tool
+handler ignore the registry). Restored by byte copy, verified by `md5`.
+
+**Measured green:** **1385/1385 across 100 suites**; app typecheck **exit 0**.
+
+### 5d. What remains — now a measured owner decision
+
+The route **is** live: `POST /api/ai_assistant/ai/run-object` → **401** (the auth gate working; a first
+probe used a guessed URL and produced a misleading 404 — read the route table, do not guess the path).
+
+But the running `starting-kit-app-1` **cannot serve the new agent**, and this was measured rather than
+assumed: it has **no bind mount** to the workspace (three volumes only — mcp-shared, init-marker,
+attachments), so its code is a **15-hour-old baked image**, and its `ai-agents.generated.ts` contains
+**0** occurrences of `ai_assistant`. **Nothing is broken — the running app is simply older than the
+change.** Completing the app-level run needs a **container rebuild** (and an authenticated session).
+
+**That is the owner's call, and it is NEEDS-YOU Part 4 item 16 — a yes/no.** The running stack was not
+touched: widening its blast radius to make my own test pass is not my decision.
+
+**Next:** the owner's answer on item 16, then G-21.

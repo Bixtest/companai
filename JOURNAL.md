@@ -7,7 +7,62 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
-## 2026-10-06 (latest) — the live model was asked, and it can: G-17's open question answered
+## 2026-10-06 (latest) — the IR agent declared, three tests its declaration falsified, and one gap left to the owner
+
+**The gap the live run exposed.** The wire to the Business IR was built and the model was proven able to
+use it — but the agent was **never declared anywhere**. `grep business_ir` found no non-test hits and
+`ai-agents.generated.ts` was an empty stub. A wire with nothing registered cannot run in the app, so the
+live app-level run could not have succeeded. Now declared: `ai-agents.ts` for
+`business_ir.query_author` — `executionMode: 'object'`, **no tools**, read-only, its output schema pinned
+to the **shared** `businessQueryIrSchema`, and its id imported from the wire so caller and registry
+cannot drift.
+
+**Getting it picked up failed silently twice, which is the part worth keeping.**
+
+1. **The generator never ran.** I invoked the CLI's `dist/index.js`; it exited **0** and printed
+   **nothing**. That file only *exports* the entry function — the real entrypoint is
+   `packages/cli/bin/mercato`. **`exit 0` with no output is not success.**
+2. **Then the registry was still empty — and my first explanation was wrong.** I assumed a stale build
+   hid the file; importing the scanner's own `resolveModuleFile` showed it resolving correctly. So I
+   traced the scan callback in the *built* extension instead, which showed it firing for `ai_assistant`
+   with the file resolved — and the registry then carried the entry.
+
+**Proven by two routes that share no failure mode:** the generated file's import statement, and a runtime
+probe through the real `loadAgentRegistry()` — `found = YES`, `executionMode = object`, `schemaName =
+BusinessQueryIR`, `allowedTools = []`, `readOnly = true`.
+
+**Declaring the agent falsified THREE tests — all asserting a registry was EMPTY as a stand-in for
+"nothing is declared".** `resetAgentRegistryForTests()` only clears a map and sets a latch; the next read
+**lazily reloads the real registry**, so the "empty" premise died one call later, silently. **`reset` did
+not mean "empty".** Repaired by moving each claim, not deleting it: the wire test now seeds the id as a
+chat-mode agent with no output schema (object mode is refused with `execution_mode_not_supported` — a
+deliberate refusal that survives whoever declares the id next), and the two empty-registry tests seed an
+explicit `[]`. **Every repair was seen red** under two different mutations. Green: **1385/1385 across 100
+suites**, app typecheck **exit 0**.
+
+**One claim I made and then disproved — kept, because that is the point.** The once-failing
+`agent-runtime-object.test.ts` is now 8/8, and the tidy story was "declaring the agent fixed it".
+Tested: swapping the generated registry back to its empty form left it at **8/8**. So the cause is
+**unattributed** (the registry sidecar was regenerated in the same window), and the item **stays open**
+rather than being closed on a plausible story. *A fix you cannot attribute is a coincidence.*
+
+**The one thing left, and it is the owner's call.** The route is live — `POST
+/api/ai_assistant/ai/run-object` → **401**, the auth gate working (my first probe used a guessed URL and
+got a misleading 404). But `starting-kit-app-1` has **no bind mount** to the workspace, so its code is
+baked into a 15-hour-old image and its registry holds **0** occurrences of `ai_assistant`. **Nothing is
+broken; the running app is simply older than the change.** The app-level run needs a **container
+rebuild** — recorded as NEEDS-YOU Part 4 **item 16**, a yes/no for the owner. I did not touch the running
+stack: widening its blast radius to make my own test pass is not my call.
+
+**Files:** code — `packages/ai-assistant/src/modules/ai_assistant/ai-agents.ts` (new), plus three
+repaired tests (`business-ir-author.test.ts`, `meta-pack.test.ts`, `ws-c-tool-pack-coverage.test.ts`),
+commit `43161b3`. Docs — `workspace/COOKBOOK.md`, `BACKLOG.md`, `NEEDS-YOU.md`, `PLAN-G17-ir-generation.md`.
+Skills — two new/updated lessons: `prove-a-generator-can-see-your-new-file` (new) and a sixth instance in
+`repair-the-test-your-fix-falsified` (a fix that *adds* rather than removes).
+
+---
+
+## 2026-10-06 — the live model was asked, and it can: G-17's open question answered
 
 **The one claim G-17 would not make has been measured, and the answer is yes.** The stack was up (all
 eight containers healthy), so the local model was asked for real: **`Qwen2.5-7B-Instruct-Q4_K_M`, 6 of 6

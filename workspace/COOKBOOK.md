@@ -2575,11 +2575,90 @@ redirection (exit code is the signal). Measured both ways: dead port → skipped
 IR out). Everything needed for it exists; it needs an authenticated session against the running app.
 Recorded as NEEDS-YOU Part 4 item 15.
 
-**A pre-existing failure, not caused by this work.** `agent-runtime-object.test.ts` fails 4 of its 8
-cases on an unmodified tree: its mock of `llm-provider-registry` no longer matches the path
-`model-factory` takes, so `resolveModel` throws `no_provider_configured`. Proven pre-existing by
-running the unmodified file. The new wire test sidesteps it by mocking `../model-factory` itself. That
-stale test is a real defect in the repo and is recorded in `NEEDS-YOU.md` for the owner.
+**A pre-existing failure — and it is now GREEN, but the cause is NOT what it looks like.**
+`agent-runtime-object.test.ts` was recorded as failing 4 of 8 on an unmodified tree (its mock of
+`llm-provider-registry` no longer matching the path `model-factory` takes). It now passes **8/8**.
+
+The tempting conclusion — *"declaring the IR agent fixed it"* — was **tested and disproved**: swapping
+the generated registry back to its empty form left the suite at 8/8. The environment changed in the same
+window (the generated registry sidecar was regenerated for the first time). **So the cause is
+unattributed, and the item stays open** rather than being claimed as fixed. Recorded in `NEEDS-YOU.md`
+Part 4 item 14 with that wording. *(A fix you cannot attribute is a coincidence; do not bank it.)*
+
+---
+
+## G-17 continued — the agent declared, and three tests its declaration falsified
+
+**Measured 2026-10-06 (later the same day).**
+
+**The gap, stated plainly.** G-17's wire existed but the agent was **never declared anywhere**:
+`grep business_ir` found no non-test hits, and `ai-agents.generated.ts` was an empty stub
+(`const aiAgentConfigEntriesRaw: AiAgentConfigEntry[] = []`). A wire with nothing registered cannot
+run in the app, so the live run above could not have succeeded. Declaring it closed a real gap in
+G-17 — it is not new scope.
+
+**What was added.** `packages/ai-assistant/src/modules/ai_assistant/ai-agents.ts`, declaring
+`business_ir.query_author` with `executionMode: 'object'`, `allowedTools: []`, `readOnly: true`,
+`mutationPolicy: 'read-only'`, and `output.schema` pinned to the **shared** `businessQueryIrSchema`.
+It imports `BUSINESS_IR_AGENT_ID` from the wire rather than re-typing the string, so caller and
+registry cannot drift.
+
+**Getting it picked up took three tries, and the first two failed SILENTLY.** This is the part worth
+remembering:
+
+1. **The generator never ran.** I invoked `node .../@open-mercato/cli/dist/index.js generate`; it
+   exited `0` and printed **nothing**. `dist/index.js` only *exports* the entry function — the real
+   entrypoint is `packages/cli/bin/mercato`. **`exit 0` with no output is not success.**
+2. **Resolution looked right and still produced nothing.** Importing the scanner's own
+   `resolveModuleFile` showed it *did* resolve `ai-agents.ts` correctly. So my first hypothesis
+   (wrong directory) was wrong — worth measuring rather than "fixing".
+3. **The trace settled it.** A temporary `console.error` patched into the *built* extension showed the
+   scan callback firing for `ai_assistant` with the file resolved — and the registry then carried
+   `moduleId: "ai_assistant"`, importing
+   `@open-mercato/ai-assistant/modules/ai_assistant/ai-agents`. Patch removed and restored byte-for-byte
+   (`md5sum -c`).
+
+**Two independent routes agree the agent is registered**, which is the point:
+- **text:** the generated file's import statement and config entry;
+- **runtime:** a probe through the real `loadAgentRegistry()` — `found = YES`, `moduleId =
+  ai_assistant`, `executionMode = object`, `schemaName = BusinessQueryIR`, `allowedTools = []`,
+  `readOnly = true`, `mutationPolicy = read-only`.
+
+(The probe is a temporary file; it caught a real drift risk in itself — it first asserted the literal
+`'business_query_ir'` when the constant is `'BusinessQueryIR'`. Fixed to compare against the shared
+constant, then deleted.)
+
+**Three tests were falsified by the declaration, all the same way.** Each asserted the agent registry
+was **empty** as a stand-in for "nothing is declared":
+
+| Test | Was | Now |
+|---|---|---|
+| `business-ir-author.test.ts` | "No agent seeded: the runtime throws" | seeds the id as chat-mode with no output schema → object mode refused with `execution_mode_not_supported` |
+| `meta-pack.test.ts` | `reset()`, then expect `[]` | `seedAgentRegistryForTests([])` |
+| `ws-c-tool-pack-coverage.test.ts` | `reset()`, then expect `{agents:[],total:0}` | `seedAgentRegistryForTests([])` |
+
+**The trap that made this subtle:** `resetAgentRegistryForTests()` only clears an in-memory map and
+sets `loaded = false`; the next read **lazily imports the real generated registry**. So the "empty"
+premise died *one call later*, silently. `reset` did not mean "empty".
+
+**Every repaired assertion was seen RED, by two different mutations:**
+- reverting the wire's `catch` to a rethrow → the agent-error test fails with the intended
+  `AgentPolicyError: does not support execution mode "object"`;
+- making `meta.list_agents` ignore the registry → the two empty-registry tests fail, and the RBAC
+  cases alongside them.
+
+Restored by byte copy, verified `md5sum -c`.
+
+**Measured green:** ai-assistant **1385/1385 across 100 suites**; app typecheck **exit 0**.
+
+**What the live app-level run needs — measured, not assumed.** The route **is** live:
+`POST /api/ai_assistant/ai/run-object` → **401** (the auth gate working; my first probe used a guessed
+URL and got a misleading 404). But the running `starting-kit-app-1` container **cannot serve the new
+agent**: it has **no bind mount** to the workspace (only three volumes: mcp-shared, init-marker,
+attachments), so its code is baked into an image built 15 hours ago, and its
+`ai-agents.generated.ts` contains **0 occurrences** of `ai_assistant`. **A container rebuild is
+required** — which is a deploy decision for the owner, not a step to take to make a test pass.
+Recorded as NEEDS-YOU Part 4 item 15.
 
 ---
 
