@@ -7,7 +7,66 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
-## 2026-10-06 (latest) — the IR agent declared, three tests its declaration falsified, and one gap left to the owner
+## 2026-10-06 (latest) — the live app-level run is GREEN: request in, Business IR out
+
+**The measurement G-17 was built for now exists.** A plain-language request went in through the running
+platform and a Business IR object came out — with the app's *own* registry resolving the agent, not a
+test double.
+
+```
+1. SESSION      POST /api/auth/login                -> http=200  {"ok":true,"token":"eyJ..."}
+2. REGISTRY     GET  /api/ai_assistant/ai/agents    -> http=200
+                business_ir.query_author present, moduleId=ai_assistant
+3. END TO END   POST /api/ai_assistant/ai/run-object -> http=200  elapsed=69s
+```
+
+```json
+{"object": {"operation": "list", "entity": "invoice", "grain": "customer",
+            "filters": [{"field": "amount", "operator": "gt", "value": 10000}],
+            "currencyBasis": "EUR",
+            "sort": [{"field": "created_at", "direction": "desc"}], "limit": 50},
+ "finishReason": "stop", "usage": {"inputTokens": 530, "outputTokens": 92, "totalTokens": 622}}
+```
+
+Correct on every axis the prompt named. The owner's **yes** to item 16 (rebuild the container) is what
+made it runnable.
+
+**The order the owner set is what made the result unambiguous.** The model was probed from **outside**
+the platform first (PASS, http=200, 32s, correct IR). So if the platform run had failed, the fault would
+have been the platform's, not the model's. Both halves passed — nothing left to unpick. This is the
+"two routes" rule applied to a *dependency* rather than to a number.
+
+**The first attempt failed, and it was my input, not the platform.** Login returned **401**. That is not
+a defect: the script had guessed `secret` for superadmin, but the container seeds superadmin with
+**`OM_INIT_SUPERADMIN_PASSWORD=password`** (measured from the container's own env; the *other* two demo
+users use `secret`). The owner confirmed the same: superadmin is `password`, superadmin logs in in the
+browser, and the password is used verbatim as the *bcrypt* secret. Re-run with `password` -> **200**.
+**Had the outside probe not been run first, a 401 here would have looked like a platform fault.**
+
+**A second input error caught before it could cost a cycle.** The run-object route's real body is
+`{agent, messages: [{role, content}]}` — read from `runObjectRequestSchema` in
+`api/ai/run-object/route.ts`. The script had guessed `{agentId, input}`; both field names wrong, which
+would have returned `400 validation_error` and sent me debugging a phantom. Both route paths were then
+confirmed against the generated table (`api-routes.generated.ts` line 32 `/auth/login`, line 239
+`/ai_assistant/ai/run-object`) rather than guessed. **Read the contract; do not guess the shape.**
+
+**The rebuild, measured both sides of the switch.** `docker compose -f docker-compose.fullapp.yml build
+app` -> **12m22s**, new image `open-mercato/app:local` id `cd8c4242dcc0`; container recreated on it. Same
+file, `/app/apps/mercato/.mercato/generated/ai-agents.generated.ts`: **0** occurrences of `ai_assistant`
+before, **5** after (line 2 imports the module, line 10 registers `moduleId: "ai_assistant"`).
+
+**Recorded but not acted on, and it does not change the result.** Latency was **69s** in-platform vs
+**32s** straight to the model — the delta is the 530-token injected system prompt plus platform
+overhead. A latency-budget data point, not a defect. Field names differ between surfaces
+(`grain`/`created_at` in-platform vs `dimensions`/`date` raw) — that is the platform's schema doing its
+job, not a discrepancy.
+
+**Files:** `analysis/g17-app-run/RESULTS-2026-10-06.md` (new), `outside-probe-2026-10-06.md` (new),
+`run-app-e2e.sh` (new; body shape and password corrected to the measured contract).
+
+---
+
+## 2026-10-06 — the IR agent declared, three tests its declaration falsified, and one gap left to the owner
 
 **The gap the live run exposed.** The wire to the Business IR was built and the model was proven able to
 use it — but the agent was **never declared anywhere**. `grep business_ir` found no non-test hits and

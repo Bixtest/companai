@@ -2651,14 +2651,72 @@ Restored by byte copy, verified `md5sum -c`.
 
 **Measured green:** ai-assistant **1385/1385 across 100 suites**; app typecheck **exit 0**.
 
-**What the live app-level run needs — measured, not assumed.** The route **is** live:
-`POST /api/ai_assistant/ai/run-object` → **401** (the auth gate working; my first probe used a guessed
-URL and got a misleading 404). But the running `starting-kit-app-1` container **cannot serve the new
-agent**: it has **no bind mount** to the workspace (only three volumes: mcp-shared, init-marker,
-attachments), so its code is baked into an image built 15 hours ago, and its
-`ai-agents.generated.ts` contains **0 occurrences** of `ai_assistant`. **A container rebuild is
-required** — which is a deploy decision for the owner, not a step to take to make a test pass.
-Recorded as NEEDS-YOU Part 4 item 15.
+**The live app-level run — DONE, and GREEN (2026-10-06).**
+
+The owner said **yes** to the rebuild, and the run was made. In the owner's order, and the order is the
+point:
+
+**Step 0 — probe the model from OUTSIDE the platform first.** `POST http://127.0.0.1:8080/v1/chat/completions`
+(model server directly; nothing of ours in the path) → **http=200, 32s**, correct IR for the test prompt.
+**So a platform-side failure would have been the platform's fault, not the model's.** That is the whole
+reason to run it first; it turns a later red into an attributable one. Record:
+`analysis/g17-app-run/outside-probe-2026-10-06.md`.
+
+**Step 1 — rebuild.** `docker compose -f docker-compose.fullapp.yml build app` → **12m22s**, new image
+`open-mercato/app:local` id `cd8c4242dcc0`; container recreated on it. The Dockerfile regenerates
+registries in-build, which is why the new convention file is picked up with no extra step. **Measured
+both sides of the switch, same file** `/app/apps/mercato/.mercato/generated/ai-agents.generated.ts`:
+
+| | before rebuild | after rebuild |
+|---|---|---|
+| `ai_assistant` occurrences | **0** | **5** (line 2 imports the module, line 10 `moduleId: "ai_assistant"`) |
+| container image | 25 h old | `cd8c4242dcc0` |
+
+**Step 2 — the run.** `analysis/g17-app-run/run-app-e2e.sh`:
+
+```
+1. SESSION      POST /api/auth/login                -> http=200  {"ok":true,"token":"eyJ..."}
+2. REGISTRY     GET  /api/ai_assistant/ai/agents    -> http=200  business_ir.query_author present
+3. END TO END   POST /api/ai_assistant/ai/run-object -> http=200  elapsed=69s
+```
+
+```json
+{"object": {"operation": "list", "entity": "invoice", "grain": "customer",
+            "filters": [{"field": "amount", "operator": "gt", "value": 10000}],
+            "currencyBasis": "EUR",
+            "sort": [{"field": "created_at", "direction": "desc"}], "limit": 50},
+ "finishReason": "stop", "usage": {"inputTokens": 530, "outputTokens": 92, "totalTokens": 622}}
+```
+
+Correct on every axis: `list`, `invoice`, grouped by `customer`, `amount > 10000`, newest first, cap 50.
+Full record: `analysis/g17-app-run/RESULTS-2026-10-06.md`.
+
+**The first attempt failed with 401, and it was my input — not the platform.** The script had guessed
+`secret` for superadmin; the container seeds superadmin with **`OM_INIT_SUPERADMIN_PASSWORD=password`**
+(measured from the container's own env; `secret` is for `admin@` and `employee@`). Re-run with
+`password` → **200**. **Without the outside probe first, this 401 would have looked like a platform
+fault.**
+
+**A second input error, caught before it could cost a cycle.** The route's real body is
+**`{agent, messages: [{role, content}]}`** — read from `runObjectRequestSchema` in
+`api/ai/run-object/route.ts`. The script had guessed `{agentId, input}`: both field names wrong, which
+would have returned **`400 validation_error`** and sent me debugging a phantom. Both paths were then
+confirmed against the generated table (`api-routes.generated.ts` **line 32** `/auth/login`, **line 239**
+`/ai_assistant/ai/run-object`) rather than guessed. **Read the contract; do not guess the shape.**
+
+**Also worth knowing for anyone driving this route:** login is rate limited at **5 attempts / 60s** per
+email+IP (`readEndpointRateLimitConfig('LOGIN', {points: 5, …})`), so a **429** is the limiter, not a
+defect — wait a minute and re-run.
+
+**Two notes recorded but not acted on, neither a defect.** (a) **69s** in-platform vs **32s** straight to
+the model — the delta is the **530-token** injected system prompt plus platform overhead; a latency
+budget data point. (b) Field names differ between surfaces (`grain`/`created_at` in-platform vs
+`dimensions`/`date` raw) — that is the platform's schema doing its job, not a discrepancy to chase.
+
+**What this run asserts, and what it does not.** It asserts the **platform path works end to end** and
+the request-shape is right. It says **nothing about answer quality** — the owner deferred that
+explicitly ("what matters now is to get the right response, not the quality of it"); model comparison
+and commercial OpenAI/Claude APIs are later work.
 
 ---
 
