@@ -52,13 +52,15 @@ is done** (code `a05ea2c`). **The active task is now row 3: the two test-suite f
 
 | # | The item | Why here |
 |---|---|---|
-| **1** | ✅ **The three directives above — DONE** | They changed how every later item is documented and what "ready" means. |
+| **1** | ✅ **The three directives above — DONE** | Directive 1's map was later found **incomplete** and completed (§4.4, 2026-10-06). |
 | **2** | ✅ **D2-wide: `dashboards` — DONE** (code `a05ea2c`) | 10 calls / 4 files → 5 guard objects; count 161 → 151; 5 suites / 19 tests green; mutation-proven twice. |
-| **3** | **Two test-suite defects, checked against the baseline** — (a) `explicit-sort-comparators` (pre-existing, fails identically at `a3b58ad`; flagged files untouched by any D2-wide commit); (b) `module-decoupling` — **order-dependent flake**, reproduces at the baseline under full-suite parallel load but passes in a pair run, so it is a **test-harness defect, not a product defect**. | Both make the suite non-green for everything after them, so they are fixed before the suite is next trusted. **Neither is a product defect** — verified by running each with the dashboards work stashed. |
-| **4** | **D2-wide: `workflows`** (9 calls / 3 files) — next enabled module | Largest enabled cluster left after dashboards. |
-| **5** | **The rest of D2-wide, enabled modules** — `inbox_ops` (8), `perspectives` (8), `translations` (6), `planner` (4), `query_index` (4), `auth` (2), `directory` (2), `feature_toggles` (2) | Largest cluster first, each with its own mutation proof. |
-| **6** | **D3** — add the `escalate` outcome to `MutationGuardResult` | The last guard-engine gap; needs D2-wide's shape settled first (the registry is where the outcome is returned). |
-| **7** | **The Metadata Registry** service (GAP A / C5) | The remaining foundation item; everything stacked on it inherits it. |
+| **3** | ✅ **Directive 1 completed** (code `—`, docs below): the Hermes service map's §4.4 now covers **every** AI-touching item in the log — the earlier version named only 11 items while the BACKLOG holds ~20. Verified: **41 backlog ids, 0 missing**. | The owner's directive 1 was **"for every bit of development in our log where needed"**; the first pass did not meet that bar. Measured and closed. |
+| **4** | ✅ **Test-suite defect (a): `explicit-sort-comparators` — DONE** (code `d5567c7`) | **Not 2 sites but 16** across 6 files (a summary said 2 — wrong). Fixed all; audit 4/4 green; 336 touched-package tests green; 7/7 equivalence probes identical. |
+| **5** | **Test-suite defect (b): `module-decoupling` — OPEN, needs the owner's call** | **Order-dependent flake**: passes alone 3/3, fails only under full-suite parallel load (a jest worker module-cache leak — the real `entities.ids.generated` wins over the test's mock). Two fix options are the owner's choice; see the question in the report. |
+| **6** | **D2-wide: `workflows`** (9 calls / 3 files) — next enabled module | Largest enabled cluster left after dashboards. |
+| **7** | **The rest of D2-wide, enabled modules** — `inbox_ops` (8), `perspectives` (8), `translations` (6), `planner` (4), `query_index` (4), `auth` (2), `directory` (2), `feature_toggles` (2) | Largest cluster first, each with its own mutation proof. |
+| **8** | **D3** — add the `escalate` outcome to `MutationGuardResult` | The last guard-engine gap; needs D2-wide's shape settled first (the registry is where the outcome is returned). |
+| **9** | **The Metadata Registry** service (GAP A / C5) | The remaining foundation item; everything stacked on it inherits it. |
 
 **Where the reasoning lives:** the order is `BUILD-ORDER.md` §2e; the live counts are in
 `BACKLOG.md`; the per-item status is in `BACKLOG.md`. **This box is the only place that says "we are
@@ -68,6 +70,14 @@ doing X now."**
 
 ### ✅ Done recently (ticked, then moved down here)
 
+- **2026-10-06 — directive 1 completed: the Hermes service map now covers *every* item** (docs below).
+  Added §4.4 to `ARCHITECTURE-hermes-service-map.md` — the owner's directive was "every bit of
+  development in our log where needed", and the first pass named only 11 items while the BACKLOG holds
+  ~20 that touch AI. Coverage now measured: **41 backlog ids, 0 missing**. Full entry below.
+- **2026-10-06 — `explicit-sort-comparators` audit fixed** (code `d5567c7`). **16 violations across 6
+  files**, not the 2 a summary had claimed — the site list was read from the test's own output. Added the
+  canonical comparator at all 18 sites; audit 4/4 green; 336 touched-package tests green; 7/7 equivalence
+  probes byte-identical. Full entry below.
 - **2026-10-06 — the owner's three directives** (docs `54459c1`): the `★ ACTIVE TASK` convention in
   this file; the Hermes/Llama service map; the front-end rule in `WORKING-RULES.md` + COOKBOOK rule 5.
   Full entry below.
@@ -85,6 +95,50 @@ doing X now."**
   `a3b58ad`). Full entry below.
 - **2026-10-06 — D0** — the generated guard registry now delivers guards, mutation-proven
   (code `d225602`). Full entry below.
+
+---
+
+## 2026-10-06 (latest) — directive 1 completed in full, and the sort audit fixed
+
+**The owner asked whether his two directives were documented, and when they would be done.** The honest
+answer, measured rather than asserted:
+
+- **Directive 2 (the Active-task box) — DONE, fully.** The `★ ACTIVE TASK` box is at the top of this
+  file; HANDOVER, START-PROMPT, README and BOOKMARKS carry no "what is next" and point here.
+- **Directive 1 (the Hermes/Llama service map) — the file existed, but it was INCOMPLETE.** The owner's
+  words were *"for every bit of development in our log where needed."* The first version named **11
+  items**; the BACKLOG holds **43 open items, ~20 of which touch AI**. So it did not meet the bar it
+  claimed to. **This turn completed it.**
+
+**How directive 1 was completed — measured, not guessed.** §4.4 was added to
+[`library/development/ARCHITECTURE-hermes-service-map.md`](library/development/ARCHITECTURE-hermes-service-map.md),
+grouped: (a) the structural-permission items `SD-1/2/4/5`; (b) the AI I/O guard `G-06` and the
+enforcement point `S-02`; (b2) the remaining security/authority items `G-04/05/13/14/15/16`; (c) the
+agent-half items `AH-1`–`AH-12`; (d) the model-layer track `ML-1`–`ML-4`; (e) the decision items `N-15`,
+`V-04` and the `V`-HOLDs. A closing paragraph names the items deliberately **not** in the map (`G-09`,
+`G-10`, `G-18`, `G-19`, `G-20`, and the human-approval/UI items `22`, `23`, `15b`, `21c`, `24b`, `C`) and
+why — no AI is an ingredient in them, so mapping them would dilute rather than complete the page.
+**Coverage is now a measured claim:** every open item id in the BACKLOG was checked against the map →
+**41 ids, 0 missing.** The document's own §9 records that its earlier completeness claim was false.
+
+**Then the straightforward next task — the `explicit-sort-comparators` audit — was fixed.** The audit test
+was red. **A handover summary said "two files are flagged"; the test's own output said 16 violations
+across 6 files.** I read the list from the failing run, not the summary — which is why the fix is
+complete rather than partial (and why fixing only the two summary names left it red: there is a *second*
+bare sort in `user-function/document.ts` at a different line). All 18 sites got the **canonical-key
+comparator** `(a, b) => (a < b ? -1 : a > b ? 1 : 0)` — *not* `localeCompare`, because these are internal
+identifiers, not display strings, and `localeCompare` would make the order locale-dependent.
+**Proven behaviour-preserving two ways:** 7/7 adversarial equivalence probes show the canonical comparator
+is byte-identical to the default string sort; and the touched shared packages = **24 suites / 336 tests
+green**, shared `tsc --noEmit` exit 0, audit 4/4. Code commit `d5567c7`.
+
+**The second test-suite defect (`module-decoupling`) is OPEN, and it is the owner's call.** Established by
+measurement: it **passes alone 3/3** and **passes in a pair run**, but fails under **full-suite parallel
+load** — the real `#generated/entities.ids.generated` wins over the test's `jest.mock` inside a shared
+jest worker, so `partitions.ts` sees a catalog registry and returns `productsMedia`. The test file itself
+already documents this exact symptom as *"seen once, never reproduced, never explained."* It is a
+**test-harness defect, not a product defect.** Two fix options exist and both are reasonable — the choice
+is put to the owner because the trade-off (global config isolation vs. one file's self-isolation) is his.
 
 ---
 

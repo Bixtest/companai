@@ -28,6 +28,11 @@ connect per item*):
 **Status in one line.** *Hermes and the map below are DESIGN, part-built. Nothing here is claimed as
 working; each row carries the honest measured status.*
 
+**Coverage, stated honestly (measured 2026-10-06).** The BACKLOG holds **43 open items**, of which
+**~20 touch AI**. §4.1–§4.3 map the items named in the build order; **§4.4 maps every remaining
+AI-touching item**, grouped — so no item that touches Hermes or Llama is left unnamed. An item that
+touches neither (a pure-CSS fix, a locale file) is deliberately **not** in this map.
+
 ---
 
 ## 0. The one-page picture
@@ -184,6 +189,92 @@ These are the `AH-` items in `BACKLOG.md`, planned in `AGENT-HALF.md`. **For all
 | **Channels and rooms** | **Agent + Wiring** | Our workspace/room objects own identity and visibility. Hermes channels are adapters, never a second inbox. | n/a | **PART** |
 | **Runtime state** | **Agent** | Isolated per tenant and agent, with export, backup, delete and retention. **Disposable and rebuildable — deleting it must never delete a business fact.** | n/a | **MISSING** |
 
+### 4.4 Every other AI-touching item in the log — the map, completed
+
+**Why this section exists.** §4.1–§4.3 cover the items named individually in the build order. The
+owner asked for **"every bit of development in our log where needed"** — so this section closes the gap:
+**every remaining item in [`BACKLOG.md`](BACKLOG.md) that touches AI at all, grouped, each with its
+Hermes/Llama relationship.** Measured 2026-10-06: the BACKLOG holds **43 open items**, of which **~20
+touch AI**; the ones below were previously not named in this map. A new developer reading only §4.1–§4.3
+would think `AH-1`–`AH-12`, `ML-1`–`ML-4`, `SD-1/2/4`, `G-06`, `S-02`, `N-15`, `V-04` did not exist.
+
+**The rule is unchanged:** *if a human's request has to be understood, it is an agent run; if an admin
+turns a knob, it is wiring (§1).* In this section most items are **wiring** — which is the point.
+
+**(a) The structural-permission items — all pure platform, and all *serve Hermes*.**
+
+| Item | Shape | How Hermes serves / is served | Llama | Status |
+|---|---|---|---|---|
+| **SD-1 — the S2 permissions gate** | **n/a** (pure platform) | New data structure may not land until its permissions are decided. **This is the gate a Hermes-proposed schema change must pass** — the AI proposes, the gate decides. Hermes has no way around it. | n/a | OPEN (needs G-04; catalogue startable) |
+| **SD-2 — mark core functions, guard deletion** | **n/a** (pure platform) | Functions the platform needs (the roles/permissions manager) ship by default and cannot be deleted. **It bounds what a Hermes run may delete** — an agent cannot remove a core function. | n/a | OPEN (startable) |
+| **SD-4 — the structural permission grammar (S11/S12)** | **n/a** (pure platform), but **the language Hermes speaks** | Per object × verb × actor (human/AI) × level. **The `actor = AI` axis is what makes a Hermes call a first-class citizen** rather than a special case: one grammar decides a human edit and an agent edit. | n/a | OPEN (D1 ✅ unblocked the setting it reads) |
+| **SD-5 — the manage screen for SD-4** | **n/a** (pure platform) | The surface an admin uses to set the AI axis. Pure wiring — no agent runs. | n/a | OPEN (needs SD-4) |
+
+**(b) The AI-input/output guard and the enforcement point — the two hardest, and both *before* broad tools.**
+
+| Item | Shape | How Hermes serves / is served | Llama | Status |
+|---|---|---|---|---|
+| **G-06 — AI Input/Output Guards + context firewall** | **n/a** (pure platform) — *but it wraps every Hermes run* | **The largest security gap.** These guards inspect what goes *into* and comes *out of* any AI call, and the firewall bounds what context may leave. **Hermes runs behind them: a Hermes run is one of the calls being guarded.** Prompt-injection and data-exfiltration defence lives here, not in Hermes. | n/a | OPEN (needs G-05) |
+| **S-02 — wire the resolver as the enforcement point** | **Agent → Platform** | Includes the **responsible-user intersection**: an agent acts **on behalf of** a person, and its authority is the **intersection** of its own and that person's, decided inside the single decider. **This is where a Hermes tool call is actually authorized.** A named warning from the source study: fail closed, or do not ship the switch. | n/a | OPEN |
+
+**(b2) The remaining security/authority G- items — the floor a Hermes run stands on.**
+
+| Item | Shape | How Hermes serves / is served | Llama | Status |
+|---|---|---|---|---|
+| **G-04 — the data-axis authorization layer** | **n/a** (pure platform) | **Not optional before broad tools.** It answers *"may this actor read this row, for this purpose?"* — which is the question a Hermes tool call's authority ultimately rests on. S-02 wires it; this builds it. | n/a | OPEN (startable) |
+| **G-05 — classification metadata on entities and fields** | **n/a** (pure platform) | Tags data as personal/secret/regulated so the platform knows **what a Hermes run may not carry out**. The input to G-06's firewall and G-13's controls. | n/a | OPEN (startable) |
+| **G-16 — a security-event taxonomy** | **n/a** (pure platform) | Defines the events that must be *recorded*. **A Hermes run's denials, escalations and tool calls land here** — this is where the audit trail for AI behaviour is normalised. | n/a | OPEN (needs G-05) |
+| **G-13 — aggregation / inference controls** | **n/a** (pure platform) | Guards against **inference from aggregated results** — the risk that an agent combining many allowed reads learns something no single read was permitted to reveal. An AI-specific control that does not exist anywhere else in the plan. | n/a | OPEN (needs G-04) |
+| **G-14 — break-glass and separation of duties** | **n/a** (pure platform) | Exceptional access with its own audit and expiry, and duties that must not collapse into one actor. **Bounds what an agent (and an operator acting as one) may do in an emergency.** | n/a | OPEN (needs G-04) |
+| **G-15 — PostgreSQL Row-Level Security** | **n/a** (pure platform) | The **database floor under tenant isolation** (§6.1). Even if the platform mis-scopes a query, RLS is the backstop that keeps one tenant's rows out of another's — the mechanical guarantee behind "the tenant is derived, never declared." | n/a | OPEN (parallel) |
+
+**Not in this map, and why (so the coverage claim is exact).** These open items touch the platform but
+**not** Hermes or Llama, so they carry no Hermes row by design: **G-09** (`@`/`#` reference layer),
+**G-10** (dependency tracking / change propagation), **G-18** (scheduler enforcement gate), **G-19**
+(ERP benchmark), **G-20** (freshness / lineage / linting), and the human-approval / UI items
+**22** (bulk approval with a diff), **23** (deputy cover), **15b** (budget as a ceiling), **21c** (a lock
+control per record), **24b** (a screen for the two per-tenant authority settings), **C** (a lawyer on
+privacy/terms). They may be *used by* a Hermes workflow later, but no AI is an ingredient in them today,
+so listing them here would dilute the map rather than complete it.
+
+**(c) The agent-half items not yet in §4.3 — named, grouped, all "Hermes as an agent".**| Item | Shape | How Hermes serves / is served | Llama | Status |
+|---|---|---|---|---|
+| **AH-1 — the agent as a kernel object** | **Agent + Wiring** | `kind` (personal · role · context · independent · system), `owner`, `actsAs`, `role`, runtime binding. **This is the object every other `AH-` item hangs off** — the persona/profile mapping the multi-tenancy answer depends on (§6.1). | n/a | OPEN |
+| **AH-2 — the responsibility rule** | **Agent → Wiring** | Autonomy per **action class** on the existing `A0`–`A5` gates, so one agent can be `A5` to *filter* and `A1` to *clean*. **The accountable party is always a person.** This is what the platform *sets* and Hermes *obeys*. | n/a | OPEN (needs G-04) |
+| **AH-8 — MCP governance** | **Agent + Wiring** | Binding precedence (narrowest-first), changed-tool quarantine, argument-bound approvals. **The policy a Hermes MCP call is judged by.** One measured warning kept: a gateway that an unmanaged client can bypass is a hole, not a policy — so MCP is the *only* door (§6.4). | n/a | OPEN (needs G-04) |
+| **AH-11 — ESTOP wired to our own pause** | **Wiring** | One sentinel file, fails safe on corruption. **The global stop that reaches a running Hermes agent.** Depends on nothing, so it can land early. | n/a | OPEN |
+| **AH-5 — the room** | **Agent + Wiring** | A first-class shared space: id, participants, agenda, lifecycle, **speaker-labelled** log. Human and agent turns share one record the *platform* owns; Hermes channels are adapters, never a second inbox. | n/a | OPEN |
+| **AH-6 — mentions / participants** | **Agent + Wiring** | Pull a specific agent into a thread **without** assigning it work, gated by the same permissions as the room. Pure wiring over the platform's own objects. | n/a | OPEN |
+| **AH-7 — hire / fire as a product operation** | **Agent + Wiring** | Not an ops script: creating or removing a Hermes worker is a **product action** with records, permissions and audit. In Hermes terms it is the profile/worker lifecycle (§6.1). | n/a | OPEN (needs AH-1) |
+| **AH-9 — skills** | **Agent + Wiring** | Description-indexed, loaded on demand, with a **derived** trust level. **The governed form of "Hermes learns as you go"** (§6.5) — provenance, scan, version, approve, pin, roll back, revoke. | n/a | OPEN (needs AH-1) |
+| **AH-12 — the warm-session acceptance test** | **Agent** | Prove the *next turn* sees a write made while the runtime holds the session. **The sibling of session continuity (§4.3)**; it is the test that keeps an implicit session from becoming a silent second source of truth. | n/a | OPEN |
+| **AH-3 — the durable wake queue** | **Agent + Wiring** | Every trigger is a **database row**, not an in-memory timer, so a deploy does not lose queued work. **Draws the line between our scheduler and "a second orchestration system inside the product"** (§6.2 / N-15). A wake for a busy agent is coalesced or deferred, never a second concurrent run. | n/a | OPEN (needs S-05) |
+| **AH-4 — routines produce work items** | **Agent + Wiring** | schedule → **task** → wake, so every scheduled run has a visible task, a thread and an origin. Our scheduler owns the job; Hermes cron may run runtime chores only. | n/a | OPEN (needs AH-3) |
+| **AH-10 — system agents** | **Agent + Wiring** | Admin-created agents that replace or augment a system function (cron, backup, cleanup). **These are Hermes workers acting as platform machinery** — so they carry the same identity, budget and audit rules as any other agent. | n/a | OPEN (needs G-12, G-18) |
+
+**(d) The model-layer track (`ML-`) — all wiring, all *serve* Hermes and Llama.**
+
+| Item | Shape | How Hermes serves / is served | Llama | Status |
+|---|---|---|---|---|
+| **ML-1 — the deployment model record + hardware profile** | **Wiring** | *"Which model runs here, and what fits?"* The platform records it; **Hermes asks for inference and never writes this record.** | **YES — this is the record that names the Llama deployment** | OPEN (trigger: first non-laptop deployment) |
+| **ML-2 — the growable model catalog** | **Wiring** | Registered models as **data**, so a new GGUF is recorded rather than code-edited. **The model registry's first real consumer**; Hermes consumes the registry, it does not own it. | **YES — the catalog holds the Llama entries** | OPEN |
+| **ML-3 — the platform-driven model swap** | **Wiring** | Update the record, fetch the file, restart the `model` service. **A swap is a restart, not a hot reload** — so a Hermes run in flight must be drained, not migrated mid-run. | **YES — swapping the Llama GGUF is exactly this op** | OPEN |
+| **ML-4 — budgets and per-tenant quotas** | **Wiring + Agent** | **Required before any tenant is placed on local inference.** Honest scope (corrected 2026-10-06): a budget **blocks admission** and **pauses the scope**; **cancelling a run already in flight is a separate, best-effort action** and must be named as one. **Do not promise a mid-run kill we have not built.** | Indirect (bounds Llama spend like any provider) | OPEN |
+
+**(e) The two decision items that touch Hermes/Llama and are waiting on the owner.**
+
+| Item | Shape | How Hermes serves / is served | Llama | Status |
+|---|---|---|---|---|
+| **N-15 — draw the orchestration boundary** | **Wiring (a decision)** | *Where does our scheduler end and "a second orchestration system inside the product" begin?* **This must be written down before AH-3 is built**, or two schedulers run one body of work (§6.2). | n/a | OPEN — **a decision first, then a build** |
+| **V-04 — adopt Hermes's ops console beside our own UI?** | **Wiring (a decision)** | **The trigger has fired** (G-07 is built), so this is **due for the owner's decision now**. It is a **host** question: G-07 built the object a host renders, not the host. **The standing rule holds — Hermes is headless (§8.4); if the console is adopted it is a dev/ops surface, never a second identity plane or a customer-facing UI.** | n/a | OPEN — **needs the owner** |
+| **The 7 `V`-HOLDs** — V-09 licensing · V-10 multi-agent boards · V-11 computer-use · V-12 locales · V-13 MCPs · S-04 skills | **Wiring / Agent, mixed** | Each is deferred with a trigger. **V-09 (licensing) and V-13 (MCPs) gate Hermes adoption directly** — the licence position is Phase 0's exit gate (§7), and MCPs are the tool door (§6.4). | n/a | HELD (each has a trigger) |
+
+**The one-line takeaway for a new developer, repeated because it is the whole map:** **most
+AI-touching items are *wiring* — a setting, a registry entry, a policy row — and the platform is the
+actor. A minority are *agent runs*, and every one of those crosses the single typed port (§3).** If you
+are unsure which you are looking at, ask: *does a human's request have to be understood?* If yes, it is
+an agent; if no, it is wiring.
+
 ---
 
 ## 5. Llama in particular — the model layer, per joint
@@ -315,6 +406,11 @@ The security floor, restated here because it governs every joint above:
   `docker-compose.fullapp.yml` (the `mcp` service's environment block lacks `OPENAI_BASE_URL`; the
   `hermes` service exists with `nousresearch/hermes-agent:latest`), `api/chat/route.ts` +
   `lib/opencode-handlers.ts` (OpenCode wiring), `principal.ts` (the `ai_worker` seam).
+- **§4.4's coverage claim is measured, not asserted:** the BACKLOG was walked for its open-item ids
+  (**43 items**), the AI-touching subset (**~20**) was listed, and each was checked against §4.1–§4.3.
+  The items that were missing (`SD-1`, `SD-2`, `SD-4/5`, `G-06`, `S-02`, `AH-1`–`AH-12`, `ML-1`–`ML-4`,
+  `N-15`, `V-04`, the `V`-HOLDs) are the rows of §4.4. **The earlier version of this file claimed to be
+  complete while covering only 11 named items — that claim was false and is corrected here.**
 - **The two "no Llama preset" routes share no failure mode:** (1) enumerate the 11 ids; (2) search for
   the base URL / server name. Both agree there is no llama.cpp preset.
 - **No status here is assumed.** Where a row says PART or MISSING, that is the integration document's
