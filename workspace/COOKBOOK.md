@@ -2720,6 +2720,99 @@ and commercial OpenAI/Claude APIs are later work.
 
 ---
 
+## G-21 — the three endings a prompt can have, and the gate on the dangerous one
+
+**Built 2026-10-06** (commit `916069a`). Plan: `library/development/PLAN-G21-request-outcomes.md`.
+
+**What it is.** Not every prompt becomes a Function. The owner named **three endings** — a one-time answer,
+a step of architecture (LMS/CRM), a saved Function — and the **triage** that decides which. Two were already
+in the vision; the one-time answer was named nowhere, and the triage had no home.
+
+**The measurement that shaped the build — do this before building anything called a "gate".** I went in
+expecting to build the §46 bar and found it **already built and already enforcing**:
+
+| What the plan said to build | What already existed | Where |
+|---|---|---|
+| The objective §46 checks | `verifyFunction()` — runs them by calling **G-02's compiler** and reading its diagnostics | `packages/shared/src/lib/user-function/verify.ts:71` |
+| "The Save button is disabled until they pass" | `transition()` **refuses** to mark a Function `verified` on a failing report | `.../user-function/lifecycle.ts:128` |
+| The rule is not bypassable by a doctored file | `importFunction` refuses a `verified`-or-later status with no verification record | `.../user-function/document.ts:112` |
+
+**So the gate *consumes* that report and never re-derives a check.** A second implementation would give the
+project two answers to one question, and the drift would be invisible because both would look authoritative.
+
+**The three files** (`packages/shared/src/lib/request-outcome/`):
+
+- `types.ts` — the three outcomes (`ephemeral_answer` · `model_proposal` · `function_candidate`), the
+  **vision's own** risk tiers (Doc 04 §130–§132 — do not invent a parallel scheme; an earlier draft did and
+  a critic pass replaced it), and `functionPlacement()`, built on the **existing** canonical-id grammar so
+  free text is refused at construction rather than at render.
+- `triage.ts` — `triageRequest()`, **pure**. Structure is checked **first**, so "add me an LMS" cannot be
+  classified as a saveable Function. Fails closed: an unrecognised change takes the **strictest** tier.
+- `gate.ts` — `canOfferSaveAsFunction()`.
+
+**The fence is a type, not a convention.** `RequestOutcomeProposal` has **no field** for an applied change —
+no `applied`, no `performed`, no `migrated` — so the triage cannot reshape the database even by mistake, and
+a future edit that tried would be a type error rather than a silent widening.
+
+**The subtle one — the `not_checked` trap.** `report.passed` is `true` when nothing **failed**, and
+`not_checked` **never** fails a report (`verify.ts:214`). So a green report can hide a check that **never
+ran** — and `authorization_valid` never has, because the data-axis layer is **G-04** and does not exist. A
+gate asking only `report.passed` would offer to save a Function whose permissions were never established.
+So the gate returns `notChecked` **even when it says yes**.
+
+**The existing intent classifier is a different axis — leave it alone.** `api/route/route.ts:32` classifies
+every request as `intent: 'tool' | 'general_chat'`. That is a **dispatcher** question ("which tool runs
+this?"), not the **outcome** question ("what does this become?"). A `tool` intent can end as an ephemeral
+answer *or* a saved Function. Widening that enum would make a dispatcher answer a product question.
+
+### Two defects found while testing — both kept as regression tests
+
+1. **A helper typed `: string` that could return `undefined`.** `describeSaveGateVerdict` read
+   `if (!verdict.allowed) return verdict.reason`. Given a value whose `allowed` was missing — a
+   `VerificationReport` passed where a `SaveGateVerdict` was expected, easy to confuse because **both carry
+   a `notChecked`** — `!undefined` is `true`, so it returned `verdict.reason`, also missing. The caller was
+   wrong; the silent non-string was the function's. Now it guards its own contract.
+2. **A mutation proof that proved nothing.** See the table below.
+
+### The mutation proofs — and the one that lied
+
+| Guard mutated | Result |
+|---|---|
+| Gate ignores failures (asks only `report.passed`) | **RED** — 1 test fails |
+| Gate drops `notChecked` from the passing verdict | **RED** — 2 tests fail |
+| Triage structure branch removed | **RED** — 5 tests fail |
+| `model_proposal` stops requiring confirmation | **RED** — 3 tests fail |
+| `tierForChange` fails **open** (`safe`) on unknown kinds | **RED** — 3 tests fail |
+| Unclassified case guesses `ephemeral_answer` | **RED** — but only on the **second** attempt (below) |
+| Branch **order** swapped (read/write before structure) | **GREEN — and it is a false alarm, not a weak guard** |
+
+**The two lessons, and they are the valuable part of this section.**
+
+- **A mutation that does not apply cannot falsify.** The first attempt to mutate the unclassified branch
+  used a whitespace-sensitive string replace that **silently did not match**, so the file was unmutated,
+  the suite stayed green, and the result looked exactly as authoritative as a real one. Redone by targeting
+  the branch by index, it fails the test. **Always confirm the mutation actually changed the file** before
+  reading its result.
+- **A green mutation is not always a weak guard — check whether the mutation is *meaningful first*. The
+  branch-order swap is green because `requiresNewStructure` and `writes` are independent flags and each has
+  its own branch, so reordering them changes no observable outcome for the cases tested. The ordering claim
+  that *does* matter — "a structure change is a proposal even though it also writes" — is proved by
+  **deleting** the structure branch (RED, 5 tests), not by reordering branches.
+
+**What was deliberately NOT built, so it is not over-read:**
+
+- **The schema-mutation IR kind.** `IrOperation` is still `list | count | aggregate`
+  (`business-ir/types.ts:38`). So outcome 2 is **triaged and gated but not yet emittable** — the fence comes
+  before the thing it fences.
+- **No UI.** The gate is the function a Save button will call; wiring the button is separate.
+- **No database row.** `document.ts:28` names its own trigger (G-07, now landed), so the row is startable —
+  but building it here would widen a taxonomy change into a migration.
+
+**Measured green:** `shared` **2234/2234 across 193 suites**, typecheck **exit 0**; mutated files restored
+byte-identical and verified with `md5sum -c`.
+
+---
+
 # The hosting environment — `Platform-Server` (Coolify)
 
 **Built 2026-10-04.** A separate environment from Sprint 0: an Ubuntu Server 24.04 VM on Hyper-V

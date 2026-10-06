@@ -7,7 +7,71 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
-## 2026-10-06 (latest) — the live app-level run is GREEN: request in, Business IR out
+## 2026-10-06 (latest) — G-21 built: the three endings a prompt can have, and the gate on the dangerous one
+
+**The last item the owner's features_pack named now exists as code.** Not every prompt becomes a
+Function. He described three endings — a one-time answer, a step of architecture (LMS/CRM), a saved
+Function — and the triage that chooses. Two were already in the vision, **the one-time answer was named
+nowhere**, and the triage had no home. Now typed, tested and committed (`916069a`).
+
+**The finding that shaped the whole build: most of the gate already existed.** I went in expecting to
+build the §46 bar and found it already built and already enforcing — `verifyFunction` runs the checks by
+calling G-02's compiler, and `transition()` **refuses** to mark a Function `verified` on a failing report.
+So G-21 **asks** that gate instead of growing a second copy of it. A re-implementation would have given
+the project two answers to one question, and the drift would have been invisible, because both would have
+looked authoritative.
+
+**What was built** (`packages/shared/src/lib/request-outcome/`): the **three outcomes** as a first-class
+union; a **pure triage** that proposes and *cannot* perform — the return type has no field for an applied
+change, so the fence is a type, not a convention; and a **Save gate** that consumes `verifyFunction`'s
+report. Structure is decided **first**, so "add me an LMS" cannot be quietly classified as a saveable
+Function — the most consequential request must not get the quietest ending.
+
+**The existing intent classifier is a different axis, and I left it alone.** `api/route/route.ts` already
+classifies every request as `tool | general_chat` — that is a *dispatcher* question ("which tool runs
+this?"), not the *outcome* question ("what does this become?"). A `tool` intent can end as either. Widening
+that enum would have made a dispatcher answer a product question, and the next reader could not have told
+which meaning was meant.
+
+**The subtle one — the `not_checked` trap.** `report.passed` is `true` when nothing **failed**, and
+`not_checked` never fails a report. So a green report can hide a check that **never ran** — and
+`authorization_valid` never has, because the data-axis layer is G-04 and does not exist. A gate asking only
+`report.passed` would have cheerfully offered to save a Function whose permissions were never established.
+The gate therefore returns `notChecked` **even when it says yes**: a clean report must not read as a clean
+bill of health.
+
+**Two defects found while testing, and both are kept as regression tests rather than quietly fixed.**
+
+1. **A helper typed `: string` that could return `undefined`.** `describeSaveGateVerdict` read
+   `if (!verdict.allowed) return verdict.reason`. Given a value whose `allowed` was missing — a
+   `VerificationReport` passed where a `SaveGateVerdict` was expected, easy to do because **both carry a
+   `notChecked`** — `!undefined` is `true`, so it returned `verdict.reason`, which was also missing. The
+   caller was wrong, but the silent non-string was the function's, so the function now guards its own
+   contract and answers with a sentence for junk input.
+2. **A mutation proof that proved nothing.** To show the fail-closed guard was real, I mutated the
+   unclassified branch and the suite **stayed green** — which looked like evidence the guard was weak. It
+   was not: my whitespace-sensitive replace **had not matched**, so I was testing an unmutated file. Redone
+   by index, it fails the test. **A mutation that does not apply cannot falsify** — and the first version
+   looked exactly as authoritative as the real one.
+
+**Every guard is mutation-proven RED:** failures ignored · `notChecked` dropped · structure branch removed ·
+confirmation dropped · tier failing open · unclassified guessing. Green: **shared 2234/2234 across 193
+suites**, typecheck **exit 0** — after confirming the restored files byte-identical by `md5sum`.
+
+**Three things deliberately NOT built, so the result is not over-read.** The **schema-mutation IR kind**
+does not exist (`IrOperation` is still `list | count | aggregate`), so outcome 2 is **triaged and gated but
+not yet emittable** — the fence comes before the thing it fences, on purpose. **No UI**: the gate is the
+function a Save button will call. **No database row**: `document.ts` names its own trigger (G-07), which has
+now landed, so that row is startable — but it is not this item's, and building it here would widen a
+taxonomy change into a migration.
+
+**Files:** code — `packages/shared/src/lib/request-outcome/{types,triage,gate}.ts` plus three test suites
+(32 tests), commit `916069a`. Docs — `library/development/PLAN-G21-request-outcomes.md` (new),
+`ARCHITECTURE-request-outcomes.md` (§5 register closed, §6 added), `BACKLOG.md`, `workspace/COOKBOOK.md`.
+
+---
+
+## 2026-10-06 — the live app-level run is GREEN: request in, Business IR out
 
 **The measurement G-17 was built for now exists.** A plain-language request went in through the running
 platform and a Business IR object came out — with the app's *own* registry resolving the agent, not a

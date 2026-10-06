@@ -250,15 +250,35 @@ narrows what G-17 must produce (three paths, not one) but does not delay it.
 |---|---|---|---|
 | 1 | Outcome 3 (save as Function) is covered by the vision | **NOT AN ISSUE** — verified, quoted | §1a |
 | 2 | Outcome 2 (prompt-caused schema change) is covered | **NOT AN ISSUE** — verified, quoted; **my earlier "absent" claim retracted** | §1b, register §7b |
-| 3 | Outcome 1 (one-time answer) is named nowhere | **OPEN → captured as G-21** | §1c, §3 |
-| 4 | The triage has no home | **OPEN → captured as G-21** | §1d, §3 |
-| 5 | The triage rule (who decides the ending) — undecided in the vision | **WILL DO** — default taken: platform proposes, user confirms, schema change gated | §2 Q1 |
-| 6 | "Answer once" may keep the *thread*, not a Function | **WILL DO** — default taken | §2 Q2 |
-| 7 | Outcome 2's risk tiers | **FIXED** — a critic pass replaced my invented small/large split with the vision's own three tiers (Doc 04 §130–§132) | §2 Q3 |
-| 8 | The "flawless" bar | **WILL DO** — Doc 03 §46's objective checks, enforced by G-02's compiler | §2 Q4 |
-| 9 | Where a saved Function goes (grouping) | **WILL DO** — declared canonical path, not free text | §2 Q5 |
+| 3 | Outcome 1 (one-time answer) is named nowhere | **FIXED 2026-10-06** — now `ephemeral_answer`, a first-class outcome in `packages/shared/src/lib/request-outcome/types.ts` | §1c, §3; built under `PLAN-G21-request-outcomes.md` |
+| 4 | The triage has no home | **FIXED 2026-10-06** — `triageRequest()` in `request-outcome/triage.ts`, pure and mutation-proven | §1d, §3 |
+| 5 | The triage rule (who decides the ending) — undecided in the vision | **FIXED 2026-10-06** — default taken and **built**: the platform proposes, the user confirms the consequential ones, a structure change is never performed by the triage | §2 Q1 |
+| 6 | "Answer once" may keep the *thread*, not a Function | **FIXED 2026-10-06** — made **structural**: `ephemeral_answer` carries no `FunctionCandidate`, so a menu entry is a type error, not a convention | §2 Q2 |
+| 7 | Outcome 2's risk tiers | **FIXED** — a critic pass replaced my invented small/large split with the vision's own three tiers (Doc 04 §130–§132), now the `ChangeRiskTier` type | §2 Q3 |
+| 8 | The "flawless" bar | **FIXED 2026-10-06** — measured: it **already exists and already enforces** (`verifyFunction`, `transition`). G-21's gate **consumes** that report rather than re-implementing it | §2 Q4 |
+| 9 | Where a saved Function goes (grouping) | **FIXED 2026-10-06** — `functionPlacement()` builds on the existing canonical-id grammar, so free text is refused **at construction** | §2 Q5 |
 | 10 | **Which tier an LMS/CRM-sized capability lands in** | **DECIDED by the owner 2026-10-06 — explicit-approval** (the strictest tier) | §2 Q3 |
-| 11 | G-17 must emit the IR for all three paths | **WILL DO** — G-17's row narrowed | §2 Q6, `BACKLOG.md` G-17 |
+| 11 | G-17 must emit the IR for all three paths | **PARTIAL** — G-17 ships the **read + command** IR (done, measured live 2026-10-06). The **schema-mutation kind does not exist** (`IrOperation` is still `list|count|aggregate`), so outcome 2 is **recognised and gated but not yet emittable**. Deliberate: the fence comes before the thing it fences | §2 Q6, `PLAN-G21-request-outcomes.md` §1e |
 
 **Nothing is open.** The one question that needed the owner — the approval tier for a whole new service
 — was answered on 2026-10-06: **explicit-approval**.
+
+---
+
+## 6. Built 2026-10-06 — what exists now, and what does not
+
+**Built** (`packages/shared/src/lib/request-outcome/`, committed `916069a`; 32 new tests, shared suite
+**2234/2234 across 193 suites**, typecheck exit 0):
+
+- `types.ts` — the three outcomes, the vision's risk tiers, `functionPlacement()`, `FunctionCandidate`.
+- `triage.ts` — `triageRequest()`, pure; structure decided **first**; fails closed on an unrecognised
+  change (strictest tier, never `safe`).
+- `gate.ts` — `canOfferSaveAsFunction()`, which **consumes** `verifyFunction`'s report and surfaces
+  `notChecked`.
+
+**Three things this deliberately does not do**, so the register is not over-read:
+
+1. **No schema-mutation IR kind** (register §11). Outcome 2 is triaged but cannot be emitted.
+2. **No UI.** The gate is the function a Save button will call; wiring the button is separate.
+3. **No database row**, and no new execution path. `authorization_valid` stays `not_checked` until G-04.
+
