@@ -559,6 +559,19 @@ the restore-time consequence: [references/parked-modules.md](references/parked-m
    your own check is not a second route. If they disagree, report the disagreement — never
    average, never quietly pick the nicer number. (Rules zero-zero-two and zero-nine.)
 
+5. **If it is ready to be switched on in the front end, switch it on.** When a piece can be
+   **fully functional on its own**, wire it into the running interface **in the same batch** as the
+   work — **even if the parts that still need work are locked, hidden or switched off behind a
+   feature toggle**. Do not wait for the whole feature to be finished before it can be seen or used.
+   **Why (the owner's reason, 2026-10-06):** *"Updating the front end helps me testing the micros as
+   you work."* A capability nobody can reach is a capability nobody can check, and a defect found by
+   the owner using the real screen is found cheaper than one found later. **The boundary that makes
+   this safe:** the rule applies only when the piece is **fully functional as a piece** — do not ship
+   a half-wired screen. Wire the working part; gate the unfinished part off (**a locked panel or a
+   switched-off toggle is correct**; a visible button that half-works is not). **This is a standing
+   rule for every item, not a one-off** — see [`../library/development/WORKING-RULES.md`](../library/development/WORKING-RULES.md),
+   which lists the owner's standing rules in one place.
+
 ---
 
 ## Phases

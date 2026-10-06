@@ -24,6 +24,12 @@ SaaS product.
 runtime boundary, the project's **B-05**, is now **decided**: see §11. What remains deferred is named
 there with its trigger.
 
+**The companion you read for "where does this show up in the build":**
+[`ARCHITECTURE-hermes-service-map.md`](ARCHITECTURE-hermes-service-map.md) — the same design, turned
+into a **per-development-item map** of how Hermes *serves* or is *served* (as an agent, or as a
+setting), with the Llama layer and the honest status. **This document is the design; that one is the
+wiring map a new developer works from.**
+
 ---
 
 ## 0. What this document changes about the prior analysis

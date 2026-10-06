@@ -26,8 +26,9 @@ follow §2 to actually get working. Everything else in the project is reachable 
 
 **What you are inheriting.** A project that has finished *thinking* and is ready to *build*. The
 analysis is complete, the agent study is complete, the specification has a first draft, and the
-plan is settled. **Nothing is blocked.** What is left is the build, and the first item is named in
-§2 step 7.
+plan is settled. **Nothing is blocked.** What is left is the build, and **the task in hand is named
+in the `★ ACTIVE TASK` box at the top of [`../../JOURNAL.md`](../../JOURNAL.md)** — the one place
+that carries it (step 7, and the owner's instruction of 2026-10-06).
 
 **Six things to do before you touch anything:**
 
@@ -43,7 +44,8 @@ plan is settled. **Nothing is blocked.** What is left is the build, and the firs
 3. **Confirm both repositories are clean** (§2 step 3), and that the stack is up (§2 step 4).
 4. **Read the project's memory** (§6c) — it holds the rules that were learned the hard way, and
    **50 reusable techniques** the previous sessions wrote from this very project.
-5. **Take the first backlog item** (§2 step 7) and work it in the four-step sprint process
+5. **Read the task in hand** — the `★ ACTIVE TASK` box at the top of
+   [`../../JOURNAL.md`](../../JOURNAL.md) (§2 step 7) — and work it in the four-step sprint process
    (README §"The sprint process") — **no code before step 3.**
 
 **What you may not do.** The admin password is the owner's and he types it; you never write it to a
@@ -104,6 +106,7 @@ reading it "for context" is how the direction gets buried (see [`../WHAT-WE-ARE-
 | A1 | [`../WHAT-WE-ARE-BUILDING.md`](../WHAT-WE-ARE-BUILDING.md) | **The product in plain English** — the decisive loop, the three things a prompt can become, what it is *not*, and which library documents are **ours vs imported**. The eye on the prize |
 | A2 | [`../../INDEX.md`](../../INDEX.md) | The map of every folder, and the rules that matter most |
 | A3 | **This file** | What exists, where, and the traps |
+| A3b | [`WORKING-RULES.md`](WORKING-RULES.md) | **The owner's standing rules, in one page** — the five that outrank everything (two routes or it is not a finding; **if it is ready to be switched on in the front end, switch it on**), how to report with a status, and how to ask. Read once, at the start |
 | A4 | [`BACKLOG.md`](BACKLOG.md) | **What is left**, in order, one line each — the single plan |
 | A5 | [`ARCHITECTURE-request-outcomes.md`](ARCHITECTURE-request-outcomes.md) | **The request-outcome taxonomy (G-21)** — the owner's core features_pack: a one-time answer, a model proposal, or a saved Function; the triage, and the gate that stops the AI reshaping the database on its own |
 | A6 | [`../../compai/planning/00-product-thesis.md`](../../compai/planning/00-product-thesis.md) | **What we are building**, and the 15 rules that must never be broken |
@@ -115,11 +118,12 @@ reading it "for context" is how the direction gets buried (see [`../WHAT-WE-ARE-
 | B1 | [`SPECIFICATIONS-DICTIONARY.md`](SPECIFICATIONS-DICTIONARY.md) | **The standard every change is checked against** — the project's MVC. **Read before making any architectural change.** The two clauses that may never be skipped: the permissions question (S2) and the tier question (S4/item 17). §C.2b: the tiers/defaults/fallbacks are a **superadmin setting**, not hardcoded |
 | B1a | [`CORE-BOUNDARY.md`](CORE-BOUNDARY.md) | **What is uncustomisable core vs configurable vs domain packs** — the answer to *"what must nobody be able to change?"* Ring 1 (identity, tenancy, the resource envelope, the policy engine, audit, localization resolution, the contract shapes) moves only by platform release |
 | B1b | [`ARCHITECTURE-structure-permissions.md`](ARCHITECTURE-structure-permissions.md) | **What the AI may do to the platform's own structure** — the object × verb × actor grammar (S11/S12), and why it plugs onto the existing mutation guard |
-| B1c | [`BUILD-ORDER.md`](BUILD-ORDER.md) | **The order — contracts, then foundation, then stack.** The owner's instruction (2026-10-06): fix the sequence so foundational items are not deferred. **Phase −1** = the architecture contracts; **Phase 0** = the foundation completion. **D0 ✅ fixed and proven 2026-10-06** — the generated guard registry now delivers guards (mutation-proven, §2c). **D1 ✅ fixed and proven 2026-10-06** — the tier mapping / defaults / fallbacks are a superadmin setting (`module_configs`), seeded from the dictionary, failing closed (§2d). **The live remaining defect is `D2-wide`:** 199 call sites in 78 files still bypass the registry via the `@deprecated` resolver (93 calls / 38 files in enabled modules = integrate now; 106 / 40 parked = disconnect & park; the `entities` path is the worked example, already fixed). **The plan is per-module, not a blind sweep — build-order §2e** |
+| B1c | [`BUILD-ORDER.md`](BUILD-ORDER.md) | **The order — contracts, then foundation, then stack.** The owner's instruction (2026-10-06): fix the sequence so foundational items are not deferred. **Phase −1** = the architecture contracts; **Phase 0** = the foundation completion. **D0 ✅ fixed and proven 2026-10-06** — the generated guard registry now delivers guards (mutation-proven, §2c). **D1 ✅ fixed and proven 2026-10-06** — the tier mapping / defaults / fallbacks are a superadmin setting (`module_configs`), seeded from the dictionary, failing closed (§2d). **The live remaining defect is `D2-wide`:** **161 call sites** in **67 files** still bypass the registry via the `@deprecated` resolver (baseline 198; `entities`, `data_sync` and `dictionaries` now retired). **The plan is per-module, not a blind sweep — build-order §2e; the exact module being worked now is in the JOURNAL's Active-task box** |
 | B1d | [`CORE-MODULES-REGISTER.md`](CORE-MODULES-REGISTER.md) | **What core modules exist, and whether they are REALLY built** — two-route verified, honest verdicts (COMPLETE / BUILT-UNEVEN / SHELL / ABSENT). Finance & procurement are ABSENT |
 | B1e | [`BLUEPRINT-GAP-ANALYSIS.md`](BLUEPRINT-GAP-ANALYSIS.md) | **What the universal platform blueprint exposed in our plan** — four gaps (resource envelope, core/pack boundary, i18n/a11y contracts, a contracts phase), and what to adapt vs adopt from the generic standard |
 | B2 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | How the three pieces run together, and the dockerisation decision |
 | B3 | [`ARCHITECTURE-hermes-integration.md`](ARCHITECTURE-hermes-integration.md) | **How Hermes attaches**, and the owner's **B-05** runtime-boundary decision (§11) |
+| B3a | [`ARCHITECTURE-hermes-service-map.md`](ARCHITECTURE-hermes-service-map.md) | **The service map, per development item** — for **every** AI-touching piece, how Hermes *serves* or is *served* (as an agent, or as a setting), where **Llama** sits, and the honest status. **Written for a new developer — read this to see the whole wiring without a learning curve.** Covers the multi-tenant-vs-one-tenant challenge, multi-agents, integrations and MCP |
 | B4 | [`ARCHITECTURE-model-server-integration.md`](ARCHITECTURE-model-server-integration.md) | **How models attach**, and the owner's **model-default** decision (§9) |
 | B5 | [`SPEC-business-model-kernel.md`](SPEC-business-model-kernel.md) | **The product specification** — the vision's own 40-item gate; ratification only remains |
 | B6 | [`../analysis/findings/12-development-plan.md`](../analysis/findings/12-development-plan.md) | **The plan** — phases, order, why |
@@ -189,56 +193,26 @@ numbered action list. As of 2026-10-05 only **three** items are open, and none o
 build: change the Coolify password (item 5), turn on Docker Desktop auto-start (item 6), and
 optionally delete the 3.8 GB ISO (item 7).
 
-**7. Take the first item from [`BACKLOG.md`](BACKLOG.md).** **`P0-spec` is done:** draft 2 of the
-Business Model Kernel specification ([`SPEC-business-model-kernel.md`](SPEC-business-model-kernel.md))
-was written **2026-10-05** and passes the vision's own 40-item gate — **36 SETTLED · 1 DERIVED · 3
-DEFERRED-with-trigger · 0 OPEN — owner**, tallied by parsing the 40 rows (the last open row, **B-05**,
-was approved by the owner on 2026-10-05). **What is left is ratification**
-(item 4 of [`NEEDS-YOU.md`](NEEDS-YOU.md)).
+**7. Your task is in `JOURNAL.md`, not here.** Open [`../../JOURNAL.md`](../../JOURNAL.md) and read
+the **`★ ACTIVE TASK`** section at the very top. **That box is the one and only place that says what
+is being worked on now** — handover documents deliberately do not carry a task, because a task changes
+every session and a stale one is worse than none (owner's instruction, 2026-10-06). The box also gives
+the convention: **when a task is done, tick it and move it down, then post the next one there.**
 
-**`G-01` (the Business Model Kernel + `G-08`) is now built** — **2026-10-05**, committed in the code repo
-as `ee406e8`. The canonical model is a **view** over the declarations the platform already keeps, so
-there is one source of truth; the plan's test (**the export/reimport round-trip is empty**) passes, with
-a non-empty-export guard so the empty diff is not vacuous.
+Use [`BACKLOG.md`](BACKLOG.md) for *what is left as a whole* and [`BUILD-ORDER.md`](BUILD-ORDER.md) for
+*the order it must be done in* — the Active-task box always says which of them is in hand, and why.
 
-**`G-02` (the Business IR + the compiler) is now built** — **2026-10-05**. The typed **read** and
-**write** shapes the AI produces instead of SQL (spec §6), and the compiler that turns a read into the
-physical query the platform already runs — **§51's ten stages, named one-for-one**. **The plan's test —
-the rename test — passes both directions and at two levels:** the old IR compiled against a renamed
-model **fails** (never a silent compile), and the rename-aware entry says **requires recompilation** and
-names the destination, using **G-01's own** rename planner. **The IR has no scope field**, so it cannot
-widen its own reach.
+**Status you can rely on (the foundation is done; this is not "what is next"):** the four-item critical
+path `spec ✅ → G-01 ✅ → G-02 ✅ → G-03 ✅` is complete, and `G-07` (the Widget contract), `G-17` (the AI
+emits the Business IR), and `G-21` (the request-outcome taxonomy and its gate) are done. The
+**live defect family** is the guard layer: **D0** ✅ (the generated registry now delivers guards),
+**D1** ✅ (the tier mapping is a superadmin setting), and **D2-wide** in progress — **161 call sites**
+still bypass the registry via the `@deprecated` resolver, being retired module by module (`entities`,
+`data_sync` and `dictionaries` done). **D3** (the `escalate` outcome) and the **Metadata Registry**
+remain. The reasoning is BUILD-ORDER §2e; the counts are in BACKLOG.md.
 
-**`G-03` (User Functions) is now built** — **2026-10-05. This completes the four-item critical path:**
-`spec ✅ → G-01 ✅ → G-02 ✅ → G-03 ✅`. A User Function is *"a validated, reusable business operation
-created by the user with AI assistance and executable without AI once published"* — the product's
-distinctive feature. It is **compiled IR made durable** (RQ-24): the artifact, an **enforced** lifecycle
-(only `published`/`active` run), **objective verification** that calls G-02's compiler rather than
-re-implementing it, a fingerprint, a **document** whose round-trip is empty, and **zero-AI execution**.
-**The plan's decisive test — "switch the model off and run a Function" — is met by two routes:** the
-runner **has no AI argument at all**, and an **import-graph test** proves nothing it reaches imports the
-AI side. That structural route was **falsified, not asserted** (an AI import was planted outside the
-module and the check failed, naming the file). **Four defects were found by three critic passes and all
-four are fixed** — including one in the compiler (`modelVersionOf` could not see a field being
-**retyped**, so a stale Function reported itself *fresh*) and one that let a **sort** be silently
-dropped. **One hole is OPEN with a named trigger** (see BACKLOG). **Deliberately not built:** a database
-row (trigger: **G-07** — **now fired**; the row is startable, and our call is to write it at **G-09** in
-one migration with the registry's own row) and placement in the interface (that **is** G-07).
-
-**`G-07` (the Widget contract, the Widget IR and the registry) is now built** — **2026-10-05**. A
-published Function, placed in a Widget, **runs from the Widget's own inputs with no AI** — the vision's
-own reusable chain, made real. **`S0` is now `DONE` too** (2026-10-06 — the re-run found the stack was
-not coming up whole: `redis` had no `restart:` policy; fixed, all eight containers healthy).
-**The next build item is the first unbuilt item in [`BACKLOG.md`](BACKLOG.md) §"The list"** — at the
-time of writing that is **`G-12`** (business backup and restore). **But one vision item now competes for
-that slot:** the owner asked on 2026-10-06 to *"keep the eye on the goal"*, and a measured check found
-that **everything downstream of the Business IR is built, while the AI that should *emit* the IR is not
-wired** — that is **`G-17`** (schema-constrained generation), which is measured, startable, and depends
-only on the now-done `G-02`. **Whether `G-12` or `G-17` goes first is the owner's call**; the finding is
-written out in `G-17`'s row and in the gap register §7a.
-
-**Verify an item's status is still true before starting it** — the roadmap has been
-wrong about what is already done **four times**.
+**Verify an item's status is still true before starting it** — the roadmap has been wrong about what
+is already done **four times**.
 
 ### What to study first, by role
 
@@ -642,24 +616,21 @@ and was *not* re-measured — treat it as a starting point, not a fact.**
 ## 8. What is left, and whose move it is
 
 - **What is left, in order** → [`BACKLOG.md`](BACKLOG.md). One roadmap. Read §"The list" and
-  nothing else for *"what is left"*. **The four-item critical path is complete:** `P0-spec` (draft 2),
-  `G-01`, `G-02` and `G-03` are all built as of 2026-10-05, **`G-07` (the Widget contract) is built
-  too**, and **`S0` is done (2026-10-06)**. **The next build item is the first unbuilt item in
-  `BACKLOG.md` §"The list"** — at the time of writing that is `G-12` (business backup and restore).
-  **A measured vision check on 2026-10-06 put one item in competition with it:** the AI-first vision's
-  decisive loop is `AI → Business IR → validation → user verifies → ONE OF THREE ENDINGS`; everything
-  **downstream of the IR** is built and proven (G-01/G-02/G-03/G-07), but the AI that should
-  **emit** the IR is not wired — that is **`G-17`** (schema-constrained generation), startable now.
-  **The "one of three endings" is the owner's core features_pack (also 2026-10-06):** a prompt can end
+  nothing else for *"what is left"*. **The task in hand is not stated here** — it is in the
+  **`★ ACTIVE TASK`** box at the top of [`../../JOURNAL.md`](../../JOURNAL.md) (owner's instruction,
+  2026-10-06), and the order it comes from is [`BUILD-ORDER.md`](BUILD-ORDER.md). **Done so far:**
+  the four-item critical path (`P0-spec`, `G-01`, `G-02`, `G-03`), plus `G-07`, `G-17` and `G-21` and
+  the foundation items `D0`, `D1` (`S0` also done). **The live defect family in progress is `D2-wide`**
+  — 161 call sites still bypass the guard registry, being retired module by module.
+  **What is left to do, in one place, is `BACKLOG.md`; what is being done *now* is the JOURNAL box.**
+  **The "one of three endings" is the owner's core features_pack (2026-10-06):** a prompt can end
   as a **one-time answer** (nothing saved), a **model proposal** (the prompt needs new structure — a
   field, an entity, a whole new service like LMS/CRM — and goes through the same validate → impact →
   approve → migrate gate, never on the AI's own initiative), or a **saved Function** (walked to
   provable correctness, named, placed in a grouping, then runs with zero AI). Two of the three are
-  already in the vision; the **one-time answer is named nowhere** and the **triage has no home** —
-  now **`G-21`**, with the design and six grilled questions in
+  already in the vision; the **one-time answer was named nowhere** and the **triage had no home** —
+  now **`G-21`**, built, with the design and six grilled questions in
   [`ARCHITECTURE-request-outcomes.md`](ARCHITECTURE-request-outcomes.md).
-  **Which goes first — `G-12` or `G-17` — is the owner's call** (I recommend `G-17`; `G-12` loses
-  nothing by waiting). Finding: `G-17`'s row + gap register §7a.
 - **What needs the owner** → [`NEEDS-YOU.md`](NEEDS-YOU.md) — a numbered action list. **Three
   items open**, and none blocks the build. The most urgent is changing the Coolify admin password
   (item 5); it is the only thing standing between an agent and the 2FA wall on the hosting panel.

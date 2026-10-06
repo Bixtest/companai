@@ -2,8 +2,9 @@
 
 **What this file is.** The ready-to-paste first message for the agent that inherits this project and
 continues the development. It is short on purpose: it tells the agent what to read, how to set up,
-the rules it may not break, and the first task — and nothing else, because the detail lives in
-[`HANDOVER.md`](HANDOVER.md) and the agent is told to read that first.
+and the rules it may not break — and **nothing about "what is next", because what is next changes
+every session.** The live task lives in **one place only: the `★ ACTIVE TASK` section at the top of
+[`../../JOURNAL.md`](../../JOURNAL.md)**. This prompt sends the agent there.
 
 **How to use it.** Copy everything between the two `═══` rules below and send it as the first
 message of the new session. Nothing else is needed. If the project has moved, change the two paths
@@ -11,7 +12,8 @@ at the top first.
 
 **Why it is written this way.** A handover that is read *after* the agent has already formed a
 picture is a handover half-wasted. So the prompt's job is to make reading the handover the **first
-action**, and to name the one thing to build afterwards — not to summarise the project itself.
+action**, and to send the agent to the one live task — not to summarise the project, and not to
+carry a task list that is stale by the time it is read (owner's instruction, 2026-10-06).
 
 ---
 
@@ -89,8 +91,9 @@ failures that describe the laptop, not the project.
 There are **two** git repositories, and both should be clean. If a tree is dirty, find out whose
 changes they are before you touch anything.
 
-**THE RULES THAT BIND.** Full text is in `workspace/COOKBOOK.md`. These are the ones that have
-already cost this project time:
+**THE RULES THAT BIND.** Full engineering text is in `workspace/COOKBOOK.md`. **The owner's standing
+rules, in one page, are [`library/development/WORKING-RULES.md`](WORKING-RULES.md)** — read it once.
+These are the ones that have already cost this project time:
 
 - **Every claim comes with an observation attached, not an argument.** Measure from the artefact,
   never from a description of it. If you are about to say "the cause is X" and you have not watched
@@ -114,7 +117,12 @@ already cost this project time:
 - **A module is not "built" because a file exists.** Mark nothing COMPLETE without the **two-route
   check** (read the artefact, and reach the same fact by an independent path). The guard engine proved
   this: it *looked* built and its central registry was **empty** (D0).
-- **Do not stack on an unfinished foundation.** Follow `BUILD-ORDER.md`; Phase 0 (D0–D3) closes first.
+- **Do not stack on an unfinished foundation.** Follow `BUILD-ORDER.md`; the foundation gaps close
+  first, and the **Active-task box in `JOURNAL.md` names which one is in hand**.
+- **If it is ready to be switched on in the front end, switch it on** — once a piece can be *fully*
+  functional, wire it up even if the parts that still need work are locked or hidden (**the owner's
+  rule, 2026-10-06**; full text in [`WORKING-RULES.md`](WORKING-RULES.md)). The owner tests the
+  platform as it is built; a feature nobody can reach is a feature nobody can check.
 
 **HOW TO TALK TO THE OWNER.** Reply in **English**, always. Plain, everyday words — he is not a
 developer, so no jargon. One specific thing at a time, answerable in a word or a sentence. **Do not
@@ -122,24 +130,22 @@ ask him to adjudicate technical decisions:** when a problem has an obvious safe 
 the work, and tell him what changed and how to undo it. Reserve his judgment for what is genuinely
 his — a name, a domain, a cost, a preference.
 
-**4. Your first task.** Read `library/development/BUILD-ORDER.md` and take the first item in **Phase 0**.
-**As of 2026-10-06 the first item is `D0` — make the generated guard registry actually deliver guards,
-and prove it.** The generated registry `apps/mercato/.mercato/generated/guards.generated.ts` is a shell
-(`export const guardEntries: GuardEntry[] = []`, zero entries) and it *is* imported by the app
-(`apps/mercato/src/bootstrap.ts:44`), so guards are hand-wired per route instead of delivered centrally.
-**A guard that claims to run and does not is worse than no guard.** Determine the root cause (generator
-not scanning, or the app never re-run through `mercato generate registry`), fix it, and **prove the
-entry list is non-empty** — the fix is not done until the artefact shows real entries.
+**4. Your task — do not look for a task list in this prompt.** Open
+`JOURNAL.md` and read the **`★ ACTIVE TASK`** section at the very top. That is the **one** place that
+says what is being worked on now. It also carries the convention you must follow: when the task is
+finished, **tick it done and move it down, then post the next one there** — never in this file.
 
-Then proceed through Phase 0 in order: **D1** (the structural-permission settings table) · **D2** (move
-the entities write path off the `@deprecated` `validateCrudMutationGuard` onto the full registry) ·
-**D3** (add the `escalate` outcome to `MutationGuardResult`) · the **Metadata Registry** service.
+`library/development/BACKLOG.md` is the full list of what is left, and
+`library/development/BUILD-ORDER.md` is the order it must be done in; the Active-task box always names
+which of them is in hand and why. **A task stated in a handover document other than the Active-task box
+is stale by definition** — trust the box, and if you find "what is next" written anywhere else, move it
+to the box and delete it where you found it (owner's instruction, 2026-10-06).
 
 **Context that shaped the order** (read it, it is why the order is what it is): the four-item critical
 path `spec ✅ → G-01 ✅ → G-02 ✅ → G-03 ✅` is complete; `G-07`, `G-17` and `G-21` are done as recorded
-in `BACKLOG.md`. What is now first is not a feature but a **defect**: the platform *looked* finished in
-the guard layer and was not. `library/development/BLUEPRINT-GAP-ANALYSIS.md` explains the rest of the
-receiving plan, and `CORE-MODULES-REGISTER.md` says honestly which modules are truly built.
+in `BACKLOG.md`. What is now first is not a feature but a **defect family**: the platform *looked*
+finished in the guard layer and was not. `library/development/BLUEPRINT-GAP-ANALYSIS.md` explains the
+rest of the receiving plan, and `CORE-MODULES-REGISTER.md` says honestly which modules are truly built.
 
 **Keep the eye on the prize while you build.** The whole product is one loop: *a need → the AI
 understands it → the AI writes a **Business IR** → the platform **validates** it → it **runs** → the
@@ -195,7 +201,11 @@ Every point you raise carries a status: **FIXED** (and how you re-checked) · **
 ## Maintaining this file
 
 - **If the project moves**, update the two paths at the top — they are the only absolute paths.
-- **If the first task changes** (it will, once `P0-spec` is done), update step 4 only. The prompt is
-  designed so that the task is the one thing that changes; the reading list and the rules are stable.
+- **Never add a task to this file.** The task lives in the `★ ACTIVE TASK` box at the top of
+  `JOURNAL.md` (owner's instruction, 2026-10-06). This file sends the agent there and nothing else.
+  That is why the reading list and the rules can stay stable while the task changes every session.
 - **If a new rule costs real time**, add it to the list — but only if it is the kind of mistake that
   is invisible from the code. Everything else belongs in `LESSONS.md`.
+- **The standing working rules are also gathered in one place:**
+  [`WORKING-RULES.md`](WORKING-RULES.md) — the owner's rules that apply to every session, kept
+  beside this prompt so they are not scattered.

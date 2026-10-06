@@ -22,6 +22,11 @@ section of a source of truth where it is relevant — never from a list at the t
 govern the section they sit in. **If you add a document and it is not referenced from a section here
 or in the vision page, it is a loose document — and a loose document is a liability.**
 
+**The owner's standing rules bind this order too:** [`WORKING-RULES.md`](WORKING-RULES.md) gathers
+them in one page — the five that outrank everything (including *"if it is ready to be switched on in
+the front end, switch it on"*), how to report, and the rule that **the task in hand lives only in the
+`★ ACTIVE TASK` box at the top of [`../../JOURNAL.md`](../../JOURNAL.md)** — never in this file.
+
 **Asked by:** the owner — *"shouldnt we already build that so we apply the standards as we go … I feel
 core requirements like accounts management, permissions, this, languages, etc… should be the first to
 build … fix the order perfectly right so this is not forgotten and push 'till later'."*
@@ -413,6 +418,10 @@ one page, each with a named home. Details: [`BLUEPRINT-GAP-ANALYSIS.md`](BLUEPRI
 > **In depth →** the guard engine and its four gaps: this file §2/§2b/§2c/§2d/§2e. The owning
 > specification: [`SPECIFICATIONS-DICTIONARY.md`](SPECIFICATIONS-DICTIONARY.md) §C.2b (tiers as a
 > setting) and S2/S4. The live counts: [`BACKLOG.md`](BACKLOG.md) Phase 2 banner + the `D2-wide` item.
+> **Why Phase 0 is not about Hermes, and why that matters:**
+> [`ARCHITECTURE-hermes-service-map.md`](ARCHITECTURE-hermes-service-map.md) §4.1 — every Phase 0 item
+> is "n/a" for Hermes **on purpose**: Phase 0 builds the authorization *floor* that makes it safe to
+> run an agent later. The first item that actually crosses the Hermes port is **G-17**, in §4.2.
 0. ~~**D0** — make the generated guard registry real.~~ ✅ **FIXED 2026-10-06, proven (§2c).** The
    registry now delivers guards from an enabled module, and the delivery chain is mutation-proven.
    **D2-wide (161 deprecated call sites remaining; 198 at baseline) is the remaining delivery work — see §2e.**

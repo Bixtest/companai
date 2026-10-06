@@ -22,9 +22,10 @@ and reading it "for context" is how the direction gets buried.
 matter, the end-game documents, and which folders are in git, on one page.
 
 **If you are an agent starting a fresh session, the message to send is
-[`START-PROMPT.md`](START-PROMPT.md).** It tells you to read the list below, states the rules you
-may not break, and names the first task — so the reading happens first, not after you have already
-formed a picture.
+[`START-PROMPT.md`](START-PROMPT.md).** It tells you to read the list below and states the rules you
+may not break — and then sends you to **the one place that says what to do now: the `★ ACTIVE TASK`
+box at the top of [`../../JOURNAL.md`](../../JOURNAL.md)**. Handover documents deliberately carry no
+task, because a task changes every session (owner's instruction, 2026-10-06).
 
 **Tier A — the six that fix the direction and the live decisions.**
 
@@ -43,6 +44,7 @@ formed a picture.
 |---|---|---|
 | B1 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | How the three big pieces run together |
 | B2 | [`ARCHITECTURE-hermes-integration.md`](ARCHITECTURE-hermes-integration.md) | How Hermes attaches, and the **B-05** runtime boundary (§11) |
+| B2a | [`ARCHITECTURE-hermes-service-map.md`](ARCHITECTURE-hermes-service-map.md) | **The Hermes/Llama service map, per development item** — how Hermes serves or is served at every AI joint (agent vs setting wiring), where Llama sits, and the status. **The no-learning-curve wiring map** |
 | B3 | [`ARCHITECTURE-model-server-integration.md`](ARCHITECTURE-model-server-integration.md) | How models attach, and the **model-default** decision (§9) |
 | B4 | [`SPEC-business-model-kernel.md`](SPEC-business-model-kernel.md) | The product specification — the vision's own 40-item gate |
 | B5 | [`../analysis/findings/12-development-plan.md`](../analysis/findings/12-development-plan.md) | **The plan** — phases, order, why |
@@ -100,8 +102,11 @@ evidence only, opened when a specific feature can learn from it.
    platform, the agent runtime and the model server together.
 5. **Run the gate, and read the `Cached:` line.** A green result from cache is not a green
    result. `--force` for anything you are about to make a claim about.
-6. **Take the first item from [`BACKLOG.md`](BACKLOG.md).** Verify it is still true against the
-   code before starting — the roadmap has been wrong about what is already done **three times**.
+6. **Get your task from the `★ ACTIVE TASK` box** at the top of [`../../JOURNAL.md`](../../JOURNAL.md).
+   **That box is the one place that says what is being worked on now** — not this file, not the
+   handover, not the start prompt (owner's instruction, 2026-10-06). Verify the item is still true
+   against the code before starting — the roadmap has been wrong about what is already done
+   **four times**.
 
 **The one rule that matters most:** *every claim comes with an observation attached, not an
 argument.* The work that held up was verified by watching it happen. The work that had to be
@@ -143,7 +148,7 @@ So every sprint runs in **four steps, and no code is written before step 3:**
 | **3. Write the cookbook steps** | The full step-by-step for **this sprint only** — enough for a junior developer to follow without asking | a new section in [`../../workspace/COOKBOOK.md`](../../workspace/COOKBOOK.md) |
 | **4. Build** | Do the work against the running stack, test it, record it | the change, tested and committed |
 
-**Sprint 0 (`S0`) is done** — the stack was coming up degraded and was fixed (redis exited, no `restart:` policy); all eight containers are now healthy. The **first real development sprint is D0**, in Phase 0 of [`BUILD-ORDER.md`](BUILD-ORDER.md): make the generated guard registry actually deliver guards, and prove it. The four items on the **critical path** — `spec → G-01 → G-02 → G-03` — are complete, and `G-07` (the Widget contract) is built and proven end to end.
+**Sprint 0 (`S0`) is done** — the stack was coming up degraded and was fixed (redis exited, no `restart:` policy); all eight containers are now healthy. The four items on the **critical path** — `spec → G-01 → G-02 → G-03` — are complete, and `G-07` (the Widget contract), `G-17` (the AI emits the Business IR) and `G-21` (the request-outcome taxonomy) are built and proven. **Which sprint runs next is not decided here** — it is in the `★ ACTIVE TASK` box at the top of [`../../JOURNAL.md`](../../JOURNAL.md), which always names the item in hand and why it is next.
 
 **Why the cookbook is written per sprint, not all up front** — the owner's question, answered:
 detailed steps for code that does not exist yet are **guesses**, because the steps depend on
@@ -159,7 +164,8 @@ See COOKBOOK rule zero-ten.
 |---|---|
 | [`HANDOVER.md`](HANDOVER.md) | **The handover** — the front door for a newcomer who knows nothing: what exists, where it is, the two-repository layout, the traps, the host VM, the standing rules, and what is proven vs not. §0 is written for an agent taking over |
 | [`BOOKMARKS.md`](BOOKMARKS.md) | **The pages to open first** — the handful of documents that matter, the **end-game / vision** documents, the two integration designs, and an honest list of which folders are in git and which are not |
-| [`START-PROMPT.md`](START-PROMPT.md) | **The message that starts a new session** — paste it to the agent taking over: what to read first, the rules it may not break, and the first task |
+| [`START-PROMPT.md`](START-PROMPT.md) | **The message that starts a new session** — paste it to the agent taking over: what to read first and the rules it may not break. It carries **no task**; it sends the agent to the `★ ACTIVE TASK` box in [`../../JOURNAL.md`](../../JOURNAL.md) |
+| [`WORKING-RULES.md`](WORKING-RULES.md) | **The owner's standing rules, in one page** — the five that outrank everything (including "two routes or it is not a finding" and the front-end rule), how to report, and how to ask. Read once, at the start |
 | [`README.md`](README.md) | **This file** — the front door, the reading order, the handover, the sprint process |
 | [`BACKLOG.md`](BACKLOG.md) | **The one roadmap** — everything left, in order, with the "do not lose this" list and the deferrals |
 | [`SPECIFICATIONS-DICTIONARY.md`](SPECIFICATIONS-DICTIONARY.md) | **The standard every architectural change is checked against** — S1–S12, the B-protocol, §C.2b (tiers as a superadmin setting), and the structure-permission grammar |

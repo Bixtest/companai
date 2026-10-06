@@ -7,6 +7,77 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## ★ ACTIVE TASK — what is being worked on right now
+
+**This section exists because the owner asked for it (2026-10-06).** Handover documents must **not**
+say what is next to do — what is next changes every session, and a stale "next" is worse than none.
+**The one place that carries "what we are doing now" is this section, at the top of the development
+log.** Everything else (HANDOVER, START-PROMPT, README, BOOKMARKS, BACKLOG) points here for it.
+
+**The convention — follow it every session:**
+
+1. **At the start of a session**, read this section. It names the task in hand.
+2. **While working**, keep this section current — if the task changes mid-session, change this first.
+3. **When the task is done**, do three things **in this order**:
+   a. **Tick it** — mark it ✅ done in the "Done" list directly below, with the commit hash and one
+      line of what proved it.
+   b. **Move it down** — it is no longer the active task, so it leaves this box.
+   c. **Post the next task** — write the next item (from [`library/development/BACKLOG.md`](library/development/BACKLOG.md),
+      in [`library/development/BUILD-ORDER.md`](library/development/BUILD-ORDER.md) order) into the
+      box, with the reason it is next.
+4. **Tell the owner, in plain English**, what was done and what is now active — never more than one
+   question, and only if it genuinely needs him.
+
+---
+
+### ▶ NOW — the owner's three directives of 2026-10-06, then the D2-wide chain
+
+**The owner's three directives (this is the chain he asked me to sort and connect):**
+
+1. **Document how Hermes serves / is served, per development item** — including the Llama
+   integration, the multi-tenant-vs-one-tenant challenge, multi-agents, integrations and MCP.
+   Written for a new developer, with no learning curve. → being built as
+   [`library/development/ARCHITECTURE-hermes-service-map.md`](library/development/ARCHITECTURE-hermes-service-map.md).
+2. **Restructure the handover docs** so they do not carry "what is next", and put the live task in
+   **this** section. → done for `START-PROMPT.md`, `HANDOVER.md`, `README.md`, `BOOKMARKS.md`.
+3. **A new standing rule:** *whatever is ready to be interfaced in the front end, do it — once it
+   can be fully functional as a piece, even if unfinished parts are locked or switched off.*
+   Updating the front end lets the owner test the micros as work proceeds. → recorded in
+   [`WORKING-RULES.md`](library/development/WORKING-RULES.md) and the COOKBOOK.
+
+**Then, in the order that makes most sense (nothing dropped):**
+
+| # | The item | Why here |
+|---|---|---|
+| **1** | **The three directives above** | They change how every later item is documented and what "ready" means — do them first so nothing has to be re-filed. |
+| **2** | **D2-wide: `dashboards`** (10 calls / 4 files) — the next enabled module | Continues the in-hand defect: 161 call sites still bypass the guard registry; `dashboards` is the largest enabled cluster left and the build-order names it next. (**measured 2026-10-06:** `layout/route.ts` 2, `layout/[itemId]/route.ts` 2, `roles/widgets/route.ts` 3, `users/widgets/route.ts` 3) |
+| **3** | **The pre-existing `explicit-sort-comparators` test failure** | **NOT mine, and verified pre-existing** — it fails identically at `a3b58ad`, before any D2-wide commit; neither `c6c3151` nor `43e4e5d` touched the two flagged files (`shared/src/lib/user-function/document.ts:261`, `fingerprint.ts:74`). It is a **test-suite defect, not a product defect**, and it makes the suite non-green for everything after it, so it is fixed before the suite is next trusted. |
+| **4** | **The rest of D2-wide, enabled modules** — `workflows` (9), `inbox_ops` (8), `perspectives` (8), `translations` (6), `planner` (4), `query_index` (4), `auth` (2), `directory` (2), `feature_toggles` (2) | Largest cluster first, each with its own mutation proof. |
+| **5** | **D3** — add the `escalate` outcome to `MutationGuardResult` | The last guard-engine gap; needs D2-wide's shape settled first (the registry is where the outcome is returned). |
+| **6** | **The Metadata Registry** service (GAP A / C5) | The remaining foundation item; everything stacked on it inherits it. |
+
+**Where the reasoning lives:** the order is `BUILD-ORDER.md` §2e; the live counts are in
+`BACKLOG.md`; the per-item status is in `BACKLOG.md`. **This box is the only place that says "we are
+doing X now."**
+
+---
+
+### ✅ Done recently (ticked, then moved down here)
+
+- **2026-10-06 — `dictionaries` D2-wide migration** (code `43e4e5d`, docs `7987f2a`). 16 calls / 6
+  files → 9 guard objects; 15 suites / 74 tests green; core `tsc --noEmit` exit 0; two mutations
+  proved the tests bite (block-path disabled → 6 red; `runAfterSuccess` neutered → 8 red). Repo-wide
+  count **177 → 161**. Full entry below.
+- **2026-10-06 — `data_sync` D2-wide migration** (code `c6c3151`, docs `a4ac202`). 19 calls / 7
+  files retired; full entry below.
+- **2026-10-06 — D1** — the tier mapping / defaults / fallbacks became a superadmin **setting**
+  (`module_configs`), seeded from the dictionary, failing closed (code `558cfab`, `6726573`,
+  `a3b58ad`). Full entry below.
+- **2026-10-06 — D0** — the generated guard registry now delivers guards, mutation-proven
+  (code `d225602`). Full entry below.
+
+---
+
 ## 2026-10-06 (later still) — D2-wide: the owner set HOW, not just WHAT
 
 **The owner's two directives this turn.** (1) *Do not state an issue without saying how it was or will be

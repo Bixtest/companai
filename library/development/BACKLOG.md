@@ -25,6 +25,15 @@ each track and each item below names **the document that governs it**, inline, i
 **The map that proves this is complete** — every hand-written document, and the section that reaches
 it — is [`../REFERENCE-REGISTER.md`](../REFERENCE-REGISTER.md).
 
+**Two things that do NOT live here, and where they live instead (owner's instruction, 2026-10-06):**
+
+- **"What is being worked on right now" lives ONLY in the `★ ACTIVE TASK` box at the top of
+  [`../../JOURNAL.md`](../../JOURNAL.md).** This file is *what is left*; the box is *what is in hand
+  now*. When a task is done it is ticked and moved down **in the box**, and the next one is posted
+  there — never here.
+- **The owner's standing rules** (how to report, how to ask, the front-end rule) are gathered in
+  [`WORKING-RULES.md`](WORKING-RULES.md) — one page, read once at the start.
+
 **Why this file exists.** Before it, "what is left" was spread across `workspace/PROGRESS.md`
 (three overlapping views that disagree), `where_we_left.md` (a snapshot from 2026-08-13, which
 predates the whole analysis programme), and remarks buried in reports. **This file replaces

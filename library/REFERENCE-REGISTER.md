@@ -36,26 +36,26 @@ Three kinds of file live under `library/`:
 
 **Measured scope:** 3,466 `.md` files sit under `library/`, but **2,866 of them are inside
 `library/ai/`** — the imported Hermes and Paperclip source trees plus the studied material. The
-**hand-written documents this register must account for number 146**, in two groups:
+**hand-written documents this register must account for number 148**, in two groups:
 
 | Group | Files | Where |
 |---|---:|---|
-| **The `library/` sets** | **73** | `development/` 29, `analysis/` 17, `paperclip-hermes-study/` 14, `paperclip-value-study/` 10, `kit-docs/` 3 |
+| **The `library/` sets** | **75** | `development/` 31, `analysis/` 17, `paperclip-hermes-study/` 14, `paperclip-value-study/` 10, `kit-docs/` 3 |
 | **The root sets** | **73** | `compai/` 29, `workspace/knowledge/` 20, `workspace/references/` 16, `llama/` 8 |
-| **Total** | **146** | — |
+| **Total** | **148** | — |
 
 Command: `find library/development library/analysis library/paperclip-hermes-study
 library/paperclip-value-study library/kit-docs llama workspace/knowledge workspace/references compai
--name '*.md' | wc -l` → **146**.
+-name '*.md' | wc -l` → **148**.
 
 ---
 
 ## 3. The register — every substantive document
 
-> **The count, measured, not estimated:** 73 hand-written `.md` files, in five folders —
-> `development/` 29, `analysis/` 17, `paperclip-hermes-study/` 14, `paperclip-value-study/` 10,
+> **The count, measured, not estimated:** 75 hand-written `.md` files, in five folders —
+> `development/` 31, `analysis/` 17, `paperclip-hermes-study/` 14, `paperclip-value-study/` 10,
 > `kit-docs/` 3. Command, so it can be re-run:
-> `find library/development library/analysis library/paperclip-hermes-study library/paperclip-value-study library/kit-docs -name '*.md' | wc -l` → **73**.
+> `find library/development library/analysis library/paperclip-hermes-study library/paperclip-value-study library/kit-docs -name '*.md' | wc -l` → **75**.
 
 ### 3.1 Point of focus (the two sources of truth themselves)
 
@@ -72,12 +72,14 @@ library/paperclip-value-study library/kit-docs llama workspace/knowledge workspa
 | `development/README.md` | The hub: reading order and what lives where | #1 §7 (the library map) |
 | `development/HANDOVER.md` | Start-here for a newcomer | #1 §7; #2a §1 |
 | `development/START-PROMPT.md` | The prompt that boots a fresh session | #1 §7 |
+| `development/WORKING-RULES.md` | **The owner's standing rules, in one page** (two routes; the front-end rule; how to report and ask) | #1 §7; #2a §1; #2b §"The list" |
 | `development/NEEDS-YOU.md` | The short list of things only the owner can decide | #2b (top of the backlog) |
 | `development/BLOCKERS.md` | Things that stop work, and what unsticks them | #2b §"blockers" |
 | `development/ARCHITECTURE.md` | The architecture's index | #1 §3 |
 | `development/ARCHITECTURE-structure-permissions.md` | The structure-change permission grammar | #1 §3 |
 | `development/ARCHITECTURE-request-outcomes.md` | The request-outcome taxonomy (D3's home) | #1 §3; #2a §2 D3 |
 | `development/ARCHITECTURE-hermes-integration.md` | How Hermes plugs in | #1 §4 |
+| `development/ARCHITECTURE-hermes-service-map.md` | **The Hermes/Llama map, per development item** — how Hermes serves or is served at every AI joint (agent vs setting), and where Llama sits | #1 §4; #2a §2 (Phase 0) |
 | `development/ARCHITECTURE-model-server-integration.md` | The model/server boundary | #1 §4 |
 | `development/AGENT-HALF.md` | The agent half of the product (the AH- series) | #1 §4 |
 | `development/SPECIFICATIONS-DICTIONARY.md` | **The binding standard** — every term, one meaning | #1 §5; #2a §1 |
@@ -156,7 +158,7 @@ library/paperclip-value-study library/kit-docs llama workspace/knowledge workspa
 | `kit-docs/cla.md` | The kit's contributor agreement | #1 §6 |
 | `kit-docs/docs/framework/widget-injection.md` | Widget injection in the kit | #1 §6 |
 | `../INDEX.md` (root of repo) | The repo's entry index | #1 §7 |
-| `../JOURNAL.md` (root of repo) | The dated work journal | #2a §7 |
+| `../JOURNAL.md` (root of repo) | The dated work journal — **and the `★ ACTIVE TASK` box at its top, the one place that says what is being worked on now** | #2a §7; #2b §"The list" (the Active-task convention) |
 | `../LESSONS.md` (root of repo) | The promoted lessons | #2a §7 |
 | `../companai.md` (root of repo) | The repo's own overview | #1 §7 |
 | `../where_we_left.md` (root of repo) | A resume point | #2b |
@@ -204,7 +206,7 @@ for f in $(find library/development library/analysis library/paperclip-hermes-st
               library/development/BACKLOG.md && echo "OK   $b" || echo "ORPHAN $b"
 done
 ```
-**Result: 73 documents, 0 orphans.** Before this change — measured against the committed versions of
+**Result: 75 documents, 0 orphans.** Before this change — measured against the committed versions of
 the three source-of-truth files at `HEAD` — it reported **39 orphans**, including the whole
 `analysis/findings/` series, both studies' `findings/` series, the RUNBOOKs, and several
 `development/` plans.

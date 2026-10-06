@@ -5,8 +5,12 @@ order that makes sense, so nobody has to guess which of several hundred files to
 **points at** documents; it does not copy them. If a document here is stale, fix the document.
 
 **Who it is for.** Two readers. A **new agent** taking over the build, who needs what we are
-doing, what is done, what is left and what is next. And **the owner**, coming back after time
+doing, what is done and what is left. And **the owner**, coming back after time
 away, who needs the end game and the current state in a few minutes.
+
+**One thing this page does not carry, on purpose: what is next.** A task changes every session, so
+the single place that says what is being worked on **now** is the **`★ ACTIVE TASK` box at the top of
+[`../../JOURNAL.md`](../../JOURNAL.md)** (owner's instruction, 2026-10-06).
 
 **Written 2026-10-05.** Owner: Ramzi.
 
@@ -26,7 +30,8 @@ where it stands.
 | 5 | [`../../workspace/COOKBOOK.md`](../../workspace/COOKBOOK.md) | **How the work is done** — read before touching code |
 
 **Handing the work to an agent?** Paste [`START-PROMPT.md`](START-PROMPT.md). It is the first
-message for a fresh session: what to read, the rules it may not break, and the first task.
+message for a fresh session: what to read and the rules it may not break. For **what to do now**,
+it sends the agent to the `★ ACTIVE TASK` box at the top of [`../../JOURNAL.md`](../../JOURNAL.md).
 
 ---
 
@@ -58,6 +63,7 @@ The product is three pieces: the **Starting Kit** (bought), **Hermes** (borrowed
 | Document | What it decides |
 |---|---|
 | [`ARCHITECTURE-hermes-integration.md`](ARCHITECTURE-hermes-integration.md) | **How Hermes attaches** — platform to platform, function to function, and multi-tenant. **The owner decided the runtime boundary (B-05) on 2026-10-05:** one product, one repository, one deployment, one interface (ours), with Hermes as a supervised private runtime process behind the internal port; Hermes is headless. §11 has the reasoning and the two hostile passes |
+| [`ARCHITECTURE-hermes-service-map.md`](ARCHITECTURE-hermes-service-map.md) | **The map, per development item** — for every AI-touching piece, how Hermes *serves* or is *served* (as an agent, or as a setting), where **Llama** sits, and the measured status. **Written so a new developer can execute without a learning curve** — the multi-tenant challenge, multi-agents, integrations and MCP, each answered |
 | [`ARCHITECTURE-model-server-integration.md`](ARCHITECTURE-model-server-integration.md) | **How models attach.** llama.cpp is one preset entry, not a project, because the platform already owns a model control plane. It root-causes two defects (the missing `--jinja`, and B-16) and records the **owner's decision on the long-term default** (§9): per-tenant policy as the destination, cloud-first as the interim |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | How all three pieces run together, and the dockerisation decision (Sprint 0) |
 | [`AGENT-HALF.md`](AGENT-HALF.md) | **The agent half** — the five kinds of agent, the rule that decides who is answerable when one acts, and where every lesson of the study lands |
