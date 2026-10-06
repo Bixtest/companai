@@ -420,3 +420,250 @@ The security floor, restated here because it governs every joint above:
 **What this document does not claim.** No performance figure, no throughput, no operational
 guarantee — none was measured. The port, the runtime, memory, skills and subagents **do not exist
 yet**; they are design.
+
+---
+
+# PART II — THE JOINT WORKED EXAMPLES
+
+**Why this part exists.** §4.4 maps every AI-touching item in one or two lines each — that is breadth, and
+it is enough to answer *"does this item touch Hermes?"*. It is **not** enough to build one. Part II is the
+**depth** the owner asked for: for the handful of items that are the *real joints* — the places a new
+developer would otherwise get wrong — a full worked example: the files, the exact functions, the call
+order, the traps, and a "done when" test.
+
+**How to use it.** Pick the joint you are building. Read its row in §4.4 for the one-line shape, then read
+its section here before you write any code. **Every file path and function name below was read from the
+source on 2026-10-06** — if a path has moved, the *shape* is still the guide and the source is the truth.
+
+**The three joints, and why these three:**
+- **Joint I — agent identity (`AH-1`).** Every other agent item depends on it. Get it wrong and the
+  governance layer silently never engages (this already happened once — see the `ai_worker` story below).
+- **Joint II — the tool door + authorization (`S-02` / `AH-8` / the agent runtime).** This is *where a
+  Hermes tool call is actually allowed or denied*. Get it wrong and Hermes can widen its own authority.
+- **Joint III — "Hermes learns as you go" = skills + memory (`AH-9`).** The owner named this explicitly.
+  It is also the most dangerous, because it is the one capability that changes behaviour over time.
+
+---
+
+## 10. JOINT I — agent identity (`AH-1`): the persona behind every run
+
+**The one sentence.** *Every Hermes run is executed as a principal of kind `ai_worker`, derived
+server-side from a credential the platform issued, and never named by the runtime.*
+
+**Why it is a joint and not a detail.** The platform's whole governance layer (ceilings, delegations,
+trust grants, denials, the approvals queue, the journal, the ledger) **keys off the principal's `kind`**.
+If a run arrives as `service` instead of `ai_worker`, every machine-specific ceiling silently fails to
+engage — the run is treated as an ordinary API key. That is not hypothetical: the code records that
+`ai_worker` was *"a type with no inhabitants"* until a producer existed, and that the effect-class matrix
+*"never engaged"* because of it.
+
+**The code as it is today (read this before you change anything):**
+
+| Piece | File | What it does |
+|---|---|---|
+| The principal type | `packages/shared/src/lib/auth/principal.ts` | `PrincipalKind = 'human' \| 'ai_worker' \| 'service' \| 'system'`. `Principal` carries `id`, `kind`, `onBehalfOfUserId`, `displayName`, `tenantId`, `organizationId`. |
+| The producer | same file, `aiWorkerSubject(apiKeyId)` | Builds the subject `ai_worker:<uuid>`. **This is the only thing that makes a principal an AI worker.** |
+| The reader | same file, `parseSubject(subject)` | The **single** place that decodes a subject. Nothing else may parse `sub`. |
+| The deriver | same file, `derivePrincipal(auth)` | Turns an auth context into a `Principal`. Populated at the auth boundary; also a fallback for pre-existing contexts. |
+| The safe accessors | same file, `effectiveUserId` / `isHumanPrincipal` / `isApiKeyBackedKind` / `isMachinePrincipal` | **Use these, never a branch on `kind` in your own file.** They exist to stop the same bug recurring. |
+
+**The four rules that make this joint correct (do not break any):**
+
+1. **Identity is derived, never received.** The runtime must not be able to *name* its tenant, user or
+   agent kind. `derivePrincipal` reads them from the credential the platform minted. In the Hermes
+   envelope (§3) these fields are marked read-only for exactly this reason.
+2. **A new kind is a compile-time question, not a runtime surprise.** When `ai_worker` was added, every
+   `kind === 'service'` check became silently incomplete — one (`RbacService`) fell through to the human
+   branch and put an `ai_worker:<uuid>` string into a uuid column, producing a 500. **The fix pattern is
+   `isApiKeyBackedKind(kind)`**: a named predicate so the next kind is caught by the type-checker.
+   *If you add a principal kind, search for every `kind ===` and every `=== 'service'` and make each one
+   a named predicate.*
+3. **`onBehalfOfUserId` is the responsible human.** An AI worker acts *for* someone; attribution,
+   preferences and personal state follow that user id, not the worker's. **This is the same "responsible
+   user" idea S-02 wires into the decider** — identity and authorization share one notion of on-behalf-of.
+4. **`system` is a machine with no credential.** The platform acting on its own behalf (a CLI, a scheduled
+   job). Do **not** look one up in `api_keys` — it is not there. This is why `isApiKeyBackedKind` is
+   narrower than `isMachinePrincipal`.
+
+**The agent *definition* is a separate object from the *principal* — do not confuse them.**
+
+| Object | File | It answers |
+|---|---|---|
+| `Principal` | `shared/src/lib/auth/principal.ts` | **Who is acting** (human / ai_worker / service / system). |
+| `AiAgentDefinition` | `packages/ai-assistant/src/modules/ai_assistant/lib/ai-agent-definition.ts` | **What the agent is allowed to do**: `id`, `moduleId`, `systemPrompt`, `allowedTools`, `mutationPolicy`, `readOnly`, `requiredFeatures`, `defaultProvider`, `executionMode`. |
+| The registry | `.../lib/agent-registry.ts` | Holds the definitions; `getAgent(id)`, `listAgents()`. Loaded from the generated `ai-agents.generated.ts`, then overrides, then extensions. |
+
+**The five agent kinds referenced in `AH-1`** (personal · role · context · independent · system) are
+**not yet in `PrincipalKind`** — `PrincipalKind` currently holds the *authentication* kind (`ai_worker`),
+which is one axis, not five. **This is the gap `AH-1` closes:** the five kinds are a *product* concept
+(what the agent is for); `ai_worker` is an *auth* concept (what it is). The work is to add the five kinds
+to the agent definition and enforce them, while every one still authenticates as `ai_worker`. **Say so
+plainly in the code comment when you do it — a future reader will otherwise assume `ai_worker` is the
+five kinds collapsed.**
+
+**Done when:**
+- A run started by the agent runtime arrives with `principal.kind === 'ai_worker'`, **proven by a test**
+  that asserts the derived principal for a worker credential (the existing test asserts
+  `{ kind: 'ai_worker', displayName: 'Hermes' }` — extend it, do not replace it).
+- The five product kinds are represented on `AiAgentDefinition` and enforced at run admission.
+- Every `kind === 'service'` comparison in the codebase has been rewritten to a named predicate
+  (grep for `kind === 'service'` and show the count reached zero or a justified exception).
+
+---
+
+## 11. JOINT II — the tool door and its authorization (`S-02` / `AH-8` / the agent runtime)
+
+**The one sentence.** *Hermes reaches a business operation through exactly one door — a tool call that
+re-authorizes against current state at execution time — and there is never a direct database handle.*
+
+**Why it is a joint.** This is where "the model cannot widen its own authority" is enforced or lost. Two
+mistakes break it: letting the model choose *whether* to authorize (it must not), and authorizing *once at
+admission* rather than *again at execution* (a permission revoked mid-run must not still work).
+
+**The code as it is today:**
+
+| Piece | File | What it does |
+|---|---|---|
+| The door (client) | `.../lib/in-process-client.ts` — `class InProcessMcpClient` | The in-process MCP client. Authenticates **before** executing, by API key **or** a pre-authenticated auth context. |
+| The registry / executor | `.../lib/tool-registry.ts`, `.../lib/tool-executor.ts` | Tool lookup and dispatch. Every call re-checks, never trusts a cached envelope. |
+| The MCP adapter | `.../lib/mcp-tool-adapter.ts` | Bridges MCP tool definitions to platform tools. |
+| The agent policy gate | `.../lib/agent-policy.ts` — `checkAgentPolicy(input)` | **The first gate.** Denies with a typed code before any execution. |
+| The authority layer | `packages/core/src/modules/auth/services/authorityEnforcementService.ts` (539 lines) + `shared/src/lib/authority/{decision,graph,preflight,shadow}.ts` | **The second gate.** The single decider. **This is `S-02`'s target and must be complete before broad tools are granted.** |
+
+**The call order (follow it exactly).** From a user request to a business mutation:
+
+```
+1. Chat route admits a run  →  platform mints the envelope (tenant, principal, agent, capability grant)
+2. Hermes reasons, chooses a tool
+3. TOOL CALL crosses back over the port (resolveToolCall)   ← the ONLY path to a business op
+4. checkAgentPolicy()      → is the agent allowed this tool? (allowlist, features, mutation policy)
+5. authority decision      → is THIS principal allowed THIS op on THIS object RIGHT NOW? (S-02)
+6. tool executes           → inside the platform, as the derived principal, on behalf of the user
+7. the platform records    → journal, ledger, audit, budget
+```
+
+**The traps, named (each one is a real way this joint has been or can be broken):**
+
+- **Trap 1 — authorize at admission only.** An envelope authorized at step 1 says nothing about step 5.
+  **Rule: re-authorize at execution.** The code already does this ("every call re-authorizes against
+  current state"); do not "optimize" it away.
+- **Trap 2 — the model deciding authorization.** A guard or policy must be a **pure predicate** the
+  platform runs, never a model output the platform trusts. *(This is the same contract as `MutationGuard`:
+  `validate()` reads the payload and returns a decision, no side effects.)*
+- **Trap 3 — a direct database handle in the runtime.** If any code path gives Hermes a connection, the
+  door is bypassed. **There is no such handle by design** — keep it that way.
+- **Trap 4 — fail-open on a missing decision.** If the decider cannot reach a verdict, the answer is
+  **deny**, never "allow because unknown". *(Recorded warning from the source study: a "shadow mode" that
+  lets a denial fall through to the agent's own decision must be fixed or not shipped.)*
+- **Trap 5 — a bypassable gateway is not a policy.** If an unmanaged client can call a tool without
+  passing this door, the policy is decorative. **One door, or it is not one.**
+
+**MCP is the door's public name** (see §6.4): Sprint 0 proved **21 MCP tools** discovered over the
+platform's own MCP server/client (`mcp-server.ts`, `mcp-client.ts`, `mcp-tool-adapter.ts`). What is
+missing is not MCP — it is the **runtime behind it** and the **decider in front of it**.
+
+**Done when:**
+- `checkAgentPolicy` and the authority decision both run **on every tool call**, proven by a test that
+  revokes a permission mid-run and shows the next call is denied.
+- A test sends a tool call whose grant was minted at admission but whose permission was since removed →
+  **denied**, not allowed.
+- No code path reaches a business entity without passing through `tool-executor` (grep for direct
+  repository access from the AI package and show zero).
+
+---
+
+## 12. JOINT III — "Hermes learns as you go" = skills + memory (`AH-9`)
+
+**The one sentence.** *What Hermes learns becomes either a governed **skill** (a reviewed, versioned,
+pinnable procedure) or a tenant-scoped **memory** artifact (consented, exportable, deletable) — and
+neither ever becomes business truth merely by existing.*
+
+**Why it is a joint, and why it is dangerous.** This is the one capability that **changes behaviour over
+time**, so it is the one that can quietly widen what the system does. The owner named it: *"Hermes learns
+as you go which means improving the quality of outcomes over time."* That is the goal — **and** it is the
+exact place a poisoned or stale learning could take effect without anyone approving it. So the whole
+design is: **learning is a candidate, never an authority.**
+
+**The two halves, and they are governed differently:**
+
+| Half | What it is | Where it lives | Governance |
+|---|---|---|---|
+| **Skills** | A learned procedure, loaded on demand | The platform's own governed catalog (the `AH-9` build) | provenance · scan · version · approve · **pin** · roll back · revoke |
+| **Memory** | Long-lived context about a user/tenant | A **new, tenant-scoped artifact** (`.../lib/session-memory.ts` today is the session projection; long-term memory is **MISSING**) | consent · export · retention · deletion |
+
+**The code as it is today (be honest about what exists):**
+
+- **Session memory exists** — `.../lib/session-memory.ts`. It is a **projection keyed by our ids**, not
+  the source of truth. Our conversation records stay canonical.
+- **A long-lived memory artifact does NOT exist.** Mark it `MISSING`, do not describe it as built.
+- **A governed skills catalog does NOT exist.** `AH-9` is the build. *(There may be a tool/agent
+  "skills" notion in the runtime used by Hermes itself — that is the runtime's internal mechanism, **not**
+  the platform's governed catalog. Do not conflate them.)*
+
+**The five rules that keep learning safe (these are the design; write them into the code as comments):**
+
+1. **A skill is a proposal until approved.** It carries provenance (where it came from), a scan result, a
+   version, and an approval. **An unapproved skill never runs.**
+2. **A skill cannot widen authority.** Loading a skill must not change the principal, the tool allowlist,
+   or the mutation policy. *If a skill could grant a tool, learning would equal privilege escalation.*
+3. **Pinning beats learning.** An operator can **pin** a version so a later "improvement" does not silently
+   take effect. Roll back and revoke must both be real operations, tested.
+4. **Memory is tenant-scoped and disposable.** Export, retention and deletion are **required**, and
+   **deleting memory must never delete a business fact.** *(Same rule as runtime state, §4.3.)*
+5. **Retrieval resolves canonical data under authorization — it never promotes a cached guess into a
+   record.** A remembered value is context for a decision, never the decision's result.
+
+**Done when:**
+- A skill can be created, scanned, versioned, approved, pinned, rolled back and revoked — each with a test.
+- A test proves a newly-"learned" skill **cannot** add a tool the agent did not already have (rule 2).
+- A test proves deleting a tenant's memory leaves every business entity intact (rule 4).
+- Contamination tests pass (per §7 Phase 4): a skill from tenant A never reaches tenant B.
+
+---
+
+## 13. The D2-wide walkthrough — the item being built *now* (a worked example of the pattern)
+
+**Why this is here.** The active task (`workflows`) is a D2-wide migration, and the pattern must be
+followed exactly. This is that pattern, end to end, with the real files. **It is the same shape as
+Joints I–III: read the source, follow the precedent, prove by mutation.**
+
+**What D2-wide fixes.** Routes call `validateCrudMutationGuard()` / `runCrudMutationGuardAfterSuccess()`
+— both marked `@deprecated` — which resolve **only the single DI-registered service** and **silently
+bypass the guard registry**. The replacement is `runRouteMutationGuards()` from
+`packages/shared/src/lib/crud/route-mutation-guard.ts`.
+
+**The pattern, proven four times (`entities`, `data_sync`, `dictionaries`, `dashboards`):**
+
+1. **Create a module wrapper** `packages/core/src/modules/<module>/api/mutation-guard.ts` exposing
+   `begin<Module>MutationGuard(ctx)` → `{ blockedResponse: NextResponse | null, runAfterSuccess }`.
+   Copy the most recent one (`dashboards/api/mutation-guard.ts`) and rename; keep the md5 so you can
+   prove you restored it byte-identically.
+2. **Repoint the route files**: `const guard = await beginX(...); if (guard.blockedResponse) return
+   guard.blockedResponse; ...write...; await guard.runAfterSuccess()`.
+3. **Repair the tests**: mock `@open-mercato/shared/lib/crud/route-mutation-guard` (not the deprecated DI
+   pair), and re-point the assertions to
+   `runRouteMutationGuards(...)` with `{ resourceKind, resourceId, operation }`.
+4. **Prove the tests bite** — two mutations, each in a fresh process:
+   a. disable the **block path** → the tests must go **RED**;
+   b. neuter **`runAfterSuccess`** → the tests must go **RED**;
+   c. restore the wrapper and confirm **md5-identical**.
+5. **Recount** with the command in `BACKLOG.md` item **D2-wide** (raw grep minus comment lines minus the
+   declaration file). **Count calls, not lines** — the two declarations in `mutation-guard.ts` inflate it.
+6. **Record** in `BUILD-ORDER.md` §2e and `BACKLOG.md`, and commit **in both repos** (never `git add -A`).
+
+**The current numbers:** 151 call sites / 59 files / 9 enabled modules (45 calls). `workflows` is next
+(9 calls / 3 files); expected count after: **142**.
+
+**The one behaviour point to watch** (from the `dashboards` run): a route with **two mutually-exclusive
+branches** (e.g. "clear the override and return" vs "upsert") must create the guard **once, before the
+branch**, and call `guard.runAfterSuccess()` in **whichever branch runs** — collecting the guard set once
+is safe **because `MutationGuard.validate` is a pure predicate**.
+
+---
+
+# PART III — WHAT PART II DID NOT COVER YET
+
+Part II works three joints in full. The other AI-touching items in §4.4 (the `AH-2`–`AH-12` remainder,
+`ML-1`–`ML-4`, `N-15`/`V-04`) get the same treatment **as each comes up the queue** — §4.4 remains their
+one-line map until then. When you build one of them and the depth is missing, that is the signal to add
+its section here, in the same shape (files → functions → call order → traps → done-when).
