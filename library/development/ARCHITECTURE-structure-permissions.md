@@ -224,33 +224,44 @@ If accepted, two clauses are added and one is amended:
 | 1 | Table + column are already resource kinds (`entities.entity`, `entities.field_definition`) | **EXISTS — measured** |
 | 2 | A column is already a row with settings (`custom_field_defs`) | **EXISTS — measured** |
 | 3 | A generic per-resource guard that can block exists (`MutationGuard`) | **EXISTS — measured** |
-| 4 | The `premium_permissions` settings block | **TO BUILD** |
-| 5 | The `escalate` outcome (review vs approval) | **TO BUILD** (pending-approval machinery exists) |
-| 6 | The actor-type axis (human vs AI) | **TO BUILD** |
+| 4 | The `premium_permissions` settings block | **TO BUILD — D1** (dictionary §C.2b; backlog SD-3/SD-4) |
+| 5 | The `escalate` outcome (review vs approval) | **TO BUILD — D3** (pending-approval machinery exists) |
+| 6 | The actor-type axis (human vs AI) | **TO BUILD** (lands with D1/D3) |
 | 7 | The grammar (object × verb × level) | **DESIGNED — this document** |
-| 8 | The manage screen | **TO BUILD** |
-| 9 | Item 17's tier table | **KEEP as the default under the mechanism** |
+| 8 | The manage screen | **TO BUILD — SD-5** (after SD-4) |
+| 9 | Item 17's tier table | **KEEP as the default under the mechanism** — the owner's Q2 answer (§7) |
+| 10 | The registry delivering guards at all (D0) | **BUILT and PROVEN 2026-10-06** (`d225602`) — §2c of the build order. Previously the generated registry was **empty**, so no structured guard ran |
 
-**Nothing is built.** This is the analysis the owner asked for, and a recommendation.
+**What is built:** the engine and its substrate (points 1–3), and — since 2026-10-06 — the registry actually
+**delivering** guards from an enabled module (D0, point 10). **What is not built: the settings block
+(point 4 / D1), the escalate outcome (point 5 / D3), the actor-type axis (point 6) and the manage screen
+(point 8).** This document remains the analysis and the recommendation; the decisions in §7 and the
+dictionary's Part E are now **settled**, so D1/D3 can be built against them.
 
 ---
 
-## 7. The one open point for the owner
-
-The grammar has one axis worth an explicit decision, because it sets how strict the platform is by default.
+## 7. The one open point for the owner — **ANSWERED 2026-10-06**
 
 **When a structural action is asked for and NO premium-permission has been set for that object yet — what
 should happen?**
 
-- [ ] **Never by default** — an unset structural permission means *not permitted*; someone must set it
-      first. (Strictest; nothing changes until a rule is made.)
-- [ ] **Approval by default** — an unset permission means *allowed, but a person approves each time*.
-      (Matches item 17's current safe default.)
-- [ ] **Fall back to item 17's tier table** — the kind of change decides. (Recommended: it reuses the
-      mapping already proposed, keeps one default, and fails closed on anything unrecognised.)
+- [ ] Never by default — an unset structural permission means *not permitted*; someone must set it first.
+- [ ] Approval by default — an unset permission means *allowed, but a person approves each time*.
+- [x] **Fall back to item 17's tier table** — the kind of change decides. **✅ CHOSEN by the owner,
+      2026-10-06, with a condition.**
 
-*(Recommended: fall back to the tier table. It means there is exactly one default in the system, not two,
-and an object that has never been configured still lands somewhere safe and known.)*
+His answer, verbatim: *"Fallback is acceptable if, again, it maps to the standards with default values."*
 
-**This is the same decision as the specifications dictionary's Part E Q2** — they resolve together. If the
-owner accepts Q1's tier mapping, this recommended option is its natural companion.
+What that means, written down so it cannot drift (`SPECIFICATIONS-DICTIONARY.md` Part E, Q2):
+- The first two options are **dead**. "Never by default" is out (it would stall the AI on every new
+  object); "approval by default, always" is out (it is the tier table with extra steps).
+- Where nothing is configured for an object, the request falls back to the **tier table**.
+- The fallback **must carry the standards' default values**: an unrecognised change kind still lands on
+  `explicit_approval` (never silent, never "never"), and a fallback pass still emits the S3 notice and,
+  where unsafe, the S8 suggestion. A fallback is a *placement*, not an exemption.
+- The tiers themselves are a **superadmin setting** (`module_configs`, module `request_outcome`, name
+  `structureChangeTiers`), seeded from the dictionary's table, failing closed if missing —
+  dictionary §C.2b, backlog SD-3, build-order **D1**.
+
+**This resolved together with the dictionary's Part E Q2**, exactly as predicted — one default in the
+system (the tier table), not two.
