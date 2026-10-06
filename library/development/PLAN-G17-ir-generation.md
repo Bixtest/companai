@@ -118,3 +118,56 @@ make.
 
 **Next:** step 3 — write the cookbook steps (the exact files, commands and the "done when" test) into
 `workspace/COOKBOOK.md`. **No code before step 3 is written.**
+
+---
+
+## 4. Step 4 — the build (done 2026-10-06)
+
+**Outcome: the wire is built and proven with a stubbed model. The live-model question remains open.**
+
+### 4a. What was built
+
+| Artifact | Path | Proven by |
+|---|---|---|
+| The IR's zod schema | `packages/shared/src/lib/business-ir/schema.ts` | `tsc --noEmit -p packages/shared/tsconfig.json` **clean**; a compiling equality proof that **fails** on drift |
+| Its conformance suite | `packages/shared/src/lib/business-ir/__tests__/schema.conformance.test.ts` | **18/18**; falsified by loosening `.strict()` → the scope test fails |
+| **The wire** | `packages/ai-assistant/src/modules/ai_assistant/lib/business-ir-author.ts` | `authorBusinessQueryIr()` passes `businessQueryIrSchema` to the existing override |
+| The wire's test | `packages/ai-assistant/src/modules/ai_assistant/lib/__tests__/business-ir-author.test.ts` | **6/6**, incl. model answer → `compileQuery` → a real plan; falsified by `passthrough()` |
+
+The full `business-ir` suite is **78/78 across 5 suites**.
+
+### 4b. The two corrections this step made to my own earlier work
+
+**1. The mirror's guard was a print, not a guard.** The schema's type-equality assertions were first
+written as unused type aliases (`type _Check = Expect<AssertEqual<A, B>>`). The mandatory
+falsification — delete a field, re-run `tsc` — came back **clean (exit 0)**, which should have been
+impossible. Root cause: TypeScript resolves an **unused type alias lazily**, so the assertion was never
+evaluated. The `/tmp/tsguard/` probes fixed the rule exactly: `type _Check = …` passes,
+`declare const c: AssertEqual<A,B>` passes, `f<AssertEqual<A,B>>()` passes — **only
+`const d: AssertEqual<A, B> = true` fails**, `TS2322: Type 'true' is not assignable to type 'never'`.
+Fixed by one exported const `IR_SCHEMA_TYPE_CHECKS`. Re-measured: delete `grain` from
+`businessQueryIrSchema` → `tsc` **fails** at the `queryIr` entry, exit 1.
+
+**2. The wire was on the wrong side of the dependency.** `authorBusinessQueryIr` was first written in
+`shared`, next to the schema. That made `shared` import `ai-assistant` and its type-check broke —
+it began reporting `@/.mercato/generated/ai-agents.generated`, a path that exists only at build time in
+the app. Proven by moving the file out: with it in `shared`, `tsc` for `shared` fails; without it,
+clean. The rule was already written down in `shared/src/modules/overrides.ts` — *"`@open-mercato/shared`
+must NOT take a runtime dependency on `@open-mercato/ai-assistant` (the dependency direction is the
+other way around)"*. The wire now lives in `ai-assistant`.
+
+### 4c. What is still open — the honest limit, unchanged in spirit from §2c
+
+**No live model call has been made.** Every proof in 4a uses a **stubbed** model. The wire is
+demonstrably correct; **whether the local quantised model can actually emit a valid IR is still
+unproven** and still needs the running stack. That is recorded as a named open item (NEEDS-YOU Part 4
+item 15), not left implied.
+
+### 4d. A pre-existing failure found on the way
+
+`agent-runtime-object.test.ts` fails **4 of 8** cases on a tree with none of my changes in it: its mock
+of `llm-provider-registry` no longer matches the path `model-factory` takes, so `resolveModel` throws
+`no_provider_configured`. Proven pre-existing by running the untouched file. Recorded as NEEDS-YOU
+Part 4 item 14 — to be **repaired, not deleted**, since the four cases are ones that should pass.
+
+**Next:** the live smoke test (needs the stack), then G-21.

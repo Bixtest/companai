@@ -7,7 +7,44 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
-## 2026-10-06 (latest) — G-17 begins: the AI that emits the Business IR, and a wrong claim corrected
+## 2026-10-06 (latest) — G-17 built: the AI that emits the Business IR, and two of my own errors caught by falsifying them
+
+**The join the vision was missing is now made.** The platform could compile and run a Business IR; it
+could call a model with a schema; **nothing pointed the one at the other.** Now:
+`business-ir/schema.ts` (the IR as a zod schema, `.strict()` at every level), `schema.conformance.test.ts`
+(18 tests), `business-ir-author.ts` (`authorBusinessQueryIr()` — the wire, through the *existing*
+`runAiAgentObject` schema override), and `business-ir-author.test.ts` (6 tests, ending with a model's
+answer being **accepted by the existing `compileQuery`**). Full `business-ir` suite: **78/78**.
+
+**Two of my own errors, both found by trying to break my own work — which is the whole reason the rule
+exists.**
+
+1. **A guard that was a print.** The schema asserted that it mirrored `types.ts` using bare type aliases
+   (`type _Check = Expect<AssertEqual<A, B>>`). The falsification — delete a field, re-run `tsc` — came
+   back **clean**, which is exactly what a broken guard looks like. Cause: TypeScript resolves an
+   **unused type alias lazily**, so it never ran. Isolated probes proved only `const d: AssertEqual<A,B>
+   = true` actually fails. Moved every assertion into one exported const. Re-measured: delete `grain` →
+   `tsc` now **fails** (`TS2322`). *A test that cannot fail is documentation, not a guard.*
+
+2. **The wire was on the wrong side of the dependency.** Writing it in `shared` made `shared` import
+   `ai-assistant`, and `shared`'s type-check broke. The direction rule was already written down one file
+   over. Moved it to `ai-assistant`; `shared` is clean again. *The layering is not a style preference; it
+   is what keeps the packages independently checkable.*
+
+**What is NOT done, plainly: the live smoke test.** Every proof above uses a **stubbed** model. Whether
+our local model can actually emit a valid IR is a **separate question** that only a live run answers — so
+it is **unproven**, and recorded as an open item (NEEDS-YOU Part 4 item 15). Also found: a **pre-existing**
+broken test in the AI package (`agent-runtime-object.test.ts`, 4 of 8 failing on an unmodified tree),
+recorded as item 14.
+
+**Files:** code — `packages/shared/src/lib/business-ir/schema.ts`, `.../__tests__/schema.conformance.test.ts`,
+`packages/ai-assistant/src/modules/ai_assistant/lib/business-ir-author.ts`,
+`.../lib/__tests__/business-ir-author.test.ts`. Docs — `BACKLOG.md`, `NEEDS-YOU.md`,
+`PLAN-G17-ir-generation.md`, `workspace/COOKBOOK.md`.
+
+---
+
+## 2026-10-06 — G-17 begins: the AI that emits the Business IR, and a wrong claim corrected
 
 **The documentation was perfected first, at the owner's request** — the tier decision recorded, and the
 reading order unified across all four entry points into three tiers (A: direction + live decisions; B:

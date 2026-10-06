@@ -2461,10 +2461,64 @@ two-severity diagnostics).
 **Two repositories, two commits.** Docs (this file, BACKLOG, PLAN, JOURNAL) in the project repo; the
 code (`schema.ts`, tests, agent) in `workspace/starting-kit`. **Never `git add -A`.**
 
-## Step 4 — (not yet done)
+## Step 4 — the build (done; the live-model question is still open)
 
-*Build, test, record.* The one thing to carry in: **the local model's ability to emit a valid IR is the
-open question, and step 4 answers it with a measurement, not an assumption.**
+**Built and tested 2026-10-06.** Three artifacts, on the two sides the layering allows:
+
+| Artifact | Repo path | What it is |
+|---|---|---|
+| The IR's runtime schema | `packages/shared/src/lib/business-ir/schema.ts` | `types.ts` as a zod schema, `.strict()` throughout, with a **forced** type-equality proof |
+| The conformance test | `packages/shared/src/lib/business-ir/__tests__/schema.conformance.test.ts` | 18 cases: the positive path, the refusals, the falsification probe |
+| The wire | `packages/ai-assistant/src/modules/ai_assistant/lib/business-ir-author.ts` | `authorBusinessQueryIr()` — the single call that points a model at the IR |
+| The wire's test | `packages/ai-assistant/src/modules/ai_assistant/lib/__tests__/business-ir-author.test.ts` | 6 cases, incl. **model answer → `compileQuery` → a real plan** |
+
+**Where the wire lives, and why not beside the IR.** The first attempt put
+`authorBusinessQueryIr` in `shared`, next to the schema. That **broke the layering**: importing
+`ai-assistant` from `shared` pulls that package's whole type graph into `shared`, and `tsc` for
+`shared` began reporting `@/.mercato/generated/ai-agents.generated` — a path that only exists at
+build time in the app. Measured both ways: with the file present, `shared` fails to type-check; move
+it out, and `shared` is clean again. The rule is already written down in
+`shared/src/modules/overrides.ts` — *"`@open-mercato/shared` must NOT take a runtime dependency on
+`@open-mercato/ai-assistant` (the dependency direction is the other way around)"*. So the IR and its
+schema stay in `shared`, dependency-free; the act of calling a model lives in `ai-assistant`. **Do
+not move it back to save an import.**
+
+**A real defect found and fixed in this step — the guard that was a print.**
+`schema.ts` first asserted the mirror as bare type aliases
+(`type _Check = Expect<AssertEqual<A, B>>`). The mandatory falsification — delete a field from the
+schema, re-run `tsc` — **passed when it should have failed** (exit 0). Cause: TypeScript resolves an
+**unused type alias lazily**, so the assertion was never evaluated. Isolated probes in `/tmp/tsguard/`
+nailed the rule: the alias form passes, `declare const c: AssertEqual<A,B>` passes,
+`f<AssertEqual<A,B>>()` passes — **only `const d: AssertEqual<A, B> = true` fails**, with
+`error TS2322: Type 'true' is not assignable to type 'never'`. Fix: one exported const,
+`IR_SCHEMA_TYPE_CHECKS`, whose values are annotated by the assertions. Re-measured: delete `grain` →
+`tsc` now fails at the `queryIr` entry, exit 1.
+
+**The measurements (each with what it tried to break):**
+
+- `schema.ts` — `tsc --noEmit -p packages/shared/tsconfig.json`: **clean**. Falsified by removing
+  `grain` from `businessQueryIrSchema`: **fails**, `TS2322`, exit 1. Guard bites.
+- `schema.conformance.test.ts` — **18/18**. Falsified by swapping the query schema's `.strict()` for
+  `.strip()`: the scope-creep test **fails**. Guard bites.
+- `business-ir-author.test.ts` — **6/6**, including the item's whole claim: a model's answer is parsed
+  and then accepted by the **existing** `compileQuery`. Falsified in two places: weakening the wire's
+  re-parse to `.passthrough()` fails the scope test; also relaxing the *nested* `irSortSchema` fails
+  the guessed-field test — which is itself evidence that `.strict()` is applied at every level, not
+  only the top.
+- The full `business-ir` suite: **78/78**, 5 suites.
+
+**What is NOT done, stated plainly.** The **live smoke test has not been run** — no prompt has been
+sent to the local model to ask whether it can actually emit a valid IR. Everything above uses a
+**stubbed** model, and that is deliberate: the wire is provably correct, and whether a given locally-
+hosted model is clever enough to produce IR-shaped JSON is a *separate* question that only a live run
+answers. It needs the running stack (the platform server / a configured provider). **Until it is run,
+"our local model can emit a valid IR" is unproven** — do not read this table as saying otherwise.
+
+**A pre-existing failure, not caused by this work.** `agent-runtime-object.test.ts` fails 4 of its 8
+cases on an unmodified tree: its mock of `llm-provider-registry` no longer matches the path
+`model-factory` takes, so `resolveModel` throws `no_provider_configured`. Proven pre-existing by
+running the unmodified file. The new wire test sidesteps it by mocking `../model-factory` itself. That
+stale test is a real defect in the repo and is recorded in `NEEDS-YOU.md` for the owner.
 
 ---
 
