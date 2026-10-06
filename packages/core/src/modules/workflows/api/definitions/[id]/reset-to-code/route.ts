@@ -12,7 +12,7 @@ import { z } from 'zod'
 import { createRequestContainer } from '@open-mercato/shared/lib/di/container'
 import { getAuthFromRequest } from '@open-mercato/shared/lib/auth/server'
 import { resolveOrganizationScopeForRequest } from '@open-mercato/core/modules/directory/utils/organizationScope'
-import { validateCrudMutationGuard, runCrudMutationGuardAfterSuccess } from '@open-mercato/shared/lib/crud/mutation-guard'
+import { beginWorkflowsMutationGuard } from '../../../mutation-guard'
 import { WorkflowDefinition, WorkflowInstance } from '../../../../data/entities'
 import { serializeCodeWorkflowDefinition } from '../../serialize'
 import { getCodeWorkflow } from '../../../../lib/code-registry'
@@ -112,18 +112,18 @@ export async function POST(
       )
     }
 
-    const guardResult = await validateCrudMutationGuard(container, {
-      tenantId: tenantId ?? '',
+    const guard = await beginWorkflowsMutationGuard({
+      container,
+      req: request,
+      tenantId,
       organizationId: organizationId ?? null,
       userId: auth.sub ?? '',
       resourceKind: 'workflows.definition',
       resourceId: String(definition.id),
       operation: 'custom',
-      requestMethod: 'POST',
-      requestHeaders: request.headers,
     })
-    if (guardResult && !guardResult.ok) {
-      return NextResponse.json(guardResult.body, { status: guardResult.status })
+    if (guard.blockedResponse) {
+      return guard.blockedResponse
     }
 
     // Look up the original code definition before deleting
@@ -167,19 +167,9 @@ export async function POST(
       invalidateTriggerCache(removedSnapshot.tenantId, removedSnapshot.organizationId ?? undefined)
     }
 
-    if (guardResult?.shouldRunAfterSuccess) {
-      await runCrudMutationGuardAfterSuccess(container, {
-        tenantId: tenantId ?? '',
-        organizationId: organizationId ?? null,
-        userId: auth.sub ?? '',
-        resourceKind: 'workflows.definition',
-        resourceId: removedSnapshot.id,
-        operation: 'custom',
-        requestMethod: 'POST',
-        requestHeaders: request.headers,
-        metadata: guardResult.metadata,
-      })
-    }
+    // The row is gone; the after-success runs against the id it carried when it
+    // still existed, which is the same id the guard was validated against.
+    await guard.runAfterSuccess(removedSnapshot.id)
 
     try {
       const eventBus = container.resolve('eventBus') as

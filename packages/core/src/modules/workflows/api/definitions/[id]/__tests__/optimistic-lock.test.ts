@@ -84,6 +84,19 @@ jest.mock('../../../../lib/event-trigger-service', () => ({
   invalidateTriggerCache: jest.fn(),
 }))
 
+/**
+ * D2-wide (2026-10-06): the route now collects its guard set through the
+ * registry wrapper `runRouteMutationGuards()` (via the module wrapper), not the
+ * `@deprecated` DI pair. Only the *registry call* is stubbed — the module
+ * wrapper runs for real so a mutation that breaks its block path is visible.
+ */
+jest.mock('@open-mercato/shared/lib/crud/route-mutation-guard', () => ({
+  runRouteMutationGuards: jest.fn(async () => ({
+    ok: true as const,
+    runAfterSuccess: jest.fn(async () => undefined),
+  })),
+}))
+
 jest.mock('../../../../lib/code-registry', () => ({
   getCodeWorkflow: jest.fn(() => null),
 }))

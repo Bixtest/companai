@@ -24,7 +24,7 @@ import { getCodeWorkflow, getAllCodeWorkflows } from '../../../lib/code-registry
 import { codeWorkflowUuid } from '../../../lib/find-definition'
 import { createGenericOptimisticLockReader } from '@open-mercato/shared/lib/crud/optimistic-lock'
 import { registerOptimisticLockReaderIfAbsent } from '@open-mercato/shared/lib/crud/optimistic-lock-store'
-import { validateCrudMutationGuard, runCrudMutationGuardAfterSuccess } from '@open-mercato/shared/lib/crud/mutation-guard'
+import { beginWorkflowsMutationGuard } from '../../mutation-guard'
 import { enforceCommandOptimisticLockWithGuards } from '@open-mercato/shared/lib/crud/optimistic-lock-command'
 import { isCrudHttpError } from '@open-mercato/shared/lib/crud/errors'
 import { createLogger } from '@open-mercato/shared/lib/logger'
@@ -183,19 +183,24 @@ export async function PUT(
     }
 
     const input: UpdateWorkflowDefinitionApiInput = validation.data
-    const guardResult = await validateCrudMutationGuard(container, {
-      tenantId: tenantId ?? '',
+    // The guard is collected ONCE, before the two mutually-exclusive write
+    // branches below (`code:` customize vs plain update). `MutationGuard.validate`
+    // is a pure predicate, so evaluating the set here and running the
+    // after-success in whichever branch actually executes is equivalent to the
+    // legacy pair — and a blocked guard stops either branch.
+    const guard = await beginWorkflowsMutationGuard({
+      container,
+      req: request,
+      tenantId,
       organizationId: organizationId ?? null,
       userId: auth.sub ?? '',
       resourceKind: 'workflows.definition',
       resourceId: params.id,
       operation: 'update',
-      requestMethod: 'PUT',
-      requestHeaders: request.headers,
       mutationPayload: input as Record<string, unknown>,
     })
-    if (guardResult && !guardResult.ok) {
-      return NextResponse.json(guardResult.body, { status: guardResult.status })
+    if (guard.blockedResponse) {
+      return guard.blockedResponse
     }
 
     // Handle customizing a code-based workflow definition
@@ -313,19 +318,10 @@ export async function PUT(
         logger.error('Failed to emit workflows.definition.customized event', { err: eventError })
       }
 
-      if (guardResult?.shouldRunAfterSuccess) {
-        await runCrudMutationGuardAfterSuccess(container, {
-          tenantId: tenantId ?? '',
-          organizationId: organizationId ?? null,
-          userId: auth.sub ?? '',
-          resourceKind: 'workflows.definition',
-          resourceId: String(savedOverride.id),
-          operation: 'update',
-          requestMethod: 'PUT',
-          requestHeaders: request.headers,
-          metadata: guardResult.metadata,
-        })
-      }
+      // Branch 1 of 2: a `code:<workflowId>` id materialises or revives an
+      // override row, so the after-success is re-bound to the row id that
+      // actually landed (the guard was validated against the synthetic id).
+      await guard.runAfterSuccess(String(savedOverride.id))
 
       return NextResponse.json({
         data: serializeWorkflowDefinition(savedOverride),
@@ -405,19 +401,8 @@ export async function PUT(
       })
     })
 
-    if (guardResult?.shouldRunAfterSuccess) {
-      await runCrudMutationGuardAfterSuccess(container, {
-        tenantId: tenantId ?? '',
-        organizationId: organizationId ?? null,
-        userId: auth.sub ?? '',
-        resourceKind: 'workflows.definition',
-        resourceId: String(definition.id),
-        operation: 'update',
-        requestMethod: 'PUT',
-        requestHeaders: request.headers,
-        metadata: guardResult.metadata,
-      })
-    }
+    // Branch 2 of 2: a plain DB row update, bound to its own row id.
+    await guard.runAfterSuccess(String(definition.id))
 
     // Embedded triggers may have changed; invalidate the in-memory cache so
     // the wildcard event subscriber reloads them on the next event.
@@ -492,18 +477,18 @@ export async function DELETE(
       )
     }
 
-    const guardResult = await validateCrudMutationGuard(container, {
-      tenantId: tenantId ?? '',
+    const guard = await beginWorkflowsMutationGuard({
+      container,
+      req: request,
+      tenantId,
       organizationId: organizationId ?? null,
       userId: auth.sub ?? '',
       resourceKind: 'workflows.definition',
       resourceId: params.id,
       operation: 'delete',
-      requestMethod: 'DELETE',
-      requestHeaders: request.headers,
     })
-    if (guardResult && !guardResult.ok) {
-      return NextResponse.json(guardResult.body, { status: guardResult.status })
+    if (guard.blockedResponse) {
+      return guard.blockedResponse
     }
 
     // Check if there are active workflow instances using this definition
@@ -541,19 +526,7 @@ export async function DELETE(
       })
     })
 
-    if (guardResult?.shouldRunAfterSuccess) {
-      await runCrudMutationGuardAfterSuccess(container, {
-        tenantId: tenantId ?? '',
-        organizationId: organizationId ?? null,
-        userId: auth.sub ?? '',
-        resourceKind: 'workflows.definition',
-        resourceId: String(definition.id),
-        operation: 'delete',
-        requestMethod: 'DELETE',
-        requestHeaders: request.headers,
-        metadata: guardResult.metadata,
-      })
-    }
+    await guard.runAfterSuccess(String(definition.id))
 
     if (tenantId) invalidateTriggerCache(tenantId, organizationId ?? undefined)
 

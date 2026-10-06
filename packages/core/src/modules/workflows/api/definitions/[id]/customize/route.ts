@@ -13,7 +13,7 @@ import { z } from 'zod'
 import { createRequestContainer } from '@open-mercato/shared/lib/di/container'
 import { getAuthFromRequest } from '@open-mercato/shared/lib/auth/server'
 import { resolveOrganizationScopeForRequest } from '@open-mercato/core/modules/directory/utils/organizationScope'
-import { validateCrudMutationGuard, runCrudMutationGuardAfterSuccess } from '@open-mercato/shared/lib/crud/mutation-guard'
+import { beginWorkflowsMutationGuard } from '../../../mutation-guard'
 import { WorkflowDefinition } from '../../../../data/entities'
 import { serializeWorkflowDefinition } from '../../serialize'
 import { getCodeWorkflow } from '../../../../lib/code-registry'
@@ -62,18 +62,18 @@ export async function POST(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: 'Workflow definition not found' }, { status: 404 })
     }
 
-    const guardResult = await validateCrudMutationGuard(container, {
-      tenantId: tenantId ?? '',
+    const guard = await beginWorkflowsMutationGuard({
+      container,
+      req: request,
+      tenantId,
       organizationId: organizationId ?? null,
       userId: auth.sub ?? '',
       resourceKind: 'workflows.definition',
       resourceId: params.id,
       operation: 'custom',
-      requestMethod: 'POST',
-      requestHeaders: request.headers,
     })
-    if (guardResult && !guardResult.ok) {
-      return NextResponse.json(guardResult.body, { status: guardResult.status })
+    if (guard.blockedResponse) {
+      return guard.blockedResponse
     }
 
     const existingOverride = await em.findOne(WorkflowDefinition, {
@@ -150,19 +150,11 @@ export async function POST(request: NextRequest, context: RouteContext) {
     // organization, not for the caller's.
     if (saved.tenantId) invalidateTriggerCache(saved.tenantId, saved.organizationId ?? undefined)
 
-    if (guardResult?.shouldRunAfterSuccess) {
-      await runCrudMutationGuardAfterSuccess(container, {
-        tenantId: tenantId ?? '',
-        organizationId: organizationId ?? null,
-        userId: auth.sub ?? '',
-        resourceKind: 'workflows.definition',
-        resourceId: String(saved.id),
-        operation: 'custom',
-        requestMethod: 'POST',
-        requestHeaders: request.headers,
-        metadata: guardResult.metadata,
-      })
-    }
+    // The write decides the final id: reviving an existing override keeps its
+    // row id; creating one materialises a fresh row id. The guard was validated
+    // against `params.id` (the `code:<workflowId>` the client addressed), so the
+    // after-success is re-bound to the id that actually landed.
+    await guard.runAfterSuccess(String(saved.id))
 
     try {
       const eventBus = container.resolve('eventBus') as

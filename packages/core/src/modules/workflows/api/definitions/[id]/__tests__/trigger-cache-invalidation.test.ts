@@ -52,6 +52,21 @@ const mockEm = {
 
 const mockRbacService = { userHasAllFeatures: jest.fn(async () => true) }
 
+/**
+ * D2-wide (2026-10-06): the routes no longer call the `@deprecated`
+ * `validateCrudMutationGuard()` DI pair — they go through the registry wrapper
+ * `runRouteMutationGuards()` via `beginWorkflowsMutationGuard`. Only the
+ * *registry call* is stubbed here, NOT the module wrapper: the wrapper's own
+ * block path and after-success runner must run for real, otherwise a mutation
+ * that breaks the wrapper would be invisible to these tests.
+ */
+jest.mock('@open-mercato/shared/lib/crud/route-mutation-guard', () => ({
+  runRouteMutationGuards: jest.fn(async () => ({
+    ok: true as const,
+    runAfterSuccess: jest.fn(async () => undefined),
+  })),
+}))
+
 const mockContainer = {
   resolve: jest.fn((token: string) => {
     if (token === 'em') return mockEm
@@ -71,11 +86,6 @@ jest.mock('@open-mercato/shared/lib/di/container', () => ({
 
 jest.mock('@open-mercato/core/modules/directory/utils/organizationScope', () => ({
   resolveOrganizationScopeForRequest: jest.fn(async () => ({ selectedId: ORG_ID })),
-}))
-
-jest.mock('@open-mercato/shared/lib/crud/mutation-guard', () => ({
-  validateCrudMutationGuard: jest.fn(async () => null),
-  runCrudMutationGuardAfterSuccess: jest.fn(async () => undefined),
 }))
 
 jest.mock('../../../../lib/event-trigger-service', () => ({

@@ -29,6 +29,21 @@ jest.mock('@open-mercato/core/modules/directory/utils/organizationScope', () => 
   resolveOrganizationScopeForRequest: jest.fn(),
 }))
 
+/**
+ * D2-wide (2026-10-06): the write routes no longer call the `@deprecated`
+ * `validateCrudMutationGuard()` DI pair — they go through the registry wrapper
+ * `runRouteMutationGuards()` via `beginWorkflowsMutationGuard`. Only the
+ * *registry call* is stubbed here, NOT the module wrapper: the wrapper's own
+ * block path and after-success runner must run for real, otherwise a mutation
+ * that breaks the wrapper would be invisible to these tests.
+ */
+jest.mock('@open-mercato/shared/lib/crud/route-mutation-guard', () => ({
+  runRouteMutationGuards: jest.fn(async () => ({
+    ok: true as const,
+    runAfterSuccess: jest.fn(async () => undefined),
+  })),
+}))
+
 describe('Workflow Definitions API', () => {
   let mockContainer: any
   let mockEm: any
