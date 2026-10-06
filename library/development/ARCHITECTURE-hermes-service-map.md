@@ -143,7 +143,7 @@ OpenCode still serves behind it ("rewire first, delete second", tracked as N-8).
 boundary. *Llama* says where the model layer sits (or "n/a" if no model is involved). *Status* is
 measured, not assumed.
 
-### 4.1 The foundation items (the ones being built now)
+### 4.1 The foundation items (Phase 0 — closed before anything is stacked on them)
 
 | Item | Shape | How Hermes serves / is served | Llama | Status |
 |---|---|---|---|---|
