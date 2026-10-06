@@ -7,7 +7,43 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
-## 2026-10-06 (latest) — D0 fixed and proven; the real defect was bigger than the registry
+## 2026-10-06 (latest) — D1: the tier mapping stopped being code and became a setting
+
+**D1 is done (code `558cfab`).** The owner's instruction was *"concerning tiers, default ones and
+concerning fallbacks. let's not make it hardcoded but a setting a superadmin can change."* Before this,
+those three values lived in a frozen `.ts` object (`CHANGE_KIND_TIER`), so changing what the platform
+permits took a code deploy. Now they are one setting — the kind→tier map, the default tier, and the S11
+fallback level — read from the platform's **existing** settings engine (`module_configs`, module
+`request_outcome`, name `structureChangeTiers`). No new table (S5): the engine was already there.
+
+**The design problem worth recording: the triage is pure, and the setting needs a database.** `triage.ts`
+promises in its own header "no model call, no database, no clock" — that is what lets its rule be proved
+exhaustively. So the fix **separates the read from the decision**: `loadTierSettings(reader, scope)` is
+the only async, store-touching part (taking an injected reader, typed structurally so `shared` never
+depends on `core`); `resolveTier(kind, settings)` is pure. `triageRequest` and `tierForChange` take the
+settings as an **optional injected argument**, so every existing caller keeps its exact behaviour and
+**not one existing test had to change**.
+
+**It fails closed, and that half is the one that matters.** A malformed setting — a bad tier string, one
+bad row inside a good map, a missing default, a missing fallback level — is rejected outright and the seed
+is used instead, whose default is the strictest tier. A reader that throws also yields the seed.
+**A broken setting is treated as no setting.** The mutation proof: softening the seed default from
+`explicit_approval` to `safe` turned **7 tests red**; the file was restored md5-identical.
+
+**Also this turn — two corrections found by re-measuring.** The D2-wide count I had written as "~201 calls
+in ~76 files" was **understated**; measured twice by independent routes it is **199 calls in 78 files**
+(raw 203/80, minus the 2 declarations and 2 docstring mentions), with **93 of those calls in enabled
+modules**. And the enabled-module count of "37" was wrong — it had matched commented-out parked lines; the
+config declares **35 static enabled modules**. Both are now corrected in every doc. The architecture
+document's §7 checklist also showed the owner's fallback question as open when **he had already answered
+it** (Q2: fall back to the tier table, standards-loaded) — settled and written in.
+
+**Next:** **D2-wide** (retire the deprecated resolver, module by module, each mutation-proven), then **D3**
+(the `escalate` outcome). The order is in [`library/development/BUILD-ORDER.md`](library/development/BUILD-ORDER.md).
+
+---
+
+## 2026-10-06 — D0 fixed and proven; the real defect was bigger than the registry
 
 **D0 is done (code `d225602`).** The generated guard registry now delivers guards, and the delivery
 chain is proven by mutation — not merely green. The build started with D0, as agreed, after the

@@ -25,9 +25,11 @@ stacking.* That is exactly what he asked for.
 | The guard engine ("this") | **PARTLY BUILT — D0 FIXED 2026-10-06, the rest open** | `MutationGuard` + `runMutationGuards()` exist and run. **D0 fixed:** the generated registry now delivers guards from an enabled module (`entities`), mutation-proven end to end (§2c). **Still open:** the **route path** — 199 call sites in 78 files still call the `@deprecated` resolver and bypass the registry (**D2-wide**, §2c); and the guard result is binary, with no `escalate` outcome (**D3**) |
 | Structural write hook | **BUILT — and now registry-based** | `beginEntitiesMutationGuard` is called at **every** entity/field-definition write path, carrying `resourceKind` (`entities.entity`, `entities.field_definition`) + `operation`. As of 2026-10-06 (`d225602`) it runs the **registry** (`runRouteMutationGuards`), not the deprecated single-service resolver |
 
-So the honest statement is: **the foundation is built; the foundation's last four gaps are not** — and
-one of them (**D0**) is a live defect the critic pass found. Build these first, then everything stacked
-on top inherits them for free. That is precisely the owner's instinct, and the code agrees with him.
+So the honest statement is: **the foundation is built; of the foundation's gaps, D0 and D1 are now closed**
+— both found or unblocked by measurement, both proven. **D0** was a live defect the critic pass found (the
+registry was empty); **D1** made the tier mapping a setting. Build the remaining gaps (**D2-wide**, **D3**,
+the Metadata Registry) first, then everything stacked on top inherits them for free. That is precisely the
+owner's instinct, and the code agrees with him.
 
 ---
 
@@ -36,10 +38,13 @@ on top inherits them for free. That is precisely the owner's instinct, and the c
 These are the only blockers to "apply the standards as we go." Each is a change to something that
 **already exists**, not new infrastructure.
 
-**D1 — the structural rules are code, not data.** `MutationGuard` rules are `.ts` functions. There is
-**no settings table** for the owner's `(object, verb, actorType, level)` grammar to read from. Until
-this exists, the structural permission cannot be *configured* — only hard-coded. **This is gap #1
-because everything in the grammar (S11) and the tier fallback (S12) reads from it.**
+**D1 — the structural rules were code, not data — ✅ FIXED 2026-10-06 (§2d).** The tier mapping, the
+default tier and the structural fallback are now a **setting** (`module_configs`, module
+`request_outcome`, name `structureChangeTiers`), seeded from the dictionary and read through a function.
+The full `(object · verb · actorType · level)` grammar beyond the tier fallback remains **SD-4** (it needs
+D3's `escalate` to be useful), and the manage screen is **SD-5** — but the **setting the grammar reads
+from now exists**, which is what gap #1 was: everything in the grammar (S11) and the tier fallback (S12)
+could not be *configured* while it was hard-coded.
 
 **D2 — the entities path runs on the deprecated resolver.** *(PARTLY FIXED 2026-10-06 — see §2c; the
 entities write path now uses the registry, but 199 other call sites do not.)* `definitions.mutation-guard.ts`
@@ -123,6 +128,54 @@ and a non-comment `id:` sweep), the config declares **35 static enabled modules*
 `example_customers_sync` join only under `OM_ENABLE_EXAMPLES=true`, `storage_s3` only under
 `OM_ENABLE_STORAGE_S3=true`.
 
+---
+
+## 2d. D1 — the tier mapping is a SETTING — FIXED and PROVEN, 2026-10-06 (code commit `558cfab`)
+
+**The owner's instruction, which this answers directly:** *"concerning tiers, default ones and concerning
+fallbacks. let's not make it hardcoded but a setting a superadmin can change."* (dictionary §C.2b.)
+
+**What was true before.** The three values — which change *kind* sits in which risk tier, the *default*
+tier for an unnamed kind, and the structural-permission *fallback* level — were a frozen `.ts` object
+(`CHANGE_KIND_TIER` in `triage.ts`, empty). Changing what the platform permits meant a code deploy.
+
+**The fix.** `packages/shared/src/lib/request-outcome/tier-source.ts` (new): the three values are one
+`TierSettings`, read from the platform's **existing** settings engine (`module_configs`, module
+`request_outcome`, name `structureChangeTiers`) through `ModuleConfigService.getValue` — so it needs **no
+new table** (S5, one engine). The dictionary's table is the **seed** (`DEFAULT_TIER_SETTINGS`:
+`changeKindTier` empty on purpose, `defaultTier` = `explicit_approval`, `fallbackLevel` = `approval`).
+
+**How the purity promise was kept.** `triage.ts`'s header promises "no model call, no database, no clock".
+The fix **separates the read from the decision**: `loadTierSettings(reader, scope)` is the only async,
+store-touching part, taking an injected `TierSettingsReader` typed **structurally** so `shared` never
+depends on `core`; `resolveTier(kind, settings)` is pure. `triageRequest(need, settings?)` and
+`tierForChange(change, settings?)` take settings as an **optional injected argument**, so every existing
+caller keeps its exact behaviour (unrecognised → strictest) and **no existing test changed**.
+
+**Fails closed, strictly.** `parseTierSettings` rejects any malformed setting — a bad tier string, one bad
+row inside an otherwise-good map, a missing default, a missing/unknown fallback level — returning `null`,
+on which the caller uses the seed. `loadTierSettings` never throws: a throwing reader, a missing reader,
+and a bad value all yield the seed. **A broken setting is treated as no setting.**
+
+**Fresh-install wiring.** `packages/core/src/modules/configs/cli.ts` `restore-defaults` now also writes the
+tier seed (`core` importing `shared` is the sanctioned direction). `restoreDefaults` fills a missing row
+and does not overwrite an edited one without `force`.
+
+| Proof | Result |
+|---|---|
+| `shared` `tsc --noEmit` | **exit 0** |
+| `core` `tsc --noEmit` | **exit 0** |
+| `request-outcome` suites | **58/58** (new `tier-source.test.ts` = 27 tests) |
+| **Mutation proof** — soften `DEFAULT_TIER_SETTINGS.defaultTier` `explicit_approval` → `safe` | **7 tests RED**, the right ones; restored **md5-identical** (`791b1d1746fcdc3d35b70199c0d7101f`) |
+
+**Two routes for the "it is a setting" claim** (they share no failure mode): (1) the injected-reader tests
+— a *different* stored value produces a *different* tier out of the same pure function; (2) the
+seed→JSON→read round-trip test — the value the CLI writes survives serialisation and reading, and still
+fails closed.
+
+**What D1 did not finish, and it is named.** The full `(object · verb · actorType · role · level)` grammar
+beyond the tier fallback is **SD-4** (it needs D3's `escalate` outcome to be useful), and the manage screen
+is **SD-5**. D1 delivered the **setting** the grammar reads from — the piece that had to exist first.
 
 ---
 
@@ -186,8 +239,13 @@ one page, each with a named home. Details: [`BLUEPRINT-GAP-ANALYSIS.md`](BLUEPRI
 0. ~~**D0** — make the generated guard registry real.~~ ✅ **FIXED 2026-10-06, proven (§2c).** The
    registry now delivers guards from an enabled module, and the delivery chain is mutation-proven.
    **D2-wide (the 199 deprecated call sites in 78 files) is the remaining delivery work — see below.**
-1. **D1** — structural-permission settings table (object · verb · actorType · role · level), with the
-   tier fallback loaded from the dictionary's defaults.
+1. **D1 — ✅ FIXED 2026-10-06, proven.** The tier mapping / defaults / structural fallback are now a
+   **setting** a superadmin can change (`module_configs`: module `request_outcome`, name
+   `structureChangeTiers`), seeded from the dictionary and read through a function — not a hardcoded
+   table. New `packages/shared/src/lib/request-outcome/tier-source.ts`; `triage.ts` takes the settings as
+   an optional injected argument so it stays pure; a malformed setting **fails closed** to the seed. See
+   §2d. *(Still open under SD-4: the full `(object · verb · actorType · role · level)` grammar beyond the
+   tier fallback, and the manage screen SD-5.)*
 2. **D2 (entities scope) — ✅ DONE 2026-10-06** (§2c). **D2-wide — OPEN:** retire the deprecated
    `validateCrudMutationGuard()` pair at the **199 remaining call sites in 78 files** (§2c), so every
    route runs the same guard set as the generic CRUD path. Module by module, each with its own proof.
@@ -234,7 +292,8 @@ must be separated from permissions** (blueprint §50) — a distinct concept we 
 
 ## 4. Why this order and not another — the reasoning, in one line each
 
-- **D1 before D2/D3:** the grammar needs a home before anything points at it.
+- **D1 before D2/D3:** the grammar needs a home before anything points at it. ✅ **D1 is now done (§2d)** —
+  the home exists; D2-wide and D3 point at it next.
 - **D2 before any AI structural autonomy:** governing a path that bypasses the guard set is governing
   nothing.
 - **D3 before SD-3:** a tier table that can ask for review is useless if "review" is not an outcome.
@@ -267,15 +326,16 @@ top of it.**
 
 **What this does *not* change:** accounts management, roles/permissions and languages are genuinely
 built (measured, §1), and the structural grammar is still the right design. The work is still edits to
-an existing system. **D0 is now fixed and proven (§2c);** what remains is D1, **D2-wide** (the 199
-deprecated call sites in 78 files, §2c) and D3.
+an existing system. **D0 and D1 are now fixed and proven (§2c, §2d);** what remains is **D2-wide** (the
+199 deprecated call sites in 78 files, §2c) and D3.
 
 ---
 
 ## 6. What is now recorded so it cannot be forgotten
 
 - This order is **Phase 0 → 3**. Phase 0's gaps are **D1, D2-wide, D3, and the Metadata Registry**;
-  **D0 is fixed, and D2's entities scope is done** (§2c) — with both proven, not asserted.
+  **D0 and D1 are fixed** (the registry delivers, §2c; the tiers are a setting, §2d) **and D2's entities
+  scope is done** — with all of them proven, not asserted.
 - **D2-wide is the live remaining defect:** **199 non-test call sites in 78 files** still bypass the
   registry via the deprecated resolver (§2c) — **93 calls in 38 files in enabled modules**, the rest in
   parked modules. Counted, so it cannot slip out of view.
