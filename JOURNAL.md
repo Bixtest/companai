@@ -30,66 +30,38 @@ log.** Everything else (HANDOVER, START-PROMPT, README, BOOKMARKS, BACKLOG) poin
 
 ---
 
-### ▶ NOW — D2-wide continues with `feature_toggles` (2 deprecated guard calls, 1 file)
+### ▶ NOW — D2-wide: **every ENABLED module is migrated.** The sweep is complete; next is `D2-gap` / `D3` / the Metadata Registry
 
 > **If you are a new agent, read only this block to know your job.** Everything below the box is the
 > history and the queue; this is the work in hand.
 
-**What happened before this box (2026-10-06, this session).** `directory` — the active task this box
-carried last — is **DONE and PROVEN**. Count **110 → 108**; files **42 → 41**. It added two findings, both
-found by **running tests, not by reading**: **(1) a `*/` inside a block comment** — the wrapper header
-contained the literal `` `get/*/lookup.ts` ``, and the `*/` inside the glob closed the JSDoc early so the
-file would not parse; **(2) a comment failed a code guard, and the fix nearly repeated it** —
-`optimistic-lock-command-coverage.test.ts` regexes **raw file text** for `enforceCommandOptimisticLock(`
-and does not strip comments, so the wrapper's header *naming* that helper in prose was reported as a
-bypassing direct call site and turned the full suite **1 test RED**, from a comment, in a file that calls
-neither helper. Recorded as **L91**. It also confirmed `directory` has **almost no `D2-gap`** — 3 unguarded
-verbs in 1 file (`organization-edges`), all protected by other controls whose names are recorded, against
-`auth`'s 12.
+**What happened before this box (2026-10-06, this session).** `feature_toggles` — the active task this
+box carried last, and **the last ENABLED module** — is **DONE and PROVEN**. Count **108 → 106**; files
+**41 → 40**. It retired the final 2 deprecated calls (`api/overrides/route.ts` PUT ×2 sites) through a
+new `beginFeatureTogglesMutationGuard`, and introduced the **id-rebind** into this wrapper
+(`runAfterSuccess(idOverride)`) because the PUT validates against `existingOverride?.id ?? toggleId`
+but the command may **create** a row whose generated id differs — exactly the `translations`/`dashboards`
+shape. It is the **second module with no `D2-gap` at all** (`overrides` PUT → this wrapper; `global`
+POST/PUT/DELETE → `makeCrudRoute` → `collectAndRunGuards()`; `check/*` is read-only — checked).
+**With this, every enabled module is migrated: the D2-wide sweep is complete.**
 
-**What the task is, in plain words.** The platform has a guard system that checks every write before it
-happens (who may change what). Some code still calls an **old, deprecated** version of it that
-**silently skips the real guard registry** — a security hole. The fix, module by module, is to repoint
-those calls at the new registry. **This is tracked as "D2-wide".** Twelve modules are now done
+**What the task was, in plain words.** The platform has a guard system that checks every write before it
+happens (who may change what). Some code still called an **old, deprecated** version of it that
+**silently skips the real guard registry** — a security hole. The fix, module by module, was to repoint
+those calls at the new registry. **This is tracked as "D2-wide".** Thirteen modules are now done
 (`entities`, `data_sync`, `dictionaries`, `dashboards`, `workflows`, `inbox_ops`, `perspectives`,
-`translations`, `planner`, `query_index`, `auth`, `directory`); **108 deprecated call sites remain across 41 files**, of which
-**2 calls in 1 enabled module** are live (`feature_toggles` 2); the rest are
-parked and recorded, not migrated.
+`translations`, `planner`, `query_index`, `auth`, `directory`, `feature_toggles`). **106 deprecated call
+sites remain across 40 files — all of them are parked, dormant modules** (recorded, not migrated; a
+parked module's call is not live, so retiring it there needs no code change until it is un-parked).
 
-**Your job now — one module: `feature_toggles` (2 calls / 1 file) — THE LAST ENABLED ONE.** Do it exactly
-the way the previous twelve were done, and the pattern is already written down (do not invent a new one):
-
-1. **Read the worked example**: `BUILD-ORDER.md` §2e, "Progress — `directory` DONE and PROVEN" — it
-   is the most recent and carries the two findings above. The eleven before it are identical in shape.
-2. **Create `packages/core/src/modules/feature_toggles/api/mutation-guard.ts`** — a
-   `beginFeatureTogglesMutationGuard(ctx)` wrapper (copy `directory/api/mutation-guard.ts` and rename).
-   **While you are in the header: never write a symbol's call syntax (`name(`) in prose, and never put a
-   path glob containing `*/` inside a block comment** (L91 — both bit `directory`).
-3. **Repoint the route file(s)** from `validateCrudMutationGuard()` / `runCrudMutationGuardAfterSuccess()`
-   to `runRouteMutationGuards()` through the wrapper. **Walk every `.ts` file under `api/` — do not glob
-   only for `route.ts`** (the `translations` + `planner` + `query_index` lesson: a named-export handler
-   is a route too). **First measure the file count** — the plan says **1 file**; re-derive it.
-   **And walk the module's OTHER write verbs** — `auth`'s lesson is that a small `D2-wide` number can
-   sit on top of a large `D2-gap`; record `feature_toggles`' unguarded count next to its guarded one.
-   (Note: `feature_toggles/commands/global.ts` is already in the optimistic-lock allowlist — confirm
-   whether that module has other write verbs too.)
-4. **Repair the tests** — re-point their mocks from the deprecated DI pair to **only** the registry call
-   `runRouteMutationGuards`.
-5. **Prove it**: stub **only** the registry call `runRouteMutationGuards` — **never** the module wrapper,
-   or the mutation is invisible (§2e, "A proof defect found and fixed"); then disable the block path →
-   the tests must go RED; neuter `runAfterSuccess` → RED; restore the wrapper and confirm it is
-   **md5-identical**. Then **mutate the route file too** (the `query_index` + `auth` strengthening).
-   **Read the test COUNT, not just the exit code** — an empty run exits 0 (L88). **Then run the WHOLE
-   suite** — a targeted module run misses guards that live in `src/__tests__/` (L91).
-6. **Recount and record**: the count command is in `BACKLOG.md` item **D2-wide**; expected result
-   **108 → 106** (verify: `feature_toggles` is 2 calls). **Derive the file count from the commits, not by
-   carrying it forward** — the `auth` row drifted by one exactly that way, corrected this session. Then
-   update `BUILD-ORDER.md` §2e and `BACKLOG.md`, and commit **in both repos**.
-
-**Definition of done:** `feature_toggles` measures **0** deprecated call sites; its route tests are green;
-the two mutation proofs went RED; the repo-wide count is **106**; the docs say so. **Then every ENABLED
-module is migrated** — the only D2-wide work left is the parked set (106 calls), which is *recorded, not
-migrated*, and `D2-gap` remains an open backlog item per module.
+**Your job now — no more enabled modules to migrate.** D2-wide's remaining work is the **parked set**
+(106 calls / 40 files), which is *recorded, not migrated*. The next real work is on the backlog's own
+order (see the queue below). **Recommended next, and the reason:** pick up **`D2-gap`** — the write
+routes that call **no** guard at all (a *different* defect from a route on the deprecated resolver) —
+because it is the sibling of the work just finished and the worst measured instance is large
+(`workflows` 13/19, `auth` 12/13, `inbox_ops` 10/14). Do it **module by module**, the same protocol:
+measure from the artefact, name the control that actually protects each route, prove the fix with two
+mutations, and update the count in both repos.
 
 **Then, in order (nothing dropped):**
 
@@ -109,9 +81,9 @@ migrated*, and `D2-gap` remains an open backlog item per module.
 | **11** | ✅ **D2-wide: `query_index` — DONE** (code `cc5a237`) | 4 calls / 2 files → **2 guard objects** (the plan's figure held again). Count **116 → 112** (files **45 → 43**). **Neither handler is a `route.ts`** (`reindex.ts`, `purge.ts` — named `POST` exports); the test mocked the **deprecated DI service**, re-pointed to stub only `runRouteMutationGuards`. **Proof went past the wrapper:** each route mutated in turn → each reddened only its own test. **No `D2-gap`** — both write verbs guarded. Mutation-proven (**2 RED / 2 RED**, disjoint). |
 | **11a** | ✅ **D2-wide: `auth` — DONE** (code `aeeaad0`) | 2 calls / 1 file → **1 guard object**; count **112 → 110** (files **43 → 42** — *the docs first said 45 → 44; corrected this session, see the file-count note below*). **The plan's figure held.** **The module is far bigger than its 2 calls suggest:** 18 files export a write verb, **only 3 are guarded** — **12 unguarded resource-writes across 10 files** is the **worst `D2-gap` measured**, recorded not fixed. **A wrong `D2-gap` claim in the header's first draft was caught and corrected against the walk** (`users/route.ts` **is** guarded via `makeCrudRoute`; `authority/projects/route.ts` is **GET only**). Mutation-proven (**2 RED / 1 RED**, plus route-file mutations 2 RED / 1 RED). |
 | **11b** | ✅ **D2-wide: `directory` — DONE** (code `d682c09`) | 2 calls / 1 file → **1 guard object**; count **110 → 108** (files **42 → 41**). **The plan's figure held.** **Almost no `D2-gap`:** the module's entire gap is **3 unguarded verbs in 1 file** (`organization-edges` POST/PATCH/DELETE) against `auth`'s 12 — and all three are protected by other controls (`requireFeatures`, a verified-tenant `resolveScope`, `assertOrganizationsInTenant()`, audit rows, the OSS optimistic-lock floor). **Two traps caught by running tests, not reading:** a `*/` inside a block comment closed the JSDoc early; and a comment **naming** `enforceCommandOptimisticLock(` failed a code guard that regexes raw text (L91). Mutation-proven (**2 RED / 1 RED**, plus route-file mutations 2 RED / 1 RED). |
-| **11c** | **◀ D2-wide: `feature_toggles`** (2 calls / 1 file) — **THE ACTIVE TASK, AND THE LAST ENABLED MODULE** | See the six steps above. **Walk every `.ts` under `api/`, not just `route.ts`; re-derive the file count; record the module's unguarded count too.** Expected **108 → 106**. |
-| **12** | **D2-gap** — the write routes that call **no** guard at all (measured: `workflows` 13/19, `auth` **12/13**, `inbox_ops` 10/14, **`directory` 3/4**, `perspectives` 0/3, `translations` 0/3, `planner` 0/2, `query_index` 0/2) | Do it module by module alongside D2-wide; record the per-module unguarded count next to the D2-wide count. |
-| **13** | **D3** — add the `escalate` outcome to `MutationGuardResult` | The last guard-engine gap; needs D2-wide's shape settled first. |
+| **11c** | ✅ **D2-wide: `feature_toggles` — DONE** (code `5af76bc`) | 2 calls / 1 file → **1 guard object**; count **108 → 106** (files **41 → 40**). **The plan's figure held.** **The LAST ENABLED MODULE — the sweep is complete.** **No `D2-gap`:** `overrides` PUT → this wrapper; `global` POST/PUT/DELETE → `makeCrudRoute` → `collectAndRunGuards()`; `check/*` is read-only (checked). **First wrapper in the sweep to carry `runAfterSuccess(idOverride)` into a route whose validated id can differ from the written id** (the override may be *created*, returning a generated `overrideToggleId`) — the `translations`/`dashboards` shape, proven with 2 registry calls on the rebind. Mutation-proven (**2 RED / 2 RED**, disjoint; plus route-file mutations 2 RED / 2 RED). |
+| **12** | **D2-gap** — the write routes that call **no** guard at all (measured: `workflows` 13/19, `auth` **12/13**, `inbox_ops` 10/14, `directory` 3/4, `feature_toggles` 0/4, `perspectives` 0/3, `translations` 0/3, `planner` 0/2, `query_index` 0/2) | **The recommended next task.** Do it module by module alongside the rest; record the per-module unguarded count next to the D2-wide count. |
+| **13** | **D3** — add the `escalate` outcome to `MutationGuardResult` | The last guard-engine gap; D2-wide's shape is now settled, so it is unblocked. |
 | **14** | **The Metadata Registry** service (GAP A / C5) | The remaining foundation item; everything stacked on it inherits it. |
 
 **Where the reasoning lives:** the order is `BUILD-ORDER.md` §2e; the live counts are in `BACKLOG.md`;
@@ -132,8 +104,9 @@ the per-item status is in `BACKLOG.md`. **This box is the only place that says "
 
 **All three are done.** The table above is the queue that followed them; the row marked
 **◀ THE ACTIVE TASK** is the work in hand. The milestones reached on the way: `dashboards`, `workflows`,
-`inbox_ops`, `perspectives`, `translations`, `planner`, `query_index`, `auth` and `directory` migrated to the registry (`a05ea2c`, `d3af1b1`, `d89b8f6`,
-`e26642c`, `a2f8d5f`, `641d3af`, `cc5a237`, `aeeaad0`, `d682c09`); directive 1's map completed to cover every
+`inbox_ops`, `perspectives`, `translations`, `planner`, `query_index`, `auth`, `directory` and `feature_toggles`
+migrated to the registry (`a05ea2c`, `d3af1b1`, `d89b8f6`,
+`e26642c`, `a2f8d5f`, `641d3af`, `cc5a237`, `aeeaad0`, `d682c09`, `5af76bc`) — **every enabled module**; directive 1's map completed to cover every
 item and to work the three joints in depth (`807ab40`, `365c4e4`); the two test-suite defects fixed so
 the suite is green (`d5567c7`, `fe7c3e5`); the two integration concerns fixed in the docs (this session,
 docs `c0b26d2`); the D2-wide **file count corrected** against the commits (this session) and **L91**
@@ -147,6 +120,28 @@ doing X now."**
 
 ### ✅ Done recently (ticked, then moved down here)
 
+- **2026-10-06 — `feature_toggles` D2-wide migration** (code `5af76bc`). 2 calls / 1 file → **1 guard
+  object**; count **108 → 106** (files **41 → 40**); `feature_toggles` measures 0. **Thirteenth and LAST
+  enabled module — the D2-wide sweep of enabled modules is complete.** **The plan's figure held.** **No
+  `D2-gap`:** walked every write verb and named its guard — `overrides` PUT → the new wrapper; `global`
+  POST/PUT/DELETE → **`makeCrudRoute` → `collectAndRunGuards()`**; the four `check/*` routes (boolean, json,
+  number, string) are **read-only** (checked, not assumed). **The shape that is new here:** the PUT
+  validates the guard set against `existingOverride?.id ?? parsed.data.toggleId`, but the command may
+  **create** a row whose generated `overrideToggleId` differs — so the wrapper's `runAfterSuccess(idOverride)`
+  re-collects the guard set for the produced id and runs that (safe: `validate` is a pure predicate). The
+  test proves the rebind by asserting the registry is called **twice** (validated id, then produced id).
+  **A naming trap already recorded applies here too:** the route also calls
+  `enforceCommandOptimisticLockWithGuards`, whose `...WithGuards` suffix means the *command optimistic-lock*
+  guard service — **not** mutation guards; a `grep -i guard` shows the file "guarded" when only this wrapper
+  is the mutation guard. **Tests:** 1 suite repaired (`api/overrides/__tests__/mutation-guard.test.ts`) — it
+  stubbed the **DI `crudMutationGuardService`**, now stubbed to **only** the registry call
+  `runRouteMutationGuards`, wrapper running for real; **5 tests green**. **Mutations bit:** block path
+  disabled → **2 RED**; `runAfterSuccess` neutered → **2 RED** (a **disjoint** set); wrapper restored
+  md5-identical `7b5514c22a8d4a78962e663725c6df24`. **Critic pass mutated the ROUTE file:** block return
+  removed → **2 RED**; after-success call removed → **2 RED**; all files restored **byte-identical**.
+  `feature_toggles` module **14 suites / 84 tests green**; core `tsc --noEmit` exit 0. **Counts re-measured
+  two independent ways:** repo-wide **108 → 106**, files **41 → 40**; both `grep` and `git grep` agree, and
+  the delta (−2 sites / −1 file) equals exactly this module's calls. Full entry below.
 - **2026-10-06 — `directory` D2-wide migration** (code `d682c09`). 2 calls / 1 file → **1 guard object**;
   count **110 → 108** (files **42 → 41**); `directory` measures 0. Twelfth enabled module. **Almost no
   `D2-gap`** — the module's entire gap is **3 unguarded verbs in 1 file** (`organization-edges`
@@ -346,7 +341,93 @@ doing X now."**
 
 ---
 
-## 2026-10-06 (newest) — `inbox_ops` retired: the sixth module, and the pattern held
+## 2026-10-06 (newest) — `feature_toggles` retired: **the last enabled module, and the D2-wide sweep is complete**
+
+**The task this box carried.** D2-wide: retire the deprecated `validateCrudMutationGuard()` /
+`runCrudMutationGuardAfterSuccess()` pair in `feature_toggles` (2 calls / 1 file), the way the previous
+twelve enabled modules were done. **Definition of done:** the module measures 0, its route tests are green,
+the two mutation proofs went RED, the repo-wide count is 106, and the docs say so.
+
+**Measured before touching it — from the artefact, never the plan.** `grep` for the deprecated pair across
+`feature_toggles --include="*.ts"`, comment lines dropped, returned exactly **2 call sites in 1 file**
+(`api/overrides/route.ts`, lines 124 and 151). Per-file shape: that one file. The plan said 2 calls / 1 file
+and it held — the third consecutive module where re-measurement confirmed the queued figure.
+
+**The D2-gap was walked, not assumed.** Every write verb in the module, and its guard:
+
+| Route file | Write verbs | Guard | Unguarded |
+|---|---|---|---|
+| `overrides/route.ts` | PUT | **this wrapper** (was the deprecated pair) | 0 |
+| `global/route.ts` | POST, PUT, DELETE | `makeCrudRoute` → `collectAndRunGuards()` | 0 |
+| `check/{boolean,json,number,string}/route.ts` | — (read only) | — | 0 |
+
+**`feature_toggles` has no `D2-gap`** — the second module in the sweep with none (after `perspectives`,
+`translations`, `planner`, `query_index`, `dashboards`, `workflows` also measuring 0, but this is the
+first whose *every* route is either a guarded write or a read). The `check/*` routes were checked, not
+assumed read-only.
+
+**How it was solved.** A new module wrapper `packages/core/src/modules/feature_toggles/api/mutation-guard.ts`
+— `beginFeatureTogglesMutationGuard(ctx)` returns `{ blockedResponse, runAfterSuccess }`, mirroring
+`beginDirectoryMutationGuard`. The PUT route now collects the guard through it, returns
+`guard.blockedResponse` when blocked, and calls `guard.runAfterSuccess(...)` after the command commits.
+
+**The shape that is new here — the id-rebind, brought into the wrapper.** This route is the first in the
+sweep whose *validated* id can differ from the *written* id **on the same route path**: it validates the
+guard set against `existingOverride?.id ?? parsed.data.toggleId`, then the command may **create** a row and
+return a generated `overrideToggleId`. The old code passed that produced id to
+`runCrudMutationGuardAfterSuccess`. The wrapper reproduces that with `runAfterSuccess(idOverride)`: when the
+override is absent or equal to the validated id it runs the collected callbacks; when it differs it
+**re-collects** the guard set for the produced id and runs that. Re-running the set is safe **only because
+`validate` is a pure predicate** — a fresh set is collected, so no callback runs twice. The test proves it by
+asserting the registry is called **twice** on the create path (validated id, then produced id).
+
+**A naming trap already on record, and it applies here.** The route also calls
+`enforceCommandOptimisticLockWithGuards` on the existing-override path. That helper does **not** run mutation
+guards — its `...WithGuards` suffix refers to the *command optimistic-lock* guard service, and its first
+step is the OSS optimistic-lock floor. A plain `grep -i guard` shows the file as "guarded"; the mutation
+guard is this wrapper. Recorded again so a later reader does not credit the wrong control.
+
+**A caution about this call site.** The mutation guard is **not** the main protection on this route: the
+route resolves a verified tenant (`resolveFeatureCheckContext`, 400 if absent), loads the override row
+tenant-scoped, and refuses a stale overwrite. **`feature_toggles` ships no `guards.ts`**, so before this
+migration the deprecated pair's only content was the bridged legacy service. The migration is still correct
+and necessary — it removes the **bypass** — but the security argument rests on that, not on the route being
+unprotected today.
+
+**Test evidence.** One suite repaired: `api/overrides/__tests__/mutation-guard.test.ts` stubbed the **DI
+`crudMutationGuardService`**, now stubbed to **only** the registry call `runRouteMutationGuards` (never the
+wrapper), with the wrapper running for real. The old assertions on the flat `{ ok, status, body, metadata }`
+shape were re-pointed to the `{ container, req, auth, input }` shape. **5 tests green**, including: the
+registry call with the route scope; deny → 403 with no command execution and no after-success; **does NOT
+run after-success when blocked**; the **rebind** (registry called twice, second call carries the produced
+`overrideToggleId`); and the existing-row id used as the validate id. The sibling
+`__tests__/optimistic-lock.test.ts` (4 tests) still green.
+
+**Mutations proved the tests bite.** Wrapper backed up (md5 `7b5514c22a8d4a78962e663725c6df24`).
+**Mutation A** — `if (!guardResult.ok)` → `if (false && !guardResult.ok)`: **2 RED** (both deny-path tests),
+3 green. **Mutation B** — `if (true) return` as the first line of `runAfterSuccess`: **2 RED** (both
+allow-path tests), 3 green — a **disjoint** set from A. Wrapper restored **md5-identical**, `diff` clean.
+
+**Critic pass then mutated the ROUTE file.** Block return disabled (`if (false && guard.blockedResponse)`)
+→ **2 RED**. After-success call commented out → **2 RED**. Both files restored **byte-identical**.
+
+**L91 applied pre-emptively and proven.** The wrapper's header names both helpers **without parentheses**
+(`enforceCommandOptimisticLockWithGuards`, "the sync helper"), and the file was checked against the raw-text
+scanner regex `enforceCommandOptimisticLock\s*\(` — **0 matches**. The whole package suite was run anyway.
+
+**Green, measured:** `feature_toggles` module **14 suites / 84 tests green**; core `tsc --noEmit` exit 0;
+**whole core suite 603 suites / 5136 tests green**.
+
+**Count re-measured two independent ways, both agree:** repo-wide **108 → 106**, files **41 → 40**. The
+"before" was re-derived on the stashed tree with the same classifier (**108 / 41**) and the delta (−2 sites /
+−1 file) is exactly this module's 2 calls in 1 file. `feature_toggles` now reads **0**.
+
+**What it means:** **every enabled module in the D2-wide sweep is migrated.** The only D2-wide work left is
+the **parked set** (106 calls / 40 files), which is *recorded, not migrated* — a parked module's deprecated
+call is dormant, so retiring it there needs no code change until it is un-parked. `D2-gap` remains an open
+backlog item, and is the recommended next task.
+
+---
 
 **The active task from the box: `inbox_ops` D2-wide (8 deprecated guard calls in 4 files). Done, proven
 and committed (`d89b8f6`, code repo).**
