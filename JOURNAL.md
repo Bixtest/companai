@@ -168,6 +168,11 @@ doing X now."**
   propagated into `BUILD-ORDER.md`, `HANDOVER.md` and this file. **The site counts were always right**
   (200 → 108, verified at every commit). **No filter ever produced 44** — it was arithmetic drift, not a
   measurement. **The rule: derive the chain from the commits, never carry a number forward.**
+  **A second count trap was caught and recorded this session (L92):** re-deriving the "before" figure with
+  `git grep <rev>` and the *working-tree* classifier gave `139 sites / 1 file` instead of `108 / 41` — because
+  `git grep <rev>` prints a **fourth** field (the revision) and `split(':', 2)` collapsed every match into one
+  pseudo-file. It failed *toward a plausible number* and nearly rewrote six documents. Fixed with a prefix-aware
+  `split(':', 3)`; the corrected probe confirmed **108 → 106, 41 → 40**, delta exactly the module.
 - **2026-10-06 — `directory` D2-wide migration** (code `d682c09`). 2 calls / 1 file → **1 guard object**;
   count **110 → 108** (files **42 → 41**); `directory` measures 0. Twelfth enabled module — **and the
   cleanest so far on `D2-gap`.** Walked every write verb and named its guard: `organization-branding` PUT

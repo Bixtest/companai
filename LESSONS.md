@@ -3089,3 +3089,28 @@ filter which drops comment lines. Text-based measurement is cheap and auditable 
 code**. When a count or a guard looks wrong, the first question is not "is the code wrong?" but "is the
 instrument reading a different thing than the claim names?" — which is the same failure mode as L90, one
 layer down.
+
+## L92 — `git grep <rev>` prefixes the output with the revision, and a `split(':',2)` classifier then reads every match as one file
+
+**What happened (2026-10-06, proving the `feature_toggles` count).** To re-derive the "before" figure I ran
+`git grep -n -e "validateCrudMutationGuard(" -e "runCrudMutationGuardAfterSuccess(" d682c09 -- packages apps`
+and piped it through the *same* classifier used for the working tree. The working tree's `git grep` output is
+`<path>:<ln>:<content>` — **3 fields**. But when a **revision** is given, git prints `<rev>:<path>:<ln>:<content>`
+— **4 fields**. The classifier did `parts = line.split(':', 2)`, so `parts[0]` became the **revision** and the
+whole run collapsed to a single pseudo-file: it reported **`sites: 139 files: 1`** for a tree that actually held
+**108 sites in 41 files**. I nearly wrote "the docs' before-count is wrong by 31" — when the error was in my
+probe.
+
+**Why it is dangerous.** It fails *toward a plausible number*. `139` is not absurd, `files: 1` is odd but
+easy to explain away ("maybe it's the concatenation"), and the wrong number is the one that would have
+**rewritten six documents**. This is the exact shape recorded in L90 and in the skill's "suspect your own
+probe" note: a probe written as a shell one-liner is a suspect; the agreed classifier is the reference — but
+the classifier must be **fed the same field layout** in both runs.
+
+**The rule.** When a classifier is reused against **different output shapes** (working tree vs `git grep <rev>`,
+single-file vs recursive, `grep` vs `git grep`), **assert the field count first** and print the raw values
+behind the result before believing the total. For revisions, split with `maxsplit=3` (`<rev>:<path>:<ln>:<content>`),
+or strip the revision with `sed 's/^[^:]*://'` first. **A classifier that runs clean is not a classifier that
+ran on the right thing** — the same "measured a different thing than the claim names" failure that has now
+produced wrong numbers in this project more than once. The corrected probe (prefix-aware) gave
+**108 / 41 before, 106 / 40 after — delta exactly the module**, which is what the docs already said.
