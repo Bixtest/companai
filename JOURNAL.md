@@ -40,7 +40,7 @@ happens (who may change what). Most of the codebase still calls an **old, deprec
 that **silently skips the real guard registry** — a security hole. The fix, module by module, is to
 repoint those calls at the new registry. **This is tracked as "D2-wide".** `entities`, `data_sync`,
 `dictionaries`, `dashboards` and `workflows` are already done; **142 deprecated call sites remain across
-58 files**, of which **36 calls in 8 enabled modules** are live (the rest are parked and recorded, not
+56 files**, of which **36 calls in 8 enabled modules** are live (the rest are parked and recorded, not
 migrated).
 
 **Your job now — one module: `inbox_ops` (8 calls / 4 files).** Do it exactly the way the previous five
@@ -114,8 +114,11 @@ doing X now."**
   wrong and is recorded:** the tests mocked the *module wrapper*, so both mutations left the suite green
   — the mutation never ran. Fixed by stubbing only the registry call `runRouteMutationGuards` and adding
   a dedicated suite; the mutations then bit (block path disabled → **5 RED**; `runAfterSuccess` neutered
-  → **3 RED**; wrapper restored md5-identical `b969e361b9c727e61f3365f0f9cae1b0`). Whole `workflows`
-  module 45 suites / 650 tests green; core `tsc --noEmit` exit 0. Full entry below.
+  → **3 RED**; wrapper restored md5-identical `b969e361b9c727e61f3365f0f9cae1b0`). **Note:** that md5 is
+  the state *the mutation proof ended in*. A later **comment-only** scope edit (see the hostile-pass
+  correction below) changed the file to `bc030d318c0baeb23d875727d65ee9dc` — the fix hash is not the
+  hash you will see in the tree now; the difference is header prose, not logic, and the suites were
+  re-run green after it). Whole `workflows` module 45 suites / 650 tests green; core `tsc --noEmit` exit 0. Full entry below.
 - **2026-10-06 — directive 1 deepened: Part II of the Hermes service map** (docs `365c4e4`). The owner
   asked for a plan a junior developer can execute flawlessly; Part II works the three real joints in
   depth — agent identity (`AH-1`), the tool door + authorization (`S-02`/`AH-8`), and "Hermes learns as
@@ -176,6 +179,14 @@ with a passing verdict, and asserts the id is re-bound to the row the write prod
 in the path, the mutations bite: **block path disabled → 5 RED; `runAfterSuccess` neutered → 3 RED;
 wrapper restored md5-identical (`b969e361b9c727e61f3365f0f9cae1b0`)**.
 
+**Why the hash in the tree is not that hash.** The proof ended by restoring the wrapper byte-for-byte to
+`b969e361…`. The hostile pass (below) then required a **comment-only** edit to the same file — the honest
+"Scope" paragraph in its header — which moved it to **`bc030d318c0baeb23d875727d65ee9dc`**. The two
+hashes differ by header prose only; no executable line changed. After that edit the api suites were
+re-run: **7 suites / 118 tests green, core `tsc --noEmit` exit 0**. A junior dev re-running `md5sum` on
+that file should expect `bc030d…`; `b969e361…` is the artefact the mutation proof restored, recorded so
+the proof stays auditable.
+
 **Also this session — the map's Part II, and a heading defect I introduced and fixed.** Per the owner's
 "deep enough for a junior developer", `ARCHITECTURE-hermes-service-map.md` gained Part II: the three real
 joints worked in full (agent identity `AH-1`; the tool door + authorization `S-02`/`AH-8`; skills+memory
@@ -186,6 +197,31 @@ verification block removed (docs `365c4e4`).
 **Evidence.** `workflows` api **7 suites / 118 tests green**; whole `workflows` module **45 suites /
 650 tests green**; core `tsc --noEmit` **exit 0**. **Next active task: `inbox_ops` (8 calls / 4 files);
 expected count 142 → 134.**
+
+**Then a hostile re-measurement found two things wrong with what I had just written — both fixed.**
+
+1. **FALSE CLAIM (the serious one) — "every `workflows` write now goes through the guard."** *Status:
+   FIXED — the false sentence is removed, the real scope is stated, and the gap is now a tracked item.*
+   A critic pass counted the module's write routes: **13 of 19 call no guard at all** — neither the new
+   wrapper nor the old deprecated pair (`instances/**`, `tasks/**`, `signals`, `events`,
+   `definitions/route` POST). Measured independently by checking each file at `d3af1b1~1`:
+   `deprecated_calls_at_parent = 0`, so the gap is **pre-existing, not a regression** — and it is
+   precisely why this migration measured 9 calls across only 3 files. The important part is the
+   *reading*: **"0 remaining on `D2-wide`" means "no deprecated resolver left", NOT "the module is
+   guarded"** — a module can score 0 and still be wide open. Recorded as backlog item **`D2-gap`**
+   (what to measure, how to measure it, the suggested fix), stated in the wrapper's own header so
+   nobody reads that file as coverage, and added as a "Scope — what this does NOT cover" row in
+   `BUILD-ORDER.md` §2e. The same question must now be asked of `data_sync`, `dictionaries` and
+   `dashboards`.
+2. **WRONG NUMBER — the file count.** *Status: FIXED — the docs now say 56, not 58.* I wrote "58 files"
+   from a `grep -rln` — but `-l` lists a file if **any** line matches, including comment-only files,
+   while the site count is computed per-line. Two genuinely different methods (a Python parser that
+   classifies each match, and an `awk` filter over `grep -rn`) both return **142 sites / 56 files** and
+   agree with each other. The site count of 142 was right; the file count was not.
+
+**The methods that caught both** are the ones the owner asks for: a separate pass whose only job is to
+break the claim (Technique A), and reaching the number by a second, different route (Technique B).
+Neither error would have been visible from re-running my own command.
 
 ---
 
