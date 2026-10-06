@@ -36,7 +36,9 @@ plan is settled. **Nothing is blocked.** What is left is the build, and the firs
    direction) and which are *imported study material* (evidence only). Do not skip it — the imported
    material in the library is twenty times the size of our own writing, and reading it "for context"
    is how the direction gets buried.
-1. **Read this page, then the eight files in §2 step 1.** Do not skip the lessons.
+1. **Read this page, then §2 step 1 — tier A first, then tier B.** Six files fix the direction and the
+   live decisions; seven more are the spine. **Tier C is opened only when the work needs it** — do not
+   read the imported material "for context". Do not skip the lessons.
 2. **Set the environment export** (§2 step 2). Every terminal, every session.
 3. **Confirm both repositories are clean** (§2 step 3), and that the stack is up (§2 step 4).
 4. **Read the project's memory** (§6c) — it holds the rules that were learned the hard way, and
@@ -87,27 +89,53 @@ and must be built.*
 
 **Do these in order. Do not skip the lessons.**
 
-**1. Read these eight files** (about two hours total). They are ordered so each one assumes the last:
+**1. Read these, in three tiers** (about two and a half hours total for tier A+B). They are ordered so
+each one assumes the last. **Read tier A, then tier B. Open tier C only when the work in front of you
+touches it** — the library holds roughly twenty times more imported material than our own writing, and
+reading it "for context" is how the direction gets buried (see [`../WHAT-WE-ARE-BUILDING.md`](../WHAT-WE-ARE-BUILDING.md) §7).
 
 > **In a hurry?** [`BOOKMARKS.md`](BOOKMARKS.md) is the one-page short list: the handful of
 > documents that matter, the **end-game / vision** documents, and which folders are in git.
 
+**Tier A — the six that fix the direction and the current decisions. Read all six first.**
+
 | # | Read | Why |
 |---|---|---|
-| 1 | [`../../INDEX.md`](../../INDEX.md) | The map of every folder, and the rules that matter most |
-| 2 | **This file** | What exists, where, and the traps |
-| 3 | [`BACKLOG.md`](BACKLOG.md) | **What is left**, in order, one line each — the single plan |
-| 4 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | How the three pieces run together |
-| 5 | [`../../compai/planning/00-product-thesis.md`](../../compai/planning/00-product-thesis.md) | **What we are building**, and the 15 rules that must never be broken |
-| 6 | [`../analysis/findings/12-development-plan.md`](../analysis/findings/12-development-plan.md) | **The plan** — phases, order, why |
-| 7 | [`../../workspace/COOKBOOK.md`](../../workspace/COOKBOOK.md) | **How the work is done** — read before touching code |
-| 8 | [`../../LESSONS.md`](../../LESSONS.md) | 82 mistakes already made, so you do not repeat them |
+| A1 | [`../WHAT-WE-ARE-BUILDING.md`](../WHAT-WE-ARE-BUILDING.md) | **The product in plain English** — the decisive loop, the three things a prompt can become, what it is *not*, and which library documents are **ours vs imported**. The eye on the prize |
+| A2 | [`../../INDEX.md`](../../INDEX.md) | The map of every folder, and the rules that matter most |
+| A3 | **This file** | What exists, where, and the traps |
+| A4 | [`BACKLOG.md`](BACKLOG.md) | **What is left**, in order, one line each — the single plan |
+| A5 | [`ARCHITECTURE-request-outcomes.md`](ARCHITECTURE-request-outcomes.md) | **The request-outcome taxonomy (G-21)** — the owner's core features_pack: a one-time answer, a model proposal, or a saved Function; the triage, and the gate that stops the AI reshaping the database on its own |
+| A6 | [`../../compai/planning/00-product-thesis.md`](../../compai/planning/00-product-thesis.md) | **What we are building**, and the 15 rules that must never be broken |
+
+**Tier B — the spine: how it runs, how the work is done, and the plan.**
+
+| # | Read | Why |
+|---|---|---|
+| B1 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | How the three pieces run together, and the dockerisation decision |
+| B2 | [`ARCHITECTURE-hermes-integration.md`](ARCHITECTURE-hermes-integration.md) | **How Hermes attaches**, and the owner's **B-05** runtime-boundary decision (§11) |
+| B3 | [`ARCHITECTURE-model-server-integration.md`](ARCHITECTURE-model-server-integration.md) | **How models attach**, and the owner's **model-default** decision (§9) |
+| B4 | [`SPEC-business-model-kernel.md`](SPEC-business-model-kernel.md) | **The product specification** — the vision's own 40-item gate; ratification only remains |
+| B5 | [`../analysis/findings/12-development-plan.md`](../analysis/findings/12-development-plan.md) | **The plan** — phases, order, why |
+| B6 | [`../../workspace/COOKBOOK.md`](../../workspace/COOKBOOK.md) | **How the work is done** — read before touching code |
+| B7 | [`../../LESSONS.md`](../../LESSONS.md) | 82 mistakes already made, so you do not repeat them |
+
+**Tier C — supporting, opened only where the work needs it.**
+
+| Read | When it matters |
+|---|---|
+| [`AGENT-HALF.md`](AGENT-HALF.md) | before any **agent-half** work (roles, tasks, delegation, triggers, conversations) |
+| [`THREAD-2026-10-05.md`](THREAD-2026-10-05.md) | when you need **why this session decided what it did** |
+| [`NEEDS-YOU.md`](NEEDS-YOU.md) · [`BLOCKERS.md`](BLOCKERS.md) | when you need **what needs the owner** or **what is stopping work** |
+| [`RUNBOOK-*.md`](.) | when the work is **hosting, deployment, domains, or Sprint 0** |
+| [`../ai/ai-first/`](../ai/ai-first/) | to see **the vision itself** (our direction). **Read its [`README.md`](../ai/ai-first/README.md) first** — the filename numbers and the README's document numbers are offset by one |
+| [`../paperclip-value-study/findings/07-synthesis.md`](../paperclip-value-study/findings/07-synthesis.md) | when **taking an idea from upstream Paperclip** |
+| [`../analysis/`](../analysis/), [`../paperclip-hermes-study/`](../paperclip-hermes-study/) | for the **evidence** behind a design claim — not for context |
 
 **Then, before you write any code:** [`../../workspace/knowledge/authority-overview.md`](../../workspace/knowledge/authority-overview.md)
 — the governance layer end to end. **Governance is the floor the product stands on, not the product itself**
 (the product is the business model being compiled into working software — see
 [`../WHAT-WE-ARE-BUILDING.md`](../WHAT-WE-ARE-BUILDING.md)).
-For the agent half, read [`AGENT-HALF.md`](AGENT-HALF.md) — the model and the plan.
 
 **2. Set up your shell — every terminal, every session.** Node 24 is project-local and mandatory:
 

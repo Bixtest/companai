@@ -23,17 +23,46 @@ You are taking over an existing project and will continue its development. Every
 
 You know nothing about it yet, and that is expected — it is written down for you.
 
-**1. Before you do anything else, read `library/WHAT-WE-ARE-BUILDING.md` — it is short, and it is the
-product in plain English.** It tells you what we are building (the AI builds a capability once, then
-it runs with no AI), the loop that makes it work, what the platform is *not*, and — most importantly
-— **which documents in the library are ours and which are only imported study material.** Then read
-`library/development/HANDOVER.md` top to bottom. It is written for exactly you: a newcomer who knows
-nothing. It tells you what exists, where it is, the traps nobody can discover by reading the code,
-the two git repositories, the rules that bind, and what is proven versus what is only claimed. Then
-read the eight files it lists in §2. Do not start any work before you have done this — the first
-hour is reading, and it is the cheapest hour you will spend. **In a hurry,
-`library/development/BOOKMARKS.md` is the one-page short list** — the documents that matter, the
-end-game and vision documents, and which folders are in git and which are not.
+**1. Read in this order, and do not start work until you have.** There are three tiers. Read tier A
+and tier B; open tier C only when the task in front of you touches it — the library holds about twenty
+times more imported material than our own writing, and reading it "for context" is exactly how the
+direction gets buried.
+
+**Tier A — the six that fix the direction and the live decisions:**
+
+    a. library/WHAT-WE-ARE-BUILDING.md        <- the product in plain English. START HERE.
+    b. INDEX.md                               <- the map of every folder
+    c. library/development/HANDOVER.md        <- written for you: what exists, the traps, the rules
+    d. library/development/BACKLOG.md         <- what is left, in order. The one plan
+    e. library/development/ARCHITECTURE-request-outcomes.md
+                                              <- the owner's core features_pack: the three things a
+                                                 prompt can become (a one-time answer, a model proposal,
+                                                 a saved Function), the triage, and the gate that stops
+                                                 the AI reshaping the database on its own (G-21)
+    f. compai/planning/00-product-thesis.md   <- what we are building, and the 15 rules never to break
+
+**Tier B — the spine: how it runs, how the work is done, and the plan:**
+
+    g. library/development/ARCHITECTURE.md
+    h. library/development/ARCHITECTURE-hermes-integration.md    (the B-05 runtime boundary, §11)
+    i. library/development/ARCHITECTURE-model-server-integration.md   (the model-default, §9)
+    j. library/development/SPEC-business-model-kernel.md
+    k. library/analysis/findings/12-development-plan.md
+    l. workspace/COOKBOOK.md                  <- how the work is done. Read before touching code
+    m. LESSONS.md                             <- 82 mistakes already made
+
+**Tier C — open only where the work needs it:** `AGENT-HALF.md` (before any agent-half work),
+`THREAD-2026-10-05.md` (why the session decided what it did), `NEEDS-YOU.md` / `BLOCKERS.md`,
+the `RUNBOOK-*.md` files (hosting, deployment, domains), `library/ai/ai-first/` (the vision itself —
+read its `README.md` first, the numbers are offset by one), and the study syntheses under
+`library/paperclip-value-study/` and `library/paperclip-hermes-study/`.
+
+**Read [`WHAT-WE-ARE-BUILDING.md`](../WHAT-WE-ARE-BUILDING.md) first of all.** It tells you
+what we are building (the AI builds a capability once, then it runs with no AI), the loop that makes it
+work, the three things a prompt can become, what the platform is *not*, and — most importantly — **which
+documents in the library are ours and which are only imported study material.** `HANDOVER.md` then gives
+you the detail, and **§2 step 1 lays out these same three tiers**. **In a hurry,
+`library/development/BOOKMARKS.md` is the one-page short list.**
 
 **2. Then set up your shell. This is mandatory in every terminal, every session:**
 
@@ -89,20 +118,26 @@ published Function placed in a Widget runs from the Widget's own inputs with no 
 
 **Take the first unbuilt item in `BACKLOG.md` §"The list".** Do not assume the order has not changed
 since this prompt was written; read the list and take item 1 unless you have a reason not to. **At
-the time of writing the first unbuilt items are `G-12`** (business backup and restore — the safety
-net, depends on nothing) **and `G-17`** (schema-constrained generation — **the AI that produces the
-Business IR**, which is the vision's own missing join). **`S0` is done.** Both `G-12` and `G-17` are
-startable; **which goes first is the owner's call** (he asked on 2026-10-06 to "keep the eye on the
-goal", which points at `G-17` — but `G-12` is the safety net). Read the two rows in `BACKLOG.md`
-before choosing.
+the time of writing the first unbuilt item is `G-17`** — *schema-constrained generation*, **the AI that
+produces the Business IR**, which is the vision's own missing join. **This was chosen over `G-12`** (the
+safety net) on 2026-10-06: `G-12` depends on nothing and loses nothing by waiting, while every remaining
+item — including the simplest one-time answer — waits on the AI being able to emit the IR. `G-17`'s
+**first artifact is a runtime parser / zod schema mirroring `business-ir/types.ts`**, because the type
+exists but nothing checks the *shape* of incoming IR. Read the `G-17` and `G-12` rows in `BACKLOG.md`
+before you start. **`G-21`** (the request-outcome taxonomy above) depends on `G-17` and narrows it: the
+IR must be emittable for **all three** prompt endings, not the read path alone.
 
 **Keep the eye on the prize while you build.** The whole product is one loop: *a need → the AI
 understands it → the AI writes a **Business IR** → the platform **validates** it → it **runs** → the
-person **confirms** it → it is **saved as a Function** → from then on it runs with **zero AI**. When
-you build a feature, ask which part of that loop it serves. **Consult the imported material in the
-library (`ai/` except `ai-first/`, `ai/source-docs/`) only when the specific feature in front of you
-can learn something from it** — never "for context". Our direction is `ai/ai-first/`, and
-`library/WHAT-WE-ARE-BUILDING.md` explains the split.
+person **confirms** it → it ends as one of **three things** → and a saved Function, from then on, runs
+with **zero AI**. The three endings are the owner's core features_pack and they are written up in
+`ARCHITECTURE-request-outcomes.md`: a **one-time answer** (nothing saved), a **model proposal** (the
+prompt needs new structure — and it only changes the database through the gate, never on the AI's own
+initiative), or a **saved Function** (walked to provable correctness, named, grouped). When you build a
+feature, ask which part of that loop it serves. **Consult the imported material in the library
+(`ai/` except `ai-first/`, `ai/source-docs/`) only when the specific feature in front of you can learn
+something from it** — never "for context". Our direction is `ai/ai-first/`, and
+`WHAT-WE-ARE-BUILDING.md` explains the split.
 
 **Two things are now decided, and they shape what you build next.** **B-05, the Hermes runtime
 boundary:** one product, one repository, one deployment, one interface (ours), with Hermes as a

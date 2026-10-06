@@ -22,15 +22,15 @@ or request scattered across other documents. If it needs you, it is here or it i
 
 ---
 
-## Part 1 — Decisions I need (**1 open — item 14** — items 1, 2, 8 and 13 closed; item 4 is "nothing needed")
+## Part 1 — Decisions I need (**none open** — item 14 closed 2026-10-06; items 1, 2, 8 and 13 closed; item 4 is "nothing needed")
 
 > **Numbering note.** Items are numbered once and **never reused**, so that a number you have already
 > quoted keeps meaning the same thing. Item 8 was appended here on 2026-10-05 and answered the same
 > day. Items 1 and 2 were closed the same day by measurement — see each item. Item 4 is a "know" item,
 > not a decision: the specification's pruning is mine, and nothing is waiting on your signature.
 > **Item 13 was added 2026-10-05** with the model-layer work, and **you decided it the same day**:
-> per-tenant policy as the destination, cloud-first as the interim. **Item 14 was added 2026-10-06**
-> with the request-outcome taxonomy — it is a real decision and **the only one open in this Part**.
+> per-tenant policy as the destination, cloud-first as the interim. **Item 14 was added and answered
+> on 2026-10-06** with the request-outcome taxonomy. **Nothing in this Part is open.**
 > *(Item 5, the Coolify password, is in Part 2 — it is a thing to do, not a decision to make.)*
 
 ### 1. Reset the local dev database? — ✅ **DONE 2026-10-05** *(no longer needs you)*
@@ -171,35 +171,32 @@ deferrals the decision moves).
 
 ---
 
-### 14. When a prompt asks for a whole new service (LMS, CRM), which approval tier? — **OPEN, and the only one in this Part**
+### 14. When a prompt asks for a whole new service (LMS, CRM), which approval tier? — ✅ **DECIDED 2026-10-06 — explicit-approval**
 
-**The one question.** You told me that a prompt can end three ways: a **one-time answer**, a **model
-proposal** (the prompt needs new structure — a field, an entity, a whole new service), or a **saved
-Function**. I checked that against the vision and wrote it up as **G-21**
-([`ARCHITECTURE-request-outcomes.md`](ARCHITECTURE-request-outcomes.md)). Everything in it is decided
-except this: **the vision already sorts *changes* into three risk tiers** — Doc 04 §130/§131/§132:
+**Your answer:** *"we follow your recommendation there."* So a whole new service takes the **strictest
+tier — explicit-approval.** In plain terms: a prompt like "add me LMS" can **never** proceed on its own.
+It will always stop and name a person who must approve that specific change, every time. It is not the
+middle "review" tier, where a less senior person could wave it through.
+
+**Why it was asked.** You told me a prompt can end three ways: a **one-time answer**, a **model
+proposal** (the prompt needs new structure), or a **saved Function**. I checked that against the vision
+and wrote it up as **G-21** ([`ARCHITECTURE-request-outcomes.md`](ARCHITECTURE-request-outcomes.md)).
+Everything in it was decided except this one mapping. The vision already sorts *changes* into three
+risk tiers — Doc 04 §130/§131/§132:
 
 | Tier | Its own examples | Who must look |
 |---|---|---|
 | **Safe** | `new optional field` · `new read-only view` · `new alias` · `new UI view` | nobody — publish after tests pass |
 | **Review-required** | `new relationship` · `metric formula change` · `field type change` · `workflow change` | a person reviews |
-| **Explicit-approval** | `deleting data` · `removing field` · `changing authorization boundaries` · `changing financial metric semantics` | a person approves that specific change |
+| **Explicit-approval** ← **a new service goes here** | `deleting data` · `removing field` · `changing authorization boundaries` · `changing financial metric semantics` | a named person approves that specific change |
 
-**The gap in the vision is only this:** it tiers *changes to the model*, but it never says which tier a
-**whole new capability** lands in. "Add a field" is obviously *safe*. "Add an LMS service" is obviously
-not *safe* — but is it **review** or **explicit-approval**?
-
-**My recommendation: explicit-approval.** A whole new service adds UI, API, migrations and tests, and
-once it is live it is part of the running platform that real tenants use — so it should carry the same
-weight as the strictest tier, not the middle one. **If you agree, say nothing and I will take it; if you
-want it as review-required, say so and nothing else changes.**
-
-**What your answer decides, in plain terms.** If it is *explicit-approval*, then a prompt like "add me
-LMS" can never proceed on its own — it will always stop and ask a named person, every time. If it is
-*review-required*, it goes ahead once someone has looked, and that person can be less senior.
+**The gap the vision left, now closed.** The vision tiers *changes to the model*, but never said which
+tier a **whole new capability** lands in. "Add a field" is obviously *safe*. "Add an LMS service" was
+the open one — now **explicit-approval**, because it adds UI, API, migrations and tests and becomes part
+of the running platform real tenants use.
 
 **Where it is written down.** [`ARCHITECTURE-request-outcomes.md`](ARCHITECTURE-request-outcomes.md) §2 Q3
-and §5 (register row 10).
+(decision taken) and §5 (register row 10, no longer open).
 
 ---
 

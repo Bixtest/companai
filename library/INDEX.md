@@ -17,7 +17,7 @@ errors.
 |---|---:|---|
 | [`WHAT-WE-ARE-BUILDING.md`](WHAT-WE-ARE-BUILDING.md) | 1 file | **The product in plain English. Start here.** |
 | [`ai/ai-first/`](ai/ai-first/) | 9 files | **THE DIRECTION** — the architecture we are actually building toward. Read [`ai/ai-first/README.md`](ai/ai-first/README.md) first |
-| [`development/`](development/) | 20 files | **The live hub** — the one roadmap, the running architecture, the handover, the rules. Start here to *work* |
+| [`development/`](development/) | 21 files | **The live hub** — the one roadmap, the running architecture, the handover, the rules, and the request-outcome taxonomy. Start here to *work* |
 | [`analysis/`](analysis/) | ~20 files | Our 12-batch check of the direction against what we already have |
 | `01-` … `16-` shelves | ~600 files | Our product documentation: policy, contracts, SRS, audits, certification, blueprints, the shipped product docs |
 | [`paperclip-hermes-study/`](paperclip-hermes-study/) · [`paperclip-value-study/`](paperclip-value-study/) | ~24 files | **Our own** studies *of* two other products — the distilled lessons |
@@ -46,11 +46,12 @@ building toward, and where it currently stands.
 
 | # | Read | What it gives you |
 |---|---|---|
-| 1 | [`WHAT-WE-ARE-BUILDING.md`](WHAT-WE-ARE-BUILDING.md) | **The product in plain English** — the idea, the decisive loop, what we are not, and how to use this library |
+| 1 | [`WHAT-WE-ARE-BUILDING.md`](WHAT-WE-ARE-BUILDING.md) | **The product in plain English** — the idea, the decisive loop, **the three things a prompt can become**, what we are not, and how to use this library |
 | 2 | [`ai/ai-first/README.md`](ai/ai-first/README.md) | **The direction** — the architecture we are actually building toward, and the reading order for the nine vision documents |
-| 3 | [`development/HANDOVER.md`](development/HANDOVER.md) | **The handover** — what exists, where it is, the two repositories, the traps, and what is proven vs claimed. **§0 is written for an agent taking over** |
+| 3 | [`development/HANDOVER.md`](development/HANDOVER.md) | **The handover** — what exists, where it is, the two repositories, the traps, and what is proven vs claimed. **§2 step 1 lays out the three-tier reading order** |
 | 4 | [`development/BACKLOG.md`](development/BACKLOG.md) | **The one roadmap** — everything left, in order. The always-current status lives here, not in this index |
-| 5 | [`07-canonical-hardening/OPEN-DECISIONS.md`](07-canonical-hardening/OPEN-DECISIONS.md) | **What is still undecided** — read before assuming anything is settled |
+| 5 | [`development/ARCHITECTURE-request-outcomes.md`](development/ARCHITECTURE-request-outcomes.md) | **The owner's core features_pack** — a prompt ends as a **one-time answer**, a **model proposal** (new structure), or a **saved Function**; the triage (`G-21`) and the gate on the one that can change the database. Nothing in it is open |
+| 6 | [`07-canonical-hardening/OPEN-DECISIONS.md`](07-canonical-hardening/OPEN-DECISIONS.md) | **What is still undecided** — read before assuming anything is settled. Note: the live owner-decision list is [`development/NEEDS-YOU.md`](development/NEEDS-YOU.md) |
 
 Then, if you want the product detail behind the direction: [`01-policy-and-plan/AI-FIRST-PLATFORM-POLICY.md`](01-policy-and-plan/AI-FIRST-PLATFORM-POLICY.md)
 (the binding policy), [`05-platform-audit-and-srs/03-srs.md`](05-platform-audit-and-srs/03-srs.md)

@@ -13,7 +13,10 @@ of a hundred files to open first.
 
 ## If you have just been handed this project — read in this order
 
-**About two hours, and you will understand what is built, what is left, and why.**
+**About two and a half hours for tier A + B, and you will understand what is built, what is left, and
+why.** There are three tiers. **Read tier A, then tier B. Open tier C only when the work in front of
+you touches it** — the library holds roughly twenty times more imported material than our own writing,
+and reading it "for context" is how the direction gets buried.
 
 **In a hurry? [`BOOKMARKS.md`](BOOKMARKS.md) is the short list** — the handful of documents that
 matter, the end-game documents, and which folders are in git, on one page.
@@ -23,22 +26,37 @@ matter, the end-game documents, and which folders are in git, on one page.
 may not break, and names the first task — so the reading happens first, not after you have already
 formed a picture.
 
+**Tier A — the six that fix the direction and the live decisions.**
+
 | # | Read | Why |
 |---|---|---|
-| 0 | [`../WHAT-WE-ARE-BUILDING.md`](../WHAT-WE-ARE-BUILDING.md) | **The product in plain English** — the idea, the decisive loop, what it is *not*, and which documents in the library are ours versus imported study material. **Read this first.** |
-| 1 | [`HANDOVER.md`](HANDOVER.md) | **The handover** — what exists, where, and the traps nobody can discover (two repos, two products called Companai, gitignored `vms/`, the host VM). Read this if you know nothing |
-| 2 | [`../INDEX.md`](../../INDEX.md) | The map of every folder. What this project is, in one paragraph |
-| 3 | **This file** | How to develop here, and the order to read things |
-| 4 | [`BACKLOG.md`](BACKLOG.md) | **What is left**, in order, one line each — the single plan |
-| 5 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | How the three big pieces run together |
-| 6 | [`../compai/planning/00-product-thesis.md`](../../compai/planning/00-product-thesis.md) | The earlier product thesis and the 15 rules that must never be broken |
-| 7 | [`../analysis/findings/12-development-plan.md`](../analysis/findings/12-development-plan.md) | **The plan** — phases, order, why |
-| 8 | [`../workspace/COOKBOOK.md`](../../workspace/COOKBOOK.md) | **How the work is done** — read before touching code |
-| 9 | [`../LESSONS.md`](../../LESSONS.md) | The mistakes already made, so you do not repeat them |
+| A1 | [`../WHAT-WE-ARE-BUILDING.md`](../WHAT-WE-ARE-BUILDING.md) | **The product in plain English** — the idea, the decisive loop, **the three things a prompt can become**, what it is *not*, and which documents are ours versus imported. **Read this first.** |
+| A2 | [`../INDEX.md`](../../INDEX.md) | The map of every folder. What this project is, in one paragraph |
+| A3 | [`HANDOVER.md`](HANDOVER.md) | **The handover** — what exists, where, and the traps nobody can discover (two repos, two products called Companai, gitignored `vms/`, the host VM) |
+| A4 | [`BACKLOG.md`](BACKLOG.md) | **What is left**, in order, one line each — the single plan |
+| A5 | [`ARCHITECTURE-request-outcomes.md`](ARCHITECTURE-request-outcomes.md) | **The owner's core features_pack (G-21)** — a prompt ends as a **one-time answer**, a **model proposal**, or a **saved Function**; the triage, and the gate on the one that can change the database |
+| A6 | [`../compai/planning/00-product-thesis.md`](../../compai/planning/00-product-thesis.md) | The product thesis and the 15 rules that must never be broken |
 
-**The direction is the nine documents in [`../ai/ai-first/`](../ai/ai-first/)** — read
-[`../ai/ai-first/README.md`](../ai/ai-first/README.md) for the order. **Then, before you write any
-code:** [`../workspace/knowledge/authority-overview.md`](../../workspace/knowledge/authority-overview.md)
+**Tier B — the spine: how it runs, how the work is done, and the plan.**
+
+| # | Read | Why |
+|---|---|---|
+| B1 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | How the three big pieces run together |
+| B2 | [`ARCHITECTURE-hermes-integration.md`](ARCHITECTURE-hermes-integration.md) | How Hermes attaches, and the **B-05** runtime boundary (§11) |
+| B3 | [`ARCHITECTURE-model-server-integration.md`](ARCHITECTURE-model-server-integration.md) | How models attach, and the **model-default** decision (§9) |
+| B4 | [`SPEC-business-model-kernel.md`](SPEC-business-model-kernel.md) | The product specification — the vision's own 40-item gate |
+| B5 | [`../analysis/findings/12-development-plan.md`](../analysis/findings/12-development-plan.md) | **The plan** — phases, order, why |
+| B6 | [`../workspace/COOKBOOK.md`](../../workspace/COOKBOOK.md) | **How the work is done** — read before touching code |
+| B7 | [`../LESSONS.md`](../../LESSONS.md) | The mistakes already made, so you do not repeat them |
+
+**Tier C — supporting, opened only where the work needs it.** [`AGENT-HALF.md`](AGENT-HALF.md) (before any
+agent-half work); [`THREAD-2026-10-05.md`](THREAD-2026-10-05.md) (why the session decided what it did);
+[`NEEDS-YOU.md`](NEEDS-YOU.md) and [`BLOCKERS.md`](BLOCKERS.md); the `RUNBOOK-*.md` files (hosting,
+deployment, domains, Sprint 0); **the direction** — the nine documents in [`../ai/ai-first/`](../ai/ai-first/),
+read [`../ai/ai-first/README.md`](../ai/ai-first/README.md) for the order; and the study syntheses under
+`../paperclip-value-study/` and `../paperclip-hermes-study/`.
+
+**Then, before you write any code:** [`../workspace/knowledge/authority-overview.md`](../../workspace/knowledge/authority-overview.md)
 — the governance layer, end to end. **Governance is the floor the product stands on; the product
 itself is the business model being compiled into working software.** Everything in the library that
 is *not* ours (`../ai/` except `ai-first/`, `../ai/source-docs/`) is imported study material —

@@ -5,8 +5,14 @@ the map.** Everything else is reachable from here.
 
 > **Wondering what we are actually building? Read
 > [`library/WHAT-WE-ARE-BUILDING.md`](library/WHAT-WE-ARE-BUILDING.md) first.** It is the product in
-> plain English — the idea, the loop that makes it work, what it is *not*, and which documents in
-> the library are ours versus imported study material.
+> plain English — the idea, the loop that makes it work, **the three things a prompt can become**,
+> what it is *not*, and which documents in the library are ours versus imported study material.
+>
+> **Then the one decision-document that shapes what gets built:**
+> [`library/development/ARCHITECTURE-request-outcomes.md`](library/development/ARCHITECTURE-request-outcomes.md)
+> — the owner's core **features_pack**: a prompt ends as a **one-time answer**, a **model proposal**
+> (new structure), or a **saved Function**, and the gate that stops the AI reshaping the database on
+> its own (`G-21`).
 >
 > **New to the project? Read the handover next:
 > [`library/development/HANDOVER.md`](library/development/HANDOVER.md).** It is written

@@ -40,6 +40,7 @@ the way it is.
 | [`../ai/ai-first/`](../ai/ai-first/) | **THE DIRECTION.** Nine documents, the fullest statement of what we will actually build. **Read its [`README.md`](../ai/ai-first/README.md) first** — the filename numbers and the README's document numbers are offset by one, which is a real citation hazard |
 | [`../../compai/planning/00-product-thesis.md`](../../compai/planning/00-product-thesis.md) | **What we are building**, in plain English, and the **15 rules that must never be broken** |
 | [`../analysis/findings/01-vision-frame.md`](../analysis/findings/01-vision-frame.md) | The vision framed against our own design: where they agree, where they differ, and what is deliberately left undecided |
+| [`ARCHITECTURE-request-outcomes.md`](ARCHITECTURE-request-outcomes.md) | **The three things a prompt can become** — the owner's core features_pack: a **one-time answer**, a **model proposal** (new structure — a field, an entity, a whole new service like LMS/CRM), or a **saved Function**. The **triage** that decides which, the **gate** that stops the AI reshaping the database on its own (G-21), and the §46 bar for "flawless". **Nothing in it is open** |
 | [`../analysis/findings/12-development-plan.md`](../analysis/findings/12-development-plan.md) | **THE DEVELOPMENT PLAN.** The deliverable the whole analysis exists for: four phases, the critical path, the first three things to build, and every decision that is the owner's |
 | [`../paperclip-hermes-study/findings/10-lessons-and-target-design.md`](../paperclip-hermes-study/findings/10-lessons-and-target-design.md) | **THE SYNTHESIS** for the agent half: what we take from Paperclip and Hermes, what we reject, and how we do it better |
 | [`../../workspace/knowledge/authority-overview.md`](../../workspace/knowledge/authority-overview.md) | **The governance layer, end to end** — the floor the product stands on. The product itself is the business model being compiled into working software (see [`../WHAT-WE-ARE-BUILDING.md`](../WHAT-WE-ARE-BUILDING.md)) |
@@ -144,7 +145,10 @@ decision, or changes what is tracked in git updates it in the same change.
 If a newcomer cannot find the five things that matter from this page, this page is broken. Fix
 the page, not the newcomer.
 
-*Last updated: 2026-10-06 — the Paperclip value scan added to §4, with its synthesis named as the
-one page to read. Previously 2026-10-05: created, with the model-layer decision (per-tenant policy
-as the destination, cloud-first as the interim) recorded, the end-game documents gathered in one
-place, and the untracked folders named honestly.*
+*Last updated: 2026-10-06 — the request-outcome taxonomy added to §2 (the owner's core features_pack,
+`ARCHITECTURE-request-outcomes.md`), and the library split stated in §1. The reading order is now three
+tiers in [`HANDOVER.md`](HANDOVER.md) §2 step 1: tier A (direction + live decisions), tier B (the spine),
+tier C (supporting, opened only where the work needs it). Previously 2026-10-06: the Paperclip value scan
+added to §4, with its synthesis named as the one page to read. Previously 2026-10-05: created, with the
+model-layer decision (per-tenant policy as the destination, cloud-first as the interim) recorded, the
+end-game documents gathered in one place, and the untracked folders named honestly.*

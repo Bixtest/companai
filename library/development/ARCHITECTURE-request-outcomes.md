@@ -150,8 +150,10 @@ parallel one.** The gate is the same *shape* for all three (proposal → validat
 migrate), but the **tier decides who must look**: a `new optional field` can proceed once tests pass; a
 `removing field` or an `authorization boundary` change cannot. The LMS/CRM case (`AI_Native…` §122) is
 the *largest* of these — it adds UI, API, migrations and tests — so it is review-or-explicit by
-construction, never "safe". **Honest limit:** the vision gives the *tiers*; it does **not** say which
-tier an LMS-sized capability lands in, so that mapping is mine and is flagged for the owner in §5.
+construction, never "safe". **The vision gives the *tiers* but does not say which tier an LMS-sized
+capability lands in. The owner decided on 2026-10-06: a whole new service is *explicit-approval*, the
+strictest tier — so "add me LMS" always stops and names a person, every time.** *(This was the one
+question in this document that needed him; it is closed — `NEEDS-YOU.md` item 14.)*
 
 ### Q4. What exactly is "flawless output" — the bar that lets a prompt become a Function?
 
@@ -255,10 +257,8 @@ narrows what G-17 must produce (three paths, not one) but does not delay it.
 | 7 | Outcome 2's risk tiers | **FIXED** — a critic pass replaced my invented small/large split with the vision's own three tiers (Doc 04 §130–§132) | §2 Q3 |
 | 8 | The "flawless" bar | **WILL DO** — Doc 03 §46's objective checks, enforced by G-02's compiler | §2 Q4 |
 | 9 | Where a saved Function goes (grouping) | **WILL DO** — declared canonical path, not free text | §2 Q5 |
-| 10 | **Which tier an LMS/CRM-sized capability lands in** | **OPEN — needs you** | §2 Q3's honest limit — the vision tiers *changes* but does not classify a whole new capability, so this one mapping is the owner's |
+| 10 | **Which tier an LMS/CRM-sized capability lands in** | **DECIDED by the owner 2026-10-06 — explicit-approval** (the strictest tier) | §2 Q3 |
 | 11 | G-17 must emit the IR for all three paths | **WILL DO** — G-17's row narrowed | §2 Q6, `BACKLOG.md` G-17 |
 
-**The single open question for the owner:** *when a prompt asks for a whole new service (LMS, CRM), which
-approval tier should that be — the middle "review" tier, or the strictest "explicit approval" tier?*
-Everything else in this document is decided, with the default taken and written down so it can be changed
-by saying so.
+**Nothing is open.** The one question that needed the owner — the approval tier for a whole new service
+— was answered on 2026-10-06: **explicit-approval**.
