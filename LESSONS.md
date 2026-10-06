@@ -2897,3 +2897,40 @@ coverage ([[L48]]).
 observation every time you quote it, and never let a count stand in for the property you actually care
 about.
 
+
+---
+
+## L87 — a migration plan's per-item arithmetic is a guess until the source is read
+
+**Caught 2026-10-06, migrating `translations` in `D2-wide` — the eighth module.**
+
+The queued task said the module had **"6 deprecated guard calls in 2 files"** and, in the plan's
+mapping table, implied **4 guard objects** — the same shape as the seven modules before it, where
+"calls → objects" had usually been roughly half. Reading the source showed the routes collect **one
+guard object each**, and that the two "halves" were **two different routes**, not one route with two
+verbs: it is **2 objects**, and the repo-wide count drops **6**, not 4.
+
+The plan's number was not random. It was derived from a **pattern** — earlier modules' ratios — rather
+than from this module's code. That is exactly the failure mode a plan is most likely to have: the
+earlier rows were right *because they were measured*, and the later row *looked* consistent with them
+without being measured at all.
+
+**The companion finding, which is worse.** The plan's step said to "repoint the route files", and the
+sweep had been described as walking `route.ts` files. **`put/locales.ts` is not a `route.ts`** — it
+exports its handler as the module **default** with a `metadata.path`. A sweep globbing only for
+`route.ts` would have skipped it, reported the module clean, and left a live write route on the
+deprecated resolver — a false green in the *safe-looking* direction, which is the direction nobody
+re-checks. Found only by walking **every `.ts` file under `api/`**.
+
+**Why it happens.** A plan written from a count is cheaper to produce than a plan written from the
+source, and it is indistinguishable from one at a glance. Both failure modes above produce a plan that
+*reads* as measured.
+
+**What to do instead.** Before executing a planned item, re-derive **that item's** numbers from its own
+files — not from the plan's table, and not by scaling an earlier module. For this class of work the
+enumeration must be **by file content** (does this file export a write verb?), never by file **name**.
+Then check the tick: `before − after == this module's real count`.
+
+**The general form:** an inherited estimate is a hypothesis. The plan tells you *what* to do; only the
+source tells you *how much*. Read the thing you are about to change, count it yourself, and let the plan
+be wrong out loud rather than silently.
