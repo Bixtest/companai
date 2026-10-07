@@ -12,14 +12,15 @@ would reach data no authorization describes (Hermes map §4.4 (b)).
 
 ## The headline
 
-| | baseline (HEAD `5af76bc`) | after `audit_logs` (`4ef5812`) | after `ai_assistant` (`0af50c8`) | after `messages` (`1f1b60e`) | after the `communication_channels` tool fix (`4eead9d`) | after `auth` (`8e1632c`) | **now (`business_rules`, `c9a6bb6`)** |
-|---|---|---|---|---|---|---|---|
-| enabled modules with a source tree | **35** | **35** | **35** | **35** | **35** | **35** | **35** |
-| write verbs across those modules | **256** | **256** | **256** | **256** | **256** | **256** | **256** |
-| **unguarded write verbs (the `D2-gap`)** | **160** | **158** | **143** | **122** | **111** | **99** | **88** |
-| auth-flow verbs set aside by design | 8 | 8 | 8 | 8 | 8 | 8 | 8 |
-| guarded verbs (registry / crud / wrapper / local / re-export) | 88 | 90 | 105 | 126 | **137** | **149** | **160** |
-| *guarded + auth-flow (the two "not a write to guard" buckets)* | *96* | *98* | *113* | *134* | ***145*** | ***157*** | ***168*** |
+| | baseline (HEAD `5af76bc`) | after `audit_logs` (`4ef5812`) | after `ai_assistant` (`0af50c8`) | after `messages` (`1f1b60e`) | after the `communication_channels` tool fix (`4eead9d`) | after `auth` (`8e1632c`) | after `business_rules` (`c9a6bb6`) | **now (`inbox_ops`, `0350563`)** |
+|---|---|---|---|---|---|---|---|---|
+| enabled modules with a source tree | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** |
+| write verbs across those modules | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** |
+| **unguarded write verbs (the `D2-gap`)** | **160** | **158** | **143** | **122** | **111** | **99** | **88** | **78** |
+| auth-flow verbs set aside by design | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 |
+| actor-less verbs set aside by design | — | — | — | — | — | — | — | **1** |
+| guarded verbs (registry / crud / wrapper / local / re-export) | 88 | 90 | 105 | 126 | **137** | **149** | **160** | **169** |
+| *guarded + auth-flow (the two "not a write to guard" buckets)* | *96* | *98* | *113* | *134* | ***145*** | ***157*** | ***168*** | ***177*** |
 
 **Each column differs from the one before it by exactly the modules fixed so far** — `audit_logs` (2
 verbs), `ai_assistant` (15 verbs), then `messages` (17) + `integrations` (4), which moved to the new
@@ -28,7 +29,11 @@ which likewise was **already guarded** and only needed the **tool** to learn its
 the `communication_channels` section: the label said 15 unguarded, the artefact said 11 of those were
 guarded all along; then **`auth` (12 verbs)**, wired through its own
 `beginAuthMutationGuard()` wrapper; then **`business_rules` (11 verbs)**, wired through a **new**
-`beginBusinessRulesMutationGuard()` wrapper. Every figure is recorded because the number a document quotes
+`beginBusinessRulesMutationGuard()` wrapper; then **`inbox_ops` (10 verbs)**, wired through the module's
+**existing** `beginInboxOpsMutationGuard()` — **9 of them** (the actor-present write routes), with the
+**10th `webhook/inbound` set aside as actor-less** rather than wired. That 10th is why the `inbox_ops`
+column moves the unguarded count by **10** but the guarded count by **9**, and introduces a **new
+set-aside row**. Every figure is recorded because the number a document quotes
 must say **which HEAD it was measured at** — carrying a "before" figure forward as if it were current
 is how the `auth`-onward file-count slip happened.
 
@@ -42,14 +47,15 @@ is how the `auth`-onward file-count slip happened.
 > never be quoted without its meaning. **Nothing about the code or the unguarded counts changed** — this
 > is the same figure-discipline rule the row itself is about, applied to the row.
 
-**Guarded by mechanism (computed by the tool, not assumed):** **88 through a module wrapper**, 0 through
+**Guarded by mechanism (computed by the tool, not assumed):** **97 through a module wrapper**, 0 through
 `runRouteMutationGuards` directly, 35 through `makeCrudRoute`/`crud.` (the CRUD factory runs
 `collectAndRunGuards()`), **32 through a module-local guard helper** (`messages` 17 + `integrations` 4 +
 `communication_channels` 11 — the `GUARDED_LOCAL` class), 5 through a re-export of a guarded factory,
 **0 through the deprecated pair** (D2-wide left none enabled). **Closure — every write verb is
-accounted for:** 88 + 0 + 35 + 32 + 5 + 0 + 8 (auth-flow, set aside) + 88 (unguarded) = **256**. *(A
-first draft of this line carried 33/26/29 forward from memory; the tool reads 50/35/5, and the closure
-check is what caught it.)*
+accounted for:** 97 + 0 + 35 + 32 + 5 + 0 + 8 (auth-flow, set aside) + 78 (unguarded) + 1 (actor-less,
+set aside) = **256**. *(A first draft of this line carried 33/26/29 forward from memory; the tool reads
+50/35/5, and the closure check is what caught it. The `actor-less` term was added 2026-10-07 with the
+`inbox_ops` fix — see the class note below.)*
 
 > **A second closure scare, and what it actually was (2026-10-07).** After wiring `auth` the closure read
 > **251**, five short. The five were **`webhooks`' 5 `GUARDED_REEXPORT` verbs**, omitted by the summing
@@ -77,7 +83,7 @@ check is what caught it.)*
 | communication_channels | 15 | 15 | 0 | 0 | 0 | 11 | 0 | **4** ✅ *tool fix (11 were already guarded); was 15* |
 | auth | 21 | 27 | 13 | 0 | 6 | 0 | 0 | **0** ✅ *fixed `8e1632c`; was 12* |
 | business_rules | 5 | 11 | 11 | 0 | 0 | 0 | 0 | **0** ✅ *fixed `c9a6bb6`; was 11* |
-| inbox_ops | 14 | 14 | 4 | 0 | 0 | 0 | 0 | **10** |
+| inbox_ops | 14 | 14 | 13 | 0 | 0 | 0 | 0 | **0** ✅ *fixed `0350563`; was 10 — 9 wired, 1 actor-less set aside* |
 | workflows | 13 | 14 | 4 | 0 | 0 | 0 | 0 | **10** |
 | notifications | 10 | 10 | 0 | 0 | 0 | 0 | 0 | **10** |
 | attachments | 4 | 8 | 0 | 0 | 0 | 0 | **8** |
@@ -199,8 +205,69 @@ exactly the **11 mutation-2** tests RED.
 **Measured after (HEAD `c9a6bb6`):** `business_rules` **11 → 0** (wrapper class for the module **0 →
 11**); **total D2-gap 99 → 88**; repo-wide wrapper class **77 → 88**; guarded-only **149 → 160**;
 closure **88 + 0 + 35 + 32 + 5 + 0 + 8 + 88 = 256**. **Green:** `business_rules` **19 suites / 393
-tests**; core `tsc --noEmit` **exit 0**. **Next module: `inbox_ops` / `notifications` / `workflows`
-(10 unguarded verbs each).**
+tests**; core `tsc --noEmit` **exit 0**.
+
+### `inbox_ops` — the fifth module fixed, and the first with a route that CANNOT be wired (`0350563`)
+
+Measured **10 unguarded verbs across 10 files** (of 14 write verbs in the module; 4 already ran the
+registry). The label was **right on its face** — these ten called no guard of any kind — but the
+implication a reader draws, *"checked by nothing"*, was **false**: every one already enforced its own
+capability (`inbox_ops.proposals.manage` / `.replies.send` / `.settings.manage`) and scoped every lookup
+by tenant + organisation. **So again: the defect was the missing structural chokepoint, not missing
+authorization.**
+
+**Nine of the ten were wired** through the module's **existing** `beginInboxOpsMutationGuard()` — no new
+wrapper was needed. Placement follows the module's own idiom: after the route's auth/validation/404/409
+gates, before the write, `runAfterSuccess()` after commit. Two placements are deliberate, not incidental:
+`proposals/[id]/translate` runs the guard **after** its cache-hit early return, so a request that only
+reads a cached translation is not policy-evaluated; and `replies/[replyId]/send` runs it **before** the
+atomic send-claim and before `resend.emails.send`, so a block prevents both the email leaving and a claim
+row being left set.
+
+**The tenth route — `webhook/inbound.ts` POST — is NOT wired, and could not be.** It is public
+(`metadata.POST = { requireAuth: false }`) and **actor-less**: it writes an `InboxEmail` attributed to no
+user (`auth: { sub: null, … }`). The registry wrapper types `auth.userId` as a **non-nullable `string`**
+and feeds it to `rbacService.getGrantedFeatures`, whose result gates every `features`-bearing guard. With
+a fabricated userId, those guards would **skip silently** — "looks guarded while doing nothing", the exact
+failure the D2-wide record warns about. It is guarded by its **own** mechanisms — provider HMAC / Svix
+signature, a 5-minute replay window, a 2 MB payload cap, global + per-tenant rate limits, and
+de-duplication — none of which the D2-gap tool can see. It is therefore **set aside by name** in the tool
+(`ACTORLESS_PATHS`, alongside the existing `AUTH_FLOW_PATHS`), and the reason is **measured** (the route
+was read), not assumed.
+
+**Two independent routes agree on the 10/10 count:** (1) the tool's `--json` rows read **10 UNGUARDED
+across 10 files** with the ten file names; (2) the module's own `api/mutation-guard.ts` header — written
+**2026-10-06, before this work** — names the **same ten** routes verbatim under *"The other 10 call no
+guard at all"*. Neither derives from the other.
+
+**One tool change, and it is a labelling one:** the tool gained an `ACTORLESS_SET_ASIDE` class so the
+webhook is not counted as GAP. This is the same discipline as `GUARDED_LOCAL` and `AUTH_FLOW_SET_ASIDE`:
+a figure that reads "checked by nothing" when the truth is "cannot be checked this way, and is checked
+another way" **over-claims**. The closure grew a term: `97 + 0 + 35 + 32 + 5 + 0 + 8 + 78 + 1 = 256`.
+
+**Test evidence — a real guard in the real store, not a mock:** new suite
+`api/__tests__/d2-gap-wiring.route.test.ts` (**73 tests**) registers a **real** guard via
+`registerMutationGuards()` and drives the **real** handlers (the older `mutation-guards.test.ts` stubs the
+registry call, so it proves only that the wrapper is *reached*). **Mutation 1 (block):** the guard
+refuses (423) and the entity manager records **no write** for all nine verbs — asserted by the write
+record, not the status. **Mutation 2 (allow):** the write happens and `afterSuccess` fires **exactly
+once**. **Three disjoint mutations** proved the suite bites, every file restored **byte-identical**
+(verified two ways — md5, and a `git diff --numstat` reading **pure insertions, zero deletions**):
+neuter the wrapper's block path → **10 RED**; remove **one route's** guard call → **1 RED**; sever the
+wrapper's **whole after-success path** (both branches) → **9 RED**.
+
+> **Two things the suite itself got wrong, recorded because a re-run of one's own check hides both.**
+> (1) A guard registered with the route's `'custom'` operation **never matches**: the registry maps
+> `'custom'` → `'update'` *before* filtering guards, so three verbs silently returned 200 with the guard
+> unfired until the helper mapped the operation. (2) An edit collapsed a newline in `translate/route.ts`
+> (`findWithDecryption(      ctx.em,`); it typechecked and the tests passed, so **only the md5 /
+> zero-deletion check caught it**. Both fixed; the file is byte-identical to its pre-mutation hash.
+
+**Measured after (HEAD `0350563`):** `inbox_ops` **10 → 0** in the GAP column (wrapper class for the
+module **4 → 13**; 1 verb newly in the actor-less class); **total D2-gap 88 → 78**; repo-wide wrapper
+class **88 → 97**; guarded-only **160 → 169**; closure **97 + 0 + 35 + 32 + 5 + 0 + 8 + 78 + 1 = 256**.
+**Green:** `inbox_ops` **36 suites / 415 tests**; core `tsc --noEmit` **exit 0**. **Next module:
+`notifications` / `workflows` (10 unguarded verbs each).**
 
 ## Reconciliation against the figures already recorded
 
@@ -210,7 +277,7 @@ slip happened before.
 
 | module | recorded in BACKLOG | this measurement | verdict |
 |---|---|---|---|
-| `inbox_ops` | 10 of 14 | 10 | ✅ exact |
+| `inbox_ops` | 10 of 14 | 10 | ✅ exact → **now 0, fixed `0350563` (9 wired, 1 actor-less set aside)** |
 | `auth` | 12 of 18 resource-writes | 12 (8 auth-flow verbs set aside by name) | ✅ exact → **now 0, fixed `8e1632c`** |
 | `business_rules` | 11 unguarded verbs | 11 | ✅ exact → **now 0, fixed `c9a6bb6`** |
 | `directory` | 3 verbs in 1 file | 3 in 1 file | ✅ exact |

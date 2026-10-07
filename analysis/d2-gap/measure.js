@@ -174,6 +174,33 @@ function isAuthFlow(relPath) {
   return AUTH_FLOW_PATHS.some((p) => relPath.endsWith(p.replace(/\//g, '/')));
 }
 
+/**
+ * Actor-less endpoints are NOT counted as D2-gap. The mutation-guard registry
+ * evaluates a guard against an AUTHENTICATED ACTOR — `runRouteMutationGuards`
+ * types `auth.userId` as a non-nullable `string` and passes it to
+ * `rbacService.getGrantedFeatures(userId, …)`, so a guard's `features` gate can
+ * only be honoured for a real user. An endpoint with no session has no such
+ * user: the guard set cannot be evaluated for it, and fabricating a userId
+ * would make every feature-gated guard SKIP SILENTLY — "looks guarded while
+ * doing nothing", the exact failure the D2-wide record warns about.
+ *
+ * `inbox_ops/api/webhook/inbound.ts` is the case that forced this class: it is
+ * `metadata.POST = { requireAuth: false }` by design, it writes an InboxEmail
+ * attributed to no actor (`auth: { sub: null, … }`), and it is guarded by its
+ * OWN mechanisms — provider HMAC / Svix signature, a 5-minute replay window,
+ * a 2 MB payload cap, global + per-tenant rate limits and de-duplication — none
+ * of which the mutation-guard tool can see. It is set aside, not counted, and
+ * the reason is MEASURED (read the route) rather than assumed. Re-check if the
+ * endpoint ever gains a session.
+ */
+const ACTORLESS_PATHS = [
+  'inbox_ops/api/webhook/inbound.ts',
+];
+
+function isActorless(relPath) {
+  return ACTORLESS_PATHS.some((p) => relPath.endsWith(p));
+}
+
 function classify(file, moduleId) {
   const raw = fs.readFileSync(file, 'utf8');
   const code = stripComments(raw);
@@ -204,6 +231,8 @@ function classify(file, moduleId) {
   const rel = path.relative(REPO, file).replace(/\\/g, '/');
   // An auth-flow endpoint is unguarded by the mutation-guard system on purpose.
   if (cls === 'UNGUARDED' && isAuthFlow(rel)) cls = 'AUTH_FLOW_SET_ASIDE';
+  // An actor-less endpoint has no user to evaluate the guard set against.
+  if (cls === 'UNGUARDED' && isActorless(rel)) cls = 'ACTORLESS_SET_ASIDE';
 
   // Verbs this file exports. A guarded file's verbs are guarded by whatever
   // mechanism it uses; an UNGUARDED file's verbs are the D2-gap exposure.
@@ -246,6 +275,7 @@ for (const id of enabled) {
     reexportVerbs: sum((r) => r.cls === 'GUARDED_REEXPORT'),
     deprecatedVerbs: sum((r) => r.cls === 'GUARDED_DEPRECATED'),
     authFlowVerbs: sum((r) => r.cls === 'AUTH_FLOW_SET_ASIDE'),
+    actorlessVerbs: sum((r) => r.cls === 'ACTORLESS_SET_ASIDE'),
     fields: {
       wrapper: sum((r) => r.cls === 'GUARDED_WRAPPER'),
       registry: sum((r) => r.cls === 'GUARDED_REGISTRY'),
@@ -255,6 +285,7 @@ for (const id of enabled) {
       deprecated: sum((r) => r.cls === 'GUARDED_DEPRECATED'),
       unguarded: sum((r) => r.cls === 'UNGUARDED'),
       authFlow: sum((r) => r.cls === 'AUTH_FLOW_SET_ASIDE'),
+      actorless: sum((r) => r.cls === 'ACTORLESS_SET_ASIDE'),
     },
   };
 }
@@ -292,6 +323,8 @@ console.log('-'.repeat(56));
 console.log(`write verbs: ${totalWrite}, unguarded verbs (D2-gap): ${totalGap}`);
 const totalSetAside = enabled.reduce((a, id) => a + (perModule[id]?.authFlowVerbs || 0), 0);
 console.log(`(plus ${totalSetAside} auth-flow verbs set aside by design — login/logout/reset/session/profile/locale/feature-check)`);
+const totalActorless = enabled.reduce((a, id) => a + (perModule[id]?.actorlessVerbs || 0), 0);
+console.log(`(plus ${totalActorless} actor-less verbs set aside by design — public endpoints with no session, guarded by their own signature/rate-limit mechanisms)`);
 console.log('');
 console.log('UNGUARDED FILES (with the verbs each exposes):');
 for (const r of rows.filter((r) => r.cls === 'UNGUARDED')) {

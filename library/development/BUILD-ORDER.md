@@ -278,32 +278,36 @@ comparable with the backlog record.
 |---|---|
 | enabled modules with a source tree | **35** |
 | write verbs across those modules | **256** |
-| **unguarded write verbs (the `D2-gap`)** | **88 now** — **99 before the `business_rules` fix** (HEAD `c9a6bb6`), **111 before the `auth` fix**, **122 before the `communication_channels` tool fix**, **143 before the `messages` registry-bypass fix**, **158 before the `ai_assistant` fix**, **160 before the `audit_logs` fix** |
+| **unguarded write verbs (the `D2-gap`)** | **78 now** — **88 before the `inbox_ops` fix** (HEAD `0350563`), **99 before the `business_rules` fix** (`c9a6bb6`), **111 before the `auth` fix**, **122 before the `communication_channels` tool fix**, **143 before the `messages` registry-bypass fix**, **158 before the `ai_assistant` fix**, **160 before the `audit_logs` fix** |
 | auth-flow verbs set aside by design | 8 |
-| guarded verbs | **160** (88 wrapper · 35 `makeCrudRoute`/`crud.` · 32 module-local helper · 5 re-exported guarded factory · 0 deprecated) |
-| *guarded + auth-flow set aside (not a write to guard)* | *168 = 160 + 8* |
+| **actor-less verbs set aside by design** | **1** (`inbox_ops/api/webhook/inbound.ts` — a public endpoint with no session; see the `inbox_ops` record below) |
+| guarded verbs | **169** (97 wrapper · 35 `makeCrudRoute`/`crud.` · 32 module-local helper · 5 re-exported guarded factory · 0 deprecated) |
+| *guarded + auth-flow set aside (not a write to guard)* | *177 = 169 + 8* |
 
-**The split is computed by the tool, not assumed, and every verb is accounted for:** 88 + 0 (registry) + 35 + 32 (local helper) + 5 + 0 +
-8 (auth-flow) + 88 (unguarded) = **256**. *(A first draft carried 33/26/29 forward from memory; the tool
+**The split is computed by the tool, not assumed, and every verb is accounted for:** 97 + 0 (registry) + 35 + 32 (local helper) + 5 + 0 +
+8 (auth-flow) + 78 (unguarded) + 1 (actor-less) = **256**. *(A first draft carried 33/26/29 forward from memory; the tool
 reads 50/35/5, and the closure check is what caught it. **A second closure check caught a label drift in
 the "guarded" row:** the columns once read 88 · 90 · 113 · 134, where 113/134 were `guarded + auth-flow`
 and the 8 was double-counted against the 256. Corrected to the guarded-only series **88 · 90 · 105 · 126 ·
-137 · 149 · 160**; both numbers are now stated with their meaning. **A third closure check, after the `auth`
+137 · 149 · 160 · 169**; both numbers are now stated with their meaning. **A third closure check, after the `auth`
 fix, read 251 — five short.** The five were `webhooks`' **`GUARDED_REEXPORT`** verbs, omitted by the
 summing script: the tool's per-module `fields` carries `reexport`, and any closure arithmetic must
-include it. With it the figures balance; the pre-change value reconstructs to the recorded 137.)*
+include it. With it the figures balance; the pre-change value reconstructs to the recorded 137. **A
+fourth closure check, after the `inbox_ops` fix, is why the actor-less column exists** — the module's
+10th verb is wired by nothing *on purpose*, so leaving it inside the unguarded count would have been a
+false admission; the tool now names it `ACTORLESS_SET_ASIDE`.)*
 
 **Both figures are recorded because the number must name the HEAD it was measured at** — the rule that
 would have prevented the `auth`-onward file-count slip. `audit_logs` (§ below) accounts for the −2.
 
 **Per module (unguarded verbs):** `ai_assistant` **9 (FIXED, below)** · `messages` **0 (FIXED — registry-bypass, below)** · `communication_channels` **4 (mis-labelled — 11 of 15 were already guarded; the tool, not the code, was the defect — below)** ·
-`auth` **0 (FIXED — a real D2-gap, 12 verbs wired through the module's own `beginAuthMutationGuard`; the routes were already capability-guarded, only the registry chokepoint was missing — below)** · `business_rules` **0 (FIXED — a real D2-gap, 11 verbs wired through a new `beginBusinessRulesMutationGuard`; the routes were already capability-guarded — below)** · `inbox_ops` 10 · `workflows` **10** · `notifications` 10 ·
+`auth` **0 (FIXED — a real D2-gap, 12 verbs wired through the module's own `beginAuthMutationGuard`; the routes were already capability-guarded, only the registry chokepoint was missing — below)** · `business_rules` **0 (FIXED — a real D2-gap, 11 verbs wired through a new `beginBusinessRulesMutationGuard`; the routes were already capability-guarded — below)** · `inbox_ops` **0 (FIXED — a real D2-gap, 9 verbs wired through the module's own `beginInboxOpsMutationGuard`; the 10th is actor-less and set aside by name — below)** · `workflows` **10** · `notifications` 10 ·
 `attachments` 8 · `search` 7 · `webhooks` 7 · `configs` 4 · `currencies` 4 · `entities` 4 ·
 `integrations` **0 (FIXED — registry-bypass, below)** · `progress` 3 · `directory` 3 · `dashboards` 2 · `audit_logs` **0 (FIXED, below)** ·
 `onboarding` 1 · `data_sync` 1 · `scheduler` 1 · and **0** for `dictionaries`, `feature_toggles`,
 `perspectives`, `planner`, `query_index`, `translations`, `api_keys`.
 
-**Reconciliation — 8 of 9 recorded modules agree exactly; the ninth record was wrong.** `inbox_ops` 10/14,
+**Reconciliation — 8 of 10 recorded modules agree exactly; the ninth record was wrong.** `inbox_ops` 10/14,
 `auth` 12 (now 0 — see the record below), `business_rules` 11 (now 0 — see the record below), `directory` 3-in-1-file and the five zeros all matched. **`workflows` was recorded as "13 of 19"
 and measures 10** — the record listed `api/tasks/route.ts` and `api/events` subscribe/unsubscribe as
 unguarded write routes, but **neither exports a write verb** (checked twice: today's file, and
@@ -419,6 +423,25 @@ being guarded**, which is exactly what happened to `communication_channels` (11 
 | **Result** | `business_rules` **11 → 0** (wrapper class for the module **0 → 11**); total **99 → 88**; repo wrapper class **77 → 88**; guarded-only **149 → 160**; closure **88 + 0 + 35 + 32 + 5 + 0 + 8 + 88 = 256**. |
 | **Green** | `business_rules` **19 suites / 393 tests**; core `tsc --noEmit` **exit 0**. |
 | **Next module** | **`inbox_ops` / `notifications` / `workflows` (10 unguarded verbs each).** |
+
+
+**Progress — `inbox_ops` DONE and PROVEN — a REAL `D2-gap`, but NOT an authorization hole, and the FIRST module with a verb that CANNOT be wired (2026-10-07, code commit `0350563`).**
+
+| What | Detail |
+|---|---|
+| **What the label said** | **10 unguarded verbs across 10 files** — the largest remaining module after `business_rules`. The label was **right on its face**: these routes really did call **no guard of any kind**. |
+| **What the implication would have been, and why it was wrong** | "A write there is checked by nothing" — **false.** Every one of the ten **already enforced its own capability** (`metadata.requireFeatures`) **and scoped every row lookup by tenant + organization.** The missing thing was the **structural guard chokepoint**, not authorization. |
+| **The 10, by file** | `api/extract` POST · `api/emails/[id]/reprocess` POST · `api/proposals/[id]/translate` POST · `api/proposals/[id]/reject` POST · `api/proposals/[id]/actions/[actionId]/accept` POST · `.../complete` POST · `.../reject` POST · `api/proposals/[id]/replies/[replyId]/send` POST · `api/settings` (PATCH/PUT) · `api/webhook/inbound` POST. |
+| **The fix — 9 of the 10** | No new wrapper — `inbox_ops` already ships `beginInboxOpsMutationGuard()`. All nine actor-present verbs call it **after** their own auth/validation/optimistic-lock gates and **before** the write, with `guard.runAfterSuccess()` after commit; where the written id differs from the validated id, the `runAfterSuccess(resourceIdOverride)` rebind idiom is used (`extract` → `email.id`). Guard against `inbox_ops:inbox_email` / `inbox_ops:inbox_proposal` / `inbox_ops:inbox_proposal_action` / `inbox_ops:inbox_settings` (the module's **colon** `resourceKind` convention, unlike `auth`'s dot form — a per-module convention, checked not assumed). |
+| **The 10th CANNOT be wired — and setting it aside is the correct answer, not a shortcut** | `api/webhook/inbound.ts` is a **public, actor-less** endpoint: the mail provider calls it, and there is **no `userId`** on the request. The registry guard **requires** a session (`auth.userId` is typed non-nullable) and, more importantly, a feature-gated guard with no user **silently skips** its feature check rather than failing loudly. Manufacturing a session to make the guard "run" would turn a visible gap into a silent one. It is therefore **set aside by name**. |
+| **The tool learned a new class so the set-aside is visible** | `ACTORLESS_PATHS = ['inbox_ops/api/webhook/inbound.ts']` → class **`ACTORLESS_SET_ASIDE`**, counted separately (`actorlessVerbs`, `fields.actorless`), and echoed on the console as *"plus N actor-less verbs set aside by design — public endpoints with no session, guarded by their own signature/rate-limit mechanisms."* A set-aside absorbed silently into the unguarded count would be a **false admission**; a set-aside absorbed silently into the *guarded* count would be a **false claim**. It is neither. |
+| **Two routes agree on the count** | **(1)** the tool's `--json` rows read **10 GAP / 10 files** with the ten file names; **(2)** the module's own `api/mutation-guard.ts` header — written **before** this work — names **the same ten** unguarded routes. Neither derived from the other. |
+| **The narrow security gain — stated so it is not over-read** | `inbox_ops` ships **no `data/guards.ts`**, so **no `inbox_ops.*` guard exists in the registry today.** The wiring means the **first** such guard ever written will be **enforced** rather than silently skipped. It does **not** mean these routes were open. |
+| **Proof** | `api/__tests__/d2-gap-wiring.route.test.ts`, **73 tests**, covering the **nine wired** verbs **both ways**: mutation 1 (block) — a **real** registered guard refuses and the response is **423**, with the write record staying **empty** (asserted by the entity manager's write record, not by the response alone); mutation 2 (allow) — the write happens **and** `afterSuccess` fires **exactly once**. A mock of the wrapper would have proven only that a function of that name is called. |
+| **Three disjoint mutations proved the suite bites** | (1) neuter the wrapper's **block** path → exactly the **10 mutation-1** tests RED; (2) remove the guard call from **one route file** → exactly that route's **1 test** RED, the other eight verbs staying green; (3) sever the wrapper's **whole `afterSuccess` path** (both the direct and the `resourceIdOverride` rebind branch, from the start) → exactly the **9 mutation-2** tests RED. Every file restored **byte-identical** (md5 **and** a `git diff --numstat` reading **pure insertions, zero deletions**). **A whitespace defect I introduced — an early "no-op" edit collapsed a newline in `translate/route.ts` — typechecked and passed every test; only the md5-vs-pre-mutation check caught it.** Recorded: the tests are not what proves a doc-preserving edit; the hash is. |
+| **Result** | `inbox_ops` **10 → 0** (9 wired + 1 actor-less set aside; wrapper class for the module **4 → 13**); total **88 → 78**; repo wrapper class **88 → 97**; guarded-only **160 → 169**; closure **97 + 0 + 35 + 32 + 5 + 0 + 8 + 78 + 1 = 256**. |
+| **Green** | `inbox_ops` **608 suites / 5232 tests** (whole core); `core` `tsc --noEmit` **exit 0**. |
+| **Next module** | **`notifications` / `workflows` (10 unguarded verbs each).** |
 
 
 **Progress — `data_sync` DONE and PROVEN (2026-10-06, code commit `c6c3151`).**

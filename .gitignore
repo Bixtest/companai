@@ -129,12 +129,15 @@ library/ai/paperclip-master/
 library/ai/source-docs/*
 !library/ai/source-docs/README.md
 
-# The D2-gap measurement's raw JSON dump. `analysis/d2-gap/measure.js --json` prints it
-# to stdout; `d2.json` is just that stream redirected to a file (95 KB). It is regenerable
-# on demand from the tool, and nothing cites it — the AUTHORED analysis next to it,
-# `analysis/d2-gap/FINDINGS.md`, is the thing that is tracked and quoted. Adding the rule
-# rather than the file keeps a 95 KB machine dump out of a repository whose stated purpose
+# The D2-gap measurement's raw JSON dump and its stderr. `analysis/d2-gap/measure.js --json`
+# prints the JSON to stdout and any warnings to stderr; `d2.json` / `d2.err` are just those
+# streams redirected to files (`d2.json` is ~95 KB). Both are regenerable on demand from the
+# tool, and nothing cites them — the AUTHORED analysis next to them,
+# `analysis/d2-gap/FINDINGS.md`, is the thing that is tracked and quoted. Adding the rules
+# rather than the files keeps a large machine dump out of a repository whose stated purpose
 # is to version the project's *thinking* (see the header of this file). (Added 2026-10-07
 # while closing out the `business_rules` fix — it surfaced as untracked and would otherwise
-# have been swept in by a `git add -A`.)
+# have been swept in by a `git add -A`. `d2.err` added the same way while closing out
+# `inbox_ops`.)
 analysis/d2-gap/d2.json
+analysis/d2-gap/d2.err
