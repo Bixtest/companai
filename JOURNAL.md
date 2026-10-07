@@ -48,10 +48,10 @@ so it is exactly the surface a Hermes tool call reaches with no authorization de
 means "no deprecated resolver left", never "the module is guarded".
 
 **The measurement (re-runnable, so it cannot rot):** 35 enabled modules · **256 write verbs** ·
-**111 unguarded now** (**122 before the `communication_channels` tool fix**, **143 before the `messages` registry-bypass fix**, **158 before the `ai_assistant` fix**, **160 before the `audit_logs` fix**) · 8 auth-flow verbs set aside · 137 guarded
-(65 wrapper · 35 crud · 32 local helper · 5 re-export; 145 = guarded + the 8 auth-flow, stated so the figure cannot be quoted without its meaning; closure 65+0+35+32+5+0+8+111 = 256).
+**99 unguarded now** (**111 before the `auth` fix**, **122 before the `communication_channels` tool fix**, **143 before the `messages` registry-bypass fix**, **158 before the `ai_assistant` fix**, **160 before the `audit_logs` fix**) · 8 auth-flow verbs set aside · 149 guarded
+(77 wrapper · 35 crud · 32 local helper · 5 re-export; 157 = guarded + the 8 auth-flow, stated so the figure cannot be quoted without its meaning; closure 77+0+35+32+5+0+8+99 = 256).
 Per module, unguarded: `ai_assistant`
-**9 (now FIXED)** · `messages` **0 (FIXED — registry-bypass, see below)** · `communication_channels` **4 (mis-labelled — 11 were already guarded; see Fix 4)** · `auth` 12 · `business_rules` 11 · `inbox_ops` 10 ·
+**9 (now FIXED)** · `messages` **0 (FIXED — registry-bypass, see below)** · `communication_channels` **4 (mis-labelled — 11 were already guarded; see Fix 4)** · `auth` **0 (now FIXED — see Fix 5)** · `business_rules` 11 · `inbox_ops` 10 ·
 `workflows` **10** · `notifications` 10 · `attachments` 8 · `search` 7 · `webhooks` 7 · `configs`/
 `currencies`/`entities` 4 · `integrations` **0 (FIXED — registry-bypass)** · `progress` 3 · `directory` 3 · `dashboards` 2 · `onboarding`/
 `data_sync`/`scheduler` 1 · **0** for `dictionaries`, `feature_toggles`, `perspectives`, `planner`,
@@ -136,15 +136,47 @@ redirect + state cookie), `webhook/[provider]` and `webhooks/gmail` (unauthentic
 can read a guarded route as GAP; measure the premise the label names before spending files on the fix it
 implies, and teach the tool a helper's name only after proving the helper reaches the registry.**
 
+**Fix 5 of the sweep — `auth`: a REAL `D2-gap` (the label was right), but NOT an authorization hole
+(the implication was wrong). DONE and PROVEN (code `8e1632c`).** Measured as **12 unguarded verbs across
+10 files** — the largest remaining module. Unlike `messages` and `communication_channels`, the label was
+**true on its face**: these routes really did call **no guard of any kind**. But the thing a reader would
+conclude from that — *"a write there is checked by nothing"* — was **false**, and saying so is part of
+the record: **every one of the twelve already enforced its own capability** (`metadata.requireFeatures` —
+`auth.delegations.manage`, `auth.denials.manage`, `auth.authority.approve`, `auth.records.lock`,
+`auth.trust.promote`, `auth.acl.manage`, `auth.sidebar.manage`) **and wrote its own audit entry**. What
+was missing is the **structural guard chokepoint**, not authorization. **No new wrapper was needed —
+`auth` already ships `beginAuthMutationGuard()`;** all twelve verbs now call it **after** the route's own
+auth/validation gates and **before** the write, with `guard.runAfterSuccess()` after commit. Ten files
+touched. **Two routes agree on the count:** the tool's `--json` rows read **12 GAP / 10 files**, and the
+module's own `api/mutation-guard.ts` header — written **2026-10-06, before this work** — records
+*"12 unguarded resource-writes across 10 files"* with the same six file names; neither derived from the
+other. **The security gain is narrow and is stated narrowly:** `auth` ships **no `data/guards.ts`**, so
+**no `auth.*` guard exists in the registry today** — the wiring means the **first** one ever written is
+**enforced** rather than silently skipped; it does **not** mean these routes were open. **A latent defect
+found while wiring, and fixed:** `sidebar/variants` POST ran its guard **inside** the `try/catch` that
+turns a unique-constraint violation into a `409 duplicate_name` — so a **blocked** mutation would have
+been **re-reported as a duplicate name**. The guard now sits outside that `catch` (the `variants/[id]`
+handlers and the five `authority/*` routes have no such trap — checked). **Proof — two disjoint
+mutations, not a mock:** `api/__tests__/d2-gap-wiring.route.test.ts`, **29 tests**, registers a **real**
+guard in the global store and drives the **real** handlers: mutation 1 (**block**) — the guard refuses
+and the **write never happens** (asserted by the service stub's call count, not the response alone);
+mutation 2 (**allow**) — the write happens **and** `afterSuccess` fires **exactly once**. All twelve
+verbs in both directions. **`auth` 12 → 0** (wrapper class **1 → 13**); **total 111 → 99**; repo wrapper
+**65 → 77**; guarded-only **137 → 149**; closure **77+0+35+32+5+0+8+99 = 256**. **`auth` 79 suites / 682
+tests green**; core `tsc --noEmit` exit 0. *(A closure scare read 251 — the missing five were
+`webhooks`' `GUARDED_REEXPORT` verbs, omitted by the summing script, not a missing guard; the tool's
+per-module `fields` carries `reexport` and any closure arithmetic must include it.)*
+
 **What the box carried before this (context).** `D2-wide`'s remaining work is the **parked set** (106
 calls / 40 files), *recorded, not migrated* — a parked module's call is not live, so retiring it there
 needs no code change until it is un-parked. `D2-gap` is the live defect, and it is what we work now.
 
 **Your job now — work `D2-gap` module by module, largest first.** The measurement names the shape of
 each fix: route the unguarded writes through a per-module wrapper, so the module has **one** guard
-chokepoint rather than two mechanisms. **Next module: `auth` (12 unguarded verbs, partly set aside by
-name).** Then
-`business_rules` (11) → `inbox_ops` (10)
+chokepoint rather than two mechanisms — **but check first whether the module already ships its own
+wrapper, as `auth` and `communication_channels` both did.** **Next module: `business_rules` (11
+unguarded verbs).** Then
+`inbox_ops` (10)
 → `workflows` (10) → `notifications` (10) → the rest. Protocol for each: **measure from the artefact**
 (re-run `measure.js` and read the module's own routes); **name the control that actually protects each
 route today** (many are protected by other means — record it, do not over-claim); **prove the fix with
@@ -152,7 +184,10 @@ two mutations** (block path, then after-success) and restore byte-identical; **u
 repos**; **tell the owner in plain English what was done.** **Added by the `communication_channels`
 episode:** before applying a `GAP` label's fix, **check whether the module ships its own guard helper**
 — if it does, prove the helper reaches the registry, then teach the tool its name; the label alone has
-now twice described a defect that was not there (`messages`, `communication_channels`).
+now twice described a defect that was not there (`messages`, `communication_channels`). **Added by the
+`auth` episode:** the label can also be **right on its face and still mislead** — a route can call no
+guard and still be capability-guarded and audited; **name what protects the route today before implying
+it is unprotected.**
 
 **A trap that has now bitten three migrations — carry it forward:** not every write handler is a
 `route.ts`. `translations/put/locales.ts`, `planner/*` and `query_index/{reindex,purge}.ts` all export
@@ -179,11 +214,12 @@ module clean while leaving live write routes unguarded.
 | **11a** | ✅ **D2-wide: `auth` — DONE** (code `aeeaad0`) | 2 calls / 1 file → **1 guard object**; count **112 → 110** (files **43 → 42** — *the docs first said 45 → 44; corrected this session, see the file-count note below*). **The plan's figure held.** **The module is far bigger than its 2 calls suggest:** 18 files export a write verb, **only 3 are guarded** — **12 unguarded resource-writes across 10 files** is the **worst `D2-gap` measured**, recorded not fixed. **A wrong `D2-gap` claim in the header's first draft was caught and corrected against the walk** (`users/route.ts` **is** guarded via `makeCrudRoute`; `authority/projects/route.ts` is **GET only**). Mutation-proven (**2 RED / 1 RED**, plus route-file mutations 2 RED / 1 RED). |
 | **11b** | ✅ **D2-wide: `directory` — DONE** (code `d682c09`) | 2 calls / 1 file → **1 guard object**; count **110 → 108** (files **42 → 41**). **The plan's figure held.** **Almost no `D2-gap`:** the module's entire gap is **3 unguarded verbs in 1 file** (`organization-edges` POST/PATCH/DELETE) against `auth`'s 12 — and all three are protected by other controls (`requireFeatures`, a verified-tenant `resolveScope`, `assertOrganizationsInTenant()`, audit rows, the OSS optimistic-lock floor). **Two traps caught by running tests, not reading:** a `*/` inside a block comment closed the JSDoc early; and a comment **naming** `enforceCommandOptimisticLock(` failed a code guard that regexes raw text (L91). Mutation-proven (**2 RED / 1 RED**, plus route-file mutations 2 RED / 1 RED). |
 | **11c** | ✅ **D2-wide: `feature_toggles` — DONE** (code `5af76bc`) | 2 calls / 1 file → **1 guard object**; count **108 → 106** (files **41 → 40**). **The plan's figure held.** **The LAST ENABLED MODULE — the sweep is complete.** **No `D2-gap`:** `overrides` PUT → this wrapper; `global` POST/PUT/DELETE → `makeCrudRoute` → `collectAndRunGuards()`; `check/*` is read-only (checked). **First wrapper in the sweep to carry `runAfterSuccess(idOverride)` into a route whose validated id can differ from the written id** (the override may be *created*, returning a generated `overrideToggleId`) — the `translations`/`dashboards` shape, proven with 2 registry calls on the rebind. Mutation-proven (**2 RED / 2 RED**, disjoint; plus route-file mutations 2 RED / 2 RED). |
-| **12** | **D2-gap** — the write routes that call **no** guard at all. **MEASURED across every enabled module 2026-10-06** (`analysis/d2-gap/measure.js`): 256 write verbs, **111 unguarded now** (122 before the `communication_channels` tool fix, 143 before the `messages` registry-bypass fix, 158 before `ai_assistant`, 160 before the `audit_logs` fix). Per module: `ai_assistant` **9** (after the fix), `messages` **0** (fixed — registry-bypass, see 12c), `integrations` **0** (fixed — same), `communication_channels` **4** (mis-labelled — 11 were already guarded; see 12d), `auth` 12, `business_rules` 11, `inbox_ops` 10, `workflows` **10** *(record said 13 — the record was wrong; `tasks/route.ts` and `events` export no write verb)*, `notifications` 10, `attachments` 8, `search` 7, `webhooks` 7, then 4/4/4/4, 3/3, 2, 1/1/1, and **0** for `dictionaries`, `feature_toggles`, `perspectives`, `planner`, `query_index`, `translations`, `api_keys`, **`audit_logs`**. | **The recommended task — now in progress.** Do it module by module, largest first; record the per-module unguarded count next to the D2-wide count. |
+| **12** | **D2-gap** — the write routes that call **no** guard at all. **MEASURED across every enabled module 2026-10-06** (`analysis/d2-gap/measure.js`): 256 write verbs, **99 unguarded now** (111 before the `auth` fix, 122 before the `communication_channels` tool fix, 143 before the `messages` registry-bypass fix, 158 before `ai_assistant`, 160 before the `audit_logs` fix). Per module: `ai_assistant` **9** (after the fix), `messages` **0** (fixed — registry-bypass, see 12c), `integrations` **0** (fixed — same), `communication_channels` **4** (mis-labelled — 11 were already guarded; see 12d), `auth` **0** (fixed — see 12e), `business_rules` 11, `inbox_ops` 10, `workflows` **10** *(record said 13 — the record was wrong; `tasks/route.ts` and `events` export no write verb)*, `notifications` 10, `attachments` 8, `search` 7, `webhooks` 7, then 4/4/4/4, 3/3, 2, 1/1/1, and **0** for `dictionaries`, `feature_toggles`, `perspectives`, `planner`, `query_index`, `translations`, `api_keys`, **`audit_logs`**. | **The recommended task — now in progress.** Do it module by module, largest first; record the per-module unguarded count next to the D2-wide count. |
 | **12a** | ✅ **D2-gap: `audit_logs` — DONE** (code `4ef5812`) | **The FIRST `D2-gap` module.** Both write routes (`undo` POST, `redo` POST) called **no guard at all**; 2 unguarded verbs → 0. New `beginAuditLogsMutationGuard`. **The design decision:** guard against the **log entry's own `resourceKind`** (fallback `audit_logs.action_log`) — undo/redo reverse or replay a write *to that resource*, so a guard for `directory.organization` must see the undo of an organization write, or the one path that can reverse a protected change is the one path no guard describes. Redo guard runs **after** `resolveRedoInput` (policy not evaluated for a request that will 400). 7 new tests; **3 disjoint mutations** proved they bite; wrapper byte-identical; 16 suites / 108 tests green. |
 | **12b** | ✅ **D2-gap: `ai_assistant` — DONE** (code `0af50c8`) | **The SECOND and largest `D2-gap` module — 24 unguarded verbs across 19 files.** New `beginAiAssistantMutationGuard`; the 10 resource-write files now run the registry. **24 → 9.** The 24 split three ways: **15 resource writes guarded**; **7 session/flow set aside by name** (`ai/chat`, `ai/run-object`, `route`, `chat`, `session-key`, `mcp-key`, `tools/execute`); **2 pending-action gate set aside by name** (`confirm`, `cancel` — the AI mutation-approval gate, `runPendingActionRechecks()`). `resourceKind` = `ai_assistant.<entity>`. The `loop-override` DELETE guards only the path that writes (no-op clear has nothing to govern). **30 new tests; 3 disjoint mutations** proved they bite; every file byte-identical; **99 suites / 1306 tests green**; app `typecheck` exit 0. |
 | **12c** | ✅ **`messages` — REGISTRY-BYPASS, not a D2-gap — DONE** (code `1f1b60e`) | Measured as **17 unguarded verbs / 11 files**, the largest `D2-gap` left — but the premise was **FALSE**: all 17 already call `runMessageMutationGuards()`. **The real defect was in the helper** — it built `runMutationGuards([legacyGuard])`, a one-element array, **skipping the global registry** (the `D2-wide` shape, reached locally). **Six more places had the identical line**: `integrations`, `payment_gateways` (parked), `staff`, and inline copies in `sales/quotes/convert`, `sales/quotes/send`, `configs/api/cache`. **All seven fixed** — registry first, then the bridged legacy service. **Latent, not live** (only 3 modules register guards, none for these kinds). **16-test cross-module suite; proved RED by mutating ONE helper** (`staff`) → only its 2 tests red. `messages` **17 → 0**, `integrations` **4 → 0**; total **143 → 122**. Tool gained class **`GUARDED_LOCAL`**; **its header states the limit** (proves a guard *call*, not a *registry* guard). **605 suites / 5159 tests green**; core `tsc` exit 0. **Next: `communication_channels` (15).** |
 | **12d** | ✅ **`communication_channels` — NOT a D2-gap; the TOOL was the defect, not the code — DONE** (tool only; repo unchanged at `1f1b60e`) | Measured as **15 unguarded verbs / 15 files**, the largest remaining — but **11 of the 15 already call `validateRouteMutationGuard`**, the module's own helper, which reaches the **registry** (`runRouteMutationGuards` → `getAllMutationGuardInstances()`). The literal fix would have wrapped 11 files needlessly. **Two routes agree on 11/4:** the artefact (11 files, each 1 verb + 1 guard call) and the tool's `--json` rows. **The helper is registry-backed — proven by its own test** (registers a real guard, asserts block + afterSuccess). **The 4 left, each set aside on evidence:** `oauth/initiate` (0 writes), `webhook/[provider]` + `webhooks/gmail` (unauthenticated by design — signature/JWT IS the auth — 0 writes, enqueue only), `test-seed` (writes, but env-gated off in prod — 404 **before** any write). **Fix = teach the tool the helper's name**; `communication_channels` **15 → 4**; total **122 → 111**; guarded **134 → 145**; **58 suites / 558 tests green**. **Standing lesson: the label is a four-symbol string scan — measure the premise before applying the fix it implies.** **Next: `auth` (12).** |
+| **12e** | ✅ **`auth` — a REAL D2-gap (label right), but NOT an authorization hole (implication wrong) — DONE** (code `8e1632c`) | Measured **12 unguarded verbs / 10 files**, the largest remaining — and the label was **true**: these routes called **no guard of any kind**. But **every one already enforced its own capability** (`metadata.requireFeatures`) **and wrote its own audit entry**, so *"checked by nothing"* was false. **No new wrapper needed — `auth` already ships `beginAuthMutationGuard()`;** all 12 verbs now call it before the write, `runAfterSuccess()` after commit. **Two routes agree on 12/10:** the tool's `--json` rows, and the module's own header written **before** this work. **Narrow gain, stated narrowly:** `auth` ships **no `data/guards.ts`**, so no `auth.*` guard exists today — what changed is that the **first** one will be enforced, not skipped. **Latent defect found and fixed:** `sidebar/variants` POST ran its guard **inside** the 409-duplicate-name `catch`, so a **blocked** mutation could have been re-reported as a duplicate name. **Proof:** 29 tests, a **real** registered guard driving the **real** handlers — block (write never happens, by call count) and allow (`afterSuccess` fires once), all 12 verbs both ways. `auth` **12 → 0**; total **111 → 99**; wrapper **65 → 77**; guarded **137 → 149**; closure **77+0+35+32+5+0+8+99 = 256**; **79 suites / 682 tests green**; `tsc` exit 0. **Next: `business_rules` (11).** |
 | **13** | **D3** — add the `escalate` outcome to `MutationGuardResult` | The last guard-engine gap; D2-wide's shape is now settled, so it is unblocked. |
 | **14** | **The Metadata Registry** service (GAP A / C5) | The remaining foundation item; everything stacked on it inherits it. |
 
@@ -546,7 +582,9 @@ RED. Routes restored **byte-identical**: undo md5 `256401137b7e0f54fd2b7482232ea
 
 **What the box posts next.** **`ai_assistant` (24 unguarded verbs)** — the Hermes-facing module, where this
 defect and the Hermes tool door meet most directly — then `messages` (17), `communication_channels` (15),
-`auth` (12), and down the measured list. **A trap carried forward:** not every write handler is a
+`auth` (12) — *all four now done: see the `D2-gap` sweep records at the top of this file; `auth` was a
+real `D2-gap` but not an authorization hole (code `8e1632c`)* — and down the measured list. **A trap
+carried forward:** not every write handler is a
 `route.ts` (`translations/put/locales.ts`, `planner/*`, `query_index/{reindex,purge}.ts` export **named**
 verbs). **Walk every `.ts` under `api/`, never glob for `route.ts`** — a name-scan reports a module clean
 while leaving live write routes unguarded.

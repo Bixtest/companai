@@ -12,21 +12,22 @@ would reach data no authorization describes (Hermes map §4.4 (b)).
 
 ## The headline
 
-| | baseline (HEAD `5af76bc`) | after `audit_logs` (`4ef5812`) | after `ai_assistant` (`0af50c8`) | after `messages` (`1f1b60e`) | **now (tool fix, HEAD `1f1b60e`)** |
-|---|---|---|---|---|---|
-| enabled modules with a source tree | **35** | **35** | **35** | **35** | **35** |
-| write verbs across those modules | **256** | **256** | **256** | **256** | **256** |
-| **unguarded write verbs (the `D2-gap`)** | **160** | **158** | **143** | **122** | **111** |
-| auth-flow verbs set aside by design | 8 | 8 | 8 | 8 | 8 |
-| guarded verbs (registry / crud / wrapper / local / re-export) | 88 | 90 | 105 | 126 | **137** |
-| *guarded + auth-flow (the two "not a write to guard" buckets)* | *96* | *98* | *113* | *134* | ***145*** |
+| | baseline (HEAD `5af76bc`) | after `audit_logs` (`4ef5812`) | after `ai_assistant` (`0af50c8`) | after `messages` (`1f1b60e`) | after the `communication_channels` tool fix (`4eead9d`) | **now (`auth`, `8e1632c`)** |
+|---|---|---|---|---|---|---|
+| enabled modules with a source tree | **35** | **35** | **35** | **35** | **35** | **35** |
+| write verbs across those modules | **256** | **256** | **256** | **256** | **256** | **256** |
+| **unguarded write verbs (the `D2-gap`)** | **160** | **158** | **143** | **122** | **111** | **99** |
+| auth-flow verbs set aside by design | 8 | 8 | 8 | 8 | 8 | 8 |
+| guarded verbs (registry / crud / wrapper / local / re-export) | 88 | 90 | 105 | 126 | **137** | **149** |
+| *guarded + auth-flow (the two "not a write to guard" buckets)* | *96* | *98* | *113* | *134* | ***145*** | ***157*** |
 
 **Each column differs from the one before it by exactly the modules fixed so far** — `audit_logs` (2
 verbs), `ai_assistant` (15 verbs), then `messages` (17) + `integrations` (4), which moved to the new
 **local-helper** class rather than becoming wrapper-guarded; then `communication_channels` (11 verbs),
 which likewise was **already guarded** and only needed the **tool** to learn its helper name — check
 the `communication_channels` section: the label said 15 unguarded, the artefact said 11 of those were
-guarded all along. Every figure is recorded because the number a document quotes
+guarded all along; then **`auth` (12 verbs)**, wired through its own
+`beginAuthMutationGuard()` wrapper. Every figure is recorded because the number a document quotes
 must say **which HEAD it was measured at** — carrying a "before" figure forward as if it were current
 is how the `auth`-onward file-count slip happened.
 
@@ -40,14 +41,21 @@ is how the `auth`-onward file-count slip happened.
 > never be quoted without its meaning. **Nothing about the code or the unguarded counts changed** — this
 > is the same figure-discipline rule the row itself is about, applied to the row.
 
-**Guarded by mechanism (computed by the tool, not assumed):** 65 through a module wrapper, 0 through
+**Guarded by mechanism (computed by the tool, not assumed):** **77 through a module wrapper**, 0 through
 `runRouteMutationGuards` directly, 35 through `makeCrudRoute`/`crud.` (the CRUD factory runs
 `collectAndRunGuards()`), **32 through a module-local guard helper** (`messages` 17 + `integrations` 4 +
 `communication_channels` 11 — the `GUARDED_LOCAL` class), 5 through a re-export of a guarded factory,
 **0 through the deprecated pair** (D2-wide left none enabled). **Closure — every write verb is
-accounted for:** 65 + 0 + 35 + 32 + 5 + 0 + 8 (auth-flow, set aside) + 111 (unguarded) = **256**. *(A
+accounted for:** 77 + 0 + 35 + 32 + 5 + 0 + 8 (auth-flow, set aside) + 99 (unguarded) = **256**. *(A
 first draft of this line carried 33/26/29 forward from memory; the tool reads 50/35/5, and the closure
 check is what caught it.)*
+
+> **A second closure scare, and what it actually was (2026-10-07).** After wiring `auth` the closure read
+> **251**, five short. The five were **`webhooks`' 5 `GUARDED_REEXPORT` verbs**, omitted by the summing
+> script — not a missing guard and not a tool defect. The tool's per-module `fields` carries
+> `reexport`; any closure arithmetic must include it. With it, the figures balance exactly and the
+> pre-change value reconstructs to the recorded **137 + 0 + 8 + 111 = 256**, confirming the earlier row
+> rather than contradicting it. Recorded because the same omission will otherwise be made again.
 
 > ⚠ **What `GUARDED_LOCAL` does and does not prove.** It records that the route calls a module-local
 > guard helper — **not** that the helper reaches the registry. `messages`, `integrations`,
@@ -66,7 +74,7 @@ check is what caught it.)*
 | ai_assistant | 19 | 24 | 15 | 0 | 0 | 0 | 0 | **9** ✅ *fixed `0af50c8`; was 24* |
 | messages | 11 | 17 | 0 | 0 | 0 | 17 | 0 | **0** ✅ *fixed `1f1b60e` (registry-bypass, not a D2-gap); was 17* |
 | communication_channels | 15 | 15 | 0 | 0 | 0 | 11 | 0 | **4** ✅ *tool fix (11 were already guarded); was 15* |
-| auth | 21 | 27 | 1 | 0 | 6 | 0 | **12** |
+| auth | 21 | 27 | 13 | 0 | 6 | 0 | **0** ✅ *fixed `8e1632c`; was 12* |
 | business_rules | 5 | 11 | 0 | 0 | 0 | 0 | **11** |
 | inbox_ops | 14 | 14 | 4 | 0 | 0 | 0 | **10** |
 | workflows | 13 | 14 | 4 | 0 | 0 | 0 | **10** |
@@ -130,6 +138,15 @@ conversation). The `loop-override` DELETE guard runs **only on the path that act
 clear has nothing for a guard to govern (the `inbox_ops` precedent). **Every route's own authorization
 is untouched. 30 tests; three disjoint mutations proved they bite; every file byte-identical.**
 
+### `auth` — the third module fixed (`8e1632c`)
+
+**12 unguarded verbs across 10 files** — the largest remaining module, and the first fixed where the
+routes were genuinely **not** unprotected: each already enforced its own capability
+(`metadata.requireFeatures`) and wrote its own audit entry. What was missing was the **structural guard
+chokepoint**, not authorization. All 12 now run through the module's existing
+`beginAuthMutationGuard()`. **12 unguarded verbs → 0.** Full detail — including the latent
+`sidebar/variants` bypass-caught-as-409 the wiring exposed — is in its own section below.
+
 ## Reconciliation against the figures already recorded
 
 Six of the previously-recorded modules agree **exactly**; two did not, and both are now explained.
@@ -139,7 +156,7 @@ slip happened before.
 | module | recorded in BACKLOG | this measurement | verdict |
 |---|---|---|---|
 | `inbox_ops` | 10 of 14 | 10 | ✅ exact |
-| `auth` | 12 of 18 resource-writes | 12 (8 auth-flow verbs set aside by name) | ✅ exact |
+| `auth` | 12 of 18 resource-writes | 12 (8 auth-flow verbs set aside by name) | ✅ exact → **now 0, fixed `8e1632c`** |
 | `directory` | 3 verbs in 1 file | 3 in 1 file | ✅ exact |
 | `feature_toggles` | 0 of 4 | 0 | ✅ exact |
 | `perspectives` | 0 of 3 | 0 | ✅ exact |
@@ -280,6 +297,68 @@ string scan*. It can read a guarded route as `GAP` (this module, `messages`) and
 names (`check-the-premise-before-the-blanket-fix`) before spending files on the fix it implies.** When a
 module ships its own guard helper, teach the tool the helper's name **only after proving the helper
 reaches the registry** — the `messages` fix proved the name alone is not enough.
+
+## `auth` — the first module fixed where the routes were *not* unprotected
+
+`auth` was measured as **12 unguarded resource-writes across 10 files** — the largest remaining module
+on the list, and the fourth-largest after three already fixed. The premise that mattered here was a
+different one from `messages` and `communication_channels`: **the label was right** (these routes really
+did call no guard), but the *implication* a reader would draw from it — "these writes are checked by
+nothing" — **was wrong, and saying so is part of the record.**
+
+**Every one of the twelve already enforced its own capability and wrote its own audit entry:**
+
+| route | write verb | its own authorization today |
+|---|---|---|
+| `authority/delegations` | POST | `metadata.requireFeatures: ['auth.delegations.manage']` + `writeDirectWriteAuditLog` |
+| `authority/denials` | POST | `auth.denials.manage` + audited by `DenialService` |
+| `authority/pending-acts` | POST | `auth.authority.approve` + audited |
+| `authority/record-locks` | POST | `auth.records.lock` + audited |
+| `authority/trust` | POST | `auth.trust.promote` + audited |
+| `roles/acl` | PUT | `auth.acl.manage` + `assertActorCanGrantAcl` + `assertActorCanModifySuperAdminRoleTarget` |
+| `users/acl` | PUT | `auth.acl.manage` + `assertActorCanAccessUserTarget` + `assertActorCanGrantAcl` |
+| `sidebar/preferences` | PUT, DELETE | `auth.sidebar.manage` (role scope) + `enforceCommandOptimisticLock` |
+| `sidebar/variants` | POST | `auth.sidebar.manage` |
+| `sidebar/variants/[id]` | PUT, DELETE | `auth.sidebar.manage` |
+
+So this is **not** "a write nothing checks" in the ordinary sense. What was missing was the **structural
+mutation-guard chokepoint** — the registry. Since `auth` ships **no `data/guards.ts`**, no `auth.*`
+guard exists in the registry today, so the security argument for the fix is narrow and is stated
+narrowly: it means the **first** `auth.*` guard ever written will be **enforced** rather than silently
+skipped. The module's own `api/mutation-guard.ts` already said exactly this before the wiring; the
+finding above is its confirmation, not a new claim.
+
+**What was done:** all twelve verbs now call the module's existing `beginAuthMutationGuard()` — which
+calls `runRouteMutationGuards()`, the registry — placed **after** the route's own auth/validation gates
+and **before** the write, with `guard.runAfterSuccess()` after the write commits. Ten files touched;
+`auth` needs no new wrapper.
+
+**Two independent routes agree on the count** (the discipline the `communication_channels` section
+established): the tool's `--json` rows read **12 GAP across 10 files**, and the module's own
+`mutation-guard.ts` header — written 2026-10-06, *before* this work — records **"12 unguarded
+resource-writes across 10 files"** with the identical six file names. Neither was derived from the
+other.
+
+**Proven by two disjoint mutations, not by a mock.** `api/__tests__/d2-gap-wiring.route.test.ts`
+registers a **real** guard in the global store via `registerMutationGuards()` and drives the **real**
+handlers — 29 cases covering all twelve verbs in both directions:
+
+- **Mutation 1 (block):** the guard refuses (423) and the **write never happens** — asserted by the
+  service stub's call count staying at zero, not by reading the response alone.
+- **Mutation 2 (allow):** the write happens **and** the guard's `afterSuccess` fires **exactly once**.
+
+A mock of `beginAuthMutationGuard` would have proven only that the routes call a function of that name;
+registering a real guard proves the chokepoint is actually reached.
+
+**One latent defect found while wiring, and fixed.** `sidebar/variants` POST ran its guard **inside** the
+`try/catch` that translates a unique-constraint violation into a `409 duplicate_name`. A blocked
+mutation would therefore have been **re-reported as a duplicate name**. The guard is now outside that
+`catch`. (The `variants/[id]` handlers and the five `authority/*` routes had no such trap; checked.)
+
+**Measured after (HEAD `8e1632c`):** `auth` **12 → 0** unguarded (all 12 now `GUARDED_WRAPPER`, wrapper
+class for the module **1 → 13**); **total 111 → 99**; repo-wide wrapper class **65 → 77**; guarded-only
+**137 → 149**. **Closure: 77 + 0 + 35 + 32 + 5 + 0 + 8 + 99 = 256.** `auth` **79 suites / 682 tests
+green**; `tsc --noEmit` clean.
 
 ## Method, so this can be re-run and cannot rot
 
