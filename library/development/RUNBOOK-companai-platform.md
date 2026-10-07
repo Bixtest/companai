@@ -21,7 +21,7 @@ itself). This page covers **only the Companai platform application** that runs o
 |---|---|
 | Public URL | `https://companai.corprorate.com` — expected root response is a **307 redirect to `/login`** |
 | VM | `platform-server` (Ubuntu 24.04.5), reached at the **static** address `172.28.50.2` — see `vm-setup.md` |
-| App container | **`companai-platform-app-1`** (image `open-mercato/app`) |
+| App container | **`companai-platform-app-1`** (image `open-mercato/app:wan`) |
 | Supporting containers | **`mercato-postgres-wan`**, **`mercato-redis-wan`**, **`mercato-meilisearch-wan`** — do **not** remove or recreate casually; the app depends on them |
 | Deployment directory on the VM | **`/opt/companai-platform`** (holds `.env` and `set-host.sh`) |
 | Source of the code | **this repository: `workspace/starting-kit`** (branch `main`) — the Starting Kit, a fork of Open Mercato 0.6.7 |
@@ -180,6 +180,14 @@ as the superadmin.
 - **No production SMTP** is configured; signup is enabled with auto-confirmation (same limitation the
   `vm-setup.md` records for the neighbouring Konsult app). Password-reset email flows therefore do not
   work — the reset above was done out-of-band for exactly that reason.
+- **The running platform predates the guard work (measured 2026-10-07).** The deployed image
+  `open-mercato/app:wan` was **built 2026-10-06 20:51**, while the whole `D2-gap` write-verb sweep was
+  committed **2026-10-06 22:00 → 2026-10-07 14:30** (`4ef5812` … `7494fbe`). So the running platform
+  contains **none** of the sweep's guard fixes. (Caveat, stated honestly: the image is built from
+  `/home/ramzi/build-src`, which is **not** a git checkout, so it cannot be dated from here — it is
+  possible that copy carried uncommitted changes. The commit dates are the reliable fact; the "none"
+  is the safe reading of them.) **A redeploy is what ships the fixes** — and the build half of that
+  path is not yet scripted (§1b, §5).
 - **Deploying a new version of the platform** — see **§1b**: the recreate half is known and safe
   (`docker compose -f docker-compose.fullapp.yml -f docker-compose.wan.yml up -d --no-build app`), but the
   **build** half is not scripted. The image is built on the VM from `/home/ramzi/build-src`, which is a

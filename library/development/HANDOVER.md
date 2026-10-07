@@ -131,7 +131,7 @@ reading it "for context" is how the direction gets buried (see [`../WHAT-WE-ARE-
 | B1 | [`SPECIFICATIONS-DICTIONARY.md`](SPECIFICATIONS-DICTIONARY.md) | **The standard every change is checked against** — the project's MVC. **Read before making any architectural change.** The two clauses that may never be skipped: the permissions question (S2) and the tier question (S4/item 17). §C.2b: the tiers/defaults/fallbacks are a **superadmin setting**, not hardcoded |
 | B1a | [`CORE-BOUNDARY.md`](CORE-BOUNDARY.md) | **What is uncustomisable core vs configurable vs domain packs** — the answer to *"what must nobody be able to change?"* Ring 1 (identity, tenancy, the resource envelope, the policy engine, audit, localization resolution, the contract shapes) moves only by platform release |
 | B1b | [`ARCHITECTURE-structure-permissions.md`](ARCHITECTURE-structure-permissions.md) | **What the AI may do to the platform's own structure** — the object × verb × actor grammar (S11/S12), and why it plugs onto the existing mutation guard |
-| B1c | [`BUILD-ORDER.md`](BUILD-ORDER.md) | **The order — contracts, then foundation, then stack.** The owner's instruction (2026-10-06): fix the sequence so foundational items are not deferred. **Phase −1** = the architecture contracts; **Phase 0** = the foundation completion. **D0 ✅ fixed and proven 2026-10-06** — the generated guard registry now delivers guards (mutation-proven, §2c). **D1 ✅ fixed and proven 2026-10-06** — the tier mapping / defaults / fallbacks are a superadmin setting (`module_configs`), seeded from the dictionary, failing closed (§2d). **The live remaining defect is `D2-wide`:** **106 call sites** in **40 files** still bypass the registry via the `@deprecated` resolver (baseline 198; **every enabled module is retired** — `entities`, `data_sync`, `dictionaries`, `dashboards`, `workflows`, `inbox_ops`, `perspectives`, `translations`, `planner`, `query_index`, `auth`, `directory`, `feature_toggles`; all 106 remaining are in **parked** modules, recorded not migrated). **The plan is per-module, not a blind sweep — build-order §2e; the exact module being worked now is in the JOURNAL's Active-task box** |
+| B1c | [`BUILD-ORDER.md`](BUILD-ORDER.md) | **The order — contracts, then foundation, then stack.** The owner's instruction (2026-10-06): fix the sequence so foundational items are not deferred. **Phase −1** = the architecture contracts; **Phase 0** = the foundation completion. **D0 ✅ fixed and proven 2026-10-06** — the generated guard registry now delivers guards (mutation-proven, §2c). **D1 ✅ fixed and proven 2026-10-06** — the tier mapping / defaults / fallbacks are a superadmin setting (`module_configs`), seeded from the dictionary, failing closed (§2d). **The live remaining defect is `D2-wide`:** **106 call sites** in **40 files** still bypass the registry via the `@deprecated` resolver (baseline 198; **every enabled module is retired** — `entities`, `data_sync`, `dictionaries`, `dashboards`, `workflows`, `inbox_ops`, `perspectives`, `translations`, `planner`, `query_index`, `auth`, `directory`, `feature_toggles`; all 106 remaining are in **parked** modules, recorded not migrated). **(`D2-gap`, the sibling sweep of write routes that reach *no* guard of any kind, is COMPLETE — 0 unguarded across the 35 enabled modules, build-order §2f.)** **The plan is per-module, not a blind sweep — build-order §2e; the exact module being worked now is in the JOURNAL's Active-task box** |
 | B1d | [`CORE-MODULES-REGISTER.md`](CORE-MODULES-REGISTER.md) | **What core modules exist, and whether they are REALLY built** — two-route verified, honest verdicts (COMPLETE / BUILT-UNEVEN / SHELL / ABSENT). Finance & procurement are ABSENT |
 | B1e | [`BLUEPRINT-GAP-ANALYSIS.md`](BLUEPRINT-GAP-ANALYSIS.md) | **What the universal platform blueprint exposed in our plan** — four gaps (resource envelope, core/pack boundary, i18n/a11y contracts, a contracts phase), and what to adapt vs adopt from the generic standard |
 | B2 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | How the three pieces run together, and the dockerisation decision |
@@ -220,11 +220,15 @@ Use [`BACKLOG.md`](BACKLOG.md) for *what is left as a whole* and [`BUILD-ORDER.m
 path `spec ✅ → G-01 ✅ → G-02 ✅ → G-03 ✅` is complete, and `G-07` (the Widget contract), `G-17` (the AI
 emits the Business IR), and `G-21` (the request-outcome taxonomy and its gate) are done. The
 **live defect family** is the guard layer: **D0** ✅ (the generated registry now delivers guards),
-**D1** ✅ (the tier mapping is a superadmin setting), and **D2-wide** enabled modules COMPLETE — **106 call sites, all parked**
-still bypass the registry via the `@deprecated` resolver, being retired module by module (`entities`,
-`data_sync`, `dictionaries`, `dashboards`, `workflows`, `inbox_ops`, `perspectives`, `translations`,
-`planner` and `query_index` done). **D3** (the `escalate` outcome) and the **Metadata Registry**
-remain. The reasoning is BUILD-ORDER §2e; the counts are in BACKLOG.md.
+**D1** ✅ (the tier mapping is a superadmin setting), **D2-wide** COMPLETE for every enabled module — the
+**106 call sites** that still bypass the registry via the `@deprecated` resolver are **all in parked
+modules** (recorded, not migrated; `entities`, `data_sync`, `dictionaries`, `dashboards`, `workflows`,
+`inbox_ops`, `perspectives`, `translations`, `planner` and `query_index` are retired), and **D2-gap**
+**COMPLETE** — the write-verb sweep closed at **0 unguarded across all 35 enabled modules** on
+2026-10-07, including a class the method-based scan could not see (a **GET that writes**; one fixed, two
+read side-effects set aside by name). **D3** (the `escalate` outcome) and the **Metadata Registry**
+remain. The reasoning is BUILD-ORDER §2e/§2f; the counts are in BACKLOG.md and
+`analysis/d2-gap/FINDINGS.md`.
 
 **Verify an item's status is still true before starting it** — the roadmap has been wrong about what
 is already done **four times**.
@@ -481,6 +485,7 @@ they pick which listener the router binds to. Behind the tunnel, use **`http://`
 | [`RUNBOOK-hosting-server-manual.md`](RUNBOOK-hosting-server-manual.md) | **The operator manual** — connecting from the laptop, DNS, directories, databases, phpMyAdmin, SSL, WordPress, deploying another Docker platform |
 | [`RUNBOOK-adding-a-domain-step-by-step.md`](RUNBOOK-adding-a-domain-step-by-step.md) | **The practical walkthrough** — GoDaddy → Cloudflare → tunnel → SSL → a live site, with all three site types |
 | [`RUNBOOK-platform-server.md`](RUNBOOK-platform-server.md) | The VM itself — how it was built, owner tasks, rollback, rebuild from scratch |
+| [`RUNBOOK-companai-platform.md`](RUNBOOK-companai-platform.md) | **THE COMPANAI APP'S OWN DEPLOYMENT** — `https://companai.corprorate.com`: what is deployed and where, Coolify's exact role (reverse proxy only — **not** the deployer), how the app initialises, its accounts, the one credential fault found and fixed 2026-10-07, and the open deploy questions. **Read this before any change that touches the running platform** |
 | [`RUNBOOK-deploying-a-site.md`](RUNBOOK-deploying-a-site.md) | The proxy and the deployment proof in depth — what is and is not proven |
 | [`RUNBOOK-sprint0.md`](RUNBOOK-sprint0.md) | Sprint 0 — running the kit on the laptop |
 
@@ -584,12 +589,12 @@ He has said this more than once, so it is worth repeating:
 **Two groups below. Group A was measured on 2026-10-05. Group B is quoted from older documents
 and was *not* re-measured — treat it as a starting point, not a fact.**
 
-**Group A — measured 2026-10-05 (revision 6):**
+**Group A — measured 2026-10-05 (revision 6), except the two repo HEADs, re-measured 2026-10-07 (revision 10):**
 
 | | |
 |---|---|
-| **Repo 1** (thinking/docs) | `master`, HEAD **`a72fdfe`** — the commit that carries the G-03 docs, **clean** |
-| **Repo 2** (code) | `main`, HEAD **`cafe7d6`** — the commit that carries the G-03 code, **clean** |
+| **Repo 1** (thinking/docs) | `master`, HEAD **`6861138`** — the commit that settles the two write-performing GETs as a named set-aside class (the D2-gap write-verb sweep is COMPLETE). **Re-measured 2026-10-07** (was `a72fdfe`) |
+| **Repo 2** (code) | `main`, HEAD **`7494fbe`** — the commit that wires the `communication_channels` writes, the **last** module of the D2-gap sweep. **Re-measured 2026-10-07** (was `cafe7d6`) |
 | **Codebase shape** | **21 packages, 1 app** (`apps/mercato`) — a monorepo (Yarn 4.17.1 + Turbo) |
 | **Documentation** | `library/` holds **3,470 markdown files**; `LESSONS.md` 3,116 lines (L1–L92); `JOURNAL.md` 4,673 lines; `COOKBOOK.md` 2,948 lines |
 | **The studies** | analysis programme **complete** (batches 0–12, 13 reports); Paperclip + Hermes study **complete** (11 batches, 3,940 lines, 53 lessons) |
@@ -641,9 +646,11 @@ and was *not* re-measured — treat it as a starting point, not a fact.**
   nothing else for *"what is left"*. **The task in hand is not stated here** — it is in the
   **`★ ACTIVE TASK`** box at the top of [`../../JOURNAL.md`](../../JOURNAL.md) (owner's instruction,
   2026-10-06), and the order it comes from is [`BUILD-ORDER.md`](BUILD-ORDER.md). **Done so far:**
-  the four-item critical path (`P0-spec`, `G-01`, `G-02`, `G-03`), plus `G-07`, `G-17` and `G-21` and
-  the foundation items `D0`, `D1` (`S0` also done). **The live defect family in progress is `D2-wide`**
-  — 106 call sites still bypass the guard registry; every enabled module is retired, the rest are parked (recorded, not migrated).
+  the four-item critical path (`P0-spec`, `G-01`, `G-02`, `G-03`), plus `G-07`, `G-17` and `G-21`, the
+  foundation items `D0`, `D1` (`S0` also done), and **`D2-gap` COMPLETE** (the write-verb sweep closed at
+  **0 unguarded across all 35 enabled modules**, 2026-10-07). **The only remaining guard work is `D2-wide`**
+  — 106 call sites still bypass the guard registry, **all in parked modules** (every enabled module is
+  retired; the rest are parked and recorded, not migrated).
   **What is left to do, in one place, is `BACKLOG.md`; what is being done *now* is the JOURNAL box.**
   **The "one of three endings" is the owner's core features_pack (2026-10-06):** a prompt can end
   as a **one-time answer** (nothing saved), a **model proposal** (the prompt needs new structure — a
@@ -692,7 +699,18 @@ alone means this page is broken — **fix the page, not the newcomer.**
 from an older document are not equally current, and mixing them in one table is how this page
 goes wrong. If two older documents disagree on a number, say so — never average them.
 
-*Last updated: 2026-10-06, revision 9 — **the second Paperclip pass is done, and it changed four
+*Last updated: 2026-10-07, revision 10 — **the `D2-gap` write-verb sweep is COMPLETE, and the platform's
+own deployment is now reachable from this page.** The sweep that retired every write route reaching **no
+guard of any kind** closed at **0 unguarded across all 35 enabled modules** (`analysis/d2-gap/measure.js`);
+it also found and fixed a class the method-based scan could not see — a **GET that writes** (one instance
+wired; two read side-effects set aside by name, owner-settled 2026-10-07). §2 step 7, §7's two HEADs and
+§8 were updated in the same change. **New: §5 now points at
+[`RUNBOOK-companai-platform.md`](RUNBOOK-companai-platform.md)** — the Companai app's own deployment at
+`https://companai.corprorate.com`: what is deployed and where, Coolify's exact role, the accounts, and the
+one credential fault found and fixed on 2026-10-07. Docs updated in the same change as the work (COOKBOOK
+rule zero).*
+
+*Earlier, 2026-10-06, revision 9 — **the second Paperclip pass is done, and it changed four
 documents without changing any code.** A new study, [`../paperclip-value-study/`](../paperclip-value-study/),
 read upstream Paperclip through a **wider lens** than the agent study: not *"how do AI workers get
 work"* but *"is any of this worth taking, learning from, or deliberately rejecting?"* Its

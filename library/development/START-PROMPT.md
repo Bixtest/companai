@@ -80,7 +80,9 @@ direction gets buried.
 
 **Tier C — open only where the work needs it:** `AGENT-HALF.md` (before any agent-half work),
 `THREAD-2026-10-05.md` (why the session decided what it did), `NEEDS-YOU.md` / `BLOCKERS.md`,
-the `RUNBOOK-*.md` files (hosting, deployment, domains), `library/ai/ai-first/` (the vision itself —
+the `RUNBOOK-*.md` files (hosting, deployment, domains — **`RUNBOOK-companai-platform.md` is the
+Companai app's own deployment at `https://companai.corprorate.com`: what runs where, its accounts,
+and how to deploy a new version**), `library/ai/ai-first/` (the vision itself —
 read its `README.md` first, the numbers are offset by one), and the study syntheses under
 `library/paperclip-value-study/` and `library/paperclip-hermes-study/`.
 
@@ -165,9 +167,13 @@ to the box and delete it where you found it (owner's instruction, 2026-10-06).
 
 **Context that shaped the order** (read it, it is why the order is what it is): the four-item critical
 path `spec ✅ → G-01 ✅ → G-02 ✅ → G-03 ✅` is complete; `G-07`, `G-17` and `G-21` are done as recorded
-in `BACKLOG.md`. What is now first is not a feature but a **defect family**: the platform *looked*
-finished in the guard layer and was not. `library/development/BLUEPRINT-GAP-ANALYSIS.md` explains the
-rest of the receiving plan, and `CORE-MODULES-REGISTER.md` says honestly which modules are truly built.
+in `BACKLOG.md`. What was first was not a feature but a **defect family**: the platform *looked*
+finished in the guard layer and was not. That family's **`D2-gap` sweep is now COMPLETE** — every write
+route that reached **no guard of any kind** was found and closed (**0 unguarded across the 35 enabled
+modules**, 2026-10-07), including a class the scanner could not see (a **GET that writes**). The only
+guard work left is **`D2-wide`** (106 call sites, all in parked modules — recorded, not migrated).
+`library/development/BLUEPRINT-GAP-ANALYSIS.md` explains the rest of the receiving plan, and
+`CORE-MODULES-REGISTER.md` says honestly which modules are truly built.
 
 **Keep the eye on the prize while you build.** The whole product is one loop: *a need → the AI
 understands it → the AI writes a **Business IR** → the platform **validates** it → it **runs** → the

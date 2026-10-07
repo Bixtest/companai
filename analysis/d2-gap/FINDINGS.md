@@ -1190,7 +1190,8 @@ restored, it reads `WRITE_GET_GUARDED` = 1. The tool reports these in their **ow
 **The critic also found the classifier's first version was too narrow, and that two MORE GETs write.** The
 first cut put the write-GET check behind `!exportsWrite`, so a **mixed-method** file hid its GET write. The
 fixed classifier is independent, and it surfaces **three** write-performing GETs: the callback (**fixed**),
-plus two that were previously invisible and are **OPEN — see the backlog**:
+plus two that were previously invisible and are **set aside by name** (read side-effects, owner-settled
+2026-10-07 — see the backlog):
 
 | route | GET write | disposition |
 |---|---|---|
