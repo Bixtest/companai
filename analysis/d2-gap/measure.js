@@ -224,6 +224,29 @@ function isActorless(relPath) {
   return ACTORLESS_PATHS.some((p) => relPath.endsWith(p));
 }
 
+/**
+ * Read-only "write verbs" are NOT counted as D2-gap. The tool classifies a route
+ * by the HTTP verb it EXPORTS, and the D2-gap definition is "a WRITE there is
+ * checked by nothing". A POST that performs no write is neither a gap nor a
+ * place to wire a guard: a guard's `afterSuccess` would fire for a mutation that
+ * never happened, and its `validate` would gate a read.
+ *
+ * `workflows/api/instances/validate-start/route.ts` is the case that forced this
+ * class: its POST merely evaluates START pre-conditions. MEASURED, not assumed —
+ * `lib/start-validator.ts` performs no entity-manager write, and
+ * `validateWorkflowStart` calls `ruleEngine.executeRuleByRuleId(...)` with
+ * `dryRun: true`, under which `logRuleExecution` (the only writer in that path)
+ * is skipped, so no `RuleExecutionLog` row is created. It is set aside by name,
+ * not wired. Re-check if the endpoint ever gains a write.
+ */
+const READ_ONLY_PATHS = [
+  'workflows/api/instances/validate-start/route.ts',
+];
+
+function isReadOnly(relPath) {
+  return READ_ONLY_PATHS.some((p) => relPath.endsWith(p));
+}
+
 function classify(file, moduleId) {
   const raw = fs.readFileSync(file, 'utf8');
   const code = stripComments(raw);
@@ -256,6 +279,8 @@ function classify(file, moduleId) {
   if (cls === 'UNGUARDED' && isAuthFlow(rel)) cls = 'AUTH_FLOW_SET_ASIDE';
   // An actor-less endpoint has no user to evaluate the guard set against.
   if (cls === 'UNGUARDED' && isActorless(rel)) cls = 'ACTORLESS_SET_ASIDE';
+  // A POST that writes nothing is not a D2-gap (nothing to guard).
+  if (cls === 'UNGUARDED' && isReadOnly(rel)) cls = 'READ_ONLY_SET_ASIDE';
 
   // Verbs this file exports. A guarded file's verbs are guarded by whatever
   // mechanism it uses; an UNGUARDED file's verbs are the D2-gap exposure.
@@ -299,6 +324,7 @@ for (const id of enabled) {
     deprecatedVerbs: sum((r) => r.cls === 'GUARDED_DEPRECATED'),
     authFlowVerbs: sum((r) => r.cls === 'AUTH_FLOW_SET_ASIDE'),
     actorlessVerbs: sum((r) => r.cls === 'ACTORLESS_SET_ASIDE'),
+    readOnlyVerbs: sum((r) => r.cls === 'READ_ONLY_SET_ASIDE'),
     fields: {
       wrapper: sum((r) => r.cls === 'GUARDED_WRAPPER'),
       registry: sum((r) => r.cls === 'GUARDED_REGISTRY'),
@@ -309,6 +335,7 @@ for (const id of enabled) {
       unguarded: sum((r) => r.cls === 'UNGUARDED'),
       authFlow: sum((r) => r.cls === 'AUTH_FLOW_SET_ASIDE'),
       actorless: sum((r) => r.cls === 'ACTORLESS_SET_ASIDE'),
+      readOnly: sum((r) => r.cls === 'READ_ONLY_SET_ASIDE'),
     },
   };
 }
@@ -348,6 +375,8 @@ const totalSetAside = enabled.reduce((a, id) => a + (perModule[id]?.authFlowVerb
 console.log(`(plus ${totalSetAside} auth-flow verbs set aside by design — login/logout/reset/session/profile/locale/feature-check)`);
 const totalActorless = enabled.reduce((a, id) => a + (perModule[id]?.actorlessVerbs || 0), 0);
 console.log(`(plus ${totalActorless} actor-less verbs set aside by design — public endpoints with no session, guarded by their own signature/rate-limit mechanisms)`);
+const totalReadOnly = enabled.reduce((a, id) => a + (perModule[id]?.readOnlyVerbs || 0), 0);
+console.log(`(plus ${totalReadOnly} read-only "write verb" set aside by design — a POST that performs no write, so there is nothing to guard)`);
 console.log('');
 console.log('UNGUARDED FILES (with the verbs each exposes):');
 for (const r of rows.filter((r) => r.cls === 'UNGUARDED')) {

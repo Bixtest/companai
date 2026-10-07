@@ -12,15 +12,16 @@ would reach data no authorization describes (Hermes map §4.4 (b)).
 
 ## The headline
 
-| | baseline (HEAD `5af76bc`) | after `audit_logs` (`4ef5812`) | after `ai_assistant` (`0af50c8`) | after `messages` (`1f1b60e`) | after the `communication_channels` tool fix (`4eead9d`) | after `auth` (`8e1632c`) | after `business_rules` (`c9a6bb6`) | after `inbox_ops` (`0350563`) | **now (the `notifications` tool fix, `0350563`)** |
-|---|---|---|---|---|---|---|---|---|---|
-| enabled modules with a source tree | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** |
-| write verbs across those modules | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** |
-| **unguarded write verbs (the `D2-gap`)** | **160** | **158** | **143** | **122** | **111** | **99** | **88** | **78** | **68** |
-| auth-flow verbs set aside by design | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 |
-| actor-less verbs set aside by design | — | — | — | — | — | — | — | **1** | **1** |
-| guarded verbs (registry / crud / wrapper / local / re-export) | 88 | 90 | 105 | 126 | **137** | **149** | **160** | **169** | **179** |
-| *guarded + auth-flow (the two "not a write to guard" buckets)* | *96* | *98* | *113* | *134* | ***145*** | ***157*** | ***168*** | ***177*** | ***187*** |
+| | baseline (HEAD `5af76bc`) | after `audit_logs` (`4ef5812`) | after `ai_assistant` (`0af50c8`) | after `messages` (`1f1b60e`) | after the `communication_channels` tool fix (`4eead9d`) | after `auth` (`8e1632c`) | after `business_rules` (`c9a6bb6`) | after `inbox_ops` (`0350563`) | after the `notifications` tool fix (`46aec05`) | **now (the `workflows` fix, `a9ecd21`)** |
+|---|---|---|---|---|---|---|---|---|---|---|
+| enabled modules with a source tree | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** |
+| write verbs across those modules | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** |
+| **unguarded write verbs (the `D2-gap`)** | **160** | **158** | **143** | **122** | **111** | **99** | **88** | **78** | **68** | **58** |
+| auth-flow verbs set aside by design | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 |
+| actor-less verbs set aside by design | — | — | — | — | — | — | — | **1** | **1** | **1** |
+| read-only "write verb" set aside by design | — | — | — | — | — | — | — | — | — | **1** |
+| guarded verbs (registry / crud / wrapper / local / re-export) | 88 | 90 | 105 | 126 | **137** | **149** | **160** | **169** | **179** | **188** |
+| *guarded + the two set-aside buckets* | *96* | *98* | *113* | *134* | ***145*** | ***157*** | ***168*** | ***177*** | ***187*** | ***197*** |
 
 **Each column differs from the one before it by exactly the modules fixed so far** — `audit_logs` (2
 verbs), `ai_assistant` (15 verbs), then `messages` (17) + `integrations` (4), which moved to the new
@@ -36,8 +37,14 @@ column moves the unguarded count by **10** but the guarded count by **9**, and i
 set-aside row**. Finally **`notifications` (10 verbs)** — the **second tool-only correction in the
 sweep** (after `communication_channels`): the label said 10 unguarded, but all ten routes already called
 a module-local **registry-backed** helper (`runGuardedNotificationWrite`, or one of the two factories
-built on it). No repo change; the **tool** learned the helper's name. Every figure is recorded because
-the number a document quotes
+built on it). No repo change; the **tool** learned the helper's name. Then **`workflows` (10 verbs)** —
+wired through the module's **existing** `beginWorkflowsMutationGuard()`, which until now only the three
+definition-write routes used: **9 of the ten** are genuine writes and are now guarded; the **10th
+`instances/validate-start` POST performs no write** (a `dryRun: true` rule evaluation) and is set aside
+in a **new `READ_ONLY_SET_ASIDE`** class rather than wired — a guard there would gate a read and fire its
+after-success for a mutation that never happened. That 10th is why the `workflows` column moves the
+unguarded count by **10** but the guarded count by **9**, and adds a **second set-aside row**. Every
+figure is recorded because the number a document quotes
 must say **which HEAD it was measured at** — carrying a "before" figure forward as if it were current
 is how the `auth`-onward file-count slip happened.
 
@@ -51,16 +58,17 @@ is how the `auth`-onward file-count slip happened.
 > never be quoted without its meaning. **Nothing about the code or the unguarded counts changed** — this
 > is the same figure-discipline rule the row itself is about, applied to the row.
 
-**Guarded by mechanism (computed by the tool, not assumed):** **97 through a module wrapper**, 0 through
+**Guarded by mechanism (computed by the tool, not assumed):** **106 through a module wrapper**, 0 through
 `runRouteMutationGuards` directly, 35 through `makeCrudRoute`/`crud.` (the CRUD factory runs
 `collectAndRunGuards()`), **42 through a module-local guard helper** (`messages` 17 + `integrations` 4 +
 `communication_channels` 11 + `notifications` 10 — the `GUARDED_LOCAL` class), 5 through a re-export of a
 guarded factory, **0 through the deprecated pair** (D2-wide left none enabled). **Closure — every write
-verb is accounted for:** 97 + 0 + 35 + 42 + 5 + 0 + 8 (auth-flow, set aside) + 68 (unguarded) + 1
-(actor-less, set aside) = **256**. *(A first draft of this line carried 33/26/29 forward from memory; the
-tool reads 50/35/5, and the closure check is what caught it. The `actor-less` term was added 2026-10-07
-with the `inbox_ops` fix — see the class note below. The local-helper term grew 32 → 42 the same day with
-the `notifications` tool fix.)*
+verb is accounted for:** 106 + 0 + 35 + 42 + 5 + 0 + 8 (auth-flow, set aside) + 1 (actor-less, set aside)
++ 1 (read-only, set aside) + 58 (unguarded) = **256**. *(A first draft of this line carried 33/26/29
+forward from memory; the tool reads 50/35/5, and the closure check is what caught it. The `actor-less`
+term was added 2026-10-07 with the `inbox_ops` fix — see the class note below. The local-helper term grew
+32 → 42 the same day with the `notifications` tool fix. The `read-only` term was added 2026-10-07 with the
+`workflows` fix — see the class note below.)*
 
 > **A second closure scare, and what it actually was (2026-10-07).** After wiring `auth` the closure read
 > **251**, five short. The five were **`webhooks`' 5 `GUARDED_REEXPORT` verbs**, omitted by the summing
@@ -89,7 +97,7 @@ the `notifications` tool fix.)*
 | auth | 21 | 27 | 13 | 0 | 6 | 0 | 0 | **0** ✅ *fixed `8e1632c`; was 12* |
 | business_rules | 5 | 11 | 11 | 0 | 0 | 0 | 0 | **0** ✅ *fixed `c9a6bb6`; was 11* |
 | inbox_ops | 14 | 14 | 13 | 0 | 0 | 0 | 0 | **0** ✅ *fixed `0350563`; was 10 — 9 wired, 1 actor-less set aside* |
-| workflows | 13 | 14 | 4 | 0 | 0 | 0 | 0 | **10** |
+| workflows | 13 | 14 | 13 | 0 | 0 | 0 | 0 | **0** ✅ *fixed `a9ecd21`; was 10 — 9 wired, 1 read-only set aside* |
 | notifications | 10 | 10 | 0 | 0 | 0 | 10 | 0 | **0** ✅ *tool fix (10 were already guarded by a registry-backed local helper); was 10* |
 | attachments | 4 | 8 | 0 | 0 | 0 | 0 | **8** |
 | search | 7 | 7 | 0 | 0 | 0 | 0 | **7** |
@@ -322,11 +330,70 @@ that consume a factory). `notifications` **10 → 0** unguarded, all 10 now `GUA
 > the alternative here was to wrap ten routes that were already covered, adding twenty call sites and a
 > false security narrative.
 
-**Next module: `workflows` (10 unguarded verbs — the sole remaining double-digit module).**
+### `workflows` — a REAL D2-gap, closed (2026-10-07; fixed `a9ecd21`)
+
+**This one is a genuine gap, not a label error — and it introduces a THIRD set-aside class.** The tool
+read `workflows` as **10 unguarded verbs across 10 files**, the joint-largest remaining with
+`notifications`. Unlike `notifications`, the artefact **agrees**: the wrapper `beginWorkflowsMutationGuard`
+exists (`api/mutation-guard.ts`) but only the **three definition-write routes** called it. Its own header
+records the gap verbatim — *"this wrapper is NOT used by every `workflows` write route … That is a
+pre-existing gap"* — so **the premise was measured and the fix was real**.
+
+**Nine of the ten are genuine writes and are now wired**, each at the established placement (after the
+route's own auth/permission/validation gates, immediately before the write; `runAfterSuccess` after the
+write commits):
+
+| route | resourceKind | operation | writeMarker |
+|---|---|---|---|
+| `definitions/route.ts` POST | `workflows.definition` | `create` | `em.persist` (resourceId rebound from `'new'`) |
+| `instances/route.ts` POST | `workflows.instance` | `custom` | `startWorkflow` |
+| `instances/[id]/advance` POST | `workflows.instance` | `custom` | `executeTransition` |
+| `instances/[id]/cancel` POST | `workflows.instance` | `update` | `completeWorkflow` |
+| `instances/[id]/retry` POST | `workflows.instance` | `update` | `executeWorkflow` |
+| `instances/[id]/signal` POST | `workflows.instance` | `custom` | `sendSignal` |
+| `signals/route.ts` POST | `workflows.instance` | `custom` | `sendSignalByCorrelationKey` (keyed on the correlation key) |
+| `tasks/[id]/claim` POST | `workflows.task` | `custom` | `claimUserTask` |
+| `tasks/[id]/complete` POST | `workflows.task` | `update` | `completeUserTask` |
+
+**The tenth verb is set aside in a NEW class — `READ_ONLY_SET_ASIDE`.** `instances/validate-start` POST
+exports a write verb but **performs no write**: `lib/start-validator.ts` touches no entity manager, and
+`validateWorkflowStart` calls `ruleEngine.executeRuleByRuleId(..., { dryRun: true })`, under which the
+only writer in that path (`logRuleExecution`) is skipped — so no `RuleExecutionLog` row is created. The
+D2-gap definition is *"a WRITE there is checked by nothing"*; a route that writes nothing is neither a
+gap nor a place to wire a guard (a guard would gate a read and fire its after-success for a mutation that
+never happened). It is set aside **by name** (`READ_ONLY_PATHS` in `measure.js`), measured rather than
+assumed, so it is neither wired nor silently counted as a gap.
+
+**Two routes agree on the count and the wiring.** **(1)** the tool's `--json` rows now read **0 GAP / 13
+wrapper verbs** for `workflows`; **(2)** a hand scan of all 22 `.ts` files under `api/` (excluding tests)
+finds **13 files that export a write verb — 12 call `beginWorkflowsMutationGuard`, and the only one that
+does not is `instances/validate-start/route.ts`**, the read-only POST just described. Two methods that
+share no failure mode agree exactly: `workflows` has **zero unguarded writes**.
+
+**A third, independent route — the new proof suite.** `api/__tests__/d2-gap-wiring.route.test.ts`
+registers a **real** guard in the global store (leaving `runRouteMutationGuards` **unmocked**) and drives
+the **real** handlers, asserting **both directions for all nine verbs**: a **block** verdict stops the
+write (its library function is never reached, no after-success) and an **allow** verdict runs it (library
+called once, after-success fires once). **18/18 green.** The suite was then **mutation-proved** — three
+disjoint mutations, each with a distinct failure signature:
+
+1. neuter the guard's block path → **9 block cases RED**, all 9 allow green;
+2. drop one route's guard (`signals`) → **only that route RED, both directions**;
+3. sever the handle's `afterSuccess` → **9 allow cases RED**, all 9 block green.
+
+Every mutated file was restored **byte-identical** (md5 unchanged against the pre-mutation record).
+
+**Measured after (HEAD `a9ecd21`):** `workflows` **10 → 0** in the GAP column (wrapper class for the
+module **4 → 13**; 1 verb newly in the read-only class); **total D2-gap 68 → 58**; repo-wide wrapper
+class **97 → 106**; guarded-only **179 → 188**; closure **106 + 0 + 35 + 42 + 5 + 0 + 8 + 1 + 1 + 58 =
+256**. **Green:** whole `workflows` suite **46 suites / 668 tests**; core `tsc --noEmit` **exit 0**.
+
+**Next module: `attachments` (8 unguarded verbs — the largest single-digit module left; no double-digit
+module remains).**
 
 ## Reconciliation against the figures already recorded
 
-Six of the previously-recorded modules agree **exactly**; three did not, and all three are now explained.
+Eight of the previously-recorded modules agree **exactly**; two did not, and both are now explained.
 This cross-check is the point: a figure carried forward unchecked is how the `auth`-onward file-count
 slip happened before.
 
@@ -342,7 +409,7 @@ slip happened before.
 | `translations` | 0 of 3 | 0 | ✅ exact |
 | `planner` | 0 of 2 | 0 | ✅ exact |
 | `query_index` | 0 of 2 | 0 | ✅ exact |
-| **`workflows`** | **13 of 19** | **10** | ❌ **the record was wrong** |
+| **`workflows`** | **13 of 19** | **10** | ❌ **the record was wrong** → **now 0, fixed `a9ecd21` (9 wired, 1 read-only set aside)** |
 
 ### Why `workflows` was wrong — two routes agree
 
