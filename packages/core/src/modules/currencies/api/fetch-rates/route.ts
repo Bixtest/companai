@@ -6,6 +6,7 @@ import { createRequestContainer } from '@open-mercato/shared/lib/di/container'
 import { getAuthFromRequest } from '@open-mercato/shared/lib/auth/server'
 import { RateFetchingService } from '../../services/rateFetchingService'
 import { CurrencyFetchConfig } from '../../data/entities'
+import { beginCurrenciesMutationGuard } from '../mutation-guard'
 
 export const metadata = {
   requireAuth: true,
@@ -34,6 +35,20 @@ export async function POST(req: NextRequest) {
     const { date, providers } = body
 
     const fetchDate = date ? new Date(date) : new Date()
+
+    const guard = await beginCurrenciesMutationGuard({
+      container,
+      req,
+      tenantId: auth.tenantId,
+      organizationId: auth.orgId,
+      userId: auth.sub,
+      resourceKind: 'currencies.exchange_rate',
+      // Rates are keyed by date; the fetch date is the stable handle.
+      resourceId: fetchDate.toISOString(),
+      operation: 'create',
+      mutationPayload: { date: fetchDate.toISOString(), providers: providers ?? null },
+    })
+    if (guard.blockedResponse) return guard.blockedResponse
 
     const result = await fetchService.fetchRatesForDate(
       fetchDate,
@@ -77,6 +92,8 @@ export async function POST(req: NextRequest) {
 
     // Flush all config updates at once
     await em.flush()
+
+    await guard.runAfterSuccess()
 
     return NextResponse.json(result)
   } catch (err: any) {

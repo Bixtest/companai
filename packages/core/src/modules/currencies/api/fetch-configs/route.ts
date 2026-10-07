@@ -13,6 +13,7 @@ import {
   deleteFetchConfig,
 } from '../../commands/fetch-configs'
 import { currencyFetchConfigCreateSchema, currencyFetchConfigUpdateSchema } from '../../data/validators'
+import { beginCurrenciesMutationGuard } from '../mutation-guard'
 
 export const metadata = {
   GET: { requireAuth: true, requireFeatures: ['currencies.fetch.view'] },
@@ -71,11 +72,28 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
     }
 
+    const guard = await beginCurrenciesMutationGuard({
+      container,
+      req,
+      tenantId: auth.tenantId,
+      organizationId: auth.orgId,
+      userId: auth.sub,
+      resourceKind: 'currencies.currency_fetch_config',
+      // The row does not exist yet; the provider is the stable handle the
+      // guard set can be evaluated against. The created id is re-bound below.
+      resourceId: String((body as { provider?: unknown })?.provider ?? ''),
+      operation: 'create',
+      mutationPayload: (body as Record<string, unknown>) ?? null,
+    })
+    if (guard.blockedResponse) return guard.blockedResponse
+
     const config = await createFetchConfig(em, body, {
       tenantId: auth.tenantId,
       organizationId: auth.orgId,
       userId: auth.sub,
     })
+
+    await guard.runAfterSuccess()
 
     return NextResponse.json({ config }, { status: 201 })
   } catch (err: any) {
@@ -123,11 +141,26 @@ export async function PUT(req: NextRequest) {
       })
     }
 
+    const guard = await beginCurrenciesMutationGuard({
+      container,
+      req,
+      tenantId: auth.tenantId,
+      organizationId: auth.orgId,
+      userId: auth.sub,
+      resourceKind: 'currencies.currency_fetch_config',
+      resourceId: String(id),
+      operation: 'update',
+      mutationPayload: (data as Record<string, unknown>) ?? null,
+    })
+    if (guard.blockedResponse) return guard.blockedResponse
+
     const config = await updateFetchConfig(em, id, data, {
       tenantId: auth.tenantId,
       organizationId: auth.orgId,
       userId: auth.sub,
     })
+
+    await guard.runAfterSuccess()
 
     return NextResponse.json({ config })
   } catch (err: any) {
@@ -171,11 +204,25 @@ export async function DELETE(req: NextRequest) {
       })
     }
 
+    const guard = await beginCurrenciesMutationGuard({
+      container,
+      req,
+      tenantId: auth.tenantId,
+      organizationId: auth.orgId,
+      userId: auth.sub,
+      resourceKind: 'currencies.currency_fetch_config',
+      resourceId: String(id),
+      operation: 'delete',
+    })
+    if (guard.blockedResponse) return guard.blockedResponse
+
     await deleteFetchConfig(em, id, {
       tenantId: auth.tenantId,
       organizationId: auth.orgId,
       userId: auth.sub,
     })
+
+    await guard.runAfterSuccess()
 
     return NextResponse.json({ success: true })
   } catch (err: any) {
