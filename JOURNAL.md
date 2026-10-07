@@ -30,30 +30,87 @@ log.** Everything else (HANDOVER, START-PROMPT, README, BOOKMARKS, BACKLOG) poin
 
 ---
 
-### ▶ NOW — `D2-gap`: the write routes that call **no** guard. **The write-verb sweep is COMPLETE — 0 unguarded across all 35 enabled modules.** SIXTEEN modules DONE (`audit_logs`, `ai_assistant`, `auth`, `business_rules`, `inbox_ops`, `workflows`, `attachments`, `search`, `directory`, `progress`, `webhooks`, `configs`, `currencies`, `entities`, `scheduler`, `communication_channels`), plus TWO findings that were NOT D2-gaps (a registry-bypass class; a mis-labelled module), ONE re-measure that closed four "leftover-verb" modules (two wired, two set aside as read-only), and ONE module set aside as actor-less (`onboarding`). The LAST module `communication_channels` closed **4 → 0** (1 wired `test-seed`, 2 actor-less set aside, 1 read-only set aside). A hostile-critic pass then found a **NEW class the scan could not see — a GET that WRITES**: one instance fixed (the `communication_channels` oauth callback), and **two set aside as a named class — read side-effects** (`dashboards/api/layout`, `messages/api/[id]`), owner-settled 2026-10-07; the tool now reports the class in its own bucket.
+### ▶ NOW — `D3`: give the guard result a third outcome, **`escalate`**. **IMPLEMENTED AND PROVEN (code uncommitted this session; plan [`library/development/PLAN-D3-escalate-outcome.md`](library/development/PLAN-D3-escalate-outcome.md)).**
 
 > **If you are a new agent, read only this block to know your job.** Everything below the box is the
 > history and the queue; this is the work in hand.
 
-**What happened before this box (2026-10-06, this session).** The `D2-wide` sweep of **every enabled
-module** is COMPLETE (`feature_toggles`, code `5af76bc`). We have now **measured `D2-gap` across every
-enabled module** (`analysis/d2-gap/measure.js`, FINDINGS.md) and **fixed the first module**.
+**What `D3` is, in plain words.** Today the platform's write check ("mutation guard") can answer only
+**yes** or **no**: `MutationGuardResult.ok` is a boolean. So a guard that wants a *person* to look at a
+change before it happens has to lie — it sends `ok:false`, a **hard refusal**, which collapses two
+different facts ("this is forbidden" and "hold this for review") into one and turns a quiet review tier
+back into a wall. **D3 adds the third answer: `escalation`** — *"do not run this yet; a person must
+decide."* It is `ok:true` **and** an `escalation` block, and the runner treats it as **not performed**:
+no mutation runs, no `afterSuccess` fires, no payload is offered back. Fail-closed both ways.
 
-**What `D2-gap` is, in plain words.** The platform checks every write before it happens (who may change
-what). `D2-wide` fixed the code that still called an **old, deprecated** version of that check — which
-**silently skips the real guard registry**. `D2-gap` is the other half: write routes that call **no
-check of any kind at all** — not the new one, not the old one. A write there is guarded by **nothing**,
-so it is exactly the surface a Hermes tool call reaches with no authorization describing it (Hermes map
-§4.4 (b); `S-02`). **A module can read "0 remaining on `D2-wide`" and still be wide open** — that phrase
-means "no deprecated resolver left", never "the module is guarded".
+**Why the guard cannot file the pending act itself (and does not try).** The platform already has the
+pending-approval machinery (`authority_pending_acts`, `PendingActService.hold()`, `ActReviewService`),
+but it is fed by the **command path** (`auth.authority-command-gate` in `interceptors.ts`) because a pending
+act needs a **`commandId`** and a **`capabilityId`** to be replayed on approval. A mutation guard has
+**neither**. So the guard **defers** — it returns the escalation; creating the act stays exactly where
+the command identity already lives. **Owner-confirmed: guard-level escalate, additive only, no
+command-path change.**
+
+**What was built (additive — a guard that never sets `escalation` behaves exactly as before):**
+- `packages/shared/src/lib/crud/mutation-guard-registry.ts` — `MutationGuardEscalation` `{gate, rule, because, status?}`;
+  `MutationGuardResult.escalation?`; `runMutationGuards` returns early on it (ok:true, **no** `afterSuccess`,
+  **no** `modifiedPayload`, short-circuits the chain); the runner's return is now the **named** type
+  `MutationGuardRunResult`.
+- `packages/shared/src/lib/crud/route-mutation-guard.ts` — `RouteMutationGuardEscalated`
+  `{escalated:true, ok:true, errorStatus, escalation, response}`; a literal `escalated:false` discriminant on
+  `Blocked`/`Passed` so `!result.ok || result.escalated` narrows in one condition; default status **202**
+  (accepted, held — never a 2xx that implies the write landed).
+- `packages/shared/src/lib/crud/factory.ts` — all **6** direct `runMutationGuards` write sites
+  (create · update ×2 · delete ×2) return `{status:'pending_review', escalation}` when the guard escalates.
+- **Every consumer** widened to `!guardResult.ok || guardResult.escalated` — the wrapper-path callers, plus
+  the **raw-registry** callers the hostile-critic pass exposed (below).
+
+**Step 5 proof (RED-then-GREEN, 3 layers — registry · route wrapper · factory mutation proof).** 11 new
+assertions: an escalating guard yields `escalated:true`, **no** `runAfterSuccess`, **no** `modifiedPayload`,
+**no** DB write, **no** event, **202 `pending_review`** — on POST, PUT **and** DELETE. All 11 go **RED** when
+the escalation branches are neutralised (`if (false)`) and pass **byte-identically** after restore (md5
+verified). **shared: 194 suites / 2278 tests green.** Typecheck **shared · core · scheduler · search ·
+webhooks = 0 errors**. Core suite: **616 passed / 1 failed**, and the 1 failure is **pre-existing** —
+`optimistic-lock-command-coverage.test.ts` fails identically on clean `HEAD` (proven by stash): its
+`DIRECT_HELPER_CALL` regex matches `…WithGuards(` and a **comment** trips it.
+
+**The hostile-critic pass found a REAL hole, and it was closed.** The wrapper path was escalation-aware, but
+**7 raw-registry sites** called `runMutationGuards` **directly** through helpers whose *declared* return type
+**dropped `escalation`** — so callers checked only `!ok` and **would have committed on an escalate**:
+`configs/api/cache/route.ts`, `{staff,messages,payment_gateways,integrations}/api/guards.ts`, and
+`sales/quotes/{send,convert}/route.ts`. **Fix at the source:** all 6 helpers now return
+`MutationGuardRunResult`; **36 consume sites across 32 files** widened; `configs/cache` (the one inline call)
+got an explicit branch. **Parked-module caveat, stated plainly:** `staff`/`payment_gateways`/`sales` are
+**PARKED** — excluded from `tsconfig.json`, tests not run — so 21 of the 36 sites are proven only by an
+isolated `tsc --noEmit` (**0 syntax errors**) + review, **not** by the package typecheck. The `messages` (11)
+and `integrations` (4) sites are in **enabled** modules and ran green (71 suites / 378 tests).
+
+**What is deliberately NOT done (additive-only boundary).** No guard in the repo emits `escalation` yet —
+the feature is **latent by design**; what changed is that the **first** escalating guard will be honoured,
+not ignored. No `authority_pending_acts` row is created from the guard path (see above).
+
+**Next after D3 (BUILD-ORDER order).** The **Metadata Registry (GAP A / `C5`)** — the owner/dependents/access
+service over the Business Model Kernel view — then **`S-02`**.
+
+---
+
+### ✅ D2-gap — the write routes that called **no** guard. **COMPLETE — the write-verb sweep closed 0 unguarded across all 35 enabled modules** (code `7494fbe`; analysis `analysis/d2-gap/`; full chain in `BUILD-ORDER.md` §2f and `BACKLOG.md` item **D2-gap**).
+
+SIXTEEN modules DONE (`audit_logs`, `ai_assistant`, `auth`, `business_rules`, `inbox_ops`, `workflows`,
+`attachments`, `search`, `directory`, `progress`, `webhooks`, `configs`, `currencies`, `entities`,
+`scheduler`, `communication_channels`), plus TWO findings that were NOT D2-gaps (a registry-bypass class; a
+mis-labelled module), ONE re-measure that closed four "leftover-verb" modules (two wired, two set aside as
+read-only), and ONE module set aside as actor-less (`onboarding`). The LAST module `communication_channels`
+closed **4 → 0**. A hostile-critic pass then found a **NEW class the scan could not see — a GET that
+WRITES**: one fixed (the `communication_channels` oauth callback), two set aside as a named class — read
+side-effects (`dashboards/api/layout`, `messages/api/[id]`), owner-settled 2026-10-07.
 
 **The measurement (re-runnable, so it cannot rot):** 35 enabled modules · **256 write verbs** ·
-**0 unguarded now — the write-verb sweep is COMPLETE** (**4 before the `communication_channels` fix**, **6 before the `scheduler` fix + `onboarding` set-aside**, **10 before the `entities` fix**, **14 before the `currencies` fix**, **18 before the `configs` fix**, **25 before the `webhooks` fix**, **34 before the four-leftover-modules fix (`directory`/`progress` wired, `dashboards`/`data_sync` set aside)**, **41 before the `search` fix**, **50 before the `attachments` fix**, **58 before the `workflows` fix**, **68 before the `notifications` tool fix**, **78 before the `inbox_ops` fix**, **88 before the `business_rules` fix**, **99 before the `auth` fix**, **111 before the `communication_channels` tool fix**, **122 before the `messages` registry-bypass fix**, **143 before the `ai_assistant` fix**, **160 before the `audit_logs` fix**) · 8 auth-flow verbs set aside · **5 actor-less verbs set aside** (`inbox_ops` `webhook/inbound`; `webhooks` `api/inbound/[endpointId]`; `onboarding` `api/post/onboarding`; `communication_channels` `post/webhook/[provider]` + `post/webhooks/gmail`) · **7 read-only "write verbs" set aside** (`workflows` `instances/validate-start`; `dashboards` `widgets/data` + `widgets/data/batch`; `data_sync` `validate`; `configs` `system-status` + `module-telemetry`; `communication_channels` `post/oauth/[provider]/initiate`) · **9 guard-system verbs set aside** (`ai_assistant` session/flow + pending-action gate) · **227 guarded** (142 wrapper · 1 registry · 35 crud · 43 local helper · 6 re-export; 256 = guarded + the four set-aside buckets, stated so the figure cannot be quoted without its meaning; closure 142+1+35+43+6+0+8+5+7+9+0+0 = 256). **PLUS a newly-named class the method-based scan cannot count as a "write verb" — a GET that WRITES: 3 found, 0 unguarded — 1 fixed, 2 set aside by name as read side-effects (owner-settled 2026-10-07)** (`dashboards/api/layout`, `messages/api/[id]`); reported on its own headline line.
-Per module, unguarded: `ai_assistant`
-**9 (now FIXED)** · `messages` **0 (FIXED — registry-bypass, see below)** · `communication_channels` **0 (now FIXED — 1 wired `test-seed`, 2 actor-less set aside (the two webhooks), 1 read-only set aside (oauth initiate); see Fix 18)** · `auth` **0 (now FIXED — see Fix 5)** · `business_rules` **0 (now FIXED — see Fix 6)** · `inbox_ops` **0 (now FIXED — 9 wired, 1 actor-less set aside; see Fix 7)** · `notifications` **0 (now FIXED — tool only; all 10 were already guarded; see Fix 8)** ·
-`workflows` **0 (now FIXED — 9 wired, 1 read-only set aside; see Fix 9)** · `attachments` **0 (now FIXED — all 8 wired through a new wrapper; see Fix 10)** · `search` **0 (now FIXED — all 7 wired through a new wrapper; see Fix 11)** · `progress` **0 (now FIXED — 3 wired through a NEW wrapper; see Fix 12)** · `directory` **0 (now FIXED — 3 wired into the existing wrapper; see Fix 12)** · `dashboards` **0 (now SET ASIDE — 2 read-only; see Fix 12)** · `webhooks` **0 (now FIXED — 5 wired through a NEW wrapper, 1 re-export shim re-classified, 1 actor-less set aside; see Fix 13)** · `configs` **0 (now FIXED — 1 wired through a NEW wrapper, 1 already registry-guarded inline (tool blind spot), 2 read-only set aside; see Fix 14)** · `currencies` **0 (now FIXED — all 4 wired through a NEW wrapper; the label did NOT split; see Fix 15)** · `entities` **0 (now FIXED — all 4 wired through the module's EXISTING wrapper; 2 genuine gaps + 2 on the optimistic-lock floor, but the file kept reading as a gap because its POST reached nothing; see Fix 16)** ·
-`integrations` **0 (FIXED — registry-bypass)** · `scheduler` **0 (now FIXED — 1 wired through a NEW wrapper; the manual trigger enqueues a job but is authenticated, so it is a genuine gap; see Fix 17)** · `onboarding` **0 (now SET ASIDE — 1 actor-less: the self-service signup CREATES the tenant and reads no session; see Fix 17)** · `data_sync` **0 (now SET ASIDE — 1 read-only; see Fix 12)** · **0** for `dictionaries`, `feature_toggles`, `perspectives`, `planner`,,
-`query_index`, `translations`, `api_keys` — and **`audit_logs` 0 (now FIXED)**.
+**0 unguarded now** (160 before the `audit_logs` fix … 4 before the `communication_channels` fix) ·
+8 auth-flow verbs set aside · **5 actor-less verbs set aside** · **7 read-only "write verbs" set aside** ·
+**9 guard-system verbs set aside** · **227 guarded** (142 wrapper · 1 registry · 35 crud · 43 local helper ·
+6 re-export; closure `142+1+35+43+6+0+8+5+7+9+0+0 = 256`). **PLUS a class the method-based scan cannot count
+— a GET that WRITES: 3 found, 0 unguarded — 1 fixed, 2 set aside by name as read side-effects.**
 
 **Fix 1 of the sweep — `audit_logs` DONE and PROVEN (code `4ef5812`).** Both write routes
 (`audit-logs/actions/undo` POST, `actions/redo` POST) called **no guard at all**. New wrapper
@@ -481,6 +538,32 @@ doing X now."**
 
 ### ✅ Done recently (ticked, then moved down here)
 
+- **2026-10-07 — `D3` — the guard result's third outcome, `escalate` — DONE and PROVEN** (code
+  uncommitted this session; plan `library/development/PLAN-D3-escalate-outcome.md`). A mutation guard
+  could answer only yes/no, so a guard wanting a *review* had to abuse `ok:false` (a hard refusal),
+  collapsing "forbidden" and "hold for a person" into one. **D3 adds the third answer:** `ok:true` **and**
+  an `escalation` block `{gate, rule, because, status?}` — treated as **not performed** (no mutation, no
+  `afterSuccess`, no `modifiedPayload`, chain short-circuits). Status **202**. **Why the guard does not
+  file the pending act:** `authority_pending_acts` needs a `commandId` + `capabilityId` to replay on
+  approval, and a guard has neither — so the guard **defers**; the act stays on the command path. Owner
+  confirmed guard-level, additive-only. **Proof:** RED-then-GREEN across 3 layers (registry · route
+  wrapper · **factory mutation proof** — POST/PUT/DELETE leave the row untouched, emit no event, return
+  202 `pending_review`); 11 assertions all RED on neutralisation, all GREEN after byte-identical restore;
+  **shared 194 suites / 2278 tests green**; typecheck shared+core+scheduler+search+webhooks = 0 errors;
+  core **616 passed / 1 failed** (the 1 **proven pre-existing** on clean HEAD). **A hostile-critic pass
+  found a REAL hole and it was closed:** 7 raw-registry sites used helpers whose *declared* return type
+  dropped `escalation`, so callers checked only `!ok` and would have committed on an escalate — fixed at
+  the source (all 6 helpers return `MutationGuardRunResult`; **36 sites / 32 files** widened). Parked
+  modules (`staff`/`payment_gateways`/`sales`) proven only by isolated `tsc` (0 syntax errors). Full detail
+  below and in `BUILD-ORDER.md` §2 / `BACKLOG.md` item **D3**.
+- **2026-10-07 — `D2-gap` COMPLETE — the write-verb sweep closed 0 unguarded across all 35 enabled
+  modules** (code `7494fbe`; analysis `analysis/d2-gap/`). Re-measured: **256 write verbs, 0 unguarded**;
+  227 guarded (142 wrapper · 1 registry · 35 crud · 43 local helper · 6 re-export) · 8 auth-flow + 5
+  actor-less + 7 read-only + 9 guard-system verbs set aside (closure `142+1+35+43+6+0+8+5+7+9+0+0 = 256`).
+  Plus a class the scan cannot count — **a GET that WRITES**: 3 found, 0 unguarded, 1 fixed (the
+  `communication_channels` oauth callback), 2 set aside by name as read side-effects (`dashboards/api/layout`,
+  `messages/api/[id]`), owner-settled. The box above carries the full per-module chain; `BUILD-ORDER.md` §2f
+  and `BACKLOG.md` item **D2-gap** carry the 18 fixes.
 - **2026-10-06 — `D2-gap` MEASURED across every enabled module, and the FIRST module fixed** (code
   `4ef5812`; analysis `analysis/d2-gap/`). The sweep: 35 enabled modules · **256 write verbs** ·
   **158 unguarded now / 160 before the fix** · 8 auth-flow verbs set aside · 90 guarded

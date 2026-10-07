@@ -63,8 +63,7 @@ stacking.* That is exactly what he asked for.
 | Accounts management | **BUILT** | `packages/core/src/modules/auth/` — api, backend, commands, components, data, di.ts, emails, encryption.ts, events.ts, frontend, `i18n`, lib, **migrations (20+)**, services, setup.ts, workers |
 | Roles & permissions | **BUILT** (two-table ACL) | `RoleAcl` (`role_acls`) + `UserAcl` (`user_acls`), `featuresJson: string[]`, wildcard matching, `isSuperAdmin` |
 | Languages / i18n | **BUILT** | `shared/src/lib/i18n`; per-module `i18n` folders; `translations` module; `dictionaries` module |
-| The guard engine ("this") | **PARTLY BUILT — D0 FIXED 2026-10-06, the route path now COMPLETE** | `MutationGuard` + `runMutationGuards()` exist and run. **D0 fixed:** the generated registry now delivers guards from an enabled module (`entities`), mutation-proven end to end (§2c). **Route path: every enabled module migrated** — the remaining **106 call sites** are all in **parked** modules (recorded, not migrated): **D2-wide**, §2c/§2e; was 198 real call sites, and `entities`, `data_sync`, `dictionaries`, `dashboards`, `workflows`, `inbox_ops`, `perspectives`, `translations`, `planner`, `query_index`, `auth`, `directory` and `feature_toggles` are now retired. Still open: the guard result is binary, with no `escalate` outcome (**D3**) |
-| Structural write hook | **BUILT — and now registry-based** | `beginEntitiesMutationGuard` is called at **every** entity/field-definition write path, carrying `resourceKind` (`entities.entity`, `entities.field_definition`) + `operation`. As of 2026-10-06 (`d225602`) it runs the **registry** (`runRouteMutationGuards`), not the deprecated single-service resolver |
+| The guard engine ("this") | **PARTLY BUILT — D0 FIXED 2026-10-06, the route path now COMPLETE** | `MutationGuard` + `runMutationGuards()` exist and run. **D0 fixed:** the generated registry now delivers guards from an enabled module (`entities`), mutation-proven end to end (§2c). **Route path: every enabled module migrated** — the remaining **106 call sites** are all in **parked** modules (recorded, not migrated): **D2-wide**, §2c/§2e; was 198 real call sites, and `entities`, `data_sync`, `dictionaries`, `dashboards`, `workflows`, `inbox_ops`, `perspectives`, `translations`, `planner`, `query_index`, `auth`, `directory` and `feature_toggles` are now retired. Still open: the guard result now carries a third outcome, `escalate` — **D3 FIXED 2026-10-07** | Structural write hook | **BUILT — and now registry-based** | `beginEntitiesMutationGuard` is called at **every** entity/field-definition write path, carrying `resourceKind` (`entities.entity`, `entities.field_definition`) + `operation`. As of 2026-10-06 (`d225602`) it runs the **registry** (`runRouteMutationGuards`), not the deprecated single-service resolver |
 
 So the honest statement is: **the foundation is built; of the foundation's gaps, D0 and D1 are now closed**
 — both found or unblocked by measurement, both proven. **D0** was a live defect the critic pass found (the
@@ -99,13 +98,29 @@ Effect today: **the authoritative write path for tables and columns — the exac
 grammar must govern — was the one path not running the full guard set.** The entities path is fixed; the
 **wider sweep of enabled modules is complete** (§2c) — `data_sync` (19), `entities/encryption.ts` (2), `dictionaries` (16), `dashboards` (10), `workflows` (9), `inbox_ops` (8), `perspectives` (8), `translations` (6), `planner` (4), `query_index` (4), `auth` (2), `directory` (2) and `feature_toggles` (2) are all retired. **What remains: 106 call sites, all in parked modules** (recorded, not migrated) — with the plan in §2e.
 
-**D3 — the guard result is binary; there is no "escalate".** `MutationGuardResult.ok` is a boolean. A
-guard can **allow** or **block** — it cannot say *"allowed, but a person must review"*. The owner's
-whole grammar needs a third outcome. Without it, every `review_required` decision has nowhere to go but
-"block", which turns the dictionary's quiet tier back into a hard stop.
+**D3 — the guard result is binary; there is no "escalate". ✅ FIXED and PROVEN 2026-10-07** (code
+uncommitted this session; plan `library/development/PLAN-D3-escalate-outcome.md`). `MutationGuardResult.ok`
+was a boolean, so a guard could only **allow** or **block** — it could not say *"allowed, but a person must
+review"*. The owner's grammar needs that third outcome; without it every `review_required` decision had
+nowhere to go but "block", turning the dictionary's quiet tier back into a hard stop. **Now the guard may
+return `ok:true` and an `escalation` block `{gate, rule, because, status?}`**, which the runner treats as
+**not performed** — no mutation, no `afterSuccess`, no `modifiedPayload`, and the chain short-circuits.
+Response status **202** (`pending_review`), never a 2xx that implies the write landed. **Additive:** a
+guard that never sets `escalation` behaves exactly as before. **The boundary, stated plainly:** a mutation
+guard has no `commandId`/`capabilityId`, so it **cannot** file an `authority_pending_acts` row itself (the
+row needs both to be replayed on approval); it **defers**, and act-creation stays on the command path
+(`auth.authority-command-gate`). Owner-confirmed: guard-level escalate, no command-path change. **Proof:**
+RED-then-GREEN across three layers (registry · route wrapper · **factory mutation proof**: POST/PUT/DELETE
+leave the row untouched, emit no event, return 202) — 11 assertions all RED under neutralisation, all GREEN
+after byte-identical restore; **shared 194 suites / 2278 tests green**; typecheck shared+core+scheduler+
+search+webhooks = 0 errors. **A hostile-critic pass found a real hole — 7 raw-registry sites used helpers
+whose declared return type dropped `escalation`, so callers checked only `!ok` and would have committed on
+an escalate** (`configs/api/cache`, `{staff,messages,payment_gateways,integrations}/api/guards`,
+`sales/quotes/{send,convert}`) — fixed at the source: all 6 helpers return `MutationGuardRunResult`, and
+**36 consume sites across 32 files** were widened to `!guardResult.ok || guardResult.escalated`.
 
 **Order within the foundation:** **D0 → D1 → D2 → D3.** D0 is not optional and comes first, because the
-other three are meaningless without it.
+other three are meaningless without it. **All four are now DONE.**
 
 ---
 
@@ -1018,7 +1033,7 @@ one page, each with a named home. Details: [`BLUEPRINT-GAP-ANALYSIS.md`](BLUEPRI
 > run an agent later. The first item that actually crosses the Hermes port is **G-17**, in §4.2.
 0. ~~**D0** — make the generated guard registry real.~~ ✅ **FIXED 2026-10-06, proven (§2c).** The
    registry now delivers guards from an enabled module, and the delivery chain is mutation-proven.
-   **D2-wide: every enabled module is migrated** — the remaining **106 deprecated call sites** (198 at baseline) are all in **parked** modules (recorded, not migrated). `D2-gap` (un-guarded writes) and **D3** remain — see §2e.
+   **D2-wide: every enabled module is migrated** — the remaining **106 deprecated call sites** (198 at baseline) are all in **parked** modules (recorded, not migrated). `D2-gap` (un-guarded writes) is **COMPLETE (2026-10-07)** and **D3** (the `escalate` outcome) is **DONE (2026-10-07)** — see §2, §2e, §2f.
 1. **D1 — ✅ FIXED 2026-10-06, proven.** The tier mapping / defaults / structural fallback are now a
    **setting** a superadmin can change (`module_configs`: module `request_outcome`, name
    `structureChangeTiers`), seeded from the dictionary and read through a function — not a hardcoded

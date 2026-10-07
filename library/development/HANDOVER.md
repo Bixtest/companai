@@ -226,8 +226,10 @@ modules** (recorded, not migrated; `entities`, `data_sync`, `dictionaries`, `das
 `inbox_ops`, `perspectives`, `translations`, `planner`, `query_index`, `auth`, `directory` and `feature_toggles` are retired), and **D2-gap**
 **COMPLETE** — the write-verb sweep closed at **0 unguarded across all 35 enabled modules** on
 2026-10-07, including a class the method-based scan could not see (a **GET that writes**; one fixed, two
-read side-effects set aside by name). **D3** (the `escalate` outcome) and the **Metadata Registry**
-remain. The reasoning is BUILD-ORDER §2e/§2f; the counts are in BACKLOG.md and
+read side-effects set aside by name). **`D3`** (the `escalate` outcome) is **DONE** on 2026-10-07 — the
+guard result now carries a third outcome, `ok:true` + `escalation`, treated as *not performed* (no
+mutation, no `afterSuccess`); additive, guard-level, no command-path change). The **Metadata Registry**
+remains — the last Phase-0 foundation item and the next task. The reasoning is BUILD-ORDER §2e/§2f; the counts are in BACKLOG.md and
 `analysis/d2-gap/FINDINGS.md`.
 
 **Verify an item's status is still true before starting it** — the roadmap has been wrong about what

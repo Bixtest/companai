@@ -55,14 +55,14 @@
 | D. Hermes | 0 | 25 | 25 |
 | E. Agent half | 0 | 17 | 17 |
 | F. Model layer | 0 | 14 | 14 |
-| G. Governance & security floor | 6 | 34 | 40 |
+| G. Governance & security floor | 7 | 33 | 40 |
 | H. Experience contracts | 0 | 13 | 13 |
 | I. Business / domain packs | 1 | 17 | 18 |
 | J. Deployment & operations | 0 | 14 | 14 |
 | K. Dev-doc extras | 0 | 13 | 13 |
-| **TOTAL** | **21** | **187** | **208** |
+| **TOTAL** | **22** | **186** | **208** |
 
-> **Read this honestly.** Only **21 of 208** points carry a tick, because the tick rule demands the code
+> **Read this honestly.** Only **22 of 208** points carry a tick, because the tick rule demands the code
 > be verified — and most points have **not yet been re-verified in code this round**. A point marked
 > `(DONE)` in its line but `☐` here means **the docs claim it, the code has not been checked** — treat
 > it as **carried, not confirmed**. This is the whole purpose of this file: **the docs' word is not the
@@ -252,8 +252,8 @@
 - ☑ **D2-gap** — Write routes that call no guard: 0 unguarded *(DONE — sweep complete, verified)*
 - ☑ **D2-gap / GETs** — The write-performing-GET class *(DONE — 1 fixed, 2 set aside as read side-effects)*
 - ☐ **SD-6** — The two read side-effect GETs: set aside or wire — to be revisited *(OPEN — recorded, owner-settled 2026-10-07)*
-- ☐ **D3** — The `escalate` outcome on the guard result *(OPEN — the posted next task)*
-- ☐ **GAP A / C5** — The Metadata Registry service *(OPEN — the last Phase-0 foundation item)*
+- ☑ **D3** — The `escalate` outcome on the guard result *(DONE — third outcome added, RED-then-GREEN proven across registry · wrapper · factory mutation proof; 36 consume sites widened; code uncommitted this session)*
+- ☐ **GAP A / C5** — The Metadata Registry service *(OPEN — the last Phase-0 foundation item; THE POSTED NEXT TASK)*
 - ☐ **GAP B** — The true-core vs domain-pack boundary as a contract *(PART — `CORE-BOUNDARY.md` written; not yet a contract)*
 - ☐ **GAP D** — Phase −1: twelve architecture contracts before all code *(OPEN)*
 
