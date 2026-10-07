@@ -1,7 +1,7 @@
 # D2-gap — measured across every enabled module
 
-**Measured:** 2026-10-06; **re-measured 2026-10-07** after the four-leftover-modules fix, **again after the `webhooks` fix + tool fix**, **again after the `configs` fix + tool fix**, and **again after the `currencies` fix**. **Tool:** `analysis/d2-gap/measure.js` (re-runnable; `--json` for machines).
-**Repo:** `workspace/starting-kit`, HEAD **`e1fa605` plus the `currencies` D2-gap fix** (the `webhooks` D2-gap fix is at `e1fa605`; the `configs` and `currencies` fixes are in the same change as this note). Tool fixes this round: the re-export regex now catches the `import { … }` + bare `export { … }` shim form; `webhooks/api/inbound/[endpointId]/route.ts` joined `ACTORLESS_PATHS`; an **inline** registry call (`getAllMutationGuardInstances()` + `runMutationGuards()`) now reads as `GUARDED_REGISTRY`; and two `configs` routes joined `READ_ONLY_PATHS`. Before that, `0ac8783` with `search`, `88582bd` with `attachments`, `a9ecd21` with `workflows`, `0350563` with `inbox_ops`, and `c9a6bb6` with `business_rules`. The `communication_channels` correction changed **only the tool**, not the repo — so the HEAD is unchanged by it.
+**Measured:** 2026-10-06; **re-measured 2026-10-07** after the four-leftover-modules fix, **again after the `webhooks` fix + tool fix**, **again after the `configs` fix + tool fix**, **again after the `currencies` fix**, and **again after the `entities` fix**. **Tool:** `analysis/d2-gap/measure.js` (re-runnable; `--json` for machines).
+**Repo:** `workspace/starting-kit`, HEAD **`f0f1dd0` plus the `entities` D2-gap fix** (the `webhooks` D2-gap fix is at `e1fa605`; the `configs` fix is at `462540e`, the `currencies` fix at `f0f1dd0`, and the `entities` fix is in the same change as this note). Tool fixes earlier in the sweep: the re-export regex now catches the `import { … }` + bare `export { … }` shim form; `webhooks/api/inbound/[endpointId]/route.ts` joined `ACTORLESS_PATHS`; an **inline** registry call (`getAllMutationGuardInstances()` + `runMutationGuards()`) now reads as `GUARDED_REGISTRY`; and two `configs` routes joined `READ_ONLY_PATHS`. Before that, `0ac8783` with `search`, `88582bd` with `attachments`, `a9ecd21` with `workflows`, `0350563` with `inbox_ops`, and `c9a6bb6` with `business_rules`. The `communication_channels` correction changed **only the tool**, not the repo — so the HEAD is unchanged by it.
 
 ## What D2-gap is, and why it is a defect
 
@@ -12,16 +12,16 @@ would reach data no authorization describes (Hermes map §4.4 (b)).
 
 ## The headline
 
-| | baseline (HEAD `5af76bc`) | after `audit_logs` (`4ef5812`) | after `ai_assistant` (`0af50c8`) | after `messages` (`1f1b60e`) | after the `communication_channels` tool fix (`4eead9d`) | after `auth` (`8e1632c`) | after `business_rules` (`c9a6bb6`) | after `inbox_ops` (`0350563`) | after the `notifications` tool fix (`46aec05`) | after `workflows` (`a9ecd21`) | after `attachments` (`88582bd`) | after `search` (`0ac8783`) | after the four-leftover-modules fix | after the `webhooks` fix (`e1fa605`) | after the `configs` fix + tool fix | **now (the `currencies` fix)** |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| enabled modules with a source tree | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** |
-| write verbs across those modules | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** |
-| **unguarded write verbs (the `D2-gap`)** | **160** | **158** | **143** | **122** | **111** | **99** | **88** | **78** | **68** | **58** | **50** | **41** | **34** | **25** | **18** | **14** | **10** |
-| auth-flow verbs set aside by design | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 |
-| actor-less verbs set aside by design | — | — | — | — | — | — | — | **1** | **1** | **1** | **1** | **1** | **1** | **2** | **2** | **2** |
-| read-only "write verb" set aside by design | — | — | — | — | — | — | — | — | — | **1** | **1** | **1** | **4** | **4** | **4** | **6** | **6** |
-| guarded verbs (registry / crud / wrapper / local / re-export) | 88 | 90 | 105 | 126 | **137** | **149** | **160** | **169** | **179** | **188** | **196** | **203** | **209** | **215** | **217** | **221** |
-| *guarded + the set-aside buckets* | *96* | *98* | *113* | *134* | ***145*** | ***157*** | ***168*** | ***177*** | ***187*** | ***197*** | ***205*** | ***222*** | ***231*** | ***238*** | ***242*** | ***246*** |
+| | baseline (HEAD `5af76bc`) | after `audit_logs` (`4ef5812`) | after `ai_assistant` (`0af50c8`) | after `messages` (`1f1b60e`) | after the `communication_channels` tool fix (`4eead9d`) | after `auth` (`8e1632c`) | after `business_rules` (`c9a6bb6`) | after `inbox_ops` (`0350563`) | after the `notifications` tool fix (`46aec05`) | after `workflows` (`a9ecd21`) | after `attachments` (`88582bd`) | after `search` (`0ac8783`) | after the four-leftover-modules fix | after the `webhooks` fix (`e1fa605`) | after the `configs` fix + tool fix | after the `currencies` fix | **now (the `entities` fix)** |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| enabled modules with a source tree | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** |
+| write verbs across those modules | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** |
+| **unguarded write verbs (the `D2-gap`)** | **160** | **158** | **143** | **122** | **111** | **99** | **88** | **78** | **68** | **58** | **50** | **41** | **34** | **25** | **18** | **14** | **10** | **6** |
+| auth-flow verbs set aside by design | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 |
+| actor-less verbs set aside by design | — | — | — | — | — | — | — | **1** | **1** | **1** | **1** | **1** | **1** | **2** | **2** | **2** | **2** |
+| read-only "write verb" set aside by design | — | — | — | — | — | — | — | — | — | **1** | **1** | **1** | **4** | **4** | **4** | **6** | **6** | **6** |
+| guarded verbs (registry / crud / wrapper / local / re-export) | 88 | 90 | 105 | 126 | **137** | **149** | **160** | **169** | **179** | **188** | **196** | **203** | **209** | **215** | **217** | **221** | **225** |
+| *guarded + the set-aside buckets* | *96* | *98* | *113* | *134* | ***145*** | ***157*** | ***168*** | ***177*** | ***187*** | ***197*** | ***205*** | ***222*** | ***231*** | ***238*** | ***242*** | ***246*** | ***250*** |
 
 > **A correction to the "guarded verbs" row (2026-10-07).** The `search` column first read **204** and
 > the four-leftover-modules column was carried forward as **204** too; both omitted one or more of the
@@ -1003,6 +1003,72 @@ allow** tests RED. Whole `currencies` module **23 suites / 167 tests green**; co
 **Measured after (tool `--json`, second route = re-summing the raw fields):** `currencies` **4 → 0**
 unguarded (wrapper **+4**); total D2-gap **14 → 10**; wrapper class **133 → 137**; guarded **217 → 221**;
 guarded + set-asides **242 → 246**; **Closure: 137 + 1 + 35 + 42 + 6 + 0 + 8 + 2 + 6 + 9 + 0 + 10 = 256.**
+
+---
+
+## `entities` — a real gap, but "2 are the lock floor" is true of the VERBS and false of the FILE; all 4 wired (2026-10-07)
+
+The tool read the `entities` module as **4 unguarded verbs across 2 files** (of 11 write verbs; the other
+7 already route through the module's own `beginEntitiesMutationGuard`). **Measured first, by two routes**
+— the tool's `--json` rows, and a hand read of both files. The carried note — *"2 of those are the
+optimistic-lock floor, not gaps"* — is **right at the verb level and false at the file level**: the file
+that holds two of them also holds a verb that reached **nothing at all**.
+
+**The four verbs, each traced to its write:**
+
+| File | Verb | The write | Reached a guard before? |
+|---|---|---|---|
+| `api/records.ts` | POST | `de.createCustomEntityRecord(...)` | **no guard of any kind** — a genuine gap |
+| `api/entity-settings.ts` | PUT | `moduleConfigService.setValue(...)` (the `newEntitiesRestrictedByDefault` policy) | **no guard of any kind** — a genuine gap |
+| `api/records.ts` | PUT | `de.updateCustomEntityRecord(...)` | the optimistic-lock **FLOOR** only (`enforceCommandOptimisticLockWithGuards`) — not the registry |
+| `api/records.ts` | DELETE | `de.deleteCustomEntityRecord(...)` | the optimistic-lock **FLOOR** only — not the registry |
+
+**Why all four were wired, not just the two.** The tool sets a file aside as `COMMAND_LOCK_FLOOR` **only
+when EVERY write verb it exports is covered by the floor**. `records.ts` is the counter-example the
+tool's own header names: its **POST reached nothing**, so the file as a whole had **no registry guard**,
+and **one protected verb must not launder an unprotected sibling in the same file**. That is why the
+tool's `COMMAND_LOCK_FLOOR` list is deliberately **empty**. `directory`'s `organization-edges` set the
+precedent — its floor verbs **also** call the registry wrapper. So PUT/DELETE keep the floor **and** gain
+the registry guard.
+
+**The fix.** No new wrapper was needed: `entities` already ships `data/guards.ts` and already wires 5
+route files through the module's **existing** `beginEntitiesMutationGuard`. Kinds: `entities.record`
+(pre-existing, previously used only by the floor) for the three record verbs, and a **new**
+`entities.settings` for the config PUT. Each guard runs after the route's own gates and before the write;
+`runAfterSuccess()` after commit. **One placement that needed care:** PUT has **two** write branches — a
+sentinel/non-UUID `recordId` falls through to a **create**, otherwise an **update** — so the guard is
+called **once** with the operation computed from the branch (`create` vs `update`) and the matching
+`resourceId` (`entityId` vs `rid`), and **each** branch fires its own `runAfterSuccess`.
+
+**What was NOT missing — stated plainly, because `D2-gap` invites the opposite reading.** All four
+already enforced their own capability (`entities.records.manage` on the three record verbs;
+`entities.definitions.manage` on the settings PUT) with tenant+org-scoped lookups and a per-entity ACL
+gate (`assertEntityAclForRequest`). The defect was the missing **structural chokepoint**, not
+authorization.
+
+**The lock-floor trap, named.** `enforceCommandOptimisticLockWithGuards` is the **command** optimistic-lock
+floor; its `...WithGuards` suffix names the command-lock guard service, **not** the mutation-guard
+registry, and it never calls `getAllMutationGuardInstances()` (the `directory` trap). The registry call
+added here is a **separate** chokepoint.
+
+**Proof.** `api/__tests__/d2-gap-wiring.route.test.ts`, **13 tests** (4 block + 4 allow for
+`entities.record` including **both** PUT branches, 2 for `entities.settings`, 1 out-of-kind control, 1
+kind-isolation control, 1 invalid-body-400), driving the **real** handlers with `runRouteMutationGuards`
+**UNMOCKED** (a real guard via `registerMutationGuards`). Each block test asserts the
+**dataEngine / moduleConfigService call did NOT happen**, not merely a status code; the allow tests assert
+the guard saw the right `resourceKind` + `operation`. **Two mutations**, files restored **byte-identical**
+(records md5 `af7d298ef2e617ff88724c855d59a7f5`, entity-settings md5 `d97e1269d1f70103195f002a1c29401b`):
+neuter the records POST block check → exactly the **records-POST block** test RED; sever
+`entity-settings`' `runAfterSuccess` → exactly the **settings allow** test RED. The module's pre-existing
+`records.crud.test.ts` (**22 tests**) still passes against the wired routes — an empty registry is a
+no-op. **A hostile critic pass returned STRONGEST COUNTER-EXAMPLE FOUND: NONE**, and recorded one honest
+tool limit: the classifier is **per-file**, so a future unguarded verb added to `records.ts` would be
+laundered by the file reading guarded.
+
+**Measured after (tool `--json`, second route = re-summing the raw fields):** `entities` **4 → 0**
+unguarded (wrapper **7 → 11**); total D2-gap **10 → 6**; wrapper class **137 → 141**; guarded **221 →
+225**; guarded + set-asides **246 → 250**; whole `entities` module **33 suites / 235 tests green**; core
+`tsc --noEmit` exit 0; **Closure: 141 + 1 + 35 + 42 + 6 + 0 + 8 + 2 + 6 + 9 + 0 + 6 = 256.**
 
 ---
 
