@@ -23,6 +23,7 @@ import {
   UnsafeOllamaBaseUrlError,
 } from '../../../../vector/lib/ollama-url-safety'
 import { searchDebug, searchDebugWarn, searchError } from '../../../../lib/debug'
+import { beginSearchMutationGuard } from '../mutation-guard'
 import { embeddingsOpenApi } from '../openapi'
 
 const embeddingConfigSchema = z.object({
@@ -209,6 +210,25 @@ export async function POST(req: Request) {
       return await configUnavailable()
     }
 
+    // Registry mutation-guard chokepoint (D2-gap). Runs AFTER the route's own
+    // auth, JSON and schema-validation gates and the config-service
+    // availability check, and BEFORE the first write (`service.setValue`).
+    const guard = await beginSearchMutationGuard({
+      container,
+      req,
+      tenantId: auth.tenantId,
+      organizationId: auth.orgId ?? null,
+      userId: auth.sub ?? null,
+      resourceKind: 'search.settings',
+      resourceId: auth.tenantId ?? '',
+      operation: 'update',
+      mutationPayload: {
+        autoIndexingEnabled: parsed.data.autoIndexingEnabled ?? null,
+        embeddingConfig: parsed.data.embeddingConfig ?? null,
+      },
+    })
+    if (guard.blockedResponse) return guard.blockedResponse
+
     if (parsed.data.autoIndexingEnabled !== undefined) {
       if (envDisablesAutoIndexing()) {
         return NextResponse.json(
@@ -365,6 +385,8 @@ export async function POST(req: Request) {
     const { source: embeddingConfigSource } = await resolveEmbeddingConfigResult(container, {
       scope: { tenantId: auth.tenantId },
     })
+
+    await guard.runAfterSuccess()
 
     return toJson({
       settings: {

@@ -11,6 +11,7 @@ import { cancelReindexProgress } from '../../../../lib/reindex-progress'
 import { resolveTranslations } from '@open-mercato/shared/lib/i18n/server'
 import { recordIndexerLog } from '@open-mercato/shared/lib/indexers/status-log'
 import { embeddingsReindexCancelOpenApi } from '../../../openapi'
+import { beginSearchMutationGuard } from '../../../mutation-guard'
 
 async function disposeContainer(container: unknown): Promise<void> {
   try {
@@ -38,6 +39,24 @@ export async function POST(req: Request) {
   const em = container.resolve('em') as EntityManager
   const progressService = container.resolve('progressService') as ProgressService
   const db = (em as unknown as { getKysely: () => Kysely<any> }).getKysely()
+
+  // Registry mutation-guard chokepoint (D2-gap). Runs after the route's own auth
+  // and scope gates and before any write; a block stops the cancel outright.
+  const guard = await beginSearchMutationGuard({
+    container,
+    req,
+    tenantId: auth.tenantId,
+    organizationId: auth.orgId ?? null,
+    userId: auth.sub ?? null,
+    resourceKind: 'search.index',
+    resourceId: auth.orgId ? `${auth.tenantId}:${auth.orgId}` : auth.tenantId,
+    operation: 'custom',
+    mutationPayload: { action: 'reindex.cancel', scope: 'vector' },
+  })
+  if (guard.blockedResponse) {
+    await disposeContainer(container)
+    return guard.blockedResponse
+  }
 
   let queue: Queue | undefined
   try {
@@ -98,6 +117,8 @@ export async function POST(req: Request) {
   }
 
   await disposeContainer(container)
+
+  await guard.runAfterSuccess()
 
   return NextResponse.json({
     ok: true,

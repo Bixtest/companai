@@ -22,6 +22,7 @@ import {
   failReindexProgress,
 } from '../../lib/reindex-progress'
 import { reindexOpenApi } from '../openapi'
+import { beginSearchMutationGuard } from '../mutation-guard'
 
 /** Strategy with optional stats support */
 type StrategyWithStats = SearchStrategy & {
@@ -112,6 +113,29 @@ export async function POST(req: Request) {
       },
       { status: 409 }
     )
+  }
+
+  // Registry mutation-guard chokepoint (D2-gap). Placed AFTER the route's own
+  // auth gate and the "another reindex is already in progress" check (which
+  // writes nothing and returns 409), and BEFORE `acquireReindexLock` — the first
+  // write this route performs. A block stops the whole operation.
+  const guard = await beginSearchMutationGuard({
+    container,
+    req,
+    tenantId,
+    organizationId: auth.orgId ?? null,
+    userId: auth.sub ?? null,
+    resourceKind: 'search.index',
+    resourceId: auth.orgId ? `${tenantId}:${auth.orgId}` : tenantId,
+    operation: 'custom',
+    mutationPayload: { action, entityId: entityId ?? null, useQueue },
+  })
+  if (guard.blockedResponse) {
+    const disposable = container as unknown as { dispose?: () => Promise<void> }
+    if (typeof disposable.dispose === 'function') {
+      await disposable.dispose()
+    }
+    return guard.blockedResponse
   }
 
   // Acquire lock before starting the operation
@@ -343,6 +367,8 @@ export async function POST(req: Request) {
       // Get updated stats from all strategies
       const stats = await collectStrategyStats(searchStrategies, tenantId)
 
+      await guard.runAfterSuccess()
+
       return toJson({
         ok: result.success,
         action,
@@ -410,6 +436,8 @@ export async function POST(req: Request) {
 
     // Get updated stats from all strategies
     const stats = await collectStrategyStats(searchStrategies, tenantId)
+
+    await guard.runAfterSuccess()
 
     return toJson({
       ok: true,

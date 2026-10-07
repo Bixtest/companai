@@ -11,6 +11,7 @@ import type { VectorSearchStrategy } from '../../../../strategies/vector.strateg
 import type { EntityId } from '@open-mercato/shared/modules/entities'
 import { searchDebugWarn, searchError } from '../../../../lib/debug'
 import { indexOpenApi } from '../openapi'
+import { beginSearchMutationGuard } from '../mutation-guard'
 
 export const metadata = {
   GET: { requireAuth: true, requireFeatures: ['search.view'] },
@@ -180,6 +181,29 @@ export async function DELETE(req: Request) {
         ? scope.filterIds
         : [undefined]
 
+    // Registry mutation-guard chokepoint (D2-gap). Placed AFTER the route's own
+    // auth gate, the `confirmAll` requirement for a full purge, the indexer
+    // availability check and the organization-scope resolution (which fixes
+    // exactly what will be purged), and BEFORE the purge loop — the first write.
+    const guard = await beginSearchMutationGuard({
+      container,
+      req,
+      tenantId: auth.tenantId,
+      organizationId: selectedOrganizationId ?? auth.orgId ?? null,
+      userId: auth.sub ?? null,
+      resourceKind: 'search.index',
+      resourceId: selectedOrganizationId
+        ? `${auth.tenantId}:${selectedOrganizationId}`
+        : auth.tenantId,
+      operation: 'delete',
+      mutationPayload: {
+        entityId: entityIdParam ?? null,
+        purgingAll: !entityIdParam,
+        organizationIds: purgeOrganizationIds.map((o) => o ?? null),
+      },
+    })
+    if (guard.blockedResponse) return guard.blockedResponse
+
     const scopes = new Set<string>()
     const registerScope = (org: string | undefined) => {
       const key = org ?? '__null__'
@@ -283,6 +307,8 @@ export async function DELETE(req: Request) {
         details: { entityIds },
       },
     ).catch(() => undefined)
+
+    await guard.runAfterSuccess()
 
     return NextResponse.json({ ok: true })
   } catch (error: unknown) {

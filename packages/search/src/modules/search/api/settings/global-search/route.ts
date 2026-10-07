@@ -11,6 +11,7 @@ import {
 import type { GlobalSearchSource } from '../../../lib/global-search-config'
 import type { SearchStrategyId } from '@open-mercato/shared/modules/search'
 import { globalSearchSettingsOpenApi } from '../../openapi'
+import { beginSearchMutationGuard } from '../../mutation-guard'
 
 const updateSchema = z.object({
   enabledStrategies: z.array(z.enum(['fulltext', 'vector', 'tokens'])).min(1),
@@ -78,9 +79,26 @@ export async function POST(req: Request) {
 
   const container = await createRequestContainer()
   try {
+    // Registry mutation-guard chokepoint (D2-gap). Runs after the route's own
+    // auth, validation and parse gates and before the settings write.
+    const guard = await beginSearchMutationGuard({
+      container,
+      req,
+      tenantId: auth.tenantId,
+      organizationId: auth.orgId ?? null,
+      userId: auth.sub ?? null,
+      resourceKind: 'search.settings',
+      resourceId: 'global-search',
+      operation: 'update',
+      mutationPayload: { enabledStrategies: parsed.data.enabledStrategies },
+    })
+    if (guard.blockedResponse) return guard.blockedResponse
+
     await saveGlobalSearchStrategies(container, parsed.data.enabledStrategies, {
       scope: { tenantId: auth.tenantId },
     })
+
+    await guard.runAfterSuccess()
 
     return NextResponse.json({ ok: true, enabledStrategies: parsed.data.enabledStrategies })
   } catch (error) {

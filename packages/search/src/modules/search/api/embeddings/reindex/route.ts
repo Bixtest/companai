@@ -19,6 +19,7 @@ import {
   failReindexProgress,
 } from '../../../lib/reindex-progress'
 import { embeddingsReindexOpenApi } from '../../openapi'
+import { beginSearchMutationGuard } from '../../mutation-guard'
 
 export const metadata = {
   POST: { requireAuth: true, requireFeatures: ['search.embeddings.manage'] },
@@ -65,6 +66,23 @@ export async function POST(req: Request) {
       { status: 409 }
     )
   }
+
+  // Registry mutation-guard chokepoint (D2-gap). Placed AFTER the route's own
+  // auth gate and the "another reindex is already in progress" check (which
+  // writes nothing and returns 409), and BEFORE `acquireReindexLock` — the first
+  // write this route performs. A block stops the whole operation.
+  const guard = await beginSearchMutationGuard({
+    container,
+    req,
+    tenantId: auth.tenantId,
+    organizationId: auth.orgId ?? null,
+    userId: auth.sub ?? null,
+    resourceKind: 'search.index',
+    resourceId: auth.orgId ? `${auth.tenantId}:${auth.orgId}` : auth.tenantId,
+    operation: 'custom',
+    mutationPayload: { action: 'reindex', entityId: entityId ?? null, purgeFirst },
+  })
+  if (guard.blockedResponse) return guard.blockedResponse
 
   // Acquire lock before starting the operation
   const { acquired: lockAcquired } = await acquireReindexLock(db, {
@@ -213,6 +231,8 @@ export async function POST(req: Request) {
         },
       },
     ).catch(() => undefined)
+
+    await guard.runAfterSuccess()
 
     return NextResponse.json({
       ok: result.success,
