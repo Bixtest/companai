@@ -1,7 +1,7 @@
 # D2-gap — measured across every enabled module
 
-**Measured:** 2026-10-06; **re-measured 2026-10-07** after the four-leftover-modules fix. **Tool:** `analysis/d2-gap/measure.js` (re-runnable; `--json` for machines).
-**Repo:** `workspace/starting-kit`, HEAD **`0ac8783`** (the `search` D2-gap fix) **plus the uncommitted four-leftover-modules change** (`directory`/`progress` wired, `dashboards`/`data_sync` set aside as read-only). Before that, `88582bd` with `attachments`, `a9ecd21` with `workflows`, `0350563` with `inbox_ops`, and `c9a6bb6` with `business_rules`. The `communication_channels` correction changed **only the tool**, not the repo — so the HEAD is unchanged by it.
+**Measured:** 2026-10-06; **re-measured 2026-10-07** after the four-leftover-modules fix **and again after the `webhooks` fix + tool fix**. **Tool:** `analysis/d2-gap/measure.js` (re-runnable; `--json` for machines).
+**Repo:** `workspace/starting-kit`, HEAD **`e1fa605`** (the `webhooks` D2-gap fix) **plus a tool fix in the same change** (the re-export regex now catches the `import { … }` + bare `export { … }` shim form, and `webhooks/api/inbound/[endpointId]/route.ts` joined `ACTORLESS_PATHS`). Before that, `0ac8783` with `search`, `88582bd` with `attachments`, `a9ecd21` with `workflows`, `0350563` with `inbox_ops`, and `c9a6bb6` with `business_rules`. The `communication_channels` correction changed **only the tool**, not the repo — so the HEAD is unchanged by it.
 
 ## What D2-gap is, and why it is a defect
 
@@ -12,16 +12,16 @@ would reach data no authorization describes (Hermes map §4.4 (b)).
 
 ## The headline
 
-| | baseline (HEAD `5af76bc`) | after `audit_logs` (`4ef5812`) | after `ai_assistant` (`0af50c8`) | after `messages` (`1f1b60e`) | after the `communication_channels` tool fix (`4eead9d`) | after `auth` (`8e1632c`) | after `business_rules` (`c9a6bb6`) | after `inbox_ops` (`0350563`) | after the `notifications` tool fix (`46aec05`) | after `workflows` (`a9ecd21`) | after `attachments` (`88582bd`) | after `search` (`0ac8783`) | **now (the four-leftover-modules fix)** |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| enabled modules with a source tree | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** |
-| write verbs across those modules | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** |
-| **unguarded write verbs (the `D2-gap`)** | **160** | **158** | **143** | **122** | **111** | **99** | **88** | **78** | **68** | **58** | **50** | **41** | **34** | **25** |
-| auth-flow verbs set aside by design | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 |
-| actor-less verbs set aside by design | — | — | — | — | — | — | — | **1** | **1** | **1** | **1** | **1** | **1** |
-| read-only "write verb" set aside by design | — | — | — | — | — | — | — | — | — | **1** | **1** | **1** | **4** |
-| guarded verbs (registry / crud / wrapper / local / re-export) | 88 | 90 | 105 | 126 | **137** | **149** | **160** | **169** | **179** | **188** | **196** | **203** | **209** |
-| *guarded + the set-aside buckets* | *96* | *98* | *113* | *134* | ***145*** | ***157*** | ***168*** | ***177*** | ***187*** | ***197*** | ***205*** | ***222*** | ***231*** |
+| | baseline (HEAD `5af76bc`) | after `audit_logs` (`4ef5812`) | after `ai_assistant` (`0af50c8`) | after `messages` (`1f1b60e`) | after the `communication_channels` tool fix (`4eead9d`) | after `auth` (`8e1632c`) | after `business_rules` (`c9a6bb6`) | after `inbox_ops` (`0350563`) | after the `notifications` tool fix (`46aec05`) | after `workflows` (`a9ecd21`) | after `attachments` (`88582bd`) | after `search` (`0ac8783`) | after the four-leftover-modules fix | **now (the `webhooks` fix + tool fix, `e1fa605`)** |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| enabled modules with a source tree | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** |
+| write verbs across those modules | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** |
+| **unguarded write verbs (the `D2-gap`)** | **160** | **158** | **143** | **122** | **111** | **99** | **88** | **78** | **68** | **58** | **50** | **41** | **34** | **25** | **18** |
+| auth-flow verbs set aside by design | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 |
+| actor-less verbs set aside by design | — | — | — | — | — | — | — | **1** | **1** | **1** | **1** | **1** | **1** | **2** |
+| read-only "write verb" set aside by design | — | — | — | — | — | — | — | — | — | **1** | **1** | **1** | **4** | **4** |
+| guarded verbs (registry / crud / wrapper / local / re-export) | 88 | 90 | 105 | 126 | **137** | **149** | **160** | **169** | **179** | **188** | **196** | **203** | **209** | **215** |
+| *guarded + the set-aside buckets* | *96* | *98* | *113* | *134* | ***145*** | ***157*** | ***168*** | ***177*** | ***187*** | ***197*** | ***205*** | ***222*** | ***231*** | ***238*** |
 
 > **A correction to the "guarded verbs" row (2026-10-07).** The `search` column first read **204** and
 > the four-leftover-modules column was carried forward as **204** too; both omitted one or more of the
@@ -71,19 +71,21 @@ is how the `auth`-onward file-count slip happened.
 > never be quoted without its meaning. **Nothing about the code or the unguarded counts changed** — this
 > is the same figure-discipline rule the row itself is about, applied to the row.
 
-**Guarded by mechanism (computed by the tool, not assumed):** **127 through a module wrapper**, 0 through
+**Guarded by mechanism (computed by the tool, not assumed):** **132 through a module wrapper**, 0 through
 `runRouteMutationGuards` directly, 35 through `makeCrudRoute`/`crud.` (the CRUD factory runs
 `collectAndRunGuards()`), **42 through a module-local guard helper** (`messages` 17 + `integrations` 4 +
-`communication_channels` 11 + `notifications` 10 — the `GUARDED_LOCAL` class), 5 through a re-export of a
+`communication_channels` 11 + `notifications` 10 — the `GUARDED_LOCAL` class), 6 through a re-export of a
 guarded factory, **0 through the deprecated pair** (D2-wide left none enabled). **Closure — every write
-verb is accounted for:** 127 + 0 + 35 + 42 + 5 + 0 + 8 (auth-flow, set aside) + 1 (actor-less, set aside)
-+ 4 (read-only, set aside) + 25 (unguarded) = **256**. *(A first draft of this line carried 33/26/29
-forward from memory; the tool reads 50/35/5, and the closure check is what caught it. The `actor-less`
-term was added 2026-10-07 with the `inbox_ops` fix — see the class note below. The local-helper term grew
-32 → 42 the same day with the `notifications` tool fix. The `read-only` term was added 2026-10-07 with the
-`workflows` fix — see the class note below — and grew 1 → 4 with the four-leftover-modules fix. The wrapper
-term grew 106 → 114 with `attachments`, then 114 → 121 with `search`, then 121 → 127 with
-`directory`+`progress`.)*
+verb is accounted for:** 132 + 0 + 35 + 42 + 6 + 0 + 8 (auth-flow, set aside) + 2 (actor-less, set aside)
++ 4 (read-only, set aside) + 9 (guard-system, set aside) + 18 (unguarded) = **256**. *(A first draft of
+this line carried 33/26/29 forward from memory; the tool reads 50/35/5, and the closure check is what
+caught it. The `actor-less` term was added 2026-10-07 with the `inbox_ops` fix and grew 1 → 2 with the
+`webhooks` tool fix — see the class note below. The local-helper term grew 32 → 42 the same day with the
+`notifications` tool fix. The `read-only` term was added 2026-10-07 with the `workflows` fix — see the
+class note below — and grew 1 → 4 with the four-leftover-modules fix. The wrapper term grew 106 → 114
+with `attachments`, then 114 → 121 with `search`, then 121 → 127 with `directory`+`progress`, then
+127 → 132 with `webhooks`. The `guard-system` term (9) was added 2026-10-07 with the `ai_assistant`
+set-asides so the figure stopped over-claiming by 9.)*
 
 > **A second closure scare, and what it actually was (2026-10-07).** After wiring `auth` the closure read
 > **251**, five short. The five were **`webhooks`' 5 `GUARDED_REEXPORT` verbs**, omitted by the summing
@@ -116,7 +118,7 @@ term grew 106 → 114 with `attachments`, then 114 → 121 with `search`, then 1
 | notifications | 10 | 10 | 0 | 0 | 0 | 10 | 0 | **0** ✅ *tool fix (10 were already guarded by a registry-backed local helper); was 10* |
 | attachments | 4 | 8 | 8 | 0 | 0 | 0 | 0 | **0** ✅ *fixed `88582bd`; was 8 — all 8 wired through a new wrapper* |
 | search | 7 | 7 | 7 | 0 | 0 | 0 | 0 | **0** ✅ *fixed `0ac8783`; was 7 — all 7 wired through a new wrapper* |
-| webhooks | 11 | 15 | 0 | 0 | 0 | 3 | 0 | **7** |
+| webhooks | 11 | 15 | 5 | 0 | 3 | 0 | 0 | **0** ✅ *fixed 2026-10-07 + tool fix; was 7 — 5 wired through a new wrapper, 1 false-positive re-export shim, 1 actor-less set aside* |
 | configs | 4 | 4 | 0 | 0 | 0 | 0 | 0 | **4** |
 | currencies | 4 | 10 | 0 | 0 | 0 | 6 | 0 | **4** |
 | entities | 7 | 11 | 7 | 0 | 0 | 0 | 0 | **4** |
@@ -492,6 +494,7 @@ slip happened before.
 | `planner` | 0 of 2 | 0 | ✅ exact |
 | `query_index` | 0 of 2 | 0 | ✅ exact |
 | **`workflows`** | **13 of 19** | **10** | ❌ **the record was wrong** → **now 0, fixed `a9ecd21` (9 wired, 1 read-only set aside)** |
+| **`webhooks`** | **7 unguarded verbs** | **5 genuine writes** (1 was a re-export shim, 1 was actor-less) | ❌ **the label over-claimed by 2** → **now 0, fixed `e1fa605` (5 wired, 2 re-classified — tool fix)** |
 
 ### Why `workflows` was wrong — two routes agree
 
@@ -778,6 +781,93 @@ FOUND: NONE."**
 127 + 0 + 35 + 42 + 5 + 0 + 8 + 1 + 4 + 9 + 0 + 25 = 256.** `directory` + `progress` **32 suites / 256
 tests green**; core `tsc --noEmit` exit 0.
 
+---
+
+## `webhooks` — a REAL gap, but the label's 7 split three ways; 5 wired + two TOOL corrections (2026-10-07, `e1fa605`)
+
+The tool read **7 unguarded verbs across 6 files** — the joint-largest remaining with `search` after
+`attachments`. **The premise was measured before a file was spent, and this time the label over-claimed
+by TWO** (the fifth time this four-symbol scan has over-claimed, and the second where the correction
+changed the **TOOL**, not the repo).
+
+**(1) False positive — `api/route.ts` POST.** It is a **two-line re-export shim**: `import { GET, POST,
+openApi as legacyOpenApi } from './webhooks/route'` then a bare `export { GET, POST }`. The real handler
+`webhooks/route.ts` **is `makeCrudRoute`** (`GUARDED_CRUD`). The tool's re-export regex required the
+**inline** `export { … } from` spelling and **missed the `import { … }` + bare `export { … }` form**.
+**Fixed in the tool, not the repo** — and the new rule is guarded: a bare `export { POST }` counts as a
+re-export **only when the file does not define that verb locally**, so a file that owns an unguarded
+handler still reads GAP (proved on two synthetic snippets: the shim → re-export; `export async function
+POST {}` + `export { POST }` → still GAP).
+
+**(2) Actor-less — `api/inbound/[endpointId]/route.ts` POST.** `requireAuth: false`; never reads a
+session; writes a `WebhookInboundReceiptEntity` whose `tenantId` may be `null`
+(`verified.tenantId ?? null`); and is guarded by **its own** mechanisms — `adapter.verifyWebhook` (the
+provider signature **is** the authentication), a 60-per-minute rate limit, integration gating and a
+unique-violation dedup on `(endpointId, messageId)`. Set aside in the tool's **`ACTORLESS_PATHS`**,
+beside `inbox_ops/api/webhook/inbound.ts` — a registry guard cannot be evaluated with no actor, and
+fabricating one would make every feature-gated guard **skip silently**.
+
+**(3) Genuine writes — 5 verbs across 4 files**, all **now wired** through a **new**
+`beginWebhooksMutationGuard()` (`api/mutation-guard.ts`, two kinds `webhooks.endpoint` /
+`webhooks.delivery`, `resourceIdOverride` support mirroring `search`), each at the established placement
+(after the route's own scope/existence/integration gates, before the write; `runAfterSuccess` after
+commit):
+
+| route | verb | resourceKind | operation | write | after-success |
+|---|---|---|---|---|---|
+| `api/webhook-deliveries/[id]/retry/route.ts` | POST | `webhooks.delivery` | `custom` | status reset + `em.flush()` (:66) then `enqueueWebhookDelivery` | plain |
+| `api/webhooks/[id]/rotate-secret/route.ts` | POST | `webhooks.endpoint` | `update` | secret rotation + `em.flush()` (:38) | plain |
+| `api/webhooks/[id]/route.ts` | PUT | `webhooks.endpoint` | `update` | `em.flush()` (:107) | plain |
+| `api/webhooks/[id]/route.ts` | DELETE | `webhooks.endpoint` | `delete` | soft-delete + `em.flush()` (:143-144) | plain |
+| `api/webhooks/[id]/test/route.ts` | POST | `webhooks.delivery` | `create` | `createWebhookDelivery` → `processWebhookDeliveryJob` | **re-bound** to the materialised delivery id |
+
+**Also added:** `WebhookRequestScope` (`api/helpers.ts`) now carries `userId` (`auth.sub`), read from the
+`auth` the scope already holds, so the wrapper gets a real actor.
+
+**What was NOT missing — stated plainly, because the label invites the opposite reading.** Every one of
+the five verbs **already enforced its own capability** through `metadata.requireFeatures`
+(`webhooks.manage` on retry/PUT/DELETE, `webhooks.secrets` on rotate, `webhooks.test` on test) and
+scoped every lookup by tenant + organization (`findScopedWebhook` / `findScopedDelivery`). **The defect
+was the missing structural chokepoint, not missing authorization.** **The optimistic-lock floor is NOT
+this guard:** `webhooks/[id]/route.ts` already calls `enforceCommandOptimisticLockWithGuards(...)` on PUT
+and DELETE, which **never consults `getAllMutationGuardInstances()`** (the `directory` trap); the
+registry call added here is a separate chokepoint. And `webhooks` ships **no `data/guards.ts`**, so no
+`webhooks.*` guard exists in the registry today — the wiring means the **first** one ever written will
+be **enforced** rather than silently skipped.
+
+**Two routes agree on the count and the wiring.** **(1)** the tool's `--json` rows now read **0 GAP /
+5 wrapper verbs** for `webhooks`; **(2)** a hand walk of every `.ts` under `api/` finds the same three-way
+split: 1 two-line shim, 1 actor-less route, 5 genuine writes.
+
+**A third, independent route — the new proof suite.** `api/__tests__/d2-gap-wiring.route.test.ts`
+(**11 tests**) registers a **real** guard in the global store (leaving `runRouteMutationGuards`
+**unmocked**) and drives the **real** handlers, asserting **both directions for all five verbs**: a
+**block** verdict stops the write (the flush / enqueue / test-delivery is never reached, no after-success)
+and an **allow** verdict runs it (the write is recorded, after-success fires once), plus a control guard
+outside the touched kinds. **Proved to bite, twice:** block path neutered → exactly the **5 block** tests
+RED (allow + control stay green); `runAfterSuccess` severed → exactly the **5 allow** tests RED; wrapper
+restored byte-identical, no mutation residue.
+
+**A hostile critic pass attacked every claim from the raw files** — re-ran the tool, hand-walked every
+`.ts` under `api/`, confirmed the two shim forms and the actor-less route, spot-checked the totals.
+**It cleared every code claim** (0 GAP; the 5 guard placements; the import depths; `tsc` 0; the suite
+registers a real guard, leaves `runRouteMutationGuards` unmocked, and is not tautological) **and found
+ONE real defect — in the TOOL, in the reverse direction:** the first version of the local-definition
+rule still counted an **aliased** entry (`export { helpers as POST }`), so a file owning an unguarded
+write reached through the alias read as `GUARDED_REEXPORT`. **Fixed and probed in the same change** (see
+"Known limits" above); the fix only **removes** laundering, so it cannot move any existing
+classification, and the tool's real output is **unchanged** (`webhooks 0`, total `18`). The critic's
+verdict on the code was "none", but its verdict on the tool was "one", and the tool fix is what this
+record carries.
+
+**Measured after (HEAD `e1fa605`):** `webhooks` **7 → 0** (5 `GUARDED_WRAPPER`, 3 `GUARDED_CRUD`, 6
+`GUARDED_REEXPORT`, 1 `ACTORLESS_SET_ASIDE`); **total 25 → 18** (re-export class **5 → 6**, actor-less
+class **1 → 2**, wrapper **127 → 132**, guarded **209 → 215**); **Closure:
+132 + 0 + 35 + 42 + 6 + 0 + 8 + 2 + 4 + 9 + 0 + 18 = 256.** Whole `webhooks` package **15 suites / 127
+tests green**; `webhooks` `tsc --noEmit` clean.
+
+---
+
 ## Method, so this can be re-run and cannot rot
 
 ```bash
@@ -800,6 +890,25 @@ with the record.
 - **`GUARDED_LOCAL` depends on `LOCAL_GUARD_HELPERS` being complete.** A module with its own guard
   helper that is **not** listed reads as `GAP` even though it is guarded — this is exactly what happened
   to `communication_channels` (11 verbs mis-labelled until `validateRouteMutationGuard` was added to the
-  map). **When a new module is measured, check whether it ships a guard helper before trusting a `GAP`.**
-  The five known helpers: `runMessageMutationGuards`, `runIntegrationMutationGuards`,
-  `runPaymentGatewayMutationGuards`, `runStaffMutationGuards`, `validateRouteMutationGuard`.
+  map) and to `notifications` (10 verbs mis-labelled until `runGuardedNotificationWrite` and its two
+  factories were added). **When a new module is measured, check whether it ships a guard helper before
+  trusting a `GAP`.** The known helpers: `runMessageMutationGuards`, `runIntegrationMutationGuards`,
+  `runPaymentGatewayMutationGuards`, `runStaffMutationGuards`, `validateRouteMutationGuard`,
+  `runGuardedNotificationWrite`/`createBulkNotificationRoute`/`createSingleNotificationActionRoute`.
+- **`GUARDED_REEXPORT` had a blind spot, now fixed (2026-10-07).** It matched only the **inline**
+  `export { … } from '…'` form and **missed** the two-line shim — an `import { … }` followed by a bare
+  `export { … }`. `webhooks/api/route.ts` is exactly that, so a file whose real handler is
+  `makeCrudRoute` read as an unguarded write verb. The tool now treats a bare `export { V }` as a
+  re-export **only when the file does not define `V` locally**, so a file that owns an unguarded handler
+  still reads GAP.
+- **The same fix had a second, narrower defect, found by a hostile-critic pass over the `webhooks`
+  change and then fixed (2026-10-07).** The first version of the local-definition guard still counted
+  an **aliased** entry: `export { helpers as POST }` put the token `POST` in the brace list, so a file
+  that owned an unguarded write reached through `helpers` read as `GUARDED_REEXPORT`. The rule now
+  requires the entry to be the **bare** verb name (an entry is split on commas and must equal
+  `POST`/`PUT`/`PATCH`/`DELETE` exactly), so neither `x as POST` nor `POST as y` counts. **Both
+  directions are probed** (`d2probe` harness, since removed): the `webhooks` shim still reads
+  re-export; a real local handler plus a bare `export { POST }` still reads GAP; an aliased entry now
+  reads GAP. Because the change only **removes** laundering it cannot move any existing classification,
+  and the tool's real output is unchanged (`webhooks 0`, total `18`). No `webhooks` file used an alias,
+  so the module's `0` was never affected — stated because a critic found the rule, not the count.

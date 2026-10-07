@@ -89,8 +89,26 @@ function resolveModuleDir(id) {
 //   export { POST, PUT } from './x'          <- a re-export
 //   export default ... with a POST in it     <- not a write verb; ignored
 const ANY_WRITE_EXPORT = /(?:^|\n)\s*export\s+(?:async\s+)?(?:function|const|let|var|\{)[^\n]*\b(POST|PUT|PATCH|DELETE)\b/;
-// A re-export of the verb (`export { POST } from '...'`) inherits the source's guard.
-const RE_REEXPORT = /(?:^|\n)\s*export\s*\{[^}]*(POST|PUT|PATCH|DELETE)[^}]*\}\s*from/;
+// A re-export of the verb inherits the source's guard. Two spellings:
+//   export { POST, PUT } from './x'   <- inline, names the source
+//   import { GET, POST } from './x'
+//   export { GET, POST }              <- bare, the source is the import above
+// The second form was missed until `webhooks/api/route.ts` exposed it: a
+// two-line shim whose real handler (`./webhooks/route.ts`) is `makeCrudRoute`
+// (GUARDED_CRUD), yet the shim read as an unguarded write verb. That is a tool
+// defect, not a repo defect, so it is fixed HERE.
+const RE_REEXPORT_INLINE = /(?:^|\n)\s*export\s*\{[^}]*(POST|PUT|PATCH|DELETE)[^}]*\}\s*from/;
+// The bare form is only a re-export when the file does not define the verb
+// locally AND the exported entry is the bare verb name (not an alias). If the
+// verb has a local `export function POST` / `export const POST` (or an inner
+// `function POST` / `const POST`), the file OWNS the handler and a missing
+// guard must still read as GAP — a bare `export { POST }` must not launder it.
+// An ALIASED entry (`helpers as POST`) likewise must not count: the token
+// `POST` appears only as an alias target, so the file may own an unguarded
+// write under that name; conservatively it reads GAP. `writeVerbs()` already
+// finds the local definition, so the two agree by construction.
+const RE_LOCAL_VERB_DEF = /(?:^|\n)\s*(?:export\s+)?(?:async\s+)?(?:function|const|let|var)\s+(POST|PUT|PATCH|DELETE)\b/g;
+const RE_REEXPORT_BARE = /(?:^|\n)\s*export\s*\{([^}]*)\}/g;
 
 const RE_WRAPPER = /begin[A-Za-z]*MutationGuard\s*\(/;
 const RE_REGISTRY = /runRouteMutationGuards\s*\(/;
@@ -218,6 +236,19 @@ function isAuthFlow(relPath) {
  */
 const ACTORLESS_PATHS = [
   'inbox_ops/api/webhook/inbound.ts',
+  // `webhooks/api/inbound/[endpointId]/route.ts` POST — the second case, added
+  // 2026-10-07 when the `webhooks` D2-gap was measured. Same shape as the
+  // inbox_ops one: `metadata.POST = { requireAuth: false }` by design, it never
+  // reads a session (`helpers.ts`' `resolveWebhookRequestScope`, which does the
+  // `getAuthFromRequest` + 401, is NOT on this path), it writes a
+  // `WebhookInboundReceiptEntity` whose `tenantId` may be `null`
+  // (`verified.tenantId ?? null`), and it is guarded by its OWN mechanisms —
+  // `adapter.verifyWebhook` (the provider signature IS the authentication), a
+  // 60-per-minute rate limit, integration-enabled gating and a unique-violation
+  // dedup on `(endpointId, messageId)`. A registry guard cannot be evaluated
+  // with no actor, and fabricating one would make every feature-gated guard
+  // SKIP SILENTLY. Set aside, not counted. Re-check if it ever gains a session.
+  'webhooks/api/inbound/[endpointId]/route.ts',
 ];
 
 function isActorless(relPath) {
@@ -341,6 +372,46 @@ function lockFloorCovers(relPath, moduleId, verbs) {
   );
 }
 
+/**
+ * A bare `export { POST, GET }` (no `from`) is a re-export ONLY when the file
+ * does not define that write verb locally AND the entry names the verb bare
+ * (not `x as POST`). Returns true if at least one write verb is bare-exported,
+ * un-aliased, and not locally defined in the same file.
+ *
+ * Why the local-definition guard matters: `export { POST }` in a file that
+ * defines `export async function POST` re-exports its OWN handler, so the file
+ * still owns the write and a missing guard must read as GAP. Only the shim case
+ * (verb imported, never defined here) is a genuine re-export.
+ *
+ * Why the alias guard matters: `export { helpers as POST }` puts the token
+ * `POST` in the list but does not re-export a handler *named* POST — it exposes
+ * a differently-named binding under that name. The file may own an unguarded
+ * write reached through it, so the conservative reading is GAP. Without this
+ * check the token match laundered the whole file (a real defect a hostile
+ * critic pass found in the `webhooks` tool fix).
+ */
+function bareReexportsAWriteVerb(code) {
+  const localVerbs = new Set();
+  for (const m of code.matchAll(RE_LOCAL_VERB_DEF)) localVerbs.add(m[1]);
+  for (const m of code.matchAll(RE_REEXPORT_BARE)) {
+    if (/\bfrom\b/.test(m[0])) continue; // inline form already handled
+    // Split the brace list into entries. An entry counts as re-exporting a
+    // write verb ONLY when it is the bare verb name — `export { POST, GET }`.
+    // An ALIASED entry (`helpers as POST`, `POST as handlePost`) must NOT
+    // count: the name in the list is not a same-named local handler, so the
+    // file may still own an unguarded write under that name, and the
+    // conservative reading is GAP. (This was a real defect: `x as POST` used
+    // to launder a whole file because the token `POST` merely appeared in the
+    // list. Found by a hostile critic pass over the `webhooks` fix.)
+    for (const entry of m[1].split(',')) {
+      const name = entry.trim().replace(/^type\s+/, '');
+      if (!/^(POST|PUT|PATCH|DELETE)$/.test(name)) continue;
+      if (!localVerbs.has(name)) return true;
+    }
+  }
+  return false;
+}
+
 function classify(file, moduleId) {
   const raw = fs.readFileSync(file, 'utf8');
   const code = stripComments(raw);
@@ -356,7 +427,7 @@ function classify(file, moduleId) {
     crud: RE_CRUD.test(code),
     local: Object.values(LOCAL_GUARD_HELPERS).some((re) => re.test(code)),
     deprecated: RE_DEPRECATED.test(code),
-    reexport: RE_REEXPORT.test(code),
+    reexport: RE_REEXPORT_INLINE.test(code) || bareReexportsAWriteVerb(code),
   };
 
   let cls;

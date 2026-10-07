@@ -1,7 +1,7 @@
 # State of play — what is done, and what is next
 
 **Written:** 2026-10-07
-**Measured at:** docs repo `839ffe1` · code repo `88582bd` (both re-read this session, not remembered)
+**Measured at:** docs repo `ded9f96` · code repo `e1fa605` (both re-read this session, not remembered)
 **Owner:** Ramzi (not a developer)
 
 This page answers one question: **where is the project really, and what is the next thing?**
@@ -25,10 +25,12 @@ two-thirds closed.**
   cross the authority boundary" true rather than aspirational — is the work in hand.
   - `D2-wide` (routes still calling the **old, deprecated** check, which silently skips the real
     registry): **COMPLETE across every enabled module.**
-  - `D2-gap` (routes calling **no** check at all): **measured 41 unguarded verbs** after this
-    session's tool correction (it read 50 before; the `ai_assistant` 9 were its declared set-asides,
-    now classed correctly). **10 are fixed** (seven modules, each proven by two mutations).
-- **The next thing is `search` (7), then `webhooks` (7), then `configs` / `currencies` (4 each).**
+  - `D2-gap` (routes calling **no** check at all): **measured 18 unguarded verbs** after this
+    session's latest fixes (it read 50 before; the `ai_assistant` 9 were its declared set-asides,
+    now classed correctly; then `search` 7 and `webhooks` 7 were fixed, `directory`/`progress` wired
+    and `dashboards`/`data_sync` set aside). **Every double-digit module is closed.**
+- **The next thing is `configs` (4), then `currencies` (4), then `entities` (4 — but 2 of those are the
+  optimistic-lock floor, not a live hole), then 1/1.**
   Note: **two of the tool's "biggest" remaining modules are tool labels, not a live hole** —
   `ai_assistant` (9, all declared set-asides) and 2 of `entities`' 4 (the optimistic-lock floor).
   Measured this session, verified by a critic pass (§4).
@@ -73,22 +75,22 @@ The journal's queue table names 13 modules migrated, from `dashboards` (`a05ea2c
 I did not re-run each commit, but the end-state is independently confirmed by the measurement tool
 (below), which counts **`D` (deprecated) = 0 for every enabled module**.
 
-### 2.4 `D2-gap` — measured (41 after this session's correction), and 10 fixed
+### 2.4 `D2-gap` — measured (18 after this session's latest fixes), and every double-digit module closed
 
 > **SUPERSEDED 2026-10-07 (same day, later):** this snapshot recorded the sweep at **41 unguarded**.
 > The `search` module was then fixed (**7 → 0**), so the live figure became **34**; then four
 > "leftover-verb" modules were closed — `directory` (3) and `progress` (3) wired, `dashboards` (2) and
-> `data_sync` (1) set aside as measured read-only — so the live figure is now **25**, with wrapper class
-> **127** and the read-only class at **4** (details in `BACKLOG.md` §D2-gap and `BUILD-ORDER.md` §2f).
-> This section is kept as the study's own reading, per the "every figure names its HEAD" rule; it is not
-> the current number.
+> `data_sync` (1) set aside as measured read-only — so the live figure became **25**; then `webhooks`
+> (**7 → 0** — 5 wired, 1 re-export shim re-classified, 1 actor-less set aside) brought it to **18**,
+> with wrapper class **132**, re-export **6** and actor-less **2** (details in `BACKLOG.md` §D2-gap and
+> `BUILD-ORDER.md` §2f). **Every double-digit module is now closed.** This section is kept as the
+> study's own reading, per the "every figure names its HEAD" rule; it is not the current number.
 
 **Route 1 (the tool):** ran `node analysis/d2-gap/measure.js` this session. It reproduces the
-documented headline **50 unguarded** — and, after this session's tool fix, reads **41**
-(the `ai_assistant` 9 are now a named set-aside class, §4 Finding 2).
-Closure at 41: `114 (wrapper) + 0 (registry) + 35 (crud) + 42 (local helper) + 5 (re-export)
-+ 0 (deprecated) + 8 (auth-flow) + 1 (actor-less) + 1 (read-only) + 9 (guard-system) + 0 (lock-floor)
-+ 41 (unguarded) = 256`.
+documented headline **50 unguarded** — and, after this session's tool fixes, reads **18**.
+Closure at 18: `132 (wrapper) + 0 (registry) + 35 (crud) + 42 (local helper) + 6 (re-export)
++ 0 (deprecated) + 8 (auth-flow) + 2 (actor-less) + 4 (read-only) + 9 (guard-system) + 0 (lock-floor)
++ 18 (unguarded) = 256`.
 
 **Route 2 (the code):** grepped each fixed module's `api/` for a registry path. Every one is wired:
 
@@ -127,17 +129,16 @@ containers healthy/up, no unhealthy container.
 
 | # | Module | Unguarded verbs | Notes |
 |---|---|---|---|
-| **1** | `search` / `webhooks` | **7 each** | joint-largest now that `ai_assistant` is reduced to its set-asides |
-| **2** | `configs` / `currencies` | 4 each | |
-| **3** | `progress` / `directory` | 3 each | `directory` is 1 file (3 verbs), already well protected |
-| 4 | `dashboards` | 2 | |
-| 5 | `onboarding` / `data_sync` / `scheduler` | 1 each | |
+| **1** | `configs` | **4** | largest remaining; 4 files, `POST`/`DELETE` |
+| **2** | `currencies` | **4** | `fetch-configs` (3 verbs) + `fetch-rates` (1) |
+| **3** | `entities` | **4** | **2 are the optimistic-lock floor, not gaps** (§4 Finding 3) |
+| 4 | `onboarding` / `scheduler` | 1 each | |
 
-*(The box currently says "next: `ai_assistant` (9), then `search` and `webhooks`". That is **stale in
-one important way**: measured this session, **all 9 `ai_assistant` verbs are its declared set-asides**
-(7 session/flow + 2 pending-action-gate) and **none reaches the registry** — the tool re-lists them
-only because it has no set-aside *class* for them. **So `ai_assistant` is a tool fix, not guard work
-(§4 Finding 2, verified by a critic pass).** The real next modules are `search` and `webhooks`.)*
+*(Every double-digit module is now closed. Measured this session, **all 9 `ai_assistant` verbs are
+its declared set-asides** (7 session/flow + 2 pending-action-gate) and **none reaches the registry** —
+the tool re-lists them only because it has no set-aside *class* for them. **So `ai_assistant` is a
+tool fix, not guard work (§4 Finding 2, verified by a critic pass).** The real next modules are
+`configs`, `currencies` and `entities`.)*
 
 **After the sweep (from the box's queue):**
 
