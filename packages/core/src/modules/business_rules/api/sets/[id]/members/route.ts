@@ -9,6 +9,7 @@ import {
   createRuleSetMemberSchema,
   updateRuleSetMemberSchema,
 } from '../../../../data/validators'
+import { beginBusinessRulesMutationGuard } from '../../../mutation-guard'
 
 const paramsSchema = z.object({
   id: z.string().uuid('Invalid rule set id'),
@@ -127,7 +128,22 @@ export async function POST(req: Request, ctx: { params?: { id?: string } }) {
     rule: rule,
   })
 
+  const guard = await beginBusinessRulesMutationGuard({
+    container,
+    tenantId: auth.tenantId,
+    organizationId: auth.orgId,
+    userId: auth.sub,
+    req,
+    resourceKind: 'business_rules.ruleSetMember',
+    resourceId: member.id ?? 'new',
+    operation: 'create',
+    mutationPayload: { ruleSetId: ruleSet.id, ruleId: rule.id, sequence: validatedPayload.sequence },
+  })
+  if (guard.blockedResponse) return guard.blockedResponse
+
   await em.persist(member).flush()
+
+  await guard.runAfterSuccess(member.id)
 
   return NextResponse.json({ id: member.id }, { status: 201 })
 }
@@ -170,6 +186,19 @@ export async function PUT(req: Request, ctx: { params?: { id?: string } }) {
     return NextResponse.json({ error: 'Member not found' }, { status: 404 })
   }
 
+  const guard = await beginBusinessRulesMutationGuard({
+    container,
+    tenantId: auth.tenantId,
+    organizationId: auth.orgId,
+    userId: auth.sub,
+    req,
+    resourceKind: 'business_rules.ruleSetMember',
+    resourceId: member.id,
+    operation: 'update',
+    mutationPayload: parsed.data as Record<string, unknown>,
+  })
+  if (guard.blockedResponse) return guard.blockedResponse
+
   if (parsed.data.sequence !== undefined) {
     member.sequence = parsed.data.sequence
   }
@@ -178,6 +207,8 @@ export async function PUT(req: Request, ctx: { params?: { id?: string } }) {
   }
 
   await em.persist(member).flush()
+
+  await guard.runAfterSuccess()
 
   return NextResponse.json({ ok: true })
 }
@@ -214,7 +245,21 @@ export async function DELETE(req: Request, ctx: { params?: { id?: string } }) {
     return NextResponse.json({ error: 'Member not found' }, { status: 404 })
   }
 
+  const guard = await beginBusinessRulesMutationGuard({
+    container,
+    tenantId: auth.tenantId,
+    organizationId: auth.orgId,
+    userId: auth.sub,
+    req,
+    resourceKind: 'business_rules.ruleSetMember',
+    resourceId: member.id,
+    operation: 'delete',
+  })
+  if (guard.blockedResponse) return guard.blockedResponse
+
   await em.remove(member).flush()
+
+  await guard.runAfterSuccess()
 
   return NextResponse.json({ ok: true })
 }

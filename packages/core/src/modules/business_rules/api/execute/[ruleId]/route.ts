@@ -5,6 +5,7 @@ import { getAuthFromRequest } from '@open-mercato/shared/lib/auth/server'
 import { createRequestContainer } from '@open-mercato/shared/lib/di/container'
 import type { EntityManager } from '@mikro-orm/postgresql'
 import * as ruleEngine from '../../../lib/rule-engine'
+import { beginBusinessRulesMutationGuard } from '../../mutation-guard'
 
 const executeByIdRequestSchema = z.object({
   data: z.any(),
@@ -94,6 +95,21 @@ export async function POST(req: Request, context: RouteContext) {
     eventType,
   }
 
+  // The execution itself writes a `RuleExecutionLog` row (see `logRuleExecution`
+  // in lib/rule-engine.ts) whenever `dryRun` is false — this is a write route.
+  const guard = await beginBusinessRulesMutationGuard({
+    container,
+    tenantId: auth.tenantId,
+    organizationId: auth.orgId,
+    userId: auth.sub,
+    req,
+    resourceKind: 'business_rules.executionLog',
+    resourceId: ruleId,
+    operation: 'create',
+    mutationPayload: { ruleId, entityType, entityId, eventType, dryRun },
+  })
+  if (guard.blockedResponse) return guard.blockedResponse
+
   try {
     const result = await ruleEngine.executeRuleById(em, execContext)
 
@@ -117,6 +133,9 @@ export async function POST(req: Request, context: RouteContext) {
 
     // Return appropriate status based on result
     const status = result.success ? 200 : (result.error === 'Rule not found' ? 404 : 200)
+    if (status === 200) {
+      await guard.runAfterSuccess(result.logId ? String(result.logId) : ruleId)
+    }
     return NextResponse.json(response, { status })
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error)

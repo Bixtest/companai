@@ -21,6 +21,7 @@ import {
   invalidateBusinessRuleDiscoveryCache,
   resolveBusinessRuleDiscoveryCache,
 } from '../../lib/rule-engine'
+import { beginBusinessRulesMutationGuard } from '../mutation-guard'
 import { createLogger } from '@open-mercato/shared/lib/logger'
 
 const logger = createLogger('business_rules').child({ component: 'rules-api' })
@@ -220,6 +221,19 @@ export async function POST(req: Request) {
 
   const rule = em.create(BusinessRule, data)
 
+  const guard = await beginBusinessRulesMutationGuard({
+    container,
+    tenantId: auth.tenantId,
+    organizationId: auth.orgId,
+    userId: auth.sub,
+    req,
+    resourceKind: 'business_rules.rule',
+    resourceId: rule.id ?? 'new',
+    operation: 'create',
+    mutationPayload: { ruleId: data.ruleId, ruleType: data.ruleType, entityType: data.entityType },
+  })
+  if (guard.blockedResponse) return guard.blockedResponse
+
   try {
     await em.persist(rule).flush()
     await invalidateBusinessRuleDiscoveryCache(cache, rule.tenantId, rule.organizationId)
@@ -230,6 +244,8 @@ export async function POST(req: Request) {
       { status: 500 },
     )
   }
+
+  await guard.runAfterSuccess(rule.id)
 
   return NextResponse.json({ id: rule.id }, { status: 201 })
 }
@@ -296,6 +312,19 @@ export async function PUT(req: Request) {
     throw err
   }
 
+  const guard = await beginBusinessRulesMutationGuard({
+    container,
+    tenantId: auth.tenantId,
+    organizationId: auth.orgId,
+    userId: auth.sub,
+    req,
+    resourceKind: 'business_rules.rule',
+    resourceId: rule.id,
+    operation: 'update',
+    mutationPayload: parsed.data as Record<string, unknown>,
+  })
+  if (guard.blockedResponse) return guard.blockedResponse
+
   em.assign(rule, parsed.data)
 
   try {
@@ -308,6 +337,8 @@ export async function PUT(req: Request) {
       { status: 500 },
     )
   }
+
+  await guard.runAfterSuccess()
 
   return NextResponse.json({ ok: true })
 }
@@ -354,9 +385,23 @@ export async function DELETE(req: Request) {
     throw err
   }
 
+  const guard = await beginBusinessRulesMutationGuard({
+    container,
+    tenantId: auth.tenantId,
+    organizationId: auth.orgId,
+    userId: auth.sub,
+    req,
+    resourceKind: 'business_rules.rule',
+    resourceId: rule.id,
+    operation: 'delete',
+  })
+  if (guard.blockedResponse) return guard.blockedResponse
+
   rule.deletedAt = new Date()
   await em.persist(rule).flush()
   await invalidateBusinessRuleDiscoveryCache(cache, rule.tenantId, rule.organizationId)
+
+  await guard.runAfterSuccess()
 
   return NextResponse.json({ ok: true })
 }

@@ -7,6 +7,7 @@ import type { EntityManager } from '@mikro-orm/postgresql'
 import type { EventBus } from '@open-mercato/events'
 import { ruleEngineContextSchema } from '../../data/validators'
 import * as ruleEngine from '../../lib/rule-engine'
+import { beginBusinessRulesMutationGuard } from '../mutation-guard'
 
 const executeRequestSchema = z.object({
   entityType: z.string().min(1, 'entityType is required'),
@@ -92,6 +93,21 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: `Invalid execution context: ${errors.join(', ')}` }, { status: 400 })
   }
 
+  // The execution itself writes a `RuleExecutionLog` row (see `logRuleExecution`
+  // in lib/rule-engine.ts) whenever `dryRun` is false — this is a write route.
+  const guard = await beginBusinessRulesMutationGuard({
+    container,
+    tenantId: auth.tenantId,
+    organizationId: auth.orgId,
+    userId: auth.sub,
+    req,
+    resourceKind: 'business_rules.executionLog',
+    resourceId: entityId ?? 'manual',
+    operation: 'create',
+    mutationPayload: { entityType, entityId, eventType, dryRun },
+  })
+  if (guard.blockedResponse) return guard.blockedResponse
+
   try {
     const result = await ruleEngine.executeRules(em, context, { eventBus, cache })
 
@@ -118,6 +134,9 @@ export async function POST(req: Request) {
       errors: result.errors,
       logIds: result.logIds?.map((entry) => String(entry)),
     }
+
+    const firstLogId = result.logIds?.[0]
+    await guard.runAfterSuccess(firstLogId != null ? String(firstLogId) : undefined)
 
     return NextResponse.json(response, { status: 200 })
   } catch (error) {

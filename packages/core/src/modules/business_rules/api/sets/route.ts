@@ -12,6 +12,7 @@ import {
   createRuleSetSchema,
   updateRuleSetSchema,
 } from '../../data/validators'
+import { beginBusinessRulesMutationGuard } from '../mutation-guard'
 
 const querySchema = z.looseObject({
   id: z.string().uuid().optional(),
@@ -173,7 +174,23 @@ export async function POST(req: Request) {
   }
 
   const ruleSet = em.create(RuleSet, parsed.data)
+
+  const guard = await beginBusinessRulesMutationGuard({
+    container,
+    tenantId: auth.tenantId,
+    organizationId: auth.orgId,
+    userId: auth.sub,
+    req,
+    resourceKind: 'business_rules.ruleSet',
+    resourceId: ruleSet.id ?? 'new',
+    operation: 'create',
+    mutationPayload: { setId: parsed.data.setId, enabled: parsed.data.enabled },
+  })
+  if (guard.blockedResponse) return guard.blockedResponse
+
   await em.persist(ruleSet).flush()
+
+  await guard.runAfterSuccess(ruleSet.id)
 
   return NextResponse.json({ id: ruleSet.id }, { status: 201 })
 }
@@ -237,8 +254,23 @@ export async function PUT(req: Request) {
     throw err
   }
 
+  const guard = await beginBusinessRulesMutationGuard({
+    container,
+    tenantId: auth.tenantId,
+    organizationId: auth.orgId,
+    userId: auth.sub,
+    req,
+    resourceKind: 'business_rules.ruleSet',
+    resourceId: ruleSet.id,
+    operation: 'update',
+    mutationPayload: parsed.data as Record<string, unknown>,
+  })
+  if (guard.blockedResponse) return guard.blockedResponse
+
   em.assign(ruleSet, parsed.data)
   await em.persist(ruleSet).flush()
+
+  await guard.runAfterSuccess()
 
   return NextResponse.json({ ok: true })
 }
@@ -284,8 +316,22 @@ export async function DELETE(req: Request) {
     throw err
   }
 
+  const guard = await beginBusinessRulesMutationGuard({
+    container,
+    tenantId: auth.tenantId,
+    organizationId: auth.orgId,
+    userId: auth.sub,
+    req,
+    resourceKind: 'business_rules.ruleSet',
+    resourceId: ruleSet.id,
+    operation: 'delete',
+  })
+  if (guard.blockedResponse) return guard.blockedResponse
+
   ruleSet.deletedAt = new Date()
   await em.persist(ruleSet).flush()
+
+  await guard.runAfterSuccess()
 
   return NextResponse.json({ ok: true })
 }
