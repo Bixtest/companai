@@ -23,12 +23,17 @@
 
 ### The strict tick rule (owner's instruction, 2026-10-07 — this is the law of this file)
 
+0. **Two different jobs, two different sources.** **The POINTS are built from the documents** — every
+   line here comes from reading what the platform is supposed to contain (the vision, the registers,
+   the backlog, the build order). **The TICK is built from the code** — a box is `☑` only after the
+   code was opened or run and the point is *proved*. **Never tick from a document. A document is the
+   source of the claim; the code is the only source of the tick.**
 1. **A box is `☑` ONLY when the code was read/run and the point *and everything it depends on* is
    finished** — no bug, no missing prerequisite, no work left elsewhere for it to be true.
 2. **Docs are not evidence.** A development document (or a developer) saying "done" does **not** tick
    the box. If the code does not back it, the box stays `☐`.
 3. **A claim is a trigger to check, not a tick.** When another document claims a point is done, verify
-   it in the code. If it holds → tick **and** record the evidence in §L. If it does not → leave `☐`,
+   it **in the code**. If it holds → tick **and** record the evidence in §L. If it does not → leave `☐`,
    and note the disagreement in §L.
 4. **Un-tick freely.** If a later change breaks a point, its box goes back to `☐` immediately. A stale
    `☑` is a defect in this file.
@@ -36,7 +41,7 @@
 6. **Adding work is a bug fix.** A point that the sources require and this file lacks is a defect in
    this file — add it, and record where it came from.
 
-**Every `☑` names its evidence in §L (the verification ledger). No evidence, no tick.**
+**In one line: the documents tell you *what* must exist; only the code tells you *whether* it does.**
 
 ---
 
@@ -46,8 +51,8 @@
 |---|---:|---:|---:|
 | A. Substrate (C1–C11) | 0 | 12 | 12 |
 | B. Platform skeleton (P1–P18) | 0 | 18 | 18 |
-| C. AI-first native layer | 15 | 9 | 24 |
-| D. Hermes | 1 | 24 | 25 |
+| C. AI-first native layer | 14 | 10 | 24 |
+| D. Hermes | 0 | 25 | 25 |
 | E. Agent half | 0 | 17 | 17 |
 | F. Model layer | 0 | 14 | 14 |
 | G. Governance & security floor | 6 | 34 | 40 |
@@ -55,9 +60,9 @@
 | I. Business / domain packs | 1 | 17 | 18 |
 | J. Deployment & operations | 0 | 14 | 14 |
 | K. Dev-doc extras | 0 | 13 | 13 |
-| **TOTAL** | **23** | **185** | **208** |
+| **TOTAL** | **21** | **187** | **208** |
 
-> **Read this honestly.** Only **23 of 208** points carry a tick, because the tick rule demands the code
+> **Read this honestly.** Only **21 of 208** points carry a tick, because the tick rule demands the code
 > be verified — and most points have **not yet been re-verified in code this round**. A point marked
 > `(DONE)` in its line but `☐` here means **the docs claim it, the code has not been checked** — treat
 > it as **carried, not confirmed**. This is the whole purpose of this file: **the docs' word is not the
@@ -107,7 +112,7 @@
 
 ## C. THE AI-FIRST NATIVE LAYER — the loop that makes this not "an ERP with AI"
 
-- ☑ **P0-spec** — The Business Model Kernel specification (vision gate RQ-140) *(DONE — draft 2; ratification only)*
+- ☐ **P0-spec** — The Business Model Kernel specification (vision gate RQ-140) *(spec exists in docs; NOT code-verified — a spec is not the build)*
 - ☑ **G-01** — Business Model Kernel: canonical, versioned, typed model above the DB *(DONE — verified)*
 - ☑ **G-08** — Relationship fabric: relationships first-class, declared attributes, collision reporting *(DONE — with G-01)*
 - ☑ **G-02** — Business IR: the typed read and write shapes the AI produces *(DONE — verified)*
@@ -136,7 +141,7 @@
 
 ## D. HERMES — the agent runtime and its joints
 
-- ☑ **B-05** — Runtime boundary decided: Hermes a supervised private Python runtime behind one typed port; headless *(DONE — decided 2026-10-05)*
+- ☐ **B-05** — Runtime boundary decided: Hermes a supervised private Python runtime behind one typed port; headless *(DECIDED in docs — but the code has no Hermes port yet; OpenCode still occupies the slot, so NOT ticked)*
 - ☐ **Port** — The typed port (`describeCapabilities` · `startRun` · `streamRun` · `cancelRun` · `steerRun` · `resumeConversation` · `resolveToolCall` · `completeRun`) *(OPEN —**verified not built**; OpenCode still occupies the slot)* · ★ Hermes: the only door
 - ☐ **Port** — The admitted envelope: server-minted identity, secret *references*, distinct ids *(OPEN)*
 - ☐ **Port** — Failure is normal: `cancelRun` bounded+idempotent, `completeRun` replay-safe *(OPEN)*
@@ -338,7 +343,6 @@ has not been verified in the code, and the claim is unconfirmed.**
 
 | Point(s) | How it was verified | Result |
 |---|---|---|
-| `P0-spec` | the spec document exists (`SPEC-business-model-kernel.md`, draft 2) | **done (ratification only)** |
 | `G-01` `G-08` | ran `packages/shared/src/lib/kernel` | **5 suites / 51 tests pass** |
 | `G-02` `G-03` | ran `business-ir` + `user-function` (incl. the zero-AI `no-llm` test and the live smoke test) | **13 suites / 217 tests pass** |
 | `G-07` `G-21` | ran `business-widget` + `request-outcome` | **10 suites / 130 tests pass** |
@@ -347,7 +351,7 @@ has not been verified in the code, and the claim is unconfirmed.**
 | `D0` `M4` | read `apps/mercato/.mercato/generated/guards.generated.ts` (**non-empty**: `entities`, 2 guards) + ran the registry test | **13 tests pass** |
 | `D2-wide` | the tool reports `D` (deprecated) **= 0 for every enabled module** | **complete** |
 | `D2-gap` | ran `node analysis/d2-gap/measure.js` (**256 write verbs, 0 unguarded**) + proof suites | **35 tests pass; 0 unguarded** |
-| `B-05` | read `AGENT-HALF.md` §1.5 + the integration doc §11 (owner-approved 2026-10-05) | **decided** |
+| `D2-gap / GETs` | the same tool run reports **3 write-performing GETs, 0 unguarded, 2 set aside (read side-effects)** | **complete** |
 
 **Whole-package run (the broad check).** The full `shared` package suite was run: **194 suites, 2264
 tests** → **193 suites / 2256 tests pass**; the **1 failing suite / 8 tests** is an **environment
@@ -359,6 +363,8 @@ sandboxed, passes 8/8 with the sandbox bypassed**). So the shared layer is **gre
 
 | Point | Verified in code | Result |
 |---|---|---|
+| `P0-spec` | the spec is a **document**; there is no code artifact for it | **not a code point — demoted from `☑` to `☐` (a spec is not the build)** |
+| `B-05` | the decision is recorded in docs; `api/chat/route.ts` still imports OpenCode, no Hermes port | **not built — demoted from `☑` to `☐` (decided ≠ implemented)** |
 | The Hermes port | `api/chat/route.ts` still imports `createOpenCodeClient` / `opencode-handlers`; `opencode-handlers.ts:178` reads `OPENCODE_URL` | **NOT built — OpenCode still occupies the slot (N-8 accurate)** |
 | Hermes id seam | `principal.ts` exports `aiWorkerSubject` / `derivePrincipal` / `PrincipalKind` | **seam is real (PART — not ticked)** |
 
@@ -378,6 +384,12 @@ These are the points where a document says "done" and this file **refuses the ti
 
 ### Documentation & tool defects found this round (and fixed)
 
+- **TWO ticks rested on documents, not code — demoted `☑` → `☐`** (the rule applied to this file itself):
+  **`P0-spec`** (its "evidence" was *the spec document exists* — a spec is not the build) and **`B-05`**
+  (its "evidence" was *the docs record the decision* — but no Hermes port exists in the code; OpenCode
+  still occupies the slot). **A decision or a spec recorded in a document is a claim, not a tick.**
+- **`D2-gap / GETs` had NO evidence row** while carrying a `☑` — "no evidence, no tick" was violated.
+  **FIXED**: it now names its tool evidence (3 write-performing GETs, 0 unguarded, 2 set aside).
 - **The Hermes service map carried a STALE `D2-gap` figure** ("50 unguarded" in two live places) — the
   tool reads 0. **FIXED** this round.
 - **`STATE-OF-PLAY-2026-10-07.md` §4 carried a SECOND stale copy** ("41 unguarded") — the tool reads 0.
