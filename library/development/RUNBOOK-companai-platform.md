@@ -41,6 +41,50 @@ docker logs --tail 100 companai-platform-app-1
 
 ---
 
+## 1b. How it is deployed — and Coolify's exact role (measured on the VM 2026-10-07)
+
+**It is a plain Docker Compose project, not a Coolify-managed application.** Everything below was read off
+the running VM, not assumed.
+
+| Fact | Measured value |
+|---|---|
+| Compose project | **`companai-platform`** |
+| Working dir / files | **`/opt/companai-platform`**, using `docker-compose.fullapp.yml` (the kit's own file, verbatim) + `docker-compose.wan.yml` (the VM-only override: adds the `coolify` network and the Traefik labels) |
+| App container | `companai-platform-app-1` (service `app`), image **`open-mercato/app:wan`** (built 2026-10-06 20:51) |
+| Compose labels on the container | `com.docker.compose.project=companai-platform`, `…working_dir=/opt/companai-platform` — and **no `coolify.managed` label** |
+| Networks | `coolify` + `mercato-network-wan` |
+| Traefik labels | `traefik.enable=true`, router `companai` → service `companai`, `traefik.http.services.companai.loadbalancer.server.port=3000`, `traefik.docker.network=coolify` |
+| Build source on the VM | **`/home/ramzi/build-src`** — kit `open-mercato` 0.6.7, **not a git checkout** (a plain file copy), holds the `Dockerfile` the image was built from |
+
+**So Coolify is the reverse proxy and nothing else.** Its bundled Traefik (`coolify-proxy`, `traefik:v3.6`)
+owns ports 80/443 and routes `companai.corprorate.com` → the app on port 3000, because the app joins the
+`coolify` network and carries the labels above. The Coolify **control panel is not the deployer** — there is
+no `coolify.managed` label, and the app is brought up by `deploy.sh` with `docker compose`, not through the
+panel. That is the "we avoided Coolify" design, and it holds for this app.
+
+**How an update goes out (the intended path).**
+
+```bash
+cd /opt/companai-platform
+docker compose -f docker-compose.fullapp.yml -f docker-compose.wan.yml up -d --no-build app
+```
+
+`--no-build` is deliberate — a missing image must fail loudly rather than trigger a rebuild of the 3 GB
+image. `deploy.sh` wraps this (starts postgres/redis/meilisearch first, waits for health, then the app).
+
+**The gap, stated plainly (this is the thing to write before the first real update deploy).** The
+**build-and-ship** half is not scripted or documented:
+
+- The image is built **on the VM** from `/home/ramzi/build-src` (that copy carries the `Dockerfile`).
+- But that copy is **not a git checkout** — it is a plain file copy — so "update it to the fork's current
+  `main`" is a manual step with no script and no drift check.
+- The app service's `build.context` is the deployment dir, which holds **no source**, so `docker compose
+  build` cannot be run from `/opt/companai-platform`; the build must run from the source copy.
+- Therefore a redeploy needs a documented *update the build source → build the image → recreate the app →
+  verify* path. It does not exist yet.
+
+---
+
 ## 2. How the app initialises (this is what makes deploys behave the way they do)
 
 The app container runs an init/migrate step on start, gated by an **init marker volume** so it only runs
@@ -136,8 +180,13 @@ as the superadmin.
 - **No production SMTP** is configured; signup is enabled with auto-confirmation (same limitation the
   `vm-setup.md` records for the neighbouring Konsult app). Password-reset email flows therefore do not
   work — the reset above was done out-of-band for exactly that reason.
-- **Deploying a new version of the platform** is not yet documented end-to-end (build image → ship →
-  migrate). That is the next piece, pending the owner's discussion.
+- **Deploying a new version of the platform** — see **§1b**: the recreate half is known and safe
+  (`docker compose -f docker-compose.fullapp.yml -f docker-compose.wan.yml up -d --no-build app`), but the
+  **build** half is not scripted. The image is built on the VM from `/home/ramzi/build-src`, which is a
+  plain file copy (not a git checkout), so "update it to the fork's current `main`" is a manual step with
+  no drift check. Writing that path (update the build source → build the image → recreate → verify) is the
+  next piece. **The owner has deferred the deploy itself** (2026-10-07): continue development until it is
+  the right time to ship an update.
 
 ---
 
