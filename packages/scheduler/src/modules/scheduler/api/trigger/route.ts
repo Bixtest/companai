@@ -9,6 +9,7 @@ import { getRedisUrlOrThrow } from '@open-mercato/shared/lib/redis/connection'
 import { ScheduledJob } from '../../data/entities.js'
 import { scheduleTriggerSchema } from '../../data/validators.js'
 import type { ExecuteSchedulePayload } from '../../workers/execute-schedule.worker.js'
+import { beginSchedulerMutationGuard } from '../mutation-guard'
 import { resolveTranslations } from '@open-mercato/shared/lib/i18n/server'
 import { createLogger } from '@open-mercato/shared/lib/logger'
 
@@ -80,6 +81,21 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    // Structural mutation guard: the manual trigger is a state-changing action
+    // on the ScheduledJob, so it runs the full registry before the enqueue.
+    const guard = await beginSchedulerMutationGuard({
+      container,
+      req,
+      userId: auth.sub,
+      tenantId: auth.tenantId,
+      organizationId: auth.orgId ?? null,
+      resourceKind: 'scheduler.job',
+      resourceId: schedule.id,
+      operation: 'custom',
+      mutationPayload: { action: 'trigger' },
+    })
+    if (guard.blockedResponse) return guard.blockedResponse
+
     // Enqueue execution job to scheduler-execution queue
     const executionQueue = createQueue<ExecuteSchedulePayload>('scheduler-execution', queueStrategy, {
       connection: { url: getRedisUrlOrThrow('QUEUE') },
@@ -96,6 +112,7 @@ export async function POST(req: NextRequest) {
 
     const jobId = await executionQueue.enqueue(payload)
     await executionQueue.close()
+    await guard.runAfterSuccess()
 
     logger.info('Manually triggered schedule', {
       scheduleId: schedule.id,
