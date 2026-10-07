@@ -1,7 +1,7 @@
 # State of play — what is done, and what is next
 
 **Written:** 2026-10-07
-**Measured at:** docs repo `79c0b13` · code repo `462540e` (HEADs after the `configs` + `currencies` fixes; both re-read this session, not remembered)
+**Measured at:** docs repo `0c82a7d` · code repo `f0f1dd0` (HEADs after the `configs` + `currencies` fixes; both re-read this session, not remembered)
 **Owner:** Ramzi (not a developer)
 
 This page answers one question: **where is the project really, and what is the next thing?**
