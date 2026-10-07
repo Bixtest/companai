@@ -258,7 +258,7 @@ between (A) and (B) is made against a stated need rather than against "the file 
 the entities fix was proven (§2c). Then the parked set is recorded — **not migrated** — as graft-phase work
 in [`CORE-MODULES-REGISTER.md`](CORE-MODULES-REGISTER.md) and the backlog.
 
-## 2f. `D2-gap` — the write routes that call NO guard (measured 2026-10-06; THIRTEEN fixes recorded: nine D2-gap modules, one registry-bypass class, three modules where the TOOL or the label was the defect, and one leftover-verbs re-measure across two wired + two set-aside modules)
+## 2f. `D2-gap` — the write routes that call NO guard (measured 2026-10-06; FOURTEEN fixes recorded: nine D2-gap modules, one registry-bypass class, four modules where the TOOL or the label was the defect, and one leftover-verbs re-measure across two wired + two set-aside modules)
 
 **Why it exists.** `D2-wide` (above) retires the **deprecated** resolver at call sites that still *call*
 a guard. `D2-gap` is the **other half**: write routes that call **no guard of any kind** — not the module
@@ -278,16 +278,16 @@ comparable with the backlog record.
 |---|---|
 | enabled modules with a source tree | **35** |
 | write verbs across those modules | **256** |
-| **unguarded write verbs (the `D2-gap`)** | **18 now** — **25 before the `webhooks` fix + tool fix** (5 verbs wired; one false-positive re-export and one actor-less verb re-classified — tool only, HEAD `e1fa605`), **34 before the four-leftover-modules fix** (`directory`/`progress` wired, `dashboards`/`data_sync` set aside; HEAD `0ac8783` + this change), **41 before the `search` fix** (`0ac8783`), **50 before the `attachments` fix** (`88582bd`), **58 before the `workflows` fix** (`a9ecd21`), **68 before the `notifications` tool fix** (HEAD `0350563`, no repo change), **78 before the `inbox_ops` fix** (`0350563`), **88 before the `business_rules` fix** (`c9a6bb6`), **99 before the `auth` fix**, **111 before the `communication_channels` tool fix**, **122 before the `messages` registry-bypass fix**, **143 before the `ai_assistant` fix**, **160 before the `audit_logs` fix** |
+| **unguarded write verbs (the `D2-gap`)** | **14 now** — **18 before the `configs` fix** (1 verb wired; 2 cache endpoints set aside as read-only; 1 already registry-guarded — tool only, HEAD `e1fa605`), **25 before the `webhooks` fix + tool fix** (5 verbs wired; one false-positive re-export and one actor-less verb re-classified — tool only, HEAD `e1fa605`), **34 before the four-leftover-modules fix** (`directory`/`progress` wired, `dashboards`/`data_sync` set aside; HEAD `0ac8783` + this change), **41 before the `search` fix** (`0ac8783`), **50 before the `attachments` fix** (`88582bd`), **58 before the `workflows` fix** (`a9ecd21`), **68 before the `notifications` tool fix** (HEAD `0350563`, no repo change), **78 before the `inbox_ops` fix** (`0350563`), **88 before the `business_rules` fix** (`c9a6bb6`), **99 before the `auth` fix**, **111 before the `communication_channels` tool fix**, **122 before the `messages` registry-bypass fix**, **143 before the `ai_assistant` fix**, **160 before the `audit_logs` fix** |
 | auth-flow verbs set aside by design | 8 |
 | **actor-less verbs set aside by design** | **2** (`inbox_ops/api/webhook/inbound.ts`, plus `webhooks/api/inbound/[endpointId]/route.ts` added 2026-10-07 — public endpoints with no session, guarded by their own signature/rate-limit mechanisms; see the `inbox_ops` and `webhooks` records below) |
-| **read-only "write verbs" set aside by design** | **4** (`workflows/api/instances/validate-start/route.ts`; `dashboards/api/widgets/data/route.ts` + `.../data/batch/route.ts`; `data_sync/api/validate.ts` — POSTs that perform no write; see the `workflows` record and the leftover-verbs record below) |
+| **read-only "write verbs" set aside by design** | **6** (`workflows/api/instances/validate-start/route.ts`; `dashboards/api/widgets/data/route.ts` + `.../data/batch/route.ts`; `data_sync/api/validate.ts`; `configs/api/system-status/route.ts` + `configs/api/module-telemetry/route.ts` — POSTs/DELETEs that perform no business-row write; see the `workflows`, leftover-verbs and `configs` records below) |
 | **guard-system verbs set aside by design** | **9** (`ai_assistant` session/flow + pending-action gate — governed by their own mechanisms; added to the tool 2026-10-07 so the figure stopped over-claiming by 9) |
-| guarded verbs | **215** (132 wrapper · 0 registry · 35 `makeCrudRoute`/`crud.` · 42 module-local helper · 6 re-exported guarded factory · 0 deprecated) |
-| *guarded + the four set-aside buckets (not a write to guard)* | *238 = 215 + 8 + 2 + 4 + 9* |
+| guarded verbs | **217** (133 wrapper · 1 registry · 35 `makeCrudRoute`/`crud.` · 42 module-local helper · 6 re-exported guarded factory · 0 deprecated) |
+| *guarded + the four set-aside buckets (not a write to guard)* | *242 = 217 + 8 + 2 + 6 + 9* |
 
-**The split is computed by the tool, not assumed, and every verb is accounted for:** 132 + 0 (registry) + 35 + 42 (local helper) + 6 + 0 +
-8 (auth-flow) + 2 (actor-less) + 4 (read-only) + 9 (guard-system) + 0 (lock-floor) + 18 (unguarded) = **256**. *(A first draft carried 33/26/29 forward from memory; the tool
+**The split is computed by the tool, not assumed, and every verb is accounted for:** 133 + 1 (registry) + 35 + 42 (local helper) + 6 + 0 +
+8 (auth-flow) + 2 (actor-less) + 6 (read-only) + 9 (guard-system) + 0 (lock-floor) + 14 (unguarded) = **256**. *(A first draft carried 33/26/29 forward from memory; the tool
 reads 50/35/5, and the closure check is what caught it. **A second closure check caught a label drift in
 the "guarded" row:** the columns once read 88 · 90 · 113 · 134, where 113/134 were `guarded + auth-flow`
 and the 8 was double-counted against the 256. Corrected to the guarded-only series **88 · 90 · 105 · 126 ·
@@ -320,7 +320,20 @@ the actor-less column (`inbound/[endpointId]`)** — 25 → 18, re-export 5 → 
 SLIP:** the first draft of this very note wrote `guarded 210` by forgetting to add the 5 new webhooks
 wrappers to the wrapper column (`127 + 5 = 132`, not 127) — the term-by-term closure is what caught it,
 which is the point of spelling it out. **The re-export column is now load-bearing three times over** —
-the third and tenth checks were the same omission, and this check adds to exactly that column.)*
+the third and tenth checks were the same omission, and this check adds to exactly that column.)* **A twelfth
+closure check, after the `configs` fix + tool fix, is the FIRST time the registry column is non-zero — and
+is why it is a column at all.** The module's 4 verbs split three ways: **1 registry** (`api/cache/route.ts`
+builds the full `[...getAllMutationGuardInstances()]` array and calls `runMutationGuards` inline — a
+`GUARDED_REGISTRY` blind spot the tool did not see until now), **2 read-only** set asides
+(`api/system-status/route.ts` clears an in-process cache; `api/module-telemetry/route.ts` is a dev-only
+in-process op — neither writes a business row), and **1 wrapper** (`api/upgrade-actions/route.ts` writes an
+`UpgradeActionRun` row via `executeUpgradeAction`). So 18 → 14, wrapper 132 → 133, registry 0 → 1,
+read-only 4 → 6, guarded **217** (`133 + 1 + 35 + 42 + 6 = 217`), guarded+set-asides **242**
+(`217 + 8 + 2 + 6 + 9`), closure `133 + 1 + 35 + 42 + 6 + 0 + 8 + 2 + 6 + 9 + 0 + 14 = 256`. **The
+registry column is now load-bearing:** before this check a `GUARDED_REGISTRY` verb was invisible to the
+tool's classifier altogether, so a module could have been "0 unguarded" only by actually calling
+`runRouteMutationGuards` — the inline `runMutationGuards(...)` form read as unguarded. The tool now matches
+`getAllMutationGuardInstances(...)` **and** `runMutationGuards(...)` in the same file as registry-guarded.**
 
 **Both figures are recorded because the number must name the HEAD it was measured at** — the rule that
 would have prevented the `auth`-onward file-count slip. `audit_logs` (§ below) accounts for the −2.
@@ -329,7 +342,8 @@ would have prevented the `auth`-onward file-count slip. `audit_logs` (§ below) 
 `auth` **0 (FIXED — a real D2-gap, 12 verbs wired through the module's own `beginAuthMutationGuard`; the routes were already capability-guarded, only the registry chokepoint was missing — below)** · `business_rules` **0 (FIXED — a real D2-gap, 11 verbs wired through a new `beginBusinessRulesMutationGuard`; the routes were already capability-guarded — below)** · `inbox_ops` **0 (FIXED — a real D2-gap, 9 verbs wired through the module's own `beginInboxOpsMutationGuard`; the 10th is actor-less and set aside by name — below)** · `notifications` **0 (TOOL FIX — all 10 already guarded through a registry-backed local helper; not a D2-gap — below)** · `workflows` **0 (FIXED — a real D2-gap, 9 verbs wired through the module's own `beginWorkflowsMutationGuard`; the 10th is a read-only POST and set aside by name — below)** · `attachments` **0 (FIXED — a real D2-gap, all 8 verbs wired through a new `beginAttachmentsMutationGuard`; a module with NO guard mechanism at all — below)** ·
 `search` **0 (FIXED — a real D2-gap, all 7 verbs wired through a new `beginSearchMutationGuard`; a module with NO guard mechanism at all; the routes were already capability-guarded, only the registry chokepoint was missing)** ·
 `webhooks` **0 (FIXED 2026-10-07 — 5 genuine verbs wired through a new `beginWebhooksMutationGuard`; the label's 7 split three ways: 1 tool false positive (a re-export shim) + 1 actor-less set-aside + 5 wired)** ·
-`ai_assistant` **9** · `configs` 4 · `currencies` 4 · `entities` 4 ·
+`configs` **0 (FIXED 2026-10-07 — 1 genuine verb (`api/upgrade-actions`) wired through a new `beginConfigsMutationGuard`; `api/cache` was already registry-guarded inline (a tool blind spot, now seen); `api/system-status` + `api/module-telemetry` set aside as read-only)** ·
+`ai_assistant` **9** · `currencies` 4 · `entities` 4 ·
 `integrations` **0 (FIXED — registry-bypass, below)** · `progress` **0 (FIXED 2026-10-07 — 3 leftover verbs wired through a NEW `beginProgressMutationGuard`; the module had no wrapper at all)** · `directory` **0 (FIXED 2026-10-07 — 3 leftover verbs in `organization-edges` wired into the module's existing `beginDirectoryMutationGuard`)** · `dashboards` **0 (SET ASIDE 2026-10-07 — 2 `widgets/data` POSTs memo a read via `cache.set`, no business-row write)** · `audit_logs` **0 (FIXED, below)** ·
 `onboarding` 1 · `data_sync` **0 (SET ASIDE 2026-10-07 — `validate` only reads `credentialsService.resolve`)** · `scheduler` 1 · and **0** for `dictionaries`, `feature_toggles`,
 `perspectives`, `planner`, `query_index`, `translations`, `api_keys`.
@@ -758,6 +772,20 @@ standard:**
 | **Proof (mutation)** | Two mutations in a fresh process, wrapper restored byte-identical after each: neuter the block check → exactly the **5 block** tests RED (allow + control stay green); sever `runAfterSuccess` → exactly the **5 allow** tests RED. No mutation residue (`grep` for the injected guards returns nothing). |
 | **Count re-measured** | 25 → **18**. `webhooks` **7 → 0** (5 wrapper, 3 `makeCrudRoute`, 6 re-export, 1 actor-less set-aside). Total classes: wrapper **127 → 132**, re-export **5 → 6**, actor-less **1 → 2**, guarded **209 → 215**, unguarded **25 → 18**. Closure `132 + 0 + 35 + 42 + 6 + 0 + 8 + 2 + 4 + 9 + 0 + 18 = 256`. Whole `webhooks` package **15 suites / 127 tests green**; `tsc --noEmit` exit 0. |
 | **Critic pass** | A separate hostile pass attacked every claim from the raw files: re-ran the tool, hand-walked every `.ts` under `api/`, confirmed both shim forms and the actor-less route, spot-checked the totals. Strongest counter-example: **NONE**. |
+
+**Progress — `configs` DONE (1 verb wired, 2 set aside, 1 already guarded) + a TOOL fix (2026-10-07, repo `workspace/starting-kit`).**
+
+| What | Detail |
+|---|---|
+| **The finding** | The `D2-gap` label read **4 unguarded verbs** for `configs`. **The premise was measured first, and it over-claimed by THREE** — the label is a symbol string scan and this is the **sixth** time it has done so (after `messages`, `communication_channels`, `notifications`, the four leftover-verb modules and `webhooks`). |
+| **How they split — three ways, not one** | **(1) already registry-guarded (TOOL blind spot)** `api/cache/route.ts` POST builds the full `[...getAllMutationGuardInstances()]` array and calls `runMutationGuards(...)` **inline** — the registry chokepoint, but not through `runRouteMutationGuards`, so the classifier read it as unguarded. **TOOL fix, not repo. (2) read-only set asides** `api/system-status/route.ts` POST clears an in-process cache (`cache.clear()`, no DB row) and `api/module-telemetry/route.ts` DELETE is a dev-only in-process op — neither writes a business row → set aside by name. **(3) the ONE genuine write** `api/upgrade-actions/route.ts` POST (`executeUpgradeAction` writes an `UpgradeActionRun` row: `tem.create` + `tem.persist` + `tem.flush`) → wired. |
+| **Owner decision** | The two cache-clearing endpoints were put to the owner as a question, not closed by me: **"Set them aside, document the reason (Recommended)"** — i.e. wire only `upgrade-actions`, and record the reason for the other two. Done as instructed. |
+| **The TOOL fix (load-bearing)** | The classifier's `registry` test required the `runRouteMutationGuards(` spelling and **missed** the inline `runMutationGuards(` form. Fix: a file counts as `GUARDED_REGISTRY` iff it calls `runRouteMutationGuards(` **OR** it both calls `getAllMutationGuardInstances(` **and** calls `runMutationGuards(`. The `configs/api/cache` row moved unguarded → registry, and `configs/api/system-status` + `configs/api/module-telemetry` were added to `READ_ONLY_PATHS`. |
+| **How `configs` was solved** | A **new** wrapper `configs/api/mutation-guard.ts` (`beginConfigsMutationGuard(ctx)`) — mirrors the `search`/`progress` shape; kind `configs.upgradeActionRun`, op `custom`. The guard sits **after** the route's own gates (enabled-check 403, scope 401/400, Zod body 400) and **before** `executeUpgradeAction`; `runAfterSuccess` runs after the service call returns; the `blockedResponse` is returned **outside** the try/catch so a guard block cannot be swallowed. `resolveScope` gained `authSub` (`auth.sub`) so the wrapper gets a real actor. |
+| **Tests** | A new proof suite `configs/api/__tests__/d2-gap-wiring.route.test.ts` (**4 tests**) drives the **real** handler with `runRouteMutationGuards` **UNMOCKED** (real guard registered in the global store): block stops the service call + no after-success; allow runs the write + after-success once; a control guard outside the kind does not fire; an invalid body is 400 before the guard. Whole `configs` package **8 suites / 56 tests green**; core `tsc --noEmit` exit 0. |
+| **Proof (mutation)** | Two mutations in a fresh process, files restored **byte-identical** after each: neuter the block path → the **block** test RED; sever `runAfterSuccess` → the **allow** test RED. Restored md5: wrapper `4d85dd2a3d979c2f212c4dcac83cb055`; route `d52d9fd30f36f9464948135894deb2a6`. |
+| **Count re-measured** | 18 → **14**. `configs` **4 → 0** (1 wrapper, 1 registry, 2 read-only). Total classes: wrapper **132 → 133**, registry **0 → 1 (first non-zero)**, read-only **4 → 6**, guarded **215 → 217**, unguarded **18 → 14**. Closure `133 + 1 + 35 + 42 + 6 + 0 + 8 + 2 + 6 + 9 + 0 + 14 = 256`. |
+| **Critic pass** | A separate hostile pass attacked every claim from the raw files: re-ran the tool, hand-walked every `.ts` under `configs/api/`, confirmed the inline-registry call in `cache`, confirmed the two set-asides write no business row, spot-checked the totals. It corrected one **statement** of mine (I described the pre-wiring split as "1 UNGUARDED"; the correct post-fix split is 1 registry + 2 read-only + 1 wrapper + 0 unguarded). No code claim broke. |
 
 **Enabled-module count, corrected.** The count of enabled modules quoted elsewhere as "37" was wrong —
 it matched commented-out parked lines. Measured two ways (scan of the `enabledModules` array literal,

@@ -112,6 +112,17 @@ const RE_REEXPORT_BARE = /(?:^|\n)\s*export\s*\{([^}]*)\}/g;
 
 const RE_WRAPPER = /begin[A-Za-z]*MutationGuard\s*\(/;
 const RE_REGISTRY = /runRouteMutationGuards\s*\(/;
+// The registry can also be reached INLINE, without the shared wrapper: a route
+// that reads the global guard store and runs it itself is doing exactly what
+// `runRouteMutationGuards` does. `configs/api/cache/route.ts` is that shape —
+// it imports `runMutationGuards` + `getAllMutationGuardInstances`, builds
+// `[...getAllMutationGuardInstances()]`, and runs `runMutationGuards(...)`.
+// Reading it as GAP (because it only referenced `runMutationGuards`, not the
+// wrapper's name) was a tool blind spot, the same class as the two
+// `LOCAL_GUARD_HELPERS` misses. Require BOTH symbols so a file that merely
+// imports the runner without the store is not mistaken for registry-backed.
+const RE_REGISTRY_INLINE_STORE = /getAllMutationGuardInstances\s*\(/;
+const RE_REGISTRY_INLINE_RUN = /\brunMutationGuards\s*\(/;
 // `crud.POST` / `makeCrudRoute(...)` / `createCrudRoute` — the factory runs the guard set itself.
 const RE_CRUD = /makeCrudRoute\b|createCrudRoute\b|\bcrud\.(?:POST|PUT|PATCH|DELETE)\b/;
 const RE_DEPRECATED = /validateCrudMutationGuard\s*\(|runCrudMutationGuardAfterSuccess\s*\(/;
@@ -284,12 +295,29 @@ function isActorless(relPath) {
  *    read) and its `em` use is `getConnection().execute(<select>)`. No
  *    `persist`/`flush`/`remove` anywhere in the path. Wiring a guard here would
  *    gate a read and fire `afterSuccess` for a mutation that never happened.
+ *
+ * Two more were measured and added 2026-10-07 for the `configs` module, where
+ * the label's 4 unguarded verbs split three ways (one already guarded inline,
+ * one dev-only, and the two below):
+ *
+ *  - `configs/api/system-status/route.ts` POST — clears the CACHE for the
+ *    current tenant (`runWithCacheTenant(tenantScope, () => cache.clear())`).
+ *    It writes no business row: the only mutation is on the cache service. A
+ *    registry guard describes writes to rows; there is no row here to describe,
+ *    and wiring it would gate the cache teardown, not a business change.
+ *  - `configs/api/module-telemetry/route.ts` DELETE — clears IN-PROCESS module
+ *    telemetry, and is gated off outside development: `canClearModuleTelemetry()`
+ *    returns `process.env.NODE_ENV === 'development'`, and the DELETE returns
+ *    **403 BEFORE the clear**. Same shape as `communication_channels`'
+ *    `test-seed` (env-gated off in production). No DB row, no production write.
  */
 const READ_ONLY_PATHS = [
   'workflows/api/instances/validate-start/route.ts',
   'data_sync/api/validate.ts',
   'dashboards/api/widgets/data/route.ts',
   'dashboards/api/widgets/data/batch/route.ts',
+  'configs/api/system-status/route.ts',
+  'configs/api/module-telemetry/route.ts',
 ];
 
 function isReadOnly(relPath) {
@@ -423,7 +451,7 @@ function classify(file, moduleId) {
 
   const g = {
     wrapper: RE_WRAPPER.test(code),
-    registry: RE_REGISTRY.test(code),
+    registry: RE_REGISTRY.test(code) || (RE_REGISTRY_INLINE_STORE.test(code) && RE_REGISTRY_INLINE_RUN.test(code)),
     crud: RE_CRUD.test(code),
     local: Object.values(LOCAL_GUARD_HELPERS).some((re) => re.test(code)),
     deprecated: RE_DEPRECATED.test(code),
