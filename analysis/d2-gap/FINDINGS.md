@@ -1192,21 +1192,23 @@ first cut put the write-GET check behind `!exportsWrite`, so a **mixed-method** 
 fixed classifier is independent, and it surfaces **three** write-performing GETs: the callback (**fixed**),
 plus two that were previously invisible and are **OPEN — see the backlog**:
 
-| route | GET write | why left OPEN rather than wired |
+| route | GET write | disposition |
 |---|---|---|
-| `dashboards/api/layout` | `em.persist` + `em.flush` — lazily creates/normalises the user's **own** default layout on first load | a **read side-effect**, not a user-intent mutation; wiring an async registry guard mid-GET would let a future `dashboards.layout` guard **veto loading the dashboard** — a policy call, not a mechanical gap |
-| `messages/api/[id]` | `commandBus.execute('messages.recipients.mark_read')` when `autoMarkRead` — a read receipt | same shape: gating it would let a guard **veto reading a message**; the command carries only `capability: 'messages.view'` (a permission check, not a registry guard) |
+| `dashboards/api/layout` | `em.persist` + `em.flush` — lazily creates/normalises the user's **own** default layout on first load | **set aside** as a **read side-effect**, not a user-intent mutation: wiring an async registry guard mid-GET would let a future `dashboards.layout` guard **veto loading the dashboard** |
+| `messages/api/[id]` | `commandBus.execute('messages.recipients.mark_read')` when `autoMarkRead` — a read receipt | **set aside** — same shape: gating it would let a guard **veto reading a message**; the command carries only `capability: 'messages.view'` (a permission check, not a registry guard) |
 
-Both are **visible** in the tool's new `WRITE-PERFORMING GET HANDLERS` list and its headline
-`(plus 3 write-performing GET handler(s) … 2 unguarded)`. They are recorded as **OPEN** items in
-`library/development/BACKLOG.md` — the decision whether a read side-effect should be vetoable by a
-business-rule guard is the owner's, not mine to close.
+Both are **visible** in the tool's `WRITE-PERFORMING GET HANDLERS` list and its headline
+`(plus 3 write-performing GET handler(s) … 0 unguarded, 2 set aside as read side-effects)`. **SETTLED by
+the owner 2026-10-07** (he delegated the call: "go with your recommendation"): read side-effects are
+**not** user-intent mutations, so there is nothing for a business rule to veto — they are a named
+set-aside class (`READ_SIDE_EFFECT_GET_PATHS` in the tool), not wired. To revisit, delete a path from that
+list and re-run: the route reads `WRITE_GET_UNGUARDED` again.
 
 **Measured after (tool `--json`, second route = re-summing the raw fields):** `communication_channels`
 **4 → 0** unguarded; local class **42 → 43**; actor-less **3 → 5**; read-only **6 → 7**; total D2-gap
 **4 → 0**; guarded **226 → 227**; guarded + set-asides **252 → 256**; **Closure: 142 + 1 + 35 + 43 + 6 + 0
 + 8 + 5 + 7 + 9 + 0 + 0 = 256.** Write verbs are **all accounted for**; the newly-named write-GET class is
-reported separately (3 found, 1 fixed, **2 open**).
+reported separately and reads **0 unguarded** (3 found: 1 guarded, 2 set aside as read side-effects).
 
 ---
 
@@ -1271,8 +1273,9 @@ with the record.
   that exports GET and performs a write, scoping the guard check to the **GET body only** (so a guarded PUT
   cannot launder a GET). These are **not** "write verbs" by method and do **not** touch the 256; they are
   reported as `writeGetRows` (`WRITE_GET_GUARDED` / `WRITE_GET_UNGUARDED`) and counted on their own headline
-  line. **As of 2026-10-07: 3 found — 1 fixed (the callback), 2 OPEN** (`dashboards/api/layout`,
-  `messages/api/[id]`). `RE_WRITE_SIGNAL` is a fixed list of strong write signals; a GET that writes via a
+  line. **As of 2026-10-07: 3 found, 0 unguarded** — 1 fixed (the callback), 2 set aside by name as read
+  side-effects (`dashboards/api/layout`, `messages/api/[id]`; owner-settled 2026-10-07). `RE_WRITE_SIGNAL`
+  is a fixed list of strong write signals; a GET that writes via a
   mechanism not on that list would still be missed, so the list is re-read when a module is touched.
 - **A route file that exports GET **and** a write verb is read by BOTH classifiers** — its write verb is in
   `rows` (the 256) and its GET write, if any, is in `writeGetRows`. `dashboards/api/layout` is exactly this:

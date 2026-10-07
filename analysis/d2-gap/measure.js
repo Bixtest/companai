@@ -573,6 +573,27 @@ function handlerBody(code, verb) {
   return next === -1 ? rest : rest.slice(0, next);
 }
 
+// A GET that writes a READ SIDE-EFFECT is neither a write verb (by method) nor a
+// user-intent mutation. Two shapes exist today:
+//   - `dashboards/api/layout` GET lazily persists the user's OWN default layout
+//     on first load (`em.persist` + `em.flush`).
+//   - `messages/api/[id]` GET auto-marks a message read when `autoMarkRead`
+//     (`commandBus.execute('messages.recipients.mark_read')`).
+// Both write INTERNAL BOOKKEEPING as a side-effect of a read, with no user
+// intent to mutate anything. Wiring a registry guard here would let a future
+// business rule VETO LOADING THE DASHBOARD / READING A MESSAGE — a policy the
+// owner has approved NOT to take (2026-10-07: "go with your recommendation").
+// They are therefore SET ASIDE BY NAME (class `WRITE_GET_SET_ASIDE`), reported in
+// the write-GET bucket, never counted as unguarded. To revisit: delete a path
+// here and re-run — the route then reads `WRITE_GET_UNGUARDED` again.
+const READ_SIDE_EFFECT_GET_PATHS = [
+  'dashboards/api/layout/route.ts',
+  'messages/api/[id]/route.ts',
+];
+function isReadSideEffectGet(rel) {
+  return READ_SIDE_EFFECT_GET_PATHS.some((p) => rel.endsWith(p));
+}
+
 function classifyWriteGet(file, moduleId) {
   if (!/[\\/]api[\\/]/.test(file)) return null;
   const code = stripComments(fs.readFileSync(file, 'utf8'));
@@ -581,10 +602,13 @@ function classifyWriteGet(file, moduleId) {
   if (body === null || !RE_WRITE_SIGNAL.test(body)) return null;
   const g = detectGuards(body);
   const guarded = g.wrapper || g.registry || g.crud || g.local || g.reexport || g.deprecated;
+  const rel = path.relative(REPO, file).replace(/\\/g, '/');
+  let cls = guarded ? 'WRITE_GET_GUARDED' : 'WRITE_GET_UNGUARDED';
+  if (cls === 'WRITE_GET_UNGUARDED' && isReadSideEffectGet(rel)) cls = 'WRITE_GET_SET_ASIDE';
   return {
-    file: path.relative(REPO, file).replace(/\\/g, '/'),
+    file: rel,
     module: moduleId,
-    cls: guarded ? 'WRITE_GET_GUARDED' : 'WRITE_GET_UNGUARDED',
+    cls,
     verbs: ['GET'],
     verbCount: 0, // not a "write verb" by HTTP method; counted in its own bucket
     g,
@@ -628,6 +652,7 @@ for (const id of enabled) {
     lockFloorVerbs: sum((r) => r.cls === 'COMMAND_LOCK_FLOOR'),
     writeGetFiles: mineGet.length,
     writeGetGuarded: mineGet.filter((r) => r.cls === 'WRITE_GET_GUARDED').length,
+    writeGetSetAside: mineGet.filter((r) => r.cls === 'WRITE_GET_SET_ASIDE').length,
     writeGetUnguarded: mineGet.filter((r) => r.cls === 'WRITE_GET_UNGUARDED').length,
     fields: {
       wrapper: sum((r) => r.cls === 'GUARDED_WRAPPER'),
@@ -643,6 +668,7 @@ for (const id of enabled) {
       guardSystem: sum((r) => r.cls === 'GUARD_SYSTEM_SET_ASIDE'),
       lockFloor: sum((r) => r.cls === 'COMMAND_LOCK_FLOOR'),
       writeGetGuarded: mineGet.filter((r) => r.cls === 'WRITE_GET_GUARDED').length,
+      writeGetSetAside: mineGet.filter((r) => r.cls === 'WRITE_GET_SET_ASIDE').length,
       writeGetUnguarded: mineGet.filter((r) => r.cls === 'WRITE_GET_UNGUARDED').length,
     },
   };
@@ -683,7 +709,8 @@ console.log(`write verbs: ${totalWrite}, unguarded verbs (D2-gap): ${totalGap}`)
 // it must never be invisible. Reported here; its unguarded count must be 0 too.
 const totalWriteGet = writeGetRows.length;
 const totalWriteGetUnguarded = writeGetRows.filter((r) => r.cls === 'WRITE_GET_UNGUARDED').length;
-console.log(`(plus ${totalWriteGet} write-performing GET handler(s) — a GET that writes rows, not counted as a write verb; ${totalWriteGetUnguarded} unguarded)`);
+const totalWriteGetSetAside = writeGetRows.filter((r) => r.cls === 'WRITE_GET_SET_ASIDE').length;
+console.log(`(plus ${totalWriteGet} write-performing GET handler(s) — a GET that writes rows, not counted as a write verb; ${totalWriteGetUnguarded} unguarded, ${totalWriteGetSetAside} set aside as read side-effects)`);
 const totalSetAside = enabled.reduce((a, id) => a + (perModule[id]?.authFlowVerbs || 0), 0);
 console.log(`(plus ${totalSetAside} auth-flow verbs set aside by design — login/logout/reset/session/profile/locale/feature-check)`);
 const totalActorless = enabled.reduce((a, id) => a + (perModule[id]?.actorlessVerbs || 0), 0);
@@ -702,5 +729,6 @@ for (const r of rows.filter((r) => r.cls === 'UNGUARDED')) {
 console.log('');
 console.log('WRITE-PERFORMING GET HANDLERS (a GET that writes rows — see RE_WRITE_SIGNAL):');
 for (const r of writeGetRows) {
-  console.log('  ' + (r.cls === 'WRITE_GET_UNGUARDED' ? 'UNGUARDED' : 'guarded  ') + ' ' + r.module.padEnd(22) + r.file);
+  const tag = r.cls === 'WRITE_GET_UNGUARDED' ? 'UNGUARDED' : r.cls === 'WRITE_GET_SET_ASIDE' ? 'set-aside' : 'guarded  ';
+  console.log('  ' + tag + ' ' + r.module.padEnd(22) + r.file);
 }

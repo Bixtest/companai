@@ -33,11 +33,13 @@ two-thirds closed.**
     fixed — 4 → 0: 1 wired `test-seed`, 2 actor-less set aside (the two webhooks), 1 read-only set
     aside (oauth initiate)).
     **Every module is now closed.**
-- **The next thing: two write-performing GETs the sweep's method-based scan could not see** —
-  `dashboards/api/layout` (lazy default layout) and `messages/api/[id]` (auto-mark-read). A hostile
-  critic found the class via the `communication_channels` oauth callback (a GET that WRITES), which
-  was **fixed**; these two are **read side-effects**, and whether a business-rule guard should be able
-  to veto them is a policy decision — recorded **OPEN**, not wired.
+- **The write-performing-GET class is closed too — 0 unguarded.** The sweep's method-based scan could
+  not see a GET that WRITES; a hostile critic found the class via the `communication_channels` oauth
+  callback (a GET that saves credentials + creates a channel), which was **fixed**. Two more were found —
+  `dashboards/api/layout` (lazy default layout) and `messages/api/[id]` (auto-mark-read) — both **read
+  side-effects**, not user-intent mutations; wiring a guard would let a business rule **veto loading the
+  dashboard / reading a message**. **SETTLED 2026-10-07** (owner delegated the call: "go with your
+  recommendation"): **set aside by name**, not wired — the tool reads **0 unguarded** in that bucket too.
   Note: **two of the tool's remaining labels are tool labels, not a live hole** —
   `ai_assistant` (9, all declared set-asides) and the `onboarding` signup POST (actor-less: it creates
   the tenant, so there is no session to evaluate a guard against). Measured this session, verified by
@@ -105,7 +107,7 @@ I did not re-run each commit, but the end-state is independently confirmed by th
 > set aside (the two webhooks), 1 read-only set aside (oauth initiate)) brought it to **0**, with local
 > class **43**, actor-less **5**, read-only **7**, guarded **227** — and a hostile-critic pass over that
 > close-out then found a **NEW class** (a GET that WRITES: the oauth callback fixed, `dashboards` +
-> `messages` OPEN). **Every module is now closed** (details in `BACKLOG.md` §D2-gap and `BUILD-ORDER.md`
+> `messages` set aside by name as read side-effects, owner-settled 2026-10-07). **Every module is now closed** (details in `BACKLOG.md` §D2-gap and `BUILD-ORDER.md`
 > §2f). This section is kept as the study's own reading, per the "every figure names its HEAD" rule; it
 > is not the current number.
 
@@ -113,8 +115,8 @@ I did not re-run each commit, but the end-state is independently confirmed by th
 documented headline **50 unguarded** — and, after this session's tool fixes, reads **0**.
 Closure at 0: `142 (wrapper) + 1 (registry) + 35 (crud) + 43 (local helper) + 6 (re-export)
 + 0 (deprecated) + 8 (auth-flow) + 5 (actor-less) + 7 (read-only) + 9 (guard-system) + 0 (lock-floor)
-+ 0 (unguarded) = 256`. (Plus the write-performing-GET class, reported separately: **3 found, 1 fixed,
-2 OPEN**.)
++ 0 (unguarded) = 256`. (Plus the write-performing-GET class, reported separately: **3 found, 0
+unguarded — 1 fixed, 2 set aside by name as read side-effects**.)
 
 **Route 2 (the code):** grepped each fixed module's `api/` for a registry path. Every one is wired:
 
@@ -153,7 +155,7 @@ containers healthy/up, no unhealthy container.
 
 | # | Module | Unguarded verbs | Notes |
 |---|---|---|---|
-| ✅ | `communication_channels` | **0 (FIXED this session)** | the LAST module — 1 wired `test-seed`, 2 actor-less set aside (the two webhooks), 1 read-only set aside (oauth initiate); a hostile critic then found a NEW class (a GET that WRITES: 1 fixed, 2 OPEN) |
+| ✅ | `communication_channels` | **0 (FIXED this session)** | the LAST module — 1 wired `test-seed`, 2 actor-less set aside (the two webhooks), 1 read-only set aside (oauth initiate); a hostile critic then found a NEW class (a GET that WRITES: 1 fixed, 2 set aside by name) |
 | ✅ | `scheduler` | **0 (FIXED this session)** | the 1 verb wired through a **new** wrapper; the module had no wrapper at all |
 | ✅ | `onboarding` | **0 (SET ASIDE this session)** | NOT a gap: actor-less (the public signup POST creates the tenant and reads no session) — a third `ACTORLESS_PATHS` entry |
 | ✅ | `entities` | **0 (FIXED this session)** | all 4 wired through the module's existing wrapper; 2 genuine gaps + 2 on the lock floor (§4 Finding 3, now closed) |
@@ -167,9 +169,10 @@ containers healthy/up, no unhealthy container.
 registry-guarded inline, 2 read-only set aside; `currencies`: all 4 wired, no set-aside; `entities`: all 4
 wired through the module's existing wrapper, no set-aside; `scheduler`: the 1 verb wired through a new
 wrapper; `communication_channels`: 1 wired `test-seed`, 2 actor-less set aside, 1 read-only set aside.
-`onboarding`'s 1 verb was **set aside** as actor-less, not wired. **The next thing is the two OPEN
-write-performing GETs** — a GET that writes a read side-effect (`dashboards/api/layout`,
-`messages/api/[id]`), a policy decision, not a mechanical gap.)*
+`onboarding`'s 1 verb was **set aside** as actor-less, not wired. **The write-performing-GET class is
+closed too** — the two remaining GETs that write (`dashboards/api/layout`, `messages/api/[id]`) are read
+side-effects, **set aside by name** (owner-settled 2026-10-07), so the tool reads **0 unguarded** in that
+bucket as well. **The sweep is complete under both definitions; nothing is left open on `D2-gap`.**)*
 
 **After the sweep (from the box's queue):**
 
