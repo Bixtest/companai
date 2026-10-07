@@ -247,6 +247,82 @@ function isReadOnly(relPath) {
   return READ_ONLY_PATHS.some((p) => relPath.endsWith(p));
 }
 
+/**
+ * Guard-system set-asides are NOT counted as D2-gap. A write route can be
+ * DELIBERATELY kept off the mutation-guard registry when the guard set cannot
+ * be meaningfully evaluated for it, and the reason was measured and recorded at
+ * the time each module was fixed. Re-reporting them as GAP over-counts the
+ * headline and invites someone to "fix" a route that must stay as it is.
+ *
+ * Two sources, both from the `ai_assistant` D2-gap fix (`0af50c8`), where the
+ * 24 unguarded verbs were split three ways and 9 were set aside BY NAME:
+ *
+ *  - session/flow (7): `ai/chat`, `ai/run-object`, `route`, `chat`,
+ *    `session-key`, `mcp-key`, `tools/execute` — chat completion, transport and
+ *    credential minting, governed by their own mechanisms (rate limits,
+ *    short-TTL keys, per-tool feature checks). No resource row is written that
+ *    a registry guard could describe.
+ *  - pending-action gate (2): `ai/actions/[id]/confirm`, `ai/actions/[id]/cancel`
+ *    — the AI mutation-approval gate, whose `runPendingActionRechecks()`
+ *    re-verifies status, expiry, agent registration, features, mutation policy,
+ *    tool whitelist, tenant scope, record version and schema drift. Wiring the
+ *    registry here would put TWO gates on the same write, the second weaker.
+ *
+ * This class is keyed on `moduleId` + the file path, so it is exact: a NEW
+ * unguarded verb in `ai_assistant` will still be reported as GAP.
+ * Re-measure before trusting: if a listed path ever gains a registry guard, it
+ * should drop out of this list.
+ */
+const GUARD_SYSTEM_SET_ASIDE = [
+  'ai_assistant/api/ai/actions/[id]/cancel/route.ts',
+  'ai_assistant/api/ai/actions/[id]/confirm/route.ts',
+  'ai_assistant/api/ai/chat/route.ts',
+  'ai_assistant/api/ai/run-object/route.ts',
+  'ai_assistant/api/chat/route.ts',
+  'ai_assistant/api/mcp-key/route.ts',
+  'ai_assistant/api/route/route.ts',
+  'ai_assistant/api/session-key/route.ts',
+  'ai_assistant/api/tools/execute/route.ts',
+];
+
+function isGuardSystemSetAside(relPath) {
+  return GUARD_SYSTEM_SET_ASIDE.some((p) => relPath.endsWith(p));
+}
+
+/**
+ * The optimistic-lock floor is NOT the mutation-guard registry. A route whose
+ * only "guard-shaped" call is `enforceCommandOptimisticLockWithGuards(...)` is
+ * NOT mutation-guarded — that function runs the OSS optimistic-lock compare
+ * plus the optional DI `commandOptimisticLockGuardService`, and never consults
+ * `getAllMutationGuardInstances()`. `directory` recorded this trap when its
+ * `organization-edges` verbs were mis-read; `entities/api/records.ts` hit it
+ * again (a `grep -i guard` shows the file as "guarded"; it is not).
+ *
+ * A file is set aside here ONLY when EVERY write verb it exports is covered by
+ * the floor. `entities/api/records.ts` is why that condition exists: it exports
+ * POST, PUT and DELETE; PUT and DELETE call the floor, but POST calls NOTHING AT
+ * ALL and is a genuine D2-gap. Because one verb is uncovered, the whole file
+ * stays in the GAP column (3 verbs) rather than being set aside — the tool must
+ * not let one protected verb launder an unprotected sibling in the same file.
+ * So this list is currently EMPTY (0 verbs set aside). The class exists so that
+ * a future file whose verbs are ALL on the floor is recorded honestly, with the
+ * reason, instead of being read as a gap.
+ */
+const COMMAND_LOCK_FLOOR = [
+  // No file currently qualifies: `entities/api/records.ts` is deliberately NOT
+  // listed, because its POST verb reaches no guard and must keep reading as GAP.
+];
+
+function lockFloorCovers(relPath, moduleId, verbs) {
+  return COMMAND_LOCK_FLOOR.some(
+    (e) =>
+      moduleId === e.module &&
+      relPath.endsWith(e.path) &&
+      verbs.length > 0 &&
+      verbs.every((v) => e.verbs.includes(v)),
+  );
+}
+
 function classify(file, moduleId) {
   const raw = fs.readFileSync(file, 'utf8');
   const code = stripComments(raw);
@@ -275,16 +351,19 @@ function classify(file, moduleId) {
   else cls = 'UNGUARDED';
 
   const rel = path.relative(REPO, file).replace(/\\/g, '/');
+  // Verbs this file exports. A guarded file's verbs are guarded by whatever
+  // mechanism it uses; an UNGUARDED file's verbs are the D2-gap exposure.
+  const verbs = writeVerbs(code);
   // An auth-flow endpoint is unguarded by the mutation-guard system on purpose.
   if (cls === 'UNGUARDED' && isAuthFlow(rel)) cls = 'AUTH_FLOW_SET_ASIDE';
   // An actor-less endpoint has no user to evaluate the guard set against.
   if (cls === 'UNGUARDED' && isActorless(rel)) cls = 'ACTORLESS_SET_ASIDE';
   // A POST that writes nothing is not a D2-gap (nothing to guard).
   if (cls === 'UNGUARDED' && isReadOnly(rel)) cls = 'READ_ONLY_SET_ASIDE';
-
-  // Verbs this file exports. A guarded file's verbs are guarded by whatever
-  // mechanism it uses; an UNGUARDED file's verbs are the D2-gap exposure.
-  const verbs = writeVerbs(code);
+  // A route kept off the registry by design (the ai_assistant set-asides).
+  if (cls === 'UNGUARDED' && isGuardSystemSetAside(rel)) cls = 'GUARD_SYSTEM_SET_ASIDE';
+  // A route protected by the command optimistic-lock floor, named per file+verb.
+  if (cls === 'UNGUARDED' && lockFloorCovers(rel, moduleId, verbs)) cls = 'COMMAND_LOCK_FLOOR';
 
   return {
     file: rel,
@@ -325,6 +404,8 @@ for (const id of enabled) {
     authFlowVerbs: sum((r) => r.cls === 'AUTH_FLOW_SET_ASIDE'),
     actorlessVerbs: sum((r) => r.cls === 'ACTORLESS_SET_ASIDE'),
     readOnlyVerbs: sum((r) => r.cls === 'READ_ONLY_SET_ASIDE'),
+    guardSystemVerbs: sum((r) => r.cls === 'GUARD_SYSTEM_SET_ASIDE'),
+    lockFloorVerbs: sum((r) => r.cls === 'COMMAND_LOCK_FLOOR'),
     fields: {
       wrapper: sum((r) => r.cls === 'GUARDED_WRAPPER'),
       registry: sum((r) => r.cls === 'GUARDED_REGISTRY'),
@@ -336,6 +417,8 @@ for (const id of enabled) {
       authFlow: sum((r) => r.cls === 'AUTH_FLOW_SET_ASIDE'),
       actorless: sum((r) => r.cls === 'ACTORLESS_SET_ASIDE'),
       readOnly: sum((r) => r.cls === 'READ_ONLY_SET_ASIDE'),
+      guardSystem: sum((r) => r.cls === 'GUARD_SYSTEM_SET_ASIDE'),
+      lockFloor: sum((r) => r.cls === 'COMMAND_LOCK_FLOOR'),
     },
   };
 }
@@ -377,6 +460,10 @@ const totalActorless = enabled.reduce((a, id) => a + (perModule[id]?.actorlessVe
 console.log(`(plus ${totalActorless} actor-less verbs set aside by design — public endpoints with no session, guarded by their own signature/rate-limit mechanisms)`);
 const totalReadOnly = enabled.reduce((a, id) => a + (perModule[id]?.readOnlyVerbs || 0), 0);
 console.log(`(plus ${totalReadOnly} read-only "write verb" set aside by design — a POST that performs no write, so there is nothing to guard)`);
+const totalGuardSystem = enabled.reduce((a, id) => a + (perModule[id]?.guardSystemVerbs || 0), 0);
+console.log(`(plus ${totalGuardSystem} guard-system verbs set aside by name — the ai_assistant session/flow + pending-action gate, governed by their own mechanisms)`);
+const totalLockFloor = enabled.reduce((a, id) => a + (perModule[id]?.lockFloorVerbs || 0), 0);
+console.log(`(plus ${totalLockFloor} command-lock-floor verbs set aside by name — protected by enforceCommandOptimisticLockWithGuards, NOT the registry)`);
 console.log('');
 console.log('UNGUARDED FILES (with the verbs each exposes):');
 for (const r of rows.filter((r) => r.cls === 'UNGUARDED')) {
