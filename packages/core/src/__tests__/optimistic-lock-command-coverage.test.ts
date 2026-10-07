@@ -65,9 +65,36 @@ const COMMAND_GUARD_ALLOWLIST: Record<string, string> = {
     'OSS-only — message action execute (messages.message) enforces the synchronous OSS updated_at floor before the terminal-action claim; the action also has its own actionTaken idempotency guard. Enterprise record_locks migration deferred.',
 }
 
-// `enforceCommandOptimisticLock(` but NOT `enforceCommandOptimisticLockWithGuards(`.
-const DIRECT_HELPER_CALL = /enforceCommandOptimisticLock\s*\(/
+// `enforceCommandOptimisticLock(` — the synchronous command-lock floor helper.
+// A negative lookahead excludes the async seam `…WithGuards(`, which is
+// belt-and-braces only: MEASURED, the bare pattern
+// `/enforceCommandOptimisticLock\s*\(/` already fails to match the seam, because
+// after the prefix the text is `WithGuards(` and `\s*\(` cannot skip it. The
+// lookahead keeps the matcher honest if the seam is ever renamed to a form whose
+// suffix *is* `(`; it fixes no live false positive.
+//
+// The real live false positive is prose: a comment that merely names the helper
+// (e.g. the `directory` trap write-up in `currencies/api/mutation-guard.ts`)
+// matched the old bare pattern and was counted as a call site — a check that
+// could not see its own documentation (lesson L91). Comments are stripped before
+// matching (see `isDirectCallSite`) so only real code is read.
+const DIRECT_HELPER_CALL = /enforceCommandOptimisticLock(?!WithGuards)\s*\(/
 const ASYNC_SEAM_CALL = /enforceCommandOptimisticLockWithGuards\s*\(/
+
+// Strip `//` line comments and `/* ... */` block comments before a call-site
+// test. Deliberately naive (no string-literal awareness) — a helper name only
+// ever appears in code or comments in this codebase, never inside a string, so
+// the naive strip is sufficient and cannot hide a real call. The `[^:]` guard
+// keeps `http://` inside a string from being read as a comment start.
+function stripComments(source: string): string {
+  return source
+    .replace(/\/\*[\s\S]*?\*\//g, ' ')
+    .replace(/(^|[^:])\/\/[^\n]*/g, '$1 ')
+}
+
+function isDirectCallSite(source: string): boolean {
+  return DIRECT_HELPER_CALL.test(stripComments(source))
+}
 
 // The helper definition file itself declares both symbols — never a call site.
 const HELPER_DEFINITION_SUFFIX = `${sep}crud${sep}optimistic-lock-command.ts`
@@ -122,7 +149,7 @@ describe('optimistic-lock-command-coverage: command-layer guard', () => {
   for (const full of files) {
     if (full.endsWith(HELPER_DEFINITION_SUFFIX)) continue
     const source = readFileSync(full, 'utf8')
-    if (DIRECT_HELPER_CALL.test(source)) directCallSites.push(full)
+    if (isDirectCallSite(source)) directCallSites.push(full)
   }
 
   it('discovered workspace source files to scan', () => {
@@ -153,7 +180,7 @@ describe('optimistic-lock-command-coverage: command-layer guard', () => {
         continue
       }
       if (!ASYNC_SEAM_CALL.test(source)) missing.push(rel)
-      if (DIRECT_HELPER_CALL.test(source)) missing.push(`${rel} (still calls sync helper)`)
+      if (isDirectCallSite(source)) missing.push(`${rel} (still calls sync helper)`)
     }
     expect(missing).toEqual([])
   })
