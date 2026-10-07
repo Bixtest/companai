@@ -12,15 +12,15 @@ would reach data no authorization describes (Hermes map §4.4 (b)).
 
 ## The headline
 
-| | baseline (HEAD `5af76bc`) | after `audit_logs` (`4ef5812`) | after `ai_assistant` (`0af50c8`) | after `messages` (`1f1b60e`) | after the `communication_channels` tool fix (`4eead9d`) | after `auth` (`8e1632c`) | after `business_rules` (`c9a6bb6`) | **now (`inbox_ops`, `0350563`)** |
-|---|---|---|---|---|---|---|---|---|
-| enabled modules with a source tree | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** |
-| write verbs across those modules | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** |
-| **unguarded write verbs (the `D2-gap`)** | **160** | **158** | **143** | **122** | **111** | **99** | **88** | **78** |
-| auth-flow verbs set aside by design | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 |
-| actor-less verbs set aside by design | — | — | — | — | — | — | — | **1** |
-| guarded verbs (registry / crud / wrapper / local / re-export) | 88 | 90 | 105 | 126 | **137** | **149** | **160** | **169** |
-| *guarded + auth-flow (the two "not a write to guard" buckets)* | *96* | *98* | *113* | *134* | ***145*** | ***157*** | ***168*** | ***177*** |
+| | baseline (HEAD `5af76bc`) | after `audit_logs` (`4ef5812`) | after `ai_assistant` (`0af50c8`) | after `messages` (`1f1b60e`) | after the `communication_channels` tool fix (`4eead9d`) | after `auth` (`8e1632c`) | after `business_rules` (`c9a6bb6`) | after `inbox_ops` (`0350563`) | **now (the `notifications` tool fix, `0350563`)** |
+|---|---|---|---|---|---|---|---|---|---|
+| enabled modules with a source tree | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** |
+| write verbs across those modules | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** |
+| **unguarded write verbs (the `D2-gap`)** | **160** | **158** | **143** | **122** | **111** | **99** | **88** | **78** | **68** |
+| auth-flow verbs set aside by design | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 |
+| actor-less verbs set aside by design | — | — | — | — | — | — | — | **1** | **1** |
+| guarded verbs (registry / crud / wrapper / local / re-export) | 88 | 90 | 105 | 126 | **137** | **149** | **160** | **169** | **179** |
+| *guarded + auth-flow (the two "not a write to guard" buckets)* | *96* | *98* | *113* | *134* | ***145*** | ***157*** | ***168*** | ***177*** | ***187*** |
 
 **Each column differs from the one before it by exactly the modules fixed so far** — `audit_logs` (2
 verbs), `ai_assistant` (15 verbs), then `messages` (17) + `integrations` (4), which moved to the new
@@ -33,7 +33,11 @@ guarded all along; then **`auth` (12 verbs)**, wired through its own
 **existing** `beginInboxOpsMutationGuard()` — **9 of them** (the actor-present write routes), with the
 **10th `webhook/inbound` set aside as actor-less** rather than wired. That 10th is why the `inbox_ops`
 column moves the unguarded count by **10** but the guarded count by **9**, and introduces a **new
-set-aside row**. Every figure is recorded because the number a document quotes
+set-aside row**. Finally **`notifications` (10 verbs)** — the **second tool-only correction in the
+sweep** (after `communication_channels`): the label said 10 unguarded, but all ten routes already called
+a module-local **registry-backed** helper (`runGuardedNotificationWrite`, or one of the two factories
+built on it). No repo change; the **tool** learned the helper's name. Every figure is recorded because
+the number a document quotes
 must say **which HEAD it was measured at** — carrying a "before" figure forward as if it were current
 is how the `auth`-onward file-count slip happened.
 
@@ -49,13 +53,14 @@ is how the `auth`-onward file-count slip happened.
 
 **Guarded by mechanism (computed by the tool, not assumed):** **97 through a module wrapper**, 0 through
 `runRouteMutationGuards` directly, 35 through `makeCrudRoute`/`crud.` (the CRUD factory runs
-`collectAndRunGuards()`), **32 through a module-local guard helper** (`messages` 17 + `integrations` 4 +
-`communication_channels` 11 — the `GUARDED_LOCAL` class), 5 through a re-export of a guarded factory,
-**0 through the deprecated pair** (D2-wide left none enabled). **Closure — every write verb is
-accounted for:** 97 + 0 + 35 + 32 + 5 + 0 + 8 (auth-flow, set aside) + 78 (unguarded) + 1 (actor-less,
-set aside) = **256**. *(A first draft of this line carried 33/26/29 forward from memory; the tool reads
-50/35/5, and the closure check is what caught it. The `actor-less` term was added 2026-10-07 with the
-`inbox_ops` fix — see the class note below.)*
+`collectAndRunGuards()`), **42 through a module-local guard helper** (`messages` 17 + `integrations` 4 +
+`communication_channels` 11 + `notifications` 10 — the `GUARDED_LOCAL` class), 5 through a re-export of a
+guarded factory, **0 through the deprecated pair** (D2-wide left none enabled). **Closure — every write
+verb is accounted for:** 97 + 0 + 35 + 42 + 5 + 0 + 8 (auth-flow, set aside) + 68 (unguarded) + 1
+(actor-less, set aside) = **256**. *(A first draft of this line carried 33/26/29 forward from memory; the
+tool reads 50/35/5, and the closure check is what caught it. The `actor-less` term was added 2026-10-07
+with the `inbox_ops` fix — see the class note below. The local-helper term grew 32 → 42 the same day with
+the `notifications` tool fix.)*
 
 > **A second closure scare, and what it actually was (2026-10-07).** After wiring `auth` the closure read
 > **251**, five short. The five were **`webhooks`' 5 `GUARDED_REEXPORT` verbs**, omitted by the summing
@@ -85,7 +90,7 @@ set aside) = **256**. *(A first draft of this line carried 33/26/29 forward from
 | business_rules | 5 | 11 | 11 | 0 | 0 | 0 | 0 | **0** ✅ *fixed `c9a6bb6`; was 11* |
 | inbox_ops | 14 | 14 | 13 | 0 | 0 | 0 | 0 | **0** ✅ *fixed `0350563`; was 10 — 9 wired, 1 actor-less set aside* |
 | workflows | 13 | 14 | 4 | 0 | 0 | 0 | 0 | **10** |
-| notifications | 10 | 10 | 0 | 0 | 0 | 0 | 0 | **10** |
+| notifications | 10 | 10 | 0 | 0 | 0 | 10 | 0 | **0** ✅ *tool fix (10 were already guarded by a registry-backed local helper); was 10* |
 | attachments | 4 | 8 | 0 | 0 | 0 | 0 | **8** |
 | search | 7 | 7 | 0 | 0 | 0 | 0 | **7** |
 | webhooks | 11 | 15 | 0 | 0 | 3 | 0 | **7** |
@@ -269,15 +274,66 @@ class **88 → 97**; guarded-only **160 → 169**; closure **97 + 0 + 35 + 32 + 
 **Green:** `inbox_ops` **36 suites / 415 tests**; core `tsc --noEmit` **exit 0**. **Next module:
 `notifications` / `workflows` (10 unguarded verbs each).**
 
+### `notifications` — NOT a D2-gap; the TOOL was the defect, not the code (2026-10-07; tool only, no repo change)
+
+**The second tool-only correction in the sweep, and the second time the label over-claimed.** The tool
+read `notifications` as **10 unguarded verbs across 10 files** — the joint-largest remaining with
+`workflows`. The artefact says otherwise: **every one of the ten routes already runs the registry guard.**
+
+**How they are guarded — one module-local helper, three entry points, all registry-backed.**
+`notifications` has **no `api/mutation-guard.ts`** wrapper, which is what the four-symbol scan noticed;
+instead it guards through `lib/routeHelpers.ts`, which exports three names:
+
+- `runGuardedNotificationWrite(container, scope, req, options, write)` — the core helper. It calls
+  `runRouteMutationGuards(...)` (line 106), returns `guarded.response` when the guard blocks **before**
+  the write, and runs `await guarded.runAfterSuccess()` **after** the write. Called directly by `route.ts`
+  (POST), `settings` (POST), `mark-all-read` (PUT), `[id]/action` (POST, `operation: 'custom'`),
+  `[id]/restore` (PUT).
+- `createBulkNotificationRoute(schema, method)` — a factory whose POST body calls
+  `runGuardedNotificationWrite` (line 150). Used by `batch`, `feature`, `role` (all POST,
+  `operation: 'create'`).
+- `createSingleNotificationActionRoute(method)` — a factory whose PUT body calls
+  `runGuardedNotificationWrite` (line 228). Used by `[id]/read`, `[id]/dismiss` (both PUT).
+
+**Two routes agree on the count and the wiring.** **(1)** the tool's `--json` rows read **10 GAP / 10
+files**, and a hand `find … route.ts` lists **exactly ten** files that export a write verb — the eleventh
+API file, `unread-count/route.ts`, exports **no** write verb (it is `GET`-only), which is why the count is
+10 and not 11. **(2)** Every one of those ten imports one of the three helper names, and both factories
+call `runGuardedNotificationWrite`, which reaches `runRouteMutationGuards` → `getAllMutationGuardInstances()`.
+
+**A third, independent route — the module's OWN pre-existing test.** `__tests__/mutation-guard.test.ts`
+was written **before** this work and drives **seven of the ten real handlers**
+(`route`, `batch`, `[id]/read`, `[id]/restore`, `[id]/action`, `mark-all-read`, `settings`), asserting
+each calls `runRouteMutationGuards` with the expected `resourceKind` / `operation` and that a block skips
+the write and the after-success hooks. `lib/__tests__/routeHelpers.guard.test.ts` proves the helper
+itself is registry-backed (registers a real guard, asserts it **blocks** and fires `afterSuccess`). Run:
+**2 suites / 11 tests green.** The claim the tool could not see is the claim the module had already tested.
+
+**The fix = teach the tool the helper's name** (`LOCAL_GUARD_HELPERS.notifications`, matching any of the
+three exported names — a regex on `runGuardedNotificationWrite` alone would have missed the five routes
+that consume a factory). `notifications` **10 → 0** unguarded, all 10 now `GUARDED_LOCAL`; **total D2-gap
+78 → 68**; local-helper class **32 → 42**; guarded-only **169 → 179**; closure
+**97 + 0 + 35 + 42 + 5 + 0 + 8 + 68 + 1 = 256**. **No repo change** — HEAD stays `0350563`.
+
+> ⚠ **The standing lesson, now paid for twice.** A four-symbol string scan is not a proof that a route
+> is unguarded; it is a proof that four particular names are absent. `communication_channels` (11 of 15
+> already guarded) and `notifications` (10 of 10 already guarded) were both **labels over-claiming**, and
+> both were corrected by reading the artefact. **Measure the premise before applying the fix it implies** —
+> the alternative here was to wrap ten routes that were already covered, adding twenty call sites and a
+> false security narrative.
+
+**Next module: `workflows` (10 unguarded verbs — the sole remaining double-digit module).**
+
 ## Reconciliation against the figures already recorded
 
-Six of the previously-recorded modules agree **exactly**; two did not, and both are now explained.
+Six of the previously-recorded modules agree **exactly**; three did not, and all three are now explained.
 This cross-check is the point: a figure carried forward unchecked is how the `auth`-onward file-count
 slip happened before.
 
 | module | recorded in BACKLOG | this measurement | verdict |
 |---|---|---|---|
 | `inbox_ops` | 10 of 14 | 10 | ✅ exact → **now 0, fixed `0350563` (9 wired, 1 actor-less set aside)** |
+| `notifications` | 10 unguarded verbs | 10 **but all through a registry-backed helper** | ❌ **the label over-claimed — now 0 via a tool fix, `notifications` section above** |
 | `auth` | 12 of 18 resource-writes | 12 (8 auth-flow verbs set aside by name) | ✅ exact → **now 0, fixed `8e1632c`** |
 | `business_rules` | 11 unguarded verbs | 11 | ✅ exact → **now 0, fixed `c9a6bb6`** |
 | `directory` | 3 verbs in 1 file | 3 in 1 file | ✅ exact |

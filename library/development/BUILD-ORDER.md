@@ -278,37 +278,39 @@ comparable with the backlog record.
 |---|---|
 | enabled modules with a source tree | **35** |
 | write verbs across those modules | **256** |
-| **unguarded write verbs (the `D2-gap`)** | **78 now** — **88 before the `inbox_ops` fix** (HEAD `0350563`), **99 before the `business_rules` fix** (`c9a6bb6`), **111 before the `auth` fix**, **122 before the `communication_channels` tool fix**, **143 before the `messages` registry-bypass fix**, **158 before the `ai_assistant` fix**, **160 before the `audit_logs` fix** |
+| **unguarded write verbs (the `D2-gap`)** | **68 now** — **78 before the `notifications` tool fix** (HEAD `0350563`, no repo change), **88 before the `inbox_ops` fix** (`0350563`), **99 before the `business_rules` fix** (`c9a6bb6`), **111 before the `auth` fix**, **122 before the `communication_channels` tool fix**, **143 before the `messages` registry-bypass fix**, **158 before the `ai_assistant` fix**, **160 before the `audit_logs` fix** |
 | auth-flow verbs set aside by design | 8 |
 | **actor-less verbs set aside by design** | **1** (`inbox_ops/api/webhook/inbound.ts` — a public endpoint with no session; see the `inbox_ops` record below) |
-| guarded verbs | **169** (97 wrapper · 35 `makeCrudRoute`/`crud.` · 32 module-local helper · 5 re-exported guarded factory · 0 deprecated) |
-| *guarded + auth-flow set aside (not a write to guard)* | *177 = 169 + 8* |
+| guarded verbs | **179** (97 wrapper · 35 `makeCrudRoute`/`crud.` · 42 module-local helper · 5 re-exported guarded factory · 0 deprecated) |
+| *guarded + auth-flow set aside (not a write to guard)* | *187 = 179 + 8* |
 
-**The split is computed by the tool, not assumed, and every verb is accounted for:** 97 + 0 (registry) + 35 + 32 (local helper) + 5 + 0 +
-8 (auth-flow) + 78 (unguarded) + 1 (actor-less) = **256**. *(A first draft carried 33/26/29 forward from memory; the tool
+**The split is computed by the tool, not assumed, and every verb is accounted for:** 97 + 0 (registry) + 35 + 42 (local helper) + 5 + 0 +
+8 (auth-flow) + 68 (unguarded) + 1 (actor-less) = **256**. *(A first draft carried 33/26/29 forward from memory; the tool
 reads 50/35/5, and the closure check is what caught it. **A second closure check caught a label drift in
 the "guarded" row:** the columns once read 88 · 90 · 113 · 134, where 113/134 were `guarded + auth-flow`
 and the 8 was double-counted against the 256. Corrected to the guarded-only series **88 · 90 · 105 · 126 ·
-137 · 149 · 160 · 169**; both numbers are now stated with their meaning. **A third closure check, after the `auth`
+137 · 149 · 160 · 169 · 179**; both numbers are now stated with their meaning. **A third closure check, after the `auth`
 fix, read 251 — five short.** The five were `webhooks`' **`GUARDED_REEXPORT`** verbs, omitted by the
 summing script: the tool's per-module `fields` carries `reexport`, and any closure arithmetic must
 include it. With it the figures balance; the pre-change value reconstructs to the recorded 137. **A
 fourth closure check, after the `inbox_ops` fix, is why the actor-less column exists** — the module's
 10th verb is wired by nothing *on purpose*, so leaving it inside the unguarded count would have been a
-false admission; the tool now names it `ACTORLESS_SET_ASIDE`.)*
+false admission; the tool now names it `ACTORLESS_SET_ASIDE`. **A fifth, after the `notifications` tool
+fix, moved 10 verbs into the local-helper column** — the module was fully guarded; only the tool's list
+of known helper names was incomplete.)*
 
 **Both figures are recorded because the number must name the HEAD it was measured at** — the rule that
 would have prevented the `auth`-onward file-count slip. `audit_logs` (§ below) accounts for the −2.
 
 **Per module (unguarded verbs):** `ai_assistant` **9 (FIXED, below)** · `messages` **0 (FIXED — registry-bypass, below)** · `communication_channels` **4 (mis-labelled — 11 of 15 were already guarded; the tool, not the code, was the defect — below)** ·
-`auth` **0 (FIXED — a real D2-gap, 12 verbs wired through the module's own `beginAuthMutationGuard`; the routes were already capability-guarded, only the registry chokepoint was missing — below)** · `business_rules` **0 (FIXED — a real D2-gap, 11 verbs wired through a new `beginBusinessRulesMutationGuard`; the routes were already capability-guarded — below)** · `inbox_ops` **0 (FIXED — a real D2-gap, 9 verbs wired through the module's own `beginInboxOpsMutationGuard`; the 10th is actor-less and set aside by name — below)** · `workflows` **10** · `notifications` 10 ·
+`auth` **0 (FIXED — a real D2-gap, 12 verbs wired through the module's own `beginAuthMutationGuard`; the routes were already capability-guarded, only the registry chokepoint was missing — below)** · `business_rules` **0 (FIXED — a real D2-gap, 11 verbs wired through a new `beginBusinessRulesMutationGuard`; the routes were already capability-guarded — below)** · `inbox_ops` **0 (FIXED — a real D2-gap, 9 verbs wired through the module's own `beginInboxOpsMutationGuard`; the 10th is actor-less and set aside by name — below)** · `notifications` **0 (TOOL FIX — all 10 already guarded through a registry-backed local helper; not a D2-gap — below)** · `workflows` **10** ·
 `attachments` 8 · `search` 7 · `webhooks` 7 · `configs` 4 · `currencies` 4 · `entities` 4 ·
 `integrations` **0 (FIXED — registry-bypass, below)** · `progress` 3 · `directory` 3 · `dashboards` 2 · `audit_logs` **0 (FIXED, below)** ·
 `onboarding` 1 · `data_sync` 1 · `scheduler` 1 · and **0** for `dictionaries`, `feature_toggles`,
 `perspectives`, `planner`, `query_index`, `translations`, `api_keys`.
 
-**Reconciliation — 8 of 10 recorded modules agree exactly; the ninth record was wrong.** `inbox_ops` 10/14,
-`auth` 12 (now 0 — see the record below), `business_rules` 11 (now 0 — see the record below), `directory` 3-in-1-file and the five zeros all matched. **`workflows` was recorded as "13 of 19"
+**Reconciliation — 8 of 10 recorded modules agree exactly; the other two are explained.** `inbox_ops` 10/14,
+`auth` 12 (now 0 — see the record below), `business_rules` 11 (now 0 — see the record below), `directory` 3-in-1-file and the five zeros all matched. **`notifications` was recorded as 10 unguarded and the label over-claimed** — all ten routes already ran a registry-backed local helper; the tool, not the code, was the defect (see the `notifications` record below). **`workflows` was recorded as "13 of 19"
 and measures 10** — the record listed `api/tasks/route.ts` and `api/events` subscribe/unsubscribe as
 unguarded write routes, but **neither exports a write verb** (checked twice: today's file, and
 `git show d3af1b1:…`). They were never write routes; the record counted *files* as if they were.
@@ -442,6 +444,21 @@ being guarded**, which is exactly what happened to `communication_channels` (11 
 | **Result** | `inbox_ops` **10 → 0** (9 wired + 1 actor-less set aside; wrapper class for the module **4 → 13**); total **88 → 78**; repo wrapper class **88 → 97**; guarded-only **160 → 169**; closure **97 + 0 + 35 + 32 + 5 + 0 + 8 + 78 + 1 = 256**. |
 | **Green** | `inbox_ops` **608 suites / 5232 tests** (whole core); `core` `tsc --noEmit` **exit 0**. |
 | **Next module** | **`notifications` / `workflows` (10 unguarded verbs each).** |
+
+
+**Progress — `notifications` NOT a D2-gap — the TOOL was the defect, not the code (2026-10-07; tool only, repo unchanged at `0350563`).**
+
+| What | Detail |
+|---|---|
+| **What the label said** | **10 unguarded verbs across 10 files** — the joint-largest remaining module with `workflows`. The label **over-claimed**, for the **second time** in the sweep (after `communication_channels`). |
+| **What the artefact says** | **Every one of the ten routes already runs the registry guard.** `notifications` has **no `api/mutation-guard.ts`** wrapper — which is what the four-symbol scan noticed — but guards through **`lib/routeHelpers.ts`**, one file exporting three **registry-backed** entry points. |
+| **The helper, and its three entry points** | `runGuardedNotificationWrite(container, scope, req, options, write)` calls `runRouteMutationGuards(...)` (line 106), returns the guard's block response **before** the write, and runs `await guarded.runAfterSuccess()` **after** it. Two factories call it: `createBulkNotificationRoute` (line 150, used by `batch`, `feature`, `role`) and `createSingleNotificationActionRoute` (line 228, used by `[id]/read`, `[id]/dismiss`). The other five routes (`route` POST, `settings` POST, `mark-all-read` PUT, `[id]/action` POST, `[id]/restore` PUT) call `runGuardedNotificationWrite` directly. |
+| **Two routes agree on the count and the wiring** | **(1)** the tool's `--json` rows read **10 GAP / 10 files**, and a hand `find … route.ts` lists **exactly ten** files exporting a write verb — the eleventh API file, `unread-count/route.ts`, is **`GET`-only** (which is why the count is 10, not 11). **(2)** Every one of the ten imports one of the three helper names, and both factories call `runGuardedNotificationWrite` → `runRouteMutationGuards` → `getAllMutationGuardInstances()`. |
+| **A third, independent route — the module's OWN pre-existing test** | `__tests__/mutation-guard.test.ts` was written **before** this work and drives **seven of the ten real handlers**, asserting each calls `runRouteMutationGuards` with the expected `resourceKind`/`operation` and that a block skips the write. `lib/__tests__/routeHelpers.guard.test.ts` registers a **real** guard and asserts the helper **blocks** and fires `afterSuccess`. Run: **2 suites / 11 tests green.** |
+| **The fix = teach the tool the helper's name (not the code)** | `LOCAL_GUARD_HELPERS.notifications`, matching **any** of the three exported names — a regex on `runGuardedNotificationWrite` alone would have missed the five routes that consume a factory, so the marker covers all three. |
+| **Result** | `notifications` **10 → 0** unguarded, all 10 now `GUARDED_LOCAL`; **total D2-gap 78 → 68**; local-helper class **32 → 42**; guarded-only **169 → 179**; **187 = guarded + auth-flow**; closure **97 + 0 + 35 + 42 + 5 + 0 + 8 + 68 + 1 = 256**. **No repo change** — HEAD stays `0350563`. |
+| **The standing lesson, now paid for twice** | A four-symbol string scan is a proof that four particular names are **absent**, not a proof that a route is unguarded. `communication_channels` (11 of 15 already guarded) and `notifications` (10 of 10 already guarded) were both **labels over-claiming**. **Measure the premise before applying the fix it implies** — here the alternative was to wrap ten already-covered routes, adding twenty call sites and a false security narrative. |
+| **Next module** | **`workflows` (10 unguarded verbs — the sole remaining double-digit module).** |
 
 
 **Progress — `data_sync` DONE and PROVEN (2026-10-06, code commit `c6c3151`).**

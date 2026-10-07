@@ -34,6 +34,14 @@
  * `configs/api/cache`) have been re-pointed at the registry. The tool cannot
  * detect a helper that regresses to legacy-only — that is a call-graph fact, not
  * a string — so `pending` here means "a helper exists AND was last read by hand".
+ *
+ * Two later entries (`communication_channels` via `validateRouteMutationGuard`,
+ * `notifications` via `runGuardedNotificationWrite` + its two factories) were
+ * added for a DIFFERENT reason: the helper was registry-backed from the start,
+ * and the tool simply did not know its name, so a module that was fully guarded
+ * read as fully unguarded. In both cases the correction changed the TOOL, not
+ * the repo. Either way the rule holds: re-read the helper body by hand when this
+ * number matters.
  * Re-read the LOCAL_GUARD_HELPERS bodies when this number matters.
  *
  * Usage: node measure.js [--json]
@@ -114,6 +122,21 @@ const LOCAL_GUARD_HELPERS = {
   // afterSuccess. Added after the D2-gap label read 15 unguarded here while the
   // artefact showed 11 of the 15 already calling this helper.
   communication_channels: /\bvalidateRouteMutationGuard\s*\(/,
+  // `notifications` guards its routes through `lib/routeHelpers.ts`, which re-exports
+  // three entry points that all reach the registry via `runRouteMutationGuards`:
+  //   - `runGuardedNotificationWrite()`        — called directly by route.ts, settings,
+  //                                              mark-all-read, [id]/action, [id]/restore
+  //   - `createBulkNotificationRoute()`         — used by batch, feature, role
+  //   - `createSingleNotificationActionRoute()`  — used by [id]/read, [id]/dismiss
+  // All three are defined in the SAME file and the two factories call
+  // `runGuardedNotificationWrite` internally, so a caller of a factory still runs the
+  // guard. The marker therefore matches ANY of the three names (a regex on
+  // `runGuardedNotificationWrite` alone would miss the five routes that consume a
+  // factory). Registry-backed, proven by lib/__tests__/routeHelpers.guard.test.ts,
+  // which registers a real guard and asserts the helper BLOCKS on it and fires its
+  // afterSuccess. Added after the D2-gap label read 10 unguarded here while all ten
+  // route files import one of these three helpers.
+  notifications: /\b(?:runGuardedNotificationWrite|createBulkNotificationRoute|createSingleNotificationActionRoute)\s*\(/,
 };
 
 function walk(dir, out = []) {
