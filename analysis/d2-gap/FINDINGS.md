@@ -1,7 +1,7 @@
 # D2-gap — measured across every enabled module
 
 **Measured:** 2026-10-06. **Tool:** `analysis/d2-gap/measure.js` (re-runnable; `--json` for machines).
-**Repo:** `workspace/starting-kit`, HEAD **`1f1b60e`** (the `messages` registry-bypass fix is in; before it, `0af50c8` with `ai_assistant`, and `4ef5812` with `audit_logs`). The `communication_channels` correction below changed **only the tool**, not the repo — so the HEAD is unchanged.
+**Repo:** `workspace/starting-kit`, HEAD **`88582bd`** (the `attachments` D2-gap fix is in; before it, `a9ecd21` with `workflows`, `0350563` with `inbox_ops`, and `c9a6bb6` with `business_rules`). The `communication_channels` correction below changed **only the tool**, not the repo — so the HEAD is unchanged.
 
 ## What D2-gap is, and why it is a defect
 
@@ -12,16 +12,16 @@ would reach data no authorization describes (Hermes map §4.4 (b)).
 
 ## The headline
 
-| | baseline (HEAD `5af76bc`) | after `audit_logs` (`4ef5812`) | after `ai_assistant` (`0af50c8`) | after `messages` (`1f1b60e`) | after the `communication_channels` tool fix (`4eead9d`) | after `auth` (`8e1632c`) | after `business_rules` (`c9a6bb6`) | after `inbox_ops` (`0350563`) | after the `notifications` tool fix (`46aec05`) | **now (the `workflows` fix, `a9ecd21`)** |
-|---|---|---|---|---|---|---|---|---|---|---|
-| enabled modules with a source tree | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** |
-| write verbs across those modules | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** |
-| **unguarded write verbs (the `D2-gap`)** | **160** | **158** | **143** | **122** | **111** | **99** | **88** | **78** | **68** | **58** |
-| auth-flow verbs set aside by design | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 |
-| actor-less verbs set aside by design | — | — | — | — | — | — | — | **1** | **1** | **1** |
-| read-only "write verb" set aside by design | — | — | — | — | — | — | — | — | — | **1** |
-| guarded verbs (registry / crud / wrapper / local / re-export) | 88 | 90 | 105 | 126 | **137** | **149** | **160** | **169** | **179** | **188** |
-| *guarded + the two set-aside buckets* | *96* | *98* | *113* | *134* | ***145*** | ***157*** | ***168*** | ***177*** | ***187*** | ***197*** |
+| | baseline (HEAD `5af76bc`) | after `audit_logs` (`4ef5812`) | after `ai_assistant` (`0af50c8`) | after `messages` (`1f1b60e`) | after the `communication_channels` tool fix (`4eead9d`) | after `auth` (`8e1632c`) | after `business_rules` (`c9a6bb6`) | after `inbox_ops` (`0350563`) | after the `notifications` tool fix (`46aec05`) | after `workflows` (`a9ecd21`) | **now (the `attachments` fix, `88582bd`)** |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| enabled modules with a source tree | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** |
+| write verbs across those modules | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** |
+| **unguarded write verbs (the `D2-gap`)** | **160** | **158** | **143** | **122** | **111** | **99** | **88** | **78** | **68** | **58** | **50** |
+| auth-flow verbs set aside by design | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 |
+| actor-less verbs set aside by design | — | — | — | — | — | — | — | **1** | **1** | **1** | **1** |
+| read-only "write verb" set aside by design | — | — | — | — | — | — | — | — | — | **1** | **1** |
+| guarded verbs (registry / crud / wrapper / local / re-export) | 88 | 90 | 105 | 126 | **137** | **149** | **160** | **169** | **179** | **188** | **196** |
+| *guarded + the two set-aside buckets* | *96* | *98* | *113* | *134* | ***145*** | ***157*** | ***168*** | ***177*** | ***187*** | ***197*** | ***205*** |
 
 **Each column differs from the one before it by exactly the modules fixed so far** — `audit_logs` (2
 verbs), `ai_assistant` (15 verbs), then `messages` (17) + `integrations` (4), which moved to the new
@@ -43,7 +43,11 @@ definition-write routes used: **9 of the ten** are genuine writes and are now gu
 `instances/validate-start` POST performs no write** (a `dryRun: true` rule evaluation) and is set aside
 in a **new `READ_ONLY_SET_ASIDE`** class rather than wired — a guard there would gate a read and fire its
 after-success for a mutation that never happened. That 10th is why the `workflows` column moves the
-unguarded count by **10** but the guarded count by **9**, and adds a **second set-aside row**. Every
+unguarded count by **10** but the guarded count by **9**, and adds a **second set-aside row**. Then
+**`attachments` (8 verbs)** — a module that shipped **no guard symbol at all** (no wrapper, no
+`runRouteMutationGuards`, no `makeCrudRoute`, neither `@deprecated` route): a **new**
+`beginAttachmentsMutationGuard()` wrapper was written and all **8** verbs wired, so the count moves by
+**8** on both the unguarded and the guarded side, and no set-aside is needed. Every
 figure is recorded because the number a document quotes
 must say **which HEAD it was measured at** — carrying a "before" figure forward as if it were current
 is how the `auth`-onward file-count slip happened.
@@ -58,17 +62,17 @@ is how the `auth`-onward file-count slip happened.
 > never be quoted without its meaning. **Nothing about the code or the unguarded counts changed** — this
 > is the same figure-discipline rule the row itself is about, applied to the row.
 
-**Guarded by mechanism (computed by the tool, not assumed):** **106 through a module wrapper**, 0 through
+**Guarded by mechanism (computed by the tool, not assumed):** **114 through a module wrapper**, 0 through
 `runRouteMutationGuards` directly, 35 through `makeCrudRoute`/`crud.` (the CRUD factory runs
 `collectAndRunGuards()`), **42 through a module-local guard helper** (`messages` 17 + `integrations` 4 +
 `communication_channels` 11 + `notifications` 10 — the `GUARDED_LOCAL` class), 5 through a re-export of a
 guarded factory, **0 through the deprecated pair** (D2-wide left none enabled). **Closure — every write
-verb is accounted for:** 106 + 0 + 35 + 42 + 5 + 0 + 8 (auth-flow, set aside) + 1 (actor-less, set aside)
-+ 1 (read-only, set aside) + 58 (unguarded) = **256**. *(A first draft of this line carried 33/26/29
+verb is accounted for:** 114 + 0 + 35 + 42 + 5 + 0 + 8 (auth-flow, set aside) + 1 (actor-less, set aside)
++ 1 (read-only, set aside) + 50 (unguarded) = **256**. *(A first draft of this line carried 33/26/29
 forward from memory; the tool reads 50/35/5, and the closure check is what caught it. The `actor-less`
 term was added 2026-10-07 with the `inbox_ops` fix — see the class note below. The local-helper term grew
 32 → 42 the same day with the `notifications` tool fix. The `read-only` term was added 2026-10-07 with the
-`workflows` fix — see the class note below.)*
+`workflows` fix — see the class note below. The wrapper term grew 106 → 114 with the `attachments` fix.)*
 
 > **A second closure scare, and what it actually was (2026-10-07).** After wiring `auth` the closure read
 > **251**, five short. The five were **`webhooks`' 5 `GUARDED_REEXPORT` verbs**, omitted by the summing
@@ -99,7 +103,7 @@ term was added 2026-10-07 with the `inbox_ops` fix — see the class note below.
 | inbox_ops | 14 | 14 | 13 | 0 | 0 | 0 | 0 | **0** ✅ *fixed `0350563`; was 10 — 9 wired, 1 actor-less set aside* |
 | workflows | 13 | 14 | 13 | 0 | 0 | 0 | 0 | **0** ✅ *fixed `a9ecd21`; was 10 — 9 wired, 1 read-only set aside* |
 | notifications | 10 | 10 | 0 | 0 | 0 | 10 | 0 | **0** ✅ *tool fix (10 were already guarded by a registry-backed local helper); was 10* |
-| attachments | 4 | 8 | 0 | 0 | 0 | 0 | **8** |
+| attachments | 4 | 8 | 8 | 0 | 0 | 0 | 0 | **0** ✅ *fixed `88582bd`; was 8 — all 8 wired through a new wrapper* |
 | search | 7 | 7 | 0 | 0 | 0 | 0 | **7** |
 | webhooks | 11 | 15 | 0 | 0 | 3 | 0 | **7** |
 | configs | 4 | 4 | 0 | 0 | 0 | 0 | **4** |
@@ -390,6 +394,73 @@ class **97 → 106**; guarded-only **179 → 188**; closure **106 + 0 + 35 + 42 
 
 **Next module: `attachments` (8 unguarded verbs — the largest single-digit module left; no double-digit
 module remains).**
+
+### `attachments` — a REAL D2-gap, closed (2026-10-07; fixed `88582bd`)
+
+**A genuine gap, and the cleanest kind: a module that shipped NO guard mechanism at all.** A string scan
+of the whole `attachments` module found **no wrapper, no `runRouteMutationGuards` call, no
+`makeCrudRoute`, and neither of the `@deprecated` pair** — so a guard set shipped for
+`attachments.attachment` / `attachments.partition` would have been **silently skipped**. Upload and delete
+are the highest-consequence writes in the product: one publishes a file to a storage partition, the other
+removes both the row and the backing file. The tool read **8 unguarded verbs across 4 files**; the
+artefact agrees (the four GET-only routes under `file/` and `image/` are correctly not counted).
+
+**All eight are genuine writes and are now wired** through a **new** `beginAttachmentsMutationGuard()`
+wrapper (`api/mutation-guard.ts`), at the established placement (after the route's own gates, before the
+write; `runAfterSuccess` after the write commits):
+
+| route | verb | resourceKind | operation | writeMarker |
+|---|---|---|---|---|
+| `api/route.ts` | POST (multipart upload) | `attachments.attachment` | `create` | `em.persist` (before the storage write) |
+| `api/route.ts` | DELETE | `attachments.attachment` | `delete` | `em.remove` |
+| `api/partitions/route.ts` | POST | `attachments.partition` | `create` | `em.persist` (id = partition code) |
+| `api/partitions/route.ts` | PUT | `attachments.partition` | `update` | `em.persist` (id = partition code) |
+| `api/partitions/route.ts` | DELETE | `attachments.partition` | `delete` | `em.remove` (id = partition code) |
+| `api/library/[id]/route.ts` | PATCH | `attachments.attachment` | `update` | `em.flush` |
+| `api/library/[id]/route.ts` | DELETE | `attachments.attachment` | `delete` | `em.remove` |
+| `api/transfer/route.ts` | POST | `attachments.attachment` | `update` | `em.persist` (once per request; N rows in one commit) |
+
+**The `resourceKind` decision.** Only two kinds are written by this module —
+`attachments.attachment` (a file record) and `attachments.partition` (a storage-topology object) — and
+each route passes the kind that names the row it writes, so a guard registered against one does not fire
+for the other. For a partition the guard id is the **partition `code`** (the stable, business-meaningful
+key the route's own audit entries already use as `resourceId`), which is the same id the route's own
+create/update/delete audit lines carry.
+
+**What was NOT missing — stated plainly, because the label invites the opposite reading.** Every one of
+the eight verbs **already enforces its own capability** (`attachments.manage`) through
+`metadata.requireFeatures`, and every row lookup carries **tenant + organization scope**. The defect was
+the **missing structural chokepoint**, not missing authorization. The wrapper does not replace any
+route's own validation (multipart shape, size, quota, dangerous-extension and active-content filters,
+partition lock, default-partition protection, in-use check), optimistic-lock handling or audit story.
+
+**Two routes agree on the count and the wiring.** **(1)** the tool's `--json` rows now read **0 GAP / 8
+wrapper verbs** for `attachments`; **(2)** a hand scan of `api/` finds **8 files/verbs that export a write
+verb, and 8 calls to `beginAttachmentsMutationGuard`** — every write verb wired, none left. Two methods
+that share no failure mode agree exactly.
+
+**A third, independent route — the new proof suite.** `api/__tests__/d2-gap-wiring.route.test.ts`
+registers a **real** guard in the global store (leaving `runRouteMutationGuards` **unmocked**) and drives
+the **real** handlers, asserting **both directions for all eight verbs**: a **block** verdict stops the
+write (the entity manager records no persist/flush/remove, no after-success) and an **allow** verdict runs
+it (the write is recorded, after-success fires once). **17/17 green** (8 block + 8 allow + 1
+unregistered-set control). The suite was then **mutation-proved** — three disjoint mutations, each with a
+distinct failure signature:
+
+1. neuter the wrapper's block path → **8 block cases RED**, all 8 allow + control green;
+2. drop one route's guard (`transfer` POST) → **only that route RED**;
+3. sever the wrapper's `afterSuccess` → **8 allow cases RED**, all 8 block + control green.
+
+Every mutated file was restored **byte-identical** (wrapper md5 `77cee6f20b6b6f72298f73fa3fdd344e`,
+`transfer/route.ts` md5 `2a483cb0f6e76ed62661fe1f6d0c4bb7` against the pre-mutation record).
+
+**Measured after (HEAD `88582bd`):** `attachments` **8 → 0** in the GAP column (wrapper class for the
+module **0 → 8**; no set-aside needed); **total D2-gap 58 → 50**; repo-wide wrapper class **106 → 114**;
+guarded-only **188 → 196**; closure **114 + 0 + 35 + 42 + 5 + 0 + 8 + 1 + 1 + 50 = 256**. **Green:** whole
+`attachments` suite **26 suites / 206 tests**; core `tsc --noEmit` **exit 0**.
+
+**Next module: `ai_assistant` (9 unguarded verbs — now the largest), then `search` (7) and `webhooks`
+(7).**
 
 ## Reconciliation against the figures already recorded
 
