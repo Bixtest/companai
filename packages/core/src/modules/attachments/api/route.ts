@@ -44,6 +44,7 @@ import {
 import { findWithDecryption } from '@open-mercato/shared/lib/encryption/find'
 import { createLogger } from '@open-mercato/shared/lib/logger'
 import { writeDirectWriteAuditLog } from '@open-mercato/shared/lib/crud/audit-write'
+import { beginAttachmentsMutationGuard } from './mutation-guard'
 
 const logger = createLogger('attachments')
 
@@ -396,6 +397,34 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: t('attachments.errors.publicPartitionBlocked', 'Public storage partitions cannot be selected explicitly for this upload.') }, { status: 403 })
   }
   const uploadDriver = await storageDriverFactory.resolveForPartition(partition.code, { tenantId, organizationId: orgId })
+  // Structural mutation-guard chokepoint. Placed after every validation gate
+  // (multipart shape, size, quota, dangerous-extension and active-content
+  // filters, partition resolution) and BEFORE the first irreversible side
+  // effect: the storage write below. A block returns here, so no file is
+  // written and no row is created. The attachment id is generated up front, so
+  // the guard validates against the exact id the row will carry.
+  const attachmentId = randomUUID()
+  const guard = await beginAttachmentsMutationGuard({
+    container,
+    tenantId: auth.tenantId,
+    organizationId: orgId,
+    userId: auth.sub,
+    req,
+    resourceKind: 'attachments.attachment',
+    resourceId: attachmentId,
+    operation: 'create',
+    mutationPayload: {
+      entityId,
+      recordId,
+      partitionCode: partition.code,
+      fileName: safeName,
+      mimeType: fileMimeType,
+      fileSize: buf.length,
+    },
+  })
+  if (guard.blockedResponse) {
+    return guard.blockedResponse
+  }
   let storedPath: string
   try {
     const stored = await uploadDriver.store({
@@ -439,7 +468,6 @@ export async function POST(req: Request) {
     assignments = upsertAssignment(assignments, { type: entityId, id: recordId })
   }
   const metadata = mergeAttachmentMetadata(null, { assignments, tags })
-  const attachmentId = randomUUID()
   assertAttachmentScopeInvariant({ tenantId: auth.tenantId, organizationId: orgId })
   const att = em.create(Attachment, {
     id: attachmentId,
@@ -515,6 +543,7 @@ export async function POST(req: Request) {
     await dataEngine.flushOrmEntityChanges()
   }
 
+  await guard.runAfterSuccess()
   return NextResponse.json({
     ok: true,
     item: {
@@ -577,6 +606,23 @@ export async function DELETE(req: Request) {
   if (orgId) deleteFilter.organizationId = orgId
   const record = await em.findOne(Attachment, deleteFilter)
   if (!record) return NextResponse.json({ error: 'Attachment not found' }, { status: 404 })
+  // Structural mutation-guard chokepoint. Runs every registered guard for the
+  // `attachments.attachment` kind before the row removal and the irreversible
+  // storage delete; a block returns here and nothing below runs.
+  const guard = await beginAttachmentsMutationGuard({
+    container,
+    tenantId: auth.tenantId,
+    organizationId: record.organizationId ?? orgId ?? null,
+    userId: auth.sub,
+    req,
+    resourceKind: 'attachments.attachment',
+    resourceId: String(record.id),
+    operation: 'delete',
+    mutationPayload: { partitionCode: record.partitionCode, storagePath: record.storagePath },
+  })
+  if (guard.blockedResponse) {
+    return guard.blockedResponse
+  }
   // R2a-custom — the row removal and its audit entry commit together. The
   // storage file is deleted afterwards, so a failed audit rolls back the row and
   // leaves the file intact rather than orphaning it.
@@ -622,6 +668,7 @@ export async function DELETE(req: Request) {
     })
     await dataEngine.flushOrmEntityChanges()
   }
+  await guard.runAfterSuccess()
   return NextResponse.json({ ok: true })
 }
 

@@ -18,6 +18,7 @@ import {
   attachmentErrorSchema,
 } from '../openapi'
 import { writeDirectWriteAuditLog } from '@open-mercato/shared/lib/crud/audit-write'
+import { beginAttachmentsMutationGuard } from '../mutation-guard'
 
 const deleteSchema = z.object({
   id: z.string().uuid(),
@@ -134,6 +135,23 @@ export async function POST(req: Request) {
   if (exists) {
     return NextResponse.json({ error: 'Partition code already exists.' }, { status: 409 })
   }
+  // Structural mutation-guard chokepoint. Runs every registered guard for the
+  // `attachments.partition` kind before the row is created; the guard id is the
+  // sanitized partition code, matching the route's own audit `resourceId`.
+  const guard = await beginAttachmentsMutationGuard({
+    container,
+    tenantId: auth.tenantId,
+    organizationId: auth.orgId ?? null,
+    userId: auth.sub,
+    req,
+    resourceKind: 'attachments.partition',
+    resourceId: code,
+    operation: 'create',
+    mutationPayload: { code, title: parsed.data.title, storageDriver: parsed.data.storageDriver ?? 'local' },
+  })
+  if (guard.blockedResponse) {
+    return guard.blockedResponse
+  }
   const entry = em.create(AttachmentPartition, {
     code,
     title: parsed.data.title.trim(),
@@ -164,6 +182,7 @@ export async function POST(req: Request) {
       snapshotAfter: serializePartition(entry) as Record<string, unknown>,
     })
   })
+  await guard.runAfterSuccess()
   return NextResponse.json({ item: serializePartition(entry) }, { status: 201 })
 }
 
@@ -202,6 +221,28 @@ export async function PUT(req: Request) {
   if (sanitizePartitionCode(parsed.data.code) !== entry.code) {
     return NextResponse.json({ error: 'Partition code cannot be changed.' }, { status: 400 })
   }
+  // Structural mutation-guard chokepoint. Runs every registered guard for the
+  // `attachments.partition` kind before the field mutations; the guard id is the
+  // partition code (stable, and what the route's own audit entry uses).
+  const guard = await beginAttachmentsMutationGuard({
+    container,
+    tenantId: auth.tenantId,
+    organizationId: auth.orgId ?? null,
+    userId: auth.sub,
+    req,
+    resourceKind: 'attachments.partition',
+    resourceId: entry.code,
+    operation: 'update',
+    mutationPayload: {
+      code: entry.code,
+      title: parsed.data.title,
+      storageDriver: parsed.data.storageDriver ?? null,
+      isPublic: parsed.data.isPublic ?? false,
+    },
+  })
+  if (guard.blockedResponse) {
+    return guard.blockedResponse
+  }
   entry.title = parsed.data.title.trim()
   entry.description = parsed.data.description?.trim() ?? null
   entry.isPublic = parsed.data.isPublic ?? false
@@ -229,6 +270,7 @@ export async function PUT(req: Request) {
       snapshotAfter: serializePartition(entry) as Record<string, unknown>,
     })
   })
+  await guard.runAfterSuccess()
   return NextResponse.json({ item: serializePartition(entry) })
 }
 
@@ -269,6 +311,22 @@ export async function DELETE(req: Request) {
   if (usage > 0) {
     return NextResponse.json({ error: 'Partition is in use and cannot be removed.' }, { status: 409 })
   }
+  // Structural mutation-guard chokepoint. Runs every registered guard for the
+  // `attachments.partition` kind before the row removal; the guard id is the
+  // partition code (stable, and what the route's own audit entry uses).
+  const guard = await beginAttachmentsMutationGuard({
+    container,
+    tenantId: auth.tenantId,
+    organizationId: auth.orgId ?? null,
+    userId: auth.sub,
+    req,
+    resourceKind: 'attachments.partition',
+    resourceId: entry.code,
+    operation: 'delete',
+  })
+  if (guard.blockedResponse) {
+    return guard.blockedResponse
+  }
   // The before-image is the whole record: once removed there is nothing left to
   // describe what the partition pointed at.
   const removedSnapshot = serializePartition(entry) as Record<string, unknown>
@@ -286,6 +344,7 @@ export async function DELETE(req: Request) {
       snapshotBefore: removedSnapshot,
     })
   })
+  await guard.runAfterSuccess()
   return NextResponse.json({ ok: true })
 }
 

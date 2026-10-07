@@ -11,6 +11,7 @@ import {
   attachmentErrorSchema,
 } from '../openapi'
 import { writeDirectWriteAuditLog } from '@open-mercato/shared/lib/crud/audit-write'
+import { beginAttachmentsMutationGuard } from '../mutation-guard'
 
 const transferSchema = z.object({
   entityId: z.string().min(1),
@@ -57,6 +58,25 @@ export async function POST(req: Request) {
   if (!records.length) {
     return NextResponse.json({ error: 'Attachments not found' }, { status: 404 })
   }
+  // Structural mutation-guard chokepoint. Runs every registered guard for the
+  // `attachments.attachment` kind before any row is touched; a block returns
+  // here and nothing below runs. The transfer moves N rows in one commit, so
+  // the guard is evaluated once per request against the shared kind — the
+  // per-row ids travel in the payload.
+  const guard = await beginAttachmentsMutationGuard({
+    container,
+    tenantId: auth.tenantId,
+    organizationId: auth.orgId,
+    userId: auth.sub,
+    req,
+    resourceKind: 'attachments.attachment',
+    resourceId: fromRecordId ?? toRecordId,
+    operation: 'update',
+    mutationPayload: { entityId, attachmentIds, fromRecordId: fromRecordId ?? null, toRecordId },
+  })
+  if (guard.blockedResponse) {
+    return guard.blockedResponse
+  }
   for (const record of records) {
     const previousRecordId = record.recordId
     record.recordId = toRecordId
@@ -91,6 +111,7 @@ export async function POST(req: Request) {
       })
     }
   })
+  await guard.runAfterSuccess()
   return NextResponse.json({ ok: true, updated: records.length })
 }
 

@@ -27,6 +27,7 @@ import {
 } from '../../openapi'
 import { createLogger } from '@open-mercato/shared/lib/logger'
 import { writeDirectWriteAuditLog } from '@open-mercato/shared/lib/crud/audit-write'
+import { beginAttachmentsMutationGuard } from '../../mutation-guard'
 
 const logger = createLogger('attachments').child({ component: 'library' })
 
@@ -165,6 +166,23 @@ export async function PATCH(req: NextRequest, ctx: RouteContext) {
   if (!record) {
     return NextResponse.json({ error: 'Attachment not found' }, { status: 404 })
   }
+  // Structural mutation-guard chokepoint. Runs every registered guard for the
+  // `attachments.attachment` kind before the metadata mutation; a block returns
+  // here and nothing below runs.
+  const guard = await beginAttachmentsMutationGuard({
+    container,
+    tenantId: auth.tenantId,
+    organizationId: auth.orgId,
+    userId: auth.sub,
+    req,
+    resourceKind: 'attachments.attachment',
+    resourceId: attachmentId,
+    operation: 'update',
+    mutationPayload: { tags: parsed.data.tags ?? null, assignments: parsed.data.assignments ?? null },
+  })
+  if (guard.blockedResponse) {
+    return guard.blockedResponse
+  }
   const patch: Record<string, unknown> = {}
   if (parsed.data.tags) patch.tags = normalizeAttachmentTags(parsed.data.tags)
   if (parsed.data.assignments) patch.assignments = normalizeAttachmentAssignments(parsed.data.assignments)
@@ -216,6 +234,7 @@ export async function PATCH(req: NextRequest, ctx: RouteContext) {
     await dataEngine.flushOrmEntityChanges()
   }
 
+  await guard.runAfterSuccess()
   const metadata = readAttachmentMetadata(record.storageMetadata)
   const assignments = metadata.assignments ?? []
   const enrichments = await resolveAssignmentEnrichments(assignments, {
@@ -258,6 +277,22 @@ export async function DELETE(req: NextRequest, ctx: RouteContext) {
   if (!record) {
     return NextResponse.json({ error: 'Attachment not found' }, { status: 404 })
   }
+  // Structural mutation-guard chokepoint. Runs every registered guard for the
+  // `attachments.attachment` kind before the row removal and the irreversible
+  // storage delete; a block returns here and nothing below runs.
+  const guard = await beginAttachmentsMutationGuard({
+    container,
+    tenantId: auth.tenantId,
+    organizationId: auth.orgId,
+    userId: auth.sub,
+    req,
+    resourceKind: 'attachments.attachment',
+    resourceId: attachmentId,
+    operation: 'delete',
+  })
+  if (guard.blockedResponse) {
+    return guard.blockedResponse
+  }
   const deleteDriver = await storageDriverFactory.resolveForPartition(record.partitionCode, {
     tenantId: record.tenantId ?? auth.tenantId,
     organizationId: record.organizationId ?? auth.orgId,
@@ -299,6 +334,7 @@ export async function DELETE(req: NextRequest, ctx: RouteContext) {
     await dataEngine.flushOrmEntityChanges()
   }
 
+  await guard.runAfterSuccess()
   return NextResponse.json({ ok: true })
 }
 
