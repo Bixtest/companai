@@ -55,14 +55,14 @@
 | D. Hermes | 0 | 25 | 25 |
 | E. Agent half | 0 | 17 | 17 |
 | F. Model layer | 0 | 14 | 14 |
-| G. Governance & security floor | 7 | 33 | 40 |
+| G. Governance & security floor | 8 | 32 | 40 |
 | H. Experience contracts | 0 | 13 | 13 |
 | I. Business / domain packs | 1 | 17 | 18 |
 | J. Deployment & operations | 0 | 14 | 14 |
 | K. Dev-doc extras | 0 | 13 | 13 |
-| **TOTAL** | **22** | **186** | **208** |
+| **TOTAL** | **23** | **185** | **208** |
 
-> **Read this honestly.** Only **22 of 208** points carry a tick, because the tick rule demands the code
+> **Read this honestly.** Only **23 of 208** points carry a tick, because the tick rule demands the code
 > be verified — and most points have **not yet been re-verified in code this round**. A point marked
 > `(DONE)` in its line but `☐` here means **the docs claim it, the code has not been checked** — treat
 > it as **carried, not confirmed**. This is the whole purpose of this file: **the docs' word is not the
@@ -80,7 +80,7 @@
 - ☐ **C2** — Actor & context model: who is acting and in what context *(PARTIAL — substantial: `shared/src/lib/auth/principal.ts` (215 lines) is a real first-class `Principal` with 4 kinds (`human`/`ai_worker`/`service`/`system`), `onBehalfOfUserId`, machine predicates, and it replaced the old `startsWith('api_key:')` branching; what is missing is the wider **context** (org/locale/tz/trace) as one model)* · ★ Hermes: the seam every run crosses
 - ☐ **C3** — Tenancy & isolation boundary: every row belongs to a tenant and cannot escape it *(PARTIAL — substantial: the CRUD factory auto-scopes by `tenantField` (default `'tenantId'`) on every read/write (`shared/src/lib/crud/factory.ts`); **no** DB-level RLS policies were found, so isolation is enforced in the query layer, not by the database)* · ★ Hermes: the tenant is derived, never declared
 - ☐ **C4** — Authorization engine: the evaluator and grammar *(PARTIAL — `shared/src/lib/authority/` (1312 lines: `decision.ts` 582 · `shadow-report.ts` 217 · `shadow.ts` 215 · `graph.ts` 182 · `preflight.ts` 116) builds an explainable `Decision` with reasons; but `decision.ts` states in its own header: **"It does not enforce. Nothing calls it in the request path; the existing RBAC checks still decide who may do what"** — shadow mode runs it beside RBAC and records, never obeys)* · ★ Hermes: S-02 is where a tool call is authorized
-- ☐ **C5** — Metadata registry & schema conventions *(PARTIAL — the Business Model Kernel `shared/src/lib/kernel/model.ts` (407 lines) **reads** the platform's declarations into a canonical, id-keyed model with a 21-item per-object contract, and `entity-fields-registry` is registered at bootstrap; but it is a **view over `custom_field_defs`/`custom_entity`**, not the queryable service C5 names — nothing answers "who owns it / what depends on it / who can access it")* · ★ Hermes: how Hermes learns the shape of the business without a DB handle
+- ☐ **C5** — Metadata registry & schema conventions *(PARTIAL — the Business Model Kernel `shared/src/lib/kernel/model.ts` (407 lines) **reads** the platform's declarations into a canonical, id-keyed model with a 21-item per-object contract, and `entity-fields-registry` is registered at bootstrap; **the read-only registry service now exists** — `shared/src/lib/kernel/metadata-registry.ts` (2026-10-07, code `59ab859`) answers **what exists · what type · provenance · what depends on it** from the declarations, and returns a **typed absence** for the other ten §54 questions; it is a **live view** over the descriptor. **What is still missing:** the *schema-conventions* half (envelope/contract, `C1`) and the answers that need real links the platform does not yet have — **who can access it** (the authority engine is shadow-mode; SD-4 unbuilt), **what APIs expose it** (no route→object index), and the rest of §54. **And it is not yet consumed** — `SD-1`'s gate can now *enumerate*, but does not call it yet)* · ★ Hermes: how Hermes learns the shape of the business without a DB handle
 - ☐ **C6** — Command / action contract: schema · permissions · side effects · risk · approval · idempotency *(PARTIAL — a real command bus exists (`shared/src/lib/commands/`: `command-bus.ts`, `types.ts`, `undo.ts`, `redo.ts`, `registry.ts`, `operationMetadata.ts`, interceptors, scopes); `types.ts` carries input/execute/undo/redo/capability; whether the *full* contract (risk · approval · idempotency) is uniform across every action was not established)*
 - ☐ **C7** — Event envelope (CloudEvents-shaped) *(NOT DONE — the entire `shared/src/lib/events/` directory is `patterns.ts` + its test; there is **no envelope type** at all. A separate `packages/events` package exists but was not the envelope)*
 - ☐ **C8** — Audit contract: every mutation records who · what · when · before · after · actor_type · trace *(PARTIAL — the `audit_logs` module is real (`packages/core/src/modules/audit_logs/`, with API, undo/redo, export, a mutation-guard, and a CLI); it records user/action/field/before/after/createdAt; `actor_type` and a request/trace id are not confirmed complete)*
@@ -252,8 +252,8 @@
 - ☑ **D2-gap** — Write routes that call no guard: 0 unguarded *(DONE — sweep complete, verified)*
 - ☑ **D2-gap / GETs** — The write-performing-GET class *(DONE — 1 fixed, 2 set aside as read side-effects)*
 - ☐ **SD-6** — The two read side-effect GETs: set aside or wire — to be revisited *(OPEN — recorded, owner-settled 2026-10-07)*
-- ☑ **D3** — The `escalate` outcome on the guard result *(DONE — third outcome added, RED-then-GREEN proven across registry · wrapper · factory mutation proof; 36 consume sites widened; code uncommitted this session)*
-- ☐ **GAP A / C5** — The Metadata Registry service *(OPEN — the last Phase-0 foundation item; THE POSTED NEXT TASK)*
+- ☑ **D3** — The `escalate` outcome on the guard result *(DONE — third outcome added, RED-then-GREEN proven across registry · wrapper · factory mutation proof; 36 consume sites widened; code `ba8a25c`; the 1 pre-existing core failure it exposed is now fixed too — code `9068f70`)*
+- ☑ **GAP A / C5** — The Metadata Registry service *(DONE — the read-only service exists (2026-10-07, code `59ab859`): answers what exists · what type · provenance · what depends on it, and a typed absence for the other ten §54 questions; a live view, not a copy. The `Resource` envelope (C1) stays a Phase −1 contract. Consumption by `SD-1` is the next consumer, not yet wired)*
 - ☐ **GAP B** — The true-core vs domain-pack boundary as a contract *(PART — `CORE-BOUNDARY.md` written; not yet a contract)*
 - ☐ **GAP D** — Phase −1: twelve architecture contracts before all code *(OPEN)*
 
@@ -382,7 +382,7 @@ Every line of §A was read against the source on 2026-10-07. **Result: 0 `DONE`,
 | `C2` Actor & context | `shared/src/lib/auth/principal.ts` (215 lines) — first-class `Principal`, 4 kinds, `onBehalfOfUserId`, machine predicates; wider context model absent | **PARTIAL** |
 | `C3` Tenancy | `shared/src/lib/crud/factory.ts` auto-scopes by `tenantField` (default `'tenantId'`); **no** DB-level RLS policies found | **PARTIAL** |
 | `C4` Authz engine | `shared/src/lib/authority/` (1312 lines) builds an explainable `Decision`; `decision.ts` header: *"It does not enforce. Nothing calls it in the request path"* | **PARTIAL** |
-| `C5` Metadata registry | `shared/src/lib/kernel/model.ts` (407 lines) = a **view** over `custom_field_defs`/`custom_entity`; no service answering owner/dependents/access | **PARTIAL** |
+| `C5` Metadata registry | `shared/src/lib/kernel/model.ts` (407 lines) = a **view**; **the registry *service* now exists** (`kernel/metadata-registry.ts`, 2026-10-07) answering what-exists/type/provenance/dependents + typed absences. **Schema conventions half (C1) absent; not yet consumed** | **PARTIAL** |
 | `C6` Command contract | `shared/src/lib/commands/` command bus is real (`command-bus.ts`, `types.ts`, `undo`/`redo`, interceptors, scopes); full contract not established | **PARTIAL** |
 | `C7` Event envelope | `shared/src/lib/events/` = `patterns.ts` + test only; **no envelope type** | **NOT DONE** |
 | `C8` Audit contract | `packages/core/src/modules/audit_logs/` real (API, undo/redo, export, mutation-guard, CLI); `actor_type`/trace not confirmed complete | **PARTIAL** |

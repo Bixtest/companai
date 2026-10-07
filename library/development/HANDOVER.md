@@ -228,8 +228,10 @@ modules** (recorded, not migrated; `entities`, `data_sync`, `dictionaries`, `das
 2026-10-07, including a class the method-based scan could not see (a **GET that writes**; one fixed, two
 read side-effects set aside by name). **`D3`** (the `escalate` outcome) is **DONE** on 2026-10-07 — the
 guard result now carries a third outcome, `ok:true` + `escalation`, treated as *not performed* (no
-mutation, no `afterSuccess`); additive, guard-level, no command-path change). The **Metadata Registry**
-remains — the last Phase-0 foundation item and the next task. The reasoning is BUILD-ORDER §2e/§2f; the counts are in BACKLOG.md and
+mutation, no `afterSuccess`); additive, guard-level, no command-path change. The **Metadata Registry**
+(the last Phase-0 foundation item) is **DONE** on 2026-10-07 (code `59ab859`) — the read-only service over
+the kernel view, answering what exists / what type / provenance / what depends on it, with a **typed
+absence** for the other §54 questions; **Phase 0 is now complete**, and the next task is **`S-02`**. The reasoning is BUILD-ORDER §2e/§2f/§2; the counts are in BACKLOG.md and
 `analysis/d2-gap/FINDINGS.md`.
 
 **Verify an item's status is still true before starting it** — the roadmap has been wrong about what

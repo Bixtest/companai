@@ -1048,9 +1048,14 @@ one page, each with a named home. Details: [`BLUEPRINT-GAP-ANALYSIS.md`](BLUEPRI
    were done first, each with its own proof; parked modules recorded as graft-phase. Mapping table: §2e.
 3. **D3** — add the `escalate` outcome to `MutationGuardResult` and route it into the existing
    pending-approval machinery (`authority_pending_acts`).
-4. **NEW — Metadata Registry service (GAP A / C5).** Answers "what exists / who owns it / what depends on
-   it". Read-only to start; it is what lets the permissions gate enumerate objects and lets the AI be
-   bounded. *(Blueprint §54, §86.)*
+4. **NEW — Metadata Registry service (GAP A / C5) — ✅ DONE 2026-10-07** (code `59ab859`). The read-only
+   service over the kernel view: answers **what exists · what type · provenance · what depends on it**
+   from the declarations, and returns a **typed absence** (`{known:false, question, reason}`) for the other
+   ten of the blueprint's §54 questions — so the shape of the gap is queryable. A **live view** (reads the
+   descriptor at query time), not a snapshot; not tenant-scoped by construction (it describes the
+   platform's *shape*, not tenant rows). New `shared/src/lib/kernel/metadata-registry.ts` + its test.
+   *(Blueprint §54, §86. The `Resource` envelope — GAP A part 1 / C1 — stays a Phase −1 contract; the
+   registry exposes envelope-shaped facts where they exist and reports the rest as typed absences.)*
    *Exit test: an AI asked to add a column lands on `review_required` from the tier fallback, a review
    task appears, and nothing was silently allowed.*
 
@@ -1143,16 +1148,18 @@ top of it.**
 
 **What this does *not* change:** accounts management, roles/permissions and languages are genuinely
 built (measured, §1), and the structural grammar is still the right design. The work is still edits to
-an existing system. **D0 and D1 are now fixed and proven (§2c, §2d);** what remains is **D2-wide** (106
-deprecated call sites remaining, all in parked modules — every enabled module is retired — planned per-module in §2e) and D3.
+an existing system. **D0, D1, D2-wide, D2-gap, D3 and the Metadata Registry are now all fixed and
+proven** (§2c, §2d, §2e, §2f, §2); what remains of Phase 0 is nothing — **the foundation is complete**.
 
 ---
 
 ## 6. What is now recorded so it cannot be forgotten
 
-- This order is **Phase 0 → 3**. Phase 0's gaps are **D1, D2-wide, D3, and the Metadata Registry**;
-  **D0 and D1 are fixed** (the registry delivers, §2c; the tiers are a setting, §2d) **and D2 now has thirteen
-  modules retired** (`entities`, `data_sync`, `dictionaries`, `dashboards`, `workflows`, `inbox_ops`, `perspectives`, `translations`, `planner`, `query_index`, `auth`, `directory`, `feature_toggles`) — with all of them proven, not asserted.
+- This order is **Phase 0 → 3**. Phase 0's gaps are **D1, D2-wide, D3, and the Metadata Registry** —
+  **all now done**: **D0/D1** (the registry delivers, §2c; the tiers are a setting, §2d), **D2-wide**
+  (thirteen enabled modules retired; the 106 remainder are parked), **D2-gap** (§2f, 0 unguarded),
+  **D3** (§2, the `escalate` outcome) and the **Metadata Registry** (§2, item 4, code `59ab859`) —
+  all proven, not asserted.
 - **D2-wide is the live remaining defect:** **106 non-test call sites** still bypass the
   registry via the deprecated resolver (baseline **198**, measured 2026-10-06 by a per-module grep walk; §2c) — **0 calls in
   enabled modules** (every enabled module migrated, §2e), **106 calls parked** (disconnect & park). The

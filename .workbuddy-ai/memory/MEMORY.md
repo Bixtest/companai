@@ -31,3 +31,18 @@
   `git diff --shortstat`; if they disagree badly, `git checkout -- <file>` to HEAD and re-apply intent.
 - **Node 24 is required:** `export PATH="/c/Users/Ramzi/Downloads/companai/workspace/.toolchain/node24:$PATH"`.
 - The `analysis/d2-gap/measure.js` tool lives in the **docs repo root**, not the code repo.
+- **Jest rootDir quirk:** run tests from **within the package dir** (`cd packages/<pkg> && npx jest
+  --config jest.config.cjs …`); from the repo root it fails with `error TS5011`. Do NOT override
+  `--rootDir` (the transform config breaks).
+- **ENCODING TRAP (bites on every scripted edit):** a Python `open(p,'w')` text-write on Windows flips
+  LF→CRLF and changes the md5 — so a "byte-identical" mutation revert silently isn't. **Write bytes**
+  (`open(p,'wb').write(s.encode())`) or pass `newline="\n"`, and **hash-compare (md5) every restore**.
+  Verify with `python -c "print(open(p,'rb').read().count(b'\r\n'))"` (expect 0 for these repos).
+- **`perl` is NOT available.** Prefer Python or Node for scripted edits.
+- **Sandbox `rmSync` shim** (`node-safe-delete-shim.cjs`) intercepts deletes and can make tests that clean
+  temp dirs (`dynamicLoader.tsconfig.test.ts`) fail under the full suite while passing in isolation — a
+  known **pre-existing environmental** failure, NOT a code defect. Prove pre-existing by re-running with
+  the suspect test excluded.
+- **Hostile-critic pass earns its keep every time** (found a real hole in D3 AND two in the registry:
+  a snapshot-vs-live-view contradiction, and a tautological test). Run it as a SEPARATE agent before
+  declaring anything done; demand a command+output for every claim.

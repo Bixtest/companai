@@ -30,14 +30,79 @@ log.** Everything else (HANDOVER, START-PROMPT, README, BOOKMARKS, BACKLOG) poin
 
 ---
 
-### ▶ NOW — `D3`: give the guard result a third outcome, **`escalate`**. **IMPLEMENTED AND PROVEN (code uncommitted this session; plan [`library/development/PLAN-D3-escalate-outcome.md`](library/development/PLAN-D3-escalate-outcome.md)).**
+### ▶ NOW — `S-02`: the **Hermes tool door** (Phase 1). **NOT STARTED — this is the posted next task.**
 
 > **If you are a new agent, read only this block to know your job.** Everything below the box is the
 > history and the queue; this is the work in hand.
 
-**What `D3` is, in plain words.** Today the platform's write check ("mutation guard") can answer only
+**What `S-02` is, in plain words.** Where an AI's tool call is **authorized** — the door the agent half
+reaches the platform through. It is the counterpart of the mutation guard on the *human* side: a human
+write is checked by a guard; an **agent** tool call has to be checked by the authority engine before it
+runs, and this is where that happens. `D2-gap` proved every write route *runs a guard*; `S-02` is where
+that guard (and the `D3` `escalate` outcome) meets a **tool call**, so an agent is bounded the same way a
+person is.
+
+**Why it is next.** Phase 0 — the foundation — is now **complete** (see the `GAP A / C5` section directly
+below, and the Done list). `S-02` is the first Phase-1 item and the one the Hermes service map names as
+where the port begins (map §4.4 (b)): *"the AI tool door"*. It is where `D2-gap` (the guard coverage) and
+the `D3` `escalate` outcome finally become **reachable by an agent**.
+
+**Read first (before designing):** `library/development/ARCHITECTURE-hermes-integration.md` (§5.3, §11.2),
+`ARCHITECTURE-hermes-service-map.md` §4.4 (b), and `platform_points.md` `C4` (the authority engine — real
+but **shadow-mode**: *"It does not enforce. Nothing calls it in the request path"*) and `S-02`. The task's
+shape is the same discipline as `D3`: fact-check what exists, name the honest boundary, then plan → execute
+→ verify → document. **Do not assume the roadmap is right — re-measure it** (it has been wrong four times).
+
+**Next after `S-02` (`BUILD-ORDER` order).** The Phase-1 sequence: `SD-1` (the S2 permissions gate — now
+that the Metadata Registry can *enumerate* what it gates), then `SD-3`, `S9`/`SD-2`, `SD-4`/`SD-5`.
+
+---
+
+### ✅ `GAP A / C5` — the **Metadata Registry** — the last Phase-0 foundation item. **DONE AND PROVEN (code `59ab859`; plan [`library/development/PLAN-metadata-registry.md`](library/development/PLAN-metadata-registry.md)).**
+
+**What it is, in plain words.** The platform had a **vision of its own shape** it could not *answer
+questions about*. The kernel (`packages/shared/src/lib/kernel/model.ts`, 407 lines) **builds** a canonical,
+versioned model — every entity, field and relationship, keyed by a stable canonical id — by **reading**
+what modules declare. But it was a **view**, not a **service**: nothing could ask it *"what exists? who
+owns it? what depends on it? who can access it?"* (blueprint §54). **The registry is that service** —
+read-only (an *inventory*), over the kernel's model.
+
+**What was built.** `packages/shared/src/lib/kernel/metadata-registry.ts` (new) + its test. It answers the
+§54 questions the declarations **support** — **what exists · what type · provenance · what depends on it**
+(a transitive reverse-edge closure over **declared** relationships, carrying an explicit caveat) — and for
+the other **ten** §54 questions it returns a **typed absence** `{known:false, question, reason}`, never
+`undefined` and never `[]`, with a **measured** reason for each. So the *shape of the gap* is queryable
+rather than hidden.
+
+**Design invariants, each pinned by a test:**
+- **A live view, not a snapshot** — the descriptor is read **at query time** (a hostile-critic pass caught
+  an earlier draft that indexed at construction: a *copy* that contradicted the docstring's "a stale
+  registry is impossible").
+- **§54 coverage** — answered ∪ unanswered = **all 13** questions, checked against an **independent** list
+  (the first version of this check was **tautological** and could not detect a dropped question — also
+  caught by the critic).
+- **No second source of truth** — a pure function of the descriptor.
+
+**The honest scope boundary.** GAP A is **two halves**: the `Resource` **envelope** (part 1, `C1`) and the
+registry **service** (part 2). Only part 2 is built. The envelope is a **Phase −1 contract**, and writing
+the type with no consumer would be the "contract after the code" failure — so the registry exposes
+envelope-shaped facts where they exist and reports the rest as typed absences. The registry is **not
+tenant-scoped by construction**: it describes the platform's *shape*, which is not tenant-owned (the rows
+are, C3 / query layer), so there is no cross-tenant read to refuse; adding a tenant parameter is deferred
+to the day per-tenant overrides exist. **And it is not yet consumed** — `SD-1`'s gate can now *enumerate*,
+but does not call it yet.
+
+**Proof (RED-then-GREEN, 4 disjoint mutations).** 25 assertions across 6 groups. Each mutation turns its
+target test RED: the dependents closure · the typed-absence path · the snapshot-vs-live-view · a dropped
+§54 question. Restored byte-identically each time. Shared + core typecheck 0; kernel suites 6/6 (76 tests).
+
+---
+
+### ✅ `D3` — give the guard result a third outcome, **`escalate`**. **DONE AND PROVEN (code `ba8a25c`; plan [`library/development/PLAN-D3-escalate-outcome.md`](library/development/PLAN-D3-escalate-outcome.md)).**
+
+**What `D3` is, in plain words.** The platform's write check ("mutation guard") could answer only
 **yes** or **no**: `MutationGuardResult.ok` is a boolean. So a guard that wants a *person* to look at a
-change before it happens has to lie — it sends `ok:false`, a **hard refusal**, which collapses two
+change before it happens had to lie — it sent `ok:false`, a **hard refusal**, which collapses two
 different facts ("this is forbidden" and "hold this for review") into one and turns a quiet review tier
 back into a wall. **D3 adds the third answer: `escalation`** — *"do not run this yet; a person must
 decide."* It is `ok:true` **and** an `escalation` block, and the runner treats it as **not performed**:
@@ -70,9 +135,7 @@ assertions: an escalating guard yields `escalated:true`, **no** `runAfterSuccess
 **no** DB write, **no** event, **202 `pending_review`** — on POST, PUT **and** DELETE. All 11 go **RED** when
 the escalation branches are neutralised (`if (false)`) and pass **byte-identically** after restore (md5
 verified). **shared: 194 suites / 2278 tests green.** Typecheck **shared · core · scheduler · search ·
-webhooks = 0 errors**. Core suite: **616 passed / 1 failed**, and the 1 failure is **pre-existing** —
-`optimistic-lock-command-coverage.test.ts` fails identically on clean `HEAD` (proven by stash): its
-`DIRECT_HELPER_CALL` regex matches `…WithGuards(` and a **comment** trips it.
+webhooks = 0 errors**.
 
 **The hostile-critic pass found a REAL hole, and it was closed.** The wrapper path was escalation-aware, but
 **7 raw-registry sites** called `runMutationGuards` **directly** through helpers whose *declared* return type
@@ -83,14 +146,21 @@ webhooks = 0 errors**. Core suite: **616 passed / 1 failed**, and the 1 failure 
 got an explicit branch. **Parked-module caveat, stated plainly:** `staff`/`payment_gateways`/`sales` are
 **PARKED** — excluded from `tsconfig.json`, tests not run — so 21 of the 36 sites are proven only by an
 isolated `tsc --noEmit` (**0 syntax errors**) + review, **not** by the package typecheck. The `messages` (11)
-and `integrations` (4) sites are in **enabled** modules and ran green (71 suites / 378 tests).
+and `integrations` (4) sites are in **enabled** modules and ran green (71 suites / 378 tests). **Each open
+note now has an owner** — the parked sites and the "no guard emits escalation yet" criterion are backlog
+rows with triggers (`BACKLOG.md`, deferred-by-decision table).
 
 **What is deliberately NOT done (additive-only boundary).** No guard in the repo emits `escalation` yet —
 the feature is **latent by design**; what changed is that the **first** escalating guard will be honoured,
 not ignored. No `authority_pending_acts` row is created from the guard path (see above).
 
-**Next after D3 (BUILD-ORDER order).** The **Metadata Registry (GAP A / `C5`)** — the owner/dependents/access
-service over the Business Model Kernel view — then **`S-02`**.
+**The 1 pre-existing core failure it exposed is now FIXED** (code `9068f70`): the coverage guard matched
+raw file text, so a **comment** naming the helper counted as a call site (lesson **L91**). Fixed by
+stripping comments before matching; proven tightened-not-hollowed (a scan showed 16 raw vs 15 code hits —
+only the comment differed; injecting a real call turns the test RED, reverting turns it GREEN). **Core
+suite now 617 suites / 5321 tests, 0 failures.**
+
+**Next after D3 (BUILD-ORDER order).** The **Metadata Registry (GAP A / `C5`)** — the box above — then **`S-02`**.
 
 ---
 
@@ -538,8 +608,24 @@ doing X now."**
 
 ### ✅ Done recently (ticked, then moved down here)
 
-- **2026-10-07 — `D3` — the guard result's third outcome, `escalate` — DONE and PROVEN** (code
-  uncommitted this session; plan `library/development/PLAN-D3-escalate-outcome.md`). A mutation guard
+- **2026-10-07 — `GAP A / C5` — the Metadata Registry — DONE and PROVEN — PHASE 0 IS COMPLETE** (code
+  `59ab859`; plan `library/development/PLAN-metadata-registry.md`). The kernel built a canonical model but
+  was a **view**, not a **service** — nothing could answer blueprint §54's *what exists / who owns it /
+  what depends on it / who can access it*. **The registry is that service** (read-only). It answers **what
+  exists · what type · provenance · what depends on it** (transitive reverse-edge closure over **declared**
+  relationships, with a caveat) and returns a **typed absence** `{known:false, question, reason}` for the
+  other **ten** §54 questions — so the gap is queryable, not hidden. **A live view** (reads the descriptor
+  at query time), not a copy; not tenant-scoped by construction (it describes the platform's *shape*; the
+  rows are C3/query layer). **Honest scope:** GAP A is two halves — the registry (**done**) and the
+  `Resource` envelope (a Phase −1 contract, C1, **not** built). **A hostile-critic pass found TWO real
+  holes, both fixed:** (1) the first draft indexed the model at construction — a *snapshot* contradicting
+  the "impossible to go stale" claim; (2) the drift test was *tautological* and could not detect a dropped
+  §54 question. **Proof:** 25 assertions, 6 groups; RED-then-GREEN across **4 disjoint mutations**
+  (dependents closure · typed-absence path · snapshot-vs-live · dropped question); shared+core typecheck 0;
+  kernel suites 6/6 (76 tests).
+
+- **2026-10-07 — `D3` — the guard result's third outcome, `escalate` — DONE and PROVEN** (code `ba8a25c`;
+  plan `library/development/PLAN-D3-escalate-outcome.md`). A mutation guard
   could answer only yes/no, so a guard wanting a *review* had to abuse `ok:false` (a hard refusal),
   collapsing "forbidden" and "hold for a person" into one. **D3 adds the third answer:** `ok:true` **and**
   an `escalation` block `{gate, rule, because, status?}` — treated as **not performed** (no mutation, no
@@ -550,12 +636,28 @@ doing X now."**
   wrapper · **factory mutation proof** — POST/PUT/DELETE leave the row untouched, emit no event, return
   202 `pending_review`); 11 assertions all RED on neutralisation, all GREEN after byte-identical restore;
   **shared 194 suites / 2278 tests green**; typecheck shared+core+scheduler+search+webhooks = 0 errors;
-  core **616 passed / 1 failed** (the 1 **proven pre-existing** on clean HEAD). **A hostile-critic pass
+  core **616 passed / 1 failed** — and **the 1 failure was a real defect, now FIXED** (see the next entry).
+  **A hostile-critic pass
   found a REAL hole and it was closed:** 7 raw-registry sites used helpers whose *declared* return type
   dropped `escalation`, so callers checked only `!ok` and would have committed on an escalate — fixed at
   the source (all 6 helpers return `MutationGuardRunResult`; **36 sites / 32 files** widened). Parked
   modules (`staff`/`payment_gateways`/`sales`) proven only by isolated `tsc` (0 syntax errors). Full detail
   below and in `BUILD-ORDER.md` §2 / `BACKLOG.md` item **D3**.
+- **2026-10-07 — the pre-existing coverage-guard failure is FIXED, and D3's three open notes each got an
+  owner** (code `9068f70`; docs `7a0d0ef`). Owner's instruction: *"we cant leave it open ending. either you
+  document in backlog to fix later or documnt and fix immediately."* **(a) The failure — fixed immediately.**
+  `optimistic-lock-command-coverage.test.ts` matched **raw file text**, so a **comment** naming the helper
+  (`currencies/api/mutation-guard.ts`, the `directory`-trap write-up) counted as a call site — a check that
+  could not see its own documentation (lesson **L91**). Fix: strip `//` and `/* */` comments before matching.
+  **Proven tightened, not hollowed:** a scan showed **16 raw hits vs 15 code hits** (the one difference is
+  exactly that comment; all 15 real hits were already allowlisted, so no drift was unmasked); a 6-case
+  falsification probe; and the strongest — injecting a genuine un-allowlisted helper call turns the real
+  test **RED**, reverting turns it **GREEN**. (The probe also corrected my own over-claim: the negative
+  lookahead fixes *no* live false positive on the async seam — measured, not assumed.) **Core suite now 617
+  suites / 5321 tests, 0 failures.** **(b) Parked-module sites — documented** in `BACKLOG.md`'s
+  deferred-by-decision table with the trigger *"the first time the module is un-parked"*. **(c) Latent-by-
+  design (no guard emits `escalation` yet) — recorded** as D3's **acceptance criterion** for the first
+  escalating guard (4 numbered conditions), pointed at from `SD-4`'s D3 clause.
 - **2026-10-07 — `D2-gap` COMPLETE — the write-verb sweep closed 0 unguarded across all 35 enabled
   modules** (code `7494fbe`; analysis `analysis/d2-gap/`). Re-measured: **256 write verbs, 0 unguarded**;
   227 guarded (142 wrapper · 1 registry · 35 crud · 43 local helper · 6 re-export) · 8 auth-flow + 5

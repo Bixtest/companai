@@ -16,8 +16,9 @@ where a number matters. Where the documentation and the code disagreed, the code
 ## 1. The short answer
 
 **The product is real and running. The guard family — the last live defect family — is now CLOSED
-(both `D2-wide` for every enabled module and `D2-gap` are COMPLETE, and `D3` — the `escalate` outcome —
-is DONE this session); the next task is the Metadata Registry.**
+(both `D2-wide` for every enabled module and `D2-gap` are COMPLETE; `D3` — the `escalate` outcome — is
+DONE; and the **Metadata Registry**, the last Phase-0 foundation item, is now DONE — **Phase 0 is
+complete**).**
 
 - The **AI half is built and proven live**: a real prompt produces a schema-valid Business IR
   through the running platform (`G-17`), and the three endings a prompt can have exist as typed,
@@ -152,7 +153,7 @@ containers healthy/up, no unhealthy container.
 
 ## 3. What is NEXT
 
-**Immediate (the ★ ACTIVE TASK box):** `D2-gap` is **COMPLETE** (0 unguarded across all 35 enabled modules); **`D3` is DONE** (the `escalate` outcome added and proven); the next task is the **Metadata Registry** (`GAP A / C5`, the last Phase-0 foundation item).
+**Immediate (the ★ ACTIVE TASK box):** `D2-gap` is **COMPLETE** (0 unguarded across all 35 enabled modules); **`D3` is DONE** (the `escalate` outcome added and proven); the **Metadata Registry** (`GAP A / C5`) is **DONE** (2026-10-07, code `59ab859`) — so **Phase 0 is complete**. The posted next task is **`S-02` — the Hermes tool door** (Phase 1).
 
 | # | Module | Unguarded verbs | Notes |
 |---|---|---|---|
@@ -180,9 +181,8 @@ bucket as well. **The sweep is complete under both definitions; nothing is left 
 | # | Item | Why |
 |---|---|---|
 | ✅ | **`D3`** — add the `escalate` outcome to the guard result | **DONE 2026-10-07** — the guard engine now returns a third outcome (`ok:true` + `escalation`), treated as *not performed*; RED-then-GREEN proven across registry · wrapper · factory mutation; 36 consume sites widened |
-| 14 | **The Metadata Registry** service | the last Phase-0 foundation item; everything stacked on it inherits it — **the posted next task** |
-| — | **`G-12`** (business backup/restore) | sits as `G-17`'s rival for the next build slot |
-| — | **`S-02`** — the Hermes tool door | where `D2-gap` and Hermes meet (§4.4 (b)) |
+| ✅ | **The Metadata Registry** service | **DONE 2026-10-07** (code `59ab859`) — the read-only service over the kernel view: answers what exists · what type · provenance · what depends on it, and a **typed absence** for the other ten §54 questions; a **live view**, not a copy. Last Phase-0 item; **Phase 0 is now complete** |
+| — | **`S-02`** — the Hermes tool door | **the posted next task** (Phase 1); where `D2-gap` and Hermes meet (§4.4 (b)) |
 
 **What needs the owner:** only **item 5** in `NEEDS-YOU.md` (change the Coolify admin password).
 Everything else is mine.
