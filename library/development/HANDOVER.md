@@ -593,7 +593,7 @@ and was *not* re-measured — treat it as a starting point, not a fact.**
 
 | | |
 |---|---|
-| **Repo 1** (thinking/docs) | `master`, HEAD **`6861138`** — the commit that settles the two write-performing GETs as a named set-aside class (the D2-gap write-verb sweep is COMPLETE). **Re-measured 2026-10-07** (was `a72fdfe`) |
+| **Repo 1** (thinking/docs) | `master` — the **D2-gap close-out** is **`6861138`** (the doc/tool commit that settles the two write-performing GETs as a named set-aside class; the handover batch that records it is the commit right after). **Re-measured 2026-10-07** (the previous figure was `a72fdfe`) |
 | **Repo 2** (code) | `main`, HEAD **`7494fbe`** — the commit that wires the `communication_channels` writes, the **last** module of the D2-gap sweep. **Re-measured 2026-10-07** (was `cafe7d6`) |
 | **Codebase shape** | **21 packages, 1 app** (`apps/mercato`) — a monorepo (Yarn 4.17.1 + Turbo) |
 | **Documentation** | `library/` holds **3,470 markdown files**; `LESSONS.md` 3,116 lines (L1–L92); `JOURNAL.md` 4,673 lines; `COOKBOOK.md` 2,948 lines |
