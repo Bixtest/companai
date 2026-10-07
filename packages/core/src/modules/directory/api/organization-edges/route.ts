@@ -13,6 +13,7 @@ import {
   organizationEdgeCreateSchema,
   organizationEdgeUpdateSchema,
 } from '@open-mercato/core/modules/directory/data/validators'
+import { beginDirectoryMutationGuard } from '../mutation-guard'
 
 /**
  * Managing the authority edges between organizations (R6).
@@ -134,6 +135,27 @@ export async function POST(req: Request) {
     )
   }
 
+  // Registry mutation-guard chokepoint (D2-gap). Placed AFTER the route's own
+  // auth gate, schema validation, tenant-boundary check and tree-inversion
+  // check (all of which return without writing), and BEFORE the first write
+  // (`trx.persist`). A block stops the whole operation.
+  const guard = await beginDirectoryMutationGuard({
+    container: scope.container,
+    req,
+    tenantId: scope.tenantId,
+    organizationId: parsed.data.childId,
+    userId: scope.auth.sub ?? null,
+    resourceKind: RESOURCE_KIND,
+    resourceId: 'new',
+    operation: 'create',
+    mutationPayload: {
+      parentId: parsed.data.parentId,
+      childId: parsed.data.childId,
+      authorityCeiling: parsed.data.authorityCeiling,
+    },
+  })
+  if (guard.blockedResponse) return guard.blockedResponse
+
   const created = await scope.em.transactional(async (trx) => {
     const edge = trx.create(OrganizationEdge, {
       tenantId: scope.tenantId,
@@ -162,6 +184,7 @@ export async function POST(req: Request) {
     return edge
   })
 
+  await guard.runAfterSuccess()
   await invalidateAuthorityGraph(scope)
   return NextResponse.json({ edge: serialize(created) }, { status: 201 })
 }
@@ -197,6 +220,26 @@ export async function PATCH(req: Request) {
     throw err
   }
 
+  // Registry mutation-guard chokepoint (D2-gap). Placed AFTER the route's own
+  // gates (schema, existence, optimistic lock) and BEFORE the write
+  // (`trx.flush`). `existing.id` is the id being written, so it is the subject.
+  const guard = await beginDirectoryMutationGuard({
+    container: scope.container,
+    req,
+    tenantId: scope.tenantId,
+    organizationId: existing.childId,
+    userId: scope.auth.sub ?? null,
+    resourceKind: RESOURCE_KIND,
+    resourceId: existing.id,
+    operation: 'update',
+    mutationPayload: {
+      authorityCeiling: parsed.data.authorityCeiling ?? null,
+      inheritanceMode: parsed.data.inheritanceMode ?? null,
+      relationshipType: parsed.data.relationshipType ?? null,
+    },
+  })
+  if (guard.blockedResponse) return guard.blockedResponse
+
   const updated = await scope.em.transactional(async (trx) => {
     const edge = await trx.findOne(OrganizationEdge, { id: parsed.data.id, tenantId: scope.tenantId, deletedAt: null })
     if (!edge) return null
@@ -224,6 +267,7 @@ export async function PATCH(req: Request) {
   })
 
   if (!updated) return NextResponse.json({ error: 'Edge not found' }, { status: 404 })
+  await guard.runAfterSuccess()
   await invalidateAuthorityGraph(scope)
   return NextResponse.json({ edge: serialize(updated) })
 }
@@ -234,6 +278,25 @@ export async function DELETE(req: Request) {
 
   const id = new URL(req.url).searchParams.get('id')
   if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 })
+
+  // Registry mutation-guard chokepoint (D2-gap). Placed AFTER the route's own
+  // gates (auth, id presence) and BEFORE the write (the soft-delete in the
+  // transaction). Note the guard runs even when the edge turns out not to
+  // exist: deciding "does this row exist?" inside the route is a read, and the
+  // guard is a pre-write chokepoint. A guard registered against
+  // `directory.organization_edge` sees the delete intent either way.
+  const guard = await beginDirectoryMutationGuard({
+    container: scope.container,
+    req,
+    tenantId: scope.tenantId,
+    organizationId: null,
+    userId: scope.auth.sub ?? null,
+    resourceKind: RESOURCE_KIND,
+    resourceId: id,
+    operation: 'delete',
+    mutationPayload: { id },
+  })
+  if (guard.blockedResponse) return guard.blockedResponse
 
   const removed = await scope.em.transactional(async (trx) => {
     const edge = await trx.findOne(OrganizationEdge, { id, tenantId: scope.tenantId, deletedAt: null })
@@ -259,6 +322,7 @@ export async function DELETE(req: Request) {
   })
 
   if (!removed) return NextResponse.json({ error: 'Edge not found' }, { status: 404 })
+  await guard.runAfterSuccess()
   await invalidateAuthorityGraph(scope)
   return NextResponse.json({ ok: true })
 }

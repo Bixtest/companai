@@ -12,6 +12,7 @@ import {
   createPagedListResponseSchema,
 } from '../openapi'
 import { createLogger } from '@open-mercato/shared/lib/logger'
+import { beginProgressMutationGuard } from '../mutation-guard'
 
 const logger = createLogger('progress').child({ component: 'jobs' })
 
@@ -156,12 +157,32 @@ export async function POST(req: Request) {
     const container = await createRequestContainer()
     const progressService = container.resolve('progressService') as import('../../lib/progressService').ProgressService
 
+    // Registry mutation-guard chokepoint (D2-gap). Placed AFTER the route's own
+    // auth and schema gates and BEFORE the write (`createJob` persists the row).
+    const guard = await beginProgressMutationGuard({
+      container,
+      req,
+      tenantId: auth.tenantId,
+      organizationId: auth.orgId ?? null,
+      userId: auth.sub ?? null,
+      resourceKind: 'progress.job',
+      resourceId: 'new',
+      operation: 'create',
+      mutationPayload: {
+        jobType: parsed.data.jobType,
+        name: parsed.data.name,
+        totalCount: parsed.data.totalCount ?? null,
+      },
+    })
+    if (guard.blockedResponse) return guard.blockedResponse
+
     const job = await progressService.createJob(parsed.data, {
       tenantId: auth.tenantId,
       organizationId: auth.orgId,
       userId: auth.sub,
     })
 
+    await guard.runAfterSuccess()
     return NextResponse.json({ id: job.id }, { status: 201 })
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)

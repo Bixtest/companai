@@ -5,6 +5,7 @@ import type { EntityManager } from '@mikro-orm/postgresql'
 import { ProgressJob } from '../../../data/entities'
 import { updateProgressSchema } from '../../../data/validators'
 import type { ProgressService } from '../../../lib/progressService'
+import { beginProgressMutationGuard } from '../../mutation-guard'
 
 const routeMetadata = {
   GET: { requireAuth: true, requireFeatures: ['progress.view'] },
@@ -86,12 +87,31 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
 
   const progressService = container.resolve('progressService') as ProgressService
 
+  // Registry mutation-guard chokepoint (D2-gap). Placed AFTER the route's own
+  // auth, schema and existence gates and BEFORE the write (`updateProgress`).
+  const guard = await beginProgressMutationGuard({
+    container,
+    req,
+    tenantId: auth.tenantId,
+    organizationId: auth.orgId ?? null,
+    userId: auth.sub ?? null,
+    resourceKind: 'progress.job',
+    resourceId: params.id,
+    operation: 'update',
+    mutationPayload: {
+      progressPercent: parsed.data.progressPercent ?? null,
+      processedCount: parsed.data.processedCount ?? null,
+    },
+  })
+  if (guard.blockedResponse) return guard.blockedResponse
+
   const job = await progressService.updateProgress(params.id, parsed.data, {
     tenantId: auth.tenantId,
     organizationId: auth.orgId,
     userId: auth.sub,
   })
 
+  await guard.runAfterSuccess()
   return NextResponse.json({ ok: true, progressPercent: job.progressPercent })
 }
 
@@ -104,12 +124,31 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
   const container = await createRequestContainer()
   const progressService = container.resolve('progressService') as ProgressService
 
+  // Registry mutation-guard chokepoint (D2-gap). Placed AFTER the route's own
+  // auth gate and BEFORE the write (`cancelJob`). Note this verb has no
+  // pre-existence check — the service itself decides whether the job may be
+  // cancelled — so the guard runs before that decision, as a pre-write
+  // chokepoint keyed on the id from the path.
+  const guard = await beginProgressMutationGuard({
+    container,
+    req,
+    tenantId: auth.tenantId,
+    organizationId: auth.orgId ?? null,
+    userId: auth.sub ?? null,
+    resourceKind: 'progress.job',
+    resourceId: params.id,
+    operation: 'delete',
+    mutationPayload: { action: 'cancel' },
+  })
+  if (guard.blockedResponse) return guard.blockedResponse
+
   try {
     await progressService.cancelJob(params.id, {
       tenantId: auth.tenantId,
       organizationId: auth.orgId,
       userId: auth.sub,
     })
+    await guard.runAfterSuccess()
     return NextResponse.json({ ok: true })
   } catch {
     return NextResponse.json({ error: 'Cannot cancel this job' }, { status: 400 })
