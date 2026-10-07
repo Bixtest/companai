@@ -238,9 +238,27 @@ function isActorless(relPath) {
  * `dryRun: true`, under which `logRuleExecution` (the only writer in that path)
  * is skipped, so no `RuleExecutionLog` row is created. It is set aside by name,
  * not wired. Re-check if the endpoint ever gains a write.
+ *
+ * Three more were measured and added 2026-10-07, when a re-measure of "closed"
+ * modules found them still reading as GAP:
+ *
+ *  - `data_sync/api/validate.ts` POST — validates a sync connection. Calls
+ *    `adapter.validateConnection` and `credentialsService.resolve`; `resolve`
+ *    only READS (`getRaw`), and the credential writers (`persist`/`flush`) live
+ *    in `save`/`saveField`, which this path never reaches. No write.
+ *  - `dashboards/api/widgets/data/route.ts` POST and
+ *    `dashboards/api/widgets/data/batch/route.ts` POST — fetch widget data
+ *    (gated on `analytics.view`). They build a `widgetDataService` and call
+ *    `fetchWidgetData`; the service's only mutation is `cache.set` (a memo of a
+ *    read) and its `em` use is `getConnection().execute(<select>)`. No
+ *    `persist`/`flush`/`remove` anywhere in the path. Wiring a guard here would
+ *    gate a read and fire `afterSuccess` for a mutation that never happened.
  */
 const READ_ONLY_PATHS = [
   'workflows/api/instances/validate-start/route.ts',
+  'data_sync/api/validate.ts',
+  'dashboards/api/widgets/data/route.ts',
+  'dashboards/api/widgets/data/batch/route.ts',
 ];
 
 function isReadOnly(relPath) {

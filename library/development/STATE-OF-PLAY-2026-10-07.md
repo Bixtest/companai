@@ -76,9 +76,12 @@ I did not re-run each commit, but the end-state is independently confirmed by th
 ### 2.4 `D2-gap` — measured (41 after this session's correction), and 10 fixed
 
 > **SUPERSEDED 2026-10-07 (same day, later):** this snapshot recorded the sweep at **41 unguarded**.
-> The `search` module was then fixed (**7 → 0**), so the live figure is now **34**, with wrapper class
-> **121** (details in `BACKLOG.md` §D2-gap and `BUILD-ORDER.md` §2f). This section is kept as the
-> study's own reading, per the "every figure names its HEAD" rule; it is not the current number.
+> The `search` module was then fixed (**7 → 0**), so the live figure became **34**; then four
+> "leftover-verb" modules were closed — `directory` (3) and `progress` (3) wired, `dashboards` (2) and
+> `data_sync` (1) set aside as measured read-only — so the live figure is now **25**, with wrapper class
+> **127** and the read-only class at **4** (details in `BACKLOG.md` §D2-gap and `BUILD-ORDER.md` §2f).
+> This section is kept as the study's own reading, per the "every figure names its HEAD" rule; it is not
+> the current number.
 
 **Route 1 (the tool):** ran `node analysis/d2-gap/measure.js` this session. It reproduces the
 documented headline **50 unguarded** — and, after this session's tool fix, reads **41**
