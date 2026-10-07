@@ -8,6 +8,7 @@ import { AUTONOMY_GATES } from '@open-mercato/shared/modules/capabilities'
 import { MAX_DELEGATION_DAYS, delegationWindowProblem } from '@open-mercato/shared/modules/delegations'
 import { derivePrincipal } from '@open-mercato/shared/lib/auth/principal'
 import type { DelegationService } from '@open-mercato/core/modules/auth/services/delegationService'
+import { beginAuthMutationGuard } from '../../mutation-guard'
 
 /**
  * Lending authority, and taking it back.
@@ -72,6 +73,25 @@ export async function POST(req: Request): Promise<NextResponse> {
   const delegations = container.resolve('delegationService') as DelegationService
   const scope = { tenantId: auth.tenantId, organizationId: auth.orgId ?? null }
 
+  // Structural mutation guard, before either branch writes. The service is what
+  // decides whether the caller may lend this capability; the guard is the
+  // registry chokepoint every other custom write route in the module now passes
+  // through, so a guard registered for `authority.delegation` is enforced rather
+  // than silently skipped (auth ships no `guards.ts` today — see
+  // `api/mutation-guard.ts`).
+  const guard = await beginAuthMutationGuard({
+    container,
+    tenantId: auth.tenantId,
+    organizationId: auth.orgId ?? null,
+    userId: auth.sub ?? null,
+    req,
+    resourceKind: RESOURCE_KIND,
+    resourceId: parsed.data.action === 'revoke' ? parsed.data.id : 'new',
+    operation: parsed.data.action === 'revoke' ? 'delete' : 'create',
+    mutationPayload: parsed.data as unknown as Record<string, unknown>,
+  })
+  if (guard.blockedResponse) return guard.blockedResponse
+
   if (parsed.data.action === 'revoke') {
     const revoked = await delegations.revoke(parsed.data.id, scope, auth.sub ?? null)
     if (!revoked) return NextResponse.json({ error: 'Not found' }, { status: 404 })
@@ -85,6 +105,7 @@ export async function POST(req: Request): Promise<NextResponse> {
       resourceId: parsed.data.id,
       snapshotAfter: { revokedAt: revoked.revokedAt, capabilityId: revoked.capabilityId },
     })
+    await guard.runAfterSuccess()
     return NextResponse.json({ item: revoked })
   }
 
@@ -124,6 +145,7 @@ export async function POST(req: Request): Promise<NextResponse> {
     },
   })
 
+  await guard.runAfterSuccess()
   return NextResponse.json({ item: granted })
 }
 

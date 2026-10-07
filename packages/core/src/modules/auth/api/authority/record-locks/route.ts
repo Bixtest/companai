@@ -6,6 +6,7 @@ import { writeDirectWriteAuditLog } from '@open-mercato/shared/lib/crud/audit-wr
 import type { OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
 import { RECORD_LOCK_STATES } from '@open-mercato/shared/modules/record-locks'
 import type { RecordLockService } from '@open-mercato/core/modules/auth/services/recordLockService'
+import { beginAuthMutationGuard } from '../../mutation-guard'
 
 /**
  * Freezing and unfreezing a record.
@@ -58,6 +59,23 @@ export async function POST(req: Request): Promise<NextResponse> {
   const locks = container.resolve('recordLockService') as RecordLockService
   const scope = { tenantId: auth.tenantId, organizationId: auth.orgId ?? null }
 
+  // Structural mutation guard, before the state change. A lock is the ceiling
+  // the authority resolver reads, so a guard registered for
+  // `authority.record_lock` that only decided *whether this write is allowed*
+  // would be pointless if it were silently skipped here. It no longer can be.
+  const guard = await beginAuthMutationGuard({
+    container,
+    tenantId: auth.tenantId,
+    organizationId: auth.orgId ?? null,
+    userId: auth.sub ?? null,
+    req,
+    resourceKind: RESOURCE_KIND,
+    resourceId: parsed.data.recordId,
+    operation: 'update',
+    mutationPayload: parsed.data as unknown as Record<string, unknown>,
+  })
+  if (guard.blockedResponse) return guard.blockedResponse
+
   const before = await locks.stateFor(parsed.data.recordId, scope)
   const after = await locks.setState(parsed.data.recordId, parsed.data.state, scope, {
     reason: parsed.data.reason ?? null,
@@ -79,6 +97,7 @@ export async function POST(req: Request): Promise<NextResponse> {
     snapshotAfter: after ? { state: after.state, reason: after.reason } : { state: 'open' },
   })
 
+  await guard.runAfterSuccess()
   return NextResponse.json({ item: after ?? { recordId: parsed.data.recordId, state: 'open' } })
 }
 

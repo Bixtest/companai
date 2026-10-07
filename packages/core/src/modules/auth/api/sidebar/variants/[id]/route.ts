@@ -17,6 +17,7 @@ import {
 } from '../../../../data/validators'
 import type { OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
 import { effectiveUserId as resolveEffectiveUserId } from '@open-mercato/shared/lib/auth/principal'
+import { beginAuthMutationGuard } from '../../../mutation-guard'
 
 export const metadata = {
   GET: { requireAuth: true },
@@ -104,8 +105,22 @@ export async function PUT(req: Request) {
   }
 
   const { locale } = await resolveTranslations()
-  const { resolve } = await createRequestContainer()
-  const em = resolve('em') as EntityManager
+  const container = await createRequestContainer()
+  const em = container.resolve('em') as EntityManager
+
+  // Structural mutation guard, before the update.
+  const guard = await beginAuthMutationGuard({
+    container,
+    tenantId: auth.tenantId ?? null,
+    organizationId: auth.orgId ?? null,
+    userId: effectiveUserId,
+    req,
+    resourceKind: 'auth.sidebar_variant',
+    resourceId: id,
+    operation: 'update',
+    mutationPayload: parsed.data as unknown as Record<string, unknown>,
+  })
+  if (guard.blockedResponse) return guard.blockedResponse
 
   const variant = await updateSidebarVariant(em, {
     userId: effectiveUserId,
@@ -120,6 +135,7 @@ export async function PUT(req: Request) {
 
   if (!variant) return NextResponse.json({ error: 'Variant not found' }, { status: 404 })
 
+  await guard.runAfterSuccess()
   return NextResponse.json({ locale, variant: serializeVariant(variant) })
 }
 
@@ -133,8 +149,21 @@ export async function DELETE(req: Request) {
   if (!id) return NextResponse.json({ error: 'Invalid id' }, { status: 400 })
 
   const { locale } = await resolveTranslations()
-  const { resolve } = await createRequestContainer()
-  const em = resolve('em') as EntityManager
+  const container = await createRequestContainer()
+  const em = container.resolve('em') as EntityManager
+
+  // Structural mutation guard, before the delete.
+  const guard = await beginAuthMutationGuard({
+    container,
+    tenantId: auth.tenantId ?? null,
+    organizationId: auth.orgId ?? null,
+    userId: effectiveUserId,
+    req,
+    resourceKind: 'auth.sidebar_variant',
+    resourceId: id,
+    operation: 'delete',
+  })
+  if (guard.blockedResponse) return guard.blockedResponse
 
   const ok = await deleteSidebarVariant(em, {
     userId: effectiveUserId,
@@ -145,6 +174,7 @@ export async function DELETE(req: Request) {
 
   if (!ok) return NextResponse.json({ error: 'Variant not found' }, { status: 404 })
 
+  await guard.runAfterSuccess()
   return NextResponse.json({ ok: true })
 }
 

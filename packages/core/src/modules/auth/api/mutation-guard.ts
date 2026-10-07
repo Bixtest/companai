@@ -100,15 +100,35 @@ type AuthMutationGuardHandle = {
  *
  * That is **`D2-gap`, not `D2-wide`**: `D2-wide` retires a *deprecated*
  * resolver where a route already calls one; `D2-gap` is the **other half**, a
- * write that nothing checks. **Recorded as a backlog item, not fixed here** —
- * this commit's scope is `D2-wide` only, and enlarging it silently is exactly
- * the blind sweep the plan forbids. **A first draft of this header named a
- * different, wrong set of files; it was written from memory and corrected
- * against the walk above.** The measured `D2-gap` figure for `auth` is
- * **12 unguarded resource-writes across 10 files** (the count once the
- * auth-flow endpoints above are set aside): `users/acl` (1), `roles/acl` (1),
+ * write that nothing checks. **A first draft of this header named a different,
+ * wrong set of files; it was written from memory and corrected against the walk
+ * above.** The measured `D2-gap` figure for `auth` is **12 unguarded
+ * resource-writes across 10 files** (the count once the auth-flow endpoints
+ * above are set aside): `users/acl` (1), `roles/acl` (1),
  * `sidebar/preferences` (2), `sidebar/variants` (1),
  * `sidebar/variants/[id]` (2), and the five `authority/*` routes (5).
+ *
+ * **Closed 2026-10-07 — all 12 are now wired through this wrapper, and the
+ * figure re-measures to zero.** Each of the ten files above calls
+ * `beginAuthMutationGuard()` before its write and `guard.runAfterSuccess()`
+ * after it commits. The measured `D2-gap` for `auth` is now **0 unguarded
+ * verbs**, and the repo-wide total fell **111 → 99**. Proven by
+ * `api/__tests__/d2-gap-wiring.route.test.ts`, which registers a **real** guard
+ * in the global store (not a mock of this function) and drives the **real**
+ * handlers twice: once with a blocking guard — the write must not happen — and
+ * once with an allowing one — the write must happen and `afterSuccess` must
+ * fire. Both mutations cover all twelve verbs.
+ *
+ * **What was *not* the point, stated so a later reader does not over-read it.**
+ * These routes were not unprotected: each already enforced its own capability
+ * via `metadata.requireFeatures` (`auth.delegations.manage`,
+ * `auth.denials.manage`, `auth.authority.approve`, `auth.records.lock`,
+ * `auth.trust.promote`, `auth.acl.manage`, `auth.sidebar.manage`) and each
+ * already wrote its own audit entry. A guard added here is a **second,
+ * structural** check — the registry chokepoint — not the thing that decides who
+ * may call the route. `auth` still ships **no `data/guards.ts`**, so no
+ * `auth.*` guard exists in the registry today; what changed is that the first
+ * one ever written will now be **enforced** rather than silently skipped.
  *
  * **A caution about this particular call site, stated because it is
  * load-bearing.** On this route the mutation guard is **not** what stops an

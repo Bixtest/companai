@@ -5,6 +5,7 @@ import { createRequestContainer } from '@open-mercato/shared/lib/di/container'
 import type { OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
 import { denialProblem } from '@open-mercato/shared/modules/denials'
 import type { DenialService } from '@open-mercato/core/modules/auth/services/denialService'
+import { beginAuthMutationGuard } from '../../mutation-guard'
 
 /**
  * Taking one permission away from one person, and giving it back.
@@ -20,6 +21,9 @@ import type { DenialService } from '@open-mercato/core/modules/auth/services/den
  */
 
 const FEATURE_MANAGE = 'auth.denials.manage'
+// Matches what `DenialService` records for its own audit entry, so the guard
+// resource and the audit resource name the same object.
+const RESOURCE_KIND = 'authority.denial'
 
 export const metadata = {
   GET: { requireAuth: true, requireFeatures: [FEATURE_MANAGE] },
@@ -74,6 +78,23 @@ export async function POST(req: Request): Promise<NextResponse> {
   const denials = container.resolve('denialService') as DenialService
   const scope = { tenantId: auth.tenantId, organizationId: auth.orgId ?? null }
 
+  // Structural mutation guard, before either branch writes. The capability
+  // (`auth.denials.manage`) is what stops an employee withholding their
+  // manager's approvals; the guard is the registry chokepoint, so a guard
+  // registered for `authority.denial` is enforced rather than skipped.
+  const guard = await beginAuthMutationGuard({
+    container,
+    tenantId: auth.tenantId,
+    organizationId: auth.orgId ?? null,
+    userId: auth.sub ?? null,
+    req,
+    resourceKind: RESOURCE_KIND,
+    resourceId: parsed.data.action === 'lift' ? parsed.data.id : 'new',
+    operation: parsed.data.action === 'lift' ? 'delete' : 'create',
+    mutationPayload: parsed.data as unknown as Record<string, unknown>,
+  })
+  if (guard.blockedResponse) return guard.blockedResponse
+
   if (parsed.data.action === 'lift') {
     const lifted = await denials.lift(parsed.data.id, scope, auth.sub ?? null)
     if (!lifted) return NextResponse.json({ error: 'Not found' }, { status: 404 })
@@ -81,6 +102,7 @@ export async function POST(req: Request): Promise<NextResponse> {
     // The audit entry is written by `DenialService.lift` itself, so the CLI
     // recovery path is recorded too (O1). Writing one here as well would file
     // the same act twice.
+    await guard.runAfterSuccess()
     return NextResponse.json({ item: lifted })
   }
 
@@ -106,6 +128,7 @@ export async function POST(req: Request): Promise<NextResponse> {
   }, scope)
 
   // Audited by the service — see the note on the lift branch above.
+  await guard.runAfterSuccess()
   return NextResponse.json({ item: withheld })
 }
 

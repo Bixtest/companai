@@ -10,6 +10,7 @@ import {
   type PendingActService,
   type PendingActStatus,
 } from '@open-mercato/core/modules/auth/services/pendingActService'
+import { beginAuthMutationGuard } from '../../mutation-guard'
 
 const FEATURE_APPROVE = 'auth.authority.approve'
 const RESOURCE_KIND = 'authority.pending_act'
@@ -99,6 +100,24 @@ export async function POST(req: Request) {
 
   const approverUserId = typeof scope.auth.sub === 'string' ? scope.auth.sub : null
 
+  // Structural mutation guard, before any branch writes. Approving runs the
+  // command that was held, so this is the highest-consequence write in the
+  // module; the capability (`auth.authority.approve`) decides who may be here,
+  // and the guard is the registry chokepoint that keeps a registered
+  // `authority.pending_act` guard enforced rather than skipped.
+  const guard = await beginAuthMutationGuard({
+    container: scope.container,
+    tenantId: scope.tenantId,
+    organizationId: null,
+    userId: approverUserId,
+    req,
+    resourceKind: RESOURCE_KIND,
+    resourceId: parsed.data.id,
+    operation: 'update',
+    mutationPayload: parsed.data as unknown as Record<string, unknown>,
+  })
+  if (guard.blockedResponse) return guard.blockedResponse
+
   if (parsed.data.decision === 'reviewed') {
     const outcome = await scope.reviews.markReviewed({
       tenantId: scope.tenantId,
@@ -118,6 +137,7 @@ export async function POST(req: Request) {
     if (!outcome.ok) {
       return NextResponse.json({ error: outcome.reason }, { status: outcome.reason === 'not-found' ? 404 : 409 })
     }
+    await guard.runAfterSuccess()
     return NextResponse.json({ ok: true, status: 'reviewed' })
   }
 
@@ -161,6 +181,7 @@ export async function POST(req: Request) {
     const status = outcome.reason === 'not-found' ? 404 : outcome.reason === 'execution-failed' ? 500 : 409
     return NextResponse.json({ error: outcome.reason }, { status })
   }
+  await guard.runAfterSuccess()
   return NextResponse.json({ ok: true, status: outcome.act.status })
 }
 

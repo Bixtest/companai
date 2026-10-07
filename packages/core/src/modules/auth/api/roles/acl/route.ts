@@ -16,6 +16,7 @@ import {
   assertActorCanModifySuperAdminRoleTarget,
   normalizeGrantFeatureList,
 } from '@open-mercato/core/modules/auth/lib/grantChecks'
+import { beginAuthMutationGuard } from '../../mutation-guard'
 
 type TaggableCache = { deleteByTags?: (tags: string[]) => Promise<void> | void }
 
@@ -229,6 +230,28 @@ export async function PUT(req: Request) {
     throw err
   }
 
+  // Structural mutation guard, before the ACL is written. This route's own
+  // authority checks (`assertActorCanModifySuperAdminRoleTarget`,
+  // `assertActorCanGrantAcl`) decide *who may edit this role's grants*; the
+  // guard is the registry chokepoint the rest of the module now shares, so a
+  // guard registered for `auth.role_acl` runs rather than being bypassed.
+  const guard = await beginAuthMutationGuard({
+    container,
+    tenantId: targetTenantId,
+    organizationId: auth.orgId ?? null,
+    userId: auth.sub ?? null,
+    req,
+    resourceKind: 'auth.role_acl',
+    resourceId: parsed.data.roleId,
+    operation: 'update',
+    mutationPayload: {
+      isSuperAdmin: requestedIsSuperAdmin,
+      features: requestedFeatures,
+      organizations: requestedOrganizations,
+    },
+  })
+  if (guard.blockedResponse) return guard.blockedResponse
+
   // Persist the ACL mutation inside a transaction so the role-permission write
   // commits atomically (proper ACL-edit transaction handling).
   const aclToPersist = acl
@@ -254,7 +277,8 @@ export async function PUT(req: Request) {
       if (cache?.deleteByTags) await cache.deleteByTags([`rbac:tenant:${targetTenantId}`])
     } catch {}
   }
-  
+
+  await guard.runAfterSuccess()
   return NextResponse.json({
     ok: true,
     sanitized: false,

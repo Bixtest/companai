@@ -25,6 +25,7 @@ import { Role, RoleSidebarPreference } from '../../../data/entities'
 import type { OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
 import { z } from 'zod'
 import { effectiveUserId as resolveEffectiveUserId } from '@open-mercato/shared/lib/auth/principal'
+import { beginAuthMutationGuard } from '../../mutation-guard'
 
 export const metadata = {
   GET: { requireAuth: true },
@@ -367,6 +368,25 @@ export async function PUT(req: Request) {
 
   const scope = parsed.data.scope ?? { type: 'user' as const }
 
+  // Structural mutation guard, before either scope writes. Role scope and user
+  // scope are different resources (`auth.role_sidebar_preference` vs
+  // `auth.sidebar_preference`) because a guard that should stop a role-wide
+  // change has no business blocking a user's own layout, and vice versa. Placed
+  // after the scope is known and before the first write in either branch.
+  const guard = await beginAuthMutationGuard({
+    container,
+    tenantId: auth.tenantId ?? null,
+    organizationId: auth.orgId ?? null,
+    userId: effectiveUserId,
+    req,
+    resourceKind:
+      scope.type === 'role' ? 'auth.role_sidebar_preference' : 'auth.sidebar_preference',
+    resourceId: scope.type === 'role' ? scope.roleId : (effectiveUserId ?? 'self'),
+    operation: 'update',
+    mutationPayload: payload as unknown as Record<string, unknown>,
+  })
+  if (guard.blockedResponse) return guard.blockedResponse
+
   // Role-scoped write: requires `auth.sidebar.manage` and a role visible to this tenant.
   // applyToRoles/clearRoleIds are forbidden in role scope (validator already rejects them).
   if (scope.type === 'role') {
@@ -411,6 +431,7 @@ export async function PUT(req: Request) {
       } catch {}
     }
     const rolesPayload = await loadRolesPayload(em, { tenantId: auth.tenantId ?? null, locale })
+    await guard.runAfterSuccess()
     return NextResponse.json({
       locale,
       settings: {
@@ -580,6 +601,7 @@ export async function PUT(req: Request) {
     locale,
   })
 
+  await guard.runAfterSuccess()
   return NextResponse.json({
     locale,
     settings,
@@ -621,6 +643,21 @@ export async function DELETE(req: Request) {
     return NextResponse.json({ error: 'Role not found' }, { status: 404 })
   }
 
+  // Structural mutation guard, before the role variant is removed. Deleting a
+  // role's sidebar is a shared-layout change, so it is the role resource that
+  // is guarded.
+  const guard = await beginAuthMutationGuard({
+    container,
+    tenantId: auth.tenantId ?? null,
+    organizationId: auth.orgId ?? null,
+    userId: resolveEffectiveUserId(auth),
+    req,
+    resourceKind: 'auth.role_sidebar_preference',
+    resourceId: role.id,
+    operation: 'delete',
+  })
+  if (guard.blockedResponse) return guard.blockedResponse
+
   // Cross-locale: keep the delete filter aligned with save/load helpers (no locale).
   await em.nativeDelete(RoleSidebarPreference, {
     role: role.id,
@@ -633,6 +670,7 @@ export async function DELETE(req: Request) {
     } catch {}
   }
 
+  await guard.runAfterSuccess()
   return NextResponse.json({ ok: true, scope: { type: 'role', roleId: role.id } })
 }
 

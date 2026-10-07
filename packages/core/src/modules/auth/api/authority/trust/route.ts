@@ -5,6 +5,7 @@ import { createRequestContainer } from '@open-mercato/shared/lib/di/container'
 import { writeDirectWriteAuditLog } from '@open-mercato/shared/lib/crud/audit-write'
 import type { OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
 import type { TrustService } from '@open-mercato/core/modules/auth/services/trustService'
+import { beginAuthMutationGuard } from '../../mutation-guard'
 
 /**
  * Earned autonomy: what a principal holds, and raising it.
@@ -70,6 +71,23 @@ export async function POST(req: Request): Promise<NextResponse> {
   const container = await createRequestContainer()
   const trust = container.resolve('trustService') as TrustService
 
+  // Structural mutation guard, before the promotion attempt. This is the only
+  // surface in the platform that *widens* authority, so it is the one that most
+  // needs a registered guard actually to run; the evidence check below is a
+  // separate gate and neither replaces the other.
+  const guard = await beginAuthMutationGuard({
+    container,
+    tenantId: auth.tenantId,
+    organizationId: auth.orgId ?? null,
+    userId: auth.sub ?? null,
+    req,
+    resourceKind: RESOURCE_KIND,
+    resourceId: `${parsed.data.principalId}:${parsed.data.capabilityGroup}`,
+    operation: 'update',
+    mutationPayload: parsed.data as unknown as Record<string, unknown>,
+  })
+  if (guard.blockedResponse) return guard.blockedResponse
+
   const outcome = await trust.promote(
     parsed.data.principalId,
     parsed.data.principalKind,
@@ -103,6 +121,7 @@ export async function POST(req: Request): Promise<NextResponse> {
     },
   })
 
+  await guard.runAfterSuccess()
   return NextResponse.json({ item: outcome.grant, unverified: outcome.unverified })
 }
 

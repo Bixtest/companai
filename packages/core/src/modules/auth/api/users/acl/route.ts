@@ -16,6 +16,7 @@ import {
 } from '@open-mercato/core/modules/auth/lib/grantChecks'
 import type { RbacService } from '@open-mercato/core/modules/auth/services/rbacService'
 import type { EntityManager } from '@mikro-orm/postgresql'
+import { beginAuthMutationGuard } from '../../mutation-guard'
 
 const getSchema = z.object({ userId: z.string().uuid() })
 const putSchema = z.object({
@@ -210,6 +211,28 @@ export async function PUT(req: Request) {
 
   const hasCustomAcl = effectiveIsSuperAdmin || effectiveFeatures.length > 0
 
+  // Structural mutation guard, before the write. `enforceCommandOptimisticLockWithGuards`
+  // above only reaches the registry when an ACL row already exists, so the
+  // first grant — the one that *creates* authority — used to reach no guard at
+  // all. This chokepoint covers both paths, and a guard registered for
+  // `auth.user_acl` now runs rather than being skipped.
+  const guard = await beginAuthMutationGuard({
+    container,
+    tenantId: auth.tenantId,
+    organizationId: auth.orgId ?? null,
+    userId: auth.sub ?? null,
+    req,
+    resourceKind: 'auth.user_acl',
+    resourceId: parsed.data.userId,
+    operation: hasCustomAcl ? 'update' : 'delete',
+    mutationPayload: {
+      isSuperAdmin: effectiveIsSuperAdmin,
+      features: effectiveFeatures,
+      organizations,
+    },
+  })
+  if (guard.blockedResponse) return guard.blockedResponse
+
   // Persist the ACL mutation inside a transaction so the per-user permission
   // write (or removal) commits atomically (proper ACL-edit transaction handling).
   if (!hasCustomAcl) {
@@ -243,6 +266,7 @@ export async function PUT(req: Request) {
     if (cache) await cache.deleteByTags([`rbac:user:${parsed.data.userId}`])
   } catch {}
 
+  await guard.runAfterSuccess()
   return NextResponse.json({
     ok: true,
     sanitized: !actorIsSuperAdmin && (hasRestrictedChanges(requestedFeatures, effectiveFeatures, existingFeatures) || requestedIsSuperAdmin !== effectiveIsSuperAdmin),

@@ -17,6 +17,7 @@ import {
 import type { OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
 import { createLogger } from '@open-mercato/shared/lib/logger'
 import { effectiveUserId as resolveEffectiveUserId } from '@open-mercato/shared/lib/auth/principal'
+import { beginAuthMutationGuard } from '../../mutation-guard'
 
 const logger = createLogger('auth').child({ component: 'sidebar-variants' })
 
@@ -99,11 +100,28 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Invalid payload', details: parsed.error.flatten() }, { status: 400 })
   }
 
-  try {
-    const { locale } = await resolveTranslations()
-    const { resolve } = await createRequestContainer()
-    const em = resolve('em') as EntityManager
+  const { locale } = await resolveTranslations()
+  const container = await createRequestContainer()
+  const em = container.resolve('em') as EntityManager
 
+  // Structural mutation guard, before the variant is created — and deliberately
+  // OUTSIDE the try/catch below, which exists to translate a unique-constraint
+  // violation into a 409. A blocked mutation must not be reinterpreted as a
+  // duplicate name by that catch.
+  const guard = await beginAuthMutationGuard({
+    container,
+    tenantId: auth.tenantId ?? null,
+    organizationId: auth.orgId ?? null,
+    userId: effectiveUserId,
+    req,
+    resourceKind: 'auth.sidebar_variant',
+    resourceId: 'new',
+    operation: 'create',
+    mutationPayload: parsed.data as unknown as Record<string, unknown>,
+  })
+  if (guard.blockedResponse) return guard.blockedResponse
+
+  try {
     const variant = await createSidebarVariant(em, {
       userId: effectiveUserId,
       tenantId: auth.tenantId ?? null,
@@ -115,6 +133,7 @@ export async function POST(req: Request) {
       isActive: parsed.data.isActive,
     })
 
+    await guard.runAfterSuccess()
     return NextResponse.json({
       locale,
       variant: serializeVariant(variant),
