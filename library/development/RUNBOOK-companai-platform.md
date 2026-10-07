@@ -105,7 +105,15 @@ targeting **only** the superadmin row (`id 1638a2de-5161-4c8a-a656-7f677e04dcf0`
 accounts were **not touched**, so the owner's existing admin login still works.
 
 - **Verified:** `UPDATE 1`, then a real login at `https://companai.corprorate.com/api/auth/login` with the
-  new password returned **HTTP 200** (it was 401 before).
+  new password returned **HTTP 200** (it was 401 before). Re-verified 2026-10-07: the stored credential
+  returns **200**, and the same email with a deliberately wrong password returns **401** (so the 200 is
+  the account, not a blanket success).
+- **The login body must be FORM-encoded, not JSON.** `POST /api/auth/login` reads
+  `application/x-www-form-urlencoded` (or multipart) fields `email` / `password` — see
+  `packages/core/src/modules/auth/api/login.ts` (`parseLoginForm`). A JSON body returns **HTTP 400**
+  regardless of the credential, which looks like a fault but is not. Working check:
+  `curl -s -o /dev/null -w "%{http_code}" -X POST https://companai.corprorate.com/api/auth/login
+  -H "Content-Type: application/x-www-form-urlencoded" --data-urlencode "email=…" --data-urlencode "password=…"`.
 - **Credential recorded in** `vms/CREDENTIALS.local.txt` (the gitignored file — see
   `RUNBOOK-platform-server.md` §3), **not** in chat or in the repo.
 - **Undo:** re-run the reset with a different password (the same script).
