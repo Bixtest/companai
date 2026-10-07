@@ -5,6 +5,7 @@ import { writeDirectWriteAuditLog } from '@open-mercato/shared/lib/crud/audit-wr
 import type { EntityManager } from '@mikro-orm/postgresql'
 import { InboxDiscrepancy, InboxEmail, InboxProposal, InboxProposalAction } from '../../../../data/entities'
 import { emitInboxOpsEvent } from '../../../../events'
+import { beginInboxOpsMutationGuard } from '../../../mutation-guard'
 import {
   resolveRequestContext,
   extractPathSegment,
@@ -51,6 +52,21 @@ export async function POST(req: Request) {
     if (email.status === 'received' || email.status === 'processing') {
       return NextResponse.json({ error: 'Email is already queued for processing' }, { status: 409 })
     }
+
+    // D2-gap (2026-10-07): no guard was called. Reprocess retires every prior
+    // proposal and re-queues the email, so it is guarded against the email —
+    // placed after the 404/409 checks and before the transaction writes.
+    const guard = await beginInboxOpsMutationGuard({
+      container: ctx.container,
+      tenantId: ctx.tenantId,
+      organizationId: ctx.organizationId,
+      userId: ctx.userId,
+      req,
+      resourceKind: 'inbox_ops:inbox_email',
+      resourceId: email.id,
+      operation: 'update',
+    })
+    if (guard.blockedResponse) return guard.blockedResponse
 
     // R2c — reprocessing discards every proposal the model previously produced
     // for this email and asks it to try again. That is a decision about machine
@@ -108,6 +124,8 @@ export async function POST(req: Request) {
     } catch (eventError) {
       logger.error('Failed to emit events', { err: eventError })
     }
+
+    await guard.runAfterSuccess()
 
     return NextResponse.json({ ok: true, ...retiredCounts })
   } catch (err) {

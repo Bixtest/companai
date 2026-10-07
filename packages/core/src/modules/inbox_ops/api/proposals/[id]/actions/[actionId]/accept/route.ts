@@ -4,6 +4,7 @@ import { serializeOperationMetadata } from '@open-mercato/shared/lib/commands/op
 import { runWithCacheTenant } from '@open-mercato/cache'
 import { findOneWithDecryption } from '@open-mercato/shared/lib/encryption/find'
 import { InboxProposal, InboxProposalAction } from '../../../../../../data/entities'
+import { beginInboxOpsMutationGuard } from '../../../../../mutation-guard'
 import { executeAction } from '../../../../../../lib/executionEngine'
 import { resolveCache, invalidateCountsCache } from '../../../../../../lib/cache'
 import {
@@ -25,6 +26,21 @@ export async function POST(req: Request) {
     const resolved = await resolveActionAndProposal(new URL(req.url), ctx)
     if (isErrorResponse(resolved)) return resolved
 
+    // D2-gap (2026-10-07): no guard was called. Accept executes the action and
+    // writes into the target module, so it is guarded against the action —
+    // placed after the 404 resolution and before `executeAction`.
+    const guard = await beginInboxOpsMutationGuard({
+      container: ctx.container,
+      tenantId: ctx.tenantId,
+      organizationId: ctx.organizationId,
+      userId: ctx.userId,
+      req,
+      resourceKind: 'inbox_ops:inbox_proposal_action',
+      resourceId: resolved.action.id,
+      operation: 'custom',
+    })
+    if (guard.blockedResponse) return guard.blockedResponse
+
     const entities = resolveCrossModuleEntities(ctx.container)
     const result = await executeAction(resolved.action, toExecutionContext(ctx, entities))
 
@@ -34,6 +50,8 @@ export async function POST(req: Request) {
         { status: result.statusCode || 400 },
       )
     }
+
+    await guard.runAfterSuccess()
 
     const freshAction = await findOneWithDecryption(
       ctx.em,

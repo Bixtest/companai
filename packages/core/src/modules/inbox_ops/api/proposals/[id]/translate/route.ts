@@ -3,6 +3,7 @@ import type { OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
 import { findWithDecryption } from '@open-mercato/shared/lib/encryption/find'
 import { InboxProposalAction } from '../../../../data/entities'
 import type { ProposalTranslationEntry } from '../../../../data/entities'
+import { beginInboxOpsMutationGuard } from '../../../mutation-guard'
 import { translateProposalSchema } from '../../../../data/validators'
 import { translateProposalContent } from '../../../../lib/translationProvider'
 import {
@@ -46,6 +47,24 @@ export async function POST(req: Request) {
       return NextResponse.json({ translation: cached, cached: true })
     }
 
+    // D2-gap (2026-10-07): the route reads as a "translate" verb but it WRITES —
+    // it persists `proposal.translations[targetLocale]` and flushes. It called
+    // no guard. Guarded against the proposal as an update, placed AFTER the
+    // cache-hit return so a request that only reads a cached translation is not
+    // policy-evaluated, and before the write.
+    const guard = await beginInboxOpsMutationGuard({
+      container: ctx.container,
+      tenantId: ctx.tenantId,
+      organizationId: ctx.organizationId,
+      userId: ctx.userId,
+      req,
+      resourceKind: 'inbox_ops:inbox_proposal',
+      resourceId: proposal.id,
+      operation: 'update',
+      mutationPayload: { targetLocale },
+    })
+    if (guard.blockedResponse) return guard.blockedResponse
+
     // Load actions for translation
     const actions = await findWithDecryption(
       ctx.em,
@@ -78,6 +97,8 @@ export async function POST(req: Request) {
     translations[targetLocale] = entry
     proposal.translations = translations
     await ctx.em.flush()
+
+    await guard.runAfterSuccess()
 
     return NextResponse.json({ translation: entry, cached: false })
   } catch (err) {

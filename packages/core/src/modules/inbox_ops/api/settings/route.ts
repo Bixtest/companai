@@ -7,6 +7,7 @@ import { writeDirectWriteAuditLog } from '@open-mercato/shared/lib/crud/audit-wr
 import { enforceCommandOptimisticLockWithGuards } from '@open-mercato/shared/lib/crud/optimistic-lock-command'
 import { isCrudHttpError } from '@open-mercato/shared/lib/crud/errors'
 import { InboxSettings } from '../../data/entities'
+import { beginInboxOpsMutationGuard } from '../mutation-guard'
 import { updateSettingsSchema } from '../../data/validators'
 import { resolveRequestContext, handleRouteError } from '../routeHelpers'
 import {
@@ -120,6 +121,27 @@ export async function PATCH(req: Request) {
       throw err
     }
 
+    // D2-gap (2026-10-07): this route reached the registry ONLY through
+    // `enforceCommandOptimisticLockWithGuards`, which is strictly additive — a
+    // no-op without the expected-version header. So the version-less write, and
+    // in particular the first one that SETS the per-tenant webhook signing
+    // secret, reached no guard. This call closes that path. Placed after the
+    // optimistic-lock gate and before the transaction writes; it runs for every
+    // PATCH, so a guard registered for `inbox_ops:inbox_settings` is enforced on
+    // both the versioned and the version-less request.
+    const guard = await beginInboxOpsMutationGuard({
+      container: ctx.container,
+      tenantId: ctx.tenantId,
+      organizationId: ctx.organizationId,
+      userId: ctx.userId,
+      req,
+      resourceKind: 'inbox_ops:inbox_settings',
+      resourceId: settings.id,
+      operation: 'update',
+      mutationPayload: parsed.data,
+    })
+    if (guard.blockedResponse) return guard.blockedResponse
+
     // R2c — the change and its audit entry commit together. This route sets the
     // per-tenant webhook signing secret, so an unrecorded change here is a change
     // to who may inject email into the tenant.
@@ -174,6 +196,8 @@ export async function PATCH(req: Request) {
     if (!updated) {
       return NextResponse.json({ error: 'Settings not found' }, { status: 404 })
     }
+
+    await guard.runAfterSuccess()
 
     const cache = resolveCache(ctx.container)
     await runWithCacheTenant(ctx.tenantId, () => invalidateSettingsCache(cache, ctx.tenantId))

@@ -9,6 +9,7 @@ import { writeDirectWriteAuditLog } from '@open-mercato/shared/lib/crud/audit-wr
 import { InboxProposalAction, InboxEmail } from '../../../../../../data/entities'
 import { draftReplyPayloadSchema } from '../../../../../../data/validators'
 import { emitInboxOpsEvent } from '../../../../../../events'
+import { beginInboxOpsMutationGuard } from '../../../../../mutation-guard'
 import { createMessageRecordForReply } from '../../../../../../lib/messagesIntegration'
 import {
   resolveRequestContext,
@@ -116,6 +117,23 @@ export async function POST(req: Request) {
       headers['References'] = references.join(' ')
     }
 
+    // D2-gap (2026-10-07): no guard was called. This route makes an IRREVERSIBLE
+    // external call — it sends a real email through the provider — and writes
+    // the action's metadata, so it is guarded against the reply action. The
+    // guard runs BEFORE the send claim and before `resend.emails.send`, so a
+    // block prevents both the message leaving and a claim row being left behind.
+    const guard = await beginInboxOpsMutationGuard({
+      container: ctx.container,
+      tenantId: ctx.tenantId,
+      organizationId: ctx.organizationId,
+      userId: ctx.userId,
+      req,
+      resourceKind: 'inbox_ops:inbox_proposal_action',
+      resourceId: action.id,
+      operation: 'custom',
+    })
+    if (guard.blockedResponse) return guard.blockedResponse
+
     // Atomically claim the send right before calling the external email provider so
     // two concurrent requests cannot both deliver the same reply. The claim only
     // succeeds when neither replySentAt nor replySendClaimedAt is already set in the
@@ -203,6 +221,8 @@ export async function POST(req: Request) {
       ...(messagesResult ? { messageRecordId: messagesResult.messageId } : {}),
     }
     await ctx.em.flush()
+
+    await guard.runAfterSuccess()
 
     // R2c — an outbound message sent to a customer on the tenant's behalf, from
     // text a model drafted. Who was contacted is exactly the kind of fact an

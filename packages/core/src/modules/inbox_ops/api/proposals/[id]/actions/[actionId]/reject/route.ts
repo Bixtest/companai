@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import type { OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
 import { runWithCacheTenant } from '@open-mercato/cache'
+import { beginInboxOpsMutationGuard } from '../../../../../mutation-guard'
 import { rejectAction } from '../../../../../../lib/executionEngine'
 import { resolveCache, invalidateCountsCache } from '../../../../../../lib/cache'
 import {
@@ -25,7 +26,24 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Action already processed' }, { status: 409 })
     }
 
+    // D2-gap (2026-10-07): no guard was called. Guarded against the action, and
+    // placed after the 409 so an action that is already processed is not
+    // policy-evaluated for a request that will not write anyway.
+    const guard = await beginInboxOpsMutationGuard({
+      container: ctx.container,
+      tenantId: ctx.tenantId,
+      organizationId: ctx.organizationId,
+      userId: ctx.userId,
+      req,
+      resourceKind: 'inbox_ops:inbox_proposal_action',
+      resourceId: resolved.action.id,
+      operation: 'update',
+    })
+    if (guard.blockedResponse) return guard.blockedResponse
+
     await rejectAction(resolved.action, toExecutionContext(ctx))
+
+    await guard.runAfterSuccess()
 
     const cache = resolveCache(ctx.container)
     await runWithCacheTenant(ctx.tenantId, () => invalidateCountsCache(cache, ctx.tenantId))

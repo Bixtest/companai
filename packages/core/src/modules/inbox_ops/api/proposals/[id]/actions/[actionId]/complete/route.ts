@@ -6,6 +6,7 @@ import { runWithCacheTenant } from '@open-mercato/cache'
 import { findOneWithDecryption } from '@open-mercato/shared/lib/encryption/find'
 import { writeDirectWriteAuditLog } from '@open-mercato/shared/lib/crud/audit-write'
 import { InboxProposal, InboxProposalAction } from '../../../../../../data/entities'
+import { beginInboxOpsMutationGuard } from '../../../../../mutation-guard'
 import { recalculateProposalStatus } from '../../../../../../lib/executionEngine'
 import { formatZodErrors } from '../../../../../../lib/validation'
 import { resolveCache, invalidateCountsCache } from '../../../../../../lib/cache'
@@ -51,6 +52,21 @@ export async function PATCH(req: Request) {
     if (!parsed.success) {
       return NextResponse.json({ error: `Invalid body: ${formatZodErrors(parsed.error)}` }, { status: 400 })
     }
+
+    // D2-gap (2026-10-07): no guard was called. Guarded against the action;
+    // placed after the 409 and the body parse, before the transaction writes.
+    const guard = await beginInboxOpsMutationGuard({
+      container: ctx.container,
+      tenantId: ctx.tenantId,
+      organizationId: ctx.organizationId,
+      userId: ctx.userId,
+      req,
+      resourceKind: 'inbox_ops:inbox_proposal_action',
+      resourceId: action.id,
+      operation: 'update',
+      mutationPayload: parsed.data,
+    })
+    if (guard.blockedResponse) return guard.blockedResponse
 
     // R2c — this route closes a proposed action that a person fulfilled by hand
     // elsewhere, outside the execution engine. It is the one path where an AI
@@ -100,6 +116,8 @@ export async function PATCH(req: Request) {
     }
 
     await recalculateProposalStatus(em, proposal.id, ctx.scope)
+
+    await guard.runAfterSuccess()
 
     const freshProposal = await findOneWithDecryption(
       em,

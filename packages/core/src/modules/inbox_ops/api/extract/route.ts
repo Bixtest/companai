@@ -5,6 +5,7 @@ import type { OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
 import { writeDirectWriteAuditLog } from '@open-mercato/shared/lib/crud/audit-write'
 import { InboxEmail } from '../../data/entities'
 import { emitInboxOpsEvent } from '../../events'
+import { beginInboxOpsMutationGuard } from '../mutation-guard'
 import { resolveRequestContext, handleRouteError } from '../routeHelpers'
 import { createLogger } from '@open-mercato/shared/lib/logger'
 
@@ -38,6 +39,24 @@ export async function POST(req: Request) {
     }
 
     const { text, title, metadata: inputMetadata } = parsed.data
+
+    // D2-gap (2026-10-07): this route — one of the two doors machine-proposed
+    // work enters through — called no guard at all. It inserts an InboxEmail, so
+    // it is guarded as a create against that entity; the row id is only known
+    // after the write, so the check runs against `'new'` and `runAfterSuccess`
+    // is re-bound to the created id below.
+    const guard = await beginInboxOpsMutationGuard({
+      container: ctx.container,
+      tenantId: ctx.tenantId,
+      organizationId: ctx.organizationId,
+      userId: ctx.userId,
+      req,
+      resourceKind: 'inbox_ops:inbox_email',
+      resourceId: 'new',
+      operation: 'create',
+      mutationPayload: { source: 'text_extract', title: title ?? null },
+    })
+    if (guard.blockedResponse) return guard.blockedResponse
 
     const maxTextSize = parseInt(process.env.INBOX_OPS_MAX_TEXT_SIZE || '204800', 10)
     const truncatedText = text.slice(0, maxTextSize)
@@ -98,6 +117,8 @@ export async function POST(req: Request) {
     } catch (eventError) {
       logger.error('Failed to emit email.received event', { err: eventError })
     }
+
+    await guard.runAfterSuccess(email.id)
 
     return NextResponse.json({ ok: true, emailId: email.id })
   } catch (err) {
