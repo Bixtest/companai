@@ -262,12 +262,14 @@ and all 9 are exactly the set-aside verbs.**
 **Fixed this session:** a new `GUARD_SYSTEM_SET_ASIDE` class (keyed on module + file path, so a *new*
 unguarded `ai_assistant` verb still reads as GAP). **`ai_assistant` 9 → 0 GAP / 9 set aside.**
 
-### Finding 3 — `previous_thread.md` is **untracked** in the docs repo
+### Finding 3 — `previous_thread.md` is **gone** (superseded by `platform_points.md`) ✅ **RESOLVED 2026-10-07**
 
-`git status` in the docs repo shows one untracked file: `library/development/previous_thread.md`
-(23,467 bytes, the owner's hand-off from the other agent, written 07:20 today). It is **not committed**.
-**Status: needs the owner** — I have not committed it, because it is his file and may be a scratch
-hand-off. Say the word and I will commit it into the docs history, or leave it.
+`git status` in the docs repo once showed one untracked file: `library/development/previous_thread.md`
+(23,467 bytes, the owner's hand-off from the other agent). **It no longer exists on disk** and was never
+committed; it has been **superseded by [`platform_points.md`](platform_points.md)** — the master point
+list, which is the durable artifact of that hand-off. The owner confirmed 2026-10-07: *"Previous_thread is
+old now for sure. We delete it if needed."* **Nothing to delete** (the file is already absent) and
+**nothing to commit** — this Finding is closed.
 
 ---
 
