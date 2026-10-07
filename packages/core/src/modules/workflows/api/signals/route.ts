@@ -12,6 +12,7 @@ import {
   workflowErrorSchema,
 } from '../openapi'
 import { createLogger } from '@open-mercato/shared/lib/logger'
+import { beginWorkflowsMutationGuard } from '../mutation-guard'
 
 const logger = createLogger('workflows')
 
@@ -67,6 +68,25 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const input = sendSignalByKeySchema.parse(body)
 
+    // Structural guard, after auth/permission and body validation, before the
+    // bulk signal mutates every matching instance. Guarded against
+    // `workflows.instance` (what the signal acts on) with operation `custom`,
+    // keyed on the correlation key the request addresses.
+    const guard = await beginWorkflowsMutationGuard({
+      container,
+      req: request,
+      tenantId,
+      organizationId: organizationId ?? null,
+      userId: auth.sub ?? '',
+      resourceKind: 'workflows.instance',
+      resourceId: input.correlationKey,
+      operation: 'custom',
+      mutationPayload: input as Record<string, unknown>,
+    })
+    if (guard.blockedResponse) {
+      return guard.blockedResponse
+    }
+
     const count = await sendSignalByCorrelationKey(em, container, {
       correlationKey: input.correlationKey,
       signalName: input.signalName,
@@ -75,6 +95,8 @@ export async function POST(request: NextRequest) {
       tenantId,
       organizationId,
     })
+
+    await guard.runAfterSuccess(input.correlationKey)
 
     return NextResponse.json({
       success: true,

@@ -16,6 +16,7 @@ import * as workflowExecutor from '../../../../lib/workflow-executor'
 import { workflowInstanceResponseSchema, workflowExecutionResultSchema } from '../../../openapi'
 import { createLogger } from '@open-mercato/shared/lib/logger'
 import { writeDirectWriteAuditLog } from '@open-mercato/shared/lib/crud/audit-write'
+import { beginWorkflowsMutationGuard } from '../../../mutation-guard'
 
 const logger = createLogger('workflows')
 
@@ -104,6 +105,22 @@ export async function POST(
     const previousErrorMessage = instance.errorMessage
     const previousErrorDetails = instance.errorDetails
 
+    // Structural guard, after auth/permission and the status gate, before the
+    // retry mutates state — a blocked guard does not re-run the instance.
+    const guard = await beginWorkflowsMutationGuard({
+      container,
+      req: request,
+      tenantId,
+      organizationId: organizationId ?? null,
+      userId: auth.sub ?? '',
+      resourceKind: 'workflows.instance',
+      resourceId: params.id,
+      operation: 'update',
+    })
+    if (guard.blockedResponse) {
+      return guard.blockedResponse
+    }
+
     instance.status = 'RUNNING'
     instance.retryCount = (instance.retryCount || 0) + 1
     instance.errorMessage = null
@@ -143,6 +160,8 @@ export async function POST(
     }
 
     await em.refresh(instance)
+
+    await guard.runAfterSuccess(String(instance.id))
 
     return NextResponse.json({
       data: {

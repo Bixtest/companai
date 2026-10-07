@@ -25,6 +25,7 @@ import {
 } from '../openapi'
 import * as workflowExecutor from '../../lib/workflow-executor'
 import { createLogger } from '@open-mercato/shared/lib/logger'
+import { beginWorkflowsMutationGuard } from '../mutation-guard'
 
 const logger = createLogger('workflows')
 
@@ -202,6 +203,25 @@ export async function POST(request: NextRequest) {
       initiatedBy: auth.sub,
     }
 
+    // Structural guard, after auth/permission/validation and before the instance
+    // is created — a blocked guard stops the workflow from starting at all.
+    // Guarded as `custom`, because starting a workflow runs its automation rather
+    // than merely inserting a row.
+    const guard = await beginWorkflowsMutationGuard({
+      container,
+      req: request,
+      tenantId,
+      organizationId: organizationId ?? null,
+      userId: auth.sub ?? '',
+      resourceKind: 'workflows.instance',
+      resourceId: 'new',
+      operation: 'custom',
+      mutationPayload: input as Record<string, unknown>,
+    })
+    if (guard.blockedResponse) {
+      return guard.blockedResponse
+    }
+
     // Start workflow
     const instance = await workflowExecutor.startWorkflow(em, {
       workflowId: input.workflowId,
@@ -227,6 +247,10 @@ export async function POST(request: NextRequest) {
         logger.error('Background workflow execution error', { err: error })
       }
     })
+
+    // The instance row is committed by `startWorkflow`; run the guard's
+    // after-success rebound to the materialised instance id.
+    await guard.runAfterSuccess(String(instance.id))
 
     return NextResponse.json(
       {

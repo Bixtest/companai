@@ -14,6 +14,7 @@ import { WorkflowInstance } from '../../../../data/entities'
 import * as workflowExecutor from '../../../../lib/workflow-executor'
 import { workflowInstanceResponseSchema } from '../../../openapi'
 import { createLogger } from '@open-mercato/shared/lib/logger'
+import { beginWorkflowsMutationGuard } from '../../../mutation-guard'
 
 const logger = createLogger('workflows')
 
@@ -99,11 +100,29 @@ export async function POST(
       )
     }
 
+    // Structural guard, after auth/permission and the status gate, before the
+    // cancel write — a blocked guard leaves the instance running.
+    const guard = await beginWorkflowsMutationGuard({
+      container,
+      req: request,
+      tenantId,
+      organizationId: organizationId ?? null,
+      userId: auth.sub ?? '',
+      resourceKind: 'workflows.instance',
+      resourceId: params.id,
+      operation: 'update',
+    })
+    if (guard.blockedResponse) {
+      return guard.blockedResponse
+    }
+
     // Cancel the workflow
     await workflowExecutor.completeWorkflow(em, container, params.id, 'CANCELLED')
 
     // Reload instance to get updated state
     await em.refresh(instance)
+
+    await guard.runAfterSuccess(String(instance.id))
 
     return NextResponse.json({
       data: instance,

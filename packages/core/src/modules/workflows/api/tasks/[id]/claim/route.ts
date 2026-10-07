@@ -17,6 +17,7 @@ import {
   workflowErrorSchema,
 } from '../../../openapi'
 import { createLogger } from '@open-mercato/shared/lib/logger'
+import { beginWorkflowsMutationGuard } from '../../../mutation-guard'
 
 const logger = createLogger('workflows')
 
@@ -58,6 +59,23 @@ export async function POST(
     }
 
     // Call task handler to claim task
+    //
+    // Structural guard, after auth/permission and before the claim write — a
+    // blocked guard leaves the task unclaimed.
+    const guard = await beginWorkflowsMutationGuard({
+      container,
+      req: request,
+      tenantId,
+      organizationId: organizationId ?? null,
+      userId: auth.sub ?? '',
+      resourceKind: 'workflows.task',
+      resourceId: params.id,
+      operation: 'custom',
+    })
+    if (guard.blockedResponse) {
+      return guard.blockedResponse
+    }
+
     await claimUserTask(em, params.id, auth.sub)
 
     // Fetch updated task
@@ -74,6 +92,8 @@ export async function POST(
         { status: 500 }
       )
     }
+
+    await guard.runAfterSuccess(String(task.id))
 
     return NextResponse.json({
       data: task,

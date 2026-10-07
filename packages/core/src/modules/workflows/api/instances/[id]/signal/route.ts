@@ -12,6 +12,7 @@ import {
   workflowErrorSchema,
 } from '../../../openapi'
 import { createLogger } from '@open-mercato/shared/lib/logger'
+import { beginWorkflowsMutationGuard } from '../../../mutation-guard'
 
 const logger = createLogger('workflows')
 
@@ -82,6 +83,23 @@ export async function POST(request: NextRequest, context: RouteContext) {
 
     const input = sendSignalSchema.parse(body)
 
+    // Structural guard, after auth/permission and body validation, before the
+    // signal mutates the paused instance — a blocked guard delivers nothing.
+    const guard = await beginWorkflowsMutationGuard({
+      container,
+      req: request,
+      tenantId,
+      organizationId: organizationId ?? null,
+      userId: auth.sub ?? '',
+      resourceKind: 'workflows.instance',
+      resourceId: params.id,
+      operation: 'custom',
+      mutationPayload: input as Record<string, unknown>,
+    })
+    if (guard.blockedResponse) {
+      return guard.blockedResponse
+    }
+
     await sendSignal(em, container, {
       instanceId: params.id,
       signalName: input.signalName,
@@ -90,6 +108,8 @@ export async function POST(request: NextRequest, context: RouteContext) {
       tenantId,
       organizationId,
     })
+
+    await guard.runAfterSuccess(params.id)
 
     return NextResponse.json({
       success: true,

@@ -28,6 +28,7 @@ import {
 } from '../../../openapi'
 import { createLogger } from '@open-mercato/shared/lib/logger'
 import { writeDirectWriteAuditLog } from '@open-mercato/shared/lib/crud/audit-write'
+import { beginWorkflowsMutationGuard } from '../../../mutation-guard'
 
 const logger = createLogger('workflows')
 
@@ -141,6 +142,24 @@ export async function POST(request: NextRequest, context: RouteContext) {
         { error: 'Workflow has failed. Use retry endpoint to retry.' },
         { status: 400 }
       )
+    }
+
+    // Structural guard, after auth/permission/validation and the status gates,
+    // before the first write of the request (the context update below or the
+    // transition itself) — a blocked guard advances nothing.
+    const guard = await beginWorkflowsMutationGuard({
+      container,
+      req: request,
+      tenantId,
+      organizationId: organizationId ?? null,
+      userId: auth.sub ?? '',
+      resourceKind: 'workflows.instance',
+      resourceId: instanceId,
+      operation: 'custom',
+      mutationPayload: input as Record<string, unknown>,
+    })
+    if (guard.blockedResponse) {
+      return guard.blockedResponse
     }
 
     // Apply context updates if provided
@@ -282,6 +301,10 @@ export async function POST(request: NextRequest, context: RouteContext) {
         userId: auth.sub,
       }
     )
+
+    // The transition is committed; run the guard's after-success against the
+    // instance id the write acted on.
+    await guard.runAfterSuccess(String(instance.id))
 
     return NextResponse.json(
       {

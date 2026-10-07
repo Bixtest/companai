@@ -23,6 +23,7 @@ import { invalidateTriggerCache } from '../../lib/event-trigger-service'
 import { getAllCodeWorkflows } from '../../lib/code-registry'
 import { createLogger } from '@open-mercato/shared/lib/logger'
 import { writeDirectWriteAuditLog } from '@open-mercato/shared/lib/crud/audit-write'
+import { beginWorkflowsMutationGuard } from '../mutation-guard'
 
 const logger = createLogger('workflows')
 
@@ -243,6 +244,25 @@ export async function POST(request: NextRequest) {
     }
 
     // Create workflow definition
+    //
+    // The structural guard runs after the route's own auth (401), create-permission
+    // (403), schema validation (400) and the duplicate-name gate (409) — and before
+    // any row is written, so a blocked guard stops the create outright.
+    const guard = await beginWorkflowsMutationGuard({
+      container,
+      req: request,
+      tenantId,
+      organizationId: organizationId ?? null,
+      userId: auth.sub ?? '',
+      resourceKind: 'workflows.definition',
+      resourceId: 'new',
+      operation: 'create',
+      mutationPayload: input as Record<string, unknown>,
+    })
+    if (guard.blockedResponse) {
+      return guard.blockedResponse
+    }
+
     const definition = em.create(WorkflowDefinition, {
       workflowId: input.workflowId,
       workflowName: input.workflowName,
@@ -277,6 +297,10 @@ export async function POST(request: NextRequest) {
     // subscriber immediately; invalidate the in-memory trigger cache so the
     // next event reload picks up this definition.
     if (tenantId) invalidateTriggerCache(tenantId, organizationId ?? undefined)
+
+    // After-success runs once the row is committed, rebound to the id the write
+    // actually materialised (the validated id was the placeholder `'new'`).
+    await guard.runAfterSuccess(String(definition.id))
 
     return NextResponse.json(
       {
