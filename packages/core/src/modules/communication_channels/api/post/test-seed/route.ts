@@ -17,6 +17,7 @@ import {
   ensureTestSeedAdapterRegistered,
   isTestChannelSeedingEnabled,
 } from '../../../lib/test-seed'
+import { validateRouteMutationGuard } from '../../../lib/route-mutation-guard'
 
 /**
  * TEST-ONLY channel seeding endpoint.
@@ -123,6 +124,23 @@ export async function POST(req: Request): Promise<Response> {
   const userId = auth.sub as string
 
   if (body.action === 'connect-channel') {
+    const guard = await validateRouteMutationGuard({
+      container,
+      req,
+      auth,
+      input: {
+        resourceKind: 'communication_channels.channel',
+        resourceId: `new:${TEST_SEED_PROVIDER_KEY}`,
+        operation: 'create',
+        mutationPayload: {
+          action: 'connect-channel',
+          providerKey: TEST_SEED_PROVIDER_KEY,
+          displayName: body.displayName,
+        },
+      },
+    })
+    if ('response' in guard) return guard.response
+
     const stamp = Date.now()
     const commandBus = container.resolve('commandBus') as CommandBus
     const input: ConnectCredentialChannelInput = {
@@ -154,6 +172,7 @@ export async function POST(req: Request): Promise<Response> {
         { status: 500 },
       )
     }
+    await guard.afterSuccess()
     return NextResponse.json(
       { channelId: result.channelId, externalIdentifier: result.externalIdentifier },
       { status: 201 },
@@ -163,6 +182,23 @@ export async function POST(req: Request): Promise<Response> {
   // action === 'emit-inbound'
   const em = (container.resolve('em') as EntityManager).fork()
   const providerKey = body.providerKey ?? TEST_SEED_PROVIDER_KEY
+
+  const guard = await validateRouteMutationGuard({
+    container,
+    req,
+    auth,
+    input: {
+      resourceKind: 'communication_channels.message',
+      resourceId: `new:inbound:${body.channelId}`,
+      operation: 'create',
+      mutationPayload: {
+        action: 'emit-inbound',
+        channelId: body.channelId,
+        providerKey,
+      },
+    },
+  })
+  if ('response' in guard) return guard.response
 
   // A MessageChannelLink requires a non-null external_conversation_id (FK) and
   // message_id. Create a synthetic conversation + (optionally threaded) message
@@ -268,6 +304,7 @@ export async function POST(req: Request): Promise<Response> {
     { persistent: true },
   )
 
+  await guard.afterSuccess()
   return NextResponse.json(
     { channelLinkId: link.id, messageId, conversationId: conversation.id },
     { status: 201 },

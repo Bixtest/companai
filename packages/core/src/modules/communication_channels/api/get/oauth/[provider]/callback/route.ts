@@ -14,6 +14,7 @@ import {
   verifyOAuthState,
 } from '../../../../../lib/oauth-state'
 import { createLogger } from '@open-mercato/shared/lib/logger'
+import { validateRouteMutationGuard } from '../../../../../lib/route-mutation-guard'
 
 const logger = createLogger('communication_channels').child({ component: 'oauth-callback' })
 
@@ -138,6 +139,30 @@ export async function GET(req: Request, context: RouteContext): Promise<Response
 
   // Exchange the code via the adapter.
   const container = await createRequestContainer()
+
+  // D2-gap (2026-10-07): this handler is a GET, so the method-based write-verb
+  // scan never counted it — yet it performs REAL business writes below: it saves
+  // the per-user credentials row (`credentialsService.save`) and creates the
+  // `CommunicationChannel` (`createConnectedChannelRow`). A write is a write
+  // regardless of HTTP method, so run the same registry guard the
+  // credential-connect path uses (`resourceKind` `communication_channels.channel`,
+  // `operation` `create`) before any write. This route's contract is to ALWAYS
+  // redirect, so a block is surfaced as an error flash rather than a JSON body.
+  const guard = await validateRouteMutationGuard({
+    container,
+    req,
+    auth,
+    input: {
+      resourceKind: 'communication_channels.channel',
+      resourceId: `new:oauth:${provider}`,
+      operation: 'create',
+      mutationPayload: { action: 'oauth-callback', provider, tenantId: statePayload.tenantId },
+    },
+  })
+  if ('response' in guard) {
+    return redirectWithFlash(req, returnUrl, { type: 'error', code: 'forbidden', provider })
+  }
+
   const credentialsService = (() => {
     try {
       return container.resolve('integrationCredentialsService') as CredentialsServiceLike
@@ -321,6 +346,7 @@ export async function GET(req: Request, context: RouteContext): Promise<Response
     }
   }
 
+  await guard.afterSuccess()
   return redirectWithFlash(req, returnUrl, {
     type: 'connected',
     provider,
