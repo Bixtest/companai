@@ -128,3 +128,13 @@ library/ai/paperclip-master/
 # are ignored, the register is not. README.md is the register and is tracked.
 library/ai/source-docs/*
 !library/ai/source-docs/README.md
+
+# The D2-gap measurement's raw JSON dump. `analysis/d2-gap/measure.js --json` prints it
+# to stdout; `d2.json` is just that stream redirected to a file (95 KB). It is regenerable
+# on demand from the tool, and nothing cites it — the AUTHORED analysis next to it,
+# `analysis/d2-gap/FINDINGS.md`, is the thing that is tracked and quoted. Adding the rule
+# rather than the file keeps a 95 KB machine dump out of a repository whose stated purpose
+# is to version the project's *thinking* (see the header of this file). (Added 2026-10-07
+# while closing out the `business_rules` fix — it surfaced as untracked and would otherwise
+# have been swept in by a `git add -A`.)
+analysis/d2-gap/d2.json

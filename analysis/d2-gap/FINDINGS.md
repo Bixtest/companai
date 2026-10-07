@@ -12,14 +12,14 @@ would reach data no authorization describes (Hermes map §4.4 (b)).
 
 ## The headline
 
-| | baseline (HEAD `5af76bc`) | after `audit_logs` (`4ef5812`) | after `ai_assistant` (`0af50c8`) | after `messages` (`1f1b60e`) | after the `communication_channels` tool fix (`4eead9d`) | **now (`auth`, `8e1632c`)** |
-|---|---|---|---|---|---|---|
-| enabled modules with a source tree | **35** | **35** | **35** | **35** | **35** | **35** |
-| write verbs across those modules | **256** | **256** | **256** | **256** | **256** | **256** |
-| **unguarded write verbs (the `D2-gap`)** | **160** | **158** | **143** | **122** | **111** | **99** |
-| auth-flow verbs set aside by design | 8 | 8 | 8 | 8 | 8 | 8 |
-| guarded verbs (registry / crud / wrapper / local / re-export) | 88 | 90 | 105 | 126 | **137** | **149** |
-| *guarded + auth-flow (the two "not a write to guard" buckets)* | *96* | *98* | *113* | *134* | ***145*** | ***157*** |
+| | baseline (HEAD `5af76bc`) | after `audit_logs` (`4ef5812`) | after `ai_assistant` (`0af50c8`) | after `messages` (`1f1b60e`) | after the `communication_channels` tool fix (`4eead9d`) | after `auth` (`8e1632c`) | **now (`business_rules`, `c9a6bb6`)** |
+|---|---|---|---|---|---|---|---|
+| enabled modules with a source tree | **35** | **35** | **35** | **35** | **35** | **35** | **35** |
+| write verbs across those modules | **256** | **256** | **256** | **256** | **256** | **256** | **256** |
+| **unguarded write verbs (the `D2-gap`)** | **160** | **158** | **143** | **122** | **111** | **99** | **88** |
+| auth-flow verbs set aside by design | 8 | 8 | 8 | 8 | 8 | 8 | 8 |
+| guarded verbs (registry / crud / wrapper / local / re-export) | 88 | 90 | 105 | 126 | **137** | **149** | **160** |
+| *guarded + auth-flow (the two "not a write to guard" buckets)* | *96* | *98* | *113* | *134* | ***145*** | ***157*** | ***168*** |
 
 **Each column differs from the one before it by exactly the modules fixed so far** — `audit_logs` (2
 verbs), `ai_assistant` (15 verbs), then `messages` (17) + `integrations` (4), which moved to the new
@@ -27,7 +27,8 @@ verbs), `ai_assistant` (15 verbs), then `messages` (17) + `integrations` (4), wh
 which likewise was **already guarded** and only needed the **tool** to learn its helper name — check
 the `communication_channels` section: the label said 15 unguarded, the artefact said 11 of those were
 guarded all along; then **`auth` (12 verbs)**, wired through its own
-`beginAuthMutationGuard()` wrapper. Every figure is recorded because the number a document quotes
+`beginAuthMutationGuard()` wrapper; then **`business_rules` (11 verbs)**, wired through a **new**
+`beginBusinessRulesMutationGuard()` wrapper. Every figure is recorded because the number a document quotes
 must say **which HEAD it was measured at** — carrying a "before" figure forward as if it were current
 is how the `auth`-onward file-count slip happened.
 
@@ -41,12 +42,12 @@ is how the `auth`-onward file-count slip happened.
 > never be quoted without its meaning. **Nothing about the code or the unguarded counts changed** — this
 > is the same figure-discipline rule the row itself is about, applied to the row.
 
-**Guarded by mechanism (computed by the tool, not assumed):** **77 through a module wrapper**, 0 through
+**Guarded by mechanism (computed by the tool, not assumed):** **88 through a module wrapper**, 0 through
 `runRouteMutationGuards` directly, 35 through `makeCrudRoute`/`crud.` (the CRUD factory runs
 `collectAndRunGuards()`), **32 through a module-local guard helper** (`messages` 17 + `integrations` 4 +
 `communication_channels` 11 — the `GUARDED_LOCAL` class), 5 through a re-export of a guarded factory,
 **0 through the deprecated pair** (D2-wide left none enabled). **Closure — every write verb is
-accounted for:** 77 + 0 + 35 + 32 + 5 + 0 + 8 (auth-flow, set aside) + 99 (unguarded) = **256**. *(A
+accounted for:** 88 + 0 + 35 + 32 + 5 + 0 + 8 (auth-flow, set aside) + 88 (unguarded) = **256**. *(A
 first draft of this line carried 33/26/29 forward from memory; the tool reads 50/35/5, and the closure
 check is what caught it.)*
 
@@ -74,11 +75,11 @@ check is what caught it.)*
 | ai_assistant | 19 | 24 | 15 | 0 | 0 | 0 | 0 | **9** ✅ *fixed `0af50c8`; was 24* |
 | messages | 11 | 17 | 0 | 0 | 0 | 17 | 0 | **0** ✅ *fixed `1f1b60e` (registry-bypass, not a D2-gap); was 17* |
 | communication_channels | 15 | 15 | 0 | 0 | 0 | 11 | 0 | **4** ✅ *tool fix (11 were already guarded); was 15* |
-| auth | 21 | 27 | 13 | 0 | 6 | 0 | **0** ✅ *fixed `8e1632c`; was 12* |
-| business_rules | 5 | 11 | 0 | 0 | 0 | 0 | **11** |
-| inbox_ops | 14 | 14 | 4 | 0 | 0 | 0 | **10** |
-| workflows | 13 | 14 | 4 | 0 | 0 | 0 | **10** |
-| notifications | 10 | 10 | 0 | 0 | 0 | 0 | **10** |
+| auth | 21 | 27 | 13 | 0 | 6 | 0 | 0 | **0** ✅ *fixed `8e1632c`; was 12* |
+| business_rules | 5 | 11 | 11 | 0 | 0 | 0 | 0 | **0** ✅ *fixed `c9a6bb6`; was 11* |
+| inbox_ops | 14 | 14 | 4 | 0 | 0 | 0 | 0 | **10** |
+| workflows | 13 | 14 | 4 | 0 | 0 | 0 | 0 | **10** |
+| notifications | 10 | 10 | 0 | 0 | 0 | 0 | 0 | **10** |
 | attachments | 4 | 8 | 0 | 0 | 0 | 0 | **8** |
 | search | 7 | 7 | 0 | 0 | 0 | 0 | **7** |
 | webhooks | 11 | 15 | 0 | 0 | 3 | 0 | **7** |
@@ -147,6 +148,60 @@ chokepoint**, not authorization. All 12 now run through the module's existing
 `beginAuthMutationGuard()`. **12 unguarded verbs → 0.** Full detail — including the latent
 `sidebar/variants` bypass-caught-as-409 the wiring exposed — is in its own section below.
 
+### `business_rules` — the fourth module fixed (`c9a6bb6`)
+
+**11 unguarded verbs across 5 files** — the largest remaining module after `auth`, and the **second**
+fixed where the routes were genuinely **not** unprotected. Every one of the eleven already enforced its
+own capability through `metadata.requireFeatures` and scoped every row lookup by tenant +
+organization:
+
+| file | verbs | feature today |
+|---|---|---|
+| `rules/route.ts` | POST, PUT, DELETE | `business_rules.manage` |
+| `sets/route.ts` | POST, PUT, DELETE | `business_rules.manage_sets` |
+| `sets/[id]/members/route.ts` | POST, PUT, DELETE | `business_rules.manage_sets` |
+| `execute/route.ts` | POST | `business_rules.execute` |
+| `execute/[ruleId]/route.ts` | POST | `business_rules.execute` |
+
+New wrapper `beginBusinessRulesMutationGuard()`; all eleven now run `runRouteMutationGuards()`.
+**11 unguarded verbs → 0** (all eleven `GUARDED_WRAPPER`).
+
+**The one design decision — and a premise that had to be measured, not assumed.** The two
+`execute/*` POSTs *look* like "run something" calls, not writes, and the tempting move was to set them
+aside by name (as class (b) of `ai_assistant` was). **The premise was tested before the label was
+applied** and it was false: both routes insert a `RuleExecutionLog` row through `logRuleExecution`
+**whenever `dryRun` is false** — reached on the success path, the error path *and* the timeout path.
+They are genuine write routes, and a guard set for this module must be able to see a manual execution.
+They are therefore guarded against `business_rules.executionLog` — the log being written, not the rule
+being read — while the four CRUD routes use `business_rules.rule` / `.ruleSet` / `.ruleSetMember`.
+Guarding them unconditionally (rather than only when `dryRun` is false) is deliberate: the guard is a
+**pre-write** chokepoint, and deciding "is this request a write?" inside the route would put policy in
+the route.
+
+**Test evidence — two disjoint mutations, not a mock.** New suite
+`api/__tests__/d2-gap-wiring.route.test.ts` (**53 tests**) registers a **real** guard in the global
+store via `registerMutationGuards()` and drives the **real** handlers. Mutation 1 (**block**) asserts
+the guard's status is returned and the **write never happens**; mutation 2 (**allow**) asserts the
+write happens **and** `afterSuccess` fires **exactly once**. Three disjoint mutations proved the suite
+bites, every file restored **byte-identical** (wrapper md5 `6638a959…`, `rules/route.ts` md5
+`5ef33481…`): (1) neuter the wrapper's **block** path → exactly the **11 mutation-1** tests RED;
+(2) remove the guard call from **one route file** (`rules/route.ts` POST) → exactly that route's **2
+tests** RED, the other 9 verbs staying green; (3) sever the wrapper's **whole `afterSuccess` path** →
+exactly the **11 mutation-2** tests RED.
+
+> **A partial mutation, recorded because it is instructive.** The first cut of mutation 3 severed only
+> the direct `afterSuccess` branch and left the `resourceIdOverride` **rebind** branch intact — so the
+> two `execute` tests (whose `runAfterSuccess` is called with the generated log id, taking the rebind
+> path) **stayed green**, and the count came to 9, not 11. That was a real gap in the *mutation's*
+> coverage, not a passing test; running the full sever produced the expected 11. It is recorded
+> because a re-run of one's own check would have hidden exactly this.
+
+**Measured after (HEAD `c9a6bb6`):** `business_rules` **11 → 0** (wrapper class for the module **0 →
+11**); **total D2-gap 99 → 88**; repo-wide wrapper class **77 → 88**; guarded-only **149 → 160**;
+closure **88 + 0 + 35 + 32 + 5 + 0 + 8 + 88 = 256**. **Green:** `business_rules` **19 suites / 393
+tests**; core `tsc --noEmit` **exit 0**. **Next module: `inbox_ops` / `notifications` / `workflows`
+(10 unguarded verbs each).**
+
 ## Reconciliation against the figures already recorded
 
 Six of the previously-recorded modules agree **exactly**; two did not, and both are now explained.
@@ -157,6 +212,7 @@ slip happened before.
 |---|---|---|---|
 | `inbox_ops` | 10 of 14 | 10 | ✅ exact |
 | `auth` | 12 of 18 resource-writes | 12 (8 auth-flow verbs set aside by name) | ✅ exact → **now 0, fixed `8e1632c`** |
+| `business_rules` | 11 unguarded verbs | 11 | ✅ exact → **now 0, fixed `c9a6bb6`** |
 | `directory` | 3 verbs in 1 file | 3 in 1 file | ✅ exact |
 | `feature_toggles` | 0 of 4 | 0 | ✅ exact |
 | `perspectives` | 0 of 3 | 0 | ✅ exact |
