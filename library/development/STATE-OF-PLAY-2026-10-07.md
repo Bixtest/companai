@@ -25,16 +25,19 @@ two-thirds closed.**
   cross the authority boundary" true rather than aspirational — is the work in hand.
   - `D2-wide` (routes still calling the **old, deprecated** check, which silently skips the real
     registry): **COMPLETE across every enabled module.**
-  - `D2-gap` (routes calling **no** check at all): **measured 4 unguarded verbs** after this
-    session's latest fixes (it read 50 before; the `ai_assistant` 9 were its declared set-asides,
-    now classed correctly; then `search` 7 and `webhooks` 7 were fixed, `directory`/`progress` wired,
-    `dashboards`/`data_sync` set aside, `configs` fixed — 4 → 0: 1 wired, 1 already
-    registry-guarded inline, 2 read-only set aside — `currencies` fixed — 4 → 0: all 4 wired —
-    `entities` fixed — 4 → 0: all 4 wired, 2 genuine gaps + 2 on the optimistic-lock floor — and
-    `scheduler` fixed — 1 → 0: wired through a **new** wrapper — with `onboarding` set aside as
-    actor-less rather than wired).
-    **Every module is now closed except `communication_channels` (4).**
-- **The next thing is `communication_channels` (4) — the last module.**
+  - `D2-gap` (routes calling **no** check at all): **0 unguarded verbs — the write-verb sweep is
+    COMPLETE** (it read 50 before; the `ai_assistant` 9 were its declared set-asides, now classed
+    correctly; then `search` 7 and `webhooks` 7 were fixed, `directory`/`progress` wired,
+    `dashboards`/`data_sync` set aside, `configs` fixed, `currencies` fixed, `entities` fixed,
+    `scheduler` fixed, `onboarding` set aside as actor-less, and finally `communication_channels`
+    fixed — 4 → 0: 1 wired `test-seed`, 2 actor-less set aside (the two webhooks), 1 read-only set
+    aside (oauth initiate)).
+    **Every module is now closed.**
+- **The next thing: two write-performing GETs the sweep's method-based scan could not see** —
+  `dashboards/api/layout` (lazy default layout) and `messages/api/[id]` (auto-mark-read). A hostile
+  critic found the class via the `communication_channels` oauth callback (a GET that WRITES), which
+  was **fixed**; these two are **read side-effects**, and whether a business-rule guard should be able
+  to veto them is a policy decision — recorded **OPEN**, not wired.
   Note: **two of the tool's remaining labels are tool labels, not a live hole** —
   `ai_assistant` (9, all declared set-asides) and the `onboarding` signup POST (actor-less: it creates
   the tenant, so there is no session to evaluate a guard against). Measured this session, verified by
@@ -80,7 +83,7 @@ The journal's queue table names 13 modules migrated, from `dashboards` (`a05ea2c
 I did not re-run each commit, but the end-state is independently confirmed by the measurement tool
 (below), which counts **`D` (deprecated) = 0 for every enabled module**.
 
-### 2.4 `D2-gap` — measured (4 after this session's latest fixes), and every module closed except `communication_channels`
+### 2.4 `D2-gap` — measured (0 after this session's latest fixes), and every module closed
 
 > **SUPERSEDED 2026-10-07 (same day, later):** this snapshot recorded the sweep at **41 unguarded**.
 > The `search` module was then fixed (**7 → 0**), so the live figure became **34**; then four
@@ -98,16 +101,20 @@ I did not re-run each commit, but the end-state is independently confirmed by th
 > verb wired through a NEW `beginSchedulerMutationGuard`; the module had no wrapper at all) with
 > `onboarding` (**1 → 0** — NOT wired: set aside as actor-less, because the public signup POST creates
 > the tenant and reads no session) brought it to **4**, with wrapper **142**, actor-less **3** and guarded
-> **226** (details in `BACKLOG.md` §D2-gap and `BUILD-ORDER.md` §2f). **Every module is now closed
-> except `communication_channels` (4)** — the last one, and the module the tool has already mis-labelled
-> once. This section is kept as the study's own reading, per the "every figure names its HEAD" rule; it
+> **226**; then `communication_channels` (**4 → 0** — the LAST module: 1 wired `test-seed`, 2 actor-less
+> set aside (the two webhooks), 1 read-only set aside (oauth initiate)) brought it to **0**, with local
+> class **43**, actor-less **5**, read-only **7**, guarded **227** — and a hostile-critic pass over that
+> close-out then found a **NEW class** (a GET that WRITES: the oauth callback fixed, `dashboards` +
+> `messages` OPEN). **Every module is now closed** (details in `BACKLOG.md` §D2-gap and `BUILD-ORDER.md`
+> §2f). This section is kept as the study's own reading, per the "every figure names its HEAD" rule; it
 > is not the current number.
 
 **Route 1 (the tool):** ran `node analysis/d2-gap/measure.js` this session. It reproduces the
-documented headline **50 unguarded** — and, after this session's tool fixes, reads **4**.
-Closure at 4: `142 (wrapper) + 1 (registry) + 35 (crud) + 42 (local helper) + 6 (re-export)
-+ 0 (deprecated) + 8 (auth-flow) + 3 (actor-less) + 6 (read-only) + 9 (guard-system) + 0 (lock-floor)
-+ 4 (unguarded) = 256`.
+documented headline **50 unguarded** — and, after this session's tool fixes, reads **0**.
+Closure at 0: `142 (wrapper) + 1 (registry) + 35 (crud) + 43 (local helper) + 6 (re-export)
++ 0 (deprecated) + 8 (auth-flow) + 5 (actor-less) + 7 (read-only) + 9 (guard-system) + 0 (lock-floor)
++ 0 (unguarded) = 256`. (Plus the write-performing-GET class, reported separately: **3 found, 1 fixed,
+2 OPEN**.)
 
 **Route 2 (the code):** grepped each fixed module's `api/` for a registry path. Every one is wired:
 
@@ -146,20 +153,23 @@ containers healthy/up, no unhealthy container.
 
 | # | Module | Unguarded verbs | Notes |
 |---|---|---|---|
-| **1** | `communication_channels` | **4** | the LAST module — and the one the tool has mis-labelled once (11 of its 15 were already guarded), so re-measure from the artefact first |
+| ✅ | `communication_channels` | **0 (FIXED this session)** | the LAST module — 1 wired `test-seed`, 2 actor-less set aside (the two webhooks), 1 read-only set aside (oauth initiate); a hostile critic then found a NEW class (a GET that WRITES: 1 fixed, 2 OPEN) |
 | ✅ | `scheduler` | **0 (FIXED this session)** | the 1 verb wired through a **new** wrapper; the module had no wrapper at all |
 | ✅ | `onboarding` | **0 (SET ASIDE this session)** | NOT a gap: actor-less (the public signup POST creates the tenant and reads no session) — a third `ACTORLESS_PATHS` entry |
 | ✅ | `entities` | **0 (FIXED this session)** | all 4 wired through the module's existing wrapper; 2 genuine gaps + 2 on the lock floor (§4 Finding 3, now closed) |
 
-*(Every module is now closed except `communication_channels` (4). Measured this session, **all 9 `ai_assistant`
-verbs are its declared set-asides** (7 session/flow + 2 pending-action-gate) and **none reaches the
-registry** — the tool re-lists them only because it has no set-aside *class* for them. **So `ai_assistant`
-is a tool fix, not guard work (§4 Finding 2, verified by a critic pass).** `configs` (**4 → 0**),
-`currencies` (**4 → 0**), `entities` (**4 → 0**) and `scheduler` (**1 → 0**) were fixed this session —
-`configs`: 1 wired, 1 already registry-guarded inline, 2 read-only set aside; `currencies`: all 4 wired, no
-set-aside; `entities`: all 4 wired through the module's existing wrapper, no set-aside; `scheduler`: the 1
-verb wired through a new wrapper. `onboarding`'s 1 verb was **set aside** as actor-less, not wired. The real
-next module is `communication_channels`.)*
+*(**Every module is now closed — the write-verb sweep is COMPLETE (0 unguarded).** Measured this session,
+**all 9 `ai_assistant` verbs are its declared set-asides** (7 session/flow + 2 pending-action-gate) and
+**none reaches the registry** — the tool re-lists them only because it has no set-aside *class* for them.
+**So `ai_assistant` is a tool fix, not guard work (§4 Finding 2, verified by a critic pass).** `configs`
+(**4 → 0**), `currencies` (**4 → 0**), `entities` (**4 → 0**), `scheduler` (**1 → 0**) and
+`communication_channels` (**4 → 0**) were fixed this session — `configs`: 1 wired, 1 already
+registry-guarded inline, 2 read-only set aside; `currencies`: all 4 wired, no set-aside; `entities`: all 4
+wired through the module's existing wrapper, no set-aside; `scheduler`: the 1 verb wired through a new
+wrapper; `communication_channels`: 1 wired `test-seed`, 2 actor-less set aside, 1 read-only set aside.
+`onboarding`'s 1 verb was **set aside** as actor-less, not wired. **The next thing is the two OPEN
+write-performing GETs** — a GET that writes a read side-effect (`dashboards/api/layout`,
+`messages/api/[id]`), a policy decision, not a mechanical gap.)*
 
 **After the sweep (from the box's queue):**
 

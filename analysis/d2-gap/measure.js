@@ -89,6 +89,17 @@ function resolveModuleDir(id) {
 //   export { POST, PUT } from './x'          <- a re-export
 //   export default ... with a POST in it     <- not a write verb; ignored
 const ANY_WRITE_EXPORT = /(?:^|\n)\s*export\s+(?:async\s+)?(?:function|const|let|var|\{)[^\n]*\b(POST|PUT|PATCH|DELETE)\b/;
+// A GET handler can also WRITE. The method-based write-verb scan above is blind
+// to it, so a write performed inside a GET reached no guard AND was invisible to
+// the count — the worst of both. `communication_channels/api/get/oauth/[provider]/
+// callback/route.ts` is that shape: a GET that saves credentials + creates a
+// channel. Found by a hostile-critic pass over the `communication_channels`
+// close-out (2026-10-07). The two regexes below make the class VISIBLE: a route
+// file that exports GET, performs a write, and exports no write verb is
+// classified WRITE_GET_GUARDED / WRITE_GET_UNGUARDED (never silently dropped).
+const RE_GET_EXPORT = /(?:^|\n)\s*export\s+(?:async\s+)?(?:function|const|let|var)\s+GET\b/;
+// Strong write signals only — an ORM/command/raw-SQL write, not any `.create(`.
+const RE_WRITE_SIGNAL = /\b(?:\.persist\s*\(|\.flush\s*\(|commandBus\.execute\s*\(|credentialsService\.save\s*\(|createConnectedChannelRow\s*\(|INSERT\s+INTO\b)/;
 // A re-export of the verb inherits the source's guard. Two spellings:
 //   export { POST, PUT } from './x'   <- inline, names the source
 //   import { GET, POST } from './x'
@@ -275,6 +286,26 @@ const ACTORLESS_PATHS = [
   // make every feature-gated guard SKIP SILENTLY. Set aside, not counted.
   // Re-check if it ever gains a session.
   'onboarding/api/post/onboarding.ts',
+  // `communication_channels/api/post/webhook/[provider]/route.ts` POST — added
+  // 2026-10-07 when `communication_channels` was closed out. `metadata.POST =
+  // { requireAuth: false }` by design: the hub iterates every active channel for
+  // the provider and asks each adapter to verify the inbound signature; the
+  // FIRST verification that succeeds pins the request to that channel's tenant,
+  // and the route never reads a session. Guarded by its OWN mechanisms —
+  // `adapter.verifyWebhook` (the provider signature IS the authentication),
+  // fail-closed 401 when no candidate verifies, and a 120-per-60s rate limit.
+  // A registry guard cannot be evaluated with no actor; fabricating one would
+  // make every feature-gated guard SKIP SILENTLY. Set aside, not counted.
+  'communication_channels/api/post/webhook/[provider]/route.ts',
+  // `communication_channels/api/post/webhooks/gmail/route.ts` POST — the Gmail
+  // Pub/Sub push endpoint, same class, added in the same pass. `requireAuth:
+  // false` by design; the auth is a Google-signed JWT in the Authorization
+  // header, verified against Google's public certs
+  // (`getGmailPubSubVerifier().verify`). It reads no session and looks channels
+  // up ACROSS tenants by email address (each enqueued job carries its own tenant
+  // scope). Own mechanisms: the JWT verifier, an audience + service-account-email
+  // check, a 503 when unconfigured, and a 120-per-60s rate limit. Set aside.
+  'communication_channels/api/post/webhooks/gmail/route.ts',
 ];
 
 function isActorless(relPath) {
@@ -333,6 +364,15 @@ const READ_ONLY_PATHS = [
   'dashboards/api/widgets/data/batch/route.ts',
   'configs/api/system-status/route.ts',
   'configs/api/module-telemetry/route.ts',
+  // `communication_channels/api/post/oauth/[provider]/initiate/route.ts` POST —
+  // added 2026-10-07 when `communication_channels` was closed out. Authenticated
+  // (requireAuth + `communication_channels.connect_user_channel`) but it performs
+  // NO business-row write: it reads the tenant's OAuth client credentials, builds
+  // the provider's authorize URL and sets an httpOnly state COOKIE
+  // (`createOAuthState`; verified `lib/oauth-state.ts` has no persist/flush). A
+  // guard here would gate a read and fire its after-success for a mutation that
+  // never happened. Set aside, not counted.
+  'communication_channels/api/post/oauth/[provider]/initiate/route.ts',
 ];
 
 function isReadOnly(relPath) {
@@ -455,16 +495,8 @@ function bareReexportsAWriteVerb(code) {
   return false;
 }
 
-function classify(file, moduleId) {
-  const raw = fs.readFileSync(file, 'utf8');
-  const code = stripComments(raw);
-  const isRoute = /[\\/]api[\\/]/.test(file);
-  if (!isRoute) return null;
-
-  const exportsWrite = ANY_WRITE_EXPORT.test(code);
-  if (!exportsWrite) return null;
-
-  const g = {
+function detectGuards(code) {
+  return {
     wrapper: RE_WRAPPER.test(code),
     registry: RE_REGISTRY.test(code) || (RE_REGISTRY_INLINE_STORE.test(code) && RE_REGISTRY_INLINE_RUN.test(code)),
     crud: RE_CRUD.test(code),
@@ -472,6 +504,19 @@ function classify(file, moduleId) {
     deprecated: RE_DEPRECATED.test(code),
     reexport: RE_REEXPORT_INLINE.test(code) || bareReexportsAWriteVerb(code),
   };
+}
+
+function classify(file, moduleId) {
+  const raw = fs.readFileSync(file, 'utf8');
+  const code = stripComments(raw);
+  const isRoute = /[\\/]api[\\/]/.test(file);
+  if (!isRoute) return null;
+  const rel = path.relative(REPO, file).replace(/\\/g, '/');
+
+  const exportsWrite = ANY_WRITE_EXPORT.test(code);
+  if (!exportsWrite) return null;
+
+  const g = detectGuards(code);
 
   let cls;
   if (g.wrapper) cls = 'GUARDED_WRAPPER';
@@ -482,7 +527,6 @@ function classify(file, moduleId) {
   else if (g.deprecated) cls = 'GUARDED_DEPRECATED';
   else cls = 'UNGUARDED';
 
-  const rel = path.relative(REPO, file).replace(/\\/g, '/');
   // Verbs this file exports. A guarded file's verbs are guarded by whatever
   // mechanism it uses; an UNGUARDED file's verbs are the D2-gap exposure.
   const verbs = writeVerbs(code);
@@ -507,9 +551,50 @@ function classify(file, moduleId) {
   };
 }
 
+// ── Write-performing GETs ──────────────────────────────────────────────────
+// A GET can WRITE. The write-verb scan above is method-based (POST/PUT/PATCH/
+// DELETE), so it is blind to it, and `classify` never sees such a file when the
+// file ALSO exports a write verb. That is how `dashboards/api/layout` (GET
+// lazily persists the default layout) and `messages/api/[id]` (GET auto-marks a
+// message read) stayed invisible. This is a SEPARATE classifier so a mixed-
+// method file contributes to BOTH the write-verb rows and the write-GET rows.
+//
+// Guard presence is read from the GET handler BODY ONLY — a file whose PUT is
+// guarded must not launder its GET. `handlerBody` takes the text from the GET
+// export to the next top-level `export` (or EOF): a heuristic, but the tool
+// deliberately avoids a full parse, and the alternative (file-level guard
+// detection) is provably wrong for `dashboards/api/layout`.
+function handlerBody(code, verb) {
+  const re = new RegExp(`(?:^|\\n)export\\s+(?:async\\s+)?(?:function|const|let|var)\\s+${verb}\\b`);
+  const m = re.exec(code);
+  if (!m) return null;
+  const rest = code.slice(m.index + m[0].length);
+  const next = rest.search(/\nexport\s/);
+  return next === -1 ? rest : rest.slice(0, next);
+}
+
+function classifyWriteGet(file, moduleId) {
+  if (!/[\\/]api[\\/]/.test(file)) return null;
+  const code = stripComments(fs.readFileSync(file, 'utf8'));
+  if (!RE_GET_EXPORT.test(code)) return null;
+  const body = handlerBody(code, 'GET');
+  if (body === null || !RE_WRITE_SIGNAL.test(body)) return null;
+  const g = detectGuards(body);
+  const guarded = g.wrapper || g.registry || g.crud || g.local || g.reexport || g.deprecated;
+  return {
+    file: path.relative(REPO, file).replace(/\\/g, '/'),
+    module: moduleId,
+    cls: guarded ? 'WRITE_GET_GUARDED' : 'WRITE_GET_UNGUARDED',
+    verbs: ['GET'],
+    verbCount: 0, // not a "write verb" by HTTP method; counted in its own bucket
+    g,
+  };
+}
+
 const enabled = readEnabledModules();
 const perModule = {};
 const rows = [];
+const writeGetRows = [];
 const missing = [];
 
 for (const id of enabled) {
@@ -519,8 +604,11 @@ for (const id of enabled) {
   for (const f of files) {
     const r = classify(f, id);
     if (r) rows.push(r);
+    const wg = classifyWriteGet(f, id);
+    if (wg) writeGetRows.push(wg);
   }
   const mine = rows.filter((r) => r.module === id);
+  const mineGet = writeGetRows.filter((r) => r.module === id);
   const sum = (f) => mine.filter(f).reduce((a, r) => a + r.verbCount, 0);
   perModule[id] = {
     writeFiles: mine.length,
@@ -538,6 +626,9 @@ for (const id of enabled) {
     readOnlyVerbs: sum((r) => r.cls === 'READ_ONLY_SET_ASIDE'),
     guardSystemVerbs: sum((r) => r.cls === 'GUARD_SYSTEM_SET_ASIDE'),
     lockFloorVerbs: sum((r) => r.cls === 'COMMAND_LOCK_FLOOR'),
+    writeGetFiles: mineGet.length,
+    writeGetGuarded: mineGet.filter((r) => r.cls === 'WRITE_GET_GUARDED').length,
+    writeGetUnguarded: mineGet.filter((r) => r.cls === 'WRITE_GET_UNGUARDED').length,
     fields: {
       wrapper: sum((r) => r.cls === 'GUARDED_WRAPPER'),
       registry: sum((r) => r.cls === 'GUARDED_REGISTRY'),
@@ -551,12 +642,14 @@ for (const id of enabled) {
       readOnly: sum((r) => r.cls === 'READ_ONLY_SET_ASIDE'),
       guardSystem: sum((r) => r.cls === 'GUARD_SYSTEM_SET_ASIDE'),
       lockFloor: sum((r) => r.cls === 'COMMAND_LOCK_FLOOR'),
+      writeGetGuarded: mineGet.filter((r) => r.cls === 'WRITE_GET_GUARDED').length,
+      writeGetUnguarded: mineGet.filter((r) => r.cls === 'WRITE_GET_UNGUARDED').length,
     },
   };
 }
 
 if (process.argv.includes('--json')) {
-  console.log(JSON.stringify({ enabled, perModule, rows, missing }, null, 2));
+  console.log(JSON.stringify({ enabled, perModule, rows, writeGetRows, missing }, null, 2));
   process.exit(0);
 }
 
@@ -586,6 +679,11 @@ for (const id of enabled) {
 }
 console.log('-'.repeat(56));
 console.log(`write verbs: ${totalWrite}, unguarded verbs (D2-gap): ${totalGap}`);
+// A GET that WRITES: not a "write verb" by method, so it is not in the 256 — but
+// it must never be invisible. Reported here; its unguarded count must be 0 too.
+const totalWriteGet = writeGetRows.length;
+const totalWriteGetUnguarded = writeGetRows.filter((r) => r.cls === 'WRITE_GET_UNGUARDED').length;
+console.log(`(plus ${totalWriteGet} write-performing GET handler(s) — a GET that writes rows, not counted as a write verb; ${totalWriteGetUnguarded} unguarded)`);
 const totalSetAside = enabled.reduce((a, id) => a + (perModule[id]?.authFlowVerbs || 0), 0);
 console.log(`(plus ${totalSetAside} auth-flow verbs set aside by design — login/logout/reset/session/profile/locale/feature-check)`);
 const totalActorless = enabled.reduce((a, id) => a + (perModule[id]?.actorlessVerbs || 0), 0);
@@ -600,4 +698,9 @@ console.log('');
 console.log('UNGUARDED FILES (with the verbs each exposes):');
 for (const r of rows.filter((r) => r.cls === 'UNGUARDED')) {
   console.log('  ' + r.module.padEnd(22) + r.verbs.join(',').padEnd(20) + r.file);
+}
+console.log('');
+console.log('WRITE-PERFORMING GET HANDLERS (a GET that writes rows — see RE_WRITE_SIGNAL):');
+for (const r of writeGetRows) {
+  console.log('  ' + (r.cls === 'WRITE_GET_UNGUARDED' ? 'UNGUARDED' : 'guarded  ') + ' ' + r.module.padEnd(22) + r.file);
 }

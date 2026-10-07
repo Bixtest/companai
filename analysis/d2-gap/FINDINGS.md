@@ -1,7 +1,7 @@
 # D2-gap — measured across every enabled module
 
-**Measured:** 2026-10-06; **re-measured 2026-10-07** after the four-leftover-modules fix, **again after the `webhooks` fix + tool fix**, **again after the `configs` fix + tool fix**, **again after the `currencies` fix**, **again after the `entities` fix**, and **again after the `scheduler` fix + the `onboarding` set-aside**. **Tool:** `analysis/d2-gap/measure.js` (re-runnable; `--json` for machines).
-**Repo:** `workspace/starting-kit`, HEAD **`43d4f8e`** (the `scheduler` D2-gap fix; the `webhooks` fix is at `e1fa605`, the `configs` fix at `462540e`, the `currencies` fix at `f0f1dd0`, and the `entities` fix at `3cf240a`). Tool fixes earlier in the sweep: the re-export regex now catches the `import { … }` + bare `export { … }` shim form; `webhooks/api/inbound/[endpointId]/route.ts` joined `ACTORLESS_PATHS`; an **inline** registry call (`getAllMutationGuardInstances()` + `runMutationGuards()`) now reads as `GUARDED_REGISTRY`; two `configs` routes joined `READ_ONLY_PATHS`; and `onboarding/api/post/onboarding.ts` joined `ACTORLESS_PATHS`. Before that, `0ac8783` with `search`, `88582bd` with `attachments`, `a9ecd21` with `workflows`, `0350563` with `inbox_ops`, and `c9a6bb6` with `business_rules`. The `communication_channels` correction changed **only the tool**, not the repo — so the HEAD is unchanged by it.
+**Measured:** 2026-10-06; **re-measured 2026-10-07** after the four-leftover-modules fix, **again after the `webhooks` fix + tool fix**, **again after the `configs` fix + tool fix**, **again after the `currencies` fix**, **again after the `entities` fix**, **again after the `scheduler` fix + the `onboarding` set-aside**, and **again after the `communication_channels` fix + the discovery of the write-performing-GET class**. **Tool:** `analysis/d2-gap/measure.js` (re-runnable; `--json` for machines).
+**Repo:** `workspace/starting-kit`, HEAD **`7494fbe`** (the `communication_channels` D2-gap fix — the `test-seed` route + the `oauth/[provider]/callback` GET; the `scheduler` fix is at `43d4f8e`, the `webhooks` fix at `e1fa605`, the `configs` fix at `462540e`, the `currencies` fix at `f0f1dd0`, and the `entities` fix at `3cf240a`). Tool fixes earlier in the sweep: the re-export regex now catches the `import { … }` + bare `export { … }` shim form; `webhooks/api/inbound/[endpointId]/route.ts` joined `ACTORLESS_PATHS`; an **inline** registry call (`getAllMutationGuardInstances()` + `runMutationGuards()`) now reads as `GUARDED_REGISTRY`; two `configs` routes joined `READ_ONLY_PATHS`; `onboarding/api/post/onboarding.ts` joined `ACTORLESS_PATHS`; and (this change) a **new write-performing-GET classifier** so a GET that writes can no longer hide. Before that, `0ac8783` with `search`, `88582bd` with `attachments`, `a9ecd21` with `workflows`, `0350563` with `inbox_ops`, and `c9a6bb6` with `business_rules`.
 
 ## What D2-gap is, and why it is a defect
 
@@ -12,16 +12,16 @@ would reach data no authorization describes (Hermes map §4.4 (b)).
 
 ## The headline
 
-| | baseline (HEAD `5af76bc`) | after `audit_logs` (`4ef5812`) | after `ai_assistant` (`0af50c8`) | after `messages` (`1f1b60e`) | after the `communication_channels` tool fix (`4eead9d`) | after `auth` (`8e1632c`) | after `business_rules` (`c9a6bb6`) | after `inbox_ops` (`0350563`) | after the `notifications` tool fix (`46aec05`) | after `workflows` (`a9ecd21`) | after `attachments` (`88582bd`) | after `search` (`0ac8783`) | after the four-leftover-modules fix | after the `webhooks` fix (`e1fa605`) | after the `configs` fix + tool fix | after the `currencies` fix | after the `entities` fix | **now (the `scheduler` fix + `onboarding` set-aside)** |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| enabled modules with a source tree | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** |
-| write verbs across those modules | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** |
-| **unguarded write verbs (the `D2-gap`)** | **160** | **158** | **143** | **122** | **111** | **99** | **88** | **78** | **68** | **58** | **50** | **41** | **34** | **25** | **18** | **14** | **6** | **4** |
-| auth-flow verbs set aside by design | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 |
-| actor-less verbs set aside by design | — | — | — | — | — | — | — | **1** | **1** | **1** | **1** | **1** | **1** | **2** | **2** | **2** | **2** | **3** |
-| read-only "write verb" set aside by design | — | — | — | — | — | — | — | — | — | **1** | **1** | **1** | **4** | **4** | **6** | **6** | **6** | **6** |
-| guarded verbs (registry / crud / wrapper / local / re-export) | 88 | 90 | 105 | 126 | **137** | **149** | **160** | **169** | **179** | **188** | **196** | **203** | **209** | **215** | **217** | **221** | **225** | **226** |
-| *guarded + the set-aside buckets* | *96* | *98* | *113* | *134* | ***145*** | ***157*** | ***168*** | ***177*** | ***187*** | ***197*** | ***205*** | ***222*** | ***231*** | ***238*** | ***242*** | ***246*** | ***250*** | ***252*** |
+| | baseline (HEAD `5af76bc`) | after `audit_logs` (`4ef5812`) | after `ai_assistant` (`0af50c8`) | after `messages` (`1f1b60e`) | after the `communication_channels` tool fix (`4eead9d`) | after `auth` (`8e1632c`) | after `business_rules` (`c9a6bb6`) | after `inbox_ops` (`0350563`) | after the `notifications` tool fix (`46aec05`) | after `workflows` (`a9ecd21`) | after `attachments` (`88582bd`) | after `search` (`0ac8783`) | after the four-leftover-modules fix | after the `webhooks` fix (`e1fa605`) | after the `configs` fix + tool fix | after the `currencies` fix | after the `entities` fix | after the `scheduler` fix + `onboarding` set-aside | **now (the `communication_channels` fix + the write-GET class)** |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| enabled modules with a source tree | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** |
+| write verbs across those modules | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** |
+| **unguarded write verbs (the `D2-gap`)** | **160** | **158** | **143** | **122** | **111** | **99** | **88** | **78** | **68** | **58** | **50** | **41** | **34** | **25** | **18** | **14** | **6** | **4** | **0** |
+| auth-flow verbs set aside by design | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 |
+| actor-less verbs set aside by design | — | — | — | — | — | — | — | **1** | **1** | **1** | **1** | **1** | **1** | **2** | **2** | **2** | **2** | **3** | **5** |
+| read-only "write verb" set aside by design | — | — | — | — | — | — | — | — | — | **1** | **1** | **1** | **4** | **4** | **6** | **6** | **6** | **6** | **7** |
+| guarded verbs (registry / crud / wrapper / local / re-export) | 88 | 90 | 105 | 126 | **137** | **149** | **160** | **169** | **179** | **188** | **196** | **203** | **209** | **215** | **217** | **221** | **225** | **226** | **227** |
+| *guarded + the set-aside buckets* | *96* | *98* | *113* | *134* | ***145*** | ***157*** | ***168*** | ***177*** | ***187*** | ***197*** | ***205*** | ***222*** | ***231*** | ***238*** | ***242*** | ***246*** | ***250*** | ***252*** | ***256*** |
 
 > **A correction to the "guarded verbs" row (2026-10-07).** The `search` column first read **204** and
 > the four-leftover-modules column was carried forward as **204** too; both omitted one or more of the
@@ -56,7 +56,13 @@ unguarded count by **10** but the guarded count by **9**, and adds a **second se
 **`attachments` (8 verbs)** — a module that shipped **no guard symbol at all** (no wrapper, no
 `runRouteMutationGuards`, no `makeCrudRoute`, neither `@deprecated` route): a **new**
 `beginAttachmentsMutationGuard()` wrapper was written and all **8** verbs wired, so the count moves by
-**8** on both the unguarded and the guarded side, and no set-aside is needed. Every
+**8** on both the unguarded and the guarded side, and no set-aside is needed. Then the four
+leftover-verb modules, `webhooks`, `configs`, `currencies`, `entities`, `scheduler` and finally
+**`communication_channels` (4 → 0)** — the last module: **1 wired** (`test-seed`), **2 actor-less set
+aside** (the two webhooks), **1 read-only set aside** (oauth initiate) — which closes the write-verb
+sweep. A hostile-critic pass over that close-out then found a **new class** the scan could not see (a GET
+that WRITES): one instance (`communication_channels` oauth callback) was **fixed**, two (`dashboards`,
+`messages`) are **OPEN** — see the `communication_channels` section. Every
 figure is recorded because the number a document quotes
 must say **which HEAD it was measured at** — carrying a "before" figure forward as if it were current
 is how the `auth`-onward file-count slip happened.
@@ -75,18 +81,20 @@ is how the `auth`-onward file-count slip happened.
 `runRouteMutationGuards`-equivalent code written inline** (`configs/api/cache/route.ts` builds
 `[...getAllMutationGuardInstances()]` + the bridged legacy guard and runs `runMutationGuards` itself — the
 tool now counts that inline form as `GUARDED_REGISTRY`, see the class note below), 35 through
-`makeCrudRoute`/`crud.` (the CRUD factory runs `collectAndRunGuards()`), **42 through a module-local guard
-helper** (`messages` 17 + `integrations` 4 + `communication_channels` 11 + `notifications` 10 — the
+`makeCrudRoute`/`crud.` (the CRUD factory runs `collectAndRunGuards()`), **43 through a module-local guard
+helper** (`messages` 17 + `integrations` 4 + `communication_channels` 12 + `notifications` 10 — the
 `GUARDED_LOCAL` class), 6 through a re-export of a guarded factory, **0 through the deprecated pair**
-(D2-wide left none enabled). **Closure — every write verb is accounted for:** 142 + 1 + 35 + 42 + 6 + 0
-+ 8 (auth-flow, set aside) + 3 (actor-less, set aside) + 6 (read-only, set aside) + 9 (guard-system, set
-aside) + 0 (lock-floor, set aside) + 4 (unguarded) = **256**. *(A first draft of this line carried
+(D2-wide left none enabled). **Closure — every write verb is accounted for:** 142 + 1 + 35 + 43 + 6 + 0
++ 8 (auth-flow, set aside) + 5 (actor-less, set aside) + 7 (read-only, set aside) + 9 (guard-system, set
+aside) + 0 (lock-floor, set aside) + 0 (unguarded) = **256**. *(A first draft of this line carried
 33/26/29 forward from memory; the tool reads 50/35/5, and the closure check is what caught it. The
 `actor-less` term was added 2026-10-07 with the `inbox_ops` fix and grew 1 → 2 with the `webhooks` tool
-fix, then 2 → 3 with the `onboarding` set-aside — see the class note below. The
-local-helper term grew 32 → 42 the same day with the `notifications` tool fix. The `read-only` term was
+fix, then 2 → 3 with the `onboarding` set-aside, then 3 → 5 with the two `communication_channels`
+webhooks — see the class note below. The
+local-helper term grew 32 → 42 the same day with the `notifications` tool fix, then 42 → 43 with the
+`communication_channels` `test-seed` fix. The `read-only` term was
 added 2026-10-07 with the `workflows` fix and grew 1 → 4 with the four-leftover-modules fix, then 4 → 6
-with the two `configs` set-asides — see the class note below. The wrapper term grew 106 → 114 with
+with the two `configs` set-asides, then 6 → 7 with the `communication_channels` oauth-initiate route — see the class note below. The wrapper term grew 106 → 114 with
 `attachments`, then 114 → 121 with `search`, 121 → 127 with `directory`+`progress`, 127 → 132 with
 `webhooks`, then 132 → 133 with the `configs` fix, then 133 → 137 with the `currencies` fix (all four of
 its verbs wired, no set-aside), then 137 → 141 with the `entities` fix (all four of its verbs wired into
@@ -122,7 +130,7 @@ nothing — see the `entities` section.)*
 |---|---|---|---|---|---|---|---|---|
 | ai_assistant | 19 | 24 | 15 | 0 | 0 | 0 | 0 | **9** ✅ *fixed `0af50c8`; was 24* |
 | messages | 11 | 17 | 0 | 0 | 0 | 17 | 0 | **0** ✅ *fixed `1f1b60e` (registry-bypass, not a D2-gap); was 17* |
-| communication_channels | 15 | 15 | 0 | 0 | 0 | 11 | 0 | **4** ✅ *tool fix (11 were already guarded); was 15* |
+| communication_channels | 15 | 15 | 0 | 0 | 0 | 12 | 0 | **0** ✅ *fixed `7494fbe`; was 4 — 1 wired (`test-seed`), 2 actor-less set aside (the two webhooks), 1 read-only set aside (oauth initiate)* |
 | auth | 21 | 27 | 13 | 0 | 6 | 0 | 0 | **0** ✅ *fixed `8e1632c`; was 12* |
 | business_rules | 5 | 11 | 11 | 0 | 0 | 0 | 0 | **0** ✅ *fixed `c9a6bb6`; was 11* |
 | inbox_ops | 14 | 14 | 13 | 0 | 0 | 0 | 0 | **0** ✅ *fixed `0350563`; was 10 — 9 wired, 1 actor-less set aside* |
@@ -1117,8 +1125,88 @@ suite **18 suites / 353 tests green**; `tsc --noEmit` exit 0.
 **Measured after (tool `--json`, second route = re-summing the raw fields):** `scheduler` **1 → 0**
 unguarded (wrapper **0 → 1**); `onboarding` **1 → 0** (actor-less **2 → 3**); total D2-gap **6 → 4**;
 wrapper class **141 → 142**; guarded **225 → 226**; guarded + set-asides **250 → 252**; **Closure: 142 + 1
-+ 35 + 42 + 6 + 0 + 8 + 3 + 6 + 9 + 0 + 4 = 256.** What remains is **`communication_channels` (4)** — the
++ 35 + 42 + 6 + 0 + 8 + 3 + 6 + 9 + 0 + 4 = 256.** What remains was **`communication_channels` (4)** — the
 last module.
+
+---
+
+## `communication_channels` — the last module closed, and a NEW class of write found by the critic (2026-10-07, `7494fbe`)
+
+The tool read `communication_channels` as **4 unguarded verbs across 4 files** — the last module. Measured
+first (the tool's `--json` rows **and** a hand read of every `.ts` under `api/`), the 4 split **three ways**:
+
+| route | why | disposition |
+|---|---|---|
+| `post/webhook/[provider]` | `requireAuth: false`; the **provider signature IS the auth**; no session read; enqueues | **actor-less set-aside** (joined `ACTORLESS_PATHS`) |
+| `post/webhooks/gmail` | same shape; a **Google-signed JWT** is the auth; enqueues; 204 | **actor-less set-aside** (joined `ACTORLESS_PATHS`) |
+| `post/oauth/[provider]/initiate` | authenticated, but **writes NO business row** — builds an authorize URL + sets an httpOnly state cookie; `lib/oauth-state.ts` has **no `persist`/`flush`** (verified by grep) | **read-only set-aside** (joined `READ_ONLY_PATHS`) |
+| `post/test-seed` | env-gated off in production, but **when enabled it writes real rows and HAS a real actor** | **wired** through `validateRouteMutationGuard` |
+
+**The genuine write, wired.** `test-seed` has two actions — `connect-channel` (`resourceKind`
+`communication_channels.channel`, `operation` `create`) and `emit-inbound` (`resourceKind`
+`communication_channels.message`, `operation` `create`). Both now run the module's own
+`validateRouteMutationGuard` **before** the write, with `await guard.afterSuccess()` **after** it.
+
+**Proof.** `api/post/test-seed/__tests__/route.test.ts`, **8 tests**, driving the **real** `testSeedPost`
+with `runRouteMutationGuards` **UNMOCKED** (a real guard via `registerMutationGuards`): block stops the
+command / the write and does **not** fire after-success; allow runs it once and fires after-success once;
+out-of-kind guard does not fire; 404-before-guard (env gate off); 401-before-guard; 422-before-guard.
+**Two mutations**, files restored **byte-identical** (route md5 `e3690c2cb309c0ea1c8a54f9221ee973`, test md5
+`90c8de5120d8c293fb4e144a775cc914`): neuter the block-return → exactly the `connect-channel` block test
+RED; sever `afterSuccess` → exactly the `emit-inbound` allow test RED. Whole `communication_channels`
+suite **60 suites / 571 tests green**; `tsc --noEmit` exit 0.
+
+### The critic found a class the scan could not see: a GET that WRITES
+
+A **hostile-critic pass** over the close-out re-measured from the files and found that
+`api/get/oauth/[provider]/callback/route.ts` — a **GET** — performs real business writes:
+`credentialsService.save(...)` (a per-user `integration_credentials` row) and `createConnectedChannelRow(...)`
+(a `CommunicationChannel`). It reached **no guard**, and it was **invisible to the tool**, because
+`ANY_WRITE_EXPORT` matches write verbs **by HTTP method** (POST/PUT/PATCH/DELETE) and never sees a GET.
+That is the worst combination: a write that is both unguarded **and** uncounted.
+
+**Why it is a real gap, not a false positive.** It is a **user-intent** write with a **guarded sibling** —
+`post/channels/connect/credentials` creates the same resource kind (`communication_channels.channel`,
+`create`) and **is** guarded (one of the 12 `GUARDED_LOCAL` verbs). So two paths to the same resource
+disagreed: one guarded, one not. The callback now runs the same `validateRouteMutationGuard`
+(`resourceKind` `communication_channels.channel`, `operation` `create`) **before** any write; because the
+route's contract is to **always redirect**, a block is surfaced as `flash=error&code=forbidden` rather than
+a JSON body, and `await guard.afterSuccess()` runs before the success redirect.
+
+**Proof.** `api/get/oauth/[provider]/callback/__tests__/route.test.ts`, **5 tests**, same discipline
+(real registry, `runRouteMutationGuards` unmocked): block prevents the channel-creating write **and**
+redirects with the error flash; allow performs the write + fires after-success; out-of-kind control; 401;
+tenant-mismatch. **Two mutations**, restored byte-identical (route md5 `f9009bee749e8819b76cb43984e951b0`):
+ignore the block → exactly the block test RED; sever `afterSuccess` → exactly the allow test RED.
+
+**The tool now sees the class (mutation-proven).** A **separate** classifier, `classifyWriteGet`, checks a
+route file that exports GET for a write signal **in the GET handler body only** (`handlerBody`), so a file
+whose PUT is guarded cannot launder its GET. `RE_WRITE_SIGNAL` matches `.persist(` / `.flush(` /
+`commandBus.execute(` / `credentialsService.save(` / `createConnectedChannelRow(` / `INSERT INTO`. Renaming
+the callback's guard call so the regex no longer matches flips the tool to `WRITE_GET_UNGUARDED` = 1;
+restored, it reads `WRITE_GET_GUARDED` = 1. The tool reports these in their **own bucket** (they are not
+"write verbs" by method, so they do **not** touch the 256).
+
+**The critic also found the classifier's first version was too narrow, and that two MORE GETs write.** The
+first cut put the write-GET check behind `!exportsWrite`, so a **mixed-method** file hid its GET write. The
+fixed classifier is independent, and it surfaces **three** write-performing GETs: the callback (**fixed**),
+plus two that were previously invisible and are **OPEN — see the backlog**:
+
+| route | GET write | why left OPEN rather than wired |
+|---|---|---|
+| `dashboards/api/layout` | `em.persist` + `em.flush` — lazily creates/normalises the user's **own** default layout on first load | a **read side-effect**, not a user-intent mutation; wiring an async registry guard mid-GET would let a future `dashboards.layout` guard **veto loading the dashboard** — a policy call, not a mechanical gap |
+| `messages/api/[id]` | `commandBus.execute('messages.recipients.mark_read')` when `autoMarkRead` — a read receipt | same shape: gating it would let a guard **veto reading a message**; the command carries only `capability: 'messages.view'` (a permission check, not a registry guard) |
+
+Both are **visible** in the tool's new `WRITE-PERFORMING GET HANDLERS` list and its headline
+`(plus 3 write-performing GET handler(s) … 2 unguarded)`. They are recorded as **OPEN** items in
+`library/development/BACKLOG.md` — the decision whether a read side-effect should be vetoable by a
+business-rule guard is the owner's, not mine to close.
+
+**Measured after (tool `--json`, second route = re-summing the raw fields):** `communication_channels`
+**4 → 0** unguarded; local class **42 → 43**; actor-less **3 → 5**; read-only **6 → 7**; total D2-gap
+**4 → 0**; guarded **226 → 227**; guarded + set-asides **252 → 256**; **Closure: 142 + 1 + 35 + 43 + 6 + 0
++ 8 + 5 + 7 + 9 + 0 + 0 = 256.** Write verbs are **all accounted for**; the newly-named write-GET class is
+reported separately (3 found, 1 fixed, **2 open**).
 
 ---
 
@@ -1176,3 +1264,16 @@ with the record.
   `notifications`, and now `configs`). The same caveat as `GUARDED_LOCAL` applies: it is a
   **symbol-presence** test, not a call graph, so a dead-code mention would still read guarded — no live
   file has that shape, and the loop is re-run whenever a module is touched.
+- **The scan is method-based, so a GET that WRITES was invisible — now reported in its own bucket
+  (2026-10-07).** `ANY_WRITE_EXPORT` matches POST/PUT/PATCH/DELETE, so a write performed inside a GET
+  reached no guard **and** was not counted. The callback `communication_channels/api/get/oauth/[provider]/callback`
+  was exactly that. A **separate** classifier (`classifyWriteGet` + `handlerBody`) now reports every route
+  that exports GET and performs a write, scoping the guard check to the **GET body only** (so a guarded PUT
+  cannot launder a GET). These are **not** "write verbs" by method and do **not** touch the 256; they are
+  reported as `writeGetRows` (`WRITE_GET_GUARDED` / `WRITE_GET_UNGUARDED`) and counted on their own headline
+  line. **As of 2026-10-07: 3 found — 1 fixed (the callback), 2 OPEN** (`dashboards/api/layout`,
+  `messages/api/[id]`). `RE_WRITE_SIGNAL` is a fixed list of strong write signals; a GET that writes via a
+  mechanism not on that list would still be missed, so the list is re-read when a module is touched.
+- **A route file that exports GET **and** a write verb is read by BOTH classifiers** — its write verb is in
+  `rows` (the 256) and its GET write, if any, is in `writeGetRows`. `dashboards/api/layout` is exactly this:
+  `GUARDED_WRAPPER` on its PUT, `WRITE_GET_UNGUARDED` on its GET.
