@@ -260,6 +260,21 @@ const ACTORLESS_PATHS = [
   // with no actor, and fabricating one would make every feature-gated guard
   // SKIP SILENTLY. Set aside, not counted. Re-check if it ever gains a session.
   'webhooks/api/inbound/[endpointId]/route.ts',
+  // `onboarding/api/post/onboarding.ts` POST — the third case, added 2026-10-07
+  // when the `onboarding` D2-gap was measured. `metadata.POST =
+  // { requireAuth: false }` by design (self-service signup, gated on
+  // `SELF_SERVICE_ONBOARDING_ENABLED`), and it reads NO session: there is no
+  // `getAuthFromRequest` anywhere on the path, and the `OnboardingRequest` row
+  // it writes carries `tenantId: null` and is attributed to no actor. This is
+  // the sharpest case for the class: the endpoint does not merely lack a user,
+  // it CREATES the tenant, so there is no tenant to scope a guard against
+  // either. It is guarded by its OWN mechanisms, all measured in the route and
+  // its service: the feature flag, a 10-per-60s rate limit, a one-shot
+  // email-verification token (24h) and a pending-request de-dup window. A
+  // registry guard cannot be evaluated here, and fabricating an actor would
+  // make every feature-gated guard SKIP SILENTLY. Set aside, not counted.
+  // Re-check if it ever gains a session.
+  'onboarding/api/post/onboarding.ts',
 ];
 
 function isActorless(relPath) {

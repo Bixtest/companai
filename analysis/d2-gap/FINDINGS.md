@@ -1,7 +1,7 @@
 # D2-gap — measured across every enabled module
 
-**Measured:** 2026-10-06; **re-measured 2026-10-07** after the four-leftover-modules fix, **again after the `webhooks` fix + tool fix**, **again after the `configs` fix + tool fix**, **again after the `currencies` fix**, and **again after the `entities` fix**. **Tool:** `analysis/d2-gap/measure.js` (re-runnable; `--json` for machines).
-**Repo:** `workspace/starting-kit`, HEAD **`f0f1dd0` plus the `entities` D2-gap fix** (the `webhooks` D2-gap fix is at `e1fa605`; the `configs` fix is at `462540e`, the `currencies` fix at `f0f1dd0`, and the `entities` fix is in the same change as this note). Tool fixes earlier in the sweep: the re-export regex now catches the `import { … }` + bare `export { … }` shim form; `webhooks/api/inbound/[endpointId]/route.ts` joined `ACTORLESS_PATHS`; an **inline** registry call (`getAllMutationGuardInstances()` + `runMutationGuards()`) now reads as `GUARDED_REGISTRY`; and two `configs` routes joined `READ_ONLY_PATHS`. Before that, `0ac8783` with `search`, `88582bd` with `attachments`, `a9ecd21` with `workflows`, `0350563` with `inbox_ops`, and `c9a6bb6` with `business_rules`. The `communication_channels` correction changed **only the tool**, not the repo — so the HEAD is unchanged by it.
+**Measured:** 2026-10-06; **re-measured 2026-10-07** after the four-leftover-modules fix, **again after the `webhooks` fix + tool fix**, **again after the `configs` fix + tool fix**, **again after the `currencies` fix**, **again after the `entities` fix**, and **again after the `scheduler` fix + the `onboarding` set-aside**. **Tool:** `analysis/d2-gap/measure.js` (re-runnable; `--json` for machines).
+**Repo:** `workspace/starting-kit`, HEAD **`43d4f8e`** (the `scheduler` D2-gap fix; the `webhooks` fix is at `e1fa605`, the `configs` fix at `462540e`, the `currencies` fix at `f0f1dd0`, and the `entities` fix at `3cf240a`). Tool fixes earlier in the sweep: the re-export regex now catches the `import { … }` + bare `export { … }` shim form; `webhooks/api/inbound/[endpointId]/route.ts` joined `ACTORLESS_PATHS`; an **inline** registry call (`getAllMutationGuardInstances()` + `runMutationGuards()`) now reads as `GUARDED_REGISTRY`; two `configs` routes joined `READ_ONLY_PATHS`; and `onboarding/api/post/onboarding.ts` joined `ACTORLESS_PATHS`. Before that, `0ac8783` with `search`, `88582bd` with `attachments`, `a9ecd21` with `workflows`, `0350563` with `inbox_ops`, and `c9a6bb6` with `business_rules`. The `communication_channels` correction changed **only the tool**, not the repo — so the HEAD is unchanged by it.
 
 ## What D2-gap is, and why it is a defect
 
@@ -12,16 +12,16 @@ would reach data no authorization describes (Hermes map §4.4 (b)).
 
 ## The headline
 
-| | baseline (HEAD `5af76bc`) | after `audit_logs` (`4ef5812`) | after `ai_assistant` (`0af50c8`) | after `messages` (`1f1b60e`) | after the `communication_channels` tool fix (`4eead9d`) | after `auth` (`8e1632c`) | after `business_rules` (`c9a6bb6`) | after `inbox_ops` (`0350563`) | after the `notifications` tool fix (`46aec05`) | after `workflows` (`a9ecd21`) | after `attachments` (`88582bd`) | after `search` (`0ac8783`) | after the four-leftover-modules fix | after the `webhooks` fix (`e1fa605`) | after the `configs` fix + tool fix | after the `currencies` fix | **now (the `entities` fix)** |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| enabled modules with a source tree | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** |
-| write verbs across those modules | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** |
-| **unguarded write verbs (the `D2-gap`)** | **160** | **158** | **143** | **122** | **111** | **99** | **88** | **78** | **68** | **58** | **50** | **41** | **34** | **25** | **18** | **14** | **10** | **6** |
-| auth-flow verbs set aside by design | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 |
-| actor-less verbs set aside by design | — | — | — | — | — | — | — | **1** | **1** | **1** | **1** | **1** | **1** | **2** | **2** | **2** | **2** |
-| read-only "write verb" set aside by design | — | — | — | — | — | — | — | — | — | **1** | **1** | **1** | **4** | **4** | **4** | **6** | **6** | **6** |
-| guarded verbs (registry / crud / wrapper / local / re-export) | 88 | 90 | 105 | 126 | **137** | **149** | **160** | **169** | **179** | **188** | **196** | **203** | **209** | **215** | **217** | **221** | **225** |
-| *guarded + the set-aside buckets* | *96* | *98* | *113* | *134* | ***145*** | ***157*** | ***168*** | ***177*** | ***187*** | ***197*** | ***205*** | ***222*** | ***231*** | ***238*** | ***242*** | ***246*** | ***250*** |
+| | baseline (HEAD `5af76bc`) | after `audit_logs` (`4ef5812`) | after `ai_assistant` (`0af50c8`) | after `messages` (`1f1b60e`) | after the `communication_channels` tool fix (`4eead9d`) | after `auth` (`8e1632c`) | after `business_rules` (`c9a6bb6`) | after `inbox_ops` (`0350563`) | after the `notifications` tool fix (`46aec05`) | after `workflows` (`a9ecd21`) | after `attachments` (`88582bd`) | after `search` (`0ac8783`) | after the four-leftover-modules fix | after the `webhooks` fix (`e1fa605`) | after the `configs` fix + tool fix | after the `currencies` fix | after the `entities` fix | **now (the `scheduler` fix + `onboarding` set-aside)** |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| enabled modules with a source tree | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** |
+| write verbs across those modules | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** |
+| **unguarded write verbs (the `D2-gap`)** | **160** | **158** | **143** | **122** | **111** | **99** | **88** | **78** | **68** | **58** | **50** | **41** | **34** | **25** | **18** | **14** | **6** | **4** |
+| auth-flow verbs set aside by design | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 |
+| actor-less verbs set aside by design | — | — | — | — | — | — | — | **1** | **1** | **1** | **1** | **1** | **1** | **2** | **2** | **2** | **2** | **3** |
+| read-only "write verb" set aside by design | — | — | — | — | — | — | — | — | — | **1** | **1** | **1** | **4** | **4** | **6** | **6** | **6** | **6** |
+| guarded verbs (registry / crud / wrapper / local / re-export) | 88 | 90 | 105 | 126 | **137** | **149** | **160** | **169** | **179** | **188** | **196** | **203** | **209** | **215** | **217** | **221** | **225** | **226** |
+| *guarded + the set-aside buckets* | *96* | *98* | *113* | *134* | ***145*** | ***157*** | ***168*** | ***177*** | ***187*** | ***197*** | ***205*** | ***222*** | ***231*** | ***238*** | ***242*** | ***246*** | ***250*** | ***252*** |
 
 > **A correction to the "guarded verbs" row (2026-10-07).** The `search` column first read **204** and
 > the four-leftover-modules column was carried forward as **204** too; both omitted one or more of the
@@ -71,27 +71,33 @@ is how the `auth`-onward file-count slip happened.
 > never be quoted without its meaning. **Nothing about the code or the unguarded counts changed** — this
 > is the same figure-discipline rule the row itself is about, applied to the row.
 
-**Guarded by mechanism (computed by the tool, not assumed):** **133 through a module wrapper**, **1 through
+**Guarded by mechanism (computed by the tool, not assumed):** **142 through a module wrapper**, **1 through
 `runRouteMutationGuards`-equivalent code written inline** (`configs/api/cache/route.ts` builds
 `[...getAllMutationGuardInstances()]` + the bridged legacy guard and runs `runMutationGuards` itself — the
 tool now counts that inline form as `GUARDED_REGISTRY`, see the class note below), 35 through
 `makeCrudRoute`/`crud.` (the CRUD factory runs `collectAndRunGuards()`), **42 through a module-local guard
 helper** (`messages` 17 + `integrations` 4 + `communication_channels` 11 + `notifications` 10 — the
 `GUARDED_LOCAL` class), 6 through a re-export of a guarded factory, **0 through the deprecated pair**
-(D2-wide left none enabled). **Closure — every write verb is accounted for:** 133 + 1 + 35 + 42 + 6 + 0
-+ 8 (auth-flow, set aside) + 2 (actor-less, set aside) + 6 (read-only, set aside) + 9 (guard-system, set
-aside) + 14 (unguarded) = **256**. *(A first draft of this line carried 33/26/29 forward from memory; the
-tool reads 50/35/5, and the closure check is what caught it. The `actor-less` term was added 2026-10-07
-with the `inbox_ops` fix and grew 1 → 2 with the `webhooks` tool fix — see the class note below. The
+(D2-wide left none enabled). **Closure — every write verb is accounted for:** 142 + 1 + 35 + 42 + 6 + 0
++ 8 (auth-flow, set aside) + 3 (actor-less, set aside) + 6 (read-only, set aside) + 9 (guard-system, set
+aside) + 0 (lock-floor, set aside) + 4 (unguarded) = **256**. *(A first draft of this line carried
+33/26/29 forward from memory; the tool reads 50/35/5, and the closure check is what caught it. The
+`actor-less` term was added 2026-10-07 with the `inbox_ops` fix and grew 1 → 2 with the `webhooks` tool
+fix, then 2 → 3 with the `onboarding` set-aside — see the class note below. The
 local-helper term grew 32 → 42 the same day with the `notifications` tool fix. The `read-only` term was
 added 2026-10-07 with the `workflows` fix and grew 1 → 4 with the four-leftover-modules fix, then 4 → 6
 with the two `configs` set-asides — see the class note below. The wrapper term grew 106 → 114 with
 `attachments`, then 114 → 121 with `search`, 121 → 127 with `directory`+`progress`, 127 → 132 with
 `webhooks`, then 132 → 133 with the `configs` fix, then 133 → 137 with the `currencies` fix (all four of
-its verbs wired, no set-aside). The `registry` term was **0 until 2026-10-07** and
+its verbs wired, no set-aside), then 137 → 141 with the `entities` fix (all four of its verbs wired into
+the module's existing wrapper), then 141 → 142 with the `scheduler` fix (its one remaining verb wired
+into a NEW wrapper). The `registry` term was **0 until 2026-10-07** and
 became **1** with the `configs` fix, whose `cache` route reaches the registry inline rather than through
 the shared wrapper. The `guard-system` term (9) was added 2026-10-07 with the `ai_assistant` set-asides
-so the figure stopped over-claiming by 9.)*
+so the figure stopped over-claiming by 9. The `lock-floor` term is **0** — the tool's `COMMAND_LOCK_FLOOR`
+list is deliberately empty, because a file is set aside there only when **every** verb it exports is
+covered by the floor, and the one candidate file (`entities/records.ts`) also held a verb that reached
+nothing — see the `entities` section.)*
 
 > **A second closure scare, and what it actually was (2026-10-07).** After wiring `auth` the closure read
 > **251**, five short. The five were **`webhooks`' 5 `GUARDED_REEXPORT` verbs**, omitted by the summing
@@ -127,22 +133,22 @@ so the figure stopped over-claiming by 9.)*
 | webhooks | 11 | 15 | 5 | 0 | 3 | 0 | 0 | **0** ✅ *fixed 2026-10-07 + tool fix; was 7 — 5 wired through a new wrapper, 1 false-positive re-export shim, 1 actor-less set aside* |
 | configs | 4 | 4 | 1 | 1 | 0 | 0 | 0 | **0** ✅ *fixed 2026-10-07 + tool fix; was 4 — 1 wired (new wrapper), 1 already registry-guarded inline (tool blind spot), 2 read-only set aside* |
 | currencies | 4 | 10 | 0 | 0 | 6 | 0 | 0 | **0** ✅ *fixed 2026-10-07; was 4 — all 4 genuine writes wired (new wrapper), the label did NOT split* |
-| entities | 7 | 11 | 7 | 0 | 0 | 0 | 0 | **4** |
+| entities | 7 | 11 | 11 | 0 | 0 | 0 | 0 | **0** ✅ *fixed `3cf240a`; was 4 — all 4 wired through the module’s existing wrapper* |
 | integrations | 4 | 4 | 0 | 0 | 0 | 4 | 0 | **0** ✅ *fixed `1f1b60e` (registry-bypass, not a D2-gap); was 4* |
 | progress | 2 | 3 | 3 | 0 | 0 | 0 | 0 | **0** ✅ *fixed 2026-10-07 (leftover verbs); was 3 — wired through a NEW wrapper* |
 | directory | 4 | 10 | 4 | 0 | 6 | 0 | 0 | **0** ✅ *fixed 2026-10-07 (leftover verbs); was 3 — 3 wired into the existing wrapper* |
 | dashboards | 6 | 6 | 4 | 0 | 0 | 0 | 0 | **0** ✅ *SET ASIDE 2026-10-07; was 2 — read-only (`widgets/data` POSTs memo a read)* |
 | audit_logs | 2 | 2 | 2 | 0 | 0 | 0 | 0 | **0** ✅ *fixed `4ef5812`; was 2* |
-| onboarding | 1 | 1 | 0 | 0 | 0 | 0 | 0 | **1** |
+| onboarding | 1 | 1 | 0 | 0 | 0 | 0 | 0 | **0** ✅ *SET ASIDE 2026-10-07; was 1 — actor-less (the public signup POST creates the tenant; no session to evaluate a feature-gated guard)* |
 | data_sync | 8 | 10 | 9 | 0 | 0 | 0 | 0 | **0** ✅ *SET ASIDE 2026-10-07; was 1 — read-only (`validate` only reads)* |
-| scheduler | 2 | 4 | 0 | 0 | 3 | 0 | **1** |
-| dictionaries | 6 | 8 | 8 | 0 | 0 | 0 | **0** |
-| feature_toggles | 2 | 4 | 1 | 0 | 3 | 0 | **0** |
-| perspectives | 3 | 3 | 3 | 0 | 0 | 0 | **0** |
-| planner | 4 | 8 | 2 | 0 | 6 | 0 | **0** |
-| query_index | 2 | 2 | 2 | 0 | 0 | 0 | **0** |
-| translations | 1 | 2 | 2 | 0 | 0 | 0 | **0** |
-| api_keys | 1 | 2 | 0 | 0 | 2 | 0 | **0** |
+| scheduler | 2 | 4 | 1 | 0 | 3 | 0 | 0 | **0** ✅ *fixed 2026-10-07; was 1 — wired through a NEW wrapper (`beginSchedulerMutationGuard`)* |
+| dictionaries | 6 | 8 | 8 | 0 | 0 | 0 | 0 | **0** |
+| feature_toggles | 2 | 4 | 1 | 0 | 3 | 0 | 0 | **0** |
+| perspectives | 3 | 3 | 3 | 0 | 0 | 0 | 0 | **0** |
+| planner | 4 | 8 | 2 | 0 | 6 | 0 | 0 | **0** |
+| query_index | 2 | 2 | 2 | 0 | 0 | 0 | 0 | **0** |
+| translations | 1 | 2 | 2 | 0 | 0 | 0 | 0 | **0** |
+| api_keys | 1 | 2 | 0 | 0 | 2 | 0 | 0 | **0** |
 
 ## The findings so far
 
@@ -1069,6 +1075,50 @@ laundered by the file reading guarded.
 unguarded (wrapper **7 → 11**); total D2-gap **10 → 6**; wrapper class **137 → 141**; guarded **221 →
 225**; guarded + set-asides **246 → 250**; whole `entities` module **33 suites / 235 tests green**; core
 `tsc --noEmit` exit 0; **Closure: 141 + 1 + 35 + 42 + 6 + 0 + 8 + 2 + 6 + 9 + 0 + 6 = 256.**
+
+---
+
+## `scheduler` — a real gap (1 verb), closed; and `onboarding` — NOT a gap, set aside as actor-less (2026-10-07)
+
+The tool read `scheduler` as **1 unguarded verb** and `onboarding` as **1 unguarded verb**. Both were
+**measured first, by two routes** — the tool's `--json` rows, and a hand read of each file. They resolved
+**oppositely**: `scheduler` was a genuine gap (wired); `onboarding` was not (set aside).
+
+**`scheduler` — the one verb, traced to its write.** `api/trigger/route.ts` POST is **authenticated with a
+real actor** (the session is read into `auth`) and **enqueues a job** (`executionQueue.enqueue(...)`, then
+`await executionQueue.close()`), and records an audit entry. It reached **no registry guard** — the module
+had **no wrapper at all** (its other 3 write verbs are `makeCrudRoute`-guarded, the `C` column). This is
+exactly the shape the codebase already wires: `communication_channels` `poll-now` is the precedent, an
+authenticated `operation: 'custom'` enqueue. So a **new** wrapper, `beginSchedulerMutationGuard`
+(`api/mutation-guard.ts`), was written and the route wired: the guard runs **after** the queue-strategy gate
+and **before** the enqueue; `runAfterSuccess()` runs **after** the enqueue + close. Resource kind
+`scheduler.job` — confirmed by **two routes**: the CRUD route's `commandId` singularisation, and the command
+layer's three audit logs, both name `scheduler.job`.
+
+**`onboarding` — the one verb, and why it CANNOT be wired.** `api/post/onboarding.ts` POST is the **public
+signup** route (`requireAuth: false`). It reads **no session**, and it **creates the tenant** — the very row
+a guard would be evaluated against. A registry guard needs a `userId` to look up granted features
+(`RouteMutationGuardAuth.userId` is non-nullable), and **fabricating one would make any feature-gated guard
+silently skip** — a guard that appears to run and cannot block is worse than none. The route already carries
+its own defences (a feature flag, a 10/60s rate limit, a one-shot 24h token, pending de-dup), the same
+profile as the two existing actor-less set-asides. It therefore joined **`ACTORLESS_PATHS`** in the tool (its
+**third** entry) rather than the code.
+
+**Proof.** `api/__tests__/d2-gap-wiring.route.test.ts`, **10 tests** (block, allow, queue-payload,
+out-of-kind, wrong-operation, 401, 404, 403, 400-before-guard) driving the **real** `triggerPost` with
+`runRouteMutationGuards` **UNMOCKED** (a real guard via `registerMutationGuards`). Each block test asserts
+the **enqueue did NOT happen**, not merely a status code; the allow test asserts the guard saw
+`resourceKind: 'scheduler.job'` and `operation: 'update'` (the registry maps `custom` → `update` via
+`toRegistryMutationOperation`). **Two mutations**, files restored **byte-identical** (route md5
+`3c8536c8cb8b975f6ba82f72ce5676eb`, wrapper md5 `a4bbeff68e755992b02184be2abc4af3`): neuter the block check →
+exactly the **block** test RED; sever `runAfterSuccess` → exactly the **allow** test RED. Whole `scheduler`
+suite **18 suites / 353 tests green**; `tsc --noEmit` exit 0.
+
+**Measured after (tool `--json`, second route = re-summing the raw fields):** `scheduler` **1 → 0**
+unguarded (wrapper **0 → 1**); `onboarding` **1 → 0** (actor-less **2 → 3**); total D2-gap **6 → 4**;
+wrapper class **141 → 142**; guarded **225 → 226**; guarded + set-asides **250 → 252**; **Closure: 142 + 1
++ 35 + 42 + 6 + 0 + 8 + 3 + 6 + 9 + 0 + 4 = 256.** What remains is **`communication_channels` (4)** — the
+last module.
 
 ---
 
