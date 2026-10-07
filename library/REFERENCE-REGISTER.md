@@ -86,6 +86,7 @@ library/paperclip-value-study library/kit-docs llama workspace/knowledge workspa
 | `development/CORE-BOUNDARY.md` | The three rings: uncustomisable core / configurable / packs | #1 §5 |
 | `development/CORE-MODULES-REGISTER.md` | Every core module decided: build / adapt / connect | #1 §5; #2a §3; **#2b §"The core-module gaps" — every `M`/`P` item is now a backlog item or cross-referenced (added 2026-10-06)** |
 | `development/BLUEPRINT-GAP-ANALYSIS.md` | The four gaps A–D between the blueprint and us | #1 §5; #2a §3; **#2b §"The core-module gaps" — GAP A–D each now a tracked backlog item (added 2026-10-06)** |
+| `development/platform_points.md` | **The master point list** — every point the platform must have, as micro one-liners, ticked only when verified in code | #1 §6; **#2b governing-document table (added 2026-10-07)** |
 | `development/SPEC-business-model-kernel.md` | The business-model kernel spec | #1 §5 |
 | `development/RUNBOOK-adding-a-domain-step-by-step.md` | How to add a domain | #1 §6 |
 | `development/RUNBOOK-deploying-a-site.md` | How to deploy | #1 §6 |

@@ -15,8 +15,8 @@ where a number matters. Where the documentation and the code disagreed, the code
 
 ## 1. The short answer
 
-**The product is real and running. The one live defect is a security-plumbing family, and it is
-two-thirds closed.**
+**The product is real and running. The guard family — the last live defect family — is now CLOSED
+(both `D2-wide` for every enabled module and `D2-gap` are COMPLETE); the next task is `D3`.**
 
 - The **AI half is built and proven live**: a real prompt produces a schema-valid Business IR
   through the running platform (`G-17`), and the three endings a prompt can have exist as typed,
@@ -151,7 +151,7 @@ containers healthy/up, no unhealthy container.
 
 ## 3. What is NEXT
 
-**Immediate (the ★ ACTIVE TASK box):** the `D2-gap` sweep, **largest module first**.
+**Immediate (the ★ ACTIVE TASK box):** `D2-gap` is **COMPLETE** (0 unguarded across all 35 enabled modules); the next task is **D3** (the `escalate` outcome).
 
 | # | Module | Unguarded verbs | Notes |
 |---|---|---|---|
@@ -190,11 +190,14 @@ Everything else is mine.
 
 ## 4. Findings — measured this session, and what the documents did not yet say
 
-**Headline of §4:** the tool's `50 unguarded` **over-counted by 9** — the `ai_assistant` verbs are
-the fix's declared set-asides, not gaps. **Fixed this session:** the tool now has a
-`GUARD_SYSTEM_SET_ASIDE` class and reads **41 unguarded**, not 50. **The 41 still contains at least
-one mixed file** (`entities/api/records.ts`), which is left in the count on purpose (Finding 1). Each
-claim below was re-measured after a hostile critic pass.
+**Headline of §4 (historical — see the correction):** at the time of this snapshot the tool's
+`50 unguarded` **over-counted by 9** — the `ai_assistant` verbs are the fix's declared set-asides, not
+gaps. **Fixed then:** the tool gained a `GUARD_SYSTEM_SET_ASIDE` class and read **41 unguarded**, not 50.
+**⚠️ CORRECTED 2026-10-07 (health/quality round):** that `41` is **no longer the figure** — the sweep
+completed afterwards (`search`, `webhooks`, `configs`, `currencies`, `entities`, `scheduler`, `onboarding`
+set aside, `communication_channels`), and the tool now reads **0 unguarded**. The `41` here is a snapshot
+of a superseded moment, kept for the record; **the live figure is 0** (§2.4 above and `BACKLOG.md` §D2-gap).
+Each claim below was re-measured after a hostile critic pass.
 
 ### Finding 1 — `entities 4`: 2 verbs on the lock floor, 2 genuine — and the file stays in the count on purpose ✅ **NOW FIXED (2026-10-07): all 4 wired**
 

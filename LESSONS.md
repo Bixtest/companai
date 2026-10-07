@@ -2888,8 +2888,10 @@ different program, must agree.
 
 **The companion fact — a count can be right and still mislead.** A module reaching **0** on this count
 is *not* "the module is guarded". The count only sees routes that *used to call* the deprecated
-resolver; a route that calls **no guard at all** is invisible to it. Measured: `workflows` **13 of 19**
-write routes unguarded, `inbox_ops` **10 of 14**, `perspectives` **0 of 3**. So the scope sentence goes
+resolver; a route that calls **no guard at all** is invisible to it. Measured at the first module
+(`workflows`, 2026-10-06): `workflows` **10 of 19** (the first count said 13, which was wrong; it
+counted files), `inbox_ops` **10 of 14**, `perspectives` **0 of 3** — all since closed (the sweep is
+now **0** across all 35 enabled modules). So the scope sentence goes
 **either way** and must be measured, not assumed — *"0"* is a claim about the resolver, never about
 coverage ([[L48]]).
 
@@ -3022,7 +3024,7 @@ other **12 resource-write verbs across 10 files call no guard whatsoever**: `use
 `sidebar/variants/[id]` (PUT, DELETE), and five `authority/*` routes (POST each).
 
 That is **`D2-gap`**, not `D2-wide`, and `auth` carries the **worst ratio measured** — worse than
-`workflows` (13/19) and `inbox_ops` (10/14), which previously looked like the bad cases. **The general
+`workflows` (10/19 — first counted as 13, wrong) and `inbox_ops` (10/14), which previously looked like the bad cases. **The general
 rule:** a module's `D2-wide` count measures only the calls that *used the deprecated resolver*. It says
 **nothing** about the writes that never called any guard. **Measure both, every module, or the small
 number hides the big hole.** The `D2-wide` sweep is a tidy-up; `D2-gap` is where writes are actually

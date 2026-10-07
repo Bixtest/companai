@@ -93,10 +93,12 @@ for f in $(grep -rl "export async function \(POST\|PUT\|PATCH\|DELETE\)" \
 done
 ```
 
-Measured so far: `workflows` **13 of 19** write routes unguarded; `inbox_ops` **10 of 14**;
-`perspectives` **0 of 3** — the first module with **no gap**. So the finding is **either way**: state
-"no gap" when that is the measurement, and never assume a gap by analogy with the previous module.
-Record it in the **wrapper's own header** either way.
+Measured at the first module (`workflows`, 2026-10-06): `workflows` **10 of 19** write routes unguarded
+(the first count said 13, which was wrong: it counted two files that export **no** write verb);
+`inbox_ops` **10 of 14**; `perspectives` **0 of 3**, the first module with **no gap**. **The sweep is
+now COMPLETE: 0 unguarded across all 35 enabled modules** (`analysis/d2-gap/measure.js`). So the
+finding is **either way**: state "no gap" when that is the measurement, and never assume a gap by
+analogy with the previous module. Record it in the **wrapper's own header** either way.
 
 ## Where the code lives
 

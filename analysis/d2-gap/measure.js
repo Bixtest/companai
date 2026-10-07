@@ -70,6 +70,11 @@ function resolveModuleDir(id) {
   const candidates = [
     path.join(REPO, 'packages/core/src/modules', id),
     path.join(REPO, 'packages', id, 'src/modules', id),
+    // App-local modules (`from: '@app'`) live under the app, not under packages/.
+    // `ratelimit_probe` is the one default-enabled case; without this candidate
+    // the tool silently skipped it and the "all 35 enabled modules" claim was
+    // false by one (found by a hostile-critic pass, 2026-10-07).
+    path.join(REPO, 'apps/mercato/src/modules', id),
   ];
   // package-backed modules (@open-mercato/content, /events, /search, ...)
   const pkgs = fs.readdirSync(path.join(REPO, 'packages')).filter((p) => !p.startsWith('.'));
@@ -620,10 +625,21 @@ const perModule = {};
 const rows = [];
 const writeGetRows = [];
 const missing = [];
+const outOfScope = [];
+// Modules that are ENABLED but are NOT part of the product write surface, so
+// they are resolved and reported but NOT counted in the write-verb total. The
+// one case is `ratelimit_probe`: an app-local (`from: '@app'`) TEST module whose
+// only route (`api/ping/route.ts` POST) returns `{ ok: true }` and writes
+// nothing. Resolving it (rather than leaving it "no source dir found") is what
+// makes "all 35 enabled modules" true; excluding it from the total keeps the
+// figure comparable with the historical record, which never counted a test
+// harness. If an app-local module ever ships a real write, remove it here.
+const OUT_OF_SCOPE_MODULES = new Set(['ratelimit_probe']);
 
 for (const id of enabled) {
   const dir = resolveModuleDir(id);
   if (!dir) { missing.push(id); continue; }
+  if (OUT_OF_SCOPE_MODULES.has(id)) { outOfScope.push(id); continue; }
   const files = walk(dir);
   for (const f of files) {
     const r = classify(f, id);
@@ -675,12 +691,13 @@ for (const id of enabled) {
 }
 
 if (process.argv.includes('--json')) {
-  console.log(JSON.stringify({ enabled, perModule, rows, writeGetRows, missing }, null, 2));
+  console.log(JSON.stringify({ enabled, perModule, rows, writeGetRows, missing, outOfScope }, null, 2));
   process.exit(0);
 }
 
 console.log(`ENABLED MODULES: ${enabled.length}`);
 if (missing.length) console.log(`  (no source dir found: ${missing.join(', ')})`);
+if (outOfScope.length) console.log(`(plus ${outOfScope.length} enabled module(s) resolved but NOT counted — test-only, not part of the product write surface: ${outOfScope.join(', ')})`);
 console.log('');
 console.log('Counted in VERBS (the unit the backlog records). W=wrapper R=registry C=crud L=local D=deprecated.');
 console.log('');

@@ -396,13 +396,13 @@ Full reasoning for the grammar: [`ARCHITECTURE-structure-permissions.md`](ARCHIT
 justification, and the correction to my earlier framing live in
 [`BUILD-ORDER.md`](BUILD-ORDER.md). Headline: accounts management is **already built** (auth module,
 20+ migrations); permissions **already exist** as a two-table ACL; the structural grammar's socket is
-**present and used, but not centrally delivered** — the generated guard registry is **empty in the
+**present and used, but not centrally delivered** — as first measured, the generated guard registry was **empty in the
 running app** (a live defect the critic pass found; `guardEntries: []` in
-`apps/mercato/.mercato/generated/guards.generated.ts`), so guards run only through hand-written
-per-route calls. So this is **not** "build foundations from scratch" — it is **finish the foundation's
+`apps/mercato/.mercato/generated/guards.generated.ts`), so guards ran only through hand-written
+per-route calls. *(That was **D0**; fixed 2026-10-06, §2c — the registry now delivers guards.)* So this is **not** "build foundations from scratch" — it is **finish the foundation's
 last four gaps before anything is stacked on top**, exactly as he asked: **D0** populate and prove the
-generated guard registry, **D1** settings table (rules are code-fixed today), **D2** the deprecated
-resolver on the entities path, **D3** the missing `escalate` outcome.
+generated guard registry ✅, **D1** settings table ✅, **D2** the deprecated
+resolver on the entities path ✅ (all three fixed 2026-10-06 — the enabled D2 sweep is COMPLETE), **D3** the missing `escalate` outcome — still open.
 
 ---
 

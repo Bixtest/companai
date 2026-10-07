@@ -219,11 +219,11 @@ Use [`BACKLOG.md`](BACKLOG.md) for *what is left as a whole* and [`BUILD-ORDER.m
 **Status you can rely on (the foundation is done; this is not "what is next"):** the four-item critical
 path `spec ✅ → G-01 ✅ → G-02 ✅ → G-03 ✅` is complete, and `G-07` (the Widget contract), `G-17` (the AI
 emits the Business IR), and `G-21` (the request-outcome taxonomy and its gate) are done. The
-**live defect family** is the guard layer: **D0** ✅ (the generated registry now delivers guards),
+**The guard family (once the live defect family) is now closed:** **D0** ✅ (the generated registry now delivers guards),
 **D1** ✅ (the tier mapping is a superadmin setting), **D2-wide** COMPLETE for every enabled module — the
 **106 call sites** that still bypass the registry via the `@deprecated` resolver are **all in parked
 modules** (recorded, not migrated; `entities`, `data_sync`, `dictionaries`, `dashboards`, `workflows`,
-`inbox_ops`, `perspectives`, `translations`, `planner` and `query_index` are retired), and **D2-gap**
+`inbox_ops`, `perspectives`, `translations`, `planner`, `query_index`, `auth`, `directory` and `feature_toggles` are retired), and **D2-gap**
 **COMPLETE** — the write-verb sweep closed at **0 unguarded across all 35 enabled modules** on
 2026-10-07, including a class the method-based scan could not see (a **GET that writes**; one fixed, two
 read side-effects set aside by name). **D3** (the `escalate` outcome) and the **Metadata Registry**

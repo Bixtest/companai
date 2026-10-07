@@ -111,7 +111,7 @@ Counts verified by **two routes** (artefact read + independent count). See §7 f
 | **P15 Dashboards / widgets / perspectives** | 3 + 2 | 6 + 3 | **0 + 0** | 3 / 1, 7 / 12 | **BUILT-UNEVEN** | **`dashboards` and `perspectives` have ZERO UI pages** — the tables and APIs exist, the screens do not. `widgets` is a **one-file re-export shim**, not a module (see §7) |
 | **P16 Custom fields / entity extension** (`entities`) | 6 | full verbs | 9 | 3 / 8 | **COMPLETE** | the expandable-platform core — strong |
 | **P17 Jobs / scheduler** (`progress` + workers) | 1 | 3 | **0** | 2 / 9 | **BUILT-UNEVEN** | service + API exist; **no UI**; workers exist in many modules (data_sync ×4, payment_gateways ×2, shipping ×3, catalog, workflows, notifications) |
-| **P18 Guard / mutation policy** | — | — | — | 10 / 7 | **SHELL — LIVE DEFECT** | the `MutationGuard` mechanism works per-route, **but the generated registry is EMPTY** (`guardEntries: []`); guards are hand-wired in ~4–6 routes. **This is D0 in BUILD-ORDER.md** |
+| **P18 Guard / mutation policy** | — | — | — | 10 / 7 | **COMPLETE (D0 fixed 2026-10-06)** | the `MutationGuard` mechanism works per-route, and the **generated registry now delivers guards** (D0, §2c). *(As first measured 2026-10-06 the registry was EMPTY — `guardEntries: []` — with guards hand-wired in ~4–6 routes; that was D0, since fixed.)* |
 
 ---
 
@@ -154,7 +154,7 @@ moves stock; nothing *orders* it.
 permissions** and **no gate that forces the permissions question when a new data structure lands**. This
 is the owner's "critical" standard and it is unbuilt.
 
-**M4 — The generated guard registry (D0). SHELL — live defect.** See §2 P18.
+**M4 — The generated guard registry (D0). FIXED 2026-10-06.** See §2 P18.
 
 **M5 — Dashboard / perspective screens. ABSENT.** Tables and APIs exist; the user-facing configuration
 screens do not.
@@ -168,7 +168,7 @@ principle is: *a module is built when everything it depends on is COMPLETE — a
 
 **TIER 0 — finish the skeleton's holes (before anything new).** These are not features; they are the
 load-bearing walls the rest stands on. (Detail: [`BUILD-ORDER.md`](BUILD-ORDER.md).)
-1. **P18 guard registry (D0)** — the live defect. Guards must actually run.
+1. **P18 guard registry (D0)** — **fixed 2026-10-06**; guards now run through the registry. *(Was the live defect.)*
 2. **P3 permissions catalogue + gate (D1/SD-1)** — force the permissions question on every change.
 3. **P5 tiers/defaults as settings (item 1 / SD-3)** — settings, not code.
 4. **P3 structural grammar (S11/S12, D2/D3)** — the structural-object permissions.
@@ -200,7 +200,7 @@ owner's whole point — do not stack on an unfinished foundation.
 
 **Measured example of exactly that trap, in this platform:** the guard engine (§2 P18). It *looks* built —
 the interface exists, `runMutationGuards()` exists, guards exist in several modules. But the **generated
-registry is empty**, so the central delivery does not work, and guards run only where someone wired them
+registry was empty** *(that was D0; fixed 2026-10-06, §2c)*, so the central delivery did not work, and guards ran only where someone wired them
 by hand. **"It exists" was true; "it is built" was false.** That is the class of defect this register
 exists to catch, and it was found only because a claim was measured from two routes instead of accepted.
 

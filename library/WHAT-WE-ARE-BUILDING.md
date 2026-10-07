@@ -298,6 +298,8 @@ the next thing to build.
 > [`development/BLUEPRINT-GAP-ANALYSIS.md`](development/BLUEPRINT-GAP-ANALYSIS.md).
 > What is measured and true vs merely present — the module audit:
 > [`development/CORE-MODULES-REGISTER.md`](development/CORE-MODULES-REGISTER.md).
+> **Every point the platform must have, as one-liners, ticked only when verified in code — the master
+> checklist:** [`development/platform_points.md`](development/platform_points.md).
 > What happened and when: [`../JOURNAL.md`](../JOURNAL.md). What is blocked:
 > [`development/BLOCKERS.md`](development/BLOCKERS.md). What needs the owner:
 > [`development/NEEDS-YOU.md`](development/NEEDS-YOU.md).

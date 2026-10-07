@@ -150,7 +150,7 @@ measured, not assumed.
 | **D0 — the guard registry delivers guards** | **n/a** (pure platform) | Hermes is not involved. This is the platform's own authorization floor — **the thing that will authorize every Hermes tool call later**. No agent runs. | n/a | ✅ FIXED, mutation-proven |
 | **D1 — tiers/defaults/fallbacks are a setting** | **n/a** (pure platform) | The tier a *structural change* takes. When the AI later proposes a schema change (a "model proposal"), **this setting decides how much approval it needs**. Hermes is served *by* this rule, not a party to it. | n/a | ✅ FIXED |
 | **D2-wide — retire the deprecated guard resolver** | **n/a** (pure platform), but **enabling** | Every route the AI will ever reach must run the **registry** guard set. Until this is done, a tool call reaching an enabled module **bypasses the guard set** — which would be an authority bypass for a Hermes call. So D2-wide is a **precondition** for granting Hermes any tool in an affected module. | n/a | **ENABLED MODULES COMPLETE** — **every enabled module is retired**; 106 call sites / 40 files left (was 198), **all in parked modules** (recorded, not migrated) — see §13 |
-| **D2-gap — write routes that call NO guard at all** | **n/a** (pure platform), but **enabling — and the stricter half** | The *other* half of the same precondition, and the half that is easy to think is covered. A route here calls **no guard of any kind** — not the registry, not the deprecated pair, not `makeCrudRoute` — so a Hermes tool call reaching it is authorized by **nothing at all**. **"0 remaining on D2-wide" does NOT mean "the module is guarded"**: a module can be finished there and still be wide open here. | n/a | **MEASURED 2026-10-07** across every enabled module: 256 write verbs, **50 unguarded now** (58 before the `attachments` fix, 68 before the `workflows` fix, 78 before the `notifications` tool fix, 88 before the `inbox_ops` fix, 99 before the `business_rules` fix, 111 before the `auth` fix, 122 before the `communication_channels` tool fix, 143 before the `messages` registry-bypass fix, 158 before the `ai_assistant` fix, 160 before the `audit_logs` fix), plus **1 actor-less verb** and **1 read-only "write verb"** set aside by design, 35 modules. Ten fixes/corrections: `audit_logs` (`4ef5812`), `ai_assistant` (`0af50c8`), a **registry-bypass class** (`messages` + `integrations` + 5 more, `1f1b60e` — not a D2-gap), a **mis-labelled module** (`communication_channels` — 11 of its 15 verbs were already guarded; the **tool** was the defect), **`auth`** (`8e1632c` — a **real** D2-gap in the registry chokepoint; the 12 authority/ACL/sidebar verbs were already capability-guarded, only the guard-set call was missing), **`business_rules`** (`c9a6bb6` — a **real** D2-gap; the 11 verbs were already capability-guarded, and the two `execute/*` routes were measured to be writes — they log each run — before being set aside), **`inbox_ops`** (`0350563` — a **real** D2-gap; 9 verbs wired, and the 10th, `webhook/inbound`, is **actor-less** — a public endpoint with no session — so it is **set aside by name**, not wired with a fabricated user), **`notifications`** (tool fix, 2026-10-07 — **not** a D2-gap; all 10 routes were already guarded through a registry-backed local helper, and the tool simply did not know its name), **`workflows`** (`a9ecd21` — a **real** D2-gap; 9 verbs wired through the module's own wrapper, and the 10th, `instances/validate-start`, is **read-only** — a POST that performs no write — so it is **set aside by name** in a new `READ_ONLY_SET_ASIDE` class rather than wired), and **`attachments`** (`88582bd` — a **real** D2-gap, and the cleanest kind: the module shipped **NO guard mechanism at all**; all **8** verbs wired through a **new** wrapper, no set-aside needed). **Next-largest remaining: `ai_assistant` (9)** — **no double-digit module remains** — see §13 |
+| **D2-gap — write routes that call NO guard at all** | **n/a** (pure platform), but **enabling — and the stricter half** | The *other* half of the same precondition, and the half that is easy to think is covered. A route here calls **no guard of any kind** — not the registry, not the deprecated pair, not `makeCrudRoute` — so a Hermes tool call reaching it is authorized by **nothing at all**. **"0 remaining on D2-wide" does NOT mean "the module is guarded"**: a module can be finished there and still be wide open here. | n/a | **MEASURED 2026-10-07** across every enabled module: 256 write verbs, **0 unguarded now — the write-verb sweep is COMPLETE** (it read 50 earlier on 2026-10-07; the ladder ran 50 to 0 as `search`, `webhooks`, `configs`, `currencies`, `entities`, `scheduler`, `onboarding` and `communication_channels` were each closed), plus **5 actor-less verbs**, **7 read-only "write verbs"** and the **write-performing-GET class (0 unguarded: 1 fixed, 2 set aside as read side-effects)** set aside by design, 35 modules. Ten fixes/corrections: `audit_logs` (`4ef5812`), `ai_assistant` (`0af50c8`), a **registry-bypass class** (`messages` + `integrations` + 5 more, `1f1b60e` — not a D2-gap), a **mis-labelled module** (`communication_channels` — 11 of its 15 verbs were already guarded; the **tool** was the defect), **`auth`** (`8e1632c` — a **real** D2-gap in the registry chokepoint; the 12 authority/ACL/sidebar verbs were already capability-guarded, only the guard-set call was missing), **`business_rules`** (`c9a6bb6` — a **real** D2-gap; the 11 verbs were already capability-guarded, and the two `execute/*` routes were measured to be writes — they log each run — before being set aside), **`inbox_ops`** (`0350563` — a **real** D2-gap; 9 verbs wired, and the 10th, `webhook/inbound`, is **actor-less** — a public endpoint with no session — so it is **set aside by name**, not wired with a fabricated user), **`notifications`** (tool fix, 2026-10-07 — **not** a D2-gap; all 10 routes were already guarded through a registry-backed local helper, and the tool simply did not know its name), **`workflows`** (`a9ecd21` — a **real** D2-gap; 9 verbs wired through the module's own wrapper, and the 10th, `instances/validate-start`, is **read-only** — a POST that performs no write — so it is **set aside by name** in a new `READ_ONLY_SET_ASIDE` class rather than wired), and **`attachments`** (`88582bd` — a **real** D2-gap, and the cleanest kind: the module shipped **NO guard mechanism at all**; all **8** verbs wired through a **new** wrapper, no set-aside needed). **Every module now reads 0 — the write-verb sweep is COMPLETE** — see §13 |
 | **D3 — the `escalate` outcome** | **n/a** (pure platform) | The guard result must be able to say *"this needs a human"*, not only allow/deny. That outcome is what a Hermes tool call will receive when a proposed action needs **approval** rather than rejection. | n/a | OPEN |
 | **The Metadata Registry** (GAP A / C5) | **n/a** (pure platform) | The declarative registry the AI will *read* to know what objects exist. It is **how Hermes learns the shape of the business** without being handed a database handle. | n/a | OPEN |
 
@@ -381,8 +381,7 @@ never call a model at run time.
 | **5. Autonomous work** | Recurring/event work through **our** scheduler and queue | Durable run records, per-tenant budgets, a global stop, deadlines, idempotency, audit |
 | **6. Execution environments and channels** | Sandboxed terminal, browser, subagents, messaging | A separate threat model; disposable sandboxes; quotas; network policy; measured cost |
 
-**Where the current build sits in this order:** **Phase 0 is partly done** (D0, D1 fixed; D2-wide in
-progress; D3 + Metadata Registry open). **Phase 1 is not started** — the port does not exist and the
+**Where the current build sits in this order:** **Phase 0 is partly done** (D0, D1 fixed; D2-wide COMPLETE for every enabled module — the remainder is the parked set; D3 + Metadata Registry open). **Phase 1 is not started** — the port does not exist and the
 chat route is still hard-wired to OpenCode. *The Active task for the session is in the `★ ACTIVE TASK`
 box at the top of [`../../JOURNAL.md`](../../JOURNAL.md).*
 
@@ -635,8 +634,8 @@ top of [`../../JOURNAL.md`](../../JOURNAL.md); this section is the pattern, not 
 bypass the guard registry**. The replacement is `runRouteMutationGuards()` from
 `packages/shared/src/lib/crud/route-mutation-guard.ts`.
 
-**The pattern, proven seven times (`entities`, `data_sync`, `dictionaries`, `dashboards`, `workflows`,
-`inbox_ops`, `perspectives`):**
+**The pattern, proven thirteen times (`entities`, `data_sync`, `dictionaries`, `dashboards`, `workflows`,
+`inbox_ops`, `perspectives`, `translations`, `planner`, `query_index`, `auth`, `directory`, `feature_toggles`):**
 
 1. **Create a module wrapper** `packages/core/src/modules/<module>/api/mutation-guard.ts` exposing
    `begin<Module>MutationGuard(ctx)` → `{ blockedResponse: NextResponse | null, runAfterSuccess }`.
@@ -659,8 +658,8 @@ bypass the guard registry**. The replacement is `runRouteMutationGuards()` from
 module** and **106 are parked**. **Every enabled module is retired** (`entities`, `data_sync`,
 `dictionaries`, `dashboards`, `workflows`, `inbox_ops`, `perspectives`, `translations`, `planner`,
 `query_index`, `auth`, `directory`, `feature_toggles`). **D2-wide's remaining work is the parked set,
-which is recorded — not migrated.** The next task (on the backlog's own order — `D2-gap`, then `D3`,
-then the Metadata Registry) is
+which is recorded — not migrated.** The next task (on the backlog's own order — `D3`,
+then the Metadata Registry; `D2-gap` is COMPLETE) is
 stated only in the `★ ACTIVE TASK` box** at the top of [`../../JOURNAL.md`](../../JOURNAL.md).
 
 **Two behaviour points to watch** (each cost a previous run something):
@@ -674,34 +673,27 @@ stated only in the `★ ACTIVE TASK` box** at the top of [`../../JOURNAL.md`](..
 - **A module may have NO `D2-gap`** — `perspectives` measured all 3 of its write routes guarded. Do not
   assume every module the sweep touches is partially open; **measure it** — and **re-measure it**:
   `D2-gap` is now measured across **all 35 enabled modules** (2026-10-07, `analysis/d2-gap/measure.js` +
-  FINDINGS.md): **256 write verbs, 50 unguarded now** (58 before the `attachments` fix, 68 before the
-  `workflows` fix, 78 before the `notifications` tool fix, 88 before
-  the `inbox_ops` fix, 99 before the `business_rules` fix, 111 before the `auth` fix, 122 before the
-  `communication_channels` tool fix, 143 before the `messages` registry-bypass fix, 158 before the
-  `ai_assistant` fix, 160 before the `audit_logs` fix), plus **1 actor-less verb** and **1 read-only
-  "write verb"** set aside by design.
-  Per module, unguarded:
-  `ai_assistant` **9 (fixed
-  `0af50c8`)**, `messages` **0 (fixed `1f1b60e` — registry-bypass, NOT a D2-gap)**, `integrations`
-  **0 (fixed `1f1b60e`)**, `communication_channels` **4 (mis-labelled — 11 of 15 were already guarded;
-  the tool was the defect, 2026-10-06)**, `auth` **0 (fixed `8e1632c`; was 12 — a real D2-gap, the
-  third module fixed)**, `business_rules` **0 (fixed `c9a6bb6`; was 11 — a real D2-gap, the fourth module
-  fixed)**, `inbox_ops` **0 (fixed `0350563`; was 10 — a real D2-gap, the fifth module fixed; 9 wired, the
-  10th actor-less and set aside)**, `notifications` **0 (tool fix 2026-10-07; was 10 — NOT a D2-gap; all
-  10 were already guarded through a registry-backed local helper; the tool did not know its name)**,
-  `workflows` **0 (fixed `a9ecd21`; was 10 — a real D2-gap, the sixth module fixed; 9 wired, the 10th a
-  read-only POST set aside)**, `attachments` **0 (fixed `88582bd`; was 8 — a real D2-gap, the seventh
-  module fixed; the module shipped NO guard mechanism at all; all 8 wired through a new wrapper, no
-  set-aside needed)**, `search` 7 (now the joint-largest with `webhooks`), `webhooks` 7, then 4/4/4/4, 3/3, 2, 1/1/1, and
-  **0** for `dictionaries`, `feature_toggles`, `perspectives`, `planner`, `query_index`, `translations`,
-  `api_keys`. **`audit_logs` is fixed** (`4ef5812`, 2 → 0), **`auth` is fixed** (`8e1632c`, 12 → 0),
-  **`business_rules` is fixed** (`c9a6bb6`, 11 → 0), **`inbox_ops` is fixed** (`0350563`, 10 → 0),
-  **`notifications` is fixed** (tool only, 2026-10-07, 10 → 0), **`workflows` is fixed** (`a9ecd21`,
-  10 → 0), **`attachments` is fixed** (`88582bd`, 8 → 0), and
-  **`communication_channels` is fixed** (2026-10-06, 4 → 0). **The `workflows` figure this section once
+  FINDINGS.md): **256 write verbs, 0 unguarded now — the write-verb sweep is COMPLETE** (it read 50 earlier on
+  2026-10-07; the ladder ran 50 to 0 as `search`, `webhooks`, `configs`, `currencies`, `entities`,
+  `scheduler`, `onboarding` and `communication_channels` were each closed), plus **5 actor-less verbs**,
+  **7 read-only "write verbs"** and the **write-performing-GET class (0 unguarded: 1 fixed, 2 set
+  aside)** set aside by design.
+  Per module: **every enabled module now reads 0** (the tool's GAP column is 0 for all 35). The historical ladder,
+  each closed by its own fix: `audit_logs` (`4ef5812`, 2 → 0), `ai_assistant` (`0af50c8`, 9 → 0 — all 9
+  are declared set-asides, not gaps), `messages` + `integrations` (`1f1b60e`, registry-bypass, NOT a
+  D2-gap), `communication_channels` (2026-10-06, 4 → 0 — 11 of its 15 were already guarded; the tool was
+  the defect), `auth` (`8e1632c`, 12 → 0), `business_rules` (`c9a6bb6`, 11 → 0), `inbox_ops` (`0350563`,
+  10 → 0 — 9 wired, the 10th actor-less and set aside), `notifications` (tool fix 2026-10-07, 10 → 0 —
+  NOT a D2-gap; all 10 were already guarded through a registry-backed local helper), `workflows`
+  (`a9ecd21`, 10 → 0 — 9 wired, the 10th a read-only POST set aside), `attachments` (`88582bd`, 8 → 0 —
+  the module shipped NO guard mechanism at all), `search` (`0ac8783`, 7 → 0), `webhooks` (7 → 0),
+  `configs` (4 → 0), `currencies` (4 → 0), `entities` (4 → 0), `scheduler` (1 → 0), `onboarding` (1 → 0,
+  actor-less, set aside), `directory` (3 → 0), `progress` (3 → 0), `dashboards` (2 → 0, read-only set
+  aside), `data_sync` (1 → 0, read-only set aside).
+  **The `workflows` figure this section once
   quoted as "13 of 19" was wrong and is corrected to 10** — the record counted `tasks/route.ts` and
   `events` as unguarded write routes, but neither exports a write verb (checked two ways). **Do not carry
-  the old number forward.** **No double-digit `D2-gap` module remains.**
+  the old number forward.** **No `D2-gap` module remains — the sweep is COMPLETE.**
 
 ---
 

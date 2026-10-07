@@ -165,10 +165,12 @@ absences that no roadmap item points at is a document, not a plan.**
 `D2-wide` is being retired module by module, each with its own **two-mutation proof**. Done and proven,
 in order, with the count each one retired: `entities` (the worked example) → `data_sync` (−19, the
 largest enabled cluster) → `dictionaries` (−16) → `dashboards` (−10) → `workflows` (−9) →
-`inbox_ops` (−8) → `perspectives` (−8, the first module with **no** `D2-gap`). Baseline **198** real
-call sites → **126** today. **20 of the remaining 126 are in ENABLED modules** (`translations` 6,
-`planner` 4, `query_index` 4, `auth` 2, `directory` 2, `feature_toggles` 2); **106 are parked** (8
-modules, no code change needed — just the record).
+`inbox_ops` (−8) → `perspectives` (−8, the first module with **no** `D2-gap`) → `translations` (−6) →
+`planner` (−4) → `query_index` (−4) → `auth` (−2) → `directory` (−2) → `feature_toggles` (−2). Baseline
+**198** real call sites → **106** today. **Every ENABLED module is now retired** — 0 of the remaining 106
+sit in an enabled module; **all 106 are parked** (8 modules, no code change needed — just the record).
+*(Corrected 2026-10-07: this paragraph read "126 today" with "20 of the remaining 126 are in ENABLED
+modules" — the state at the `perspectives` step, before the last six modules were retired.)*
 The live module is named, and only named, in the **`★ ACTIVE TASK` box at the top of
 [`../../JOURNAL.md`](../../JOURNAL.md)**.
 
