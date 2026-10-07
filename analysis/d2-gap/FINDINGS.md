@@ -1,7 +1,7 @@
 # D2-gap — measured across every enabled module
 
-**Measured:** 2026-10-06; **re-measured 2026-10-07** after the four-leftover-modules fix, **again after the `webhooks` fix + tool fix**, and **again after the `configs` fix + tool fix**. **Tool:** `analysis/d2-gap/measure.js` (re-runnable; `--json` for machines).
-**Repo:** `workspace/starting-kit`, HEAD **`e1fa605` plus the `configs` D2-gap fix** (the `webhooks` D2-gap fix is at `e1fa605`; the `configs` fix is in the same change as this note). Tool fixes this round: the re-export regex now catches the `import { … }` + bare `export { … }` shim form; `webhooks/api/inbound/[endpointId]/route.ts` joined `ACTORLESS_PATHS`; an **inline** registry call (`getAllMutationGuardInstances()` + `runMutationGuards()`) now reads as `GUARDED_REGISTRY`; and two `configs` routes joined `READ_ONLY_PATHS`. Before that, `0ac8783` with `search`, `88582bd` with `attachments`, `a9ecd21` with `workflows`, `0350563` with `inbox_ops`, and `c9a6bb6` with `business_rules`. The `communication_channels` correction changed **only the tool**, not the repo — so the HEAD is unchanged by it.
+**Measured:** 2026-10-06; **re-measured 2026-10-07** after the four-leftover-modules fix, **again after the `webhooks` fix + tool fix**, **again after the `configs` fix + tool fix**, and **again after the `currencies` fix**. **Tool:** `analysis/d2-gap/measure.js` (re-runnable; `--json` for machines).
+**Repo:** `workspace/starting-kit`, HEAD **`e1fa605` plus the `currencies` D2-gap fix** (the `webhooks` D2-gap fix is at `e1fa605`; the `configs` and `currencies` fixes are in the same change as this note). Tool fixes this round: the re-export regex now catches the `import { … }` + bare `export { … }` shim form; `webhooks/api/inbound/[endpointId]/route.ts` joined `ACTORLESS_PATHS`; an **inline** registry call (`getAllMutationGuardInstances()` + `runMutationGuards()`) now reads as `GUARDED_REGISTRY`; and two `configs` routes joined `READ_ONLY_PATHS`. Before that, `0ac8783` with `search`, `88582bd` with `attachments`, `a9ecd21` with `workflows`, `0350563` with `inbox_ops`, and `c9a6bb6` with `business_rules`. The `communication_channels` correction changed **only the tool**, not the repo — so the HEAD is unchanged by it.
 
 ## What D2-gap is, and why it is a defect
 
@@ -12,16 +12,16 @@ would reach data no authorization describes (Hermes map §4.4 (b)).
 
 ## The headline
 
-| | baseline (HEAD `5af76bc`) | after `audit_logs` (`4ef5812`) | after `ai_assistant` (`0af50c8`) | after `messages` (`1f1b60e`) | after the `communication_channels` tool fix (`4eead9d`) | after `auth` (`8e1632c`) | after `business_rules` (`c9a6bb6`) | after `inbox_ops` (`0350563`) | after the `notifications` tool fix (`46aec05`) | after `workflows` (`a9ecd21`) | after `attachments` (`88582bd`) | after `search` (`0ac8783`) | after the four-leftover-modules fix | after the `webhooks` fix (`e1fa605`) | **now (the `configs` fix + tool fix)** |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| enabled modules with a source tree | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** |
-| write verbs across those modules | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** |
-| **unguarded write verbs (the `D2-gap`)** | **160** | **158** | **143** | **122** | **111** | **99** | **88** | **78** | **68** | **58** | **50** | **41** | **34** | **25** | **18** | **14** |
-| auth-flow verbs set aside by design | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 |
-| actor-less verbs set aside by design | — | — | — | — | — | — | — | **1** | **1** | **1** | **1** | **1** | **1** | **2** | **2** |
-| read-only "write verb" set aside by design | — | — | — | — | — | — | — | — | — | **1** | **1** | **1** | **4** | **4** | **4** | **6** |
-| guarded verbs (registry / crud / wrapper / local / re-export) | 88 | 90 | 105 | 126 | **137** | **149** | **160** | **169** | **179** | **188** | **196** | **203** | **209** | **215** | **217** |
-| *guarded + the set-aside buckets* | *96* | *98* | *113* | *134* | ***145*** | ***157*** | ***168*** | ***177*** | ***187*** | ***197*** | ***205*** | ***222*** | ***231*** | ***238*** | ***242*** |
+| | baseline (HEAD `5af76bc`) | after `audit_logs` (`4ef5812`) | after `ai_assistant` (`0af50c8`) | after `messages` (`1f1b60e`) | after the `communication_channels` tool fix (`4eead9d`) | after `auth` (`8e1632c`) | after `business_rules` (`c9a6bb6`) | after `inbox_ops` (`0350563`) | after the `notifications` tool fix (`46aec05`) | after `workflows` (`a9ecd21`) | after `attachments` (`88582bd`) | after `search` (`0ac8783`) | after the four-leftover-modules fix | after the `webhooks` fix (`e1fa605`) | after the `configs` fix + tool fix | **now (the `currencies` fix)** |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| enabled modules with a source tree | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** | **35** |
+| write verbs across those modules | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** | **256** |
+| **unguarded write verbs (the `D2-gap`)** | **160** | **158** | **143** | **122** | **111** | **99** | **88** | **78** | **68** | **58** | **50** | **41** | **34** | **25** | **18** | **14** | **10** |
+| auth-flow verbs set aside by design | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 | 8 |
+| actor-less verbs set aside by design | — | — | — | — | — | — | — | **1** | **1** | **1** | **1** | **1** | **1** | **2** | **2** | **2** |
+| read-only "write verb" set aside by design | — | — | — | — | — | — | — | — | — | **1** | **1** | **1** | **4** | **4** | **4** | **6** | **6** |
+| guarded verbs (registry / crud / wrapper / local / re-export) | 88 | 90 | 105 | 126 | **137** | **149** | **160** | **169** | **179** | **188** | **196** | **203** | **209** | **215** | **217** | **221** |
+| *guarded + the set-aside buckets* | *96* | *98* | *113* | *134* | ***145*** | ***157*** | ***168*** | ***177*** | ***187*** | ***197*** | ***205*** | ***222*** | ***231*** | ***238*** | ***242*** | ***246*** |
 
 > **A correction to the "guarded verbs" row (2026-10-07).** The `search` column first read **204** and
 > the four-leftover-modules column was carried forward as **204** too; both omitted one or more of the
@@ -87,7 +87,8 @@ local-helper term grew 32 → 42 the same day with the `notifications` tool fix.
 added 2026-10-07 with the `workflows` fix and grew 1 → 4 with the four-leftover-modules fix, then 4 → 6
 with the two `configs` set-asides — see the class note below. The wrapper term grew 106 → 114 with
 `attachments`, then 114 → 121 with `search`, 121 → 127 with `directory`+`progress`, 127 → 132 with
-`webhooks`, then 132 → 133 with the `configs` fix. The `registry` term was **0 until 2026-10-07** and
+`webhooks`, then 132 → 133 with the `configs` fix, then 133 → 137 with the `currencies` fix (all four of
+its verbs wired, no set-aside). The `registry` term was **0 until 2026-10-07** and
 became **1** with the `configs` fix, whose `cache` route reaches the registry inline rather than through
 the shared wrapper. The `guard-system` term (9) was added 2026-10-07 with the `ai_assistant` set-asides
 so the figure stopped over-claiming by 9.)*
@@ -125,7 +126,7 @@ so the figure stopped over-claiming by 9.)*
 | search | 7 | 7 | 7 | 0 | 0 | 0 | 0 | **0** ✅ *fixed `0ac8783`; was 7 — all 7 wired through a new wrapper* |
 | webhooks | 11 | 15 | 5 | 0 | 3 | 0 | 0 | **0** ✅ *fixed 2026-10-07 + tool fix; was 7 — 5 wired through a new wrapper, 1 false-positive re-export shim, 1 actor-less set aside* |
 | configs | 4 | 4 | 1 | 1 | 0 | 0 | 0 | **0** ✅ *fixed 2026-10-07 + tool fix; was 4 — 1 wired (new wrapper), 1 already registry-guarded inline (tool blind spot), 2 read-only set aside* |
-| currencies | 4 | 10 | 0 | 0 | 6 | 0 | 0 | **4** |
+| currencies | 4 | 10 | 0 | 0 | 6 | 0 | 0 | **0** ✅ *fixed 2026-10-07; was 4 — all 4 genuine writes wired (new wrapper), the label did NOT split* |
 | entities | 7 | 11 | 7 | 0 | 0 | 0 | 0 | **4** |
 | integrations | 4 | 4 | 0 | 0 | 0 | 4 | 0 | **0** ✅ *fixed `1f1b60e` (registry-bypass, not a D2-gap); was 4* |
 | progress | 2 | 3 | 3 | 0 | 0 | 0 | 0 | **0** ✅ *fixed 2026-10-07 (leftover verbs); was 3 — wired through a NEW wrapper* |
@@ -501,6 +502,7 @@ slip happened before.
 | **`workflows`** | **13 of 19** | **10** | ❌ **the record was wrong** → **now 0, fixed `a9ecd21` (9 wired, 1 read-only set aside)** |
 | **`webhooks`** | **7 unguarded verbs** | **5 genuine writes** (1 was a re-export shim, 1 was actor-less) | ❌ **the label over-claimed by 2** → **now 0, fixed `e1fa605` (5 wired, 2 re-classified — tool fix)** |
 | **`configs`** | **4 unguarded verbs** | **1 genuine write** (1 already registry-guarded inline, 2 read-only: a cache clear and a dev-only clear) | ❌ **the label over-claimed by 3** → **now 0, fixed 2026-10-07 (1 wired, 1 re-classified — tool fix, 2 set aside)** |
+| **`currencies`** | **4 unguarded verbs** | **4 genuine writes** (3 `fetch-configs` POST/PUT/DELETE + 1 `fetch-rates` POST; no partial labels) | ✅ **the label was RIGHT** → **now 0, fixed 2026-10-07 (all 4 wired, no set-aside)** |
 
 ### Why `workflows` was wrong — two routes agree
 
@@ -949,6 +951,58 @@ unguarded (registry **+1**, read-only **+2**, wrapper **+1**); total D2-gap **18
 **132 → 133**; registry **0 → 1**; read-only class **4 → 6**; guarded **215 → 217**; guarded +
 set-asides **238 → 242**; **Closure: 133 + 1 + 35 + 42 + 6 + 0 + 8 + 2 + 6 + 9 + 0 + 14 = 256.** Whole
 `configs` module **8 suites / 56 tests green**; core `tsc --noEmit` exit 0.
+
+---
+
+## `currencies` — a real gap with NO split: all 4 verbs write, all 4 wired (2026-10-07)
+
+The tool read the `currencies` module as **4 unguarded verbs across 2 files** (of 10 write verbs; the
+other 6 are `makeCrudRoute` on `currencies/route.ts` and `exchange-rates/route.ts`). **Measured first, by
+two routes** — the tool's `--json` rows, and a hand read of every `.ts` under `api/` — and, unlike the
+last several modules, the label was **RIGHT**: every one of the four is a genuine business-row write, so a
+blanket fix was the correct fix here. **No set-aside was needed.**
+
+**The four verbs, each traced to its write:**
+
+| File | Verb | The write |
+|---|---|---|
+| `api/fetch-configs/route.ts` | POST | `createFetchConfig` — `em.create(CurrencyFetchConfig)` + `em.persist(...).flush()` (`commands/fetch-configs.ts:35-43`) |
+| `api/fetch-configs/route.ts` | PUT | `updateFetchConfig` — `em.assign(config, validated)` + `em.persist(...).flush()` (`:65-66`) |
+| `api/fetch-configs/route.ts` | DELETE | `deleteFetchConfig` — `em.remove(config).flush()` (`:86`) |
+| `api/fetch-rates/route.ts` | POST | `fetchService.fetchRatesForDate` writes `ExchangeRate` rows (`services/rateFetchingService.ts:194-216` `em.create` + `em.persist` + `em.flush`), then the route updates each `CurrencyFetchConfig.lastSync*` and `em.flush()`es |
+
+**The fix.** A **new** `beginCurrenciesMutationGuard(ctx)` wrapper (`api/mutation-guard.ts`, mirroring the
+`configs`/`search` shape). The module had **no wrapper and no `data/guards.ts`**, so a `currencies.*`
+guard set would have been silently skipped (the `search`/`webhooks` lesson) — the wrapper is therefore
+the chokepoint. Kinds: `currencies.currency_fetch_config` (3 verbs) and `currencies.exchange_rate` (1).
+Each guard runs after the route's own gates (auth 401, body 400, id 400; PUT/DELETE also after the
+optimistic-lock call) and before the write; `runAfterSuccess()` after commit.
+
+**What was NOT missing — stated plainly, because `D2-gap` invites the opposite reading.** Every route
+already enforced its own capability (`currencies.fetch.manage`) through `metadata.requireFeatures` and
+resolved a tenant + organization scope from the authenticated actor. The defect was the missing
+**structural chokepoint**, not missing authorization.
+
+**The lock-floor trap, named.** `fetch-configs` PUT/DELETE also call `enforceCommandOptimisticLock(...)`
+— the **command-lock floor**, a different mechanism that never consults the registry (the `directory`
+trap). The registry call added here is a **separate** chokepoint; finding the word "lock" in the file is
+not the guard.
+
+**A body-validation note (found while writing the test, kept).** `currencyFetchConfigCreateSchema.provider`
+is a closed enum `['NBP', 'Raiffeisen Bank Polska', 'Custom']`, so a lower-case provider fails Zod and the
+route returns **400 before** the command runs — the guard is reached only for a schema-valid body.
+
+**Proof.** `api/__tests__/d2-gap-wiring.route.test.ts`, **10 tests** (4 block + 4 allow + 1 out-of-kind
+control + 1 invalid-body-400), driving the **real** handlers with `runRouteMutationGuards` **UNMOCKED**
+(a real guard registered via `registerMutationGuards`). Each block test asserts the **command/service did
+not run** (`em.create`/`em.assign`/`em.remove`/`fetchRatesForDate` never recorded), not merely a status
+code. **Two mutations**, wrapper restored **byte-identical** (md5 `56e4ea6ae6e605ca9fcedf94a4b71ea5`):
+neuter the block path → exactly the **4 block** tests RED; sever `runAfterSuccess` → exactly the **4
+allow** tests RED. Whole `currencies` module **23 suites / 167 tests green**; core `tsc --noEmit` exit 0.
+
+**Measured after (tool `--json`, second route = re-summing the raw fields):** `currencies` **4 → 0**
+unguarded (wrapper **+4**); total D2-gap **14 → 10**; wrapper class **133 → 137**; guarded **217 → 221**;
+guarded + set-asides **242 → 246**; **Closure: 137 + 1 + 35 + 42 + 6 + 0 + 8 + 2 + 6 + 9 + 0 + 10 = 256.**
 
 ---
 

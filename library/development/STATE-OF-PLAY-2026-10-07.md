@@ -1,7 +1,8 @@
 # State of play — what is done, and what is next
 
 **Written:** 2026-10-07
-**Measured at:** docs repo `ded9f96` · code repo `e1fa605` (both re-read this session, not remembered)**Owner:** Ramzi (not a developer)
+**Measured at:** docs repo `79c0b13` · code repo `462540e` (HEADs after the `configs` + `currencies` fixes; both re-read this session, not remembered)
+**Owner:** Ramzi (not a developer)
 
 This page answers one question: **where is the project really, and what is the next thing?**
 Every figure below was measured from the files in this session, by **two separate routes**
@@ -24,12 +25,13 @@ two-thirds closed.**
   cross the authority boundary" true rather than aspirational — is the work in hand.
   - `D2-wide` (routes still calling the **old, deprecated** check, which silently skips the real
     registry): **COMPLETE across every enabled module.**
-  - `D2-gap` (routes calling **no** check at all): **measured 14 unguarded verbs** after this
+  - `D2-gap` (routes calling **no** check at all): **measured 10 unguarded verbs** after this
     session's latest fixes (it read 50 before; the `ai_assistant` 9 were its declared set-asides,
     now classed correctly; then `search` 7 and `webhooks` 7 were fixed, `directory`/`progress` wired,
-    `dashboards`/`data_sync` set aside, and `configs` fixed — 4 → 0: 1 wired, 1 already
-    registry-guarded inline, 2 read-only set aside). **Every double-digit module is closed.**
-- **The next thing is `currencies` (4), then `entities` (4 — but 2 of those are the
+    `dashboards`/`data_sync` set aside, `configs` fixed — 4 → 0: 1 wired, 1 already
+    registry-guarded inline, 2 read-only set aside — and `currencies` fixed — 4 → 0: all 4 wired).
+    **Every double-digit module is closed.**
+- **The next thing is `entities` (4 — but 2 of those are the
   optimistic-lock floor, not a live hole), then 1/1.**
   Note: **two of the tool's "biggest" remaining modules are tool labels, not a live hole** —
   `ai_assistant` (9, all declared set-asides) and 2 of `entities`' 4 (the optimistic-lock floor).
@@ -75,7 +77,7 @@ The journal's queue table names 13 modules migrated, from `dashboards` (`a05ea2c
 I did not re-run each commit, but the end-state is independently confirmed by the measurement tool
 (below), which counts **`D` (deprecated) = 0 for every enabled module**.
 
-### 2.4 `D2-gap` — measured (14 after this session's latest fixes), and every double-digit module closed
+### 2.4 `D2-gap` — measured (10 after this session's latest fixes), and every double-digit module closed
 
 > **SUPERSEDED 2026-10-07 (same day, later):** this snapshot recorded the sweep at **41 unguarded**.
 > The `search` module was then fixed (**7 → 0**), so the live figure became **34**; then four
@@ -84,15 +86,17 @@ I did not re-run each commit, but the end-state is independently confirmed by th
 > (**7 → 0** — 5 wired, 1 re-export shim re-classified, 1 actor-less set aside) brought it to **18**,
 > with wrapper class **132**, re-export **6** and actor-less **2**; then `configs` (**4 → 0** — 1 wired,
 > 1 already registry-guarded inline, 2 read-only set aside) brought it to **14**, with wrapper **133**,
-> registry **1** (the tool's first non-zero), read-only **6**, guarded **217** (details in `BACKLOG.md`
+> registry **1** (the tool's first non-zero), read-only **6**, guarded **217**; then `currencies`
+> (**4 → 0** — all 4 genuine writes wired through a new `beginCurrenciesMutationGuard`, the label did
+> NOT split) brought it to **10**, with wrapper **137** and guarded **221** (details in `BACKLOG.md`
 > §D2-gap and `BUILD-ORDER.md` §2f). **Every double-digit module is now closed.** This section is kept
 > as the study's own reading, per the "every figure names its HEAD" rule; it is not the current number.
 
 **Route 1 (the tool):** ran `node analysis/d2-gap/measure.js` this session. It reproduces the
-documented headline **50 unguarded** — and, after this session's tool fixes, reads **14**.
-Closure at 14: `133 (wrapper) + 1 (registry) + 35 (crud) + 42 (local helper) + 6 (re-export)
+documented headline **50 unguarded** — and, after this session's tool fixes, reads **10**.
+Closure at 10: `137 (wrapper) + 1 (registry) + 35 (crud) + 42 (local helper) + 6 (re-export)
 + 0 (deprecated) + 8 (auth-flow) + 2 (actor-less) + 6 (read-only) + 9 (guard-system) + 0 (lock-floor)
-+ 14 (unguarded) = 256`.
++ 10 (unguarded) = 256`.
 
 **Route 2 (the code):** grepped each fixed module's `api/` for a registry path. Every one is wired:
 
@@ -131,16 +135,15 @@ containers healthy/up, no unhealthy container.
 
 | # | Module | Unguarded verbs | Notes |
 |---|---|---|---|
-| **1** | `currencies` | **4** | `fetch-configs` (3 verbs) + `fetch-rates` (1) |
-| **2** | `entities` | **4** | **2 are the optimistic-lock floor, not gaps** (§4 Finding 3) |
-| 3 | `onboarding` / `scheduler` | 1 each | |
+| **1** | `entities` | **4** | **2 are the optimistic-lock floor, not gaps** (§4 Finding 3) |
+| 2 | `onboarding` / `scheduler` | 1 each | |
 
 *(Every double-digit module is now closed. Measured this session, **all 9 `ai_assistant` verbs are
 its declared set-asides** (7 session/flow + 2 pending-action-gate) and **none reaches the registry** —
 the tool re-lists them only because it has no set-aside *class* for them. **So `ai_assistant` is a
-tool fix, not guard work (§4 Finding 2, verified by a critic pass).** `configs` (**4 → 0**) was fixed
-this session — 1 wired, 1 already registry-guarded inline, 2 read-only set aside. The real next
-modules are `currencies` and `entities`.)*
+tool fix, not guard work (§4 Finding 2, verified by a critic pass).** `configs` (**4 → 0**) and
+`currencies` (**4 → 0**) were fixed this session — `configs`: 1 wired, 1 already registry-guarded inline,
+2 read-only set aside; `currencies`: all 4 wired, no set-aside. The real next module is `entities`.)*
 
 **After the sweep (from the box's queue):**
 
