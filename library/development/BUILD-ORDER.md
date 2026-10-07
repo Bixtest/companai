@@ -278,7 +278,7 @@ comparable with the backlog record.
 |---|---|
 | enabled modules with a source tree | **35** |
 | write verbs across those modules | **256** |
-| **unguarded write verbs (the `D2-gap`)** | **34 now** — **41 before the `search` fix** (`HEAD-search`), **50 before the `attachments` fix** (`88582bd`), **58 before the `workflows` fix** (`a9ecd21`), **68 before the `notifications` tool fix** (HEAD `0350563`, no repo change), **78 before the `inbox_ops` fix** (`0350563`), **88 before the `business_rules` fix** (`c9a6bb6`), **99 before the `auth` fix**, **111 before the `communication_channels` tool fix**, **122 before the `messages` registry-bypass fix**, **143 before the `ai_assistant` fix**, **160 before the `audit_logs` fix** |
+| **unguarded write verbs (the `D2-gap`)** | **34 now** — **41 before the `search` fix** (`0ac8783`), **50 before the `attachments` fix** (`88582bd`), **58 before the `workflows` fix** (`a9ecd21`), **68 before the `notifications` tool fix** (HEAD `0350563`, no repo change), **78 before the `inbox_ops` fix** (`0350563`), **88 before the `business_rules` fix** (`c9a6bb6`), **99 before the `auth` fix**, **111 before the `communication_channels` tool fix**, **122 before the `messages` registry-bypass fix**, **143 before the `ai_assistant` fix**, **160 before the `audit_logs` fix** |
 | auth-flow verbs set aside by design | 8 |
 | **actor-less verbs set aside by design** | **1** (`inbox_ops/api/webhook/inbound.ts` — a public endpoint with no session; see the `inbox_ops` record below) |
 | **read-only "write verb" set aside by design** | **1** (`workflows/api/instances/validate-start/route.ts` — a POST that performs no write; see the `workflows` record below) |

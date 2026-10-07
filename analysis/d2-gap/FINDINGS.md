@@ -709,7 +709,7 @@ such guard ever written is enforced rather than silently skipped.
 The suite (`api/__tests__/d2-gap-wiring.route.test.ts`, **15 tests**) registers a **real** guard via
 `registerMutationGuards()` with `runRouteMutationGuards` **UNMOCKED**, and drives the real handlers.
 
-**Measured after (working tree, `search` fixed):** `search` **7 → 0** unguarded (wrapper class **0 → 7**);
+**Measured after (HEAD `0ac8783`, repo `workspace/starting-kit`):** `search` **7 → 0** unguarded (wrapper class **0 → 7**);
 **total 41 → 34**; repo-wide wrapper class **114 → 121**; guarded-only **196 → 204**. **Closure:
 121 + 0 + 35 + 42 + 5 + 0 + 8 + 1 + 1 + 9 + 0 + 34 = 256.** `search` **26 suites / 269 tests green**;
 `search` `tsc --noEmit` clean.
