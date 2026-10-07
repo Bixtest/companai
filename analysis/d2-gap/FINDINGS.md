@@ -677,6 +677,49 @@ class for the module **1 → 13**); **total 111 → 99**; repo-wide wrapper clas
 **137 → 149**. **Closure: 77 + 0 + 35 + 32 + 5 + 0 + 8 + 99 = 256.** `auth` **79 suites / 682 tests
 green**; `tsc --noEmit` clean.
 
+---
+
+## `search` — no guard mechanism at all, closed (2026-10-07)
+
+The module shipped **no mutation guard of any kind**: a string scan found no wrapper, no
+`runRouteMutationGuards` call, no `makeCrudRoute`, and neither of the `@deprecated` pair. **Premise
+measured before the fix, because the `D2-gap` label has over-claimed four times** (`messages`,
+`communication_channels`, `notifications`, and the `ai_assistant` set-asides): **two routes that share
+no failure mode agree** — this tool's `--json` rows and a hand walk of every `.ts` under `api/` both find
+**exactly 7 write verbs across 7 files**, and none references any guard symbol. The label was right here.
+
+**Wired:** a new `beginSearchMutationGuard()` (`packages/search/src/modules/search/api/mutation-guard.ts`)
+runs `runRouteMutationGuards()` for all seven verbs, each after the route's own gates and before the first
+write, with `runAfterSuccess` after commit. Kinds: `search.index` (six index-touching verbs) and
+`search.settings` (the global-search settings POST).
+
+**What was NOT missing.** All seven already enforce their own capability via `metadata.requireFeatures`
+(`search.embeddings.manage`, `search.reindex`, `search.manage`) and carry tenant + organization scope. The
+defect was the missing **structural chokepoint**, not missing authorization. And `search` ships **no
+`data/guards.ts`**, so no `search.*` guard exists in the registry today — the wiring means the **first**
+such guard ever written is enforced rather than silently skipped.
+
+**Proven by two disjoint mutations, the wrapper restored byte-identical after each**
+(md5 `bc86104a68c9a43b341a08bd07f78ac1`):
+
+- **Mutation 1 — neuter the block path:** exactly the **7 block** tests RED, 7 allow + control green.
+- **Mutation 2 — sever the whole `afterSuccess` path:** exactly the **7 allow** tests RED, 7 block +
+  control green.
+
+The suite (`api/__tests__/d2-gap-wiring.route.test.ts`, **15 tests**) registers a **real** guard via
+`registerMutationGuards()` with `runRouteMutationGuards` **UNMOCKED**, and drives the real handlers.
+
+**Measured after (working tree, `search` fixed):** `search` **7 → 0** unguarded (wrapper class **0 → 7**);
+**total 41 → 34**; repo-wide wrapper class **114 → 121**; guarded-only **196 → 204**. **Closure:
+121 + 0 + 35 + 42 + 5 + 0 + 8 + 1 + 1 + 9 + 0 + 34 = 256.** `search` **26 suites / 269 tests green**;
+`search` `tsc --noEmit` clean.
+
+**A hostile critic pass found nothing.** A separate agent enumerated every route file (exactly 7 write
+verbs), quoted each guard call line, grepped for any alternate write path (zero crud-factory hits),
+confirmed the wrapper imports and calls the real `runRouteMutationGuards`, and confirmed the proof suite
+does **not** mock `route-mutation-guard` or `mutation-guard-registry`. Its one-line verdict:
+"STRONGEST COUNTER-EXAMPLE FOUND: NONE."
+
 ## Method, so this can be re-run and cannot rot
 
 ```bash

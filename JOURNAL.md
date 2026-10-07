@@ -48,11 +48,11 @@ so it is exactly the surface a Hermes tool call reaches with no authorization de
 means "no deprecated resolver left", never "the module is guarded".
 
 **The measurement (re-runnable, so it cannot rot):** 35 enabled modules · **256 write verbs** ·
-**50 unguarded now** (**58 before the `attachments` fix**, **68 before the `workflows` fix**, **78 before the `notifications` tool fix**, **88 before the `inbox_ops` fix**, **99 before the `business_rules` fix**, **111 before the `auth` fix**, **122 before the `communication_channels` tool fix**, **143 before the `messages` registry-bypass fix**, **158 before the `ai_assistant` fix**, **160 before the `audit_logs` fix**) · 8 auth-flow verbs set aside · 1 actor-less verb set aside (`inbox_ops` `webhook/inbound`) · 1 read-only "write verb" set aside (`workflows` `instances/validate-start`) · 196 guarded
-(114 wrapper · 35 crud · 42 local helper · 5 re-export; 205 = guarded + the two set-aside buckets, stated so the figure cannot be quoted without its meaning; closure 114+0+35+42+5+0+8+1+1+50 = 256).
+**34 unguarded now** (**41 before the `search` fix**, **50 before the `attachments` fix**, **58 before the `workflows` fix**, **68 before the `notifications` tool fix**, **78 before the `inbox_ops` fix**, **88 before the `business_rules` fix**, **99 before the `auth` fix**, **111 before the `communication_channels` tool fix**, **122 before the `messages` registry-bypass fix**, **143 before the `ai_assistant` fix**, **160 before the `audit_logs` fix**) · 8 auth-flow verbs set aside · 1 actor-less verb set aside (`inbox_ops` `webhook/inbound`) · 1 read-only "write verb" set aside (`workflows` `instances/validate-start`) · **9 guard-system verbs set aside** (`ai_assistant` session/flow + pending-action gate) · 204 guarded
+(121 wrapper · 35 crud · 42 local helper · 5 re-export; 211 = guarded + the four set-aside buckets, stated so the figure cannot be quoted without its meaning; closure 121+0+35+42+5+0+8+1+1+9+0+34 = 256).
 Per module, unguarded: `ai_assistant`
 **9 (now FIXED)** · `messages` **0 (FIXED — registry-bypass, see below)** · `communication_channels` **4 (mis-labelled — 11 were already guarded; see Fix 4)** · `auth` **0 (now FIXED — see Fix 5)** · `business_rules` **0 (now FIXED — see Fix 6)** · `inbox_ops` **0 (now FIXED — 9 wired, 1 actor-less set aside; see Fix 7)** · `notifications` **0 (now FIXED — tool only; all 10 were already guarded; see Fix 8)** ·
-`workflows` **0 (now FIXED — 9 wired, 1 read-only set aside; see Fix 9)** · `attachments` **0 (now FIXED — all 8 wired through a new wrapper; see Fix 10)** · `search` 7 · `webhooks` 7 · `configs`/
+`workflows` **0 (now FIXED — 9 wired, 1 read-only set aside; see Fix 9)** · `attachments` **0 (now FIXED — all 8 wired through a new wrapper; see Fix 10)** · `search` **0 (now FIXED — all 7 wired through a new wrapper; see Fix 11)** · `webhooks` 7 · `configs`/
 `currencies`/`entities` 4 · `integrations` **0 (FIXED — registry-bypass)** · `progress` 3 · `directory` 3 · `dashboards` 2 · `onboarding`/
 `data_sync`/`scheduler` 1 · **0** for `dictionaries`, `feature_toggles`, `perspectives`, `planner`,
 `query_index`, `translations`, `api_keys` — and **`audit_logs` 0 (now FIXED)**.
@@ -299,6 +299,34 @@ one route's guard removed (`transfer`) → **only that route RED**; whole `after
 **106 → 114**; guarded-only **188 → 196**; closure **114+0+35+42+5+0+8+1+1+50 = 256**; whole
 `attachments` module **26 suites / 206 tests green**; core `tsc --noEmit` exit 0.
 
+**Fix 11 of the sweep — `search` was a REAL D2-gap, and the cleanest kind: a module with NO guard
+mechanism at all (2026-10-07, repo `workspace/starting-kit`).** Measured as **7 unguarded verbs across 7
+files** — the joint-largest left with `webhooks`. A string scan of the whole module found **no wrapper, no
+`runRouteMutationGuards`, no `makeCrudRoute`, neither `@deprecated` name**, so a guard set for
+`search.index` / `search.settings` would have been **silently skipped**. **Premise measured before the
+fix** — the standing rule this sweep has now paid for four times: **two routes that share no failure mode
+agree** (the tool's `--json` and a hand walk of every `.ts` under `api/` both find exactly 7 write verbs
+across 7 files, none referencing a guard). The label was right. **All 7 are now wired** through a **new**
+`beginSearchMutationGuard()` (`api/mutation-guard.ts`, mirroring the `attachments`/`workflows` shape incl.
+the `runAfterSuccess(resourceIdOverride)` rebind): `api/embeddings/reindex` POST,
+`api/embeddings/reindex/cancel` POST, `api/embeddings` POST, `api/index` DELETE, `api/reindex` POST,
+`api/reindex/cancel` POST — kind `search.index` — and `api/settings/global-search` POST — kind
+`search.settings`. **What was NOT missing** — all 7 already enforce their own capability
+(`search.embeddings.manage`, `search.reindex`, `search.manage`) and carry tenant+org scope; the wrapper
+adds the **structural chokepoint**, it does not replace any route's own validation or audit story. And
+`search` ships **no `data/guards.ts`**, so no `search.*` guard exists today — the wiring means the **first**
+such guard is enforced, not silently skipped. **Proof:** new `d2-gap-wiring.route.test.ts`, **15 tests**
+(7 block + 7 allow + 1 control), a **real** guard registered in the global store (`runRouteMutationGuards`
+**unmocked**) driving the **real** handlers. **Two disjoint mutations** each reddened exactly the expected
+tests, wrapper restored byte-identical (md5 `bc86104a68c9a43b341a08bd07f78ac1`): block path neutered →
+**7 block RED** (7 allow + control green); whole `afterSuccess` path severed → **7 allow RED** (7 block +
+control green). **A hostile critic pass found nothing** — a separate agent enumerated every route file
+(exactly 7 write verbs), quoted each guard call line, grepped for alternate write paths (zero crud-factory
+hits), and confirmed the proof suite does **not** mock the registry. Its verdict: "STRONGEST
+COUNTER-EXAMPLE FOUND: NONE." `search` **7 → 0**; **total 41 → 34**; wrapper class **114 → 121**;
+guarded-only **196 → 204**; closure **121+0+35+42+5+0+8+1+1+9+0+34 = 256**; whole `search` module **26
+suites / 269 tests green**; `search` `tsc --noEmit` exit 0.
+
 **Your job now — work `D2-gap` module by module, largest first.** The measurement names the shape of
 each fix: route the unguarded writes through a per-module wrapper, so the module has **one** guard
 chokepoint rather than two mechanisms — **but check first whether the module already ships its own
@@ -306,7 +334,7 @@ wrapper, as `auth`, `communication_channels`, `inbox_ops` and `workflows` all di
 before spending files on a fix the label implies (the two `execute/*` routes looked like non-writes and
 were writes; an actor-less route like `inbox_ops`' webhook cannot be wired at all; and a read-only POST
 like `workflows`' `validate-start` must NOT be wired — both are set aside by name).** **Next module:
-`ai_assistant` (9 unguarded verbs — now the largest), then `search` (7) and `webhooks` (7).**
+`webhooks` (7 unguarded verbs — now the joint-largest), then `configs` and `currencies` (4 each).**
 Then the rest. Protocol for each: **measure from the artefact**
 (re-run `measure.js` and read the module's own routes); **name the control that actually protects each
 route today** (many are protected by other means — record it, do not over-claim); **prove the fix with

@@ -258,7 +258,7 @@ between (A) and (B) is made against a stated need rather than against "the file 
 the entities fix was proven (§2c). Then the parked set is recorded — **not migrated** — as graft-phase work
 in [`CORE-MODULES-REGISTER.md`](CORE-MODULES-REGISTER.md) and the backlog.
 
-## 2f. `D2-gap` — the write routes that call NO guard (measured 2026-10-06; SIX fixes: four D2-gap modules, one registry-bypass class, and one mis-labelled module where the TOOL was the defect)
+## 2f. `D2-gap` — the write routes that call NO guard (measured 2026-10-06; ELEVEN fixes recorded: eight D2-gap modules, one registry-bypass class, two modules where the TOOL or the label was the defect)
 
 **Why it exists.** `D2-wide` (above) retires the **deprecated** resolver at call sites that still *call*
 a guard. `D2-gap` is the **other half**: write routes that call **no guard of any kind** — not the module
@@ -278,15 +278,16 @@ comparable with the backlog record.
 |---|---|
 | enabled modules with a source tree | **35** |
 | write verbs across those modules | **256** |
-| **unguarded write verbs (the `D2-gap`)** | **50 now** — **58 before the `attachments` fix** (`88582bd`), **68 before the `workflows` fix** (`a9ecd21`), **78 before the `notifications` tool fix** (HEAD `0350563`, no repo change), **88 before the `inbox_ops` fix** (`0350563`), **99 before the `business_rules` fix** (`c9a6bb6`), **111 before the `auth` fix**, **122 before the `communication_channels` tool fix**, **143 before the `messages` registry-bypass fix**, **158 before the `ai_assistant` fix**, **160 before the `audit_logs` fix** |
+| **unguarded write verbs (the `D2-gap`)** | **34 now** — **41 before the `search` fix** (`HEAD-search`), **50 before the `attachments` fix** (`88582bd`), **58 before the `workflows` fix** (`a9ecd21`), **68 before the `notifications` tool fix** (HEAD `0350563`, no repo change), **78 before the `inbox_ops` fix** (`0350563`), **88 before the `business_rules` fix** (`c9a6bb6`), **99 before the `auth` fix**, **111 before the `communication_channels` tool fix**, **122 before the `messages` registry-bypass fix**, **143 before the `ai_assistant` fix**, **160 before the `audit_logs` fix** |
 | auth-flow verbs set aside by design | 8 |
 | **actor-less verbs set aside by design** | **1** (`inbox_ops/api/webhook/inbound.ts` — a public endpoint with no session; see the `inbox_ops` record below) |
 | **read-only "write verb" set aside by design** | **1** (`workflows/api/instances/validate-start/route.ts` — a POST that performs no write; see the `workflows` record below) |
-| guarded verbs | **196** (114 wrapper · 35 `makeCrudRoute`/`crud.` · 42 module-local helper · 5 re-exported guarded factory · 0 deprecated) |
-| *guarded + the two set-aside buckets (not a write to guard)* | *205 = 196 + 8 + 1* |
+| **guard-system verbs set aside by design** | **9** (`ai_assistant` session/flow + pending-action gate — governed by their own mechanisms; added to the tool 2026-10-07 so the figure stopped over-claiming by 9) |
+| guarded verbs | **204** (121 wrapper · 35 `makeCrudRoute`/`crud.` · 42 module-local helper · 5 re-exported guarded factory · 0 deprecated) |
+| *guarded + the four set-aside buckets (not a write to guard)* | *211 = 204 + 8 + 1 + 1 + 9* |
 
-**The split is computed by the tool, not assumed, and every verb is accounted for:** 114 + 0 (registry) + 35 + 42 (local helper) + 5 + 0 +
-8 (auth-flow) + 1 (actor-less) + 1 (read-only) + 50 (unguarded) = **256**. *(A first draft carried 33/26/29 forward from memory; the tool
+**The split is computed by the tool, not assumed, and every verb is accounted for:** 121 + 0 (registry) + 35 + 42 (local helper) + 5 + 0 +
+8 (auth-flow) + 1 (actor-less) + 1 (read-only) + 9 (guard-system) + 0 (lock-floor) + 34 (unguarded) = **256**. *(A first draft carried 33/26/29 forward from memory; the tool
 reads 50/35/5, and the closure check is what caught it. **A second closure check caught a label drift in
 the "guarded" row:** the columns once read 88 · 90 · 113 · 134, where 113/134 were `guarded + auth-flow`
 and the 8 was double-counted against the 256. Corrected to the guarded-only series **88 · 90 · 105 · 126 ·
@@ -309,7 +310,8 @@ would have prevented the `auth`-onward file-count slip. `audit_logs` (§ below) 
 
 **Per module (unguarded verbs):** `ai_assistant` **9 (FIXED, below)** · `messages` **0 (FIXED — registry-bypass, below)** · `communication_channels` **4 (mis-labelled — 11 of 15 were already guarded; the tool, not the code, was the defect — below)** ·
 `auth` **0 (FIXED — a real D2-gap, 12 verbs wired through the module's own `beginAuthMutationGuard`; the routes were already capability-guarded, only the registry chokepoint was missing — below)** · `business_rules` **0 (FIXED — a real D2-gap, 11 verbs wired through a new `beginBusinessRulesMutationGuard`; the routes were already capability-guarded — below)** · `inbox_ops` **0 (FIXED — a real D2-gap, 9 verbs wired through the module's own `beginInboxOpsMutationGuard`; the 10th is actor-less and set aside by name — below)** · `notifications` **0 (TOOL FIX — all 10 already guarded through a registry-backed local helper; not a D2-gap — below)** · `workflows` **0 (FIXED — a real D2-gap, 9 verbs wired through the module's own `beginWorkflowsMutationGuard`; the 10th is a read-only POST and set aside by name — below)** · `attachments` **0 (FIXED — a real D2-gap, all 8 verbs wired through a new `beginAttachmentsMutationGuard`; a module with NO guard mechanism at all — below)** ·
-`ai_assistant` **9** · `search` 7 · `webhooks` 7 · `configs` 4 · `currencies` 4 · `entities` 4 ·
+`search` **0 (FIXED — a real D2-gap, all 7 verbs wired through a new `beginSearchMutationGuard`; a module with NO guard mechanism at all; the routes were already capability-guarded, only the registry chokepoint was missing)** ·
+`ai_assistant` **9** · `webhooks` 7 · `configs` 4 · `currencies` 4 · `entities` 4 ·
 `integrations` **0 (FIXED — registry-bypass, below)** · `progress` 3 · `directory` 3 · `dashboards` 2 · `audit_logs` **0 (FIXED, below)** ·
 `onboarding` 1 · `data_sync` 1 · `scheduler` 1 · and **0** for `dictionaries`, `feature_toggles`,
 `perspectives`, `planner`, `query_index`, `translations`, `api_keys`.
