@@ -7,6 +7,7 @@ import { resolveTranslations } from '@open-mercato/shared/lib/i18n/server'
 import { resolveFeatureCheckContext } from '@open-mercato/core/modules/directory/utils/organizationScope'
 import { executeUpgradeAction, getCurrentVersion, isUpgradeActionsEnabled, listPendingUpgradeActions } from '../../services/upgradeActionsService'
 import type { EntityManager } from '@mikro-orm/postgresql'
+import { beginConfigsMutationGuard } from '../mutation-guard'
 import {
   configsTag,
   upgradeActionsListResponseSchema,
@@ -32,7 +33,7 @@ type Scope = { tenantId: string; organizationId: string }
 async function resolveScope(
   req: Request,
   translate: (key: string, fallback?: string, params?: Record<string, unknown>) => string,
-): Promise<{ scope: Scope | null; container: Awaited<ReturnType<typeof createRequestContainer>> | null; error?: Response }> {
+): Promise<{ scope: Scope | null; container: Awaited<ReturnType<typeof createRequestContainer>> | null; authSub?: string | null; error?: Response }> {
   const auth = await getAuthFromRequest(req)
   if (!auth?.sub) {
     return { scope: null, container: null, error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) }
@@ -46,11 +47,12 @@ async function resolveScope(
       'upgrades.scopeRequired',
       'Select an organization and tenant to apply this upgrade.'
     )
-    return { scope: null, container, error: NextResponse.json({ error: message }, { status: 400 }) }
+    return { scope: null, container, authSub: auth.sub, error: NextResponse.json({ error: message }, { status: 400 }) }
   }
   return {
     scope: { tenantId, organizationId },
     container,
+    authSub: auth.sub,
   }
 }
 
@@ -123,6 +125,19 @@ export async function POST(req: Request) {
   const container = scopeResult.container ?? (await createRequestContainer())
   const version = getCurrentVersion()
 
+  const guard = await beginConfigsMutationGuard({
+    container,
+    tenantId: scopeResult.scope.tenantId,
+    organizationId: scopeResult.scope.organizationId,
+    userId: scopeResult.authSub,
+    req,
+    resourceKind: 'configs.upgradeActionRun',
+    resourceId: parsed.data.actionId,
+    operation: 'custom',
+    mutationPayload: { actionId: parsed.data.actionId, version },
+  })
+  if (guard.blockedResponse) return guard.blockedResponse
+
   try {
     const result = await executeUpgradeAction(container, {
       actionId: parsed.data.actionId,
@@ -130,6 +145,7 @@ export async function POST(req: Request) {
       organizationId: scopeResult.scope.organizationId,
       version,
     })
+    await guard.runAfterSuccess()
     const successMessage = translate(
       result.action.successKey,
       'Example catalog products and categories installed.'
