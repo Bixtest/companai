@@ -72,18 +72,22 @@
 
 ## A. THE SUBSTRATE — Ring 1, uncustomisable core (`CORE-BOUNDARY.md` C1–C11)
 
-- ☐ **C1** — Resource envelope: the shape every object shares *(OPEN — not built)*
-- ☐ **C2** — Actor & context model: who is acting and in what context *(PART — `principal.ts`; needs the full model)* · ★ Hermes: the seam every run crosses
-- ☐ **C3** — Tenancy & isolation boundary: every row belongs to a tenant and cannot escape it *(DONE in code — not yet verified this round)* · ★ Hermes: the tenant is derived, never declared
-- ☐ **C4** — Authorization engine: the evaluator and grammar *(PART — resolver in `shadow` only)* · ★ Hermes: S-02 is where a tool call is authorized
-- ☐ **C5** — Metadata registry & schema conventions *(OPEN — GAP A)* · ★ Hermes: how Hermes learns the shape of the business without a DB handle
-- ☐ **C6** — Command / action contract: schema · permissions · side effects · risk · approval · idempotency *(PART — command bus exists)*
-- ☐ **C7** — Event envelope (CloudEvents-shaped) *(PART — `packages/events` exists, no envelope)*
-- ☐ **C8** — Audit contract: every mutation records who · what · when · before · after · actor_type · trace *(PART — `actor_type` incomplete)*
-- ☐ **C9** — Migration & versioning contract: plan → validate → migrate → verify *(PART)*
-- ☐ **C10** — Localization resolution: fallback chain + formatting contracts *(PART — GAP C)*
-- ☐ **C11** — Error model: code · message · details · field_errors · retryable · trace *(OPEN)*
-- ☐ **Ring-1 enforcement** — no config key for core; migration contract the only door; a test asserts the core *(OPEN)*
+> **Fact-checked in the code 2026-10-07** — every line below was read against the source, not the docs.
+> Verdicts: `NOT DONE` (no code), `PARTIAL` (real code, incomplete), `DONE` (verified, 100%).
+> **No line in this section is `☑`** — and now that is a *measured* result, not a carried claim.
+
+- ☐ **C1** — Resource envelope: the shape every object shares *(NOT DONE — no `ResourceEnvelope`/`BaseEntity`/shared base type anywhere in `shared` or `core`; each module declares its own `tenantId`/`organizationId` columns independently)*
+- ☐ **C2** — Actor & context model: who is acting and in what context *(PARTIAL — substantial: `shared/src/lib/auth/principal.ts` (215 lines) is a real first-class `Principal` with 4 kinds (`human`/`ai_worker`/`service`/`system`), `onBehalfOfUserId`, machine predicates, and it replaced the old `startsWith('api_key:')` branching; what is missing is the wider **context** (org/locale/tz/trace) as one model)* · ★ Hermes: the seam every run crosses
+- ☐ **C3** — Tenancy & isolation boundary: every row belongs to a tenant and cannot escape it *(PARTIAL — substantial: the CRUD factory auto-scopes by `tenantField` (default `'tenantId'`) on every read/write (`shared/src/lib/crud/factory.ts`); **no** DB-level RLS policies were found, so isolation is enforced in the query layer, not by the database)* · ★ Hermes: the tenant is derived, never declared
+- ☐ **C4** — Authorization engine: the evaluator and grammar *(PARTIAL — `shared/src/lib/authority/` (1312 lines: `decision.ts` 582 · `shadow-report.ts` 217 · `shadow.ts` 215 · `graph.ts` 182 · `preflight.ts` 116) builds an explainable `Decision` with reasons; but `decision.ts` states in its own header: **"It does not enforce. Nothing calls it in the request path; the existing RBAC checks still decide who may do what"** — shadow mode runs it beside RBAC and records, never obeys)* · ★ Hermes: S-02 is where a tool call is authorized
+- ☐ **C5** — Metadata registry & schema conventions *(PARTIAL — the Business Model Kernel `shared/src/lib/kernel/model.ts` (407 lines) **reads** the platform's declarations into a canonical, id-keyed model with a 21-item per-object contract, and `entity-fields-registry` is registered at bootstrap; but it is a **view over `custom_field_defs`/`custom_entity`**, not the queryable service C5 names — nothing answers "who owns it / what depends on it / who can access it")* · ★ Hermes: how Hermes learns the shape of the business without a DB handle
+- ☐ **C6** — Command / action contract: schema · permissions · side effects · risk · approval · idempotency *(PARTIAL — a real command bus exists (`shared/src/lib/commands/`: `command-bus.ts`, `types.ts`, `undo.ts`, `redo.ts`, `registry.ts`, `operationMetadata.ts`, interceptors, scopes); `types.ts` carries input/execute/undo/redo/capability; whether the *full* contract (risk · approval · idempotency) is uniform across every action was not established)*
+- ☐ **C7** — Event envelope (CloudEvents-shaped) *(NOT DONE — the entire `shared/src/lib/events/` directory is `patterns.ts` + its test; there is **no envelope type** at all. A separate `packages/events` package exists but was not the envelope)*
+- ☐ **C8** — Audit contract: every mutation records who · what · when · before · after · actor_type · trace *(PARTIAL — the `audit_logs` module is real (`packages/core/src/modules/audit_logs/`, with API, undo/redo, export, a mutation-guard, and a CLI); it records user/action/field/before/after/createdAt; `actor_type` and a request/trace id are not confirmed complete)*
+- ☐ **C9** — Migration & versioning contract: plan → validate → migrate → verify *(NOT DONE — per-module MikroORM migration folders exist (`<module>/migrations`), but there is **no** plan/validate/verify contract: a grep for `planMigration`/`validateMigration`/`verifyMigration`/`migrationPlan` across `shared` and `core` finds nothing)*
+- ☐ **C10** — Localization resolution: fallback chain + formatting contracts *(PARTIAL — `shared/src/lib/i18n/locale.ts` has a real resolution chain (`resolveLocaleFromCandidates`: requested → base-locale → null), plus `number.ts` and `date/format.ts`; but the specified five-step chain (requested → lang+region → lang → app default → platform) and the formatting **contracts** (as a contract, not helpers) are incomplete — GAP C)*
+- ☐ **C11** — Error model: code · message · details · field_errors · retryable · trace *(NOT DONE — `shared/src/lib/crud/errors.ts` builds only `{ error: message }` (`badRequest`/`forbidden`/`notFound`/`conflict`); the tokens `field_errors`/`retryable` appear scattered across files, not as one canonical error model)*
+- ☐ **Ring-1 enforcement** — no config key for core; migration contract the only door; a test asserts the core *(NOT DONE — no test asserting the core contracts was found, and the migration contract (C9) that was to be "the only door" does not exist)*
 
 ---
 
@@ -367,6 +371,30 @@ sandboxed, passes 8/8 with the sandbox bypassed**). So the shared layer is **gre
 | `B-05` | the decision is recorded in docs; `api/chat/route.ts` still imports OpenCode, no Hermes port | **not built — demoted from `☑` to `☐` (decided ≠ implemented)** |
 | The Hermes port | `api/chat/route.ts` still imports `createOpenCodeClient` / `opencode-handlers`; `opencode-handlers.ts:178` reads `OPENCODE_URL` | **NOT built — OpenCode still occupies the slot (N-8 accurate)** |
 | Hermes id seam | `principal.ts` exports `aiWorkerSubject` / `derivePrincipal` / `PrincipalKind` | **seam is real (PART — not ticked)** |
+
+### Verified in code this round — SECTION A (`C1`–`C11`), fact-checked line by line
+
+Every line of §A was read against the source on 2026-10-07. **Result: 0 `DONE`, 8 `PARTIAL`, 4 `NOT DONE`.**
+
+| Point | What the code shows | Verdict |
+|---|---|---|
+| `C1` Resource envelope | no `ResourceEnvelope`/`BaseEntity`/shared base type in `shared` or `core`; modules declare their own `tenantId`/`organizationId` columns | **NOT DONE** |
+| `C2` Actor & context | `shared/src/lib/auth/principal.ts` (215 lines) — first-class `Principal`, 4 kinds, `onBehalfOfUserId`, machine predicates; wider context model absent | **PARTIAL** |
+| `C3` Tenancy | `shared/src/lib/crud/factory.ts` auto-scopes by `tenantField` (default `'tenantId'`); **no** DB-level RLS policies found | **PARTIAL** |
+| `C4` Authz engine | `shared/src/lib/authority/` (1312 lines) builds an explainable `Decision`; `decision.ts` header: *"It does not enforce. Nothing calls it in the request path"* | **PARTIAL** |
+| `C5` Metadata registry | `shared/src/lib/kernel/model.ts` (407 lines) = a **view** over `custom_field_defs`/`custom_entity`; no service answering owner/dependents/access | **PARTIAL** |
+| `C6` Command contract | `shared/src/lib/commands/` command bus is real (`command-bus.ts`, `types.ts`, `undo`/`redo`, interceptors, scopes); full contract not established | **PARTIAL** |
+| `C7` Event envelope | `shared/src/lib/events/` = `patterns.ts` + test only; **no envelope type** | **NOT DONE** |
+| `C8` Audit contract | `packages/core/src/modules/audit_logs/` real (API, undo/redo, export, mutation-guard, CLI); `actor_type`/trace not confirmed complete | **PARTIAL** |
+| `C9` Migration contract | per-module `<module>/migrations` exist; grep for `planMigration`/`validateMigration`/`verifyMigration` = **nothing** | **NOT DONE** |
+| `C10` Localization | `shared/src/lib/i18n/locale.ts` chain (`resolveLocaleFromCandidates`) + `number.ts`/`date/format.ts`; five-step chain + contracts incomplete | **PARTIAL** |
+| `C11` Error model | `shared/src/lib/crud/errors.ts` = `{ error: message }` only; `field_errors`/`retryable` scattered, no canonical model | **NOT DONE** |
+| Ring-1 enforcement | no test asserting the core; the C9 migration contract it depends on does not exist | **NOT DONE** |
+
+> **Why this matters (owner's goal #2):** the old §A said C3 was *"DONE in code"*, C5/C11 were *"OPEN"*,
+> and the rest *"PART"* — **all of it inherited from the document, none of it checked.** The check shows
+> **C3 is PARTIAL, not DONE** (no DB-level isolation), and **C5 is PARTIAL, not OPEN** (the kernel view
+> exists). The document was wrong in both directions; the code settles it.
 
 ### Carried — a doc claims `DONE`, the code was **not** re-verified this round (so: `☐`)
 
