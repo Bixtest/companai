@@ -122,4 +122,36 @@ describe('staff leave-requests accept route mutation guard', () => {
     expect(mockExecute).toHaveBeenCalled()
     expect(mockRunStaffMutationGuardAfterSuccess).not.toHaveBeenCalled()
   })
+
+  // D3 (escalate): a guard may return `ok:true` **and** an escalation — "hold
+  // this for a person". Before D3 this route checked only `!ok`, so the
+  // escalation was ok:true and the decision would have been EXECUTED. The
+  // staged claim (202 + no command) is what makes that impossible to re-open.
+  it('holds the decision when the guard escalates, and never executes the command', async () => {
+    mockRunStaffMutationGuards.mockResolvedValueOnce({
+      ok: true,
+      escalation: {
+        gate: 'A3',
+        rule: 'staff.leave-review',
+        because: 'Leave above the auto-approve threshold needs a manager.',
+      },
+      afterSuccessCallbacks: [],
+    })
+
+    const response = await postHandler(buildRequest())
+
+    // 202: the request was understood and HELD — not performed.
+    expect(response.status).toBe(202)
+    await expect(response.json()).resolves.toEqual({
+      status: 'pending_review',
+      escalation: {
+        gate: 'A3',
+        rule: 'staff.leave-review',
+        because: 'Leave above the auto-approve threshold needs a manager.',
+      },
+    })
+    // The decisive assertion: the command that accepts the leave never ran.
+    expect(mockExecute).not.toHaveBeenCalled()
+    expect(mockRunStaffMutationGuardAfterSuccess).not.toHaveBeenCalled()
+  })
 })

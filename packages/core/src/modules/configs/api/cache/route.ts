@@ -138,6 +138,16 @@ export async function POST(req: Request) {
           { status: guardResult.errorStatus ?? 422 },
         )
       }
+      // D3: a guard asked for a review — return BEFORE the purge. This route is
+      // the one inline raw-registry call site, so `!guardResult.ok` alone is not
+      // enough here: an escalate is ok:true and would otherwise fall through to
+      // `cache.clear()` below, purging on a decision nobody made.
+      if (guardResult.escalation) {
+        return NextResponse.json(
+          { status: 'pending_review', escalation: guardResult.escalation },
+          { status: guardResult.escalation.status ?? 202 },
+        )
+      }
       afterSuccessCallbacks = guardResult.afterSuccessCallbacks
     }
 

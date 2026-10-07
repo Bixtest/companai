@@ -192,9 +192,12 @@ export async function beginAuthMutationGuard(
     },
   })
 
-  if (!guardResult.ok) {
+  if (!guardResult.ok || guardResult.escalated) {
     return {
-      blockedResponse: NextResponse.json(guardResult.errorBody, { status: guardResult.errorStatus }),
+      blockedResponse: NextResponse.json(
+        ("errorBody" in guardResult) ? guardResult.errorBody : { status: "pending_review", escalation: guardResult.escalation },
+        { status: guardResult.errorStatus },
+      ),
       runAfterSuccess: async () => undefined,
     }
   }

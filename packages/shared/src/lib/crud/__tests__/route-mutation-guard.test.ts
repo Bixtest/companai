@@ -293,4 +293,106 @@ describe('runRouteMutationGuards', () => {
       { err: resolutionError },
     )
   })
+
+  // D3 — the route wrapper is where consumers read the result, so the three
+  // outcomes must be distinguishable *here*, not only in the runner.
+  describe('escalate (D3)', () => {
+    const escalation = {
+      gate: 'A3',
+      rule: 'things.review-required',
+      because: 'High-value thing edits need a second pair of eyes.',
+    }
+
+    it('returns escalated:true, ok:true and a 202 response — held, not performed', async () => {
+      const guard = makeGuard({
+        id: 'escalating-guard',
+        validate: jest.fn().mockResolvedValue({ ok: true, escalation }),
+      })
+      registerStoreGuards([guard])
+
+      const result = await runRouteMutationGuards({
+        container: makeContainer(),
+        req: makeRequest(),
+        auth: baseAuth,
+        input: baseInput,
+      })
+
+      expect(result.ok).toBe(true)
+      if (!result.ok) throw new Error('expected a non-blocked result')
+      expect(result.escalated).toBe(true)
+      if (!result.escalated) throw new Error('expected an escalated result')
+      expect(result.escalation).toEqual(escalation)
+      // 202 by default: the request was accepted *and held*, never 2xx-as-committed.
+      expect(result.errorStatus).toBe(202)
+      expect(result.response.status).toBe(202)
+      await expect(result.response.json()).resolves.toEqual({
+        status: 'pending_review',
+        escalation: { gate: 'A3', rule: 'things.review-required', because: 'High-value thing edits need a second pair of eyes.' },
+      })
+    })
+
+    it('honours an explicit escalation status when the guard supplies one', async () => {
+      const guard = makeGuard({
+        id: 'escalating-with-status',
+        validate: jest.fn().mockResolvedValue({ ok: true, escalation: { ...escalation, status: 409 } }),
+      })
+      registerStoreGuards([guard])
+
+      const result = await runRouteMutationGuards({
+        container: makeContainer(),
+        req: makeRequest(),
+        auth: baseAuth,
+        input: baseInput,
+      })
+
+      if (!result.ok || !result.escalated) throw new Error('expected an escalated result')
+      expect(result.errorStatus).toBe(409)
+      expect(result.response.status).toBe(409)
+    })
+
+    it('does not expose runAfterSuccess or modifiedPayload on an escalated result', async () => {
+      const guard = makeGuard({
+        id: 'escalating-guard',
+        validate: jest.fn().mockResolvedValue({ ok: true, escalation, modifiedPayload: { sneaky: true } }),
+      })
+      registerStoreGuards([guard])
+
+      const result = await runRouteMutationGuards({
+        container: makeContainer(),
+        req: makeRequest(),
+        auth: baseAuth,
+        input: baseInput,
+      })
+
+      if (!result.ok || !result.escalated) throw new Error('expected an escalated result')
+      // The trap this closes: reading `ok:true` and then calling runAfterSuccess()
+      // on a write that never happened.
+      expect('runAfterSuccess' in result).toBe(false)
+      expect('modifiedPayload' in result).toBe(false)
+    })
+
+    it('lets the bridged legacy DI guard escalate too (no new interface needed)', async () => {
+      // A legacy service only speaks ok/block; but a *registry* guard escalating
+      // must still win over a legacy pass, so the union is exercised end-to-end.
+      const guard = makeGuard({
+        id: 'escalating-guard',
+        validate: jest.fn().mockResolvedValue({ ok: true, escalation }),
+      })
+      registerStoreGuards([guard])
+      const legacyService = {
+        validateMutation: jest.fn().mockResolvedValue({ ok: true }),
+        afterMutationSuccess: jest.fn().mockResolvedValue(undefined),
+      }
+
+      const result = await runRouteMutationGuards({
+        container: makeContainer({ crudMutationGuardService: legacyService }),
+        req: makeRequest('PUT'),
+        auth: baseAuth,
+        input: baseInput,
+      })
+
+      if (!result.ok || !result.escalated) throw new Error('expected an escalated result')
+      expect(result.escalation.rule).toBe('things.review-required')
+    })
+  })
 })

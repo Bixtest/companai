@@ -112,7 +112,11 @@ export async function POST(req: Request) {
       mutationPayload: parsed.data as unknown as Record<string, unknown>,
     }
     const guardResult = await runStaffMutationGuards(container, guardInput, resolveUserFeatures(auth))
-    if (!guardResult.ok) {
+    if (!guardResult.ok || guardResult.escalation) {
+      // D3: an escalate is ok:true — return before the mutation runs.
+      if (guardResult.escalation) {
+        return NextResponse.json({ status: 'pending_review', escalation: guardResult.escalation }, { status: guardResult.escalation.status ?? 202 })
+      }
       return NextResponse.json(
         guardResult.errorBody ?? { error: 'Operation blocked by guard' },
         { status: guardResult.errorStatus ?? 422 },

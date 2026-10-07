@@ -4,6 +4,7 @@ import {
   runMutationGuards,
   type MutationGuard,
   type MutationGuardInput,
+  type MutationGuardRunResult,
 } from '@open-mercato/shared/lib/crud/mutation-guard-registry'
 import { getAllMutationGuardInstances } from '@open-mercato/shared/lib/crud/mutation-guard-store'
 
@@ -22,13 +23,7 @@ export async function runPaymentGatewayMutationGuards(
   container: AwilixContainer,
   input: MutationGuardInput,
   userFeatures: string[],
-): Promise<{
-  ok: boolean
-  errorBody?: Record<string, unknown>
-  errorStatus?: number
-  modifiedPayload?: Record<string, unknown>
-  afterSuccessCallbacks: GuardAfterCallback[]
-}> {
+): Promise<MutationGuardRunResult> {
   // Run every guard from the global mutation-guard store, plus the bridged
   // legacy DI service — the same set `makeCrudRoute` writes enforce
   // (`collectAndRunGuards()` in `crud/factory.ts`). Previously this ran ONLY

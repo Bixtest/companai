@@ -159,9 +159,12 @@ export async function beginFeatureTogglesMutationGuard(
 
   const guardResult = await callGuards(ctx.resourceId)
 
-  if (!guardResult.ok) {
+  if (!guardResult.ok || guardResult.escalated) {
     return {
-      blockedResponse: NextResponse.json(guardResult.errorBody, { status: guardResult.errorStatus }),
+      blockedResponse: NextResponse.json(
+        ("errorBody" in guardResult) ? guardResult.errorBody : { status: "pending_review", escalation: guardResult.escalation },
+        { status: guardResult.errorStatus },
+      ),
       runAfterSuccess: async () => undefined,
     }
   }
@@ -177,7 +180,7 @@ export async function beginFeatureTogglesMutationGuard(
       // created override row). Re-collect the guard set for the produced id —
       // safe because `validate` is a pure predicate — and run its callbacks.
       const rebound = await callGuards(idOverride)
-      if (rebound.ok) await rebound.runAfterSuccess()
+      if (rebound.ok && !rebound.escalated) await rebound.runAfterSuccess()
     },
   }
 }

@@ -118,7 +118,7 @@ export async function runGuardedNotificationWrite<T>(
       mutationPayload: options.payload ?? null,
     },
   })
-  if (!guarded.ok) {
+  if (!guarded.ok || guarded.escalated) {
     return { ok: false, response: guarded.response }
   }
 

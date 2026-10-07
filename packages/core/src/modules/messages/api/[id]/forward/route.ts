@@ -35,7 +35,11 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     },
     resolveUserFeatures(ctx.auth),
   )
-  if (!guardResult.ok) {
+  if (!guardResult.ok || guardResult.escalation) {
+    // D3: an escalate is ok:true — return before the mutation runs.
+    if (guardResult.escalation) {
+      return Response.json({ status: 'pending_review', escalation: guardResult.escalation }, { status: guardResult.escalation.status ?? 202 })
+    }
     return Response.json(
       guardResult.errorBody ?? { error: 'Operation blocked by guard' },
       { status: guardResult.errorStatus ?? 422 },

@@ -88,9 +88,12 @@ export async function beginDictionariesMutationGuard(
 
   const guardResult = await callGuards(ctx.resourceId)
 
-  if (!guardResult.ok) {
+  if (!guardResult.ok || guardResult.escalated) {
     return {
-      blockedResponse: NextResponse.json(guardResult.errorBody, { status: guardResult.errorStatus }),
+      blockedResponse: NextResponse.json(
+        ("errorBody" in guardResult) ? guardResult.errorBody : { status: "pending_review", escalation: guardResult.escalation },
+        { status: guardResult.errorStatus },
+      ),
       runAfterSuccess: async () => undefined,
     }
   }
@@ -106,7 +109,7 @@ export async function beginDictionariesMutationGuard(
       // callbacks bound to that id, then run them. `validate` is a pure
       // predicate (see the guard contract), so re-running it has no effect.
       const rebound = await callGuards(resourceIdOverride)
-      if (rebound.ok) await rebound.runAfterSuccess()
+      if (rebound.ok && !rebound.escalated) await rebound.runAfterSuccess()
     },
   }
 }

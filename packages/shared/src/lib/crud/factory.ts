@@ -2251,6 +2251,14 @@ export function makeCrudRoute<TCreate = any, TUpdate = any, TList = any>(opts: C
         if (!guardResult.ok) {
           return json(guardResult.errorBody ?? { error: 'Operation blocked by guard' }, { status: guardResult.errorStatus ?? 422 })
         }
+        // D3: a guard asked for a review — the mutation must NOT run. Returning
+        // before the write keeps "held for a person" from becoming a silent commit.
+        if (guardResult.escalation) {
+          return json(
+            { status: 'pending_review', escalation: guardResult.escalation },
+            { status: guardResult.escalation.status ?? 202 },
+          )
+        }
         if (guardResult.modifiedPayload && typeof input === 'object' && input) {
           input = createConfig.schema.parse({ ...input as Record<string, unknown>, ...guardResult.modifiedPayload })
         }
@@ -2458,6 +2466,13 @@ export function makeCrudRoute<TCreate = any, TUpdate = any, TList = any>(opts: C
           if (!guardResult.ok) {
             return json(guardResult.errorBody ?? { error: 'Operation blocked by guard' }, { status: guardResult.errorStatus ?? 422 })
           }
+          // D3: held for a person, not run.
+          if (guardResult.escalation) {
+            return json(
+              { status: 'pending_review', escalation: guardResult.escalation },
+              { status: guardResult.escalation.status ?? 202 },
+            )
+          }
           if (guardResult.modifiedPayload && typeof input === 'object' && input) {
             input = { ...input as Record<string, unknown>, ...guardResult.modifiedPayload }
           }
@@ -2591,6 +2606,13 @@ export function makeCrudRoute<TCreate = any, TUpdate = any, TList = any>(opts: C
         }, { userFeatures: updateUserFeatures ?? [] })
         if (!guardResult.ok) {
           return json(guardResult.errorBody ?? { error: 'Operation blocked by guard' }, { status: guardResult.errorStatus ?? 422 })
+        }
+        // D3: held for a person, not run.
+        if (guardResult.escalation) {
+          return json(
+            { status: 'pending_review', escalation: guardResult.escalation },
+            { status: guardResult.escalation.status ?? 202 },
+          )
         }
         if (guardResult.modifiedPayload && typeof input === 'object' && input) {
           input = updateConfig.schema.parse({ ...input as Record<string, unknown>, ...guardResult.modifiedPayload })
@@ -2807,6 +2829,13 @@ export function makeCrudRoute<TCreate = any, TUpdate = any, TList = any>(opts: C
           if (!guardResult.ok) {
             return json(guardResult.errorBody ?? { error: 'Operation blocked by guard' }, { status: guardResult.errorStatus ?? 422 })
           }
+          // D3: held for a person, not run.
+          if (guardResult.escalation) {
+            return json(
+              { status: 'pending_review', escalation: guardResult.escalation },
+              { status: guardResult.escalation.status ?? 202 },
+            )
+          }
           cmdDeleteGuardAfterCallbacks = guardResult.afterSuccessCallbacks
         }
         const baseMetadata: CommandLogMetadata = {
@@ -2920,6 +2949,13 @@ export function makeCrudRoute<TCreate = any, TUpdate = any, TList = any>(opts: C
         }, { userFeatures: deleteUserFeatures ?? [] })
         if (!guardResult.ok) {
           return json(guardResult.errorBody ?? { error: 'Operation blocked by guard' }, { status: guardResult.errorStatus ?? 422 })
+        }
+        // D3: held for a person, not run.
+        if (guardResult.escalation) {
+          return json(
+            { status: 'pending_review', escalation: guardResult.escalation },
+            { status: guardResult.escalation.status ?? 202 },
+          )
         }
         deleteGuardAfterCallbacks = guardResult.afterSuccessCallbacks
       }

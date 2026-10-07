@@ -96,10 +96,10 @@ export async function beginSchedulerMutationGuard(
     },
   })
 
-  if (!guardResult.ok) {
+  if (!guardResult.ok || guardResult.escalated) {
     return {
       blockedResponse: NextResponse.json(
-        guardResult.errorBody,
+        ("errorBody" in guardResult) ? guardResult.errorBody : { status: "pending_review", escalation: guardResult.escalation },
         { status: guardResult.errorStatus ?? 422 },
       ),
       runAfterSuccess: async () => {},

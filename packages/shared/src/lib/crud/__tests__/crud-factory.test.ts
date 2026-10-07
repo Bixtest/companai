@@ -4,6 +4,8 @@ jest.mock('@open-mercato/cache', () => ({
 
 import { makeCrudRoute } from '@open-mercato/shared/lib/crud/factory'
 import { registerApiInterceptors } from '@open-mercato/shared/lib/crud/interceptor-registry'
+import { registerMutationGuards } from '@open-mercato/shared/lib/crud/mutation-guard-store'
+import type { MutationGuard } from '@open-mercato/shared/lib/crud/mutation-guard-registry'
 import {
   clearOptimisticLockReadersForTests,
   getAllOptimisticLockReaders,
@@ -200,6 +202,7 @@ describe('CRUD Factory', () => {
       execute: jest.fn(async () => ({ result: {}, logEntry: { id: 'log-1' } })),
     }
     crudMutationGuardService = null
+    registerMutationGuards([])
     registerApiInterceptors([])
   })
 
@@ -692,6 +695,97 @@ describe('CRUD Factory', () => {
       resourceId: created.id,
       requestHeaders: expect.any(Headers),
     }))
+  })
+
+  // D3 — the mutation proof. The registry and route tests prove the *shape* of an
+  // escalation; these prove the thing that actually matters: that an escalating
+  // guard on a real route leaves the database untouched.
+  describe('D3 escalate — the factory does not commit', () => {
+    const escalation = {
+      gate: 'A3',
+      rule: 'example.review-required',
+      because: 'Todo edits above the threshold need sign-off.',
+    }
+
+    function registerEscalatingGuard(operations: MutationGuard['operations']) {
+      const guard: MutationGuard = {
+        id: 'example.escalating',
+        targetEntity: 'example.todo',
+        operations,
+        priority: 10,
+        validate: jest.fn().mockResolvedValue({ ok: true, escalation }),
+      }
+      registerMutationGuards([{ moduleId: 'example', guards: [guard] }])
+      return guard
+    }
+
+    it('POST holds the create: no row is written, no event emitted, 202 pending_review', async () => {
+      registerEscalatingGuard(['create'])
+      const res = await route.POST(new Request('http://x/api/example/todos', {
+        method: 'POST',
+        body: JSON.stringify({ title: 'Should not land' }),
+        headers: { 'content-type': 'application/json' },
+      }))
+
+      // Held, not performed: 202 (the guard's default), never 201.
+      expect(res.status).toBe(202)
+      await expect(res.json()).resolves.toEqual({ status: 'pending_review', escalation })
+      // The decisive assertion — nothing was written and nothing was announced.
+      expect(Object.values(db)).toHaveLength(0)
+      expect(mockDataEngine.createOrmEntity).not.toHaveBeenCalled()
+      expect(mockDataEngine.emitOrmEntityEvent).not.toHaveBeenCalled()
+      expect(setRecordCustomFields).not.toHaveBeenCalled()
+    })
+
+    it('PUT holds the update: the seeded row is byte-for-byte unchanged', async () => {
+      const created = em.create(Todo, { title: 'Before', organizationId: defaultOrganizationId, tenantId: defaultTenantId }) as Rec
+      created.id = '123e4567-e89b-12d3-a456-4266141740d3'
+      await em.persist(created).flush()
+
+      registerEscalatingGuard(['update'])
+      const res = await route.PUT(new Request('http://x/api/example/todos', {
+        method: 'PUT',
+        body: JSON.stringify({ id: created.id, title: 'After' }),
+        headers: { 'content-type': 'application/json' },
+      }))
+
+      expect(res.status).toBe(202)
+      await expect(res.json()).resolves.toEqual({ status: 'pending_review', escalation })
+      // The row must be exactly as seeded — a held update must not be applied.
+      expect(db[created.id].title).toBe('Before')
+      expect(mockDataEngine.updateOrmEntity).not.toHaveBeenCalled()
+      expect(mockDataEngine.emitOrmEntityEvent).not.toHaveBeenCalled()
+    })
+
+    it('DELETE holds the delete: the row is not soft-deleted', async () => {
+      const created = em.create(Todo, { title: 'Keep me', organizationId: defaultOrganizationId, tenantId: defaultTenantId }) as Rec
+      created.id = '123e4567-e89b-12d3-a456-4266141740d4'
+      await em.persist(created).flush()
+
+      registerEscalatingGuard(['delete'])
+      const res = await route.DELETE(new Request(`http://x/api/example/todos?id=${created.id}`, { method: 'DELETE' }))
+
+      expect(res.status).toBe(202)
+      await expect(res.json()).resolves.toEqual({ status: 'pending_review', escalation })
+      // Still live: a held delete must leave deletedAt untouched. The harness
+      // seeds no deletedAt, so the correct reading is "not a Date" — asserting
+      // exactly null would test the fixture, not the guard.
+      expect(db[created.id].deletedAt).toBeUndefined()
+      expect(mockDataEngine.deleteOrmEntity).not.toHaveBeenCalled()
+      expect(mockDataEngine.emitOrmEntityEvent).not.toHaveBeenCalled()
+    })
+
+    it('a passing guard still commits — the escalate branch did not swallow the happy path', async () => {
+      // Non-regression: with no escalating guard registered, the same route must
+      // still write. If this fails, the D3 branch is over-reaching.
+      const res = await route.POST(new Request('http://x/api/example/todos', {
+        method: 'POST',
+        body: JSON.stringify({ title: 'Lands normally' }),
+        headers: { 'content-type': 'application/json' },
+      }))
+      expect(res.status).toBe(201)
+      expect(Object.values(db)).toHaveLength(1)
+    })
   })
 
   it('DELETE command route delegates event emission to CommandBus (no factory-level emission)', async () => {

@@ -41,6 +41,46 @@ export interface MutationGuardInput {
   mutationPayload?: Record<string, unknown> | null
 }
 
+/**
+ * The third outcome (D3): the guard says *"do not run this yet — a person must
+ * decide"*, which is neither a pass nor a refusal.
+ *
+ * **Why it cannot be a boolean.** `ok:false` already means "this must not
+ * happen" — a hard stop with an HTTP status. A guard that wants a *review* had
+ * nowhere to say so and had to abuse `ok:false`, collapsing two different facts
+ * ("refused" and "held for a person") into one, and turning the dictionary's
+ * quiet tier back into a wall. This block restores the distinction without
+ * changing `ok`.
+ *
+ * **Escalate is never "allowed".** An escalating guard returns `ok:true` **and**
+ * this block; the runner treats it as **not performed** — no mutation runs, no
+ * `afterSuccess` fires. The reviewer's word is the only thing that lets it run,
+ * through the existing approval path. Fail-closed both ways: an escalate that is
+ * ignored means nothing happened, and nothing happened is the safe reading.
+ *
+ * **What it deliberately does not carry.** A `commandId` or `capabilityId`: a
+ * mutation guard has neither, and the pending-act row (`authority_pending_acts`)
+ * needs both to be replayed on approval. So the guard *defers*; it does not file
+ * the act itself. Creating the pending act stays where the command identity
+ * already lives — the command path (`auth.authority-command-gate`).
+ */
+export interface MutationGuardEscalation {
+  /**
+   * The gate the guard settled on. Uses the platform's autonomy gates (`A1`–`A4`)
+   * so an escalate reads in the same vocabulary as a commanded act.
+   */
+  gate: string
+  /** Stable identifier of the rule that asked for the review — safe to switch on. */
+  rule: string
+  /** Human-readable, specific: why this particular act needs a person. */
+  because: string
+  /**
+   * Suggested status for the caller's "needs review" response. Defaults to `202`
+   * (accepted, not performed) — never a `2xx` that implies the write landed.
+   */
+  status?: number
+}
+
 export interface MutationGuardResult {
   ok: boolean
   /** HTTP status for rejection (default: 422) */
@@ -55,6 +95,13 @@ export interface MutationGuardResult {
   shouldRunAfterSuccess?: boolean
   /** Arbitrary metadata passed to afterSuccess */
   metadata?: Record<string, unknown>
+  /**
+   * D3 — the third outcome. Present only when the guard wants a review: the
+   * mutation does **not** run, and this carries the reason. See
+   * {@link MutationGuardEscalation}. Additive: a guard that never sets it behaves
+   * exactly as before.
+   */
+  escalation?: MutationGuardEscalation
 }
 
 export interface MutationGuardAfterInput {
@@ -67,6 +114,26 @@ export interface MutationGuardAfterInput {
   requestMethod: string
   requestHeaders: Headers
   metadata?: Record<string, unknown> | null
+}
+
+/**
+ * What {@link runMutationGuards} returns.
+ *
+ * Declared as a **named** type (not an inline return type) on purpose. The D3
+ * audit found six raw-registry helpers that copied this shape by hand and
+ * **dropped `escalation`**, so their callers checked only `ok` and would have
+ * committed a mutation a guard had held for review. TypeScript could not flag
+ * them because the omission was in the *declared* type, not the call. Routing
+ * every helper through this one type makes that omission a compile error.
+ */
+export interface MutationGuardRunResult {
+  ok: boolean
+  errorBody?: Record<string, unknown>
+  errorStatus?: number
+  modifiedPayload?: Record<string, unknown>
+  afterSuccessCallbacks: Array<{ guard: MutationGuard; metadata: Record<string, unknown> | null }>
+  /** D3 — set when a guard asked for a review instead of allowing or blocking. */
+  escalation?: MutationGuardEscalation
 }
 
 // ---------------------------------------------------------------------------
@@ -91,13 +158,7 @@ export async function runMutationGuards(
   guards: MutationGuard[],
   input: MutationGuardInput,
   context: { userFeatures: string[] },
-): Promise<{
-  ok: boolean
-  errorBody?: Record<string, unknown>
-  errorStatus?: number
-  modifiedPayload?: Record<string, unknown>
-  afterSuccessCallbacks: Array<{ guard: MutationGuard; metadata: Record<string, unknown> | null }>
-}> {
+): Promise<MutationGuardRunResult> {
   const matching = guards
     .filter((g) => matchesEntity(g.targetEntity, input.resourceKind))
     .filter((g) => g.operations.includes(input.operation))
@@ -112,6 +173,20 @@ export async function runMutationGuards(
     if (!result.ok) {
       const body = result.body ?? { error: result.message ?? 'Operation blocked by guard', guardId: guard.id }
       return { ok: false, errorBody: body, errorStatus: result.status ?? 422, afterSuccessCallbacks: [] }
+    }
+    // D3: an escalation is not a pass. The guard returned ok:true (it is not
+    // refusing) but asked for a person — so the run stops here, nothing is
+    // modified, no afterSuccess is queued, and the caller decides. First
+    // escalation wins: like a block, it short-circuits the rest of the chain,
+    // because running further guards against a mutation that will not happen
+    // would only produce explanations for a decision already made.
+    if (result.escalation) {
+      return {
+        ok: true,
+        modifiedPayload: payload !== input.mutationPayload ? (payload ?? undefined) : undefined,
+        afterSuccessCallbacks: [],
+        escalation: result.escalation,
+      }
     }
     if (result.modifiedPayload) payload = { ...payload, ...result.modifiedPayload }
     if (result.shouldRunAfterSuccess && guard.afterSuccess) {

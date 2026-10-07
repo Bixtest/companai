@@ -57,7 +57,7 @@ export async function validateRouteMutationGuard(params: {
     },
   })
 
-  if (!guarded.ok) {
+  if (!guarded.ok || guarded.escalated) {
     return { response: guarded.response }
   }
 

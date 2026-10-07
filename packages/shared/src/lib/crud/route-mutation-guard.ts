@@ -3,6 +3,7 @@ import {
   bridgeLegacyGuard,
   runMutationGuards,
   type MutationGuard,
+  type MutationGuardEscalation,
 } from './mutation-guard-registry'
 import { getAllMutationGuardInstances } from './mutation-guard-store'
 import { createLogger } from '../logger'
@@ -52,14 +53,44 @@ export type RouteMutationGuardInput = {
 
 export type RouteMutationGuardBlocked = {
   ok: false
+  /**
+   * Discriminant, present on **all three** variants so a caller can narrow with a
+   * plain `if (result.escalated)` / `if (!result.ok || result.escalated)`.
+   * TypeScript narrows on a literal-typed field only when every member declares
+   * it, so `false` here is not decoration — it is what makes the escalate branch
+   * reachable in one condition instead of an `'escalated' in result` dance.
+   */
+  escalated: false
   errorStatus: number
   errorBody: Record<string, unknown>
   /** Ready-to-return JSON response built from `errorBody` / `errorStatus`. */
   response: Response
 }
 
+/**
+ * D3 — a guard asked for a review: the mutation did **not** run, and a person
+ * must decide. Distinct from `Blocked` (a refusal) and from `Passed` (ran).
+ *
+ * The discriminant is `escalated: true`, so a caller that only checks `ok` sees
+ * `ok:true` and **must not** read that as "the write landed" — it did not. That
+ * is why this type carries no `modifiedPayload` and no `runAfterSuccess`: there
+ * is nothing that ran, and offering either would be an invitation to commit
+ * uncommitted work. A ready `response` is provided for the common case.
+ */
+export type RouteMutationGuardEscalated = {
+  escalated: true
+  ok: true
+  errorStatus: number
+  /** The guard's reason, in the platform's decision vocabulary. */
+  escalation: MutationGuardEscalation
+  /** Ready-to-return JSON response describing the pending review. */
+  response: Response
+}
+
 export type RouteMutationGuardPassed = {
   ok: true
+  /** Discriminant — see {@link RouteMutationGuardBlocked}. */
+  escalated: false
   /** Merged payload when a guard transformed it; `undefined` when unchanged. */
   modifiedPayload?: Record<string, unknown>
   /**
@@ -70,7 +101,10 @@ export type RouteMutationGuardPassed = {
   runAfterSuccess: () => Promise<void>
 }
 
-export type RouteMutationGuardResult = RouteMutationGuardBlocked | RouteMutationGuardPassed
+export type RouteMutationGuardResult =
+  | RouteMutationGuardBlocked
+  | RouteMutationGuardEscalated
+  | RouteMutationGuardPassed
 
 type RbacServiceLike = {
   getGrantedFeatures: (
@@ -152,14 +186,40 @@ export async function runRouteMutationGuards(params: {
     const errorBody = guardResult.errorBody ?? { error: 'Operation blocked by guard' }
     return {
       ok: false,
+      escalated: false,
       errorStatus,
       errorBody,
       response: Response.json(errorBody, { status: errorStatus }),
     }
   }
 
+  // D3: a guard asked for a review. Return before the passed branch, so no
+  // caller can mistake "held for a person" for "the write went through". The
+  // status defaults to 202 Accepted — the request was understood and *held*, not
+  // performed — carried in the guard's own vocabulary (`gate`, `rule`, `because`).
+  if (guardResult.escalation) {
+    const escalation = guardResult.escalation
+    const errorStatus = escalation.status ?? 202
+    const errorBody = {
+      status: 'pending_review',
+      escalation: {
+        gate: escalation.gate,
+        rule: escalation.rule,
+        because: escalation.because,
+      },
+    }
+    return {
+      escalated: true,
+      ok: true,
+      errorStatus,
+      escalation,
+      response: Response.json(errorBody, { status: errorStatus }),
+    }
+  }
+
   return {
     ok: true,
+    escalated: false,
     modifiedPayload: guardResult.modifiedPayload,
     runAfterSuccess: async () => {
       for (const { guard, metadata } of guardResult.afterSuccessCallbacks) {
