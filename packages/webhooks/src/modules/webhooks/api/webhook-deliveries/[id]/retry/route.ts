@@ -3,6 +3,7 @@ import type { OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
 import { enqueueWebhookDelivery } from '../../../../lib/queue'
 import { isWebhookIntegrationEnabled } from '../../../../lib/integration-state'
 import { findScopedDelivery, json, resolveWebhookRequestScope, serializeDeliveryDetail } from '../../../helpers'
+import { beginWebhooksMutationGuard } from '../../../mutation-guard'
 
 export const metadata = {
   POST: { requireAuth: true, requireFeatures: ['webhooks.manage'] },
@@ -60,6 +61,21 @@ export async function POST(request: Request, context: RouteContext): Promise<Res
     return json({ error: 'Custom Webhooks integration is disabled' }, { status: 409 })
   }
 
+  // Registry mutation-guard chokepoint (D2-gap). Runs after the route's own
+  // scope resolution, existence check and integration-enabled gate, and before
+  // the delivery status reset + flush.
+  const guard = await beginWebhooksMutationGuard({
+    container: scope.container,
+    req: request,
+    tenantId: scope.tenantId,
+    organizationId: scope.organizationId,
+    userId: scope.userId,
+    resourceKind: 'webhooks.delivery',
+    resourceId: delivery.id,
+    operation: 'custom',
+  })
+  if (guard.blockedResponse) return guard.blockedResponse
+
   delivery.status = 'pending'
   delivery.nextRetryAt = null
   delivery.errorMessage = null
@@ -70,6 +86,8 @@ export async function POST(request: Request, context: RouteContext): Promise<Res
     tenantId: delivery.tenantId,
     organizationId: delivery.organizationId,
   })
+
+  await guard.runAfterSuccess()
 
   return json({
     success: true,

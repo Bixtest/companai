@@ -3,6 +3,7 @@ import type { OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
 import { createWebhookDelivery, processWebhookDeliveryJob } from '../../../../lib/delivery'
 import { isWebhookIntegrationEnabled } from '../../../../lib/integration-state'
 import { findScopedWebhook, json, resolveWebhookRequestScope, serializeDeliveryDetail } from '../../../helpers'
+import { beginWebhooksMutationGuard } from '../../../mutation-guard'
 
 export const metadata = {
   POST: { requireAuth: true, requireFeatures: ['webhooks.test'] },
@@ -70,6 +71,27 @@ export async function POST(request: Request, context: RouteContext): Promise<Res
     return json({ error: 'Invalid request payload' }, { status: 400 })
   }
 
+  // Registry mutation-guard chokepoint (D2-gap). Runs after the route's own
+  // scope resolution, existence check, integration-enabled gate and body parse,
+  // and before the delivery row is created. The delivery id is materialised by
+  // `createWebhookDelivery`, so the guard validates against the target webhook
+  // and `afterSuccess` is re-bound to the final delivery id below.
+  const guard = await beginWebhooksMutationGuard({
+    container: scope.container,
+    req: request,
+    tenantId: scope.tenantId,
+    organizationId: scope.organizationId,
+    userId: scope.userId,
+    resourceKind: 'webhooks.delivery',
+    resourceId: webhook.id,
+    operation: 'create',
+    mutationPayload: {
+      eventType: parsed.data.eventType ?? null,
+      webhookId: webhook.id,
+    },
+  })
+  if (guard.blockedResponse) return guard.blockedResponse
+
   const delivery = await createWebhookDelivery({
     em,
     webhook,
@@ -88,6 +110,8 @@ export async function POST(request: Request, context: RouteContext): Promise<Res
   }, { scheduleRetries: false })
 
   await em.refresh(delivery)
+
+  await guard.runAfterSuccess(delivery.id)
 
   return json({
     success: true,

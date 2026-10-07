@@ -6,6 +6,7 @@ import { findScopedWebhook, json, resolveWebhookRequestScope, serializeWebhookDe
 import { webhookUpdateSchema } from '../../../data/validators'
 import { enforceCommandOptimisticLockWithGuards } from '@open-mercato/shared/lib/crud/optimistic-lock-command'
 import { isCrudHttpError } from '@open-mercato/shared/lib/crud/errors'
+import { beginWebhooksMutationGuard } from '../../mutation-guard'
 
 export const metadata = {
   GET: { requireAuth: true, requireFeatures: ['webhooks.view'] },
@@ -83,6 +84,21 @@ export async function PUT(request: Request, context: RouteContext): Promise<Resp
     throw err
   }
 
+  // Registry mutation-guard chokepoint (D2-gap). Runs after the route's own
+  // scope resolution, existence check and optimistic-lock gate, and before the
+  // field writes + flush.
+  const guard = await beginWebhooksMutationGuard({
+    container: scope.container,
+    req: request,
+    tenantId: scope.tenantId,
+    organizationId: scope.organizationId,
+    userId: scope.userId,
+    resourceKind: 'webhooks.endpoint',
+    resourceId: webhook.id,
+    operation: 'update',
+  })
+  if (guard.blockedResponse) return guard.blockedResponse
+
   const parsed = webhookUpdateSchema.safeParse(await request.json().catch(() => null))
   if (!parsed.success) {
     return json({ error: 'Invalid request payload' }, { status: 400 })
@@ -112,6 +128,8 @@ export async function PUT(request: Request, context: RouteContext): Promise<Resp
     tenantId: webhook.tenantId,
   }, { persistent: true })
 
+  await guard.runAfterSuccess()
+
   return json(serializeWebhookDetail(webhook))
 }
 
@@ -140,6 +158,21 @@ export async function DELETE(request: Request, context: RouteContext): Promise<R
     throw err
   }
 
+  // Registry mutation-guard chokepoint (D2-gap). Runs after the route's own
+  // scope resolution, existence check and optimistic-lock gate, and before the
+  // soft-delete write.
+  const guard = await beginWebhooksMutationGuard({
+    container: scope.container,
+    req: request,
+    tenantId: scope.tenantId,
+    organizationId: scope.organizationId,
+    userId: scope.userId,
+    resourceKind: 'webhooks.endpoint',
+    resourceId: webhook.id,
+    operation: 'delete',
+  })
+  if (guard.blockedResponse) return guard.blockedResponse
+
   webhook.deletedAt = new Date()
   await em.flush()
 
@@ -148,6 +181,8 @@ export async function DELETE(request: Request, context: RouteContext): Promise<R
     organizationId: webhook.organizationId,
     tenantId: webhook.tenantId,
   }, { persistent: true })
+
+  await guard.runAfterSuccess()
 
   return json({ success: true })
 }

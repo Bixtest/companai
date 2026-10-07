@@ -12,6 +12,14 @@ export type WebhookRequestScope = {
   tenantId: string
   organizationId: string | null
   allowedOrganizationIds: string[] | null
+  /**
+   * The authenticated actor id (`auth.sub`). Exposed so write routes can feed
+   * the mutation-guard registry, which evaluates a guard against a real actor
+   * (see `beginWebhooksMutationGuard`). `resolveWebhookRequestScope` already
+   * reads `auth` and returns 401 when it is absent, so this is non-null on any
+   * scope that reaches a write.
+   */
+  userId: string | null
 }
 
 export function json(payload: unknown, init: ResponseInit = { status: 200 }): Response {
@@ -45,6 +53,7 @@ export async function resolveWebhookRequestScope(request: Request): Promise<Webh
     tenantId,
     organizationId,
     allowedOrganizationIds,
+    userId: auth.sub ?? null,
   }
 }
 

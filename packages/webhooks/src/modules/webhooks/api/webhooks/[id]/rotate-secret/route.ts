@@ -3,6 +3,7 @@ import type { OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
 import { generateWebhookSecret } from '@open-mercato/shared/lib/webhooks'
 import { emitWebhooksEvent } from '../../../../events'
 import { findScopedWebhook, json, resolveWebhookRequestScope } from '../../../helpers'
+import { beginWebhooksMutationGuard } from '../../../mutation-guard'
 
 export const metadata = {
   POST: { requireAuth: true, requireFeatures: ['webhooks.secrets'] },
@@ -32,6 +33,20 @@ export async function POST(request: Request, context: RouteContext): Promise<Res
     return json({ error: 'Webhook not found' }, { status: 404 })
   }
 
+  // Registry mutation-guard chokepoint (D2-gap). Runs after the route's own
+  // scope resolution and existence check, and before the secret rotation write.
+  const guard = await beginWebhooksMutationGuard({
+    container: scope.container,
+    req: request,
+    tenantId: scope.tenantId,
+    organizationId: scope.organizationId,
+    userId: scope.userId,
+    resourceKind: 'webhooks.endpoint',
+    resourceId: webhook.id,
+    operation: 'update',
+  })
+  if (guard.blockedResponse) return guard.blockedResponse
+
   webhook.previousSecret = webhook.secret
   webhook.previousSecretSetAt = new Date()
   webhook.secret = generateWebhookSecret()
@@ -42,6 +57,8 @@ export async function POST(request: Request, context: RouteContext): Promise<Res
     organizationId: webhook.organizationId,
     tenantId: webhook.tenantId,
   })
+
+  await guard.runAfterSuccess()
 
   return json({
     success: true,
