@@ -17,6 +17,7 @@ import { isCrudHttpError } from '@open-mercato/shared/lib/crud/errors'
 import { getModules } from '@open-mercato/shared/lib/i18n/server'
 import { assertEntityAclForRequest } from '../lib/entityAcl'
 import { createLogger } from '@open-mercato/shared/lib/logger'
+import { beginEntitiesMutationGuard } from './definitions.mutation-guard'
 
 const logger = createLogger('entities').child({ component: 'records' })
 
@@ -69,6 +70,16 @@ async function findScopedCustomEntity(em: any, CustomEntity: any, entityId: stri
   return null
 }
 
+// Resource kind for a doc-storage record write. It feeds TWO seams: the
+// optimistic-lock floor on PUT/DELETE (`enforceCommandOptimisticLockWithGuards`)
+// AND — since the D2-gap wiring — the mutation-guard registry on all three
+// verbs (`beginEntitiesMutationGuard`). The floor and the registry are different
+// mechanisms: `...WithGuards` refers to the *command* optimistic-lock guard
+// service and never consults `getAllMutationGuardInstances()`. Before this
+// wiring the file reached no registry guard at all, and POST reached nothing
+// whatsoever; the file as a whole therefore read as a D2-gap even though two of
+// its three verbs sat on the floor. It now goes through the module wrapper like
+// every other entities write.
 const CUSTOM_ENTITY_RECORD_RESOURCE_KIND = 'entities.record'
 
 type RecordsEntityKind = 'system' | 'custom' | 'unknown'
@@ -429,7 +440,8 @@ export async function POST(req: Request) {
   let { recordId, values } = parsed.data as { recordId?: string; values: Record<string, any> }
 
   try {
-    const { resolve } = await createRequestContainer()
+    const container = await createRequestContainer()
+    const { resolve } = container
     const de = resolve('dataEngine') as any
     const em = resolve('em') as any
     const rbac = resolve('rbacService') as RbacService
@@ -465,6 +477,16 @@ export async function POST(req: Request) {
       const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
       return uuid.test(raw) ? raw : undefined
     })()
+    const guard = await beginEntitiesMutationGuard({
+      container,
+      auth,
+      req,
+      resourceKind: CUSTOM_ENTITY_RECORD_RESOURCE_KIND,
+      resourceId: normalizedRecordId ?? entityId,
+      operation: 'create',
+      mutationPayload: { entityId, values: norm },
+    })
+    if (guard.blockedResponse) return guard.blockedResponse
     const { id } = await de.createCustomEntityRecord({
       entityId,
       recordId: normalizedRecordId,
@@ -472,6 +494,7 @@ export async function POST(req: Request) {
       tenantId: auth.tenantId!,
       values: norm,
     })
+    await guard.runAfterSuccess()
 
     return NextResponse.json({ ok: true, item: { entityId, recordId: id } })
   } catch (e) {
@@ -536,6 +559,22 @@ export async function PUT(req: Request) {
     const low = rid.toLowerCase()
     const isSentinel = !rid || low === 'create' || low === 'new' || low === 'null' || low === 'undefined'
     const isUuid = uuidRe.test(rid)
+
+    // One guard call covers both PUT outcomes. This verb writes on BOTH branches:
+    // a sentinel/non-uuid recordId falls through to a CREATE, otherwise it is an
+    // UPDATE. The operation and resourceId therefore depend on which branch runs,
+    // and the guard must see the operation that actually happens.
+    const guard = await beginEntitiesMutationGuard({
+      container,
+      auth,
+      req,
+      resourceKind: CUSTOM_ENTITY_RECORD_RESOURCE_KIND,
+      resourceId: isSentinel || !isUuid ? entityId : rid,
+      operation: isSentinel || !isUuid ? 'create' : 'update',
+      mutationPayload: { entityId, values: norm },
+    })
+    if (guard.blockedResponse) return guard.blockedResponse
+
     if (isSentinel || !isUuid) {
       const created = await de.createCustomEntityRecord({
         entityId,
@@ -544,6 +583,7 @@ export async function PUT(req: Request) {
         tenantId: auth.tenantId!,
         values: norm,
       })
+      await guard.runAfterSuccess()
       return NextResponse.json({ ok: true, item: { entityId, recordId: created.id } })
     }
 
@@ -573,6 +613,7 @@ export async function PUT(req: Request) {
       tenantId: auth.tenantId!,
       values: norm,
     })
+    await guard.runAfterSuccess()
     return NextResponse.json({ ok: true, item: { entityId, recordId: rid } })
   } catch (e) {
     if (isCrudHttpError(e)) return NextResponse.json(e.body, { status: e.status })
@@ -633,7 +674,19 @@ export async function DELETE(req: Request) {
       throw lockError
     }
 
+    const guard = await beginEntitiesMutationGuard({
+      container,
+      auth,
+      req,
+      resourceKind: CUSTOM_ENTITY_RECORD_RESOURCE_KIND,
+      resourceId: recordId,
+      operation: 'delete',
+      mutationPayload: { entityId, recordId },
+    })
+    if (guard.blockedResponse) return guard.blockedResponse
+
     await de.deleteCustomEntityRecord({ entityId, recordId, organizationId: targetOrgId, tenantId: auth.tenantId!, soft: true })
+    await guard.runAfterSuccess()
     return NextResponse.json({ ok: true })
   } catch (e) {
     if (isCrudHttpError(e)) return NextResponse.json(e.body, { status: e.status })

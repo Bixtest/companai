@@ -3,11 +3,25 @@ import { z } from 'zod'
 import { getAuthFromRequest } from '@open-mercato/shared/lib/auth/server'
 import { createRequestContainer } from '@open-mercato/shared/lib/di/container'
 import type { OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
+import { beginEntitiesMutationGuard } from './definitions.mutation-guard'
 
 // Tenant-scoped policy: when true, new custom entities are created with
 // `access_restricted = true` unless the create request explicitly sets the flag.
 const CONFIG_MODULE = 'entities'
 const NEW_ENTITIES_RESTRICTED_KEY = 'newEntitiesRestrictedByDefault'
+
+// D2-gap: the PUT below writes the tenant's `entities` module config row
+// (`moduleConfigService.setValue`) and, before this wiring, reached NO guard at
+// all — not the registry, not the optimistic-lock floor. The `access_restricted`
+// policy this setting controls is a security control (it decides whether a new
+// custom entity is visible cross-org by default), so a write that flips it must
+// pass the same structural guard seam as every other entities write. It goes
+// through the existing module wrapper (`beginEntitiesMutationGuard`), which runs
+// `runRouteMutationGuards()`; `entities` ships a `data/guards.ts`, but no guard
+// is registered for this resource kind today, so the registry content is the
+// bridged legacy service — the point of the wiring is that the seam now exists,
+// so the first guard this kind ever ships is enforced rather than skipped.
+const ENTITY_SETTINGS_RESOURCE_KIND = 'entities.settings'
 
 export const metadata = {
   GET: { requireAuth: true, requireFeatures: ['entities.definitions.view'] },
@@ -62,7 +76,18 @@ export async function PUT(req: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: 'Validation failed', details: parsed.error.flatten() }, { status: 400 })
   }
-  const { resolve } = await createRequestContainer()
+  const container = await createRequestContainer()
+  const { resolve } = container
+  const guard = await beginEntitiesMutationGuard({
+    container,
+    auth,
+    req,
+    resourceKind: ENTITY_SETTINGS_RESOURCE_KIND,
+    resourceId: NEW_ENTITIES_RESTRICTED_KEY,
+    operation: 'update',
+    mutationPayload: { newEntitiesRestrictedByDefault: parsed.data.newEntitiesRestrictedByDefault },
+  })
+  if (guard.blockedResponse) return guard.blockedResponse
   const moduleConfigService = resolve('moduleConfigService') as ModuleConfigServiceLike
   await moduleConfigService.setValue(
     CONFIG_MODULE,
@@ -70,6 +95,7 @@ export async function PUT(req: Request) {
     parsed.data.newEntitiesRestrictedByDefault,
     { tenantId: auth.tenantId ?? null },
   )
+  await guard.runAfterSuccess()
   return NextResponse.json({ ok: true, newEntitiesRestrictedByDefault: parsed.data.newEntitiesRestrictedByDefault })
 }
 
