@@ -71,10 +71,13 @@ before-state exists at each write site, so the shared guard contract was not tou
 **and the merge into `role_acls.features_json` is now atomic** (one SQL `UPDATE`, `jsonb ||` deduped by
 `group by elem` with first-occurrence order, `returning` so the DB is the source of truth — no lost update
 under a race; proven against live Postgres 17 with a concurrent-session test **and** a negative control —
-CC-16, 2026-10-08).
-**82 SD-1 tests; 40 mutations RED-then-GREEN across eight slices, each restore md5-verified; `shared`
+CC-16, 2026-10-08) — **and the batch path now names every key it writes** so the reserved-key guard runs on
+it (`keys: definitions.map(d => d.key)`; the guards read the list via the new `readFieldKeys`; the measured
+hole was the *reserved* key — a malformed key was already refused by zod 400 on both routes — CC-18,
+2026-10-08).
+**89 SD-1 tests; 44 mutations RED-then-GREEN across nine slices, each restore md5-verified; `shared`
 197/2329 — 8 fail in the one suite of CC-19 (a host process-creation failure, not code), `core` 625/5403,
-typecheck 0.** **Six** hostile-critic passes plus two mutation/premise-found defects (twenty-four real
+typecheck 0.** **Seven** hostile-critic passes plus two mutation/premise-found defects (twenty-four real
 defects) — all fixed or named (`PLAN-SD-1.md` §9).
 
 **It is still PARTIAL — but ALL headline limits are closed.** A gate that decides but does not record was
@@ -83,14 +86,14 @@ ungated; it now runs the same gate. The **non-request** field paths (module inst
 `add-field` CLI) were ungated; they now run it in the shared primitive. The **HTTP reactivation** paths
 (single + restore) were ungated; they now gate at the route. A **custom entity created by the module
 install** was ungated; it now gates at the primitive. A **field-type change** was ungated; it now gates at
-all three write sites. And the **ACL merge** could lose an addition under a race; it is now atomic. What
-remains is **the reserved-key gap, the `decided` carrier, the enforcement consumer, and the create-branch
+all three write sites. The **ACL merge** could lose an addition under a race; it is now atomic. And the
+**batch path could define a field on a system column** (`id`); it now refuses it. What
+remains is **the `decided` carrier, the enforcement consumer, and the create-branch
 double-insert** — every one scheduled in
 [`COMPLETION-CALLBACKS.md`](library/development/COMPLETION-CALLBACKS.md):
-1. **Give the batch path its reserved-key check** — measured: a batch POST of `key:'id'` returns 200 where the single POST refuses. **(CC-18)**
-2. **Make the `decided` branch reachable** — today only the rule fires, never a person's decision. **(CC-17)**
-3. **Give a custom *field*'s records an enforcement consumer** — SD-1 writes ACL rows nothing reads yet. **(CC-20)**
-4. **Close the create-branch double-insert** — a first grant onto a role with no ACL row can create two rows; needs a unique index `(role_id, tenant_id)` (a migration, deferred). **(CC-23)**
+1. **Make the `decided` branch reachable** — today only the rule fires, never a person's decision. **(CC-17)**
+2. **Give a custom *field*'s records an enforcement consumer** — SD-1 writes ACL rows nothing reads yet. **(CC-20)**
+3. **Close the create-branch double-insert** — a first grant onto a role with no ACL row can create two rows; needs a unique index `(role_id, tenant_id)` (a migration, deferred). **(CC-23)**
 
 **Read first (before continuing):** [`PLAN-SD-1.md`](library/development/PLAN-SD-1.md) — the plan, the
 critics' twenty-four defects (§9) and the honest limits (§10) — and the completion register

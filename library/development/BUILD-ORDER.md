@@ -1084,8 +1084,10 @@ one page, each with a named home. Details: [`BLUEPRINT-GAP-ANALYSIS.md`](BLUEPRI
    **entity** appearing, before the row, with the live `entities.records.<id>` records; all three field
    write sites gate a **field-type change** (`existing.kind !== incoming.kind` — the before-state exists at
    each write site, so the shared guard contract was not touched); and the merge into `role_acls.features_json`
-   is now **atomic** (one SQL `UPDATE`, `jsonb ||` deduped, `returning` — no lost update under a race).
-   **The headline limits are all closed.** Still open: the batch's reserved-key check, an enforcement consumer
+   is now **atomic** (one SQL `UPDATE`, `jsonb ||` deduped, `returning` — no lost update under a race); and the
+   batch path **names every key it writes** so the reserved-key guard runs on it (the key-shape check is
+   already closed by zod on both routes; the reserved key was the real hole — CC-18).
+   **The headline limits are all closed.** Still open: an enforcement consumer
    for a *field*'s records, the create-branch double-insert (needs a migration — CC-23), and the two
    deferred consumers (`SD-4`, `G-04`) — each scheduled in [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md)
    (plan [`PLAN-SD-1.md`](PLAN-SD-1.md), limits §10).
