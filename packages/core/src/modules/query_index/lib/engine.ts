@@ -226,7 +226,7 @@ export class HybridQueryEngine implements QueryEngine {
       const debugEnabled = this.isDebugVerbosity()
       if (debugEnabled) this.debug('query:start', { entity })
 
-      const isCustom = opts.forceCustomEntityStorage === true || await this.isCustomEntity(entity)
+      const isCustom = opts.forceCustomEntityStorage === true || await this.isCustomEntity(entity, opts.tenantId)
       if (isCustom) {
         if (debugEnabled) this.debug('query:custom-entity', { entity })
         const section = profiler.section('custom_entity')
@@ -1069,8 +1069,9 @@ export class HybridQueryEngine implements QueryEngine {
     return prepared
   }
 
-  private async isCustomEntity(entity: string): Promise<boolean> {
-    const cached = this.customEntityCache.get(entity)
+  private async isCustomEntity(entity: string, tenantId?: string | null): Promise<boolean> {
+    const cacheKey = tenantId ? `${tenantId}\u0000${entity}` : entity
+    const cached = this.customEntityCache.get(cacheKey)
     if (cached !== undefined) return cached
     let result = false
     try {
@@ -1088,12 +1089,19 @@ export class HybridQueryEngine implements QueryEngine {
         result = false
       } else {
         const db = this.getDb() as any
-        const row = await db
+        let registryQuery = db
           .selectFrom('custom_entities')
           .select('id')
           .where('entity_id', '=', entity)
           .where('is_active', '=', true)
-          .executeTakeFirst()
+        // Scope the registry probe by tenant when the caller supplies one. `custom_entities`
+        // is a shared registry: without this, another tenant's active registration for the
+        // same entity id makes this tenant's reads take the doc-storage branch against an
+        // empty storage scope and return no rows at all.
+        if (tenantId) {
+          registryQuery = registryQuery.where('tenant_id', '=', tenantId)
+        }
+        const row = await registryQuery.executeTakeFirst()
         if (row) {
           result = true
         } else if (resolveRegisteredEntityTableName(this.em, entity) !== null) {
@@ -1110,25 +1118,30 @@ export class HybridQueryEngine implements QueryEngine {
           // system id as non-registrable). Without this fallback the query routes to
           // the empty ORM/index path and those records are write-only (created with
           // 200 but unreadable on the edit form).
-          result = await this.hasCustomEntityStorageRows(entity)
+          result = await this.hasCustomEntityStorageRows(entity, tenantId)
         }
       }
     } catch {
       result = false
     }
-    this.customEntityCache.set(entity, result)
+    this.customEntityCache.set(cacheKey, result)
     return result
   }
 
-  private async hasCustomEntityStorageRows(entity: string): Promise<boolean> {
+  private async hasCustomEntityStorageRows(entity: string, tenantId?: string | null): Promise<boolean> {
     try {
       const db = this.getDb() as any
-      const row = await db
+      let query = db
         .selectFrom('custom_entities_storage')
         .select(sql<number>`1`.as('one'))
         .where('entity_type', '=', entity)
-        .limit(1)
-        .executeTakeFirst()
+      // Tenant-scope the probe: a storage row belonging to another tenant must not force
+      // this tenant's reads down the doc-storage branch, where the scoped list query would
+      // then return nothing even though this tenant has records in the ORM/index path.
+      if (tenantId) {
+        query = query.where('tenant_id', '=', tenantId)
+      }
+      const row = await query.limit(1).executeTakeFirst()
       return !!row
     } catch {
       return false

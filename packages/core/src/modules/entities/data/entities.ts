@@ -166,8 +166,45 @@ export class CustomEntity {
 }
 
 // Storage for custom entity records (JSONB document store)
+//
+// Uniqueness is owned by FOUR indexes, and the split is deliberate — it was measured
+// against Postgres 17 on this host, not assumed.
+//
+// `custom_entities_storage_scope_uq` is a PLAIN (non-partial) unique index on all four
+// scope columns. It must be plain because the record upsert in
+// `@open-mercato/shared/lib/data/engine` uses `ON CONFLICT (entity_type, entity_id,
+// organization_id, tenant_id)` with no predicate, and Postgres never infers a PARTIAL
+// index for a bare conflict target — it raises "there is no unique or exclusion
+// constraint matching the ON CONFLICT specification" even when the row would satisfy
+// the predicate. A plain index makes the upsert resolve.
+//
+// The cost of a plain index is that Postgres treats NULLs as DISTINCT, so it cannot
+// enforce one-row-per-scope when `organization_id` or `tenant_id` is null. The three
+// PARTIAL indexes below restore that protection for the null-scope shapes. They cannot
+// be used by the upsert (see above) but they DO reject duplicate INSERTs, which is how
+// such rows get written. This is the same null-scope technique `perspectives` uses.
+//
+// The legacy `custom_entities_storage_unique_idx` is NOT declared here on purpose: the
+// original migration created it WITHOUT `unique`, so it never enforced anything, and
+// declaring it would make `yarn db:generate` re-emit a create for an index the
+// migrations deliberately drop. `Migration20261009090000` replaces it with this set.
 @Entity({ tableName: 'custom_entities_storage' })
-@Index({ name: 'custom_entities_storage_unique_idx', properties: ['entityType', 'entityId', 'organizationId'], options: { unique: true } })
+@Index({ name: 'custom_entities_storage_scope_uq', properties: ['entityType', 'entityId', 'organizationId', 'tenantId'], options: { unique: true } })
+@Index({
+  name: 'custom_entities_storage_tenant_uq',
+  expression:
+    'create unique index "custom_entities_storage_tenant_uq" on "custom_entities_storage" ("entity_type", "entity_id", "tenant_id") where "tenant_id" is not null and "organization_id" is null',
+})
+@Index({
+  name: 'custom_entities_storage_org_uq',
+  expression:
+    'create unique index "custom_entities_storage_org_uq" on "custom_entities_storage" ("entity_type", "entity_id", "organization_id") where "tenant_id" is null and "organization_id" is not null',
+})
+@Index({
+  name: 'custom_entities_storage_global_uq',
+  expression:
+    'create unique index "custom_entities_storage_global_uq" on "custom_entities_storage" ("entity_type", "entity_id") where "tenant_id" is null and "organization_id" is null',
+})
 export class CustomEntityStorage {
   @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
   id!: string

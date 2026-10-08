@@ -183,8 +183,15 @@ function resolveFirstRow(
     }
   }
   if (table === 'custom_entities_storage' && log.limit === 1) {
-    // Existence probe used by isCustomEntity/hasCustomEntityStorageRows.
-    return (config.rows?.custom_entities_storage ?? []).length ? { one: 1 } : undefined
+    // Existence probe used by isCustomEntity/hasCustomEntityStorageRows. Apply the
+    // captured `tenant_id = ?` filter so the probe can actually observe cross-tenant
+    // rows: a row whose tenant does not match the filter must NOT be returned.
+    const rows = config.rows?.custom_entities_storage ?? []
+    const tenantFilter = log.wheres.find((args: any[]) => args[0] === 'tenant_id')
+    const scoped = tenantFilter
+      ? rows.filter((row) => row.tenant_id === tenantFilter[2])
+      : rows
+    return scoped.length ? { one: 1 } : undefined
   }
   // Count subquery / data reads: look for `count` alias in selects. Kysely's
   // `AliasedRawBuilderImpl` exposes the alias via a getter named `alias`
@@ -200,7 +207,12 @@ function resolveFirstRow(
     // Active-registration probe used by isCustomEntity. Returns a row only when the
     // fixture explicitly seeds `rows.custom_entities` (simulating an active overlay /
     // registration row); existing fixtures that omit it keep the unregistered behavior.
-    return (config.rows?.custom_entities ?? []).length ? (config.rows!.custom_entities[0]) : undefined
+    // A captured `tenant_id = ?` filter is honored so the shared registry can be probed
+    // per-tenant.
+    const rows = config.rows?.custom_entities ?? []
+    const tenantFilter = log.wheres.find((args: any[]) => args[0] === 'tenant_id')
+    const scoped = tenantFilter ? rows.filter((row) => row.tenant_id === tenantFilter[2]) : rows
+    return scoped.length ? scoped[0] : undefined
   }
   return undefined
 }
@@ -1145,5 +1157,42 @@ describe('HybridQueryEngine custom-entity classification (#2939)', () => {
     const chains = db._chains as ChainLog[]
     expect(chains.some((chain) => chain.table === 'custom_entities_storage' && chain.selects.length > 0)).toBe(true)
     expect(chains.some((chain) => chain.table === 'todos')).toBe(false)
+  })
+
+  // The single-row existence probes (`custom_entities`, `custom_entities_storage`) are
+  // SHARED tables: a row written by tenant A must not decide tenant B's read routing.
+  // When it does, tenant B's list takes the doc-storage branch and the (correctly)
+  // tenant-scoped query inside it returns nothing — records silently disappear.
+  test('the storage existence probe is tenant-scoped so another tenant’s row cannot reroute this tenant', async () => {
+    // Tenant A has a doc record; the caller is tenant B. The probe must not see it.
+    const build = (tenantId: string | undefined) => {
+      const db = createFakeKysely({
+        baseTable: 'unused',
+        hasIndexAny: false,
+        baseCount: 0,
+        indexCount: 0,
+        customFieldKeys: {},
+        rows: { custom_entities_storage: [{ entity_id: 'record-a', tenant_id: 'tenant-a' }] },
+      })
+      const em = buildEmWithOrmMetadata(db, {})
+      const fallback = { query: jest.fn() }
+      const engine = new HybridQueryEngine(em, fallback as any, () => ({ emitEvent: jest.fn() }))
+      return { db, engine, tenantId }
+    }
+
+    const other = await (build('tenant-b').engine as any).isCustomEntity('example:todo', 'tenant-b')
+    expect(other).toBe(false)
+
+    const owner = await (build('tenant-a').engine as any).isCustomEntity('example:todo', 'tenant-a')
+    expect(owner).toBe(true)
+
+    // And the probe carries the filter, so a future refactor that drops it goes red.
+    const { db, engine } = build('tenant-b')
+    await (engine as any).isCustomEntity('example:todo', 'tenant-b')
+    const probe = (db._chains as ChainLog[]).find(
+      (chain) => chain.table === 'custom_entities_storage' && chain.limit === 1,
+    )
+    expect(probe).toBeDefined()
+    expect(probe!.wheres).toContainEqual(['tenant_id', '=', 'tenant-b'])
   })
 })

@@ -342,13 +342,37 @@ export class DefaultDataEngine implements DataEngine {
       deleted_at: null,
     }
 
-    // Upsert by scoped uniqueness
+    // Upsert by scoped uniqueness.
+    //
+    // `tenant_id` is part of the conflict target, not just a stored column. The
+    // table's uniqueness has to include the tenant for the same reason every read
+    // path scopes by it: without it, two tenants that happen to hold the same
+    // `(entity_type, entity_id, organization_id)` would resolve to ONE row and the
+    // second writer would overwrite the first tenant's document.
+    //
+    // MEASURED AGAINST POSTGRES 17 on this host, NOT ASSUMED: a bare
+    // `ON CONFLICT (cols)` resolves ONLY against a non-partial unique index. A partial
+    // unique index is never inferred — Postgres raises `there is no unique or
+    // exclusion constraint matching the ON CONFLICT specification`, even when the
+    // inserted row would satisfy the index predicate. The entities migration therefore
+    // creates `custom_entities_storage_scope_uq` as a PLAIN (non-partial) unique index
+    // on exactly these four columns, so this target resolves. The three sibling
+    // partial indexes in that migration cover the null-scope shapes, which this
+    // statement does not target because it always writes a non-null org and tenant.
+    //
+    // Consequence to keep in mind: a plain unique index treats NULLs as DISTINCT, so
+    // the null-org/null-tenant shapes have no constraint an ON CONFLICT could use. No
+    // shipped caller reaches them — every API path rejects a missing org (`if
+    // (!targetOrgId) return 400`) — and the sibling partial indexes still protect those
+    // rows against duplicate INSERTs, just not via this upsert. The fallback below
+    // handles the non-conflicting cases.
+    const conflictTarget = ['entity_type', 'entity_id', 'organization_id', 'tenant_id']
     try {
       await db
         .insertInto('custom_entities_storage' as any)
         .values(payload as any)
         .onConflict((oc) => oc
-          .columns(['entity_type', 'entity_id', 'organization_id'])
+          .columns(conflictTarget as any)
           .doUpdateSet({
             doc: sql`${JSON.stringify(doc)}::jsonb`,
             updated_at: sql`now()`,

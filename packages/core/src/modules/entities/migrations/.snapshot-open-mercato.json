@@ -265,19 +265,44 @@
       "schema": "public",
       "indexes": [
         {
-          "keyName": "custom_entities_storage_unique_idx",
           "columnNames": [
             "entity_type",
             "entity_id",
-            "organization_id"
+            "organization_id",
+            "tenant_id"
           ],
           "composite": true,
           "constraint": false,
+          "keyName": "custom_entities_storage_scope_uq",
+          "primary": false,
+          "unique": true
+        },
+        {
+          "columnNames": [],
+          "composite": false,
+          "constraint": false,
+          "keyName": "custom_entities_storage_tenant_uq",
           "primary": false,
           "unique": false,
-          "options": {
-            "unique": true
-          }
+          "expression": "create unique index \"custom_entities_storage_tenant_uq\" on \"custom_entities_storage\" (\"entity_type\", \"entity_id\", \"tenant_id\") where \"tenant_id\" is not null and \"organization_id\" is null"
+        },
+        {
+          "columnNames": [],
+          "composite": false,
+          "constraint": false,
+          "keyName": "custom_entities_storage_org_uq",
+          "primary": false,
+          "unique": false,
+          "expression": "create unique index \"custom_entities_storage_org_uq\" on \"custom_entities_storage\" (\"entity_type\", \"entity_id\", \"organization_id\") where \"tenant_id\" is null and \"organization_id\" is not null"
+        },
+        {
+          "columnNames": [],
+          "composite": false,
+          "constraint": false,
+          "keyName": "custom_entities_storage_global_uq",
+          "primary": false,
+          "unique": false,
+          "expression": "create unique index \"custom_entities_storage_global_uq\" on \"custom_entities_storage\" (\"entity_type\", \"entity_id\") where \"tenant_id\" is null and \"organization_id\" is null"
         },
         {
           "keyName": "custom_entities_storage_pkey",

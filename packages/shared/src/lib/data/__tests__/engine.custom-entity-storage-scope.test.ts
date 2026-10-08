@@ -8,6 +8,7 @@ type ScopeCall = [column: string, operator: string, value: unknown]
 type QueryCall = {
   operation: 'select' | 'insert' | 'update' | 'delete' | 'table-check'
   scopes: ScopeCall[]
+  conflictColumns: string[] | null
 }
 
 function buildDb(options: { rejectFirstInsert?: boolean } = {}) {
@@ -15,7 +16,7 @@ function buildDb(options: { rejectFirstInsert?: boolean } = {}) {
   let rejectFirstInsert = options.rejectFirstInsert === true
 
   const buildQuery = (operation: QueryCall['operation']) => {
-    const query: QueryCall = { operation, scopes: [] }
+    const query: QueryCall = { operation, scopes: [], conflictColumns: null }
     queries.push(query)
 
     const chain = {
@@ -30,7 +31,14 @@ function buildDb(options: { rejectFirstInsert?: boolean } = {}) {
         columns: (_columns: string[]) => { doUpdateSet: (_values: unknown) => unknown }
       }) => unknown) => {
         callback({
-          columns: (_columns) => ({ doUpdateSet: (_values) => ({}) }),
+          // Record the conflict target instead of discarding it. The target is the contract
+          // with the database: it names the unique index Postgres resolves the ON CONFLICT
+          // against, so dropping `tenant_id` from it would let one tenant's write overwrite
+          // another tenant's row. A mock that swallows these columns cannot see that.
+          columns: (columns: string[]) => {
+            query.conflictColumns = columns
+            return { doUpdateSet: (_values: unknown) => ({}) }
+          },
         })
         return chain
       },
@@ -92,6 +100,26 @@ describe('custom-entity document storage tenant scope', () => {
 
   afterEach(() => {
     registerEntityIds({})
+  })
+
+  // The upsert's ON CONFLICT target must name every column of the scoping unique index,
+  // `tenant_id` included. Postgres matches the target against a NON-partial unique index:
+  // a target that omits `tenant_id` would resolve two tenants' rows to the same conflict,
+  // and the second writer would silently replace the first tenant's document. (A partial
+  // index would not be matched at all — see the entities migration for the measured proof.)
+  test('create upsert conflict target includes tenant_id', async () => {
+    const { engine, queries } = buildEngine()
+
+    await engine.createCustomEntityRecord({
+      entityId: ENTITY_ID,
+      recordId: RECORD_ID,
+      organizationId: 'org-1',
+      tenantId: 'tenant-1',
+      values: {},
+    })
+
+    const insert = queries.find((query) => query.operation === 'insert')!
+    expect(insert.conflictColumns).toEqual(['entity_type', 'entity_id', 'organization_id', 'tenant_id'])
   })
 
   test.each([
