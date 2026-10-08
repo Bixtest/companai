@@ -1,5 +1,19 @@
 import { ensureCustomFieldDefinitions } from '../field-definitions'
 
+// SD-1 (CC-3): the primitive now runs the permissions gate and writes the default's
+// records. The sync behaviour under test here is independent of that write, so the
+// grant is stubbed — its own contract is proved in `field-definitions.sd1.test.ts`.
+jest.mock('@open-mercato/core/modules/auth/lib/permission-decision-grant', () => ({
+  applyStructureChangeGrant: jest.fn(async () => ({
+    applied: true,
+    roleName: 'superadmin',
+    roleId: 'role-1',
+    aclCreated: false,
+    added: [],
+    alreadyPresent: [],
+  })),
+}))
+
 type Where = Record<string, unknown>
 
 function createMockEm(existing: Array<Record<string, unknown>> = []) {

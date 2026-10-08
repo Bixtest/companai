@@ -6,6 +6,8 @@ import {
   installCustomEntitiesFromModules,
   getAggregatedCustomEntityConfigs,
 } from './lib/install-from-ce'
+import { decideNewFieldPermissions, writeFieldPermissionGrant, isActiveColumn } from './lib/field-definitions'
+import { fieldDefinitionSurface } from './data/guards'
 import readline from 'node:readline/promises'
 import { stdin as input, stdout as output } from 'node:process'
 import { isTenantDataEncryptionEnabled } from '@open-mercato/shared/lib/encryption/toggles'
@@ -226,6 +228,15 @@ const addField: ModuleCli = {
       if (label !== undefined) configJson.label = label
       if (description !== undefined) configJson.description = description
 
+      // SD-1 (CC-3): a field this command brings into existence — created, or
+      // reactivated from a tombstone — is a new permission surface. The gate decides
+      // before it lands (a refusal throws, caught below, and nothing is written); the
+      // default's records are written once the row has committed.
+      const isNewSurface = !existing || !isActiveColumn(existing)
+      const decision = isNewSurface
+        ? decideNewFieldPermissions([fieldDefinitionSurface(entityId, key)])
+        : null
+
       if (!existing) {
         await em.persist(em.create(CustomFieldDef, {
           entityId,
@@ -241,9 +252,11 @@ const addField: ModuleCli = {
         existing.kind = kind as any
         existing.configJson = configJson
         existing.isActive = true
+        if (existing.deletedAt) existing.deletedAt = null
         await em.flush()
         console.log(`Updated custom field: ${entityId}.${key} (${kind})${orgId == null ? ' [global]' : ` [org=${orgId}, tenant=${tenantId}]`}`)
       }
+      await writeFieldPermissionGrant(em, tenantId, decision)
     } catch (e: any) {
       console.error('Failed:', e?.message || e)
     } finally {
