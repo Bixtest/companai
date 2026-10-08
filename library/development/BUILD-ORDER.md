@@ -1076,12 +1076,13 @@ one page, each with a named home. Details: [`BLUEPRINT-GAP-ANALYSIS.md`](BLUEPRI
    (`auth/lib/permission-decision-grant.ts` — the gate's `defaulted` records land in the tenant's grant
    role's `role_acls.features_json`) are built, tested and mutation-proven; **and every create path is now
    covered** — the **batch** definitions route (the one the field-management UI mostly uses) runs the same
-   gate at the route, because the registry cannot see the columns it creates; the **non-request** paths
+   gate at the route, because the registry cannot see the columns it creates; the **non-request** field paths
    (module install / seeds / the `add-field` CLI) run it in the shared primitive
-   `ensureCustomFieldDefinitions`; and the two HTTP **reactivation** routes (`api/definitions.ts` +
-   `api/definitions.restore.ts`) gate a tombstoned field coming back, from the before-state at the route.
-   **All three headline limits are closed, and the HTTP reactivation paths with them.** Still open: the
-   **custom-entity** install path, the field-type-change case, the lock-free
+   `ensureCustomFieldDefinitions`; the two HTTP **reactivation** routes (`api/definitions.ts` +
+   `api/definitions.restore.ts`) gate a tombstoned field coming back, from the before-state at the route;
+   and the custom-entity install primitive `upsertCustomEntity` (`entities/lib/register.ts`) gates a custom
+   **entity** appearing, before the row, with the live `entities.records.<id>` records.
+   **The headline limits are all closed.** Still open: the field-type-change case, the lock-free
    merge, the batch's reserved-key check, an enforcement consumer for a *field*'s records, and the two
    deferred consumers (`SD-4`, `G-04`) — each scheduled in [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md)
    (plan [`PLAN-SD-1.md`](PLAN-SD-1.md), limits §10).

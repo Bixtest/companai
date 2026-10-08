@@ -62,28 +62,31 @@ the registry maps that route to `'update'` with no field list, so a create-only 
 the choke point behind seven callers) **plus the `add-field` CLI** for the non-request paths, deciding
 before the create and granting after the flush — **and run at the two HTTP *reactivation* routes**
 (`api/definitions.ts` and `api/definitions.restore.ts`: a tombstoned field brought back is a surface
-re-appearing, gated from the before-state and granted after the flush — CC-22, 2026-10-08).
-**68 SD-1 tests; 28 mutations RED-then-GREEN across five slices, each restore md5-verified; `shared`
-197/2329 — 8 fail in the one suite of CC-19 (a host process-creation failure, not code), `core` 623/5380,
-typecheck 0.** **Five** hostile-critic passes found nineteen real defects — all fixed or named
-(`PLAN-SD-1.md` §9).
+re-appearing, gated from the before-state and granted after the flush — CC-22, 2026-10-08) — **and run in
+the entity-install primitive `upsertCustomEntity`** (`entities/lib/register.ts`: a custom **entity**
+appearing is a surface appearing, gated before the row and granted after the flush, with the **live**
+`entities.records.<id>` records — CC-21, 2026-10-08).
+**75 SD-1 tests; 33 mutations RED-then-GREEN across six slices, each restore md5-verified; `shared`
+197/2329 — 8 fail in the one suite of CC-19 (a host process-creation failure, not code), `core` 625/5396,
+typecheck 0.** **Five** hostile-critic passes plus one mutation-found defect (twenty real defects) — all
+fixed or named (`PLAN-SD-1.md` §9).
 
-**It is still PARTIAL — but ALL THREE headline limits are closed, and the reactivation paths with them.**
-A gate that decides but does not record was not yet a gate; it now records. The path the field-management
-UI mostly uses — the **batch** route — was ungated; it now runs the same gate. The **non-request** paths
-(module install / seeds / the `add-field` CLI) were ungated; they now run it in the shared primitive.
-And the **HTTP reactivation** paths (single + restore) were ungated; they now gate at the route. What
-remains is **one install path and the deferred consumers** — every one scheduled in
+**It is still PARTIAL — but ALL headline limits are closed.** A gate that decides but does not record was
+not yet a gate; it now records. The path the field-management UI mostly uses — the **batch** route — was
+ungated; it now runs the same gate. The **non-request** field paths (module install / seeds / the
+`add-field` CLI) were ungated; they now run it in the shared primitive. The **HTTP reactivation** paths
+(single + restore) were ungated; they now gate at the route. And a **custom entity created by the module
+install** was ungated; it now gates at the primitive. What remains is **the type-change case and the
+deferred consumers** — every one scheduled in
 [`COMPLETION-CALLBACKS.md`](library/development/COMPLETION-CALLBACKS.md):
-1. **Gate the custom-entity install path** — `install-from-ce` creates a `CustomEntity` with no gate; its records *are* the live ones. **(CC-21)**
-2. **Field-type-change detection** — needs the before-state, which the guard input does not carry. **(CC-4)**
-3. **Make the ACL merge atomic** — it is a lock-free read-modify-write today. **(CC-16)**
-4. **Give the batch path its reserved-key check** — measured: a batch POST of `key:'id'` returns 200 where the single POST refuses. **(CC-18)**
-5. **Make the `decided` branch reachable** — today only the rule fires, never a person's decision. **(CC-17)**
-6. **Give a custom *field*'s records an enforcement consumer** — SD-1 writes ACL rows nothing reads yet. **(CC-20)**
+1. **Field-type-change detection** — needs the before-state, which the guard input does not carry. **(CC-4)**
+2. **Make the ACL merge atomic** — it is a lock-free read-modify-write today. **(CC-16)**
+3. **Give the batch path its reserved-key check** — measured: a batch POST of `key:'id'` returns 200 where the single POST refuses. **(CC-18)**
+4. **Make the `decided` branch reachable** — today only the rule fires, never a person's decision. **(CC-17)**
+5. **Give a custom *field*'s records an enforcement consumer** — SD-1 writes ACL rows nothing reads yet. **(CC-20)**
 
 **Read first (before continuing):** [`PLAN-SD-1.md`](library/development/PLAN-SD-1.md) — the plan, the
-critics' nineteen defects (§9) and the honest limits (§10) — and the completion register
+critics' twenty defects (§9) and the honest limits (§10) — and the completion register
 [`COMPLETION-CALLBACKS.md`](library/development/COMPLETION-CALLBACKS.md) (the owner's 2026-10-08 standing
 instruction: always schedule a partial build's gap, prerequisite and callback). Then the same discipline
 as `S-02`/`D3`: fact-check what exists, name the honest boundary, then plan → execute → verify → document.
