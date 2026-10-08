@@ -1,6 +1,21 @@
-import type { MutationGuard } from '@open-mercato/shared/lib/crud/mutation-guard-registry'
+import type { EntityManager } from '@mikro-orm/postgresql'
+import type {
+  MutationGuard,
+  MutationGuardAfterInput,
+} from '@open-mercato/shared/lib/crud/mutation-guard-registry'
 import type { PermissionSurface } from '@open-mercato/shared/lib/permissions/catalogue'
-import { evaluateStructureChange } from '@open-mercato/shared/lib/permissions/structure-change-gate'
+import {
+  evaluateStructureChange,
+  type StructureChangeGateOutcome,
+} from '@open-mercato/shared/lib/permissions/structure-change-gate'
+import { createRequestContainer } from '@open-mercato/shared/lib/di/container'
+import { createLogger } from '@open-mercato/shared/lib/logger'
+import {
+  applyPermissionDecisionGrant,
+  type PermissionGrantOutcome,
+} from '@open-mercato/core/modules/auth/lib/permission-decision-grant'
+
+const logger = createLogger('entities').child({ component: 'structure-change-gate' })
 
 /**
  * Structural guards for the dynamic-entity definition path.
@@ -116,8 +131,15 @@ const keyShapeGuard: MutationGuard = {
  * (`@open-mercato/shared/lib/permissions/structure-change-gate`) for the surface a
  * create lands and REFUSE (fail closed) when the gate cannot establish the
  * permissions. The default — full grant to the superadmin role plus the records —
- * is the gate's; writing those records into `role_acls.features_json` is the
- * caller's step through the existing store (S5: one engine).
+ * is the gate's; **this hook now writes those records** into
+ * `role_acls.features_json` through the existing store (S5: one engine), in the
+ * guard's `afterSuccess` step (see `applyGateDecisionToGrantRole` below).
+ *
+ * Why `afterSuccess` and not `validate`: the write is a *post-commit* side effect —
+ * the surface must exist before it is granted — and the mutation-guard contract
+ * provides exactly this step (`shouldRunAfterSuccess` + `metadata` carry the
+ * validate-time decision forward). The write is idempotent (a set-union), so a
+ * retry cannot double-grant.
  *
  * Scope, stated honestly (a hostile-critic pass corrected an earlier, looser version):
  *   - `operations: ['create']` only. This guard's payload carries no field list, so it
@@ -127,10 +149,11 @@ const keyShapeGuard: MutationGuard = {
  *     therefore **not** gated by this hook. Named as an open hole in `PLAN-SD-1.md` §10.
  *   - A **field-type change** (an update of an existing field's `kind`) is also not gated:
  *     detecting it needs the before-state, which the guard input does not carry.
- *   - **The gate produces the records; nothing writes them yet.** No call site persists
- *     the default into `role_acls.features_json` yet, so on the HTTP routes this hook
- *     enumerates and fails closed but does not itself change the ACL. `PLAN-SD-1.md`
- *     §10 states this plainly — the item is **PARTIAL**, not done.
+ *   - **A write that cannot be applied is logged, not blocked.** `afterSuccess` runs
+ *     after the surface has committed, so it cannot un-land it; when the grant role is
+ *     missing (a provisioning defect) the failure is logged at `error` with the reason,
+ *     and the gate itself already failed closed on the *decision*. Named in
+ *     `PLAN-SD-1.md` §10 and scheduled in `COMPLETION-CALLBACKS.md` (CC-1).
  */
 
 /**
@@ -163,8 +186,9 @@ export function entityDefinitionSurface(entityId: string): PermissionSurface {
  * Run the gate for a create and turn a refusal into a block.
  *
  * A refusal is returned as `ok:false` with a plain-language message (dictionary
- * S3: *tell the user why*). A pass carries the gate's outcome in `metadata`, so a
- * caller that wants to write the default's records can read them.
+ * S3: *tell the user why*). A pass carries the gate's outcome in `metadata` and
+ * sets `shouldRunAfterSuccess`, so the guard's own `afterSuccess` step can write
+ * the default's records once the surface has committed.
  */
 function runStructureChangeGate(surfaces: PermissionSurface[], what: string) {
   const result = evaluateStructureChange({ surfaces })
@@ -177,7 +201,111 @@ function runStructureChangeGate(surfaces: PermissionSurface[], what: string) {
         'Every new data structure must answer the permissions question before it is applied (S2).',
     }
   }
-  return { ok: true as const, metadata: { permissionDecision: result } }
+  return {
+    ok: true as const,
+    shouldRunAfterSuccess: true,
+    metadata: { permissionDecision: result },
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * SD-1 — the write: applying the gate's default to the ACL store
+ * ------------------------------------------------------------------ *
+ * The gate is pure and writes nothing; the records it returns are applied here,
+ * through the existing roles-and-permissions store (S5). The write happens in the
+ * guard's `afterSuccess`, after the surface has committed.
+ */
+
+/** Read the gate's decision out of the guard's `metadata`, defensively. */
+function readPermissionDecision(
+  metadata: Record<string, unknown> | null | undefined,
+): StructureChangeGateOutcome | null {
+  const raw = metadata?.permissionDecision
+  if (!raw || typeof raw !== 'object') return null
+  const outcome = (raw as { outcome?: unknown }).outcome
+  if (outcome !== 'defaulted' && outcome !== 'decided' && outcome !== 'refused') return null
+  return raw as StructureChangeGateOutcome
+}
+
+/**
+ * Obtain the request's EntityManager, or `null` when there is none.
+ *
+ * The mutation-guard contract hands `afterSuccess` no container (only ids and
+ * metadata), so the guard resolves one itself — the same pattern
+ * `customers/data/guards.ts` uses. Returning `null` rather than throwing keeps a
+ * missing container from being mistaken for a refused write.
+ */
+async function resolveRequestEntityManager(): Promise<EntityManager | null> {
+  try {
+    const container = await createRequestContainer()
+    return container.resolve('em') as EntityManager
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Apply the gate's `defaulted` decision to the grant role. Exported so it can be
+ * tested with a mock EntityManager — the DB-backed half of this guard.
+ *
+ * Returns `null` when there is nothing to write (no decision, or a `decided`
+ * outcome whose records belong to a person's own grant target, which the decision
+ * type does not yet carry — a named boundary, not a silent skip).
+ */
+export async function applyGateDecisionToGrantRole(
+  em: EntityManager,
+  input: { tenantId: string; metadata?: Record<string, unknown> | null },
+): Promise<PermissionGrantOutcome | null> {
+  const decision = readPermissionDecision(input.metadata)
+  if (!decision || decision.outcome !== 'defaulted') return null
+  return applyPermissionDecisionGrant(em, {
+    tenantId: input.tenantId,
+    grantTo: decision.grantTo,
+    records: decision.records.map((record) => record.feature),
+  })
+}
+
+/**
+ * The guard's `afterSuccess` body: write the default's records, and make a
+ * failure *loud*. The runner swallows `afterSuccess` errors so a committed write
+ * still succeeds, so an un-appliable grant is logged here at `error` — an ungated
+ * surface is the exact defect SD-1 exists to prevent and must be visible.
+ */
+async function writeGateDecisionGrant(input: MutationGuardAfterInput): Promise<void> {
+  const decision = readPermissionDecision(input.metadata)
+  if (!decision || decision.outcome !== 'defaulted') return
+
+  const em = await resolveRequestEntityManager()
+  if (!em) {
+    logger.error('SD-1: the new structure landed but no request EntityManager was available to grant its permissions', {
+      tenantId: input.tenantId,
+      resourceKind: input.resourceKind,
+      surface: decision.records.map((record) => record.surfaceId),
+    })
+    return
+  }
+
+  const result = await applyGateDecisionToGrantRole(em, { tenantId: input.tenantId, metadata: input.metadata })
+  if (result && !result.applied) {
+    logger.error('SD-1: the new structure landed but its permission records could not be written', {
+      reason: result.reason,
+      because: result.because,
+      roleName: result.roleName,
+      tenantId: input.tenantId,
+      resourceKind: input.resourceKind,
+    })
+    return
+  }
+  if (result) {
+    logger.info('SD-1: permission records granted for the new structure', {
+      roleName: result.roleName,
+      added: result.added.length,
+      alreadyPresent: result.alreadyPresent.length,
+      aclCreated: result.aclCreated,
+      tenantId: input.tenantId,
+      resourceKind: input.resourceKind,
+    })
+  }
 }
 
 const fieldPermissionDecisionGuard: MutationGuard = {
@@ -196,6 +324,11 @@ const fieldPermissionDecisionGuard: MutationGuard = {
       'A new custom field',
     )
   },
+
+  // The write: apply the gate's default to the ACL store once the field landed.
+  async afterSuccess(input) {
+    await writeGateDecisionGrant(input)
+  },
 }
 
 const entityPermissionDecisionGuard: MutationGuard = {
@@ -210,6 +343,11 @@ const entityPermissionDecisionGuard: MutationGuard = {
       entityId ? [entityDefinitionSurface(entityId)] : [],
       'A new custom entity',
     )
+  },
+
+  // The write: apply the gate's default to the ACL store once the entity landed.
+  async afterSuccess(input) {
+    await writeGateDecisionGrant(input)
   },
 }
 
