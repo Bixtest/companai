@@ -19,6 +19,14 @@ type FormValues = {
   organizationId: string | null
   expiresAt: string | null
   roles: string[]
+  /**
+   * The "AI user" tick. A **boolean** in the form and a **string** on the wire:
+   * the server's `principalKind` accepts `'service' | 'ai_worker'`, and the
+   * form converts the tick in `onSubmit`. Unticked means the field is not sent
+   * at all, which the server reads as `service` — the same value every key had
+   * before the column existed.
+   */
+  isAiWorker: boolean
 }
 
 export default function CreateApiKeyPage() {
@@ -105,11 +113,57 @@ export default function CreateApiKeyPage() {
       loadOptions: loadRoleOptions,
       description: t('api_keys.form.rolesHint'),
     },
+    {
+      /**
+       * The "AI user" tick (CC-26). The server has accepted
+       * `principal_kind = 'ai_worker'` since the column landed
+       * (`api_keys/data/entities.ts`, `data/validators.ts`, `api/keys/route.ts`),
+       * but no shipped page could set it — so the only way to mint an AI worker
+       * was a direct API or CLI call. This is the missing **UI for a server
+       * capability that already exists**, not a new procedure.
+       *
+       * The tick is a boolean here and the wire value is a string, so `onSubmit`
+       * does the conversion; see the note on `FormValues.isAiWorker`.
+       */
+      id: 'isAiWorker',
+      label: t('api_keys.form.isAiWorker'),
+      type: 'checkbox',
+      description: t('api_keys.form.isAiWorkerHint'),
+    },
+    {
+      /**
+       * Revealed only when the tick is on (`visibleWhen`). `CrudForm` excludes a
+       * hidden field from validation and from the submitted values, so an unticked
+       * form neither validates nor sends this — and unticking after reading it
+       * removes it from the payload.
+       *
+       * Rendered as a `custom` field rather than a read-only `textarea`: a textarea
+       * needs a *value* to show, and this is a static note with no value to store
+       * (a read-only empty textarea would render blank). A custom component renders
+       * the explanatory text and writes nothing.
+       *
+       * What it states is a **fact about the current server contract**, not a
+       * planned feature: an `ai_worker` key issues the subject `ai_worker:<id>`
+       * instead of `api_key:<id>`, so the resolver, the journal and the ledger
+       * classify everything it does as a machine. Roles are granted the same way a
+       * human's are (`roles_json`). It does **not** yet bind the key to an agent —
+       * that is CC-27, deliberately not claimed here.
+       */
+      id: 'aiWorkerNotice',
+      label: t('api_keys.form.aiWorkerNotice'),
+      type: 'custom',
+      visibleWhen: { field: 'isAiWorker', equals: true },
+      component: () => (
+        <p className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-900 dark:text-amber-100">
+          {t('api_keys.form.aiWorkerNoticeHint')}
+        </p>
+      ),
+    },
     { id: 'expiresAt', label: t('api_keys.form.expiresAt'), type: 'date', description: t('api_keys.form.expiresHint') },
   ], [loadRoleOptions, t])
 
   const groups = React.useMemo<CrudFormGroup[]>(() => ([
-    { id: 'details', title: t('api_keys.form.details'), column: 1, fields: ['name', 'description', 'organizationId', 'roles', 'expiresAt'] },
+    { id: 'details', title: t('api_keys.form.details'), column: 1, fields: ['name', 'description', 'organizationId', 'roles', 'isAiWorker', 'aiWorkerNotice', 'expiresAt'] },
   ]), [t])
 
   if (createdSecret) {
@@ -156,7 +210,7 @@ export default function CreateApiKeyPage() {
             backHref="/backend/api-keys"
             fields={fields}
             groups={groups}
-            initialValues={{ name: '', description: null, organizationId: null, roles: [], expiresAt: null }}
+            initialValues={{ name: '', description: null, organizationId: null, roles: [], expiresAt: null, isAiWorker: false }}
             submitLabel={t('common.create')}
             cancelHref="/backend/api-keys"
             onSubmit={async (values) => {
@@ -167,12 +221,24 @@ export default function CreateApiKeyPage() {
                 roles: string[]
                 expiresAt: string | null
                 tenantId?: string | null
+                principalKind?: 'ai_worker'
               } = {
                 name: values.name,
                 description: values.description || null,
                 organizationId: values.organizationId || null,
                 roles: Array.isArray(values.roles) ? values.roles : [],
                 expiresAt: values.expiresAt || null,
+              }
+              // The tick is a boolean; the server wants the kind. Sent only when
+              // ticked: an unticked form omits the key entirely, which the server
+              // reads as `service` — the same shape as every pre-existing key.
+              // (`aiWorkerNotice` is deliberately not sent because it is a read-only
+              // note with no server field. Measured, not assumed: the create schema
+              // is not `.strict()`, so zod would **strip** an unknown key rather than
+              // reject it — and `mapToEntity` reads only named fields. The comment is
+              // here so the next reader does not have to re-measure that.)
+              if (values.isAiWorker === true) {
+                payload.principalKind = 'ai_worker'
               }
               if (actorIsSuperAdmin) {
                 const tenant = typeof selectedTenantId === 'string' && selectedTenantId.trim().length > 0 ? selectedTenantId.trim() : null
