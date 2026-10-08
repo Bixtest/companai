@@ -17,7 +17,11 @@
  */
 
 import { Role, RoleAcl } from '@open-mercato/core/modules/auth/data/entities'
-import { applyPermissionDecisionGrant, resolveGrantRole } from '../permission-decision-grant'
+import {
+  applyPermissionDecisionGrant,
+  applyStructureChangeGrant,
+  resolveGrantRole,
+} from '../permission-decision-grant'
 
 const TENANT = '123e4567-e89b-12d3-a456-426614174001'
 const ROLE_ID = '123e4567-e89b-12d3-a456-426614174050'
@@ -190,5 +194,62 @@ describe('a role with an ACL gets a set-union merge (nothing lost, nothing dupli
     })
     expect((result as { added: string[] }).added).toEqual(['a.b.view'])
     expect(acl.featuresJson).toEqual(['a.b.view'])
+  })
+})
+
+/**
+ * The one mapping from the gate's vocabulary to the write. Both callers — the guard's
+ * `afterSuccess` and the batch route (CC-2) — go through it, so these cases fix the
+ * contract they share.
+ */
+describe('applyStructureChangeGrant maps a gate outcome to the write', () => {
+  const records = [
+    { feature: 'test:entity.alpha.view', block: 'data' as const, surfaceId: 'test:entity.alpha' },
+    { feature: 'test:entity.alpha.manage', block: 'data' as const, surfaceId: 'test:entity.alpha' },
+    { feature: 'test:entity.alpha.structure', block: 'structural' as const, surfaceId: 'test:entity.alpha' },
+  ]
+
+  it('applies a defaulted outcome: the records go to the gate default role', async () => {
+    const em = makeEm({ role })
+    const result = await applyStructureChangeGrant(em as never, {
+      tenantId: TENANT,
+      decision: { outcome: 'defaulted', records, grantTo: 'superadmin', because: 'no decision was recorded' },
+    })
+
+    expect(result).toMatchObject({ applied: true, roleName: 'superadmin', aclCreated: true })
+    expect(em.create).toHaveBeenCalledWith(
+      RoleAcl,
+      expect.objectContaining({
+        featuresJson: [
+          'test:entity.alpha.view',
+          'test:entity.alpha.manage',
+          'test:entity.alpha.structure',
+        ],
+      }),
+    )
+  })
+
+  it('writes nothing for a decided outcome — the decision carries no grant target yet (CC-17)', async () => {
+    const em = makeEm({ role })
+    const result = await applyStructureChangeGrant(em as never, {
+      tenantId: TENANT,
+      decision: { outcome: 'decided', records, decidedBy: 'user-1', because: 'user-1 decided' },
+    })
+
+    expect(result).toBeNull()
+    expect(em.findOne).not.toHaveBeenCalled()
+    expect(em.create).not.toHaveBeenCalled()
+  })
+
+  it('writes nothing for a refused outcome — there is no surface to grant', async () => {
+    const em = makeEm({ role })
+    const result = await applyStructureChangeGrant(em as never, {
+      tenantId: TENANT,
+      decision: { outcome: 'refused', reason: 'no_surface', because: 'the change creates nothing' },
+    })
+
+    expect(result).toBeNull()
+    expect(em.findOne).not.toHaveBeenCalled()
+    expect(em.create).not.toHaveBeenCalled()
   })
 })

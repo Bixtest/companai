@@ -55,6 +55,15 @@ jest.mock('../../lib/definitions-version', () => ({
   resolveEntityDefinitionsVersion: jest.fn(async () => null),
 }))
 
+// SD-1 (CC-2) adds a post-commit grant write for the columns a batch creates. These
+// tests assert the prefetch / bounds query shape, so stub that write too — the same
+// reason the version reader is stubbed above: keep the `em.findOne` assertions about
+// the definition lookups alone. The write itself is proved in
+// definitions.batch.sd1.test.ts.
+jest.mock('@open-mercato/core/modules/auth/lib/permission-decision-grant', () => ({
+  applyStructureChangeGrant: jest.fn(async () => null),
+}))
+
 const makeRequest = (body: unknown) =>
   new Request('http://x/api/entities/definitions/batch', {
     method: 'POST',

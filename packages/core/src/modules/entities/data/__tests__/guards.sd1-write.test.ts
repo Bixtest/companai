@@ -6,10 +6,12 @@
  * **What this suite has to prove.** The gate's decision is carried in `metadata`
  * from `validate` to `afterSuccess`; this proves the wire is real:
  *
- *   1. a `defaulted` decision is **applied** to the grant role through the ACL store;
- *   2. a `decided` decision is **not** auto-applied (its records belong to a person's
- *      own grant target, which the decision type does not yet carry);
- *   3. no decision → nothing is written;
+ *   1. a `defaulted` decision is **carried** from `validate` to `afterSuccess` and
+ *      handed to the shared mapping;
+ *   2. a `decided` decision is carried too and **not** written (the mapping's own
+ *      contract — its records belong to a person's own grant target, which the decision
+ *      type does not yet carry — is proved in `permission-decision-grant.test.ts`);
+ *   3. no readable decision → nothing is written;
  *   4. the guard's `validate` **asks** for `afterSuccess` (`shouldRunAfterSuccess`),
  *      because a write that is never scheduled is a write that never happens.
  *
@@ -21,14 +23,29 @@ import type { MutationGuardAfterInput } from '@open-mercato/shared/lib/crud/muta
 
 const mockEm = { findOne: jest.fn(), create: jest.fn(), persist: jest.fn(), flush: jest.fn() }
 
-const mockApply = jest.fn(async () => ({
-  applied: true as const,
-  roleName: 'superadmin',
-  roleId: 'r1',
-  aclCreated: false,
-  added: ['a'],
-  alreadyPresent: [] as string[],
-}))
+// The mapping from a gate outcome to a grant lives in `applyStructureChangeGrant`
+// (auth/lib/permission-decision-grant.ts), which the guard calls. This file proves the
+// guard's WIRING — that it reads the decision out of `metadata` and hands it over — and
+// that mapping's own contract (defaulted is written; decided/refused are not) is proved
+// against the real module in `auth/lib/__tests__/permission-decision-grant.test.ts`.
+// The stand-in below mirrors that contract, so a decision that should not be written
+// produces no grant here either.
+const mockApply = jest.fn(
+  async (
+    _em: unknown,
+    input: { tenantId?: string; decision?: { outcome?: string } },
+  ) =>
+    input?.decision?.outcome === 'defaulted'
+      ? {
+          applied: true as const,
+          roleName: 'superadmin',
+          roleId: 'r1',
+          aclCreated: false,
+          added: ['a'],
+          alreadyPresent: [] as string[],
+        }
+      : null,
+)
 
 const mockCreateContainer = jest.fn(async () => ({
   resolve: (token: string) => (token === 'em' ? mockEm : null),
@@ -39,7 +56,7 @@ jest.mock('@open-mercato/shared/lib/di/container', () => ({
 }))
 
 jest.mock('@open-mercato/core/modules/auth/lib/permission-decision-grant', () => ({
-  applyPermissionDecisionGrant: (...args: unknown[]) => mockApply(...(args as [])),
+  applyStructureChangeGrant: (...args: unknown[]) => mockApply(...(args as [])),
   resolveGrantRole: jest.fn(),
 }))
 
@@ -88,31 +105,38 @@ beforeEach(() => {
   mockCreateContainer.mockClear()
 })
 
-describe('applyGateDecisionToGrantRole — the decision → ACL mapping', () => {
-  it('applies a defaulted decision, mapping records to their feature ids', async () => {
+describe('applyGateDecisionToGrantRole — reading the decision out of the guard metadata', () => {
+  it('reads a defaulted decision out of the metadata and hands it to the shared mapping', async () => {
     const result = await applyGateDecisionToGrantRole(mockEm as never, {
       tenantId: 't1',
       metadata: defaultedMetadata(),
     })
     expect(result).toMatchObject({ applied: true })
     expect(mockApply).toHaveBeenCalledTimes(1)
-    const [em, input] = mockApply.mock.calls[0] as [unknown, { tenantId: string; grantTo: string; records: string[] }]
+    const [em, input] = mockApply.mock.calls[0] as [
+      unknown,
+      { tenantId: string; decision: { outcome: string; grantTo: string; records: { feature: string }[] } },
+    ]
     expect(em).toBe(mockEm)
     expect(input.tenantId).toBe('t1')
-    expect(input.grantTo).toBe('superadmin')
-    expect(input.records).toEqual([
+    expect(input.decision.outcome).toBe('defaulted')
+    expect(input.decision.grantTo).toBe('superadmin')
+    expect(input.decision.records.map((record) => record.feature)).toEqual([
       'entities.records.customers:customer_person.view',
       'entities.records.customers:customer_person.manage',
     ])
   })
 
-  it('does NOT auto-apply a decided outcome (its grant target is not carried yet)', async () => {
+  it('hands a decided outcome to the shared mapping, which is what declines to write it (CC-17)', async () => {
     const result = await applyGateDecisionToGrantRole(mockEm as never, {
       tenantId: 't1',
       metadata: { permissionDecision: { outcome: 'decided', decidedBy: 'u9', records: [{ feature: 'a.b.view' }] } },
     })
+    // The guard does not filter the outcome itself: the one place that decides which
+    // outcomes are written is `applyStructureChangeGrant`, proved in the module's own
+    // test. Here we only prove the decision is carried across, not dropped.
+    expect(mockApply).toHaveBeenCalledTimes(1)
     expect(result).toBeNull()
-    expect(mockApply).not.toHaveBeenCalled()
   })
 
   it('does nothing when there is no decision in the metadata', async () => {
@@ -153,17 +177,18 @@ describe('the guard schedules and performs the write', () => {
     expect(typeof guardById(ENTITY_GUARD_ID).afterSuccess).toBe('function')
   })
 
-  it('afterSuccess writes the records for a defaulted decision', async () => {
+  it('afterSuccess asks the shared mapping for a defaulted decision', async () => {
     await guardById(FIELD_GUARD_ID).afterSuccess!(afterInput({ metadata: defaultedMetadata() }))
     expect(mockApply).toHaveBeenCalledTimes(1)
-    const [, input] = mockApply.mock.calls[0] as [unknown, { grantTo: string }]
-    expect(input.grantTo).toBe('superadmin')
+    const [, input] = mockApply.mock.calls[0] as [unknown, { decision: { grantTo: string } }]
+    expect(input.decision.grantTo).toBe('superadmin')
   })
 
-  it('afterSuccess does nothing when the metadata carries no defaulted decision', async () => {
+  it('afterSuccess writes nothing when the metadata carries no readable decision at all', async () => {
     await guardById(FIELD_GUARD_ID).afterSuccess!(afterInput({ metadata: null }))
+    await guardById(FIELD_GUARD_ID).afterSuccess!(afterInput({ metadata: {} }))
     await guardById(FIELD_GUARD_ID).afterSuccess!(
-      afterInput({ metadata: { permissionDecision: { outcome: 'decided', decidedBy: 'u9', records: [] } } }),
+      afterInput({ metadata: { permissionDecision: { outcome: 'not-a-real-outcome' } } }),
     )
     expect(mockApply).not.toHaveBeenCalled()
   })

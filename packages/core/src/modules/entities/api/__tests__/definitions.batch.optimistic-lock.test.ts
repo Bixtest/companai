@@ -67,6 +67,14 @@ jest.mock('../../lib/definitions-version', () => ({
   resolveEntityDefinitionsVersion: (...args: unknown[]) => resolveVersionMock(...args),
 }))
 
+// SD-1 (CC-2) adds a post-commit grant write for the columns a batch creates. This
+// suite is about the optimistic lock, so stub that write — otherwise the mocked EM has
+// no `superadmin` role and every pass-through case logs a (correct but misleading)
+// "permission records could not be written" error.
+jest.mock('@open-mercato/core/modules/auth/lib/permission-decision-grant', () => ({
+  applyStructureChangeGrant: jest.fn(async () => null),
+}))
+
 const makeRequest = (body: unknown, headers?: Record<string, string>) =>
   new Request('http://x/api/entities/definitions/batch', {
     method: 'POST',

@@ -11,7 +11,7 @@ import {
 import { createRequestContainer } from '@open-mercato/shared/lib/di/container'
 import { createLogger } from '@open-mercato/shared/lib/logger'
 import {
-  applyPermissionDecisionGrant,
+  applyStructureChangeGrant,
   type PermissionGrantOutcome,
 } from '@open-mercato/core/modules/auth/lib/permission-decision-grant'
 
@@ -146,7 +146,11 @@ const keyShapeGuard: MutationGuard = {
  *     cannot enumerate the columns a bulk save creates — and the batch definitions
  *     endpoint (`api/definitions.batch.ts`) creates NEW columns under
  *     `operation: 'custom'`, which the registry maps to `'update'`. Those creates are
- *     therefore **not** gated by this hook. Named as an open hole in `PLAN-SD-1.md` §10.
+ *     therefore not gated *by this hook*. They are gated **at that route instead**
+ *     (CC-2, closed): the route runs the same pure gate over the same
+ *     `fieldDefinitionSurface` for the keys it finds no definition row for, and writes
+ *     the default through the same `applyStructureChangeGrant`. The trigger moved to the
+ *     one place that knows the create; the policy did not move at all.
  *   - A **field-type change** (an update of an existing field's `kind`) is also not gated:
  *     detecting it needs the before-state, which the guard input does not carry.
  *   - **A write that cannot be applied is logged, not blocked.** `afterSuccess` runs
@@ -245,24 +249,22 @@ async function resolveRequestEntityManager(): Promise<EntityManager | null> {
 }
 
 /**
- * Apply the gate's `defaulted` decision to the grant role. Exported so it can be
- * tested with a mock EntityManager — the DB-backed half of this guard.
+ * Apply the gate's decision (read out of the guard's `metadata`) to the grant role.
+ * Exported so it can be tested with a mock EntityManager — the DB-backed half of this
+ * guard. The mapping itself lives in `applyStructureChangeGrant`, so the guard and the
+ * batch route (CC-2) share one implementation.
  *
- * Returns `null` when there is nothing to write (no decision, or a `decided`
- * outcome whose records belong to a person's own grant target, which the decision
- * type does not yet carry — a named boundary, not a silent skip).
+ * Returns `null` when there is nothing to write (no decision, or a `decided` outcome
+ * whose records belong to a person's own grant target, which the decision type does
+ * not yet carry — a named boundary, not a silent skip).
  */
 export async function applyGateDecisionToGrantRole(
   em: EntityManager,
   input: { tenantId: string; metadata?: Record<string, unknown> | null },
 ): Promise<PermissionGrantOutcome | null> {
   const decision = readPermissionDecision(input.metadata)
-  if (!decision || decision.outcome !== 'defaulted') return null
-  return applyPermissionDecisionGrant(em, {
-    tenantId: input.tenantId,
-    grantTo: decision.grantTo,
-    records: decision.records.map((record) => record.feature),
-  })
+  if (!decision) return null
+  return applyStructureChangeGrant(em, { tenantId: input.tenantId, decision })
 }
 
 /**
@@ -280,7 +282,9 @@ async function writeGateDecisionGrant(input: MutationGuardAfterInput): Promise<v
     logger.error('SD-1: the new structure landed but no request EntityManager was available to grant its permissions', {
       tenantId: input.tenantId,
       resourceKind: input.resourceKind,
-      surface: decision.records.map((record) => record.surfaceId),
+      // Deduped: a surface yields several records, so mapping records here would name
+      // the same surface once per record.
+      surfaces: [...new Set(decision.records.map((record) => record.surfaceId))],
     })
     return
   }

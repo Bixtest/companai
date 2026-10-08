@@ -36,7 +36,7 @@
  * `roles/acl/route.ts`), which needs a client-supplied version this post-commit
  * hook does not have. The fix (an atomic `||`-merge at the database, or an
  * optimistic retry) is scheduled in `PLAN-SD-1.md` §10 and
- * `COMPLETION-CALLBACKS.md` (CC-1).
+ * `COMPLETION-CALLBACKS.md` (CC-16).
  *
  * **Fail closed, and say why.** A grant that cannot be applied returns
  * `applied: false` with a machine-readable `reason` and a plain-language
@@ -49,6 +49,7 @@
 
 import type { EntityManager } from '@mikro-orm/postgresql'
 import { findOneWithDecryption } from '@open-mercato/shared/lib/encryption/find'
+import type { StructureChangeGateOutcome } from '@open-mercato/shared/lib/permissions/structure-change-gate'
 import { Role, RoleAcl } from '@open-mercato/core/modules/auth/data/entities'
 
 /** Why a grant could not be applied. A closed set, so a caller can switch on it. */
@@ -178,4 +179,36 @@ export async function applyPermissionDecisionGrant(
   }
 
   return { applied: true, roleName: grantTo, roleId, aclCreated: false, added, alreadyPresent }
+}
+
+/**
+ * Apply a structure-change gate **outcome** to the grant role.
+ *
+ * This is the one mapping from the gate's vocabulary to the write, shared by every
+ * caller so the two can never drift:
+ *
+ *   - the field/entity guards in `entities/data/guards.ts`, whose `afterSuccess`
+ *     reads the outcome out of the guard's `metadata` (the validate-time decision
+ *     carried forward); and
+ *   - the batch definitions route (`entities/api/definitions.batch.ts`), which runs
+ *     the gate itself because the new columns it creates are knowable only inside its
+ *     transaction — the registry sees that route as an `'update'` and its payload
+ *     carries no field list (`COMPLETION-CALLBACKS.md` CC-2).
+ *
+ * **Only `defaulted` is written.** A `decided` outcome belongs to whoever decided
+ * (the decision type carries no grant target yet — CC-17), and a `refused` outcome
+ * never lands a surface to grant. Both return `null`: "nothing to write" is a fact
+ * to report, not a silent success.
+ */
+export async function applyStructureChangeGrant(
+  em: EntityManager,
+  input: { tenantId: string; decision: StructureChangeGateOutcome },
+): Promise<PermissionGrantOutcome | null> {
+  const { decision } = input
+  if (decision.outcome !== 'defaulted') return null
+  return applyPermissionDecisionGrant(em, {
+    tenantId: input.tenantId,
+    grantTo: decision.grantTo,
+    records: decision.records.map((record) => record.feature),
+  })
 }
