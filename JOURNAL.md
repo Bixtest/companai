@@ -74,10 +74,19 @@ under a race; proven against live Postgres 17 with a concurrent-session test **a
 CC-16, 2026-10-08) — **and the batch path now names every key it writes** so the reserved-key guard runs on
 it (`keys: definitions.map(d => d.key)`; the guards read the list via the new `readFieldKeys`; the measured
 hole was the *reserved* key — a malformed key was already refused by zod 400 on both routes — CC-18,
-2026-10-08).
-**89 SD-1 tests; 44 mutations RED-then-GREEN across nine slices, each restore md5-verified; `shared`
-197/2329 — 8 fail in the one suite of CC-19 (a host process-creation failure, not code), `core` 626/5410,
-typecheck 0.** **Seven** hostile-critic passes plus two mutation/premise-found defects (twenty-four real
+2026-10-08) — **and the `decided` outcome is now reachable and writable** (a caller may *state* the decision
+instead of accepting the default: the carrier `shared/src/lib/permissions/structure-change-decision-header.ts`
+reads a three-way `x-om-ext-permissions-decision` header — `absent` / `malformed` / `decision` — **fail-closed**,
+so a malformed header is a **400**, never a silent default; a **stated** decision grants its records to the
+role it names (`grantTo`, defaulting to `superadmin`). Both write sites that only accepted `defaulted` now
+**also** write a `decided` one: the **guard** (read from `input.requestHeaders` in `validate`, carried to
+`afterSuccess`) and the **three HTTP route** paths (read from `req.headers`). The third primitive path
+(`register.ts`) and the field choke point correctly **cannot** see a request header and still default —
+CC-17, 2026-10-08).
+
+**117 SD-1 tests; 48 mutations RED-then-GREEN across ten slices, each restore md5-verified; `shared`
+197/2329 — 8 fail in the one suite of CC-19 (a host process-creation failure, not code), `core` 626/5427,
+typecheck 0.** **Eight** hostile-critic passes plus two mutation/premise-found defects (twenty-six real
 defects) — all fixed or named (`PLAN-SD-1.md` §9).
 
 **It is still PARTIAL — but ALL headline limits are closed.** A gate that decides but does not record was
@@ -87,16 +96,18 @@ ungated; it now runs the same gate. The **non-request** field paths (module inst
 (single + restore) were ungated; they now gate at the route. A **custom entity created by the module
 install** was ungated; it now gates at the primitive. A **field-type change** was ungated; it now gates at
 all three write sites. The **ACL merge** could lose an addition under a race; it is now atomic. And the
-**batch path could define a field on a system column** (`id`); it now refuses it. What
-remains is **the `decided` carrier, the enforcement consumer, and the create-branch
-double-insert** — every one scheduled in
+**batch path could define a field on a system column** (`id`); it now refuses it. And the **`decided`
+outcome** — S2's *"either by a person"* — is now reachable and writable from every request path. What
+remains is **the enforcement consumer, the ungated entity reactivation, the unauthorised decision actor,
+and the create-branch double-insert** — every one scheduled in
 [`COMPLETION-CALLBACKS.md`](library/development/COMPLETION-CALLBACKS.md):
-1. **Make the `decided` branch reachable** — today only the rule fires, never a person's decision. **(CC-17)**
-2. **Give a custom *field*'s records an enforcement consumer** — SD-1 writes ACL rows nothing reads yet. **(CC-20)**
-3. **Close the create-branch double-insert** — a first grant onto a role with no ACL row can create two rows; needs a unique index `(role_id, tenant_id)` (a migration, deferred). **(CC-23)**
+1. **Give a custom *field*'s records an enforcement consumer** — SD-1 writes ACL rows nothing reads yet. **(CC-20)**
+2. **Gate the custom *entity*'s HTTP reactivation** — its gate is `operations:['create']`, but the route maps a reactivation to `update`, so it never fires. **(CC-24)**
+3. **Authorise the decision actor** — the header *names* who decided; nothing checks they were allowed to. **(CC-25)**
+4. **Close the create-branch double-insert** — a first grant onto a role with no ACL row can create two rows; needs a unique index `(role_id, tenant_id)` (a migration, deferred). **(CC-23)**
 
 **Read first (before continuing):** [`PLAN-SD-1.md`](library/development/PLAN-SD-1.md) — the plan, the
-critics' twenty-four defects (§9) and the honest limits (§10) — and the completion register
+critics' twenty-six defects (§9) and the honest limits (§10) — and the completion register
 [`COMPLETION-CALLBACKS.md`](library/development/COMPLETION-CALLBACKS.md) (the owner's 2026-10-08 standing
 instruction: always schedule a partial build's gap, prerequisite and callback). Then the same discipline
 as `S-02`/`D3`: fact-check what exists, name the honest boundary, then plan → execute → verify → document.

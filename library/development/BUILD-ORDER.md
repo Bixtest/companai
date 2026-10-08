@@ -1086,9 +1086,18 @@ one page, each with a named home. Details: [`BLUEPRINT-GAP-ANALYSIS.md`](BLUEPRI
    each write site, so the shared guard contract was not touched); and the merge into `role_acls.features_json`
    is now **atomic** (one SQL `UPDATE`, `jsonb ||` deduped, `returning` — no lost update under a race); and the
    batch path **names every key it writes** so the reserved-key guard runs on it (the key-shape check is
-   already closed by zod on both routes; the reserved key was the real hole — CC-18).
-   **The headline limits are all closed.** Still open: an enforcement consumer
-   for a *field*'s records, the create-branch double-insert (needs a migration — CC-23), and the two
+   already closed by zod on both routes; the reserved key was the real hole — CC-18); and **the `decided`
+   outcome is now reachable and writable** — a caller may *state* the decision (a three-way
+   `x-om-ext-permissions-decision` header, fail-closed: malformed is 400, never a silent default; a stated
+   decision grants to the role it names, `grantTo`, defaulting to `superadmin`), read at the guard (from
+   `input.requestHeaders`) and at the three HTTP route paths (from `req.headers`) — so both the guard and
+   the routes now write a **stated** decision as well as a defaulted one, while the non-request primitives
+   correctly cannot (they see no header) and still default (CC-17).
+   **The headline limits are all closed.** Still open: the create-branch double-insert (needs a
+   migration — CC-23), the custom **entity**'s ungated HTTP reactivation (its gate is `operations:['create']`
+   but the route maps a reactivation to `update` — CC-24), an enforcement consumer
+   for a *field*'s records (CC-20), **no authorisation of the decision actor** (the header names them;
+   nothing checks them — CC-25), and the two
    deferred consumers (`SD-4`, `G-04`) — each scheduled in [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md)
    (plan [`PLAN-SD-1.md`](PLAN-SD-1.md), limits §10).
 6. **SD-3** — make the tier mapping/defaults/fallbacks a **superadmin setting** (`module_configs`, module
