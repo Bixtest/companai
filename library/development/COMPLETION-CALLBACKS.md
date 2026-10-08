@@ -1,0 +1,99 @@
+# Completion callbacks — the register of work stopped short of 100%
+
+**What this file is.** Every item this project has **partially** built — the decision core without its
+enforcement, the mechanism without its first caller, the half of a gap that has a consumer and the half
+that does not — **gathered in one place, each with three things: the gap (measured), the prerequisite it
+waits on, and the callback to run when that prerequisite lands.**
+
+**Why it exists (the owner's instruction, 2026-10-08, verbatim).** *"always document and schedule gaps and
+prerequisites to develop and callbacks to complete developing what you partially did once prerequisites
+are completed."* A partially-built item that is only described inside one plan document is a partial item
+**one session away from being forgotten** — the next agent reads the plan's §7 ("what was built"), not its
+§10 ("what was not"). This register is the place a partial item is **scheduled**, not merely noted.
+
+**How it differs from the two neighbours.** [`BACKLOG.md`](BACKLOG.md)'s foot table is **"deferred by
+decision — the trigger that brings it back"**: work *chosen not to start*. This file is **"started and not
+finished"**: work that has **real code in the tree today** and a **named callback** to complete. Where an
+item is both (a deferral whose trigger is another build), the deferral table owns the *reason* and this
+file owns the *completion step*; each row below cross-references its parent.
+
+**The rule this file carries (now a standing rule — [`WORKING-RULES.md`](WORKING-RULES.md) §1 rule 8).**
+**When you stop short of 100% on any item, you add its row here in the same change** — with the gap, the
+prerequisite, and the callback — **and you name it in the parent's own plan §10.** A session that leaves a
+partial item documented only inside a plan is not finished, the same standard as updating the docs.
+
+**How to read a row.** *Gap* = what is not done, with the observation that proves it. *Prerequisite* =
+what must land first (or **"none — startable now"**, which is itself a finding: a startable gap left
+unstarted is a scheduling defect, not a blocked one). *Callback* = the concrete, checkable action to run
+**when the prerequisite lands** — never "finish it", always the first command or the exact change.
+
+---
+
+## The register
+
+### `SD-1` — the S2 permissions gate (parent: [`PLAN-SD-1.md`](PLAN-SD-1.md) §10; live task)
+
+| ID | Gap (measured) | Prerequisite | Callback — what to run when it lands |
+|---|---|---|---|
+| **CC-1** | **The records are not written.** `evaluateStructureChange` returns `defaulted` with `records` + `grantTo: 'superadmin'`, but **no call site persists them** to `role_acls.features_json`. On the HTTP routes the hook enumerates and fails closed but does not change the ACL. | **none — startable now.** The roles/permissions store exists (S5); the write goes through the existing ACL store, not a second scheme. | **The next slice.** Implement the write that turns `defaulted` into a real grant: apply the records to the tenant's `superadmin` `RoleAcl` through the existing store; test with the **mocked EntityManager** (a migration is unprovable here — `document.ts:22-28`); mutation-prove RED-then-GREEN; re-measure `shared`/`core`; document in `PLAN-SD-1.md` §10. **This is what turns the gate from a decision into an enforcement.** |
+| **CC-2** | **The batch create path is ungated.** `entities/api/definitions.batch.ts` creates **new columns** under `operation:'custom'`, which the registry maps to `'update'` — so a `create`-only guard never sees them, and the guard payload carries **no field list**. | **none — but it is a deliberate change, not a one-liner.** Either the created keys are passed into the guard, or the gate is run at the route's `if (!def)` branch. | Decide the shape (pass the keys vs. gate at the route), then implement; add a guard test that a batch-created column runs the gate; mutation-prove; record in `PLAN-SD-1.md` §10. |
+| **CC-3** | **The module-install and CLI create paths are ungated** — `entities/lib/field-definitions.ts` (via `install-from-ce.ts`) and `entities/cli.ts` create definitions with no guard. | **none** — non-request paths, the same class as `S-02`'s non-request limits. | Either **gate them** (call `runStructureChangeGate` at each creation site) **or name them** as accepted non-request surfaces with a trigger, the way `S-02` §10 named its four. Whichever is chosen, the decision is recorded, not left implicit. |
+| **CC-4** | **A field-type change is not gated.** The gate fires on `create`; an `update` that changes a field's **type** (a new surface in effect) is not seen. | **the before-state** — detecting the change needs the pre-update field definition, which the guard input does not carry. | When the guard input gains a before-state, add an `update` guard that runs the gate **only** when the type changes; test the "type changed → gate fires / same type → no fire" pair; mutation-prove. |
+| **CC-5** | **The structural block is a single record** (`<prefix>.structure`). The per-verb, per-level grammar (add/edit/remove/reference × straight/review/approval/never) is **not** in SD-1. | **`SD-4`** — the structural-permission grammar (S11/S12). | When `SD-4` lands, expand `<prefix>.structure` into the per-verb records it defines; the catalogue already yields the block — `SD-4` fills it. Cross-ref: `ARCHITECTURE-structure-permissions.md`. |
+| **CC-6** | **The data-axis row shape is not built.** SD-1 produces the data-block records (`entities.records.<id>.view\|manage`); the **row-level** rule is not SD-1's. | **`G-04`** — the data-axis layer. | When `G-04` lands, the data-block records gain the row-level rule; re-run the gate's tests against the new shape. |
+| **CC-7** | **The catalogue is in-process** for **recorded (runtime) surfaces** — a recorded custom field or saved Function lives for the process, not in a durable row. | **`G-04`** — a migration is **unprovable on this host** (the unit suites mock the EntityManager; `document.ts:22-28` records the same reasoning for the Function row). | Write the catalogue row **in the same migration as `G-04`'s data-axis work** — one migration, not two (the same call the Function row and G-07's registry row already took, deferring to `G-09`). |
+
+### `S-02` — the Hermes tool door (parent: [`PLAN-S-02.md`](PLAN-S-02.md) §10; **DONE**, these are its named limits)
+
+| ID | Gap (measured) | Prerequisite | Callback — what to run when it lands |
+|---|---|---|---|
+| **CC-8** | **`ai-assistant/.../tool-test-runner.ts:193` runs a read-tool handler ungated.** Reachable only from the `mercato ai_assistant tool-test` CLI and an integration spec — not a request path, superadmin in-process. | **the CLI command gains an HTTP surface.** | At that moment, gate the handler with `checkToolAuthority` before it runs; add the request-path test. Until then it is correctly ungated (no subject, no request). |
+| **CC-9** | **`catalog` / `customers` `ai-agents-context.ts` call `tool.handler` directly** with `userId: null` for page-context hydration. A `checkToolAuthority` call there returns `permit` immediately (no subject), so gating it today changes nothing. | **the page-context hydration gains a subject.** | When it gains a subject, supply it and gate the call — the gate is a no-op without one, which is *why* it is deferred, not skipped. |
+| **CC-10** | **The HTTP RBAC path (`refusalFor`) passes no invoker.** Pre-existing; S-02 did not change it and does not claim to. | **whoever next touches `rbacService.refusedByAuthority`.** | Pass the invoker there, matching what the tool door now does — then the two authorization paths agree on the invoker. |
+| **CC-11** | **`enforce` is not armed for any tenant.** The door is capable and fail-closed; the switch remains the operator's decision, made against their own shadow evidence. | **the operator's decision**, against shadow evidence. | Arm it **tenant by tenant** once that tenant's shadow evidence supports it; record each arming. *(Owner's call — see `NEEDS-YOU.md`.)* |
+
+### The Blueprint gap and the request-outcome item (partial builds by design)
+
+| ID | Gap (measured) | Prerequisite | Callback — what to run when it lands |
+|---|---|---|---|
+| **CC-12** | **GAP A — the `Resource` envelope half is OPEN.** The Metadata Registry half is **DONE** (`59ab859`); the universal `Resource` shape every object shares is not built. | **Phase −1 contract C1, and a consumer.** Building the type with no consumer would be the *"contract after the code"* failure the gap analysis names. | Build the envelope **with its first consumer** (not before). The registry already exposes envelope-shaped facts where they exist and returns a **typed absence** for the rest, so the shape of the gap is queryable today. Cross-ref: [`BLUEPRINT-GAP-ANALYSIS.md`](BLUEPRINT-GAP-ANALYSIS.md) §2 GAP A. |
+| **CC-13** | **G-21 — the schema-mutation IR kind, a UI, and a database row are not built.** The taxonomy, the pure triage and the Save gate are **DONE** (`916069a`). | **the schema-mutation IR kind** (G-21's own follow-up); the DB row waits on the same migration story as CC-7. | Build the schema-mutation IR kind as its own item; wire the UI once the kind exists (front-end rule, `WORKING-RULES.md` §2.4); the row rides the `G-04`/`G-09` migration. Cross-ref: `ARCHITECTURE-request-outcomes.md`. |
+
+### `D3` — the `escalation` outcome (parent: [`PLAN-D3-escalate-outcome.md`](PLAN-D3-escalate-outcome.md); mechanism DONE, latent by design)
+
+| ID | Gap (measured) | Prerequisite | Callback — what to run when it lands |
+|---|---|---|---|
+| **CC-14** | **The escalation branch in the three PARKED modules** (`staff` 11 sites, `payment_gateways` 4, `sales` 2 — 21 of the 36 widened guard-consume sites). They are **commented out** in `modules.ts` and **excluded** from `packages/core/tsconfig.json`, so the package typecheck and the core suite never compile or run them. | **the first time `staff`, `payment_gateways` or `sales` is un-parked** (re-enabled in `modules.ts` **and** `tsconfig.json`). | At that moment: re-run `tsc --noEmit` on `@open-mercato/core` **and** the module suites; confirm each escalation branch compiles and returns **`202 pending_review`**. Doing it before un-parking would be running code the build deliberately excludes. |
+| **CC-15** | **The first production guard that emits `escalation`** — D3 added the outcome and honoured it end-to-end, but **no production guard emits one yet**; the capability is proven by test, not by a live caller. | **the first guard built to escalate** — e.g. a `level = approval` rule from **`SD-4`**'s grammar. | The acceptance criterion, fixed in [`BACKLOG.md`](BACKLOG.md)'s deferral table so it cannot be forgotten: (1) the guard returns `{ ok: true, escalation: { gate, rule, because } }`; (2) `runMutationGuards` short-circuits and the route returns **`202 pending_review`** with the block — **not** `200`, **not** `403`; (3) the row is **unchanged**; (4) a `pending_acts` row is created (the guard **defers**; feeding `authority_pending_acts` is the approval-layer's job and is part of this criterion). |
+
+---
+
+## How to re-measure this register (so a partial item cannot silently go missing)
+
+**Every partial item that has a `PLAN-*.md` §10 must appear here.** The check is one command:
+
+```bash
+cd /c/Users/Ramzi/Downloads/companai/library/development
+# 1. Every plan that records honest limits must be named in this register:
+for p in PLAN-SD-1 PLAN-S-02 PLAN-D3-escalate-outcome PLAN-G21-request-outcomes PLAN-metadata-registry; do
+  grep -q "$p" COMPLETION-CALLBACKS.md && echo "OK      $p" || echo "MISSING $p"
+done
+# 2. Every CC- row must be unique and contiguous (no gaps, no duplicates):
+grep -oE '\*\*CC-[0-9]+\*\*' COMPLETION-CALLBACKS.md | sort | uniq -c | awk '$1!=1{print "DUP",$2}'
+```
+
+**A `MISSING` plan means a partial item exists in a plan and is not scheduled here — a defect, fixed in
+the same change.** Re-run after every task that stops short of 100%.
+
+---
+
+## Cross-references
+
+- **The live task** — the `★ ACTIVE TASK` box at the top of [`../../JOURNAL.md`](../../JOURNAL.md).
+- **What is left as a whole** — [`BACKLOG.md`](BACKLOG.md) (and its deferral table, for the *chosen-not-to-start* items).
+- **The order** — [`BUILD-ORDER.md`](BUILD-ORDER.md).
+- **The standard** — [`SPECIFICATIONS-DICTIONARY.md`](SPECIFICATIONS-DICTIONARY.md); *"it exists" ≠ "it is built"*.
+- **The rule that points here** — [`WORKING-RULES.md`](WORKING-RULES.md) §1 rule 8.
+
+*Created 2026-10-08, on the owner's instruction. Maintained in the same change as the work that adds or
+closes a partial item.*

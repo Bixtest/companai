@@ -27,6 +27,11 @@ log.** Everything else (HANDOVER, START-PROMPT, README, BOOKMARKS, BACKLOG) poin
       box, with the reason it is next.
 4. **Tell the owner, in plain English**, what was done and what is now active — never more than one
    question, and only if it genuinely needs him.
+5. **If the task stops short of 100%, schedule it — do not merely note it.** Add its row to
+   [`library/development/COMPLETION-CALLBACKS.md`](library/development/COMPLETION-CALLBACKS.md) with the
+   **gap**, the **prerequisite**, and the **callback** to run when the prerequisite lands *(owner's
+   instruction, 2026-10-08; the standing rule is [`WORKING-RULES.md`](library/development/WORKING-RULES.md)
+   §1 rule 8)*. A partial item left only inside a plan's §10 is one session away from being forgotten.
 
 ---
 

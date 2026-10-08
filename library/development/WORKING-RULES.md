@@ -56,6 +56,17 @@ gets broken.
    not finished** — the same standard as updating the docs (rule at §2.1) and capturing the know-how
    (COOKBOOK rule zero-five).
 
+8. **A partial build is scheduled, not merely noted** *(owner, 2026-10-08)*. **When you stop short of
+   100% on any item, you add its row to [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md) in the same
+   change** — with **the gap** (measured), **the prerequisite** it waits on, and **the callback** to run
+   when that prerequisite lands — and you name it in the parent's own plan §10. **His words, verbatim:**
+   *"always document and schedule gaps and prerequisites to develop and callbacks to complete developing
+   what you partially did once prerequisites are completed."* **Why:** a partial item described only
+   inside one plan is one session away from being forgotten — the next agent reads §7 ("what was built"),
+   not §10 ("what was not"). **A session that leaves a partial item documented only inside a plan is not
+   finished**, the same standard as updating the docs (§2.1) and the Hermes map (rule 6). Re-measure with
+   the commands in that file.
+
 *(The COOKBOOK also carries the numbered engineering rules — zero-zero through zero-ten — that govern
 **how** the work is done: the specifications dictionary is binding, "it exists" is not "it is built",
 foundation before stack, the core boundary is not customisable, keep the project findable, measure
@@ -141,5 +152,7 @@ that still need work). Updating the front end helps me testing the micros as you
 - **If a rule stops being true**, delete it — do not leave it to be obeyed after it is wrong.
 - **Keep it short.** This is a page the agent reads once at the start; a long page defeats its purpose.
 
-*Last updated: 2026-10-06 — created, carrying the owner's two additions to the override list (two
-routes; the front-end rule) and the pointer to the Active-task box.*
+*Last updated: 2026-10-08 — added rule 8 (a partial build is scheduled in
+[`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md), not merely noted), on the owner's instruction.
+Previously 2026-10-06 — created, carrying the owner's two additions to the override list (two routes;
+the front-end rule) and the pointer to the Active-task box.*

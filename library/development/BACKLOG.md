@@ -433,6 +433,14 @@ lose this" list rather than the roadmap, because none of them is required by the
 
 **A deferral is honest only when it names what brings it back** (COOKBOOK rule zero-one).
 
+> **Started and not finished is a different list: [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md).**
+> This table is work **chosen not to start**. The register is work that has **real code in the tree today**
+> and a **named callback** to complete — `SD-1`'s seven remaining steps, `S-02`'s four named limits, `GAP
+> A`'s envelope half, `G-21`'s unbuilt parts, `D3`'s latent escalation. Where an item is both, this table
+> owns the *reason* and the register owns the *completion step*. **Owner's standing rule (2026-10-08,
+> [`WORKING-RULES.md`](WORKING-RULES.md) §1 rule 8):** a partial build is **scheduled there in the same
+> change**, never left inside a plan's §10 alone.
+
 | Item | Why it waits | The trigger |
 |---|---|---|
 | **20** — Deploy on a real Plesk VPS | Owner said "not now"; nothing to deploy yet | Sprint 0's stack is proven locally and a server is wanted |
