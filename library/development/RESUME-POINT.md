@@ -73,10 +73,11 @@ for: **a mutation (or a measurement) that produces no RED/difference is a findin
 | **CC-23** | create-branch double-insert | needs a **migration** (deferred; unreachable in normal operation) |
 | **CC-25** | a structure-permission decision is not authorised against the actor | **CONFIRMED by the owner — a ROLE PERMISSION** (a build, not open policy) |
 | **CC-27** | an AI user cannot be *bound* to an agent | **approved — needs `AH-1` first** |
-| **§4.5 upsert** | the `custom_entities_storage` upsert conflict target omits `tenant_id` (a write-side sibling of CC-28) | **startable now** — small, but needs care (the `ON CONFLICT` requires a unique index that includes the new column) |
+| **§4.5 upsert** | the `custom_entities_storage` upsert conflict target omits `tenant_id` | **DONE (2026-10-08, CC-30)** — and the slice grew: the real defect was that the conflict target matched **no constraint at all** (legacy index non-unique *and* missing `tenant_id`). Measured on live PG 17: a bare `ON CONFLICT` never resolves against a **partial** index. Fix = one plain 4-col unique index + three partial indexes for the null-scope shapes. See `analysis/cc30-.../FINDINGS.md` |
+| **CC-30 follow-ons** | (i) the in-engine upsert still carries a `try/catch` fallback that is now redundant on a migrated DB; (ii) `updateCustomEntityRecord` inserts without a conflict target on the not-found branch | **OPEN — needs an owner call**: (i) is dead code on the happy path, harmless, but untested against a real conflict; (ii) needs its own migration-shaped decision. Neither is a live leak |
 | **`SD-4` / `G-04`** | the per-verb structural grammar / the data-axis row | blocked on **`G-04`** |
 
-**The next slice is the CC-28 write-side sibling (§4.5) or `SD-3` in BUILD-ORDER order.** The `★ ACTIVE
+**The next slice is `SD-3` in BUILD-ORDER order** (§4.5 shipped as **CC-30** on 2026-10-08). The `★ ACTIVE
 TASK` box posts the next item; `BUILD-ORDER.md` and the box are the arbiters.
 
 ---

@@ -112,8 +112,13 @@ The platform's AI **actor** is already a first-class principal (`api_keys.princi
 what is missing is the **UI** (CC-26) and the **agent ↔ AI-user binding** (CC-27) — both approved. The
 tenant model is **single-DB / shared-schema / `tenant_id`-column with no RLS**, and a per-tenant structure
 change is a **row, not DDL**, so it cannot leak to another tenant's schema — but one real cross-tenant
-`updated_at` read was found and is fixed as **CC-28**. Full reasoning:
-[`analysis/ANSWER-2026-10-08-organisational-questions.md`](analysis/ANSWER-2026-10-08-organisational-questions.md).
+`updated_at` read was found and is fixed as **CC-28**, and the **write-side sibling of that same shared
+table then shipped as `CC-30`**: the `custom_entities_storage` upsert's conflict target, measured on live
+PG 17 to match **no constraint at all** (legacy index non-unique *and* missing `tenant_id`), so the
+single-statement upsert had never run and the `try/catch` fallback silently did the work. Fix = one plain
+4-col unique index + three partial indexes for the null-scope shapes. Full reasoning:
+[`analysis/ANSWER-2026-10-08-organisational-questions.md`](analysis/ANSWER-2026-10-08-organisational-questions.md);
+CC-30's measurement and shape: [`analysis/findings/cc30-custom-entities-storage-uniqueness.md`](analysis/findings/cc30-custom-entities-storage-uniqueness.md).
 
 **Read first (before continuing):** [`PLAN-SD-1.md`](library/development/PLAN-SD-1.md) — the plan, the
 critics' thirty-one defects (§9) and the honest limits (§10) — and the completion register
@@ -129,10 +134,11 @@ two small startable-now items were done by the owner's approval (2026-10-08): `C
 is in the API-key create form** (the UI for a server capability that already existed:
 `api_keys.principal_kind = 'ai_worker'`), **and `CC-28` — the custom-record `updated_at` read-backs now
 scope by tenant** (the batch path was the live cross-tenant hole; the single path was defence-in-depth). **The
-box now posts `SD-4`/`SD-5`'s predecessor — or, if the owner prefers, the write-side sibling of CC-28** (the
-`custom_entities_storage` upsert conflict target omitting `tenant_id`, §4.5 of the tenant-isolation
-forensic). **`CC-20`, `CC-23` and `CC-25` remain behind `SD-1`'s own gates** (`G-04`, a migration, and the
-confirmed role-permission build respectively).
+box no longer carries a startable-now item: **the two `S-03`-free CC items the owner approved are both done —
+`CC-26` and `CC-28` — and their write-side sibling shipped as `CC-30`** (the `custom_entities_storage`
+upsert conflict target, §4.5 of the tenant-isolation forensic; see the dated entry below). **`CC-20`,
+`CC-23` and `CC-25` remain behind `SD-1`'s own gates** (`G-04`, a migration, and the confirmed
+role-permission build respectively).
 
 ---
 
@@ -704,7 +710,80 @@ the per-item status is in `BACKLOG.md`. **This box is the only place that says "
    Updating the front end lets the owner test the micros as work proceeds. → recorded in
    [`WORKING-RULES.md`](library/development/WORKING-RULES.md) and the COOKBOOK.
 
-## 2026-10-08 (newest) — `CC-28`: the shared-store read-backs are tenant-scoped, and the forensic's premise was corrected by measuring
+## 2026-10-08 (newest) — `CC-30`: the `custom_entities_storage` upsert matched no constraint, and a plain-vs-partial index measurement re-made the design
+
+**What happened.** This is the **write-side sibling of CC-28** — §4.5 of the tenant-isolation forensic. The
+custom-entity write path in `packages/shared/src/lib/data/engine.ts` declares
+`on conflict (entity_type, entity_id, organization_id, tenant_id)`. The forensic said it omitted `tenant_id`.
+It did. Started under the rule-10 package workflow; **the first two steps — study the references, prove the
+prerequisite in code — are what corrected the premise, and the correction was larger than the entry.**
+
+**What the live database showed (the premise correction).** The only index on `custom_entities_storage` was
+`custom_entities_storage_unique_idx ON (entity_type, entity_id, organization_id)` — created **non-unique**,
+and **missing `tenant_id`**. So the shipped conflict target matched **no unique or exclusion constraint at
+all**. Postgres raised `ERROR: there is no unique or exclusion constraint matching the ON CONFLICT
+specification` on **every** call; the `try/catch` in the engine caught it and fell through to a manual
+UPDATE-then-INSERT. **The single-statement upsert had never once run on a real deployment.** The entry
+understated the defect *and* named a fix that the database refuses.
+
+**The measurement that re-made the design (three probes, throwaway schemas, both dropped; the real table
+verified untouched at 0 rows with its original two indexes).**
+- **(A)** A bare `ON CONFLICT (cols)` against a **partial** unique index → **ERROR**, *even when the inserted
+  row satisfies the predicate*. Postgres infers the arbiter from **statement** predicates only, never from
+  `VALUES`.
+- **(B)** The same statement against a **plain** unique index → `INSERT 0 1` twice, **1 row**, `doc` updated
+  in place. ✔ the intended behaviour.
+- **(C)** Two NULL-scope rows `(e, r, NULL, NULL)` under a **plain** index → **2 rows** (Postgres treats NULLs
+  as distinct, so no collision) vs under a **partial** index → **duplicate key rejected**. The two properties
+  are **mutually exclusive on one index**.
+
+**The shipped shape.** Because no single index has both properties, the fix is **four indexes**:
+- `custom_entities_storage_scope_uq` — **plain** unique on `(entity_type, entity_id, organization_id,
+  tenant_id)`; this is what the upsert's conflict target resolves against.
+- `custom_entities_storage_tenant_uq` / `_org_uq` / `_global_uq` — **partial** unique on
+  `(entity_type, entity_id, tenant_id)` / `(…, organization_id)` / `(entity_type, entity_id)`, each with a
+  `where` pinning its null-scope shape.
+The legacy `custom_entities_storage_unique_idx` decorator was **removed** (the migration drops the index;
+leaving the declaration would have been drift). Migration `Migration20261009090000.ts`; the four statements
+are byte-identical to the decorators. **End-to-end live proof:** the migration applied cleanly; the shipped
+upsert updated in place (1 row, v=2); two tenants sharing one `organization_id` produced **2 rows** — exactly
+the overwrite the fix prevents; a global-scope duplicate INSERT was **rejected** by `_global_uq`.
+
+**A second defect, found by the same package workflow.** `packages/core/src/modules/query_index/lib/engine.ts`
+classified an entity as doc-storage-backed by probing two **shared** tables with **no** tenant filter (and
+caching by entity alone). So **tenant A's row classified the entity for tenant B**, whose scoped list query
+then returned **zero rows**. Now tenant-scoped: the cache key carries `tenantId`, and both probes
+(`isCustomEntity`, `hasCustomEntityStorageRows`) apply `.where('tenant_id','=',tenantId)`. **Honest limit:**
+the records API was never exposed — `forceCustomEntityStorage` short-circuits the classifier before it runs.
+
+**Verification.** `core` **628 suites / 5463 tests / 0 failures** (the **+12 tests** over CC-28's 5447 is this
+slice); `shared` **199 suites / 2368 tests** — the 8 failures in `dynamicLoader.tsconfig.test.ts` are the
+sandbox shim's `fs.rmSync` in teardown and are **pre-existing**, proved by stashing all eight tracked files,
+moving the untracked migration aside, verifying an empty `git status`, and re-running the pristine suite to
+the **identical 8 failures**; `tsc --noEmit` exit **0** on both packages. **6 mutations RED-then-GREEN, each
+restore `md5sum`-verified:** M1 (drop `tenant_id` from the target) → 1 RED; M2 (remove the probe tenant
+filter) → 1 RED; M3 (drop `tenant_id` from entity + migration) → 2 RED; M4 (re-declare the legacy index
+decorator) → 1 RED; M5 (drop the null predicate) → 1 RED; M6 (mutate the snapshot shape to `unique:true` +
+`options`) → 1 RED.
+
+**Two hostile-critic rounds ran as separate agents.** Round 1 checked six claims: four held, and it found
+**two real errors in my own work** — (i) my first `engine.ts` comment claimed a partial index would resolve
+the upsert (measured false: **A** above), and (ii) the snapshot entries I hand-wrote had the wrong shape for
+`expression` indexes (they would have made `db:generate` re-emit) — fixed to the shape
+`DatabaseTable.addIndex` provably emits and pinned by a test. Round 2 attacked the redesign: claims 1, 3, 5,
+6 held; it called A2 and A4 broken — A2 was **correct** and is now the measured rule, A4 was correct and was
+fixed. Both round-1 findings were reproduced by hand against the live database before acceptance.
+
+**One more premise corrected by measuring, in the same slice:** the configured snapshot filename is
+**hardcoded** — `packages/cli/src/lib/db/commands.ts:95-97` `getMigrationSnapshotName` returns
+`'.snapshot-open-mercato'` (with dash), so the sibling `.snapshot-openmercato.json` (no dash) is **dead** —
+nothing reads it.
+
+**Code (this commit); docs this commit.** Registers updated: `COMPLETION-CALLBACKS.md` (CC-28's open note
+closed + a full CC-30 row), `BACKLOG.md` (new item + header), `RESUME-POINT.md` (§4.5 row → DONE + a CC-30
+follow-ons row; next slice → `SD-3`), `platform_points.md` (the S4 row), `analysis/findings/cc30-custom-entities-storage-uniqueness.md` (new), this file.
+
+## 2026-10-08 — `CC-28`: the shared-store read-backs are tenant-scoped, and the forensic's premise was corrected by measuring
 
 **What happened.** The tenant-isolation forensic (2026-10-08, §4.4) found the custom-record `updated_at`
 read-backs reading the **shared** `custom_entities_storage` table. It flagged **two** paths and called the
@@ -918,6 +997,27 @@ doing X now."**
 ---
 
 ### ✅ Done recently (ticked, then moved down here)
+
+- **2026-10-08 — `CC-30` — the `custom_entities_storage` upsert conflict target — DONE and PROVEN.** The
+  **write-side sibling of CC-28**: the shared table's upsert declared `on conflict (entity_type, entity_id,
+  organization_id, tenant_id)`. **Proved on live PG 17 that it matched no constraint at all** — the only
+  index was `custom_entities_storage_unique_idx (entity_type, entity_id, organization_id)`, created
+  **non-unique** *and* lacking `tenant_id`, so Postgres raised the ON-CONFLICT-spec error on every call and
+  the `try/catch` fallback did the work in silence. **The design was settled by measurement, not assumption:**
+  a bare `on conflict` is **never** matched against a **partial** index (even when the row satisfies its
+  predicate) — it *is* matched against a **plain** index. Since a plain index cannot enforce the null-scope
+  shapes (Postgres treats NULLs as distinct: two `(e, r, NULL, NULL)` rows coexist, measured 2) and a partial
+  index cannot satisfy the upsert, the fix is **four indexes — one plain (the conflict target) + three partial
+  (the null shapes)**. **A second, independent defect was found and fixed in the same slice:** the read
+  classifier in `query_index/lib/engine.ts` probed two **shared** tables with no tenant filter, so tenant A's
+  row classified the entity as doc-storage-backed for tenant B. **Proof:** `core` **628 suites / 5463 tests /
+  0 failures**; `shared` **199 suites / 2368 tests** (8 pre-existing sandbox-shim `fs.rmSync` failures in
+  `dynamicLoader.tsconfig.test.ts`, **proved pre-existing** by stashing all 8 files and re-running to the
+  identical 8); `tsc` exit 0 on both; **6 mutations RED-then-GREEN**, all 8 files md5-verified restored; **two
+  hostile-critic rounds** as separate agents (round 1 found the partial-index error and a snapshot-shape
+  error that would have made `db:generate` re-emit; round 2 attacked the redesign). Two items left for the
+  owner: the now-redundant upsert `try/catch`, and `updateCustomEntityRecord`'s not-found `INSERT` having no
+  conflict target. Details: `analysis/findings/cc30-custom-entities-storage-uniqueness.md`.
 
 - **2026-10-08 — `CC-28` — the shared-store read-backs are tenant-scoped — DONE and PROVEN.** The custom-record
   `updated_at` read-backs read the shared `custom_entities_storage` table. The **batch** read-back in `GET`
