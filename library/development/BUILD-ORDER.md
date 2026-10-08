@@ -1111,6 +1111,13 @@ one page, each with a named home. Details: [`BLUEPRINT-GAP-ANALYSIS.md`](BLUEPRI
 6. **SD-3** — make the tier mapping/defaults/fallbacks a **superadmin setting** (`module_configs`, module
    `request_outcome`), seeded from the dictionary, failing closed (§C.2b). **Not** a hardcoded table.
 7. **S9 / SD-2** — mark core functions (roles & permissions manager first) and guard their deletion.
+   **BUILT 2026-10-09** for the one live surface that exists — the built-in **`superadmin` role** — and
+   **enforced on EVERY role-delete path**: the route, the command, and the new `refuse` hook on
+   `DataEngine.deleteOrmEntity` (so the audit **redo** path, which re-runs a command without the route,
+   is covered too). A hostile round found the route-only first cut bypassable; a second hostile round
+   verified the fix, and the mutation proof exposed the store hook as decorative until a dedicated engine
+   suite armed it. Open, scheduled: the core set is by **name** not a column (CC-31); the `UserFunction`
+   core flag waits on `G-09` (CC-32). Plan [`PLAN-SD-2.md`](PLAN-SD-2.md).
 8. **SD-4 / SD-5** — the structural grammar screen (manage what can do what, to what level).
 9. **NEW — generic state-machine engine** (blueprint §10) promoted to a core primitive: allowed
    transitions, transition permissions, preconditions, events. Today pipelines exist only inside

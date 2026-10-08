@@ -35,7 +35,54 @@ log.** Everything else (HANDOVER, START-PROMPT, README, BOOKMARKS, BACKLOG) poin
 
 ---
 
-### ▶ NOW — `SD-1`: the **S2 permissions gate** (Phase 1). **PARTIAL — the decision core AND the enforcement are built, tested and mutation-proven; the remaining paths are scheduled. Plan: [`library/development/PLAN-SD-1.md`](library/development/PLAN-SD-1.md).**
+### ▶ NOW — `SD-4` / `SD-5`: the **structural-permission grammar** (S11/S12) and its **manage screen** (Phase 0 → Phase 1). **The next *undone* slice in `BUILD-ORDER` order after `SD-2` (done 2026-10-09). Plan: to be written (`PLAN-SD-4.md`) following the `PLAN-SD-1.md` discipline.**
+
+> **If you are a new agent, read only this block to know your job.** Everything below the box is the
+> history and the queue; this is the work in hand.
+
+**Why this is next.** `BUILD-ORDER.md` §8 lists it immediately after `SD-2` (done), and `SD-2` was the
+*last* startable Phase-1 slice that needed no owner ruling. The grammar is the piece the whole structural
+programme has been building toward: `SD-1` built the **gate** (a new surface cannot appear undecided),
+`SD-3` built the **tier setting** (what a change is judged by), `D3` gave a guard the **`escalation`**
+outcome, and the Metadata Registry exposes the **objects**. `SD-4` is the **grammar** those compose into —
+per object (table/column/relation/function/widget/agent) × verb (read/add/edit/remove/**reference**) ×
+actor (human/AI) × level (straight/review/approval/never) — and `SD-5` is its **manage screen** (the
+roles-and-permissions-style surface over it, reusing the same grant mechanism, S5).
+
+**Where it stands — read this before doing anything (fact-check, rule 10d).** Phase 0's foundation is
+**complete**: `D1` (the settings table / tier setting, `SD-3`), `D2-wide` (every enabled module's guard
+retired to the registry; the 106 remaining are all parked modules, recorded not migrated), `D3`
+(`escalation` as a third outcome, honoured end-to-end), and the Metadata Registry are all **done**. `SD-4`
+itself is **not built**: rules are still `.ts` code, not rows. **`SD-4`'s own first real prerequisite is
+`D1`-complete** — a place to *store* a rule — and the tier setting (`module_configs`, module
+`request_outcome`) is the precedent to follow (§C.2b).
+
+**The honest boundary to establish first.** `SD-4` touches the **structural grammar** — a dictionary
+matter (`SPECIFICATIONS-DICTIONARY.md` S11/S12, `CORE-BOUNDARY.md` §2/§5). Before building: fact-check
+what grammar shape the dictionary fixes vs what is a design choice, and confirm **nothing here is the
+owner's to decide** (rule 11) — or surface the one question if it is. **Do not assume the roadmap is
+right — re-measure it.**
+
+---
+
+### ✅ DONE — `SD-2` / `S9`: **mark core functions and guard their deletion.** **(2026-10-09, code repo; plan [`library/development/PLAN-SD-2.md`](library/development/PLAN-SD-2.md).)**
+
+> **One line proved it:** the built-in `superadmin` role (the roles-and-permissions manager, dictionary
+> §C.3) is a **409 for every actor** on **every** delete path — route, command, **and** the audit-redo path
+> that bypasses the route — and an ordinary role still deletes. `core` **630 suites / 5479 tests**, `shared`
+> **201 / 2385** (one pre-existing environmental flake, CC-19), both `tsc` exit 0, **6 mutations all RED**,
+> **two separate hostile-critic agents**.
+>
+> **The challenge (rule 9b) corrected the task before code was written.** *"A flag on the function record +
+> a guard on the delete path"* had **no home**: the `UserFunction` artifact has no delete path and no
+> persistence (`document.ts:22-28`), and no core/undeletable concept existed. But the dictionary's **named
+> example** — the roles-and-permissions manager = the built-in **`superadmin` role** — **is** a live
+> surface with a `DELETE`. So the rule was built where it can bite, and the Function flag was **deferred to
+> `G-09`, scheduled** (CC-32).
+
+---
+
+### ✅ DONE — `SD-1`: the **S2 permissions gate** (Phase 1). **PARTIAL — the decision core AND the enforcement are built, tested and mutation-proven; the remaining paths are scheduled. Plan: [`library/development/PLAN-SD-1.md`](library/development/PLAN-SD-1.md).**
 
 > **If you are a new agent, read only this block to know your job.** Everything below the box is the
 > history and the queue; this is the work in hand.
@@ -716,6 +763,57 @@ the per-item status is in `BACKLOG.md`. **This box is the only place that says "
    can be fully functional as a piece, even if unfinished parts are locked or switched off.*
    Updating the front end lets the owner test the micros as work proceeds. → recorded in
    [`WORKING-RULES.md`](library/development/WORKING-RULES.md) and the COOKBOOK.
+
+## 2026-10-09 (newest) — `SD-2` / `S9`: core objects are marked and undeletable, the delete rule lives on **every** path, and two hostile rounds plus a mutation proof corrected the first cut twice
+
+**What happened.** The owner said *"proceed following our wok rules"* on the `SD-2` slice named in the
+`★ ACTIVE TASK` box. `SD-2` is dictionary §C.3 / S9: *a core function — the platform's roles-and-permissions
+manager being the named example — ships by default and **cannot be deleted**.*
+
+**The challenge first (rule 9b), and it corrected the task.** The item's own sketch — *"a flag on the
+function record + a guard on the delete path"* — had **no home**, measured three ways: the `UserFunction`
+artifact has **no persistence and no delete** (`document.ts:22-28`; `lifecycle.ts` has only `archived`), no
+`isCore`/`undeletable` concept exists anywhere, and a flag on an unbuilt foundation would have been
+**stacking on an unfinished base** (rule 10d). But the dictionary's **named example** — the roles-and-permissions
+manager = the built-in **`superadmin` role** (`setup-app.ts:20,531,536,569`, tenant-scoped) — **is** a live
+surface with a real `DELETE`. So the rule was built where it can actually bite, and the Function flag was
+**deferred to `G-09`, scheduled** (CC-32). The comment in the code records *why*, so a later reader does not
+"fix" the design back to the sketch.
+
+**What landed (code repo `workspace/starting-kit`).** A shared, testable registry
+`shared/src/lib/core-boundary/core-objects.ts` (the one place that says *which* object is core —
+`coreObjects()`, `isCoreObject()`, `coreObjectRefusal()`, folding-insensitive), and the enforcement on
+**three layers**: the **route** (`auth/api/roles/route.ts`, both `mapInput` and exported `DELETE`), the
+**command** (`auth/commands/roles.ts` — `deleteRoleCommand.execute` and both hard-delete store calls), and
+the **store** (`DataEngine.deleteOrmEntity`'s new `refuse?` predicate — the choke point every delete funnels
+through). 409, not 400 — a well-formed request conflicting with a platform invariant.
+
+**The first cut was WRONG, and a hostile round proved it (rule 4).** Enforcing only at the route was
+**bypassable**: `audit-logs/.../redo/route.ts:155` calls `commandBus.execute(log.commandId, …)`, which
+re-runs a logged command **without entering the originating route's `mapInput`** — so a role delete refused
+at the route could be replayed through redo and succeed. Plus the role-create **undo** path hard-deleted.
+"Undeletable by anyone" was **false**. Fixed by moving the rule to the command **and** arming the store hook;
+a **second** hostile round then CONFIRMED every claim (redoing the M4 mutation itself, tracing the redo
+path by observation: `deleteRoleCommand` has no `redo` method, so the bus falls to `execute` → refuses).
+
+**The mutation proof then found the store hook DECORATIVE.** M4 (silencing `if (opts.refuse)`) went **GREEN**
+— the command's own check caught everything first, so the hook could have been deleted by any refactor with
+no test noticing. Closed by a dedicated engine suite (`shared/.../deleteOrmEntity.refuse.sd2.test.ts`, 5
+tests); re-measured, M4 fails 3. **This is the whole reason the mutation proof runs** (new lesson **L93**).
+
+**Measured:** `core` **630 suites / 5479 tests**, 0 failures; `shared` **201 / 2385** this run (one
+**pre-existing, environmental** flake — `dynamicLoader.tsconfig.test.ts`, CC-19 — passes in isolation,
+fails under the full run on a clean stashed tree; NOT from this slice); both `tsc` exit 0; **6 disjoint
+mutations, all RED**, each restored **md5-identical**; **two separate hostile-critic agents**. My
+"shared suite is green" claim was **falsified by the critic** (it hit the 8 failures on the same tree) and
+corrected to *"green on this run"* — recorded as lesson **L94**.
+
+**Docs, same change (rule 10f):** `BACKLOG.md` (SD-2 entry rewritten with the full record), `BUILD-ORDER.md`
+§7, `platform_points.md` S9 row (☐→☑, with the honest limits), `COMPLETION-CALLBACKS.md` (new `SD-2` section,
+**CC-31** name-not-column / CC-32 `UserFunction` flag → `G-09`, and the re-measure list gains `PLAN-SD-2`),
+`PLAN-SD-2.md` §7–§10 filled, `LESSONS.md` **L93**/**L94** added, and the **`★ ACTIVE TASK` box** now posts
+**`SD-4`/`SD-5`**, with `SD-2` ticked done. *Caught and fixed mid-commit: my scripted edits flipped five docs
+LF→CRLF; all converted back byte-clean (HEAD blobs are LF), and `git diff -w` now equals `git diff`.*
 
 ## 2026-10-08 (newest) — `CC-30`: the `custom_entities_storage` upsert matched no constraint, and a plain-vs-partial index measurement re-made the design
 

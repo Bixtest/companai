@@ -3116,3 +3116,53 @@ or strip the revision with `sed 's/^[^:]*://'` first. **A classifier that runs c
 ran on the right thing** — the same "measured a different thing than the claim names" failure that has now
 produced wrong numbers in this project more than once. The corrected probe (prefix-aware) gave
 **108 / 41 before, 106 / 40 after — delta exactly the module**, which is what the docs already said.
+
+## L93 — a defence you added but never tested is a defence a refactor may delete; the mutation proof is what tells the two apart
+
+**What happened.** Building `SD-2` I protected a core role on **three** layers: the route, the command,
+and a new `refuse?` predicate on the shared `DataEngine.deleteOrmEntity` (the store choke point). The
+route and command checks were each covered by their own suite. The store predicate was **not** — every
+test that reached the store also passed through the command's own check first, so silencing the predicate
+changed **no test result**. The 6-mutation proof caught it: **M4 (`if (false && opts.refuse)`) went GREEN**
+(16/16 core, 12/12 shared) while the other five went RED. The hook was **decorative** — a future refactor
+could have deleted the option argument and the whole suite would still have reported green.
+
+**Why it is dangerous.** A layer added "for safety" reads as *more* protection, so it raises confidence
+in proportion to how much it does **not** do. The failure is silent, and it is exactly the shape a human
+review misses: the code *is* there, it *is* called from real call sites, and it *is* plausible. Only a
+mutation that **removes** it shows whether anything notices.
+
+**The rule.** For every layer you add to a defence-in-depth stack, the proof must include a mutation that
+**disables that specific layer** and shows a test goes RED. Layers that share a test are one layer for
+proof purposes. When a layer's mutation stays GREEN, do **not** rationalise it ("the earlier layer catches
+it anyway") — either **add the test that makes it bite**, or **delete the layer on purpose** and say so.
+A defence with no test is not a defence; it is a comment that compiles. (Here: closed by
+`shared/src/lib/data/__tests__/deleteOrmEntity.refuse.sd2.test.ts`, 5 tests; M4 then failed 3.)
+
+*Cross-ref: L21 (a control that holds the mistake fixed proves nothing), L85 (a test that mocks the layer
+you are changing proves nothing).*
+
+## L94 — a suite that passed for you and failed for the critic is not "green"; it is "green on your run", and the claim must say which
+
+**What happened.** I ran the full `packages/shared` suite, saw the tail, and wrote into the work record
+that it was **201 suites / 2385 tests, 0 failures**. A separate hostile-critic agent then ran the **same**
+suite and got **1 failed / 8 failed** — the `dynamicLoader.tsconfig.test.ts` suite (a Windows
+`spawnSync … EBUSY` host failure, already catalogued as **CC-19**). It reproduced the 8 failures on a
+**stashed clean tree**, so the failure was pre-existing and unrelated to my change — but my claim as
+written was false.
+
+**Why it is dangerous.** "Green" is a claim about a *run*, not about *code*. A flaky-or-environmental
+suite makes the same tree produce different verdicts on different runs, so a claim stated as a bare fact
+("the suite passes") silently asserts more than the measurement supports — and the next reader trusts it
+and does not re-run. The trap is worse when the failure is **pre-existing**: the temptation is to wave it
+away ("not mine"), which is right about *causation* and wrong about *the claim*. The claim still said
+"0 failures".
+
+**The rule.** When a suite is known to be flaky or host-failing, the claim must read **"green on this run
+(N suites / M tests, 0 failures); it fails X on other runs for the known reason, catalogued as CC-n"** —
+never a bare pass. State the measured figure **with its condition**, and name the pre-existing failure
+rather than folding it into silence. **A verdict is a measurement; report it as one.** (Owner's rule 0:
+every claim carries an observation — and the observation here includes the run it came from.)
+
+*Cross-ref: L1 (a confident label is not an inspection), L10 (report the whole picture, not the first red
+flag), L14 (a green build is not a working platform).*

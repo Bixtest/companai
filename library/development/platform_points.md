@@ -225,7 +225,7 @@
 - ☐ **S6** — Every model a job uses is declared *(OPEN)*
 - ☐ **S7** — Chat is a legitimate unclassified state *(DONE with G-21 — not re-verified this round)*
 - ☐ **S8** — The platform notices and suggests, and never acts without asking *(OPEN)*
-- ☐ **S9 (= SD-2)** — Core functions ship by default and cannot be deleted *(OPEN — startable)*
+- ☑ **S9 (= SD-2)** — Core functions ship by default and cannot be deleted *(PARTIAL 2026-10-09 — built for the one live surface that exists, the built-in `superadmin` role (the roles-and-permissions manager, dictionary §C.3); enforced on EVERY delete path (route + command + the `DataEngine.deleteOrmEntity` `refuse` hook), 409, actor-independent. **Challenged first (rule 9b):** "a flag on the function record" had no home — the `UserFunction` artifact has no delete path and no persistence, and no core/undeletable concept existed; the dictionary's named example is the live `superadmin` role, so the rule was built there. Open, scheduled: the core set is marked by NAME not a column (CC-31); the `UserFunction` core flag waits on the artifact gaining a delete path / persistence (`G-09`, CC-32). Evidence: `BACKLOG.md` SD-2, `PLAN-SD-2.md`, `COMPLETION-CALLBACKS.md` CC-31/CC-32.)*
 - ☐ **S10** — Every standard has a home in code, and drift is a defect *(PART)*
 - ☐ **S11 (= SD-4)** — Structural permissions explicit, per object and per verb, inherited by default *(OPEN)*
 - ☐ **S12** — The actor type is part of every structural decision *(OPEN)*
