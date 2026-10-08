@@ -1093,11 +1093,19 @@ one page, each with a named home. Details: [`BLUEPRINT-GAP-ANALYSIS.md`](BLUEPRI
    `input.requestHeaders`) and at the three HTTP route paths (from `req.headers`) — so both the guard and
    the routes now write a **stated** decision as well as a defaulted one, while the non-request primitives
    correctly cannot (they see no header) and still default (CC-17).
-   **The headline limits are all closed.** Still open: the create-branch double-insert (needs a
-   migration — CC-23), the custom **entity**'s ungated HTTP reactivation (its gate is `operations:['create']`
-   but the route maps a reactivation to `update` — CC-24), an enforcement consumer
-   for a *field*'s records (CC-20), **no authorisation of the decision actor** (the header names them;
-   nothing checks them — CC-25), and the two
+   **The headline limits are all closed.** **CC-24 (2026-10-08) closed the entity twin of the
+   reactivation gap:** `api/entities.ts` now detects a reactivation from the before-state
+   (`!isActiveEntity(ent) && (input.isActive ?? true)`), reads the same CC-17 carrier, runs the same
+   `evaluateStructureChange`, refuses fail-closed (422, nothing written), and writes the records after
+   the flush through the same `writeFieldPermissionGrant` (gated at the route; no new query, no contract
+   change). Its mutation pass also found and fixed two **harness** defects (an unpinned `deletedAt`
+   clause in both consumers; a test leaking into the `globalThis` guard store) and widened the second
+   into **CC-29**. Still open: the create-branch double-insert (needs a
+   migration — CC-23), the `globalThis`-backed test store having no reset (CC-29), an enforcement consumer
+   for a *field*'s records (CC-20), and **authorising the decision actor** — a limit whose **model is now
+   confirmed by the owner (2026-10-08): it is a ROLE PERMISSION** (the platform's own `role_acls.features_json`),
+   so *who may decide a new surface's permissions* is a permission string a superadmin grants; a build, not
+   an open policy (CC-25) — plus the two
    deferred consumers (`SD-4`, `G-04`) — each scheduled in [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md)
    (plan [`PLAN-SD-1.md`](PLAN-SD-1.md), limits §10).
 6. **SD-3** — make the tier mapping/defaults/fallbacks a **superadmin setting** (`module_configs`, module

@@ -84,9 +84,9 @@ role it names (`grantTo`, defaulting to `superadmin`). Both write sites that onl
 (`register.ts`) and the field choke point correctly **cannot** see a request header and still default —
 CC-17, 2026-10-08).
 
-**117 SD-1 tests; 48 mutations RED-then-GREEN across ten slices, each restore md5-verified; `shared`
-197/2329 — 8 fail in the one suite of CC-19 (a host process-creation failure, not code), `core` 626/5427,
-typecheck 0.** **Eight** hostile-critic passes plus two mutation/premise-found defects (twenty-six real
+**128 SD-1 tests; 54 mutations RED-then-GREEN across eleven slices, each restore md5-verified; `shared`
+197/2329 — 8 fail in the one suite of CC-19 (a host process-creation failure, not code), `core` 627/5438,
+typecheck 0.** **Nine** hostile-critic passes plus two mutation/premise-found defects (thirty real
 defects) — all fixed or named (`PLAN-SD-1.md` §9).
 
 **It is still PARTIAL — but ALL headline limits are closed.** A gate that decides but does not record was
@@ -98,13 +98,22 @@ install** was ungated; it now gates at the primitive. A **field-type change** wa
 all three write sites. The **ACL merge** could lose an addition under a race; it is now atomic. And the
 **batch path could define a field on a system column** (`id`); it now refuses it. And the **`decided`
 outcome** — S2's *"either by a person"* — is now reachable and writable from every request path. What
-remains is **the enforcement consumer, the ungated entity reactivation, the unauthorised decision actor,
-and the create-branch double-insert** — every one scheduled in
+remains is **the enforcement consumer, the unauthorised decision actor, the create-branch double-insert,
+and a test-store reset** — every one scheduled in
 [`COMPLETION-CALLBACKS.md`](library/development/COMPLETION-CALLBACKS.md):
 1. **Give a custom *field*'s records an enforcement consumer** — SD-1 writes ACL rows nothing reads yet. **(CC-20)**
-2. **Gate the custom *entity*'s HTTP reactivation** — its gate is `operations:['create']`, but the route maps a reactivation to `update`, so it never fires. **(CC-24)**
-3. **Authorise the decision actor** — the header *names* who decided; nothing checks they were allowed to. **(CC-25)**
+2. **Gate the custom *entity*'s HTTP reactivation** — **✅ DONE 2026-10-08 (CC-24).** It was: the entity gate is `operations:['create']`, but the route maps a reactivation to `update`, so it never fired. The route now gates it from the before-state, refuses fail-closed (422), and writes the records after the flush — the CC-22 shape for the field twin. **The mutation pass found two real harness defects** (an unpinned `deletedAt` clause, now pinned in both consumers; and a leak into the `globalThis` guard store, now restored and widened into **CC-29**). 11 tests; 6 mutations RED-then-GREEN; a ninth hostile-critic agent found nothing falsifiable. `PLAN-SD-1.md` §9.11.
+3. **Authorise the decision actor** — **CONFIRMED by the owner (2026-10-08): it is a ROLE PERMISSION** (the platform's own model, `role_acls.features_json`) — a build, not an open policy. **(CC-25)**
 4. **Close the create-branch double-insert** — a first grant onto a role with no ACL row can create two rows; needs a unique index `(role_id, tenant_id)` (a migration, deferred). **(CC-23)**
+5. **Reset the `globalThis`-backed mutation-guard store between test files** — any suite that registers a guard can otherwise break any other; CC-24's did. **(CC-29)**
+
+**Two organisational questions were answered and CONFIRMED (2026-10-08), and produced three more items.**
+The platform's AI **actor** is already a first-class principal (`api_keys.principal_kind = 'ai_worker'`);
+what is missing is the **UI** (CC-26) and the **agent ↔ AI-user binding** (CC-27) — both approved. The
+tenant model is **single-DB / shared-schema / `tenant_id`-column with no RLS**, and a per-tenant structure
+change is a **row, not DDL**, so it cannot leak to another tenant's schema — but one real cross-tenant
+`updated_at` read was found and is fixed as **CC-28**. Full reasoning:
+[`analysis/ANSWER-2026-10-08-organisational-questions.md`](analysis/ANSWER-2026-10-08-organisational-questions.md).
 
 **Read first (before continuing):** [`PLAN-SD-1.md`](library/development/PLAN-SD-1.md) — the plan, the
 critics' twenty-six defects (§9) and the honest limits (§10) — and the completion register
@@ -686,6 +695,54 @@ the per-item status is in `BACKLOG.md`. **This box is the only place that says "
    can be fully functional as a piece, even if unfinished parts are locked or switched off.*
    Updating the front end lets the owner test the micros as work proceeds. → recorded in
    [`WORKING-RULES.md`](library/development/WORKING-RULES.md) and the COOKBOOK.
+
+## 2026-10-08 (newest) — `CC-24`: the entity reactivation is gated, and the mutation pass found two defects in *my* tests
+
+**What happened.** `SD-1`'s eleventh slice. A custom **entity** brought back from a tombstone via HTTP was
+landing with **no** permissions gate: the route reports the operation as `update` for an existing row, and
+the only entity gate is `operations: ['create']` — so it never fired. The **field** twin had already been
+closed (`CC-22`); this was the entity twin.
+
+**What changed.** `entities/api/entities.ts` now detects the reactivation from the before-state it already
+holds (`!isActiveEntity(ent) && (input.isActive ?? true)`), reads the `CC-17` decision carrier (a
+**malformed** header is a **400**, before anything is touched), runs the same `evaluateStructureChange` on
+the same surface, **refuses fail-closed (422, nothing written)**, and writes the records **after the
+flush**. `isActiveEntity` was exported from `entities/lib/register.ts`. **Shape: gate at the route** — the
+before-state is in hand, so no new query and no change to the shared guard contract.
+
+**The finding that matters is not the feature — it is what the mutation pass caught.** Two defects, both in
+the tests I had just written, both found by a mutation that produced **no RED**:
+
+1. **The `deletedAt` clause of `isActiveEntity` was unpinned in *both* consumers** — dropping it left
+   `CC-24` 10/10 and `CC-21` 8/8 GREEN. The clause is the only reader of a row with `deletedAt` set but
+   `isActive` still true, and that row is reachable without a caller doing anything unusual. **Fixed:** one
+   test in each consumer; the mutation now gives **1 RED in each**.
+2. **The suite leaked into the `globalThis`-backed mutation-guard store and broke an unrelated suite,
+   flakily.** The store replaces wholesale, no jest config sets `resetModules`, and the guard this suite
+   registered **re-armed another file's shared grant mock**. One full run failed exactly one test; the next
+   two passed — which makes it *worse*, not better. **Fixed here; widened into `CC-29`**, because I could
+   **not** reproduce the failure on demand and a green tick over an unexplained failure is not a result.
+
+**Also this session, a false finding I raised and then killed.** I read a `+CC-24` row in
+`git show 595df08 -- …COMPLETION-CALLBACKS.md` as "that commit added the row early". Wrong: the row was
+already in `3afebd3`, and the line prints because it is **diff context**. The corroborating reading —
+`git diff --stat` naming neither register file — meant they were **already committed**, not that my edits
+were lost. Both readings were wrong, and neither was independent: both were interpretations of a
+**rendered diff**. Written up as **Rule 12** with its second half: `core.autocrlf=true` on this host makes
+a raw byte comparison across the worktree/git boundary meaningless (**CRLF** vs **LF**), which produced a
+second false anomaly in the same hour. `analysis/git-diff-blob-vs-worktree-2026-10-08/FINDINGS.md`.
+
+**Verification.** `core` **627 suites / 5438 tests, 0 failures**; `entities` **42/335**; `auth` **80/699**;
+`shared` permissions **3/59**; both packages `tsc --noEmit` exit **0**. **6 mutations RED-then-GREEN**, every
+restore **md5-verified** (`entities.ts` `35640fb9…`, `register.ts` `93e9077b…`), zero mutation markers left.
+A **ninth hostile-critic agent**, run separately and required to attach a command to every claim, found
+**nothing falsifiable** across all nine attacks — and independently reproduced the mutation results.
+
+**What it means.** `SD-1` is still `PARTIAL`, but the box's own remaining list is now down to four items:
+an enforcement consumer for a *field*'s records (`CC-20`, blocked on `G-04`), the create-branch
+double-insert (`CC-23`, needs a migration), the decision actor's authorisation (`CC-25`, confirmed as a
+**role permission**), and the **test-store reset** (`CC-29`). The two organisational questions are answered
+and confirmed, and produced `CC-26`/`CC-27`/`CC-28`.
 
 **All three are done.** The table above is the queue that followed them; the row marked
 **◀ THE ACTIVE TASK** is the work in hand. The milestones reached on the way: `dashboards`, `workflows`,
