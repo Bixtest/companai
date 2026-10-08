@@ -281,7 +281,9 @@ wrapper, not `runRouteMutationGuards()`, not the deprecated pair, and not built 
 runs the registry itself). A write there is checked by **nothing**, so it is exactly the surface a Hermes
 tool call reaches with no authorization describing it (**Hermes map §4.4 (b)**; `S-02`). **A module can
 measure `0` remaining on `D2-wide` and still be wide open** — "0 remaining" means "no deprecated resolver
-left", never "the module is guarded".
+left", never "the module is guarded". *(Two complementary layers, not one: `S-02` ✅ 2026-10-08 now
+authorizes the **tool call itself** through the authority resolver; the write route's own guard is still
+what `D2-gap` measures. A tool call can be authorized at the door and still reach an unguarded write.)*
 
 **Measured across every enabled module — `analysis/d2-gap/measure.js` + `FINDINGS.md`.** Re-runnable;
 `--json` for machines. Reads the enabled set from `apps/mercato/src/modules.ts` (not a hand-typed list),

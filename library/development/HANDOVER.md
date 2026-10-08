@@ -231,7 +231,11 @@ guard result now carries a third outcome, `ok:true` + `escalation`, treated as *
 mutation, no `afterSuccess`); additive, guard-level, no command-path change. The **Metadata Registry**
 (the last Phase-0 foundation item) is **DONE** on 2026-10-07 (code `59ab859`) — the read-only service over
 the kernel view, answering what exists / what type / provenance / what depends on it, with a **typed
-absence** for the other §54 questions; **Phase 0 is now complete**, and the next task is **`S-02`**. The reasoning is BUILD-ORDER §2e/§2f/§2; the counts are in BACKLOG.md and
+absence** for the other §54 questions; **Phase 0 is now complete**. **`S-02`** (the Hermes tool door) is
+**DONE** on 2026-10-08 (code `3add3a2`) — the authority resolver is now the AI tool door's enforcement
+point: `checkToolAuthority` runs **after** RBAC (narrow-only, I4) and **fails closed**, gating both the
+execute path and the pending-action **confirm** path; `enforce` is not armed for any tenant. The next task
+is **`SD-1`** (the S2 permissions gate). The reasoning is BUILD-ORDER §2e/§2f/§2; the counts are in BACKLOG.md and
 `analysis/d2-gap/FINDINGS.md`.
 
 **Verify an item's status is still true before starting it** — the roadmap has been wrong about what

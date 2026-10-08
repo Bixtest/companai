@@ -52,17 +52,17 @@
 | A. Substrate (C1–C11) | 0 | 12 | 12 |
 | B. Platform skeleton (P1–P18) | 0 | 18 | 18 |
 | C. AI-first native layer | 14 | 10 | 24 |
-| D. Hermes | 0 | 25 | 25 |
+| D. Hermes | 1 | 24 | 25 |
 | E. Agent half | 0 | 17 | 17 |
 | F. Model layer | 0 | 14 | 14 |
-| G. Governance & security floor | 8 | 32 | 40 |
+| G. Governance & security floor | 9 | 31 | 40 |
 | H. Experience contracts | 0 | 13 | 13 |
 | I. Business / domain packs | 1 | 17 | 18 |
 | J. Deployment & operations | 0 | 14 | 14 |
-| K. Dev-doc extras | 0 | 13 | 13 |
-| **TOTAL** | **23** | **185** | **208** |
+| K. Dev-doc extras | 1 | 12 | 13 |
+| **TOTAL** | **26** | **182** | **208** |
 
-> **Read this honestly.** Only **23 of 208** points carry a tick, because the tick rule demands the code
+> **Read this honestly.** Only **26 of 208** points carry a tick, because the tick rule demands the code
 > be verified — and most points have **not yet been re-verified in code this round**. A point marked
 > `(DONE)` in its line but `☐` here means **the docs claim it, the code has not been checked** — treat
 > it as **carried, not confirmed**. This is the whole purpose of this file: **the docs' word is not the
@@ -79,7 +79,7 @@
 - ☐ **C1** — Resource envelope: the shape every object shares *(NOT DONE — no `ResourceEnvelope`/`BaseEntity`/shared base type anywhere in `shared` or `core`; each module declares its own `tenantId`/`organizationId` columns independently)*
 - ☐ **C2** — Actor & context model: who is acting and in what context *(PARTIAL — substantial: `shared/src/lib/auth/principal.ts` (215 lines) is a real first-class `Principal` with 4 kinds (`human`/`ai_worker`/`service`/`system`), `onBehalfOfUserId`, machine predicates, and it replaced the old `startsWith('api_key:')` branching; what is missing is the wider **context** (org/locale/tz/trace) as one model)* · ★ Hermes: the seam every run crosses
 - ☐ **C3** — Tenancy & isolation boundary: every row belongs to a tenant and cannot escape it *(PARTIAL — substantial: the CRUD factory auto-scopes by `tenantField` (default `'tenantId'`) on every read/write (`shared/src/lib/crud/factory.ts`); **no** DB-level RLS policies were found, so isolation is enforced in the query layer, not by the database)* · ★ Hermes: the tenant is derived, never declared
-- ☐ **C4** — Authorization engine: the evaluator and grammar *(PARTIAL — `shared/src/lib/authority/` (1312 lines: `decision.ts` 582 · `shadow-report.ts` 217 · `shadow.ts` 215 · `graph.ts` 182 · `preflight.ts` 116) builds an explainable `Decision` with reasons; but `decision.ts` states in its own header: **"It does not enforce. Nothing calls it in the request path; the existing RBAC checks still decide who may do what"** — shadow mode runs it beside RBAC and records, never obeys)* · ★ Hermes: S-02 is where a tool call is authorized
+- ☐ **C4** — Authorization engine: the evaluator and grammar *(PARTIAL — `shared/src/lib/authority/` (1312 lines: `decision.ts` 582 · `shadow-report.ts` 217 · `shadow.ts` 215 · `graph.ts` 182 · `preflight.ts` 116) builds an explainable `Decision` with reasons, and it **is now called in the request path**: `AuthorityEnforcementService` (the command gate + the HTTP RBAC path, which subtract a refusal from an RBAC allowance) and — since `S-02`, code `3add3a2` — the **AI tool door** (`ai-assistant` `lib/tool-authority.ts`). Tenants run `off`/`shadow`(default)/`enforce`; `enforce` binds. **The header quote this row used to carry — "It does not enforce. Nothing calls it in the request path" — was corrected in `decision.ts` on 2026-10-08** (it had been stale since the command gate landed 2026-08-10). **Still PARTIAL because the *grammar* half is not built** — that is `SD-4`, and the data axis is `G-04`)* · ★ Hermes: S-02 is where a tool call is authorized — **now wired**
 - ☐ **C5** — Metadata registry & schema conventions *(PARTIAL — the Business Model Kernel `shared/src/lib/kernel/model.ts` (407 lines) **reads** the platform's declarations into a canonical, id-keyed model with a 21-item per-object contract, and `entity-fields-registry` is registered at bootstrap; **the read-only registry service now exists** — `shared/src/lib/kernel/metadata-registry.ts` (2026-10-07, code `59ab859`) answers **what exists · what type · provenance · what depends on it** from the declarations, and returns a **typed absence** for the other ten §54 questions; it is a **live view** over the descriptor. **What is still missing:** the *schema-conventions* half (envelope/contract, `C1`) and the answers that need real links the platform does not yet have — **who can access it** (the authority engine is shadow-mode; SD-4 unbuilt), **what APIs expose it** (no route→object index), and the rest of §54. **And it is not yet consumed** — `SD-1`'s gate can now *enumerate*, but does not call it yet)* · ★ Hermes: how Hermes learns the shape of the business without a DB handle
 - ☐ **C6** — Command / action contract: schema · permissions · side effects · risk · approval · idempotency *(PARTIAL — a real command bus exists (`shared/src/lib/commands/`: `command-bus.ts`, `types.ts`, `undo.ts`, `redo.ts`, `registry.ts`, `operationMetadata.ts`, interceptors, scopes); `types.ts` carries input/execute/undo/redo/capability; whether the *full* contract (risk · approval · idempotency) is uniform across every action was not established)*
 - ☐ **C7** — Event envelope (CloudEvents-shaped) *(NOT DONE — the entire `shared/src/lib/events/` directory is `patterns.ts` + its test; there is **no envelope type** at all. A separate `packages/events` package exists but was not the envelope)*
@@ -153,7 +153,7 @@
 - ☐ **Hermes id** — `ai_worker` principal derived server-side; no branch on `kind` in own files *(PART — seam built, must extend + enforce)*
 - ☐ **AH-1** — The five agent kinds on the agent definition *(OPEN)*
 - ☐ **Tool door** — One door only: in-process client + tool registry/executor/mcp-adapter; every call re-authorizes; no DB handle *(PART)*
-- ☐ **S-02** — Tool-call authorization at execution time, deny-by-default *(OPEN)* · ★ Hermes: where a tool call is allowed or denied
+- ☑ **S-02** — Tool-call authorization at execution time, deny-by-default *(DONE 2026-10-08, code `3add3a2`)* · ★ Hermes: where a tool call is allowed or denied
 - ☐ **G-06** — AI input/output guards + the context firewall (prompt-injection + exfiltration) *(OPEN)*
 - ☐ **Provider** — Provider choice and fallback; allowlist and local/cloud rule stay ours *(PART)*
 - ☐ **Sessions** — Session continuity as a projection keyed by our ids; our records canonical *(PART)*
@@ -230,7 +230,7 @@
 - ☐ **S12** — The actor type is part of every structural decision *(OPEN)*
 - ☐ **SD-5** — The structural-permission manage screen (the roles-style surface over S11) *(OPEN — a UI surface, absent)*
 - ☐ **S-01** — The product-half spine item *(status carried in the plan)*
-- ☐ **S-02** — Wire the resolver as the enforcement point (responsible-user intersection; fail closed or do not ship) *(OPEN)*
+- ☑ **S-02** — Wire the resolver as the enforcement point (responsible-user intersection; fail closed or do not ship) *(DONE 2026-10-08, code `3add3a2` — `ai-assistant/lib/tool-authority.ts`; two hostile-critic passes found six defects, all fixed; plan `PLAN-S-02.md`)*
 - ☐ **S-04** — Skills as a first-class product object *(OPEN — held; see AH-9)*
 - ☐ **S-05** — The item AH-3 (durable wake queue) depends on *(OPEN)*
 - ☐ **22** — Bulk approval with a diff; **the diff is the feature** *(OPEN)*
@@ -325,7 +325,7 @@
 - ☐ **N-2** — The vocabulary register: four word-collisions (Capability, delegation, project, widget) *(OPEN)*
 - ☐ **N-3** — `where_we_left.md` is stale *(OPEN — hygiene)*
 - ☐ **N-4** — `workspace/PROGRESS.md` has three overlapping views that disagree *(OPEN — superseded by the backlog)*
-- ☐ **N-5** — The `S-02` five missing inputs to the resolver are read but supplied by nothing *(OPEN)*
+- ☑ **N-5** — The `S-02` five missing inputs to the resolver are read but supplied by nothing *(RESOLVED for the request path 2026-10-08, code `3add3a2` — the tool door supplies them via `AuthorityEnforcementService.decideFor`, which already read all five; the command gate and HTTP RBAC supply them too. `policy_version`/`decision_id` remain a separate thread)*
 - ☐ **N-7** — The `V`-register HOLDs each need a review before use *(OPEN)*
 - ☐ **N-11** — The host cannot run the codebase natively (no Node 24 / yarn) — the container is the path *(recorded)*
 - ☐ **N-16 / N-17 / N-18 / N-19** — the Paperclip-pass items *(OPEN — see §E)*
@@ -356,6 +356,7 @@ has not been verified in the code, and the claim is unconfirmed.**
 | `D2-wide` | the tool reports `D` (deprecated) **= 0 for every enabled module** | **complete** |
 | `D2-gap` | ran `node analysis/d2-gap/measure.js` (**256 write verbs, 0 unguarded**) + proof suites | **35 tests pass; 0 unguarded** |
 | `D2-gap / GETs` | the same tool run reports **3 write-performing GETs, 0 unguarded, 2 set aside (read side-effects)** | **complete** |
+| `S-02` `N-5` | ran the new tool-door suite (`tool-authority.s02.test.ts`) + the 5 confirm-path tests; **two hostile-critic passes**; **six mutations RED-then-GREEN**, each restore md5-verified | **ai-assistant 102 suites / 1434 tests; core auth 275; shared authority 114; typecheck 0** |
 
 **Whole-package run (the broad check).** The full `shared` package suite was run: **194 suites, 2264
 tests** → **193 suites / 2256 tests pass**; the **1 failing suite / 8 tests** is an **environment
@@ -381,7 +382,7 @@ Every line of §A was read against the source on 2026-10-07. **Result: 0 `DONE`,
 | `C1` Resource envelope | no `ResourceEnvelope`/`BaseEntity`/shared base type in `shared` or `core`; modules declare their own `tenantId`/`organizationId` columns | **NOT DONE** |
 | `C2` Actor & context | `shared/src/lib/auth/principal.ts` (215 lines) — first-class `Principal`, 4 kinds, `onBehalfOfUserId`, machine predicates; wider context model absent | **PARTIAL** |
 | `C3` Tenancy | `shared/src/lib/crud/factory.ts` auto-scopes by `tenantField` (default `'tenantId'`); **no** DB-level RLS policies found | **PARTIAL** |
-| `C4` Authz engine | `shared/src/lib/authority/` (1312 lines) builds an explainable `Decision`; `decision.ts` header: *"It does not enforce. Nothing calls it in the request path"* | **PARTIAL** |
+| `C4` Authz engine | `shared/src/lib/authority/` (1312 lines) builds an explainable `Decision`, and it **is called in the request path** — the command gate, the HTTP RBAC path, and (since `S-02`, `3add3a2`) the AI tool door; the header quote this row used to carry was corrected in `decision.ts` on 2026-10-08 | **PARTIAL** — the *grammar* half (`SD-4`) is not built |
 | `C5` Metadata registry | `shared/src/lib/kernel/model.ts` (407 lines) = a **view**; **the registry *service* now exists** (`kernel/metadata-registry.ts`, 2026-10-07) answering what-exists/type/provenance/dependents + typed absences. **Schema conventions half (C1) absent; not yet consumed** | **PARTIAL** |
 | `C6` Command contract | `shared/src/lib/commands/` command bus is real (`command-bus.ts`, `types.ts`, `undo`/`redo`, interceptors, scopes); full contract not established | **PARTIAL** |
 | `C7` Event envelope | `shared/src/lib/events/` = `patterns.ts` + test only; **no envelope type** | **NOT DONE** |

@@ -30,31 +30,74 @@ log.** Everything else (HANDOVER, START-PROMPT, README, BOOKMARKS, BACKLOG) poin
 
 ---
 
-### ▶ NOW — `S-02`: the **Hermes tool door** (Phase 1). **NOT STARTED — this is the posted next task.**
+### ▶ NOW — `SD-1`: the **S2 permissions gate** (Phase 1). **NOT STARTED — this is the posted next task.**
 
 > **If you are a new agent, read only this block to know your job.** Everything below the box is the
 > history and the queue; this is the work in hand.
 
-**What `S-02` is, in plain words.** Where an AI's tool call is **authorized** — the door the agent half
-reaches the platform through. It is the counterpart of the mutation guard on the *human* side: a human
-write is checked by a guard; an **agent** tool call has to be checked by the authority engine before it
-runs, and this is where that happens. `D2-gap` proved every write route *runs a guard*; `S-02` is where
-that guard (and the `D3` `escalate` outcome) meets a **tool call**, so an agent is bounded the same way a
-person is.
+**What `SD-1` is, in plain words.** When a **new data structure lands** — a table, a column, a field-type
+change — the platform **must not apply it until the permissions for the new surface are decided**. Either
+a person decides, or the default applies (full grant to the superadmin role **+ the permission records
+created**). It is the gate that makes the *structural grammar* (SD-4) real: a permission surface cannot
+appear un-gated, and it is the gate a **Hermes-proposed schema change** must pass — the AI proposes, the
+gate decides, and there is no way around it.
 
-**Why it is next.** Phase 0 — the foundation — is now **complete** (see the `GAP A / C5` section directly
-below, and the Done list). `S-02` is the first Phase-1 item and the one the Hermes service map names as
-where the port begins (map §4.4 (b)): *"the AI tool door"*. It is where `D2-gap` (the guard coverage) and
-the `D3` `escalate` outcome finally become **reachable by an agent**.
+**Why it is next.** It is Phase-1 item 1 in `BUILD-ORDER.md`, and its **prerequisite just landed**: the
+**Metadata Registry** (`GAP A / C5`, code `59ab859`) is what lets the gate *enumerate* the objects it is
+gating — without it `SD-1` "cannot list what it is gating" (the register's own build order put the
+registry in Phase 0 for exactly this reason). With `S-02` done, the two halves the map calls the port's
+beginning are in place.
 
-**Read first (before designing):** `library/development/ARCHITECTURE-hermes-integration.md` (§5.3, §11.2),
-`ARCHITECTURE-hermes-service-map.md` §4.4 (b), and `platform_points.md` `C4` (the authority engine — real
-but **shadow-mode**: *"It does not enforce. Nothing calls it in the request path"*) and `S-02`. The task's
-shape is the same discipline as `D3`: fact-check what exists, name the honest boundary, then plan → execute
-→ verify → document. **Do not assume the roadmap is right — re-measure it** (it has been wrong four times).
+**Measured state (2026-10-06, re-measure before designing).** **No per-permission table exists** —
+permissions are string arrays on `role_acls`/`user_acls` (`features_json`), and **saving a Function writes
+no permission record at all**. So this is a **build, not a check**: a catalogue + a hook on the change path
++ the fail-closed gate. The catalogue itself is **startable now**; the full data-axis shape waits on `G-04`.
 
-**Next after `S-02` (`BUILD-ORDER` order).** The Phase-1 sequence: `SD-1` (the S2 permissions gate — now
-that the Metadata Registry can *enumerate* what it gates), then `SD-3`, `S9`/`SD-2`, `SD-4`/`SD-5`.
+**Read first (before designing):** `library/development/SPECIFICATIONS-DICTIONARY.md` (S2, §C.1),
+`ARCHITECTURE-structure-permissions.md`, `platform_points.md` `SD-1` + `C5`, `BACKLOG.md` `SD-1` / `M3`,
+and `analysis/owner-workthrough-2026-10-06.md` point 0 (the measured evidence). Same discipline as `S-02`
+and `D3`: fact-check what exists, name the honest boundary, then plan → execute → verify → document.
+**Do not assume the roadmap is right — re-measure it.**
+
+**Next after `SD-1` (`BUILD-ORDER` order).** `SD-3` (the tier mapping becomes a superadmin setting), then
+`S9`/`SD-2` (mark core functions and guard their deletion), then `SD-4`/`SD-5` (the structural grammar
+screen).
+
+---
+
+### ✅ `S-02` — wire the resolver as the **Hermes tool door**'s enforcement point. **DONE AND PROVEN (code `3add3a2`; plan [`library/development/PLAN-S-02.md`](library/development/PLAN-S-02.md)).**
+
+**What it is, in plain words.** Where an **AI's tool call is authorized**. A human write is checked by a
+mutation guard; an **agent** tool call has to be checked by the authority engine before it runs, and this
+is where that happens. The authority resolver was real but **shadow-mode** — *"It does not enforce.
+Nothing calls it in the request path."*
+
+**What was measured.** The tool door authorized with a **parallel check the resolver never saw**:
+`executeTool` asked `rbacService.hasAllFeatures` — a synchronous string match — and **never** consulted
+`AuthorityEnforcementService`. `packages/ai-assistant/` had **zero** references to
+`authorityEnforcement` / `resolveDecision` / `Decision`. So the single decider every other act goes
+through, and the only place the **responsible-user intersection** is computed, was absent from the AI
+door.
+
+**What was built.** `packages/ai-assistant/src/modules/ai_assistant/lib/tool-authority.ts` —
+`checkToolAuthority(toolName, requiredFeatures, context)`. It asks the **same** enforcement service the
+command gate asks, with the same `onBehalfOfUserId`, and reads the same `Decision`. It runs **after** RBAC
+(so it can only narrow — invariant **I4**) and **fails closed** when the resolver is unreachable — the
+source study's named warning, *"fail closed, or do not ship the switch."* It is called from **both** places
+a tool handler runs: `executeTool` (every HTTP/MCP/agent call) **and** the pending-action **confirm** path
+— which, until the first hostile-critic pass, executed a confirmed act with the RBAC check alone.
+`McpToolContext` gained `onBehalfOfUserId`, populated at every door that resolves a machine subject.
+
+**Two hostile-critic passes — both found real defects, all six fixed.** (1) a **real bypass**: the confirm
+path ran a tool handler ungated; (2) a **dropped field**; (3) **two over-claims** in the docstring;
+(4) a **dead field** carried into a context that never consults the resolver (removed); (5) a **backwards
+direction claim** — omitting an invoker *removes a ceiling*, so it is **wider**, not narrower; (6) a
+**stale docstring**. Full detail in `PLAN-S-02.md` §9.
+
+**Proved by.** 14 new tests + 5 confirm-path tests; **six mutations** proven RED-then-GREEN (each reverted
+and md5-verified byte-identical). Full ai-assistant suite **102 suites / 1434 tests, 0 failures**; `core`
+auth **275**; `shared` authority **114**; typecheck **0**. `enforce` is **not armed** for any tenant — the
+door is capable and fail-closed; the switch stays the operator's.
 
 ---
 
