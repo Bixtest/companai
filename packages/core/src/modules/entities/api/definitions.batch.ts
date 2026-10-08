@@ -254,8 +254,15 @@ export async function POST(req: Request) {
     // reactivates — re-appearing is appearing, and the gate's write is idempotent, so
     // gating a reactivation costs nothing. A key saved **inactive** is a tombstone, not a
     // column, and is deliberately not gated.
+    // SD-1 (CC-4): a key whose **kind changes** on an active row is a new surface *in
+    // effect* (S2 names "a field-type change"); it is gated too (the write is idempotent).
     const newKeys = definitions
-      .filter((d) => d.isActive !== false && !isActiveColumn(defByKey.get(d.key)))
+      .filter((d) => {
+        if (d.isActive === false) return false
+        const existing = defByKey.get(d.key)
+        if (!isActiveColumn(existing)) return true
+        return existing.kind !== d.kind
+      })
       .map((d) => d.key)
     if (newKeys.length > 0) {
       permissionDecision = evaluateStructureChange({

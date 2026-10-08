@@ -186,6 +186,30 @@ describe('definitions POST — the SD-1 reactivation gate (CC-22)', () => {
     expect(res.status).toBe(200)
     expect(grantMock).not.toHaveBeenCalled()
   })
+
+  it('SD-1 (CC-4): gates a field-type change on an active row and grants after the flush', async () => {
+    // Was ungated before CC-4: an active row with the same key reached the registry as
+    // `'update'`, so a kind change was invisible. A field-type change is a new surface in
+    // effect (S2 names it), so it is gated here and granted after the flush.
+    mockEm.findOne.mockResolvedValue(existingRow({ isActive: true, deletedAt: null, kind: 'text' }))
+
+    const res = await upsertDefinition(request({ entityId: 'a:one', key: 'foo', kind: 'integer' }))
+
+    expect(res.status).toBe(200)
+    expect(grantMock).toHaveBeenCalledTimes(1)
+    expect(grantMock.mock.calls[0][1].decision.outcome).toBe('defaulted')
+    expect(featuresOfLastGrant()).toContain('a:one.foo.view')
+    expect(mockEm.flush.mock.invocationCallOrder[0]).toBeLessThan(grantMock.mock.invocationCallOrder[0])
+  })
+
+  it('SD-1 (CC-4): does not gate an active row whose kind is unchanged', async () => {
+    mockEm.findOne.mockResolvedValue(existingRow({ isActive: true, deletedAt: null, kind: 'text' }))
+
+    const res = await upsertDefinition(request({ entityId: 'a:one', key: 'foo', kind: 'text', configJson: { label: 'New' } }))
+
+    expect(res.status).toBe(200)
+    expect(grantMock).not.toHaveBeenCalled()
+  })
 })
 
 describe('definitions.restore POST — the SD-1 reactivation gate (CC-22)', () => {

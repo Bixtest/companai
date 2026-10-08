@@ -146,7 +146,24 @@ describe('entities/definitions.batch POST — SD-1 (CC-2) the create path is gat
     ])
   })
 
-  it('does not gate a save that creates no column (an existing key is an update)', async () => {
+  it('does not gate a save that creates no column (an existing key updated in place)', async () => {
+    mockEm.find.mockResolvedValueOnce([
+      { entityId: 'test:entity', key: 'alpha', kind: 'text', configJson: {}, isActive: true },
+    ] as unknown[])
+
+    const response = await POST(makeRequest({
+      entityId: 'test:entity',
+      definitions: [{ key: 'alpha', kind: 'text', configJson: { label: 'Renamed' } }],
+    }))
+
+    expect(response.status).toBe(200)
+    expect(grantMock).not.toHaveBeenCalled()
+  })
+
+  it('SD-1 (CC-4): gates a field-type change on an active row', async () => {
+    // Was ungated before CC-4: the key has an active row, so it was "an update" — but its
+    // kind changes (text -> integer), which is a new surface *in effect* (S2 names "a
+    // field-type change"). It must be gated, and granted after the commit.
     mockEm.find.mockResolvedValueOnce([
       { entityId: 'test:entity', key: 'alpha', kind: 'text', configJson: {}, isActive: true },
     ] as unknown[])
@@ -154,6 +171,23 @@ describe('entities/definitions.batch POST — SD-1 (CC-2) the create path is gat
     const response = await POST(makeRequest({
       entityId: 'test:entity',
       definitions: [{ key: 'alpha', kind: 'integer' }],
+    }))
+
+    expect(response.status).toBe(200)
+    expect(grantMock).toHaveBeenCalledTimes(1)
+    expect(
+      grantMock.mock.calls[0][1].decision.records.map((r: { feature: string }) => r.feature),
+    ).toEqual(fieldRecords('test:entity', 'alpha'))
+  })
+
+  it('SD-1 (CC-4): does not gate a same-kind update of an active row', async () => {
+    mockEm.find.mockResolvedValueOnce([
+      { entityId: 'test:entity', key: 'alpha', kind: 'text', configJson: {}, isActive: true },
+    ] as unknown[])
+
+    const response = await POST(makeRequest({
+      entityId: 'test:entity',
+      definitions: [{ key: 'alpha', kind: 'text', configJson: { label: 'Renamed again' } }],
     }))
 
     expect(response.status).toBe(200)

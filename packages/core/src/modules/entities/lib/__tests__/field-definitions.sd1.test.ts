@@ -112,6 +112,35 @@ describe('ensureCustomFieldDefinitions — the SD-1 permissions gate (CC-3)', ()
     expect(recordsOfLastGrant()).toContain('a:one.foo.view')
   })
 
+  it('SD-1 (CC-4): gates a field-type change on an active row', async () => {
+    // Was ungated before CC-4: an active row with the same key was "an update" — but its
+    // kind changes (text -> integer), which is a new surface *in effect* (S2 names "a
+    // field-type change"). It must be gated.
+    const existing = [
+      { entityId: 'a:one', key: 'foo', kind: 'text', configJson: { label: 'Old' }, isActive: true, deletedAt: null },
+    ]
+    const em = createMockEm(existing)
+    const sets = [{ entity: 'a:one', fields: [{ key: 'foo', kind: 'integer' as const, label: 'Old' }] }]
+
+    const result = await ensureCustomFieldDefinitions(em as any, sets, scope)
+
+    expect(result).toEqual({ created: 0, updated: 1, unchanged: 0 })
+    expect(grantMock).toHaveBeenCalledTimes(1)
+    expect(recordsOfLastGrant()).toContain('a:one.foo.view')
+  })
+
+  it('SD-1 (CC-4): does not gate a field-type change under createOnly (the loop skips updates)', async () => {
+    const existing = [
+      { entityId: 'a:one', key: 'foo', kind: 'text', configJson: { label: 'Old' }, isActive: true, deletedAt: null },
+    ]
+    const em = createMockEm(existing)
+    const sets = [{ entity: 'a:one', fields: [{ key: 'foo', kind: 'integer' as const, label: 'Old' }] }]
+
+    await ensureCustomFieldDefinitions(em as any, sets, { ...scope, createOnly: true })
+
+    expect(grantMock).not.toHaveBeenCalled()
+  })
+
   it('does not gate a tombstone under createOnly — the loop never reactivates it', async () => {
     const existing = [
       { entityId: 'a:one', key: 'foo', kind: 'text', configJson: { label: 'Old' }, isActive: false, deletedAt: null },

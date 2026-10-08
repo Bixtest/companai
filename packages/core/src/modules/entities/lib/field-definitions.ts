@@ -219,19 +219,21 @@ export async function ensureCustomFieldDefinitions(
   let dirty = false
 
   // SD-1 (CC-3): the surfaces this call brings into existence — a key with no row,
-  // or a tombstone this sync reactivates. It must match **exactly what the loop
-  // below lands**: under `createOnly` the loop never reactivates (it skips updates),
-  // so a tombstone is not a new surface there — gating it would grant records for a
-  // column that never appears. Computed from the prefetch, before any write, so a
-  // refusal can stop the landing instead of following it. A dry run lands nothing,
-  // so it is not gated.
+  // a tombstone this sync reactivates, or (CC-4) an **active** row whose **kind
+  // changes** (a field-type change is a new surface in effect, named in S2). It must
+  // match **exactly what the loop below lands**: under `createOnly` the loop never
+  // reactivates or retypes (it skips updates), so neither is a new surface there.
+  // Computed from the prefetch, before any write, so a refusal can stop the landing
+  // instead of following it. A dry run lands nothing, so it is not gated.
   const newSurfaces: PermissionSurface[] = []
   if (!scope.dryRun) {
     const seen = new Set<string>()
     for (const set of sets) {
       for (const field of set.fields) {
         const existing = existingByKey.get(`${set.entity}|${field.key}`)
-        const lands = !existing || (!scope.createOnly && !isActiveColumn(existing))
+        const reactivates = !!existing && !scope.createOnly && !isActiveColumn(existing)
+        const retypes = !!existing && !scope.createOnly && isActiveColumn(existing) && existing.kind !== field.kind
+        const lands = !existing || reactivates || retypes
         if (!lands) continue
         const surface = fieldDefinitionSurface(set.entity, field.key)
         if (seen.has(surface.id)) continue

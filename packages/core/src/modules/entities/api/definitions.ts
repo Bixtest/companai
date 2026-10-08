@@ -534,23 +534,27 @@ export async function POST(req: Request) {
 
   // SD-1 (CC-22): a field this route **brings back** — an existing row that was an
   // inactive tombstone and is saved active — is a permission surface (re)appearing,
-  // exactly as a create is. The registry's create-only gate guard cannot see it: this
-  // route passes `operation: def ? 'update' : 'create'`, so a reactivation arrives as
-  // `'update'`. (Relabelling it `'create'` would fire the guard, but it would also drop
-  // the bridged legacy guard — `operations: ['update','delete']` — which is why CC-2
-  // rejected that shape for the batch.) So, like the batch route, the gate runs **here**,
-  // at the one place the before-state (`def`) is known, against the same
-  // `fieldDefinitionSurface` and the same write (`writeFieldPermissionGrant`) every other
-  // create path uses. A refusal fails closed: 422, and nothing is written.
+  // exactly as a create is. SD-1 (CC-4): a field whose **kind changes** on an active
+  // row is a new surface *in effect* (S2 names "a field-type change"), and must be
+  // gated too. Both reach the registry as `'update'` (`operation: def ? 'update' :
+  // 'create'`), so the create-only gate guard cannot see them. (Relabelling them
+  // `'create'` would fire the guard, but it would also drop the bridged legacy guard —
+  // `operations: ['update','delete']` — which is why CC-2 rejected that shape for the
+  // batch.) So, like the batch route, the gate runs **here**, at the one place the
+  // before-state (`def`) is known, against the same `fieldDefinitionSurface` and the
+  // same write (`writeFieldPermissionGrant`) every other create path uses. A refusal
+  // fails closed: 422, and nothing is written.
   const reactivatesField = !!def && !isActiveColumn(def) && (input.isActive ?? true)
-  const permissionDecision: StructureChangeGateOutcome | null = reactivatesField
+  const retypesField = !!def && isActiveColumn(def) && def.kind !== input.kind
+  const changesSurface = reactivatesField || retypesField
+  const permissionDecision: StructureChangeGateOutcome | null = changesSurface
     ? evaluateStructureChange({ surfaces: [fieldDefinitionSurface(input.entityId, input.key)] })
     : null
   if (permissionDecision?.outcome === 'refused') {
     return NextResponse.json(
       {
         error:
-          `The field cannot be re-activated: ${permissionDecision.because} ` +
+          `The field cannot be ${retypesField ? 're-typed' : 're-activated'}: ${permissionDecision.because} ` +
           'Every new data structure must answer the permissions question before it is applied (S2).',
       },
       { status: 422 },
@@ -594,10 +598,15 @@ export async function POST(req: Request) {
   em.persist(def)
   await em.flush()
   await guard.runAfterSuccess()
-  // SD-1 (CC-22): the reactivated column has landed — now write the default's records.
-  // A no-op unless this was a reactivation (the decision is null otherwise): the create
-  // case was already granted by the guard's own `afterSuccess`.
-  await writeFieldPermissionGrant(em, scope.tenantId, permissionDecision, 'the re-activated custom field')
+  // SD-1 (CC-22/CC-4): the reactivated or re-typed column has landed — now write the
+  // default's records. A no-op unless this changed a surface (the decision is null
+  // otherwise): the create case was already granted by the guard's own `afterSuccess`.
+  await writeFieldPermissionGrant(
+    em,
+    scope.tenantId,
+    permissionDecision,
+    retypesField ? 'the re-typed custom field' : 'the re-activated custom field',
+  )
   await invalidateDefinitionsCache(cache, {
     tenantId: scope.tenantId,
     organizationId: scope.organizationId,
