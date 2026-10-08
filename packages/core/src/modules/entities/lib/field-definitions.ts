@@ -145,6 +145,16 @@ export function decideNewFieldPermissions(
  * actually happened — a create and a reactivation both land a field, but they are
  * not the same event. The default keeps the original (create) wording; the HTTP
  * reactivation routes (CC-22) pass their own.
+ *
+ * **A `decided` outcome is written too (CC-17).** Before CC-17 this returned unless
+ * the outcome was `defaulted`, so a person's decision reached the gate, produced
+ * records, and was then **dropped** on the floor at the write — "I decided" would
+ * have meant "nothing happened". S2 says the permissions are decided *"either by a
+ * person or by a rule"*, and a `decided` outcome is exactly the person's half of
+ * that sentence: it names its own `decidedBy` and its own grant target
+ * (`decision.grantTo`), and it now travels the same write as the default. The one
+ * outcome that still writes nothing is `refused` — that change did not land, so
+ * there is nothing to grant — which is a fact, not a silent success.
  */
 export async function writeFieldPermissionGrant(
   em: EntityManager,
@@ -152,7 +162,9 @@ export async function writeFieldPermissionGrant(
   decision: StructureChangeGateOutcome | null,
   what = 'the new custom fields',
 ): Promise<void> {
-  if (!decision || decision.outcome !== 'defaulted') return
+  // Only `refused` (or no outcome at all) has nothing to write. `decided` and
+  // `defaulted` both carry records, and since CC-17 both carry a grant target.
+  if (!decision || decision.outcome === 'refused') return
 
   if (!tenantId) {
     logger.debug(

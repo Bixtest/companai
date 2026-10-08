@@ -28,6 +28,10 @@ import {
   evaluateStructureChange,
   type StructureChangeGateOutcome,
 } from '@open-mercato/shared/lib/permissions/structure-change-gate'
+import {
+  readStructureDecisionFromHeaders,
+  toStructurePermissionDecision,
+} from '@open-mercato/shared/lib/permissions/structure-change-decision-header'
 import { fieldDefinitionSurface } from '../data/guards'
 import { isActiveColumn, writeFieldPermissionGrant } from '../lib/field-definitions'
 import {
@@ -547,8 +551,19 @@ export async function POST(req: Request) {
   const reactivatesField = !!def && !isActiveColumn(def) && (input.isActive ?? true)
   const retypesField = !!def && isActiveColumn(def) && def.kind !== input.kind
   const changesSurface = reactivatesField || retypesField
+  // SD-1 (CC-17): the same decision carrier every other request path uses. A malformed
+  // decision is refused with 400 before anything is touched; a well-formed one reaches
+  // the gate so the `decided` branch is reachable here too.
+  const requestedDecision = readStructureDecisionFromHeaders(req.headers)
+  if (requestedDecision.kind === 'malformed') {
+    return NextResponse.json({ error: requestedDecision.because }, { status: 400 })
+  }
   const permissionDecision: StructureChangeGateOutcome | null = changesSurface
-    ? evaluateStructureChange({ surfaces: [fieldDefinitionSurface(input.entityId, input.key)] })
+    ? evaluateStructureChange({
+        surfaces: [fieldDefinitionSurface(input.entityId, input.key)],
+        decision:
+          requestedDecision.kind === 'decision' ? toStructurePermissionDecision(requestedDecision.decision) : null,
+      })
     : null
   if (permissionDecision?.outcome === 'refused') {
     return NextResponse.json(

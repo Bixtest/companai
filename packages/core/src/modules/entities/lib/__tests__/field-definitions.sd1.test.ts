@@ -7,7 +7,7 @@
  * and the default's records are written **after** the flush — on both create and
  * reactivation, never on a dry run, and never silently skipped.
  */
-import { ensureCustomFieldDefinitions } from '../field-definitions'
+import { ensureCustomFieldDefinitions, writeFieldPermissionGrant } from '../field-definitions'
 import { applyStructureChangeGrant } from '@open-mercato/core/modules/auth/lib/permission-decision-grant'
 
 jest.mock('@open-mercato/core/modules/auth/lib/permission-decision-grant', () => ({
@@ -202,5 +202,85 @@ describe('ensureCustomFieldDefinitions — the SD-1 permissions gate (CC-3)', ()
     // A failed grant must never fail the sync — the rows have already committed.
     expect(result).toEqual({ created: 1, updated: 0, unchanged: 0 })
     expect(grantMock).toHaveBeenCalledTimes(1)
+  })
+})
+
+/**
+ * CC-17 — `writeFieldPermissionGrant` writes a `decided` outcome too.
+ *
+ * Before CC-17 this returned unless the outcome was `defaulted`, so a person's
+ * decision that reached the gate was **dropped at the write**. These tests pin the
+ * two outcomes that must be written and the one that must not, directly against the
+ * exported function (the `ensureCustomFieldDefinitions` path above only ever
+ * produces `defaulted`, so it could not reach this branch).
+ */
+describe('writeFieldPermissionGrant — which outcomes are written (CC-17)', () => {
+  const records = [{ feature: 'a:one.foo.view', block: 'data' as const, surfaceId: 'a:one.foo' }]
+
+  beforeEach(() => {
+    grantMock.mockClear()
+    grantMock.mockResolvedValue({
+      applied: true,
+      roleName: 'superadmin',
+      roleId: 'role-1',
+      aclCreated: false,
+      added: [],
+      alreadyPresent: [],
+    })
+  })
+
+  it('writes a decided outcome — it is no longer dropped (CC-17)', async () => {
+    const em = createMockEm()
+    await writeFieldPermissionGrant(em as any, 'tenant-1', {
+      outcome: 'decided',
+      decidedBy: 'role:finance-admin',
+      grantTo: 'finance',
+      records,
+      because: 'finance decided',
+    })
+    expect(grantMock).toHaveBeenCalledTimes(1)
+    const [, input] = grantMock.mock.calls[0]
+    expect(input.decision.outcome).toBe('decided')
+    expect(input.decision.grantTo).toBe('finance')
+  })
+
+  it('still writes a defaulted outcome', async () => {
+    const em = createMockEm()
+    await writeFieldPermissionGrant(em as any, 'tenant-1', {
+      outcome: 'defaulted',
+      grantTo: 'superadmin',
+      records,
+      because: 'no decision',
+    })
+    expect(grantMock).toHaveBeenCalledTimes(1)
+    expect(grantMock.mock.calls[0][1].decision.outcome).toBe('defaulted')
+  })
+
+  it('writes nothing for a refused outcome — no surface landed to grant', async () => {
+    const em = createMockEm()
+    await writeFieldPermissionGrant(em as any, 'tenant-1', {
+      outcome: 'refused',
+      reason: 'no_surface',
+      because: 'the change creates nothing',
+    })
+    expect(grantMock).not.toHaveBeenCalled()
+  })
+
+  it('writes nothing for a null outcome (nothing new to decide)', async () => {
+    const em = createMockEm()
+    await writeFieldPermissionGrant(em as any, 'tenant-1', null)
+    expect(grantMock).not.toHaveBeenCalled()
+  })
+
+  it('skips (does not throw) a global surface with no tenant', async () => {
+    const em = createMockEm()
+    await writeFieldPermissionGrant(em as any, null, {
+      outcome: 'decided',
+      decidedBy: 'admin',
+      grantTo: 'finance',
+      records,
+      because: 'decided',
+    })
+    expect(grantMock).not.toHaveBeenCalled()
   })
 })

@@ -14,6 +14,10 @@ import {
   evaluateStructureChange,
   type StructureChangeGateOutcome,
 } from '@open-mercato/shared/lib/permissions/structure-change-gate'
+import {
+  readStructureDecisionFromHeaders,
+  toStructurePermissionDecision,
+} from '@open-mercato/shared/lib/permissions/structure-change-decision-header'
 import { fieldDefinitionSurface } from '../data/guards'
 import { isActiveColumn, writeFieldPermissionGrant } from '../lib/field-definitions'
 import { createExactDefinitionWhere, resolveDefinitionMutationScope } from '../lib/definition-scope'
@@ -63,8 +67,21 @@ export async function POST(req: Request) {
   // uses. Restoring an already-active row changes nothing structural and is not gated. A
   // refusal fails closed: 422, and the row is left as it was.
   const reactivatesField = !isActiveColumn(def)
+  // SD-1 (CC-17): the same decision carrier the batch route and the guards use — a
+  // malformed decision is refused with 400 before anything is touched, a well-formed
+  // one reaches the gate. A reactivation is handled here (not by the registry) because
+  // this route passes `operation: 'custom'`, which the registry maps to `'update'` and
+  // the create-only gate guard cannot see (CC-22).
+  const requestedDecision = readStructureDecisionFromHeaders(req.headers)
+  if (requestedDecision.kind === 'malformed') {
+    return NextResponse.json({ error: requestedDecision.because }, { status: 400 })
+  }
   const permissionDecision: StructureChangeGateOutcome | null = reactivatesField
-    ? evaluateStructureChange({ surfaces: [fieldDefinitionSurface(entityId, key)] })
+    ? evaluateStructureChange({
+        surfaces: [fieldDefinitionSurface(entityId, key)],
+        decision:
+          requestedDecision.kind === 'decision' ? toStructurePermissionDecision(requestedDecision.decision) : null,
+      })
     : null
   if (permissionDecision?.outcome === 'refused') {
     return NextResponse.json(

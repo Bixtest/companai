@@ -151,3 +151,66 @@ describe('a decision decides, and is carried through unchanged', () => {
     if (result.outcome === 'decided') expect(result.records.map((r) => r.feature)).toEqual(['only.this'])
   })
 })
+
+/**
+ * CC-17 — the grant target on a decision, which is what makes `decided` writable.
+ *
+ * Before CC-17 a `decided` outcome named only `decidedBy` and the records, so the
+ * write had **nowhere to put them** and deliberately returned `null`. S2 says the
+ * permissions are decided *"either by a person or by a rule"*: a person deciding is
+ * not just a different `decidedBy`, it is a different **target** (a narrow role, not
+ * the default superadmin). These tests pin that the target travels with the decision
+ * and that the default is the fallback, not the only answer.
+ */
+describe('CC-17 — a decided outcome names the role its records go to', () => {
+  const records = [{ feature: 'only.this', block: 'data' as const, surfaceId: fieldSurface.id }]
+
+  it('carries the decision’s own grantTo through to the outcome', () => {
+    const result = evaluateStructureChange({
+      surfaces: [fieldSurface],
+      decision: { decidedBy: 'role:finance-admin', records, grantTo: 'finance' },
+    })
+    expect(result.outcome).toBe('decided')
+    if (result.outcome === 'decided') {
+      expect(result.grantTo).toBe('finance')
+      expect(result.because).toContain('finance')
+    }
+  })
+
+  it('falls back to the default role when the decision names no target', () => {
+    const result = evaluateStructureChange({
+      surfaces: [fieldSurface],
+      decision: { decidedBy: 'admin', records },
+    })
+    expect(result.outcome).toBe('decided')
+    if (result.outcome === 'decided') expect(result.grantTo).toBe(DEFAULT_GRANT_ROLE)
+  })
+
+  it('treats a blank/whitespace grantTo as "no target" rather than a role named ""', () => {
+    const result = evaluateStructureChange({
+      surfaces: [fieldSurface],
+      decision: { decidedBy: 'admin', records, grantTo: '   ' },
+    })
+    expect(result.outcome).toBe('decided')
+    if (result.outcome === 'decided') expect(result.grantTo).toBe(DEFAULT_GRANT_ROLE)
+  })
+
+  it('trims a padded grantTo, so "finance " and "finance" resolve to one role', () => {
+    const result = evaluateStructureChange({
+      surfaces: [fieldSurface],
+      decision: { decidedBy: 'admin', records, grantTo: '  finance  ' },
+    })
+    expect(result.outcome).toBe('decided')
+    if (result.outcome === 'decided') expect(result.grantTo).toBe('finance')
+  })
+
+  it('a decided outcome has a grantTo even though a refused outcome has none', () => {
+    const decided = evaluateStructureChange({
+      surfaces: [fieldSurface],
+      decision: { decidedBy: 'admin', records, grantTo: 'finance' },
+    })
+    // The one field that makes `decided` writable — asserted directly so a future
+    // refactor that drops it fails here rather than silently in the write.
+    expect(decided).toHaveProperty('grantTo', 'finance')
+  })
+})

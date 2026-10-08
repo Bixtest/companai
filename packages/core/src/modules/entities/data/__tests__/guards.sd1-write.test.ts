@@ -1,44 +1,46 @@
 /** @jest-environment node */
 
 /**
- * SD-1 — the write hook: the guard's `afterSuccess` applies the gate's default.
+ * SD-1 — the write hook: the guard's `afterSuccess` applies the gate's decision.
  *
  * **What this suite has to prove.** The gate's decision is carried in `metadata`
  * from `validate` to `afterSuccess`; this proves the wire is real:
  *
  *   1. a `defaulted` decision is **carried** from `validate` to `afterSuccess` and
  *      handed to the shared mapping;
- *   2. a `decided` decision is carried too and **not** written (the mapping's own
- *      contract — its records belong to a person's own grant target, which the decision
- *      type does not yet carry — is proved in `permission-decision-grant.test.ts`);
+ *   2. a `decided` decision is carried too and **is** written (CC-17 — before this
+ *      it was dropped, because the decision type carried no grant target);
  *   3. no readable decision → nothing is written;
  *   4. the guard's `validate` **asks** for `afterSuccess` (`shouldRunAfterSuccess`),
- *      because a write that is never scheduled is a write that never happens.
+ *      because a write that is never scheduled is a write that never happens;
+ *   5. a decision carried on the **request header** reaches the gate (CC-17) and
+ *      produces a `decided` outcome the guard then writes.
  *
  * The container and the grant function are mocked — this suite is about the *wire*,
  * not the SQL (that is `permission-decision-grant.test.ts`).
  */
 
 import type { MutationGuardAfterInput } from '@open-mercato/shared/lib/crud/mutation-guard-registry'
+import { STRUCTURE_DECISION_HEADER_NAME } from '@open-mercato/shared/lib/permissions/structure-change-decision-header'
 
 const mockEm = { findOne: jest.fn(), create: jest.fn(), persist: jest.fn(), flush: jest.fn() }
 
 // The mapping from a gate outcome to a grant lives in `applyStructureChangeGrant`
 // (auth/lib/permission-decision-grant.ts), which the guard calls. This file proves the
 // guard's WIRING — that it reads the decision out of `metadata` and hands it over — and
-// that mapping's own contract (defaulted is written; decided/refused are not) is proved
-// against the real module in `auth/lib/__tests__/permission-decision-grant.test.ts`.
-// The stand-in below mirrors that contract, so a decision that should not be written
+// that mapping's own contract (defaulted AND decided are written; refused is not) is
+// proved against the real module in `auth/lib/__tests__/permission-decision-grant.test.ts`.
+// The stand-in below mirrors that contract, so an outcome that should not be written
 // produces no grant here either.
 const mockApply = jest.fn(
   async (
     _em: unknown,
-    input: { tenantId?: string; decision?: { outcome?: string } },
+    input: { tenantId?: string; decision?: { outcome?: string; grantTo?: string } },
   ) =>
-    input?.decision?.outcome === 'defaulted'
+    input?.decision?.outcome === 'defaulted' || input?.decision?.outcome === 'decided'
       ? {
           applied: true as const,
-          roleName: 'superadmin',
+          roleName: input.decision.grantTo ?? 'superadmin',
           roleId: 'r1',
           aclCreated: false,
           added: ['a'],
@@ -127,16 +129,21 @@ describe('applyGateDecisionToGrantRole — reading the decision out of the guard
     ])
   })
 
-  it('hands a decided outcome to the shared mapping, which is what declines to write it (CC-17)', async () => {
+  it('hands a decided outcome to the shared mapping, which now writes it (CC-17)', async () => {
     const result = await applyGateDecisionToGrantRole(mockEm as never, {
       tenantId: 't1',
-      metadata: { permissionDecision: { outcome: 'decided', decidedBy: 'u9', records: [{ feature: 'a.b.view' }] } },
+      metadata: {
+        permissionDecision: { outcome: 'decided', decidedBy: 'u9', grantTo: 'finance', records: [{ feature: 'a.b.view' }] },
+      },
     })
     // The guard does not filter the outcome itself: the one place that decides which
-    // outcomes are written is `applyStructureChangeGrant`, proved in the module's own
-    // test. Here we only prove the decision is carried across, not dropped.
+    // outcomes are written is `applyStructureChangeGrant`, and since CC-17 that place
+    // writes both `defaulted` and `decided`. Here we prove the decision is carried
+    // across with its grant target intact — not dropped.
     expect(mockApply).toHaveBeenCalledTimes(1)
-    expect(result).toBeNull()
+    const [, input] = mockApply.mock.calls[0] as [unknown, { decision: { grantTo?: string } }]
+    expect(input.decision.grantTo).toBe('finance')
+    expect(result).toMatchObject({ applied: true, roleName: 'finance' })
   })
 
   it('does nothing when there is no decision in the metadata', async () => {
@@ -182,6 +189,34 @@ describe('the guard schedules and performs the write', () => {
     expect(mockApply).toHaveBeenCalledTimes(1)
     const [, input] = mockApply.mock.calls[0] as [unknown, { decision: { grantTo: string } }]
     expect(input.decision.grantTo).toBe('superadmin')
+  })
+
+  it('afterSuccess writes a decided decision too (CC-17 — it is no longer dropped)', async () => {
+    await guardById(FIELD_GUARD_ID).afterSuccess!(
+      afterInput({
+        metadata: {
+          permissionDecision: {
+            outcome: 'decided',
+            decidedBy: 'u9',
+            grantTo: 'finance',
+            records: [{ feature: 'a.b.view', block: 'data', surfaceId: 'a.b' }],
+          },
+        },
+      }),
+    )
+    expect(mockApply).toHaveBeenCalledTimes(1)
+    const [, input] = mockApply.mock.calls[0] as [unknown, { decision: { outcome: string; grantTo: string } }]
+    expect(input.decision.outcome).toBe('decided')
+    expect(input.decision.grantTo).toBe('finance')
+  })
+
+  it('afterSuccess writes nothing for a refused decision — no surface landed to grant', async () => {
+    await guardById(FIELD_GUARD_ID).afterSuccess!(
+      afterInput({
+        metadata: { permissionDecision: { outcome: 'refused', reason: 'no_surface', because: 'nothing to grant' } },
+      }),
+    )
+    expect(mockApply).not.toHaveBeenCalled()
   })
 
   it('afterSuccess writes nothing when the metadata carries no readable decision at all', async () => {
@@ -258,5 +293,115 @@ describe('end-to-end through the real runner (the metadata wire)', () => {
     )
     expect(result.ok).toBe(false)
     expect(result.afterSuccessCallbacks).toEqual([])
+  })
+})
+
+/**
+ * CC-17 — the reachable entry point for the `decided` branch, proven end to end.
+ *
+ * Before CC-17 **no caller ever supplied a decision**, so the gate's `decided`
+ * branch was unreachable dead code: S2 says the permissions are decided *"either by
+ * a person or by a rule"*, but only the rule could ever fire. These tests drive a
+ * decision in through the **header** — the carrier — and prove the guard's gate reads
+ * it and produces a `decided` outcome (not the default), then writes it.
+ */
+describe('CC-17 — a decision on the request header reaches the gate', () => {
+  function headersValue(): Headers {
+    const h = new Headers()
+    h.set(
+      STRUCTURE_DECISION_HEADER_NAME,
+      JSON.stringify({
+        decidedBy: 'role:finance-admin',
+        grantTo: 'finance',
+        records: [
+          { feature: 'customers:customer_person.loyalty_tier.view' },
+          { feature: 'customers:customer_person.loyalty_tier.manage' },
+        ],
+      }),
+    )
+    return h
+  }
+
+  it('the guard’s validate produces a decided outcome (not the default) when the header carries a decision', async () => {
+    const result = await guardById(FIELD_GUARD_ID).validate({
+      tenantId: 't1',
+      organizationId: 'o1',
+      userId: 'u1',
+      resourceKind: 'entities.field_definition',
+      resourceId: null,
+      operation: 'create',
+      requestMethod: 'POST',
+      requestHeaders: headersValue(),
+      mutationPayload: { entityId: 'customers:customer_person', key: 'loyalty_tier' },
+    })
+    expect(result.ok).toBe(true)
+    const decision = (result.metadata as { permissionDecision?: { outcome?: string; grantTo?: string } } | undefined)
+      ?.permissionDecision
+    expect(decision?.outcome).toBe('decided')
+    expect(decision?.grantTo).toBe('finance')
+  })
+
+  it('with no header, the same create defaults (the two paths are told apart)', async () => {
+    const result = await guardById(FIELD_GUARD_ID).validate({
+      tenantId: 't1',
+      organizationId: 'o1',
+      userId: 'u1',
+      resourceKind: 'entities.field_definition',
+      resourceId: null,
+      operation: 'create',
+      requestMethod: 'POST',
+      requestHeaders: new Headers(),
+      mutationPayload: { entityId: 'customers:customer_person', key: 'loyalty_tier' },
+    })
+    expect(result.ok).toBe(true)
+    const decision = (result.metadata as { permissionDecision?: { outcome?: string } } | undefined)?.permissionDecision
+    expect(decision?.outcome).toBe('defaulted')
+  })
+
+  it('a malformed decision header is REFUSED with 400 — never silently treated as "no decision"', async () => {
+    const h = new Headers()
+    h.set(STRUCTURE_DECISION_HEADER_NAME, '{ this is not json')
+    const result = await guardById(FIELD_GUARD_ID).validate({
+      tenantId: 't1',
+      organizationId: 'o1',
+      userId: 'u1',
+      resourceKind: 'entities.field_definition',
+      resourceId: null,
+      operation: 'create',
+      requestMethod: 'POST',
+      requestHeaders: h,
+      mutationPayload: { entityId: 'customers:customer_person', key: 'loyalty_tier' },
+    })
+    // Falling through to the default here would default-grant superadmin and discard
+    // the person's (broken) intent — a fail-open reading of a broken authorisation.
+    expect(result.ok).toBe(false)
+    if (result.ok === false) {
+      expect(result.status).toBe(400)
+      expect(result.message).toContain(STRUCTURE_DECISION_HEADER_NAME)
+    }
+  })
+
+  it('the entity guard honours the header the same way (both guards share one carrier)', async () => {
+    const h = new Headers()
+    h.set(
+      STRUCTURE_DECISION_HEADER_NAME,
+      JSON.stringify({ decidedBy: 'admin', grantTo: 'ops', records: [{ feature: 'entities.records.customers:customer_person.view' }] }),
+    )
+    const result = await guardById(ENTITY_GUARD_ID).validate({
+      tenantId: 't1',
+      organizationId: 'o1',
+      userId: 'u1',
+      resourceKind: 'entities.entity',
+      resourceId: null,
+      operation: 'create',
+      requestMethod: 'POST',
+      requestHeaders: h,
+      mutationPayload: { entityId: 'customers:customer_person' },
+    })
+    expect(result.ok).toBe(true)
+    const decision = (result.metadata as { permissionDecision?: { outcome?: string; grantTo?: string } } | undefined)
+      ?.permissionDecision
+    expect(decision?.outcome).toBe('decided')
+    expect(decision?.grantTo).toBe('ops')
   })
 })

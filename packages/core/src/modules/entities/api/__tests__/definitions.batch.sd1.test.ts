@@ -90,10 +90,11 @@ jest.mock('../../data/guards', () => {
 const grantMock = applyStructureChangeGrant as unknown as jest.Mock
 const surfaceMock = fieldDefinitionSurface as unknown as jest.Mock
 
-const makeRequest = (body: unknown) =>
+const makeRequest = (body: unknown, headers?: Record<string, string>) =>
   new Request('http://x/api/entities/definitions/batch', {
     method: 'POST',
     body: JSON.stringify(body),
+    ...(headers ? { headers } : {}),
   })
 
 /** The records a custom field yields — the two S2 blocks, in catalogue order. */
@@ -281,5 +282,87 @@ describe('entities/definitions.batch POST — SD-1 (CC-2) the create path is gat
 
     expect(response.status).toBe(200)
     expect(mockEm.commit).toHaveBeenCalledTimes(1)
+  })
+})
+
+/**
+ * CC-17 — a person's decision carried on the request header reaches the gate and is
+ * written. Before CC-17 the batch route never supplied a decision, so the gate's
+ * `decided` branch was unreachable dead code.
+ */
+describe('entities/definitions.batch POST — CC-17 the decision header makes `decided` reachable', () => {
+  const HEADER = 'x-om-ext-permissions-decision'
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockEm.find.mockResolvedValue([] as unknown[])
+    surfaceMock.mockImplementation(jest.requireActual('../../data/guards').fieldDefinitionSurface)
+  })
+
+  it('a header decision produces a decided outcome, written to the decision’s own target', async () => {
+    const response = await POST(
+      makeRequest(
+        { entityId: 'test:entity', definitions: [{ key: 'alpha', kind: 'text' }] },
+        {
+          [HEADER]: JSON.stringify({
+            decidedBy: 'role:finance-admin',
+            grantTo: 'finance',
+            records: [
+              { feature: 'test:entity.alpha.view' },
+              { feature: 'test:entity.alpha.manage' },
+              { feature: 'test:entity.alpha.structure' },
+            ],
+          }),
+        },
+      ),
+    )
+
+    expect(response.status).toBe(200)
+    expect(grantMock).toHaveBeenCalledTimes(1)
+    const input = grantMock.mock.calls[0][1]
+    expect(input.decision.outcome).toBe('decided')
+    expect(input.decision.grantTo).toBe('finance')
+    expect(input.decision.decidedBy).toBe('role:finance-admin')
+    expect(input.decision.records.map((r: { feature: string }) => r.feature)).toEqual(
+      fieldRecords('test:entity', 'alpha'),
+    )
+  })
+
+  it('without the header, the same request defaults to superadmin (the two paths differ)', async () => {
+    const response = await POST(
+      makeRequest({ entityId: 'test:entity', definitions: [{ key: 'alpha', kind: 'text' }] }),
+    )
+    expect(response.status).toBe(200)
+    expect(grantMock.mock.calls[0][1].decision.outcome).toBe('defaulted')
+    expect(grantMock.mock.calls[0][1].decision.grantTo).toBe('superadmin')
+  })
+
+  it('a malformed decision header is refused with 400 before anything is touched', async () => {
+    const response = await POST(
+      makeRequest(
+        { entityId: 'test:entity', definitions: [{ key: 'alpha', kind: 'text' }] },
+        { [HEADER]: '{ not json' },
+      ),
+    )
+
+    expect(response.status).toBe(400)
+    expect(await response.json()).toMatchObject({ error: expect.stringContaining(HEADER) })
+    // Fail closed: the transaction never began, nothing was written.
+    expect(mockEm.begin).not.toHaveBeenCalled()
+    expect(mockEm.commit).not.toHaveBeenCalled()
+    expect(grantMock).not.toHaveBeenCalled()
+  })
+
+  it('a decision with an empty records array is refused by the gate (422), not read as the default', async () => {
+    const response = await POST(
+      makeRequest(
+        { entityId: 'test:entity', definitions: [{ key: 'alpha', kind: 'text' }] },
+        { [HEADER]: JSON.stringify({ decidedBy: 'admin', records: [] }) },
+      ),
+    )
+    // The gate's rule 4: "I decided" must not mean "I decided nothing".
+    expect(response.status).toBe(422)
+    expect(mockEm.rollback).toHaveBeenCalledTimes(1)
+    expect(grantMock).not.toHaveBeenCalled()
   })
 })

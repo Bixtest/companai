@@ -13,7 +13,9 @@
  * an already-loaded input: given the surfaces a change creates, and an optional
  * decision a person made, it says one of three things —
  *
- *   - `decided` — a person decided; the records are theirs;
+ *   - `decided` — a person decided; the records are theirs, **and the role they
+ *     go to is the decision's own target** (`grantTo`, defaulting to the
+ *     superadmin role) — CC-17;
  *   - `defaulted` — nobody decided; **the default applies**: full grant to the
  *     superadmin role, plus the records the surfaces yield;
  *   - `refused` — the gate **cannot establish** the permissions, so the change
@@ -69,16 +71,33 @@ import {
 export const DEFAULT_GRANT_ROLE = 'superadmin' as const
 
 /**
- * A decision a person made about a new surface — the records they granted.
+ * A decision a person made about a new surface — the records they granted, and
+ * **who those records go to**.
  *
  * The type carries the records, not a boolean, so "a person decided" cannot be
  * true while the decision is empty. An empty decision is refused (rule 4).
+ *
+ * **Why it now carries a grant target (CC-17).** The gate's other outcome —
+ * `defaulted` — names a role (`DEFAULT_GRANT_ROLE`). A person's decision named
+ * only `decidedBy` and the records, so the write had **nowhere to put them**: it
+ * deliberately returned `null` for `decided` (a named boundary, not a silent
+ * skip). S2 says the permissions are decided *"either by a person or by a rule"* —
+ * a person deciding is not just a different `decidedBy`, it is a different
+ * **target** (a narrow role instead of the default superadmin), so the target has
+ * to travel with the decision. `grantTo` is the role **name**, the same
+ * vocabulary as `DEFAULT_GRANT_ROLE`; absent means the default role, so a caller
+ * that only has a person and a record list still gets a sensible target.
  */
 export type StructurePermissionDecision = {
   /** Who decided — a user id, a role, or a named policy. Recorded, never inferred. */
   decidedBy: string
   /** The records the decision grants. */
   records: readonly PermissionRecord[]
+  /**
+   * The role the records are granted to. Absent → {@link DEFAULT_GRANT_ROLE}.
+   * A person may narrow the grant; this is where they say to whom.
+   */
+  grantTo?: string
 }
 
 export type StructureChangeGateInput = {
@@ -106,6 +125,13 @@ export type StructureChangeGateOutcome =
       /** The records the decision grants. */
       records: PermissionRecord[]
       decidedBy: string
+      /**
+       * The role the records go to — the decision's own target, or the default
+       * role when the decision did not name one. Present so the write can place
+       * a person's records exactly as the default's (CC-17); it is the one field
+       * that makes `decided` writable.
+       */
+      grantTo: string
       because: string
     }
   | {
@@ -215,11 +241,20 @@ export function evaluateStructureChange(input: StructureChangeGateInput): Struct
           'which is the same as deciding nothing. The default must be applied explicitly instead.',
       }
     }
+    // CC-17: the decision's own grant target, or the default role when it named
+    // none. The gate resolves it here so every caller and the write share one
+    // reading of "where do a person's records go" — the same way `defaulted`
+    // resolves its target, rather than leaving each caller to guess.
+    const grantTo =
+      typeof decision.grantTo === 'string' && decision.grantTo.trim().length > 0
+        ? decision.grantTo.trim()
+        : DEFAULT_GRANT_ROLE
     return {
       outcome: 'decided',
       records: dedupeRecords(decision.records),
       decidedBy: decision.decidedBy,
-      because: `${decision.decidedBy} decided the permissions for this change.`,
+      grantTo,
+      because: `${decision.decidedBy} decided the permissions for this change; the records are granted to the "${grantTo}" role.`,
     }
   }
 

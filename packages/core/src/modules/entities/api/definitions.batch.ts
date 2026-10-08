@@ -13,6 +13,10 @@ import {
   evaluateStructureChange,
   type StructureChangeGateOutcome,
 } from '@open-mercato/shared/lib/permissions/structure-change-gate'
+import {
+  readStructureDecisionFromHeaders,
+  toStructurePermissionDecision,
+} from '@open-mercato/shared/lib/permissions/structure-change-decision-header'
 import { applyStructureChangeGrant } from '@open-mercato/core/modules/auth/lib/permission-decision-grant'
 import { invalidateDefinitionsCache } from './definitions.cache'
 import type { OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
@@ -67,8 +71,13 @@ const logger = createLogger('entities').child({ component: 'definitions-batch' }
  * double-grant.
  */
 
-/** The gate's `defaulted` variant — the only one with records to grant. */
-type DefaultedStructureChange = Extract<StructureChangeGateOutcome, { outcome: 'defaulted' }>
+/**
+ * A gate outcome that has records to write. `refused` is excluded — a refusal
+ * never lands a surface, so there is nothing to grant. CC-17: this is now both
+ * writable variants (`defaulted` and `decided`), not just `defaulted`, so the
+ * batch route grants a person's decision as surely as the rule's default.
+ */
+type WritableStructureChange = Extract<StructureChangeGateOutcome, { outcome: 'defaulted' | 'decided' }>
 
 /**
  * True when a definition row exists **and is an active column**.
@@ -95,7 +104,7 @@ function isActiveColumn(def: { isActive?: boolean } | undefined): boolean {
 async function applyBatchStructureChangeGrant(
   em: EntityManager,
   tenantId: string,
-  decision: DefaultedStructureChange,
+  decision: WritableStructureChange,
 ): Promise<void> {
   try {
     const result = await applyStructureChangeGrant(em, { tenantId, decision })
@@ -222,6 +231,16 @@ export async function POST(req: Request) {
     throw err
   }
 
+  // SD-1 (CC-17): read the person's permission decision off the request, if any.
+  // Done once, before the transaction, so a malformed decision is refused **before**
+  // anything is touched (fail closed) and so the read is not repeated per column. A
+  // malformed decision is a 400 (a bad request), distinct from the gate's 422 (a
+  // policy refusal) — the same split zod and the guards already draw.
+  const requestedDecision = readStructureDecisionFromHeaders(req.headers)
+  if (requestedDecision.kind === 'malformed') {
+    return NextResponse.json({ error: requestedDecision.because }, { status: 400 })
+  }
+
   await em.begin()
   // SD-1 (CC-2): the gate's outcome for the columns this batch creates, decided inside
   // the transaction (see the section comment above) and applied after the commit.
@@ -275,6 +294,12 @@ export async function POST(req: Request) {
     if (newKeys.length > 0) {
       permissionDecision = evaluateStructureChange({
         surfaces: newKeys.map((key) => fieldDefinitionSurface(entityId, key)),
+        // CC-17: a person's decision, if the request carried one, so the `decided`
+        // branch is reachable (before this it never was — no caller supplied a
+        // decision). `absent` leaves the gate on its default; `malformed` has
+        // already been refused with 400 above, so by here the read is `absent` or
+        // `decision` only.
+        decision: requestedDecision.kind === 'decision' ? toStructurePermissionDecision(requestedDecision.decision) : null,
       })
       if (permissionDecision.outcome === 'refused') {
         await em.rollback()
@@ -366,10 +391,13 @@ export async function POST(req: Request) {
 
   await guard.runAfterSuccess()
 
-  // SD-1 (CC-2): the batch committed — now grant the default's records for the columns
-  // it created. Post-commit because the surface must exist first; the write is
+  // SD-1 (CC-2): the batch committed — now grant the records for the columns it
+  // created. Post-commit because the surface must exist first; the write is
   // idempotent, and a failure is logged rather than failing a save that already landed.
-  if (permissionDecision?.outcome === 'defaulted') {
+  // CC-17: a `decided` outcome is written too (the person's own records and grant
+  // target) — before CC-17 this branch only ever fired for `defaulted`, so a person's
+  // decision was silently dropped at the write.
+  if (permissionDecision?.outcome === 'defaulted' || permissionDecision?.outcome === 'decided') {
     if (auth.tenantId) {
       await applyBatchStructureChangeGrant(em, auth.tenantId, permissionDecision)
     } else {

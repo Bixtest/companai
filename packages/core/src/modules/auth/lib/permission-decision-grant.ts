@@ -252,17 +252,25 @@ export async function applyPermissionDecisionGrant(
  *     transaction — the registry sees that route as an `'update'` and its payload
  *     carries no field list (`COMPLETION-CALLBACKS.md` CC-2).
  *
- * **Only `defaulted` is written.** A `decided` outcome belongs to whoever decided
- * (the decision type carries no grant target yet — CC-17), and a `refused` outcome
- * never lands a surface to grant. Both return `null`: "nothing to write" is a fact
- * to report, not a silent success.
+ * **Both a `defaulted` and a `decided` outcome are written (CC-17).** The two are
+ * the same *kind* of thing — records that must land on a role — and differ only in
+ * **who chose the role**: a rule chose the default (`DEFAULT_GRANT_ROLE`), a person
+ * chose theirs (the decision's `grantTo`). Both therefore go through the one write
+ * below, so the two can never drift into "the rule is enforced, a person's decision
+ * is not". A `refused` outcome never lands a surface to grant, so it is the only
+ * one that returns `null` — "nothing to write" is a fact to report, not a silent
+ * success.
+ *
+ * (Before CC-17 the `decided` branch returned `null` deliberately: the decision
+ * type carried no grant target, so there was genuinely nowhere to put the records.
+ * Adding the target to the type is what makes this branch writable.)
  */
 export async function applyStructureChangeGrant(
   em: EntityManager,
   input: { tenantId: string; decision: StructureChangeGateOutcome },
 ): Promise<PermissionGrantOutcome | null> {
   const { decision } = input
-  if (decision.outcome !== 'defaulted') return null
+  if (decision.outcome === 'refused') return null
   return applyPermissionDecisionGrant(em, {
     tenantId: input.tenantId,
     grantTo: decision.grantTo,

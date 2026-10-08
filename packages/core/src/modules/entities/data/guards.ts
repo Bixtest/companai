@@ -8,6 +8,11 @@ import {
   evaluateStructureChange,
   type StructureChangeGateOutcome,
 } from '@open-mercato/shared/lib/permissions/structure-change-gate'
+import {
+  readStructureDecisionFromHeaders,
+  toStructurePermissionDecision,
+  type StructureDecisionHeaderRead,
+} from '@open-mercato/shared/lib/permissions/structure-change-decision-header'
 import { createRequestContainer } from '@open-mercato/shared/lib/di/container'
 import { createLogger } from '@open-mercato/shared/lib/logger'
 import {
@@ -244,10 +249,39 @@ export function entityDefinitionSurface(entityId: string): PermissionSurface {
  * A refusal is returned as `ok:false` with a plain-language message (dictionary
  * S3: *tell the user why*). A pass carries the gate's outcome in `metadata` and
  * sets `shouldRunAfterSuccess`, so the guard's own `afterSuccess` step can write
- * the default's records once the surface has committed.
+ * the records once the surface has committed.
+ *
+ * **CC-17: the person's decision, read from the request.** The guards see the
+ * request headers (the runner passes them through), so this is where a decision
+ * carried on the `x-om-ext-permissions-decision` header reaches the gate — the
+ * reachable entry point for the `decided` branch, which no caller could reach
+ * before. The three-way read is honoured exactly as the batch route honours it:
+ *
+ *   - `absent` → no decision; the gate applies its default;
+ *   - `malformed` → **refused here as a block** (400), because falling through to
+ *     the default would silently swap a person's intent for a superadmin grant —
+ *     a fail-open reading of a broken authorisation;
+ *   - `decision` → handed to the gate, which resolves its grant target.
+ *
+ * This is deliberately the *same* carrier and the *same* mapping the batch route
+ * uses (`toStructurePermissionDecision`), so the two cannot drift into "the route
+ * honours a decision, the guard ignores it".
  */
-function runStructureChangeGate(surfaces: PermissionSurface[], what: string) {
-  const result = evaluateStructureChange({ surfaces })
+function runStructureChangeGate(
+  surfaces: PermissionSurface[],
+  what: string,
+  requestHeaders?: Headers,
+) {
+  let decision: StructureDecisionHeaderRead = { kind: 'absent' }
+  if (requestHeaders) decision = readStructureDecisionFromHeaders(requestHeaders)
+  if (decision.kind === 'malformed') {
+    return { ok: false as const, status: 400, message: decision.because }
+  }
+
+  const result = evaluateStructureChange({
+    surfaces,
+    decision: decision.kind === 'decision' ? toStructurePermissionDecision(decision.decision) : null,
+  })
   if (result.outcome === 'refused') {
     return {
       ok: false as const,
@@ -306,9 +340,11 @@ async function resolveRequestEntityManager(): Promise<EntityManager | null> {
  * guard. The mapping itself lives in `applyStructureChangeGrant`, so the guard and the
  * batch route (CC-2) share one implementation.
  *
- * Returns `null` when there is nothing to write (no decision, or a `decided` outcome
- * whose records belong to a person's own grant target, which the decision type does
- * not yet carry — a named boundary, not a silent skip).
+ * Returns `null` only when there is **nothing to write** — no decision at all, or a
+ * `refused` outcome (which never landed a surface, so there is nothing to grant).
+ * Since CC-17 a `decided` outcome is a real write target: the decision type carries
+ * a grant target, so the person's records go to the role they named rather than
+ * being dropped here (which is exactly what used to happen).
  */
 export async function applyGateDecisionToGrantRole(
   em: EntityManager,
@@ -320,14 +356,20 @@ export async function applyGateDecisionToGrantRole(
 }
 
 /**
- * The guard's `afterSuccess` body: write the default's records, and make a
- * failure *loud*. The runner swallows `afterSuccess` errors so a committed write
- * still succeeds, so an un-appliable grant is logged here at `error` — an ungated
+ * The guard's `afterSuccess` body: write the gate's records, and make a failure
+ * *loud*. The runner swallows `afterSuccess` errors so a committed write still
+ * succeeds, so an un-appliable grant is logged here at `error` — an ungated
  * surface is the exact defect SD-1 exists to prevent and must be visible.
+ *
+ * **CC-17: a `decided` outcome is written too.** Before CC-17 this returned unless
+ * the outcome was `defaulted`, so a person's decision reached the gate (once the
+ * carrier is wired), produced records, and was then dropped at the write. S2 says
+ * the permissions are decided *"either by a person or by a rule"*; both now go
+ * through `applyGateDecisionToGrantRole`, which maps both to the one write.
  */
 async function writeGateDecisionGrant(input: MutationGuardAfterInput): Promise<void> {
   const decision = readPermissionDecision(input.metadata)
-  if (!decision || decision.outcome !== 'defaulted') return
+  if (!decision || decision.outcome === 'refused') return
 
   const em = await resolveRequestEntityManager()
   if (!em) {
@@ -378,6 +420,7 @@ const fieldPermissionDecisionGuard: MutationGuard = {
     return runStructureChangeGate(
       entityId && key ? [fieldDefinitionSurface(entityId, key)] : [],
       'A new custom field',
+      input.requestHeaders,
     )
   },
 
@@ -398,6 +441,7 @@ const entityPermissionDecisionGuard: MutationGuard = {
     return runStructureChangeGate(
       entityId ? [entityDefinitionSurface(entityId)] : [],
       'A new custom entity',
+      input.requestHeaders,
     )
   },
 

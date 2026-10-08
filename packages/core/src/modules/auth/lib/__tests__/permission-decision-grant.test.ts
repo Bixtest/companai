@@ -299,15 +299,49 @@ describe('applyStructureChangeGrant maps a gate outcome to the write', () => {
     )
   })
 
-  it('writes nothing for a decided outcome — the decision carries no grant target yet (CC-17)', async () => {
+  it('writes a decided outcome — the decision’s own target and records (CC-17)', async () => {
+    // Before CC-17 this returned `null`: the `decided` outcome carried no grant
+    // target, so the write had nowhere to put a person's records. Now the target
+    // travels with the decision, so a person's decision is written exactly as the
+    // default's — to the role the person named.
+    const financeRole = { id: 'role-finance', name: 'finance', tenantId: TENANT }
+    const em = makeEm({ role: financeRole })
+    const result = await applyStructureChangeGrant(em as never, {
+      tenantId: TENANT,
+      decision: { outcome: 'decided', records, decidedBy: 'user-1', grantTo: 'finance', because: 'user-1 decided' },
+    })
+
+    expect(result).toMatchObject({ applied: true, roleName: 'finance', aclCreated: true })
+    // The role looked up is the DECISION's target, not the default superadmin role.
+    expect(em.findOne).toHaveBeenCalledWith(Role, { name: 'finance', tenantId: TENANT }, {})
+    expect(em.create).toHaveBeenCalledWith(
+      RoleAcl,
+      expect.objectContaining({
+        featuresJson: [
+          'test:entity.alpha.view',
+          'test:entity.alpha.manage',
+          'test:entity.alpha.structure',
+        ],
+      }),
+    )
+  })
+
+  it('a decided outcome with the default target writes to superadmin (the fallback, not the only answer)', async () => {
     const em = makeEm({ role })
     const result = await applyStructureChangeGrant(em as never, {
       tenantId: TENANT,
-      decision: { outcome: 'decided', records, decidedBy: 'user-1', because: 'user-1 decided' },
+      decision: { outcome: 'decided', records, decidedBy: 'user-1', grantTo: 'superadmin', because: 'user-1 decided' },
     })
+    expect(result).toMatchObject({ applied: true, roleName: 'superadmin' })
+  })
 
-    expect(result).toBeNull()
-    expect(em.findOne).not.toHaveBeenCalled()
+  it('a decided outcome whose role is missing fails loudly (role_not_found), like the default', async () => {
+    const em = makeEm({ role: null })
+    const result = await applyStructureChangeGrant(em as never, {
+      tenantId: TENANT,
+      decision: { outcome: 'decided', records, decidedBy: 'user-1', grantTo: 'finance', because: 'user-1 decided' },
+    })
+    expect(result).toMatchObject({ applied: false, reason: 'role_not_found', roleName: 'finance' })
     expect(em.create).not.toHaveBeenCalled()
   })
 
