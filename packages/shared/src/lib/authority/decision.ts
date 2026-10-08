@@ -10,11 +10,22 @@
  * recovers it: by the time a `false` reaches the caller, the reason has already
  * been discarded. That is why this returns a `Decision` and never a boolean.
  *
- * **What this does not do yet.** It does not enforce. Nothing calls it in the
- * request path; the existing RBAC checks still decide who may do what. Wiring it
- * in is deliberate later work, because a resolver that silently starts refusing
- * requests is the least safe way to introduce one. What exists here is the
- * kernel, its explanation, and its tests.
+ * **What this does now, and how it got there.** It resolves; it does not itself
+ * enforce — it returns a `Decision` and a caller acts on it. That separation is
+ * deliberate, and the wiring happened the gradual way the note here used to
+ * promise, because a resolver that silently starts refusing requests is the least
+ * safe way to introduce one. It is called in the request path by
+ * `AuthorityEnforcementService` — the command gate and the HTTP RBAC path, which
+ * subtract a refusal from an allowance RBAC already made — and, since `S-02`, by
+ * the AI tool door (`ai-assistant` `lib/tool-authority.ts`). Nothing here refuses
+ * on its own: a tenant runs `off`, `shadow` (the default — record, change nothing)
+ * or `enforce` (bind), and `enforce` is an operator's decision made against their
+ * own evidence.
+ *
+ * *(This header said "It does not enforce. Nothing calls it in the request path"
+ * until 2026-10-08. That stopped being true on 2026-08-10, when the command gate
+ * landed. A stale comment about a control is worse than none, because it is read
+ * as a limitation and worked around.)*
  *
  * Source: planning 02 §6.
  */
