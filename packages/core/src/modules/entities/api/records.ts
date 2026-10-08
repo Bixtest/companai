@@ -125,7 +125,7 @@ function systemEntityRecordsRejection(entityId: string) {
 
 async function readCustomEntityRecordUpdatedAt(
   em: any,
-  input: { entityType: string; entityId: string; organizationId: string | null },
+  input: { entityType: string; entityId: string; organizationId: string | null; tenantId: string | null },
 ): Promise<string | null> {
   try {
     const db = em.getKysely()
@@ -134,6 +134,13 @@ async function readCustomEntityRecordUpdatedAt(
       .select(['updated_at' as any])
       .where('entity_type' as any, '=', input.entityType)
       .where('entity_id' as any, '=', input.entityId)
+    // Scope by tenant as well as org (CC-28). The org id is a globally-unique UUID, so
+    // this is defence-in-depth rather than a live fix here — but it keeps this read in
+    // step with the batch read-back and the query engine, none of which may scope by org
+    // alone. A null tenant stays null-scoped, matching a global-scope row.
+    query = input.tenantId === null
+      ? query.where('tenant_id' as any, 'is', null as any)
+      : query.where('tenant_id' as any, '=', input.tenantId)
     query = input.organizationId === null
       ? query.where('organization_id' as any, 'is', null as any)
       : query.where('organization_id' as any, '=', input.organizationId)
@@ -331,12 +338,23 @@ export async function GET(req: Request) {
           .filter((v: any): v is string => typeof v === 'string' && v.length > 0)
         if (recordIds.length) {
           const db = em.getKysely()
-          const rows = await db
+          // Scope the read-back the same way the query engine scopes the list above:
+          // ALWAYS by the caller's tenant, and by org when the caller is org-scoped.
+          // A record id is a caller-suppliable UUID (see PUT/POST normalization), so an
+          // unscoped `entity_id IN (…)` could match ANOTHER tenant's row and merge its
+          // `updated_at` into this tenant's response (CC-28). Record ids in the list come
+          // from the caller's own scoped page, so the tenant filter can only ever remove
+          // rows that do not belong to the caller.
+          let storageQuery = db
             .selectFrom('custom_entities_storage' as any)
             .select(['entity_id' as any, 'updated_at' as any])
             .where('entity_type' as any, '=', entityId)
             .where('entity_id' as any, 'in', recordIds as any)
-            .execute()
+            .where('tenant_id' as any, '=', auth.tenantId!)
+          if (organizationIds && organizationIds.length) {
+            storageQuery = storageQuery.where('organization_id' as any, 'in', organizationIds as any)
+          }
+          const rows = await storageQuery.execute()
           const updatedById = new Map<string, string>()
           for (const row of rows as any[]) {
             const value = row?.updated_at
@@ -592,6 +610,7 @@ export async function PUT(req: Request) {
         entityType: entityId,
         entityId: rid,
         organizationId: targetOrgId,
+        tenantId: auth.tenantId!,
       })
       await enforceCommandOptimisticLockWithGuards(container, {
         resourceKind: CUSTOM_ENTITY_RECORD_RESOURCE_KIND,
@@ -660,6 +679,7 @@ export async function DELETE(req: Request) {
         entityType: entityId,
         entityId: recordId,
         organizationId: targetOrgId,
+        tenantId: auth.tenantId!,
       })
       await enforceCommandOptimisticLockWithGuards(container, {
         resourceKind: CUSTOM_ENTITY_RECORD_RESOURCE_KIND,

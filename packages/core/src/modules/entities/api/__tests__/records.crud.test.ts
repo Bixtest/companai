@@ -3,12 +3,35 @@ import { GET, POST, PUT, DELETE } from '@open-mercato/core/modules/entities/api/
 import { UNKNOWN_CUSTOM_FIELD_ERROR } from '@open-mercato/shared/modules/entities/validation'
 
 let mockRecordUpdatedAt: string | null = null
+// The scope the "stored" row belongs to, for the CC-28 filter-awareness below.
+let mockRecordScope: { tenantId: string | null; organizationId: string | null } = { tenantId: 't1', organizationId: 'org' }
+// Every `where` op the single-record read-back issued on the last call (CC-28).
+let lastWhereOps: { column: string; op: string; value: unknown }[] = []
 
+/**
+ * A stub for the single-record read-back. It records the `where` clauses the caller
+ * issued and returns the "stored" row ONLY when those clauses match the row's scope —
+ * so a query that omits `tenant_id` (the pre-CC-28 shape) fails to find its own row,
+ * which is how the CC-28 test below goes RED without the fix.
+ */
 function makeKyselyStub() {
+  const ops: { column: string; op: string; value: unknown }[] = []
+  lastWhereOps = ops
   const builder: any = {
     select: () => builder,
-    where: () => builder,
-    executeTakeFirst: async () => (mockRecordUpdatedAt == null ? undefined : { updated_at: mockRecordUpdatedAt }),
+    where: (column: string, op: string, value: unknown) => {
+      ops.push({ column, op, value })
+      return builder
+    },
+    executeTakeFirst: async () => {
+      const matches = ops.every(({ column, op, value }) => {
+        if (column === 'tenant_id') return op === 'is' ? mockRecordScope.tenantId == null : mockRecordScope.tenantId === value
+        if (column === 'organization_id') return op === 'is' ? mockRecordScope.organizationId == null : mockRecordScope.organizationId === value
+        return true // entity_type / entity_id are not the subject of this test
+      })
+      if (!matches) return undefined
+      return mockRecordUpdatedAt == null ? undefined : { updated_at: mockRecordUpdatedAt }
+    },
   }
   return { selectFrom: () => builder }
 }
@@ -75,6 +98,8 @@ describe('Records API CRUD operations', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockRecordUpdatedAt = null
+    mockRecordScope = { tenantId: 't1', organizationId: 'org' }
+    lastWhereOps = []
   })
 
   describe('POST /api/entities/records', () => {
@@ -194,8 +219,24 @@ describe('Records API CRUD operations', () => {
       )
     })
 
-    it('falls back to create when recordId is sentinel value', async () => {
+    // CC-28 — the single-record read-back (used for the optimistic-lock version) must
+    // scope by tenant as well as org. Before CC-28 it filtered on entity + org only.
+    it('scopes the updated_at read-back by tenant (CC-28)', async () => {
       mockCustomFieldDefsLookup(['title'])
+      mockRecordUpdatedAt = '2026-07-07T00:00:00.000Z'
+      const recordId = '123e4567-e89b-12d3-a456-426614174000'
+      const req = new Request('http://x/api/entities/records', {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ entityId: 'user:qa_entity', recordId, values: { title: 'T' } }),
+      })
+      await PUT(req)
+      expect(lastWhereOps).toEqual(
+        expect.arrayContaining([{ column: 'tenant_id', op: '=', value: 't1' }]),
+      )
+    })
+
+    it('falls back to create when recordId is sentinel value', async () => {      mockCustomFieldDefsLookup(['title'])
       const req = new Request('http://x/api/entities/records', {
         method: 'PUT',
         headers: { 'content-type': 'application/json' },
