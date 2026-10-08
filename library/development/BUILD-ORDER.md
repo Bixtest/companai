@@ -1081,11 +1081,12 @@ one page, each with a named home. Details: [`BLUEPRINT-GAP-ANALYSIS.md`](BLUEPRI
    `ensureCustomFieldDefinitions`;    the two HTTP **reactivation** routes (`api/definitions.ts` +
    `api/definitions.restore.ts`) gate a tombstoned field coming back, from the before-state at the route;
    the custom-entity install primitive `upsertCustomEntity` (`entities/lib/register.ts`) gates a custom
-   **entity** appearing, before the row, with the live `entities.records.<id>` records; and all three field
+   **entity** appearing, before the row, with the live `entities.records.<id>` records; all three field
    write sites gate a **field-type change** (`existing.kind !== incoming.kind` — the before-state exists at
-   each write site, so the shared guard contract was not touched).
-   **The headline limits are all closed.** Still open: the lock-free
-   merge, the batch's reserved-key check, an enforcement consumer for a *field*'s records, and the two
+   each write site, so the shared guard contract was not touched); and the merge into `role_acls.features_json`
+   is now **atomic** (one SQL `UPDATE`, `jsonb ||` deduped, `returning` — no lost update under a race).
+   **The headline limits are all closed.** Still open: the batch's reserved-key check, an enforcement consumer
+   for a *field*'s records, the create-branch double-insert (needs a migration — CC-23), and the two
    deferred consumers (`SD-4`, `G-04`) — each scheduled in [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md)
    (plan [`PLAN-SD-1.md`](PLAN-SD-1.md), limits §10).
 6. **SD-3** — make the tier mapping/defaults/fallbacks a **superadmin setting** (`module_configs`, module

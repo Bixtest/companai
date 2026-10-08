@@ -67,10 +67,14 @@ the entity-install primitive `upsertCustomEntity`** (`entities/lib/register.ts`:
 appearing is a surface appearing, gated before the row and granted after the flush, with the **live**
 `entities.records.<id>` records — CC-21, 2026-10-08) — **and run at all three field write sites on a
 *type change*** (`existing.kind !== incoming.kind`: a re-typed field is a surface changing shape; the
-before-state exists at each write site, so the shared guard contract was not touched — CC-4, 2026-10-08).
-**81 SD-1 tests; 36 mutations RED-then-GREEN across seven slices, each restore md5-verified; `shared`
-197/2329 — 8 fail in the one suite of CC-19 (a host process-creation failure, not code), `core` 625/5402,
-typecheck 0.** **Five** hostile-critic passes plus two mutation/premise-found defects (twenty-two real
+before-state exists at each write site, so the shared guard contract was not touched — CC-4, 2026-10-08) —
+**and the merge into `role_acls.features_json` is now atomic** (one SQL `UPDATE`, `jsonb ||` deduped by
+`group by elem` with first-occurrence order, `returning` so the DB is the source of truth — no lost update
+under a race; proven against live Postgres 17 with a concurrent-session test **and** a negative control —
+CC-16, 2026-10-08).
+**82 SD-1 tests; 40 mutations RED-then-GREEN across eight slices, each restore md5-verified; `shared`
+197/2329 — 8 fail in the one suite of CC-19 (a host process-creation failure, not code), `core` 625/5403,
+typecheck 0.** **Six** hostile-critic passes plus two mutation/premise-found defects (twenty-four real
 defects) — all fixed or named (`PLAN-SD-1.md` §9).
 
 **It is still PARTIAL — but ALL headline limits are closed.** A gate that decides but does not record was
@@ -78,17 +82,18 @@ not yet a gate; it now records. The path the field-management UI mostly uses —
 ungated; it now runs the same gate. The **non-request** field paths (module install / seeds / the
 `add-field` CLI) were ungated; they now run it in the shared primitive. The **HTTP reactivation** paths
 (single + restore) were ungated; they now gate at the route. A **custom entity created by the module
-install** was ungated; it now gates at the primitive. And a **field-type change** was ungated; it now
-gates at all three write sites. What remains is **the deferred consumers and the merge's concurrency** —
-every one scheduled in
+install** was ungated; it now gates at the primitive. A **field-type change** was ungated; it now gates at
+all three write sites. And the **ACL merge** could lose an addition under a race; it is now atomic. What
+remains is **the reserved-key gap, the `decided` carrier, the enforcement consumer, and the create-branch
+double-insert** — every one scheduled in
 [`COMPLETION-CALLBACKS.md`](library/development/COMPLETION-CALLBACKS.md):
-1. **Make the ACL merge atomic** — it is a lock-free read-modify-write today. **(CC-16)**
-2. **Give the batch path its reserved-key check** — measured: a batch POST of `key:'id'` returns 200 where the single POST refuses. **(CC-18)**
-3. **Make the `decided` branch reachable** — today only the rule fires, never a person's decision. **(CC-17)**
-4. **Give a custom *field*'s records an enforcement consumer** — SD-1 writes ACL rows nothing reads yet. **(CC-20)**
+1. **Give the batch path its reserved-key check** — measured: a batch POST of `key:'id'` returns 200 where the single POST refuses. **(CC-18)**
+2. **Make the `decided` branch reachable** — today only the rule fires, never a person's decision. **(CC-17)**
+3. **Give a custom *field*'s records an enforcement consumer** — SD-1 writes ACL rows nothing reads yet. **(CC-20)**
+4. **Close the create-branch double-insert** — a first grant onto a role with no ACL row can create two rows; needs a unique index `(role_id, tenant_id)` (a migration, deferred). **(CC-23)**
 
 **Read first (before continuing):** [`PLAN-SD-1.md`](library/development/PLAN-SD-1.md) — the plan, the
-critics' twenty defects (§9) and the honest limits (§10) — and the completion register
+critics' twenty-four defects (§9) and the honest limits (§10) — and the completion register
 [`COMPLETION-CALLBACKS.md`](library/development/COMPLETION-CALLBACKS.md) (the owner's 2026-10-08 standing
 instruction: always schedule a partial build's gap, prerequisite and callback). Then the same discipline
 as `S-02`/`D3`: fact-check what exists, name the honest boundary, then plan → execute → verify → document.
