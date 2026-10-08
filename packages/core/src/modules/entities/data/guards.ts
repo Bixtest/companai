@@ -1,4 +1,6 @@
 import type { MutationGuard } from '@open-mercato/shared/lib/crud/mutation-guard-registry'
+import type { PermissionSurface } from '@open-mercato/shared/lib/permissions/catalogue'
+import { evaluateStructureChange } from '@open-mercato/shared/lib/permissions/structure-change-gate'
 
 /**
  * Structural guards for the dynamic-entity definition path.
@@ -103,4 +105,117 @@ const keyShapeGuard: MutationGuard = {
   },
 }
 
-export const guards: MutationGuard[] = [reservedKeyGuard, keyShapeGuard]
+/* ------------------------------------------------------------------ *
+ * SD-1 — the permissions-on-change gate (S2)
+ * ------------------------------------------------------------------ *
+ * The dictionary's S2 standard: *"When new data structure appears — a new table,
+ * a new column, a field-type change — the platform must not allow it to land until
+ * permissions for it are decided, either by a person or by a rule."*
+ *
+ * These two guards are the hook. They run the shared structure-change gate
+ * (`@open-mercato/shared/lib/permissions/structure-change-gate`) for the surface a
+ * create lands and REFUSE (fail closed) when the gate cannot establish the
+ * permissions. The default — full grant to the superadmin role plus the records —
+ * is the gate's; writing those records into `role_acls.features_json` is the
+ * caller's step through the existing store (S5: one engine).
+ *
+ * Scope, stated honestly (a hostile-critic pass corrected an earlier, looser version):
+ *   - `operations: ['create']` only. This guard's payload carries no field list, so it
+ *     cannot enumerate the columns a bulk save creates — and the batch definitions
+ *     endpoint (`api/definitions.batch.ts`) creates NEW columns under
+ *     `operation: 'custom'`, which the registry maps to `'update'`. Those creates are
+ *     therefore **not** gated by this hook. Named as an open hole in `PLAN-SD-1.md` §10.
+ *   - A **field-type change** (an update of an existing field's `kind`) is also not gated:
+ *     detecting it needs the before-state, which the guard input does not carry.
+ *   - **The gate produces the records; nothing writes them yet.** No call site persists
+ *     the default into `role_acls.features_json` yet, so on the HTTP routes this hook
+ *     enumerates and fails closed but does not itself change the ACL. `PLAN-SD-1.md`
+ *     §10 states this plainly — the item is **PARTIAL**, not done.
+ */
+
+/**
+ * The permission surface a custom **field** creates. The id is `<entityId>.<key>`,
+ * so a field is a surface in its own right (the amended S2: a new column is not
+ * "permitted" until both its blocks are set).
+ */
+export function fieldDefinitionSurface(entityId: string, key: string): PermissionSurface {
+  return { id: `${entityId}.${key}`, kind: 'field', owner: 'entities', source: 'recorded' }
+}
+
+/**
+ * The permission surface a custom **entity** creates.
+ *
+ * The records use the platform's own per-entity prefix (`entities.records.<id>`)
+ * rather than a new scheme, so the catalogue and enforcement cannot drift — the
+ * same ids `recordFeatures.ts` derives.
+ */
+export function entityDefinitionSurface(entityId: string): PermissionSurface {
+  return {
+    id: entityId,
+    kind: 'object',
+    owner: 'entities',
+    source: 'recorded',
+    featurePrefix: `entities.records.${entityId}`,
+  }
+}
+
+/**
+ * Run the gate for a create and turn a refusal into a block.
+ *
+ * A refusal is returned as `ok:false` with a plain-language message (dictionary
+ * S3: *tell the user why*). A pass carries the gate's outcome in `metadata`, so a
+ * caller that wants to write the default's records can read them.
+ */
+function runStructureChangeGate(surfaces: PermissionSurface[], what: string) {
+  const result = evaluateStructureChange({ surfaces })
+  if (result.outcome === 'refused') {
+    return {
+      ok: false as const,
+      status: 422,
+      message:
+        `${what} cannot land: ${result.because} ` +
+        'Every new data structure must answer the permissions question before it is applied (S2).',
+    }
+  }
+  return { ok: true as const, metadata: { permissionDecision: result } }
+}
+
+const fieldPermissionDecisionGuard: MutationGuard = {
+  id: 'entities.field_definition.requires-permission-decision',
+  targetEntity: 'entities.field_definition',
+  operations: ['create'],
+  priority: 5,
+
+  async validate(input) {
+    const entityId = readStringField(input.mutationPayload, 'entityId')
+    const key = readStringField(input.mutationPayload, 'key')
+    // A create that cannot name the surface it creates is refused, not waved
+    // through: the gate cannot decide permissions for a change it cannot describe.
+    return runStructureChangeGate(
+      entityId && key ? [fieldDefinitionSurface(entityId, key)] : [],
+      'A new custom field',
+    )
+  },
+}
+
+const entityPermissionDecisionGuard: MutationGuard = {
+  id: 'entities.entity.requires-permission-decision',
+  targetEntity: 'entities.entity',
+  operations: ['create'],
+  priority: 5,
+
+  async validate(input) {
+    const entityId = readStringField(input.mutationPayload, 'entityId')
+    return runStructureChangeGate(
+      entityId ? [entityDefinitionSurface(entityId)] : [],
+      'A new custom entity',
+    )
+  },
+}
+
+export const guards: MutationGuard[] = [
+  reservedKeyGuard,
+  keyShapeGuard,
+  fieldPermissionDecisionGuard,
+  entityPermissionDecisionGuard,
+]
