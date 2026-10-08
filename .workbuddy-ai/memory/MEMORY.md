@@ -24,6 +24,15 @@
 - **Never `git add -A`.** Commit in both repos (docs repo `C:/Users/Ramzi/Downloads/companai`;
   code repo `C:/Users/Ramzi/Downloads/companai/workspace/starting-kit`).
 - Handover docs carry **no "what is next"**; the live task lives only in the `★ ACTIVE TASK` box.
+- **OWN THE CODE YOU TOUCH — FULLY — AND CHALLENGE THE TASK BEFORE EXECUTING IT** *(owner, 2026-10-08;
+  `WORKING-RULES.md` §1 rule 9)*. (a) **Ownership:** once you touch a piece of code you are responsible for
+  the **entirety** of it — every bug, incomplete piece, error, optimisation and enhancement. **Fix it
+  directly, or schedule it** (backlog / `COMPLETION-CALLBACKS.md`) with the trigger that brings it back.
+  **Never leave a defect standing as "pre-existing, not mine".** (b) **Challenge, then execute:** before any
+  task, **investigate whether it is the best thing for the project, challenge it if not, execute it if it
+  is.** *"Work with knowledge, vision and awareness, not in a blind robotic way."*
+- **Every partial build is scheduled** in `library/development/COMPLETION-CALLBACKS.md` (gap + prerequisite
+  + callback), in the same change — *not merely noted inside a plan's §10* (`WORKING-RULES.md` rule 8).
 
 ### Working hazards learned
 - **Markdown formatter damage recurs:** a Prettier-style reflow adds trailing two-space hard-breaks and

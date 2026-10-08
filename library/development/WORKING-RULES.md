@@ -67,6 +67,28 @@ gets broken.
    finished**, the same standard as updating the docs (§2.1) and the Hermes map (rule 6). Re-measure with
    the commands in that file.
 
+9. **You own the code you touch — fully — and you challenge the task before you execute it**
+   *(owner, 2026-10-08)*. **Two halves, both binding.**
+   **(a) Ownership.** Once you start working on a piece of code you are **fully responsible for the
+   entirety of it** — every issue, bug, incomplete piece and error, and every optimisation or enhancement
+   it needs. **You either fix it directly, or you document it in the backlog with the trigger that brings
+   it back** — you never leave a defect standing as "pre-existing, not mine". A thing you touched is
+   yours; a thing you noticed is yours to *schedule*, at minimum. *(This is the same standard as the
+   completion register — [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md) — applied to **everything**
+   you meet, not only to the slice you were asked for.)*
+   **(b) Challenge, then execute.** **Before** working on any task it is your responsibility to
+   **investigate whether it is the best thing to do for the project**, to **challenge it if it is not**,
+   and to **execute it if it is**. Never run the roadmap blind.
+   **The principle, in his words:** *"work with knowledge, vision, and awareness, not in a blind robotic
+   way."* **His instruction, verbatim:** *"You are fully responsible of the entirety of the code once you
+   start working on it. Fully. Any issue in the code, any bug, any incomplete work, any error, any
+   optimization or enhancement required is your responsibility. And it is your responsibility to either
+   fix directly or document in the backlog to fix when it is the right time to do so. Just like it is
+   your responsibility before working on any task to investigate if this is the best to be done for the
+   project, challenge if not, execute if it is."*
+   **What it forbids:** flagging a defect as "not mine" and moving on; and executing a queued item without
+   first asking whether it is still the right next thing for the project.
+
 *(The COOKBOOK also carries the numbered engineering rules — zero-zero through zero-ten — that govern
 **how** the work is done: the specifications dictionary is binding, "it exists" is not "it is built",
 foundation before stack, the core boundary is not customisable, keep the project findable, measure
@@ -152,7 +174,9 @@ that still need work). Updating the front end helps me testing the micros as you
 - **If a rule stops being true**, delete it — do not leave it to be obeyed after it is wrong.
 - **Keep it short.** This is a page the agent reads once at the start; a long page defeats its purpose.
 
-*Last updated: 2026-10-08 — added rule 8 (a partial build is scheduled in
-[`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md), not merely noted), on the owner's instruction.
-Previously 2026-10-06 — created, carrying the owner's two additions to the override list (two routes;
-the front-end rule) and the pointer to the Active-task box.*
+*Last updated: 2026-10-08 — added rule 9 (you own the code you touch, fully; and challenge the task before
+executing it — *"work with knowledge, vision and awareness, not in a blind robotic way"*), on the owner's
+instruction. Previously 2026-10-08 — rule 8 (a partial build is scheduled in
+[`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md), not merely noted). 2026-10-06 — created, carrying the
+owner's two additions to the override list (two routes; the front-end rule) and the pointer to the
+Active-task box.*
