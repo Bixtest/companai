@@ -10,6 +10,12 @@ import {
   beginEntitiesMutationGuard,
   FIELD_DEFINITION_RESOURCE_KIND,
 } from './definitions.mutation-guard'
+import {
+  evaluateStructureChange,
+  type StructureChangeGateOutcome,
+} from '@open-mercato/shared/lib/permissions/structure-change-gate'
+import { fieldDefinitionSurface } from '../data/guards'
+import { isActiveColumn, writeFieldPermissionGrant } from '../lib/field-definitions'
 import { createExactDefinitionWhere, resolveDefinitionMutationScope } from '../lib/definition-scope'
 
 export const metadata = {
@@ -48,12 +54,37 @@ export async function POST(req: Request) {
   })
   if (guard.blockedResponse) return guard.blockedResponse
 
+  // SD-1 (CC-22): this route exists to bring a tombstoned field back, so — when the row
+  // really is a tombstone — it (re)appears a permission surface, exactly as a create
+  // does. The registry's create-only gate guard cannot see it: this route passes
+  // `operation: 'custom'`, which the registry maps to `'update'`. So, like the batch
+  // route, the gate runs **here**, at the one place the before-state (`def`) is known,
+  // against the same `fieldDefinitionSurface` and the same write every other create path
+  // uses. Restoring an already-active row changes nothing structural and is not gated. A
+  // refusal fails closed: 422, and the row is left as it was.
+  const reactivatesField = !isActiveColumn(def)
+  const permissionDecision: StructureChangeGateOutcome | null = reactivatesField
+    ? evaluateStructureChange({ surfaces: [fieldDefinitionSurface(entityId, key)] })
+    : null
+  if (permissionDecision?.outcome === 'refused') {
+    return NextResponse.json(
+      {
+        error:
+          `The field cannot be restored: ${permissionDecision.because} ` +
+          'Every new data structure must answer the permissions question before it is applied (S2).',
+      },
+      { status: 422 },
+    )
+  }
+
   ;(def as any).deletedAt = null
   ;(def as any).isActive = true
   ;(def as any).updatedAt = new Date()
   em.persist(def)
   await em.flush()
   await guard.runAfterSuccess()
+  // SD-1 (CC-22): the restored column has landed — now write the default's records.
+  await writeFieldPermissionGrant(em, scope.tenantId, permissionDecision, 'the restored custom field')
   await invalidateDefinitionsCache(cache, {
     tenantId: scope.tenantId,
     organizationId: scope.organizationId,

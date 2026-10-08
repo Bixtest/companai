@@ -25,6 +25,12 @@ import {
   FIELD_DEFINITION_RESOURCE_KIND,
 } from './definitions.mutation-guard'
 import {
+  evaluateStructureChange,
+  type StructureChangeGateOutcome,
+} from '@open-mercato/shared/lib/permissions/structure-change-gate'
+import { fieldDefinitionSurface } from '../data/guards'
+import { isActiveColumn, writeFieldPermissionGrant } from '../lib/field-definitions'
+import {
   createExactDefinitionWhere,
   createScopedDefinitionTombstone,
   createVisibleDefinitionWhere,
@@ -526,6 +532,31 @@ export async function POST(req: Request) {
   })
   if (guard.blockedResponse) return guard.blockedResponse
 
+  // SD-1 (CC-22): a field this route **brings back** — an existing row that was an
+  // inactive tombstone and is saved active — is a permission surface (re)appearing,
+  // exactly as a create is. The registry's create-only gate guard cannot see it: this
+  // route passes `operation: def ? 'update' : 'create'`, so a reactivation arrives as
+  // `'update'`. (Relabelling it `'create'` would fire the guard, but it would also drop
+  // the bridged legacy guard — `operations: ['update','delete']` — which is why CC-2
+  // rejected that shape for the batch.) So, like the batch route, the gate runs **here**,
+  // at the one place the before-state (`def`) is known, against the same
+  // `fieldDefinitionSurface` and the same write (`writeFieldPermissionGrant`) every other
+  // create path uses. A refusal fails closed: 422, and nothing is written.
+  const reactivatesField = !!def && !isActiveColumn(def) && (input.isActive ?? true)
+  const permissionDecision: StructureChangeGateOutcome | null = reactivatesField
+    ? evaluateStructureChange({ surfaces: [fieldDefinitionSurface(input.entityId, input.key)] })
+    : null
+  if (permissionDecision?.outcome === 'refused') {
+    return NextResponse.json(
+      {
+        error:
+          `The field cannot be re-activated: ${permissionDecision.because} ` +
+          'Every new data structure must answer the permissions question before it is applied (S2).',
+      },
+      { status: 422 },
+    )
+  }
+
   if (!def) def = em.create(CustomFieldDef, { ...where, createdAt: new Date() })
   def.kind = input.kind
   const inCfg = (input as any).configJson ?? {}
@@ -563,6 +594,10 @@ export async function POST(req: Request) {
   em.persist(def)
   await em.flush()
   await guard.runAfterSuccess()
+  // SD-1 (CC-22): the reactivated column has landed — now write the default's records.
+  // A no-op unless this was a reactivation (the decision is null otherwise): the create
+  // case was already granted by the guard's own `afterSuccess`.
+  await writeFieldPermissionGrant(em, scope.tenantId, permissionDecision, 'the re-activated custom field')
   await invalidateDefinitionsCache(cache, {
     tenantId: scope.tenantId,
     organizationId: scope.organizationId,

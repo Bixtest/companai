@@ -140,17 +140,23 @@ export function decideNewFieldPermissions(
  * so it must be visible. A **global** surface (`tenantId` null) has no single tenant
  * to grant in; that is a named limit (`PLAN-SD-1.md` §10), not a silent skip, and is
  * reported at `debug`.
+ *
+ * `what` is the plain-language subject of the event, so the log line names what
+ * actually happened — a create and a reactivation both land a field, but they are
+ * not the same event. The default keeps the original (create) wording; the HTTP
+ * reactivation routes (CC-22) pass their own.
  */
 export async function writeFieldPermissionGrant(
   em: EntityManager,
   tenantId: string | null,
   decision: StructureChangeGateOutcome | null,
+  what = 'the new custom fields',
 ): Promise<void> {
   if (!decision || decision.outcome !== 'defaulted') return
 
   if (!tenantId) {
     logger.debug(
-      'SD-1: a new global custom field landed; a global surface has no tenant to grant its records in (skipped by design)',
+      `SD-1: ${what} landed; a global surface has no tenant to grant its records in (skipped by design)`,
       { surfaces: [...new Set(decision.records.map((record) => record.surfaceId))] },
     )
     return
@@ -159,7 +165,7 @@ export async function writeFieldPermissionGrant(
   try {
     const result = await applyStructureChangeGrant(em, { tenantId, decision })
     if (result && !result.applied) {
-      logger.error('SD-1: new custom fields landed but their permission records could not be written', {
+      logger.error(`SD-1: ${what} landed but the permission records could not be written`, {
         reason: result.reason,
         because: result.because,
         roleName: result.roleName,
@@ -168,7 +174,7 @@ export async function writeFieldPermissionGrant(
       return
     }
     if (result) {
-      logger.info('SD-1: permission records granted for the new custom fields', {
+      logger.info(`SD-1: permission records granted for ${what}`, {
         roleName: result.roleName,
         added: result.added.length,
         alreadyPresent: result.alreadyPresent.length,
@@ -177,7 +183,7 @@ export async function writeFieldPermissionGrant(
       })
     }
   } catch (error) {
-    logger.error('SD-1: new custom fields landed but writing their permission records threw', {
+    logger.error(`SD-1: ${what} landed but writing the permission records threw`, {
       tenantId,
       err: error,
     })
