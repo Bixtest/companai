@@ -100,6 +100,17 @@ you the detail, and **§2 step 1 lays out these same three tiers**. **In a hurry
 The system Node is 22 and the platform refuses to run on it. Without this export you will get
 failures that describe the laptop, not the project.
 
+**The commands you will actually use** (all from `workspace/starting-kit`, after the export above):
+
+    npx tsc --noEmit -p packages/core/tsconfig.json       # typecheck the core package
+    npx tsc --noEmit -p packages/shared/tsconfig.json     # typecheck the shared package
+    cd packages/core   && npx jest --config jest.config.cjs <path>   # run one core test file
+    cd packages/shared && npx jest --config jest.config.cjs <path>   # run one shared test file
+    cd packages/core   && npx jest --config jest.config.cjs          # the full core suite
+
+The full `core` suite takes roughly **4–5 minutes**; run it in the background rather than blocking on
+it, and read the final `Tests:` / `Test Suites:` lines, not the scroll.
+
 **3. Confirm the state before you trust it.** Run these and read the output:
 
     cd /c/Users/Ramzi/Downloads/companai && git status --short          # thinking + docs
@@ -107,7 +118,16 @@ failures that describe the laptop, not the project.
     docker ps                                                            # is the stack up?
 
 There are **two** git repositories, and both should be clean. If a tree is dirty, find out whose
-changes they are before you touch anything.
+changes they are before you touch anything. **Read the `Status` column, not the line count** — once
+`docker ps` showed eight rows while a container had exited and another was unhealthy behind it.
+
+**A live database is available — use it, and do not claim something about the database is unprovable.**
+A **Postgres 17** runs in the container `mercato-postgres-local` (database `open-mercato`); measure
+against it directly with
+`docker exec -i mercato-postgres-local psql -U postgres -d open-mercato` (the connection string is in
+`workspace/starting-kit/apps/mercato/.env`). **This is how the 2026-10-08 database defect was settled**
+— the index shape and the `ON CONFLICT` behaviour were *measured*, not inferred, and two written
+premises were corrected as a result. Work in a throwaway schema and drop it when you are done.
 
 **THE RULES THAT BIND.** Full engineering text is in `workspace/COOKBOOK.md`. **The owner's standing
 rules, in one page, are [`library/development/WORKING-RULES.md`](WORKING-RULES.md)** — read it once.
@@ -147,6 +167,14 @@ These are the ones that have already cost this project time:
   functional, wire it up even if the parts that still need work are locked or hidden (**the owner's
   rule, 2026-10-06**; full text in [`WORKING-RULES.md`](WORKING-RULES.md)). The owner tests the
   platform as it is built; a feature nobody can reach is a feature nobody can check.
+- **Never grep a *rendered* diff, and never compare bytes across the worktree↔git boundary.** Ask the
+  object store for the file (`git show <rev>:<path>`) instead of reading `git show <rev> -- <path>`;
+  a rendered diff cannot tell an *added* line from a *context* line, and this line of reasoning has
+  produced a false finding more than once. Line endings are normalised on the git side
+  (`core.autocrlf=true`), so a byte comparison that spans the boundary is meaningless — compare lines.
+- **When a measurement falsifies a premise, correct it *everywhere it was copied*.** A premise written
+  into one document gets copied into others; fixing only the one you found leaves the falsehood live.
+  (2026-10-08: two forensic premises were corrected this way, and the copies were hunted down by hand.)
 
 **HOW TO TALK TO THE OWNER.** Reply in **English**, always. Plain, everyday words — he is not a
 developer, so no jargon. One specific thing at a time, answerable in a word or a sentence. **Do not
@@ -168,12 +196,24 @@ to the box and delete it where you found it (owner's instruction, 2026-10-06).
 **Context that shaped the order** (read it, it is why the order is what it is): the four-item critical
 path `spec ✅ → G-01 ✅ → G-02 ✅ → G-03 ✅` is complete; `G-07`, `G-17` and `G-21` are done as recorded
 in `BACKLOG.md`. What was first was not a feature but a **defect family**: the platform *looked*
-finished in the guard layer and was not. That family's **`D2-gap` sweep is now COMPLETE** — every write
+finished in the guard layer and was not. That family's **`D2-gap` sweep is COMPLETE** — every write
 route that reached **no guard of any kind** was found and closed (**0 unguarded across the 35 enabled
-modules**, 2026-10-07), including a class the scanner could not see (a **GET that writes**). The only
-guard work left is **`D2-wide`** (106 call sites, all in parked modules — recorded, not migrated).
-`library/development/BLUEPRINT-GAP-ANALYSIS.md` explains the rest of the receiving plan, and
-`CORE-MODULES-REGISTER.md` says honestly which modules are truly built.
+modules**, 2026-10-07), including a class the scanner could not see (a **GET that writes**).
+
+**The foundation that followed is now also COMPLETE (2026-10-07) — and the build has started on top of
+it.** The four named guard-engine gaps are built and proven: **`D0`** (the registry is populated and
+delivers guards from an enabled module, proven by mutation), **`D1`** (the tier/defaults/fallbacks
+settings table exists — rules are no longer `.ts` code alone), **`D3`** (the guard result has a third
+outcome, `escalate`, treated as *not performed*), and **`GAP A`'s registry half** — the read-only
+**Metadata Registry** (`59ab859`), the service that lets the gate *enumerate* what it is gating. The
+first build slice past the foundation, **`SD-1` Phase 1** (the **S2 structure-change gate** — a new data
+structure may not be applied until its permissions are decided, by a person or by the default), is built
+and mutation-proven across **every create path**, with its remaining paths scheduled in
+`COMPLETION-CALLBACKS.md`. **The only guard work left is `D2-wide`** (106 call sites, all in parked
+modules — recorded, not migrated), and **`GAP A`'s `Resource` envelope** is a Phase −1 contract,
+deliberately unbuilt. **The next slice in BUILD-ORDER order is `SD-3`** (the tier mapping becomes a
+superadmin setting). `library/development/BLUEPRINT-GAP-ANALYSIS.md` explains the rest of the receiving
+plan, and `CORE-MODULES-REGISTER.md` says honestly which modules are truly built.
 
 **Keep the eye on the prize while you build.** The whole product is one loop: *a need → the AI
 understands it → the AI writes a **Business IR** → the platform **validates** it → it **runs** → the
@@ -204,14 +244,26 @@ migration with the registry's own row), a verified Function's definition being e
 invalidating its verification (trigger: the first editing operation), and the Widget registry's
 **database row** (trigger: `G-09`).
 
-Work it in the project's four-step sprint process — **no code before step 3**. Steps 1–3 are
-documents and measurement; only step 4 writes code:
+Work it as a **package** — the standing **rule 10** in
+[`WORKING-RULES.md`](WORKING-RULES.md) is the current process, and it supersedes the older narrative
+four-step sprint below where they differ. **No code before the requirement is written and the
+prerequisites are proven in code.** The six steps of rule 10:
 
-1. **Research** — what already exists for this, in Hermes, in the Starting Kit, in the `V`-register?
-2. **Validate** — is this the best approach, and what would break it?
-3. **Write the cookbook steps** for this sprint only, in `workspace/COOKBOOK.md` — the exact commands,
-   the files to touch, and the "done when" test. **No code is written in steps 1–3.**
-4. **Build** it, test it against the running stack, and record it.
+1. **Study the references** for this task.
+2. **Pick the relevant points** from `library/development/platform_points.md` that bear on it.
+3. **Write the combined requirement** — the task, in one place.
+4. **Prove the prerequisites flawless FIRST, in code** — not in a document. Fix them before building on
+   top.
+5. **Trace the impact** — what else your change can reach — and update the development plans.
+6. **Execute under the TOTAL quality protocol** — a hostile critic as a **separate agent**, a
+   RED-then-GREEN mutation proof with **md5-verified restores**, a two-route re-measure, a green gate,
+   then the docs.
+
+The older four-step sprint (still the right shape for a fresh feature) was: **1 Research** — what
+already exists for this, in Hermes, in the Starting Kit, in the `V`-register? **2 Validate** — is this
+the best approach, and what would break it? **3 Write the cookbook steps** for this sprint only, in
+`workspace/COOKBOOK.md` — the exact commands, the files to touch, and the "done when" test. **4 Build**
+it, test it against the running stack, and record it.
 
 **5. Before you finish your turn, tell the owner, in plain English:**
 

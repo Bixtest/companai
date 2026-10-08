@@ -382,7 +382,21 @@ a folder, finishes a phase, or makes a decision updates it in the same change.
 A newcomer who cannot orient themselves from this page alone means it is broken —
 fix the page, not the newcomer.
 
-*Last updated: 2026-10-06 — **the second Paperclip pass is done, and it found six things worth
+*Last updated: 2026-10-08 — **the handover and the start prompt are refreshed for a new agent taking
+over as though it had been here since day one.** [`library/development/HANDOVER.md`](library/development/HANDOVER.md)
+is now **revision 11**: its §7 "current state" is re-measured (both repo HEADs, the document counts,
+the running stack, and a new row for the **phase-0 foundation — COMPLETE 2026-10-07** — and for the
+first build slice past it, **`SD-1` Phase 1**), its §8 "done so far" now runs past the `D2-gap`
+close-out to name the Metadata Registry and the `CC-26`/`CC-28`/`CC-29`/`CC-30` items, and its §6c
+now names **every** place the project's memory lives — including that there are **three** log
+locations (one live, one mirror, one superseded) and **57** reusable techniques. A new §3g bullet
+records that a **live Postgres 17** runs on this host, so database behaviour is directly provable and
+must not be assumed unprovable. [`library/development/START-PROMPT.md`](library/development/START-PROMPT.md)
+likewise gains the current context (phase 0 complete, `SD-3` next), the shell/test commands a new
+agent needs, the **rule-10 package workflow**, and the two newest binding rules (never grep a rendered
+diff; correct a falsified premise everywhere it was copied).*
+
+*Earlier, 2026-10-06 — **the second Paperclip pass is done, and it found six things worth
 acting on.** A new study, [`library/paperclip-value-study/`](library/paperclip-value-study/), read
 upstream Paperclip again through a **wider lens** than the agent study: not *"how do AI workers get
 work"* but *"is any of this worth taking, learning from, or deliberately rejecting?"* Its

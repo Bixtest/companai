@@ -7,7 +7,11 @@ learns the order to read things in, and where the handover lives. It does not re
 existing documents — it **points at them and orders them**, so you do not have to guess which
 of a hundred files to open first.
 
-**Written 2026-10-04.**
+**Written 2026-10-04. Last refreshed 2026-10-08** — the handover and the start prompt were updated for
+a new agent taking over as though it had been here since day one (see
+[`HANDOVER.md`](HANDOVER.md) revision 11 and [`START-PROMPT.md`](START-PROMPT.md)). **The one live fact
+— what is being worked on now — is never in this folder's prose; it is the `★ ACTIVE TASK` box at the
+top of [`../../JOURNAL.md`](../../JOURNAL.md).**
 
 ---
 
@@ -135,6 +139,15 @@ measure the parts, not the OS's summary of them.
 
 ## The sprint process — every sprint, in order
 
+> **Current process (2026-10-08): the standing rule 10 in [`WORKING-RULES.md`](WORKING-RULES.md) is the
+> task-package workflow and supersedes this four-step narrative where they differ** — study the
+> references → pick the relevant `platform_points` → write the combined requirement → **prove the
+> prerequisites flawless in code first** → trace the impact and update the plans → execute under the
+> TOTAL quality protocol (hostile critic as a separate agent, RED-then-GREEN mutation proof with
+> md5-verified restores, a two-route re-measure, a green gate, then the docs). **The four steps below
+> remain the right shape for a fresh feature and are kept because they explain *why* the work happens
+> in that order.**
+
 **Owner's instruction, 2026-10-04:** *before working on any sprint, research it and validate
 its plan; check whether Hermes or the Starting Kit already adds value on top of it; then write
 the cookbook steps in detail a junior developer can follow.*
@@ -149,7 +162,7 @@ So every sprint runs in **four steps, and no code is written before step 3:**
 | **3. Write the cookbook steps** | The full step-by-step for **this sprint only** — enough for a junior developer to follow without asking | a new section in [`../../workspace/COOKBOOK.md`](../../workspace/COOKBOOK.md) |
 | **4. Build** | Do the work against the running stack, test it, record it | the change, tested and committed |
 
-**Sprint 0 (`S0`) is done** — the stack was coming up degraded and was fixed (redis exited, no `restart:` policy); all eight containers are now healthy. The four items on the **critical path** — `spec → G-01 → G-02 → G-03` — are complete, and `G-07` (the Widget contract), `G-17` (the AI emits the Business IR) and `G-21` (the request-outcome taxonomy) are built and proven. **Which sprint runs next is not decided here** — it is in the `★ ACTIVE TASK` box at the top of [`../../JOURNAL.md`](../../JOURNAL.md), which always names the item in hand and why it is next.
+**Sprint 0 (`S0`) is done** — the stack was coming up degraded and was fixed (redis exited, no `restart:` policy); all eight containers are now healthy. The four items on the **critical path** — `spec → G-01 → G-02 → G-03` — are complete, and `G-07` (the Widget contract), `G-17` (the AI emits the Business IR) and `G-21` (the request-outcome taxonomy) are built and proven. **Since then the foundation closed:** the `D2-gap` sweep reached **0 unguarded across the 35 enabled modules**, and **phase 0 is COMPLETE (2026-10-07)** — `D0`, `D1`, `D3` and the **Metadata Registry** are built and proven. **The build has started on top of it:** `SD-1` Phase 1 (the S2 structure-change gate) is built and mutation-proven, and the next slice in BUILD-ORDER order is **`SD-3`**. **Which sprint runs next is not decided here** — it is in the `★ ACTIVE TASK` box at the top of [`../../JOURNAL.md`](../../JOURNAL.md), which always names the item in hand and why it is next.
 
 **Why the cookbook is written per sprint, not all up front** — the owner's question, answered:
 detailed steps for code that does not exist yet are **guesses**, because the steps depend on

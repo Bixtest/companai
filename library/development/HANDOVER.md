@@ -14,7 +14,10 @@ written for exactly that person — and this revision is written for an agent th
 continue the development work.** Read it top to bottom once (about 20 minutes), then
 follow §2 to actually get working. Everything else in the project is reachable from here.
 
-**Written 2026-10-05, revision 9 (2026-10-06). Owner: Ramzi. Development machine: `BIXMASERVER` (Windows 10 Pro).**
+**Written 2026-10-05, revision 11 (2026-10-08). Owner: Ramzi. Development machine: `BIXMASERVER` (Windows 10 Pro).**
+**This revision refreshes §7 and §8 against the state measured on 2026-10-08 — the phase-0 foundation
+is complete and four `CC-` items have shipped since the last revision. If you want the newest numbers,
+re-measure them; §7 tells you how to split what was measured from what was quoted.**
 
 > **What we are building, in one line:** a platform that turns a business's plain-language needs into
 > **real working software** — the AI builds a capability once, the platform checks and saves it, and
@@ -33,11 +36,15 @@ follow §2 to actually get working. Everything else in the project is reachable 
 
 ## 0. If you are an agent taking over
 
-**What you are inheriting.** A project that has finished *thinking* and is ready to *build*. The
-analysis is complete, the agent study is complete, the specification has a first draft, and the
-plan is settled. **Nothing is blocked.** What is left is the build, and **the task in hand is named
-in the `★ ACTIVE TASK` box at the top of [`../../JOURNAL.md`](../../JOURNAL.md)** — the one place
-that carries it (step 7, and the owner's instruction of 2026-10-06).
+**What you are inheriting.** A project whose **foundation phase is a real thing** — not a plan. It has
+finished thinking, and it has *started* building: the **phase-0 foundation is complete and proven**
+(the guard engine's registry is populated, the settings table exists, the third guard outcome
+`escalate` shipped, and the **Metadata Registry** — the service that lets the gate *enumerate* objects —
+is built, 2026-10-07). On top of that, the first slice of the permissions gate (**`SD-1`**) is built and
+mutation-proven, and a run of small "`CC-`" items has shipped. **Nothing is blocked.** What is left is
+the build continuing in order, and **the task in hand is named in the `★ ACTIVE TASK` box at the top of
+[`../../JOURNAL.md`](../../JOURNAL.md)** — the one place that carries it (step 7, and the owner's
+instruction of 2026-10-06).
 
 **Six things to do before you touch anything:**
 
@@ -47,17 +54,21 @@ that carries it (step 7, and the owner's instruction of 2026-10-06).
    material in the library is twenty times the size of our own writing, and reading it "for context"
    is how the direction gets buried.
 1. **Read this page, then §2 step 1 — tier A first, then tier B.** Six files fix the direction and the
-   live decisions; seven more are the spine. **Tier C is opened only when the work needs it** — do not
+   live decisions; their spine follows. **Tier C is opened only when the work needs it** — do not
    read the imported material "for context". **And read [`../../LESSONS.md`](../../LESSONS.md) — do not
-   skip the lessons.** Every numbered entry is a mistake this project already made, written in its
-   general form; it is a reading list you act on, not history.
+   skip the lessons.** Every numbered entry (L1–L92 so far) is a mistake this project already made,
+   written in its general form; it is a reading list you act on, not history.
 2. **Set the environment export** (§2 step 2). Every terminal, every session.
 3. **Confirm both repositories are clean** (§2 step 3), and that the stack is up (§2 step 4).
 4. **Read the project's memory** (§6c) — it holds the rules that were learned the hard way, and
-   **50 reusable techniques** the previous sessions wrote from this very project.
+   **57 reusable techniques** the previous sessions wrote from this very project.
 5. **Read the task in hand** — the `★ ACTIVE TASK` box at the top of
-   [`../../JOURNAL.md`](../../JOURNAL.md) (§2 step 7) — and work it in the four-step sprint process
-   (README §"The sprint process") — **no code before step 3.**
+   [`../../JOURNAL.md`](../../JOURNAL.md) (§2 step 7) — and work it as a **package**: the standing
+   **rule 10** in [`WORKING-RULES.md`](WORKING-RULES.md) (study the references → pick the relevant
+   platform_points → write the combined requirement → **prove the prerequisites flawless in code
+   first** → trace the impact and update the plans → execute under the TOTAL quality protocol), and
+   the older narrative four-step sprint process in README §"The sprint process" — **no code before
+   the requirement is written and the prerequisites are proven.**
 
 **What you may not do.** The admin password is the owner's and he types it; you never write it to a
 file or type it into a form. You never `git add -A`. You never take an irreversible action without
@@ -343,6 +354,14 @@ This is not optional and not a preference.
   `app` and `opencode` and not for `mcp`). The second, also-real defect is that the `model` service
   has no embedding model. All 21 tools register and are callable; only semantic search over tools is
   degraded. See [`ARCHITECTURE-model-server-integration.md`](ARCHITECTURE-model-server-integration.md) §6.2.
+- **You may have been told database behaviour is "unprovable on this host". It is not.**
+  A **live Postgres 17** runs in the container **`mercato-postgres-local`** (`pgvector/pgvector:pg17-trixie`),
+  database `open-mercato`, and you can measure against it directly:
+  `docker exec -i mercato-postgres-local psql -U postgres -d open-mercato` (the connection string is in
+  `workspace/starting-kit/apps/mercato/.env:11`). **This is how the 2026-10-08 `CC-30` defect was
+  settled** — the index shape and the `ON CONFLICT` behaviour were measured, not inferred, and two
+  written premises were corrected as a result. **Before you tell the owner something about the database
+  cannot be checked, check it.** (For anything experimental, work in a throwaway schema and drop it.)
 
 ### 3h. The one rule that matters most
 
@@ -564,15 +583,18 @@ off, so this recurs on every restart. It is a **permanent owner step** ([`NEEDS-
 
 ### 6c. Where the project's memory lives — read this, it is not in the repo
 
-The repository holds the *project*. The accumulated **memory and technique** live outside it, and
-a new agent that does not know they exist will re-learn them the hard way:
+The repository holds the *project*. The accumulated **memory and technique** live outside it (and
+partly in a hidden folder *inside* it), and a new agent that does not know they exist will re-learn
+them the hard way. **Paths measured 2026-10-08.**
 
 | What | Where | What is in it |
 |---|---|---|
-| **Project memory (curated)** | `C:\.workbuddy-ai\memory\MEMORY.md` | How to work with this owner, the project in one screen, and the hard rules — learned the hard way |
-| **Daily session logs** | `C:\.workbuddy-ai\memory\2026-10-03.md`, `…-04.md`, `…-05.md` | What each session did, what it measured, and what it left open |
-| **Standing preferences (all projects)** | `~/.workbuddy-ai/MEMORY.md` | The two techniques, how to ask questions, reply language. Archived to `~/.workbuddy-ai/archive/MEMORY-to-2026-09-21.md` |
-| **Reusable techniques — 50 of them** | `~/.workbuddy-ai\skills\` | Each is a hard-won method from *this* project: proving a deploy reached the running process, catching a file that is imported but never committed, measuring before a blanket fix, and so on. **Load the matching one before starting a task it covers** |
+| **Project memory (curated, LIVE)** | `C:\Users\Ramzi\Downloads\companai\.workbuddy-ai\memory\MEMORY.md` | The role and the work protocol, the project in one screen, and the hard rules — learned the hard way. **This is the current one**; it is inside the docs repo and is tracked. |
+| **Daily session logs (LIVE)** | `C:\Users\Ramzi\Downloads\companai\.workbuddy-ai\memory\2026-10-06.md`, `…-07.md`, `…-08.md` | What each session did, what it measured, and what it left open. **The docs-repo copy is the canonical log.** A mirror copy is written under the worktree path below. |
+| **Worktree memory mirror** | `C:\Users\Ramzi\WorkBuddy\Worktrees\companai\master-7662cc8f\.workbuddy-ai\memory\` | The same logs, mirrored by the tooling, plus a `worktree-divergence-*.patch`. Read it if the docs-repo copy is missing. |
+| **Older project memory (superseded)** | `C:\.workbuddy-ai\memory\MEMORY.md` **and** `C:\.workbuddy-ai\memory\2026-10-0{3,4,5}.md` | An **earlier** memory location (last written 2026-10-05). Still readable for the session narrative, but **superseded** by the docs-repo copy above — do not treat it as the current state. |
+| **Standing preferences (all projects)** | `C:\Users\Ramzi\.workbuddy-ai\user-fc59ba67-9898-4f99-81cd-ca8434b72894-personal\MEMORY.md` (beside `IDENTITY.md`, `SOUL.md`, `USER.md`) | The standing preferences that apply to every project, not just this one: the two techniques (**bounce every outcome off a third-person critic**; **reach every answer by two different routes**), how to ask questions, reply language (always English), and the status vocabulary. An older revision is archived at `C:\Users\Ramzi\.workbuddy-ai\archive\MEMORY-to-2026-09-21.md`. |
+| **Reusable techniques — 57 skills** | `C:\Users\Ramzi\.workbuddy-ai\skills\` | Each is a hard-won method written **from *this* project**: proving a deploy reached the running process, catching a file that is imported but never committed, measuring before a blanket fix, resuming an interrupted agent thread, writing a handover a newcomer can follow. **Load the matching one before starting a task it covers** — the list grew from 50 to 57 in the 2026-10-07/08 sessions. |
 
 ### 6d. How to talk to the owner
 
@@ -598,23 +620,25 @@ He has said this more than once, so it is worth repeating:
 
 ## 7. Current state — measured, not assumed
 
-**Two groups below. Group A was measured on 2026-10-05. Group B is quoted from older documents
-and was *not* re-measured — treat it as a starting point, not a fact.**
+**Two groups below. Group A was re-measured on 2026-10-08 (revision 11). Group B is quoted from older
+documents and was *not* re-measured — treat it as a starting point, not a fact.**
 
-**Group A — measured 2026-10-05 (revision 6), except the two repo HEADs, re-measured 2026-10-07 (revision 10):**
+**Group A — measured 2026-10-08 (revision 11), except where a row says otherwise:**
 
 | | |
 |---|---|
-| **Repo 1** (thinking/docs) | `master` — the **D2-gap close-out** is **`6861138`** (the doc/tool commit that settles the two write-performing GETs as a named set-aside class; the handover batch that records it is the commit right after). **Re-measured 2026-10-07** (the previous figure was `a72fdfe`) |
-| **Repo 2** (code) | `main`, HEAD **`7494fbe`** — the commit that wires the `communication_channels` writes, the **last** module of the D2-gap sweep. **Re-measured 2026-10-07** (was `cafe7d6`) |
+| **Repo 1** (thinking/docs) | `master`, HEAD **`073d455`** — the `CC-30` documentation batch (the `custom_entities_storage` upsert fix and its registers). **Re-measured 2026-10-08** (the previous figure was `6861138`). |
+| **Repo 2** (code) | `main`, HEAD **`35d9257`** — `CC-30`, which gives `custom_entities_storage` a real unique constraint for the upsert to conflict on, plus a tenant-scoped read classifier. **Re-measured 2026-10-08** (the previous figure was `7494fbe`). |
 | **Codebase shape** | **21 packages, 1 app** (`apps/mercato`) — a monorepo (Yarn 4.17.1 + Turbo) |
-| **Documentation** | `library/` holds **3,470 markdown files**; `LESSONS.md` 3,116 lines (L1–L92); `JOURNAL.md` 4,673 lines; `COOKBOOK.md` 2,948 lines |
+| **Documentation** | `library/` holds **3,480 markdown files**; `LESSONS.md` **3,118 lines** (L1–L92); `JOURNAL.md` **5,766 lines**; `COOKBOOK.md` **2,948 lines** |
 | **The studies** | analysis programme **complete** (batches 0–12, 13 reports); Paperclip + Hermes study **complete** (11 batches, 3,940 lines, 53 lessons) |
 | **The specification** | **Draft 2** — of its 40 rows, **36 SETTLED · 1 DERIVED · 3 DEFERRED-with-trigger · 0 OPEN — owner**. The gate is passed; only ratification remains |
+| **The foundation (phase 0)** | **COMPLETE (2026-10-07).** The four named guard-engine gaps are built and proven — **`D0`** (the registry is populated from an enabled module, proven by mutation), **`D1`** (the tier/defaults/fallbacks settings table exists — rules are no longer `.ts` code alone), **`D3`** (the guard result has a third outcome, `escalate`, treated as *not performed*), and **`GAP A`'s registry half** (the read-only **Metadata Registry**, code `59ab859` — it answers *what exists · what type · provenance · what depends on it*, and returns a **typed absence** for the other ten blueprint §54 questions). **`D2-gap`** (every write route that reached no guard) also closed: **0 unguarded across the 35 enabled modules**. **What remains of the foundation: `D2-wide`** — 106 call sites still use the `@deprecated` guard pair, **all in parked modules** (recorded, not migrated), and **`GAP A`'s `Resource` envelope half** — a Phase −1 contract, deliberately not built because a type with no consumer is the "contract after the code" failure. |
+| **The first build slice past the foundation** | **`SD-1` Phases 1 is BUILT (2026-10-08, PARTIAL).** The **S2 structure-change gate**: when a new data structure lands (a table, a column, a field-type change), the platform must not apply it until the permissions for the new surface are decided — either a person decides, or the default applies (full grant to the superadmin role **and the permission records created**). Its decision core (`structure-change-gate.ts`), its hook (two `MutationGuard`s on the entities create path), and its **enforcement** (`permission-decision-grant.ts`, which writes the gate's `defaulted` records into the role's `role_acls.features_json`) are built, tested and mutation-proven across **every create path**, including the batch route, the shared primitive `ensureCustomFieldDefinitions`, the `add-field` CLI, the two HTTP reactivation routes, the entity-install primitive and all three field-type-change sites. **The remaining paths are scheduled** in [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md) (`CC-20`, `CC-23`, `CC-25`, `CC-27`). Plan: [`PLAN-SD-1.md`](PLAN-SD-1.md). |
 | **The runtime boundary (B-05)** | **DECIDED 2026-10-05 by the owner.** One product, one repository, one deployment, one interface (ours), with Hermes as a **supervised private runtime process behind the internal port**; Hermes is **headless**. Reasoning in [`ARCHITECTURE-hermes-integration.md`](ARCHITECTURE-hermes-integration.md) §11. The Hermes **profile** topology is deferred with the trigger **the agent gateway** |
 | **The model default (item 13)** | **DECIDED 2026-10-05 by the owner: per-tenant policy is the destination, cloud-first is the interim.** It turns three pieces of work from *nice* to *required* — the model registry, the Hermes **agent / persona / profile** mapping, and platform-managed local models. Reasoning in [`ARCHITECTURE-model-server-integration.md`](ARCHITECTURE-model-server-integration.md) §9 |
-| **The running stack** | **8 containers up, all healthy** (app, mcp, hermes, model, opencode, postgres, redis, meilisearch); `/login` answers **200**. **Re-measured 2026-10-06** — the earlier "8 containers up" was a **count that hid a dead container**: `redis` had exited (255) and `mcp` was unhealthy behind it, yet `docker ps` still showed eight rows. Fixed and proven 2026-10-06 (see [`../../workspace/COOKBOOK.md`](../../workspace/COOKBOOK.md) §"Sprint 0 — the re-run") |
-| **The local database** | **Clean and complete** — 3 users, 1 tenant, 1 organisation, 5 feature toggles, 5 `action_logs` rows. Rebuilt from scratch on the fixed image 2026-10-05, init ran green |
+| **The running stack** | **8 containers up, all healthy** (app, mcp, hermes, model, opencode, postgres, redis, meilisearch) — **re-measured 2026-10-08** (`docker ps`), all up ~19 hours. The platform's own Postgres 17 (`mercato-postgres-local`) is **live**, so **database behaviour is directly provable on this host** (see §3g, and [`../../workspace/COOKBOOK.md`](../../workspace/COOKBOOK.md)). *Note the trap in the count itself: on 2026-10-06 `docker ps` showed eight rows while `redis` had exited and `mcp` was unhealthy behind it — **eight rows is not eight healthy**, so read the `Status` column, not the line count.* |
+| **The local database** | **Rebuilt clean 2026-10-05** (3 users, 1 tenant, 1 organisation, 5 feature toggles, 5 `action_logs` rows; init ran green). Used in the 2026-10-08 `CC-30` work as a **live measurement target** — the `custom_entities_storage` index shape and the `ON CONFLICT` behaviour were measured against it, not inferred. |
 | **Open blockers** | **3** — B-05 (OpenCode is load-bearing), B-16 (no embeddings endpoint), B-17 (no audit trail of agent tool calls). **None stops the build** (see [`BLOCKERS.md`](BLOCKERS.md)). **B-05's design face is now closed** (the boundary is decided); what stays open is *when* OpenCode goes, tracked as **N-8**. **B-16 was root-caused 2026-10-05** — it is two defects, the first being a missing `OPENAI_BASE_URL` on the `mcp` service |
 | **Waiting on the owner** | **3** — Coolify password (item 5), Docker Desktop auto-start (item 6), the ISO (item 7, optional). **Item 13, the model layer's long-term default, was decided by the owner on 2026-10-05** (per-tenant policy as the destination, cloud-first as the interim), so it is no longer waiting |
 
@@ -622,8 +646,8 @@ and was *not* re-measured — treat it as a starting point, not a fact.**
 
 | | |
 |---|---|
-| **Starting Kit milestone** | *~80% done; the governance layer is complete and has screens.* **Source:** [`../../where_we_left.md`](../../where_we_left.md) — **a 2026-08-13 snapshot, self-labelled out of date** |
-| **Last gate run** | *Green, `Cached: 0`.* **But the two status documents disagree on the test count** (`where_we_left.md` says 12,924; `INDEX.md` says 12,898, both dated 2026-08-13). **Do not quote either — re-run the gate and read the number yourself.** |
+| **Starting Kit milestone** | *~80% done; the governance layer is complete and has screens.* **Source:** [`../../where_we_left.md`](../../where_we_left.md) — **a 2026-08-13 snapshot, self-labelled out of date.** **Still true as of 2026-10-08, but do not treat the "80%" as current** — the 2026-10-07/08 work (phase 0 complete, `SD-1` Phase 1) is not in it. |
+| **Last gate run** | *Green, `Cached: 0`.* **But the two status documents disagree on the test count** (`where_we_left.md` says 12,924; `INDEX.md` says 12,898, both dated 2026-08-13). **Do not quote either — re-run the gate and read the number yourself.** (For orientation only: the `core` package alone measured **628 suites / 5,463 tests / 0 failures** on 2026-10-08, run as part of `CC-30`. That is **not** the full gate figure — the full gate spans both packages and the front end.) |
 | **Hosting VM** | *Built and proven; directory-based hosting works, proven over public HTTPS.* **Source:** the hosting runbooks |
 
 ### What is **proven** vs **not proven**
@@ -634,9 +658,21 @@ and was *not* re-measured — treat it as a starting point, not a fact.**
   (Settings → Authority → Approvals).
 - Hermes connects to the platform's MCP and discovers all 21 tools; the local model answers with
   a 65,536-token context.
-- The local stack runs: **8 containers, all healthy** (re-verified 2026-10-06 after the redis
-  restart-policy fix), the app serving on `http://localhost:3000`, loopback only, on a database
-  that initialised cleanly.
+- The local stack runs: **8 containers, all healthy** (re-verified 2026-10-08), the app serving on
+  `http://localhost:3000`, loopback only.
+- **The phase-0 foundation is real, not a plan** (2026-10-07): the guard registry is populated and
+  delivers guards from an enabled module (D0, proven by mutation); the tier/defaults settings table
+  exists (D1); the guard result has a third outcome `escalate` (D3); and the **Metadata Registry**
+  answers what exists / what type / provenance / what depends on it (code `59ab859`).
+- **The S2 gate's enforcement writes what it decides** (2026-10-08, `SD-1` Phase 1): the gate's
+  `defaulted` records are merged into the role's `role_acls.features_json` **atomically** (one SQL
+  `UPDATE`, `jsonb ||` deduped), proven against **live Postgres 17** with a concurrent-session test
+  **and** a negative control (CC-16).
+- **Database-level behaviour is measurable on this host** (2026-10-08, `CC-30`): the live
+  `mercato-postgres-local` was used to prove the `custom_entities_storage` upsert fix end to end —
+  a plain `ON CONFLICT` resolves against a plain unique index but **never** against a partial one;
+  two tenants sharing an organisation id produce **2 rows**, not 1; a global-scope duplicate `INSERT`
+  is rejected. The forensic's premises were corrected by these measurements twice (CC-28, CC-30).
 - Directory-based hosting on the VM: each hostname serves its own directory; a file in one
   returns **404** on the other; a host-side edit appears live with no rebuild; the whole chain
   fetched from the laptop over public HTTPS (`200`, certificate valid).
@@ -649,6 +685,12 @@ and was *not* re-measured — treat it as a starting point, not a fact.**
 - A **real reboot** of the VM, and the **visitor's IP reaching the app**.
 - The **GoDaddy → Cloudflare nameserver move** — the only thing still blocking the real domain,
   and it is the owner's action.
+- **`D2-wide`** — the 106 parked-module call sites that still bypass the guard registry have **not**
+  been migrated; they are recorded, not fixed.
+- **`SD-1`'s remaining paths** — the enforcement consumer for a custom field's records (`CC-20`), the
+  unauthorised-decision actor (`CC-25`), the create-branch double-insert (`CC-23`) and the
+  agent ↔ AI-user binding (`CC-27`) are **scheduled, not built** (see
+  [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md)).
 
 ---
 
@@ -657,13 +699,27 @@ and was *not* re-measured — treat it as a starting point, not a fact.**
 - **What is left, in order** → [`BACKLOG.md`](BACKLOG.md). One roadmap. Read §"The list" and
   nothing else for *"what is left"*. **The task in hand is not stated here** — it is in the
   **`★ ACTIVE TASK`** box at the top of [`../../JOURNAL.md`](../../JOURNAL.md) (owner's instruction,
-  2026-10-06), and the order it comes from is [`BUILD-ORDER.md`](BUILD-ORDER.md). **Done so far:**
-  the four-item critical path (`P0-spec`, `G-01`, `G-02`, `G-03`), plus `G-07`, `G-17` and `G-21`, the
-  foundation items `D0`, `D1` (`S0` also done), and **`D2-gap` COMPLETE** (the write-verb sweep closed at
-  **0 unguarded across all 35 enabled modules**, 2026-10-07). **The only remaining guard work is `D2-wide`**
-  — 106 call sites still bypass the guard registry, **all in parked modules** (every enabled module is
-  retired; the rest are parked and recorded, not migrated).
+  2026-10-06), and the order it comes from is [`BUILD-ORDER.md`](BUILD-ORDER.md).
+  **Done so far, in order:** the four-item critical path (`P0-spec`, `G-01`, `G-02`, `G-03`), plus
+  `G-07`, `G-17` and `G-21`; the foundation items `D0`, `D1` (`S0` also done); the foundation's
+  `D3` (the third guard outcome, `escalate`); **`D2-gap` COMPLETE** (the write-verb sweep closed at
+  **0 unguarded across all 35 enabled modules**, 2026-10-07); **the Metadata Registry** (`GAP A`'s
+  registry half, code `59ab859`) — **so phase 0 IS COMPLETE (2026-10-07)**; and the first build slice
+  past it, **`SD-1` Phase 1** (the S2 structure-change gate's decision core, hook and **enforcement**),
+  built and mutation-proven 2026-10-08. A run of small items shipped alongside it — **`CC-26`** (the
+  "AI user" tick in the API-key form), **`CC-28`** (the custom-record `updated_at` read-backs
+  tenant-scoped), **`CC-29`** (a test-store reset so every suite starts clean), and **`CC-30`** (the
+  `custom_entities_storage` upsert given a real unique constraint, plus a tenant-scoped read
+  classifier) — all 2026-10-08.
   **What is left to do, in one place, is `BACKLOG.md`; what is being done *now* is the JOURNAL box.**
+  **Still open in the foundation:** **`D2-wide`** — 106 call sites still bypass the guard registry,
+  **all in parked modules** (every enabled module is retired; the rest are parked and recorded, not
+  migrated); and **`GAP A`'s `Resource` envelope half** — a Phase −1 contract, deliberately unbuilt.
+  **Still open in `SD-1`** (each scheduled in [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md)):
+  **`CC-20`** (a custom *field*'s records have no enforcement consumer — blocked on `G-04`), **`CC-23`**
+  (the create-branch double-insert — needs a migration), **`CC-25`** (the decision actor's permission —
+  a build), **`CC-27`** (the agent ↔ AI-user binding — needs `AH-1`). The **next slice in BUILD-ORDER
+  order** is **`SD-3`** (the tier mapping becomes a superadmin setting).
   **The "one of three endings" is the owner's core features_pack (2026-10-06):** a prompt can end
   as a **one-time answer** (nothing saved), a **model proposal** (the prompt needs new structure — a
   field, an entity, a whole new service like LMS/CRM — and goes through the same validate → impact →

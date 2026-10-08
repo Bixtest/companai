@@ -12,13 +12,15 @@ away, who needs the end game and the current state in a few minutes.
 the single place that says what is being worked on **now** is the **`★ ACTIVE TASK` box at the top of
 [`../../JOURNAL.md`](../../JOURNAL.md)** (owner's instruction, 2026-10-06).
 
-**Written 2026-10-05.** Owner: Ramzi.
+**Written 2026-10-05. Refreshed 2026-10-08** — the handover and start prompt were updated for an agent
+taking over as though it had been here since day one (see [`HANDOVER.md`](HANDOVER.md) revision 11).
+Owner: Ramzi.
 
 ---
 
 ## 1. If you have five minutes
 
-Read these six, in this order. They tell you what the product is, how the work is done, and
+Read these seven, in this order. They tell you what the product is, how the work is done, and
 where it stands — and how we got here.
 
 | # | Read | Why |
@@ -29,6 +31,7 @@ where it stands — and how we got here.
 | 4 | [`JOURNEY.md`](JOURNEY.md) | **The journey told forward** — Act 0 to today: the idea, what has been built and proven phase by phase, and the through-lines. Read this to understand the *why* behind the decisions, as if you had been here since day one |
 | 5 | [`BACKLOG.md`](BACKLOG.md) | **What is left**, in order, one line each. The one roadmap |
 | 6 | [`../../workspace/COOKBOOK.md`](../../workspace/COOKBOOK.md) | **How the work is done** — read before touching code |
+| 7 | [`WORKING-RULES.md`](WORKING-RULES.md) | **The owner's standing rules in one page** — including **rule 10**, the task-package workflow every task now follows |
 
 **Handing the work to an agent?** Paste [`START-PROMPT.md`](START-PROMPT.md). It is the first
 message for a fresh session: what to read and the rules it may not break. For **what to do now**,
