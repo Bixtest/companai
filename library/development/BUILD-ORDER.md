@@ -1078,11 +1078,13 @@ one page, each with a named home. Details: [`BLUEPRINT-GAP-ANALYSIS.md`](BLUEPRI
    covered** — the **batch** definitions route (the one the field-management UI mostly uses) runs the same
    gate at the route, because the registry cannot see the columns it creates; the **non-request** field paths
    (module install / seeds / the `add-field` CLI) run it in the shared primitive
-   `ensureCustomFieldDefinitions`; the two HTTP **reactivation** routes (`api/definitions.ts` +
+   `ensureCustomFieldDefinitions`;    the two HTTP **reactivation** routes (`api/definitions.ts` +
    `api/definitions.restore.ts`) gate a tombstoned field coming back, from the before-state at the route;
-   and the custom-entity install primitive `upsertCustomEntity` (`entities/lib/register.ts`) gates a custom
-   **entity** appearing, before the row, with the live `entities.records.<id>` records.
-   **The headline limits are all closed.** Still open: the field-type-change case, the lock-free
+   the custom-entity install primitive `upsertCustomEntity` (`entities/lib/register.ts`) gates a custom
+   **entity** appearing, before the row, with the live `entities.records.<id>` records; and all three field
+   write sites gate a **field-type change** (`existing.kind !== incoming.kind` — the before-state exists at
+   each write site, so the shared guard contract was not touched).
+   **The headline limits are all closed.** Still open: the lock-free
    merge, the batch's reserved-key check, an enforcement consumer for a *field*'s records, and the two
    deferred consumers (`SD-4`, `G-04`) — each scheduled in [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md)
    (plan [`PLAN-SD-1.md`](PLAN-SD-1.md), limits §10).

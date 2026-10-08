@@ -200,6 +200,33 @@ the existing guards — not a per-route hand-wired call.
 | `packages/core/src/modules/entities/lib/register.ts` **(modified)** | `upsertCustomEntity` gained the before-state gate: `lands` computed from `ent`/`createOnly`/`dryRun` before any write; `evaluateStructureChange([entityDefinitionSurface(entityId)])`; `refused` → **throw**; `writeFieldPermissionGrant(tem, tenantId, decision, 'the new custom entity' \| 'the re-activated custom entity')` after each `flush` (both the create branch and the update branch). Imports `entityDefinitionSurface` (`../data/guards`) and `writeFieldPermissionGrant` (`./field-definitions`) — no import cycle (`guards.ts` and `field-definitions.ts` do not import `register.ts`). |
 | `packages/core/src/modules/entities/lib/__tests__/register.sd1.test.ts` **(new)** | 7 tests: a create is gated and granted after the flush (records use the live `entities.records.<id>` prefix); a reactivation is gated and granted; an update that stays active is not gated; a `createOnly` sync is not gated; **a `createOnly` sync of a malformed surface does not even evaluate the gate** (the non-vacuous form — see §9.6); a dry run is not gated; a malformed surface id refuses and creates nothing (fail-closed). |
 
+### 7.6 The field-type-change case — step 2 of §10, built 2026-10-08 (CC-4)
+
+**What it is.** A **re-typed** field (`text` → `integer`, `text` → `reference`, …) is a permission surface **changing shape**: what it can hold, and therefore what a permission decision about it can mean, becomes different. It is neither a create nor a reactivation, so neither the create-only guard nor the reactivation clause sees it. CC-4 closes it on every path a re-type can travel.
+
+**The stated blocker was measured, and it was only half true.** CC-4's row read *"detecting it needs the before-state, which the guard input does not carry."* The second half is correct — `MutationGuardInput` carries only `mutationPayload`, so a **guard** cannot see the old `kind`. But the first half is **false**: the before-state **exists at every write site that can re-type a field** — the single-route `def` (loaded before the write), the batch route's `defByKey` (prefetched), and the primitive's `existingByKey` (found inside the transaction). So CC-4 is **startable at the route/primitive layer**, exactly like CC-21 and CC-22, **without touching the shared guard contract** — and it needed no new input type. (This is rule 10d doing its job: proving the premise before building on it.)
+
+**The predicate, one clause at each site.** A re-type is `existing && active && existing.kind !== incoming.kind`. The clause is added **beside** the reactivation clause (never replacing it), under the **same** `createOnly`/active guards, so the two cannot drift:
+
+| Site | Predicate |
+|---|---|
+| `field-definitions.ts` (the shared primitive) | `retypes = !!existing && !scope.createOnly && isActiveColumn(existing) && existing.kind !== field.kind` — folded into `lands = !existing \|\| reactivates \|\| retypes` |
+| `definitions.ts` (single POST) | `retypesField = !!def && isActiveColumn(def) && def.kind !== input.kind`; `changesSurface = reactivatesField \|\| retypesField` |
+| `definitions.batch.ts` (batch POST) | the `newKeys` predicate gains `if (!isActiveColumn(existing)) return true; return existing.kind !== d.kind;` |
+
+**The refusal message and the grant label name the real event.** Where a single predicate now covers two cases, the message and the log label pick the right word (`'re-typed'` vs `'re-activated'`; `'the re-typed custom field'` vs `'the re-activated custom field'`), so an operator reading the log sees which change was gated — a re-type is not reported as a reactivation.
+
+**Fail-closed, and two-phase, unchanged.** Decided **before** the write (a refusal stops the landing — 422 at the routes, a throw in the primitive), the default's records written **after** the flush (the surface must exist first). Same `evaluateStructureChange` + `writeFieldPermissionGrant` as every other path.
+
+| File | What it is |
+|---|---|
+| `packages/core/src/modules/entities/lib/field-definitions.ts` **(modified)** | The shared primitive's `newSurfaces` predicate gains the `retypes` clause; `lands = !existing \|\| reactivates \|\| retypes`. A re-typed key is now a surface the gate must decide, so the primitive refuses (throws) before the loop and grants after the flush. |
+| `packages/core/src/modules/entities/api/definitions.ts` **(modified)** | The single POST's `changesSurface = reactivatesField \|\| retypesField`; the refusal branch and the grant label branch on `retypesField ? 're-typed' : 're-activated'`. |
+| `packages/core/src/modules/entities/api/definitions.batch.ts` **(modified)** | The batch route's `newKeys` predicate adds `existing.kind !== d.kind` for an active existing row, so a re-typed key is gated and granted exactly like a new one. |
+| `packages/core/src/modules/entities/api/__tests__/definitions.reactivation.sd1.test.ts` **(modified)** | +2 tests: a field-type change on an active row **is** gated and granted after the flush; an active row whose `kind` is **unchanged** is **not** gated. |
+| `packages/core/src/modules/entities/lib/__tests__/field-definitions.sd1.test.ts` **(modified)** | +2 tests: a field-type change on an active row is gated (primitive); a field-type change under `createOnly` is **not** gated (the sync skips updates, so it never re-types). |
+| `packages/core/src/modules/entities/api/__tests__/definitions.batch.sd1.test.ts` **(modified)** | The stale test *"does not gate a save that creates no column (an existing key is an update)"* sent a **type change** (`key:'alpha'`, `kind:'integer'` against an active `text` row) — which CC-4 now correctly gates. Renamed and corrected to a **same-kind** update, and +2 CC-4 tests (a type change is gated; a same-kind update of an active row is not). This was a **real, correct behaviour change** the old test was encoding wrongly. |
+
 ## 8. Verification results (measured, not assumed)
 
 ### 8.1 The decision core (2026-10-08, first slice)
@@ -311,9 +338,22 @@ the existing guards — not a per-route hand-wired call.
 - **No CRLF, no trailing hard-breaks** introduced in the two touched code files (checked on each).
 - **Files, md5 at the verified revision:** `register.ts` `f5584dc257ad0cb4a3e4ca4415538c41` · `register.sd1.test.ts` (new).
 
-## 9. The hostile-critic passes and mutation-found defects — twenty real defects found
+### 8.7 The field-type-change case (2026-10-08, seventh slice — CC-4)
 
-Each slice got its **own separate hostile-critic agent** (the standing rule), demanding a command + output for every claim — **except CC-21**, where the mutation pass itself found the one weakness (§9.6). The tally: **§9.1** 5 · **§9.2** 5 · **§9.3** 4 · **§9.4** 4 · **§9.5** 1 · **§9.6** 1 = **20**, each **fixed** or **named** (never left silent).
+- **New tests:** 6 (2 in `definitions.reactivation.sd1.test.ts`, 2 in `field-definitions.sd1.test.ts`, 2 in `definitions.batch.sd1.test.ts`). **SD-1's tests now total 81.**
+- **RED-then-GREEN mutation proof: 3 disjoint mutations, one per write site, 3/3 RED**, each restored and **md5-verified byte-identical** (`md5sum -c`, bytes I/O so the LF→CRLF trap cannot hide a bad restore):
+  | # | Mutation | Result |
+  |---|---|---|
+  | M1 | primitive: drop the `retypes` clause (only "no row" / reactivation are new) | RED — 1 failed (a re-typed active column lands ungated) |
+  | M2 | single route: drop the `retypesField` clause | RED — 1 failed (a re-typed active column lands ungated) |
+  | M3 | batch route: drop the `existing.kind !== d.kind` test | RED — 1 failed (a re-typed active key lands ungated) |
+- **Suites:** `core` `tsc --noEmit` **exit 0**. The three targeted suites (the two route files + `field-definitions` + `definitions.batch.sd1`) **33/33**. `entities` module **40 suites / 302 tests, 0 failures**. Whole `core` package **625 suites / 5402 tests, 0 failures** (net +6 over CC-21's 5396 = exactly the six new CC-4 tests; no regression, no suite count change).
+- **No CRLF, no trailing hard-breaks** introduced in the three touched code files (checked on each).
+- **Files, md5 at the verified revision:** `field-definitions.ts` `f321c2954152ab4bc9220e1e4ad7fc53` · `definitions.ts` `4adecf33ea98e0b13c7e70023d205c9f` · `definitions.batch.ts` `850292cf7e42d31105e5d2a22fa18170`.
+
+## 9. The hostile-critic passes and mutation-found defects — twenty-two real defects found
+
+Each slice got its **own separate hostile-critic agent** (the standing rule), demanding a command + output for every claim — **except CC-21 and CC-4**, where the mutation pass / premise-measurement itself found the weakness (§9.6, §9.7). The tally: **§9.1** 5 · **§9.2** 5 · **§9.3** 4 · **§9.4** 4 · **§9.5** 1 · **§9.6** 1 · **§9.7** 2 = **22**, each **fixed** or **named** (never left silent).
 
 ### 9.1 The decision core (2026-10-08, first slice)
 
@@ -391,13 +431,25 @@ The mutation proof found this one **before** any critic did — which is the poi
 
 **No separate hostile-critic agent was run for this slice's *code*** — the change is 20 lines mirroring an already-criticised primitive (`ensureCustomFieldDefinitions`), and the mutation pass caught the one test-weakness. The next full hostile-critic pass is scheduled for a slice with new logic (CC-4's before-state).
 
+### 9.7 The field-type-change case (2026-10-08, seventh slice — CC-4)
+
+The finding here is a **scope correction made before any code was written** (rule 10d), not a critic finding. CC-4's row asserted the slice was **blocked** — *"detecting it needs the before-state, which the guard input does not carry."* The second clause is true; the first — the implication that the slice cannot start — is **false**, and measuring it changed the plan:
+
+| # | Finding (as the measurement proved it) | Resolution |
+|---|---|---|
+| 1 | **CC-4 was not blocked.** The before-state the guard lacks is already present at **every write site that can re-type a field**: `def` (single route, loaded pre-write), `defByKey` (batch route, prefetched), `existingByKey` (the primitive, found in-transaction). So the re-type is detectable at the **route/primitive layer**, the same layer CC-21/CC-22 gated — and CC-4 needed **no** new guard input type and **no** change to the shared guard contract. | **FIXED by building it that way** — the clause runs at all three sites (§7.6). The stale "blocked" wording in §10 item 2 was **corrected**, not inherited. |
+
+**A second finding, from the build itself — a test that was encoding the wrong behaviour.** The batch test *"does not gate a save that creates no column (an existing key is an update)"* sent `key:'alpha'`, `kind:'integer'` against an active `kind:'text'` row. That is a **type change**, which CC-4 now correctly gates — so the old test failed. Diagnosed by a **second route** (the request genuinely is a re-type, per the row's own `kind`), the test was **corrected** to a same-kind update and two explicit CC-4 tests added. The lesson is the ordinary one: a regression test that pins a *wrong* behaviour is not a regression — it is a mis-statement the change corrects.
+
+**No separate hostile-critic agent was run for this slice's *code*** — the change is three one-clause predicates, each with a mutation that goes RED. The next full hostile-critic pass is scheduled for **CC-16** (the atomic merge), which carries new concurrency logic.
+
 ## 10. Honest limits — **SD-1 is PARTIAL, not done**
 
-The standard is: a new structure must not land until permissions are decided **and the records are created**. **Both halves now exist on every create path — HTTP *and* non-request:** the gate decides (pure, fail-closed) and the default's records are written into the tenant's grant role through the existing store — from the guard's `afterSuccess` on the single-definition path, from the route itself on the batch path (§7.2), from the shared primitive `ensureCustomFieldDefinitions` + the `add-field` CLI on the non-request paths (§7.3), the two HTTP reactivation routes (§7.4), and the shared primitive `upsertCustomEntity` on the custom-entity install (§7.5). **The headline limits are closed:** *"a gate that decides but does not record is not yet a gate"*, *"the path the field-management UI mostly uses was ungated"*, *"the module-install / CLI paths are ungated"*, *"the HTTP reactivation paths are ungated"*, and *"a custom entity created by the module install is ungated"*. What is **not** built:
+The standard is: a new structure must not land until permissions are decided **and the records are created**. **Both halves now exist on every create path — HTTP *and* non-request — and on every *change* to an existing structure that can re-shape a surface (reactivation, re-type):** the gate decides (pure, fail-closed) and the default's records are written into the tenant's grant role through the existing store — from the guard's `afterSuccess` on the single-definition path, from the route itself on the batch path (§7.2), from the shared primitive `ensureCustomFieldDefinitions` + the `add-field` CLI on the non-request paths (§7.3), the two HTTP reactivation routes (§7.4), the shared primitive `upsertCustomEntity` on the custom-entity install (§7.5), and all three field write sites on a re-type (§7.6). **The headline limits are closed:** *"a gate that decides but does not record is not yet a gate"*, *"the path the field-management UI mostly uses was ungated"*, *"the module-install / CLI paths are ungated"*, *"the HTTP reactivation paths are ungated"*, *"a custom entity created by the module install is ungated"*, and *"a field-type change is not gated"*. What is **not** built:
 
 1. ✅ **The HTTP *reactivation* paths — GATED 2026-10-08 (CC-22).** Was: a tombstoned field is brought back by the single-definition route (`operation: def ? 'update' : 'create'`) and the restore route (`operation: 'custom'`) — both `'update'`, which the create-only guard does not see. **Now:** both routes detect the reactivation from the before-state (`!isActiveColumn(def) && (input.isActive ?? true)`), run the same `evaluateStructureChange` on the same `fieldDefinitionSurface`, refuse fail-closed (422, nothing written), and write the default's records after the flush through `writeFieldPermissionGrant`. **Shape chosen: gate at the route, not relabel `'create'`** — that would drop the bridged legacy guard, the same reason CC-2 rejected it. 9 tests; 4 mutations RED-then-GREEN. *(Section §7.4 below.)*
 1b. ✅ **The custom *entity* install path — GATED 2026-10-08 (CC-21).** Was: `install-from-ce.ts` → `upsertCustomEntity` created a `CustomEntity` row with no gate; its records *are* the live ones (`entities.records.<id>`). **Now:** the primitive detects the new-or-reactivated surface from its own before-state, runs `evaluateStructureChange([entityDefinitionSurface(entityId)])`, throws fail-closed on a refusal (nothing created), and writes the default's records after the flush through the same `writeFieldPermissionGrant`. **Shape chosen: gate at the primitive** — the single choke point, so no call site is forgotten (the same reason CC-3 gated `ensureCustomFieldDefinitions`). 7 tests; 5 mutations RED-then-GREEN. *(Section §7.5.)*
-2. **A field-type change is not gated.** Detecting it needs the before-state, which the guard input does not carry. **(CC-4)**
+2. ✅ **A field-type change — GATED 2026-10-08 (CC-4).** Was: a re-typed field (`text`→`integer`, `text`→`reference`, …) landed with no gate, because a re-type is neither a create nor a reactivation and the guard input carries no before-state. **Now:** all three write sites that can re-type a field detect it from the before-state they already hold (`existing.kind !== incoming.kind`, under the same active/`createOnly` guards as CC-3/CC-22), run the same `evaluateStructureChange`, refuse fail-closed (422 at the routes / throw in the primitive, nothing written), and write the default's records after the flush. **The stated blocker was measured and was only half true** — the before-state the *guard* lacks already exists at every *write site*, so the clause lives at the route/primitive layer and the shared guard contract was **not** changed. 6 tests; 3 mutations RED-then-GREEN. *(Section §7.6.)*
 3. **The structural block is a single record** (`<prefix>.structure`). The per-verb, per-level grammar (add/edit/remove/reference × straight/review/approval/never) is **`SD-4`'s**. **(CC-5)**
 4. **The data-axis row shape is `G-04`'s.** **(CC-6)**
 5. **The catalogue is in-process** for recorded (runtime) surfaces. A durable row is deferred — a migration is **unprovable on this host** (the unit suites mock the EntityManager; `document.ts:22-28` records the same reasoning for the Function row). **Trigger: `G-04`.** **(CC-7)**
@@ -408,10 +460,9 @@ The standard is: a new structure must not land until permissions are decided **a
 10. **A global surface lands with no records.** `writeFieldPermissionGrant` skips when `tenantId` is null: a global custom field/entity has no single tenant to grant in. Reported at `debug` and stated here — not a silent skip, but a real gap on the literal reading of *"nothing is ever invisible"*. Closing it needs a per-tenant fan-out, which is a design of its own.
 11. **A refusal on the install path can leave a partial install.** `install-from-ce` commits the `CustomEntity` before the field sync, so a malformed declared key would throw after the entity had committed. **Unreachable today** (every declared key in the tree is snake_case — measured); a throw is the correct fail-closed response to a defective declaration. Named, not hidden. (CC-21 adds a *second* such throw point: the entity gate itself throws before the row — but that throw is **before** any commit, so it leaves nothing.)
 
-**Status: PARTIAL.** The pure core is done, tested and mutation-proven; the hook is wired and fail-closed; **the write that turns the decision into an enforcement is built and tested on every create path — both HTTP create paths (single and batch), the HTTP reactivation paths (single + restore), the custom-entity install primitive, and the non-request field paths (module install / seeds / CLI)**. What remains is the type-change case, the concurrency of the merge, the batch key-validation gap, an enforcement consumer for the field records, and the two deferred consumers (`SD-4`, `G-04`). SD-1 stays the active task. **Every remaining item is scheduled in [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md).**
+**Status: PARTIAL.** The pure core is done, tested and mutation-proven; the hook is wired and fail-closed; **the write that turns the decision into an enforcement is built and tested on every path a field or entity surface can land or re-shape by — both HTTP create paths (single and batch), the HTTP reactivation paths (single + restore), the custom-entity install primitive, the non-request field paths (module install / seeds / CLI), and the field re-type case on all three write sites**. What remains is the concurrency of the merge, the batch key-validation gap, an enforcement consumer for the field records, and the two deferred consumers (`SD-4`, `G-04`). SD-1 stays the active task. **Every remaining item is scheduled in [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md).**
 
 ### The next slice (in order)
-1. Field-type-change detection (needs the before-state). **(CC-4)**
-2. Make the ACL merge atomic (the concurrency fix). **(CC-16)**
-3. Restore the reserved-key / key-shape checks on the batch path. **(CC-18)**
+1. Make the ACL merge atomic (the concurrency fix). **(CC-16)**
+2. Restore the reserved-key / key-shape checks on the batch path. **(CC-18)**
 

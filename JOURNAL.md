@@ -65,25 +65,27 @@ before the create and granting after the flush — **and run at the two HTTP *re
 re-appearing, gated from the before-state and granted after the flush — CC-22, 2026-10-08) — **and run in
 the entity-install primitive `upsertCustomEntity`** (`entities/lib/register.ts`: a custom **entity**
 appearing is a surface appearing, gated before the row and granted after the flush, with the **live**
-`entities.records.<id>` records — CC-21, 2026-10-08).
-**75 SD-1 tests; 33 mutations RED-then-GREEN across six slices, each restore md5-verified; `shared`
-197/2329 — 8 fail in the one suite of CC-19 (a host process-creation failure, not code), `core` 625/5396,
-typecheck 0.** **Five** hostile-critic passes plus one mutation-found defect (twenty real defects) — all
-fixed or named (`PLAN-SD-1.md` §9).
+`entities.records.<id>` records — CC-21, 2026-10-08) — **and run at all three field write sites on a
+*type change*** (`existing.kind !== incoming.kind`: a re-typed field is a surface changing shape; the
+before-state exists at each write site, so the shared guard contract was not touched — CC-4, 2026-10-08).
+**81 SD-1 tests; 36 mutations RED-then-GREEN across seven slices, each restore md5-verified; `shared`
+197/2329 — 8 fail in the one suite of CC-19 (a host process-creation failure, not code), `core` 625/5402,
+typecheck 0.** **Five** hostile-critic passes plus two mutation/premise-found defects (twenty-two real
+defects) — all fixed or named (`PLAN-SD-1.md` §9).
 
 **It is still PARTIAL — but ALL headline limits are closed.** A gate that decides but does not record was
 not yet a gate; it now records. The path the field-management UI mostly uses — the **batch** route — was
 ungated; it now runs the same gate. The **non-request** field paths (module install / seeds / the
 `add-field` CLI) were ungated; they now run it in the shared primitive. The **HTTP reactivation** paths
-(single + restore) were ungated; they now gate at the route. And a **custom entity created by the module
-install** was ungated; it now gates at the primitive. What remains is **the type-change case and the
-deferred consumers** — every one scheduled in
+(single + restore) were ungated; they now gate at the route. A **custom entity created by the module
+install** was ungated; it now gates at the primitive. And a **field-type change** was ungated; it now
+gates at all three write sites. What remains is **the deferred consumers and the merge's concurrency** —
+every one scheduled in
 [`COMPLETION-CALLBACKS.md`](library/development/COMPLETION-CALLBACKS.md):
-1. **Field-type-change detection** — needs the before-state, which the guard input does not carry. **(CC-4)**
-2. **Make the ACL merge atomic** — it is a lock-free read-modify-write today. **(CC-16)**
-3. **Give the batch path its reserved-key check** — measured: a batch POST of `key:'id'` returns 200 where the single POST refuses. **(CC-18)**
-4. **Make the `decided` branch reachable** — today only the rule fires, never a person's decision. **(CC-17)**
-5. **Give a custom *field*'s records an enforcement consumer** — SD-1 writes ACL rows nothing reads yet. **(CC-20)**
+1. **Make the ACL merge atomic** — it is a lock-free read-modify-write today. **(CC-16)**
+2. **Give the batch path its reserved-key check** — measured: a batch POST of `key:'id'` returns 200 where the single POST refuses. **(CC-18)**
+3. **Make the `decided` branch reachable** — today only the rule fires, never a person's decision. **(CC-17)**
+4. **Give a custom *field*'s records an enforcement consumer** — SD-1 writes ACL rows nothing reads yet. **(CC-20)**
 
 **Read first (before continuing):** [`PLAN-SD-1.md`](library/development/PLAN-SD-1.md) — the plan, the
 critics' twenty defects (§9) and the honest limits (§10) — and the completion register
