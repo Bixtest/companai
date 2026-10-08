@@ -1073,10 +1073,13 @@ one page, each with a named home. Details: [`BLUEPRINT-GAP-ANALYSIS.md`](BLUEPRI
    lands, force the permissions question; default = full grant to superadmin + create the records.
    **◐ PARTIAL 2026-10-08** — the decision core (the permission catalogue + the pure fail-closed gate in
    `shared/src/lib/permissions/`), the `MutationGuard` hook on the entities `create` path, **and the write**
-   (`auth/lib/permission-decision-grant.ts` — the gate's `defaulted` records now land in the tenant's grant
-   role's `role_acls.features_json`) are built, tested and mutation-proven; **the headline limit is closed.**
-   Still open: the batch / CLI / field-type-change paths, the lock-free merge, and the two deferred
-   consumers (`SD-4`, `G-04`) — each scheduled in [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md)
+   (`auth/lib/permission-decision-grant.ts` — the gate's `defaulted` records land in the tenant's grant
+   role's `role_acls.features_json`) are built, tested and mutation-proven; **and both HTTP create paths are
+   now covered** — the **batch** definitions route (the one the field-management UI mostly uses) runs the
+   same gate at the route, because the registry cannot see the columns it creates. **Both headline limits
+   are closed.** Still open: the CLI / module-install paths, the field-type-change case, the lock-free
+   merge, the batch's reserved-key check, an enforcement consumer for a *field*'s records, and the two
+   deferred consumers (`SD-4`, `G-04`) — each scheduled in [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md)
    (plan [`PLAN-SD-1.md`](PLAN-SD-1.md), limits §10).
 6. **SD-3** — make the tier mapping/defaults/fallbacks a **superadmin setting** (`module_configs`, module
    `request_outcome`), seeded from the dictionary, failing closed (§C.2b). **Not** a hardcoded table.

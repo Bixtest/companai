@@ -217,7 +217,7 @@
 ## G. THE GOVERNANCE & SECURITY FLOOR — `S1`–`S12` + the `G-`/`SD-`/`D` items
 
 - ☐ **S1** — Every architectural change is gated and inspected before it is applied *(PART)*
-- ☐ **S2 (= SD-1)** — Every architectural change answers the permissions question: catalogue + fail-closed gate *(PARTIAL 2026-10-08 — the **decision core AND the enforcement are built and proven**: the permission catalogue (`shared/src/lib/permissions/catalogue.ts` — surfaces + the two blocks they yield) and a pure fail-closed gate (`structure-change-gate.ts`), a `MutationGuard` hook on the entities `create` path, and **the write** (`auth/lib/permission-decision-grant.ts` — applies the gate's `defaulted` records to the tenant's grant role's `role_acls.features_json`, idempotent set-union, S5), wired in the guards' `afterSuccess` and carried from `validate` to `afterSuccess` by the real runner; 53 tests, 9 mutations RED-then-GREEN, `shared` 197/2327, `core` 620/5352, typecheck 0; two hostile-critic passes. **Still PARTIAL**: the batch / module-install / CLI create paths and the field-type-change case are ungated, the ACL merge is lock-free, and `decided` is unreachable — each scheduled in `COMPLETION-CALLBACKS.md`. Plan `PLAN-SD-1.md`, limits §10)*
+- ☐ **S2 (= SD-1)** — Every architectural change answers the permissions question: catalogue + fail-closed gate *(PARTIAL 2026-10-08 — the **decision core AND the enforcement are built and proven, on BOTH HTTP create paths**: the permission catalogue (`shared/src/lib/permissions/catalogue.ts` — surfaces + the two blocks they yield) and a pure fail-closed gate (`structure-change-gate.ts`), a `MutationGuard` hook on the entities `create` path, and **the write** (`auth/lib/permission-decision-grant.ts` — applies the gate's `defaulted` records to the tenant's grant role's `role_acls.features_json`, idempotent set-union, S5), wired in the guards' `afterSuccess` and carried from `validate` to `afterSuccess` by the real runner, **and run directly by the batch definitions route** for the columns it creates (the registry maps that route to `'update'` and its payload carries no field list, so the gate runs where the create is actually known); 45 tests, 16 mutations RED-then-GREEN across three slices, `shared` 197/2329 (8 known host failures — CC-19), `core` 621/5366, typecheck 0; three hostile-critic passes. **Still PARTIAL**: the module-install / CLI create paths and the field-type-change case are ungated, the ACL merge is lock-free, `decided` is unreachable, the batch skips the reserved-key guard, and a **field**'s records have no enforcement consumer — each scheduled in `COMPLETION-CALLBACKS.md`. Plan `PLAN-SD-1.md`, limits §10)*
 - ☐ **S3** — The platform tells the user when access is refused *(OPEN)*
 - ☐ **S4** — Data is the gate, not the screen *(PART — scope is tenant + org only today)*
 - ☐ **S5** — One permission engine, never a second one *(PART)*
@@ -293,7 +293,7 @@
 - ☐ **B12 Currencies (`currencies`)** — FX *(DONE)*
 - ☐ **B13 Email / messaging (`messages`, `inbox_ops`, `communication_channels`)** *(DONE)*
 - ☐ **B14 Customer portal (`portal`, `customer_accounts`)** *(PART — `customer_accounts` duplicates `auth`; N-6 says remove)*
-- ☐ **M3** — The permissions catalogue (= SD-1) *(PARTIAL 2026-10-08 — the catalogue service exists (`shared/src/lib/permissions/catalogue.ts`): permission surfaces + the two blocks each yields (data + structural), populated from declarations and extended by runtime surfaces. It is now **consumed by a write** (`auth/lib/permission-decision-grant.ts` applies its records to `role_acls.features_json` on the entities create path). **Still not persisted** for runtime surfaces (in-process; a durable row waits on `G-04`, since a migration is unprovable on this host). See `S2 (= SD-1)`)*
+- ☐ **M3** — The permissions catalogue (= SD-1) *(PARTIAL 2026-10-08 — the catalogue service exists (`shared/src/lib/permissions/catalogue.ts`): permission surfaces + the two blocks each yields (data + structural), populated from declarations and extended by runtime surfaces. It is now **consumed by a write** (`auth/lib/permission-decision-grant.ts` applies its records to `role_acls.features_json` on the entities create path **and on the batch definitions route**). **Caveat, measured:** a **field** surface's records (`<entityId>.<key>.view|manage|structure`) are written but have **no enforcement consumer** — the live per-record features are `entities.records.<entityId>.{view,manage}` (`CC-20`). **Still not persisted** for runtime surfaces (in-process; a durable row waits on `G-04`, since a migration is unprovable on this host). See `S2 (= SD-1)`)*
 - ☑ **M4** — The generated guard registry (= D0) *(DONE)*
 - ☐ **M5** — Dashboard / perspective screens (= P15) *(OPEN)*
 - ☐ **N-6** — `customer_accounts` duplicates `auth` — an island to remove *(OPEN)*
@@ -357,13 +357,19 @@ has not been verified in the code, and the claim is unconfirmed.**
 | `D2-gap` | ran `node analysis/d2-gap/measure.js` (**256 write verbs, 0 unguarded**) + proof suites | **35 tests pass; 0 unguarded** |
 | `D2-gap / GETs` | the same tool run reports **3 write-performing GETs, 0 unguarded, 2 set aside (read side-effects)** | **complete** |
 | `S-02` `N-5` | ran the new tool-door suite (`tool-authority.s02.test.ts`) + the 5 confirm-path tests; **two hostile-critic passes**; **six mutations RED-then-GREEN**, each restore md5-verified | **ai-assistant 102 suites / 1434 tests; core auth 275; shared authority 114; typecheck 0** |
-| `S2` `SD-1` `M3` | ran the new permissions suites (catalogue 13, gate 13) + the guard suite (11); **one hostile-critic pass (5 defects, all fixed or named)**; **eight mutations RED-then-GREEN**, each restore md5-verified | **37 tests; `shared` 197 suites / 2327; `core` 618 / 5332; typecheck 0 — but **PARTIAL**: the records are not written** |
+| `S2` `SD-1` `M3` | ran the permissions suites (catalogue 13, gate 13, guard 11) + the write/mapping suites (16) + the batch slice (12); **three hostile-critic passes (twelve defects, all fixed or named)**; **16 mutations RED-then-GREEN across three slices**, each restore md5-verified | **45 tests; `shared` 197 / 2329 (8 fail in the one suite of CC-19); `core` 621 / 5366; typecheck 0 — and the records ARE written on BOTH HTTP create paths — but still **PARTIAL**: CLI / module-install paths, a field-type change, the lock-free merge, the unreachable `decided`, the batch's reserved-key check, and the field records' missing enforcement consumer — each scheduled in `COMPLETION-CALLBACKS.md`** |
 
-**Whole-package run (the broad check).** The full `shared` package suite was run: **194 suites, 2264
-tests** → **193 suites / 2256 tests pass**; the **1 failing suite / 8 tests** is an **environment
-artifact, not a code defect** (`bootstrap/__tests__/dynamicLoader.tsconfig.test.ts`, whose `afterAll`
-`fs.rmSync` is intercepted by the sandbox's safe-delete shim — proved by the differential: **fails 8/8
-sandboxed, passes 8/8 with the sandbox bypassed**). So the shared layer is **green modulo the sandbox**.
+**Whole-package run (the broad check).** The full `shared` package suite was run: **197 suites, 2329
+tests** → **196 suites / 2321 tests pass**; the **1 failing suite / 8 tests** is a **host-level
+process-creation failure, not a code defect** (`bootstrap/__tests__/dynamicLoader.tsconfig.test.ts`).
+**An earlier note here — that the sandbox's safe-delete shim intercepts the suite's `fs.rmSync` — was
+WRONG and was re-diagnosed on 2026-10-08.** The measured facts: the failure is `spawnSync …\.toolchain\node24\node.exe
+EBUSY` with `errno=-4082` (libuv maps Windows `ERROR_SHARING_VIOLATION` to `UV_EBUSY` — `CreateProcessW`
+was refused, so no project code ran); the suite **passes 8/8 in isolation** but fails 8/8 under the full
+run; **12 retries over 6.7 s all fail** (continuous, not transient — so a retry cannot fix it, and the
+retry-based "fix" was reverted); it fails identically with the **sandbox disabled**; and at **HEAD,
+byte-unmodified**, the full run gives the **same 8 failures**. Owned and recorded as a known
+environmental failure (**CC-19**) with the trigger that closes it.
 
 ### Verified `☐` (checked this round, and confirmed NOT done)
 

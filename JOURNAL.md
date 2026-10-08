@@ -48,28 +48,34 @@ appear un-gated, and it is the gate a **Hermes-proposed schema change** must pas
 gate decides, and there is no way around it.
 
 **Where it stands (2026-10-08) — read this before doing anything.** **The decision machinery and the
-enforcement are built and proven.** *The decision:* `shared/src/lib/permissions/catalogue.ts` (the
-permission catalogue — surfaces and the two blocks they yield) and `structure-change-gate.ts`
-(`evaluateStructureChange` → `decided | defaulted | refused`, pure, fail-closed). *The hook:* two
-`MutationGuard`s on the entities `create` path (`entities/data/guards.ts`) block a create the gate refuses.
-*The enforcement (the step that was missing):* `auth/lib/permission-decision-grant.ts` **writes** the
-gate's `defaulted` records into the tenant's grant role's `role_acls.features_json` (idempotent set-union,
-S5), wired in the guards' `afterSuccess` and carried from `validate` to `afterSuccess` by the real
-`runMutationGuards` runner. **33 SD-1 tests; 9 mutations RED-then-GREEN, each restore md5-verified;
-`shared` 197/2327, `core` 620/5354, typecheck 0.** **Two** hostile-critic passes found ten real defects —
-all fixed or named (`PLAN-SD-1.md` §9).
+enforcement are built and proven, on BOTH HTTP create paths.** *The decision:*
+`shared/src/lib/permissions/catalogue.ts` (the permission catalogue — surfaces and the two blocks they
+yield) and `structure-change-gate.ts` (`evaluateStructureChange` → `decided | defaulted | refused`, pure,
+fail-closed). *The hook:* two `MutationGuard`s on the entities `create` path (`entities/data/guards.ts`)
+block a create the gate refuses. *The enforcement (the step that was missing):*
+`auth/lib/permission-decision-grant.ts` **writes** the gate's `defaulted` records into the tenant's grant
+role's `role_acls.features_json` (idempotent set-union, S5), wired in the guards' `afterSuccess` and
+carried from `validate` to `afterSuccess` by the real `runMutationGuards` runner — **and run directly by
+the batch definitions route** (`entities/api/definitions.batch.ts`) for the columns it creates, because
+the registry maps that route to `'update'` with no field list, so a create-only guard can never see them.
+**45 SD-1 tests; 16 mutations RED-then-GREEN across three slices, each restore md5-verified; `shared`
+197/2329 — 8 fail in the one suite of CC-19 (a host process-creation failure, not code), `core` 621/5366,
+typecheck 0.** **Three** hostile-critic passes found twelve real defects — all fixed or named
+(`PLAN-SD-1.md` §9).
 
-**It is still PARTIAL — but the headline limit is closed.** A gate that decides but does not record was
-not yet a gate; it now records. What remains is **coverage of the other creation paths and two deferred
+**It is still PARTIAL — but BOTH headline limits are closed.** A gate that decides but does not record was
+not yet a gate; it now records. And the path the field-management UI mostly uses — the **batch** route —
+was ungated; it now runs the same gate. What remains is **the other creation paths and four deferred
 consumers** — every one scheduled in [`COMPLETION-CALLBACKS.md`](library/development/COMPLETION-CALLBACKS.md):
-1. **Close the batch create path** — `api/definitions.batch.ts` creates new columns under
-   `operation:'custom'` (mapped to `'update'`), so a create-only guard never sees them. **(CC-2)**
-2. **Name or gate the module-install / CLI create paths** (`entities/lib/field-definitions.ts`, `cli.ts`). **(CC-3)**
-3. **Field-type-change detection** — needs the before-state, which the guard input does not carry. **(CC-4)**
-4. **Make the ACL merge atomic** — it is a lock-free read-modify-write today. **(CC-16)**
+1. **Name or gate the module-install / CLI create paths** (`entities/lib/field-definitions.ts`, `cli.ts`). **(CC-3)**
+2. **Field-type-change detection** — needs the before-state, which the guard input does not carry. **(CC-4)**
+3. **Make the ACL merge atomic** — it is a lock-free read-modify-write today. **(CC-16)**
+4. **Make the `decided` branch reachable** — today only the rule fires, never a person's decision. **(CC-17)**
+5. **Give the batch path its reserved-key check** — measured: a batch POST of `key:'id'` returns 200 where the single POST refuses. **(CC-18)**
+6. **Give a custom *field*'s records an enforcement consumer** — SD-1 writes ACL rows nothing reads yet. **(CC-20)**
 
 **Read first (before continuing):** [`PLAN-SD-1.md`](library/development/PLAN-SD-1.md) — the plan, the
-critics' ten defects (§9) and the honest limits (§10) — and the completion register
+critics' twelve defects (§9) and the honest limits (§10) — and the completion register
 [`COMPLETION-CALLBACKS.md`](library/development/COMPLETION-CALLBACKS.md) (the owner's 2026-10-08 standing
 instruction: always schedule a partial build's gap, prerequisite and callback). Then the same discipline
 as `S-02`/`D3`: fact-check what exists, name the honest boundary, then plan → execute → verify → document.
