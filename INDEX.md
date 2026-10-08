@@ -392,9 +392,21 @@ now names **every** place the project's memory lives — including that there ar
 locations (one live, one mirror, one superseded) and **57** reusable techniques. A new §3g bullet
 records that a **live Postgres 17** runs on this host, so database behaviour is directly provable and
 must not be assumed unprovable. [`library/development/START-PROMPT.md`](library/development/START-PROMPT.md)
-likewise gains the current context (phase 0 complete, `SD-3` next), the shell/test commands a new
+likewise gains the current context (phase 0 complete), the shell/test commands a new
 agent needs, the **rule-10 package workflow**, and the two newest binding rules (never grep a rendered
 diff; correct a falsified premise everywhere it was copied).*
+*A **hostile-critic pass over the refresh then found real defects, all now fixed** — and it caught the
+single most valuable kind: **`SD-3` was being called "the next slice" in three documents when it is
+already BUILT (2026-10-06)**; the handover's §7 also mis-attributed the `CC-30` batch to the wrong commit
+and quoted a **document count that drifts** with untracked files (it now names the tracked figure and
+says so), and `PLAN-D3` still read "IN PROGRESS" against three documents that record D3 as done. Two
+internal `BACKLOG.md` contradictions (`D2-wide` marked done while 106 parked call sites remain; the
+Metadata Registry listed as remaining while marked done) were corrected in place. **And the handover and
+the prompt now name three documents they had omitted — a gap the owner called out:**
+[`COMPLETION-CALLBACKS.md`](library/development/COMPLETION-CALLBACKS.md) (the register of every partial
+build — rule 8), [`RESUME-POINT.md`](library/development/RESUME-POINT.md), and
+[`STATE-OF-PLAY-2026-10-07.md`](library/development/STATE-OF-PLAY-2026-10-07.md) are now Tier-A reads in
+both, and the Hermes service map is in the spine.*
 
 *Earlier, 2026-10-06 — **the second Paperclip pass is done, and it found six things worth
 acting on.** A new study, [`library/paperclip-value-study/`](library/paperclip-value-study/), read

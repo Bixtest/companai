@@ -118,7 +118,7 @@ PG 17 to match **no constraint at all** (legacy index non-unique *and* missing `
 single-statement upsert had never run and the `try/catch` fallback silently did the work. Fix = one plain
 4-col unique index + three partial indexes for the null-scope shapes. Full reasoning:
 [`analysis/ANSWER-2026-10-08-organisational-questions.md`](analysis/ANSWER-2026-10-08-organisational-questions.md);
-CC-30's measurement and shape: [`analysis/findings/cc30-custom-entities-storage-uniqueness.md`](analysis/findings/cc30-custom-entities-storage-uniqueness.md).
+CC-30's measurement and shape: [`library/analysis/findings/cc30-custom-entities-storage-uniqueness.md`](library/analysis/findings/cc30-custom-entities-storage-uniqueness.md).
 
 **Read first (before continuing):** [`PLAN-SD-1.md`](library/development/PLAN-SD-1.md) — the plan, the
 critics' thirty-one defects (§9) and the honest limits (§10) — and the completion register
@@ -781,7 +781,7 @@ nothing reads it.
 
 **Code (this commit); docs this commit.** Registers updated: `COMPLETION-CALLBACKS.md` (CC-28's open note
 closed + a full CC-30 row), `BACKLOG.md` (new item + header), `RESUME-POINT.md` (§4.5 row → DONE + a CC-30
-follow-ons row; next slice → `SD-3`), `platform_points.md` (the S4 row), `analysis/findings/cc30-custom-entities-storage-uniqueness.md` (new), this file.
+follow-ons row; next slice → `SD-2` — *corrected 2026-10-08: this line said `SD-3`, which was already built*), `platform_points.md` (the S4 row), `library/analysis/findings/cc30-custom-entities-storage-uniqueness.md` (new), this file.
 
 ## 2026-10-08 — `CC-28`: the shared-store read-backs are tenant-scoped, and the forensic's premise was corrected by measuring
 

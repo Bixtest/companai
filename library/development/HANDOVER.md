@@ -123,7 +123,7 @@ reading it "for context" is how the direction gets buried (see [`../WHAT-WE-ARE-
 > **In a hurry?** [`BOOKMARKS.md`](BOOKMARKS.md) is the one-page short list: the handful of
 > documents that matter, the **end-game / vision** documents, and which folders are in git.
 
-**Tier A — the six that fix the direction and the current decisions. Read all six first.**
+**Tier A — the ones that fix the direction, the current decisions, and where we actually are. Read them all first.**
 
 | # | Read | Why |
 |---|---|---|
@@ -134,6 +134,9 @@ reading it "for context" is how the direction gets buried (see [`../WHAT-WE-ARE-
 | A4 | [`BACKLOG.md`](BACKLOG.md) | **What is left**, in order, one line each — the single plan |
 | A5 | [`ARCHITECTURE-request-outcomes.md`](ARCHITECTURE-request-outcomes.md) | **The request-outcome taxonomy (G-21)** — the owner's core features_pack: a one-time answer, a model proposal, or a saved Function; the triage, and the gate that stops the AI reshaping the database on its own |
 | A6 | [`../../compai/planning/00-product-thesis.md`](../../compai/planning/00-product-thesis.md) | **What we are building**, and the 15 rules that must never be broken |
+| A7 | [`STATE-OF-PLAY-2026-10-07.md`](STATE-OF-PLAY-2026-10-07.md) | **Where the project really is, and what is next** — a whole-project snapshot with every figure measured by two routes. It is **dated (2026-10-07)**, so re-measure before quoting; it defers to the box for the live task |
+| A8 | [`RESUME-POINT.md`](RESUME-POINT.md) | **A parking space, not a roadmap** — where the last session stopped, the honest open list (§3), and the standing rules in force (§5). Written for the last slice; **stale the moment it disagrees with the box** |
+| A9 | [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md) | **The register of every partial build** — the **gap**, the **prerequisite**, and the **callback** to run when the prerequisite lands (**rule 8**). **If you ship something partial, it goes here in the same change — never merely noted.** This is the file that stops a half-finished slice being forgotten |
 
 **Tier B — the spine: how it runs, how the work is done, and the plan.**
 
@@ -142,7 +145,7 @@ reading it "for context" is how the direction gets buried (see [`../WHAT-WE-ARE-
 | B1 | [`SPECIFICATIONS-DICTIONARY.md`](SPECIFICATIONS-DICTIONARY.md) | **The standard every change is checked against** — the project's MVC. **Read before making any architectural change.** The two clauses that may never be skipped: the permissions question (S2) and the tier question (S4/item 17). §C.2b: the tiers/defaults/fallbacks are a **superadmin setting**, not hardcoded |
 | B1a | [`CORE-BOUNDARY.md`](CORE-BOUNDARY.md) | **What is uncustomisable core vs configurable vs domain packs** — the answer to *"what must nobody be able to change?"* Ring 1 (identity, tenancy, the resource envelope, the policy engine, audit, localization resolution, the contract shapes) moves only by platform release |
 | B1b | [`ARCHITECTURE-structure-permissions.md`](ARCHITECTURE-structure-permissions.md) | **What the AI may do to the platform's own structure** — the object × verb × actor grammar (S11/S12), and why it plugs onto the existing mutation guard |
-| B1c | [`BUILD-ORDER.md`](BUILD-ORDER.md) | **The order — contracts, then foundation, then stack.** The owner's instruction (2026-10-06): fix the sequence so foundational items are not deferred. **Phase −1** = the architecture contracts; **Phase 0** = the foundation completion. **D0 ✅ fixed and proven 2026-10-06** — the generated guard registry now delivers guards (mutation-proven, §2c). **D1 ✅ fixed and proven 2026-10-06** — the tier mapping / defaults / fallbacks are a superadmin setting (`module_configs`), seeded from the dictionary, failing closed (§2d). **The live remaining defect is `D2-wide`:** **106 call sites** in **40 files** still bypass the registry via the `@deprecated` resolver (baseline 198; **every enabled module is retired** — `entities`, `data_sync`, `dictionaries`, `dashboards`, `workflows`, `inbox_ops`, `perspectives`, `translations`, `planner`, `query_index`, `auth`, `directory`, `feature_toggles`; all 106 remaining are in **parked** modules, recorded not migrated). **(`D2-gap`, the sibling sweep of write routes that reach *no* guard of any kind, is COMPLETE — 0 unguarded across the 35 enabled modules, build-order §2f.)** **The plan is per-module, not a blind sweep — build-order §2e; the exact module being worked now is in the JOURNAL's Active-task box** |
+| B1c | [`BUILD-ORDER.md`](BUILD-ORDER.md) | **The order — contracts, then foundation, then stack.** The owner's instruction (2026-10-06): fix the sequence so foundational items are not deferred. **Phase −1** = the architecture contracts; **Phase 0** = the foundation completion — **now COMPLETE (2026-10-07):** **D0 ✅** (the generated guard registry delivers guards, mutation-proven, §2c), **D1 ✅** (the tier mapping / defaults / fallbacks are a superadmin setting, §2d), **D3 ✅** (the third guard outcome `escalate`, 2026-10-07, code `ba8a25c`), the **Metadata Registry ✅** (`59ab859`), and **`D2-gap` COMPLETE** (0 unguarded across the 35 enabled modules, §2f). **The live remaining defect is `D2-wide`:** **106 call sites** in **40 files** still bypass the registry via the `@deprecated` resolver (baseline 198; **every enabled module is retired** — `entities`, `data_sync`, `dictionaries`, `dashboards`, `workflows`, `inbox_ops`, `perspectives`, `translations`, `planner`, `query_index`, `auth`, `directory`, `feature_toggles`; all 106 remaining are in **parked** modules, recorded not migrated). **The plan is per-module, not a blind sweep — build-order §2e; the exact item being worked now is in the JOURNAL's Active-task box** |
 | B1d | [`CORE-MODULES-REGISTER.md`](CORE-MODULES-REGISTER.md) | **What core modules exist, and whether they are REALLY built** — two-route verified, honest verdicts (COMPLETE / BUILT-UNEVEN / SHELL / ABSENT). Finance & procurement are ABSENT |
 | B1e | [`BLUEPRINT-GAP-ANALYSIS.md`](BLUEPRINT-GAP-ANALYSIS.md) | **What the universal platform blueprint exposed in our plan** — four gaps (resource envelope, core/pack boundary, i18n/a11y contracts, a contracts phase), and what to adapt vs adopt from the generic standard |
 | B2 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | How the three pieces run together, and the dockerisation decision |
@@ -152,7 +155,7 @@ reading it "for context" is how the direction gets buried (see [`../WHAT-WE-ARE-
 | B5 | [`SPEC-business-model-kernel.md`](SPEC-business-model-kernel.md) | **The product specification** — the vision's own 40-item gate; ratification only remains |
 | B6 | [`../analysis/findings/12-development-plan.md`](../analysis/findings/12-development-plan.md) | **The plan** — phases, order, why |
 | B7 | [`../../workspace/COOKBOOK.md`](../../workspace/COOKBOOK.md) | **How the work is done** — read before touching code |
-| B8 | [`../../LESSONS.md`](../../LESSONS.md) | 86 mistakes already made, so you do not repeat them |
+| B8 | [`../../LESSONS.md`](../../LESSONS.md) | **92 mistakes already made (L1–L92)**, so you do not repeat them — read before you start, and add the next number before you finish |
 | B8a | [`JOURNEY.md`](JOURNEY.md) | **How the project got here, in order** — the arc from the first brainstorm to the guard migration in hand, written forward. Read it to follow any conversation about this project as if you had been here since day one. **`JOURNAL.md` is the same story newest-first, with the dates and measurements; this is the readable version** |
 
 **Tier C — supporting, opened only where the work needs it.**
@@ -627,10 +630,10 @@ documents and was *not* re-measured — treat it as a starting point, not a fact
 
 | | |
 |---|---|
-| **Repo 1** (thinking/docs) | `master`, most recent **substantive** batch **`073d455`** — the `CC-30` documentation batch (the `custom_entities_storage` upsert fix and its registers). *The handover-refresh batch that records this revision is the commit right after it, so HEAD will read higher than `073d455` — that is expected, not drift.* **Re-measured 2026-10-08** (the previous figure was `6861138`). |
+| **Repo 1** (thinking/docs) | `master`, most recent **substantive** batch **`3c799c3`** — the `CC-30` documentation batch (JOURNAL, BACKLOG, COMPLETION-CALLBACKS, RESUME-POINT, platform_points, and the new findings file). *The handover-refresh commits that record this revision come after it, so HEAD will read higher than `3c799c3` — that is expected, not drift.* **Re-measured 2026-10-08** (the previous figure was `6861138`). |
 | **Repo 2** (code) | `main`, HEAD **`35d9257`** — `CC-30`, which gives `custom_entities_storage` a real unique constraint for the upsert to conflict on, plus a tenant-scoped read classifier. **Re-measured 2026-10-08** (the previous figure was `7494fbe`). |
 | **Codebase shape** | **21 packages, 1 app** (`apps/mercato`) — a monorepo (Yarn 4.17.1 + Turbo) |
-| **Documentation** | `library/` holds **3,480 markdown files**; `LESSONS.md` **3,118 lines** (L1–L92); `JOURNAL.md` **5,766 lines**; `COOKBOOK.md` **2,948 lines** |
+| **Documentation** | **Tracked markdown: 220 repo-wide, of which 41 are in `library/development/`.** `library/` also holds **≈3,480 `.md` files on disk** — but most of that is **gitignored imported study material** (§3i), so **treat the disk figure as approximate: it drifts as untracked files come and go** (it read 3,480 earlier the same day and 3,481 an hour later, off one untracked file). `LESSONS.md` **3,118 lines** (L1–L92); `JOURNAL.md` **5,766 lines**; `COOKBOOK.md` **2,948 lines** |
 | **The studies** | analysis programme **complete** (batches 0–12, 13 reports); Paperclip + Hermes study **complete** (11 batches, 3,940 lines, 53 lessons) |
 | **The specification** | **Draft 2** — of its 40 rows, **36 SETTLED · 1 DERIVED · 3 DEFERRED-with-trigger · 0 OPEN — owner**. The gate is passed; only ratification remains |
 | **The foundation (phase 0)** | **COMPLETE (2026-10-07).** The four named guard-engine gaps are built and proven — **`D0`** (the registry is populated from an enabled module, proven by mutation), **`D1`** (the tier/defaults/fallbacks settings table exists — rules are no longer `.ts` code alone), **`D3`** (the guard result has a third outcome, `escalate`, treated as *not performed*), and **`GAP A`'s registry half** (the read-only **Metadata Registry**, code `59ab859` — it answers *what exists · what type · provenance · what depends on it*, and returns a **typed absence** for the other ten blueprint §54 questions). **`D2-gap`** (every write route that reached no guard) also closed: **0 unguarded across the 35 enabled modules**. **What remains of the foundation: `D2-wide`** — 106 call sites still use the `@deprecated` guard pair, **all in parked modules** (recorded, not migrated), and **`GAP A`'s `Resource` envelope half** — a Phase −1 contract, deliberately not built because a type with no consumer is the "contract after the code" failure. |
@@ -718,8 +721,12 @@ documents and was *not* re-measured — treat it as a starting point, not a fact
   **Still open in `SD-1`** (each scheduled in [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md)):
   **`CC-20`** (a custom *field*'s records have no enforcement consumer — blocked on `G-04`), **`CC-23`**
   (the create-branch double-insert — needs a migration), **`CC-25`** (the decision actor's permission —
-  a build), **`CC-27`** (the agent ↔ AI-user binding — needs `AH-1`). The **next slice in BUILD-ORDER
-  order** is **`SD-3`** (the tier mapping becomes a superadmin setting).
+  a build), **`CC-27`** (the agent ↔ AI-user binding — needs `AH-1`). **A caution, measured 2026-10-08:
+  `SD-3` (the tier mapping as a superadmin setting) is ALREADY BUILT (`[x]`, 2026-10-06, BUILD-ORDER §2d)
+  — several documents still call it "the next slice", which is stale.** The next **undone** slice in
+  BUILD-ORDER order is **`SD-2` / `S9`** (mark core functions and guard their deletion — startable, `G-07`
+  is done), then **`SD-4` / `SD-5`**. **The order is [`BUILD-ORDER.md`](BUILD-ORDER.md)'s to state and the
+  box's to post — do not re-derive it from a handover.**
   **The "one of three endings" is the owner's core features_pack (2026-10-06):** a prompt can end
   as a **one-time answer** (nothing saved), a **model proposal** (the prompt needs new structure — a
   field, an entity, a whole new service like LMS/CRM — and goes through the same validate → impact →
@@ -731,6 +738,18 @@ documents and was *not* re-measured — treat it as a starting point, not a fact
 - **What needs the owner** → [`NEEDS-YOU.md`](NEEDS-YOU.md) — a numbered action list. **Three
   items open**, and none blocks the build. The most urgent is changing the Coolify admin password
   (item 5); it is the only thing standing between an agent and the 2FA wall on the hosting panel.
+- **What is scheduled but not finished** → [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md) — the
+  register of every **partial build**, each with its **gap**, the **prerequisite** that must land, and
+  the **callback** to run when it does (**rule 8**). **This is the file that stops a half-done slice
+  being forgotten — and the one a newcomer must read before assuming "done" means done.** Anything
+  shipped partial is here; if you ship something partial and it is not, that is the defect.
+- **Where the last session actually stopped** → [`RESUME-POINT.md`](RESUME-POINT.md) — a **parking
+  space**: what was just completed, the premise its own measurement disproved (the lesson), and the
+  honest open list (§3). It is written for the last slice, so it is stale the moment it disagrees with
+  the box.
+- **A whole-project snapshot, measured two ways** → [`STATE-OF-PLAY-2026-10-07.md`](STATE-OF-PLAY-2026-10-07.md)
+  — *"where is the project really, and what is the next thing?"* It is **dated (2026-10-07)**, so
+  re-measure before quoting it, and it defers to the box for the live task.
 - **What is stopping work** → [`BLOCKERS.md`](BLOCKERS.md) — re-checked each session, because a
   blocker is a claim about *now*. **Three open, none blocking.**
 - **The product specification** → [`SPEC-business-model-kernel.md`](SPEC-business-model-kernel.md)

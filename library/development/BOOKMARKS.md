@@ -20,7 +20,7 @@ Owner: Ramzi.
 
 ## 1. If you have five minutes
 
-Read these seven, in this order. They tell you what the product is, how the work is done, and
+Read these ten, in this order. They tell you what the product is, how the work is done, and
 where it stands — and how we got here.
 
 | # | Read | Why |
@@ -32,6 +32,9 @@ where it stands — and how we got here.
 | 5 | [`BACKLOG.md`](BACKLOG.md) | **What is left**, in order, one line each. The one roadmap |
 | 6 | [`../../workspace/COOKBOOK.md`](../../workspace/COOKBOOK.md) | **How the work is done** — read before touching code |
 | 7 | [`WORKING-RULES.md`](WORKING-RULES.md) | **The owner's standing rules in one page** — including **rule 10**, the task-package workflow every task now follows |
+| 8 | [`STATE-OF-PLAY-2026-10-07.md`](STATE-OF-PLAY-2026-10-07.md) | **Where the project really is, and what is next** — a whole-project snapshot, every figure measured two ways. **Dated (2026-10-07), so re-measure** |
+| 9 | [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md) | **Every partial build** — its gap, the prerequisite that must land, and the callback to run when it does (**rule 8**). Read before assuming "done" means done |
+| 10 | [`RESUME-POINT.md`](RESUME-POINT.md) | **Where the last session stopped**, and the honest open list — a parking space, not a roadmap |
 
 **Handing the work to an agent?** Paste [`START-PROMPT.md`](START-PROMPT.md). It is the first
 message for a fresh session: what to read and the rules it may not break. For **what to do now**,

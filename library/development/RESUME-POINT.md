@@ -77,8 +77,11 @@ for: **a mutation (or a measurement) that produces no RED/difference is a findin
 | **CC-30 follow-ons** | (i) the in-engine upsert still carries a `try/catch` fallback that is now redundant on a migrated DB; (ii) `updateCustomEntityRecord` inserts without a conflict target on the not-found branch | **OPEN — needs an owner call**: (i) is dead code on the happy path, harmless, but untested against a real conflict; (ii) needs its own migration-shaped decision. Neither is a live leak |
 | **`SD-4` / `G-04`** | the per-verb structural grammar / the data-axis row | blocked on **`G-04`** |
 
-**The next slice is `SD-3` in BUILD-ORDER order** (§4.5 shipped as **CC-30** on 2026-10-08). The `★ ACTIVE
-TASK` box posts the next item; `BUILD-ORDER.md` and the box are the arbiters.
+**The next undone slice is `SD-2` / `S9` in BUILD-ORDER order** (mark core functions and guard their
+deletion). **Corrected 2026-10-08:** this line used to say `SD-3` — but **`SD-3` is already BUILT
+(`[x]`, 2026-10-06, BUILD-ORDER §2d)**, so calling it "next" was stale; the next *undone* item after it
+is `SD-2`, then `SD-4`/`SD-5`. The `★ ACTIVE TASK` box posts the next item; `BUILD-ORDER.md` and the box
+are the arbiters.
 
 ---
 

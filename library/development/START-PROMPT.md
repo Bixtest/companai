@@ -39,7 +39,7 @@ and tier B; open tier C only when the task in front of you touches it — the li
 times more imported material than our own writing, and reading it "for context" is exactly how the
 direction gets buried.
 
-**Tier A — the six that fix the direction and the live decisions:**
+**Tier A — the ones that fix the direction, the live decisions, and where we actually are:**
 
     a. library/WHAT-WE-ARE-BUILDING.md        <- the product in plain English. START HERE.
     b. INDEX.md                               <- the map of every folder
@@ -51,29 +51,42 @@ direction gets buried.
                                                  a saved Function), the triage, and the gate that stops
                                                  the AI reshaping the database on its own (G-21)
     f. compai/planning/00-product-thesis.md   <- what we are building, and the 15 rules never to break
+    g. library/development/WORKING-RULES.md   <- the owner's standing rules in one page (incl. rule 10)
+    h. library/development/STATE-OF-PLAY-2026-10-07.md
+                                              <- where the project really is, and what is next. A DATED
+                                                 snapshot (2026-10-07) measured two ways — re-measure it
+    i. library/development/RESUME-POINT.md    <- where the last session stopped, and the honest open list
+                                                 (a parking space, not a roadmap)
+    j. library/development/COMPLETION-CALLBACKS.md
+                                              <- EVERY partial build: its gap, its prerequisite, and the
+                                                 callback to run when the prerequisite lands (rule 8).
+                                                 Read this before you assume "done" means done
 
 **Tier B — the spine: how it runs, how the work is done, and the plan:**
 
-    g. library/development/SPECIFICATIONS-DICTIONARY.md   <- THE STANDARD every change is checked
+    k. library/development/SPECIFICATIONS-DICTIONARY.md   <- THE STANDARD every change is checked
                                                               against (the project's "MVC"). Read before
                                                               any architectural change; S2 + tiers bind
-    h. library/development/BUILD-ORDER.md     <- the order: contracts, then foundation, then the stack.
-                                                 Phase 0 = four named guard-engine gaps (D0-D3)
-    i. library/development/CORE-BOUNDARY.md   <- what is UNCUSTOMISABLE core vs configurable vs packs
-    j. library/development/CORE-MODULES-REGISTER.md  <- what core modules exist and whether they are
+    l. library/development/BUILD-ORDER.md     <- the order: contracts, then foundation, then the stack.
+                                                 Phase 0 = the foundation completion (D0-D3 + the
+                                                 Metadata Registry) — now COMPLETE
+    m. library/development/CORE-BOUNDARY.md   <- what is UNCUSTOMISABLE core vs configurable vs packs
+    n. library/development/CORE-MODULES-REGISTER.md  <- what core modules exist and whether they are
                                                  REALLY built (two-route verified)
-    k. library/development/BLUEPRINT-GAP-ANALYSIS.md <- what the universal blueprint exposed in our plan
-    l. library/development/ARCHITECTURE.md
-    m. library/development/ARCHITECTURE-hermes-integration.md    (the B-05 runtime boundary, §11)
-    n. library/development/ARCHITECTURE-model-server-integration.md   (the model-default, §9)
-    o. library/development/ARCHITECTURE-structure-permissions.md  <- object × verb × actor grammar (S11/S12)
-    p. library/development/SPEC-business-model-kernel.md
-    q. workspace/COOKBOOK.md                  <- how the work is done. Read before touching code
-    r. LESSONS.md                             <- mistakes already made. **Read before you start, and
+    o. library/development/BLUEPRINT-GAP-ANALYSIS.md <- what the universal blueprint exposed in our plan
+    p. library/development/ARCHITECTURE.md
+    q. library/development/ARCHITECTURE-hermes-integration.md    (the B-05 runtime boundary, §11)
+    r. library/development/ARCHITECTURE-hermes-service-map.md    <- the per-item service map: how Hermes
+                                                 serves or is served by every AI-touching piece
+    s. library/development/ARCHITECTURE-model-server-integration.md   (the model-default, §9)
+    t. library/development/ARCHITECTURE-structure-permissions.md  <- object × verb × actor grammar (S11/S12)
+    u. library/development/SPEC-business-model-kernel.md
+    v. workspace/COOKBOOK.md                  <- how the work is done. Read before touching code
+    w. LESSONS.md                             <- mistakes already made. **Read before you start, and
                                                  add to it before you finish** — see the binding rule
                                                  below. Every entry is a trap you would otherwise
                                                  walk into
-    s. library/development/JOURNEY.md         <- how the project got here, in order. Read it to
+    x. library/development/JOURNEY.md         <- how the project got here, in order. Read it to
                                                  follow the project as if you had been here since day
                                                  one — the arc, the turning points, the reversals.
                                                  (JOURNAL.md is the same story newest-first, with dates.)
@@ -211,9 +224,11 @@ structure may not be applied until its permissions are decided, by a person or b
 and mutation-proven across **every create path**, with its remaining paths scheduled in
 `COMPLETION-CALLBACKS.md`. **The only guard work left is `D2-wide`** (106 call sites, all in parked
 modules — recorded, not migrated), and **`GAP A`'s `Resource` envelope** is a Phase −1 contract,
-deliberately unbuilt. **The next slice in BUILD-ORDER order is `SD-3`** (the tier mapping becomes a
-superadmin setting). `library/development/BLUEPRINT-GAP-ANALYSIS.md` explains the rest of the receiving
-plan, and `CORE-MODULES-REGISTER.md` says honestly which modules are truly built.
+deliberately unbuilt. **One trap, measured 2026-10-08: `SD-3` (the tier mapping as a superadmin setting)
+is ALREADY BUILT (2026-10-06) — several documents still call it "the next slice", which is stale.** The
+next **undone** slice in BUILD-ORDER order is **`SD-2` / `S9`** (mark core functions and guard their
+deletion), then **`SD-4` / `SD-5`**. `library/development/BLUEPRINT-GAP-ANALYSIS.md` explains the rest of
+the receiving plan, and `CORE-MODULES-REGISTER.md` says honestly which modules are truly built.
 
 **Keep the eye on the prize while you build.** The whole product is one loop: *a need → the AI
 understands it → the AI writes a **Business IR** → the platform **validates** it → it **runs** → the

@@ -20,7 +20,7 @@ to the guard migration in hand today.**
 
 It started as three brainstorming documents: a comparison of two AI-agent workplace systems, a survey
 of permissively-licensed building blocks, and a functional specification of the product written as if
-we would build all of it ourselves. Source: [`../compai/brainstorming/`](../compai/brainstorming/).
+we would build all of it ourselves. Source: [`../../compai/brainstorming/`](../../compai/brainstorming/).
 
 Then the idea was turned into four concepts and **fifteen invariants that everything else must
 respect** (`compai/planning/00-product-thesis.md` §3, July–August 2026) — numbered `I1`–`I15`, plus one

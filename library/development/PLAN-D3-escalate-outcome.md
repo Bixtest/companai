@@ -1,6 +1,6 @@
 # PLAN — `D3`: the `escalate` outcome on the guard result
 
-**Written:** 2026-10-07 · **Task:** `D3` (BUILD-ORDER Phase 0, item 3) · **Status:** IN PROGRESS
+**Written:** 2026-10-07 · **Task:** `D3` (BUILD-ORDER Phase 0, item 3) · **Status:** ✅ **DONE (2026-10-07, code `ba8a25c`)** — this header read "IN PROGRESS" until 2026-10-08, which contradicted `BACKLOG.md`, `JOURNAL.md` and `HANDOVER.md` (all of which record D3 as done). Corrected.
 **Protocol:** the owner's 6-step work protocol (build from docs, tick from code; fact-check first).
 
 ---

@@ -9,9 +9,12 @@ of a hundred files to open first.
 
 **Written 2026-10-04. Last refreshed 2026-10-08** — the handover and the start prompt were updated for
 a new agent taking over as though it had been here since day one (see
-[`HANDOVER.md`](HANDOVER.md) revision 11 and [`START-PROMPT.md`](START-PROMPT.md)). **The one live fact
-— what is being worked on now — is never in this folder's prose; it is the `★ ACTIVE TASK` box at the
-top of [`../../JOURNAL.md`](../../JOURNAL.md).**
+[`HANDOVER.md`](HANDOVER.md) revision 11 and [`START-PROMPT.md`](START-PROMPT.md)), and a hostile-critic
+pass corrected real defects in them (chiefly: `SD-3` was being called "next" while already built). Both
+now also name three documents they had omitted — [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md),
+[`RESUME-POINT.md`](RESUME-POINT.md) and [`STATE-OF-PLAY-2026-10-07.md`](STATE-OF-PLAY-2026-10-07.md) —
+as first-tier reads. **The one live fact — what is being worked on now — is never in this folder's
+prose; it is the `★ ACTIVE TASK` box at the top of [`../../JOURNAL.md`](../../JOURNAL.md).**
 
 ---
 
@@ -162,7 +165,7 @@ So every sprint runs in **four steps, and no code is written before step 3:**
 | **3. Write the cookbook steps** | The full step-by-step for **this sprint only** — enough for a junior developer to follow without asking | a new section in [`../../workspace/COOKBOOK.md`](../../workspace/COOKBOOK.md) |
 | **4. Build** | Do the work against the running stack, test it, record it | the change, tested and committed |
 
-**Sprint 0 (`S0`) is done** — the stack was coming up degraded and was fixed (redis exited, no `restart:` policy); all eight containers are now healthy. The four items on the **critical path** — `spec → G-01 → G-02 → G-03` — are complete, and `G-07` (the Widget contract), `G-17` (the AI emits the Business IR) and `G-21` (the request-outcome taxonomy) are built and proven. **Since then the foundation closed:** the `D2-gap` sweep reached **0 unguarded across the 35 enabled modules**, and **phase 0 is COMPLETE (2026-10-07)** — `D0`, `D1`, `D3` and the **Metadata Registry** are built and proven. **The build has started on top of it:** `SD-1` Phase 1 (the S2 structure-change gate) is built and mutation-proven, and the next slice in BUILD-ORDER order is **`SD-3`**. **Which sprint runs next is not decided here** — it is in the `★ ACTIVE TASK` box at the top of [`../../JOURNAL.md`](../../JOURNAL.md), which always names the item in hand and why it is next.
+**Sprint 0 (`S0`) is done** — the stack was coming up degraded and was fixed (redis exited, no `restart:` policy); all eight containers are now healthy. The four items on the **critical path** — `spec → G-01 → G-02 → G-03` — are complete, and `G-07` (the Widget contract), `G-17` (the AI emits the Business IR) and `G-21` (the request-outcome taxonomy) are built and proven. **Since then the foundation closed:** the `D2-gap` sweep reached **0 unguarded across the 35 enabled modules**, and **phase 0 is COMPLETE (2026-10-07)** — `D0`, `D1`, `D3` and the **Metadata Registry** are built and proven. **The build has started on top of it:** `SD-1` Phase 1 (the S2 structure-change gate) is built and mutation-proven. **`SD-3` is already BUILT (2026-10-06)** — so the next *undone* slice in BUILD-ORDER order is **`SD-2`** (mark core functions and guard their deletion), then `SD-4`/`SD-5`. **Which sprint runs next is not decided here** — it is in the `★ ACTIVE TASK` box at the top of [`../../JOURNAL.md`](../../JOURNAL.md), which always names the item in hand and why it is next.
 
 **Why the cookbook is written per sprint, not all up front** — the owner's question, answered:
 detailed steps for code that does not exist yet are **guesses**, because the steps depend on
