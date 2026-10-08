@@ -127,10 +127,17 @@ instruction: always schedule a partial build's gap, prerequisite and callback). 
 as `S-02`/`D3`: fact-check what exists, name the honest boundary, then plan → execute → verify → document.
 **Do not assume the roadmap is right — re-measure it.**
 
-**Next after `SD-1` (`BUILD-ORDER` order) — two startable-now items now DONE.** The next slice in
-BUILD-ORDER order is `SD-3` (the tier mapping becomes a superadmin setting), then `S9`/`SD-2` (mark core
-functions and guard their deletion), then `SD-4`/`SD-5` (the structural grammar screen). **Ahead of those,
-two small startable-now items were done by the owner's approval (2026-10-08): `CC-26` — the "AI user" tick
+**Next after `SD-1` (`BUILD-ORDER` order) — two startable-now items now DONE.** **The next *undone*
+slice in BUILD-ORDER order is `SD-2` / `S9` (mark core functions and guard their deletion — the
+roles-and-permissions manager is the named example; startable now, `G-07` is done), then `SD-4`/`SD-5`
+(the structural grammar screen).** **CORRECTED 2026-10-09 (rule 13 — a falsified premise, fixed where it
+was copied): this line used to name `SD-3` first — but `SD-3` is ALREADY BUILT (2026-10-06, verified,
+`BACKLOG.md` ticks it `[x]`).** Every other document (HANDOVER §8, START-PROMPT, RESUME-POINT §3, README,
+INDEX, the CC-30 entry below) was corrected on 2026-10-08; **this box paragraph was the one surviving
+stale copy** — and it is the one place the convention declares authoritative, so it mattered most.
+
+**Ahead of those, two small startable-now items were done by the owner's approval (2026-10-08):
+`CC-26` — the "AI user" tick
 is in the API-key create form** (the UI for a server capability that already existed:
 `api_keys.principal_kind = 'ai_worker'`), **and `CC-28` — the custom-record `updated_at` read-backs now
 scope by tenant** (the batch path was the live cross-tenant hole; the single path was defence-in-depth). **The
