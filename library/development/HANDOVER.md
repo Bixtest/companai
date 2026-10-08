@@ -627,7 +627,7 @@ documents and was *not* re-measured — treat it as a starting point, not a fact
 
 | | |
 |---|---|
-| **Repo 1** (thinking/docs) | `master`, HEAD **`073d455`** — the `CC-30` documentation batch (the `custom_entities_storage` upsert fix and its registers). **Re-measured 2026-10-08** (the previous figure was `6861138`). |
+| **Repo 1** (thinking/docs) | `master`, most recent **substantive** batch **`073d455`** — the `CC-30` documentation batch (the `custom_entities_storage` upsert fix and its registers). *The handover-refresh batch that records this revision is the commit right after it, so HEAD will read higher than `073d455` — that is expected, not drift.* **Re-measured 2026-10-08** (the previous figure was `6861138`). |
 | **Repo 2** (code) | `main`, HEAD **`35d9257`** — `CC-30`, which gives `custom_entities_storage` a real unique constraint for the upsert to conflict on, plus a tenant-scoped read classifier. **Re-measured 2026-10-08** (the previous figure was `7494fbe`). |
 | **Codebase shape** | **21 packages, 1 app** (`apps/mercato`) — a monorepo (Yarn 4.17.1 + Turbo) |
 | **Documentation** | `library/` holds **3,480 markdown files**; `LESSONS.md` **3,118 lines** (L1–L92); `JOURNAL.md` **5,766 lines**; `COOKBOOK.md` **2,948 lines** |
