@@ -80,8 +80,10 @@ cd /c/Users/Ramzi/Downloads/companai/library/development
 for p in PLAN-SD-1 PLAN-S-02 PLAN-D3-escalate-outcome PLAN-G21-request-outcomes PLAN-metadata-registry; do
   grep -q "$p" COMPLETION-CALLBACKS.md && echo "OK      $p" || echo "MISSING $p"
 done
-# 2. Every CC- row must be unique and contiguous (no gaps, no duplicates):
-grep -oE '\*\*CC-[0-9]+\*\*' COMPLETION-CALLBACKS.md | sort | uniq -c | awk '$1!=1{print "DUP",$2}'
+# 2. Every CC- ROW must be unique (match only a row-leading id, not a mention in prose):
+grep -oE '^\| \*\*CC-[0-9]+\*\*' COMPLETION-CALLBACKS.md | sort | uniq -c | awk '$1!=1{print "DUP",$2}'
+# 3. Every row-leading CC- id must be contiguous CC-1..CC-N (no gaps):
+grep -oE '^\| \*\*CC-[0-9]+\*\*' COMPLETION-CALLBACKS.md | grep -oE '[0-9]+' | sort -n | awk 'NR!=$1{print "GAP before",$1; exit}'
 ```
 
 **A `MISSING` plan means a partial item exists in a plan and is not scheduled here — a defect, fixed in
