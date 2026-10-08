@@ -194,3 +194,78 @@ describe('regression — the pre-existing guards still fire', () => {
     expect(result.ok).toBe(false)
   })
 })
+
+/**
+ * CC-18 — the batch path's keys.
+ *
+ * The batch endpoint upserts a definition set under `operation: 'update'` and
+ * used to carry `{ entityId, definitionCount }` — no key at all. `readFieldKeys`
+ * then returned `[]`, both guards passed, and a batch could define a field on a
+ * system column or with a malformed key while the single route refused the very
+ * same field. (Measured before the fix: the batch payload yielded
+ * `{ ok: true }`; the same reserved key through a create yielded 422.)
+ *
+ * The route now names every key it is about to write (`keys: [...]`), and these
+ * tests pin the guard half of that contract: a keyed batch is judged on every
+ * key, and the offending key is named so the author can find it.
+ */
+describe('CC-18 — a batch payload is judged on every key, not one', () => {
+  it('refuses a batch that contains a reserved system-column key', async () => {
+    const result = await runMutationGuards(
+      guards,
+      input({
+        resourceKind: 'entities.field_definition',
+        operation: 'update',
+        mutationPayload: { entityId: 'customers:customer_person', keys: ['alpha', 'id'] },
+      }),
+      ctx,
+    )
+    expect(result.ok).toBe(false)
+    expect(result.errorStatus).toBe(422)
+    // Names the offender: "one of these is reserved" is not actionable in a batch.
+    expect((result.errorBody as { error?: string }).error).toContain('"id"')
+  })
+
+  it('refuses a batch that contains a malformed key', async () => {
+    const result = await runMutationGuards(
+      guards,
+      input({
+        resourceKind: 'entities.field_definition',
+        operation: 'update',
+        mutationPayload: { entityId: 'customers:customer_person', keys: ['alpha', 'Bad-Key'] },
+      }),
+      ctx,
+    )
+    expect(result.ok).toBe(false)
+    expect(result.errorStatus).toBe(422)
+    expect((result.errorBody as { error?: string }).error).toContain('Bad-Key')
+  })
+
+  it('passes a batch whose keys are all well-formed', async () => {
+    const result = await runMutationGuards(
+      guards,
+      input({
+        resourceKind: 'entities.field_definition',
+        operation: 'update',
+        mutationPayload: { entityId: 'customers:customer_person', keys: ['alpha', 'beta_2'] },
+      }),
+      ctx,
+    )
+    expect(result.ok).toBe(true)
+  })
+
+  it('does not fire on a keyless batch payload (no keys named, nothing to judge)', async () => {
+    // The shape the route sent before CC-18 — kept true so a payload that names no
+    // key is not suddenly a refusal.
+    const result = await runMutationGuards(
+      guards,
+      input({
+        resourceKind: 'entities.field_definition',
+        operation: 'update',
+        mutationPayload: { entityId: 'customers:customer_person', definitionCount: 3 },
+      }),
+      ctx,
+    )
+    expect(result.ok).toBe(true)
+  })
+})

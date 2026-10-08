@@ -46,6 +46,12 @@ const logger = createLogger('entities').child({ component: 'structure-change-gat
  *      matching the schema the definition API already enforces. Enforcing it
  *      here as well means an AI-authored or CLI-authored definition cannot
  *      slip a malformed key past the HTTP validator.
+ *
+ * Both read **every** key the payload names (`readFieldKeys`), not one
+ * `payload.key`. The batch endpoint carries a list of definitions and no single
+ * key, so a one-key reading silently skipped both guards there (CC-18). The
+ * batch route now passes its keys (`keys: [...]`); the single route passes its
+ * one (`{ ...input }`).
  */
 
 /**
@@ -67,6 +73,48 @@ const RESERVED_RECORD_KEYS: ReadonlySet<string> = new Set([
 
 const FIELD_KEY_PATTERN = /^[a-z0-9_]+$/
 
+/**
+ * Find the field keys in a mutation payload. Returns `[]` when the payload
+ * carries none.
+ *
+ * **Why this is not just `payload.key`.** Those two guards used to read one
+ * string field (`readStringField(payload, 'key')`), and the batch endpoint
+ * (`api/definitions.batch.ts`) carries `{ entityId, definitionCount }` — no key
+ * at all — so neither guard had ever run on a batch save. Measured (CC-18):
+ * a batch POST with `definitions:[{key:'id',kind:'text'}]` returned 200 and
+ * created a field defined on a system column, while the same key through the
+ * single route (`api/definitions.ts`, which does put `key` in the payload) was
+ * refused with 422.
+ *
+ * Rather than duplicate the checks into the route — which is how the two paths
+ * drifted apart in the first place — the payload now names **every** key the
+ * mutation touches: the two guards iterate them, and one reading of the list
+ * keeps the single and batch paths honest.
+ *
+ * The contract (a mutation that writes keyed definitions puts the keys in
+ * `keys`; a single-key payload is the one-element case) is pinned by the
+ * batch route's own `keys: [...]` and by the single route's `{ ...input }`,
+ * which spreads `key` in. It is a convention, not a closed type — a payload
+ * that carried a key under any other name would still be missed — so the
+ * call sites are the documentation, and this comment names them.
+ */
+export function readFieldKeys(payload: Record<string, unknown> | null | undefined): string[] {
+  if (!payload || typeof payload !== 'object') return []
+  const keys = (payload as Record<string, unknown>).keys
+  if (Array.isArray(keys)) {
+    return keys.filter((key): key is string => typeof key === 'string')
+  }
+  const key = (payload as Record<string, unknown>).key
+  return typeof key === 'string' ? [key] : []
+}
+
+/**
+ * Read a single string field off a payload, or `null`.
+ *
+ * Used by the two permission-decision guards (`entityId`, and the single `key`
+ * of a create). Those name exactly one surface each, so a single-value read is
+ * right for them — `readFieldKeys` is for the guards that must judge a batch.
+ */
 function readStringField(payload: Record<string, unknown> | null | undefined, key: string): string | null {
   if (!payload || typeof payload !== 'object') return null
   const raw = (payload as Record<string, unknown>)[key]
@@ -80,15 +128,18 @@ const reservedKeyGuard: MutationGuard = {
   priority: 10,
 
   async validate(input) {
-    const key = readStringField(input.mutationPayload, 'key')
-    if (!key) return { ok: true }
+    const keys = readFieldKeys(input.mutationPayload)
+    if (keys.length === 0) return { ok: true }
 
-    if (RESERVED_RECORD_KEYS.has(key)) {
+    const reserved = keys.find((key) => RESERVED_RECORD_KEYS.has(key))
+    if (reserved) {
+      // Name the offending key: a batch names many, and "one of these is
+      // reserved" is not actionable (dictionary S3: tell the user why).
       return {
         ok: false,
         status: 422,
         message:
-          `"${key}" is a system column and cannot be used as a custom field key. ` +
+          `"${reserved}" is a system column and cannot be used as a custom field key. ` +
           'System columns are managed by the platform and are stripped from record writes, ' +
           'so a field defined with this key could never store a value.',
       }
@@ -105,14 +156,15 @@ const keyShapeGuard: MutationGuard = {
   priority: 20,
 
   async validate(input) {
-    const key = readStringField(input.mutationPayload, 'key')
-    if (key === null) return { ok: true }
+    const keys = readFieldKeys(input.mutationPayload)
+    if (keys.length === 0) return { ok: true }
 
-    if (!FIELD_KEY_PATTERN.test(key)) {
+    const malformed = keys.find((key) => !FIELD_KEY_PATTERN.test(key))
+    if (malformed !== undefined) {
       return {
         ok: false,
         status: 422,
-        message: `Field key "${key}" is not valid: use lowercase letters, digits and underscores only (snake_case).`,
+        message: `Field key "${malformed}" is not valid: use lowercase letters, digits and underscores only (snake_case).`,
       }
     }
 

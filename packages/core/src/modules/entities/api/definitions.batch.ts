@@ -185,7 +185,15 @@ export async function POST(req: Request) {
     resourceKind: FIELD_DEFINITION_RESOURCE_KIND,
     resourceId: entityId,
     operation: 'custom',
-    mutationPayload: { entityId, definitionCount: definitions.length },
+    // SD-1 (CC-18): carry the batch's keys, not just the count. The registry's
+    // key guards (`no-reserved-key`, `key-shape`) iterate the keys a payload
+    // names; a one-key reading saw none here, so a batch could define a field on
+    // a system column (`id`, `created_at`, …) or with a malformed key and the
+    // single route would have refused the identical field. This is the fix: the
+    // route names every key it is about to write, and the guards judge them all
+    // before a single row is touched. `definitionCount` stays — a payload that
+    // names the keys should still say how many definitions it carries.
+    mutationPayload: { entityId, keys: definitions.map((d) => d.key), definitionCount: definitions.length },
   })
   if (guard.blockedResponse) return guard.blockedResponse
 
