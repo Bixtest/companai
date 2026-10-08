@@ -95,7 +95,7 @@
 
 - ☐ **P1 Identity & accounts** — users · sessions · password reset · consent · login *(DONE — the strongest module; not re-verified this round)*
 - ☐ **P2 Tenancy & org structure** — tenants · organisations · hierarchy · scoping *(DONE — not re-verified this round)*
-- ☐ **P3 Roles & permissions (RBAC/ACL)** — roles · grants · feature gates *(PART — two-table ACL real; no permissions catalogue = SD-1)*
+- ☐ **P3 Roles & permissions (RBAC/ACL)** — roles · grants · feature gates *(PART — two-table ACL real; the permissions catalogue now exists as a typed service (`SD-1`, 2026-10-08) but is not yet persisted for runtime surfaces nor consumed by a write)*
 - ☐ **P4 Audit & compliance log** — who/when/which record; retention/export *(PART — read+create API, one viewer page)*
 - ☐ **P5 Settings / configuration** — instance- and tenant-level *(DONE — `module_configs`; hosts the tier setting)*
 - ☐ **P6 File / document storage** — attachments · partitions · backends *(DONE)*
@@ -217,7 +217,7 @@
 ## G. THE GOVERNANCE & SECURITY FLOOR — `S1`–`S12` + the `G-`/`SD-`/`D` items
 
 - ☐ **S1** — Every architectural change is gated and inspected before it is applied *(PART)*
-- ☐ **S2 (= SD-1)** — Every architectural change answers the permissions question: catalogue + fail-closed gate *(OPEN — the owner's "critical" standard)*
+- ☐ **S2 (= SD-1)** — Every architectural change answers the permissions question: catalogue + fail-closed gate *(PARTIAL 2026-10-08 — the **decision core is built and proven**: the permission catalogue (`shared/src/lib/permissions/catalogue.ts` — surfaces + the two blocks they yield) and a pure fail-closed gate (`structure-change-gate.ts`), plus a `MutationGuard` hook on the entities `create` path; 37 tests, 8 mutations RED-then-GREEN, `shared` 197/2327, `core` 618/5332, typecheck 0. **Not yet an enforcement**: the records are not written (`role_acls.features_json` untouched), and the batch / module-install / CLI create paths are ungated. Plan `PLAN-SD-1.md`, limits §10)*
 - ☐ **S3** — The platform tells the user when access is refused *(OPEN)*
 - ☐ **S4** — Data is the gate, not the screen *(PART — scope is tenant + org only today)*
 - ☐ **S5** — One permission engine, never a second one *(PART)*
@@ -293,7 +293,7 @@
 - ☐ **B12 Currencies (`currencies`)** — FX *(DONE)*
 - ☐ **B13 Email / messaging (`messages`, `inbox_ops`, `communication_channels`)** *(DONE)*
 - ☐ **B14 Customer portal (`portal`, `customer_accounts`)** *(PART — `customer_accounts` duplicates `auth`; N-6 says remove)*
-- ☐ **M3** — The permissions catalogue (= SD-1) *(OPEN)*
+- ☐ **M3** — The permissions catalogue (= SD-1) *(PARTIAL 2026-10-08 — the catalogue service now exists (`shared/src/lib/permissions/catalogue.ts`): permission surfaces + the two blocks each yields (data + structural), populated from declarations and extended by runtime surfaces. **Not yet persisted** for runtime surfaces (in-process; a durable row waits on `G-04`, since a migration is unprovable on this host) and **not yet consumed by a write**. See `S2 (= SD-1)`)*
 - ☑ **M4** — The generated guard registry (= D0) *(DONE)*
 - ☐ **M5** — Dashboard / perspective screens (= P15) *(OPEN)*
 - ☐ **N-6** — `customer_accounts` duplicates `auth` — an island to remove *(OPEN)*
@@ -357,6 +357,7 @@ has not been verified in the code, and the claim is unconfirmed.**
 | `D2-gap` | ran `node analysis/d2-gap/measure.js` (**256 write verbs, 0 unguarded**) + proof suites | **35 tests pass; 0 unguarded** |
 | `D2-gap / GETs` | the same tool run reports **3 write-performing GETs, 0 unguarded, 2 set aside (read side-effects)** | **complete** |
 | `S-02` `N-5` | ran the new tool-door suite (`tool-authority.s02.test.ts`) + the 5 confirm-path tests; **two hostile-critic passes**; **six mutations RED-then-GREEN**, each restore md5-verified | **ai-assistant 102 suites / 1434 tests; core auth 275; shared authority 114; typecheck 0** |
+| `S2` `SD-1` `M3` | ran the new permissions suites (catalogue 13, gate 13) + the guard suite (11); **one hostile-critic pass (5 defects, all fixed or named)**; **eight mutations RED-then-GREEN**, each restore md5-verified | **37 tests; `shared` 197 suites / 2327; `core` 618 / 5332; typecheck 0 — but **PARTIAL**: the records are not written** |
 
 **Whole-package run (the broad check).** The full `shared` package suite was run: **194 suites, 2264
 tests** → **193 suites / 2256 tests pass**; the **1 failing suite / 8 tests** is an **environment

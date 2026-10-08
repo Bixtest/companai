@@ -30,7 +30,7 @@ log.** Everything else (HANDOVER, START-PROMPT, README, BOOKMARKS, BACKLOG) poin
 
 ---
 
-### ▶ NOW — `SD-1`: the **S2 permissions gate** (Phase 1). **NOT STARTED — this is the posted next task.**
+### ▶ NOW — `SD-1`: the **S2 permissions gate** (Phase 1). **PARTIAL — the decision core is built, tested and mutation-proven; the enforcement half is next. Plan: [`library/development/PLAN-SD-1.md`](library/development/PLAN-SD-1.md).**
 
 > **If you are a new agent, read only this block to know your job.** Everything below the box is the
 > history and the queue; this is the work in hand.
@@ -42,21 +42,28 @@ created**). It is the gate that makes the *structural grammar* (SD-4) real: a pe
 appear un-gated, and it is the gate a **Hermes-proposed schema change** must pass — the AI proposes, the
 gate decides, and there is no way around it.
 
-**Why it is next.** It is Phase-1 item 1 in `BUILD-ORDER.md`, and its **prerequisite just landed**: the
-**Metadata Registry** (`GAP A / C5`, code `59ab859`) is what lets the gate *enumerate* the objects it is
-gating — without it `SD-1` "cannot list what it is gating" (the register's own build order put the
-registry in Phase 0 for exactly this reason). With `S-02` done, the two halves the map calls the port's
-beginning are in place.
+**Where it stands (2026-10-08) — read this before doing anything.** The **decision machinery is built and
+proven**: `shared/src/lib/permissions/catalogue.ts` (the permission catalogue — surfaces and the two
+blocks they yield) and `structure-change-gate.ts` (`evaluateStructureChange` → `decided | defaulted |
+refused`, pure, fail-closed). The **hook is wired and fail-closed**: two `MutationGuard`s on the entities
+`create` path (`entities/data/guards.ts`) block a create the gate refuses. **37 tests; 8 mutations
+RED-then-GREEN, each restore md5-verified; `shared` 197/2327, `core` 618/5332, typecheck 0.** A
+**hostile-critic pass found five real defects** — all fixed or named (`PLAN-SD-1.md` §9).
 
-**Measured state (2026-10-06, re-measure before designing).** **No per-permission table exists** —
-permissions are string arrays on `role_acls`/`user_acls` (`features_json`), and **saving a Function writes
-no permission record at all**. So this is a **build, not a check**: a catalogue + a hook on the change path
-+ the fail-closed gate. The catalogue itself is **startable now**; the full data-axis shape waits on `G-04`.
+**But it is PARTIAL, and the reason is the headline:** **the records the gate produces are not written
+anywhere.** No call site persists the default into `role_acls.features_json`, so on the HTTP routes the
+gate enumerates and fails closed but does **not** change the ACL. A gate that decides but does not record
+is not yet a gate. Four things remain, in order (`PLAN-SD-1.md` §10):
+1. **Write the records** — apply the `defaulted` outcome to the tenant's superadmin role through the
+   existing store (S5). This is the step that turns the decision into an enforcement.
+2. **Close the batch create path** — `api/definitions.batch.ts` creates new columns under
+   `operation:'custom'` (mapped to `'update'`), so a create-only guard never sees them.
+3. **Name or gate the module-install / CLI create paths** (`entities/lib/field-definitions.ts`, `cli.ts`).
+4. **Field-type-change detection** — needs the before-state, which the guard input does not carry.
 
-**Read first (before designing):** `library/development/SPECIFICATIONS-DICTIONARY.md` (S2, §C.1),
-`ARCHITECTURE-structure-permissions.md`, `platform_points.md` `SD-1` + `C5`, `BACKLOG.md` `SD-1` / `M3`,
-and `analysis/owner-workthrough-2026-10-06.md` point 0 (the measured evidence). Same discipline as `S-02`
-and `D3`: fact-check what exists, name the honest boundary, then plan → execute → verify → document.
+**Read first (before continuing):** [`PLAN-SD-1.md`](library/development/PLAN-SD-1.md) — the plan, the
+critic's five defects (§9) and the honest limits (§10). Then the same discipline as `S-02`/`D3`:
+fact-check what exists, name the honest boundary, then plan → execute → verify → document.
 **Do not assume the roadmap is right — re-measure it.**
 
 **Next after `SD-1` (`BUILD-ORDER` order).** `SD-3` (the tier mapping becomes a superadmin setting), then
