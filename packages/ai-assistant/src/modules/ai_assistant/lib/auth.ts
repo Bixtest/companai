@@ -19,6 +19,13 @@ export type McpAuthSuccess = {
   userId: string
   features: string[]
   isSuperAdmin: boolean
+  /**
+   * The **person** this API key acts for (S-02). `userId` above is the machine
+   * subject (`apikey:<id>`); this is the human behind it, so a tool call through
+   * an MCP server door carries the responsible-user intersection rather than
+   * resolving the actor alone. Optional: an unowned key has none.
+   */
+  onBehalfOfUserId?: string | null
 }
 
 /**
@@ -108,6 +115,9 @@ export async function authenticateMcpRequest(
       userId,
       features: acl.features,
       isSuperAdmin: acl.isSuperAdmin,
+      // S-02: the person this key acts for — the input to the resolver's
+      // responsible-user intersection. Same owner the HTTP path derives.
+      onBehalfOfUserId: apiKey.sessionUserId ?? apiKey.createdBy ?? null,
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)

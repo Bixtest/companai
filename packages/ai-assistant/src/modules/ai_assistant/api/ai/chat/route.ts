@@ -680,6 +680,8 @@ export async function POST(req: NextRequest): Promise<Response> {
         userId: auth.sub,
         features: acl.features,
         isSuperAdmin: acl.isSuperAdmin,
+        // S-02: the person this machine actor acts for (auth.userId; undefined for a person).
+        onBehalfOfUserId: auth.userId ?? null,
       },
       container,
       requestOverride,

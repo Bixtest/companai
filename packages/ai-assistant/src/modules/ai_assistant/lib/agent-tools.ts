@@ -158,6 +158,10 @@ function buildToolHandlerContext(
     tenantId: ctx.tenantId,
     organizationId: ctx.organizationId,
     userId: ctx.userId,
+    // S-02: the person a machine actor acts for, carried into the resolver as the
+    // responsible-user intersection. Present only when the auth boundary
+    // resolved one; never derived here.
+    ...(ctx.onBehalfOfUserId !== undefined ? { onBehalfOfUserId: ctx.onBehalfOfUserId } : {}),
     container: (container ?? undefined) as unknown as McpToolContext['container'],
     userFeatures: ctx.features,
     isSuperAdmin: ctx.isSuperAdmin,
@@ -259,6 +263,10 @@ function adaptToolToAiSdk(
               userId: mutation.ctx.userId,
               features: mutation.ctx.features,
               isSuperAdmin: mutation.ctx.isSuperAdmin,
+              // S-02: keep the responsible user across the mutation-preview hop.
+              ...(mutation.ctx.onBehalfOfUserId !== undefined
+                ? { onBehalfOfUserId: mutation.ctx.onBehalfOfUserId }
+                : {}),
               container: mutation.container,
             },
           )

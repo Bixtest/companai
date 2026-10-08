@@ -346,3 +346,160 @@ describe('executePendingActionConfirm', () => {
     expect(finalExtra.failedRecords).toBeNull()
   })
 })
+
+/**
+ * **S-02 on the confirm path.**
+ *
+ * A confirmed pending action runs a tool handler — so it is a tool door, and the
+ * authority resolver must see it. Before S-02 this path executed with the RBAC
+ * check alone (`runPendingActionRechecks` verifies status, expiry, features,
+ * policy and drift but never consults the resolver), making it the last handler
+ * path the single decider did not see.
+ *
+ * These tests exist because the other tests in this file use a tool with **no**
+ * `requiredFeatures`, so they never reach the authority check — the fixture had
+ * to grow a feature-bearing tool for the new code to be exercised at all.
+ */
+describe('executePendingActionConfirm — S-02 authority gate', () => {
+  const FEATURE = 'catalog.products.manage'
+
+  function gatedTool(handler?: () => Promise<unknown>) {
+    return makeTool({
+      requiredFeatures: [FEATURE],
+      ...(handler ? { handler } : {}),
+    } as Partial<AiToolDefinition>)
+  }
+
+  function authorityCtx(
+    mode: 'off' | 'shadow' | 'enforce',
+    decide: () => unknown,
+    onBehalfOfUserId?: string | null,
+  ) {
+    const calls: Array<{ subject: string; feature: string; options?: { onBehalfOfUserId?: string | null } }> = []
+    const ctx = {
+      tenantId: 'tenant-1',
+      organizationId: 'org-1',
+      userId: 'apikey:key-id',
+      userFeatures: [FEATURE],
+      isSuperAdmin: false,
+      ...(onBehalfOfUserId !== undefined ? { onBehalfOfUserId } : {}),
+      container: {
+        resolve: (name: string) => {
+          if (name === 'em') return {}
+          if (name === 'eventBus') return { emitEvent: async () => {} }
+          if (name === 'authorityEnforcement') {
+            return {
+              modeFor: async () => mode,
+              decideFor: async (
+                subject: string,
+                feature: string,
+                _scope: unknown,
+                options?: { onBehalfOfUserId?: string | null },
+              ) => {
+                calls.push({ subject, feature, options })
+                return decide()
+              },
+            }
+          }
+          throw new Error(`unknown dep ${name}`)
+        },
+      },
+    } as unknown as ReturnType<typeof makeCtx>
+    return { ctx, calls }
+  }
+
+  const A0 = {
+    gate: 'A0',
+    allowed: false,
+    reasons: [{ rule: 'grant', ceiling: 'A0', detail: 'the actor does not hold it' }],
+    bindingRule: 'grant',
+    obligations: [],
+    alternatives: [],
+  }
+  const A5 = {
+    gate: 'A5',
+    allowed: true,
+    reasons: [],
+    bindingRule: 'grant',
+    obligations: [],
+    alternatives: [],
+  }
+
+  it('refuses to run the handler when the resolver returns A0 in enforce mode', async () => {
+    const handler = jest.fn(async () => ({ recordId: 'p-1' }))
+    const repo = makeRepoStub(makeAction())
+    const { ctx } = authorityCtx('enforce', () => A0)
+    const result = await executePendingActionConfirm({
+      action: makeAction(),
+      agent: makeAgent(),
+      tool: gatedTool(handler),
+      ctx,
+      repo: repo as unknown as never,
+      emitEvent: jest.fn().mockResolvedValue(undefined),
+    })
+    expect(handler).not.toHaveBeenCalled()
+    expect(result.ok).toBe(false)
+    expect(repo.current.status).toBe('failed')
+    expect((result.executionResult.error as { code: string } | undefined)?.code).toBe('authority_refused')
+  })
+
+  it('runs the handler when the resolver permits at A5 in enforce mode', async () => {
+    const handler = jest.fn(async () => ({ recordId: 'p-1', commandName: 'catalog.product.update' }))
+    const { ctx } = authorityCtx('enforce', () => A5)
+    const result = await executePendingActionConfirm({
+      action: makeAction(),
+      agent: makeAgent(),
+      tool: gatedTool(handler),
+      ctx,
+      repo: makeRepoStub(makeAction()) as unknown as never,
+      emitEvent: jest.fn().mockResolvedValue(undefined),
+    })
+    expect(handler).toHaveBeenCalledTimes(1)
+    expect(result.ok).toBe(true)
+  })
+
+  it('runs the handler in shadow mode even at A0', async () => {
+    const handler = jest.fn(async () => ({ recordId: 'p-1', commandName: 'catalog.product.update' }))
+    const { ctx } = authorityCtx('shadow', () => A0)
+    const result = await executePendingActionConfirm({
+      action: makeAction(),
+      agent: makeAgent(),
+      tool: gatedTool(handler),
+      ctx,
+      repo: makeRepoStub(makeAction()) as unknown as never,
+      emitEvent: jest.fn().mockResolvedValue(undefined),
+    })
+    expect(handler).toHaveBeenCalledTimes(1)
+    expect(result.ok).toBe(true)
+  })
+
+  it('carries the responsible user into the resolver', async () => {
+    const { ctx, calls } = authorityCtx('enforce', () => A5, 'human-owner-id')
+    await executePendingActionConfirm({
+      action: makeAction(),
+      agent: makeAgent(),
+      tool: gatedTool(),
+      ctx,
+      repo: makeRepoStub(makeAction()) as unknown as never,
+      emitEvent: jest.fn().mockResolvedValue(undefined),
+    })
+    expect(calls[0]?.options?.onBehalfOfUserId).toBe('human-owner-id')
+    expect(calls[0]?.feature).toBe(FEATURE)
+  })
+
+  it('fails closed when the resolver is unreachable', async () => {
+    // `makeCtx()`'s container throws for `authorityEnforcement`.
+    const handler = jest.fn(async () => ({ recordId: 'p-1' }))
+    const repo = makeRepoStub(makeAction())
+    const result = await executePendingActionConfirm({
+      action: makeAction(),
+      agent: makeAgent(),
+      tool: gatedTool(handler),
+      ctx: makeCtx(),
+      repo: repo as unknown as never,
+      emitEvent: jest.fn().mockResolvedValue(undefined),
+    })
+    expect(handler).not.toHaveBeenCalled()
+    expect(result.ok).toBe(false)
+  })
+})

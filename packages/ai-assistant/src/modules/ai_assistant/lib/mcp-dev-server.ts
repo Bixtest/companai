@@ -279,6 +279,9 @@ export async function runMcpDevServer(): Promise<void> {
     tenantId: authResult.tenantId,
     organizationId: authResult.organizationId,
     userId: authResult.userId,
+    // S-02: the person this key acts for, so the resolver computes the
+    // responsible-user intersection.
+    onBehalfOfUserId: authResult.onBehalfOfUserId ?? null,
     container,
     userFeatures: authResult.features,
     isSuperAdmin: authResult.isSuperAdmin,

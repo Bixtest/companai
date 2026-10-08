@@ -12,6 +12,23 @@ export interface McpToolContext {
   container: AwilixContainer
   userFeatures: string[]
   isSuperAdmin: boolean
+  /**
+   * The **person** a machine actor acts on behalf of (S-02).
+   *
+   * `userId` is the acting principal's *subject* — `apikey:<id>` or
+   * `aiworker:<id>` for a machine, a bare user id for a person. This field is the
+   * separate human behind that credential, which the auth boundary already
+   * resolves (`auth.principal.onBehalfOfUserId` → `auth.userId`).
+   *
+   * It is what lets the authority resolver compute the **responsible-user
+   * intersection**: an agent's authority is its own ∩ this person's. It is
+   * optional and deliberately **not derived from `userId`** at the door — a
+   * context that has not resolved it must be read as "no invoker", never as "the
+   * machine is the person", because guessing would either disable the
+   * intersection or apply it to the wrong principal. Absent is honest; invented
+   * is not.
+   */
+  onBehalfOfUserId?: string | null
   /** API key secret for authenticating HTTP requests to internal APIs */
   apiKeySecret?: string
   /** Session token for memory layer (deduplication of search/GET calls) */

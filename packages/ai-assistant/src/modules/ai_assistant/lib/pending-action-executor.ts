@@ -25,6 +25,7 @@ import { emitAiAssistantEvent } from '../events'
 import type { AiActionConfirmedPayload } from '../events'
 import type { AiAgentDefinition } from './ai-agent-definition'
 import type { AiToolDefinition, McpToolContext } from './types'
+import { checkToolAuthority } from './tool-authority'
 import type {
   AiPendingActionExecutionResult,
   AiPendingActionFailedRecord,
@@ -39,6 +40,12 @@ export interface PendingActionExecuteContext {
   userFeatures: string[]
   isSuperAdmin: boolean
   container: import('awilix').AwilixContainer
+  /**
+   * The person a machine actor acts for (S-02). Carried so the tool call this
+   * confirms is authorized with the responsible-user intersection, not as a
+   * machine with no invoker.
+   */
+  onBehalfOfUserId?: string | null
 }
 
 export interface PendingActionExecuteInput {
@@ -296,6 +303,9 @@ function toToolHandlerContext(
     tenantId: ctx.tenantId,
     organizationId: ctx.organizationId,
     userId: ctx.userId,
+    // S-02: carry the responsible user through the confirm path so the act this
+    // approves is authorized with the intersection, not as an invokerless machine.
+    ...(ctx.onBehalfOfUserId !== undefined ? { onBehalfOfUserId: ctx.onBehalfOfUserId } : {}),
     container: ctx.container,
     userFeatures: ctx.userFeatures,
     isSuperAdmin: ctx.isSuperAdmin,
@@ -359,9 +369,49 @@ export async function executePendingActionConfirm(
   })
   const executingRow = await repo.setStatus(confirmedRow.id, 'executing', scope, { now: clock })
 
+  // S-02 — the confirm path runs a tool handler, so it is a tool door too, and
+  // the same enforcement point applies. Before this, a confirmed act executed
+  // with the RBAC check alone: `runPendingActionRechecks` verifies status,
+  // expiry, features, policy and drift, but never consults the authority
+  // resolver — so this was the last handler path the single decider did not see.
+  const handlerContext = toToolHandlerContext(ctx, tool)
+  const authority = await checkToolAuthority(tool.name, tool.requiredFeatures, handlerContext)
+  if (authority.kind !== 'permit') {
+    const refusalResult: AiPendingActionExecutionResult = {
+      error: {
+        code: authority.kind === 'hold' ? 'authority_held' : 'authority_refused',
+        message: authority.kind === 'hold'
+          ? `The authority resolver held this act at ${authority.gate} (${authority.bindingRule}); it needs approval and cannot execute from here.${authority.because ? ` ${authority.because}` : ''}`
+          : `The authority resolver refused this act at ${authority.gate} (${authority.bindingRule}).${authority.because ? ` ${authority.because}` : ''}`,
+      },
+    }
+    const refusedRow = await repo.setStatus(executingRow.id, 'failed', scope, {
+      executionResult: refusalResult,
+      now: clock,
+    })
+    await emitConfirmed(emitter, {
+      pendingActionId: refusedRow.id,
+      agentId: agent.id,
+      toolName: tool.name,
+      status: refusedRow.status,
+      tenantId: ctx.tenantId,
+      organizationId: ctx.organizationId ?? null,
+      userId: ctx.userId,
+      resolvedByUserId: ctx.userId,
+      resolvedAt: (refusedRow.resolvedAt ?? clock).toISOString?.() ?? new Date(clock).toISOString(),
+      executionResult: refusalResult,
+    })
+    return {
+      ok: false,
+      action: refusedRow,
+      executionResult: refusalResult,
+      cause: new Error(refusalResult.error?.message ?? 'authority refused the act'),
+    }
+  }
+
   let handlerOutput: unknown
   try {
-    handlerOutput = await tool.handler(action.normalizedInput as never, toToolHandlerContext(ctx, tool))
+    handlerOutput = await tool.handler(action.normalizedInput as never, handlerContext)
   } catch (error) {
     const failureResult: AiPendingActionExecutionResult = {
       error: buildHandlerErrorFromThrown(error, action.normalizedInput),

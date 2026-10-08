@@ -112,6 +112,9 @@ function toolHandlerContext(ctx: PrepareMutationContext): McpToolContext {
     tenantId: ctx.tenantId,
     organizationId: ctx.organizationId,
     userId: ctx.userId,
+    // S-02: the responsible user, so the preview/`loadBeforeRecord` resolvers and
+    // the eventual confirmed call see the intersection rather than no invoker.
+    ...(ctx.onBehalfOfUserId !== undefined ? { onBehalfOfUserId: ctx.onBehalfOfUserId } : {}),
     container: ctx.container,
     userFeatures: ctx.features,
     isSuperAdmin: ctx.isSuperAdmin,

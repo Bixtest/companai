@@ -39,6 +39,9 @@ export async function createMcpServer(options: McpServerOptions): Promise<Server
   let userId: string | null = null
   let userFeatures: string[] = []
   let isSuperAdmin = false
+  // S-02: the person a machine key acts for. Set only on the API-key path; the
+  // manual path names a real user already, so it carries no invoker.
+  let onBehalfOfUserId: string | null = null
 
   // API key authentication takes precedence
   if (apiKeySecret) {
@@ -51,6 +54,7 @@ export async function createMcpServer(options: McpServerOptions): Promise<Server
     userId = authResult.userId
     userFeatures = authResult.features
     isSuperAdmin = authResult.isSuperAdmin
+    onBehalfOfUserId = authResult.onBehalfOfUserId ?? null
     writeStderrLine(`[MCP Server] Authenticated via API key: ${authResult.keyName}`)
   } else if (context && context.userId) {
     // Manual context with a real user — load that user's ACL.
@@ -100,6 +104,9 @@ export async function createMcpServer(options: McpServerOptions): Promise<Server
     tenantId,
     organizationId,
     userId,
+    // S-02: null on the manual path (a real user), the key's owner on the API-key
+    // path — so the resolver computes the responsible-user intersection.
+    onBehalfOfUserId,
     container,
     userFeatures,
     isSuperAdmin,

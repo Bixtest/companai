@@ -67,6 +67,8 @@ export class InProcessMcpClient implements McpClientInterface {
       tenantId: auth.tenantId,
       organizationId: auth.organizationId,
       userId: auth.userId,
+      // S-02: the person this key acts for.
+      onBehalfOfUserId: auth.onBehalfOfUserId ?? null,
       container,
       userFeatures: auth.features,
       isSuperAdmin: auth.isSuperAdmin,

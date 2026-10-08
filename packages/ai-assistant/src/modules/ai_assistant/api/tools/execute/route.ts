@@ -54,6 +54,10 @@ export async function POST(req: NextRequest) {
       tenantId: auth.tenantId,
       organizationId: auth.orgId,
       userId: auth.sub,
+      // The person an API key/AI worker acts for (S-02). `auth.sub` is the
+      // machine subject; `auth.userId` is the human behind it, set only for
+      // machine principals — so a person acting as themselves carries none.
+      onBehalfOfUserId: auth.userId ?? null,
       container,
       userFeatures: acl.features,
       isSuperAdmin: acl.isSuperAdmin,

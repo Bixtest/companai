@@ -2,6 +2,7 @@ import { createLogger } from '@open-mercato/shared/lib/logger'
 import type { McpToolContext, ToolExecutionResult } from './types'
 import { getToolRegistry } from './tool-registry'
 import { hasRequiredFeatures } from './auth'
+import { checkToolAuthority } from './tool-authority'
 import type { RbacService } from '@open-mercato/core/modules/auth/services/rbacService'
 
 const logger = createLogger('ai_assistant')
@@ -55,6 +56,27 @@ export async function executeTool(
         error: `Insufficient permissions for tool "${toolName}". Required: ${tool.requiredFeatures.join(', ')}`,
         errorCode: 'UNAUTHORIZED',
       }
+    }
+  }
+
+  // The authority resolver — S-02. RBAC above answers *does the actor hold the
+  // grant*; this answers *how much may it do with it*, which is a different
+  // question RBAC cannot express. It runs second and can only subtract: a
+  // permit here adds nothing, a refusal or a hold removes an allowance.
+  //
+  // Until this landed the door authorized with the RBAC check alone — a
+  // parallel decider the authority resolver never saw, and the one place the
+  // responsible-user intersection (an agent's authority ∩ the person it acts
+  // for) was never computed for a tool call. See `tool-authority.ts`.
+  const authority = await checkToolAuthority(toolName, tool.requiredFeatures, context)
+  if (authority.kind !== 'permit') {
+    const subject = context.userId ?? 'this actor'
+    return {
+      success: false,
+      error: authority.kind === 'hold'
+        ? `Tool "${toolName}" is held for approval (gate ${authority.gate}, ${authority.bindingRule}). ${authority.because ?? ''}`.trim()
+        : `Tool "${toolName}" was refused by the authority resolver (gate ${authority.gate}, ${authority.bindingRule}) for ${subject}. ${authority.because ?? ''}`.trim(),
+      errorCode: 'UNAUTHORIZED',
     }
   }
 
