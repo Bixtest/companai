@@ -25,6 +25,7 @@ import {
 import { extractUndoPayload } from '@open-mercato/shared/lib/commands/undo'
 import { resolveRedoSnapshot } from '@open-mercato/shared/lib/commands/redo'
 import { resolveIsSuperAdmin, normalizeTenantId } from '@open-mercato/core/modules/auth/lib/tenantAccess'
+import { refuseCoreRoleDelete } from '@open-mercato/core/modules/auth/lib/core-object-guard'
 import type { CommandRuntimeContext } from '@open-mercato/shared/lib/commands'
 
 type SerializedRole = {
@@ -245,6 +246,8 @@ const createRoleCommand: CommandHandler<Record<string, unknown>, Role> = {
       entity: Role,
       where: { id: undo.id, deletedAt: null } as FilterQuery<Role>,
       soft: false,
+      // SD-2 / S9: undoing a role create hard-deletes the row — core roles stay.
+      refuse: refuseCoreRoleDelete,
     })
   },
   redo: async ({ logEntry, ctx }) => {
@@ -501,6 +504,12 @@ const deleteRoleCommand: CommandHandler<{ body?: Record<string, unknown>; query?
     const role = await findOneWithDecryption(em, Role, buildScopedRoleFilter(id, scope), {}, { tenantId: scope.actorTenantId, organizationId: null })
     if (!role) throw new CrudHttpError(404, { error: 'Role not found' })
     assertRoleTenantInScope(resolveActorTenantScope(ctx), role.tenantId)
+    // SD-2 / S9: the core-object rule is object-level and actor-independent. It
+    // lives here — on the command every delete path funnels through — as well as in
+    // the route's mapInput, because the audit `redo` path re-executes this command
+    // directly and would otherwise bypass a route-only check.
+    const coreRefusal = refuseCoreRoleDelete(role as { name?: string | null })
+    if (coreRefusal) throw coreRefusal
     const activeAssignments = await em.count(UserRole, { role, deletedAt: null })
     if (activeAssignments > 0) throw new CrudHttpError(400, { error: 'Role has assigned users' })
 
@@ -511,6 +520,7 @@ const deleteRoleCommand: CommandHandler<{ body?: Record<string, unknown>; query?
       entity: Role,
       where: buildScopedRoleFilter(id, scope),
       soft: false,
+      refuse: refuseCoreRoleDelete,
     })
     if (!deleted) throw new CrudHttpError(404, { error: 'Role not found' })
 

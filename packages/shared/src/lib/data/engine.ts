@@ -117,6 +117,7 @@ export interface DataEngine {
     where: FilterQuery<T>
     soft?: boolean
     softDeleteField?: keyof T & string
+    refuse?: (current: T) => CrudHttpError | null | void
   }): Promise<T | null>
 
   emitOrmEntityEvent<T>(opts: {
@@ -566,9 +567,24 @@ export class DefaultDataEngine implements DataEngine {
     where: FilterQuery<T>
     soft?: boolean
     softDeleteField?: keyof T & string
+    /**
+     * SD-2 / S9 — last-line refusal, run against the loaded row **before** any
+     * write, hard or soft. Return a `CrudHttpError` to refuse; return `null`/void
+     * to allow. This exists so an object-level rule that must hold for **every**
+     * caller (not just one route) has a home on the one path every delete funnels
+     * through: the audit `redo` path re-executes a command directly, so a check
+     * that lives only in a route's `mapInput` is silently bypassable. Callers that
+     * own an object-level invariant pass a predicate here and are then covered on
+     * every path — route, command, undo and redo alike.
+     */
+    refuse?: (current: T) => CrudHttpError | null | void
   }): Promise<T | null> {
     const current = await this.em.findOne(opts.entity as EntityName<T>, opts.where as FilterQuery<NoInfer<T>>)
     if (!current) return null
+    if (opts.refuse) {
+      const refusal = opts.refuse(current)
+      if (refusal) throw refusal
+    }
     if (opts.soft !== false) {
       const field = opts.softDeleteField || ('deletedAt' as keyof T & string)
       if (typeof current === 'object' && current !== null) {

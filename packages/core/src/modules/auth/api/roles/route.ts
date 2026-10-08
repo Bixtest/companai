@@ -15,6 +15,7 @@ import type { EntityManager, FilterQuery } from '@mikro-orm/postgresql'
 import { roleCrudEvents, roleCrudIndexer } from '@open-mercato/core/modules/auth/commands/roles'
 import { escapeLikePattern } from '@open-mercato/shared/lib/db/escapeLikePattern'
 import { assertActorCanModifySuperAdminRoleTarget } from '@open-mercato/core/modules/auth/lib/grantChecks'
+import { assertCoreRoleNotDeletable } from '@open-mercato/core/modules/auth/lib/core-object-guard'
 import { enforceRoleTenantAccess } from '@open-mercato/core/modules/auth/lib/roleTenantGuard'
 import type { RbacService } from '@open-mercato/core/modules/auth/services/rbacService'
 import { runWithCacheTenant } from '@open-mercato/cache'
@@ -141,6 +142,15 @@ const crud = makeCrudRoute<CrudInput, CrudInput, Record<string, unknown>>({
         const targetId = resolveDeleteTargetId(parsed, raw)
         if (ctx.request && targetId) {
           await assertCanModifySuperAdminRole(ctx.request, targetId)
+        }
+        // S9 / SD-2 — a core role cannot be deleted by ANY actor, so this runs
+        // after the actor check and refuses regardless of who the actor is.
+        if (targetId) {
+          await assertCoreRoleNotDeletable(
+            ctx.container.resolve('em') as EntityManager,
+            { tenantId: ctx.auth?.tenantId ?? null },
+            targetId,
+          )
         }
         return enforceRoleTenantAccess('delete', parsed, { auth: ctx.auth, container: ctx.container })
       },
@@ -335,6 +345,15 @@ export const DELETE = async (req: Request) => {
   if (targetId) {
     try {
       await assertCanModifySuperAdminRole(req, targetId)
+      // S9 / SD-2 — the core-role refusal, on the route's own delete entry point
+      // as well as the CRUD action's, so neither path can bypass the rule.
+      const auth = await getAuthFromRequest(req)
+      const container = await createRequestContainer()
+      await assertCoreRoleNotDeletable(
+        container.resolve('em') as EntityManager,
+        { tenantId: auth?.tenantId ?? null },
+        targetId,
+      )
     } catch (err) {
       if (err instanceof CrudHttpError) {
         return NextResponse.json(err.body, { status: err.status })
