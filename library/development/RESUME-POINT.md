@@ -1,10 +1,10 @@
 # RESUME POINT — where we are, and the plan to get back here
 
-> **Last written 2026-10-08**, at the owner's explicit instruction: *"save exactly where you are and what
-> the plan is to do next and the context so you can easily get back to that point."*
+> **Last written 2026-10-08 (CC-29)**, at the owner's explicit instruction: *"save exactly where you are and
+> what the plan is to do next and the context so you can easily get back to that point."*
 >
 > This file is a **parking space**, not a roadmap. It is meant to be read *first* by a new session that has
-> to resume. **It was written for CC-24, and CC-24 is now DONE** — so §2 below is a record, not a
+> to resume. **It was written for CC-29, and CC-29 is now DONE** — so §1–§2 below are a record, not a
 > to-do. **The honest next slice is named in §3, and the one place that says "what we are doing now" is the
 > `★ ACTIVE TASK` box at the top of [`../../JOURNAL.md`](../../JOURNAL.md).** Treat this file as stale the
 > moment the box and this file disagree — the box wins.
@@ -13,53 +13,48 @@
 
 ## 1. What was just completed (do not redo)
 
-**CC-24 — the custom *entity*'s HTTP reactivation is now gated.**
-- **Code:** Repo 2 (`workspace/starting-kit`), branch `main` — `entities/api/entities.ts`,
-  `entities/lib/register.ts` (the export), and two test files.
-- **Docs:** Repo 1, branch `master` — the registers and the plan (§9.11/§9.12/§9.13 of `PLAN-SD-1.md`).
-- **Proven:** both packages `tsc --noEmit` exit **0**; **`core` 627 suites / 5438 tests, 0 failures**;
-  `entities` module **42 suites / 335 tests**; `auth` **80/699**; `shared` permissions **3/59**.
-  **6 mutations RED-then-GREEN**, every restore **md5-verified**. **Ninth hostile-critic pass** (separate
-  agent) run — it found **nothing falsifiable** across all nine claims.
+**CC-29 — the mutation-guard store now resets before every test.**
+- **Code:** Repo 2 (`workspace/starting-kit`), branch `main` — `shared/lib/crud/mutation-guard-store.ts`
+  (the new `resetMutationGuards()`), `core/jest.setup.ts` (the wiring), a new 5-test suite, and the
+  corrected comments in `entities.reactivation.sd1.test.ts`.
+- **Docs:** Repo 1, branch `master` — the registers and the plan (§9.14 of `PLAN-SD-1.md`).
+- **Proven:** `tsc --noEmit` exit **0** on `shared` and `core`; the full `core` suite **green five
+  consecutive times** — **627 suites / 5438 tests / 0 failures** each — **plus a sixth** green run on the
+  *final* tree after the comment corrections. Guard-store blast radius **19 suites / 209 tests green**.
+  **2 mutations RED-then-GREEN**, restore verified by `md5sum`.
+- **The tenth hostile-critic pass** (separate agent, a command per claim) **held all five claims** and
+  **found three real defects — all in my own shipped comments**, now fixed.
 
-**What CC-24 added, in one line.** `entities/api/entities.ts` now detects a **reactivation** from the
-before-state it already holds (`!isActiveEntity(ent) && (input.isActive ?? true)`), reads the CC-17
-decision carrier (a **malformed** header is a **400** before anything is touched), runs the same
-`evaluateStructureChange` on the same `entityDefinitionSurface`, **refuses fail-closed (422, nothing
-written)**, and writes the records **after the flush** through the same `writeFieldPermissionGrant` every
-create path uses. `isActiveEntity` is exported now (it was module-private).
+**What CC-29 added, in one line.** `resetMutationGuards()` clears the module-local cache **and** the
+`globalThis` slot (both, because `getAllMutationGuards()` prefers the global but **falls back** to the
+local — clearing one only would let the cache resurrect the guards), and `core`'s `jest.setup.ts` calls it
+in a root-level `beforeEach`, so every **test** starts from a known-empty store.
 
-**And it closed the honest limit it was written against.** The `★ ACTIVE TASK` box said *"the ungated
-entity reactivation"* — that phrase is now struck through in the box, the plan (§10 item 9), `BACKLOG.md`,
-`platform_points.md` and `BUILD-ORDER.md`.
+**Scope, deliberately not expanded.** The reset is wired into `core` only. `shared`, `scheduler`, `search`
+and `webhooks` also have suites that touch the store and **no** `setupFilesAfterEnv` — same leak class, no
+hook to hang the fix on. That is a separate change, recorded in `PLAN-SD-1.md` §9.14, **not** an oversight.
 
 ---
 
-## 2. The two defects CC-24's *own* run found (read this — it is the lesson)
+## 2. The premise CC-29's own measurement *disproved* (read this — it is the lesson)
 
-The mutation pass did not merely confirm the change; it found **two real defects in the harness**, and both
-were mine:
+The `CC-29` row — and `CC-24`'s own code comments — said the store **"outlives a test file into the next
+one"** via `globalThis`. **That is false in this jest config (`testEnvironment: 'node'`).** Measured with a
+two-file probe: file A registers a guard and sets the key (`true`); file B reads it as **`undefined`**,
+count **0** — **even with the reset switched off**. Jest gives each test *file* its own realm.
 
-1. **The `deletedAt` clause of `isActiveEntity` was unpinned — in *both* consumers.** A mutation dropping
-   `ent.deletedAt == null` left CC-24's suite **10/10 GREEN** and CC-21's primitive suite **8/8 GREEN** —
-   **0 RED**. The clause is the only reader of a row with `deletedAt` set but `isActive` still true, and
-   that row is reachable without a caller doing anything odd (the install primitive sets `isActive` and
-   clears `deletedAt` as **two statements**). **FIXED:** one test in each consumer; re-measured, the
-   mutation now gives **1 RED in each suite**.
-2. **The suite leaked into the `globalThis`-backed mutation-guard store and broke an unrelated suite,
-   flakily.** `registerMutationGuards` **replaces the store wholesale** and writes it to `globalThis`, and
-   no jest config sets `resetModules` — so the registration outlived the file, and the guard it registered
-   **re-armed another file's shared grant mock**. Observed: the first full-suite run failed **exactly one**
-   test (the refusal case); the next two runs passed. **FIXED here** (capture the prior store, restore it in
-   `afterEach`) — re-applying the leak reproduces the `1 failed`, and the restore removes it.
-   **WIDENED into `CC-29`:** the *class* is not mine — **any** suite that registers a guard can break
-   **any** other, and I could **not** reproduce the failure on demand (the whole `entities` module
-   **in-band** is 335/335 even with the leak re-applied). That is stated as an open item with a callback,
-   **not** ticked green.
+**The real leak is within a file:** a guard registered in one test is still returned at the start of the
+**next test in the same file** (measured **1**; **0** with the reset wired). The fix was right; the *story*
+was wrong — and I had already measured it false before writing it into three comments across two repos.
 
-**The lesson to carry forward** (it is the standing rule, twice paid for): **a mutation that produces no
-RED is a finding, not a pass.** And **a green suite is not evidence until you have asked what would make it
-red.**
+**The three defects the tenth critic found (all in my words, none in the code):**
+1. the disproved cross-file mechanism, shipped in three comments — **all corrected**;
+2. a wrong count ("22 of the 23") — measured **18** test files under `packages/core/src` (25 repo-wide);
+3. a self-contradiction ("before each test" vs "before each test file") — the wiring is per **test**.
+
+**The lesson, now a working rule:** *when a measurement falsifies a premise, correct it **everywhere it was
+copied**, not only in the file being edited.* Combined with the standing rule this project keeps re-paying
+for: **a mutation (or a measurement) that produces no RED/difference is a finding, not a pass.**
 
 ---
 
@@ -67,19 +62,17 @@ red.**
 
 | | gap | status right now |
 |---|---|---|
+| **CC-26** | the "AI user" tick has no UI | **approved — startable now** (a front-end change against an existing server contract) |
+| **CC-28** | cross-tenant `updated_at` read-back (`entities/api/records.ts:336-338` omits `tenant_id`) | **startable now** (MEDIUM; a two-line fix + tests) |
 | **CC-20** | a custom *field*'s records have no enforcement consumer | blocked on **`G-04`** (the data axis) |
 | **CC-23** | create-branch double-insert | needs a **migration** (deferred; unreachable in normal operation) |
 | **CC-25** | a structure-permission decision is not authorised against the actor | **CONFIRMED by the owner — a ROLE PERMISSION** (a build, not open policy) |
-| **CC-29** | the `globalThis`-backed test store has **no reset**; one full-run failure unexplained | **startable now** — export `resetMutationGuards()`, call it in `packages/core/jest.setup.ts`, run the full suite ≥5× |
-| **CC-26** | the "AI user" tick has no UI | **approved — startable now** (a front-end change against an existing server contract) |
 | **CC-27** | an AI user cannot be *bound* to an agent | **approved — needs `AH-1` first** |
-| **CC-28** | cross-tenant `updated_at` read-back (`records.ts:336-338` omits `tenant_id`) | **startable now** (MEDIUM; a two-line fix) |
 | **SD-4 / G-04** | the per-verb structural grammar / the data-axis row | blocked on **`G-04`** |
 
-**The next slice is CC-29 or CC-26 — both startable now, and the choice is a scheduling call, not a
-policy call.** CC-29 is the one with a *name attached to a suspicion*: it is the only open item that can
-invalidate a green gate, so if the next session wants the foundation certain before adding to it, do CC-29
-first. `BUILD-ORDER.md` §order and the `★ ACTIVE TASK` box are the arbiters.
+**The next slice is CC-26 or CC-28 — both startable now, and the choice is a scheduling call, not a policy
+call.** The `★ ACTIVE TASK` box posts **CC-26** (the owner-approved item), with CC-28 immediately behind
+it. `BUILD-ORDER.md` and the box are the arbiters.
 
 ---
 
@@ -124,5 +117,7 @@ role permission rather than a new mechanism.
   the worktree/git boundary.** Ask the object store for the file (`git show <rev>:<path>`) or the path's
   history (`git log -1 -- <path>`); `git diff --stat` answers only *"what differs from HEAD"*. On this host
   `core.autocrlf=true`, so worktree **CRLF** vs blob **LF** makes a raw byte count meaningless — compare
-  **lines**. Both traps are written up in `analysis/git-diff-blob-vs-worktree-2026-10-08/FINDINGS.md`, and
-  both produced a **false finding** before they were caught.
+  **lines**. Both traps are written up in `analysis/git-diff-blob-vs-worktree-2026-10-08/FINDINGS.md`.
+- **Rule 13 (paid for 2026-10-08, CC-29):** **when a measurement falsifies a premise, correct it
+  everywhere it was copied** — not only in the file you are editing. A disproved claim that stays in a
+  comment is a defect even when the code is right.

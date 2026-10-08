@@ -1100,8 +1100,8 @@ one page, each with a named home. Details: [`BLUEPRINT-GAP-ANALYSIS.md`](BLUEPRI
    the flush through the same `writeFieldPermissionGrant` (gated at the route; no new query, no contract
    change). Its mutation pass also found and fixed two **harness** defects (an unpinned `deletedAt`
    clause in both consumers; a test leaking into the `globalThis` guard store) and widened the second
-   into **CC-29**. Still open: the create-branch double-insert (needs a
-   migration — CC-23), the `globalThis`-backed test store having no reset (CC-29), an enforcement consumer
+   into **CC-29** — and **CC-29 is now closed**: a `resetMutationGuards()` clears both the module-local cache and the `globalThis` slot, `core`'s `jest.setup.ts` calls it in a root-level `beforeEach`, and the full core suite ran green **six consecutive times** (627 suites / 5438 tests, 0 failures). Still open: the create-branch double-insert (needs a
+   migration — CC-23), an enforcement consumer
    for a *field*'s records (CC-20), and **authorising the decision actor** — a limit whose **model is now
    confirmed by the owner (2026-10-08): it is a ROLE PERMISSION** (the platform's own `role_acls.features_json`),
    so *who may decide a new surface's permissions* is a permission string a superadmin grants; a build, not

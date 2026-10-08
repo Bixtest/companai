@@ -126,6 +126,33 @@ gets broken.
 foundation before stack, the core boundary is not customisable, keep the project findable, measure
 from the artefact, research-validate-write-then-build. Read them once, before touching code.)*
 
+11. **A question the owner is holding is not the assistant's to close** *(owner, 2026-10-08)*.
+    When a note says a decision is his — *"decide and record"*, an open policy, an approval — **do not
+    resolve it yourself and write it down as settled.** Either **ask him**, or leave it **explicitly
+    open** (a `NEEDS-YOU.md` row, an `OPEN — needs you` status). His words: *"a question I am holding is
+    not yours to close."* Guessing a decision and recording it as done costs a full turn to undo and
+    hides the fact that a decision is still outstanding.
+
+12. **Never grep a rendered diff, and never compare bytes across the worktree/git boundary**
+    *(paid for twice on 2026-10-08 — two separate false findings)*. (a) `git show <commit> -- <path>`
+    renders a **diff**: a line beginning `+` may be an **added** line or merely **context** in a hunk,
+    so grep cannot tell you when a line was added. Ask the **object store** for the file
+    (`git show <rev>:<path>`) or the **path's history** (`git log -1 -- <path>`); `git diff --stat`
+    answers only *"what differs from HEAD"* — a file it omits is **already committed**, not lost.
+    (b) On this host `core.autocrlf=true` (measured: git `2.55.0.windows.3`), so the **worktree carries
+    CRLF** and a git-rendered blob carries **LF** — a raw byte count across that boundary is meaningless.
+    **Compare lines.** Full write-up: `analysis/git-diff-blob-vs-worktree-2026-10-08/FINDINGS.md`.
+
+13. **When a measurement falsifies a premise, correct it everywhere it was copied — not only in the file
+    you are editing** *(paid for 2026-10-08, CC-29)*. A premise (a claimed mechanism, a count, a
+    behaviour) usually gets copied into a plan, several code comments, and one or more registers; the
+    **code can be right while every one of those copies is a false statement in the tree**. Fixing only
+    the file in hand leaves the falsehood standing elsewhere, and the next session reads *that* copy. A
+    disproved claim left in a comment is a **defect**, the same standard as a broken test. *(CC-29: one
+    measurement showed the guard store did not leak across test files; the claim "it outlives that suite
+    into whichever file next shares the worker" had been copied into three comments across both repos —
+    a tenth hostile-critic pass found all three, plus a wrong count and a self-contradiction.)*
+
 ---
 
 ## 2. How to work with the owner

@@ -488,7 +488,7 @@ One statement is inherently atomic in Postgres — there is no window between re
   Each restored and verified md5-identical (`structure-change-gate.ts` `0ee67e7d92e48687ada72f1bc984509e`; `structure-change-decision-header.ts` `740d4eee8148b61d8ebdac4d56d7768f`; `permission-decision-grant.ts` `325337a4d23bef08eaadc19f8e7ed44b`; `guards.ts` `f21ee48f01b75d65db7fe5a51515f903`; `definitions.batch.ts` `b461ee9d6bfcd7bba191a5990ad85f16`; `field-definitions.ts` `7a32be6bc2a2392ce2e79fff7ee3c75a`).
 - **Suites:** both packages `tsc --noEmit` **exit 0**. `shared` permissions **3 suites / 59 tests, 0 failures**. Whole `core` package **626 suites / 5427 tests, 0 failures** (net +17 over CC-18's 5410 = the new core tests; no regression, no suite-count change). The `entities` api subtree **17 suites / 148 tests, 0 failures** — including `definitions.reactivation.sd1` and `d-guard` suites that exercise the newly-wired restore/single routes. *(A separate `shared` suite, `bootstrap/__tests__/dynamicLoader.tsconfig.test.ts`, reports 8 failures only under the full-suite parallel run — proved pre-existing and unrelated: it is not in the diff, and passes 8/8 in isolation; it is a `node-safe-delete-shim` teardown interaction, named here so the count is not mistaken for a regression.)*
 
-## 9. The hostile-critic passes and mutation-found defects — twenty-six real defects found
+## 9. The hostile-critic passes and mutation-found defects — thirty-one real defects found
 
 Each slice got its **own separate hostile-critic agent** (the standing rule), demanding a command + output for every claim — **except CC-21, CC-4 and CC-18**, where the mutation pass / premise-measurement itself found the weakness (§9.6, §9.7, §9.9). The tally: **§9.1** 5 · **§9.2** 5 · **§9.3** 4 · **§9.4** 4 · **§9.5** 1 · **§9.6** 1 · **§9.7** 2 · **§9.8** 2 · **§9.10** 2 = **26**, each **fixed** or **named** (never left silent).
 
@@ -630,7 +630,7 @@ The standard is: a new structure must not land until permissions are decided **a
 6. ✅ **The ACL merge — ATOMIC 2026-10-08 (CC-16).** Was: the merge into `role_acls.features_json` was a lock-free read-modify-write (`findOne` → `[...current, ...added]` → `persist`/`flush`), so two grants that interleaved *exactly* could lose an addition. **Now:** the union is **one atomic SQL `UPDATE`** (`jsonb ||` deduped by a `group by elem` sub-select, first-occurrence order preserved, `coalesce` for a null column, `returning` so the DB is the source of truth). The lost-update window is closed **empirically proven** — two concurrent sessions on live Postgres 17 both landed, while the old pattern (negative control, same interleave) lost one. 15 tests; 4 mutations RED-then-GREEN; a sixth hostile-critic pass found two issues (an overclaimed "after commit" in the header; an overstated test title) — both fixed. **The fix holds whether or not an ambient transaction exists** (the row lock is taken wherever it runs). *(Section §7.7.)*
 7. ⚠️ **A first grant onto a role with NO ACL row can double-insert under a race.** The merge fix (item 6) covers the *existing-row* case; the *create* branch still reads-then-inserts, and `role_acls` has **no unique index on `(role_id, tenant_id)`** — so two grants racing on a missing row can create two rows. **Unreachable in normal operation** (the row is created at setup), but real for a role whose ACL was deleted. Closing it needs the unique index → a migration, unprovable on this host. **(CC-23)**
 8. ✅ **The `decided` outcome — REACHABLE AND WRITABLE 2026-10-08 (CC-17).** Was: S2's *"either by a person or by a rule"* was only ever the rule — no caller supplied a `decision`, and both write sites returned/skipped for anything but `defaulted`, so a person's decision was unreachable **and** would have been dropped. **Now:** a **request-header carrier** (`x-om-ext-permissions-decision`, built by the platform's own `buildExtensionHeader`, parsed by the platform's own `getExtensionHeaderValue`) supplies a person's decision to the three request paths that can change a structure (the batch route, the single route, the restore route) **and** to the entity guards (via `input.requestHeaders`); the read is **three-way** (`absent`/`malformed`/`decision`) and a **malformed** header is refused **400** — never read as `absent`, which would fail-open into a superadmin grant; the decision type gained `grantTo?` and **both** `applyStructureChangeGrant` and `writeFieldPermissionGrant` now write a `decided` outcome through the same atomic merge as the default. **Measuring corrected two premises:** the `block`/`surfaceId` derivation **agrees on `block`** but **disagrees on `surfaceId`** with the catalogue (best-effort, harmless — nothing reads it but log lines), and two existing tests were found **pinning the pre-CC-17 defect** and corrected. 28 new/changed tests; 4 mutations RED-then-GREEN. *(Section §7.9.)*
-9. ✅ **A custom *entity*'s HTTP reactivation — GATED 2026-10-08 (CC-24).** Was: `entities/api/entities.ts` passes `operation: ent ? 'update' : 'create'`, and the only entity gate is `operations: ['create']` — so an entity that re-appears via HTTP landed with neither the header read nor the default applied. **Now:** the route detects the reactivation from the before-state (`!isActiveEntity(ent) && (input.isActive ?? true)`), reads the CC-17 carrier (malformed → **400**), runs the same `evaluateStructureChange` on the same `entityDefinitionSurface`, refuses fail-closed (**422**, nothing written), and writes the records after the flush through the same `writeFieldPermissionGrant`. **Shape chosen: gate at the route** — the before-state is already in hand (`ent`), so no new query and no change to the shared guard contract. **The mutation pass found a real test gap** (the `deletedAt` clause of `isActiveEntity` was unpinned in **both** consumers — 0 RED) and closed it in each; it also found that this suite **leaked into the global guard store** and broke an unrelated suite — fixed, and the wider class scheduled as **CC-29**. 11 tests; 6 mutations RED-then-GREEN; a ninth hostile-critic agent found nothing falsifiable. *(Section §9.11/§9.13.)*
+9. ✅ **A custom *entity*'s HTTP reactivation — GATED 2026-10-08 (CC-24).** Was: `entities/api/entities.ts` passes `operation: ent ? 'update' : 'create'`, and the only entity gate is `operations: ['create']` — so an entity that re-appears via HTTP landed with neither the header read nor the default applied. **Now:** the route detects the reactivation from the before-state (`!isActiveEntity(ent) && (input.isActive ?? true)`), reads the CC-17 carrier (malformed → **400**), runs the same `evaluateStructureChange` on the same `entityDefinitionSurface`, refuses fail-closed (**422**, nothing written), and writes the records after the flush through the same `writeFieldPermissionGrant`. **Shape chosen: gate at the route** — the before-state is already in hand (`ent`), so no new query and no change to the shared guard contract. **The mutation pass found a real test gap** (the `deletedAt` clause of `isActiveEntity` was unpinned in **both** consumers — 0 RED) and closed it in each; it also found that this suite **left the guard store dirty**, which the next test in the file could see — that class is now closed by **CC-29** (§9.14), which measured the real mechanism (within-file, not cross-file) and wired a reset into the harness. 11 tests; 6 mutations RED-then-GREEN; a ninth hostile-critic agent found nothing falsifiable. *(Section §9.11/§9.13.)*
 10. ✅ **The batch path's key validation — RESTORED 2026-10-08 (CC-18).** Was: the batch route carried `{ entityId, definitionCount }` in the guard payload, and both key guards (`no-reserved-key`, `key-shape`) read a single `payload.key` — so with no key they passed, and a batch could define a field whose key is a system column (`id`, `created_at`, …) while the single POST refused the identical field with 422. **Now:** the route names every key it is about to write (`keys: definitions.map(d => d.key)`), and the guards read that list through the new `readFieldKeys` helper and iterate it — one reading of the keys, so the single and batch paths cannot drift again. **The measured hole was the reserved key** (zod already refuses a malformed key with 400 before the guard on *both* routes, so the key-shape guard is defence-in-depth for non-HTTP callers — CLI/AI-authored); the reserved-key half is a genuine pre-fix hole, proven by reproduction at the pre-fix revision. 7 new tests (4 guard + 3 route); 4 mutations RED-then-GREEN. *(Section §7.8.)*
 11. **A custom *field*'s permission records have no enforcement consumer.** SD-1 grants `<entityId>.<key>.view|manage|structure` for a new column, but nothing reads them: the platform's live per-record features are `entities.records.<entityId>.{view,manage}` (`recordFeatures.ts`). So for a **field** the write is a real ACL change with no reader yet — *"permissions were decided and recorded"* is true, *"and now enforced"* is **not**. (For a custom **entity** the records *are* the live ones, because the entity surface supplies `featurePrefix` — which is what makes CC-21's gate consequential.) Named rather than glossed: it is a genuine caveat on the word "gated". **(CC-20)**
 12. **A global surface lands with no records.** `writeFieldPermissionGrant` skips when `tenantId` is null: a global custom field/entity has no single tenant to grant in. Reported at `debug` and stated here — not a silent skip, but a real gap on the literal reading of *"nothing is ever invisible"*. Closing it needs a per-tenant fan-out, which is a design of its own.
@@ -638,7 +638,7 @@ The standard is: a new structure must not land until permissions are decided **a
 14. **A decision carried on the header is not authorised against the actor.** `decidedBy` is taken from the wire and is **not** checked against the authenticated user, and `grantTo` may name any existing role — so a caller with `entities.definitions.manage` can grant arbitrary feature strings to an arbitrary role. This is a **pre-existing shape** (the route already writes grants), and S2 does not define the authorisation model for a decision, so it is **named as a limit, not fixed here**: the carrier delivers the decision, and *who is allowed to make one* is a policy question this slice does not answer. Recorded by the eighth hostile-critic pass as the sharpest unproven risk. **Scheduled as CC-25 — and the model is now answered in principle by the owner (2026-10-08):** *"all the relevant functionalities get broken down to specific permissions that we give or block from roles we create; depending on the role, the user gets or doesn't get this or that."* That **is** the platform's model (`role_acls.features_json` — permission strings on a role), so authorising the decision is **a role permission, not a new mechanism**. Awaiting the owner's confirmation before build (rule 11). Full reasoning: [`../analysis/ANSWER-2026-10-08-organisational-questions.md`](../analysis/ANSWER-2026-10-08-organisational-questions.md) §3.
 15. **Two organisational findings (2026-10-08) are NOT SD-1's, but they bound it.** (a) The platform's AI *actor* is a principal with a kind (`api_keys.principal_kind='ai_worker'`), but the "AI user" tick has no UI — the server contract exists, the shipped page does not expose it (**CC-26**). (b) An AI user cannot yet be *bound* to an agent (the actor and the code-declared agent are joined only by a caller-supplied string — **CC-27**). Neither is an SD-1 gap; both are recorded because they answer the *who* half of S2's rule. (c) Separately, the tenant-isolation forensic found one **real cross-tenant read** in a custom-record read-back (`entities/api/records.ts:336-338` omits `tenant_id` — **CC-28**, MEDIUM). See [`../analysis/ANSWER-2026-10-08-organisational-questions.md`](../analysis/ANSWER-2026-10-08-organisational-questions.md).
 
-**Status: PARTIAL.** The pure core is done, tested and mutation-proven; the hook is wired and fail-closed; **the write that turns the decision into an enforcement is built and tested on every path a field or entity surface can land or re-shape by — both HTTP create paths (single and batch), the HTTP reactivation paths (single + restore), the entity HTTP reactivation, the custom-entity install primitive, the non-request field paths (module install / seeds / CLI), and the field re-type case on all three write sites — and the merge itself is now atomic (no lost updates), and both the "by a rule" and "by a person" halves of S2 are now reachable and written**. What remains is an enforcement consumer for the field records, the create-branch double-insert (needs a migration), the decision-authorisation policy (CC-25), a reset for the `globalThis`-backed test store (**CC-29**), and the two deferred consumers (`SD-4`, `G-04`). SD-1 stays the active task. **Every remaining item is scheduled in [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md).**
+**Status: PARTIAL.** The pure core is done, tested and mutation-proven; the hook is wired and fail-closed; **the write that turns the decision into an enforcement is built and tested on every path a field or entity surface can land or re-shape by — both HTTP create paths (single and batch), the HTTP reactivation paths (single + restore), the entity HTTP reactivation, the custom-entity install primitive, the non-request field paths (module install / seeds / CLI), and the field re-type case on all three write sites — and the merge itself is now atomic (no lost updates), and both the "by a rule" and "by a person" halves of S2 are now reachable and written**, and the **test harness now resets the guard store before every test** (CC-29 — the full core suite ran green six times: 627/5438). What remains is an enforcement consumer for the field records, the create-branch double-insert (needs a migration), the decision-authorisation policy (CC-25), and the two deferred consumers (`SD-4`, `G-04`). SD-1 stays the active task. **Every remaining item is scheduled in [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md).**
 
 ### 9.11 The entity HTTP reactivation gated (2026-10-08, eleventh slice — CC-24)
 
@@ -701,13 +701,71 @@ its exact pre-mutation hash (`entities.ts` `35640fb9…`, `register.ts` `93e9077
 | **M6** | `(input.isActive ?? true)` → `true` | **1** | found independently by the critic; confirms the "stays a tombstone" clause |
 
 
+### 9.14 The guard-store reset, and a below-the-line premise correction (2026-10-08, twelfth slice — CC-29)
+
+**What CC-29 asked for (the callback text, written by the CC-24 slice).** *"export a
+`resetMutationGuards()` and call it from `packages/core/jest.setup.ts`, then run the **full**
+core suite **≥5 times** and require 0 failures; if any failure persists, treat it as its own
+defect and do **not** re-add a retry."*
+
+**What was built.** `resetMutationGuards()` in `shared/lib/crud/mutation-guard-store.ts`:
+clears the module-local `_guardEntries` **and** deletes the `globalThis` slot
+(`GLOBAL_KEY`). `packages/core/jest.setup.ts` (the core package's `setupFilesAfterEnv`) calls
+it in a root-level `beforeEach`. A new 5-test suite,
+`packages/shared/src/lib/crud/__tests__/mutation-guard-store.reset.test.ts`, pins both stores
+separately. Four files: 3 changed + 1 new.
+
+**Prerequisite proven in code first (rule 10d).** Two things were measured before writing
+anything: (i) no `resetMutationGuards` existed anywhere and no jest config cleared the store
+(`grep -rn` → nothing); (ii) `registerMutationGuards` **replaces wholesale** and
+`getAllMutationGuards` **prefers the global slot but falls back to the local cache** — which is
+why the reset must clear *both*, and why the fallback has its own test.
+
+**The premise was wrong, and measuring corrected it.** The CC-29 row (and CC-24's own code
+comments) said the store **outlives a test file into the next one** via `globalThis`. That is
+**false in this jest config** (`testEnvironment: 'node'`). Measured with a two-file probe: file
+A registers a guard and sets the key (`true`); file B reads it as **`undefined`**, count **0** —
+**even with the reset switched off**. So jest gives each test *file* its own realm. The
+**real** leak is **within a file**: a guard registered in one test is still returned at the
+start of the **next test in the same file** (measured count **1**; **0** with the reset wired).
+The accepted mechanism and the three affected comments were rewritten to state only this.
+
+**Scope, stated rather than silently expanded.** The reset is wired into `core` only. Four
+other packages have suites that import the store — `shared`, `scheduler`, `search`, `webhooks`
+— and **none** has a `setupFilesAfterEnv`, so they carry the same within-file leak class with
+no hook to hang the fix on. Wiring them is a separate change with its own blast radius; CC-29's
+acceptance criterion names the **core** suite, and that is what was run. Recorded here so the
+boundary is a decision, not an oversight.
+
+**Proof.**
+- **Green gate:** the full core suite **green five consecutive times** — **627 suites / 5438
+  tests / 0 failures** each — plus a **sixth** green run on the final tree *after* the
+  correct-the-comments change (comment-only, but re-measured rather than assumed).
+- **`tsc --noEmit`** exit **0** on `shared` and on `core`.
+- **Blast radius:** the 19 `core` suites that import the guard store → **209 tests, all green**
+  (run as a group, then the two the shell glob had swallowed run separately: 2 suites / 7 tests).
+  `entities` module **42/335**; `shared` crud **23/291**; the new reset suite **5/5**.
+- **2 mutations, RED-then-GREEN:**
+  - **M1** — `resetMutationGuards` clears **only** the global slot → **3 RED**; restore verified
+    by `md5sum` (`362b9e21…`), zero markers left.
+  - **M2** — the `jest.setup.ts` call removed → the within-file count measured **1** (vs **0**
+    wired). This mutation tests the *wiring*, which no unit test of the function can reach.
+- **A tenth hostile-critic agent** (separate agent, a command per claim) **held all five
+  claims** and **found three real defects in my own shipped comments** — (1) the false
+  cross-file mechanism, (2) a wrong count ("22 of the 23" → measured **18** test files in
+  `core`, 25 repo-wide), (3) a self-contradiction ("before each test" in one file, "before each
+  test file" in another). All three corrected. **The lesson, recorded in
+  [`WORKING-RULES.md`](WORKING-RULES.md):** when a measurement falsifies a premise, the
+  premise must be corrected *everywhere it was copied*, not only in the file being edited —
+  it had been copied into three comments across two repos.
+
 ### The next slice (in order)
 
 1. ✅ **Gate the custom entity's HTTP reactivation — DONE 2026-10-08 (CC-24, §9.11).**
-2. Give a custom field's records an enforcement consumer. **(CC-20)**
-3. Add the unique index on `(role_id, tenant_id)` + switch the create branch to `insert … on conflict … do update`. **(CC-23)**
-4. Authorise who may make a structure-permission decision — as a **role permission** (owner's model, confirmed 2026-10-08); the carrier and enforcement already exist. **(CC-25)**
-5. Reset the `globalThis`-backed mutation-guard store between test files, and re-run the full suite enough times to prove the one-run failure is gone. **(CC-29)**
+2. ✅ **Reset the guard store between tests, and prove the full suite green repeatedly — DONE 2026-10-08 (CC-29, §9.14).**
+3. Give a custom field's records an enforcement consumer. **(CC-20)**
+4. Add the unique index on `(role_id, tenant_id)` + switch the create branch to `insert … on conflict … do update`. **(CC-23)**
+5. Authorise who may make a structure-permission decision — as a **role permission** (owner's model, confirmed 2026-10-08); the carrier and enforcement already exist. **(CC-25)**
 
 **Adjacent items the two organisational questions produced (not SD-1's own slices, but they bound it):**
 6. Add the "AI user" tick to the create form — the missing UI for an existing server capability. **(CC-26)**

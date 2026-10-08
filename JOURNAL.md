@@ -84,10 +84,10 @@ role it names (`grantTo`, defaulting to `superadmin`). Both write sites that onl
 (`register.ts`) and the field choke point correctly **cannot** see a request header and still default —
 CC-17, 2026-10-08).
 
-**128 SD-1 tests; 54 mutations RED-then-GREEN across eleven slices, each restore md5-verified; `shared`
-197/2329 — 8 fail in the one suite of CC-19 (a host process-creation failure, not code), `core` 627/5438,
-typecheck 0.** **Nine** hostile-critic passes plus two mutation/premise-found defects (thirty real
-defects) — all fixed or named (`PLAN-SD-1.md` §9).
+**133 SD-1 tests; 56 mutations RED-then-GREEN across twelve slices, each restore md5-verified; `shared`
+197/2329 — 8 fail in the one suite of CC-19 (a host process-creation failure, not code), `core` 627/5438
+green **six consecutive times**, typecheck 0.** **Ten** hostile-critic passes plus four
+mutation/premise-found defects (thirty-one real defects) — all fixed or named (`PLAN-SD-1.md` §9).
 
 **It is still PARTIAL — but ALL headline limits are closed.** A gate that decides but does not record was
 not yet a gate; it now records. The path the field-management UI mostly uses — the **batch** route — was
@@ -105,7 +105,7 @@ and a test-store reset** — every one scheduled in
 2. **Gate the custom *entity*'s HTTP reactivation** — **✅ DONE 2026-10-08 (CC-24).** It was: the entity gate is `operations:['create']`, but the route maps a reactivation to `update`, so it never fired. The route now gates it from the before-state, refuses fail-closed (422), and writes the records after the flush — the CC-22 shape for the field twin. **The mutation pass found two real harness defects** (an unpinned `deletedAt` clause, now pinned in both consumers; and a leak into the `globalThis` guard store, now restored and widened into **CC-29**). 11 tests; 6 mutations RED-then-GREEN; a ninth hostile-critic agent found nothing falsifiable. `PLAN-SD-1.md` §9.11.
 3. **Authorise the decision actor** — **CONFIRMED by the owner (2026-10-08): it is a ROLE PERMISSION** (the platform's own model, `role_acls.features_json`) — a build, not an open policy. **(CC-25)**
 4. **Close the create-branch double-insert** — a first grant onto a role with no ACL row can create two rows; needs a unique index `(role_id, tenant_id)` (a migration, deferred). **(CC-23)**
-5. **Reset the `globalThis`-backed mutation-guard store between test files** — any suite that registers a guard can otherwise break any other; CC-24's did. **(CC-29)**
+5. **Reset the mutation-guard store before every test** — **✅ DONE 2026-10-08 (CC-29).** A `resetMutationGuards()` clears both the module-local cache and the `globalThis` slot, and `core`'s `jest.setup.ts` calls it in a root-level `beforeEach`, so every **test** starts clean. **The stated mechanism was disproved by measuring** — the store does *not* leak across test files (each file gets its own realm); the real leak is *within* a file. 5 consecutive full-suite runs green + a 6th on the final tree (627 suites / 5438 tests); 2 mutations; the tenth hostile-critic agent held all five claims and found three false statements in my own comments, all fixed. `PLAN-SD-1.md` §9.14.
 
 **Two organisational questions were answered and CONFIRMED (2026-10-08), and produced three more items.**
 The platform's AI **actor** is already a first-class principal (`api_keys.principal_kind = 'ai_worker'`);
@@ -116,15 +116,19 @@ change is a **row, not DDL**, so it cannot leak to another tenant's schema — b
 [`analysis/ANSWER-2026-10-08-organisational-questions.md`](analysis/ANSWER-2026-10-08-organisational-questions.md).
 
 **Read first (before continuing):** [`PLAN-SD-1.md`](library/development/PLAN-SD-1.md) — the plan, the
-critics' twenty-six defects (§9) and the honest limits (§10) — and the completion register
+critics' thirty-one defects (§9) and the honest limits (§10) — and the completion register
 [`COMPLETION-CALLBACKS.md`](library/development/COMPLETION-CALLBACKS.md) (the owner's 2026-10-08 standing
 instruction: always schedule a partial build's gap, prerequisite and callback). Then the same discipline
 as `S-02`/`D3`: fact-check what exists, name the honest boundary, then plan → execute → verify → document.
 **Do not assume the roadmap is right — re-measure it.**
 
-**Next after `SD-1` (`BUILD-ORDER` order).** `SD-3` (the tier mapping becomes a superadmin setting), then
-`S9`/`SD-2` (mark core functions and guard their deletion), then `SD-4`/`SD-5` (the structural grammar
-screen).
+**Next after `SD-1` (`BUILD-ORDER` order) — with one startable-now item inserted.** The next slice in
+BUILD-ORDER order is `SD-3` (the tier mapping becomes a superadmin setting), then `S9`/`SD-2` (mark core
+functions and guard their deletion), then `SD-4`/`SD-5` (the structural grammar screen). **Ahead of those,
+by the owner's approval (2026-10-08), one small item is startable now and needs no prerequisite: `CC-26` —
+add the "AI user" tick to the API-key create form** (the UI for a server capability that already exists:/n`api_keys.principal_kind = 'ai_worker'`). It is a front-end change against a settled contract, so it can
+land before the next structural slice. **`CC-20`, `CC-23` and `CC-25` remain behind `SD-1`'s own gates**
+(`G-04`, a migration, and the confirmed role-permission build respectively).
 
 ---
 
@@ -696,7 +700,55 @@ the per-item status is in `BACKLOG.md`. **This box is the only place that says "
    Updating the front end lets the owner test the micros as work proceeds. → recorded in
    [`WORKING-RULES.md`](library/development/WORKING-RULES.md) and the COOKBOOK.
 
-## 2026-10-08 (newest) — `CC-24`: the entity reactivation is gated, and the mutation pass found two defects in *my* tests
+## 2026-10-08 (newest) — `CC-29`: the guard store now resets, and a tenth critic found three false statements in *my own comments*
+
+**What happened.** `SD-1`'s twelfth slice. `CC-24`'s own mutation pass had found that its test suite left
+the `globalThis`-backed **mutation-guard store** dirty. The store had **no reset** and `registerMutationGuards`
+**replaces it wholesale**, so any suite that registers a guard changed the state for whatever ran next.
+`CC-29`'s callback was explicit: *"export a `resetMutationGuards()` and call it from
+`packages/core/jest.setup.ts`, then run the **full** core suite **≥5 times** and require 0 failures."*
+
+**What changed.** `resetMutationGuards()` clears the module-local `_guardEntries` **and** deletes the
+`globalThis` slot — both, because `getAllMutationGuards()` prefers the global one but **falls back** to the
+local cache, so clearing only the global would let the cache resurrect the old guards. `core`'s
+`jest.setup.ts` (`setupFilesAfterEnv`) calls it in a root-level `beforeEach`. A new 5-test suite pins both
+stores separately. Four files: 3 changed + 1 new.
+
+**The premise was wrong, and measuring is what caught it.** The `CC-29` row — and `CC-24`'s own code
+comments — said the store **outlives a test file into the next one** via `globalThis`. I built a two-file
+probe and measured: file A registers a guard and sets the key (`true`); file B reads it as **`undefined`**,
+count **0** — **even with the reset switched off**. Jest gives each test *file* its own realm here. The
+**real** leak is **within a file**: a guard registered in one test is still returned at the start of the
+**next test in the same file** (measured **1**; **0** with the reset wired). So the fix stands, but the
+*story* I had copied into three comments was false.
+
+**The tenth hostile-critic agent (a separate agent, a command per claim) held all five claims and found
+three real defects — all in my shipped words, none in the code:**
+1. **The disproved mechanism, shipped anyway.** I had already measured the cross-file claim false and then
+   wrote it into three comments across two repos. **Every copy corrected.**
+2. **A wrong count.** "22 of the 23 suites" → measured **18** test files under `packages/core/src`
+   (25 repo-wide). Corrected.
+3. **A self-contradiction.** One comment said "before each test", another "before each test file". The
+   wiring is a `beforeEach` — per **test**. Corrected.
+
+**The lesson, now a working rule:** when a measurement falsifies a premise, correct it **everywhere it was
+copied**, not only in the file being edited.
+
+**Verification.** Full core suite green **five consecutive times** — **627 suites / 5438 tests / 0
+failures** each — plus a **sixth** green run on the *final* tree after the comment corrections (comment-only,
+but re-measured rather than assumed). `tsc --noEmit` exit **0** on `shared` and `core`. Guard-store blast
+radius: **19 suites / 209 tests green**. **2 mutations RED-then-GREEN:** M1 (clear only the global slot) →
+**3 RED**, md5-verified restore; M2 (reset unwired) → within-file count **1** vs **0** wired — the mutation
+that tests the *wiring*, which no unit test of the function can reach.
+
+**Scope, stated rather than silently expanded:** the reset is wired into `core` only. `shared`, `scheduler`,
+`search` and `webhooks` also have suites that touch the store and **no** `setupFilesAfterEnv`; that is the
+same leak class with no hook to hang the fix on, and is a separate change.
+
+**Code `b129c81`→CC-29 (this commit); docs this commit.** Registers updated: `PLAN-SD-1.md` §9.14/§10,
+`COMPLETION-CALLBACKS.md`, `BACKLOG.md`, `BUILD-ORDER.md`, `platform_points.md`, `STATE-OF-PLAY`, this file.
+
+## 2026-10-08 — `CC-24`: the entity reactivation is gated, and the mutation pass found two defects in *my* tests
 
 **What happened.** `SD-1`'s eleventh slice. A custom **entity** brought back from a tombstone via HTTP was
 landing with **no** permissions gate: the route reports the operation as `update` for an existing row, and
