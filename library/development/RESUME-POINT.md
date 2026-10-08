@@ -1,10 +1,10 @@
 # RESUME POINT — where we are, and the plan to get back here
 
-> **Last written 2026-10-08 (CC-29)**, at the owner's explicit instruction: *"save exactly where you are and
+> **Last written 2026-10-08 (CC-26)**, at the owner's explicit instruction: *"save exactly where you are and
 > what the plan is to do next and the context so you can easily get back to that point."*
 >
 > This file is a **parking space**, not a roadmap. It is meant to be read *first* by a new session that has
-> to resume. **It was written for CC-29, and CC-29 is now DONE** — so §1–§2 below are a record, not a
+> to resume. **It was written for CC-26, and CC-26 is now DONE** — so §1–§2 below are a record, not a
 > to-do. **The honest next slice is named in §3, and the one place that says "what we are doing now" is the
 > `★ ACTIVE TASK` box at the top of [`../../JOURNAL.md`](../../JOURNAL.md).** Treat this file as stale the
 > moment the box and this file disagree — the box wins.
@@ -13,26 +13,30 @@
 
 ## 1. What was just completed (do not redo)
 
-**CC-29 — the mutation-guard store now resets before every test.**
-- **Code:** Repo 2 (`workspace/starting-kit`), branch `main` — `shared/lib/crud/mutation-guard-store.ts`
-  (the new `resetMutationGuards()`), `core/jest.setup.ts` (the wiring), a new 5-test suite, and the
-  corrected comments in `entities.reactivation.sd1.test.ts`.
-- **Docs:** Repo 1, branch `master` — the registers and the plan (§9.14 of `PLAN-SD-1.md`).
-- **Proven:** `tsc --noEmit` exit **0** on `shared` and `core`; the full `core` suite **green five
-  consecutive times** — **627 suites / 5438 tests / 0 failures** each — **plus a sixth** green run on the
-  *final* tree after the comment corrections. Guard-store blast radius **19 suites / 209 tests green**.
-  **2 mutations RED-then-GREEN**, restore verified by `md5sum`.
-- **The tenth hostile-critic pass** (separate agent, a command per claim) **held all five claims** and
-  **found three real defects — all in my own shipped comments**, now fixed.
+**CC-26 — the "AI user" tick now exists in the API-key create form.**
+- **Code:** Repo 2 (`workspace/starting-kit`), branch `main` — `api_keys/backend/api-keys/create/page.tsx`
+  (the `isAiWorker` checkbox, the `aiWorkerNotice` custom field gated by `visibleWhen`, the group listing
+  both, and the `onSubmit` conversion), the extended test file (now **7/7 green**), and 3 keys added
+  **in place** to all four i18n files (`{en,de,es,pl}.json`, `3 0` each).
+- **Docs:** Repo 1, branch `master` — the registers (`COMPLETION-CALLBACKS.md`, `BACKLOG.md`,
+  `platform_points.md`, `RESUME-POINT.md`, `JOURNAL.md`).
+- **Proven:** `tsc --noEmit` exit **0** on `core`; the `api_keys` module **6 suites / 51 tests green**; the
+  full `core` suite **green six consecutive times** — **627 suites / 5443 tests / 0 failures** each (the +5
+  over CC-29's 5438 is exactly this slice's new tests). **3 mutations RED-then-GREEN**, restores verified by
+  `md5sum` against `651d4a34f09ff97ae4017cb5bd58aa28`.
+- **The eleventh hostile-critic pass** (separate agent, a command per claim) **held all seven claims**,
+  naming what it tried to break and how each survived.
 
-**What CC-29 added, in one line.** `resetMutationGuards()` clears the module-local cache **and** the
-`globalThis` slot (both, because `getAllMutationGuards()` prefers the global but **falls back** to the
-local — clearing one only would let the cache resurrect the guards), and `core`'s `jest.setup.ts` calls it
-in a root-level `beforeEach`, so every **test** starts from a known-empty store.
+**What CC-26 added, in one line.** A `checkbox` field `isAiWorker` on the create form, a `custom` notice
+revealed **only when it is ticked** (`visibleWhen: { field: 'isAiWorker', equals: true }`), and an `onSubmit`
+conversion `if (values.isAiWorker === true) { payload.principalKind = 'ai_worker' }` — so an **unticked**
+form sends **no `principalKind` key at all**, and the form-only fields (`isAiWorker`, `aiWorkerNotice`) never
+reach the wire.
 
-**Scope, deliberately not expanded.** The reset is wired into `core` only. `shared`, `scheduler`, `search`
-and `webhooks` also have suites that touch the store and **no** `setupFilesAfterEnv` — same leak class, no
-hook to hang the fix on. That is a separate change, recorded in `PLAN-SD-1.md` §9.14, **not** an oversight.
+**A premise corrected by measuring, not assumed.** The server schema (`api_keys/data/validators.ts`) has
+**no `.strict()`**, so zod would **strip** an unknown key rather than refuse it — the page therefore
+converts deliberately instead of relying on a rejection. (My first comment claimed the schema was "strict
+about unknown fields"; the measurement disproved it, and the comment was corrected — rule 13.)
 
 ---
 
@@ -62,7 +66,6 @@ for: **a mutation (or a measurement) that produces no RED/difference is a findin
 
 | | gap | status right now |
 |---|---|---|
-| **CC-26** | the "AI user" tick has no UI | **approved — startable now** (a front-end change against an existing server contract) |
 | **CC-28** | cross-tenant `updated_at` read-back (`entities/api/records.ts:336-338` omits `tenant_id`) | **startable now** (MEDIUM; a two-line fix + tests) |
 | **CC-20** | a custom *field*'s records have no enforcement consumer | blocked on **`G-04`** (the data axis) |
 | **CC-23** | create-branch double-insert | needs a **migration** (deferred; unreachable in normal operation) |
@@ -70,9 +73,8 @@ for: **a mutation (or a measurement) that produces no RED/difference is a findin
 | **CC-27** | an AI user cannot be *bound* to an agent | **approved — needs `AH-1` first** |
 | **SD-4 / G-04** | the per-verb structural grammar / the data-axis row | blocked on **`G-04`** |
 
-**The next slice is CC-26 or CC-28 — both startable now, and the choice is a scheduling call, not a policy
-call.** The `★ ACTIVE TASK` box posts **CC-26** (the owner-approved item), with CC-28 immediately behind
-it. `BUILD-ORDER.md` and the box are the arbiters.
+**The next slice is CC-28 — startable now.** CC-26 is done. The `★ ACTIVE TASK` box posts the next item;
+`BUILD-ORDER.md` and the box are the arbiters.
 
 ---
 

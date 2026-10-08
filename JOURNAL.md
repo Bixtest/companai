@@ -122,13 +122,15 @@ instruction: always schedule a partial build's gap, prerequisite and callback). 
 as `S-02`/`D3`: fact-check what exists, name the honest boundary, then plan → execute → verify → document.
 **Do not assume the roadmap is right — re-measure it.**
 
-**Next after `SD-1` (`BUILD-ORDER` order) — with one startable-now item inserted.** The next slice in
-BUILD-ORDER order is `SD-3` (the tier mapping becomes a superadmin setting), then `S9`/`SD-2` (mark core
-functions and guard their deletion), then `SD-4`/`SD-5` (the structural grammar screen). **Ahead of those,
-by the owner's approval (2026-10-08), one small item is startable now and needs no prerequisite: `CC-26` —
-add the "AI user" tick to the API-key create form** (the UI for a server capability that already exists:/n`api_keys.principal_kind = 'ai_worker'`). It is a front-end change against a settled contract, so it can
-land before the next structural slice. **`CC-20`, `CC-23` and `CC-25` remain behind `SD-1`'s own gates**
-(`G-04`, a migration, and the confirmed role-permission build respectively).
+**Next after `SD-1` (`BUILD-ORDER` order) — with one startable-now item now DONE and one posted.** The next
+slice in BUILD-ORDER order is `SD-3` (the tier mapping becomes a superadmin setting), then `S9`/`SD-2` (mark
+core functions and guard their deletion), then `SD-4`/`SD-5` (the structural grammar screen). **Ahead of
+those, by the owner's approval (2026-10-08), one small item was startable now and needs no prerequisite —
+and it is now DONE: `CC-26` — the "AI user" tick is in the API-key create form** (the UI for a server
+capability that already existed: `api_keys.principal_kind = 'ai_worker'`). **It is replaced in the box by
+`CC-28` — the cross-tenant `updated_at` read-back** (`entities/api/records.ts:336-338` drops `tenant_id`),
+which is also **startable now** and needs no prerequisite. **`CC-20`, `CC-23` and `CC-25` remain behind
+`SD-1`'s own gates** (`G-04`, a migration, and the confirmed role-permission build respectively).
 
 ---
 
@@ -700,7 +702,51 @@ the per-item status is in `BACKLOG.md`. **This box is the only place that says "
    Updating the front end lets the owner test the micros as work proceeds. → recorded in
    [`WORKING-RULES.md`](library/development/WORKING-RULES.md) and the COOKBOOK.
 
-## 2026-10-08 (newest) — `CC-29`: the guard store now resets, and a tenth critic found three false statements in *my own comments*
+## 2026-10-08 (newest) — `CC-26`: the "AI user" tick lands in the API-key create form, and an eleventh critic holds all seven claims
+
+**What happened.** The owner approved `CC-26` (2026-10-08) and said *"proceed"*. It is the **missing UI for
+a server capability that already existed**: `api_keys.principal_kind` accepts `service | ai_worker`
+(`api_keys/data/entities.ts:52-53`; migration `Migration20260812180000.ts:32`; validator
+`api_keys/data/validators.ts:33`; persisted at `api/keys/route.ts:126`) — but the shipped create page
+exposed **no** such control, so an AI worker could only be marked by a direct API/CLI call.
+
+**What changed.** `api_keys/backend/api-keys/create/page.tsx` now declares an `isAiWorker` **`checkbox`**
+field and an `aiWorkerNotice` **`custom`** field gated by
+`visibleWhen: { field: 'isAiWorker', equals: true }` — so the notice is revealed **only when the tick is
+on** — both named in the group `details`'s `fields` array, with `initialValues.isAiWorker = false`. `onSubmit`
+converts the tick to the wire shape: `if (values.isAiWorker === true) { payload.principalKind = 'ai_worker' }`.
+Three keys were added **in place** to all four language files (`{en,de,es,pl}.json` — `3 0` each, pure
+additions, all valid JSON). Four files changed in the code repo (2 source + 4 i18n + 1 test file).
+
+**The two facts that matter.** (1) **The tick never reaches the wire.** The payload literal assigns only the
+named keys, so neither `isAiWorker` nor `aiWorkerNotice` is sent — pinned by test. (2) **An unticked form
+sends no `principalKind` key at all** — not `null`, not `undefined` — so the server's `?? null` default and
+the `'service'` reading are untouched for every existing caller. Both are pinned by dedicated tests.
+
+**A premise corrected by measuring, not assumed.** My first comment claimed the server schema was "strict
+about unknown fields". Measured: `createApiKeySchema` has **no `.strict()`**, so zod would **strip** an
+unknown key rather than refuse it. The page therefore converts deliberately — it never relies on the server
+rejecting a stray field. (Corrected in the comment; rule 13.)
+
+**Verification.** `api_keys` module **6 suites / 51 tests green**; the page's own suite **7/7**;
+`tsc --noEmit` on `core` exit **0**; the **full core suite green six consecutive times** — **627 suites /
+5443 tests / 0 failures** each (the **+5** over CC-29's 5438 is exactly this slice's new tests). **3
+mutations RED-then-GREEN**, each restore `md5sum`-verified to `651d4a34f09ff97ae4017cb5bd58aa28` with zero
+markers left: **M1** (`if (false && …)` — the kind is never sent) → **1 RED**; **M2** (`if (true || …)` —
+the kind is always sent) → **2 RED**; **M3** (`visibleWhen` removed) → **1 RED**.
+
+**The eleventh hostile-critic agent** (a separate agent, a command per claim) **held all seven claims**,
+naming what it tried to break: a field declared but **ungrouped** (would never render); a **truthy** guard
+instead of the strict `=== true`; **tautological** tests that stub the value they assert; i18n keys that were
+**re-sorted** rather than added; form-only fields **leaking** onto the wire; and **leftover mutation
+markers**. Its one correction is framing, not a defect: the i18n keys are **flat dotted top-level keys**,
+not nested objects.
+
+**Code (this commit); docs this commit.** Registers updated: `COMPLETION-CALLBACKS.md` (CC-26 → DONE),
+`BACKLOG.md` (item + header), `platform_points.md` (the AI-USERS point's "no UI" clause is now false),
+`RESUME-POINT.md`, this file.
+
+## 2026-10-08 — `CC-29`: the guard store now resets, and a tenth critic found three false statements in *my own comments*
 
 **What happened.** `SD-1`'s twelfth slice. `CC-24`'s own mutation pass had found that its test suite left
 the `globalThis`-backed **mutation-guard store** dirty. The store had **no reset** and `registerMutationGuards`
@@ -813,6 +859,18 @@ doing X now."**
 ---
 
 ### ✅ Done recently (ticked, then moved down here)
+
+- **2026-10-08 — `CC-26` — the "AI user" tick is in the API-key create form — DONE and PROVEN.** The UI for
+  a server capability that already existed: `api_keys.principal_kind` accepted `service | ai_worker` but the
+  create page exposed **no** control, so an AI worker could only be marked by API/CLI. The page now carries
+  an `isAiWorker` **checkbox** and an `aiWorkerNotice` **custom** field revealed by
+  `visibleWhen: { field: 'isAiWorker', equals: true }`, and `onSubmit` sends `payload.principalKind =
+  'ai_worker'` **only when ticked** — an **unticked** form sends **no `principalKind` key at all**, and the
+  form-only fields never reach the wire. **Proof:** `api_keys` module **6 suites / 51 tests green**; `tsc`
+  exit **0**; full core suite **green six consecutive times** (**627 suites / 5443 tests / 0 failures** —
+  the +5 over CC-29 is this slice's new tests). **3 mutations RED-then-GREEN**, md5-verified restores; the
+  **eleventh hostile-critic agent** held all seven claims. A premise was corrected by measuring: the server
+  schema is **not `.strict()`**, so zod would strip an unknown key rather than refuse it.
 
 - **2026-10-07 — `GAP A / C5` — the Metadata Registry — DONE and PROVEN — PHASE 0 IS COMPLETE** (code
   `59ab859`; plan `library/development/PLAN-metadata-registry.md`). The kernel built a canonical model but

@@ -768,7 +768,11 @@ boundary is a decision, not an oversight.
 5. Authorise who may make a structure-permission decision — as a **role permission** (owner's model, confirmed 2026-10-08); the carrier and enforcement already exist. **(CC-25)**
 
 **Adjacent items the two organisational questions produced (not SD-1's own slices, but they bound it):**
-6. Add the "AI user" tick to the create form — the missing UI for an existing server capability. **(CC-26)**
+6. ✅ **Add the "AI user" tick to the create form — DONE 2026-10-08 (CC-26).** The `isAiWorker` checkbox +
+   the `visibleWhen`-gated notice on the API-key create page; `onSubmit` sends `principalKind: 'ai_worker'`
+   only when ticked (an unticked form sends no `principalKind` key at all). 3 mutations RED-then-GREEN;
+   `api_keys` 6/51 green; full core suite green six consecutive times (627/5443); an eleventh hostile-critic
+   agent held all seven claims. **It replaces item 8 in the `★ ACTIVE TASK` box.**
 7. Build the agent↔AI-user **binding** row (and teach the registry to resolve a binding, never a definition). **(CC-27)**
-8. Fix the cross-tenant `updated_at` read-back (`entities/api/records.ts:336-338` omits `tenant_id`). **(CC-28)**
+8. Fix the cross-tenant `updated_at` read-back (`entities/api/records.ts:336-338` omits `tenant_id`). **(CC-28)** — **posted as the next task.**
 
