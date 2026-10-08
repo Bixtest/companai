@@ -35,7 +35,7 @@ log.** Everything else (HANDOVER, START-PROMPT, README, BOOKMARKS, BACKLOG) poin
 
 ---
 
-### ▶ NOW — `SD-1`: the **S2 permissions gate** (Phase 1). **PARTIAL — the decision core is built, tested and mutation-proven; the enforcement half is next. Plan: [`library/development/PLAN-SD-1.md`](library/development/PLAN-SD-1.md).**
+### ▶ NOW — `SD-1`: the **S2 permissions gate** (Phase 1). **PARTIAL — the decision core AND the enforcement are built, tested and mutation-proven; the remaining paths are scheduled. Plan: [`library/development/PLAN-SD-1.md`](library/development/PLAN-SD-1.md).**
 
 > **If you are a new agent, read only this block to know your job.** Everything below the box is the
 > history and the queue; this is the work in hand.
@@ -47,28 +47,32 @@ created**). It is the gate that makes the *structural grammar* (SD-4) real: a pe
 appear un-gated, and it is the gate a **Hermes-proposed schema change** must pass — the AI proposes, the
 gate decides, and there is no way around it.
 
-**Where it stands (2026-10-08) — read this before doing anything.** The **decision machinery is built and
-proven**: `shared/src/lib/permissions/catalogue.ts` (the permission catalogue — surfaces and the two
-blocks they yield) and `structure-change-gate.ts` (`evaluateStructureChange` → `decided | defaulted |
-refused`, pure, fail-closed). The **hook is wired and fail-closed**: two `MutationGuard`s on the entities
-`create` path (`entities/data/guards.ts`) block a create the gate refuses. **37 tests; 8 mutations
-RED-then-GREEN, each restore md5-verified; `shared` 197/2327, `core` 618/5332, typecheck 0.** A
-**hostile-critic pass found five real defects** — all fixed or named (`PLAN-SD-1.md` §9).
+**Where it stands (2026-10-08) — read this before doing anything.** **The decision machinery and the
+enforcement are built and proven.** *The decision:* `shared/src/lib/permissions/catalogue.ts` (the
+permission catalogue — surfaces and the two blocks they yield) and `structure-change-gate.ts`
+(`evaluateStructureChange` → `decided | defaulted | refused`, pure, fail-closed). *The hook:* two
+`MutationGuard`s on the entities `create` path (`entities/data/guards.ts`) block a create the gate refuses.
+*The enforcement (the step that was missing):* `auth/lib/permission-decision-grant.ts` **writes** the
+gate's `defaulted` records into the tenant's grant role's `role_acls.features_json` (idempotent set-union,
+S5), wired in the guards' `afterSuccess` and carried from `validate` to `afterSuccess` by the real
+`runMutationGuards` runner. **33 SD-1 tests; 9 mutations RED-then-GREEN, each restore md5-verified;
+`shared` 197/2327, `core` 620/5354, typecheck 0.** **Two** hostile-critic passes found ten real defects —
+all fixed or named (`PLAN-SD-1.md` §9).
 
-**But it is PARTIAL, and the reason is the headline:** **the records the gate produces are not written
-anywhere.** No call site persists the default into `role_acls.features_json`, so on the HTTP routes the
-gate enumerates and fails closed but does **not** change the ACL. A gate that decides but does not record
-is not yet a gate. Four things remain, in order (`PLAN-SD-1.md` §10):
-1. **Write the records** — apply the `defaulted` outcome to the tenant's superadmin role through the
-   existing store (S5). This is the step that turns the decision into an enforcement.
-2. **Close the batch create path** — `api/definitions.batch.ts` creates new columns under
-   `operation:'custom'` (mapped to `'update'`), so a create-only guard never sees them.
-3. **Name or gate the module-install / CLI create paths** (`entities/lib/field-definitions.ts`, `cli.ts`).
-4. **Field-type-change detection** — needs the before-state, which the guard input does not carry.
+**It is still PARTIAL — but the headline limit is closed.** A gate that decides but does not record was
+not yet a gate; it now records. What remains is **coverage of the other creation paths and two deferred
+consumers** — every one scheduled in [`COMPLETION-CALLBACKS.md`](library/development/COMPLETION-CALLBACKS.md):
+1. **Close the batch create path** — `api/definitions.batch.ts` creates new columns under
+   `operation:'custom'` (mapped to `'update'`), so a create-only guard never sees them. **(CC-2)**
+2. **Name or gate the module-install / CLI create paths** (`entities/lib/field-definitions.ts`, `cli.ts`). **(CC-3)**
+3. **Field-type-change detection** — needs the before-state, which the guard input does not carry. **(CC-4)**
+4. **Make the ACL merge atomic** — it is a lock-free read-modify-write today. **(CC-16)**
 
 **Read first (before continuing):** [`PLAN-SD-1.md`](library/development/PLAN-SD-1.md) — the plan, the
-critic's five defects (§9) and the honest limits (§10). Then the same discipline as `S-02`/`D3`:
-fact-check what exists, name the honest boundary, then plan → execute → verify → document.
+critics' ten defects (§9) and the honest limits (§10) — and the completion register
+[`COMPLETION-CALLBACKS.md`](library/development/COMPLETION-CALLBACKS.md) (the owner's 2026-10-08 standing
+instruction: always schedule a partial build's gap, prerequisite and callback). Then the same discipline
+as `S-02`/`D3`: fact-check what exists, name the honest boundary, then plan → execute → verify → document.
 **Do not assume the roadmap is right — re-measure it.**
 
 **Next after `SD-1` (`BUILD-ORDER` order).** `SD-3` (the tier mapping becomes a superadmin setting), then

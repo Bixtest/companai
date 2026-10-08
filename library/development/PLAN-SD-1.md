@@ -128,7 +128,18 @@ the existing guards — not a per-route hand-wired call.
 | `packages/shared/src/lib/permissions/__tests__/structure-change-gate.test.ts` **(new)** | 13 tests. |
 | `packages/core/src/modules/entities/data/__tests__/guards.sd1.test.ts` **(new)** | 11 tests. |
 
+### 7.1 The enforcement half — step 1 of §10, built 2026-10-08
+
+| File | What it is |
+|---|---|
+| `packages/core/src/modules/auth/lib/permission-decision-grant.ts` **(new)** | **The write.** `applyPermissionDecisionGrant(em, { tenantId, grantTo, records })` applies the gate's `defaulted` outcome to the tenant's grant role through the **existing** roles-and-permissions store (`role_acls.features_json`, S5). Finds the role by name+tenant (`resolveGrantRole`), finds/creates its `RoleAcl`, and merges the records as a **set-union** (idempotent). Never sets `isSuperAdmin` to `true`, never changes an existing flag, never touches `organizationsJson`. Returns `{applied:true,…}` or `{applied:false, reason:'role_not_found'|'no_records', because}`. |
+| `packages/core/src/modules/entities/data/guards.ts` **(modified)** | The two SD-1 guards gained `afterSuccess`. `runStructureChangeGate` now returns `shouldRunAfterSuccess:true` + `metadata.permissionDecision`; `writeGateDecisionGrant` resolves the request EM (`createRequestContainer`, the `customers/data/guards.ts` pattern), calls `applyGateDecisionToGrantRole`, and logs at `error` when it cannot apply. **The decision is now carried from `validate` to `afterSuccess` and written.** |
+| `packages/core/src/modules/auth/lib/__tests__/permission-decision-grant.test.ts` **(new)** | 13 tests — the write, with a mocked EM. |
+| `packages/core/src/modules/entities/data/__tests__/guards.sd1-write.test.ts` **(new)** | 12 tests — the wiring, **including a test through the real `runMutationGuards` runner** (the metadata wire a hostile critic proved was untested). |
+
 ## 8. Verification results (measured, not assumed)
+
+### 8.1 The decision core (2026-10-08, first slice)
 
 - **New tests:** 37 (13 + 13 + 11).
 - **RED-then-GREEN mutation proof: 8 disjoint mutations, 8/8 RED**, each restored and **md5-verified byte-identical** (bytes I/O, `open(p,'wb')`, so the LF→CRLF trap cannot hide a bad restore):
@@ -145,7 +156,27 @@ the existing guards — not a per-route hand-wired call.
 - **Suites (GREEN):** `shared` **197 suites / 2327 tests, 0 failures**; `core` **618 suites / 5332 tests, 0 failures**.
 - **Typecheck:** `shared` **exit 0**; `core` exit 0.
 
-## 9. The hostile-critic pass — a separate agent, five real defects found
+### 8.2 The enforcement half (2026-10-08, second slice)
+
+- **New tests:** 22 (`permission-decision-grant.test.ts` 11, `guards.sd1-write.test.ts` 11). **SD-1's tests now total 33.**
+- **RED-then-GREEN mutation proof: 9 disjoint mutations across 3 files, 9/9 RED**, each restored and **md5-verified byte-identical** (bytes I/O, so the LF→CRLF trap cannot hide a bad restore):
+  | # | Mutation | Result |
+  |---|---|---|
+  | M1 | grant: drop the no-records refusal | RED — 2 failed |
+  | M2 | grant: replace the merge instead of union | RED — 1 failed |
+  | M3 | grant: confer superadmin on a fresh ACL | RED — 1 failed |
+  | M4 | grant: pretend a missing role exists | RED — 1 failed |
+  | M5 | guards: never ask for `afterSuccess` | RED — 2 failed |
+  | M6 | guards: remove the field guard's `afterSuccess` | RED — 5 failed |
+  | M7 | guards: auto-apply a `decided` outcome too | RED — 1 failed |
+  | M8 | grant: drop the `added.length` guard (always flush) | RED — 1 failed |
+  | M9 | **runner: drop the metadata carried to `afterSuccess`** (the wire) | RED — 1 failed |
+- **Suites:** `core` **620 suites / 5354 tests, 0 failures**. `shared` **197 suites / 2329 tests — 2321 pass, 8 fail in ONE suite**: `dynamicLoader.tsconfig.test.ts`, the **known pre-existing environmental failure** (the sandbox `rmSync` shim intercepts deletes, so a suite that cleans a temp dir fails under the full run). **Proved pre-existing two ways:** `git status` shows `shared` is **byte-unmodified** this slice (only `core` changed), and the suite **passes 8/8 in isolation**. Not a regression.
+- **Typecheck:** `core` **exit 0**; `shared` exit 0.
+
+## 9. The hostile-critic passes — separate agents, ten real defects found
+
+### 9.1 The decision core (2026-10-08, first slice)
 
 Run as a **separate agent** (the standing rule), demanding a command + output for every claim. It found five real defects. **All five are fixed or named:**
 
@@ -159,23 +190,38 @@ Run as a **separate agent** (the standing rule), demanding a command + output fo
 
 The critic also found the gate's records-empty check was **dead code** (kind + id valid ⇒ records non-empty). It is now **reachable** via defect 1's fix.
 
+### 9.2 The enforcement half (2026-10-08, second slice)
+
+A **second** separate hostile-critic agent, again demanding a command + output for every claim. It confirmed the chain end-to-end by reading (route → wrapper → runner → `afterSuccess`), confirmed the guards are registered in the running app (`apps/mercato/.mercato/generated/guards.generated.ts`), and found **five real issues**. **All five are addressed:**
+
+| # | Defect (as the critic proved it) | Resolution |
+|---|---|---|
+| 1 | **The metadata wire was untested.** `guards.sd1-write.test.ts` called `afterSuccess` directly and `guards.sd1.test.ts` asserted only `result.ok` — so if `mutation-guard-registry.ts:193` passed `metadata: null`, all 31 tests would still pass and the write would never fire. | **FIXED** — a new test goes through the **real `runMutationGuards` runner**, asserts the decision is carried into `afterSuccessCallbacks.metadata`, and runs it the way `runRouteMutationGuards` does. Mutation **M9** (drop the metadata) now proves it RED. |
+| 2 | **The `decided` outcome is unreachable in production** — the only caller passes `{ surfaces }` with no `decision`. | **NAMED** — scheduled as **CC-17** in `COMPLETION-CALLBACKS.md`; the write deliberately ignores `decided` until a decision carrier exists. |
+| 3 | **"Never touches `isSuperAdmin`" was literally false** — the create branch writes `isSuperAdmin: false`. | **FIXED** — the claim is now precise: it never sets the flag **to `true`** and never **changes an existing** value; a fresh row keeps the entity default. |
+| 4 | **The merge is not concurrency-safe** — a lock-free read-modify-write can lose an addition under exact interleaving. | **NAMED** — scheduled as **CC-16**; stated honestly in the file header (the ACL edit route guards the same shape with an optimistic lock the post-commit hook cannot supply). |
+| 5 | **A non-array `featuresJson` is silently replaced**; case/whitespace variants are not deduped against existing entries. | **NOTED** — the entity type is `string[] \| null`, so a non-array cannot occur through the typed path; the `Array.isArray` guard already handles `null`. Cosmetic; left as-is. |
+
+The critic also confirmed the two claims it could not reproduce (`8 mutations`, and the runtime DB write) are **unprovable on this host** for the same reason the whole item is: the unit suites mock the EntityManager.
+
 ## 10. Honest limits — **SD-1 is PARTIAL, not done**
 
-The standard is: a new structure must not land until permissions are decided **and the records are created**. What is built is the **decision machinery** and a **fail-closed hook**. What is **not** built:
+The standard is: a new structure must not land until permissions are decided **and the records are created**. **Both halves now exist for the HTTP create paths:** the gate decides (pure, fail-closed) and the guard's `afterSuccess` writes the default's records into the tenant's grant role through the existing store. **The headline limit — "a gate that decides but does not record is not yet a gate" — is closed.** What is **not** built:
 
-1. **The records are not written.** The gate produces the records (`entities.records.<entityId>.view|manage`, `<surface>.structure`); **no call site persists them** into `role_acls.features_json`. So on the HTTP routes the hook enumerates and fails closed, but does not itself change the ACL. **This is the headline limit: the gate is a decision, not yet an enforcement.** The write is the caller's step through the existing store (S5), and it is the next slice.
-2. **The batch create path is ungated.** `api/definitions.batch.ts` creates new columns under `operation:'custom'` (mapped to `'update'`); a create-only guard cannot see them, and the guard's payload carries no field list. Closing it needs either the keys passed into the guard or the gate run at the route's `if (!def)` branch — a deliberate change, not a one-liner.
-3. **The module-install and CLI create paths are ungated** (`entities/lib/field-definitions.ts` via `install-from-ce.ts`; `entities/cli.ts`). Non-request paths; the same class as `S-02`'s documented limits.
-4. **A field-type change is not gated.** Detecting it needs the before-state, which the guard input does not carry.
-5. **The structural block is a single record** (`<prefix>.structure`). The per-verb, per-level grammar (add/edit/remove/reference × straight/review/approval/never) is **`SD-4`'s**.
-6. **The data-axis row shape is `G-04`'s.**
-7. **The catalogue is in-process** for recorded (runtime) surfaces. A durable row is deferred — a migration is **unprovable on this host** (the unit suites mock the EntityManager; `document.ts:22-28` records the same reasoning for the Function row). **Trigger: `G-04`.**
+1. **The batch create path is ungated.** `api/definitions.batch.ts` creates new columns under `operation:'custom'` (mapped to `'update'`); a create-only guard cannot see them, and the guard's payload carries no field list. Closing it needs either the keys passed into the guard or the gate run at the route's `if (!def)` branch — a deliberate change, not a one-liner. **(CC-2)**
+2. **The module-install and CLI create paths are ungated** (`entities/lib/field-definitions.ts` via `install-from-ce.ts`; `entities/cli.ts`). Non-request paths; the same class as `S-02`'s documented limits. **(CC-3)**
+3. **A field-type change is not gated.** Detecting it needs the before-state, which the guard input does not carry. **(CC-4)**
+4. **The structural block is a single record** (`<prefix>.structure`). The per-verb, per-level grammar (add/edit/remove/reference × straight/review/approval/never) is **`SD-4`'s**. **(CC-5)**
+5. **The data-axis row shape is `G-04`'s.** **(CC-6)**
+6. **The catalogue is in-process** for recorded (runtime) surfaces. A durable row is deferred — a migration is **unprovable on this host** (the unit suites mock the EntityManager; `document.ts:22-28` records the same reasoning for the Function row). **Trigger: `G-04`.** **(CC-7)**
+7. **The ACL merge is a lock-free read-modify-write.** Under exact interleaving (two structure changes at once, same tenant) one addition can be lost. Stated in `permission-decision-grant.ts`'s header; the ACL edit route guards the same shape with an optimistic lock this post-commit hook cannot supply. **(CC-16)**
+8. **The `decided` outcome is unreachable in production.** The only caller passes no `decision`, so the gate can only ever return `defaulted`/`refused` — S2's *"either a person or a rule"* is today only the rule. The write deliberately ignores `decided` until a decision carrier with a grant target exists. **(CC-17)**
 
-**Status: PARTIAL.** The pure core is done, tested and mutation-proven; the hook is wired and fail-closed; **the write that would make it a gate is not built.** SD-1 stays the active task.
+**Status: PARTIAL.** The pure core is done, tested and mutation-proven; the hook is wired and fail-closed; **the write that turns the decision into an enforcement is built and tested for the HTTP create paths.** What remains is coverage of the other creation paths, the type-change case, the concurrency of the merge, and the two deferred consumers (`SD-4`, `G-04`). SD-1 stays the active task. **Every remaining item is scheduled in [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md).**
 
 ### The next slice (in order)
-1. Write the records: apply the gate's `defaulted` outcome to the tenant's superadmin role ACL through the existing store — the step that turns the decision into an enforcement.
-2. Close the batch create path (pass the keys, or gate at the route).
-3. Name or gate the module-install / CLI paths.
-4. Field-type-change detection (needs the before-state).
+1. Close the batch create path (pass the keys, or gate at the route). **(CC-2)**
+2. Name or gate the module-install / CLI paths. **(CC-3)**
+3. Field-type-change detection (needs the before-state). **(CC-4)**
+4. Make the ACL merge atomic (the concurrency fix). **(CC-16)**
 

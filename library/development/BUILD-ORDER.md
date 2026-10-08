@@ -1072,9 +1072,12 @@ one page, each with a named home. Details: [`BLUEPRINT-GAP-ANALYSIS.md`](BLUEPRI
 5. **SD-1 / S2** — the permissions gate on new data structures: when a table/column/field-type change
    lands, force the permissions question; default = full grant to superadmin + create the records.
    **◐ PARTIAL 2026-10-08** — the decision core (the permission catalogue + the pure fail-closed gate in
-   `shared/src/lib/permissions/`) and the `MutationGuard` hook on the entities `create` path are built,
-   tested and mutation-proven; **the records the gate produces are not yet written**, so it is not yet an
-   enforcement (plan [`PLAN-SD-1.md`](PLAN-SD-1.md), limits §10).
+   `shared/src/lib/permissions/`), the `MutationGuard` hook on the entities `create` path, **and the write**
+   (`auth/lib/permission-decision-grant.ts` — the gate's `defaulted` records now land in the tenant's grant
+   role's `role_acls.features_json`) are built, tested and mutation-proven; **the headline limit is closed.**
+   Still open: the batch / CLI / field-type-change paths, the lock-free merge, and the two deferred
+   consumers (`SD-4`, `G-04`) — each scheduled in [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md)
+   (plan [`PLAN-SD-1.md`](PLAN-SD-1.md), limits §10).
 6. **SD-3** — make the tier mapping/defaults/fallbacks a **superadmin setting** (`module_configs`, module
    `request_outcome`), seeded from the dictionary, failing closed (§C.2b). **Not** a hardcoded table.
 7. **S9 / SD-2** — mark core functions (roles & permissions manager first) and guard their deletion.
