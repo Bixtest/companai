@@ -14,6 +14,17 @@ import {
   beginEntitiesMutationGuard,
   ENTITY_DEFINITION_RESOURCE_KIND,
 } from './definitions.mutation-guard'
+import {
+  evaluateStructureChange,
+  type StructureChangeGateOutcome,
+} from '@open-mercato/shared/lib/permissions/structure-change-gate'
+import {
+  readStructureDecisionFromHeaders,
+  toStructurePermissionDecision,
+} from '@open-mercato/shared/lib/permissions/structure-change-decision-header'
+import { entityDefinitionSurface } from '../data/guards'
+import { isActiveEntity } from '../lib/register'
+import { writeFieldPermissionGrant } from '../lib/field-definitions'
 
 const CUSTOM_ENTITY_DEFINITION_RESOURCE_KIND = ENTITY_DEFINITION_RESOURCE_KIND
 
@@ -151,6 +162,42 @@ export async function POST(req: Request) {
     }
   }
 
+  // SD-1 (CC-24): a reactivation is a surface reappearing, exactly as a create is.
+  // This route reaches the registry as `operation: ent ? 'update' : 'create'` (below),
+  // and the only entity gate is `operations: ['create']` — so an entity that comes back
+  // from an inactive tombstone was **never** gated. The field twin was closed in CC-22
+  // (`definitions.ts` / `definitions.restore.ts`); this is the entity twin.
+  //
+  // The shape is CC-22's, deliberately: gate **at the route**, from the before-state
+  // (`ent`, already loaded above), because the route is where the reactivation is known.
+  // The before-state is in hand, so no new query and no change to the shared guard
+  // contract is needed.
+  const reactivatesEntity = !!ent && !isActiveEntity(ent) && (input.isActive ?? true)
+  // SD-1 (CC-17): the same decision carrier every other request path uses. A malformed
+  // decision is refused with 400 **before anything is touched**; a well-formed one
+  // reaches the gate so the `decided` branch is reachable here too.
+  const requestedDecision = readStructureDecisionFromHeaders(req.headers)
+  if (requestedDecision.kind === 'malformed') {
+    return NextResponse.json({ error: requestedDecision.because }, { status: 400 })
+  }
+  const entityPermissionDecision: StructureChangeGateOutcome | null = reactivatesEntity
+    ? evaluateStructureChange({
+        surfaces: [entityDefinitionSurface(input.entityId)],
+        decision:
+          requestedDecision.kind === 'decision' ? toStructurePermissionDecision(requestedDecision.decision) : null,
+      })
+    : null
+  if (entityPermissionDecision?.outcome === 'refused') {
+    return NextResponse.json(
+      {
+        error:
+          `The entity cannot be re-activated: ${entityPermissionDecision.because} ` +
+          'Every new data structure must answer the permissions question before it is applied (S2).',
+      },
+      { status: 422 },
+    )
+  }
+
   const guard = await beginEntitiesMutationGuard({
     container,
     auth,
@@ -195,6 +242,17 @@ export async function POST(req: Request) {
   em.persist(ent)
   await em.flush()
   await guard.runAfterSuccess()
+  // SD-1 (CC-24): the re-activated entity has landed — now write the decision's records.
+  // A no-op unless this was a reactivation (the decision is null otherwise): the **create**
+  // case is already granted by the guard's own `afterSuccess`, so granting here as well
+  // would double the write (it is an idempotent set-union, so that would be harmless, but
+  // the null guard keeps one path — one write — per surface).
+  await writeFieldPermissionGrant(
+    em,
+    auth.tenantId ?? null,
+    entityPermissionDecision,
+    'the re-activated custom entity',
+  )
   // Invalidate sidebar/nav cache for tenant scope (also when tenantId is null)
   try {
     const cache = (await createRequestContainer()).resolve('cache') as any

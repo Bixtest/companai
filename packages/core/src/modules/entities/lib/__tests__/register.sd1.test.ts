@@ -126,6 +126,29 @@ describe('upsertCustomEntity — the SD-1 gate (CC-21)', () => {
     expect(featuresOfLastGrant()).toContain('entities.records.a:one.view')
   })
 
+  it('gates a row whose isActive is already true but which is still a tombstone (deletedAt set)', async () => {
+    // `isActiveEntity` is `isActive === true && deletedAt == null` — both clauses must bite.
+    // Before this test existed, a mutation dropping the `deletedAt` clause left **every**
+    // test in this suite and the CC-24 route suite green (measured: 0 RED), so the clause
+    // was unpinned in both consumers. It matters because the clause is the only thing that
+    // reads a `deletedAt` **without** `isActive` going false, and that row is reachable
+    // without a caller doing anything unusual: `apply()` (`register.ts:76`) sets `isActive`
+    // and clears `deletedAt` as two separate statements, so an interrupted write — or a
+    // direct DB edit — leaves exactly this shape. Without the clause the primitive would
+    // take the "nothing to reactivate" branch (`lands:false`), reactivate the row, and
+    // write **no** records.
+    const em = makeEm(activeRow({ isActive: true, deletedAt: new Date('2026-01-01T00:00:00.000Z') }))
+
+    const result = await upsertCustomEntity(em as never, 'a:one', {
+      label: 'One',
+      tenantId: 'tenant-1',
+    })
+
+    expect(result).toBe('updated')
+    expect(grantMock).toHaveBeenCalledTimes(1)
+    expect(grantMock.mock.calls[0][1].decision.outcome).toBe('defaulted')
+  })
+
   it('does not gate an update that leaves the entity active', async () => {
     const em = makeEm(activeRow({ label: 'Old' }))
 

@@ -20,8 +20,16 @@ export type UpsertEntityOptions = {
 
 export type UpsertCustomEntityResult = 'created' | 'updated' | 'unchanged'
 
-/** Whether a custom-entity row is a live surface (active and not tombstoned). */
-function isActiveEntity(ent: { isActive?: boolean; deletedAt?: Date | null } | null | undefined): boolean {
+/**
+ * Whether a custom-entity row is a live surface (active and not tombstoned).
+ *
+ * Exported since CC-24 (the entity twin of `isActiveColumn`): the HTTP route
+ * (`api/entities.ts`) must decide "is this a reactivation?" from the before-state,
+ * and that rule has to be the *same* rule the install primitive uses here — one
+ * definition, so the primitive and the route cannot drift into disagreeing about
+ * what "an entity appearing" means.
+ */
+export function isActiveEntity(ent: { isActive?: boolean; deletedAt?: Date | null } | null | undefined): boolean {
   return !!ent && ent.isActive === true && ent.deletedAt == null
 }
 
