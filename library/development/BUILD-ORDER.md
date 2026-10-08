@@ -1074,10 +1074,12 @@ one page, each with a named home. Details: [`BLUEPRINT-GAP-ANALYSIS.md`](BLUEPRI
    **◐ PARTIAL 2026-10-08** — the decision core (the permission catalogue + the pure fail-closed gate in
    `shared/src/lib/permissions/`), the `MutationGuard` hook on the entities `create` path, **and the write**
    (`auth/lib/permission-decision-grant.ts` — the gate's `defaulted` records land in the tenant's grant
-   role's `role_acls.features_json`) are built, tested and mutation-proven; **and both HTTP create paths are
-   now covered** — the **batch** definitions route (the one the field-management UI mostly uses) runs the
-   same gate at the route, because the registry cannot see the columns it creates. **Both headline limits
-   are closed.** Still open: the CLI / module-install paths, the field-type-change case, the lock-free
+   role's `role_acls.features_json`) are built, tested and mutation-proven; **and every create path is now
+   covered** — the **batch** definitions route (the one the field-management UI mostly uses) runs the same
+   gate at the route, because the registry cannot see the columns it creates, and the **non-request** paths
+   (module install / seeds / the `add-field` CLI) run it in the shared primitive
+   `ensureCustomFieldDefinitions`. **All three headline limits are closed.** Still open: the HTTP
+   **reactivation** paths, the **custom-entity** install path, the field-type-change case, the lock-free
    merge, the batch's reserved-key check, an enforcement consumer for a *field*'s records, and the two
    deferred consumers (`SD-4`, `G-04`) — each scheduled in [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md)
    (plan [`PLAN-SD-1.md`](PLAN-SD-1.md), limits §10).
