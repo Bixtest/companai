@@ -170,6 +170,21 @@ the existing guards — not a per-route hand-wired call.
 | `packages/core/src/modules/entities/__tests__/cli-add-field.sd1.test.ts` **(new)** | 5 tests — the CLI gates a create and grants after it lands; **gates a reactivation**; no gate for an update that keeps the field active; a malformed key refuses and creates nothing; a global field is not granted. |
 | `packages/core/src/modules/entities/lib/__tests__/field-definitions.test.ts` **(modified)** | Its grant module is stubbed so the sync assertions stay focused (its own contract is proved in the new suite). |
 
+### 7.4 The HTTP reactivation paths — step 1 of §10, built 2026-10-08 (CC-22)
+
+**What it is.** A field brought back from a tombstone is a permission surface **re-appearing**, so it must not land until the gate has decided — exactly as a create must not. Two routes bring a field back: the single-definition POST (`definitions.ts`, an existing **inactive** row saved active) and the restore POST (`definitions.restore.ts`). Both reach the registry as `'update'` (`operation: def ? 'update' : 'create'` and `operation: 'custom'` both map to `'update'`), so the create-only gate guard never sees them.
+
+**The shape chosen, and why — gate at the route, not relabel the operation.** The CC-22 row offered two options: relabel the operation `'create'` when the row is a tombstone, or gate at the route. **Relabelling was rejected for the same reason CC-2 rejected it for the batch:** it would fire the create-only gate guard, but it would also **drop the bridged legacy guard** (`operations: ['update','delete']`) that the route needs on its update path. So the gate runs **at the route**, on the before-state the route has already loaded, against the same `fieldDefinitionSurface` and the same `writeFieldPermissionGrant` every other create path uses — **one gate, one write, whichever path a column lands by**.
+
+**Fail-closed.** A refusal returns **422 and writes nothing** (the row is left as it was). Granting happens **after the flush**, so the surface exists first.
+
+| File | What it is |
+|---|---|
+| `packages/core/src/modules/entities/api/definitions.ts` **(modified)** | The single-definition POST. `reactivatesField = !!def && !isActiveColumn(def) && (input.isActive ?? true)`; if so, `evaluateStructureChange([fieldDefinitionSurface(entityId, key)])`; `refused` → 422; after the flush, `writeFieldPermissionGrant(…, 'the re-activated custom field')`. On a **create** the decision is `null`, so the grant early-returns and the route never competes with the create-only guard. |
+| `packages/core/src/modules/entities/api/definitions.restore.ts` **(modified)** | The restore POST — same shape, `reactivatesField = !isActiveColumn(def)`, label `'the restored custom field'`. The `def` lookup 404s before the gate is reached. |
+| `packages/core/src/modules/entities/lib/field-definitions.ts` **(modified)** | `writeFieldPermissionGrant` gained a 4th, **log-only** parameter `what = 'the new custom fields'`, so a create and a reactivation log distinctly. The default preserves every existing caller's wording exactly (proved inert — it appears only inside `logger.*` templates). |
+| `packages/core/src/modules/entities/api/__tests__/definitions.reactivation.sd1.test.ts` **(new)** | 9 tests across both routes: a reactivation is gated and granted after the flush; **a create is not gated by the route** (and, with a real guard registered, the route contributes zero grants — it never competes with the create-only guard); an active update is not gated; a deactivation is not gated; re-saving a tombstone as still inactive is not gated; a restore is gated and granted; restoring an already-active row is not gated; a malformed surface id refuses and restores nothing (fail-closed); a missing row 404s. |
+
 ## 8. Verification results (measured, not assumed)
 
 ### 8.1 The decision core (2026-10-08, first slice)
@@ -252,35 +267,23 @@ the existing guards — not a per-route hand-wired call.
 - **Typecheck:** `core` **exit 0**; `shared` exit 0.
 - **A defect found by self-review, before the critic — and fixed.** The first cut counted a tombstone as a "new surface" even under `createOnly` — but the loop **never reactivates under `createOnly`** (it skips updates), so the gate would have granted records for a column that never appeared. Reachable (the definitions GET uses `createOnly: true`). Fixed: `lands = !existing || (!createOnly && !isActiveColumn(existing))`; the test "does not gate a tombstone under createOnly" pins it.
 
-### 9.3 The batch create path (2026-10-08, third slice — CC-2)
+### 8.5 The HTTP reactivation paths (2026-10-08, fifth slice — CC-22)
 
-A **third** separate hostile-critic agent, again demanding a command + output for every claim. It found **two real defects and two unstated limits**. All four are addressed:
+- **New tests:** 9 (one file, `definitions.reactivation.sd1.test.ts` — both routes). **SD-1's tests now total 68.**
+- **RED-then-GREEN mutation proof: 4 disjoint mutations across the two route files, 4/4 RED**, each restored and **md5-verified byte-identical** (`md5sum -c`, bytes I/O so the LF→CRLF trap cannot hide a bad restore):
+  | # | Mutation | Result |
+  |---|---|---|
+  | M1 | single route: drop the reactivation gate (never evaluate) | RED — 1 failed (the reactivation is no longer refused/granted) |
+  | M2 | restore route: drop the reactivation gate (never evaluate) | RED — 2 failed (the restore gate + its grant) |
+  | M3 | single route: fail open (do not refuse on `refused`) | RED — 1 failed (the fail-closed test) |
+  | M4 | single route: gate every key (`>= 0`, not only `reactivatesField`) | RED — **4 failed**, incl. the create / active-update / deactivation "not gated" tests |
+- **Suites:** `core` `tsc --noEmit` **exit 0**. `entities` module **39 suites / 289 tests, 0 failures**; the **6 direct consumers** (the two route files, `field-definitions`, `cli-add-field`, `definitions.batch.sd1`, `guards.sd1` + `guards.sd1-write`) **49 tests, 0 failures**.
+- **No CRLF, no trailing hard-breaks** introduced in the four touched code files (checked on each).
+- **Files, md5 at the verified revision:** `definitions.ts` `779741671d8fd491cca4e86860359ca4` · `definitions.restore.ts` `d5863c7edf897b76e2f9b2a10ea7cfa2` · `field-definitions.ts` `ac5ae4f887c7b786c27a5984138d3eb3` · `definitions.reactivation.sd1.test.ts` (new).
 
-| # | Defect (as the critic proved it) | Resolution |
-|---|---|---|
-| 1 | **A reactivation slipped through ungated.** `defByKey` holds rows regardless of `isActive`/`deletedAt`, so a key whose row is an **inactive tombstone** was not "new" — yet the loop flips it active. Re-adding a deleted field landed ungated. | **FIXED** — the test is now "no row **or** an inactive row" (`isActiveColumn`); mutation **M6** proves it RED. |
-| 2 | **A missing tenant skipped the grant silently.** `if (… && auth.tenantId)` returned 200 with the columns committed and nothing written and nothing said — contradicting the file's own "an ungated surface must be visible". | **FIXED** — an explicit `else` logs at `error` with the ungranted surfaces; mutation **M7** proves it RED. |
-| 3 | **The 422 refusal is unreachable through HTTP.** `entityId` and `key` are both validated, so a field surface is always readable and the gate can only return `defaulted`. The refusal test reaches the branch only by substituting a surface. | **NAMED** — the branch is a guard against a malformed surface, and it becomes reachable when the **non-request** paths (CC-3: CLI / module-install) are gated. Stated in §10. |
-| 4 | **The granted records have no enforcement consumer.** Nothing reads `<entityId>.<key>.view\|manage\|structure`; the platform's real per-record features are `entities.records.<entityId>.{view,manage}` (`recordFeatures.ts`). So SD-1 writes ACL rows nothing checks. **Pre-existing** (the guard does the same) and not a regression. | **NAMED** — scheduled as **CC-20**; it is a real caveat on the word "gated" and must not be left implicit. |
+## 9. The hostile-critic passes — separate agents, nineteen real defects found
 
-The critic confirmed, with commands, that it could **not** falsify: the write-after-commit ordering, the "a failing write does not fail the save" behaviour, the "one mapping" claim, the tenant identity between the two paths, and the absence of weakened assertions in the updated test files (`git diff` shows only added `jest.mock` blocks).
-
-### 9.4 The non-request create paths (2026-10-08, fourth slice — CC-3)
-
-A **fourth** separate hostile-critic agent, again demanding a command + output for every claim. It found **four real issues** — one fixed, three named — and could **not** falsify the core claims.
-
-| # | Finding (as the critic proved it) | Resolution |
-|---|---|---|
-| 1 | **The HTTP reactivation paths are ungated.** The single-definition route passes `operation: def ? 'update' : 'create'` and the restore route passes `operation: 'custom'`; both map to `'update'`, which the create-only SD-1 guard does not see — so a tombstoned field is reactivated with no gate. (The batch route *does* gate this, CC-2.) **Pre-existing** (neither route is a CC-3 file), and the field records are inert (CC-20), so the impact is completeness, not a live bypass. | **NAMED** — scheduled as **CC-22** (startable now: each route already holds the before-state). |
-| 2 | **A custom *entity* created by the module install is ungated.** `install-from-ce.ts` calls `upsertCustomEntity` before the field sync, and that lands a `CustomEntity` row with no gate. Its records **are** the live ones (`entities.records.<id>`). | **NAMED** — scheduled as **CC-21**. |
-| 3 | **The caller-list comment was incomplete.** It named five callers of the primitive; there are **seven** (it also reaches `checkout/seed/customFields.ts` and `sync-akeneo/lib/catalog-importer.ts`). | **FIXED** — the comment now names all of them and points at CC-22. |
-| 4 | **A global surface lands with no records.** `writeFieldPermissionGrant` skips when `tenantId` is null. | **NAMED** — a limit in §10. It is the honest consequence of "a global surface has no tenant to grant in" — reported at `debug` and stated, not a silent skip. |
-
-The critic re-ran two of the mutations independently and confirmed both RED, and could **not** falsify the claim that the gated set equals the set the loop lands across a matrix of edge cases (duplicate keys, `createOnly` × {missing, tombstone}, soft-deleted, dry-run). It also confirmed `upsertCustomEntity` is genuinely ungated.
-
-**One further limit, from the throw itself.** `install-from-ce` commits the `CustomEntity` (`upsertCustomEntity`) *before* it calls the field sync, so if a **malformed declared key** ever existed the throw would leave an entity with no fields. **Unreachable today** — every declared key in the tree is snake_case (measured: 0 non-conforming keys across `packages/*` and `apps/*`) — and a throw is the correct fail-closed response to a defective declaration. Named, not hidden.
-
-## 9. The hostile-critic passes — separate agents, sixteen real defects found
+Each slice got its **own separate hostile-critic agent** (the standing rule), demanding a command + output for every claim. The tally across the five passes: **§9.1** 5 · **§9.2** 5 · **§9.3** 4 · **§9.4** 4 · **§9.5** 1 = **19**, each **fixed** or **named** (never left silent).
 
 ### 9.1 The decision core (2026-10-08, first slice)
 
@@ -310,11 +313,49 @@ A **second** separate hostile-critic agent, again demanding a command + output f
 
 The critic also confirmed the two claims it could not reproduce (`8 mutations`, and the runtime DB write) are **unprovable on this host** for the same reason the whole item is: the unit suites mock the EntityManager.
 
+### 9.3 The batch create path (2026-10-08, third slice — CC-2)
+
+A **third** separate hostile-critic agent, again demanding a command + output for every claim. It found **two real defects and two unstated limits**. All four are addressed:
+
+| # | Defect (as the critic proved it) | Resolution |
+|---|---|---|
+| 1 | **A reactivation slipped through ungated.** `defByKey` holds rows regardless of `isActive`/`deletedAt`, so a key whose row is an **inactive tombstone** was not "new" — yet the loop flips it active. Re-adding a deleted field landed ungated. | **FIXED** — the test is now "no row **or** an inactive row" (`isActiveColumn`); mutation **M6** proves it RED. |
+| 2 | **A missing tenant skipped the grant silently.** `if (… && auth.tenantId)` returned 200 with the columns committed and nothing written and nothing said — contradicting the file's own "an ungated surface must be visible". | **FIXED** — an explicit `else` logs at `error` with the ungranted surfaces; mutation **M7** proves it RED. |
+| 3 | **The 422 refusal is unreachable through HTTP.** `entityId` and `key` are both validated, so a field surface is always readable and the gate can only return `defaulted`. The refusal test reaches the branch only by substituting a surface. | **NAMED** — the branch is a guard against a malformed surface, and it becomes reachable when the **non-request** paths (CC-3: CLI / module-install) are gated. Stated in §10. |
+| 4 | **The granted records have no enforcement consumer.** Nothing reads `<entityId>.<key>.view\|manage\|structure`; the platform's real per-record features are `entities.records.<entityId>.{view,manage}` (`recordFeatures.ts`). So SD-1 writes ACL rows nothing checks. **Pre-existing** (the guard does the same) and not a regression. | **NAMED** — scheduled as **CC-20**; it is a real caveat on the word "gated" and must not be left implicit. |
+
+The critic confirmed, with commands, that it could **not** falsify: the write-after-commit ordering, the "a failing write does not fail the save" behaviour, the "one mapping" claim, the tenant identity between the two paths, and the absence of weakened assertions in the updated test files (`git diff` shows only added `jest.mock` blocks).
+
+### 9.4 The non-request create paths (2026-10-08, fourth slice — CC-3)
+
+A **fourth** separate hostile-critic agent, again demanding a command + output for every claim. It found **four real issues** — one fixed, three named — and could **not** falsify the core claims.
+
+| # | Finding (as the critic proved it) | Resolution |
+|---|---|---|
+| 1 | **The HTTP reactivation paths are ungated.** The single-definition route passes `operation: def ? 'update' : 'create'` and the restore route passes `operation: 'custom'`; both map to `'update'`, which the create-only SD-1 guard does not see — so a tombstoned field is reactivated with no gate. (The batch route *does* gate this, CC-2.) **Pre-existing** (neither route is a CC-3 file), and the field records are inert (CC-20), so the impact is completeness, not a live bypass. | **NAMED** — scheduled as **CC-22** (built 2026-10-08 — see §9.5). |
+| 2 | **A custom *entity* created by the module install is ungated.** `install-from-ce.ts` calls `upsertCustomEntity` before the field sync, and that lands a `CustomEntity` row with no gate. Its records **are** the live ones (`entities.records.<id>`). | **NAMED** — scheduled as **CC-21**. |
+| 3 | **The caller-list comment was incomplete.** It named five callers of the primitive; there are **seven** (it also reaches `checkout/seed/customFields.ts` and `sync-akeneo/lib/catalog-importer.ts`). | **FIXED** — the comment now names all of them and points at CC-22. |
+| 4 | **A global surface lands with no records.** `writeFieldPermissionGrant` skips when `tenantId` is null. | **NAMED** — a limit in §10. It is the honest consequence of "a global surface has no tenant to grant in" — reported at `debug` and stated, not a silent skip. |
+
+The critic re-ran two of the mutations independently and confirmed both RED, and could **not** falsify the claim that the gated set equals the set the loop lands across a matrix of edge cases (duplicate keys, `createOnly` × {missing, tombstone}, soft-deleted, dry-run). It also confirmed `upsertCustomEntity` is genuinely ungated.
+
+**One further limit, from the throw itself.** `install-from-ce` commits the `CustomEntity` (`upsertCustomEntity`) *before* it calls the field sync, so if a **malformed declared key** ever existed the throw would leave an entity with no fields. **Unreachable today** — every declared key in the tree is snake_case (measured: 0 non-conforming keys across `packages/*` and `apps/*`) — and a throw is the correct fail-closed response to a defective declaration. Named, not hidden.
+
+### 9.5 The HTTP reactivation paths (2026-10-08, fifth slice — CC-22)
+
+A **fifth** separate hostile-critic agent, again demanding a command + output for every claim. It **could not falsify any of the four claims** (exit 0; the 9 tests; the exact mutation counts; the byte-identical restores) and it proved independently that the **double-grant logic is correct** (a reactivation through the single route totals **one** grant, not two — the create-only guard contributes zero because the route's own path already granted) and that the **new `what` parameter is inert** (it appears only inside `logger.*` templates; changing its value changes no assertion). It found **one real weakness** — and it was a weakness in my *proof*, not the code:
+
+| # | Finding (as the critic proved it) | Resolution |
+|---|---|---|
+| 1 | **The "route contributes zero grants" create test was vacuous.** It asserted `expect(grantMock).not.toHaveBeenCalled()`, but **registered no guard** — so nothing could have called the grant regardless, and the assertion would have passed even if the route double-granted. The claim it was meant to pin ("the route never competes with the create-only guard") was **not actually tested**. | **FIXED** — the test now registers a **real create guard** and keeps the `not.toHaveBeenCalled()` assertion, so the route's own contribution is proved **zero against a live guard**. Mutation **M4** (gate every key) then proves the strengthened test is **non-vacuous**: it goes RED with 4 failures. |
+
+The critic's own note, kept as the lesson: *a negative assertion is only as strong as the mechanism that could have made it positive* — `not.toHaveBeenCalled()` proves nothing unless the thing that would have called it is present.
+
 ## 10. Honest limits — **SD-1 is PARTIAL, not done**
 
 The standard is: a new structure must not land until permissions are decided **and the records are created**. **Both halves now exist on every create path — HTTP *and* non-request:** the gate decides (pure, fail-closed) and the default's records are written into the tenant's grant role through the existing store — from the guard's `afterSuccess` on the single-definition path, from the route itself on the batch path (§7.2), and from the shared primitive `ensureCustomFieldDefinitions` + the `add-field` CLI on the non-request paths (§7.3). **The three headline limits are closed:** *"a gate that decides but does not record is not yet a gate"*, *"the path the field-management UI mostly uses was ungated"*, and *"the module-install / CLI paths are ungated"*. What is **not** built:
 
-1. **The HTTP *reactivation* paths are ungated.** A tombstoned field is brought back by the single-definition route (`operation: def ? 'update' : 'create'`) and the restore route (`operation: 'custom'`) — both `'update'`, which the create-only guard does not see. The batch route *does* gate this (CC-2). Pre-existing, and the field records are inert (item 9), so the impact is completeness, not a live bypass. **(CC-22)**
+1. ✅ **The HTTP *reactivation* paths — GATED 2026-10-08 (CC-22).** Was: a tombstoned field is brought back by the single-definition route (`operation: def ? 'update' : 'create'`) and the restore route (`operation: 'custom'`) — both `'update'`, which the create-only guard does not see. **Now:** both routes detect the reactivation from the before-state (`!isActiveColumn(def) && (input.isActive ?? true)`), run the same `evaluateStructureChange` on the same `fieldDefinitionSurface`, refuse fail-closed (422, nothing written), and write the default's records after the flush through `writeFieldPermissionGrant`. **Shape chosen: gate at the route, not relabel `'create'`** — that would drop the bridged legacy guard, the same reason CC-2 rejected it. 9 tests; 4 mutations RED-then-GREEN. *(Section §7.4 below.)*
 2. **A custom *entity* created by the module install is ungated** — `install-from-ce.ts` calls `upsertCustomEntity` before the field sync. Its records *are* the live ones. **(CC-21)**
 3. **A field-type change is not gated.** Detecting it needs the before-state, which the guard input does not carry. **(CC-4)**
 4. **The structural block is a single record** (`<prefix>.structure`). The per-verb, per-level grammar (add/edit/remove/reference × straight/review/approval/never) is **`SD-4`'s**. **(CC-5)**
@@ -327,12 +368,11 @@ The standard is: a new structure must not land until permissions are decided **a
 11. **A global surface lands with no records.** `writeFieldPermissionGrant` skips when `tenantId` is null: a global custom field has no single tenant to grant in. Reported at `debug` and stated here — not a silent skip, but a real gap on the literal reading of *"nothing is ever invisible"*. Closing it needs a per-tenant fan-out, which is a design of its own.
 12. **A refusal on the install path can leave a partial install.** `install-from-ce` commits the `CustomEntity` before the field sync, so a malformed declared key would throw after the entity had committed. **Unreachable today** (every declared key in the tree is snake_case — measured); a throw is the correct fail-closed response to a defective declaration. Named, not hidden.
 
-**Status: PARTIAL.** The pure core is done, tested and mutation-proven; the hook is wired and fail-closed; **the write that turns the decision into an enforcement is built and tested on every create path — both HTTP create paths (single and batch) and the non-request paths (module install / seeds / CLI)**. What remains is the HTTP *reactivation* paths, the custom-entity install path, the type-change case, the concurrency of the merge, the batch key-validation gap, an enforcement consumer for the field records, and the two deferred consumers (`SD-4`, `G-04`). SD-1 stays the active task. **Every remaining item is scheduled in [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md).**
+**Status: PARTIAL.** The pure core is done, tested and mutation-proven; the hook is wired and fail-closed; **the write that turns the decision into an enforcement is built and tested on every create path — both HTTP create paths (single and batch), the HTTP reactivation paths (single + restore), and the non-request paths (module install / seeds / CLI)**. What remains is the custom-entity install path, the type-change case, the concurrency of the merge, the batch key-validation gap, an enforcement consumer for the field records, and the two deferred consumers (`SD-4`, `G-04`). SD-1 stays the active task. **Every remaining item is scheduled in [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md).**
 
 ### The next slice (in order)
-1. Gate the HTTP reactivation paths (single + restore). **(CC-22)**
-2. Gate the custom-entity install path. **(CC-21)**
-3. Field-type-change detection (needs the before-state). **(CC-4)**
-4. Make the ACL merge atomic (the concurrency fix). **(CC-16)**
-5. Restore the reserved-key / key-shape checks on the batch path. **(CC-18)**
+1. Gate the custom-entity install path. **(CC-21)**
+2. Field-type-change detection (needs the before-state). **(CC-4)**
+3. Make the ACL merge atomic (the concurrency fix). **(CC-16)**
+4. Restore the reserved-key / key-shape checks on the batch path. **(CC-18)**
 

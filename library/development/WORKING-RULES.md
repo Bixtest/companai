@@ -89,6 +89,38 @@ gets broken.
    **What it forbids:** flagging a defect as "not mine" and moving on; and executing a queued item without
    first asking whether it is still the right next thing for the project.
 
+10. **Build every task as a PACKAGE — and prove its prerequisites are flawless before stacking on them**
+    *(owner, 2026-10-08)*. This is how the **6-step work protocol** (`MEMORY.md`) is applied to a queued
+    item. **Steps, in order, and none may be skipped:**
+    **(a) Study the task's references.** Read what the `★ ACTIVE TASK` box and `BACKLOG.md` name for the
+    item — its `★ Hermes:` map section, its plan, its parent documents — **before** designing anything.
+    **(b) Pick its points from `platform_points.md`.** That file — `library/development/platform_points.md`
+    — is the **master point list**; it is kept in step with `BACKLOG.md` and the other docs as we go.
+    Take the points that define the task (and only those) and state them in the pack.
+    **(c) Write the requirement** = the task's own definition **+** those points, **combined**, before
+    touching code (`PLAN-*.md` §2/§3 is the shape).
+    **(d) Identify the prerequisites and prove them flawless FIRST.** Every prerequisite the task stands
+    on is **verified in the code** (not the docs) to be **done, functional, and bug-free** before the new
+    work is built on it. **If a prerequisite is not flawless, you fix it first** — or you schedule it
+    with the trigger that brings it back (`COMPLETION-CALLBACKS.md`, rule 8) — **you never stack on a
+    broken or unproven base.** This is where CC-20/CC-21/CC-22-class defects are caught.
+    **(e) Trace the impact and update the plans.** Before executing, identify **every other code piece
+    the change can touch** (callers, consumers, guards, other modules, parked modules) and **update the
+    development plans** (`PLAN-*.md`, `BUILD-ORDER.md`, `BACKLOG.md`, `platform_points.md`) so the blast
+    radius is written down, not discovered.
+    **(f) Then execute, and run the TOTAL quality protocol** — the standing verification set from §1:
+    the **hostile-critic pass** as a SEPARATE agent (demand a command + output for every claim, rule 4),
+    the **RED-then-GREEN mutation proof** for each new branch (restore md5-verified byte-identical), the
+    **re-measure** (two routes, rule 4), the **gate is green** (install/typecheck/lint/test/build,
+    rule 3), and only then the docs (rule at §2.1).
+    **Why:** *"the best package for that task"* built on an unverified base silently re-breaks the same
+    defect one layer down. His instruction, verbatim: *"whenever we pick the next task in backlog, we
+    study its references, and pick its relevant points in `platform_points.md` and create the best
+    package for that task from it. Identify required prerequisites that need to be flawless before
+    building this new task on top of it (so you fix that), then identify what other code pieces can be
+    impacted by your changes and update the development plans accordingly. Perform the total quality
+    protocols — the critical reviews and so — to verify delivery."*
+
 *(The COOKBOOK also carries the numbered engineering rules — zero-zero through zero-ten — that govern
 **how** the work is done: the specifications dictionary is binding, "it exists" is not "it is built",
 foundation before stack, the core boundary is not customisable, keep the project findable, measure
@@ -174,9 +206,12 @@ that still need work). Updating the front end helps me testing the micros as you
 - **If a rule stops being true**, delete it — do not leave it to be obeyed after it is wrong.
 - **Keep it short.** This is a page the agent reads once at the start; a long page defeats its purpose.
 
-*Last updated: 2026-10-08 — added rule 9 (you own the code you touch, fully; and challenge the task before
-executing it — *"work with knowledge, vision and awareness, not in a blind robotic way"*), on the owner's
-instruction. Previously 2026-10-08 — rule 8 (a partial build is scheduled in
+*Last updated: 2026-10-08 — added rule 10 (build every task as a PACKAGE: study references → pick the
+`platform_points.md` points → write the requirement → **prove the prerequisites flawless first** → trace
+the impact and update the plans → execute and run the total quality protocol), on the owner's
+instruction. Previously 2026-10-08 — added rule 9 (you own the code you touch, fully; and challenge the
+task before executing it — *"work with knowledge, vision and awareness, not in a blind robotic way"*),
+on the owner's instruction. Previously 2026-10-08 — rule 8 (a partial build is scheduled in
 [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md), not merely noted). 2026-10-06 — created, carrying the
 owner's two additions to the override list (two routes; the front-end rule) and the pointer to the
 Active-task box.*
