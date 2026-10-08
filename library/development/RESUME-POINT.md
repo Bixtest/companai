@@ -1,10 +1,10 @@
 # RESUME POINT — where we are, and the plan to get back here
 
-> **Last written 2026-10-08 (CC-26)**, at the owner's explicit instruction: *"save exactly where you are and
+> **Last written 2026-10-08 (CC-28)**, at the owner's explicit instruction: *"save exactly where you are and
 > what the plan is to do next and the context so you can easily get back to that point."*
 >
 > This file is a **parking space**, not a roadmap. It is meant to be read *first* by a new session that has
-> to resume. **It was written for CC-26, and CC-26 is now DONE** — so §1–§2 below are a record, not a
+> to resume. **It was written for CC-28, and CC-28 is now DONE** — so §1–§2 below are a record, not a
 > to-do. **The honest next slice is named in §3, and the one place that says "what we are doing now" is the
 > `★ ACTIVE TASK` box at the top of [`../../JOURNAL.md`](../../JOURNAL.md).** Treat this file as stale the
 > moment the box and this file disagree — the box wins.
@@ -13,30 +13,33 @@
 
 ## 1. What was just completed (do not redo)
 
-**CC-26 — the "AI user" tick now exists in the API-key create form.**
-- **Code:** Repo 2 (`workspace/starting-kit`), branch `main` — `api_keys/backend/api-keys/create/page.tsx`
-  (the `isAiWorker` checkbox, the `aiWorkerNotice` custom field gated by `visibleWhen`, the group listing
-  both, and the `onSubmit` conversion), the extended test file (now **7/7 green**), and 3 keys added
-  **in place** to all four i18n files (`{en,de,es,pl}.json`, `3 0` each).
+**CC-28 — the custom-record `updated_at` read-backs now scope by tenant.**
+- **Code:** Repo 2 (`workspace/starting-kit`), branch `main` — `entities/api/records.ts` (the batch
+  read-back in `GET` gained `.where('tenant_id','=', auth.tenantId!)` plus an org filter when the caller is
+  org-scoped; `readCustomEntityRecordUpdatedAt` gained `tenant_id`, and both call sites pass it), the new
+  `records.tenant-scope.cc28.test.ts` (3 tests), and 1 added test in `records.crud.test.ts`.
 - **Docs:** Repo 1, branch `master` — the registers (`COMPLETION-CALLBACKS.md`, `BACKLOG.md`,
-  `platform_points.md`, `RESUME-POINT.md`, `JOURNAL.md`).
-- **Proven:** `tsc --noEmit` exit **0** on `core`; the `api_keys` module **6 suites / 51 tests green**; the
-  full `core` suite **green six consecutive times** — **627 suites / 5443 tests / 0 failures** each (the +5
-  over CC-29's 5438 is exactly this slice's new tests). **3 mutations RED-then-GREEN**, restores verified by
-  `md5sum` against `651d4a34f09ff97ae4017cb5bd58aa28`.
-- **The eleventh hostile-critic pass** (separate agent, a command per claim) **held all seven claims**,
-  naming what it tried to break and how each survived.
+  `PLAN-SD-1.md` §10, `RESUME-POINT.md`, `JOURNAL.md`).
+- **Proven:** `tsc --noEmit` exit **0** on `core` and `shared`; the `entities` module **43 suites / 339 tests
+  green**; the full `core` suite **green five consecutive times** — **628 suites / 5447 tests / 0 failures**
+  each (the +1 suite / +4 tests over CC-26's 627/5443 is exactly this slice's additions). **3 mutations
+  RED-then-GREEN**, restores verified by `md5sum` against `211ce8f2e28c46e699acc60c1a573429`.
+- **The twelfth hostile-critic pass** (separate agent, a command per claim) **held all seven claims** — it
+  **stashed the fix and re-ran** to confirm **4 RED** pre-fix, and verified `auth.tenantId` is guaranteed
+  non-null at the batch block and that the list feeding `recordIds` is tenant-scoped.
 
-**What CC-26 added, in one line.** A `checkbox` field `isAiWorker` on the create form, a `custom` notice
-revealed **only when it is ticked** (`visibleWhen: { field: 'isAiWorker', equals: true }`), and an `onSubmit`
-conversion `if (values.isAiWorker === true) { payload.principalKind = 'ai_worker' }` — so an **unticked**
-form sends **no `principalKind` key at all**, and the form-only fields (`isAiWorker`, `aiWorkerNotice`) never
-reach the wire.
+**What CC-28 changed, in one line.** The two reads of the **shared** `custom_entities_storage` table now
+filter by `tenant_id` (and, in the batch path, by `organization_id` when the caller is org-scoped) — so a
+record id that also exists in another tenant can no longer merge that tenant's `updated_at` into the
+response.
 
-**A premise corrected by measuring, not assumed.** The server schema (`api_keys/data/validators.ts`) has
-**no `.strict()`**, so zod would **strip** an unknown key rather than refuse it — the page therefore
-converts deliberately instead of relying on a rejection. (My first comment claimed the schema was "strict
-about unknown fields"; the measurement disproved it, and the comment was corrected — rule 13.)
+**A premise corrected by measuring, not assumed.** The tenant-isolation forensic (§4.4) called **two** paths
+a "HIGH (concrete)" cross-tenant leak. Measuring the call sites showed the **single-record** path was **not**
+a live leak: it filtered on `organization_id`, and `organizations.id` is a `gen_random_uuid()` **primary
+key** — globally unique, so an org id already scoped the read to one tenant. The **live** hole was the
+**batch** path alone (**MEDIUM**). The single-path change is therefore **defence-in-depth**. (Rule 13 —
+correct a disproved premise everywhere it was copied; the FINDINGS §4.4 severity and the `PLAN-SD-1` §10
+clause were both corrected.)
 
 ---
 
@@ -66,15 +69,15 @@ for: **a mutation (or a measurement) that produces no RED/difference is a findin
 
 | | gap | status right now |
 |---|---|---|
-| **CC-28** | cross-tenant `updated_at` read-back (`entities/api/records.ts:336-338` omits `tenant_id`) | **startable now** (MEDIUM; a two-line fix + tests) |
 | **CC-20** | a custom *field*'s records have no enforcement consumer | blocked on **`G-04`** (the data axis) |
 | **CC-23** | create-branch double-insert | needs a **migration** (deferred; unreachable in normal operation) |
 | **CC-25** | a structure-permission decision is not authorised against the actor | **CONFIRMED by the owner — a ROLE PERMISSION** (a build, not open policy) |
 | **CC-27** | an AI user cannot be *bound* to an agent | **approved — needs `AH-1` first** |
-| **SD-4 / G-04** | the per-verb structural grammar / the data-axis row | blocked on **`G-04`** |
+| **§4.5 upsert** | the `custom_entities_storage` upsert conflict target omits `tenant_id` (a write-side sibling of CC-28) | **startable now** — small, but needs care (the `ON CONFLICT` requires a unique index that includes the new column) |
+| **`SD-4` / `G-04`** | the per-verb structural grammar / the data-axis row | blocked on **`G-04`** |
 
-**The next slice is CC-28 — startable now.** CC-26 is done. The `★ ACTIVE TASK` box posts the next item;
-`BUILD-ORDER.md` and the box are the arbiters.
+**The next slice is the CC-28 write-side sibling (§4.5) or `SD-3` in BUILD-ORDER order.** The `★ ACTIVE
+TASK` box posts the next item; `BUILD-ORDER.md` and the box are the arbiters.
 
 ---
 

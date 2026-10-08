@@ -122,15 +122,17 @@ instruction: always schedule a partial build's gap, prerequisite and callback). 
 as `S-02`/`D3`: fact-check what exists, name the honest boundary, then plan → execute → verify → document.
 **Do not assume the roadmap is right — re-measure it.**
 
-**Next after `SD-1` (`BUILD-ORDER` order) — with one startable-now item now DONE and one posted.** The next
-slice in BUILD-ORDER order is `SD-3` (the tier mapping becomes a superadmin setting), then `S9`/`SD-2` (mark
-core functions and guard their deletion), then `SD-4`/`SD-5` (the structural grammar screen). **Ahead of
-those, by the owner's approval (2026-10-08), one small item was startable now and needs no prerequisite —
-and it is now DONE: `CC-26` — the "AI user" tick is in the API-key create form** (the UI for a server
-capability that already existed: `api_keys.principal_kind = 'ai_worker'`). **It is replaced in the box by
-`CC-28` — the cross-tenant `updated_at` read-back** (`entities/api/records.ts:336-338` drops `tenant_id`),
-which is also **startable now** and needs no prerequisite. **`CC-20`, `CC-23` and `CC-25` remain behind
-`SD-1`'s own gates** (`G-04`, a migration, and the confirmed role-permission build respectively).
+**Next after `SD-1` (`BUILD-ORDER` order) — two startable-now items now DONE.** The next slice in
+BUILD-ORDER order is `SD-3` (the tier mapping becomes a superadmin setting), then `S9`/`SD-2` (mark core
+functions and guard their deletion), then `SD-4`/`SD-5` (the structural grammar screen). **Ahead of those,
+two small startable-now items were done by the owner's approval (2026-10-08): `CC-26` — the "AI user" tick
+is in the API-key create form** (the UI for a server capability that already existed:
+`api_keys.principal_kind = 'ai_worker'`), **and `CC-28` — the custom-record `updated_at` read-backs now
+scope by tenant** (the batch path was the live cross-tenant hole; the single path was defence-in-depth). **The
+box now posts `SD-4`/`SD-5`'s predecessor — or, if the owner prefers, the write-side sibling of CC-28** (the
+`custom_entities_storage` upsert conflict target omitting `tenant_id`, §4.5 of the tenant-isolation
+forensic). **`CC-20`, `CC-23` and `CC-25` remain behind `SD-1`'s own gates** (`G-04`, a migration, and the
+confirmed role-permission build respectively).
 
 ---
 
@@ -702,7 +704,64 @@ the per-item status is in `BACKLOG.md`. **This box is the only place that says "
    Updating the front end lets the owner test the micros as work proceeds. → recorded in
    [`WORKING-RULES.md`](library/development/WORKING-RULES.md) and the COOKBOOK.
 
-## 2026-10-08 (newest) — `CC-26`: the "AI user" tick lands in the API-key create form, and an eleventh critic holds all seven claims
+## 2026-10-08 (newest) — `CC-28`: the shared-store read-backs are tenant-scoped, and the forensic's premise was corrected by measuring
+
+**What happened.** The tenant-isolation forensic (2026-10-08, §4.4) found the custom-record `updated_at`
+read-backs reading the **shared** `custom_entities_storage` table. It flagged **two** paths and called the
+finding **"HIGH (concrete)"**. Task started under the rule-10 package workflow; **the first two steps were
+to study the reference and prove the prerequisite in code — and that is what corrected the premise.**
+
+**What the measurement showed (the premise correction).** The forensic said *both* paths omit `tenant_id`.
+Both do. But that is not the same as both being a live cross-tenant leak:
+1. The **single-record** path (`readCustomEntityRecordUpdatedAt`) filters on **`organization_id`** — and
+   `organizations.id` is a `gen_random_uuid()` **primary key** (`directory/data/entities.ts:30-32`),
+   i.e. **globally unique**. One tenant's request can therefore **never** match another tenant's org. The
+   single path was **not** a live leak; scoping it by tenant is **defence-in-depth**.
+2. The **batch** path (in `GET`) filtered on `entity_type` + `entity_id IN (…)` — **neither** `tenant_id`
+   **nor** `organization_id`. **This** is the real hole (**MEDIUM**): a record id is a caller-suppliable UUID,
+   so a colliding id could merge another tenant's `updated_at` into the response.
+
+So the forensic's severity and its "two live paths" framing were **both corrected** in place (rule 13), in
+its §4.4, in `PLAN-SD-1.md` §10, and in the register.
+
+**What changed.** `entities/api/records.ts`: the batch read-back now filters
+`.where('tenant_id','=', auth.tenantId!)` and, when the caller is org-scoped,
+`.where('organization_id','in', organizationIds)` — matching the query engine's own scoping. The
+single-record function gained a required `tenantId` and both call sites (PUT, DELETE) pass
+`tenantId: auth.tenantId!`. Three i18n-free, one-file change plus tests.
+
+**Verification.** `entities` module **43 suites / 339 tests green**; `tsc --noEmit` exit **0** on `core`
+and `shared`; the **full core suite green five consecutive times** — **628 suites / 5447 tests / 0
+failures** each (the **+1 suite / +4 tests** over CC-26's 627/5443 is exactly this slice's additions).
+**3 mutations RED-then-GREEN, each restore `md5sum`-verified** to `211ce8f2e28c46e699acc60c1a573429` with
+zero markers left:
+- **M1** (batch tenant filter removed — the pre-fix shape) → **3 RED**, and the failure output shows the
+  **other tenant's** `updated_at` (`2030-09-09T09:09:09.000Z`) leaking into the response — the actual bug,
+  reproduced.
+- **M2** (org filter removed) → **1 RED** (the org test only).
+- **M3** (single-path tenant filter removed) → **1 RED** (the new `records.crud` test only — 25 others stay
+  green, so the mutation is surgical).
+
+**The twelfth hostile-critic agent** (a separate agent, a command per claim) **held all seven claims**, and
+did real adversarial work: it **stashed the fix and re-ran the pre-fix code**, getting exactly **4 RED**
+(the 3 batch tests + the crud single-path test); it verified `auth.tenantId` is guaranteed non-null at the
+batch block (`GET` returns 401 earlier) and that `organizationIds` cannot be `[]` there (an empty scope
+returns before the read-back); it confirmed `organizations.id` is a globally-unique PK (C3); and it
+confirmed the list feeding `recordIds` is tenant-scoped by the query engine (C7). Its one finding — the
+stale `packages/core/dist/` build still carrying pre-fix code — is **not tracked and is gitignored**
+(`git ls-files` empty; `git check-ignore` → `.gitignore:70`), so it is build output, regenerated on any
+build, never committed, never consumed by the tests: recorded, not a code change.
+
+**A test-harness fact worth keeping:** the pre-existing `makeKyselyStub` **ignored `where` entirely**, which
+is precisely why this defect hid — a test on that stub could not tell a scoped query from an unscoped one.
+The CC-28 tests use a **filter-aware** stub that applies the clauses against a fixture, so an unscoped query
+returns the wrong row and the test goes RED.
+
+**Code (this commit); docs this commit.** Registers updated: `COMPLETION-CALLBACKS.md` (CC-28 → DONE),
+`BACKLOG.md` (new item + header), `PLAN-SD-1.md` §10 (item 8 done; item 15's premise corrected),
+`RESUME-POINT.md`, this file.
+
+## 2026-10-08 — `CC-26`: the "AI user" tick lands in the API-key create form, and an eleventh critic holds all seven claims
 
 **What happened.** The owner approved `CC-26` (2026-10-08) and said *"proceed"*. It is the **missing UI for
 a server capability that already existed**: `api_keys.principal_kind` accepts `service | ai_worker`
@@ -859,6 +918,17 @@ doing X now."**
 ---
 
 ### ✅ Done recently (ticked, then moved down here)
+
+- **2026-10-08 — `CC-28` — the shared-store read-backs are tenant-scoped — DONE and PROVEN.** The custom-record
+  `updated_at` read-backs read the shared `custom_entities_storage` table. The **batch** read-back in `GET`
+  now filters `.where('tenant_id','=', auth.tenantId!)` (plus `organization_id` when the caller is
+  org-scoped); the **single-record** read gained a required `tenantId`, with both call sites passing it.
+  **The forensic's premise was corrected by measuring:** the single path already scoped by a globally-unique
+  `organization_id` (`organizations.id` is a `gen_random_uuid()` PK), so only the batch path was a live leak
+  (MEDIUM, not HIGH). **Proof:** `entities` **43 suites / 339 tests green**; full core suite **green five
+  consecutive times** (**628 suites / 5447 tests / 0 failures**); `tsc` exit 0; **3 mutations RED-then-GREEN**,
+  md5-verified restores (M1 → 3 RED with the other tenant's timestamp visibly leaking; M2 → 1 RED; M3 →
+  1 RED). The **twelfth hostile-critic agent** stashed the fix and re-ran to confirm **4 RED** pre-fix.
 
 - **2026-10-08 — `CC-26` — the "AI user" tick is in the API-key create form — DONE and PROVEN.** The UI for
   a server capability that already existed: `api_keys.principal_kind` accepted `service | ai_worker` but the
