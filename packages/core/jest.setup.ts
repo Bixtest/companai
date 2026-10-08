@@ -40,6 +40,23 @@ jest.mock('react-markdown', () => ({
   default: ({ children }: { children?: unknown }) => children ?? null,
 }))
 
+// `registerMutationGuards` replaces the whole guard store wholesale, so a guard a test
+// registers is still there when the **next test in the same file** runs. Measured (CC-29):
+// a guard registered in one test is returned by `getAllMutationGuards()` at the start of the
+// following test in that file (count 1); with this hook it is 0. 18 test files under
+// `packages/core/src` call `registerMutationGuards` and only one of them puts the store back.
+//
+// Scope, stated because it is easy to overclaim: this is a **within-file** leak. The store
+// does **not** cross a file boundary here — measured directly, a second test file reads the
+// `globalThis` key as `undefined` even with this hook disabled, so jest gives each test file
+// its own realm. Clearing before every test makes each test's starting state a fact of the
+// harness instead of a fact of what ran earlier in its own file.
+import { resetMutationGuards } from '@open-mercato/shared/lib/crud/mutation-guard-store'
+
+beforeEach(() => {
+  resetMutationGuards()
+})
+
 // Mock Response/Request/Headers for tests that need them in jsdom environment
 class MockResponse {
   body: string

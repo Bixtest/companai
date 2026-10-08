@@ -155,16 +155,20 @@ beforeEach(() => {
 })
 
 /**
- * Give back the global guard store exactly as it was found.
+ * Give back the guard store exactly as it was found.
  *
- * `registerMutationGuards` **replaces** the whole store (`mutation-guard-store.ts:44-51`)
- * and writes it to `globalThis`, which outlives this file's module registry. Without this
- * restore the create guard registered below leaks into every later suite in the same
- * worker — and it does real damage, because that guard calls
- * `grantMock.mockResolvedValue(...)`, re-arming the shared grant mock of whichever file
- * runs next. That is how the refusal test (which sets `mockResolvedValueOnce({applied:false})`)
- * came to see a grant it never made. Restoring is the difference between a test that
- * observes the route and a test that edits the environment for everyone after it.
+ * `registerMutationGuards` **replaces** the whole store (`mutation-guard-store.ts:41-52`).
+ * Without this restore the create guard registered below is still in the store when a
+ * **later test in this same file** runs.
+ *
+ * **Corrected (CC-29, by measurement).** This comment used to say the guard "leaks into
+ * every later suite in the same worker" via `globalThis`. That is **false in this jest
+ * config**: a guard written to the `globalThis` slot in one test file is not visible in the
+ * next file (measured — the second file reads the key as `undefined` even with CC-29's
+ * reset switched off; jest gives each file its own realm). So the real risk here is leakage
+ * **within the file**, and CC-29's `beforeEach` reset now covers it globally. This
+ * `afterEach` stays because it is correct and harmless, and because a test that relies on
+ * the store being *exactly* empty after it should not depend on the harness to say so.
  */
 afterEach(() => {
   registerMutationGuards([])
@@ -202,13 +206,13 @@ describe('entities POST — the SD-1 entity reactivation gate (CC-24)', () => {
     // `entities.entity.requires-permission-decision`) is the one writer. Registering a real
     // create guard here also proves the route does not *compete* with it.
     //
-    // **The registration is restored in `afterEach`.** The guard store is `globalThis`-backed
-    // (`mutation-guard-store.ts:15-31`) and this suite's jest config sets no `resetModules`,
-    // so a registration made here survives past the end of this file into whichever suite
-    // next shares the worker. Measured, not assumed: with the restore absent, run 1 of the
-    // full suite failed exactly one test — the refusal case below, which sets
-    // `applied:false` and then saw this file's **create** guard re-assert "applied", so the
-    // `grantMock` call it asserted on belonged to another file's grant.
+    // **The registration is restored in `afterEach`** (and CC-29's `beforeEach` reset in
+    // `jest.setup.ts` now clears the store before every test regardless). The store is
+    // `globalThis`-backed (`mutation-guard-store.ts:15-35`) and `registerMutationGuards`
+    // replaces it wholesale, so a registration made here would otherwise still be present
+    // for the tests that follow **in this file**. (That it would also reach the *next file*
+    // was the earlier claim; CC-29 measured it false in this jest config — each file gets
+    // its own realm, so a second file reads the `globalThis` key as `undefined`.)
     const previousGuards = getAllMutationGuards()
     registeredByThisTest = previousGuards
     registerMutationGuards([

@@ -62,6 +62,37 @@ export function getAllMutationGuards(): MutationGuardRegistryEntry[] {
 }
 
 /**
+ * Clear the guard store.
+ *
+ * **Why this exists (CC-29).** The store backs itself with `globalThis` so it survives HMR
+ * and module re-evaluation, and `registerMutationGuards` **replaces it wholesale** — the
+ * right behaviour at runtime, but it means a guard a test registers is still in the store
+ * when the **next test in the same file** runs. Measured: a guard registered in one test is
+ * still returned by {@link getAllMutationGuards} at the start of the following test in that
+ * file (count 1); with this reset wired into `jest.setup.ts` it is 0. The store does **not**
+ * cross a *file* boundary in this jest config — measured directly: a second test file reads
+ * the `globalThis` key as `undefined` even with the reset switched off, so jest gives each
+ * test file its own realm. The leak this fixes is therefore *within* a file, not between
+ * files, and a suite left with a stale guard can fail a later test in that same file.
+ *
+ * Clearing **both** places is deliberate: {@link getAllMutationGuards} prefers the global
+ * slot but falls back to the module-local `_guardEntries`, so clearing only the global one
+ * would let the local cache resurrect the previous guards (pinned by three tests in
+ * `__tests__/mutation-guard-store.reset.test.ts`, which go RED if the local clear is removed).
+ *
+ * Callers: `jest.setup.ts` (`setupFilesAfterEnv`) calls it in a root-level `beforeEach`, so
+ * every **test** starts from a known-empty store instead of inheriting the previous test's.
+ */
+export function resetMutationGuards(): void {
+  _guardEntries = null
+  try {
+    delete (globalThis as Record<string, unknown>)[GLOBAL_KEY]
+  } catch {
+    // Mirror writeGlobal: a restricted global must not turn a reset into a throw.
+  }
+}
+
+/**
  * Get all guard instances (unwrapped from registry entries).
  */
 export function getAllMutationGuardInstances(): MutationGuard[] {
