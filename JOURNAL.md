@@ -76,7 +76,7 @@ it (`keys: definitions.map(d => d.key)`; the guards read the list via the new `r
 hole was the *reserved* key — a malformed key was already refused by zod 400 on both routes — CC-18,
 2026-10-08).
 **89 SD-1 tests; 44 mutations RED-then-GREEN across nine slices, each restore md5-verified; `shared`
-197/2329 — 8 fail in the one suite of CC-19 (a host process-creation failure, not code), `core` 625/5403,
+197/2329 — 8 fail in the one suite of CC-19 (a host process-creation failure, not code), `core` 626/5410,
 typecheck 0.** **Seven** hostile-critic passes plus two mutation/premise-found defects (twenty-four real
 defects) — all fixed or named (`PLAN-SD-1.md` §9).
 
