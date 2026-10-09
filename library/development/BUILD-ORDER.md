@@ -1117,10 +1117,20 @@ one page, each with a named home. Details: [`BLUEPRINT-GAP-ANALYSIS.md`](BLUEPRI
    the custom-entity install primitive `upsertCustomEntity`; the `add-field` CLI; and the `runStructureChangeGate`
    path, whose `validate` now carries the surfaces into its metadata for the after-write recorder).
    Proven: affected suites **48 suites / 419 tests** green, full `core` **638 suites / 5600 tests** green,
-   `tsc` 0, and **6 md5-verified RED-then-GREEN mutations**. **The remaining half — the catalogue's READ side —
-   is a gap, not a claim:** `hydratePermissionCatalogue` / `listPermissionSurfaces()` have **no live consumer**
-   and the app bootstrap is synchronous with no tenant, so *"read back by the running app"* is **not** met.
-   Scheduled as **`CC-43`** (row 9 is 🟡, not ☑). Cross-ref: `platform_points.md` row 9 + §B `P3b` + §D `M3e`.
+   `tsc` 0, and **6 md5-verified RED-then-GREEN mutations**. **The READ side is now built too (2026-10-09), so
+   the row is complete:** `readTenantSurfaces(em, tenantId)` (`auth/services/permissionSurfacesService.ts`) is
+   the live consumer of `listPermissionSurfaces()` — it answers from **declared (global) + exactly this tenant's
+   persisted rows**, never the raw global `Map` (which would leak one tenant's recorded surfaces into another),
+   and is exposed at **`GET /api/auth/permission-surfaces`** (fail-soft, never 500; carries an `openApi` export).
+   **The tenant-aware hook is the request** — the boot is synchronous and tenant-less, so the request is the first
+   point where `auth.tenantId` and an `EntityManager` both exist; the tenant-less seam `hydratePermissionCatalogue`
+   is kept and documented for the first tenant-aware boot rather than deleted.
+   Proven: read-side suites **27/27** green; full `core` **639 suites / 5620 tests** green; `tsc` 0; **5
+   md5-verified RED-then-GREEN mutations** (the raw-map leak, the dropped tenant, the dropped declared-wins rule,
+   two error-swallow paths); the route **mounted** (`mercato generate`); the read side **proven on the live DB**
+   (record → read back → soft-delete → gone → re-appear → present → cleanup 0); and a separate-agent hostile-critic
+   independently reverted the anti-leak line and confirmed the cross-tenant test **fails**. **Row 9 is ticked ☑
+   and `CC-43` is CLOSED.** Cross-ref: `platform_points.md` row 9 + §B `P3b` + §D `M3e`.
 6. **SD-3** — make the tier mapping/defaults/fallbacks a **superadmin setting** (`module_configs`, module
    `request_outcome`), seeded from the dictionary, failing closed (§C.2b). **Not** a hardcoded table.
 7. **S9 / SD-2** — mark core functions (roles & permissions manager first) and guard their deletion.

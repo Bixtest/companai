@@ -61,7 +61,7 @@ started while a higher one is open). If you move something, write one line besid
 |---|---|---|---|
 | 7 | You can define roles and give them permissions, and the platform **enforces** every one on every write — not just in the UI. | 🟡 | `P3` |
 | 8 | When you create a new table or column, the platform **forces the permission question** — it can no longer be forgotten. | 🟡 | `SD-1` / `S2` / `P3a` / `P3b` |
-| 9 | The permission rules are **stored** (not just in memory) and read back by the running app. | 🟡 | `P3b` / `M3e` |
+| 9 | The permission rules are **stored** (not just in memory) and read back by the running app. | ☑ | `P3b` / `M3e` |
 | 10 | Every write passes one gate, and the gate can say "allow", "refuse", or "ask a human first". | ✅ | `P18` / `D0`–`D3` |
 | 11 | You can change the platform's behaviour by **setting**, not by deploying code (the tier mapping is a setting). | ✅ | `D1` |
 | 12 | A high-impact change can be sent for **approval** instead of silently allowed. | ✅ | `D3` |
@@ -213,7 +213,7 @@ started while a higher one is open). If you move something, write one line besid
 - ☐ **P2 Tenancy & org structure** — tenants · organisations · hierarchy · scoping *(DONE — not re-verified this round)*
 - ☐ **P3 Roles & permissions (RBAC/ACL)** — roles · grants · feature gates ▸ 0/2 *(no sub-part verified in code this round)*
 -   - ☐ **P3a** — Two-table ACL + the typed permissions-catalogue **service** (`SD-1`, 2026-10-08) *(carried — docs claim it, the code was not re-verified this round)*
--   - 🟡 **P3b** — Persisted for runtime surfaces + consumed by a write *(HALF DONE 2026-10-09 — the durable **write** half is built, wired to all 7 callers and proven on the live DB (`permission_surfaces`, `Migration20261009205000`); the **read** half is LEFT — `hydratePermissionCatalogue`/`listPermissionSurfaces()` have no live consumer → `CC-43`. See `SD-1`)*
+-   - ☑ **P3b** — Persisted for runtime surfaces + consumed by a read *(DONE 2026-10-09 — the durable **write** half is built, wired to all 7 callers and proven on the live DB (`permission_surfaces`, `Migration20261009205000`); the **read** half is now built too: `readTenantSurfaces(em, tenantId)` in `permissionSurfacesService.ts` answers from **declared (global) + exactly this tenant's persisted rows** (never the raw global `Map`), consumed live by the route `GET /api/auth/permission-surfaces`, proven by 27/27 read-side tests + a cross-tenant non-leak test + 5 md5-verified mutations + a separate-agent hostile-critic. `CC-43` CLOSED. See `SD-1`)*
 -     *(was PART — two-table ACL real; the catalogue service exists, is persisted for runtime surfaces on the **write** side, and is consumed by a write; the **read-back** half is open (`CC-43`))*
 - ☐ **P4 Audit & compliance log** — who/when/which record; retention/export ▸ 0/2 *(no sub-part verified in code this round)*
 -   - ☐ **P4a** — Read + create API and one viewer page *(carried — docs claim it, not re-verified this round)*
@@ -530,7 +530,7 @@ started while a higher one is open). If you move something, write one line besid
 -   - ☑ **M3b** — Consumed by a **write**: `auth/lib/permission-decision-grant.ts` applies its records to `role_acls.features_json` on every create path (entities create, the batch definitions route, `ensureCustomFieldDefinitions`, the HTTP reactivation routes (CC-22), the entity-install primitive `upsertCustomEntity` (CC-21), each field write site on a type change (CC-4)) *(DONE 2026-10-08 — measured)*
 -   - ☑ **M3c** — The merge itself is atomic (no lost update) *(DONE 2026-10-08 — CC-16)*
 -   - ☐ **M3d** — A **field** surface's records have an enforcement consumer (the live per-record features are `entities.records.<entityId>.{view,manage}`) *(LEFT — CC-20; for a custom entity the records *are* the live ones)*
--   - 🟡 **M3e** — Persisted for **runtime** surfaces *(HALF DONE 2026-10-09 — the durable row **exists and was written + read back on the live DB** (`permission_surfaces`, `Migration20261009205000` applied to `mercato-postgres-local`), persisted fail-soft from the gate/route/lib layers on every structure change, and wired into all 7 callers; **the remaining half is the READ side** — the catalogue's registry has no live consumer → `CC-43`. `CORRECTED (rule 13):` the old note said a durable row "waits on `G-04`" and that a migration "is unprovable on this host" — **both false**: `G-04` is the data-axis authorization layer (unrelated to storing surfaces), and a migration **is** provable here (this one was; `mercato-postgres-local` runs Postgres 17))*.
+-   - ☑ **M3e** — Persisted for **runtime** surfaces *(DONE 2026-10-09 — the durable row **exists and was written + read back on the live DB** (`permission_surfaces`, `Migration20261009205000` applied to `mercato-postgres-local`), persisted fail-soft from the gate/route/lib layers on every structure change, and wired into all 7 callers; **the READ side is now built too** — `readTenantSurfaces(em, tenantId)` (in `permissionSurfacesService.ts`) is the live consumer of `listPermissionSurfaces()`, answering from declared + this tenant's persisted rows, exposed at `GET /api/auth/permission-surfaces`. `CC-43` CLOSED. `CORRECTED (rule 13):` the old note said a durable row "waits on `G-04`" and that a migration "is unprovable on this host" — **both false**: `G-04` is the data-axis authorization layer (unrelated to storing surfaces), and a migration **is** provable here (this one was; `mercato-postgres-local` runs Postgres 17))*.
 -     *(was PARTIAL 2026-10-08 — the catalogue exists and is consumed by a write with an atomic merge; runtime surface persistence is now **written** (durable row, live-proven) with its **read side** open (CC-43); the field-records consumer is CC-20. See `S2 (= SD-1)`)*
 - ☑ **M4** — The generated guard registry (= D0) *(DONE)*
 - ☐ **M5** — Dashboard / perspective screens (= P15) *(OPEN)*
@@ -683,8 +683,8 @@ rule, in one place:
 6. Coverage `% = done ÷ units`. Build-weighted `% = Σ(done×w) ÷ Σ(units×w)` with `w` the section's effort
    weight (the rubric table above).
 
-**Re-run the check in this session (2026-10-09) gave:** A 10/31 · B 0/36 · C 14/28 · D 1/39 · E 2/18 ·
-F 0/14 · G 29/74 · H 0/13 · I 4/35 · J 0/18 · K 1/13 · **TOTAL 61 / 319 = 19%** (build-weighted ≈22%).
+**Re-run the check in this session (2026-10-09) gave:** A 10/31 · B 0/36 · C 14/28 · D 2/39 · E 2/18 ·
+F 0/14 · G 29/74 · H 0/13 · I 4/35 · J 0/18 · K 1/13 · **TOTAL 62 / 319 = 19%** (build-weighted ≈22%).
 **This replaced a typed table that read 61 / 276 = 22%** — the DONE total happened to be right, but every
 section total was under-counted (the pass-2 split added units no one had re-summed). The lesson is the
 **N-20** one: *a count that is typed drifts from the boxes the moment a box changes.* If you ever change a

@@ -35,14 +35,15 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
-### ▶ NOW — **Phase 3, row 9 (`P3b` / `M3e`): the durable WRITE half is BUILT and proven; the READ half is scheduled (`CC-43`) — row 9 is 🟡, not ☑.**
+### ✅ DONE — **Phase 3, row 9 (`P3b` / `M3e`): the permission rules are STORED and READ BACK by the running app — BOTH halves built and proven; row 9 ticked ☑, `CC-43` CLOSED.**
 
-**Where this stands (2026-10-09).** The task was corrected before it was built (rule 9b): the literal
+**Where this stood (2026-10-09).** The task was corrected before it was built (rule 9b): the literal
 target was *"persist the catalogue `Map`"*, but the catalogue's runtime registry had **zero live
 consumers**, so persisting the `Map` alone would have been **storage with no reader**. The honest
 reading of row 9 — *"the permission rules are **stored** (not just in memory) and **read back by the
 running app**"* — was therefore split into a **write half** (a durable table + the surfaces recorded by
-the code that judges them) and a **read half** (a live consumer that reads them back).
+the code that judges them) and a **read half** (a live consumer that reads them back). **Both halves are
+now built.**
 
 **✅ WRITE HALF — BUILT, WIRED, PROVEN.** The `permission_surfaces` table (migration
 `Migration20261009205000`, `up()`/`down()` symmetric, **applied to `mercato-postgres-local` and measured
@@ -65,42 +66,60 @@ with a mismatch test). The live DB round-trip was proven end to end (record → 
 duplicate refused by the index → upsert-on-conflict works → soft-delete leaves the live read →
 re-appearance inserts a fresh live row → cleanup 0 rows).
 
-**🟡 READ HALF — NOT DONE, and named honestly (rule 8 / rule 9a).** `hydratePermissionCatalogue`,
-`hydrateCatalogueFromFeatures` and `listPermissionSurfaces()` have **no live consumer** (`grep` = 0
-importers); the in-process `Map` in `shared/src/lib/permissions/catalogue.ts` is still populated by
-**tests only**. The app bootstrap (`apps/mercato/src/bootstrap.ts`; `instrumentation.ts:register()` is
-a no-op) is **synchronous and has no tenant**, so there is nowhere today to hydrate the registry *for a
-tenant*. **Hydrating a registry nothing reads would be decoration, not row 9** — so acceptance item (b)
-*"the app hydrates the catalogue at boot"* and the second clause *"read back by the running app"* are
-**not met**, and the remainder is **scheduled** rather than claimed: **`CC-43`** (gap = the read side;
-prerequisite = a tenant-aware boot/request hook; callback = hydrate declarations **+** DB at that hook
-and give `listPermissionSurfaces()` a live reader, proven end to end). *(For the record: the enforced
-runtime ACLs **are** already read back by the app — `rbacService` reads `role_acls.features_json` from
-the DB at request time; what is missing is a live reader of the **surface catalogue**.)*
+**✅ READ HALF — BUILT, WIRED, PROVEN (this is what closed `CC-43`).** The honest read side is a
+**tenant-scoped route**, because the app bootstrap is **synchronous with no tenant** — a boot-time read
+of the process-global `Map` would leak one tenant's *recorded* surfaces into another tenant's answer
+depending on request order. So the read answers from **declared (global) + exactly this tenant's
+persisted rows**, never the raw global map:
+- **`readTenantSurfaces(em, tenantId)`** (`auth/services/permissionSurfacesService.ts`) — filters the
+  catalogue to `source === 'declared'`, then loads the tenant's rows via `loadPersistedSurfaces`, records
+  each back into the catalogue, and merges **declared-wins by id**. Returns `{ surfaces, recorded, error }`
+  and **never throws** (a DB failure is reported in `error`, not raised).
+- **`GET /api/auth/permission-surfaces`** (`auth/api/permission-surfaces/route.ts`, NEW) — the live
+  consumer: `getAuthFromRequest` → `auth.tenantId`; resolves `em` from the request container; returns
+  `{ items, recorded, error }`. **Fail-soft** — never 500 on a DB/container error, and it distinguishes
+  `container_error: …` from `no_entity_manager` (a hostile-critic finding, fixed).
+- **Proven:** the two read-side suites are **27/27 GREEN** (`permissionSurfacesService` **20**,
+  `permission-surfaces.route` **7**); full `core` **639 suites / 5620 tests** green; `core` `tsc` exit 0;
+  **5 md5-verified RED-then-GREEN mutations** (M1 service reads the raw global map → cross-tenant leak
+  RED; M2 route drops the tenant RED; M3 declared-wins dropped RED; M4 route swallows the error RED; M5
+  service swallows the read error RED — every restore **md5-identical**, baseline svc
+  `7769a092e31e0cd1cf5aceeda0ae5fab`, route `22a74e530586a3e6f616939bf003d81c`); the route is **mounted**
+  (proven by `npx mercato generate` → manifest line
+  `{ moduleId: "auth", kind: "route-file", path: "/auth/permission-surfaces", methods: ["GET"] }` — the
+  generated manifest is a **gitignored build artifact**, so a fresh clone must regenerate it, which the
+  build does); and the read side was **proven against the live DB** (`mercato-postgres-local`, Postgres
+  17) end to end: **record → read back** `customers:loyalty_panel` → soft-delete → **read gone** →
+  re-appearance → **read present again** (`LIVE_ROWS=1`) → cleanup **0 live rows**. A **separate-agent
+  hostile-critic** independently reverted the anti-leak line and confirmed the cross-tenant test **fails**
+  (`Expected: 0 Received: 1`) — i.e. the leak guard and the declared-wins test are **not tautological**;
+  it found **no cross-tenant leak** and flagged two honesty gaps (the `hydratePermissionCatalogue`
+  doc-comment, now corrected; the over-broad `no_entity_manager`, now split), both fixed.
 
 > **What "done, flawlessly" means for this row (the acceptance test), and which parts are met:**
 > (a) ✅ a migration creates the table (`up()`/`down()`, applied to `mercato-postgres-local`, **measured
-> back**); (b) ❌ the app **hydrates** the catalogue at boot from declarations + DB — **scheduled
-> (`CC-43`)**; (c) ❌ a surface recorded at runtime is **read back after a restart** — **scheduled
-> (`CC-43`)**; (d) ✅ the full quality protocol passed (separate-agent hostile-critic; **6 md5-verified**
-> RED-then-GREEN mutations; re-measure; green gate); (e) ✅ docs updated and the remainder **scheduled**
-> (`CC-43`); (f) ✅ the false `M3e` note and the false *"unprovable on this host"* premise were
+> back**); (b) ✅ the catalogue is hydrated for the tenant at the **tenant-aware hook** — the request —
+> and answers from **declarations + DB** (`readTenantSurfaces`); *(the synchronous, tenant-less boot
+> cannot hydrate for a tenant; the seam `hydratePermissionCatalogue` is kept and documented as exactly
+> that, not deleted)*; (c) ✅ a surface recorded at runtime is **read back** by the running app (proven
+> on the live DB); (d) ✅ the full quality protocol passed (separate-agent hostile-critic; **5 md5-verified**
+> RED-then-GREEN mutations; re-measure; green gate **639 suites / 5620 tests**); (e) ✅ docs updated and
+> `CC-43` **closed**; (f) ✅ the false `M3e` note and the false *"unprovable on this host"* premise were
 > **corrected everywhere** (rule 13) — `platform_points.md` (§B `P3b`, §D `M3e`, row 9),
 > `permission-decision-grant.ts`, `Migration20261009205000.ts`, and four sibling files that had copied
 > the same false claim (`core-objects.ts`, `user-function/document.ts`, `business-widget/document.ts`,
 > `business-widget/registry.ts`, and the `permission-decision-grant.test.ts` header).
 
-**★ NEXT TASK — the next item in the vision's order after row 9.** Row 9's read half is scheduled; the
-**lowest open phase row remains Phase 3**, and within it the next rows that are not `☑` are **row 7
+**★ NEXT TASK — the next item in the vision's order after row 9.** Row 9 is **☑** and `CC-43` is closed,
+so the **lowest open phase is still Phase 3**, and the next rows there that are **not** `☑` are **row 7
 (`P3`, 🟡)** and **row 13 (`SD-4`/`SD-5`, 🟡 — the screen to *see and change* the rules)**. The concrete
-next build is **`CC-43`** itself (the row-9 read side), because it is the *other half of the row we just
-opened* and leaving it open while closing nothing else is exactly the drift rule 0 forbids — **finish
-the row before starting a new one.** It is startable now (the write half is built and its schema is
-live). If the owner prefers a *different* next item, `CC-42` (`G-22` Slice 2B) and `CC-27` (the AI-user
-↔ agent binding, unblocked by `AH-1`) are the two behind it — but they are **business/agent work**, not
-the skeleton, so they wait (rule 0b).
+next build is **row 7 (`P3`)** — the structure-change **permission grammar** enforcement path is built for
+the entity/field axis but its non-`☑` remainder must be re-measured against the code first (rule 0b:
+finish the row before starting a new one). If the owner prefers a *different* next item, `CC-42` (`G-22`
+Slice 2B) and `CC-27` (the AI-user ↔ agent binding, unblocked by `AH-1`) are the two behind it — but they
+are **business/agent work**, not the skeleton, so they wait (rule 0b).
 
-**Status:** ▶ **WRITE HALF DONE; READ HALF SCHEDULED (`CC-43`); row 9 recorded 🟡 — NOT ticked ☑.**
+**Status:** ✅ **ROW 9 DONE — WRITE HALF AND READ HALF BUILT AND PROVEN; row 9 ticked ☑; `CC-43` CLOSED.**
 
 **This section exists because the owner asked for it (2026-10-06).** Handover documents must **not**
 say what is next to do — what is next changes every session, and a stale "next" is worse than none.
@@ -297,10 +316,11 @@ new describe block; (D3/MEDIUM) the "never downgrades a declared surface" test w
 persisted under the **stale `auth.tenantId`** while rows land under `scope.tenantId` — fixed to
 `scope.tenantId ?? auth.tenantId` with a mismatch test.
 
-**Remainder — scheduled, not claimed (rule 8).** The **read half**: `hydratePermissionCatalogue` /
-`listPermissionSurfaces()` have **no live consumer** and the app bootstrap is synchronous with no tenant,
-so *"read back by the running app"* is **not met**. Scheduled as **`CC-43`**; row 9 is recorded **🟡** in
-`platform_points.md`, `BACKLOG.md` and `BUILD-ORDER.md`, **not ☑** (rule 13 honest status).
+**Remainder — SCHEDULED HERE, THEN CLOSED (rule 8 → rule 13).** The **read half**: at the time of this
+entry `hydratePermissionCatalogue` / `listPermissionSurfaces()` had **no live consumer** and the app
+bootstrap is synchronous with no tenant, so *"read back by the running app"* was **not met** — it was
+scheduled as **`CC-43`** and row 9 was recorded **🟡**, not ☑ (rule 13 honest status). **`CC-43` is now
+CLOSED and row 9 is ☑** — see the entry immediately below.
 
 **Corrections made in the same change (rule 13).** The false `M3e` premise — *"a durable row waits on
 `G-04`, since a migration is unprovable on this host"* — was corrected **everywhere**: `platform_points.md`
@@ -309,6 +329,50 @@ and four sibling files that had copied the same claim (`core-boundary/core-objec
 `user-function/document.ts`, `business-widget/document.ts`, `business-widget/registry.ts`) plus the
 `permission-decision-grant.test.ts` header. **Both halves were false:** `G-04` is the data-axis
 authorization layer (unrelated to storing surfaces), and a migration **is** provable here.
+
+---
+
+### ✅ DONE — **Phase 3, row 9 (`P3b` / `M3e`)** — the **READ half**: a tenant-scoped reader for the permission catalogue, its live consumer route, and the closure of **`CC-43`**. **Row 9 is now ticked ☑.** **(2026-10-09; code `workspace/starting-kit`; new route [`packages/core/src/modules/auth/api/permission-surfaces/route.ts`](workspace/starting-kit/packages/core/src/modules/auth/api/permission-surfaces/route.ts); reader in [`packages/core/src/modules/auth/services/permissionSurfacesService.ts`](workspace/starting-kit/packages/core/src/modules/auth/services/permissionSurfacesService.ts).)**
+
+**What was built.** The read half answers the row-9 second clause — *"read back by the running app"* —
+without the cross-tenant leak a naive global-`Map` read would cause. **Declared** surfaces are global (a
+module's features are identical per tenant); **recorded** surfaces are per-tenant. So the reader never
+returns the raw map — it returns **declared + exactly this tenant's rows**:
+- **`readTenantSurfaces(em, tenantId)`** — filters the catalogue to `source === 'declared'`, loads the
+  tenant's persisted rows (the service's exact `deletedAt: null` predicate), records each back into the
+  catalogue, and merges **declared-wins by id**. Returns `{ surfaces, recorded, error }`; **never throws**
+  (a DB failure lands in `error`). With no tenant it answers from declarations only and does **not** query.
+- **`GET /api/auth/permission-surfaces`** (NEW; `requireAuth` + `requireFeatures: ['auth.acl.manage']`) —
+  the live consumer: `getAuthFromRequest` → `auth.tenantId`; `createRequestContainer()` → `em`; returns
+  `{ items, recorded, error }`. **Fail-soft** — a DB/container error is reported, never a 500, and
+  `container_error: …` is distinguished from `no_entity_manager` (a critic finding). Carries an `openApi`
+  export. **The tenant-aware hook is the request** — the boot is synchronous and has no tenant, so this is
+  the first point where `auth.tenantId` and an `EntityManager` both exist.
+
+**What proved it.** The two read-side suites are **27/27 GREEN** (`permissionSurfacesService` **20** incl.
+a 6-test *live consumer* block whose anti-leak test hydrates the map from tenant A and asserts tenant B's
+answer stays 0; `permission-surfaces.route` **7**); full `core` **639 suites / 5620 tests** green; `core`
+`tsc` exit 0; **5 md5-verified RED-then-GREEN mutations** — M1 service reads the raw global map
+(cross-tenant leak → RED), M2 route drops the tenant (RED), M3 declared-wins dropped (RED), M4 route
+swallows the error (RED), M5 service swallows the read error (RED) — **every restore md5-identical**
+(baseline svc `7769a092e31e0cd1cf5aceeda0ae5fab`, route `22a74e530586a3e6f616939bf003d81c`); the route is
+**mounted**, proven by `npx mercato generate` (the generated manifest is a **gitignored build artifact** —
+the build regenerates it, so a fresh clone is fine); and the read side was **proven on the live DB**
+(`mercato-postgres-local`, Postgres 17): record → **read back** `customers:loyalty_panel` → soft-delete →
+**read gone** → re-appearance → **read present** (`LIVE_ROWS=1`) → cleanup **0 live rows**. A
+**separate-agent hostile-critic** independently reverted the anti-leak line and confirmed the cross-tenant
+test **fails** (`Expected: 0 Received: 1`) — the leak guard is real, not tautological; it found **no
+cross-tenant leak** and flagged two honesty gaps, both fixed: the `hydratePermissionCatalogue` doc-comment
+(its "so a boot can log it" framing was overstated — clarified to an honest *"nothing calls it today; kept
+as the documented seam for the first tenant-aware boot"*), and the over-broad `no_entity_manager` (split
+into `container_error: …` with a test).
+
+**Why a full tick, not a partial.** Both halves of row 9's sentence — *stored* and *read back by the
+running app* — are now built and proven; the only thing that does not exist is a **boot**-time hydration,
+and that is **correct by design**, not a gap: the boot is synchronous and tenant-less, so the tenant-aware
+hook *is* the request; the seam `hydratePermissionCatalogue` is kept and documented for the first
+tenant-aware boot rather than deleted. `CC-43` is therefore **closed** (a closed callback is removed from
+the register, not tombstoned).
 
 ---
 
