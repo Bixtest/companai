@@ -1,6 +1,16 @@
 # PLAN — `SD-1`: the S2 permissions gate (Phase 1)
 
 **Status:** IN PROGRESS — the startable slice (catalogue + gate + hook) is being built this session.
+> **⚠️ CORRECTION 2026-10-09 — the "migration is unprovable on this host" premise in this
+> document is FALSE, and is retracted wherever it appears below.** A **live Postgres 17** runs in
+> `mercato-postgres-local`, and a schema change **is** provable end-to-end: `Migration20261009090000`
+> (CC-31, `roles.is_core`) was written, applied with `mercato db migrate`, read back on the live DB
+> (`is_core boolean not null default false`, backfill `superadmin=t`), rebuilt into the container's
+> runtime artefact, and proven through the restarted app (the `Role` entity returned `isCore=true` and
+> the guard refused both delete and rename with 409). **Nothing prevents a well-thought schema change
+> during development** (owner, 2026-10-09). Where this document defers work purely because a migration
+> "cannot be proven", that deferral is **void**; only the *sequencing* choice it also names still stands.
+
 **Task source:** the `★ ACTIVE TASK` box in `JOURNAL.md` (posted 2026-10-08, after `S-02`).
 **Predecessor:** `PLAN-S-02.md` (same discipline: fact-check → plan → execute → verify → document).
 

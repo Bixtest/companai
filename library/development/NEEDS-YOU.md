@@ -233,6 +233,16 @@ UI, no deploy**, and the parser guarantees a setting may **add**, never **drop**
 manage screen is folded into **`SD-5`**; the structural guard now rides **`SD-4`** (the ★ ACTIVE TASK). **Still
 not yours:** nothing here needs a decision from you.
 
+**✅ ALSO DECIDED AND DONE 2026-10-09 — `CC-31(a)`, "Option B".** A second question had been sitting under this
+item: whether the platform's *core* role should be marked by its **name** (`superadmin`) or by a durable
+**`is_core` column**. Your ruling, verbatim: *"lets do option B. This way we may also end up having one main
+superadmin that is undeletable (the main one) but later we may add new superadmins that the main one can delete
+them by changing their names first."* **Built and proven on the live database:** the column exists
+(`roles.is_core`), a core role **cannot be renamed away from its guard**, and a freshly created core role is
+stamped core so a rename cannot disarm it. **This item no longer needs you** — and it un-parked a whole class of
+work: the *"a migration is unprovable on this host"* premise turned out to be **false** (corrected in CC-31 /
+CC-7 / CC-23 / `PLAN-SD-1` / `PLAN-SD-2`; your directive is now `WORKING-RULES.md` §1 rule 14).
+
 ---
 
 ## Part 2 — Things only you can do (**1 open** — items 6 and 7 are done)

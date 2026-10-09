@@ -153,6 +153,32 @@ from the artefact, research-validate-write-then-build. Read them once, before to
     into whichever file next shares the worker" had been copied into three comments across both repos —
     a tenth hostile-critic pass found all three, plus a wrong count and a self-contradiction.)*
 
+14. **A blocker is stated REPEATEDLY until it is resolved — and a schema change during development is
+    never "blocked by a rule"** *(owner, 2026-10-09 — paid for on CC-31(a); the owner had to say it
+    twice before it was acted on)*. **Three parts, all binding.**
+    **(a) State the blocker, loudly and repeatedly.** When something stands between the work and its
+    completion, **you name it in every report until it is gone** — not once in a footnote, not only in a
+    plan §10. His words, verbatim: *"ANYTHING that blocks the work you HAVE TO clearly state it
+    repeatedly till it is resolved. That is your responsibility."* A blocker mentioned once and then
+    quietly worked around is how work stalls invisibly.
+    **(b) Nothing forbids customising the database during development.** His words, verbatim: *"No one set
+    a rule that forbids you from customizing the database… So if there is a need to change the database
+    schema, there is nothing preventing us during development from doing so as long as the changes are
+    well thought and well executed."* **The false premise that held several items open — *"a migration is
+    unprovable on this host"* — is FALSE and retracted (rule 13): a live Postgres 17 runs in
+    `mercato-postgres-local`, and `Migration20261009090000` was written, applied, read back, rebuilt into
+    the container, and proven through the restarted app.** Do not park schema work behind a ban that
+    does not exist. Do, however, keep it **well thought and well executed**: a migration is written with
+    an explicit `up()`/`down()`, applied to the live DB, and **measured back** (columns, defaults,
+    backfills, indexes) — never assumed.
+    **(c) Activate the original ERP's parked modules AS FUNCTIONS of the new platform.** His words,
+    verbatim: *"while activating the 'modules' of the original ERP, we should be activating them as
+    functions the way it works with the original concept of the new platform we are developing. Or else,
+    why did we deactivate them in the first place."* A module switched back on is **not** switched on as
+    the old module — it is re-expressed through the new platform's own concepts (the core boundary, the
+    settings layer, the permission grammar, the function/widget model). Re-wiring an old module verbatim
+    defeats the reason it was parked.
+
 ---
 
 ## 2. How to work with the owner

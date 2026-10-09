@@ -113,8 +113,41 @@ mutation guard sees it — **named and scheduled**, the guard does not pretend o
 > **restore** path (a tombstoned field could be resurrected onto a system table — now refused).
 
 > **Honest limits:** the manage screen is **not** built (folded into `SD-5`); the structural guard (DROP/re-type/FK)
-> is **not** built (rides `SD-4`); the core marker is still **by name** not a column (CC-31(a), waits on a
-> migration). All three scheduled.
+> is **not** built (rides `SD-4`); the core marker is still **by name** not a column (CC-31(a)) — **⚠️ CORRECTION
+> 2026-10-09: this last limit is now CLOSED; see the DONE entry below.**
+
+---
+
+### ✅ DONE — `CC-31(a)`: the core role marker becomes a durable **`is_core` column**, and a core role can no longer be **renamed** away from its guard (owner ruled **Option B**, 2026-10-09). **(2026-10-09; code `workspace/starting-kit`; callback [`COMPLETION-CALLBACKS.md`](library/development/COMPLETION-CALLBACKS.md) CC-31 now closed.)**
+
+> **The ruling, verbatim:** *"lets do option B. This way we may also end up having one main superadmin that is
+> undeletable (the main one) but later we may add new superadmins that the main one can delete them by changing
+> their names first… No one set a rule that forbids you from customizing the database. In fact, I am surprised
+> you didn't do that yet… if there is a need to change the database schema, there is nothing preventing us during
+> development from doing so as long as the changes are well thought and well executed."*
+
+> **The blocker was FALSE and is retracted.** The item sat open on *"a durable `is_core` column needs a migration
+> — unprovable on this host"*. **Measured:** a live Postgres 17 runs in `mercato-postgres-local`; the migration was
+> **written, applied, and read back**. The false premise is corrected in CC-31, CC-7, CC-23, `PLAN-SD-1`, and
+> `PLAN-SD-2` (rule 13), and the owner's directive is now **`WORKING-RULES.md` §1 rule 14**.
+
+> **What landed.** `Migration20261009090000` adds `roles.is_core boolean not null default false`, backfills
+> `lower(btrim(name)) = 'superadmin'`, and creates a partial index `roles_is_core_idx`. `Role.isCore` maps it with
+> the exact column name. `coreObjectFor(kind, id, settings, { isCore })` makes the **durable marker win over the
+> name — and over the setting** (otherwise a rename to a name the setting demotes would re-open the hole). New
+> `refuseCoreRoleRename` / `assertCoreRoleNotRenamable` (409) are wired on the route's `update.mapInput` **and**
+> the `auth.roles.update` command (the audit-redo path). The marker is stamped on the **seed** *and* on the **API
+> create path** — the critic's HIGH finding: without it a setting-added core role created via the API was born
+> `is_core = false`, so one rename fully unguarded it.
+
+> **One line proved it (on the LIVE stack, not a mock):** after rebuilding `shared`+`core` in the container and
+> restarting the app, a live round-trip through the rebuilt `Role` entity returned `isCore=true` for `superadmin`
+> and **the guard refused both delete and rename with 409** (`code: core_role_unrenamable`), while `admin` and
+> `employee` passed both — proving the column, the entity map, and both guards **together**. `core` guard suites
+> **3 / 38**, `shared` core-boundary **2 / 57**, full `auth` **83 / 737**, both `tsc` exit 0; **4 mutations
+> RED-then-GREEN** (M7 absent-name branch, M8 durable marker, M9 command guard, M10 create-path stamp), each
+> restore md5-verified LF-only; **a hostile-critic pass as a separate agent** found the create-path HIGH and a
+> mislabelled test (both fixed).
 
 ---
 

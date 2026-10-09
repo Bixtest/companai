@@ -3166,3 +3166,52 @@ every claim carries an observation — and the observation here includes the run
 
 *Cross-ref: L1 (a confident label is not an inspection), L10 (report the whole picture, not the first red
 flag), L14 (a green build is not a working platform).*
+
+## L95 — a blocker repeated for weeks can be a **false premise**, and it will have been copied into every document before anyone re-measures it
+
+**What happened.** Two register rows (`CC-7`, `CC-31`) and two plan documents (`PLAN-SD-1`, `PLAN-SD-2`)
+all deferred real work because *"a migration is unprovable on this host — the unit suites mock the
+EntityManager"*. The owner pushed back and asked for the schema change to be made. Re-measuring found the
+premise **false**: a **live Postgres 17** had been running in `mercato-postgres-local` the whole time;
+`Migration20261009090000` was written, applied with `mercato db migrate`, and read back on the live DB
+(`is_core boolean not null default false`, backfill `superadmin=t`), then rebuilt into the container's
+runtime artefacts and proven through the restarted app. Nothing had ever forbidden the change.
+
+**Why it is dangerous.** A premise that is *convenient* (it defers hard work) gets copied — into the
+register row, into both plans, into code comments — and each copy makes it look more measured than it is.
+No single copy was ever re-derived from an observation; they all cited each other. A **blocker** is the
+most dangerous place for this, because a blocker is exactly what nobody tries to falsify — its job is to
+stop you looking.
+
+**The rule.** **A blocker is a claim, and every claim carries an observation (rule 0) — including the
+claim that something *cannot* be done.** When a blocker is more than one session old, re-measure it before
+trusting it: run the command it says is impossible, and look at the output. And when a measurement
+falsifies a premise, **correct it everywhere it was copied** (rule 13) — here five documents. Stated in
+the owner's own standing instruction (now `WORKING-RULES.md` §1 rule 14): *"ANYTHING that blocks the work
+you HAVE TO clearly state it repeatedly till it is resolved."* A blocker you repeat but never re-test is a
+blocker you have stopped thinking about.
+
+*Cross-ref: rule 13 (correct a falsified premise everywhere it was copied), rule 0-zero-two ("it exists" is
+not "it is built"), L1 (a confident label is not an inspection).*
+
+## L96 — a guard on the SEED path is not a guard on the CREATE path, and the two are found in different files
+
+**What happened.** The durable `is_core` marker was stamped in the seed (`setup-app.ts`, for the built-in
+`superadmin`/`admin`/`employee` roles) and the guard was wired on the delete and rename paths. Then the
+hostile critic found a **HIGH** hole: the **API create path** (`auth/roles/commands/roles.ts`) inserted a
+role with `{ name, tenantId }` and **no `isCore`**, so a role the setting marks core — created at runtime —
+was born `is_core = false`. One rename would move its name out of the setting and leave it fully
+unguarded: the exact hole the work existed to close, re-opened for every non-seed core role.
+
+**Why it is dangerous.** "I stamped the marker" is true of *a* path (the seed), and the seed is the path a
+reader naturally checks first — it is where the built-in roles visibly come from. The create path is in a
+different file, a command, not a setup script. A property that must hold **for every row** was enforced on
+one of the two ways a row is born, and the one it missed is the one that runs in production.
+
+**The rule.** When an invariant is "every X is stamped/has/gets Y", enumerate **every place an X is
+created** and check each — not just the one that is easiest to find. Seed and runtime-create are different
+paths *by construction* (one is bootstrapping data, one is user action), so a check on one says nothing
+about the other. Ask "how many ways can this row come into existence?" before declaring the invariant held.
+
+*Cross-ref: rule 9a (own the code you touch — the create path was mine the moment I stamped the seed),
+L85 (a test that mocks the layer you are changing proves nothing).*
