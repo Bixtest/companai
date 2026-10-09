@@ -4,12 +4,18 @@
 or request scattered across other documents. If it needs you, it is here or it is not tracked.
 
 > **2026-10-06 — you answered the three open items.** *"I will change the password later, docker
-> autostart fixed and the iso is deleted."* **Items 6 and 7 are done and measured; item 5 stays open
+> autostart fixed and the iso is deleted."* **`NY-6` and `NY-7` are done and measured; `NY-5` stays open
 > because you said "later".** Part 2 is down from three items to one. **Nothing here blocks the build.**
 
-**How to answer.** Every item has a number. Reply with the numbers and a word each — for example  
-*"5 done, 6 yes, 7 yes, 4 keep"*. You do not need to read anything else first. Where an item is  
-**not** a decision, it says so, and you can ignore it.
+**How to answer.** Every item has an **ID** (`NY-n` — its stable handle). Reply with the IDs and a word
+each — for example *"`NY-5` done, `NY-6` yes, `NY-7` yes, `P0-spec` keep"*. You do not need to read
+anything else first. Where an item is **not** a decision, it says so, and you can ignore it.
+
+> **Why IDs, not bare numbers (owner's rule, 2026-10-09).** A bare number is ambiguous — `5` could mean
+> this file's item 5, or `P5`, or BUILD-ORDER's item 5. An **ID** resolves in every document. This file's
+> numbers are therefore written with the `NY-` prefix, and where the item already has a project ID that
+> ID is shown too. An item's number is **never reused**, so an ID you quoted yesterday still means the
+> same thing today.
 
 **Legend**
 
@@ -22,7 +28,7 @@ or request scattered across other documents. If it needs you, it is here or it i
 
 ---
 
-## Part 1 — Decisions I need (**none open** — item 15 decided 2026-10-09; item 14 closed 2026-10-06; items 1, 2, 8 and 13 closed; item 4 is "nothing needed")
+## Part 1 — Decisions I need (**none open** — `NY-15` decided 2026-10-09; `NY-14` closed 2026-10-06; `NY-1`, `NY-2`, `NY-8`, `NY-13` closed; `NY-4` is "nothing needed")
 
 > **Numbering note.** Items are numbered once and **never reused**, so that a number you have already
 > quoted keeps meaning the same thing. Item 8 was appended here on 2026-10-05 and answered the same
@@ -33,7 +39,7 @@ or request scattered across other documents. If it needs you, it is here or it i
 > on 2026-10-06** with the request-outcome taxonomy. **Nothing in this Part is open.**
 > *(Item 5, the Coolify password, is in Part 2 — it is a thing to do, not a decision to make.)*
 
-### 1. Reset the local dev database? — ✅ **DONE 2026-10-05** *(no longer needs you)*
+### `NY-1` — Reset the local dev database? — ✅ **DONE 2026-10-05** *(no longer needs you)*
 
 **Resolved by measurement.** The database was deleted and rebuilt from scratch on the fixed image, and
 the rebuild came out clean. Read off the running container, not argued: the app log says
@@ -56,7 +62,7 @@ script, and watched whether it completed cleanly. That is the only way to know.
 **What it cost.** The three local demo accounts were recreated automatically. There was **no real  
 data** in this database — it has only ever held the starter data.
 
-### 2. Drop the `apps/docs` folder from the codebase? — ✅ **DONE 2026-10-05** *(no longer needs you)*
+### `NY-2` — Drop the `apps/docs` folder from the codebase? — ✅ **DONE 2026-10-05** *(no longer needs you)*
 
 **Done.** You approved it and it was moved out of the codebase in commit `2c8fda5` (*"Move apps/docs
 out of the codebase"*, 2026-10-05 05:38). Measured: `apps/` now contains only `apps/mercato`. It is
@@ -66,8 +72,7 @@ recoverable from the kit's upstream if it is ever wanted back.
 build config and content. It came with the kit we forked. We have our own documentation in  
 `library/`, and this was 471 files to keep in step for no benefit.
 
-### &#x20; 
- Get a lawyer to review the privacy policy and terms before any commercial use? — **DECIDE**
+### `NY-3` — Get a lawyer to review the privacy policy and terms before any commercial use? — **DECIDE**
 
 · *recommend: NOT YET*
 
@@ -78,7 +83,7 @@ before you take a paying customer, not before you write code.
 someone. **If not yet.** It is already recorded as item **C** on the roadmap with the trigger  
 "before commercial use", so it will come back on its own.
 
-### 4. Do you want a say in how I pruned the specification's object list? — **KNOW** · *nothing needed*
+### `NY-4` — Do you want a say in how I pruned the specification's object list? — **KNOW** · *nothing needed*
 
 This is the question you asked about — *"I don't know what ratification is and what is expected from  
 me."* Here is the honest answer.
@@ -104,7 +109,7 @@ the document.
 
 ---
 
-### 8. Are assistant agents *identity* or *context*? — ✅ **ANSWERED 2026-10-05**
+### `NY-8` — Are assistant agents *identity* or *context*? — ✅ **ANSWERED 2026-10-05**
 
 **Your answer: neither, and both.** There are **five kinds** of agent, and a separate rule that decides
 who is answerable when one acts.
@@ -135,7 +140,7 @@ responsible when the agent acts?"*
 
 ---
 
-### 13. What should the long-term default for models be — cloud, local, or per-tenant policy? — ✅ **DECIDED 2026-10-05** *(no longer needs you)*
+### `NY-13` — What should the long-term default for models be — cloud, local, or per-tenant policy? — ✅ **DECIDED 2026-10-05** *(no longer needs you)*
 
 **Your decision: per-tenant policy is the destination, cloud-first is the interim.** Recorded
 2026-10-05. It is the answer I recommended, and it is now the plan.
@@ -171,7 +176,7 @@ deferrals the decision moves).
 
 ---
 
-### 14. When a prompt asks for a whole new service (LMS, CRM), which approval tier? — ✅ **DECIDED 2026-10-06 — explicit-approval**
+### `NY-14` — When a prompt asks for a whole new service (LMS, CRM), which approval tier? — ✅ **DECIDED 2026-10-06 — explicit-approval**
 
 **Your answer:** *"we follow your recommendation there."* So a whole new service takes the **strictest
 tier — explicit-approval.** In plain terms: a prompt like "add me LMS" can **never** proceed on its own.
@@ -200,7 +205,7 @@ of the running platform real tenants use.
 
 ---
 
-### 15. What else is "core" beyond the roles-and-permissions manager — and which **database tables** count as the schema backbone? — ✅ **DECIDED 2026-10-09 — the recommendations, AND as a superadmin SETTING, not hardcoded**
+### `NY-15` — What else is "core" beyond the roles-and-permissions manager — and which **database tables** count as the schema backbone? — ✅ **DECIDED 2026-10-09 — the recommendations, AND as a superadmin SETTING, not hardcoded**
 
 **Your ruling (2026-10-09).** *"we follow your recommendations concerning that. However, analyze if we can do
 this as a manageable matter instead of hardcoded. Give the superadmin the right and functionality to identify
@@ -248,11 +253,11 @@ CC-7 / CC-23 / `PLAN-SD-1` / `PLAN-SD-2`; your directive is now `WORKING-RULES.m
 ## Part 2 — Things only you can do (**1 open** — items 6 and 7 are done)
 
 > **Update 2026-10-06.** You answered the three items: *"I will change the password later, docker
-> autostart fixed and the iso is deleted."* **Item 6 is done** and **item 7 is done** — both measured,
+> autostart fixed and the iso is deleted."* **`NY-6` is done** and **`NY-7` is done** — both measured,
 > see each item. **Item 5 is still open, and it is the only thing left in this Part.** Nothing here
 > blocks the build.
 
-### 5. Change the Coolify admin password — **DO** · *still open, and it is the only item left here*
+### `NY-5` — Change the Coolify admin password — **DO** · *still open, and it is the only item left here*
 
 You said *"password I will change later"*, and on 2026-10-06 you said it again. So this stays open and
 I am not touching it. There is a reason to move it up when you have a minute.
@@ -273,7 +278,7 @@ Until you change it, 2FA is the only thing standing between that password and th
 **Password** section → fill in **Current password**, **New password**, **Confirm new password** →  
 **Change password**. It signs out every session, including yours.
 
-### 6. Turn on Docker Desktop auto-start — ✅ **DONE 2026-10-06** *(no longer needs you)*
+### `NY-6` — Turn on Docker Desktop auto-start — ✅ **DONE 2026-10-06** *(no longer needs you)*
 
 **You said "docker autostart fixed". Measured, and it is true.** Docker is running right now and the
 whole local stack is up: `mercato-postgres-local`, `mercato-meilisearch-local`, `mercato-model-local`,
@@ -289,7 +294,7 @@ blocks for anything I launch (**B-04**). **It is no longer blocked, and it is no
 restart left the stack down and only you could start it — open **Docker Desktop** → **Settings** → the
 gear, top right → **General** → tick **"Start Docker Desktop when you sign in"**.)*
 
-### 7. Delete the 3.8 GB Ubuntu installer, if you want the space — ✅ **DONE 2026-10-06** *(no longer needs you)*
+### `NY-7` — Delete the 3.8 GB Ubuntu installer, if you want the space — ✅ **DONE 2026-10-06** *(no longer needs you)*
 
 **You said "the iso is deleted". Measured, and it is true, by two routes.**
 
@@ -381,18 +386,22 @@ design, and nothing is exposed to the network.
 
 Listed so you are not surprised by the work, not because it needs you.
 
-| #  | What                                                                                                                                     | Status                                                                                                       |
-| -- | ---------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| 8  | **Prove the database init completes cleanly**                                                                                            | ✅ **DONE 2026-10-05** — rebuilt on the fixed image; every init step ran green (see item **1**) |
-| 13 | **`S0` — re-run the local dockerised trio and confirm it still comes up** — the first unbuilt item in [`BACKLOG.md`](BACKLOG.md)          | ✅ **DONE 2026-10-06.** The re-run found the stack **was not** coming up whole: `mercato-redis-local` had exited because it was the **only** service with **no `restart:` policy**, and `mercato-mcp-local`'s `unhealthy` was a symptom of that (it depends on redis being healthy). **Fixed** — one line added to the redis service, both restarted, **all eight containers now healthy**. Full record: `workspace/COOKBOOK.md`, *Sprint 0 — the re-run* |
-| 9  | **Finish the specification** | ✅ **DONE 2026-10-05** — draft 2 closes all 18 items: **36 settled · 1 derived · 3 deferred-with-trigger · 0 open**. The one item that was yours, the **Hermes boundary (B-05)**, you **approved on 2026-10-05**. Only **ratification** is left — and that is item **4** |
-| 10 | **Wire the two new test files into the automatic check** so they run without being remembered                                            | ✅ **DONE 2026-10-05** — a `docker-scripts` job in `ci.yml` runs all four on every push/PR (**N-10**)        |
-| 11 | **Remove OpenCode properly** — the platform's own AI chat is built on it, so it cannot just be deleted; the chat has to be rewired first | Open, and the reason is recorded                                                                             |
-| 12 | **Deploy a WordPress site and a Docker app to a subdomain on the hosting server, and prove the database-plus-phpMyAdmin path**           | This is the thing you asked for. The runbook and the procedure exist; it needs the hosting server VM running |
-| 16 | **The G-17 agent declared, in the running app, and the live app-level run GREEN** | ✅ **DONE 2026-10-06 — you said yes, and it passed.** Container rebuilt (`docker compose -f docker-compose.fullapp.yml build app`, **12m22s**, new image `open-mercato/app:local` id `cd8c4242dcc0`). Measured both sides of the switch, same file: `ai-agents.generated.ts` held **0** `ai_assistant` occurrences before and **5** after. Then the live run: login **200** → `GET /ai_assistant/ai/agents` **200** (the app's own registry lists `business_ir.query_author`) → `POST /ai_assistant/ai/run-object` **200** in **69s**, returning a schema-valid Business IR (`list` invoices, `grain: customer`, `amount > 10000`, newest first, `limit 50`, EUR). **The one failure on the way was my input, not the platform:** login first returned **401** because the script guessed the password `secret`; the container seeds superadmin with **`OM_INIT_SUPERADMIN_PASSWORD=password`** (`secret` is for `admin@`/`employee@`). Confirmed by the owner. Full record: `analysis/g17-app-run/RESULTS-2026-10-06.md`. **No further action from you.** The outside-model probe you asked for ran first and passed, so the in-platform pass is unambiguous. **Answer QUALITY remains deliberately unevaluated** — that is the later model-comparison work |
-| 14 | **A pre-existing broken test in the AI package** — `agent-runtime-object.test.ts` failed 4 of its 8 cases on an unmodified tree | **OPEN — green now, but UNATTRIBUTED, and it does not need you.** Found while building G-17: the test's mock of the LLM provider registry no longer matched the path the model factory actually takes, so the model could not be resolved and it threw `no_provider_configured`. **It now passes 8/8** — but I tested the obvious explanation (*declaring the IR agent fixed it*) and it is **false**: swapping the generated registry back to its empty form left the suite at **8/8**. The environment changed in the same window (the generated registry sidecar was regenerated for the first time). **So the cause is unattributed and the item stays open** rather than being closed on a plausible story. A fix you cannot attribute is a coincidence, and the next person would lean on it. **My side, not yours** |
-| 15 | **The live smoke test for G-17** — ask the running local model whether it can actually emit a valid Business IR | ✅ **ANSWERED 2026-10-06 — yes, 6 of 6.** Qwen2.5-7B-Instruct-Q4_K_M produced an object the platform schema accepts for six different IR shapes (filtered list, count, bucketed aggregate, text search, sort+limit, grouped average), each validated against `businessQueryIrSchema` rather than by eye. A **negative control** confirms the pass is real: a loose prompt made the model invent nonsense (incl. a `tenant_id` key), and the schema **rejected** it. Full record: `workspace/COOKBOOK.md`, *Sprint G-17, Step 4*. **The app-level half is now measured and GREEN — see item 16** |
-| 17 | **Which risk tier each kind of structure change sits in** — the mapping from a change (e.g. "add an optional field") to one of the vision's three tiers | ✅ **ANSWERED, 2026-10-06 — by being absorbed into the specifications dictionary.** Verified this session: `CHANGE_KIND_TIER` in `packages/shared/src/lib/request-outcome/triage.ts` is an **empty frozen object**, so today every structure change lands in the strictest tier. That is the safe default, not a fault — but it is noisier than wanted. **The owner's new instruction resolves it a better way than picking a table:** the tiers become a **standard in [`SPECIFICATIONS-DICTIONARY.md`](SPECIFICATIONS-DICTIONARY.md) §C.2**, derived from the vision's own three tiers and failing closed on anything unrecognised. A **first mapping is proposed there** (optional column → `review_required`; new table / field-type change / removal → `explicit_approval`; index → `safe`) and **one question is open on it** — see the dictionary's Part E. **If the owner does nothing:** the mapping is not written to code and every change keeps stopping for explicit approval — safe, just noisy. **Confirmed properly answered:** the question is no longer "pick a tier per change", it is "the dictionary defines the tiers, the code inherits them" — which is what makes it un-forgettable |
+> **Keying (2026-10-09).** The first column is now the **canonical ID** — `NY-n`, the item's stable
+> handle. Quote the ID, never a bare number, so it resolves in every document. Where the row already
+> has a project ID, that ID is carried in the Status cell.
+
+| ID | What | Status |
+| -- | ---- | ------ |
+| **`NY-8`** | **Prove the database init completes cleanly** | ✅ **DONE 2026-10-05** — rebuilt on the fixed image; every init step ran green (see `NY-1`) |
+| **`S0`** (`NY-13`) | **Re-run the local dockerised trio and confirm it still comes up** — the first unbuilt item in [`BACKLOG.md`](BACKLOG.md) | ✅ **DONE 2026-10-06.** The re-run found the stack **was not** coming up whole: `mercato-redis-local` had exited because it was the **only** service with **no `restart:` policy**, and `mercato-mcp-local`'s `unhealthy` was a symptom of that (it depends on redis being healthy). **Fixed** — one line added to the redis service, both restarted, **all eight containers now healthy**. Full record: `workspace/COOKBOOK.md`, *Sprint 0 — the re-run* |
+| **`P0-spec`** (`NY-9`) | **Finish the specification** | ✅ **DONE 2026-10-05** — draft 2 closes all 18 items: **36 settled · 1 derived · 3 deferred-with-trigger · 0 open**. The one item that was yours, the **Hermes boundary (B-05)**, you **approved on 2026-10-05**. Only **ratification** is left — and that is `P0-spec` |
+| **`N-10`** (`NY-10`) | **Wire the two new test files into the automatic check** so they run without being remembered | ✅ **DONE 2026-10-05** — a `docker-scripts` job in `ci.yml` runs all four on every push/PR (**N-10**) |
+| **`N-8`** (`NY-11`) | **Remove OpenCode properly** — the platform's own AI chat is built on it, so it cannot just be deleted; the chat has to be rewired first | Open, and the reason is recorded |
+| **`NY-12`** | **Deploy a WordPress site and a Docker app to a subdomain on the hosting server, and prove the database-plus-phpMyAdmin path** | This is the thing you asked for. The runbook and the procedure exist; it needs the hosting server VM running |
+| **`G-17`** (`NY-16`) | **The G-17 agent declared, in the running app, and the live app-level run GREEN** | ✅ **DONE 2026-10-06 — you said yes, and it passed.** Container rebuilt (`docker compose -f docker-compose.fullapp.yml build app`, **12m22s**, new image `open-mercato/app:local` id `cd8c4242dcc0`). Measured both sides of the switch, same file: `ai-agents.generated.ts` held **0** `ai_assistant` occurrences before and **5** after. Then the live run: login **200** → `GET /ai_assistant/ai/agents` **200** (the app's own registry lists `business_ir.query_author`) → `POST /ai_assistant/ai/run-object` **200** in **69s**, returning a schema-valid Business IR (`list` invoices, `grain: customer`, `amount > 10000`, newest first, `limit 50`, EUR). **The one failure on the way was my input, not the platform:** login first returned **401** because the script guessed the password `secret`; the container seeds superadmin with **`OM_INIT_SUPERADMIN_PASSWORD=password`** (`secret` is for `admin@`/`employee@`). Confirmed by the owner. Full record: `analysis/g17-app-run/RESULTS-2026-10-06.md`. **No further action from you.** The outside-model probe you asked for ran first and passed, so the in-platform pass is unambiguous. **Answer QUALITY remains deliberately unevaluated** — that is the later model-comparison work |
+| **`NY-14`** | **A pre-existing broken test in the AI package** — `agent-runtime-object.test.ts` failed 4 of its 8 cases on an unmodified tree | **OPEN — green now, but UNATTRIBUTED, and it does not need you.** Found while building G-17: the test's mock of the LLM provider registry no longer matched the path the model factory actually takes, so the model could not be resolved and it threw `no_provider_configured`. **It now passes 8/8** — but I tested the obvious explanation (*declaring the IR agent fixed it*) and it is **false**: swapping the generated registry back to its empty form left the suite at **8/8**. The environment changed in the same window (the generated registry sidecar was regenerated for the first time). **So the cause is unattributed and the item stays open** rather than being closed on a plausible story. A fix you cannot attribute is a coincidence, and the next person would lean on it. **My side, not yours** |
+| **`G-17`** (`NY-15`) | **The live smoke test for G-17** — ask the running local model whether it can actually emit a valid Business IR | ✅ **ANSWERED 2026-10-06 — yes, 6 of 6.** Qwen2.5-7B-Instruct-Q4_K_M produced an object the platform schema accepts for six different IR shapes (filtered list, count, bucketed aggregate, text search, sort+limit, grouped average), each validated against `businessQueryIrSchema` rather than by eye. A **negative control** confirms the pass is real: a loose prompt made the model invent nonsense (incl. a `tenant_id` key), and the schema **rejected** it. Full record: `workspace/COOKBOOK.md`, *Sprint G-17, Step 4*. **The app-level half is now measured and GREEN — see the `G-17` row above** |
+| **`S2`/`SD-1`** (`NY-17`) | **Which risk tier each kind of structure change sits in** — the mapping from a change (e.g. "add an optional field") to one of the vision's three tiers | ✅ **ANSWERED, 2026-10-06 — by being absorbed into the specifications dictionary.** Verified this session: `CHANGE_KIND_TIER` in `packages/shared/src/lib/request-outcome/triage.ts` is an **empty frozen object**, so today every structure change lands in the strictest tier. That is the safe default, not a fault — but it is noisier than wanted. **The owner's new instruction resolves it a better way than picking a table:** the tiers become a **standard in [`SPECIFICATIONS-DICTIONARY.md`](SPECIFICATIONS-DICTIONARY.md) §C.2**, derived from the vision's own three tiers and failing closed on anything unrecognised. A **first mapping is proposed there** (optional column → `review_required`; new table / field-type change / removal → `explicit_approval`; index → `safe`) and **one question is open on it** — see the dictionary's Part E. **If the owner does nothing:** the mapping is not written to code and every change keeps stopping for explicit approval — safe, just noisy. **Confirmed properly answered:** the question is no longer "pick a tier per change", it is "the dictionary defines the tiers, the code inherits them" — which is what makes it un-forgettable |
 
 ---
 
@@ -404,7 +413,7 @@ So you can see these are genuinely done and not re-appearing.
 | ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
 | **Docker Desktop was not running** — the one thing blocking everything | **You started it.** The full stack came up and was verified today: **8 services, 7 healthy, 21 AI tools discovered** |
 | **The local platform might not run at all**                            | It runs. `http://localhost:3000` serves, and the login page loads                                                    |
-| **The local database might be half-seeded** — item **1**               | **Rebuilt and clean.** Deleted and rebuilt from scratch on the fixed image; every init step ran green, all five toggles created, 5 `action_logs` rows (see item **1**) |
+| **The local database might be half-seeded** — item **1**               | **Rebuilt and clean.** Deleted and rebuilt from scratch on the fixed image; every init step ran green, all five toggles created, 5 `action_logs` rows (see `NY-1`) |
 | **`apps/docs` — 471 files to keep in step** — item **2**               | **Moved out of the codebase** (commit `2c8fda5`, 2026-10-05); `apps/` now holds only `apps/mercato` (see item **2**) |
 | **The two new test files were not wired into CI** — Part 4 row 10      | **A `docker-scripts` job runs all four on every push/PR** (**N-10**)                                                 |
 | **`library/analysis/` had no history** — one bad edit from gone        | **Versioned.** You said yes; 41 files are now in version control, and the copies are excluded                        |
