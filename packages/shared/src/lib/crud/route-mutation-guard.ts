@@ -7,6 +7,7 @@ import {
 } from './mutation-guard-registry'
 import { getAllMutationGuardInstances } from './mutation-guard-store'
 import { createLogger } from '../logger'
+import type { PrincipalKind } from '../auth/principal'
 
 const logger = createLogger('shared').child({ component: 'crud' })
 
@@ -30,6 +31,14 @@ export type RouteMutationGuardAuth = {
   userId: string
   tenantId: string
   organizationId?: string | null
+  /**
+   * S12 / SD-4 slice B — the acting principal kind (`human` | `ai_worker` |
+   * `service` | `system`). **Optional**: a route that predates this field passes
+   * nothing and every guard behaves identically; a route that knows its principal
+   * passes it so a structural guard can tell a person from an AI. Callers derive
+   * it from `requirePrincipal(auth)?.kind` — never by parsing `userId`.
+   */
+  actorKind?: PrincipalKind
   /**
    * Pre-resolved granted features for the caller. When omitted, the wrapper
    * resolves them via `rbacService.getGrantedFeatures` (same source the CRUD
@@ -171,6 +180,7 @@ export async function runRouteMutationGuards(params: {
       tenantId: auth.tenantId,
       organizationId: auth.organizationId ?? null,
       userId: auth.userId,
+      actorKind: auth.actorKind,
       resourceKind: input.resourceKind,
       resourceId: input.resourceId ?? null,
       operation,
@@ -228,6 +238,7 @@ export async function runRouteMutationGuards(params: {
             tenantId: auth.tenantId,
             organizationId: auth.organizationId ?? null,
             userId: auth.userId,
+            actorKind: auth.actorKind,
             resourceKind: input.resourceKind,
             resourceId: input.resourceId ?? '',
             operation,

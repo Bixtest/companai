@@ -153,14 +153,31 @@ describe('a payload that names no target is not this guard’s business', () => 
 })
 
 describe('the wildcard is narrowed to the definition writes — a record write is NOT judged', () => {
+  // The record route's resourceKind, pinned to the constant `records.ts` actually
+  // emits. A hostile-critic pass found the first version of this test used a
+  // plausible-but-fictional string, so it passed for the wrong reason. This
+  // reads the real value from the source so the test cannot silently drift from
+  // production; if `CUSTOM_ENTITY_RECORD_RESOURCE_KIND` is ever renamed, this
+  // assertion — not a mystery failure — tells the next reader why.
+  const RECORD_RESOURCE_KIND = 'entities.record'
+
+  it('matches the resourceKind the records route really emits (drift guard)', () => {
+    const fs = require('node:fs') as typeof import('node:fs')
+    const path = require('node:path') as typeof import('node:path')
+    const source = fs.readFileSync(path.join(__dirname, '..', '..', 'api', 'records.ts'), 'utf8')
+    const match = source.match(/CUSTOM_ENTITY_RECORD_RESOURCE_KIND\s*=\s*'([^']+)'/)
+    expect(match?.[1]).toBe(RECORD_RESOURCE_KIND)
+  })
+
   it('does not block a record delete even when the payload names a reserved entity', async () => {
     // A hostile-critic pass (Probe 3) proved the un-narrowed wildcard returned 422
     // for a *record* write against auth:user. Record writes carry an entityId too,
-    // so the guard must scope by resourceKind. This pins the fix.
+    // so the guard must scope by resourceKind. This pins the fix — using the
+    // resourceKind `records.ts` actually emits, not a plausible-looking string.
     const result = await runMutationGuards(
       guards,
       input({
-        resourceKind: 'entities.custom_entity_record',
+        resourceKind: RECORD_RESOURCE_KIND,
         operation: 'delete',
         mutationPayload: { entityId: 'auth:user', recordId: 'r1' },
       }),
@@ -173,7 +190,7 @@ describe('the wildcard is narrowed to the definition writes — a record write i
     const result = await runMutationGuards(
       guards,
       input({
-        resourceKind: 'entities.custom_entity_record',
+        resourceKind: RECORD_RESOURCE_KIND,
         operation: 'update',
         mutationPayload: { entityId: 'auth:user', values: { a: 1 } },
       }),
@@ -195,5 +212,71 @@ describe('the namespace is pinned — a table name is NOT an entity id', () => {
   it('refuses the entity-id form of the same object (auth:user / auth:role)', () => {
     expect(structuralGuardRefusal({ entityId: 'auth:user' }, 'delete')).not.toBeNull()
     expect(structuralGuardRefusal({ entityId: 'auth:role' }, 'delete')).not.toBeNull()
+  })
+})
+
+/* ------------------------------------------------------------------ *
+ * S12 / slice B — the actor kind is part of the decision
+ * ------------------------------------------------------------------ */
+
+describe('S12 — the actor kind reaches the guard and shapes the refusal', () => {
+  it('names the machine actor when an AI worker is refused', () => {
+    const refusal = structuralGuardRefusal(
+      { entityId: 'auth:user', key: 'nickname' },
+      'delete',
+      undefined,
+      'ai_worker',
+    )
+    expect(refusal).not.toBeNull()
+    expect(refusal?.message).toContain('automated actor')
+    expect(refusal?.message).toContain('ai_worker')
+  })
+
+  it('does not name a machine when a human is refused', () => {
+    const refusal = structuralGuardRefusal(
+      { entityId: 'auth:user', key: 'nickname' },
+      'delete',
+      undefined,
+      'human',
+    )
+    expect(refusal).not.toBeNull()
+    expect(refusal?.message).not.toContain('automated actor')
+  })
+
+  it('still refuses when the actor kind is unknown (fail closed)', () => {
+    const refusal = structuralGuardRefusal({ entityId: 'auth:user' }, 'delete')
+    expect(refusal).not.toBeNull()
+    expect(refusal?.status).toBe(422)
+  })
+
+  it('carries actorKind through the real registry runner to the guard', async () => {
+    // End-to-end transport proof: the runner spreads the input, so a guard sees
+    // actorKind. The AI refusal message is the observable that proves it arrived.
+    const result = await runMutationGuards(
+      guards,
+      input({
+        resourceKind: 'entities.field_definition',
+        operation: 'delete',
+        actorKind: 'ai_worker',
+        mutationPayload: { entityId: 'auth:user', key: 'nickname' },
+      }),
+      ctx,
+    )
+    expect(result.ok).toBe(false)
+    expect(JSON.stringify(result.errorBody)).toContain('automated actor')
+  })
+
+  it('an ordinary object is still allowed for a machine actor (the axis does not over-fire)', async () => {
+    const result = await runMutationGuards(
+      guards,
+      input({
+        resourceKind: 'entities.field_definition',
+        operation: 'delete',
+        actorKind: 'ai_worker',
+        mutationPayload: { entityId: 'customers:customer_person', key: 'loyalty_tier' },
+      }),
+      ctx,
+    )
+    expect(result.ok).toBe(true)
   })
 })

@@ -1,6 +1,7 @@
 import type { AwilixContainer } from 'awilix'
 import { hasAllFeatures } from '../../security/features'
 import { resolveCrudMutationGuardService } from './mutation-guard-service'
+import type { PrincipalKind } from '../auth/principal'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -33,6 +34,22 @@ export interface MutationGuardInput {
   tenantId: string
   organizationId: string | null
   userId: string
+  /**
+   * S12 / SD-4 slice B — **who** is acting, in the platform's own principal
+   * vocabulary (`PrincipalKind`: `human` | `ai_worker` | `service` | `system`).
+   *
+   * **Optional, deliberately.** Every guard written before this field existed
+   * omits it and behaves identically; a guard that consults it (a structural
+   * decision that may differ for a person and an AI) opts in by reading it and
+   * failing closed when it is `undefined`. Making it required would have forced a
+   * value at every construction site — including the ones that genuinely have no
+   * principal (CLI, scheduled jobs) — which is a lie dressed as a type.
+   *
+   * The actor axis is the whole point of S12 (*"the actor type is part of every
+   * structural decision"*), so a guard that re-introduces the AI/human split must
+   * read this, never parse a prefix off `userId`.
+   */
+  actorKind?: PrincipalKind
   resourceKind: string
   resourceId: string | null
   operation: 'create' | 'update' | 'delete'
@@ -108,6 +125,8 @@ export interface MutationGuardAfterInput {
   tenantId: string
   organizationId: string | null
   userId: string
+  /** S12 / SD-4 slice B — the acting principal kind; optional, as on the input. */
+  actorKind?: PrincipalKind
   resourceKind: string
   resourceId: string
   operation: 'create' | 'update' | 'delete'

@@ -19,6 +19,7 @@ import {
   DEFAULT_CORE_SETTINGS,
   type CoreSettings,
 } from '@open-mercato/shared/lib/core-boundary/core-settings'
+import type { PrincipalKind } from '@open-mercato/shared/lib/auth/principal'
 import { isReservedSystemEntityType } from '@open-mercato/shared/lib/entities/system-entities'
 import {
   applyStructureChangeGrant,
@@ -523,11 +524,22 @@ const STRUCTURAL_RESOURCE_KINDS: ReadonlySet<string> = new Set([
  * tables in entity-id form — so a field on `auth:user` and an entity `auth:user`
  * are both protected, from one decision, with no second authority on what is
  * protected (S5).
+ *
+ * **S12 — the actor kind is part of the decision.** When the acting principal is a
+ * **machine** (`ai_worker` / `service` / `system`), the refusal names that fact, so
+ * the reason tells the truth about *who* was stopped. This is the first reader of
+ * the actor axis: it makes the `actorKind` that rides the guard input
+ * **load-bearing** (a guard that never read it would be the decoration the rules
+ * forbid). The *broader* per-(object, verb, actor) grammar — where an AI might be
+ * allowed a change a person is not, and vice versa — is Slice C; what is settled
+ * here is that a machine may not restructure a protected object at all, and the
+ * decision knows the actor.
  */
 export function structuralGuardRefusal(
   payload: Record<string, unknown> | null | undefined,
   operation: 'create' | 'update' | 'delete',
   settings: CoreSettings = DEFAULT_CORE_SETTINGS,
+  actorKind?: PrincipalKind,
 ): { status: number; message: string } | null {
   // A create is not a structural change to an existing object — it is the S2
   // gate's job (a different guard already runs there), not this one.
@@ -542,10 +554,15 @@ export function structuralGuardRefusal(
   const key = readStringField(payload, 'key')
   const subject = key ? `"${entityId}.${key}"` : `"${entityId}"`
   const verb = operation === 'delete' ? 'removed' : 'changed'
+  const byMachine = actorKind !== undefined && actorKind !== 'human'
+  const because = byMachine
+    ? `${subject} is part of the schema backbone the platform depends on and cannot be ${verb} ` +
+      `by an automated actor (${actorKind}).`
+    : `${subject} is part of the schema backbone the platform depends on and cannot be ${verb}.`
   return {
     status: 422,
     message:
-      `${subject} is part of the schema backbone the platform depends on and cannot be ${verb}. ` +
+      `${because} ` +
       "It is not the tenant's to restructure (CORE-BOUNDARY.md §2). " +
       'A superadmin may move it between tiers in the core-object setting if that is intended.',
   }
@@ -563,7 +580,12 @@ const structuralCoreGuard: MutationGuard = {
   async validate(input) {
     // Narrow the wildcard to the definition writes only — never a record write.
     if (!STRUCTURAL_RESOURCE_KINDS.has(input.resourceKind)) return { ok: true }
-    const refusal = structuralGuardRefusal(input.mutationPayload, input.operation)
+    const refusal = structuralGuardRefusal(
+      input.mutationPayload,
+      input.operation,
+      undefined,
+      input.actorKind,
+    )
     return refusal ? { ok: false, status: refusal.status, message: refusal.message } : { ok: true }
   },
 }

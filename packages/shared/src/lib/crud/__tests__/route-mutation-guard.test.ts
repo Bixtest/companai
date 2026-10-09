@@ -294,6 +294,74 @@ describe('runRouteMutationGuards', () => {
     )
   })
 
+  // S12 / SD-4 slice B — the actor axis must survive the whole trip from the
+  // route's declared `auth` into the guard, on BOTH the validate call and the
+  // afterSuccess call. Proving it only at the registry type level would be a
+  // decorative field; this is the transport contract.
+  describe('actorKind transport (S12 / SD-4 slice B)', () => {
+    it('carries auth.actorKind into the validate input', async () => {
+      const guard = makeGuard({ id: 'actor-reading-guard' })
+      registerStoreGuards([guard])
+
+      const result = await runRouteMutationGuards({
+        container: makeContainer(),
+        req: makeRequest(),
+        auth: { ...baseAuth, actorKind: 'ai_worker' },
+        input: baseInput,
+      })
+
+      expect(result.ok).toBe(true)
+      expect(guard.validate).toHaveBeenCalledTimes(1)
+      expect(guard.validate).toHaveBeenCalledWith(
+        expect.objectContaining({ actorKind: 'ai_worker' }),
+      )
+    })
+
+    it('carries auth.actorKind into the afterSuccess input', async () => {
+      const afterSuccess = jest.fn().mockResolvedValue(undefined)
+      const guard = makeGuard({
+        id: 'actor-after-guard',
+        validate: jest.fn().mockResolvedValue({ ok: true, shouldRunAfterSuccess: true }),
+        afterSuccess,
+      })
+      registerStoreGuards([guard])
+
+      const result = await runRouteMutationGuards({
+        container: makeContainer(),
+        req: makeRequest(),
+        auth: { ...baseAuth, actorKind: 'service' },
+        input: baseInput,
+      })
+
+      expect(result.ok).toBe(true)
+      if (!result.ok) throw new Error('expected passed result')
+      await result.runAfterSuccess()
+
+      expect(afterSuccess).toHaveBeenCalledWith(
+        expect.objectContaining({ actorKind: 'service' }),
+      )
+    })
+
+    it('leaves actorKind undefined when the route does not declare one (no behaviour change for legacy callers)', async () => {
+      const guard = makeGuard({ id: 'legacy-guard' })
+      registerStoreGuards([guard])
+
+      const result = await runRouteMutationGuards({
+        container: makeContainer(),
+        req: makeRequest(),
+        auth: baseAuth,
+        input: baseInput,
+      })
+
+      expect(result.ok).toBe(true)
+      // The field is present on the input object but explicitly undefined — a
+      // legacy guard that never reads it is byte-for-byte unaffected, and a
+      // structural guard that does read it must fail closed on undefined.
+      const call = (guard.validate as jest.Mock).mock.calls[0][0] as { actorKind?: unknown }
+      expect(call.actorKind).toBeUndefined()
+    })
+  })
+
   // D3 — the route wrapper is where consumers read the result, so the three
   // outcomes must be distinguishable *here*, not only in the runner.
   describe('escalate (D3)', () => {

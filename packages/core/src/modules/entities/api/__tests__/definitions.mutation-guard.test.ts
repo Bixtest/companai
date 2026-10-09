@@ -33,14 +33,16 @@ jest.mock('@open-mercato/shared/lib/di/container', () => ({
   createRequestContainer: async () => container,
 }))
 
+let mockAuth: Record<string, unknown> = {
+  sub: 'user-1',
+  userId: 'user-1',
+  tenantId: 'tenant-1',
+  orgId: 'org-1',
+  roles: ['admin'],
+}
+
 jest.mock('@open-mercato/shared/lib/auth/server', () => ({
-  getAuthFromRequest: async () => ({
-    sub: 'user-1',
-    userId: 'user-1',
-    tenantId: 'tenant-1',
-    orgId: 'org-1',
-    roles: ['admin'],
-  }),
+  getAuthFromRequest: async () => mockAuth,
 }))
 
 // D2 (2026-10-06): the entities write path now runs the REGISTRY-based guard
@@ -135,6 +137,13 @@ describe('entities write routes — mutation guard lifecycle (issue #3226)', () 
     jest.clearAllMocks()
     mockEm.find.mockResolvedValue([] as unknown[])
     mockEm.findOne.mockResolvedValue(null)
+    mockAuth = {
+      sub: 'user-1',
+      userId: 'user-1',
+      tenantId: 'tenant-1',
+      orgId: 'org-1',
+      roles: ['admin'],
+    }
   })
 
   describe('POST /api/entities/entities', () => {
@@ -276,6 +285,67 @@ describe('entities write routes — mutation guard lifecycle (issue #3226)', () 
       const response = await DEFINITIONS_RESTORE_POST(jsonRequest('http://x/api/entities/definitions/restore', 'POST', body))
       expect(response.status).toBe(200)
       expect(afterSuccess).toHaveBeenCalled()
+    })
+  })
+
+  // S12 / SD-4 slice B — the actor axis. The guard input's `auth.actorKind` must
+  // reflect the real principal, including on a *trusted-envelope* context (the
+  // in-process AI runner) which carries `sub: 'ai_worker:<id>'` and no
+  // `principal` field. A direct `auth.principal` read would call that worker
+  // "unknown" — the exact case the axis exists for — so this proves the
+  // derivation fallback, not merely the field's presence.
+  describe('S12 — the acting principal kind reaches the guard input', () => {
+    const body = { entityId: 'mod:thing', label: 'Thing' }
+
+    const actorKindFromLastCall = (): unknown => {
+      const call = runRouteMutationGuardsMock.mock.calls.at(-1)?.[0] as { auth?: { actorKind?: unknown } } | undefined
+      return call?.auth?.actorKind
+    }
+
+    it('derives ai_worker from a trusted-envelope-shaped context (no principal field)', async () => {
+      mockAuth = {
+        sub: 'ai_worker:123e4567-e89b-12d3-a456-426614174000',
+        userId: '123e4567-e89b-12d3-a456-426614174000',
+        tenantId: 'tenant-1',
+        orgId: 'org-1',
+        roles: [],
+      }
+      allow()
+      await ENTITIES_POST(jsonRequest('http://x/api/entities/entities', 'POST', body))
+      expect(actorKindFromLastCall()).toBe('ai_worker')
+    })
+
+    it('derives service from an api-key subject', async () => {
+      mockAuth = {
+        sub: 'api_key:123e4567-e89b-12d3-a456-426614174000',
+        userId: '123e4567-e89b-12d3-a456-426614174000',
+        tenantId: 'tenant-1',
+        orgId: 'org-1',
+        roles: [],
+      }
+      allow()
+      await ENTITIES_POST(jsonRequest('http://x/api/entities/entities', 'POST', body))
+      expect(actorKindFromLastCall()).toBe('service')
+    })
+
+    it('derives human from a bare user subject', async () => {
+      allow()
+      await ENTITIES_POST(jsonRequest('http://x/api/entities/entities', 'POST', body))
+      expect(actorKindFromLastCall()).toBe('human')
+    })
+
+    it('prefers an explicit principal.kind over the subject', async () => {
+      mockAuth = {
+        sub: 'user-1',
+        userId: 'user-1',
+        tenantId: 'tenant-1',
+        orgId: 'org-1',
+        roles: ['admin'],
+        principal: { id: 'key-1', kind: 'ai_worker', onBehalfOfUserId: 'user-1', displayName: null, tenantId: 'tenant-1', organizationId: 'org-1' },
+      }
+      allow()
+      await ENTITIES_POST(jsonRequest('http://x/api/entities/entities', 'POST', body))
+      expect(actorKindFromLastCall()).toBe('ai_worker')
     })
   })
 })

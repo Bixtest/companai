@@ -3,6 +3,7 @@ import type { AwilixContainer } from 'awilix'
 import { createRequestContainer } from '@open-mercato/shared/lib/di/container'
 import { buildScopedWhere } from '@open-mercato/shared/lib/api/crud'
 import { getAuthFromCookies, getAuthFromRequest, type AuthContext } from '@open-mercato/shared/lib/auth/server'
+import { derivePrincipal, type PrincipalKind } from '@open-mercato/shared/lib/auth/principal'
 import type { QueryEngine, Where, Sort, Page, QueryCustomFieldSource, QueryJoinEdge } from '@open-mercato/shared/lib/query/types'
 import { SortDir } from '@open-mercato/shared/lib/query/types'
 import type { DataEngine } from '@open-mercato/shared/lib/data/engine'
@@ -80,6 +81,25 @@ type RbacServiceLike = {
 }
 
 const logger = createLogger('shared').child({ component: 'crud' })
+
+/**
+ * The acting principal kind for a CRUD guard input (S12 / SD-4 slice B).
+ *
+ * Prefers `auth.principal.kind` and **derives** it when the context predates
+ * that field. The fallback is load-bearing, not defensive: the in-process AI
+ * runner hands routes a trusted envelope whose `AuthContext` carries
+ * `sub: 'ai_worker:<id>'` and no `principal` field, so a direct read would call
+ * an AI worker "unknown" — the one case the actor axis exists to distinguish.
+ * `derivePrincipal` is imported from `auth/principal`, the pure module that owns
+ * the subject encoding, and is mocked nowhere; calling it here keeps every
+ * consumer's `@open-mercato/shared/lib/auth/server` mock complete as written.
+ *
+ * Returns `undefined` only when there is genuinely nothing to derive from, which
+ * a guard reads as "unknown" and fails closed on.
+ */
+function resolveCrudActorKind(auth: AuthContext): PrincipalKind | undefined {
+  return auth?.principal?.kind ?? derivePrincipal(auth)?.kind
+}
 
 function resolveSortParams(queryParams: Record<string, unknown>) {
   const rawSortField = queryParams.sortField ?? queryParams.sort ?? 'id'
@@ -2241,6 +2261,15 @@ export function makeCrudRoute<TCreate = any, TUpdate = any, TList = any>(opts: C
           tenantId: ctx.auth.tenantId,
           organizationId: scopeOrganizationId,
           userId: ctx.auth.sub,
+          // S12 / SD-4 slice B — the actor axis (the other builders in this file
+          // read it the same way, via `resolveActorKind`). Derived from the
+          // principal, falling back to `derivePrincipal()` so a trusted-envelope
+          // context (the in-process AI runner: `sub: 'ai_worker:<id>'`, no
+          // `principal` field) is still read as a machine. Imported from
+          // `auth/principal` — the un-mocked pure module — so no consumer's mock
+          // of `auth/server` has to grow an export. `undefined` means genuinely
+          // unknown, which a guard treats as fail-closed.
+          actorKind: resolveCrudActorKind(ctx.auth),
           resourceKind,
           resourceId: null,
           operation: 'create',
@@ -2454,6 +2483,7 @@ export function makeCrudRoute<TCreate = any, TUpdate = any, TList = any>(opts: C
             tenantId: ctx.auth.tenantId,
             organizationId: scopeOrganizationId,
             userId: ctx.auth.sub,
+            actorKind: resolveCrudActorKind(ctx.auth),
             resourceKind,
             resourceId: candidateId,
             operation: 'update',
@@ -2512,6 +2542,7 @@ export function makeCrudRoute<TCreate = any, TUpdate = any, TList = any>(opts: C
             tenantId: ctx.auth.tenantId,
             organizationId: scopeOrganizationId,
             userId: ctx.auth.sub,
+            actorKind: resolveCrudActorKind(ctx.auth),
             resourceKind,
             resourceId: candidateId,
             operation: 'update',
@@ -2597,6 +2628,7 @@ export function makeCrudRoute<TCreate = any, TUpdate = any, TList = any>(opts: C
           tenantId: ctx.auth.tenantId,
           organizationId: scopeOrganizationId,
           userId: ctx.auth.sub,
+          actorKind: resolveCrudActorKind(ctx.auth),
           resourceKind,
           resourceId: id,
           operation: 'update',
@@ -2820,6 +2852,7 @@ export function makeCrudRoute<TCreate = any, TUpdate = any, TList = any>(opts: C
             tenantId: ctx.auth.tenantId,
             organizationId: scopeOrganizationId,
             userId: ctx.auth.sub,
+            actorKind: resolveCrudActorKind(ctx.auth),
             resourceKind,
             resourceId: candidateId,
             operation: 'delete',
@@ -2872,6 +2905,7 @@ export function makeCrudRoute<TCreate = any, TUpdate = any, TList = any>(opts: C
             tenantId: ctx.auth.tenantId,
             organizationId: scopeOrganizationId,
             userId: ctx.auth.sub,
+            actorKind: resolveCrudActorKind(ctx.auth),
             resourceKind,
             resourceId: candidateId,
             operation: 'delete',
@@ -2941,6 +2975,7 @@ export function makeCrudRoute<TCreate = any, TUpdate = any, TList = any>(opts: C
           tenantId: ctx.auth.tenantId,
           organizationId: scopeOrganizationId,
           userId: ctx.auth.sub,
+          actorKind: resolveCrudActorKind(ctx.auth),
           resourceKind,
           resourceId: id,
           operation: 'delete',
