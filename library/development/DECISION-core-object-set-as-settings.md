@@ -3,7 +3,7 @@
 **Written:** 2026-10-09. **Author:** the agent. **Status:** 🟡 **PROPOSAL — awaiting the owner's go-ahead.**
 **Supersedes:** the "written in code" recommendation in [`DECISION-core-object-set.md`](DECISION-core-object-set.md) §4/§5.
 **Parent:** `SD-2`/`S9` (dictionary §C.3), **`SD-3`/`D1` + dictionary §C.2b (the precedent this copies)**,
-`CORE-BOUNDARY.md` §2/§5, `COMPLETION-CALLBACKS.md` CC-31, `NEEDS-YOU.md` item 15.
+`CORE-BOUNDARY.md` §2/§5, `COMPLETION-CALLBACKS.md` CC-31, `NEEDS-YOU.md` row `G-17`.
 
 > **The owner's instruction (2026-10-09).** *"we follow your recommendations concerning that. However,
 > analyze if we can do this as a manageable matter instead of hardcoded. Give the superadmin the right and

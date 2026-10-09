@@ -153,7 +153,7 @@ the *largest* of these — it adds UI, API, migrations and tests — so it is re
 construction, never "safe". **The vision gives the *tiers* but does not say which tier an LMS-sized
 capability lands in. The owner decided on 2026-10-06: a whole new service is *explicit-approval*, the
 strictest tier — so "add me LMS" always stops and names a person, every time.** *(This was the one
-question in this document that needed him; it is closed — `NEEDS-YOU.md` item 14.)*
+question in this document that needed him; it is closed — `NEEDS-YOU.md` row `NY-14`.)*
 
 ### Q4. What exactly is "flawless output" — the bar that lets a prompt become a Function?
 

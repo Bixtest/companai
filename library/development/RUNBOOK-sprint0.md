@@ -44,7 +44,7 @@ Docker Desktop's startup path runs `wsl.exe`, and this machine's security policy
 anything the agent launches. The block is not approvable and must not be worked around. **So "start
 Docker Desktop" is a permanent owner step *for the agent* — but it is no longer a step the owner has to
 remember, because auto-start is now on.** Full detail: **B-04** in [`BLOCKERS.md`](BLOCKERS.md);
-[`NEEDS-YOU.md`](NEEDS-YOU.md) item 6 is **done**.
+[`NEEDS-YOU.md`](NEEDS-YOU.md) row `B-04` is **done**.
 
 > **Do not confuse "parses" with "runs".** `docker compose config` succeeds with the engine down, so
 > a passing parse proves nothing about whether anything can start.

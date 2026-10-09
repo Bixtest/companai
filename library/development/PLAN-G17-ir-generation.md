@@ -192,7 +192,7 @@ schema catches it — including the exact tenant-widening the `.strict()` design
    stubbed tests were not made redundant by this run.
 
 **Still open:** the same request driven through the live app end to end (HTTP in, IR out), which needs
-an authenticated session. NEEDS-YOU Part 4 item 15.
+an authenticated session. NEEDS-YOU Part 4 row `G-17`.
 
 ### 4d. What remains open — the honest limit
 
@@ -209,7 +209,7 @@ of `llm-provider-registry` no longer matched the path `model-factory` takes, so 
 fixed it*) was **tested and disproved**: swapping the generated registry back to its empty form left the
 suite at **8/8**. The generated registry sidecar was regenerated for the first time in the same window,
 which is a plausible cause and an unproven one. **The item stays open** rather than being closed on a
-plausible story — NEEDS-YOU Part 4 item 14. *A fix you cannot attribute is a coincidence.*
+plausible story — NEEDS-YOU Part 4 row `NY-14`. *A fix you cannot attribute is a coincidence.*
 
 ---
 
@@ -279,7 +279,7 @@ attachments), so its code is a **15-hour-old baked image**, and its `ai-agents.g
 **0** occurrences of `ai_assistant`. **Nothing is broken — the running app is simply older than the
 change.** Completing the app-level run needs a **container rebuild** (and an authenticated session).
 
-**That is the owner's call, and it is NEEDS-YOU Part 4 item 16 — a yes/no.** The running stack was not
+**That is the owner's call, and it is NEEDS-YOU Part 4 row `G-17` — a yes/no.** The running stack was not
 touched: widening its blast radius to make my own test pass is not my decision.
 
-**Next:** the owner's answer on item 16, then G-21.
+**Next:** the owner's answer on `G-17`, then G-21.

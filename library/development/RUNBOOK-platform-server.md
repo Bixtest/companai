@@ -227,7 +227,7 @@ So the ⚠ is the Traefik version notice and nothing else.
 ### Task 5 — The 3.8 GB installer ISO — ✅ **DELETED 2026-10-06 by the owner**
 
 **This task is closed. There is nothing to do.** The owner deleted the installer on 2026-10-06
-(`NEEDS-YOU.md` item 7), and it is confirmed by two routes: a search for every `.iso` under the project
+(`NEEDS-YOU.md` row `NY-7`), and it is confirmed by two routes: a search for every `.iso` under the project
 now returns **one** file, `vms/seed.iso` (67,584 bytes — the cloud-init seed, not the installer), and
 `C:` reports **86 GB free** against the **82.74 GB** recorded at the end of the build.
 
