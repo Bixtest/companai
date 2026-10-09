@@ -27,7 +27,7 @@ import {
   isCoreObjectKind,
   loadCoreObjects,
 } from '../core-objects'
-import { DEFAULT_CORE_SETTINGS, SUBSTRATE_ENTITY_TYPES, type CoreSettings } from '../core-settings'
+import { DEFAULT_CORE_SETTINGS, SUBSTRATE_ENTITY_TYPES, resolveCoreTier, type CoreSettings } from '../core-settings'
 
 describe('isCoreObject — the owner\'s named surface is core', () => {
   it('the roles-and-permissions manager (superadmin) is core', () => {
@@ -105,8 +105,12 @@ describe('the registry is exposed read-only and the kind set is closed', () => {
   })
 
   it('the kind set is exactly the declared kinds', () => {
-    expect(CORE_OBJECT_KINDS).toEqual(['role'])
+    // `agent` joined the row-level registry kinds in AH-1 (2026-10-09): an agent
+    // row may be marked core, so it carries a delete/rename refusal here. `role`
+    // remains the first; both are declared, and the set is closed to anything else.
+    expect(CORE_OBJECT_KINDS).toEqual(['role', 'agent'])
     expect(isCoreObjectKind('role')).toBe(true)
+    expect(isCoreObjectKind('agent')).toBe(true)
     expect(isCoreObjectKind('function')).toBe(false)
     expect(isCoreObjectKind(undefined)).toBe(false)
   })
@@ -172,6 +176,10 @@ describe('coreObjectRenameRefusal — a different act, said in the word for the 
     expect(refusal).not.toBeNull()
     expect(refusal!.reason).toBe('"superadmin" is a core role and cannot be renamed.')
     expect(refusal!.because).toContain('recognis')
+    // The rename reason names WHAT must not lose recognition — and does not paste
+    // the delete clause into a rename sentence (the AH-1 regression this pins).
+    expect(refusal!.because).toContain('the surface that manages roles and permissions')
+    expect(refusal!.because).not.toContain('deleting it removes')
   })
 
   it('returns null for a renameable object (the caller proceeds)', () => {
@@ -215,7 +223,7 @@ describe('the registry reads the SETTING — a tier change moves an object (SD-2
 
   it('loadCoreObjects reads the live setting through a reader', async () => {
     const stored = {
-      objectTier: { table: {}, column: {}, relation: {}, function: {}, role: { ops_admin: 'core' } },
+      objectTier: { table: {}, column: {}, relation: {}, function: {}, role: { ops_admin: 'core' }, agent: {} },
       defaultTier: 'tenant_structural',
       systemColumns: ['id'],
       reservedEntityTypes: [...SUBSTRATE_ENTITY_TYPES, 'auth:user'],
@@ -228,3 +236,93 @@ describe('the registry reads the SETTING — a tier change moves an object (SD-2
 
 // A local type only so the mutation-in-the-test above typechecks.
 type CoreObject = ReturnType<typeof coreObjects>[number]
+
+/**
+ * AH-1 (2026-10-09) — an **agent** is a core-object kind.
+ *
+ * **What this proves.** The owner ruled the agent's protection is a per-object
+ * SETTING, like a table's (`DECISION-agent-protection-tier.md`): a superadmin marks
+ * ONE agent core, and that agent — and only that agent — cannot be deleted or
+ * renamed by a tenant. This suite drives the registry the way the guard does
+ * (`core-object-guard.ts`), so the refusal is proven at the surface a delete route
+ * actually calls, not by inspecting the settings object directly.
+ *
+ * **What it must NOT do.** The seed stays fail-closed: an agent that no one has
+ * marked core is `tenant_structural` (ordinary, deletable), never silently `core`.
+ * That is the difference between "agents can be protected" and "all agents are
+ * protected" — and over-blocking every agent would be as wrong as protecting none.
+ */
+describe('an agent is a core-object kind (AH-1, 2026-10-09)', () => {
+  /** A setting that marks exactly one agent core — the superadmin's act. */
+  const withCoreAgent = (id: string): CoreSettings => ({
+    ...DEFAULT_CORE_SETTINGS,
+    objectTier: {
+      ...DEFAULT_CORE_SETTINGS.objectTier,
+      agent: { ...DEFAULT_CORE_SETTINGS.objectTier.agent, [id]: 'core' },
+    },
+  })
+
+  it('the seed does NOT make any agent core (fail-closed: agents are business data by default)', () => {
+    // An agent the seed never heard of — which is every agent, since the seed's
+    // agent map is empty — is ordinary. Never `core`, never protected.
+    expect(resolveCoreTier('agent', 'support_bot')).toBe('tenant_structural')
+    expect(isCoreObject('agent', 'support_bot')).toBe(false)
+    expect(coreObjectRefusal('agent', 'support_bot')).toBeNull()
+  })
+
+  it('a superadmin marks ONE agent core via the SETTING — and it is then core', () => {
+    const settings = withCoreAgent('support_bot')
+    // The seed disagrees...
+    expect(isCoreObject('agent', 'support_bot')).toBe(false)
+    // ...the setting wins, with no code change and no deploy.
+    expect(resolveCoreTier('agent', 'support_bot', settings)).toBe('core')
+    expect(isCoreObject('agent', 'support_bot', settings)).toBe(true)
+  })
+
+  it('a core agent is REFUSED on delete, with the agent reason (not the role reason)', () => {
+    const refusal = coreObjectRefusal('agent', 'support_bot', withCoreAgent('support_bot'))
+    expect(refusal).not.toBeNull()
+    expect(refusal!.reason).toBe('"support_bot" is a core agent and cannot be deleted.')
+    // The reason is the AGENT one — proving the per-kind `because` map is keyed
+    // correctly and an agent does not inherit the role's words.
+    expect(refusal!.because).toContain('agent machinery')
+    expect(refusal!.because).not.toContain('roles-and-permissions manager')
+  })
+
+  it('a core agent is REFUSED on rename (the CC-31(a) hole, closed for agents too)', () => {
+    const refusal = coreObjectRenameRefusal('agent', 'support_bot', withCoreAgent('support_bot'))
+    expect(refusal).not.toBeNull()
+    expect(refusal!.reason).toBe('"support_bot" is a core agent and cannot be renamed.')
+    expect(refusal!.because).toContain('recognis')
+    // The agent rename reason names the marker (its own sentence, not the role's).
+    expect(refusal!.because).toContain('marker travels with the row')
+    expect(refusal!.because).not.toContain('roles and permissions')
+  })
+
+  it('marking ONE agent core does NOT protect the others (per-object, not per-kind)', () => {
+    const settings = withCoreAgent('support_bot')
+    expect(isCoreObject('agent', 'support_bot', settings)).toBe(true)
+    // A sibling agent, not marked, stays deletable — the whole point of a
+    // per-object setting rather than a blanket "all agents are core".
+    expect(isCoreObject('agent', 'sales_bot', settings)).toBe(false)
+    expect(coreObjectRefusal('agent', 'sales_bot', settings)).toBeNull()
+  })
+
+  it('coreObjects() lists a core agent alongside the core role', () => {
+    const objs = coreObjects(withCoreAgent('support_bot'))
+    const agents = objs.filter((o) => o.kind === 'agent')
+    expect(agents.map((o) => o.id)).toEqual(['support_bot'])
+    expect(agents[0].because).toContain('agent machinery')
+    // The role entry is unaffected by the agent addition.
+    expect(objs.some((o) => o.kind === 'role' && o.id === 'superadmin')).toBe(true)
+  })
+
+  it('an agent can also be protected by the durable marker (the is_core column, forward-compatible)', () => {
+    // No agent column exists yet (it needs a migration — CC-31(a)); the registry
+    // already honours a marker for any kind, so the day an agent row carries one it
+    // is core with no further registry change.
+    expect(isCoreObject('agent', 'renamed_agent', undefined, { isCore: true })).toBe(true)
+    const refusal = coreObjectRefusal('agent', 'renamed_agent', undefined, { isCore: true })
+    expect(refusal!.because).toContain('agent machinery')
+  })
+})

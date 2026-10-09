@@ -61,13 +61,20 @@ import {
  * ------------------------------------------------------------------ */
 
 /**
- * The kinds of object that can be core.
+ * The kinds of object this **row-level** registry will call core.
  *
- * Re-exported from the setting's own kind set (`./core-settings.ts`) so the
- * registry and the setting cannot drift: a new *shape* of core object is a
- * dictionary change, which is exactly what extending this list means.
+ * Distinct from `CORE_SETTING_KINDS` (`./core-settings.ts`), which is the set of
+ * kinds a *tier can be assigned to*. This list is narrower on purpose: it holds
+ * the kinds whose **individual rows** carry a delete/rename refusal here. Tables
+ * and columns are not row objects — a structural change to them is refused by the
+ * `SD-1` gate, not by this registry — so they are absent even though they are
+ * assignable kinds.
+ *
+ * - `role` — the first core function (`SPECIFICATIONS-DICTIONARY.md` §C.3).
+ * - `agent` — added 2026-10-09 (`AH-1`): an agent row may be marked `core` by a
+ *   superadmin, so no tenant may delete it (see `DECISION-agent-protection-tier.md`).
  */
-export const CORE_OBJECT_KINDS = ['role'] as const
+export const CORE_OBJECT_KINDS = ['role', 'agent'] as const
 export type CoreObjectKind = (typeof CORE_OBJECT_KINDS)[number]
 
 /** The tier an object must be in for this registry to call it *core*. */
@@ -92,6 +99,42 @@ export type CoreObject = {
 const ROLE_CORE_BECAUSE =
   'the roles-and-permissions manager — deleting it removes the ability to manage roles in that scope (SPECIFICATIONS-DICTIONARY.md §C.3 / S9, the surface the owner named)'
 
+/** The reason attached to every *agent* core object — same rule, agent scoped. */
+const AGENT_CORE_BECAUSE =
+  'the platform\'s own agent machinery — a superadmin marked this agent core, so no tenant may delete or rename it (DECISION-agent-protection-tier.md, owner 2026-10-09)'
+
+/**
+ * One `because` per core-object **kind**.
+ *
+ * A reason belongs to the kind, not to one hardcoded branch: before `AH-1` the
+ * whole registry listed only roles, so a single `ROLE_CORE_BECAUSE` was enough.
+ * Now that `agent` is a core-object kind, the reason must be looked up by kind —
+ * and a kind with no reason is a defect the type system catches (the map is
+ * `Record<CoreObjectKind, string>`).
+ */
+const CORE_BECAUSE_BY_KIND: Record<CoreObjectKind, string> = {
+  role: ROLE_CORE_BECAUSE,
+  agent: AGENT_CORE_BECAUSE,
+}
+
+/**
+ * The reason for a **rename** refusal, per kind — a *different sentence* from the
+ * delete reason, because a rename is a different act.
+ *
+ * **Why this map exists, and is not just the delete reason reused.** Before `AH-1`
+ * the rename refusal hardcoded one sentence ending *"…must not happen to the
+ * surface that manages roles and permissions"*. Making that kind-generic by
+ * pasting the whole delete `because` into the rename sentence produced a
+ * malformed sentence — the delete clause (*"deleting it removes the ability to…"*)
+ * does not belong in *"…must not happen to X"*. So each kind carries two reasons:
+ * what its **loss** costs (delete) and what **losing recognition** costs (rename).
+ * A kind with no rename reason is again caught by the type system.
+ */
+const CORE_RENAME_BECAUSE_BY_KIND: Record<CoreObjectKind, string> = {
+  role: 'the surface that manages roles and permissions',
+  agent: 'an agent a superadmin marked core — the marker travels with the row, so a rename must not silently disarm it',
+}
+
 /**
  * The core objects, derived from settings.
  *
@@ -104,12 +147,17 @@ const ROLE_CORE_BECAUSE =
  * without erasing why it is on the list.
  */
 export function coreObjects(settings: CoreSettings = DEFAULT_CORE_SETTINGS): readonly CoreObject[] {
-  const ids = settings.objectTier.role ?? {}
   const objects: CoreObject[] = []
-  for (const id of Object.keys(ids)) {
-    if (resolveCoreTier('role', id, settings) !== CORE_TIER) continue
-    if (!isCoreObjectKind('role')) continue
-    objects.push({ kind: 'role', id, since: '2026-10-09', because: ROLE_CORE_BECAUSE })
+  // Walk every core-object KIND the registry knows, not just roles (AH-1,
+  // 2026-10-09). A kind in the setting at a non-'core' tier is skipped by the
+  // resolveCoreTier check, so a kind with no core rows contributes nothing.
+  for (const kind of CORE_OBJECT_KINDS) {
+    const ids = settings.objectTier[kind] ?? {}
+    for (const id of Object.keys(ids)) {
+      if (resolveCoreTier(kind, id, settings) !== CORE_TIER) continue
+      if (!isCoreObjectKind(kind)) continue
+      objects.push({ kind, id, since: '2026-10-09', because: CORE_BECAUSE_BY_KIND[kind] })
+    }
   }
   return objects.map((o) => ({ ...o }))
 }
@@ -177,7 +225,7 @@ export function coreObjectFor(
   // the setting (e.g. it was renamed). The reason still comes from the kind's one
   // place, so a renamed core role is refused in the same words as before.
   if (flags?.isCore === true) {
-    return { kind, id, since: '2026-10-09', because: ROLE_CORE_BECAUSE }
+    return { kind, id, since: '2026-10-09', because: CORE_BECAUSE_BY_KIND[kind] }
   }
   return null
 }
@@ -204,7 +252,7 @@ export function coreObjectRenameRefusal(
   return {
     reason: `"${core.id}" is a core ${core.kind} and cannot be renamed.`,
     because:
-      'renaming it would let the platform stop recognising it as core, which is the one thing that must not happen to the surface that manages roles and permissions (SPECIFICATIONS-DICTIONARY.md §C.3 / S9).',
+      `renaming it would let the platform stop recognising it as core, which is the one thing that must not happen to ${CORE_RENAME_BECAUSE_BY_KIND[core.kind]} (SPECIFICATIONS-DICTIONARY.md §C.3 / S9).`,
   }
 }
 

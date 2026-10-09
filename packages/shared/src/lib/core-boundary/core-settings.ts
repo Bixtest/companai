@@ -87,7 +87,7 @@ export type CoreTier = (typeof CORE_TIERS)[number]
 export const DEFAULT_CORE_TIER: CoreTier = 'tenant_structural'
 
 /** The kinds of object a tier can be assigned to (dictionary §C.3 + the DB axis). */
-export const CORE_SETTING_KINDS = ['table', 'column', 'relation', 'function', 'role'] as const
+export const CORE_SETTING_KINDS = ['table', 'column', 'relation', 'function', 'role', 'agent'] as const
 export type CoreSettingKind = (typeof CORE_SETTING_KINDS)[number]
 
 /* ------------------------------------------------------------------ *
@@ -298,14 +298,43 @@ const SEED_RESERVED_ENTITY_TYPES = [
   'entities:encryption_map',
 ] as const
 
-/** Build a `kind → (id → tier)` bucket with every kind present (an empty map). */
-const emptyObjectTier = (): Record<CoreSettingKind, Record<string, CoreTier>> => ({
-  table: {},
-  column: {},
-  relation: {},
-  function: {},
-  role: {},
-})
+/**
+ * Build a `kind → (id → tier)` bucket with every kind present (an empty map),
+ * **each inner map frozen**.
+ *
+ * **Derived from {@link CORE_SETTING_KINDS}, never re-listed.** The kinds used to
+ * be spelled out here, in the parser and in the frozen return — three places that
+ * had to be kept in step by hand. Adding a kind (the 2026-10-09 `agent` addition)
+ * would have had to touch all three and could silently miss one. Deriving from the
+ * const makes the vocabulary one source (the same discipline as S5: one list).
+ *
+ * **Why the inner maps are frozen.** This bucket is spread into
+ * {@link DEFAULT_CORE_SETTINGS}. Before AH-1 the seed froze `objectTier` itself and
+ * the two *populated* inner buckets (`table`, `role`), but the **empty** ones
+ * (`column`, `relation`, `function`) were left mutable — so
+ * `DEFAULT_CORE_SETTINGS.objectTier.column.evil = 'core'` succeeded and poisoned
+ * the module-level seed for the whole process (the hostile-critic pass proved the
+ * mutation; the HEAD construction had the identical gap, so it was pre-existing,
+ * not a regression — fixed here under rule 9a, own the code you touch). Freezing
+ * every inner map here closes it at the source: the parser's maps are frozen
+ * separately (see {@link emptyObjectTierNullProto}), and the seed can no longer be
+ * deepened into.
+ */
+const emptyObjectTier = (): Record<CoreSettingKind, Record<string, CoreTier>> =>
+  Object.fromEntries(
+    CORE_SETTING_KINDS.map((kind) => [kind, Object.freeze({}) as Record<string, CoreTier>]),
+  ) as Record<CoreSettingKind, Record<string, CoreTier>>
+
+/**
+ * The same bucket with **own-key, null-prototype** inner maps — what the parser
+ * returns. Kept separate from {@link emptyObjectTier} because the parser's maps
+ * must not inherit from `Object.prototype` (the `__proto__` defence
+ * {@link resolveCoreTier} documents).
+ */
+const emptyObjectTierNullProto = (): Record<CoreSettingKind, Record<string, CoreTier>> =>
+  Object.fromEntries(
+    CORE_SETTING_KINDS.map((kind) => [kind, Object.create(null) as Record<string, CoreTier>]),
+  ) as Record<CoreSettingKind, Record<string, CoreTier>>
 
 /**
  * **The seed — the recommendation's values, not the mechanism.**
@@ -395,13 +424,7 @@ export function parseCoreSettings(raw: unknown): CoreSettings | null {
   if (!rawMap || typeof rawMap !== 'object') return null
   const rawMapObj = rawMap as Record<string, unknown>
 
-  const objectTier: Record<CoreSettingKind, Record<string, CoreTier>> = {
-    table: Object.create(null),
-    column: Object.create(null),
-    relation: Object.create(null),
-    function: Object.create(null),
-    role: Object.create(null),
-  }
+  const objectTier: Record<CoreSettingKind, Record<string, CoreTier>> = emptyObjectTierNullProto()
   for (const [kind, inner] of Object.entries(rawMapObj)) {
     // An unknown kind invalidates the whole setting (fail closed), rather than
     // being silently dropped — a typo'd kind must not vanish without a trace.
@@ -414,13 +437,11 @@ export function parseCoreSettings(raw: unknown): CoreSettings | null {
   }
 
   return Object.freeze({
-    objectTier: Object.freeze({
-      table: Object.freeze(objectTier.table),
-      column: Object.freeze(objectTier.column),
-      relation: Object.freeze(objectTier.relation),
-      function: Object.freeze(objectTier.function),
-      role: Object.freeze(objectTier.role),
-    }),
+    objectTier: Object.freeze(
+      Object.fromEntries(
+        CORE_SETTING_KINDS.map((kind) => [kind, Object.freeze(objectTier[kind])]),
+      ) as Record<CoreSettingKind, Readonly<Record<string, CoreTier>>>,
+    ),
     defaultTier,
     systemColumns: Object.freeze([...systemColumns]),
     reservedEntityTypes: Object.freeze([...reservedEntityTypes]),

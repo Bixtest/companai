@@ -66,6 +66,22 @@ describe('the seed — the owner-accepted recommendation', () => {
     expect(DEFAULT_CORE_SETTINGS.reservedEntityTypes).toContain('auth:user')
     expect(DEFAULT_CORE_SETTINGS.reservedEntityTypes).toContain('entities:custom_entity')
   })
+
+  it('EVERY inner seed bucket is frozen — including the empty ones (no deepening the seed)', () => {
+    // The hostile-critic finding: the seed froze `table`/`role` but left the empty
+    // buckets (`column`, `relation`, `function`, and the new `agent`) mutable, so
+    // `DEFAULT_CORE_SETTINGS.objectTier.column.evil = 'core'` poisoned the
+    // module-level seed process-wide. Every kind's bucket must be frozen now.
+    for (const kind of Object.keys(DEFAULT_CORE_SETTINGS.objectTier)) {
+      expect(Object.isFrozen(DEFAULT_CORE_SETTINGS.objectTier[kind as keyof typeof DEFAULT_CORE_SETTINGS.objectTier])).toBe(true)
+    }
+    // Prove the mutation an attacker would attempt now throws in strict mode.
+    expect(() => {
+      ;(DEFAULT_CORE_SETTINGS.objectTier.column as Record<string, string>).evil = 'core'
+    }).toThrow()
+    // ...and the seed is unchanged after the attempt.
+    expect(resolveCoreTier('column', 'evil')).toBe('tenant_structural')
+  })
 })
 
 describe('parseCoreSettings — strict, so a bad setting is treated as NO setting', () => {
@@ -73,7 +89,14 @@ describe('parseCoreSettings — strict, so a bad setting is treated as NO settin
   // substrate, never drop it). Built from the seed's own substrate so it cannot drift.
   const VALID_RESERVED = [...SUBSTRATE_ENTITY_TYPES, 'auth:user']
   const valid = {
-    objectTier: { table: { tenants: 'core' }, column: {}, relation: {}, function: {}, role: { superadmin: 'core' } },
+    objectTier: {
+      table: { tenants: 'core' },
+      column: {},
+      relation: {},
+      function: {},
+      role: { superadmin: 'core' },
+      agent: {},
+    },
     defaultTier: 'tenant_structural',
     systemColumns: ['id'],
     reservedEntityTypes: VALID_RESERVED,
@@ -225,7 +248,7 @@ describe('resolveCoreTier — own-keys only, so a hostile id cannot defeat the d
     const bucket = Object.create(proto) as Record<string, unknown>
     bucket.tenants = 'core'
     const hostile = {
-      objectTier: { table: bucket, column: {}, relation: {}, function: {}, role: {} },
+      objectTier: { table: bucket, column: {}, relation: {}, function: {}, role: {}, agent: {} },
       defaultTier: 'tenant_structural',
       systemColumns: [],
       reservedEntityTypes: [],
@@ -238,7 +261,7 @@ describe('resolveCoreTier — own-keys only, so a hostile id cannot defeat the d
 
   it('a setting built BY HAND (not via the parser) is not trusted either', () => {
     const hostile = {
-      objectTier: { table: { tenants: 'evil' as unknown as never }, column: {}, relation: {}, function: {}, role: {} },
+      objectTier: { table: { tenants: 'evil' as unknown as never }, column: {}, relation: {}, function: {}, role: {}, agent: {} },
       defaultTier: 'tenant_structural',
       systemColumns: [],
       reservedEntityTypes: [],
@@ -282,7 +305,7 @@ describe('loadCoreSettings — never throws, always fails closed to the seed', (
 
   it('a stored VALID setting is returned (the live value wins)', async () => {
     const stored = {
-      objectTier: { table: { only_this: 'core' }, column: {}, relation: {}, function: {}, role: {} },
+      objectTier: { table: { only_this: 'core' }, column: {}, relation: {}, function: {}, role: {}, agent: {} },
       defaultTier: 'tenant_data',
       systemColumns: ['id'],
       reservedEntityTypes: [...SUBSTRATE_ENTITY_TYPES, 'auth:user'],
@@ -295,7 +318,7 @@ describe('loadCoreSettings — never throws, always fails closed to the seed', (
 
   it('a stored setting with an EMPTY reserved set falls back to the seed (fail open refused)', async () => {
     const reader = { getValue: async () => ({
-      objectTier: { table: {}, column: {}, relation: {}, function: {}, role: {} },
+      objectTier: { table: {}, column: {}, relation: {}, function: {}, role: {}, agent: {} },
       defaultTier: 'tenant_structural',
       systemColumns: ['id'],
       reservedEntityTypes: [],
@@ -306,7 +329,7 @@ describe('loadCoreSettings — never throws, always fails closed to the seed', (
 
   it('a stored setting with a JUNK-ONLY reserved set also falls back to the seed (round-2 hole)', async () => {
     const reader = { getValue: async () => ({
-      objectTier: { table: {}, column: {}, relation: {}, function: {}, role: {} },
+      objectTier: { table: {}, column: {}, relation: {}, function: {}, role: {}, agent: {} },
       defaultTier: 'tenant_structural',
       systemColumns: ['id'],
       reservedEntityTypes: ['nope'],
@@ -336,7 +359,7 @@ describe('loadCoreSettings — never throws, always fails closed to the seed', (
   it('resolveCoreTierWithReader composes read + decision', async () => {
     const reader = {
       getValue: async () => ({
-        objectTier: { table: { x: 'core' }, column: {}, relation: {}, function: {}, role: {} },
+        objectTier: { table: { x: 'core' }, column: {}, relation: {}, function: {}, role: {}, agent: {} },
         defaultTier: 'tenant_structural',
         systemColumns: ['id'],
         reservedEntityTypes: [...SUBSTRATE_ENTITY_TYPES, 'auth:user'],
