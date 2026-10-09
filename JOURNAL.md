@@ -35,7 +35,7 @@ log.** Everything else (HANDOVER, START-PROMPT, README, BOOKMARKS, BACKLOG) poin
 
 ---
 
-### ▶ NOW — `SD-4`: the **structural permission grammar** (S11/S12), which now also **owns the structural guard** (DROP / re-type / FK) that `SD-2b` deferred to it. Plan: [`library/development/BUILD-ORDER.md`](library/development/BUILD-ORDER.md) Phase 0 §8; architecture: [`library/development/ARCHITECTURE-structure-permissions.md`](library/development/ARCHITECTURE-structure-permissions.md).
+### ▶ NOW — `SD-4`: the **structural permission grammar** (S11/S12). **Slice A (the structural guard) is BUILT and PROVEN; Slices B (the actor axis) and C (the per-verb grammar) remain.** Plan: [`library/development/PLAN-SD-4.md`](library/development/PLAN-SD-4.md); architecture: [`library/development/ARCHITECTURE-structure-permissions.md`](library/development/ARCHITECTURE-structure-permissions.md).
 
 > **If you are a new agent, read only this block to know your job.** Everything below the box is the
 > history and the queue; this is the work in hand.
@@ -45,12 +45,30 @@ log.** Everything else (HANDOVER, START-PROMPT, README, BOOKMARKS, BACKLOG) poin
 is the **grammar** that consumes them: per object (table/column/relation/function/widget/agent) × verb
 (read/add/edit/remove/**reference**) × actor (human/AI) × level (straight/review/approval/never), with the
 per-object tier as the **fallback** when no explicit rule exists. Its foundation completion (D0/D1/D2-wide/D3 +
-Metadata Registry) is **done**; what remains is the grammar itself.
+Metadata Registry) is **done**.
 
-**Two things `SD-2b` handed to this task (do not lose them):**
-1. **The structural guard** (a `core`/`platform_release` object must not be **DROPped, re-typed, or have its
-   FK changed**) rides **here** — S5: one engine, never a rival. It reads the same `core-objects.ts` /
-   `core-settings.ts` the delete-guard reads.
+**The challenge (rule 9b) rewrote the task into three slices, in this order** (the plan §4 measures each):
+- **Slice A — the STRUCTURAL GUARD** (the `SD-2b` handoff): a `core`/`platform_release` object may not be
+  **DROPped or re-typed**. **✅ BUILT 2026-10-09 (code `6fbd605`)** — the guard `entities.structural.core-object-guard`
+  (`entities/data/guards.ts`) refuses a `delete`/`update` whose `entityId` is a reserved system surface, via
+  the **`SD-2b` predicate** `isReservedSystemEntityType` (the entity-id namespace — measured: the route passes
+  `auth:user`, not the table name `users`). **17 tests; 3 mutations RED-then-GREEN; a hostile-critic pass found
+  a HIGH wildcard over-fire on record writes (fixed by scoping to the two definition resource kinds) and a LOW
+  namespace-pin gap (fixed with a test).** `core` **632 suites / 5501 tests, 0 failures**; both `tsc` exit 0.
+- **Slice B — the actor axis** (S12): `PrincipalKind` exists platform-wide (`principal.ts:28`) but does **not**
+  reach the guard input (`MutationGuardInput` carries only `userId`). Add an **optional** `actorKind` field —
+  additive, no call site breaks.
+- **Slice C — the per-verb grammar** (S11, the CC-5 expansion): `PERMISSION_BLOCK_VERBS.structural` is today a
+  single `'structure'` verb (`catalogue.ts:99-102`); S11 needs add/edit/remove/reference. This is the piece
+  the manage screen (`SD-5`) then renders.
+
+**The two boundaries the challenge kept honest:** (1) `read`/`reference` are grammar *postures*, not
+write-path-enforceable (the guard only fires on writes; `SD-6` already set read side-effect GETs aside) —
+**scheduled, not silently dropped**; (2) a raw DDL `DROP TABLE` / FK change is not a row write, so no
+mutation guard sees it — **named and scheduled**, the guard does not pretend otherwise.
+
+**Two things `SD-2b` handed here (do not lose them):**
+1. **The structural guard** ✓ Slice A.
 2. **The per-object manage screen** stays folded into **`SD-5`** (one grid, two settings — not a second UI).
 
 **Fact-check all of this in code before writing (rule 10d) — do not assume.**

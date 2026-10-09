@@ -1135,10 +1135,21 @@ one page, each with a named home. Details: [`BLUEPRINT-GAP-ANALYSIS.md`](BLUEPRI
    failures**; both `tsc` exit 0; **10 disjoint mutations all RED**, each restore md5-identical; **two
    separate hostile-critic rounds**. Manage screen folds into **`SD-5`**; the structural guard rides **`SD-4`**
    (now built). Design: [`DECISION-core-object-set-as-settings.md`](DECISION-core-object-set-as-settings.md).
-8. **SD-4 / SD-5** — the structural grammar screen (manage what can do what, to what level). **This is now the
+8. **SD-4 / SD-5** — the structural grammar screen (manage what can do what, to what level). **This is the
    ★ ACTIVE TASK.** It consumes the `SD-3`/`SD-2b` settings and **also owns the structural guard** (a `core`/
    `platform_release` object must not be **DROPped, re-typed, or have its FK changed**) that `SD-2b` deferred to
-   it — S5: one engine, never a rival. `SD-5` keeps the **per-object manage screen** (one grid, two settings).
+   it — S5: one engine, never a rival. **Slice A — the structural guard — BUILT 2026-10-09** (plan
+   [`PLAN-SD-4.md`](PLAN-SD-4.md)): `entities.structural.core-object-guard` (`entities/data/guards.ts`) refuses
+   a `delete`/`update` whose `entityId` is a reserved system surface, via the `SD-2b` predicate
+   `isReservedSystemEntityType` (the entity-id namespace — measured: the route passes `auth:user`, **not** the
+   table name `users`, so a table-name lookup would have been dead code). 17 tests; **3 mutations
+   RED-then-GREEN**; a **hostile-critic pass** found a **HIGH** wildcard over-fire on record writes (fixed by
+   scoping to the two definition resource kinds) and a **LOW** namespace-pin gap (fixed with a test);
+   `core` **632 suites / 5501 tests, 0 failures**; `shared` **202/203** (the 1 red is the pre-existing
+   `dynamicLoader` flake, CC-19); both `tsc` exit 0. **Slice B (the actor axis, S12) and Slice C (the per-verb
+   grammar, S11/CC-5) remain** — the challenge (rule 9b) split the task into three and named the order. The
+   **manage screen stays `SD-5`** (one grid, two settings). Limits scheduled in
+   [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md) (CC-33: DDL DROP/FK; CC-34: read/reference verbs).
 9. **NEW — generic state-machine engine** (blueprint §10) promoted to a core primitive: allowed
    transitions, transition permissions, preconditions, events. Today pipelines exist only inside
    `customers`; the blueprint makes lifecycle generic.
