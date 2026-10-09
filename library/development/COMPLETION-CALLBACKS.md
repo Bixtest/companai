@@ -66,6 +66,8 @@ unstarted is a scheduling defect, not a blocked one). *Callback* = the concrete,
 
 ### `SD-4` — the structural grammar + the structural guard (parent: [`PLAN-SD-4.md`](PLAN-SD-4.md) §6)
 
+> **`SD-4` is COMPLETE (2026-10-09).** Slices A/B/C, the enforcement wiring (CC-37) **and the manage screen (`SD-5`, code `a2317b1`)** are all built and proven. The rows below are the **named, deferred** edges — none blocks `SD-4`'s completion, and each carries the trigger that brings it back. (`SD-5` itself needs no callback: it is done; its only honest limit is the approval-layer wiring, which is **CC-38** below and is *not* SD-5's to close.)
+
 | ID | Gap (measured) | Prerequisite | Callback — what to run when it lands |
 |---|---|---|---|
 | **CC-33** | **The structural guard sees row-level writes, not raw DDL.** `entities.structural.core-object-guard` refuses a `delete`/`update` of a `custom_field_defs` / entity-definition **row** on a reserved surface. A raw `DROP TABLE` / `ALTER … TYPE` / FK change is **not** a row write, so no mutation guard can see it — and the platform's own schema changes go through **migrations**, not a route's data write. This is stated in the guard's own header and in `PLAN-SD-4.md` §6, not hidden. | **a migration-time / DDL-time guard** — the schema-change path (migrations, or whatever authors them) gaining a check. | When that path exists: run `resolveCoreTier` / `isReservedSystemEntityType` over each table/column a migration touches, and refuse a DROP / re-type / FK change on a `core`/`platform_release` object — the same decision the row-level guard uses (S5: one engine). Until then the row-level guard is the real coverage and the DDL case is named, not claimed. |

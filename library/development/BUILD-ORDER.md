@@ -82,7 +82,7 @@ These are the only blockers to "apply the standards as we go." Each is a change 
 default tier and the structural fallback are now a **setting** (`module_configs`, module
 `request_outcome`, name `structureChangeTiers`), seeded from the dictionary and read through a function.
 The full `(object · verb · actorType · level)` grammar beyond the tier fallback remains **SD-4** (it needs
-D3's `escalate` to be useful), and the manage screen is **SD-5** — but the **setting the grammar reads
+D3's `escalate` to be useful), and the manage screen is **SD-5** — **both ✅ DONE 2026-10-09** — but the **setting the grammar reads
 from now exists**, which is what gap #1 was: everything in the grammar (S11) and the tier fallback (S12)
 could not be *configured* while it was hard-coded.
 
@@ -956,7 +956,7 @@ BACKLOG under G-21 and SD-4 so it cannot be mistaken for done.
 
 **What D1 did not finish, and it is named.** The full `(object · verb · actorType · role · level)` grammar
 beyond the tier fallback is **SD-4** (it needs D3's `escalate` outcome to be useful), and the manage screen
-is **SD-5**. D1 delivered the **setting** the grammar reads from — the piece that had to exist first.
+is **SD-5** — **both ✅ DONE 2026-10-09**. D1 delivered the **setting** the grammar reads from — the piece that had to exist first.
 
 ---
 
@@ -1135,8 +1135,7 @@ one page, each with a named home. Details: [`BLUEPRINT-GAP-ANALYSIS.md`](BLUEPRI
    failures**; both `tsc` exit 0; **10 disjoint mutations all RED**, each restore md5-identical; **two
    separate hostile-critic rounds**. Manage screen folds into **`SD-5`**; the structural guard rides **`SD-4`**
    (now built). Design: [`DECISION-core-object-set-as-settings.md`](DECISION-core-object-set-as-settings.md).
-8. **SD-4 / SD-5** — the structural grammar screen (manage what can do what, to what level). **This is the
-   ★ ACTIVE TASK.** It consumes the `SD-3`/`SD-2b` settings and **also owns the structural guard** (a `core`/
+8. **SD-4 / SD-5** — the structural grammar screen (manage what can do what, to what level). **✅ DONE 2026-10-09 (SD-4 code `a2317b1` for the manage screen; SD-4's slices in `6fbd605` + follow-ons).** It consumes the `SD-3`/`SD-2b` settings and **also owns the structural guard** (a `core`/
    `platform_release` object must not be **DROPped, re-typed, or have its FK changed**) that `SD-2b` deferred to
    it — S5: one engine, never a rival. **Slice A — the structural guard — BUILT 2026-10-09** (plan
    [`PLAN-SD-4.md`](PLAN-SD-4.md)): `entities.structural.core-object-guard` (`entities/data/guards.ts`) refuses
@@ -1162,7 +1161,7 @@ one page, each with a named home. Details: [`BLUEPRINT-GAP-ANALYSIS.md`](BLUEPRI
    corrected, since the per-actor **grammar** is Slice C, not B. `core` **632 suites / 5510 tests, 0 failures**;
    `shared` **203 suites / 2435 tests, 0 failures**; both `tsc` exit 0. **Slice C (the per-verb grammar,
    S11/CC-5) remains** — the challenge (rule 9b) split the task into three and named the order. The
-   **manage screen stays `SD-5`** (one grid, two settings). Limits scheduled in
+   **manage screen (`SD-5`) BUILT 2026-10-09 (code `a2317b1`) — the last half of SD-4 is closed** (one grid, two settings). Limits scheduled in
    [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md) (CC-33: DDL DROP/FK; CC-34: read/reference verbs;
    CC-35: re-type labelled `'create'`; CC-36: foreign builders omit `actorKind`).
 9. **NEW — generic state-machine engine** (blueprint §10) promoted to a core primitive: allowed

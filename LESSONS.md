@@ -3279,3 +3279,35 @@ it (here: `actorType='any'` on an unreached triple — the sole path to the fina
 apart), L94 (green on your run is a claim about a run), the encoding-trap note (a byte-identical restore must
 be proven, not assumed), rule 13 (a falsified premise is corrected everywhere it was copied — here CC-37's own
 callback named a `resolveStructuralLevel` design that would have weakened S9).*
+
+## L99 — a test whose two inputs are both produced by the function under test is **tautological**: it passes even when that function is replaced by a naive one
+
+**What happened.** `SD-5` added `structuralSettingsEqual(a, b)` (compares two settings cell-by-cell over the
+grammar's closed sets) and a test named *"ignores raw-shape differences (key presence/order) between
+equivalent settings"*. Both inputs were built with `parseStructuralSettings(...)`, which **normalises** both
+to the identical full shape. The hostile critic mutated the function itself to `return JSON.stringify(a) ===
+JSON.stringify(b)` — a naive deep-equality — and the suite stayed **green** (`49 passed`). The test could not
+tell the real function from the naive one, because after normalisation the two inputs *were* byte-identical:
+the whole point of the test — that raw shape must not matter — was never exercised.
+
+**Why it is dangerous.** A test that passes for *any* implementation of the function it names is **not a
+test of that function** — it is a coincidence that happens to run, and it manufactures confidence in exactly
+the property it claims to pin. Worse, it is invisible: the assertion (`toBe(true)`) is correct, the inputs
+look reasonable, and the suite is green. The defect is in the **relationship** between the inputs and the
+function under test — the inputs were pre-processed by the very thing being tested, so the test could only
+ever see already-equal values.
+
+**The rule.** For an equality/hashing/normalisation function, at least one input must be a **hand-built,
+deliberately differently-shaped** value that the function under test did **not** produce — a raw literal the
+other path (a parser, a serialiser) would emit. And **prove the test bites**: mutate the function to the
+naive wrong implementation (`JSON.stringify(a) === JSON.stringify(b)`) and confirm the test goes **RED**. If
+it stays green, the inputs were too well-normalised to distinguish the implementations — the test is
+tautological, and the fix is a raw-shape-*differing* pair (here: a hand-built object with only one object
+kind, a different key order and extra empty buckets; re-proven RED under M26). This is the sibling of **L98**:
+L98 is a mutation that never *runs* (unreachable); this is a mutation that runs but whose *test inputs*
+cannot tell the two implementations apart.
+
+*Cross-ref: L98 (a mutation that does not flip a test may be unreachable — check it ran; this is the other
+half — check the inputs can distinguish), L93 (a defence you never tested is one a refactor may delete), rule 9a
+(own the code you touch — the critic found it; I fixed it and re-proved it), the `check-the-premise-before-the-
+blanket-fix` discipline (re-measure the premise of a claim before trusting it).*

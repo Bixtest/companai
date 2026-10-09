@@ -35,78 +35,87 @@ log.** Everything else (HANDOVER, START-PROMPT, README, BOOKMARKS, BACKLOG) poin
 
 ---
 
-### ▶ NOW — `SD-4`: the **structural permission grammar** (S11/S12). **Slices A (the structural guard), B (the actor axis), C (the per-verb grammar) AND the enforcement wiring (CC-37) are BUILT and PROVEN; the one remaining half is the manage screen (`SD-5`).** Plan: [`library/development/PLAN-SD-4.md`](library/development/PLAN-SD-4.md); architecture: [`library/development/ARCHITECTURE-structure-permissions.md`](library/development/ARCHITECTURE-structure-permissions.md).
+### ▶ NOW — `SD-5` **DONE**; the active task is **BUILD-ORDER item 9 — the generic state-machine engine** (blueprint §10), unless the owner redirects. **`SD-4` is COMPLETE** (Slices A/B/C + CC-37 + the manage screen `SD-5` — code `a2317b1`); the structural-permission grammar is built, enforced and managed end-to-end.
 
 > **If you are a new agent, read only this block to know your job.** Everything below the box is the
 > history and the queue; this is the work in hand.
 
-**Why this is next.** `SD-2b` (just done) delivered the **setting** the grammar reads — the object→tier map
-(`module_configs`, `core_boundary`/`coreObjectTiers`). The `SD-3`/`SD-2b` settings are the **inputs**; `SD-4`
-is the **grammar** that consumes them: per object (table/column/relation/function/widget/agent) × verb
-(read/add/edit/remove/**reference**) × actor (human/AI) × level (straight/review/approval/never), with the
-per-object tier as the **fallback** when no explicit rule exists. Its foundation completion (D0/D1/D2-wide/D3 +
-Metadata Registry) is **done**.
+**What just finished (`SD-5`, code `a2317b1`).** The structural-permission **manage screen** — the last
+half of `SD-4`. A settings surface over the S11/S12 grammar: grouped by object kind, one Select per
+(verb × actor) with the four levels plus a distinct **"Inherited"** choice that **clears** a cell (S11
+inheritance) rather than storing the default. Three pieces, in `core`'s `auth` module (the
+roles-and-permissions owner, `auth.acl.manage` — NOT a new `permissions` module; the setting's module id
+is a string):
+1. the **data shape** stays in `shared/src/lib/permissions/structural-settings.ts` (pure grid / one-cell
+   edit / equality), so the screen holds no rule of its own;
+2. the **route** `auth/api/structural-permissions` (GET fail-closed; PUT validates + passes the auth
+   mutation-guard seam + writes `permissions`/`structuralPermissionLevels`);
+3. the **screen + page** (`auth/components/StructuralPermissionsSettings.tsx`,
+   `auth/backend/settings/structural-permissions/page.{tsx,meta.ts}`).
+**68 tests; 6 mutations RED-then-GREEN (M21–M26); a hostile-critic pass with 0 functional defects** (1
+tautological test + 2 weaknesses, all fixed). Full detail: the `✅ DONE — SD-4 / SD-5` entry below.
 
-**The challenge (rule 9b) rewrote the task into three slices, in this order** (the plan §4 measures each):
-- **Slice A — the STRUCTURAL GUARD** (the `SD-2b` handoff): a `core`/`platform_release` object may not be
-  **DROPped or re-typed**. **✅ BUILT 2026-10-09 (code `6fbd605`)** — the guard `entities.structural.core-object-guard`
-  (`entities/data/guards.ts`) refuses a `delete`/`update` whose `entityId` is a reserved system surface, via
-  the **`SD-2b` predicate** `isReservedSystemEntityType` (the entity-id namespace — measured: the route passes
-  `auth:user`, not the table name `users`). **17 tests; 3 mutations RED-then-GREEN; a hostile-critic pass found
-  a HIGH wildcard over-fire on record writes (fixed by scoping to the two definition resource kinds) and a LOW
-  namespace-pin gap (fixed with a test).** `core` **632 suites / 5501 tests, 0 failures**; both `tsc` exit 0.
-- **Slice B — the actor axis** (S12): `PrincipalKind` exists platform-wide (`principal.ts:28`) but did **not**
-  reach the guard input (`MutationGuardInput` carried only `userId`). **✅ BUILT 2026-10-09** — an **optional**
-  `actorKind?: PrincipalKind` now rides `MutationGuardInput` / `MutationGuardAfterInput` / `RouteMutationGuardAuth`,
-  threaded into **both** the validate and the `afterSuccess` inputs of `runRouteMutationGuards`, and set in the
-  eight guard-input builders (`factory.ts` ×7 + `beginEntitiesMutationGuard`). The kind is resolved as
-  `auth.principal?.kind ?? derivePrincipal(auth)?.kind`, with `derivePrincipal` imported from **`auth/principal`**
-  (the pure, un-mocked module) — **not** `auth/server` (which every consumer's test mocks wholesale). The
-  structural guard now **reads** it: a machine's refusal names the actor. **A hostile-critic pass caught two HIGH
-  issues: (1) a direct `auth.principal` read was a real regression — the in-process AI runner's *trusted
-  envelope* carries `sub:'ai_worker:<id>'` and no `principal` field, so that machine was mislabelled "unknown"
-  (fixed + pinned by 3 derivation tests, mutation M6); (2) the axis changes only the refusal *reason* today, not
-  the decision — corrected in the docs, since the per-actor grammar is Slice C.** Honest limit: the axis reaches
-  the guard and is a real reader; it does **not** yet make a machine's outcome differ from a person's.
-  `core` **632 suites / 5510 tests, 0 failures**; `shared` **203 suites / 2435 tests, 0 failures**; both `tsc`
-  exit 0; 3 mutations RED-then-GREEN (M4 transport, M5 actor reader, M6 the derivation).
-- **Slice C — the per-verb grammar** (S11, the CC-5 expansion): `PERMISSION_BLOCK_VERBS.structural` was a
-  single `'structure'` verb (`catalogue.ts:99-102`); it is now the **five S11 verbs** (`read`/`add`/`edit`/`remove`/`reference`),
-  so a surface yields **7** records (2 data + 5 structural) where it yielded 3. The grammar's **level** (per
-  object × verb × actor) has a home in `packages/shared/src/lib/permissions/structural-settings.ts` (the
-  `SD-3`/`SD-2b` pattern: seed + strict parser + pure `resolveStructuralLevel` — exact→`any`→default — + the
-  `actorTypeForPrincipal` bridge + fail-closed read). The falsified `'structure'` literal in
-  `structure-change-decision-header.ts`'s `blockFromFeature` is corrected at source (rule 13). **✅ BUILT 2026-10-09;
-  5 mutations RED-then-GREEN (M11–M15), each restore md5-identical; a hostile-critic pass measured the honest
-  boundary: the settings module had NO production reader yet — the enforcement wiring was CC-37.** This is the piece
-  the manage screen (`SD-5`) then renders.
-- **Slice C's enforcement wiring — CC-37** (the reader the grammar lacked). **✅ BUILT 2026-10-09.** The structural
-  guard (`entities.structural.core-object-guard`) now reads the **live** setting (`container.resolve('moduleConfigService')`
-  → `loadStructuralSettings`, failing closed to the seed) and, on a **protected** surface, turns an **explicit**
-  `review`/`approval` rule into the **escalate** outcome (D3 — `{ ok:true, escalation }`, status 202, *held for a
-  person*) instead of the hard 422. **The trap, self-caught and fixed:** acting on the *resolved* level would return
-  the seed's fail-closed `approval` default and convert the **absolute** S9/SD-2b refusal into a 202 for *every*
-  protected write with no rule — i.e. **weaken** the rule it refines. So a new `explicitStructuralLevel` (own-keys;
-  `null` when no rule reaches the triple) was added, and the guard escalates **only on a chosen rule**; no rule →
-  the 422 stands. **This guard is D3's first production emitter** (the acceptance criterion the D3 deferral recorded).
-  **A hostile-critic pass found two things, both fixed:** (1) a doc-comment falsely claimed the guard reads
-  `resolveStructuralLevel` for placement (it does not — corrected); (2) **it escalated an unresolved actor
-  (`actorKind === undefined`) under the `any` axis and mislabelled it "a person"** — now an unnamed actor is **not**
-  escalated (S9 may be loosened only for a **named** actor; the 422 stands), pinned by a regression test and M20.
-  **Mutations M16–M20 RED-then-GREEN, each restore md5-identical.** `shared` **204/2482**; `core` entities
-  **47 suites / 390 tests**; both `tsc` exit 0.
-  **⬅ THE REMAINING HALF OF `SD-4`: `SD-5` (the manage screen that renders the grammar — the only reader left).**
-
-**The two boundaries the challenge kept honest:** (1) `read`/`reference` are grammar *postures*, not
-write-path-enforceable (the guard only fires on writes; `SD-6` already set read side-effect GETs aside) —
-**scheduled, not silently dropped**; (2) a raw DDL `DROP TABLE` / FK change is not a row write, so no
-mutation guard sees it — **named and scheduled**, the guard does not pretend otherwise.
-
-**Two things `SD-2b` handed here (do not lose them):**
-1. **The structural guard** ✓ Slice A.
-2. **The per-object manage screen** stays folded into **`SD-5`** (one grid, two settings — not a second UI).
+**Why the next task is the state-machine engine (rule 9b — challenge it before executing).** The
+structural-permission arc (`SD-2` → `SD-2b` → `SD-3` → `SD-4` → `SD-5`) is now closed: the grammar that
+bounds what an agent may restructure exists, is enforced by a guard, and is editable from a screen. The
+next item in [`library/development/BUILD-ORDER.md`](library/development/BUILD-ORDER.md) order is **item 9 —
+"NEW — generic state-machine engine"** (blueprint §10), promoted to a core primitive: allowed
+transitions, transition permissions, preconditions, events — today pipelines exist only inside
+`customers`, and the blueprint makes lifecycle generic. **This is a NEW core primitive, so it starts with
+a plan and a fact-check (rule 10d), not with code.** `SD-6` (the two read side-effect GETs) stays an
+**open choice to revisit**, not a build.
 
 **Fact-check all of this in code before writing (rule 10d) — do not assume.**
+
+---
+
+### ✅ DONE — `SD-4` / `SD-5`: the **structural permission grammar** (S11/S12) — the last slice, and the manage screen. **(2026-10-09, code `a2317b1`; plan [`library/development/PLAN-SD-4.md`](library/development/PLAN-SD-4.md); architecture [`library/development/ARCHITECTURE-structure-permissions.md`](library/development/ARCHITECTURE-structure-permissions.md).)**
+
+> **One line proved it:** a person can, from a settings screen, set the level a structural change is
+> permitted at — **per object × verb × actor** — and the value they set is the **same** value the CC-37
+> structural guard reads at enforcement time (one home in
+> `shared/src/lib/permissions/structural-settings.ts`, both readers over it).
+>
+> **What `SD-4` delivered, in four slices + the screen:** **A** the structural guard (a `core`/
+> `platform_release` object may not be DROPped or re-typed — `entities.structural.core-object-guard`,
+> code `6fbd605`); **B** the actor axis (S12 — `actorKind` reaches the guard, code carries it through
+> both guard inputs); **C** the per-verb grammar (S11 — five verbs `read/add/edit/remove/reference`, the
+> level's home in `structural-settings.ts`); **CC-37** the enforcement wiring (the guard reads the live
+> setting and escalates an **explicit** `review`/`approval` rule to the D3 escalate outcome — D3's first
+> production emitter); and **`SD-5`** the manage screen. **The honest boundaries stay named:** `read`/
+> `reference` are declaration-only (CC-34); a raw DDL `DROP TABLE`/FK change is not a row write
+> (CC-33); the approval-layer that would turn an escalation into a `pending_acts` row is CC-38.
+>
+> **`SD-5` — the manage screen (code `a2317b1`).** The roles-and-permissions-style surface over the S11
+> block: **grouped by object kind** (`table/column/relation/function/widget/agent`), one **Select per
+> (verb × actor)** offering the four levels (`straight/review/approval/never`) plus a distinct
+> **"Inherited"** choice. Choosing "Inherited" **clears** the cell (removes the row → S11 inheritance);
+> choosing a level sets it. The three pieces: the **pure data shape** in `shared` (grid / one-cell edit
+> / equality — so the screen holds no rule of its own); the **route**
+> `packages/core/src/modules/auth/api/structural-permissions/route.ts` (GET fail-closed through
+> `loadStructuralSettings`; PUT validates with `parseStructuralSettings` → 400 on a bad body, passes the
+> `auth` mutation-guard seam, writes `permissions`/`structuralPermissionLevels` via
+> `moduleConfigService`); the **screen + page** in `auth` (`components/StructuralPermissionsSettings.tsx`,
+> `backend/settings/structural-permissions/page.{tsx,meta.ts}`, gated `auth.acl.manage`,
+> `pageContext: 'settings'`). **Why `auth` and not a new `permissions` module:** the setting's module id
+> is a string, and the roles-and-permissions owner and `auth.acl.manage` are `auth`'s (S5).
+>
+> **The verification.** **68 tests** (49 shared + 11 route + 8 jsdom). `shared/src/lib/permissions`
+> **4 suites / 110 tests** and `core` `configs`+`auth`+`entities` **140 suites / 1202 tests, 0
+> failures**; both `tsc` exit 0. **6 mutations RED-then-GREEN (M21–M26), each restore md5-identical**
+> (M21 the fail-closed fallback; M22 the `straight`-default refusal; M23 the clear-to-inheritance; M24
+> the guard-seam skip; M25 the closed verb set; M26 the naive equality). **A hostile-critic pass (a
+> separate agent) found 0 functional defects** and three things, all fixed: **(1) a TAUTOLOGICAL test** —
+> `structuralSettingsEqual`'s "ignores raw-shape differences" test fed two values the parser had already
+> normalised, so a naive `JSON.stringify`-equality mutation left it **green**; rewritten to a hand-built,
+> raw-shape-*differing* pair and re-proven RED under M26. **(2) An unreachable `cellFor` fallback** that
+> invented an `effective` level the grammar never produced — replaced with a fail-loud invariant. **(3)
+> Asymmetric container error handling** — PUT resolved the container uncaught (a 500); now wrapped like
+> GET's, fail-closed to a controlled 500 with no write.
+>
+> **Corrected at source (rule 13):** the two docs (`BACKLOG.md` `SD-4`/`SD-5` rows, `BUILD-ORDER.md`
+> §Phase 0 item 8) that named the manage screen as the *remaining half* are now ticked — nothing else
+> copied that claim.
 
 ---
 
