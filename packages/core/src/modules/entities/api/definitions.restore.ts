@@ -3,6 +3,7 @@ import { z } from 'zod'
 import type { CacheStrategy } from '@open-mercato/cache'
 import { createRequestContainer } from '@open-mercato/shared/lib/di/container'
 import { getAuthFromRequest } from '@open-mercato/shared/lib/auth/server'
+import type { RbacService } from '@open-mercato/core/modules/auth/services/rbacService'
 import { CustomFieldDef } from '@open-mercato/core/modules/entities/data/entities'
 import { invalidateDefinitionsCache } from './definitions.cache'
 import type { OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
@@ -12,12 +13,15 @@ import {
 } from './definitions.mutation-guard'
 import {
   evaluateStructureChange,
+  DEFAULT_GRANT_ROLE,
   type StructureChangeGateOutcome,
 } from '@open-mercato/shared/lib/permissions/structure-change-gate'
 import {
   readStructureDecisionFromHeaders,
   toStructurePermissionDecision,
 } from '@open-mercato/shared/lib/permissions/structure-change-decision-header'
+import { assertActorMayStateDecision } from '@open-mercato/core/modules/auth/lib/permission-decision-grant'
+import { isCrudHttpError } from '@open-mercato/shared/lib/crud/errors'
 import { fieldDefinitionSurface } from '../data/guards'
 import { isActiveColumn, writeFieldPermissionGrant } from '../lib/field-definitions'
 import { createExactDefinitionWhere, resolveDefinitionMutationScope } from '../lib/definition-scope'
@@ -86,6 +90,26 @@ export async function POST(req: Request) {
   const requestedDecision = readStructureDecisionFromHeaders(req.headers)
   if (requestedDecision.kind === 'malformed') {
     return NextResponse.json({ error: requestedDecision.because }, { status: 400 })
+  }
+  // SD-1 (CC-25): a decision must be stated by an authorised actor — the header's
+  // `decidedBy` / `grantTo` are checked against the authenticated user, not trusted.
+  if (requestedDecision.kind === 'decision') {
+    try {
+      await assertActorMayStateDecision({
+        em,
+        rbacService: resolve('rbacService') as RbacService,
+        actorUserId: auth.sub,
+        tenantId: scope.tenantId,
+        organizationId: scope.organizationId,
+        records: requestedDecision.decision.records,
+        grantTo: requestedDecision.decision.grantTo ?? DEFAULT_GRANT_ROLE,
+      })
+    } catch (err) {
+      if (isCrudHttpError(err)) {
+        return NextResponse.json(err.body, { status: err.status })
+      }
+      throw err
+    }
   }
   const permissionDecision: StructureChangeGateOutcome | null = reactivatesField
     ? evaluateStructureChange({

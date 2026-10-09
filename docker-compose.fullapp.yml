@@ -274,9 +274,11 @@ services:
     # redis is load-bearing: mcp, app and opencode all declare
     # `depends_on: redis: condition: service_healthy`, so if redis is not
     # restarted after a host/Docker restart the whole stack comes up degraded
-    # (measured 2026-10-06: redis exited 255, mcp went unhealthy). Every other
-    # service in this file carries `restart: unless-stopped`; redis is the only
-    # one that did not, which is why it alone stayed down.
+    # (measured 2026-10-06: redis exited 255, mcp went unhealthy; and again
+    # 2026-10-08 on the WAN deployment, where redis stayed down ~33h and login
+    # returned HTTP 500 for every account until it was started again). Every
+    # other service in this file carries `restart: unless-stopped`; redis was
+    # the only one that did not, which is why it alone stayed down.
     restart: unless-stopped
     # ports not exposed - only accessible within docker network
     volumes:

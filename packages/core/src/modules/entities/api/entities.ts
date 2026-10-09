@@ -16,12 +16,15 @@ import {
 } from './definitions.mutation-guard'
 import {
   evaluateStructureChange,
+  DEFAULT_GRANT_ROLE,
   type StructureChangeGateOutcome,
 } from '@open-mercato/shared/lib/permissions/structure-change-gate'
 import {
   readStructureDecisionFromHeaders,
   toStructurePermissionDecision,
 } from '@open-mercato/shared/lib/permissions/structure-change-decision-header'
+import { assertActorMayStateDecision } from '@open-mercato/core/modules/auth/lib/permission-decision-grant'
+import type { RbacService } from '@open-mercato/core/modules/auth/services/rbacService'
 import { entityDefinitionSurface } from '../data/guards'
 import { isActiveEntity } from '../lib/register'
 import { writeFieldPermissionGrant } from '../lib/field-definitions'
@@ -179,6 +182,26 @@ export async function POST(req: Request) {
   const requestedDecision = readStructureDecisionFromHeaders(req.headers)
   if (requestedDecision.kind === 'malformed') {
     return NextResponse.json({ error: requestedDecision.because }, { status: 400 })
+  }
+  // SD-1 (CC-25): a decision is stated by an *authorised* actor. The header's
+  // `decidedBy` / `grantTo` are checked against the authenticated user, not trusted.
+  if (requestedDecision.kind === 'decision') {
+    try {
+      await assertActorMayStateDecision({
+        em,
+        rbacService: resolve('rbacService') as RbacService,
+        actorUserId: auth.sub,
+        tenantId: auth.tenantId,
+        organizationId: auth.orgId,
+        records: requestedDecision.decision.records,
+        grantTo: requestedDecision.decision.grantTo ?? DEFAULT_GRANT_ROLE,
+      })
+    } catch (err) {
+      if (isCrudHttpError(err)) {
+        return NextResponse.json(err.body, { status: err.status })
+      }
+      throw err
+    }
   }
   const entityPermissionDecision: StructureChangeGateOutcome | null = reactivatesEntity
     ? evaluateStructureChange({

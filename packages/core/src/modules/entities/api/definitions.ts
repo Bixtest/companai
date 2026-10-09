@@ -26,12 +26,15 @@ import {
 } from './definitions.mutation-guard'
 import {
   evaluateStructureChange,
+  DEFAULT_GRANT_ROLE,
   type StructureChangeGateOutcome,
 } from '@open-mercato/shared/lib/permissions/structure-change-gate'
 import {
   readStructureDecisionFromHeaders,
   toStructurePermissionDecision,
 } from '@open-mercato/shared/lib/permissions/structure-change-decision-header'
+import { assertActorMayStateDecision } from '@open-mercato/core/modules/auth/lib/permission-decision-grant'
+import { isCrudHttpError } from '@open-mercato/shared/lib/crud/errors'
 import { fieldDefinitionSurface } from '../data/guards'
 import { isActiveColumn, writeFieldPermissionGrant } from '../lib/field-definitions'
 import {
@@ -557,6 +560,31 @@ export async function POST(req: Request) {
   const requestedDecision = readStructureDecisionFromHeaders(req.headers)
   if (requestedDecision.kind === 'malformed') {
     return NextResponse.json({ error: requestedDecision.because }, { status: 400 })
+  }
+  // SD-1 (CC-25): a decision is stated by an *authorised* actor. The carrier reads
+  // `decidedBy` / `grantTo` from the header and (before CC-25) never checked them
+  // against the authenticated user — any `entities.definitions.manage` holder could
+  // grant arbitrary features to an arbitrary role. Refuse an unauthorised decision
+  // here, before the gate, exactly as a malformed one is refused above.
+  if (requestedDecision.kind === 'decision') {
+    try {
+      await assertActorMayStateDecision({
+        em,
+        rbacService: resolve('rbacService') as RbacService,
+        actorUserId: auth.sub,
+        tenantId: scope.tenantId,
+        organizationId: scope.organizationId,
+        records: requestedDecision.decision.records,
+        // The decision's own target, or the gate's default when it named none —
+        // the same role the gate will resolve, so the check and the write agree.
+        grantTo: requestedDecision.decision.grantTo ?? DEFAULT_GRANT_ROLE,
+      })
+    } catch (err) {
+      if (isCrudHttpError(err)) {
+        return NextResponse.json(err.body, { status: err.status })
+      }
+      throw err
+    }
   }
   const permissionDecision: StructureChangeGateOutcome | null = changesSurface
     ? evaluateStructureChange({

@@ -35,6 +35,10 @@ jest.mock('@open-mercato/core/modules/auth/lib/permission-decision-grant', () =>
     added: [],
     alreadyPresent: [],
   })),
+  // CC-25: the actor check the route runs before the gate (mocked as granted here —
+  // this suite proves the reactivation wiring; the refusals are proved in the CC-25 suite).
+  assertActorMayStateDecision: jest.fn(async () => undefined),
+  STRUCTURE_DECISION_PERMISSION: 'entities.definitions.decide',
 }))
 
 // The shared logger is stubbed, because `writeFieldPermissionGrant` swallows every error

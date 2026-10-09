@@ -12,13 +12,18 @@ import { enforceCommandOptimisticLock } from '@open-mercato/shared/lib/crud/opti
 import { isCrudHttpError } from '@open-mercato/shared/lib/crud/errors'
 import {
   evaluateStructureChange,
+  DEFAULT_GRANT_ROLE,
   type StructureChangeGateOutcome,
 } from '@open-mercato/shared/lib/permissions/structure-change-gate'
 import {
   readStructureDecisionFromHeaders,
   toStructurePermissionDecision,
 } from '@open-mercato/shared/lib/permissions/structure-change-decision-header'
-import { applyStructureChangeGrant } from '@open-mercato/core/modules/auth/lib/permission-decision-grant'
+import {
+  applyStructureChangeGrant,
+  assertActorMayStateDecision,
+} from '@open-mercato/core/modules/auth/lib/permission-decision-grant'
+import type { RbacService } from '@open-mercato/core/modules/auth/services/rbacService'
 import { invalidateDefinitionsCache } from './definitions.cache'
 import type { OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
 import { mergeEntityFieldsetConfig, normalizeEntityFieldsetConfig } from '../lib/fieldsets'
@@ -250,6 +255,29 @@ export async function POST(req: Request) {
   const requestedDecision = readStructureDecisionFromHeaders(req.headers)
   if (requestedDecision.kind === 'malformed') {
     return NextResponse.json({ error: requestedDecision.because }, { status: 400 })
+  }
+
+  // SD-1 (CC-25): the decision is stated by an *authorised* actor. The carrier
+  // reads `decidedBy` / `grantTo` from the header; this refuses a decision from an
+  // actor who may not state it, or who may not grant its records to the role it
+  // names — before the transaction opens, exactly as a malformed one is refused.
+  if (requestedDecision.kind === 'decision') {
+    try {
+      await assertActorMayStateDecision({
+        em,
+        rbacService: resolve('rbacService') as RbacService,
+        actorUserId: auth.sub,
+        tenantId: scope.tenantId,
+        organizationId: scope.organizationId,
+        records: requestedDecision.decision.records,
+        grantTo: requestedDecision.decision.grantTo ?? DEFAULT_GRANT_ROLE,
+      })
+    } catch (err) {
+      if (isCrudHttpError(err)) {
+        return NextResponse.json(err.body, { status: err.status })
+      }
+      throw err
+    }
   }
 
   await em.begin()

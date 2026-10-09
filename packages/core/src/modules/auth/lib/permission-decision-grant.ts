@@ -69,9 +69,12 @@
  */
 
 import type { EntityManager } from '@mikro-orm/postgresql'
+import { forbidden } from '@open-mercato/shared/lib/crud/errors'
 import { findOneWithDecryption } from '@open-mercato/shared/lib/encryption/find'
 import type { StructureChangeGateOutcome } from '@open-mercato/shared/lib/permissions/structure-change-gate'
 import { Role, RoleAcl } from '@open-mercato/core/modules/auth/data/entities'
+import type { RbacService } from '@open-mercato/core/modules/auth/services/rbacService'
+import { assertActorCanGrantAcl, assertActorCanGrantRoles } from './grantChecks'
 
 /** Why a grant could not be applied. A closed set, so a caller can switch on it. */
 export const PERMISSION_GRANT_FAILURES = ['role_not_found', 'no_records'] as const
@@ -275,5 +278,148 @@ export async function applyStructureChangeGrant(
     tenantId: input.tenantId,
     grantTo: decision.grantTo,
     records: decision.records.map((record) => record.feature),
+  })
+}
+
+/* ------------------------------------------------------------------ *
+ * CC-25 — who may state a decision (the authorisation half)
+ * ------------------------------------------------------------------ *
+ * The carrier (`shared/lib/permissions/structure-change-decision-header.ts`)
+ * reads `decidedBy` and `grantTo` **from the request header** and, until this
+ * function arrived, never checked them against the authenticated actor: any
+ * caller holding the routes' `entities.definitions.manage` could send a header
+ * granting **arbitrary feature strings to an arbitrary existing role**. S2 says
+ * *who* the permission records go to must be decided — it never said *who may
+ * decide*. This is that missing half.
+ *
+ * **It is a role permission, not a new mechanism.** The platform's own model is
+ * a list of feature strings on a role (`role_acls.features_json`, S5 — one
+ * engine); the owner's model (2026-10-08) is the same. So authorising the actor
+ * needs no new scheme: it needs one more feature string, checked against the
+ * actor's effective ACL, exactly as every other authorisation in the platform is.
+ *
+ * **Two refusals, and they are different questions:**
+ *   1. *May this actor state a decision at all?* → the actor must hold
+ *      {@link STRUCTURE_DECISION_PERMISSION}. Without it, a decision is refused
+ *      even if the records are harmless — stating the decision is the capability.
+ *   2. *May this actor name that role?* → the actor must be allowed to grant
+ *      every feature the decision grants TO the role it names. This is **not**
+ *      re-implemented here: it is the platform's existing grant check
+ *      (`assertActorCanGrantAcl`), reused verbatim so the two can never drift
+ *      into "the roles screen refuses this grant, the decision header allows it".
+ *      A superadmin passes it (the existing check's own bypass); a plain manager
+ *      does not, and cannot use the header to grant themselves a feature they
+ *      do not hold, nor to reach a role they could not reach from the UI.
+ *
+ * **Why a superadmin passing is correct, not a hole.** `assertActorCanGrantAcl`
+ * lets a superadmin grant anything — by definition. The gate is not a second
+ * privilege model; it is the *same* one applied to a new entry point. Anything a
+ * superadmin can do here they can already do on the roles screen.
+ *
+ * **The machine case is bounded elsewhere, deliberately.** An `ai_worker` that
+ * holds this permission is still bounded by the authority resolver's autonomy
+ * matrix (an untrusted machine is capped at "acts with prior approval"); a human
+ * is not. The same permission therefore behaves correctly for both principal
+ * kinds without a special case here — the bound is a property of the actor, not
+ * of this check.
+ *
+ * **Fail closed.** The functions throw (`CrudHttpError` / `forbidden`), which is
+ * the platform's convention for an authorisation failure at a route or guard, and
+ * the call sites translate them to a refusal (403/422). They never return a
+ * boolean the caller could ignore by accident.
+ */
+
+/** The feature an actor must hold to state a structure-permission decision. */
+export const STRUCTURE_DECISION_PERMISSION = 'entities.definitions.decide'
+
+export type DecisionActorCheckInput = {
+  em: EntityManager
+  rbacService: RbacService
+  /** The authenticated actor's user id (`auth.sub`). Absent → refused. */
+  actorUserId: string | null | undefined
+  tenantId: string | null | undefined
+  organizationId?: string | null | undefined
+  /** The decision's records (feature ids), as the gate resolved them. */
+  records: readonly { feature: string }[]
+  /** The role the records go to (the decision's `grantTo`). */
+  grantTo: string
+}
+
+/**
+ * Assert the actor may state this structure-permission decision.
+ *
+ * Throws `forbidden` (403) when the actor lacks
+ * {@link STRUCTURE_DECISION_PERMISSION}, and delegates to the platform's own
+ * grant check (`assertActorCanGrantAcl`) for the "may they name this role with
+ * these records" question. Returns normally only when both hold.
+ */
+export async function assertActorMayStateDecision(input: DecisionActorCheckInput): Promise<void> {
+  const actorUserId = typeof input.actorUserId === 'string' && input.actorUserId.trim().length > 0
+    ? input.actorUserId.trim()
+    : null
+  if (!actorUserId) {
+    throw forbidden('A permission decision must be stated by an authenticated actor.')
+  }
+
+  const tenantId = typeof input.tenantId === 'string' && input.tenantId.trim().length > 0
+    ? input.tenantId.trim()
+    : null
+  if (!tenantId) {
+    throw forbidden('Tenant context is required to state a permission decision.')
+  }
+
+  const scope = {
+    tenantId,
+    organizationId: input.organizationId ?? null,
+  }
+
+  // (1) The capability itself: stating a decision is a permission, not an
+  // implication of being able to manage the structure.
+  const mayDecide = await input.rbacService.userHasAllFeatures(
+    actorUserId,
+    [STRUCTURE_DECISION_PERMISSION],
+    scope,
+  )
+  if (!mayDecide) {
+    throw forbidden(
+      `Stating a permission decision needs the "${STRUCTURE_DECISION_PERMISSION}" permission. ` +
+        'Without it, a new structure still lands — with the platform default grant — but the actor may not choose the role.',
+    )
+  }
+
+  // (2) The target: the actor may only name a role they could grant to from the
+  // roles screen. Reused verbatim from the platform's own grant checks so the two
+  // cannot drift. `assertActorCanGrantAcl` refuses a *feature* the actor does not
+  // hold; `assertActorCanGrantRoles` refuses a **role** whose own ACL the actor
+  // could not administer (e.g. a fellow role that is itself more privileged). A
+  // superadmin passes both by their own bypass.
+  //
+  // The role check runs only when the role exists: a `grantTo` naming a role that
+  // does not exist is a *fact* the write half already reports (`role_not_found`),
+  // not an authorisation question — there is nothing to administer. Checking it
+  // here would turn a reportable "no such role" into a misleading "forbidden".
+  const targetRole = await resolveGrantRole(input.em, tenantId, input.grantTo)
+  if (targetRole) {
+    await assertActorCanGrantRoles({
+      em: input.em,
+      rbacService: input.rbacService,
+      actorUserId,
+      tenantId,
+      organizationId: input.organizationId ?? null,
+      roles: [targetRole],
+    })
+  }
+
+  await assertActorCanGrantAcl({
+    em: input.em,
+    rbacService: input.rbacService,
+    actorUserId,
+    tenantId,
+    organizationId: input.organizationId ?? null,
+    features: input.records.map((record) => record.feature),
+    // A decision never confers superadmin (see this file's header): a grant that
+    // set `isSuperAdmin` would be the privilege-escalation smell the write half
+    // already refuses to commit, so it is refused here too.
+    isSuperAdmin: false,
   })
 }

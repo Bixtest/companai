@@ -20,6 +20,7 @@ import { Role, RoleAcl } from '@open-mercato/core/modules/auth/data/entities'
 import {
   applyPermissionDecisionGrant,
   applyStructureChangeGrant,
+  assertActorMayStateDecision,
   resolveGrantRole,
 } from '../permission-decision-grant'
 
@@ -355,5 +356,186 @@ describe('applyStructureChangeGrant maps a gate outcome to the write', () => {
     expect(result).toBeNull()
     expect(em.findOne).not.toHaveBeenCalled()
     expect(em.create).not.toHaveBeenCalled()
+  })
+})
+
+
+/**
+ * CC-25 — the *authorisation* half: who may state a structure-permission decision.
+ *
+ * **What this suite has to prove.** The carrier (the
+ * `x-om-ext-permissions-decision` header) is trusted input: it names `decidedBy`
+ * and `grantTo`, and before CC-25 nothing checked them against the actor. That let
+ * any holder of `entities.definitions.manage` grant **arbitrary features to an
+ * arbitrary role** through a header. These tests drive the **real**
+ * `assertActorMayStateDecision` against a mocked `rbacService` — the platform's own
+ * API (`userHasAllFeatures`, `loadAcl`) — and prove:
+ *
+ *   1. an actor without the decide permission is refused (`403`);
+ *   2. an actor **with** it, granting records they hold to a role, is allowed;
+ *   3. an actor with it, but granting a feature they do **not** hold, is refused —
+ *      delegated verbatim to the platform's own `assertActorCanGrantAcl`;
+ *   4. a superadmin is allowed (the existing check's own bypass — not a new hole);
+ *   5. a missing actor or tenant is refused (fail closed).
+ */
+describe('CC-25 — assertActorMayStateDecision authorises the deciding actor', () => {
+  const RECORDS = [
+    { feature: 'entities.records.customers:customer_person.view' },
+    { feature: 'entities.records.customers:customer_person.manage' },
+  ]
+
+  /**
+   * A stand-in `rbacService` with the two methods the real check uses.
+   *
+   * `userHasAllFeatures` answers question (1) — does the actor hold the decide
+   * permission; `loadAcl` answers the grant target question, mirrored by
+   * `assertActorCanGrantAcl` (which loads the actor ACL and refuses a feature the
+   * actor does not itself hold, unless the actor is a superadmin).
+   */
+  function makeRbac(opts: { decide: boolean; actorFeatures?: string[]; superAdmin?: boolean }) {
+    const actorFeatures = opts.actorFeatures ?? []
+    return {
+      userHasAllFeatures: jest.fn(async (_userId: string, features: string[]) =>
+        opts.decide && features.every((f) => f === 'entities.definitions.decide'),
+      ),
+      loadAcl: jest.fn(async () => ({
+        isSuperAdmin: !!opts.superAdmin,
+        features: opts.superAdmin ? ['*'] : actorFeatures,
+        organizations: null,
+      })),
+    }
+  }
+
+  it('refuses an actor who does not hold the decide permission (403)', async () => {
+    // The actor holds EVERY feature being granted (so the second check — the
+    // grant target check — would pass) but NOT the decide permission. This makes
+    // the refusal attributable to the decide check alone: if that check were
+    // removed, the grant check would let this through and the test would fail.
+    const rbac = makeRbac({
+      decide: false,
+      actorFeatures: [
+        'entities.records.customers:customer_person.view',
+        'entities.records.customers:customer_person.manage',
+      ],
+    })
+    await expect(
+      assertActorMayStateDecision({
+        em: makeEm({ role }) as never,
+        rbacService: rbac as never,
+        actorUserId: 'user-1',
+        tenantId: TENANT,
+        organizationId: null,
+        records: RECORDS,
+        grantTo: 'superadmin',
+      }),
+    ).rejects.toMatchObject({ status: 403 })
+  })
+
+  it('allows an actor who holds the permission and grants features they hold', async () => {
+    const rbac = makeRbac({
+      decide: true,
+      actorFeatures: ['entities.records.customers:customer_person.view', 'entities.records.customers:customer_person.manage'],
+    })
+    await expect(
+      assertActorMayStateDecision({
+        em: makeEm({ role }) as never,
+        rbacService: rbac as never,
+        actorUserId: 'user-1',
+        tenantId: TENANT,
+        organizationId: null,
+        records: RECORDS,
+        grantTo: 'superadmin',
+      }),
+    ).resolves.toBeUndefined()
+  })
+
+  it('refuses an actor granting a feature they do NOT hold (delegated to the platform grant check)', async () => {
+    const rbac = makeRbac({ decide: true, actorFeatures: ['entities.records.customers:customer_person.view'] })
+    await expect(
+      assertActorMayStateDecision({
+        em: makeEm({ role }) as never,
+        rbacService: rbac as never,
+        actorUserId: 'user-1',
+        tenantId: TENANT,
+        organizationId: null,
+        records: RECORDS,
+        grantTo: 'superadmin',
+      }),
+    ).rejects.toMatchObject({ status: 403 })
+  })
+
+  it('allows a superadmin (the existing grant check bypass — not a new hole)', async () => {
+    const rbac = makeRbac({ decide: true, superAdmin: true })
+    await expect(
+      assertActorMayStateDecision({
+        em: makeEm({ role }) as never,
+        rbacService: rbac as never,
+        actorUserId: 'root',
+        tenantId: TENANT,
+        organizationId: null,
+        records: RECORDS,
+        grantTo: 'superadmin',
+      }),
+    ).resolves.toBeUndefined()
+  })
+
+  it('refuses an actor naming a role whose ACL they could not administer (role-target check)', async () => {
+    // The actor holds the decide permission AND every feature they grant, so the
+    // feature check passes — but the TARGET ROLE's own ACL carries a feature the
+    // actor does not hold, so  refuses. This makes the
+    // refusal attributable to the role-target check alone.
+    const rbac = makeRbac({
+      decide: true,
+      actorFeatures: [
+        'entities.records.customers:customer_person.view',
+        'entities.records.customers:customer_person.manage',
+      ],
+    })
+    // The target role ('finance') has an ACL holding a feature the actor lacks.
+    const emWithRoleAcl = makeEm({
+      role: { id: 'role-finance', name: 'finance', tenantId: TENANT },
+      acl: { id: 'acl-finance', featuresJson: ['billing.invoices.manage'], isSuperAdmin: false },
+    })
+    await expect(
+      assertActorMayStateDecision({
+        em: emWithRoleAcl as never,
+        rbacService: rbac as never,
+        actorUserId: 'user-1',
+        tenantId: TENANT,
+        organizationId: null,
+        records: RECORDS,
+        grantTo: 'finance',
+      }),
+    ).rejects.toMatchObject({ status: 403 })
+  })
+
+  it('refuses when no actor is named (fail closed)', async () => {
+    const rbac = makeRbac({ decide: true })
+    await expect(
+      assertActorMayStateDecision({
+        em: makeEm({ role }) as never,
+        rbacService: rbac as never,
+        actorUserId: null,
+        tenantId: TENANT,
+        organizationId: null,
+        records: RECORDS,
+        grantTo: 'superadmin',
+      }),
+    ).rejects.toMatchObject({ status: 403 })
+  })
+
+  it('refuses when no tenant is named (fail closed)', async () => {
+    const rbac = makeRbac({ decide: true })
+    await expect(
+      assertActorMayStateDecision({
+        em: makeEm({ role }) as never,
+        rbacService: rbac as never,
+        actorUserId: 'user-1',
+        tenantId: null,
+        organizationId: null,
+        records: RECORDS,
+        grantTo: 'superadmin',
+      }),
+    ).rejects.toMatchObject({ status: 403 })
   })
 })

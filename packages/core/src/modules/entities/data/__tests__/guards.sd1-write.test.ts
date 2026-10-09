@@ -57,9 +57,18 @@ jest.mock('@open-mercato/shared/lib/di/container', () => ({
   createRequestContainer: (...args: unknown[]) => mockCreateContainer(...(args as [])),
 }))
 
+// CC-25 added an authorisation step to the guard's gate (`assertActorMayStateDecision`).
+// This suite is about the *wire* (a header decision reaches the gate and is carried to
+// `afterSuccess`), not about the authorisation — so the actor check is mocked as
+// **granted** here. The refusal paths are proved against the real function in
+// `permission-decision-grant.test.ts` and in the CC-25 guard suite.
+const mockAssertActorMayStateDecision = jest.fn(async () => undefined)
+
 jest.mock('@open-mercato/core/modules/auth/lib/permission-decision-grant', () => ({
   applyStructureChangeGrant: (...args: unknown[]) => mockApply(...(args as [])),
   resolveGrantRole: jest.fn(),
+  assertActorMayStateDecision: (...args: unknown[]) => mockAssertActorMayStateDecision(...(args as [])),
+  STRUCTURE_DECISION_PERMISSION: 'entities.definitions.decide',
 }))
 
 import { runMutationGuards } from '@open-mercato/shared/lib/crud/mutation-guard-registry'
@@ -403,5 +412,68 @@ describe('CC-17 — a decision on the request header reaches the gate', () => {
       ?.permissionDecision
     expect(decision?.outcome).toBe('decided')
     expect(decision?.grantTo).toBe('ops')
+  })
+})
+
+/**
+ * CC-25 — the guard refuses a decision from an unauthorised actor.
+ *
+ * The guard shares ONE chokepoint (`runStructureChangeGate`) for both the field and
+ * the entity guard, and the actor check lives there. This proves the *translation*:
+ * a refused actor check surfaces as the guard's own block (`ok:false`) carrying the
+ * platform status (403), so the runner stops the write — not an unhandled throw.
+ */
+describe('CC-25 — the guard refuses an unauthorised decision', () => {
+  afterEach(() => mockAssertActorMayStateDecision.mockReset().mockResolvedValue(undefined))
+
+  function decisionHeaders(): Headers {
+    const h = new Headers()
+    h.set(
+      STRUCTURE_DECISION_HEADER_NAME,
+      JSON.stringify({ decidedBy: 'user-1', grantTo: 'finance', records: [{ feature: 'x.y.view' }] }),
+    )
+    return h
+  }
+
+  it('a refused actor check blocks the create with the platform status (403), queueing no write', async () => {
+    mockAssertActorMayStateDecision.mockRejectedValueOnce(
+      new (require('@open-mercato/shared/lib/crud/errors').CrudHttpError)(403, {
+        error: 'Stating a permission decision needs the "entities.definitions.decide" permission.',
+      }),
+    )
+    const result = await guardById(FIELD_GUARD_ID).validate({
+      tenantId: 't1',
+      organizationId: 'o1',
+      userId: 'u1',
+      resourceKind: 'entities.field_definition',
+      resourceId: null,
+      operation: 'create',
+      requestMethod: 'POST',
+      requestHeaders: decisionHeaders(),
+      mutationPayload: { entityId: 'customers:customer_person', key: 'loyalty_tier' },
+    })
+    expect(result.ok).toBe(false)
+    if (result.ok === false) {
+      expect(result.status).toBe(403)
+      expect(result.message).toContain('decide')
+    }
+  })
+
+  it('a decision with NO header actor context is still refused (no actor → fail closed)', async () => {
+    mockAssertActorMayStateDecision.mockRejectedValueOnce(
+      new (require('@open-mercato/shared/lib/crud/errors').CrudHttpError)(403, { error: 'no actor' }),
+    )
+    const result = await guardById(ENTITY_GUARD_ID).validate({
+      tenantId: 't1',
+      organizationId: 'o1',
+      userId: 'u1',
+      resourceKind: 'entities.entity',
+      resourceId: null,
+      operation: 'create',
+      requestMethod: 'POST',
+      requestHeaders: decisionHeaders(),
+      mutationPayload: { entityId: 'customers:customer_person' },
+    })
+    expect(result.ok).toBe(false)
   })
 })

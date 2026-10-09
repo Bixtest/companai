@@ -2,16 +2,21 @@ import type { EntityManager } from '@mikro-orm/postgresql'
 import type {
   MutationGuard,
   MutationGuardAfterInput,
+  MutationGuardResult,
 } from '@open-mercato/shared/lib/crud/mutation-guard-registry'
+import { CrudHttpError, isCrudHttpError } from '@open-mercato/shared/lib/crud/errors'
+import type { RbacService } from '@open-mercato/core/modules/auth/services/rbacService'
 import type { PermissionSurface } from '@open-mercato/shared/lib/permissions/catalogue'
 import {
   evaluateStructureChange,
+  DEFAULT_GRANT_ROLE,
   type StructureChangeGateOutcome,
 } from '@open-mercato/shared/lib/permissions/structure-change-gate'
 import {
   readStructureDecisionFromHeaders,
   toStructurePermissionDecision,
   type StructureDecisionHeaderRead,
+  type StructureDecisionHeaderValue,
 } from '@open-mercato/shared/lib/permissions/structure-change-decision-header'
 import { createRequestContainer } from '@open-mercato/shared/lib/di/container'
 import { createLogger } from '@open-mercato/shared/lib/logger'
@@ -34,6 +39,7 @@ import type { MutationGuardEscalation } from '@open-mercato/shared/lib/crud/muta
 import { isReservedSystemEntityType } from '@open-mercato/shared/lib/entities/system-entities'
 import {
   applyStructureChangeGrant,
+  assertActorMayStateDecision,
   type PermissionGrantOutcome,
 } from '@open-mercato/core/modules/auth/lib/permission-decision-grant'
 
@@ -284,15 +290,28 @@ export function entityDefinitionSurface(entityId: string): PermissionSurface {
  * uses (`toStructurePermissionDecision`), so the two cannot drift into "the route
  * honours a decision, the guard ignores it".
  */
-function runStructureChangeGate(
+async function runStructureChangeGate(
   surfaces: PermissionSurface[],
   what: string,
   requestHeaders?: Headers,
+  actor?: { userId?: string; tenantId?: string; organizationId?: string | null },
 ) {
   let decision: StructureDecisionHeaderRead = { kind: 'absent' }
   if (requestHeaders) decision = readStructureDecisionFromHeaders(requestHeaders)
   if (decision.kind === 'malformed') {
     return { ok: false as const, status: 400, message: decision.because }
+  }
+
+  // SD-1 (CC-25): a person's decision is only honoured when the *actor* is
+  // authorised to state it. The carrier trusts the header's `decidedBy` /
+  // `grantTo`; this is where they are checked against the authenticated user, at
+  // the guard's single chokepoint (both the field and the entity guard pass
+  // through here), so the two can never drift into "the route checks, the guard
+  // does not". A malformed decision is refused above (400); an unauthorised one
+  // is refused here with the platform's own status (`403`), before the gate runs.
+  if (decision.kind === 'decision') {
+    const refusal = await assertActorMayStateDecisionFromGuard(decision.decision, actor)
+    if (refusal) return refusal
   }
 
   const result = evaluateStructureChange({
@@ -313,6 +332,71 @@ function runStructureChangeGate(
     shouldRunAfterSuccess: true,
     metadata: { permissionDecision: result },
   }
+}
+
+/**
+ * Run the CC-25 actor check for a guard, converting a `CrudHttpError` refusal into
+ * the guard's own failure shape (`ok:false` with the platform's status).
+ *
+ * The guard runner resolves no container into `validate`, so one is created here —
+ * the same pattern {@link loadStructuralSettingsForGuard} already uses. **Fail
+ * closed on a broken container:** if the RBAC service cannot be resolved the
+ * decision cannot be authorised, so it is refused rather than waved through (a
+ * store failure must never *loosen* a protected write — the same rule the
+ * structural-settings reader states).
+ *
+ * Returns `null` when the actor may state the decision (nothing to refuse).
+ */
+async function assertActorMayStateDecisionFromGuard(
+  decision: StructureDecisionHeaderValue,
+  actor?: { userId?: string; tenantId?: string; organizationId?: string | null },
+): Promise<MutationGuardResult | null> {
+  const tenantId = actor?.tenantId
+  if (!tenantId) {
+    return {
+      ok: false as const,
+      status: 403,
+      message: 'A permission decision must be stated within a tenant.',
+    }
+  }
+  try {
+    const container = await createRequestContainer()
+    const em = container.resolve('em') as EntityManager
+    const rbacService = container.resolve('rbacService') as RbacService
+    await assertActorMayStateDecision({
+      em,
+      rbacService,
+      actorUserId: actor?.userId,
+      tenantId,
+      organizationId: actor?.organizationId ?? null,
+      records: decision.records,
+      grantTo: decision.grantTo ?? DEFAULT_GRANT_ROLE,
+    })
+    return null
+  } catch (err) {
+    if (isCrudHttpError(err)) {
+      return { ok: false as const, status: err.status, message: errorMessage(err) }
+    }
+    // A container/RBAC failure cannot authorise the decision → refuse (fail closed).
+    logger.warn('SD-1 (CC-25): could not authorise a structure-permission decision', {
+      tenantId,
+      err,
+    })
+    return {
+      ok: false as const,
+      status: 403,
+      message:
+        'The permission decision could not be authorised (the permissions service was unreachable), ' +
+        'so it is refused rather than applied unverified.',
+    }
+  }
+}
+
+/** The plain-language message out of a CrudHttpError body. */
+function errorMessage(err: CrudHttpError): string {
+  const body = err.body as Record<string, unknown> | undefined
+  const message = body?.error
+  return typeof message === 'string' && message.length > 0 ? message : err.message
 }
 
 /* ------------------------------------------------------------------ *
@@ -463,6 +547,7 @@ const fieldPermissionDecisionGuard: MutationGuard = {
       entityId && key ? [fieldDefinitionSurface(entityId, key)] : [],
       'A new custom field',
       input.requestHeaders,
+      { userId: input.userId, tenantId: input.tenantId, organizationId: input.organizationId },
     )
   },
 
@@ -484,6 +569,7 @@ const entityPermissionDecisionGuard: MutationGuard = {
       entityId ? [entityDefinitionSurface(entityId)] : [],
       'A new custom entity',
       input.requestHeaders,
+      { userId: input.userId, tenantId: input.tenantId, organizationId: input.organizationId },
     )
   },
 

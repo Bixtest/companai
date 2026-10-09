@@ -76,6 +76,11 @@ jest.mock('@open-mercato/core/modules/auth/lib/permission-decision-grant', () =>
     added: [],
     alreadyPresent: [],
   })),
+  // CC-25: the actor check the route runs before the gate. This suite proves the
+  // route's DECISION wiring, not the authorisation, so it is mocked as granted;
+  // the refusal paths are proved against the real function in the CC-25 suite.
+  assertActorMayStateDecision: jest.fn(async () => undefined),
+  STRUCTURE_DECISION_PERMISSION: 'entities.definitions.decide',
 }))
 
 // Keep the real surface builder for every test except the refusal case, which needs a
