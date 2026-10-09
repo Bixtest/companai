@@ -91,3 +91,35 @@
 - **Hostile-critic pass earns its keep every time** (found a real hole in D3 AND two in the registry:
   a snapshot-vs-live-view contradiction, and a tautological test). Run it as a SEPARATE agent before
   declaring anything done; demand a command+output for every claim.
+
+## The deploy path (`companai.corprorate.com`) — measured 2026-10-09
+
+- **The VM** `platform-server` (Ubuntu 24.04.5), static `172.28.50.2`, user `ramzi`, key
+  `vms/id_ed25519`; reachable **only from this laptop**. App = plain Docker Compose project
+  `companai-platform` in `/opt/companai-platform` (`docker-compose.fullapp.yml` +
+  `docker-compose.wan.yml`), app container `companai-platform-app-1`, image `open-mercato/app:wan`.
+  Source tree (a plain file copy, NOT a git checkout) = `/home/ramzi/build-src`.
+- **To deploy:** stream the current source into `/home/ramzi/build-src`, then
+  `cd /opt/companai-platform && ./update.sh /home/ramzi/build-src`. Take a DB export first
+  (`pg_dump` inside `mercato-postgres-wan`, db `open-mercato`; no backup button). Verify with
+  `./verify.sh https://companai.corprorate.com`.
+- **`update.sh`'s build context is the SOURCE tree, not the deploy dir.** The original script built from
+  the deploy dir (`context: .`), which holds **no source** → the context was **2 bytes** and the build
+  died on `COPY docker/scripts/mcp-entrypoint.sh: not found`. Fixed to
+  `docker build -t "$IMAGE" -f "$SRC/Dockerfile" "$SRC"`. **If a `COPY …: not found` error appears, check
+  the context size first** — "transferring context: 2B" is the tell.
+- **`update.sh` destroys its own rollback** (rebuilds onto the same tag) → **`CC-41`** to fix
+  (tag the outgoing image `:wan-<date>` first). Live app stays up on the old image until step 4, so a
+  failed build does NOT break the site.
+- **The login route parses form-encoded / formData ONLY** (`packages/core/src/modules/auth/api/login.ts`,
+  `parseLoginForm`). A **JSON** body → empty email → **400 "Invalid email or password"** (looks like bad
+  creds; it's a format failure). Use `curl --data-urlencode email=… --data-urlencode password=…`.
+- **`users.email` is encrypted at rest; `email_hash` is the lookup column** =
+  `"v2:"+HMAC_SHA256(pepper, lower(trim(email)))` (`shared/src/lib/encryption/aes.ts`), pepper =
+  `LOOKUP_HASH_PEPPER` ?? `TENANT_DATA_ENCRYPTION_FALLBACK_KEY` ?? `TENANT_DATA_ENCRYPTION_KEY`. Identify
+  users by hashing candidates **inside the container** (its env holds the pepper); confirm passwords by
+  bcrypt-comparing against `password_hash` inside the container. The **three live accounts**:
+  superadmin `admin@companai.local` / `wM8ciC9i8OBIM30KLlh2`; admin `admin@acme.com` / `secret`;
+  employee `employee@acme.com` / `secret`. (The `.env` `OM_INIT_SUPERADMIN_PASSWORD` is **stale**.)
+- **This repo has `core.autocrlf=true`** — the working tree shows CRLF, the **committed blob is LF-0**.
+  Judge line endings from the blob (`git show HEAD:file`), not the worktree.

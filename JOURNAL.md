@@ -35,7 +35,7 @@ log.** Everything else (HANDOVER, START-PROMPT, README, BOOKMARKS, BACKLOG) poin
 
 ---
 
-### ▶ NOW — **the owner's ACTION LIST of 2026-10-09** (directly below) is the live work queue. **A1 DONE** (the callback register gained the mechanical linkage); **A2 BUILT** (CC-25, the decision-actor permission — proven; **CONFIRM GRANTED** by the owner's blanket ruling 2026-10-09); **A4 DONE** (live login 500 — Redis restarted + hardened); **A5 DONE** (the build-ship script `.sh` deployed + proven). **A3 (CC-27) is BLOCKED on `AH-1`** — *re-measured 2026-10-09: the `Agent` object now EXISTS (slice 1, code `1a518f8`) but `AH-1`'s box stays `☐` (its `reportsTo` edge + relation-typed fields are deferred → `CC-40`), so the binding's prerequisite is still not ticked (rule 13; do not build A3 before `AH-1` closes).* **The owner-facing next step is A6/A7** (rebuild + deploy the current `main`, then hand over the credentials — both now unblocked by A4+A5, and both owner-gated). When the action list is clear, the standing next build is **`AH-1`** (the agent as a kernel object — the only agent-half item on the critical path; **item 20** in `BUILD-ORDER.md`). **🟢 `AH-1` PROGRESS 2026-10-09: slices 1 + 2 are BUILT and PROVEN** (codes `1a518f8`, `acfd020`) — the `Agent` is declared with all six §1.4 fields, and `agent` is a core-object kind (a superadmin marks one `core`; it is then refused on delete/rename). **The box stays `☐`** because `owner`/`role`/`actsAs` are `text` (not `relation`) and the `reportsTo` edge is deferred (**`CC-40`**) — so **the next concrete step on `AH-1` is `CC-40`** (flip the fields to relations once their kernel targets exist), *or* proceed to **BUILD-ORDER item 9 — the generic state-machine engine**. **✅ The "is the agent core?" leg is RESOLVED and BUILT, not owner-gated** — the agent's protection tier is the **per-object setting the tables use** ([`DECISION-agent-protection-tier.md`](library/development/DECISION-agent-protection-tier.md)), assigned at creation.
+### ▶ NOW — **the owner's ACTION LIST of 2026-10-09** (directly below) is the live work queue. **A1 DONE** (the callback register gained the mechanical linkage); **A2 BUILT** (CC-25, the decision-actor permission — proven; **CONFIRM GRANTED** by the owner's blanket ruling 2026-10-09); **A4 DONE** (live login 500 — Redis restarted + hardened); **A5 DONE** (the build-ship script `.sh` deployed + proven); **A6 DONE** (the current `main` is built on the VM and live on `companai.corprorate.com` — new image `4375447250e3`; **A6 found a real defect**: the same-tag rebuild destroys its own rollback → **`CC-41`** scheduled); **A7 DONE** (the three real credentials handed over, each proven **200** on the live site; a wrong password proven **401**). **A3 (CC-27) is BLOCKED on `AH-1`** — *re-measured 2026-10-09: the `Agent` object now EXISTS (slice 1, code `1a518f8`) but `AH-1`'s box stays `☐` (its `reportsTo` edge + relation-typed fields are deferred → `CC-40`), so the binding's prerequisite is still not ticked (rule 13; do not build A3 before `AH-1` closes).* **The owner-facing action list is now clear through A5, plus A6/A7** (both closed 2026-10-09 — the deploy is live and the credentials are handed over). When the action list is clear, the standing next build is **`AH-1`** (the agent as a kernel object — the only agent-half item on the critical path; **item 20** in `BUILD-ORDER.md`). **🟢 `AH-1` PROGRESS 2026-10-09: slices 1 + 2 are BUILT and PROVEN** (codes `1a518f8`, `acfd020`) — the `Agent` is declared with all six §1.4 fields, and `agent` is a core-object kind (a superadmin marks one `core`; it is then refused on delete/rename). **The box stays `☐`** because `owner`/`role`/`actsAs` are `text` (not `relation`) and the `reportsTo` edge is deferred (**`CC-40`**) — so **the next concrete step on `AH-1` is `CC-40`** (flip the fields to relations once their kernel targets exist), *or* proceed to **BUILD-ORDER item 9 — the generic state-machine engine**. **✅ The "is the agent core?" leg is RESOLVED and BUILT, not owner-gated** — the agent's protection tier is the **per-object setting the tables use** ([`DECISION-agent-protection-tier.md`](library/development/DECISION-agent-protection-tier.md)), assigned at creation.
 
 > **If you are a new agent, read only this block to know your job.** Everything below the box is the
 > history and the queue; this is the work in hand.
@@ -67,8 +67,8 @@ The owner then ruled: **do the fixes needed so every callback is closed at the r
 | **A3** | **CC-27 — the AI-user ↔ agent binding row.** Build the binding **row** (which agent an AI user may run, which tools, which feature scope) and teach the agent **registry** to resolve the *binding* from the DB — **never** the agent *definition* (that must stay code-declared, or `runAiAgent*` cannot see it). | Ruled **YES** (owner: "the best options you recommend"). Done = a binding row exists, the registry resolves it, the runtime honours it; mutation-proven. | ⛔ **BLOCKED — needs `AH-1` (the agent as a kernel object), which is NOT built.** **Premise corrected 2026-10-09 (rule 13):** CC-27's register row states *"⛔ needs AH-1 (the agent as a kernel object) — the binding hangs off it"*, and `BACKLOG.md:107` shows `AH-1` is an unchecked box (`[ ]`) — so the binding has no foundation to attach to and **must not** be built before AH-1 (never stack on an unfinished foundation). The owner **approved** CC-27 on 2026-10-08 (build the row) — the approval stands; only the *order* is wrong. **Do not build A3 now.** |
 | **A4** | **Live login 500 — diagnose and fix.** `POST /api/auth/login` on `companai.corprorate.com` returns **500** for a **known-existing** email (~4 s) but **400** for an unknown one (0.13 s). The failure is **after** the email lookup (the DB/decryption path), so **no account can log in**. Diagnose from the container logs + the live DB, fix, and verify a real 200. | Ruled **YES** (owner: "the best options"). Done = a real superadmin login returns **200** on the live site, verified two ways (correct → 200, wrong → 401). | ✅ **DONE 2026-10-09.** Root cause: **`mercato-redis-wan` had exited (code 255)** and was never restarted — the deployed compose's `redis:` service **lacked `restart: unless-stopped`** (`CACHE_STRATEGY=redis`). Fixed live (`docker start` + `docker update --restart unless-stopped`) and hardened in both compose files. **Verified two ways: all three accounts → 200; wrong password → 401.** |
 | **A5** | **Build-ship path — write and prove it.** Document + script the **build half**: update the on-VM build source (`/home/ramzi/build-src`, a plain copy, **not** a git checkout) from the fork's `main` → build the image → recreate the app (`docker compose -f docker-compose.fullapp.yml -f docker-compose.wan.yml up -d --no-build app`) → verify. Add a **drift check** (the copy vs the repo). | Ruled **YES** (owner). Done = a scripted, idempotent update path with a verification step, written into `RUNBOOK-companai-platform.md` §1b. | ✅ **DONE 2026-10-09.** `workspace/scripts/vm-platform/update.sh` (versioned, LF-only, `sh -n` clean) — five abort-on-failure steps incl. a **config-sync** (`cp` the kit's compose + Dockerfile into the deploy dir, closing the stale-config drift) and a `curl /login` verify. Deployed to `/opt/companai-platform/update.sh`; guard proven (bad source → `EXIT=1`). **The actual rebuild+deploy is A6 (deliberately not run).** |
-| **A6** | **Deploy the updated build** (only after A4 + A5 are done). Ship everything since the running image (`open-mercato/app:wan`, built 2026-10-06 20:51): the whole `D2-gap` guard sweep + SD-1…SD-5. Take a DB export first (there is **no** backup button — `FX-D09`). | Ruled **YES** (owner's question ii), **gated** on A4 + A5. Done = the live platform runs the current `main` and the owner can log in and see the difference. | ⏳ **TO DO — GO GIVEN 2026-10-09** (owner's blanket ruling). Take a DB export first, then rebuild + recreate + verify. |
-| **A7** | **Hand the owner the real credentials** (in the same report as A6 — not before, since the login is broken until A4). superadmin `admin@companai.local` / `wM8ciC9i8OBIM30KLlh2` (in the gitignored `vms/CREDENTIALS.local.txt`); admin `admin@acme.com`; employee `employee@acme.com`. | Ruled **YES** (owner's question ii). Done = the owner has the three sets and they all log in **200** on the live site. | ⏳ **TO DO — GO GIVEN 2026-10-09** (delivered in the same report as A6). |
+| **A6** | **Deploy the updated build** (only after A4 + A5 are done). Ship everything since the running image (`open-mercato/app:wan`, built 2026-10-06 20:51): the whole `D2-gap` guard sweep + SD-1…SD-5. Take a DB export first (there is **no** backup button — `FX-D09`). | Ruled **YES** (owner's question ii), **gated** on A4 + A5. Done = the live platform runs the current `main` and the owner can log in and see the difference. | ✅ **DONE 2026-10-09.** DB export `/home/ramzi/db-backups/open-mercato_20261009T135447Z.dump` (890 TOC / 141 table-data) taken and verified first; source streamed to `/home/ramzi/build-src`; image rebuilt (`open-mercato/app:wan` = `4375447250e3`) and the app recreated. Verified: loopback + **public** `https://companai.corprorate.com/login` **200** (`<title>Companai</title>`), and `CORE_OBJECT_KINDS = ["role","agent"]` present in the running container. **One defect found + scheduled (`CC-41`):** the same-tag rebuild destroyed the old image, so there is no image-level rollback — tag-preservation scheduled. |
+| **A7** | **Hand the owner the real credentials** (in the same report as A6 — not before, since the login is broken until A4). superadmin `admin@companai.local` / `wM8ciC9i8OBIM30KLlh2` (in the gitignored `vms/CREDENTIALS.local.txt`); admin `admin@acme.com`; employee `employee@acme.com`. | Ruled **YES** (owner's question ii). Done = the owner has the three sets and they all log in **200** on the live site. | ✅ **DONE 2026-10-09** (in the A6 report). All three proven: `admin@companai.local` / `wM8ciC9i8OBIM30KLlh2` → **200**; wrong password → **401**; `admin@acme.com` / `secret` → **200**; `employee@acme.com` / `secret` → **200** (form-encoded `POST /api/auth/login`). Passwords were also confirmed against the stored bcrypt hashes inside the container. |
 
 **Notes.**
 - **★ OWNER'S BLANKET RULING 2026-10-09 (verbatim: *"We can finish the rest as best recommended, so my
@@ -153,6 +153,56 @@ a plan and a fact-check (rule 10d), not with code.** `SD-6` (the two read side-e
 **Fact-check all of this in code before writing (rule 10d) — do not assume.**
 
 ---
+
+### ✅ DONE — **`A6`**: the current `main` is **built on the VM and deployed** to `companai.corprorate.com`, and **`A7`**: the real credentials are handed over. **(2026-10-09; new image `open-mercato/app:wan` = `4375447250e3`, built `16:13` on the VM; source tree `/home/ramzi/build-src`; DB export taken first.)**
+
+> **In plain English.** The live site now runs today's code, not a two-day-old build. Nothing about the
+> site changed for a user except that it is current: it still shows `<title>Companai</title>`, and the
+> three logins work. **The credentials are real and proven** (see below). One thing you should know:
+> **there is no one-click undo** — the build replaces the old image under the same name, so going back
+> means rebuilding from an older copy of the source (that is written down in the runbook §5, and I have
+> scheduled the missing safety net — see the finding below).
+>
+> **What proved it** (every line is a command's output, not a summary):
+> - The build context bug that **failed the first attempt** was found and fixed: `update.sh` copied only
+>   the *Dockerfile* and *compose file* into `/opt/companai-platform` and built there — but that folder
+>   holds **no source** (`package.json`, `apps/`, `packages/`, `docker/scripts/` are all absent), so the
+>   context transferred **2 bytes** and Docker failed on `COPY docker/scripts/mcp-entrypoint.sh: not
+>   found`. The file existed on disk; it simply was not in the context. **Fix:** build with the source
+>   tree as the context (`docker build -f "$SRC/Dockerfile" "$SRC"`). Context then transferred
+>   **96.58 MB**, every `COPY` resolved, and the build ran to completion (50/50 runner steps, including
+>   the `chmod +x …/mcp-entrypoint.sh` step that had failed).
+> - **The running container is the new image:** `docker inspect companai-platform-app-1 --format
+>   '{{.Image}}'` = `sha256:4375447250e3…` = the `open-mercato/app:wan` tag's id, byte-for-byte.
+> - **The `AH-1` change is live in the running container:** `grep 'CORE_OBJECT_KINDS = '
+>   …/dist/lib/core-boundary/core-objects.js` → `const CORE_OBJECT_KINDS = ["role", "agent"];`.
+> - **The site answers, publicly:** `./verify.sh https://companai.corprorate.com` → loopback `/login`
+>   **200** (484,989 bytes), public `https://companai.corprorate.com/login` **200**, title `Companai`;
+>   DB `tables=141 users=3 database=open-mercato`.
+> - **Every account logs in** (form-encoded `POST /api/auth/login`, the route's real contract):
+>   `admin@companai.local` / `wM8ciC9i8OBIM30KLlh2` → **200** (JWT issued); the **same email with a wrong
+>   password → 401** (the refusal is correct, not a coincidence); `admin@acme.com` / `secret` → **200**;
+>   `employee@acme.com` / `secret` → **200**. *(An earlier probe returned `400` — that was my request being
+>   sent as JSON; the route parses form-encoded form data only, so an empty email failed validation. The
+>   credential was never the problem. Recorded so the next reader does not "fix" the wrong thing.)*
+>
+> **The real credentials (A7)** — proven against the stored bcrypt hashes *inside the container*, then
+> proven again through the live login endpoint:
+>
+> | Role | Email | Password |
+> |---|---|---|
+> | superadmin | `admin@companai.local` | `wM8ciC9i8OBIM30KLlh2` |
+> | admin (demo) | `admin@acme.com` | `secret` |
+> | employee (demo) | `employee@acme.com` | `secret` |
+>
+> **Honest finding (rule 9a — own the code you touch).** `update.sh` **destroys its own rollback**: it
+> rebuilds onto the *same* tag (`open-mercato/app:wan`), so the previous image is overwritten and
+> **cannot be restored by id** (verified: `docker inspect 7624dc853abd` → gone). A deploy script must not
+> do that. **Scheduled:** `CC-41` — tag the outgoing image with a dated tag (`:wan-<date>`) **before**
+> rebuilding, so a rollback is one `docker tag` away. Until then the rollback path is the runbook §5
+> rebuild-from-older-source, and the DB export is
+> `/home/ramzi/db-backups/open-mercato_20261009T135447Z.dump` (2.4 MB, 890 TOC entries, 141 table-data
+> sections — taken and verified **before** the build).
 
 ### ✅ DONE — `SD-4` / `SD-5`: the **structural permission grammar** (S11/S12) — the last slice, and the manage screen. **(2026-10-09, code `a2317b1`; plan [`library/development/PLAN-SD-4.md`](library/development/PLAN-SD-4.md); architecture [`library/development/ARCHITECTURE-structure-permissions.md`](library/development/ARCHITECTURE-structure-permissions.md).)**
 

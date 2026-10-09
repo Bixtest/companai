@@ -119,6 +119,17 @@ which now **fails** on a row whose prerequisite is done but whose status is unma
 | ID | Gap (measured) | Prerequisite | Trigger ↔ checked at | Callback — what to run when it lands |
 |---|---|---|---|---|
 | **CC-40** | **The `Agent`'s `owner` / `role` / `actsAs` are declared as `text`, not real `relation` fields, and the `reportsTo` self-edge is not declared.** `AH-1` slice 1 (`packages/ai-assistant/src/modules/ai_assistant/ce.ts`, code `1a518f8`) declares the six §1.4 fields, so the kernel sees the object — but it carries id strings where first-class relations belong, and `AGENT-HALF.md` §3.1 promises *"a real `reportsTo` edge — no 'type' flag"*. Measured: the field kinds in `AGENT_FIELDS` for `owner`/`role`/`acts_as` are `text`; `ce.ts` declares no `entityExtensions` edge. | **The referenced entities must themselves be declared in the kernel** — a `relation` field needs a target entity id the kernel knows (`User`, `Role`, `Organization`). Today `kernel/model.ts` admits only what modules declare; the target list is the prerequisite, not this row. | **When a `User`/`Role`/`Organization` (or the `agent` → `agent` self) entity id is present in the kernel descriptor** — check: `buildModelDescriptor(...).entities` contains the target id, then flip the field kinds from `text` to `relation` and declare the `reportsTo` edge. | Upgrade `owner`/`role`/`acts_as` to `relation` fields and declare the `reportsTo` self-edge on `ai_assistant:agent`; re-run the `AH-1` kernel-object test (add assertions that the relations resolve). Do **not** invent default targets before they are declared. |
+
+## Deployment / operations gaps (host & release, not code)
+
+**Why these live here.** The release path itself can leave the project worse off — a deploy that
+cannot be undone is one bad release away from an outage with no fast way back. Same rule: **measured,
+scheduled, with a trigger** — never just noted.
+
+| ID | Gap (measured) | Prerequisite | Trigger ↔ checked at | Callback — what to run when it lands |
+|---|---|---|---|---|
+| **CC-41** | **`/opt/companai-platform/update.sh` destroys its own rollback.** Step 3 builds onto the **same tag** (`open-mercato/app:${DEPLOY_ENV}`, i.e. `open-mercato/app:wan`), so the outgoing image is overwritten and **cannot be restored by id**. Measured 2026-10-09 during the A6 deploy: before the rebuild the running image was `7624dc853abd`; after, `docker inspect 7624dc853abd` → **gone**. A rollback therefore requires rebuilding from an older source tree (runbook §5) — minutes, not seconds, and it needs a copy of the old source that may not exist. | **None — this is a pure script fix and can land immediately** (do not wait for a release). Edit step 3 to tag the outgoing image with a dated tag (`docker tag open-mercato/app:${DEPLOY_ENV} open-mercato/app:${DEPLOY_ENV}-<UTC-date>` when it exists) **before** the build. | **Immediately**, at the next `update.sh` edit — check: run `update.sh` twice and confirm an `open-mercato/app:wan-<date>` image exists for the first build after the second runs. | Add the pre-build dated tag to `update.sh`; prove it by building twice and showing two distinct dated tags survive; write the rollback one-liner (`docker tag open-mercato/app:wan-<date> open-mercato/app:wan && ./deploy.sh`) into the runbook `§5`. |
+
 ---
 
 ## Known environmental failures (host, not code)
