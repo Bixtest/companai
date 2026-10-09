@@ -1118,6 +1118,14 @@ one page, each with a named home. Details: [`BLUEPRINT-GAP-ANALYSIS.md`](BLUEPRI
    verified the fix, and the mutation proof exposed the store hook as decorative until a dedicated engine
    suite armed it. Open, scheduled: the core set is by **name** not a column (CC-31); the `UserFunction`
    core flag waits on `G-09` (CC-32). Plan [`PLAN-SD-2.md`](PLAN-SD-2.md).
+7b. **SD-2b** — make the **core object set a superadmin setting** (owner, 2026-10-09), not a hardcoded list.
+   A **direct copy of the `SD-3` pattern** (`tier-source.ts`: seed + strict parser + pure decision + fail-closed
+   read; dictionary §C.2b), stored in `module_configs` (module `core_boundary`, name `coreObjectTiers`).
+   **No new table, no migration.** The *rule* that core objects cannot be deleted/restructured stays Ring 1;
+   only the *object→tier map* is a setting. The seed = the owner-accepted recommendation; its first payoff is
+   closing the measured hole where a custom field can attach to `users`/`roles`/`tenants`/`sessions`
+   (the 7-id selectability list omits them). Manage screen folds into **`SD-5`**; the structural guard rides
+   **`SD-4`**. Design: [`DECISION-core-object-set-as-settings.md`](DECISION-core-object-set-as-settings.md).
 8. **SD-4 / SD-5** — the structural grammar screen (manage what can do what, to what level).
 9. **NEW — generic state-machine engine** (blueprint §10) promoted to a core primitive: allowed
    transitions, transition permissions, preconditions, events. Today pipelines exist only inside

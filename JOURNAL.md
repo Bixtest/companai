@@ -35,33 +35,38 @@ log.** Everything else (HANDOVER, START-PROMPT, README, BOOKMARKS, BACKLOG) poin
 
 ---
 
-### ▶ NOW — `SD-4` / `SD-5`: the **structural-permission grammar** (S11/S12) and its **manage screen** (Phase 0 → Phase 1). **The next *undone* slice in `BUILD-ORDER` order after `SD-2` (done 2026-10-09). Plan: to be written (`PLAN-SD-4.md`) following the `PLAN-SD-1.md` discipline.**
+### ▶ NOW — `SD-2b`: make the **core object set a superadmin SETTING** (owner-ruled 2026-10-09). **A direct copy of the `SD-3` pattern; small, unblocked. Plan: [`library/development/DECISION-core-object-set-as-settings.md`](library/development/DECISION-core-object-set-as-settings.md).**
 
 > **If you are a new agent, read only this block to know your job.** Everything below the box is the
 > history and the queue; this is the work in hand.
 
-**Why this is next.** `BUILD-ORDER.md` §8 lists it immediately after `SD-2` (done), and `SD-2` was the
-*last* startable Phase-1 slice that needed no owner ruling. The grammar is the piece the whole structural
-programme has been building toward: `SD-1` built the **gate** (a new surface cannot appear undecided),
-`SD-3` built the **tier setting** (what a change is judged by), `D3` gave a guard the **`escalation`**
-outcome, and the Metadata Registry exposes the **objects**. `SD-4` is the **grammar** those compose into —
-per object (table/column/relation/function/widget/agent) × verb (read/add/edit/remove/**reference**) ×
-actor (human/AI) × level (straight/review/approval/never) — and `SD-5` is its **manage screen** (the
-roles-and-permissions-style surface over it, reusing the same grant mechanism, S5).
+**Why this is next.** The owner ruled item 15 on 2026-10-09: *"we follow your recommendations… however,
+analyze if we can do this as a manageable matter instead of hardcoded. Give the superadmin the right and
+functionality to identify which table/column/function belongs to which tier… your recommendations become
+**default settings**, not hardcoded architecture."* That acceptance **creates a new, small, unblocked build
+(`SD-2b`)** which must land **before** `SD-4`/`SD-5`, because the structural grammar reads the tier map this
+setting stores.
 
-**Where it stands — read this before doing anything (fact-check, rule 10d).** Phase 0's foundation is
-**complete**: `D1` (the settings table / tier setting, `SD-3`), `D2-wide` (every enabled module's guard
-retired to the registry; the 106 remaining are all parked modules, recorded not migrated), `D3`
-(`escalation` as a third outcome, honoured end-to-end), and the Metadata Registry are all **done**. `SD-4`
-itself is **not built**: rules are still `.ts` code, not rows. **`SD-4`'s own first real prerequisite is
-`D1`-complete** — a place to *store* a rule — and the tier setting (`module_configs`, module
-`request_outcome`) is the precedent to follow (§C.2b).
+**What it is.** Move the object→tier map out of code into `module_configs` (module `core_boundary`, name
+`coreObjectTiers`), so a superadmin can mark **a table or column they just created** as protected **from the
+UI, with no deploy**. It is a **direct copy of `shared/src/lib/request-outcome/tier-source.ts`** (`SD-3`:
+seed + strict parser + pure decision + fail-closed read; dictionary **§C.2b** is the precedent verbatim), and
+**`module_configs` + `ModuleConfigService` already exist** — `getValue`/`setValue`/`restoreDefaults` — so
+there is **no new table and no migration**.
 
-**The honest boundary to establish first.** `SD-4` touches the **structural grammar** — a dictionary
-matter (`SPECIFICATIONS-DICTIONARY.md` S11/S12, `CORE-BOUNDARY.md` §2/§5). Before building: fact-check
-what grammar shape the dictionary fixes vs what is a design choice, and confirm **nothing here is the
-owner's to decide** (rule 11) — or surface the one question if it is. **Do not assume the roadmap is
-right — re-measure it.**
+**The two guardrails (copied from §C.2b — they are why this is safe).** (1) **It fails closed** — a missing or
+malformed setting resolves to the **seed**, never to a weaker tier. (2) **What stays CODE (Ring 1,
+`CORE-BOUNDARY.md` §2):** the *rule* that core objects cannot be deleted or restructured, the four tier names,
+and the parser. *A setting can move an object **between** tiers; it can never **delete the tiers**.*
+
+**The seed = the owner-accepted recommendation** (`DECISION-core-object-set.md`: the ~25 `core` tables — tenancy,
+identity, authz, audit, the customization substrate, the migration ledger — plus the `platform_release` set).
+Its first payoff **closes a measured hole**: a custom field can attach to a system table today because the only
+block is a **7-id UI-selectability list** that omits `users`, `roles`, `tenants`, `sessions`.
+
+**Also in this block (after `SD-2b`):** the **manage screen folds into `SD-5`** (one per-object grid, two
+settings — not a second UI), and the **structural guard** (DROP / re-type / FK) rides **`SD-4`** (S5: one
+engine, never a rival). **Fact-check all of this in code before writing (rule 10d) — do not assume.**
 
 ---
 
