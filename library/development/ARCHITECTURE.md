@@ -35,7 +35,7 @@ OpenAI-compatible presets, a tenant model allowlist, per-agent overrides and tok
 exist in `packages/ai-assistant`), so llama.cpp needs **one preset entry**, not a project; and the
 **embedding lane is a separate, closed lane** that is where **B-16** actually lives. **The owner
 decided the long-term default on 2026-10-05** — per-tenant policy is the destination, cloud-first is
-the interim (§9 of that document, and item 13 in [`NEEDS-YOU.md`](NEEDS-YOU.md)). It turns three
+the interim (§9 of that document, and `ML-1` (was “item 13”) in [`NEEDS-YOU.md`](NEEDS-YOU.md)). It turns three
 pieces of work from *nice* to *required*: the model registry, the Hermes **agent / persona / profile**
 mapping, and platform-managed local models.
 
@@ -154,7 +154,7 @@ data, is ours.* Hermes is the agent; the platform is the company.
 architectural change is checked against it before it lands, and the two clauses that may never be
 skipped are **the permissions question** (new data structure gets permissions decided before it
 lands — never forgotten for tomorrow's tables) and **the tier question** (which review tier the
-change sits in; item 17). Read it before making any structural change; update it before writing
+change sits in; `S2`/`SD-1` (was “item 17”)). Read it before making any structural change; update it before writing
 the code that implements the change.
 
 ---
@@ -237,7 +237,7 @@ with development."*
 localhost; no service exposed to the LAN". A domain-reachable deployment is the next boundary after it,
 and it is where the compose file's `DEPLOY_ENV` branch stops being a claim and gets exercised for real —
 which is exactly what happened: `DEPLOY_ENV=wan` now names the image tag, the containers, the volumes
-and the docker network. The related WordPress-and-subdomain request (**item 12**) is separate and still
+and the docker network. The related WordPress-and-subdomain request (**`NY-12`**) is separate and still
 to be discussed — the owner wants **directory-based hosting**, not WordPress-as-Docker: he adds the
 domain, creates a directory, uploads his own backup into it, imports the database through phpMyAdmin,
 then tests.

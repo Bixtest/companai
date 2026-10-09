@@ -1164,9 +1164,11 @@ one page, each with a named home. Details: [`BLUEPRINT-GAP-ANALYSIS.md`](BLUEPRI
    **manage screen (`SD-5`) BUILT 2026-10-09 (code `a2317b1`) — the last half of SD-4 is closed** (one grid, two settings). Limits scheduled in
    [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md) (CC-33: DDL DROP/FK; CC-34: read/reference verbs;
    CC-35: re-type labelled `'create'`; CC-36: foreign builders omit `actorKind`).
-9. **NEW — generic state-machine engine** (blueprint §10) promoted to a core primitive: allowed
+9. **`G-22` — the generic state-machine engine** (blueprint §10) promoted to a core primitive: allowed
    transitions, transition permissions, preconditions, events. Today pipelines exist only inside
-   `customers`; the blueprint makes lifecycle generic.
+   `customers`; the blueprint makes lifecycle generic. *(This is the item referred to elsewhere as
+   "item 9"; its canonical ID is `G-22`. Named `G-22` 2026-10-09 — the next free `G-` id, so no new
+   number family is created.)*
 
 **PHASE 1 (continued) — the agent half** *(added 2026-10-09 — the order for the `AH-` track; the
 detail lives in [`AGENT-HALF.md`](AGENT-HALF.md) §4, the register in [`BACKLOG.md`](BACKLOG.md))*
@@ -1178,7 +1180,7 @@ detail lives in [`AGENT-HALF.md`](AGENT-HALF.md) §4, the register in [`BACKLOG.
 > phase 4; only its **phase-1 item (`AH-1`)** is listed here, because that is the one on the critical
 > path. The other eleven `AH-` items stay in `AGENT-HALF.md` §4 / `BACKLOG.md` with their phases.
 
-20. **`AH-1` — the agent as a kernel object** *(the only agent-half item on the critical path; **the
+9a. **`AH-1` — the agent as a kernel object** *(the only agent-half item on the critical path; **the
     startable next build** — needs `G-01`, ✅ done).* An agent is **one flat, legible row** with a
     `kind` (*personal · role · context · independent · system*), an `owner`, an `actsAs`, a `role`, a
     **runtime binding**, and an **autonomy gate** — no "type" flag, no separate human/AI shape. The

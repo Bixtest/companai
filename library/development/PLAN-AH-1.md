@@ -1,7 +1,7 @@
 # PLAN — `AH-1`: the agent as a kernel object
 
 **Written:** 2026-10-09. **Author:** the agent. **Status:** 🟢 **EXECUTING** (the owner said "proceed").
-**Task:** `AH-1` (the only agent-half item on the critical path) — `BACKLOG.md:107`, `BUILD-ORDER.md` item 20,
+**Task:** `AH-1` (the only agent-half item on the critical path) — `BACKLOG.md:107`, `BUILD-ORDER.md` `AH-1`,
 `platform_points.md` §E, `AGENT-HALF.md` §1.4 + §3.1.
 **Parent decisions:** [`DECISION-agent-protection-tier.md`](DECISION-agent-protection-tier.md) (the tier is a
 per-object SETTING, owner 2026-10-09); [`DECISION-core-object-set-as-settings.md`](DECISION-core-object-set-as-settings.md)
@@ -175,17 +175,17 @@ remains the open callback, now scoped to `role` alone. Honest, not a tick.
 
 ---
 
-## 9. Slices 4+ — the `role` half and BUILD-ORDER item 9, in one channel (owner, 2026-10-09)
+## 9. Slices 4+ — the `role` half and `G-22`, in one channel (owner, 2026-10-09)
 
 This plan's slice 3 (§8) landed the **relation half**. The owner then ruled that the **remaining `role`
-half of `CC-40`** and **BUILD-ORDER item 9 (the generic state-machine engine)** should be executed **both,
+half of `CC-40`** and **`G-22` (the generic state-machine engine)** should be executed **both,
 in an order that leaves no gap** — rather than choosing one and deferring the other. **That work is planned
 in a dedicated sub-plan** so this document stays the `AH-1` record and does not grow a second subject:
 
-▶ [`SUB-IMPLEMENTATION-PLAN-CC40-and-item9.md`](SUB-IMPLEMENTATION-PLAN-CC40-and-item9.md)
+▶ [`SUB-IMPLEMENTATION-PLAN-CC40-and-G-22.md`](SUB-IMPLEMENTATION-PLAN-CC40-and-G-22.md)
 
 **The order it sets, in one line:** declare `role` in the kernel → flip `role` `text`→`relation` → extend
-the test + mutation → **tick `AH-1` ☐→☑ and close `CC-40`** (unblocking `CC-27`) → **then** build item 9
+the test + mutation → **tick `AH-1` ☐→☑ and close `CC-40`** (unblocking `CC-27`) → **then** build `G-22`
 (so the primitive is stacked on a *finished* agent object — rule 10d). The sub-plan carries the measured
 premise-check (no agent table, no `agent.role_id`; the honest admission route is a real `role_id` carrier),
 the acceptance per slice, and the rule-8 no-gap guarantee.
@@ -205,5 +205,5 @@ admission is load-bearing for the **kernel model** only, and the two registries 
 comments. **Answer to the §6 honesty question** (recorded so it is not re-litigated): `AH-1` owns the
 **declaration** of the six fields; the `runtime`/`autonomy` **enforcement** is owned by `L-01`/`AH-5` and
 `AH-2` — all three documents state this explicitly, and §3.1's table lists `L-01` as a *sibling item*, not a
-dependency. So the tick is honest. **`CC-27` is now unblocked.** Stream 2 (BUILD-ORDER item 9) awaits the
+dependency. So the tick is honest. **`CC-27` is now unblocked.** Stream 2 (`G-22`) awaits the
 owner's go, per his instruction.

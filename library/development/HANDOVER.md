@@ -143,7 +143,7 @@ reading it "for context" is how the direction gets buried (see [`../WHAT-WE-ARE-
 
 | # | Read | Why |
 |---|---|---|
-| B1 | [`SPECIFICATIONS-DICTIONARY.md`](SPECIFICATIONS-DICTIONARY.md) | **The standard every change is checked against** — the project's MVC. **Read before making any architectural change.** The two clauses that may never be skipped: the permissions question (S2) and the tier question (S4/item 17). §C.2b: the tiers/defaults/fallbacks are a **superadmin setting**, not hardcoded |
+| B1 | [`SPECIFICATIONS-DICTIONARY.md`](SPECIFICATIONS-DICTIONARY.md) | **The standard every change is checked against** — the project's MVC. **Read before making any architectural change.** The two clauses that may never be skipped: the permissions question (S2) and the tier question (S4/`S2`/`SD-1` (was “item 17”)). §C.2b: the tiers/defaults/fallbacks are a **superadmin setting**, not hardcoded |
 | B1a | [`CORE-BOUNDARY.md`](CORE-BOUNDARY.md) | **What is uncustomisable core vs configurable vs domain packs** — the answer to *"what must nobody be able to change?"* Ring 1 (identity, tenancy, the resource envelope, the policy engine, audit, localization resolution, the contract shapes) moves only by platform release |
 | B1b | [`ARCHITECTURE-structure-permissions.md`](ARCHITECTURE-structure-permissions.md) | **What the AI may do to the platform's own structure** — the object × verb × actor grammar (S11/S12), and why it plugs onto the existing mutation guard |
 | B1c | [`BUILD-ORDER.md`](BUILD-ORDER.md) | **The order — contracts, then foundation, then stack.** The owner's instruction (2026-10-06): fix the sequence so foundational items are not deferred. **Phase −1** = the architecture contracts; **Phase 0** = the foundation completion — **now COMPLETE (2026-10-07):** **D0 ✅** (the generated guard registry delivers guards, mutation-proven, §2c), **D1 ✅** (the tier mapping / defaults / fallbacks are a superadmin setting, §2d), **D3 ✅** (the third guard outcome `escalate`, 2026-10-07, code `ba8a25c`), the **Metadata Registry ✅** (`59ab859`), and **`D2-gap` COMPLETE** (0 unguarded across the 35 enabled modules, §2f). **The live remaining defect is `D2-wide`:** **106 call sites** in **40 files** still bypass the registry via the `@deprecated` resolver (baseline 198; **every enabled module is retired** — `entities`, `data_sync`, `dictionaries`, `dashboards`, `workflows`, `inbox_ops`, `perspectives`, `translations`, `planner`, `query_index`, `auth`, `directory`, `feature_toggles`; all 106 remaining are in **parked** modules, recorded not migrated). **The plan is per-module, not a blind sweep — build-order §2e; the exact item being worked now is in the JOURNAL's Active-task box** |
@@ -219,8 +219,8 @@ Never pipe these through `head` or `tail` — you throw away the exit code.
 
 **6. Check what needs the owner before you plan around it.** [`NEEDS-YOU.md`](NEEDS-YOU.md) is a
 numbered action list. As of 2026-10-05 only **three** items are open, and none of them blocks the
-build: change the Coolify password (item 5), turn on Docker Desktop auto-start (item 6), and
-optionally delete the 3.8 GB ISO (item 7).
+build: change the Coolify password (`NY-5`), turn on Docker Desktop auto-start (`B-04`), and
+optionally delete the 3.8 GB ISO (`NY-7`).
 
 **7. Your task is in `JOURNAL.md`, not here.** Open [`../../JOURNAL.md`](../../JOURNAL.md) and read
 the **`★ ACTIVE TASK`** section at the very top. **That box is the one and only place that says what
@@ -559,7 +559,7 @@ they pick which listener the router binds to. Behind the tunnel, use **`http://`
 **Docker Desktop must be running for the Sprint 0 stack, and only the owner can start it.**
 Docker Desktop's startup runs `wsl.exe`, which this machine's security policy blocks for anything
 an agent launches — the block is **not approvable and must not be worked around.** `AutoStart` is
-off, so this recurs on every restart. It is a **permanent owner step** ([`NEEDS-YOU.md`](NEEDS-YOU.md) item 6).
+off, so this recurs on every restart. It is a **permanent owner step** ([`NEEDS-YOU.md`](NEEDS-YOU.md) row `B-04`).
 *It is running as this page is written.*
 
 ---
@@ -662,11 +662,11 @@ documents and was *not* re-measured — treat it as a starting point, not a fact
 | **The foundation (phase 0)** | **COMPLETE (2026-10-07).** The four named guard-engine gaps are built and proven — **`D0`** (the registry is populated from an enabled module, proven by mutation), **`D1`** (the tier/defaults/fallbacks settings table exists — rules are no longer `.ts` code alone), **`D3`** (the guard result has a third outcome, `escalate`, treated as *not performed*), and **`GAP A`'s registry half** (the read-only **Metadata Registry**, code `59ab859` — it answers *what exists · what type · provenance · what depends on it*, and returns a **typed absence** for the other ten blueprint §54 questions). **`D2-gap`** (every write route that reached no guard) also closed: **0 unguarded across the 35 enabled modules**. **What remains of the foundation: `D2-wide`** — 106 call sites still use the `@deprecated` guard pair, **all in parked modules** (recorded, not migrated), and **`GAP A`'s `Resource` envelope half** — a Phase −1 contract, deliberately not built because a type with no consumer is the "contract after the code" failure. |
 | **The first build slice past the foundation** | **`SD-1` Phase 1 is BUILT (2026-10-08, PARTIAL).** The **S2 structure-change gate**: when a new data structure lands (a table, a column, a field-type change), the platform must not apply it until the permissions for the new surface are decided — either a person decides, or the default applies (full grant to the superadmin role **and the permission records created**). Its decision core (`structure-change-gate.ts`), its hook (two `MutationGuard`s on the entities create path), and its **enforcement** (`permission-decision-grant.ts`, which writes the gate's `defaulted` records into the role's `role_acls.features_json`) are built, tested and mutation-proven across **every create path**, including the batch route, the shared primitive `ensureCustomFieldDefinitions`, the `add-field` CLI, the two HTTP reactivation routes, the entity-install primitive and all three field-type-change sites. **The remaining paths are scheduled** in [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md) (`CC-20`, `CC-23`, `CC-27`; `CC-25` — the decision actor's permission — is **BUILT 2026-10-09**, awaiting the owner's confirm). Plan: [`PLAN-SD-1.md`](PLAN-SD-1.md). |
 | **The runtime boundary (B-05)** | **DECIDED 2026-10-05 by the owner.** One product, one repository, one deployment, one interface (ours), with Hermes as a **supervised private runtime process behind the internal port**; Hermes is **headless**. Reasoning in [`ARCHITECTURE-hermes-integration.md`](ARCHITECTURE-hermes-integration.md) §11. The Hermes **profile** topology is deferred with the trigger **the agent gateway** |
-| **The model default (item 13)** | **DECIDED 2026-10-05 by the owner: per-tenant policy is the destination, cloud-first is the interim.** It turns three pieces of work from *nice* to *required* — the model registry, the Hermes **agent / persona / profile** mapping, and platform-managed local models. Reasoning in [`ARCHITECTURE-model-server-integration.md`](ARCHITECTURE-model-server-integration.md) §9 |
+| **The model default (`ML-1`)** | **DECIDED 2026-10-05 by the owner: per-tenant policy is the destination, cloud-first is the interim.** It turns three pieces of work from *nice* to *required* — the model registry, the Hermes **agent / persona / profile** mapping, and platform-managed local models. Reasoning in [`ARCHITECTURE-model-server-integration.md`](ARCHITECTURE-model-server-integration.md) §9 |
 | **The running stack** | **8 containers up, all healthy** (app, mcp, hermes, model, opencode, postgres, redis, meilisearch) — **re-measured 2026-10-08** (`docker ps`), all up ~19 hours. The platform's own Postgres 17 (`mercato-postgres-local`) is **live**, so **database behaviour is directly provable on this host** (see §3g, and [`../../workspace/COOKBOOK.md`](../../workspace/COOKBOOK.md)). *Note the trap in the count itself: on 2026-10-06 `docker ps` showed eight rows while `redis` had exited and `mcp` was unhealthy behind it — **eight rows is not eight healthy**, so read the `Status` column, not the line count.* |
 | **The local database** | **Rebuilt clean 2026-10-05** (3 users, 1 tenant, 1 organisation, 5 feature toggles, 5 `action_logs` rows; init ran green). Used in the 2026-10-08 `CC-30` work as a **live measurement target** — the `custom_entities_storage` index shape and the `ON CONFLICT` behaviour were measured against it, not inferred. |
 | **Open blockers** | **3** — B-05 (OpenCode is load-bearing), B-16 (no embeddings endpoint), B-17 (no audit trail of agent tool calls). **None stops the build** (see [`BLOCKERS.md`](BLOCKERS.md)). **B-05's design face is now closed** (the boundary is decided); what stays open is *when* OpenCode goes, tracked as **N-8**. **B-16 was root-caused 2026-10-05** — it is two defects, the first being a missing `OPENAI_BASE_URL` on the `mcp` service |
-| **Waiting on the owner** | **3** — Coolify password (item 5), Docker Desktop auto-start (item 6), the ISO (item 7, optional). **Item 13, the model layer's long-term default, was decided by the owner on 2026-10-05** (per-tenant policy as the destination, cloud-first as the interim), so it is no longer waiting |
+| **Waiting on the owner** | **3** — Coolify password (`NY-5`), Docker Desktop auto-start (`B-04`), the ISO (`NY-7`, optional). **`ML-1`, the model layer's long-term default, was decided by the owner on 2026-10-05** (per-tenant policy as the destination, cloud-first as the interim), so it is no longer waiting |
 
 **Group B — quoted from older documents, not re-measured:**
 
@@ -766,7 +766,7 @@ documents and was *not* re-measured — treat it as a starting point, not a fact
   [`ARCHITECTURE-request-outcomes.md`](ARCHITECTURE-request-outcomes.md).
 - **What needs the owner** → [`NEEDS-YOU.md`](NEEDS-YOU.md) — a numbered action list. **Three
   items open**, and none blocks the build. The most urgent is changing the Coolify admin password
-  (item 5); it is the only thing standing between an agent and the 2FA wall on the hosting panel.
+  (`NY-5`); it is the only thing standing between an agent and the 2FA wall on the hosting panel.
 - **What is scheduled but not finished** → [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md) — the
   register of every **partial build**, each with its **gap**, the **prerequisite** that must land, **the
   *Trigger ↔ checked at* column** (the observable event that means the prerequisite has landed, and where
@@ -796,7 +796,7 @@ documents and was *not* re-measured — treat it as a starting point, not a fact
   DERIVED · 3 DEFERRED-with-trigger · 0 OPEN — owner** (the tally is parsed from the 40 rows, not
   written by hand — `LESSONS.md` **L49**; the last open row, **B-05**, was approved on 2026-10-05). One
   code gap surfaced: the ledger carries no
-  `policy_version`/`decision_id` (assigned to **G-16**). **Only ratification remains** (item 4 of
+  `policy_version`/`decision_id` (assigned to **G-16**). **Only ratification remains** (`P0-spec`, was “item 4” of
   [`NEEDS-YOU.md`](NEEDS-YOU.md)). **§10a records that `G-01` has now run the specification's central
   claims as measurements** — the ID grammar, the contract, the versions and the round-trip are tested,
   not merely stated.
@@ -861,7 +861,7 @@ source at the root is now ignored. §2 step 1 points at the short list, and §4'
 the new file and the root folders. Docs updated in the same change as the work (COOKBOOK rule zero).*
 
 *Earlier, 2026-10-05, revision 7 — **the model layer's one owner decision is taken: per-tenant
-policy is the destination, cloud-first is the interim** (item 13,
+policy is the destination, cloud-first is the interim** (`ML-1`,
 [`ARCHITECTURE-model-server-integration.md`](ARCHITECTURE-model-server-integration.md) §9). It turns
 three pieces of work from *nice* to *required*: the model registry, the Hermes **agent / persona /
 profile** mapping, and platform-managed local models (§6.4). Two further owner requirements were

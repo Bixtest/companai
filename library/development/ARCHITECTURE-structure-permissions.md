@@ -112,7 +112,7 @@ levels) — and each one is a clear sentence.
 
 ---
 
-## 3. Why this is better than what item 17 set
+## 3. Why this is better than what `S2`/`SD-1` (was “item 17”) set
 
 **Item 17 set:** one tier per **kind of change** ("add an optional column" → review). A lookup table,
 keyed on the change's description.
@@ -126,7 +126,7 @@ keyed on the change's description.
 | **Actor type** | not considered | human vs AI is a first-class axis | **owner** — the whole point |
 | **Escalation** | a tier already chosen | a level the guard can raise | **owner** — "review" vs "approval" is per-case |
 | **Where it lives** | one table in one file | settings on the object + guards | **owner** — travels with the object |
-| **Cost** | near-zero (a table) | higher: needs the settings block, the escalate outcome, the actor axis | **item 17** |
+| **Cost** | near-zero (a table) | higher: needs the settings block, the escalate outcome, the actor axis | **`S2`/`SD-1`** |
 | **Fails closed** | yes (unknown → strictest) | must be built to | tie |
 
 **The honest cost.** Item 17 is nearly free — it is one table. The owner's idea is real work: a settings
@@ -142,7 +142,7 @@ order:
    this object → fall back to the kind's tier").
 3. **Both fail closed** — an object with no setting and an unrecognised kind land in the strictest level.
 
-That way the fine-grained idea is the mechanism, item 17 is the safety net beneath it, and neither is
+That way the fine-grained idea is the mechanism, `S2`/`SD-1` is the safety net beneath it, and neither is
 thrown away.
 
 ---
@@ -205,14 +205,14 @@ uses for data permissions (so it is the same engine, S5).
 If accepted, two clauses are added and one is amended:
 
 - **New S11 — structural permissions are explicit, per object and verb, and inherited by default.** Every
-  governable object carries a structural permission block; an unset entry falls back to item 17's tier;
+  governable object carries a structural permission block; an unset entry falls back to `S2`/`SD-1`'s tier;
   both fail closed.
 - **New S12 — the actor type is part of every structural decision.** A rule may say what *AI* may do
   and what a *human* may do, separately. Neither is inferred from the other.
 - **Amended S2** — the permissions-on-change gate now installs **both** blocks when a new object appears:
   the data permission (who may read/write the values) **and** the structural permission (who may add/edit/
   remove/reference the object). A new column is not "permitted" until both are set.
-- **Amended C.2 / item 17** — the tier table is demoted from *the mechanism* to *the default under the
+- **Amended C.2 / `S2`/`SD-1`** — the tier table is demoted from *the mechanism* to *the default under the
   mechanism*.
 
 ---
@@ -247,7 +247,7 @@ should happen?**
 
 - [ ] Never by default — an unset structural permission means *not permitted*; someone must set it first.
 - [ ] Approval by default — an unset permission means *allowed, but a person approves each time*.
-- [x] **Fall back to item 17's tier table** — the kind of change decides. **✅ CHOSEN by the owner,
+- [x] **Fall back to `S2`/`SD-1`'s tier table** — the kind of change decides. **✅ CHOSEN by the owner,
       2026-10-06, with a condition.**
 
 His answer, verbatim: *"Fallback is acceptable if, again, it maps to the standards with default values."*

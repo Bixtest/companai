@@ -1,4 +1,4 @@
-# SUB-IMPLEMENTATION PLAN — closing `CC-40` (the `role` half) **and** BUILD-ORDER item 9, in one channel
+# SUB-IMPLEMENTATION PLAN — closing `CC-40` (the `role` half) **and** `G-22`, in one channel
 
 **Written:** 2026-10-09
 **Author:** the agent (per the owner's instruction, 2026-10-09, verbatim): *"Create a sub-implementation
@@ -10,7 +10,7 @@ this document is the agent's recommendation, with the facts that make it safe to
 
 **Parent documents.** [`PLAN-AH-1.md`](PLAN-AH-1.md) (the `AH-1` plan; §8 is the slice-3 record);
 [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md) (`CC-40`, now narrowed to `role` alone);
-[`BUILD-ORDER.md`](BUILD-ORDER.md) item 9; [`AGENT-HALF.md`](AGENT-HALF.md) §3.1;
+[`BUILD-ORDER.md`](BUILD-ORDER.md) `G-22`; [`AGENT-HALF.md`](AGENT-HALF.md) §3.1;
 [`WORKING-RULES.md`](WORKING-RULES.md) (the six-box protocol, rule 8 = schedule every partial, rule 9a =
 own the code you touch).
 
@@ -19,7 +19,7 @@ own the code you touch).
 ## 0. Why this plan exists — the owner's two-objective instruction, resolved
 
 The owner was offered a fork: **(a)** finish `CC-40`'s `role` half — *blocked* until a `role` entity is
-declared in the kernel; or **(b)** build **BUILD-ORDER item 9**, the generic state-machine engine —
+declared in the kernel; or **(b)** build **`G-22`**, the generic state-machine engine —
 *unblocked*. The agent recommended **(b)**.
 
 **The owner's call: do neither *instead of* the other — do both, in an order that leaves no gap.** His
@@ -29,8 +29,8 @@ the best of the two worlds."*
 
 **That is the right instinct, and the measurement says it is also the cheap one** — because the two halves
 are **not independent**: `CC-40`'s blocker (no `role` entity in the kernel) turns out to be a **small,
-additive declaration**, and doing it *first* means **`AH-1` and `CC-40` both close before item 9 starts** —
-so item 9 is then stacked on a *finished* agent object, not an unfinished one (**rule 10d: never stack on an
+additive declaration**, and doing it *first* means **`AH-1` and `CC-40` both close before `G-22` starts** —
+so `G-22` is then stacked on a *finished* agent object, not an unfinished one (**rule 10d: never stack on an
 unfinished foundation**). The compromise therefore **removes** a stack rather than creating one.
 
 **The measured facts that make this safe (each verified this session, not assumed):**
@@ -43,14 +43,14 @@ unfinished foundation**). The compromise therefore **removes** a stack rather th
 | The `roles` **table and data already exist** | migration `packages/core/src/modules/auth/migrations/Migration20251030150038.ts`; **live DB**: `select count(*) from roles` → **3** (`admin`, `employee`, `superadmin`) | Declaring `role` in the kernel needs **no migration** (it is a *descriptor* admission, not a table). Same as `user`. |
 | **No agent table exists** — the agent is a kernel descriptor, not a row | live DB: `information_schema.tables like '%agent%'` → only three `ai_agent_*_overrides` tables; `%` of the agent record itself is **absent** | So there is **no `agent.role_id` column** — `CC-40`'s `role` relation **cannot** be joined on the agent (falsifies "Shape 1"). |
 | The only real `role_id` columns live on join tables | live DB: `column_name='role_id'` → `user_roles`, `role_acls`, `role_perspectives`, `role_sidebar_preferences`, `dashboard_role_widgets` | `user_roles` (`user_id`,`role_id`, real FKs) is the honest place to declare the `auth:role` edge. |
-| Item 9's precedent is real but narrow | `packages/core/src/modules/customers/` — deal **stage transitions** live in a table + `dealStageTransitionTable.ts` (table-name + missing-table handling), driven from `api/deals/[id]/route.ts` and `commands/deals.ts` | The engine exists **only inside `customers`**; item 9 = **generalise** it, not invent it. |
+| `G-22`'s precedent is real but narrow | `packages/core/src/modules/customers/` — deal **stage transitions** live in a table + `dealStageTransitionTable.ts` (table-name + missing-table handling), driven from `api/deals/[id]/route.ts` and `commands/deals.ts` | The engine exists **only inside `customers`**; `G-22` = **generalise** it, not invent it. |
 
 **The critical-path argument (why this keeps us "channelled").** Both targets are on the **same** path —
-`AH-1` is the object every other `AH-` item hangs off, and item 9 is a **core primitive** the agent half
+`AH-1` is the object every other `AH-` item hangs off, and `G-22` is a **core primitive** the agent half
 needs for its lifecycle. Doing the `role` half first **closes `AH-1` completely** (its last open leg), which
-is what unblocks `CC-27` (the AI-user ↔ agent binding) and the rest of the `AH-` track. Doing item 9 first
-instead would build a primitive on an agent object still carrying a known gap. **Order: `role` first, item 9
-second — and item 9 starts only after `AH-1`'s box is ticked.** That is the compromise.
+is what unblocks `CC-27` (the AI-user ↔ agent binding) and the rest of the `AH-` track. Doing `G-22` first
+instead would build a primitive on an agent object still carrying a known gap. **Order: `role` first, `G-22`
+second — and `G-22` starts only after `AH-1`'s box is ticked.** That is the compromise.
 
 ---
 
@@ -66,7 +66,7 @@ second — and item 9 starts only after `AH-1`'s box is ticked.** That is the co
                                                         │  (AH-1 now 100% — no gap to carry)
                                                         ▼
         ┌──────────────────────── WORK-STREAM 2 (the unblocked build) ─────────────────────┐
-        │  E. BUILD-ORDER item 9 — generalise the state-machine engine                      │
+        │  E. `G-22` — generalise the state-machine engine                      │
         │  F. FIRST CALLER: migrate the `customers` deal pipeline onto the generic engine   │
         │  G. Schedule whatever remains (rule 8) rather than leaving it implicit            │
         └───────────────────────────────────────────────────────────────────────────────────┘
@@ -171,7 +171,7 @@ everything it depends on* is 100%. After 1A–1C:
   as a dependency of `AH-1`, or as a sibling item? **This is the one honesty question to answer from the
   docs before ticking.** If the docs say `AH-1` is "declared here, enforced there", tick it; if they make
   enforcement part of `AH-1`, do **not** tick and keep a narrowed callback).
-- If ticked: `platform_points.md` `AH-1` ☐→☑; `BACKLOG.md` `AH-1` `[ ]`→`[x]`; `BUILD-ORDER.md` item 20
+- If ticked: `platform_points.md` `AH-1` ☐→☑; `BACKLOG.md` `AH-1` `[ ]`→`[x]`; `BUILD-ORDER.md` `AH-1`
   marked done; **`CC-40` is removed from `COMPLETION-CALLBACKS.md`** (a closed callback is deleted, not left
   as a tombstone — *verify the register's own convention first*).
 - **Then** (and only then) unblock **`CC-27`** (`A3`): once `AH-1`'s box is `[x]`, `CC-27`'s prerequisite is
@@ -179,13 +179,13 @@ everything it depends on* is 100%. After 1A–1C:
 
 ---
 
-## 3. WORK-STREAM 2 — BUILD-ORDER item 9, the generic state-machine engine
+## 3. WORK-STREAM 2 — `G-22`, the generic state-machine engine
 
 **Starts only after `AH-1` is ticked** (so the primitive is not stacked on an unfinished object).
 
 ### Slice 2A — define the engine (a new shared primitive)
 
-**The requirement (BUILD-ORDER §item 9, verbatim):** *"generic state-machine engine (blueprint §10)
+**The requirement (`G-22`, verbatim):** *"generic state-machine engine (blueprint §10)
 promoted to a core primitive: allowed transitions, transition permissions, preconditions, events. Today
 pipelines exist only inside `customers`; the blueprint makes lifecycle generic."*
 
@@ -214,9 +214,9 @@ the duplicate.
 
 ### Slice 2C — schedule what remains (rule 8)
 
-Whatever item 9 cannot finish (e.g. a second caller, a UI surface, a blueprint §10 sub-feature) gets a
+Whatever `G-22` cannot finish (e.g. a second caller, a UI surface, a blueprint §10 sub-feature) gets a
 **`CC-` row** in `COMPLETION-CALLBACKS.md` with gap + prerequisite + callback — in the same change. Check the
-docs for whether item 9 has known sub-parts already scheduled; if so, reconcile rather than duplicate.
+docs for whether `G-22` has known sub-parts already scheduled; if so, reconcile rather than duplicate.
 
 ---
 
@@ -240,7 +240,7 @@ intention.
 - It does **not** invent a `role` target before measuring the real entity id (spec §5.4).
 - It does **not** tick `AH-1` on the `role` half alone if the enforcement leg belongs to `AH-1` (the honesty
   check in 1D decides).
-- It does **not** start item 9 before `AH-1` closes (**rule 10d**).
+- It does **not** start `G-22` before `AH-1` closes (**rule 10d**).
 - It does **not** delete the `customers` transition code until the generic path is proven equal.
 
 ---
@@ -267,7 +267,7 @@ Run the project's **standard review + verification** on each slice:
 - **If declaration only** (the reading in `PLAN-AH-1.md` §8 and `AGENT-HALF.md` §3.1, and the fact that
   `L-01`/`AH-5` and `AH-2` are named as the owners): then after 1A–1C, **`AH-1` is 100% and must be ticked**.
 - **If enforcement is part of `AH-1`:** then `AH-1` is **not** tickable after the `role` half, `CC-40` closes
-  but `AH-1` stays `☐` with a **new, named callback** for the enforcement leg, and item 9 still proceeds
+  but `AH-1` stays `☐` with a **new, named callback** for the enforcement leg, and `G-22` still proceeds
   (it does not depend on the enforcement, only on the object).
 
 **The plan resolves this by reading the three documents before Slice 1D** — not by choosing the convenient
@@ -279,9 +279,9 @@ reading. The answer is written into `JOURNAL.md` at that moment, with the citati
 
 | The owner's objective | Satisfied by | How it is proven |
 |---|---|---|
-| *"execute all that"* — both halves, not a choice | Work-stream 1 **and** Work-stream 2 | both streams land; 1D closes `CC-40`; 2B proves item 9 with a real caller |
+| *"execute all that"* — both halves, not a choice | Work-stream 1 **and** Work-stream 2 | both streams land; 1D closes `CC-40`; 2B proves `G-22` with a real caller |
 | *"so we don't leave gaps behind"* | the rule-8 guarantee (§4) + the honesty check (§6) | every halt produces a `CC-` row in the same change; `AH-1` is ticked only if honestly tickable |
-| *"move forward … the same critical path intended"* | `role` → `AH-1` ✅ → `CC-27` unblocked → item 9 | the ordering in §1; item 9 starts only after `AH-1` closes (rule 10d) |
+| *"move forward … the same critical path intended"* | `role` → `AH-1` ✅ → `CC-27` unblocked → `G-22` | the ordering in §1; `G-22` starts only after `AH-1` closes (rule 10d) |
 | *"the best of the two worlds"* | the `role` half is **cheap** (measured: a declaration, no migration) and it **removes** a stack rather than adding one | the §0 measurement table |
 
 ---

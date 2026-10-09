@@ -168,7 +168,7 @@ These are the ones that have already cost this project time:
   not finished.
 - **A decision that is the owner's is not yours to close.** Ask, or leave it explicitly open.
 - **Rule zero-zero-one: the dictionary binds.** No architectural change without checking
-  `SPECIFICATIONS-DICTIONARY.md`. The permissions question (S2) and the tier question (S4/item 17) may
+  `SPECIFICATIONS-DICTIONARY.md`. The permissions question (S2) and the tier question (S4/`S2`/`SD-1` (was “item 17”)) may
   never be skipped. Where a doc and the code disagree, the **disagreement is the defect** — fix it, do
   not pick a side.
 - **A module is not "built" because a file exists.** Mark nothing COMPLETE without the **two-route
@@ -245,7 +245,7 @@ something from it** — never "for context". Our direction is `ai/ai-first/`, an
 **Two things are now decided, and they shape what you build next.** **B-05, the Hermes runtime
 boundary:** one product, one repository, one deployment, one interface (ours), with Hermes as a
 **supervised private runtime process behind the internal port**, and Hermes **headless**. **The
-long-term model default (item 13): per-tenant policy is the destination, cloud-first is the
+long-term model default (`ML-1`, was “item 13”): per-tenant policy is the destination, cloud-first is the
 interim.** The second turns three pieces of work from *nice* to *required* — the model registry, the
 Hermes **agent / persona / profile** mapping, and platform-managed local models — tracked as the
 **`ML-`** items in `BACKLOG.md`. Two further owner requirements are recorded in

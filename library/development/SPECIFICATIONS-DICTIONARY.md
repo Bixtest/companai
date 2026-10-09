@@ -224,9 +224,9 @@ its full design is [`ARCHITECTURE-structure-permissions.md`](ARCHITECTURE-struct
 fix it. Invisible-to-everyone is a silent failure; visible-to-superadmin is a safe starting point an
 admin narrows from.
 
-### C.2 — How a change meets the tier question (this is item 17, resolved)
+### C.2 — How a change meets the tier question (this is `S2`/`SD-1` (was “item 17”), resolved)
 
-**Status 2026-10-06:** item 17 is still answered — but the tier table below is now the **default beneath
+**Status 2026-10-06:** `S2`/`SD-1` is still answered — but the tier table below is now the **default beneath
 a finer mechanism**, not the mechanism itself. The owner proposed the better shape (S11/S12): a
 structural permission set per object, per verb, per actor. When such a permission exists, **it decides**;
 when none is set, **this table decides**; both fail closed. See
@@ -260,7 +260,7 @@ written into code — see the question at the end):
 | Add a screen or a widget over existing data | `review_required` | no new data, but may expose existing data differently (S4) |
 | Remove a column or table | `explicit_approval` | destructive; "nothing is deleted before it is analysed" (cookbook rule) |
 
-**This table is the answer to item 17.** It is derived, not invented, and it lives in the dictionary so a
+**This table is the answer to `S2`/`SD-1`.** It is derived, not invented, and it lives in the dictionary so a
 new change kind is added here first — then in code.
 
 ### C.2b — The tiers, the defaults and the fallbacks are SETTINGS, not hardcoded *(owner, 2026-10-06)*
@@ -369,7 +369,7 @@ The owner answered both. Recorded here as **settled**, with his two conditions w
 > that bulk-apply changes based on my suggestion WHERE NEEDED."*
 
 What this means, written down so it cannot drift:
-- The tier mapping (item 17) is accepted **as the default beneath the structural grammar** — it is not a
+- The tier mapping (`S2`/`SD-1`) is accepted **as the default beneath the structural grammar** — it is not a
   rival to S11, it is S11's fallback. One default in the system, not two.
 - Tiers are **bulk-applied to the structural permissions**: choosing a tier fills in `(object, verb,
   actorType, level)` where the owner has not set one specifically. A tier choice is a convenience over
