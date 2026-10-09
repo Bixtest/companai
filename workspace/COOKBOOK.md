@@ -540,6 +540,19 @@ the restore-time consequence: [references/parked-modules.md](references/parked-m
 
 ## The three rules that override everything
 
+0. **The order of development is the vision's order — build the skeleton before the flesh**
+   *(owner, 2026-10-09).* The primitive vision
+   ([`library/ai/ai-first/06_Platform_Foundation_and_Security_Kernel_Specification.md`](../library/ai/ai-first/06_Platform_Foundation_and_Security_Kernel_Specification.md)
+   **§222–232**) fixes the sequence, bottom-up: **Phase 0** primitives · **1** identity · **2**
+   tenancy · **3** policy kernel (*"the first major kernel milestone"*) · **4** classification · **5**
+   query/command enforcement · **6** audit · **7** business agent gateway · **8** Hermes · **9**
+   functions/widgets · **10** *"only now build … Customer + Sales"*. **§233** forbids starting with the
+   ERP screens. **Work the lowest open phase first; business capabilities are last.** Only the owner
+   may re-order — and a deviation is recorded beside the row with its reason. **Why:** on 2026-10-09
+   the skeleton sat at 0/36 while four business modules were ticked done and the next slice was a CRM
+   pipeline — the work had begun to run ahead of its own Phase 3. Full statement:
+   [`../library/development/WORKING-RULES.md`](../library/development/WORKING-RULES.md) §1 rule 0.
+
 1. **Nothing is deleted before it is analysed.** Every module, package or file
    scheduled for removal gets a read-only salvage analysis first, and the report
    is committed. Protocol: [references/salvage-analysis.md](references/salvage-analysis.md).

@@ -20,6 +20,48 @@ These are also written at the top of `workspace/COOKBOOK.md` ("The three rules t
 everything", now six). They are repeated here because a rule a newcomer has to find is a rule that
 gets broken.
 
+0. **THE ORDER OF DEVELOPMENT IS THE VISION'S ORDER — and no task may jump ahead of it**
+   *(owner, 2026-10-09, after measuring the drift himself)*. **This rule governs *which task comes
+   next*, so it is written first.**
+   **The order is fixed by the primitive vision** — `library/ai/ai-first/06_Platform_Foundation_and_Security_Kernel_Specification.md`
+   **Part LXXXII §222–232** — and it runs **bottom-up, substrate → flesh**:
+
+   | Phase | What it builds | Category |
+   |---|---|---|
+   | **0** | Immutable primitives — IDs · TenantRef · EntityRef · ActorRef · Version · Provenance · Lifecycle | substrate |
+   | **1** | Identity — Person · UserAccount · ServiceIdentity · AgentIdentity · sessions · lifecycle | substrate |
+   | **2** | Multi-tenancy — Tenant · Organization · LegalEntity · Membership · RLS | substrate |
+   | **3** | **Policy kernel** — Action · Resource · Permission · Role · Policy · Scope · Decision · Obligation | **"the first major kernel milestone"** |
+   | **4** | Data classification / secrets | substrate |
+   | **5** | Query / Command enforcement | substrate |
+   | **6** | Audit / provenance | substrate |
+   | **7** | Business Agent Gateway | substrate |
+   | **8** | Hermes adapter — *"only after the security gateway exists"* | AI |
+   | **9** | Functions / Widgets / Workspace — *"all clients of the policy kernel"* | AI |
+   | **10** | **First complete business capability** — *"Only now build something such as Customer + Sales"* | **flesh** |
+
+   **And the vision's §233, "What must not be built first", says it outright:** *"Do not start by
+   building dozens of ERP screens … CRM screens, Accounting screens, HR screens, Inventory screens …
+   while the security model remains informal. That creates an enormous future migration problem."*
+
+   **The rule, three parts, all binding:**
+   **(a) Work the phases in order, lowest open phase first.** No item from a lower-numbered phase may
+   sit unbuilt while an item from a higher-numbered phase is worked. **Business capabilities (Phase
+   10 — CRM, Sales, Accounting, HR, Inventory, WMS, and any `B`- or `P`-module work) are LAST.**
+   **(b) The next task to pick is always the lowest open phase that is not yet whole.** Read the
+   `★ ACTIVE TASK` box in `JOURNAL.md` and [`platform_points.md`](platform_points.md) **"THE LIST"**
+   (sorted in this same order) — pick the first row that is not `☑`, and challenge it (rule 9b) before
+   executing.
+   **(c) Deviating requires the owner's explicit word, written down.** Only the owner may re-order the
+   phases; if he does, **record the deviation, its reason and the date beside the row**, so the next
+   session does not silently "correct" it back.
+   **Why this rule exists:** on 2026-10-09 the owner measured that the skeleton (Phase 3, the policy
+   kernel) sat at **0/36** while four Phase-10 business modules were ticked DONE and the next queued
+   slice was a **`customers` CRM pipeline** — i.e. the work had begun to run *ahead* of its own Phase 3.
+   His words: *"you flipped the development into reverse order."* The order document was not reversed,
+   but the queue was drifting toward the flesh. **This rule is the antidote: build the skeleton first,
+   and do not start a module until the platform under it is finished.**
+
 1. **Nothing is deleted before it is analysed.** Every file or module headed for removal gets a
    read-only salvage analysis first, committed.
 2. **Analysis is read-only; execution is a separate step.** The agent that decides never deletes; the
