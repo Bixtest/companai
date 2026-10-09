@@ -53,11 +53,22 @@ export type AgentKind = (typeof AGENT_KINDS)[number]
 /**
  * The `Agent` object's declared fields (kernel field declarations).
  *
- * These describe the *object*; they are the §1.4 fields made concrete. `text` carries an id/marker where no
- * first-class relation is declared yet — a declared string, never an invented default (spec §5.4: an absent
- * value is a gap the model reports, not a default it invents). Turning `owner`/`role`/`actsAs` into real
- * `relation` fields is a follow-up the moment the referenced entities are declared in the kernel — recorded
- * here so the downgrade is visible, not silent.
+ * These describe the *object*; they are the §1.4 fields made concrete.
+ *
+ * **The relation upgrade (`CC-40`, slice 3).** `owner` and `acts_as` are now declared as `relation` fields
+ * carrying a `relatedEntityId` of `user`, and the `reportsTo` self-edge (`data/extensions.ts`) is a real
+ * kernel relationship. **Where the target lands, stated precisely** (a hostile-critic pass corrected an
+ * earlier overstatement here): the `relation` *kind* reaches the kernel model (`KernelField.fieldKind`),
+ * and the `relatedEntityId` target is a real, **consumed** property of the custom-field declaration — the
+ * installer persists it (`entities/lib/install-from-ce.ts` `FIELD_DETAIL_KEYS`) and the relation-options UI
+ * reads it (`ui/backend/custom-fields/FieldDefinitionsEditor.tsx`). **It is NOT carried on the kernel
+ * model's `KernelField`** — that type has no such property (verified). Making the target first-class *in the
+ * model* would need a companion relationship and is deliberately not claimed here.
+ *
+ * `role` stays a declared `text` because the **admin** role entity (`auth:role`) is not in the kernel
+ * descriptor — measured, not assumed. (`customer_accounts:customer_role` exists, but it is a different
+ * concept: customer-portal roles, not the staff role an agent carries.) So `role` keeps carrying an id as
+ * text; making it a relation is the remaining half of `CC-40` (see `COMPLETION-CALLBACKS.md`).
  */
 export const AGENT_FIELDS: CustomFieldDefinition[] = [
   {
@@ -73,19 +84,21 @@ export const AGENT_FIELDS: CustomFieldDefinition[] = [
   },
   {
     key: 'owner',
-    kind: 'text',
+    kind: 'relation',
+    relatedEntityId: 'user',
     label: 'Owner',
     description:
-      'The visibility scope and the party answerable for the agent: a user id, a role id, the organization id, or an admin marker.',
+      'The visibility scope and the party answerable for the agent: a user (a first-class relation — CC-40). An organization- or admin-owned agent is deferred until those entities are declared in the kernel.',
     filterable: true,
     listVisible: true,
   },
   {
     key: 'acts_as',
-    kind: 'text',
+    kind: 'relation',
+    relatedEntityId: 'user',
     label: 'Acts as',
     description:
-      'Set for context agents only — the user id whose seat this agent occupies ("acts as Alice"). Empty otherwise.',
+      'Set for context agents only — the user whose seat this agent occupies ("acts as Alice"), as a first-class relation (CC-40). Empty otherwise.',
     filterable: false,
     listVisible: true,
   },
@@ -94,7 +107,7 @@ export const AGENT_FIELDS: CustomFieldDefinition[] = [
     kind: 'text',
     label: 'Role',
     description:
-      'The role whose permissions the agent carries, exactly as a human has them (a role id).',
+      'The role whose permissions the agent carries, exactly as a human has them (a role id). Declared as text because no `role` entity is in the kernel descriptor yet — turning it into a relation is the remaining half of CC-40, and must not invent a target (spec §5.4).',
     filterable: true,
     listVisible: true,
   },

@@ -14,6 +14,7 @@
  */
 
 import entities, { AGENT_FIELDS, AGENT_KINDS } from '../ce'
+import { entityExtensions } from '../data/extensions'
 import { collectDeclarations } from '@open-mercato/shared/lib/kernel/from-modules'
 import { buildModelDescriptor, canonicalEntityId } from '@open-mercato/shared/lib/kernel/model'
 
@@ -26,6 +27,8 @@ function moduleEntryFromCe() {
     customFieldSets: ce
       .filter((e) => Array.isArray(e.fields) && e.fields.length > 0)
       .map((e) => ({ entity: e.id, fields: e.fields, source: 'ai_assistant' })),
+    // Exactly as `module-registry.ts:3163` derives the extensions entry from `data/extensions.ts`.
+    entityExtensions,
   }
 }
 
@@ -64,5 +67,75 @@ describe('AH-1 slice 1 — the Agent object is declared and the kernel sees it',
 
   it('marks the agent record access-restricted (it holds a role — a governance surface)', () => {
     expect(entities[0].accessRestricted).toBe(true)
+  })
+})
+
+describe('AH-1 slice 3 (CC-40) — the relation upgrade and the reportsTo self-edge', () => {
+  // Build the model the way PRODUCTION does: several modules collected together, so `user` (declared by
+  // another module) is present on the entity set — the same condition that makes the relation target real.
+  // A single-module model would carry only `agent`, so it could not prove the target resolves (a hostile-
+  // critic pass caught the earlier version of this test doing exactly that).
+  const userDeclaringModule = {
+    id: 'communication_channels',
+    entityExtensions: [
+      { base: 'auth:user', extension: 'probe:thing', join: { baseKey: 'id', extensionKey: 'x' } },
+    ],
+  }
+  const model = buildModelDescriptor(
+    collectDeclarations([moduleEntryFromCe() as never, userDeclaringModule as never]),
+  )
+  const agent = model.entities['agent']
+
+  const fieldOf = (key: string) => agent.fields.find((f) => f.id.split('.').pop() === key)
+
+  it('the `owner`/`acts_as` target entity is present in the model this test builds', () => {
+    // Precondition: the target must be a REAL entity in the model, or the assertions below are vacuous.
+    expect(model.entities['user']).toBeDefined()
+  })
+
+  it('carries `owner` and `acts_as` as relation-kind fields in the model', () => {
+    expect(fieldOf('owner')?.fieldKind).toBe('relation')
+    expect(fieldOf('acts_as')?.fieldKind).toBe('relation')
+  })
+
+  it('declares the relation TARGET as `user` on the source fields (persisted to the field-definition store)', () => {
+    // Where the target lands, stated precisely: `relatedEntityId` is a real, consumed property of the
+    // custom-field declaration — the installer persists it (`install-from-ce.ts` FIELD_DETAIL_KEYS) and the
+    // relation-options UI reads it. It is NOT carried on the kernel model's `KernelField` (that type has no
+    // such property — verified), so this test asserts it on the declaration, not on the model.
+    const owner = AGENT_FIELDS.find((f) => f.key === 'owner')
+    const actsAs = AGENT_FIELDS.find((f) => f.key === 'acts_as')
+    expect(owner?.kind).toBe('relation')
+    expect(owner?.relatedEntityId).toBe('user')
+    expect(actsAs?.kind).toBe('relation')
+    expect(actsAs?.relatedEntityId).toBe('user')
+  })
+
+  it('keeps `role` as text — the ADMIN role entity is NOT declared in the kernel (honest, not invented)', () => {
+    // `auth:role` (the admin role the agent should carry) is not a declared entity; `customer_role` is a
+    // different concept (customer-portal roles). So no relation target exists for this field yet.
+    const role = AGENT_FIELDS.find((f) => f.key === 'role')
+    expect(role?.kind).toBe('text')
+    expect(role?.relatedEntityId).toBeUndefined()
+    expect(model.entities['role']).toBeUndefined()
+  })
+
+  it('declares a real `agent → agent` reportsTo self-edge in the model (no "type" flag)', () => {
+    const rels = agent.relationships
+    expect(rels.length).toBeGreaterThan(0)
+    const selfEdge = rels.find(
+      (r) => r.fromEntityId === 'agent' && r.toEntityId === 'agent',
+    )
+    expect(selfEdge).toBeDefined()
+    // §3.1: it is a real edge, so the kernel records it as a relationship object, not a "type" field.
+    expect(selfEdge?.kind).toBe('relationship')
+    expect(selfEdge?.toEntityId).toBe('agent')
+  })
+
+  it('pushes the self-edge exactly once (the kernel handles from === to without double-counting)', () => {
+    const selfEdges = agent.relationships.filter(
+      (r) => r.fromEntityId === 'agent' && r.toEntityId === 'agent',
+    )
+    expect(selfEdges).toHaveLength(1)
   })
 })
