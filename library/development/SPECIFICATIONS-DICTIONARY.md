@@ -319,6 +319,14 @@ and permissions is the named example. Core functions:
 **The list of core functions starts with: the roles-and-permissions manager.** The rest is to be filled
 in as the platform grows, and every addition to the list is itself a dictionary change.
 
+**Addition 2026-10-09 — the object KINDS a tier can be assigned to gain `agent`.** `CORE_SETTING_KINDS`
+goes from `['table','column','relation','function','role']` to include **`agent`** (owner, 2026-10-09): an
+agent's protection tier is the **same per-object setting** as a table's — `core` / `platform_release` /
+`tenant_structural` / `tenant_data`, assigned when the agent is created, from the UI, no deploy. This is a
+**dictionary change to the vocabulary** (a new kind), **not** a new tier (the four tiers stand) and **not** a
+new mechanism (it reuses `SD-2b`'s engine). `AH-1` declares the `Agent` object and routes its delete/rename
+guard through `resolveCoreTier` (the S5 reuse). Design: `DECISION-agent-protection-tier.md`.
+
 ---
 
 ## Part D — Status of enforcement (honest)

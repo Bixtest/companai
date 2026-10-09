@@ -1192,10 +1192,18 @@ detail lives in [`AGENT-HALF.md`](AGENT-HALF.md) §4, the register in [`BACKLOG.
     `collectDeclarations`), **not** an `Agent` object: `packages/shared/src/lib/kernel/model.ts` exports
     only `KernelEntity`/`KernelField`/`KernelRelationship`, and **no module declares an agent entity**.
     So `AH-1`'s **first slice is to declare the `Agent` kernel object** (additive — the engine already
-    reads declarations), and the item carries an **owner-gated leg**: whether the agent is a *core*
-    object is the pending ruling in [`DECISION-core-object-set.md`](DECISION-core-object-set.md) (🟡;
-    the registry's kind set is `['table','column','relation','function','role']` — **no `agent` kind
-    today**). **Buildable now** = declaring the object; **owner-gated** = its core-object status.
+    reads declarations).
+
+    **✅ Its "is the agent core?" leg is RESOLVED, 2026-10-09 (owner).** It is **not** a one-off ruling: the
+    agent's protection tier is the **same per-object SETTING the tables use** — `core` / `platform_release`
+    / `tenant_structural` / `tenant_data`, **assigned when the agent is created**, from the UI, no deploy
+    (measured: `Role` already carries an `isCore` column and the guard reads it — `core-object-guard.ts:86`).
+    Design: [`DECISION-agent-protection-tier.md`](DECISION-agent-protection-tier.md). **Consequences:**
+    `AH-10` (system agents) needs **no carve-out** (a system agent is just an agent marked `core`); a
+    tenant-based agent may be marked `core` by a superadmin. **Seed: `tenant_data`.** The build gains one
+    piece — admit `agent` as a core-object kind and route the agent delete/rename guard through
+    `resolveCoreTier` (the S5 reuse; `core-object-guard.ts` is the template).
+
 
 *The eleven remaining `AH-` items (phases 2–4) are ordered in [`AGENT-HALF.md`](AGENT-HALF.md) §4; they
 keep the backlogs where they are and land as their prerequisites do.*

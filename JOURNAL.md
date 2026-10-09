@@ -35,7 +35,7 @@ log.** Everything else (HANDOVER, START-PROMPT, README, BOOKMARKS, BACKLOG) poin
 
 ---
 
-### ▶ NOW — **the owner's ACTION LIST of 2026-10-09** (directly below) is the live work queue. **A1 DONE** (the callback register gained the mechanical linkage); **A2 BUILT** (CC-25, the decision-actor permission — proven; the owner's one-line confirm is still owed, rule 11); **A4 DONE** (live login 500 — Redis restarted + hardened); **A5 DONE** (the build-ship script `.sh` deployed + proven). **A3 (CC-27) is BLOCKED on `AH-1`** — *re-measured 2026-10-09: the binding hangs off the agent-as-kernel-object, which is not built (rule 13 premise correction; do not build it before AH-1).* **The owner-facing next step is A6/A7** (rebuild + deploy the current `main`, then hand over the credentials — both now unblocked by A4+A5, and both owner-gated). When the action list is clear, the standing next build is **`AH-1`** (the agent as a kernel object — the only agent-half item on the critical path; now carried as **item 20** in `BUILD-ORDER.md`, recorded there 2026-10-09). **⚠️ Re-measured 2026-10-09:** `AH-1`'s "startable" label is true of the *engine* (`G-01`) but the **`Agent` object is not yet declared** — so its **first slice is declaring the object**, and its *core-object status* is an **owner-gated** leg (`DECISION-core-object-set.md` 🟡). Then **BUILD-ORDER item 9 — the generic state-machine engine**.
+### ▶ NOW — **the owner's ACTION LIST of 2026-10-09** (directly below) is the live work queue. **A1 DONE** (the callback register gained the mechanical linkage); **A2 BUILT** (CC-25, the decision-actor permission — proven; the owner's one-line confirm is still owed, rule 11); **A4 DONE** (live login 500 — Redis restarted + hardened); **A5 DONE** (the build-ship script `.sh` deployed + proven). **A3 (CC-27) is BLOCKED on `AH-1`** — *re-measured 2026-10-09: the binding hangs off the agent-as-kernel-object, which is not built (rule 13 premise correction; do not build it before AH-1).* **The owner-facing next step is A6/A7** (rebuild + deploy the current `main`, then hand over the credentials — both now unblocked by A4+A5, and both owner-gated). When the action list is clear, the standing next build is **`AH-1`** (the agent as a kernel object — the only agent-half item on the critical path; now carried as **item 20** in `BUILD-ORDER.md`, recorded there 2026-10-09). **⚠️ Re-measured 2026-10-09:** `AH-1`'s "startable" label is true of the *engine* (`G-01`) but the **`Agent` object is not yet declared** — so its **first slice is declaring the object**. **✅ Its "is the agent core?" leg is RESOLVED, not owner-gated** — the agent's protection tier is the **per-object setting the tables use** ([`DECISION-agent-protection-tier.md`](library/development/DECISION-agent-protection-tier.md)), assigned at creation. Then **BUILD-ORDER item 9 — the generic state-machine engine**.
 
 > **If you are a new agent, read only this block to know your job.** Everything below the box is the
 > history and the queue; this is the work in hand.
@@ -88,16 +88,21 @@ The owner then ruled: **do the fixes needed so every callback is closed at the r
 - **A4 + A5 are DONE**, so **A6/A7 are unblocked**: the live platform still runs the 2026-10-06 image;
   deploying the current `main` is a rebuild + recreate. **GO GIVEN 2026-10-09** (the blanket ruling) — take
   a DB export first (there is no backup button, `FX-D09`), then build + deploy + verify.
-- **The core-object question, in plain English** (he asked, so it is recorded here): *"core object"* means
-  an object the platform ships with and **nothing — not a tenant, not a superadmin, not an AI — may delete
-  or rename** (only a platform release changes it), because the platform needs it to keep describing
-  itself (`CORE-BOUNDARY.md` Ring 1). It is *not* about coding style: it is the owner's standing rule
-  that the backbone stays fixed while everything around it is configurable. **The question for the agent
-  object is only:** *is the agent part of that backbone, or is it a normal thing a tenant may create and
-  remove?* **Recommended answer: normal (not core) at first** — an agent is business data like a customer,
-  so a tenant may create/remove one; if it later becomes load-bearing platform machinery (the `system`
-  kind, `AH-10`), *that* specific use is where a core entry may be warranted. **No answer needed now** —
-  build the object first.
+- **The core-object question, RESOLVED 2026-10-09 — the owner's approach supersedes the agent's first
+  recommendation.** The agent's first idea was a blanket rule ("an agent is not core; except *system*
+  agents, maybe"); **the owner's is better**: make the agent's protection tier the **same per-object
+  setting the tables already use** — `core` / `platform_release` / `tenant_structural` / `tenant_data`,
+  **assigned when the agent is created**, from the UI, no deploy. **Measured: his assumption is correct —
+  the DB analogue is already built** (`SD-2b`: `core-settings.ts` + `core-objects.ts` over `module_configs`,
+  `resolveCoreTier(kind,id,settings)`), and the **`Role` entity already carries an `isCore` column** read by
+  `core-object-guard.ts:86`. His approach wins on three grounds: (1) it **reuses** the shipped engine (S5);
+  (2) it **survives agent kinds we cannot foresee** (a blanket rule needs a deploy the day a load-bearing
+  system agent appears — the exact defect he already named for tables); (3) it keeps the invariance rule (the
+  *values* are settings; the **four tiers and the refusal rule stay code**). **Consequences:** `AH-10` (system
+  agents) needs **no carve-out**; a tenant-based agent may be marked `core` by a superadmin. **Seed:
+  `tenant_data`.** **No answer is asked of the owner** — this removes his yes/no and gives him a control
+  instead. Full design: [`library/development/DECISION-agent-protection-tier.md`](library/development/DECISION-agent-protection-tier.md).
+
 - **`AH-1`'s "startable" label re-measured 2026-10-09 (rule 13) — true of the *engine*, not yet of the
   *object*.** Fact-checking before opening `AH-1` (rule 10d) showed **`G-01` built the descriptor
   *engine*** (`buildModelDescriptor` + `collectDeclarations`), **not** an `Agent` object:
