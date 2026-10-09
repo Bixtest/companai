@@ -35,92 +35,80 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
-### ✅ DONE — **Phase 3, row 9 (`P3b` / `M3e`): the permission rules are STORED and READ BACK by the running app — BOTH halves built and proven; row 9 ticked ☑, `CC-43` CLOSED.**
+### ✅ DONE — **Phase 3, row 7 (`P3`): roles & grants are enforced on every write — VERIFIED IN CODE and given a going-forward gate; row 7 ticked ☑, `P3a`'s false "two-table" claim corrected, `CC-44` scheduled.**
 
-**Where this stood (2026-10-09).** The task was corrected before it was built (rule 9b): the literal
-target was *"persist the catalogue `Map`"*, but the catalogue's runtime registry had **zero live
-consumers**, so persisting the `Map` alone would have been **storage with no reader**. The honest
-reading of row 9 — *"the permission rules are **stored** (not just in memory) and **read back by the
-running app**"* — was therefore split into a **write half** (a durable table + the surfaces recorded by
-the code that judges them) and a **read half** (a live consumer that reads them back). **Both halves are
-now built.**
+**The task (protocol step 3), from `platform_points.md` row 7 + §B `P3`:** *"You can define roles and give
+them permissions, and the platform **enforces** every one on every write — not just in the UI."* The row
+was **🟡** and its sub-point `P3a` ("Two-table ACL + the typed permissions-catalogue service") was
+**☐ carried — docs claim it, the code was not re-verified.** So the job was **fact-check the code first**
+(protocol step 4), not build.
 
-**✅ WRITE HALF — BUILT, WIRED, PROVEN.** The `permission_surfaces` table (migration
-`Migration20261009205000`, `up()`/`down()` symmetric, **applied to `mercato-postgres-local` and measured
-back**); the `PermissionSurfaceRecord` entity (`auth/data/entities.ts`); the fail-soft service
-`auth/services/permissionSurfacesService.ts` (`persistRecordedSurface` / `loadPersistedSurfaces` /
-`hydratePermissionCatalogue`); and **all 7 real callers wired** to record the surface they judge —
-entities create, the **batch** definitions route, the two HTTP reactivation routes,
-`ensureCustomFieldDefinitions`, the custom-entity install primitive `upsertCustomEntity`, the
-`add-field` CLI, and the `runStructureChangeGate` path (whose `validate` now carries the surfaces into
-its metadata for the after-write recorder). **Proven:** affected suites **48 suites / 419 tests** green;
-full `core` **638 suites / 5600 tests** green; `core` `tsc` exit 0; **6 md5-verified RED-then-GREEN
-mutations**; a **separate-agent hostile-critic pass** found three real defects — an **inert
-`{ filters: { softDelete: false } }`** (no such filter is registered → a soft-deleted tombstone stayed
-invisible while the partial index permitted a second live row: **fixed** by writing the live-row
-predicate explicitly + a tombstone test block), **untested batch persistence** (**fixed** with a new
-describe block), and a **tautological** "never downgrades a declared surface" test (**fixed** so it
-fails if hydration is inert) — plus a **tenant-scope gap** (the batch persisted under the stale
-`auth.tenantId` while rows land under `scope.tenantId`: **fixed** to `scope.tenantId ?? auth.tenantId`
-with a mismatch test). The live DB round-trip was proven end to end (record → boot read sees it →
-duplicate refused by the index → upsert-on-conflict works → soft-delete leaves the live read →
-re-appearance inserts a fresh live row → cleanup 0 rows).
+**Fact-check (measured, not read from docs).** Two independent mechanisms exist on the write path, and
+they answer different questions:
+- **the feature gate** — *may this actor do this?* — `metadata.requireFeatures`, enforced centrally by the
+  dispatcher `checkAuthorization` (`apps/mercato/src/app/api/[...slug]/route.ts:150`, gate at `:207`).
+- **the guard registry** — *is this write structurally permitted?* — `runRouteMutationGuards` /
+  `makeCrudRoute` (the mechanism `D2-gap` already measures at **0 unguarded**).
 
-**✅ READ HALF — BUILT, WIRED, PROVEN (this is what closed `CC-43`).** The honest read side is a
-**tenant-scoped route**, because the app bootstrap is **synchronous with no tenant** — a boot-time read
-of the process-global `Map` would leak one tenant's *recorded* surfaces into another tenant's answer
-depending on request order. So the read answers from **declared (global) + exactly this tenant's
-persisted rows**, never the raw global map:
-- **`readTenantSurfaces(em, tenantId)`** (`auth/services/permissionSurfacesService.ts`) — filters the
-  catalogue to `source === 'declared'`, then loads the tenant's rows via `loadPersistedSurfaces`, records
-  each back into the catalogue, and merges **declared-wins by id**. Returns `{ surfaces, recorded, error }`
-  and **never throws** (a DB failure is reported in `error`, not raised).
-- **`GET /api/auth/permission-surfaces`** (`auth/api/permission-surfaces/route.ts`, NEW) — the live
-  consumer: `getAuthFromRequest` → `auth.tenantId`; resolves `em` from the request container; returns
-  `{ items, recorded, error }`. **Fail-soft** — never 500 on a DB/container error, and it distinguishes
-  `container_error: …` from `no_entity_manager` (a hostile-critic finding, fixed).
-- **Proven:** the two read-side suites are **27/27 GREEN** (`permissionSurfacesService` **20**,
-  `permission-surfaces.route` **7**); full `core` **639 suites / 5620 tests** green; `core` `tsc` exit 0;
-  **5 md5-verified RED-then-GREEN mutations** (M1 service reads the raw global map → cross-tenant leak
-  RED; M2 route drops the tenant RED; M3 declared-wins dropped RED; M4 route swallows the error RED; M5
-  service swallows the read error RED — every restore **md5-identical**, baseline svc
-  `7769a092e31e0cd1cf5aceeda0ae5fab`, route `22a74e530586a3e6f616939bf003d81c`); the route is **mounted**
-  (proven by `npx mercato generate` → manifest line
-  `{ moduleId: "auth", kind: "route-file", path: "/auth/permission-surfaces", methods: ["GET"] }` — the
-  generated manifest is a **gitignored build artifact**, so a fresh clone must regenerate it, which the
-  build does); and the read side was **proven against the live DB** (`mercato-postgres-local`, Postgres
-  17) end to end: **record → read back** `customers:loyalty_panel` → soft-delete → **read gone** →
-  re-appearance → **read present again** (`LIVE_ROWS=1`) → cleanup **0 live rows**. A **separate-agent
-  hostile-critic** independently reverted the anti-leak line and confirmed the cross-tenant test **fails**
-  (`Expected: 0 Received: 1`) — i.e. the leak guard and the declared-wins test are **not tautological**;
-  it found **no cross-tenant leak** and flagged two honesty gaps (the `hydratePermissionCatalogue`
-  doc-comment, now corrected; the over-broad `no_entity_manager`, now split), both fixed.
+`D2-gap`'s "0 unguarded" is correct but says **nothing** about the feature gate — a route can run a guard
+and have no feature check. So a **new instrument** was built: **`analysis/permission-gate/measure.js`**
+(+ `FINDINGS.md`), which walks every write verb in every **enabled** module (the enabled set is read from
+`apps/mercato/src/modules.ts`, so it cannot drift from the app). **Measured: of 169 write route files in
+the 35 enabled modules, 158 are feature-gated, 5 are guard-only (the `notifications` routes), and 6 reach
+neither — ALL SIX BY DESIGN** (self-service `auth/profile` + `auth/locale`; signature/JWT-verified webhooks
+in `communication_channels` + `webhooks`; the `ratelimit_probe` ping). **No genuine resource-mutating,
+staff-facing write lacks a permission check.**
+
+**Two honest corrections to the docs (rule 13).**
+1. **`P3a`'s "Two-table ACL" was FALSE.** The ACL model is **`roles`** (`auth/data/entities.ts:53`) **+
+   `role_acls`** (`:337`) **+ `user_acls`** (`:372`) with a **`user_roles`** join (`:268`) — three tables
+   plus a join, **not two**. And the "typed permissions-catalogue service" is **two pieces**, not one: the
+   typed catalogue (`shared/src/lib/permissions/catalogue.ts` — a process-`Map`) **plus** its
+   persistence/read service (`auth/services/permissionSurfacesService.ts`). The substance was right; the
+   wording was wrong. Corrected in §B `P3a`.
+2. **The gate is OPT-IN, not default-deny — and that is a design property, not a bug.** The dispatcher
+   enforces only when `requiredFeatures.length > 0`; a route with `requireAuth: true` and no
+   `requireFeatures` has no feature check. That behaviour is **itself tested**
+   (`should allow any authenticated user when only deprecated requireRoles is set (no feature gate)`,
+   `apps/mercato/src/__tests__/api-authorization.test.ts`) — deliberate, not a silent hole. A
+   **default-deny** would be a **new rule** needing an explicit allowlist, so it is the **owner's policy
+   call**, scheduled as **`CC-44`** — not silently assumed here.
+
+**The going-forward guard (the durable deliverable).** `measure.js --check` **exits 1** when a write route
+appears that is neither feature-gated nor a named by-design exception, so the opt-in gap **cannot widen
+silently**. The six exceptions live in `BY_DESIGN_NO_FEATURE`, each carrying its reason (a reader
+re-verifies rather than trusts). **Mutation-proven:** a probe route with `metadata = { POST: { requireAuth: true } }`
+makes the check **FAIL (exit 1)**; adding `requireFeatures` makes it **PASS (exit 0)**.
+
+**What proved it.** `measure.js --check` **green** (169 routes → 158 gated / 5 guard-only / 6 by-design /
+**0 unexplained**); **2 mutations RED-then-GREEN** (add an unfeatured route → RED; declare its feature →
+GREEN); the new tool **follows re-export shims** (the `webhooks` shims were briefly misclassified NEITHER
+until the tool read through them — a tool defect fixed, not a repo defect); docs corrected and `CC-44`
+scheduled. **Code repo unchanged** — the one non-by-design candidate (`sales/api/document-numbers`, an
+inline `userHasAllFeatures`) lives in a **parked** module (absent from the generated manifest), so a fix
+there is unprovable today; it was reverted rather than claimed, and is **recorded** for when `sales` is
+enabled. **No code was changed to "pass" this row; the row was measured and the mechanism was proven.**
 
 > **What "done, flawlessly" means for this row (the acceptance test), and which parts are met:**
-> (a) ✅ a migration creates the table (`up()`/`down()`, applied to `mercato-postgres-local`, **measured
-> back**); (b) ✅ the catalogue is hydrated for the tenant at the **tenant-aware hook** — the request —
-> and answers from **declarations + DB** (`readTenantSurfaces`); *(the synchronous, tenant-less boot
-> cannot hydrate for a tenant; the seam `hydratePermissionCatalogue` is kept and documented as exactly
-> that, not deleted)*; (c) ✅ a surface recorded at runtime is **read back** by the running app (proven
-> on the live DB); (d) ✅ the full quality protocol passed (separate-agent hostile-critic; **5 md5-verified**
-> RED-then-GREEN mutations; re-measure; green gate **639 suites / 5620 tests**); (e) ✅ docs updated and
-> `CC-43` **closed**; (f) ✅ the false `M3e` note and the false *"unprovable on this host"* premise were
-> **corrected everywhere** (rule 13) — `platform_points.md` (§B `P3b`, §D `M3e`, row 9),
-> `permission-decision-grant.ts`, `Migration20261009205000.ts`, and four sibling files that had copied
-> the same false claim (`core-objects.ts`, `user-function/document.ts`, `business-widget/document.ts`,
-> `business-widget/registry.ts`, and the `permission-decision-grant.test.ts` header).
+> (a) ✅ there IS a central feature chokepoint (`checkAuthorization`) and it is tested
+> (`api-authorization.test.ts`); (b) ✅ every genuine resource write reaches the feature gate or the guard
+> registry — **6 exceptions, all by design, 0 unexplained**; (c) ✅ the enforcement claim is measured by a
+> **re-runnable instrument** with a **`--check` gate** that fails on a new unexplained route (mutation-proven);
+> (d) ✅ the false `P3a` "two-table" claim was corrected everywhere (rule 13); (e) ✅ the opt-in nature is
+> recorded honestly and the default-deny question is **scheduled as `CC-44` (owner's call)**, not claimed.
 
-**★ NEXT TASK — the next item in the vision's order after row 9.** Row 9 is **☑** and `CC-43` is closed,
-so the **lowest open phase is still Phase 3**, and the next rows there that are **not** `☑` are **row 7
-(`P3`, 🟡)** and **row 13 (`SD-4`/`SD-5`, 🟡 — the screen to *see and change* the rules)**. The concrete
-next build is **row 7 (`P3`)** — the structure-change **permission grammar** enforcement path is built for
-the entity/field axis but its non-`☑` remainder must be re-measured against the code first (rule 0b:
-finish the row before starting a new one). If the owner prefers a *different* next item, `CC-42` (`G-22`
-Slice 2B) and `CC-27` (the AI-user ↔ agent binding, unblocked by `AH-1`) are the two behind it — but they
-are **business/agent work**, not the skeleton, so they wait (rule 0b).
+**★ NEXT TASK — the next item in the vision's order after row 7.** Row 7 is **☑** and its sub-parts are
+2/2, so the lowest open phase is **still Phase 3**, and the next rows there that are **not** `☑` are
+**row 8 (`SD-1`/`S2`/`P3a`/`P3b`, 🟡 — the structure-change permission gate's remaining paths)** and
+**row 13 (`SD-4`/`SD-5`, 🟡 — the screen to *see and change* the rules)**. The concrete next build is
+**row 8** — its `SD-1` gate is built and its named remainders are already scheduled in
+`COMPLETION-CALLBACKS.md` (`CC-20`, `CC-23`, `CC-25`), so the honest first move is to **re-measure which
+of those remainders are still open** (rule 0b: finish the row before starting a new one) — **do not build
+before measuring.** If the owner prefers a *different* next item, `CC-42` (`G-22` Slice 2B) and `CC-27`
+(the AI-user ↔ agent binding) are the two behind it, but they are **business/agent work**, not the
+skeleton, so they wait (rule 0b).
 
-**Status:** ✅ **ROW 9 DONE — WRITE HALF AND READ HALF BUILT AND PROVEN; row 9 ticked ☑; `CC-43` CLOSED.**
-
+**Status:** ✅ **ROW 7 DONE — roles & grants enforced on every write VERIFIED IN CODE; 0 unexplained gap; `measure.js --check` is the going-forward gate; row 7 ticked ☑; `CC-44` scheduled (owner's call).**
 **This section exists because the owner asked for it (2026-10-06).** Handover documents must **not**
 say what is next to do — what is next changes every session, and a stale "next" is worse than none.
 **The one place that carries "what we are doing now" is this section, at the top of the development
@@ -373,6 +361,44 @@ and that is **correct by design**, not a gap: the boot is synchronous and tenant
 hook *is* the request; the seam `hydratePermissionCatalogue` is kept and documented for the first
 tenant-aware boot rather than deleted. `CC-43` is therefore **closed** (a closed callback is removed from
 the register, not tombstoned).
+
+---
+
+### ✅ DONE — **Phase 3, row 7 (`P3`)** — roles & grants are **enforced on every write**, VERIFIED IN CODE, with a going-forward gate. **(2026-10-09; docs repo only — no code changed; tool `analysis/permission-gate/measure.js` + `FINDINGS.md`; `CC-44` scheduled.)**
+
+**The task.** Row 7 — *"You can define roles and give them permissions, and the platform **enforces**
+every one on every write — not just in the UI."* — was **🟡**, and its sub-point `P3a` was **☐ carried,
+docs claim it, the code was not re-verified.** The job was therefore to **fact-check the code first**
+(protocol step 4), not to build.
+
+**What was measured.** Two independent mechanisms sit on the write path: the **feature gate**
+(`metadata.requireFeatures` → the dispatcher `checkAuthorization`, `apps/mercato/src/app/api/[...slug]/route.ts:150`)
+answers *may this actor do this?*; the **guard registry** (`runRouteMutationGuards` / `makeCrudRoute`)
+answers *is this write structurally permitted?* and is what `D2-gap` measures (0 unguarded). D2-gap's
+number says **nothing** about the feature gate, so a new instrument was built —
+**`analysis/permission-gate/measure.js`** — which walks every write verb in every enabled module (the
+enabled set read from `apps/mercato/src/modules.ts`). **Result: 169 write route files, 158 feature-gated,
+5 guard-only, 6 neither — all six by design** (self-service `auth/profile`/`auth/locale`; signature/JWT
+webhooks in `communication_channels`/`webhooks`; the `ratelimit_probe` ping). **Zero genuine
+resource-mutating staff-facing writes lack a permission check.**
+
+**Two honest corrections (rule 13).** (1) `P3a`'s **"Two-table ACL" was false** — the model is `roles` +
+`role_acls` + `user_acls` + a `user_roles` join (three tables + a join); and the "typed permissions-catalogue
+service" is two pieces (the `Map` catalogue + its persistence/read service), not one. Corrected in §B
+`P3a`. (2) The gate is **opt-in, not default-deny** — the dispatcher enforces only when
+`requiredFeatures.length > 0`, and that is **tested** behaviour
+(`api-authorization.test.ts`: *"should allow any authenticated user when only deprecated requireRoles is
+set (no feature gate)"*). A default-deny is a **new rule** needing an allowlist, so it is the **owner's
+policy call**, scheduled as **`CC-44`** — not silently assumed.
+
+**The durable deliverable.** `measure.js --check` **exits 1** when a write route is neither feature-gated
+nor a named by-design exception, so the opt-in gap cannot widen silently; the six exceptions carry their
+reasons in `BY_DESIGN_NO_FEATURE` (a reader re-verifies). **Mutation-proven:** an unfeatured probe route →
+**FAIL (exit 1)**; declaring its feature → **PASS (exit 0)**. The tool **follows re-export shims** (the
+`webhooks` shims were briefly misclassified NEITHER until the tool read through them — a tool fix, not a
+repo defect). **Code repo unchanged:** the one non-by-design candidate (`sales/api/document-numbers`, an
+inline `userHasAllFeatures`) is in a **parked** module (absent from the manifest), so a fix there is
+unprovable today — it was **reverted rather than claimed** and recorded for when `sales` is enabled.
 
 ---
 
