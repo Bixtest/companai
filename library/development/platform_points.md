@@ -119,7 +119,9 @@ with it. A weighted percentage that hides its weights is the same defect as a co
 
 > **▶ FRONTIER — the next unit to work on: `G-22`** (BUILD-ORDER §3 item 9 — the generic state-machine
 > engine). Ask for the frontier by **ID**; it is one unit, named the same in every document.
-> *(It sits behind the owner's explicit go — the Work-Stream 2 order.)*
+> **🟡 IN PROGRESS — Slice 2A (the engine) is BUILT 2026-10-09** (`packages/shared/src/lib/state-machine/`,
+> 26 tests GREEN, 8 md5-verified mutations, two hostile-critic passes); **Slice 2B (the first caller —
+> migrate the `customers` deal pipeline, behaviour-preserving) is next**, carried as **`CC-42`**.
 >
 > **Read this honestly.** **61 of 319 units** are ticked. Every tick was earned by reading or running the
 > code — a sub-point tick only where the parent line carries a **dated, measured** verification (a build
@@ -573,6 +575,7 @@ has not been verified in the code, and the claim is unconfirmed.**
 | `D2-gap / GETs` | the same tool run reports **3 write-performing GETs, 0 unguarded, 2 set aside (read side-effects)** | **complete** |
 | `S-02` `N-5` | ran the new tool-door suite (`tool-authority.s02.test.ts`) + the 5 confirm-path tests; **two hostile-critic passes**; **six mutations RED-then-GREEN**, each restore md5-verified | **ai-assistant 102 suites / 1434 tests; core auth 275; shared authority 114; typecheck 0** |
 | `S2` `SD-1` `M3` | ran the permissions suites (catalogue 13, gate 19, guard 17, decision-header 28) + the write/mapping suites (19) + the batch slice (16) + the non-request slice (19) + the reactivation slice (9) + the entity-install slice (7) + the re-type slice (6) + the atomic-merge slice (1) + the batch-key slice (7); **nine hostile-critic passes + four mutation/premise-found defects (thirty-one defects, all fixed or named)**; **56 mutations RED-then-GREEN across twelve slices**, each restore md5-verified — **plus the atomic merge proven against live Postgres 17 with a concurrent-session test and a negative control** | **133 tests; `shared` 197 / 2329 (8 fail in the one suite of CC-19); `core` 627 / 5438, green six consecutive times; typecheck 0 — and the records ARE written on every create path, every reactivation path, the field re-type case, and a **stated (`decided`) decision**, with an atomic (no-lost-update) merge, the batch key validation restored, and the test harness now resetting the guard store before every test (CC-29) — but still **PARTIAL**: the create-branch double-insert (needs a migration — CC-23), the unauthorised decision actor (CC-25), the field records' missing enforcement consumer (CC-20), and the global-surface gap — each scheduled in `COMPLETION-CALLBACKS.md`** |
+| `G-22` (Slice 2A) | read the new primitive (`packages/shared/src/lib/state-machine/`: `types.ts` · `machine.ts` · `index.ts`) line by line; ran its suite; ran `tsc --noEmit -p tsconfig.json` on `shared`; **two hostile-critic passes as SEPARATE agents**; **8 md5-verified RED-then-GREEN mutations** (M1 undeclared-transition gate removed; M2 permission ignored; M3 precondition ignored; M4 events dropped; M5 perm/precond order swapped; M6 fail-closed reading removed; M7 reason forced empty; M8 string-emit dropped) — each restore **md5-identical** (`7bcd6f63…`) | **26 tests GREEN; `shared` tsc 0; full `shared` suite 204/204 suites · 2515/2515 tests pass with only the CC-19 suite excluded (8 pre-existing failures, proven not caused by this change). Round 1 of the critic found TWO REAL DEFECTS, both fixed and re-verified: (1) `readGate` read a gate returning `null`/`0`/`NaN`/`undefined` as ALLOW (silent allow — the exact `G-03` trap) — now **fail-closed** (only an explicit `true` allows); (2) an empty-string gate reason produced a refusal with `reason:''` — now the call sites use `reason \|\| fallback`, so every refusal carries a non-empty reason. Round 2 independently re-probed both (all of `null`/`undefined`/`0`/`NaN`/`''`/`false` now refuse; no branch can yield an empty reason) and confirmed both new tests are non-tautological. Slice 2A is a verified `✅`-quality unit; `G-22` stays `🟡` because the first caller (Slice 2B → `CC-42`) is unbuilt** |
 
 **Whole-package run (the broad check).** The full `shared` package suite was run: **197 suites, 2329
 tests** → **196 suites / 2321 tests pass**; the **1 failing suite / 8 tests** is a **host-level
@@ -585,6 +588,13 @@ run; **12 retries over 6.7 s all fail** (continuous, not transient — so a retr
 retry-based "fix" was reverted); it fails identically with the **sandbox disabled**; and at **HEAD,
 byte-unmodified**, the full run gives the **same 8 failures**. Owned and recorded as a known
 environmental failure (**CC-19**) with the trigger that closes it.
+**Re-observed 2026-10-09 while verifying `G-22` Slice 2A:** the full `shared` run gave **205 suites / 2523
+tests, 1 suite / 8 tests failing** — again exactly this suite and no other — and it **passed 8/8 in
+isolation**, then the same run **with only this suite excluded was 204/204 suites · 2515/2515 tests
+pass**. (In *this* session the injection point surfaced as the WorkBuddy sandbox's safe-delete shim
+intercepting the suite's `fs.rmSync` — `SAFE_DELETE_BULK_CONFIRM_REQUIRED` — whereas the 2026-10-08
+observation was `spawnSync … EBUSY`; **both are the same class: a host-level interception of a
+sandbox/child-process operation, not project code**, which is why the trigger is a CI run.)
 
 ### Verified `☐` (checked this round, and confirmed NOT done)
 

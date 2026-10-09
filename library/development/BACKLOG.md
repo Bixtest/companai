@@ -15,9 +15,9 @@ document — never a position like "item 9"). This box and
 
 | | ID | What it is | State |
 |---|---|---|---|
-| **NOW** | `G-22` | The generic state-machine engine (BUILD-ORDER §3) — promoted to a core primitive; first caller = the `customers` deal pipeline | ⏳ **awaiting the owner's go** (Work-Stream 2) |
+| **NOW** | `G-22` | The generic state-machine engine (BUILD-ORDER §3) — promoted to a core primitive; first caller = the `customers` deal pipeline | 🟢 **IN PROGRESS — Slice 2A (the engine) BUILT 2026-10-09** (26 tests, 8 mutations RED, 2 critic passes); Slice 2B (the first caller) next |
 | **NEXT** | `CC-27` | The AI-user ↔ agent binding row (unblocked once `AH-1` closed) | ⬜ startable |
-| **THEN** | `CC-41` | The deploy rollback tag — 🟡 fixed, awaiting its own next-run proof | 🟡 fixed, not yet proven |
+| **THEN** | `CC-42` | `G-22` Slice 2B/2C — migrate the `customers` deal pipeline onto the engine, then schedule any remainder | ⬜ startable (the engine is built) |
 
 > **The pile below is not "stuck".** Every unit in [`platform_points.md`](platform_points.md) is either
 > **✅ done**, **🟡 partial with a named remainder**, or **⬜ open** — and the `⬜` units (e.g. `G-05`, `G-06`,
@@ -74,7 +74,7 @@ should follow).
 predates the whole analysis programme), and remarks buried in reports. **This file replaces
 those as the plan.** The others are kept for their reasoning and point here.
 
-**Last updated:** 2026-10-09 (**the documentation-cleanup pass + the derived progress view.** The ORDER is done through the current frontier: **`CC-3`/`CC-4`/`CC-16`/`CC-17`/`CC-18`/`CC-21`/`CC-22`/`CC-24`/`CC-25` committed; `SD-4` (A+B+C) built; `CC-37` closed; `SD-5` built; `AH-1` ticked and `CC-40` CLOSED; the live deploy shipped (`open-mercato/app:wan` `4375447250e3`).** The one live item is **`G-22`** (the generic state-machine engine), **awaiting the owner's go** — see the ▶ FRONTIER box at the top. **The honest progress number is in [`platform_points.md`](platform_points.md)'s PROGRESS AT A GLANCE — ≈19% of the checklist / ≈22% build-weighted, ± 4, derived from the boxes.** *(Prior entry, kept: 2026-10-08 — `CC-30` closed: the `custom_entities_storage` upsert now has a real constraint to conflict on (four global indexes: one plain unique + three partial for the null-scope shapes), and the read classifier is tenant-scoped.)*
+**Last updated:** 2026-10-09 (**`G-22` Slice 2A — the generic state-machine engine — BUILT.** The ORDER is done through the current frontier: **`CC-3`/`CC-4`/`CC-16`/`CC-17`/`CC-18`/`CC-21`/`CC-22`/`CC-24`/`CC-25` committed; `SD-4` (A+B+C) built; `CC-37` closed; `SD-5` built; `AH-1` ticked and `CC-40` CLOSED; the live deploy shipped (`open-mercato/app:wan` `4375447250e3`).** The one live item is **`G-22`** — the engine itself is now **built** at `packages/shared/src/lib/state-machine/` (**26 tests GREEN, `tsc` 0, 8 md5-verified RED-then-GREEN mutations, two hostile-critic passes**); its **first caller (Slice 2B, carried as `CC-42`)** is next. See the ▶ FRONTIER box at the top. **The honest progress number is in [`platform_points.md`](platform_points.md)'s PROGRESS AT A GLANCE — ≈19% of the checklist / ≈22% build-weighted, ± 4, derived from the boxes.** *(Prior entry: 2026-10-09 — the documentation-cleanup pass + the derived progress view.)*
 
 | Tag | Meaning |
 |---|---|

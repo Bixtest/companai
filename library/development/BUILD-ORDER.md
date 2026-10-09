@@ -1168,7 +1168,19 @@ one page, each with a named home. Details: [`BLUEPRINT-GAP-ANALYSIS.md`](BLUEPRI
    transitions, transition permissions, preconditions, events. Today pipelines exist only inside
    `customers`; the blueprint makes lifecycle generic. *(This is the item referred to elsewhere as
    "item 9"; its canonical ID is `G-22`. Named `G-22` 2026-10-09 — the next free `G-` id, so no new
-   number family is created.)*
+   number family is created.)* — **🟡 PARTIAL 2026-10-09: Slice 2A (the engine) BUILT.** The primitive
+   lives at `packages/shared/src/lib/state-machine/` (`types.ts` declaration · `machine.ts` enforcement ·
+   `index.ts` barrel · 26 tests): `compile` / `canTransition` / `findTransition` / `attempt` /
+   `initialState` / `declaredEvents`, with `attempt` returning **allow** (carrying the events) or a
+   **refusal with a value** (`{ ok:false, kind, from, to, reason }`, the `G-03` lesson generalised —
+   `kind` ∈ `not-a-declared-transition` | `permission` | `precondition`). The four facets: allowed
+   transitions + permissions + preconditions + events, each enforced; the permission/precondition gates
+   are **delegated** to caller functions (no policy, no authority import — S5 *"one permission engine"*).
+   Gate reading is **fail-closed** (only an explicit `true` allows). **26/26 tests GREEN, `tsc` 0, 8
+   md5-verified RED-then-GREEN mutations, two hostile-critic passes (round 1 found 2 real defects, both
+   fixed and re-verified).** **Slices 2B (the first caller: migrate the `customers` deal pipeline,
+   behaviour-preserving) and 2C (schedule any remainder) remain** — see `COMPLETION-CALLBACKS.md`
+   `CC-42`.
 
 **PHASE 1 (continued) — the agent half** *(added 2026-10-09 — the order for the `AH-` track; the
 detail lives in [`AGENT-HALF.md`](AGENT-HALF.md) §4, the register in [`BACKLOG.md`](BACKLOG.md))*
