@@ -52,7 +52,7 @@ log.** Everything else (HANDOVER, START-PROMPT, README, BOOKMARKS, BACKLOG) poin
 > (verbatim: *"Follow the best options you recommend for the project and put them in order as action
 > list in the journal. Then update the handover accordingly. Only then you go thru it all and fix. This
 > way if we move to a different agent at any moment, the process is active and well documented to
-> continue from wherever you are stopped."*). **It is the live work queue and it overrides "item 9" as
+> continue from wherever you are stopped."*). **It is the live work queue and it overrides "`G-22`" as
 > the next thing to pick up.** Work it in order; tick items off in place; do not re-order without a
 > reason written beside the change.
 
@@ -153,7 +153,7 @@ tautological test + 2 weaknesses, all fixed). Full detail: the `✅ DONE — SD-
 **Why the next task is the state-machine engine (rule 9b — challenge it before executing).** The
 structural-permission arc (`SD-2` → `SD-2b` → `SD-3` → `SD-4` → `SD-5`) is now closed: the grammar that
 bounds what an agent may restructure exists, is enforced by a guard, and is editable from a screen. The
-next item in [`library/development/BUILD-ORDER.md`](library/development/BUILD-ORDER.md) order is **item 9 —
+next item in [`library/development/BUILD-ORDER.md`](library/development/BUILD-ORDER.md) order is **`G-22` —
 "NEW — generic state-machine engine"** (blueprint §10), promoted to a core primitive: allowed
 transitions, transition permissions, preconditions, events — today pipelines exist only inside
 `customers`, and the blueprint makes lifecycle generic. **This is a NEW core primitive, so it starts with
