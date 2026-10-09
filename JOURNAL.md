@@ -35,7 +35,7 @@ log.** Everything else (HANDOVER, START-PROMPT, README, BOOKMARKS, BACKLOG) poin
 
 ---
 
-### ▶ NOW — `SD-4`: the **structural permission grammar** (S11/S12). **Slices A (the structural guard) and B (the actor axis) are BUILT and PROVEN; Slice C (the per-verb grammar) remains.** Plan: [`library/development/PLAN-SD-4.md`](library/development/PLAN-SD-4.md); architecture: [`library/development/ARCHITECTURE-structure-permissions.md`](library/development/ARCHITECTURE-structure-permissions.md).
+### ▶ NOW — `SD-4`: the **structural permission grammar** (S11/S12). **Slices A (the structural guard), B (the actor axis) and C (the per-verb grammar) are BUILT and PROVEN; the remaining halves are the enforcement wiring (CC-37) and the manage screen (`SD-5`).** Plan: [`library/development/PLAN-SD-4.md`](library/development/PLAN-SD-4.md); architecture: [`library/development/ARCHITECTURE-structure-permissions.md`](library/development/ARCHITECTURE-structure-permissions.md).
 
 > **If you are a new agent, read only this block to know your job.** Everything below the box is the
 > history and the queue; this is the work in hand.
@@ -70,9 +70,17 @@ Metadata Registry) is **done**.
   the guard and is a real reader; it does **not** yet make a machine's outcome differ from a person's.
   `core` **632 suites / 5510 tests, 0 failures**; `shared` **203 suites / 2435 tests, 0 failures**; both `tsc`
   exit 0; 3 mutations RED-then-GREEN (M4 transport, M5 actor reader, M6 the derivation).
-- **Slice C — the per-verb grammar** (S11, the CC-5 expansion): `PERMISSION_BLOCK_VERBS.structural` is today a
-  single `'structure'` verb (`catalogue.ts:99-102`); S11 needs add/edit/remove/reference. This is the piece
-  the manage screen (`SD-5`) then renders. **⬅ THE ACTIVE TASK.**
+- **Slice C — the per-verb grammar** (S11, the CC-5 expansion): `PERMISSION_BLOCK_VERBS.structural` was a
+  single `'structure'` verb (`catalogue.ts:99-102`); it is now the **five S11 verbs** (`read`/`add`/`edit`/`remove`/`reference`),
+  so a surface yields **7** records (2 data + 5 structural) where it yielded 3. The grammar's **level** (per
+  object × verb × actor) has a home in `packages/shared/src/lib/permissions/structural-settings.ts` (the
+  `SD-3`/`SD-2b` pattern: seed + strict parser + pure `resolveStructuralLevel` — exact→`any`→default — + the
+  `actorTypeForPrincipal` bridge + fail-closed read). The falsified `'structure'` literal in
+  `structure-change-decision-header.ts`'s `blockFromFeature` is corrected at source (rule 13). **✅ BUILT 2026-10-09;
+  5 mutations RED-then-GREEN (M11–M15), each restore md5-identical; a hostile-critic pass measured the honest
+  boundary: the settings module has NO production reader yet — the enforcement wiring is CC-37, and
+  `read`/`reference` stay declaration-only (CC-34).** This is the piece the manage screen (`SD-5`) then renders.
+  **⬅ THE REMAINING HALF: CC-37 (wire the level into the structural guard) + `SD-5` (render it).**
 
 **The two boundaries the challenge kept honest:** (1) `read`/`reference` are grammar *postures*, not
 write-path-enforceable (the guard only fires on writes; `SD-6` already set read side-effect GETs aside) —

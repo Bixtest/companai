@@ -204,6 +204,31 @@ A `MutationGuard` that refuses a structural change to a protected object, on the
   (seed + strict parser + pure decision + fail-closed read).
 - **`SD-5` renders it** — not built here.
 
+#### Slice C — BUILT (2026-10-09, code `…`); what it actually is, and its honest boundary
+
+- **The catalogue (`packages/shared/src/lib/permissions/catalogue.ts`).** `PERMISSION_BLOCK_VERBS.structural`
+  is now `[...STRUCTURAL_VERBS]` — the **five** S11 verbs (`read`/`add`/`edit`/`remove`/`reference`), in
+  declaration order. `STRUCTURAL_ENFORCED_VERBS` (`add`/`edit`/`remove`) names the three a write-path guard
+  can act on; `read`/`reference` are **declared** (the dictionary names five verbs, so the catalogue names
+  five) with their enforcement at CC-34. A surface now yields **7** records (2 data + 5 structural) where it
+  yielded 3.
+- **The settings home (`packages/shared/src/lib/permissions/structural-settings.ts`, NEW).** The grammar's
+  *level* as a setting, the `SD-3`/`SD-2b` pattern copied exactly: a seed
+  (`DEFAULT_STRUCTURAL_SETTINGS` — empty rules, `defaultLevel: 'approval'`), a strict parser
+  (`parseStructuralSettings` — the grammar stays **closed**: an unknown verb / actor / level / object kind
+  is rejected, and a `straight` **default** is rejected because it would open every undeclared change), a
+  pure decision (`resolveStructuralLevel` — the exact (object, verb, actor) row wins, then the `any`-actor
+  row, then the default), a principal bridge (`actorTypeForPrincipal` — human→human, every machine kind→ai,
+  unknown→any — S12), and a fail-closed read (`loadStructuralSettings`).
+- **The corrected decision carrier (`structure-change-decision-header.ts`).** `blockFromFeature` compared
+  the last dotted segment to the literal `'structure'`; it now checks membership in the catalogue's own
+  `STRUCTURAL_VERBS` (the falsified premise, corrected at its source — rule 13), and both doc-comments that
+  said *"the catalogue's only structural verb is `structure`"* are rewritten.
+- **The honest boundary (a hostile critic measured it).** `structural-settings.ts` has **no production
+  reader yet** — nothing imports it. It is the grammar's *home*; the *enforcement* (a guard reading a level
+  and escalating/refusing) is the next slice, scheduled as **CC-37**. The module's JSDoc now states this
+  plainly rather than implying a caller that does not exist.
+
 ---
 
 ## 6. What this plan does NOT build (honest limits)

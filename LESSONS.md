@@ -3215,3 +3215,34 @@ about the other. Ask "how many ways can this row come into existence?" before de
 
 *Cross-ref: rule 9a (own the code you touch — the create path was mine the moment I stamped the seed),
 L85 (a test that mocks the layer you are changing proves nothing).*
+
+---
+
+## L97 — a **declared** grammar with no reader is not an enforced one; the honest boundary must be measured, not implied
+
+**What happened.** `SD-4` Slice C was asked to build *"the per-verb grammar (S11/CC-5)"*. It built two
+things: the **records** the catalogue yields (the structural block widened from one `'structure'` verb to
+the five S11 verbs), and a **settings home** for the grammar's *level* (`structural-settings.ts` — seed +
+strict parser + pure `resolveStructuralLevel` + the `actorTypeForPrincipal` bridge + fail-closed read). The
+module's own JSDoc said a guard "calls it". Then the hostile critic ran `grep -rn "structural-settings"
+packages` (excluding `dist`/`node_modules`) and got back **only the test file**. Nothing in production
+imports it. The grammar is *declared and readable*; it is *not enforced* — and the comment claiming a
+caller existed was **false in the tree**.
+
+**Why it is dangerous.** "The grammar is built" reads as "the rule is in force". It is not: no guard reads a
+level, no route escalates on one, and nothing changes for any actor. A reader who trusts the comment ships a
+platform where the AI's structural reach is *described* but not *bounded*. The gap is invisible to every
+test in the module — they all pass, because they test the functions that were built, not the wiring that was
+not.
+
+**The rule.** When a change adds a **mechanism** (a parser, a decision, a settings home) but not its
+**enforcement** (the caller that acts on it), say so with an *observation*, not a promise: run the grep for
+the module's importers and report the count. If the count is zero, that is the finding — record it in the
+module's own header **and** schedule the wiring in `COMPLETION-CALLBACKS.md` with the trigger that brings it
+back (here, **CC-37**: the guard gaining the escalate outcome). A mechanism with no caller is a legitimate,
+honest partial build; a mechanism *claimed* to be enforced when it has no caller is the decoration the
+working rules forbid. The distinction is one grep wide.
+
+*Cross-ref: rule 9a (own the code you touch — fix it or schedule it, never leave it implied), L83 (a file
+that exists is not a mechanism that runs), L94 (a suite green on your run, not the critic's, is a claim
+about a run, not the artefact).*
