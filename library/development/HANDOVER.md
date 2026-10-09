@@ -14,7 +14,7 @@ written for exactly that person — and this revision is written for an agent th
 continue the development work.** Read it top to bottom once (about 20 minutes), then
 follow §2 to actually get working. Everything else in the project is reachable from here.
 
-**Written 2026-10-05, revision 13 (2026-10-09). Owner: Ramzi. Development machine: `BIXMASERVER` (Windows 10 Pro).**
+**Written 2026-10-05, revision 14 (2026-10-09). Owner: Ramzi. Development machine: `BIXMASERVER` (Windows 10 Pro).**
 **This revision records the owner's 2026-10-09 rulings as a live ordered ACTION LIST at the top of
 [`../../JOURNAL.md`](../../JOURNAL.md) (see §8's "What is scheduled but not finished", and §5's
 ⚠️ live-platform block). If you want the newest numbers, re-measure them; §7 tells you how to split what
@@ -746,10 +746,11 @@ documents and was *not* re-measured — treat it as a starting point, not a fact
   migrated); and **`GAP A`'s `Resource` envelope half** — a Phase −1 contract, deliberately unbuilt.
   **Still open in `SD-1`** (each scheduled in [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md)):
   **`CC-20`** (a custom *field*'s records have no enforcement consumer — blocked on `G-04`), **`CC-23`**
-  (the create-branch double-insert — needs a migration), **`CC-27`** (the agent ↔ AI-user binding — needs
-  `AH-1`), and **`CC-39`** (the CC-25 actor check reads live state inside a guard's `validate` — a named,
-  minor contract deviation). **`CC-25` (the decision actor's permission) is BUILT 2026-10-09 (`d61d4f6`)** —
-  awaiting the owner's confirm — *not* one of the open rows. **A caution, measured 2026-10-08:
+  (the create-branch double-insert — needs a migration), **`CC-27`** (the agent ↔ AI-user binding — **BLOCKED
+  on `AH-1`**, the agent-as-kernel-object, which is *not built*; the binding hangs off it), and **`CC-39`**
+  (the CC-25 actor check reads live state inside a guard's `validate` — a named, minor contract deviation).
+  **`CC-25` (the decision actor's permission) is BUILT 2026-10-09 (`d61d4f6`)** — awaiting the owner's
+  confirm — *not* one of the open rows. **A caution, measured 2026-10-08:
   `SD-3` (the tier mapping as a superadmin setting) is ALREADY BUILT (`[x]`, 2026-10-06, BUILD-ORDER §2d)
   — several documents still call it "the next slice", which is stale.** The next **undone** slice in
   BUILD-ORDER order is **`SD-2` / `S9`** (mark core functions and guard their deletion — startable, `G-07`
@@ -824,16 +825,14 @@ alone means this page is broken — **fix the page, not the newcomer.**
 from an older document are not equally current, and mixing them in one table is how this page
 goes wrong. If two older documents disagree on a number, say so — never average them.
 
-*Last updated: 2026-10-09, revision 13 — **`A2` (CC-25) is built and proven** (the
-`entities.definitions.decide` role permission, enforced at all five carrier call sites; the
-`auth/lib/permission-decision-grant.ts` check reusing the platform's own grant checks — S5, one engine;
-**3 mutations RED-then-GREEN, each md5-verified**; full core suite **637 suites / 5580 tests green**).
-It awaits only the owner's one-line confirm (rule 11); its one honest edge is **`CC-39`** (the actor check
-reads live state inside a guard's `validate` — scheduled). Work order: **A1 done; A2 built (confirm owed);
-A3–A7 open.** (Revision 12, below, recorded the owner's 2026-10-09 rulings as a live, ordered ACTION LIST
-at the top of [`../../JOURNAL.md`](../../JOURNAL.md), the register's mechanical linkage — a ***Trigger ↔
-checked at*** column on every row, the close-in-the-same-change rule, and a reconciliation check — and a
-**⚠️ The live platform right now** block in §5.)*
+*Last updated: 2026-10-09, revision 14 — **`A3` (CC-27) is BLOCKED, not next: a premise was corrected
+(rule 13).** The agent ↔ AI-user binding *hangs off* **`AH-1`** (the agent as a kernel object), which is
+**not built** (`BACKLOG.md:107`, unchecked) — so CC-27 must not be built before AH-1. The owner's **approval**
+of CC-27 (2026-10-08) stands; only the *order* was wrong (the action list had copied the approval but dropped
+the blocker). The **startable next build is `AH-1`**; the **owner-facing next step is `A6`/`A7`** (rebuild +
+deploy — unblocked by A4+A5, owner-gated). (Revision 13, below, recorded **`A2` built**; revision 12 recorded
+the owner's 2026-10-09 rulings as the ordered ACTION LIST, the register's mechanical linkage, and the
+live-platform warning block in §5.)*
 *Previous — 2026-10-07, revision 11 — the `D2-gap` write-verb sweep COMPLETE; the platform's own
 deployment now reachable from this page (0 unguarded across all 35 enabled modules, and the GET-that-writes
 class found and fixed). §2 step 7, §7's two HEADs and §8 updated in the same change; §5 first pointed at
