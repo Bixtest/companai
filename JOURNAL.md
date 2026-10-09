@@ -35,38 +35,56 @@ log.** Everything else (HANDOVER, START-PROMPT, README, BOOKMARKS, BACKLOG) poin
 
 ---
 
-### ▶ NOW — `SD-2b`: make the **core object set a superadmin SETTING** (owner-ruled 2026-10-09). **A direct copy of the `SD-3` pattern; small, unblocked. Plan: [`library/development/DECISION-core-object-set-as-settings.md`](library/development/DECISION-core-object-set-as-settings.md).**
+### ▶ NOW — `SD-4`: the **structural permission grammar** (S11/S12), which now also **owns the structural guard** (DROP / re-type / FK) that `SD-2b` deferred to it. Plan: [`library/development/BUILD-ORDER.md`](library/development/BUILD-ORDER.md) Phase 0 §8; architecture: [`library/development/ARCHITECTURE-structure-permissions.md`](library/development/ARCHITECTURE-structure-permissions.md).
 
 > **If you are a new agent, read only this block to know your job.** Everything below the box is the
 > history and the queue; this is the work in hand.
 
-**Why this is next.** The owner ruled item 15 on 2026-10-09: *"we follow your recommendations… however,
-analyze if we can do this as a manageable matter instead of hardcoded. Give the superadmin the right and
-functionality to identify which table/column/function belongs to which tier… your recommendations become
-**default settings**, not hardcoded architecture."* That acceptance **creates a new, small, unblocked build
-(`SD-2b`)** which must land **before** `SD-4`/`SD-5`, because the structural grammar reads the tier map this
-setting stores.
+**Why this is next.** `SD-2b` (just done) delivered the **setting** the grammar reads — the object→tier map
+(`module_configs`, `core_boundary`/`coreObjectTiers`). The `SD-3`/`SD-2b` settings are the **inputs**; `SD-4`
+is the **grammar** that consumes them: per object (table/column/relation/function/widget/agent) × verb
+(read/add/edit/remove/**reference**) × actor (human/AI) × level (straight/review/approval/never), with the
+per-object tier as the **fallback** when no explicit rule exists. Its foundation completion (D0/D1/D2-wide/D3 +
+Metadata Registry) is **done**; what remains is the grammar itself.
 
-**What it is.** Move the object→tier map out of code into `module_configs` (module `core_boundary`, name
-`coreObjectTiers`), so a superadmin can mark **a table or column they just created** as protected **from the
-UI, with no deploy**. It is a **direct copy of `shared/src/lib/request-outcome/tier-source.ts`** (`SD-3`:
-seed + strict parser + pure decision + fail-closed read; dictionary **§C.2b** is the precedent verbatim), and
-**`module_configs` + `ModuleConfigService` already exist** — `getValue`/`setValue`/`restoreDefaults` — so
-there is **no new table and no migration**.
+**Two things `SD-2b` handed to this task (do not lose them):**
+1. **The structural guard** (a `core`/`platform_release` object must not be **DROPped, re-typed, or have its
+   FK changed**) rides **here** — S5: one engine, never a rival. It reads the same `core-objects.ts` /
+   `core-settings.ts` the delete-guard reads.
+2. **The per-object manage screen** stays folded into **`SD-5`** (one grid, two settings — not a second UI).
 
-**The two guardrails (copied from §C.2b — they are why this is safe).** (1) **It fails closed** — a missing or
-malformed setting resolves to the **seed**, never to a weaker tier. (2) **What stays CODE (Ring 1,
-`CORE-BOUNDARY.md` §2):** the *rule* that core objects cannot be deleted or restructured, the four tier names,
-and the parser. *A setting can move an object **between** tiers; it can never **delete the tiers**.*
+**Fact-check all of this in code before writing (rule 10d) — do not assume.**
 
-**The seed = the owner-accepted recommendation** (`DECISION-core-object-set.md`: the ~25 `core` tables — tenancy,
-identity, authz, audit, the customization substrate, the migration ledger — plus the `platform_release` set).
-Its first payoff **closes a measured hole**: a custom field can attach to a system table today because the only
-block is a **7-id UI-selectability list** that omits `users`, `roles`, `tenants`, `sessions`.
+---
 
-**Also in this block (after `SD-2b`):** the **manage screen folds into `SD-5`** (one per-object grid, two
-settings — not a second UI), and the **structural guard** (DROP / re-type / FK) rides **`SD-4`** (S5: one
-engine, never a rival). **Fact-check all of this in code before writing (rule 10d) — do not assume.**
+### ✅ DONE — `SD-2b`: the **core object set is a superadmin SETTING**, not a hardcoded list (owner-ruled 2026-10-09). **(2026-10-09, code `fd170d1`; plan [`library/development/PLAN-SD-2b.md`](library/development/PLAN-SD-2b.md); design [`library/development/DECISION-core-object-set-as-settings.md`](library/development/DECISION-core-object-set-as-settings.md).)**
+
+> **One line proved it:** the object→tier map lives in `module_configs` (`core_boundary`/`coreObjectTiers`), so
+> a superadmin can move an object **between** the four tiers **from the UI with no deploy** — while the *rule*,
+> the four tier names and the parser stay code. It **closes a measured hole**: `isSystemEntitySelectable('auth:user'
+> | 'auth:role' | 'directory:tenant' | 'auth:session')` → **`false`** (before: a custom field could attach to
+> `users`/`roles`/`tenants`/`sessions`, because the only block was a 7-id list that omitted them).
+> `shared` **202/203 suites, 2424 tests** (the 1 red is the pre-existing `dynamicLoader` sandbox flake, CC-19);
+> `core` **630 suites / 5479 tests, 0 failures**; both `tsc` exit 0; **10 disjoint mutations all RED** (each
+> restore md5-identical); **two separate hostile-critic rounds**.
+
+> **The form was a direct copy of `SD-3`/`tier-source.ts`** — seed (`DEFAULT_CORE_SETTINGS`) + strict parser
+> (`parseCoreSettings → null` on any bad row) + pure decision (`resolveCoreTier`, own-keys only to defeat
+> `__proto__`) + fail-closed async read (`loadCoreSettings`, never throws; falls back to the seed) — in
+> `shared/src/lib/core-boundary/core-settings.ts`. **No new table, no migration.**
+
+> **The two hostile rounds earned their keep.** Round 1 found a **CRITICAL bypass**: the selectability gate sat
+> only on the two preset routes, while the **batch route**, the **`add-field` CLI** and the shared primitive
+> `ensureCustomFieldDefinitions` wrote `CustomFieldDef` rows **without it** — fixed with one shared helper,
+> `reservedEntityRefusal(entityId)`, called on **all four** write paths (batch, CLI, primitive, restore). Round 2
+> then found the junk-only hole (a set of only unknown ids passed the empty-length check and reopened `auth:user`
+> — fixed by a **substrate invariant**: the parser requires all 7 substrate ids present, so a setting may **add**,
+> never **drop**, the substrate), the regression its own fix caused in a pre-mocked suite, and the ungated
+> **restore** path (a tombstoned field could be resurrected onto a system table — now refused).
+
+> **Honest limits:** the manage screen is **not** built (folded into `SD-5`); the structural guard (DROP/re-type/FK)
+> is **not** built (rides `SD-4`); the core marker is still **by name** not a column (CC-31(a), waits on a
+> migration). All three scheduled.
 
 ---
 

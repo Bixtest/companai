@@ -227,6 +227,12 @@ prompted it: [`DECISION-core-object-set.md`](DECISION-core-object-set.md).
 `tier-source.ts`'s shape), fold its manage screen into **`SD-5`**, and schedule the structural guard with
 **`SD-4`**. **Nothing is blocked on you.**
 
+**✅ DONE 2026-10-09 — `SD-2b` is built** (`module_configs` `core_boundary`/`coreObjectTiers`; plan
+[`PLAN-SD-2b.md`](PLAN-SD-2b.md)). The superadmin can now move an object **between** the four tiers **from the
+UI, no deploy**, and the parser guarantees a setting may **add**, never **drop**, the protected substrate. The
+manage screen is folded into **`SD-5`**; the structural guard now rides **`SD-4`** (the ★ ACTIVE TASK). **Still
+not yours:** nothing here needs a decision from you.
+
 ---
 
 ## Part 2 — Things only you can do (**1 open** — items 6 and 7 are done)

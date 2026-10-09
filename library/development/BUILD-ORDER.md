@@ -1119,14 +1119,26 @@ one page, each with a named home. Details: [`BLUEPRINT-GAP-ANALYSIS.md`](BLUEPRI
    suite armed it. Open, scheduled: the core set is by **name** not a column (CC-31); the `UserFunction`
    core flag waits on `G-09` (CC-32). Plan [`PLAN-SD-2.md`](PLAN-SD-2.md).
 7b. **SD-2b** — make the **core object set a superadmin setting** (owner, 2026-10-09), not a hardcoded list.
-   A **direct copy of the `SD-3` pattern** (`tier-source.ts`: seed + strict parser + pure decision + fail-closed
-   read; dictionary §C.2b), stored in `module_configs` (module `core_boundary`, name `coreObjectTiers`).
-   **No new table, no migration.** The *rule* that core objects cannot be deleted/restructured stays Ring 1;
-   only the *object→tier map* is a setting. The seed = the owner-accepted recommendation; its first payoff is
-   closing the measured hole where a custom field can attach to `users`/`roles`/`tenants`/`sessions`
-   (the 7-id selectability list omits them). Manage screen folds into **`SD-5`**; the structural guard rides
-   **`SD-4`**. Design: [`DECISION-core-object-set-as-settings.md`](DECISION-core-object-set-as-settings.md).
-8. **SD-4 / SD-5** — the structural grammar screen (manage what can do what, to what level).
+   **BUILT 2026-10-09** (plan [`PLAN-SD-2b.md`](PLAN-SD-2b.md)). A **direct copy of the `SD-3` pattern**
+   (`tier-source.ts`: seed + strict parser + pure decision + fail-closed read; dictionary §C.2b), stored in
+   `module_configs` (module `core_boundary`, name `coreObjectTiers`) — **no new table, no migration.** The
+   *rule* that core objects cannot be deleted/restructured stays Ring 1; only the *object→tier map* is a
+   setting. **Two guardrails proved by mutation + two hostile rounds:** it **fails closed** (a missing/malformed
+   setting resolves to the seed, never a weaker tier), and the parser enforces a **substrate invariant** (all 7
+   substrate entity ids must be present — a setting may **add**, never **drop**, the substrate). **First payoff
+   closes a measured hole:** `isSystemEntitySelectable('auth:user'|'auth:role'|'directory:tenant'|'auth:session')`
+   → `false` (before, a custom field could attach to those tables — the only block was a 7-id list that omitted
+   them). Round 1 found a **CRITICAL bypass** (the gate sat only on the two preset routes; the batch route, the
+   `add-field` CLI and `ensureCustomFieldDefinitions` wrote rows without it) — closed with one shared helper
+   `reservedEntityRefusal(entityId)` on all four write paths. Measured: `shared` **202/203 suites, 2424 tests**
+   (the 1 red is the pre-existing `dynamicLoader` sandbox flake, CC-19); `core` **630 suites / 5479 tests, 0
+   failures**; both `tsc` exit 0; **10 disjoint mutations all RED**, each restore md5-identical; **two
+   separate hostile-critic rounds**. Manage screen folds into **`SD-5`**; the structural guard rides **`SD-4`**
+   (now built). Design: [`DECISION-core-object-set-as-settings.md`](DECISION-core-object-set-as-settings.md).
+8. **SD-4 / SD-5** — the structural grammar screen (manage what can do what, to what level). **This is now the
+   ★ ACTIVE TASK.** It consumes the `SD-3`/`SD-2b` settings and **also owns the structural guard** (a `core`/
+   `platform_release` object must not be **DROPped, re-typed, or have its FK changed**) that `SD-2b` deferred to
+   it — S5: one engine, never a rival. `SD-5` keeps the **per-object manage screen** (one grid, two settings).
 9. **NEW — generic state-machine engine** (blueprint §10) promoted to a core primitive: allowed
    transitions, transition permissions, preconditions, events. Today pipelines exist only inside
    `customers`; the blueprint makes lifecycle generic.
