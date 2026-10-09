@@ -1168,6 +1168,28 @@ one page, each with a named home. Details: [`BLUEPRINT-GAP-ANALYSIS.md`](BLUEPRI
    transitions, transition permissions, preconditions, events. Today pipelines exist only inside
    `customers`; the blueprint makes lifecycle generic.
 
+**PHASE 1 (continued) — the agent half** *(added 2026-10-09 — the order for the `AH-` track; the
+detail lives in [`AGENT-HALF.md`](AGENT-HALF.md) §4, the register in [`BACKLOG.md`](BACKLOG.md))*
+
+> **Why this block exists.** Three documents (`JOURNAL.md`, `BACKLOG.md`, `HANDOVER.md`) name **`AH-1`
+> as the startable next build** — but the *order document* had no `AH-` entry at all, so the next build
+> could not be placed on the order. Recorded here so source of truth #2 carries it. **This is not a new
+> phase of its own and not a parallel project** — it is a track that starts in phase 1 and runs through
+> phase 4; only its **phase-1 item (`AH-1`)** is listed here, because that is the one on the critical
+> path. The other eleven `AH-` items stay in `AGENT-HALF.md` §4 / `BACKLOG.md` with their phases.
+
+20. **`AH-1` — the agent as a kernel object** *(the only agent-half item on the critical path; **the
+    startable next build** — needs only `G-01`, ✅ done).* An agent is **one flat, legible row** with a
+    `kind` (*personal · role · context · independent · system*), an `owner`, an `actsAs`, a `role`, a
+    **runtime binding**, and an **autonomy gate** — no "type" flag, no separate human/AI shape. The
+    existing `Agent` kernel object is extended with those fields (§1.4). **Everything else in the agent
+    half waits on this**, because each item needs to know what an agent *is*. It also unblocks
+    **CC-27** (the AI-user ↔ agent binding — the register's row corrected 2026-10-09: the binding hangs
+    off `AH-1`). Design: [`AGENT-HALF.md`](AGENT-HALF.md) §1.4 and §3.1.
+
+*The eleven remaining `AH-` items (phases 2–4) are ordered in [`AGENT-HALF.md`](AGENT-HALF.md) §4; they
+keep the backlogs where they are and land as their prerequisites do.*
+
 **PHASE 2 — Experience contracts completed + standing rebuilds**
 
 > **In depth →** the localization/RTL/a11y contract: [`BLUEPRINT-GAP-ANALYSIS.md`](BLUEPRINT-GAP-ANALYSIS.md)

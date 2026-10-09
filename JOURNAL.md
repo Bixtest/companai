@@ -35,7 +35,7 @@ log.** Everything else (HANDOVER, START-PROMPT, README, BOOKMARKS, BACKLOG) poin
 
 ---
 
-### ▶ NOW — **the owner's ACTION LIST of 2026-10-09** (directly below) is the live work queue. **A1 DONE** (the callback register gained the mechanical linkage); **A2 BUILT** (CC-25, the decision-actor permission — proven; the owner's one-line confirm is still owed, rule 11); **A4 DONE** (live login 500 — Redis restarted + hardened); **A5 DONE** (the build-ship script `.sh` deployed + proven). **A3 (CC-27) is BLOCKED on `AH-1`** — *re-measured 2026-10-09: the binding hangs off the agent-as-kernel-object, which is not built (rule 13 premise correction; do not build it before AH-1).* **The owner-facing next step is A6/A7** (rebuild + deploy the current `main`, then hand over the credentials — both now unblocked by A4+A5, and both owner-gated). When the action list is clear, the standing next build is **`AH-1`** (the agent as a kernel object — the only agent-half item on the critical path, startable since `G-01` is done), then **BUILD-ORDER item 9 — the generic state-machine engine**.
+### ▶ NOW — **the owner's ACTION LIST of 2026-10-09** (directly below) is the live work queue. **A1 DONE** (the callback register gained the mechanical linkage); **A2 BUILT** (CC-25, the decision-actor permission — proven; the owner's one-line confirm is still owed, rule 11); **A4 DONE** (live login 500 — Redis restarted + hardened); **A5 DONE** (the build-ship script `.sh` deployed + proven). **A3 (CC-27) is BLOCKED on `AH-1`** — *re-measured 2026-10-09: the binding hangs off the agent-as-kernel-object, which is not built (rule 13 premise correction; do not build it before AH-1).* **The owner-facing next step is A6/A7** (rebuild + deploy the current `main`, then hand over the credentials — both now unblocked by A4+A5, and both owner-gated). When the action list is clear, the standing next build is **`AH-1`** (the agent as a kernel object — the only agent-half item on the critical path, startable since `G-01` is done; now carried as **item 20** in `BUILD-ORDER.md`, recorded there 2026-10-09), then **BUILD-ORDER item 9 — the generic state-machine engine**.
 
 > **If you are a new agent, read only this block to know your job.** Everything below the box is the
 > history and the queue; this is the work in hand.
@@ -82,6 +82,13 @@ The owner then ruled: **do the fixes needed so every callback is closed at the r
   2026-10-06 image; deploying the current `main` is a rebuild + recreate the owner should authorise (take a
   DB export first — there is no backup button, `FX-D09`). Until then the *fix* is real but *not shipped*.
 - **The action list is append-only while live:** when an item is done, mark its Status cell ✅ **DONE <date>** with the commit — do not delete the row (the same discipline as the register).
+- **Order-document gap closed 2026-10-09 (owner's Message 2, "everything … updated in the … order
+  documentation").** Three documents (`JOURNAL.md`, `BACKLOG.md`, `HANDOVER.md`) named **`AH-1` as the
+  startable next build**, but **`BUILD-ORDER.md` — source of truth #2, the *order* — carried no `AH-`
+  entry at all**, so the next build could not be placed on the order. Fixed: the agent half now has its
+  **phase-1 block** in `BUILD-ORDER.md` (new item **20 — `AH-1`**), cross-referencing
+  `AGENT-HALF.md` §4 for the eleven remaining `AH-` items. `BACKLOG.md` needed **no** change — `AH-1`
+  already sits there under *Phase 1 — the spine* as `⛔ needs G-01 ✅ done — startable` (status correct).
 
 ---
 
