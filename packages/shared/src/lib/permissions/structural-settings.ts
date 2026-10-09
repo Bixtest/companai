@@ -470,6 +470,22 @@ export async function loadStructuralSettings(
 }
 
 /**
+ * Turn an already-fetched value into a {@link StructuralSettings}, never `null` —
+ * the seed when the value is not valid.
+ *
+ * The **synchronous twin of {@link loadStructuralSettings}**, for a caller that
+ * has the raw value in hand rather than a reader: the manage screen (`SD-5`) gets
+ * the setting as JSON from its route and must render a *valid* setting even if
+ * that JSON is malformed (a hand-edited store, a version skew). It applies the
+ * same one rule — {@link parseStructuralSettings}, else the seed — so the screen
+ * and the guard fail closed identically. Exported so neither has to reimplement
+ * the `parse ?? seed` idiom and risk a divergent fallback.
+ */
+export function normalizeStructuralSettings(raw: unknown): StructuralSettings {
+  return parseStructuralSettings(raw) ?? DEFAULT_STRUCTURAL_SETTINGS
+}
+
+/**
  * The level an **undeclared** structural change inherits (S11) — `SD-3`'s
  * `fallbackLevel`, read from the tier source so the two settings cannot disagree.
  *
@@ -479,4 +495,157 @@ export async function loadStructuralSettings(
  */
 export function inheritedStructuralLevel(): StructurePermissionLevel {
   return TIER_TO_LEVEL[DEFAULT_TIER_SETTINGS.defaultTier]
+}
+
+/* ------------------------------------------------------------------ *
+ * The manage screen's data shape (SD-5) — pure, so the UI stays dumb
+ * ------------------------------------------------------------------ *
+ * The page and its route live in `core` (a page is core's business); the *shape*
+ * they render and write stays here, with the rest of the grammar, for three
+ * reasons: (1) `shared` must not depend on `core`, so the policy cannot live in
+ * the page; (2) the shape is the same grammar the guard reads, so one module owns
+ * both readers and they cannot drift; (3) a pure function is testable without a
+ * DOM, a route, or a database.
+ */
+
+/** One cell of the grid: the level a single (object, verb, actor) sits at. */
+export type StructuralLevelCell = {
+  objectKind: StructuralObjectKind
+  verb: StructuralVerb
+  actorType: StructuralActorType
+  /**
+   * The level **explicitly set** for this cell, or `null` when no rule reaches it
+   * (the cell then *renders* {@link StructuralSettings.defaultLevel} but is not a
+   * stored row). The distinction matters: the screen must be able to show *"this is
+   * only the default, nobody chose it"* apart from *"a person set this"* — the same
+   * explicit-vs-default line the guard draws (CC-37).
+   */
+  explicit: StructurePermissionLevel | null
+  /** What the cell shows: the explicit level, or the default when unset. */
+  effective: StructurePermissionLevel
+}
+
+/**
+ * The full grid the manage screen renders: one cell per
+ * (objectKind × verb × actorType), each carrying both its **explicit** level
+ * (`null` when unset) and its **effective** level (the default when unset).
+ *
+ * Order is the declaration order of the three axes, so the rendered grid is stable
+ * and a screenshot is comparable between sessions.
+ */
+export function structuralSettingsGrid(
+  settings: StructuralSettings = DEFAULT_STRUCTURAL_SETTINGS,
+): StructuralLevelCell[] {
+  const cells: StructuralLevelCell[] = []
+  for (const objectKind of STRUCTURAL_OBJECT_KINDS) {
+    for (const verb of STRUCTURAL_VERBS) {
+      for (const actorType of STRUCTURAL_ACTOR_TYPES) {
+        const explicit = explicitStructuralLevel(objectKind, verb, actorType, settings)
+        cells.push({
+          objectKind,
+          verb,
+          actorType,
+          explicit,
+          effective: explicit ?? settings.defaultLevel,
+        })
+      }
+    }
+  }
+  return cells
+}
+
+/**
+ * Apply one cell edit and return a **new** {@link StructuralSettings} — or `null`
+ * when the edit is not a valid placement.
+ *
+ * **What "set" means, and why it is not the same as "store every cell".** A level of
+ * `straight`/`review`/`approval`/`never` is written as an **explicit rule** for the
+ * exact (object, verb, actor) triple. The screen therefore stores exactly the cells a
+ * person chose and leaves the rest unset, so the fail-closed default keeps its meaning
+ * (S11's inheritance). A caller may instead pass `null` to **clear** a cell back to
+ * inheritance — that removes the row rather than storing the current default, because
+ * storing the default would turn "nobody chose this" into "somebody chose the strictest",
+ * which is a different fact and would freeze the cell against a future default change.
+ *
+ * **Validation.** The object/verb/actor are the grammar's closed sets and the level is
+ * one of the four — anything else returns `null` (the caller renders it as a rejected
+ * edit), never a coerced value. The returned settings still round-trip through
+ * {@link parseStructuralSettings} (the screen writes what a reader will accept).
+ *
+ * **Pure and immutable.** The input is never mutated; every nested level is a fresh
+ * null-prototype-safe object, matching `parseStructuralSettings`.
+ */
+export function withStructuralLevel(
+  settings: StructuralSettings,
+  edit: {
+    objectKind: StructuralObjectKind
+    verb: StructuralVerb
+    actorType: StructuralActorType
+    /** The level to set, or `null` to clear the cell back to inheritance. */
+    level: StructurePermissionLevel | null
+  },
+): StructuralSettings | null {
+  if (!isObjectKind(edit.objectKind)) return null
+  if (!isVerb(edit.verb)) return null
+  if (!isActorType(edit.actorType)) return null
+  if (edit.level !== null && !isLevel(edit.level)) return null
+
+  // Build the next `rules` by copying every existing row, then applying (or removing)
+  // the one cell. A full copy — not a shallow patch — so the result is independent of
+  // the input and safe to hand straight to `setValue`.
+  const rules = emptyRules()
+  for (const objectKind of STRUCTURAL_OBJECT_KINDS) {
+    for (const verb of STRUCTURAL_VERBS) {
+      for (const actorType of STRUCTURAL_ACTOR_TYPES) {
+        const current = explicitStructuralLevel(objectKind, verb, actorType, settings)
+        if (current) rules[objectKind][verb][actorType] = current
+      }
+    }
+  }
+
+  if (edit.level === null) {
+    delete rules[edit.objectKind][edit.verb][edit.actorType]
+  } else {
+    rules[edit.objectKind][edit.verb][edit.actorType] = edit.level
+  }
+
+  return Object.freeze({
+    rules: Object.freeze(
+      Object.fromEntries(
+        STRUCTURAL_OBJECT_KINDS.map((objectKind) => [
+          objectKind,
+          Object.freeze(
+            Object.fromEntries(
+              STRUCTURAL_VERBS.map((verb) => [verb, Object.freeze({ ...rules[objectKind][verb] })]),
+            ),
+          ),
+        ]),
+      ),
+    ) as StructuralSettings['rules'],
+    defaultLevel: settings.defaultLevel,
+  })
+}
+
+/**
+ * Whether two settings are the same — the screen uses it to enable/disable *Save*
+ * and to detect an unchanged form.
+ *
+ * **Compared cell by cell over the grammar's closed sets**, not by deep-equality:
+ * two settings are equal when every (object, verb, actor) has the same **explicit**
+ * level and the same default. That is the fact that matters — the raw object shape
+ * (present-but-undefined keys, key order) must not make two equivalent settings look
+ * different.
+ */
+export function structuralSettingsEqual(a: StructuralSettings, b: StructuralSettings): boolean {
+  if (a.defaultLevel !== b.defaultLevel) return false
+  for (const objectKind of STRUCTURAL_OBJECT_KINDS) {
+    for (const verb of STRUCTURAL_VERBS) {
+      for (const actorType of STRUCTURAL_ACTOR_TYPES) {
+        const left = explicitStructuralLevel(objectKind, verb, actorType, a)
+        const right = explicitStructuralLevel(objectKind, verb, actorType, b)
+        if (left !== right) return false
+      }
+    }
+  }
+  return true
 }

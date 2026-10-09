@@ -20,12 +20,15 @@ import {
   parseStructuralSettings,
   resolveStructuralLevel,
   resolveStructuralLevelForPrincipal,
+  structuralSettingsEqual,
+  structuralSettingsGrid,
   STRUCTURAL_ACTOR_TYPES,
   STRUCTURAL_LEVELS,
   STRUCTURAL_OBJECT_KINDS,
   STRUCTURAL_SETTINGS_MODULE,
   STRUCTURAL_SETTINGS_NAME,
   type StructuralSettings,
+  withStructuralLevel,
 } from '../structural-settings'
 import { STRUCTURAL_VERBS } from '../catalogue'
 
@@ -317,5 +320,164 @@ describe('loadStructuralSettings — the read, and its fail-closed fallback', ()
 describe('the level set — one union, shared with SD-3', () => {
   it('the four levels are spelled the way the dictionary spells them', () => {
     expect([...STRUCTURAL_LEVELS]).toEqual(['straight', 'review', 'approval', 'never'])
+  })
+})
+
+/**
+ * SD-5 — the manage screen's data shape. These are the three pure functions the
+ * page renders and writes with; keeping them here (not in the page) means the UI
+ * cannot drift from the grammar the guard reads.
+ */
+describe('structuralSettingsGrid — the grid the manage screen renders (SD-5)', () => {
+  it('yields one cell per (object × verb × actor), in declaration order', () => {
+    const grid = structuralSettingsGrid()
+    expect(grid).toHaveLength(
+      STRUCTURAL_OBJECT_KINDS.length * STRUCTURAL_VERBS.length * STRUCTURAL_ACTOR_TYPES.length,
+    )
+    expect(grid[0]).toMatchObject({ objectKind: 'table', verb: 'read', actorType: 'human' })
+  })
+
+  it('a cell with no rule shows the default as its effective level, and null as explicit', () => {
+    const cell = structuralSettingsGrid(DEFAULT_STRUCTURAL_SETTINGS).find(
+      (c) => c.objectKind === 'column' && c.verb === 'remove' && c.actorType === 'human',
+    )
+    expect(cell?.explicit).toBeNull()
+    expect(cell?.effective).toBe(DEFAULT_STRUCTURAL_LEVEL)
+  })
+
+  it('a cell with an explicit rule shows it as both explicit and effective', () => {
+    const settings = parseStructuralSettings({
+      rules: { column: { remove: { human: 'review' } } },
+      defaultLevel: 'approval',
+    }) as StructuralSettings
+    const cell = structuralSettingsGrid(settings).find(
+      (c) => c.objectKind === 'column' && c.verb === 'remove' && c.actorType === 'human',
+    )
+    expect(cell?.explicit).toBe('review')
+    expect(cell?.effective).toBe('review')
+  })
+})
+
+describe('withStructuralLevel — one cell edit, immutably (SD-5)', () => {
+  it('sets an explicit rule for the exact triple', () => {
+    const next = withStructuralLevel(DEFAULT_STRUCTURAL_SETTINGS, {
+      objectKind: 'column',
+      verb: 'remove',
+      actorType: 'ai',
+      level: 'never',
+    }) as StructuralSettings
+    expect(explicitStructuralLevel('column', 'remove', 'ai', next)).toBe('never')
+    // The input is untouched.
+    expect(explicitStructuralLevel('column', 'remove', 'ai', DEFAULT_STRUCTURAL_SETTINGS)).toBeNull()
+  })
+
+  it('stores only the cell a person chose — every other cell stays unset', () => {
+    const next = withStructuralLevel(DEFAULT_STRUCTURAL_SETTINGS, {
+      objectKind: 'column',
+      verb: 'remove',
+      actorType: 'ai',
+      level: 'never',
+    }) as StructuralSettings
+    expect(explicitStructuralLevel('column', 'remove', 'human', next)).toBeNull()
+    expect(explicitStructuralLevel('column', 'add', 'ai', next)).toBeNull()
+    expect(explicitStructuralLevel('table', 'remove', 'ai', next)).toBeNull()
+  })
+
+  it('clears a cell back to inheritance when `level` is null (removes the row, does not store the default)', () => {
+    const withRuleSet = withStructuralLevel(DEFAULT_STRUCTURAL_SETTINGS, {
+      objectKind: 'column',
+      verb: 'remove',
+      actorType: 'ai',
+      level: 'never',
+    }) as StructuralSettings
+    const cleared = withStructuralLevel(withRuleSet, {
+      objectKind: 'column',
+      verb: 'remove',
+      actorType: 'ai',
+      level: null,
+    }) as StructuralSettings
+    expect(explicitStructuralLevel('column', 'remove', 'ai', cleared)).toBeNull()
+    expect(structuralSettingsEqual(cleared, DEFAULT_STRUCTURAL_SETTINGS)).toBe(true)
+  })
+
+  it('the result round-trips through parseStructuralSettings (the screen writes what a reader accepts)', () => {
+    const next = withStructuralLevel(DEFAULT_STRUCTURAL_SETTINGS, {
+      objectKind: 'function',
+      verb: 'edit',
+      actorType: 'any',
+      level: 'approval',
+    }) as StructuralSettings
+    const reparsed = parseStructuralSettings(JSON.parse(JSON.stringify(next)))
+    expect(reparsed).not.toBeNull()
+    expect(explicitStructuralLevel('function', 'edit', 'any', reparsed as StructuralSettings)).toBe('approval')
+  })
+
+  it('rejects an invalid triple or level (returns null, never a coercion)', () => {
+    const base = DEFAULT_STRUCTURAL_SETTINGS
+    expect(withStructuralLevel(base, { objectKind: 'nope' as never, verb: 'remove', actorType: 'ai', level: 'never' })).toBeNull()
+    expect(withStructuralLevel(base, { objectKind: 'column', verb: 'nope' as never, actorType: 'ai', level: 'never' })).toBeNull()
+    expect(withStructuralLevel(base, { objectKind: 'column', verb: 'remove', actorType: 'nope' as never, level: 'never' })).toBeNull()
+    expect(withStructuralLevel(base, { objectKind: 'column', verb: 'remove', actorType: 'ai', level: 'nope' as never })).toBeNull()
+  })
+
+  it('preserves the default level (an edit never lowers the fail-closed floor)', () => {
+    const next = withStructuralLevel(DEFAULT_STRUCTURAL_SETTINGS, {
+      objectKind: 'column',
+      verb: 'remove',
+      actorType: 'ai',
+      level: 'straight',
+    }) as StructuralSettings
+    expect(next.defaultLevel).toBe(DEFAULT_STRUCTURAL_SETTINGS.defaultLevel)
+  })
+})
+
+describe('structuralSettingsEqual — the screen’s dirty check (SD-5)', () => {
+  it('is true for a value equal to the seed, and for a round-tripped copy', () => {
+    expect(structuralSettingsEqual(DEFAULT_STRUCTURAL_SETTINGS, DEFAULT_STRUCTURAL_SETTINGS)).toBe(true)
+    const copy = parseStructuralSettings(JSON.parse(JSON.stringify(DEFAULT_STRUCTURAL_SETTINGS))) as StructuralSettings
+    expect(structuralSettingsEqual(DEFAULT_STRUCTURAL_SETTINGS, copy)).toBe(true)
+  })
+
+  it('is false when an explicit rule differs, or the default differs', () => {
+    const withRule = withStructuralLevel(DEFAULT_STRUCTURAL_SETTINGS, {
+      objectKind: 'column',
+      verb: 'remove',
+      actorType: 'ai',
+      level: 'never',
+    }) as StructuralSettings
+    expect(structuralSettingsEqual(DEFAULT_STRUCTURAL_SETTINGS, withRule)).toBe(false)
+    const otherDefault = parseStructuralSettings({
+      rules: {},
+      defaultLevel: 'review',
+    }) as StructuralSettings
+    expect(structuralSettingsEqual(DEFAULT_STRUCTURAL_SETTINGS, otherDefault)).toBe(false)
+  })
+
+  it('ignores raw-shape differences (key presence/order) between equivalent settings', () => {
+    // The parsed value is fully normalised (every object kind / verb present). The
+    // other value is HAND-BUILT with the same explicit rows but a raw shape a
+    // `JSON.stringify` equality would call DIFFERENT: only the one object kind, a
+    // different key order, and extra empty verb buckets. `structuralSettingsEqual`
+    // must call them equal — that is the whole reason it compares cell by cell over
+    // the closed sets instead of deep-equalling the raw object.
+    const parsed = parseStructuralSettings({
+      rules: { column: { remove: { ai: 'never' } } },
+      defaultLevel: 'approval',
+    }) as StructuralSettings
+
+    const handBuilt = {
+      rules: {
+        column: { add: {}, remove: { ai: 'never' }, reference: {} },
+        table: {},
+      },
+      defaultLevel: 'approval',
+    } as unknown as StructuralSettings
+
+    // Sanity: this pair really does differ raw-shape-wise, so the assertion below
+    // is not vacuous.
+    expect(JSON.stringify(parsed)).not.toEqual(JSON.stringify(handBuilt))
+
+    expect(structuralSettingsEqual(parsed, handBuilt)).toBe(true)
+    expect(structuralSettingsEqual(handBuilt, parsed)).toBe(true)
   })
 })
