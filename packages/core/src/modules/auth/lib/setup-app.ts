@@ -8,6 +8,7 @@ import { normalizeTenantId } from './tenantAccess'
 import { computeEmailHash } from '@open-mercato/core/modules/auth/lib/emailHash'
 import { getDefaultEncryptionMaps, type Module } from '@open-mercato/shared/modules/registry'
 import { isEncryptionDebugEnabled, isTenantDataEncryptionEnabled } from '@open-mercato/shared/lib/encryption/toggles'
+import { isCoreObject } from '@open-mercato/shared/lib/core-boundary/core-objects'
 import { EncryptionMap } from '@open-mercato/core/modules/entities/data/entities'
 import { createKmsService } from '@open-mercato/shared/lib/encryption/kms'
 import { TenantDataEncryptionService } from '@open-mercato/shared/lib/encryption/tenantDataEncryptionService'
@@ -34,7 +35,12 @@ async function ensureRolesInContext(
   for (const name of roleNames) {
     const existing = await findOneWithDecryption(em, Role, { name, tenantId }, {}, { tenantId, organizationId: null })
     if (existing) continue
-    em.persist(em.create(Role, { name, tenantId, createdAt: new Date() }))
+    // CC-31(a) — a role the registry calls *core* is created with the durable
+    // marker (`roles.is_core`), so it is recognised by a column, not only by its
+    // name, from the moment it exists. The decision stays in one place
+    // (`isCoreObject`, the same registry the guards read), so setup and the
+    // guards can never disagree about which role is core.
+    em.persist(em.create(Role, { name, tenantId, createdAt: new Date(), isCore: isCoreObject('role', name) }))
   }
 }
 

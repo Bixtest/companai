@@ -62,6 +62,19 @@ export class Role {
   @Property({ name: 'tenant_id', type: 'uuid' })
   tenantId!: string
 
+  /**
+   * Whether this role is a **core object** — the platform's own surface, which
+   * no actor may delete or rename away (`SPECIFICATIONS-DICTIONARY.md` §C.3 /
+   * `S9`, `CORE-BOUNDARY.md` §2). Migrated in `Migration20261009090000`.
+   *
+   * The rule is enforced in `auth/lib/core-object-guard.ts`; this column is its
+   * durable key. Before it existed the role was recognised by its **name**
+   * (`superadmin`), which a rename could change — so the protection could be
+   * disarmed by a rename. A column travels with the row; a name does not.
+   */
+  @Property({ name: 'is_core', type: 'boolean', default: false })
+  isCore: boolean = false
+
   @Property({ name: 'created_at', type: Date, onCreate: () => new Date() })
   createdAt: Date = new Date()
 

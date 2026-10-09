@@ -131,8 +131,9 @@ export function isCoreObject(
   kind: CoreObjectKind,
   id: string,
   settings: CoreSettings = DEFAULT_CORE_SETTINGS,
+  flags?: { isCore?: boolean },
 ): boolean {
-  return coreObjectFor(kind, id, settings) !== null
+  return coreObjectFor(kind, id, settings, flags) !== null
 }
 
 /**
@@ -142,11 +143,28 @@ export function isCoreObject(
  * the setting. Folding here, not in the setting, keeps the setting's stored keys
  * the platform's own form (`superadmin`) while remaining forgiving of a stored
  * ` SuperAdmin `.
+ *
+ * **The durable marker wins over the name — and over the setting (CC-31(a),
+ * owner ruling 2026-10-09).** When the caller supplies `flags.isCore === true` —
+ * the `roles.is_core` column, migrated in `Migration20261009090000` — the object
+ * is core **whatever its id, and whatever the setting says**. That is the whole
+ * point: the marker travels with the row through a rename, so renaming a core
+ * role can neither make the registry forget it is core *nor* move it to a name
+ * the setting happens to demote. If the setting could override the marker, a
+ * rename would re-open the exact hole Option B closes.
+ *
+ * The setting stays authoritative everywhere the marker does not reach: a name
+ * the setting lists as core with no row flag is core; a name the setting moves
+ * between tiers is decided by the setting. The marker is a durable **floor**,
+ * not a competing list. When the flag is absent or `false`, the name lookup runs
+ * exactly as before, so a row that predates the migration (or a caller that did
+ * not load the column) is **exactly as protected as it was** — never less.
  */
 export function coreObjectFor(
   kind: CoreObjectKind,
   id: string,
   settings: CoreSettings = DEFAULT_CORE_SETTINGS,
+  flags?: { isCore?: boolean },
 ): CoreObject | null {
   if (typeof id !== 'string') return null
   const needle = id.trim().toLowerCase()
@@ -154,7 +172,40 @@ export function coreObjectFor(
   const match = coreObjects(settings).find(
     (o) => o.kind === kind && o.id.toLowerCase() === needle,
   )
-  return match ?? null
+  if (match) return match
+  // The durable marker: a row carrying `is_core` is core even if its id is not in
+  // the setting (e.g. it was renamed). The reason still comes from the kind's one
+  // place, so a renamed core role is refused in the same words as before.
+  if (flags?.isCore === true) {
+    return { kind, id, since: '2026-10-09', because: ROLE_CORE_BECAUSE }
+  }
+  return null
+}
+
+/**
+ * A typed refusal for a **rename** of a core object, returned (not thrown).
+ *
+ * A rename is a different act from a delete and must say so: renaming a core
+ * role is refused because it would make the role stop being *recognised* as core
+ * (the historical gap — CC-31(a)), not because the row would vanish. One reason,
+ * stated in the word for the act, so the caller and the user both know which
+ * thing was stopped.
+ *
+ * Returns `null` when the object may be renamed.
+ */
+export function coreObjectRenameRefusal(
+  kind: CoreObjectKind,
+  id: string,
+  settings: CoreSettings = DEFAULT_CORE_SETTINGS,
+  flags?: { isCore?: boolean },
+): { reason: string; because: string } | null {
+  const core = coreObjectFor(kind, id, settings, flags)
+  if (!core) return null
+  return {
+    reason: `"${core.id}" is a core ${core.kind} and cannot be renamed.`,
+    because:
+      'renaming it would let the platform stop recognising it as core, which is the one thing that must not happen to the surface that manages roles and permissions (SPECIFICATIONS-DICTIONARY.md §C.3 / S9).',
+  }
 }
 
 /**
@@ -170,8 +221,9 @@ export function coreObjectRefusal(
   kind: CoreObjectKind,
   id: string,
   settings: CoreSettings = DEFAULT_CORE_SETTINGS,
+  flags?: { isCore?: boolean },
 ): { reason: string; because: string } | null {
-  const core = coreObjectFor(kind, id, settings)
+  const core = coreObjectFor(kind, id, settings, flags)
   if (!core) return null
   return {
     reason: `"${core.id}" is a core ${core.kind} and cannot be deleted.`,

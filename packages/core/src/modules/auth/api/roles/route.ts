@@ -15,7 +15,7 @@ import type { EntityManager, FilterQuery } from '@mikro-orm/postgresql'
 import { roleCrudEvents, roleCrudIndexer } from '@open-mercato/core/modules/auth/commands/roles'
 import { escapeLikePattern } from '@open-mercato/shared/lib/db/escapeLikePattern'
 import { assertActorCanModifySuperAdminRoleTarget } from '@open-mercato/core/modules/auth/lib/grantChecks'
-import { assertCoreRoleNotDeletable } from '@open-mercato/core/modules/auth/lib/core-object-guard'
+import { assertCoreRoleNotDeletable, assertCoreRoleNotRenamable } from '@open-mercato/core/modules/auth/lib/core-object-guard'
 import { enforceRoleTenantAccess } from '@open-mercato/core/modules/auth/lib/roleTenantGuard'
 import type { RbacService } from '@open-mercato/core/modules/auth/services/rbacService'
 import { runWithCacheTenant } from '@open-mercato/cache'
@@ -131,6 +131,17 @@ const crud = makeCrudRoute<CrudInput, CrudInput, Record<string, unknown>>({
       mapInput: async ({ parsed, ctx }) => {
         if (ctx.request && typeof parsed.id === 'string' && parsed.id.length) {
           await assertCanModifySuperAdminRole(ctx.request, parsed.id)
+          // S9 / SD-2 / CC-31(a) — Option B (owner ruling 2026-10-09). A core role
+          // cannot be RENAMED, by any actor: the rule has always recognised the
+          // core role by its name, so a rename silently disarmed the delete guard.
+          // Guarded here, on the CRUD update chokepoint, so the identity of a core
+          // role is fixed for everyone.
+          await assertCoreRoleNotRenamable(
+            ctx.container.resolve('em') as EntityManager,
+            { tenantId: ctx.auth?.tenantId ?? null },
+            parsed.id,
+            typeof parsed.name === 'string' ? parsed.name : undefined,
+          )
         }
         return enforceRoleTenantAccess('update', parsed, { auth: ctx.auth, container: ctx.container })
       },

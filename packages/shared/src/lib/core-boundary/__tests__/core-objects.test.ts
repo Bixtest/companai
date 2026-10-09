@@ -21,6 +21,7 @@ import {
   CORE_OBJECT_KINDS,
   coreObjectFor,
   coreObjectRefusal,
+  coreObjectRenameRefusal,
   coreObjects,
   isCoreObject,
   isCoreObjectKind,
@@ -108,6 +109,79 @@ describe('the registry is exposed read-only and the kind set is closed', () => {
     expect(isCoreObjectKind('role')).toBe(true)
     expect(isCoreObjectKind('function')).toBe(false)
     expect(isCoreObjectKind(undefined)).toBe(false)
+  })
+})
+
+describe('the durable is_core marker (CC-31(a), owner ruling 2026-10-09)', () => {
+  it('a row flagged is_core is core EVEN when its id is not in the setting', () => {
+    // The whole point of the column: the marker travels with the row through a
+    // rename, so the registry cannot forget it. 'restructured_ops' is unknown to
+    // the seed.
+    expect(isCoreObject('role', 'restructured_ops')).toBe(false)
+    expect(isCoreObject('role', 'restructured_ops', undefined, { isCore: true })).toBe(true)
+  })
+
+  it('coreObjectFor returns the object with the kind\'s one reason for a flagged row', () => {
+    const core = coreObjectFor('role', 'restructured_ops', undefined, { isCore: true })
+    expect(core).not.toBeNull()
+    expect(core!.id).toBe('restructured_ops')
+    expect(core!.because).toContain('roles-and-permissions manager')
+  })
+
+  it('is_core = false does NOT weaken the name lookup (additive, never subtractive)', () => {
+    // An un-migrated row (or a caller that did not select the column) is exactly as
+    // protected as before.
+    expect(isCoreObject('role', 'superadmin', undefined, { isCore: false })).toBe(true)
+    expect(isCoreObject('role', 'superadmin', undefined, {})).toBe(true)
+  })
+
+  it('a false marker on a non-core name is still not core (no fail-open)', () => {
+    expect(isCoreObject('role', 'admin', undefined, { isCore: false })).toBe(false)
+  })
+
+  it('the durable MARKER wins over the setting when the two disagree (Option B precedence)', () => {
+    // Precedence, stated honestly: when the setting moves a name OUT of core but the
+    // row carries `is_core = true`, the MARKER wins — the row stays core.
+    //
+    // Why the marker, and not the setting: Option B exists so that a rename cannot
+    // disarm the guard. If the setting could override the marker by name, a rename
+    // to a name the setting marks `platform_release` would re-open the hole — the
+    // precise attack the owner ruled against ("one main superadmin that is
+    // undeletable … additional superadmins the main one can delete by renaming them
+    // FIRST"). The setting remains authoritative for objects the marker does not
+    // cover: a name the setting lists as core with no row flag, and any name the
+    // setting moves between tiers, are both decided by the setting (see the SD-2b
+    // tests above). The marker is a durable floor, not a competing list.
+    const overridden: CoreSettings = {
+      ...DEFAULT_CORE_SETTINGS,
+      objectTier: { ...DEFAULT_CORE_SETTINGS.objectTier, role: { superadmin: 'platform_release' } },
+    }
+    // The setting alone would call it non-core...
+    expect(isCoreObject('role', 'superadmin', overridden)).toBe(false)
+    // ...but the row's durable marker keeps it core.
+    expect(isCoreObject('role', 'superadmin', overridden, { isCore: true })).toBe(true)
+    // And with no marker, the setting's demotion IS honoured (the setting is not
+    // ignored — it is only ever overridden by an explicit per-row core flag).
+    expect(isCoreObject('role', 'superadmin', overridden, { isCore: false })).toBe(false)
+  })
+})
+
+describe('coreObjectRenameRefusal — a different act, said in the word for the act', () => {
+  it('names the rename, not the delete, for a core object', () => {
+    const refusal = coreObjectRenameRefusal('role', 'superadmin')
+    expect(refusal).not.toBeNull()
+    expect(refusal!.reason).toBe('"superadmin" is a core role and cannot be renamed.')
+    expect(refusal!.because).toContain('recognis')
+  })
+
+  it('returns null for a renameable object (the caller proceeds)', () => {
+    expect(coreObjectRenameRefusal('role', 'admin')).toBeNull()
+  })
+
+  it('honours the durable marker (a renamed core row is still refused)', () => {
+    const refusal = coreObjectRenameRefusal('role', 'renamed_long_ago', undefined, { isCore: true })
+    expect(refusal).not.toBeNull()
+    expect(refusal!.reason).toContain('renamed_long_ago')
   })
 })
 

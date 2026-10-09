@@ -25,7 +25,8 @@ import {
 import { extractUndoPayload } from '@open-mercato/shared/lib/commands/undo'
 import { resolveRedoSnapshot } from '@open-mercato/shared/lib/commands/redo'
 import { resolveIsSuperAdmin, normalizeTenantId } from '@open-mercato/core/modules/auth/lib/tenantAccess'
-import { refuseCoreRoleDelete } from '@open-mercato/core/modules/auth/lib/core-object-guard'
+import { refuseCoreRoleDelete, refuseCoreRoleRename } from '@open-mercato/core/modules/auth/lib/core-object-guard'
+import { isCoreObject } from '@open-mercato/shared/lib/core-boundary/core-objects'
 import type { CommandRuntimeContext } from '@open-mercato/shared/lib/commands'
 
 type SerializedRole = {
@@ -164,6 +165,16 @@ const createRoleCommand: CommandHandler<Record<string, unknown>, Role> = {
       data: {
         name: parsed.name,
         tenantId: resolvedTenantId,
+        // SD-2 / SD-2b / CC-31(a) — the durable core marker, stamped at CREATE time.
+        //
+        // The seed (`setup-app.ts`) already stamps `isCore` on the built-in roles,
+        // but a role created THROUGH THE API gets its `isCore` here. Without this,
+        // a role the SD-2b SETTING marks core (which a superadmin may add from the
+        // UI with no deploy) would be born `is_core = false` — and then a single
+        // rename would move its name out of the setting and leave it completely
+        // unguarded. That is exactly the CC-31(a) hole this option closes, so the
+        // marker MUST be stamped on every create path, not only the seed.
+        isCore: isCoreObject('role', parsed.name),
       },
     })
 
@@ -338,6 +349,16 @@ const updateRoleCommand: CommandHandler<Record<string, unknown>, Role> = {
           throw new CrudHttpError(400, { error: 'Role name cannot be changed while users are assigned' })
         }
       }
+      // S9 / SD-2 / CC-31(a) — Option B (owner ruling 2026-10-09). The core role
+      // cannot be renamed *even when no users are assigned* (the check above only
+      // bites while assignments exist). Guarded here, in the command, because the
+      // audit `redo` path re-executes this command directly and would otherwise
+      // bypass a route-only check — the same reason the delete guard lives here.
+      const coreRenameRefusal = refuseCoreRoleRename(
+        current as { name?: string | null; isCore?: boolean | null },
+        nextName,
+      )
+      if (coreRenameRefusal) throw coreRenameRefusal
     }
     const wantsTenantChange = parsed.tenantId !== undefined && parsed.tenantId !== current.tenantId
     if (wantsTenantChange) {
