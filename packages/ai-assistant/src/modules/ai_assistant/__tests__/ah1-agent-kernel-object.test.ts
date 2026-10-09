@@ -70,7 +70,7 @@ describe('AH-1 slice 1 — the Agent object is declared and the kernel sees it',
   })
 })
 
-describe('AH-1 slice 3 (CC-40) — the relation upgrade and the reportsTo self-edge', () => {
+describe('AH-1 slices 3+4 (CC-40) — the relation upgrade, the reportsTo self-edge, and the role admission', () => {
   // Build the model the way PRODUCTION does: several modules collected together, so `user` (declared by
   // another module) is present on the entity set — the same condition that makes the relation target real.
   // A single-module model would carry only `agent`, so it could not prove the target resolves (a hostile-
@@ -111,13 +111,33 @@ describe('AH-1 slice 3 (CC-40) — the relation upgrade and the reportsTo self-e
     expect(actsAs?.relatedEntityId).toBe('user')
   })
 
-  it('keeps `role` as text — the ADMIN role entity is NOT declared in the kernel (honest, not invented)', () => {
-    // `auth:role` (the admin role the agent should carry) is not a declared entity; `customer_role` is a
-    // different concept (customer-portal roles). So no relation target exists for this field yet.
+  it('declares `role` with kind:relation and the `auth:role` target, AND the model carries a `role` entity', () => {
+    // Both halves in ONE assertion, deliberately (a hostile-critic pass found the earlier split let this test
+    // pass with the change reverted): the source declaration carries the target, AND the kernel model — built
+    // by the real buildModelDescriptor — actually contains the `role` entity. Either half alone is not the claim.
     const role = AGENT_FIELDS.find((f) => f.key === 'role')
-    expect(role?.kind).toBe('text')
-    expect(role?.relatedEntityId).toBeUndefined()
-    expect(model.entities['role']).toBeUndefined()
+    expect(role?.kind).toBe('relation')
+    // The target id is the canonical id the kernel reports (verified in the generated entity-id registry).
+    expect(role?.relatedEntityId).toBe('auth:role')
+    // The model half: this is what makes the relation target REAL, not a string in a field declaration.
+    expect(model.entities['role']).toBeDefined()
+  })
+
+  it('the `auth:role` target entity is present in the model this test builds (non-vacuous)', () => {
+    // Precondition: the target must be a REAL entity in the model, or the assertion above is vacuous.
+    // The `auth:role` admission comes from the ai_assistant module's OWN extensions entry (below), so this
+    // model — built from `moduleEntryFromCe()` — carries it without a second stub module.
+    expect(model.entities['role']).toBeDefined()
+  })
+
+  it('declares a real `auth:user_role → auth:role` edge that admits `auth:role` (no fabricated agent column)', () => {
+    // The admission is on a REAL table with a REAL FK (`user_roles.role_id` → `roles.id`), not on a
+    // fabricated `agent.role_id` — there is no agent table at all (the CC-27 lesson).
+    const roleEdge = entityExtensions.find(
+      (e) => e.base === 'auth:user_role' && e.extension === 'auth:role',
+    )
+    expect(roleEdge).toBeDefined()
+    expect(roleEdge?.join).toEqual({ baseKey: 'role_id', extensionKey: 'id' })
   })
 
   it('declares a real `agent → agent` reportsTo self-edge in the model (no "type" flag)', () => {

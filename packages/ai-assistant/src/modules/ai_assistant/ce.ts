@@ -55,20 +55,29 @@ export type AgentKind = (typeof AGENT_KINDS)[number]
  *
  * These describe the *object*; they are the §1.4 fields made concrete.
  *
- * **The relation upgrade (`CC-40`, slice 3).** `owner` and `acts_as` are now declared as `relation` fields
- * carrying a `relatedEntityId` of `user`, and the `reportsTo` self-edge (`data/extensions.ts`) is a real
- * kernel relationship. **Where the target lands, stated precisely** (a hostile-critic pass corrected an
- * earlier overstatement here): the `relation` *kind* reaches the kernel model (`KernelField.fieldKind`),
- * and the `relatedEntityId` target is a real, **consumed** property of the custom-field declaration — the
- * installer persists it (`entities/lib/install-from-ce.ts` `FIELD_DETAIL_KEYS`) and the relation-options UI
- * reads it (`ui/backend/custom-fields/FieldDefinitionsEditor.tsx`). **It is NOT carried on the kernel
- * model's `KernelField`** — that type has no such property (verified). Making the target first-class *in the
- * model* would need a companion relationship and is deliberately not claimed here.
+ * **The relation upgrade (`CC-40`, slices 3+4).** `owner`, `acts_as` and now `role` are declared as
+ * `relation` fields, and the `reportsTo` self-edge (`data/extensions.ts`) is a real kernel relationship.
+ * **Where the target lands, stated precisely** (a hostile-critic pass corrected an earlier overstatement
+ * here): the `relation` *kind* reaches the kernel model (`KernelField.fieldKind`), and the `relatedEntityId`
+ * target is a real, **consumed** property of the custom-field declaration — the installer persists it
+ * (`entities/lib/install-from-ce.ts` `FIELD_DETAIL_KEYS`) and the relation-options UI reads it
+ * (`ui/backend/custom-fields/FieldDefinitionsEditor.tsx`). **It is NOT carried on the kernel model's
+ * `KernelField`** — that type has no such property (verified). Making the target first-class *in the model*
+ * would need a companion relationship and is deliberately not claimed here.
  *
- * `role` stays a declared `text` because the **admin** role entity (`auth:role`) is not in the kernel
- * descriptor — measured, not assumed. (`customer_accounts:customer_role` exists, but it is a different
- * concept: customer-portal roles, not the staff role an agent carries.) So `role` keeps carrying an id as
- * text; making it a relation is the remaining half of `CC-40` (see `COMPLETION-CALLBACKS.md`).
+ * `role` now targets **`auth:role`**, which IS a declared kernel entity — admitted by `data/extensions.ts`
+ * (the same route that admits `auth:user`: an `EntityExtension` end). `auth:role` has **no `ce.ts`** of its
+ * own, exactly like `auth:user`, so this declaration is what puts it in the **kernel model**. Verified by the
+ * AH-1 kernel-object test, which asserts the target entity is present in the built model before asserting the
+ * field carries it — a hostile-critic pass caught an earlier version asserting only the source constant.
+ *
+ * **Two registries, kept distinct (the critic's precision).** The kernel model
+ * (`buildModelDescriptor`) is one registry; the generated MikroORM entity ids
+ * (`entities.ids.generated.ts`) and the relation-options resolver
+ * (`entities/api/relations/options.ts:66` → `resolveRegisteredEntityTableName`) are another. `auth:role` was
+ * always in the *second* (a registered `Role` ORM entity), which is why the relation-options UI could already
+ * resolve it. What this slice fixes is the **first** — the kernel model having a `role` entity — which is
+ * exactly the gap `CC-40` names and the gap `AH-1` reported (`role` could not honestly be a relation).
  */
 export const AGENT_FIELDS: CustomFieldDefinition[] = [
   {
@@ -104,10 +113,11 @@ export const AGENT_FIELDS: CustomFieldDefinition[] = [
   },
   {
     key: 'role',
-    kind: 'text',
+    kind: 'relation',
+    relatedEntityId: 'auth:role',
     label: 'Role',
     description:
-      'The role whose permissions the agent carries, exactly as a human has them (a role id). Declared as text because no `role` entity is in the kernel descriptor yet — turning it into a relation is the remaining half of CC-40, and must not invent a target (spec §5.4).',
+      'The role whose permissions the agent carries, exactly as a human has them (a real relation to `auth:role`). `auth:role` is a declared kernel entity via `data/extensions.ts` — the CC-40 prerequisite, met.',
     filterable: true,
     listVisible: true,
   },
