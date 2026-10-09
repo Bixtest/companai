@@ -20,6 +20,17 @@ import {
   type CoreSettings,
 } from '@open-mercato/shared/lib/core-boundary/core-settings'
 import type { PrincipalKind } from '@open-mercato/shared/lib/auth/principal'
+import {
+  actorTypeForPrincipal,
+  DEFAULT_STRUCTURAL_SETTINGS,
+  explicitStructuralLevel,
+  loadStructuralSettings,
+  type StructuralObjectKind,
+  type StructuralSettings,
+  type StructuralSettingsReader,
+} from '@open-mercato/shared/lib/permissions/structural-settings'
+import type { StructuralVerb } from '@open-mercato/shared/lib/permissions/catalogue'
+import type { MutationGuardEscalation } from '@open-mercato/shared/lib/crud/mutation-guard-registry'
 import { isReservedSystemEntityType } from '@open-mercato/shared/lib/entities/system-entities'
 import {
   applyStructureChangeGrant,
@@ -341,6 +352,31 @@ async function resolveRequestEntityManager(): Promise<EntityManager | null> {
 }
 
 /**
+ * Load the structural-permission setting for the guard, or the seed (fail closed).
+ *
+ * **Why the guard reads the LIVE setting, not just the seed.** The seed is empty by
+ * design (every level inherits the strictest), so a guard that only ever saw the seed
+ * could never escalate — the CC-37 wiring would be *reachable in principle and dead
+ * in practice*, the exact decoration the rules forbid. The setting is what a
+ * superadmin edits to place a level, so the guard must read it for the wiring to be
+ * real end to end.
+ *
+ * **Fail closed, always.** A missing container, an unreachable store, or a malformed
+ * value all yield {@link DEFAULT_STRUCTURAL_SETTINGS} — the empty seed — which the
+ * decision reads as *"no explicit rule"*, so the absolute 422 stands. Never the other
+ * way: a store failure must not be able to *loosen* a protected surface.
+ */
+async function loadStructuralSettingsForGuard(tenantId: string): Promise<StructuralSettings> {
+  try {
+    const container = await createRequestContainer()
+    const reader = container.resolve('moduleConfigService') as StructuralSettingsReader
+    return await loadStructuralSettings(reader, { tenantId })
+  } catch {
+    return DEFAULT_STRUCTURAL_SETTINGS
+  }
+}
+
+/**
  * Apply the gate's decision (read out of the guard's `metadata`) to the grant role.
  * Exported so it can be tested with a mock EntityManager — the DB-backed half of this
  * guard. The mapping itself lives in `applyStructureChangeGrant`, so the guard and the
@@ -512,6 +548,117 @@ const STRUCTURAL_RESOURCE_KINDS: ReadonlySet<string> = new Set([
 ])
 
 /**
+ * The grammar's **object** axis for a resource kind (CC-37) — the architecture's
+ * §4.2 bridge `resourceKind → object`.
+ *
+ * `entities.field_definition` is a **column**; `entities.entity` is a **table**.
+ * That is the whole map for this guard: those are the two definition kinds
+ * `STRUCTURAL_RESOURCE_KINDS` governs. A kind outside the set returns `null`, and
+ * the caller then does not consult the grammar (the guard is inert for it).
+ */
+function structuralObjectKindFor(resourceKind: string): StructuralObjectKind | null {
+  if (resourceKind === 'entities.field_definition') return 'column'
+  if (resourceKind === 'entities.entity') return 'table'
+  return null
+}
+
+/**
+ * The grammar's **verb** axis for a mutation operation (CC-37) — the architecture's
+ * §4.2 bridge `operation → verb` (create→add, update→edit, delete→remove).
+ *
+ * **`create` maps to `add`, but this guard never *acts* on a `create`** (a create is
+ * the S2 gate's job — see `structuralGuardRefusal`'s first line and the guard's
+ * `operations: ['update','delete']`). The mapping is total anyway, so the function
+ * has no silent hole and a future caller cannot get `undefined`.
+ */
+function structuralVerbFor(operation: 'create' | 'update' | 'delete'): StructuralVerb {
+  if (operation === 'create') return 'add'
+  if (operation === 'update') return 'edit'
+  return 'remove'
+}
+
+/**
+ * CC-37 — the grammar's **level**, turned into a guard outcome, for a structural
+ * write. The reader `structural-settings.ts` was built for (Slice C) and had none.
+ *
+ * **What it decides, and — just as important — what it does not.** A resolved level
+ * of `review`/`approval` on a reserved surface becomes the **escalate** outcome (D3,
+ * *held for a person* instead of hard-blocked); `never` keeps the existing 422
+ * refusal; `straight` cannot *un*-refuse a reserved surface — S9/SD-2b is absolute,
+ * and the grammar **refines** it, never weakens it.
+ *
+ * **Why it only refines a *reserved* surface, and does not yet judge an ordinary
+ * one.** The seed's default level is `approval` (fail closed). If this guard escalated
+ * every **non-reserved** structural write by that default, it would hold **every**
+ * column-add and entity-create-for-review — the platform would stop, and it would be
+ * the agent inventing a posture the owner has not set. The grammar's *per-object rules*
+ * (which object sits at which level) are the owner's to set; until they exist, a
+ * non-reserved write keeps its present behaviour (`ok:true`). So this wiring is
+ * **load-bearing where a decision already exists** (a protected surface) and **inert
+ * where inventing a decision would break the platform** — the honest, non-breaking
+ * half of CC-37. The remainder (acting on a non-reserved object once the owner sets
+ * its rules) is stated plainly in the guard's own comment and stays scheduled.
+ *
+ * **An unresolved actor is refused, not escalated (fail closed).** `actorKind` is
+ * optional on the guard input; `undefined` means *"we could not name who is acting"*,
+ * not *"a person"*. A hostile-critic pass caught the first version escalating the
+ * `any` axis for such a caller under the label "a person" — a false statement (S3)
+ * about an unidentified actor. S9 is absolute and the grammar may loosen it **only
+ * for a named actor**, so an unnamed one keeps the 422. (Regression: the
+ * "does NOT escalate an UNRESOLVED actor" test.)
+ *
+ * **Pure over its inputs** — no DB, no container. Exported so it can be tested at its
+ * exact inputs (the same reason `structuralGuardRefusal` is exported).
+ */
+export function structuralLevelDecision(
+  resourceKind: string,
+  operation: 'create' | 'update' | 'delete',
+  isReserved: boolean,
+  actorKind: PrincipalKind | undefined,
+  settings: StructuralSettings,
+): MutationGuardEscalation | null {
+  // Only refine a surface the guard already refuses. A non-reserved structural write
+  // is not judged by the grammar yet (see the doc-comment above).
+  if (!isReserved) return null
+  const objectKind = structuralObjectKindFor(resourceKind)
+  if (!objectKind) return null
+
+  // **An unresolved actor is never escalated (fail closed).** `actorKind` is optional
+  // on the guard input — a route that predates S12 passes none — so `undefined` means
+  // *"we could not name who is acting"*, **not** *"a person"*. S9's refusal is
+  // absolute; the grammar may loosen it **only for an actor we can name**. Escalating
+  // an unidentified caller would both hold a write on behalf of an unknown and label
+  // it "a person" (a false statement — dictionary S3). So no name → the 422 stands.
+  // (A hostile-critic pass found the earlier version escalated `undefined` under the
+  // `any` axis and mislabelled it; that is the hole this closes.)
+  if (actorKind === undefined) return null
+
+  const verb = structuralVerbFor(operation)
+  // **Explicit rules only.** The grammar's default is `approval` (fail closed), so
+  // acting on the resolved default would turn the absolute S9 refusal into a 202 for
+  // every reserved write that has no rule — weakening the rule the guard exists for.
+  // Only a level a person **chose** may loosen an absolute rule (see
+  // `explicitStructuralLevel`); no rule → the 422 stands.
+  const level = explicitStructuralLevel(objectKind, verb, actorTypeForPrincipal(actorKind), settings)
+
+  // `never` is the existing hard refusal; `straight` cannot override S9 on a protected
+  // object. Only a *held-for-a-person* level becomes an escalation.
+  if (level !== 'review' && level !== 'approval') return null
+
+  const actor = actorKind === 'human' ? 'a person' : `an automated actor (${actorKind})`
+  const gate = level === 'approval' ? 'A3' : 'A2'
+  return {
+    gate,
+    rule: `structural_permission.${objectKind}.${verb}.${level}`,
+    because:
+      `A structural change to a protected object by ${actor} is set to the "${level}" level ` +
+      `for (${objectKind}, ${verb}) — the change is held for a person rather than applied. ` +
+      `The level is the superadmin's structural-permission setting (S11).`,
+    status: 202,
+  }
+}
+
+/**
  * The refusal for a protected object, or `null` when the write may proceed.
  *
  * Exported (like `applyGateDecisionToGrantRole`) so the decision can be tested at
@@ -527,13 +674,21 @@ const STRUCTURAL_RESOURCE_KINDS: ReadonlySet<string> = new Set([
  *
  * **S12 — the actor kind is part of the decision.** When the acting principal is a
  * **machine** (`ai_worker` / `service` / `system`), the refusal names that fact, so
- * the reason tells the truth about *who* was stopped. This is the first reader of
- * the actor axis: it makes the `actorKind` that rides the guard input
- * **load-bearing** (a guard that never read it would be the decoration the rules
- * forbid). The *broader* per-(object, verb, actor) grammar — where an AI might be
- * allowed a change a person is not, and vice versa — is Slice C; what is settled
- * here is that a machine may not restructure a protected object at all, and the
- * decision knows the actor.
+ * the reason tells the truth about *who* was stopped. This makes the `actorKind`
+ * that rides the guard input **load-bearing** (a guard that never read it would be
+ * the decoration the rules forbid).
+ *
+ * **CC-37 — the grammar's level now *shapes* the refusal.** The S11 per-(object,
+ * verb, actor) level (`structuralLevelDecision`, below) is read from the settings
+ * module Slice C built: an **explicit** `review`/`approval` level turns this hard
+ * 422 into an **escalation** — *held for a person*, D3's third outcome, and this
+ * guard is its first production emitter. `never`/`straight`/no-rule keep the 422.
+ * The grammar **refines** the reserved-surface refusal; it never weakens it (S9 is
+ * absolute) — which is why the decision reads `explicitStructuralLevel`, not the
+ * resolved default: the seed's `approval` default must **not** convert the absolute
+ * refusal into a 202 for every write that has no rule. A non-reserved surface is
+ * deliberately **not** judged by the grammar yet (only an explicit rule may move a
+ * write off the absolute refusal; on an ordinary object there is no refusal to refine).
  */
 export function structuralGuardRefusal(
   payload: Record<string, unknown> | null | undefined,
@@ -586,7 +741,28 @@ const structuralCoreGuard: MutationGuard = {
       undefined,
       input.actorKind,
     )
-    return refusal ? { ok: false, status: refusal.status, message: refusal.message } : { ok: true }
+    // No refusal → the surface is not protected; the grammar does not judge it yet
+    // (see `structuralLevelDecision`'s doc-comment for why that is deliberate).
+    if (!refusal) return { ok: true }
+
+    // CC-37 — the refusal stands, but the grammar may *shape* it: an **explicit**
+    // `review`/`approval` level on this (object, verb) turns the hard 422 into an
+    // *escalation* (held for a person) — the escalate outcome D3 built, and this guard
+    // is its first production emitter. `never`/`straight`/no-rule → the 422 as before.
+    //
+    // The level is read from the **live** setting so the wiring is reachable end to end
+    // (a superadmin places a rule → the guard escalates), and it fails closed to the
+    // seed on any store problem, so a failure can never loosen a protected surface.
+    const settings = await loadStructuralSettingsForGuard(input.tenantId)
+    const escalation = structuralLevelDecision(
+      input.resourceKind,
+      input.operation,
+      true,
+      input.actorKind,
+      settings,
+    )
+    if (escalation) return { ok: true, escalation }
+    return { ok: false, status: refusal.status, message: refusal.message }
   },
 }
 

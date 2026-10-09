@@ -54,14 +54,17 @@
  * happens"); it routes to the strictest level. §C.2b's guardrail, applied here:
  * *"Missing/invalid setting → the strictest level, never `straight`."*
  *
- * **Built with a home, not yet with a reader (this slice's honest boundary).**
- * This module is the *grammar's home*: the seed, the parser, the pure decision and
- * the read. The **enforcement** — a structural guard that reads a resolved level and
- * escalates or refuses on it — is a *later* slice, scheduled as `CC-37` with the
- * trigger that brings it back. Nothing in production imports this module yet, and
- * that is stated here rather than implied away, because a settings home claimed to
- * be enforced when it has no reader is exactly the decoration the working rules
- * forbid.
+ * **The reader now exists (CC-37, 2026-10-09).** This module was built with a home
+ * and, for one slice, no reader — stated plainly at the time rather than implied
+ * away, because a settings home claimed to be enforced when nothing reads it is
+ * exactly the decoration the working rules forbid. `CC-37` closed that gap: the
+ * structural guard (`entities.structural.core-object-guard`) reads the live setting
+ * through `loadStructuralSettings` and acts on it — an **explicit** `review`/
+ * `approval` rule escalates a protected write (held for a person, D3) instead of
+ * hard-refusing it. The guard reads {@link explicitStructuralLevel} (not
+ * {@link resolveStructuralLevel}, whose fail-closed default must not loosen an
+ * absolute refusal). The manage screen (`SD-5`) is the other intended reader, and it
+ * is the one that asks the *placement* question via {@link resolveStructuralLevel}.
  *
  * Source: `library/development/SPECIFICATIONS-DICTIONARY.md` S11 + S12 + §C.2b
  * (the precedent); `library/development/ARCHITECTURE-structure-permissions.md`
@@ -356,11 +359,59 @@ export function resolveStructuralLevel(
 }
 
 /**
+ * The level **explicitly set** for an (object, verb, actor) — or `null` when no
+ * rule reaches it (so the caller sees only a deliberate placement, never a default).
+ *
+ * **Why this exists, and why it is separate from {@link resolveStructuralLevel}.**
+ * The reserved-surface guard (S9 / `SD-2b`) is **absolute**: a `core` object cannot be
+ * restructured by anyone. The grammar (S11) is meant to **refine** that — a
+ * `review`/`approval` level says *"held for a person"* instead of *"forbidden"*. But
+ * the grammar's **default** is `approval` (fail closed), so a guard that acted on
+ * `resolveStructuralLevel()` alone would turn the absolute 422 into a 202 *for every
+ * reserved write with no explicit rule* — i.e. it would **weaken** S9 by default. That
+ * is the opposite of what CC-37 must do.
+ *
+ * So the guard asks this function instead: **only an explicit `review`/`approval`
+ * rule** may escalate a reserved write; no rule → the absolute refusal stands. The
+ * default level is still the fail-closed answer for a *placement* question ("what
+ * level applies?"), but it is **not** evidence that a person chose a level — and
+ * only a chosen level may loosen an absolute rule.
+ *
+ * **Own-keys only**, like every lookup here, so a hostile key falls through to `null`.
+ */
+export function explicitStructuralLevel(
+  objectKind: StructuralObjectKind,
+  verb: StructuralVerb,
+  actorType: StructuralActorType,
+  settings: StructuralSettings = DEFAULT_STRUCTURAL_SETTINGS,
+): StructurePermissionLevel | null {
+  const has = (bucket: unknown, key: string): boolean =>
+    !!bucket && typeof bucket === 'object' && Object.prototype.hasOwnProperty.call(bucket, key)
+
+  const byVerb = (settings.rules as Record<string, unknown>)?.[objectKind]
+  if (!has(byVerb, verb)) return null
+  const byActor = (byVerb as Record<string, unknown>)[verb]
+  const findLevel = (actor: string): StructurePermissionLevel | null => {
+    if (!has(byActor, actor)) return null
+    const level = (byActor as Record<string, unknown>)[actor]
+    return isLevel(level) ? level : null
+  }
+  const exact = findLevel(actorType)
+  if (exact) return exact
+  if (actorType !== 'any') return findLevel('any')
+  return null
+}
+
+/**
  * Convenience: the level for a principal, mapping its kind to the actor axis first.
  *
- * The shape the structural guard will call once it is wired to the grammar
- * (CC-37): it has a `PrincipalKind`, not the grammar's `actorType`, so this bridges
- * (via {@link actorTypeForPrincipal}) and resolves in one step.
+ * A convenience for a caller that has a `PrincipalKind`, not the grammar's
+ * `actorType`: it bridges (via {@link actorTypeForPrincipal}) and resolves in one
+ * step. **The structural guard (CC-37) does *not* use this** — it asks
+ * {@link explicitStructuralLevel} directly, because it must see only an explicitly
+ * *chosen* level (an absolute reserved-surface refusal may not be loosened by the
+ * fail-closed default). This function is for the placement question — and for the
+ * manage screen (`SD-5`) showing *"what level applies here?"*.
  */
 export function resolveStructuralLevelForPrincipal(
   objectKind: StructuralObjectKind,

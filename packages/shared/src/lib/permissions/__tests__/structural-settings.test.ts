@@ -14,6 +14,7 @@ import {
   actorTypeForPrincipal,
   DEFAULT_STRUCTURAL_LEVEL,
   DEFAULT_STRUCTURAL_SETTINGS,
+  explicitStructuralLevel,
   inheritedStructuralLevel,
   loadStructuralSettings,
   parseStructuralSettings,
@@ -200,6 +201,75 @@ describe('resolveStructuralLevelForPrincipal — the guard’s own call shape', 
 
   it('an unresolved principal kind falls to the `any` axis, then the default', () => {
     expect(resolveStructuralLevelForPrincipal('column', 'add', undefined, settings)).toBe('approval')
+  })
+})
+
+/**
+ * CC-37 — the function the reserved-surface guard asks *"did a person choose a
+ * level here?"* It must return `null` when only the fail-closed **default** would
+ * apply, because the absolute S9 refusal may be loosened **only** by a level a
+ * person chose (never by the seed's `approval` default — that would weaken S9).
+ *
+ * This block was added **after** a mutation (M16: make `explicitStructuralLevel`
+ * return `settings.defaultLevel` instead of `null`) went undetected by every other
+ * test in the repo except the core guard's end-to-end — proving this contract was
+ * unpinned in its **own** module. Regression guard for that gap.
+ */
+describe('explicitStructuralLevel — an explicit rule only, never the default (CC-37)', () => {
+  it('returns `null` for the empty seed, even though the default is `approval`', () => {
+    // The load-bearing case: the seed's default must NOT read as an explicit rule.
+    expect(explicitStructuralLevel('column', 'remove', 'human', DEFAULT_STRUCTURAL_SETTINGS)).toBeNull()
+    expect(DEFAULT_STRUCTURAL_SETTINGS.defaultLevel).toBe('approval') // the temptation it must resist
+  })
+
+  it('returns the explicit level when a rule reaches the triple', () => {
+    const settings = parseStructuralSettings({
+      rules: { column: { remove: { human: 'review' } } },
+      defaultLevel: 'approval',
+    }) as StructuralSettings
+    expect(explicitStructuralLevel('column', 'remove', 'human', settings)).toBe('review')
+  })
+
+  it('falls to the `any` row when there is no row for the exact actor', () => {
+    const settings = parseStructuralSettings({
+      rules: { column: { remove: { any: 'approval' } } },
+      defaultLevel: 'approval',
+    }) as StructuralSettings
+    expect(explicitStructuralLevel('column', 'remove', 'human', settings)).toBe('approval')
+  })
+
+  it('returns `null` for a triples the rules do not reach (wrong verb / actor / object)', () => {
+    const settings = parseStructuralSettings({
+      rules: { column: { remove: { human: 'review' } } },
+      defaultLevel: 'approval',
+    }) as StructuralSettings
+    expect(explicitStructuralLevel('column', 'edit', 'human', settings)).toBeNull() // wrong verb
+    expect(explicitStructuralLevel('column', 'remove', 'ai', settings)).toBeNull() // wrong actor
+    expect(explicitStructuralLevel('table', 'remove', 'human', settings)).toBeNull() // wrong object
+  })
+
+  it('returns `null` for the `any` actor on an unreached triple — never the default', () => {
+    // **The case that reaches the function's final `return null`.** For any actor
+    // *other* than `any`, the `findLevel('any')` branch returns first, so only
+    // `actorType === 'any'` exercises the last line. A mutation that swapped that
+    // `null` for `settings.defaultLevel` (the S9-weakening regression) was invisible
+    // until this case existed — the seed's `approval` default would have read as a
+    // chosen level. Both the seed and a partial rule set must answer `null` here.
+    expect(explicitStructuralLevel('column', 'remove', 'any', DEFAULT_STRUCTURAL_SETTINGS)).toBeNull()
+    const settings = parseStructuralSettings({
+      rules: { column: { remove: { human: 'review' } } }, // no `any` row for this verb
+      defaultLevel: 'approval',
+    }) as StructuralSettings
+    expect(explicitStructuralLevel('column', 'remove', 'any', settings)).toBeNull()
+  })
+
+  it('is own-keys only: a hostile key yields `null`, not a prototype value', () => {
+    const hostile = parseStructuralSettings({
+      rules: { column: { add: { ai: 'never' } } },
+      defaultLevel: 'approval',
+    }) as StructuralSettings
+    expect(explicitStructuralLevel('__proto__' as never, '__proto__' as never, '__proto__' as never, hostile)).toBeNull()
+    expect(explicitStructuralLevel('constructor' as never, 'constructor' as never, 'constructor' as never, hostile)).toBeNull()
   })
 })
 
