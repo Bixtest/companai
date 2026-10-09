@@ -69,6 +69,10 @@ jest.mock('@open-mercato/shared/lib/entities/system-entities', () => ({
   // here (nothing is reserved) — the refusal itself is proved in
   // `definitions.batch.sd2b.test.ts`.
   reservedEntityRefusal: () => null,
+  // SD-4: the structural guard reads this to decide if a delete/re-type targets
+  // a protected object. No-op here (nothing reserved) — the guard's own decision
+  // is proved in `guards.sd4.test.ts`.
+  isReservedSystemEntityType: () => false,
 }))
 
 jest.mock('@open-mercato/shared/lib/data/engine', () => ({
