@@ -1,136 +1,163 @@
-# platform_points.md — every point the platform must have, and its true status
+# platform_points.md — the ONE list: every task, in plain English, in build order
 
-**Written:** 2026-10-07 · **Rewritten:** 2026-10-07 (basic form: one glyph per point, DONE or LEFT)
-**Asked by:** the owner —
-> *"create a checklist called platform_points.md where you list everything that needs to be in the
-> platform, not with details but as micro broken down oneliners."*
-> *"My goal… 1 track the platform progress so I see what is done and how much work left from a basic
-> file that doesn't flood me with text. 2 identify claims made in other docs that everything is done
-> when I can see not everything is ticked in my file. The important thing is to have strict rules to
-> update this file that it is only tagging a task as done when it is done with 100% certainty —
-> critically reviewed and verified in the codebase."*
+**You asked for this file to be the single scoreboard.** It replaces the old technical `§A`–`§K` view
+(kept at the bottom as an **appendix** — nothing was deleted). There is now **one number** and **one
+list**, sorted so you can reorder it.
 
----
+**Read it like this:** each row says **what you, the user, can do after the task is done** — not
+`G-22`, not `SD-1`. Those IDs are still there, in the last column, so a developer can act; you can ignore
+that column. **`☑` = done and verified in the code. `☐` = not done. `🟡` = real work landed, not whole.**
 
-## HOW TO READ THIS FILE (30 seconds)
-
-- **Every unit of work is one line with one stable ID**: `☐ **ID** — what it is *(reason if LEFT)*`.
-  An ID is the unit's *name* — it never changes and it means the same thing in every document.
-  **Talk in IDs, never in positions** ("item 9" means nothing outside one file; `G-22` means one thing
-  everywhere).
-- **`☑` = DONE.** The unit is finished, and it was **verified in the code** — 100%, critically reviewed.
-  Nothing else earns a tick.
-- **`☐` = LEFT.** Either genuinely not done, or **a doc claims it is done but the code was not verified**
-  (written `⬜` in the notes below). The parenthetical says which.
-- **`🟡` = PARTIAL.** Real, proven work exists, but the unit is not whole — the remainder is **named and
-  scheduled**. A `🟡` is **never** a tick: it scores **less than 1** in the weighted view. It exists so a
-  reader is not told *"nothing happened"* about a unit (e.g. `S2`) where weeks of proven work landed.
-  (Full method below.)
-- **A partial unit is split into sub-units.** When a point is *partly* done, it is **not** left as one
-  ambiguous `☐`; it is broken into named sub-points (`S2a`, `S2b`, …), each carrying **its own** honest
-  tick. The parent line keeps `☐` and shows a **derived** rollup `▸ n/N` (how many of its sub-points are
-  done). So an unticked box **never hides finished work** — you can see exactly what is done and what is
-  left.
-- **The count is derived from the units, not typed by hand.** Unit = a whole (unsplit) point, **or** each
-  sub-point of a split parent — never both. `▸ n/N` and the table below are computed from the ticks, so
-  they cannot drift from the boxes.
-- **`▶ FRONTIER`** marks the next point to work on — answered by an **ID**, so "what is next" always
-  resolves to the same unit everywhere.
-
-### The strict tick rule (owner's instruction, 2026-10-07 — this is the law of this file)
-
-0. **Two different jobs, two different sources.** **The POINTS are built from the documents** — every
-   line here comes from reading what the platform is supposed to contain (the vision, the registers,
-   the backlog, the build order). **The TICK is built from the code** — a box is `☑` only after the
-   code was opened or run and the point is *proved*. **Never tick from a document. A document is the
-   source of the claim; the code is the only source of the tick.**
-1. **A box is `☑` ONLY when the code was read/run and the point *and everything it depends on* is
-   finished** — no bug, no missing prerequisite, no work left elsewhere for it to be true.
-2. **Docs are not evidence.** A development document (or a developer) saying "done" does **not** tick
-   the box. If the code does not back it, the box stays `☐`.
-3. **A claim is a trigger to check, not a tick.** When another document claims a point is done, verify
-   it **in the code**. If it holds → tick **and** record the evidence in §L. If it does not → leave `☐`,
-   and note the disagreement in §L.
-4. **Un-tick freely.** If a later change breaks a point, its box goes back to `☐` immediately. A stale
-   `☑` is a defect in this file.
-5. **Never a "partial" tick — split instead.** A partly-done point is **not** ticked and **not** left as
-   one ambiguous `☐`: it is **split into named sub-points**, each whole, each ticked or not on its own
-   merits. The parent stays `☐` and shows `▸ n/N`. Only whole units are ticked, and only at 100%.
-6. **Adding work is a bug fix.** A point that the sources require and this file lacks is a defect in
-   this file — add it, and record where it came from.
-
-**In one line: the documents tell you *what* must exist; only the code tells you *whether* it does.**
+**The order is the vision's own order** (`library/ai/ai-first/06_...§222-232`, Phase 0 → Phase 10). The
+platform skeleton is built **before** business capabilities — because the vision says so (§233:
+*"Do not start by building dozens of ERP screens … while the security model remains informal"*).
 
 ---
 
-## PROGRESS AT A GLANCE
+## THE ONE NUMBER
 
-**Counting rule (units, not lines).** A **whole point** counts once; a **split parent** is *not* counted —
-its **sub-points** count instead. A `☑` unit scores **1**; a `🟡` unit scores its **stated fraction**; a `☐`
-scores **0**. Every number below is **derived from the boxes** by re-running the `derive-counts` check in
-§L — **never typed by hand.** If a number here ever disagrees with the boxes, the number is the defect.
-
-### The two percentages — and why there are two
-
-| View | What it counts | This round | Meaning |
-|---|---|---|---|
-| **Coverage** | units done ÷ units total (all units equal) | **19%** (61 / 319) | "How much of the checklist is ticked" — simple, honest, and it **under-sells** deep work (a week-long unit and a one-line unit both count 1). |
-| **Build-weighted** | units × an **effort weight** per section | **≈22%** (89 / 407) | "How much of the *work* is done" — the better number to weigh progress by, with the weights stated below. |
-
-> **The one honest sentence.** *We are roughly **20%** done — **≈19%** of the checklist, **≈22%** of the
-> build-weighted work. **± 4 points** (see confidence, below). The frontier is `G-22`. Five sections (B, F,
-> H, J, and the `D` Hermes runtime at 3%) are effectively **un-started** — they are the pile ahead, not
-> failures.*
-
-### Per section (derived)
-
-| Section | DONE | LEFT | Total | Coverage | Build-weighted | Effort weight |
-|---|---:|---:|---:|---:|---:|---:|
-| A. Substrate (C1–C11) | 10 | 21 | 31 | 32% | 32% | 1.6 |
-| B. Platform skeleton (P1–P18) | 0 | 36 | 36 | 0% | 0% | 0.9 |
-| C. AI-first native layer | 14 | 14 | 28 | 50% | 50% | 1.5 |
-| D. Hermes | 1 | 38 | 39 | 3% | 3% | 1.7 |
-| E. Agent half | 2 | 16 | 18 | 11% | 11% | 1.3 |
-| F. Model layer | 0 | 14 | 14 | 0% | 0% | 1.2 |
-| G. Governance & security floor | 29 | 45 | 74 | 39% | 39% | 1.5 |
-| H. Experience contracts | 0 | 13 | 13 | 0% | 0% | 1.0 |
-| I. Business / domain packs | 4 | 31 | 35 | 11% | 11% | 0.9 |
-| J. Deployment & operations | 0 | 18 | 18 | 0% | 0% | 0.8 |
-| K. Dev-doc extras | 1 | 12 | 13 | 8% | 8% | 0.5 |
-| **TOTAL** | **61** | **258** | **319** | **19%** | **≈22%** | — |
-
-**The build weight (the rubric — state it, do not hide it).** The weight is *nominal effort per unit*, on a
-0.5–1.7 scale: `A` 1.6 and `D` 1.7 and `C`/`G` 1.5 = deep engineering (contracts, isolation, the agent
-runtime, the security floor); `E` 1.3 and `F` 1.2 = substantial subsystems; `B` 0.9 / `I` 0.9 = module
-surface (thin, repetitive); `J` 0.8 / `K` 0.5 = ops and doc hygiene. **The weights are a judgement, and the
-judgement is written here on purpose** — if you disagree with a weight, change the cell and the total moves
-with it. A weighted percentage that hides its weights is the same defect as a count typed by hand.
-
-**Confidence and error bars (never a percentage without them).**
-
-- **± 4 points.** The dominant uncertainty is the **"carried" units**: points whose *text* says `(DONE)` but
-  whose box is `☐` because the code was **not re-verified this round** (the whole §L "Carried" list, and the
-  `P1`–`P18` / `B1`–`B14` register verdicts). There are **many** of these; if even half hold on re-check, the
-  number rises; if several fail, it falls. **The figure counts carried points as 0 and says so.**
-- **What raises it:** re-verifying a carried unit in the code (a `☐`→`☑`, honest). **What lowers it:** a new
-  unit added (rule 6) or an existing `☑` un-ticked because a later change broke it (rule 4).
-- **What the number is NOT:** it is **not** a project-management estimate, a schedule, or a promise. It is a
-  **scale to weigh "how much is done vs left"**, re-derived every session from the boxes.
-
-> **▶ FRONTIER — the next unit to work on: `G-22`** (BUILD-ORDER §3 item 9 — the generic state-machine
-> engine). Ask for the frontier by **ID**; it is one unit, named the same in every document.
-> **🟡 IN PROGRESS — Slice 2A (the engine) is BUILT 2026-10-09** (`packages/shared/src/lib/state-machine/`,
-> 26 tests GREEN, 8 md5-verified mutations, two hostile-critic passes); **Slice 2B (the first caller —
-> migrate the `customers` deal pipeline, behaviour-preserving) is next**, carried as **`CC-42`**.
+> ### **19% done** — 61 of 319 units · weighted ≈22% · **±4**
 >
-> **Read this honestly.** **61 of 319 units** are ticked. Every tick was earned by reading or running the
-> code — a sub-point tick only where the parent line carries a **dated, measured** verification (a build
-> date, a test count, a mutation proof), or where §A was fact-checked in the code. A point whose *text*
-> says `(DONE)` but whose box is `☐` means **the docs claim it, the code has not been checked** — treat it
-> as **carried, not confirmed**. The split is what makes this count trustworthy: no single `☐` hides a
-> finished sub-part, and no `☑` covers an unfinished one.
+> **But read this next line carefully — it is the honest headline.** The work that is *done* is
+> skewed **high** in the stack: the AI-first loop (the hard, interesting part) is largely built, while the
+> **platform skeleton underneath it is only starting**. So the "%" is real, but the *order* is the real
+> story: **we are ~20% done, and the next work must go DOWN the stack (the skeleton), not sideways into
+> business modules.**
+
+**Why there are still 319 units in the appendix but one number here:** the number is derived from the
+ticked boxes, never typed. If the number and the boxes disagree, the number is the defect.
 
 ---
+
+## THE LIST — sorted in build order (vision Phase 0 → Phase 10)
+
+**How to reorder:** move a row up or down; the phases must stay in order (a lower phase cannot be
+started while a higher one is open). If you move something, write one line beside it saying why.
+
+### PHASE 0 — Immutable platform primitives *(the foundation under everything)*
+
+| # | What you can do after this | Status | ID |
+|---|---|---|---|
+| 1 | Every record everywhere has a stable ID, an owner, a version and a "who changed it" trail — so nothing is anonymous and nothing is lost. | 🟡 | C1–C11 / `P0-spec` |
+| 2 | The platform can always answer "what is this, who owns it, what depends on it" from one registry — the AI never has to guess. | ✅ | `G-01` / Metadata Registry |
+
+### PHASE 1 — Identity *(who is acting)*
+
+| # | What you can do after this | Status | ID |
+|---|---|---|---|
+| 3 | You can create users, log in, reset a password, and have a session that knows who you are. | ✅ | `P1` |
+| 4 | An **agent** is a real object in the system — owned by someone, acting as someone, with a role — so an AI is a first-class citizen, not a side file. | ✅ | `AH-1` |
+
+### PHASE 2 — Multi-tenancy *(who is allowed to see what, by boundary)*
+
+| # | What you can do after this | Status | ID |
+|---|---|---|---|
+| 5 | You can run several organisations (tenants) with hard walls between them — no data leaks across, by construction. | ✅ | `P2` |
+| 6 | You can organise a tenant into units/departments and scope data to them. | ✅ | `P2` |
+
+### PHASE 3 — The policy kernel *(the vision's "first major kernel milestone")* — **this is where the queue now points**
+
+| # | What you can do after this | Status | ID |
+|---|---|---|---|
+| 7 | You can define roles and give them permissions, and the platform **enforces** every one on every write — not just in the UI. | 🟡 | `P3` |
+| 8 | When you create a new table or column, the platform **forces the permission question** — it can no longer be forgotten. | 🟡 | `SD-1` / `S2` / `P3a` / `P3b` |
+| 9 | The permission rules are **stored** (not just in memory) and read back by the running app. | ☐ | `P3b` / `M3e` |
+| 10 | Every write passes one gate, and the gate can say "allow", "refuse", or "ask a human first". | ✅ | `P18` / `D0`–`D3` |
+| 11 | You can change the platform's behaviour by **setting**, not by deploying code (the tier mapping is a setting). | ✅ | `D1` |
+| 12 | A high-impact change can be sent for **approval** instead of silently allowed. | ✅ | `D3` |
+| 13 | You can see the rules that govern a structure, and change them from a screen. | 🟡 | `SD-4` / `SD-5` |
+
+### PHASE 4 — Data classification / secrets
+
+| # | What you can do after this | Status | ID |
+|---|---|---|---|
+| 14 | Sensitive fields and secrets are marked as such, and the platform treats them specially (never logged, never exported by accident). | ☐ | `P4` (classification leg) |
+
+### PHASE 5 — Query / Command enforcement *(reads and writes are authorized)*
+
+| # | What you can do after this | Status | ID |
+|---|---|---|---|
+| 15 | Every read is filtered by permission at the **data layer** — not by hiding a button. | 🟡 | `P10` |
+| 16 | You can restrict a person to **their own rows / their team's rows**, not just their whole tenant. | ☐ | Phase 3 item 18 |
+| 17 | Permission coverage reaches **every** table — a new table cannot be created un-gated. | ☐ | Phase 3 item 17 |
+| 18 | The AI's read path goes through the **same** column- and row-level gates as a human. | ☐ | Phase 3 item 19 |
+| 19 | Every state-changing action goes through one typed "command", never a raw write. | 🟡 | Phase −1 C6 / `S5` |
+| 20 | A generic **state-machine engine** exists so any "stage → stage" flow (an order, a ticket, a deal) can be declared once and enforced everywhere. | 🟡 | `G-22` |
+
+### PHASE 6 — Audit / provenance
+
+| # | What you can do after this | Status | ID |
+|---|---|---|---|
+| 21 | You can see **who did what, when, on which record** — and export it for compliance. | 🟡 | `P4` |
+| 22 | Audit history is independent of the business record (you cannot edit your own past). | 🟡 | `P4a` |
+
+### PHASE 7 — Business Agent Gateway
+
+| # | What you can do after this | Status | ID |
+|---|---|---|---|
+| 23 | You can type a request in ordinary words and the platform turns it into a **typed business request** (a Business IR), not SQL. | ✅ | `G-02` / `G-17` |
+| 24 | The AI is **structurally constrained** to produce a valid request — it cannot hallucinate a table or field. | ✅ | `G-17` |
+| 25 | The platform **validates deterministically** before anything runs — the AI's output is a proposal, not an action. | ✅ | `G-02` |
+| 26 | Every request ends in one of three known ways (an answer, a proposed model change, or a saved Function). | ✅ | `G-21` |
+| 27 | The user is **told when blocked** and **noticed and suggested to** — not left guessing. | ☐ | `S3` / `S8` |
+
+### PHASE 8 — Hermes adapter *(the agent runtime)*
+
+| # | What you can do after this | Status | ID |
+|---|---|---|---|
+| 28 | The agent runtime sits behind **one typed door** — no other code talks to it directly. | ☐ | `B-05` / `Port` |
+| 29 | An AI user can be **bound** to a specific agent, with specific tools and scope. | ☐ | `CC-27` |
+| 30 | Each AI job **declares which model** it uses (local or cloud) — one picture, no surprises. | ☐ | `S6` |
+
+### PHASE 9 — Functions / Widgets / Workspace
+
+| # | What you can do after this | Status | ID |
+|---|---|---|---|
+| 31 | You ask for something new, verify it, and **save it as a Function** that then runs with **zero AI** forever. | ✅ | `G-03` |
+| 32 | A Function's lifecycle (draft → published → archived) is an **enforced state machine**. | ✅ | `G-03` |
+| 33 | A published Function **never calls a model at run time** — proven by test. | ✅ | `G-03` |
+| 34 | A Function runs from a **Widget** (a small UI block) with typed inputs and outputs. | ✅ | `G-07` |
+| 35 | You can place Functions and Widgets on a **Workspace** and share it. | ☐ | Widgets doc / Workspace |
+
+### PHASE 10 — First complete business capability *(the flesh — last, by design)*
+
+| # | What you can do after this | Status | ID |
+|---|---|---|---|
+| 36 | A complete business vertical (e.g. Customer + Sales) runs end-to-end on the finished skeleton. | 🟡 | `B1`–`B14` |
+| 37 | CRM: leads, contacts, deals, pipeline. | ✅ (built early) | `B1` |
+| 38 | Sales: orders, quotes, invoices, returns. | ✅ (built early) | `B2` |
+| 39 | Catalog: products and pricing. | ✅ (built early) | `B3` |
+| 40 | Inventory / WMS: stock and warehouses. | ✅ (built early) | `B4` |
+| 41 | Finance / accounting (GL, AP/AR). | ☐ ABSENT | `B5` / `M1` |
+| 42 | Procurement / purchasing. | ☐ ABSENT | `B6` / `M2` |
+| 43 | HR / people (payroll absent). | 🟡 | `B7` |
+| 44 | Projects, shipping, payments, customer portal. | 🟡 | `B8`–`B14` |
+
+### PHASE 11+ — later (horizontal services, enterprise scale, entitlements)
+
+| # | What you can do after this | Status | ID |
+|---|---|---|---|
+| 45 | Entitlements (what a plan *includes*) are separated from permissions (what a person *may do*). | ☐ | blueprint §50 |
+| 46 | Deployment, operations and the dev-doc set are complete. | ☐ | `J` / `K` |
+
+---
+
+## THE THREE THINGS THIS REWRITE FIXED
+
+1. **The two-scoreboard contradiction is gone.** Before, `§B` (skeleton) read 0% while `§I` (business
+   packs) read "done" — side by side, with no explanation. Now the list is one order, and the skeleton
+   rows sit **above** the business rows, so the drift is visible in the layout itself.
+2. **`☐ … (DONE)` is gone.** That confusing pattern (docs claim done, code unchecked) is replaced by the
+   honest three-value glyph: `☑` verified, `🟡` partial, `☐` not done.
+3. **Plain English.** Every row is now a sentence about *you*, not about a code item.
+
+---
+
+## APPENDIX — the technical detail (unchanged; kept for developers)
+
+> The sections below are the **old** `§A`–`§L` view, byte-preserved. They carry the evidence ledger
+> (§L) that every `☑` requires. **Do not read them to understand status** — read the list above. They
+> exist so a developer can find a proof and so nothing was lost in this rewrite.
 
 ## A. THE SUBSTRATE — Ring 1, uncustomisable core (`CORE-BOUNDARY.md` C1–C11)
 

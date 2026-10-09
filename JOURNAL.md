@@ -9,6 +9,30 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ## ★ ACTIVE TASK — what is being worked on right now
 
+> ### 🔴 OWNER'S RULING 2026-10-09 — THE ORDER IS THE VISION'S ORDER, AND THE SCOREBOARD IS PLAIN ENGLISH
+>
+> The owner challenged the direction: *"If I am understanding what is happening now right, you flipped
+> the development in a reverse order."* I measured it against the primitive vision
+> (`library/ai/ai-first/06_Platform_Foundation_and_Security_Kernel_Specification.md` §222–232, the
+> vision's own Phase 0 → Phase 10 build order, and §233 *"Do not start by building dozens of ERP
+> screens … while the security model remains informal"*). **Honest verdict: the order document is not
+> reversed, but the *measured* scoreboard and the queue had drifted — the skeleton (vision Phase 3, the
+> policy kernel) sits at `§B P1`–`P18` = 0/36, while four business modules (vision Phase 10) are ticked
+> DONE, and the next queued slice was a CRM pipeline. The owner is right about the direction of travel.**
+>
+> **Two rulings given (via the question card, 2026-10-09):**
+> 1. **Build order = the vision's order.** Finish the architectural skeleton first (Phase 3 policy
+>    kernel → Phase 4 classification → Phase 5 enforcement → Phase 6 audit → Phase 7 gateway), and only
+>    build business capabilities (CRM/Sales/etc.) *after*. **No business-module work until then.**
+> 2. **The task list = one plain-English scoreboard that REPLACES `platform_points.md`'s technical
+>    view.** *Landed this change* — `platform_points.md` now opens with **one number** and **one list**
+>    sorted in the vision's Phase 0 → Phase 10 order, each row written as *what the user can do after
+>    it*; the old `§A`–`§L` view is kept **byte-identical** as an appendix (developer evidence, §L).
+>
+> **`G-22` Slice 2B is PAUSED, not cancelled** — it is the `customers` caller and therefore Phase-10
+> (business) work. It stays scheduled as **`CC-42`**; it resumes only if the owner says so, or once
+> Phase 3–7 are done (whichever comes first). **The queue now points at Phase 3 (the policy kernel).**
+
 **This section exists because the owner asked for it (2026-10-06).** Handover documents must **not**
 say what is next to do — what is next changes every session, and a stale "next" is worse than none.
 **The one place that carries "what we are doing now" is this section, at the top of the development
