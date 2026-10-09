@@ -14,12 +14,28 @@
 
 ## HOW TO READ THIS FILE (30 seconds)
 
-- Every point is **one line**: `☐ **ID** — what it is *(reason if LEFT)*`.
-- **`☑` = DONE.** The point is finished, and it was **verified in the code** — 100%, critically reviewed.
+- **Every unit of work is one line with one stable ID**: `☐ **ID** — what it is *(reason if LEFT)*`.
+  An ID is the unit's *name* — it never changes and it means the same thing in every document.
+  **Talk in IDs, never in positions** ("item 9" means nothing outside one file; `G-22` means one thing
+  everywhere).
+- **`☑` = DONE.** The unit is finished, and it was **verified in the code** — 100%, critically reviewed.
   Nothing else earns a tick.
-- **`☐` = LEFT.** Either genuinely not done, or **a doc claims it is done but the code was not verified**.
-  The parenthetical says which.
-- **The total at the foot tells you the whole project in one glance.**
+- **`☐` = LEFT.** Either genuinely not done, or **a doc claims it is done but the code was not verified**
+  (written `⬜` in the notes below). The parenthetical says which.
+- **`🟡` = PARTIAL.** Real, proven work exists, but the unit is not whole — the remainder is **named and
+  scheduled**. A `🟡` is **never** a tick: it scores **less than 1** in the weighted view. It exists so a
+  reader is not told *"nothing happened"* about a unit (e.g. `S2`) where weeks of proven work landed.
+  (Full method below.)
+- **A partial unit is split into sub-units.** When a point is *partly* done, it is **not** left as one
+  ambiguous `☐`; it is broken into named sub-points (`S2a`, `S2b`, …), each carrying **its own** honest
+  tick. The parent line keeps `☐` and shows a **derived** rollup `▸ n/N` (how many of its sub-points are
+  done). So an unticked box **never hides finished work** — you can see exactly what is done and what is
+  left.
+- **The count is derived from the units, not typed by hand.** Unit = a whole (unsplit) point, **or** each
+  sub-point of a split parent — never both. `▸ n/N` and the table below are computed from the ticks, so
+  they cannot drift from the boxes.
+- **`▶ FRONTIER`** marks the next point to work on — answered by an **ID**, so "what is next" always
+  resolves to the same unit everywhere.
 
 ### The strict tick rule (owner's instruction, 2026-10-07 — this is the law of this file)
 
@@ -37,7 +53,9 @@
    and note the disagreement in §L.
 4. **Un-tick freely.** If a later change breaks a point, its box goes back to `☐` immediately. A stale
    `☑` is a defect in this file.
-5. **Never a "partial" tick.** `PART` is `☐`. Only whole points are ticked, and only at 100%.
+5. **Never a "partial" tick — split instead.** A partly-done point is **not** ticked and **not** left as
+   one ambiguous `☐`: it is **split into named sub-points**, each whole, each ticked or not on its own
+   merits. The parent stays `☐` and shows `▸ n/N`. Only whole units are ticked, and only at 100%.
 6. **Adding work is a bug fix.** A point that the sources require and this file lacks is a defect in
    this file — add it, and record where it came from.
 
@@ -47,45 +65,114 @@
 
 ## PROGRESS AT A GLANCE
 
-| Section | DONE | LEFT | Total |
-|---|---:|---:|---:|
-| A. Substrate (C1–C11) | 0 | 12 | 12 |
-| B. Platform skeleton (P1–P18) | 0 | 18 | 18 |
-| C. AI-first native layer | 14 | 10 | 24 |
-| D. Hermes | 1 | 24 | 25 |
-| E. Agent half | 0 | 17 | 17 |
-| F. Model layer | 0 | 14 | 14 |
-| G. Governance & security floor | 9 | 31 | 40 |
-| H. Experience contracts | 0 | 13 | 13 |
-| I. Business / domain packs | 1 | 17 | 18 |
-| J. Deployment & operations | 0 | 14 | 14 |
-| K. Dev-doc extras | 1 | 12 | 13 |
-| **TOTAL** | **26** | **182** | **208** |
+**Counting rule (units, not lines).** A **whole point** counts once; a **split parent** is *not* counted —
+its **sub-points** count instead. A `☑` unit scores **1**; a `🟡` unit scores its **stated fraction**; a `☐`
+scores **0**. Every number below is **derived from the boxes** by re-running the `derive-counts` check in
+§L — **never typed by hand.** If a number here ever disagrees with the boxes, the number is the defect.
 
-> **Read this honestly.** Only **26 of 208** points carry a tick, because the tick rule demands the code
-> be verified — and most points have **not yet been re-verified in code this round**. A point marked
-> `(DONE)` in its line but `☐` here means **the docs claim it, the code has not been checked** — treat
-> it as **carried, not confirmed**. This is the whole purpose of this file: **the docs' word is not the
-> tick.**
+### The two percentages — and why there are two
+
+| View | What it counts | This round | Meaning |
+|---|---|---|---|
+| **Coverage** | units done ÷ units total (all units equal) | **19%** (61 / 319) | "How much of the checklist is ticked" — simple, honest, and it **under-sells** deep work (a week-long unit and a one-line unit both count 1). |
+| **Build-weighted** | units × an **effort weight** per section | **≈22%** (89 / 407) | "How much of the *work* is done" — the better number to weigh progress by, with the weights stated below. |
+
+> **The one honest sentence.** *We are roughly **20%** done — **≈19%** of the checklist, **≈22%** of the
+> build-weighted work. **± 4 points** (see confidence, below). The frontier is `G-22`. Five sections (B, F,
+> H, J, and the `D` Hermes runtime at 3%) are effectively **un-started** — they are the pile ahead, not
+> failures.*
+
+### Per section (derived)
+
+| Section | DONE | LEFT | Total | Coverage | Build-weighted | Effort weight |
+|---|---:|---:|---:|---:|---:|---:|
+| A. Substrate (C1–C11) | 10 | 21 | 31 | 32% | 32% | 1.6 |
+| B. Platform skeleton (P1–P18) | 0 | 36 | 36 | 0% | 0% | 0.9 |
+| C. AI-first native layer | 14 | 14 | 28 | 50% | 50% | 1.5 |
+| D. Hermes | 1 | 38 | 39 | 3% | 3% | 1.7 |
+| E. Agent half | 2 | 16 | 18 | 11% | 11% | 1.3 |
+| F. Model layer | 0 | 14 | 14 | 0% | 0% | 1.2 |
+| G. Governance & security floor | 29 | 45 | 74 | 39% | 39% | 1.5 |
+| H. Experience contracts | 0 | 13 | 13 | 0% | 0% | 1.0 |
+| I. Business / domain packs | 4 | 31 | 35 | 11% | 11% | 0.9 |
+| J. Deployment & operations | 0 | 18 | 18 | 0% | 0% | 0.8 |
+| K. Dev-doc extras | 1 | 12 | 13 | 8% | 8% | 0.5 |
+| **TOTAL** | **61** | **258** | **319** | **19%** | **≈22%** | — |
+
+**The build weight (the rubric — state it, do not hide it).** The weight is *nominal effort per unit*, on a
+0.5–1.7 scale: `A` 1.6 and `D` 1.7 and `C`/`G` 1.5 = deep engineering (contracts, isolation, the agent
+runtime, the security floor); `E` 1.3 and `F` 1.2 = substantial subsystems; `B` 0.9 / `I` 0.9 = module
+surface (thin, repetitive); `J` 0.8 / `K` 0.5 = ops and doc hygiene. **The weights are a judgement, and the
+judgement is written here on purpose** — if you disagree with a weight, change the cell and the total moves
+with it. A weighted percentage that hides its weights is the same defect as a count typed by hand.
+
+**Confidence and error bars (never a percentage without them).**
+
+- **± 4 points.** The dominant uncertainty is the **"carried" units**: points whose *text* says `(DONE)` but
+  whose box is `☐` because the code was **not re-verified this round** (the whole §L "Carried" list, and the
+  `P1`–`P18` / `B1`–`B14` register verdicts). There are **many** of these; if even half hold on re-check, the
+  number rises; if several fail, it falls. **The figure counts carried points as 0 and says so.**
+- **What raises it:** re-verifying a carried unit in the code (a `☐`→`☑`, honest). **What lowers it:** a new
+  unit added (rule 6) or an existing `☑` un-ticked because a later change broke it (rule 4).
+- **What the number is NOT:** it is **not** a project-management estimate, a schedule, or a promise. It is a
+  **scale to weigh "how much is done vs left"**, re-derived every session from the boxes.
+
+> **▶ FRONTIER — the next unit to work on: `G-22`** (BUILD-ORDER §3 item 9 — the generic state-machine
+> engine). Ask for the frontier by **ID**; it is one unit, named the same in every document.
+> *(It sits behind the owner's explicit go — the Work-Stream 2 order.)*
+>
+> **Read this honestly.** **61 of 319 units** are ticked. Every tick was earned by reading or running the
+> code — a sub-point tick only where the parent line carries a **dated, measured** verification (a build
+> date, a test count, a mutation proof), or where §A was fact-checked in the code. A point whose *text*
+> says `(DONE)` but whose box is `☐` means **the docs claim it, the code has not been checked** — treat it
+> as **carried, not confirmed**. The split is what makes this count trustworthy: no single `☐` hides a
+> finished sub-part, and no `☑` covers an unfinished one.
 
 ---
 
 ## A. THE SUBSTRATE — Ring 1, uncustomisable core (`CORE-BOUNDARY.md` C1–C11)
 
 > **Fact-checked in the code 2026-10-07** — every line below was read against the source, not the docs.
-> Verdicts: `NOT DONE` (no code), `PARTIAL` (real code, incomplete), `DONE` (verified, 100%).
-> **No line in this section is `☑`** — and now that is a *measured* result, not a carried claim.
+> Verdicts (three-valued, see §"HOW TO READ"): `⬜ OPEN` (not built), `🟡 PARTIAL` (real code, incomplete —
+> the remainder is named and scheduled), `✅ DONE` (verified, 100%). **Derived this round: 31 units, 10 done
+> (32%)** — split into 7 parents whose 19 sub-points carry the ticks.
 
 - ☐ **C1** — Resource envelope: the shape every object shares *(NOT DONE — no `ResourceEnvelope`/`BaseEntity`/shared base type anywhere in `shared` or `core`; each module declares its own `tenantId`/`organizationId` columns independently)*
-- ☐ **C2** — Actor & context model: who is acting and in what context *(PARTIAL — substantial: `shared/src/lib/auth/principal.ts` (215 lines) is a real first-class `Principal` with 4 kinds (`human`/`ai_worker`/`service`/`system`), `onBehalfOfUserId`, machine predicates, and it replaced the old `startsWith('api_key:')` branching; what is missing is the wider **context** (org/locale/tz/trace) as one model)* · ★ Hermes: the seam every run crosses
-- ☐ **C3** — Tenancy & isolation boundary: every row belongs to a tenant and cannot escape it *(PARTIAL — substantial: the CRUD factory auto-scopes by `tenantField` (default `'tenantId'`) on every read/write (`shared/src/lib/crud/factory.ts`); **no** DB-level RLS policies were found, so isolation is enforced in the query layer, not by the database)* · ★ Hermes: the tenant is derived, never declared
-- ☐ **C4** — Authorization engine: the evaluator and grammar *(PARTIAL — `shared/src/lib/authority/` (1312 lines: `decision.ts` 582 · `shadow-report.ts` 217 · `shadow.ts` 215 · `graph.ts` 182 · `preflight.ts` 116) builds an explainable `Decision` with reasons, and it **is now called in the request path**: `AuthorityEnforcementService` (the command gate + the HTTP RBAC path, which subtract a refusal from an RBAC allowance) and — since `S-02`, code `3add3a2` — the **AI tool door** (`ai-assistant` `lib/tool-authority.ts`). Tenants run `off`/`shadow`(default)/`enforce`; `enforce` binds. **The header quote this row used to carry — "It does not enforce. Nothing calls it in the request path" — was corrected in `decision.ts` on 2026-10-08** (it had been stale since the command gate landed 2026-08-10). **Still PARTIAL — but the *grammar* half is now DECLARED *and enforced for the write verbs*:** `SD-4` Slice C (2026-10-09) built the S11 per-verb grammar — the five verbs in `PERMISSION_BLOCK_VERBS.structural` and the per-(object, verb, actor) **level** in `structural-settings.ts` (`straight`/`review`/`approval`/`never`) — and **CC-37 (2026-10-09) wired it**: the structural guard reads the level **live** and, on a protected surface, escalates an explicit `review`/`approval` rule (D3 `{ok:true, escalation}`, 202) instead of the hard 422. What remains is `read`/`reference` enforcement (CC-34) and, separately, the data axis (`G-04`). So: the grammar **exists, is readable, and is acted on for `add`/`edit`/`remove`**.)* · ★ Hermes: S-02 is where a tool call is authorized — **now wired**
-- ☐ **C5** — Metadata registry & schema conventions *(PARTIAL — the Business Model Kernel `shared/src/lib/kernel/model.ts` (407 lines) **reads** the platform's declarations into a canonical, id-keyed model with a 21-item per-object contract, and `entity-fields-registry` is registered at bootstrap; **the read-only registry service now exists** — `shared/src/lib/kernel/metadata-registry.ts` (2026-10-07, code `59ab859`) answers **what exists · what type · provenance · what depends on it** from the declarations, and returns a **typed absence** for the other ten §54 questions; it is a **live view** over the descriptor. **What is still missing:** the *schema-conventions* half (envelope/contract, `C1`) and the answers that need real links the platform does not yet have — **who can access it** (the authority engine is shadow-mode; SD-4 unbuilt), **what APIs expose it** (no route→object index), and the rest of §54. **And it is not yet consumed** — `SD-1`'s gate can now *enumerate*, but does not call it yet)* · ★ Hermes: how Hermes learns the shape of the business without a DB handle
-- ☐ **C6** — Command / action contract: schema · permissions · side effects · risk · approval · idempotency *(PARTIAL — a real command bus exists (`shared/src/lib/commands/`: `command-bus.ts`, `types.ts`, `undo.ts`, `redo.ts`, `registry.ts`, `operationMetadata.ts`, interceptors, scopes); `types.ts` carries input/execute/undo/redo/capability; whether the *full* contract (risk · approval · idempotency) is uniform across every action was not established)*
+- ☐ **C2** — Actor & context model: who is acting and in what context ▸ 1/2
+-   - ☑ **C2a** — The first-class `Principal`: 4 kinds (`human`/`ai_worker`/`service`/`system`), `onBehalfOfUserId`, machine predicates (`shared/src/lib/auth/principal.ts`, 215 lines) *(DONE — replaced the old `startsWith('api_key:')` branching)*
+-   - ☐ **C2b** — The wider **context** (org/locale/tz/trace) as one model *(LEFT — not built; only the principal exists)*
+-     *(was PARTIAL — substantial: `principal.ts` is real; what is missing is the wider context model)* · ★ Hermes: the seam every run crosses
+- ☐ **C3** — Tenancy & isolation boundary: every row belongs to a tenant and cannot escape it ▸ 1/2
+-   - ☑ **C3a** — Query-layer scoping: the CRUD factory auto-scopes by `tenantField` (default `'tenantId'`) on every read/write (`shared/src/lib/crud/factory.ts`) *(DONE — measured)*
+-   - ☐ **C3b** — DB-level isolation: RLS policies / a database-enforced boundary *(LEFT — no DB-level RLS policies were found; isolation is enforced in the query layer only)*
+-     *(was PARTIAL — substantial: auto-scoping is real; **no** DB-level RLS policies found)* · ★ Hermes: the tenant is derived, never declared
+- ☐ **C4** — Authorization engine: the evaluator and grammar ▸ 3/5
+-   - ☑ **C4a** — The evaluator: `shared/src/lib/authority/` (1312 lines) builds an explainable `Decision` with reasons *(DONE — measured)*
+-   - ☑ **C4b** — Called in the request path: the command gate + the HTTP RBAC path + (since `S-02`, code `3add3a2`) the **AI tool door** (`ai-assistant` `lib/tool-authority.ts`) *(DONE — the header quote "It does not enforce. Nothing calls it in the request path" was **corrected in `decision.ts` on 2026-10-08**; it had been stale since the command gate landed 2026-08-10)*
+-   - ☑ **C4c** — The per-verb **grammar** for the write verbs: `SD-4` Slice C built the S11 per-verb grammar (the five verbs in `PERMISSION_BLOCK_VERBS.structural`; the per-(object, verb, actor) **level** in `structural-settings.ts` — `straight`/`review`/`approval`/`never`) and **CC-37 (2026-10-09) wired it** (the structural guard reads the level **live** and escalates an explicit `review`/`approval` rule to the D3 outcome on a protected surface) *(DONE — the grammar exists, is readable, and is acted on for `add`/`edit`/`remove`)*
+-   - ☐ **C4d** — `read`/`reference` enforcement (the two verbs the write-path guard cannot act on) *(LEFT — CC-34)*
+-   - ☐ **C4e** — The data axis ("may this actor read this row, for this purpose?") *(LEFT — `G-04`)*
+-     *(was PARTIAL — the evaluator is real and is now called in the request path; what remains is the `read`/`reference` half of the grammar and the data axis)* · ★ Hermes: S-02 is where a tool call is authorized — **now wired**
+- ☐ **C5** — Metadata registry & schema conventions ▸ 2/4
+-   - ☑ **C5a** — The kernel **view**: `shared/src/lib/kernel/model.ts` (407 lines) **reads** the platform's declarations into a canonical, id-keyed model with a 21-item per-object contract; `entity-fields-registry` is registered at bootstrap *(DONE — measured)*
+-   - ☑ **C5b** — The read-only registry **service**: `shared/src/lib/kernel/metadata-registry.ts` (2026-10-07, code `59ab859`) answers **what exists · what type · provenance · what depends on it** from the declarations, and returns a **typed absence** for the other ten §54 questions; it is a **live view** over the descriptor *(DONE — measured)*
+-   - ☐ **C5c** — The **schema-conventions** half: the envelope/contract every object shares *(LEFT — that is `C1`, not built)*
+-   - ☐ **C5d** — Consumed by a real caller + the remaining §54 answers that need links the platform does not yet have (**who can access it** — the authority engine is shadow-mode and SD-4 unbuilt; **what APIs expose it** — no route→object index) *(LEFT — `SD-1`'s gate can now *enumerate* but does not call it yet)*
+-     *(was PARTIAL — the view and the service are real; what is missing is the schema-conventions half and real consumption)* · ★ Hermes: how Hermes learns the shape of the business without a DB handle
+- ☐ **C6** — Command / action contract: schema · permissions · side effects · risk · approval · idempotency ▸ 1/2
+-   - ☑ **C6a** — A real command bus: `shared/src/lib/commands/` (`command-bus.ts`, `types.ts`, `undo.ts`, `redo.ts`, `registry.ts`, `operationMetadata.ts`, interceptors, scopes); `types.ts` carries input/execute/undo/redo/capability *(DONE — measured)*
+-   - ☐ **C6b** — The **full** contract uniform across every action (risk · approval · idempotency) *(LEFT — whether it is uniform was not established)*
+-     *(was PARTIAL — the bus is real; the full contract is unproven)*
 - ☐ **C7** — Event envelope (CloudEvents-shaped) *(NOT DONE — the entire `shared/src/lib/events/` directory is `patterns.ts` + its test; there is **no envelope type** at all. A separate `packages/events` package exists but was not the envelope)*
-- ☐ **C8** — Audit contract: every mutation records who · what · when · before · after · actor_type · trace *(PARTIAL — the `audit_logs` module is real (`packages/core/src/modules/audit_logs/`, with API, undo/redo, export, a mutation-guard, and a CLI); it records user/action/field/before/after/createdAt; `actor_type` and a request/trace id are not confirmed complete)*
+- ☐ **C8** — Audit contract: every mutation records who · what · when · before · after · actor_type · trace ▸ 1/2
+-   - ☑ **C8a** — The `audit_logs` module: `packages/core/src/modules/audit_logs/` (API, undo/redo, export, a mutation-guard, a CLI); it records user/action/field/before/after/createdAt *(DONE — measured)*
+-   - ☐ **C8b** — `actor_type` and a request/trace id on every record *(LEFT — not confirmed complete)*
+-     *(was PARTIAL — the module is real; two fields of the contract are unconfirmed)*
 - ☐ **C9** — Migration & versioning contract: plan → validate → migrate → verify *(NOT DONE — per-module MikroORM migration folders exist (`<module>/migrations`), but there is **no** plan/validate/verify contract: a grep for `planMigration`/`validateMigration`/`verifyMigration`/`migrationPlan` across `shared` and `core` finds nothing)*
-- ☐ **C10** — Localization resolution: fallback chain + formatting contracts *(PARTIAL — `shared/src/lib/i18n/locale.ts` has a real resolution chain (`resolveLocaleFromCandidates`: requested → base-locale → null), plus `number.ts` and `date/format.ts`; but the specified five-step chain (requested → lang+region → lang → app default → platform) and the formatting **contracts** (as a contract, not helpers) are incomplete — GAP C)*
+- ☐ **C10** — Localization resolution: fallback chain + formatting contracts ▸ 1/2
+-   - ☑ **C10a** — A real resolution chain: `shared/src/lib/i18n/locale.ts` (`resolveLocaleFromCandidates`: requested → base-locale → null), plus `number.ts` and `date/format.ts` *(DONE — measured)*
+-   - ☐ **C10b** — The specified five-step chain (requested → lang+region → lang → app default → platform) and the formatting **contracts** (as a contract, not helpers) *(LEFT — GAP C)*
+-     *(was PARTIAL — the chain helper is real; the specified chain and the contracts are incomplete)*
 - ☐ **C11** — Error model: code · message · details · field_errors · retryable · trace *(NOT DONE — `shared/src/lib/crud/errors.ts` builds only `{ error: message }` (`badRequest`/`forbidden`/`notFound`/`conflict`); the tokens `field_errors`/`retryable` appear scattered across files, not as one canonical error model)*
 - ☐ **Ring-1 enforcement** — no config key for core; migration contract the only door; a test asserts the core *(NOT DONE — no test asserting the core contracts was found, and the migration contract (C9) that was to be "the only door" does not exist)*
 
@@ -95,21 +182,48 @@
 
 - ☐ **P1 Identity & accounts** — users · sessions · password reset · consent · login *(DONE — the strongest module; not re-verified this round)*
 - ☐ **P2 Tenancy & org structure** — tenants · organisations · hierarchy · scoping *(DONE — not re-verified this round)*
-- ☐ **P3 Roles & permissions (RBAC/ACL)** — roles · grants · feature gates *(PART — two-table ACL real; the permissions catalogue now exists as a typed service (`SD-1`, 2026-10-08) but is not yet persisted for runtime surfaces nor consumed by a write)*
-- ☐ **P4 Audit & compliance log** — who/when/which record; retention/export *(PART — read+create API, one viewer page)*
+- ☐ **P3 Roles & permissions (RBAC/ACL)** — roles · grants · feature gates ▸ 0/2 *(no sub-part verified in code this round)*
+-   - ☐ **P3a** — Two-table ACL + the typed permissions-catalogue **service** (`SD-1`, 2026-10-08) *(carried — docs claim it, the code was not re-verified this round)*
+-   - ☐ **P3b** — Persisted for runtime surfaces + consumed by a write *(LEFT — in-process only; see `SD-1`)*
+-     *(was PART — two-table ACL real; the catalogue service exists but is not yet persisted for runtime surfaces nor consumed by a write)*
+- ☐ **P4 Audit & compliance log** — who/when/which record; retention/export ▸ 0/2 *(no sub-part verified in code this round)*
+-   - ☐ **P4a** — Read + create API and one viewer page *(carried — docs claim it, not re-verified this round)*
+-   - ☐ **P4b** — Retention and export *(LEFT)*
+-     *(was PART — read+create API, one viewer page)*
 - ☐ **P5 Settings / configuration** — instance- and tenant-level *(DONE — `module_configs`; hosts the tier setting)*
 - ☐ **P6 File / document storage** — attachments · partitions · backends *(DONE)*
-- ☐ **P7 Notifications** — in-app + email + push, templates *(PART — templates code-defined, not user-editable)*
+- ☐ **P7 Notifications** — in-app + email + push, templates ▸ 0/2 *(no sub-part verified in code this round)*
+-   - ☐ **P7a** — The notification engine (in-app + email + push) *(carried — docs claim it, not re-verified this round)*
+-   - ☐ **P7b** — User-editable templates *(LEFT — templates are code-defined, not user-editable)*
+-     *(was PART — templates code-defined, not user-editable)*
 - ☐ **P8 Workflow / automation engine** — definitions · instances · steps · user tasks *(DONE)*
 - ☐ **P9 Business rules engine** — declarative conditions → actions *(DONE)*
-- ☐ **P10 Search / indexing** — full-text + vector *(PART — strong engine, thin UI, `aclFeatures` 6 of 67 tables)*
-- ☐ **P11 Integrations & sync** — external systems · credentials · mapping · cursors *(PART — read+update only)*
-- ☐ **P12 API keys / programmatic access** — machine auth *(PART — one composite route file)*
-- ☐ **P13 i18n / localisation** — translation catalogue · locales *(PART — single-route API, one UI page)*
+- ☐ **P10 Search / indexing** — full-text + vector ▸ 0/2 *(no sub-part verified in code this round)*
+-   - ☐ **P10a** — A strong search engine *(carried — docs claim it, not re-verified this round)*
+-   - ☐ **P10b** — A real UI + full ACL-feature coverage (`aclFeatures` covers 6 of 67 tables) *(LEFT — thin UI; blocks the AI data work)*
+-     *(was PART — strong engine, thin UI, `aclFeatures` 6 of 67 tables)*
+- ☐ **P11 Integrations & sync** — external systems · credentials · mapping · cursors ▸ 0/2 *(no sub-part verified in code this round)*
+-   - ☐ **P11a** — Read + update *(carried — docs claim it, not re-verified this round)*
+-   - ☐ **P11b** — Create / delete · credential management · cursor persistence *(LEFT — read+update only)*
+-     *(was PART — read+update only)*
+- ☐ **P12 API keys / programmatic access** — machine auth ▸ 0/2 *(no sub-part verified in code this round)*
+-   - ☐ **P12a** — One composite route file *(carried — docs claim it, not re-verified this round)*
+-   - ☐ **P12b** — The complete route set *(LEFT — one composite route file)*
+-     *(was PART — one composite route file)*
+- ☐ **P13 i18n / localisation** — translation catalogue · locales ▸ 0/2 *(no sub-part verified in code this round)*
+-   - ☐ **P13a** — A single-route API + one UI page *(carried — docs claim it, not re-verified this round)*
+-   - ☐ **P13b** — A full translation management surface *(LEFT)*
+-     *(was PART — single-route API, one UI page)*
 - ☐ **P14 Feature flags** — gradual rollout · kill switches *(DONE)*
-- ☐ **P15 Dashboards / widgets / perspectives** — configurable views *(PART — tables+APIs exist, ZERO UI)*
+- ☐ **P15 Dashboards / widgets / perspectives** — configurable views ▸ 0/2 *(no sub-part verified in code this round)*
+-   - ☐ **P15a** — Tables + APIs *(carried — docs claim it, not re-verified this round)*
+-   - ☐ **P15b** — The configuration UI *(LEFT — tables+APIs exist, ZERO UI)*
+-     *(was PART — tables+APIs exist, ZERO UI)*
 - ☐ **P16 Custom fields / entity extension** — user-defined tables and columns *(DONE)*
-- ☐ **P17 Background jobs / scheduler** — workers · queues · schedules *(PART — service+API, no UI)*
+- ☐ **P17 Background jobs / scheduler** — workers · queues · schedules ▸ 0/2 *(no sub-part verified in code this round)*
+-   - ☐ **P17a** — The service + API *(carried — docs claim it, not re-verified this round)*
+-   - ☐ **P17b** — The jobs/scheduler UI *(LEFT — service+API, no UI)*
+-     *(was PART — service+API, no UI)*
 - ☐ **P18 Guard / mutation policy engine** — the gate every write passes *(DONE — D0 fixed; D2-wide enabled-complete; D2-gap 0)*
 
 ---
@@ -137,8 +251,14 @@
 - ☐ **G-12** — Business backup and restore *(OPEN — the safety net)*
 - ☐ **G-19** — A proprietary ERP benchmark *(OPEN)*
 - ☐ **G-20** — Freshness, lineage and continuous linting *(OPEN)*
-- ☐ **Vision** — Business Model Kernel object list (31 objects + 4 contracts) *(PART)*
-- ☐ **Vision** — Core data vs capability data: one business universe, no DB islands *(PART)*
+- ☐ **Vision** — Business Model Kernel object list (31 objects + 4 contracts) ▸ 0/2 *(no sub-part verified in code this round)*
+-   - ☐ **Vision.a** — The object list + contracts are enumerated *(carried — in the vision docs)*
+-   - ☐ **Vision.b** — Every one of the 31 objects exists in code *(LEFT — partially; see §C `G-01`/`G-08`)*
+-     *(was PART)*
+- ☐ **Vision** — Core data vs capability data: one business universe, no DB islands ▸ 0/2 *(no sub-part verified in code this round)*
+-   - ☐ **Vision.a** — The principle is written down *(carried — in the vision docs)*
+-   - ☐ **Vision.b** — No DB islands in code (every pack shares the universe) *(LEFT — `N-6` `customer_accounts` is a named island)*
+-     *(was PART)*
 - ☐ **Vision** — Schema compiler: model → DB + API + UI + AI + MCP + skills + docs + tests *(OPEN — pieces exist, no single compiler)*
 
 ---
@@ -150,20 +270,41 @@
 - ☐ **Port** — The admitted envelope: server-minted identity, secret *references*, distinct ids *(OPEN)*
 - ☐ **Port** — Failure is normal: `cancelRun` bounded+idempotent, `completeRun` replay-safe *(OPEN)*
 - ☐ **N-8** — Displace OpenCode: build the port, move the chat route, *then* delete OpenCode *(OPEN — rewire first)*
-- ☐ **Hermes id** — `ai_worker` principal derived server-side; no branch on `kind` in own files *(PART — seam built, must extend + enforce)*
+- ☐ **Hermes id** — `ai_worker` principal derived server-side; no branch on `kind` in own files ▸ 0/2 *(no sub-part verified in code this round)*
+-   - ☐ **Hermes id.a** — The seam (`aiWorkerSubject`/`derivePrincipal`/`PrincipalKind`) *(carried — the seam is real; not ticked, per §L)*
+-   - ☐ **Hermes id.b** — Extended and **enforced** — no branch on `kind` in Hermes's own files *(LEFT — must extend + enforce)*
+-     *(was PART — seam built, must extend + enforce)*
 - ☐ **AH-1** — The five agent kinds **enforced** on the agent definition *(ENFORCEMENT LEG — distinct from the `AH-1` object in §E, which is DONE 2026-10-09. The five kinds `personal · role · context · independent · system` ARE declared as the `kind` field's option set (`ai_assistant/ce.ts`, code `1a518f8`), so the vocabulary is one source for DB/API/UI — but they are a declared enumerable, not yet an **enforced per-kind definition** (what each kind *decides* about visibility/ownership). That enforcement is owned by `AH-2` (the autonomy gate, needs `G-04`) / the agent-half phase 2, not by the object declaration. Stays `☐` per the never-a-partial-tick rule; it does **not** block the `AH-1` object in §E.)*
-- ☐ **Tool door** — One door only: in-process client + tool registry/executor/mcp-adapter; every call re-authorizes; no DB handle *(PART)*
+- ☐ **Tool door** — One door only: in-process client + tool registry/executor/mcp-adapter; every call re-authorizes; no DB handle ▸ 0/2 *(no sub-part verified in code this round)*
+-   - ☐ **Tool door.a** — The single door: in-process client + registry/executor/mcp-adapter *(carried)*
+-   - ☐ **Tool door.b** — Every call re-authorizes + no DB handle leaks *(LEFT — `S-02` wires the authorization; the completeness of the door is unverified)*
+-     *(was PART)*
 - ☑ **S-02** — Tool-call authorization at execution time, deny-by-default *(DONE 2026-10-08, code `3add3a2`)* · ★ Hermes: where a tool call is allowed or denied
 - ☐ **G-06** — AI input/output guards + the context firewall (prompt-injection + exfiltration) *(OPEN)*
-- ☐ **Provider** — Provider choice and fallback; allowlist and local/cloud rule stay ours *(PART)*
-- ☐ **Sessions** — Session continuity as a projection keyed by our ids; our records canonical *(PART)*
+- ☐ **Provider** — Provider choice and fallback; allowlist and local/cloud rule stay ours ▸ 0/2 *(no sub-part verified in code this round)*
+-   - ☐ **Provider.a** — Provider choice + fallback exists *(carried)*
+-   - ☐ **Provider.b** — An allowlist + the local/cloud rule, ours to set *(LEFT)*
+-     *(was PART)*
+- ☐ **Sessions** — Session continuity as a projection keyed by our ids; our records canonical ▸ 0/2 *(no sub-part verified in code this round)*
+-   - ☐ **Sessions.a** — Session continuity as a projection *(carried)*
+-   - ☐ **Sessions.b** — Keyed by **our** ids, our records canonical *(LEFT)*
+-     *(was PART)*
 - ☐ **Memory** — Long-lived tenant-scoped memory artifact with consent, export, retention, deletion *(MISSING)*
 - ☐ **AH-9** — Governed skills catalog: provenance · scan · version · approve · pin · roll back · revoke *(MISSING)* · ★ Hermes: "Hermes learns as you go"
 - ☐ **Subagents** — Bounded child runs with budgets, deadlines, cancellation, trace *(MISSING)*
-- ☐ **Channels** — Rooms own identity; Hermes channels are adapters, never a second inbox *(PART)*
+- ☐ **Channels** — Rooms own identity; Hermes channels are adapters, never a second inbox ▸ 0/2 *(no sub-part verified in code this round)*
+-   - ☐ **Channels.a** — Channels exist as adapters *(carried)*
+-   - ☐ **Channels.b** — Rooms own identity (never a second inbox) *(LEFT)*
+-     *(was PART)*
 - ☐ **Runtime state** — Isolated per tenant and agent; export, backup, delete, retention *(MISSING)*
-- ☐ **Scheduling** — Our scheduler owns every business job; Hermes cron runtime chores only *(PART)*
-- ☐ **Sandbox** — Disposable, quota-bounded, network-policed worker *(PART — highest risk)*
+- ☐ **Scheduling** — Our scheduler owns every business job; Hermes cron runtime chores only ▸ 0/2 *(no sub-part verified in code this round)*
+-   - ☐ **Scheduling.a** — A scheduler exists *(carried)*
+-   - ☐ **Scheduling.b** — It owns **every business job**; Hermes cron does runtime chores only *(LEFT — needs the `G-18` enforcement gate)*
+-     *(was PART)*
+- ☐ **Sandbox** — Disposable, quota-bounded, network-policed worker ▸ 0/2 *(highest risk; no sub-part verified in code this round)*
+-   - ☐ **Sandbox.a** — A sandbox exists *(carried)*
+-   - ☐ **Sandbox.b** — Disposable + quota-bounded + network-policed *(LEFT — highest risk)*
+-     *(was PART — highest risk)*
 - ☐ **Phase 0** — Pin the Hermes source digest + a compatibility harness *(OPEN)*
 - ☐ **Phase 0** — State the licence position, including optional components *(OPEN — V-09 gates adoption)*
 - ☐ **Never 1** — A model-widened grant *(invariant — must hold)*
@@ -217,18 +358,58 @@
 
 ## G. THE GOVERNANCE & SECURITY FLOOR — `S1`–`S12` + the `G-`/`SD-`/`D` items
 
-- ☐ **S1** — Every architectural change is gated and inspected before it is applied *(PART)*
-- ☐ **S2 (= SD-1)** — Every architectural change answers the permissions question: catalogue + fail-closed gate *(PARTIAL 2026-10-08 — the **decision core AND the enforcement are built and proven, on every create path**: the permission catalogue (`shared/src/lib/permissions/catalogue.ts` — surfaces + the two blocks they yield) and a pure fail-closed gate (`structure-change-gate.ts`), a `MutationGuard` hook on the entities `create` path, and **the write** (`auth/lib/permission-decision-grant.ts` — applies the gate's `defaulted` records to the tenant's grant role's `role_acls.features_json`, idempotent set-union, S5), wired in the guards' `afterSuccess` and carried from `validate` to `afterSuccess` by the real runner, **run directly by the batch definitions route** for the columns it creates (the registry maps that route to `'update'` and its payload carries no field list, so the gate runs where the create is actually known), **run in the shared primitive `ensureCustomFieldDefinitions`** (`entities/lib/field-definitions.ts`, the choke point behind seven callers) **plus the `add-field` CLI** for the non-request paths, **run at the three HTTP reactivation routes** (`api/definitions.ts` + `api/definitions.restore.ts` — a tombstoned **field** brought back is a surface re-appearing — **and the entity twin**, `api/entities.ts`, gated at the route from the before-state (`!isActiveEntity(ent) && (input.isActive ?? true)`), refusing fail-closed **422**, records written after the flush — **CC-24, 2026-10-08**), gated from the before-state at the route and granted after the flush, **CC-22, built 2026-10-08**), **and run in the primitive `upsertCustomEntity`** (`entities/lib/register.ts`, the module-install choke point — a custom **entity** appearing is a surface appearing, gated before the row and granted after the flush, with the live `entities.records.<id>` records, **CC-21, built 2026-10-08**), **and at all three field write sites on a type change** (`existing.kind !== incoming.kind` — a re-typed field is a surface changing shape; the before-state exists at each write site so no guard-contract change was needed, **CC-4, built 2026-10-08**) — **and the merge into `role_acls.features_json` is now atomic** (one SQL `UPDATE`, `jsonb ||` deduped by `group by elem` with first-occurrence order, `returning` so the DB is the source of truth — no lost update under a race, **CC-16, built 2026-10-08**, proven against live Postgres with a negative control) — deciding before the create and granting after the flush; **and the batch path's reserved-key check is restored** (the route now names every key it writes, `keys: definitions.map(d => d.key)`, and the two key guards read the list via the new `readFieldKeys` helper; measured — a malformed key was already refused by zod 400 before the guard on both routes, so the *reserved* key was the real hole, **CC-18, built 2026-10-08**) — **and the `decided` outcome is now reachable and writable** (a caller may *state* the decision instead of accepting the default: the carrier `structure-change-decision-header.ts` reads a three-way `x-om-ext-permissions-decision` header — `absent`/`malformed`/`decision` — fail-closed (malformed is **400**, never silently defaulted), and a **stated** decision grants the records to the role it names (`grantTo`, defaulting to `superadmin`); the two write sites that only accepted `defaulted` now **also** write a `decided` decision — the **guard** path (read from `input.requestHeaders` in `validate`, carried to `afterSuccess`) and the **three HTTP route** paths (read from `req.headers`; malformed → 400 before any transaction); the third primitive path (`register.ts`) and the field choke point correctly **cannot** see a request header and so still default — measured by the route tests, the guard tests and the direct-primitive tests, **CC-17, built 2026-10-08**) — 133 tests, 56 mutations RED-then-GREEN across twelve slices, `shared` 197/2329 (8 known host failures — CC-19), `core` 627/5438, typecheck 0, **the full core suite green six consecutive times**; nine hostile-critic passes + four mutation/premise-found defects (thirty-one defects, all fixed or named). **Still PARTIAL**: the create-branch double-insert (no unique index on `(role_id,tenant_id)` — CC-23, unreachable in normal operation), ~~a custom **entity**'s HTTP reactivation is ungated (its gate is `operations:['create']` but the route maps a reactivation to `update` — CC-24)~~ ✅ **closed 2026-10-08 (CC-24)**, **no one is authorised** to make a structure-permission decision (the header names the actor but nothing checks them — CC-25), a **field**'s records have no enforcement consumer (CC-20), ~~the `globalThis`-backed test store having no reset~~ ✅ **closed 2026-10-08 (CC-29)** — the store resets before every *test*, and the mechanism is now measured correctly (it leaked *within* a file, not across files), and a global surface has no tenant to grant in — each scheduled in `COMPLETION-CALLBACKS.md`. **CC-25's model is CONFIRMED by the owner (2026-10-08): a structure-permission decision is a ROLE PERMISSION** — the platform's own model (`role_acls.features_json`), so *who may decide a new surface's permissions* is a permission string a superadmin grants; this is now a build, not an open policy (item 14 of `PLAN-SD-1.md` §10). Plan `PLAN-SD-1.md`, limits §10)*
+- ☐ **S1** — Every architectural change is gated and inspected before it is applied ▸ 0/2 *(no sub-part verified in code this round)*
+-   - ☐ **S1a** — A gate exists for the create/structural paths *(carried — `S2`/`SD-1`'s gate is built; not re-verified as S1's own point)*
+-   - ☐ **S1b** — Inspection coverage for **every** architectural change (not only create) *(LEFT)*
+-     *(was PART)*
+- ☐ **S2 (= SD-1)** — Every architectural change answers the permissions question: catalogue + fail-closed gate ▸ 4/7
+-   - ☑ **S2a** — The permission catalogue: `shared/src/lib/permissions/catalogue.ts` — surfaces + the two blocks they yield (data + structural), populated from declarations and extended by runtime surfaces *(DONE 2026-10-08 — measured)*
+-   - ☑ **S2b** — The pure fail-closed gate: `structure-change-gate.ts` + a `MutationGuard` hook on the entities `create` path *(DONE 2026-10-08 — measured)*
+-   - ☑ **S2c** — The write: `auth/lib/permission-decision-grant.ts` applies the gate's `defaulted` records to the tenant's grant role's `role_acls.features_json` (idempotent set-union), wired in the guards' `afterSuccess` and carried `validate`→`afterSuccess` by the real runner; **run on every create path** — the batch definitions route, the shared primitive `ensureCustomFieldDefinitions`, the `add-field` CLI, the three HTTP reactivation routes (CC-22/CC-24), the entity-install primitive `upsertCustomEntity` (CC-21), and the three field write sites on a type change (CC-4) *(DONE 2026-10-08 — measured; 133 tests, 56 mutations RED-then-GREEN across twelve slices, nine hostile-critic passes)*
+-   - ☑ **S2d** — The merge into `role_acls.features_json` is **atomic** (one SQL `UPDATE`, `jsonb ||` deduped, `returning` — no lost update under a race), proven against live Postgres *(DONE 2026-10-08 — CC-16, with a concurrent-session test + negative control)*
+-   - ☐ **S2e** — A unique index on `(role_id, tenant_id)` to close the create-branch double-insert *(LEFT — CC-23; needs a migration, unreachable in normal operation)*
+-   - ☐ **S2f** — An authorised decision actor: the `decided` header names the actor but nothing checks them *(LEFT — CC-25; its model is confirmed by the owner: a structure-permission decision is a ROLE PERMISSION)*
+-   - ☐ **S2g** — An enforcement consumer for a **field** surface's records (`<entityId>.<key>.view|manage|structure`) + the global-surface gap *(LEFT — CC-20)*
+-     *(was PARTIAL 2026-10-08 — the decision core AND the enforcement are built and proven on every create path; what remains is the double-insert index (CC-23), the unauthorised decision actor (CC-25), the field records' missing consumer (CC-20), and the global-surface gap — each scheduled in `COMPLETION-CALLBACKS.md`. Plan `PLAN-SD-1.md`, limits §10)*
 - ☐ **S3** — The platform tells the user when access is refused *(OPEN)*
-- ☐ **S4** — Data is the gate, not the screen *(PART 2026-10-08 — scope is tenant + org **in the app layer**, per the owner's confirmed isolation model: single DB, single schema, nullable `tenant_id`, no RLS, no per-tenant DDL. **Two cross-tenant defects measured and closed:*** **(i) the batch `updated_at` read-back** (`entities/api/records.ts`, `GET`) read `custom_entities_storage` by `entity_id IN (…)` with **no tenant filter**, merging another tenant's `updated_at` into this tenant's response — closed by scoping the read to `auth.tenantId` plus the caller's org scope (**CC-28**; the single-record sibling was measured NOT to be a live leak — it filtered on `organization_id`, which is a globally-unique `gen_random_uuid()` PK — premise corrected everywhere it was copied). **(ii) the write side had no constraint at all** — the record upsert (`shared/src/lib/data/engine.ts`) targets `on conflict (entity_type, entity_id, organization_id, tenant_id)`, but the table's only index was **non-unique** *and* omitted `tenant_id`, so the target matched **no constraint**; the `try/catch` fallback hid it. Fixed with four global indexes — one **plain** unique on all four columns (measured on live PG 17: a bare `ON CONFLICT` resolves only against a **non-partial** index, and never against a partial one, not even when the row satisfies the predicate) plus **three partial** indexes for the null-scope shapes (a plain index cannot enforce those — NULLs are distinct). Proven on the live DB: the shipped upsert now updates in place, two tenants sharing an org id produce **2 rows** not 1, and a global-scope duplicate INSERT is rejected (**CC-30**). Also closed: the read classifier probed `custom_entities` / `custom_entities_storage` **without a tenant filter**, so one tenant's row routed another tenant's query to doc storage and returned zero rows — now tenant-scoped, cache key included (**CC-30**). **Still open:** `CC-20` (a custom *field*'s records have no enforcement consumer), and the CC-30 follow-ons in `RESUME-POINT.md` §3 — the now-redundant upsert fallback and the untargeted INSERT in `updateCustomEntityRecord`)*
-- ☐ **S5** — One permission engine, never a second one *(PART)*
+- ☐ **S4** — Data is the gate, not the screen ▸ 4/5
+-   - ☑ **S4a** — The isolation model is confirmed by the owner: scope is tenant + org **in the app layer** — single DB, single schema, nullable `tenant_id`, no RLS, no per-tenant DDL *(DONE — owner-confirmed)*
+-   - ☑ **S4b** — Cross-tenant defect (i): the batch `updated_at` read-back (`entities/api/records.ts`, GET) read by `entity_id IN (…)` with **no tenant filter**, merging another tenant's `updated_at` into this tenant's response — closed by scoping to `auth.tenantId` + the caller's org scope *(DONE 2026-10-08 — CC-28; the single-record sibling was measured NOT to be a live leak — it filtered on a globally-unique `gen_random_uuid()` PK)*
+-   - ☑ **S4c** — Cross-tenant defect (ii): the record upsert's `on conflict (entity_type, entity_id, organization_id, tenant_id)` target matched **no constraint** (the only index was non-unique and omitted `tenant_id`), and a `try/catch` hid it — fixed with four global indexes (one plain unique on all four columns + three partial for the null-scope shapes), proven on live PG 17 *(DONE 2026-10-08 — CC-30: two tenants sharing an org id now produce 2 rows, a global-scope duplicate INSERT is rejected)*
+-   - ☑ **S4d** — Cross-tenant defect (iii): the read classifier probed `custom_entities`/`custom_entities_storage` **without a tenant filter**, so one tenant's row routed another tenant's query to doc storage and returned zero rows — now tenant-scoped, cache key included *(DONE 2026-10-08 — CC-30)*
+-   - ☐ **S4e** — An enforcement consumer for a custom **field**'s records + the remaining app-layer scope hardening *(LEFT — CC-20)*
+-     *(was PART 2026-10-08 — the isolation model is owner-confirmed and three measured cross-tenant defects are closed; what remains is the field-records consumer (CC-20))*
+- ☐ **S5** — One permission engine, never a second one ▸ 0/2 *(no sub-part verified in code this round)*
+-   - ☐ **S5a** — The single engine is the authority layer + the catalogue *(carried — see `S2`/`C4`)*
+-   - ☐ **S5b** — Proof that no second engine exists anywhere *(LEFT)*
+-     *(was PART)*
 - ☐ **S6** — Every model a job uses is declared *(OPEN)*
 - ☐ **S7** — Chat is a legitimate unclassified state *(DONE with G-21 — not re-verified this round)*
 - ☐ **S8** — The platform notices and suggests, and never acts without asking *(OPEN)*
-- ☑ **S9 (= SD-2)** — Core functions ship by default and cannot be deleted *(PARTIAL 2026-10-09 — built for the one live surface that exists, the built-in `superadmin` role (the roles-and-permissions manager, dictionary §C.3); enforced on EVERY delete path (route + command + the `DataEngine.deleteOrmEntity` `refuse` hook), 409, actor-independent. **Challenged first (rule 9b):** "a flag on the function record" had no home — the `UserFunction` artifact has no delete path and no persistence, and no core/undeletable concept existed; the dictionary's named example is the live `superadmin` role, so the rule was built there. Open, scheduled: the core set is marked by NAME not a column (CC-31) — ⚠️ **CLOSED 2026-10-09**: `roles.is_core` migrated + applied + proven live; the rename path is guarded (Option B). The *wider* set is `SD-2b`; the `UserFunction` core flag waits on the artifact gaining a delete path / persistence (`G-09`, CC-32); **and the owner RULED 2026-10-09 that the wider core set — including the DATABASE-side backbone (tables/columns/relations a tenant may not restructure), a DIFFERENT axis from SD-2's row-level delete rule — becomes a superadmin SETTING, not a hardcoded list** — **now BUILT as `SD-2b` 2026-10-09** (`module_configs` `core_boundary`/`coreObjectTiers`, a direct copy of the `SD-3`/§C.2b pattern — seed + strict parser + pure decision + fail-closed read; the *rule* + four tier names + parser stay Ring 1). **Closes a measured hole:** `isSystemEntitySelectable('auth:user'|'auth:role'|'directory:tenant'|'auth:session')` → `false` (before, a custom field could attach to those tables — the only block was a 7-id list that omitted them). **Two hostile rounds:** round 1 found a CRITICAL bypass (the gate sat only on the two preset routes; the batch route, the `add-field` CLI and `ensureCustomFieldDefinitions` wrote rows without it — closed by one shared `reservedEntityRefusal` on all four paths); round 2 found the junk-only hole (fixed by a substrate invariant: the parser requires all 7 substrate ids present), its own regression, and the ungated restore path. 10 mutations all RED. **Still open/scheduled:** the per-object manage screen → `SD-5` **✅ BUILT 2026-10-09**; the structural guard (DROP/re-type/FK) → `SD-4` (**✅ built; DDL case CC-33 scheduled**); the core marker as a column → CC-31(a) **✅ CLOSED 2026-10-09**. Evidence: `BACKLOG.md` SD-2/SD-2b, `PLAN-SD-2.md`, `PLAN-SD-2b.md`, `COMPLETION-CALLBACKS.md` CC-31/CC-32.)*
-- ☐ **S10** — Every standard has a home in code, and drift is a defect *(PART)*
-- ☐ **S11 (= SD-4)** — Structural permissions explicit, per object and per verb, inherited by default *(PARTIAL — **Slice A (the structural guard) BUILT 2026-10-09**: `entities.structural.core-object-guard` (`entities/data/guards.ts`) refuses a `delete`/`update` whose `entityId` is a reserved system surface, via the `SD-2b` predicate `isReservedSystemEntityType` (entity-id namespace — measured: the route passes `auth:user`, not the table name `users`). 17 tests; 3 mutations RED-then-GREEN; a hostile-critic pass found a HIGH wildcard over-fire on record writes (fixed by scoping to the two definition resource kinds) and a LOW namespace-pin gap (fixed). **Slice B (the actor axis, S12) BUILT 2026-10-09** — see S12 below. **Slice C (the per-verb grammar) BUILT 2026-10-09:** `PERMISSION_BLOCK_VERBS.structural` is now the **five S11 verbs** (`read`/`add`/`edit`/`remove`/`reference`) rather than the single `'structure'` — a surface yields 7 records (2 data + 5 structural); `STRUCTURAL_ENFORCED_VERBS` names the three the write-path guard can act on. The grammar's **level** (per object × verb × actor, `straight`/`review`/`approval`/`never`) now has a home in `packages/shared/src/lib/permissions/structural-settings.ts` (the `SD-3`/`SD-2b` pattern: seed + strict parser + pure `resolveStructuralLevel` — exact→`any`→default — + the `actorTypeForPrincipal` bridge + fail-closed read). **The falsified premise corrected at source** (rule 13): `structure-change-decision-header.ts`'s `blockFromFeature` compared to the literal `'structure'`; it now reads the catalogue's own verb set. 5 mutations RED-then-GREEN (M11 catalogue / M12 parser default / M13 the `any` fallback / M14 the literal / M15 the S12 bridge), each restore md5-identical. **Slice C's enforcement wiring (CC-37) BUILT 2026-10-09:** the structural guard (`entities.structural.core-object-guard`) now reads the level **live** (`moduleConfigService` → `loadStructuralSettings`, fail-closed) and, on a **protected** surface, turns an **explicit** `review`/`approval` rule into the **escalate** outcome (D3 — `{ok:true, escalation}`, status 202) instead of the hard 422; `never`/`straight`/no-rule keep the 422. **The trap avoided:** a new `explicitStructuralLevel` is read, **not** `resolveStructuralLevel` (whose fail-closed `approval` default would have weakened the **absolute** S9 refusal into a 202 for every rule-less protected write). **A hostile-critic pass found two issues, both fixed:** a doc-comment falsely claimed a `resolveStructuralLevel` placement call, and an **unresolved actor** (`actorKind === undefined`) was escalated and mislabelled "a person" — now an unnamed actor is not escalated. **M16–M20 RED-then-GREEN**, each restore md5-identical. `core` 47 suites / 390 tests (entities); `shared` 204 suites / **2482** tests, 0 failures. **The manage screen (`SD-5`) is now BUILT 2026-10-09 (code `a2317b1`)** — the settings surface over this grammar, grouped by object, one Select per (verb × actor) with "Inherited" clearing a cell; its data shape is pure in `structural-settings.ts` and the route writes the same setting this guard reads. **Remaining:** `read`/`reference` enforcement (CC-34); scheduled limits CC-33/CC-34/CC-35/CC-36/**CC-38** (the escalation is held but not filed — the approval-layer intake). Plan `PLAN-SD-4.md`.)*
-- ☐ **S12** — The actor type is part of every structural decision *(PARTIAL — **Slice B of `SD-4` BUILT 2026-10-09.** The actor kind (`PrincipalKind = 'human'|'ai_worker'|'service'|'system'`, `principal.ts:28`) now **reaches the guard input**: an **optional** `actorKind?: PrincipalKind` rides `MutationGuardInput`/`MutationGuardAfterInput`/`RouteMutationGuardAuth`, is threaded into both the validate and the `afterSuccess` inputs of `runRouteMutationGuards`, and is set by the eight guard-input builders (`factory.ts` ×7 + `beginEntitiesMutationGuard`). It is resolved as `auth.principal?.kind ?? derivePrincipal(auth)?.kind` — importing `derivePrincipal` from the un-mocked `auth/principal`, **not** `auth/server` — so a trusted-envelope AI context (`sub:'ai_worker:<id>'`, no `principal` field) is still read as a machine. The structural guard **reads** it (a machine's refusal names the actor). 3 mutations RED-then-GREEN (M4 transport / M5 reader / M6 derivation); a hostile-critic pass caught a **real regression** in the first draft (the direct `auth.principal` read lost the AI worker on the trusted-envelope path) — fixed + pinned by 3 derivation tests. **Honest limit:** the axis changes the refusal *reason* today, not the decision — the per-actor **grammar** is S11/Slice C. Plan `PLAN-SD-4.md` §5.)*
+- ☑ **S9 (= SD-2)** — Core functions ship by default and cannot be deleted ▸ 5/6
+-   - ☑ **S9a** — Enforced on **every** delete path (route + command + the `DataEngine.deleteOrmEntity` `refuse` hook), 409, actor-independent — for the one live surface, the built-in `superadmin` role (the roles-and-permissions manager) *(DONE 2026-10-09 — built after challenging the premise: "a flag on the function record" had no home, so the rule was built on the dictionary's named example)*
+-   - ☑ **S9b** — The core marker is a **column**: `roles.is_core` migrated + applied + proven live; the rename path is guarded (Option B) *(DONE 2026-10-09 — CC-31(a) CLOSED)*
+-   - ☑ **S9c** — The wider core set is a superadmin **SETTING**, not a hardcoded list: `module_configs` `core_boundary`/`coreObjectTiers` (a copy of the `SD-3`/§C.2b pattern — seed + strict parser + pure decision + fail-closed read; the rule + four tier names + parser stay Ring 1) *(DONE 2026-10-09 — built as `SD-2b`)*
+-   - ☑ **S9d** — The measured hole closed: `isSystemEntitySelectable('auth:user'|'auth:role'|'directory:tenant'|'auth:session')` → `false` (before, only a 7-id list blocked full custom fields, and it omitted these) *(DONE 2026-10-09 — two hostile rounds: round 1 found a CRITICAL bypass on four paths, closed by one shared `reservedEntityRefusal`; round 2 found the junk-only hole, fixed by a substrate invariant; 10 mutations all RED)*
+-   - ☑ **S9e** — The per-object manage screen over the core boundary *(DONE 2026-10-09 — `SD-5`, code `a2317b1`)*
+-   - ☐ **S9f** — The `UserFunction` core flag (waits on the artifact gaining a delete path / persistence) *(LEFT — `G-09`, CC-32)*
+-     *(was PARTIAL 2026-10-09 — built for the one live surface; the core set is a setting (`SD-2b`); what remains is the `UserFunction` core flag (CC-32), which waits on the artifact gaining a delete path. Evidence: `BACKLOG.md` SD-2/SD-2b, `PLAN-SD-2.md`, `PLAN-SD-2b.md`)
+- ☐ **S10** — Every standard has a home in code, and drift is a defect ▸ 0/2 *(no sub-part verified in code this round)*
+-   - ☐ **S10a** — The standards register exists as a document *(carried — `SPECIFICATIONS-DICTIONARY.md`)*
+-   - ☐ **S10b** — Each standard has a **home in code** + a drift check *(LEFT)*
+-     *(was PART)*
+- ☐ **S11 (= SD-4)** — Structural permissions explicit, per object and per verb, inherited by default ▸ 5/6
+-   - ☑ **S11a** — Slice A — the structural guard: `entities.structural.core-object-guard` refuses a `delete`/`update` whose `entityId` is a reserved system surface, via the `SD-2b` predicate `isReservedSystemEntityType` (entity-id namespace — the route passes `auth:user`, not `users`) *(DONE 2026-10-09 — 17 tests, 3 mutations RED-then-GREEN; a hostile pass found a HIGH wildcard over-fire on record writes + a LOW namespace-pin gap, both fixed)*
+-   - ☑ **S11b** — Slice B — the actor axis (S12) reaches the guard *(DONE 2026-10-09 — see `S12`)*
+-   - ☑ **S11c** — Slice C — the per-verb grammar: `PERMISSION_BLOCK_VERBS.structural` is the **five S11 verbs** (`read`/`add`/`edit`/`remove`/`reference`), a surface yields 7 records; the level (per object × verb × actor, `straight`/`review`/`approval`/`never`) lives in `structural-settings.ts` (seed + strict parser + pure `resolveStructuralLevel` + the `actorTypeForPrincipal` bridge + fail-closed read) *(DONE 2026-10-09 — 5 mutations RED-then-GREEN, each restore md5-identical; the falsified `'structure'`-literal premise was corrected at source)*
+-   - ☑ **S11d** — CC-37 — the grammar's enforcement wiring: the structural guard reads the level **live** and turns an explicit `review`/`approval` rule into the **escalate** outcome (D3, `{ok:true, escalation}`, 202) instead of the hard 422; `never`/`straight`/no-rule keep the 422 *(DONE 2026-10-09 — M16–M20 RED-then-GREEN; the trap avoided: `explicitStructuralLevel` read, not the fail-closed `resolveStructuralLevel` default, which would have weakened the absolute S9 refusal)*
+-   - ☑ **S11e** — The manage screen over this grammar *(DONE 2026-10-09 — `SD-5`, code `a2317b1`: grouped by object, one Select per (verb × actor), "Inherited" clears a cell)*
+-   - ☐ **S11f** — `read`/`reference` enforcement + the approval-layer intake (a `review`/`approval` rule producing a `pending_acts` row) *(LEFT — CC-34, CC-38; the escalation is held but not filed)*
+-     *(was PARTIAL — the structural guard, the actor axis, the per-verb grammar, its enforcement wiring, and the manage screen are all BUILT 2026-10-09; what remains is `read`/`reference` enforcement (CC-34) and the approval-layer intake (CC-38). Plan `PLAN-SD-4.md`)*
+- ☐ **S12** — The actor type is part of every structural decision ▸ 1/2
+-   - ☑ **S12a** — Slice B of `SD-4`: the actor kind (`PrincipalKind = 'human'|'ai_worker'|'service'|'system'`) reaches the guard input — an optional `actorKind` rides `MutationGuardInput`/`MutationGuardAfterInput`/`RouteMutationGuardAuth`, is threaded into both validate and `afterSuccess` inputs, and is set by the eight guard-input builders; resolved as `auth.principal?.kind ?? derivePrincipal(auth)?.kind` (importing from the un-mocked `auth/principal`), so a trusted-envelope AI context is still read as a machine *(DONE 2026-10-09 — 3 mutations RED-then-GREEN; a hostile pass caught a real regression on the trusted-envelope path, fixed + pinned by 3 derivation tests)*
+-   - ☐ **S12b** — The axis changes the **decision**, not only the refusal reason (the per-actor grammar) *(LEFT — that is S11/Slice C)*
+-     *(was PARTIAL — Slice B is built; honest limit: the axis changes the refusal *reason* today, not the decision. Plan `PLAN-SD-4.md` §5)*
 - ☑ **SD-5** — The structural-permission manage screen (the roles-style surface over S11) *(BUILT 2026-10-09, code `a2317b1` — grouped by object kind, one Select per (verb × actor) with the four levels plus a distinct **"Inherited"** choice that **clears** the cell; the pure data shape (grid / one-cell edit / equality) lives in `shared/src/lib/permissions/structural-settings.ts`, the route is `auth/api/structural-permissions` (GET fail-closed, PUT validates + passes the auth mutation-guard seam + writes `permissions`/`structuralPermissionLevels`), and the screen + page sit in `auth` (`components/StructuralPermissionsSettings.tsx`, `backend/settings/structural-permissions/`) gated `auth.acl.manage`. **68 tests** (49 shared + 11 route + 8 jsdom); `shared` 110 tests and `core` configs+auth+entities 140 suites / 1202 tests, 0 failures; both `tsc` exit 0; **6 mutations RED-then-GREEN (M21–M26)**, each restore md5-identical; a hostile-critic pass found **0 functional defects** (1 tautological test + 2 weaknesses, all fixed). **Honest limit:** the approval-layer intake (a `review`/`approval` rule producing a `pending_acts` row) is CC-38, unchanged here.)*
 - ☐ **S-01** — The product-half spine item *(status carried in the plan)*
 - ☑ **S-02** — Wire the resolver as the enforcement point (responsible-user intersection; fail closed or do not ship) *(DONE 2026-10-08, code `3add3a2` — `ai-assistant/lib/tool-authority.ts`; two hostile-critic passes found six defects, all fixed; plan `PLAN-S-02.md`)*
@@ -255,7 +436,10 @@
 - ☐ **SD-6** — The two read side-effect GETs: set aside or wire — to be revisited *(OPEN — recorded, owner-settled 2026-10-07)*
 - ☑ **D3** — The `escalate` outcome on the guard result *(DONE — third outcome added, RED-then-GREEN proven across registry · wrapper · factory mutation proof; 36 consume sites widened; code `ba8a25c`; the 1 pre-existing core failure it exposed is now fixed too — code `9068f70`)*
 - ☑ **GAP A / C5** — The Metadata Registry service *(DONE — the read-only service exists (2026-10-07, code `59ab859`): answers what exists · what type · provenance · what depends on it, and a typed absence for the other ten §54 questions; a live view, not a copy. The `Resource` envelope (C1) stays a Phase −1 contract. Consumption by `SD-1` is the next consumer, not yet wired)*
-- ☐ **GAP B** — The true-core vs domain-pack boundary as a contract *(PART — `CORE-BOUNDARY.md` written; not yet a contract)*
+- ☐ **GAP B** — The true-core vs domain-pack boundary as a contract ▸ 0/2 *(no sub-part verified in code this round)*
+-   - ☐ **GAP B.a** — The concept is written down (`CORE-BOUNDARY.md`) *(carried — a document, not a contract)*
+-   - ☐ **GAP B.b** — It is expressed as an enforceable contract in code *(LEFT)*
+-     *(was PART — `CORE-BOUNDARY.md` written; not yet a contract)*
 - ☐ **GAP D** — Phase −1: twelve architecture contracts before all code *(OPEN)*
 
 ---
@@ -286,15 +470,39 @@
 - ☐ **B4 Inventory / WMS (`wms`)** — stock · warehouse *(DONE — light unit coverage)*
 - ☐ **B5 Finance / accounting** — GL · journal · chart of accounts · AP/AR *(ABSENT — M1 · build-vs-integrate is the owner's)*
 - ☐ **B6 Procurement / purchasing** — suppliers · POs · RFQ · goods-receipt *(ABSENT — M2 · needs M1's decision)*
-- ☐ **B7 HR / people (`staff`)** — people · teams · leave · time; payroll absent *(PART)*
-- ☐ **B8 Projects / PSA (`planner`)** — availability rules; no project accounting/billing *(PART)*
-- ☐ **B9 BI / analytics (`query_index`, `dashboards`)** — engine yes, screens no *(PART)*
-- ☐ **B10 Shipping (`shipping_carriers`)** — webhook-driven, minimal UI *(PART)*
-- ☐ **B11 Payments (`payment_gateways`)** — gateway transactions + workers, minimal UI *(PART)*
+- ☐ **B7 HR / people (`staff`)** — people · teams · leave · time; payroll absent ▸ 0/2 *(no sub-part verified in code this round)*
+-   - ☐ **B7a** — People · teams · leave · time *(carried)*
+-   - ☐ **B7b** — Payroll *(LEFT — absent)*
+-     *(was PART)*
+- ☐ **B8 Projects / PSA (`planner`)** — availability rules; no project accounting/billing ▸ 0/2 *(no sub-part verified in code this round)*
+-   - ☐ **B8a** — Availability rules *(carried)*
+-   - ☐ **B8b** — Project accounting / billing *(LEFT — absent)*
+-     *(was PART)*
+- ☐ **B9 BI / analytics (`query_index`, `dashboards`)** — engine yes, screens no ▸ 0/2 *(no sub-part verified in code this round)*
+-   - ☐ **B9a** — The query/analytics engine *(carried)*
+-   - ☐ **B9b** — The screens *(LEFT — screens absent)*
+-     *(was PART — engine yes, screens no)*
+- ☐ **B10 Shipping (`shipping_carriers`)** — webhook-driven, minimal UI ▸ 0/2 *(no sub-part verified in code this round)*
+-   - ☐ **B10a** — The webhook-driven core *(carried)*
+-   - ☐ **B10b** — A real UI *(LEFT — minimal UI)*
+-     *(was PART — webhook-driven, minimal UI)*
+- ☐ **B11 Payments (`payment_gateways`)** — gateway transactions + workers, minimal UI ▸ 0/2 *(no sub-part verified in code this round)*
+-   - ☐ **B11a** — Gateway transactions + workers *(carried)*
+-   - ☐ **B11b** — A real UI *(LEFT — minimal UI)*
+-     *(was PART — gateway transactions + workers, minimal UI)*
 - ☐ **B12 Currencies (`currencies`)** — FX *(DONE)*
 - ☐ **B13 Email / messaging (`messages`, `inbox_ops`, `communication_channels`)** *(DONE)*
-- ☐ **B14 Customer portal (`portal`, `customer_accounts`)** *(PART — `customer_accounts` duplicates `auth`; N-6 says remove)*
-- ☐ **M3** — The permissions catalogue (= SD-1) *(PARTIAL 2026-10-08 — the catalogue service exists (`shared/src/lib/permissions/catalogue.ts`): permission surfaces + the two blocks each yields (data + structural), populated from declarations and extended by runtime surfaces. It is now **consumed by a write** (`auth/lib/permission-decision-grant.ts` applies its records to `role_acls.features_json` on the entities create path, **on the batch definitions route**, **in the non-request primitive `ensureCustomFieldDefinitions`**, **at the HTTP reactivation routes (CC-22)**, **in the entity-install primitive `upsertCustomEntity` (CC-21)**, **at each field write site on a type change (CC-4)**, **and the merge itself is atomic (CC-16)**). **Caveat, measured:** a **field** surface's records (`<entityId>.<key>.view|manage|structure`) are written but have **no enforcement consumer** — the live per-record features are `entities.records.<entityId>.{view,manage}` (`CC-20`); for a **custom entity** the records *are* the live ones (the surface supplies the `entities.records.<id>` prefix). **Still not persisted** for runtime surfaces (in-process; a durable row waits on `G-04`, since a migration is unprovable on this host). See `S2 (= SD-1)`)*
+- ☐ **B14 Customer portal (`portal`, `customer_accounts`)** ▸ 0/2 *(no sub-part verified in code this round)*
+-   - ☐ **B14a** — The portal surface *(carried)*
+-   - ☐ **B14b** — Remove the duplicate: `customer_accounts` duplicates `auth` *(LEFT — `N-6` says remove)*
+-     *(was PART — `customer_accounts` duplicates `auth`; N-6 says remove)*
+- ☐ **M3** — The permissions catalogue (= SD-1) ▸ 3/5
+-   - ☑ **M3a** — The catalogue service exists (`shared/src/lib/permissions/catalogue.ts`): permission surfaces + the two blocks each yields (data + structural) *(DONE 2026-10-08 — measured)*
+-   - ☑ **M3b** — Consumed by a **write**: `auth/lib/permission-decision-grant.ts` applies its records to `role_acls.features_json` on every create path (entities create, the batch definitions route, `ensureCustomFieldDefinitions`, the HTTP reactivation routes (CC-22), the entity-install primitive `upsertCustomEntity` (CC-21), each field write site on a type change (CC-4)) *(DONE 2026-10-08 — measured)*
+-   - ☑ **M3c** — The merge itself is atomic (no lost update) *(DONE 2026-10-08 — CC-16)*
+-   - ☐ **M3d** — A **field** surface's records have an enforcement consumer (the live per-record features are `entities.records.<entityId>.{view,manage}`) *(LEFT — CC-20; for a custom entity the records *are* the live ones)*
+-   - ☐ **M3e** — Persisted for **runtime** surfaces *(LEFT — in-process; a durable row waits on `G-04`, since a migration is unprovable on this host)*
+-     *(was PARTIAL 2026-10-08 — the catalogue exists and is consumed by a write with an atomic merge; the remaining halves are the field-records consumer (CC-20) and runtime persistence (waits on `G-04`). See `S2 (= SD-1)`)*
 - ☑ **M4** — The generated guard registry (= D0) *(DONE)*
 - ☐ **M5** — Dashboard / perspective screens (= P15) *(OPEN)*
 - ☐ **N-6** — `customer_accounts` duplicates `auth` — an island to remove *(OPEN)*
@@ -307,9 +515,15 @@
 - ☐ **Deploy** — The Companai platform deployment (compose project, image, reverse proxy) *(DONE — documented in RUNBOOK)*
 - ☐ **Deploy** — The running image predates the guard sweep — a redeploy ships the fixes *(OPEN)*
 - ☐ **Hermes svc** — The `hermes` service needs a healthcheck *(OPEN)*
-- ☐ **Blueprint App. B** — The twenty non-negotiable design rules adopted *(PART — most aligned, some GAPs)*
+- ☐ **Blueprint App. B** — The twenty non-negotiable design rules adopted ▸ 0/2 *(no sub-part verified in code this round)*
+-   - ☐ **Blueprint App. B.a** — Most of the twenty rules are aligned *(carried)*
+-   - ☐ **Blueprint App. B.b** — The remaining rules adopted (some GAPs) *(LEFT)*
+-     *(was PART — most aligned, some GAPs)*
 - ☐ **Observability** — Trace/context envelope crossing every execution boundary *(OPEN)*
-- ☐ **Versioning** — API and event contracts versioned *(PART)*
+- ☐ **Versioning** — API and event contracts versioned ▸ 0/2 *(no sub-part verified in code this round)*
+-   - ☐ **Versioning.a** — Some API versioning exists *(carried)*
+-   - ☐ **Versioning.b** — Event contracts versioned too *(LEFT)*
+-     *(was PART)*
 - ☐ **Item 20** — Deploy on a real Plesk VPS *(DEFERRED — owner said "not now")*
 - ☐ **Item 25** — Ledger Tier 2, signed checkpoints *(DEFERRED — a customer's-auditor feature)*
 - ☐ **Item 26** — `domain_mappings` extraction *(DEFERRED — nothing needs it)*
@@ -418,6 +632,26 @@ These are the points where a document says "done" and this file **refuses the ti
 - `S0` (the docker stack) — not re-run this round; the docs report 8 containers healthy.
 - Every `(DONE)` line in §A–§K whose box is `☐` — the docs claim done, the code is unchecked. A `(DONE)`
   in the text with a `☐` in front of it is **carried, not confirmed** by definition.
+
+### How the numbers are derived (the `derive-counts` check — reproducible, not typed)
+
+The PROGRESS table and the per-section counts are **computed from the boxes**, never typed by hand. The
+rule, in one place:
+
+1. Walk each section `A`–`K` (section `L` is this ledger — it holds no points).
+2. A line starting `- ` is a **whole point** — count it once (it has no `▸`).
+3. A line starting `- ` **with** a `▸ n/N` is a **split parent** — do **not** count it; count its sub-points.
+4. A line starting `-   - ` is a **sub-point** — count it once.
+5. `units = whole points + sub-points`. `done =` the units carrying `☑`. `left = units − done`.
+6. Coverage `% = done ÷ units`. Build-weighted `% = Σ(done×w) ÷ Σ(units×w)` with `w` the section's effort
+   weight (the rubric table above).
+
+**Re-run the check in this session (2026-10-09) gave:** A 10/31 · B 0/36 · C 14/28 · D 1/39 · E 2/18 ·
+F 0/14 · G 29/74 · H 0/13 · I 4/35 · J 0/18 · K 1/13 · **TOTAL 61 / 319 = 19%** (build-weighted ≈22%).
+**This replaced a typed table that read 61 / 276 = 22%** — the DONE total happened to be right, but every
+section total was under-counted (the pass-2 split added units no one had re-summed). The lesson is the
+**N-20** one: *a count that is typed drifts from the boxes the moment a box changes.* If you ever change a
+tick, re-run this — the table is downstream of the boxes, never the other way round.
 
 ### Documentation & tool defects found this round (and fixed)
 
