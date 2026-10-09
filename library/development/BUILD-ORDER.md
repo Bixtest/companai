@@ -1179,13 +1179,23 @@ detail lives in [`AGENT-HALF.md`](AGENT-HALF.md) §4, the register in [`BACKLOG.
 > path. The other eleven `AH-` items stay in `AGENT-HALF.md` §4 / `BACKLOG.md` with their phases.
 
 20. **`AH-1` — the agent as a kernel object** *(the only agent-half item on the critical path; **the
-    startable next build** — needs only `G-01`, ✅ done).* An agent is **one flat, legible row** with a
+    startable next build** — needs `G-01`, ✅ done).* An agent is **one flat, legible row** with a
     `kind` (*personal · role · context · independent · system*), an `owner`, an `actsAs`, a `role`, a
     **runtime binding**, and an **autonomy gate** — no "type" flag, no separate human/AI shape. The
     existing `Agent` kernel object is extended with those fields (§1.4). **Everything else in the agent
     half waits on this**, because each item needs to know what an agent *is*. It also unblocks
     **CC-27** (the AI-user ↔ agent binding — the register's row corrected 2026-10-09: the binding hangs
     off `AH-1`). Design: [`AGENT-HALF.md`](AGENT-HALF.md) §1.4 and §3.1.
+
+    **⚠️ Premise re-measured 2026-10-09 (rule 13) — "startable" is true of the *engine*, not yet of
+    the *object*.** `G-01` built the descriptor **engine** (`buildModelDescriptor` +
+    `collectDeclarations`), **not** an `Agent` object: `packages/shared/src/lib/kernel/model.ts` exports
+    only `KernelEntity`/`KernelField`/`KernelRelationship`, and **no module declares an agent entity**.
+    So `AH-1`'s **first slice is to declare the `Agent` kernel object** (additive — the engine already
+    reads declarations), and the item carries an **owner-gated leg**: whether the agent is a *core*
+    object is the pending ruling in [`DECISION-core-object-set.md`](DECISION-core-object-set.md) (🟡;
+    the registry's kind set is `['table','column','relation','function','role']` — **no `agent` kind
+    today**). **Buildable now** = declaring the object; **owner-gated** = its core-object status.
 
 *The eleven remaining `AH-` items (phases 2–4) are ordered in [`AGENT-HALF.md`](AGENT-HALF.md) §4; they
 keep the backlogs where they are and land as their prerequisites do.*

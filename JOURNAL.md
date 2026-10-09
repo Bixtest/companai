@@ -35,7 +35,7 @@ log.** Everything else (HANDOVER, START-PROMPT, README, BOOKMARKS, BACKLOG) poin
 
 ---
 
-### ▶ NOW — **the owner's ACTION LIST of 2026-10-09** (directly below) is the live work queue. **A1 DONE** (the callback register gained the mechanical linkage); **A2 BUILT** (CC-25, the decision-actor permission — proven; the owner's one-line confirm is still owed, rule 11); **A4 DONE** (live login 500 — Redis restarted + hardened); **A5 DONE** (the build-ship script `.sh` deployed + proven). **A3 (CC-27) is BLOCKED on `AH-1`** — *re-measured 2026-10-09: the binding hangs off the agent-as-kernel-object, which is not built (rule 13 premise correction; do not build it before AH-1).* **The owner-facing next step is A6/A7** (rebuild + deploy the current `main`, then hand over the credentials — both now unblocked by A4+A5, and both owner-gated). When the action list is clear, the standing next build is **`AH-1`** (the agent as a kernel object — the only agent-half item on the critical path, startable since `G-01` is done; now carried as **item 20** in `BUILD-ORDER.md`, recorded there 2026-10-09), then **BUILD-ORDER item 9 — the generic state-machine engine**.
+### ▶ NOW — **the owner's ACTION LIST of 2026-10-09** (directly below) is the live work queue. **A1 DONE** (the callback register gained the mechanical linkage); **A2 BUILT** (CC-25, the decision-actor permission — proven; the owner's one-line confirm is still owed, rule 11); **A4 DONE** (live login 500 — Redis restarted + hardened); **A5 DONE** (the build-ship script `.sh` deployed + proven). **A3 (CC-27) is BLOCKED on `AH-1`** — *re-measured 2026-10-09: the binding hangs off the agent-as-kernel-object, which is not built (rule 13 premise correction; do not build it before AH-1).* **The owner-facing next step is A6/A7** (rebuild + deploy the current `main`, then hand over the credentials — both now unblocked by A4+A5, and both owner-gated). When the action list is clear, the standing next build is **`AH-1`** (the agent as a kernel object — the only agent-half item on the critical path; now carried as **item 20** in `BUILD-ORDER.md`, recorded there 2026-10-09). **⚠️ Re-measured 2026-10-09:** `AH-1`'s "startable" label is true of the *engine* (`G-01`) but the **`Agent` object is not yet declared** — so its **first slice is declaring the object**, and its *core-object status* is an **owner-gated** leg (`DECISION-core-object-set.md` 🟡). Then **BUILD-ORDER item 9 — the generic state-machine engine**.
 
 > **If you are a new agent, read only this block to know your job.** Everything below the box is the
 > history and the queue; this is the work in hand.
@@ -81,6 +81,17 @@ The owner then ruled: **do the fixes needed so every callback is closed at the r
 - **A4 + A5 are DONE**, so **A6/A7 are unblocked and owner-gated**: the live platform still runs the
   2026-10-06 image; deploying the current `main` is a rebuild + recreate the owner should authorise (take a
   DB export first — there is no backup button, `FX-D09`). Until then the *fix* is real but *not shipped*.
+- **`AH-1`'s "startable" label re-measured 2026-10-09 (rule 13) — true of the *engine*, not yet of the
+  *object*.** Fact-checking before opening `AH-1` (rule 10d) showed **`G-01` built the descriptor
+  *engine*** (`buildModelDescriptor` + `collectDeclarations`), **not** an `Agent` object:
+  `packages/shared/src/lib/kernel/model.ts` exports only `KernelEntity`/`KernelField`/`KernelRelationship`,
+  and **no module declares an agent entity** (two-route grep). So `AH-1`'s **first slice is to declare the
+  `Agent` kernel object** (additive — the engine already reads declarations), and the item carries an
+  **owner-gated leg**: whether the agent is a *core* object is the pending ruling in
+  `DECISION-core-object-set.md` (🟡; the registry's kind set is `['table','column','relation','function','role']`
+  — **no `agent` kind today**). Corrected in BACKLOG (`AH-1`), BUILD-ORDER (item 20), and the register
+  (CC-27's Prerequisite cell). **This does not un-block `AH-1`** — it means the *first slice* is
+  declaring the object, and the *core-object status* is the owner's to rule (rule 11).
 - **The action list is append-only while live:** when an item is done, mark its Status cell ✅ **DONE <date>** with the commit — do not delete the row (the same discipline as the register).
 - **Order-document gap closed 2026-10-09 (owner's Message 2, "everything … updated in the … order
   documentation").** Three documents (`JOURNAL.md`, `BACKLOG.md`, `HANDOVER.md`) named **`AH-1` as the
