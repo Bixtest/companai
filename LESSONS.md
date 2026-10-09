@@ -3246,3 +3246,36 @@ working rules forbid. The distinction is one grep wide.
 *Cross-ref: rule 9a (own the code you touch — fix it or schedule it, never leave it implied), L83 (a file
 that exists is not a mechanism that runs), L94 (a suite green on your run, not the critic's, is a claim
 about a run, not the artefact).*
+
+## L98 — a mutation that does **not** flip a test may be **unreachable**, not redundant; and a mutation `git checkout` restore can silently destroy uncommitted work
+
+**What happened (two failures in one session, both in the CC-37 mutation proof).** (1) I mutated a function's
+final `return null` to `return settings.defaultLevel` and re-ran its suite: **all tests still passed**. My
+first read was "the tests are weak". The truth was subtler: for every input the tests used
+(`actorType='human'`), an earlier branch (`return findLevel('any')`) returned *first*, so the mutated line was
+**dead for those inputs** — the mutation never executed. The tests were fine; my *mutation* was unreachable.
+Crafting the mutation to bite the reachable path (`actorType='any'`) then required the test that reached it,
+which did not exist — so the real gap was a **missing input**, found only by asking *"does my mutation even
+run?"* (2) My restore helper used `git checkout -- <file>`. On a file with **uncommitted edits** that reverts
+to *HEAD*, not to the pre-mutation working tree — it deleted the entire change (the new function and all doc
+edits) and the md5 "proved" a file that was now *wrong*. The mismatch (`RESTORE-MISMATCH`) was the only thing
+that caught it.
+
+**Why it is dangerous.** (1) A mutation that silently does not run is worse than no mutation: it *looks* like
+proof and manufactures false confidence in tests that may genuinely be thin. "Red-then-green" is only evidence
+if the **red** is real — i.e. if the mutated line is on the path the test drives. (2) A restore that reverts to
+HEAD on an uncommitted file is **data loss dressed as verification** — the md5 check passes against the wrong
+baseline, and an uncommitted-but-correct change is gone.
+
+**The rule.** (1) When a mutation fails to flip a test, ask **"did the mutation actually execute?"** before
+concluding the test is weak — trace the branch. A mutation must be **reachable** for the inputs the test uses;
+if the only reaching input is not tested, the gap is a **missing input**, and the fix is a test that reaches
+it (here: `actorType='any'` on an unreached triple — the sole path to the final `return`). (2) Restore from a
+**byte copy you took**, never `git checkout`, for any file with uncommitted changes; and check the md5 of the
+*restored* file against the *pre-mutation* value, not against HEAD. (Both were fixed this session: a
+`snapshot`/`restore` helper that copies the file and verifies md5, and the `any`-actor test.)
+
+*Cross-ref: L93 (a defence you never tested is one a refactor may delete — the mutation proof tells the two
+apart), L94 (green on your run is a claim about a run), the encoding-trap note (a byte-identical restore must
+be proven, not assumed), rule 13 (a falsified premise is corrected everywhere it was copied — here CC-37's own
+callback named a `resolveStructuralLevel` design that would have weakened S9).*

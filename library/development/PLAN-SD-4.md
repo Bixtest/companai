@@ -204,7 +204,7 @@ A `MutationGuard` that refuses a structural change to a protected object, on the
   (seed + strict parser + pure decision + fail-closed read).
 - **`SD-5` renders it** — not built here.
 
-#### Slice C — BUILT (2026-10-09, code `…`); what it actually is, and its honest boundary
+#### Slice C — BUILT (2026-10-09); what it actually is, and its honest boundary
 
 - **The catalogue (`packages/shared/src/lib/permissions/catalogue.ts`).** `PERMISSION_BLOCK_VERBS.structural`
   is now `[...STRUCTURAL_VERBS]` — the **five** S11 verbs (`read`/`add`/`edit`/`remove`/`reference`), in
@@ -224,10 +224,18 @@ A `MutationGuard` that refuses a structural change to a protected object, on the
   the last dotted segment to the literal `'structure'`; it now checks membership in the catalogue's own
   `STRUCTURAL_VERBS` (the falsified premise, corrected at its source — rule 13), and both doc-comments that
   said *"the catalogue's only structural verb is `structure`"* are rewritten.
-- **The honest boundary (a hostile critic measured it).** `structural-settings.ts` has **no production
-  reader yet** — nothing imports it. It is the grammar's *home*; the *enforcement* (a guard reading a level
-  and escalating/refusing) is the next slice, scheduled as **CC-37**. The module's JSDoc now states this
-  plainly rather than implying a caller that does not exist.
+- **The honest boundary (a hostile critic measured it) — NOW CLOSED BY CC-37 (2026-10-09).** At Slice C's
+  close, `structural-settings.ts` had **no production reader** — nothing imported it. It was the grammar's
+  *home*; the *enforcement* (a guard reading a level and escalating/refusing) was the next slice, scheduled as
+  **CC-37**. **CC-37 is now BUILT:** the structural guard (`entities/data/guards.ts`,
+  `entities.structural.core-object-guard`) reads the **live** setting (`moduleConfigService` →
+  `loadStructuralSettings`, fail-closed to the seed) and, on a **protected** surface, turns an **explicit**
+  `review`/`approval` rule into the **escalate** outcome (D3 — `{ ok:true, escalation }`, status 202),
+  keeping the hard 422 for `never`/`straight`/no-rule. **The trap it avoided:** the guard reads a new
+  `explicitStructuralLevel`, **not** `resolveStructuralLevel` — the latter returns the fail-closed `approval`
+  default, which would have turned the **absolute** S9 refusal into a 202 for every protected write with no
+  rule. A second hostile-critic finding (an unresolved actor escalated under `any` and mislabelled) is fixed.
+  `read`/`reference` remain declaration-only (CC-34).
 
 ---
 
@@ -312,4 +320,11 @@ A `MutationGuard` that refuses a structural change to a protected object, on the
 - **Foreign guard-input builders omit `actorKind`** (`messages`, `configs.cache`, `communication_channels`,
   `staff`, `payment_gateways`, `integrations`, `sales/quotes/*`) — harmless today (none is a structural
   resourceKind), scheduled (CC-36) for when a global reader of the axis exists.
-- **Slice C (per-verb grammar)** — not built in this change (the plan's §5).
+- ~~**Slice C (per-verb grammar)** — not built in this change (the plan's §5).~~ **BUILT** (§5, Slice C), and
+  its enforcement (**CC-37**) is **BUILT** too.
+- **The escalation is held but not filed (CC-37's own limit)** — CC-37 makes the structural guard D3's first
+  production emitter, but the guard **defers** (no `commandId`/`capabilityId`), so no `authority_pending_acts`
+  row is written; the approval-layer intake is **CC-38**. And no **live route** is asserted end-to-end yet
+  (only the wrapper) — named in CC-38, not implied away.
+- **Slice C's level has a reader; `read`/`reference` do not (CC-34)** — the write verbs (`add`/`edit`/`remove`)
+  are enforced by CC-37; `read`/`reference` stay declaration-only until a read-path enforcement point exists.

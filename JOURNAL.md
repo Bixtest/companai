@@ -35,7 +35,7 @@ log.** Everything else (HANDOVER, START-PROMPT, README, BOOKMARKS, BACKLOG) poin
 
 ---
 
-### ▶ NOW — `SD-4`: the **structural permission grammar** (S11/S12). **Slices A (the structural guard), B (the actor axis) and C (the per-verb grammar) are BUILT and PROVEN; the remaining halves are the enforcement wiring (CC-37) and the manage screen (`SD-5`).** Plan: [`library/development/PLAN-SD-4.md`](library/development/PLAN-SD-4.md); architecture: [`library/development/ARCHITECTURE-structure-permissions.md`](library/development/ARCHITECTURE-structure-permissions.md).
+### ▶ NOW — `SD-4`: the **structural permission grammar** (S11/S12). **Slices A (the structural guard), B (the actor axis), C (the per-verb grammar) AND the enforcement wiring (CC-37) are BUILT and PROVEN; the one remaining half is the manage screen (`SD-5`).** Plan: [`library/development/PLAN-SD-4.md`](library/development/PLAN-SD-4.md); architecture: [`library/development/ARCHITECTURE-structure-permissions.md`](library/development/ARCHITECTURE-structure-permissions.md).
 
 > **If you are a new agent, read only this block to know your job.** Everything below the box is the
 > history and the queue; this is the work in hand.
@@ -78,9 +78,24 @@ Metadata Registry) is **done**.
   `actorTypeForPrincipal` bridge + fail-closed read). The falsified `'structure'` literal in
   `structure-change-decision-header.ts`'s `blockFromFeature` is corrected at source (rule 13). **✅ BUILT 2026-10-09;
   5 mutations RED-then-GREEN (M11–M15), each restore md5-identical; a hostile-critic pass measured the honest
-  boundary: the settings module has NO production reader yet — the enforcement wiring is CC-37, and
-  `read`/`reference` stay declaration-only (CC-34).** This is the piece the manage screen (`SD-5`) then renders.
-  **⬅ THE REMAINING HALF: CC-37 (wire the level into the structural guard) + `SD-5` (render it).**
+  boundary: the settings module had NO production reader yet — the enforcement wiring was CC-37.** This is the piece
+  the manage screen (`SD-5`) then renders.
+- **Slice C's enforcement wiring — CC-37** (the reader the grammar lacked). **✅ BUILT 2026-10-09.** The structural
+  guard (`entities.structural.core-object-guard`) now reads the **live** setting (`container.resolve('moduleConfigService')`
+  → `loadStructuralSettings`, failing closed to the seed) and, on a **protected** surface, turns an **explicit**
+  `review`/`approval` rule into the **escalate** outcome (D3 — `{ ok:true, escalation }`, status 202, *held for a
+  person*) instead of the hard 422. **The trap, self-caught and fixed:** acting on the *resolved* level would return
+  the seed's fail-closed `approval` default and convert the **absolute** S9/SD-2b refusal into a 202 for *every*
+  protected write with no rule — i.e. **weaken** the rule it refines. So a new `explicitStructuralLevel` (own-keys;
+  `null` when no rule reaches the triple) was added, and the guard escalates **only on a chosen rule**; no rule →
+  the 422 stands. **This guard is D3's first production emitter** (the acceptance criterion the D3 deferral recorded).
+  **A hostile-critic pass found two things, both fixed:** (1) a doc-comment falsely claimed the guard reads
+  `resolveStructuralLevel` for placement (it does not — corrected); (2) **it escalated an unresolved actor
+  (`actorKind === undefined`) under the `any` axis and mislabelled it "a person"** — now an unnamed actor is **not**
+  escalated (S9 may be loosened only for a **named** actor; the 422 stands), pinned by a regression test and M20.
+  **Mutations M16–M20 RED-then-GREEN, each restore md5-identical.** `shared` **204/2482**; `core` entities
+  **47 suites / 390 tests**; both `tsc` exit 0.
+  **⬅ THE REMAINING HALF OF `SD-4`: `SD-5` (the manage screen that renders the grammar — the only reader left).**
 
 **The two boundaries the challenge kept honest:** (1) `read`/`reference` are grammar *postures*, not
 write-path-enforceable (the guard only fires on writes; `SD-6` already set read side-effect GETs aside) —
