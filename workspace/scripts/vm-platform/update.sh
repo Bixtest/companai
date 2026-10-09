@@ -56,9 +56,22 @@ cp "$SRC/Dockerfile" ./Dockerfile
 printf '   synced docker-compose.fullapp.yml + Dockerfile\n'
 
 echo "== 3. build the image (this is the slow step, several minutes) =="
-docker compose -f docker-compose.fullapp.yml build app
-# Re-tag explicitly so `up` uses the just-built image even if compose built a
-# content-addressed one under a different id.
+# Preserve the outgoing image under a dated tag BEFORE overwriting the main tag,
+# so a bad release can be rolled back with one `docker tag` (CC-41). Without this
+# the rebuild overwrites open-mercato/app:${DEPLOY_ENV} and the previous image is
+# gone — measured 2026-10-09: the old image could no longer be restored by id.
+if docker image inspect "$IMAGE" >/dev/null 2>&1; then
+  OUTGOING_TAG="open-mercato/app:${DEPLOY_ENV}-$(date -u +%Y%m%dT%H%M%SZ)"
+  docker tag "$IMAGE" "$OUTGOING_TAG"
+  printf '   tagged the outgoing image as %s (rollback: docker tag %s %s)\n' \
+    "$OUTGOING_TAG" "$OUTGOING_TAG" "$IMAGE"
+fi
+# Build CONTEXT must be the SOURCE tree, NOT the deployment dir. The deployment
+# dir holds no source (no package.json/apps/packages/docker-scripts), so building
+# from it (compose's `context: .`) transfers an empty context and every Dockerfile
+# COPY fails — measured 2026-10-09: context was 2 bytes and the build died on
+# `COPY docker/scripts/mcp-entrypoint.sh: not found`. Build directly from $SRC.
+docker build -t "$IMAGE" -f "$SRC/Dockerfile" "$SRC"
 printf '   built %s\n' "$IMAGE"
 docker images "$IMAGE" --format '   {{.Repository}}:{{.Tag}}  {{.CreatedSince}}  {{.Size}}'
 

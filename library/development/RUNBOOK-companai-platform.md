@@ -180,21 +180,25 @@ as the superadmin.
 - **No production SMTP** is configured; signup is enabled with auto-confirmation (same limitation the
   `vm-setup.md` records for the neighbouring Konsult app). Password-reset email flows therefore do not
   work — the reset above was done out-of-band for exactly that reason.
-- **The running platform predates the guard work (measured 2026-10-07).** The deployed image
-  `open-mercato/app:wan` was **built 2026-10-06 20:51**, while the whole `D2-gap` write-verb sweep was
-  committed **2026-10-06 22:00 → 2026-10-07 14:30** (`4ef5812` … `7494fbe`). So the running platform
-  contains **none** of the sweep's guard fixes. (Caveat, stated honestly: the image is built from
-  `/home/ramzi/build-src`, which is **not** a git checkout, so it cannot be dated from here — it is
-  possible that copy carried uncommitted changes. The commit dates are the reliable fact; the "none"
-  is the safe reading of them.) **A redeploy is what ships the fixes** — and the build half of that
-  path is not yet scripted (§1b, §5).
-- **Deploying a new version of the platform** — see **§1b**: the recreate half is known and safe
-  (`docker compose -f docker-compose.fullapp.yml -f docker-compose.wan.yml up -d --no-build app`), but the
-  **build** half is not scripted. The image is built on the VM from `/home/ramzi/build-src`, which is a
-  plain file copy (not a git checkout), so "update it to the fork's current `main`" is a manual step with
-  no drift check. Writing that path (update the build source → build the image → recreate → verify) is the
-  next piece. **The owner has deferred the deploy itself** (2026-10-07): continue development until it is
-  the right time to ship an update.
+- **The running platform now carries the guard work (re-measured 2026-10-09).** ~~The deployed image
+  `open-mercato/app:wan` was built 2026-10-06 20:51…~~ **Superseded:** the image was **rebuilt and
+  deployed 2026-10-09** (new id `4375447250e3`, built `16:13`), shipping the whole `D2-gap` sweep +
+  SD-1…SD-5 with it. Verified live: `CORE_OBJECT_KINDS = ["role","agent"]` is present in the running
+  container. *(History: the 2026-10-06 image predated the sweep; this deploy closed that gap.)*
+- **Deploying a new version of the platform** — **the whole path is now scripted: `./update.sh
+  /home/ramzi/build-src`** (source → config-sync → build → recreate → verify; five abort-on-failure
+  steps). See **§1b**. Two measured facts to keep: (a) **the build CONTEXT is the source tree**, not the
+  deploy dir — the deploy dir holds no source, so building from it (compose `context: .`) transfers an
+  empty context and every Dockerfile `COPY` fails (measured 2026-10-09: 2-byte context, `COPY
+  docker/scripts/mcp-entrypoint.sh: not found`); (b) **take a DB export first** (below) — there is no
+  backup button.
+- **Rollback (one command now).** `update.sh` tags the outgoing image `open-mercato/app:wan-<UTC-date>`
+  **before** it rebuilds, so a bad release is undone with:
+  `docker tag open-mercato/app:wan-<date> open-mercato/app:wan && ./deploy.sh`. **Before the CC-41 fix
+  (landed 2026-10-09) this was impossible** — the rebuild overwrote the single tag and the previous
+  image was unrecoverable by id (measured: the 2026-10-06 image `7624dc853abd` was gone after the
+  deploy). A DB rollback is `psql … < /home/ramzi/db-backups/open-mercato_<stamp>.dump` (a verified
+  export was taken before the 2026-10-09 deploy).
 
 ---
 
