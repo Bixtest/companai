@@ -327,6 +327,14 @@ agent's protection tier is the **same per-object setting** as a table's — `cor
 new mechanism (it reuses `SD-2b`'s engine). `AH-1` declares the `Agent` object and routes its delete/rename
 guard through `resolveCoreTier` (the S5 reuse). Design: `DECISION-agent-protection-tier.md`.
 
+**Built 2026-10-09 (codes `1a518f8`, `acfd020`).** The declaration above is now **in the code**, not just the
+dictionary: the `Agent` object is declared (`ai_assistant/ce.ts`, `1a518f8`), and the tier rule is admitted on
+both axes — `CORE_SETTING_KINDS` **and** `CORE_OBJECT_KINDS` gain `agent` (`acfd020`), so a superadmin marks
+one agent `core` and it is refused on delete/rename. Verified: core-boundary 65/65, `core` 637/637 suites
+(5580 tests), `shared` 203/204, `ai-assistant` 103/103; 3 md5-verified RED-then-GREEN mutations; one
+hostile-critic round. The `AH-1` *box* stays `☐` (its `reportsTo` edge + relation-typed fields are deferred →
+`CC-40`) — the *dictionary addition* here is landed.
+
 ---
 
 ## Part D — Status of enforcement (honest)

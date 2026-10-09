@@ -35,7 +35,7 @@ log.** Everything else (HANDOVER, START-PROMPT, README, BOOKMARKS, BACKLOG) poin
 
 ---
 
-### ▶ NOW — **the owner's ACTION LIST of 2026-10-09** (directly below) is the live work queue. **A1 DONE** (the callback register gained the mechanical linkage); **A2 BUILT** (CC-25, the decision-actor permission — proven; the owner's one-line confirm is still owed, rule 11); **A4 DONE** (live login 500 — Redis restarted + hardened); **A5 DONE** (the build-ship script `.sh` deployed + proven). **A3 (CC-27) is BLOCKED on `AH-1`** — *re-measured 2026-10-09: the binding hangs off the agent-as-kernel-object, which is not built (rule 13 premise correction; do not build it before AH-1).* **The owner-facing next step is A6/A7** (rebuild + deploy the current `main`, then hand over the credentials — both now unblocked by A4+A5, and both owner-gated). When the action list is clear, the standing next build is **`AH-1`** (the agent as a kernel object — the only agent-half item on the critical path; now carried as **item 20** in `BUILD-ORDER.md`, recorded there 2026-10-09). **⚠️ Re-measured 2026-10-09:** `AH-1`'s "startable" label is true of the *engine* (`G-01`) but the **`Agent` object is not yet declared** — so its **first slice is declaring the object**. **✅ Its "is the agent core?" leg is RESOLVED, not owner-gated** — the agent's protection tier is the **per-object setting the tables use** ([`DECISION-agent-protection-tier.md`](library/development/DECISION-agent-protection-tier.md)), assigned at creation. Then **BUILD-ORDER item 9 — the generic state-machine engine**.
+### ▶ NOW — **the owner's ACTION LIST of 2026-10-09** (directly below) is the live work queue. **A1 DONE** (the callback register gained the mechanical linkage); **A2 BUILT** (CC-25, the decision-actor permission — proven; **CONFIRM GRANTED** by the owner's blanket ruling 2026-10-09); **A4 DONE** (live login 500 — Redis restarted + hardened); **A5 DONE** (the build-ship script `.sh` deployed + proven). **A3 (CC-27) is BLOCKED on `AH-1`** — *re-measured 2026-10-09: the `Agent` object now EXISTS (slice 1, code `1a518f8`) but `AH-1`'s box stays `☐` (its `reportsTo` edge + relation-typed fields are deferred → `CC-40`), so the binding's prerequisite is still not ticked (rule 13; do not build A3 before `AH-1` closes).* **The owner-facing next step is A6/A7** (rebuild + deploy the current `main`, then hand over the credentials — both now unblocked by A4+A5, and both owner-gated). When the action list is clear, the standing next build is **`AH-1`** (the agent as a kernel object — the only agent-half item on the critical path; **item 20** in `BUILD-ORDER.md`). **🟢 `AH-1` PROGRESS 2026-10-09: slices 1 + 2 are BUILT and PROVEN** (codes `1a518f8`, `acfd020`) — the `Agent` is declared with all six §1.4 fields, and `agent` is a core-object kind (a superadmin marks one `core`; it is then refused on delete/rename). **The box stays `☐`** because `owner`/`role`/`actsAs` are `text` (not `relation`) and the `reportsTo` edge is deferred (**`CC-40`**) — so **the next concrete step on `AH-1` is `CC-40`** (flip the fields to relations once their kernel targets exist), *or* proceed to **BUILD-ORDER item 9 — the generic state-machine engine**. **✅ The "is the agent core?" leg is RESOLVED and BUILT, not owner-gated** — the agent's protection tier is the **per-object setting the tables use** ([`DECISION-agent-protection-tier.md`](library/development/DECISION-agent-protection-tier.md)), assigned at creation.
 
 > **If you are a new agent, read only this block to know your job.** Everything below the box is the
 > history and the queue; this is the work in hand.
@@ -1306,6 +1306,31 @@ doing X now."**
 
 ### ✅ Done recently (ticked, then moved down here)
 
+- **2026-10-09 — `AH-1` (slices 1 + 2) — the agent becomes a kernel object, and can be marked core — BUILT
+  and PROVEN; the item stays `☐` (its `reportsTo` edge + relation-typed fields are deferred → `CC-40`).**
+  Codes `1a518f8` (slice 1), `acfd020` (slice 2). **The owner's "is an agent core?" leg is RESOLVED and
+  built, not a one-off ruling:** an agent's protection tier is the **same per-object SETTING the tables
+  use** (`DECISION-agent-protection-tier.md`). **Slice 1** declares the `Agent` as a kernel object
+  (`packages/ai-assistant/src/modules/ai_assistant/ce.ts`) — a module-root `ce.ts` is the one channel the
+  generator splits into `customEntities` **and** `customFieldSets` (`module-registry.ts:3166`/`:3139`), so
+  `buildModelDescriptor` sees the object **and** its six §1.4 fields (`kind`/`owner`/`acts_as`/`role`/
+  `runtime`/`autonomy`), `entityClass` CAPABILITY, `accessRestricted`. **Slice 2** admits `agent` on **both**
+  axes — `CORE_SETTING_KINDS` (a tier can be assigned) **and** `CORE_OBJECT_KINDS` (the row-level registry
+  refuses delete/rename) — carrying its own per-kind `because` (delete) and rename reason, so an agent is
+  refused in its own words, not the role's. Seed stays fail-closed: agents are `tenant_structural` (business
+  data) unless a superadmin marks one `core`; marking one does **not** protect the others. **One rule-9a fix
+  in the same change:** the seed's *empty* inner buckets were unfrozen shared singletons (a pre-existing gap
+  the critic proved by mutating `DEFAULT_CORE_SETTINGS.objectTier.column`) — every inner bucket is frozen
+  now. **Proof:** `tsc` exit 0; core-boundary **65/65**; `core` **637 suites / 5580 tests** (baseline, no
+  regression); `shared` **203/204 suites / 2494/2502** (the 8 are the pre-existing sandbox-shim
+  `dynamicLoader` case, **8/8 in isolation**); `ai-assistant` **103/103 / 1438/1438**; **three mutations
+  RED-then-GREEN** (remove `agent` from `CORE_OBJECT_KINDS`; remove it from `CORE_SETTING_KINDS`; unfreeze
+  the inner buckets), each **md5-verified restored**, LF-0 preserved; **one hostile-critic round as a
+  separate agent** (C1–C6 all CONFIRMED — the refactor is behaviour-preserving, the parser still fails
+  closed, per-object is honoured). **What remains, and is scheduled:** the `reportsTo` edge and
+  relation-typed `owner`/`role`/`actsAs` (→ **`CC-40`**, needs the target entities declared in the kernel);
+  the `runtime`/`autonomy` **enforcement** stays `L-01`/`AH-5` and `AH-2` (declared now, enforced there).
+  Plan: [`PLAN-AH-1.md`](library/development/PLAN-AH-1.md); design: [`DECISION-agent-protection-tier.md`](library/development/DECISION-agent-protection-tier.md).
 - **2026-10-08 — `CC-30` — the `custom_entities_storage` upsert conflict target — DONE and PROVEN.** The
   **write-side sibling of CC-28**: the shared table's upsert declared `on conflict (entity_type, entity_id,
   organization_id, tenant_id)`. **Proved on live PG 17 that it matched no constraint at all** — the only

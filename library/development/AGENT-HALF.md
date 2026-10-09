@@ -214,6 +214,14 @@ entity. Its kind, owner and role are fields. Build these anywhere else and they 
 | **D-06** | **One canonical owner per fact**, and the boundary written down. Their own register calls two owners of one fact *"the most expensive kind of bug… it produces no error — only a system that quietly disagrees with itself"* | a design rule for the kernel: every field has one writer |
 | **D-10** | **Generate schema docs from the schema**; keep ephemeral notes out of spec-named files | a rule for the kernel's own documentation |
 
+> **`AH-1` status 2026-10-09 — the spine has landed, the item stays open.** The `Agent` object is now
+> declared in the kernel (`packages/ai-assistant/src/modules/ai_assistant/ce.ts`, code `1a518f8`) with all
+> six §1.4 fields, and it is **protectable** — `agent` is a core-object kind, so a superadmin marks one
+> agent `core` and it is refused on delete/rename (code `acfd020`). **Still open** (so the box stays `☐`):
+> the `reportsTo` **edge** and **relation-typed** `owner`/`role`/`actsAs` are deferred until their kernel
+> targets are declared → **`CC-40`**. Endorsed by a hostile-critic pass (C1–C6 confirmed) and three
+> md5-verified RED-then-GREEN mutations. Plan: [`PLAN-AH-1.md`](PLAN-AH-1.md).
+
 ### 3.2 Phase 2 — the security floor · *the responsibility rule is enforced here*
 
 **Why here.** Phase 2 is where classification, authorization and the AI guards live. The owner's

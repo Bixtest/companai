@@ -151,7 +151,7 @@
 - ☐ **Port** — Failure is normal: `cancelRun` bounded+idempotent, `completeRun` replay-safe *(OPEN)*
 - ☐ **N-8** — Displace OpenCode: build the port, move the chat route, *then* delete OpenCode *(OPEN — rewire first)*
 - ☐ **Hermes id** — `ai_worker` principal derived server-side; no branch on `kind` in own files *(PART — seam built, must extend + enforce)*
-- ☐ **AH-1** — The five agent kinds on the agent definition *(OPEN)*
+- ☐ **AH-1** — The five agent kinds on the agent definition *(PARTIAL 2026-10-09 — the five kinds `personal · role · context · independent · system` ARE declared as the `kind` field's option set in `packages/ai-assistant/src/modules/ai_assistant/ce.ts` (code `1a518f8`), so the vocabulary is one source for DB/API/UI — but they are a declared enumerable, not yet an enforced per-kind definition; stays `☐` per the never-a-partial-tick rule)*
 - ☐ **Tool door** — One door only: in-process client + tool registry/executor/mcp-adapter; every call re-authorizes; no DB handle *(PART)*
 - ☑ **S-02** — Tool-call authorization at execution time, deny-by-default *(DONE 2026-10-08, code `3add3a2`)* · ★ Hermes: where a tool call is allowed or denied
 - ☐ **G-06** — AI input/output guards + the context firewall (prompt-injection + exfiltration) *(OPEN)*
@@ -175,7 +175,7 @@
 
 ## E. THE AGENT HALF — `AH-1`–`AH-12`
 
-- ☐ **AH-1** — The agent as a kernel object: `kind` · `owner` · `actsAs` · `role` · `runtime` · `autonomy` *(OPEN — the only agent item on the critical path)*
+- ☐ **AH-1** — The agent as a kernel object: `kind` · `owner` · `actsAs` · `role` · `runtime` · `autonomy` *(PARTIAL 2026-10-09 — the `Agent` object IS declared with all six fields (`ai_assistant/ce.ts`, code `1a518f8`) so `buildModelDescriptor` sees it, and it is protectable as a core object per-object (code `acfd020`); **left `☐`** because `owner`/`role`/`actsAs` are `text`, not `relation` fields, and the `reportsTo` edge is deferred (`CC-40`) — the point and everything it depends on is not yet 100%)* · ★ Hermes: the object the multi-tenancy persona map depends on
 - ☐ **AH-2** — The responsibility rule: autonomy per action class on `A0`–`A5`; accountable party always a person *(OPEN — needs G-04)*
 - ☐ **AH-3** — Durable wake queue: every trigger is a database row, not an in-memory timer *(OPEN — needs S-05)*
 - ☐ **AH-4** — Routines produce work items: schedule → task → wake *(OPEN — needs AH-3)*
