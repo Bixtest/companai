@@ -35,7 +35,7 @@ log.** Everything else (HANDOVER, START-PROMPT, README, BOOKMARKS, BACKLOG) poin
 
 ---
 
-### ▶ NOW — `SD-4`: the **structural permission grammar** (S11/S12). **Slice A (the structural guard) is BUILT and PROVEN; Slices B (the actor axis) and C (the per-verb grammar) remain.** Plan: [`library/development/PLAN-SD-4.md`](library/development/PLAN-SD-4.md); architecture: [`library/development/ARCHITECTURE-structure-permissions.md`](library/development/ARCHITECTURE-structure-permissions.md).
+### ▶ NOW — `SD-4`: the **structural permission grammar** (S11/S12). **Slices A (the structural guard) and B (the actor axis) are BUILT and PROVEN; Slice C (the per-verb grammar) remains.** Plan: [`library/development/PLAN-SD-4.md`](library/development/PLAN-SD-4.md); architecture: [`library/development/ARCHITECTURE-structure-permissions.md`](library/development/ARCHITECTURE-structure-permissions.md).
 
 > **If you are a new agent, read only this block to know your job.** Everything below the box is the
 > history and the queue; this is the work in hand.
@@ -55,12 +55,24 @@ Metadata Registry) is **done**.
   `auth:user`, not the table name `users`). **17 tests; 3 mutations RED-then-GREEN; a hostile-critic pass found
   a HIGH wildcard over-fire on record writes (fixed by scoping to the two definition resource kinds) and a LOW
   namespace-pin gap (fixed with a test).** `core` **632 suites / 5501 tests, 0 failures**; both `tsc` exit 0.
-- **Slice B — the actor axis** (S12): `PrincipalKind` exists platform-wide (`principal.ts:28`) but does **not**
-  reach the guard input (`MutationGuardInput` carries only `userId`). Add an **optional** `actorKind` field —
-  additive, no call site breaks.
+- **Slice B — the actor axis** (S12): `PrincipalKind` exists platform-wide (`principal.ts:28`) but did **not**
+  reach the guard input (`MutationGuardInput` carried only `userId`). **✅ BUILT 2026-10-09** — an **optional**
+  `actorKind?: PrincipalKind` now rides `MutationGuardInput` / `MutationGuardAfterInput` / `RouteMutationGuardAuth`,
+  threaded into **both** the validate and the `afterSuccess` inputs of `runRouteMutationGuards`, and set in the
+  eight guard-input builders (`factory.ts` ×7 + `beginEntitiesMutationGuard`). The kind is resolved as
+  `auth.principal?.kind ?? derivePrincipal(auth)?.kind`, with `derivePrincipal` imported from **`auth/principal`**
+  (the pure, un-mocked module) — **not** `auth/server` (which every consumer's test mocks wholesale). The
+  structural guard now **reads** it: a machine's refusal names the actor. **A hostile-critic pass caught two HIGH
+  issues: (1) a direct `auth.principal` read was a real regression — the in-process AI runner's *trusted
+  envelope* carries `sub:'ai_worker:<id>'` and no `principal` field, so that machine was mislabelled "unknown"
+  (fixed + pinned by 3 derivation tests, mutation M6); (2) the axis changes only the refusal *reason* today, not
+  the decision — corrected in the docs, since the per-actor grammar is Slice C.** Honest limit: the axis reaches
+  the guard and is a real reader; it does **not** yet make a machine's outcome differ from a person's.
+  `core` **632 suites / 5510 tests, 0 failures**; `shared` **203 suites / 2435 tests, 0 failures**; both `tsc`
+  exit 0; 3 mutations RED-then-GREEN (M4 transport, M5 actor reader, M6 the derivation).
 - **Slice C — the per-verb grammar** (S11, the CC-5 expansion): `PERMISSION_BLOCK_VERBS.structural` is today a
   single `'structure'` verb (`catalogue.ts:99-102`); S11 needs add/edit/remove/reference. This is the piece
-  the manage screen (`SD-5`) then renders.
+  the manage screen (`SD-5`) then renders. **⬅ THE ACTIVE TASK.**
 
 **The two boundaries the challenge kept honest:** (1) `read`/`reference` are grammar *postures*, not
 write-path-enforceable (the guard only fires on writes; `SD-6` already set read side-effect GETs aside) —

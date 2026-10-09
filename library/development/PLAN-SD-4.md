@@ -148,12 +148,52 @@ A `MutationGuard` that refuses a structural change to a protected object, on the
   labels by row existence, so it cannot happen on this route today) and scheduled in §6; the guard's own
   header already warns against name-keyed conventions.
 
-### Slice B — the **actor axis** (additive contract change)
+### Slice B — the **actor axis** (additive contract change) — **BUILT** (code `8f7c9a2`…, see §8)
 
-- Add an **optional** `actorKind?: PrincipalKind` to `MutationGuardInput` and `MutationGuardAfterInput`,
-  and thread it from `RouteMutationGuardAuth` (populated from the request's principal where available).
+- Added an **optional** `actorKind?: PrincipalKind` to `MutationGuardInput` and `MutationGuardAfterInput`
+  (`mutation-guard-registry.ts`), and to `RouteMutationGuardAuth` (`route-mutation-guard.ts`), threaded into
+  **both** the `validate` input and the `afterSuccess` input of `runRouteMutationGuards`.
+- Threaded it into the guard-input builders that construct a `MutationGuardInput` directly: the seven sites in
+  `factory.ts` and the one in `beginEntitiesMutationGuard` (`definitions.mutation-guard.ts`).
 - **Never required** — every existing guard keeps compiling and behaving identically (the optional-field
   rule); a guard that consults it opts in.
+- **Made a real reader:** `structuralGuardRefusal` (`guards.ts`) now takes `actorKind` and its refusal *names*
+  the machine actor when one is refused — so the field is load-bearing (a guard that never read it would be the
+  decoration the rules forbid), not decorative.
+- **The derivation, and why it is not a direct field read.** The kind is resolved as
+  `auth.principal?.kind ?? derivePrincipal(auth)?.kind`, with `derivePrincipal` imported from **`auth/principal`**
+  — the pure module that owns the subject encoding, mocked **nowhere** in the repo — not from `auth/server`,
+  which the tests of every route sharing the builder mock wholesale. This is deliberate: (a) it keeps every such
+  mock complete as written (no mock must grow an export it does not use); (b) it is *correct* where a direct
+  read is not — see the critic's HIGH #2 below.
+
+**A hostile-critic pass (separate agent, six probes) on Slice B found two HIGH issues and three lower ones:**
+
+- **HIGH — the direct `auth.principal` read was a real regression (fixed before commit).** The first draft read
+  `ctx.auth.principal?.kind` directly, reasoned safe because "every real path populates `principal`". That is
+  **false**: the in-process AI runner hands routes a *trusted envelope*
+  (`ai-api-operation-runner.ts` `buildAuthEnvelope`) whose `AuthContext` carries `sub:'ai_worker:<id>'` and **no
+  `principal` field**, and `resolveAuthFromRequestDetailed` returns it **verbatim** (no `withResolvedPrincipal`).
+  So the one path S12 exists to bound — a machine — was labelled *unknown*. **Fixed:** derive via
+  `derivePrincipal` from the un-mocked pure module; pinned by **three** new tests (the trusted-envelope
+  `ai_worker` case, a `service` api-key subject, and a bare-`human` subject) that go **RED** on the direct read
+  (mutation **M6**). *The critic earned its keep: this was a live defect where the exact target case was lost.*
+- **HIGH — the claim was overstated (corrected in the docs, not the code).** Today the axis changes only the
+  refusal **message**, never the decision (`ok`/`status`/allow-vs-refuse are actor-invariant). That is
+  **correct for Slice B's scope** — its job is to make the axis *reach* the guard so the per-actor **grammar**
+  can use it (Slice C) — but it must not be sold as "a structural decision already differs for a person and a
+  machine". The headline is corrected here and in the JOURNAL/BACKLOG/platform_points.
+- **MEDIUM — silent drop elsewhere.** `messages`, `configs.cache`, `communication_channels`, `staff`,
+  `payment_gateways`, `integrations`, `sales/quotes/*` build guard inputs without `actorKind`. Harmless today
+  (none is a structural resourceKind), but a future *global* reader of the axis would see "unknown" on all of
+  them. Recorded as a **scheduled limit** (new CC-36) rather than silently ignored.
+- **LOW — a decorative test.** `guards.sd4.test.ts` proved the record-write narrowing with
+  `resourceKind:'entities.custom_entity_record'`, a string **no production route emits** (real value is
+  `'entities.record'`); it passed for the wrong reason. **Fixed:** the test now uses the real
+  `'entities.record'`.
+- **LOW — the seven `factory.ts` sites are inert for *this* guard.** Entities routes don't use the factory, so
+  those writes never reach `STRUCTURAL_RESOURCE_KINDS`. They prove transport only, not effect. Noted so the
+  field's reach is not overclaimed.
 
 ### Slice C — the **per-verb grammar** (S11, the CC-5 expansion)
 
@@ -187,9 +227,24 @@ A `MutationGuard` that refuses a structural change to a protected object, on the
 | `packages/core/src/modules/entities/data/__tests__/guards.sd4.test.ts` | NEW — 17 tests (refusal, allowance, record-write scoping, namespace pin, create-exclusion) |
 | `packages/core/src/modules/entities/api/__tests__/definitions.mutation-guard.test.ts` | add `isReservedSystemEntityType: () => false` to the `system-entities` mock |
 
+## 7b. The file table (Slice B)
+
+| File | Change |
+|---|---|
+| `packages/shared/src/lib/crud/mutation-guard-registry.ts` | add optional `actorKind?: PrincipalKind` to `MutationGuardInput` + `MutationGuardAfterInput` |
+| `packages/shared/src/lib/crud/route-mutation-guard.ts` | add optional `actorKind?` to `RouteMutationGuardAuth`; thread it into the validate input **and** the `afterSuccess` input |
+| `packages/shared/src/lib/crud/factory.ts` | add `resolveCrudActorKind()` (derives via `derivePrincipal` from `auth/principal`); use it at the 7 guard-input builders |
+| `packages/core/src/modules/entities/api/definitions.mutation-guard.ts` | add `resolveActorKind()` (same derivation); pass it as `auth.actorKind` |
+| `packages/core/src/modules/entities/data/guards.ts` | `structuralGuardRefusal` reads `actorKind` — a machine refusal names the actor; `structuralCoreGuard.validate` passes `input.actorKind` |
+| `packages/core/src/modules/entities/data/__tests__/guards.sd4.test.ts` | +5 actor-axis tests; record-write test now uses the **real** `entities.record` kind + a drift guard |
+| `packages/core/src/modules/entities/api/__tests__/definitions.mutation-guard.test.ts` | +4 derivation tests (trusted-envelope `ai_worker`, `service`, `human`, explicit-principal-wins) |
+| `packages/shared/src/lib/crud/__tests__/route-mutation-guard.test.ts` | +3 transport tests (validate input, afterSuccess input, legacy-undefined) |
+
 ---
 
 ## 8. Verification protocol (step 5 — done, the observations)
+
+### Slice A
 
 - **RED-then-GREEN mutations (three, each restore md5-identical):**
   - **M1** disable the refusal → **5 tests RED** (every refusal case).
@@ -200,10 +255,36 @@ A `MutationGuard` that refuses a structural change to a protected object, on the
 - **A hostile-critic pass** (separate agent, six probes, each with a command + output) — found the HIGH
   wildcard over-fire, a LOW namespace-pin gap, and a MEDIUM convention risk (all recorded in §5).
 
+### Slice B
+
+- **RED-then-GREEN mutations (three, each restore md5-identical):**
+  - **M4** stop threading `actorKind` into the validate input → **1 test RED** (`route-mutation-guard`:
+    "carries auth.actorKind into the validate input").
+  - **M5** make `structuralGuardRefusal` ignore the actor (`byMachine = false && …`) → **2 tests RED**
+    (the actor-axis naming + the registry-runner transport case).
+  - **M6** revert the derivation to a direct `auth.principal` read → **3 tests RED** (the trusted-envelope
+    `ai_worker` case, the `service` case, the `human` case) — the critic's HIGH #2, now caught by a test.
+- **Suites:** `guards.sd4` **23/23**; `definitions.mutation-guard` **16/16**; `route-mutation-guard` **18/18**;
+  the `entities` slice **45 suites / 370 tests**; the `shared` `crud` slice **23 suites / 294 tests**;
+  **full `core` 632 suites / 5510 tests, 0 failures**; **full `shared` 203 suites / 2435 tests, 0 failures**;
+  both `tsc --noEmit` **exit 0**.
+- **A hostile-critic pass** (separate agent, six probes, each with a command + output) — found the HIGH
+  direct-read regression (fixed pre-commit), the HIGH over-stated claim (docs corrected), a MEDIUM silent-drop
+  set, and two LOW test defects (both fixed). All recorded in §5.
+- **Note on the `shared` flake (CC-19):** the pre-existing `dynamicLoader.tsconfig.test.ts` failure did **not**
+  appear in this run — confirming it is flaky-environmental, not a code defect.
+
 ---
 
 ## 9. Documented limits (to fill at close of the slice)
 
-- **DDL DROP / FK change** — not seen by a row-level guard; scheduled.
-- **re-type labelled `'create'`** — convention risk; scheduled.
-- **Slices B (actor axis) and C (per-verb grammar)** — not built in this change (the plan's §5).
+- **DDL DROP / FK change** — not seen by a row-level guard; scheduled (CC-33).
+- **re-type labelled `'create'`** — convention risk; scheduled (CC-35).
+- **`read`/`reference` enforcement** — declared but not enforced; scheduled (CC-34).
+- **The actor axis changes only the refusal *reason* today, not the decision** — the per-actor *grammar*
+  is Slice C (S11). Slice B makes the axis *reach* the guard and be a real reader; it does **not** yet make a
+  machine's outcome differ from a person's. Stated plainly so it is not overclaimed.
+- **Foreign guard-input builders omit `actorKind`** (`messages`, `configs.cache`, `communication_channels`,
+  `staff`, `payment_gateways`, `integrations`, `sales/quotes/*`) — harmless today (none is a structural
+  resourceKind), scheduled (CC-36) for when a global reader of the axis exists.
+- **Slice C (per-verb grammar)** — not built in this change (the plan's §5).

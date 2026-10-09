@@ -1146,10 +1146,25 @@ one page, each with a named home. Details: [`BLUEPRINT-GAP-ANALYSIS.md`](BLUEPRI
    RED-then-GREEN**; a **hostile-critic pass** found a **HIGH** wildcard over-fire on record writes (fixed by
    scoping to the two definition resource kinds) and a **LOW** namespace-pin gap (fixed with a test);
    `core` **632 suites / 5501 tests, 0 failures**; `shared` **202/203** (the 1 red is the pre-existing
-   `dynamicLoader` flake, CC-19); both `tsc` exit 0. **Slice B (the actor axis, S12) and Slice C (the per-verb
-   grammar, S11/CC-5) remain** — the challenge (rule 9b) split the task into three and named the order. The
+   `dynamicLoader` flake, CC-19); both `tsc` exit 0. **Slice B — the actor axis — BUILT 2026-10-09.** An
+   optional `actorKind?: PrincipalKind` (S12) now rides `MutationGuardInput`/`MutationGuardAfterInput`/
+   `RouteMutationGuardAuth`, is threaded into **both** the validate and the `afterSuccess` inputs of
+   `runRouteMutationGuards`, and is set by the eight guard-input builders (`factory.ts`'s 7 +
+   `beginEntitiesMutationGuard`). It is resolved as `auth.principal?.kind ?? derivePrincipal(auth)?.kind`,
+   importing `derivePrincipal` from **`auth/principal`** — the pure module that owns the subject encoding and is
+   mocked **nowhere** — *not* `auth/server`, which every consumer's test mocks wholesale (so no mock has to grow
+   an export). The structural guard now **reads** it: a machine's refusal names the actor. **3 mutations
+   RED-then-GREEN** (M4 the transport, M5 the reader, M6 the derivation); a **second hostile-critic pass** caught
+   two HIGH issues — (1) the first draft's direct `auth.principal` read was a **real regression**: the in-process
+   AI runner's *trusted envelope* (`buildAuthEnvelope`) carries `sub:'ai_worker:<id>'` and **no `principal`
+   field**, and the resolver returns it verbatim, so that machine was mislabelled "unknown" — fixed and pinned by
+   three derivation tests; (2) the axis today changes only the refusal **reason**, not the decision — the docs are
+   corrected, since the per-actor **grammar** is Slice C, not B. `core` **632 suites / 5510 tests, 0 failures**;
+   `shared` **203 suites / 2435 tests, 0 failures**; both `tsc` exit 0. **Slice C (the per-verb grammar,
+   S11/CC-5) remains** — the challenge (rule 9b) split the task into three and named the order. The
    **manage screen stays `SD-5`** (one grid, two settings). Limits scheduled in
-   [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md) (CC-33: DDL DROP/FK; CC-34: read/reference verbs).
+   [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md) (CC-33: DDL DROP/FK; CC-34: read/reference verbs;
+   CC-35: re-type labelled `'create'`; CC-36: foreign builders omit `actorKind`).
 9. **NEW — generic state-machine engine** (blueprint §10) promoted to a core primitive: allowed
    transitions, transition permissions, preconditions, events. Today pipelines exist only inside
    `customers`; the blueprint makes lifecycle generic.
