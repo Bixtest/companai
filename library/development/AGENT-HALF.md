@@ -214,13 +214,7 @@ entity. Its kind, owner and role are fields. Build these anywhere else and they 
 | **D-06** | **One canonical owner per fact**, and the boundary written down. Their own register calls two owners of one fact *"the most expensive kind of bug… it produces no error — only a system that quietly disagrees with itself"* | a design rule for the kernel: every field has one writer |
 | **D-10** | **Generate schema docs from the schema**; keep ephemeral notes out of spec-named files | a rule for the kernel's own documentation |
 
-> **`AH-1` status 2026-10-09 — the spine has landed, the item stays open.** The `Agent` object is now
-> declared in the kernel (`packages/ai-assistant/src/modules/ai_assistant/ce.ts`, code `1a518f8`) with all
-> six §1.4 fields, and it is **protectable** — `agent` is a core-object kind, so a superadmin marks one
-> agent `core` and it is refused on delete/rename (code `acfd020`). **Still open** (so the box stays `☐`):
-> the `reportsTo` **edge** and **relation-typed** `owner`/`role`/`actsAs` are deferred until their kernel
-> targets are declared → **`CC-40`**. Endorsed by a hostile-critic pass (C1–C6 confirmed) and three
-> md5-verified RED-then-GREEN mutations. Plan: [`PLAN-AH-1.md`](PLAN-AH-1.md).
+> **`AH-1` status 2026-10-09 — the spine has landed and the relation half is now real; the item still stays open.** The `Agent` object is declared in the kernel (`packages/ai-assistant/src/modules/ai_assistant/ce.ts`, code `1a518f8`) with all six §1.4 fields, and it is **protectable** — `agent` is a core-object kind, so a superadmin marks one agent `core` and it is refused on delete/rename (code `acfd020`). **The relation half is partly landed (slice 3):** `owner` and `acts_as` are now real `relation` fields (target `user`), and `packages/ai-assistant/src/modules/ai_assistant/data/extensions.ts` declares a genuine `ai_assistant:agent → ai_assistant:agent` **`reportsTo` self-edge** — the §3.1 promise of *"a real `reportsTo` edge, no 'type' flag"* is now true in the kernel model (`model.ts:265` pushes the self-edge exactly once). **Still open** (so the box stays `☐`): only `role` remains `text`, because the *admin* role entity is **not** declared in the kernel (measured: `user` ✅, `role` ❌). → **`CC-40`** (now narrowed to `role` alone). Endorsed by a hostile-critic pass (C1–C7 confirmed, all three slice-3 claim defects fixed) and md5-verified RED-then-GREEN mutations (M1 owner relation→text; M2 empty extensions). Plan: [`PLAN-AH-1.md`](PLAN-AH-1.md) §8.
 
 ### 3.2 Phase 2 — the security floor · *the responsibility rule is enforced here*
 

@@ -125,3 +125,50 @@ shape cannot express a self-edge cleanly; recorded honestly in §6 if so. *(Meas
 2. Slice 2 (the tier) → tests → commit.
 3. Verification pass (tsc, suite, mutations, critic).
 4. Docs + register, in the same change as the final code commit.
+
+---
+
+## 8. Slice 3 — `CC-40`, the relation upgrade (owner said **"build the possible half now"**, 2026-10-09)
+
+**The requirement (facts measured, not assumed).** `CC-40` says the agent's `owner`/`role`/`actsAs` should be
+first-class `relation` fields and a real `reportsTo` self-edge should exist, and that the **prerequisite is the
+target entities being declared in the kernel**. That prerequisite is **partially** met — measured by running the
+real descriptor inside the deployed image (`collectDeclarations(getModules())` → `buildModelDescriptor`):
+
+```
+entity count: 11
+  agent present: true   (fields: acts_as, autonomy, kind, owner, role, runtime)
+  user  present: true   ← declared via `communication_channels/data/extensions.ts:30` `base: 'auth:user'`
+  role  present: false
+  organization / tenant: false
+```
+
+So, precisely:
+
+| Field | Target | In descriptor? | This slice |
+|---|---|---|---|
+| `owner` | User | ✅ `user` | **→ `relation` (`relatedEntityId: 'user'`)** |
+| `acts_as` | User | ✅ `user` | **→ `relation` (`relatedEntityId: 'user'`)** |
+| `role` | Role | ❌ absent | **stays `text`** — no invented target (spec §5.4) |
+| `reportsTo` | agent → agent | ✅ `agent` (self) | **→ real `entityExtension` self-edge** |
+
+**Why the self-edge is safe:** `model.ts:265` is `if (to !== from) to.relationships.push(relationship)` — the
+kernel **explicitly handles `from === to`**, so an `agent → agent` edge is pushed once, not overflowed.
+`'relation'` is a valid `CustomFieldKind` (`entities/kinds.ts:9`) and carries its target via `relatedEntityId`
+(`entities.ts`, `CustomFieldDefinition`). All measured.
+
+**Scope of this slice:**
+1. In `ce.ts`: `owner` and `acts_as` → `kind: 'relation'`, `relatedEntityId: 'user'`. `role` stays `text` with a
+   comment naming `CC-40`'s remaining half.
+2. In `ce.ts`: add the `reportsTo` `entityExtension` (base `ai_assistant:agent` → extension `ai_assistant:agent`),
+   so the kernel model carries a real self-edge.
+3. Extend `ah1-agent-kernel-object.test.ts` to assert: `owner`/`acts_as` have `fieldKind === 'relation'` and
+   resolve to `user`; and the model carries a `agent → agent` relationship. A mutation must falsify each.
+
+**What stays open (rule 8):** the `role` **relation** remains deferred — `CC-40` stays OPEN with its callback
+unchanged, but its *declared gap narrows* to exactly one field (`role`), which closes when a `role` entity is
+declared in the kernel. That narrowing is recorded in `COMPLETION-CALLBACKS.md` in this same change.
+
+**Does this close `AH-1`?** **No.** `AH-1`'s box stays `☐` until *all* its §1.4 fields are relations **and** the
+`reportsTo` edge exists. After this slice, one field (`role`) is still `text` — so the box remains `☐` and `CC-40`
+remains the open callback, now scoped to `role` alone. Honest, not a tick.
