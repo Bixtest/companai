@@ -1204,23 +1204,23 @@ detail lives in [`AGENT-HALF.md`](AGENT-HALF.md) §4, the register in [`BACKLOG.
     piece — admit `agent` as a core-object kind and route the agent delete/rename guard through
     `resolveCoreTier` (the S5 reuse; `core-object-guard.ts` is the template).
 
-    **🟢 PROGRESS 2026-10-09 — three slices BUILT; the item stays OPEN (strict tick rule).** *Slice 1*
+    **✅ DONE 2026-10-09 — four slices built and proven; `CC-40` CLOSED.** *Slice 1*
     declares the `Agent` kernel object (`packages/ai-assistant/src/modules/ai_assistant/ce.ts`, code
     `1a518f8`); the generator splits it into `customEntities` **and** `customFieldSets`, so
     `buildModelDescriptor` sees the object and its six §1.4 fields. *Slice 2* admits `agent` as both a
     `CORE_SETTING_KINDS` kind and a `CORE_OBJECT_KINDS` kind (code `acfd020`), so a superadmin can mark an
-    agent `core` per object and it is then refused on delete/rename. *Slice 3 (2026-10-09 — the owner's
-    "build the possible half" scope decision)* upgrades `owner`/`actsAs` to real `relation` fields (target
-    `user`) and declares a true `ai_assistant:agent → ai_assistant:agent` **`reportsTo` self-edge**
-    (`packages/ai-assistant/src/modules/ai_assistant/data/extensions.ts`; the kernel pushes `from === to`
-    exactly once — `shared/src/lib/kernel/model.ts:265`). **Proven:** core-boundary 65/65; `core` 637/637
-    suites / 5580/5580 tests (baseline); `shared` 203/204 (8 pre-existing sandbox-shim failures);
-    `ai-assistant` 103/103 / 1444/1444; `tsc` clean in `shared`+`core`; **five mutations RED-then-GREEN**,
-    each md5-verified; two hostile-critic rounds (round 1: C1–C6; round 2 on slice 3: C1/C6/C7 — all fixed).
-    **Why the item is NOT ticked:** the tick rule requires the point **and everything it depends on** at
-    100% — the **`role`** field is still `text` because its target entity is **not** in the kernel
-    (measured: `user` ✅, `role` ❌) → **`CC-40`, now narrowed to `role` alone**; the `runtime`/`autonomy`
-    **enforcement** is owned by `L-01`/`AH-5` and `AH-2`. Declared now, enforced there.
+    agent `core` per object and it is then refused on delete/rename. *Slice 3* upgrades `owner`/`actsAs` to
+    real `relation` fields (target `user`) and declares a true `ai_assistant:agent → ai_assistant:agent`
+    **`reportsTo` self-edge**. *Slice 4 (`CC-40`'s last leg)* admits **`auth:role`** to the kernel via the
+    same `entityExtensions` route that admits `auth:user` (a real `auth:user_role → auth:role` edge on the
+    real `user_roles` table), and `role` becomes `kind:'relation', relatedEntityId:'auth:role'`. **Proven:**
+    AH-1 test **12/12 GREEN**; `ai-assistant` **103/103 / 1446**; `shared` 203/204 (8 pre-existing shim
+    failures) + `tsc` clean; `core` `tsc` clean; **four md5-verified RED-then-GREEN mutations**; **two
+    hostile-critic rounds** (round 2 caught a tautological assertion + an overstated rationale, both fixed).
+    **Why this is a full tick:** the `runtime`/`autonomy` legs are **declaration-only here by design** —
+    `AGENT-HALF.md` §3.1's table lists `L-01` (the runtime seam) as a **sibling item, not a dependency**, and
+    `ce.ts`'s header states the enforcement is "already tracked by its own item". Enforcement is owned by
+    `L-01`/`AH-5` and `AH-2`. **This unblocks `CC-27`.** See also `JOURNAL.md` `▶ NOW`.
 
 
 *The eleven remaining `AH-` items (phases 2–4) are ordered in [`AGENT-HALF.md`](AGENT-HALF.md) §4; they

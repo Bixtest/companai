@@ -214,7 +214,19 @@ entity. Its kind, owner and role are fields. Build these anywhere else and they 
 | **D-06** | **One canonical owner per fact**, and the boundary written down. Their own register calls two owners of one fact *"the most expensive kind of bug… it produces no error — only a system that quietly disagrees with itself"* | a design rule for the kernel: every field has one writer |
 | **D-10** | **Generate schema docs from the schema**; keep ephemeral notes out of spec-named files | a rule for the kernel's own documentation |
 
-> **`AH-1` status 2026-10-09 — the spine has landed and the relation half is now real; the item still stays open.** The `Agent` object is declared in the kernel (`packages/ai-assistant/src/modules/ai_assistant/ce.ts`, code `1a518f8`) with all six §1.4 fields, and it is **protectable** — `agent` is a core-object kind, so a superadmin marks one agent `core` and it is refused on delete/rename (code `acfd020`). **The relation half is partly landed (slice 3):** `owner` and `acts_as` are now real `relation` fields (target `user`), and `packages/ai-assistant/src/modules/ai_assistant/data/extensions.ts` declares a genuine `ai_assistant:agent → ai_assistant:agent` **`reportsTo` self-edge** — the §3.1 promise of *"a real `reportsTo` edge, no 'type' flag"* is now true in the kernel model (`model.ts:265` pushes the self-edge exactly once). **Still open** (so the box stays `☐`): only `role` remains `text`, because the *admin* role entity is **not** declared in the kernel (measured: `user` ✅, `role` ❌). → **`CC-40`** (now narrowed to `role` alone). Endorsed by a hostile-critic pass (C1–C7 confirmed, all three slice-3 claim defects fixed) and md5-verified RED-then-GREEN mutations (M1 owner relation→text; M2 empty extensions). Plan: [`PLAN-AH-1.md`](PLAN-AH-1.md) §8.
+> **`AH-1` status 2026-10-09 — DONE (`☑`); `CC-40` closed.** The `Agent` object is declared in the kernel
+> (`packages/ai-assistant/src/modules/ai_assistant/ce.ts`, code `1a518f8`) with all six §1.4 fields, and it is
+> **protectable** — `agent` is a core-object kind, so a superadmin marks one agent `core` and it is refused on
+> delete/rename (code `acfd020`). **All three relation fields are real (slices 3+4):** `owner`/`acts_as` target
+> `auth:user`, `role` targets `auth:role` (admitted by `packages/ai-assistant/src/modules/ai_assistant/data/extensions.ts`
+> — the same `entityExtensions` route that admits `auth:user`), and a genuine `ai_assistant:agent → ai_assistant:agent`
+> **`reportsTo` self-edge** is declared — the §3.1 promise of *"a real `reportsTo` edge, no 'type' flag"* is now true
+> in the kernel model (`model.ts:265` pushes the self-edge exactly once). **The `runtime`/`autonomy` legs are
+> declaration-only here by design** — the table below lists `L-01` as a **sibling item, not a dependency** — so their
+> enforcement (`L-01`/`AH-5`, `AH-2`) is a **different item**, not a gap in `AH-1`. Proven by the AH-1 test (**12/12
+> GREEN**), `ai-assistant` (**103/103 / 1446**), `tsc` clean in `shared`+`core`, **four md5-verified RED-then-GREEN
+> mutations**, and **two hostile-critic rounds** (round 2 caught a tautological assertion + an overstated rationale,
+> both fixed). Plan: [`PLAN-AH-1.md`](PLAN-AH-1.md) §8/§9. **This unblocks `CC-27`.**
 
 ### 3.2 Phase 2 — the security floor · *the responsibility rule is enforced here*
 

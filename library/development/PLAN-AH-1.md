@@ -189,3 +189,21 @@ the test + mutation → **tick `AH-1` ☐→☑ and close `CC-40`** (unblocking 
 (so the primitive is stacked on a *finished* agent object — rule 10d). The sub-plan carries the measured
 premise-check (no agent table, no `agent.role_id`; the honest admission route is a real `role_id` carrier),
 the acceptance per slice, and the rule-8 no-gap guarantee.
+
+### 9b. Stream 1 outcome — `AH-1` is DONE (2026-10-09)
+
+**The four slices are all built and proven; `AH-1` is ticked `☑` and `CC-40` is CLOSED.** Slice 4 admitted
+`auth:role` to the kernel (a real `auth:user_role → auth:role` `entityExtensions` edge — the same route that
+admits `auth:user`), and `role` is now `kind:'relation', relatedEntityId:'auth:role'`. Proven by the AH-1 test
+(**12/12 GREEN**), `ai-assistant` (**103/103 / 1446**), `tsc` clean in `shared`+`core`, **four md5-verified
+RED-then-GREEN mutations** (M1 `owner`→text; M2 empty extensions; M3 `role`→text; M4/M5b remove the admission),
+and **two hostile-critic rounds** — round 2 caught two defects in *my* claims, both fixed: (a) an assertion
+that only read the source constant and passed with the change reverted (now folded into one model-coupled
+assertion), and (b) an overstated rationale — the `relatedEntityId` target is consumed by the field-definition
+store and the relation-options API, which resolve via **MikroORM metadata, not the kernel model**; so this
+admission is load-bearing for the **kernel model** only, and the two registries are now distinguished in the
+comments. **Answer to the §6 honesty question** (recorded so it is not re-litigated): `AH-1` owns the
+**declaration** of the six fields; the `runtime`/`autonomy` **enforcement** is owned by `L-01`/`AH-5` and
+`AH-2` — all three documents state this explicitly, and §3.1's table lists `L-01` as a *sibling item*, not a
+dependency. So the tick is honest. **`CC-27` is now unblocked.** Stream 2 (BUILD-ORDER item 9) awaits the
+owner's go, per his instruction.
