@@ -12,6 +12,7 @@
  */
 import cli from '../cli'
 import { applyStructureChangeGrant } from '@open-mercato/core/modules/auth/lib/permission-decision-grant'
+import { CustomFieldDef } from '../data/entities'
 
 const mockQuestion = jest.fn()
 
@@ -53,6 +54,17 @@ jest.mock('@open-mercato/shared/lib/di/container', () => ({
 }))
 
 const grantMock = applyStructureChangeGrant as unknown as jest.Mock
+
+/**
+ * How many times a mock was called **for a given entity class**.
+ *
+ * `M3e`/`P3b` added a second, independent `create`/`persist` path (a `PermissionSurfaceRecord`
+ * row for the catalogue) alongside the `CustomFieldDef` write these tests are about. Counting
+ * all calls now conflates the two, so the assertions narrow to the entity under test.
+ */
+function callsFor(mock: jest.Mock, entity: unknown): unknown[][] {
+  return mock.mock.calls.filter((call) => call[0] === entity)
+}
 
 function addFieldCommand() {
   const commands = cli as unknown as Array<{ command: string; run: (rest: string[]) => Promise<void> }>
@@ -97,7 +109,7 @@ describe('entities add-field — the SD-1 permissions gate (CC-3)', () => {
 
     await addFieldCommand().run(fieldFlags())
 
-    expect(create).toHaveBeenCalledTimes(1)
+    expect(callsFor(create, CustomFieldDef)).toHaveLength(1)
     expect(grantMock).toHaveBeenCalledTimes(1)
     const [, grantInput] = grantMock.mock.calls[0]
     expect(grantInput.tenantId).toBe('tenant-1')
@@ -111,7 +123,7 @@ describe('entities add-field — the SD-1 permissions gate (CC-3)', () => {
 
     await addFieldCommand().run(fieldFlags('Bad-Key'))
 
-    expect(create).not.toHaveBeenCalled()
+    expect(callsFor(create, CustomFieldDef)).toHaveLength(0)
     expect(persist).not.toHaveBeenCalled()
     expect(grantMock).not.toHaveBeenCalled()
   })
@@ -124,7 +136,7 @@ describe('entities add-field — the SD-1 permissions gate (CC-3)', () => {
 
     await addFieldCommand().run(fieldFlags())
 
-    expect(create).not.toHaveBeenCalled() // it updated the existing row, not created one
+    expect(callsFor(create, CustomFieldDef)).toHaveLength(0) // it updated the existing row, not created one
     expect(grantMock).toHaveBeenCalledTimes(1)
     const [, grantInput] = grantMock.mock.calls[0]
     expect(grantInput.decision.outcome).toBe('defaulted')

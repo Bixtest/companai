@@ -203,9 +203,13 @@ export async function POST(req: Request) {
       throw err
     }
   }
+  // The surface this call re-appears, named once and reused for both the gate and the
+  // catalogue write below — so the surface the gate judged and the surface the catalogue
+  // records cannot drift (`M3e`/`P3b`).
+  const appearingSurfaces = reactivatesEntity ? [entityDefinitionSurface(input.entityId)] : []
   const entityPermissionDecision: StructureChangeGateOutcome | null = reactivatesEntity
     ? evaluateStructureChange({
-        surfaces: [entityDefinitionSurface(input.entityId)],
+        surfaces: appearingSurfaces,
         decision:
           requestedDecision.kind === 'decision' ? toStructurePermissionDecision(requestedDecision.decision) : null,
       })
@@ -275,6 +279,7 @@ export async function POST(req: Request) {
     auth.tenantId ?? null,
     entityPermissionDecision,
     'the re-activated custom entity',
+    appearingSurfaces,
   )
   // Invalidate sidebar/nav cache for tenant scope (also when tenantId is null)
   try {

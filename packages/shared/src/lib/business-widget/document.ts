@@ -26,10 +26,14 @@
  *     later.
  *
  * **Why a database row is deliberately not built here.** The same two measured
- * reasons as G-03, plus one: (i) this project tests DB-backed code against a
- * **mocked** EntityManager, so a migration written now would be **unprovable**;
- * (ii) the registry's shape is driven by the **`@`/`#` reference layer (G-09)**,
- * which will query it. **Trigger for the row: G-09.**
+ * reasons as G-03, plus one: (i) the registry's shape is driven by the **`@`/`#`
+ * reference layer (G-09)**, which will query it, so a schema written today would
+ * likely be rewritten — a **design/timing** decision, **not** a proof boundary
+ * (`CORRECTED (rule 13)`: an earlier note claimed a migration would be
+ * *"unprovable"* — **false and retracted**; `mercato-postgres-local` is a live
+ * Postgres 17 and row DDL is provable there); and (ii) DB code here is tested
+ * against a **mocked** EntityManager, so the row would have no live test until a
+ * caller exercises it. **Trigger for the row: G-09.**
  *
  * **The trap, the same one G-01 and G-03 documented:** an empty diff is trivially
  * satisfied by exporting nothing. So the tests assert the export is **non-empty

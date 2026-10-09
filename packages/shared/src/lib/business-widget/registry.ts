@@ -19,12 +19,14 @@
  * rule G-01 and G-02 both follow, for the same reason: a silent merge would make
  * the registry answer a question about an object nobody wrote.
  *
- * **Why it is a value and not a database table.** The same measured reason as
- * G-03's Function: DB code here is tested against a mocked EntityManager, so a
- * migration written now would be unprovable, and the registry's shape is driven by
- * **G-09**, which will query it. **Trigger for the row: G-09.** Until then the
- * registry is a value — built, tested, serialisable, and re-derivable from stored
- * Widget documents.
+ * **Why it is a value and not a database table.** The same reason as G-03's
+ * Function: the registry's shape is driven by **G-09**, which will query it, so a
+ * schema written today would likely be rewritten — a **design/timing** decision,
+ * **not** a proof boundary (`CORRECTED (rule 13)`: an earlier note called a
+ * migration *"unprovable"* — **false and retracted**; `mercato-postgres-local` is
+ * a live Postgres 17 where row DDL is written and read back). **Trigger for the
+ * row: G-09.** Until then the registry is a value — built, tested, serialisable,
+ * and re-derivable from stored Widget documents.
  *
  * Source: Doc 5 §106–§114, Part LXXIII rules 7, 26, 29; COOKBOOK Sprint G-07 step 3.4.
  */

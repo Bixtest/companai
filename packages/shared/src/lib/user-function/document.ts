@@ -20,12 +20,15 @@
  *     loudly instead of being stored and failing later.
  *
  * **Why a database row is deliberately not built here.** Two reasons, both
- * measured: (i) this project tests DB-backed code against a **mocked**
- * EntityManager, so a migration written now would be **unprovable** on this host —
- * and an unprovable migration is precisely the claim this project refuses to
- * ship; (ii) the Function's remaining shape (`presentation_definition`, the UI
+ * measured: (i) the Function's remaining shape (`presentation_definition`, the UI
  * metadata, placement) is **G-07's**, so a schema written today would very likely
- * be rewritten. **Trigger for the row: G-07 lands.**
+ * be rewritten — the deferral is a **design/timing** decision, **not** a proof
+ * boundary (`CORRECTED (rule 13)`: an earlier note here claimed a migration would
+ * be *"unprovable on this host"* — **false and retracted**; `mercato-postgres-local`
+ * runs Postgres 17 and row DDL is written, applied and read back on it, e.g.
+ * `Migration20261009205000`, 2026-10-09); and (ii) this module tests DB-backed code
+ * against a **mocked** EntityManager, so the row would have no live test until a
+ * caller exercises it. **Trigger for the row: G-07 lands.**
  *
  * **The trap this module is written to avoid**, the same one G-01 documented: an
  * empty diff is trivially satisfied by exporting nothing. So the tests assert the

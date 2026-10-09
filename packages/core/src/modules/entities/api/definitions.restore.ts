@@ -111,9 +111,13 @@ export async function POST(req: Request) {
       throw err
     }
   }
+  // The surface this restore (re)appears, named once and reused for both the gate and
+  // the catalogue write below — so the surface the gate judged and the surface the
+  // catalogue records cannot drift (`M3e`/`P3b`).
+  const appearingSurfaces = reactivatesField ? [fieldDefinitionSurface(entityId, key)] : []
   const permissionDecision: StructureChangeGateOutcome | null = reactivatesField
     ? evaluateStructureChange({
-        surfaces: [fieldDefinitionSurface(entityId, key)],
+        surfaces: appearingSurfaces,
         decision:
           requestedDecision.kind === 'decision' ? toStructurePermissionDecision(requestedDecision.decision) : null,
       })
@@ -136,7 +140,7 @@ export async function POST(req: Request) {
   await em.flush()
   await guard.runAfterSuccess()
   // SD-1 (CC-22): the restored column has landed — now write the default's records.
-  await writeFieldPermissionGrant(em, scope.tenantId, permissionDecision, 'the restored custom field')
+  await writeFieldPermissionGrant(em, scope.tenantId, permissionDecision, 'the restored custom field', appearingSurfaces)
   await invalidateDefinitionsCache(cache, {
     tenantId: scope.tenantId,
     organizationId: scope.organizationId,

@@ -237,10 +237,12 @@ const addField: ModuleCli = {
       // SD-1 (CC-3): a field this command brings into existence — created, or
       // reactivated from a tombstone — is a new permission surface. The gate decides
       // before it lands (a refusal throws, caught below, and nothing is written); the
-      // default's records are written once the row has committed.
+      // default's records are written once the row has committed. The surface is named
+      // once so it also reaches the catalogue write below (`M3e`/`P3b`).
       const isNewSurface = !existing || !isActiveColumn(existing)
+      const appearingSurfaces = isNewSurface ? [fieldDefinitionSurface(entityId, key)] : []
       const decision = isNewSurface
-        ? decideNewFieldPermissions([fieldDefinitionSurface(entityId, key)])
+        ? decideNewFieldPermissions(appearingSurfaces)
         : null
 
       if (!existing) {
@@ -262,7 +264,7 @@ const addField: ModuleCli = {
         await em.flush()
         console.log(`Updated custom field: ${entityId}.${key} (${kind})${orgId == null ? ' [global]' : ` [org=${orgId}, tenant=${tenantId}]`}`)
       }
-      await writeFieldPermissionGrant(em, tenantId, decision)
+      await writeFieldPermissionGrant(em, tenantId, decision, 'the new custom field', appearingSurfaces)
     } catch (e: any) {
       console.error('Failed:', e?.message || e)
     } finally {

@@ -71,6 +71,23 @@ jest.mock('@open-mercato/core/modules/auth/lib/permission-decision-grant', () =>
   STRUCTURE_DECISION_PERMISSION: 'entities.definitions.decide',
 }))
 
+// `M3e`/`P3b`: the guard's `afterSuccess` also records the surfaces it judged, through the
+// real `permissionSurfacesService`. The stand-in below mirrors that service's contract
+// (never throws; returns whether the row was stored) so this suite stays about the WIRE —
+// that the guard hands the surfaces to the recorder — and not about the SQL, which
+// `permissionSurfacesService.test.ts` proves.
+const mockPersistRecordedSurface = jest.fn(
+  async (_em: unknown, input: { tenantId: string; surface: { id: string } }) => ({
+    stored: true as const,
+    created: true,
+    surfaceId: input.surface.id,
+  }),
+)
+
+jest.mock('@open-mercato/core/modules/auth/services/permissionSurfacesService', () => ({
+  persistRecordedSurface: (...args: unknown[]) => mockPersistRecordedSurface(...(args as [])),
+}))
+
 import { runMutationGuards } from '@open-mercato/shared/lib/crud/mutation-guard-registry'
 import { guards, applyGateDecisionToGrantRole } from '../guards'
 
@@ -114,6 +131,7 @@ function afterInput(partial: Partial<MutationGuardAfterInput>): MutationGuardAft
 beforeEach(() => {
   mockApply.mockClear()
   mockCreateContainer.mockClear()
+  mockPersistRecordedSurface.mockClear()
 })
 
 describe('applyGateDecisionToGrantRole — reading the decision out of the guard metadata', () => {
@@ -475,5 +493,87 @@ describe('CC-25 — the guard refuses an unauthorised decision', () => {
       mutationPayload: { entityId: 'customers:customer_person' },
     })
     expect(result.ok).toBe(false)
+  })
+})
+
+/**
+ * `M3e`/`P3b` — the guard's `afterSuccess` records the **surfaces it judged** in the
+ * catalogue, so a runtime create is readable back after a restart.
+ *
+ * **What this has to prove** (the same discipline as the metadata wire above): the surfaces
+ * `validate` ran the gate over are carried to `afterSuccess` and handed to the recorder —
+ * and they are the *right* ones (the field surface for a field create, the entity surface for
+ * an entity create). If the guard dropped them, the catalogue would silently stay empty and
+ * every other test here would still pass.
+ */
+describe('M3e/P3b — the guard records the surfaces it judged', () => {
+  it('validate carries the field surface, and afterSuccess records exactly it', async () => {
+    const result = await runMutationGuards(
+      guards,
+      {
+        tenantId: 't1',
+        organizationId: 'o1',
+        userId: 'u1',
+        resourceKind: 'entities.field_definition',
+        resourceId: null,
+        operation: 'create',
+        requestMethod: 'POST',
+        requestHeaders: new Headers(),
+        mutationPayload: { entityId: 'customers:customer_person', key: 'loyalty_tier', kind: 'text' },
+      },
+      { userFeatures: [] },
+    )
+    expect(result.ok).toBe(true)
+    const entry = result.afterSuccessCallbacks.find((cb) => cb.guard.id === FIELD_GUARD_ID)
+    expect(entry).toBeDefined()
+    // The surfaces travelled with the decision (the whole point of carrying them).
+    const surfaces = (entry!.metadata as { surfaces?: { id: string; kind: string }[] } | null)?.surfaces
+    expect(surfaces).toEqual([
+      { id: 'customers:customer_person.loyalty_tier', kind: 'field', owner: 'entities', source: 'recorded' },
+    ])
+
+    await entry!.guard.afterSuccess!(afterInput({ metadata: entry!.metadata as Record<string, unknown> }))
+
+    expect(mockPersistRecordedSurface).toHaveBeenCalledTimes(1)
+    const [, input] = mockPersistRecordedSurface.mock.calls[0] as [unknown, { tenantId: string; surface: { id: string } }]
+    expect(input.tenantId).toBe('t1')
+    expect(input.surface.id).toBe('customers:customer_person.loyalty_tier')
+  })
+
+  it('the entity guard records the entity surface (not a field surface)', async () => {
+    const result = await runMutationGuards(
+      guards,
+      {
+        tenantId: 't1',
+        organizationId: 'o1',
+        userId: 'u1',
+        resourceKind: 'entities.entity',
+        resourceId: null,
+        operation: 'create',
+        requestMethod: 'POST',
+        requestHeaders: new Headers(),
+        mutationPayload: { entityId: 'customers:customer_person', label: 'Person' },
+      },
+      { userFeatures: [] },
+    )
+    expect(result.ok).toBe(true)
+    const entry = result.afterSuccessCallbacks.find((cb) => cb.guard.id === ENTITY_GUARD_ID)
+    await entry!.guard.afterSuccess!(afterInput({ metadata: entry!.metadata as Record<string, unknown> }))
+    const [, input] = mockPersistRecordedSurface.mock.calls[0] as [unknown, { surface: { id: string; kind: string } }]
+    expect(input.surface.id).toBe('customers:customer_person')
+    expect(input.surface.kind).toBe('object')
+  })
+
+  it('records nothing (and does not crash) for a refused create — no surface landed', async () => {
+    await guardById(FIELD_GUARD_ID).afterSuccess!(
+      afterInput({ metadata: { permissionDecision: { outcome: 'refused', reason: 'no_surface', because: 'nothing' } } }),
+    )
+    expect(mockPersistRecordedSurface).not.toHaveBeenCalled()
+  })
+
+  it('records nothing when the metadata carries no surfaces (a pre-M3e decision)', async () => {
+    await guardById(FIELD_GUARD_ID).afterSuccess!(afterInput({ metadata: defaultedMetadata() }))
+    expect(mockPersistRecordedSurface).not.toHaveBeenCalled()
+    expect(mockApply).toHaveBeenCalledTimes(1) // the grant still happens
   })
 })

@@ -586,9 +586,13 @@ export async function POST(req: Request) {
       throw err
     }
   }
+  // The surface this call (re)appears, named once and reused for both the gate and the
+  // catalogue write below — so the surface the gate judged and the surface the catalogue
+  // records cannot drift (`M3e`/`P3b`).
+  const appearingSurfaces = changesSurface ? [fieldDefinitionSurface(input.entityId, input.key)] : []
   const permissionDecision: StructureChangeGateOutcome | null = changesSurface
     ? evaluateStructureChange({
-        surfaces: [fieldDefinitionSurface(input.entityId, input.key)],
+        surfaces: appearingSurfaces,
         decision:
           requestedDecision.kind === 'decision' ? toStructurePermissionDecision(requestedDecision.decision) : null,
       })
@@ -649,6 +653,7 @@ export async function POST(req: Request) {
     scope.tenantId,
     permissionDecision,
     retypesField ? 'the re-typed custom field' : 'the re-activated custom field',
+    appearingSurfaces,
   )
   await invalidateDefinitionsCache(cache, {
     tenantId: scope.tenantId,

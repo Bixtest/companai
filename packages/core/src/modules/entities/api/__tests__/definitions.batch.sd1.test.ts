@@ -49,8 +49,9 @@ jest.mock('@open-mercato/shared/lib/logger', () => {
   return { createLogger: () => withChild() }
 })
 
+const mockResolveOrganizationScope = jest.fn(async () => ({ tenantId: 'tenant-1', selectedId: 'org-1' }))
 jest.mock('@open-mercato/core/modules/directory/utils/organizationScope', () => ({
-  resolveOrganizationScopeForRequest: async () => ({ tenantId: 'tenant-1', selectedId: 'org-1' }),
+  resolveOrganizationScopeForRequest: (...args: unknown[]) => mockResolveOrganizationScope(...(args as [])),
 }))
 
 jest.mock('@open-mercato/core/modules/entities/data/entities', () => ({
@@ -62,6 +63,13 @@ jest.mock('../definitions.cache', () => ({ invalidateDefinitionsCache: jest.fn()
 
 jest.mock('../../lib/definitions-version', () => ({
   resolveEntityDefinitionsVersion: jest.fn(async () => null),
+}))
+
+// `M3e`/`P3b`: the route records each new column's surface. Spied here so the tests can assert
+// the tenant it records under (the write's own contract is proved in the service's own suite).
+const persistSurfaceMock = jest.fn(async () => ({ stored: true as const, created: true, surfaceId: 'x' }))
+jest.mock('@open-mercato/core/modules/auth/services/permissionSurfacesService', () => ({
+  persistRecordedSurface: (...args: unknown[]) => persistSurfaceMock(...(args as [])),
 }))
 
 // The write half itself is proved in `auth/lib/__tests__/permission-decision-grant.test.ts`.
@@ -120,6 +128,7 @@ describe('entities/definitions.batch POST — SD-1 (CC-2) the create path is gat
     jest.clearAllMocks()
     mockEm.find.mockResolvedValue([] as unknown[])
     surfaceMock.mockImplementation(jest.requireActual('../../data/guards').fieldDefinitionSurface)
+    persistSurfaceMock.mockImplementation(async () => ({ stored: true as const, created: true, surfaceId: 'x' }))
   })
 
   it('runs the gate for a newly created column and grants its records to the tenant role', async () => {
@@ -138,6 +147,43 @@ describe('entities/definitions.batch POST — SD-1 (CC-2) the create path is gat
     expect(input.decision.records.map((r: { feature: string }) => r.feature)).toEqual(
       fieldRecords('test:entity', 'alpha'),
     )
+  })
+
+  it('records each new column’s surface under the definition tenant (M3e/P3b)', async () => {
+    const response = await POST(makeRequest({
+      entityId: 'test:entity',
+      definitions: [
+        { key: 'alpha', kind: 'text' },
+        { key: 'beta', kind: 'integer' },
+      ],
+    }))
+
+    expect(response.status).toBe(200)
+    const recorded = persistSurfaceMock.mock.calls.map(
+      (call) => (call[1] as { tenantId: string; surface: { id: string } }),
+    )
+    expect(recorded.map((r) => r.surface.id).sort()).toEqual(['test:entity.alpha', 'test:entity.beta'])
+    expect(recorded.every((r) => r.tenantId === 'tenant-1')).toBe(true)
+  })
+
+  it('scopes the surface to the DEFINITION tenant, not a stale auth tenant (M3e/P3b)', async () => {
+    // A request whose auth tenant differs from the selected organisation's tenant: the
+    // definitions land under the resolved scope tenant, so the surface must be recorded there
+    // too — recording it under the auth tenant would file it against the wrong tenant's rows.
+    mockGetAuth.mockResolvedValueOnce({ sub: 'user-1', tenantId: 'tenant-auth', orgId: 'org-1' })
+    mockResolveOrganizationScope.mockResolvedValueOnce({ tenantId: 'tenant-scope', selectedId: 'org-1' })
+
+    const response = await POST(makeRequest({
+      entityId: 'test:entity',
+      definitions: [{ key: 'alpha', kind: 'text' }],
+    }))
+
+    expect(response.status).toBe(200)
+    const recorded = persistSurfaceMock.mock.calls.map((call) => (call[1] as { tenantId: string }))
+    expect(recorded).toHaveLength(1)
+    // `resolveDefinitionScopeFromOrganizationScope` prefers the auth tenant on a mismatch — so
+    // the definition tenant here is 'tenant-auth', and the surface follows it (never 'tenant-scope').
+    expect(recorded[0].tenantId).toBe('tenant-auth')
   })
 
   it('gates every newly created column in one decision', async () => {
@@ -234,7 +280,13 @@ describe('entities/definitions.batch POST — SD-1 (CC-2) the create path is gat
   })
 
   it('logs loudly when the columns committed but the request carried no tenant to grant in', async () => {
+    // **No tenant means no tenant anywhere** — the auth carries none *and* the resolved
+    // organisation scope resolves to none. (`scope.tenantId` is the authoritative definition
+    // tenant: `resolveDefinitionScopeFromOrganizationScope` prefers the auth tenant on a
+    // mismatch, else `scopeTenantId ?? authTenantId`. The grant/catalogue write is now scoped
+    // to it, so a null auth tenant alone is NOT "no tenant" when the scope still resolves one.)
     mockGetAuth.mockResolvedValueOnce({ sub: 'user-1', tenantId: null, orgId: 'org-1' })
+    mockResolveOrganizationScope.mockResolvedValueOnce({ tenantId: null, selectedId: 'org-1' })
 
     const response = await POST(makeRequest({
       entityId: 'test:entity',
@@ -308,6 +360,7 @@ describe('entities/definitions.batch POST — CC-17 the decision header makes `d
     jest.clearAllMocks()
     mockEm.find.mockResolvedValue([] as unknown[])
     surfaceMock.mockImplementation(jest.requireActual('../../data/guards').fieldDefinitionSurface)
+    persistSurfaceMock.mockImplementation(async () => ({ stored: true as const, created: true, surfaceId: 'x' }))
   })
 
   it('a header decision produces a decided outcome, written to the decision’s own target', async () => {

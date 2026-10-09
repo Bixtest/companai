@@ -23,6 +23,8 @@ import {
   applyStructureChangeGrant,
   assertActorMayStateDecision,
 } from '@open-mercato/core/modules/auth/lib/permission-decision-grant'
+import type { PermissionSurface } from '@open-mercato/shared/lib/permissions/catalogue'
+import { persistRecordedSurface } from '@open-mercato/core/modules/auth/services/permissionSurfacesService'
 import type { RbacService } from '@open-mercato/core/modules/auth/services/rbacService'
 import { invalidateDefinitionsCache } from './definitions.cache'
 import type { OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
@@ -284,6 +286,11 @@ export async function POST(req: Request) {
   // SD-1 (CC-2): the gate's outcome for the columns this batch creates, decided inside
   // the transaction (see the section comment above) and applied after the commit.
   let permissionDecision: StructureChangeGateOutcome | null = null
+  // `M3e`/`P3b`: the surfaces this batch brings into existence, in the same scope as the
+  // decision so both the gate and the catalogue write (below) use the one list — the
+  // batch route writes through its own grant helper, so it must hand the surfaces on
+  // itself rather than inheriting the shared write's.
+  let batchSurfaces: PermissionSurface[] = []
   try {
     // Prefetch every existing definition for this entity in a single query, then index
     // by key so the per-definition loop resolves create/update without round trips.
@@ -331,8 +338,9 @@ export async function POST(req: Request) {
       })
       .map((d) => d.key)
     if (newKeys.length > 0) {
+      batchSurfaces = newKeys.map((key) => fieldDefinitionSurface(entityId, key))
       permissionDecision = evaluateStructureChange({
-        surfaces: newKeys.map((key) => fieldDefinitionSurface(entityId, key)),
+        surfaces: batchSurfaces,
         // CC-17: a person's decision, if the request carried one, so the `decided`
         // branch is reachable (before this it never was — no caller supplied a
         // decision). `absent` leaves the gate on its default; `malformed` has
@@ -437,8 +445,35 @@ export async function POST(req: Request) {
   // target) — before CC-17 this branch only ever fired for `defaulted`, so a person's
   // decision was silently dropped at the write.
   if (permissionDecision?.outcome === 'defaulted' || permissionDecision?.outcome === 'decided') {
-    if (auth.tenantId) {
-      await applyBatchStructureChangeGrant(em, auth.tenantId, permissionDecision)
+    // **The tenant is `scope.tenantId`, not `auth.tenantId`.** They can differ: a request may
+    // select an organisation in another tenant, and `resolveDefinitionScopeFromOrganizationScope`
+    // resolves that to the *definition's* tenant (preferring the auth tenant on a mismatch). The
+    // columns land under `scope.tenantId` (see the writes above), so both the grant **and** the
+    // catalogue row must be scoped to it — else a surface is recorded for a tenant whose rows it
+    // does not belong to. (This also corrects the grant, which read `auth.tenantId` — rule 9a.)
+    const grantTenantId = scope.tenantId ?? auth.tenantId
+    if (grantTenantId) {
+      await applyBatchStructureChangeGrant(em, grantTenantId, permissionDecision)
+      // `M3e`/`P3b`: record the surfaces this batch brought into existence, so the
+      // catalogue can be read back after a restart. Separate from the grant above
+      // (the catalogue is a registry of *surfaces*, not of grants) and fail-soft —
+      // the columns are already committed, so a missing catalogue row must not fail
+      // the save. The batch grants through its own helper, so it persists here too.
+      for (const surface of batchSurfaces) {
+        try {
+          const outcome = await persistRecordedSurface(em, { tenantId: grantTenantId, surface })
+          if (!outcome.stored) {
+            logger.error('M3e: a batch column landed but could not be recorded in the catalogue', {
+              surfaceId: outcome.surfaceId,
+              reason: outcome.reason,
+              because: outcome.because,
+              tenantId: grantTenantId,
+            })
+          }
+        } catch (error) {
+          logger.error('M3e: recording a batch surface threw', { surfaceId: surface.id, tenantId: grantTenantId, err: error })
+        }
+      }
     } else {
       // The columns are committed and the gate said "grant these", but the request
       // carried no tenant to grant them in. Skipping quietly would be the exact defect

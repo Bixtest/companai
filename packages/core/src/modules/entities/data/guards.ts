@@ -42,6 +42,7 @@ import {
   assertActorMayStateDecision,
   type PermissionGrantOutcome,
 } from '@open-mercato/core/modules/auth/lib/permission-decision-grant'
+import { persistRecordedSurface } from '@open-mercato/core/modules/auth/services/permissionSurfacesService'
 
 const logger = createLogger('entities').child({ component: 'structure-change-gate' })
 
@@ -330,7 +331,11 @@ async function runStructureChangeGate(
   return {
     ok: true as const,
     shouldRunAfterSuccess: true,
-    metadata: { permissionDecision: result },
+    // `M3e`/`P3b`: carry the surfaces through to `afterSuccess`, so the catalogue write
+    // there records **the same** surfaces this gate judged (rather than reconstructing
+    // them from the records — which carry only ids, not owner/kind/source, and so would
+    // have to be guessed). The decision travels the same way it always has.
+    metadata: { permissionDecision: result, surfaces },
   }
 }
 
@@ -461,6 +466,28 @@ async function loadStructuralSettingsForGuard(tenantId: string): Promise<Structu
 }
 
 /**
+ * Read the surfaces the gate judged out of the guard's `metadata`, defensively.
+ *
+ * `M3e`/`P3b`: the guard's `validate` records the surfaces it ran the gate over
+ * (`runStructureChangeGate`'s `metadata`), so `afterSuccess` persists **the same**
+ * surfaces — no reconstruction from the records (which carry only ids). Returns `[]`
+ * when the metadata carries none (a guard run that predates this, or a malformed
+ * value), so the catalogue write is simply skipped rather than guessed.
+ */
+function readGateSurfaces(metadata: Record<string, unknown> | null | undefined): PermissionSurface[] {
+  const raw = metadata?.surfaces
+  if (!Array.isArray(raw)) return []
+  return raw.filter(
+    (surface): surface is PermissionSurface =>
+      !!surface
+      && typeof surface === 'object'
+      && typeof (surface as PermissionSurface).id === 'string'
+      && typeof (surface as PermissionSurface).kind === 'string'
+      && typeof (surface as PermissionSurface).owner === 'string',
+  )
+}
+
+/**
  * Apply the gate's decision (read out of the guard's `metadata`) to the grant role.
  * Exported so it can be tested with a mock EntityManager — the DB-backed half of this
  * guard. The mapping itself lives in `applyStructureChangeGrant`, so the guard and the
@@ -507,6 +534,28 @@ async function writeGateDecisionGrant(input: MutationGuardAfterInput): Promise<v
       surfaces: [...new Set(decision.records.map((record) => record.surfaceId))],
     })
     return
+  }
+
+  // `M3e`/`P3b`: record the surfaces this create brought into existence, so the
+  // catalogue can be read back after a restart (and by any other process). Separate
+  // from the grant below (the catalogue is a registry of *surfaces*, not of grants)
+  // and fail-soft: the surface is already committed, so a missing catalogue row must
+  // not fail a save that landed. The surfaces are the ones the gate judged, carried on
+  // the metadata — never reconstructed from the records.
+  for (const surface of readGateSurfaces(input.metadata)) {
+    try {
+      const outcome = await persistRecordedSurface(em, { tenantId: input.tenantId, surface })
+      if (!outcome.stored) {
+        logger.error('M3e: a new structure landed but could not be recorded in the catalogue', {
+          surfaceId: outcome.surfaceId,
+          reason: outcome.reason,
+          because: outcome.because,
+          tenantId: input.tenantId,
+        })
+      }
+    } catch (error) {
+      logger.error('M3e: recording a surface threw', { surfaceId: surface.id, tenantId: input.tenantId, err: error })
+    }
   }
 
   const result = await applyGateDecisionToGrantRole(em, { tenantId: input.tenantId, metadata: input.metadata })

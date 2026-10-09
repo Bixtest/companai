@@ -1,4 +1,5 @@
 import { ensureCustomFieldDefinitions } from '../field-definitions'
+import { CustomFieldDef } from '../../data/entities'
 
 // SD-1 (CC-3): the primitive now runs the permissions gate and writes the default's
 // records. The sync behaviour under test here is independent of that write, so the
@@ -18,16 +19,31 @@ type Where = Record<string, unknown>
 
 function createMockEm(existing: Array<Record<string, unknown>> = []) {
   const persisted: Array<Record<string, unknown>> = []
-  return {
+  const em: any = {
     find: jest.fn(async (_entity: unknown, _where: Where) => existing),
     findOne: jest.fn(async () => null),
     create: jest.fn((_entity: unknown, data: Where) => ({ ...data })),
+    // Faithful to the real `EntityManager.persist(): this` — see the note in
+    // `field-definitions.sd1.test.ts`. Callers chain `em.persist(x).flush()`.
     persist: jest.fn((entity: Record<string, unknown>) => {
       persisted.push(entity)
+      return em
     }),
     flush: jest.fn(async () => {}),
     persisted,
   }
+  return em
+}
+
+/**
+ * The arguments of every call to a mock made **for a given entity class**.
+ *
+ * `M3e`/`P3b` added a second, independent write path (`permission_surfaces` rows) alongside
+ * the `CustomFieldDef` writes these tests are about. Counting *all* calls now conflates the
+ * two, so the assertions narrow to the entity under test — which is what they always meant.
+ */
+function callsFor(mock: jest.Mock, entity: unknown): unknown[][] {
+  return mock.mock.calls.filter((call) => call[0] === entity)
 }
 
 const scope = { organizationId: 'org-1', tenantId: 'tenant-1' }
@@ -51,10 +67,13 @@ describe('ensureCustomFieldDefinitions (issue #1399)', () => {
       tenantId: 'tenant-1',
       key: { $in: ['foo', 'bar', 'baz'] },
     })
-    // No per-field point lookups, single flush for the batch.
-    expect(em.findOne).not.toHaveBeenCalled()
-    expect(em.flush).toHaveBeenCalledTimes(1)
-    expect(em.persisted).toHaveLength(3)
+    // No per-field point lookups for a definition row.
+    expect(callsFor(em.findOne, CustomFieldDef)).toHaveLength(0)
+    // The whole definition batch still flushes **once** (plus one flush per catalogue row the
+    // `M3e` write persists — 3 surfaces here). The invariant under test is the *batch* flush,
+    // so it is stated as that: 1 batch + one per recorded surface, not a bare total.
+    expect(callsFor(em.create, CustomFieldDef)).toHaveLength(3)
+    expect(em.flush).toHaveBeenCalledTimes(1 + 3)
   })
 
   it('updates prefetched matches in memory without per-field lookups', async () => {
@@ -73,8 +92,9 @@ describe('ensureCustomFieldDefinitions (issue #1399)', () => {
 
     expect(result).toEqual({ created: 1, updated: 1, unchanged: 0 })
     expect(existing[0].kind).toBe('integer')
-    expect(em.findOne).not.toHaveBeenCalled()
-    expect(em.flush).toHaveBeenCalledTimes(1)
+    expect(callsFor(em.findOne, CustomFieldDef)).toHaveLength(0)
+    // One batch flush + one per recorded surface (2 here): the O(n) per-field cost is gone.
+    expect(em.flush).toHaveBeenCalledTimes(1 + 2)
   })
 
   it('passes a declared priority through to configJson (#4378)', async () => {

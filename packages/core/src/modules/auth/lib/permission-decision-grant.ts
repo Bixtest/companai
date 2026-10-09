@@ -56,8 +56,13 @@
  * **unique index on `(role_id, tenant_id)`**, which `role_acls` does **not** have
  * (measured: the only index is the primary key on `id` — migration
  * `Migration20251030150038` + the MikroORM snapshot + the live `\d role_acls` all
- * agree) and which needs a migration (unprovable on this host, like every other row
- * DDL here). Scheduled as **CC-23** in `COMPLETION-CALLBACKS.md`.
+ * agree) and which needs a migration. **CORRECTED (rule 13):** an earlier note here
+ * claimed such a migration was *"unprovable on this host"* — **false and retracted.**
+ * A live Postgres 17 runs in `mercato-postgres-local` and is reachable via
+ * `docker exec`; row DDL is written, applied and read back on it (e.g.
+ * `Migration20261009205000` for `permission_surfaces`, 2026-10-09). What is missing
+ * for CC-23 is simply the migration itself, not the ability to prove it.
+ * Scheduled as **CC-23** in `COMPLETION-CALLBACKS.md`.
  *
  * **Fail closed, and say why.** A grant that cannot be applied returns
  * `applied: false` with a machine-readable `reason` and a plain-language

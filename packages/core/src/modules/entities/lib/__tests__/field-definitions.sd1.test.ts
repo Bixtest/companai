@@ -27,16 +27,23 @@ type Where = Record<string, unknown>
 
 function createMockEm(existing: Array<Record<string, unknown>> = []) {
   const persisted: Array<Record<string, unknown>> = []
-  return {
+  const em: any = {
     find: jest.fn(async (_entity: unknown, _where: Where) => existing),
     findOne: jest.fn(async () => null),
     create: jest.fn((_entity: unknown, data: Where) => ({ ...data })),
+    // The real MikroORM `EntityManager.persist()` returns `this` (its d.ts declares
+    // `persist(...): this`), and every caller relies on that to chain
+    // `em.persist(x).flush()`. A mock returning `void` breaks that chain silently
+    // (it made the `M3e` catalogue write throw inside its own fail-soft catch), so
+    // it must return the em to stay faithful to the contract it stands in for.
     persist: jest.fn((entity: Record<string, unknown>) => {
       persisted.push(entity)
+      return em
     }),
     flush: jest.fn(async () => {}),
     persisted,
   }
+  return em
 }
 
 const scope = { organizationId: 'org-1', tenantId: 'tenant-1' }
@@ -285,5 +292,100 @@ describe('writeFieldPermissionGrant — which outcomes are written (CC-17)', () 
       because: 'decided',
     })
     expect(grantMock).not.toHaveBeenCalled()
+  })
+})
+
+/**
+ * `M3e`/`P3b` — `writeFieldPermissionGrant` also **records the surfaces** it was handed, so
+ * the catalogue can be read back after a restart. These tests pin the three facts that make
+ * the persistence honest: it happens for the surfaces passed in; it is **independent of the
+ * grant** (a `refused`/`null` decision still lands a surface — the catalogue is a registry of
+ * *surfaces*, not of grants); and a persistence failure **never stops the grant** (fail soft).
+ */
+describe('writeFieldPermissionGrant — records the surfaces it was handed (M3e/P3b)', () => {
+  const records = [{ feature: 'a:one.foo.view', block: 'data' as const, surfaceId: 'a:one.foo' }]
+  const surface = { id: 'a:one.foo', kind: 'field' as const, owner: 'entities', source: 'recorded' as const }
+
+  beforeEach(() => {
+    grantMock.mockClear()
+    grantMock.mockResolvedValue({
+      applied: true,
+      roleName: 'superadmin',
+      roleId: 'role-1',
+      aclCreated: false,
+      added: [],
+      alreadyPresent: [],
+    })
+  })
+
+  it('persists a surface row for the surface it was handed', async () => {
+    const em = createMockEm()
+    await writeFieldPermissionGrant(
+      em as any,
+      'tenant-1',
+      { outcome: 'defaulted', grantTo: 'superadmin', records, because: 'no decision' },
+      'the new custom fields',
+      [surface],
+    )
+    // The row that `persistRecordedSurface` created carries the surface's id and kind.
+    const persistedSurfaceRow = em.persisted.find((row: any) => row.surfaceId === 'a:one.foo')
+    expect(persistedSurfaceRow).toBeTruthy()
+    expect(persistedSurfaceRow.kind).toBe('field')
+    expect(persistedSurfaceRow.tenantId).toBe('tenant-1')
+    expect(persistedSurfaceRow.source).toBe('recorded')
+  })
+
+  it('records the surface even for a refused outcome — the catalogue is not the grant', async () => {
+    // A refusal means no *grant* is written, but the surface still landed on disk (the caller
+    // reaches this write only after the row committed), so the catalogue must know it.
+    const em = createMockEm()
+    await writeFieldPermissionGrant(
+      em as any,
+      'tenant-1',
+      { outcome: 'refused', reason: 'no_surface', because: 'the change creates nothing' },
+      'the changed custom field',
+      [surface],
+    )
+    expect(grantMock).not.toHaveBeenCalled() // no grant for a refusal…
+    expect(em.persisted.some((row: any) => row.surfaceId === 'a:one.foo')).toBe(true) // …but the surface is recorded
+  })
+
+  it('persists no surface row when none was handed (every pre-M3e caller)', async () => {
+    const em = createMockEm()
+    await writeFieldPermissionGrant(em as any, 'tenant-1', {
+      outcome: 'defaulted',
+      grantTo: 'superadmin',
+      records,
+      because: 'no decision',
+    })
+    expect(em.persisted).toHaveLength(0)
+    expect(grantMock).toHaveBeenCalledTimes(1) // the grant still happens
+  })
+
+  it('a catalogue-write failure never stops the grant (fail soft)', async () => {
+    // A broken `em` for the surface write (its `findOne` throws) must be swallowed: the
+    // grant that follows is the part the business operation depends on.
+    const em = createMockEm()
+    ;(em.findOne as jest.Mock).mockRejectedValueOnce(new Error('catalogue table is gone'))
+    await writeFieldPermissionGrant(
+      em as any,
+      'tenant-1',
+      { outcome: 'defaulted', grantTo: 'superadmin', records, because: 'no decision' },
+      'the new custom fields',
+      [surface],
+    )
+    expect(grantMock).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not record a surface for a global (tenant-less) call', async () => {
+    const em = createMockEm()
+    await writeFieldPermissionGrant(
+      em as any,
+      null,
+      { outcome: 'defaulted', grantTo: 'superadmin', records, because: 'no decision' },
+      'the new custom fields',
+      [surface],
+    )
+    expect(em.persisted).toHaveLength(0)
   })
 })

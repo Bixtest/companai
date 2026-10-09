@@ -98,10 +98,15 @@ export async function upsertCustomEntity(em: EntityManager, entityId: string, op
       // updates), and a dry run lands nothing, so neither is gated. Decided from
       // the before-state, before any write, so a refusal stops the landing instead
       // of following it.
+      //
+      // The surface is named once (rather than inline at the gate) so the same value
+      // travels to the catalogue write below (`M3e`/`P3b`): the surface the gate judged
+      // and the surface the catalogue records are the same object, by construction.
+      const appearingSurfaces = [entityDefinitionSurface(entityId)]
       const lands = !dryRun && (!ent || (!createOnly && !isActiveEntity(ent as any)))
       let permissionDecision = null as ReturnType<typeof evaluateStructureChange> | null
       if (lands) {
-        permissionDecision = evaluateStructureChange({ surfaces: [entityDefinitionSurface(entityId)] })
+        permissionDecision = evaluateStructureChange({ surfaces: appearingSurfaces })
         if (permissionDecision.outcome === 'refused') {
           throw new Error(
             `A new custom entity cannot land: ${permissionDecision.because} ` +
@@ -114,7 +119,7 @@ export async function upsertCustomEntity(em: EntityManager, entityId: string, op
         if (dryRun) return 'created'
         ent = tem.create(CustomEntity as any, { ...where, ...desired, createdAt: now, updatedAt: now, deletedAt: null })
         await tem.persist(ent).flush()
-        await writeFieldPermissionGrant(tem as unknown as EntityManager, opts.tenantId ?? null, permissionDecision, 'the new custom entity')
+        await writeFieldPermissionGrant(tem as unknown as EntityManager, opts.tenantId ?? null, permissionDecision, 'the new custom entity', appearingSurfaces)
         return 'created' as UpsertCustomEntityResult
       }
       if (createOnly) return 'unchanged'
@@ -122,7 +127,7 @@ export async function upsertCustomEntity(em: EntityManager, entityId: string, op
       if (dryRun) return 'updated'
       apply(ent)
       await tem.flush()
-      await writeFieldPermissionGrant(tem as unknown as EntityManager, opts.tenantId ?? null, permissionDecision, 'the re-activated custom entity')
+      await writeFieldPermissionGrant(tem as unknown as EntityManager, opts.tenantId ?? null, permissionDecision, 'the re-activated custom entity', appearingSurfaces)
       return 'updated' as UpsertCustomEntityResult
     } catch (error: any) {
       if (error?.code === '23505' || error?.message?.includes('duplicate key')) {

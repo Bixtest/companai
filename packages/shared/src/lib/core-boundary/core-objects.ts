@@ -32,9 +32,14 @@
  * (`auth/lib/setup-app.ts:20`, `:536`, `:569`, with `isSuperAdmin: true`), per
  * tenant. Deleting it removes the ability to manage roles *in that scope*, which
  * is exactly what `S9` forbids. The `Role` entity carries no `isCore` column and
- * adding one needs a migration — unprovable on this host (`COMPLETION-CALLBACKS.md`
- * CC-31(a) records the boundary) — so the honest, migration-free shape is to match
- * the platform's own convention by name, which is testable today. **The seed's
+ * adding one needs a migration — **and such a migration IS provable here**
+ * (`mercato-postgres-local`, Postgres 17, reachable via `docker exec`; e.g.
+ * `Migration20261009205000` was written, applied and read back on 2026-10-09).
+ * **CORRECTED (rule 13):** an earlier note called row DDL *"unprovable on this
+ * host"* — **false and retracted.** The honest migration-free shape is still to
+ * match the platform's own convention by name, because that is testable today and
+ * needs no schema change; the deferral is a **design** choice, not a proof
+ * boundary (`COMPLETION-CALLBACKS.md` CC-31(a) records it). **The seed's
  * `role` map carries that name; the setting may move it.**
  *
  * **The list is the owner's to grow — from the UI, now.** §C.3: *"The rest is to

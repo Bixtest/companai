@@ -172,6 +172,59 @@ export class RoleSidebarPreference {
   deletedAt?: Date | null
 }
 
+@Entity({ tableName: 'permission_surfaces' })
+// One row per (tenant, surface) — the durable half of the permission catalogue
+// (`@open-mercato/shared/lib/permissions/catalogue`). The uniqueness is a partial
+// unique index (`permission_surfaces_tenant_surface_uidx`) over live rows
+// (`WHERE deleted_at IS NULL`), owned by raw SQL in Migration20261009205000. A
+// `@Unique` decorator cannot express a partial index, so the entity omits it — the
+// migration is the source of truth (same convention as `users` and `sidebar_variants`).
+//
+// What this stores: the *surfaces* that can be permitted (an object, a field, a
+// relation, a Function, a widget, an agent) and where each came from. It does not
+// store *who may do what* — grants stay in `role_acls.features_json` (S5: one
+// permission engine, never a second one). This is a registry, not a policy.
+export class PermissionSurfaceRecord {
+  @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
+  id!: string
+
+  // Tenant scope is mandatory: the same surface id can be recorded by two tenants,
+  // and the catalogue is a per-tenant live view.
+  @Property({ name: 'tenant_id', type: 'uuid' })
+  tenantId!: string
+
+  // The surface's canonical id (e.g. `customers:customer_person`, `auth.users`).
+  @Property({ name: 'surface_id', type: 'text' })
+  surfaceId!: string
+
+  // The surface kind (`object | field | relation | function | widget | agent`) and
+  // the module or owner that declared or recorded it.
+  @Property({ type: 'text' })
+  kind!: string
+
+  @Property({ type: 'text' })
+  owner!: string
+
+  // `declared` (the platform ships it in code) or `recorded` (it appeared at runtime).
+  // A declared surface is never downgraded to recorded: the declaration wins.
+  @Property({ type: 'text', default: 'recorded' })
+  source: string = 'recorded'
+
+  // Present only when the platform has a native record-id convention for the surface
+  // (a custom entity's `entities.records.<entityId>`), so catalogue and enforcement agree.
+  @Property({ name: 'feature_prefix', type: 'text', nullable: true })
+  featurePrefix?: string | null
+
+  @Property({ name: 'created_at', type: Date, onCreate: () => new Date() })
+  createdAt: Date = new Date()
+
+  @Property({ name: 'updated_at', type: Date, onUpdate: () => new Date(), nullable: true })
+  updatedAt?: Date
+
+  @Property({ name: 'deleted_at', type: Date, nullable: true })
+  deletedAt?: Date | null
+}
+
 @Entity({ tableName: 'sidebar_variants' })
 // Uniqueness is enforced by a partial unique index (`sidebar_variants_active_name_unique_idx`)
 // scoped to live rows (`WHERE deleted_at IS NULL`) and owned by raw SQL in

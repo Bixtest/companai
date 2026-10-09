@@ -64,6 +64,19 @@ jest.mock('@open-mercato/core/modules/auth/lib/permission-decision-grant', () =>
   applyStructureChangeGrant: jest.fn(async () => null),
 }))
 
+// `M3e`/`P3b`: the batch route also records each new column's surface in the catalogue (its
+// own `em.findOne`/`create`/`persist`). Stubbed for the same reason as the grant above — so
+// the `findOne`/`create`/`persist` assertions below stay about the `CustomFieldDef` writes.
+const persistRecordedSurfaceMock = jest.fn(async () => ({ stored: true as const, created: true, surfaceId: 'x' }))
+jest.mock('@open-mercato/core/modules/auth/services/permissionSurfacesService', () => ({
+  persistRecordedSurface: (...args: unknown[]) => persistRecordedSurfaceMock(...(args as [])),
+}))
+
+/** The arguments of every call to a mock made for `CustomFieldDef` (a string token here). */
+function defCalls(mock: jest.Mock): unknown[][] {
+  return mock.mock.calls.filter((call) => call[0] === 'CustomFieldDef')
+}
+
 const makeRequest = (body: unknown) =>
   new Request('http://x/api/entities/definitions/batch', {
     method: 'POST',
@@ -101,7 +114,7 @@ describe('entities/definitions.batch POST (issue #1399)', () => {
     // No per-definition point lookups.
     expect(mockEm.findOne).not.toHaveBeenCalled()
     // All three created (none existed) and flushed once in the transaction.
-    expect(mockEm.create).toHaveBeenCalledTimes(3)
+    expect(defCalls(mockEm.create)).toHaveLength(3)
     expect(mockEm.flush).toHaveBeenCalledTimes(1)
     expect(mockEm.commit).toHaveBeenCalledTimes(1)
   })
@@ -124,8 +137,8 @@ describe('entities/definitions.batch POST (issue #1399)', () => {
     expect(mockEm.findOne).not.toHaveBeenCalled()
     // Existing 'alpha' mutated in memory; only 'beta' is newly created.
     expect(existing.kind).toBe('integer')
-    expect(mockEm.create).toHaveBeenCalledTimes(1)
-    expect(mockEm.create.mock.calls[0][1]).toMatchObject({ key: 'beta' })
+    expect(defCalls(mockEm.create)).toHaveLength(1)
+    expect(defCalls(mockEm.create)[0][1]).toMatchObject({ key: 'beta' })
     expect(mockEm.flush).toHaveBeenCalledTimes(1)
   })
 
@@ -206,7 +219,7 @@ describe('entities/definitions.batch POST array bounds (issue #2924)', () => {
     const response = await POST(makeRequest(body))
 
     expect(response.status).toBe(200)
-    expect(mockEm.persist).toHaveBeenCalledTimes(1000)
+    expect(defCalls(mockEm.create)).toHaveLength(1000)
   })
 
   it('still accepts an empty definitions array (fieldset-only save path)', async () => {
@@ -216,5 +229,57 @@ describe('entities/definitions.batch POST array bounds (issue #2924)', () => {
 
     expect(response.status).toBe(200)
     expect(mockEm.persist).not.toHaveBeenCalled()
+  })
+})
+
+/**
+ * `M3e`/`P3b` — the batch route records the surfaces for the columns it creates in the catalogue.
+ *
+ * The whole point of "stored, not just in memory" is that a runtime-appearing surface is written at
+ * the moment it appears. The batch route writes through its **own** grant helper, so it must record
+ * its surfaces itself — a hostile critic found this call-site had zero coverage (the service mock
+ * existed only to silence the write). This proves the wire.
+ */
+describe('entities/definitions.batch — records the new columns’ surfaces (M3e/P3b)', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockEm.find.mockResolvedValue([] as unknown[])
+    persistRecordedSurfaceMock.mockResolvedValue({ stored: true, created: true, surfaceId: 'x' })
+  })
+
+  it('records one surface per new column, scoped to the tenant, with the field kind', async () => {
+    const body = {
+      entityId: 'test:entity',
+      definitions: [
+        { key: 'alpha', kind: 'text' },
+        { key: 'beta', kind: 'integer' },
+      ],
+    }
+
+    const response = await POST(makeRequest(body))
+
+    expect(response.status).toBe(200)
+    const recorded = persistRecordedSurfaceMock.mock.calls.map(
+      (call) => (call[1] as { surface: { id: string; kind: string }; tenantId: string }),
+    )
+    expect(recorded.map((r) => r.surface.id).sort()).toEqual(['test:entity.alpha', 'test:entity.beta'])
+    expect(recorded.every((r) => r.surface.kind === 'field')).toBe(true)
+    expect(recorded.every((r) => r.tenantId === 'tenant-1')).toBe(true)
+  })
+
+  it('records nothing when the batch brings no new column into existence', async () => {
+    // Both keys already exist and are active with the same kind → this is an update, not an appearance.
+    mockEm.find.mockResolvedValueOnce([
+      { entityId: 'test:entity', key: 'alpha', kind: 'text', configJson: {}, isActive: true },
+      { entityId: 'test:entity', key: 'beta', kind: 'integer', configJson: {}, isActive: true },
+    ] as unknown[])
+
+    const response = await POST(makeRequest({
+      entityId: 'test:entity',
+      definitions: [{ key: 'alpha', kind: 'text' }, { key: 'beta', kind: 'integer' }],
+    }))
+
+    expect(response.status).toBe(200)
+    expect(persistRecordedSurfaceMock).not.toHaveBeenCalled()
   })
 })

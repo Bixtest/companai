@@ -7,6 +7,7 @@ import {
   type StructureChangeGateOutcome,
 } from '@open-mercato/shared/lib/permissions/structure-change-gate'
 import { applyStructureChangeGrant } from '@open-mercato/core/modules/auth/lib/permission-decision-grant'
+import { persistRecordedSurface } from '@open-mercato/core/modules/auth/services/permissionSurfacesService'
 import { createLogger } from '@open-mercato/shared/lib/logger'
 import { fieldDefinitionSurface } from '../data/guards'
 import { reservedEntityRefusal } from '@open-mercato/shared/lib/entities/system-entities'
@@ -162,7 +163,32 @@ export async function writeFieldPermissionGrant(
   tenantId: string | null,
   decision: StructureChangeGateOutcome | null,
   what = 'the new custom fields',
+  surfaces: readonly PermissionSurface[] = [],
 ): Promise<void> {
+  // `M3e` / `P3b`: persist the surfaces that this call brought into existence, so the catalogue can
+  // be read back after a restart (and by any other process). This runs even when the decision is
+  // `refused` or absent — the *surface* exists regardless of who may use it, and the catalogue is a
+  // registry of surfaces, not of grants. It is deliberately separate from the grant write below and
+  // fails soft (the service never throws into this path): a missing catalogue row must not stop a
+  // field from landing. See `permissionSurfacesService.ts` for the full posture.
+  if (surfaces.length > 0 && tenantId) {
+    for (const surface of surfaces) {
+      try {
+        const outcome = await persistRecordedSurface(em, { tenantId, surface })
+        if (!outcome.stored) {
+          logger.error(`M3e: a surface landed but could not be recorded in the catalogue`, {
+            surfaceId: outcome.surfaceId,
+            reason: outcome.reason,
+            because: outcome.because,
+            tenantId,
+          })
+        }
+      } catch (error) {
+        logger.error(`M3e: recording a surface threw`, { surfaceId: surface.id, tenantId, err: error })
+      }
+    }
+  }
+
   // Only `refused` (or no outcome at all) has nothing to write. `decided` and
   // `defaulted` both carry records, and since CC-17 both carry a grant target.
   if (!decision || decision.outcome === 'refused') return
@@ -333,7 +359,7 @@ export async function ensureCustomFieldDefinitions(
   // SD-1 (CC-3): the columns have landed — now write the default's records. The
   // write is post-commit (the surface must exist first) and never throws (a landed
   // save must not fail on a grant); see `writeFieldPermissionGrant`.
-  await writeFieldPermissionGrant(em, scope.tenantId, permissionDecision)
+  await writeFieldPermissionGrant(em, scope.tenantId, permissionDecision, 'the new custom fields', newSurfaces)
 
   return { created, updated, unchanged }
 }

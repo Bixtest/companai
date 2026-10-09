@@ -13,7 +13,9 @@
  *   5. it **never** touches `isSuperAdmin` (a grant must not confer superadmin).
  *
  * The EntityManager is mocked (the project tests DB-backed code against a mocked EM;
- * a real migration is unprovable on this host — `document.ts:22-28`).
+ * the DB itself is provable on this host — `mercato-postgres-local` — so a migration
+ * is deferred for shape/timing reasons, never for provability: `CORRECTED (rule 13)`,
+ * the older *"a real migration is unprovable on this host"* note was false).
  */
 
 import { Role, RoleAcl } from '@open-mercato/core/modules/auth/data/entities'
