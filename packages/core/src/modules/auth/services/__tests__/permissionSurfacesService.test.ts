@@ -26,6 +26,7 @@ import {
   hydratePermissionCatalogue,
   loadPersistedSurfaces,
   persistRecordedSurface,
+  readTenantSurfaces,
 } from '../permissionSurfacesService'
 
 type Row = Record<string, unknown>
@@ -253,5 +254,87 @@ describe('hydrating the live catalogue', () => {
     expect(result.error).toBe('connection reset')
     // The declaration it was built with is still there — a partial view, not an emptied catalogue.
     expect(hasPermissionSurface('auth.users')).toBe(true)
+  })
+})
+
+/**
+ * The live consumer (`P3b` / `M3e`, row 9's read half) — and the cross-tenant defect it exists to
+ * prevent.
+ *
+ * The catalogue's registry is a **process-global `Map`**, but a *recorded* surface belongs to one
+ * tenant. So an answer read from the raw global map would hand tenant B whatever tenant A's request
+ * happened to leave there — a data leak that depends only on request *order*. These tests pin the
+ * tenant-scoped answer: declared (global) + **exactly this tenant's own rows**, nothing else.
+ */
+describe('the live consumer — reading the catalogue back for one tenant', () => {
+  const TENANT_B = '22222222-2222-2222-2222-222222222222'
+
+  it('returns the declared surfaces even with no rows', async () => {
+    declareSurfaces([{ id: 'auth.users', kind: 'object', owner: 'auth', source: 'declared' }])
+    const { em } = makeEm({ rowsOnRead: [] })
+    const view = await readTenantSurfaces(em as never, TENANT)
+    expect(view.recorded).toBe(0)
+    expect(view.error).toBeNull()
+    expect(view.surfaces.map((s) => s.id)).toEqual(['auth.users'])
+  })
+
+  it('returns this tenant’s recorded rows alongside the declared surfaces', async () => {
+    declareSurfaces([{ id: 'auth.users', kind: 'object', owner: 'auth', source: 'declared' }])
+    const { em } = makeEm({
+      rowsOnRead: [{ surfaceId: 'customers:widget_panel', kind: 'object', owner: 'customers', source: 'recorded' }],
+    })
+    const view = await readTenantSurfaces(em as never, TENANT)
+    expect(view.recorded).toBe(1)
+    expect(view.surfaces.map((s) => s.id).sort()).toEqual(['auth.users', 'customers:widget_panel'])
+  })
+
+  it('does NOT leak another tenant’s recorded surface, even after that tenant hydrated the map', async () => {
+    // Tenant A records its surface first — this is what puts it in the process-global map.
+    declareSurfaces([{ id: 'auth.users', kind: 'object', owner: 'auth', source: 'declared' }])
+    const tenantA = { rowsOnRead: [{ surfaceId: 'customers:widget_panel', kind: 'object', owner: 'customers', source: 'recorded' }] }
+    await readTenantSurfaces(makeEm(tenantA).em as never, TENANT)
+    expect(hasPermissionSurface('customers:widget_panel')).toBe(true) // now in the global map
+
+    // Tenant B has no recorded rows. Its answer must not include A's surface.
+    const { em } = makeEm({ rowsOnRead: [] })
+    const view = await readTenantSurfaces(em as never, TENANT_B)
+    expect(view.recorded).toBe(0)
+    expect(view.surfaces.map((s) => s.id)).toEqual(['auth.users'])
+    expect(view.surfaces.some((s) => s.id === 'customers:widget_panel')).toBe(false)
+  })
+
+  it('never lets a recorded row shadow a declared surface (declared wins)', async () => {
+    declareSurfaces([{ id: 'auth.users', kind: 'object', owner: 'auth', source: 'declared' }])
+    const { em } = makeEm({
+      rowsOnRead: [{ surfaceId: 'auth.users', kind: 'object', owner: 'somebody-else', source: 'recorded' }],
+    })
+    const view = await readTenantSurfaces(em as never, TENANT)
+    const users = view.surfaces.find((s) => s.id === 'auth.users')
+    expect(users?.source).toBe('declared')
+    expect(users?.owner).toBe('auth')
+  })
+
+  it('a read failure still answers, with the declared surfaces and a reported error', async () => {
+    declareSurfaces([{ id: 'auth.users', kind: 'object', owner: 'auth', source: 'declared' }])
+    const { em } = makeEm({ throwOnRead: true })
+    const view = await readTenantSurfaces(em as never, TENANT)
+    expect(view.recorded).toBe(0)
+    expect(view.error).toBe('connection reset')
+    expect(view.surfaces.map((s) => s.id)).toEqual(['auth.users'])
+  })
+
+  it('with no tenant, answers the declared (global) surfaces and issues no query', async () => {
+    declareSurfaces([{ id: 'auth.users', kind: 'object', owner: 'auth', source: 'declared' }])
+    let queried = false
+    const em = {
+      async find() {
+        queried = true
+        return []
+      },
+    }
+    const view = await readTenantSurfaces(em as never, null)
+    expect(view.surfaces.map((s) => s.id)).toEqual(['auth.users'])
+    expect(view.recorded).toBe(0)
+    expect(queried).toBe(false)
   })
 })

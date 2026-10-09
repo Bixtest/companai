@@ -30,6 +30,13 @@
  * an answer. Nothing is removed by hydration: if the DB is briefly unreachable the catalogue keeps the
  * declarations it was built with (a partial view, honestly), rather than being emptied.
  *
+ * **The read side is `readTenantSurfaces` — the live consumer (row 9's second clause).** The write half
+ * alone was storage with no reader, so this service owns the read too: `readTenantSurfaces` hydrates the
+ * registry from **declarations + this tenant's rows** and answers from **declared (global) + exactly
+ * this tenant's recorded rows** — never the raw process-global map, which would leak one tenant's
+ * recorded surfaces into another's answer depending on request order. It is called by
+ * `GET /api/auth/permission-surfaces`, so the catalogue is genuinely read back by the running app.
+ *
  * Source: `SPECIFICATIONS-DICTIONARY.md` S2 + §C.1; `library/development/platform_points.md` row 9
  * (`P3b` / `M3e`); `Migration20261009205000`.
  */
@@ -38,6 +45,7 @@ import type { EntityManager } from '@mikro-orm/postgresql'
 import {
   isPermissionSurfaceId,
   isPermissionSurfaceKind,
+  listPermissionSurfaces,
   recordSurface,
   type PermissionSurface,
   type PermissionSurfaceKind,
@@ -166,7 +174,13 @@ export async function loadPersistedSurfaces(
  *
  * **Additive, idempotent, and non-destructive** — see the file header. The catalogue's own
  * `recordSurface` already protects a `declared` surface from being downgraded, so a row that shadows
- * a declaration is a no-op. Returns how many rows were read, so a boot can log it.
+ * a declaration is a no-op. Returns how many rows were read, so a caller can log it.
+ *
+ * **Honest note on its callers:** `readTenantSurfaces` below is the **live consumer** (it inlines the
+ * same hydrate-and-record loop, because it must also return *this tenant's* rows and not the global
+ * map). This function remains the plain "hydrate and report" entry point for a **boot/worker** that
+ * knows a tenant — nothing calls it today, because the app bootstrap is synchronous and tenant-less;
+ * it is kept as the documented seam for the first tenant-aware boot rather than deleted.
  *
  * A read failure is swallowed to `0` and reported, never thrown: the running app keeps the
  * declarations it was built with and the platform stays up. This is the deliberate *soft-fail* that
@@ -183,4 +197,69 @@ export async function hydratePermissionCatalogue(
   } catch (err) {
     return { hydrated: 0, error: err instanceof Error ? err.message : String(err) }
   }
+}
+
+/** One tenant's catalogue view, as a live consumer reads it. */
+export type TenantSurfacesView = {
+  /** Every surface this tenant has, declared (global) + recorded (this tenant's rows). */
+  surfaces: PermissionSurface[]
+  /** How many rows this tenant's own persistence contributed (recorded surfaces). */
+  recorded: number
+  /** A read failure message, or `null`. Recovery already happened (fail soft). */
+  error: string | null
+}
+
+/**
+ * The **live consumer** — read the catalogue back for one tenant, from the running app.
+ *
+ * This is the function the `GET /api/auth/permission-surfaces` route calls, and it is
+ * what makes the durable half *read back by the running app* (`P3b` / `M3e`, row 9) rather
+ * than merely written.
+ *
+ * **Why it hydrates *and* filters, and not just `listPermissionSurfaces()`.** The
+ * catalogue's registry is a **process-global `Map`**. Declared surfaces are genuinely
+ * global — a module's features are the same for every tenant — but a *recorded* surface
+ * belongs to one tenant. So the global map, read raw, would leak tenant A's recorded
+ * surfaces into tenant B's answer after A's request ran first. The honest read therefore:
+ *
+ *   1. hydrates the registry from **declarations + this tenant's persisted rows** (so the
+ *      map holds this tenant's rows *plus* whatever a previous request put there), then
+ *   2. builds the answer from **declared surfaces (global, safe) + exactly the rows this
+ *      tenant's own read returned** — never from the raw global map.
+ *
+ * The result is tenant-correct by construction, not by luck of request ordering. (Recorded
+ * ids are simply dropped from the leak if they are not in this tenant's row set: a foreign
+ * recorded id cannot appear in `thisTenantIds`.)
+ *
+ * Fail soft, like every other read here: a DB failure yields the **declared** surfaces
+ * alone (a partial view, honestly) with `error` set, never a throw.
+ */
+export async function readTenantSurfaces(
+  em: EntityManager,
+  tenantId: string | null | undefined,
+): Promise<TenantSurfacesView> {
+  const assigned = typeof tenantId === 'string' && tenantId.trim().length > 0 ? tenantId.trim() : null
+  // The declared half is global: it is in the registry regardless of tenant, and is safe
+  // to return for every tenant. (Declarations are code, identical per tenant.)
+  const declared = listPermissionSurfaces().filter((surface) => surface.source === 'declared')
+  if (!assigned) {
+    return { surfaces: declared, recorded: 0, error: null }
+  }
+
+  let rows: PermissionSurface[] = []
+  let error: string | null = null
+  try {
+    rows = await loadPersistedSurfaces(em, assigned)
+    for (const surface of rows) recordSurface(surface)
+  } catch (err) {
+    error = err instanceof Error ? err.message : String(err)
+  }
+
+  // Exactly this tenant's recorded rows — the same set the DB returned, not the global map.
+  const recorded = rows.filter((surface) => surface.source === 'recorded')
+  const byId = new Map<string, PermissionSurface>()
+  for (const surface of declared) byId.set(surface.id, surface) // declared wins (catalogue precedence)
+  for (const surface of recorded) if (!byId.has(surface.id)) byId.set(surface.id, surface)
+
+  return { surfaces: [...byId.values()], recorded: recorded.length, error }
 }
