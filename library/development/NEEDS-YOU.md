@@ -22,7 +22,7 @@ or request scattered across other documents. If it needs you, it is here or it i
 
 ---
 
-## Part 1 — Decisions I need (**none open** — item 14 closed 2026-10-06; items 1, 2, 8 and 13 closed; item 4 is "nothing needed")
+## Part 1 — Decisions I need (**1 open** — item 15, added 2026-10-09; item 14 closed 2026-10-06; items 1, 2, 8 and 13 closed; item 4 is "nothing needed")
 
 > **Numbering note.** Items are numbered once and **never reused**, so that a number you have already
 > quoted keeps meaning the same thing. Item 8 was appended here on 2026-10-05 and answered the same
@@ -197,6 +197,38 @@ of the running platform real tenants use.
 
 **Where it is written down.** [`ARCHITECTURE-request-outcomes.md`](ARCHITECTURE-request-outcomes.md) §2 Q3
 (decision taken) and §5 (register row 10, no longer open).
+
+---
+
+### 15. What else is "core" beyond the roles-and-permissions manager — and which **database tables** count as the schema backbone? — **DECIDE** · *open 2026-10-09*
+
+**Why it is yours.** `SD-2` built the rule *"a core object ships by default and cannot be deleted by anyone"*
+and its first entry (the built-in `superadmin` role). The dictionary (`§C.3`) says the list *"starts with the
+roles-and-permissions manager"* and *"every addition to the list is itself a dictionary change"*. **Filling
+the list is a dictionary change — your ruling, not mine (rule 11).**
+
+**Your own point, and it is right.** There are **two** kinds of "core", and they need two guards:
+- **(A) an object is *deleted*** — a row vanishes (the `superadmin` role). **`SD-2` — BUILT.**
+- **(B) the *schema's backbone is changed*** — a system table dropped, a system column removed/re-typed, a
+  relation broken, by the customization UI or a Hermes-proposed change. **NOT built** — and this is the more
+  dangerous one (it can take the whole database down, not just one surface).
+
+**Measured hole today (so this is not theoretical):** a custom field may be attached to a system table —
+the only thing stopping it is a **7-id UI-selectability list** (`system-entities.ts`), and `users`, `roles`,
+`tenants`, `sessions` **are not in it**. Nothing at all covers a **DROP** or a **broken relation**.
+
+**Full evidence and the recommendation:** [`DECISION-core-object-set.md`](DECISION-core-object-set.md)
+(the ~25 **Tier‑1** tables recommended core now, the Tier‑2 set, and the columns/relations rule).
+
+**Answer with three words.** Reply **"15: tier1 yes, tier2 yes, cols yes"** (or say which to drop). Where:
+| Line | Question | My recommendation |
+|---|---|---|
+| **1** | The ~25 Tier‑1 tables (tenants, users, roles, `role_acls`, sessions, audit, the customization substrate, the migration ledger) → core now? | **yes** |
+| **2** | Tier‑2 (the platform's own process machinery) → core, but releasable by a platform release? | **yes** |
+| **3** | For Tier‑1 tables: system columns un-removable and foreign keys fixed? | **yes** |
+
+**Nothing is blocked on this.** `SD-2` ships the mechanism; the ruling only fills the list. Until you rule,
+the registry is honestly **one entry deep** and says so (`CC-31(b)`).
 
 ---
 
