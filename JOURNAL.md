@@ -33,6 +33,75 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 > (business) work. It stays scheduled as **`CC-42`**; it resumes only if the owner says so, or once
 > Phase 3–7 are done (whichever comes first). **The queue now points at Phase 3 (the policy kernel).**
 
+---
+
+### ▶ NOW — **Phase 3, row 9 (`P3b` / `M3e`): the durable WRITE half is BUILT and proven; the READ half is scheduled (`CC-43`) — row 9 is 🟡, not ☑.**
+
+**Where this stands (2026-10-09).** The task was corrected before it was built (rule 9b): the literal
+target was *"persist the catalogue `Map`"*, but the catalogue's runtime registry had **zero live
+consumers**, so persisting the `Map` alone would have been **storage with no reader**. The honest
+reading of row 9 — *"the permission rules are **stored** (not just in memory) and **read back by the
+running app**"* — was therefore split into a **write half** (a durable table + the surfaces recorded by
+the code that judges them) and a **read half** (a live consumer that reads them back).
+
+**✅ WRITE HALF — BUILT, WIRED, PROVEN.** The `permission_surfaces` table (migration
+`Migration20261009205000`, `up()`/`down()` symmetric, **applied to `mercato-postgres-local` and measured
+back**); the `PermissionSurfaceRecord` entity (`auth/data/entities.ts`); the fail-soft service
+`auth/services/permissionSurfacesService.ts` (`persistRecordedSurface` / `loadPersistedSurfaces` /
+`hydratePermissionCatalogue`); and **all 7 real callers wired** to record the surface they judge —
+entities create, the **batch** definitions route, the two HTTP reactivation routes,
+`ensureCustomFieldDefinitions`, the custom-entity install primitive `upsertCustomEntity`, the
+`add-field` CLI, and the `runStructureChangeGate` path (whose `validate` now carries the surfaces into
+its metadata for the after-write recorder). **Proven:** affected suites **48 suites / 419 tests** green;
+full `core` **638 suites / 5600 tests** green; `core` `tsc` exit 0; **6 md5-verified RED-then-GREEN
+mutations**; a **separate-agent hostile-critic pass** found three real defects — an **inert
+`{ filters: { softDelete: false } }`** (no such filter is registered → a soft-deleted tombstone stayed
+invisible while the partial index permitted a second live row: **fixed** by writing the live-row
+predicate explicitly + a tombstone test block), **untested batch persistence** (**fixed** with a new
+describe block), and a **tautological** "never downgrades a declared surface" test (**fixed** so it
+fails if hydration is inert) — plus a **tenant-scope gap** (the batch persisted under the stale
+`auth.tenantId` while rows land under `scope.tenantId`: **fixed** to `scope.tenantId ?? auth.tenantId`
+with a mismatch test). The live DB round-trip was proven end to end (record → boot read sees it →
+duplicate refused by the index → upsert-on-conflict works → soft-delete leaves the live read →
+re-appearance inserts a fresh live row → cleanup 0 rows).
+
+**🟡 READ HALF — NOT DONE, and named honestly (rule 8 / rule 9a).** `hydratePermissionCatalogue`,
+`hydrateCatalogueFromFeatures` and `listPermissionSurfaces()` have **no live consumer** (`grep` = 0
+importers); the in-process `Map` in `shared/src/lib/permissions/catalogue.ts` is still populated by
+**tests only**. The app bootstrap (`apps/mercato/src/bootstrap.ts`; `instrumentation.ts:register()` is
+a no-op) is **synchronous and has no tenant**, so there is nowhere today to hydrate the registry *for a
+tenant*. **Hydrating a registry nothing reads would be decoration, not row 9** — so acceptance item (b)
+*"the app hydrates the catalogue at boot"* and the second clause *"read back by the running app"* are
+**not met**, and the remainder is **scheduled** rather than claimed: **`CC-43`** (gap = the read side;
+prerequisite = a tenant-aware boot/request hook; callback = hydrate declarations **+** DB at that hook
+and give `listPermissionSurfaces()` a live reader, proven end to end). *(For the record: the enforced
+runtime ACLs **are** already read back by the app — `rbacService` reads `role_acls.features_json` from
+the DB at request time; what is missing is a live reader of the **surface catalogue**.)*
+
+> **What "done, flawlessly" means for this row (the acceptance test), and which parts are met:**
+> (a) ✅ a migration creates the table (`up()`/`down()`, applied to `mercato-postgres-local`, **measured
+> back**); (b) ❌ the app **hydrates** the catalogue at boot from declarations + DB — **scheduled
+> (`CC-43`)**; (c) ❌ a surface recorded at runtime is **read back after a restart** — **scheduled
+> (`CC-43`)**; (d) ✅ the full quality protocol passed (separate-agent hostile-critic; **6 md5-verified**
+> RED-then-GREEN mutations; re-measure; green gate); (e) ✅ docs updated and the remainder **scheduled**
+> (`CC-43`); (f) ✅ the false `M3e` note and the false *"unprovable on this host"* premise were
+> **corrected everywhere** (rule 13) — `platform_points.md` (§B `P3b`, §D `M3e`, row 9),
+> `permission-decision-grant.ts`, `Migration20261009205000.ts`, and four sibling files that had copied
+> the same false claim (`core-objects.ts`, `user-function/document.ts`, `business-widget/document.ts`,
+> `business-widget/registry.ts`, and the `permission-decision-grant.test.ts` header).
+
+**★ NEXT TASK — the next item in the vision's order after row 9.** Row 9's read half is scheduled; the
+**lowest open phase row remains Phase 3**, and within it the next rows that are not `☑` are **row 7
+(`P3`, 🟡)** and **row 13 (`SD-4`/`SD-5`, 🟡 — the screen to *see and change* the rules)**. The concrete
+next build is **`CC-43`** itself (the row-9 read side), because it is the *other half of the row we just
+opened* and leaving it open while closing nothing else is exactly the drift rule 0 forbids — **finish
+the row before starting a new one.** It is startable now (the write half is built and its schema is
+live). If the owner prefers a *different* next item, `CC-42` (`G-22` Slice 2B) and `CC-27` (the AI-user
+↔ agent binding, unblocked by `AH-1`) are the two behind it — but they are **business/agent work**, not
+the skeleton, so they wait (rule 0b).
+
+**Status:** ▶ **WRITE HALF DONE; READ HALF SCHEDULED (`CC-43`); row 9 recorded 🟡 — NOT ticked ☑.**
+
 **This section exists because the owner asked for it (2026-10-06).** Handover documents must **not**
 say what is next to do — what is next changes every session, and a stale "next" is worse than none.
 **The one place that carries "what we are doing now" is this section, at the top of the development
@@ -193,6 +262,56 @@ a plan and a fact-check (rule 10d), not with code.** `SD-6` (the two read side-e
 **Fact-check all of this in code before writing (rule 10d) — do not assume.**
 
 ---
+
+### ✅ DONE — **Phase 3, row 9 (`P3b` / `M3e`)** — the permission catalogue's **durable WRITE half**: a real table, a fail-soft service, and **all 7 real callers** recording the surface they judge. **(2026-10-09; code `workspace/starting-kit`; migration `Migration20261009205000.ts`; service [`packages/core/src/modules/auth/services/permissionSurfacesService.ts`](workspace/starting-kit/packages/core/src/modules/auth/services/permissionSurfacesService.ts); plan [`library/development/PLAN-P3b-permission-catalogue-persistence.md`](library/development/PLAN-P3b-permission-catalogue-persistence.md).)**
+
+**What was built.** The catalogue's runtime registry had **zero live consumers** (rule 9b: persisting
+the `Map` alone would have been *storage with no reader*), so row 9 was corrected into a **write half**
+(record the surface a change *judges*) and a **read half** (read it back). This entry is the write half:
+- **The migration** `Migration20261009205000` — `permission_surfaces` (id/tenant_id/surface_id/kind/owner/
+  source/feature_prefix/created_at/updated_at/deleted_at) + a **partial unique index**
+  `permission_surfaces_tenant_surface_uidx on (tenant_id, surface_id) where deleted_at is null`.
+  `up()`/`down()` symmetric; **applied to `mercato-postgres-local` and measured back** (table + index
+  confirmed, round-trip proven, cleanup 0 rows).
+- **The entity** `PermissionSurfaceRecord` (`auth/data/entities.ts`).
+- **The fail-soft service** `auth/services/permissionSurfacesService.ts` — `persistRecordedSurface` /
+  `loadPersistedSurfaces` / `hydratePermissionCatalogue`; **never throws into the caller** (a persistence
+  failure must not break the write it is recording).
+- **All 7 real callers wired:** entities create (`lib/field-definitions.ts`), the **batch** definitions
+  route, the two HTTP reactivation routes, `ensureCustomFieldDefinitions`, the custom-entity install
+  primitive `upsertCustomEntity` (`lib/register.ts`), the `add-field` CLI, and the `runStructureChangeGate`
+  path (`data/guards.ts` — `validate` now returns the surfaces in its metadata; the after-write recorder
+  persists them).
+
+**What proved it.** Affected suites **48 suites / 419 tests** green; full `core` **638 suites / 5600
+tests** green; `core` `tsc` exit 0; **6 md5-verified RED-then-GREEN mutations** (M1 drop the surfaces arg;
+M2/M3 drop the tombstone predicate; M4 drop surfaces from guard metadata; M5 batch stops persisting;
+M6 batch uses the stale tenant) — **every restore md5-identical**; a **separate-agent hostile-critic
+pass** found three real defects and a scope gap, **all fixed**: (D1/HIGH) the
+`{ filters: { softDelete: false } }` predicate was **inert** (no such filter is registered anywhere → a
+soft-deleted tombstone stayed invisible while the partial index allowed a second live row) — fixed by
+writing `deletedAt: null` explicitly in both the upsert lookup and the boot read, plus a defensive clear,
+pinned by a 3-test tombstone block; (D2/MEDIUM) the batch route's persistence had **zero coverage** — a
+new describe block; (D3/MEDIUM) the "never downgrades a declared surface" test was **tautological**
+(passed with hydration removed) — coupled to the change so it fails if hydration is inert; and the batch
+persisted under the **stale `auth.tenantId`** while rows land under `scope.tenantId` — fixed to
+`scope.tenantId ?? auth.tenantId` with a mismatch test.
+
+**Remainder — scheduled, not claimed (rule 8).** The **read half**: `hydratePermissionCatalogue` /
+`listPermissionSurfaces()` have **no live consumer** and the app bootstrap is synchronous with no tenant,
+so *"read back by the running app"* is **not met**. Scheduled as **`CC-43`**; row 9 is recorded **🟡** in
+`platform_points.md`, `BACKLOG.md` and `BUILD-ORDER.md`, **not ☑** (rule 13 honest status).
+
+**Corrections made in the same change (rule 13).** The false `M3e` premise — *"a durable row waits on
+`G-04`, since a migration is unprovable on this host"* — was corrected **everywhere**: `platform_points.md`
+(§B `P3b`, §D `M3e`, row 9), `permission-decision-grant.ts:59`, `Migration20261009205000.ts`'s header,
+and four sibling files that had copied the same claim (`core-boundary/core-objects.ts`,
+`user-function/document.ts`, `business-widget/document.ts`, `business-widget/registry.ts`) plus the
+`permission-decision-grant.test.ts` header. **Both halves were false:** `G-04` is the data-axis
+authorization layer (unrelated to storing surfaces), and a migration **is** provable here.
+
+---
+
 
 ### ✅ DONE — **`A6`**: the current `main` is **built on the VM and deployed** to `companai.corprorate.com`, and **`A7`**: the real credentials are handed over. **(2026-10-09; new image `open-mercato/app:wan` = `4375447250e3`, built `16:13` on the VM; source tree `/home/ramzi/build-src`; DB export taken first.)**
 

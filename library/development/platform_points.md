@@ -61,7 +61,7 @@ started while a higher one is open). If you move something, write one line besid
 |---|---|---|---|
 | 7 | You can define roles and give them permissions, and the platform **enforces** every one on every write — not just in the UI. | 🟡 | `P3` |
 | 8 | When you create a new table or column, the platform **forces the permission question** — it can no longer be forgotten. | 🟡 | `SD-1` / `S2` / `P3a` / `P3b` |
-| 9 | The permission rules are **stored** (not just in memory) and read back by the running app. | ☐ | `P3b` / `M3e` |
+| 9 | The permission rules are **stored** (not just in memory) and read back by the running app. | 🟡 | `P3b` / `M3e` |
 | 10 | Every write passes one gate, and the gate can say "allow", "refuse", or "ask a human first". | ✅ | `P18` / `D0`–`D3` |
 | 11 | You can change the platform's behaviour by **setting**, not by deploying code (the tier mapping is a setting). | ✅ | `D1` |
 | 12 | A high-impact change can be sent for **approval** instead of silently allowed. | ✅ | `D3` |
@@ -213,8 +213,8 @@ started while a higher one is open). If you move something, write one line besid
 - ☐ **P2 Tenancy & org structure** — tenants · organisations · hierarchy · scoping *(DONE — not re-verified this round)*
 - ☐ **P3 Roles & permissions (RBAC/ACL)** — roles · grants · feature gates ▸ 0/2 *(no sub-part verified in code this round)*
 -   - ☐ **P3a** — Two-table ACL + the typed permissions-catalogue **service** (`SD-1`, 2026-10-08) *(carried — docs claim it, the code was not re-verified this round)*
--   - ☐ **P3b** — Persisted for runtime surfaces + consumed by a write *(LEFT — in-process only; see `SD-1`)*
--     *(was PART — two-table ACL real; the catalogue service exists but is not yet persisted for runtime surfaces nor consumed by a write)*
+-   - 🟡 **P3b** — Persisted for runtime surfaces + consumed by a write *(HALF DONE 2026-10-09 — the durable **write** half is built, wired to all 7 callers and proven on the live DB (`permission_surfaces`, `Migration20261009205000`); the **read** half is LEFT — `hydratePermissionCatalogue`/`listPermissionSurfaces()` have no live consumer → `CC-43`. See `SD-1`)*
+-     *(was PART — two-table ACL real; the catalogue service exists, is persisted for runtime surfaces on the **write** side, and is consumed by a write; the **read-back** half is open (`CC-43`))*
 - ☐ **P4 Audit & compliance log** — who/when/which record; retention/export ▸ 0/2 *(no sub-part verified in code this round)*
 -   - ☐ **P4a** — Read + create API and one viewer page *(carried — docs claim it, not re-verified this round)*
 -   - ☐ **P4b** — Retention and export *(LEFT)*
@@ -530,8 +530,8 @@ started while a higher one is open). If you move something, write one line besid
 -   - ☑ **M3b** — Consumed by a **write**: `auth/lib/permission-decision-grant.ts` applies its records to `role_acls.features_json` on every create path (entities create, the batch definitions route, `ensureCustomFieldDefinitions`, the HTTP reactivation routes (CC-22), the entity-install primitive `upsertCustomEntity` (CC-21), each field write site on a type change (CC-4)) *(DONE 2026-10-08 — measured)*
 -   - ☑ **M3c** — The merge itself is atomic (no lost update) *(DONE 2026-10-08 — CC-16)*
 -   - ☐ **M3d** — A **field** surface's records have an enforcement consumer (the live per-record features are `entities.records.<entityId>.{view,manage}`) *(LEFT — CC-20; for a custom entity the records *are* the live ones)*
--   - ☐ **M3e** — Persisted for **runtime** surfaces *(LEFT — in-process; a durable row waits on `G-04`, since a migration is unprovable on this host)*
--     *(was PARTIAL 2026-10-08 — the catalogue exists and is consumed by a write with an atomic merge; the remaining halves are the field-records consumer (CC-20) and runtime persistence (waits on `G-04`). See `S2 (= SD-1)`)*
+-   - 🟡 **M3e** — Persisted for **runtime** surfaces *(HALF DONE 2026-10-09 — the durable row **exists and was written + read back on the live DB** (`permission_surfaces`, `Migration20261009205000` applied to `mercato-postgres-local`), persisted fail-soft from the gate/route/lib layers on every structure change, and wired into all 7 callers; **the remaining half is the READ side** — the catalogue's registry has no live consumer → `CC-43`. `CORRECTED (rule 13):` the old note said a durable row "waits on `G-04`" and that a migration "is unprovable on this host" — **both false**: `G-04` is the data-axis authorization layer (unrelated to storing surfaces), and a migration **is** provable here (this one was; `mercato-postgres-local` runs Postgres 17))*.
+-     *(was PARTIAL 2026-10-08 — the catalogue exists and is consumed by a write with an atomic merge; runtime surface persistence is now **written** (durable row, live-proven) with its **read side** open (CC-43); the field-records consumer is CC-20. See `S2 (= SD-1)`)*
 - ☑ **M4** — The generated guard registry (= D0) *(DONE)*
 - ☐ **M5** — Dashboard / perspective screens (= P15) *(OPEN)*
 - ☐ **N-6** — `customer_accounts` duplicates `auth` — an island to remove *(OPEN)*

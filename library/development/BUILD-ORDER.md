@@ -1108,6 +1108,19 @@ one page, each with a named home. Details: [`BLUEPRINT-GAP-ANALYSIS.md`](BLUEPRI
    an open policy (CC-25) — plus the two
    deferred consumers (`SD-4`, `G-04`) — each scheduled in [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md)
    (plan [`PLAN-SD-1.md`](PLAN-SD-1.md), limits §10).
+   **The row-9 persistence half is now built (2026-10-09) — the catalogue has a durable table and a real
+   write path.** `permission_surfaces` (migration `Migration20261009205000`, applied to
+   `mercato-postgres-local` and **measured back**), the `PermissionSurfaceRecord` entity, and the fail-soft
+   service `auth/services/permissionSurfacesService.ts` (`persistRecordedSurface` / `loadPersistedSurfaces`
+   / `hydratePermissionCatalogue`); the surface a change *judges* is now recorded by **all 7 real callers**
+   (entities create; the batch definitions route; the two HTTP reactivation routes; `ensureCustomFieldDefinitions`;
+   the custom-entity install primitive `upsertCustomEntity`; the `add-field` CLI; and the `runStructureChangeGate`
+   path, whose `validate` now carries the surfaces into its metadata for the after-write recorder).
+   Proven: affected suites **48 suites / 419 tests** green, full `core` **638 suites / 5600 tests** green,
+   `tsc` 0, and **6 md5-verified RED-then-GREEN mutations**. **The remaining half — the catalogue's READ side —
+   is a gap, not a claim:** `hydratePermissionCatalogue` / `listPermissionSurfaces()` have **no live consumer**
+   and the app bootstrap is synchronous with no tenant, so *"read back by the running app"* is **not** met.
+   Scheduled as **`CC-43`** (row 9 is 🟡, not ☑). Cross-ref: `platform_points.md` row 9 + §B `P3b` + §D `M3e`.
 6. **SD-3** — make the tier mapping/defaults/fallbacks a **superadmin setting** (`module_configs`, module
    `request_outcome`), seeded from the dictionary, failing closed (§C.2b). **Not** a hardcoded table.
 7. **S9 / SD-2** — mark core functions (roles & permissions manager first) and guard their deletion.
