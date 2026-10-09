@@ -172,3 +172,20 @@ declared in the kernel. That narrowing is recorded in `COMPLETION-CALLBACKS.md` 
 **Does this close `AH-1`?** **No.** `AH-1`'s box stays `☐` until *all* its §1.4 fields are relations **and** the
 `reportsTo` edge exists. After this slice, one field (`role`) is still `text` — so the box remains `☐` and `CC-40`
 remains the open callback, now scoped to `role` alone. Honest, not a tick.
+
+---
+
+## 9. Slices 4+ — the `role` half and BUILD-ORDER item 9, in one channel (owner, 2026-10-09)
+
+This plan's slice 3 (§8) landed the **relation half**. The owner then ruled that the **remaining `role`
+half of `CC-40`** and **BUILD-ORDER item 9 (the generic state-machine engine)** should be executed **both,
+in an order that leaves no gap** — rather than choosing one and deferring the other. **That work is planned
+in a dedicated sub-plan** so this document stays the `AH-1` record and does not grow a second subject:
+
+▶ [`SUB-IMPLEMENTATION-PLAN-CC40-and-item9.md`](SUB-IMPLEMENTATION-PLAN-CC40-and-item9.md)
+
+**The order it sets, in one line:** declare `role` in the kernel → flip `role` `text`→`relation` → extend
+the test + mutation → **tick `AH-1` ☐→☑ and close `CC-40`** (unblocking `CC-27`) → **then** build item 9
+(so the primitive is stacked on a *finished* agent object — rule 10d). The sub-plan carries the measured
+premise-check (no agent table, no `agent.role_id`; the honest admission route is a real `role_id` carrier),
+the acceptance per slice, and the rule-8 no-gap guarantee.
