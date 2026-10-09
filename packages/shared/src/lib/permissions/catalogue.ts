@@ -22,8 +22,9 @@
  *
  *   - the **data block** — who may read/edit the *values* (`<prefix>.view`,
  *     `<prefix>.manage`); and
- *   - the **structural block** — who may add/edit/remove/reference the *object
- *     itself* (`<prefix>.structure`), whose per-verb levels are `SD-4`'s.
+ *   - the **structural block** — who may read/add/edit/remove/reference the *object
+ *     itself*, **one record per verb** (`<prefix>.read|add|edit|remove|reference`),
+ *     which is `SD-4`'s per-verb grammar (S11/CC-5).
  *
  * `prefix` is the surface's own id unless the caller supplies `featurePrefix`. A
  * caller that has a platform-native convention **must** supply it, so the
@@ -95,10 +96,67 @@ export type PermissionSurface = {
 export const PERMISSION_BLOCKS = ['data', 'structural'] as const
 export type PermissionBlock = (typeof PERMISSION_BLOCKS)[number]
 
-/** The verbs each block yields. Data is read/edit; structural is the object's own verbs. */
+/* ------------------------------------------------------------------ *
+ * The structural verb grammar (S11) — the per-verb block
+ * ------------------------------------------------------------------ */
+
+/**
+ * The **five structural verbs** the dictionary's S11 *names*:
+ *
+ * > *"for each verb (**read / add / edit / remove / reference**) and each actor
+ * > (human / AI) a level: straight / review / approval / never."*
+ *
+ * This is the architecture's grammar verbatim
+ * (`ARCHITECTURE-structure-permissions.md` §4.1:
+ * `verb: 'read' | 'add' | 'edit' | 'remove' | 'reference'`), and the same order.
+ * It is **declared in full** because the dictionary declares it in full — the
+ * grammar is a closed set, and a caller must be able to name every verb.
+ */
+export const STRUCTURAL_VERBS = ['read', 'add', 'edit', 'remove', 'reference'] as const
+export type StructuralVerb = (typeof STRUCTURAL_VERBS)[number]
+
+/**
+ * The verbs the **write-path guard can enforce today** — the mutation guard fires
+ * on `'create' | 'update' | 'delete'` only (S11's `operation → verb` bridge:
+ * create→add, update→edit, delete→remove; `ARCHITECTURE-structure-permissions.md`
+ * §4.2).
+ *
+ * `read` and `reference` are **declared** in {@link STRUCTURAL_VERBS} but their
+ * *enforcement* is scheduled (PLAN-SD-4 §6, its challenge 2): the write-path guard
+ * cannot see a read, and `SD-6` already set aside read-side side-effect GETs. A
+ * verb whose level is declared but not yet enforced is stated plainly here rather
+ * than silently omitted — the dictionary names five verbs, so the catalogue names
+ * five; only three of them can have their *level* acted on by a mutation guard.
+ */
+export const STRUCTURAL_ENFORCED_VERBS = ['add', 'edit', 'remove'] as const
+export type StructuralEnforcedVerb = (typeof STRUCTURAL_ENFORCED_VERBS)[number]
+
+/**
+ * The verbs each block yields. Data is read/edit (`view`/`manage`); **structural is
+ * the object's own per-verb grammar (S11)**.
+ *
+ * **This block is the CC-5 expansion.** Until SD-4 it was a single `'structure'`
+ * verb — one record where the grammar defines five. That made the structural block
+ * a *flag*, not the *grammar* the dictionary (S11) and the architecture (§4.1)
+ * require: the whole point of S11 is that *"AI may add columns but not drop them"*
+ * is expressible, and it is not expressible over one record.
+ *
+ * **What changed, exactly, and its honest consequence.** The structural block now
+ * yields **five** records (`<prefix>.read|add|edit|remove|reference`) instead of
+ * one (`<prefix>.structure`). The one live consumer that reads these records is
+ * the SD-1 structure-change gate, which grants them to the superadmin role when a
+ * surface appears — so a new surface now grants the superadmin the *named* verbs
+ * rather than one opaque `structure` record. That is wider and it is **correct**:
+ * the grant still goes **only** to the superadmin (S2's default), and it is now
+ * legible per verb, which is what the manage screen (`SD-5`) renders.
+ *
+ * **Order is declaration order, and it is stable** (`read` before `add` before
+ * `edit` before `remove` before `reference`), so the records a surface yields are
+ * deterministic and a diff of two yields is meaningful.
+ */
 export const PERMISSION_BLOCK_VERBS: Readonly<Record<PermissionBlock, readonly string[]>> = Object.freeze({
   data: Object.freeze(['view', 'manage']),
-  structural: Object.freeze(['structure']),
+  structural: Object.freeze([...STRUCTURAL_VERBS]),
 })
 
 /** One permission record: a feature id, and which block it belongs to. */

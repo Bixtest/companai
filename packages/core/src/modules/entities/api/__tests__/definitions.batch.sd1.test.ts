@@ -97,11 +97,17 @@ const makeRequest = (body: unknown, headers?: Record<string, string>) =>
     ...(headers ? { headers } : {}),
   })
 
-/** The records a custom field yields — the two S2 blocks, in catalogue order. */
+/** The records a custom field yields — the two S2 blocks, in catalogue order.
+ * SD-4 Slice C: the structural block is the S11 verb set (read/add/edit/remove/reference),
+ * not the single `structure` record it was before. */
 const fieldRecords = (entityId: string, key: string) => [
   `${entityId}.${key}.view`,
   `${entityId}.${key}.manage`,
-  `${entityId}.${key}.structure`,
+  `${entityId}.${key}.read`,
+  `${entityId}.${key}.add`,
+  `${entityId}.${key}.edit`,
+  `${entityId}.${key}.remove`,
+  `${entityId}.${key}.reference`,
 ]
 
 describe('entities/definitions.batch POST — SD-1 (CC-2) the create path is gated', () => {
@@ -323,9 +329,15 @@ describe('entities/definitions.batch POST — CC-17 the decision header makes `d
     expect(input.decision.outcome).toBe('decided')
     expect(input.decision.grantTo).toBe('finance')
     expect(input.decision.decidedBy).toBe('role:finance-admin')
-    expect(input.decision.records.map((r: { feature: string }) => r.feature)).toEqual(
-      fieldRecords('test:entity', 'alpha'),
-    )
+    // A `decided` outcome carries the DECISION's own records unchanged — not the
+    // catalogue's default set. (Before SD-4 Slice C both happened to be three long
+    // because the catalogue's structural block was one `structure` record; the test
+    // passed for the wrong reason. It now states the truth: the three the header sent.)
+    expect(input.decision.records.map((r: { feature: string }) => r.feature)).toEqual([
+      'test:entity.alpha.view',
+      'test:entity.alpha.manage',
+      'test:entity.alpha.structure',
+    ])
   })
 
   it('without the header, the same request defaults to superadmin (the two paths differ)', async () => {

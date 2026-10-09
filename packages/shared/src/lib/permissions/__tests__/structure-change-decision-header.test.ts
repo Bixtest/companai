@@ -27,7 +27,7 @@ import {
   STRUCTURE_DECISION_HEADER_NAME,
 } from '../structure-change-decision-header'
 import { evaluateStructureChange } from '../structure-change-gate'
-import type { PermissionSurface } from '../catalogue'
+import { STRUCTURAL_VERBS, type PermissionSurface } from '../catalogue'
 
 const fieldSurface: PermissionSurface = {
   id: 'customers:customer_person.loyalty_tier',
@@ -204,12 +204,25 @@ describe('toStructurePermissionDecision — derives block and surfaceId, never d
     ])
   })
 
-  it('derives the structural block from a .structure verb', () => {
+  it('derives the structural block from each S11 structural verb', () => {
+    // SD-4 Slice C: the block is read from the catalogue's own structural verb set.
+    for (const verb of STRUCTURAL_VERBS) {
+      const mapped = toStructurePermissionDecision({
+        decidedBy: 'admin',
+        records: [{ feature: `customers:customer_person.loyalty_tier.${verb}` }],
+      })
+      expect(mapped.records[0].block).toBe('structural')
+    }
+  })
+
+  it('a legacy `.structure` verb is NOT structural any more (it is not an S11 verb)', () => {
+    // The old single-verb name is gone from the grammar; a feature carrying it must
+    // not be silently classified structural — that would reintroduce the flag.
     const mapped = toStructurePermissionDecision({
       decidedBy: 'admin',
       records: [{ feature: 'customers:customer_person.loyalty_tier.structure' }],
     })
-    expect(mapped.records[0].block).toBe('structural')
+    expect(mapped.records[0].block).toBe('data')
   })
 
   it('lets an explicit block/surfaceId win over the derivation', () => {

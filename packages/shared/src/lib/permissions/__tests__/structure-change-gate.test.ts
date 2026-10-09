@@ -96,16 +96,21 @@ describe('the default — full grant to superadmin, plus the records', () => {
     }
   })
 
-  it('the default carries BOTH blocks (data + structural), reusing the platform’s entity ids', () => {
+  it('the default carries BOTH blocks (data + the full structural verb set), reusing the platform’s entity ids', () => {
     const result = evaluateStructureChange({ surfaces: [entitySurface] })
     expect(result.outcome).toBe('defaulted')
     if (result.outcome === 'defaulted') {
       expect(result.records.map((r) => r.feature)).toEqual([
         'entities.records.customers:customer_person.view',
         'entities.records.customers:customer_person.manage',
-        'entities.records.customers:customer_person.structure',
+        'entities.records.customers:customer_person.read',
+        'entities.records.customers:customer_person.add',
+        'entities.records.customers:customer_person.edit',
+        'entities.records.customers:customer_person.remove',
+        'entities.records.customers:customer_person.reference',
       ])
-      expect(result.records.filter((r) => r.block === 'structural')).toHaveLength(1)
+      // SD-4 Slice C: the structural block is the S11 grammar — five verbs.
+      expect(result.records.filter((r) => r.block === 'structural')).toHaveLength(5)
     }
   })
 
@@ -117,7 +122,11 @@ describe('the default — full grant to superadmin, plus the records', () => {
       expect(features).toEqual([
         'customers:customer_person.loyalty_tier.view',
         'customers:customer_person.loyalty_tier.manage',
-        'customers:customer_person.loyalty_tier.structure',
+        'customers:customer_person.loyalty_tier.read',
+        'customers:customer_person.loyalty_tier.add',
+        'customers:customer_person.loyalty_tier.edit',
+        'customers:customer_person.loyalty_tier.remove',
+        'customers:customer_person.loyalty_tier.reference',
       ])
       expect(new Set(features).size).toBe(features.length)
     }

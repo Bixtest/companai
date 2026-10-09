@@ -51,6 +51,7 @@
  */
 
 import { buildExtensionHeader, getExtensionHeaderValue } from '../umes/extension-headers'
+import { STRUCTURAL_VERBS } from './catalogue'
 
 /**
  * The header that carries a person's permission decision with a structure change.
@@ -246,12 +247,15 @@ export function readStructureDecisionHeader(
  * `block` / `surfaceId` explicitly (they win):
  *
  *   - `block` is read from the feature id's own verb, the same way the catalogue
- *     builds it in reverse: a `.structure` verb is the **structural** block, every
- *     other verb (`.view`, `.manage`, …) is the **data** block. This is total, and
- *     it **provably matches** what the catalogue would have produced — the
- *     catalogue's only structural verb is `structure` (`PERMISSION_BLOCK_VERBS`).
+ *     builds it in reverse: a verb in the **structural block** is `structural`,
+ *     every other verb (`.view`, `.manage`, …) is the **data** block. This is
+ *     total, and it **provably matches** what the catalogue would have produced —
+ *     the catalogue's structural verbs are exactly `PERMISSION_BLOCK_VERBS.structural`
+ *     (`read`/`add`/`edit`/`remove`/`reference`, SD-4's S11 grammar), which
+ *     {@link blockFromFeature} reads from that one set rather than re-listing.
  *     (Measured: for the catalogue's own entity surface, both sides yield
- *     `data/data/structural` for the `.view/.manage/.structure` records.)
+ *     `data/data/structural/structural/structural/structural/structural` for the
+ *     `.view/.manage/.read/.add/.edit/.remove/.reference` records.)
  *   - `surfaceId` is the caller's when supplied, else the feature id with its
  *     trailing verb segment removed (`x.y.view` → `x.y`). **This is best-effort and
  *     does NOT always equal the catalogue's `surfaceId`.** The catalogue records
@@ -290,13 +294,22 @@ export function toStructurePermissionDecision(
  * The block a feature id belongs to, read from its own verb.
  *
  * The catalogue builds every record as `PERMISSION_BLOCK_VERBS[block]` — the
- * `structural` block is exactly the `structure` verb, the `data` block is
- * `view` / `manage`. Reading the last dotted segment back therefore yields the
- * same block the catalogue would have produced for the same surface.
+ * `structural` block is the S11 verb set (`read`/`add`/`edit`/`remove`/`reference`,
+ * `SD-4` Slice C), the `data` block is `view` / `manage`. Reading the last dotted
+ * segment back therefore yields the same block the catalogue would have produced
+ * for the same surface.
+ *
+ * **Read from the catalogue's own set, not re-listed.** Before SD-4 the structural
+ * block was a single `structure` verb and this helper compared against the literal
+ * `'structure'`. That literal is now **false** — the block is five verbs — so the
+ * helper reads {@link STRUCTURAL_VERBS} from the catalogue, the one place the set
+ * is declared. A hand-copied verb list here would silently drift the moment the
+ * grammar changed (the same defect class the falsified-premise rule, rule 13, names:
+ * a premise copied elsewhere is corrected everywhere it was copied).
  */
 function blockFromFeature(feature: string): 'data' | 'structural' {
   const verb = feature.split('.').pop()
-  return verb === 'structure' ? 'structural' : 'data'
+  return verb !== undefined && (STRUCTURAL_VERBS as readonly string[]).includes(verb) ? 'structural' : 'data'
 }
 
 /**

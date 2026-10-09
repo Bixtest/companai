@@ -30,6 +30,8 @@ import {
   objectSurfaceIdFromFeatureId,
   permissionRecordsFor,
   recordSurface,
+  STRUCTURAL_ENFORCED_VERBS,
+  STRUCTURAL_VERBS,
   type PermissionSurface,
 } from '../catalogue'
 
@@ -38,17 +40,41 @@ beforeEach(() => {
 })
 
 describe('permissionRecordsFor — the two blocks (amended S2)', () => {
-  it('yields a data block (view/manage) and a structural block (structure)', () => {
+  it('yields a data block (view/manage) and the FULL per-verb structural block (S11)', () => {
     const surface: PermissionSurface = { id: 'auth.users', kind: 'object', owner: 'auth', source: 'declared' }
     const records = permissionRecordsFor(surface)
 
+    // SD-4 Slice C: the structural block is the S11 grammar — five verbs — not the
+    // single `structure` record it was before. The order is declaration order.
     expect(records.map((r) => r.feature)).toEqual([
       'auth.users.view',
       'auth.users.manage',
-      'auth.users.structure',
+      'auth.users.read',
+      'auth.users.add',
+      'auth.users.edit',
+      'auth.users.remove',
+      'auth.users.reference',
     ])
-    expect(records.map((r) => r.block)).toEqual(['data', 'data', 'structural'])
+    expect(records.map((r) => r.block)).toEqual([
+      'data',
+      'data',
+      'structural',
+      'structural',
+      'structural',
+      'structural',
+      'structural',
+    ])
     expect(records.every((r) => r.surfaceId === 'auth.users')).toBe(true)
+  })
+
+  it('the structural block is exactly the declared S11 verb set (no drift)', () => {
+    const surface: PermissionSurface = { id: 'auth.users', kind: 'object', owner: 'auth', source: 'declared' }
+    const structural = permissionRecordsFor(surface)
+      .filter((r) => r.block === 'structural')
+      .map((r) => r.feature.split('.').pop())
+    expect(structural).toEqual([...STRUCTURAL_VERBS])
+    // The enforced subset is the write verbs; read/reference are declared, not enforced.
+    expect(structural).toEqual(expect.arrayContaining([...STRUCTURAL_ENFORCED_VERBS]))
   })
 
   it('uses featurePrefix when supplied, so an entity matches the platform’s own ids', () => {
@@ -66,7 +92,11 @@ describe('permissionRecordsFor — the two blocks (amended S2)', () => {
     expect(features).toEqual([
       'entities.records.customers:customer_person.view',
       'entities.records.customers:customer_person.manage',
-      'entities.records.customers:customer_person.structure',
+      'entities.records.customers:customer_person.read',
+      'entities.records.customers:customer_person.add',
+      'entities.records.customers:customer_person.edit',
+      'entities.records.customers:customer_person.remove',
+      'entities.records.customers:customer_person.reference',
     ])
   })
 

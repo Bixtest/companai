@@ -82,7 +82,10 @@ describe('ensureCustomFieldDefinitions — the SD-1 permissions gate (CC-3)', ()
     // The gate yields the data block (`view`/`manage`) and the structural block.
     expect(features).toContain('a:one.foo.view')
     expect(features).toContain('a:one.foo.manage')
-    expect(features).toContain('a:one.foo.structure')
+    // SD-4 Slice C: the structural block is the S11 verb set, not one `structure` record.
+    expect(features).toContain('a:one.foo.add')
+    expect(features).toContain('a:one.foo.edit')
+    expect(features).toContain('a:one.foo.remove')
     expect(features).toContain('b:two.baz.view')
   })
 
