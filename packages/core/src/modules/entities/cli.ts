@@ -25,6 +25,7 @@ import {
   parseDecryptedFieldValue,
 } from '@open-mercato/shared/lib/encryption/tenantDataEncryptionService'
 import { resolveEntityIdFromMetadata } from '@open-mercato/shared/lib/encryption/entityIds'
+import { reservedEntityRefusal } from '@open-mercato/shared/lib/entities/system-entities'
 import { Organization } from '../directory/data/entities'
 import crypto from 'node:crypto'
 
@@ -182,6 +183,11 @@ const addField: ModuleCli = {
       const em = resolve('em') as any
 
       const entityId = (args.entity as string) || (args.e as string) || await ask('Entity ID (e.g., example:todo)')
+      // SD-2b: refuse a reserved system surface before any DB work — the CLI writes
+      // `CustomFieldDef` rows directly and, before this, never asked the gate, so
+      // `add-field --entity auth:user` was a way around the rule.
+      const reservedRefusal = reservedEntityRefusal(entityId)
+      if (reservedRefusal) throw new Error(reservedRefusal.reason)
       const isGlobal = args.global ? true : await askBool('Global (no organization)?', false)
       const orgId = isGlobal ? null : ((args.org as string) || (args.organizationId as string) || await ask('Organization ID'))
       const tenantId = isGlobal ? null : ((args.tenant as string) || (args.tenantId as string) || await ask('Tenant ID'))

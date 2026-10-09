@@ -9,6 +9,7 @@ import {
 import { applyStructureChangeGrant } from '@open-mercato/core/modules/auth/lib/permission-decision-grant'
 import { createLogger } from '@open-mercato/shared/lib/logger'
 import { fieldDefinitionSurface } from '../data/guards'
+import { reservedEntityRefusal } from '@open-mercato/shared/lib/entities/system-entities'
 
 const logger = createLogger('entities').child({ component: 'field-definitions' })
 
@@ -210,6 +211,17 @@ export async function ensureCustomFieldDefinitions(
   let created = 0
   let updated = 0
   let unchanged = 0
+
+  // SD-2b: refuse a reserved system surface before any work. This is the single
+  // non-request primitive behind seven callers (CLI, onboarding, install, …); it
+  // wrote `CustomFieldDef` rows directly and never asked the gate, so a custom
+  // field could attach to `auth:user` here even with the routes guarded. Refused
+  // for a dry run too — a dry run must report a refusal, not predict a success the
+  // real run would reject.
+  for (const set of sets) {
+    const reservedRefusal = reservedEntityRefusal(set.entity)
+    if (reservedRefusal) throw new Error(reservedRefusal.reason)
+  }
 
   // Prefetch every existing definition the batch could touch in a single query,
   // then index by composite key so the nested loop never issues per-field lookups.

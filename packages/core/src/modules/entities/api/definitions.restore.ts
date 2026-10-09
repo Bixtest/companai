@@ -21,6 +21,7 @@ import {
 import { fieldDefinitionSurface } from '../data/guards'
 import { isActiveColumn, writeFieldPermissionGrant } from '../lib/field-definitions'
 import { createExactDefinitionWhere, resolveDefinitionMutationScope } from '../lib/definition-scope'
+import { reservedEntityRefusal } from '@open-mercato/shared/lib/entities/system-entities'
 
 export const metadata = {
   POST: { requireAuth: true, requireFeatures: ['entities.definitions.manage'] },
@@ -33,6 +34,16 @@ export async function POST(req: Request) {
   try { body = await req.json() } catch { return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 }) }
   const { entityId, key } = body || {}
   if (!entityId || !key) return NextResponse.json({ error: 'entityId and key are required' }, { status: 400 })
+
+  // SD-2b: a custom field may not attach to (or be restored on) a reserved system
+  // surface. This route reactivates a `CustomFieldDef`, so like the batch route it
+  // must ask the gate — a reserved entity could otherwise be resurrected from a
+  // tombstone written before the gate existed. Same refusal, same status as the
+  // other write paths (400 — the entity is not a valid target).
+  const reservedRefusal = reservedEntityRefusal(entityId)
+  if (reservedRefusal) {
+    return NextResponse.json({ error: reservedRefusal.reason }, { status: 400 })
+  }
 
   const container = await createRequestContainer()
   const scope = await resolveDefinitionMutationScope({ auth, container, request: req })

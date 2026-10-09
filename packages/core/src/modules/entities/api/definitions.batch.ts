@@ -6,6 +6,7 @@ import { getAuthFromRequest } from '@open-mercato/shared/lib/auth/server'
 import { createLogger } from '@open-mercato/shared/lib/logger'
 import { CustomFieldDef, CustomFieldEntityConfig } from '@open-mercato/core/modules/entities/data/entities'
 import { customFieldEntityConfigSchema, upsertCustomFieldDefSchema } from '@open-mercato/core/modules/entities/data/validators'
+import { reservedEntityRefusal } from '@open-mercato/shared/lib/entities/system-entities'
 import { z } from 'zod'
 import { enforceCommandOptimisticLock } from '@open-mercato/shared/lib/crud/optimistic-lock-command'
 import { isCrudHttpError } from '@open-mercato/shared/lib/crud/errors'
@@ -177,6 +178,16 @@ export async function POST(req: Request) {
   const parsed = batchSchema.safeParse(body)
   if (!parsed.success) return NextResponse.json({ error: 'Validation failed', details: parsed.error.flatten() }, { status: 400 })
   const { entityId, definitions, fieldsets, singleFieldsetPerRecord } = parsed.data
+
+  // SD-2b: a custom field may not attach to a reserved system surface (`auth:user`,
+  // `auth:role`, `directory:tenant`, `auth:session`, …). The single route checks
+  // this (`definitions.ts`); the batch route validated the id only by regex and
+  // never called the gate, so it was a way around the rule. Same refusal, same
+  // status as the single route (400 — the entity is not a valid target).
+  const reservedRefusal = reservedEntityRefusal(entityId)
+  if (reservedRefusal) {
+    return NextResponse.json({ error: reservedRefusal.reason }, { status: 400 })
+  }
 
   const container = await createRequestContainer()
   const scope = await resolveDefinitionMutationScope({ auth, container, request: req })

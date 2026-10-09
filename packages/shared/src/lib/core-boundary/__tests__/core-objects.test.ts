@@ -24,7 +24,9 @@ import {
   coreObjects,
   isCoreObject,
   isCoreObjectKind,
+  loadCoreObjects,
 } from '../core-objects'
+import { DEFAULT_CORE_SETTINGS, SUBSTRATE_ENTITY_TYPES, type CoreSettings } from '../core-settings'
 
 describe('isCoreObject — the owner\'s named surface is core', () => {
   it('the roles-and-permissions manager (superadmin) is core', () => {
@@ -106,6 +108,47 @@ describe('the registry is exposed read-only and the kind set is closed', () => {
     expect(isCoreObjectKind('role')).toBe(true)
     expect(isCoreObjectKind('function')).toBe(false)
     expect(isCoreObjectKind(undefined)).toBe(false)
+  })
+})
+
+describe('the registry reads the SETTING — a tier change moves an object (SD-2b)', () => {
+  it('a role moved OUT of core is no longer core (the setting is honoured, not ignored)', () => {
+    // The seed makes superadmin core. An override that moves it to another tier
+    // must make isCoreObject false — this is the whole point of SD-2b, and it is
+    // what a registry that ignored the tier would get wrong.
+    const overridden: CoreSettings = {
+      ...DEFAULT_CORE_SETTINGS,
+      objectTier: { ...DEFAULT_CORE_SETTINGS.objectTier, role: { superadmin: 'platform_release' } },
+    }
+    expect(isCoreObject('role', 'superadmin')).toBe(true) // seed
+    expect(isCoreObject('role', 'superadmin', overridden)).toBe(false) // setting wins
+    expect(coreObjectFor('role', 'superadmin', overridden)).toBeNull()
+  })
+
+  it('a NEW role added to core IS core, and is listed by coreObjects() (no deploy)', () => {
+    const overridden: CoreSettings = {
+      ...DEFAULT_CORE_SETTINGS,
+      objectTier: {
+        ...DEFAULT_CORE_SETTINGS.objectTier,
+        role: { ...DEFAULT_CORE_SETTINGS.objectTier.role, billing_admin: 'core' },
+      },
+    }
+    expect(isCoreObject('role', 'billing_admin')).toBe(false) // seed: unknown
+    expect(isCoreObject('role', 'billing_admin', overridden)).toBe(true) // setting
+    const ids = coreObjects(overridden).map((o) => o.id).sort()
+    expect(ids).toEqual(['billing_admin', 'superadmin'])
+  })
+
+  it('loadCoreObjects reads the live setting through a reader', async () => {
+    const stored = {
+      objectTier: { table: {}, column: {}, relation: {}, function: {}, role: { ops_admin: 'core' } },
+      defaultTier: 'tenant_structural',
+      systemColumns: ['id'],
+      reservedEntityTypes: [...SUBSTRATE_ENTITY_TYPES, 'auth:user'],
+    }
+    const reader = { getValue: async () => stored }
+    const ids = (await loadCoreObjects(reader)).map((o) => o.id)
+    expect(ids).toEqual(['ops_admin'])
   })
 })
 

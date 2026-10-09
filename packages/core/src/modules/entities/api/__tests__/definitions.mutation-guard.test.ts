@@ -64,6 +64,11 @@ jest.mock('@open-mercato/shared/lib/encryption/entityIds', () => ({
 jest.mock('@open-mercato/shared/lib/entities/system-entities', () => ({
   isSystemEntitySelectable: () => true,
   filterSelectableSystemEntityIds: (ids: string[]) => ids,
+  // SD-2b: the batch route now refuses a reserved system surface before writing.
+  // This suite is about the mutation-guard lifecycle, so the refusal is a no-op
+  // here (nothing is reserved) — the refusal itself is proved in
+  // `definitions.batch.sd2b.test.ts`.
+  reservedEntityRefusal: () => null,
 }))
 
 jest.mock('@open-mercato/shared/lib/data/engine', () => ({
