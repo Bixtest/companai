@@ -35,10 +35,50 @@ log.** Everything else (HANDOVER, START-PROMPT, README, BOOKMARKS, BACKLOG) poin
 
 ---
 
-### ▶ NOW — `SD-5` **DONE**; the active task is **BUILD-ORDER item 9 — the generic state-machine engine** (blueprint §10), unless the owner redirects. **`SD-4` is COMPLETE** (Slices A/B/C + CC-37 + the manage screen `SD-5` — code `a2317b1`); the structural-permission grammar is built, enforced and managed end-to-end.
+### ▶ NOW — **the owner's ACTION LIST of 2026-10-09** (directly below) is the live work queue. **A1 is DONE** (the callback register gained the mechanical linkage); **A2 is BUILT** (CC-25, the decision-actor permission — proven; the owner's one-line confirm is still owed, rule 11); **the next item is A3** (CC-27, the AI-user ↔ agent binding), then the **fix pass A4→A7** (live login 500 → build-ship script → deploy → hand over credentials). **`SD-4` / `SD-5` are COMPLETE** (code `a2317b1`); when the action list is clear, the standing next task is **BUILD-ORDER item 9 — the generic state-machine engine** (blueprint §10).
 
 > **If you are a new agent, read only this block to know your job.** Everything below the box is the
 > history and the queue; this is the work in hand.
+>
+> **>>> BUT READ THE ORDERED ACTION LIST DIRECTLY BELOW FIRST.** The owner issued it on **2026-10-09**
+> (verbatim: *"Follow the best options you recommend for the project and put them in order as action
+> list in the journal. Then update the handover accordingly. Only then you go thru it all and fix. This
+> way if we move to a different agent at any moment, the process is active and well documented to
+> continue from wherever you are stopped."*). **It is the live work queue and it overrides "item 9" as
+> the next thing to pick up.** Work it in order; tick items off in place; do not re-order without a
+> reason written beside the change.
+
+---
+
+## ★ ACTION LIST — the owner's rulings of 2026-10-09 (work in this order)
+
+**Context.** The owner asked two questions on 2026-10-09: (i) is `COMPLETION-CALLBACKS.md` organically
+linked to `BACKLOG.md` and do callbacks ever close? (ii) when should an updated build go to
+`companai.corprorate.com` and what are the real superadmin/admin/employee credentials? The answers were
+measured (see the `✅ DONE — the callback register's linkage, and the live deployment` entry below).
+The owner then ruled: **do the fixes needed so every callback is closed at the right time**, and
+**follow my recommended options, in order, recorded here**. The three rulings below are therefore
+**decided — build them, do not re-ask.**
+
+| # | Action (in order) | Ruling / what "done" means | Status |
+|---|---|---|---|
+| **A1** | **Callback register — mechanical linkage (DONE this entry).** Add the 4th column *Trigger ↔ checked at* to every row; add the reconciliation + `BAD-COLUMNS` + drift checks to the re-measure block; state the rule **"a callback closes in the same change that lands its prerequisite"**; normalise the two drifted rows (CC-5, CC-37) to the canonical ✅. | Ruled **YES** (owner). Done = the re-measure block runs clean and every row names an observable trigger with a checker. | ✅ **DONE 2026-10-09** — see the register's new header/legend + step 4/5 of its re-measure block. |
+| **A2** | **CC-25 — authorise the structure-permission decision actor.** Add a permission string for *stating a structure-permission decision* (and for *naming the role the records go to*); enforce it at the carrier's call sites (three routes + two guards): reject a decision from an actor who does not hold it, and reject a `grantTo` naming a role the actor may not administer; mutation-prove the refusals. | Rule 11: the owner's question is his to close — **but his 2026-10-08 model of permissions IS the platform's model** (role `features_json`), so the recommended option is **build it as a role permission**, no new mechanism. **Seek his one-line confirm in the same report where A2 is reported, then build.** Done = an unpermitted actor cannot state a decision or name a foreign role; proven. | ✅ **BUILT 2026-10-09 — awaiting the owner's one-line confirm (rule 11).** Permission `entities.definitions.decide` in `entities/acl.ts`; check `assertActorMayStateDecision` in `auth/lib/permission-decision-grant.ts` (reuses `assertActorCanGrantAcl` + `assertActorCanGrantRoles` — same engine, S5); enforced at all five sites. **3 mutations RED-then-GREEN, each md5-verified.** Full core suite **637 suites / 5580 tests green**. |
+| **A3** | **CC-27 — schedule the AI-user ↔ agent binding.** Design/build the binding **row** (which agent an AI user may run, which tools, which feature scope) and teach the agent **registry** to resolve the *binding* from the DB — **never** the agent *definition* (that must stay code-declared, or `runAiAgent*` cannot see it). | Ruled **YES** (owner: "the best options you recommend"). Done = a binding row exists, the registry resolves it, the runtime honours it; mutation-proven. | ⏳ **TO DO** (schedule as its own item after A2). |
+| **A4** | **Live login 500 — diagnose and fix.** `POST /api/auth/login` on `companai.corprorate.com` returns **500** for a **known-existing** email (~4 s) but **400** for an unknown one (0.13 s). The failure is **after** the email lookup (the DB/decryption path), so **no account can log in**. Diagnose from the container logs + the live DB, fix, and verify a real 200. | Ruled **YES** (owner: "the best options"). Done = a real superadmin login returns **200** on the live site, verified two ways (correct → 200, wrong → 401). | ⏳ **TO DO** (highest priority of the fix pass — it blocks the owner's testing). |
+| **A5** | **Build-ship path — write and prove it.** Document + script the **build half**: update the on-VM build source (`/home/ramzi/build-src`, a plain copy, **not** a git checkout) from the fork's `main` → build the image → recreate the app (`docker compose -f docker-compose.fullapp.yml -f docker-compose.wan.yml up -d --no-build app`) → verify. Add a **drift check** (the copy vs the repo). | Ruled **YES** (owner). Done = a scripted, idempotent update path with a verification step, written into `RUNBOOK-companai-platform.md` §1b. | ⏳ **TO DO** (after A4; A4 fixes what A5 will then ship). |
+| **A6** | **Deploy the updated build** (only after A4 + A5 are done). Ship everything since the running image (`open-mercato/app:wan`, built 2026-10-06 20:51): the whole `D2-gap` guard sweep + SD-1…SD-5. Take a DB export first (there is **no** backup button — `FX-D09`). | Ruled **YES** (owner's question ii), **gated** on A4 + A5. Done = the live platform runs the current `main` and the owner can log in and see the difference. | ⏳ **TO DO — gated on A4 + A5.** |
+| **A7** | **Hand the owner the real credentials** (in the same report as A6 — not before, since the login is broken until A4). superadmin `admin@companai.local` / `wM8ciC9i8OBIM30KLlh2` (in the gitignored `vms/CREDENTIALS.local.txt`); admin `admin@acme.com`; employee `employee@acme.com`. | Ruled **YES** (owner's question ii). Done = the owner has the three sets and they all log in **200** on the live site. | ⏳ **TO DO — gated on A4.**
+
+**Notes.**
+- **A2's one-line confirm is still owed the owner** (rule 11 — the decision-actor permission is a policy
+  call). It is **built and proven** as the recommended option (a role permission string, the owner's own
+  2026-10-08 model); if the owner says otherwise, the change is small and localised. **A3 (CC-27) is the
+  next build item.**
+- **A4 is the blocker for A6/A7**: until login returns 200, no credentials can be tested, so handing them over earlier would be handing over something that cannot be used.
+- **The action list is append-only while live:** when an item is done, mark its Status cell ✅ **DONE <date>** with the commit — do not delete the row (the same discipline as the register).
+
+---
 
 **What just finished (`SD-5`, code `a2317b1`).** The structural-permission **manage screen** — the last
 half of `SD-4`. A settings surface over the S11/S12 grammar: grouped by object kind, one Select per

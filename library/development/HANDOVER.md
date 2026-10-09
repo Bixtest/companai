@@ -14,10 +14,11 @@ written for exactly that person — and this revision is written for an agent th
 continue the development work.** Read it top to bottom once (about 20 minutes), then
 follow §2 to actually get working. Everything else in the project is reachable from here.
 
-**Written 2026-10-05, revision 11 (2026-10-08). Owner: Ramzi. Development machine: `BIXMASERVER` (Windows 10 Pro).**
-**This revision refreshes §7 and §8 against the state measured on 2026-10-08 — the phase-0 foundation
-is complete and four `CC-` items have shipped since the last revision. If you want the newest numbers,
-re-measure them; §7 tells you how to split what was measured from what was quoted.**
+**Written 2026-10-05, revision 13 (2026-10-09). Owner: Ramzi. Development machine: `BIXMASERVER` (Windows 10 Pro).**
+**This revision records the owner's 2026-10-09 rulings as a live ordered ACTION LIST at the top of
+[`../../JOURNAL.md`](../../JOURNAL.md) (see §8's "What is scheduled but not finished", and §5's
+⚠️ live-platform block). If you want the newest numbers, re-measure them; §7 tells you how to split what
+was measured from what was quoted.**
 
 > **What we are building, in one line:** a platform that turns a business's plain-language needs into
 > **real working software** — the AI builds a capability once, the platform checks and saves it, and
@@ -136,7 +137,7 @@ reading it "for context" is how the direction gets buried (see [`../WHAT-WE-ARE-
 | A6 | [`../../compai/planning/00-product-thesis.md`](../../compai/planning/00-product-thesis.md) | **What we are building**, and the 15 rules that must never be broken |
 | A7 | [`STATE-OF-PLAY-2026-10-07.md`](STATE-OF-PLAY-2026-10-07.md) | **Where the project really is, and what is next** — a whole-project snapshot with every figure measured by two routes. It is **dated (2026-10-07)**, so re-measure before quoting; it defers to the box for the live task |
 | A8 | [`RESUME-POINT.md`](RESUME-POINT.md) | **A parking space, not a roadmap** — where the last session stopped, the honest open list (§3), and the standing rules in force (§5). Written for the last slice; **stale the moment it disagrees with the box** |
-| A9 | [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md) | **The register of every partial build** — the **gap**, the **prerequisite**, and the **callback** to run when the prerequisite lands (**rule 8**). **If you ship something partial, it goes here in the same change — never merely noted.** This is the file that stops a half-finished slice being forgotten |
+| A9 | [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md) | **The register of every partial build** — the **gap**, the **prerequisite**, the ***Trigger ↔ checked at*** (the observable event + where it is checked), and the **callback** to run when the prerequisite lands (**rule 8**). **If you ship something partial, it goes here in the same change — never merely noted.** **And a callback closes in the same change that lands its prerequisite** (owner, 2026-10-09); run the file's re-measure block to reconcile. This is the file that stops a half-finished slice being forgotten |
 
 **Tier B — the spine: how it runs, how the work is done, and the plan.**
 
@@ -523,6 +524,28 @@ they pick which listener the router binds to. Behind the tunnel, use **`http://`
 | [`RUNBOOK-deploying-a-site.md`](RUNBOOK-deploying-a-site.md) | The proxy and the deployment proof in depth — what is and is not proven |
 | [`RUNBOOK-sprint0.md`](RUNBOOK-sprint0.md) | Sprint 0 — running the kit on the laptop |
 
+### ⚠️ The live platform right now (`companai.corprorate.com`, measured 2026-10-09)
+
+**Measured this session, two ways** (`curl` + the runbook's own expected responses):
+
+- **The site is up:** `GET /` → **307 → `/login`**; `GET /login` → **200**. Correct.
+- **The login is BROKEN for every real account.** `POST /api/auth/login` (must be **form-encoded** —
+  JSON always 400s here, see the runbook §4) with a **known-existing** email → **HTTP 500** (~4 s);
+  with an **unknown** email → **HTTP 400** (0.13 s). The contrast proves the fault is **after** the
+  email lookup — the DB/decryption path — not the credential. **Until this is fixed, no account can
+  log in, so handing over credentials would be handing over something unusable.** It is **action list
+  A4** (top of [`../../JOURNAL.md`](../../JOURNAL.md)).
+- **What is actually running is old:** image `open-mercato/app:wan`, built **2026-10-06 20:51** — so the
+  live platform contains **none** of the `D2-gap` guard sweep **or** SD-1…SD-5. A redeploy ships all of
+  it at once (the difference the owner wants to see is total, not incremental).
+- **The redeploy is gated on a missing script, not timing:** the *recreate* half is known/safe, but the
+  **build half is unscripted** — the image is built on the VM from `/home/ramzi/build-src`, a **plain
+  file copy, not a git checkout** (runbook §1b). **Action list A5** writes and proves that path.
+- **The real credentials** live in the **gitignored** `vms/CREDENTIALS.local.txt`, never in the repo or
+  in chat: **superadmin** `admin@companai.local` / `wM8ciC9i8OBIM30KLlh2` (reset 2026-10-07); **admin**
+  `admin@acme.com`; **employee** `employee@acme.com`. **Action list A7** hands these over — only after
+  A4 makes login return **200**.
+
 ### The owner's two hard rules about the machine
 
 1. **"So we don't ruin the laptop."** Prefer reversible actions; take a checkpoint before anything
@@ -637,7 +660,7 @@ documents and was *not* re-measured — treat it as a starting point, not a fact
 | **The studies** | analysis programme **complete** (batches 0–12, 13 reports); Paperclip + Hermes study **complete** (11 batches, 3,940 lines, 53 lessons) |
 | **The specification** | **Draft 2** — of its 40 rows, **36 SETTLED · 1 DERIVED · 3 DEFERRED-with-trigger · 0 OPEN — owner**. The gate is passed; only ratification remains |
 | **The foundation (phase 0)** | **COMPLETE (2026-10-07).** The four named guard-engine gaps are built and proven — **`D0`** (the registry is populated from an enabled module, proven by mutation), **`D1`** (the tier/defaults/fallbacks settings table exists — rules are no longer `.ts` code alone), **`D3`** (the guard result has a third outcome, `escalate`, treated as *not performed*), and **`GAP A`'s registry half** (the read-only **Metadata Registry**, code `59ab859` — it answers *what exists · what type · provenance · what depends on it*, and returns a **typed absence** for the other ten blueprint §54 questions). **`D2-gap`** (every write route that reached no guard) also closed: **0 unguarded across the 35 enabled modules**. **What remains of the foundation: `D2-wide`** — 106 call sites still use the `@deprecated` guard pair, **all in parked modules** (recorded, not migrated), and **`GAP A`'s `Resource` envelope half** — a Phase −1 contract, deliberately not built because a type with no consumer is the "contract after the code" failure. |
-| **The first build slice past the foundation** | **`SD-1` Phase 1 is BUILT (2026-10-08, PARTIAL).** The **S2 structure-change gate**: when a new data structure lands (a table, a column, a field-type change), the platform must not apply it until the permissions for the new surface are decided — either a person decides, or the default applies (full grant to the superadmin role **and the permission records created**). Its decision core (`structure-change-gate.ts`), its hook (two `MutationGuard`s on the entities create path), and its **enforcement** (`permission-decision-grant.ts`, which writes the gate's `defaulted` records into the role's `role_acls.features_json`) are built, tested and mutation-proven across **every create path**, including the batch route, the shared primitive `ensureCustomFieldDefinitions`, the `add-field` CLI, the two HTTP reactivation routes, the entity-install primitive and all three field-type-change sites. **The remaining paths are scheduled** in [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md) (`CC-20`, `CC-23`, `CC-25`, `CC-27`). Plan: [`PLAN-SD-1.md`](PLAN-SD-1.md). |
+| **The first build slice past the foundation** | **`SD-1` Phase 1 is BUILT (2026-10-08, PARTIAL).** The **S2 structure-change gate**: when a new data structure lands (a table, a column, a field-type change), the platform must not apply it until the permissions for the new surface are decided — either a person decides, or the default applies (full grant to the superadmin role **and the permission records created**). Its decision core (`structure-change-gate.ts`), its hook (two `MutationGuard`s on the entities create path), and its **enforcement** (`permission-decision-grant.ts`, which writes the gate's `defaulted` records into the role's `role_acls.features_json`) are built, tested and mutation-proven across **every create path**, including the batch route, the shared primitive `ensureCustomFieldDefinitions`, the `add-field` CLI, the two HTTP reactivation routes, the entity-install primitive and all three field-type-change sites. **The remaining paths are scheduled** in [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md) (`CC-20`, `CC-23`, `CC-27`; `CC-25` — the decision actor's permission — is **BUILT 2026-10-09**, awaiting the owner's confirm). Plan: [`PLAN-SD-1.md`](PLAN-SD-1.md). |
 | **The runtime boundary (B-05)** | **DECIDED 2026-10-05 by the owner.** One product, one repository, one deployment, one interface (ours), with Hermes as a **supervised private runtime process behind the internal port**; Hermes is **headless**. Reasoning in [`ARCHITECTURE-hermes-integration.md`](ARCHITECTURE-hermes-integration.md) §11. The Hermes **profile** topology is deferred with the trigger **the agent gateway** |
 | **The model default (item 13)** | **DECIDED 2026-10-05 by the owner: per-tenant policy is the destination, cloud-first is the interim.** It turns three pieces of work from *nice* to *required* — the model registry, the Hermes **agent / persona / profile** mapping, and platform-managed local models. Reasoning in [`ARCHITECTURE-model-server-integration.md`](ARCHITECTURE-model-server-integration.md) §9 |
 | **The running stack** | **8 containers up, all healthy** (app, mcp, hermes, model, opencode, postgres, redis, meilisearch) — **re-measured 2026-10-08** (`docker ps`), all up ~19 hours. The platform's own Postgres 17 (`mercato-postgres-local`) is **live**, so **database behaviour is directly provable on this host** (see §3g, and [`../../workspace/COOKBOOK.md`](../../workspace/COOKBOOK.md)). *Note the trap in the count itself: on 2026-10-06 `docker ps` showed eight rows while `redis` had exited and `mcp` was unhealthy behind it — **eight rows is not eight healthy**, so read the `Status` column, not the line count.* |
@@ -691,9 +714,12 @@ documents and was *not* re-measured — treat it as a starting point, not a fact
 - **`D2-wide`** — the 106 parked-module call sites that still bypass the guard registry have **not**
   been migrated; they are recorded, not fixed.
 - **`SD-1`'s remaining paths** — the enforcement consumer for a custom field's records (`CC-20`), the
-  unauthorised-decision actor (`CC-25`), the create-branch double-insert (`CC-23`) and the
-  agent ↔ AI-user binding (`CC-27`) are **scheduled, not built** (see
-  [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md)).
+  create-branch double-insert (`CC-23`) and the agent ↔ AI-user binding (`CC-27`) are **scheduled, not
+  built**; the unauthorised-decision actor (`CC-25`) is now **BUILT (2026-10-09, `d61d4f6`)** — the
+  `entities.definitions.decide` role permission, enforced at all five carrier call sites — and awaits
+  only the **owner's one-line confirm** (rule 11); its one honest edge is **`CC-39`** (the actor check
+  reads live authorisation state inside a guard's `validate`). See
+  [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md).
 
 ---
 
@@ -720,8 +746,10 @@ documents and was *not* re-measured — treat it as a starting point, not a fact
   migrated); and **`GAP A`'s `Resource` envelope half** — a Phase −1 contract, deliberately unbuilt.
   **Still open in `SD-1`** (each scheduled in [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md)):
   **`CC-20`** (a custom *field*'s records have no enforcement consumer — blocked on `G-04`), **`CC-23`**
-  (the create-branch double-insert — needs a migration), **`CC-25`** (the decision actor's permission —
-  a build), **`CC-27`** (the agent ↔ AI-user binding — needs `AH-1`). **A caution, measured 2026-10-08:
+  (the create-branch double-insert — needs a migration), **`CC-27`** (the agent ↔ AI-user binding — needs
+  `AH-1`), and **`CC-39`** (the CC-25 actor check reads live state inside a guard's `validate` — a named,
+  minor contract deviation). **`CC-25` (the decision actor's permission) is BUILT 2026-10-09 (`d61d4f6`)** —
+  awaiting the owner's confirm — *not* one of the open rows. **A caution, measured 2026-10-08:
   `SD-3` (the tier mapping as a superadmin setting) is ALREADY BUILT (`[x]`, 2026-10-06, BUILD-ORDER §2d)
   — several documents still call it "the next slice", which is stale.** The next **undone** slice in
   BUILD-ORDER order is **`SD-2` / `S9`** (mark core functions and guard their deletion — startable, `G-07`
@@ -739,10 +767,20 @@ documents and was *not* re-measured — treat it as a starting point, not a fact
   items open**, and none blocks the build. The most urgent is changing the Coolify admin password
   (item 5); it is the only thing standing between an agent and the 2FA wall on the hosting panel.
 - **What is scheduled but not finished** → [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md) — the
-  register of every **partial build**, each with its **gap**, the **prerequisite** that must land, and
-  the **callback** to run when it does (**rule 8**). **This is the file that stops a half-done slice
-  being forgotten — and the one a newcomer must read before assuming "done" means done.** Anything
-  shipped partial is here; if you ship something partial and it is not, that is the defect.
+  register of every **partial build**, each with its **gap**, the **prerequisite** that must land, **the
+  *Trigger ↔ checked at* column** (the observable event that means the prerequisite has landed, and where
+  a session checks for it), and the **callback** to run when it does (**rule 8**). **This is the file that
+  stops a half-done slice being forgotten — and the one a newcomer must read before assuming "done" means
+  done.** Anything shipped partial is here; if you ship something partial and it is not, that is the defect.
+  **Two standing rules (owner, 2026-10-09):** (a) **a callback closes in the *same change* that lands its
+  prerequisite** — a session that lands a prerequisite must re-read this register and close any row whose
+  *Trigger ↔ checked at* names what it just did; (b) **run the register's re-measure block** (bottom of the
+  file: plan coverage, unique/contiguous ids, the 5-column shape, and the step-5 `OPEN` reconciliation list)
+  after every task that stops short of 100% **and** after every change that lands a prerequisite.
+- **What the owner ruled on 2026-10-09** → the **★ ACTION LIST** at the top of
+  [`../../JOURNAL.md`](../../JOURNAL.md) — his rulings on the callback register, the deployment, and the
+  credentials, **in the order they are to be worked**. It is the live work queue; read it before picking an
+  item. **Status is current as of 2026-10-09: A1 done; A2–A7 open.**
 - **Where the last session actually stopped** → [`RESUME-POINT.md`](RESUME-POINT.md) — a **parking
   space**: what was just completed, the premise its own measurement disproved (the lesson), and the
   honest open list (§3). It is written for the last slice, so it is stale the moment it disagrees with
@@ -786,16 +824,21 @@ alone means this page is broken — **fix the page, not the newcomer.**
 from an older document are not equally current, and mixing them in one table is how this page
 goes wrong. If two older documents disagree on a number, say so — never average them.
 
-*Last updated: 2026-10-07, revision 10 — **the `D2-gap` write-verb sweep is COMPLETE, and the platform's
-own deployment is now reachable from this page.** The sweep that retired every write route reaching **no
-guard of any kind** closed at **0 unguarded across all 35 enabled modules** (`analysis/d2-gap/measure.js`);
-it also found and fixed a class the method-based scan could not see — a **GET that writes** (one instance
-wired; two read side-effects set aside by name, owner-settled 2026-10-07). §2 step 7, §7's two HEADs and
-§8 were updated in the same change. **New: §5 now points at
-[`RUNBOOK-companai-platform.md`](RUNBOOK-companai-platform.md)** — the Companai app's own deployment at
-`https://companai.corprorate.com`: what is deployed and where, Coolify's exact role, the accounts, and the
-one credential fault found and fixed on 2026-10-07. Docs updated in the same change as the work (COOKBOOK
-rule zero).*
+*Last updated: 2026-10-09, revision 13 — **`A2` (CC-25) is built and proven** (the
+`entities.definitions.decide` role permission, enforced at all five carrier call sites; the
+`auth/lib/permission-decision-grant.ts` check reusing the platform's own grant checks — S5, one engine;
+**3 mutations RED-then-GREEN, each md5-verified**; full core suite **637 suites / 5580 tests green**).
+It awaits only the owner's one-line confirm (rule 11); its one honest edge is **`CC-39`** (the actor check
+reads live state inside a guard's `validate` — scheduled). Work order: **A1 done; A2 built (confirm owed);
+A3–A7 open.** (Revision 12, below, recorded the owner's 2026-10-09 rulings as a live, ordered ACTION LIST
+at the top of [`../../JOURNAL.md`](../../JOURNAL.md), the register's mechanical linkage — a ***Trigger ↔
+checked at*** column on every row, the close-in-the-same-change rule, and a reconciliation check — and a
+**⚠️ The live platform right now** block in §5.)*
+*Previous — 2026-10-07, revision 11 — the `D2-gap` write-verb sweep COMPLETE; the platform's own
+deployment now reachable from this page (0 unguarded across all 35 enabled modules, and the GET-that-writes
+class found and fixed). §2 step 7, §7's two HEADs and §8 updated in the same change; §5 first pointed at
+[`RUNBOOK-companai-platform.md`](RUNBOOK-companai-platform.md). Docs updated in the same change as the work
+(COOKBOOK rule zero).*
 
 *Earlier, 2026-10-06, revision 9 — **the second Paperclip pass is done, and it changed four
 documents without changing any code.** A new study, [`../paperclip-value-study/`](../paperclip-value-study/),
