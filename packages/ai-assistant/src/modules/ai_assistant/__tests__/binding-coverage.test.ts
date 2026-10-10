@@ -23,13 +23,33 @@ import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { join, relative, sep } from 'node:path'
 
 const MODULE_ROOT = join(__dirname, '..')
-const API_ROOT = join(MODULE_ROOT, 'api', 'ai')
 
 /** Routes that dispatch an agent and MUST therefore consult the binding. */
 const AGENT_DISPATCH_ROUTES = [
   'api/ai/chat/route.ts',
   'api/ai/run-object/route.ts',
 ].map((p) => p.split('/').join(sep))
+
+/**
+ * The runtime file that DEFINES the dispatch entry points — it is the thing
+ * being reached, not a caller, so the module-wide scan excludes it.
+ */
+const RUNTIME_DEFINITION = join('lib', 'agent-runtime.ts')
+
+/**
+ * `CC-55` hardening — dispatch sites OUTSIDE the gated routes that call the
+ * runtime but do NOT consult the binding. Each is a KNOWN gap with a scheduled
+ * callback; the module-wide scan below fails if a NEW un-gated site appears, and
+ * fails if one of these disappears (so the list cannot go stale).
+ *
+ * - `lib/business-ir-author.ts` — `authorBusinessQueryIr` calls
+ *   `runAiAgentObject` with the fixed `business_ir.query_author` agent and no
+ *   `boundScope`. It is an in-process helper with **no caller today** (not routed,
+ *   not in the barrel); wiring a scope needs the caller's `AuthContext`, which the
+ *   helper does not receive. Scheduled as **`CC-57`** (thread the bound scope into
+ *   every in-process dispatch site).
+ */
+const IN_PROCESS_DISPATCH_SITES = ['lib/business-ir-author.ts'].map((p) => p.split('/').join(sep))
 
 /** Markers that identify "this file dispatches an agent". */
 const DISPATCH_MARKERS = [
@@ -38,6 +58,9 @@ const DISPATCH_MARKERS = [
   'runAiAgentText',
   'runAiAgentObject',
 ]
+
+/** Matches an actual CALL of a dispatch entry point (name followed by `(`). */
+const DISPATCH_CALL_RE = /\brunAiAgent(?:Text|Object)\s*\(/
 
 function walk(dir: string): string[] {
   const out: string[] = []
@@ -62,6 +85,11 @@ function bodyAfterImports(source: string): string {
     if (/^\s*import\s/.test(line) || /^\s*}\s*from\s/.test(line)) lastImport = i
   })
   return lines.slice(lastImport + 1).join('\n')
+}
+
+/** Removes block and line comments so a name in a comment is not a false hit. */
+function stripComments(source: string): string {
+  return source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/[^\n]*/g, '$1')
 }
 
 describe('CC-27 / B6 — every agent dispatch site applies the binding gate', () => {
@@ -92,22 +120,35 @@ describe('CC-27 / B6 — every agent dispatch site applies the binding gate', ()
     expect(read(rel)).toMatch(/agent_not_bound/)
   })
 
-  it('nothing under api/** dispatches an agent by a name the marker list misses', () => {
-    // The list above is only as good as the names in it. This test insists the
-    // agent runtime be reached through ONE of the marker names — so a new route
-    // cannot smuggle a dispatch in via an alias (`runAiAgentText`,
-    // `runAiAgentObject`) that was never added to the list.
-    const allApi = walk(API_ROOT)
+  it('CC-55 — every in-process dispatch site is either GATED or a named CC-57 gap', () => {
+    // Broadened in CC-55: the scan covers the WHOLE module, not just `api/ai/**`,
+    // so an in-process dispatcher (a lib helper calling `runAiAgentObject`) is no
+    // longer invisible. A file that CALLS a dispatch entry point and is neither a
+    // gated route nor the runtime definition itself must be a KNOWN, named gap.
+    const all = walk(MODULE_ROOT)
     const offenders: string[] = []
 
-    for (const abs of allApi) {
+    for (const abs of all) {
       const rel = relative(MODULE_ROOT, abs)
       if (AGENT_DISPATCH_ROUTES.includes(rel)) continue
-      const body = bodyAfterImports(readFileSync(abs, 'utf8'))
-      if (DISPATCH_MARKERS.some((m) => body.includes(m))) offenders.push(rel)
+      if (rel === RUNTIME_DEFINITION) continue
+      const body = stripComments(bodyAfterImports(readFileSync(abs, 'utf8')))
+      if (DISPATCH_CALL_RE.test(body)) offenders.push(rel)
     }
 
-    expect(offenders).toEqual([])
+    // The offenders are EXACTLY the known, scheduled in-process sites. A new one
+    // (a real coverage hole) fails here; a stale allowlist entry also fails.
+    expect(offenders.sort()).toEqual([...IN_PROCESS_DISPATCH_SITES].sort())
+  })
+
+  it('CC-55 — every named in-process gap still exists and is genuinely un-gated', () => {
+    for (const rel of IN_PROCESS_DISPATCH_SITES) {
+      const source = read(rel)
+      // It must still dispatch (otherwise the entry is stale and must be removed)…
+      expect(stripComments(bodyAfterImports(source))).toMatch(DISPATCH_CALL_RE)
+      // …and it must NOT consult the binding yet (that is the CC-57 work).
+      expect(source).not.toMatch(/resolveAgentBinding/)
+    }
   })
 
   it('the runtime-module marker list is exactly the runtime\'s real dispatch exports', () => {

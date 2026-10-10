@@ -9,7 +9,7 @@ import type { RbacService } from '@open-mercato/core/modules/auth/services/rbacS
 import { llmProviderRegistry } from '@open-mercato/shared/lib/ai/llm-provider-registry'
 import { loadAgentRegistry } from '../../../lib/agent-registry'
 import { checkAgentPolicy, type AgentPolicyDenyCode } from '../../../lib/agent-policy'
-import { resolveAgentBinding } from '../../../lib/agent-binding'
+import { resolveAgentBinding, computeBoundRunScope } from '../../../lib/agent-binding'
 import {
   runAiAgentText,
   resolveLoopBudgetPreset,
@@ -498,6 +498,10 @@ export async function POST(req: NextRequest): Promise<Response> {
       )
     }
 
+    // CC-55 — apply the binding's NARROWING (tools INTERSECT, features UNION) to
+    // the run. `binding.bound` is always true here, so the scope is well-typed.
+    const boundScope = computeBoundRunScope({ agentId, binding })
+
     const agentDef = decision.agent
 
     // --- Phase 4a: validate runtime override query params ---
@@ -689,6 +693,7 @@ export async function POST(req: NextRequest): Promise<Response> {
       debug: bodyResult.data.debug,
       sessionId: bodyResult.data.sessionId ?? null,
       conversationId: bodyResult.data.conversationId ?? null,
+      boundScope,
       authContext: {
         tenantId: auth.tenantId ?? null,
         organizationId: auth.orgId ?? null,

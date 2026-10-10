@@ -8,7 +8,7 @@ import { createRequestContainer } from '@open-mercato/shared/lib/di/container'
 import type { RbacService } from '@open-mercato/core/modules/auth/services/rbacService'
 import { loadAgentRegistry } from '../../../lib/agent-registry'
 import { checkAgentPolicy, type AgentPolicyDenyCode } from '../../../lib/agent-policy'
-import { resolveAgentBinding } from '../../../lib/agent-binding'
+import { resolveAgentBinding, computeBoundRunScope } from '../../../lib/agent-binding'
 import { runAiAgentObject } from '../../../lib/agent-runtime'
 import { AgentPolicyError } from '../../../lib/agent-tools'
 
@@ -179,12 +179,17 @@ export async function POST(req: NextRequest): Promise<Response> {
       )
     }
 
+    // CC-55 — apply the binding's NARROWING (tools INTERSECT, features UNION) to
+    // the run. `binding.bound` is always true here, so the scope is well-typed.
+    const boundScope = computeBoundRunScope({ agentId: bodyResult.data.agent, binding })
+
     const result = await runAiAgentObject({
       agentId: bodyResult.data.agent,
       input: bodyResult.data.messages as unknown as UIMessage[],
       attachmentIds: bodyResult.data.attachmentIds,
       pageContext: bodyResult.data.pageContext,
       modelOverride: bodyResult.data.modelOverride,
+      boundScope,
       authContext: {
         tenantId: auth.tenantId ?? null,
         organizationId: auth.orgId ?? null,

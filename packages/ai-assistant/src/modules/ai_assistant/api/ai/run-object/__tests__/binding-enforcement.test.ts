@@ -131,4 +131,51 @@ describe('POST /api/ai_assistant/ai/run-object — CC-27 binding enforcement', (
     expect(findBindingMock).not.toHaveBeenCalled()
     expect(runAiAgentObjectMock).toHaveBeenCalled()
   })
+
+  // --- CC-55: the route passes the NARROWED bound scope into the runtime ---
+
+  it('CC-55 — PASSES the binding-narrowed boundScope to the runtime', async () => {
+    seedAgentRegistryForTests([
+      makeAgent({
+        id: 'mod.agent',
+        moduleId: 'mod',
+        allowedTools: ['mod.a', 'mod.b'],
+      }),
+    ])
+    authMock.mockResolvedValue({
+      sub: 'ai_worker:key-1',
+      tenantId: 'tenant-1',
+      orgId: 'org-1',
+    })
+    findBindingMock.mockResolvedValue({ toolAllowlist: ['mod.a'], requiredFeatures: [] })
+
+    const res = await POST(buildRequest(VALID_BODY) as never)
+    expect(res.status).toBe(200)
+
+    const arg = runAiAgentObjectMock.mock.calls[0][0] as {
+      boundScope?: { allowedTools: string[]; requiredFeatures: string[] }
+    }
+    expect(arg.boundScope).toBeDefined()
+    expect(arg.boundScope!.allowedTools).toEqual(['mod.a'])
+    expect(arg.boundScope!.requiredFeatures).toEqual([])
+  })
+
+  it('CC-55 — a HUMAN run gets the agent’s FULL scope (nothing narrowed)', async () => {
+    seedAgentRegistryForTests([
+      makeAgent({
+        id: 'mod.agent',
+        moduleId: 'mod',
+        allowedTools: ['mod.a', 'mod.b'],
+      }),
+    ])
+    authMock.mockResolvedValue({ sub: 'user-1', tenantId: 'tenant-1', orgId: 'org-1' })
+
+    const res = await POST(buildRequest(VALID_BODY) as never)
+    expect(res.status).toBe(200)
+
+    const arg = runAiAgentObjectMock.mock.calls[0][0] as {
+      boundScope?: { allowedTools: string[]; requiredFeatures: string[] }
+    }
+    expect(arg.boundScope).toEqual({ allowedTools: ['mod.a', 'mod.b'], requiredFeatures: [] })
+  })
 })

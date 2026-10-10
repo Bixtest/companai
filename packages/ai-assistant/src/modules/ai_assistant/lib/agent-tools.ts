@@ -12,6 +12,7 @@ import {
   resolveEffectiveMutationPolicy,
   type AgentPolicyDenyCode,
 } from './agent-policy'
+import { hasRequiredFeatures } from './auth'
 import { toolRegistry } from './tool-registry'
 import { toSafeZodSchema } from './schema-utils'
 import { prepareMutation } from './prepare-mutation'
@@ -71,6 +72,19 @@ export interface ResolveAiAgentToolsInput {
    * per-tenant/org uniqueness within the TTL window.
    */
   conversationId?: string | null
+  /**
+   * `CC-55` — the **narrowing-only** bound scope resolved from an
+   * `ai_agent_bindings` row (`computeBoundRunScope`). When supplied:
+   *
+   * - the tool set built for the run is `agent.allowedTools ∩ allowedTools`
+   *   (a binding may never add a tool the agent did not declare — `B3'a`);
+   * - `requiredFeatures` is enforced **in addition to** the agent's own
+   *   (`B3'b`): the acting principal must hold the union or the run is denied.
+   *
+   * Omitted ⇒ byte-identical to the pre-`CC-55` behaviour (humans, and any
+   * caller that has no binding).
+   */
+  boundScope?: { allowedTools: string[]; requiredFeatures: string[] }
 }
 
 /**
@@ -331,6 +345,32 @@ export async function resolveAiAgentTools(
   }
 
   const { agent } = agentDecision
+
+  // CC-55 — apply the bound scope (NARROWING-ONLY). A binding may never widen:
+  // the run's tool set is the INTERSECTION with the agent's declared tools, and
+  // the binding's required features are enforced IN ADDITION to the agent's.
+  const boundScope = input.boundScope
+  const effectiveAllowedTools = boundScope
+    ? agent.allowedTools.filter((tool) => boundScope.allowedTools.includes(tool))
+    : agent.allowedTools
+  if (boundScope) {
+    const effectiveRequiredFeatures = Array.from(
+      new Set([...(agent.requiredFeatures ?? []), ...boundScope.requiredFeatures]),
+    )
+    if (
+      !hasRequiredFeatures(
+        effectiveRequiredFeatures,
+        input.authContext.features,
+        input.authContext.isSuperAdmin,
+      )
+    ) {
+      throw new AgentPolicyError(
+        'agent_features_denied',
+        `The binding for agent "${input.agentId}" requires features the acting principal does not hold: ${effectiveRequiredFeatures.join(', ')}`,
+      )
+    }
+  }
+
   const tools: Record<string, Tool<unknown, unknown>> = {}
   const uiPartQueue = createAiUiPartQueue()
   const effectiveMutationPolicy = resolveEffectiveMutationPolicy(
@@ -341,7 +381,7 @@ export async function resolveAiAgentTools(
   const canInterceptMutations =
     effectiveMutationPolicy !== 'read-only' && typeof input.container !== 'undefined'
 
-  for (const toolName of agent.allowedTools) {
+  for (const toolName of effectiveAllowedTools) {
     const toolDecision = checkAgentPolicy({
       agentId: input.agentId,
       authContext: policyAuth,
@@ -400,5 +440,17 @@ export async function resolveAiAgentTools(
     }
   }
 
-  return { agent, tools, uiPartQueue }
+  // CC-55 — surface the narrowed tool set on the returned agent so EVERY
+  // downstream consumer (system prompt, loop active-tools, mutation
+  // interceptor) sees the same binding-restricted view. When the scope removes
+  // nothing (a human, or a binding that narrows no tool) the ORIGINAL agent
+  // object is returned, so the pre-CC-55 path is byte-identical (B4).
+  return {
+    agent:
+      effectiveAllowedTools.length === agent.allowedTools.length
+        ? agent
+        : { ...agent, allowedTools: effectiveAllowedTools },
+    tools,
+    uiPartQueue,
+  }
 }

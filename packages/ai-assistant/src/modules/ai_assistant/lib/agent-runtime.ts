@@ -197,6 +197,14 @@ export interface RunAiAgentTextInput {
    * Phase 4 of spec `2026-04-28-ai-agents-agentic-loop-controls`.
    */
   emitLoopTrace?: boolean
+  /**
+   * `CC-55` — the narrowing-only bound scope resolved from an
+   * `ai_agent_bindings` row (`computeBoundRunScope`). Forwarded verbatim to
+   * `resolveAiAgentTools`, which intersects the tool set and enforces the
+   * binding's required features in addition to the agent's. Omitted ⇒
+   * byte-identical to the pre-`CC-55` behaviour.
+   */
+  boundScope?: { allowedTools: string[]; requiredFeatures: string[] }
 }
 
 /**
@@ -1453,6 +1461,7 @@ export async function runAiAgentText(input: RunAiAgentTextInput): Promise<Respon
     mutationPolicyOverride,
     container: input.container,
     conversationId: effectiveSessionId,
+    boundScope: input.boundScope,
   })
 
   const resolvedAttachments = await resolveAttachmentPartsForAgent({
@@ -1787,6 +1796,14 @@ export interface RunAiAgentObjectInput<TSchema = ZodTypeAny> {
   generateObject?: (
     options: PreparedAiSdkObjectOptions,
   ) => Promise<GenerateObjectResult<unknown> | StreamObjectResult<unknown, unknown, unknown>>
+  /**
+   * `CC-55` — the narrowing-only bound scope resolved from an
+   * `ai_agent_bindings` row (`computeBoundRunScope`). Forwarded verbatim to
+   * `resolveAiAgentTools`, which intersects the tool set and enforces the
+   * binding's required features in addition to the agent's. Omitted ⇒
+   * byte-identical to the pre-`CC-55` behaviour.
+   */
+  boundScope?: { allowedTools: string[]; requiredFeatures: string[] }
 }
 
 export type RunAiAgentObjectGenerateResult<TSchema> = {
@@ -1893,6 +1910,7 @@ export async function runAiAgentObject<TSchema = unknown>(
     requestedExecutionMode: 'object',
     mutationPolicyOverride,
     container: input.container,
+    boundScope: input.boundScope,
   })
 
   const resolvedOutput = resolveStructuredOutput(agent, input.output)
