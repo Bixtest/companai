@@ -3311,3 +3311,40 @@ cannot tell the two implementations apart.
 half — check the inputs can distinguish), L93 (a defence you never tested is one a refactor may delete), rule 9a
 (own the code you touch — the critic found it; I fixed it and re-proved it), the `check-the-premise-before-the-
 blanket-fix` discipline (re-measure the premise of a claim before trusting it).*
+
+---
+
+## L100 — a **headline number that is incremented by hand** drifts away from the boxes it claims to be derived from; the *sections nobody re-opens* go stale first
+
+**What happened.** `platform_points.md` opens with a single headline number — *"72 of 321 units"* (it read
+*"73 of 330"*). The file's own §L states the number is **derived from the ticked boxes, never typed**, and
+gives the exact counting rule. Over several sessions the headline was **bumped by hand** as rows closed
+(`68/329 → 70/329 → 71/330 → 72/330 → 73/330`) instead of the check being re-run. When the owner asked for a
+forensic sweep and the count was actually **re-derived**, the boxes summed to **72 / 321**, not 73 / 330.
+Two *section* figures had been stale the entire time — §H was kept at `0 done` even after its `P10` line was
+ticked, and §K was kept at `3/23` even though §K has **13 lines and 1 tick** (the "23" had counted *ids named
+inside one bullet* — `N-16/17/18/19`, `V-09…V-13/S-04` — as if each were its own line). §B's unit count was
+one short.
+
+**How it was caught.** The owner refused to accept the number on faith and asked for a forensic re-check;
+the count was then derived **twice by two independent routes** (a local script, and a separate blind
+hostile-critic agent) and **both returned 72 / 321**.
+
+**Why it is dangerous.** A derived number is only as trustworthy as the last time it was *actually derived*.
+Bumping a total by hand looks harmless — it is one and the same as the real delta **only if every section is
+still current**, and the sections that no one re-opens (the ones whose work is *done* and therefore
+"finished") are exactly the ones that go stale unnoticed. The headline then becomes a **typed** number
+wearing the badge of a derived one — and a reader who trusts the badge propagates the error into handovers,
+starter prompts and status pages.
+
+**The rule.** A number that claims to be derived must be **re-derived, in full, in the same change that
+changes any box** — never incremented. If a file says "computed, never typed", the derivation must be
+**reproducible from the raw file** (state the rule, then show the per-section sum), and any session that
+edits a tick re-runs it. When a derived figure is found wrong, **fix it everywhere it was copied** (rule 13)
+— and record *why* it drifted, so the reason is not rediscovered. This is the standing-instruction version of
+`N-20`: one fact, one canonical copy — and the copy must be *computed*, not remembered.
+
+*Cross-ref: `N-20` (one fact, one canonical copy; two stale copies of one count is a defect), rule 13
+(re-measure premises; correct a falsified premise everywhere it was copied), §L `derive-counts` in
+`platform_points.md` (the rule this lesson protects), L1 (a confident label is not an inspection — the
+headline's "%" badge is a label; the boxes are the inspection).*

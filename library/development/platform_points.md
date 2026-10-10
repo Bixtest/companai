@@ -21,7 +21,7 @@ platform skeleton is built **before** business capabilities — because the visi
 
 ## THE ONE NUMBER
 
-> ### **22% done** — 73 of 330 units · weighted ≈23% · **±4**
+> ### **22% done** — 72 of 321 units · weighted ≈23% · **±4**
 >
 > **But read this next line carefully — it is the honest headline.** The work that is *done* is
 > skewed **high** in the stack: the AI-first loop (the hard, interesting part) is largely built, while the
@@ -725,42 +725,39 @@ The PROGRESS table and the per-section counts are **computed from the boxes**, n
 rule, in one place:
 
 1. Walk each section `A`–`K` (section `L` is this ledger — it holds no points).
-2. A line starting `- ` is a **whole point** — count it once (it has no `▸`).
-3. A line starting `- ` **with** a `▸ n/N` is a **split parent** — do **not** count it; count its sub-points.
-4. A line starting `-   - ` is a **sub-point** — count it once.
-5. `units = whole points + sub-points`. `done =` the units carrying `☑`. `left = units − done`.
+2. A line starting `- ` is a **whole point** — count it once as a **unit** (it has no `▸`).
+3. A line starting `- ` **with** a `▸ n/N` is a **split parent** — it counts as a **unit**, but its
+   **ticks live on its children**, so it is **never counted as `done`** (count its sub-points for that).
+4. A line starting `-   - ` is a **sub-point** — count it once as a **unit**.
+5. `units = whole points + split parents + sub-points`. `done =` the whole points and sub-points carrying
+   `☑` (a ticked split parent adds **no** `done` — its children carry it). `left = units − done`.
 6. Coverage `% = done ÷ units`. Build-weighted `% = Σ(done×w) ÷ Σ(units×w)` with `w` the section's effort
    weight (the rubric table above).
 
-**Re-run the check in this session (2026-10-10, `CC-46` completion) gave:** A 10/31 · B **5**/37 ·
-C 14/28 · D 1/39 · E 2/18 · F 0/14 · G **33**/74 · H 0/13 · I 5/35 · J 0/18 · K 3/23 · **TOTAL 73 / 330 = 22%**
-(build-weighted ≈23%).
-**This replaced a line that read 71 / 330** (with B 3/37) — re-derived from the boxes this session, because
-row 15's re-measure **verified the search engine IS built** (`packages/search/src/indexer/search-indexer.ts`
-+ `strategies/{token,fulltext,vector}.strategy.ts` + the global-search route/UI; suite 26/269 green), so
-`P10a` ("a strong search engine") flipped **☐ → ☑** → **B +1 done** (`P10a` is a sub-point, so it counts;
-its parent `P10 ▸ 1/2` is not itself counted). Net **71 → 72**. *(Row 15 itself STAYS 🟡 — its absolute
-claim "every read permission-filtered at the data layer" is NOT met; its remainder is `CC-46`. Only the
-engine sub-point `P10a` moved, which is a true, measured tick; `P10b` then also flipped ☑ via `CC-46` below.)*
-**Then 72 → 73 in the SAME session** — `CC-46` (row 15's ACL-coverage remainder) was **built**: all **53**
-searchable entities now declare `aclFeatures` (47 added; 6 `customers` entities already had it), each naming an
-existing feature, and a new coverage test (`packages/cli/.../search-acl-coverage.test.ts`) fails the build when a
-searchable entity is added without one → `P10b` (a sub-point) flipped **☐ → ☑** → **B 4/37 → 5/37**, net **72 → 73**.
-*(`P10b` is a sub-point of the `P10 ▸ 2/2` parent, which is not itself counted. Row 15 STAYS 🟡 — its ABSOLUTE
-claim needs the human-CRUD-list gate too, now `CC-47`.)*
-**This replaced a line that read 70 / 329** (with B 2/36) — re-derived from the boxes this session, because
-row 14's re-measure **split** the overloaded `P4` id into two honest units: the **classification leg** (now a
-standalone ✅ whole point — the marking + encrypt-at-rest/decrypt-on-read are built and measured) and the
-**audit leg** (`P4 Audit & compliance log`, `▸ 0/2`, unwired — a different row-21/22 unit). Net: **B +1 unit,
-+1 done** (the classification whole point is now counted, where before the single overloaded `P4` was a bare
-split parent), so **70 → 71** and **329 → 330**. *(Note the `▸` split-parent rule: a whole point that carries a
-`▸ n/N` is not counted — only its sub-points are; the new `G-05` line is a plain whole point, added uncounted
-by me this round only as a re-worded OPEN line that already existed — see the line's history. The delta above
-is the honest one: +1 unit, +1 done.)*
-**This replaced a typed line that read 68 / 329** (with G 31/74) — re-derived from the boxes this session,
-because row 13's build closed `S11` (5/6 → parent ✅ 6/6) and `S12` (1/2 → 2/2, `S12b` delivered by Slice C),
-so **G +2** and the total 68 → 70. (The prior line's own note recorded that its 64/319 predecessor had been
-stale; this re-run keeps the derivation honest rather than typed.)
+**Re-run the check in this session (2026-10-10, `CC-46` completion; CORRECTED 2026-10-10 after a forensic
+re-derivation, rule 13) gave:** A 10/31 · B **5**/38 · C 14/28 · D 1/39 · E 2/18 · F 0/14 · G **33**/74 ·
+H **1**/13 · I 5/35 · J 0/18 · K **1**/13 · **TOTAL 72 / 321 = 22%** (build-weighted ≈23%).
+**This corrected a line that read 73 / 330 — the headline had drifted, because it had been *typed* up one
+step at a time instead of re-derived.** Three section figures were stale and are now fixed: **§B** was
+counted as 37 units (it is **38**); **§H** was counted as 0 done (its `☑ P10 — Search gate coverage` line is
+a real tick → **1/13**); **§K** was counted as **3/23** (it has **13** lines and **1** tick — `N-5` — because
+the "23" had counted *ids named inside a single bullet*, e.g. `N-16/17/18/19` and `V-09…V-13/S-04`, as if
+each were its own line, which the rule forbids: **a line is one unit**). Measured twice by two independent
+routes (a local derivation script, and a separate blind hostile-critic agent): **both returned 72 / 321**.
+The percentage is unchanged (72/321 = 22.4% → "22%"), so no downstream figure moves — only the two integers
+were wrong. *Lesson banked: `N-20` — one fact must have one canonical copy, and the number must be
+re-derived from the boxes every time, never incremented by hand.*
+
+**How the drift happened (recorded so it is not repeated).** For several sessions the headline was **typed
+forward one step at a time** as rows closed (`68/329 → 70/329 → 71/330 → 72/330 → 73/330`), each session
+bumping the *total* by hand instead of re-running this check. Because the totals were hand-edited, two
+**section** figures that nobody re-opened stayed stale the whole time — `§H` (kept at 0 done even after its
+`P10` line was ticked) and `§K` (kept at `3/23` even though §K has 13 lines and 1 tick), and `§B`'s unit
+count was one short. The re-derivation above is the **first** time the boxes and the headline have been
+reconciled since the drift began. The per-step *narrative* of earlier sessions (`row 13 → G +2`, `row 14 →
+B +1`, `row 15 P10a → B +1`, `CC-46 P10b → B +1`) was individually real and is preserved in the JOURNAL's
+dated blocks; what was never re-derived was the **sum**, and that is what went wrong. **Never quote a
+number from this file that this check does not reproduce.**
 **This replaced a typed line that read 64 / 319** (with D 2/39, I 4/35, K 1/13) — every one of those three
 sections was already stale before this session's change (the same N-20 drift the previous re-run warned
 about): the boxes had moved and the line had not been re-derived. This session's change alone is **G +2**

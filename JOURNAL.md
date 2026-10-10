@@ -79,7 +79,7 @@ refinement: sales now uses `quotes.view`/`channels.view`/`settings.view` where t
 "67" figure *substantially correct* is corrected to say it named the right **gap** by the wrong **measure**.
 
 **Status:** ✅ **`CC-46` CLOSED** — deleted from the register; `P10b` (**a real UI + full ACL-feature coverage**)
-flipped **☐ → ☑** (§B), so the counts move **72 → 73 / 330** (B 4/37 → 5/37). **Row 15 (`P10`) STAYS 🟡** — its
+flipped **☐ → ☑** (§B), so the counts move **72 → 73** under the *then-current* headline. **CORRECTED 2026-10-10 (rule 13):** the headline itself had drifted (it was typed `73 / 330`); re-derived from the boxes the true figures are **`72 / 321`** — `P10b` still flipped ☐ → ☑ (`B` 4/38 → 5/38), but the §K and §H section figures were stale. See `platform_points.md` §L. **Row 15 (`P10`) STAYS 🟡** — its
 **absolute** claim ("EVERY read") also needs a gate on the **human CRUD list path**, which is untouched; that last
 leg is now **`CC-47`**.
 
