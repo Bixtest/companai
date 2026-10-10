@@ -106,11 +106,12 @@ the wrong claim is corrected in every document that copied it (rule 13). Full de
 `PLAN-CC-47-human-crud-read-gate.md`.
 
 **Rider worth your eye (one open item, not this one).** The test's honest bound is that its `makeCrudRoute`
-family (assertion A) and its exported-metadata family (assertion B) are **not** the whole 457-file tree — 163
-route files are in neither, and they are overwhelmingly action/mutation endpoints (POST/PUT), not list reads.
+family (assertion A) and its exported-metadata family (assertion B) are **not** the whole 457-file tree — **161**
+route files are in neither, and **every one is a mutation endpoint** (POST/PUT/PATCH/DELETE) — **none exports a
+`GET`**, so none is a list read.
 That is intended for CC-47's scope, but it means *"every read is permission-filtered"* is guaranteed for the
 human CRUD list family, not for every route that happens to export a `GET`. This is stated in the test header,
-not hidden.
+not hidden. *(Rule-13 correction, 2026-10-10: this read "163"; measured three ways, the true value is 161.)*
 
 ---
 

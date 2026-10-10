@@ -127,9 +127,10 @@ grep's 66 includes 6 comment-only mentions); 296 GET-exporting; tally **216 gate
 public-explicit (== `PUBLIC_ROUTES`) / 31 not-demonstrable (== `DELEGATED_GATED_ROUTES`)**.
 
 **Honest bound (written into the test header).** A's family is the 60 `makeCrudRoute` routes; B's is the 296
-GET-exporting routes; their union is **not** the tree — **163 of 457** route files are in neither, and they are
-overwhelmingly action/mutation endpoints (POST/PUT: `/cancel`, `/retry`, `/assign`, …), not human list reads.
-CC-47 is scoped to the human CRUD **list** path, so this is intended — but the guarantee is *the human CRUD
+GET-exporting routes; their union is **not** the tree — **161** of 457 route files are in neither, and every
+one is a mutation endpoint (POST/PUT/PATCH/DELETE: `/cancel`, `/retry`, `/assign`, …); **zero export a `GET`**.
+*(Rule-13 correction, 2026-10-10: this read "163"; the true value is 161 — see §7.)* CC-47 is scoped to the
+human CRUD **list** path, so this is intended — but the guarantee is *the human CRUD
 list family*, not *every route that exports a `GET`*.
 
 **Pre-existing, unrelated failure (not folded in):** `openapi.test.ts` fails **3 tests** ("does not cache a
@@ -145,3 +146,25 @@ static fallback after a bundle failure"), reproduced with the CC-47 test file re
 - ✅ `HANDOVER.md` — revision 18 header + §5/§7/§8 mentions + the "Not proven" bullet.
 - ✅ `NEEDS-YOU.md` — `NY-19` decided; Part 1 → 0 open.
 - ✅ `LESSONS.md` — **L104** (a coverage test's discovery predicate is part of its guarantee).
+
+### 7b. Second rule-13 correction — the "in neither" count (2026-10-10, later)
+
+The owner asked what the honest bound meant. Re-measuring it (rather than restating it) found the bound's
+**number** was stale, though its **claim** held:
+
+- The header said **163** files in neither, "overwhelmingly action/mutation endpoints". **Measured: 161**
+  files, and **every one a mutation endpoint — zero export a `GET`.**
+- **Why 163 was wrong.** CC-47's own pass-12 fix widened the GET-exporting predicate (B) to accept the
+  destructured form `export const { metadata, GET, … } = builder(…)`, lifting **B 287 → 296**. The union grew
+  294 → 296 (the 60 `makeCrudRoute` routes are a subset of the 296, so the union *is* B), so "in neither" fell
+  **163 → 161**. The 163 in the header was the *pre-fix* value; the fix updated the counts it printed but not
+  the prose number.
+- **The two files that moved** are the `makeSalesLineRoute` line lists (`sales/api/order-lines`,
+  `sales/api/quote-lines`) — the only destructured files that were not already in A.
+- **Measured three independent routes:** (1) comment-stripped regex scan; (2) TypeScript-AST walk;
+  (3) union computation `457 − |A ∪ B|`. All three agree: **457 / A 60 / B 296 / union 296 / neither 161.**
+  *(An early AST probe gave B = 282 — investigated, not averaged: that probe missed `export { GET }`
+  declarations; corrected, it agrees at 296.)*
+- **Corrected in 6 places** (grep for `163`, not from memory): the test header, `LESSONS.md`,
+  `JOURNAL.md`, `HANDOVER.md`, `NEEDS-YOU.md`, this plan. The claim was also strengthened from
+  "overwhelmingly" to the stronger measured fact "**all 161 are mutation endpoints; zero export a `GET`**".

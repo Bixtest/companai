@@ -757,8 +757,11 @@ documents and was *not* re-measured — treat it as a starting point, not a fact
   the earlier claim here — *"the ordinary human CRUD `GET`/list path has no per-entity permission filter"* —
   was **FALSE**, falsified in code. **The honest bound (in the test header, not hidden):** the guarantee
   covers the **human CRUD list family** (and the AI-tool gates), **not** every route that happens to export a
-  `GET`; 163 of 457 route files are in neither assertion's scope and are overwhelmingly action/mutation
-  endpoints (POST/PUT), not list reads.
+  `GET`; **161** of 457 route files are in neither assertion's scope and **all 161 are mutation endpoints**
+  (POST/PUT/PATCH/DELETE) — **none exports a `GET`** — so none is a list read. *(Rule-13 correction,
+  2026-10-10: this read "163 … overwhelmingly action/mutation endpoints (POST/PUT)"; the true count is 161,
+  measured three ways. The union of the two assertions is exactly the 296 GET-exporting routes, because the
+  60 `makeCrudRoute` routes are a subset of them.)*
 - **Row 14 is ✅ — its server export leg (`CC-45`), its custom-entity client `view` leg (`CC-48`) and its customer-tasks leg (`CC-49`) are all DONE 2026-10-10.** Sensitive-field **marking** (15 module `defaultEncryptionMaps`
   persisted to `encryption_maps`), encrypt-at-rest/decrypt-on-read and the manage screen are all built and
   measured; **every server-side CRUD export path now consults the classification map and masks a marked field** (`shared/src/lib/crud/export-encryption.ts`, wired at the factory funnel + `entities/api/records.ts`), the **records-page `view` export is server-routed** (`CC-48`, `getUrl` + an `exportColumns` projection), and the **customer-tasks table is server-routed too** (`CC-49` — `interactions/tasks` gained a `?format=` export mode that **unions both entities' marked fields** and masks via an **alias map**, `todoTitle→title`, `todoDescription→body`, `displayName`/`customer.displayName`→`display_name`) so the mask applies to the aliased columns.

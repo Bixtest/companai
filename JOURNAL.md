@@ -81,10 +81,12 @@ family); verdict tally **216 `gated` / 40 `gated-auth-true` / 9 `public-explicit
 `not-demonstrably-gated` (== `DELEGATED_GATED_ROUTES`)**.
 
 **Honest bound (written into the test header, not hidden).** A's family is the `makeCrudRoute` routes (60); B's
-family is routes that export a `GET` (296); their union is **not** the whole tree — 163 route files are in
-neither, and they are overwhelmingly action/mutation endpoints (`/cancel`, `/retry`, `/assign`, …), not human
-list reads. CC-47 is scoped to the human CRUD **list** path, so this is intended — but the guarantee is *the
-human CRUD list family*, not *every route that exports a GET*.
+family is routes that export a `GET` (296); their union is **not** the whole tree — **161** route files are in
+neither, and every one is a mutation endpoint (POST/PUT/PATCH/DELETE) — **zero export a `GET`**, not human
+list reads. *(Rule-13 correction, 2026-10-10: this read "163 … overwhelmingly action/mutation endpoints" — a
+stale pre-fix count; the destructured-export fix lifted B 287→296 and the true "in neither" is 161, now
+measured three ways.)* CC-47 is scoped to the human CRUD **list** path, so this is intended — but the
+guarantee is *the human CRUD list family*, not *every route that exports a GET*.
 
 **Pre-existing, unrelated failure noted (not CC-47's).** `packages/cli/src/lib/generators/__tests__/openapi.test.ts`
 fails **3 tests** ("does not cache a static fallback after a bundle failure"); reproduced with the CC-47 test

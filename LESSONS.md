@@ -3493,10 +3493,14 @@ Where a count is pinned, pair it with a check that the excluded files are **name
 newly-surfaced routes went onto the pinned `DELEGATED_GATED_ROUTES` list with verified evidence). (3) A
 header must **not claim more than its code proves**: when I widened discovery, the honest fix was to also
 write the test's **bound** into the header — A covers the `makeCrudRoute` family, B covers routes that export
-a `GET`, their union is **not** the whole tree (163 of 457 route files are in neither, overwhelmingly
-POST/PUT action endpoints), so *"every read is permission-filtered"* is guaranteed for the **human CRUD list
+a `GET`, their union is **not** the whole tree (161 of 457 route files are in neither — every one a
+mutation endpoint, zero exporting a `GET`; the earlier "163" was the pre-fix value), so *"every read is
+permission-filtered"* is guaranteed for the **human CRUD list
 family**, not for *every route that exports a `GET`*. (4) **Never let a promise of "all" rest on a walker
-whose exclusions you have not enumerated** — enumerate them.
+whose exclusions you have not enumerated** — enumerate them. (5) **When you widen a discovery predicate, the
+counts it fed do not update themselves**: fixing the destructured-export gap lifted B from 287 to 296 and
+dropped "in neither" from 163 to 161, but the *derived* number 163 had been copied into five documents and
+survived until a reader (the owner) asked what it meant. A correction must be **grepped for**, not remembered.
 
 *Cross-ref: L93 (a defence never tested is one a refactor may delete — here the "defence" was a discovery
 predicate), L99 (a tautological test — a narrow discovery makes a coverage test tautologically true over a
