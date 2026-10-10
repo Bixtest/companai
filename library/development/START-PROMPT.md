@@ -246,10 +246,11 @@ business-module work; and the task list became **one plain-English scoreboard**,
 [`platform_points.md`](platform_points.md), sorted in the vision's Phase 0 → Phase 10 order, opening with
 **one number derived from the ticked boxes** (never typed). **As of revision 16 of the handover
 (2026-10-10): PHASE 3 is COMPLETE** — rows 7, 8, 9 and 13 are ✅; **row 14 is 🟡** (its **server** export
-leg is CLOSED by `CC-45`; only the client-side `view` export leaks — `CC-48`), and **row 15 is an accurate 🟡**
+leg is CLOSED by `CC-45`, and its custom-entity **client `view`** export by `CC-48`; only the **customer-tasks**
+export leaks — `CC-49`), and **row 15 is an accurate 🟡**
 (reads are tenant/org-**scoped** universally and there are two real permission read gates, but the
 **human CRUD *list* path** has no per-entity permission filter — that last leg is open as `CC-47`).
-**The live FRONTIER is `CC-47` · `CC-48`.** **Do not re-derive the order from this prompt** — read the
+**The live FRONTIER is `CC-47` · `CC-49`.** **Do not re-derive the order from this prompt** — read the
 `★ ACTIVE TASK` box for *what is in hand*, `BUILD-ORDER.md` for the *order*, and `platform_points.md`
 for *the one number*. **One trap worth keeping, measured 2026-10-08: `SD-3` (the tier mapping as a
 superadmin setting) is ALREADY BUILT (2026-10-06) — several documents still call it "the next slice",
@@ -328,8 +329,9 @@ Every point you raise carries a status: **FIXED** (and how you re-checked) · **
 - **Keep the reading list current, but keep it task-free.** When a *front-door* document is added,
   renamed or superseded (a new scoreboard, a moved plan), update the tiers — that is maintenance, not a
   task list. The last such maintenance was **2026-10-10** (the handover's revision 16): the FRONTIER was
-  rolled from `CC-45`/`CC-47` to `CC-47`/`CC-48` (the `CC-45` close + the client `view` leak the critic
-  found), and the scoreboard's one number was re-derived **unchanged at `72 of 321 = 22%`**. *(Prior
+  rolled from `CC-47`/`CC-48` to **`CC-47`/`CC-49`** (the `CC-48` close + the customer-tasks alias leak its
+  critic found and two routes reproduced), and the scoreboard's one number was re-derived **unchanged at
+  `72 of 321 = 22%`**. *(Prior
   maintenance, revision 15: `platform_points.md`
   and `BUILD-ORDER.md` were promoted into tier A, and the "context that shaped the order" block was
   refreshed for the owner's 2026-10-09 ruling ("the order is the vision's order") and PHASE 3's completion.

@@ -28,7 +28,7 @@ anything else first. Where an item is **not** a decision, it says so, and you ca
 
 ---
 
-## Part 1 — Decisions I need (**2 open** — `NY-16`, `NY-17`, both from the `CC-45` close 2026-10-10; `NY-15` decided 2026-10-09; `NY-14` closed 2026-10-06; `NY-1`, `NY-2`, `NY-8`, `NY-13` closed; `NY-4` is "nothing needed")
+## Part 1 — Decisions I need (**1 open** — `NY-18`, the customer-tasks export fix, a real open leak; `NY-16` and `NY-17` **decided 2026-10-10** ("we follow your recommendations" → blank the value; Option B); `NY-15` decided 2026-10-09; `NY-14` closed 2026-10-06; `NY-1`, `NY-2`, `NY-8`, `NY-13` closed; `NY-4` is "nothing needed")
 
 > **Numbering note.** Items are numbered once and **never reused**, so that a number you have already
 > quoted keeps meaning the same thing. Item 8 was appended here on 2026-10-05 and answered the same
@@ -38,43 +38,52 @@ anything else first. Where an item is **not** a decision, it says so, and you ca
 > per-tenant policy as the destination, cloud-first as the interim. **Item 14 was added and answered
 > on 2026-10-06** with the request-outcome taxonomy. **Nothing in this Part is open.**
 > *(Item 5, the Coolify password, is in Part 2 — it is a thing to do, not a decision to make.)*
-> **Items 16 and 17 were added 2026-10-10** when `CC-45` closed — both are small wording choices with a
-> working default already in place, so **neither blocks the build.**
+> **Items 16 and 17 were added 2026-10-10** when `CC-45` closed — both were small wording choices with a
+> working default already in place. **You decided both the same day:** `NY-16` **blank the value** (the
+> default, unchanged — no code touched) and `NY-17` **Option B** (the browser export is sent back through
+> the server). Neither blocked the build. **Item 18 was added later on 2026-10-10**, when the `CC-48` critic
+> found a *second*, differently-caused leak (the customer-tasks table) — **that one is a real open leak, not
+> a preference**, and its fix choice is yours.
 
-### `NY-16` — An exported marked field: hide the column, or blank the value? — **DECIDE** *(default already applied: blank the value)*
+### `NY-16` — An exported marked field: hide the column, or blank the value? — ✅ **DECIDED 2026-10-10: blank the value** *(no code change — that was already the behaviour)*
 
-**Answered already by default, so you can just say "keep".** When we found that a marked (encrypted) field
-could be **downloaded in an export in clear**, I fixed it: exports now replace the marked value with `***`.
-That is the **default**. The alternative is to **drop the column entirely**. Both are safe.
+**Your ruling: blank the value** (`"we follow your recommendations"`). When a marked (encrypted) field is
+exported, the value is replaced with `***` and the column and its heading stay in place. The alternative
+(drop the column entirely) was rejected — it would shift columns for any spreadsheet or script that reads
+the file. **Nothing changed in code**: `***` was already what `CC-45` shipped. Undo, if ever wanted, is one
+line in `applyEncryptedFieldMask`.
 
-- **If you say "keep" (blank the value):** the export keeps every column and its heading; the secret shows
-  as `***`. Any spreadsheet or script that reads the file keeps working — nothing shifts.
-- **If you choose "hide the column":** the secret column disappears from the file. Cleaner to the eye, but a
-  script that expects that column at that position now reads the wrong column, silently.
+### `NY-17` — The one export that still leaks: which fix do you want? — ✅ **DECIDED 2026-10-10: Option B** *(built as `CC-48`)*
 
-**My recommendation: keep** (blank the value). Undo is one line if you disagree.
+**Your ruling: Option B** (`"we follow your recommendations"`) — the browser-side "View → Export" is sent
+back **through the server**, so it gets the same blanking as every other export and reveals nothing new to
+the browser. Options A (blank in the browser, which would expose the secret field *names* to the client) and
+C (hide marked columns from every records table) were rejected. Built and measured as **`CC-48`**; see
+`PLAN-CC-48-client-view-export-leak.md`.
 
-### `NY-17` — The one export that still leaks: which fix do you want? — **DECIDE** *(needs you; nothing is exposed until you choose)*
+### `NY-18` — The customer **tasks** table leaks the same way (a *different* fix needed): which shape? — **DECIDE** *(nothing is exposed until you choose; recommendation below)*
 
-**What is left.** The fix above covers every export the **server** makes. There is one more export path that
-runs **in the browser** ("View → Export" on a records table): it copies the rows the page is already showing,
-so the server never sees it and cannot blank anything. **Measured:** a marked field is an ordinary visible
-column on those tables, so that button **does** download it in clear. It is tracked as **`CC-48`**.
+**What is left — found by the `CC-48` critic after your two rulings, and reproduced twice.** The
+**customer tasks** table ("Work plan → Tasks → Export") builds its file **in the browser** too. Its rows
+carry a task's **title** and **description** and the **customer's name** — and those three are **marked
+(secret)** fields in the database. Because the table renames them on the way in (`todoTitle`, `todoDescription`,
+`displayName`), the server's blanking rule — which matches on the **real** field name (`title`, `body`,
+`display_name`) — **never matches the alias**, so the file gets the real values. This is `CC-49`.
 
-**Three ways to close it — pick one:**
+**Two ways to close it — pick one:**
 
-- **(A) Blank it in the browser.** The page needs the list of "secret" field names sent to it. *If yes:* the
-  button stops leaking, but the browser (and anyone with devtools open) can **see which field names are
-  secret** — the names only, never the values.
-- **(B) Send the browser export back through the server.** The export then gets the same blanking as every
-  other export. *If yes:* nothing extra is revealed, but the export must re-send the current filters and
-  visible columns, so it becomes a small server job instead of an instant download.
-- **(C) Hide marked columns from the records tables entirely.** *If yes:* the button cannot leak because the
-  column is not on screen — but **every operator** loses sight of that field in every list, which is a
-  bigger change than either (A) or (B).
+- **(A) Blank it in the browser.** The tasks page gets told "blank `todoTitle`, `todoDescription`,
+  `displayName`". *If yes:* the export stops leaking; the browser learns the *list of which columns are
+  secret* (names only, never values).
+- **(B) Give the tasks route a server export mode** (like the records page now has, after `CC-48`). The
+  server builds the file and blanks the aliased columns there. *If yes:* nothing extra is revealed, and it
+  matches the shape you already approved for the records page. Cost: a small amount of new server code
+  (the tasks route currently only returns data, it has no "download a file" mode).
 
-**My recommendation: (B)** — it reuses the blanking already built, and reveals nothing new. Say `NY-17 B`
-(or A/C) and I will build it.
+**My recommendation: (B)** — same reasoning as `NY-17`: it reuses the pattern you already approved and
+reveals nothing new. Say `NY-18 B` (or A) and I will build it. **Counter-note for honesty:** this one is a
+**real leak that is still open right now** — unlike `NY-16`/`NY-17`, it is not "already safe by default".
+
 
 ### `NY-1` — Reset the local dev database? — ✅ **DONE 2026-10-05** *(no longer needs you)*
 

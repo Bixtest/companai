@@ -35,6 +35,64 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+### ✅ DONE — **`CC-48` (row 14 / `P4` classification leg, custom-entity CLIENT half): the records-page "View → Export" now goes THROUGH THE SERVER, so the `CC-45` mask applies.**
+**(2026-10-10; code repo `workspace/starting-kit`.)**
+
+**The task (protocol step 3), from register `CC-48` + `PLAN-CC-48-client-view-export-leak.md`:** `CC-45`
+masked every **server** export, but the custom-entity records page built its **"View → Export"** file in the
+**browser** (`records/page.tsx` had a `view: { prepare: … }` that read the rows on screen and called
+`serializeExport`), so no server mask reached it and a marked field downloaded **in clear**.
+
+**Owner decision (rule 11):** `NY-17` = **Option B** — reroute the browser export through the server. (`NY-16`
+= keep blanking the value; no code change.) Both recorded in `NEEDS-YOU.md`.
+
+**Step 4 — prerequisites re-measured in code (rule 0b), and it corrected my own scope twice.**
+- The server endpoint **already** serves a `view`-shaped export and **already** applies the mask
+  (`records.ts:391` picks `viewPageItems` vs `fullPageItems`; `:416-430` masks *after* the branch — I read it
+  live). So Option B is a **reroute**, not new masking.
+- **Correction #1 (rule 13):** I first wrote that `CustomerTodosTable.tsx` "cannot leak" because *no entity
+  named `customer_todo` is marked*. **Wrong entity.** The tasks table reads **`customer_interaction`**, which
+  **is** marked — see the critic finding below.
+- **Correction #2:** the projection param must not be named `columns` — it would enter the endpoint's
+  reserved-key skip list and silently drop a custom entity's own `columns` **filter** field.
+
+**Step 5–6 — the build.**
+- **`records/page.tsx`:** the `view` section's `prepare` → **`getUrl`** (`buildViewExportUrl`), carrying the
+  current `search`/`searchFields`/`sort` and the visible columns as **`exportColumns`**.
+- **`records.ts`:** accepts optional **`exportColumns`** → `ensureColumns(rows, hint)`, so the server export
+  still honours the operator's visible columns. Absent ⇒ auto-derived columns ⇒ **existing callers unchanged**.
+- **Why it is clean:** the serializer emits **only listed columns** (I verified all four serializers iterate
+  `prepared.columns`), and the mask keys on the column's field name — so a projected-out secret is not
+  emitted, and a projected-in secret is masked. **Leak-safe by construction.**
+
+**The hostile critic (a SEPARATE agent) found three things — two fixed here, one split out.**
+- **(D1) The first static guard was too narrow.** The critic inserted a **fully functional** browser `prepare`
+  leak into a *sibling* export section (it contained no literal `serializeExport`) and the guard **passed
+  4/4**. **FIXED:** the guard now asserts the page contains **no `prepare:` at all** and that **both** sections
+  use `getUrl` — and I **re-ran the critic's exact attack** to prove the new guard goes RED.
+- **(D2) The `columns` name collided** with a custom entity's own `columns` filter field. **FIXED:** renamed
+  to **`exportColumns`**; verified no collision.
+- **(D3) `CustomerTodosTable` genuinely leaks — a DIFFERENT root cause.** The task rows **alias** the marked
+  fields: `todoTitle: interaction.title`, `todoDescription: interaction.body`, `customer.displayName`
+  (`todoCompatibility.ts:603,610,154`); `customer_interaction` (`title`,`body`) and `customer_entity`
+  (`display_name`) **are** marked; `listCanonicalTodoRows` reads them **decrypted**. The mask keys on the
+  **true** field name (`title`), so it **never matches the alias** (`todoTitle` → canonical `todotitle`).
+  **SPLIT OUT as `CC-49`** — a distinct defect needing its own fix (recommend: add a server export mode to
+  the tasks route that masks the aliased fields). **Reproduced independently** by me *and* a separate
+  verifier agent (both confirmed all five links).
+
+**Evidence (rule 10 step 6).** 12 tests / 2 suites (7 behavioural + 5 static guard); **3 RED-then-GREEN
+mutations** — mask off → 3 RED; column hint ignored → 2 RED; page reverted to `prepare` → 1 RED — each
+restore **md5-verified**; green gate **417 tests / 49 suites** (core entities) and **556 / 48** (shared,
+untouched — no regression); `tsc --noEmit` exit 0 on **both** packages. **Two-route re-measure:** THE ONE
+NUMBER re-derived by my script **and** a separate blind verifier's own script — **both returned
+72 / 321 = 22%, UNCHANGED** (`CC-48` closed a callback; the verifier also confirmed the appendix structure
+and the traps). **Row 14 stays 🟡** — the tasks leak (`CC-49`) remains.
+
+**★ NEXT:** `CC-47` (row 15's human CRUD read leg) · `CC-49` (the customer-tasks export leak).
+
+---
+
 ### ✅ DONE — **`CC-45` (row 14 / `P4` classification leg, SERVER half): every CRUD export path now consults the encryption map and MASKs a marked field.**
 **(2026-10-10; code repo `workspace/starting-kit`.)**
 

@@ -3383,3 +3383,39 @@ number; a total from one parser is a hypothesis.**
 check itself*), L1 (a confident label is not an inspection — a parser's total is a label until the lines are
 read), rule 0 (the code/text is the evidence, and here the *reader* of that evidence was the defect),
 rule 13 (a falsified premise must be corrected everywhere — but *first* be sure it is falsified).*
+
+## L102 — before you call a file **"not a leak surface"**, name the **entity the code actually reads** — not the entity its *name* suggests; I dismissed a real leak by checking the wrong table
+
+**The trap.** Closing the *client-side export* leak (`CC-48`), I had to say which other exporters were and
+were not leak surfaces. I looked at `customers/components/CustomerTodosTable.tsx`, saw it exports "todo"
+rows, then checked the encryption map for a **`customer_todo`** entity, found none, and wrote the table off
+as **"not a leak surface"**. That claim was **false**, and it was false for a reason worth banking: the
+table does not read a `customer_todo` entity at all — it reads **`customers:customer_interaction`**
+(`listCanonicalTodoRows` → `em.find(CustomerInteraction, …)`), and **`customer_interaction` IS marked**
+(`title`, `body`). Even worse, the rows **alias** the marked fields — `todoTitle: interaction.title`,
+`todoDescription: interaction.body` — so the mask (which keys on the true field name) would **never match**
+the alias, meaning the value is decrypted server-side, aliased, sent to the browser, and exported **in
+clear**. **Only the mandatory hostile critic caught it**; I had already written the false "not a surface"
+claim into a planning document.
+
+**The rule.** A **negative** claim ("X is not a leak surface" / "Y cannot happen") is the most dangerous kind,
+because it *closes* an investigation. So a negative claim must (a) name the **concrete object the code
+reads** — the *entity id at the read call* (`em.find(CustomerInteraction, …)`), the *column actually
+serialized* — not the object the file's **name** or purpose suggests; (b) be derived by **following the data
+path to its read site**, not by matching a plausible-looking identifier; and (c) be **stated with the search
+that would falsify it** ("I looked for a marked entity among the ones this table reads"). If you cannot name
+the read site, you have not measured — you have guessed, and a guess in the negative voice is worse than no
+claim at all.
+
+**The second half.** When the critic *did* find it, the right response was **not** to fold it silently into
+the change in hand: it is a **different defect with a different root cause** (aliasing, not the browser), so
+it became its own callback row (`CC-49`) with its own reproduction, and the parent row-14 status was left
+**🟡** rather than falsely ✅. **Splitting a newly-found defect out is not "leaving work incomplete" — it is
+keeping the record honest**; the sin would be to mark row 14 done while a leak of the same requirement
+survives.
+
+*Cross-ref: L101 (the *reader* of the evidence was the defect — here the *scope* of the claim was), L1 (a
+confident label is not an inspection), rule 0 (the code is the evidence — so read *which* code), rule 2 (two
+routes or it is not a finding — the leak was confirmed by the critic **and** reproduced by me **and** a
+verifier), rule 13 (a falsified premise corrected everywhere it was copied), rule 11 (an owner's decision is
+not the assistant's to close — the new defect's fix choice was registered, not silently taken).*
