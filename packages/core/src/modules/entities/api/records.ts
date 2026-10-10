@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { createRequestContainer } from '@open-mercato/shared/lib/di/container'
 import { getAuthFromRequest } from '@open-mercato/shared/lib/auth/server'
 import type { QueryEngine, QueryOptions, Where, Sort } from '@open-mercato/shared/lib/query/types'
-import { normalizeExportFormat, serializeExport, defaultExportFilename, ensureColumns } from '@open-mercato/shared/lib/crud/exporters'
+import { normalizeExportFormat, serializeExport, defaultExportFilename, ensureColumns, toHeaderLabel, type CrudExportColumn } from '@open-mercato/shared/lib/crud/exporters'
 import {
   resolveExportEncryptedFields,
   applyEncryptedFieldMask,
@@ -217,10 +217,15 @@ export async function GET(req: Request) {
   const withDeleted = parseBooleanWithDefault(url.searchParams.get('withDeleted'), false)
   const searchTerm = (url.searchParams.get('search') || '').trim()
   const searchFields = parseCommaSeparatedList(url.searchParams.get('searchFields'))
+  // CC-48: an optional projection so a server-side "view" export can honour the browser's visible
+  // columns. Absent => undefined => `ensureColumns` auto-derives exactly as before (byte-identical).
+  // Named `exportColumns` (not `columns`) so it cannot shadow a custom entity's own `columns` field
+  // used as a record filter (the hostile critic's finding: a bare `columns` would silently drop it).
+  const requestedColumns = parseCommaSeparatedList(url.searchParams.get('exportColumns'))
 
   const qpEntries: Array<[string, string]> = []
   for (const [key, val] of url.searchParams.entries()) {
-    if (['entityId','page','pageSize','sortField','sortDir','withDeleted','format','exportScope','export_scope','all','full','search','searchFields'].includes(key)) continue
+    if (['entityId','page','pageSize','sortField','sortDir','withDeleted','format','exportScope','export_scope','all','full','search','searchFields','exportColumns'].includes(key)) continue
     qpEntries.push([key, val])
   }
 
@@ -406,8 +411,13 @@ export async function GET(req: Request) {
           nextPage += 1
         }
       }
+      // CC-48: when the caller names the visible columns (the browser "view" export does), use them as
+      // the column hint so the server export matches what the operator sees; otherwise auto-derive.
+      const columnHint: CrudExportColumn[] | undefined = requestedColumns && requestedColumns.length > 0
+        ? requestedColumns.map((field) => ({ field, header: toHeaderLabel(field) }))
+        : undefined
       const preparedRaw = {
-        columns: ensureColumns(exportItems),
+        columns: ensureColumns(exportItems, columnHint),
         rows: exportItems,
       }
       // CC-45: a marked (encrypted) field must never leave in an export in clear. Mask any field

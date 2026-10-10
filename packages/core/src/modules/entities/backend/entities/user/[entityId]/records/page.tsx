@@ -5,7 +5,6 @@ import type { ColumnDef, SortingState } from '@tanstack/react-table'
 import { filterCustomFieldDefs, useCustomFieldDefs } from '@open-mercato/ui/backend/utils/customFieldDefs'
 import { Page, PageBody } from '@open-mercato/ui/backend/Page'
 import { DataTable, type DataTableExportFormat } from '@open-mercato/ui/backend/DataTable'
-import type { PreparedExport } from '@open-mercato/shared/lib/crud/exporters'
 import type { FilterDef } from '@open-mercato/ui/backend/FilterBar'
 import { ContextHelp } from '@open-mercato/ui/backend/ContextHelp'
 import { Button } from '@open-mercato/ui/primitives/button'
@@ -229,25 +228,37 @@ function RecordsPageInner({ params }: { params: { entityId?: string } }) {
     return `/api/entities/records?${qp.toString()}`
   }, [entityId, sorting, search, searchableFields])
 
+  // CC-48: the "view" export is served by the server (not built in the browser), so the CC-45
+  // encryption mask applies to it exactly as it does to the "full" export. It still respects the
+  // current filters/sort and exports only the visible columns (passed as a projection hint).
+  const buildViewExportUrl = React.useCallback((format: DataTableExportFormat) => {
+    const qp = new URLSearchParams({
+      entityId,
+      format,
+      all: 'true',
+    })
+    const sort = sorting?.[0]
+    if (sort?.id) {
+      qp.set('sortField', String(sort.id))
+      qp.set('sortDir', sort.desc ? 'desc' : 'asc')
+    }
+    const trimmedSearch = search.trim()
+    if (trimmedSearch) {
+      qp.set('search', trimmedSearch)
+      if (searchableFields.length) qp.set('searchFields', searchableFields.join(','))
+    }
+    const visibleFields = viewExportColumns.map((col) => col.field).filter(Boolean)
+    if (visibleFields.length) qp.set('exportColumns', visibleFields.join(','))
+    return `/api/entities/records?${qp.toString()}`
+  }, [entityId, sorting, search, searchableFields, viewExportColumns])
+
   const exportConfig = React.useMemo(() => {
     const safeEntityId = entityId.replace(/[^a-z0-9_-]/gi, '_') || 'records'
     return {
       view: {
         description: 'Exports the current list respecting filters and column visibility.',
-        prepare: async (): Promise<{ prepared: PreparedExport; filename: string }> => {
-          const rowsForExport = data.map((row) => {
-            const out: Record<string, unknown> = {}
-            for (const col of viewExportColumns) {
-              out[col.field] = (row as Record<string, unknown>)[col.field]
-            }
-            return out
-          })
-          const prepared: PreparedExport = {
-            columns: viewExportColumns.map((col) => ({ field: col.field, header: col.header })),
-            rows: rowsForExport,
-          }
-          return { prepared, filename: `${safeEntityId}_view` }
-        },
+        getUrl: (format: DataTableExportFormat) => buildViewExportUrl(format),
+        filename: () => `${safeEntityId}_view`,
       },
       full: {
         description: 'Exports raw records with every field and custom field included.',
@@ -255,7 +266,7 @@ function RecordsPageInner({ params }: { params: { entityId?: string } }) {
         filename: () => `${safeEntityId}_full`,
       },
     }
-  }, [buildFullExportUrl, data, entityId, viewExportColumns])
+  }, [buildFullExportUrl, buildViewExportUrl, entityId])
 
   const hasAnyFormFields = React.useMemo(() => filterCustomFieldDefs(cfDefs, 'form').length > 0, [cfDefs])
   const actions = (
