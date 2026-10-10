@@ -14,11 +14,15 @@ written for exactly that person — and this revision is written for an agent th
 continue the development work.** Read it top to bottom once (about 20 minutes), then
 follow §2 to actually get working. Everything else in the project is reachable from here.
 
-**Written 2026-10-05, revision 14 (2026-10-09). Owner: Ramzi. Development machine: `BIXMASERVER` (Windows 10 Pro).**
+**Written 2026-10-05, revision 15 (2026-10-10). Owner: Ramzi. Development machine: `BIXMASERVER` (Windows 10 Pro).**
 **This revision records the owner's 2026-10-09 rulings as a live ordered ACTION LIST at the top of
 [`../../JOURNAL.md`](../../JOURNAL.md) (see §8's "What is scheduled but not finished", and §5's
-⚠️ live-platform block). If you want the newest numbers, re-measure them; §7 tells you how to split what
-was measured from what was quoted.**
+⚠️ live-platform block). It also records the 2026-10-10 close of **`CC-46`** (row 15's ACL-coverage
+leg) and the opening of **`CC-47`**/**`CC-45`** as the live FRONTIER. If you want the newest numbers,
+re-measure them; §7 tells you how to split what was measured from what was quoted.**
+*⚠️ **Note the revision cadence:** this page is bumped by a session that changes the *project layout,
+the front-door documents, or a numbered ruling* — it is **not** bumped by every `CC-` item. Where this
+page and the `★ ACTIVE TASK` box disagree about *what is being worked on now*, **the box wins** (line 9).*
 
 > **What we are building, in one line:** a platform that turns a business's plain-language needs into
 > **real working software** — the AI builds a capability once, the platform checks and saves it, and
@@ -42,10 +46,17 @@ finished thinking, and it has *started* building: the **phase-0 foundation is co
 (the guard engine's registry is populated, the settings table exists, the third guard outcome
 `escalate` shipped, and the **Metadata Registry** — the service that lets the gate *enumerate* objects —
 is built, 2026-10-07). On top of that, the first slice of the permissions gate (**`SD-1`**) is built and
-mutation-proven, and a run of small "`CC-`" items has shipped. **Nothing is blocked.** What is left is
-the build continuing in order, and **the task in hand is named in the `★ ACTIVE TASK` box at the top of
-[`../../JOURNAL.md`](../../JOURNAL.md)** — the one place that carries it (step 7, and the owner's
-instruction of 2026-10-06).
+mutation-proven, and a long run of small "`CC-`" items has shipped — most recently **`CC-46`**
+(2026-10-10: every one of the **53 searchable entities** now declares `aclFeatures`, enforced by a
+coverage gate — this closed **row 15's ACL-coverage half**). **PHASE 3 is COMPLETE; PHASE 4 (row 14,
+data classification) is ✅ with one leg open (`CC-45`, the export leg)**; rows 7, 8, 9, 13 and 14 are
+ticked. **Nothing is blocked.** What is left is the build continuing in order, and **the task in hand is
+named in the `★ ACTIVE TASK` box at the top of [`../../JOURNAL.md`](../../JOURNAL.md)** — the one place
+that carries it (step 7, and the owner's instruction of 2026-10-06). The **live FRONTIER** (its
+authoritative statement is [`platform_points.md`](platform_points.md)'s `▶ FRONTIER` box) is
+**`CC-47`** (row 15's remaining leg — a per-entity permission gate on the *human CRUD list path*) **·**
+**`CC-45`** (row 14's export leg); both are buildable now, and **both must be re-measured in code before
+building** (rule 0b).
 
 **Six things to do before you touch anything:**
 
@@ -57,7 +68,8 @@ instruction of 2026-10-06).
 1. **Read this page, then §2 step 1 — tier A first, then tier B.** Six files fix the direction and the
    live decisions; their spine follows. **Tier C is opened only when the work needs it** — do not
    read the imported material "for context". **And read [`../../LESSONS.md`](../../LESSONS.md) — do not
-   skip the lessons.** Every numbered entry (L1–L92 so far) is a mistake this project already made,
+   skip the lessons.** Every numbered entry (L1–L99 so far, `LESSONS.md` 3,313 lines — re-measured
+   2026-10-10) is a mistake this project already made,
    written in its general form; it is a reading list you act on, not history.
 2. **Set the environment export** (§2 step 2). Every terminal, every session.
 3. **Confirm both repositories are clean** (§2 step 3), and that the stack is up (§2 step 4).
@@ -646,21 +658,23 @@ He has said this more than once, so it is worth repeating:
 
 ## 7. Current state — measured, not assumed
 
-**Two groups below. Group A was re-measured on 2026-10-08 (revision 11). Group B is quoted from older
+**Two groups below. Group A was re-measured on 2026-10-10 (revision 15) where a row says so; rows still
+carrying their 2026-10-08 (revision 11) figures are marked. Group B is quoted from older
 documents and was *not* re-measured — treat it as a starting point, not a fact.**
 
-**Group A — measured 2026-10-08 (revision 11), except where a row says otherwise:**
+**Group A — re-measured 2026-10-10 (revision 15), except where a row says otherwise:**
 
 | | |
 |---|---|
-| **Repo 1** (thinking/docs) | `master`, most recent **substantive** batch **`3c799c3`** — the `CC-30` documentation batch (JOURNAL, BACKLOG, COMPLETION-CALLBACKS, RESUME-POINT, platform_points, and the new findings file). *The handover-refresh commits that record this revision come after it, so HEAD will read higher than `3c799c3` — that is expected, not drift.* **Re-measured 2026-10-08** (the previous figure was `6861138`). |
-| **Repo 2** (code) | `main`, HEAD **`35d9257`** — `CC-30`, which gives `custom_entities_storage` a real unique constraint for the upsert to conflict on, plus a tenant-scoped read classifier. **Re-measured 2026-10-08** (the previous figure was `7494fbe`). |
+| **Repo 1** (thinking/docs) | `master`, HEAD **`10ecfc5`** — **re-measured 2026-10-10**. It is the `CC-46` documentation close (`JOURNAL`/`BACKLOG`/`platform_points`/`COMPLETION-CALLBACKS`/`BUILD-ORDER` all updated in the same change; two commits, `dfbb497` + `10ecfc5`). *(Previous figure: **`3c799c3`**, the `CC-30` batch, re-measured 2026-10-08.)* |
+| **Repo 2** (code) | `main`, HEAD **`c03eca5c`** — **re-measured 2026-10-10**. It is `CC-46`: every searchable entity declares `aclFeatures` + a coverage gate (`47 insertions(+), 0 deletions`). *(Previous figure: **`35d9257`**, `CC-30`, re-measured 2026-10-08.)* |
 | **Codebase shape** | **21 packages, 1 app** (`apps/mercato`) — a monorepo (Yarn 4.17.1 + Turbo) |
-| **Documentation** | **Tracked markdown: 220 repo-wide, of which 41 are in `library/development/`.** `library/` also holds **≈3,480 `.md` files on disk** — but most of that is **gitignored imported study material** (§3i), so **treat the disk figure as approximate: it drifts as untracked files come and go** (it read 3,480 earlier the same day and 3,481 an hour later, off one untracked file). `LESSONS.md` **3,118 lines** (L1–L92); `JOURNAL.md` **5,766 lines**; `COOKBOOK.md` **2,948 lines** |
+| **Documentation** | **Tracked markdown: 1,094 repo-wide, of which 50 are in `library/development/`** — **re-measured 2026-10-10** via `git ls-files`. `library/` also holds thousands of `.md` files on disk — but most of that is **gitignored imported study material** (§3i), so **treat the disk figure as approximate: it drifts as untracked files come and go.** `LESSONS.md` (L1–L92), `JOURNAL.md` (6,720 lines) and `COOKBOOK.md` (2,948 lines) are the three long-form files. |
 | **The studies** | analysis programme **complete** (batches 0–12, 13 reports); Paperclip + Hermes study **complete** (11 batches, 3,940 lines, 53 lessons) |
 | **The specification** | **Draft 2** — of its 40 rows, **36 SETTLED · 1 DERIVED · 3 DEFERRED-with-trigger · 0 OPEN — owner**. The gate is passed; only ratification remains |
 | **The foundation (phase 0)** | **COMPLETE (2026-10-07).** The four named guard-engine gaps are built and proven — **`D0`** (the registry is populated from an enabled module, proven by mutation), **`D1`** (the tier/defaults/fallbacks settings table exists — rules are no longer `.ts` code alone), **`D3`** (the guard result has a third outcome, `escalate`, treated as *not performed*), and **`GAP A`'s registry half** (the read-only **Metadata Registry**, code `59ab859` — it answers *what exists · what type · provenance · what depends on it*, and returns a **typed absence** for the other ten blueprint §54 questions). **`D2-gap`** (every write route that reached no guard) also closed: **0 unguarded across the 35 enabled modules**. **What remains of the foundation: `D2-wide`** — 106 call sites still use the `@deprecated` guard pair, **all in parked modules** (recorded, not migrated), and **`GAP A`'s `Resource` envelope half** — a Phase −1 contract, deliberately not built because a type with no consumer is the "contract after the code" failure. |
-| **The first build slice past the foundation** | **`SD-1` Phase 1 is BUILT (2026-10-08, PARTIAL).** The **S2 structure-change gate**: when a new data structure lands (a table, a column, a field-type change), the platform must not apply it until the permissions for the new surface are decided — either a person decides, or the default applies (full grant to the superadmin role **and the permission records created**). Its decision core (`structure-change-gate.ts`), its hook (two `MutationGuard`s on the entities create path), and its **enforcement** (`permission-decision-grant.ts`, which writes the gate's `defaulted` records into the role's `role_acls.features_json`) are built, tested and mutation-proven across **every create path**, including the batch route, the shared primitive `ensureCustomFieldDefinitions`, the `add-field` CLI, the two HTTP reactivation routes, the entity-install primitive and all three field-type-change sites. **The remaining paths are scheduled** in [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md) (`CC-20`, `CC-23`, `CC-27`; `CC-25` — the decision actor's permission — is **BUILT 2026-10-09**, awaiting the owner's confirm). Plan: [`PLAN-SD-1.md`](PLAN-SD-1.md). |
+| **The first build slice past the foundation** | **`SD-1` Phase 1 is BUILT (2026-10-08, PARTIAL).** The **S2 structure-change gate**: when a new data structure lands (a table, a column, a field-type change), the platform must not apply it until the permissions for the new surface are decided — either a person decides, or the default applies (full grant to the superadmin role **and the permission records created**). Its decision core (`structure-change-gate.ts`), its hook (two `MutationGuard`s on the entities create path), and its **enforcement** (`permission-decision-grant.ts`, which writes the gate's `defaulted` records into the role's `role_acls.features_json`) are built, tested and mutation-proven across **every create path**, including the batch route, the shared primitive `ensureCustomFieldDefinitions`, the `add-field` CLI, the two HTTP reactivation routes, the entity-install primitive and all three field-type-change sites. **The remaining paths are scheduled** in [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md) (`CC-20`, `CC-23`, `CC-27`; `CC-23` — the create-branch double-insert — is **BUILT 2026-10-09**; `CC-25` — the decision actor's permission — is **BUILT 2026-10-09**, awaiting the owner's confirm). Plan: [`PLAN-SD-1.md`](PLAN-SD-1.md). |
+| **Where the build is now (2026-10-10)** | **PHASE 3 is COMPLETE.** The policy-kernel skeleton (vision Phase 3) is done: **rows 7, 8, 9, 13 and 14 are ✅**, and **row 15 (`P10`, the read layer) is an *accurate* 🟡** — its non-permission half (tenant/org row **scope**, via `buildScopedWhere`) is universal, its permission half has **two real read gates** (the AI search tools' `authorizeEntityAccess`, now backed by **all 53 entities declaring `aclFeatures`** after `CC-46`, 2026-10-10; and one module's per-record owner-only gate), and its **one remaining leg** — a per-entity permission gate on the **human CRUD *list* path** — is open as **`CC-47`**. **The scoreboard is [`platform_points.md`](platform_points.md): one number, `73 of 330 = 22%`** (weighted ≈23%, ±4), derived from the ticked boxes, never typed (§L `derive-counts`). |
 | **The runtime boundary (B-05)** | **DECIDED 2026-10-05 by the owner.** One product, one repository, one deployment, one interface (ours), with Hermes as a **supervised private runtime process behind the internal port**; Hermes is **headless**. Reasoning in [`ARCHITECTURE-hermes-integration.md`](ARCHITECTURE-hermes-integration.md) §11. The Hermes **profile** topology is deferred with the trigger **the agent gateway** |
 | **The model default (`ML-1`)** | **DECIDED 2026-10-05 by the owner: per-tenant policy is the destination, cloud-first is the interim.** It turns three pieces of work from *nice* to *required* — the model registry, the Hermes **agent / persona / profile** mapping, and platform-managed local models. Reasoning in [`ARCHITECTURE-model-server-integration.md`](ARCHITECTURE-model-server-integration.md) §9 |
 | **The running stack** | **8 containers up, all healthy** (app, mcp, hermes, model, opencode, postgres, redis, meilisearch) — **re-measured 2026-10-08** (`docker ps`), all up ~19 hours. The platform's own Postgres 17 (`mercato-postgres-local`) is **live**, so **database behaviour is directly provable on this host** (see §3g, and [`../../workspace/COOKBOOK.md`](../../workspace/COOKBOOK.md)). *Note the trap in the count itself: on 2026-10-06 `docker ps` showed eight rows while `redis` had exited and `mcp` was unhealthy behind it — **eight rows is not eight healthy**, so read the `Status` column, not the line count.* |
@@ -702,6 +716,13 @@ documents and was *not* re-measured — treat it as a starting point, not a fact
 - Directory-based hosting on the VM: each hostname serves its own directory; a file in one
   returns **404** on the other; a host-side edit appears live with no rebuild; the whole chain
   fetched from the laptop over public HTTPS (`200`, certificate valid).
+- **Every searchable entity declares its ACL features** (2026-10-10, `CC-46`): all **53** searchable
+  entities across 10 modules declare `aclFeatures`, each naming an **existing** feature in its owning
+  module's `acl.ts`; a new coverage gate test fails if any entity omits it or names a nonexistent
+  feature (proven RED→GREEN with an md5-identical restore). Search suite **26 suites / 269 tests green**;
+  `tsc --noEmit` clean in `core`/`cli`/`checkout`; a separate-agent hostile-critic confirmed all seven
+  claims. *(This is the **AI-tool** gate's coverage half — it does **not** gate the human CRUD list path;
+  that is `CC-47`.)*
 
 **Not proven** (do not claim these):
 
@@ -714,12 +735,22 @@ documents and was *not* re-measured — treat it as a starting point, not a fact
 - **`D2-wide`** — the 106 parked-module call sites that still bypass the guard registry have **not**
   been migrated; they are recorded, not fixed.
 - **`SD-1`'s remaining paths** — the enforcement consumer for a custom field's records (`CC-20`), the
-  create-branch double-insert (`CC-23`) and the agent ↔ AI-user binding (`CC-27`) are **scheduled, not
-  built**; the unauthorised-decision actor (`CC-25`) is now **BUILT (2026-10-09, `d61d4f6`)** — the
+  agent ↔ AI-user binding (`CC-27`) are **scheduled, not built**; the create-branch double-insert
+  (`CC-23`) is **BUILT (2026-10-09, `53ed2e7b`)** — a DB-enforced unique index + one-statement upsert;
+  the unauthorised-decision actor (`CC-25`) is **BUILT (2026-10-09, `d61d4f6`)** — the
   `entities.definitions.decide` role permission, enforced at all five carrier call sites — and awaits
   only the **owner's one-line confirm** (rule 11); its one honest edge is **`CC-39`** (the actor check
   reads live authorisation state inside a guard's `validate`). See
   [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md).
+- **Row 15 is NOT yet ✅ — do not claim "every read is permission-filtered at the data layer".** It is an
+  **accurate 🟡**: reads **are** tenant/org-**scoped** universally (`buildScopedWhere`), and there **are**
+  two real permission read gates (the AI search tools + one module's owner-only gate), but the
+  **ordinary human CRUD `GET`/list path has no per-entity permission filter** — that last leg is
+  **`CC-47`**, open, re-measure-before-building.
+- **Row 14's export leg is NOT yet done.** Sensitive-field **marking** (15 module `defaultEncryptionMaps`
+  persisted to `encryption_maps`), encrypt-at-rest/decrypt-on-read and the manage screen are all built and
+  measured — but **no export path consults the classification map** (`shared/src/lib/crud/exporters.ts` is
+  classification-agnostic), so "never exported by accident" is **`CC-45`**, open.
 
 ---
 
@@ -733,24 +764,30 @@ documents and was *not* re-measured — treat it as a starting point, not a fact
   `G-07`, `G-17` and `G-21`; the foundation items `D0`, `D1` (`S0` also done); the foundation's
   `D3` (the third guard outcome, `escalate`); **`D2-gap` COMPLETE** (the write-verb sweep closed at
   **0 unguarded across all 35 enabled modules**, 2026-10-07); **the Metadata Registry** (`GAP A`'s
-  registry half, code `59ab859`) — **so phase 0 IS COMPLETE (2026-10-07)**; and the first build slice
+  registry half, code `59ab859`) — **so phase 0 IS COMPLETE (2026-10-07)**; the first build slice
   past it, **`SD-1` Phase 1** (the S2 structure-change gate's decision core, hook and **enforcement**),
-  built and mutation-proven 2026-10-08. A run of small items shipped alongside it — **`CC-26`** (the
-  "AI user" tick in the API-key form), **`CC-28`** (the custom-record `updated_at` read-backs
-  tenant-scoped), **`CC-29`** (a test-store reset so every suite starts clean), and **`CC-30`** (the
-  `custom_entities_storage` upsert given a real unique constraint, plus a tenant-scoped read
-  classifier) — all 2026-10-08.
+  built and mutation-proven 2026-10-08; **`AH-1`** (the `Agent` kernel object, 2026-10-09); and the
+  **→2026-10-10 run of the vision-ordered skeleton — rows 7, 8, 9, 13 and 14 ticked ✅ (PHASE 3
+  COMPLETE), `CC-23` and `CC-25` built, and `CC-46`** (every searchable entity declares `aclFeatures`
+  + a coverage gate). A run of smaller items shipped alongside — `CC-26` (the "AI user" tick in the
+  API-key form), `CC-28` (the custom-record `updated_at` read-backs tenant-scoped), `CC-29` (a
+  test-store reset), `CC-30` (the `custom_entities_storage` upsert given a real unique constraint),
+  all 2026-10-08.
+  **The scoreboard: [`platform_points.md`](platform_points.md) — `73 of 330 = 22%`** (derived from the
+  ticked boxes, never typed). The **live FRONTIER** is **`CC-47`** (row 15's human-CRUD-list leg) **·**
+  **`CC-45`** (row 14's export leg); the *authoritative* statement of it is `platform_points.md`'s
+  `▶ FRONTIER` box, and **`BACKLOG.md`'s box points to it, not the reverse.**
   **What is left to do, in one place, is `BACKLOG.md`; what is being done *now* is the JOURNAL box.**
   **Still open in the foundation:** **`D2-wide`** — 106 call sites still bypass the guard registry,
   **all in parked modules** (every enabled module is retired; the rest are parked and recorded, not
   migrated); and **`GAP A`'s `Resource` envelope half** — a Phase −1 contract, deliberately unbuilt.
   **Still open in `SD-1`** (each scheduled in [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md)):
-  **`CC-20`** (a custom *field*'s records have no enforcement consumer — blocked on `G-04`), **`CC-23`**
-  (the create-branch double-insert — needs a migration), **`CC-27`** (the agent ↔ AI-user binding — **BLOCKED
-  on `AH-1`**, the agent-as-kernel-object, which is *not built*; the binding hangs off it), and **`CC-39`**
-  (the CC-25 actor check reads live state inside a guard's `validate` — a named, minor contract deviation).
-  **`CC-25` (the decision actor's permission) is BUILT 2026-10-09 (`d61d4f6`)** — awaiting the owner's
-  confirm — *not* one of the open rows. **A caution, measured 2026-10-08:
+  **`CC-20`** (a custom *field*'s records have no enforcement consumer — blocked on `G-04`) and
+  **`CC-27`** (the agent ↔ AI-user binding — now **unblocked**, since `AH-1` closed 2026-10-09; it is
+  the FRONTIER's **NEXT**), plus **`CC-39`** (the CC-25 actor check reads live state inside a guard's
+  `validate` — a named, minor contract deviation). **`CC-23` (the create-branch double-insert) and
+  `CC-25` (the decision actor's permission) are BUILT (2026-10-09, `53ed2e7b` / `d61d4f6`)** — `CC-25`
+  awaits the owner's confirm — *not* open rows. **A caution, measured 2026-10-08:
   `SD-3` (the tier mapping as a superadmin setting) is ALREADY BUILT (`[x]`, 2026-10-06, BUILD-ORDER §2d)
   — several documents still call it "the next slice", which is stale.** The next **undone** slice in
   BUILD-ORDER order is **`SD-2` / `S9`** (mark core functions and guard their deletion — startable, `G-07`
@@ -825,14 +862,31 @@ alone means this page is broken — **fix the page, not the newcomer.**
 from an older document are not equally current, and mixing them in one table is how this page
 goes wrong. If two older documents disagree on a number, say so — never average them.
 
-*Last updated: 2026-10-09, revision 14 — **`A3` (CC-27) is BLOCKED, not next: a premise was corrected
-(rule 13).** The agent ↔ AI-user binding *hangs off* **`AH-1`** (the agent as a kernel object), which is
-**not built** (`BACKLOG.md:107`, unchecked) — so CC-27 must not be built before AH-1. The owner's **approval**
-of CC-27 (2026-10-08) stands; only the *order* was wrong (the action list had copied the approval but dropped
-the blocker). The **startable next build is `AH-1`**; the **owner-facing next step is `A6`/`A7`** (rebuild +
-deploy — unblocked by A4+A5, owner-gated). (Revision 13, below, recorded **`A2` built**; revision 12 recorded
-the owner's 2026-10-09 rulings as the ordered ACTION LIST, the register's mechanical linkage, and the
-live-platform warning block in §5.)*
+*Last updated: 2026-10-10, revision 15 — **row 15's ACL-coverage leg is CLOSED (`CC-46`), the live
+FRONTIER is now `CC-47` · `CC-45`, and PHASE 3 is complete.** `CC-46` (code `c03eca5c`, docs
+`dfbb497`+`10ecfc5`) makes **all 53 searchable entities** declare `aclFeatures` (47 declarations added
+across 10 `search.ts` files — `47 insertions(+), 0 deletions`) plus a **coverage gate test** that fails
+if a new entity is added un-gated, so `P10b` flipped **☐ → ☑** and the scoreboard moved **72 → 73 of
+330 = 22%**. **Row 15 (`P10`) still STAYS 🟡** — its absolute claim ("EVERY read is permission-filtered
+at the data layer") also needs a gate on the **human CRUD list path**, which `CC-46` did not touch; that
+last leg is **`CC-47`**. This revision re-measured §7 Group A (both repo HEADs, the tracked-markdown
+counts) and folded a **rule-13 correction** through every document (`platform_points`, `BACKLOG`,
+`BUILD-ORDER`, `COMPLETION-CALLBACKS`, `JOURNAL`): the long-quoted **"67 tables"** was wrong — the true
+count is **53 searchable entities** (the "67" counted textual `entityId:` occurrences, 14 of them in
+helper code inside `customers/search.ts`). **A note for the next agent:** several statements below still
+carry their revision dates on purpose — a figure re-measured this revision says so; an older one keeps
+its date so you can tell the two apart (§7's rule). (Revision 14, below, recorded the owner's 2026-10-09
+rulings as the ordered ACTION LIST and the `CC-27`-is-blocked correction.)*
+
+*Previous — 2026-10-09, revision 14 — **`A3` (CC-27) is BLOCKED, not next: a premise was corrected
+(rule 13).** The agent ↔ AI-user binding *hangs off* **`AH-1`** (the agent as a kernel object), which was
+**not built** at that date (`BACKLOG.md:107`, unchecked) — so CC-27 must not be built before AH-1. (By
+revision 15, **`AH-1` is BUILT (2026-10-09)** and `CC-27` is the FRONTIER's **NEXT** — unblocked.) The
+owner's **approval** of CC-27 (2026-10-08) stands; only the *order* was wrong (the action list had copied
+the approval but dropped the blocker). The **startable next build was `AH-1`**; the **owner-facing next
+step is `A6`/`A7`** (rebuild + deploy — unblocked by A4+A5, owner-gated). (Revision 13, below, recorded
+**`A2` built**; revision 12 recorded the owner's 2026-10-09 rulings as the ordered ACTION LIST, the
+register's mechanical linkage, and the live-platform warning block in §5.)*
 *Previous — 2026-10-07, revision 11 — the `D2-gap` write-verb sweep COMPLETE; the platform's own
 deployment now reachable from this page (0 unguarded across all 35 enabled modules, and the GET-that-writes
 class found and fixed). §2 step 7, §7's two HEADs and §8 updated in the same change; §5 first pointed at

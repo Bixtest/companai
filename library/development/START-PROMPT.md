@@ -14,6 +14,9 @@ continues the development. It is short on purpose: it tells the agent what to re
 and the rules it may not break — and **nothing about "what is next", because what is next changes
 every session.** The live task lives in **one place only: the `★ ACTIVE TASK` section at the top of
 [`../../JOURNAL.md`](../../JOURNAL.md)**. This prompt sends the agent there.
+*(Last refreshed 2026-10-10 — the reading tiers and the "context that shaped the order" block were
+updated for the owner's 2026-10-09 ruling and PHASE 3's completion. **The task still lives only in the
+box.**)*
 
 **How to use it.** Copy everything between the two `═══` rules below and send it as the first
 message of the new session. Nothing else is needed. If the project has moved, change the two paths
@@ -45,6 +48,16 @@ direction gets buried.
     b. INDEX.md                               <- the map of every folder
     c. library/development/HANDOVER.md        <- written for you: what exists, the traps, the rules
     d. library/development/BACKLOG.md         <- what is left, in order. The one plan
+    d2. library/development/platform_points.md
+                                              <- THE SCOREBOARD (owner's 2026-10-09 ruling): one number
+                                                 derived from the ticked boxes, and one plain-English
+                                                 list sorted in the vision's Phase 0 -> Phase 10 order.
+                                                 Its top box, the "▶ FRONTIER", is the AUTHORITATIVE
+                                                 statement of what is being built now (BACKLOG's box
+                                                 points here, not the reverse)
+    d3. library/development/BUILD-ORDER.md    <- the order the work must be done in (contracts, then
+                                                 foundation, then the stack). Phase 0 = the foundation
+                                                 completion -- now COMPLETE
     e. library/development/ARCHITECTURE-request-outcomes.md
                                               <- the owner's core features_pack: the three things a
                                                  prompt can become (a one-time answer, a model proposal,
@@ -213,8 +226,8 @@ finished in the guard layer and was not. That family's **`D2-gap` sweep is COMPL
 route that reached **no guard of any kind** was found and closed (**0 unguarded across the 35 enabled
 modules**, 2026-10-07), including a class the scanner could not see (a **GET that writes**).
 
-**The foundation that followed is now also COMPLETE (2026-10-07) — and the build has started on top of
-it.** The four named guard-engine gaps are built and proven: **`D0`** (the registry is populated and
+**The foundation that followed is COMPLETE (2026-10-07), and the build on top of it is well under way.**
+The four named guard-engine gaps are built and proven: **`D0`** (the registry is populated and
 delivers guards from an enabled module, proven by mutation), **`D1`** (the tier/defaults/fallbacks
 settings table exists — rules are no longer `.ts` code alone), **`D3`** (the guard result has a third
 outcome, `escalate`, treated as *not performed*), and **`GAP A`'s registry half** — the read-only
@@ -224,10 +237,22 @@ structure may not be applied until its permissions are decided, by a person or b
 and mutation-proven across **every create path**, with its remaining paths scheduled in
 `COMPLETION-CALLBACKS.md`. **The only guard work left is `D2-wide`** (106 call sites, all in parked
 modules — recorded, not migrated), and **`GAP A`'s `Resource` envelope** is a Phase −1 contract,
-deliberately unbuilt. **One trap, measured 2026-10-08: `SD-3` (the tier mapping as a superadmin setting)
-is ALREADY BUILT (2026-10-06) — several documents still call it "the next slice", which is stale.** The
-next **undone** slice in BUILD-ORDER order is **`SD-2` / `S9`** (mark core functions and guard their
-deletion), then **`SD-4` / `SD-5`**. `library/development/BLUEPRINT-GAP-ANALYSIS.md` explains the rest of
+deliberately unbuilt.
+
+**The order changed on 2026-10-09, and this is the shape you inherit.** The owner ruled: **build order =
+the vision's order** — finish the architectural skeleton (vision **Phase 3** policy kernel → **Phase 4**
+classification → **Phase 5** enforcement → **Phase 6** audit → **Phase 7** gateway) **before** any
+business-module work; and the task list became **one plain-English scoreboard**,
+[`platform_points.md`](platform_points.md), sorted in the vision's Phase 0 → Phase 10 order, opening with
+**one number derived from the ticked boxes** (never typed). **As of revision 15 of the handover
+(2026-10-10): PHASE 3 is COMPLETE** — rows 7, 8, 9, 13 and 14 are ✅, and **row 15 is an accurate 🟡**
+(reads are tenant/org-**scoped** universally and there are two real permission read gates, but the
+**human CRUD *list* path** has no per-entity permission filter — that last leg is open as `CC-47`; row
+14's export leg is open as `CC-45`). **Do not re-derive the order from this prompt** — read the
+`★ ACTIVE TASK` box for *what is in hand*, `BUILD-ORDER.md` for the *order*, and `platform_points.md`
+for *the one number*. **One trap worth keeping, measured 2026-10-08: `SD-3` (the tier mapping as a
+superadmin setting) is ALREADY BUILT (2026-10-06) — several documents still call it "the next slice",
+which is stale.** `library/development/BLUEPRINT-GAP-ANALYSIS.md` explains the rest of
 the receiving plan, and `CORE-MODULES-REGISTER.md` says honestly which modules are truly built.
 
 **Keep the eye on the prize while you build.** The whole product is one loop: *a need → the AI
@@ -299,6 +324,11 @@ Every point you raise carries a status: **FIXED** (and how you re-checked) · **
 - **Never add a task to this file.** The task lives in the `★ ACTIVE TASK` box at the top of
   `JOURNAL.md` (owner's instruction, 2026-10-06). This file sends the agent there and nothing else.
   That is why the reading list and the rules can stay stable while the task changes every session.
+- **Keep the reading list current, but keep it task-free.** When a *front-door* document is added,
+  renamed or superseded (a new scoreboard, a moved plan), update the tiers — that is maintenance, not a
+  task list. The last such maintenance was **2026-10-10** (the handover's revision 15): `platform_points.md`
+  and `BUILD-ORDER.md` were promoted into tier A, and the "context that shaped the order" block was
+  refreshed for the owner's 2026-10-09 ruling ("the order is the vision's order") and PHASE 3's completion.
 - **If a new rule costs real time**, add it to the list — but only if it is the kind of mistake that
   is invisible from the code. Everything else belongs in `LESSONS.md`.
 - **The standing working rules are also gathered in one place:**
