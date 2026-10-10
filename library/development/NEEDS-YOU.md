@@ -28,7 +28,7 @@ anything else first. Where an item is **not** a decision, it says so, and you ca
 
 ---
 
-## Part 1 — Decisions I need (**1 open** — `NY-20` (row 16 scope) **new 2026-10-10**; `NY-19` **decided 2026-10-10** (owner chose Option A: build the read-gate coverage test → built as `CC-47`, row 15 ✅); `NY-18` **decided 2026-10-10** ("we follow your recommendations" → Option B, built as `CC-49`); `NY-16` and `NY-17` **decided 2026-10-10** (blank the value; Option B); `NY-15` decided 2026-10-09; `NY-14` closed 2026-10-06; `NY-1`, `NY-2`, `NY-8`, `NY-13` closed; `NY-4` is "nothing needed")
+## Part 1 — Decisions I need (**0 open** — `NY-20` (row 16 scope) **decided 2026-10-11: Option A**; `NY-19` **decided 2026-10-10** (owner chose Option A: build the read-gate coverage test → built as `CC-47`, row 15 ✅); `NY-18` **decided 2026-10-10** ("we follow your recommendations" → Option B, built as `CC-49`); `NY-16` and `NY-17` **decided 2026-10-10** (blank the value; Option B); `NY-15` decided 2026-10-09; `NY-14` closed 2026-10-06; `NY-1`, `NY-2`, `NY-8`, `NY-13` closed; `NY-4` is "nothing needed")
 
 > **Numbering note.** Items are numbered once and **never reused**, so that a number you have already
 > quoted keeps meaning the same thing. Item 8 was appended here on 2026-10-05 and answered the same
@@ -115,7 +115,7 @@ not hidden. *(Rule-13 correction, 2026-10-10: this read "163"; measured three wa
 
 ---
 
-### `NY-20` — Row 16 ("own / team row scope"): which scope do you actually want? — **DECIDE** *(new, 2026-10-10)*
+### `NY-20` — Row 16 ("own / team row scope"): which scope do you actually want? — ✅ **DECIDED 2026-10-11 (owner chose Option A)** *(Option B documented as a future addition)*
 
 **What row 16 says.** *"You can restrict a person to their own rows / their team's rows, not just their whole
 tenant."* (BUILD-ORDER item 18: *"today scope is tenant + organization only."*)
@@ -146,7 +146,9 @@ which column is the owner (the same shape as the existing `aclFeatures` declarat
 bounded change, and defers "team" as a **scheduled callback** — named, not silently dropped. If you want the
 full thing, pick B and I will treat the team entity as its own project. Detail: `PLAN-ROW16-own-team-row-scope.md`.
 
-**Your answer (one word):** A, B, or C.
+**Your answer (2026-10-11): A — own-only, opt-in per entity; and document B as a future addition.** A is being
+built (`CC-50` is the partial); **Option B** (a real `team` entity + membership + UI + migrations) is written
+down as a **future addition** in `PLAN-ROW16-own-team-row-scope.md` §7, not dropped. **Part 1 is 0 open again.**
 
 ---
 

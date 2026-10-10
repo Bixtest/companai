@@ -93,3 +93,41 @@ bounded, testable change, and defers "team" with a scheduled callback rather tha
 Record the ruling in `NEEDS-YOU.md` (NY-20), then execute the chosen option under the full protocol
 (hostile critic as a separate agent, RED-then-GREEN with md5-verified restores, two-route re-measure, green
 gate, docs + commit — committing as I go, per the owner's batch instruction).
+
+## 7. THE OWNER'S RULING (2026-10-11) — Option A, and **Option B is a FUTURE ADDITION, not dropped**
+
+**Decision (owner, 2026-10-11): "We will currently do A but after you document B as a future addition."**
+
+### 7.1 What is being built now — **Option A (own-only, opt-in per entity)**
+
+The per-entity `rowScope` declaration + a role-level "own-only" switch, so an entity that declares an owner
+column can be restricted to `ownerField = caller`. **No new `team` entity.** Delivers row 16's substance: a
+person *can* be restricted to their own rows, and a role with the normal scope is unchanged.
+
+### 7.2 What is deferred — **Option B (own + team) — the FUTURE ADDITION**
+
+Recorded here so it is never lost (rule 8 / the owner's explicit instruction). **B = A plus a real `team`
+concept**, which does not exist today in any form (measured 2026-10-11: no team entity, no membership, nothing
+on `auth`). B needs, as its own project:
+
+1. **A `team` entity + membership** — a table plus a many-to-many (user ↔ team), tenant/org-scoped, with its
+   own CRUD and a manage screen. *(This is the item that makes B "large" — the rest of B is a filter.)*
+2. **A `teamField` on the per-entity `rowScope` declaration** (B's only change to the row-scope mechanism A
+   builds): where A filters `ownerField = caller`, B additionally allows `ownerField ∈ teamMemberIds(caller)`.
+3. **A resolution step** in `buildScopedWhere()` / the scope resolver
+   (`packages/core/src/modules/directory/utils/organizationScope.ts`) to expand "my teams" → the set of member
+   ids, cached like the org scope (the file already has a short-TTL cache + tag invalidation to copy).
+4. **A role-level third mode** — currently A's switch is all-or-own; B adds "team", so the role-level
+   enumeration becomes `all | own | team`.
+5. **Its own hostile-critic + two-route + RED-then-GREEN pass and a coverage test**, per A.
+
+**Why it is genuinely deferred, not lazy:** §2 — the blocker is that there is **no team concept and no shared
+owner column**. A can be built against the columns that exist; B must first invent a concept the platform has
+never had, with a schema + migrations + UI, which is a project in its own right. **Trigger to bring B back:**
+whenever the owner asks for team-based visibility, or when the first real caller needs it — whichever comes
+first. Scheduled in `COMPLETION-CALLBACKS.md` (**`CC-51`**) with that trigger named.
+
+### 7.3 Status of A
+
+Recorded as the partial **`CC-50`**. Build proceeds under the full protocol; this section is updated with the
+measured outcome when A lands (and `CC-50` closes).

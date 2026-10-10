@@ -111,13 +111,18 @@ gets broken.
 
 9. **You own the code you touch — fully — and you challenge the task before you execute it**
    *(owner, 2026-10-08)*. **Two halves, both binding.**
-   **(a) Ownership.** Once you start working on a piece of code you are **fully responsible for the
-   entirety of it** — every issue, bug, incomplete piece and error, and every optimisation or enhancement
-   it needs. **You either fix it directly, or you document it in the backlog with the trigger that brings
-   it back** — you never leave a defect standing as "pre-existing, not mine". A thing you touched is
-   yours; a thing you noticed is yours to *schedule*, at minimum. *(This is the same standard as the
-   completion register — [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md) — applied to **everything**
-   you meet, not only to the slice you were asked for.)*
+   **(a) Ownership — of the FULL codebase, not just your diff** *(strengthened by the owner, 2026-10-11 —
+   *"you hold the full responsibility of the state of the full codebase as long as you are working on it,
+   not just your work on it. Any flawed, incomplete, bugged or error-carrying code is your responsibility
+   to fix or document to be fixed in the right development document. Same with any test that is required:
+   either you do it if it impacts your work, or you schedule it to be tested."*).* While you are working on
+   this project, **every issue, bug, incomplete piece, error, and needed test in the whole tree is yours** —
+   not only the files you happened to edit. **You either fix it directly, or you schedule it in the right
+   document ([`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md) / [`BACKLOG.md`](BACKLOG.md)) with the
+   trigger that brings it back** — **you never leave a defect standing as "pre-existing, not mine"**, and
+   you never leave a required test unbuilt as "not my slice". A thing you touched is yours; a thing you
+   *noticed* is yours to **schedule**, at minimum. *(This is the completion register applied to
+   **everything** you meet, not only to the slice you were asked for.)*
    **(b) Challenge, then execute.** **Before** working on any task it is your responsibility to
    **investigate whether it is the best thing to do for the project**, to **challenge it if it is not**,
    and to **execute it if it is**. Never run the roadmap blind.
@@ -301,7 +306,11 @@ that still need work). Updating the front end helps me testing the micros as you
 - **If a rule stops being true**, delete it — do not leave it to be obeyed after it is wrong.
 - **Keep it short.** This is a page the agent reads once at the start; a long page defeats its purpose.
 
-*Last updated: 2026-10-08 — added rule 10 (build every task as a PACKAGE: study references → pick the
+*Last updated: 2026-10-11 — **rule 9(a) strengthened** on the owner's instruction: ownership is of the
+**full codebase while you are working on it, not just your own diff** — any flawed/incomplete/bugged/
+error-carrying code, and any required test, is either fixed or scheduled in the right document, never left
+as "pre-existing, not mine". Previously 2026-10-08 — added rule 10 (build every task as a PACKAGE: study
+references → pick the
 `platform_points.md` points → write the requirement → **prove the prerequisites flawless first** → trace
 the impact and update the plans → execute and run the total quality protocol), on the owner's
 instruction. Previously 2026-10-08 — added rule 9 (you own the code you touch, fully; and challenge the
