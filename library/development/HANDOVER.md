@@ -14,16 +14,24 @@ written for exactly that person — and this revision is written for an agent th
 continue the development work.** Read it top to bottom once (about 20 minutes), then
 follow §2 to actually get working. Everything else in the project is reachable from here.
 
-**Written 2026-10-05, revision 22 (2026-10-11). Owner: Ramzi. Development machine: `BIXMASERVER` (Windows 10 Pro).**
-**This revision records the 2026-10-11 BUILD of row 18 (the AI's read path goes through the SAME column- and
-row-level gates as a human — `CC-53`, now ✅), which COMPLETES the PHASE-5 batch (rows 16 → 17 → 18).** Row 18's
-rule-0b measurement first: the AI record-returning tools (`packages/search/src/modules/search/ai-tools.ts`)
-applied the **entity** gate (`authorizeEntityAccess`, `aclFeatures`, fail-closed) + tenant/org **scope**, but
-**neither** the platform **classification** map (`defaultEncryptionMaps`) **nor** the owner row-scope. The build
-wires `search_get` to mask every classified field via the **same helper the human export uses** (`CC-45`'s
-`resolveExportEncryptedFields`/`isEncryptedExportField`), **recursing into nested object/array values**
-(`maskValueDeep`) and **failing closed** (`maskAll`) on a throwing map; `search_query` drops the index-time
-presenter for a classified entity; `search_aggregate` refuses a classified `groupBy`. **No map ⇒ byte-identical.**
+**Written 2026-10-05, revision 23 (2026-10-11). Owner: Ramzi. Development machine: `BIXMASERVER` (Windows 10 Pro).**
+**This revision records the 2026-10-11 BUILD of row 22's CORE leg (an AI user can run only the agents bound to
+it — `CC-27`, now ✅ core), with two follow-ons left OPEN and named.** Rule-0b measurement first: the AI **actor**
+is an `api_keys` row issuing an `ai_worker:<id>` subject; the AI **agent** is **code-declared** (in-memory `Map`,
+zero DB reads); and both agent dispatch routes (`api/ai/run-object`, `api/ai/chat`) took the agent id as a **raw
+request-body string with no binding check**. Built: an `ai_agent_bindings` table (one live row per
+`(tenant, org, principal, agent)` via two partial-unique indexes), a repository, a **fail-closed**
+`resolveAgentBinding` for `ai_worker` (passthrough for a human), **403 `agent_not_bound`** wired into both
+dispatch routes after the policy gate and before the runtime call, a manage surface
+(`api/ai/agents/[agentId]/bindings`), and a coverage gate. A separate-agent hostile critic found **2 real
+defects** (the coverage marker list omitted the real dispatcher `runAiAgentText`; the test `requirePrincipal`
+mock ignored `keyId`) — both fixed, the coverage gate now derives its marker list from the runtime's own exports;
+**9 RED-then-GREEN** mutations, md5-verified; **1364 tests pass** (only the 2 pre-existing `isolated-vm`
+electron-ABI suites fail, proven at HEAD). **NOT built (not claimed):** the **narrowing leg**
+(`computeBoundRunScope` is built + tested but **not called** — a binding's tool/feature narrowing has no runtime
+effect) → **`CC-55`**; the pending-action **confirm** re-check → **`CC-56`**. ONE NUMBER **72 / 321 = 22%**,
+**unchanged** (§L's **ninth** re-run, both routes agree). The live FRONTIER is now **`CC-44`**, then
+**`CC-55`**/`CC-56`. **Prior — revision 22: row 18 (`CC-53`) built the AI read path onto the human column-/row-level gates, completing the PHASE-5 batch (rows 16 → 17 → 18).**
 **Two separate-agent hostile-critic rounds** found and fixed **two real holes** (the presenter-promotion leak +
 the raw aggregate bucket leak; then a classified key **nested in an object value** that the first top-level-only
 mask missed) — **6 RED-then-GREEN** mutations, md5-verified (`8b9238b006ec1ea6eab76199d6365bc6`); green 12/12 in
@@ -33,7 +41,7 @@ question **`NY-22`** (rules 8/10d/11). The ONE NUMBER is **72 / 321 = 22%, uncha
 LIST box has **no** fresh appendix marker in §A–§K; §L now carries an **eighth** consecutive re-run, and this
 re-run's two routes **disagreed** until the verifier's `[A-K]` regex bug — it never matched `## L.` — was found
 to be counting the **ledger §L** as points). The previous revision (21) recorded the row-17 build (`CC-52`,
-every-table coverage gate). **The PHASE-5 batch is now COMPLETE; the live FRONTIER is `CC-27` (then `CC-44`).**
+every-table coverage gate). **The PHASE-5 batch is COMPLETE and row 22's core is now also BUILT; the live FRONTIER is `CC-44` (then `CC-55`/`CC-56`).**
 The revision before that (20) recorded the row-16 own-leg build (`CC-50` **CLOSED**; the row stays 🟡 because the
 team-leg is deliberately deferred, `CC-51`): an opt-in `ownerField`/`ownerFeature` declaration on
 **`OrmEntityConfig`** (rule-13 correction — it belongs on the CRUD layer every `makeCrudRoute` caller shares,
@@ -94,9 +102,10 @@ named in the `★ ACTIVE TASK` box at the top of [`../../JOURNAL.md`](../../JOUR
 that carries it (step 7, and the owner's instruction of 2026-10-06). The **live FRONTIER** (its
 authoritative statement is [`platform_points.md`](platform_points.md)'s `▶ FRONTIER` box) is
 **re-derived from the ONE NUMBER** — row 16's own-leg is built (`CC-50` closed; row remains 🟡 pending the
-deferred team-leg `CC-51`), rows 17 (`CC-52`) and 18 (`CC-53`) are **✅ DONE** (the PHASE-5 batch is
-complete); the live FRONTIER is now **`CC-27`** (the AI-user ↔ agent binding row, unblocked since `AH-1`
-closed), then **`CC-44`** (the write-path feature gate being opt-in, not default-deny — an owner policy call);
+deferred team-leg `CC-51`), rows 17 (`CC-52`), 18 (`CC-53`) and 22's core (`CC-27`) are **✅ DONE** (the PHASE-5
+batch is complete); the live FRONTIER is now **`CC-44`** (the write-path feature gate being opt-in, not
+default-deny — an owner policy call), then **`CC-55`** (apply the bound scope to the runtime — row 22's
+narrowing leg) and **`CC-56`** (re-check the binding on the pending-action confirm path);
 each is buildable now, and **it must be re-measured in code before
 building** (rule 0b).
 
@@ -916,7 +925,7 @@ alone means this page is broken — **fix the page, not the newcomer.**
 from an older document are not equally current, and mixing them in one table is how this page
 goes wrong. If two older documents disagree on a number, say so — never average them.
 
-*Last updated: 2026-10-11, revision 22 — **row 18 (`CC-53`) BUILDS the AI read path onto the human column-/row-level gates, COMPLETING the PHASE-5 batch (rows 16 → 17 → 18).** The AI record-returning tools (`packages/search/src/modules/search/ai-tools.ts`) now apply the platform **classification mask** — the **same** `resolveExportEncryptedFields`/`isEncryptedExportField` helper the human export uses (`CC-45`) — on `search_get` (with `maskValueDeep` recursion into nested object/array values and a **fail-closed** `maskAll`), **drop the index-time presenter** for a classified entity (`search_query`), and **refuse a classified `groupBy`** (`search_aggregate`); no map ⇒ **byte-identical**. **Two** separate-agent hostile-critic rounds fixed **two real holes** (presenter-promotion + raw aggregate buckets; then a classified key nested in an object value); **6 RED-then-GREEN** mutations, md5-verified (`8b9238b006ec1ea6eab76199d6365bc6`); green 12/12 new / 281/281 search; `tsc` clean. The **own row-scope leg is NOT built** (no entity is both searchable and own-scoped → the owner clause has **no reader** on the AI path) → owner question **`NY-22`**. ONE NUMBER **72 / 321 = 22%, unchanged** (§L's **eighth** re-run; this re-run's two routes disagreed until the verifier's `[A-K]` regex bug — it never matched `## L.` — was found counting the **ledger §L** as points). The live FRONTIER is now **`CC-27`**, then **`CC-44`**. **Prior — revision 21: row 17 (`CC-52`) built the every-table coverage gate.** **Prior — revision 20: row 16's own-leg (`CC-50`), with rule 9(a) strengthened and the CC-47 "in neither" count corrected 163→161.**
+*Last updated: 2026-10-11, revision 23 — **row 22's (`CC-27`) CORE leg: an AI user can run only the agents bound to it.** The AI **actor** is an `api_keys` row issuing an `ai_worker:<id>` subject; the AI **agent** is **code-declared** (in-memory `Map`, zero DB reads); both dispatch routes (`api/ai/run-object`, `api/ai/chat`) took the agent id as a **raw request-body string with no binding check**. Built: an `ai_agent_bindings` table (one live row per `(tenant, org, principal, agent)` via two partial-unique indexes), a repository, a **fail-closed** `resolveAgentBinding` for `ai_worker` (passthrough for a human), **403 `agent_not_bound`** wired into both dispatch routes after the policy gate and before the runtime call, a manage surface (`api/ai/agents/[agentId]/bindings`, GET/POST/DELETE), and a coverage gate. A separate-agent hostile critic found **2 real defects** (the coverage marker list omitted the real dispatcher `runAiAgentText` — fixed so the gate derives its marker list from `agent-runtime.ts`'s own exports; the test `requirePrincipal` mock ignored `keyId` — fixed); **9 RED-then-GREEN** mutations, md5-verified; `tsc` clean; **1364 tests pass** (only the 2 pre-existing `isolated-vm` electron-ABI suites fail, proven at HEAD). **Lesson banked L116:** a jest positional path containing `[agentId]` is a **glob** that matches nothing — "no tests found" ≠ "all tests passed", so a mutation proof must assert the **test count**. **Legs NOT built (not claimed):** the **narrowing leg** (`computeBoundRunScope` built + tested but **never called** — a binding's tool/feature narrowing has no runtime effect) → **`CC-55`**; the pending-action **confirm** re-check → **`CC-56`**. ONE NUMBER **72 / 321 = 22%, unchanged** (§L's **ninth** re-run; both routes agree — new LIST row 22 has no fresh appendix marker). The live FRONTIER is now **`CC-44`**, then **`CC-55`**/**`CC-56`**. **Prior — revision 22: row 18 (`CC-53`) built the AI read path onto the human column-/row-level gates, completing the PHASE-5 batch (rows 16 → 17 → 18).**
 
 *Prior — 2026-10-11, revision 19 — **the PHASE-5 batch (rows 16 → 17 → 18) begins; row 16 first; rule 9(a) strengthened; the CC-47 "in neither" count corrected 163→161.**
 **Row 16 (own / team row scope) — MEASURED (rule 0b) and DECIDED.** Scope today is exactly `tenantId` + `organizationId` + `organizationIds` (`shared/src/lib/api/crud.ts` `buildScopedWhere`; `factory.ts` `withCtx()` `:1359-1412`); `auth.sub` is stamped into audit/event records 20+ times in `factory.ts` but **never used to filter rows**; there is **no `team` concept**; and there is **no shared owner column** (`createdByUserId` uuid vs `createdBy` varchar vs `assignedTo`/`assignedToRoles`) — so a blanket owner filter is impossible and row 16 must be an **opt-in per-entity `rowScope` declaration** (the `aclFeatures` pattern in `shared/src/modules/search.ts`). **Owner chose Option A** (`NY-20`) = own-only, opt-in, no team entity; **Option B (a real `team` entity + membership + UI + migrations) is documented as a FUTURE addition** (`PLAN-ROW16-own-team-row-scope.md` §7). Partial scheduled as **`CC-50`**. Rows 17 and 18 follow, each committed as it lands.

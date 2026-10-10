@@ -35,7 +35,59 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
-### ✅ DONE — **row 18 (the AI's read path goes through the SAME column- and row-level gates as a human, `BUILD-ORDER` item 19): BUILT (`CC-53`). The PHASE-5 batch (row 16 → row 17 → row 18) is COMPLETE. ★ NEXT = `CC-27` (then `CC-44`).**
+### ✅ DONE — **row 22 (an AI user can run only the agents bound to it, `BUILD-ORDER` item 20): CORE BUILT (`CC-27`). Narrowing leg → `CC-55`; confirm re-check → `CC-56`. ★ NEXT = `CC-44` (then `CC-55`, `CC-56`).**
+**(2026-10-11; code repo `workspace/starting-kit`.)**
+
+**The task.** Row 22: *"An AI user can run only the agents bound to it."* Per rule 0b I **re-measured the
+premise in code first**: the AI **actor** is an `api_keys` row whose credential issues an `ai_worker:<id>`
+subject (`aiWorkerSubject`/`derivePrincipal`); the AI **agent** is **code-declared** (`ai-agents.generated.ts`)
+resolved from an **in-memory `Map`** (`agent-registry.ts:16 agentsById`) with **zero DB reads**; and both
+agent dispatch routes (`api/ai/run-object`, `api/ai/chat`) took the agent id as a **raw request-body string
+with no binding check** — any authenticated caller could name any agent.
+
+**The contract built (`PLAN-CC-27-agent-binding.md` §2, `B1`–`B6`).** (B1) the **binding table** —
+`ai_agent_bindings`, keyed `(tenant, org, principal, agent)`, one live row per pair via two partial-unique
+indexes, additive migration `Migration20261010180000_ai_agent_bindings.ts`. (B2) **fail-closed for an
+`ai_worker`** — `resolveAgentBinding` returns `bound:false` on no-binding / no-tenant / empty id. (B3)
+**narrowing-only** — `computeBoundRunScope` INTERSECTs tools and UNIONs features (a binding can never widen).
+(B4) **no regression** — a **human** principal passes through untouched. (B5) the agent **definition stays
+in code** (only the binding is DB). (B6) the **manage surface + a coverage gate** — `api/ai/agents/[agentId]/bindings`
+(GET/POST/DELETE, `ai_assistant.settings.manage`, mutation-guarded) and `binding-coverage.test.ts`.
+
+**Wiring.** Both routes call `resolveAgentBinding` **after** the policy gate and **before** the runtime call,
+returning **403 `agent_not_bound`**. The owner ruled **ENFORCE · AI WORKERS ONLY** (the ONE question, §2.2).
+
+**Hardening (TOTAL quality protocol).** A **separate-agent hostile critic** found **2 REAL defects, both
+fixed:** (1) the coverage gate's marker list **omitted the real chat dispatcher `runAiAgentText`** — it named
+`runAiAgentStream`/`runAiAgentChat`/`streamAiAgent`, **none of which exist** — so the gate would NOT have caught
+the most likely new un-gated site; fixed to the runtime's **real** exports, **plus a new test that derives the
+marker list from `agent-runtime.ts`'s own `export function runAiAgent*` surface** (drift now fails the build),
+**proven** by adding a scratch `runAiAgentText` route (the gate goes RED). (2) the route tests' `requirePrincipal`
+**mock ignored `keyId`**, diverging from the real `derivePrincipal`; fixed to resolve a machine id from `keyId`.
+**9 RED-then-GREEN mutations** (resolver fail-open ×3, route 403 removal, narrowing widening, coverage
+import/refusal, manage 403 gate, manage 400) each restore **md5-verified**; `tsc --noEmit` clean; **1364 tests
+pass** across the package — only the **2 pre-existing `isolated-vm` electron-ABI suites** fail, **proven
+pre-existing at HEAD** by stashing the work and re-running.
+
+**Lesson banked (L116).** The mutation proof itself was **almost a false proof**: two manage-route mutations
+read **GREEN** — not because the tests miss the line, but because the suite **never ran** (the path contained
+`[agentId]`, which to jest's positional matcher is a **glob** that matches nothing; "no tests found" ≠ "all
+tests passed"). The fix — assert the **test COUNT**, not merely the absence of failures — is the standing rule now.
+
+**Honest scope (rule 13).** The row's **core** claim is enforced on the two dispatch routes. **Two legs are
+NOT built and are NOT claimed:** the **narrowing leg** (`computeBoundRunScope` is built + unit-tested but
+**nothing calls it** — the routes read only `binding.bound`, so a binding's `toolAllowlist`/`requiredFeatures`
+have **no runtime effect** today) → **`CC-55`**; and the pending-action **confirm** path
+(`api/ai/actions/[id]/confirm`) **executes a tool without re-checking the binding** (checked at dispatch;
+a revocation between dispatch and confirm is not observed) → **`CC-56`**.
+
+**THE ONE NUMBER (two routes).** **72 / 321 = 22%** — **unchanged**; row 22 is a **new LIST row** but has **no**
+fresh appendix marker in §A–§K (derivation walks §A–§K only). **9th consecutive re-run**; both routes agree
+(Route 1 regex · Route 2 char-scan). Recorded in `platform_points.md` §L.
+
+---
+
+### ✅ DONE / 🟡 (superseded by row 22) — **row 18 (the AI's read path goes through the SAME column- and row-level gates as a human, `BUILD-ORDER` item 19): BUILT (`CC-53`).**
 **(2026-10-11; code repo `workspace/starting-kit`.)**
 
 **The task.** Row 18: *"Wire the AI IR path to the new column- and row-level gates."* Per rule 0b I

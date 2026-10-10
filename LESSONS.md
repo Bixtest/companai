@@ -3791,3 +3791,25 @@ sections, the disagreement is almost always **one mis-bounded region** — diff 
 the measurer is under test), rule 4 (two routes or it is not a finding — never average, never pick the nicer
 number).*
 
+## L116 — a test-runner **path pattern** that contains glob metacharacters (`[agentId]`) **silently matches nothing**: the suite never runs, the mutation proof reads GREEN, and a broken build is certified as proven
+
+**The trap (CC-27, the mutation proof).** I proved the RED-then-GREEN property by mutating a production file
+and asserting the suite turns RED. Two mutations against the manage-surface route — *remove the 403 feature
+gate*, *remove the missing-`principalId` 400* — came back **GREEN**, i.e. "the mutation did not break any
+test." That reads as *"the test does not cover this line."* It was the opposite: the tests **did** cover it,
+but the suite **was not running**. The path I passed was
+`src/modules/ai_assistant/api/ai/agents/[agentId]/bindings/__tests__/bindings.route.test.ts`, and to jest's
+**positional** test-path matcher `[agentId]` is a **glob character class** — so the pattern matched **zero**
+files, jest exited 0 with *"No tests found"*, and the harness saw "no failures" and printed GREEN.
+
+**The rule.** (1) A test runner's path argument may be a **glob**, not a literal. Any path containing `[`,`]`,
+`*`, `?`, `{`,`}` can silently match nothing — and *"no tests found" is not "all tests passed."* (2) A
+mutation proof must assert the **test COUNT**, not merely the absence of failures: for each mutation, confirm
+the baseline suite count is the number you expect **before** trusting a RED/GREEN verdict. A GREEN that means
+"0 tests ran" is the most dangerous kind of false proof — it certifies a broken build. (3) Prefer matching a
+bracket-free **substring/regex** (`--testPathPatterns "bindings\\.route"`) over a literal path when the path
+contains brackets. (4) The tell: the total test count for the run is **smaller than the sum of the suites you
+asked for** — here the combined run reported **8** (the coverage suite alone) instead of **15** (8 + 7).
+*Cross-ref: L114 (a test that cannot catch the bug), the hostile-critic protocol (a SEPARATE agent re-ran and
+found the hole), rule 10 (RED-then-GREEN must be a **real** proof).*
+
