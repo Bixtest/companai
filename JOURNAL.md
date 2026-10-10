@@ -35,52 +35,56 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
-### ✅ DONE / 🟡 IN PROGRESS — **row 16 (own / team row scope, `BUILD-ORDER` item 18): MEASURED, DECIDED (Option A), and building; the PHASE-5 batch (rows 16 → 17 → 18) starts here. Plus two rule corrections this session.**
-**(2026-10-11; docs repo; code repo `workspace/starting-kit` for the CC-47 header fix.)**
+### ✅ DONE / 🟡 IN PROGRESS — **row 16 (own / team row scope, `BUILD-ORDER` item 18): the OPT-IN OWN-LEG is BUILT (`CC-50` CLOSED); the row stays 🟡 because the team-leg is deliberately deferred (`CC-51`). The PHASE-5 batch (rows 16 → 17 → 18) continues with row 17.**
+**(2026-10-11; code repo `workspace/starting-kit`.)**
 
 **The task.** Row 16: *"You can restrict a person to their own rows / their team's rows, not just their whole
 tenant."* Per rule 0b I **re-measured the premise in code before building** — and it survived, unlike row 15's.
+**Owner chose Option A** (`NY-20`): own-only, **opt-in per entity**, no team entity; Option B (a real `team`
+entity) is documented as a FUTURE addition in `PLAN-ROW16-own-team-row-scope.md` §7.2 and scheduled as
+**`CC-51`** with its trigger named.
 
 **Measured (rule 0b).** Scope today is exactly **three** dimensions: `tenantId`, `organizationId`, and an
 `organizationIds` allowlist (`shared/src/lib/api/crud.ts` `buildScopedWhere()`; applied in
-`shared/src/lib/crud/factory.ts` `withCtx()` `:1359-1412`). The user id (`ctx.auth.sub`) is read **20+ times**
-in `factory.ts` but **only to stamp audit/event records — never to filter rows**. There is **no `team`**
-concept (no entity, no membership, nothing on `auth`). And the design-decider: there is **no shared owner
-column** — most entities have none, and the few that do disagree (`createdByUserId` uuid on `auth`/`customers`;
-`createdBy` **varchar** on `business_rules`/`workflows`; `assignedTo`+`assignedToRoles` on `workflows`
-UserTask). **So a blanket "filter every table by owner" is impossible** — row 16 must be an **opt-in,
-per-entity `rowScope` declaration**, the same shape as the existing `aclFeatures` declaration in each module's
-`search.ts`.
+`shared/src/lib/crud/factory.ts` `withCtx()`). The user id (`ctx.auth.sub`) is read **20+ times** in
+`factory.ts` but **only to stamp audit/event records — never to filter rows**. There is **no `team`** concept,
+and **no shared owner column** (the few entities that have one disagree in name and type:
+`createdByUserId` uuid on `auth`/`customers`; `createdBy` varchar on `business_rules`/`workflows`). **So a
+blanket "filter every table by owner" is impossible — row 16 must be an opt-in, per-entity declaration.**
 
-**Owner decision (`NY-20`, 2026-10-11).** **Option A** — own-only, **opt-in per entity**, no team entity.
-The owner explicitly asked that **Option B (a real `team` entity + membership + UI + migrations) be documented
-as a FUTURE addition, not dropped** — done in `PLAN-ROW16-own-team-row-scope.md` §7. Partial scheduled as
-**`CC-50`**. Rows 17 and 18 follow, in that order, each committed as it lands.
+**The contract actually built (Option A) — note the rule-13 correction.** The declaration lives on
+**`OrmEntityConfig`** (`ownerField?` / `ownerFeature?`), **not** in the search registry: the search registry
+exists only for the **11 searchable modules**, while row scope must apply to **every CRUD entity** — and the
+first entity wired (`api_keys`) has **no `search.ts` at all**, so the original placement was **unusable for
+the very entity that proves the mechanism**. The mechanism:
+1. **A new opt-in declaration** — `orm: { ownerField: 'createdBy', ownerFeature: 'api_keys.view' }`. Both must
+   be present together (a static AST coverage test enforces it over every `route.ts`).
+2. **A new role-level `.own` feature-grant modifier** — a role granted `api_keys.view.own` is own-scoped;
+   `featureMatch.ts` gained `isOwnScoped`/`stripOwnScope`/`hasOwnScopeGrant`, and **`matchFeature` is
+   byte-unchanged** (proven), so a `.own` grant still satisfies the plain feature.
+3. **Resolution in one place** — `withCtx()` resolves `rowScope` once (fail-safe `null` on any error) with a
+   **dual super-admin carve-out** (`auth.isSuperAdmin` **or** `acl.isSuperAdmin`), and the **three**
+   `buildScopedWhere` call sites (list/update/delete) pass the owner clause through.
 
-**Two corrections made this session (both the owner's calls).**
-- **Rule 9(a) STRENGTHENED.** The owner's instruction: *"you hold the full responsibility of the state of the
-  full codebase as long as you are working on it, not just your work on it. Any flawed, incomplete, bugged or
-  error-carrying code is your responsibility to fix or document… Same with any test…"* The rule already existed
-  (rule 9, 2026-10-08) but I had **under-applied** it — twice this session I waved findings off as
-  "pre-existing, not mine". The rule now says **the whole codebase, not just your diff**, and the two findings
-  are **scheduled**, not dismissed: **`N-20`** (`openapi.test.ts` 3 failing tests, proven not caused by
-  `CC-47`) and **`N-21`** (`structural-contracts.test.ts` is a ~17-min suite — `104/104` green with no bound,
-  but a **suite-level FAIL** under a default bound). Both are now rows on BACKLOG's "do-not-lose-this" list.
-- **Rule-13 correction (the "honest bound" count).** The owner asked what the CC-47 test's honest bound meant.
-  Re-measuring it (rather than restating it) showed the **number** was stale though the **claim** held: the
-  header said **163** files are in neither assertion, but that is the **pre-fix** value — pass 12 widened the
-  GET-exporting predicate (B) 287 → 296, which dropped "in neither" to **161**. Measured **three independent
-  ways** (comment-stripped regex, TypeScript-AST walk, and the union computation `457 − |A∪B|`): all agree
-  **457 / A 60 / B 296 / union 296 / neither 161**, and **every one of the 161 is a mutation endpoint
-  (POST/PUT/PATCH/DELETE) — zero export a `GET`**. Corrected in **6 places** (the test header, `LESSONS.md`,
-  `JOURNAL.md`, `HANDOVER.md`, `NEEDS-YOU.md`, `PLAN-CC-47`), grep-driven not from memory (code `48fc2191`,
-  docs `a6d7c79`). Also this session: **`structural-contracts.test.ts` proven a time bound, not a regression**
-  — run with no timeout it passes **104/104, exit 0, in 1046 s** (vs. a 599 s SIGTERM kill under the bound).
+**First real caller: `api_keys`.** Rows are already stamped `createdBy: ctx.auth?.sub ?? null` on create; the
+route now opts in. **Hostile-critic round 1 found a REAL list leak** — the `GET` `beforeList` builds its own
+query and short-circuits via `throw json(...)`, so it **never reached `buildScopedWhere`** and an own-only role
+would still list every key in its org; **fixed** by adding the owner clause inside `beforeList`, with a GET
+test, RED-then-GREEN md5-verified. **Hostile-critic round 2 found a SECOND REAL defect** — the super-admin
+carve-out checked **only** `acl.isSuperAdmin` while the platform has a **second** notion (`auth.isSuperAdmin`,
+set by `applySuperAdminScope` / for API-key principals); when they disagreed a super-admin was own-restricted
+on GET; **fixed** to check both, with the new test, RED-then-GREEN md5-verified. (My own new test also caught
+a bug in my own `hasOwnScopeGrant` — the first version returned **true for a plain grant**, which would have
+own-restricted a role merely granted the feature; fixed to require `isOwnScoped`.)
 
-**★ NEXT:** **row 16 Option A** (build it under the full protocol: hostile critic as a separate agent,
-RED-then-GREEN with md5-verified restores, two-route re-measure, green gate, docs + commit) — **then, in the
-same batch and committed as each lands: row 17, then row 18.** All three are PHASE 5 (`Query / Command
-enforcement`).
+**Green gate (all re-run after every fix).** shared **207 suites / 2561 tests**; core auth **88/793**;
+`api_keys` **55/55**; both new coverage tests pass; `tsc --noEmit` clean on shared + core. **Two-route
+re-measure (§L):** the ONE NUMBER is **72 / 321 = 22%, UNCHANGED** — row 16 is a 🟡 partial, so closing
+`CC-50` (a callout row, not a box) moves nothing. Diff-vs-`-w` equality: all CLEAN (no formatter reflow).
+
+**★ NEXT:** **row 17** (`BUILD-ORDER` item 17 — *"permission coverage reaches every table; a new table cannot
+be created un-gated"*), re-measured in code first (rule 0b), built under the full protocol, documented and
+committed in the same change — **then row 18.** All three are PHASE 5 (`Query / Command enforcement`).
 
 ---
 

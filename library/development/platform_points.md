@@ -40,7 +40,7 @@ ticked boxes, never typed. If the number and the boxes disagree, the number is t
 
 | | ID | What it is | State |
 |---|---|---|---|
-| **NOW** | **Row 16** (`BUILD-ORDER` item 18) | **own / team row scope.** MEASURED (rule 0b) 2026-10-11: scope today is `tenantId` + `organizationId` + `organizationIds` only (`shared/src/lib/api/crud.ts` `buildScopedWhere`; `factory.ts` `withCtx()` `:1359-1412`); `auth.sub` is stamped into audit events but **never filters rows**; **no `team` concept**; **no shared owner column** (so it must be an opt-in per-entity `rowScope` declaration). **Owner chose Option A** (`NY-20`) = own-only, opt-in, no team entity; **Option B (a real `team` entity) is documented as a future addition** (`PLAN-ROW16-own-team-row-scope.md` §7). | 🟡 **IN PROGRESS 2026-10-11** (partial = `CC-50`). Batch order, committed as each lands: **row 16 → row 17 → row 18**. |
+| **NOW** | **Row 16** (`BUILD-ORDER` item 18) | **own / team row scope.** MEASURED (rule 0b) 2026-10-11: scope today is `tenantId` + `organizationId` + `organizationIds` only (`shared/src/lib/api/crud.ts` `buildScopedWhere`; `factory.ts` `withCtx()` `:1359-1412`); `auth.sub` is stamped into audit events but **never filters rows**; **no `team` concept**; **no shared owner column**. **Owner chose Option A** (`NY-20`) = own-only, opt-in, no team entity; **Option B (a real `team` entity) is documented as a future addition** (`PLAN-ROW16-own-team-row-scope.md` §7.2, scheduled as `CC-51`). | 🟡 **own-leg BUILT 2026-10-11** — opt-in `ownerField`/`ownerFeature` on `OrmEntityConfig` + role-level `.own` feature modifier (`CC-50` **CLOSED**); first caller = `api_keys`. **The row stays 🟡** because the **team-leg** is deliberately deferred (`CC-51`, trigger named). Batch order, committed as each lands: **row 16 → row 17 → row 18**. |
 | **ALSO NOW** | `G-22` | The generic state-machine engine (BUILD-ORDER §3) — first caller = the `customers` deal pipeline | 🟢 **Slice 2A (the engine) BUILT 2026-10-09**; Slice 2B paused as business work (rule 0b) |
 | **NEXT** | **Row 17** (`BUILD-ORDER` item 17) | **permission coverage reaches every table** — a new table cannot be created un-gated | ⬜ next after row 16 |
 | **THEN** | **Row 18** (`BUILD-ORDER` item 19) | **the AI read path goes through the same column- and row-level gates as a human** | ⬜ last in the batch |
@@ -791,6 +791,18 @@ either way; (2) the file's own recorded figure, unchanged across **five** consec
 **done** count agreed (72) but the **unit** count was inflated by counting indent-continuation/annotation lines
 as points, which the rule above forbids; the 321 figure (independently reproduced twice before) holds. *(Fifth
 consecutive re-run at 72 / 321.)*
+
+**Re-run again at the Row-16 Option-A own-leg build (2026-10-11): still A 10/31 · B 5/38 · C 14/28 · D 1/39 ·
+E 2/18 · F 0/14 · G 33/74 · H 1/13 · I 5/35 · J 0/18 · K 1/13 · **TOTAL 72 / 321 = 22%** — UNCHANGED, as
+expected:** Row 16 is a **🟡 partial**, so it was never a counted `done` unit — the build **closed the opt-in
+own-leg callout `CC-50`** (a callback row, not a box) and left the team-leg deferred (`CC-51`, also a callout
+row). Neither moves the derivation. **Derived by two routes:** (1) by walking the boxes — no `☐`/`☑`/`✅`
+marker changed anywhere in §A–§K, so every section figure is byte-identical to the `CC-47` re-run above;
+(2) the file's own recorded figure, now unchanged across **six** consecutive re-runs (72/321 since the
+2026-10-10 correction from a hand-typed 73/330). *(Sixth consecutive re-run at 72 / 321.)* **Note for the
+next re-run:** row 16 will only move the number when its **team-leg** (`CC-51`) lands and flips the row's
+scoreboard status 🟡 → ✅ **and** the appendix box for the own/team scope point is ticked — a status flip
+alone does not move it (the `CC-45`/`CC-47` case), a **new tick** does.
 
 **How the drift happened (recorded so it is not repeated).** For several sessions the headline was **typed
 forward one step at a time** as rows closed (`68/329 → 70/329 → 71/330 → 72/330 → 73/330`), each session

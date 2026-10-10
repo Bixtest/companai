@@ -3510,3 +3510,128 @@ rule 2 (two routes — the pre-fix `287` and the destructured family were each r
 rule 10 step 6 (the hostile critic as a **separate** agent; the twelfth pass found what eleven predicate
 passes could not), rule 13 (the falsified "no per-entity permission filter" premise corrected in all six
 documents).*
+
+---
+
+## L105 — a declaration put where *you* assumed it lives can be unreachable by the very entity that proves it; the place a mechanism must live is decided by the **scope of the guarantee**, not by the file you read first
+
+**The trap (row 16, Option A).** The mission was *"restrict a person to their own rows"* for **every** CRUD
+entity. I placed the new opt-in declaration (`rowScope` / owner-marker) in the **search registry**
+(`SearchEntityConfig.aclFeatures`'s neighbour, `shared/src/modules/search.ts`), because that is where the
+analogous **per-entity permission declaration** (`aclFeatures`, `CC-46`) already lived, and copying the
+pattern that works is a good instinct. **But the search registry exists only for the 11 modules that define a
+`search.ts`** — and the **first entity I wired to prove the mechanism, `api_keys`, has no `search.ts` at all.**
+The declaration was therefore **unusable for the very entity that demonstrated it** — I could have written a
+green test proving a mechanism no real entity could use.
+
+**How it was caught.** By reading the code the declaration would have to serve (rule 0b — *"what is there;
+which prerequisites must be done"*) **before** building on it: grepping the entities that actually have a
+`search.ts`, then grepping the first target entity, and finding it absent. No test would have caught this —
+the test would have passed, over the wrong home.
+
+**The rule.** (1) Before you put a declaration in a file, **name the set of callers the guarantee must cover**
+and **prove the file is present for every one of them**. A declaration belongs at the **lowest layer every
+covered caller shares**, not at the layer of the nearest existing example. (2) An example is a **hint about
+style**, not **evidence about scope**: the existing example (`aclFeatures`) was correct *for its own promise*
+("every **searchable** entity declares its ACL") and wrong for this promise ("every **CRUD** entity can opt
+in"). (3) The correction is a **rule-13 sweep** — the wrong home was already copied into the plan's §3 and the
+requirement draft; fixing the code without grepping for the claim leaves the documents lying. I reverted the
+`search.ts` edit (kept only a NOTE pointing at the true home), moved the declaration to **`OrmEntityConfig`**
+(the layer every `makeCrudRoute` caller shares), and rewrote the coverage walker to walk `orm: {}` blocks.
+
+*Cross-ref: L89 (a plan that inherits a count/a shape is right by luck), rule 0b (measure the prerequisites
+before building), rule 13 (correct a falsified premise **everywhere it was copied**), rule 2 (two routes — the
+"searchable entities" set and the "CRUD entities" set were each measured, and they are not the same set).*
+
+---
+
+## L106 — a hook that short-circuits the shared builder is a place the shared builder's new clause never reaches; wiring a clause at the **one** place you know is not the same as wiring it at **every** place the query is built
+
+**The trap (row 16 hostile-critic round 1 — a REAL leak, caught before commit).** The scoping mechanism's
+design claim was *"`buildScopedWhere` is the single scope builder; wire the owner clause there and every read
+is scoped."* I wired it there and a test went green. The critic asked a different question — *"is
+`buildScopedWhere` actually on the path of **every** list?"* — and found that the `api_keys` `GET` route's
+custom **`beforeList` hook builds its own query builder and short-circuits** via `throw json(...)`: it
+**returns the response itself and never calls `buildScopedWhere`**. So an own-only role would still list
+**every key in its organization**. My wired owner clause was **dead code for that route** — I had scoped the
+thing I *knew about* (the shared builder) and missed the route that bypasses it.
+
+**How it was caught.** The **hostile critic as a separate agent**, asking "where else is a query built for
+this entity?" — not "does the clause you added fire?" The fix was to add the owner clause inside the
+`beforeList` hook too, plus a GET test (the earlier tests only exercised the shared path).
+
+**The rule.** (1) When you add enforcement at a **shared** choke point, **enumerate the paths that bypass
+it** — a hook, a raw `createQueryBuilder`, a hand-written query, a second route — **before** claiming the
+guarantee. "Single choke point" is a **claim to verify**, not an assumption to build on. (2) A green test over
+the choke point proves the **choke point**, not the **route family**: the critic's question ("does this route
+reach it?") is a different question from yours ("does my clause do what I intend?"), and you need both. (3)
+This is the **same defect class as L104** (a *discovery* gap in a coverage claim) applied to **enforcement**:
+a claim of "every read is scoped" rests on a **discovery** of "every read path", and the discovery is exactly
+where a hand-rolled bypass hides.
+
+*Cross-ref: L104 (a discovery predicate is part of a coverage guarantee), L96 (a guard on one path is not a
+guard on another, found in a different file), rule 2 (two routes), rule 10 step 6 (the separate-agent critic
+earned its keep on the first pass).*
+
+---
+
+## L107 — a security carve-out must be checked against **every** notion of the privileged principal the platform actually has, not the one on the object you happen to hold
+
+**The trap (row 16 hostile-critic round 2 — a REAL defect).** The design was *"a super-admin is never
+own-restricted."* I implemented it as `if (!acl.isSuperAdmin && hasOwnScopeGrant(...)) rowScope = …`, reading
+the flag from the **ACL** object (`rbacService.loadAcl()` → `{ isSuperAdmin, … }`) — the object I already had
+in hand. The critic found that the platform has **a second, independent** super-admin notion:
+**`auth.isSuperAdmin`**, set on the request (`applySuperAdminScope` in `shared/src/lib/auth/server.ts`, and
+for API-key principals). **When the two disagree** — a super-admin whose `auth` flag is set but whose ACL flag
+is not (or vice versa) — the user was **own-restricted on `GET`** while being treated as super-admin
+everywhere else. The carve-out was checked against one notion and the platform honoured two.
+
+**How it was caught.** The separate-agent critic, by grepping for **every** place the concept
+*"super admin"* is expressed — not by testing my one flag.
+
+**The rule.** (1) For a **security exception**, first **enumerate every expression of the privileged
+concept** (`grep -ri "superadmin\|super_admin"`), then design the check against **all** of them; a carve-out
+that misses one notion is a hole, not a partial defence. (2) When the two notions live on **different objects
+the code already holds** (here `acl` and the request `auth`), the check must **consult both** — `a || b`, not
+whichever is closer. (3) The fix's shape can itself mislead: the correct read of `auth.isSuperAdmin` required a
+cast (`(auth as Record<string, unknown>).isSuperAdmin === true`) because `AuthContext` does not **declare** the
+field — the type system did not surface the second notion, which is *why* it was easy to miss. **A runtime flag
+the type does not declare is a flag that hides from the compiler and the reader alike.**
+
+*Cross-ref: L97 (a declared thing with no reader is not enforced — here, an *undeclared* thing with a real
+reader was not noticed), rule 10 step 6 (two critic rounds, two real defects — the critic's value is asking
+the question you did not), rule 2 (two routes / two notions), L103 (the first draft of a security fix is where
+the critic earns its keep).*
+
+---
+
+## L108 — the "obvious" implementation of a suffix helper is wrong in the direction the tests must catch: `strip(x) === feature` returns **true for a plain grant**, which would own-restrict a role that was merely granted the feature
+
+**The trap (row 16, caught by my own new test — before the critic).** To implement *"does this role hold the
+own-scoped form of the feature?"* the natural code is
+`granted.some(g => stripOwnScope(g) === feature)`, where `stripOwnScope` removes a trailing `.own`. It reads
+well and it is **wrong**: for a **plain** grant (`api_keys.view`, no suffix), `stripOwnScope` is a **no-op**,
+so `strip('api_keys.view') === 'api_keys.view'` → **true**. The helper then reports *"holds the own-scoped
+grant"* for a role holding the **unscoped** grant — and the factory would **own-restrict a role that was never
+scoped**, silently hiding rows from a user who was promised the whole tenant. The fix is to require the
+**positive** signal: `isOwnScoped(g) && stripOwnScope(g) === feature`.
+
+**How it was caught.** By the **test I wrote for the helper**, on the first run — the negative case
+*"a plain grant does not count as own-scoped"* failed. This is the payoff of writing the **negative** test
+first: the bug is a **false positive on the negative input**, and a test suite that only proved the positive
+case (`.own` grant → own-restricted) would have passed over it.
+
+**The rule.** (1) When a helper answers a question by **stripping** or **normalising** its input, the
+**identity / no-op input** is the dangerous case — write the test where the transformation does **nothing** and
+assert the **conservative** answer (here: *not* own-scoped, so the user keeps their rows). (2) In security
+code the **safe default is the permissive-to-the-innocent** one: an unrecognised/malformed grant must **not**
+narrow a user's access, so the check must require the **affirmative marker**, never infer intent from a
+successful strip. (3) The **general form**: any `f(x) === target` predicate is only sound when `f` is
+**injective** on the inputs that matter; when `f` is a **projection that fixes** some inputs (a strip that
+does nothing), it **confuses them with the target**.
+
+*Cross-ref: L99 (a tautological test — here the *positive* test alone was near-tautological), L103 (the first
+draft of a security helper is where the critic earns its keep — here a self-test beat the critic to it),
+rule 2 (two routes — the strip direction and the identity direction were each asserted), rule 10 step 4/6
+(RED-then-GREEN: this bug's test was the RED).*
+

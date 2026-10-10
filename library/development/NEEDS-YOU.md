@@ -146,9 +146,12 @@ which column is the owner (the same shape as the existing `aclFeatures` declarat
 bounded change, and defers "team" as a **scheduled callback** — named, not silently dropped. If you want the
 full thing, pick B and I will treat the team entity as its own project. Detail: `PLAN-ROW16-own-team-row-scope.md`.
 
-**Your answer (2026-10-11): A — own-only, opt-in per entity; and document B as a future addition.** A is being
-built (`CC-50` is the partial); **Option B** (a real `team` entity + membership + UI + migrations) is written
-down as a **future addition** in `PLAN-ROW16-own-team-row-scope.md` §7, not dropped. **Part 1 is 0 open again.**
+**Your answer (2026-10-11): A — own-only, opt-in per entity; and document B as a future addition.** A is
+**BUILT** (2026-10-11 — the partial `CC-50` is **CLOSED**: an opt-in `ownerField`/`ownerFeature` on
+`OrmEntityConfig` plus a role-level `.own` feature-grant modifier, first caller `api_keys`); **Option B** (a
+real `team` entity + membership + UI + migrations) is written down as a **future addition** in
+`PLAN-ROW16-own-team-row-scope.md` §7.2, scheduled as **`CC-51`** with its trigger named — not dropped. **Part
+1 is 0 open again.**
 
 ---
 

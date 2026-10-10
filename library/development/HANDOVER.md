@@ -14,22 +14,34 @@ written for exactly that person — and this revision is written for an agent th
 continue the development work.** Read it top to bottom once (about 20 minutes), then
 follow §2 to actually get working. Everything else in the project is reachable from here.
 
-**Written 2026-10-05, revision 19 (2026-10-11). Owner: Ramzi. Development machine: `BIXMASERVER` (Windows 10 Pro).**
-**This revision records the 2026-10-11 start of the PHASE-5 batch (rows 16 → 17 → 18) and two standing-rule
-changes. (1) Row 16 (own / team row scope) is MEASURED and DECIDED: the owner chose Option A (own-only,
-opt-in per entity, no team entity), with Option B (a real `team` entity + membership) documented as a
-**future addition**; the partial is scheduled as `CC-50`. (2) **Rule 9(a) was strengthened** on the owner's
-instruction — ownership is of the **full codebase while you are working on it, not just your own diff** — so
-two findings previously waved off as "pre-existing, not mine" are now **scheduled** (`N-20`: `openapi.test.ts`
-3 failing tests; `N-21`: `structural-contracts.test.ts` is a ~17-min suite that times out under a default
-bound). (3) A **rule-13 correction**: the CC-47 test header's "in neither" count read `163` (the pre-fix
-value) and is measured at **161** (all mutation endpoints, zero export a `GET`), corrected in 6 places. It
-also records the earlier 2026-10-10 close of **`CC-46`** (row 15's ACL-coverage leg), **`CC-45`** (row 14's
-**server** export leg), **`CC-48`** (row 14's custom-entity **client** `view` export leg), **`CC-49`** (row
-14's **customer-tasks** alias export leg) and **`CC-47`** (row 15's **human-CRUD-list** read gate — the
-register's premise was falsified in code; the path IS gated, and the structural test now exists — **row 15 is
-✅, so PHASE 3 is complete on rows 7–9, 13–15**). The FRONTIER is re-derived from `platform_points.md`. If you
-want the newest numbers, re-measure them; §7 tells you how to split what was measured from what was quoted.**
+**Written 2026-10-05, revision 20 (2026-10-11). Owner: Ramzi. Development machine: `BIXMASERVER` (Windows 10 Pro).**
+**This revision records the 2026-10-11 BUILD of row 16's own-leg (Option A) — the partial `CC-50` is now
+**CLOSED**, and **the row stays 🟡** because the team-leg is deliberately deferred (`CC-51`).** Row 16 (own /
+team row scope) was MEASURED and DECIDED earlier the same day: the owner chose Option A (own-only, **opt-in per
+entity**, no team entity), with Option B (a real `team` entity + membership) documented as a **future addition**
+(`PLAN-ROW16-own-team-row-scope.md` §7.2, scheduled as `CC-51`). The built mechanism: an opt-in
+`ownerField`/`ownerFeature` declaration on **`OrmEntityConfig`** (rule-13 correction — it belongs on the CRUD
+layer every `makeCrudRoute` caller shares, **not** in the search registry, which exists only for the 11
+searchable modules and which the first wired entity `api_keys` does not have), plus a role-level **`.own`**
+feature-grant modifier (`matchFeature` byte-unchanged) resolved once in `withCtx()` with a **dual super-admin
+carve-out** (`auth.isSuperAdmin` **or** `acl.isSuperAdmin`) and threaded through all **three**
+`buildScopedWhere` call sites plus any route hook that short-circuits them. Two hostile-critic rounds (separate
+agent) each found a **real** defect: a `beforeList` bypass that never reached the shared builder (**L106**), and
+the missing second super-admin notion (**L107**); both fixed, RED-then-GREEN md5-verified. This revision also
+carries the earlier-in-the-day records: **(1)** Row 16 MEASURED/DECIDED (Option A; `CC-50` the partial). **(2)**
+**Rule 9(a) was strengthened** on the owner's instruction — ownership is of the **full codebase while you are
+working on it, not just your own diff** — so two findings previously waved off as "pre-existing, not mine" are
+now **scheduled** (`N-20`: `openapi.test.ts` 3 failing tests; `N-21`: `structural-contracts.test.ts` is a
+~17-min suite that times out under a default bound). **(3)** A **rule-13 correction**: the CC-47 test header's
+"in neither" count read `163` (the pre-fix value) and is measured at **161** (all mutation endpoints, zero
+export a `GET`), corrected in 6 places. It also records the earlier 2026-10-10 close of **`CC-46`** (row 15's
+ACL-coverage leg), **`CC-45`** (row 14's **server** export leg), **`CC-48`** (row 14's custom-entity **client**
+`view` export leg), **`CC-49`** (row 14's **customer-tasks** alias export leg) and **`CC-47`** (row 15's
+**human-CRUD-list** read gate — the register's premise was falsified in code; the path IS gated, and the
+structural test now exists — **row 15 is ✅, so PHASE 3 is complete on rows 7–9, 13–15**). The FRONTIER is
+re-derived from `platform_points.md`; the ONE NUMBER is **72 / 321 = 22%, unchanged by row 16** (a 🟡 partial —
+closing a callout row moves no box; §L now carries a **sixth** consecutive re-run at 72/321). If you want the
+newest numbers, re-measure them; §7 tells you how to split what was measured from what was quoted.**
 *⚠️ **Note the revision cadence:** this page is bumped by a session that changes the *project layout,
 the front-door documents, or a numbered ruling* — it is **not** bumped by every `CC-` item. Where this
 page and the `★ ACTIVE TASK` box disagree about *what is being worked on now*, **the box wins** (line 9).*
@@ -56,7 +68,11 @@ finished thinking, and it has *started* building: the **phase-0 foundation is co
 (the guard engine's registry is populated, the settings table exists, the third guard outcome
 `escalate` shipped, and the **Metadata Registry** — the service that lets the gate *enumerate* objects —
 is built, 2026-10-07). On top of that, the first slice of the permissions gate (**`SD-1`**) is built and
-mutation-proven, and a long run of small "`CC-`" items has shipped — most recently **`CC-47`**
+mutation-proven, and a long run of small "`CC-`" items has shipped — most recently **row 16's own-leg
+(Option A, `CC-50`, 2026-10-11)**: an opt-in, per-entity **owner row-scope** (`ownerField`/`ownerFeature` on
+`OrmEntityConfig`) plus a role-level **`.own`** feature-grant modifier, so a role granted e.g.
+`api_keys.view.own` sees **only its own rows** (the row stays 🟡 — the team-leg is deferred as `CC-51`),
+preceded by **`CC-47`**
 (2026-10-10: the register's premise *"the human CRUD `GET`/list path has **no** per-entity permission
 filter"* was **falsified in code** — the path **IS** gated by route-metadata `requireFeatures`, enforced
 **403** by the dispatcher; `CC-47` added `crud-read-gate-coverage.test.ts` so a new list route cannot be
@@ -69,9 +85,10 @@ client `view` export is **CLOSED (`CC-48`, 2026-10-10)**, and the **customer-tas
 named in the `★ ACTIVE TASK` box at the top of [`../../JOURNAL.md`](../../JOURNAL.md)** — the one place
 that carries it (step 7, and the owner's instruction of 2026-10-06). The **live FRONTIER** (its
 authoritative statement is [`platform_points.md`](platform_points.md)'s `▶ FRONTIER` box) is
-**re-derived from the ONE NUMBER** — `CC-47` is closed; the next is the earliest unstarted Phase-3/5 row
-(row 16 / row 17 / row 18);
-it is buildable now, and **it must be re-measured in code before
+**re-derived from the ONE NUMBER** — row 16's own-leg is built (`CC-50` closed; row remains 🟡 pending the
+deferred team-leg `CC-51`); the next is **row 17** (permission coverage reaches every table), then **row 18**
+(the AI read path through the same gates);
+each is buildable now, and **it must be re-measured in code before
 building** (rule 0b).
 
 **Six things to do before you touch anything:**
