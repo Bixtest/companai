@@ -28,7 +28,7 @@ anything else first. Where an item is **not** a decision, it says so, and you ca
 
 ---
 
-## Part 1 — Decisions I need (**0 open** — `NY-20` (row 16 scope) **decided 2026-10-11: Option A**; `NY-19` **decided 2026-10-10** (owner chose Option A: build the read-gate coverage test → built as `CC-47`, row 15 ✅); `NY-18` **decided 2026-10-10** ("we follow your recommendations" → Option B, built as `CC-49`); `NY-16` and `NY-17` **decided 2026-10-10** (blank the value; Option B); `NY-15` decided 2026-10-09; `NY-14` closed 2026-10-06; `NY-1`, `NY-2`, `NY-8`, `NY-13` closed; `NY-4` is "nothing needed")
+## Part 1 — Decisions I need (**0 open** — `NY-21` (row 17 coverage) **decided 2026-10-11: Option A** (build the all-tables classification gate); `NY-20` (row 16 scope) **decided 2026-10-11: Option A**; `NY-19` **decided 2026-10-10** (owner chose Option A: build the read-gate coverage test → built as `CC-47`, row 15 ✅); `NY-18` **decided 2026-10-10** ("we follow your recommendations" → Option B, built as `CC-49`); `NY-16` and `NY-17` **decided 2026-10-10** (blank the value; Option B); `NY-15` decided 2026-10-09; `NY-14` closed 2026-10-06; `NY-1`, `NY-2`, `NY-8`, `NY-13` closed; `NY-4` is "nothing needed")
 
 > **Numbering note.** Items are numbered once and **never reused**, so that a number you have already
 > quoted keeps meaning the same thing. Item 8 was appended here on 2026-10-05 and answered the same
@@ -363,6 +363,54 @@ them by changing their names first."* **Built and proven on the live database:**
 stamped core so a rename cannot disarm it. **This item no longer needs you** — and it un-parked a whole class of
 work: the *"a migration is unprovable on this host"* premise turned out to be **false** (corrected in CC-31 /
 CC-7 / CC-23 / `PLAN-SD-1` / `PLAN-SD-2`; your directive is now `WORKING-RULES.md` §1 rule 14).
+
+---
+
+### `NY-21` — Row 17 ("permission coverage reaches **every** table"): measured, only **53 of 239** tables carry a read-ACL declaration — how strict do you want it? — ✅ **DECIDED 2026-10-11: Option A** *(force the classification — build a coverage gate over all 239 tables)*
+
+**What row 17 says** (`BUILD-ORDER.md` item 17): *"Coverage: extend `aclFeatures` from 6 of 53 tables to all
+tables, with an aggregate rule so a new table cannot be added un-gated."*
+
+**What I measured in code (rule 0b), 2026-10-11:**
+- **239 tables** exist (exported entity classes across the modules' `data/entities.ts`; biggest: sales 28,
+  customers 25, auth 21).
+- **53 are searchable entities and ALL 53 declare `aclFeatures`** (`CC-46`, 2026-10-10) — the AI read path is
+  fully gated and **fails closed** for anything un-declared.
+- **60 have a `makeCrudRoute` CRUD route and ALL 60 declare a GET read gate** (`CC-47`, 2026-10-10) — the human
+  list path is gated and a **new list route cannot be added un-gated**.
+- **→ ~186 tables declare no `aclFeatures` and are not behind a CRUD route.** Many are **not read surfaces at
+  all** (join tables, `auth.Session`, `auth.PasswordReset`, sidebar preferences, `PermissionSurfaceRecord`,
+  audit/mechanism tables, `query_index`, `translations`, `progress`). They are protected by **tenant/org row
+  scope** and by the **write** guards — but **not** by a per-table **read** ACL declaration.
+
+**So the honest state:** the row's *substance* ("a new table cannot be added un-gated") has **two mechanical
+guards** today (the CC-46 and CC-47 coverage tests) — but the row's *literal words* ("**every** table") are
+**not** met: 186 of 239 tables have no read-ACL declaration.
+
+**Three options:**
+
+| | Option | What it means for you | Size |
+|---|---|---|---|
+| **A** *(my rec)* | **Classify every table, force the question** | A new coverage gate enumerates **all 239** tables and requires each to be **either** granted a read-ACL (`aclFeatures`) **or** explicitly classified *"internal — not a read surface"*. A brand-new table then **cannot** ship un-classified. This is the row's spirit, applied to *every* table, with the "internal" list reviewable by name. | Bounded, testable |
+| **B** | **Narrow the row to the measured boundary** | Tick row 17 against what is *actually* guaranteed — **searchable entities (53) + CRUD list routes (60)** — and record the honest bound (the other ~186 are scope- + write-guarded). Same treatment row 15 got. No new code. | Trivial |
+| **C** | **Declare a read-ACL for all 239** | Give every table an `aclFeatures` declaration, including internal ones. Most accurate, but **invents a permission for tables no actor can read** — plumbing with no reader. | Large |
+
+**Recommendation: A.** It delivers the row's real promise (nothing ships un-gated *or* un-classified), keeps
+the answer honest (the "internal" set is a **named, reviewable list**, not a silent omission), and is the same
+*shape* as the `check-the-premise` rule: force the classification rather than assume it.
+
+**✅ OUTCOME — Option A BUILT 2026-10-11 (`CC-52`; see `PLAN-ROW17-every-table-coverage.md`).**
+`packages/cli/src/lib/generators/__tests__/table-coverage.test.ts` enumerates every table and requires it to be
+**searchable**, **a comment-stripped `api/**/*.ts` read surface**, or **on the named `INTERNAL_TABLES`
+allowlist**. **Rule-13 count correction:** the code-measured exact figure is **233** tables (not 239 — the 239
+was the rough rule-0b scan; the gate **pins 233**, and the surface/search module counts 47/12). A separate-agent
+hostile critic found 3 real holes (comment false-positive, `route.ts`-only walker, loose floors) — all fixed;
+4 RED-then-GREEN mutations md5-verified; green 5/5; `tsc` clean. The "internal" list is a named, reviewable
+allowlist with a **reason per entry**, exactly as Option A promised.
+
+**Your answer (2026-10-11): A — force the classification.** Build a coverage gate over **all 239** tables: each
+must **either** declare a read-ACL **or** be explicitly classified *"internal — not a read surface"* on a named,
+reviewable list. A new table then cannot ship un-classified. **Part 1 is 0 open again.**
 
 ---
 

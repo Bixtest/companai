@@ -1293,8 +1293,13 @@ keep the backlogs where they are and land as their prerequisites do.*
 > through: [`ARCHITECTURE-request-outcomes.md`](ARCHITECTURE-request-outcomes.md).
 
 17. Coverage: extend `aclFeatures` from 6 of 53 tables to all tables, with an aggregate rule so a new
-    table cannot be added un-gated. *(Enforced by SD-1, which is why SD-1 is Phase 1.)*
-18. Per-user / own / team row scope (today scope is tenant + organization only).
+    table cannot be added un-gated. *(Enforced by SD-1, which is why SD-1 is Phase 1.)* **✅ BUILT
+    2026-10-11 (`CC-52`) — the "6 of 53" is historical: `CC-46` lifted `aclFeatures` to all **53**
+    searchable entities, and `CC-52` added `table-coverage.test.ts`, so now every one of the **233**
+    tables must be searchable, a comment-stripped `api/**/*.ts` read surface, or on the named
+    `INTERNAL_TABLES` allowlist — a new table cannot be added un-gated.**
+18. Per-user / own / team row scope (today scope is tenant + organization only). **🟡 own-leg BUILT
+    2026-10-11 (`CC-50`); the team-leg is deferred (`CC-51`).**
 19. Wire the AI IR path to the new column- and row-level gates.
 
 **PHASE 4+ — the blueprint's later phases** (horizontal services · AI foundation · enterprise scale ·

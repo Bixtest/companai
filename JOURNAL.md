@@ -35,7 +35,60 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
-### ✅ DONE / 🟡 IN PROGRESS — **row 16 (own / team row scope, `BUILD-ORDER` item 18): the OPT-IN OWN-LEG is BUILT (`CC-50` CLOSED); the row stays 🟡 because the team-leg is deliberately deferred (`CC-51`). The PHASE-5 batch (rows 16 → 17 → 18) continues with row 17.**
+### ✅ DONE — **row 17 (permission coverage reaches EVERY table, `BUILD-ORDER` item 17): BUILT (`CC-52`). The PHASE-5 batch (rows 16 → 17 → 18) continues with row 18.**
+**(2026-10-11; code repo `workspace/starting-kit`.)**
+
+**The task.** Row 17: *"Permission coverage reaches **every** table — a new table cannot be created un-gated."*
+Per rule 0b I **re-measured the premise in code first** — and it did **not** survive literally: only **53 of
+233** tables were covered (the searchable entities, `CC-46`) plus the **60 `makeCrudRoute`** list routes
+(`CC-47`); the balance had **no per-table read-ACL check at all**. So the row's words over-state today's
+reality; the honest job is to **make the words true mechanically**. **Owner chose Option A** (`NY-21`, rule 11):
+build a coverage gate that forces **every** table to be either read-gated or on a **named allowlist**.
+
+**Measured (rule 0b), the numbers the gate now pins.** **233** entity classes (tables) across module
+`data/entities.ts` files; **53** searchable entities (a module `search.ts` entityId); the union of tables
+reachable from a module's comment-stripped **`api/**/*.ts`** read surface = **47 surface modules**; **12**
+search modules. The ~120 remaining tables are join tables, log/ledger tables, and internal bookkeeping read only
+through a parent's route — they are legitimately **not** independently read-gated, so the gate names them.
+
+**The contract built (Option A).** New gate
+`packages/cli/src/lib/generators/__tests__/table-coverage.test.ts` (AST, `typescript-js`) enumerates every
+`export class` across module `data/entities.ts` and requires each table to be **exactly one** of:
+1. **searchable** — its entityId appears in a module `search.ts`;
+2. **a read surface** — its class name is referenced by a **comment-stripped** `api/**/*.ts` file in its own
+   module (so a live `GET` exists for it);
+3. **`INTERNAL_TABLES`** — a **named allowlist** (~63 entries, each carrying a one-line **reason**).
+It **pins the exact counts** (`EXPECTED_TABLES = 233`, `EXPECTED_SURFACE_MODULES = 47`,
+`EXPECTED_SEARCH_MODULES = 12`) so a silent shrink fails the build, and runs **five assertions**: a sanity
+check (exact counts), **A** (every table classified), **B** (no table both searchable *and* internal), **C** (no
+stale internal entry — a listed name that no longer exists), **D** (every internal entry has a reason).
+
+**The hostile critic (separate agent) found 3 REAL holes — all fixed.** (1) The read-surface predicate matched
+a bare class name inside a **comment** (e.g. `communication_channels.ExternalMessage` "passed" from a comment
+in a neighbouring file) — fixed with `stripComments()`. (2) The walker read **only `route.ts`**, so a live
+`GET` in a sibling `api/*.ts` (e.g. `entities.CustomEntity` in `api/definitions.ts`) was invisible and the
+table was **wrongly** marked internal — fixed by walking `api/**/*.ts`. (3) The sanity thresholds were loose
+floors (`>200`), so a **39-table shrink passed silently** — fixed by **pinning exact counts**. My own first
+`INTERNAL_TABLES` draft was also wrong (18 route-backed tables listed internal; 3 stale names; 4 joins
+missing) — the gate's own assertions A/B/C caught every one.
+
+**RED-then-GREEN (4 mutations, each md5-verified restore).** MUT1 (remove `auth.Session` from the union) →
+1 failed; MUT2 (a stale internal name) → 2 failed; MUT3 (a searchable entity added to internal) → 1 failed;
+MUT4 (break discovery) → 2 failed. All restored byte-identical to md5 `60c40f29c5f1bff438b29f564ea99460`.
+**Final state GREEN 5/5; `tsc --noEmit` clean on `packages/cli`.**
+
+**Two-route re-measure (§L, 7th re-run).** The ONE NUMBER is **72 / 321 = 22%, UNCHANGED** — row 17 is a
+**coverage gate**, not a vision point; it **annotates** the already-`☑` §K `P10` line and adds **no new box**.
+Route 1 (my derivation script) and Route 2 (a separate blind verifier agent, its own script) both returned
+**72 / 321**.
+
+**★ NEXT:** **row 18** (`BUILD-ORDER` item 19 — *"the AI's read path goes through the **same** column- and
+row-level gates as a human"*), re-measured in code first (rule 0b), built under the full protocol, documented
+and committed in the same change. Rows 16 → 17 → 18 are all PHASE 5 (`Query / Command enforcement`).
+
+---
+
+### ✅ DONE / 🟡 — **row 16 (own / team row scope, `BUILD-ORDER` item 18): the OPT-IN OWN-LEG is BUILT (`CC-50` CLOSED); the row stays 🟡 because the team-leg is deliberately deferred (`CC-51`).**
 **(2026-10-11; code repo `workspace/starting-kit`.)**
 
 **The task.** Row 16: *"You can restrict a person to their own rows / their team's rows, not just their whole
@@ -82,9 +135,7 @@ own-restricted a role merely granted the feature; fixed to require `isOwnScoped`
 re-measure (§L):** the ONE NUMBER is **72 / 321 = 22%, UNCHANGED** — row 16 is a 🟡 partial, so closing
 `CC-50` (a callout row, not a box) moves nothing. Diff-vs-`-w` equality: all CLEAN (no formatter reflow).
 
-**★ NEXT:** **row 17** (`BUILD-ORDER` item 17 — *"permission coverage reaches every table; a new table cannot
-be created un-gated"*), re-measured in code first (rule 0b), built under the full protocol, documented and
-committed in the same change — **then row 18.** All three are PHASE 5 (`Query / Command enforcement`).
+**★ NEXT:** *(superseded — row 17 is now ✅, see the block above; the live next is **row 18**.)*
 
 ---
 

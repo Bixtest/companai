@@ -3635,3 +3635,76 @@ draft of a security helper is where the critic earns its keep — here a self-te
 rule 2 (two routes — the strip direction and the identity direction were each asserted), rule 10 step 4/6
 (RED-then-GREEN: this bug's test was the RED).*
 
+
+## L109 — a **coverage test's predicate** is a security control, and a coarse one ("is the name mentioned *anywhere* in the file") is defeated by a **comment**; strip comments before you trust a textual match
+
+**The trap (row 17, caught by a separate-agent hostile critic).** The new `table-coverage.test.ts` decided a
+table was *"a read surface"* by searching the module's `api/**/*.ts` files for the **bare class name**. It
+passed — but one of its passes was **false**: `communication_channels.ExternalMessage` was matched from a
+**comment** in a neighbouring file that merely *mentioned* the class name, not from any live `GET`. A table
+proved "reachable" by a sentence about it is **not** read-gated; the predicate was satisfied by prose, so the
+guarantee it claimed (row 17: *"a new table cannot be added un-gated"*) was **one comment away from a hole**.
+
+**How it was caught.** By a **separate blind hostile-critic agent** (rule 10f), whose job was to *break* the
+gate, not to re-run it — it inserted a class name into a comment and watched the gate stay green. My own
+RED-then-GREEN mutations had all passed, because **each mutated the data, never the predicate**.
+
+**The rule.** (1) A **coverage/enforcement claim is only as strong as the predicate that computes it** — so the
+predicate, not the allowlist, is what the critic must attack. (2) When a check is **textual** (grep/AST over
+source), **comments and string literals are attacker-controlled text**: strip them (`stripComments()`) before
+matching, or the check certifies *"someone wrote this word"*, not *"the code does this"*. (3) The **general
+form**: *"X is mentioned in file Y"* is **not** *"Y does X"* — and any security gate built on a text search
+inherits that gap. Assert the **structural** fact (a route/handler exists), never a **textual** proximity.
+
+*Cross-ref: L104 (a discovery predicate is part of a coverage guarantee — here the predicate's **input** was
+the defect, not its **reach**), L102 (a name suggested a thing that the code did not do), rule 10f (the
+hostile critic must attack the **predicate**, and must be a separate agent), rule 4 (two routes).*
+
+
+## L110 — when a walker reads exactly **one filename**, everything defined in a **sibling file** is invisible — and the invisible thing is marked "not a surface" by default, i.e. the failure is a **false negative that hides a real read path**
+
+**The trap (row 17, second real hole, found by the same hostile critic).** The gate's read-surface walker read
+each module's **`route.ts`** and nothing else. Measured: the `entities` module serves a live **`GET`** from
+**`api/definitions.ts`**, not from `route.ts` — so `entities.CustomEntity`, a table with a real read path, was
+**invisible** to the walker and got filed as *"internal"*. The gate was **green and wrong**: it silently
+declared a **readable** table un-readable, so the day that table's real `GET` was removed, no test would
+notice — the allowlist entry would keep the gate green.
+
+**The rule.** (1) When you enumerate *"is this thing read anywhere in its module?"*, the unit is **the module's
+whole read surface**, not one blessed filename — walk **`api/**/*.ts`** (or the module's declared entry
+points), never a single guessed path. (2) **A missed discovery is a false negative in a gate whose whole job is
+to force a positive classification** — so the safe direction is to **over-discover** and let the allowlist
+carry the deliberate exceptions by **name + reason**, never to under-discover and let silence pass as internal.
+(3) The general form: *"I read the file I expected the behaviour to live in"* is **L105's trap** (a
+declaration lives where the **scope** says, not where you looked first) applied to a **search** — the search's
+**path list** is a premise that must be measured, not assumed.
+
+*Cross-ref: L105 (the mechanism lives at the scope of the guarantee, not the file you read first — here it was
+the *search*, not the *declaration*), L104/L109 (a discovery predicate is part of the claim), rule 0b
+(measure the premise — including *where* a thing is read), rule 10f (a separate critic found it).*
+
+
+## L111 — a **sanity threshold with slack** (`> 200`, `> 30`) is a **silent-permission slip**: it lets a whole class of regression pass because the number only has to stay *above* a floor — pin the **exact** figure so any shrink is RED
+
+**The trap (row 17, third real hole, found by the same hostile critic).** The gate opened with loose sanity
+checks (`tables > 200`, `surfaceModules > 30`) so it would not be brittle. The critic **deleted 39 tables**
+from the discovery (`EXPECTED_TABLES` 233 → 194) and the suite stayed **GREEN** — the floor was 200 only in
+spirit; the real numbers it compared against were loose enough that a **17% shrink of the entire audited
+universe** slipped through. A gate whose job is *"a new/changed table cannot slip past un-gated"* had a hole
+the size of *"any table you like, as long as a few dozen remain"*.
+
+**The rule.** (1) In a **coverage / inventory gate**, the count of audited items is **itself an assertion** —
+pin the **exact** number (`EXPECTED_TABLES = 233`), so both a **shrink** (something stopped being discovered)
+and a **growth** (a new table appeared — which must be classified deliberately) turn the suite **RED** and force
+a human to re-derive. (2) A floor with slack is the *right* tool for a **sanity guard against total collapse**
+(a `> 0` guard against "the walker returned nothing"), and the *wrong* tool for the **guarantee itself** — use
+both: a low floor to catch a broken walker, an **exact pin** to catch a silent shrink. (3) The general form:
+**any threshold expressed as an inequality is a **permission** for everything on the far side of it**; a
+security gate must express its spine as an **equality**, and reserve inequalities for the "did it run at all?"
+check.
+
+*Cross-ref: L100 (a number must be re-derived, never incremented — here a floor *permitted* a wrong number to
+stand), L101 (the parser/measurer is the thing under test), L109/L110 (the same critic, the same session, the
+same class — a gate that is green while the thing it claims to protect is gone), rule 10f (the critic is a
+**separate agent** that attacks the guarantee, not the data).*
+

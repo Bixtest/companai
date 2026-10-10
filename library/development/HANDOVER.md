@@ -14,34 +14,37 @@ written for exactly that person — and this revision is written for an agent th
 continue the development work.** Read it top to bottom once (about 20 minutes), then
 follow §2 to actually get working. Everything else in the project is reachable from here.
 
-**Written 2026-10-05, revision 20 (2026-10-11). Owner: Ramzi. Development machine: `BIXMASERVER` (Windows 10 Pro).**
-**This revision records the 2026-10-11 BUILD of row 16's own-leg (Option A) — the partial `CC-50` is now
-**CLOSED**, and **the row stays 🟡** because the team-leg is deliberately deferred (`CC-51`).** Row 16 (own /
-team row scope) was MEASURED and DECIDED earlier the same day: the owner chose Option A (own-only, **opt-in per
-entity**, no team entity), with Option B (a real `team` entity + membership) documented as a **future addition**
-(`PLAN-ROW16-own-team-row-scope.md` §7.2, scheduled as `CC-51`). The built mechanism: an opt-in
-`ownerField`/`ownerFeature` declaration on **`OrmEntityConfig`** (rule-13 correction — it belongs on the CRUD
-layer every `makeCrudRoute` caller shares, **not** in the search registry, which exists only for the 11
-searchable modules and which the first wired entity `api_keys` does not have), plus a role-level **`.own`**
-feature-grant modifier (`matchFeature` byte-unchanged) resolved once in `withCtx()` with a **dual super-admin
-carve-out** (`auth.isSuperAdmin` **or** `acl.isSuperAdmin`) and threaded through all **three**
-`buildScopedWhere` call sites plus any route hook that short-circuits them. Two hostile-critic rounds (separate
-agent) each found a **real** defect: a `beforeList` bypass that never reached the shared builder (**L106**), and
-the missing second super-admin notion (**L107**); both fixed, RED-then-GREEN md5-verified. This revision also
-carries the earlier-in-the-day records: **(1)** Row 16 MEASURED/DECIDED (Option A; `CC-50` the partial). **(2)**
-**Rule 9(a) was strengthened** on the owner's instruction — ownership is of the **full codebase while you are
-working on it, not just your own diff** — so two findings previously waved off as "pre-existing, not mine" are
-now **scheduled** (`N-20`: `openapi.test.ts` 3 failing tests; `N-21`: `structural-contracts.test.ts` is a
-~17-min suite that times out under a default bound). **(3)** A **rule-13 correction**: the CC-47 test header's
-"in neither" count read `163` (the pre-fix value) and is measured at **161** (all mutation endpoints, zero
-export a `GET`), corrected in 6 places. It also records the earlier 2026-10-10 close of **`CC-46`** (row 15's
-ACL-coverage leg), **`CC-45`** (row 14's **server** export leg), **`CC-48`** (row 14's custom-entity **client**
-`view` export leg), **`CC-49`** (row 14's **customer-tasks** alias export leg) and **`CC-47`** (row 15's
-**human-CRUD-list** read gate — the register's premise was falsified in code; the path IS gated, and the
-structural test now exists — **row 15 is ✅, so PHASE 3 is complete on rows 7–9, 13–15**). The FRONTIER is
-re-derived from `platform_points.md`; the ONE NUMBER is **72 / 321 = 22%, unchanged by row 16** (a 🟡 partial —
-closing a callout row moves no box; §L now carries a **sixth** consecutive re-run at 72/321). If you want the
-newest numbers, re-measure them; §7 tells you how to split what was measured from what was quoted.**
+**Written 2026-10-05, revision 21 (2026-10-11). Owner: Ramzi. Development machine: `BIXMASERVER` (Windows 10 Pro).**
+**This revision records the 2026-10-11 BUILD of row 17 (permission coverage reaches every table — `CC-52`,
+now ✅) on top of row 16's own-leg.** Row 17's rule-0b measurement first: coverage today was only the **53
+searchable** entities (`CC-46`) plus the **60 `makeCrudRoute`** list routes (`CC-47`) out of **233 tables** — the
+balance had **no per-table read-ACL check**. The build is a **coverage gate**,
+`packages/cli/src/lib/generators/__tests__/table-coverage.test.ts` (AST, `typescript-js`): every table must be
+**(a) searchable**, **(b) a comment-stripped `api/**/*.ts` read surface**, **or (c) on the named
+`INTERNAL_TABLES` allowlist** (~63 entries, reason per entry) — so a new table cannot be added un-gated. It
+**pins exact counts** (233 tables / 47 surface modules / 12 search modules). A **separate-agent hostile critic
+found 3 REAL holes** — a class name matched inside a **comment**, a walker that read only `route.ts` (missing
+live `api/*.ts` GETs), and loose `>200` floors that let a **39-table shrink pass** — **all fixed**
+(comment-stripping, broaden to `api/**/*.ts`, pin exact counts); new lessons **L109/L110/L111**. **4
+RED-then-GREEN mutations** (md5-verified restores); green 5/5; `tsc` clean. Owner chose Option A via `NY-21`.
+The ONE NUMBER is **72 / 321 = 22%, unchanged by row 17** (a coverage gate annotates an already-`☑` §K `P10`
+line — no new box; §L now carries a **seventh** consecutive re-run). The **PHASE-5 batch** (rows 16 → 17 → 18)
+continues with **row 18** (wire the AI read path to the same column- and row-level gates). The previous
+revision (20) recorded the row-16 own-leg build (`CC-50` **CLOSED**; the row stays 🟡 because the team-leg is
+deliberately deferred, `CC-51`): an opt-in `ownerField`/`ownerFeature` declaration on **`OrmEntityConfig`**
+(rule-13 correction — it belongs on the CRUD layer every `makeCrudRoute` caller shares, **not** in the search
+registry, which exists only for the 11 searchable modules and which the first wired entity `api_keys` does not
+have), plus a role-level **`.own`** feature-grant modifier (`matchFeature` byte-unchanged) resolved once in
+`withCtx()` with a **dual super-admin carve-out** (`auth.isSuperAdmin` **or** `acl.isSuperAdmin`) and threaded
+through all **three** `buildScopedWhere` call sites plus any route hook that short-circuits them. Two
+hostile-critic rounds (separate agent) each found a **real** defect: a `beforeList` bypass that never reached
+the shared builder (**L106**), and the missing second super-admin notion (**L107**); both fixed, RED-then-GREEN
+md5-verified. Revision 20 also carried: **Rule 9(a) strengthened** (ownership is of the **full codebase while
+you are working on it, not just your own diff** — two findings previously waved off are now **scheduled**:
+`N-20` `openapi.test.ts` 3 failing tests; `N-21` `structural-contracts.test.ts` ~17-min suite), and a
+**rule-13 correction** (the CC-47 test header's "in neither" count `163` → measured **161**). It also records
+the 2026-10-10 closes of **`CC-46`**, **`CC-45`**, **`CC-48`**, **`CC-49`**, **`CC-47`** — **row 15 ✅, so
+PHASE 3 is complete on rows 7–9, 13–15**.
 *⚠️ **Note the revision cadence:** this page is bumped by a session that changes the *project layout,
 the front-door documents, or a numbered ruling* — it is **not** bumped by every `CC-` item. Where this
 page and the `★ ACTIVE TASK` box disagree about *what is being worked on now*, **the box wins** (line 9).*
