@@ -28,7 +28,7 @@ anything else first. Where an item is **not** a decision, it says so, and you ca
 
 ---
 
-## Part 1 — Decisions I need (**0 open** — `NY-19` **decided 2026-10-10** (owner chose Option A: build the read-gate coverage test → built as `CC-47`, row 15 ✅); `NY-18` **decided 2026-10-10** ("we follow your recommendations" → Option B, built as `CC-49`); `NY-16` and `NY-17` **decided 2026-10-10** (blank the value; Option B); `NY-15` decided 2026-10-09; `NY-14` closed 2026-10-06; `NY-1`, `NY-2`, `NY-8`, `NY-13` closed; `NY-4` is "nothing needed")
+## Part 1 — Decisions I need (**1 open** — `NY-20` (row 16 scope) **new 2026-10-10**; `NY-19` **decided 2026-10-10** (owner chose Option A: build the read-gate coverage test → built as `CC-47`, row 15 ✅); `NY-18` **decided 2026-10-10** ("we follow your recommendations" → Option B, built as `CC-49`); `NY-16` and `NY-17` **decided 2026-10-10** (blank the value; Option B); `NY-15` decided 2026-10-09; `NY-14` closed 2026-10-06; `NY-1`, `NY-2`, `NY-8`, `NY-13` closed; `NY-4` is "nothing needed")
 
 > **Numbering note.** Items are numbered once and **never reused**, so that a number you have already
 > quoted keeps meaning the same thing. Item 8 was appended here on 2026-10-05 and answered the same
@@ -112,6 +112,41 @@ route files are in neither, and **every one is a mutation endpoint** (POST/PUT/P
 That is intended for CC-47's scope, but it means *"every read is permission-filtered"* is guaranteed for the
 human CRUD list family, not for every route that happens to export a `GET`. This is stated in the test header,
 not hidden. *(Rule-13 correction, 2026-10-10: this read "163"; measured three ways, the true value is 161.)*
+
+---
+
+### `NY-20` — Row 16 ("own / team row scope"): which scope do you actually want? — **DECIDE** *(new, 2026-10-10)*
+
+**What row 16 says.** *"You can restrict a person to their own rows / their team's rows, not just their whole
+tenant."* (BUILD-ORDER item 18: *"today scope is tenant + organization only."*)
+
+**What I measured in code (rule 0b).** The claim is **true** — scope today is exactly **three** dimensions:
+`tenantId`, `organizationId`, and an `organizationIds` allowlist (`shared/src/lib/api/crud.ts`
+`buildScopedWhere()`, applied in `shared/src/lib/crud/factory.ts` `withCtx()`). The user id (`auth.sub`) is read
+all over the factory **but only to stamp audit/event records — never to filter rows.** There is **no `team`
+concept at all** (no team entity, no membership, nothing on `auth`).
+
+**The obstacle that decides the design.** "Own rows" needs a column that says *whose* row it is. **There is no
+shared owner column.** Most tables have none, and the few that do use **different names and types**:
+`createdByUserId` (`created_by_user_id`, uuid) on `auth`/`customers`; `createdBy` (`created_by`, **varchar** — a
+label, not a user) on `business_rules`/`workflows`; `assignedTo` + `assignedToRoles` on `workflows` UserTask. So
+a blanket "filter every table by owner" is impossible; row 16 must be an **opt-in, per-entity declaration** of
+which column is the owner (the same shape as the existing `aclFeatures` declaration in each module's
+`search.ts`).
+
+**Three options:**
+
+| | Option | What it means for you | Size |
+|---|---|---|---|
+| **A** ✅ *my rec* | **Own-only, opt-in per entity** | An entity that declares an owner column can be restricted so a role sees **only its own rows**; a role on the normal scope is unchanged. **No new "team" thing.** | Bounded, testable |
+| **B** | **Own + Team** | As A, **plus** a real `team` entity + membership + UI + schema/migrations. The *full* row 16 as worded. | Large (new entity) |
+| **C** | **Correct the row, don't build** | Change row 16 to say the platform is tenant+org by design and per-row scope is a plugin concern. | Trivial |
+
+**Recommendation: A.** It delivers the row's substance (a person *can* be restricted to their own rows) with a
+bounded change, and defers "team" as a **scheduled callback** — named, not silently dropped. If you want the
+full thing, pick B and I will treat the team entity as its own project. Detail: `PLAN-ROW16-own-team-row-scope.md`.
+
+**Your answer (one word):** A, B, or C.
 
 ---
 
