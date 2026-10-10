@@ -35,6 +35,77 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+### 🟡 RE-MEASURED — **Phase 5, row 15 (`P10`): the read axis IS scoped and HAS two real permission read gates, but the row's absolute claim ("EVERY read is filtered by permission at the data layer") is NOT yet true — so row 15 stays 🟡 with its remainder named and scheduled (`CC-46`).**
+**(2026-10-10; docs repo — no code changed this turn; measured against code `53ed2e7b`.)**
+
+**The task (protocol step 3), from `platform_points.md` row 15:** *"Every read is filtered by permission at
+the **data layer** — not by hiding a button."* The row was **🟡**, so the job was **re-measure first** (rule
+0b), **not build** — as the FRONTIER box instructs.
+
+**The re-measure (step 4, against the code). What the read layer ACTUALLY does — three distinct things, only
+one of which is *permission*:**
+- **Tenant/org row SCOPE (not permission) — universal.** `buildScopedWhere` (`shared/src/lib/api/crud.ts:5`)
+  injects `tenantId` + `organizationId` into every CRUD list/read `where` (`factory.ts:1988/2659/3002`), and
+  `omitAutomaticTenantOrgScope` is an **explicit opt-out** whose own doc says the caller's `buildFilters`
+  "MUST fully encode row visibility … and MUST fail closed". So **every read is tenant/org-scoped** — but
+  this answers *"which rows are in my tenant?"*, **not** *"may this actor read this row?"*.
+- **A permission read gate — but ONLY on the AI search tools.** `packages/search/src/modules/search/ai-tools.ts`
+  gates the data-returning tools `search_get`/`search_aggregate` through `authorizeEntityAccess` (`:80`):
+  it resolves the entity's declared **`aclFeatures`** and, when the caller lacks them (or the entity declares
+  none), **fails closed**; `stripSensitiveFields` (`:114`) additionally drops `hashOnly`/`excluded` PII. This
+  is a genuine data-layer permission read gate — and it is the **only generic one**.
+- **A per-record permission read gate — in ONE module.** `communication_channels/lib/access-control.ts`
+  (`assertCanAccessChannel`, `:36`) enforces **owner-only** personal mailboxes on the read routes, backed by
+  SQL narrowing (`user_id IS NULL` for the admin list, `user_id = currentUser.id` for the profile list) — 4
+  call sites. Real, but local to that module.
+
+**The honest gap (this is the 🟡).** The **ordinary human read path** — a CRUD `GET`/list — has **NO
+per-entity permission filter**: `factory.ts` reads `requireFeatures` only as a *route metadata* concept
+(`:170`, enforced by the dispatcher for the route, not per row/entity), and `aclFeatures` is read **nowhere**
+outside `ai-tools.ts` (measured: the only other consumer is a CLI fact generator). And the `aclFeatures`
+coverage is **thin**: **~67-69 search entity configs exist; only 6 declare `aclFeatures` — all 6 in ONE module
+(`customers`)**; the other 10 modules with a `search.ts` (`catalog`, `sales`, `staff`, `checkout`,
+`customer_accounts`, `inbox_ops`, `messages`, `planner`, `resources`, `wms`) declare **none**, so their
+entities are **denied** by the fails-closed AI gate (safe, but unusable). This is exactly
+`BUILD-ORDER.md` item **17**: *"extend `aclFeatures` from 6 of 67 tables to all tables, with an aggregate
+rule so a new table cannot be added un-gated."*
+
+**So the row's three sub-claims, measured:**
+| Sub-claim | Measured |
+|---|---|
+| reads are scoped (tenant/org) at the data layer | ✅ **true, universal** (`buildScopedWhere`) |
+| reads are *permission*-filtered at the data layer | 🟡 **true only for the AI search tools (6/~67 entity configs) + one channel module** |
+| "**EVERY** read" | ❌ **not true** — the human CRUD list path has no per-entity permission filter; the remaining ~61 search configs are un-gated (fail closed) |
+
+**Why the row STAYS 🟡 (not ticked).** Unlike row 14, the row's own wording is **absolute** ("every read …
+not by hiding a button"), and the measured mechanism does **not** meet it. Per the never-a-partial-tick
+rule this is a **genuine partial**, and its remainder is a **named, startable** piece of work — so it is
+**scheduled, not merely noted**: new callback **`CC-46`** (extend `aclFeatures` to every searchable entity
++ add the aggregate fail-closed rule so a new entity cannot be added un-gated; optionally add a generic
+per-entity read gate on the CRUD list path). It is **buildable now** (the pattern exists in `ai-tools.ts`),
+which is why it is a callback and not "blocked".
+
+**What would flip row 15 to ✅:** every searchable/readable entity declares `aclFeatures` (and a new one
+cannot be added without it), and the human read path consults it — i.e. `CC-46` lands.
+
+**Corrections the re-measure produced (rule 13).**
+1. `platform_points.md` §B `P10` was described as **"Search / indexing — full-text + vector ▸ 0/2"** with
+   `P10a` "a strong search engine (carried)" and `P10b` "a real UI + full ACL-feature coverage". Measured:
+   the engine **is real** (`packages/search`, strategies `tokens`/`vector`/`fulltext`, an indexer, workers,
+   embeddings, a global-search route + UI; suite **26/269 green**) — so row 15's blocker is **not** the
+   engine and **not** the UI; it is the **ACL-feature coverage**. The `P10` id is doing **double duty** in
+   the doc (row 15's *read gate* vs §B's *search module*); the record now names them distinctly.
+2. `P10b`'s parenthetical "`aclFeatures` covers 6 of 67 tables" is **substantially CORRECT, not stale** — the
+   hostile-critic's own re-measure confirms **6 `aclFeatures` declarations** across **~67-69 search `entityId`
+   configs**, all 6 in `customers` (`BUILD-ORDER.md` item 17's "6 of 67" was essentially right). Recorded, not re-typed.
+
+**Status:** 🟡 **ROW 15 PARTIAL (accurately) — reads ARE scoped and the AI-search + channel permission read
+gates ARE real, but "every read permission-filtered at the data layer" is NOT yet true: the human CRUD list
+path is un-gated per entity and `aclFeatures` covers only 6 of ~67 search configs. Remainder scheduled as `CC-46`
+(buildable now). Row 15 stays 🟡.**
+
+---
+
 ### ✅ DONE — **Phase 4, row 14 (`P4`, the classification leg): sensitive fields/secrets ARE marked and the platform DOES treat them specially — RE-MEASURED IN CODE; the row is substantially BUILT, one leg (`never exported by accident`) is genuinely OPEN and scheduled, and row 14 is ticked ✅ with that remainder named.**
 **(2026-10-10; docs repo — no code changed this turn; measured against code `53ed2e7b` (the row-8 HEAD, unchanged since).)**
 
@@ -293,22 +364,20 @@ enabled. **No code was changed to "pass" this row; the row was measured and the 
 > (d) ✅ the false `P3a` "two-table" claim was corrected everywhere (rule 13); (e) ✅ the opt-in nature is
 > recorded honestly and the default-deny question is **scheduled as `CC-44` (owner's call)**, not claimed.
 
-**★ NEXT TASK — the next item in the vision's order after row 14.** **PHASE 3 is COMPLETE** (rows 7–13 ✅) and
-**row 14 (`P4`, the classification leg) is now ✅** — the marking mechanism and the "treated specially" core
-(encrypt at rest, decrypt on read, a manage screen, 15 module maps) are built and measured, with one leg
-(`never exported by accident`) opened honestly as **`CC-45`**. So the queue **moves within PHASE 4/5** to the
-next skeleton row that is not blocked. The two genuine candidates, in the vision's order, are:
-- **row 15 (`P10`) — "Every read is filtered by permission at the data layer, not by hiding a button"** (Phase 5,
-  currently 🟡). This is the **read-axis counterpart** of the write gate row 7 already proved, and it is the
-  natural next row of the skeleton.
-- **`CC-45` — the export leg just opened** (small, bounded): make every export path consult the encryption map
-  so a marked field is never handed back in clear. It is a **direct continuation of row 14**, so if the owner
-  wants the row *fully* closed before moving on, this is the build to do next.
+**★ NEXT TASK — after row 15's re-measure.** **PHASE 3 is COMPLETE** (rows 7–13 ✅), **row 14 is ✅** (`CC-45`
+opened for its export leg), and **row 15 was just re-measured and is an accurate 🟡** — its mechanism is
+partly there (reads are tenant/org-scoped; the AI-search + channel permission read gates are real) but the
+absolute claim is not met, and its remainder is **buildable now** as **`CC-46`** (extend `aclFeatures` to
+every searchable entity + the aggregate fail-closed rule; optionally a generic per-entity gate on the CRUD
+list path). The queue therefore holds **three startable, named pieces** — the honest first move for any is
+the same: **re-measure it against the code before building** (rule 0b) — **do not build before measuring**:
+- **`CC-46`** — finish row 15's read gate (the direct continuation of the row just measured; buildable now).
+- **`CC-45`** — the row-14 export leg (small, bounded; make every export path consult the encryption map).
+- **row 16/17/18** (`Phase 3 item 18` own/team row scope · `item 17` the same aclFeatures coverage · `item 19`
+  the AI IR path through the gates) — the next genuine Phase-5 rows.
 
-The honest first move for whichever is chosen is the same as always: **re-measure the row's sub-points against
-the code before building** (rule 0b: finish the row before starting a new one) — **do not build before
-measuring.** If the owner prefers a *different* item, `CC-42` (`G-22` Slice 2B) and `CC-27` (the AI-user ↔
-agent binding) are behind these, but they are **business/agent work**, not the skeleton, so they wait (rule 0b).
+If the owner prefers a *different* item, `CC-42` (`G-22` Slice 2B) and `CC-27` (the AI-user ↔ agent binding)
+are behind these, but they are **business/agent work**, not the skeleton, so they wait (rule 0b).
 
 **Status:** ✅ **ROW 7 DONE — roles & grants enforced on every write VERIFIED IN CODE; 0 unexplained gap; `measure.js --check` is the going-forward gate; row 7 ticked ☑; `CC-44` scheduled (owner's call).**
 **This section exists because the owner asked for it (2026-10-06).** Handover documents must **not**
