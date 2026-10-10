@@ -98,7 +98,11 @@ const crud = makeCrudRoute<
     POST: { requireAuth: true, requireFeatures: ['api_keys.create'] },
     DELETE: { requireAuth: true, requireFeatures: ['api_keys.delete'] },
   },
-  orm: { entity: ApiKey, orgField: null },
+  // Row 16 (Option A): api_keys opt into owner row scope. Rows are already
+  // stamped with `createdBy = caller` on create (see `create.mapToEntity`), so a
+  // role granted the `.own` modifier on `api_keys.view` sees/updates/deletes only
+  // its own keys. Without that modifier this is a no-op — behaviour is unchanged.
+  orm: { entity: ApiKey, orgField: null, ownerField: 'createdBy', ownerFeature: 'api_keys.view' },
   list: { schema: listQuerySchema },
   create: {
     schema: createApiKeySchema,
@@ -166,6 +170,15 @@ const crud = makeCrudRoute<
         qb.andWhere({ organizationId: { $in: organizationIds } })
       } else if (auth.orgId) {
         qb.andWhere({ organizationId: auth.orgId })
+      }
+      // Row 16 (Option A): this hook builds its OWN query and short-circuits the
+      // factory via `throw json(...)`, so it never reaches `buildScopedWhere`.
+      // An own-only role's row scope must therefore be applied HERE too, or the
+      // list path would leak every key in the organization. `ctx.rowScope` is
+      // resolved once in `withCtx()` and is `null` unless the route opted in AND
+      // the caller holds the `.own` grant — so this is a strict no-op otherwise.
+      if (ctx.rowScope) {
+        qb.andWhere({ [ctx.rowScope.ownerField]: ctx.rowScope.ownerUserId })
       }
       if (search) {
         const pattern = `%${escapeLikePattern(search)}%`

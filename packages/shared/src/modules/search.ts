@@ -289,6 +289,13 @@ export type SearchEntityConfig = {
    * to gate record reads — callers must additionally hold the owning module's
    * `<entity>.view` feature(s) declared here. When omitted, those tools fail
    * closed (deny) so an entity is never exposed without an explicit grant.
+   *
+   * NOTE on row scope (Row 16 / Option A): per-entity row scope is NOT declared
+   * here. It belongs on the CRUD route's `orm` config (`OrmEntityConfig.ownerField`
+   * / `ownerFeature` in `lib/crud/factory.ts`) because row scope must apply to
+   * EVERY CRUD entity — including entities such as `api_keys` that are not
+   * searchable and have no `search.ts`. Declaring it here would create a second,
+   * drift-prone home for the same fact.
    */
   aclFeatures?: string[]
 }

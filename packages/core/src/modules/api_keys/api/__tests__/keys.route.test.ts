@@ -14,6 +14,7 @@ interface MockEntityManager {
   find: jest.Mock<Promise<unknown[]>, [unknown, Record<string, unknown>?]>
   fork: jest.Mock<MockEntityManager, []>
   transactional: jest.Mock<Promise<unknown>, [(em: MockEntityManager) => Promise<unknown>]>
+  createQueryBuilder?: jest.Mock<unknown, [unknown, string?]>
 }
 
 interface MockDataEngine {
@@ -48,6 +49,7 @@ const mockEm: MockEntityManager = {
   transactional: jest.fn<Promise<unknown>, [(em: MockEntityManager) => Promise<unknown>]>(
     async (fn) => fn(mockEm),
   ),
+  createQueryBuilder: jest.fn(() => makeMockQueryBuilder()),
 }
 const mockDataEngine: MockDataEngine = {
   __queue: queue,
@@ -58,6 +60,26 @@ const mockDataEngine: MockDataEngine = {
   flushOrmEntityChanges: jest.fn<Promise<void>, []>(),
 }
 const mockFindOneWithDecryption = jest.fn()
+/**
+ * Row 16 (Option A) — the api_keys GET `beforeList` builds its own query via
+ * `em.createQueryBuilder` and short-circuits the factory with `throw json(...)`,
+ * so the owner-scope must be asserted on the QUERY BUILDER, not on a
+ * `buildScopedWhere` result. This records every `andWhere` clause the hook adds.
+ */
+const recordedAndWhere: Array<Record<string, unknown>> = []
+const makeMockQueryBuilder = () => {
+  const qb: Record<string, unknown> = {}
+  qb.where = jest.fn(() => qb)
+  qb.andWhere = jest.fn((clause: Record<string, unknown>) => {
+    recordedAndWhere.push(clause)
+    return qb
+  })
+  qb.orderBy = jest.fn(() => qb)
+  qb.limit = jest.fn(() => qb)
+  qb.offset = jest.fn(() => qb)
+  qb.getResultAndCount = jest.fn(async () => [[], 0])
+  return qb
+}
 const mockRbac: MockRbacService = {
   invalidateUserCache: jest.fn<Promise<void>, [string]>(),
   loadAcl: jest.fn<Promise<MockAcl | null>, [string, { tenantId: string | null; organizationId: string | null }]>(),
@@ -108,12 +130,14 @@ type RouteModule = typeof import('../keys/route')
 let routeMetadata: RouteModule['metadata']
 let postHandler: RouteModule['POST']
 let deleteHandler: RouteModule['DELETE']
+let getHandler: RouteModule['GET']
 
 beforeAll(async () => {
   const routeModule = await import('../keys/route')
   routeMetadata = routeModule.metadata
   postHandler = routeModule.POST
   deleteHandler = routeModule.DELETE
+  getHandler = routeModule.GET
 })
 
 describe('API Keys route', () => {
@@ -196,6 +220,7 @@ describe('API Keys route', () => {
     mockRbac.invalidateUserCache.mockResolvedValue(undefined)
     mockRbac.loadAcl.mockResolvedValue({ isSuperAdmin: false })
     mockHashApiKey.mockClear()
+    recordedAndWhere.length = 0
   })
 
   it('exports the expected ACL features', () => {
@@ -210,6 +235,49 @@ describe('API Keys route', () => {
     expect(routeMetadata.POST?.requireFeatures).toEqual(['api_keys.create'])
     expect(routeMetadata.DELETE?.requireAuth).toBe(true)
     expect(routeMetadata.DELETE?.requireFeatures).toEqual(['api_keys.delete'])
+  })
+
+  // Row 16 (Option A) — A3: the GET list path must honour the owner row scope.
+  // The route's `beforeList` builds its own query and short-circuits the factory,
+  // so this asserts the owner clause lands on the QUERY BUILDER — the exact place
+  // the hostile-critic review found the scope had been missed.
+  it('restricts the GET list to the caller\'s own rows when the role holds the .own grant', async () => {
+    mockRbac.loadAcl.mockResolvedValue({ isSuperAdmin: false, features: ['api_keys.view', 'api_keys.view.own'] })
+    const res = await getHandler(new Request('http://localhost/api/api_keys/keys'))
+    expect(res.status).toBe(200)
+    expect(recordedAndWhere).toContainEqual({ createdBy: 'user-1' })
+  })
+
+  it('does NOT restrict the GET list for a plain (non-.own) view grant', async () => {
+    mockRbac.loadAcl.mockResolvedValue({ isSuperAdmin: false, features: ['api_keys.view'] })
+    const res = await getHandler(new Request('http://localhost/api/api_keys/keys'))
+    expect(res.status).toBe(200)
+    expect(recordedAndWhere.some((clause) => 'createdBy' in clause)).toBe(false)
+  })
+
+  it('does NOT restrict a super-admin even when the role lists the .own grant', async () => {
+    mockRbac.loadAcl.mockResolvedValue({ isSuperAdmin: true, features: ['api_keys.view.own'] })
+    const res = await getHandler(new Request('http://localhost/api/api_keys/keys'))
+    expect(res.status).toBe(200)
+    expect(recordedAndWhere.some((clause) => 'createdBy' in clause)).toBe(false)
+  })
+
+  // Two super-admin notions exist and both must bypass row scope: the ACL's
+  // `is_super_admin` grant AND the request's `auth.isSuperAdmin` (set for API-key
+  // principals / tenant-org overrides). If the request flag is true but the ACL
+  // is not, the caller is super-admin everywhere else — so row scope must not
+  // narrow them either.
+  it('does NOT restrict when auth.isSuperAdmin is set even if the ACL is not super-admin', async () => {
+    mockGetAuthFromRequest.mockResolvedValue({
+      sub: 'user-1',
+      tenantId: '123e4567-e89b-12d3-a456-426614174000',
+      orgId: null,
+      isSuperAdmin: true,
+    })
+    mockRbac.loadAcl.mockResolvedValue({ isSuperAdmin: false, features: ['api_keys.view', 'api_keys.view.own'] })
+    const res = await getHandler(new Request('http://localhost/api/api_keys/keys'))
+    expect(res.status).toBe(200)
+    expect(recordedAndWhere.some((clause) => 'createdBy' in clause)).toBe(false)
   })
 
   it('creates API keys with organization scope, hashed secret, and role mapping', async () => {
@@ -474,7 +542,11 @@ describe('API Keys route', () => {
       deletedAt: null,
     }
     mockResolveScope.mockResolvedValueOnce({ selectedId: null, filterIds: [], allowedIds: [] })
-    mockRbac.loadAcl.mockResolvedValueOnce({ isSuperAdmin: true })
+    // Row 16 (Option A): the row-scope resolution in `withCtx()` reads `loadAcl`
+    // too (to decide whether the actor holds the `.own` grant). Use a persistent
+    // value (not `...Once`) so the super-admin ACL holds for BOTH calls this
+    // request makes — the delete-authorization read and the row-scope read.
+    mockRbac.loadAcl.mockResolvedValue({ isSuperAdmin: true })
     mockEm.findOne.mockResolvedValueOnce(record)
     mockFindOneWithDecryption.mockResolvedValueOnce(record)
     mockDataEngine.deleteOrmEntity.mockResolvedValueOnce(record)

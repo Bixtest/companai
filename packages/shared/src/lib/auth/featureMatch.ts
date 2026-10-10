@@ -32,6 +32,42 @@ export function matchFeature(required: string, granted: string): boolean {
 }
 
 /**
+ * Row 16 (Option A) — the `own` row-scope modifier, a **suffix** on a feature id.
+ *
+ * A role grant of `<feature>.own` (e.g. `customers.customer_person.own`) means
+ * *"this role may only see rows it owns"* for that entity; the plain `<feature>`
+ * grant means all rows in the caller's tenant/organization scope. The modifier is
+ * resolved into a row filter by `withCtx()` (`lib/crud/factory.ts`) — it never
+ * changes who *may* call an endpoint, only which rows the call returns.
+ *
+ * This parser is deliberately **additive**: it is a separate function so that
+ * `matchFeature()` (used by every one of the platform's permission checks) keeps
+ * its exact existing semantics. A grant of `x.y` does NOT satisfy a required
+ * `x.y.own`, and a grant of `x.y.own` does NOT satisfy a required `x.y` — the two
+ * are different capabilities, kept apart on purpose so a role can be given the
+ * ordinary feature without accidentally restricting it, and vice-versa.
+ */
+export const OWN_SCOPE_SUFFIX = '.own'
+
+/** True when a feature id ends with the `.own` row-scope modifier. */
+export function isOwnScoped(featureId: string): boolean {
+  return typeof featureId === 'string' && featureId.endsWith(OWN_SCOPE_SUFFIX)
+}
+
+/** Strip a trailing `.own` modifier, if present (else return the id unchanged). */
+export function stripOwnScope(featureId: string): string {
+  return isOwnScoped(featureId) ? featureId.slice(0, -OWN_SCOPE_SUFFIX.length) : featureId
+}
+
+/** True when the granted feature list carries the `.own` modifier for `feature`. */
+export function hasOwnScopeGrant(granted: readonly string[] | undefined | null, feature: string): boolean {
+  if (!Array.isArray(granted) || !granted.length) return false
+  // The grant must ACTUALLY carry the `.own` suffix — a plain `<feature>` grant
+  // means "all rows", never "own rows". So we require `isOwnScoped(grant)`.
+  return granted.some((grant) => isOwnScoped(grant) && stripOwnScope(grant) === feature)
+}
+
+/**
  * Checks if all required features are satisfied by the granted feature set.
  */
 export function hasAllFeatures(required: string[], granted: string[]): boolean {

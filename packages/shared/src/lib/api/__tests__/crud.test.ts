@@ -127,6 +127,58 @@ describe('buildScopedWhere', () => {
       deletedAt: null,
     })
   })
+
+  // Row 16 (Option A) — the owner dimension. A1: it ANDs an owner clause when
+  // both `ownerField` and `ownerUserId` are present, and is a strict no-op
+  // otherwise (so no existing caller changes).
+  it('ANDs an owner clause only when both ownerField and ownerUserId are present', () => {
+    expect(
+      buildScopedWhere(
+        { id: 'entity-1' },
+        { organizationId: 'org-1', tenantId: 'tenant-1', ownerField: 'createdBy', ownerUserId: 'user-1' }
+      )
+    ).toEqual({
+      id: 'entity-1',
+      organizationId: 'org-1',
+      tenantId: 'tenant-1',
+      createdBy: 'user-1',
+      deletedAt: null,
+    })
+  })
+
+  it('is a no-op for the owner dimension when ownerField is absent (byte-identical to pre-row-16)', () => {
+    const withoutOwner = buildScopedWhere(
+      { id: 'entity-1' },
+      { organizationId: 'org-1', tenantId: 'tenant-1' }
+    )
+    expect(withoutOwner).toEqual({
+      id: 'entity-1',
+      organizationId: 'org-1',
+      tenantId: 'tenant-1',
+      deletedAt: null,
+    })
+    // ownerUserId alone (no ownerField) must NOT add any key
+    expect(
+      buildScopedWhere(
+        { id: 'entity-1' },
+        { organizationId: 'org-1', tenantId: 'tenant-1', ownerUserId: 'user-1' }
+      )
+    ).toEqual(withoutOwner)
+    // ownerField alone (no ownerUserId) must NOT add any key
+    expect(
+      buildScopedWhere(
+        { id: 'entity-1' },
+        { organizationId: 'org-1', tenantId: 'tenant-1', ownerField: 'createdBy' }
+      )
+    ).toEqual(withoutOwner)
+    // explicit null ownerField is a no-op too
+    expect(
+      buildScopedWhere(
+        { id: 'entity-1' },
+        { organizationId: 'org-1', tenantId: 'tenant-1', ownerField: null, ownerUserId: 'user-1' }
+      )
+    ).toEqual(withoutOwner)
+  })
 })
 
 describe('extractScopeFromAuth', () => {

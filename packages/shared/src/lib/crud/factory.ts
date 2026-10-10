@@ -3,6 +3,7 @@ import type { AwilixContainer } from 'awilix'
 import { createRequestContainer } from '@open-mercato/shared/lib/di/container'
 import { buildScopedWhere } from '@open-mercato/shared/lib/api/crud'
 import { getAuthFromCookies, getAuthFromRequest, type AuthContext } from '@open-mercato/shared/lib/auth/server'
+import { hasOwnScopeGrant } from '@open-mercato/shared/lib/auth/featureMatch'
 import { derivePrincipal, type PrincipalKind } from '@open-mercato/shared/lib/auth/principal'
 import type { QueryEngine, Where, Sort, Page, QueryCustomFieldSource, QueryJoinEdge } from '@open-mercato/shared/lib/query/types'
 import { SortDir } from '@open-mercato/shared/lib/query/types'
@@ -191,6 +192,18 @@ export type OrmEntityConfig = {
   orgField?: string | null // default: 'organizationId'; pass null to disable automatic org scoping
   tenantField?: string | null // default: 'tenantId'; pass null to disable automatic tenant scoping
   softDeleteField?: string | null // default: 'deletedAt'; pass null to disable implicit soft delete filter
+  /**
+   * Row 16 (Option A) — the column that holds the owning user id (uuid), for
+   * entities that opt into row scope. When set, AND ONLY WHEN the caller's role
+   * carries the `.own` modifier for this entity's view feature, list/update/delete
+   * are restricted to rows where `ownerField = callerUserId`. When unset (the
+   * default) the owner dimension is a no-op and behaviour is unchanged.
+   */
+  ownerField?: string | null
+  /** The view feature id whose `.own` modifier turns on owner-scoping for this
+   *  entity (e.g. `customers.customer_person.view`). Optional; when omitted the
+   *  entity cannot be own-scoped even if `ownerField` is set. */
+  ownerFeature?: string | null
 }
 
 export type CustomFieldsConfig =
@@ -498,12 +511,26 @@ export type CrudCommandActionConfig = {
   status?: number
 }
 
+/**
+ * Row 16 (Option A) — the resolved owner row-scope for a request.
+ *
+ * `null` means "no owner restriction" (the caller sees all rows in their
+ * tenant/org scope). Non-null means the entity opted in AND the caller's role
+ * carries the `.own` modifier: queries are ANDed with `ownerField = ownerUserId`.
+ */
+export type RowScope = {
+  ownerField: string
+  ownerUserId: string
+}
+
 export type CrudCtx = {
   container: AwilixContainer
   auth: AuthContext | null
   organizationScope: OrganizationScope | null
   selectedOrganizationId: string | null
   organizationIds: string[] | null
+  /** Row 16 (Option A) — resolved owner scope, or null when not own-restricted. */
+  rowScope?: RowScope | null
   request?: Request
 }
 
@@ -1013,6 +1040,9 @@ export function makeCrudRoute<TCreate = any, TUpdate = any, TList = any>(opts: C
     orgField: opts.orm.orgField === null ? null : opts.orm.orgField ?? 'organizationId',
     tenantField: opts.orm.tenantField === null ? null : opts.orm.tenantField ?? 'tenantId',
     softDeleteField: opts.orm.softDeleteField === null ? null : opts.orm.softDeleteField ?? 'deletedAt',
+    // Row 16 (Option A): opt-in owner dimension. Unset by default → no-op.
+    ownerField: opts.orm.ownerField ?? null,
+    ownerFeature: opts.orm.ownerFeature ?? null,
   }
   const entityName = typeof ormCfg.entity?.name === 'string' && ormCfg.entity.name.length > 0 ? ormCfg.entity.name : undefined
   const resourceInfo = resolveResourceAliasesList(opts, entityName)
@@ -1409,7 +1439,52 @@ export function makeCrudRoute<TCreate = any, TUpdate = any, TList = any>(opts: C
     } else {
       organizationIds = []
     }
-    return { container, auth: scopedAuth, organizationScope: scope, selectedOrganizationId, organizationIds, request }
+
+    // Row 16 (Option A) — resolve the owner row-scope ONCE, here, the same way the
+    // organization scope is resolved: from the entity's declared `ownerField` AND
+    // the caller's role grant (`.own` on the entity's view feature). This is the
+    // single resolution point for every CRUD verb (list/update/delete all pass
+    // through `withCtx()`), so the restriction cannot be forgotten per-verb.
+    //
+    // Fail-safe: any failure (no rbac service, no owner field declared, no `.own`
+    // grant) yields `rowScope: null` = the caller's ordinary tenant/org scope —
+    // i.e. today's behaviour. Owner-scoping only ever *narrows* a query, and only
+    // when an entity has explicitly opted in, so a resolver error cannot lock a
+    // caller out of their own data (it fails open to normal scope, never closed).
+    let rowScope: RowScope | null = null
+    if (rawAuth && ormCfg.ownerField && ormCfg.ownerFeature && rawAuth.sub) {
+      try {
+        const rbacForScope = (container as AwilixContainer).resolve('rbacService') as unknown as {
+          loadAcl: (
+            userId: string,
+            scope: { tenantId: string | null; organizationId: string | null },
+          ) => Promise<{ isSuperAdmin?: boolean; features?: string[] | null } | null | undefined>
+        }
+        const acl = await rbacForScope.loadAcl(rawAuth.sub, {
+          tenantId: scopedTenantId ?? null,
+          organizationId: scopedOrgId ?? null,
+        })
+        // Super-admin bypass: a super-admin can do everything, so an `.own` grant
+        // on a super-admin role must NOT narrow them (the platform's one permission
+        // engine treats super-admin as an all-rows bypass everywhere else). There
+        // are TWO super-admin notions and BOTH must be honoured, or they diverge:
+        //  - `rawAuth.isSuperAdmin` — set on the request for API-key principals and
+        //    tenant/org overrides (`lib/auth/server.ts` `applySuperAdminScope`);
+        //  - `acl.isSuperAdmin` — the ACL's own `is_super_admin` grant.
+        // The route layer checks `auth.isSuperAdmin` first (e.g. `resolveIsSuperAdmin`),
+        // so if we only checked the ACL here, a request flagged super-admin would be
+        // treated as such everywhere EXCEPT row scope.
+        const isSuperAdmin =
+          (rawAuth as Record<string, unknown>).isSuperAdmin === true || acl?.isSuperAdmin === true
+        if (!isSuperAdmin && hasOwnScopeGrant(acl?.features, ormCfg.ownerFeature)) {
+          rowScope = { ownerField: ormCfg.ownerField, ownerUserId: rawAuth.sub }
+        }
+      } catch {
+        rowScope = null
+      }
+    }
+
+    return { container, auth: scopedAuth, organizationScope: scope, selectedOrganizationId, organizationIds, rowScope, request }
   }
 
   // The caller explicitly selected an organization (selected-org cookie) that no
@@ -2035,6 +2110,9 @@ export function makeCrudRoute<TCreate = any, TUpdate = any, TList = any>(opts: C
           orgField: ormCfg.orgField,
           tenantField: ormCfg.tenantField,
           softDeleteField: ormCfg.softDeleteField,
+          // Row 16 (Option A): owner dimension (no-op unless ctx.rowScope is set).
+          ownerField: !omitListScope ? ctx.rowScope?.ownerField ?? undefined : undefined,
+          ownerUserId: !omitListScope ? ctx.rowScope?.ownerUserId ?? undefined : undefined,
         }
       )
       let list = await repo.find(where)
@@ -2707,6 +2785,9 @@ export function makeCrudRoute<TCreate = any, TUpdate = any, TList = any>(opts: C
           orgField: ormCfg.orgField,
           tenantField: ormCfg.tenantField,
           softDeleteField: ormCfg.softDeleteField,
+          // Row 16 (Option A): an own-only role cannot UPDATE a row it does not own.
+          ownerField: ctx.rowScope?.ownerField ?? undefined,
+          ownerUserId: ctx.rowScope?.ownerUserId ?? undefined,
         }
       )
       const em = (ctx.container.resolve('em') as EntityManager)
@@ -3050,6 +3131,9 @@ export function makeCrudRoute<TCreate = any, TUpdate = any, TList = any>(opts: C
           orgField: ormCfg.orgField,
           tenantField: ormCfg.tenantField,
           softDeleteField: ormCfg.softDeleteField,
+          // Row 16 (Option A): an own-only role cannot DELETE a row it does not own.
+          ownerField: ctx.rowScope?.ownerField ?? undefined,
+          ownerUserId: ctx.rowScope?.ownerUserId ?? undefined,
         }
       )
       const em = (ctx.container.resolve('em') as EntityManager)

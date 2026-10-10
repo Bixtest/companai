@@ -3,7 +3,10 @@ import {
   featureScope,
   featureString,
   hasAllFeatures,
+  hasOwnScopeGrant,
+  isOwnScoped,
   matchFeature,
+  stripOwnScope,
 } from '../featureMatch'
 
 describe('featureString', () => {
@@ -74,5 +77,43 @@ describe('hasAllFeatures', () => {
 
   it('returns false when any required feature is missing', () => {
     expect(hasAllFeatures(['catalog.view', 'sales.edit'], ['catalog.*'])).toBe(false)
+  })
+})
+
+// Row 16 (Option A) — the `.own` row-scope modifier. A2: the modifier is a
+// separate capability, parsed by its own helpers, and MUST NOT change
+// `matchFeature` semantics (otherwise granting `.own` would silently satisfy a
+// plain feature requirement, or vice-versa).
+describe('own row-scope modifier', () => {
+  it('detects the `.own` suffix', () => {
+    expect(isOwnScoped('customers.customer_person.view.own')).toBe(true)
+    expect(isOwnScoped('customers.customer_person.view')).toBe(false)
+    expect(isOwnScoped('catalog.*')).toBe(false)
+    expect(isOwnScoped('')).toBe(false)
+  })
+
+  it('strips a trailing `.own` and leaves other ids unchanged', () => {
+    expect(stripOwnScope('api_keys.view.own')).toBe('api_keys.view')
+    expect(stripOwnScope('api_keys.view')).toBe('api_keys.view')
+    expect(stripOwnScope('api_keys.*')).toBe('api_keys.*')
+  })
+
+  it('reports an own-scope grant only for the exact feature', () => {
+    expect(hasOwnScopeGrant(['api_keys.view.own'], 'api_keys.view')).toBe(true)
+    expect(hasOwnScopeGrant(['api_keys.view.own'], 'api_keys.create')).toBe(false)
+    expect(hasOwnScopeGrant(['api_keys.view'], 'api_keys.view')).toBe(false)
+    expect(hasOwnScopeGrant([], 'api_keys.view')).toBe(false)
+    expect(hasOwnScopeGrant(undefined, 'api_keys.view')).toBe(false)
+    expect(hasOwnScopeGrant(null, 'api_keys.view')).toBe(false)
+  })
+
+  it('does NOT change matchFeature: `.own` and the plain feature are distinct', () => {
+    // A plain grant must not satisfy an `.own` requirement...
+    expect(matchFeature('api_keys.view.own', 'api_keys.view')).toBe(false)
+    // ...and an `.own` grant must not satisfy a plain requirement...
+    expect(matchFeature('api_keys.view', 'api_keys.view.own')).toBe(false)
+    // ...while the module wildcard still reaches both (unchanged semantics).
+    expect(matchFeature('api_keys.view.own', 'api_keys.*')).toBe(true)
+    expect(matchFeature('api_keys.view', 'api_keys.*')).toBe(true)
   })
 })
