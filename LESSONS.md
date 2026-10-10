@@ -3348,3 +3348,38 @@ edits a tick re-runs it. When a derived figure is found wrong, **fix it everywhe
 (re-measure premises; correct a falsified premise everywhere it was copied), §L `derive-counts` in
 `platform_points.md` (the rule this lesson protects), L1 (a confident label is not an inspection — the
 headline's "%" badge is a label; the boxes are the inspection).*
+
+---
+
+## L101 — when you **re-derive a number from a text file**, the *parser* is the thing under test: a near-miss on `319` vs `321` was **my measurement being wrong**, not the file
+
+**The trap.** Asked to re-derive `platform_points.md`'s headline from its boxes, I wrote a small parser
+and it returned **`72 / 319`** — two units short of the file's `72 / 321`. The honest first response is
+*"the file is wrong"*. It was not. The file was right and **my parser was wrong**.
+
+**What actually happened.** The file's rule says a line starting `- ` is a whole point, marked `☐` or `☑`.
+My regex matched exactly those two markers. But the appendix contains **two** whole-point lines marked
+`- ✅` instead (`S11` and `S12` in section G) — and my pattern silently skipped both. `319 + 2 = 321`: the
+file's number was correct all along, and the "discrepancy" was an artifact of my instrument. **A second,
+independent verifier then reproduced the *same class* of error from the other direction** — its first pass
+returned `364` because it counted the `-     *(was PARTIAL…)*` **annotation** lines (which are prose under a
+point, not points) as units. Two different parsers, two different wrong answers, one correct file.
+
+**Why it is dangerous.** A re-derivation is supposed to be the *check* on a typed number. When the parser is
+wrong, the check **manufactures a defect that does not exist** — and the natural next move (edit the file to
+"fix" it) would have written the *parser's* bug into the source of truth, i.e. exactly the L100 failure in
+reverse. The instrument failing is indistinguishable, on first reading, from the patient failing.
+
+**The rule.** When a re-derivation disagrees with the file, treat **both** as suspects: before touching the
+file, (a) enumerate the **actual distinct line-markers / line-classes** in the raw text and prove your
+parser covers *every* class (here: `☐`/`☑`/**`✅`** for whole points, `-   - ` for sub-points, and the
+indent-only `-     *(was …)*` lines are **annotations, never units**); (b) get a **second route** that is
+genuinely different — and when the two routes disagree, assume the *instruments* disagree until the raw
+lines are printed and counted by eye. A re-derivation that reports a defect must be able to **show the
+offending lines**, not just a total. **The number that survives two independent correct parsers is the
+number; a total from one parser is a hypothesis.**
+
+*Cross-ref: L100 (a derived number must be re-derived, never incremented — this is the failure mode *of the
+check itself*), L1 (a confident label is not an inspection — a parser's total is a label until the lines are
+read), rule 0 (the code/text is the evidence, and here the *reader* of that evidence was the defect),
+rule 13 (a falsified premise must be corrected everywhere — but *first* be sure it is falsified).*

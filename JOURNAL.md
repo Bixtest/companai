@@ -35,7 +35,64 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
-### ✅ DONE — **`CC-46` (row 15 / `P10` half): every searchable entity now declares `aclFeatures`, enforced by a coverage gate.**
+### ✅ DONE — **`CC-45` (row 14 / `P4` classification leg, SERVER half): every CRUD export path now consults the encryption map and MASKs a marked field.**
+**(2026-10-10; code repo `workspace/starting-kit`.)**
+
+**The task (protocol step 3), from `platform_points.md` row 14 + register `CC-45`:** the row's *"never exported
+by accident"* leg. The marking half and the encrypt-at-rest/decrypt-on-read half were already built and
+measured; what was absent is that **no export path consulted the map**, so `shared/src/lib/crud/exporters.ts`
+would serialize a marked field **in clear**.
+
+**Step 4 — the prerequisites, re-measured in code (rule 0b), falsified part of the row's own scope.**
+Enumerated every production `serializeExport(` caller. The row named three leaking callers; measured, only
+**two** could leak: `audit_logs/.../export/route.ts` serializes audit **metadata** (`when/user/action/field/
+oldValue/newValue/source` — no entity data row, no `entityId` to resolve a map against) and
+`entities/lib/entitiesCsvExport.ts` serializes the entity **metadata listing** (`entityId/label/source/count`
+— never a data row). The real surface is the **generic factory list/export** (`factory.ts` — the query-engine
+branch *and* the ORM-fallback branch) plus `entities/api/records.ts` for custom entities. *(Rule 13: the row
+was corrected in place.)*
+
+**Step 5–6 — the build.**
+- **New module `shared/src/lib/crud/export-encryption.ts`** — `resolveExportEncryptedFields` +
+  `applyEncryptedFieldMask`, copying the codebase's own precedent (`shared/src/lib/query/encrypted-sort.ts`):
+  the encryption service is required **structurally** (`getEncryptedFieldNames?`, `isEnabled?`), the container
+  key is the existing **`tenantEncryptionService`** (the same key the query engine already resolves), and the
+  **fail-safe** is explicit: absent/disabled service or no `entityId` ⇒ empty set ⇒ **byte-identical export**;
+  a map read that **throws** ⇒ mask everything (fail-closed).
+- **Chosen fix point (rule 9b, challenged then chosen):** `maskPreparedExportForEntity` at the single funnel
+  both factory branches share — one edit covers both, no type change, `serializeExport` stays pure. This is
+  *cleaner* than the two options the row named (per-site filtering, or threading a new field through
+  `PreparedExport`).
+- **Semantics: MASK (`***`), not omit** — keeps the column/header stable for spreadsheet consumers; the
+  owner may still override (rule 11; flagged in `PLAN-CC-45-*.md` §5, not closed by me).
+
+**The hostile critic (a SEPARATE agent) found two real defects — this is why the pass is mandatory.**
+- **(D2) SILENT MISS on header spellings.** `sanitizeFieldName` preserves `-` and case, so a `csv.headers`
+  entry of `Api Secret` / `api-secret` / `API_SECRET` produced an export column my raw/snake/camel candidate
+  set never matched — the secret shipped raw while the mask reported success. **FIXED** by matching on a
+  **canonical form** (lowercase, alphanumerics only — which subsumes snake/camel/kebab/space/case) + regression
+  tests (incl. the `SSN` vs `ssn` case). The critic's `SSN` probe is what revealed the clean fix.
+- **(D1) THE CLIENT-SIDE `view` EXPORT LEAKS.** `ui/src/backend/DataTable.tsx:768` calls `serializeExport`
+  with **no** mask, and its caller `entities/.../records/page.tsx` builds rows from data **already in the
+  browser** — no server mask can reach it. **My first judgement ("client = out of scope") was wrong**: the
+  row's claim is *"never exported by accident"*, and this **is** an export. Confirmed **nothing hides marked
+  columns from entity grids**, so the field is an ordinary visible column. **SPLIT OUT as `CC-48`** — the fix
+  is a real design choice (mask in the browser ⇒ the client learns which fields are secret; or reroute the
+  `view` export through the server; or hide marked columns entirely) and **that choice is the owner's**.
+
+**Evidence (rule 10 step 6).** 27 tests across 2 new suites; **3 RED-then-GREEN mutations** — (1) mask
+disabled, (2) map never consulted, (3) canonical match reverted — **7 / 6 / 7 tests RED respectively**, each
+restore **md5-verified**; green gate **556 tests / 48 suites** (shared: crud + query + encryption) and
+**405 tests / 47 suites** (core entities); `tsc --noEmit` exit 0 on **both** packages. **Two-route
+re-measure:** the ONE NUMBER was re-derived by my script **and** a separate blind verifier agent's own
+script — **both returned 72 / 321 = 22%, UNCHANGED** (both first passes erred on a line class and were
+corrected: mine skipped §G's two `- ✅` lines, the verifier's counted the `-     *(was …)*` annotations).
+**Row 14 ✅ → 🟡** — its absolute claim is not met until `CC-48` closes the client path.
+
+**★ NEXT:** `CC-47` (row 15's human CRUD read leg) · `CC-48` (the client `view` export) — both now in the
+FRONTIER `NOW` slot.
+
+---
 **(2026-10-10; code repo `workspace/starting-kit` commit `c03eca5c`.)**
 
 **The task (protocol step 3), from `platform_points.md` row 15 + register `CC-46`:** the read layer's only

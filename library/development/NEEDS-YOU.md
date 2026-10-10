@@ -28,7 +28,7 @@ anything else first. Where an item is **not** a decision, it says so, and you ca
 
 ---
 
-## Part 1 — Decisions I need (**none open** — `NY-15` decided 2026-10-09; `NY-14` closed 2026-10-06; `NY-1`, `NY-2`, `NY-8`, `NY-13` closed; `NY-4` is "nothing needed")
+## Part 1 — Decisions I need (**2 open** — `NY-16`, `NY-17`, both from the `CC-45` close 2026-10-10; `NY-15` decided 2026-10-09; `NY-14` closed 2026-10-06; `NY-1`, `NY-2`, `NY-8`, `NY-13` closed; `NY-4` is "nothing needed")
 
 > **Numbering note.** Items are numbered once and **never reused**, so that a number you have already
 > quoted keeps meaning the same thing. Item 8 was appended here on 2026-10-05 and answered the same
@@ -38,6 +38,43 @@ anything else first. Where an item is **not** a decision, it says so, and you ca
 > per-tenant policy as the destination, cloud-first as the interim. **Item 14 was added and answered
 > on 2026-10-06** with the request-outcome taxonomy. **Nothing in this Part is open.**
 > *(Item 5, the Coolify password, is in Part 2 — it is a thing to do, not a decision to make.)*
+> **Items 16 and 17 were added 2026-10-10** when `CC-45` closed — both are small wording choices with a
+> working default already in place, so **neither blocks the build.**
+
+### `NY-16` — An exported marked field: hide the column, or blank the value? — **DECIDE** *(default already applied: blank the value)*
+
+**Answered already by default, so you can just say "keep".** When we found that a marked (encrypted) field
+could be **downloaded in an export in clear**, I fixed it: exports now replace the marked value with `***`.
+That is the **default**. The alternative is to **drop the column entirely**. Both are safe.
+
+- **If you say "keep" (blank the value):** the export keeps every column and its heading; the secret shows
+  as `***`. Any spreadsheet or script that reads the file keeps working — nothing shifts.
+- **If you choose "hide the column":** the secret column disappears from the file. Cleaner to the eye, but a
+  script that expects that column at that position now reads the wrong column, silently.
+
+**My recommendation: keep** (blank the value). Undo is one line if you disagree.
+
+### `NY-17` — The one export that still leaks: which fix do you want? — **DECIDE** *(needs you; nothing is exposed until you choose)*
+
+**What is left.** The fix above covers every export the **server** makes. There is one more export path that
+runs **in the browser** ("View → Export" on a records table): it copies the rows the page is already showing,
+so the server never sees it and cannot blank anything. **Measured:** a marked field is an ordinary visible
+column on those tables, so that button **does** download it in clear. It is tracked as **`CC-48`**.
+
+**Three ways to close it — pick one:**
+
+- **(A) Blank it in the browser.** The page needs the list of "secret" field names sent to it. *If yes:* the
+  button stops leaking, but the browser (and anyone with devtools open) can **see which field names are
+  secret** — the names only, never the values.
+- **(B) Send the browser export back through the server.** The export then gets the same blanking as every
+  other export. *If yes:* nothing extra is revealed, but the export must re-send the current filters and
+  visible columns, so it becomes a small server job instead of an instant download.
+- **(C) Hide marked columns from the records tables entirely.** *If yes:* the button cannot leak because the
+  column is not on screen — but **every operator** loses sight of that field in every list, which is a
+  bigger change than either (A) or (B).
+
+**My recommendation: (B)** — it reuses the blanking already built, and reveals nothing new. Say `NY-17 B`
+(or A/C) and I will build it.
 
 ### `NY-1` — Reset the local dev database? — ✅ **DONE 2026-10-05** *(no longer needs you)*
 

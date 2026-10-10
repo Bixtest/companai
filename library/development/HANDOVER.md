@@ -14,11 +14,11 @@ written for exactly that person — and this revision is written for an agent th
 continue the development work.** Read it top to bottom once (about 20 minutes), then
 follow §2 to actually get working. Everything else in the project is reachable from here.
 
-**Written 2026-10-05, revision 15 (2026-10-10). Owner: Ramzi. Development machine: `BIXMASERVER` (Windows 10 Pro).**
+**Written 2026-10-05, revision 16 (2026-10-10). Owner: Ramzi. Development machine: `BIXMASERVER` (Windows 10 Pro).**
 **This revision records the owner's 2026-10-09 rulings as a live ordered ACTION LIST at the top of
 [`../../JOURNAL.md`](../../JOURNAL.md) (see §8's "What is scheduled but not finished", and §5's
 ⚠️ live-platform block). It also records the 2026-10-10 close of **`CC-46`** (row 15's ACL-coverage
-leg) and the opening of **`CC-47`**/**`CC-45`** as the live FRONTIER. If you want the newest numbers,
+leg) and of **`CC-45`** (row 14's server export leg), and the live FRONTIER as **`CC-47`**/**`CC-48`**. If you want the newest numbers,
 re-measure them; §7 tells you how to split what was measured from what was quoted.**
 *⚠️ **Note the revision cadence:** this page is bumped by a session that changes the *project layout,
 the front-door documents, or a numbered ruling* — it is **not** bumped by every `CC-` item. Where this
@@ -49,13 +49,14 @@ is built, 2026-10-07). On top of that, the first slice of the permissions gate (
 mutation-proven, and a long run of small "`CC-`" items has shipped — most recently **`CC-46`**
 (2026-10-10: every one of the **53 searchable entities** now declares `aclFeatures`, enforced by a
 coverage gate — this closed **row 15's ACL-coverage half**). **PHASE 3 is COMPLETE; PHASE 4 (row 14,
-data classification) is ✅ with one leg open (`CC-45`, the export leg)**; rows 7, 8, 9, 13 and 14 are
+data classification) is 🟡 — its **server** export leg is **CLOSED (`CC-45`, 2026-10-10)** and only the
+client-side `view` export (`CC-48`) keeps it off ✅**; rows 7, 8, 9 and 13 are
 ticked. **Nothing is blocked.** What is left is the build continuing in order, and **the task in hand is
 named in the `★ ACTIVE TASK` box at the top of [`../../JOURNAL.md`](../../JOURNAL.md)** — the one place
 that carries it (step 7, and the owner's instruction of 2026-10-06). The **live FRONTIER** (its
 authoritative statement is [`platform_points.md`](platform_points.md)'s `▶ FRONTIER` box) is
 **`CC-47`** (row 15's remaining leg — a per-entity permission gate on the *human CRUD list path*) **·**
-**`CC-45`** (row 14's export leg); both are buildable now, and **both must be re-measured in code before
+**`CC-48`** (row 14's client `view` export leak); both are buildable now, and **both must be re-measured in code before
 building** (rule 0b).
 
 **Six things to do before you touch anything:**
@@ -68,7 +69,7 @@ building** (rule 0b).
 1. **Read this page, then §2 step 1 — tier A first, then tier B.** Six files fix the direction and the
    live decisions; their spine follows. **Tier C is opened only when the work needs it** — do not
    read the imported material "for context". **And read [`../../LESSONS.md`](../../LESSONS.md) — do not
-   skip the lessons.** Every numbered entry (L1–L100 so far, `LESSONS.md` 3,350 lines — re-measured
+   skip the lessons.** Every numbered entry (L1–L101 so far, `LESSONS.md` 3,385 lines — re-measured
    2026-10-10) is a mistake this project already made,
    written in its general form; it is a reading list you act on, not history.
 2. **Set the environment export** (§2 step 2). Every terminal, every session.
@@ -168,7 +169,7 @@ reading it "for context" is how the direction gets buried (see [`../WHAT-WE-ARE-
 | B5 | [`SPEC-business-model-kernel.md`](SPEC-business-model-kernel.md) | **The product specification** — the vision's own 40-item gate; ratification only remains |
 | B6 | [`../analysis/findings/12-development-plan.md`](../analysis/findings/12-development-plan.md) | **The plan** — phases, order, why |
 | B7 | [`../../workspace/COOKBOOK.md`](../../workspace/COOKBOOK.md) | **How the work is done** — read before touching code |
-| B8 | [`../../LESSONS.md`](../../LESSONS.md) | **100 mistakes already made (L1–L100)**, so you do not repeat them — read before you start, and add the next number before you finish |
+| B8 | [`../../LESSONS.md`](../../LESSONS.md) | **101 mistakes already made (L1–L101)**, so you do not repeat them — read before you start, and add the next number before you finish |
 | B8a | [`JOURNEY.md`](JOURNEY.md) | **How the project got here, in order** — the arc from the first brainstorm to the guard migration in hand, written forward. Read it to follow any conversation about this project as if you had been here since day one. **`JOURNAL.md` is the same story newest-first, with the dates and measurements; this is the readable version** |
 
 **Tier C — supporting, opened only where the work needs it.**
@@ -669,12 +670,12 @@ documents and was *not* re-measured — treat it as a starting point, not a fact
 | **Repo 1** (thinking/docs) | `master`, HEAD **`10ecfc5`** — **re-measured 2026-10-10**. It is the `CC-46` documentation close (`JOURNAL`/`BACKLOG`/`platform_points`/`COMPLETION-CALLBACKS`/`BUILD-ORDER` all updated in the same change; two commits, `dfbb497` + `10ecfc5`). *(Previous figure: **`3c799c3`**, the `CC-30` batch, re-measured 2026-10-08.)* |
 | **Repo 2** (code) | `main`, HEAD **`c03eca5c`** — **re-measured 2026-10-10**. It is `CC-46`: every searchable entity declares `aclFeatures` + a coverage gate (`47 insertions(+), 0 deletions`). *(Previous figure: **`35d9257`**, `CC-30`, re-measured 2026-10-08.)* |
 | **Codebase shape** | **21 packages, 1 app** (`apps/mercato`) — a monorepo (Yarn 4.17.1 + Turbo) |
-| **Documentation** | **Tracked markdown: 1,094 repo-wide, of which 50 are in `library/development/`** — **re-measured 2026-10-10** via `git ls-files`. `library/` also holds thousands of `.md` files on disk — but most of that is **gitignored imported study material** (§3i), so **treat the disk figure as approximate: it drifts as untracked files come and go.** `LESSONS.md` (L1–L100, 3,350 lines), `JOURNAL.md` (6,720 lines) and `COOKBOOK.md` (2,948 lines) are the three long-form files. |
+| **Documentation** | **Tracked markdown: 1,094 repo-wide, of which 50 are in `library/development/`** — **re-measured 2026-10-10** via `git ls-files`. `library/` also holds thousands of `.md` files on disk — but most of that is **gitignored imported study material** (§3i), so **treat the disk figure as approximate: it drifts as untracked files come and go.** `LESSONS.md` (L1–L101, 3,385 lines), `JOURNAL.md` (6,777 lines) and `COOKBOOK.md` (2,961 lines) are the three long-form files. |
 | **The studies** | analysis programme **complete** (batches 0–12, 13 reports); Paperclip + Hermes study **complete** (11 batches, 3,940 lines, 53 lessons) |
 | **The specification** | **Draft 2** — of its 40 rows, **36 SETTLED · 1 DERIVED · 3 DEFERRED-with-trigger · 0 OPEN — owner**. The gate is passed; only ratification remains |
 | **The foundation (phase 0)** | **COMPLETE (2026-10-07).** The four named guard-engine gaps are built and proven — **`D0`** (the registry is populated from an enabled module, proven by mutation), **`D1`** (the tier/defaults/fallbacks settings table exists — rules are no longer `.ts` code alone), **`D3`** (the guard result has a third outcome, `escalate`, treated as *not performed*), and **`GAP A`'s registry half** (the read-only **Metadata Registry**, code `59ab859` — it answers *what exists · what type · provenance · what depends on it*, and returns a **typed absence** for the other ten blueprint §54 questions). **`D2-gap`** (every write route that reached no guard) also closed: **0 unguarded across the 35 enabled modules**. **What remains of the foundation: `D2-wide`** — 106 call sites still use the `@deprecated` guard pair, **all in parked modules** (recorded, not migrated), and **`GAP A`'s `Resource` envelope half** — a Phase −1 contract, deliberately not built because a type with no consumer is the "contract after the code" failure. |
 | **The first build slice past the foundation** | **`SD-1` Phase 1 is BUILT (2026-10-08, PARTIAL).** The **S2 structure-change gate**: when a new data structure lands (a table, a column, a field-type change), the platform must not apply it until the permissions for the new surface are decided — either a person decides, or the default applies (full grant to the superadmin role **and the permission records created**). Its decision core (`structure-change-gate.ts`), its hook (two `MutationGuard`s on the entities create path), and its **enforcement** (`permission-decision-grant.ts`, which writes the gate's `defaulted` records into the role's `role_acls.features_json`) are built, tested and mutation-proven across **every create path**, including the batch route, the shared primitive `ensureCustomFieldDefinitions`, the `add-field` CLI, the two HTTP reactivation routes, the entity-install primitive and all three field-type-change sites. **The remaining paths are scheduled** in [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md) (`CC-20`, `CC-23`, `CC-27`; `CC-23` — the create-branch double-insert — is **BUILT 2026-10-09**; `CC-25` — the decision actor's permission — is **BUILT 2026-10-09**, awaiting the owner's confirm). Plan: [`PLAN-SD-1.md`](PLAN-SD-1.md). |
-| **Where the build is now (2026-10-10)** | **PHASE 3 is COMPLETE.** The policy-kernel skeleton (vision Phase 3) is done: **rows 7, 8, 9, 13 and 14 are ✅**, and **row 15 (`P10`, the read layer) is an *accurate* 🟡** — its non-permission half (tenant/org row **scope**, via `buildScopedWhere`) is universal, its permission half has **two real read gates** (the AI search tools' `authorizeEntityAccess`, now backed by **all 53 entities declaring `aclFeatures`** after `CC-46`, 2026-10-10; and one module's per-record owner-only gate), and its **one remaining leg** — a per-entity permission gate on the **human CRUD *list* path** — is open as **`CC-47`**. **The scoreboard is [`platform_points.md`](platform_points.md): one number, `72 of 321 = 22%`** (weighted ≈23%, ±4), derived from the ticked boxes, never typed (§L `derive-counts`). |
+| **Where the build is now (2026-10-10)** | **PHASE 3 is COMPLETE.** The policy-kernel skeleton (vision Phase 3) is done: **rows 7, 8, 9 and 13 are ✅**; **row 14 is 🟡** (its server export leg is **CLOSED by `CC-45`**, 2026-10-10; only the client `view` export, **`CC-48`**, remains), and **row 15 (`P10`, the read layer) is an *accurate* 🟡** — its non-permission half (tenant/org row **scope**, via `buildScopedWhere`) is universal, its permission half has **two real read gates** (the AI search tools' `authorizeEntityAccess`, now backed by **all 53 entities declaring `aclFeatures`** after `CC-46`, 2026-10-10; and one module's per-record owner-only gate), and its **one remaining leg** — a per-entity permission gate on the **human CRUD *list* path** — is open as **`CC-47`**. **The scoreboard is [`platform_points.md`](platform_points.md): one number, `72 of 321 = 22%`** (weighted ≈23%, ±4), derived from the ticked boxes, never typed (§L `derive-counts`). |
 | **The runtime boundary (B-05)** | **DECIDED 2026-10-05 by the owner.** One product, one repository, one deployment, one interface (ours), with Hermes as a **supervised private runtime process behind the internal port**; Hermes is **headless**. Reasoning in [`ARCHITECTURE-hermes-integration.md`](ARCHITECTURE-hermes-integration.md) §11. The Hermes **profile** topology is deferred with the trigger **the agent gateway** |
 | **The model default (`ML-1`)** | **DECIDED 2026-10-05 by the owner: per-tenant policy is the destination, cloud-first is the interim.** It turns three pieces of work from *nice* to *required* — the model registry, the Hermes **agent / persona / profile** mapping, and platform-managed local models. Reasoning in [`ARCHITECTURE-model-server-integration.md`](ARCHITECTURE-model-server-integration.md) §9 |
 | **The running stack** | **8 containers up, all healthy** (app, mcp, hermes, model, opencode, postgres, redis, meilisearch) — **re-measured 2026-10-08** (`docker ps`), all up ~19 hours. The platform's own Postgres 17 (`mercato-postgres-local`) is **live**, so **database behaviour is directly provable on this host** (see §3g, and [`../../workspace/COOKBOOK.md`](../../workspace/COOKBOOK.md)). *Note the trap in the count itself: on 2026-10-06 `docker ps` showed eight rows while `redis` had exited and `mcp` was unhealthy behind it — **eight rows is not eight healthy**, so read the `Status` column, not the line count.* |
@@ -747,10 +748,9 @@ documents and was *not* re-measured — treat it as a starting point, not a fact
   two real permission read gates (the AI search tools + one module's owner-only gate), but the
   **ordinary human CRUD `GET`/list path has no per-entity permission filter** — that last leg is
   **`CC-47`**, open, re-measure-before-building.
-- **Row 14's export leg is NOT yet done.** Sensitive-field **marking** (15 module `defaultEncryptionMaps`
+- **Row 14 is 🟡 — its SERVER export leg is DONE (`CC-45`, 2026-10-10), its CLIENT `view` leg is still open.** Sensitive-field **marking** (15 module `defaultEncryptionMaps`
   persisted to `encryption_maps`), encrypt-at-rest/decrypt-on-read and the manage screen are all built and
-  measured — but **no export path consults the classification map** (`shared/src/lib/crud/exporters.ts` is
-  classification-agnostic), so "never exported by accident" is **`CC-45`**, open.
+  measured; and **every server-side CRUD export path now consults the classification map and masks a marked field** (`shared/src/lib/crud/export-encryption.ts`, wired at the factory funnel + `entities/api/records.ts`). **What is still NOT covered:** the **client-side `view` export** (`ui/src/backend/DataTable.tsx:768` serializes browser-resident rows — no server mask can reach it), so "never exported by accident" is **`CC-48`**, open (owner's choice of fix).
 
 ---
 
@@ -775,8 +775,8 @@ documents and was *not* re-measured — treat it as a starting point, not a fact
   all 2026-10-08.
   **The scoreboard: [`platform_points.md`](platform_points.md) — `72 of 321 = 22%`** (derived from the
   ticked boxes, never typed). *(Corrected 2026-10-10: the headline had drifted to a typed `73 of 330`; a
-  forensic re-derivation by two independent routes put it back to the boxes' true `72 of 321` — see §L.)* The **live FRONTIER** is **`CC-47`** (row 15's human-CRUD-list leg) **·**
-  **`CC-45`** (row 14's export leg); the *authoritative* statement of it is `platform_points.md`'s
+  forensic re-derivation by two independent routes put it back to the boxes' true `72 of 321` — see §L. Re-derived again, unchanged, at the `CC-45` close.)* The **live FRONTIER** is **`CC-47`** (row 15's human-CRUD-list leg) **·**
+  **`CC-48`** (row 14's client `view` export leg); the *authoritative* statement of it is `platform_points.md`'s
   `▶ FRONTIER` box, and **`BACKLOG.md`'s box points to it, not the reverse.**
   **What is left to do, in one place, is `BACKLOG.md`; what is being done *now* is the JOURNAL box.**
   **Still open in the foundation:** **`D2-wide`** — 106 call sites still bypass the guard registry,
@@ -863,12 +863,22 @@ alone means this page is broken — **fix the page, not the newcomer.**
 from an older document are not equally current, and mixing them in one table is how this page
 goes wrong. If two older documents disagree on a number, say so — never average them.
 
-*Last updated: 2026-10-10, revision 15 — **row 15's ACL-coverage leg is CLOSED (`CC-46`), the live
-FRONTIER is now `CC-47` · `CC-45`, and PHASE 3 is complete.** `CC-46` (code `c03eca5c`, docs
-`dfbb497`+`10ecfc5`) makes **all 53 searchable entities** declare `aclFeatures` (47 declarations added
-across 10 `search.ts` files — `47 insertions(+), 0 deletions`) plus a **coverage gate test** that fails
-if a new entity is added un-gated, so `P10b` flipped **☐ → ☑** and the scoreboard moved **72 → 73 of
-330 = 22%**. **Row 15 (`P10`) still STAYS 🟡** — its absolute claim ("EVERY read is permission-filtered
+*Last updated: 2026-10-10, revision 16 — **row 14's server export leg is CLOSED (`CC-45`), the live
+FRONTIER is now `CC-47` · `CC-48`, and row 14 and row 15 both stand 🟡.** `CC-45` (code repo
+`workspace/starting-kit`) adds `shared/src/lib/crud/export-encryption.ts` and wires the mask at the single
+funnel both factory list-export branches share (`maskPreparedExportForEntity`) plus
+`entities/api/records.ts`; **the map is consulted on every server export path** and a marked field is
+**masked**, with an absent/disabled service leaving the export **byte-identical** and a map read that
+throws masking **everything**. **27 tests / 2 suites; 3 RED-then-GREEN mutations (restores md5-verified);
+green gate 556/48 shared + 405/47 core; `tsc` exit 0 both packages.** A **hostile critic (separate agent)**
+found two real defects: a **silent miss** on header spellings like `Api Secret` (**FIXED** — canonical,
+spelling-agnostic matching + regressions) and the **client-side `view` export** leak in
+`ui/src/backend/DataTable.tsx:768` (**SPLIT OUT as `CC-48`** — the fix is the owner's choice). **SCOPE
+CORRECTION (rule 13):** two of the three callers the old row named as leaking could not (audit-log export =
+metadata only; `entitiesCsvExport` = entity-metadata listing). **The scoreboard is UNCHANGED at
+`72 of 321 = 22%`** — `CC-45` closed a callback, it did not tick a box; re-derived twice by two independent
+routes. *(Revision 15's "moved 72 → 73 of 330" copied the drift error; the boxes always gave 72 / 321.)*
+**Row 15 (`P10`) still STAYS 🟡** — its absolute claim ("EVERY read is permission-filtered
 at the data layer") also needs a gate on the **human CRUD list path**, which `CC-46` did not touch; that
 last leg is **`CC-47`**. This revision re-measured §7 Group A (both repo HEADs, the tracked-markdown
 counts) and folded a **rule-13 correction** through every document (`platform_points`, `BACKLOG`,
