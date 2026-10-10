@@ -6,15 +6,12 @@ list**, sorted so you can reorder it.
 
 **Read it like this:** each row says **what you, the user, can do after the task is done** — not
 `G-22`, not `SD-1`. Those IDs are still there, in the last column, so a developer can act; you can ignore
-that column. **`☑` (or `✅`) = done and verified in the code. `☐` = not done. `🟡` = real work landed, not whole.**
+that column. **`✅` = done and verified in the code. `☐` = not done. `🟡` = real work landed, not whole.**
 
-> **Two tick glyphs, one meaning — `✅` and `☑` both mean "done, verified in code".** *(2026-10-10)* The
-> legend once named only `☑`, but the list had drifted: rows 2–6, 10–12, 23–26 and 31–34, 37–40 carry
-> **`✅`** (from the original plain-English rewrite), while rows **7, 8, 9** carry **`☑`** (added later, one
-> at a time, as those rows were finished). **They are not two tiers of done.** Rather than silently repaint
-> history, this note makes the equivalence explicit; the archive's own appendix uses `✅ DONE` / `🟡 PARTIAL`
-> / `⬜ OPEN` as its three-valued key, and the list keeps its per-row glyph. *So: a `✅` row and a `☑` row are
-> both finished; a `🟡` row is partial; a `☐` row is not started.*
+> **One tick, one meaning (fixed 2026-10-10).** Until this change the list used **two** check glyphs for
+> "done" — `✅` on most rows and `☑` on rows 7–9, added later one at a time. **They always meant the same
+> thing; there was never a difference.** The list's status column is now **uniformly `✅`** (the appendix
+> below keeps its own three-valued key — `✅ DONE` / `🟡 PARTIAL` / `⬜ OPEN` — for the dev sub-points).
 
 **The order is the vision's own order** (`library/ai/ai-first/06_...§222-232`, Phase 0 → Phase 10). The
 platform skeleton is built **before** business capabilities — because the vision says so (§233:
@@ -86,9 +83,9 @@ started while a higher one is open). If you move something, write one line besid
 
 | # | What you can do after this | Status | ID |
 |---|---|---|---|
-| 7 | You can define roles and give them permissions, and the platform **enforces** every one on every write — not just in the UI. | ☑ | `P3` |
-| 8 | When you create a new table or column, the platform **forces the permission question** — it can no longer be forgotten. | ☑ | `SD-1` / `S2` / `P3a` / `P3b` |
-| 9 | The permission rules are **stored** (not just in memory) and read back by the running app. | ☑ | `P3b` / `M3e` |
+| 7 | You can define roles and give them permissions, and the platform **enforces** every one on every write — not just in the UI. | ✅ | `P3` |
+| 8 | When you create a new table or column, the platform **forces the permission question** — it can no longer be forgotten. | ✅ | `SD-1` / `S2` / `P3a` / `P3b` |
+| 9 | The permission rules are **stored** (not just in memory) and read back by the running app. | ✅ | `P3b` / `M3e` |
 | 10 | Every write passes one gate, and the gate can say "allow", "refuse", or "ask a human first". | ✅ | `P18` / `D0`–`D3` |
 | 11 | You can change the platform's behaviour by **setting**, not by deploying code (the tier mapping is a setting). | ✅ | `D1` |
 | 12 | A high-impact change can be sent for **approval** instead of silently allowed. | ✅ | `D3` |
