@@ -1287,12 +1287,12 @@ keep the backlogs where they are and land as their prerequisites do.*
 
 **PHASE 3 — Data-access depth (the owner's Message A idea, on the built engine)**
 
-> **In depth →** the data-axis authorization design and the coverage gap (6 of 67 tables):
+> **In depth →** the data-axis authorization design and the coverage gap (6 of 53 tables):
 > [`CORE-MODULES-REGISTER.md`](CORE-MODULES-REGISTER.md) §2 (P10) and
 > [`SPECIFICATIONS-DICTIONARY.md`](SPECIFICATIONS-DICTIONARY.md) (S4). The IR the AI path is wired
 > through: [`ARCHITECTURE-request-outcomes.md`](ARCHITECTURE-request-outcomes.md).
 
-17. Coverage: extend `aclFeatures` from 6 of 67 tables to all tables, with an aggregate rule so a new
+17. Coverage: extend `aclFeatures` from 6 of 53 tables to all tables, with an aggregate rule so a new
     table cannot be added un-gated. *(Enforced by SD-1, which is why SD-1 is Phase 1.)*
 18. Per-user / own / team row scope (today scope is tenant + organization only).
 19. Wire the AI IR path to the new column- and row-level gates.

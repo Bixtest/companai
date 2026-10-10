@@ -35,6 +35,56 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+### ✅ DONE — **`CC-46` (row 15 / `P10` half): every searchable entity now declares `aclFeatures`, enforced by a coverage gate.**
+**(2026-10-10; code repo `workspace/starting-kit` commit `c03eca5c`.)**
+
+**The task (protocol step 3), from `platform_points.md` row 15 + register `CC-46`:** the read layer's only
+*per-entity permission* gate before this change was the **AI search tools** (`packages/search/src/modules/search/
+ai-tools.ts` `authorizeEntityAccess`), which resolves an entity's declared **`aclFeatures`** and **fails closed**
+when the entity declares none. But only **6 of 53** searchable entities declared it (all in `customers`), so 47
+entities were safe-but-unusable through the tools, and — worse — a new searchable entity could be added with no
+gate at all. `CC-46`'s job: make the declaration **universal** and the omission **impossible** (`BUILD-ORDER.md`
+item 17: *"so a new table cannot be added un-gated"*).
+
+**What was built.** (a) **47 `aclFeatures` declarations added** across 10 `search.ts` files (checkout 2, catalog 8,
+customer_accounts 2, inbox_ops 1, messages 1, planner 1, resources 2, sales 22, staff 4, wms 4) — purely additive
+(`47 insertions(+), 0 deletions`); the 6 `customers` entities already declared it and were **not** doubled. Each
+value names an **existing** feature in the owning module's `acl.ts` — the coarse module read feature where that is
+the correct gate (`messages.view`, `planner.view`, `wms.view`, `checkout.view`, `customer_accounts.view`,
+`resources.view`, `staff.view`, `inbox_ops.proposals.view`), and the specific one where the module distinguishes
+(`catalog`: 7×`products.view` + 1×`categories.view`; `sales`: 16×`orders.view` + 3×`quotes.view` + 2×`settings.view`
++ 1×`channels.view`). (b) **A coverage gate** — new test `packages/cli/src/lib/generators/__tests__/
+search-acl-coverage.test.ts` walks every `searchConfig.entities` and asserts (i) each declares a non-empty
+`aclFeatures`, (ii) each **own-module** feature id exists in that module's `acl.ts`, plus a sanity assertion that
+guards against a vacuous pass (it must find > 40 entities).
+
+**Fact-check before building (step 4) — and a count corrected.** The register said "extend to every searchable
+entity"; measuring the code first found two things: (1) every searchable module **does** declare at least one own
+`.view` feature, so no feature had to be invented (though I first mis-measured this with a two-segment-only grep and
+corrected it in the same pass — rule 13 applies to the challenger too); and (2) the widely-quoted **"67" is wrong —
+there are 53** searchable entities. The 67 figure counted textual `entityId:` occurrences; **14 of them are in
+helper code** inside `customers/search.ts` (`CUSTOMER_CUSTOM_FIELD_SOURCES`, local `const entityId`, profile
+resolution), not in the `entities` array. True count: **53 entities** (customers 6, sales 22, catalog 8, staff 4,
+wms 4, checkout 2, customer_accounts 2, resources 2, inbox_ops 1, messages 1, planner 1).
+
+**Verification.** Search suite **26 suites / 269 tests green** (the AI tools are unaffected). `tsc --noEmit` clean
+in `core`, `cli`, `checkout`. The gate was proven **RED** (it names the exact un-gated entity) **then GREEN** with an
+**md5-identical** restore, for **both** assertions. A **separate-agent hostile-critic** attacked all seven claims
+and **CONFIRMED** each — its one catch (that my sales/catalog mapping was coarser than described) was applied as a
+refinement: sales now uses `quotes.view`/`channels.view`/`settings.view` where those apply, catalog uses
+`categories.view` for the category entity.
+
+**Doc correction (rule 13).** Every "6 of 67 tables" in `platform_points.md`, `BACKLOG.md`, `BUILD-ORDER.md`,
+`COMPLETION-CALLBACKS.md` and this journal is corrected to **"6 of 53 entities"**; the sentence that had called the
+"67" figure *substantially correct* is corrected to say it named the right **gap** by the wrong **measure**.
+
+**Status:** ✅ **`CC-46` CLOSED** — deleted from the register; `P10b` (**a real UI + full ACL-feature coverage**)
+flipped **☐ → ☑** (§B), so the counts move **72 → 73 / 330** (B 4/37 → 5/37). **Row 15 (`P10`) STAYS 🟡** — its
+**absolute** claim ("EVERY read") also needs a gate on the **human CRUD list path**, which is untouched; that last
+leg is now **`CC-47`**.
+
+---
+
 ### 🟡 RE-MEASURED — **Phase 5, row 15 (`P10`): the read axis IS scoped and HAS two real permission read gates, but the row's absolute claim ("EVERY read is filtered by permission at the data layer") is NOT yet true — so row 15 stays 🟡 with its remainder named and scheduled (`CC-46`).**
 **(2026-10-10; docs repo — no code changed this turn; measured against code `53ed2e7b`.)**
 
@@ -63,18 +113,18 @@ one of which is *permission*:**
 per-entity permission filter**: `factory.ts` reads `requireFeatures` only as a *route metadata* concept
 (`:170`, enforced by the dispatcher for the route, not per row/entity), and `aclFeatures` is read **nowhere**
 outside `ai-tools.ts` (measured: the only other consumer is a CLI fact generator). And the `aclFeatures`
-coverage is **thin**: **~67-69 search entity configs exist; only 6 declare `aclFeatures` — all 6 in ONE module
+coverage is **thin**: **53 searchable entities exist; only 6 declare `aclFeatures` — all 6 in ONE module
 (`customers`)**; the other 10 modules with a `search.ts` (`catalog`, `sales`, `staff`, `checkout`,
 `customer_accounts`, `inbox_ops`, `messages`, `planner`, `resources`, `wms`) declare **none**, so their
 entities are **denied** by the fails-closed AI gate (safe, but unusable). This is exactly
-`BUILD-ORDER.md` item **17**: *"extend `aclFeatures` from 6 of 67 tables to all tables, with an aggregate
+`BUILD-ORDER.md` item **17**: *"extend `aclFeatures` from 6 of 53 tables to all tables, with an aggregate
 rule so a new table cannot be added un-gated."*
 
 **So the row's three sub-claims, measured:**
 | Sub-claim | Measured |
 |---|---|
 | reads are scoped (tenant/org) at the data layer | ✅ **true, universal** (`buildScopedWhere`) |
-| reads are *permission*-filtered at the data layer | 🟡 **true only for the AI search tools (6/~67 entity configs) + one channel module** |
+| reads are *permission*-filtered at the data layer | 🟡 **true only for the AI search tools (6/53 entity configs) + one channel module** |
 | "**EVERY** read" | ❌ **not true** — the human CRUD list path has no per-entity permission filter; the remaining ~61 search configs are un-gated (fail closed) |
 
 **Why the row STAYS 🟡 (not ticked).** Unlike row 14, the row's own wording is **absolute** ("every read …
@@ -95,13 +145,14 @@ cannot be added without it), and the human read path consults it — i.e. `CC-46
    embeddings, a global-search route + UI; suite **26/269 green**) — so row 15's blocker is **not** the
    engine and **not** the UI; it is the **ACL-feature coverage**. The `P10` id is doing **double duty** in
    the doc (row 15's *read gate* vs §B's *search module*); the record now names them distinctly.
-2. `P10b`'s parenthetical "`aclFeatures` covers 6 of 67 tables" is **substantially CORRECT, not stale** — the
-   hostile-critic's own re-measure confirms **6 `aclFeatures` declarations** across **~67-69 search `entityId`
-   configs**, all 6 in `customers` (`BUILD-ORDER.md` item 17's "6 of 67" was essentially right). Recorded, not re-typed.
+2. `P10b`'s parenthetical "`aclFeatures` covers 6 of 67 tables" pointed at the right gap but by a **different
+   measure**: the true count is **53 searchable entities**, of which **6** declared `aclFeatures` (all in
+   `customers`). The "67" figure counted textual `entityId:` occurrences — 14 of them are in helper code inside
+   `customers/search.ts`, not entity configs. Corrected below (rule 13); the *gap* it named was real.
 
 **Status:** 🟡 **ROW 15 PARTIAL (accurately) — reads ARE scoped and the AI-search + channel permission read
 gates ARE real, but "every read permission-filtered at the data layer" is NOT yet true: the human CRUD list
-path is un-gated per entity and `aclFeatures` covers only 6 of ~67 search configs. Remainder scheduled as `CC-46`
+path is un-gated per entity and `aclFeatures` covered only 6 of 53 searchable entities. Remainder scheduled as `CC-46`
 (buildable now). Row 15 stays 🟡.**
 
 ---

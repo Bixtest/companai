@@ -21,7 +21,7 @@ platform skeleton is built **before** business capabilities — because the visi
 
 ## THE ONE NUMBER
 
-> ### **22% done** — 72 of 330 units · weighted ≈23% · **±4**
+> ### **22% done** — 73 of 330 units · weighted ≈23% · **±4**
 >
 > **But read this next line carefully — it is the honest headline.** The work that is *done* is
 > skewed **high** in the stack: the AI-first loop (the hard, interesting part) is largely built, while the
@@ -40,7 +40,7 @@ ticked boxes, never typed. If the number and the boxes disagree, the number is t
 
 | | ID | What it is | State |
 |---|---|---|---|
-| **NOW** | `CC-46` · `CC-45` | **`CC-46`** — finish row 15's read gate (extend `aclFeatures` to every searchable entity + the aggregate fail-closed rule; optionally a generic per-entity gate on the CRUD list path) **and/or** **`CC-45`** — the row-14 export leg | ☐ **NEXT — both are buildable now; re-measure before building** (rule 0b). *(Row 15 (`P10`) was re-measured 2026-10-10 and stays an accurate 🟡 — its remainder IS `CC-46`. Row 14 is ✅ with `CC-45` opened.)* |
+| **NOW** | `CC-47` · `CC-45` | **`CC-47`** — the LAST leg of row 15 (`P10`): a generic per-entity permission gate on the **human CRUD list path** (**`CC-46`** closed the ACL-coverage half on 2026-10-10 — all 53 searchable entities now declare `aclFeatures`, with a coverage gate) **and/or** **`CC-45`** — the row-14 export leg | ☐ **NEXT — both are buildable now; re-measure before building** (rule 0b). *(Row 15 (`P10`) was re-measured 2026-10-10 and stays an accurate 🟡 — its ACL-coverage leg is now ✅ (`P10b` ☑) and only the human-CRUD-list leg (`CC-47`) remains. Row 14 is ✅ with `CC-45` opened.)* |
 | **ALSO NOW** | `G-22` | The generic state-machine engine (BUILD-ORDER §3) — first caller = the `customers` deal pipeline | 🟢 **Slice 2A (the engine) BUILT 2026-10-09**; Slice 2B paused as business work (rule 0b) |
 | **NEXT** | `CC-27` | The AI-user ↔ agent binding row (unblocked once `AH-1` closed) | ⬜ startable |
 | **THEN** | `CC-44` | The write-path feature gate is **opt-in, not default-deny** — a policy call (owner's) | ⬜ startable (needs the owner's ruling) |
@@ -104,7 +104,7 @@ started while a higher one is open). If you move something, write one line besid
 
 | # | What you can do after this | Status | ID |
 |---|---|---|---|
-| 15 | Every read is filtered by permission at the **data layer** — not by hiding a button. | 🟡 | `P10` *(re-measured 2026-10-10: reads ARE tenant/org-scoped + the AI-search & channel permission gates ARE real, but the human CRUD list path is un-gated per entity and `aclFeatures` covers only 6 of ~67 search configs — remainder `CC-46`)* |
+| 15 | Every read is filtered by permission at the **data layer** — not by hiding a button. | 🟡 | `P10` *(re-measured 2026-10-10: reads ARE tenant/org-scoped + the AI-search & channel permission gates ARE real, but the ACL-coverage gap was CLOSED by `CC-46` (2026-10-10: all 53 searchable entities + a coverage gate) — but the human CRUD list path is still gated by scope only, so the row's ABSOLUTE claim is not yet met; that last leg is `CC-47`))* |
 | 16 | You can restrict a person to **their own rows / their team's rows**, not just their whole tenant. | ☐ | Phase 3 item 18 |
 | 17 | Permission coverage reaches **every** table — a new table cannot be created un-gated. | ☐ | Phase 3 item 17 |
 | 18 | The AI's read path goes through the **same** column- and row-level gates as a human. | ☐ | Phase 3 item 19 |
@@ -275,9 +275,9 @@ started while a higher one is open). If you move something, write one line besid
 -     *(was PART — templates code-defined, not user-editable)*
 - ☐ **P8 Workflow / automation engine** — definitions · instances · steps · user tasks *(DONE)*
 - ☐ **P9 Business rules engine** — declarative conditions → actions *(DONE)*
-- 🟡 **P10 Search / indexing** — full-text + vector ▸ 1/2 *(the ENGINE is real: `packages/search`, strategies `tokens`/`vector`/`fulltext` + indexer/workers/embeddings + a global-search route & UI, suite 26/269 green — so the blocker is NOT the engine. Re-measured 2026-10-10.)*
+- ☑ **P10 Search / indexing** — full-text + vector ▸ 2/2 *(BOTH sub-points now DONE: the ENGINE (`packages/search`, strategies `tokens`/`vector`/`fulltext` + indexer/workers/embeddings + a global-search route & UI, suite 26/269 green) and the ACL-feature COVERAGE (all 53 searchable entities declare `aclFeatures` + a coverage gate — `CC-46`, 2026-10-10).)*
 -   - ☑ **P10a** — A strong search engine *(DONE — re-measured 2026-10-10: `packages/search/src/modules/search/` (strategies `tokens`/`vector`/`fulltext`, indexer, workers, embeddings, `global-search` route + `GlobalSearchDialog.tsx`); suite 26/269 green)*
--   - ☐ **P10b** — A real UI + full ACL-feature coverage *(LEFT — the UI is real; the ACL-feature coverage is thin: measured 2026-10-10 (independent hostile-critic re-measure), **6 `aclFeatures` declarations across ~67-69 search `entityId` configs**, ALL in the `customers` module — the other 10 modules with a `search.ts` declare none (fail closed in the AI-tools gate). The earlier "6 of 67 tables" figure is **substantially correct, not stale**. This is row 15's remainder → **`CC-46`**.)*
+-   - ☑ **P10b** — A real UI + full ACL-feature coverage *(DONE 2026-10-10 (`CC-46`) — the UI is real; the ACL-feature coverage was thin: measured 2026-10-10 (independent hostile-critic re-measure), **6 `aclFeatures` across 53 searchable entities**, ALL in the `customers` module — the other 10 modules with a `search.ts` declared none (fail closed in the AI-tools gate). **CLOSED 2026-10-10 by `CC-46`**: all 53 entities now declare `aclFeatures` mapping to existing features, enforced by a new coverage test. **`P10b` → ☑.**)*
 -     *(the `P10` id does double duty: row 15's **read gate** (`aclFeatures` coverage) vs §B's **search module**. They are distinct; recorded 2026-10-10.)*
 - ☐ **P11 Integrations & sync** — external systems · credentials · mapping · cursors ▸ 0/2 *(no sub-part verified in code this round)*
 -   - ☐ **P11a** — Read + update *(carried — docs claim it, not re-verified this round)*
@@ -532,7 +532,7 @@ started while a higher one is open). If you move something, write one line besid
 - ☐ **P13** — The i18n management surface *(OPEN)*
 - ☐ **P7** — Notification templates: code-defined vs user-editable *(OPEN — needs the owner only if a template surface is wanted)*
 - ☐ **P12** — API keys: complete the routes *(OPEN)*
-- ☐ **P10** — Search gate coverage: extend `aclFeatures` to every searchable entity + the aggregate fail-closed rule *(OPEN — blocks the AI data work. Re-measured 2026-10-10: **6 `aclFeatures` declarations across 67** search `entityId:` configs, ALL in `customers`; the earlier "6 of 67 tables" figure is substantially correct. **Fact-checked 2026-10-10: `CC-46` IS buildable now** — every searchable module declares at least one own `.view` feature, so each undeclared entity maps to an existing feature without inventing one (see `CC-46`). The **coverage gate** (a check that fails when a new searchable entity lacks `aclFeatures`) is the mechanical half of `BUILD-ORDER.md` item 17. Row 15's remainder → **`CC-46`**.)*
+- ☑ **P10** — Search gate coverage: extend `aclFeatures` to every searchable entity + the aggregate fail-closed rule *(DONE 2026-10-10 (`CC-46`, code `c03eca5c`) — had blocked the AI data work. Re-measured 2026-10-10: **6 `aclFeatures` across 53** searchable entities, ALL in `customers` (the "67" figure over-counted textual `entityId:` occurrences). **CLOSED 2026-10-10 by `CC-46`** — all 53 entities now declare `aclFeatures` (mapped to existing features, never invented) and a new coverage test fails the build when a searchable entity is added without one (the mechanical half of `BUILD-ORDER.md` item 17). **`P10b` → ☑**; row 15 stays 🟡 only for the human-CRUD-list leg → **`CC-47`**.)*
 - ☐ **P17** — A jobs/scheduler UI *(OPEN)*
 - ☐ **G-16b** — The ledger carries `policy_version`/`decision_id` *(OPEN)*
 - ☐ **Register** — Every module with a `0` in any layer column is a "looks built, is not" candidate until proven *(standing rule)*
@@ -732,8 +732,8 @@ rule, in one place:
 6. Coverage `% = done ÷ units`. Build-weighted `% = Σ(done×w) ÷ Σ(units×w)` with `w` the section's effort
    weight (the rubric table above).
 
-**Re-run the check in this session (2026-10-10, row-15/P10 re-measure) gave:** A 10/31 · B 4/37 ·
-C 14/28 · D 1/39 · E 2/18 · F 0/14 · G **33**/74 · H 0/13 · I 5/35 · J 0/18 · K 3/23 · **TOTAL 72 / 330 = 22%**
+**Re-run the check in this session (2026-10-10, `CC-46` completion) gave:** A 10/31 · B **5**/37 ·
+C 14/28 · D 1/39 · E 2/18 · F 0/14 · G **33**/74 · H 0/13 · I 5/35 · J 0/18 · K 3/23 · **TOTAL 73 / 330 = 22%**
 (build-weighted ≈23%).
 **This replaced a line that read 71 / 330** (with B 3/37) — re-derived from the boxes this session, because
 row 15's re-measure **verified the search engine IS built** (`packages/search/src/indexer/search-indexer.ts`
@@ -741,7 +741,13 @@ row 15's re-measure **verified the search engine IS built** (`packages/search/sr
 `P10a` ("a strong search engine") flipped **☐ → ☑** → **B +1 done** (`P10a` is a sub-point, so it counts;
 its parent `P10 ▸ 1/2` is not itself counted). Net **71 → 72**. *(Row 15 itself STAYS 🟡 — its absolute
 claim "every read permission-filtered at the data layer" is NOT met; its remainder is `CC-46`. Only the
-engine sub-point `P10a` moved, which is a true, measured tick; `P10b` stays ☐.)*
+engine sub-point `P10a` moved, which is a true, measured tick; `P10b` then also flipped ☑ via `CC-46` below.)*
+**Then 72 → 73 in the SAME session** — `CC-46` (row 15's ACL-coverage remainder) was **built**: all **53**
+searchable entities now declare `aclFeatures` (47 added; 6 `customers` entities already had it), each naming an
+existing feature, and a new coverage test (`packages/cli/.../search-acl-coverage.test.ts`) fails the build when a
+searchable entity is added without one → `P10b` (a sub-point) flipped **☐ → ☑** → **B 4/37 → 5/37**, net **72 → 73**.
+*(`P10b` is a sub-point of the `P10 ▸ 2/2` parent, which is not itself counted. Row 15 STAYS 🟡 — its ABSOLUTE
+claim needs the human-CRUD-list gate too, now `CC-47`.)*
 **This replaced a line that read 70 / 329** (with B 2/36) — re-derived from the boxes this session, because
 row 14's re-measure **split** the overloaded `P4` id into two honest units: the **classification leg** (now a
 standalone ✅ whole point — the marking + encrypt-at-rest/decrypt-on-read are built and measured) and the
