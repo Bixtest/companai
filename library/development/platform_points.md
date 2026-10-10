@@ -52,8 +52,10 @@ ticked boxes, never typed. If the number and the boxes disagree, the number is t
 no read-path enforcement point exists — measured: the sole reader of the structural level is the write guard)
 and `CC-38` (the approval intake: the guard **defers** by design, carrying no `commandId`, so nothing files the
 `pending_acts` row). The named edges `CC-33`/`CC-35`/`CC-36` are harmless-today and scheduled (building `CC-36`
-now would be plumbing with no reader — the same anti-pattern as row 1). **PHASE 3 is now complete; the queue
-moves to PHASE 4 (row 14).** *
+now would be plumbing with no reader — the same anti-pattern as row 1). **PHASE 3 is complete (rows 7–9,
+13–15); the queue is now in PHASE 5 (row 16 🟡 IN PROGRESS, then rows 17–18) — PHASE 4 (row 14) is
+✅.** *(Corrected 2026-10-11, rule 13: this footnote still read "the queue moves to PHASE 4 (row 14)" — a
+leftover from the row-13 session, now false and contradicting this file's own PHASE headers below.)* *
 
 ---
 
