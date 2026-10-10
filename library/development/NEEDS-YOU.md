@@ -28,7 +28,7 @@ anything else first. Where an item is **not** a decision, it says so, and you ca
 
 ---
 
-## Part 1 — Decisions I need (**0 open** — `NY-18` **decided 2026-10-10** ("we follow your recommendations" → Option B, built as `CC-49`); `NY-16` and `NY-17` **decided 2026-10-10** (blank the value; Option B); `NY-15` decided 2026-10-09; `NY-14` closed 2026-10-06; `NY-1`, `NY-2`, `NY-8`, `NY-13` closed; `NY-4` is "nothing needed")
+## Part 1 — Decisions I need (**0 open** — `NY-19` **decided 2026-10-10** (owner chose Option A: build the read-gate coverage test → built as `CC-47`, row 15 ✅); `NY-18` **decided 2026-10-10** ("we follow your recommendations" → Option B, built as `CC-49`); `NY-16` and `NY-17` **decided 2026-10-10** (blank the value; Option B); `NY-15` decided 2026-10-09; `NY-14` closed 2026-10-06; `NY-1`, `NY-2`, `NY-8`, `NY-13` closed; `NY-4` is "nothing needed")
 
 > **Numbering note.** Items are numbered once and **never reused**, so that a number you have already
 > quoted keeps meaning the same thing. Item 8 was appended here on 2026-10-05 and answered the same
@@ -74,6 +74,43 @@ too, and its rows carried a task's **title**/**description** and the **customer'
 (secret) fields. Because the table renamed them (`todoTitle`, `todoDescription`, `displayName`), the
 server's blanking rule — which matches on the **real** field name — never matched the alias, so the file
 got the real values. This was a **real, open leak** (not a preference), and it is now closed.
+
+---
+
+### `NY-19` — `CC-47`: the register's premise is **wrong**, so the "last leg of row 15" is a choice, not a build — ✅ **DECIDED 2026-10-10 (owner chose Option A)**
+
+**What I found (measured in code, three routes).** The register says *"the ordinary human CRUD `GET`/list path
+has **NO** per-entity permission filter."* **That is false.** A CRUD route's own `metadata.GET.requireFeatures`
+**is** enforced for the whole request: `apps/mercato/src/app/api/[...slug]/route.ts` loads the route's metadata
+(`:367`), extracts the method's entry (`:377`) and calls `checkAuthorization(...)` (`:378`) — which resolves
+`rbac.userHasAllFeatures(...)` and returns **403 Forbidden** if the caller lacks the feature (`:207-251`).
+**61 of 66** real CRUD `route.ts` files declare it (or gate inside the handler); I found **no un-gated list
+endpoint**. So the *filter exists* — what is missing is only a **test that stops a new list route being added
+without one** (the same gap `CC-46` closed for the search path).
+
+**The two options.** **Option A (my recommendation):** add one structural test that fails the build when a new
+CRUD list route declares no read gate (an explicit, commented exemption list for the handful of handler-gated
+and custom-action routes). It is **additive** — one test file, no production code changes — and it closes row
+15 *honestly* (`BUILD-ORDER.md` item 17: "so a new table cannot be added un-gated"). **Option B:** just correct
+row 15's wording to the measured truth and close it; no test, so a future un-gated list route would still be
+possible silently.
+
+**DECISION (owner, 2026-10-10): Option A — build the coverage test.** Built as
+`packages/cli/src/lib/generators/__tests__/crud-read-gate-coverage.test.ts` (9 tests GREEN; `tsc --noEmit`
+clean). The test is **fail-closed**: it only accepts what the AST can *see* is a statically-read, non-vacuous
+gate and forces a human to name everything else on a pinned, commented exemption list — a design inverted
+after **12 hostile-critic passes** each found a shape the earlier, open-ended versions missed (each is now a
+RED-then-GREEN self-check fixture). Pass 12 additionally found a **discovery gap** (the destructured
+`export const { GET, … } = builder(…)` form was invisible to the walker), now fixed. Row 15 flips 🟡 → ✅ and
+the wrong claim is corrected in every document that copied it (rule 13). Full detail in
+`PLAN-CC-47-human-crud-read-gate.md`.
+
+**Rider worth your eye (one open item, not this one).** The test's honest bound is that its `makeCrudRoute`
+family (assertion A) and its exported-metadata family (assertion B) are **not** the whole 457-file tree — 163
+route files are in neither, and they are overwhelmingly action/mutation endpoints (POST/PUT), not list reads.
+That is intended for CC-47's scope, but it means *"every read is permission-filtered"* is guaranteed for the
+human CRUD list family, not for every route that happens to export a `GET`. This is stated in the test header,
+not hidden.
 
 ---
 

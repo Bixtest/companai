@@ -3463,3 +3463,46 @@ optional extra.
 false-negative in the same feature: the wrong *entity* dismissed a leak), L101 (a measurement was the
 defect), rule 2 (two routes — both the wrong id and the flat-export leak were reproduced independently), rule
 10 step 6 (the hostile critic as a **separate** agent is mandatory, and here it found every real defect).*
+
+## L104 — a coverage test's **discovery** predicate is part of its guarantee: if it recognises only *one* spelling of the thing it audits, the routes written the *other* spelling are silently outside the claim — and the header must not claim more than the discovery enumerates
+
+**The trap.** `CC-47`'s coverage test asserts that every human CRUD `GET`/list route is permission-gated. Its
+"which routes exist" walker (`exportsGet`) recognised `export const GET = …`, `export function GET`, and
+`export { GET } from …` — but **not** the **destructured** form
+`export const { metadata, GET, POST, PUT, DELETE } = makeCrudRoute({…})`, which is the **canonical** shape the
+CRUD factory prints. A destructured binding name is an `ObjectBindingPattern`, **not** an `Identifier`, so the
+`ts.isIdentifier(decl.name) && decl.name.text === 'GET'` check returned false for it. **Nine real route files
+fell out of the audited set entirely** — B never saw them — while the sanity test happily pinned a count
+(`287`) that *encoded* the omission. The detector was fine; the **discovery** was narrow, and a narrow
+discovery is a silent hole in a *coverage* claim, the same way a wide detector is a silent hole in a *gating*
+claim.
+
+**How it was caught.** Only by the **hostile critic as a separate agent**, on the **twelfth** pass — eleven
+earlier passes had attacked the detector's *predicates* (comment tokens, `as const`, spreads, `['']`, `let`,
+duplicate keys, `Object.assign`, in-place array mutation) and all had been closed. It was the pass that asked
+the *other* question — "is the set of routes you claim to cover the same set you actually enumerate?" — that
+found it. I reproduced it from the code before fixing: `exportsGet` returned **false** for every one of the
+destructured files, including the two `makeSalesLineRoute` line lists that were in **neither** assertion.
+
+**The rule.** (1) In a coverage test, **test the discovery against every spelling** the language and the
+project's own factories permit — the shape you happened to write first is not the only shape the codebase
+uses. Add a **discovery self-check fixture** for each form (I did: all four export forms asserted
+`exportsGet === true`, and a POST-only file asserted `false`), so a future narrowing fails loudly. (2) A
+**sanity count that pins the discovered set** does not protect against a *discovery* gap — it *bakes it in*.
+Where a count is pinned, pair it with a check that the excluded files are **named**, not absent (here: the
+newly-surfaced routes went onto the pinned `DELEGATED_GATED_ROUTES` list with verified evidence). (3) A
+header must **not claim more than its code proves**: when I widened discovery, the honest fix was to also
+write the test's **bound** into the header — A covers the `makeCrudRoute` family, B covers routes that export
+a `GET`, their union is **not** the whole tree (163 of 457 route files are in neither, overwhelmingly
+POST/PUT action endpoints), so *"every read is permission-filtered"* is guaranteed for the **human CRUD list
+family**, not for *every route that exports a `GET`*. (4) **Never let a promise of "all" rest on a walker
+whose exclusions you have not enumerated** — enumerate them.
+
+*Cross-ref: L93 (a defence never tested is one a refactor may delete — here the "defence" was a discovery
+predicate), L99 (a tautological test — a narrow discovery makes a coverage test tautologically true over a
+smaller set), L101 (a measurement was the defect — here a *discovery* was), L95 (a false premise copied into
+every document), rule 0 (only the code is evidence — the fix began by reading the walker, not the doc),
+rule 2 (two routes — the pre-fix `287` and the destructured family were each re-measured independently),
+rule 10 step 6 (the hostile critic as a **separate** agent; the twelfth pass found what eleven predicate
+passes could not), rule 13 (the falsified "no per-entity permission filter" premise corrected in all six
+documents).*

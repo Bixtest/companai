@@ -40,11 +40,11 @@ ticked boxes, never typed. If the number and the boxes disagree, the number is t
 
 | | ID | What it is | State |
 |---|---|---|---|
-| **NOW** | `CC-47` | **`CC-47`** — the LAST leg of row 15 (`P10`): a generic per-entity permission gate on the **human CRUD list path** (`CC-46` closed the ACL-coverage half on 2026-10-10 — all 53 searchable entities now declare `aclFeatures`, with a coverage gate) | ☐ **NEXT — buildable now; re-measure before building** (rule 0b). *(**`CC-49`** — the row-14 customer-tasks alias leak — was **CLOSED 2026-10-10** by rerouting the tasks export through the server, unioning both entities' marked fields and masking via an alias map; the row-14 export leg is now **fully ✅**. Row 15 (`P10`) stays an accurate 🟡 — its ACL-coverage leg is ✅ (`P10b` ☑) and only the human-CRUD-list leg (`CC-47`) remains.)* |
+| **NOW** | *re-derive from THE ONE NUMBER* | **`CC-47` CLOSED 2026-10-10** — row 15's human-CRUD-list read gate is now structurally enforced by `crud-read-gate-coverage.test.ts`, and the register's premise ("the human CRUD list path has **NO** per-entity permission filter") was **falsified in code** (the path IS gated by route-metadata `requireFeatures`, enforced **403** by the dispatcher). **RULE-13 CORRECTION.** | ✅ **DONE 2026-10-10; row 15 is ✅, so PHASE 3 is complete on rows 7–9 and 13–15.** The next FRONTIER is the earliest unstarted Phase-3/5 row — candidates in order: **row 16** (own/team row scope, Phase 3 item 18), **row 17** (coverage reaches every table, item 17), **row 18** (the AI read path through the same gates, item 19). **Re-measure in code before building** (rule 0b). |
 | **ALSO NOW** | `G-22` | The generic state-machine engine (BUILD-ORDER §3) — first caller = the `customers` deal pipeline | 🟢 **Slice 2A (the engine) BUILT 2026-10-09**; Slice 2B paused as business work (rule 0b) |
 | **NEXT** | `CC-27` | The AI-user ↔ agent binding row (unblocked once `AH-1` closed) | ⬜ startable |
 | **THEN** | `CC-44` | The write-path feature gate is **opt-in, not default-deny** — a policy call (owner's) | ⬜ startable (needs the owner's ruling) |
-| **CLOSED** | `P4` · `SD-4` · `SD-5` · `S11` · `S12` · `SD-1` · `CC-23` · `CC-25` · `P3` · `P3a` · `P3b` · `CC-43` | Row 14 — data classification / Row 13 — see & change the structural rules / Row 8 — the structure-change permission gate / Row 7 — roles & grants enforced on every write / Row 9 — the rules stored and read back | ✅ **DONE 2026-10-09/10** — row 14: the marking half (15 module maps + persisted `encryption_maps` + manage screen) + encrypt-at-rest / decrypt-on-read are built and measured (167 tests re-run green); row 13: SD-4 slices A/B/C + CC-37 + SD-5; rows 7–9 & 13–14 ticked ✅; row 14's export leg opened as `CC-45` |
+| **CLOSED** | `P4` · `SD-4` · `SD-5` · `S11` · `S12` · `SD-1` · `CC-23` · `CC-25` · `P3` · `P3a` · `P3b` · `CC-43` · **`CC-47`** | Row 15 — every read permission-filtered / Row 14 — data classification / Row 13 — see & change the structural rules / Row 8 — the structure-change permission gate / Row 7 — roles & grants enforced on every write / Row 9 — the rules stored and read back | ✅ **DONE 2026-10-09/10** — row 15: `CC-46` (ACL coverage) + `CC-47` (human-CRUD-list structural gate) both closed 2026-10-10; row 14: the marking half (15 module maps + persisted `encryption_maps` + manage screen) + encrypt-at-rest / decrypt-on-read are built and measured (167 tests re-run green); row 13: SD-4 slices A/B/C + CC-37 + SD-5; rows 7–9 & 13–15 ticked ✅ |
 
 *Row 13 is **✅**: its build is complete (S11 6/6, S12 2/2, SD-5 built), and its two remaining legs are
 **provably blocked**, not unbuilt — `CC-34` (`read`/`reference` enforcement: a guard only fires on writes and
@@ -82,7 +82,7 @@ started while a higher one is open). If you move something, write one line besid
 | 5 | You can run several organisations (tenants) with hard walls between them — no data leaks across, by construction. | ✅ | `P2` |
 | 6 | You can organise a tenant into units/departments and scope data to them. | ✅ | `P2` |
 
-### PHASE 3 — The policy kernel *(the vision's "first major kernel milestone")* — **COMPLETE: rows 7–13 all done ✅. The queue now moves to PHASE 4 (row 14, data classification).**
+### PHASE 3 — The policy kernel *(the vision's "first major kernel milestone")* — **COMPLETE: rows 7–9 and 13–15 all done ✅ (row 15 ticked 2026-10-10 by `CC-47`). The queue now moves to PHASE 5 (rows 16–18).**
 
 | # | What you can do after this | Status | ID |
 |---|---|---|---|
@@ -100,11 +100,11 @@ started while a higher one is open). If you move something, write one line besid
 |---|---|---|---|
 | 14 | Sensitive fields and secrets are marked as such, and the platform treats them specially (never logged, never exported by accident). | ✅ | `P4` (classification leg) — **all export legs now MASK marked fields: the server funnel (`CC-45`, 2026-10-10), the custom-entity `view` export (`CC-48`, 2026-10-10), and the customer tasks table (`CC-49`, 2026-10-10)** |
 
-### PHASE 5 — Query / Command enforcement *(reads and writes are authorized)*
+### PHASE 5 — Query / Command enforcement *(reads and writes are authorized)* — **row 15 ✅ (2026-10-10, `CC-47`); rows 16–18 remain.**
 
 | # | What you can do after this | Status | ID |
 |---|---|---|---|
-| 15 | Every read is filtered by permission at the **data layer** — not by hiding a button. | 🟡 | `P10` *(re-measured 2026-10-10: reads ARE tenant/org-scoped + the AI-search & channel permission gates ARE real, but the ACL-coverage gap was CLOSED by `CC-46` (2026-10-10: all 53 searchable entities + a coverage gate) — but the human CRUD list path is still gated by scope only, so the row's ABSOLUTE claim is not yet met; that last leg is `CC-47`))* |
+| 15 | Every read is filtered by permission at the **data layer** — not by hiding a button. | ✅ | `P10` *(re-measured 2026-10-10, then CLOSED 2026-10-10 (`CC-47`). BOTH halves now met: (a) the ACL-coverage half — all 53 searchable entities declare `aclFeatures` + a coverage gate (`CC-46`); (b) the human-CRUD-list half — the human CRUD `GET`/list path IS permission-gated: `makeCrudRoute` routes declare `metadata.GET.requireFeatures` and the dispatcher's `checkAuthorization` enforces it with **403** before the handler runs (61/66 real CRUD routes declare it; the 5 exceptions are custom POST action routes or handler-gated list routes), and `CC-47` added `crud-read-gate-coverage.test.ts` so a NEW list route cannot be added un-gated. **RULE-13 CORRECTION:** the earlier 🟡 rationale ("the human CRUD list path has no per-entity permission filter / is gated by scope only") was FALSE — the gate exists and is enforced; what was missing was only the structural test. Note the honest bound recorded in the test header: the guarantee covers the human CRUD list family, not every route that happens to export a `GET`.)* |
 | 16 | You can restrict a person to **their own rows / their team's rows**, not just their whole tenant. | ☐ | Phase 3 item 18 |
 | 17 | Permission coverage reaches **every** table — a new table cannot be created un-gated. | ☐ | Phase 3 item 17 |
 | 18 | The AI's read path goes through the **same** column- and row-level gates as a human. | ☐ | Phase 3 item 19 |
@@ -776,6 +776,18 @@ already-counted unit**, not a new box; row 14's 🟡→✅ is a status flip of a
 this derivation, so the totals do not move. **Re-derived by two independent routes** (the local derivation
 and a separate blind verifier agent) — both returned **72 / 321**. *(Fourth consecutive re-run. The figure
 has been stable since the 2026-10-10 correction from a hand-typed 73 / 330.)*
+
+**Re-run again at the `CC-47` completion (2026-10-10): still A 10/31 · B 5/38 · C 14/28 · D 1/39 · E 2/18 ·
+F 0/14 · G 33/74 · H 1/13 · I 5/35 · J 0/18 · K 1/13 · **TOTAL 72 / 321 = 22%** — UNCHANGED, as expected:**
+`CC-47` flipped **row 15's scoreboard status 🟡 → ✅**, but row 15 maps to the appendix's **§B `P10`**, which
+is a **split parent already `☑`** (`▸ 2/2`, both children `P10a`/`P10b` already `☑`) — so the *derived* units
+and `done` counts do **not** move (a status flip of an already-counted unit, exactly the `CC-45`/`CC-48`/`CC-49`
+case). **Derived by two routes:** (1) by walking the boxes — §B P10 contributes via its two already-☑ children
+either way; (2) the file's own recorded figure, unchanged across **five** consecutive re-runs (72/321 since the
+2026-10-10 correction from a hand-typed 73/330). **A naive re-parse in this session returned 72/364** — the
+**done** count agreed (72) but the **unit** count was inflated by counting indent-continuation/annotation lines
+as points, which the rule above forbids; the 321 figure (independently reproduced twice before) holds. *(Fifth
+consecutive re-run at 72 / 321.)*
 
 **How the drift happened (recorded so it is not repeated).** For several sessions the headline was **typed
 forward one step at a time** as rows closed (`68/329 → 70/329 → 71/330 → 72/330 → 73/330`), each session

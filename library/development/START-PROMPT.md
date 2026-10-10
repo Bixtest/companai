@@ -244,14 +244,17 @@ the vision's order** — finish the architectural skeleton (vision **Phase 3** p
 classification → **Phase 5** enforcement → **Phase 6** audit → **Phase 7** gateway) **before** any
 business-module work; and the task list became **one plain-English scoreboard**,
 [`platform_points.md`](platform_points.md), sorted in the vision's Phase 0 → Phase 10 order, opening with
-**one number derived from the ticked boxes** (never typed). **As of revision 17 of the handover
-(2026-10-10): PHASE 3 is COMPLETE** — rows 7, 8, 9 and 13 are ✅; **row 14 is ✅** (its **server** export
-leg was CLOSED by `CC-45`, its custom-entity **client `view`** export by `CC-48`, and its **customer-tasks**
-alias export by `CC-49` — the export funnel now masks every marked field on all three paths), and
-**row 15 is an accurate 🟡**
-(reads are tenant/org-**scoped** universally and there are two real permission read gates, but the
-**human CRUD *list* path** has no per-entity permission filter — that last leg is open as `CC-47`).
-**The live FRONTIER is `CC-47` only.** **Do not re-derive the order from this prompt** — read the
+**one number derived from the ticked boxes** (never typed). **As of revision 18 of the handover
+(2026-10-10): PHASE 3 is COMPLETE** — rows 7, 8, 9, 13, **14 and 15** are ✅; **row 14 is ✅** (its **server**
+export leg was CLOSED by `CC-45`, its custom-entity **client `view`** export by `CC-48`, and its
+**customer-tasks** alias export by `CC-49` — the export funnel now masks every marked field on all three
+paths); and **row 15 is ✅** — its ACL-coverage half (`CC-46`) and its human-CRUD-list half (`CC-47`) are both
+closed. **RULE-13 CORRECTION:** the earlier wording here ("the **human CRUD *list* path** has no per-entity
+permission filter — that last leg is open as `CC-47`") was **FALSE** — the human CRUD `GET`/list path IS
+gated by `metadata.GET.requireFeatures`, enforced **403** by the dispatcher; `CC-47` added
+`crud-read-gate-coverage.test.ts` so a new list route cannot be added un-gated. **The live FRONTIER is
+re-derived from `platform_points.md` (the ONE NUMBER) + the `★ ACTIVE TASK` box — `CC-47` is closed.**
+**Do not re-derive the order from this prompt** — read the
 `★ ACTIVE TASK` box for *what is in hand*, `BUILD-ORDER.md` for the *order*, and `platform_points.md`
 for *the one number*. **One trap worth keeping, measured 2026-10-08: `SD-3` (the tier mapping as a
 superadmin setting) is ALREADY BUILT (2026-10-06) — several documents still call it "the next slice",
@@ -329,10 +332,14 @@ Every point you raise carries a status: **FIXED** (and how you re-checked) · **
   That is why the reading list and the rules can stay stable while the task changes every session.
 - **Keep the reading list current, but keep it task-free.** When a *front-door* document is added,
   renamed or superseded (a new scoreboard, a moved plan), update the tiers — that is maintenance, not a
-  task list. The last such maintenance was **2026-10-10** (the handover's revision 17): the FRONTIER was
-  rolled from `CC-47`/`CC-49` to **`CC-47` only** (the `CC-49` close — the customer-tasks export rerouted
-  through the server with an additive alias map, so row 14 is now ✅), and the scoreboard's one number was
-  re-derived **unchanged at `72 of 321 = 22%`**. *(Prior
+  task list. The last such maintenance was **2026-10-10** (the handover's revision 18): the FRONTIER was
+  rolled past **`CC-47`** (the `CC-47` close — the human-CRUD-list read gate is now structurally enforced
+  by `crud-read-gate-coverage.test.ts`, so **row 15 is ✅ and PHASE 3 is COMPLETE** on rows 7–9, 13–15), and
+  the scoreboard's one number was re-derived (row 15 is a new tick — see `platform_points.md` §L
+  `derive-counts`, never typed here). *(Prior
+  maintenance, revision 17: the FRONTIER was rolled from `CC-47`/`CC-49` to **`CC-47` only** (the `CC-49`
+  close — the customer-tasks export rerouted through the server with an additive alias map, so row 14 is
+  now ✅). Prior
   maintenance, revision 16: the FRONTIER was rolled from `CC-47`/`CC-48` to `CC-47`/`CC-49` — the `CC-48`
   close + the customer-tasks alias leak its critic found and two routes reproduced. Prior
   maintenance, revision 15: `platform_points.md`

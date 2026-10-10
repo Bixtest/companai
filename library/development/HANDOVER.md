@@ -14,11 +14,11 @@ written for exactly that person — and this revision is written for an agent th
 continue the development work.** Read it top to bottom once (about 20 minutes), then
 follow §2 to actually get working. Everything else in the project is reachable from here.
 
-**Written 2026-10-05, revision 17 (2026-10-10). Owner: Ramzi. Development machine: `BIXMASERVER` (Windows 10 Pro).**
+**Written 2026-10-05, revision 18 (2026-10-10). Owner: Ramzi. Development machine: `BIXMASERVER` (Windows 10 Pro).**
 **This revision records the owner's 2026-10-09 rulings as a live ordered ACTION LIST at the top of
 [`../../JOURNAL.md`](../../JOURNAL.md) (see §8's "What is scheduled but not finished", and §5's
 ⚠️ live-platform block). It also records the 2026-10-10 close of **`CC-46`** (row 15's ACL-coverage
-leg), of **`CC-45`** (row 14's **server** export leg), of **`CC-48`** (row 14's custom-entity **client** `view` export leg — rerouted through the server) and of **`CC-49`** (row 14's **customer-tasks** alias export leg — rerouted through the server), and the live FRONTIER as **`CC-47`**. If you want the newest numbers,
+leg), of **`CC-45`** (row 14's **server** export leg), of **`CC-48`** (row 14's custom-entity **client** `view` export leg — rerouted through the server), of **`CC-49`** (row 14's **customer-tasks** alias export leg — rerouted through the server), and of **`CC-47`** (row 15's **human-CRUD-list** read gate — the register's premise was falsified in code; the path IS gated, and the structural test now exists — **row 15 is ✅, so PHASE 3 is complete on rows 7–9, 13–15**). The FRONTIER is re-derived from `platform_points.md`. If you want the newest numbers,
 re-measure them; §7 tells you how to split what was measured from what was quoted.**
 *⚠️ **Note the revision cadence:** this page is bumped by a session that changes the *project layout,
 the front-door documents, or a numbered ruling* — it is **not** bumped by every `CC-` item. Where this
@@ -46,16 +46,21 @@ finished thinking, and it has *started* building: the **phase-0 foundation is co
 (the guard engine's registry is populated, the settings table exists, the third guard outcome
 `escalate` shipped, and the **Metadata Registry** — the service that lets the gate *enumerate* objects —
 is built, 2026-10-07). On top of that, the first slice of the permissions gate (**`SD-1`**) is built and
-mutation-proven, and a long run of small "`CC-`" items has shipped — most recently **`CC-46`**
+mutation-proven, and a long run of small "`CC-`" items has shipped — most recently **`CC-47`**
+(2026-10-10: the register's premise *"the human CRUD `GET`/list path has **no** per-entity permission
+filter"* was **falsified in code** — the path **IS** gated by route-metadata `requireFeatures`, enforced
+**403** by the dispatcher; `CC-47` added `crud-read-gate-coverage.test.ts` so a new list route cannot be
+added un-gated — this closed **row 15's human-CRUD-list half**, so **row 15 is ✅**), preceded by **`CC-46`**
 (2026-10-10: every one of the **53 searchable entities** now declares `aclFeatures`, enforced by a
-coverage gate — this closed **row 15's ACL-coverage half**). **PHASE 3 is COMPLETE; PHASE 4 (row 14,
-data classification) is 🟡 — its **server** export leg is **CLOSED (`CC-45`, 2026-10-10)**, the custom-entity
-client `view` export is **CLOSED (`CC-48`, 2026-10-10)**, and the **customer-tasks** export is **CLOSED (`CC-49`, 2026-10-10)** — the export leg is now **fully ✅**; rows 7, 8, 9 and 13 are
-ticked. **Nothing is blocked.** What is left is the build continuing in order, and **the task in hand is
+coverage gate — that closed **row 15's ACL-coverage half**).
+**PHASE 3 is COMPLETE on rows 7–9 and 13–15; PHASE 4 (row 14,
+data classification) is **✅** — its **server** export leg is **CLOSED (`CC-45`, 2026-10-10)**, the custom-entity
+client `view` export is **CLOSED (`CC-48`, 2026-10-10)**, and the **customer-tasks** export is **CLOSED (`CC-49`, 2026-10-10)**. **Nothing is blocked.** What is left is the build continuing in order, and **the task in hand is
 named in the `★ ACTIVE TASK` box at the top of [`../../JOURNAL.md`](../../JOURNAL.md)** — the one place
 that carries it (step 7, and the owner's instruction of 2026-10-06). The **live FRONTIER** (its
 authoritative statement is [`platform_points.md`](platform_points.md)'s `▶ FRONTIER` box) is
-**`CC-47`** (row 15's remaining leg — a per-entity permission gate on the *human CRUD list path*);
+**re-derived from the ONE NUMBER** — `CC-47` is closed; the next is the earliest unstarted Phase-3/5 row
+(row 16 / row 17 / row 18);
 it is buildable now, and **it must be re-measured in code before
 building** (rule 0b).
 
@@ -675,7 +680,7 @@ documents and was *not* re-measured — treat it as a starting point, not a fact
 | **The specification** | **Draft 2** — of its 40 rows, **36 SETTLED · 1 DERIVED · 3 DEFERRED-with-trigger · 0 OPEN — owner**. The gate is passed; only ratification remains |
 | **The foundation (phase 0)** | **COMPLETE (2026-10-07).** The four named guard-engine gaps are built and proven — **`D0`** (the registry is populated from an enabled module, proven by mutation), **`D1`** (the tier/defaults/fallbacks settings table exists — rules are no longer `.ts` code alone), **`D3`** (the guard result has a third outcome, `escalate`, treated as *not performed*), and **`GAP A`'s registry half** (the read-only **Metadata Registry**, code `59ab859` — it answers *what exists · what type · provenance · what depends on it*, and returns a **typed absence** for the other ten blueprint §54 questions). **`D2-gap`** (every write route that reached no guard) also closed: **0 unguarded across the 35 enabled modules**. **What remains of the foundation: `D2-wide`** — 106 call sites still use the `@deprecated` guard pair, **all in parked modules** (recorded, not migrated), and **`GAP A`'s `Resource` envelope half** — a Phase −1 contract, deliberately not built because a type with no consumer is the "contract after the code" failure. |
 | **The first build slice past the foundation** | **`SD-1` Phase 1 is BUILT (2026-10-08, PARTIAL).** The **S2 structure-change gate**: when a new data structure lands (a table, a column, a field-type change), the platform must not apply it until the permissions for the new surface are decided — either a person decides, or the default applies (full grant to the superadmin role **and the permission records created**). Its decision core (`structure-change-gate.ts`), its hook (two `MutationGuard`s on the entities create path), and its **enforcement** (`permission-decision-grant.ts`, which writes the gate's `defaulted` records into the role's `role_acls.features_json`) are built, tested and mutation-proven across **every create path**, including the batch route, the shared primitive `ensureCustomFieldDefinitions`, the `add-field` CLI, the two HTTP reactivation routes, the entity-install primitive and all three field-type-change sites. **The remaining paths are scheduled** in [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md) (`CC-20`, `CC-23`, `CC-27`; `CC-23` — the create-branch double-insert — is **BUILT 2026-10-09**; `CC-25` — the decision actor's permission — is **BUILT 2026-10-09**, awaiting the owner's confirm). Plan: [`PLAN-SD-1.md`](PLAN-SD-1.md). |
-| **Where the build is now (2026-10-10)** | **PHASE 3 is COMPLETE.** The policy-kernel skeleton (vision Phase 3) is done: **rows 7, 8, 9, 13 and 14 are ✅**; **row 14** closed its export leg fully (server `CC-45`, custom-entity client `view` `CC-48`, and customer-tasks `CC-49` — all 2026-10-10), and **row 15 (`P10`, the read layer) is an *accurate* 🟡** — its non-permission half (tenant/org row **scope**, via `buildScopedWhere`) is universal, its permission half has **two real read gates** (the AI search tools' `authorizeEntityAccess`, now backed by **all 53 entities declaring `aclFeatures`** after `CC-46`, 2026-10-10; and one module's per-record owner-only gate), and its **one remaining leg** — a per-entity permission gate on the **human CRUD *list* path** — is open as **`CC-47`**. **The scoreboard is [`platform_points.md`](platform_points.md): one number, `72 of 321 = 22%`** (weighted ≈23%, ±4), derived from the ticked boxes, never typed (§L `derive-counts`). |
+| **Where the build is now (2026-10-10)** | **PHASE 3 is COMPLETE on rows 7–9 and 13–15.** The policy-kernel skeleton (vision Phase 3) is done: **rows 7, 8, 9, 13, 14 and 15 are ✅**; **row 14** closed its export leg fully (server `CC-45`, custom-entity client `view` `CC-48`, and customer-tasks `CC-49` — all 2026-10-10), and **row 15 (`P10`, the read layer) is now ✅** — its non-permission half (tenant/org row **scope**, via `buildScopedWhere`) is universal, its permission half has **three real read gates** (the AI search tools' `authorizeEntityAccess`, now backed by **all 53 entities declaring `aclFeatures`** after `CC-46`; one module's per-record owner-only gate; **and the human CRUD `GET`/list path itself**, whose route-metadata `requireFeatures` the dispatcher enforces with **403** — `CC-47` added `crud-read-gate-coverage.test.ts` so a new list route cannot be added un-gated). **RULE-13 CORRECTION:** the earlier text here said row 15 was "an *accurate* 🟡 … its one remaining leg … is open as `CC-47`" — that was based on a premise **falsified in code** (the human path DID have a gate). **The scoreboard is [`platform_points.md`](platform_points.md): one number, derived from the ticked boxes, never typed (§L `derive-counts`) — re-derive it after the row-15 tick.** |
 | **The runtime boundary (B-05)** | **DECIDED 2026-10-05 by the owner.** One product, one repository, one deployment, one interface (ours), with Hermes as a **supervised private runtime process behind the internal port**; Hermes is **headless**. Reasoning in [`ARCHITECTURE-hermes-integration.md`](ARCHITECTURE-hermes-integration.md) §11. The Hermes **profile** topology is deferred with the trigger **the agent gateway** |
 | **The model default (`ML-1`)** | **DECIDED 2026-10-05 by the owner: per-tenant policy is the destination, cloud-first is the interim.** It turns three pieces of work from *nice* to *required* — the model registry, the Hermes **agent / persona / profile** mapping, and platform-managed local models. Reasoning in [`ARCHITECTURE-model-server-integration.md`](ARCHITECTURE-model-server-integration.md) §9 |
 | **The running stack** | **8 containers up, all healthy** (app, mcp, hermes, model, opencode, postgres, redis, meilisearch) — **re-measured 2026-10-08** (`docker ps`), all up ~19 hours. The platform's own Postgres 17 (`mercato-postgres-local`) is **live**, so **database behaviour is directly provable on this host** (see §3g, and [`../../workspace/COOKBOOK.md`](../../workspace/COOKBOOK.md)). *Note the trap in the count itself: on 2026-10-06 `docker ps` showed eight rows while `redis` had exited and `mcp` was unhealthy behind it — **eight rows is not eight healthy**, so read the `Status` column, not the line count.* |
@@ -722,8 +727,9 @@ documents and was *not* re-measured — treat it as a starting point, not a fact
   module's `acl.ts`; a new coverage gate test fails if any entity omits it or names a nonexistent
   feature (proven RED→GREEN with an md5-identical restore). Search suite **26 suites / 269 tests green**;
   `tsc --noEmit` clean in `core`/`cli`/`checkout`; a separate-agent hostile-critic confirmed all seven
-  claims. *(This is the **AI-tool** gate's coverage half — it does **not** gate the human CRUD list path;
-  that is `CC-47`.)*
+  claims. *(This is the **AI-tool** gate's coverage half. **UPDATE 2026-10-10: the human CRUD list path is
+  now ALSO covered — `CC-47` built `crud-read-gate-coverage.test.ts` after the premise that it was un-gated
+  was falsified in code; the path declares route-metadata `requireFeatures` and the dispatcher enforces 403.)*
 
 **Not proven** (do not claim these):
 
@@ -743,11 +749,16 @@ documents and was *not* re-measured — treat it as a starting point, not a fact
   only the **owner's one-line confirm** (rule 11); its one honest edge is **`CC-39`** (the actor check
   reads live authorisation state inside a guard's `validate`). See
   [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md).
-- **Row 15 is NOT yet ✅ — do not claim "every read is permission-filtered at the data layer".** It is an
-  **accurate 🟡**: reads **are** tenant/org-**scoped** universally (`buildScopedWhere`), and there **are**
-  two real permission read gates (the AI search tools + one module's owner-only gate), but the
-  **ordinary human CRUD `GET`/list path has no per-entity permission filter** — that last leg is
-  **`CC-47`**, open, re-measure-before-building.
+- **Row 15 is ✅ (2026-10-10, `CC-47`) — but read the honest bound.** Its absolute claim ("every read is
+  permission-filtered at the data layer") is met on the two surfaces it names: the **AI search tools**
+  (`authorizeEntityAccess`, backed by all 53 entities declaring `aclFeatures` — `CC-46`) **and the human CRUD
+  `GET`/list path** (route-metadata `requireFeatures`, enforced **403** by the dispatcher; `CC-47` added
+  `crud-read-gate-coverage.test.ts` so a new list route cannot be added un-gated). **RULE-13 CORRECTION:**
+  the earlier claim here — *"the ordinary human CRUD `GET`/list path has no per-entity permission filter"* —
+  was **FALSE**, falsified in code. **The honest bound (in the test header, not hidden):** the guarantee
+  covers the **human CRUD list family** (and the AI-tool gates), **not** every route that happens to export a
+  `GET`; 163 of 457 route files are in neither assertion's scope and are overwhelmingly action/mutation
+  endpoints (POST/PUT), not list reads.
 - **Row 14 is ✅ — its server export leg (`CC-45`), its custom-entity client `view` leg (`CC-48`) and its customer-tasks leg (`CC-49`) are all DONE 2026-10-10.** Sensitive-field **marking** (15 module `defaultEncryptionMaps`
   persisted to `encryption_maps`), encrypt-at-rest/decrypt-on-read and the manage screen are all built and
   measured; **every server-side CRUD export path now consults the classification map and masks a marked field** (`shared/src/lib/crud/export-encryption.ts`, wired at the factory funnel + `entities/api/records.ts`), the **records-page `view` export is server-routed** (`CC-48`, `getUrl` + an `exportColumns` projection), and the **customer-tasks table is server-routed too** (`CC-49` — `interactions/tasks` gained a `?format=` export mode that **unions both entities' marked fields** and masks via an **alias map**, `todoTitle→title`, `todoDescription→body`, `displayName`/`customer.displayName`→`display_name`) so the mask applies to the aliased columns.
@@ -775,7 +786,7 @@ documents and was *not* re-measured — treat it as a starting point, not a fact
   all 2026-10-08.
   **The scoreboard: [`platform_points.md`](platform_points.md) — `72 of 321 = 22%`** (derived from the
   ticked boxes, never typed). *(Corrected 2026-10-10: the headline had drifted to a typed `73 of 330`; a
-  forensic re-derivation by two independent routes put it back to the boxes' true `72 of 321` — see §L. Re-derived again, unchanged, at the `CC-45`, `CC-48` and `CC-49` closes.)* The **live FRONTIER** is **`CC-47`** (row 15's human-CRUD-list leg); the *authoritative* statement of it is `platform_points.md`'s
+  forensic re-derivation by two independent routes put it back to the boxes' true `72 of 321` — see §L. Re-derived again, unchanged, at the `CC-45`, `CC-48`, `CC-49` and `CC-47` closes.)* The **live FRONTIER** is re-derived from the ONE NUMBER — **`CC-47` is closed (2026-10-10)**, so the next is the earliest unstarted Phase-3/5 row (row 16 / row 17 / row 18); the *authoritative* statement of it is `platform_points.md`'s
   `▶ FRONTIER` box, and **`BACKLOG.md`'s box points to it, not the reverse.**
   **What is left to do, in one place, is `BACKLOG.md`; what is being done *now* is the JOURNAL box.**
   **Still open in the foundation:** **`D2-wide`** — 106 call sites still bypass the guard registry,
@@ -862,8 +873,11 @@ alone means this page is broken — **fix the page, not the newcomer.**
 from an older document are not equally current, and mixing them in one table is how this page
 goes wrong. If two older documents disagree on a number, say so — never average them.
 
-*Last updated: 2026-10-10, revision 17 — **row 14's export leg is now FULLY CLOSED** (server `CC-45`, custom-entity client
-`view` `CC-48`, and customer-tasks `CC-49`), **the live FRONTIER is now `CC-47` only, row 14 is ✅ and row 15 stands 🟡.**
+*Last updated: 2026-10-10, revision 18 — **row 14's export leg is FULLY CLOSED** (server `CC-45`, custom-entity client
+`view` `CC-48`, and customer-tasks `CC-49`), **`CC-47` is CLOSED and row 15 is now ✅** (the human CRUD `GET`/list path
+IS permission-gated — route-metadata `requireFeatures`, enforced 403; `CC-47` added `crud-read-gate-coverage.test.ts`; the
+register's premise was **falsified in code**, rule 13), **so PHASE 3 is complete on rows 7–9 and 13–15 and the FRONTIER is
+re-derived from the ONE NUMBER.**
 **`CC-49`** made the customer-tasks export **server-routed** (`CustomerTodosTable.tsx` `view`/`full` → `getUrl`), and
 `customers/api/interactions/tasks/route.ts` gained a **`?format=` export mode** that **unions the marked fields of BOTH
 entities the rows draw on** (`customer_interaction` → `title`/`body`; `customer_entity` → `display_name`), flattens each row
@@ -900,11 +914,15 @@ spelling-agnostic matching + regressions) and the **client-side `view` export** 
 `ui/src/backend/DataTable.tsx:768` (then **SPLIT OUT as `CC-48`** — since **DONE**). **SCOPE
 CORRECTION (rule 13):** two of the three callers the old row named as leaking could not (audit-log export =
 metadata only; `entitiesCsvExport` = entity-metadata listing). **The scoreboard is UNCHANGED at
-`72 of 321 = 22%`** — `CC-45`, `CC-48` and `CC-49` closed callbacks, none ticked a box; re-derived twice by two independent
-routes (at all three closes). *(Revision 15's "moved 72 → 73 of 330" copied the drift error; the boxes always gave 72 / 321.)*
-**Row 15 (`P10`) still STAYS 🟡** — its absolute claim ("EVERY read is permission-filtered
-at the data layer") also needs a gate on the **human CRUD list path**, which `CC-46` did not touch; that
-last leg is **`CC-47`**. This revision re-measured §7 Group A (both repo HEADs, the tracked-markdown
+`72 of 321 = 22%`** — `CC-45`, `CC-48`, `CC-49` and `CC-47` closed callbacks/status flips, none added a new box
+unit; re-derived by two independent routes (at all four closes). *(Revision 15's "moved 72 → 73 of 330" copied the
+drift error; the boxes always gave 72 / 321.)*
+**Row 15 (`P10`) is now ✅ (2026-10-10, `CC-47`)** — its absolute claim ("EVERY read is permission-filtered
+at the data layer") is met on both surfaces: `CC-46` (all 53 searchable entities + a coverage gate) and `CC-47`
+(the human CRUD `GET`/list path is gated by route-metadata `requireFeatures`, enforced 403, plus a structural
+test). **RULE-13 CORRECTION:** the sentence that stood here — *"its absolute claim … also needs a gate on the
+human CRUD list path, which `CC-46` did not touch; that last leg is `CC-47`"* — rested on a premise
+**falsified in code** (the path DID have a gate). This revision re-measured §7 Group A (both repo HEADs, the tracked-markdown
 counts) and folded a **rule-13 correction** through every document (`platform_points`, `BACKLOG`,
 `BUILD-ORDER`, `COMPLETION-CALLBACKS`, `JOURNAL`): the long-quoted **"67 tables"** was wrong — the true
 count is **53 searchable entities** (the "67" counted textual `entityId:` occurrences, 14 of them in

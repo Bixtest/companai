@@ -35,6 +35,68 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+### ✅ DONE — **`CC-47` (row 15 / `P10`): the human CRUD `GET`/list read gate is now structurally enforced by a test, and the register's premise ("the human CRUD list path has NO per-entity permission filter") was FALSIFIED in code. Row 15 is now ✅.**
+**(2026-10-10; code repo `workspace/starting-kit`. Owner chose Option A via `NY-19`.)**
+
+**The task (protocol step 3), from register `CC-47` + `PLAN-CC-47-human-crud-read-gate.md`:** row 15 (`P10`)
+claims *"every read is filtered by permission at the data layer"*. Its ACL-coverage half was closed by `CC-46`
+(2026-10-10). Its remaining leg (`CC-47`) was described as *"the ordinary human CRUD `GET`/list path has **NO**
+per-entity permission filter."* The job was **re-measure first (rule 0b)**, then either build a structural gate
+or narrow the row's wording — the owner's choice (rule 11).
+
+**Step 4 — prerequisites re-measured in code (rule 0b), and it FALSIFIED the register's premise (rule 13).**
+- The route's own `metadata.GET.requireFeatures` **IS** enforced for the whole list request: the dispatcher
+  (`apps/mercato/src/app/api/[...slug]/route.ts`) loads the route module's `metadata` (`:367`), extracts the
+  method entry via `extractMethodMetadata` (`:377`), and calls `checkAuthorization(...)` (`:378`) — which
+  normalises `requireFeatures` (`:116-118`), resolves `rbac.userHasAllFeatures(...)`, and returns **403
+  Forbidden** (`:207-251`) before the handler runs. `makeCrudRoute` passes the route's own `metadata` through
+  (`packages/shared/src/lib/crud/factory.ts:173-186`, returned `:3148`).
+- **Measured: 61 of 66** real CRUD routes declare a GET `requireFeatures`; the 5 exceptions are custom POST
+  action routes or the two handler-gated list routes (`sales/api/notes`, `sales/api/document-addresses`).
+  **No un-gated list endpoint was found.** So *the filter exists*; what was genuinely missing was **a test that
+  stops a NEW list route being added without one**.
+
+**Owner decision (rule 11):** `NY-19` = **Option A** — build the structural coverage test. Recorded in
+`NEEDS-YOU.md`.
+
+**Step 6 — built `packages/cli/src/lib/generators/__tests__/crud-read-gate-coverage.test.ts`** (9 tests GREEN;
+`tsc --noEmit` exit 0). Two **independent** AST assertions: **(A)** every `makeCrudRoute` route declares a GET
+read gate or is handler-gated; **(B)** every GET-exporting route's exported `metadata` is **demonstrably** gated
+(`requireFeatures`, or `requireAuth: true`) or is a knowing public opt-out on the pinned `PUBLIC_ROUTES` list,
+**else it is FLAGGED** unless a human pinned it on `HANDLER_GATED_ROUTES` (2) / `DELEGATED_GATED_ROUTES` (31).
+
+**Why the design is fail-closed, and the twelve critic passes.** Earlier versions of B tried to *prove a
+negative* by pattern-matching TypeScript; a hostile critic (separate agent) defeated each in turn — a
+comment/string token; `requireAuth: false`; a computed `['GET']`; a stray `resource:`; `as const`; a spread;
+`requireFeatures: []`; `['']`; an unresolved identifier; a non-literal `GET:` decoy; `let`+reassign; duplicate
+keys; `Object.assign`; an in-place array mutation. Each is now a **RED-then-GREEN self-check fixture** with an
+**md5-verified restore**. **Pass 12 found a DISCOVERY gap** (not a detector gap): `exportsGet` only matched
+identifier-named `GET` bindings, so the canonical **destructured** `export const { GET, … } = builder(…)` form
+was invisible to B — **fixed**; the 6 newly-surfaced routes are pinned with verified evidence; the pinned count
+was corrected **287 → 296**. **Pass 13 found NO LIVE HOLE.**
+
+**Two-route re-measure (rule 2) — agrees.** 457 route files (bash `find` = walker); 60 `makeCrudRoute`
+(bash grep's 66 includes 6 comment-only mentions); 296 GET-exporting (the pre-fix 287 missed the destructured
+family); verdict tally **216 `gated` / 40 `gated-auth-true` / 9 `public-explicit` (== `PUBLIC_ROUTES`) / 31
+`not-demonstrably-gated` (== `DELEGATED_GATED_ROUTES`)**.
+
+**Honest bound (written into the test header, not hidden).** A's family is the `makeCrudRoute` routes (60); B's
+family is routes that export a `GET` (296); their union is **not** the whole tree — 163 route files are in
+neither, and they are overwhelmingly action/mutation endpoints (`/cancel`, `/retry`, `/assign`, …), not human
+list reads. CC-47 is scoped to the human CRUD **list** path, so this is intended — but the guarantee is *the
+human CRUD list family*, not *every route that exports a GET*.
+
+**Pre-existing, unrelated failure noted (not CC-47's).** `packages/cli/src/lib/generators/__tests__/openapi.test.ts`
+fails **3 tests** ("does not cache a static fallback after a bundle failure"); reproduced with the CC-47 test
+file **removed** and in isolation — proven unrelated, not folded in. Full generators suite: **20/21 suites,
+812/815 tests** before the CC-47 suite was added.
+
+**Rule 13 correction applied everywhere the falsified premise was copied:** `COMPLETION-CALLBACKS.md` (CC-47
+row → ✅ DONE), `BACKLOG.md` (FRONTIER + row-15 description), `platform_points.md` (row 15 🟡 → ✅ + `P10`
+bullets), `START-PROMPT.md` (the FRONTIER line), and this block. **Row 15 flips 🟡 → ✅.**
+
+---
+
 ### ✅ DONE — **`CC-49` (row 14 / `P4` classification leg, customer-tasks half): the customer-tasks export now goes THROUGH THE SERVER with an ADDITIVE alias map, so a marked field aliased to `todoTitle`/`todoDescription` is masked. Row 14 is now ✅.**
 **(2026-10-10; code repo `workspace/starting-kit`.)**
 
@@ -312,19 +374,30 @@ rule so a new table cannot be added un-gated."*
 | Sub-claim | Measured |
 |---|---|
 | reads are scoped (tenant/org) at the data layer | ✅ **true, universal** (`buildScopedWhere`) |
-| reads are *permission*-filtered at the data layer | 🟡 **true only for the AI search tools (6/53 entity configs) + one channel module** |
-| "**EVERY** read" | ❌ **not true** — the human CRUD list path has no per-entity permission filter; the remaining ~61 search configs are un-gated (fail closed) |
+| reads are *permission*-filtered at the data layer | ✅ **true** — the human CRUD list path IS permission-gated: `makeCrudRoute` routes declare `metadata.GET.requireFeatures` and the dispatcher enforces it with **403** (`checkAuthorization`); plus the AI-search tools (6/53 entity configs). **CORRECTED (rule 13, 2026-10-10):** the earlier entry here read "🟡 true only for the AI search tools + one channel module" — that was WRONG; it missed the route-metadata gate entirely. |
+| "**EVERY** read" | 🟡 **still not literally true** — the gate is a **route-level** `requireFeatures` check, not a **row/entity-level** filter inside the query; and the remaining ~61 search configs are un-gated (fail closed). **CORRECTED (rule 13):** the earlier wording ("the human CRUD list path has no per-entity permission filter") was FALSE — the gate exists and is enforced. What was genuinely missing was a **structural guarantee** that a new list route cannot be added un-gated. |
 
-**Why the row STAYS 🟡 (not ticked).** Unlike row 14, the row's own wording is **absolute** ("every read …
-not by hiding a button"), and the measured mechanism does **not** meet it. Per the never-a-partial-tick
-rule this is a **genuine partial**, and its remainder is a **named, startable** piece of work — so it is
-**scheduled, not merely noted**: new callback **`CC-46`** (extend `aclFeatures` to every searchable entity
-+ add the aggregate fail-closed rule so a new entity cannot be added un-gated; optionally add a generic
-per-entity read gate on the CRUD list path). It is **buildable now** (the pattern exists in `ai-tools.ts`),
-which is why it is a callback and not "blocked".
+**Correction (rule 13, 2026-10-10) — the premise above was falsified in code.** `CC-47` step 4 measured that
+the human CRUD `GET`/list path **is** permission-gated: `makeCrudRoute` passes the route's own `metadata`
+through (`factory.ts:173-186`, returned `:3148`), and the dispatcher's `checkAuthorization`
+(`apps/mercato/src/app/api/[...slug]/route.ts:150-254`) reads `methodMetadata.requireFeatures` and returns
+**403** when the caller lacks the feature. **61 of 66** real CRUD routes declare a GET gate; the 5 exceptions
+are custom POST action routes or the two handler-gated list routes. The genuine gap was **not the gate** but
+the absence of a structural test — the exact analogue of `search-acl-coverage.test.ts` (`CC-46`). That test is
+now built: `packages/cli/…/__tests__/crud-read-gate-coverage.test.ts`.
 
-**What would flip row 15 to ✅:** every searchable/readable entity declares `aclFeatures` (and a new one
-cannot be added without it), and the human read path consults it — i.e. `CC-46` lands.
+**Why the row flipped 🟡 → ✅ (2026-10-10, `CC-47`).** With both halves met — the ACL-coverage half
+(`CC-46`: all 53 searchable entities + a coverage gate) and the human-CRUD-list half (`CC-47`: the human CRUD
+`GET`/list path IS gated by `metadata.GET.requireFeatures`, enforced 403 by the dispatcher, now structurally
+guaranteed by a test) — the row's absolute claim is met on both surfaces it names. The earlier "STAYS 🟡"
+reasoning below is superseded: its premise ("the human CRUD list path is gated by scope only") was **falsified
+in code** (rule 13).
+
+**Corrected (superseded) reasoning — kept for the record.** *"The row's wording is absolute ('every read …
+not by hiding a button'), and the measured mechanism does not meet it"* was written when we believed the human
+list path had no permission filter. **Measured 2026-10-10: it does** (route-metadata `requireFeatures`, enforced
+403). The remainder was scheduled as `CC-46` (search coverage) and `CC-47` (the human-path structural test) —
+**both now closed**.
 
 **Corrections the re-measure produced (rule 13).**
 1. `platform_points.md` §B `P10` was described as **"Search / indexing — full-text + vector ▸ 0/2"** with
