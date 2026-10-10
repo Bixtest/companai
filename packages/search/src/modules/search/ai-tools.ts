@@ -5,6 +5,12 @@ import type {
   SearchStrategyId,
 } from '@open-mercato/shared/modules/search'
 import { hasAllFeatures } from '@open-mercato/shared/security/features'
+import {
+  resolveExportEncryptedFields,
+  isEncryptedExportField,
+  MASKED_EXPORT_VALUE,
+  type ExportEncryptionService,
+} from '@open-mercato/shared/lib/crud/export-encryption'
 
 /**
  * AI Tools definitions for the Search module.
@@ -143,6 +149,99 @@ function isGroupByAllowed(field: string, config: SearchEntityConfig): boolean {
   return searchable.includes(field)
 }
 
+/**
+ * Row 18 — apply the platform's COLUMN-LEVEL **data-classification** mask to a
+ * record returned to an AI, so the AI read path is governed by the SAME
+ * classification map the human export path is (`CC-45`), not only by the search
+ * module's own `fieldPolicy`.
+ *
+ * This is *defence in depth over* `stripSensitiveFields` (which drops the search
+ * `fieldPolicy.hashOnly`/`excluded` names): a field the platform marks via
+ * `ModuleEncryptionMap` but which is absent from the search field policy would
+ * otherwise leave through `search_get` in clear. The mask, not omission, matches
+ * `CC-45`'s owner-decided behaviour.
+ *
+ * Fail-safe, mirroring `resolveExportEncryptedFields`:
+ *   - no service / disabled / unknown entity ⇒ empty set ⇒ **byte-identical** to today;
+ *   - a map read that throws ⇒ `maskAll` ⇒ every value masked.
+ */
+async function maskClassifiedFields(
+  record: Record<string, unknown>,
+  entityId: string,
+  ctx: ToolContext
+): Promise<Record<string, unknown>> {
+  const resolved = await resolveClassifiedFieldSet(entityId, ctx)
+  if (resolved.maskAll) {
+    const maskedAll: Record<string, unknown> = {}
+    for (const key of Object.keys(record)) maskedAll[key] = MASKED_EXPORT_VALUE
+    return maskedAll
+  }
+  if (resolved.fields.size === 0) return record
+  return maskValueDeep(record, resolved.fields) as Record<string, unknown>
+}
+
+/**
+ * Row 18 (critic round 2) — mask classified keys at ANY depth. `search_get` returns a
+ * record whose values may be nested objects/arrays (the human export path never hit this
+ * because exports are FLAT rows; the AI path is not, so a key buried inside an object
+ * column — e.g. `meta.secret` — would otherwise leave in clear). Walking the structure is
+ * the only way to guarantee the column-level gate holds for arbitrary record shapes.
+ */
+function maskValueDeep(value: unknown, fields: ReadonlySet<string>): unknown {
+  if (Array.isArray(value)) return value.map((item) => maskValueDeep(item, fields))
+  if (value !== null && typeof value === 'object') {
+    const out: Record<string, unknown> = {}
+    for (const [key, inner] of Object.entries(value as Record<string, unknown>)) {
+      out[key] = isEncryptedExportField(key, fields)
+        ? MASKED_EXPORT_VALUE
+        : maskValueDeep(inner, fields)
+    }
+    return out
+  }
+  return value
+}
+
+/**
+ * Row 18 — resolve the platform classification set for one entity. The single place
+ * `maskClassifiedFields`, `entityHasClassifiedFields` and the aggregate gate all read
+ * from, so the three cannot drift (L106).
+ */
+async function resolveClassifiedFieldSet(
+  entityId: string,
+  ctx: ToolContext
+): Promise<{ fields: ReadonlySet<string>; maskAll: boolean }> {
+  const resolveService = (): ExportEncryptionService | null => {
+    try {
+      return (ctx.container.resolve('tenantEncryptionService') as ExportEncryptionService) ?? null
+    } catch {
+      return null
+    }
+  }
+  return resolveExportEncryptedFields(
+    resolveService,
+    entityId,
+    ctx.tenantId ?? null,
+    ctx.organizationId ?? null
+  )
+}
+
+/**
+ * Row 18 — true when the entity carries ANY platform-classified field. `search_query`
+ * returns a presenter `title`/`subtitle` that is built at INDEX time (the fallback
+ * presenter promotes an arbitrary string field into the title — `fallback-presenter.ts`
+ * `findAnyStringValue`), so a classified value can be embedded in it and the tool cannot
+ * tell which field it came from. The fail-safe egress rule: for an entity with a non-empty
+ * classification map, do NOT return the free-text presenter — return the record id
+ * instead. A map read that throws is treated as "classified" (fail closed).
+ *
+ * Fail-safe, mirroring `resolveExportEncryptedFields`: no service / disabled ⇒ the same
+ * empty set as the rest of the platform ⇒ presenter returned unchanged (byte-identical).
+ */
+async function entityHasClassifiedFields(entityId: string, ctx: ToolContext): Promise<boolean> {
+  const resolved = await resolveClassifiedFieldSet(entityId, ctx)
+  return resolved.maskAll || resolved.fields.size > 0
+}
+
 // =============================================================================
 // Tool Definitions
 // =============================================================================
@@ -192,18 +291,31 @@ Searches customers, products, orders, deals, and more in one call.`,
       limit: input.limit,
     })
 
+    // Row 18 — the presenter title/subtitle is index-time text and may embed a classified
+    // field value; for any entity carrying a classification map, drop the free text and
+    // fall back to the record id (fail-safe egress). Resolved once per distinct entity.
+    const classifiedByEntity = new Map<string, boolean>()
+    await Promise.all(
+      Array.from(new Set(results.map((r) => r.entityId))).map(async (entityId) => {
+        classifiedByEntity.set(entityId, await entityHasClassifiedFields(entityId, ctx))
+      })
+    )
+
     return {
       query: input.query,
       totalResults: results.length,
-      results: results.map((result) => ({
-        entityType: result.entityId,
-        recordId: result.recordId,
-        score: Math.round(result.score * 100) / 100,
-        source: result.source,
-        title: result.presenter?.title ?? result.recordId,
-        subtitle: result.presenter?.subtitle,
-        url: result.url,
-      })),
+      results: results.map((result) => {
+        const mayLeak = classifiedByEntity.get(result.entityId) === true
+        return {
+          entityType: result.entityId,
+          recordId: result.recordId,
+          score: Math.round(result.score * 100) / 100,
+          source: result.source,
+          title: mayLeak ? result.recordId : (result.presenter?.title ?? result.recordId),
+          subtitle: mayLeak ? undefined : result.presenter?.subtitle,
+          url: result.url,
+        }
+      }),
     }
   },
 }
@@ -291,10 +403,15 @@ const searchGetTool: AiToolDefinition = {
 
     const record = stripSensitiveFields(rawRecord, entityConfig)
 
+    // Row 18 — also apply the platform data-classification mask (the `CC-45`
+    // gate the human export path uses), so a classified field cannot leave
+    // through this AI read tool in clear. Fail-safe: no map ⇒ byte-identical.
+    const classified = await maskClassifiedFields(record, input.entityType, ctx)
+
     // Extract custom fields
     const customFields: Record<string, unknown> = {}
     const standardFields: Record<string, unknown> = {}
-    for (const [key, value] of Object.entries(record)) {
+    for (const [key, value] of Object.entries(classified)) {
       if (key.startsWith('cf:') || key.startsWith('cf_')) {
         customFields[key.replace(/^cf[:_]/, '')] = value
       } else {
@@ -304,7 +421,7 @@ const searchGetTool: AiToolDefinition = {
 
     // Build URL based on entity type
     let url: string | null = null
-    const id = record.id ?? record.entity_id ?? input.recordId
+    const id = classified.id ?? classified.entity_id ?? input.recordId
     if (input.entityType.includes('person')) {
       url = `/backend/customers/people/${id}`
     } else if (input.entityType.includes('company')) {
@@ -312,7 +429,7 @@ const searchGetTool: AiToolDefinition = {
     } else if (input.entityType.includes('deal')) {
       url = `/backend/customers/deals/${id}`
     } else if (input.entityType.includes('activity')) {
-      const entityId = record.entity_id ?? record.entityId
+      const entityId = classified.entity_id ?? classified.entityId
       url = entityId ? `/backend/customers/companies/${entityId}#activity-${id}` : null
     }
 
@@ -434,6 +551,17 @@ const searchAggregateTool: AiToolDefinition = {
     if (!isGroupByAllowed(input.groupBy, entityConfig)) {
       throw new SearchToolAuthorizationError(
         `[internal] Field "${input.groupBy}" is not an allowed grouping key for "${input.entityType}"`
+      )
+    }
+
+    // Row 18 — a classified field must never be enumerable, even as a bucket VALUE.
+    // `isGroupByAllowed` only consults the search `fieldPolicy`; a field the PLATFORM
+    // classifies (via `ModuleEncryptionMap`) but which is `searchable` would otherwise
+    // return its raw values as bucket keys. Reject it (fail closed on a map read error).
+    const classified = await resolveClassifiedFieldSet(input.entityType, ctx)
+    if (classified.maskAll || isEncryptedExportField(input.groupBy, classified.fields)) {
+      throw new SearchToolAuthorizationError(
+        `[internal] Field "${input.groupBy}" is classified and cannot be aggregated for "${input.entityType}"`
       )
     }
 
