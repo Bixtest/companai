@@ -3005,7 +3005,7 @@ answer read as a complete one.
 
 **Also measured this session (feeds S4):** the data-permission idea is **already half-built** — a per-table
 gate (`aclFeatures`, fails closed) and a per-column policy (`fieldPolicy`) exist; the own/team/global row
-scope does not; coverage is **6 of 67** tables. And there is **no unguarded door**: every path the AI can
+scope does not; coverage is **6 of 67** tables. *(Correction 2026-10-10: the true figure is **6 of 53** searchable entities — the "67" counted textual `entityId:` occurrences, not entity configs; and the gate is now complete — all 53 declare `aclFeatures`, `CC-46`, `c03eca5c`.)* And there is **no unguarded door**: every path the AI can
 use to reach data is checked, and its sandbox cannot fake its scope. Full write-up:
 [`analysis/owner-workthrough-data-permissions.md`](analysis/owner-workthrough-data-permissions.md).
 
