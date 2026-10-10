@@ -14,29 +14,34 @@ written for exactly that person — and this revision is written for an agent th
 continue the development work.** Read it top to bottom once (about 20 minutes), then
 follow §2 to actually get working. Everything else in the project is reachable from here.
 
-**Written 2026-10-05, revision 21 (2026-10-11). Owner: Ramzi. Development machine: `BIXMASERVER` (Windows 10 Pro).**
-**This revision records the 2026-10-11 BUILD of row 17 (permission coverage reaches every table — `CC-52`,
-now ✅) on top of row 16's own-leg.** Row 17's rule-0b measurement first: coverage today was only the **53
-searchable** entities (`CC-46`) plus the **60 `makeCrudRoute`** list routes (`CC-47`) out of **233 tables** — the
-balance had **no per-table read-ACL check**. The build is a **coverage gate**,
-`packages/cli/src/lib/generators/__tests__/table-coverage.test.ts` (AST, `typescript-js`): every table must be
-**(a) searchable**, **(b) a comment-stripped `api/**/*.ts` read surface**, **or (c) on the named
-`INTERNAL_TABLES` allowlist** (~63 entries, reason per entry) — so a new table cannot be added un-gated. It
-**pins exact counts** (233 tables / 47 surface modules / 12 search modules). A **separate-agent hostile critic
-found 3 REAL holes** — a class name matched inside a **comment**, a walker that read only `route.ts` (missing
-live `api/*.ts` GETs), and loose `>200` floors that let a **39-table shrink pass** — **all fixed**
-(comment-stripping, broaden to `api/**/*.ts`, pin exact counts); new lessons **L109/L110/L111**. **4
-RED-then-GREEN mutations** (md5-verified restores); green 5/5; `tsc` clean. Owner chose Option A via `NY-21`.
-The ONE NUMBER is **72 / 321 = 22%, unchanged by row 17** (a coverage gate annotates an already-`☑` §K `P10`
-line — no new box; §L now carries a **seventh** consecutive re-run). The **PHASE-5 batch** (rows 16 → 17 → 18)
-continues with **row 18** (wire the AI read path to the same column- and row-level gates). The previous
-revision (20) recorded the row-16 own-leg build (`CC-50` **CLOSED**; the row stays 🟡 because the team-leg is
-deliberately deferred, `CC-51`): an opt-in `ownerField`/`ownerFeature` declaration on **`OrmEntityConfig`**
-(rule-13 correction — it belongs on the CRUD layer every `makeCrudRoute` caller shares, **not** in the search
-registry, which exists only for the 11 searchable modules and which the first wired entity `api_keys` does not
-have), plus a role-level **`.own`** feature-grant modifier (`matchFeature` byte-unchanged) resolved once in
-`withCtx()` with a **dual super-admin carve-out** (`auth.isSuperAdmin` **or** `acl.isSuperAdmin`) and threaded
-through all **three** `buildScopedWhere` call sites plus any route hook that short-circuits them. Two
+**Written 2026-10-05, revision 22 (2026-10-11). Owner: Ramzi. Development machine: `BIXMASERVER` (Windows 10 Pro).**
+**This revision records the 2026-10-11 BUILD of row 18 (the AI's read path goes through the SAME column- and
+row-level gates as a human — `CC-53`, now ✅), which COMPLETES the PHASE-5 batch (rows 16 → 17 → 18).** Row 18's
+rule-0b measurement first: the AI record-returning tools (`packages/search/src/modules/search/ai-tools.ts`)
+applied the **entity** gate (`authorizeEntityAccess`, `aclFeatures`, fail-closed) + tenant/org **scope**, but
+**neither** the platform **classification** map (`defaultEncryptionMaps`) **nor** the owner row-scope. The build
+wires `search_get` to mask every classified field via the **same helper the human export uses** (`CC-45`'s
+`resolveExportEncryptedFields`/`isEncryptedExportField`), **recursing into nested object/array values**
+(`maskValueDeep`) and **failing closed** (`maskAll`) on a throwing map; `search_query` drops the index-time
+presenter for a classified entity; `search_aggregate` refuses a classified `groupBy`. **No map ⇒ byte-identical.**
+**Two separate-agent hostile-critic rounds** found and fixed **two real holes** (the presenter-promotion leak +
+the raw aggregate bucket leak; then a classified key **nested in an object value** that the first top-level-only
+mask missed) — **6 RED-then-GREEN** mutations, md5-verified (`8b9238b006ec1ea6eab76199d6365bc6`); green 12/12 in
+the new suite, **281/281** in the search module; `tsc` clean. **The own row-scope leg is NOT built** — measured:
+**no entity is both searchable and own-scoped**, so the owner clause has **no reader** on the AI path → owner
+question **`NY-22`** (rules 8/10d/11). The ONE NUMBER is **72 / 321 = 22%, unchanged by row 18** (row 18's new
+LIST box has **no** fresh appendix marker in §A–§K; §L now carries an **eighth** consecutive re-run, and this
+re-run's two routes **disagreed** until the verifier's `[A-K]` regex bug — it never matched `## L.` — was found
+to be counting the **ledger §L** as points). The previous revision (21) recorded the row-17 build (`CC-52`,
+every-table coverage gate). **The PHASE-5 batch is now COMPLETE; the live FRONTIER is `CC-27` (then `CC-44`).**
+The revision before that (20) recorded the row-16 own-leg build (`CC-50` **CLOSED**; the row stays 🟡 because the
+team-leg is deliberately deferred, `CC-51`): an opt-in `ownerField`/`ownerFeature` declaration on
+**`OrmEntityConfig`** (rule-13 correction — it belongs on the CRUD layer every `makeCrudRoute` caller shares,
+**not** in the search registry, which exists only for the 11 searchable modules and which the first wired entity
+`api_keys` does not have), plus a role-level **`.own`** feature-grant modifier (`matchFeature` byte-unchanged)
+resolved once in `withCtx()` with a **dual super-admin carve-out** (`auth.isSuperAdmin` **or**
+`acl.isSuperAdmin`) and threaded through all **three** `buildScopedWhere` call sites plus any route hook that
+short-circuits them. Two
 hostile-critic rounds (separate agent) each found a **real** defect: a `beforeList` bypass that never reached
 the shared builder (**L106**), and the missing second super-admin notion (**L107**); both fixed, RED-then-GREEN
 md5-verified. Revision 20 also carried: **Rule 9(a) strengthened** (ownership is of the **full codebase while
@@ -89,8 +94,9 @@ named in the `★ ACTIVE TASK` box at the top of [`../../JOURNAL.md`](../../JOUR
 that carries it (step 7, and the owner's instruction of 2026-10-06). The **live FRONTIER** (its
 authoritative statement is [`platform_points.md`](platform_points.md)'s `▶ FRONTIER` box) is
 **re-derived from the ONE NUMBER** — row 16's own-leg is built (`CC-50` closed; row remains 🟡 pending the
-deferred team-leg `CC-51`); the next is **row 17** (permission coverage reaches every table), then **row 18**
-(the AI read path through the same gates);
+deferred team-leg `CC-51`), rows 17 (`CC-52`) and 18 (`CC-53`) are **✅ DONE** (the PHASE-5 batch is
+complete); the live FRONTIER is now **`CC-27`** (the AI-user ↔ agent binding row, unblocked since `AH-1`
+closed), then **`CC-44`** (the write-path feature gate being opt-in, not default-deny — an owner policy call);
 each is buildable now, and **it must be re-measured in code before
 building** (rule 0b).
 
@@ -910,7 +916,9 @@ alone means this page is broken — **fix the page, not the newcomer.**
 from an older document are not equally current, and mixing them in one table is how this page
 goes wrong. If two older documents disagree on a number, say so — never average them.
 
-*Last updated: 2026-10-11, revision 19 — **the PHASE-5 batch (rows 16 → 17 → 18) begins; row 16 first; rule 9(a) strengthened; the CC-47 "in neither" count corrected 163→161.**
+*Last updated: 2026-10-11, revision 22 — **row 18 (`CC-53`) BUILDS the AI read path onto the human column-/row-level gates, COMPLETING the PHASE-5 batch (rows 16 → 17 → 18).** The AI record-returning tools (`packages/search/src/modules/search/ai-tools.ts`) now apply the platform **classification mask** — the **same** `resolveExportEncryptedFields`/`isEncryptedExportField` helper the human export uses (`CC-45`) — on `search_get` (with `maskValueDeep` recursion into nested object/array values and a **fail-closed** `maskAll`), **drop the index-time presenter** for a classified entity (`search_query`), and **refuse a classified `groupBy`** (`search_aggregate`); no map ⇒ **byte-identical**. **Two** separate-agent hostile-critic rounds fixed **two real holes** (presenter-promotion + raw aggregate buckets; then a classified key nested in an object value); **6 RED-then-GREEN** mutations, md5-verified (`8b9238b006ec1ea6eab76199d6365bc6`); green 12/12 new / 281/281 search; `tsc` clean. The **own row-scope leg is NOT built** (no entity is both searchable and own-scoped → the owner clause has **no reader** on the AI path) → owner question **`NY-22`**. ONE NUMBER **72 / 321 = 22%, unchanged** (§L's **eighth** re-run; this re-run's two routes disagreed until the verifier's `[A-K]` regex bug — it never matched `## L.` — was found counting the **ledger §L** as points). The live FRONTIER is now **`CC-27`**, then **`CC-44`**. **Prior — revision 21: row 17 (`CC-52`) built the every-table coverage gate.** **Prior — revision 20: row 16's own-leg (`CC-50`), with rule 9(a) strengthened and the CC-47 "in neither" count corrected 163→161.**
+
+*Prior — 2026-10-11, revision 19 — **the PHASE-5 batch (rows 16 → 17 → 18) begins; row 16 first; rule 9(a) strengthened; the CC-47 "in neither" count corrected 163→161.**
 **Row 16 (own / team row scope) — MEASURED (rule 0b) and DECIDED.** Scope today is exactly `tenantId` + `organizationId` + `organizationIds` (`shared/src/lib/api/crud.ts` `buildScopedWhere`; `factory.ts` `withCtx()` `:1359-1412`); `auth.sub` is stamped into audit/event records 20+ times in `factory.ts` but **never used to filter rows**; there is **no `team` concept**; and there is **no shared owner column** (`createdByUserId` uuid vs `createdBy` varchar vs `assignedTo`/`assignedToRoles`) — so a blanket owner filter is impossible and row 16 must be an **opt-in per-entity `rowScope` declaration** (the `aclFeatures` pattern in `shared/src/modules/search.ts`). **Owner chose Option A** (`NY-20`) = own-only, opt-in, no team entity; **Option B (a real `team` entity + membership + UI + migrations) is documented as a FUTURE addition** (`PLAN-ROW16-own-team-row-scope.md` §7). Partial scheduled as **`CC-50`**. Rows 17 and 18 follow, each committed as it lands.
 **Rule 9(a) STRENGTHENED (owner's instruction).** Ownership is of the **full codebase while you are working on it, not just your own diff** — any flawed/incomplete/bugged/error-carrying code, and any required test, is **fixed or scheduled**, never left as "pre-existing, not mine". Applied retroactively the same session: **`N-20`** (`openapi.test.ts` 3 failing tests, proven not caused by `CC-47`) and **`N-21`** (`structural-contracts.test.ts` is a ~17-min suite — `104/104` green with no bound, but a **suite-level FAIL** under a default bound) are now rows on BACKLOG's "do-not-lose-this" list.
 **RULE-13 correction (rule 13).** The CC-47 test header's "files in neither" figure read **163** (the *pre-fix* value, before pass 12 widened the GET-export predicate 287→296); re-measured **three independent ways** (comment-stripped regex, TypeScript-AST walk, union computation `457 − |A∪B|`) it is **161**, and **all 161 export POST/PUT/PATCH/DELETE — zero export a `GET`**. Corrected in 6 places (code `48fc2191`, docs `a6d7c79`). The claim held; only the number was stale.

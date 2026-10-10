@@ -3708,3 +3708,86 @@ stand), L101 (the parser/measurer is the thing under test), L109/L110 (the same 
 same class — a gate that is green while the thing it claims to protect is gone), rule 10f (the critic is a
 **separate agent** that attacks the guarantee, not the data).*
 
+---
+
+## L112 — a record you **mask by field name** still leaks if the value is **re-shaped** on the way out: an *index-time presenter* can promote an arbitrary string field into the displayed `title`, so "I masked the field" is not "the value cannot leave"
+
+**The trap (row 18, first hostile-critic round).** `search_get` was masked correctly — every field the platform
+classification map names was replaced with `***`. But the AI's **other** two record-returning tools did not
+return the raw record:
+
+- `search_query` returns a **presenter** shape (`title`/`subtitle`/`url`) built at **index time**. The fallback
+  presenter (`fallback-presenter.ts` `findAnyStringValue`) will **promote *any* string field** it finds into
+  `title`. So an entity with a classified field `api_secret` (not in the search `fieldPolicy`) would have had
+  that secret **copied into the displayed title** — the mask on the raw record never saw it, because the record
+  that left the tool was not the raw record.
+- `search_aggregate` returns **raw bucket values**. `isGroupByAllowed` blocked grouping only on the **search**
+  `fieldPolicy`, so a `groupBy` on a classified field returned the secret as a group key.
+
+Both are the same shape: **the field was "masked", but the *value* reached the caller through a second,
+re-shaped channel.**
+
+**The rule.** (1) When a read path **transforms** a record before returning it (a presenter, a projection, an
+aggregate, a join, a serialiser), masking the **source** field is not sufficient — enumerate every **egress
+shape** and ask, for each, *"can this shape carry the value?"*. (2) For a **free-form promotion** (the fallback
+presenter), the safe fix is to **suppress the whole shape** for a classified entity, not to try to scrub the
+one field you know about — you cannot enumerate what a "find any string" heuristic will pick. (3) For an
+**aggregate**, refuse the **dimension** (`groupBy`) that names a classified field, exactly as you refuse to sort
+on one. *Cross-ref: L102 (name the entity the code actually reads), rule 10f (the critic found it, not the
+author).*
+
+---
+
+## L113 — a mask that checks only **top-level keys** is defeated by one level of nesting; a recursive egress needs a **recursive** mask
+
+**The trap (row 18, second hostile-critic round).** The first mask iterated the record's own keys and replaced
+each classified one. A classified key **nested inside an object value** — `record.meta.api_secret` — was
+**never visited**, so the secret left in clear. (The same would be true of a classified key inside an **array**
+of objects.) This is the classic shallow-vs-deep traversal bug, and it is invisible to a test that only uses
+**flat** fixture records.
+
+**The rule.** (1) If the egress can contain **nested structures** (objects, arrays, JSON columns), the mask must
+**recurse** into them (`maskValueDeep`), not just rewrite the top level. (2) The test must include a **nested**
+fixture — a flat fixture proves nothing about depth. (3) The general form: **a mask's reach must equal the
+egress's shape**; anything the serialiser can descend into, the mask must descend into first. *Cross-ref: L112
+(the same class — "masked" is not "gone"), rule 10f.*
+
+---
+
+## L114 — a test whose **mock ignores its arguments** cannot catch the bug the arguments encode: the wrong-entity mutation stayed GREEN because the mock was entity-blind
+
+**The trap (row 18, found by re-running the mutations, then hardened).** The mask resolves the classification
+map **for a given entity** (`getEncryptedFieldNames(entityId)`). I wrote a mutation that passed the **wrong
+`entityId`** expecting the test to go RED — and it stayed **GREEN**, because the mock returned the same set
+**regardless of what entity was asked for**. The test was asserting behaviour that its own fixture had made
+unobservable: **the very parameter under test was ignored by the double.**
+
+**The rule.** (1) A mock/stub must be **sensitive to every argument the real code depends on** — if the code
+branches on `entityId`, the double must branch on it too (make it **entity-aware**, keyed by the argument).
+(2) After writing a mutation that *should* fail, if it stays **GREEN**, suspect the **fixture** before you
+suspect the mutation — a mutation that cannot fail is a test that cannot fail. (3) Add an **explicit assertion**
+that the correct argument was used (here: *"resolves the map for the **requested** entity"*), so the contract
+is pinned even when the happy-path output would look identical. *Cross-ref: L103 (the same lesson from the other
+direction — a double that is the same regardless of input), rule 10f (the mutation is the second critic).*
+
+---
+
+## L115 — two routes can **agree on every section and still disagree on the total** if one of them **counts a section the rule excludes**: §L is the ledger, not a unit — bound the walk to `A…K`, never `A…L`
+
+**The trap (row 18, the eighth §L re-run).** The ONE-NUMBER is re-derived by two independent routes. Mine
+returned `72 / 321`; a blind verifier returned `74 / 331`. Per-section they differed only on §K (`3/23` vs
+`1/13`). The verifier's section regex was `^##\s+([A-K])\.\s` — which **never matches `## L.`** (the letter
+`L` is outside `[A-K]`), so its parser left `sec = 'K'` open and **kept counting every `- ` bullet in the
+verification ledger §L** (lines 634–862) as if they were §K points — inflating §K to 23 (the exact "23" the
+file's own §L note had already warned about). Fixing the bound to `[A-L]` corrected §K to `1/13`, **but the
+total then read `72 / 331`** — the extra 10 units were §L itself being summed **as a point section**.
+
+**The rule.** (1) The derivation walks **§A–§K only**; **§L is the ledger** (it names evidence for the ticks,
+it holds no points) and must be **excluded from the count** — bound the walk's **end** at `## L.` and **do not
+sum L**. (2) A section-header regex must include the very letter that **ends** the walk, or the last counted
+section silently absorbs the ledger. (3) When two routes disagree on the **total** while agreeing on most
+sections, the disagreement is almost always **one mis-bounded region** — diff per section, then inspect the
+**boundary** between the last real section and the excluded one. *Cross-ref: L100/L101 (the number is derived,
+the measurer is under test), rule 4 (two routes or it is not a finding — never average, never pick the nicer
+number).*
+

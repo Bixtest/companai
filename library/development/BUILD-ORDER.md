@@ -1300,7 +1300,13 @@ keep the backlogs where they are and land as their prerequisites do.*
     `INTERNAL_TABLES` allowlist — a new table cannot be added un-gated.**
 18. Per-user / own / team row scope (today scope is tenant + organization only). **🟡 own-leg BUILT
     2026-10-11 (`CC-50`); the team-leg is deferred (`CC-51`).**
-19. Wire the AI IR path to the new column- and row-level gates.
+19. Wire the AI IR path to the new column- and row-level gates. **✅ BUILT 2026-10-11 (`CC-53`) — the AI
+    record-returning tools (`packages/search/src/modules/search/ai-tools.ts`) now apply the platform
+    **classification mask** (the same `resolveExportEncryptedFields`/`isEncryptedExportField` helper the
+    human export uses, `CC-45`) on `search_get` (nested-value recursion + fail-closed `maskAll`), drop the
+    index-time presenter for a classified entity (`search_query`), and refuse a classified `groupBy`
+    (`search_aggregate`); no map ⇒ byte-identical. The **own row-scope** leg has **no reader** on the AI
+    path (no entity is both searchable and own-scoped) → owner question `NY-22`.**
 
 **PHASE 4+ — the blueprint's later phases** (horizontal services · AI foundation · enterprise scale ·
 domain packs) — see [`BLUEPRINT-GAP-ANALYSIS.md`](BLUEPRINT-GAP-ANALYSIS.md) §5. Notably **entitlements

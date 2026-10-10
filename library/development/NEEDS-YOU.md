@@ -28,7 +28,7 @@ anything else first. Where an item is **not** a decision, it says so, and you ca
 
 ---
 
-## Part 1 — Decisions I need (**0 open** — `NY-21` (row 17 coverage) **decided 2026-10-11: Option A** (build the all-tables classification gate); `NY-20` (row 16 scope) **decided 2026-10-11: Option A**; `NY-19` **decided 2026-10-10** (owner chose Option A: build the read-gate coverage test → built as `CC-47`, row 15 ✅); `NY-18` **decided 2026-10-10** ("we follow your recommendations" → Option B, built as `CC-49`); `NY-16` and `NY-17` **decided 2026-10-10** (blank the value; Option B); `NY-15` decided 2026-10-09; `NY-14` closed 2026-10-06; `NY-1`, `NY-2`, `NY-8`, `NY-13` closed; `NY-4` is "nothing needed")
+## Part 1 — Decisions I need (**1 open** — `NY-22` (row 18: AI own-row-scope semantics) **OPEN — your call; the safe default (a) is already in place**; `NY-21` (row 17 coverage) **decided 2026-10-11: Option A** (build the all-tables classification gate); `NY-20` (row 16 scope) **decided 2026-10-11: Option A**; `NY-19` **decided 2026-10-10** (owner chose Option A: build the read-gate coverage test → built as `CC-47`, row 15 ✅); `NY-18` **decided 2026-10-10** ("we follow your recommendations" → Option B, built as `CC-49`); `NY-16` and `NY-17` **decided 2026-10-10** (blank the value; Option B); `NY-15` decided 2026-10-09; `NY-14` closed 2026-10-06; `NY-1`, `NY-2`, `NY-8`, `NY-13` closed; `NY-4` is "nothing needed")
 
 > **Numbering note.** Items are numbered once and **never reused**, so that a number you have already
 > quoted keeps meaning the same thing. Item 8 was appended here on 2026-10-05 and answered the same
@@ -411,6 +411,39 @@ allowlist with a **reason per entry**, exactly as Option A promised.
 **Your answer (2026-10-11): A — force the classification.** Build a coverage gate over **all 239** tables: each
 must **either** declare a read-ACL **or** be explicitly classified *"internal — not a read surface"* on a named,
 reviewable list. A new table then cannot ship un-classified. **Part 1 is 0 open again.**
+
+---
+
+### `NY-22` — Row 18: when an AI acts for a user who is restricted to **their own rows**, should the AI see only that user's rows, or the whole tenant? — ⬜ **OPEN (your call; the safe default is already in place)**
+
+**What row 18 says** (`BUILD-ORDER.md` item 19): *"Wire the AI IR path to the new column- and row-level gates."*
+**(✅ BUILT 2026-10-11 as `CC-53` — the column-level half.)**
+
+**What I measured in code (rule 0b), 2026-10-11:** the AI read tools (`packages/search/src/modules/search/ai-tools.ts`)
+now apply the **same column-level classification mask** a human export gets (`CC-45`'s helper), so a field the
+platform marks sensitive can no longer be returned to the AI unmasked. But the **row-level** half has a
+complication I will not decide for you:
+
+- Row 16 added an **opt-in owner row-scope** (`OrmEntityConfig.ownerField`/`ownerFeature`) that the **human**
+  path applies — *"show me only my own rows"*.
+- On the **AI** path, that clause has **no reader**: I measured that **no entity is both searchable and
+  own-scoped** (only `api_keys` declares `ownerField`, and it has **no** `search.ts`). So today the AI path
+  cannot apply an owner clause even if it wanted to.
+- That makes the *semantics* a policy question, not a build question — **which is yours, not mine (rule 11)**.
+
+**The question:** *when an AI assistant acts on behalf of a user who is own-scoped, should it (a) see **only
+that user's own rows** — the safe default, so the AI can never show more than the human could — or (b) see the
+**whole tenant** because the AI is a service principal with its own rights?*
+
+**My recommendation: (a).** It preserves the row 15 guarantee (*"every read is filtered by permission"*) for the
+AI door too, and an AI can never exceed the human it speaks for. **This is already the built default** — the
+column-mask shipped, and the owner clause is simply not applied because no searchable entity is own-scoped; no
+AI can leak across an owner boundary today. If you rule **(b)**, it is a **one-line change** at the resolution
+site when the first searchable+own-scoped entity appears, plus a recorded exemption.
+
+**Why it does not block the row:** row 18's **column-level** gate is built and verified; the **row-level** leg is
+**deferred with a named trigger** (rules 8/10d) — *the first entity that is both searchable and own-scoped*, or
+your ruling, whichever comes first. Recorded as `CC-53`'s own-leg note.
 
 ---
 

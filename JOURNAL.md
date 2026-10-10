@@ -35,7 +35,54 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
-### ✅ DONE — **row 17 (permission coverage reaches EVERY table, `BUILD-ORDER` item 17): BUILT (`CC-52`). The PHASE-5 batch (rows 16 → 17 → 18) continues with row 18.**
+### ✅ DONE — **row 18 (the AI's read path goes through the SAME column- and row-level gates as a human, `BUILD-ORDER` item 19): BUILT (`CC-53`). The PHASE-5 batch (row 16 → row 17 → row 18) is COMPLETE. ★ NEXT = `CC-27` (then `CC-44`).**
+**(2026-10-11; code repo `workspace/starting-kit`.)**
+
+**The task.** Row 18: *"Wire the AI IR path to the new column- and row-level gates."* Per rule 0b I
+**re-measured the premise in code first**: the AI record-returning tools (`packages/search/src/modules/search/ai-tools.ts`)
+apply the **entity** gate (`authorizeEntityAccess`, `aclFeatures`, fail-closed) + tenant/org **scope**, and a
+**search** `fieldPolicy` strip — but they apply **neither** the platform **classification** map
+(`defaultEncryptionMaps`, the thing `CC-45` protects on the human export) **nor** the owner row-scope. So the
+row's words were **not** met.
+
+**Measured (rule 0b).** `search_get`/`search_query`/`search_aggregate` are the three record-returning tools of
+the six; `grep` for `ownerField|rowScope|buildScopedWhere` across `packages/search/src` → **no matches**;
+`grep` for `defaultEncryptionMaps|resolveExportEncryptedFields|applyEncryptedFieldMask` → **only the module's
+own `encryption.ts` map declaration**, never a read. **No entity is both searchable and own-scoped** (only
+`api_keys` declares `ownerField`, and it has **no** `search.ts`) → the owner clause has **no reader** on the AI
+path → **not built, scheduled as the owner question `NY-22`** (rules 8/10d/11).
+
+**The contract built.** (A1) **column mask** — `search_get` masks every field the platform **classification
+map** names, using the **same** helper the human export uses (`resolveExportEncryptedFields` +
+`isEncryptedExportField` + `MASKED_EXPORT_VALUE`), **recursing into nested object/array values**
+(`maskValueDeep`), **fail-closed** on a throwing map (`maskAll` ⇒ mask everything); a disabled/absent service
+⇒ **byte-identical**. (A2) — the reachable leak routes on the other two tools: `search_query` **drops the
+index-time presenter** for a classified entity (an index-promoted arbitrary string field could otherwise leak
+as `title`), and `search_aggregate` **refuses** a `groupBy` naming a classified field. (A3) no map ⇒
+byte-identical, existing suites green. (A4) — the new suite proves the tools go through the mask.
+
+**Hardening (TOTAL quality protocol).** **TWO separate-agent hostile-critic rounds**, each finding a REAL
+hole: **round 1** — the `search_query` index-time presenter (`fallback-presenter.ts` `findAnyStringValue`)
+can promote an arbitrary string field into `title`, and `search_aggregate` returns raw bucket values — both
+could carry a classified field → **fixed** (drop presenter for classified entities; refuse a classified
+`groupBy`). **round 2** — `maskClassifiedFields` checked **top-level keys only**, so a classified key
+**nested in an object value** (`meta.secret`) leaked → **fixed** with `maskValueDeep` recursion. **6
+RED-then-GREEN mutations** (disable the mask; wrong entityId → 2 RED; break the aggregate refusal; break the
+presenter drop; disable recursion → the nested test RED), each restore **md5-verified** to
+`8b9238b006ec1ea6eab76199d6365bc6`; final GREEN **12/12** in the new suite, **281/281** across the search
+module (27 suites); `tsc --noEmit` clean (search). **A lesson banked (L103):** my own test was initially
+**mock-defeated** — the wrong-entityId mutation stayed GREEN because the mock ignored its `entityId` argument;
+fixed by making the mock **entity-aware**.
+
+**THE ONE NUMBER (two routes).** **72 / 321 = 22%** — **unchanged**; row 18's new LIST box has **no** fresh
+appendix marker in §A–§K. **8th consecutive re-run.** The two routes **disagreed on the way** — mine
+`72/321`, a blind verifier's `74/331` (§K) — and the cause is worth banking: the verifier's section regex
+`[A-K]` **never matches `## L.`**, so it counted the **verification ledger §L** as points; with §L excluded
+both routes return **72 / 321** (recorded in `platform_points.md` §L).
+
+---
+
+### ✅ DONE / 🟡 (superseded by row 18) — **row 17 (permission coverage reaches EVERY table, `BUILD-ORDER` item 17): BUILT (`CC-52`).**
 **(2026-10-11; code repo `workspace/starting-kit`.)**
 
 **The task.** Row 17: *"Permission coverage reaches **every** table — a new table cannot be created un-gated."*
@@ -82,9 +129,9 @@ MUT4 (break discovery) → 2 failed. All restored byte-identical to md5 `60c40f2
 Route 1 (my derivation script) and Route 2 (a separate blind verifier agent, its own script) both returned
 **72 / 321**.
 
-**★ NEXT:** **row 18** (`BUILD-ORDER` item 19 — *"the AI's read path goes through the **same** column- and
+**★ NEXT:** *(superseded — row 18 is now ✅, see the block at the top of this section; the live next is **`CC-27`**, then `CC-44`.)* ~~row 18 (`BUILD-ORDER` item 19 — *"the AI's read path goes through the **same** column- and
 row-level gates as a human"*), re-measured in code first (rule 0b), built under the full protocol, documented
-and committed in the same change. Rows 16 → 17 → 18 are all PHASE 5 (`Query / Command enforcement`).
+and committed in the same change. Rows 16 → 17 → 18 are all PHASE 5 (`Query / Command enforcement`).~~
 
 ---
 
