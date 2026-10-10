@@ -1184,6 +1184,14 @@ one page, each with a named home. Details: [`BLUEPRINT-GAP-ANALYSIS.md`](BLUEPRI
    **manage screen (`SD-5`) BUILT 2026-10-09 (code `a2317b1`) — the last half of SD-4 is closed** (one grid, two settings). Limits scheduled in
    [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md) (CC-33: DDL DROP/FK; CC-34: read/reference verbs;
    CC-35: re-type labelled `'create'`; CC-36: foreign builders omit `actorKind`).
+   **✅ RE-MEASURED IN CODE 2026-10-10 (row 13) — the build is complete and PHASE 3 IS CLOSED.** The slices
+   are present (commits `6fbd605c`, `a2317b1a`) and their suites were **re-run green this session** (`shared`
+   permissions 110/110; `core` structural-permissions + entities guards 80/80); `S11 ▸ 5/5`, `S12 ▸ 2/2`.
+   The four limits above are each **named, deferred, and genuinely blocked or harmless-today** — none is a
+   missing slice: `CC-34` (no read-path enforcement point exists — the sole reader of the structural level is
+   the write guard), `CC-38` (the guard defers by design, no `commandId`, so the `pending_acts` row is not
+   filed), `CC-33`/`CC-35`/`CC-36` (harmless-today: the only `actorKind` consumer is the entities structural
+   guard). **Row 13 is ticked ✅.**
 9. **`G-22` — the generic state-machine engine** (blueprint §10) promoted to a core primitive: allowed
    transitions, transition permissions, preconditions, events. Today pipelines exist only inside
    `customers`; the blueprint makes lifecycle generic. *(This is the item referred to elsewhere as

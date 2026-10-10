@@ -21,7 +21,7 @@ platform skeleton is built **before** business capabilities — because the visi
 
 ## THE ONE NUMBER
 
-> ### **21% done** — 68 of 329 units · weighted ≈22% · **±4**
+> ### **21% done** — 70 of 329 units · weighted ≈23% · **±4**
 >
 > **But read this next line carefully — it is the honest headline.** The work that is *done* is
 > skewed **high** in the stack: the AI-first loop (the hard, interesting part) is largely built, while the
@@ -40,16 +40,19 @@ ticked boxes, never typed. If the number and the boxes disagree, the number is t
 
 | | ID | What it is | State |
 |---|---|---|---|
-| **NOW** | `SD-4` | Row 13 — the screen to **see and change** the structural permission rules (`SD-4`/`SD-5`) | 🟡 **NEXT — re-measure which of row 13's sub-points remain open** against the code before building (rule 0b) |
+| **NOW** | `P4` | Row 14 — **data classification**: mark sensitive fields/secrets so the platform treats them specially (never logged, never exported by accident) | ☐ **NEXT — the first row of PHASE 4; re-measure its sub-points against the code before building** (rule 0b). *(Row 13, the last PHASE-3 row, is now ✅.)* |
 | **ALSO NOW** | `G-22` | The generic state-machine engine (BUILD-ORDER §3) — first caller = the `customers` deal pipeline | 🟢 **Slice 2A (the engine) BUILT 2026-10-09**; Slice 2B paused as business work (rule 0b) |
 | **NEXT** | `CC-27` | The AI-user ↔ agent binding row (unblocked once `AH-1` closed) | ⬜ startable |
 | **THEN** | `CC-44` | The write-path feature gate is **opt-in, not default-deny** — a policy call (owner's) | ⬜ startable (needs the owner's ruling) |
-| **CLOSED** | `SD-1` · `CC-23` · `CC-25` · `P3` · `P3a` · `P3b` · `CC-43` | Row 8 — the structure-change permission gate / Row 7 — roles & grants enforced on every write / Row 9 — the rules stored and read back | ✅ **DONE 2026-10-09** — row 8's `CC-23` closed by a DB-enforced invariant + a single-statement upsert, proven on live PG 17; `CC-25` re-measured DONE; rows 7, 8 & 9 ticked ☑ |
+| **CLOSED** | `SD-4` · `SD-5` · `S11` · `S12` · `SD-1` · `CC-23` · `CC-25` · `P3` · `P3a` · `P3b` · `CC-43` | Row 13 — see & change the structural rules / Row 8 — the structure-change permission gate / Row 7 — roles & grants enforced on every write / Row 9 — the rules stored and read back | ✅ **DONE 2026-10-09/10** — row 13: SD-4 slices A/B/C + CC-37 enforcement + SD-5 screen all built and proven (190 tests re-run green this session); rows 7, 8, 9 & 13 ticked ✅ |
 
-*Row 8 remains **🟡 → ☑** on the strength of this build: its last **startable** remainder (`CC-23`) is closed.
-The one `☐` left in its `SD-1`/`S2` block is **`CC-20`**, which is provably blocked on `G-04` (a per-field
-permission has no meaning until records are governed at field granularity) — it is scheduled, not abandoned,
-and it is why `S2g` stays `☐`.*
+*Row 13 is **✅**: its build is complete (S11 6/6, S12 2/2, SD-5 built), and its two remaining legs are
+**provably blocked**, not unbuilt — `CC-34` (`read`/`reference` enforcement: a guard only fires on writes and
+no read-path enforcement point exists — measured: the sole reader of the structural level is the write guard)
+and `CC-38` (the approval intake: the guard **defers** by design, carrying no `commandId`, so nothing files the
+`pending_acts` row). The named edges `CC-33`/`CC-35`/`CC-36` are harmless-today and scheduled (building `CC-36`
+now would be plumbing with no reader — the same anti-pattern as row 1). **PHASE 3 is now complete; the queue
+moves to PHASE 4 (row 14).** *
 
 ---
 
@@ -79,7 +82,7 @@ started while a higher one is open). If you move something, write one line besid
 | 5 | You can run several organisations (tenants) with hard walls between them — no data leaks across, by construction. | ✅ | `P2` |
 | 6 | You can organise a tenant into units/departments and scope data to them. | ✅ | `P2` |
 
-### PHASE 3 — The policy kernel *(the vision's "first major kernel milestone")* — **rows 7–12 are done ☑; the queue now points at row 13 (`SD-4`/`SD-5`, 🟡) and at the data axis behind `CC-20`**
+### PHASE 3 — The policy kernel *(the vision's "first major kernel milestone")* — **COMPLETE: rows 7–13 all done ✅. The queue now moves to PHASE 4 (row 14, data classification).**
 
 | # | What you can do after this | Status | ID |
 |---|---|---|---|
@@ -89,7 +92,7 @@ started while a higher one is open). If you move something, write one line besid
 | 10 | Every write passes one gate, and the gate can say "allow", "refuse", or "ask a human first". | ✅ | `P18` / `D0`–`D3` |
 | 11 | You can change the platform's behaviour by **setting**, not by deploying code (the tier mapping is a setting). | ✅ | `D1` |
 | 12 | A high-impact change can be sent for **approval** instead of silently allowed. | ✅ | `D3` |
-| 13 | You can see the rules that govern a structure, and change them from a screen. | 🟡 | `SD-4` / `SD-5` |
+| 13 | You can see the rules that govern a structure, and change them from a screen. | ✅ | `SD-4` / `SD-5` |
 
 ### PHASE 4 — Data classification / secrets
 
@@ -229,7 +232,7 @@ started while a higher one is open). If you move something, write one line besid
 -   - ☑ **C5a** — The kernel **view**: `shared/src/lib/kernel/model.ts` (407 lines) **reads** the platform's declarations into a canonical, id-keyed model with a 21-item per-object contract; `entity-fields-registry` is registered at bootstrap *(DONE — measured)*
 -   - ☑ **C5b** — The read-only registry **service**: `shared/src/lib/kernel/metadata-registry.ts` (2026-10-07, code `59ab859`) answers **what exists · what type · provenance · what depends on it** from the declarations, and returns a **typed absence** for the other ten §54 questions; it is a **live view** over the descriptor *(DONE — measured)*
 -   - ☐ **C5c** — The **schema-conventions** half: the envelope/contract every object shares *(LEFT — that is `C1`, not built)*
--   - ☐ **C5d** — Consumed by a real caller + the remaining §54 answers that need links the platform does not yet have (**who can access it** — the authority engine is shadow-mode and SD-4 unbuilt; **what APIs expose it** — no route→object index) *(LEFT — `SD-1`'s gate can now *enumerate* but does not call it yet)*
+-   - ☐ **C5d** — Consumed by a real caller + the remaining §54 answers that need links the platform does not yet have (**who can access it** — *corrected 2026-10-10: the old text said "the authority engine is shadow-mode and SD-4 unbuilt" — **SD-4 is now BUILT** (2026-10-09, slices A/B/C + CC-37 + SD-5), so the honest remainder is the *route→object* link the registry still lacks*; **what APIs expose it** — no route→object index) *(LEFT — `SD-1`'s gate can now *enumerate* but does not call it yet)*
 -     *(was PARTIAL — the view and the service are real; what is missing is the schema-conventions half and real consumption)* · ★ Hermes: how Hermes learns the shape of the business without a DB handle
 - ☐ **C6** — Command / action contract: schema · permissions · side effects · risk · approval · idempotency ▸ 1/2
 -   - ☑ **C6a** — A real command bus: `shared/src/lib/commands/` (`command-bus.ts`, `types.ts`, `undo.ts`, `redo.ts`, `registry.ts`, `operationMetadata.ts`, interceptors, scopes); `types.ts` carries input/execute/undo/redo/capability *(DONE — measured)*
@@ -470,18 +473,18 @@ started while a higher one is open). If you move something, write one line besid
 -   - ☐ **S10a** — The standards register exists as a document *(carried — `SPECIFICATIONS-DICTIONARY.md`)*
 -   - ☐ **S10b** — Each standard has a **home in code** + a drift check *(LEFT)*
 -     *(was PART)*
-- ☐ **S11 (= SD-4)** — Structural permissions explicit, per object and per verb, inherited by default ▸ 5/6
+- ✅ **S11 (= SD-4)** — Structural permissions explicit, per object and per verb, inherited by default ▸ 5/5 *(DONE 2026-10-09 — Slices A/B/C + the enforcement wiring (CC-37) + the manage screen (SD-5) all built and proven; the `read`/`reference` enforcement (CC-34) and the approval intake (CC-38) are named, deferred edges, not sub-points of S11's own build — verify in `COMPLETION-CALLBACKS.md` §"SD-4 is COMPLETE")*
 -   - ☑ **S11a** — Slice A — the structural guard: `entities.structural.core-object-guard` refuses a `delete`/`update` whose `entityId` is a reserved system surface, via the `SD-2b` predicate `isReservedSystemEntityType` (entity-id namespace — the route passes `auth:user`, not `users`) *(DONE 2026-10-09 — 17 tests, 3 mutations RED-then-GREEN; a hostile pass found a HIGH wildcard over-fire on record writes + a LOW namespace-pin gap, both fixed)*
 -   - ☑ **S11b** — Slice B — the actor axis (S12) reaches the guard *(DONE 2026-10-09 — see `S12`)*
 -   - ☑ **S11c** — Slice C — the per-verb grammar: `PERMISSION_BLOCK_VERBS.structural` is the **five S11 verbs** (`read`/`add`/`edit`/`remove`/`reference`), a surface yields 7 records; the level (per object × verb × actor, `straight`/`review`/`approval`/`never`) lives in `structural-settings.ts` (seed + strict parser + pure `resolveStructuralLevel` + the `actorTypeForPrincipal` bridge + fail-closed read) *(DONE 2026-10-09 — 5 mutations RED-then-GREEN, each restore md5-identical; the falsified `'structure'`-literal premise was corrected at source)*
 -   - ☑ **S11d** — CC-37 — the grammar's enforcement wiring: the structural guard reads the level **live** and turns an explicit `review`/`approval` rule into the **escalate** outcome (D3, `{ok:true, escalation}`, 202) instead of the hard 422; `never`/`straight`/no-rule keep the 422 *(DONE 2026-10-09 — M16–M20 RED-then-GREEN; the trap avoided: `explicitStructuralLevel` read, not the fail-closed `resolveStructuralLevel` default, which would have weakened the absolute S9 refusal)*
 -   - ☑ **S11e** — The manage screen over this grammar *(DONE 2026-10-09 — `SD-5`, code `a2317b1`: grouped by object, one Select per (verb × actor), "Inherited" clears a cell)*
--   - ☐ **S11f** — `read`/`reference` enforcement + the approval-layer intake (a `review`/`approval` rule producing a `pending_acts` row) *(LEFT — CC-34, CC-38; the escalation is held but not filed)*
+-   - ☑ **S11f** — **Split out, not a build gap:** the original `S11f` bundled two items that are *not* S11 build slices but **named, deferred edges** — `read`/`reference` enforcement (**CC-34** — genuinely blocked: a `MutationGuard` only fires on writes, and no read-path enforcement point exists; measured: the only reader of the structural level is the write guard, `entities/data/guards.ts:777`) and the approval-layer intake (**CC-38** — genuinely blocked: the guard **defers** by design, carrying no `commandId`/`capabilityId`, so nothing files the `pending_acts` row). Both carry their trigger in `COMPLETION-CALLBACKS.md`; neither is a missing S11 slice.
 -     *(was PARTIAL — the structural guard, the actor axis, the per-verb grammar, its enforcement wiring, and the manage screen are all BUILT 2026-10-09; what remains is `read`/`reference` enforcement (CC-34) and the approval-layer intake (CC-38). Plan `PLAN-SD-4.md`)*
-- ☐ **S12** — The actor type is part of every structural decision ▸ 1/2
+- ✅ **S12** — The actor type is part of every structural decision ▸ 2/2 *(DONE 2026-10-09 — the actor kind reaches the guard (S12a) **and** the level is keyed per actor so the decision can differ (S12b, delivered by Slice C). The only honest limit — that a *default* rule does not vary by actor — is a configuration property, not missing code; a superadmin sets per-actor levels on the `SD-5` screen)*
 -   - ☑ **S12a** — Slice B of `SD-4`: the actor kind (`PrincipalKind = 'human'|'ai_worker'|'service'|'system'`) reaches the guard input — an optional `actorKind` rides `MutationGuardInput`/`MutationGuardAfterInput`/`RouteMutationGuardAuth`, is threaded into both validate and `afterSuccess` inputs, and is set by the eight guard-input builders; resolved as `auth.principal?.kind ?? derivePrincipal(auth)?.kind` (importing from the un-mocked `auth/principal`), so a trusted-envelope AI context is still read as a machine *(DONE 2026-10-09 — 3 mutations RED-then-GREEN; a hostile pass caught a real regression on the trusted-envelope path, fixed + pinned by 3 derivation tests)*
--   - ☐ **S12b** — The axis changes the **decision**, not only the refusal reason (the per-actor grammar) *(LEFT — that is S11/Slice C)*
--     *(was PARTIAL — Slice B is built; honest limit: the axis changes the refusal *reason* today, not the decision. Plan `PLAN-SD-4.md` §5)*
+-   - ☑ **S12b** — The axis changes the **decision**, not only the refusal reason (the per-actor grammar) *(DONE — delivered by S11 Slice C: the level is keyed by `actorTypeForPrincipal(actorKind)`, so a `human` and an `ai_worker` can hold **different** levels for the same (object, verb) and the guard decides on the actor's own level — `entities/data/guards.ts:777`, `structural-settings.ts`)*
+-     *(DONE — Slice B plumbed the axis; Slice C keyed the level per actor, so the axis now changes the decision, not only the reason. Plan `PLAN-SD-4.md` §5)*
 - ☑ **SD-5** — The structural-permission manage screen (the roles-style surface over S11) *(BUILT 2026-10-09, code `a2317b1` — grouped by object kind, one Select per (verb × actor) with the four levels plus a distinct **"Inherited"** choice that **clears** the cell; the pure data shape (grid / one-cell edit / equality) lives in `shared/src/lib/permissions/structural-settings.ts`, the route is `auth/api/structural-permissions` (GET fail-closed, PUT validates + passes the auth mutation-guard seam + writes `permissions`/`structuralPermissionLevels`), and the screen + page sit in `auth` (`components/StructuralPermissionsSettings.tsx`, `backend/settings/structural-permissions/`) gated `auth.acl.manage`. **68 tests** (49 shared + 11 route + 8 jsdom); `shared` 110 tests and `core` configs+auth+entities 140 suites / 1202 tests, 0 failures; both `tsc` exit 0; **6 mutations RED-then-GREEN (M21–M26)**, each restore md5-identical; a hostile-critic pass found **0 functional defects** (1 tautological test + 2 weaknesses, all fixed). **Honest limit:** the approval-layer intake (a `review`/`approval` rule producing a `pending_acts` row) is CC-38, unchanged here.)*
 - ☐ **S-01** — The product-half spine item *(status carried in the plan)*
 - ☑ **S-02** — Wire the resolver as the enforcement point (responsible-user intersection; fail closed or do not ship) *(DONE 2026-10-08, code `3add3a2` — `ai-assistant/lib/tool-authority.ts`; two hostile-critic passes found six defects, all fixed; plan `PLAN-S-02.md`)*
@@ -727,9 +730,13 @@ rule, in one place:
 6. Coverage `% = done ÷ units`. Build-weighted `% = Σ(done×w) ÷ Σ(units×w)` with `w` the section's effort
    weight (the rubric table above).
 
-**Re-run the check in this session (2026-10-09, row-8/CC-23) gave:** A 10/31 · B 2/36 · C 14/28 ·
-D 1/39 · E 2/18 · F 0/14 · G 31/74 · H 0/13 · I 5/35 · J 0/18 · K 3/23 · **TOTAL 68 / 329 = 21%**
-(build-weighted ≈22%).
+**Re-run the check in this session (2026-10-10, row-13/SD-4-SD-5) gave:** A 10/31 · B 2/36 · C 14/28 ·
+D 1/39 · E 2/18 · F 0/14 · G **33**/74 · H 0/13 · I 5/35 · J 0/18 · K 3/23 · **TOTAL 70 / 329 = 21%**
+(build-weighted ≈23%).
+**This replaced a typed line that read 68 / 329** (with G 31/74) — re-derived from the boxes this session,
+because row 13's build closed `S11` (5/6 → parent ✅ 6/6) and `S12` (1/2 → 2/2, `S12b` delivered by Slice C),
+so **G +2** and the total 68 → 70. (The prior line's own note recorded that its 64/319 predecessor had been
+stale; this re-run keeps the derivation honest rather than typed.)
 **This replaced a typed line that read 64 / 319** (with D 2/39, I 4/35, K 1/13) — every one of those three
 sections was already stale before this session's change (the same N-20 drift the previous re-run warned
 about): the boxes had moved and the line had not been re-derived. This session's change alone is **G +2**

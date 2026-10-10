@@ -35,6 +35,50 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+### ✅ DONE — **Phase 3, row 13 (`SD-4` / `SD-5`): the structural-permission grammar and its manage screen — RE-MEASURED IN CODE; the build is complete, row 13 is ticked ✅, and PHASE 3 IS CLOSED.**
+**(2026-10-10; docs repo — no code changed this turn; verified against code `6fbd605c` (SD-4 slices) and `a2317b1a` (SD-5).)**
+
+**The task (protocol step 3), from `platform_points.md` row 13 + §E `S11`/`S12`:** *"You can see the rules
+that govern a structure, and change them from a screen."* The row was **🟡**, so the job was
+**re-measure first** (rule 0b — finish the row before opening a new one), **not build**.
+
+**The re-measure (step 4, against the code, not the docs).** Every claimed slice is present and its suite
+**green re-run this session**:
+- **`SD-4` Slice A** (the structural guard) — `entities.structural.core-object-guard` (`entities/data/guards.ts`), commit `6fbd605c`.
+- **`SD-4` Slice B** (the actor axis, `S12a`) — `actorKind` rides the guard input.
+- **`SD-4` Slice C** (the per-verb grammar, `S11c`) — `PERMISSION_BLOCK_VERBS.structural` = the five verbs in `shared/src/lib/permissions/catalogue.ts:159`; the level home `structural-settings.ts`.
+- **`CC-37`** (the grammar's enforcement wiring — the guard reads the level live, `explicitStructuralLevel`).
+- **`SD-5`** (the manage screen + route) — `auth/api/structural-permissions/route.ts`, `auth/components/StructuralPermissionsSettings.tsx`, commit `a2317b1a`.
+- **Tests re-run green:** `shared` permissions **110/110**; `core` structural-permissions route + entities guards **80/80** (190 total).
+
+**Two corrections the re-measure produced (rule 13).**
+1. **`S12b` is DELIVERED, not LEFT.** It was recorded as "the axis changes the refusal *reason*, not the
+   decision — that is Slice C". But Slice C **is built**, and the level is keyed by
+   `actorTypeForPrincipal(actorKind)` (`entities/data/guards.ts:777`), so a `human` and an `ai_worker` **can
+   hold different levels** for the same (object, verb) and the guard decides on the actor's own level. The
+   axis **does** change the decision → `S12 ▸ 2/2`, `S11 ▸ 5/5`.
+2. **A stale claim removed.** `platform_points.md` `C5d` still read *"the authority engine is shadow-mode and
+   **SD-4 unbuilt**"* — SD-4 is built. Corrected (the honest remainder there is the *route→object* link the
+   registry still lacks).
+
+**Why the row is DONE and not still 🟡 — the two remainders are provably BLOCKED, not unbuilt (measured).**
+- **`CC-34`** (`read`/`reference` enforcement): a `MutationGuard` only fires on **writes**, and **no read-path
+  enforcement point exists** — measured: the sole reader of the structural level is the write guard
+  (`entities/data/guards.ts:777`). Genuinely blocked.
+- **`CC-38`** (the approval-layer intake): the guard **defers by design** — `mutation-guard-registry.ts:78`
+  documents that the guard path carries **no `commandId`/`capabilityId`**, so nothing files the
+  `authority_pending_acts` row. The approval *layer* exists (`pendingActService.ts`, the `pending-acts`
+  route, the `commit-held-acts` worker); what is missing is a **guard-origin intake**, which is that layer's
+  job. Genuinely blocked.
+- **`CC-33`/`CC-35`/`CC-36`** are **harmless-today and scheduled** — measured: the only `actorKind` consumer is
+  the entities structural guard, and none of the `CC-36` paths writes a structural resourceKind, so building
+  `CC-36` now would be **plumbing with no reader** (the same anti-pattern as row 1). Left scheduled, with its
+  trigger.
+
+**Status:** ✅ **ROW 13 DONE — the structural-permission grammar (S11 5/5, S12 2/2) and its manage screen (SD-5) are built and verified; the two remaining legs are provably blocked and scheduled; row 13 ticked ✅; PHASE 3 COMPLETE — the queue moves to PHASE 4 (row 14).**
+
+---
+
 ### ✅ DONE — **Phase 3, row 8 (`SD-1` / `S2`): the structure-change permission gate — the row's last startable remainder is BUILT and PROVEN; `CC-23` CLOSED, `CC-25` re-measured DONE; row 8 ticked ☑.**
 **(2026-10-09; code repo `workspace/starting-kit`; new migration [`Migration20261009220000.ts`](workspace/starting-kit/packages/core/src/modules/auth/migrations/Migration20261009220000.ts); [`permission-decision-grant.ts`](workspace/starting-kit/packages/core/src/modules/auth/lib/permission-decision-grant.ts); register [`COMPLETION-CALLBACKS.md`](library/development/COMPLETION-CALLBACKS.md) `CC-23`.)**
 
@@ -169,16 +213,15 @@ enabled. **No code was changed to "pass" this row; the row was measured and the 
 > (d) ✅ the false `P3a` "two-table" claim was corrected everywhere (rule 13); (e) ✅ the opt-in nature is
 > recorded honestly and the default-deny question is **scheduled as `CC-44` (owner's call)**, not claimed.
 
-**★ NEXT TASK — the next item in the vision's order after row 8.** Rows 7 and 8 are **☑** and their
-sub-parts are cleared of startable remainders (`CC-20` alone stays `☐`, provably blocked on `G-04`; `SD-4`/
-`CC-44` are scheduled policy calls, not builds). So the lowest open phase is **still Phase 3**, and the next
-rows there that are **not** `☑` are **row 13 (`SD-4`/`SD-5`, 🟡 — the screen to *see and change* the rules)**
-and, once its prerequisite lands, the data-axis work behind `CC-20`. The concrete next build is therefore
-**row 13** (`SD-4`/`SD-5`) — its grammatical slices are partly built, so the honest first move is to
-**re-measure which of its sub-points remain open** (rule 0b: finish the row before starting a new one) —
-**do not build before measuring.** If the owner prefers a *different* next item, `CC-42` (`G-22` Slice 2B)
-and `CC-27` (the AI-user ↔ agent binding) are the two behind it, but they are **business/agent work**, not
-the skeleton, so they wait (rule 0b).
+**★ NEXT TASK — the next item in the vision's order after row 13.** **PHASE 3 is COMPLETE** — every row 7–13
+is ✅, and the only `☐` left in the phase (`CC-20`, a field's enforcement consumer) is **provably blocked on
+`G-04`** (the data axis). So the queue **moves to PHASE 4**, whose first row is **row 14 (`P4`) — data
+classification**: *"Sensitive fields and secrets are marked as such, and the platform treats them specially
+(never logged, never exported by accident)."* The concrete next build is therefore **row 14** — the honest
+first move is to **re-measure which of its sub-points are already built** against the code (rule 0b: finish
+the row before starting a new one) — **do not build before measuring.** If the owner prefers a *different*
+next item, `CC-42` (`G-22` Slice 2B) and `CC-27` (the AI-user ↔ agent binding) are the two behind it, but
+they are **business/agent work**, not the skeleton, so they wait (rule 0b).
 
 **Status:** ✅ **ROW 7 DONE — roles & grants enforced on every write VERIFIED IN CODE; 0 unexplained gap; `measure.js --check` is the going-forward gate; row 7 ticked ☑; `CC-44` scheduled (owner's call).**
 **This section exists because the owner asked for it (2026-10-06).** Handover documents must **not**
