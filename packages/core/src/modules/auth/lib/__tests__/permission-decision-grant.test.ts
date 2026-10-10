@@ -9,13 +9,16 @@
  *   2. a role with **no ACL** gets one holding exactly the records;
  *   3. a role **with** an ACL gets a **set-union** merge — nothing is lost, nothing
  *      is duplicated;
- *   4. the merge is **idempotent** — a second run adds nothing and does not flush;
- *   5. it **never** touches `isSuperAdmin` (a grant must not confer superadmin).
+ *   4. the merge is **idempotent** — a second run adds nothing;
+ *   5. it **never** touches `isSuperAdmin` (a grant must not confer superadmin);
+ *   6. the **whole** write is one statement **regardless of create-or-update** —
+ *      `INSERT … ON CONFLICT (role_id, tenant_id) DO UPDATE` — so the create-branch
+ *      race CC-16 left open (CC-23) is closed by the unique index, not an app lock.
  *
- * The EntityManager is mocked (the project tests DB-backed code against a mocked EM;
- * the DB itself is provable on this host — `mercato-postgres-local` — so a migration
- * is deferred for shape/timing reasons, never for provability: `CORRECTED (rule 13)`,
- * the older *"a real migration is unprovable on this host"* note was false).
+ * The EntityManager is mocked (the project tests DB-backed code against a mocked EM);
+ * the DB itself is provable on this host — `mercato-postgres-local` — so the CC-23
+ * index is **applied and measured live** (see `Migration20261009220000`), not merely
+ * asserted here.
  */
 
 import { Role, RoleAcl } from '@open-mercato/core/modules/auth/data/entities'
@@ -35,27 +38,50 @@ type EmMock = {
   persist: jest.Mock
   flush: jest.Mock
   getConnection: jest.Mock
-  /** The rows the mocked atomic `update … returning features_json` returns. */
+  /** The one row the mocked atomic upsert (`insert … on conflict … returning`) returns. */
   execute: jest.Mock
 }
 
 /**
  * Mock the EntityManager the way the other DB-backed suites do (the ledger,
- * `reconcileOrganization`): the merge is now ONE atomic `update … returning`, so
- * `getConnection().execute` stands in for the database. `mergedValue` lets a test
- * choose what the UPDATE returns for `features_json`; it defaults to the test's
- * expectation of the deduped union, so a test that does not care need not set it.
+ * `reconcileOrganization`): the write is now ONE atomic upsert, so
+ * `getConnection().execute` stands in for the database.
+ *
+ *   - `inserted` is what `(xmax = 0)` returns: `true` on a genuinely inserted row,
+ *     `false` on a row the `do update` branch touched. It is what `aclCreated` is
+ *     derived from.
+ *   - `newlyAdded` / `alreadyPresent` are what the statement's `newly_added` /
+ *     `already_present` columns return — the classified request. The unit mock
+ *     cannot run the SQL, so a test states them; the SQL that derives them is
+ *     proven separately against live Postgres (see `Migration20261009220000`
+ *     and the CC-23 concurrency proof).
+ *   - `acl` is no longer read by the **write** path (that is the point of CC-23 —
+ *     no pre-read), but the CC-25 role-target check (`assertActorCanGrantRoles`)
+ *     still reads the *target role's* ACL through `em.findOne(RoleAcl, …)`, so it
+ *     stays wired for those cases.
  */
 function makeEm(handlers: {
   role?: unknown
   acl?: unknown
-  /** What the atomic UPDATE returns for `features_json` (the post-merge array). */
-  mergedValue?: unknown
+  /** What `(xmax = 0)` returns — true when the row was inserted, false when updated. */
+  inserted?: boolean
+  /** What the statement's `newly_added` column returns. Defaults to `[]`. */
+  newlyAdded?: string[]
+  /** What the statement's `already_present` column returns. Defaults to `[]`. */
+  alreadyPresent?: string[]
 }): EmMock {
-  const execute = jest.fn(async () => [{ features_json: handlers.mergedValue ?? null }])
+  const execute = jest.fn(async () => [
+    {
+      features_json: null,
+      inserted: handlers.inserted ?? true,
+      newly_added: handlers.newlyAdded ?? [],
+      already_present: handlers.alreadyPresent ?? [],
+    },
+  ])
   const em: EmMock = {
-    // findOneWithDecryption calls em.findOne(entityName, where, options); the two
-    // callers pass the Role class then the RoleAcl class, so dispatch on the class.
+    // findOneWithDecryption calls em.findOne(entityName, where, options); the callers
+    // pass the Role class (resolveGrantRole, grant checks) then the RoleAcl class
+    // (the CC-25 role-target check), so dispatch on the class.
     findOne: jest.fn(async (entity: unknown) => {
       if (entity === Role) return handlers.role ?? null
       if (entity === RoleAcl) return handlers.acl ?? null
@@ -122,8 +148,14 @@ describe('a grant that cannot be applied reports why and writes nothing', () => 
 })
 
 describe('a role with no ACL gets one holding exactly the records', () => {
-  it('creates the ACL with the records and never sets isSuperAdmin', async () => {
-    const em = makeEm({ role, acl: null })
+  it('inserts the ACL with the records and never sets isSuperAdmin', async () => {
+    // `inserted: true` is what the DB's `(xmax = 0)` reports for a genuinely new row.
+    const em = makeEm({
+      role,
+      inserted: true,
+      newlyAdded: ['entities.records.x.view', 'entities.records.x.manage'],
+      alreadyPresent: [],
+    })
     const result = await applyPermissionDecisionGrant(em as never, {
       tenantId: TENANT,
       grantTo: 'superadmin',
@@ -135,38 +167,88 @@ describe('a role with no ACL gets one holding exactly the records', () => {
       'entities.records.x.view',
       'entities.records.x.manage',
     ])
-    expect(em.create).toHaveBeenCalledTimes(1)
-    const [entity, data] = em.create.mock.calls[0]
-    expect(entity).toBe(RoleAcl)
-    expect(data).toMatchObject({
-      role,
+    expect((result as { alreadyPresent: string[] }).alreadyPresent).toEqual([])
+
+    // The whole write is ONE statement: an INSERT … ON CONFLICT (CC-23).
+    expect(em.getConnection).toHaveBeenCalledTimes(1)
+    expect(em.execute).toHaveBeenCalledTimes(1)
+    const [sql, params] = em.execute.mock.calls[0]
+    expect(String(sql)).toMatch(/insert\s+into\s+role_acls/i)
+    expect(String(sql)).toMatch(/on\s+conflict\s*\(\s*role_id\s*,\s*tenant_id\s*\)/i)
+    expect(String(sql)).toMatch(/do\s+update/i)
+    // A fresh row is created with the entity default for the flag — never `true`.
+    expect(String(sql)).toMatch(/is_super_admin,\s*created_at/i)
+    expect(String(sql)).toMatch(/values\s*\(\s*\?\s*,\s*\?\s*,\s*\?\s*::jsonb\s*,\s*false\s*,\s*now\(\)\s*\)/i)
+    // `aclCreated` is read from the DB, not guessed: `(xmax = 0)` marks a genuinely
+    // inserted row. Pin the construct — the unit mock cannot run the SQL, so a
+    // mutation replacing it with `(true)` would otherwise pass unnoticed (it did,
+    // in mutation M2, until this assertion existed).
+    expect(String(sql)).toMatch(/xmax\s*=\s*0/i)
+    // The classification of the request is computed in SQL from the PRE-merge value
+    // (`pre.before`), and returned alongside the union. Pin the CLASSIFICATION, not
+    // merely the column names: `newly_added` must be "requested records NOT in
+    // `p.before`" and `already_present` must be "requested records IN `p.before`".
+    // A mutation that read `newly_added` from the post-merge `u.features_json`
+    // instead of `p.before` passed unnoticed until this pin existed (mutation M3).
+    expect(String(sql)).toMatch(/newly_added/)
+    expect(String(sql)).toMatch(/already_present/)
+    expect(String(sql)).toMatch(/not\s*\(\s*coalesce\(p\.before[\s\S]*?\)\s*@>\s*to_jsonb\(r\.elem\)\)\)\s*as\s*newly_added/i)
+    expect(String(sql)).toMatch(/where\s+coalesce\(p\.before[\s\S]*?\)\s*@>\s*to_jsonb\(r\.elem\)\)\s*as\s*already_present/i)
+    expect(String(sql)).toMatch(/left\s+join\s+role_acls\s+a\s+on\s+a\.role_id\s*=\s*\?\s+and\s+a\.tenant_id\s*=\s*\?/i)
+    // The request is parameterised twice: once for the INSERT and once for the
+    // `requested` CTE that classifies it into newly_added / already_present.
+    expect(params).toEqual([
+      ROLE_ID,
+      TENANT,
+      ROLE_ID,
+      TENANT,
+      JSON.stringify(['entities.records.x.view', 'entities.records.x.manage']),
+      JSON.stringify(['entities.records.x.view', 'entities.records.x.manage']),
+    ])
+    // It no longer persists a MikroORM entity in memory.
+    expect(em.create).not.toHaveBeenCalled()
+    expect(em.persist).not.toHaveBeenCalled()
+    expect(em.flush).not.toHaveBeenCalled()
+  })
+
+  it('reports aclCreated=false when the ON CONFLICT branch updated (xmax ≠ 0)', async () => {
+    // Same single statement, but the row already existed and `do update` ran — the
+    // DB reports `inserted: false`. `aclCreated` must follow the DB, not the branch.
+    const em = makeEm({ role, inserted: false, newlyAdded: ['new.three'], alreadyPresent: [] })
+    const result = await applyPermissionDecisionGrant(em as never, {
       tenantId: TENANT,
-      featuresJson: ['entities.records.x.view', 'entities.records.x.manage'],
-      isSuperAdmin: false,
+      grantTo: 'superadmin',
+      records: ['new.three'],
     })
-    expect(em.persist).toHaveBeenCalledTimes(1)
-    expect(em.flush).toHaveBeenCalledTimes(1)
+    expect(result).toMatchObject({ applied: true, aclCreated: false })
+    expect((result as { added: string[] }).added).toEqual(['new.three'])
+    expect((result as { alreadyPresent: string[] }).alreadyPresent).toEqual([])
   })
 
   it('dedupes repeated records before writing', async () => {
-    const em = makeEm({ role, acl: null })
+    const em = makeEm({ role, inserted: true, newlyAdded: ['a.b.view', 'a.b.manage'] })
     const result = await applyPermissionDecisionGrant(em as never, {
       tenantId: TENANT,
       grantTo: 'superadmin',
       records: ['a.b.view', 'a.b.view', 'a.b.manage'],
     })
     expect((result as { added: string[] }).added).toEqual(['a.b.view', 'a.b.manage'])
+    // The dedupe happens before the statement: both the INSERT value and the
+    // classifying CTE's request carry the two uniques, not the three inputs.
+    const params = em.execute.mock.calls[0][1] as unknown[]
+    expect(params[4]).toEqual(JSON.stringify(['a.b.view', 'a.b.manage']))
+    expect(params[5]).toEqual(JSON.stringify(['a.b.view', 'a.b.manage']))
   })
 })
 
 describe('a role with an ACL gets a set-union merge (nothing lost, nothing duplicated)', () => {
   it('adds only the new records via ONE atomic statement, preserving order', async () => {
-    const acl = { id: 'acl-1', featuresJson: ['existing.one', 'shared.two'] }
     const em = makeEm({
       role,
-      acl,
-      // The DB returns the deduped union in first-occurrence order.
-      mergedValue: ['existing.one', 'shared.two', 'new.three'],
+      inserted: false, // the row exists → the `do update` branch ran
+      // The statement classifies the request against the PRE-merge value.
+      newlyAdded: ['new.three'],
+      alreadyPresent: ['shared.two'],
     })
 
     const result = await applyPermissionDecisionGrant(em as never, {
@@ -179,12 +261,13 @@ describe('a role with an ACL gets a set-union merge (nothing lost, nothing dupli
     expect((result as { added: string[] }).added).toEqual(['new.three'])
     expect((result as { alreadyPresent: string[] }).alreadyPresent).toEqual(['shared.two'])
 
-    // The merge is a single UPDATE — the concurrency fix (CC-16). A read-modify-write
-    // (persist + flush of an in-memory array) would reintroduce the lost-update window.
+    // The whole write is a single statement — the CC-16 + CC-23 concurrency fix. A
+    // read-modify-write (persist + flush of an in-memory array) would reintroduce the
+    // lost-update window.
     expect(em.getConnection).toHaveBeenCalledTimes(1)
     expect(em.execute).toHaveBeenCalledTimes(1)
     const [sql, params] = em.execute.mock.calls[0]
-    expect(String(sql)).toMatch(/update\s+role_acls/i)
+    expect(String(sql)).toMatch(/on\s+conflict\s*\(\s*role_id\s*,\s*tenant_id\s*\)/i)
     expect(String(sql)).toMatch(/features_json/i)
     expect(String(sql)).toMatch(/\|\|/) // the JSONB union operator
     expect(String(sql)).toMatch(/returning\s+features_json/i)
@@ -193,15 +276,16 @@ describe('a role with an ACL gets a set-union merge (nothing lost, nothing dupli
     // the SQL. Empirically proven against Postgres 17 separately (PLAN-SD-1.md §8.8).
     expect(String(sql)).toMatch(/jsonb_array_elements_text/i)
     expect(String(sql)).toMatch(/group\s+by\s+elem/i)
-    expect(params).toEqual([JSON.stringify(['shared.two', 'new.three']), 'acl-1'])
+    expect(params[4]).toEqual(JSON.stringify(['shared.two', 'new.three']))
     // It no longer mutates the entity in memory and flushes it.
+    expect(em.create).not.toHaveBeenCalled()
     expect(em.persist).not.toHaveBeenCalled()
     expect(em.flush).not.toHaveBeenCalled()
   })
 
-  it('is idempotent: a second identical grant writes nothing and does not touch the DB', async () => {
-    const acl = { id: 'acl-1', featuresJson: ['a.b.view'] }
-    const em = makeEm({ role, acl })
+  it('is idempotent: a second identical grant adds nothing', async () => {
+    // Every requested record was already on the role → `newly_added` is empty.
+    const em = makeEm({ role, inserted: false, newlyAdded: [], alreadyPresent: ['a.b.view'] })
 
     const result = await applyPermissionDecisionGrant(em as never, {
       tenantId: TENANT,
@@ -211,60 +295,61 @@ describe('a role with an ACL gets a set-union merge (nothing lost, nothing dupli
 
     expect((result as { added: string[] }).added).toEqual([])
     expect((result as { alreadyPresent: string[] }).alreadyPresent).toEqual(['a.b.view'])
-    // Nothing new to add ⇒ no UPDATE at all (the previous code did not flush either).
-    expect(em.execute).not.toHaveBeenCalled()
+    // Still one statement (the upsert), but the classified request is empty on the
+    // `newly_added` side — so nothing was added. A write that short-circuited on a
+    // pre-read would reintroduce the very read-modify-write window CC-23 closed.
+    expect(em.execute).toHaveBeenCalledTimes(1)
+    expect(em.create).not.toHaveBeenCalled()
     expect(em.persist).not.toHaveBeenCalled()
     expect(em.flush).not.toHaveBeenCalled()
   })
 
   it('never touches isSuperAdmin on an existing ACL', async () => {
-    const acl = { id: 'acl-1', featuresJson: [], isSuperAdmin: false }
-    const em = makeEm({ role, acl, mergedValue: ['a.b.view'] })
+    const em = makeEm({ role, inserted: false, newlyAdded: ['a.b.view'] })
     await applyPermissionDecisionGrant(em as never, {
       tenantId: TENANT,
       grantTo: 'superadmin',
       records: ['a.b.view'],
     })
-    // The atomic UPDATE names only `features_json` and `updated_at` — never the flag.
+    // The `do update` clause names only `features_json` and `updated_at` — never the
+    // flag. (The INSERT's column list names `is_super_admin` only to set the default
+    // `false` on a *fresh* row, which cannot confer superadmin.)
     const [sql] = em.execute.mock.calls[0]
-    expect(String(sql)).not.toMatch(/is_super_admin/i)
-    expect(acl.isSuperAdmin).toBe(false)
+    const doUpdate = String(sql).split(/do\s+update/i)[1] ?? ''
+    expect(doUpdate).not.toMatch(/is_super_admin/i)
   })
 
   it('tolerates a null featuresJson on an existing ACL', async () => {
-    const acl = { id: 'acl-1', featuresJson: null }
-    const em = makeEm({ role, acl, mergedValue: ['a.b.view'] })
+    const em = makeEm({ role, inserted: false, newlyAdded: ['a.b.view'] })
     const result = await applyPermissionDecisionGrant(em as never, {
       tenantId: TENANT,
       grantTo: 'superadmin',
       records: ['a.b.view'],
     })
     expect((result as { added: string[] }).added).toEqual(['a.b.view'])
-    // `coalesce(features_json, '[]')` in the statement is what makes a null safe.
+    // `coalesce(... features_json, '[]')` in the statement makes a null safe.
     const [sql] = em.execute.mock.calls[0]
-    expect(String(sql)).toMatch(/coalesce\(features_json/i)
+    expect(String(sql)).toMatch(/coalesce\(role_acls\.features_json,\s*'\[\]'::jsonb\)/i)
   })
 
   it('reports `added` from what the DB RETURNED (not a stale in-memory guess)', async () => {
-    // `added` is derived from the array the atomic UPDATE returned — the DB is the
-    // source of truth. Here the returned value OMITS one of our requested records (as
-    // if a concurrent writer's transaction won), so that record must NOT be reported
-    // as added: a fallback that ignored the returned value would wrongly claim it.
-    // (`alreadyPresent` is deliberately the *read-time* observation from `currentSet`
-    // — "records already on the role when we looked" — and is log-only.)
-    const acl = { id: 'acl-1', featuresJson: ['existing.one'] }
+    // `added` is derived from the statement's own `newly_added` classification — the
+    // DB is the source of truth. Here it OMITS one of our requested records (as if a
+    // concurrent writer's transaction won the race for that one), so it must NOT be
+    // reported as added: a fallback that echoed the request would wrongly claim it.
     const em = makeEm({
       role,
-      acl,
-      mergedValue: ['existing.one', 'mine.only'], // note: 'raced.already.there' absent
+      inserted: false,
+      newlyAdded: ['mine.only'], // note: 'raced.already.there' absent
+      alreadyPresent: [],
     })
     const result = await applyPermissionDecisionGrant(em as never, {
       tenantId: TENANT,
       grantTo: 'superadmin',
       records: ['raced.already.there', 'mine.only'],
     })
-    // 'raced.already.there' was not present before and is NOT in what the DB returned,
-    // so this grant did not land it — it must not be reported as added.
+    // 'raced.already.there' was not reported as newly added, so this grant did not
+    // land it — it must not be reported as added.
     expect((result as { added: string[] }).added).toEqual(['mine.only'])
     expect((result as { alreadyPresent: string[] }).alreadyPresent).toEqual([])
   })
@@ -283,22 +368,29 @@ describe('applyStructureChangeGrant maps a gate outcome to the write', () => {
   ]
 
   it('applies a defaulted outcome: the records go to the gate default role', async () => {
-    const em = makeEm({ role })
+    const em = makeEm({
+      role,
+      inserted: true,
+      newlyAdded: [
+        'test:entity.alpha.view',
+        'test:entity.alpha.manage',
+        'test:entity.alpha.structure',
+      ],
+    })
     const result = await applyStructureChangeGrant(em as never, {
       tenantId: TENANT,
       decision: { outcome: 'defaulted', records, grantTo: 'superadmin', because: 'no decision was recorded' },
     })
 
     expect(result).toMatchObject({ applied: true, roleName: 'superadmin', aclCreated: true })
-    expect(em.create).toHaveBeenCalledWith(
-      RoleAcl,
-      expect.objectContaining({
-        featuresJson: [
-          'test:entity.alpha.view',
-          'test:entity.alpha.manage',
-          'test:entity.alpha.structure',
-        ],
-      }),
+    // The records land in the one atomic upsert's payload (params[4] / [5]).
+    const params = em.execute.mock.calls[0][1] as unknown[]
+    expect(params[4]).toEqual(
+      JSON.stringify([
+        'test:entity.alpha.view',
+        'test:entity.alpha.manage',
+        'test:entity.alpha.structure',
+      ]),
     )
   })
 
@@ -308,7 +400,15 @@ describe('applyStructureChangeGrant maps a gate outcome to the write', () => {
     // travels with the decision, so a person's decision is written exactly as the
     // default's — to the role the person named.
     const financeRole = { id: 'role-finance', name: 'finance', tenantId: TENANT }
-    const em = makeEm({ role: financeRole })
+    const em = makeEm({
+      role: financeRole,
+      inserted: true,
+      newlyAdded: [
+        'test:entity.alpha.view',
+        'test:entity.alpha.manage',
+        'test:entity.alpha.structure',
+      ],
+    })
     const result = await applyStructureChangeGrant(em as never, {
       tenantId: TENANT,
       decision: { outcome: 'decided', records, decidedBy: 'user-1', grantTo: 'finance', because: 'user-1 decided' },
@@ -317,20 +417,13 @@ describe('applyStructureChangeGrant maps a gate outcome to the write', () => {
     expect(result).toMatchObject({ applied: true, roleName: 'finance', aclCreated: true })
     // The role looked up is the DECISION's target, not the default superadmin role.
     expect(em.findOne).toHaveBeenCalledWith(Role, { name: 'finance', tenantId: TENANT }, {})
-    expect(em.create).toHaveBeenCalledWith(
-      RoleAcl,
-      expect.objectContaining({
-        featuresJson: [
-          'test:entity.alpha.view',
-          'test:entity.alpha.manage',
-          'test:entity.alpha.structure',
-        ],
-      }),
-    )
+    // The insert targets the decision's own role id.
+    const params = em.execute.mock.calls[0][1] as unknown[]
+    expect(params[2]).toEqual('role-finance')
   })
 
   it('a decided outcome with the default target writes to superadmin (the fallback, not the only answer)', async () => {
-    const em = makeEm({ role })
+    const em = makeEm({ role, inserted: true, newlyAdded: ['test:entity.alpha.view'] })
     const result = await applyStructureChangeGrant(em as never, {
       tenantId: TENANT,
       decision: { outcome: 'decided', records, decidedBy: 'user-1', grantTo: 'superadmin', because: 'user-1 decided' },
@@ -345,7 +438,7 @@ describe('applyStructureChangeGrant maps a gate outcome to the write', () => {
       decision: { outcome: 'decided', records, decidedBy: 'user-1', grantTo: 'finance', because: 'user-1 decided' },
     })
     expect(result).toMatchObject({ applied: false, reason: 'role_not_found', roleName: 'finance' })
-    expect(em.create).not.toHaveBeenCalled()
+    expect(em.execute).not.toHaveBeenCalled()
   })
 
   it('writes nothing for a refused outcome — there is no surface to grant', async () => {
@@ -357,7 +450,7 @@ describe('applyStructureChangeGrant maps a gate outcome to the write', () => {
 
     expect(result).toBeNull()
     expect(em.findOne).not.toHaveBeenCalled()
-    expect(em.create).not.toHaveBeenCalled()
+    expect(em.execute).not.toHaveBeenCalled()
   })
 })
 
