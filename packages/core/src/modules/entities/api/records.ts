@@ -4,6 +4,11 @@ import { createRequestContainer } from '@open-mercato/shared/lib/di/container'
 import { getAuthFromRequest } from '@open-mercato/shared/lib/auth/server'
 import type { QueryEngine, QueryOptions, Where, Sort } from '@open-mercato/shared/lib/query/types'
 import { normalizeExportFormat, serializeExport, defaultExportFilename, ensureColumns } from '@open-mercato/shared/lib/crud/exporters'
+import {
+  resolveExportEncryptedFields,
+  applyEncryptedFieldMask,
+  type ExportEncryptionService,
+} from '@open-mercato/shared/lib/crud/export-encryption'
 import type { RbacService } from '@open-mercato/core/modules/auth/services/rbacService'
 import { resolveOrganizationScope, getSelectedOrganizationFromRequest } from '@open-mercato/core/modules/directory/utils/organizationScope'
 import { SYSTEM_ENTITY_RECORDS_BLOCKED_CODE, isOrmBackedSystemEntityId } from '@open-mercato/shared/lib/data/engine'
@@ -401,10 +406,25 @@ export async function GET(req: Request) {
           nextPage += 1
         }
       }
-      const prepared = {
+      const preparedRaw = {
         columns: ensureColumns(exportItems),
         rows: exportItems,
       }
+      // CC-45: a marked (encrypted) field must never leave in an export in clear. Mask any field
+      // the encryption map marks for this entity; no-op when encryption is off or nothing is marked.
+      const resolvedEncrypted = await resolveExportEncryptedFields(
+        () => {
+          try {
+            return (resolve('tenantEncryptionService') as ExportEncryptionService) ?? null
+          } catch {
+            return null
+          }
+        },
+        String(entityId),
+        auth.tenantId ?? null,
+        scope.selectedId ?? auth.orgId ?? null,
+      )
+      const prepared = applyEncryptedFieldMask(preparedRaw, resolvedEncrypted)
       const filenameBase = exportFullRequested ? `${entityId || 'records'}_full` : entityId || 'records'
       const serialized = serializeExport(prepared, requestedExport)
       const filename = defaultExportFilename(filenameBase, requestedExport)

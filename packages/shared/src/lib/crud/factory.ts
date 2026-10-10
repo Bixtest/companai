@@ -41,6 +41,11 @@ import {
   type ResolvedCustomFieldDefinitions,
 } from './custom-field-definition-index'
 import { serializeExport, normalizeExportFormat, defaultExportFilename, ensureColumns, type CrudExportFormat, type PreparedExport } from './exporters'
+import {
+  resolveExportEncryptedFields,
+  applyEncryptedFieldMask,
+  type ExportEncryptionService,
+} from './export-encryption'
 import { CrudHttpError, isCrudHttpError } from './errors'
 import type { CommandBus, CommandLogMetadata } from '@open-mercato/shared/lib/commands'
 import type { EntityId } from '@open-mercato/shared/modules/entities'
@@ -377,6 +382,41 @@ function prepareExportData(items: any[], list: ListConfig<any>): PreparedExport 
     columns: ensureColumns(prepared.rows, prepared.columns),
     rows: prepared.rows,
   }
+}
+
+/**
+ * CC-45 — mask any field the encryption map marks for this entity, in a prepared export.
+ *
+ * Applied at the single funnel both list-export branches (query-engine and ORM fallback, in both
+ * their "view" and "full" shapes) hand their rows to. Keeping the mask here — rather than at each
+ * call site or inside `serializeExport` — covers every branch with one edit and leaves
+ * `serializeExport` a pure function.
+ *
+ * Fail-safe: no `entityId`, no resolvable encryption service, or encryption disabled all yield an
+ * empty marked-set, so the export is byte-identical to the pre-CC-45 behaviour. A read *error*
+ * fails closed (every column masked).
+ */
+async function maskPreparedExportForEntity(
+  prepared: PreparedExport,
+  list: ListConfig<any>,
+  ctx: CrudCtx,
+): Promise<PreparedExport> {
+  const entityId = list.entityId ? String(list.entityId) : null
+  if (!entityId) return prepared
+  const resolveService = (): ExportEncryptionService | null => {
+    try {
+      return (ctx.container?.resolve?.('tenantEncryptionService') as ExportEncryptionService) ?? null
+    } catch {
+      return null
+    }
+  }
+  const resolved = await resolveExportEncryptedFields(
+    resolveService,
+    entityId,
+    ctx.auth?.tenantId ?? null,
+    ctx.selectedOrganizationId ?? ctx.auth?.orgId ?? null,
+  )
+  return applyEncryptedFieldMask(prepared, resolved)
 }
 
 function finalizeExportFilename(list: ListConfig<any>, format: CrudExportFormat, fallbackBase: string): string {
@@ -1834,9 +1874,10 @@ export function makeCrudRoute<TCreate = any, TUpdate = any, TList = any>(opts: C
               nextPage += 1
             }
           }
-          const prepared = exportFullRequested
+          const preparedRaw = exportFullRequested
             ? { columns: ensureColumns(exportItems), rows: exportItems }
             : prepareExportData(exportItems, opts.list)
+          const prepared = await maskPreparedExportForEntity(preparedRaw, opts.list, ctx)
           const fallbackBase = `${opts.events?.entity || resourceKind || 'list'}${exportFullRequested ? '_full' : ''}`
           const filename = finalizeExportFilename(opts.list, requestedExport, fallbackBase)
           const serialized = serializeExport(prepared, requestedExport)
@@ -2036,9 +2077,10 @@ export function makeCrudRoute<TCreate = any, TUpdate = any, TList = any>(opts: C
       profiler.mark('access_logged', accessLogResult)
       if (exportRequested && requestedExport) {
         const exportItems = exportFullRequested ? list.map(normalizeFullRecordForExport) : list
-        const prepared = exportFullRequested
+        const preparedRaw = exportFullRequested
           ? { columns: ensureColumns(exportItems), rows: exportItems }
           : prepareExportData(exportItems, opts.list)
+        const prepared = await maskPreparedExportForEntity(preparedRaw, opts.list, ctx)
         const fallbackBase = `${opts.events?.entity || resourceKind || 'list'}${exportFullRequested ? '_full' : ''}`
         const filename = finalizeExportFilename(opts.list, requestedExport, fallbackBase)
         const serialized = serializeExport(prepared, requestedExport)
