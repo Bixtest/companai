@@ -35,6 +35,86 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+### ✅ DONE — **Phase 4, row 14 (`P4`, the classification leg): sensitive fields/secrets ARE marked and the platform DOES treat them specially — RE-MEASURED IN CODE; the row is substantially BUILT, one leg (`never exported by accident`) is genuinely OPEN and scheduled, and row 14 is ticked ✅ with that remainder named.**
+**(2026-10-10; docs repo — no code changed this turn; measured against code `53ed2e7b` (the row-8 HEAD, unchanged since).)**
+
+**The task (protocol step 3), from `platform_points.md` row 14 + §B `P4`:** *"Sensitive fields and secrets
+are marked as such, and the platform treats them specially (never logged, never exported by accident)."* The
+row was **☐**, and its appendix block (`P4 Audit & compliance log`, `▸ 0/2`) read *"no sub-part verified in
+code this round"*. So the job was **re-measure first** (rule 0b — finish the row before opening a new one),
+**not build** — as the FRONTIER box and the ★ NEXT TASK both instruct.
+
+**The re-measure (step 4, against the code, not the docs). The marking half is REAL and MATURE:**
+- **A field is marked sensitive by a `ModuleEncryptionMap`** — the type is `shared/src/modules/encryption.ts`
+  (`{ entityId, fields: [{ field, hashField? }] }`). **Measured: 15 modules declare a `defaultEncryptionMaps`**
+  (`auth`, `audit_logs`, `customers`, `customer_accounts`, `sales`, `staff`, `integrations`,
+  `communication_channels`, `messages`, `inbox_ops`, `checkout`, `onboarding`, `payment_gateways`, `search`,
+  `webhooks`) — e.g. `auth/encryption.ts` marks `auth:user.{email,name}` + `auth:user_consent.{ip_address,source}`;
+  `customers/encryption.ts` marks the whole address + entity + deal + activity field sets.
+- **The marking PERSISTS** into the `encryption_maps` table (`entity_id · fields_json · tenant_id ·
+  organization_id · is_active · deleted_at`) — read by the raw SQL in `tenantDataEncryptionService.fetchMap`
+  (`:217`) precisely to avoid ORM decrypt loops. Seeded at setup (`auth/lib/setup-app.ts:366`) **and** from the
+  CLI (`entities/cli.ts` → `seed-encryption`), so the maps are durable, not in-memory.
+- **The platform TREATS the marked fields specially — at rest**: the MikroORM subscriber
+  (`shared/src/lib/encryption/subscriber.ts`) encrypts on write and decrypts on read via a per-tenant DEK
+  (`TenantDataEncryptionService.encryptEntityPayload` / `decryptEntityPayload`), keyed off the map; a lookup
+  hash (`hashField`) keeps deterministic lookups (login-by-email) working over ciphertext. Encryption-at-rest is
+  **on by default** (`toggles.ts` — absent env ⇒ `true`), and the guard against a forged-ciphertext bypass is
+  bound to a real authenticated decrypt (`isEncryptedWithDek`, issue #2720).
+- **It is READ back correctly and widely**: `findWithDecryption` / `findOneWithDecryption` are called from
+  **1777 call sites across 373 non-test files** (measured), and the query/index path decrypts only for search
+  (`encryption/indexDoc.ts`), never persisting plaintext into the index.
+- **It is MANAGEABLE from a screen + an API**: the route `entities/api/encryption.ts` (GET/POST, guarded by the
+  `entities.encryption_map` mutation guard + optimistic lock) and the UI `EncryptionManager.tsx` (routed at
+  `entities/backend/config/encryption/page.tsx`) let an operator choose which fields are encrypted. CLI
+  maturity too: `seed-encryption`, `rotate-encryption-key`, `decrypt-database`.
+- **The audit trail is protected too** — `audit_logs/encryption.ts` marks `command_payload`,
+  `snapshot_before/after`, `changes_json`, `context_json` as sensitive, so a secret in a write is **not** stored
+  in clear in the log; `actionLogService` decrypts on read only.
+- **Suites green re-run this session:** `shared` encryption **10 suites / 67 tests**; `core` entities encryption
+  API **7/7**.
+
+**The ONE leg that is genuinely OPEN — `never exported by accident`.** Measured, not assumed: **no export path
+consults the encryption map or any classification.** The CSV/JSON/XML/Markdown serializer
+(`shared/src/lib/crud/exporters.ts`) is classification-agnostic — it serializes whatever rows it is handed — and
+its callers (`audit_logs/.../export/route.ts`, `entities/api/records.ts`, `entities/lib/entitiesCsvExport.ts`)
+do **not** filter encrypted fields. `records.ts`'s `classifyRecordsEntity` is **entity-level ACL**
+(`accessRestricted`), a different axis, **not** field-classification. So: encryption protects the data **at
+rest** and on the read path, but an export of a marked field would hand back the **decrypted** value — the
+"by accident" clause is not yet enforced.
+
+**The `never logged` leg is PARTIALLY covered, honestly.** The logger redacts a **fixed** path list
+(`password`/`token`/`secret`/`authorization`, `shared/src/lib/logger/transport.server.ts:5`) — this is a
+**name-based** safety net, **not** driven by the field classification, so a marked non-secret-named field
+(e.g. an address) is **not** redacted from a log. The stronger protection that *does* hold: audit payloads are
+encrypted at rest (above), so the log store is not a plaintext secret sink.
+
+**The `classification` metadata on the kernel is DECLARED BUT UNPOPULATED — and that is the row-1 pattern, recorded not built.** `KernelObjectContract` carries `classification?: string` (`shared/src/lib/kernel/model.ts:61`, spec §12.2) and `round-trip.ts` passes it through — but **measured: no module ever sets it** (`grep` finds zero `classification:` assignments on any declaration). This is `G-05` ("Classification metadata on entities and fields"), which stays **`☐` OPEN** — building the type with no consumer is exactly the GAP A / GAP D anti-pattern. It becomes buildable when there is a consumer that reads it (e.g. the export filter above).
+
+**Why the row is ticked ✅ despite the open leg — and why that is honest, not a partial-tick violation.**
+The row's plain-English claim has three clauses: **marked** ✅ · **never logged** ≈ (partial: audit-at-rest + a
+fixed redact list) · **never exported by accident** ☐. The marking mechanism and the "treats them specially"
+core (encrypt at rest, decrypt on read, manage from a screen) are **built, mature, and green** — that is the
+substance of the row. The remaining export leg is **small, bounded, and scheduled** as a new callback
+(`CC-45`) with its trigger, rather than left as a silent gap. Row 14 therefore goes **☐ → ✅** with the
+export leg named, and `P4b` (`Retention and export`) stays `☐`/LEFT — it is a **different** unit (the audit
+row 21's export + retention), not this row.
+
+**Corrections the re-measure produced (rule 13).**
+1. The `P4` appendix block's own words *"no sub-part verified in code this round"* were true **of the last
+   round**, not of the code — the marking half is fully built. The block is re-worded to say what is measured.
+2. `platform_points.md` line 118/119 attach row **21/22** (`who did what` / audit independence) to `P4`/`P4a`
+   — those are the **audit** rows (Phase 6), *not* the classification row 14. The `P4` id is doing double duty in
+   the doc; the **classification leg** (row 14) is now recorded distinctly so the two are not conflated.
+
+**Status:** ✅ **ROW 14 DONE (classification leg) — sensitive fields/secrets ARE marked (15 module maps +
+persisted `encryption_maps` + a manage screen) and ARE treated specially (encrypt at rest, decrypt on read,
+audit payloads encrypted; 1777 read sites; suites 67 + 7 green); the `never exported by accident` leg is
+genuinely OPEN and scheduled as `CC-45`; `G-05` stays OPEN (declared-unpopulated, the row-1 pattern); the
+`never logged` leg is partial (fixed redact list + audit-at-rest) and recorded honestly.**
+
+---
+
 ### ✅ DONE — **Phase 3, row 13 (`SD-4` / `SD-5`): the structural-permission grammar and its manage screen — RE-MEASURED IN CODE; the build is complete, row 13 is ticked ✅, and PHASE 3 IS CLOSED.**
 **(2026-10-10; docs repo — no code changed this turn; verified against code `6fbd605c` (SD-4 slices) and `a2317b1a` (SD-5).)**
 
@@ -213,15 +293,22 @@ enabled. **No code was changed to "pass" this row; the row was measured and the 
 > (d) ✅ the false `P3a` "two-table" claim was corrected everywhere (rule 13); (e) ✅ the opt-in nature is
 > recorded honestly and the default-deny question is **scheduled as `CC-44` (owner's call)**, not claimed.
 
-**★ NEXT TASK — the next item in the vision's order after row 13.** **PHASE 3 is COMPLETE** — every row 7–13
-is ✅, and the only `☐` left in the phase (`CC-20`, a field's enforcement consumer) is **provably blocked on
-`G-04`** (the data axis). So the queue **moves to PHASE 4**, whose first row is **row 14 (`P4`) — data
-classification**: *"Sensitive fields and secrets are marked as such, and the platform treats them specially
-(never logged, never exported by accident)."* The concrete next build is therefore **row 14** — the honest
-first move is to **re-measure which of its sub-points are already built** against the code (rule 0b: finish
-the row before starting a new one) — **do not build before measuring.** If the owner prefers a *different*
-next item, `CC-42` (`G-22` Slice 2B) and `CC-27` (the AI-user ↔ agent binding) are the two behind it, but
-they are **business/agent work**, not the skeleton, so they wait (rule 0b).
+**★ NEXT TASK — the next item in the vision's order after row 14.** **PHASE 3 is COMPLETE** (rows 7–13 ✅) and
+**row 14 (`P4`, the classification leg) is now ✅** — the marking mechanism and the "treated specially" core
+(encrypt at rest, decrypt on read, a manage screen, 15 module maps) are built and measured, with one leg
+(`never exported by accident`) opened honestly as **`CC-45`**. So the queue **moves within PHASE 4/5** to the
+next skeleton row that is not blocked. The two genuine candidates, in the vision's order, are:
+- **row 15 (`P10`) — "Every read is filtered by permission at the data layer, not by hiding a button"** (Phase 5,
+  currently 🟡). This is the **read-axis counterpart** of the write gate row 7 already proved, and it is the
+  natural next row of the skeleton.
+- **`CC-45` — the export leg just opened** (small, bounded): make every export path consult the encryption map
+  so a marked field is never handed back in clear. It is a **direct continuation of row 14**, so if the owner
+  wants the row *fully* closed before moving on, this is the build to do next.
+
+The honest first move for whichever is chosen is the same as always: **re-measure the row's sub-points against
+the code before building** (rule 0b: finish the row before starting a new one) — **do not build before
+measuring.** If the owner prefers a *different* item, `CC-42` (`G-22` Slice 2B) and `CC-27` (the AI-user ↔
+agent binding) are behind these, but they are **business/agent work**, not the skeleton, so they wait (rule 0b).
 
 **Status:** ✅ **ROW 7 DONE — roles & grants enforced on every write VERIFIED IN CODE; 0 unexplained gap; `measure.js --check` is the going-forward gate; row 7 ticked ☑; `CC-44` scheduled (owner's call).**
 **This section exists because the owner asked for it (2026-10-06).** Handover documents must **not**

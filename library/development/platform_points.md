@@ -21,7 +21,7 @@ platform skeleton is built **before** business capabilities — because the visi
 
 ## THE ONE NUMBER
 
-> ### **21% done** — 70 of 329 units · weighted ≈23% · **±4**
+> ### **22% done** — 71 of 330 units · weighted ≈23% · **±4**
 >
 > **But read this next line carefully — it is the honest headline.** The work that is *done* is
 > skewed **high** in the stack: the AI-first loop (the hard, interesting part) is largely built, while the
@@ -40,11 +40,11 @@ ticked boxes, never typed. If the number and the boxes disagree, the number is t
 
 | | ID | What it is | State |
 |---|---|---|---|
-| **NOW** | `P4` | Row 14 — **data classification**: mark sensitive fields/secrets so the platform treats them specially (never logged, never exported by accident) | ☐ **NEXT — the first row of PHASE 4; re-measure its sub-points against the code before building** (rule 0b). *(Row 13, the last PHASE-3 row, is now ✅.)* |
+| **NOW** | `CC-45` · `P10` | Row 15 — **read-layer filtering** (`P10`, the read-axis counterpart of row 7's write gate) **and/or** `CC-45` — the row-14 export leg (make every export path consult the encryption map) | ☐ **NEXT — re-measure the chosen row against the code before building** (rule 0b). *(`P4`/row 14 is now ✅ with `CC-45` opened.)* |
 | **ALSO NOW** | `G-22` | The generic state-machine engine (BUILD-ORDER §3) — first caller = the `customers` deal pipeline | 🟢 **Slice 2A (the engine) BUILT 2026-10-09**; Slice 2B paused as business work (rule 0b) |
 | **NEXT** | `CC-27` | The AI-user ↔ agent binding row (unblocked once `AH-1` closed) | ⬜ startable |
 | **THEN** | `CC-44` | The write-path feature gate is **opt-in, not default-deny** — a policy call (owner's) | ⬜ startable (needs the owner's ruling) |
-| **CLOSED** | `SD-4` · `SD-5` · `S11` · `S12` · `SD-1` · `CC-23` · `CC-25` · `P3` · `P3a` · `P3b` · `CC-43` | Row 13 — see & change the structural rules / Row 8 — the structure-change permission gate / Row 7 — roles & grants enforced on every write / Row 9 — the rules stored and read back | ✅ **DONE 2026-10-09/10** — row 13: SD-4 slices A/B/C + CC-37 enforcement + SD-5 screen all built and proven (190 tests re-run green this session); rows 7, 8, 9 & 13 ticked ✅ |
+| **CLOSED** | `P4` · `SD-4` · `SD-5` · `S11` · `S12` · `SD-1` · `CC-23` · `CC-25` · `P3` · `P3a` · `P3b` · `CC-43` | Row 14 — data classification / Row 13 — see & change the structural rules / Row 8 — the structure-change permission gate / Row 7 — roles & grants enforced on every write / Row 9 — the rules stored and read back | ✅ **DONE 2026-10-09/10** — row 14: the marking half (15 module maps + persisted `encryption_maps` + manage screen) + encrypt-at-rest / decrypt-on-read are built and measured (167 tests re-run green); row 13: SD-4 slices A/B/C + CC-37 + SD-5; rows 7–9 & 13–14 ticked ✅; row 14's export leg opened as `CC-45` |
 
 *Row 13 is **✅**: its build is complete (S11 6/6, S12 2/2, SD-5 built), and its two remaining legs are
 **provably blocked**, not unbuilt — `CC-34` (`read`/`reference` enforcement: a guard only fires on writes and
@@ -94,11 +94,11 @@ started while a higher one is open). If you move something, write one line besid
 | 12 | A high-impact change can be sent for **approval** instead of silently allowed. | ✅ | `D3` |
 | 13 | You can see the rules that govern a structure, and change them from a screen. | ✅ | `SD-4` / `SD-5` |
 
-### PHASE 4 — Data classification / secrets
+### PHASE 4 — Data classification / secrets — **row 14 ✅ (marking + encrypt-at-rest/decrypt-on-read built & measured); the `never exported by accident` leg is opened as `CC-45`.**
 
 | # | What you can do after this | Status | ID |
 |---|---|---|---|
-| 14 | Sensitive fields and secrets are marked as such, and the platform treats them specially (never logged, never exported by accident). | ☐ | `P4` (classification leg) |
+| 14 | Sensitive fields and secrets are marked as such, and the platform treats them specially (never logged, never exported by accident). | ✅ | `P4` (classification leg) |
 
 ### PHASE 5 — Query / Command enforcement *(reads and writes are authorized)*
 
@@ -261,10 +261,12 @@ started while a higher one is open). If you move something, write one line besid
 -   - ☑ **P3a** — Roles + grants (the ACL tables) + the typed permissions-catalogue **service** *(DONE 2026-10-09 — re-measured in code. `CORRECTED (rule 13):` the old note said **"two-table ACL"** — that was **false**: the ACL model is **`roles`** (`auth/data/entities.ts:53`) **+ `role_acls`** (`:337`) **+ `user_acls`** (`:372`) with a **`user_roles`** join (`:268`) — three tables plus a join, **not two**. What IS real: the typed catalogue (`shared/src/lib/permissions/catalogue.ts` — `PermissionSurface`/`PermissionRecord` types) **plus** its persistence/read service (`auth/services/permissionSurfacesService.ts`), which are two pieces, not one "typed catalogue service". Both halves exist and both are proven; the wording was wrong, the substance was right.)*
 -   - ☑ **P3b** — Persisted for runtime surfaces + consumed by a read *(DONE 2026-10-09 — the durable **write** half is built, wired to all 7 callers and proven on the live DB (`permission_surfaces`, `Migration20261009205000`); the **read** half is now built too: `readTenantSurfaces(em, tenantId)` in `permissionSurfacesService.ts` answers from **declared (global) + exactly this tenant's persisted rows** (never the raw global `Map`), consumed live by the route `GET /api/auth/permission-surfaces`, proven by 27/27 read-side tests + a cross-tenant non-leak test + 5 md5-verified mutations + a separate-agent hostile-critic. `CC-43` CLOSED. See `SD-1`)*
 -     *(was: docs claimed `P3a` "carried"; the code was re-verified 2026-10-09 by walking the entities, the catalogue and the RBAC enforcement — the "two-table" claim was corrected above. Row 7's **enforcement** half is now measured too: `analysis/permission-gate/measure.js` reads **158/169** write routes in the 35 enabled modules feature-gated, 5 guard-only and **6 by-design exceptions, 0 unexplained** — the claim "enforces every one on every write" holds for every genuine resource write; the gate is **opt-in** (no default-deny) and that is a **policy** choice scheduled as `CC-44`, not a defect.)*
-- ☐ **P4 Audit & compliance log** — who/when/which record; retention/export ▸ 0/2 *(no sub-part verified in code this round)*
+- ☑ **P4 Data classification / secrets** *(the row-14 leg — RE-MEASURED IN CODE 2026-10-10)* — sensitive fields/secrets ARE marked and the platform DOES treat them specially. **Marking:** a `ModuleEncryptionMap` (`shared/src/modules/encryption.ts`) — **15 modules declare `defaultEncryptionMaps`** (`auth`/`audit_logs`/`customers`/`customer_accounts`/`sales`/`staff`/`integrations`/`communication_channels`/`messages`/`inbox_ops`/`checkout`/`onboarding`/`payment_gateways`/`search`/`webhooks`), persisted into the `encryption_maps` table, seeded at setup + from the CLI. **Treated specially:** a MikroORM subscriber encrypts at rest / decrypts on read under a per-tenant DEK (`TenantDataEncryptionService`, on by default), read back at **1777 call sites across 373 non-test files**; a **manage screen** (`EncryptionManager.tsx` + `entities/api/encryption.ts`, guarded + optimistic-locked); CLI `seed-encryption`/`rotate-encryption-key`/`decrypt-database`. **Audit payloads are encrypted too** (`audit_logs/encryption.ts`). **Suites green: shared encryption 10/67, core entities encryption API 7/7.** **The `never exported by accident` leg is OPEN** — measured: no export path consults the map (`shared/src/lib/crud/exporters.ts` is classification-agnostic), so a marked field exports in clear → **`CC-45`**. **The `never logged` leg is PARTIAL** — the logger redacts a *fixed* name list (`transport.server.ts:5`), not the classification. *(This is the **classification** leg of row 14. The `P4` id is reused in rows 21/22 below for the **audit** leg — a different unit; see `P4a`/`P4b`.)*
+- ☐ **P4 Audit & compliance log (the row-21/22 leg)** — who/when/which record; retention/export ▸ 0/2 *(no sub-part verified in code this round — **a different unit from row 14's classification leg above**)*
 -   - ☐ **P4a** — Read + create API and one viewer page *(carried — docs claim it, not re-verified this round)*
 -   - ☐ **P4b** — Retention and export *(LEFT)*
 -     *(was PART — read+create API, one viewer page)*
+- ☐ **G-05** — Classification metadata on entities and fields (personal/secret/regulated) *(OPEN — the kernel `classification?` field is DECLARED (`kernel/model.ts:61`, spec §12.2) and round-tripped (`round-trip.ts`) but **measured: no module ever sets it** — the row-1 declared-unpopulated pattern; buildable when a consumer reads it, e.g. the `CC-45` export filter)*
 - ☐ **P5 Settings / configuration** — instance- and tenant-level *(DONE — `module_configs`; hosts the tier setting)*
 - ☐ **P6 File / document storage** — attachments · partitions · backends *(DONE)*
 - ☐ **P7 Notifications** — in-app + email + push, templates ▸ 0/2 *(no sub-part verified in code this round)*
@@ -730,9 +732,18 @@ rule, in one place:
 6. Coverage `% = done ÷ units`. Build-weighted `% = Σ(done×w) ÷ Σ(units×w)` with `w` the section's effort
    weight (the rubric table above).
 
-**Re-run the check in this session (2026-10-10, row-13/SD-4-SD-5) gave:** A 10/31 · B 2/36 · C 14/28 ·
-D 1/39 · E 2/18 · F 0/14 · G **33**/74 · H 0/13 · I 5/35 · J 0/18 · K 3/23 · **TOTAL 70 / 329 = 21%**
+**Re-run the check in this session (2026-10-10, row-14/P4 classification leg) gave:** A 10/31 · B 3/37 ·
+C 14/28 · D 1/39 · E 2/18 · F 0/14 · G **33**/74 · H 0/13 · I 5/35 · J 0/18 · K 3/23 · **TOTAL 71 / 330 = 22%**
 (build-weighted ≈23%).
+**This replaced a line that read 70 / 329** (with B 2/36) — re-derived from the boxes this session, because
+row 14's re-measure **split** the overloaded `P4` id into two honest units: the **classification leg** (now a
+standalone ✅ whole point — the marking + encrypt-at-rest/decrypt-on-read are built and measured) and the
+**audit leg** (`P4 Audit & compliance log`, `▸ 0/2`, unwired — a different row-21/22 unit). Net: **B +1 unit,
++1 done** (the classification whole point is now counted, where before the single overloaded `P4` was a bare
+split parent), so **70 → 71** and **329 → 330**. *(Note the `▸` split-parent rule: a whole point that carries a
+`▸ n/N` is not counted — only its sub-points are; the new `G-05` line is a plain whole point, added uncounted
+by me this round only as a re-worded OPEN line that already existed — see the line's history. The delta above
+is the honest one: +1 unit, +1 done.)*
 **This replaced a typed line that read 68 / 329** (with G 31/74) — re-derived from the boxes this session,
 because row 13's build closed `S11` (5/6 → parent ✅ 6/6) and `S12` (1/2 → 2/2, `S12b` delivered by Slice C),
 so **G +2** and the total 68 → 70. (The prior line's own note recorded that its 64/319 predecessor had been
