@@ -16,6 +16,18 @@ const appendConversationMessageMock = jest.fn()
 
 jest.mock('@open-mercato/shared/lib/auth/server', () => ({
   getAuthFromRequest: (...args: unknown[]) => authMock(...args),
+  // CC-27: the chat route reads the acting principal to apply the agent binding.
+  requirePrincipal: (auth: { sub?: string; keyId?: string | null } | null) => {
+    if (!auth?.sub) return null
+    const sub = auth.sub
+    if (sub.startsWith('ai_worker:')) {
+      return { kind: 'ai_worker', id: auth.keyId ?? sub.slice(10) }
+    }
+    if (sub.startsWith('api_key:')) {
+      return { kind: 'service', id: auth.keyId ?? sub.slice(8) }
+    }
+    return { kind: 'human', id: sub }
+  },
 }))
 
 jest.mock('@open-mercato/shared/lib/di/container', () => ({

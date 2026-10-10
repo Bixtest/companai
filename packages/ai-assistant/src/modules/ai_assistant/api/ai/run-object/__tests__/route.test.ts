@@ -14,6 +14,21 @@ const runAiAgentObjectMock = jest.fn()
 
 jest.mock('@open-mercato/shared/lib/auth/server', () => ({
   getAuthFromRequest: (...args: unknown[]) => authMock(...args),
+  // CC-27: the route now reads the acting principal. Mirror the real export so
+  // the mocked module keeps the shape the production code relies on. Fidelity
+  // matters: the real `derivePrincipal` resolves a machine's id from `keyId`
+  // when present, so the mock must too.
+  requirePrincipal: (auth: { sub?: string; keyId?: string | null } | null) => {
+    if (!auth?.sub) return null
+    const sub = auth.sub
+    if (sub.startsWith('ai_worker:')) {
+      return { kind: 'ai_worker', id: auth.keyId ?? sub.slice(10) }
+    }
+    if (sub.startsWith('api_key:')) {
+      return { kind: 'service', id: auth.keyId ?? sub.slice(8) }
+    }
+    return { kind: 'human', id: sub }
+  },
 }))
 
 jest.mock('@open-mercato/shared/lib/di/container', () => ({

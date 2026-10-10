@@ -958,3 +958,109 @@ export class AiChatMessage {
   @Property({ name: 'deleted_at', type: Date, nullable: true })
   deletedAt?: Date | null
 }
+
+/**
+ * An **agent ↔ AI-user binding** (`CC-27`).
+ *
+ * The AI *actor* is an `api_keys` row with `principal_kind = 'ai_worker'` — a
+ * principal that carries roles, scope and a credential. The AI *agent*
+ * (tools, prompt, loop, model) is **code-declared** and resolved from the
+ * in-memory `agentsById` Map, so it can never be a row. What was missing is the
+ * join between them: a row saying *"this AI user may run this agent, with these
+ * tools, under these permissions."*
+ *
+ * This entity is that row. It is a **binding**, never a definition: the runtime
+ * still reads the agent from code (`B5`), and this table only **narrows** what a
+ * machine principal may do (`B3`).
+ *
+ * Enforcement (`B2`) is **fail-closed for AI workers**: an `ai_worker` principal
+ * with no live binding for the requested agent is refused (`agent_not_bound`).
+ * A human caller is unaffected — humans are not bound here.
+ *
+ * `principal_id` is the **`api_keys` id** (a uuid), stored as `uuid`: unlike the
+ * audit/ledger columns that must hold the string subject `ai_worker:<id>`, this
+ * table is keyed by the credential id itself, which is always a bare uuid.
+ *
+ * `tool_allowlist` (`jsonb`, nullable) is a **subset** of the agent's own
+ * `allowedTools`; `null` means "all of the agent's tools". `required_features`
+ * (`jsonb`, nullable) are features the caller must **additionally** hold on top
+ * of the agent's code-declared `requiredFeatures`. Neither can widen the agent.
+ */
+@Entity({ tableName: 'ai_agent_bindings' })
+@Index({
+  name: 'ai_agent_bindings_tenant_org_principal_agent_uq',
+  expression:
+    'create unique index "ai_agent_bindings_tenant_org_principal_agent_uq" on "ai_agent_bindings" ("tenant_id", "organization_id", "principal_id", "agent_id") where "organization_id" is not null and "deleted_at" is null',
+})
+@Index({
+  name: 'ai_agent_bindings_tenant_principal_agent_null_org_uq',
+  expression:
+    'create unique index "ai_agent_bindings_tenant_principal_agent_null_org_uq" on "ai_agent_bindings" ("tenant_id", "principal_id", "agent_id") where "organization_id" is null and "deleted_at" is null',
+})
+@Index({
+  name: 'ai_agent_bindings_tenant_org_principal_agent_idx',
+  properties: ['tenantId', 'organizationId', 'principalId', 'agentId'],
+})
+@Index({
+  name: 'ai_agent_bindings_tenant_agent_idx',
+  properties: ['tenantId', 'agentId'],
+})
+export class AiAgentBinding {
+  [OptionalProps]?:
+    | 'createdAt'
+    | 'updatedAt'
+    | 'organizationId'
+    | 'toolAllowlist'
+    | 'requiredFeatures'
+    | 'notes'
+    | 'createdByUserId'
+    | 'deletedAt'
+
+  @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })
+  id!: string
+
+  @Property({ name: 'tenant_id', type: 'uuid' })
+  tenantId!: string
+
+  @Property({ name: 'organization_id', type: 'uuid', nullable: true })
+  organizationId?: string | null
+
+  /** The `api_keys` id of the AI-user principal this binding belongs to. */
+  @Property({ name: 'principal_id', type: 'uuid' })
+  principalId!: string
+
+  /** The code-declared agent id (`<module>.<agent>`) this principal may run. */
+  @Property({ name: 'agent_id', type: 'text' })
+  agentId!: string
+
+  /**
+   * A subset of the agent's own `allowedTools`. `null` means "all of the
+   * agent's tools". The effective set is the INTERSECTION with the agent's
+   * declaration — a binding can narrow, never widen (`B3`).
+   */
+  @Property({ name: 'tool_allowlist', type: 'jsonb', nullable: true })
+  toolAllowlist?: string[] | null
+
+  /**
+   * Features the caller must ADDITIONALLY hold, on top of the agent's
+   * code-declared `requiredFeatures`. The effective requirement is the UNION
+   * with the agent's declaration (`B3`).
+   */
+  @Property({ name: 'required_features', type: 'jsonb', nullable: true })
+  requiredFeatures?: string[] | null
+
+  @Property({ name: 'notes', type: 'text', nullable: true })
+  notes?: string | null
+
+  @Property({ name: 'created_by_user_id', type: 'uuid', nullable: true })
+  createdByUserId?: string | null
+
+  @Property({ name: 'created_at', type: Date, onCreate: () => new Date() })
+  createdAt: Date = new Date()
+
+  @Property({ name: 'updated_at', type: Date, onUpdate: () => new Date() })
+  updatedAt: Date = new Date()
+
+  @Property({ name: 'deleted_at', type: Date, nullable: true })
+  deletedAt?: Date | null
+}

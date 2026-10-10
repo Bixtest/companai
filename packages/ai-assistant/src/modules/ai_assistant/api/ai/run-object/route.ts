@@ -8,6 +8,7 @@ import { createRequestContainer } from '@open-mercato/shared/lib/di/container'
 import type { RbacService } from '@open-mercato/core/modules/auth/services/rbacService'
 import { loadAgentRegistry } from '../../../lib/agent-registry'
 import { checkAgentPolicy, type AgentPolicyDenyCode } from '../../../lib/agent-policy'
+import { resolveAgentBinding } from '../../../lib/agent-binding'
 import { runAiAgentObject } from '../../../lib/agent-runtime'
 import { AgentPolicyError } from '../../../lib/agent-tools'
 
@@ -162,6 +163,20 @@ export async function POST(req: NextRequest): Promise<Response> {
 
     if (!decision.ok) {
       return jsonError(statusForDenyCode(decision.code), decision.message, decision.code)
+    }
+
+    // CC-27 — an AI-user principal may run only the agents BOUND to it (fail-closed).
+    const binding = await resolveAgentBinding({
+      em: container.resolve('em'),
+      auth,
+      agentId: bodyResult.data.agent,
+    })
+    if (!binding.bound) {
+      return jsonError(
+        403,
+        `Agent "${bodyResult.data.agent}" is not bound to this principal.`,
+        'agent_not_bound',
+      )
     }
 
     const result = await runAiAgentObject({
