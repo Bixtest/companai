@@ -35,6 +35,78 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+### ✅ DONE — **Phase 3, row 8 (`SD-1` / `S2`): the structure-change permission gate — the row's last startable remainder is BUILT and PROVEN; `CC-23` CLOSED, `CC-25` re-measured DONE; row 8 ticked ☑.**
+**(2026-10-09; code repo `workspace/starting-kit`; new migration [`Migration20261009220000.ts`](workspace/starting-kit/packages/core/src/modules/auth/migrations/Migration20261009220000.ts); [`permission-decision-grant.ts`](workspace/starting-kit/packages/core/src/modules/auth/lib/permission-decision-grant.ts); register [`COMPLETION-CALLBACKS.md`](library/development/COMPLETION-CALLBACKS.md) `CC-23`.)**
+
+**The task (protocol step 3), from `platform_points.md` row 8 + §B `SD-1`:** *"When you create a new table
+or column, the platform **forces the permission question** — it can no longer be forgotten."* The row was
+**🟡** and its `SD-1`/`S2` block named **three remainders** — `CC-20` (a field's records have no enforcement
+consumer), `CC-23` (the create-branch double-insert), `CC-25` (the decision actor is not authorised). The
+job was therefore **step 1: re-measure which remainders are still open** (rule 0b — finish the row before
+opening a new one), **not** to assume the docs.
+
+**The re-measure (protocol step 4, against the code, not the docs).**
+- **`CC-25` was ALREADY DONE** and the docs were stale — its code (`d61d4f6`) is committed: `entities.definitions.decide`
+  + `assertActorMayStateDecision` (`auth/lib/permission-decision-grant.ts`) refuse an unauthorised actor at
+  all **five** enforcement sites. Corrected in the docs (rule 13).
+- **`CC-23` was genuinely OPEN.** Its register row carried a retracted premise ("unprovable on this host —
+  the DB is unreachable"). That premise is **false**: the app container `starting-kit-app-1` sits on
+  `mercato-network-local` with a `DATABASE_URL` to `mercato-postgres-local`, so the CLI runs **inside the
+  container**. Unblocked, so it was the row's last startable remainder — and it was built. `CC-20` stays
+  **genuinely blocked on `G-04`** (a per-field permission has no meaning until records are governed at
+  field granularity), so it was left scheduled, honestly, with `S2g` still `☐`.
+- **`CC-20` confirmed blocked, not startable** — do not build enforcement the data axis has not defined.
+
+**The defect, precisely.** `CC-16` (2026-10-08) made the merge into an **existing** `role_acls.features_json`
+atomic — one SQL `UPDATE`, `jsonb ||` deduped by `group by elem`, `returning`. But the **create** branch was
+still `findOneWithDecryption(RoleAcl) → em.create → flush`: a lock-free read-modify-write. Two grants racing
+on a role that had **no** ACL row could each see "absent" and each `INSERT` — **two rows**, and the ACL model
+(one row per role per tenant) silently broken.
+
+**The fix — a DB-enforced invariant, not an application lock.** Two changes:
+1. **`Migration20261009220000.ts`** adds `create unique index "role_acls_role_id_tenant_id_unique" on "role_acls" ("role_id", "tenant_id")`.
+   **Plain, not partial** — nothing soft-deletes a `role_acls` row (the entity's `deleted_at` is an inert
+   property; every delete path is a hard `nativeDelete`), so the invariant *is* "exactly one per role per
+   tenant" and a `where deleted_at is null` index would protect nothing extra. `down()` drops exactly that
+   index (`drop index if exists`), so the migration is symmetric.
+2. **`auth/lib/permission-decision-grant.ts`** now performs the **whole write as one statement** —
+   `INSERT … ON CONFLICT (role_id, tenant_id) DO UPDATE`, the update branch reusing `CC-16`'s `jsonb ||`-into-
+   `group by elem` union, `(xmax = 0) as inserted` to read `aclCreated` **from the database rather than
+   guessing it**, and `newly_added`/`already_present` computed in SQL from the **pre-merge** value (CTEs
+   `pre`/`upsert`/`requested`). **There is no read-modify-write window left at all** — the race is closed by
+   the schema, so it cannot regress by an app change.
+
+**What proved it (the acceptance test).**
+- **Applied on live Postgres 17 via the real CLI:** `mercato db migrate` **inside** the app container
+  → `auth: 1 migration applied`; the journal `mikro_orm_migrations_auth` records `Migration20261009220000`,
+  and `\d role_acls` shows `role_acls_role_id_tenant_id_unique UNIQUE btree (role_id, tenant_id)`. Read back,
+  not assumed.
+- **The race is closed and demonstrated:** two concurrent **plain** inserts now fail with
+  `duplicate key value violates unique constraint "role_acls_role_id_tenant_id_unique"` (row count stayed 1);
+  the **negative control** (drop the index, repeat) yields **2 rows**.
+- **The new upsert, two-session interleave:** session B inserts at +0.1 s → `inserted = t`,
+  `["grant.B"]`; session A takes the conflict path at +0.4 s → `inserted = f`, `["grant.B","grant.A"]` —
+  **exactly ONE row, no lost update, no duplicate**. Three hand-run cases confirmed `inserted`/`newly_added`/
+  `already_present` (A: `t | both | []`; B: `f | ["new.three"] | ["a.b.manage"]`; C: `f | [] | ["a.b.view"]`).
+  Scratch rows cleaned; the original 3 rows intact.
+- **Tests:** auth lib **25/25**, migration **2/2**, `core` **639 suites / 5621 tests green**, `tsc` **0**.
+- **Six mutations RED-then-GREEN**, each restore **md5-verified** to baseline — M1 bogus conflict target;
+  M2 `xmax`→`true`; M3 `newly_added` read from the post-merge value; M4 `do update` sets `is_super_admin = true`;
+  M5 drop the `pre` tenant filter; M6 migration drops instead of creates. **M2 and M3 initially stayed GREEN** —
+  the unit tests mock the connection, so only an **SQL-text pin** catches them; the tests were strengthened
+  (`xmax = 0` and the `p.before` classification are now pinned) and both re-ran **RED**. That is a real
+  test gap the mutation pass found, not a test artefact.
+- **A separate-agent hostile-critic** re-ran all eight claims against live Postgres with commands+output. It
+  confirmed the behaviour, and named three things: the work **was not committed** (finding #1 — remedied by
+  this commit), the `pre` CTE's `tenant_id` filter is a latent silent-failure tripwire if ever dropped (now
+  **pinned** by M5), and `added` under-reports under a genuine race (a **contract limit**, now documented
+  honestly in the file header — `added`/`alreadyPresent` are computed from the statement's own snapshot, so
+  two concurrent grants may each report the other's key as absent; the *row* is never wrong).
+
+**Status:** ✅ **ROW 8 DONE — the last startable remainder (`CC-23`) is built, applied on live PG, race-demonstrated closed, 6 mutations RED, hostile-critic-confirmed; `CC-25` re-measured DONE (docs were stale); `CC-20` remains scheduled, blocked on `G-04`; row 8 ticked ☑.**
+
+---
+
 ### ✅ DONE — **Phase 3, row 7 (`P3`): roles & grants are enforced on every write — VERIFIED IN CODE and given a going-forward gate; row 7 ticked ☑, `P3a`'s false "two-table" claim corrected, `CC-44` scheduled.**
 
 **The task (protocol step 3), from `platform_points.md` row 7 + §B `P3`:** *"You can define roles and give
@@ -97,16 +169,16 @@ enabled. **No code was changed to "pass" this row; the row was measured and the 
 > (d) ✅ the false `P3a` "two-table" claim was corrected everywhere (rule 13); (e) ✅ the opt-in nature is
 > recorded honestly and the default-deny question is **scheduled as `CC-44` (owner's call)**, not claimed.
 
-**★ NEXT TASK — the next item in the vision's order after row 7.** Row 7 is **☑** and its sub-parts are
-2/2, so the lowest open phase is **still Phase 3**, and the next rows there that are **not** `☑` are
-**row 8 (`SD-1`/`S2`/`P3a`/`P3b`, 🟡 — the structure-change permission gate's remaining paths)** and
-**row 13 (`SD-4`/`SD-5`, 🟡 — the screen to *see and change* the rules)**. The concrete next build is
-**row 8** — its `SD-1` gate is built and its named remainders are already scheduled in
-`COMPLETION-CALLBACKS.md` (`CC-20`, `CC-23`, `CC-25`), so the honest first move is to **re-measure which
-of those remainders are still open** (rule 0b: finish the row before starting a new one) — **do not build
-before measuring.** If the owner prefers a *different* next item, `CC-42` (`G-22` Slice 2B) and `CC-27`
-(the AI-user ↔ agent binding) are the two behind it, but they are **business/agent work**, not the
-skeleton, so they wait (rule 0b).
+**★ NEXT TASK — the next item in the vision's order after row 8.** Rows 7 and 8 are **☑** and their
+sub-parts are cleared of startable remainders (`CC-20` alone stays `☐`, provably blocked on `G-04`; `SD-4`/
+`CC-44` are scheduled policy calls, not builds). So the lowest open phase is **still Phase 3**, and the next
+rows there that are **not** `☑` are **row 13 (`SD-4`/`SD-5`, 🟡 — the screen to *see and change* the rules)**
+and, once its prerequisite lands, the data-axis work behind `CC-20`. The concrete next build is therefore
+**row 13** (`SD-4`/`SD-5`) — its grammatical slices are partly built, so the honest first move is to
+**re-measure which of its sub-points remain open** (rule 0b: finish the row before starting a new one) —
+**do not build before measuring.** If the owner prefers a *different* next item, `CC-42` (`G-22` Slice 2B)
+and `CC-27` (the AI-user ↔ agent binding) are the two behind it, but they are **business/agent work**, not
+the skeleton, so they wait (rule 0b).
 
 **Status:** ✅ **ROW 7 DONE — roles & grants enforced on every write VERIFIED IN CODE; 0 unexplained gap; `measure.js --check` is the going-forward gate; row 7 ticked ☑; `CC-44` scheduled (owner's call).**
 **This section exists because the owner asked for it (2026-10-06).** Handover documents must **not**

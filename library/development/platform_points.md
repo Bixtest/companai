@@ -16,7 +16,7 @@ platform skeleton is built **before** business capabilities — because the visi
 
 ## THE ONE NUMBER
 
-> ### **19% done** — 61 of 319 units · weighted ≈22% · **±4**
+> ### **21% done** — 68 of 329 units · weighted ≈22% · **±4**
 >
 > **But read this next line carefully — it is the honest headline.** The work that is *done* is
 > skewed **high** in the stack: the AI-first loop (the hard, interesting part) is largely built, while the
@@ -26,6 +26,25 @@ platform skeleton is built **before** business capabilities — because the visi
 
 **Why there are still 319 units in the appendix but one number here:** the number is derived from the
 ticked boxes, never typed. If the number and the boxes disagree, the number is the defect.
+
+---
+
+## ▶ FRONTIER — the one thing being built now, and the two behind it
+
+**Same fact as [`BACKLOG.md`](BACKLOG.md)'s ▶ FRONTIER box — this line is authoritative; that box points here.**
+
+| | ID | What it is | State |
+|---|---|---|---|
+| **NOW** | `SD-4` | Row 13 — the screen to **see and change** the structural permission rules (`SD-4`/`SD-5`) | 🟡 **NEXT — re-measure which of row 13's sub-points remain open** against the code before building (rule 0b) |
+| **ALSO NOW** | `G-22` | The generic state-machine engine (BUILD-ORDER §3) — first caller = the `customers` deal pipeline | 🟢 **Slice 2A (the engine) BUILT 2026-10-09**; Slice 2B paused as business work (rule 0b) |
+| **NEXT** | `CC-27` | The AI-user ↔ agent binding row (unblocked once `AH-1` closed) | ⬜ startable |
+| **THEN** | `CC-44` | The write-path feature gate is **opt-in, not default-deny** — a policy call (owner's) | ⬜ startable (needs the owner's ruling) |
+| **CLOSED** | `SD-1` · `CC-23` · `CC-25` · `P3` · `P3a` · `P3b` · `CC-43` | Row 8 — the structure-change permission gate / Row 7 — roles & grants enforced on every write / Row 9 — the rules stored and read back | ✅ **DONE 2026-10-09** — row 8's `CC-23` closed by a DB-enforced invariant + a single-statement upsert, proven on live PG 17; `CC-25` re-measured DONE; rows 7, 8 & 9 ticked ☑ |
+
+*Row 8 remains **🟡 → ☑** on the strength of this build: its last **startable** remainder (`CC-23`) is closed.
+The one `☐` left in its `SD-1`/`S2` block is **`CC-20`**, which is provably blocked on `G-04` (a per-field
+permission has no meaning until records are governed at field granularity) — it is scheduled, not abandoned,
+and it is why `S2g` stays `☐`.*
 
 ---
 
@@ -55,12 +74,12 @@ started while a higher one is open). If you move something, write one line besid
 | 5 | You can run several organisations (tenants) with hard walls between them — no data leaks across, by construction. | ✅ | `P2` |
 | 6 | You can organise a tenant into units/departments and scope data to them. | ✅ | `P2` |
 
-### PHASE 3 — The policy kernel *(the vision's "first major kernel milestone")* — **this is where the queue now points**
+### PHASE 3 — The policy kernel *(the vision's "first major kernel milestone")* — **rows 7–12 are done ☑; the queue now points at row 13 (`SD-4`/`SD-5`, 🟡) and at the data axis behind `CC-20`**
 
 | # | What you can do after this | Status | ID |
 |---|---|---|---|
 | 7 | You can define roles and give them permissions, and the platform **enforces** every one on every write — not just in the UI. | ☑ | `P3` |
-| 8 | When you create a new table or column, the platform **forces the permission question** — it can no longer be forgotten. | 🟡 | `SD-1` / `S2` / `P3a` / `P3b` |
+| 8 | When you create a new table or column, the platform **forces the permission question** — it can no longer be forgotten. | ☑ | `SD-1` / `S2` / `P3a` / `P3b` |
 | 9 | The permission rules are **stored** (not just in memory) and read back by the running app. | ☑ | `P3b` / `M3e` |
 | 10 | Every write passes one gate, and the gate can say "allow", "refuse", or "ask a human first". | ✅ | `P18` / `D0`–`D3` |
 | 11 | You can change the platform's behaviour by **setting**, not by deploying code (the tier mapping is a setting). | ✅ | `D1` |
@@ -391,15 +410,15 @@ started while a higher one is open). If you move something, write one line besid
 -   - ☐ **S1a** — A gate exists for the create/structural paths *(carried — `S2`/`SD-1`'s gate is built; not re-verified as S1's own point)*
 -   - ☐ **S1b** — Inspection coverage for **every** architectural change (not only create) *(LEFT)*
 -     *(was PART)*
-- ☐ **S2 (= SD-1)** — Every architectural change answers the permissions question: catalogue + fail-closed gate ▸ 4/7
+- ☑ **S2 (= SD-1)** — Every architectural change answers the permissions question: catalogue + fail-closed gate ▸ 6/7
 -   - ☑ **S2a** — The permission catalogue: `shared/src/lib/permissions/catalogue.ts` — surfaces + the two blocks they yield (data + structural), populated from declarations and extended by runtime surfaces *(DONE 2026-10-08 — measured)*
 -   - ☑ **S2b** — The pure fail-closed gate: `structure-change-gate.ts` + a `MutationGuard` hook on the entities `create` path *(DONE 2026-10-08 — measured)*
 -   - ☑ **S2c** — The write: `auth/lib/permission-decision-grant.ts` applies the gate's `defaulted` records to the tenant's grant role's `role_acls.features_json` (idempotent set-union), wired in the guards' `afterSuccess` and carried `validate`→`afterSuccess` by the real runner; **run on every create path** — the batch definitions route, the shared primitive `ensureCustomFieldDefinitions`, the `add-field` CLI, the three HTTP reactivation routes (CC-22/CC-24), the entity-install primitive `upsertCustomEntity` (CC-21), and the three field write sites on a type change (CC-4) *(DONE 2026-10-08 — measured; 133 tests, 56 mutations RED-then-GREEN across twelve slices, nine hostile-critic passes)*
 -   - ☑ **S2d** — The merge into `role_acls.features_json` is **atomic** (one SQL `UPDATE`, `jsonb ||` deduped, `returning` — no lost update under a race), proven against live Postgres *(DONE 2026-10-08 — CC-16, with a concurrent-session test + negative control)*
--   - ☐ **S2e** — A unique index on `(role_id, tenant_id)` to close the create-branch double-insert *(LEFT — CC-23; needs a migration, unreachable in normal operation)*
--   - ☐ **S2f** — An authorised decision actor: the `decided` header names the actor but nothing checks them *(LEFT — CC-25; its model is confirmed by the owner: a structure-permission decision is a ROLE PERMISSION)*
--   - ☐ **S2g** — An enforcement consumer for a **field** surface's records (`<entityId>.<key>.view|manage|structure`) + the global-surface gap *(LEFT — CC-20)*
--     *(was PARTIAL 2026-10-08 — the decision core AND the enforcement are built and proven on every create path; what remains is the double-insert index (CC-23), the unauthorised decision actor (CC-25), the field records' missing consumer (CC-20), and the global-surface gap — each scheduled in `COMPLETION-CALLBACKS.md`. Plan `PLAN-SD-1.md`, limits §10)*
+-   - ☑ **S2e** — A unique index on `(role_id, tenant_id)` to close the create-branch double-insert *(DONE 2026-10-09 — CC-23: `Migration20261009220000` adds `role_acls_role_id_tenant_id_unique` (plain unique — nothing soft-deletes a `role_acls` row, so the invariant is "exactly one per role per tenant"); the whole write is now ONE statement `INSERT … ON CONFLICT (role_id, tenant_id) DO UPDATE` (`permission-decision-grant.ts`), so a first grant and a later grant are the same atomic upsert — no read-modify-write window. Proven on live PG 17: applied via `mercato db migrate` (`auth: 1 migration applied`), the two-concurrent-insert race rejected with `duplicate key … "role_acls_role_id_tenant_id_unique"`, and a two-session interleave left EXACTLY ONE row with the union `["grant.B","grant.A"]`. `aclCreated` now read from the DB (`xmax = 0`); `added`/`alreadyPresent` computed in SQL from the pre-merge value. 6 mutations RED-then-GREEN (M2/M3 forced a test strengthening — the SQL-text pins were too weak), md5-verified restores; a separate-agent hostile-critic CONFIRMED all eight claims against live Postgres)*
+-   - ☑ **S2f** — An authorised decision actor: the `decided` header names the actor but nothing checks them *(DONE 2026-10-09 — CC-25, code `d61d4f6`: new permission `entities.definitions.decide`; `assertActorMayStateDecision` reuses the platform's grant checks, S5 one engine; enforced at all five sites. Was carried as stale-open until re-measured this round — the register already recorded it DONE)*
+-   - ☐ **S2g** — An enforcement consumer for a **field** surface's records (`<entityId>.<key>.view|manage|structure`) + the global-surface gap *(LEFT — CC-20, blocked on `G-04`: a per-field permission has no meaning until records can be governed at field granularity)*
+-     *(was PARTIAL 2026-10-08 — the double-insert index (CC-23) and the decision actor (CC-25) are now BUILT; what genuinely remains is the field records' missing consumer, which is blocked on the data axis (`G-04`) — `CC-20`. The global-surface gap folds into `CC-20`. Plan `PLAN-SD-1.md`, limits §10)*
 - ☐ **S3** — The platform tells the user when access is refused *(OPEN)*
 - ☐ **S4** — Data is the gate, not the screen ▸ 4/5
 -   - ☑ **S4a** — The isolation model is confirmed by the owner: scope is tenant + org **in the app layer** — single DB, single schema, nullable `tenant_id`, no RLS, no per-tenant DDL *(DONE — owner-confirmed)*
@@ -525,7 +544,7 @@ started while a higher one is open). If you move something, write one line besid
 -   - ☐ **B14a** — The portal surface *(carried)*
 -   - ☐ **B14b** — Remove the duplicate: `customer_accounts` duplicates `auth` *(LEFT — `N-6` says remove)*
 -     *(was PART — `customer_accounts` duplicates `auth`; N-6 says remove)*
-- ☐ **M3** — The permissions catalogue (= SD-1) ▸ 3/5
+- ☐ **M3** — The permissions catalogue (= SD-1) ▸ 4/5
 -   - ☑ **M3a** — The catalogue service exists (`shared/src/lib/permissions/catalogue.ts`): permission surfaces + the two blocks each yields (data + structural) *(DONE 2026-10-08 — measured)*
 -   - ☑ **M3b** — Consumed by a **write**: `auth/lib/permission-decision-grant.ts` applies its records to `role_acls.features_json` on every create path (entities create, the batch definitions route, `ensureCustomFieldDefinitions`, the HTTP reactivation routes (CC-22), the entity-install primitive `upsertCustomEntity` (CC-21), each field write site on a type change (CC-4)) *(DONE 2026-10-08 — measured)*
 -   - ☑ **M3c** — The merge itself is atomic (no lost update) *(DONE 2026-10-08 — CC-16)*
@@ -602,6 +621,7 @@ has not been verified in the code, and the claim is unconfirmed.**
 | `D2-gap / GETs` | the same tool run reports **3 write-performing GETs, 0 unguarded, 2 set aside (read side-effects)** | **complete** |
 | `S-02` `N-5` | ran the new tool-door suite (`tool-authority.s02.test.ts`) + the 5 confirm-path tests; **two hostile-critic passes**; **six mutations RED-then-GREEN**, each restore md5-verified | **ai-assistant 102 suites / 1434 tests; core auth 275; shared authority 114; typecheck 0** |
 | `S2` `SD-1` `M3` | ran the permissions suites (catalogue 13, gate 19, guard 17, decision-header 28) + the write/mapping suites (19) + the batch slice (16) + the non-request slice (19) + the reactivation slice (9) + the entity-install slice (7) + the re-type slice (6) + the atomic-merge slice (1) + the batch-key slice (7); **nine hostile-critic passes + four mutation/premise-found defects (thirty-one defects, all fixed or named)**; **56 mutations RED-then-GREEN across twelve slices**, each restore md5-verified — **plus the atomic merge proven against live Postgres 17 with a concurrent-session test and a negative control** | **133 tests; `shared` 197 / 2329 (8 fail in the one suite of CC-19); `core` 627 / 5438, green six consecutive times; typecheck 0 — and the records ARE written on every create path, every reactivation path, the field re-type case, and a **stated (`decided`) decision**, with an atomic (no-lost-update) merge, the batch key validation restored, and the test harness now resetting the guard store before every test (CC-29) — but still **PARTIAL**: the create-branch double-insert (needs a migration — CC-23), the unauthorised decision actor (CC-25), the field records' missing enforcement consumer (CC-20), and the global-surface gap — each scheduled in `COMPLETION-CALLBACKS.md`** |
+| `S2e` (`CC-23`) | added `auth/migrations/Migration20261009220000.ts` (unique index `role_acls_role_id_tenant_id_unique`); rewrote the write in `auth/lib/permission-decision-grant.ts` as ONE statement `INSERT … ON CONFLICT (role_id, tenant_id) DO UPDATE` (CTEs `pre`/`upsert`/`requested`; `(xmax = 0) as inserted`; `newly_added`/`already_present` computed from the pre-merge value); ran the migration + migration test + the auth lib suite; **applied the migration on live PG 17 via `mercato db migrate`** (`auth: 1 migration applied`, journal records `Migration20261009220000`, `\d role_acls` shows the unique index); **proved the race closed** (two concurrent plain inserts → `duplicate key value violates unique constraint "role_acls_role_id_tenant_id_unique"`; a two-session interleave of the new upsert → EXACTLY ONE row, union `["grant.B","grant.A"]`); **six mutations RED-then-GREEN** (M2 `xmax`→`true` and M3 `newly_added` read from post-merge forced a test strengthening — the SQL-text pins were too weak; both re-ran RED after); each restore **md5-verified**; **one hostile-critic pass as a SEPARATE agent** — CONFIRMED all eight claims against live Postgres, found the tenant-filter pin weak (now pinned by M5) and named the `added`-under-concurrency contract limit (now documented) | **auth lib suite 25/25; migration suite 2/2; `core` 639 suites / 5621 tests GREEN; `core` tsc 0 — the create-branch double-insert is closed by a DB-enforced invariant, not an app lock** |
 | `G-22` (Slice 2A) | read the new primitive (`packages/shared/src/lib/state-machine/`: `types.ts` · `machine.ts` · `index.ts`) line by line; ran its suite; ran `tsc --noEmit -p tsconfig.json` on `shared`; **two hostile-critic passes as SEPARATE agents**; **8 md5-verified RED-then-GREEN mutations** (M1 undeclared-transition gate removed; M2 permission ignored; M3 precondition ignored; M4 events dropped; M5 perm/precond order swapped; M6 fail-closed reading removed; M7 reason forced empty; M8 string-emit dropped) — each restore **md5-identical** (`7bcd6f63…`) | **26 tests GREEN; `shared` tsc 0; full `shared` suite 204/204 suites · 2515/2515 tests pass with only the CC-19 suite excluded (8 pre-existing failures, proven not caused by this change). Round 1 of the critic found TWO REAL DEFECTS, both fixed and re-verified: (1) `readGate` read a gate returning `null`/`0`/`NaN`/`undefined` as ALLOW (silent allow — the exact `G-03` trap) — now **fail-closed** (only an explicit `true` allows); (2) an empty-string gate reason produced a refusal with `reason:''` — now the call sites use `reason \|\| fallback`, so every refusal carries a non-empty reason. Round 2 independently re-probed both (all of `null`/`undefined`/`0`/`NaN`/`''`/`false` now refuse; no branch can yield an empty reason) and confirmed both new tests are non-tautological. Slice 2A is a verified `✅`-quality unit; `G-22` stays `🟡` because the first caller (Slice 2B → `CC-42`) is unbuilt** |
 
 **Whole-package run (the broad check).** The full `shared` package suite was run: **197 suites, 2329
@@ -683,12 +703,15 @@ rule, in one place:
 6. Coverage `% = done ÷ units`. Build-weighted `% = Σ(done×w) ÷ Σ(units×w)` with `w` the section's effort
    weight (the rubric table above).
 
-**Re-run the check in this session (2026-10-09) gave:** A 10/31 · B 2/36 · C 14/28 · D 2/39 · E 2/18 ·
-F 0/14 · G 29/74 · H 0/13 · I 4/35 · J 0/18 · K 1/13 · **TOTAL 64 / 319 = 20%** (build-weighted ≈22%).
-**This replaced a typed table that read 61 / 276 = 22%** — the DONE total happened to be right, but every
-section total was under-counted (the pass-2 split added units no one had re-summed). The lesson is the
-**N-20** one: *a count that is typed drifts from the boxes the moment a box changes.* If you ever change a
-tick, re-run this — the table is downstream of the boxes, never the other way round.
+**Re-run the check in this session (2026-10-09, row-8/CC-23) gave:** A 10/31 · B 2/36 · C 14/28 ·
+D 1/39 · E 2/18 · F 0/14 · G 31/74 · H 0/13 · I 5/35 · J 0/18 · K 3/23 · **TOTAL 68 / 329 = 21%**
+(build-weighted ≈22%).
+**This replaced a typed line that read 64 / 319** (with D 2/39, I 4/35, K 1/13) — every one of those three
+sections was already stale before this session's change (the same N-20 drift the previous re-run warned
+about): the boxes had moved and the line had not been re-derived. This session's change alone is **G +2**
+(`S2e` and `S2f` ticked: CC-23 built, CC-25 re-measured as already DONE), so `G 29/74 → 31/74` and the
+total `66 → 68`. If you ever change a tick, re-run this — **the line is downstream of the boxes, never the
+other way round.**
 
 ### Documentation & tool defects found this round (and fixed)
 

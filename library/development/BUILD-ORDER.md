@@ -1100,14 +1100,11 @@ one page, each with a named home. Details: [`BLUEPRINT-GAP-ANALYSIS.md`](BLUEPRI
    the flush through the same `writeFieldPermissionGrant` (gated at the route; no new query, no contract
    change). Its mutation pass also found and fixed two **harness** defects (an unpinned `deletedAt`
    clause in both consumers; a test leaking into the `globalThis` guard store) and widened the second
-   into **CC-29** — and **CC-29 is now closed**: a `resetMutationGuards()` clears both the module-local cache and the `globalThis` slot, `core`'s `jest.setup.ts` calls it in a root-level `beforeEach`, and the full core suite ran green **six consecutive times** (627 suites / 5438 tests, 0 failures). Still open: the create-branch double-insert (needs a
-   migration — CC-23), an enforcement consumer
-   for a *field*'s records (CC-20), and **authorising the decision actor** — a limit whose **model is now
-   confirmed by the owner (2026-10-08): it is a ROLE PERMISSION** (the platform's own `role_acls.features_json`),
-   so *who may decide a new surface's permissions* is a permission string a superadmin grants; a build, not
-   an open policy (CC-25) — plus the two
+   into **CC-29** — and **CC-29 is now closed**: a `resetMutationGuards()` clears both the module-local cache and the `globalThis` slot, `core`'s `jest.setup.ts` calls it in a root-level `beforeEach`, and the full core suite ran green **six consecutive times** (627 suites / 5438 tests, 0 failures). Of the three remainders named here: **CC-23 is now CLOSED (2026-10-09)** — the create-branch double-insert is closed by a **DB-enforced invariant** (`Migration20261009220000.ts`: a *plain* unique index `role_acls(role_id, tenant_id)`, because nothing soft-deletes a `role_acls` row) plus a **single-statement** `INSERT … ON CONFLICT (role_id, tenant_id) DO UPDATE` in `auth/lib/permission-decision-grant.ts` (CC-16's `jsonb ||`-into-`group by elem` union, `(xmax = 0) as inserted`, `newly_added`/`already_present` computed in SQL from the pre-merge value) — so **no read-modify-write window remains**; proven on live PG 17 (migration applied via `mercato db migrate`; two concurrent plain inserts rejected; a two-session interleave leaves exactly one row); 6 mutations RED, each restore md5-verified; a separate-agent hostile-critic confirmed all eight claims. **CC-25 is CLOSED (2026-10-09, code `d61d4f6`)** — the decision actor is authorised by a role permission `entities.definitions.decide` at all five sites. **CC-20 remains genuinely open** — an enforcement consumer
+   for a *field*'s records, provably blocked on the data axis (`G-04`): a per-field permission has no meaning until records are governed at field granularity. That plus the two
    deferred consumers (`SD-4`, `G-04`) — each scheduled in [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md)
-   (plan [`PLAN-SD-1.md`](PLAN-SD-1.md), limits §10).
+   (plan [`PLAN-SD-1.md`](PLAN-SD-1.md), limits §10). **Row 8 is now ticked ☑** (its last *startable*
+   remainder is closed; only the `G-04`-blocked `CC-20` stays `☐`).
    **The row-9 persistence half is now built (2026-10-09) — the catalogue has a durable table and a real
    write path.** `permission_surfaces` (migration `Migration20261009205000`, applied to
    `mercato-postgres-local` and **measured back**), the `PermissionSurfaceRecord` entity, and the fail-soft
