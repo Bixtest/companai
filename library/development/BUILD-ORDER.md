@@ -1307,14 +1307,18 @@ keep the backlogs where they are and land as their prerequisites do.*
     index-time presenter for a classified entity (`search_query`), and refuse a classified `groupBy`
     (`search_aggregate`); no map ⇒ byte-identical. The **own row-scope** leg has **no reader** on the AI
     path (no entity is both searchable and own-scoped) → owner question `NY-22`.**
-20. An AI user can run only the agents bound to it. **✅ CORE BUILT 2026-10-11 (`CC-27`) — an
-    `ai_agent_bindings` table + repo + a **fail-closed** `resolveAgentBinding` for `ai_worker` principals,
-    wired into **both** agent dispatch routes (`api/ai/run-object`, `api/ai/chat`) as **403
-    `agent_not_bound`** after the policy gate and before the runtime call; a manage surface
+20. An AI user can run only the agents bound to it. **✅ BUILT 2026-10-11 (`CC-27` core + `CC-55`
+    narrowing) — an `ai_agent_bindings` table + repo + a **fail-closed** `resolveAgentBinding` for
+    `ai_worker` principals, wired into **both** agent dispatch routes (`api/ai/run-object`, `api/ai/chat`)
+    as **403 `agent_not_bound`** after the policy gate and before the runtime call; a manage surface
     (`api/ai/agents/[agentId]/bindings`, GET/POST/DELETE) and a coverage gate that fails a new un-gated
-    dispatch site. Hostile-critic-hardened (2 real defects fixed), RED-then-GREEN ×9, md5-verified
-    restores. **The narrowing leg** (`computeBoundRunScope`: tools INTERSECT / features UNION, built + tested
-    but **not wired into the runtime**) → **`CC-55`**; the pending-action **confirm** re-check → **`CC-56`**.**
+    dispatch site. **`CC-55` completes the narrowing half:** the resolved `boundScope` is threaded into the
+    runtime — tools INTERSECT (agent list as base, never widening), features UNION (both required, deny
+    otherwise), humans byte-identical. Hostile-critic-hardened (**2** real defects fixed in `CC-27`; **2** in
+    `CC-55` — the coverage gate was blind to in-process dispatch sites; the "union" test did not test the
+    union), RED-then-GREEN ×9 + ×6, md5-verified restores. **Remaining named legs:** the pending-action
+    **confirm** re-check → **`CC-56`**; the in-process dispatch sites (the one known site
+    `lib/business-ir-author.ts` has no caller yet) → **`CC-57`**.**
 
 **PHASE 4+ — the blueprint's later phases** (horizontal services · AI foundation · enterprise scale ·
 domain packs) — see [`BLUEPRINT-GAP-ANALYSIS.md`](BLUEPRINT-GAP-ANALYSIS.md) §5. Notably **entitlements

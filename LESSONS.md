@@ -3813,3 +3813,41 @@ asked for** — here the combined run reported **8** (the coverage suite alone) 
 *Cross-ref: L114 (a test that cannot catch the bug), the hostile-critic protocol (a SEPARATE agent re-ran and
 found the hole), rule 10 (RED-then-GREEN must be a **real** proof).*
 
+## L117 — a test can pass for the **wrong reason**: if a property is enforced in **two** places, a test that does not isolate the **new** one stays GREEN when the new one is deleted
+
+**Seen in `CC-55` (2026-10-11).** The build added a **binding-feature union** check inside
+`resolveAiAgentTools` (`agent.requiredFeatures ∪ binding.requiredFeatures`). A test named *"the binding's
+features are UNIONED with the agent's own"* seeded an agent that **already declared** a required feature, gave
+the actor **no** features, and asserted the run was denied. That assertion passed — **but for the wrong
+reason**: `checkAgentPolicy` (which runs *first*, and is untouched) independently denies when the agent's own
+feature is missing. So when a mutation **deleted the new union check**, the test stayed **GREEN** — it was
+testing `checkAgentPolicy`, not the union. **The hostile critic caught it** (mutation: only the *deny* test went
+red, the "union" test did not).
+
+**The rule.** (1) When a property ends up enforced at **two** layers, a test for the **new** layer must
+exercise the case that **only** the new layer handles — otherwise it proves nothing about the new code. For a
+union, that case is: the actor **holds the first set's members** but **lacks the second set's** — the old layer
+passes it, so only the new layer can deny. (2) A **mutation proof** is the detector: delete the new enforcement
+and confirm the named test goes **RED**. If it stays green, the test is mis-targeted (or, worse, is an L116
+false-green). (3) Name the test after the case it actually isolates, not the property in the abstract.
+*Cross-ref: L114 (a mock that ignores its arguments), L116 (a suite that never ran), rule 10 (RED-then-GREEN
+must be a **real** proof — a mutation that does not flip the test proves the test is wrong, not the code).*
+
+## L118 — a **structural coverage gate** that scans only **part** of the tree is blind to the rest: name the known exceptions explicitly, or a real hole hides just outside the scan
+
+**Seen in `CC-55` (2026-10-11).** The `CC-27` binding-coverage gate asserted *"every agent dispatch site
+consults the binding"* — but it walked only `api/ai/**`. A **production** dispatch site in `lib/`
+(`business-ir-author.ts`, which calls `runAiAgentObject` with no binding) sat **outside the scan** and was
+invisible: the gate passed while a real un-gated path existed. **The hostile critic found it** by a repo-wide
+grep of the runtime's call sites.
+
+**The rule.** (1) A coverage gate must scan the **whole** surface where the pattern can occur — not the
+convenient sub-directory. If the pattern is "calls the agent runtime", the scan is the **whole package**, not
+`api/`. (2) Known exceptions are **named in an allowlist with a reason and a scheduled callback**, and the test
+asserts the offender set **equals** that allowlist — so a **new** occurrence fails the build *and* a **stale**
+entry fails it too. (3) Prefer detecting the **call** (name + `(`, comments stripped) over a bare textual
+mention, so a name in a comment is not a false hit. (4) The test that would have caught it is the one you did
+not write: ask *"where else could this pattern appear?"* before scoping the scan.
+*Cross-ref: L111 (a sanity floor is a silent-permission slip), the hostile-critic protocol (a SEPARATE agent
+found the blind spot), rule 9(a) (own the full codebase, not just your diff).*
+

@@ -14,24 +14,25 @@ written for exactly that person — and this revision is written for an agent th
 continue the development work.** Read it top to bottom once (about 20 minutes), then
 follow §2 to actually get working. Everything else in the project is reachable from here.
 
-**Written 2026-10-05, revision 23 (2026-10-11). Owner: Ramzi. Development machine: `BIXMASERVER` (Windows 10 Pro).**
-**This revision records the 2026-10-11 BUILD of row 22's CORE leg (an AI user can run only the agents bound to
-it — `CC-27`, now ✅ core), with two follow-ons left OPEN and named.** Rule-0b measurement first: the AI **actor**
-is an `api_keys` row issuing an `ai_worker:<id>` subject; the AI **agent** is **code-declared** (in-memory `Map`,
-zero DB reads); and both agent dispatch routes (`api/ai/run-object`, `api/ai/chat`) took the agent id as a **raw
-request-body string with no binding check**. Built: an `ai_agent_bindings` table (one live row per
-`(tenant, org, principal, agent)` via two partial-unique indexes), a repository, a **fail-closed**
-`resolveAgentBinding` for `ai_worker` (passthrough for a human), **403 `agent_not_bound`** wired into both
-dispatch routes after the policy gate and before the runtime call, a manage surface
-(`api/ai/agents/[agentId]/bindings`), and a coverage gate. A separate-agent hostile critic found **2 real
-defects** (the coverage marker list omitted the real dispatcher `runAiAgentText`; the test `requirePrincipal`
-mock ignored `keyId`) — both fixed, the coverage gate now derives its marker list from the runtime's own exports;
-**9 RED-then-GREEN** mutations, md5-verified; **1364 tests pass** (only the 2 pre-existing `isolated-vm`
-electron-ABI suites fail, proven at HEAD). **NOT built (not claimed):** the **narrowing leg**
-(`computeBoundRunScope` is built + tested but **not called** — a binding's tool/feature narrowing has no runtime
-effect) → **`CC-55`**; the pending-action **confirm** re-check → **`CC-56`**. ONE NUMBER **72 / 321 = 22%**,
-**unchanged** (§L's **ninth** re-run, both routes agree). The live FRONTIER is now **`CC-44`**, then
-**`CC-55`**/`CC-56`. **Prior — revision 22: row 18 (`CC-53`) built the AI read path onto the human column-/row-level gates, completing the PHASE-5 batch (rows 16 → 17 → 18).**
+**Written 2026-10-05, revision 24 (2026-10-11). Owner: Ramzi. Development machine: `BIXMASERVER` (Windows 10 Pro).**
+**This revision records the 2026-10-11 BUILD of row 22's NARROWING leg (`CC-55`) — the binding's scope is now
+applied to the run, so row 22 is ✅ whole.** Rule-0b measurement first: `computeBoundRunScope` had **no
+production caller** (repo-wide grep: only its definition + the unit test); `resolveAiAgentTools` built the tool
+set from the **full** `agent.allowedTools`; `checkAgentPolicy` enforced only `agent.requiredFeatures`; both
+routes read only `binding.bound` and dispatched the **un-narrowed** `agentId`. Built: an optional `boundScope`
+on `ResolveAiAgentToolsInput` + `RunAiAgentTextInput`/`RunAiAgentObjectInput`; `resolveAiAgentTools` intersects
+tools (the agent's list is the base — **never widening**), enforces the **feature union**
+(`AgentPolicyError('agent_features_denied')` on a miss), and returns the **original** agent object when nothing
+narrows (**humans byte-identical**); both routes compute `computeBoundRunScope({ agentId, binding })` after the
+`bound` check and pass it into the runtime call. A separate-agent hostile critic found **2 real defects** — (1)
+the **coverage gate was blind to in-process dispatch sites** (it scanned only `api/ai/**`; it now scans the
+**whole module** for dispatch *calls* and names the one known un-gated site `lib/business-ir-author.ts` as a
+**`CC-57`** gap); (2) the **"features UNIONED" test did not test the union** (it stayed GREEN when the
+enforcement was deleted — rewritten to assert the union). **6 RED-then-GREEN** mutations, md5-verified; `tsc`
+clean; **1374 tests pass** (the 2 `isolated-vm` electron-ABI suites are flaky/environmental — they *passed* in
+the critic's run). **Legs NOT built (not claimed):** the pending-action **confirm** re-check → **`CC-56`**; the
+in-process dispatch site → **`CC-57`**. ONE NUMBER **72 / 321 = 22%, unchanged** (§L's **tenth** re-run, both
+routes agree). The live FRONTIER is now **`CC-44`**, then **`CC-56`**/**`CC-57`**. **Prior — revision 23: row 22's (`CC-27`) CORE leg (an AI user can run only the agents bound to it): an `ai_agent_bindings` table + a fail-closed `resolveAgentBinding` for `ai_worker` + 403 `agent_not_bound` in both dispatch routes; the narrowing leg was left open as `CC-55`, the confirm re-check as `CC-56`.**
 **Two separate-agent hostile-critic rounds** found and fixed **two real holes** (the presenter-promotion leak +
 the raw aggregate bucket leak; then a classified key **nested in an object value** that the first top-level-only
 mask missed) — **6 RED-then-GREEN** mutations, md5-verified (`8b9238b006ec1ea6eab76199d6365bc6`); green 12/12 in
@@ -102,10 +103,11 @@ named in the `★ ACTIVE TASK` box at the top of [`../../JOURNAL.md`](../../JOUR
 that carries it (step 7, and the owner's instruction of 2026-10-06). The **live FRONTIER** (its
 authoritative statement is [`platform_points.md`](platform_points.md)'s `▶ FRONTIER` box) is
 **re-derived from the ONE NUMBER** — row 16's own-leg is built (`CC-50` closed; row remains 🟡 pending the
-deferred team-leg `CC-51`), rows 17 (`CC-52`), 18 (`CC-53`) and 22's core (`CC-27`) are **✅ DONE** (the PHASE-5
-batch is complete); the live FRONTIER is now **`CC-44`** (the write-path feature gate being opt-in, not
-default-deny — an owner policy call), then **`CC-55`** (apply the bound scope to the runtime — row 22's
-narrowing leg) and **`CC-56`** (re-check the binding on the pending-action confirm path);
+deferred team-leg `CC-51`), rows 17 (`CC-52`), 18 (`CC-53`) and 22 (`CC-27` core + `CC-55` narrowing) are **✅
+DONE** (the PHASE-5 batch is complete); the live FRONTIER is now **`CC-44`** (the write-path feature gate being
+opt-in, not default-deny — an owner policy call), then **`CC-56`** (re-check the binding on the pending-action
+confirm path) and **`CC-57`** (thread the bound scope into the in-process dispatch sites — the one known site
+`lib/business-ir-author.ts` has no caller today);
 each is buildable now, and **it must be re-measured in code before
 building** (rule 0b).
 
@@ -925,7 +927,7 @@ alone means this page is broken — **fix the page, not the newcomer.**
 from an older document are not equally current, and mixing them in one table is how this page
 goes wrong. If two older documents disagree on a number, say so — never average them.
 
-*Last updated: 2026-10-11, revision 23 — **row 22's (`CC-27`) CORE leg: an AI user can run only the agents bound to it.** The AI **actor** is an `api_keys` row issuing an `ai_worker:<id>` subject; the AI **agent** is **code-declared** (in-memory `Map`, zero DB reads); both dispatch routes (`api/ai/run-object`, `api/ai/chat`) took the agent id as a **raw request-body string with no binding check**. Built: an `ai_agent_bindings` table (one live row per `(tenant, org, principal, agent)` via two partial-unique indexes), a repository, a **fail-closed** `resolveAgentBinding` for `ai_worker` (passthrough for a human), **403 `agent_not_bound`** wired into both dispatch routes after the policy gate and before the runtime call, a manage surface (`api/ai/agents/[agentId]/bindings`, GET/POST/DELETE), and a coverage gate. A separate-agent hostile critic found **2 real defects** (the coverage marker list omitted the real dispatcher `runAiAgentText` — fixed so the gate derives its marker list from `agent-runtime.ts`'s own exports; the test `requirePrincipal` mock ignored `keyId` — fixed); **9 RED-then-GREEN** mutations, md5-verified; `tsc` clean; **1364 tests pass** (only the 2 pre-existing `isolated-vm` electron-ABI suites fail, proven at HEAD). **Lesson banked L116:** a jest positional path containing `[agentId]` is a **glob** that matches nothing — "no tests found" ≠ "all tests passed", so a mutation proof must assert the **test count**. **Legs NOT built (not claimed):** the **narrowing leg** (`computeBoundRunScope` built + tested but **never called** — a binding's tool/feature narrowing has no runtime effect) → **`CC-55`**; the pending-action **confirm** re-check → **`CC-56`**. ONE NUMBER **72 / 321 = 22%, unchanged** (§L's **ninth** re-run; both routes agree — new LIST row 22 has no fresh appendix marker). The live FRONTIER is now **`CC-44`**, then **`CC-55`**/**`CC-56`**. **Prior — revision 22: row 18 (`CC-53`) built the AI read path onto the human column-/row-level gates, completing the PHASE-5 batch (rows 16 → 17 → 18).**
+*Last updated: 2026-10-11, revision 24 — **row 22's (`CC-55`) NARROWING leg: a binding's scope is now applied to the run (tools INTERSECT, features UNION, humans byte-identical).** Rule-0b first: `computeBoundRunScope` had **no production caller** (grep: only its definition + the unit test); `resolveAiAgentTools` built tools from the **full** `agent.allowedTools`; `checkAgentPolicy` enforced only `agent.requiredFeatures`; both routes dispatched the un-narrowed `agentId`. Built: an optional `boundScope` on `ResolveAiAgentToolsInput` + `RunAiAgentTextInput`/`RunAiAgentObjectInput`; `resolveAiAgentTools` intersects tools (agent list as base, never widening), enforces the feature union (throws `AgentPolicyError('agent_features_denied')`), and returns the **original** agent object when nothing narrows; both routes pass `computeBoundRunScope({ agentId, binding })`. A separate-agent hostile critic found **2 real defects**, both fixed: (1) the **coverage gate was blind to in-process dispatch sites** (it scanned only `api/ai/**`) — it now scans the **whole module** for dispatch *calls* and names the one known gap `lib/business-ir-author.ts` as **`CC-57`**; (2) the **"features UNIONED" test did not test the union** (it stayed GREEN when the enforcement was deleted) — rewritten. **6 RED-then-GREEN** mutations, md5-verified; `tsc` clean; **1374 tests pass** (the 2 `isolated-vm` suites are flaky/environmental). **Legs NOT built:** confirm re-check → **`CC-56`**; in-process dispatch → **`CC-57`**. ONE NUMBER **72 / 321 = 22% unchanged** (§L's tenth re-run). **Prior — revision 23 — row 22's (`CC-27`) CORE leg: an AI user can run only the agents bound to it.** The AI **actor** is an `api_keys` row issuing an `ai_worker:<id>` subject; the AI **agent** is **code-declared** (in-memory `Map`, zero DB reads); both dispatch routes (`api/ai/run-object`, `api/ai/chat`) took the agent id as a **raw request-body string with no binding check**. Built: an `ai_agent_bindings` table (one live row per `(tenant, org, principal, agent)` via two partial-unique indexes), a repository, a **fail-closed** `resolveAgentBinding` for `ai_worker` (passthrough for a human), **403 `agent_not_bound`** wired into both dispatch routes after the policy gate and before the runtime call, a manage surface (`api/ai/agents/[agentId]/bindings`, GET/POST/DELETE), and a coverage gate. A separate-agent hostile critic found **2 real defects** (the coverage marker list omitted the real dispatcher `runAiAgentText` — fixed so the gate derives its marker list from `agent-runtime.ts`'s own exports; the test `requirePrincipal` mock ignored `keyId` — fixed); **9 RED-then-GREEN** mutations, md5-verified; `tsc` clean; **1364 tests pass** (only the 2 pre-existing `isolated-vm` electron-ABI suites fail, proven at HEAD). **Lesson banked L116:** a jest positional path containing `[agentId]` is a **glob** that matches nothing — "no tests found" ≠ "all tests passed", so a mutation proof must assert the **test count**. **Legs NOT built (not claimed):** the **narrowing leg** (`computeBoundRunScope` built + tested but **never called** — a binding's tool/feature narrowing has no runtime effect) → **`CC-55`**; the pending-action **confirm** re-check → **`CC-56`**. ONE NUMBER **72 / 321 = 22%, unchanged** (§L's **ninth** re-run; both routes agree — new LIST row 22 has no fresh appendix marker). The live FRONTIER is now **`CC-44`**, then **`CC-55`**/**`CC-56`**. **Prior — revision 22: row 18 (`CC-53`) built the AI read path onto the human column-/row-level gates, completing the PHASE-5 batch (rows 16 → 17 → 18).**
 
 *Prior — 2026-10-11, revision 19 — **the PHASE-5 batch (rows 16 → 17 → 18) begins; row 16 first; rule 9(a) strengthened; the CC-47 "in neither" count corrected 163→161.**
 **Row 16 (own / team row scope) — MEASURED (rule 0b) and DECIDED.** Scope today is exactly `tenantId` + `organizationId` + `organizationIds` (`shared/src/lib/api/crud.ts` `buildScopedWhere`; `factory.ts` `withCtx()` `:1359-1412`); `auth.sub` is stamped into audit/event records 20+ times in `factory.ts` but **never used to filter rows**; there is **no `team` concept**; and there is **no shared owner column** (`createdByUserId` uuid vs `createdBy` varchar vs `assignedTo`/`assignedToRoles`) — so a blanket owner filter is impossible and row 16 must be an **opt-in per-entity `rowScope` declaration** (the `aclFeatures` pattern in `shared/src/modules/search.ts`). **Owner chose Option A** (`NY-20`) = own-only, opt-in, no team entity; **Option B (a real `team` entity + membership + UI + migrations) is documented as a FUTURE addition** (`PLAN-ROW16-own-team-row-scope.md` §7). Partial scheduled as **`CC-50`**. Rows 17 and 18 follow, each committed as it lands.

@@ -35,7 +35,37 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
-### ✅ DONE — **row 22 (an AI user can run only the agents bound to it, `BUILD-ORDER` item 20): CORE BUILT (`CC-27`). Narrowing leg → `CC-55`; confirm re-check → `CC-56`. ★ NEXT = `CC-44` (then `CC-55`, `CC-56`).**
+### ✅ DONE — **row 22's NARROWING leg (an AI user can run only the agents bound to it, `BUILD-ORDER` item 20): BUILT (`CC-55`). The binding's scope is now applied to the run. ★ NEXT = `CC-44` (then `CC-56`, `CC-57`).**
+**(2026-10-11; code repo `workspace/starting-kit`.)**
+
+**The task.** `CC-55` is the **second half** of row 22's `B3`: `CC-27` enforced *"may this AI worker run this
+agent?"* (fail-closed) but **discarded** the binding's `toolAllowlist`/`requiredFeatures` —
+`computeBoundRunScope` was built + unit-tested but had **no caller**. So a binding that named a tool subset,
+or added a required feature, had **no runtime effect**.
+
+**The contract built.** An optional `boundScope` on `ResolveAiAgentToolsInput` +
+`RunAiAgentTextInput`/`RunAiAgentObjectInput`; `resolveAiAgentTools` intersects tools (the agent's list is the
+base — **never widening**), enforces the feature **union** (`agent.requiredFeatures ∪ binding.requiredFeatures`,
+`AgentPolicyError('agent_features_denied')` on a miss), and returns the **original** agent object when nothing
+narrows (**humans byte-identical**); both routes compute `computeBoundRunScope({ agentId, binding })` after the
+`bound` check and pass it into the runtime call.
+
+**Hardening (TOTAL quality protocol).** A **separate-agent hostile critic** found **2 REAL defects, both
+fixed**: (1) the **coverage gate was blind to in-process dispatch sites** (it scanned only `api/ai/**`) → it now
+scans the **whole module** for dispatch *calls* (comments stripped) and names the one known un-gated site
+(`lib/business-ir-author.ts`) as a **`CC-57`** gap; (2) the **"features UNIONED" test did not test the union** —
+it stayed GREEN when the enforcement was deleted (satisfied instead by `checkAgentPolicy`) — rewritten to assert
+the union. **6 RED-then-GREEN mutations**, every restore **md5-verified**; `tsc --noEmit` clean; **1374 tests
+pass** (the 2 `isolated-vm` electron-ABI suites are flaky/environmental — they *passed* in the critic's run).
+**ONE NUMBER, two routes: 72 / 321 = 22% — unchanged** (§L's 10th re-run).
+
+**Honestly NOT built — named, scheduled:** the pending-action **confirm** path still does not re-check the
+binding → **`CC-56`**; the in-process dispatch site (`lib/business-ir-author.ts`, no caller today) still
+dispatches without a scope → **`CC-57`**.
+
+---
+
+### ✅ DONE — **row 22 (an AI user can run only the agents bound to it, `BUILD-ORDER` item 20): CORE BUILT (`CC-27`); the narrowing leg is now BUILT (`CC-55`, block above). ★ NEXT = `CC-44` (then `CC-56`, `CC-57`).** *(superseded by the `CC-55` block above)*
 **(2026-10-11; code repo `workspace/starting-kit`.)**
 
 **The task.** Row 22: *"An AI user can run only the agents bound to it."* Per rule 0b I **re-measured the
