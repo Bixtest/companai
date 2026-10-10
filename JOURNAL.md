@@ -35,6 +35,78 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+### ✅ DONE — **`CC-49` (row 14 / `P4` classification leg, customer-tasks half): the customer-tasks export now goes THROUGH THE SERVER with an ADDITIVE alias map, so a marked field aliased to `todoTitle`/`todoDescription` is masked. Row 14 is now ✅.**
+**(2026-10-10; code repo `workspace/starting-kit`.)**
+
+**The task (protocol step 3), from register `CC-49` + `PLAN-CC-49-tasks-alias-export-leak.md`:** `CC-45`
+masked every **server** export and `CC-48` closed the custom-entity **client `view`** export, but the
+**customer-tasks** table (`CustomerTodosTable.tsx`) still built its file in the browser — and, worse, its rows
+reached the browser **already aliased**: `todoTitle: interaction.title`, `todoDescription: interaction.body`,
+`customer.displayName` (verified at `todoCompatibility.ts:603,610`). The mask keys on the **true** field name
+(`title` → canonical `title`), so it **never matched the alias** (`todoTitle` → canonical `todotitle`), and the
+decrypted secret was exported **in clear**. `CC-49`'s job: close that third and last export leg of row 14.
+
+**Owner decision (rule 11):** `NY-18` = **Option B** — reroute the tasks export through the server and teach
+the shared mask the alias map (**additive**), mirroring the `CC-48` pattern. Recorded in `NEEDS-YOU.md`.
+
+**Step 4 — prerequisites re-measured in code (rule 0b), and it corrected my own premise (rule 13).**
+- The two marked entities are `customers:customer_interaction` (`title`, `body`) and `customers:customer_entity`
+  (`display_name`) — read live in `customers/encryption.ts:22,48`, **not** the `customer_todo` name the file
+  suggests (the `L102` trap).
+- **Correction (rule 13):** I first asserted `displayName` was **un**masked. **Measured: it was already
+  masked** — `displayName` canonicalizes to `displayname`, which **equals** `display_name` (the canonical form
+  strips the underscore and lowercases). So the only **genuine** leak was `todoTitle`/`todoDescription`; the
+  test was corrected to record the measured truth, not my first guess.
+
+**Step 5–6 — the build.**
+- **`shared/src/lib/crud/export-encryption.ts`:** added an **additive** `ExportFieldAliasMap` and an
+  `aliasTrueNames` resolver; `isEncryptedExportField` and `applyEncryptedFieldMask` now also consult the alias
+  map when one is supplied. **Absent ⇒ byte-identical** (existing callers unchanged).
+- **`customers/api/interactions/tasks/route.ts`:** a **server export mode** — when `format` is present the
+  route derives columns (from an `exportColumns` hint **or** `deriveScalarColumns`), **flattens** each row to
+  the exact column fields via `readValueAtPath`, resolves the marked fields for **both** entity ids via
+  `Promise.all` and **unions** them (`maskAll`/`some`), then `applyEncryptedFieldMask(preparedRaw, resolved,
+  TASKS_EXPORT_ALIASES)` → `serializeExport` → a download `Response`. The JSON branch is **unchanged**.
+- **`customers/components/CustomerTodosTable.tsx`:** both export sections moved from a browser `prepare` to a
+  server **`getUrl`** (`buildTasksExportUrl`), sending `format`/`exportColumns`; the now-dead browser helpers
+  (`readValueAtPath`, `buildPreparedExport`, the `PreparedExport` import) were removed.
+
+**The hostile critic (a SEPARATE agent) found three REAL defects — all in the first draft, all fixed.**
+- **(H1, CRITICAL) The wrong entity id ⇒ the mask was a silent no-op in production.** The first draft passed
+  `CUSTOMER_INTERACTION_TODO_ADAPTER_SOURCE` = `'adapter:todo'` (a row **source tag**) as the entityId, so
+  `getEncryptedFieldNames` matched **zero** rows. **FIXED:** pass `CUSTOMER_INTERACTION_ENTITY_ID`
+  (`'customers:customer_interaction'`) **and** union the marked fields of `customers:customer_entity` (the
+  nested `display_name` column draws on a second entity).
+- **(H2) A flat `format` export leaked the whole record in clear.** `serializeCsv` reads `row[col.field]`
+  (flat), so the nested `customer.displayName` column resolved to `undefined` — and **with no projection**,
+  `ensureColumns` derived a `customer` **object** column that serialized the entire record, leaking
+  `Secret Customer Name` **in clear**. **FIXED:** flatten every row to the exact column fields via
+  `readValueAtPath`, and derive un-projected columns from **scalar** keys only (`deriveScalarColumns`).
+- **(H3) The static guard was bypassable.** A computed `['pre'+'pare']` plus a hand-built `new Blob` /
+  `createObjectURL` download slipped past the string-match guard. **FIXED:** the guard now also rejects
+  computed/concatenated `prepare` spellings and any hand-assembled download.
+
+**And the test could not fail (the `L103` trap).** The first route test mocked the encryption service
+**entity-agnostically**, so it passed no matter which id the route asked for — the *exact* bug (H1) it existed
+to catch. **FIXED:** the mock is now **entity-aware** and asserts the route queried **both** real ids and never
+`'adapter:todo'`.
+
+**Evidence (rule 10 step 6).** 20 tests / 3 suites — **9 route** (entity-aware mock, `markCalls`), **6 static
+guard** (no `serializeExport`, no `prepare:`, no `Blob`/`createObjectURL`, both sections `getUrl`), **5 shared
+alias** (21/21 in the shared suite). **4 RED-then-GREEN mutations** — (1) wrong entity id → **4 RED**; (2) alias
+map off → **2 RED**; (3) the critic's `['pre'+'pare']`+`Blob` bypass → **3 RED**; (4) shared alias loop off →
+**2 RED** — each restore **md5-verified**. Green gate **core 5635/5635**, **shared 2555/2555**, **customers
+module 6883 pass** (1 pre-existing unrelated fail). `tsc --noEmit` exit **0** on core and shared; a temp
+parked-scope typecheck proved **0 new errors** in the changed files (the `customers` module is **parked** —
+excluded from `tsconfig`/jest — so the normal gates do not cover it; I used temp configs, deleted before
+finishing). **Two-route re-measure:** THE ONE NUMBER re-derived **unchanged at `72 / 321 = 22%`**.
+**Row 14 🟡 → ✅** — server (`CC-45`), custom-entity client (`CC-48`) and customer-tasks alias (`CC-49`) legs
+are all closed.
+
+**★ NEXT:** `CC-47` (row 15's human CRUD read leg) — the **sole** remaining FRONTIER item.
+
+---
+
 ### ✅ DONE — **`CC-48` (row 14 / `P4` classification leg, custom-entity CLIENT half): the records-page "View → Export" now goes THROUGH THE SERVER, so the `CC-45` mask applies.**
 **(2026-10-10; code repo `workspace/starting-kit`.)**
 
@@ -89,7 +161,8 @@ NUMBER re-derived by my script **and** a separate blind verifier's own script �
 72 / 321 = 22%, UNCHANGED** (`CC-48` closed a callback; the verifier also confirmed the appendix structure
 and the traps). **Row 14 stays 🟡** — the tasks leak (`CC-49`) remains.
 
-**★ NEXT:** `CC-47` (row 15's human CRUD read leg) · `CC-49` (the customer-tasks export leak).
+**★ NEXT (as of `CC-48`):** `CC-47` (row 15's human CRUD read leg) · `CC-49` (the customer-tasks export leak).
+*(Both since resolved: `CC-49` is ✅ above; `CC-47` is the sole remaining FRONTIER item.)*
 
 ---
 

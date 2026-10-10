@@ -3419,3 +3419,47 @@ confident label is not an inspection), rule 0 (the code is the evidence — so r
 routes or it is not a finding — the leak was confirmed by the critic **and** reproduced by me **and** a
 verifier), rule 13 (a falsified premise corrected everywhere it was copied), rule 11 (an owner's decision is
 not the assistant's to close — the new defect's fix choice was registered, not silently taken).*
+
+---
+
+## L103 — a mock that is **the same regardless of what you pass it** makes the test **unable to fail** on the one bug you are testing; and the **first** draft of a security fix is where the critic earns its keep
+
+**The trap (two, in one change).** Building `CC-49` — the customer-tasks export leak — my first route test
+mocked the encryption service **entity-agnostically**: `getEncryptedFieldNames: jest.fn(async () =>
+encryptedFields.value)`. It returned the same marked-field set no matter **which entity id** the route asked
+about. But the *entire* bug under test is "did the route ask the **right entity** for its marked fields?" —
+and with that mock, a route that asked for **any** id (or none) still passed. The test **could not fail** on
+the exact defect it existed to catch. **The same first draft then passed the wrong id in production too:**
+`CUSTOMER_INTERACTION_TODO_ADAPTER_SOURCE` = `'adapter:todo'` (a row **source tag**) instead of
+`CUSTOMER_INTERACTION_ENTITY_ID` = `'customers:customer_interaction'` (the entity id), so
+`getEncryptedFieldNames` matched **zero** rows and the mask was a **silent no-op** — the leak the fix was
+supposed to close would have shipped, with a green test beside it.
+
+**How it was caught.** Only by the **mandatory hostile critic, a separate agent**. It ran the fix's *own*
+premise through the code and noticed the mock's output never depended on its argument, then traced the id
+back to its definition and found it was a source tag, not an entity id. I had already written a "tests
+prove it" line into the plan. **I reproduced both from the code** (rule 2) before fixing.
+
+**The rule.** (1) A mock **must depend on the argument the code under test varies**; if the thing you are
+testing is *which* value was passed, the mock must return **different** results for different values and the
+test must **assert the value was asked for** (here: assert the route queried **both**
+`customers:customer_interaction` **and** `customers:customer_entity`, and never `adapter:todo`). A mock that
+returns a constant is a **tautology** (see L99) wearing a service stub. (2) **Interrogate a constant that
+looks like an identifier**: before using an exported `*_ID`/`*_SOURCE` constant as an id, **read where it is
+defined** and confirm its *value* is the id the callee matches on — `..._SOURCE` and `..._ENTITY_ID` are
+different kinds of thing even when both are strings. (3) A fix that spans **two** entities must resolve the
+marked fields of **both** and treat a field as marked if **either** says so (`some`, not `every`), or half
+the leak survives.
+
+**The second half — the fix's first draft is where the critic earns its keep.** All three of this change's
+real defects (the wrong id above; a **flat** `format` export that left a nested `customer.displayName`
+column `undefined` and, with no projection, serialized the **whole object** in clear; and a static guard
+that a `['pre'+'pare']` + hand-built `Blob` download could slip past) were **in the first draft** and were
+found **only** by the separate-agent critic. A correctness pass by the author is not a substitute: the
+author reads for *intent*, the critic reads for *falsification*. Budget it as part of the change, not as an
+optional extra.
+
+*Cross-ref: L99 (a tautological test — here the tautology was a *constant mock*), L102 (the sibling
+false-negative in the same feature: the wrong *entity* dismissed a leak), L101 (a measurement was the
+defect), rule 2 (two routes — both the wrong id and the flat-export leak were reproduced independently), rule
+10 step 6 (the hostile critic as a **separate** agent is mandatory, and here it found every real defect).*

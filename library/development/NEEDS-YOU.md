@@ -28,7 +28,7 @@ anything else first. Where an item is **not** a decision, it says so, and you ca
 
 ---
 
-## Part 1 — Decisions I need (**1 open** — `NY-18`, the customer-tasks export fix, a real open leak; `NY-16` and `NY-17` **decided 2026-10-10** ("we follow your recommendations" → blank the value; Option B); `NY-15` decided 2026-10-09; `NY-14` closed 2026-10-06; `NY-1`, `NY-2`, `NY-8`, `NY-13` closed; `NY-4` is "nothing needed")
+## Part 1 — Decisions I need (**0 open** — `NY-18` **decided 2026-10-10** ("we follow your recommendations" → Option B, built as `CC-49`); `NY-16` and `NY-17` **decided 2026-10-10** (blank the value; Option B); `NY-15` decided 2026-10-09; `NY-14` closed 2026-10-06; `NY-1`, `NY-2`, `NY-8`, `NY-13` closed; `NY-4` is "nothing needed")
 
 > **Numbering note.** Items are numbered once and **never reused**, so that a number you have already
 > quoted keeps meaning the same thing. Item 8 was appended here on 2026-10-05 and answered the same
@@ -61,29 +61,21 @@ the browser. Options A (blank in the browser, which would expose the secret fiel
 C (hide marked columns from every records table) were rejected. Built and measured as **`CC-48`**; see
 `PLAN-CC-48-client-view-export-leak.md`.
 
-### `NY-18` — The customer **tasks** table leaks the same way (a *different* fix needed): which shape? — **DECIDE** *(nothing is exposed until you choose; recommendation below)*
+### `NY-18` — The customer **tasks** table leaks the same way (a *different* fix needed): which shape? — ✅ **DECIDED 2026-10-10: Option B (server export mode)** *(built as `CC-49`)*
 
-**What is left — found by the `CC-48` critic after your two rulings, and reproduced twice.** The
-**customer tasks** table ("Work plan → Tasks → Export") builds its file **in the browser** too. Its rows
-carry a task's **title** and **description** and the **customer's name** — and those three are **marked
-(secret)** fields in the database. Because the table renames them on the way in (`todoTitle`, `todoDescription`,
-`displayName`), the server's blanking rule — which matches on the **real** field name (`title`, `body`,
-`display_name`) — **never matches the alias**, so the file gets the real values. This is `CC-49`.
+**Your ruling: Option B** (`"we follow your recommendations"`) — the customer-tasks export is now built
+**by the server** (the same pattern as the records page after `CC-48`), so the mask blanks the aliased
+columns (`todoTitle`/`todoDescription`/`displayName`) and nothing new reaches the browser. Built and
+measured as **`CC-49`** (done 2026-10-10); see `PLAN-CC-49-tasks-alias-export-leak.md`. Option A (mask in
+the browser) was rejected for the same reason as `NY-17` A — it names the secret columns to the client.
 
-**Two ways to close it — pick one:**
+**What this was.** The customer tasks table ("Work plan → Tasks → Export") built its file in the browser
+too, and its rows carried a task's **title**/**description** and the **customer's name** — all marked
+(secret) fields. Because the table renamed them (`todoTitle`, `todoDescription`, `displayName`), the
+server's blanking rule — which matches on the **real** field name — never matched the alias, so the file
+got the real values. This was a **real, open leak** (not a preference), and it is now closed.
 
-- **(A) Blank it in the browser.** The tasks page gets told "blank `todoTitle`, `todoDescription`,
-  `displayName`". *If yes:* the export stops leaking; the browser learns the *list of which columns are
-  secret* (names only, never values).
-- **(B) Give the tasks route a server export mode** (like the records page now has, after `CC-48`). The
-  server builds the file and blanks the aliased columns there. *If yes:* nothing extra is revealed, and it
-  matches the shape you already approved for the records page. Cost: a small amount of new server code
-  (the tasks route currently only returns data, it has no "download a file" mode).
-
-**My recommendation: (B)** — same reasoning as `NY-17`: it reuses the pattern you already approved and
-reveals nothing new. Say `NY-18 B` (or A) and I will build it. **Counter-note for honesty:** this one is a
-**real leak that is still open right now** — unlike `NY-16`/`NY-17`, it is not "already safe by default".
-
+---
 
 ### `NY-1` — Reset the local dev database? — ✅ **DONE 2026-10-05** *(no longer needs you)*
 
