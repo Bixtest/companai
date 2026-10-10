@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation'
 import type { ColumnDef } from '@tanstack/react-table'
 import { useQuery, keepPreviousData } from '@tanstack/react-query'
 import { DataTable, type DataTableExportFormat } from '@open-mercato/ui/backend/DataTable'
-import type { PreparedExport } from '@open-mercato/shared/lib/crud/exporters'
 import { RowActions } from '@open-mercato/ui/backend/RowActions'
 import { BooleanIcon } from '@open-mercato/ui/backend/ValueIcons'
 import { flash } from '@open-mercato/ui/backend/FlashMessages'
@@ -75,16 +74,6 @@ function buildCustomerTasksQueryString(input: {
   if (input.search.trim().length > 0) usp.set('search', input.search.trim())
   if (input.all) usp.set('all', 'true')
   return usp.toString()
-}
-
-function readValueAtPath(record: Record<string, unknown>, path: string): unknown {
-  const segments = path.split('.').filter((segment) => segment.length > 0)
-  let current: unknown = record
-  for (const segment of segments) {
-    if (!current || typeof current !== 'object') return null
-    current = (current as Record<string, unknown>)[segment]
-  }
-  return current ?? null
 }
 
 export function CustomerTodosTable(): React.JSX.Element {
@@ -156,19 +145,6 @@ export function CustomerTodosTable(): React.JSX.Element {
       .filter((col): col is { field: string; header: string } => !!col)
   }, [columns])
 
-  const buildPreparedExport = React.useCallback((
-    exportRows: CustomerTodoItem[],
-    exportColumns: Array<{ field: string; header: string }>,
-  ): PreparedExport => ({
-    columns: exportColumns.map((col) => ({ field: col.field, header: col.header })),
-    rows: exportRows.map((row) => {
-      const record = row as Record<string, unknown>
-      return Object.fromEntries(
-        exportColumns.map((col) => [col.field, readValueAtPath(record, col.field)]),
-      )
-    }),
-  }), [])
-
   const fetchTasks = React.useCallback(async (queryString: string): Promise<CustomerTodosResponse> => {
     return readApiResultOrThrow<CustomerTodosResponse>(
       `${CUSTOMER_TASKS_API_PATH}?${queryString}`,
@@ -185,32 +161,34 @@ export function CustomerTodosTable(): React.JSX.Element {
 
   const rows = data?.items ?? []
 
+  // CC-49: the export is served by the server (not assembled in the browser), so the CC-45
+  // encryption mask applies and blanks the marked fields the columns alias (`todoTitle`,
+  // `todoDescription`, `displayName`). Passing the visible columns lets the file match what the
+  // operator sees, exactly like the records page after CC-48.
+  const buildTasksExportUrl = React.useCallback((
+    format: DataTableExportFormat,
+    full: boolean,
+  ): string => {
+    const usp = new URLSearchParams({ page: '1', pageSize: String(pageSize), format })
+    if (full) usp.set('all', 'true')
+    if (search.trim().length > 0) usp.set('search', search.trim())
+    const visibleFields = viewExportColumns.map((col) => col.field).filter(Boolean)
+    if (visibleFields.length) usp.set('exportColumns', visibleFields.join(','))
+    return `${CUSTOMER_TASKS_API_PATH}?${usp.toString()}`
+  }, [pageSize, search, viewExportColumns])
+
   const exportConfig = React.useMemo(() => ({
     view: {
       description: t('customers.workPlan.customerTodos.table.export.view'),
-      prepare: async (): Promise<{ prepared: PreparedExport; filename: string }> => {
-        return {
-          prepared: buildPreparedExport(rows, viewExportColumns),
-          filename: 'customer_todos_view',
-        }
-      },
+      getUrl: (format: DataTableExportFormat) => buildTasksExportUrl(format, false),
+      filename: () => 'customer_todos_view',
     },
     full: {
       description: t('customers.workPlan.customerTodos.table.export.full'),
-      prepare: async (_format: DataTableExportFormat): Promise<{ prepared: PreparedExport; filename: string }> => {
-        const fullData = await fetchTasks(buildCustomerTasksQueryString({
-          page: 1,
-          pageSize,
-          search,
-          all: true,
-        }))
-        return {
-          prepared: buildPreparedExport(fullData.items, viewExportColumns),
-          filename: 'customer_todos_full',
-        }
-      },
+      getUrl: (format: DataTableExportFormat) => buildTasksExportUrl(format, true),
+      filename: () => 'customer_todos_full',
     },
-  }), [buildPreparedExport, fetchTasks, pageSize, rows, search, t, viewExportColumns])
+  }), [buildTasksExportUrl, t])
 
   const handleRefresh = React.useCallback(async () => {
     try {

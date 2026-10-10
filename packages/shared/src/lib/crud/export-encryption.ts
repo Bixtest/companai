@@ -86,6 +86,30 @@ export type ExportEncryptedFieldResult = {
   maskAll: boolean
 }
 
+/**
+ * CC-49 — an export column may be an **alias** for a marked field (e.g. the tasks table exports
+ * `todoTitle`, which is set from the marked `customer_interaction.title`). The mask keys on the
+ * field name, so an alias never matches and the value leaves in clear. An alias map lets a caller
+ * name those renames: `{ todoTitle: 'title', todoDescription: 'body' }`. The mask then tests each
+ * exported column against **both** its own name and its mapped true name, so the value is masked
+ * under whichever spelling the marked set uses. Additive: an unmapped/absent map changes nothing.
+ */
+export type ExportFieldAliasMap = Record<string, string | readonly string[]>
+
+function aliasTrueNames(field: string, aliases?: ExportFieldAliasMap | null): string[] {
+  if (!aliases) return []
+  const raw = String(field || '').trim()
+  if (!raw) return []
+  const mapped =
+    aliases[raw]
+    ?? aliases[canonicalExportFieldName(raw)]
+    ?? Object.entries(aliases).find(
+      ([key]) => canonicalExportFieldName(key) === canonicalExportFieldName(raw),
+    )?.[1]
+  if (mapped == null) return []
+  return Array.isArray(mapped) ? mapped.map((v) => String(v)) : [String(mapped)]
+}
+
 export async function resolveExportEncryptedFields(
   resolveService: ExportEncryptionResolver | ExportEncryptionService | null | undefined,
   entityId: string | null | undefined,
@@ -126,14 +150,29 @@ function safeResolve(resolver: ExportEncryptionResolver): ExportEncryptionServic
 /**
  * True when `field` is marked. Compares the CANONICAL form of both sides, so map `apiSecret`
  * matches export column `api-secret` / `Api Secret` / `API_SECRET` / `api_secret`.
+ *
+ * CC-49: when `aliases` is supplied, a column is also considered marked if the **true field it
+ * aliases** is marked — so an export of `todoTitle` (aliasing `title`) is masked even though the
+ * marked set (correctly) names only `title`.
  */
-export function isEncryptedExportField(field: string, encrypted: ReadonlySet<string>): boolean {
+export function isEncryptedExportField(
+  field: string,
+  encrypted: ReadonlySet<string>,
+  aliases?: ExportFieldAliasMap | null,
+): boolean {
   if (!encrypted || encrypted.size === 0) return false
   const canonical = canonicalExportFieldName(field)
   if (!canonical) return false
   if (encrypted.has(canonical)) return true
   // Backstop: also try the raw spelling, in case a caller populated the set directly with raw names.
-  return encrypted.has(String(field || '').trim())
+  if (encrypted.has(String(field || '').trim())) return true
+  // CC-49: check the true name(s) this column aliases.
+  for (const trueName of aliasTrueNames(field, aliases)) {
+    const trueCanonical = canonicalExportFieldName(trueName)
+    if (trueCanonical && encrypted.has(trueCanonical)) return true
+    if (encrypted.has(String(trueName || '').trim())) return true
+  }
+  return false
 }
 
 /**
@@ -141,17 +180,21 @@ export function isEncryptedExportField(field: string, encrypted: ReadonlySet<str
  * keeps its header but receives {@link MASKED_EXPORT_VALUE} for every row. When `maskAll` is set
  * (fail-closed) every column is masked. A no-op when nothing is marked, so an unmarked export is
  * byte-unchanged.
+ *
+ * CC-49: `aliases` (optional) names export-column→true-field renames, so an aliased column is masked
+ * when the **true** field it carries is marked. Absent, behaviour is byte-identical to pre-CC-49.
  */
 export function applyEncryptedFieldMask(
   prepared: PreparedExport,
   resolved: ExportEncryptedFieldResult,
+  aliases?: ExportFieldAliasMap | null,
 ): PreparedExport {
   if (!resolved) return prepared
   const { fields, maskAll } = resolved
   if (!maskAll && (!fields || fields.size === 0)) return prepared
   const maskedFields = new Set<string>()
   for (const column of prepared.columns) {
-    if (maskAll || isEncryptedExportField(column.field, fields)) maskedFields.add(column.field)
+    if (maskAll || isEncryptedExportField(column.field, fields, aliases)) maskedFields.add(column.field)
   }
   if (maskedFields.size === 0) return prepared
   const rows = prepared.rows.map((row) => {

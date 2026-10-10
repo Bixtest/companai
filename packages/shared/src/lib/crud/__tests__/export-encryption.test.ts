@@ -168,3 +168,67 @@ describe('CC-45 header-spelling variants are all masked (D2 regression)', () => 
     expect(isEncryptedExportField('id', fields)).toBe(false)
   })
 })
+
+describe('CC-49 alias map — an exported column that renames a marked field is masked', () => {
+  // The tasks table exports `todoTitle` (aliasing the marked `title`), `todoDescription` (aliasing
+  // `body`) and the customer `displayName` (aliasing `display_name`). The mask keys on the true
+  // name, so without the alias map the value left in clear (L102).
+  const tasksExport = (): PreparedExport => ({
+    columns: [
+      { field: 'todoTitle', header: 'Task' },
+      { field: 'todoDescription', header: 'Description' },
+      { field: 'displayName', header: 'Customer' },
+      { field: 'todoIsDone', header: 'Done' },
+    ],
+    rows: [
+      {
+        todoTitle: 'Secret task title',
+        todoDescription: 'Secret task body',
+        displayName: 'Secret Customer',
+        todoIsDone: false,
+      },
+    ],
+  })
+
+  const marked = new Set(['title', 'body', 'displayname'])
+  const aliases = { todoTitle: 'title', todoDescription: 'body', displayName: 'display_name' }
+
+  it('WITHOUT the alias map, todoTitle/todoDescription are NOT masked (this was the leak)', () => {
+    // Measured: `displayName` canonicalizes to `displayname`, which equals the marked column
+    // `display_name` — so it was already masked by the canonical match. But `todoTitle` → `todotitle`
+    // and `todoDescription` → `tododescription` do NOT equal `title`/`body`, so those two leaked.
+    const fields = new Set(['title', 'body', 'displayname'])
+    const result = applyEncryptedFieldMask(tasksExport(), { fields, maskAll: false })
+    const row = result.rows[0]
+    expect(row.todoTitle).toBe('Secret task title')
+    expect(row.todoDescription).toBe('Secret task body')
+    expect(row.displayName).toBe(MASKED_EXPORT_VALUE)
+  })
+
+  it('WITH the alias map, every aliased column is masked and none leaks', () => {
+    const result = applyEncryptedFieldMask(tasksExport(), { fields: marked, maskAll: false }, aliases)
+    const row = result.rows[0]
+    expect(row.todoTitle).toBe(MASKED_EXPORT_VALUE)
+    expect(row.todoDescription).toBe(MASKED_EXPORT_VALUE)
+    expect(row.displayName).toBe(MASKED_EXPORT_VALUE)
+    // The unmarked column is untouched.
+    expect(row.todoIsDone).toBe(false)
+  })
+
+  it('is a no-op when nothing is marked, even with an alias map present', () => {
+    const result = applyEncryptedFieldMask(tasksExport(), { fields: new Set(), maskAll: false }, aliases)
+    expect(result.rows[0].todoTitle).toBe('Secret task title')
+  })
+
+  it('supports a column aliasing several true names (array form)', () => {
+    const fields = new Set(['body'])
+    const map = { combined: ['title', 'body'] as const }
+    expect(isEncryptedExportField('combined', fields, map)).toBe(true)
+  })
+
+  it('does not mask an unmapped column', () => {
+    const fields = new Set(['title', 'body'])
+    const map = { other: 'title' }
+    expect(isEncryptedExportField('todoIsDone', fields, map)).toBe(false)
+  })
+})
