@@ -105,6 +105,7 @@ export const searchConfig: SearchModuleConfig = {
       fieldPolicy: {
         searchable: ['name', 'description', 'timezone'],
       },
+      aclFeatures: ['planner.view'],
     },
   ],
 }

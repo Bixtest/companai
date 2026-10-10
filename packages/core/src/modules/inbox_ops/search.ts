@@ -64,6 +64,7 @@ export const searchConfig: SearchModuleConfig = {
         if (!id) return null
         return `/backend/inbox-ops/proposals/${encodeURIComponent(String(id))}`
       },
+      aclFeatures: ['inbox_ops.proposals.view'],
     },
   ],
 }

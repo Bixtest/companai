@@ -25,6 +25,7 @@ export const searchConfig: SearchModuleConfig = {
         subtitle: `/pay/${asSearchText(ctx.record.slug)}`,
         icon: 'lucide:link',
       }),
+      aclFeatures: ['checkout.view'],
     },
     {
       entityId: CHECKOUT_ENTITY_IDS.template,
@@ -44,6 +45,7 @@ export const searchConfig: SearchModuleConfig = {
         subtitle: 'Link Template',
         icon: 'lucide:file-text',
       }),
+      aclFeatures: ['checkout.view'],
     },
   ],
 }

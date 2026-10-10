@@ -332,6 +332,7 @@ export const searchConfig: SearchModuleConfig = {
         ],
         excluded: ['metadata', 'dimensions', 'tax_rate_id'],
       },
+      aclFeatures: ['catalog.products.view'],
     },
     {
       entityId: 'catalog:catalog_product_variant',
@@ -360,6 +361,7 @@ export const searchConfig: SearchModuleConfig = {
         searchable: ['name', 'sku', 'barcode'],
         excluded: ['metadata', 'dimensions', 'option_values', 'tax_rate_id'],
       },
+      aclFeatures: ['catalog.products.view'],
     },
     {
       entityId: 'catalog:catalog_product_category',
@@ -384,6 +386,7 @@ export const searchConfig: SearchModuleConfig = {
         searchable: ['name', 'slug', 'description', 'tree_path'],
         excluded: ['metadata', 'ancestor_ids', 'child_ids', 'descendant_ids'],
       },
+      aclFeatures: ['catalog.categories.view'],
     },
     {
       entityId: 'catalog:catalog_offer',
@@ -410,6 +413,7 @@ export const searchConfig: SearchModuleConfig = {
         searchable: ['title', 'description'],
         excluded: ['metadata'],
       },
+      aclFeatures: ['catalog.products.view'],
     },
     {
       entityId: 'catalog:catalog_product_tag',
@@ -431,6 +435,7 @@ export const searchConfig: SearchModuleConfig = {
       fieldPolicy: {
         searchable: ['label', 'slug'],
       },
+      aclFeatures: ['catalog.products.view'],
     },
     {
       entityId: 'catalog:catalog_price_kind',
@@ -454,6 +459,7 @@ export const searchConfig: SearchModuleConfig = {
       fieldPolicy: {
         searchable: ['title', 'code'],
       },
+      aclFeatures: ['catalog.products.view'],
     },
     {
       entityId: 'catalog:catalog_product_unit_conversion',
@@ -482,6 +488,7 @@ export const searchConfig: SearchModuleConfig = {
         searchable: ['unit_code'],
         excluded: ['metadata'],
       },
+      aclFeatures: ['catalog.products.view'],
     },
     {
       entityId: 'catalog:catalog_option_schema_template',
@@ -505,6 +512,7 @@ export const searchConfig: SearchModuleConfig = {
         searchable: ['name', 'code', 'description'],
         excluded: ['schema', 'metadata'],
       },
+      aclFeatures: ['catalog.products.view'],
     },
   ],
 }

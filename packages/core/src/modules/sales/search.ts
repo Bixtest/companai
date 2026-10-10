@@ -423,6 +423,7 @@ export const searchConfig: SearchModuleConfig = {
         const channelId = readRecordText(ctx.record, 'id')
         return channelId ? `${SALES_CHANNELS_URL}/${encodeURIComponent(channelId)}/edit` : SALES_CHANNELS_URL
       },
+      aclFeatures: ['sales.channels.view'],
     },
     {
       entityId: 'sales:sales_order',
@@ -446,6 +447,7 @@ export const searchConfig: SearchModuleConfig = {
         return buildOrderPresenter(translate, ctx.record, ctx.customFields)
       },
       resolveUrl: async (ctx) => buildOrderUrl(readRecordText(ctx.record, 'id')),
+      aclFeatures: ['sales.orders.view'],
     },
     {
       entityId: 'sales:sales_quote',
@@ -468,6 +470,7 @@ export const searchConfig: SearchModuleConfig = {
         return buildQuotePresenter(translate, ctx.record, ctx.customFields)
       },
       resolveUrl: async (ctx) => buildQuoteUrl(readRecordText(ctx.record, 'id')),
+      aclFeatures: ['sales.quotes.view'],
     },
     {
       entityId: 'sales:sales_order_line',
@@ -496,6 +499,7 @@ export const searchConfig: SearchModuleConfig = {
         return buildOrderLinePresenter(translate, ctx.record)
       },
       resolveUrl: async (ctx) => buildOrderUrl(resolveOrderId(ctx.record)),
+      aclFeatures: ['sales.orders.view'],
     },
     {
       entityId: 'sales:sales_quote_line',
@@ -524,6 +528,7 @@ export const searchConfig: SearchModuleConfig = {
         return buildQuoteLinePresenter(translate, ctx.record)
       },
       resolveUrl: async (ctx) => buildQuoteUrl(resolveQuoteId(ctx.record)),
+      aclFeatures: ['sales.quotes.view'],
     },
     {
       entityId: 'sales:sales_order_adjustment',
@@ -544,6 +549,7 @@ export const searchConfig: SearchModuleConfig = {
         return buildOrderAdjustmentPresenter(translate, ctx.record)
       },
       resolveUrl: async (ctx) => buildOrderUrl(resolveOrderId(ctx.record)),
+      aclFeatures: ['sales.orders.view'],
     },
     {
       entityId: 'sales:sales_quote_adjustment',
@@ -564,6 +570,7 @@ export const searchConfig: SearchModuleConfig = {
         return buildQuoteAdjustmentPresenter(translate, ctx.record)
       },
       resolveUrl: async (ctx) => buildQuoteUrl(resolveQuoteId(ctx.record)),
+      aclFeatures: ['sales.quotes.view'],
     },
     {
       entityId: 'sales:sales_shipment',
@@ -584,6 +591,7 @@ export const searchConfig: SearchModuleConfig = {
         return buildShipmentPresenter(translate, ctx.record)
       },
       resolveUrl: async (ctx) => buildOrderUrl(resolveOrderId(ctx.record)),
+      aclFeatures: ['sales.orders.view'],
     },
     {
       entityId: 'sales:sales_shipment_item',
@@ -602,6 +610,7 @@ export const searchConfig: SearchModuleConfig = {
         return buildShipmentItemPresenter(translate, ctx.record)
       },
       resolveUrl: async (ctx) => buildOrderUrl(resolveOrderId(ctx.record)),
+      aclFeatures: ['sales.orders.view'],
     },
     {
       entityId: 'sales:sales_invoice',
@@ -622,6 +631,7 @@ export const searchConfig: SearchModuleConfig = {
         return buildInvoicePresenter(translate, ctx.record)
       },
       resolveUrl: async (ctx) => buildOrderUrl(resolveOrderId(ctx.record)),
+      aclFeatures: ['sales.orders.view'],
     },
     {
       entityId: 'sales:sales_invoice_line',
@@ -648,6 +658,7 @@ export const searchConfig: SearchModuleConfig = {
         return buildInvoiceLinePresenter(translate, ctx.record)
       },
       resolveUrl: async (ctx) => buildOrderUrl(resolveOrderId(ctx.record)),
+      aclFeatures: ['sales.orders.view'],
     },
     {
       entityId: 'sales:sales_credit_memo',
@@ -668,6 +679,7 @@ export const searchConfig: SearchModuleConfig = {
         return buildCreditMemoPresenter(translate, ctx.record)
       },
       resolveUrl: async (ctx) => buildOrderUrl(resolveOrderId(ctx.record)),
+      aclFeatures: ['sales.orders.view'],
     },
     {
       entityId: 'sales:sales_credit_memo_line',
@@ -694,6 +706,7 @@ export const searchConfig: SearchModuleConfig = {
         return buildCreditMemoLinePresenter(translate, ctx.record)
       },
       resolveUrl: async (ctx) => buildOrderUrl(resolveOrderId(ctx.record)),
+      aclFeatures: ['sales.orders.view'],
     },
     {
       entityId: 'sales:sales_payment',
@@ -714,6 +727,7 @@ export const searchConfig: SearchModuleConfig = {
         return buildPaymentPresenter(translate, ctx.record)
       },
       resolveUrl: async (ctx) => buildOrderUrl(resolveOrderId(ctx.record)),
+      aclFeatures: ['sales.orders.view'],
     },
     {
       entityId: 'sales:sales_payment_allocation',
@@ -734,6 +748,7 @@ export const searchConfig: SearchModuleConfig = {
         return buildPaymentAllocationPresenter(translate, ctx.record)
       },
       resolveUrl: async (ctx) => buildOrderUrl(resolveOrderId(ctx.record)),
+      aclFeatures: ['sales.orders.view'],
     },
     {
       entityId: 'sales:sales_note',
@@ -757,6 +772,7 @@ export const searchConfig: SearchModuleConfig = {
         const documentId = resolveDocumentId(ctx.record)
         return resolveDocumentUrl(kind, documentId)
       },
+      aclFeatures: ['sales.orders.view'],
     },
     {
       entityId: 'sales:sales_document_address',
@@ -783,6 +799,7 @@ export const searchConfig: SearchModuleConfig = {
         const documentId = resolveDocumentId(ctx.record)
         return resolveDocumentUrl(kind, documentId)
       },
+      aclFeatures: ['sales.orders.view'],
     },
     {
       entityId: 'sales:sales_shipping_method',
@@ -803,6 +820,7 @@ export const searchConfig: SearchModuleConfig = {
         return buildShippingMethodPresenter(translate, ctx.record)
       },
       resolveUrl: async () => SALES_CONFIG_URL,
+      aclFeatures: ['sales.orders.view'],
     },
     {
       entityId: 'sales:sales_delivery_window',
@@ -823,6 +841,7 @@ export const searchConfig: SearchModuleConfig = {
         return buildDeliveryWindowPresenter(translate, ctx.record)
       },
       resolveUrl: async () => SALES_CONFIG_URL,
+      aclFeatures: ['sales.orders.view'],
     },
     {
       entityId: 'sales:sales_payment_method',
@@ -843,6 +862,7 @@ export const searchConfig: SearchModuleConfig = {
         return buildPaymentMethodPresenter(translate, ctx.record)
       },
       resolveUrl: async () => SALES_CONFIG_URL,
+      aclFeatures: ['sales.settings.view'],
     },
     {
       entityId: 'sales:sales_tax_rate',
@@ -863,6 +883,7 @@ export const searchConfig: SearchModuleConfig = {
         return buildTaxRatePresenter(translate, ctx.record)
       },
       resolveUrl: async () => SALES_CONFIG_URL,
+      aclFeatures: ['sales.settings.view'],
     },
     {
       entityId: 'sales:sales_document_tag',
@@ -882,6 +903,7 @@ export const searchConfig: SearchModuleConfig = {
         return buildDocumentTagPresenter(translate, ctx.record)
       },
       resolveUrl: async () => SALES_ORDERS_URL,
+      aclFeatures: ['sales.orders.view'],
     },
   ],
 }

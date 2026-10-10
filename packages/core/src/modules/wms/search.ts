@@ -127,6 +127,7 @@ export const searchConfig: SearchModuleConfig = {
       fieldPolicy: {
         searchable: ['name', 'code', 'city', 'country', 'timezone'],
       },
+      aclFeatures: ['wms.view'],
     },
     {
       entityId: E.wms.warehouse_location,
@@ -152,6 +153,7 @@ export const searchConfig: SearchModuleConfig = {
       fieldPolicy: {
         searchable: ['code', 'type', 'warehouse_id', 'parent_id', 'capacity_units', 'capacity_weight'],
       },
+      aclFeatures: ['wms.view'],
     },
     {
       entityId: E.wms.product_inventory_profile,
@@ -192,6 +194,7 @@ export const searchConfig: SearchModuleConfig = {
           'safety_stock',
         ],
       },
+      aclFeatures: ['wms.view'],
     },
     {
       entityId: E.wms.inventory_lot,
@@ -222,6 +225,7 @@ export const searchConfig: SearchModuleConfig = {
       fieldPolicy: {
         searchable: ['lot_number', 'batch_number', 'sku', 'catalog_variant_id', 'status', 'expires_at'],
       },
+      aclFeatures: ['wms.view'],
     },
   ],
 }

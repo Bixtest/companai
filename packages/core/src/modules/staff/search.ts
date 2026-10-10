@@ -141,6 +141,7 @@ export const searchConfig: SearchModuleConfig = {
       fieldPolicy: {
         searchable: ['name', 'description'],
       },
+      aclFeatures: ['staff.view'],
     },
     {
       entityId: 'staff:staff_team_member',
@@ -164,6 +165,7 @@ export const searchConfig: SearchModuleConfig = {
       fieldPolicy: {
         searchable: ['display_name', 'description', 'tags'],
       },
+      aclFeatures: ['staff.view'],
     },
     {
       entityId: 'staff:staff_team_role',
@@ -187,6 +189,7 @@ export const searchConfig: SearchModuleConfig = {
       fieldPolicy: {
         searchable: ['name', 'description', 'appearance_icon', 'appearance_color'],
       },
+      aclFeatures: ['staff.view'],
     },
     {
       entityId: 'staff:staff_time_project',
@@ -222,6 +225,7 @@ export const searchConfig: SearchModuleConfig = {
       fieldPolicy: {
         searchable: ['name', 'code', 'description', 'project_type', 'cost_center'],
       },
+      aclFeatures: ['staff.view'],
     },
   ],
 }

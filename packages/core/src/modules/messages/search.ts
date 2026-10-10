@@ -80,6 +80,7 @@ export const searchConfig: SearchModuleConfig = {
         hashOnly: ['external_email'],
         excluded: ['action_data', 'action_result'],
       },
+      aclFeatures: ['messages.view'],
     },
   ],
 }

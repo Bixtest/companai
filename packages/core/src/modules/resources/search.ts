@@ -128,6 +128,7 @@ export const searchConfig: SearchModuleConfig = {
       fieldPolicy: {
         searchable: ['name', 'description', 'capacity', 'capacity_unit_name', 'capacity_unit_value', 'tags'],
       },
+      aclFeatures: ['resources.view'],
     },
     {
       entityId: 'resources:resources_resource_type',
@@ -151,6 +152,7 @@ export const searchConfig: SearchModuleConfig = {
       fieldPolicy: {
         searchable: ['name', 'description', 'appearance_icon', 'appearance_color'],
       },
+      aclFeatures: ['resources.view'],
     },
   ],
 }

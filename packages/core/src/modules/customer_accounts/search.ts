@@ -90,6 +90,7 @@ export const searchConfig: SearchModuleConfig = {
         searchable: ['display_name', 'email'],
         excluded: ['password_hash', 'email_hash'],
       },
+      aclFeatures: ['customer_accounts.view'],
     },
     {
       entityId: 'customer_accounts:customer_role',
@@ -126,6 +127,7 @@ export const searchConfig: SearchModuleConfig = {
       fieldPolicy: {
         searchable: ['name', 'description'],
       },
+      aclFeatures: ['customer_accounts.view'],
     },
   ],
 }
