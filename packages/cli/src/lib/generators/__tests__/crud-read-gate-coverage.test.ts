@@ -72,9 +72,12 @@
  *     the `buildDocumentCrudOptions` family, …) is NOT audited by A.
  *   - Assertion B covers routes that EXPORT a `GET` (296 files, all export forms). A route that
  *     serves a list read without exporting a `GET` binding is outside both.
- *   - The union of A and B is not all 457 route files: 163 files are in neither, and they are
- *     overwhelmingly action/mutation endpoints (`/cancel`, `/retry`, `/assign`, `/confirm`,
- *     `/reject`, `/advance`, `/send`, `/reindex`, …) — POST/PUT handlers, not human list reads.
+ *   - The union of A and B is not all 457 route files: **161** files are in neither, and every one of
+ *     them is a mutation endpoint (POST/PUT/PATCH/DELETE) — **zero export a `GET`** (measured 2026-10-10
+ *     by three independent routes: a comment-stripped regex scan, a TypeScript-AST walk, and a union
+ *     computation; the earlier figure "163" was the *pre-fix* value, before the destructured-export fix
+ *     lifted B from 287 to 296 — see the discovery-gap note above; the two files that moved,
+ *     `sales/api/order-lines` and `sales/api/quote-lines`, are `makeSalesLineRoute` lists).
  *     CC-47 is scoped to the *human CRUD list* path, so that is intended, not a gap. Where a
  *     genuine GET list falls outside both nets it must be visible, not silent — hence the pinned
  *     `DELEGATED_GATED_ROUTES` list, which now names the two `makeSalesLineRoute` line lists.
