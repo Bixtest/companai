@@ -532,7 +532,7 @@ started while a higher one is open). If you move something, write one line besid
 - ☐ **P13** — The i18n management surface *(OPEN)*
 - ☐ **P7** — Notification templates: code-defined vs user-editable *(OPEN — needs the owner only if a template surface is wanted)*
 - ☐ **P12** — API keys: complete the routes *(OPEN)*
-- ☐ **P10** — Search gate coverage: extend `aclFeatures` to every searchable entity + the aggregate fail-closed rule *(OPEN — blocks the AI data work. Re-measured 2026-10-10: **6 `aclFeatures` declarations across ~67-69** search `entityId` configs, ALL in `customers`; the earlier "6 of 67 tables" figure is substantially correct. Row 15's remainder → **`CC-46`**.)*
+- ☐ **P10** — Search gate coverage: extend `aclFeatures` to every searchable entity + the aggregate fail-closed rule *(OPEN — blocks the AI data work. Re-measured 2026-10-10: **6 `aclFeatures` declarations across 67** search `entityId:` configs, ALL in `customers`; the earlier "6 of 67 tables" figure is substantially correct. **Fact-checked 2026-10-10: `CC-46` IS buildable now** — every searchable module declares at least one own `.view` feature, so each undeclared entity maps to an existing feature without inventing one (see `CC-46`). The **coverage gate** (a check that fails when a new searchable entity lacks `aclFeatures`) is the mechanical half of `BUILD-ORDER.md` item 17. Row 15's remainder → **`CC-46`**.)*
 - ☐ **P17** — A jobs/scheduler UI *(OPEN)*
 - ☐ **G-16b** — The ledger carries `policy_version`/`decision_id` *(OPEN)*
 - ☐ **Register** — Every module with a `0` in any layer column is a "looks built, is not" candidate until proven *(standing rule)*
