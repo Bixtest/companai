@@ -6,7 +6,15 @@ list**, sorted so you can reorder it.
 
 **Read it like this:** each row says **what you, the user, can do after the task is done** — not
 `G-22`, not `SD-1`. Those IDs are still there, in the last column, so a developer can act; you can ignore
-that column. **`☑` = done and verified in the code. `☐` = not done. `🟡` = real work landed, not whole.**
+that column. **`☑` (or `✅`) = done and verified in the code. `☐` = not done. `🟡` = real work landed, not whole.**
+
+> **Two tick glyphs, one meaning — `✅` and `☑` both mean "done, verified in code".** *(2026-10-10)* The
+> legend once named only `☑`, but the list had drifted: rows 2–6, 10–12, 23–26 and 31–34, 37–40 carry
+> **`✅`** (from the original plain-English rewrite), while rows **7, 8, 9** carry **`☑`** (added later, one
+> at a time, as those rows were finished). **They are not two tiers of done.** Rather than silently repaint
+> history, this note makes the equivalence explicit; the archive's own appendix uses `✅ DONE` / `🟡 PARTIAL`
+> / `⬜ OPEN` as its three-valued key, and the list keeps its per-row glyph. *So: a `✅` row and a `☑` row are
+> both finished; a `🟡` row is partial; a `☐` row is not started.*
 
 **The order is the vision's own order** (`library/ai/ai-first/06_...§222-232`, Phase 0 → Phase 10). The
 platform skeleton is built **before** business capabilities — because the vision says so (§233:
@@ -186,6 +194,25 @@ started while a higher one is open). If you move something, write one line besid
 > (32%)** — split into 7 parents whose 19 sub-points carry the ticks.
 
 - ☐ **C1** — Resource envelope: the shape every object shares *(NOT DONE — no `ResourceEnvelope`/`BaseEntity`/shared base type anywhere in `shared` or `core`; each module declares its own `tenantId`/`organizationId` columns independently)*
+  > **Why row 1 is not finished, and why that is right (measured 2026-10-10).** Row 1 is the **only** row
+  > before row 13 without a tick — the owner noticed, and asked. **Verdict: leave it ruled-by-design, do
+  > not build it yet.** The reason is written down and principled, not an oversight:
+  > `BACKLOG.md` GAP A says the `Resource` envelope is a **Phase −1 architecture contract** (a *document*
+  > that constrains the build), and *"building the type with no consumer would be the 'contract after the
+  > code' failure."* GAP D states the same rule from the other side: *"a contract written **after** the code
+  > is a description of what was built, not a constraint on what may be built."* **Measured in the code:** the
+  > premise holds — `grep` across `shared`/`core` finds **no** `ResourceEnvelope`/`BaseEntity`/shared base
+  > type, and **34 modules** each declare `tenantId` independently. So the envelope is genuinely absent, and
+  > genuinely has **no consumer** today: nothing in the running app needs a common `Resource` shape yet —
+  > the kernel **view** (`model.ts`) and the registry service (`metadata-registry.ts`) already answer the
+  > questions the envelope would be *for*, and the registry deliberately reports envelope-shaped facts as
+  > **typed absences** rather than inventing them. **What would change the verdict:** the moment a real
+  > caller needs a uniform `Resource` (e.g. a generic list/export/audit path that must treat every object
+  > alike), the envelope acquires a consumer and becomes startable with a proof. Until then, finishing it
+  > would produce a type nobody reads — the exact anti-pattern Phase −1 exists to prevent. **So the order
+  > is better this way:** row 1 waits; rows 7→8→9→13 (the policy kernel) lead, which is also the vision's
+  > own order. *Scheduled as a Phase −1 contract; not a `CC-` callback because it is a design gate, not a
+  > partial build.*
 - ☐ **C2** — Actor & context model: who is acting and in what context ▸ 1/2
 -   - ☑ **C2a** — The first-class `Principal`: 4 kinds (`human`/`ai_worker`/`service`/`system`), `onBehalfOfUserId`, machine predicates (`shared/src/lib/auth/principal.ts`, 215 lines) *(DONE — replaced the old `startsWith('api_key:')` branching)*
 -   - ☐ **C2b** — The wider **context** (org/locale/tz/trace) as one model *(LEFT — not built; only the principal exists)*
