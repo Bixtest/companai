@@ -575,6 +575,22 @@ answered both parts of his own follow-up:
 5. **Go-ahead to execute:** *"document and then we start executing the suplimentary implimentation plan."* The docs are
    updated (this block + plan §S1.1–§S1.3 + rule 15 + the register), and execution begins.
 
+**Correction found the moment execution began (2026-10-11, rule 0b — correcting the text above where it is now false).**
+Two statements in this block above are **superseded by measurement**:
+- It says `CC-59` is *"the compile half (a shared-library capability + a read path)"* — **as if that chain had to be
+  built.** Measured: the chain is **already built and complete** in **`runFunction`** (`packages/shared/src/lib/user-function/run.ts:112`)
+  — bind → freshness → compile → resolve the physical binding → **execute via `engine.query`** (`run.ts:216-241`) on the
+  platform's existing read path. **`CC-59` is therefore ONE CALLER, not a chain.**
+- It implies a caller could *"load a saved Function by id"*. Measured: a `UserFunction` has **no persistence** (no entity,
+  no table, no repo — the type is referenced only by libs). That shape is **`CC-32`**, gated on `G-09`. **The startable
+  `CC-59` shape is the authoring one:** prompt → `authorBusinessQueryIr` → IR → `compileQuery` → `engine.query` → rows —
+  **no persistence needed**, and exactly the flow the owner describes in item 3.
+- *(Also: the exported entry is **`runFunction`**, not `runUserFunction` — a naming slip in the earlier text.)*
+
+**What this changes for you:** **nothing** — it makes `CC-59` **smaller and more clearly startable** (one core entry
+point), and it removes a phantom dependency (`G-09` is not needed). **`CC-59` is now the first startable item of the
+supplementary core queue.** Corrected in: the plan §S1.2, the register `CC-59` row, and `BACKLOG.md`.
+
 **Nothing further is needed from you on this item** — the re-classification is recorded, the full layer map exists, and
 the workspace detail arrives after the core. **This item stays ✅ DECIDED.**
 

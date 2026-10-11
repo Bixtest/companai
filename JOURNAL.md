@@ -35,6 +35,25 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+### ✅ CORRECTION — **`CC-59`'s scope was wrong: the compile+execute chain is ALREADY BUILT (`runFunction`) — the gap is one caller, not a chain. Corrected everywhere it was copied (rule 13). `CC-59` is now the first startable item of the supplementary queue.**  
+**(2026-10-11; docs repo only — no code yet.)**
+
+**How it was found — the first act of *executing* the plan (rule 0b).** Starting `CC-59` (the owner's go-ahead), I measured the pipeline before writing anything. **The register's wording was false:** it said *"wire `compileQuery` + `runUserFunction` to an external read path"* — as if the chain had to be built.
+
+**What is actually true (measured).**
+- **The chain is complete.** **`runFunction`** (`packages/shared/src/lib/user-function/run.ts:112`) already does **bind → freshness → compile → resolve the physical binding → execute** — the execute hop is `engine.query(binding.platformEntityId, plan.physical)` (`run.ts:216-241`) on the platform's **existing** read path. It is tested (`business-ir` 78 + `user-function` 133 = **211 passing**).
+- **There is no production caller.** `runFunction`'s only non-test mention is a **comment** (`business-widget/placement.ts:24`); `authorBusinessQueryIr` and `compileQuery` likewise have no production caller. **The pipeline is a complete circuit with no switch on the panel.**
+- **The "load a saved Function by id" shape is impossible** — a `UserFunction` has **no persistence** (no entity, no table, no repo). That shape is `CC-32`, gated on `G-09`. **So `CC-59` is NOT blocked on `G-09`.**
+- **The naming slip:** the exported entry is **`runFunction`**, not `runUserFunction`.
+
+**What `CC-59` therefore IS:** **one core entry point** — prompt → `authorBusinessQueryIr` → IR → `compileQuery` → `engine.query` → **a compiled result** — needing **no persistence**, and exactly the owner's described flow (§S1.3). It **merges** with `CC-58` Stage C (both are the same single core caller).
+
+**Rule-13 corrections made (5 docs):** the plan §S1.2 (table rows L5/W-A rewritten + a "corrected scope" paragraph), the register `CC-59` row, `BACKLOG.md` (`CC-59` + the workspace row), `NEEDS-YOU.md` (`NY-24` — a dated correction note), `platform_points.md` (FRONTIER NOW = `CC-59`).
+
+**Verification.** Register clean (59 rows, contiguous 1…59, no dups, no BAD-COLUMNS); every edited file `raw diff == git diff -w` (no reflow); LF-0.
+
+---
+
 ### ✅ DONE — **rule 15 (solve-what-is-straightforward NOW) added; the Business IR re-classified as CORE; every postponed layer + wiring point enumerated so nothing is missed when the core is done**  
 **(2026-10-11; docs repo only — no code.)**
 
