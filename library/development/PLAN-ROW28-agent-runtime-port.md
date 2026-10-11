@@ -270,6 +270,91 @@ adapter (R28-2) and is repeated in the outcome below.
 
 ---
 
+### CC-67 — Move the two remaining callers onto the door (the change that flips `B-05` and `N-8`)
+**Status: ✅ IN PROGRESS 2026-10-11 (requirement written below, before the code).**
+
+**What it is.** Row 28's own sentence is *"the agent runtime sits behind one typed door — **no other code
+talks to it directly**."* R28-3 moved the chat route onto the door. **Two callers still reach the
+platform's own engine (`agent-runtime.ts`) directly.** Moving them is what makes the sentence true and
+what finally flips `B-05` and `N-8`.
+
+**Prerequisite.** R28-1/2/3 — all ✅ DONE. Its trigger (the chat route proven on the door) has landed.
+
+#### CC-67 — the requirement (rule 10 step 3: written BEFORE the code)
+
+**Measured first (rule 0b), 2026-10-11.** The two callers are **not the same shape as the chat route's**,
+and that is the whole difficulty:
+
+| Caller | What it calls | What it passes | What it gets back |
+|---|---|---|---|
+| `api/ai/chat/route.ts:688` | `runAiAgentText({...})` | `agentId`, `messages` (a full `UIMessage[]`), `attachmentIds`, `pageContext`, `sessionId`, `conversationId`, **`boundScope`**, **`authContext`** (`tenantId`/`organizationId`/`userId`/`features`/`isSuperAdmin`/**`onBehalfOfUserId`**), **`container`** (the DI container), `requestOverride`, `loop`, `emitLoopTrace` | a **streaming `Response`** |
+| `api/ai/run-object/route.ts:186` + `lib/business-ir-author.ts:160` | `runAiAgentObject({...})` | `agentId`, `input` (`UIMessage[]` or a bare prompt), `boundScope`, `authContext`, **`container`**, `modelOverride` | a **structured value** (`RunAiAgentObjectResult`) |
+
+**The requirement, in plain words.** *The two remaining callers must reach an engine through the door,
+not by importing `agent-runtime` directly. The behaviour a user or a program sees must not change at all.*
+
+**Acceptance (each a measurement, not a tag):**
+1. `grep -rn "runAiAgentText\|runAiAgentObject"` in **production** files returns **no** import from
+   `agent-runtime` — the names are reached through the door (or the route no longer names them).
+2. `api/ai/chat/route.ts`, `api/ai/run-object/route.ts` and `lib/business-ir-author.ts` build a run and
+   reach the engine **through the port**.
+3. Every behaviour preserved: the policy gate, the binding re-check (`CC-27`), the narrowing (`CC-55`),
+   the persistence calls, the SSE shape / the JSON shape. **Existing tests pass UNMODIFIED** — if one must
+   change, that is evidence behaviour changed and must be justified.
+4. Suite green; the changed files type-check clean.
+
+#### CC-67 — the challenge (rule 9b: challenge the task before executing)
+
+**Challenge 1 — can these two callers honestly sit behind the SAME port as the chat route, with the
+OpenCode adapter as the only engine behind it?** No — and this is the decisive measurement. The port's
+envelope (`§4.2`) carries **references** (`allowedInputRefs: string[]`), **identity** (tenant/principal/
+actor/agent ids) and **nothing else**. `runAiAgentText` needs **three things the envelope cannot honestly
+carry**:
+
+1. **The DI `container`** — a live object with database access. Putting it in an envelope (or in an
+   allowed-input reference) would be exactly the *"secrets/objects inlined"* §4.2 forbids, and the port is
+   types-only with **no runtime dependency** by design.
+2. **The full request context** (`acl.features`, `isSuperAdmin`, `onBehalfOfUserId`, `boundScope`) — a
+   per-request authorization context. The port's model is: the platform **admits** a run with a
+   `capabilityGrantId`, and the runtime acts under it — the grant is an **id**, not the whole context.
+3. **`UIMessage[]`** vs the port's opaque `messages?: unknown[]` — the port deliberately does not adopt
+   either engine's message type.
+
+**So the two callers are a DIFFERENT ENGINE, not the same one.** The OpenCode adapter sits behind the door
+for the **OpenCode engine**; these two callers use the platform's **own in-process AI SDK runtime**
+(`agent-runtime.ts`). They are two implementations of one interface — which is the entire point of a port.
+
+**Decision — the honest options:**
+
+- **(a) Write a SECOND adapter (`agent-runtime-port-adapter.ts`) that puts `runAiAgentText`/
+  `runAiAgentObject` behind the door, and expose the port's `startRun`/`streamRun` with the rich input
+  travelling as an **engine-specific op bag** carried *outside* the generic envelope.** Smaller, and it
+  makes the door the only path — but the rich input (the container, the full auth context) genuinely
+  cannot be expressed in the envelope, so it travels as a **second argument** to the adapter's own
+  factory — i.e. the caller constructs the adapter with its deps, exactly as the chat route does with
+  `createOpenCodePortAdapter({ auth, em })`. **This is the honest shape:** the door stays generic; the
+  deps ride on the adapter's construction, not inside the envelope.
+- **(b) Extend the envelope** to carry a `container`/`authContext`. Rejected — it puts live objects and the
+  whole authorization context *inside* the admitted envelope, which §4.2 and §8 forbid, and it would make
+  the port depend on runtime objects it deliberately has none of.
+
+**Decision: (a).** The door gains a **second implementation** — an adapter for the platform's own
+in-process runtime — and the two callers reach it through the port. The container and auth context travel
+on the adapter's construction (per request), exactly like the OpenCode adapter's `{ auth, em }`. **No
+envelope field is invented; no live object is inlined into the envelope.**
+**And — rule 11 note — this is a *wiring* move, not a design decision:** the port already exists, the
+adapter pattern is established (R28-2), and the mapping is mechanical once the split is understood. It does
+not need the owner's word; it needs to be done honestly and proven.
+
+**The one honest limit (stated, not hidden).** `runAiAgentText` returns a **streaming `Response`**, not an
+event stream. The port's `streamRun` emits `AiRuntimeStreamEvent`s. The adapter must either (i) tee the
+response body into port events (a real re-plumbing of the SSE parsing), or (ii) leave the response
+un-plumbed for the text path **and register it**. **(i) is the honest build** — a passthrough that keeps
+the route's `Response` behaviour and re-frames its SSE as port events; the route then writes the port
+events back out, which is exactly what R28-3 did for the chat route.
+
+---
+
 ### R28-5 — Prove the door is the only way in (nothing else talks to an engine directly)
 **Status: STARTABLE NOW (R28-3 done).** Note: with `CC-67` still open (two callers reach the engines
 directly), a full "nothing bypasses" check would fail today — so R28-5 is the check, and **`CC-67` must land
