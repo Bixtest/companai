@@ -14,9 +14,10 @@ continues the development. It is short on purpose: it tells the agent what to re
 and the rules it may not break — and **nothing about "what is next", because what is next changes
 every session.** The live task lives in **one place only: the `★ ACTIVE TASK` section at the top of
 [`../../JOURNAL.md`](../../JOURNAL.md)**. This prompt sends the agent there.
-*(Last refreshed 2026-10-10 — the reading tiers and the "context that shaped the order" block were
-updated for the owner's 2026-10-09 ruling and PHASE 3's completion. **The task still lives only in the
-box.**)*
+*(Last refreshed 2026-10-11 — the reading tiers gained the second live track (**`library/workspace-architecture/`
++ its bridge `04-BRIDGE.md`**, Tier A `j2`), and the "context that shaped the order" block was updated for the
+**supplementary core queue** (`NOW = CC-59`, `ALSO NOW = G-22`) and the `B-WS` design track. **The task still
+lives only in the box.**)*
 
 **How to use it.** Copy everything between the two `═══` rules below and send it as the first
 message of the new session. Nothing else is needed. If the project has moved, change the two paths
@@ -74,6 +75,21 @@ direction gets buried.
                                               <- EVERY partial build: its gap, its prerequisite, and the
                                                  callback to run when the prerequisite lands (rule 8).
                                                  Read this before you assume "done" means done
+    j2. library/workspace-architecture/README.md
+                                              <- A **SECOND LIVE TRACK: the workspace-architecture
+                                                 workstream (`B-WS`)** -- the design of the dashboard &
+                                                 workspace widget architecture (the owner's Message 6).
+                                                 **It is DESIGN, never code** (BR-4): its outputs are
+                                                 `CC-*` items in the spine, not builds. Read it with its
+                                                 **contract**, `library/workspace-architecture/04-BRIDGE.md`
+                                                 -- the four rules (BR-1 one live task / BR-2 one
+                                                 numbering `B-WS/Bn` / BR-3 every plan item registered /
+                                                 BR-4 a design is never a build) that bind it to the
+                                                 spine, plus `WORKING-RULES.md` **Rule 16**. **04-BRIDGE.md
+                                                 §4 answers *"which document do I trace?"*.** State:
+                                                 `B-WS/B1-B-WS/B8` of 10 done, next `B-WS/B9`; then
+                                                 WS-1 B-perms / WS-2 B-studio -- **but the live task is
+                                                 still whatever the box says (BR-1)**
 
 **Tier B — the spine: how it runs, how the work is done, and the plan:**
 
@@ -255,12 +271,18 @@ CLOSED); the row stays 🟡 only because its text names *own **and** team* and t
 `CC-51` (deferred by the owner's ruling; **Option B**, a real `team` entity, is documented as a **future
 addition** — `PLAN-ROW16-own-team-row-scope.md` §7.2). **Rows 17 (`CC-52`), 18 (`CC-53`) and 22 (`CC-27` core +
 `CC-55` narrowing + `CC-56` confirm-path + `CC-57` in-process) are ✅ DONE.** **The named `CC-` queue is now
-EXHAUSTED** — the last named leg (`CC-57`) landed 2026-10-11. **RULE-13 CORRECTION:** the earlier wording here
+EXHAUSTED** — the last named leg (`CC-57`) landed 2026-10-11. **So the live task is now a *supplementary* core
+queue** ([`PLAN-SUPPLEMENTARY-CORE-QUEUE.md`](PLAN-SUPPLEMENTARY-CORE-QUEUE.md); the owner's 2026-10-11 go-ahead
+was *execute it*): **NOW = `CC-59`** (one caller for the **already-built** Business-IR compile+execute chain),
+**ALSO NOW = `G-22`**. **A second, *design* track is also live: `B-WS`** (the workspace-architecture workstream),
+bound to this spine by the bridge (`04-BRIDGE.md`, Rule 16) — **`B-WS/B1–B-WS/B8` of 10 done, next `B-WS/B9`**.
+**A design is never a build (BR-4), so the design track moves no box and does not change the ONE NUMBER.**
+**RULE-13 CORRECTION:** the earlier wording here
 ("the **human CRUD *list* path** has no per-entity permission filter — that last leg is open as `CC-47`") was
 **FALSE** — the human CRUD `GET`/list path IS gated by `metadata.GET.requireFeatures`, enforced **403** by the
 dispatcher; `CC-47` added `crud-read-gate-coverage.test.ts` so a new list route cannot be added un-gated. **The
 live FRONTIER is re-derived from `platform_points.md` (the ONE NUMBER) + the `★ ACTIVE TASK` box — with the
-named queue exhausted, the next task is a fresh pick from the vision order.**
+named queue exhausted, the next task is the first startable item of the supplementary core queue.**
 **Do not re-derive the order from this prompt** — read the
 `★ ACTIVE TASK` box for *what is in hand*, `BUILD-ORDER.md` for the *order*, and `platform_points.md`
 for *the one number*. **One trap worth keeping, measured 2026-10-08: `SD-3` (the tier mapping as a
@@ -339,12 +361,18 @@ Every point you raise carries a status: **FIXED** (and how you re-checked) · **
   That is why the reading list and the rules can stay stable while the task changes every session.
 - **Keep the reading list current, but keep it task-free.** When a *front-door* document is added,
   renamed or superseded (a new scoreboard, a moved plan), update the tiers — that is maintenance, not a
-  task list. The last such maintenance was **2026-10-11** (the handover's revision 19): the FRONTIER was
-  rolled to the **PHASE-5 batch — rows 16 → 17 → 18**, with **row 16 (own/team row scope) 🟡 IN PROGRESS**
-  under **Option A** (owner's `NY-20`); **Option B** is documented as a future addition. Also recorded this
-  revision: **rule 9(a) strengthened** (own the **full codebase**, not just your diff — two "pre-existing,
-  not mine" findings are now scheduled as `N-20`/`N-21`), and a **rule-13 correction** (the CC-47 honest-bound
-  count was `163`/pre-fix and is measured at **161**). *(Prior
+  task list. The last such maintenance was **2026-10-11** (following the handover's revision 28): **the
+  workspace-architecture workstream (`B-WS`) was added to Tier A (`j2`)** — the design of the dashboard &
+  workspace widget architecture, bound to the spine by its bridge (`04-BRIDGE.md` + `WORKING-RULES.md`
+  **Rule 16**; `B-WS/B1–B-WS/B8` of 10 done, next `B-WS/B9`) — and the "context that shaped the order" block
+  was refreshed to name the **supplementary core queue** as the live frontier (`NOW = CC-59`, `ALSO NOW =
+  G-22`) now that the named `CC-` queue is exhausted, and to record that **`B-WS` is a *design* track that
+  moves no box**. *(Prior maintenance, revision 19: the FRONTIER was rolled to the **PHASE-5 batch — rows 16 →
+  17 → 18**, with **row 16 (own/team row scope) 🟡 IN PROGRESS** under **Option A** (owner's `NY-20`); **Option
+  B** is documented as a future addition. Also recorded this revision: **rule 9(a) strengthened** (own the
+  **full codebase**, not just your diff — two "pre-existing, not mine" findings are now scheduled as
+  `N-20`/`N-21`), and a **rule-13 correction** (the CC-47 honest-bound count was `163`/pre-fix and is measured
+  at **161**). *(Prior
   maintenance, revision 18: the FRONTIER was
   rolled past **`CC-47`** (the `CC-47` close — the human-CRUD-list read gate is now structurally enforced
   by `crud-read-gate-coverage.test.ts`, so **row 15 is ✅ and PHASE 3 is COMPLETE** on rows 7–9, 13–15), and
