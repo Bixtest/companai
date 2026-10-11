@@ -14,12 +14,9 @@ recommendation under each item. This file is only where *your* answers live, in 
 
 ## The questions currently open (copy the id, write your answer below it)
 
-**DP-08 — menu categories: flat or nested?**
-*(flat list of categories, or a folder-like tree?)*
-
-your answer:
-
----
+> **⚠️ These three are the ones still waiting on you** — they are **B6's** questions, and they were only ever
+> listed *here* (in this file), which is why they were easy to miss. If you answered them somewhere I have not
+> seen, just say so and I will record it. **DP-12, DP-13, DP-14 are answered (see the recorded list below).**
 
 **DP-09 — is the AI a *participant* in a thread, or the thread's *agent*?**
 *(should "human and AI in one thread" be one participants list?)*
@@ -41,22 +38,9 @@ your answer:
 
 ---
 
-**DP-12 — should a user (a tenant) be able to build their own widget, or only us and the AI?**
-*(held until the permissions workstream (DP-04) lands, or built earlier private-to-creator only?)*
-
-your answer:
-
----
-
-**DP-13 — does a user-built widget need review before others can see it?**
-*(review by change class — only new dependencies/permissions wait — or review always?)*
-
-your answer:
-
----
-
-**DP-14 — what happens to a user's widgets when that user leaves the company?**
-*(archive, reassign automatically, or offer to an admin?)*
+**DP-15 — do you want "The Studio" opened as its own analysis batch?**
+*(one hub for functions, widgets, widget pages, menu items + a database editor, built on the DP-04 permissions
+engine — see `discussion_points.md` DP-15)*
 
 your answer:
 
@@ -73,6 +57,12 @@ your answer:
 - **DP-06** — a recipe may sit in several menu homes, but carries one permission set everywhere.
 - **DP-07** — a recipe may open as its own page, as a workspace panel, or both; the user chooses per recipe.
 - **DP-08** — menu categories are **flat for now** (nesting can be switched on later with no recipe re-saved).
+- **DP-12** — follow the recommendation (tenant authoring behind DP-04), but **document the sequence so each
+  part is built only when its prerequisite exists**.
+- **DP-13** — it is a permissions question → belongs in **"The Studio"** (DP-15); note **"allow" ≠ "place into
+  their interface"**; auto-posting risks spam.
+- **DP-14** — follow the recommendation; ownership/sharing/review/placement are one subject → **"The Studio"**
+  (DP-15).
 
 ---
 
