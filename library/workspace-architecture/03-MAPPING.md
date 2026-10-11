@@ -59,7 +59,7 @@ supporting evidence is a measurement in that SRS file.
 |---|---|
 | **What** | A user's plain-language request is triaged into exactly one of **three endings**: a one-time answer, a model proposal, or a **save-as-Function** offer. *"The user decides, the platform proposes."* |
 | **HAVE IT** | ✅ **`request-outcome/triage.ts`** (`triageRequest` `:82`), **`request-outcome/gate.ts`** (`canOfferSaveAsFunction` `:80`), **`request-outcome/types.ts`** (`RequestOutcome` `:51`, `REQUEST_OUTCOMES` `:57`). Measured in B4. |
-| **BUILD IT** | ⬜ the **screen** that runs the triage for a person — **`CC-58` Stage B** (trigger: *business work resumes*); the head can go live first via **`CC-58` Stage C** (a chat tool) |
+| **BUILD IT** | ⬜ the **screen** that runs the triage for a person — **`CC-58` Stage B** (trigger: *business work resumes*). **Stage C merged with `CC-59`** (both were the one core caller) and is **DONE 2026-10-11**; its in-chat consumer is **`CC-60`**. |
 | **Prerequisite / trigger** | Stage C: none (`CC-57` landed the binding). Stage B: the owner's ruling lifting (business half un-paused). |
 | **Source** | `02-SRS-01`; `PLAN-SUPPLEMENTARY-CORE-QUEUE.md` §S1 |
 
@@ -69,8 +69,8 @@ supporting evidence is a measurement in that SRS file.
 |---|---|
 | **What** | The model turns a plain-language request into the platform's structured **Business IR**; before the model is asked, the actor's **agent binding** is resolved (fail-closed). |
 | **HAVE IT** | ✅ **`business-ir-author.ts`** `authorBusinessQueryIr` — binding-gated (`agent_not_bound`) + scope-threaded, per **`CC-57`** (code `1bb61557`). |
-| **BUILD IT** | ⬜ **`CC-59`** — a **caller** (the chain is complete; only a caller is missing — the corrected finding, `PLAN-SUPPLEMENTARY-CORE-QUEUE.md` §S1.2) |
-| **Prerequisite / trigger** | none — startable now (`CC-59` is `NOW` in the FRONTIER) |
+| **BUILD IT** | ✅ **`CC-59` DONE 2026-10-11** (code `83f88bd3`) — the caller exists: `runBusinessQueryPrompt` (`lib/business-ir-run.ts`) + the registered tool **`business_ir.run_query`** (`ai-tools/business-ir-pack.ts`). What remains is the tool's **in-chat consumer** — **`CC-60`**. *(This row read "⬜ `CC-59` — startable now" until 2026-10-11; corrected the same day `CC-59` landed — rule 13.)* |
+| **Prerequisite / trigger** | none — **built**; **`CC-60`** fires when the AI tool surface is next touched |
 | **Source** | `02-SRS-01`, `02-SRS-02`; §S1.2 rows L2/L4/L5 |
 
 ### R3 — Display: the Business-IR nugget shows its progress and result in business terms
@@ -100,8 +100,8 @@ supporting evidence is a measurement in that SRS file.
 |---|---|
 | **What** | A saved Function runs **deterministically** — bind → freshness → compile → resolve → execute — with **no model call**. |
 | **HAVE IT** | ✅ **`user-function/run.ts:112`** `runFunction` — the **complete chain** (measured 2026-10-11, B1/B4; 211 passing across the five IR layers) |
-| **BUILD IT** | ⬜ **`CC-59`** — a caller (same item as R2) |
-| **Prerequisite / trigger** | none — startable now |
+| **BUILD IT** | ✅ **`CC-59` DONE 2026-10-11** — the caller (the same item as R2); the whole chain now runs from a prompt. |
+| **Prerequisite / trigger** | none — **built** |
 | **Source** | `02-SRS-02`; §S1.2 row L5 |
 
 ### R6 — Naming / menus: a saved Function appears in the interface (the JOIN)
