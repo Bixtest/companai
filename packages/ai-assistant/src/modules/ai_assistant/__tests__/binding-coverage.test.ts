@@ -53,6 +53,42 @@ const RUNTIME_DEFINITION = join('lib', 'agent-runtime.ts')
  */
 const IN_PROCESS_DISPATCH_SITES: string[] = []
 
+/**
+ * `CC-67` — the files that ARE the door, not callers of it.
+ *
+ * Behind the door (row 28), the dispatch call to the engine lives in an
+ * ADAPTER, not in the business code: `lib/opencode-port-adapter.ts` (the
+ * OpenCode engine) and `lib/agent-runtime-port-adapter.ts` (the platform's own
+ * in-process AI SDK runtime). These files call `runAiAgentText`/`runAiAgentObject`
+ * **by design** — but they do NOT make the binding decision, and must not: they
+ * have no `em`/`auth`, and the binding check belongs to the caller that knows the
+ * principal. The gate is therefore enforced **at the door's callers**
+ * (`api/ai/chat/route.ts`, `api/ai/run-object/route.ts`,
+ * `lib/business-ir-author.ts`), each of which still resolves the binding and
+ * refuses `agent_not_bound` before constructing the adapter.
+ *
+ * They are excluded from the offender scan for the same reason
+ * `RUNTIME_DEFINITION` is: they are the thing being reached, the one place that
+ * legitimately names the engine — not another business caller. The `CC-67` pin
+ * below keeps the gate on the CALLERS from regressing.
+ */
+const RUNTIME_ADAPTERS = [
+  join('lib', 'opencode-port-adapter.ts'),
+  join('lib', 'agent-runtime-port-adapter.ts'),
+]
+
+/**
+ * `CC-67` — the files whose dispatch now happens THROUGH the door, and which
+ * must therefore keep consulting the binding themselves (they are the gate).
+ * The scan below cannot see them as dispatchers any more (they no longer call a
+ * `runAiAgent*` marker directly), so this list pins that they are still gated.
+ */
+const DOOR_CALLERS_THAT_MUST_STAY_GATED = [
+  join('api', 'ai', 'chat', 'route.ts'),
+  join('api', 'ai', 'run-object', 'route.ts'),
+  join('lib', 'business-ir-author.ts'),
+]
+
 /** Markers that identify "this file dispatches an agent". */
 const DISPATCH_MARKERS = [
   // Must mirror the agent-runtime's public dispatch entry points exactly;
@@ -197,6 +233,9 @@ describe('CC-27 / B6 — every agent dispatch site applies the binding gate', ()
       const rel = relative(MODULE_ROOT, abs)
       if (AGENT_DISPATCH_ROUTES.includes(rel)) continue
       if (rel === RUNTIME_DEFINITION) continue
+      // `CC-67` — the adapters ARE the door: the one legitimate place that names
+      // the engine. They are not business callers and do not own the gate.
+      if (RUNTIME_ADAPTERS.includes(rel)) continue
       const raw = readFileSync(abs, 'utf8')
       const body = stripComments(bodyAfterImports(raw))
       // Alias-aware: a dispatch imported `as someOtherName` is still a dispatch.
@@ -214,20 +253,29 @@ describe('CC-27 / B6 — every agent dispatch site applies the binding gate', ()
     // (a real coverage hole) fails here; a stale allowlist entry also fails. Every
     // other caller is GATED by construction (the arm above).
     expect(offenders.sort()).toEqual([...IN_PROCESS_DISPATCH_SITES].sort())
-    // The GATED arm must be non-vacuous: at least the one known in-process site
-    // (`lib/business-ir-author.ts`) must have been recognised as gated. A scan
-    // that recognises nothing would make every file look like an offender (the
-    // assertion above would then fail) — but this pins the positive direction too,
-    // so the arm cannot be silently weakened into "nobody calls anything".
-    expect(gatedCallers).toContain(join('lib', 'business-ir-author.ts'))
+    // Since `CC-67`, every dispatch marker in the tree is called from an ADAPTER
+    // (excluded above as the door) — so `gatedCallers` is legitimately empty here.
+    // The gate that used to be proven by this arm is now proven by the explicit
+    // `CC-67 — every caller of the runtime door still consults the binding` test
+    // below. This arm still catches a FUTURE in-process dispatcher: if one is
+    // added it appears in `offenders` (and fails the assertion above) unless it is
+    // gated, in which case it appears in `gatedCallers`.
+    if (gatedCallers.length > 0) {
+      for (const rel of gatedCallers) {
+        expect(resolveBindingCallRe(readFileSync(join(MODULE_ROOT, rel), 'utf8')).test(
+          stripComments(readFileSync(join(MODULE_ROOT, rel), 'utf8')),
+        )).toBe(true)
+      }
+    }
   })
 
-  it('CC-57 — the one known in-process dispatch site is GATED (positive pin)', () => {
+  it('CC-57 / CC-67 — the one known in-process dispatch site is GATED (positive pin)', () => {
     // The `CC-55` header promised this pin; `CC-57` delivers it and closes the
     // gap. `lib/business-ir-author.ts` (`authorBusinessQueryIr`) used to dispatch
     // via `runAiAgentObject` with NO binding check and no `boundScope`. It now:
-    //   (1) still dispatches (so this pin is not satisfied by a file that stopped
-    //       running the agent), and
+    //   (1) still runs the agent — since `CC-67` THROUGH THE DOOR (it constructs
+    //       the runtime port adapter and calls `runObjectForRun`; it no longer
+    //       names the engine), and
     //   (2) consults the binding — imports AND calls `resolveAgentBinding` — and
     //   (3) threads the narrowed scope into the runtime (`computeBoundRunScope` … `boundScope`).
     // If any of those is removed by a future refactor, this fails — the closure
@@ -236,8 +284,15 @@ describe('CC-27 / B6 — every agent dispatch site applies the binding gate', ()
     const raw = read(rel)
     const stripped = stripComments(raw)
 
-    // (1) It still dispatches an agent.
-    expect(dispatchCallRe(raw).test(stripComments(bodyAfterImports(raw)))).toBe(true)
+    // (1) It still RUNS an agent — through the door (`CC-67`). Either the direct
+    // dispatch marker (pre-CC-67) or the door's own op counts, so this pin does
+    // not silently pass on a file that stopped running the agent.
+    const runsAgent =
+      dispatchCallRe(raw).test(stripComments(bodyAfterImports(raw))) ||
+      /createAgentRuntimePortAdapter\s*\(/.test(stripped)
+    expect(runsAgent).toBe(true)
+    // ...and it reaches the engine only THROUGH the door, never by name.
+    expect(raw).not.toMatch(/from\s+['"][^'"]*\bagent-runtime['"]/)
 
     // (2) It consults the binding — import + a real call (not a comment).
     expect(raw).toMatch(/import\s*\{[^}]*resolveAgentBinding[^}]*\}/)
@@ -247,6 +302,38 @@ describe('CC-27 / B6 — every agent dispatch site applies the binding gate', ()
     expect(stripped).toMatch(/agent_not_bound/)
     expect(stripped).toMatch(/computeBoundRunScope\s*\(/)
     expect(stripped).toMatch(/boundScope/)
+  })
+
+  it('CC-67 — every caller of the runtime door still consults the binding', () => {
+    // The dispatch behind the door is gated by the caller that constructs the
+    // adapter (the adapter has no `em`/`auth` and must not decide). This pins
+    // that each of the three door callers keeps the gate — so `CC-67` cannot
+    // move the dispatch behind the door and leave it ungated.
+    for (const rel of DOOR_CALLERS_THAT_MUST_STAY_GATED) {
+      const raw = read(rel)
+      const stripped = stripComments(raw)
+      expect(resolveBindingCallRe(raw).test(stripped)).toBe(true)
+      expect(stripped).toMatch(/agent_not_bound/)
+    }
+  })
+
+  it('CC-67 — the adapters are the door, and never consult the binding themselves', () => {
+    // An adapter that grew its own binding check would be a second, competing
+    // gate (and it has no `em`/`auth` to consult). This pins the boundary: each
+    // adapter names its engine and does NOT resolve the binding.
+    //
+    // The engine each adapter names differs: the OpenCode adapter calls the
+    // OpenCode handlers, the platform adapter calls the in-process `runAiAgent*`
+    // entry points. Both are engines; neither makes the binding decision.
+    const engineMarkers: Record<string, RegExp> = {
+      [join('lib', 'opencode-port-adapter.ts')]: /handleOpenCode\w+/,
+      [join('lib', 'agent-runtime-port-adapter.ts')]: /runAiAgent(?:Text|Object)\s*\(/,
+    }
+    for (const rel of RUNTIME_ADAPTERS) {
+      const raw = read(rel)
+      expect(raw).toMatch(engineMarkers[rel])
+      expect(stripComments(raw)).not.toMatch(/resolveAgentBinding\s*\(/)
+    }
   })
 
   it('the runtime-module marker list is exactly the runtime\'s real dispatch exports', () => {

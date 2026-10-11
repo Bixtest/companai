@@ -9,7 +9,11 @@ import type { RbacService } from '@open-mercato/core/modules/auth/services/rbacS
 import { loadAgentRegistry } from '../../../lib/agent-registry'
 import { checkAgentPolicy, type AgentPolicyDenyCode } from '../../../lib/agent-policy'
 import { resolveAgentBinding, computeBoundRunScope } from '../../../lib/agent-binding'
-import { runAiAgentObject } from '../../../lib/agent-runtime'
+// OPEN — row 28 / `CC-67`: this route reaches the platform's own AI SDK runtime
+// THROUGH THE DOOR, never by importing `agent-runtime` by name. The engine sits
+// behind the door as one implementation (`agent-runtime-port-adapter.ts`) — see
+// `ARCHITECTURE-hermes-integration.md` §4/§9. This file must not name an engine.
+import { createAgentRuntimePortAdapter } from '../../../lib/agent-runtime-port-adapter'
 import { AgentPolicyError } from '../../../lib/agent-tools'
 
 const logger = createLogger('ai_assistant')
@@ -183,13 +187,12 @@ export async function POST(req: NextRequest): Promise<Response> {
     // the run. `binding.bound` is always true here, so the scope is well-typed.
     const boundScope = computeBoundRunScope({ agentId: bodyResult.data.agent, binding })
 
-    const result = await runAiAgentObject({
-      agentId: bodyResult.data.agent,
-      input: bodyResult.data.messages as unknown as UIMessage[],
-      attachmentIds: bodyResult.data.attachmentIds,
-      pageContext: bodyResult.data.pageContext,
-      modelOverride: bodyResult.data.modelOverride,
-      boundScope,
+    // The AI runtime door (`CC-67`). The engine sits behind it; this route never
+    // names one. The rich deps the envelope cannot hold — the container, the
+    // resolved auth context, the binding's narrowed scope — ride on the adapter's
+    // CONSTRUCTION (per request), exactly as the OpenCode adapter's `{ auth, em }`
+    // do (§4.2: the envelope carries identity + references only).
+    const port = createAgentRuntimePortAdapter({
       authContext: {
         tenantId: auth.tenantId ?? null,
         organizationId: auth.orgId ?? null,
@@ -200,6 +203,15 @@ export async function POST(req: NextRequest): Promise<Response> {
         onBehalfOfUserId: auth.userId ?? null,
       },
       container,
+      boundScope,
+    })
+
+    const result = await port.runObjectForRun({
+      agentId: bodyResult.data.agent,
+      prompt: bodyResult.data.messages as unknown as UIMessage[],
+      attachmentIds: bodyResult.data.attachmentIds,
+      pageContext: bodyResult.data.pageContext,
+      modelOverride: bodyResult.data.modelOverride,
     })
 
     if (result.mode !== 'generate') {

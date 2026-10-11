@@ -10,12 +10,22 @@ import { llmProviderRegistry } from '@open-mercato/shared/lib/ai/llm-provider-re
 import { loadAgentRegistry } from '../../../lib/agent-registry'
 import { checkAgentPolicy, type AgentPolicyDenyCode } from '../../../lib/agent-policy'
 import { resolveAgentBinding, computeBoundRunScope } from '../../../lib/agent-binding'
+import { AgentPolicyError } from '../../../lib/agent-tools'
+// OPEN — row 28 / `CC-67`: this route reaches the platform's own AI SDK runtime
+// THROUGH THE DOOR, never by importing `agent-runtime`'s engine functions by
+// name. The engine sits behind the door as one implementation
+// (`agent-runtime-port-adapter.ts`) — see `ARCHITECTURE-hermes-integration.md`
+// §4/§9. This file must not name an engine function. The pure loop-budget preset
+// resolver is re-exported through the adapter so the route has NO import from
+// `agent-runtime` at all.
 import {
-  runAiAgentText,
+  createAgentRuntimePortAdapter,
+  attachRunInput,
   resolveLoopBudgetPreset,
   type AiAgentLoopBudgetPreset,
-} from '../../../lib/agent-runtime'
-import { AgentPolicyError } from '../../../lib/agent-tools'
+  type AgentRuntimePortAdapter,
+} from '../../../lib/agent-runtime-port-adapter'
+import type { AiRuntimeEnvelope } from '../../../lib/ai-runtime-port'
 import { readBaseurlAllowlist, isBaseurlAllowlisted } from '../../../lib/baseurl-allowlist'
 import {
   canonicalProviderId,
@@ -344,6 +354,25 @@ async function persistChatTurnStart(input: {
   }
 }
 
+/**
+ * Wrap the engine's `Response` so the RUN IS CLOSED AT THE DOOR when the client's
+ * stream ends (row 28 / `CC-67`), and — when there is a persisted turn —
+ * snapshot the assistant message.
+ *
+ * **Why the close lives here (rule 0b measurement).** `runAiAgentText` returns a
+ * `Response`; the route hands it to the client and the client consumes it. The
+ * run is not finished when `streamRun` returns (the bytes have not been sent
+ * yet) — it is finished when the BODY ENDS. The only place that observes that is
+ * this pump, which already reads the body to the last byte. So the run's close
+ * is attached to the pump's `finally`, not to the route body: closing it earlier
+ * would record an outcome the door cannot yet vouch for, and closing it never
+ * (the `CC-67` hostile-critic defect) leaves the run open in the adapter forever.
+ *
+ * **The tee does not change what the client receives.** Every byte read is
+ * written straight through (`writer.write(value)`), so the client sees the exact
+ * engine bytes; the pump only *additionally* knows when they stop. This is not
+ * the single-use-body trap — the wrapper OWNS the body and passes it on.
+ */
 function persistAssistantOnStreamCompletion(input: {
   response: Response
   container: Awaited<ReturnType<typeof createRequestContainer>>
@@ -352,8 +381,27 @@ function persistAssistantOnStreamCompletion(input: {
   userId: string
   conversationId: string
   userClientMessageId: string | null
+  /**
+   * Called once when the stream ends (or fails), to close the run at the door.
+   * Omitted only by a caller that does not open a run.
+   */
+  closeRun?: (outcome: { aborted: boolean; status?: 'completed' | 'failed' | 'cancelled' }) => Promise<void>
 }): Response {
-  if (!input.response.body || !input.tenantId) return input.response
+  // A bodyless response cannot be teed, so there is no stream end to observe —
+  // but a run that was opened must still be closed (rule 15: a bodyless engine
+  // `Response` is a latent leak if this early return skipped the close). We close
+  // it here as `completed` (the engine returned a response, just without a
+  // stream) and hand the response back unchanged.
+  if (!input.response.body) {
+    if (input.closeRun) {
+      void input.closeRun({ aborted: false, status: 'completed' }).catch((closeErr) => {
+        logger.error('AI Chat Agent — failed to close run at the door (no body)', { err: closeErr })
+      })
+    }
+    return input.response
+  }
+  // No tenant (no persistence) AND no run to close ⇒ nothing to wrap.
+  if (!input.tenantId && !input.closeRun) return input.response
   const tenantId = input.tenantId
   const { readable, writable } = new TransformStream<Uint8Array, Uint8Array>()
   const writer = writable.getWriter()
@@ -363,6 +411,7 @@ function persistAssistantOnStreamCompletion(input: {
   async function pump(): Promise<void> {
     const reader = input.response.body!.getReader()
     let raw = ''
+    let failed = false
     try {
       for (;;) {
         const { value, done } = await reader.read()
@@ -372,30 +421,45 @@ function persistAssistantOnStreamCompletion(input: {
         await writer.write(value)
       }
       raw += decoder.decode()
-      const assistant = extractAssistantSnapshot(raw, contentType)
-      if (assistant.content.trim() || assistant.uiParts.length > 0) {
-        const repo = createConversationStorage(input.container)
-        await repo.appendMessage(
-          input.conversationId,
-          {
-            clientMessageId: input.userClientMessageId
-              ? `${input.userClientMessageId}:assistant`
-              : undefined,
-            role: 'assistant',
-            content: assistant.content,
-            uiParts: assistant.uiParts,
-          },
-          {
-            tenantId,
-            organizationId: input.organizationId ?? null,
-            userId: input.userId,
-          },
-        )
+      if (tenantId) {
+        const assistant = extractAssistantSnapshot(raw, contentType)
+        if (assistant.content.trim() || assistant.uiParts.length > 0) {
+          const repo = createConversationStorage(input.container)
+          await repo.appendMessage(
+            input.conversationId,
+            {
+              clientMessageId: input.userClientMessageId
+                ? `${input.userClientMessageId}:assistant`
+                : undefined,
+              role: 'assistant',
+              content: assistant.content,
+              uiParts: assistant.uiParts,
+            },
+            {
+              tenantId,
+              organizationId: input.organizationId ?? null,
+              userId: input.userId,
+            },
+          )
+        }
       }
     } catch (error) {
+      failed = true
       logger.error('AI Chat Agent — Conversation persistence failure', { err: error })
     } finally {
       reader.releaseLock()
+      // Close the run at the door BEFORE the writer closes, so the run is already
+      // closed by the time the client observes the stream ending — otherwise a
+      // test (or an observer) that awaits the response body could see the run
+      // still open (a race the hostile critic's probe would catch). Idempotent
+      // and replay-safe (§4.3): a double close does not double-count.
+      if (input.closeRun) {
+        try {
+          await input.closeRun({ aborted: false, status: failed ? 'failed' : 'completed' })
+        } catch (closeErr) {
+          logger.error('AI Chat Agent — failed to close run at the door', { err: closeErr })
+        }
+      }
       await writer.close().catch(() => undefined)
     }
   }
@@ -685,15 +749,17 @@ export async function POST(req: NextRequest): Promise<Response> {
       logger.error('AI Chat Agent — Failed to persist user message', { err: error })
     }
 
-    const response = await runAiAgentText({
-      agentId,
-      messages: bodyResult.data.messages as unknown as UIMessage[],
-      attachmentIds: bodyResult.data.attachmentIds,
-      pageContext: bodyResult.data.pageContext,
-      debug: bodyResult.data.debug,
-      sessionId: bodyResult.data.sessionId ?? null,
-      conversationId: bodyResult.data.conversationId ?? null,
-      boundScope,
+    // ── The door (row 28 / `CC-67`) ────────────────────────────────────────
+    // Build the run behind the door, reach the engine THROUGH it, and get the
+    // engine's `Response` back. The engine is never named; the adapter decides
+    // what sits behind the door. Identity is minted here (server-side), and the
+    // run id is distinct from the conversation id (§4.2).
+    //
+    // The rich deps the §4.2 envelope cannot hold — the container, the resolved
+    // auth context, the binding's narrowed scope, the loop override — ride on
+    // the adapter's CONSTRUCTION (per request), exactly as the OpenCode
+    // adapter's `{ auth, em }` do.
+    const port: AgentRuntimePortAdapter = createAgentRuntimePortAdapter({
       authContext: {
         tenantId: auth.tenantId ?? null,
         organizationId: auth.orgId ?? null,
@@ -704,19 +770,68 @@ export async function POST(req: NextRequest): Promise<Response> {
         onBehalfOfUserId: auth.userId ?? null,
       },
       container,
+      boundScope,
       requestOverride,
       loop: loopFromPreset,
       emitLoopTrace: true,
     })
-    if (!persistedTurn) return response
+
+    // The run id is unique PER RUN, not merely per millisecond.
+    const runId = `${auth.sub}:${agentId}:run-${Date.now()}`
+    const conversationId = bodyResult.data.sessionId ?? bodyResult.data.conversationId ?? runId
+    const envelope: AiRuntimeEnvelope = {
+      schemaVersion: 1,
+      runId,
+      tenantId: auth.tenantId ?? '',
+      principalId: auth.sub,
+      actorId: auth.sub,
+      agentId,
+      conversationId,
+      runtimeSessionId: bodyResult.data.sessionId ?? null,
+      capabilityGrantId: `chat-turn:${auth.sub}:${runId}`,
+      correlationId: runId,
+    }
+
+    await port.startRun(envelope)
+    attachRunInput(port, runId, {
+      messages: bodyResult.data.messages as unknown as UIMessage[],
+      ...(bodyResult.data.attachmentIds ? { attachmentIds: bodyResult.data.attachmentIds } : {}),
+      ...(bodyResult.data.pageContext ? { pageContext: bodyResult.data.pageContext } : {}),
+      ...(bodyResult.data.debug !== undefined ? { debug: bodyResult.data.debug } : {}),
+      sessionId: bodyResult.data.sessionId ?? null,
+      conversationId: bodyResult.data.conversationId ?? null,
+    })
+    // `streamRun` performs the engine call and records the run for the door; it
+    // does NOT drain the body (a Response body is single-use). The original
+    // engine `Response` is read back here and handed to the client unchanged.
+    try {
+      await port.streamRun(runId, async () => undefined)
+    } catch (engineError) {
+      // The engine call failed — close the run as failed at the door so it does
+      // not stay open, then surface the error to the caller.
+      await port.completeRun(runId, { status: 'failed' }).catch(() => undefined)
+      throw engineError
+    }
+    const response = port.responseForRun(runId)
+    if (!response) {
+      await port.completeRun(runId, { status: 'failed' }).catch(() => undefined)
+      return jsonError(500, 'Agent dispatch produced no response.', 'internal_error')
+    }
+    // The run is closed at the door when the CLIENT'S stream ends (see
+    // `persistAssistantOnStreamCompletion`) — that is the one place that observes
+    // the body reaching its end. The wrapper also snapshots the assistant message
+    // when there is a persisted turn.
     return persistAssistantOnStreamCompletion({
       response,
       container,
       tenantId: auth.tenantId ?? null,
       organizationId: auth.orgId ?? null,
       userId: auth.sub,
-      conversationId: persistedTurn.conversationId,
-      userClientMessageId: persistedTurn.userClientMessageId,
+      conversationId: persistedTurn?.conversationId ?? conversationId,
+      userClientMessageId: persistedTurn?.userClientMessageId ?? null,
+      closeRun: async (outcome) => {
+        await port.completeRun(runId, { status: outcome.status ?? 'completed' })
+      },
     })
   } catch (error) {
     if (error instanceof AgentPolicyError) {

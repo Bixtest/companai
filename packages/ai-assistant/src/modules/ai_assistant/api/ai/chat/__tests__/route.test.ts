@@ -42,6 +42,37 @@ jest.mock('../../../../lib/agent-runtime', () => {
   }
 })
 
+// CC-67 — observe the DOOR, not the engine. The route builds the adapter
+// internally, so we wrap the factory to record every `completeRun`/`cancelRun`
+// call. This is what protects the run-close: the hostile critic's defect was the
+// route opening a run and never closing it, which no engine-level assertion can
+// see.
+const completeRunMock = jest.fn()
+const cancelRunMock = jest.fn()
+
+jest.mock('../../../../lib/agent-runtime-port-adapter', () => {
+  const actual = jest.requireActual<typeof import('../../../../lib/agent-runtime-port-adapter')>(
+    '../../../../lib/agent-runtime-port-adapter',
+  )
+  return {
+    ...actual,
+    createAgentRuntimePortAdapter: (deps: unknown) => {
+      const port = actual.createAgentRuntimePortAdapter(deps as never)
+      const origComplete = port.completeRun.bind(port)
+      const origCancel = port.cancelRun.bind(port)
+      port.completeRun = ((runId: string, result: unknown) => {
+        completeRunMock(runId, result)
+        return origComplete(runId, result as never)
+      }) as typeof port.completeRun
+      port.cancelRun = ((runId: string) => {
+        cancelRunMock(runId)
+        return origCancel(runId)
+      }) as typeof port.cancelRun
+      return port
+    },
+  }
+})
+
 jest.mock('../../../../lib/conversation-storage', () => ({
   createConversationStorage: jest.fn(() => ({
     createOrGet: (...args: unknown[]) => createOrGetConversationMock(...args),
@@ -421,6 +452,96 @@ describe('POST /api/ai/chat', () => {
         userId: 'user-1',
       }),
     )
+  })
+
+  it('CC-67 — the run is CLOSED at the door when the client stream ends (the hostile-critic defect)', async () => {
+    // The `CC-67` hostic critic found the route opening a run (`startRun`) and
+    // never closing it (`completeRun`) — leaving an open run that a later cancel
+    // would misreport as cancellable. No engine-level assertion can see that, so
+    // this observes the DOOR: after the stream is fully drained, `completeRun`
+    // must have been called exactly once, with `completed`.
+    seedAgentRegistryForTests([makeAgent({ id: 'customers.assistant', moduleId: 'customers' })])
+    runAiAgentTextMock.mockResolvedValueOnce(
+      new Response('data: {"type":"text-delta","delta":"hi"}\n\ndata: [DONE]\n\n', {
+        status: 200,
+        headers: { 'Content-Type': 'text/event-stream' },
+      }),
+    )
+
+    const response = await POST(
+      buildRequest({
+        agent: 'customers.assistant',
+        body: { conversationId: 'conv-close-1', messages: [{ role: 'user', content: 'hi' }] },
+      }) as any,
+    )
+    await response.text()
+
+    expect(completeRunMock).toHaveBeenCalledTimes(1)
+    const [runId, result] = completeRunMock.mock.calls[0] as [string, { status: string }]
+    expect(typeof runId).toBe('string')
+    expect(runId.length).toBeGreaterThan(0)
+    expect(result.status).toBe('completed')
+    // A completed run is never left cancellable.
+    expect(cancelRunMock).not.toHaveBeenCalled()
+  })
+
+  it('CC-67 — the run is CLOSED even when there is no persisted turn (still no leak)', async () => {
+    // The honest trap: the old code returned the raw `Response` when there was no
+    // persisted turn, which would skip the wrapper — and the run close with it.
+    // This pins that the wrapper (and the close) is applied regardless.
+    seedAgentRegistryForTests([makeAgent({ id: 'customers.assistant', moduleId: 'customers' })])
+    runAiAgentTextMock.mockResolvedValueOnce(
+      new Response('data: {"type":"text-delta","delta":"hi"}\n\ndata: [DONE]\n\n', {
+        status: 200,
+        headers: { 'Content-Type': 'text/event-stream' },
+      }),
+    )
+
+    const response = await POST(
+      buildRequest({
+        agent: 'customers.assistant',
+        body: { messages: [{ role: 'user', content: 'hi' }] },
+      }) as any,
+    )
+    await response.text()
+
+    expect(completeRunMock).toHaveBeenCalledTimes(1)
+  })
+
+  it('CC-67 — a failing engine CALL closes the run as failed at the door', async () => {
+    seedAgentRegistryForTests([makeAgent({ id: 'customers.assistant', moduleId: 'customers' })])
+    runAiAgentTextMock.mockRejectedValueOnce(new Error('engine exploded'))
+
+    const response = await POST(
+      buildRequest({
+        agent: 'customers.assistant',
+        body: { messages: [{ role: 'user', content: 'hi' }] },
+      }) as any,
+    )
+    // The route maps an unexpected dispatch failure to 500 (its existing contract).
+    expect(response.status).toBe(500)
+    // The run must not be left open.
+    expect(completeRunMock).toHaveBeenCalledTimes(1)
+    expect((completeRunMock.mock.calls[0][1] as { status: string }).status).toBe('failed')
+  })
+
+  it('CC-67 — a bodyless engine response still closes the run (the latent leak)', async () => {
+    // The re-verification critic's latent finding: a `Response` with `body === null`
+    // cannot be teed, so the wrapper's early return must NOT skip the close.
+    seedAgentRegistryForTests([makeAgent({ id: 'customers.assistant', moduleId: 'customers' })])
+    runAiAgentTextMock.mockResolvedValueOnce(new Response(null, { status: 204 }))
+
+    const response = await POST(
+      buildRequest({
+        agent: 'customers.assistant',
+        body: { messages: [{ role: 'user', content: 'hi' }] },
+      }) as any,
+    )
+    expect(response.status).toBe(204)
+    // The close is fire-and-forget in this path; let the microtask run.
+    await new Promise((r) => setTimeout(r, 0))
+    expect(completeRunMock).toHaveBeenCalledTimes(1)
+    expect((completeRunMock.mock.calls[0][1] as { status: string }).status).toBe('completed')
   })
 
   it('maps AgentPolicyError thrown by the runtime to the canonical HTTP status', async () => {

@@ -54,7 +54,13 @@ import {
 import type { BusinessQueryIR } from '@open-mercato/shared/lib/business-ir/types'
 import type { AuthContext } from '@open-mercato/shared/lib/auth/server'
 import { computeBoundRunScope, resolveAgentBinding } from './agent-binding'
-import { runAiAgentObject } from './agent-runtime'
+// OPEN — row 28 / `CC-67`: the author reaches the platform's own AI SDK runtime
+// THROUGH THE DOOR, never by importing `agent-runtime` by name. The engine sits
+// behind the door as one implementation (`agent-runtime-port-adapter.ts`).
+import {
+  createAgentRuntimePortAdapter,
+  type AgentRuntimePortAdapter,
+} from './agent-runtime-port-adapter'
 import type { AiChatRequestContext } from './attachment-bridge-types'
 
 /**
@@ -157,13 +163,20 @@ export async function authorBusinessQueryIr(
     // here, so the scope is well-typed.
     const boundScope = computeBoundRunScope({ agentId: BUSINESS_IR_AGENT_ID, binding })
 
-    const result = await runAiAgentObject({
-      agentId: BUSINESS_IR_AGENT_ID,
-      input: input.prompt,
+    // The AI runtime door (`CC-67`). The engine is never named; `port` decides
+    // what sits behind it. The auth context, container and narrowed scope — the
+    // rich deps the §4.2 envelope cannot hold — ride on the adapter's
+    // construction, not inside the envelope.
+    const port: AgentRuntimePortAdapter = createAgentRuntimePortAdapter({
       authContext: input.authContext,
+      ...(input.container !== undefined ? { container: input.container as never } : {}),
       boundScope,
       ...(input.modelOverride !== undefined ? { modelOverride: input.modelOverride } : {}),
-      ...(input.container !== undefined ? { container: input.container as never } : {}),
+    })
+
+    const result = await port.runObjectForRun({
+      agentId: BUSINESS_IR_AGENT_ID,
+      prompt: input.prompt,
       output: {
         schemaName: BUSINESS_QUERY_IR_SCHEMA_NAME,
         schema: businessQueryIrSchema,
