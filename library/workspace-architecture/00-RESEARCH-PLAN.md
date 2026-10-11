@@ -224,6 +224,62 @@ recommendation and one specific question.
 
 ---
 
+## 2b. The two WORKSTREAMS the owner's answers created *(added 2026-10-11)*
+
+The batches above produce **the SRS for the workspace layer**. Two of the owner's answers (DP-02/03 and
+DP-13/14) created **two workstreams of their own**, which are **not batches of this SRS** but **separate
+analysis programmes** that this plan hands to. They are recorded here, with the sequencing, because the owner
+asked for it explicitly: *"make sure all is documented in the right sequence so it gets developed when the
+prerequisite is developed"* (DP-12).
+
+### WS-1 — B-perms: the permissions engine *(from DP-04)*
+
+**What it is.** The **two-gate permission engine**: check on the way **in** (*may this user request this?*)
+and on the way **back** (*may this user see this outcome?*), engineered to protect without destroying
+optimization. Owner-APPROVED as a dedicated workstream.
+
+**Produces:** its own SRS. Its **first requirement is the two-gate rule**; its first measured question is the
+*kind* of gate — the fact-check already established that the write path has a feature gate (`metadata.
+requireFeatures`) that is **OPT-IN, not default-deny** (`CC-44`), and that the human CRUD **read** path has
+**no** per-entity permission filter (`CC-47`). Those two are its opening items.
+
+**Why it must come first:** it is **cross-cutting** — every function, widget, thread and prompt touches it.
+It is the **engine** of The Studio (WS-2) and the **prerequisite** of DP-12's tenant-authoring build.
+
+### WS-2 — B-studio: "The Studio" *(from DP-13 + DP-14)*
+
+**What it is.** The owner's named hub: **one place** where **functions, widgets, widget pages and menu items**
+are listed and managed the same way, plus a **database editor**, with per-user permissions. It **owns** four
+subjects the owner says are one: **ownership · sharing · review · placement** — and the owner's key
+distinction: **"allow you to use it" ≠ "post it into your interface"** (auto-posting is a spam risk).
+
+**Produces:** its own SRS. It is the **surface** of WS-1's engine. Its measured starting point is that three
+of its four registries **already exist** (`user-function/`, `business-widget/registry.ts`, the B5 menu
+projector) — so the Studio is mostly **one view over what exists + the permission model + the database editor**.
+
+### The sequencing (binding — the owner's DP-12 instruction)
+
+```
+B1…B10  (this SRS)            ── runs NOW, unaffected
+   │
+   ├─→ WS-1  B-perms   (the engine: the two gates)
+   │        │
+   │        └─→ WS-2  B-studio   (the surface: one hub; takes the engine + the 3 registries + the DB editor)
+   │                 │
+   │                 └─→ the permissions-DEPENDENT builds:
+   │                       · DP-12 route 2  (tenant-authored widgets — needs the gates)
+   │                       · DP-05 route "yes" (the schema-change build pool — needs the engine)
+   │                       · any Studio-native management of the registries
+   │
+   └─→ (no sequencing dependency) the builds that need NO permissions layer:
+         · the wiring (DP-01, first)   · the join (B5)   · route 1 & the AI-propose half (B7)
+```
+
+**One rule this fixes:** nothing that depends on *"who may run / save / share / see what"* is built before
+**B-perms**. Everything else proceeds. This is the owner's DP-12 answer made concrete.
+
+---
+
 ## 3. The dependency graph
 
 ```
@@ -271,7 +327,9 @@ The workstream is done when **all** of these hold:
    and its status.
 3. The **reference-system verdict** is one recommendation with alternatives.
 4. The **mapping** leaves no requirement without a destination.
-5. The **owner's decisions** are listed, each with a recommendation and one specific question.
+5. The **owner's decisions** are listed, each with a recommendation and one specific question — **including
+   the two workstreams the decisions created (§2b), with their sequence recorded** (the owner's DP-12
+   instruction: *"developed when the prerequisite is developed"*).
 6. The folder is ready to be **integrated and indexed** — the deferred later stage.
 
 ---

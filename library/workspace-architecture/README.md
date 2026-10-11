@@ -65,9 +65,15 @@ permission **on the way in** (may this user *request* this?) **and on the way ba
 outcome?), engineered to **protect without destroying optimization**. DP-05 (the schema-change "explain and
 route" branch ships early; the build pool waits on DP-04) · DP-06 (a recipe may sit in several menu homes but
 carries **one** permission set everywhere) · DP-07 (a recipe may open as a page, a panel, or both — chosen per
-recipe) · **DP-08 (menu categories are FLAT for now; nesting is a later switch with no recipe re-saved)**.
-**The SRS batches B7–B10 are NOT blocked by DP-04** — they proceed; only permissions-*dependent builds* queue
-behind it.
+recipe) · **DP-08 (menu categories are FLAT for now; nesting is a later switch with no recipe re-saved)** ·
+**DP-12 (follow the recommendation — tenant authoring behind DP-04 — but SEQUENCE every affected build so it
+is built only when its prerequisite exists)** · **DP-13 (it is a permissions question → belongs in "The
+Studio"; "allow you to use it" ≠ "post it into your interface")** · **DP-14 (follow the recommendation;
+ownership · sharing · review · placement are ONE subject)** · **DP-15 ("The Studio" — one hub for functions,
+widgets, widget pages, menu items + a database editor, on the DP-04 engine — raised for approval).**
+**DP-09/10/11 (B6's) remain ⏳ open — they live in `owner_answers.md`.**
+**The SRS batches B8–B10 are NOT blocked** — they proceed; only permissions-*dependent builds* queue behind
+B-perms → B-studio.
 
 **B6's finding B7 must carry:** the kit **already persists threads** (`ai_chat_conversations`,
 `ai_chat_conversation_participants`, `ai_chat_messages` — 36 + 2 tests passing) and **already models human
@@ -87,10 +93,27 @@ AI-proposed** (the *propose* half built as `FunctionCandidate`; the *apply* half
 NEW). The one law that makes Route 2 safe: **a widget's audience is an intersection computed per view, not a
 grant stored once** — DP-04's two gates are the load-bearing safety property, not a policy.
 
+**⚠️ THE PLAN GAINED TWO WORKSTREAMS (2026-10-11, from the owner's DP-04 and DP-13/14 answers).** They are
+**not** batches of this SRS; they are **separate analysis programmes** this plan hands to, with a binding
+order (full detail in `00-RESEARCH-PLAN.md` §2b):
+
+- **WS-1 · B-perms — the permissions engine.** The two-gate rule (check in *and* back; protect without
+  harming optimization). **APPROVED by the owner.** Cross-cutting; the engine of WS-2. **Opening measured
+  items:** the write-path feature gate is **OPT-IN, not default-deny** (`CC-44`); the human CRUD **read**
+  path has **no** per-entity permission filter (`CC-47`).
+- **WS-2 · B-studio — "The Studio"** (the owner's name). **One hub** where **functions, widgets, widget
+  pages, menu items** are listed and managed the same way, **plus a database editor**, with per-user
+  permissions. It **owns** the four subjects the owner says are one — **ownership · sharing · review ·
+  placement** — with his key distinction: **"allow you to use it" ≠ "post it into your interface"**.
+- **The binding sequence:** `B1…B10 (runs now)` → `B-perms` → `B-studio` → the permissions-**dependent**
+  builds (DP-12 route 2 · DP-05's build pool). The builds needing **no** permissions layer proceed
+  independently: the wiring (DP-01), the join (B5), route 1 & the AI-propose half (B7).
+
 **⚠️ File-collision hazard (learned 2026-10-11).** The owner and the agent both edit files in this folder. An
 editor holding an older copy silently overwrote a committed edit once (`discussion_points.md`). **Both
 editors must re-read the file from disk before writing, and the agent commits immediately after every edit**
-so any loss is recoverable via `git show <commit>:<path>`.
+so any loss is recoverable via `git show <commit>:<path>`. **The owner's answers live in `owner_answers.md`
+(his file; the agent reads it, never writes it) as well as in `discussion_points.md`.**
 
 **RESUME HERE — B8.** Carry-forwards B8 needs:
 1. **From B2** — the three reference systems are described from their own source; B8 makes the **one
