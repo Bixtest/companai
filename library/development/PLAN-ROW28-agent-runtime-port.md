@@ -99,7 +99,7 @@ envelope rules (server-minted identity, secrets as references, distinct ids).
 ---
 
 ### R28-2 — The first engine behind the door: OpenCode as one implementation
-**Status: BLOCKED on R28-1 (needs the door's shape to fit behind).**
+**Status: IN PROGRESS (2026-10-11) — BLOCKED cleared (R28-1 ✅ DONE).**
 
 **What it is.** Wrap the **existing** OpenCode client so it fits behind the new door. OpenCode does not
 change and is not removed — it simply becomes one of the things the door can hide. Nothing new is added
@@ -213,7 +213,7 @@ Every sub-row that ends less than fully done gets (or keeps) a row in `COMPLETIO
 | Sub-row | Status | Evidence |
 |---|---|---|
 | R28-1 | ✅ **DONE 2026-10-11** | See §7.1 below. |
-| R28-2 | not started | — |
+| R28-2 | 🟡 **IN PROGRESS 2026-10-11** | Measured the OpenCode surface (rule 0b): the client is 495 lines, the handlers 957; the adapter must map the eight port operations onto `createOpenCodeClient` + `handleOpenCodeMessageStreaming` (`opencode-client.ts` / `opencode-handlers.ts`). Build next. |
 | R28-3 | not started | — |
 | R28-4 | not started | — |
 | R28-5 | not started | — |
