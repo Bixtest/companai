@@ -158,6 +158,37 @@ const baseAuth = {
   isSuperAdmin: true,
 }
 
+/**
+ * `CC-57` — the two inputs the binding lookup needs.
+ *
+ * `auth` is the **authenticated server context** (distinct from `authContext`,
+ * the *resolved* run scope): a bare `sub` with no `ai_worker:`/`api_key:` prefix
+ * resolves — through the **real** `requirePrincipal` → `derivePrincipal` this
+ * suite does not mock — to a **human** principal. A human is a passthrough in
+ * `resolveAgentBinding` (`B4`), so it consults **no** database row; that is why
+ * `em` can be a stand-in here and the six cases below stay byte-identical to the
+ * pre-`CC-57` wire (the assertion the suite is *for*). The worker and
+ * bound-scope cases — where the binding genuinely affects the run — live in the
+ * dedicated `business-ir-author-binding.test.ts`.
+ */
+const humanAuth = { sub: 'user-1', tenantId: 'tenant-1', orgId: 'org-1' }
+const emStub = {} as unknown as Parameters<
+  typeof authorBusinessQueryIr
+>[0]['em']
+
+/** The three inputs every call in this suite supplies. */
+function callInput(overrides: {
+  prompt: string
+  authContext?: typeof baseAuth
+}): Parameters<typeof authorBusinessQueryIr>[0] {
+  return {
+    prompt: overrides.prompt,
+    authContext: overrides.authContext ?? baseAuth,
+    auth: humanAuth,
+    em: emStub,
+  }
+}
+
 /** A model answer that is a valid `BusinessQueryIR` for the model above. */
 const GOOD_IR = {
   operation: 'list',
@@ -195,7 +226,7 @@ describe('authorBusinessQueryIr — the model→IR wire (G-17)', () => {
       }),
     ])
 
-    await authorBusinessQueryIr({ prompt: 'invoices over 10k by customer', authContext: baseAuth })
+    await authorBusinessQueryIr(callInput({ prompt: 'invoices over 10k by customer' }))
 
     expect(generateObjectMock).toHaveBeenCalledTimes(1)
     const callArg = generateObjectMock.mock.calls[0][0] as { schemaName: string; schema: unknown }
@@ -218,10 +249,9 @@ describe('authorBusinessQueryIr — the model→IR wire (G-17)', () => {
       }),
     ])
 
-    const result = await authorBusinessQueryIr({
-      prompt: 'invoices over 10k by customer',
-      authContext: baseAuth,
-    })
+    const result = await authorBusinessQueryIr(
+      callInput({ prompt: 'invoices over 10k by customer' }),
+    )
 
     expect(result.ok).toBe(true)
     if (!result.ok) throw new Error('unreachable')
@@ -239,10 +269,9 @@ describe('authorBusinessQueryIr — the model→IR wire (G-17)', () => {
       }),
     ])
 
-    const authored = await authorBusinessQueryIr({
-      prompt: 'invoices over 10k by customer',
-      authContext: baseAuth,
-    })
+    const authored = await authorBusinessQueryIr(
+      callInput({ prompt: 'invoices over 10k by customer' }),
+    )
     expect(authored.ok).toBe(true)
     if (!authored.ok) throw new Error('unreachable')
 
@@ -271,10 +300,9 @@ describe('authorBusinessQueryIr — the model→IR wire (G-17)', () => {
       finishReason: 'stop',
     }))
 
-    const result = await authorBusinessQueryIr({
-      prompt: 'invoices, but my own way',
-      authContext: baseAuth,
-    })
+    const result = await authorBusinessQueryIr(
+      callInput({ prompt: 'invoices, but my own way' }),
+    )
 
     expect(result.ok).toBe(false)
     if (result.ok) throw new Error('unreachable')
@@ -295,7 +323,7 @@ describe('authorBusinessQueryIr — the model→IR wire (G-17)', () => {
       finishReason: 'stop',
     }))
 
-    const result = await authorBusinessQueryIr({ prompt: 'newest first', authContext: baseAuth })
+    const result = await authorBusinessQueryIr(callInput({ prompt: 'newest first' }))
 
     expect(result.ok).toBe(false)
     if (result.ok) throw new Error('unreachable')
@@ -329,7 +357,7 @@ describe('authorBusinessQueryIr — the model→IR wire (G-17)', () => {
       }),
     ])
 
-    const result = await authorBusinessQueryIr({ prompt: 'anything', authContext: baseAuth })
+    const result = await authorBusinessQueryIr(callInput({ prompt: 'anything' }))
 
     expect(result.ok).toBe(false)
     if (result.ok) throw new Error('unreachable')

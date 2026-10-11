@@ -33,16 +33,27 @@
  * where a model is callable. Putting this file in `shared` would invert the
  * layering to save one import.
  *
+ * **Who may ask.** The wire consults the same `(principal, agent)` binding the
+ * routed dispatch paths do (`CC-27`): an AI worker that is not bound to
+ * `business_ir.query_author` is refused (`agent_not_bound`) **before the model is
+ * asked**, and a bound one runs under the binding's narrowed scope (`CC-55`). A
+ * human session is a passthrough (`B4`). The binding is the grant; a grant that is
+ * not consulted is not a grant — so this in-process path consults it too
+ * (`CC-57`).
+ *
  * Source: Doc 3 §49–§53 (`BusinessQueryIR` / `BusinessCommandIR`);
  * `library/development/ARCHITECTURE-request-outcomes.md`, outcome 3.
  */
 
 import type { ZodIssue } from 'zod'
+import type { EntityManager } from '@mikro-orm/postgresql'
 import {
   BUSINESS_QUERY_IR_SCHEMA_NAME,
   businessQueryIrSchema,
 } from '@open-mercato/shared/lib/business-ir/schema'
 import type { BusinessQueryIR } from '@open-mercato/shared/lib/business-ir/types'
+import type { AuthContext } from '@open-mercato/shared/lib/auth/server'
+import { computeBoundRunScope, resolveAgentBinding } from './agent-binding'
 import { runAiAgentObject } from './agent-runtime'
 import type { AiChatRequestContext } from './attachment-bridge-types'
 
@@ -68,6 +79,21 @@ export interface AuthorBusinessQueryIrInput {
    * **never** from the IR the model emits (the IR has no scope field on purpose).
    */
   authContext: AiChatRequestContext
+  /**
+   * The authenticated **server** context — the source of the binding decision
+   * (`CC-57`). Distinct from {@link authContext}: that one carries the *resolved*
+   * scope the run executes under, this one carries the `sub`/`principal` the
+   * binding is looked up **by**. The check is fail-closed for an `ai_worker` and
+   * a passthrough for a human (`CC-27`), so the caller must state who is acting
+   * rather than let the helper guess.
+   */
+  auth: AuthContext
+  /**
+   * The entity manager the binding lookup runs on (`CC-57`). Passed explicitly
+   * rather than resolved from `container`, so this module's **one** database read
+   * is visible at the call site and testable without a container.
+   */
+  em: EntityManager
   /** Optional per-call model override; resolution otherwise follows the agent. */
   modelOverride?: string
   /** Optional container for agent/tool resolution in a live request. */
@@ -81,11 +107,16 @@ export interface AuthorBusinessQueryIrInput {
  * produce a usable IR" instead of a `try/catch` it may forget. `ok: false`
  * carries the schema issues — the message the model would be shown if the caller
  * decides to retry.
+ *
+ * `reason: 'agent_not_bound'` (`CC-57`) means the acting principal may **not**
+ * run this agent — the binding check refused it, before the model was asked. It
+ * is a refusal, not a failure, so it carries nothing to retry.
  */
 export type AuthorBusinessQueryIrResult =
   | { ok: true; ir: BusinessQueryIR }
   | { ok: false; reason: 'schema_rejected'; issues: ZodIssue[] }
   | { ok: false; reason: 'agent_error'; error: unknown }
+  | { ok: false; reason: 'agent_not_bound' }
 
 /**
  * Ask the configured agent to turn a plain-language request into a Business IR.
@@ -107,10 +138,30 @@ export async function authorBusinessQueryIr(
 ): Promise<AuthorBusinessQueryIrResult> {
   let object: unknown
   try {
+    // CC-57 — consult the grant BEFORE the model is asked anything. This is the
+    // same fail-closed binding check the routed dispatch paths apply (`CC-27`):
+    // an unbound `ai_worker` is refused here, as a value, with no model call. A
+    // human principal is a passthrough (`B4`). Resolved inside the `try` so a
+    // lookup failure is a value too, not a throw the caller may forget.
+    const binding = await resolveAgentBinding({
+      em: input.em,
+      auth: input.auth,
+      agentId: BUSINESS_IR_AGENT_ID,
+    })
+    if (!binding.bound) {
+      return { ok: false, reason: 'agent_not_bound' }
+    }
+
+    // CC-55 / CC-57 — the binding's NARROWING (tools INTERSECT, features UNION)
+    // is applied to the run, exactly as the routes do. `binding.bound` is true
+    // here, so the scope is well-typed.
+    const boundScope = computeBoundRunScope({ agentId: BUSINESS_IR_AGENT_ID, binding })
+
     const result = await runAiAgentObject({
       agentId: BUSINESS_IR_AGENT_ID,
       input: input.prompt,
       authContext: input.authContext,
+      boundScope,
       ...(input.modelOverride !== undefined ? { modelOverride: input.modelOverride } : {}),
       ...(input.container !== undefined ? { container: input.container as never } : {}),
       output: {
