@@ -95,6 +95,20 @@ describe('resolveAgentBinding — CC-27', () => {
     expect(findBindingMock).not.toHaveBeenCalled()
   })
 
+  it('fails closed for an unidentifiable principal (blank subject) — never a human passthrough', async () => {
+    // A blank/whitespace subject identifies nobody. Before this guard, it derived
+    // NO principal and fell into the human branch, skipping the binding entirely —
+    // a fail-open. It must now refuse.
+    findBindingMock.mockResolvedValue(null)
+    const result = await resolveAgentBinding({
+      em: fakeEm,
+      auth: { sub: '   ', tenantId: 'tenant-1', orgId: 'org-1' } as never,
+      agentId: 'mod.agent',
+    })
+    expect(result).toEqual({ bound: false, reason: 'no_binding' })
+    expect(findBindingMock).not.toHaveBeenCalled()
+  })
+
   it('treats a service principal (api_key:) as unbound', async () => {
     // A service key is not an ai_worker, so it is NOT subject to the binding
     // check — it keeps today's behaviour (returns bound, no DB read).

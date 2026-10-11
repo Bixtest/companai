@@ -39,8 +39,17 @@ export async function resolveAgentBinding(input: {
   const { em, auth, agentId } = input
   const principal = requirePrincipal(auth)
 
-  // Human (or unknown) principals are not subject to the binding check.
-  if (!principal || principal.kind !== 'ai_worker') {
+  // A principal that cannot be derived at all is **nobody** — an empty or
+  // whitespace-only subject identifies no person and no machine. Treating that as
+  // a human passthrough would be a fail-OPEN (the binding is a grant, and an
+  // unidentifiable actor holds none), so refuse. This closes the path where a
+  // blank subject reached the human branch and skipped the check entirely.
+  if (!principal) {
+    return { bound: false, reason: 'no_binding' }
+  }
+
+  // Human (or other non-AI-worker) principals are not subject to the binding check.
+  if (principal.kind !== 'ai_worker') {
     return { bound: true, toolAllowlist: null, requiredFeatures: [] }
   }
 
