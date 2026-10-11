@@ -31,6 +31,22 @@ let bootstrapped = false
  * registry was reset by a test, in which case registration runs again).
  */
 export function registerBuiltInLlmProviders(): void {
+  // Defensive surface check. Several suites (e.g. `business-ir-author.test.ts`)
+  // mock the shared registry with a PARTIAL stub carrying only
+  // `resolveFirstConfigured` — enough for the code under test, but not the
+  // `register`/`list` surface this bootstrap needs. This module runs at IMPORT
+  // time (the auto-bootstrap call at the bottom of this file), so an incomplete
+  // stub would otherwise throw `list is not a function` on a re-evaluation
+  // (the first call short-circuits before `list()`; the second does not),
+  // producing an order-dependent failure that only appears when this module is
+  // re-resolved in a worker. Treat a registry that does not expose the write
+  // surface as "nothing to bootstrap": registration is a best-effort
+  // convenience, never a load-time precondition of the importers.
+  const registry = llmProviderRegistry as Partial<typeof llmProviderRegistry> | undefined
+  if (typeof registry?.register !== 'function' || typeof registry?.list !== 'function') {
+    return
+  }
+
   if (bootstrapped && llmProviderRegistry.list().length > 0) {
     return
   }

@@ -174,34 +174,48 @@ describe('mcp:dev API key resolution (#2671)', () => {
     it.each(['linux', 'win32'] as const)(
       'fails closed when the config path is replaced after open/validation (%s)',
       async (platform) => {
-        const replacementPath = join(projectRoot, 'replacement.mcp.json')
-        const openedPath = join(projectRoot, 'opened.mcp.json')
+        // TOCTOU: the descriptor was opened on the TRUSTED file, but by the
+        // time the path is `lstat`ed it names a DIFFERENT inode (the attacker
+        // swapped it after the open succeeded). The function must compare the
+        // two identities and refuse.
+        //
+        // This is deterministic BY CONSTRUCTION — it does not rename real files
+        // and does not depend on the host's inode semantics. It states the
+        // mismatch directly: the descriptor reports one `{dev, ino}`, the path
+        // reports another. An earlier version drove the swap with real
+        // renames raced against the check's own `Promise.all([stat, lstat])`,
+        // so the outcome depended on microtask order and the host's rename
+        // behaviour — it failed intermittently in the full suite (CC-68).
         await realFs.writeFile(configPath, mcpConfig('trusted-key'), { mode: 0o600 })
-        await realFs.writeFile(replacementPath, mcpConfig('replacement-key'), { mode: 0o600 })
         const platformDescriptor = Object.getOwnPropertyDescriptor(process, 'platform')
         Object.defineProperty(process, 'platform', { ...platformDescriptor, value: platform })
 
         try {
-          let replaced = false
-          const replaceConfigPath = async () => {
-            if (replaced) return
-            replaced = true
-            await realFs.rename(configPath, openedPath)
-            await realFs.rename(replacementPath, configPath)
-          }
-          mockedStat.mockImplementation(async (...args) => {
-            const result = await realFs.stat(...args)
-            if (String(args[0]) === configPath) await replaceConfigPath()
-            return result
-          })
+          // The descriptor's own stat — the file that was opened (trusted).
+          // Keep the REAL Stats object (so `isFile()` etc. still work) and
+          // override only the identity fields.
           mockedOpen.mockImplementation(async (...args) => {
             const handle = await realFs.open(...args)
-            if (String(args[0]) === configPath) await replaceConfigPath()
+            const realStat = handle.stat.bind(handle)
+            // `FileHandle.stat` is overloaded (Stats | BigIntStats); the
+            // production code only calls the no-arg form, so cast the override.
+            handle.stat = (async () => {
+              const stats = await realStat()
+              Object.defineProperty(stats, 'dev', { value: 1, configurable: true })
+              Object.defineProperty(stats, 'ino', { value: 111, configurable: true })
+              return stats
+            }) as typeof handle.stat
             return handle
+          })
+          // The path's lstat — a DIFFERENT file now lives at that path.
+          mockedLstat.mockImplementation(async (...args) => {
+            const stats = await realFs.lstat(...args)
+            Object.defineProperty(stats, 'dev', { value: 2, configurable: true })
+            Object.defineProperty(stats, 'ino', { value: 222, configurable: true })
+            return stats
           })
 
           await expect(getApiKeyFromMcpJson()).resolves.toBeUndefined()
-          expect(replaced).toBe(true)
         } finally {
           if (platformDescriptor) Object.defineProperty(process, 'platform', platformDescriptor)
         }
