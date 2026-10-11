@@ -35,6 +35,9 @@ recommendation**. Nothing here needs an answer *now* unless it is marked **BLOCK
   reframed it: *first ask whether this user holds the permissions (collectively) to change tenant schema;* if
   **yes** → a different (approval-pool) flow; if **no** → explain what is needed and route it to the right
   person. See **DP-04** and **DP-05**.
+- **DP-08 — menu categories are FLAT for now** (2026-10-11). The owner's words: *"We can have it Flat for now."*
+  The category is the path minus its last segment, shown as one flat list; nesting can be turned on later
+  without re-saving a recipe, because the category is a pure function of the path.
 
 ---
 
@@ -344,7 +347,8 @@ is lost by starting flat.
 
 **The one question.** *Do you want a nested, folder-like menu, or a flat list of categories for now?*
 
-** Answer: We can have it Flat for now.**
+**ANSWERED (2026-10-11) — flat for now.** The owner's words verbatim: *"We can have it Flat for now."* The
+mechanism stays a pure function of the path, so nesting is a later switch with **no recipe re-saved**.
 
 ---
 
@@ -368,5 +372,6 @@ file; the agent must re-read the file from disk (not from memory) before every e
 its last version is the current one.** Every edit is committed immediately so the history is recoverable
 (`git show <commit>:<path>`).
 
-**Current list:** DP-01 ✅ answered · DP-02 ✅ answered · DP-03 ✅ answered · DP-04 (permissions workstream) ·
-DP-05 (schema-change pool) · DP-06 · DP-07 · DP-08 — all waiting, none blocking the SRS.
+**Current list:** DP-01 ✅ answered · DP-02 ✅ answered · DP-03 ✅ answered · DP-04 ✅ approved · DP-05 ✅
+answered · DP-06 ✅ answered · DP-07 ✅ answered · DP-08 ✅ answered · DP-09 ⏳ · DP-10 ⏳ · DP-11 ⏳ — none
+blocking the SRS.

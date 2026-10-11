@@ -51,6 +51,7 @@ your answer:
 - **DP-05** — the "explain and route" branch ships early; the build pool waits on DP-04.
 - **DP-06** — a recipe may sit in several menu homes, but carries one permission set everywhere.
 - **DP-07** — a recipe may open as its own page, as a workspace panel, or both; the user chooses per recipe.
+- **DP-08** — menu categories are **flat for now** (nesting can be switched on later with no recipe re-saved).
 
 ---
 
