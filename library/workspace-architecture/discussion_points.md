@@ -25,12 +25,6 @@ recommendation**. Nothing here needs an answer *now* unless it is marked **BLOCK
   reframed it: *first ask whether this user holds the permissions (collectively) to change tenant schema;* if
   **yes** → a different (approval-pool) flow; if **no** → explain what is needed and route it to the right
   person. See **DP-04** and **DP-05**.
-- **DP-04 — the permissions workstream is APPROVED** (2026-10-11), with a **two-gate** rule the owner stated:
-  check permission **on the way in** (may this user *request* this?) **and on the way back** (may this user
-  *see* the outcome?), engineered so it **protects without damaging optimization**.
-- **DP-05 — the "explain and route" branch ships early** (2026-10-11); the "build pool" branch waits on DP-04.
-- **DP-06 — a recipe may sit in several menu homes, but carries ONE permission set everywhere** (2026-10-11):
-  placement is many-to-one; permissions live on the recipe, not on each placement.
 
 ---
 
@@ -216,30 +210,7 @@ that the permissions-dependent builds are **scheduled behind it**, not guessed a
 we build anything that depends on "who may run/save/share what" — or should permissions stay a lighter,
 deferred layer while the workspace SRS finishes?*
 
-**ANSWERED (2026-10-11) — YES, open the dedicated permissions batch.** The owner's words verbatim: *"Yes you
-can do so. Permissions management is extremely critical especially that — unlike standard platforms where the
-permissions are channeled with static hardcoded functions — in our system the ai-first prompting makes the
-platform more fluid that may expose it to prompt engineering that can expose the platform and the database in a
-way that should not be permitted — which is why it is important to check user permission when the flow is from
-the user to the ai 'does this user have the rights needed to request this' and on the way back before the user
-can have any access to the outcomes — in any way — there should be the question asked again 'does the user
-have all the rights required to see this outcome', just one example why permissions management and gateguards
-management need a proper engineering that protect the system without damaging its optimization."*
-
-**What this adds (important, and new):** the owner gives the **reason** permissions must be engineered, and it
-is a **two-gate** rule unique to an AI-first platform:
-1. **Gate on the way IN** — before the system acts on a prompt, check *"does this user have the rights to
-   request this?"* (the prompt-injection exposure — an AI-first surface is more fluid than a menu-driven one,
-   so the *request* itself must be authorized, not just the click).
-2. **Gate on the way BACK** — before the user can see any outcome, ask *"does the user have all the rights
-   required to see this?"* — because an outcome the platform can compute is not an outcome this user may see.
-   (This is the read-side of the vision's §176: *the reference is not authorization*.)
-3. **The goal is protection *without* destroying optimization** — the gates must not make the platform slow or
-   awkward. That is the engineering brief.
-
-→ **Action:** a dedicated **permissions-architecture batch** (its own SRS) is **approved**. It is scheduled as
-its own analysis, and permissions-dependent builds queue behind it. The two gates above are its first two
-requirements.
+** Answer: Yes you can do so. Permid´ssions management is extremely critical especially that -unlike standard platforms were he permissions are channeled with static hardcoded functions- in our system the ai-first prompting makes the platform more fluid that may expose it to prompt engineering that can expose the platform and the database in a way that should not be permitted - which is why it is important to check user permission when the flow is from the user to the ai "does this user have the rights needed to request this" and on the way back before the user can have any access to the outcomes - in any way- there should be the question asked again "does the user have all the rights required to see this outcome", just one example why permissions management and gateguards management need a proper engineering that protect the system without damaging its optimization. **
 
 ---
 
@@ -277,9 +248,7 @@ after the permissions workstream.**
 **The one question.** *Do you want the "explain and route to the right person" branch built early (it needs no
 permissions layer), with the "build pool" branch held until the permissions workstream (DP-04) lands?*
 
-**ANSWERED (2026-10-11) — yes, build the "explain and route" branch early.** The owner's words verbatim:
-*"Yes, we can do so."* → the cheap, honest branch ships before the permissions layer; the "build pool" branch
-still waits on DP-04.
+** Answer: Yes, we can do so**
 
 ---
 
@@ -307,12 +276,7 @@ when we need them. That gives predictability now and flexibility later, at no co
 
 **The one question.** *Should a saved recipe appear in exactly one menu location, or be allowed in several?*
 
-**ANSWERED (2026-10-11) — allowed in several, with ONE permission set shared everywhere.** The owner's words
-verbatim: *"Be allowed in several. But it will have the same permissions settings everywhere."* → this is a
-clean, important refinement: a recipe may have **many homes** (many menu placements), but **its permissions are
-a property of the recipe, not of each placement** — so the same recipe cannot be more restricted in one menu
-than another. **Consequence for the SRS:** placement is many-to-one (many Widget placements → one Function),
-while `requiredPermissions` stays on the Function (B5 §5.1 already stores it there — consistent).
+**Answer: Be allowed in several. But it will have the same permissions setings everywhere.**
 
 ---
 
@@ -341,6 +305,8 @@ also means a recipe and a chat about that recipe live side by side, which is wha
 **The one question.** *Should a saved recipe open as its own page, or be dropped into the workspace as a panel
 (your menu being a shortcut to it)?*
 
+** My answer: We can have both optons. When I save a recipe, I can choose one of the two options or both.**
+
 ---
 
 ### DP-08 — How deep should the menu categories go?
@@ -368,89 +334,9 @@ is lost by starting flat.
 
 **The one question.** *Do you want a nested, folder-like menu, or a flat list of categories for now?*
 
----
-
-### DP-09 — Is the AI a *participant* in a thread, or the thread's *agent*?
-
-**Status:** waiting · **Raised by:** Batch B6 · **Blocks anything?** No — B6 has a working default.
-
-**Where this lives in the technical file:** `02-SRS-04-threads-and-collaboration.md` §8, question **OQ-B6-1**.
-
-**What it is, in plain words.**
-Today a saved thread records **which AI agent it talks to** as a field on the thread, and records **humans** as
-participants (owner / viewer / commenter). So a thread is *"one AI, plus some humans"* — the AI and the humans
-live on different lists. Your words were *"collaborate in one as human users or human and ai users"* — i.e. one
-list where an AI can be a peer.
-
-**What it changes for the user.**
-- **AI as a participant (one list):** a thread can show *"Participants: Sarah, John, ProcurementAgent"* — you
-  can address the AI by name like a colleague, and see it in the same list as people. This is the vision's
-  `@ProcurementAgent` idea.
-- **AI as only the thread's agent (today):** simpler, but the AI is a fixture of the room rather than someone
-  in it — you cannot have *two* AIs in one thread, and "human and AI in one thread" stays two lists.
-
-**My recommendation: make the AI a participant** (one list), keeping today's field as *"the thread's default
-agent"* so nothing breaks. It is one small change and it is literally the thing you asked for.
-
-**The one question.** *Should an AI appear in a thread's participant list as a peer — so "human and AI in one
-thread" is one list — or is "the thread has one agent, plus humans" enough?*
+** Answer: We can have it Flat for now.**
 
 ---
-
-### DP-10 — Is a "saved thread" the same thing as a "workspace"?
-
-**Status:** waiting · **Raised by:** Batch B6 · **Blocks anything?** No — but it shapes the workspace surface
-(B9).
-
-**Where this lives in the technical file:** `02-SRS-04-threads-and-collaboration.md` §8, question **OQ-B6-2**.
-
-**What it is, in plain words.**
-You asked how to *"save different threads of that workspace"*. That phrasing could mean two things: a **thread
-*is* a workspace** (one container — you open it and it has your conversation **and** your widgets and panels),
-or a workspace **contains several threads** (like several chat channels inside one room). We already have a
-thread object that is well-suited to be *the* workspace.
-
-**What it changes for the user.**
-- **One and the same:** simpler to explain and to build; a saved thread *is* a saved workspace. Opening it
-  restores everything.
-- **Workspace holds several threads:** more like Slack (a workspace with channels). More flexible for teams;
-  more to build and to get right.
-
-**My recommendation: a thread *is* a workspace** (one container), for now — it matches your sentence ("threads
-*of that workspace*" = the workspace's saved states) and it reuses what is built.
-
-**The one question.** *Is a saved thread the same object as a workspace, or do you want several threads inside
-one workspace?*
-
----
-
-### DP-11 — Do comments need to anchor to specific data (a row, a cell, a field)?
-
-**Status:** waiting · **Raised by:** Batch B6 · **Blocks anything?** No.
-
-**Where this lives in the technical file:** `02-SRS-04-threads-and-collaboration.md` §8, question **OQ-B6-3**.
-
-**What it is, in plain words.**
-The vision wants a comment to be able to point at *exactly* one thing — a specific row, a cell, a chart point, a
-form field — and to show a thread of discussion **on that item**. Today a thread can record which *page* it was
-on, but not anchor to a specific record or cell.
-
-**What it changes for the user.**
-- **With anchoring:** you click a cell and discuss that cell; the comment travels with the data.
-- **Without it:** discussion is at the level of the whole thread — fine for now, less precise for reviewing
-  a specific number.
-
-**My recommendation: build a simple typed anchor later, with the access check.**
-It is valuable but not needed to prove the architecture. Crucially, when it is built, the vision's rule must
-hold: **seeing the anchor is not permission to see the data** — the platform must check each viewer's access to
-the underlying record (the owner's own "gate on the way back", DP-04).
-
-**The one question.** *Do you want comments anchored to specific records/cells early, or is thread-level
-discussion enough for now?*
-
----
-
-## PART 3 — HOW TO ADD TO THIS FILE
 
 - **A blocker** goes in Part 1 the moment it stops work, with the reason stated plainly.
 - **Anything else** goes in Part 2 the moment it is found, so nothing is lost — and we discuss the whole
@@ -472,7 +358,5 @@ file; the agent must re-read the file from disk (not from memory) before every e
 its last version is the current one.** Every edit is committed immediately so the history is recoverable
 (`git show <commit>:<path>`).
 
-**Current list:** DP-01 ✅ · DP-02 ✅ · DP-03 ✅ · DP-04 ✅ (**permissions workstream APPROVED**) · DP-05 ✅ ·
-DP-06 ✅ · **DP-07 ⏳ waiting** (what a recipe opens as) · **DP-08 ⏳ waiting** (flat vs nested menu) · **DP-09
-⏳ waiting** (is the AI a *participant* — raised by B6) · **DP-10 ⏳ waiting** (is a thread the same object as a
-workspace — B6) · **DP-11 ⏳ waiting** (do comments anchor to data — B6). None blocks the SRS.
+**Current list:** DP-01 ✅ answered · DP-02 ✅ answered · DP-03 ✅ answered · DP-04 (permissions workstream) ·
+DP-05 (schema-change pool) · DP-06 · DP-07 · DP-08 — all waiting, none blocking the SRS.
