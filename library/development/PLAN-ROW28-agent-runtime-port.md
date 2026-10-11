@@ -271,7 +271,7 @@ adapter (R28-2) and is repeated in the outcome below.
 ---
 
 ### CC-67 — Move the two remaining callers onto the door (the change that flips `B-05` and `N-8`)
-**Status: ✅ IN PROGRESS 2026-10-11 (requirement written below, before the code).**
+**Status: ✅ DONE 2026-10-11 (code `6c3db27c`) — see §7.5 for the outcome, proof and the two hostile critics.**
 
 **What it is.** Row 28's own sentence is *"the agent runtime sits behind one typed door — **no other code
 talks to it directly**."* R28-3 moved the chat route onto the door. **Two callers still reach the
@@ -353,19 +353,57 @@ un-plumbed for the text path **and register it**. **(i) is the honest build** �
 the route's `Response` behaviour and re-frames its SSE as port events; the route then writes the port
 events back out, which is exactly what R28-3 did for the chat route.
 
+### CC-67 — design, measured against the CLIENT (rule 0b, extended 2026-10-11)
+
+**What I measured before choosing the adapter shape.** The chat route's `Response` is not free-form SSE:
+it is the **AI SDK UI-message stream** (`toUIMessageStreamResponse()`, wrapped by
+`injectTaskPlanIntoStream` + `appendLoopFinishToStream`). The front end consumes it with the AI SDK's
+`DefaultChatTransport` (`agent-transport.ts:47`) inside `useAiChat`, which reads `data-*` UI-message
+chunks. And the route's own `persistAssistantOnStreamCompletion` (`api/ai/chat/route.ts:347`) reads the
+same bytes to snapshot the assistant message.
+
+**Consequence — the `Response` must pass through byte-identical.** If the adapter re-framed those bytes
+into `AiRuntimeStreamEvent`s and the route wrote *those* back out, the AI SDK client would stop
+understanding the stream — a user-visible change. So option (i) is refined precisely:
+
+> **The text adapter TEES the response body.** The route still hands the client the **same `Response`
+> object** `runAiAgentText` produced (bytes unchanged, headers unchanged). The adapter *additionally*
+> reads a copy of the byte stream to emit port events for the door (so `completeRun` has an honest
+> outcome and `cancelRun` has a live thing to stop) — **the tee never mutates what the client receives.**
+
+**So the split is honest and small:**
+- `runAiAgentObject` (`run-object` route, `business-ir-author`) returns a **structured value** — it maps
+  cleanly onto `startRun` + `completeRun` with an `AiRuntimeRunResult`; no stream to tee.
+- `runAiAgentText` (`ai/chat` route) returns a **`Response`** — it maps onto `startRun` + `streamRun`
+  (tee → events for the door only) + `completeRun`; the route keeps writing the original `Response`.
+
+**The op bag (how the rich deps travel without touching the envelope).** The adapter is constructed per
+request with the same three things the route holds — `container`, `authContext`, `boundScope` (plus
+`modelOverride`/`loop`/`emitLoopTrace`/`requestOverride` when the caller supplies them). The §4.2 envelope
+carries only identity + references, exactly as the OpenCode adapter does. **The envelope is not extended;
+no live object enters it.**
+
+**The route still names `runAiAgentText` in ONE file** (`api/ai/chat/route.ts`) — but the *import* moves
+from `agent-runtime` to the new adapter, and the call becomes `port.startRun/streamRun/completeRun` with
+the adapter doing the engine call. After this change, `grep "from '.*agent-runtime'"` in production
+returns only `src/index.ts` (the package's public barrel — a re-export of the package API, not a caller).
+
 ---
 
 ### R28-5 — Prove the door is the only way in (nothing else talks to an engine directly)
-**Status: STARTABLE NOW (R28-3 done).** Note: with `CC-67` still open (two callers reach the engines
-directly), a full "nothing bypasses" check would fail today — so R28-5 is the check, and **`CC-67` must land
-first for it to pass**. The order is: `CC-67` → R28-5.
+**Status: ★ STARTABLE NOW (2026-10-11 — `CC-67` landed, so no production caller outside the two adapters
+reaches an engine).** The order was `CC-67` → R28-5; `CC-67` is **✅ DONE** (code `6c3db27c`, §7.5), so this
+is the **next build**.
 
 **What it is.** A check that fails the build if any code besides the door reaches an AI engine directly.
-Without it, the door is a suggestion, and the next session can quietly bypass it.
+Without it, the door is a suggestion, and the next session can quietly bypass it. Now that `CC-67` has moved
+the last two callers, a full "nothing bypasses" check can pass — with **two named, honest exceptions**:
+`src/index.ts` (the package's public barrel — a re-export, not a caller) and **`CC-69`** (the chat route's
+`answerQuestion` short-circuit, which is not a *run*).
 
-**Prerequisite.** R28-3 (the chat route must be on the door first, or the check would fail immediately).
+**Prerequisite.** R28-3 **and** `CC-67` — both ✅ DONE.
 
-**Takes points:** the row's own guarantee (*"no other code talks to it directly"*).
+**Takes points:** the row's own guarantee (*"no other code talks to it directly"*) — i.e. `B-05` and `N-8`.
 
 ---
 
@@ -402,7 +440,7 @@ document, which are **not** this row's work.
 |---|---|---|
 | `api/chat/route.ts` (the live chat screen) | High — this is a working, user-facing path | Walk it through the door **without changing behaviour**; prove the suite green; the door wraps OpenCode unchanged |
 | `lib/opencode-client.ts` / `opencode-handlers.ts` | Low — not modified in row 28, only wrapped | No edits until R28-6 |
-| The two other AI paths (`runAiText`, `runAiObject`) | None in row 28 | Explicitly out of scope (`§4`); registered as `CC-67` |
+| The two other AI paths (`runAiText`, `runAiObject`) | None in row 28 | Explicitly out of scope (`§4`); registered as `CC-67` (now **✅ DONE**, §7.5) |
 | Any test that asserts the chat route imports OpenCode by name | Medium — the import moves | Find and update them in the same change (rule 10e) |
 | `ce.ts`'s comment-only `AiRuntimePort` | Low — a false "it exists" statement | Correct it in the same change (rule 13) |
 
@@ -414,7 +452,9 @@ Every sub-row that ends less than fully done gets (or keeps) a row in `COMPLETIO
 
 - **`CC-67`** (new, this plan) — **the two other AI paths still call an engine directly.** Rows 2 and 3
   of §1 (`api/ai/chat/route.ts:688`, `api/ai/run-object/route.ts:186`) are not moved by row 28.
-  **Trigger:** when R28-3 has proven the door on the chat route.
+  **Trigger:** when R28-3 has proven the door on the chat route. — **✅ DONE 2026-10-11** (code `6c3db27c`):
+  a second adapter (`agent-runtime-port-adapter.ts`) puts the platform runtime behind the door and all three
+  callers walk through it (§7.5).
 - **`CC-66`** (existing, row 27) — unchanged; not this row.
 - **`CC-69`** (new, R28-3) — **the chat route's `answerQuestion` short-circuit still calls OpenCode
   directly.** It is not a run (the port has no such operation); registered rather than hidden.
@@ -437,7 +477,8 @@ Every sub-row that ends less than fully done gets (or keeps) a row in `COMPLETIO
 | R28-2 | ✅ **DONE 2026-10-11** | See §7.2 below. |
 | R28-3 | ✅ **DONE 2026-10-11** | See §7.3 below. |
 | R28-4 | ✅ **DONE 2026-10-11** | See §7.4 below. |
-| R28-5 | not started | — |
+| `CC-67` | ✅ **DONE 2026-10-11** | See §7.5 below — the platform runtime behind the door; the last two callers moved. |
+| R28-5 | ★ STARTABLE NOW | `CC-67` landed; nothing outside the two adapters reaches an engine (except the barrel + `CC-69`). |
 | R28-6 | out of row (N-8) | — |
 
 ### §7.1 R28-1 — the port's shape — BUILT (2026-10-11, code repo)
@@ -680,9 +721,89 @@ an engine directly** (`CC-67`). `Port` (c) **could** be argued to completion on 
 the row's door is still bypassed would be exactly the "one caller out of three" trap. **ONE NUMBER unchanged
 75 / 321 = 23%.**
 
-**★ NEXT = `CC-67`** — move the two remaining direct callers (`api/ai/chat/route.ts:688` `runAiAgentText`;
-`api/ai/run-object/route.ts:186` + `lib/business-ir-author.ts:160` `runAiAgentObject`) onto the door; that is
-the change that finally flips **`B-05`** and **`N-8`**. Then **R28-5** (the "nothing bypasses" check).
+**★ NEXT (as of R28-4) was `CC-67`** — move the two remaining direct callers (`api/ai/chat/route.ts:688` `runAiAgentText`;
+`api/ai/run-object/route.ts:186` + `lib/business-ir-author.ts:160` `runAiAgentObject`) onto the door. **`CC-67` is now ✅ DONE (§7.5).**
+**★ NEXT now = sub-row R28-5** — the "nothing bypasses the door" check (§8 below), the **exit gate** for `B-05`/`N-8`.
+
+---
+
+### §7.5 `CC-67` — the platform runtime sits behind the door; the last two callers walk through it — BUILT (2026-10-11, code repo `6c3db27c`)
+
+**What landed.** A **second** implementation of `AiRuntimePort` —
+`packages/ai-assistant/src/modules/ai_assistant/lib/agent-runtime-port-adapter.ts` — puts the platform's
+**own in-process AI SDK runtime** (`runAiAgentText` / `runAiAgentObject`) behind the same door the OpenCode
+engine sits behind. Then the three callers that reached that engine by name were moved onto the door:
+
+- `api/ai/chat/route.ts` (was `runAiAgentText`) — builds the adapter per request, `startRun` →
+  `attachRunInput` → `streamRun`, reads the engine's `Response` back with `responseForRun`, hands it to the
+  client;
+- `api/ai/run-object/route.ts` and `lib/business-ir-author.ts` (was `runAiAgentObject`) — build the adapter
+  and call `runObjectForRun`. **None of the three imports `agent-runtime` any more** (proven by a static
+  test); only `src/index.ts` still re-exports it — that is the package's public barrel, not a caller.
+
+**Why a SECOND adapter, not the OpenCode one (the decisive measurement).** These callers use a **different
+engine**: the platform's own in-process loop, not OpenCode-over-HTTP. A port exists so two implementations
+share one interface — that is the whole point. Their input additionally carries **three things the §4.2
+envelope must not hold** — the live DI `container`, the full authorization context
+(`features`/`isSuperAdmin`/`onBehalfOfUserId`/`boundScope`), and a `UIMessage[]` — so those ride on the
+adapter's **construction** (per request), exactly as the OpenCode adapter's `{ auth, em }` do. **The envelope
+is not extended; no live object enters it.**
+
+**The honest split (measured against the CLIENT, not assumed).** `runAiAgentObject` returns a **value** →
+`runObjectForRun` (the port has no "return an object" op; inventing a ninth would be a design decision, not a
+wiring move). `runAiAgentText` returns a **streaming `Response`** whose bytes are the AI SDK's UI-message SSE
+— consumed by the client with `DefaultChatTransport` (`agent-transport.ts:47`) and by the route's own
+`persistAssistantOnStreamCompletion`. **A `Response` body is single-use**, so the adapter does **not** drain
+it: `streamRun` performs the engine call, **stashes** the original `Response`, and the caller hands that exact
+object to the client. Re-framing those bytes into port events and writing *those* out would change what a
+user sees.
+
+**The hostile critic found a REAL defect — the run was never closed.** My first cut called `startRun` and
+**never `completeRun`**, leaving every chat run **open** at the door; a later `cancelRun` would then falsely
+report a **finished** run as `cancelled`. (Command evidence: `run.completed after route sequence: false`;
+`cancelRun on finished-uncompled run: {cancelled: true}`.) **Fixed, and the fix is proven:**
+- the route closes the run in the stream wrapper's `finally`, **before** `writer.close()` — so there is no
+  race with the client observing the stream end (the re-verification critic probed exactly this: a slow
+  close still lands before the client's `done`);
+- the engine-failure path completes `failed` and re-throws; a **bodyless** `Response` still closes
+  (the second critic's latent finding — rule 15, closed now rather than left);
+- **4 tests** pin the close (normal end, no-persisted-turn, engine failure, bodyless), and a mutation that
+  removes the close goes **RED**.
+
+**The binding gate (`CC-27`/`CC-57`) kept honest.** The gate moved **one hop above** the dispatch: the
+adapter has no `em`/`auth` and must **not** decide, so the gate lives at the door's callers. All three
+callers still `resolveAgentBinding` and refuse `agent_not_bound` (the critic hunted for an un-gated path and
+**found none**). `binding-coverage.test.ts` was updated **honestly**: the two adapters are now recognised as
+*the door* (not business callers), and a **new pin** asserts every door caller keeps the gate + that no
+adapter grows a competing gate. The old positive arm — which asserted `business-ir-author.ts` was a *gated
+dispatcher* — became vacuous when its dispatch moved behind the door, so it was replaced by the door-aware
+pin, not weakened.
+
+**Proof.** `lib/__tests__/agent-runtime-port-adapter.test.ts` (**15 tests**, the mock boundary is the
+**engine**, below the adapter) + **4** new close-guard tests in `api/ai/chat/__tests__/route.test.ts` +
+**2** new binding pins. The pre-existing `api/ai/chat/__tests__/route.test.ts` (27 tests) and the
+object/business-ir suites pass — and crucially, the 27 route tests **mock the engine and assert it is called
+with the resolved payload**, so they pass **only because the adapter is the path** (a stronger proof than a
+static check). Route + adapter type-check clean. **Whole package suite green: 117 suites / 1596 tests**
+(`CC-67` baseline 116 / 1575). **8 RED-then-GREEN mutations** (M1 cancel reports a reason; M2 complete loses
+replay safety; M3 cancel order-dependence; M4 `streamRun` drains the body; M5 the route re-imports the
+engine; M6 the caller drops `agent_not_bound`; M7 an adapter grows a competing gate; M8 the route leaves the
+run open), each restore **md5-verified**. **Two separate-agent hostile critics**: the first found the
+run-close defect (fixed); the second verified the fix on all five claims and found only a latent
+bodyless-`Response` gap (also fixed).
+
+**No box moved — the honest outcome.** This is the change the whole row points at: after it, **no production
+code outside the two adapters names an engine**. But the row's sentence is *"**no other** code talks to it
+directly"*, and **one registered bypass remains** (`CC-69`: the chat route's `answerQuestion` short-circuit
+still calls `createOpenCodeClient` — it is not a *run*, so it is a port-shape decision, not a wiring move).
+`B-05`, `N-8` and the three `Port` boxes keep their `☐` **on purpose** — R28-5 exists to *prove* the door is
+the only way in, and that proof is the row's exit gate, not this move. **ONE NUMBER unchanged 75 / 321 = 23%**
+(re-derived, §L 21st run).
+
+**★ NEXT = sub-row R28-5** — the "nothing bypasses the door" check: prove, mechanically, that no production
+file outside the two adapters reaches an engine, with `CC-69` named as the ONE registered exception (and
+`src/index.ts` named as the package barrel, not a caller). Then **R28-6** (`N-8`'s second half — delete
+OpenCode).
 
 ---
 

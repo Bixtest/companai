@@ -55,7 +55,7 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
-### 🔵 IN PROGRESS — **Row 28 (Phase 8): *"the agent runtime sits behind one typed door — no other code talks to it directly."* Broken into six sub-rows. **R28-1, R28-2, R28-3 and R28-4 ✅ DONE 2026-10-11 — the chat route walks through the door and the run is now CLOSED there (cancel + complete). NEXT = `CC-67`.** No box moved (the row needs *all* callers moved).**
+### 🔵 IN PROGRESS — **Row 28 (Phase 8): *"the agent runtime sits behind one typed door — no other code talks to it directly."* Broken into six sub-rows. **R28-1, R28-2, R28-3, R28-4 and `CC-67` ✅ DONE 2026-10-11 — the chat route walks through the door, the run is CLOSED there (cancel + complete), and the LAST THREE direct callers now walk through it too (a second adapter for the platform's own in-process runtime). NEXT = `R28-5`.** No box moved (the row's exit gate is the *proof* that nothing bypasses the door — R28-5).**
 **(2026-10-11; plan = [`library/development/PLAN-ROW28-agent-runtime-port.md`](library/development/PLAN-ROW28-agent-runtime-port.md).)**
 
 **What the row asks, in plain words.** Today the platform reaches its AI engine **two different ways,
@@ -83,8 +83,9 @@ OpenCode behind it"*).
 | **R28-2** | **OpenCode fitted behind the door** (unchanged, just hidden) | ✅ **DONE 2026-10-11** (below) |
 | **R28-3** | The **chat screen moved onto the door** (the step that makes the row true) | ✅ **DONE 2026-10-11** (below) |
 | **R28-4** | Failure handled — cancel is safe to repeat, complete is safe to replay | ✅ **DONE 2026-10-11** (below) |
-| **R28-5** | A check that **nothing** talks to an engine directly | startable after `CC-67` |
+| **R28-5** | A check that **nothing** talks to an engine directly | **★ NEXT** (the exit gate for `B-05`/`N-8` — now startable) |
 | **R28-6** | **Delete OpenCode** — separate, later step (`N-8`) | OUT of row 28 |
+| **`CC-67`** | The **last three direct callers** moved onto the door — a second adapter for the platform's own in-process runtime | ✅ **DONE 2026-10-11** (below) |
 
 **R28-1 DONE — what was built, and the honest headline.** `lib/ai-runtime-port.ts` — **definitions only,
 zero imports**, so no caller drags an engine in behind the types. It declares the **eight operations**
@@ -196,9 +197,49 @@ skipped in `finally`), route restored **md5-identical**. **A separate-agent host
 defect** — it attacked all six claims and broke none, and its one **extra** probe ("a run that never streams is
 still closed") was correct, so it is now a **permanent test** (rule 15) and is itself mutation-proved.
 
-**★ NEXT = `CC-67`** — move the two remaining direct callers (`runAiAgentText` at `api/ai/chat/route.ts:688`;
-`runAiAgentObject` at `api/ai/run-object/route.ts:186` + `lib/business-ir-author.ts:160`) onto the door. That
-is the change that finally flips **`B-05`** and **`N-8`**. Then **R28-5** (the "nothing bypasses" check).
+**`CC-67` DONE — the last three direct callers now walk through the door: a SECOND adapter.** The row's remaining
+work was *"move the two remaining direct callers"* — the **in-process** ones, which reach the platform's **own
+AI-SDK runner** (`runAiAgentText` / `runAiAgentObject`), a **different engine** from R28-2's OpenCode. Measured
+first (rule 0b): the three callers are the chat route's text path (`api/ai/chat/route.ts`), the run-object route
+(`api/ai/run-object/route.ts`), and the in-process helper (`lib/business-ir-author.ts`); and their input carries
+**three things the §4.2 envelope cannot honestly hold** — the **live DI `container`**, the **full auth context**,
+and a **`UIMessage[]`**. **Decision (rule 9b): a SECOND adapter** (`lib/agent-runtime-port-adapter.ts`) —
+`AgentRuntimePortAdapter implements AiRuntimePort`, the honest counterpart to the OpenCode adapter — with those
+three live things carried **on the adapter's construction (per request)**, exactly as the OpenCode adapter carries
+`{ auth, em }`. **No envelope field is invented; no live object is inlined into the envelope** (§4.2 respected).
+
+**The one hard bug — and it was in the first cut. `streamRun` must not drain the body.** The platform runner hands
+back a **`Response`** whose body is the AI SDK **UI-message SSE** the browser consumes (single-use!). My first draft
+read `response.body` to emit stream events — which would have left the client with **nothing to read**. Fixed: the
+adapter **stashes the ORIGINAL `Response`** (`responseForRun(runId)`) and **does not touch the body**; the route
+hands that same response to `persistAssistantOnStreamCompletion`. A `getReader` spy pins `readCount()===0`.
+
+**The defect the SEPARATE-AGENT hostile critic found — the run was never CLOSED.** My first cut called `startRun`
+and **never `completeRun`**: the run stayed open forever, so a later `cancelRun` on a finished run would falsely
+report it `cancelled`. **Fixed:** the route closes the run in the stream wrapper's `finally`, **before**
+`writer.close()` (no race), completing `failed` on an engine error, and **also** closing when the engine returned a
+**bodyless** `Response` (a second latent leak the second critic found — also fixed). **4 tests pin it; M8 (remove
+the close) goes RED.**
+
+**Proof.** The three callers now **import no engine module** (statically pinned in the adapter's own test, plus the
+honestly-updated `binding-coverage.test.ts`); **117 suites / 1596 tests green** (baseline 116/1575 → **+1 suite,
++21 tests**); the **27 pre-existing route tests pass UNMODIFIED** and prove the adapter is the path (they mock the
+engine and assert it is called with the resolved payload); **8 RED-then-GREEN mutations, all md5-restored**
+(M1 cancel reports a reason; M2 complete loses replay safety; M3 cancel order-dependence; M4 `streamRun` drains the
+body; M5 the route re-imports the engine; M6 the caller drops `agent_not_bound`; M7 an adapter grows a competing
+gate; M8 the route leaves the run open). **Two separate-agent hostile critics**: the first found the run-close
+defect; the second verified the fix on all five claims and found only the bodyless-`Response` gap (also fixed).
+
+**Honest bound — NO box moved.** After this change **no production code outside the two adapters names an engine**,
+**except** the package barrel `src/index.ts` (a re-export, not a caller) and the registered `CC-69` bypass.
+**`B-05`, `N-8` and the three `Port` boxes keep `☐`** on purpose: the row's sentence is *"no other code talks to
+it directly"*, and that is a claim about **the whole codebase** — it is only true once **proven**, and the proof is
+**R28-5**. **ONE NUMBER unchanged 75 / 321 = 23%.**
+
+**★ NEXT = `R28-5`** — the "nothing bypasses the door" check: prove, **mechanically**, that no production file
+outside the two adapters reaches an engine, with **`CC-69`** named as the ONE registered bypass (the chat route's
+`answerQuestion` short-circuit — trigger-gated on an owner ruling) and **`src/index.ts`** named as the package
+barrel (a re-export, not a caller). This is the row's exit gate for **`B-05`** and **`N-8`**.
 
 ---
 
