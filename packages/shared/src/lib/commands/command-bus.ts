@@ -3,11 +3,15 @@ import type { ActionLogCreateInput } from '@open-mercato/core/modules/audit_logs
 import { commandRegistry } from './registry'
 import type {
   BulkImportSuppression,
+  CommandApproval,
+  CommandContractMetadata,
   CommandExecutionOptions,
   CommandExecuteResult,
   CommandHandler,
+  CommandIdempotency,
   CommandLogBuilderArgs,
   CommandLogMetadata,
+  CommandRisk,
   CommandRuntimeContext,
 } from './types'
 import { defaultUndoToken } from './types'
@@ -39,6 +43,32 @@ const logger = createLogger('shared').child({ component: 'commands' })
 function asRecord(input: unknown): Record<string, unknown> | null {
   if (!input || typeof input !== 'object' || Array.isArray(input)) return null
   return input as Record<string, unknown>
+}
+
+/**
+ * The serializable fragment of the command contract a handler **declares**
+ * (`C6` — `risk` · `approval` · `idempotency`), or `null` when it declares none.
+ *
+ * `null` is deliberate: the bus adds **no key** for an undeclaring handler, so
+ * its action log is byte-identical to before this change. `idempotency.keyOf` is
+ * a function, so only `hasKey` is recorded — the record says *whether* a dedupe
+ * key exists, never the function.
+ */
+export function commandContractMetadata(handler: {
+  risk?: CommandRisk
+  approval?: CommandApproval
+  idempotency?: CommandIdempotency
+}): CommandContractMetadata | null {
+  const out: CommandContractMetadata = {}
+  if (handler.risk) out.risk = handler.risk
+  if (handler.approval) out.approval = handler.approval
+  if (handler.idempotency) {
+    out.idempotency = {
+      idempotent: handler.idempotency.idempotent === true,
+      hasKey: typeof handler.idempotency.keyOf === 'function',
+    }
+  }
+  return Object.keys(out).length > 0 ? out : null
 }
 
 /** Command handlers often return domain keys (e.g. warehouseId) without `id`; cache invalidation must still resolve the record. */
@@ -414,6 +444,15 @@ export class CommandBus {
         if (inferred) mergedMeta.changes = inferred
       }
     }
+      // C6 (`CC-61` / LIST row 19) — record the contract a handler DECLARES on the
+      // action log, **wherever a log is written** (not only when the handler has a
+      // `buildLog`; a log can also come from caller-supplied `metadata`). A handler
+      // that declares nothing adds NO key, so its log is byte-identical to before.
+      // The merge is a spread, so a `context` the handler set is preserved.
+      const contract = commandContractMetadata(handler)
+      if (contract && mergedMeta) {
+        mergedMeta.context = { ...(mergedMeta.context ?? {}), commandContract: contract }
+      }
       logEntry = await this.persistLog(commandId, effectiveOptions, mergedMeta)
     }
 
@@ -628,7 +667,8 @@ export class CommandBus {
       ctx: options.ctx,
       snapshots,
     }
-    return (await handler.buildLog(args)) || null
+    const built = (await handler.buildLog(args)) || null
+    return built
   }
 
   private mergeMetadata(primary?: CommandLogMetadata | null, secondary?: CommandLogMetadata | null): CommandLogMetadata | null {

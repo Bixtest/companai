@@ -126,6 +126,64 @@ export type CommandLogBuilderArgs<TInput, TResult> = {
   }
 }
 
+/**
+ * The **declared impact level** of a command (`C6` — *"risk"*).
+ *
+ * A command that changes little and can be undone is `'low'`; one that reaches
+ * outside the tenant, cannot be undone, or notifies people is `'high'`. The
+ * declaration is **recorded on the action log** (see {@link CommandContractMetadata}),
+ * so an auditor can read the impact of an act from the record itself.
+ *
+ * **This is a DECLARATION, not a gate.** Whether an act may proceed is decided by
+ * the authority layer (`shared/src/lib/authority/`), never by this field — see
+ * {@link CommandApproval}.
+ */
+export type CommandRisk = 'low' | 'medium' | 'high'
+
+/**
+ * The **declared approval posture** of a command (`C6` — *"approval"*).
+ *
+ * `'required'` means the act is one a person must approve before it happens.
+ *
+ * **It declares; it does not enforce.** Approval is **owned by the authority
+ * layer** (`resolveDecision` → the `escalation` outcome → `pending_acts`). A
+ * command bus that refused on `'required'` itself would be a **second permission
+ * engine** — the exact thing `S5` forbids. So the field exists to make the
+ * contract uniform and the record complete; the *decision* stays where the one
+ * engine is.
+ */
+export type CommandApproval = 'none' | 'required'
+
+/**
+ * The **declared idempotency** of a command (`C6` — *"idempotency"*).
+ *
+ * `idempotent: true` means re-running the same input has no additional effect.
+ * `keyOf` (optional) derives a dedupe key from the input — the material a
+ * **store** would need. **No dedupe store exists today**, so this is declared and
+ * recorded, not enforced; a store is a named follow-on, not smuggled in here.
+ *
+ * `keyOf` takes `never` for the same contravariance reason `capability`'s function
+ * does (see {@link CommandHandler.capability}).
+ */
+export type CommandIdempotency = {
+  /** True when re-running the same input has no additional effect. */
+  idempotent: boolean
+  /** Derive a dedupe key from the input; `null` = not dedupable for this call. */
+  keyOf?: (input: never) => string | null
+}
+
+/**
+ * The **serializable fragment** of the contract that rides on the action log
+ * (`context.commandContract`). `idempotency.keyOf` is a function, so it is
+ * recorded as `hasKey: boolean` — the record says *whether* a key exists, never
+ * the function.
+ */
+export type CommandContractMetadata = {
+  risk?: CommandRisk
+  approval?: CommandApproval
+  idempotency?: { idempotent: boolean; hasKey: boolean }
+}
+
 export interface CommandHandler<TInput = unknown, TResult = unknown> {
   readonly id: string
   readonly isUndoable?: boolean
@@ -165,6 +223,25 @@ export interface CommandHandler<TInput = unknown, TResult = unknown> {
    * having it inferred, which is a small price for not re-typing the registry.
    */
   readonly capability?: string | ((input: never) => string | null)
+  /**
+   * The command's declared **impact level** (`C6`). Optional — a command that
+   * declares nothing behaves **exactly as before**, and the uncovered set stays
+   * visible rather than guessed (the same reasoning as {@link capability}).
+   * Recorded on the action log as `context.commandContract.risk`.
+   */
+  readonly risk?: CommandRisk
+  /**
+   * The command's declared **approval posture** (`C6`). **Declares, does not
+   * enforce** — the authority layer owns approval (`S5`: one engine, never a
+   * second). Recorded on the action log as `context.commandContract.approval`.
+   */
+  readonly approval?: CommandApproval
+  /**
+   * The command's declared **idempotency** (`C6`). Recorded on the action log as
+   * `context.commandContract.idempotency` (`{ idempotent, hasKey }` — the
+   * function itself is never serialized).
+   */
+  readonly idempotency?: CommandIdempotency
   prepare?(input: TInput, ctx: CommandRuntimeContext): Promise<{ before?: unknown } | null> | { before?: unknown } | null
   execute(input: TInput, ctx: CommandRuntimeContext): Promise<TResult> | TResult
   buildLog?(args: CommandLogBuilderArgs<TInput, TResult>): Promise<CommandLogMetadata | null | undefined> | CommandLogMetadata | null | undefined

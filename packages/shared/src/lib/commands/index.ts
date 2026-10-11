@@ -1,6 +1,6 @@
 export * from './types'
 export * from './registry'
-export { CommandBus } from './command-bus'
+export { CommandBus, commandContractMetadata } from './command-bus'
 export * from './customFieldSnapshots'
 export * from './undo'
 export * from './redo'
