@@ -10,7 +10,7 @@ import {
 import { resolveTranslations } from '@open-mercato/shared/lib/i18n/server'
 
 export const metadata = {
-  POST: { requireAuth: true },
+  POST: { requireAuth: true, byDesign: 'own-record notification action; guard-backed, no role feature needed' },
 }
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {

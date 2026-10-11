@@ -73,7 +73,7 @@ const profileUpdateResponseSchema = z.object({
 
 export const metadata = {
   GET: { requireAuth: true },
-  PUT: { requireAuth: true },
+  PUT: { requireAuth: true, byDesign: 'self-service: caller edits their own profile; own password re-verified' },
 }
 
 function buildCommandContext(container: Awaited<ReturnType<typeof createRequestContainer>>, auth: NonNullable<Awaited<ReturnType<typeof getAuthFromRequest>>>, req: Request): CommandRuntimeContext {

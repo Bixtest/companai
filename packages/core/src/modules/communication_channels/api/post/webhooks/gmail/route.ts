@@ -39,7 +39,7 @@ export const metadata = {
   // Unauthenticated at the platform layer (a Google-signed JWT is the auth).
   // Rate-limited so a caller can't drive unbounded JWT-verification +
   // cert-fetch work before the signature gate rejects them.
-  POST: { requireAuth: false, rateLimit: { points: 120, duration: 60, keyPrefix: 'cc_webhook_gmail' } },
+  POST: { requireAuth: false, byDesign: 'JWT-verified inbound webhook (Google-signed JWT IS the auth)', rateLimit: { points: 120, duration: 60, keyPrefix: 'cc_webhook_gmail' } },
 }
 
 type GmailHistorySyncJobPayload = {

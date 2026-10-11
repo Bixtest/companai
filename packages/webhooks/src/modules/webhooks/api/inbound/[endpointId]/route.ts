@@ -13,7 +13,7 @@ import { json } from '../../helpers'
 import { WebhookInboundReceiptEntity } from '../../../data/entities'
 
 export const metadata = {
-  POST: { requireAuth: false },
+  POST: { requireAuth: false, byDesign: 'signature-verified inbound webhook (adapter.verifyWebhook IS the auth)' },
 }
 
 interface RouteContext {

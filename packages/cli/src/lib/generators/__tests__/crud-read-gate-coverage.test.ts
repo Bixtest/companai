@@ -715,12 +715,15 @@ describe('CC-47: every human CRUD list route declares a read gate', () => {
   const getRoutes = parsed.filter((p) => exportsGet(p.sf))
 
   it('discovers CRUD + GET routes (sanity — pins the measured counts)', () => {
-    // Measured 2026-10-10. Pinned EXACTLY (not a loose floor): if a walker silently stops
-    // scanning `apps/` (441 of the 457 files live under `packages/`), a floor like `>100`
+    // Measured 2026-10-10; re-pinned 2026-10-11 (CC-27 added one route file —
+    // `packages/ai-assistant/.../api/ai/agents/[agentId]/bindings/route.ts`, GET/POST/DELETE —
+    // so routeFiles 457→458 and getRoutes 296→297; the GET is feature-gated, so A/B still hold).
+    // Pinned EXACTLY (not a loose floor): if a walker silently stops
+    // scanning `apps/` (442 of the 458 files live under `packages/`), a floor like `>100`
     // would still clear while the guarantee quietly shrank. Exact counts fail loudly.
-    expect(routeFiles.length).toBe(457)
+    expect(routeFiles.length).toBe(458)
     expect(crudRoutes.length).toBe(60)
-    expect(getRoutes.length).toBe(296)
+    expect(getRoutes.length).toBe(297)
   })
 
   it('A. every makeCrudRoute route declares a GET read gate (or is handler-gated)', () => {

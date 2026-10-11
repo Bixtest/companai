@@ -17,7 +17,7 @@ const localeErrorSchema = z.object({ error: z.string() })
 
 export const metadata = {
   GET: { requireAuth: false },
-  POST: { requireAuth: false },
+  POST: { requireAuth: false, byDesign: 'self-service: sets the caller locale cookie; no entity data' },
 }
 
 export async function POST(req: Request) {

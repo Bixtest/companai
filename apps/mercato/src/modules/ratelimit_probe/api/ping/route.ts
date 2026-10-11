@@ -4,6 +4,7 @@ import type { OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
 export const metadata = {
   POST: {
     requireAuth: false,
+    byDesign: 'rate-limit probe endpoint; touches no resource',
     rateLimit: { points: 3, duration: 60, keyPrefix: 'ratelimit_probe' },
   },
 }

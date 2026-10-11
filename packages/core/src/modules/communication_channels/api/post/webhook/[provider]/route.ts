@@ -35,6 +35,7 @@ export const metadata = {
   path: '/communication_channels/webhook/[provider]',
   POST: {
     requireAuth: false,
+    byDesign: 'signature-verified inbound webhook (provider signature IS the auth)',
     // Unauthenticated by design (signature verification IS the auth), but the
     // handler fans out an O(N) cross-tenant candidate scan, so bound per-IP
     // request volume to limit abuse. Generous enough for real provider traffic;

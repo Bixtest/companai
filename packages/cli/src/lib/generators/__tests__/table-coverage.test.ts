@@ -260,7 +260,8 @@ const tableKey = (t: Table) => `${t.module}.${t.name}`
 
 // Measured 2026-10-11 (pinned EXACTLY, not as a floor — a shrinking discovery
 // must fail loudly, not pass vacuously; hostile-critic hole #3).
-const EXPECTED_TABLES = 233
+// Re-pinned 2026-10-11 (CC-27 added the `ai_agent_bindings` table → 233→234).
+const EXPECTED_TABLES = 234
 const EXPECTED_SURFACE_MODULES = 47
 const EXPECTED_SEARCH_MODULES = 12
 
