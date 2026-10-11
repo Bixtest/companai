@@ -55,6 +55,47 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+### 🔵 OPEN — **Row 28 (Phase 8): *"the agent runtime sits behind one typed door — no other code talks to it directly."* MEASURED (rule 0b) 2026-10-11 — and BROKEN INTO SIX SUB-ROWS so it is built one small piece at a time. No code written yet.**
+**(2026-10-11; plan = [`library/development/PLAN-ROW28-agent-runtime-port.md`](library/development/PLAN-ROW28-agent-runtime-port.md).)**
+
+**What the row asks, in plain words.** Today the platform reaches its AI engine **two different ways,
+from many places, with nothing in between**: the chat screen calls **OpenCode directly**; two other
+routes call the platform's **own runner directly**. Row 28 says: give the engine **one front door**, so
+every caller talks to the door and the door decides which engine sits behind it. **This is the *shape*
+work, not the Hermes work** — the first job is the door with **OpenCode still standing behind it**
+(the architecture document's own order: *"rewire first, delete second"*; Phase 1 = *"the port, with
+OpenCode behind it"*).
+
+**Measured in code (rule 0b) — the row's sentence is literally false today:**
+
+| What | Where |
+|---|---|
+| The chat route calls OpenCode **directly** | `ai_assistant/api/chat/route.ts` — import `:10`/`:6–9`; calls `:218`, `:349` |
+| A second route calls the platform's own runner directly | `ai_assistant/api/ai/chat/route.ts:688` (`runAiAgentText`) |
+| A third calls it directly too | `api/ai/run-object/route.ts:186`, `lib/business-ir-author.ts:160` (`runAiAgentObject`) |
+| The "typed port" is **only a comment** | `ai_assistant/ce.ts` (`AiRuntimePort`, owned by `L-01`/`AH-5`) |
+
+**The breakdown (each sub-row is built, and finishes, on its own):**
+
+| Sub-row | What it is | Status |
+|---|---|---|
+| **R28-1** | The typed port's **shape** — its eight operations + the envelope rules | **STARTABLE NOW** |
+| **R28-2** | **OpenCode fitted behind the door** (unchanged, just hidden) | BLOCKED on R28-1 |
+| **R28-3** | The **chat screen moved onto the door** (the step that makes the row true) | BLOCKED on R28-1+2 |
+| **R28-4** | Failure handled — cancel is safe to repeat, complete is safe to replay | BLOCKED on R28-1 |
+| **R28-5** | A check that **nothing** talks to an engine directly | BLOCKED on R28-3 |
+| **R28-6** | **Delete OpenCode** — separate, later step (`N-8`) | OUT of row 28 |
+
+**What is NOT in row 28:** Hermes itself (no new engine; the door ships with the existing one behind
+it), and the two other callers (`CC-67`, below).
+
+**Registered:** **`CC-67`** — the two other callers (`api/ai/chat`, `run-object`) still bypass the door;
+trigger = when R28-3 proves the chat on the port. **No box moved; ONE NUMBER unchanged 75 / 321 = 23%.**
+
+**★ NEXT = sub-row R28-1** (the port's shape).
+
+---
+
 ### ✅ DONE (partial) — **Row 27 (Phase 7): MEASURED, and its one startable half built — the S8 repeat-detection signal. `S3`'s seal is blocked on `G-04`; the offer is the frontend. No box moved.**
 **(2026-10-11; code repo `workspace/starting-kit`.)**
 

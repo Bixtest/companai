@@ -98,17 +98,20 @@ lands"* is a trigger; *"later"* is not. An item whose trigger is **"startable no
 | **26** | `CC-13` | `G-21`'s **schema-mutation IR kind**, its **UI**, and its **database row** are not built (the taxonomy and the Save gate are). | When the schema-mutation IR kind exists. |
 | **27** | `CC-8` | `tool-test-runner.ts` runs a read-tool handler **ungated** (reachable only from the superadmin CLI). | When the `tool-test` CLI gains an HTTP surface. |
 | **27** | `CC-9` | `catalog`/`customers` `ai-agents-context.ts` call a tool handler **directly** with `userId: null`. | When page-context hydration gains a subject. |
+| **28** | `CC-67` | **Row 28 builds the typed runtime door and moves the chat route onto it — but two callers still walk in through the window.** The **port** + the **chat move** land in row 28 (`PLAN-ROW28-agent-runtime-port.md`; sub-rows R28-1…R28-5); `runAiAgentText` (`api/ai/chat/route.ts:688`) and `runAiAgentObject` (`api/ai/run-object/route.ts:186`, `lib/business-ir-author.ts:160`) still call an engine **directly**. **Deleting OpenCode (`N-8`'s second half) is the later, separate step.** | **R28-3** — the chat route must be proven on the door first. | **When R28-3 lands** — check: `api/ai/chat/route.ts` and `api/ai/run-object/route.ts` reach the engine through the port. |
 | **27** | `CC-66` | **S8's remaining half.** The **similarity signal** is BUILT (`request-outcome/repeat.ts`); still missing: the **history read** that feeds it, and the **offer** (`canOfferSaveAsFunction` has no caller — the Save button is frontend). **`S3`'s seal is BLOCKED on `G-04`.** | **History read:** startable. **Offer:** the frontend. **`S3` seal:** when `G-04` lands. |
 | **31** | `CC-32` | A saved **Function has no persistence** — so it has no delete path to guard, and cannot be loaded by id. | When **`G-09`** gives a saved Function a durable row. |
 | **35** | `CC-62` | **The workspace build set** — every requirement the `B-WS` design mapped as *"BUILD IT"*: the menu **join** (`UserFunction.placement` → `InjectionMenuItem`), the thread **lifecycle**, collaboration **anchoring/presence/feed**, the **AI-as-participant**, and the **tenant-authored / AI-proposed extension routes**. **None was a register row** until 2026-10-11 (found by the owner's audit). Full detail: [`../workspace-architecture/03-MAPPING.md`](../workspace-architecture/03-MAPPING.md). | **Mixed** — the join/lifecycle/presence ride `G-09`/`CC-32`; the **AI-as-participant** needs the owner's **`DP-09`**; the extension routes need **WS-1 (B-perms)** + **`B-WS/B9`**. |
 | **46** | `CC-19` | `packages/shared`'s `dynamicLoader.tsconfig.test.ts` fails under the full suite (`EBUSY`) but passes alone — **environmental, not a code defect**. | **The first CI run** (a host that does not hold the `node.exe` image). |
 | **46** | `CC-41` | `update.sh` rebuilt onto the same tag, so the outgoing image could not be restored. **Fixed** 2026-10-09; what remains is to **watch it run**. | The **next `update.sh` run** (the following deploy). |
 
-**Rows that are `☐` with no `CC-` item yet** (so they are not in the table above): **row 28** (the agent runtime
-behind one typed door — `B-05`/`Port`) and **row 30** (each job declares its model — `S6`) are unstarted Phase-8
-work; rows **36–44** are business verticals; **row 45** (entitlements) is a later-phase item. *(**Row 35** — the
-workspace — **was** in this list until 2026-10-11; it now carries **`CC-62`** in the table above, which the
-owner's audit added because the `B-WS` design's build items had no register row.)*
+**Rows that are `☐` with no `CC-` item yet** (so they are not in the table above): **row 30** (each job
+declares its model — `S6`) is unstarted Phase-8 work; rows **36–44** are business verticals; **row 45**
+(entitlements) is a later-phase item. *(**Row 28** — the agent runtime behind one typed door — **was** in
+this list until 2026-10-11; it now carries **`CC-67`** in the table above, added with the row-28 plan,
+which breaks the row into sub-rows R28-1…R28-6 so it is built one small piece at a time. **Row 35** — the
+workspace — **was** in this list until 2026-10-11 too; it now carries **`CC-62`**, which the owner's audit
+added because the `B-WS` design's build items had no register row.)*
 
 ---
 
