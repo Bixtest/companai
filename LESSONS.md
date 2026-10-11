@@ -3851,3 +3851,29 @@ not write: ask *"where else could this pattern appear?"* before scoping the scan
 *Cross-ref: L111 (a sanity floor is a silent-permission slip), the hostile-critic protocol (a SEPARATE agent
 found the blind spot), rule 9(a) (own the full codebase, not just your diff).*
 
+## L119 — a documented lesson is not an applied one: when you write a guard of a class the file already covers, **reuse its fixed form** instead of re-deriving it
+
+**Seen in `CC-56` (2026-10-11).** Adding a coverage assertion to `binding-coverage.test.ts` — the *same file*
+that already defines `stripComments()` and whose own L118 clause (3) reads *"detect the call (name + `(`,
+comments stripped)"* — I matched the confirm route's source for `resolveAgentBinding(` against **raw** source.
+A `// resolveAgentBinding(...)` comment satisfied it. **Two documented lessons were re-broken in one line:**
+**L109** ("strip comments before trusting a textual match") and **L118 clause 3**. In the same change the
+"human passthrough" test was green whether or not the production call existed — **L93**'s shape ("a defence
+with no test is not a defence"), also a recurrence. A **separate-agent hostile critic** found both by attacking
+the *predicate* (inserting a comment) rather than the data.
+
+**Why it happens.** Each lesson was written in a *different* session and file, and the new guard was written
+*fresh* rather than by copying the neighbouring, already-fixed pattern. The failure is not ignorance of the
+rule — it is that the rule lives in **prose** while the fix lives in a **helper** (`stripComments`) two
+functions away.
+
+**The rule.** (1) Before writing a guard, ask *"has this module already solved this class?"* — here it had, and
+the solution was a **named helper in the same file**; **call it**, do not re-derive the predicate. (2)
+`LESSONS.md` is a **critic's checklist, not a memory**: point the hostile critic at the *classes already
+documented* (comments, one-file walkers, sanity floors, non-discriminating tests) so a recurrence is caught in
+the same session. (3) Every test added for a change must be **shown to fail when the change is reverted** (the
+mutation proof) — a test green in **both** trees documents behaviour, it does not verify the change. (4) A
+lesson is only "learned" when the **shared artefact** (a helper, a pattern) carries it, not the sentence.
+
+*Cross-ref: L109, L118, L93, L91, L65, L104; rule 7 (LESSONS.md binds **both** ways — read **and** apply).*
+

@@ -28,7 +28,7 @@ anything else first. Where an item is **not** a decision, it says so, and you ca
 
 ---
 
-## Part 1 — Decisions I need (**1 open** — `NY-22` (row 18: AI own-row-scope semantics) **OPEN — your call; the safe default (a) is already in place**; `NY-21` (row 17 coverage) **decided 2026-10-11: Option A** (build the all-tables classification gate); `NY-20` (row 16 scope) **decided 2026-10-11: Option A**; `NY-19` **decided 2026-10-10** (owner chose Option A: build the read-gate coverage test → built as `CC-47`, row 15 ✅); `NY-18` **decided 2026-10-10** ("we follow your recommendations" → Option B, built as `CC-49`); `NY-16` and `NY-17` **decided 2026-10-10** (blank the value; Option B); `NY-15` decided 2026-10-09; `NY-14` closed 2026-10-06; `NY-1`, `NY-2`, `NY-8`, `NY-13` closed; `NY-4` is "nothing needed")
+## Part 1 — Decisions I need (**2 open** — `NY-23` (row 22 / `CC-44`: should a write endpoint with no permission check fail the build?) **OPEN — your call; the safe status-quo guard is already in place**; `NY-22` (row 18: AI own-row-scope semantics) **OPEN — your call; the safe default (a) is already in place**; `NY-21` (row 17 coverage) **decided 2026-10-11: Option A** (build the all-tables classification gate); `NY-20` (row 16 scope) **decided 2026-10-11: Option A**; `NY-19` **decided 2026-10-10** (owner chose Option A: build the read-gate coverage test → built as `CC-47`, row 15 ✅); `NY-18` **decided 2026-10-10** ("we follow your recommendations" → Option B, built as `CC-49`); `NY-16` and `NY-17` **decided 2026-10-10** (blank the value; Option B); `NY-15` decided 2026-10-09; `NY-14` closed 2026-10-06; `NY-1`, `NY-2`, `NY-8`, `NY-13` closed; `NY-4` is "nothing needed")
 
 > **Numbering note.** Items are numbered once and **never reused**, so that a number you have already
 > quoted keeps meaning the same thing. Item 8 was appended here on 2026-10-05 and answered the same
@@ -444,6 +444,45 @@ site when the first searchable+own-scoped entity appears, plus a recorded exempt
 **Why it does not block the row:** row 18's **column-level** gate is built and verified; the **row-level** leg is
 **deferred with a named trigger** (rules 8/10d) — *the first entity that is both searchable and own-scoped*, or
 your ruling, whichever comes first. Recorded as `CC-53`'s own-leg note.
+
+---
+
+### `NY-23` — Should a write screen with **no** permission check fail the build? (the `CC-44` ruling) — ⬜ **OPEN (your call; today's guard is already in place)**
+
+**What this is about, in plain terms.** Whenever we build something that **changes data** — a screen or an
+endpoint that saves, edits or deletes a record — the platform is supposed to ask *"is this person allowed to
+do this?"*. Today it only asks **if the developer remembered to name a permission on that piece of code**. If
+they forget, the code still runs and checks nothing. The check is **opt-in**, not automatic.
+
+**Is anything actually broken right now?** **No.** I measured it (2026-10-09): across the **35** active modules
+there are **169** write endpoints. **158** do name a permission; **5** are protected by a different guard; and
+the last **6** are deliberately open on purpose (logging in / changing your own profile; webhooks whose
+signature is the real check; and one rate-limit probe). So **no real data-write is unprotected today.** The
+claim "roles and grants are enforced on every write" is **true** as things stand.
+
+**So what is the risk?** Only this: nothing **forces** the *next* endpoint to name a permission. A future
+endpoint could be added that forgets, and it would ship silently open. The hole cannot exist today, but it can
+appear tomorrow.
+
+**The decision I need from you.** Do you want the platform to **refuse to build** when a write endpoint names
+neither a permission nor an explicit "this one is deliberately open" marker?
+
+| | Option | What it means for you | Size |
+|---|---|---|---|
+| **A** *(my rec)* | **Default-deny — make it a build failure** | A new write endpoint that declares no permission and no "by design" exemption **fails the build**. The 6 deliberately-open endpoints get a small, readable "by design" tag (e.g. `byDesign: 'signature-verified'`). | Bounded — one check + 6 tags |
+| **B** | **Leave it opt-in — keep the manual guard** | No build failure. The existing checker (`analysis/permission-gate/measure.js --check`) stays as the guard: it lists every write endpoint and its gate state and exits with an error if one appears with no explanation — but **someone has to remember to run it**. | Trivial (already built) |
+
+**Recommendation: A.** It turns a rule we currently *hope* is followed into one the machine *enforces* — a
+future endpoint cannot ship un-gated by accident. It is a **new rule, not a bug fix**, which is exactly why it
+is your call and not mine (rule 11).
+
+**What is already done either way.** The checker that measures every write endpoint and its gate state is
+**built** (`analysis/permission-gate/measure.js`); in `--check` mode it exits with an error on an unexplained
+route. So even Option B has a mechanical guard — Option A just promotes it from "a step someone must remember"
+to "the build stops".
+
+**If you do nothing:** the gate stays opt-in and the manual checker stays the guard. Nothing breaks; the only
+risk is a future endpoint added silently un-gated. Detail: `COMPLETION-CALLBACKS.md` `CC-44`.
 
 ---
 

@@ -35,7 +35,40 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
-### ✅ DONE — **row 22's NARROWING leg (an AI user can run only the agents bound to it, `BUILD-ORDER` item 20): BUILT (`CC-55`). The binding's scope is now applied to the run. ★ NEXT = `CC-44` (then `CC-56`, `CC-57`).**
+### ✅ DONE — **row 22's EXECUTION leg — the pending-action confirm path re-checks the binding (`CC-56`). ★ NEXT = `CC-44` (awaits the owner's ruling, asked plainly as `NY-23`), then `CC-57`.**
+**(2026-10-11; code repo `workspace/starting-kit`.)**
+
+**The task.** `CC-27` gated the **dispatch** of an agent and `CC-55` applied the binding's narrowing — but the
+**pending-action confirm** route (`api/ai/actions/[id]/confirm/route.ts`), which **executes the agent's tool**,
+did **not** re-check the binding. A binding revoked between the proposal (dispatch) and the confirm was **not
+observed**, and the confirm re-executed the tool anyway.
+
+**The contract built.** After `runPendingActionRechecks` succeeds and before `executePendingActionConfirm`, the
+route now calls `resolveAgentBinding({ em, auth, agentId: row.agentId })` and returns **403 `agent_not_bound`**
+when `!binding.bound` — the **identical** check and error code the two dispatch routes use. A human caller is a
+passthrough (humans are not bound); an `ai_worker` whose binding was revoked is refused **before the handler
+runs**. The OpenAPI 403 text now names `agent_not_bound`.
+
+**Hardening (TOTAL quality protocol).** A **separate-agent hostile critic** raised 5 items, **3 real and fixed**:
+(1) the **"human passthrough" test was vacuous** — it passed whether or not the production call existed; it now
+supplies a `null` binding and asserts a human still gets 200; (2) the **coverage assertion ran on raw source**,
+so a commented-out `// resolveAgentBinding(...)` satisfied it — it now strips comments (mirroring `CC-55`),
+**proven** by a comment-out mutation that FAILS the fixed assertion and PASSES the old one; (3) the OpenAPI 403
+description omitted `agent_not_bound`. **5 RED-then-GREEN mutations**, every restore **md5-verified**;
+`tsc --noEmit` clean; **1487 tests / 108 suites** green.
+
+**Honestly measured — the guard's scope.** The re-check guards the **confirm caller**: a **human** confirm is a
+passthrough (correct — row 22's "run" is gated at **dispatch** by `CC-27`; a human confirm is the human
+exercising their own authority), so the worker's revocation is observed when an **`ai_worker`** confirms.
+Observing the **proposing worker's** binding on a human confirm would need the proposer's principal persisted on
+the row (it stores only `createdByUserId`) — **out of scope, not a row-22 requirement today**. The only other
+`executePendingActionConfirm` caller is the CLI tool-test harness (`lib/tool-test-runner.ts`, synthetic agent +
+super-admin ctx) — measured, not a row-22 door. **Remaining named leg: in-process dispatch sites → `CC-57`.**
+**ONE NUMBER, two routes: 72 / 321 = 22% — unchanged** (§L's 11th re-run).
+
+---
+
+### ✅ DONE — **row 22's NARROWING leg (an AI user can run only the agents bound to it, `BUILD-ORDER` item 20): BUILT (`CC-55`). The binding's scope is now applied to the run. ★ NEXT = `CC-44` (then `CC-57`).**
 **(2026-10-11; code repo `workspace/starting-kit`.)**
 
 **The task.** `CC-55` is the **second half** of row 22's `B3`: `CC-27` enforced *"may this AI worker run this

@@ -1308,7 +1308,7 @@ keep the backlogs where they are and land as their prerequisites do.*
     (`search_aggregate`); no map ⇒ byte-identical. The **own row-scope** leg has **no reader** on the AI
     path (no entity is both searchable and own-scoped) → owner question `NY-22`.**
 20. An AI user can run only the agents bound to it. **✅ BUILT 2026-10-11 (`CC-27` core + `CC-55`
-    narrowing) — an `ai_agent_bindings` table + repo + a **fail-closed** `resolveAgentBinding` for
+    narrowing + `CC-56` confirm-path) — an `ai_agent_bindings` table + repo + a **fail-closed** `resolveAgentBinding` for
     `ai_worker` principals, wired into **both** agent dispatch routes (`api/ai/run-object`, `api/ai/chat`)
     as **403 `agent_not_bound`** after the policy gate and before the runtime call; a manage surface
     (`api/ai/agents/[agentId]/bindings`, GET/POST/DELETE) and a coverage gate that fails a new un-gated
@@ -1316,8 +1316,10 @@ keep the backlogs where they are and land as their prerequisites do.*
     runtime — tools INTERSECT (agent list as base, never widening), features UNION (both required, deny
     otherwise), humans byte-identical. Hostile-critic-hardened (**2** real defects fixed in `CC-27`; **2** in
     `CC-55` — the coverage gate was blind to in-process dispatch sites; the "union" test did not test the
-    union), RED-then-GREEN ×9 + ×6, md5-verified restores. **Remaining named legs:** the pending-action
-    **confirm** re-check → **`CC-56`**; the in-process dispatch sites (the one known site
+    union), RED-then-GREEN ×9 + ×6 + ×5, md5-verified restores. **`CC-56` completes the execution side:** the
+    pending-action **confirm** route (which runs the agent's tool) now re-checks the binding before executing
+    (fail-closed for an `ai_worker`, passthrough for a human; 3 real critic defects fixed). **Remaining named
+    leg:** the in-process dispatch sites (the one known site
     `lib/business-ir-author.ts` has no caller yet) → **`CC-57`**.**
 
 **PHASE 4+ — the blueprint's later phases** (horizontal services · AI foundation · enterprise scale ·

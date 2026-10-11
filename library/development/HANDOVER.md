@@ -14,8 +14,22 @@ written for exactly that person — and this revision is written for an agent th
 continue the development work.** Read it top to bottom once (about 20 minutes), then
 follow §2 to actually get working. Everything else in the project is reachable from here.
 
-**Written 2026-10-05, revision 24 (2026-10-11). Owner: Ramzi. Development machine: `BIXMASERVER` (Windows 10 Pro).**
-**This revision records the 2026-10-11 BUILD of row 22's NARROWING leg (`CC-55`) — the binding's scope is now
+**Written 2026-10-05, revision 25 (2026-10-11). Owner: Ramzi. Development machine: `BIXMASERVER` (Windows 10 Pro).**
+**This revision records the 2026-10-11 BUILD of row 22's EXECUTION leg (`CC-56`) — the pending-action **confirm**
+route now re-checks the agent binding before it runs the tool. Rule-0b measurement first: the confirm route
+reached `executePendingActionConfirm` (which invokes the tool handler) with **no** `resolveAgentBinding` call, so
+a binding **revoked between the dispatch that proposed the action and the confirm** was **not observed**. Built:
+after `runPendingActionRechecks` succeeds and before `executePendingActionConfirm`, the route calls
+`resolveAgentBinding({ em, auth, agentId: row.agentId })` and refuses **403 `agent_not_bound`** when
+`!binding.bound` — the identical check + code the dispatch routes use (fail-closed for an `ai_worker`,
+passthrough for a human). A separate-agent hostile critic raised 5 items, **3 real and fixed** (a vacuous human
+test, a comment-blind coverage assertion, a stale OpenAPI 403 text); **5 RED-then-GREEN** mutations,
+md5-verified; `tsc` clean; **1487 tests / 108 suites** green. **SCOPE (measured):** the guard checks the
+**confirm caller**, so the worker's revocation is observed when an **`ai_worker`** confirms; a **human** confirm
+is a passthrough (row 22's "run" is gated at **dispatch** by `CC-27`). **The remaining named leg is `CC-57`**
+(in-process dispatch sites). ONE NUMBER **72 / 321 = 22%, unchanged** (§L's **eleventh** re-run, both routes
+agree). The live FRONTIER is now **`CC-44`** (the owner's ruling, **asked plainly as `NY-23`**), then **`CC-57`**.
+**Prior — revision 24: row 22's NARROWING leg (`CC-55`) — the binding's scope is now
 applied to the run, so row 22 is ✅ whole.** Rule-0b measurement first: `computeBoundRunScope` had **no
 production caller** (repo-wide grep: only its definition + the unit test); `resolveAiAgentTools` built the tool
 set from the **full** `agent.allowedTools`; `checkAgentPolicy` enforced only `agent.requiredFeatures`; both
@@ -103,10 +117,11 @@ named in the `★ ACTIVE TASK` box at the top of [`../../JOURNAL.md`](../../JOUR
 that carries it (step 7, and the owner's instruction of 2026-10-06). The **live FRONTIER** (its
 authoritative statement is [`platform_points.md`](platform_points.md)'s `▶ FRONTIER` box) is
 **re-derived from the ONE NUMBER** — row 16's own-leg is built (`CC-50` closed; row remains 🟡 pending the
-deferred team-leg `CC-51`), rows 17 (`CC-52`), 18 (`CC-53`) and 22 (`CC-27` core + `CC-55` narrowing) are **✅
+deferred team-leg `CC-51`), rows 17 (`CC-52`), 18 (`CC-53`) and 22 (`CC-27` core + `CC-55` narrowing + `CC-56`
+confirm-path) are **✅
 DONE** (the PHASE-5 batch is complete); the live FRONTIER is now **`CC-44`** (the write-path feature gate being
-opt-in, not default-deny — an owner policy call), then **`CC-56`** (re-check the binding on the pending-action
-confirm path) and **`CC-57`** (thread the bound scope into the in-process dispatch sites — the one known site
+opt-in, not default-deny — an owner policy call, **asked as `NY-23`**), then **`CC-57`** (thread the bound scope
+into the in-process dispatch sites — the one known site
 `lib/business-ir-author.ts` has no caller today);
 each is buildable now, and **it must be re-measured in code before
 building** (rule 0b).
