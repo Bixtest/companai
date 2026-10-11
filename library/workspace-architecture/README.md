@@ -167,8 +167,10 @@ What does **not** exist is the artefact the owner asked for:
 | `00-RESEARCH-PLAN.md` | The **batches-based research plan** — what each batch reads, produces, and its exit gate. |
 | `01-RECON.md` | **B1** — the **recon dossier**: the measured inventory of every code surface this workstream rests on, and a verdict row per owner question. |
 | `02-REFERENCE-SYSTEMS.md` | **B2** — the **three reference systems** (Buzz / OpenRig / Paperclip) analysed from their own source, plus the **verdict and alternatives**. |
-| `02-SRS-*.md` | The detailed SRS (to be written: B3–B9). |
+| `02-SRS-*.md` | The detailed SRS (B3–B6 written; B7–B9 to go). |
 | `03-MAPPING.md` | The SRS → current state → development plan map (B10). |
+| `discussion_points.md` | The live list of open questions/decisions in plain language — **the document of record**. |
+| `owner_answers.md` | **The owner's own file** — a safe place to write answers; the agent reads it and never writes it. |
 
 ---
 

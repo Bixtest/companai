@@ -1,5 +1,15 @@
 # discussion_points.md — the open questions, in plain language
 
+> ## ⚠️ BEFORE YOU EDIT THIS FILE — ONE STEP
+> **Click into the file and reload it (or close & reopen it) right before you type.** This file is edited by
+> **both** you and the agent, and an editor holding an **older copy** will silently overwrite whatever was
+> saved in between. That has now happened **twice** (your DP-02/03 answers, then your DP-07 answer) — both
+> recovered, but avoidable.
+>
+> **If you prefer never to risk it: write your answers in `owner_answers.md` instead** (same folder). It is
+> **yours alone** — the agent only reads it and never writes to it. Say the word and I will treat that file as
+> the single place your answers live.
+
 **What this file is.** A running list of every open question, decision, or risk the workspace-architecture
 research has raised — written in **plain words**, with **what it changes for the user**, and **my
 recommendation**. Nothing here needs an answer *now* unless it is marked **BLOCKER**.
