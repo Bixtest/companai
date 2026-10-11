@@ -87,18 +87,22 @@ Worked example: `CC-43` "flagged, not fixed" **hid `CC-46`**.
   `AiRuntimePort` is a **comment-only** declaration (`ce.ts`, owned by `L-01`/`AH-5`). Authoritative contract =
   `ARCHITECTURE-hermes-integration.md` §4/§7/§9 → **Phase 1 = "the port, with OpenCode behind it"**.
 - **ALSO NOW:** Row 16 team-leg (`CC-51`) + `G-22`. **DESIGN TRACK: `B-WS/B9`** (widget architecture). **DONE: Row 22.**
-- **Row 28 🔵 IN PROGRESS** — six sub-rows (`PLAN-ROW28-agent-runtime-port.md`). **R28-1 ✅ DONE 2026-10-11**
-  (code `513bad41`): the port's **shape + test** — `lib/ai-runtime-port.ts` (definitions only, zero imports; the eight
-  §4.1 signatures, the §4.2 envelope with required `capabilityGrantId`, secret *references*) + 9 tests incl. the
-  `IsExactKeys` type guard. **R28-2 ✅ DONE 2026-10-11** (code `743156dd`): the first engine behind the door —
-  `lib/opencode-port-adapter.ts` implements all eight operations, delegating to the **unchanged** OpenCode engine
-  (`opencode-client.ts`/`opencode-handlers.ts` NOT touched); **honest capability map** (`steerRun`/`resolveToolCall`
-  openly ✗, declared in the header AND in `describeCapabilities`) + 22 tests; hostile critic found **6 real defects,
-  all fixed** (defeated abort slot → a Set of controllers; `cancelRun`-after-complete order-dependence →
-  `completed` checked first; **run = conversation** → fresh distinct run id per resume; stale capability grant on a
-  second resume; unchecked `sessionId` cast; concurrent streams sharing one abort slot). 15 mutations RED.
-  Suite **114/1552 green**. **NEXT = R28-3** (the chat route moved onto the port — the exit gate; it is what finally
-  moves `B-05`). R28-4 = cancel/complete semantics. `CC-67` (two other direct callers) is R28-3-blocked.
+- **Row 28 🔵 IN PROGRESS** — six sub-rows (`PLAN-ROW28-agent-runtime-port.md`). **R28-1 ✅** (code `513bad41`):
+  the port's shape (`lib/ai-runtime-port.ts` — the eight §4.1 operations, the §4.2 envelope with required
+  `capabilityGrantId`, secret *references*; + 9 tests incl. the `IsExactKeys` guard). **R28-2 ✅** (code
+  `743156dd`): the first engine behind the door — `lib/opencode-port-adapter.ts` implements all eight,
+  delegating to the **unchanged** OpenCode engine; honest capability map (`steerRun`/`resolveToolCall`
+  openly ✗); 22 tests. **R28-3 ✅ DONE 2026-10-11** (code `61776eae`): **the exit gate — the chat route now
+  walks through the door** — `api/chat/route.ts` imports the port + factory (NOT the engine), builds an
+  envelope, calls `startRun`→`streamRun`; no engine import on the run path (self-tested static guard asserts
+  imported *symbols*); the pre-existing behaviour tests pass **unmodified**; 15 tests, 9 mutations. Fixed a
+  real defect: the run id was per-ms (two runs in one ms would share an id → the adapter's idempotent
+  re-start → the second never streams) → exported `mintChatRunId` with a monotonic counter. Registered
+  **`CC-69`** (the `answerQuestion` bypass still calls OpenCode directly — not a run) and **`CC-70`** (the
+  run's grant is carried but not consumed). **NEXT = R28-4** (give `cancelRun`/`completeRun` a production
+  caller), then **`CC-67`** (move the two remaining callers — what finally flips `B-05`/`N-8`). **Row 28's
+  own box stays `☐`**: its sentence needs *all* callers moved, and two remain (`CC-67`) plus the bypass.
+  Suite **115/1567 green**. **ONE NUMBER 75/321 (unchanged — derived).**
 - **`CC-68` ✅ CLOSED 2026-10-11** (code `537e30b5`): a **non-deterministic TEST** in `mcp-dev-key-resolution.test.ts`
   (the TOCTOU case, both variants) — it raced the swap against the reader's `Promise.all`; **product was correct**.
   Fixed by stating the inode mismatch directly; mutation-proved; 5× full-suite green (1530/1530). Also guarded

@@ -55,7 +55,7 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
-### 🔵 IN PROGRESS — **Row 28 (Phase 8): *"the agent runtime sits behind one typed door — no other code talks to it directly."* Broken into six sub-rows. **R28-1 (the port's shape) ✅ DONE 2026-10-11. R28-2 (OpenCode behind the door) ✅ DONE 2026-10-11. NEXT = R28-3.** No box moved.**
+### 🔵 IN PROGRESS — **Row 28 (Phase 8): *"the agent runtime sits behind one typed door — no other code talks to it directly."* Broken into six sub-rows. **R28-1, R28-2 and R28-3 ✅ DONE 2026-10-11 — the chat route now walks through the door. NEXT = R28-4.** No box moved (the row needs *all* callers moved).**
 **(2026-10-11; plan = [`library/development/PLAN-ROW28-agent-runtime-port.md`](library/development/PLAN-ROW28-agent-runtime-port.md).)**
 
 **What the row asks, in plain words.** Today the platform reaches its AI engine **two different ways,
@@ -81,9 +81,9 @@ OpenCode behind it"*).
 |---|---|---|
 | **R28-1** | The typed port's **shape** — its eight operations + the envelope rules | ✅ **DONE 2026-10-11** (below) |
 | **R28-2** | **OpenCode fitted behind the door** (unchanged, just hidden) | ✅ **DONE 2026-10-11** (below) |
-| **R28-3** | The **chat screen moved onto the door** (the step that makes the row true) | ⏳ **NEXT** (R28-1+2 cleared) |
-| **R28-4** | Failure handled — cancel is safe to repeat, complete is safe to replay | startable now (R28-1 cleared) |
-| **R28-5** | A check that **nothing** talks to an engine directly | blocked on R28-3 |
+| **R28-3** | The **chat screen moved onto the door** (the step that makes the row true) | ✅ **DONE 2026-10-11** (below) |
+| **R28-4** | Failure handled — cancel is safe to repeat, complete is safe to replay | ⏳ **NEXT** (startable now) |
+| **R28-5** | A check that **nothing** talks to an engine directly | blocked-cleared (R28-3 done) |
 | **R28-6** | **Delete OpenCode** — separate, later step (`N-8`) | OUT of row 28 |
 
 **R28-1 DONE — what was built, and the honest headline.** `lib/ai-runtime-port.ts` — **definitions only,
@@ -144,8 +144,35 @@ per-stream controllers.
 **Honest bound — NO box moved.** An **unused** door with an engine behind it still completes nothing —
 `B-05` / `N-8`'s first half are about the door being *used*. **ONE NUMBER unchanged 75 / 321 = 23%.**
 
-**★ NEXT = sub-row R28-3** (move the chat screen onto the door — **this is the row's exit gate**, and it is
-the change that finally moves `B-05`).
+**R28-3 DONE — the exit gate: the chat route now walks through the door.** `api/chat/route.ts` (412 → 445
+lines) now imports the **port** and the adapter **factory**, and **not** the engine: it builds one envelope
+(identity minted server-side; the run id **distinct** from the conversation id per §4.2) and calls
+`port.startRun(envelope)` → `port.streamRun(runId, sink)`. `opencode-client.ts` / `opencode-handlers.ts` are
+**not modified**. **One real defect found by my own mutation battery and fixed:** the first draft minted the
+run id from the request time alone, so two runs in the same millisecond would share an id — and the adapter
+treats a repeated id as an idempotent re-start, so the second would silently never stream; fixed with an
+exported `mintChatRunId` (legible id + monotonic counter). **One registered bypass:** the `answerQuestion`
+short-circuit still calls OpenCode directly — it is **not a run**, the port has no such operation, and adding
+a ninth is a design decision — registered as **`CC-69`**, not hidden.
+
+**Proof:** 15 new tests (mock boundary = the engine, **below** the door, so they fail if the route ever calls
+it directly; includes a **self-tested static guard** that asserts the *imported symbols*, not a line
+substring); the **pre-existing behaviour tests pass UNMODIFIED (8/8)** — the user sees no change; route
+type-checks clean; **115 suites / 1567 tests green**; **9 RED-then-GREEN mutations**, route restored
+md5-identical. **A separate-agent hostile critic found FOUR real defects — all fixed in-batch**, two of them
+in my *tests*: (1) the static guard was **evadable** (a two-symbol import line passed; `require` was missed);
+(2) the run-id test was **vacuous** (only asserted inequality); (3) the counter's stated motivation was
+**false** (the adapter is per-request); (4) `tenantId: ''` was a latent **fail-open** and the grant was a
+**placeholder** → tenant now fails closed, the grant is a real per-turn value with its non-consumption
+registered as **`CC-70`**.
+
+**Honest bound — NO box moved, and that is the point.** The row's sentence is *"**no other** code talks to it
+directly"* — **two other callers still do** (`CC-67`) plus the registered bypass. The door is now **used**,
+which is real and measured, but one caller out of three is not the row. `B-05`, `N-8` and the three `Port`
+boxes keep `☐` **on purpose**; §D was re-worded to say what is built. **ONE NUMBER unchanged 75 / 321 = 23%.**
+
+**★ NEXT = sub-row R28-4** (give `cancelRun`/`completeRun` a production caller), then **`CC-67`** (move the
+two remaining callers — the change that finally flips `B-05` and `N-8`).
 
 ---
 

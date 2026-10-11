@@ -112,12 +112,13 @@ to the system; the existing engine just learns to sit behind the door.
 ---
 
 ### R28-3 — Move the chat screen onto the door
-**Status: BLOCKED on R28-1 + R28-2.**
+**Status: ✅ DONE 2026-10-11 (code `61776eae`).** The requirement and the challenge are below, kept as
+written before the code (rule 10); the measured outcome is §7.3.
 
 **What it is.** Change the chat route so it reaches the AI engine **through the door** instead of
 importing OpenCode by name. This is the step that makes row 28's own sentence start becoming true.
 
-**Prerequisite.** R28-1 and R28-2.
+**Prerequisite.** R28-1 and R28-2 — **both now cleared.**
 
 **Why it matters.** Until this step, the door exists but nobody walks through it — which is exactly the
 "capability nobody can reach" trap our rules warn against. This step closes it.
@@ -126,6 +127,66 @@ importing OpenCode by name. This is the step that makes row 28's own sentence st
 
 **Exit gate (the architecture document's own words):** the chat works through the door; OpenCode is one
 implementation behind it; the test suite is green.
+
+#### R28-3 — the requirement (rule 10, step 3: written BEFORE the code)
+
+**Measured first (rule 0b), 2026-10-11.** `ai_assistant/api/chat/route.ts` is **412 lines**. It reaches
+OpenCode **by name** in exactly these places:
+
+| Line | What it does | Which port operation it must become |
+|---|---|---|
+| `:6–9` | imports `handleOpenCodeMessageStreaming`, `OpenCodeAuthContext`, `OpenCodeStreamEvent` | gone — the route imports the **port**, not the engine |
+| `:10` | imports `createOpenCodeClient` | gone |
+| `:181` | `writeSSE` typed on `OpenCodeStreamEvent` | typed on the **port's** `AiRuntimeStreamEvent` |
+| `:208–212` | builds `opencodeAuth` | becomes part of the **envelope** (identity fields already exist) |
+| `:218–221` | `createOpenCodeClient()` → `getPendingQuestions()` for the answer short-circuit | `startRun`/`resumeConversation` path, **or** stays as a documented bypass — see the challenge below |
+| `:349–380` | `handleOpenCodeMessageStreaming({message, sessionId, auth, em}, onEvent)` | **`startRun(envelope)` → `streamRun(runId, sink)`** |
+
+**The requirement, in plain words.** *The chat screen must get its answers by asking **the door**, not by
+calling OpenCode itself. After this change, a person reading `route.ts` must not see the word OpenCode
+anywhere except, at most, one comment saying which engine currently sits behind the door. The behaviour a
+user sees must not change at all.*
+
+**Acceptance (each is a measurement, not a tag):**
+1. `grep -n "opencode\|OpenCode" route.ts` returns **zero** imports of the engine (comments allowed, and
+   recorded as such).
+2. The route builds one **envelope** and calls `startRun` then `streamRun`; it never imports
+   `opencode-handlers` / `opencode-client`.
+3. Every behaviour the current route has is preserved: the `answerQuestion` short-circuit's ownership
+   re-check; the ephemeral session key + token injection; the post-`done` binding; the SSE event shapes;
+   the rate limit; the `finally` cleanup. **The existing SSE tests must stay green unchanged** — if one
+   needs editing, that is evidence behaviour changed and must be justified, not waved through.
+4. The suite is green; the door's own tests still pass; typecheck clean.
+
+#### R28-3 — the challenge (rule 9b: challenge the task before executing)
+
+**Challenge 1 — is the `answerQuestion` short-circuit in scope?** It calls `createOpenCodeClient()` **directly**
+to resolve a pending question. The port has **no** operation for "list pending questions". Two honest options:
+- **(a) Leave it, and register it.** It is a *different* job from "run a turn" — it is a control message about an
+  in-flight question. Putting it behind the door means **adding a ninth operation** the architecture document
+  does not name, which is a design decision (rule 11 — the owner decides *what*), not a mechanical move.
+- **(b) Add the operation now.** Bigger, and it invents contract surface.
+
+**Decision: (a)** — move the **run** path (the row's actual sentence), leave the question short-circuit with a
+**named** register entry, and say so plainly. Reason: row 28's sentence is *"no other code talks to it **to run
+an agent**"*; the question path is not a run, and inventing a ninth operation in this row would be exactly the
+scope-creep my rules warn against. It is registered as **`CC-69`** (below), **not** swept under the rug.
+
+**Challenge 2 — does the port's `startRun`+`streamRun` split fit the route's shape?** The route today passes an
+`onEvent` callback into one streaming call. The port splits it: `startRun` returns a `runId`, then
+`streamRun(runId, sink)`. That is a **two-call** shape. It fits: `startRun` mints the run (and the adapter
+creates the OpenCode session), `streamRun` then streams with the same sink the route already has. The route's
+current callback **is** a sink — it needs a trivial adapter, not a rewrite.
+
+**Challenge 3 — the sessionId/binding coupling.** Today the route passes `sessionId` straight through, and on
+`done` binds the resolved session id to the api_key row (`:360–376`). Under the port, `sessionId` becomes
+`input.sessionId` (the adapter already reads it — that is defect-7b's fix) and the `done` event still carries
+`sessionId` on the port's event union. So the binding logic **moves unchanged**. Good — but it must be
+**proven** by the existing binding test staying green, not assumed.
+
+**Conclusion of the challenge:** R28-3 is **safe to build as scoped** — the run path moves; the question
+short-circuit is registered as `CC-69`; the existing tests are the behaviour contract. **No new contract
+surface is invented.**
 
 ---
 
@@ -201,6 +262,12 @@ Every sub-row that ends less than fully done gets (or keeps) a row in `COMPLETIO
   of §1 (`api/ai/chat/route.ts:688`, `api/ai/run-object/route.ts:186`) are not moved by row 28.
   **Trigger:** when R28-3 has proven the door on the chat route.
 - **`CC-66`** (existing, row 27) — unchanged; not this row.
+- **`CC-69`** (new, R28-3) — **the chat route's `answerQuestion` short-circuit still calls OpenCode
+  directly.** It is not a run (the port has no such operation); registered rather than hidden.
+  **Trigger:** when the port's contract is next extended, or when Hermes lands.
+- **`CC-70`** (new, R28-3) — **the run's `capabilityGrantId` is carried but not consumed.** The OpenCode
+  adapter does not read it (it resolves tools internally and reports `resolveToolCall` ✗). **Trigger:** the
+  first engine that implements `resolveToolCall` (Hermes, §9 Phase 2+).
 - **`N-8`'s second half** (delete OpenCode) — stays open, with the trigger named in §3 R28-6.
 
 ---
@@ -214,6 +281,7 @@ Every sub-row that ends less than fully done gets (or keeps) a row in `COMPLETIO
 |---|---|---|
 | R28-1 | ✅ **DONE 2026-10-11** | See §7.1 below. |
 | R28-2 | ✅ **DONE 2026-10-11** | See §7.2 below. |
+| R28-3 | ✅ **DONE 2026-10-11** | See §7.3 below. |
 | R28-3 | not started | — |
 | R28-4 | not started | — |
 | R28-5 | not started | — |
@@ -339,6 +407,70 @@ behind it still completes nothing — that is R28-3. **ONE NUMBER unchanged 75 /
 
 ---
 
+### §7.3 R28-3 — the chat route walks through the door — BUILT (2026-10-11, code `61776eae`)
+
+**What landed.** `packages/ai-assistant/src/modules/ai_assistant/api/chat/route.ts` (412 → 445 lines) now
+reaches the AI runtime **through the port**:
+
+- it imports `../../lib/ai-runtime-port` and the adapter **factory**, and **not** `opencode-handlers` /
+  `opencode-client` for the run path;
+- it builds one `AiRuntimeEnvelope` (server-minted identity; the run id **distinct** from the conversation id
+  per §4.2) and calls `port.startRun(envelope)` → `port.streamRun(runId, sink)` — the route's existing
+  callback is the sink;
+- `opencode-client.ts` and `opencode-handlers.ts` are **not modified** (the engine moves behind the door
+  *unchanged*).
+
+**One real defect found by my own mutation battery (M5), and fixed.** The first draft minted the run id from
+the request start time alone, so **two runs inside the same millisecond would share a run id** — and the
+adapter treats a repeated run id as an *idempotent re-start*, so the second run would silently never stream.
+Fixed by `mintChatRunId(conversationId, startedAt)` (exported, so its two guarantees are tested directly): a
+legible id `<conv>:<engine>:run-<t>-<seq>` with a monotonic counter.
+
+**One registered bypass, stated plainly.** The `answerQuestion` short-circuit **still calls OpenCode
+directly** — answering an in-flight question is **not a run**, and the port's contract has no such operation;
+adding a ninth one is a **design decision** (rule 11), not a wiring move. It is registered as **`CC-69`**, not
+swept under the rug.
+
+**Proof.** `chat-route-through-port.test.ts` — **15 tests green**. The mock boundary is the **engine**, below
+the door, so these fail if the route ever calls the engine directly again. Includes a **static guard** that
+asserts the *imported symbols* (not a line substring) and bans `require()`/dynamic `import()`, with a
+**self-test** proving the guard catches what it claims. The pre-existing `chat-route-ownership.test.ts`
+(**8 tests**) passes **unmodified** — the behaviour a user sees did not change. Route type-checks clean;
+the **whole package suite green: 115 suites / 1567 tests** (R28-2 baseline 114 / 1552); **9 RED-then-GREEN
+mutations** (M1 the direct import; M1b a hidden `require`; M2 streamRun removed; M3 the text ref dropped;
+M4 the session dropped; M5/M5b the run-id schemes; M6 the binding removed; M7 the tenant guard removed),
+route restored **md5-identical** (`3d6c71620765caba9cd68c87e5295214`).
+
+**A hostile critic (separate agent) found FOUR real defects, all fixed in-batch.** This is the honest
+headline of R28-3 — and two of the four were in *my tests*, not the code:
+1. **The static guard was evadable** — it whitelisted any import line *containing* `createOpenCodeClient`, so
+   a line importing **two** symbols (the whitelisted one **and** the engine) passed. It also missed
+   `require()` / dynamic `import()`. **Fixed:** the guard now parses each import statement's **symbol list**
+   and bans the other module-loading forms; a self-test proves it catches the exact case that previously
+   passed.
+2. **The run-id "uniqueness" test was vacuous** — it only asserted `a !== b`, which *any* scheme (even
+   `Math.random()`) satisfies. **Fixed:** it now asserts the id **shape** and a **monotonic increment**.
+3. **The counter's stated motivation was false** — I wrote that it prevented a cross-request collision, but
+   the adapter is constructed **per request**, so that collision cannot happen; and the counter does not
+   survive a reload or span instances. **Fixed:** the comment now states the honest limit (the id is
+   collision-proof as a property of itself; that safety is not process-global).
+4. **A latent fail-open and a placeholder** — `tenantId: ''` would read as "no restriction" to a future
+   engine (the adapter happens not to read it *today*), and the capability grant was a meaningless
+   `chat:<userId>`. **Fixed:** a missing tenant now **fails closed** (tested); the grant is a real per-turn
+   value, and its **non-consumption** is registered as **`CC-70`**.
+
+**No box moved — and that is the honest outcome.** R28-3 is the row's *exit gate*, so it is tempting to tick
+`B-05`. But the row's own sentence is *"**no other** code talks to it directly"*, and **two other callers
+still do** (`CC-67`) plus the registered bypass (`CC-69`). The door is now **used** — real, measured,
+proven — but a door one caller out of three uses is not yet the row. `B-05`, `N-8` and the three `Port` boxes
+keep their `☐` **on purpose**; §D's text was re-worded to say exactly what is built. **ONE NUMBER unchanged
+75 / 321 = 23%** (re-derived, two routes).
+
+**★ NEXT = sub-row R28-4** — give `cancelRun`/`completeRun` a production caller (so the third `Port` box can
+flip), then **`CC-67`** (move the two remaining callers — the change that finally flips `B-05` and `N-8`).
+
+---
+
 ## §8. Measured vs quoted (so nothing is overstated)
 
 - **Measured in code (this session):** §1 rows 1–6, all by reading the named files; the R28-1 proof
@@ -346,7 +478,10 @@ behind it still completes nothing — that is R28-3. **ONE NUMBER unchanged 75 /
 - **Quoted from the architecture document (now implemented faithfully):** the eight operation signatures,
   the §4.2 envelope field list, the envelope's three rules, the "rewire first, delete second" order, and
   §9 Phase 1's exit gate — all re-read verbatim from `ARCHITECTURE-hermes-integration.md` §4/§7/§9.
-- **Not yet measured:** how many tests assert the chat route's OpenCode import (to be found in R28-3).
+- **Now measured:** how many tests assert the chat route's OpenCode import (R28-3): the pre-existing
+  `chat-route-ownership.test.ts` (8 tests, mocks the engine below the door) plus the new
+  `chat-route-through-port.test.ts` (15 tests). The route's remaining direct engine import is **one**
+  symbol (`createOpenCodeClient`), in the registered `CC-69` bypass.
 
 **R28-2 measurement (2026-10-11).** The whole `ai-assistant` package suite was run green: **114 suites /
 1552 tests** (the R28-1 baseline was 112 / 1527 — so R28-2 added 2 suites and 25 tests, exactly the adapter
