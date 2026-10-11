@@ -15,13 +15,16 @@ recommendation**. Nothing here needs an answer *now* unless it is marked **BLOCK
   person* (2026-10-06).
 - The Business IR is **CORE**, not a business feature (2026-10-11).
 - The platform **proposes** a prompt's ending; the **user confirms** the consequential ones (option **c**).
-- **DP-01 — the chain is made live FIRST, storage second** (2026-10-11). The owner's words: *"We do the
-  wiring first as saving is an architecture that needs the wiring as a prerequisite (if not wired for an
-  initial outcome that I can see, fix-optimize-and-refine the recipe via a follow-up prompt to the ai if the
-  outcomes are not accurate, till it is perfectly tuned, then there is nothing to save, proper wiring and
-  recipe perfecting comes first)."* — i.e. **wire it → see a real result → refine the recipe by follow-up
-  prompt until it is right → only then talk about saving.** This confirms the recommendation in DP-01 and
-  **unblocks `CC-59`** (the first startable item of the supplementary core queue).
+- **DP-01 — the chain is made live FIRST, storage second** (2026-10-11). The owner's reasoning: *wire it →
+  see a real result → refine the recipe by follow-up prompt until it is right → only then talk about saving.*
+  This confirms the recommendation in DP-01 and **unblocks `CC-59`** (the first startable item of the
+  supplementary core queue).
+- **DP-02 — a saved recipe shows "permissions were not checked"** (2026-10-11). The owner accepted the
+  recommendation — **and raised the permissions architecture as its own engineering workstream** (see **DP-04**).
+- **DP-03 — a schema-change request follows the permissions flow, not a bare refusal** (2026-10-11). The owner
+  reframed it: *first ask whether this user holds the permissions (collectively) to change tenant schema;* if
+  **yes** → a different (approval-pool) flow; if **no** → explain what is needed and route it to the right
+  person. See **DP-04** and **DP-05**.
 
 ---
 
@@ -71,9 +74,12 @@ working in front of real data sooner, which is the thing that proves the archite
 saved yet), or the save-to-database piece first — accepting its shape may be rebuilt once the reference
 research lands?*
 
-**ANSWERED (2026-10-11) — wiring first.** See the "already decided" list at the top: *wire it → see a real
-result → refine the recipe by follow-up prompt until it is right → then save.* The owner's fuller reasoning
-is quoted there verbatim.
+**ANSWERED (2026-10-11) — wiring first.** See the "already decided" list at the top. The owner's words
+verbatim: *"We do the wiring first as saving is an architecture that needs the wiring as a prerequisite (if
+not wired for an initial outcome that I can see, fix-optimize-and-refine the recipe via a follow-up prompt to
+the ai if the outcomes are not accurate, till it is perfectly tuned, then there is nothing to save, proper
+wiring and recipe perfecting comes first)."*
+
 ---
 
 ### DP-02 — When we save a recipe, should it visibly say "permissions were not checked"?
@@ -103,6 +109,19 @@ a quiet, wrong reassurance.
 
 **The one question.** *Should a saved recipe visibly state "permissions not checked" until that layer
 exists — or is recording it silently enough for now?*
+
+**ANSWERED (2026-10-11) — show it.** The owner accepted the recommendation, and added a substantial new
+requirement: the **permissions architecture is a workstream of its own** — see **DP-04**. His words verbatim:
+*"we go with your recommendation. But there is a very important flow that we need to iron-out: When the user
+sends a prompt, we verify if the user has the right permissions to every functionality and data performing
+this request requires, if approved, then we process it. Now we have the outcome recipe. If no permissions set,
+ONLY THE USER THAT CREATED THIS ONE can have access to it and run it — because permissions are not set yet.
+There is a possibility this user has no permission to set permission for this service so other users can have
+access to it. So there need to be a place where all functions are listed with the setting of each. And whoever
+has the permission to that can set the pending permissions for functions or change permissions for existing
+ones. That user may have permission to set permissions of his own or all. this is just a brainstorming. The
+main point is that the permissions architecture is not casual, there are too many layers and 'what-ifs' for
+it, so we need to investigate and engineer it properly and accurately."*
 
 ---
 
@@ -141,9 +160,95 @@ step."* Building the *execution* here is a much bigger decision and, I recommend
 and its seriousness — with actually carrying it out still out of scope — or is it fine for that request to
 simply stop for now?*
 
+**ANSWERED (2026-10-11) — reframed; it is a permissions question first.** The owner's answer verbatim:
+*"part of the answer is what I mentioned in the previous question's answer, the need for a highly engineered
+permissions system. Because the first question to ask: does this user have the permissions — collectively —
+to change tenant-based database schema? If yes, that takes you in a completely different flow than the one you
+mentioned. If the user does not have all the permissions needed then you can explain what is needed and if you
+should forward that requested change to the right person to approve or work on it. If yes, we can have a
+specific pool for that and users with the right permissions can pick that up, validate, build, and inform the
+user that it is ready to use."* → captured as **DP-05** (the schema-change approval pool).
+
 ---
 
-### DP-04 — Does a saved recipe get **one home** in the menu, or can it sit in several?
+### DP-04 — The permissions architecture must be engineered as its own workstream
+
+**Status:** waiting · **Raised by:** owner's answers to DP-02 and DP-03 · **Blocks anything?** No for the SRS;
+**yes for the permissions-dependent builds** it will spawn.
+
+**Where this lives in the technical file:** to be defined by a dedicated analysis batch (see below).
+
+**What it is, in plain words.**
+When the owner answered "show that permissions were not checked", he attached a much bigger point: **the
+permissions system is not a casual feature.** It has many layers, and the "what ifs" multiply fast. His own
+words are the specification:
+
+1. **On every prompt**, the platform checks whether the user holds the permissions that *every* functionality
+   and *every piece of data* the request touches requires. If approved → process it.
+2. **A recipe with no permissions set is private to its creator.** Only the user who made it can find and run
+   it — because nobody has decided who else may.
+3. **But that creator may not have the right to grant permissions to others.** So there must be **a place that
+   lists all functions and their permission settings**, and **someone with the authority** can set the
+   *pending* permissions for a function, or change the permissions of an existing one.
+4. **Scope of that authority differs by person:** one person may be able to set permissions *only for their
+   own* functions; another, for *all* functions.
+
+**What it changes for the user.**
+- Without this: a saved recipe is either **invisible to everyone but its maker forever**, or **visible to
+  everyone with no control** — both wrong in a multi-company product.
+- With this: a recipe is **born private**, and **someone accountable decides when and to whom it opens up** —
+  which is exactly the "psychological shift: the user is teaching the ERP a new capability" the vision wants,
+  without handing out unearned access.
+
+**My recommendation: treat it as a named engineering workstream with its own analysis batch, not a footnote.**
+This is the same class of decision as the Business IR being CORE: it is **cross-cutting** — every function,
+every widget, every thread, every prompt touches it. Building it piecemeal is how permission bugs become
+security bugs. I recommend a **dedicated analysis batch (call it B-perms)** that produces its own SRS, and
+that the permissions-dependent builds are **scheduled behind it**, not guessed at now.
+
+**The one question.** *Do you want me to open a dedicated permissions-architecture batch (its own SRS) before
+we build anything that depends on "who may run/save/share what" — or should permissions stay a lighter,
+deferred layer while the workspace SRS finishes?*
+
+---
+
+### DP-05 — When a prompt needs a new database structure and the user is *allowed*, what happens?
+
+**Status:** waiting · **Raised by:** owner's answer to DP-03 · **Blocks anything?** No — B6–B10 proceed.
+
+**Where this lives in the technical file:** `02-SRS-02-function-lifecycle.md` §8, question **OQ-B4-3** (the
+owner's reframing supersedes the original "just show a refusal" option).
+
+**What it is, in plain words.**
+The owner's reframing splits the old single question into **two flows**, depending on one check:
+
+- **Does this user hold the permissions — collectively — to change the tenant's database schema?**
+  - **Yes →** a *different* flow: the change is picked up and carried out.
+  - **No →** the platform **explains what is needed** and can **route the request to the right person** to
+    approve or work on it.
+
+**And the "yes" flow has a shape**, in the owner's words: *"a specific pool … users with the right permissions
+can pick that up, validate, build, and inform the user that it is ready to use."* — i.e. a **build queue /
+pool** where authorized people take a schema-change request, run it through the same validate→build discipline
+the platform uses, and tell the requester when it is live.
+
+**What it changes for the user.**
+- A schema-change request stops being a dead end. It becomes either **done by someone entitled to do it**, or
+  **a routed, tracked request** with a named owner — and either way the requester is told.
+- This is also a **safety** improvement: the "yes" path does not remove the fence; it **replaces an
+  unattended fence with a staffed gate.**
+
+**My recommendation: capture the two flows now, build neither until DP-04's permissions layer exists.**
+The "no" branch (explain + route) is cheap and honest and can ship early. The "yes" branch (the pool) depends
+entirely on DP-04's permission model — it *is* a permissions feature. So: **specify both; sequence the pool
+after the permissions workstream.**
+
+**The one question.** *Do you want the "explain and route to the right person" branch built early (it needs no
+permissions layer), with the "build pool" branch held until the permissions workstream (DP-04) lands?*
+
+---
+
+### DP-06 — Does a saved recipe get **one home** in the menu, or can it sit in several?
 
 **Status:** waiting · **Raised by:** Batch B5 · **Blocks anything?** No — B5 has a working default.
 
@@ -152,8 +257,8 @@ simply stop for now?*
 **What it is, in plain words.**
 When a user saves a recipe, they choose **where it goes** in the menu (the vision's own example: *Destination:
 Finance → Accounts Receivable*). The technical question is *what owns that "where"* — the recipe itself, or
-the placed button/panel that shows it. We already keep "a thing" and "a place a thing is shown" apart in
-code (one recipe can be shown in five places, with one identity and five placements).
+the placed button/panel that shows it. We already keep "a thing" and "a place a thing is shown" apart in code
+(one recipe can be shown in five places, with one identity and five placements).
 
 **What it changes for the user.**
 - **One home per recipe:** every saved recipe appears in exactly one menu spot. Simple, predictable, and the
@@ -169,7 +274,7 @@ when we need them. That gives predictability now and flexibility later, at no co
 
 ---
 
-### DP-05 — When a user runs a saved recipe, what does it *open as*?
+### DP-07 — When a user runs a saved recipe, what does it *open as*?
 
 **Status:** waiting · **Raised by:** Batch B5 · **Blocks anything?** No.
 
@@ -184,30 +289,29 @@ inside the workspace** (the widget idea). The menu item needs to know which.
 - **Its own page:** clicking the menu item takes you to a full screen for that recipe. Familiar; you can
   bookmark it; it feels like a "real" part of the app.
 - **Opens in the workspace:** clicking drops the recipe into the workspace you are in, alongside your
-  conversation and other panels. More "one working surface"; more in keeping with the vision's workspace
-  idea, but the menu is then a *shortcut* rather than a *page*.
+  conversation and other panels. More "one working surface"; more in keeping with the vision's workspace idea,
+  but the menu is then a *shortcut* rather than a *page*.
 
 **My recommendation: open in the workspace (a panel), with the menu item a shortcut to it.**
 This matches the vision's whole point — *interaction islands in one workspace*, not a tree of new pages. It
-also means a recipe and a chat about that recipe live side by side, which is what you asked the workspace to
-be.
+also means a recipe and a chat about that recipe live side by side, which is what you asked the workspace to be.
 
-**The one question.** *Should a saved recipe open as its own page, or be dropped into the workspace as a
-panel (your menu being a shortcut to it)?*
+**The one question.** *Should a saved recipe open as its own page, or be dropped into the workspace as a panel
+(your menu being a shortcut to it)?*
 
 ---
 
-### DP-06 — How deep should the menu categories go?
+### DP-08 — How deep should the menu categories go?
 
 **Status:** waiting · **Raised by:** Batch B5 · **Blocks anything?** No.
 
 **Where this lives in the technical file:** `02-SRS-03-naming-menus-grouping.md` §9, question **OQ-B5-3**.
 
 **What it is, in plain words.**
-A recipe's location is a **path** — e.g. `team.reports.followups`. Read from the left, each dot is a level.
-The question: when the user picks `team.reports.followups`, is the *category* simply **`team.reports`** (a
-flat list of categories), or is it a **nested tree** — a "team" category containing a "reports" category
-containing "followups"?
+A recipe's location is a **path** — e.g. `team.reports.followups`. Read from the left, each dot is a level. The
+question: when the user picks `team.reports.followups`, is the *category* simply **`team.reports`** (a flat
+list of categories), or is it a **nested tree** — a "team" category containing a "reports" category containing
+"followups"?
 
 **What it changes for the user.**
 - **Flat categories:** the menu has a flat list of categories, each with items. Easy to scan; the name shows
@@ -216,9 +320,9 @@ containing "followups"?
   but it needs expand/collapse behaviour and is more to get right.
 
 **My recommendation: flat categories for now, with the path carrying the full parent.**
-It is simpler, needs no new menu behaviour, and the path already tells you where you are. Because the
-mechanism is a pure function of the path, **we can turn on nesting later without re-saving a single recipe** —
-so nothing is lost by starting flat.
+It is simpler, needs no new menu behaviour, and the path already tells you where you are. Because the mechanism
+is a pure function of the path, **we can turn on nesting later without re-saving a single recipe** — so nothing
+is lost by starting flat.
 
 **The one question.** *Do you want a nested, folder-like menu, or a flat list of categories for now?*
 
@@ -235,5 +339,14 @@ so nothing is lost by starting flat.
 ---
 
 *Created 2026-10-11. Owner: Ramzi. Lives in `library/workspace-architecture/` alongside the SRS. Updated as
-each batch (B5–B10) raises its questions. **B5 added DP-04, DP-05, DP-06; the owner answered DP-01 in place
-(2026-10-11).***
+each batch raises its questions.*
+
+**⚠️ Editing discipline (added 2026-10-11 after a lost edit).** This file is edited by **both** the owner and
+the agent. An editor holding an older copy can silently overwrite the other's changes on save — which
+happened once and cost the agent's DP-04/05/06 additions. Rule: **before saving, the editor should reload the
+file; the agent must re-read the file from disk (not from memory) before every edit, and must never assume
+its last version is the current one.** Every edit is committed immediately so the history is recoverable
+(`git show <commit>:<path>`).
+
+**Current list:** DP-01 ✅ answered · DP-02 ✅ answered · DP-03 ✅ answered · DP-04 (permissions workstream) ·
+DP-05 (schema-change pool) · DP-06 · DP-07 · DP-08 — all waiting, none blocking the SRS.
