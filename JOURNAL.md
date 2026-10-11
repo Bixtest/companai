@@ -55,7 +55,7 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
-### 🔵 OPEN — **Row 28 (Phase 8): *"the agent runtime sits behind one typed door — no other code talks to it directly."* MEASURED (rule 0b) 2026-10-11 — and BROKEN INTO SIX SUB-ROWS so it is built one small piece at a time. No code written yet.**
+### 🔵 IN PROGRESS — **Row 28 (Phase 8): *"the agent runtime sits behind one typed door — no other code talks to it directly."* Broken into six sub-rows. **R28-1 (the port's shape) ✅ DONE 2026-10-11. NEXT = R28-2.** No box moved.**
 **(2026-10-11; plan = [`library/development/PLAN-ROW28-agent-runtime-port.md`](library/development/PLAN-ROW28-agent-runtime-port.md).)**
 
 **What the row asks, in plain words.** Today the platform reaches its AI engine **two different ways,
@@ -73,26 +73,43 @@ OpenCode behind it"*).
 | The chat route calls OpenCode **directly** | `ai_assistant/api/chat/route.ts` — import `:10`/`:6–9`; calls `:218`, `:349` |
 | A second route calls the platform's own runner directly | `ai_assistant/api/ai/chat/route.ts:688` (`runAiAgentText`) |
 | A third calls it directly too | `api/ai/run-object/route.ts:186`, `lib/business-ir-author.ts:160` (`runAiAgentObject`) |
-| The "typed port" is **only a comment** | `ai_assistant/ce.ts` (`AiRuntimePort`, owned by `L-01`/`AH-5`) |
+| The "typed port" was **only a comment** | `ai_assistant/ce.ts` (`AiRuntimePort`, owned by `L-01`/`AH-5`) |
 
-**The breakdown (each sub-row is built, and finishes, on its own):**
+**The six sub-rows (built one at a time):**
 
 | Sub-row | What it is | Status |
 |---|---|---|
-| **R28-1** | The typed port's **shape** — its eight operations + the envelope rules | **STARTABLE NOW** |
-| **R28-2** | **OpenCode fitted behind the door** (unchanged, just hidden) | BLOCKED on R28-1 |
-| **R28-3** | The **chat screen moved onto the door** (the step that makes the row true) | BLOCKED on R28-1+2 |
-| **R28-4** | Failure handled — cancel is safe to repeat, complete is safe to replay | BLOCKED on R28-1 |
-| **R28-5** | A check that **nothing** talks to an engine directly | BLOCKED on R28-3 |
+| **R28-1** | The typed port's **shape** — its eight operations + the envelope rules | ✅ **DONE 2026-10-11** (below) |
+| **R28-2** | **OpenCode fitted behind the door** (unchanged, just hidden) | ⏳ **NEXT** |
+| **R28-3** | The **chat screen moved onto the door** (the step that makes the row true) | blocked on R28-1+2 (R28-1 now cleared) |
+| **R28-4** | Failure handled — cancel is safe to repeat, complete is safe to replay | startable now (R28-1 cleared) |
+| **R28-5** | A check that **nothing** talks to an engine directly | blocked on R28-3 |
 | **R28-6** | **Delete OpenCode** — separate, later step (`N-8`) | OUT of row 28 |
 
-**What is NOT in row 28:** Hermes itself (no new engine; the door ships with the existing one behind
-it), and the two other callers (`CC-67`, below).
+**R28-1 DONE — what was built, and the honest headline.** `lib/ai-runtime-port.ts` — **definitions only,
+zero imports**, so no caller drags an engine in behind the types. It declares the **eight operations**
+exactly as the architecture document §4.1 gives them (including **`resolveToolCall(call, capabilityGrant)`**
+— the document's *"ONLY path to a business operation"*), the **§4.2 envelope** (including the required
+**`capabilityGrantId`**), **secret references** (no field can hold a value), and **cancel/complete results
+that are values, not exceptions**.
 
-**Registered:** **`CC-67`** — the two other callers (`api/ai/chat`, `run-object`) still bypass the door;
-trigger = when R28-3 proves the chat on the port. **No box moved; ONE NUMBER unchanged 75 / 321 = 23%.**
+**Proof:** 9 tests green; `tsc --strict` clean; **112 suites / 1527 tests green** (two full runs);
+**6 RED-then-GREEN mutations**, md5-verified restores.
+**A separate-agent hostile critic found THREE real defects — all fixed in-batch:** (1) my first draft
+**dropped `capabilityGrant`** from `resolveToolCall` and the envelope — the exact security-relevant
+argument; (2) the envelope was **missing several §4.2 fields** and the signatures were not faithful to the
+document; (3) my tests were **weaker than they looked** — they checked an instance's keys, so an added
+*optional* field passed silently (the critic proved it with an `authorityOverride` mutation that stayed
+green) → fixed with a type-level key-exactness guard, and the same mutation is now caught.
 
-**★ NEXT = sub-row R28-1** (the port's shape).
+**Also met and registered:** a **flaky test** (`mcp-dev-key-resolution`, ~1 full-run-in-3, green in
+isolation) — **not** caused by this change (which is additive only; `git diff --stat` empty), registered
+as **`CC-68`** (rule 9a).
+
+**Honest bound — NO box moved.** `B-05`/`Port` are about the door being **used**; a door nobody walks
+through yet does not complete them — that is R28-3. **ONE NUMBER unchanged 75 / 321 = 23%.**
+
+**★ NEXT = sub-row R28-2** (fit OpenCode behind the door, unchanged).
 
 ---
 

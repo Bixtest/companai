@@ -207,23 +207,79 @@ Every sub-row that ends less than fully done gets (or keeps) a row in `COMPLETIO
 
 ## §7. OUTCOME
 
-*(Empty until built. Filled with measured evidence per sub-row, per rule §2.1: every claim carries an
-observation, and the "done" is a measured claim, not a tag.)*
+*(Filled with measured evidence per sub-row, per rule §2.1: every claim carries an observation, and the
+"done" is a measured claim, not a tag.)*
 
 | Sub-row | Status | Evidence |
 |---|---|---|
-| R28-1 | not started | — |
+| R28-1 | ✅ **DONE 2026-10-11** | See §7.1 below. |
 | R28-2 | not started | — |
 | R28-3 | not started | — |
 | R28-4 | not started | — |
 | R28-5 | not started | — |
 | R28-6 | out of row (N-8) | — |
 
+### §7.1 R28-1 — the port's shape — BUILT (2026-10-11, code repo)
+
+**What landed.** `packages/ai-assistant/src/modules/ai_assistant/lib/ai-runtime-port.ts` — **definitions
+only, no imports at all** (proven: a grep for any `import`/`require` returns none), so no caller drags an
+engine in behind the types. It declares:
+
+- **The envelope** (`AiRuntimeEnvelope`) with all the §4.2 fields, including **`capabilityGrantId`**;
+- **A secret reference** (`AiRuntimeSecretRef`) = `scope` + `name` (+ `purpose`) — **no field that can hold
+  a value**;
+- **The eight operations** in `AiRuntimePort`, each signature keeping every argument §4.1 names — notably
+  **`resolveToolCall(call, capabilityGrant)`** (§4.1's *"ONLY path to a business operation"*) and
+  **`completeRun(runId, result)`**;
+- **Results that are values, not exceptions** — `AiRuntimeCancelResult` (with its four reasons) and
+  `AiRuntimeCompleteResult` (replay-safe), plus `AiRuntimeRunResult` carrying usage **with its scope
+  stated** and an unknown provider **left unknown** (§4.3).
+
+**Proof.** `ai-runtime-port.test.ts` — **9 tests green**; `tsc --strict --noEmit` clean on both files;
+and the **whole package suite green: 112 suites / 1527 tests** (two consecutive full runs, rule 4).
+**Six RED-then-GREEN mutations**, each restore md5-verified:
+
+| Mutation | Result |
+|---|---|
+| rename the implementation constant | caught (2 tests RED) |
+| make `turnId`/`conversationId`/`capabilityGrantId` optional | caught — `tsc` TS2322 |
+| add `value?: string` to the secret ref | caught — `tsc` TS2322/TS1360 (the key-exactness guard) |
+| add `authorityOverride?` to the envelope | caught — `tsc` TS2322/TS1360 |
+| drop `capabilityGrant` from `resolveToolCall` | caught — `tsc` TS2322 |
+| drop `result` from `completeRun` | caught — `tsc` TS2322 |
+| break the event sequence assertion | caught (1 test RED) |
+
+**A hostile critic (separate agent) found THREE real defects, all fixed in-batch.** This is the honest
+headline of R28-1:
+1. **The port dropped `capabilityGrant`** — I had named the eight operations but not matched the
+   document's signatures, and §4.1 calls the grant *"the ONLY path to a business operation."* **Fixed:**
+   the grant is now a required argument of `resolveToolCall` **and** a required field
+   (`capabilityGrantId`) of the envelope.
+2. **The envelope was missing fields** §4.2 lists (schema version, task id, policy/model versions,
+   deadline, budget, correlation id…) and had no signature-faithful `streamRun(runId)` /
+   `resumeConversation(binding, input)`. **Fixed:** the envelope and every signature now follow §4.1/§4.2.
+3. **The tests were weaker than they looked** — the secret-ref and identity checks asserted on an
+   *instance's* keys, so an added *optional* field passed silently (the critic proved it with an
+   `authorityOverride` mutation that stayed GREEN). **Fixed:** added a type-level `IsExactKeys` guard, so
+   an added field — optional or not — now fails `tsc`. Re-run: the same mutation is now **caught**.
+
+**Also met and registered:** a **flaky test** (`mcp-dev-key-resolution`, ~1 full-run-in-3, green in
+isolation) — **not** caused by this change (which is additive only; `git diff --stat` empty), registered
+as **`CC-68`** per rule 9a.
+
+**No box moved.** `B-05`/`Port` are about the door being *used*; a door nobody walks through yet does not
+complete them — that is R28-3. **ONE NUMBER unchanged 75 / 321 = 23%.**
+*(The five partial-credit sub-points §D lists — `Port (a)/(b)/(c)` — stay `☐` for the same reason.)*
+
+**★ NEXT = sub-row R28-2** — fit OpenCode behind the door, unchanged.
+
 ---
 
 ## §8. Measured vs quoted (so nothing is overstated)
 
-- **Measured in code (this session):** §1 rows 1–6, all by reading the named files.
-- **Quoted from the architecture document (not re-measured):** the eight operation names, the envelope
-  rules, the "rewire first, delete second" order, and §9 Phase 1's exit gate.
+- **Measured in code (this session):** §1 rows 1–6, all by reading the named files; the R28-1 proof
+  (tests, `tsc`, mutations, the full-suite run).
+- **Quoted from the architecture document (now implemented faithfully):** the eight operation signatures,
+  the §4.2 envelope field list, the envelope's three rules, the "rewire first, delete second" order, and
+  §9 Phase 1's exit gate — all re-read verbatim from `ARCHITECTURE-hermes-integration.md` §4/§7/§9.
 - **Not yet measured:** how many tests assert the chat route's OpenCode import (to be found in R28-3).
