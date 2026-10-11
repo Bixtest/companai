@@ -11,6 +11,7 @@ import {
   OPENCODE_RUNTIME_IMPLEMENTATION,
   type AiRuntimeEnvelope,
   type AiRuntimePort,
+  type AiRuntimeRunResult,
   type AiRuntimeStreamEvent,
 } from '../../lib/ai-runtime-port'
 import { createOpenCodePortAdapter, textInputRef } from '../../lib/opencode-port-adapter'
@@ -61,6 +62,51 @@ let runCounter = 0
 export function mintChatRunId(conversationId: string, startedAt: number): string {
   const sequence = ++runCounter
   return `${conversationId}:${OPENCODE_RUNTIME_IMPLEMENTATION}:run-${startedAt}-${sequence}`
+}
+
+/**
+ * Close a run at the door (row 28 / R28-4) — the ONE place the chat route ends
+ * a run, so "failure is normal" is a property of a single function rather than
+ * a rule repeated at three call sites.
+ *
+ * **What it does, in order.** If the run was aborted (the browser closed the
+ * socket — the Stop button, or a closed tab), it first asks the door to
+ * **cancel** the run, then reports the run's outcome to the door. Cancelling
+ * before completing is what makes a cancelled run record `cancelled`, not
+ * `completed`: the adapter checks `completed` first, so completing before
+ * cancelling would freeze the run as completed and the cancel would then be a
+ * no-op (`already-complete`).
+ *
+ * **Why both calls are safe to repeat (that is the whole point of R28-4).**
+ * `cancelRun` returns a *value* — a second cancel answers `already-cancelled`,
+ * never an error. `completeRun` is replay-safe — a second completion reports
+ * `alreadyComplete` and changes nothing. So this function may be reached twice
+ * (e.g. the abort fires *and* the `finally` runs) without double-counting, and
+ * it is the reason the sequence is fixed *here* rather than left to each caller.
+ *
+ * **The one honest limit (stated, not hidden).** The cancel is *cooperative*
+ * for the engine behind the door today: `cancelRun` marks the run cancelled and
+ * the consumer stops being fed further events, but the adapter holds no handle
+ * to force-tear-down the engine's in-flight call (see the adapter's own header,
+ * R28-2). This helper does not pretend otherwise — it reports the outcome the
+ * door can actually vouch for.
+ */
+export async function closeChatRun(
+  port: AiRuntimePort,
+  runId: string,
+  outcome: { aborted: boolean; status?: AiRuntimeRunResult['status'] },
+): Promise<void> {
+  const status: AiRuntimeRunResult['status'] = outcome.status ?? (outcome.aborted ? 'cancelled' : 'completed')
+
+  if (outcome.aborted) {
+    // Bounded and idempotent (§4.3): a second cancel is a value, not an error.
+    await port.cancelRun(runId)
+  }
+
+  // Replay-safe (§4.3): a second completion does not double-count. `status` is
+  // the honest outcome — `cancelled` when the abort was observed, so a run the
+  // user stopped is recorded as stopped, never as finished.
+  await port.completeRun(runId, { status })
 }
 
 /**
@@ -409,6 +455,28 @@ export async function POST(req: NextRequest) {
       let toolCallCount = 0
       let lastTokens: { input?: number; output?: number } | undefined
       let resultSessionId: string | undefined
+      // The run this turn opened at the door, when it got that far. Hoisted so
+      // the `finally` can close it (R28-4) even when the run ends by throwing.
+      let runId: string | undefined
+      // True once the client has gone away (Stop button, or closed tab). Read by
+      // the `finally` to record the honest outcome — `cancelled`, not `completed`.
+      let aborted = false
+
+      // Observe the client disconnect (row 28 / R28-4). The UI's Stop button
+      // aborts the browser's own fetch, which closes this request's socket; that
+      // is the ONLY signal the server gets that the user stopped the run. We do
+      // not cancel here — we only remember it, so the run is closed at the door
+      // in ONE place below (cancelling here and again in `finally` would be
+      // harmless — cancel is idempotent — but the single close point is what
+      // keeps the ordering — cancel BEFORE complete — in one readable place).
+      if (req.signal) {
+        const onAbort = () => {
+          aborted = true
+          logger.info('Chat run aborted by client', { userId: auth.sub })
+        }
+        if (req.signal.aborted) onAbort()
+        else req.signal.addEventListener('abort', onAbort, { once: true })
+      }
 
       try {
         // Emit session-authorized event first (if we have a token)
@@ -443,7 +511,7 @@ export async function POST(req: NextRequest) {
         // The run id must be UNIQUE PER RUN, not merely per millisecond (see
         // `mintChatRunId`).
         const conversationId = sessionId ?? `chat:${actorIdentity.userId}:${chatStartTime}`
-        const runId = mintChatRunId(conversationId, chatStartTime)
+        runId = mintChatRunId(conversationId, chatStartTime)
         const envelope: AiRuntimeEnvelope = {
           schemaVersion: 1,
           runId,
@@ -497,6 +565,23 @@ export async function POST(req: NextRequest) {
           error: error instanceof Error ? error.message : 'OpenCode request failed',
         })
       } finally {
+        // ── Close the run at the door (row 28 / R28-4) ─────────────────────
+        // Every run that opened at the door is closed here, once: cancelled
+        // first when the client went away, then completed with the honest
+        // status. Both calls are safe to repeat (cancel → `already-cancelled`,
+        // complete → `alreadyComplete`), so a run that is aborted AND reaches
+        // this `finally` is not double-counted. Failure is normal, and this is
+        // the one place the route treats it so.
+        if (runId) {
+          try {
+            await closeChatRun(port, runId, { aborted })
+          } catch (closeErr) {
+            // Closing the run must never break the response — the user already
+            // has (or has abandoned) the stream. Surface it to logs only.
+            logger.error('AI Chat — failed to close run at the door', { err: closeErr })
+          }
+        }
+
         const durationMs = Date.now() - chatStartTime
         logger.info('Chat complete', {
           userId: auth.sub,
