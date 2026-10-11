@@ -55,6 +55,38 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+### ✅ DONE — **Row 21 / 21b (Phase 6, Audit): RE-MEASURED — the phase is BUILT. `P4a`/`P4b` ☐→☑, so the ONE NUMBER MOVED again: 73/321 → 75/321 = 23%.**
+**(2026-10-11; docs only — no code changed; this was a measurement.)**
+
+**The task (rule 0b).** Rows 21 / 21b were 🟡, with the appendix recording `P4 ▸ 0/2 — *"no sub-part verified
+in code this round"*. So the job was to **measure first**, not build. Measured: **the phase is built.**
+`packages/core/src/modules/audit_logs/` carries a **read API** (`api/audit-logs/actions/route.ts` — `GET`, RBAC
+`audit_logs.view_self`, filters by actor / resource / org), a **viewer page** (`backend/audit-logs/page.tsx`,
+235 lines, fetching the action **and** access logs), an **export API** (`actions/export/route.ts` — CSV), a
+**hash-chained ledger** (`services/ledgerService.ts` — each event carries its predecessor's hash;
+`unique(tenant_id, seq)` + `unique(tenant_id, hash)`; `verifyTenantChain` + a `ledger:verify` CLI), appended
+**automatically** by `actionLogService.log()` (called by the command bus), and **retention** for the
+high-volume access log (`accessLogService.rotate()` — core 7d / non-core 8h).
+
+**Corrected (rule 13):** `P4a` and `P4b` ☐→☑ → **§B 5/38 → 7/38**, so the ONE NUMBER moved **73/321 → 75/321 =
+23%** — re-derived by **two independent routes** (a Node parse and a Python parse). Row 21b's ID had also cited
+`P4a` (the *read-API* sub-point) — a **mis-reference**, now fixed.
+
+**A separate-agent hostile critic (8 claims, a command + output each) could NOT falsify the build** — and found
+**2 register-worthy cracks, both scheduled:**
+- **`CC-64`** — an **undo's trace bypasses the ledger** (`markUndone` uses `createLogEntity` + `persist`, never
+  `appendToLedger`), so the one record the chain does **not** cover is the record of an undo.
+- **`CC-65`** — **`action_logs` has no retention path** (unbounded growth; `access_logs` rotates, the ledger is
+  deliberately permanent — pruning it would break the chain).
+It also recorded that **`action_logs` is mutable by design** (the backfill CLIs `UPDATE` derived columns), so
+the tamper-evidence is the **ledger**, not the table. **Stated, not hidden.**
+
+**★ NEXT = LIST row 27** (Phase 7 — *"the user is told when blocked and noticed and suggested to — not left
+guessing"*), the earliest open row now that Phase 6 is ✅. Its items are `CC-8` / `CC-9` (both trigger-gated);
+it starts with a rule-0b measurement.
+
+---
+
 ### ✅ DONE — **`CC-61` (LIST row 19): the command contract is now uniform — `risk` · `approval` · `idempotency` exist and are recorded. `C6b` ☐→☑, so the ONE NUMBER MOVED: 72/321 → 73/321 = 23%.**
 **(2026-10-11; code repo `workspace/starting-kit`.)**
 

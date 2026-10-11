@@ -14,24 +14,30 @@ written for exactly that person — and this revision is written for an agent th
 continue the development work.** Read it top to bottom once (about 20 minutes), then
 follow §2 to actually get working. Everything else in the project is reachable from here.
 
-**Written 2026-10-05, revision 30 (2026-10-11). Owner: Ramzi. Development machine: `BIXMASERVER` (Windows 10 Pro).**
-**This revision records `CC-61` — LIST row 19, the command contract made uniform — and the FIRST movement of the
-ONE NUMBER since its 2026-10-10 correction.** Row 19's claim (*"every state-changing action goes through one
-typed command"*) **held** — the command bus is real (~122 command files, ~18 modules). What did not was `C6b`
-(*"the full contract uniform across every action"*): `CommandHandler` had no `risk` / `approval` / `idempotency`
-at all. Built: the three facets as **optional** declarations (`shared/src/lib/commands/types.ts`) and recorded on
-the action log under `context.commandContract` (`command-bus.ts`). **Approval DECLARES; the authority layer
-ENFORCES** — a bus refusal would be a second engine (`S5`). `C6b` ☐→☑ ⇒ **ONE NUMBER 72/321 → 73/321 = 23%**
-(re-derived by two independent routes: a Node parse and a Python parse). **Proof:** `src/lib/commands` 20 suites
-/ 169 tests green; whole `shared` 2555 tests (the one failing suite is the known-environmental `CC-19`);
-`tsc` clean; **5 RED-then-GREEN mutations**, md5-verified. **A separate-agent hostile critic found 1 REAL defect,
-fixed** (the first draft merged inside `buildLog`, which returns null without one — so a declaring handler
-recorded nothing); its `D2` (0 of ~93 commands declare the fields) is **`CC-63`**. **Honest bounds:** the
-contract is uniform in **shape**, adoption is **0**; `S5` is **measured, not closed**. **NEXT = LIST row 21/21b**
-(Phase 6 — Audit), starting with a rule-0b measurement. **Docs also changed this session:** `platform_points.md`
-became the **single row-based tracker** (the ⏳ OPEN WORK section; two row-number defects fixed — row 22 was used
-twice, row 29 was a false open), the register's 19 mis-filed rows were re-filed, and the workspace-architecture
-builds were registered (`CC-62`).
+**Written 2026-10-05, revision 31 (2026-10-11). Owner: Ramzi. Development machine: `BIXMASERVER` (Windows 10 Pro).**
+**This revision records a RE-MEASUREMENT: Phase 6 (Audit) was recorded as `0/2 — never verified`, and it is
+BUILT.** Rows 21 / 21b were 🟡; the rule-0b measurement found the whole phase in place —
+`packages/core/src/modules/audit_logs/` carries a **read API** (`GET`, RBAC `audit_logs.view_self`, filter by
+actor/resource/org), a **viewer page** (235 lines, fetching the action + access logs), an **export API** (CSV), a
+**hash-chained ledger** (`ledgerService.ts` — each event carries its predecessor's hash; `unique(tenant_id, seq)`
++ `unique(tenant_id, hash)`; `verifyTenantChain` + a `ledger:verify` CLI), appended **automatically** by
+`actionLogService.log()`, and **retention** for the high-volume access log (core 7d / non-core 8h). **`P4a` /
+`P4b` ☐→☑ ⇒ the ONE NUMBER MOVED AGAIN: 73/321 → 75/321 = 23%** (§B 5/38 → 7/38; two independent routes agree).
+**A separate-agent hostile critic (8 claims) could not falsify it**, and found **2 register-worthy cracks —
+`CC-64`** (an undo's trace **bypasses the ledger**) and **`CC-65`** (`action_logs` has **no retention path**).
+It also established that **`action_logs` is mutable by design** (backfill CLIs update derived columns), so the
+tamper-evidence is the **ledger**, not the table — recorded, not hidden. **NEXT = LIST row 27** (Phase 7 — *"the
+user is told when blocked and noticed and suggested to"*).
+**Prior — revision 30 recorded `CC-61` — LIST row 19, the command contract made uniform.** Row 19's claim (*"every
+state-changing action goes through one typed command"*) **held** — the command bus is real (~122 command files,
+~18 modules). What did not was `C6b` (*"the full contract uniform across every action"*): `CommandHandler` had no
+`risk` / `approval` / `idempotency` at all. Built: the three facets as **optional** declarations
+(`shared/src/lib/commands/types.ts`) and recorded on the action log under `context.commandContract`
+(`command-bus.ts`). **Approval DECLARES; the authority layer ENFORCES** — a bus refusal would be a second engine
+(`S5`). `C6b` ☐→☑ ⇒ ONE NUMBER 72/321 → 73/321. **Proof:** `src/lib/commands` 20 suites / 169 tests green; whole
+`shared` 2555 tests (the one failing suite is the known-environmental `CC-19`); `tsc` clean; **5 RED-then-GREEN
+mutations**, md5-verified. **A separate-agent hostile critic found 1 REAL defect, fixed** (the first draft merged
+inside `buildLog`, which returns null without one); its `D2` (0 of ~93 commands declare the fields) is **`CC-63`**.
 **Prior — revision 29 recorded `CC-59` — the Business-IR chain's FIRST PRODUCTION CALLER — and the two real defects a
 separate-agent hostile critic found in it.** The Business-IR pipeline (prompt → typed IR → deterministic compile
 → execute) was five built, tested layers with **no caller**; `CC-59` adds the caller and the switch. Two new
@@ -822,7 +828,7 @@ documents and was *not* re-measured — treat it as a starting point, not a fact
 
 | | |
 |---|---|
-| **Repo 1** (thinking/docs) | `master`, HEAD **`00bbb08`** — **re-measured 2026-10-11**. It is the **front-door sync to the `B-WS` bridge** (`docs: sync platform_points/HANDOVER/START-PROMPT/BACKLOG to the B-WS bridge`). *(The `CC-59` documentation commit follows this figure — a commit cannot name its own hash.)* *(Previous figure: **`33ca4a5`**, the `B-WS` bridge itself, re-measured 2026-10-11; before that **`10ecfc5`**, the `CC-46` documentation close.)* |
+| **Repo 1** (thinking/docs) | `master`, HEAD **`f48f0c3`** — **re-measured 2026-10-11**. It is the **`CC-61` documentation commit** (`docs(CC-61): row 19 done — the command contract made uniform`). *(The row-21/21b re-measurement commit follows this figure — a commit cannot name its own hash.)* *(Previous figures: **`00bbb08`**, the front-door sync to the `B-WS` bridge; before that **`33ca4a5`**, the bridge itself.)* |
 | **Repo 2** (code) | `main`, HEAD **`4c8eecfe`** — **re-measured 2026-10-11**. It is **`CC-61`** (`feat(commands): CC-61 — the command contract made uniform`): `types.ts` (the three optional facets) + `command-bus.ts` (`commandContractMetadata` + the merge before `persistLog`) + the new `command-contract.test.ts`. *(Previous figure: **`83f88bd3`**, `CC-59`, re-measured 2026-10-11; before that **`1bb61557`**, `CC-57`.)* **RULE-13 CORRECTION (2026-10-11):** this row had read `c03eca5c` while three later code commits (`CC-44` `3ba7b28f`, `CC-56` `0d52368f`, `CC-57` `1bb61557`) had already landed — the figure was stale by three commits. |
 | **Codebase shape** | **21 packages, 1 app** (`apps/mercato`) — a monorepo (Yarn 4.17.1 + Turbo) |
 | **Documentation** | **Tracked markdown: 1,094 repo-wide, of which 50 are in `library/development/`** — **re-measured 2026-10-10** via `git ls-files`. `library/` also holds thousands of `.md` files on disk — but most of that is **gitignored imported study material** (§3i), so **treat the disk figure as approximate: it drifts as untracked files come and go.** `LESSONS.md` (L1–L101, 3,385 lines), `JOURNAL.md` (6,777 lines) and `COOKBOOK.md` (2,961 lines) are the three long-form files. |
