@@ -54,7 +54,7 @@ onto what we already have and onto the development plan** — so the build proce
 user–AI interaction + the Business-IR display) · **B4 ✅** (the prompt→function lifecycle) · **B5 ✅** (naming,
 menus, grouping, and the organic non-business wiring). **Next: B6** (threads and collaboration). Commits:
 `2064046` (bookmark + plan), `82f72e8` (B1), `250f6c1` (B2), `7131195` (B3), `bd4de50` (B4 + the B1 Q3
-correction), `7634dcb` (README + memory), **`<B5>` (B5, critic-corrected)**.
+correction), `7634dcb` (README + memory), **`72c20e2` (B5, critic-corrected)**.
 
 **RESUME HERE — B6.** The B5 finding B6 must carry: the kit's **navigation is already built and
 menu-injectable** (`InjectionMenuItem`/`InjectionMenuItemWidget`, the sidebar spot ids, `mergeMenuItems`,
