@@ -77,13 +77,20 @@ accumulating many holes."* Worked example: `CC-43` left "flagged, not fixed" **h
 immediately exposed the second; two DONE, tested capabilities were invisible in the register for two days.
 
 
-## Live frontier (2026-10-11, after `CC-57`; read `JOURNAL.md`'s `★ ACTIVE TASK` for the truth)
+## Live frontier (2026-10-11, executing the supplementary core queue; read `JOURNAL.md`'s `★ ACTIVE TASK` for the truth)
 - **Rows 7–9, 13–18 and 22 are ✅** (row 16 ✅-own-leg / 🟡 overall pending its team-leg `CC-51`). **PHASE 3–5 complete.**
-- **The named `CC-` queue is EXHAUSTED** (`CC-57` was the last leg, DONE 2026-10-11, code `1bb61557`, docs `712d359`).
-  Remaining `CC-` items are **trigger-blocked only**: `CC-51` (row 16 team-leg — needs the owner's go-ahead, it was
-  *deferred by ruling* not by code), `CC-54` (awaits an index rebuild), `CC-19` (awaits CI).
-- **Next candidates (vision order):** (1) `CC-51` team-leg — smallest closable, finishes an already-🟡 row;
-  (2) **vision Phase 6 = audit** (tamper-evident decision record) — the next skeleton frontier, no scaffold yet;
+- **Owner's 2026-10-11 go-ahead: execute the supplementary core queue** (`PLAN-SUPPLEMENTARY-CORE-QUEUE.md`; docs
+  commits `47177f1`, `caeface`). **The Business IR is re-classified CORE** (`CORE-BOUNDARY.md` §2 note + plan §S1.1);
+  every postponed layer/wiring point is mapped in plan **§S1.2** (L1–L5 + W-A/W-B/W-C).
+- **FIRST STARTABLE ITEM = `CC-59`** (IN PROGRESS): measured (rule 0b) the compile+execute chain is **ALREADY BUILT** in
+  **`runFunction`** (`user-function/run.ts:112` — bind → compile → **execute via `engine.query`** `:216-241`), so the gap
+  is **ONE caller**, not a chain; a *"load a saved Function by id"* caller is impossible (no persistence → `CC-32`/`G-09`).
+  **`CC-59` = prompt → `authorBusinessQueryIr` → IR → `compileQuery` → `engine.query` → result** (no persistence); it
+  merges with `CC-58` Stage C. **Rule-13 correction committed `caeface`.**
+- **Remaining `CC-` items are trigger-blocked only:** `CC-51` (row 16 team-leg — the owner's go-ahead), `CC-54` (index
+  rebuild), `CC-19` (CI). `CC-58` Stage C/B staged; `CC-32` gated on `G-09`.
+- **Next candidates (vision order):** (1) `CC-59` caller — **started**; (2) `CC-51` team-leg — smallest closable;
+  (3) **vision Phase 6 = audit** (tamper-evident decision record) — the next skeleton frontier, no scaffold yet;
   (3) `CC-54`/`CC-19` — not startable. **ONE NUMBER 72 / 321 = 22%** (weighted ≈23%, ±4), derived from §A–§K boxes.
 
 ## Durable code facts
