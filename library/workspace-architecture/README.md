@@ -46,18 +46,23 @@ onto what we already have and onto the development plan** — so the build proce
 | 1 | Bookmark the position (this file) | ✅ **DONE** — this file |
 | 2 | Recon the reference systems + docs | ✅ **DONE (B2)** — `02-REFERENCE-SYSTEMS.md`; plus B1 `01-RECON.md` |
 | 3 | The batched research plan | ✅ **DONE** — `00-RESEARCH-PLAN.md` |
-| 4 | The detailed SRS | 🔄 **B1–B4 done; B5–B9 to go** |
+| 4 | The detailed SRS | 🔄 **B1–B5 done; B6–B9 to go** |
 | 5 | Map SRS → current state → development plan | ⬜ not started (B10) |
 | 6 | Integrate + index into the rest of the docs | ⬜ **deliberately deferred** (later stage) |
 
 **Batch progress:** **B1 ✅** (recon, measured) · **B2 ✅** (reference systems, verdict) · **B3 ✅** (the
-user–AI interaction + the Business-IR display) · **B4 ✅** (the prompt→function lifecycle). **Next: B5**
-(naming, menus, grouping, and the organic non-business wiring). Commits: `2064046` (bookmark + plan),
-`82f72e8` (B1), `250f6c1` (B2), `7131195` (B3), **`bd4de50` (B4 + the B1 Q3 correction)**.
+user–AI interaction + the Business-IR display) · **B4 ✅** (the prompt→function lifecycle) · **B5 ✅** (naming,
+menus, grouping, and the organic non-business wiring). **Next: B6** (threads and collaboration). Commits:
+`2064046` (bookmark + plan), `82f72e8` (B1), `250f6c1` (B2), `7131195` (B3), `bd4de50` (B4 + the B1 Q3
+correction), `7634dcb` (README + memory), **`<B5>` (B5, critic-corrected)**.
 
-**RESUME HERE — B5.** The B4 measurement that B5 must build on: the `request-outcome` layer (805 lines,
-62 tests, G-21 ✅) already holds `FunctionPlacement` (`types.ts:203`) and `FunctionCandidate` (`:246`) —
-*"the built home of Q4's placement"* — and B4 corrected the B1 recon to include it.
+**RESUME HERE — B6.** The B5 finding B6 must carry: the kit's **navigation is already built and
+menu-injectable** (`InjectionMenuItem`/`InjectionMenuItemWidget`, the sidebar spot ids, `mergeMenuItems`,
+`mergeSidebarGroupsWithInjected` which **creates a group from a named `groupId`**), and the one missing link
+is the **join from a saved Function to a menu item** — `UserFunction` and the placed Widget carry **no**
+placement today, though `FunctionPlacement` (`types.ts:203`) and `FunctionCandidate` (`:246`) already exist
+on the candidate side. B5 specifies that join in two additive changes (`02-SRS-03` §5). B6 is **independent**
+of it: a thread is a container a placed Widget can be referenced from.
 
 ### What the recon already established (so the next session does not redo it)
 
