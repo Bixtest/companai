@@ -3967,3 +3967,13 @@ you touch — including the gate you delivered), rule 13 (state the measured tru
 
 
 
+## L123 — a `python3 - <<'PY'` heredoc through Git Bash **mangles `\n`** in string literals — write the script to a FILE instead
+
+**Seen in the `CC-58` docs change (2026-10-11).** I added a register-hygiene note by building it in a Python heredoc and writing it with `open(p,'wb')`. The note needed literal newlines inside its string (`"…CC-58 change:" + "\n\n" + "1. A duplicate…"`). On disk the result contained a **literal `/n`** — two characters, forward-slash and `n` — where a newline was intended, so the paragraph and the numbered list collapsed onto one physical line. A **separate-agent hostile critic** caught it (`od -c` showed `: / n \n`).
+
+**Why it happens.** Git Bash (MSYS2) rewrites an **unquoted-ish** argument/heredoc body before Python sees it: a backslash followed by `n` inside the heredoc can be transliterated to `/n` by the MSYS path-conversion layer (it treats `\something` as a path-like token). It is **intermittent and silent** — the script runs, the file is written, and only a **byte-level inspection** of the output reveals the corruption. Prose is unaffected because natural text rarely contains a lone `\n`; the damage lands precisely in the strings that *build structure*.
+
+**The rule.** (1) **Never build content with `\n`/`\r`/`\t` escapes inside a `python3 - <<'PY'` heredoc** run through Git Bash. Write the generator to a **script file** (`Write` tool) and run `python3 script.py` — the shell never sees the escapes. (2) If a heredoc is unavoidable, build the newline from a **non-escape** — `chr(10)` — never the two-character literal. (3) **Always assert the result byte-wise** after writing structured text: `repr()` the tail, — a `\n` count, or `od -c` — so a `/n` cannot survive unnoticed. (4) This is the same family as the standing rule *"prefer script files over `python -c` heredocs"* — that rule is about **backticks / `[]` / em-dashes**; this adds **`\n` in string literals** to the mutation set. (5) Delete the helper script afterwards (do not leave scratch files in the tree).
+
+*Cross-ref: the standing hazard note (prefer script files over heredocs); L122 (the critic found it — a separate agent verifying byte-level output is what caught it); rule 0 (only the code — here the *bytes* — is evidence).*
+

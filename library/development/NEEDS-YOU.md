@@ -28,7 +28,7 @@ anything else first. Where an item is **not** a decision, it says so, and you ca
 
 ---
 
-## Part 1 — Decisions I need (**1 open** — `NY-22` (row 18: AI own-row-scope semantics) **OPEN — your call; the safe default (a) is already in place**; `NY-23` (row 22 / `CC-44`: should a write endpoint with no permission check fail the build?) **decided 2026-10-11: Option A** (build the default-deny gate); `NY-21` (row 17 coverage) **decided 2026-10-11: Option A** (build the all-tables classification gate); `NY-20` (row 16 scope) **decided 2026-10-11: Option A**; `NY-19` **decided 2026-10-10** (owner chose Option A: build the read-gate coverage test → built as `CC-47`, row 15 ✅); `NY-18` **decided 2026-10-10** ("we follow your recommendations" → Option B, built as `CC-49`); `NY-16` and `NY-17` **decided 2026-10-10** (blank the value; Option B); `NY-15` decided 2026-10-09; `NY-14` closed 2026-10-06; `NY-1`, `NY-2`, `NY-8`, `NY-13` closed; `NY-4` is "nothing needed")
+## Part 1 — Decisions I need (**2 open** — `NY-22` (row 18: AI own-row-scope semantics) **OPEN — your call; the safe default (a) is already in place**; `NY-24` (the Business-IR authoring wire's first caller) **DECIDED 2026-10-11 — A now → C next → B later (staged + scheduled)**; `NY-23` (row 22 / `CC-44`: should a write endpoint with no permission check fail the build?) **decided 2026-10-11: Option A** (build the default-deny gate); `NY-21` (row 17 coverage) **decided 2026-10-11: Option A** (build the all-tables classification gate); `NY-20` (row 16 scope) **decided 2026-10-11: Option A**; `NY-19` **decided 2026-10-10** (owner chose Option A: build the read-gate coverage test → built as `CC-47`, row 15 ✅); `NY-18` **decided 2026-10-10** ("we follow your recommendations" → Option B, built as `CC-49`); `NY-16` and `NY-17` **decided 2026-10-10** (blank the value; Option B); `NY-15` decided 2026-10-09; `NY-14` closed 2026-10-06; `NY-1`, `NY-2`, `NY-8`, `NY-13` closed; `NY-4` is "nothing needed")
 
 > **Numbering note.** Items are numbered once and **never reused**, so that a number you have already
 > quoted keeps meaning the same thing. Item 8 was appended here on 2026-10-05 and answered the same
@@ -492,6 +492,45 @@ to "the build stops".
 **You ruled Option A, and it is built (2026-10-11).** The gate is now **default-deny at the build** — a new
 write endpoint that names no permission and no explicit by-design exemption **fails the build**. Detail:
 `COMPLETION-CALLBACKS.md` `CC-44`.
+
+---
+
+### `NY-24` — The Business-IR authoring wire is built but has **no caller**: how should its first caller be introduced? — ✅ **DECIDED 2026-10-11: keep it pinned now; wire it as a chat tool (C) when the AI tool surface is next touched; wire the full business screen (B) only when business work resumes.**
+
+> **Owner's answer, 2026-10-11:** *"we can follow this as long as you clearly and in details you document that in
+> the backlog and platform_points and any other document needed so each stage is developed at the right time
+> instead of forgetting about it."* So the recommendation is **adopted**, on the condition that each stage is
+> **scheduled in the live documents** (this file, `BACKLOG.md`, `platform_points.md`, `COMPLETION-CALLBACKS.md`)
+> rather than left in a session's summary. That scheduling is the **supplementary implementation plan** —
+> [`PLAN-SUPPLEMENTARY-CORE-QUEUE.md`](PLAN-SUPPLEMENTARY-CORE-QUEUE.md) — and the register row **`CC-58`** below.
+
+**What this is about, in plain terms.** There is a piece of the platform that turns a plain-language request
+(*"invoices over 10,000 EUR, by customer"*) into the platform's own structured request object (a **Business IR**).
+It is written, tested, and — as of `CC-57` (2026-10-11) — it now correctly checks the agent-permission binding
+before it does anything. **But nothing in the running product calls it.** It is a **wired circuit with no switch
+on the panel**: no screen reaches it, and it is not exported for other code to use. So the whole capability is
+**safe but inert**.
+
+**Why it is that way.** The wire belongs to the **AI foundation** (it calls a model), but its natural consumer —
+a *screen* where a person types a business question — belongs to the **business half**, which your own ruling
+(2026-10-09) deferred until the policy kernel is finished. So the wire was built when its task (`G-17`) asked for
+it; its consumer simply has not been reached yet. It is not a hole (nobody can exploit a path nobody can call);
+the risks are **rot** (a signature never exercised by a real caller) and a **false "done"** (an unreachable item
+mistaken for a working feature).
+
+**The decision I need from you.** Which of three stages introduces its first caller — and in what order?
+
+| | Stage | What it means | When it is right | Size |
+|---|---|---|---|---|
+| **A** *(adopted now)* | **Leave it pinned, unreachable** | The coverage gate (`binding-coverage.test.ts`) keeps it honest; the register records that it has no caller. Nothing is spent. | While Phase 3–7 (the kernel) are unfinished — **now**. | Zero |
+| **C** *(next)* | **Register it as a chat tool** | The **existing** AI chat path can then ask it to author an IR — it becomes live **without** any new screen, staying inside the AI foundation. | The **next time the AI tool surface is touched**. | Bounded — one tool registration + tests, under the same binding |
+| **B** *(later)* | **Wire the full business screen** | A person types a business question on a real screen and gets a compiled answer. | When **business work resumes** (your ruling lifts). | One route + one screen |
+
+**Recommendation (adopted): A now → C next → B later.** Each stage is **scheduled with a named trigger** in the
+supplementary plan and the register (`CC-58`), so no stage is forgotten and each is built at the right time.
+
+**What is already done either way.** The wire exists and is binding-gated (`CC-57`); the coverage gate guards it;
+this decision changes **when** it is exercised, not whether it is safe.
 
 ---
 

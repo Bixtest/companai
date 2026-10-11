@@ -35,6 +35,26 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+### ✅ DONE — **the supplementary core queue: every open register item staged in the live docs; the Business-IR wire's first caller scheduled A→C→B (`CC-58`)**  
+**(2026-10-11; docs repo only — no code.)**
+
+**The task (the owner's Message-3 instruction, 2026-10-11).** Two things: **(1)** adopt the staged introduction of the Business-IR authoring wire's first caller (A now → C next → B later) **on the condition that each stage is scheduled in the live documents** — so no stage is forgotten; **(2)** create a **supplementary implementation plan** covering every item in `COMPLETION-CALLBACKS.md`, **focused on the core, not business modules**.
+
+**What was built (docs).**
+
+1. **Register row `CC-58`** (`COMPLETION-CALLBACKS.md`) — `authorBusinessQueryIr` (the plain-language → Business IR wire) is built, tested, and — since `CC-57` — **fails closed** and threads `computeBoundRunScope`, but **nothing in the running product calls it**. Three stages with **named triggers**: **A** (leave it pinned, unreachable — the coverage gate keeps it honest) **in force now**; **C** (register it as a chat tool on the existing AI chat path) *when the AI tool surface is next touched*; **B** (the full business screen) *when business work resumes*.
+2. **`PLAN-SUPPLEMENTARY-CORE-QUEUE.md` (NEW)** — the supplementary implementation plan. It goes through **every open register row** (measured: **24 open** — 32 DONE, 56 rows total), stages them into clusters (**§S1** the `CC-58` staged caller; **§S2** the data-axis cluster gated on `G-04`/`G-09`; **§S3** the structural-guard edges; **§S4** the escalation/approval cluster; **§S6** environment/ops; **§S7** the AI read/write tool-path edges; **§S8** owner-decision; **§S9** the deferred-by-ruling team-leg), each with a **named trigger** copied from the register. **`CC-42` (the `customers` deal pipeline's first caller) is the ONLY business item and is excluded (§X)** — 23 core items covered,
+   1 business excluded.
+3. **Live-doc references** — the staging is linked from `platform_points.md` (FRONTIER **NOW**), `BACKLOG.md` (FRONTIER **NOW** + the *Deferred by decision* table), and `NEEDS-YOU.md` (`NY-24`, the decision record).
+
+**Register hygiene (found while adding `CC-58`; the register's own 5 checks).** Two **pre-existing** conditions surfaced: **(a)** a **duplicate `CC-27` row** (the original gap statement *and* the DONE record) made `CC-27` read as both closed and open — the superseded row was **removed** (its gap text is preserved struck inside the DONE row); **(b)** **`CC-43` has no register row though it is cited CLOSED elsewhere** (check 3: `GAP before 44`) — **flagged, not fixed** (a small standalone edit, deliberately not mixed into this change). Both are recorded in the register's own hygiene note.
+
+**Verification (the TOTAL quality protocol).** A **separate-agent hostile critic** verified all **6** claims with a command+output each (open-set derivation exact match 24/24; plan covers all 24 ids; register checks 2 & 4 clean, check 3's `GAP before 44` proven pre-existing at HEAD; `raw diff == git diff -w` for all four files; `CC-58` well-formed with 5 cells; no scope creep) and found **1 real defect** — a literal `/n` typo in the hygiene note — **fixed** (the note's paragraph/numbered-list structure restored). **No code changed; ONE NUMBER unchanged** (72 / 321 = 22%).
+
+**Honest boundary.** This change **schedules** work; it builds nothing. Every row in the plan is a *view* of the register — the register remains the truth.
+
+---
+
 ### ✅ DONE — **row 22's LAST named leg — the in-process dispatch helper now consults the binding and threads its scope (`CC-57`). Row 22 is now COMPLETE. ★ NEXT = a fresh pick from the vision order (the named `CC-` queue is exhausted).**
 **(2026-10-11; code repo `workspace/starting-kit`.)**
 
