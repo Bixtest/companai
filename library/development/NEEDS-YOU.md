@@ -28,7 +28,7 @@ anything else first. Where an item is **not** a decision, it says so, and you ca
 
 ---
 
-## Part 1 — Decisions I need (**2 open** — `NY-23` (row 22 / `CC-44`: should a write endpoint with no permission check fail the build?) **OPEN — your call; the safe status-quo guard is already in place**; `NY-22` (row 18: AI own-row-scope semantics) **OPEN — your call; the safe default (a) is already in place**; `NY-21` (row 17 coverage) **decided 2026-10-11: Option A** (build the all-tables classification gate); `NY-20` (row 16 scope) **decided 2026-10-11: Option A**; `NY-19` **decided 2026-10-10** (owner chose Option A: build the read-gate coverage test → built as `CC-47`, row 15 ✅); `NY-18` **decided 2026-10-10** ("we follow your recommendations" → Option B, built as `CC-49`); `NY-16` and `NY-17` **decided 2026-10-10** (blank the value; Option B); `NY-15` decided 2026-10-09; `NY-14` closed 2026-10-06; `NY-1`, `NY-2`, `NY-8`, `NY-13` closed; `NY-4` is "nothing needed")
+## Part 1 — Decisions I need (**1 open** — `NY-22` (row 18: AI own-row-scope semantics) **OPEN — your call; the safe default (a) is already in place**; `NY-23` (row 22 / `CC-44`: should a write endpoint with no permission check fail the build?) **decided 2026-10-11: Option A** (build the default-deny gate); `NY-21` (row 17 coverage) **decided 2026-10-11: Option A** (build the all-tables classification gate); `NY-20` (row 16 scope) **decided 2026-10-11: Option A**; `NY-19` **decided 2026-10-10** (owner chose Option A: build the read-gate coverage test → built as `CC-47`, row 15 ✅); `NY-18` **decided 2026-10-10** ("we follow your recommendations" → Option B, built as `CC-49`); `NY-16` and `NY-17` **decided 2026-10-10** (blank the value; Option B); `NY-15` decided 2026-10-09; `NY-14` closed 2026-10-06; `NY-1`, `NY-2`, `NY-8`, `NY-13` closed; `NY-4` is "nothing needed")
 
 > **Numbering note.** Items are numbered once and **never reused**, so that a number you have already
 > quoted keeps meaning the same thing. Item 8 was appended here on 2026-10-05 and answered the same
@@ -447,7 +447,15 @@ your ruling, whichever comes first. Recorded as `CC-53`'s own-leg note.
 
 ---
 
-### `NY-23` — Should a write screen with **no** permission check fail the build? (the `CC-44` ruling) — ⬜ **OPEN (your call; today's guard is already in place)**
+### `NY-23` — Should a write screen with **no** permission check fail the build? (the `CC-44` ruling) — ✅ **DECIDED 2026-10-11: Option A (default-deny). BUILT as `CC-44` (2026-10-11).**
+
+> **Owner's answer, 2026-10-11:** *"CC-44: we do Option A (your recommendation)."* So a write endpoint that
+> declares no permission and no explicit "by design" exemption **will fail the build**; the deliberately-open
+> endpoints get a machine-readable "by design" tag on the route itself.
+>
+> **✅ DONE 2026-10-11.** The build-time gate is `packages/cli/src/lib/generators/__tests__/write-gate-coverage.test.ts`
+> (a new write route that names no permission and no `byDesign` exemption now fails the build); the **11**
+> non-feature-gated routes carry an inert `byDesign: '<reason>'` tag. Detail: `COMPLETION-CALLBACKS.md` `CC-44`.
 
 **What this is about, in plain terms.** Whenever we build something that **changes data** — a screen or an
 endpoint that saves, edits or deletes a record — the platform is supposed to ask *"is this person allowed to
@@ -481,8 +489,9 @@ is your call and not mine (rule 11).
 route. So even Option B has a mechanical guard — Option A just promotes it from "a step someone must remember"
 to "the build stops".
 
-**If you do nothing:** the gate stays opt-in and the manual checker stays the guard. Nothing breaks; the only
-risk is a future endpoint added silently un-gated. Detail: `COMPLETION-CALLBACKS.md` `CC-44`.
+**You ruled Option A, and it is built (2026-10-11).** The gate is now **default-deny at the build** — a new
+write endpoint that names no permission and no explicit by-design exemption **fails the build**. Detail:
+`COMPLETION-CALLBACKS.md` `CC-44`.
 
 ---
 

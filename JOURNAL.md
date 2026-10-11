@@ -35,7 +35,62 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
-### ✅ DONE — **row 22's EXECUTION leg — the pending-action confirm path re-checks the binding (`CC-56`). ★ NEXT = `CC-44` (awaits the owner's ruling, asked plainly as `NY-23`), then `CC-57`.**
+### ✅ DONE — **row 7's write-path feature gate is now DEFAULT-DENY at the build (`CC-44`). ★ NEXT = `CC-57` (the last named leg of row 22).**
+**(2026-10-11; code repo `workspace/starting-kit`.)**
+
+**The task.** Row 7 ("roles & grants enforced on every write") was true **in substance** but its mechanism was
+**opt-in**: the dispatcher enforces `requireFeatures` only when the array is non-empty
+(`apps/mercato/src/app/api/[...slug]/route.ts:207`), so a write route declaring `requireAuth: true` and **no**
+`requireFeatures` has **no** feature check — and nothing *forced* the next route to declare one. The owner ruled
+Option A (`NY-23`): make it a **build failure**.
+
+**The contract built.** A build-time coverage gate —
+`packages/cli/src/lib/generators/__tests__/write-gate-coverage.test.ts` (4 tests) — asserts that every write-verb
+`route.ts` in an **enabled** module is either **feature-gated** (a non-empty `requireFeatures: [ … ]`) **or**
+carries an explicit, machine-readable **`byDesign: '<reason>'`** exemption. Anything else fails the build. The
+**11** non-feature-gated routes (6 by-design + 5 guard-only notifications) got the inert tag.
+
+**The tag is INERT (proven, not assumed).** `extractMethodMetadata` (`route.ts:104–133`) copies only
+`requireAuth`/`requireRoles`/`requireFeatures`/`rateLimit`/`skipModuleResourceUsageTracking` — never `byDesign` —
+so the key is documentation, never behaviour. Confirmed by reading the function and by a `git stash` A/B (the
+app's typecheck is byte-identical with and without the tags).
+
+**Measured first (rule 0b).** 35 enabled modules · **170** write route files · **159** feature-gated · **11**
+by-design (up from 169/158 at `CC-44`'s first measurement — `CC-27` added one feature-gated route).
+
+**Hardening (TOTAL quality protocol) — TWO separate-agent hostile-critic passes.**
+- **Round 1 found 3 REAL defects in the classifier**, all fixed: (1) `requireFeatures: []` counted as a gate
+  although the runtime treats an empty array as **no** gate; (2) a bare `requireFeatures:` token inside a regex
+  literal or a TS type annotation counted as a gate; (3) the factory clause (`makeCrudRoute(`/`make*Route(`)
+  counted as a gate although `makeCrudRoute` only **relays** `opts.metadata.requireFeatures`
+  (`shared/src/lib/crud/factory.ts:1036`) and supplies nothing. The predicate is now a **non-empty array literal
+  whose first element is a string literal or an identifier** (the runtime condition), the factory clause is
+  **removed**, and `byDesign` requires a quoted reason.
+- **The tightening is FREE (measured):** old and new predicates classify **159 / 11 / 170** — **0** routes change.
+- **Round 2 confirmed fixes 1 & 3 closed** and found the honest residual — a regex **character class**
+  (`/requireFeatures: [abc]/`) or a **tuple type** (`[string]`) is indistinguishable from a real declaration by a
+  tokeniser. Recorded as the tool's **honest limit** (0 routes affected).
+
+**6 RED-then-GREEN mutations**, each restore **md5-verified**: un-gated new route; marker removed; marker
+commented; commented-feature-only; empty array; stale pinned entry. `tsc --noEmit` clean (cli prod + test-file,
+core, webhooks). **Green gates:** cli `write-gate-coverage` 4/4 + `crud-read-gate-coverage` 9/9, core-targeted
+25/25, webhooks 127/127.
+
+**A discovered, pre-existing defect — found and fixed (rule 13).** Running the sibling gates exposed that
+`crud-read-gate-coverage.test.ts` (`CC-47`) was **RED at HEAD** (`routeFiles` 457 vs 458) and
+`table-coverage.test.ts` (`CC-52`) was **RED at HEAD** (`EXPECTED_TABLES` 233 vs 234) — both drifted by `CC-27`'s
+new bindings **route** and **table**, neither re-pinned by that change. Proven pre-existing by `git stash`
+(identical failures with the working tree clean). Both pins corrected; both gates GREEN. **Banked `L121`.**
+
+**ONE NUMBER, two routes: 72 / 321 = 22% — unchanged** (§L's 12th re-run; local script + blind verifier agent).
+The gate adds no vision box.
+
+**Banked `L120`:** a *gate* must be at least as strict as the *runtime* it guards — a faithful port of a
+*measurement* tool is not a correct *gate* (its error tolerance is the opposite).
+
+---
+
+### ✅ DONE — **row 22's EXECUTION leg — the pending-action confirm path re-checks the binding (`CC-56`).** *(superseded by the `CC-44` block above; both are done 2026-10-11 — ★ NEXT = `CC-57`.)*
 **(2026-10-11; code repo `workspace/starting-kit`.)**
 
 **The task.** `CC-27` gated the **dispatch** of an agent and `CC-55` applied the binding's narrowing — but the

@@ -3877,3 +3877,61 @@ lesson is only "learned" when the **shared artefact** (a helper, a pattern) carr
 
 *Cross-ref: L109, L118, L93, L91, L65, L104; rule 7 (LESSONS.md binds **both** ways — read **and** apply).*
 
+## L120 — a **gate** must be at least as strict as the **runtime it guards**; porting a *measurement* tool verbatim is not porting a *gate*
+
+**Seen in `CC-44` (2026-10-11).** The new build-time write-gate was built by "faithfully porting" the classifier
+from `analysis/permission-gate/measure.js` — the right instinct per **L119** (reuse the fixed form, do not
+re-derive it). That was **half** right. `measure.js` is a **measurement** tool: its predicate is
+`requireFeatures\s*:` — deliberately loose, because its output is read by a **human** who classifies the
+residue by hand. The **runtime** it now guards is stricter: the dispatcher fires the feature check only
+`if (requiredFeatures.length)` (`apps/mercato/src/app/api/[...slug]/route.ts:207`). So the ported predicate
+certified three shapes the runtime leaves **open**: (1) `requireFeatures: []` — an empty array; (2) a bare
+`requireFeatures:` token inside a **regex literal** or a **TS type annotation**; (3) the
+`makeCrudRoute(`/`make*Route(` **factory clause** — but `makeCrudRoute` only *relays*
+`opts.metadata.requireFeatures` (`shared/src/lib/crud/factory.ts:1036`) and supplies **nothing**, so a factory
+route with no `requireFeatures` is genuinely ungated. A **separate-agent hostile critic** found all three by
+attacking the *predicate* (inserting an empty array, a regex, a coincidental helper), not the data.
+
+**Why it happens.** "Faithful port" is the right instinct for a *measurer* (L119) and the wrong one for a
+*gate*: the two artefacts share a classifier but have **opposite** error tolerances. A measurer prefers **no
+false positives** (a human reads the output); a gate must prefer **no false negatives** (the build is the
+reader, and a false PASS ships silently).
+
+**The rule.** (1) When you turn a measuring script into a build gate, re-derive the predicate from the
+**runtime condition**, not from the script — the gate's predicate must be a **subset** of "the runtime actually
+enforces this". (2) A "feature carrier" is only a carrier if it **supplies** the feature — verify in the
+factory's own code (`opts.metadata || {}` is **not** "supplies"), never by the factory's **name**. (3) Prove the
+tightening is **free** before adopting it: measure old-vs-new classification over the real tree and show **0**
+routes change (here 159 gated / 11 by-design / 170 total either way). (4) State the tool's **honest limit** — the
+shapes a tokeniser cannot tell from a real declaration (a regex character class, a tuple type) — in the header,
+so the gate never claims more than it proves.
+
+*Cross-ref: L109/L119 (a coverage predicate is a security control; reuse the fixed form), L111 (a sanity floor is
+a permission slip), L114 (a test that cannot catch the bug), L104 (the discovery predicate bounds the claim);
+rule 0b (measure the premise in code first), rule 10 (the TOTAL quality protocol).*
+
+## L121 — a change that **adds an enumerable object** (a route, a table, a module) drifts **every pinned count** in **every sibling coverage gate**; re-run them ALL, and expect the first failure to hide the rest
+
+**Seen in `CC-44` (2026-10-11).** While building the write-gate, the sibling gate `crud-read-gate-coverage.test.ts`
+(`CC-47`) was found **RED at HEAD** — `routeFiles.length` expected **457**, got **458** — a failure **not** caused
+by `CC-44`. It was caused by **`CC-27`** (an earlier session) adding one route file
+(`packages/ai-assistant/.../api/ai/agents/[agentId]/bindings/route.ts`, GET/POST/DELETE) **without re-pinning** the
+count. Proven pre-existing by a `git stash` A/B (identical failure at HEAD with the working tree clean). The first
+mismatch (`routeFiles`) **hid a second** (`getRoutes` 296→297 — the new route exports GET); only fixing the first
+revealed the second. `crudRoutes` stayed **60** (the new route is hand-written, not `makeCrudRoute`).
+
+**Why it happens.** The gates pin **exact** counts on purpose (**L111**: a floor is a silent-permission slip). But a
+pin is only correct for the tree it was measured on. A change in **one** package (here `ai-assistant`) moves a count
+in a **different** package's gate (here `cli`), which that change's author never ran. And because the assertions run
+in order, the run **stops at the first** mismatch — so one failing `expect` masks the next.
+
+**The rule.** (1) When a change adds an **enumerable** object (a route, a table, an entity, a module), treat **every**
+repo-wide coverage gate as affected: run them (at least the sibling gates in the same suite dir) in the **same**
+change. (2) When a pinned count fails, **do not stop at the first** — fix it, re-run, repeat until GREEN; a single
+run reports only the first mismatch. (3) A pin failing is the pin **working** — the fix is to **re-measure every
+count that moved**, never to loosen the pin to a floor (**L111**). (4) Record the correction where the pin lives,
+with the date and the cause.
+
+*Cross-ref: L111 (pin the exact figure), L104/L110 (a walker's discovery predicate bounds its claim), L120 (a gate
+vs the runtime it guards); rule 0b (measure the premise first), rule 9(a) (own the full codebase).*
+

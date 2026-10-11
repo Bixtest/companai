@@ -14,8 +14,23 @@ written for exactly that person — and this revision is written for an agent th
 continue the development work.** Read it top to bottom once (about 20 minutes), then
 follow §2 to actually get working. Everything else in the project is reachable from here.
 
-**Written 2026-10-05, revision 25 (2026-10-11). Owner: Ramzi. Development machine: `BIXMASERVER` (Windows 10 Pro).**
-**This revision records the 2026-10-11 BUILD of row 22's EXECUTION leg (`CC-56`) — the pending-action **confirm**
+**Written 2026-10-05, revision 26 (2026-10-11). Owner: Ramzi. Development machine: `BIXMASERVER` (Windows 10 Pro).**
+**This revision records the 2026-10-11 BUILD of row 7's write-path feature gate as DEFAULT-DENY (`CC-44`) — the
+owner's Option A ruling (`NY-23`). Rule-0b measurement first: the dispatcher enforces `requireFeatures` only when
+the array is non-empty (`apps/mercato/src/app/api/[...slug]/route.ts:207`), so a write route declaring
+`requireAuth: true` and no `requireFeatures` had **no** feature check — the gate was **opt-in**. Built: a
+build-time coverage gate (`packages/cli/src/lib/generators/__tests__/write-gate-coverage.test.ts`, 4 tests) fails
+when a write-verb `route.ts` in an enabled module declares neither a **non-empty** `requireFeatures` nor an
+explicit `byDesign: '<reason>'` exemption; the **11** non-feature-gated routes carry the inert tag
+(`extractMethodMetadata` never copies it, so it is documentation, not behaviour). **TWO separate-agent
+hostile-critic passes:** round 1 found **3 REAL classifier defects** (empty-array counted as a gate; a bare token
+in a regex literal / TS type; the factory clause counted although `makeCrudRoute` only **relays**
+`opts.metadata.requireFeatures`) — all fixed (the predicate is now a non-empty array literal of
+strings/identifiers; the factory clause removed), the tightening proven **free** (0 routes reclassified); round 2
+confirmed the fixes and recorded the honest limit (a regex character class / tuple type). **6 RED-then-GREEN**
+mutations, md5-verified; `tsc` clean (cli, core, webhooks). ONE NUMBER **72 / 321 = 22%, unchanged** (§L's
+**twelfth** re-run, both routes agree). The live FRONTIER is now **`CC-57`**.
+**Prior — revision 25: row 22's EXECUTION leg (`CC-56`) — the pending-action **confirm**
 route now re-checks the agent binding before it runs the tool. Rule-0b measurement first: the confirm route
 reached `executePendingActionConfirm` (which invokes the tool handler) with **no** `resolveAgentBinding` call, so
 a binding **revoked between the dispatch that proposed the action and the confirm** was **not observed**. Built:
