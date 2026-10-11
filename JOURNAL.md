@@ -55,6 +55,55 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+### ✅ DONE — **`CC-59`: the Business-IR chain now has its FIRST PRODUCTION CALLER — the wire `runBusinessQueryPrompt` plus the registered tool `business_ir.run_query`. Gated, tested, and verified by a separate-agent critic.**
+**(2026-10-11; code repo `workspace/starting-kit`; owner's go-ahead: *"execute the supplementary core queue"*.)**
+
+**What was built.** The pipeline was five built, tested layers with **no caller**. `CC-59` added the caller:
+`lib/business-ir-run.ts` — **`runBusinessQueryPrompt`**: prompt → `authorBusinessQueryIr` (binding-gated,
+`CC-57`) → IR → `compileQuery` (session-scoped `CompileContext`) → `engine.query` → a **result** union
+(`{ rows, ir, plan, provenance, diagnostics, entity, appliedBounds }`). Every refusal is a **value**, never a
+throw: `agent_not_bound` / `schema_rejected` / `compile_failed` / `no_binding` / `engine_failed`. It also adds
+the defensive guardrails the NL→query literature calls mandatory (`B5e`): a default row limit (100) and a max
+time range (365 days), applied **only** when the IR stated none (`applyDefaultBounds`). The **caller of the
+caller** is `ai-tools/business-ir-pack.ts` — the tool **`business_ir.run_query`** (read-only,
+`requiredFeatures:['ai_assistant.view']`), registered in `ai-tools.ts` so the generator picks it up. It
+assembles the model (`tryBuildModelFromModules`), the bindings (`createBindingsFromDeclarations`), `em` and
+`queryEngine` from `ctx.container`, and passes **scope from the tool context only**.
+
+**The interruption it finished.** `CC-59` was left **RED** mid-build: the wire's test failed 1/15 because the
+test stubbed the DB handle as `{}` and the unbound-AI-worker case does a real lookup — so it threw and the
+refusal came back as `engine_failed` instead of `agent_not_bound`. **Fixed** by mocking the binding repository
+the way the project's own routed test does. **No gap left.**
+
+**Proof.** Pack gate **9** + wire **15** + binding **9** + coverage gate **12** green; **whole `ai_assistant`
+module 111 suites / 1518 tests green**. **8 RED-then-GREEN mutations**, every restore **md5-verified**: early
+return before the entry point; hardcoded `auth.sub`; the principal guard removed; `isMutation:true`; the pack
+dropped from the aggregator; a real compiler import; the null-principal guard; the whitespace guard.
+
+**A separate-agent hostile critic** checked all 7 claims (a command + output each) and found **2 REAL
+defects — both fixed**:
+1. **The doc overclaimed.** It said the tool is "the one tool an agent can call"; measured, **no agent
+   whitelists it** (`business_ir.query_author` is object-mode with **no tools**, by design). The tool is live
+   on the authenticated tool door (`POST /api/ai/tools/execute`) and MCP — **not yet** for an in-chat agent.
+   The doc now says exactly that, and the consumer gap is scheduled as **`CC-60`**.
+2. **A blank/whitespace subject skipped the binding.** `derivePrincipal` trims the subject and returns `null`
+   for a blank one; `resolveAgentBinding` treated `null` as a **human passthrough** — a fail-open. **Fixed in
+   both places:** the tool's guard now trims (`!ctx.userId.trim()`), and **`agent-binding.ts` now refuses a
+   null principal** (`bound:false`) instead of treating "unknown" as human. Two new tests, both
+   mutation-proven (M7/M8).
+
+**THE ONE NUMBER: UNCHANGED at 72 / 321 = 22%** — a caller adds no vision box. Re-derived by **two routes**
+(the local `derive-counts` parse and a blind verifier agent), both 72/321.
+
+**★ NEXT:** the named `CC-` queue is exhausted — every remaining `CC-` item is trigger-blocked (`CC-51` needs
+the owner's go-ahead; `CC-54`/`CC-19` are blocked) or newly scheduled (`CC-60`). The live candidates, ranked:
+**(1) `CC-51`** (row 16's team-leg — smallest, closes an already-🟡 row, needs only the owner's go-ahead);
+**(2) vision Phase 6 = audit** (the next skeleton frontier, no scaffold yet — the biggest and most
+foundational); **(3) `B-WS/B9`** (the design track's widget architecture). **The choice of the next build is
+the owner's (rule 11).**
+
+---
+
 ### ✅ CORRECTION — **`CC-59`'s scope was wrong: the compile+execute chain is ALREADY BUILT (`runFunction`) — the gap is one caller, not a chain. Corrected everywhere it was copied (rule 13). `CC-59` is now the first startable item of the supplementary queue.**  
 **(2026-10-11; docs repo only — no code yet.)**
 

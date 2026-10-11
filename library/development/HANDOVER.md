@@ -14,8 +14,29 @@ written for exactly that person — and this revision is written for an agent th
 continue the development work.** Read it top to bottom once (about 20 minutes), then
 follow §2 to actually get working. Everything else in the project is reachable from here.
 
-**Written 2026-10-05, revision 28 (2026-10-11). Owner: Ramzi. Development machine: `BIXMASERVER` (Windows 10 Pro).**
-**This revision records the `B-WS` BRIDGE and the follow-on document sync — the workspace-architecture design
+**Written 2026-10-05, revision 29 (2026-10-11). Owner: Ramzi. Development machine: `BIXMASERVER` (Windows 10 Pro).**
+**This revision records `CC-59` — the Business-IR chain's FIRST PRODUCTION CALLER — and the two real defects a
+separate-agent hostile critic found in it.** The Business-IR pipeline (prompt → typed IR → deterministic compile
+→ execute) was five built, tested layers with **no caller**; `CC-59` adds the caller and the switch. Two new
+files in `packages/ai-assistant/src/modules/ai_assistant/`: **`lib/business-ir-run.ts`** — `runBusinessQueryPrompt`
+(prompt → `authorBusinessQueryIr`, binding-gated `CC-57` → IR → `compileQuery`, session-scoped → `engine.query` →
+a **result** union; every refusal a **value**: `agent_not_bound`/`schema_rejected`/`compile_failed`/`no_binding`/
+`engine_failed`; plus the `B5e` guardrails `applyDefaultBounds`, default limit 100 / max range 365d) — and
+**`ai-tools/business-ir-pack.ts`**, the read-only tool **`business_ir.run_query`**, registered in `ai-tools.ts`
+so the generator picks it up. **The interruption it finished:** `CC-59` had been left **RED** (the wire's test
+stubbed the DB handle as `{}`, so the unbound-AI-worker case threw and returned `engine_failed` instead of
+`agent_not_bound`); fixed by mocking the binding repository as the project's own routed test does. **The
+hostile critic (separate agent, a command + output per claim) found 2 REAL defects, both fixed:** (1) the pack's
+doc **overclaimed** that an agent can call it — measured, **no agent whitelists it** (`business_ir.query_author`
+is object-mode with **no tools**), so the tool is live on the authenticated tool door
+(`POST /api/ai/tools/execute`) and MCP, **not yet** for an in-chat agent (doc corrected; the consumer gap is
+scheduled as **`CC-60`**); (2) a **blank/whitespace subject** derived **no** principal and fell into the human
+passthrough, skipping the binding (**fail-open**) — fixed in the tool's guard (trim) **and** in
+`lib/agent-binding.ts`, which now **refuses a null principal**. **Proof:** pack gate 9 + wire 15 + binding 9 +
+coverage 12 green; **whole `ai_assistant` module 111 suites / 1518 tests green**; **8 RED-then-GREEN mutations**,
+md5-verified restores. **THE ONE NUMBER unchanged at 72 / 321 = 22%** (a caller adds no box), re-derived by two
+routes.
+**Prior — revision 28 recorded the `B-WS` BRIDGE and the follow-on document sync — the workspace-architecture design
 workstream is now bound to this spine by a written contract.** The workspace-architecture workstream (`B-WS`,
 `library/workspace-architecture/`) is the design of the dashboard & workspace widget architecture (the owner's
 Message 6). Until the bridge it ran **alongside** the spine with **no binding** — the measured gap: `git grep -l
@@ -784,8 +805,8 @@ documents and was *not* re-measured — treat it as a starting point, not a fact
 
 | | |
 |---|---|
-| **Repo 1** (thinking/docs) | `master`, HEAD **`33ca4a5`** — **re-measured 2026-10-11**. It is the **`B-WS` bridge** (`docs(bridge): bind the workspace workstream (B-WS) to the development spine` — `04-BRIDGE.md` + Rule 16 + pointer rows into **eight** spine documents + `JOURNAL.md`; eleven files, `+354/−39`). *(Previous figure: **`10ecfc5`**, the `CC-46` documentation close, re-measured 2026-10-10; before that **`3c799c3`**, the `CC-30` batch.)* |
-| **Repo 2** (code) | `main`, HEAD **`1bb61557`** — **re-measured 2026-10-11**. It is **`CC-57`** (`feat(ai-assistant): CC-57 — the in-process dispatch helper consults the agent binding`), the last named leg of row 22. *(Previous figure: **`c03eca5c`**, `CC-46`, re-measured 2026-10-10; before that **`35d9257`**, `CC-30`.)* **RULE-13 CORRECTION (2026-10-11):** this row had read `c03eca5c` while three later code commits (`CC-44` `3ba7b28f`, `CC-56` `0d52368f`, `CC-57` `1bb61557`) had already landed — the figure was stale by three commits. |
+| **Repo 1** (thinking/docs) | `master`, HEAD **`00bbb08`** — **re-measured 2026-10-11**. It is the **front-door sync to the `B-WS` bridge** (`docs: sync platform_points/HANDOVER/START-PROMPT/BACKLOG to the B-WS bridge`). *(The `CC-59` documentation commit follows this figure — a commit cannot name its own hash.)* *(Previous figure: **`33ca4a5`**, the `B-WS` bridge itself, re-measured 2026-10-11; before that **`10ecfc5`**, the `CC-46` documentation close.)* |
+| **Repo 2** (code) | `main`, HEAD **`83f88bd3`** — **re-measured 2026-10-11**. It is **`CC-59`** (`feat(ai-assistant): CC-59 — the Business-IR chain gets its first production caller`): the wire `lib/business-ir-run.ts`, the tool `ai-tools/business-ir-pack.ts`, and the `agent-binding.ts` null-principal fail-closed hardening. *(Previous figure: **`1bb61557`**, `CC-57`, re-measured 2026-10-11; before that **`c03eca5c`**, `CC-46`.)* **RULE-13 CORRECTION (2026-10-11):** this row had read `c03eca5c` while three later code commits (`CC-44` `3ba7b28f`, `CC-56` `0d52368f`, `CC-57` `1bb61557`) had already landed — the figure was stale by three commits. |
 | **Codebase shape** | **21 packages, 1 app** (`apps/mercato`) — a monorepo (Yarn 4.17.1 + Turbo) |
 | **Documentation** | **Tracked markdown: 1,094 repo-wide, of which 50 are in `library/development/`** — **re-measured 2026-10-10** via `git ls-files`. `library/` also holds thousands of `.md` files on disk — but most of that is **gitignored imported study material** (§3i), so **treat the disk figure as approximate: it drifts as untracked files come and go.** `LESSONS.md` (L1–L101, 3,385 lines), `JOURNAL.md` (6,777 lines) and `COOKBOOK.md` (2,961 lines) are the three long-form files. |
 | **The studies** | analysis programme **complete** (batches 0–12, 13 reports); Paperclip + Hermes study **complete** (11 batches, 3,940 lines, 53 lessons) |

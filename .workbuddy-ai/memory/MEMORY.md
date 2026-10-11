@@ -92,16 +92,23 @@ immediately exposed the second; two DONE, tested capabilities were invisible in 
 - **Owner's 2026-10-11 go-ahead: execute the supplementary core queue** (`PLAN-SUPPLEMENTARY-CORE-QUEUE.md`; docs
   commits `47177f1`, `caeface`). **The Business IR is re-classified CORE** (`CORE-BOUNDARY.md` §2 note + plan §S1.1);
   every postponed layer/wiring point is mapped in plan **§S1.2** (L1–L5 + W-A/W-B/W-C).
-- **FIRST STARTABLE ITEM = `CC-59`** (IN PROGRESS): measured (rule 0b) the compile+execute chain is **ALREADY BUILT** in
-  **`runFunction`** (`user-function/run.ts:112` — bind → compile → **execute via `engine.query`** `:216-241`), so the gap
-  is **ONE caller**, not a chain; a *"load a saved Function by id"* caller is impossible (no persistence → `CC-32`/`G-09`).
-  **`CC-59` = prompt → `authorBusinessQueryIr` → IR → `compileQuery` → `engine.query` → result** (no persistence); it
-  merges with `CC-58` Stage C. **Rule-13 correction committed `caeface`.**
+- **`CC-59` ✅ DONE 2026-10-11 (code `83f88bd3`)** — the Business-IR chain now has its **first production caller**:
+  `lib/business-ir-run.ts` (`runBusinessQueryPrompt` — prompt → `authorBusinessQueryIr` → IR → `compileQuery` →
+  `engine.query` → a **result** union; every refusal a **value**; `B5e` bounds) + the tool
+  `ai-tools/business-ir-pack.ts` (`business_ir.run_query`, registered in `ai-tools.ts`). Measured (rule 0b) the
+  compile+execute chain was **ALREADY BUILT** in `runFunction` (`user-function/run.ts:112`), so the gap was **ONE
+  caller**; a *"load a saved Function by id"* caller is impossible (no persistence → `CC-32`/`G-09`).
+  **Proof:** 111 suites / 1518 tests green; 8 RED-then-GREEN mutations (md5-verified); a separate-agent hostile
+  critic found **2 real defects, both fixed** — (a) the doc's "an agent can call it" overclaim (no agent whitelists
+  it → the consumer gap is **`CC-60`**), (b) a **blank subject skipped the binding** (fail-open) → guarded in the
+  tool **and** in `agent-binding.ts` (a null principal now **fails closed**). Lessons **L125**/**L126**.
 - **Remaining `CC-` items are trigger-blocked only:** `CC-51` (row 16 team-leg — the owner's go-ahead), `CC-54` (index
   rebuild), `CC-19` (CI). `CC-58` Stage C/B staged; `CC-32` gated on `G-09`.
-- **Next candidates (vision order):** (1) `CC-59` caller — **started**; (2) `CC-51` team-leg — smallest closable;
-  (3) **vision Phase 6 = audit** (tamper-evident decision record) — the next skeleton frontier, no scaffold yet;
-  (3) `CC-54`/`CC-19` — not startable. **ONE NUMBER 72 / 321 = 22%** (weighted ≈23%, ±4), derived from §A–§K boxes.
+- **Next candidates (ranked):** (1) `CC-51` (row 16's team-leg — smallest closable; needs the owner's go-ahead);
+  (2) **vision Phase 6 = audit** (tamper-evident decision record) — the next skeleton frontier, no scaffold yet;
+  (3) `B-WS/B9` (the design track's widget architecture); (4) `CC-60` (wire the tool to a chat consumer).
+  `CC-54`/`CC-19` are trigger-blocked. **ONE NUMBER 72 / 321 = 22%** (weighted ≈23%, ±4), derived from §A–§K boxes;
+  §L's **15th** re-run (2026-10-11), two routes agree.
 
 ## Durable code facts
 - **Kernel admits objects via exactly TWO channels:** `customEntities` and
@@ -156,9 +163,8 @@ immediately exposed the second; two DONE, tested capabilities were invisible in 
   Accounts: superadmin `admin@companai.local` / `wM8ciC9i8OBIM30KLlh2`; admin `admin@acme.com` / `secret`;
   employee `employee@acme.com` / `secret`.
 
-## Live frontier (2026-10-10) — read `JOURNAL.md`'s `★ ACTIVE TASK` for the truth
-- Rows 7, 8, 9, 13, 14 are ✅. **PHASE 3 COMPLETE.** Row 15 is an accurate 🟡 (only `CC-47` left); row 14's
-  export leg is `CC-45`. **Progress 73 / 330 = 22%** (weighted ≈23%, ±4).
-- **FRONTIER NOW = `CC-47` · `CC-45`** (both buildable; re-measure first, rule 0b; `CC-47`'s *semantics* is an
-  owner decision — rule 11). **ALSO NOW = `G-22`** (2A built; 2B paused as `CC-42`). **NEXT = `CC-27`**
-  (unblocked since `AH-1` closed). **THEN = `CC-44`** (owner's ruling).
+## Live frontier — see the section ABOVE (2026-10-11); read `JOURNAL.md`'s `★ ACTIVE TASK` for the truth
+*(The older duplicate frontier block that used to sit here — the 2026-10-10 one reading "row 15 🟡 / 73 of 330
+/ FRONTIER = `CC-47`" — was **stale and is removed** (rule 15/13): it was superseded by the 2026-10-11 section
+above and had already misled one reader. The single live frontier is the section above; the ONE NUMBER is
+**72 / 321 = 22%**.)*
