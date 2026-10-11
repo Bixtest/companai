@@ -249,15 +249,18 @@ business-module work; and the task list became **one plain-English scoreboard**,
 export leg was CLOSED by `CC-45`, its custom-entity **client `view`** export by `CC-48`, and its
 **customer-tasks** alias export by `CC-49` — the export funnel now masks every marked field on all three
 paths); and **row 15 is ✅** — its ACL-coverage half (`CC-46`) and its human-CRUD-list half (`CC-47`) are both
-closed. **THE LIVE WORK IS THE PHASE-5 BATCH: rows 16 → 17 → 18, in that order, committed as each lands.**
-**Row 16 (own / team row scope) is 🟡 IN PROGRESS** — MEASURED (scope today is tenant+org only; `auth.sub`
-never filters rows; no owner column; no `team` concept), DECIDED (**Option A**: own-only, opt-in per entity;
-**Option B**, a real `team` entity, is documented as a **future addition** — `PLAN-ROW16-own-team-row-scope.md`
-§7; partial `CC-50`). **RULE-13 CORRECTION:** the earlier wording here ("the **human CRUD *list* path** has no
-per-entity permission filter — that last leg is open as `CC-47`") was **FALSE** — the human CRUD `GET`/list
-path IS gated by `metadata.GET.requireFeatures`, enforced **403** by the dispatcher; `CC-47` added
-`crud-read-gate-coverage.test.ts` so a new list route cannot be added un-gated. **The live FRONTIER is
-re-derived from `platform_points.md` (the ONE NUMBER) + the `★ ACTIVE TASK` box — the batch is rows 16/17/18.**
+closed. **THE PHASE-5 BATCH (rows 16 → 17 → 18) IS COMPLETE, and row 22 is now COMPLETE too.**
+**Row 16 (own / team row scope) is 🟡** — its **own-leg** is BUILT (**Option A**, opt-in per entity, `CC-50`
+CLOSED); the row stays 🟡 only because its text names *own **and** team* and the **team-leg** is
+`CC-51` (deferred by the owner's ruling; **Option B**, a real `team` entity, is documented as a **future
+addition** — `PLAN-ROW16-own-team-row-scope.md` §7.2). **Rows 17 (`CC-52`), 18 (`CC-53`) and 22 (`CC-27` core +
+`CC-55` narrowing + `CC-56` confirm-path + `CC-57` in-process) are ✅ DONE.** **The named `CC-` queue is now
+EXHAUSTED** — the last named leg (`CC-57`) landed 2026-10-11. **RULE-13 CORRECTION:** the earlier wording here
+("the **human CRUD *list* path** has no per-entity permission filter — that last leg is open as `CC-47`") was
+**FALSE** — the human CRUD `GET`/list path IS gated by `metadata.GET.requireFeatures`, enforced **403** by the
+dispatcher; `CC-47` added `crud-read-gate-coverage.test.ts` so a new list route cannot be added un-gated. **The
+live FRONTIER is re-derived from `platform_points.md` (the ONE NUMBER) + the `★ ACTIVE TASK` box — with the
+named queue exhausted, the next task is a fresh pick from the vision order.**
 **Do not re-derive the order from this prompt** — read the
 `★ ACTIVE TASK` box for *what is in hand*, `BUILD-ORDER.md` for the *order*, and `platform_points.md`
 for *the one number*. **One trap worth keeping, measured 2026-10-08: `SD-3` (the tier mapping as a

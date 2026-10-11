@@ -3935,3 +3935,35 @@ with the date and the cause.
 *Cross-ref: L111 (pin the exact figure), L104/L110 (a walker's discovery predicate bounds its claim), L120 (a gate
 vs the runtime it guards); rule 0b (measure the premise first), rule 9(a) (own the full codebase).*
 
+## L122 — a coverage gate that matches a call **by name** is evadable by an **alias**; a gate you just delivered is still your gate — harden it in the same change the critic names it
+
+**Seen in `CC-57` (2026-10-11).** `binding-coverage.test.ts` scans the module for files that **dispatch an agent**
+and treats a file that **also calls `resolveAgentBinding`** as GATED. Its dispatch detection was a regex on the
+literal name: `/\brunAiAgent(?:Text|Object)\s*\(/`. A **separate-agent hostile critic** — one command + output per
+claim — confirmed all six of my claims, then raised **one LOW**: `import { runAiAgentObject as dispatch } from
+'./agent-runtime'` followed by `dispatch(...)` dispatches an agent while matching **neither** the marker list nor
+the call regex, so the file would be **invisible** to the gate. The evasion was **latent** — `grep` for
+`runAiAgent(Text|Object) as` and for a barrel `export … runAiAgent*` both returned **nothing** today — but it is
+the very gate `CC-57` delivered, and a gate with a known walk-around is a gate that will be walked around
+(**L120**: a gate must be at least as strict as the thing it guards; **L119**: a coverage predicate is a security
+control).
+
+**Why it happens.** A text scanner is the cheap, dependency-free way to enforce a structural rule across a module
+(the alternative — an AST — is heavier and version-fragile). But a text scanner sees **tokens**, and a token can be
+**renamed on import**. The name-matching predicate is therefore only as broad as the *spelling* it anticipates.
+
+**The rule.** (1) When you write a name-matching enforcement predicate, resolve the **local binding name** from the
+file's own **import statements** — match `X as Y` and treat `Y` as an alias of `X` — on **both** sides of the
+predicate (the call you are hunting **and** the call that clears it). (2) **Pin the alias case with its own
+RED-then-GREEN test** (import the entry `as` an alias, assert the scan catches it; and, symmetrically, an aliased
+binder still counts as gated) so the detection cannot silently regress. (3) A critic finding on a gate you **just
+delivered** is not "pre-existing, not mine" — the item exists to make that gate correct; fix it in the same
+change. (4) But do **not** over-claim: state plainly whether the hole is **live** (an alias exists) or **latent**
+(none does) — here it was latent, and the honest record says so.
+
+*Cross-ref: L119/L109 (a coverage predicate is a security control; reuse the fixed form), L120 (a gate vs the
+runtime it guards), L121 (a change that adds an enumerable object drifts sibling pins); rule 9(a) (own the code
+you touch — including the gate you delivered), rule 13 (state the measured truth, live vs latent).*
+
+
+

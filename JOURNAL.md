@@ -35,7 +35,64 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
-### ✅ DONE — **row 7's write-path feature gate is now DEFAULT-DENY at the build (`CC-44`). ★ NEXT = `CC-57` (the last named leg of row 22).**
+### ✅ DONE — **row 22's LAST named leg — the in-process dispatch helper now consults the binding and threads its scope (`CC-57`). Row 22 is now COMPLETE. ★ NEXT = a fresh pick from the vision order (the named `CC-` queue is exhausted).**
+**(2026-10-11; code repo `workspace/starting-kit`.)**
+
+**The task.** Row 22's core leg (`CC-27`) gated agent **dispatch**; the narrowing leg (`CC-55`) applied the binding's
+scope at run time; the execution leg (`CC-56`) re-checked the binding at the pending-action **confirm**. What
+remained: the **in-process** dispatch helper `lib/business-ir-author.ts` (`authorBusinessQueryIr`) called
+`runAiAgentObject({ agentId: BUSINESS_IR_AGENT_ID, … })` with **no `boundScope` and no binding check** — the
+**only** non-route dispatch site (found by `CC-55`'s module-wide coverage scan, which named it in
+`IN_PROCESS_DISPATCH_SITES`). A grant that is not consulted is not a grant.
+
+**The contract built (`B3''`).** `AuthorBusinessQueryIrInput` gains **two required** fields — `auth: AuthContext`
+(the `sub`/`principal` the binding is looked up **by**) and `em: EntityManager` (so the one DB read is visible at
+the call site and testable without a container). `AuthorBusinessQueryIrResult` gains the arm
+`{ ok:false, reason:'agent_not_bound' }`. Before the model is asked, the helper resolves
+`resolveAgentBinding({ em, auth, agentId: BUSINESS_IR_AGENT_ID })`, **refuses** when `!binding.bound` (a value,
+not a throw — and the model is never called), then `computeBoundRunScope({ agentId, binding })` and passes it into
+`runAiAgentObject` — the **identical** fail-closed check and narrowing-only scope the two routed paths apply. A
+**human** is a passthrough (`{ toolAllowlist: null, requiredFeatures: [] }`, **no** DB read, `B4`).
+
+**The gate got the arm its own header promised.** `binding-coverage.test.ts` now has a **GATED arm**: a file that
+both **dispatches** and **calls `resolveAgentBinding`** is gated, not an offender — so `IN_PROCESS_DISPATCH_SITES`
+falls to **empty** (no un-gated site remains). A **positive pin** asserts the known in-process site still
+dispatches, consults the binding, and threads `boundScope`, so the closure cannot silently regress. The **6** call
+sites in the helper's own end-to-end suite now pass a **human** `auth` + a stub `em` (the human path is
+byte-identical — the assertion the suite exists for).
+
+**Hardening (TOTAL quality protocol) — a separate-agent hostile critic, a command + output per claim.** It
+**CONFIRMED all 6 claims** (the scan walked **176** real files and classified the helper **GATED**; a temporary
+probe file proved a binding-less dispatcher turns the gate **RED**, then was deleted with `git status` verified
+unchanged; the refusal genuinely precedes the model — the mock resolves to the production import; the **real**
+`computeBoundRunScope` runs (tools INTERSECT / features UNION, read from `agent-binding.ts`); the human derives as
+`human` via `parseSubject`; **no other** un-gated dispatch site; the **full ai-assistant suite 109/109 suites ·
+1492/1492 tests**). It raised **one LOW latent weakness**: the scan matched a dispatch **by name**, so an
+`import { runAiAgentObject as dispatch }` alias would evade it. It is latent (grep: **no** alias and **no** barrel
+re-export exists today) — but it is the very gate this item delivered, so it was **fixed**: the scan is now
+**alias-aware** on both the dispatch and the resolver side, with a **new RED-then-GREEN pin** proving the alias is
+caught.
+
+**RED-then-GREEN — 5 mutations per `PLAN-CC-57` §6, + 1 for the hardening, every restore md5-verified.**
+(1) fail-closed removed → both refusal tests **RED**; (2) `boundScope` dropped from the runtime call → all 3
+scope tests **RED**; (3) `resolveAgentBinding` not called → the **gate** flags the helper as an offender **and**
+all 5 binding tests **RED**; (4) the gate's GATED arm reverted → the helper re-appears in `offenders` **RED**;
+(5) the human path force-narrowed → all 6 end-to-end IR tests **RED**; (6) alias-awareness removed → the new
+alias pin **RED**. Restores verified **md5-identical** (`business-ir-author.ts` `c06e0ecf…`,
+`binding-coverage.test.ts` `cda0525c…`); **23/23 GREEN** across the three suites. `tsc` clean for the CC-57 files
+(the only two errors are a pre-existing `convertToModelMessages` mock spread and a generated-file path alias,
+both independent of this change — proven by reading them at `HEAD`).
+
+**Honest boundary (unchanged).** `authorBusinessQueryIr` still has **no routed caller** — this makes the existing
+helper **safe for the caller it will one day have**; the register's honest trigger (a real caller) still governs
+whether it is *used*. It is a **latent** gap made **safe**, not a new route.
+
+**ONE NUMBER, two routes: 72 / 321 = 22% — unchanged** (§L's 13th re-run; local derivation + blind verifier
+agent). The change adds no vision box.
+
+---
+
+### ✅ DONE — **row 7's write-path feature gate is now DEFAULT-DENY at the build (`CC-44`).** *(superseded by the `CC-57` block above; both done 2026-10-11.)*
 **(2026-10-11; code repo `workspace/starting-kit`.)**
 
 **The task.** Row 7 ("roles & grants enforced on every write") was true **in substance** but its mechanism was

@@ -14,22 +14,34 @@ written for exactly that person — and this revision is written for an agent th
 continue the development work.** Read it top to bottom once (about 20 minutes), then
 follow §2 to actually get working. Everything else in the project is reachable from here.
 
-**Written 2026-10-05, revision 26 (2026-10-11). Owner: Ramzi. Development machine: `BIXMASERVER` (Windows 10 Pro).**
-**This revision records the 2026-10-11 BUILD of row 7's write-path feature gate as DEFAULT-DENY (`CC-44`) — the
-owner's Option A ruling (`NY-23`). Rule-0b measurement first: the dispatcher enforces `requireFeatures` only when
-the array is non-empty (`apps/mercato/src/app/api/[...slug]/route.ts:207`), so a write route declaring
-`requireAuth: true` and no `requireFeatures` had **no** feature check — the gate was **opt-in**. Built: a
-build-time coverage gate (`packages/cli/src/lib/generators/__tests__/write-gate-coverage.test.ts`, 4 tests) fails
-when a write-verb `route.ts` in an enabled module declares neither a **non-empty** `requireFeatures` nor an
-explicit `byDesign: '<reason>'` exemption; the **11** non-feature-gated routes carry the inert tag
-(`extractMethodMetadata` never copies it, so it is documentation, not behaviour). **TWO separate-agent
-hostile-critic passes:** round 1 found **3 REAL classifier defects** (empty-array counted as a gate; a bare token
-in a regex literal / TS type; the factory clause counted although `makeCrudRoute` only **relays**
-`opts.metadata.requireFeatures`) — all fixed (the predicate is now a non-empty array literal of
-strings/identifiers; the factory clause removed), the tightening proven **free** (0 routes reclassified); round 2
-confirmed the fixes and recorded the honest limit (a regex character class / tuple type). **6 RED-then-GREEN**
-mutations, md5-verified; `tsc` clean (cli, core, webhooks). ONE NUMBER **72 / 321 = 22%, unchanged** (§L's
-**twelfth** re-run, both routes agree). The live FRONTIER is now **`CC-57`**.
+**Written 2026-10-05, revision 27 (2026-10-11). Owner: Ramzi. Development machine: `BIXMASERVER` (Windows 10 Pro).**
+**This revision records the 2026-10-11 BUILD of row 22's LAST named leg (`CC-57`) — the in-process dispatch
+helper now consults the binding and threads its scope, so **row 22 is COMPLETE**. Rule-0b measurement first:
+`authorBusinessQueryIr` (`lib/business-ir-author.ts`) called `runAiAgentObject({ agentId: BUSINESS_IR_AGENT_ID, … })`
+with **no** `boundScope` and **no** binding check — the **only** non-route dispatch site (found by `CC-55`'s
+coverage scan, which named it in `IN_PROCESS_DISPATCH_SITES`). Built (`B3''`): `AuthorBusinessQueryIrInput` gains
+**required** `auth: AuthContext` + `em: EntityManager`; a new result arm `{ ok:false, reason:'agent_not_bound' }`;
+before the model is asked the helper resolves `resolveAgentBinding`, refuses fail-closed when unbound, then threads
+`computeBoundRunScope` into the runtime — the identical check + narrowing-only scope the routed paths use (humans
+passthrough, no DB read). The gate got the **GATED arm** its `CC-55` header promised (a caller that dispatches
+**and** calls `resolveAgentBinding` is gated), so `IN_PROCESS_DISPATCH_SITES` is now **empty**, held by a positive
+pin. **A separate-agent hostile critic confirmed all 6 claims** (scan walks 176 files; a temporary un-gated probe
+turned the gate RED then was deleted; the refusal precedes the model; real `computeBoundRunScope`; human
+derivation; no other un-gated site; full suite **109/109 suites · 1492/1492 tests**) and raised **1 LOW** — the
+scan matched a dispatch by **name**, so an `… as dispatch` alias would evade it; **fixed** (the scan is now
+**alias-aware**, with a new RED-then-GREEN pin). **6 RED-then-GREEN** mutations, every restore **md5-verified**
+(`business-ir-author.ts` `c06e0ecf…`, `binding-coverage.test.ts` `cda0525c…`); **23/23** across the three suites;
+`tsc` clean for the CC-57 files (the only two errors are a pre-existing mock spread and a generated-file alias,
+independent of this change). **Honest boundary:** the helper still has **no routed caller** — this makes it **safe
+for the caller it will one day have**. ONE NUMBER **72 / 321 = 22%, unchanged** (§L's **thirteenth** re-run, both
+routes agree). **The named `CC-` queue is now EXHAUSTED** — the next task is a fresh pick from the vision order
+(rule 11 — the owner decides *what*).
+**Prior — revision 26: row 7's write-path feature gate as DEFAULT-DENY (`CC-44`, owner's Option A, `NY-23`).** A
+build-time gate fails when a write-verb `route.ts` in an enabled module declares neither a **non-empty**
+`requireFeatures` nor a `byDesign: '<reason>'` exemption; the **11** non-feature-gated routes carry the inert tag.
+**TWO separate-agent hostile-critic passes** (round 1: **3 REAL classifier defects**, all fixed, tightening proven
+free — 0 routes reclassified; round 2: limits recorded); **6 RED-then-GREEN** mutations. ONE NUMBER unchanged
+(§L's **twelfth** re-run). The live FRONTIER then was `CC-57`.
 **Prior — revision 25: row 22's EXECUTION leg (`CC-56`) — the pending-action **confirm**
 route now re-checks the agent binding before it runs the tool. Rule-0b measurement first: the confirm route
 reached `executePendingActionConfirm` (which invokes the tool handler) with **no** `resolveAgentBinding` call, so
@@ -41,9 +53,8 @@ passthrough for a human). A separate-agent hostile critic raised 5 items, **3 re
 test, a comment-blind coverage assertion, a stale OpenAPI 403 text); **5 RED-then-GREEN** mutations,
 md5-verified; `tsc` clean; **1487 tests / 108 suites** green. **SCOPE (measured):** the guard checks the
 **confirm caller**, so the worker's revocation is observed when an **`ai_worker`** confirms; a **human** confirm
-is a passthrough (row 22's "run" is gated at **dispatch** by `CC-27`). **The remaining named leg is `CC-57`**
-(in-process dispatch sites). ONE NUMBER **72 / 321 = 22%, unchanged** (§L's **eleventh** re-run, both routes
-agree). The live FRONTIER is now **`CC-44`** (the owner's ruling, **asked plainly as `NY-23`**), then **`CC-57`**.
+is a passthrough (row 22's "run" is gated at **dispatch** by `CC-27`). ONE NUMBER **72 / 321 = 22%, unchanged**
+(§L's **eleventh** re-run, both routes agree).
 **Prior — revision 24: row 22's NARROWING leg (`CC-55`) — the binding's scope is now
 applied to the run, so row 22 is ✅ whole.** Rule-0b measurement first: `computeBoundRunScope` had **no
 production caller** (repo-wide grep: only its definition + the unit test); `resolveAiAgentTools` built the tool
@@ -133,13 +144,12 @@ that carries it (step 7, and the owner's instruction of 2026-10-06). The **live 
 authoritative statement is [`platform_points.md`](platform_points.md)'s `▶ FRONTIER` box) is
 **re-derived from the ONE NUMBER** — row 16's own-leg is built (`CC-50` closed; row remains 🟡 pending the
 deferred team-leg `CC-51`), rows 17 (`CC-52`), 18 (`CC-53`) and 22 (`CC-27` core + `CC-55` narrowing + `CC-56`
-confirm-path) are **✅
-DONE** (the PHASE-5 batch is complete); the live FRONTIER is now **`CC-44`** (the write-path feature gate being
-opt-in, not default-deny — an owner policy call, **asked as `NY-23`**), then **`CC-57`** (thread the bound scope
-into the in-process dispatch sites — the one known site
-`lib/business-ir-author.ts` has no caller today);
-each is buildable now, and **it must be re-measured in code before
-building** (rule 0b).
+confirm-path + `CC-57` in-process) are **✅
+DONE** (the PHASE-5 batch is complete and **row 22 is now COMPLETE — no named leg remains**); **the named `CC-`
+queue is EXHAUSTED**, so the next task is a **fresh pick from the vision order** (`platform_points.md` THE LIST),
+and **it must be re-measured in code before building** (rule 0b). The only remaining `CC-` items are
+trigger-gated: `CC-51` (row 16 team-leg — deferred by the owner's ruling), `CC-54` (index-time presenter —
+awaits an index rebuild), `CC-19` (environmental — awaits CI).
 
 **Six things to do before you touch anything:**
 
