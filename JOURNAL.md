@@ -55,7 +55,7 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
-### 🔵 IN PROGRESS — **Row 28 (Phase 8): *"the agent runtime sits behind one typed door — no other code talks to it directly."* Broken into six sub-rows. **R28-1 (the port's shape) ✅ DONE 2026-10-11. NEXT = R28-2.** No box moved.**
+### 🔵 IN PROGRESS — **Row 28 (Phase 8): *"the agent runtime sits behind one typed door — no other code talks to it directly."* Broken into six sub-rows. **R28-1 (the port's shape) ✅ DONE 2026-10-11. R28-2 (OpenCode behind the door) ✅ DONE 2026-10-11. NEXT = R28-3.** No box moved.**
 **(2026-10-11; plan = [`library/development/PLAN-ROW28-agent-runtime-port.md`](library/development/PLAN-ROW28-agent-runtime-port.md).)**
 
 **What the row asks, in plain words.** Today the platform reaches its AI engine **two different ways,
@@ -80,8 +80,8 @@ OpenCode behind it"*).
 | Sub-row | What it is | Status |
 |---|---|---|
 | **R28-1** | The typed port's **shape** — its eight operations + the envelope rules | ✅ **DONE 2026-10-11** (below) |
-| **R28-2** | **OpenCode fitted behind the door** (unchanged, just hidden) | ⏳ **NEXT** |
-| **R28-3** | The **chat screen moved onto the door** (the step that makes the row true) | blocked on R28-1+2 (R28-1 now cleared) |
+| **R28-2** | **OpenCode fitted behind the door** (unchanged, just hidden) | ✅ **DONE 2026-10-11** (below) |
+| **R28-3** | The **chat screen moved onto the door** (the step that makes the row true) | ⏳ **NEXT** (R28-1+2 cleared) |
 | **R28-4** | Failure handled — cancel is safe to repeat, complete is safe to replay | startable now (R28-1 cleared) |
 | **R28-5** | A check that **nothing** talks to an engine directly | blocked on R28-3 |
 | **R28-6** | **Delete OpenCode** — separate, later step (`N-8`) | OUT of row 28 |
@@ -114,7 +114,38 @@ registry stub) is also fixed + tested. Registered as **`CC-68`, now closed**; le
 **Honest bound — NO box moved.** `B-05`/`Port` are about the door being **used**; a door nobody walks
 through yet does not complete them — that is R28-3. **ONE NUMBER unchanged 75 / 321 = 23%.**
 
-**★ NEXT = sub-row R28-2** (fit OpenCode behind the door, unchanged).
+**R28-2 DONE — what was built, and the honest headline.** `lib/opencode-port-adapter.ts` — the first engine
+behind the door. It implements **all eight port operations** and delegates to the **existing, unmodified**
+OpenCode engine (`createOpenCodeClient`, `handleOpenCodeMessageStreaming`). **`opencode-client.ts` and
+`opencode-handlers.ts` are not touched** — that is the entire point of the step: the engine moves behind the
+door *unchanged*, so the door is proven useful before anything is rewritten (the architecture document's
+Phase 1: *"the port, with OpenCode behind it. No Hermes yet."*).
+
+**The honest capability map** — a door that claims more than it can do is worse than no door. Six operations
+work; **two are openly ✗** and the adapter says so in its own header **and** through
+`describeCapabilities`: `steerRun` (unsupported — OpenCode has no mid-run steering) and `resolveToolCall`
+(unsupported — OpenCode resolves its tools internally, so §4.1's *"ONLY path to a business operation"* is
+**not** served by this engine). Those two are not holes swept under the door; they are **declared**.
+
+**Proof:** 22 tests green; `tsc --strict` clean; **114 suites / 1552 tests green** (the R28-1 baseline was
+112/1527); **15 RED-then-GREEN mutations** (10 build + 5 critic-defect), md5-verified restores.
+**A separate-agent hostile critic found SIX real defects — all fixed in-batch, each with its own regression
+test:** (1) a **defeated abort slot** — `run.abort?.abort()` was defended by nothing, so a cancel before a
+stream started was a silent no-op → a **Set** of controllers, all aborted; (2) **`cancelRun` after
+`completeRun` was order-dependent** → `completed` is now checked **first**, so the answer is the same in any
+order; (3) **run = conversation** — the resume run id was `conversationId:agentId:resume`, so two resumes of
+one conversation shared one run id, breaking §4.2's *"a run is not a transcript"* **and** silently collapsing
+replay-safety → `resumeConversation` now **mints a fresh, distinct run id**; (4) **the stale capability
+grant** — a second resume kept the **first** grant, carrying an authority it was never issued → a new grant
+per resume; (5) **an unchecked cast** — `input.sessionId as string` would have accepted a number, an object
+or `null` → a validated `readSessionId` accessor; (6) **concurrent streams shared one abort slot** →
+per-stream controllers.
+
+**Honest bound — NO box moved.** An **unused** door with an engine behind it still completes nothing —
+`B-05` / `N-8`'s first half are about the door being *used*. **ONE NUMBER unchanged 75 / 321 = 23%.**
+
+**★ NEXT = sub-row R28-3** (move the chat screen onto the door — **this is the row's exit gate**, and it is
+the change that finally moves `B-05`).
 
 ---
 

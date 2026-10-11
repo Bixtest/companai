@@ -72,7 +72,9 @@ Worked example: `CC-43` "flagged, not fixed" **hid `CC-46`**.
 - **Hostile-critic = a SEPARATE agent every time; demand a command+output per claim.**
 
 ## Live frontier (2026-10-11 — read `JOURNAL.md`'s `★ ACTIVE TASK` for the truth)
-- **ONE NUMBER 75 / 321 = 23%** (weighted ≈23%, ±4), derived from §A–§K boxes; §L's **17th** re-run, two routes agree.
+- **ONE NUMBER 75 / 321 = 23%** (weighted ≈23%), derived from §A–§K boxes; §L's **18th** re-run, two routes agree.
+  *Banked trap:* a **split parent** (`- ` line carrying `▸ n/N`) is **never** a derivable tick — its `n` sub-points
+  are. Counting the parent too inflates done (83 instead of 75).
 - **Row 27 ✅ DONE 2026-10-11** (code `3ff25376`, docs `b15a792`): `packages/shared/src/lib/request-outcome/repeat.ts`
   (`normaliseRequestText`/`requestTokens`/`requestSimilarity` Jaccard/`detectRepeatedRequest`→`RepeatSignal`; pure,
   zero imports; threshold 0.8). Measured: `S3` "told" half exists, "seal" blocked on `G-04`; `S8` gate inert,
@@ -88,8 +90,15 @@ Worked example: `CC-43` "flagged, not fixed" **hid `CC-46`**.
 - **Row 28 🔵 IN PROGRESS** — six sub-rows (`PLAN-ROW28-agent-runtime-port.md`). **R28-1 ✅ DONE 2026-10-11**
   (code `513bad41`): the port's **shape + test** — `lib/ai-runtime-port.ts` (definitions only, zero imports; the eight
   §4.1 signatures, the §4.2 envelope with required `capabilityGrantId`, secret *references*) + 9 tests incl. the
-  `IsExactKeys` type guard. **NEXT = R28-2** (fit OpenCode behind the door, unchanged behaviour). R28-3 = the chat
-  route moved onto the port (the exit gate). `CC-67` (two other direct callers) is R28-3-blocked.
+  `IsExactKeys` type guard. **R28-2 ✅ DONE 2026-10-11** (code `743156dd`): the first engine behind the door —
+  `lib/opencode-port-adapter.ts` implements all eight operations, delegating to the **unchanged** OpenCode engine
+  (`opencode-client.ts`/`opencode-handlers.ts` NOT touched); **honest capability map** (`steerRun`/`resolveToolCall`
+  openly ✗, declared in the header AND in `describeCapabilities`) + 22 tests; hostile critic found **6 real defects,
+  all fixed** (defeated abort slot → a Set of controllers; `cancelRun`-after-complete order-dependence →
+  `completed` checked first; **run = conversation** → fresh distinct run id per resume; stale capability grant on a
+  second resume; unchecked `sessionId` cast; concurrent streams sharing one abort slot). 15 mutations RED.
+  Suite **114/1552 green**. **NEXT = R28-3** (the chat route moved onto the port — the exit gate; it is what finally
+  moves `B-05`). R28-4 = cancel/complete semantics. `CC-67` (two other direct callers) is R28-3-blocked.
 - **`CC-68` ✅ CLOSED 2026-10-11** (code `537e30b5`): a **non-deterministic TEST** in `mcp-dev-key-resolution.test.ts`
   (the TOCTOU case, both variants) — it raced the swap against the reader's `Promise.all`; **product was correct**.
   Fixed by stating the inode mismatch directly; mutation-proved; 5× full-suite green (1530/1530). Also guarded

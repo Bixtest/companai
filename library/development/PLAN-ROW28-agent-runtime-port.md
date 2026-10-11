@@ -213,7 +213,7 @@ Every sub-row that ends less than fully done gets (or keeps) a row in `COMPLETIO
 | Sub-row | Status | Evidence |
 |---|---|---|
 | R28-1 | ✅ **DONE 2026-10-11** | See §7.1 below. |
-| R28-2 | 🟡 **IN PROGRESS 2026-10-11** | Measured the OpenCode surface (rule 0b): the client is 495 lines, the handlers 957; the adapter must map the eight port operations onto `createOpenCodeClient` + `handleOpenCodeMessageStreaming` (`opencode-client.ts` / `opencode-handlers.ts`). Build next. |
+| R28-2 | ✅ **DONE 2026-10-11** | See §7.2 below. |
 | R28-3 | not started | — |
 | R28-4 | not started | — |
 | R28-5 | not started | — |
@@ -275,6 +275,70 @@ complete them — that is R28-3. **ONE NUMBER unchanged 75 / 321 = 23%.**
 
 ---
 
+### §7.2 R28-2 — OpenCode behind the door, unchanged — BUILT (2026-10-11, code repo)
+
+**What landed.** `packages/ai-assistant/src/modules/ai_assistant/lib/opencode-port-adapter.ts` — the first
+engine behind the door. It implements all eight operations of `AiRuntimePort` and delegates to the
+**existing, unmodified** OpenCode engine (`createOpenCodeClient`, `handleOpenCodeMessageStreaming`).
+`opencode-client.ts` and `opencode-handlers.ts` are **not touched** — that is the whole point of the step:
+the engine moves behind the door *unchanged*, so the door is proven useful before anything is rewritten.
+
+**Measured surface first (rule 0b):** the client is 495 lines, the handlers 957; the handlers expose
+`handleOpenCodeMessageStreaming(request, onEvent)` taking `{ message, sessionId?, model?, auth?, em? }`,
+which is what the eight port operations are mapped onto.
+
+**The honest capability map** (a door that claims more than it can do is worse than no door):
+
+| Operation | State | What it does |
+|---|---|---|
+| `describeCapabilities(runtimeVersion)` | ✅ | reports the real map below, per operation |
+| `startRun(envelope)` | ✅ | creates an OpenCode session; mints the run id server-side |
+| `streamRun(runId)` | ✅ | forwards engine events; **cooperative** cancel honoured between events |
+| `cancelRun(runId)` | ✅ | **cooperative** — aborts the live request(s); returns a value, never throws |
+| `steerRun(runId, instruction)` | ✗ | **unsupported** — OpenCode has no mid-run steering; throws a named error |
+| `resumeConversation(binding, input)` | ✅ | resumes by session id, minting a **fresh** run id |
+| `resolveToolCall(call, capGrant)` | ✗ | **unsupported** — OpenCode resolves tools internally; §4.1's *"only path"* is *not* served by this engine |
+| `completeRun(runId, result)` | ✅ | replay-safe: completing twice returns the same verdict |
+
+The two ✗ rows are not holes swept under the door: they are **stated in the adapter's own header** and
+**reported by `describeCapabilities`**, so a caller can never be surprised.
+
+**Proof.** `__tests__/opencode-port-adapter.test.ts` — **22 tests green**; `tsc --strict --noEmit` clean on
+both files; and the **whole package suite green: 114 suites / 1552 tests** (the R28-1 baseline was
+112/1527). **Fifteen RED-then-GREEN mutations** (10 build + 5 critic-defect), each restore md5-verified
+against `4c1734738243256c7272705b97ba1c75`.
+
+**A hostile critic (separate agent) found SIX real defects, all fixed in-batch.** This is the honest
+headline of R28-2 — the first draft *looked* finished and was not:
+1. **A defeated abort slot.** `run.abort?.abort()` was defended by nothing — a cancel before a stream
+   started was a silent no-op. **Fixed:** a **Set** of `AbortController`s, and `cancelRun` aborts **every**
+   one of them, so *"a second stream was never cancelled"* cannot happen.
+2. **`cancelRun` after `completeRun` was order-dependent** — the outcome depended on which flag the code
+   happened to read first. **Fixed:** `completed` is checked **first**, so the answer is the same in any
+   order (and a completed run is never reported as cancelled).
+3. **Run = conversation.** The resume run id was `conversationId:agentId:resume`, so two resumes of the
+   same conversation shared one run id. That breaks §4.2's rule that *"a run is not a transcript"*, and it
+   silently broke replay-safety: two distinct runs were indistinguishable. **Fixed:** `resumeConversation`
+   now **mints a fresh, distinct run id** each time.
+4. **The stale capability grant.** A second resume of the same conversation kept the **first** grant,
+   so the run would have carried an authority it was not issued. **Fixed:** a new grant is taken per resume.
+5. **An unchecked cast.** `input.sessionId as string` would have accepted a number, an object, or `null`
+   and passed it to the engine as if it were a session id. **Fixed:** a validated `readSessionId` accessor
+   that returns `null` unless it is a non-empty string.
+6. **Concurrent streams shared one abort slot** — the same root as defect 1, but a distinct symptom:
+   cancelling one stream could leave a sibling running. **Fixed** by the same Set.
+
+Every one of the six carries its **own regression test**, and each regression test is itself
+mutation-proved (delete the fix → that test goes RED).
+
+**No box moved.** `B-05` / `N-8`'s first half are about the door being *used*; an unused door with an engine
+behind it still completes nothing — that is R28-3. **ONE NUMBER unchanged 75 / 321 = 23%.**
+
+**★ NEXT = sub-row R28-3** — move the chat route onto the door. **This is the row's exit gate**
+(*"the chat works through the port"*), and it is the change that finally moves `B-05`.
+
+---
+
 ## §8. Measured vs quoted (so nothing is overstated)
 
 - **Measured in code (this session):** §1 rows 1–6, all by reading the named files; the R28-1 proof
@@ -283,3 +347,9 @@ complete them — that is R28-3. **ONE NUMBER unchanged 75 / 321 = 23%.**
   the §4.2 envelope field list, the envelope's three rules, the "rewire first, delete second" order, and
   §9 Phase 1's exit gate — all re-read verbatim from `ARCHITECTURE-hermes-integration.md` §4/§7/§9.
 - **Not yet measured:** how many tests assert the chat route's OpenCode import (to be found in R28-3).
+
+**R28-2 measurement (2026-10-11).** The whole `ai-assistant` package suite was run green: **114 suites /
+1552 tests** (the R28-1 baseline was 112 / 1527 — so R28-2 added 2 suites and 25 tests, exactly the adapter
+suite plus its tests). The scoreboard was re-derived (rule 0, not typed): **75 / 321 = 23%**, per-section
+A 11/31 · B 7/38 · C 14/28 · D 1/39 · E 2/18 · F 0/14 · G 33/74 · H 1/13 · I 5/35 · J 0/18 · K 1/13 —
+**unchanged**, because `B-05` / `N-8` are about the door being *used*.
