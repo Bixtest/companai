@@ -46,35 +46,49 @@ onto what we already have and onto the development plan** — so the build proce
 | 1 | Bookmark the position (this file) | ✅ **DONE** — this file |
 | 2 | Recon the reference systems + docs | ✅ **DONE (B2)** — `02-REFERENCE-SYSTEMS.md`; plus B1 `01-RECON.md` |
 | 3 | The batched research plan | ✅ **DONE** — `00-RESEARCH-PLAN.md` |
-| 4 | The detailed SRS | 🔄 **B1–B5 done; B6–B9 to go** |
+| 4 | The detailed SRS | 🔄 **B1–B6 done; B7–B9 to go** |
 | 5 | Map SRS → current state → development plan | ⬜ not started (B10) |
 | 6 | Integrate + index into the rest of the docs | ⬜ **deliberately deferred** (later stage) |
 
 **Batch progress:** **B1 ✅** (recon, measured) · **B2 ✅** (reference systems, verdict) · **B3 ✅** (the
 user–AI interaction + the Business-IR display) · **B4 ✅** (the prompt→function lifecycle) · **B5 ✅** (naming,
-menus, grouping, and the organic non-business wiring). **Next: B6** (threads and collaboration). Commits:
-`2064046` (bookmark + plan), `82f72e8` (B1), `250f6c1` (B2), `7131195` (B3), `bd4de50` (B4 + the B1 Q3
-correction), `7634dcb` (README + memory), **`72c20e2` (B5, critic-corrected)**.
+menus, grouping, and the organic non-business wiring) · **B6 ✅** (threads and collaboration). **Next: B7**
+(extensibility: adding tools and widgets). Commits: `2064046` (bookmark + plan), `82f72e8` (B1), `250f6c1` (B2),
+`7131195` (B3), `bd4de50` (B4 + the B1 Q3 correction), `7634dcb` (README + memory), `72c20e2` (B5,
+critic-corrected), `c8c0fdf` (B6, critic-corrected).
 
 **Owner decisions recorded so far (all in `discussion_points.md`):** DP-01 **wiring first, storage second** ·
-DP-02 **show "permissions not checked"** · DP-03 **a schema-change request is a permissions question first**.
-**NEW workstream the owner opened (DP-04):** the **permissions architecture** is *"not casual — too many
-layers and what-ifs"* and must be **investigated and engineered properly** as its own batch (its own SRS).
-DP-05 (the schema-change build pool) depends on it. **The SRS batches B6–B10 are NOT blocked by DP-04** —
-they proceed; only permissions-*dependent builds* queue behind it.
+DP-02 **show "permissions not checked"** · DP-03 **a schema-change request is a permissions question first** ·
+**DP-04 APPROVED — a dedicated permissions-architecture batch**, with the owner's **two-gate rule**: check
+permission **on the way in** (may this user *request* this?) **and on the way back** (may this user *see* the
+outcome?), engineered to **protect without destroying optimization**. DP-05 (the schema-change "explain and
+route" branch ships early; the build pool waits on DP-04) · DP-06 (a recipe may sit in several menu homes but
+carries **one** permission set everywhere). **The SRS batches B7–B10 are NOT blocked by DP-04** — they proceed;
+only permissions-*dependent builds* queue behind it.
+
+**B6's finding B7 must carry:** the kit **already persists threads** (`ai_chat_conversations`,
+`ai_chat_conversation_participants`, `ai_chat_messages` — 36 + 2 tests passing) and **already models human
+sharing** (roles owner/viewer/commenter; share dialog). The gaps: the **AI is the thread's `agent_id`, not a
+participant**; a thread **holds messages, not widgets/objects**; no anchoring/presence/CRDT layer (correct for
+now — the vision assigns CRDT only to document-like state). **A thread is a host a Widget can be placed into**
+— that is the join B7 and B9 use.
 
 **⚠️ File-collision hazard (learned 2026-10-11).** The owner and the agent both edit files in this folder. An
 editor holding an older copy silently overwrote a committed edit once (`discussion_points.md`). **Both
 editors must re-read the file from disk before writing, and the agent commits immediately after every edit**
 so any loss is recoverable via `git show <commit>:<path>`.
 
-**RESUME HERE — B6.** The B5 finding B6 must carry: the kit's **navigation is already built and
-menu-injectable** (`InjectionMenuItem`/`InjectionMenuItemWidget`, the sidebar spot ids, `mergeMenuItems`,
-`mergeSidebarGroupsWithInjected` which **creates a group from a named `groupId`**), and the one missing link
-is the **join from a saved Function to a menu item** — `UserFunction` and the placed Widget carry **no**
-placement today, though `FunctionPlacement` (`types.ts:203`) and `FunctionCandidate` (`:246`) already exist
-on the candidate side. B5 specifies that join in two additive changes (`02-SRS-03` §5). B6 is **independent**
-of it: a thread is a container a placed Widget can be referenced from.
+**RESUME HERE — B7.** Two carry-forwards B7 needs:
+1. **From B5** — the kit's **navigation is already built and menu-injectable** (`InjectionMenuItem`/
+   `InjectionMenuItemWidget`, the sidebar spot ids, `mergeMenuItems`, `mergeSidebarGroupsWithInjected` which
+   **creates a group from a named `groupId`**); the one missing link is the **join from a saved Function to a
+   menu item** (`UserFunction`/Widget carry **no** placement today; `FunctionPlacement` `types.ts:203` and
+   `FunctionCandidate` `:246` exist on the candidate side) — B5 specifies it in two additive changes
+   (`02-SRS-03` §5).
+2. **From B6** — the kit **already persists threads and human sharing** (`ai_chat_*`, 36 + 2 tests passing);
+   a **thread is a host a Widget can be placed into**; the gaps are AI-as-participant, widgets/objects in a
+   thread, and anchoring. **B7 must read the kit's existing extension system (UMES / `widgets/` injection
+   points) before proposing new routes** — the same discipline B5 applied to menus.
 
 ### What the recon already established (so the next session does not redo it)
 
