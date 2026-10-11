@@ -4022,3 +4022,19 @@ you touch — including the gate you delivered), rule 13 (state the measured tru
 **The rule.** (1) When a `☐` carries *"not verified / carried / claimed by docs"*, **the next action is a measurement, not a build** — write it as *"UNVERIFIED — go measure"* in your head, and measure before planning anything. (2) Before building any row, grep the code for the **feature's own vocabulary** (here: `audit_logs`, `ledger`, `rotate`, `export`) — a built phase leaves many traces. (3) When the measurement finds it built, the fix is a **rule-13 correction with evidence**, not a build; and the ONE NUMBER moves on a **correction** exactly as it does on a build. (4) Then ask the **critic** to falsify the "it is built" claim — the stakes are inverted here (a false "built" is worse than a false "missing"), and it is the one claim you must not self-certify.
 
 *Cross-ref: L124 (a check that mis-measures reports a healthy file as broken — the mirror image); the standing "a `0` is a claim about the instrument" lesson; rule 0b (measure before you build); rule 13 (correct it everywhere it was copied).*
+
+## L129 — a test that asserts on a value's **runtime keys** does **not** defend a type's **shape** — an added *optional* field is absent from every instance, so it passes silently
+
+**What happened (2026-10-11, row 28 / R28-1).** The port declares `AiRuntimeSecretRef = { scope; name }` — a secret **reference**, never a value. The test "proved" it by `expect(Object.keys(ref).sort()).toEqual(['name','scope'])`. A separate-agent hostile critic added a field — `value?: string` — to the interface and re-ran: **the suite stayed GREEN.** The assertion reads an **instance**, and an *optional* field is simply **absent** from any instance you construct, so the check cannot see it. The critic did the same with `authorityOverride?` on the envelope: green. **Two tests that looked like guards were decorative.**
+
+**Why it is easy to miss.** `Object.keys(x)` *feels* like "the shape of x". It is the shape of **one value**, and an optional field is invisible in it. The assertion also reads as a strong, specific check — the danger is that it looks **stronger** than it is, so nobody re-examines it. The real defect class is worse than a missing test: a **false sense of coverage** on a security-adjacent rule ("no field can hold a secret").
+
+**The rule.** (1) To pin a **type's** key set, assert at the **type** level, not on a value: a key-exactness guard —
+```ts
+type IsExactKeys<T, K extends string> = [keyof T] extends [K] ? ([K] extends [keyof T] ? true : false) : false
+const ok: IsExactKeys<AiRuntimeSecretRef, 'scope' | 'name' | 'purpose'> = true
+ok satisfies true   // `tsc` fails if a field is added, removed, or made optional
+```
+— because `keyof T` changes the moment **any** field is added, optional or not. (2) The proof of a type-level guard is a **mutation run**: add the forbidden field, run `tsc`, confirm it goes **RED**, restore (md5). A type guard is only real once a mutation has proved it. (3) Prefer the guard **in the type's own file or a type-test**, and note that `tsc` must **include the test file** in the same invocation — compiling the source alone does not run the guard. (4) When a critic shows an assertion was vacuous, do not merely strengthen that one test: **re-derive the guard for the whole class** (here: the envelope key set too got an `IsExactKeys` guard), then re-run **the critic's own mutation** and show it now goes RED.
+
+*Cross-ref: L124 (a check that mis-measures reports a healthy file as broken); L127 (the test that cannot fail); L103; rule 10f (the hostile critic; a mutation must go RED); rule 4 (two routes).*
