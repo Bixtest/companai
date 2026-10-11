@@ -41,6 +41,27 @@ your answer:
 
 ---
 
+**DP-12 — should a user (a tenant) be able to build their own widget, or only us and the AI?**
+*(held until the permissions workstream (DP-04) lands, or built earlier private-to-creator only?)*
+
+your answer:
+
+---
+
+**DP-13 — does a user-built widget need review before others can see it?**
+*(review by change class — only new dependencies/permissions wait — or review always?)*
+
+your answer:
+
+---
+
+**DP-14 — what happens to a user's widgets when that user leaves the company?**
+*(archive, reassign automatically, or offer to an admin?)*
+
+your answer:
+
+---
+
 ## Your answers already recorded (for reference — no need to retype)
 
 - **DP-01** — wiring first, storage second; refine the recipe by follow-up prompt until right, then save.

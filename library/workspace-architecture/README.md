@@ -46,16 +46,17 @@ onto what we already have and onto the development plan** — so the build proce
 | 1 | Bookmark the position (this file) | ✅ **DONE** — this file |
 | 2 | Recon the reference systems + docs | ✅ **DONE (B2)** — `02-REFERENCE-SYSTEMS.md`; plus B1 `01-RECON.md` |
 | 3 | The batched research plan | ✅ **DONE** — `00-RESEARCH-PLAN.md` |
-| 4 | The detailed SRS | 🔄 **B1–B6 done; B7–B9 to go** |
+| 4 | The detailed SRS | 🔄 **B1–B7 done; B8–B9 to go** |
 | 5 | Map SRS → current state → development plan | ⬜ not started (B10) |
 | 6 | Integrate + index into the rest of the docs | ⬜ **deliberately deferred** (later stage) |
 
 **Batch progress:** **B1 ✅** (recon, measured) · **B2 ✅** (reference systems, verdict) · **B3 ✅** (the
 user–AI interaction + the Business-IR display) · **B4 ✅** (the prompt→function lifecycle) · **B5 ✅** (naming,
-menus, grouping, and the organic non-business wiring) · **B6 ✅** (threads and collaboration). **Next: B7**
-(extensibility: adding tools and widgets). Commits: `2064046` (bookmark + plan), `82f72e8` (B1), `250f6c1` (B2),
+menus, grouping, and the organic non-business wiring) · **B6 ✅** (threads and collaboration) · **B7 ✅**
+(extensibility: adding tools and widgets). **Next: B8** (the reference-system decision, reconciled to our
+plan). Commits: `2064046` (bookmark + plan), `82f72e8` (B1), `250f6c1` (B2),
 `7131195` (B3), `bd4de50` (B4 + the B1 Q3 correction), `7634dcb` (README + memory), `72c20e2` (B5,
-critic-corrected), `c8c0fdf` (B6, critic-corrected).
+critic-corrected), `c8c0fdf` (B6, critic-corrected), `6c19925` (owner DP-08), **B7 = this change**.
 
 **Owner decisions recorded so far (all in `discussion_points.md`):** DP-01 **wiring first, storage second** ·
 DP-02 **show "permissions not checked"** · DP-03 **a schema-change request is a permissions question first** ·
@@ -63,8 +64,10 @@ DP-02 **show "permissions not checked"** · DP-03 **a schema-change request is a
 permission **on the way in** (may this user *request* this?) **and on the way back** (may this user *see* the
 outcome?), engineered to **protect without destroying optimization**. DP-05 (the schema-change "explain and
 route" branch ships early; the build pool waits on DP-04) · DP-06 (a recipe may sit in several menu homes but
-carries **one** permission set everywhere). **The SRS batches B7–B10 are NOT blocked by DP-04** — they proceed;
-only permissions-*dependent builds* queue behind it.
+carries **one** permission set everywhere) · DP-07 (a recipe may open as a page, a panel, or both — chosen per
+recipe) · **DP-08 (menu categories are FLAT for now; nesting is a later switch with no recipe re-saved)**.
+**The SRS batches B7–B10 are NOT blocked by DP-04** — they proceed; only permissions-*dependent builds* queue
+behind it.
 
 **B6's finding B7 must carry:** the kit **already persists threads** (`ai_chat_conversations`,
 `ai_chat_conversation_participants`, `ai_chat_messages` — 36 + 2 tests passing) and **already models human
@@ -73,22 +76,29 @@ participant**; a thread **holds messages, not widgets/objects**; no anchoring/pr
 now — the vision assigns CRDT only to document-like state). **A thread is a host a Widget can be placed into**
 — that is the join B7 and B9 use.
 
+**B7's finding B8 must carry:** the kit **already has a real extension system** — **UMES**, whose taxonomy
+enumerates four extension types including `injection-widget` (`packages/cli/src/lib/umes/collector.ts:8`). A
+module declares widgets under `widgets/injection/<name>/widget.ts` + a `widgets/injection-table.ts` mapping a
+**named spot** to widget ids; a **build-time generator** discovers them and a **runtime loader** resolves,
+gates and renders them (11 `spotId` mounts in `AppShell.tsx`, **five** sidebar-scoped). Extension therefore
+splits into **three routes**: **Route 1 platform-shipped** (BUILT); **Route 2 tenant-authored** (NEW —
+**declarative-only**, because `WidgetIR` has no slot for code, `business-widget/ir.ts:171`); **Route 3
+AI-proposed** (the *propose* half built as `FunctionCandidate`; the *apply* half — patch validator + sandbox —
+NEW). The one law that makes Route 2 safe: **a widget's audience is an intersection computed per view, not a
+grant stored once** — DP-04's two gates are the load-bearing safety property, not a policy.
+
 **⚠️ File-collision hazard (learned 2026-10-11).** The owner and the agent both edit files in this folder. An
 editor holding an older copy silently overwrote a committed edit once (`discussion_points.md`). **Both
 editors must re-read the file from disk before writing, and the agent commits immediately after every edit**
 so any loss is recoverable via `git show <commit>:<path>`.
 
-**RESUME HERE — B7.** Two carry-forwards B7 needs:
-1. **From B5** — the kit's **navigation is already built and menu-injectable** (`InjectionMenuItem`/
-   `InjectionMenuItemWidget`, the sidebar spot ids, `mergeMenuItems`, `mergeSidebarGroupsWithInjected` which
-   **creates a group from a named `groupId`**); the one missing link is the **join from a saved Function to a
-   menu item** (`UserFunction`/Widget carry **no** placement today; `FunctionPlacement` `types.ts:203` and
-   `FunctionCandidate` `:246` exist on the candidate side) — B5 specifies it in two additive changes
-   (`02-SRS-03` §5).
-2. **From B6** — the kit **already persists threads and human sharing** (`ai_chat_*`, 36 + 2 tests passing);
-   a **thread is a host a Widget can be placed into**; the gaps are AI-as-participant, widgets/objects in a
-   thread, and anchoring. **B7 must read the kit's existing extension system (UMES / `widgets/` injection
-   points) before proposing new routes** — the same discipline B5 applied to menus.
+**RESUME HERE — B8.** Carry-forwards B8 needs:
+1. **From B2** — the three reference systems are described from their own source; B8 makes the **one
+   recommendation + alternatives** and reconciles it to the development plan's items.
+2. **From B7** — the three systems inform **different layers**, not one winner: **Paperclip → the
+   control-plane / human-confirm surface** (route 3's feed); **Buzz → humans-and-agents building together on a
+   relay you own** (who may extend); **OpenRig → a local daemon team** (least relevant to hosted multi-tenant).
+   B8 should decide **which layer each informs**.
 
 ### What the recon already established (so the next session does not redo it)
 
@@ -167,7 +177,7 @@ What does **not** exist is the artefact the owner asked for:
 | `00-RESEARCH-PLAN.md` | The **batches-based research plan** — what each batch reads, produces, and its exit gate. |
 | `01-RECON.md` | **B1** — the **recon dossier**: the measured inventory of every code surface this workstream rests on, and a verdict row per owner question. |
 | `02-REFERENCE-SYSTEMS.md` | **B2** — the **three reference systems** (Buzz / OpenRig / Paperclip) analysed from their own source, plus the **verdict and alternatives**. |
-| `02-SRS-*.md` | The detailed SRS (B3–B6 written; B7–B9 to go). |
+| `02-SRS-*.md` | The detailed SRS (B3–B7 written; B8–B9 to go). |
 | `03-MAPPING.md` | The SRS → current state → development plan map (B10). |
 | `discussion_points.md` | The live list of open questions/decisions in plain language — **the document of record**. |
 | `owner_answers.md` | **The owner's own file** — a safe place to write answers; the agent reads it and never writes it. |

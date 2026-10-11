@@ -352,6 +352,94 @@ mechanism stays a pure function of the path, so nesting is a later switch with *
 
 ---
 
+### DP-12 — Should a *tenant* (a user) be able to build their own widget, or only us and the AI?
+
+**Status:** waiting · **Raised by:** Batch B7 · **Blocks anything?** No — B7 specifies all three routes; only
+the *build* order depends on this.
+
+**Where this lives in the technical file:** `02-SRS-05-extensibility.md` §5 (the three routes) and §9,
+question **OQ-B7-1**.
+
+**What it is, in plain words.**
+There are three people who might add a new panel/button/tool to the workspace: **us** (the platform), **your
+users** (a company using the product), and **the AI** (when a user asks for one). "Us" already works today —
+we add a widget by shipping code. "The AI" mostly works — it *proposes*, and we already have the
+propose-machinery. The third one, **a user building a widget themselves through the interface**, does not
+exist yet, and it is the one with a security trade-off.
+
+**What it changes for the user.**
+- **Allow it (declarative only):** a user can compose a panel — *"show this saved report as a chart, titled X"*
+  — and place it, **with no developer involved**. This is the real promise of the product.
+- **Consequence we must design for:** a widget a user builds only ever **re-shows data that a saved function
+  or an existing record already governs**, under that function's/record's permissions — it can **never**
+  introduce new code, a new query, or a new table. That is *why* it is safe; and it is also why it is the
+  **natural home of your permissions workstream (DP-04)**: the safety of user-built widgets *is* the two
+  permission gates.
+
+**My recommendation: yes — but build it *behind* the permissions workstream (DP-04).**
+Its whole safety case is "check on the way in, check on the way back", so building it before DP-04 means
+building the gate twice. Specify it now (done); build "us" and the AI-propose half on what exists today;
+build the user-authoring half when DP-04 lands.
+
+**The one question.** *Do you want the "a user builds their own widget" route held until the permissions
+workstream lands — or built earlier, initially private-to-creator only?*
+
+---
+
+### DP-13 — Does a user-built widget need review before others can see it?
+
+**Status:** waiting · **Raised by:** Batch B7 · **Blocks anything?** No.
+
+**Where this lives in the technical file:** `02-SRS-05-extensibility.md` §9, question **OQ-B7-2**.
+
+**What it is, in plain words.**
+When a user builds a widget and wants colleagues to use it, does it go straight live, or does someone
+approve it first? The vision's own rule answers the *principle*: a change that only moves things around
+(layout, title, icon) is **safe**; a change that introduces a **new dependency, command, permission or
+external integration** **needs review**. So the trigger is *what the change introduces*, not *who made it*.
+
+**What it changes for the user.**
+- **Review-by-change-class:** a widget that just re-shows an existing report is usable **immediately**;
+  a widget that hooks a **new** data source or a **new** permission waits for review. Low friction, and
+  review lands exactly where risk is.
+- **Review-always:** simpler to explain, but it puts a queue in front of harmless "show me the same report as
+  a chart" actions — which is the friction that kills adoption of features like this.
+
+**My recommendation: review by change class.**
+It is the vision's rule, it keeps friction where it belongs, and our own code already distinguishes the
+cases (a widget with no new dependency is a re-presentation; one with a new dependency is not).
+
+**The one question.** *Should a widget that only re-shows an existing function be usable immediately, with
+review reserved for widgets that introduce a new dependency or permission?*
+
+---
+
+### DP-14 — What happens to a user's widgets when that user leaves the company?
+
+**Status:** waiting · **Raised by:** Batch B7 · **Blocks anything?** No.
+
+**Where this lives in the technical file:** `02-SRS-05-extensibility.md` §9, question **OQ-B7-3**.
+
+**What it is, in plain words.**
+Every widget has an **owner** (the vision insists on it). Today, if a user who built several widgets leaves or
+is deactivated, those widgets have **no owner** — and nothing in our code says what happens next. Left
+undefined, they become orphans: visible to some people, changeable by none.
+
+**What it changes for the user.**
+- **Defined fate:** a departed user's *personal* widgets are **kept but no longer shared**; a *company-wide*
+  widget is **flagged for an admin** to reassign or archive. Predictable, no surprises.
+- **Undefined:** widgets quietly persist, half-owned, until someone notices — the kind of mess that shows up
+  a year later.
+
+**My recommendation: define the fate now (cheap), implement with the rest of route 2.**
+It is one rule written down today, and it prevents a class of "who owns this?" support tickets that is
+expensive to untangle later.
+
+**The one question.** *When a widget's author is removed, should their personal widgets be archived,
+reassigned automatically, or offered to an admin to decide?*
+
+---
+
 - **A blocker** goes in Part 1 the moment it stops work, with the reason stated plainly.
 - **Anything else** goes in Part 2 the moment it is found, so nothing is lost — and we discuss the whole
   of Part 2 **once the analysis is finished** (the owner's instruction, 2026-10-11).
@@ -373,5 +461,5 @@ its last version is the current one.** Every edit is committed immediately so th
 (`git show <commit>:<path>`).
 
 **Current list:** DP-01 ✅ answered · DP-02 ✅ answered · DP-03 ✅ answered · DP-04 ✅ approved · DP-05 ✅
-answered · DP-06 ✅ answered · DP-07 ✅ answered · DP-08 ✅ answered · DP-09 ⏳ · DP-10 ⏳ · DP-11 ⏳ — none
-blocking the SRS.
+answered · DP-06 ✅ answered · DP-07 ✅ answered · DP-08 ✅ answered · DP-09 ⏳ · DP-10 ⏳ · DP-11 ⏳ ·
+DP-12 ⏳ · DP-13 ⏳ · DP-14 ⏳ — none blocking the SRS.
