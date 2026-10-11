@@ -56,6 +56,18 @@ menus, grouping, and the organic non-business wiring). **Next: B6** (threads and
 `2064046` (bookmark + plan), `82f72e8` (B1), `250f6c1` (B2), `7131195` (B3), `bd4de50` (B4 + the B1 Q3
 correction), `7634dcb` (README + memory), **`72c20e2` (B5, critic-corrected)**.
 
+**Owner decisions recorded so far (all in `discussion_points.md`):** DP-01 **wiring first, storage second** ·
+DP-02 **show "permissions not checked"** · DP-03 **a schema-change request is a permissions question first**.
+**NEW workstream the owner opened (DP-04):** the **permissions architecture** is *"not casual — too many
+layers and what-ifs"* and must be **investigated and engineered properly** as its own batch (its own SRS).
+DP-05 (the schema-change build pool) depends on it. **The SRS batches B6–B10 are NOT blocked by DP-04** —
+they proceed; only permissions-*dependent builds* queue behind it.
+
+**⚠️ File-collision hazard (learned 2026-10-11).** The owner and the agent both edit files in this folder. An
+editor holding an older copy silently overwrote a committed edit once (`discussion_points.md`). **Both
+editors must re-read the file from disk before writing, and the agent commits immediately after every edit**
+so any loss is recoverable via `git show <commit>:<path>`.
+
 **RESUME HERE — B6.** The B5 finding B6 must carry: the kit's **navigation is already built and
 menu-injectable** (`InjectionMenuItem`/`InjectionMenuItemWidget`, the sidebar spot ids, `mergeMenuItems`,
 `mergeSidebarGroupsWithInjected` which **creates a group from a named `groupId`**), and the one missing link
