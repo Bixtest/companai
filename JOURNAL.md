@@ -102,9 +102,14 @@ document; (3) my tests were **weaker than they looked** — they checked an inst
 *optional* field passed silently (the critic proved it with an `authorityOverride` mutation that stayed
 green) → fixed with a type-level key-exactness guard, and the same mutation is now caught.
 
-**Also met and registered:** a **flaky test** (`mcp-dev-key-resolution`, ~1 full-run-in-3, green in
-isolation) — **not** caused by this change (which is additive only; `git diff --stat` empty), registered
-as **`CC-68`** (rule 9a).
+**Also met and FIXED in the same change (rule 9a / rule 15):** a **flaky test** — `mcp-dev-key-resolution.test.ts` › the
+TOCTOU case, ~1 full-suite run in 2–3, green in isolation. Measured cause: the test **manufactured the file swap by
+renaming real files inside mocked `stat`/`open`**, racing the reader's own `Promise.all([descriptor stat, path lstat])`
+— a microtask-order coin toss. **The production code was correct**; the test was non-deterministic. Fixed by
+**stating the mismatch directly** (descriptor `{dev:1,ino:111}` vs path `{dev:2,ino:222}` — no rename, no race),
+**mutation-proved** (delete `isSameFile` → RED on both variants), **5 consecutive full-suite runs green (1530/1530)**.
+A second latent hazard found on the way (`llm-bootstrap` calling `list()` unguarded on re-evaluation against a partial
+registry stub) is also fixed + tested. Registered as **`CC-68`, now closed**; lesson **`L130`**.
 
 **Honest bound — NO box moved.** `B-05`/`Port` are about the door being **used**; a door nobody walks
 through yet does not complete them — that is R28-3. **ONE NUMBER unchanged 75 / 321 = 23%.**

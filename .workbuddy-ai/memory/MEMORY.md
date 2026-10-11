@@ -85,8 +85,17 @@ Worked example: `CC-43` "flagged, not fixed" **hid `CC-46`**.
   `AiRuntimePort` is a **comment-only** declaration (`ce.ts`, owned by `L-01`/`AH-5`). Authoritative contract =
   `ARCHITECTURE-hermes-integration.md` §4/§7/§9 → **Phase 1 = "the port, with OpenCode behind it"**.
 - **ALSO NOW:** Row 16 team-leg (`CC-51`) + `G-22`. **DESIGN TRACK: `B-WS/B9`** (widget architecture). **DONE: Row 22.**
-- **Open `CC-` items:** `CC-51` (row 16 team-leg — owner's go-ahead), `CC-54` (index rebuild), `CC-19` (CI) are
-  trigger-blocked; `CC-58` staged; `CC-32` gated on `G-09`; `CC-60` (wire the Business-IR tool to a chat consumer).
+- **Row 28 🔵 IN PROGRESS** — six sub-rows (`PLAN-ROW28-agent-runtime-port.md`). **R28-1 ✅ DONE 2026-10-11**
+  (code `513bad41`): the port's **shape + test** — `lib/ai-runtime-port.ts` (definitions only, zero imports; the eight
+  §4.1 signatures, the §4.2 envelope with required `capabilityGrantId`, secret *references*) + 9 tests incl. the
+  `IsExactKeys` type guard. **NEXT = R28-2** (fit OpenCode behind the door, unchanged behaviour). R28-3 = the chat
+  route moved onto the port (the exit gate). `CC-67` (two other direct callers) is R28-3-blocked.
+- **`CC-68` ✅ CLOSED 2026-10-11** (code `537e30b5`): a **non-deterministic TEST** in `mcp-dev-key-resolution.test.ts`
+  (the TOCTOU case, both variants) — it raced the swap against the reader's `Promise.all`; **product was correct**.
+  Fixed by stating the inode mismatch directly; mutation-proved; 5× full-suite green (1530/1530). Also guarded
+  `llm-bootstrap` (partial-registry stub). Lesson **L130**.
+- **Open `CC-` items:** `CC-67` (R28-3), `CC-60` (Business-IR tool → chat consumer), `CC-51` (row 16 team-leg — owner's
+  go-ahead), `CC-54` (index rebuild), `CC-19` (CI) are trigger-blocked; `CC-58` staged; `CC-32` gated on `G-09`.
 - **Owner's go-ahead in force:** execute the supplementary core queue (`PLAN-SUPPLEMENTARY-CORE-QUEUE.md`; docs
   `47177f1`, `caeface`); the Business IR is re-classified **CORE** (`CORE-BOUNDARY.md` §2 note + plan §S1.1).
 
