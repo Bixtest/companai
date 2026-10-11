@@ -46,17 +46,18 @@ onto what we already have and onto the development plan** — so the build proce
 | 1 | Bookmark the position (this file) | ✅ **DONE** — this file |
 | 2 | Recon the reference systems + docs | ✅ **DONE (B2)** — `02-REFERENCE-SYSTEMS.md`; plus B1 `01-RECON.md` |
 | 3 | The batched research plan | ✅ **DONE** — `00-RESEARCH-PLAN.md` |
-| 4 | The detailed SRS | 🔄 **B1–B7 done; B8–B9 to go** |
-| 5 | Map SRS → current state → development plan | ⬜ not started (B10) |
+| 4 | The detailed SRS | 🔄 **B1–B8 done; B9 to go** |
+| 5 | Map SRS → current state → development plan | 🔄 **first draft done (B8, `03-MAPPING.md`); finalised in B10** |
 | 6 | Integrate + index into the rest of the docs | ⬜ **deliberately deferred** (later stage) |
 
 **Batch progress:** **B1 ✅** (recon, measured) · **B2 ✅** (reference systems, verdict) · **B3 ✅** (the
 user–AI interaction + the Business-IR display) · **B4 ✅** (the prompt→function lifecycle) · **B5 ✅** (naming,
 menus, grouping, and the organic non-business wiring) · **B6 ✅** (threads and collaboration) · **B7 ✅**
-(extensibility: adding tools and widgets). **Next: B8** (the reference-system decision, reconciled to our
-plan). Commits: `2064046` (bookmark + plan), `82f72e8` (B1), `250f6c1` (B2),
-`7131195` (B3), `bd4de50` (B4 + the B1 Q3 correction), `7634dcb` (README + memory), `72c20e2` (B5,
-critic-corrected), `c8c0fdf` (B6, critic-corrected), `6c19925` (owner DP-08), **B7 = this change**.
+(extensibility: adding tools and widgets) · **B8 ✅** (the reference-system decision, reconciled to our
+plan + the first draft of the mapping). **Next: B9** (the widget architecture end to end). Commits: `2064046`
+(bookmark + plan), `82f72e8` (B1), `250f6c1` (B2), `7131195` (B3), `bd4de50` (B4 + the B1 Q3 correction),
+`7634dcb` (README + memory), `72c20e2` (B5, critic-corrected), `c8c0fdf` (B6, critic-corrected), `6c19925`
+(owner DP-08), `59afc53` (B7), `43173e3` (DP-12/13/14 + DP-15), `96e962c` (two workstreams), **B8 = this change**.
 
 **Owner decisions recorded so far (all in `discussion_points.md`):** DP-01 **wiring first, storage second** ·
 DP-02 **show "permissions not checked"** · DP-03 **a schema-change request is a permissions question first** ·
@@ -115,13 +116,30 @@ editors must re-read the file from disk before writing, and the agent commits im
 so any loss is recoverable via `git show <commit>:<path>`. **The owner's answers live in `owner_answers.md`
 (his file; the agent reads it, never writes it) as well as in `discussion_points.md`.**
 
-**RESUME HERE — B8.** Carry-forwards B8 needs:
-1. **From B2** — the three reference systems are described from their own source; B8 makes the **one
-   recommendation + alternatives** and reconciles it to the development plan's items.
-2. **From B7** — the three systems inform **different layers**, not one winner: **Paperclip → the
-   control-plane / human-confirm surface** (route 3's feed); **Buzz → humans-and-agents building together on a
-   relay you own** (who may extend); **OpenRig → a local daemon team** (least relevant to hosted multi-tenant).
-   B8 should decide **which layer each informs**.
+**B8's finding B9 must carry:** **the decision is made, and it is additive.** Build our own workspace
+layer on our own stack; **borrow ideas per layer, adopt no protocol/runtime/datastore** — Buzz → the
+**experience model** (activity feed, grouping, thread lifecycle); Paperclip → the **governance model**
+(the self-modification gate, systematic status, consumed-once consent); OpenRig → **two mechanisms**
+(SSE, thin-clients-over-one-daemon). **No core item is delayed by the choice** (`02-REFERENCE-SYSTEMS.md`
+§9d) — because nothing of theirs is adopted as a runtime. The two items the choice *unblocks* are
+**`CC-59`** (a live caller exercises route 3) and **`CC-58` Stage B** (the screen shows a nugget).
+**B8 also produced `03-MAPPING.md`** (first draft) — every workspace requirement mapped to
+*have-it (path) / build-it (`G-*`/`CC-*` + prerequisite + trigger) / borrow-it (kit/Hermes)*.
+
+**RESUME HERE — B9.** Carry-forwards B9 needs:
+1. **From B8** — the widgetized structure itself is **ours to build** (not borrowed): B9 is
+   `02-SRS-06-widget-architecture.md`, the **synthesis** batch. The three borrowed layers (Buzz's feed,
+   Paperclip's gate, OpenRig's SSE) are its **inputs**, not its subject.
+2. **From B7** — the three extension routes (platform-shipped / tenant-authored / AI-proposed) and the
+   two files a widget is (`widgets/injection/<name>/widget.ts` + `widgets/injection-table.ts`).
+3. **From B6** — a thread is a **host a Widget can be placed into** (`AiChatConversation` + participants).
+4. **From B5** — the join: `UserFunction.placement` → `InjectionMenuItem`; `groupId` = path minus its
+   last segment; membership confers **no** authority.
+5. **The B9 exit gate** (`00-RESEARCH-PLAN.md:206`): a reader can name **every part of the workspace**
+   (widget definition, instance, runtime, IR, renderer, registry, reference layer, threads, collaboration,
+   extension) and say **"we have it (here) / we build it (item) / we borrow it (Hermes, the kit)"**.
+6. **The `03-MAPPING.md` draft** (`§4`) names exactly what B9 must fill: the **Q11 row** and **R12's
+   BUILD-IT detail** (the frontend workspace surface).
 
 ### What the recon already established (so the next session does not redo it)
 
@@ -199,9 +217,9 @@ What does **not** exist is the artefact the owner asked for:
 | `README.md` | This file — the workstream bookmark and the resume point. |
 | `00-RESEARCH-PLAN.md` | The **batches-based research plan** — what each batch reads, produces, and its exit gate. |
 | `01-RECON.md` | **B1** — the **recon dossier**: the measured inventory of every code surface this workstream rests on, and a verdict row per owner question. |
-| `02-REFERENCE-SYSTEMS.md` | **B2** — the **three reference systems** (Buzz / OpenRig / Paperclip) analysed from their own source, plus the **verdict and alternatives**. |
-| `02-SRS-*.md` | The detailed SRS (B3–B7 written; B8–B9 to go). |
-| `03-MAPPING.md` | The SRS → current state → development plan map (B10). |
+| `02-REFERENCE-SYSTEMS.md` | **B2** — the **three reference systems** (Buzz / OpenRig / Paperclip) analysed from their own source, plus the **verdict and alternatives**; **§9 = B8's final decision**, reconciled to the plan. |
+| `02-SRS-*.md` | The detailed SRS (B3–B7 written; **B9 to go** — `02-SRS-06-widget-architecture.md`). |
+| `03-MAPPING.md` | The SRS → current state → development plan map — **first draft in B8**; finalised in **B10**. |
 | `discussion_points.md` | The live list of open questions/decisions in plain language — **the document of record**. |
 | `owner_answers.md` | **The owner's own file** — a safe place to write answers; the agent reads it and never writes it. |
 

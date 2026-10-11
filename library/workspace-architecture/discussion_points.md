@@ -536,3 +536,14 @@ its last version is the current one.** Every edit is committed immediately so th
 answered · DP-06 ✅ answered · DP-07 ✅ answered · DP-08 ✅ answered · **DP-09 ⏳ · DP-10 ⏳ · DP-11 ⏳ (B6's
 questions — still open; they live in `owner_answers.md`, not here)** · DP-12 ✅ answered · DP-13 ✅ answered ·
 DP-14 ✅ answered · **DP-15 🆕 raised (The Studio — a new workstream)** — none blocking the SRS.
+
+**B8 (2026-10-11) — the reference-system decision, recorded. No new DP.** B8 answers **Q10** with **one
+choice + reasons + alternatives** (`02-REFERENCE-SYSTEMS.md` §5 + §9): **build our own workspace layer;
+borrow ideas per layer** — Buzz → the experience model; Paperclip → the governance model; OpenRig → two
+mechanisms — and **adopt none of their protocols, runtimes or datastores.** This is **ours to decide**
+(rule 11 is about *what to build*, and this is *how we relate to references*), so it raises no question for
+the owner. **It delays no core item** (§9d). B8 also produced the **first draft of `03-MAPPING.md`** —
+every workspace requirement mapped to *have-it / build-it / borrow-it*. The batch's hostile critic (a
+**separate** agent, command+output per claim) found **13 real defects — all sourcing/overclaiming in our
+own documents, none in the code or plan** — each corrected in place and tabled (`02-REFERENCE-SYSTEMS.md`
+§8b; `03-MAPPING.md` §5; `01-RECON.md` §critic table).

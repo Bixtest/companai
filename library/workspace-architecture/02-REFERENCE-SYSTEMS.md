@@ -17,7 +17,11 @@ READMEs but had NOT extracted them, so no reader could check the quotes; all thr
 extracted and every quote below is verifiable from the extract)*:
 `buzz-main/{README,VISION,VISION_AGENT,VISION_ACTIVITY,VISION_PROJECTS,VISION_MESH,CONTEXT,ARCHITECTURE}.md`;
 `openrig-main/{README,ARCHITECTURE,ROADMAP}.md`; `paperclip-master/{README,DESIGN,ROADMAP,AGENTS}.md`.
-**Licences verified from the actual `LICENSE` files inside the zips** (read via `unzip -p`).
+**Licences verified from the actual `LICENSE` files inside the zips** — *corrected by the B8 critic
+(finding A4): the first cut said this but had only read them via `unzip -p`, so a reader of the
+artefact could not open them — the **same** "unverifiable by construction" defect §8 claims to have
+fixed. All three `LICENSE` files are now **extracted into `_extract/`**: `_extract/buzz-main/LICENSE`
+(Apache-2.0), `_extract/openrig-main/LICENSE` (Apache-2.0), `_extract/paperclip-master/LICENSE` (MIT).*
 **Prior studies cited:** `library/paperclip-hermes-study/` (11 findings) and
 `library/paperclip-value-study/findings/07-synthesis.md`.
 
@@ -32,7 +36,9 @@ extracted and every quote below is verifiable from the extract)*:
 | **Paperclip** (`paperclipai/paperclip`) | *"The app people use to manage AI agents for work."* — an operational control plane: org charts, tasks, heartbeat runs, budgets, approvals, audit. | **MIT** | **Agent operations control plane** |
 
 *Citation note (added after the hostile-critic pass): the Buzz line is `buzz-main/README.md`; the
-OpenRig line is `openrig-main/README.md`; the Paperclip line is `paperclip-master/README.md` line 1.
+OpenRig line is `openrig-main/README.md`; the Paperclip line is `paperclip-master/README.md` **line 3**
+*(corrected by the B8 critic, finding A2: the tagline is the `alt` attribute of the banner `<img>`, not
+line 1).*
 The licences are the first lines of the three top-level `LICENSE` files — **not** inferred.*
 
 **The first strategic observation.** None of the three is *our* product — ours is a **business
@@ -107,7 +113,7 @@ commands, **6 runtime adapters** (claude-code, codex, pi, omp, terminal, stub), 
 
 | # | OpenRig's idea | Where | Why it matters |
 |---|---|---|---|
-| **O-1** | **The "attention surface"** — a named, first-class concept for *what needs a human now* (the daemon exposes `attention-surface.ts` as a shareable unit). | `ARCHITECTURE.md:38` | The same problem as Buzz's activity feed and Paperclip's "does it need me" — three independent systems converge on **one** answer to Q2. Worth heeding. |
+| **O-1** | **The "attention surface"** — a file `attention-surface.ts` the daemon exposes as a shareable unit *(**gloss, not in the extract** — B8 critic C4: the cited line shows only the filename and that `*-surface.ts` is a shareable subpath; the reading "a named, first-class concept for what needs a human now" is **mine**)*. | `ARCHITECTURE.md:38` | The same problem as Buzz's activity feed and Paperclip's "does it need me" — three independent systems converge on **one** answer to Q2. ⚠️ **That "convergence" is a hypothesis, per §5a's correction.** Worth heeding. |
 | **O-2** | **State in SQLite, one daemon, one HTTP surface, thin clients** — the CLI/TUI/MCP are all **thin clients of the same daemon**. | `ARCHITECTURE.md:44–59` | A clean pattern for our workspace: **one server-side workspace service**, many surfaces. |
 | **O-3** | **Server-sent events for live updates** (`routes/events.ts` via `streamSSE`; the TUI subscribes to `/api/activity/events`). | `ARCHITECTURE.md:88–89` | The concrete transport for our live workspace/thread updates. |
 | **O-4** | **A durable work queue with honest run-bounding** (the queue is a table; retries are bounded). | `ARCHITECTURE.md:15–17` | Confirms our `AH-3` direction (a wake is a database row) — the same finding the Paperclip study reached. |
@@ -139,7 +145,7 @@ in one sentence that is, again, our Q2:
 
 `library/paperclip-value-study/findings/07-synthesis.md` is a **complete** forensic pass.
 **Citation note (corrected after the hostile-critic pass — finding 5):** the synthesis explicitly
-warns that its marker tally is *not* its structure — verbatim, `07-synthesis.md:42–48`: *"'six
+warns that its marker tally is *not* its structure — verbatim, `07-synthesis.md:40–41`: *"'six
 things worth acting on' … is a judgement, not a count of markers in the findings files"*, and gives
 the markers only *"for reference: **LEARN 20 · IDEA 8 · WARN 5 · CONFIRMATION 2 · NOT FOR US 1**."*
 The first cut of this document reprinted that footnote as the study's verdict profile — it is not.
@@ -309,3 +315,123 @@ defects in this document, none in the sources** — each corrected in place abov
 reader can open.* Every quote in the first cut of §0 was **true** — it came from a README the author
 had read via `unzip -p` — but the reader could not reach that file, so the citations were
 **unverifiable by construction**. That is a defect even when the words are right.
+
+### 8b. Re-corrected in B8 (rule 13 — the recurrence the lesson above predicted)
+
+A **second** separate hostile-critic agent (B8) re-attacked every citation in this file **and** in the
+new `03-MAPPING.md`, with a command and its output per claim. It found **four defects in this file** —
+and, tellingly, **three of them are the very class §8 above named**: citations whose *values* were
+right but whose *location* a reader could not check. Fixed in place:
+
+| # | Was | Now | Finding |
+|---|---|---|---|
+| 8 | §0/§8 claimed the `LICENSE` files were "read from the actual `LICENSE` files … now **sourced**" — but **no `LICENSE` file was ever extracted into `_extract/`** (`find _extract -iname 'LICENSE*'` → empty). The **recurrence** of §8's own banked lesson. | all three `LICENSE` files **extracted**: `_extract/{buzz-main,openrig-main,paperclip-master}/LICENSE` — every licence now verifiable from the artefact | B8 critic A4 |
+| 9 | §0 said the Paperclip tagline is `README.md` **line 1** | it is **line 3** (the `alt` attribute of the banner `<img>`) | B8 critic A2 |
+| 10 | §3b quoted the synthesis at `07-synthesis.md:42–48` | the quoted sentence is at **`:40–41`**; the cited range began one bullet *past* it, on different text | B8 critic A3 |
+| 11 | §9e said the choice "rests on **four** measured rows" while naming **five**, and "the **eight** borrow rows" for sets of **8** (§9b) and **7** (§9d) | corrected to **five** measured rows, and the two set sizes named exactly | B8 critic C1/D2 |
+
+*(Findings in the new `03-MAPPING.md` — 9 of them — are recorded in that file's own correction table,
+because that is where they were copied.)*
+
+---
+
+## 9. Batch B8 — the DECISION, reconciled to the development plan (final)
+
+**Batch:** B8 of the research plan. **Date:** 2026-10-11. **Status:** the **final** verdict — this
+section **supersedes §5a as the answer** (it does not contradict it; it *sharpens* it from *"take Buzz
+first"* to *"each system informs one layer, and here is the plan item each layer touches"*).
+**Exit gate this section must meet** (`00-RESEARCH-PLAN.md:194`): *the recommendation is **one choice
++ reasons + alternatives**, never a menu; and it names, per choice, the **development-plan items it
+accelerates or delays**.*
+
+### 9a. The one choice, in one paragraph
+
+**Build our own workspace layer on our own stack; borrow from the three systems *ideas for one layer
+each*; adopt none of their protocols, runtimes, or storage.** Concretely: **Buzz supplies the
+experience model** (what a user sees while the AI works — the activity feed, the grouping object, the
+thread lifecycle, "humans and agents are the same kind of colleague"); **Paperclip supplies the
+governance model** (the propose→diff→approve→apply path for an AI change, the systematic status
+vocabulary, consumed-once consent); **OpenRig supplies two mechanisms only** (server-sent events as
+the live-update transport; the "thin clients over one daemon" shape). **Nothing of theirs becomes a
+second source of truth.**
+
+### 9b. Why this is the choice — the reasons, ranked
+
+1. **Our product is not their product.** Ours is *a business platform whose business model is compiled
+   into working software*; theirs are a collaboration relay (Buzz), a coding-agent harness (OpenRig),
+   and an agent-operations console (Paperclip). B2 §0 measured this. A wholesale adoption would import
+   a **second source of truth** (Buzz's Nostr relay beside our Postgres model), a **second identity
+   system** (secp256k1 beside our `api_keys`), and a **second tenant boundary** — a permanent,
+   structural cost (B2 §5b alternative 2).
+2. **The three systems do not compete — they live at different layers.** This is B7's refinement, and
+   it is the reason the answer is a *blend* and not a *winner*. Measured across B2/B7:
+   | Layer of our workspace | Which system informs it | Evidence |
+   |---|---|---|
+   | **What the user sees while the AI works** (Q2) | **Buzz** — the activity feed (verb·object·outcome), 12 render classes, "never go dark" | B2 §1b B-1/B-2 |
+   | **Who may extend the workspace, and how** (Q8/Q9) | **Buzz** — "humans and agents are the same kind of colleague"; grouping confers no authority | B2 §1b B-5, §5a |
+   | **Threads and their lifecycle** (Q6) | **Buzz** — branch-as-channel: open → live → archived-as-record | B2 §1b B-6 |
+   | **The AI-proposed change path** (B7 route 3) | **Paperclip** — the self-modification gate (propose → diff → accepted interaction → apply in a *separate* run) | B2 §3b `N-16` |
+   | **Status vocabulary everywhere** | **Paperclip** — "status is systematic" | B2 §3b, §5a |
+   | **The consent / approval shape** | **Paperclip** — consumed-once, run-bound consent | B2 §3b |
+   | **Live-update transport** | **OpenRig** — SSE over one daemon | B2 §2b O-3 |
+   | **One server-side workspace service, many surfaces** | **OpenRig** — thin clients over one daemon | B2 §2b O-2 |
+3. **The one law that makes borrowing safe.** A borrowed *idea* costs nothing; a borrowed *mechanism
+   from a foreign stack* costs a permanent reconciliation. So the borrow is **ideas for the
+   experience and governance layers**, and **two well-understood transports** from OpenRig — never a
+   runtime, a protocol, or a datastore.
+4. **What none of the three gives us — so it is ours.** Stated in B2 §5c and **re-confirmed by B3–B7**:
+   the **prompt → Business-IR → saved tenant Function** chain (B3, B4) and the **Business-IR ↔ user
+   display bridge** (B3). No reference system has *"a user's prompt becomes a saved, named, reusable,
+   deterministic function with no AI at run time."* That is our differentiator (the vision's §160),
+   and B1/B4 measured that **half of it is already in code** (`placement.ts`, `runFunction`).
+
+### 9c. The alternatives, and why each is not the choice
+
+The owner invited alternatives (B2 §5b). B8 re-states them **with the plan cost of each**, which B2
+did not:
+
+| Alternative | Why it is not the choice | The plan items it would *delay*, and why |
+|---|---|---|
+| **Build the layer from scratch, borrow nothing** | Rejected as a **default** — three products in the same neighbourhood each arrived at a similar interface concept (a feed, a status vocabulary, a "what needs me" surface). Re-deriving it worse is the cost. **But** our *stack* is from scratch regardless — the borrow is ideas, not code. | **Delays nothing directly** — but it **adds design risk** to `G-07`/`G-03` (the Widget contract and User Functions would be designed without a proven display/vocabulary model to check against). |
+| **Adopt a mature OSS workspace runtime wholesale** (e.g. run Buzz's relay as our backend) | Rejected — a **second source of truth**, a second identity system, a second tenant boundary, all permanently reconciled with the kernel. | **Delays the *whole spine***: `G-01` kernel · `G-08` relationship fabric · `G-02` IR — because the relay's event model would have to be mapped into, and kept consistent with, our canonical model. **Structural, not incremental.** |
+| **Lean on a generic component/composition framework** for the widgetized structure | Rejected — the vision's Widget is a **typed, versioned, registry business object with a dependency graph**, a business-layer concern no UI framework provides. We already have the rendering layer. | **Delays `G-07`** (the Widget contract): the framework solves rendering, not the *contract*, so `G-07` still has to be built — the framework would be an extra dependency under it, not a substitute for it. |
+
+### 9d. What the choice **accelerates** and **delays** — per layer, against the plan's own items
+
+The exit gate requires naming, per choice, the plan items a choice touches. The plan's live vocabulary
+is the **supplementary core queue** (`PLAN-SUPPLEMENTARY-CORE-QUEUE.md` — `CC-*`) and the **vision
+phases** (`12-development-plan.md` — `G-*`). Both are named.
+
+| Our choice (borrowed layer) | The plan item it **accelerates** | The plan item it is a **prerequisite to** (does not delay, does unblock) | Its **cost** (what it delays) |
+|---|---|---|---|
+| **Buzz → the experience model** (the feed, the 12 render classes, never-go-dark) | **`CC-58` Stage B** (the person-facing Business-IR screen) — the feed *is* the display model for a nugget executing (B3 §display) | — | **None to the core queue.** The display model is design, not build; it *informs* `CC-58` Stage B when business work resumes. |
+| **Buzz → grouping confers no authority** (B-5) | **The menu join** (SRS-03 §5: `UserFunction.placement` → `InjectionMenuItem`) — a group is a grouping object, not a grant | B-perms (WS-1) — reinforces "membership ≠ permission" | None. It is a **constraint on the design**, and it **reduces** security risk. *(Corrected in B8 — see §8b: the first draft called this "`G-09`-era menu wiring", but SRS-03 §5.3 measures that the **projector is pure and needs no `G-09`**; only the `placement` **field** rides the Function row's persistence, `CC-32`/`G-09`.)* |
+| **Buzz → thread lifecycle** (open → live → archived) | **B6's three gaps** (AI-as-participant; widgets-in-a-thread; anchoring/presence) — the lifecycle is the *frame* the gaps fill | — | None. B6 measured the kit **already persists threads** (`AiChatConversation`, 36+2 tests pass); the lifecycle is additive. |
+| **Paperclip → the self-modification gate** (propose → diff → approve → apply-later) | **B7 route 3** (AI-proposed extension) — the gate *is* route 3's process. Aligns with the existing `FunctionCandidate` (propose-half built) + `canOfferSaveAsFunction` (`gate.ts:80`) | **`CC-59`** (the Business-IR caller) — a live caller is what makes route 3 exercisable | **None to the core.** It reuses `request-outcome/triage.ts` + `gate.ts`, which are **already built**. |
+| **Paperclip → systematic status; consumed-once consent** | **`CC-15` / `CC-38`** (the escalation/approval cluster — the first live `202` + a `pending_acts` row) — the consent shape is *the* approval model | — | **None.** `CC-38` is already staged in §S4 with its own trigger; this **clarifies** its shape, it does not move it. |
+| **OpenRig → SSE transport** | **B6's live-update gap** (no CRDT/WebSocket/Yjs in production) — SSE is the simplest proven transport | — | None. It is a transport choice for a build that is **not yet started**. |
+| **OpenRig → thin clients over one daemon** | **B7 route 1/2/3** (the extension routes all go through one server-side registry) — matches the kit's build-time generator + runtime loader shape | — | None. B7 measured the kit **already has** the one-loader shape (`injection-loader.ts`). |
+
+### 9e. The honest limits of this verdict
+
+- **Two of the eight rows in §9b rest on a hypothesis, not a measurement** — the "what needs me
+  now" convergence (B2 §5a, labelled) and OpenRig's `attention-surface.ts` (cited as a **filename**
+  only; its content was not in the extract). They are **not** load-bearing for the choice: the choice
+  rests on the five *measured* rows (Buzz's feed, grouping, and thread-lifecycle; Paperclip's gate and
+  status). (§9b holds **8** rows; §9d holds **7** — the two sets are different, not both "eight".)
+- **The borrows are design influences, so this verdict *delays no core item*.** Every row in §9d names
+  an item the choice **informs or unblocks**; none names an item it pushes later. That is the honest
+  reading: the choice is **additive**, because we are not adopting a runtime.
+- **The one place the choice *could* cost:** if the owner ever wanted Buzz's relay as the *actual*
+  backend. That is §9c alternative 2, and its cost (`G-01`/`G-08`/`G-02` delayed structurally) is the
+  reason it is rejected.
+
+### 9f. Hand-off to B9
+
+B9 (the widget architecture, end to end) takes from this section: **Buzz's activity feed is the Q2
+display model** (to be specified for our Business-IR nugget in B3's terms); **Paperclip's gate is
+route 3's process**; **OpenRig's SSE is the live-update transport**; and **the widgetized structure
+itself is ours to build** — it is the subject of `02-SRS-06-widget-architecture.md`, which maps each
+part to *have it (here) / build it (item) / borrow it (kit, Hermes)*.
+
+*End of batch B8 §9. The first draft of `03-MAPPING.md` follows this section in its own file.*

@@ -258,7 +258,7 @@ knows what changed:
 | # | Was | Now | Source of the correction |
 |---|---|---|---|
 | 1 | "§4b — **every** business module ships a `widgets/` folder" | **24** real module-level extension points of 32 directories (2 are the widgets module, 4 are API-scoped duplicates, 2 are fixture/template) | hostile-critic finding 1 |
-| 2 | "§2 — execute via `engine.query` **(lines 216–241)**" | execute call at **line 218**, `try` block **217–228** (241 was the function's closing brace) | hostile-critic finding 2 |
+| 2 | "§2 — execute via `engine.query` **(lines 216–241)**" | the **216–241 range is correct** (the execute block); the *first* correction to "line 218 / `try` 217–228" was **also wrong** — re-measured 2026-10-11 in B8: the `try` is at **line 219**, the `engine.query` call at **line 220**, and 218 is the `let result` declaration. `run.ts:112` (the `runFunction` entry) is correct. | hostile-critic finding 2 (B1), re-corrected by B8 critic A7 |
 | 3 | "§1 — `placement.ts` contains the chain" (as one literal quote) | the text is **line-wrapped across lines 4–5** | hostile-critic finding 3 |
 | 4 | "§4a/§6 — `widgets.ts` (60 lines, **the whole contract**)" | file is **114 lines**; the contract type is at lines 53–58; 60 was a read window | hostile-critic finding 4 |
 | 5 | "§0 header — counts are from find/ls, **not estimates**" (while §2 quoted test counts from prose) | test counts **run here, 2026-10-11**: `business-ir` 78+6 skipped / `user-function` 133 / `business-widget` 68 / **all three: 279 passed + 6 skipped** | hostile-critic finding 4 (self-contradiction) |
