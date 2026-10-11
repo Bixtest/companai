@@ -17,11 +17,19 @@ So this plan: **(1)** goes through **every** open item in the register; **(2)** 
 **Scope discipline (measured, not asserted).** The register holds **25** open rows as of 2026-10-11 (derived,
 not typed — the last row per id, non-`✅`): `CC-6`, `CC-7`, `CC-8`, `CC-9`, `CC-10`, `CC-11`, `CC-12`,
 `CC-13`, `CC-14`, `CC-15`, `CC-19`, `CC-20`, `CC-32`, `CC-33`, `CC-34`, `CC-35`, `CC-36`, `CC-38`, `CC-39`,
-`CC-41`, `CC-42`, `CC-51`, `CC-54`, `CC-58`, `CC-59`. Of these, **one is business** (`CC-42` — its first caller is the
+`CC-41`, `CC-42`, `CC-51`, `CC-54`, `CC-58`, `CC-60`. Of these, **one is business** (`CC-42` — its first caller is the
 `customers` deal pipeline, paused as business work) and is **excluded here**; the remaining **24 are core** and
 appear below. (`CC-58` + `CC-59` were both added 2026-10-11 — `CC-58` from `NY-24`, `CC-59` from the measurement
-that answered the owner's Stage-B question; `CC-43` and `CC-46` were missing register rows, added the same day —
-both DONE, so neither adds to the open count.)
+that answered the owner's Stage-B question; **`CC-59` is now ✅ DONE (2026-10-11, code `83f88bd3`)**, and its
+follow-on **`CC-60`** — the tool's in-chat consumer — takes its place in the open set, so the count is
+unchanged; `CC-43` and `CC-46` were missing register rows, added the same day — both DONE, so neither adds to
+the open count.)
+
+> **⚠️ This plan is now a VIEW, not the tracking place (2026-10-11).** The owner asked for one trackable list:
+> *"you need to talk to me based on `platform_points.md` rows."* So **every open item below is now also listed
+> under its `platform_points.md` LIST row** — see that file's **⏳ OPEN WORK** section, which is the place to
+> read "what is left". This plan keeps the **cluster reasoning** (why items group, and their prerequisites);
+> the register still owns the truth; and `platform_points.md` owns the **row view**.
 
 **How to use it.** Each item carries: **what it is** (plain words), **why it is open** (the gap), **its named
 trigger** (copied from the register — the register owns the truth), **its prerequisite**, and **what to do when

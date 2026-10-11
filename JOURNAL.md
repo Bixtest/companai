@@ -95,12 +95,13 @@ defects — both fixed**:
 **THE ONE NUMBER: UNCHANGED at 72 / 321 = 22%** — a caller adds no vision box. Re-derived by **two routes**
 (the local `derive-counts` parse and a blind verifier agent), both 72/321.
 
-**★ NEXT:** the named `CC-` queue is exhausted — every remaining `CC-` item is trigger-blocked (`CC-51` needs
-the owner's go-ahead; `CC-54`/`CC-19` are blocked) or newly scheduled (`CC-60`). The live candidates, ranked:
-**(1) `CC-51`** (row 16's team-leg — smallest, closes an already-🟡 row, needs only the owner's go-ahead);
-**(2) vision Phase 6 = audit** (the next skeleton frontier, no scaffold yet — the biggest and most
-foundational); **(3) `B-WS/B9`** (the design track's widget architecture). **The choice of the next build is
-the owner's (rule 11).**
+**★ NEXT = LIST row 19** (Phase 5 — *"every state-changing action goes through one typed command, never a raw
+write"*), chosen by the vision's own order (Phase 5 before Phase 6): Phase 5's other open rows are **blocked** —
+**row 16** 🟡 (its remainder `CC-51` is **deferred by you**), **row 20** 🟡 (its remainder `CC-42` is **business
+work**). **Row 19 starts with a rule-0b measurement** — its remainder is **un-named** today (the appendix says
+the command contract is `PARTIAL` and `S5` is `☐ 0/2`, but **no `CC-` item carries it**), so step 1 measures,
+names, and registers it (rule 8). **Every open item, listed under its row:
+[`library/development/platform_points.md`](library/development/platform_points.md) → ⏳ OPEN WORK.**
 
 ---
 

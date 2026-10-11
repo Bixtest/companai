@@ -40,7 +40,7 @@ ticked boxes, never typed. If the number and the boxes disagree, the number is t
 
 | | ID | What it is | State |
 |---|---|---|---|
-| **NOW** | **`CC-59`** — a caller for the Business-IR compile+execute chain | **Owner's 2026-10-11 go-ahead: execute the supplementary core queue** ([`PLAN-SUPPLEMENTARY-CORE-QUEUE.md`](PLAN-SUPPLEMENTARY-CORE-QUEUE.md) — 24 open, 1 business excluded, 23 core), updating the development docs as we go. **The Business IR is re-classified CORE** (owner, 2026-10-11; `CORE-BOUNDARY.md` §2 note). **First startable item = `CC-59`:** measured (rule 0b) the chain is **already built + complete** in `runFunction` (`user-function/run.ts:112` — bind → compile → execute via `engine.query`), so the gap is **one caller**, not a chain; the startable shape is prompt → `authorBusinessQueryIr` → IR → `compileQuery` → `engine.query` → result (no persistence; **not** blocked on `CC-32`/`G-09`). Full layer-and-wiring map: plan §S1.1–§S1.3. **Alongside it (a second, *design* track — see the DESIGN TRACK row below): the workspace workstream `B-WS` was bound to this spine on 2026-10-11 (`04-BRIDGE.md` + Rule 16), so `platform_points.md` now also tracks the `B-WS` design batches "as we update everything else".** | ✅ **`CC-59` DONE 2026-10-11** — the Business-IR chain now has its **first production caller**: `runBusinessQueryPrompt` (the wire) + the registered tool `business_ir.run_query` (`ai-tools/business-ir-pack.ts`). Gated, **111 suites / 1518 tests green**, **8 RED-then-GREEN mutations**, a separate-agent critic (2 real defects found and fixed). **The next FRONTIER is the earliest unstarted item** — candidates: **`CC-51`** (row 16's team-leg — the owner's go-ahead), **`B-WS/B9`** (the design track's widget architecture), **vision Phase 6 = audit** (the next skeleton frontier), and **`CC-60`** (wire the tool to a chat consumer). `CC-54`/`CC-19` are trigger-blocked. **Re-measure in code before building** (rule 0b). Bridge `B-WS` binding committed **`33ca4a5`**. |
+| **NOW** | **Row 19** (Phase 5) — *"every state-changing action goes through one typed command, never a raw write"* | **The next row to work, chosen by the vision's own order (Phase 5 before Phase 6) and by what is actually startable.** Phase 5's other open rows are **blocked**: **row 16** 🟡 (its remainder `CC-51` is **deferred by the owner**), **row 20** 🟡 (its remainder `CC-42` is **business work**). **Row 19 is the only Phase-5 row that can move now.** It **begins with a rule-0b measurement** — its remainder is currently **un-named** (a tracking gap: the appendix records the command contract as `PARTIAL` and `S5` *"one permission engine"* as `☐ 0/2`, but **no `CC-` item carries it**), so step 1 is to measure what the command bus already does, name what is left, and register it (rule 8). Full map of everything left: the **⏳ OPEN WORK** section below. | ⏳ **NEXT — starts with a measurement.** `CC-59` (the Business-IR caller) is ✅ **DONE 2026-10-11**. |
 | **ALSO NOW** | Row 16 (team-leg), `G-22` | **own / team row scope** — the own-leg is BUILT (`CC-50` CLOSED 2026-10-11); only the **team-leg** (`CC-51`, a real `team` entity, deliberately deferred) remains. The generic state-machine engine (BUILD-ORDER §3) — first caller = the `customers` deal pipeline | 🟡 **row 16** own-leg BUILT 2026-10-11 (opt-in `ownerField`/`ownerFeature` on `OrmEntityConfig` + role-level `.own` feature modifier; first caller = `api_keys`); **team-leg = `CC-51`** (trigger named). `G-22` Slice 2A (the engine) BUILT 2026-10-09; Slice 2B paused as business work (rule 0b). |
 | **DESIGN TRACK** | **`B-WS/B9`** — the widget architecture (end to end) | **A SECOND LIVE TRACK: the workspace-architecture workstream (`B-WS`)** — the design of the dashboard & workspace widget architecture. **It is DESIGN, never code** (BR-4): its outputs are `CC-*` items in THIS list, not builds. **Its design feeds LIST row 35 (Phase 9 — *"you can place Functions and Widgets on a Workspace and share it"*)**, which stays `☐` because no build exists yet. **Bound to this spine 2026-10-11 by a written contract — [`library/workspace-architecture/04-BRIDGE.md`](../workspace-architecture/04-BRIDGE.md)** (rules BR-1…BR-4 + [`WORKING-RULES.md`](WORKING-RULES.md) **Rule 16**): one live task (this box), one numbering (**`B-WS/Bn`**, never a bare `Bn`), every touched register row carries a `decided in B-WS/<batch>` note, and **a design is never a build**. Batch order `B-WS/B1…B-WS/B10`, then the two owner-approved follow-on workstreams **WS-1 B-perms** (the two-gate permissions engine) and **WS-2 B-studio** ("The Studio"). | 🟡 **`B-WS/B1–B-WS/B8` of 10 done; next `B-WS/B9`** (the widget architecture, end to end — the SRS `02-SRS-06-widget-architecture.md`, *to be written*; the sequence runs `02-SRS-01`…`02-SRS-05` today), then `B-WS/B10` finalises `03-MAPPING.md`. **Design track — moves no appendix box, so the ONE NUMBER is unchanged by it.** |
 | **DONE** | **Row 22** (`CC-27` core + `CC-55` narrowing + `CC-56` confirm-path + `CC-57` in-process) | **an AI user can run only the agents bound to it** | ✅ **BUILT 2026-10-11 — COMPLETE** (`CC-27` core, `CC-55` narrowing, `CC-56` confirm-path re-check, `CC-57` in-process) — an `ai_agent_bindings` table + repo + a fail-closed `resolveAgentBinding` for `ai_worker` principals, wired into **both** agent dispatch routes (`run-object`, `chat`) as **403 `agent_not_bound`** after the policy gate, a manage surface, and a coverage gate that fails a new un-gated dispatch site. **`CC-55` completes the narrowing half:** the resolved scope is threaded into the runtime — tools INTERSECT (`agent.allowedTools ∩ binding.toolAllowlist`, never widening), features UNION (both required, deny otherwise) — with humans byte-identical. **`CC-56` completes the execution side:** the pending-action **confirm** route (which runs the agent's tool) now re-checks the binding (fail-closed for an `ai_worker`, passthrough for a human) before executing. **`CC-57` closes the last leg:** the **in-process** helper (`lib/business-ir-author.ts`) now resolves the binding (fail-closed `agent_not_bound`, **before the model is asked**) and threads `computeBoundRunScope` too — the coverage gate's `IN_PROCESS_DISPATCH_SITES` is now **empty** (held by a positive pin) and its dispatch detection is **alias-aware**. Hostile-critic-hardened (**2** real defects fixed in `CC-27`; **2** in `CC-55`; **3** in `CC-56`; **1** LOW in `CC-57`), RED-then-GREEN ×9 (`CC-27`) + ×6 (`CC-55`) + ×5 (`CC-56`) + ×6 (`CC-57`). **No remaining named leg.** No fresh appendix box ⇒ ONE NUMBER unchanged. |
@@ -58,10 +58,69 @@ leftover from the row-13 session, now false and contradicting this file's own PH
 
 ---
 
+## ⏳ OPEN WORK — every open item, tied to its LIST row (the ONE place to see what is left)
+
+**Why this section exists (owner, 2026-10-11, verbatim):** *"you need to talk to me based on
+`platform_points.md` rows … Add whatever rows or statuses that are missing there to cover it all in one place
+… then you tell me what is next first based on what row you will be working on there."*
+
+So: **every open item in the register is listed here, under the LIST row it belongs to.** The register
+([`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md)) stays the truth; this is its **row view**. A row whose
+Status above is `✅` can still carry an open remainder — the `✅` says the *capability* is built, the remainder
+says what is still not whole. **25 open items**, derived from the register (never typed).
+
+**How to read the Trigger column:** it is the **observable event** that makes the item startable. *"When `G-04`
+lands"* is a trigger; *"later"* is not. An item whose trigger is **"startable now"** needs nothing but a go-ahead.
+
+| LIST row | Item | What it is, in plain words | Trigger — when it can be built |
+|---|---|---|---|
+| **1** | `CC-12` | The universal **`Resource` envelope** — the stable id / owner / version / "who changed it" trail every object should share. (The registry half is done; the envelope is not.) | When its **first real consumer** exists (a contract with no consumer is *"contract after the code"*). |
+| **1** | `CC-6` | The **row-level** rule of the data axis — per-record `view` / `manage`. | When **`G-04`** (the data-axis layer) lands. |
+| **1** | `CC-20` | A custom **field's** permission is granted, but **nothing reads it** (declared, granted, inert). | When **`G-04`** lands. |
+| **7** | `CC-10` | The **HTTP** authorization path passes **no invoker** (the tool door does) — two paths, two answers. | When `rbacService.refusedByAuthority` is next touched. |
+| **7** | `CC-11` | `enforce` is **not armed for any tenant** — the door is capable and fail-closed; arming is the **operator's** per-tenant decision. | **The operator's decision** — **needs you**. |
+| **8** | `CC-33` | The structural guard sees **row writes, not raw DDL** — a `DROP TABLE` / re-type / FK change is invisible to it. | When a **migration-time / DDL-time check path** exists. |
+| **8** | `CC-35` | A structural **re-type labelled `'create'`** would escape the guard (a name-keyed convention). | When any writer can label a re-type `'create'`. |
+| **8** | `CC-36` | Several **foreign guard-input builders omit `actorKind`** (`messages`, `configs`, `communication_channels`, `staff`, …). | When a guard **reads** `actorKind` on those paths. |
+| **8** | `CC-39` | The `CC-25` actor check reads **live ACL state inside a guard's `validate`** — an extra DB round-trip. | When the guard input carries (or can cheaply resolve) the actor's ACL. |
+| **9** | `CC-7` | The permission **catalogue is in-process** for recorded surfaces — a recorded field or saved Function lives for the process, not in a durable row. | The next **`G-04`/`G-09` migration** (one migration, not two). |
+| **12** | `CC-15` | **No live route** proves the `escalation` (`202` + a `pending_acts` row) end-to-end. | When a live route asserts the 202 end-to-end. |
+| **12** | `CC-38` | The **escalate outcome has no approval-layer wiring** — nobody files the pending act. | When the approval layer gains a guard-origin intake. |
+| **12** | `CC-14` | The escalation branch in the **three PARKED modules** (`staff`, `payment_gateways`, `sales`) is commented out, so it never compiles or runs. | When those modules are **un-parked** (a business decision). |
+| **13** | `CC-34` | The `read` / `reference` **verbs** are grammar postures, **not** enforceable — a guard only fires on writes. | When a **read-path enforcement point** exists. |
+| **16** | `CC-51` | Row 16 **Option B — "own + TEAM"** row scope. The own-leg (`CC-50`) is built; "team" needs a **real `team` concept the platform has never had**. | **Your go-ahead** — you deferred it 2026-10-11 (*"document B as a future addition"*). |
+| **18** | `CC-54` | The **index-time presenter** can still promote **any** string field into the stored search `title` — `CC-53` fixed the tool side, this closes the **source**. | When an **index rebuild** is next performed. |
+| **20** | `CC-42` | `G-22` **Slice 2B** — the state-machine engine's **first caller** is the `customers` deal pipeline. **Business work** (excluded from the core queue). | When business work resumes. |
+| **21 / 21b** | *(the phase itself)* | **Audit / provenance** — *"see who did what"* and *"audit history is independent"*. Both 🟡; **no `CC-` item carries them yet** — this is the next unbuilt skeleton frontier (vision Phase 6). | **Startable now** — it begins with a rule-0b measurement of what audit already exists. |
+| **23** | `CC-58` | The Business-IR authoring wire's **person-facing screen** (Stage B) — the head + the compile half are now live (`CC-59`); the screen is not. | When **business work resumes** (the screen is business-half UI). |
+| **23** | `CC-60` | The `business_ir.run_query` tool is registered, but **no agent whitelists it** — so a chat assistant cannot call it yet. | When the AI tool surface is next touched, or a general assistant agent is added. |
+| **26** | `CC-13` | `G-21`'s **schema-mutation IR kind**, its **UI**, and its **database row** are not built (the taxonomy and the Save gate are). | When the schema-mutation IR kind exists. |
+| **27** | `CC-8` | `tool-test-runner.ts` runs a read-tool handler **ungated** (reachable only from the superadmin CLI). | When the `tool-test` CLI gains an HTTP surface. |
+| **27** | `CC-9` | `catalog`/`customers` `ai-agents-context.ts` call a tool handler **directly** with `userId: null`. | When page-context hydration gains a subject. |
+| **31** | `CC-32` | A saved **Function has no persistence** — so it has no delete path to guard, and cannot be loaded by id. | When **`G-09`** gives a saved Function a durable row. |
+| **46** | `CC-19` | `packages/shared`'s `dynamicLoader.tsconfig.test.ts` fails under the full suite (`EBUSY`) but passes alone — **environmental, not a code defect**. | **The first CI run** (a host that does not hold the `node.exe` image). |
+| **46** | `CC-41` | `update.sh` rebuilt onto the same tag, so the outgoing image could not be restored. **Fixed** 2026-10-09; what remains is to **watch it run**. | The **next `update.sh` run** (the following deploy). |
+
+**Rows that are `☐` with no `CC-` item yet** (so they are not in the table above): **row 28** (the agent runtime
+behind one typed door — `B-05`/`Port`) and **row 30** (each job declares its model — `S6`) are unstarted Phase-8
+work; **row 35** (place Functions/Widgets on a Workspace) waits on the **`B-WS`** design track (▶ FRONTIER,
+DESIGN TRACK row); rows **36–44** are business verticals; **row 45** (entitlements) is a later-phase item.
+
+---
+
 ## THE LIST — sorted in build order (vision Phase 0 → Phase 10)
 
 **How to reorder:** move a row up or down; the phases must stay in order (a lower phase cannot be
 started while a higher one is open). If you move something, write one line beside it saying why.
+
+> **Row numbers are stable handles — and they are now UNIQUE (repaired 2026-10-11).** Two defects were fixed
+> this session, both found by auditing every row against the register: **(1) row `22` was used twice** — by the
+> Phase-5 **AI-binding** row (`BUILD-ORDER` item 20, referenced as *"row 22"* in ~50 places, so it **keeps**
+> `22`) and by a Phase-6 **audit** row, now **`21b`**; and **(2) row `29`** (Phase 8) restated row 22's own item
+> (`CC-27`) while still reading `☐` — a **false open**, now ✅ with a cross-reference. **The physical order of
+> the rows follows the PHASES, not the numbers** — so row **22** (a Phase-5 row) sits above rows **21 / 21b**
+> (Phase 6). That is correct, not a mis-sort. **Every open item is mapped to its row in the ⏳ OPEN WORK
+> section above.**
 
 ### PHASE 0 — Immutable platform primitives *(the foundation under everything)*
 
@@ -119,7 +178,7 @@ started while a higher one is open). If you move something, write one line besid
 | # | What you can do after this | Status | ID |
 |---|---|---|---|
 | 21 | You can see **who did what, when, on which record** — and export it for compliance. | 🟡 | `P4` |
-| 22 | Audit history is independent of the business record (you cannot edit your own past). | 🟡 | `P4a` |
+| 21b | Audit history is independent of the business record (you cannot edit your own past). | 🟡 | `P4a` *(renumbered 2026-10-11: this row was **also** numbered `22`, colliding with the Phase-5 AI-binding row — `BUILD-ORDER` item 20, referenced as "row 22" in ~50 places. The binding keeps `22`; this one becomes `21b`.)* |
 
 ### PHASE 7 — Business Agent Gateway
 
@@ -136,7 +195,7 @@ started while a higher one is open). If you move something, write one line besid
 | # | What you can do after this | Status | ID |
 |---|---|---|---|
 | 28 | The agent runtime sits behind **one typed door** — no other code talks to it directly. | ☐ | `B-05` / `Port` |
-| 29 | An AI user can be **bound** to a specific agent, with specific tools and scope. | ☐ | `CC-27` |
+| 29 | An AI user can be **bound** to a specific agent, with specific tools and scope. | ✅ | `CC-27` — **same item as LIST row 22** (Phase 5), which carries the full evidence: the `ai_agent_bindings` table + fail-closed `resolveAgentBinding` + the narrowing (`CC-55`), the confirm re-check (`CC-56`) and the in-process gate (`CC-57`), all closed 2026-10-11. *(This row read `☐` until 2026-10-11 — a **false open**: it named `CC-27`, which was already complete. Rule-13 correction; the two rows are one item seen from the binding's side and the runtime's side.)* |
 | 30 | Each AI job **declares which model** it uses (local or cloud) — one picture, no surprises. | ☐ | `S6` |
 
 ### PHASE 9 — Functions / Widgets / Workspace — **rows 31–34 ✅; row 35 is `☐` and is exactly what the `B-WS` DESIGN TRACK feeds (the widget-and-workspace design is being written now: `B-WS/B9` widget architecture → `B-WS/B10` mapping; then WS-1 B-perms / WS-2 B-studio). A design is not a build, so row 35 stays `☐` until the design becomes a `CC-*` item that is built.**
