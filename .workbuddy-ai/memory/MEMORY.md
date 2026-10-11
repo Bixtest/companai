@@ -16,6 +16,16 @@
 - **Two sources of truth:** `BACKLOG.md` (status) + `BUILD-ORDER.md` (order). Authoritative FRONTIER =
   `platform_points.md`'s `▶ FRONTIER` box; BACKLOG's box points to it.
 - **Every claim carries an observation.** Only the code is evidence (Rule 0).
+- **SHARED-DOC CLOBBER HAZARD (learned twice, 2026-10-11).** The owner edits docs from a **stale editor copy**;
+  his save silently overwrites agent edits (`discussion_points.md` was clobbered twice). **BEFORE touching any
+  shared doc: `git diff <path>` worktree-vs-HEAD to see if the owner changed it; if the worktree lost agent
+  content, `git checkout <good-commit> -- <path>` then re-apply — never hand-edit a possibly-clobbered
+  worktree. Commit immediately after every edit.** Mitigation: `library/workspace-architecture/
+  owner_answers.md` is **the owner's file (agent reads, never writes)**; the live list stays in
+  `discussion_points.md`.
+- **`grep $'\r'` LIES on a git pipe** in this Git-Bash worktree (reports every line as CRLF). To test LF-0 of a
+  committed blob use **`git ls-files --eol <path>` → `i/lf`**, or `git cat-file blob <sha> | od -An -tx1 |
+  tr ' ' '\n' | grep -c '^0d'` → **0**.
 - **Never `git add -A`** — stage by explicit path; commit in BOTH repos (docs `C:/Users/Ramzi/Downloads/companai`;
   code `…/workspace/starting-kit`).
 - Handover docs carry **no "what is next"**; the live task lives only in the `★ ACTIVE TASK` box.
