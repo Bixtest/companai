@@ -55,6 +55,46 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+### ✅ DONE (partial) — **Row 27 (Phase 7): MEASURED, and its one startable half built — the S8 repeat-detection signal. `S3`'s seal is blocked on `G-04`; the offer is the frontend. No box moved.**
+**(2026-10-11; code repo `workspace/starting-kit`.)**
+
+**The task (rule 0b).** Row 27 — *"the user is told when blocked and noticed and suggested to — not left
+guessing"* (`S3` + `S8`). Measured first:
+
+- **`S3` ("told when refused") is HALF there.** The dispatcher's refusal returns a localised message **plus the
+  missing feature list** (`{ error: t('api.errors.forbidden','Forbidden'), requiredFeatures }`, 403 —
+  `apps/mercato/src/app/api/[...slug]/route.ts:249`). The **"seal"** — a marker that an answer was *reduced* —
+  does **not** exist, and the spec ties it to the **data permissions work**: it needs the **data axis
+  (`G-04`)** to know *what* was withheld. **So that half is BLOCKED, not skipped.**
+- **`S8` ("notices and suggests") was half-built and inert.** The **gate** exists
+  (`canOfferSaveAsFunction`, `request-outcome/gate.ts`) but has **no production caller** — the architecture
+  says the Save *button* is separate (frontend). The **"notices" half did not exist at all**; the spec names
+  it exactly: *"a per-user request history and a similarity signal"*.
+
+**Built — the startable half.** `shared/src/lib/request-outcome/repeat.ts` (+ test): the **similarity signal**.
+`normaliseRequestText` (Unicode-aware — a naive `[a-z0-9]` strip would empty every non-Latin request and make
+them all look like repeats), `requestSimilarity` (Jaccard over token sets), `detectRepeatedRequest` →
+`RepeatSignal`. **Pure — zero imports** (no clock, no DB, no model), so the rule can be tested exhaustively.
+**A signal, not a decision:** renamed from `…Verdict`/`repeated` to `RepeatSignal`/`looksLikeRepeat` after the
+critic flagged that the first name collided with the gate's real decision type. An empty request is **not** a
+repeat of an empty one; the threshold defaults to **0.8** and is clamped; the O(history) cost is documented as
+the caller's to bound (the module does not silently truncate).
+
+**Proof.** `request-outcome` — **5 suites / 78 tests green** (16 new); `tsc --noEmit` clean; **4 RED-then-GREEN
+mutations**, md5-verified restores (+1 re-proved after the rename). **A separate-agent hostile critic attacked 7
+claims: all held; 2 findings were FALSE POSITIVES** (the cited docs *do* exist — in the docs repo, which the
+critic did not search; and the deep-path import is the package's own pattern, as the sibling `tier-source` is
+imported the same way) **and 1 was real and is fixed** (the naming collision).
+
+**Honest bound — and NO box moved.** `S3` and `S8` are whole points and neither is whole, so both stay `☐`;
+the ONE NUMBER is **unchanged at 75 / 321 = 23%**. Registered as **`CC-66`**: the **history read** that feeds
+the signal, and the **offer** (the Save button).
+
+**★ NEXT = LIST row 28** (Phase 8 — *"the agent runtime sits behind one typed door"*), starting with a rule-0b
+measurement.
+
+---
+
 ### ✅ DONE — **Row 21 / 21b (Phase 6, Audit): RE-MEASURED — the phase is BUILT. `P4a`/`P4b` ☐→☑, so the ONE NUMBER MOVED again: 73/321 → 75/321 = 23%.**
 **(2026-10-11; docs only — no code changed; this was a measurement.)**
 

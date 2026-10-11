@@ -14,8 +14,24 @@ written for exactly that person — and this revision is written for an agent th
 continue the development work.** Read it top to bottom once (about 20 minutes), then
 follow §2 to actually get working. Everything else in the project is reachable from here.
 
-**Written 2026-10-05, revision 31 (2026-10-11). Owner: Ramzi. Development machine: `BIXMASERVER` (Windows 10 Pro).**
-**This revision records a RE-MEASUREMENT: Phase 6 (Audit) was recorded as `0/2 — never verified`, and it is
+**Written 2026-10-05, revision 32 (2026-10-11). Owner: Ramzi. Development machine: `BIXMASERVER` (Windows 10 Pro).**
+**This revision records row 27 (Phase 7 — *"told when blocked, noticed and suggested to"*): MEASURED, with its one
+startable half built.** Measured: **`S3` ("told when refused") is half there** — the dispatcher's refusal already
+returns a localised message **plus the missing feature list** (403, `apps/mercato/src/app/api/[...slug]/route.ts:249`)
+— but the **"seal"** (a marker that an answer was *reduced*) is **blocked on `G-04`** (the data axis knows *what*
+was withheld). **`S8` ("notices and suggests") was half-built and inert** — `canOfferSaveAsFunction`
+(`request-outcome/gate.ts`) exists with **no production caller** (the Save *button* is frontend), and the
+**"notices" half did not exist**. **Built:** the **similarity signal** —
+`shared/src/lib/request-outcome/repeat.ts` (`normaliseRequestText` Unicode-aware · `requestSimilarity` Jaccard ·
+`detectRepeatedRequest`; **pure, zero imports**; threshold **0.8** clamped; `RepeatSignal`/`looksLikeRepeat`, a
+**signal not a decision** — renamed after a critic flagged the collision with the gate's real decision type).
+**Proof:** `request-outcome` 5 suites / 78 tests green (16 new); `tsc` clean; **4 RED-then-GREEN mutations**,
+md5-verified. A separate-agent hostile critic: all 7 claims held; **2 of its findings were false positives** (the
+cited docs exist in the docs repo — it searched only the code repo; the deep-path import is the package's own
+pattern) and **1 was real and fixed**. **NO BOX MOVED** — `S3`/`S8` are whole points and neither is whole, so the
+ONE NUMBER is **unchanged at 75 / 321 = 23%**. Registered **`CC-66`** (the history read that feeds the signal,
+and the offer). **NEXT = LIST row 28** (Phase 8).
+**Prior — revision 31 recorded a RE-MEASUREMENT: Phase 6 (Audit) was recorded as `0/2 — never verified`, and it is
 BUILT.** Rows 21 / 21b were 🟡; the rule-0b measurement found the whole phase in place —
 `packages/core/src/modules/audit_logs/` carries a **read API** (`GET`, RBAC `audit_logs.view_self`, filter by
 actor/resource/org), a **viewer page** (235 lines, fetching the action + access logs), an **export API** (CSV), a
@@ -829,7 +845,7 @@ documents and was *not* re-measured — treat it as a starting point, not a fact
 | | |
 |---|---|
 | **Repo 1** (thinking/docs) | `master`, HEAD **`f48f0c3`** — **re-measured 2026-10-11**. It is the **`CC-61` documentation commit** (`docs(CC-61): row 19 done — the command contract made uniform`). *(The row-21/21b re-measurement commit follows this figure — a commit cannot name its own hash.)* *(Previous figures: **`00bbb08`**, the front-door sync to the `B-WS` bridge; before that **`33ca4a5`**, the bridge itself.)* |
-| **Repo 2** (code) | `main`, HEAD **`4c8eecfe`** — **re-measured 2026-10-11**. It is **`CC-61`** (`feat(commands): CC-61 — the command contract made uniform`): `types.ts` (the three optional facets) + `command-bus.ts` (`commandContractMetadata` + the merge before `persistLog`) + the new `command-contract.test.ts`. *(Previous figure: **`83f88bd3`**, `CC-59`, re-measured 2026-10-11; before that **`1bb61557`**, `CC-57`.)* **RULE-13 CORRECTION (2026-10-11):** this row had read `c03eca5c` while three later code commits (`CC-44` `3ba7b28f`, `CC-56` `0d52368f`, `CC-57` `1bb61557`) had already landed — the figure was stale by three commits. |
+| **Repo 2** (code) | `main`, HEAD **`3ff25376`** — **re-measured 2026-10-11**. It is **row 27's S8 signal** (`feat(request-outcome): row 27 / S8 — the repeat-detection similarity signal`): `request-outcome/repeat.ts` + its test. *(Previous figure: **`4c8eecfe`**, `CC-61`, re-measured 2026-10-11; before that **`83f88bd3`**, `CC-59`.)* **RULE-13 CORRECTION (2026-10-11):** this row had read `c03eca5c` while three later code commits (`CC-44` `3ba7b28f`, `CC-56` `0d52368f`, `CC-57` `1bb61557`) had already landed — the figure was stale by three commits. |
 | **Codebase shape** | **21 packages, 1 app** (`apps/mercato`) — a monorepo (Yarn 4.17.1 + Turbo) |
 | **Documentation** | **Tracked markdown: 1,094 repo-wide, of which 50 are in `library/development/`** — **re-measured 2026-10-10** via `git ls-files`. `library/` also holds thousands of `.md` files on disk — but most of that is **gitignored imported study material** (§3i), so **treat the disk figure as approximate: it drifts as untracked files come and go.** `LESSONS.md` (L1–L101, 3,385 lines), `JOURNAL.md` (6,777 lines) and `COOKBOOK.md` (2,961 lines) are the three long-form files. |
 | **The studies** | analysis programme **complete** (batches 0–12, 13 reports); Paperclip + Hermes study **complete** (11 batches, 3,940 lines, 53 lessons) |
