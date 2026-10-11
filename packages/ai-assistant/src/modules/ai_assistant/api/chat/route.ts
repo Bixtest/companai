@@ -2,12 +2,18 @@ import { createLogger } from '@open-mercato/shared/lib/logger'
 import { NextResponse, type NextRequest } from 'next/server'
 import type { OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
 import { getAuthFromRequest } from '@open-mercato/shared/lib/auth/server'
+// OPEN — row 28 / R28-3: the chat route reaches the AI runtime THROUGH THE
+// PORT, never by importing an engine. The engine itself (OpenCode today) sits
+// behind the door as one implementation (`opencode-port-adapter.ts`) — see
+// `ARCHITECTURE-hermes-integration.md` §4/§9 Phase 1 ("the port, with OpenCode
+// behind it"). This file must not name an engine anywhere below this line.
 import {
-  handleOpenCodeMessageStreaming,
-  type OpenCodeAuthContext,
-  type OpenCodeStreamEvent,
-} from '../../lib/opencode-handlers'
-import { createOpenCodeClient } from '../../lib/opencode-client'
+  OPENCODE_RUNTIME_IMPLEMENTATION,
+  type AiRuntimeEnvelope,
+  type AiRuntimePort,
+  type AiRuntimeStreamEvent,
+} from '../../lib/ai-runtime-port'
+import { createOpenCodePortAdapter, textInputRef } from '../../lib/opencode-port-adapter'
 import { createRequestContainer } from '@open-mercato/shared/lib/di/container'
 import type { EntityManager } from '@mikro-orm/postgresql'
 import {
@@ -18,8 +24,60 @@ import {
 } from '@open-mercato/core/modules/api_keys/services/apiKeyService'
 import { checkAiChatRateLimit } from '../../lib/rate-limit'
 import { getUserRoleIds } from '../../lib/user-role-ids'
+import { createOpenCodeClient } from '../../lib/opencode-client'
 
 const logger = createLogger('ai_assistant')
+
+/**
+ * A process-monotonic counter that makes each run's id unique even when two
+ * runs start in the same millisecond. Purely local — it carries no authority
+ * and is never a security token.
+ *
+ * **The honest limit (hostile-critic finding 3, 2026-10-11).** Today the port
+ * is constructed **once per request** (`resolveAiRuntimePort` is called inside
+ * the handler), so its run registry is request-scoped and two requests can
+ * never collide through the adapter. The counter is therefore *not* load-
+ * bearing today; it makes the id collision-proof as a property of the id
+ * itself, so the safety does not depend on the adapter staying per-request.
+ * It does **not** survive a module reload or span multiple server instances —
+ * if the adapter ever became a process singleton (or the app ran in more than
+ * one instance), a `<conv>:<engine>:run-<t>-1` from two instances could still
+ * collide, and this counter would not prevent it. That limit is named here
+ * rather than hidden; a truly process-global id would need a server-minted
+ * UUID, which is the port's `runId` contract's business, not this file's.
+ */
+let runCounter = 0
+
+/**
+ * Mint the run id for one chat turn. Exported so its two guarantees can be
+ * tested directly (a run is not a transcript; a run id is unique per run):
+ *
+ *  - **distinct from the conversation id** — §4.2's rule that the identifiers
+ *    stay separate, which the R28-2 hostile critic made us enforce;
+ *  - **unique per run, not per millisecond** — a repeated run id is treated by
+ *    the adapter as an idempotent re-start, so two runs sharing an id would
+ *    make the second never stream. The monotonic counter removes that.
+ */
+export function mintChatRunId(conversationId: string, startedAt: number): string {
+  const sequence = ++runCounter
+  return `${conversationId}:${OPENCODE_RUNTIME_IMPLEMENTATION}:run-${startedAt}-${sequence}`
+}
+
+/**
+ * The AI runtime door (row 28). One function so the **choice of engine** lives
+ * in exactly one place: today it is OpenCode behind the port; a future engine
+ * swaps here and nowhere else. Every caller in this file talks to the returned
+ * `AiRuntimePort`, never to an engine by name.
+ */
+function resolveAiRuntimePort(deps: {
+  em: EntityManager
+  auth: { userId: string; tenantId: string | null; organizationId: string | null }
+}): AiRuntimePort {
+  return createOpenCodePortAdapter({
+    auth: deps.auth,
+    em: deps.em,
+  })
+}
 
 /**
  * System instructions injected at the start of new chat sessions.
@@ -178,7 +236,7 @@ export async function POST(req: NextRequest) {
     const writer = stream.writable.getWriter()
     let writerClosed = false
 
-    const writeSSE = async (event: OpenCodeStreamEvent | { type: string; [key: string]: unknown }) => {
+    const writeSSE = async (event: AiRuntimeStreamEvent | { type: string; [key: string]: unknown }) => {
       if (writerClosed) return // Guard against writes after close
       try {
         const jsonStr = JSON.stringify(event)
@@ -205,7 +263,20 @@ export async function POST(req: NextRequest) {
     const container = await createRequestContainer()
     const em = container.resolve<EntityManager>('em')
 
-    const opencodeAuth: OpenCodeAuthContext = {
+    // The AI runtime door. Every engine call below goes through `port`.
+    // The engine behind the door is chosen here and nowhere else.
+    const port = resolveAiRuntimePort({
+      em,
+      auth: {
+        userId: auth.sub,
+        tenantId: auth.tenantId ?? null,
+        organizationId: auth.orgId ?? null,
+      },
+    })
+
+    // The identity fields the door's envelope needs, read from the
+    // authenticated principal (server-minted; the runtime cannot name its own).
+    const actorIdentity = {
       userId: auth.sub,
       tenantId: auth.tenantId ?? null,
       organizationId: auth.orgId ?? null,
@@ -213,10 +284,17 @@ export async function POST(req: NextRequest) {
 
     // Handle question answer - simple JSON response, not SSE
     // The original SSE stream continues and will receive the follow-up response
+    //
+    // REGISTERED BYPASS (`CC-69`, row 28 / R28-3): answering an in-flight
+    // question is NOT a run — the port's contract (§4.1) has no
+    // "list/answer a paused question" operation, and inventing a ninth one is a
+    // design decision, not a wiring move. This is the ONE remaining place the
+    // chat route reaches an engine directly; it is ownership-checked below
+    // (fail-closed 403) and tracked in `COMPLETION-CALLBACKS.md`.
     if (answerQuestion) {
       try {
         const client = createOpenCodeClient()
-        // Resolve the question's actual sessionID from OpenCode — never
+        // Resolve the question's actual sessionID from the engine — never
         // trust the caller-supplied `answerQuestion.sessionId` blindly.
         const pending = await client.getPendingQuestions()
         const matching = pending.find((q) => q.id === answerQuestion.questionId)
@@ -228,14 +306,14 @@ export async function POST(req: NextRequest) {
         if (matching.sessionID !== answerQuestion.sessionId) {
           return NextResponse.json({ error: 'Session not available' }, { status: 403 })
         }
-        // Look up the api_key row bound to this OpenCode session and
+        // Look up the api_key row bound to this session and
         // assert ownership matches the authenticated caller.
         const ownerRow = await findApiKeyByOpencodeSessionId(em, matching.sessionID)
         if (
           !ownerRow ||
-          ownerRow.sessionUserId !== opencodeAuth.userId ||
-          (ownerRow.tenantId ?? null) !== opencodeAuth.tenantId ||
-          (ownerRow.organizationId ?? null) !== opencodeAuth.organizationId
+          ownerRow.sessionUserId !== actorIdentity.userId ||
+          (ownerRow.tenantId ?? null) !== actorIdentity.tenantId ||
+          (ownerRow.organizationId ?? null) !== actorIdentity.organizationId
         ) {
           return NextResponse.json({ error: 'Session not available' }, { status: 403 })
         }
@@ -345,41 +423,75 @@ export async function POST(req: NextRequest) {
         // Emit thinking event for UX feedback
         await writeSSE({ type: 'thinking' })
 
-        // Use streaming handler that supports questions
-        await handleOpenCodeMessageStreaming(
-          {
-            message: messageToSend,
-            sessionId,
-            auth: opencodeAuth,
-            em,
-          },
-          async (event) => {
-            // Track usage from stream events
-            if (event.type === 'tool-call') toolCallCount++
-            if (event.type === 'metadata' && 'tokens' in event) lastTokens = event.tokens
-            if (event.type === 'done' && 'sessionId' in event) {
-              resultSessionId = event.sessionId
-              // First-time binding: when the caller did NOT supply a
-              // sessionId (i.e., this is a freshly minted chat) and we
-              // successfully created a session token earlier, bind the
-              // newly-resolved OpenCode session id to that api_key row so
-              // subsequent resumes can be authorized.
-              if (!sessionId && sessionToken && event.sessionId) {
-                try {
-                  await bindOpencodeSessionToApiKey(em, sessionToken, event.sessionId)
-                } catch (bindErr) {
-                  // The response stream is already in-flight — surface the
-                  // failure to logs without disturbing the SSE pipeline.
-                  logger.error('AI Chat — Failed to bind OpenCode session to api_key', { err: bindErr })
-                }
+        // ── The door (row 28 / R28-3) ──────────────────────────────────────
+        // Build the envelope the platform admits, then start the run and
+        // stream it. The engine is never named; `port` decides what sits
+        // behind it. Identity is minted here (server-side) and the run id is
+        // distinct from the conversation id (the §4.2 rule the R28-2 hostile
+        // critic made us apply — a run is not a transcript).
+        //
+        // The tenant is REQUIRED by the envelope and must not be empty: an
+        // empty tenant read as "no restriction" would be a fail-open
+        // (hostile-critic finding 4). The chat route already refuses an
+        // unauthenticated request; this makes the same refusal explicit for a
+        // missing tenant.
+        if (!actorIdentity.tenantId) {
+          await writeSSE({ type: 'error', error: 'A tenant is required to start a run' })
+          return
+        }
+
+        // The run id must be UNIQUE PER RUN, not merely per millisecond (see
+        // `mintChatRunId`).
+        const conversationId = sessionId ?? `chat:${actorIdentity.userId}:${chatStartTime}`
+        const runId = mintChatRunId(conversationId, chatStartTime)
+        const envelope: AiRuntimeEnvelope = {
+          schemaVersion: 1,
+          runId,
+          tenantId: actorIdentity.tenantId,
+          principalId: actorIdentity.userId,
+          actorId: actorIdentity.userId,
+          agentId: 'ai_assistant.chat',
+          conversationId,
+          // An explicit resume only when the caller supplied a session id.
+          runtimeSessionId: sessionId ?? null,
+          // A PER-TURN, NARROW grant: the user may act as themselves for this
+          // chat turn. It is NOT the ephemeral session key (that stays a
+          // referenced secret in the message, never an envelope value) and it
+          // is NOT read by the OpenCode adapter yet — see `CC-70`. It is the
+          // honest carrier for the authority this run acts under, and the
+          // first engine that performs a business operation must consult it.
+          capabilityGrantId: `chat-turn:${actorIdentity.userId}:${runId}`,
+          allowedInputRefs: [textInputRef(messageToSend)],
+          correlationId: runId,
+        }
+
+        await port.startRun(envelope)
+        await port.streamRun(runId, async (event) => {
+          // Track usage from stream events
+          if (event.type === 'tool-call') toolCallCount++
+          if (event.type === 'metadata' && 'tokens' in event) lastTokens = event.tokens
+          if (event.type === 'done' && 'sessionId' in event) {
+            resultSessionId = event.sessionId
+            // First-time binding: when the caller did NOT supply a
+            // sessionId (i.e., this is a freshly minted chat) and we
+            // successfully created a session token earlier, bind the
+            // newly-resolved session id to that api_key row so
+            // subsequent resumes can be authorized.
+            if (!sessionId && sessionToken && event.sessionId) {
+              try {
+                await bindOpencodeSessionToApiKey(em, sessionToken, event.sessionId)
+              } catch (bindErr) {
+                // The response stream is already in-flight — surface the
+                // failure to logs without disturbing the SSE pipeline.
+                logger.error('AI Chat — Failed to bind session to api_key', { err: bindErr })
               }
             }
-
-            await writeSSE(event)
           }
-        )
+
+          await writeSSE(event)
+        })
       } catch (error) {
-        logger.error('AI Chat — OpenCode error', { err: error })
+        logger.error('AI Chat — runtime error', { err: error })
         await writeSSE({
           type: 'error',
           error: error instanceof Error ? error.message : 'OpenCode request failed',
