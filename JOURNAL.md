@@ -131,8 +131,21 @@ imported the same way) **and 1 was real and is fixed** (the naming collision).
 the ONE NUMBER is **unchanged at 75 / 321 = 23%**. Registered as **`CC-66`**: the **history read** that feeds
 the signal, and the **offer** (the Save button).
 
-**★ NEXT = LIST row 28** (Phase 8 — *"the agent runtime sits behind one typed door"*), starting with a rule-0b
-measurement.
+**WHAT IS STILL NOT DONE, IN PLAIN WORDS — and what unblocks each part.** Row 27 promised two things.
+Neither is finished. Here is exactly what is missing, and what has to happen before each one can be built:
+
+| # | What is missing (plain words) | Unblocked when… | Who holds it |
+|---|---|---|---|
+| **1** | **"The answer you got was reduced" marker.** When the system hides part of an answer because you are not allowed to see it, it does **not** currently tell you a part was withheld. It cannot — it does not yet know *which* records you may read line-by-line. | **`G-04`** lands — the "may this actor read **this row**, for this purpose?" layer. Until it exists there is no way to know *what* was withheld, so the marker has nothing to name. | **Blocked on other work** (not on you). `G-04` is open at `platform_points.md:569`. |
+| **2** | **The memory of your past requests.** The thing I built can tell two requests are similar, but **nothing feeds it your history yet** — so today it sits unused. | **Immediately startable** — no prerequisite. The platform already stores your past prompts in `ai_chat_messages`; they just are not read yet. | **Ready to build now** (a small wiring job). |
+| **3** | **The "Save as a Function?" offer — the button.** The rule that decides *whether* an offer may be made exists, but **no screen asks you**. | **The front end is built** — the Save button is a user-interface piece, deliberately deferred. | **Blocked on UI work** (not on you). |
+| **4** | **"The platform never acts without asking."** This is `S8`'s second clause. It is only true once parts 2 and 3 exist — there is nothing to ask about until the platform notices (2) and offers (3). | **After 2 and 3 are done.** | **Follows from 2 and 3.** |
+
+**Summary of the four:** one piece (**2**) can be built any time; one (**1**) waits on the data-permission
+layer `G-04`; one (**3**) waits on the front end; the last (**4**) simply follows from 2 and 3. **Row 27
+stays 🟡 until at least `S3`'s marker (1) exists**, because `S3` names both halves.
+
+**★ NEXT = LIST row 28** (Phase 8 — *"the agent runtime sits behind one typed door"*).
 
 ---
 
