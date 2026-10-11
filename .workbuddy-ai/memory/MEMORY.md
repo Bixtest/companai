@@ -54,6 +54,26 @@
   excluding that suite.
 - **Hostile-critic as a SEPARATE agent every time; demand a command+output per claim.**
 
+## Reporting rules — BINDING (owner, 2026-10-11, stated twice — do not break again)
+The owner's standard: **an issue is only "reported" if it is COMPLETE.** A flag without the following is **invalid**.
+- **No flag without a full report.** Every issue I raise carries all five: (1) **named**; (2) **what it is, in our
+  terms** (plain words, our vocabulary); (3) **why it exists**; (4) **the risk if left alone**; (5) **recommended
+  lines of action** — ranked, with trade-offs, and a stated recommendation. A bare "honest boundary kept",
+  "latent gap", "out of scope", or "note:" is NOT a report and must not be shipped.
+- **Never end on "your call" / "your decision" / "you decide".** Rule 11 says the owner decides *what*, but I owe
+  the **full shortlist, ranked, with trade-offs and my recommendation**, then **one specific question**. A pointer
+  with no candidates ("a fresh pick from the vision order", "the next task is yours") is banned.
+- **Never make the owner ask "what does that mean?".** If a sentence needs decoding to act on, it is not finished.
+
+## Live frontier (2026-10-11, after `CC-57`; read `JOURNAL.md`'s `★ ACTIVE TASK` for the truth)
+- **Rows 7–9, 13–18 and 22 are ✅** (row 16 ✅-own-leg / 🟡 overall pending its team-leg `CC-51`). **PHASE 3–5 complete.**
+- **The named `CC-` queue is EXHAUSTED** (`CC-57` was the last leg, DONE 2026-10-11, code `1bb61557`, docs `712d359`).
+  Remaining `CC-` items are **trigger-blocked only**: `CC-51` (row 16 team-leg — needs the owner's go-ahead, it was
+  *deferred by ruling* not by code), `CC-54` (awaits an index rebuild), `CC-19` (awaits CI).
+- **Next candidates (vision order):** (1) `CC-51` team-leg — smallest closable, finishes an already-🟡 row;
+  (2) **vision Phase 6 = audit** (tamper-evident decision record) — the next skeleton frontier, no scaffold yet;
+  (3) `CC-54`/`CC-19` — not startable. **ONE NUMBER 72 / 321 = 22%** (weighted ≈23%, ±4), derived from §A–§K boxes.
+
 ## Durable code facts
 - **Kernel admits objects via exactly TWO channels:** `customEntities` and
   `entityExtensions`/`customFieldSets` — no separate "platform entity" list. A module-root `ce.ts` fills both
