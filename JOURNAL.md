@@ -33,6 +33,26 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 > (business) work. It stays scheduled as **`CC-42`**; it resumes only if the owner says so, or once
 > Phase 3–7 are done (whichever comes first). **The queue now points at Phase 3 (the policy kernel).**
 
+> ### 🟡 SECOND LIVE TRACK — **`B-WS` · the workspace-architecture workstream** (2026-10-11)
+>
+> **There are two live tracks, and this box owns both.** The **build track** is `CC-59` (the box's next
+> block, *below*). The **design track** is **`B-WS`** — the workspace-architecture workstream in
+> [`library/workspace-architecture/`](library/workspace-architecture/README.md): it answers the owner's
+> Message 6 (*how the user↔AI interaction, the Business-IR display, the saved Functions, the menu
+> grouping, the threads, the collaboration, and the widget architecture all fit together*).
+>
+> **State: B-WS/B1–B8 of 10 done** (B-WS/B1 recon · B-WS/B2 reference systems + verdict · B-WS/B3
+> interaction/IR display · B-WS/B4 function lifecycle · B-WS/B5 naming/menus/grouping · B-WS/B6
+> threads/collaboration · B-WS/B7 extensibility · B-WS/B8 the reference-system decision + the mapping
+> draft + the bridge). **Next: B-WS/B9** (the widget architecture, end to
+> end). **`B-WS` produces *design*, never code** (BR-4) — its builds are the `CC-*`/`G-*` items it maps
+> in [`03-MAPPING.md`](library/workspace-architecture/03-MAPPING.md). **The bridge that binds these two
+> tracks is [`04-BRIDGE.md`](library/workspace-architecture/04-BRIDGE.md)** — read it before touching
+> either. **Its answers live in
+> [`discussion_points.md`](library/workspace-architecture/discussion_points.md)** (open owner decisions:
+> **DP-09/10/11/15**). *(Internal batch numbers are written `B-WS/Bn` everywhere in the spine — bridge
+> rule BR-2.)*
+
 ---
 
 ### ✅ CORRECTION — **`CC-59`'s scope was wrong: the compile+execute chain is ALREADY BUILT (`runFunction`) — the gap is one caller, not a chain. Corrected everywhere it was copied (rule 13). `CC-59` is now the first startable item of the supplementary queue.**  

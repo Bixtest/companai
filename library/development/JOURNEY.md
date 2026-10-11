@@ -187,6 +187,43 @@ sentences have historically been the ones most worth checking.
 
 ---
 
+## Act 10 — The workspace gets designed, and the two paths get bound (11 October 2026)
+
+**The owner turned to the thing the product *is*.** In Message 6 he asked the questions behind the
+product's surface: *how does the user↔AI interaction happen? how does the Business IR show the user what
+is happening? how do we turn a prompt we commonly need into a **saved tenant Function**, name it, show
+it in the menu, and group the functions? how do we save **threads** and collaborate in them — human and
+AI? how do we add tools and widgets **as we go**?* He was explicit that this is *"the actual product and
+the quality of the product is judged based on it."*
+
+**The answer is a dedicated design workstream — `B-WS`.** Ten batches, in
+[`../workspace-architecture/`](../workspace-architecture/README.md). **It produces design, never code**
+(rule BR-4): specifications (`02-SRS-*`), a decision (`02-REFERENCE-SYSTEMS.md` §9), and a requirement
+ledger ([`03-MAPPING.md`](../workspace-architecture/03-MAPPING.md)). Its builds are the **named
+`CC-*`/`G-*` items it maps** — so it moves no box and touches no number.
+
+**The decisive recon finding (why this was not a blank page).** The governing vision already existed
+(`library/ai/ai-first/05_Widgetized_Collaborative_Workspace_Architecture.md`, 4,826 lines) and was
+already forensically analysed (analysis batch 4). Two of its layers are **already built in code**: the
+`business-widget` layer (Sprint **G-07** ✅) and the `user-function` chain (`runFunction` — the complete
+bind→compile→execute path). The kit **already persists threads** and **already has an extension system
+(UMES, three routes)**. What was missing was the **wiring between them** and the **interface** — which is
+what `B-WS` designs.
+
+**The one structural decision (B-WS/B8).** *Build our own workspace layer; borrow **ideas per layer**; adopt
+none of their protocols, runtimes or datastores* — **Buzz** → the experience model; **Paperclip** → the
+governance model; **OpenRig** → two mechanisms. **No core item is delayed by the choice.**
+
+**And the discipline this act added — the two paths are now bound.** Measured 2026-10-11: the workstream
+was **completely disconnected** from this spine (nothing here pointed at it; nothing there obeyed this
+spine's rules). The fix is [`../workspace-architecture/04-BRIDGE.md`](../workspace-architecture/04-BRIDGE.md):
+**one live task** (this spine's `★ ACTIVE TASK` box), **one numbering** (`B-WS/Bn`, never a bare `Bn`),
+**every plan item registered** in [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md), and **no design
+mistaken for a build**. A design workstream that runs beside the build spine without a contract is
+exactly how a dual path grows a gap — and this act closes it.
+
+---
+
 ## The through-lines (what a newcomer needs to *feel*, not just read)
 
 1. **Measure the artefact, never the description of it.** Every major defect here was a document, a

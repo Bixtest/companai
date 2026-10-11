@@ -63,6 +63,7 @@ task, because a task changes every session (owner's instruction, 2026-10-06).
 | B10 | [`CORE-BOUNDARY.md`](CORE-BOUNDARY.md) | **What may never be customised** — the three rings, and the C1–C11 core the architecture depends on |
 | B11 | [`CORE-MODULES-REGISTER.md`](CORE-MODULES-REGISTER.md) | **Every core module, measured** — industry baseline mapped to our modules, verdicts, counts, and the five genuine absences (M1–M5) |
 | B12 | [`BLUEPRINT-GAP-ANALYSIS.md`](BLUEPRINT-GAP-ANALYSIS.md) | **What the Universal Platform Blueprint exposes we had not planned** — the four gaps A–D, and what we adopt vs adapt |
+| B-WS | [`../workspace-architecture/README.md`](../workspace-architecture/README.md) | **THE WORKSPACE DESIGN WORKSTREAM** (owner's Message 6) — the dashboard & workspace **widget architecture**. **This is *design*, not code** (its builds are named `CC-*`/`G-*` items). Its internal batches are `B-WS/B1…B-WS/B10` **but they are written `B-WS/Bn` everywhere in the spine** — do **not** confuse them with *this file's* Tier B rows or with `B1 CRM`. **Read [`04-BRIDGE.md`](../workspace-architecture/04-BRIDGE.md) first** — it is the contract that binds the workstream to the spine |
 
 **Tier C — supporting, opened only where the work needs it.** [`AGENT-HALF.md`](AGENT-HALF.md) (before any
 agent-half work); [`THREAD-2026-10-05.md`](THREAD-2026-10-05.md) (why the session decided what it did);
@@ -88,6 +89,7 @@ evidence only, opened when a specific feature can learn from it.
 | **Testing it** | `workspace/references/how-to-test.md` → `workspace/knowledge/test-gate.md` |
 | **Picking up the analysis** | `library/analysis/PLAN.md` → `library/analysis/LOG.md` → the `findings/` reports |
 | **Designing the agent half** (AI staff, roles, tasks, delegation, triggers, meetings) | [`AGENT-HALF.md`](AGENT-HALF.md) — **the model and the plan** — then [`../paperclip-hermes-study/findings/10-lessons-and-target-design.md`](../paperclip-hermes-study/findings/10-lessons-and-target-design.md) for the evidence behind each lesson |
+| **Designing the workspace / widget architecture** (the dashboard & the workspace — the owner's Message 6) | [`../workspace-architecture/README.md`](../workspace-architecture/README.md) — **the `B-WS` workstream** (design only). Read [`../workspace-architecture/04-BRIDGE.md`](../workspace-architecture/04-BRIDGE.md) first; it binds the workstream to this spine and answers *"which document do I trace for progress?"* |
 | **Deciding whether to take an idea from upstream Paperclip** | [`../paperclip-value-study/findings/07-synthesis.md`](../paperclip-value-study/findings/07-synthesis.md) — **the answer**, not the evidence. What is worth taking, what we already have, and what is rejected with a reason |
 
 ---

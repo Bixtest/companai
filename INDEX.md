@@ -120,6 +120,19 @@ companai/                      ← you are here
 │   │   ├── README.md          how the programme runs, and the rules
 │   │   ├── LOG.md             one dated line per batch completed
 │   │   └── findings/          one report per batch — **batch 12 is THE DEVELOPMENT PLAN**
+│   ├── workspace-architecture/ **THE WORKSPACE DESIGN WORKSTREAM (`B-WS`)** — the dashboard &
+│   │   │                      workspace widget architecture (owner's Message 6). **DESIGN ONLY,
+│   │   │                      never code** (its builds are named `CC-*`/`G-*` items). B-WS/B1–B8 of 10 done
+│   │   ├── README.md          the batch scoreboard + the resume pointer (into JOURNAL's ★ ACTIVE TASK)
+│   │   ├── 00-RESEARCH-PLAN.md  the batches, their exit gates, and the two workstreams the answers created
+│   │   ├── 01-RECON.md        B-WS/B1 — the measured code the design rests on
+│   │   ├── 02-REFERENCE-SYSTEMS.md  B-WS/B2 — Buzz/OpenRig/Paperclip; §9 = B-WS/B8's final verdict
+│   │   ├── 02-SRS-01…05-*.md  B-WS/B3–B7 — the detailed SRS (interaction/IR · function lifecycle ·
+│   │   │                      naming/menus/grouping · threads/collaboration · extensibility)
+│   │   ├── 03-MAPPING.md      **the requirement ledger** — every requirement → have/build/borrow
+│   │   ├── 04-BRIDGE.md       **the contract binding this workstream to the spine — read first**
+│   │   ├── discussion_points.md  the open owner questions (plain language)
+│   │   └── owner_answers.md   the owner's own answer file (agent reads, never writes)
 │   ├── paperclip-hermes-study/ THE AGENT STUDY — **COMPLETE, all 11 batches**
 │   │   ├── PLAN.md            the batch plan with tickboxes — all 11 DONE
 │   │   ├── LOG.md             one dated line per batch completed
@@ -336,6 +349,7 @@ Break these and you will damage the project.
 | **Understand how Hermes attaches (the runtime boundary)** | [`library/development/ARCHITECTURE-hermes-integration.md`](library/development/ARCHITECTURE-hermes-integration.md) — **the full Hermes integration design**, and the owner's **B-05** decision (§11) |
 | **Understand how models attach, and the model default** | [`library/development/ARCHITECTURE-model-server-integration.md`](library/development/ARCHITECTURE-model-server-integration.md) — llama.cpp as one preset entry, the two defects, and the owner's **model-default** decision (§9) |
 | **Know what we are building, in what order, and why** | [`library/analysis/findings/12-development-plan.md`](library/analysis/findings/12-development-plan.md) — **THE DEVELOPMENT PLAN.** The deliverable the whole analysis exists for: four phases, the critical path (G-01 → G-02 → G-03), the first three things to build, and every decision that is the owner's |
+| **Design the workspace / widget architecture (the dashboard & the workspace)** | [`library/workspace-architecture/README.md`](library/workspace-architecture/README.md) — **the `B-WS` workstream** (design only, never code). Read [`04-BRIDGE.md`](library/workspace-architecture/04-BRIDGE.md) first — it binds this workstream to the spine. The byte the owner asked "what do I trace?" → see its §4 |
 | **See the analysis plan, and what is being checked** | [`library/analysis/PLAN.md`](library/analysis/PLAN.md) — 12 batches with tickboxes, **all DONE**. Start here if you want the programme itself |
 | **Know what has been analysed so far** | [`library/analysis/LOG.md`](library/analysis/LOG.md) — one dated line per batch, and [`library/analysis/findings/`](library/analysis/findings/) for the reports |
 | **Understand the agent half (AI staff, roles, tasks, delegation, triggers, meetings)** | [`library/development/AGENT-HALF.md`](library/development/AGENT-HALF.md) — **the model and the plan**: the five kinds of agent, the rule that decides who is answerable when one acts, and where every lesson lands. Then [`library/paperclip-hermes-study/findings/10-lessons-and-target-design.md`](library/paperclip-hermes-study/findings/10-lessons-and-target-design.md) — **THE SYNTHESIS** — for the evidence: what we take from Paperclip and Hermes, what we reject, and how we do it better |

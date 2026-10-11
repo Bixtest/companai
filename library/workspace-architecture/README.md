@@ -10,13 +10,16 @@ dashboard and workspaces, threads, collaboration and extensibility** — the lay
 > *"For now, lets keep the documentation in a seperate folder so it is easy to reach seperatey
 > from other documents, then we untegate and index in another stage."*
 
-So this folder is **self-contained and standalone**. It is *not* yet indexed into
-`library/INDEX.md` or `BOOKMARKS.md`; that integration is a deliberate **later stage**. Nothing
-here touches `library/development/`'s registers until the owner says so.
+So this folder was created **self-contained and standalone**, and it stayed that way until the owner's
+2026-10-11 instruction to **bridge** it. **It is now bridged** (see below and
+[`04-BRIDGE.md`](04-BRIDGE.md)): it is **indexed into `library/INDEX.md` + `INDEX.md`**, and it **does**
+touch `library/development/`'s registers — through the bridge, not by editing them freely. The bridge,
+not this folder, decides what is written where.
 
 **Where the truth of "what we are doing now" lives.** Unchanged from the rest of the project:
 the `★ ACTIVE TASK` box at the top of [`../../JOURNAL.md`](../../JOURNAL.md). This folder holds
-the **analysis and the plan for one workstream**; it does not compete with the live task box.
+the **analysis and the plan for one workstream** — the **batch scoreboard** — and it does **not** carry
+a competing "what is next" (bridge rule **BR-1**); it points **into** the box.
 
 ---
 
@@ -41,23 +44,27 @@ onto what we already have and onto the development plan** — so the build proce
 
 ### Status at the moment this bookmark was written
 
-| # | Step | Status |
-|---|---|---|
-| 1 | Bookmark the position (this file) | ✅ **DONE** — this file |
-| 2 | Recon the reference systems + docs | ✅ **DONE (B2)** — `02-REFERENCE-SYSTEMS.md`; plus B1 `01-RECON.md` |
-| 3 | The batched research plan | ✅ **DONE** — `00-RESEARCH-PLAN.md` |
-| 4 | The detailed SRS | 🔄 **B1–B8 done; B9 to go** |
-| 5 | Map SRS → current state → development plan | 🔄 **first draft done (B8, `03-MAPPING.md`); finalised in B10** |
-| 6 | Integrate + index into the rest of the docs | ⬜ **deliberately deferred** (later stage) |
+| # | Step                                        | Status                                                             |
+| - | ------------------------------------------- | ------------------------------------------------------------------ |
+| 1 | Bookmark the position (this file)           | ✅ **DONE** — this file                                             |
+| 2 | Recon the reference systems + docs          | ✅ **DONE (B2)** — `02-REFERENCE-SYSTEMS.md`; plus B1 `01-RECON.md` |
+| 3 | The batched research plan                   | ✅ **DONE** — `00-RESEARCH-PLAN.md`                                 |
+| 4 | The detailed SRS                            | 🔄 **B1–B8 done; B9 to go**                                        |
+| 5 | Map SRS → current state → development plan  | 🔄 **first draft done (B8)** — `03-MAPPING.md`; finalised in B10    |
+| 6 | Bridge to the spine + integrate + index     | 🔄 **BRIDGED (B8)** — `04-BRIDGE.md` + `WORKING-RULES.md` rule 16 + the pointer rows; **indexing done** |
 
 **Batch progress:** **B1 ✅** (recon, measured) · **B2 ✅** (reference systems, verdict) · **B3 ✅** (the
 user–AI interaction + the Business-IR display) · **B4 ✅** (the prompt→function lifecycle) · **B5 ✅** (naming,
 menus, grouping, and the organic non-business wiring) · **B6 ✅** (threads and collaboration) · **B7 ✅**
 (extensibility: adding tools and widgets) · **B8 ✅** (the reference-system decision, reconciled to our
-plan + the first draft of the mapping). **Next: B9** (the widget architecture end to end). Commits: `2064046`
-(bookmark + plan), `82f72e8` (B1), `250f6c1` (B2), `7131195` (B3), `bd4de50` (B4 + the B1 Q3 correction),
-`7634dcb` (README + memory), `72c20e2` (B5, critic-corrected), `c8c0fdf` (B6, critic-corrected), `6c19925`
-(owner DP-08), `59afc53` (B7), `43173e3` (DP-12/13/14 + DP-15), `96e962c` (two workstreams), **B8 = this change**.
+plan + the `03-MAPPING.md` first draft + the bridge). **The next batch in the bookkeeping sense is B9**
+(the widget architecture, end to end) — **but the live task is whatever the `★ ACTIVE TASK` box says
+(rule BR-1); this line is a scoreboard fact, not a competing "what is next."**
+Commits: `2064046` (bookmark + plan), `82f72e8` (B1), `250f6c1` (B2),
+`7131195` (B3), `bd4de50` (B4 + the B1 Q3 correction), `7634dcb` (README + memory), `72c20e2` (B5,
+critic-corrected), `c8c0fdf` (B6, critic-corrected), `6c19925` (owner DP-08), `59afc53` (B7),
+`43173e3` (DP-12/13/14 + DP-15), `96e962c` (the two new workstreams), `9b5af4d` (B8), **the bridge =
+this change**.
 
 **Owner decisions recorded so far (all in `discussion_points.md`):** DP-01 **wiring first, storage second** ·
 DP-02 **show "permissions not checked"** · DP-03 **a schema-change request is a permissions question first** ·
@@ -126,20 +133,31 @@ layer on our own stack; **borrow ideas per layer, adopt no protocol/runtime/data
 **B8 also produced `03-MAPPING.md`** (first draft) — every workspace requirement mapped to
 *have-it (path) / build-it (`G-*`/`CC-*` + prerequisite + trigger) / borrow-it (kit/Hermes)*.
 
-**RESUME HERE — B9.** Carry-forwards B9 needs:
-1. **From B8** — the widgetized structure itself is **ours to build** (not borrowed): B9 is
-   `02-SRS-06-widget-architecture.md`, the **synthesis** batch. The three borrowed layers (Buzz's feed,
-   Paperclip's gate, OpenRig's SSE) are its **inputs**, not its subject.
+### ★ RESUME — but the LIVE task lives in the spine (rule BR-1)
+
+**Per the project's standing rule, this folder carries NO competing "what is next". The live task is the
+`★ ACTIVE TASK` box at the top of [`../../JOURNAL.md`](../../JOURNAL.md)** — which now names **both**
+live tracks (the build track `CC-59`, and this design track `B-WS`). **Start there.**
+
+**When the spine's box next calls this workstream, the batch to run is B9** (the widget architecture,
+end to end — `02-SRS-06-widget-architecture.md`). Its carry-forwards:
+
+1. **From B8** — the three borrowed layers (Buzz's feed, Paperclip's gate, OpenRig's SSE) are B9's
+   **inputs**, not its subject; the widgetized structure itself is **ours to build**.
 2. **From B7** — the three extension routes (platform-shipped / tenant-authored / AI-proposed) and the
-   two files a widget is (`widgets/injection/<name>/widget.ts` + `widgets/injection-table.ts`).
+   **two files a widget is** (`widgets/injection/<name>/widget.ts` + `widgets/injection-table.ts`).
 3. **From B6** — a thread is a **host a Widget can be placed into** (`AiChatConversation` + participants).
-4. **From B5** — the join: `UserFunction.placement` → `InjectionMenuItem`; `groupId` = path minus its
-   last segment; membership confers **no** authority.
+4. **From B5** — the join: `UserFunction.placement` → `InjectionMenuItem`; `groupId` = path minus its last
+   segment; membership confers **no** authority.
 5. **The B9 exit gate** (`00-RESEARCH-PLAN.md:206`): a reader can name **every part of the workspace**
    (widget definition, instance, runtime, IR, renderer, registry, reference layer, threads, collaboration,
    extension) and say **"we have it (here) / we build it (item) / we borrow it (Hermes, the kit)"**.
-6. **The `03-MAPPING.md` draft** (`§4`) names exactly what B9 must fill: the **Q11 row** and **R12's
-   BUILD-IT detail** (the frontend workspace surface).
+6. **`03-MAPPING.md` §4** names exactly what B9 must fill: the **Q11 row** and **R12's BUILD-IT** detail
+   (the frontend workspace surface).
+
+**The bridge (read this before touching either path):** [`04-BRIDGE.md`](04-BRIDGE.md) — the contract
+that binds this workstream to `BACKLOG` / `BUILD-ORDER` / `JOURNEY` / `COMPLETION-CALLBACKS` /
+`platform_points` / `JOURNAL`, and §4 of which answers the owner's *"which document do I trace?"*.
 
 ### What the recon already established (so the next session does not redo it)
 
@@ -212,16 +230,17 @@ What does **not** exist is the artefact the owner asked for:
 
 ## 2. The files in this folder
 
-| File | What it is |
-|---|---|
-| `README.md` | This file — the workstream bookmark and the resume point. |
-| `00-RESEARCH-PLAN.md` | The **batches-based research plan** — what each batch reads, produces, and its exit gate. |
-| `01-RECON.md` | **B1** — the **recon dossier**: the measured inventory of every code surface this workstream rests on, and a verdict row per owner question. |
-| `02-REFERENCE-SYSTEMS.md` | **B2** — the **three reference systems** (Buzz / OpenRig / Paperclip) analysed from their own source, plus the **verdict and alternatives**; **§9 = B8's final decision**, reconciled to the plan. |
-| `02-SRS-*.md` | The detailed SRS (B3–B7 written; **B9 to go** — `02-SRS-06-widget-architecture.md`). |
-| `03-MAPPING.md` | The SRS → current state → development plan map — **first draft in B8**; finalised in **B10**. |
-| `discussion_points.md` | The live list of open questions/decisions in plain language — **the document of record**. |
-| `owner_answers.md` | **The owner's own file** — a safe place to write answers; the agent reads it and never writes it. |
+| File                      | What it is                                                                                                                                   |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `README.md`               | This file — the workstream batch scoreboard; the **live task** is in [`JOURNAL.md`](../../JOURNAL.md)'s `★ ACTIVE TASK` box (rule BR-1).       |
+| `00-RESEARCH-PLAN.md`     | The **batches-based research plan** — what each batch reads, produces, and its exit gate; §2b = the two workstreams the owner's answers created. |
+| `01-RECON.md`             | **B1** — the **recon dossier**: the measured inventory of every code surface this workstream rests on, and a verdict row per owner question. |
+| `02-REFERENCE-SYSTEMS.md` | **B2** — the **three reference systems** (Buzz / OpenRig / Paperclip) analysed from their own source, plus the verdict; **§9 = B8's final decision**. |
+| `02-SRS-01…05-*.md`       | The detailed SRS, **B3–B7** (interaction/IR display · function lifecycle · naming/menus/grouping · threads/collaboration · extensibility). **B9 to go** — `02-SRS-06-widget-architecture.md`. |
+| `03-MAPPING.md`           | The SRS → current state → development plan map — **first draft in B8**; finalised in **B10**.                                                  |
+| `04-BRIDGE.md`            | **THE BRIDGE** — the binding contract that syncs this workstream with the spine; **§4 answers *"which document do I trace for progress?"***. Read before touching either path. |
+| `discussion_points.md`    | The live list of open questions/decisions in plain language — **the document of record**.                                                    |
+| `owner_answers.md`        | **The owner's own file** — a safe place to write answers; the agent reads it and never writes it.                                            |
 
 ---
 
@@ -236,6 +255,11 @@ Unchanged from the project. Restated here because this workstream is large and e
 - **Rule 10c** — write the requirement **before** any code.
 - **Rule 11** — a decision that is the **owner's** is not ours to close.
 - **Rule 13** — when a measurement falsifies a premise, correct it **everywhere it was copied**.
+- **Rule 16 — the bridge rule** *(added 2026-10-11, at the owner's instruction)* — a parallel design
+  workstream is bound to the spine by a **written contract**. Here that contract is [`04-BRIDGE.md`](04-BRIDGE.md):
+  **one live task** (BR-1) · **one numbering** `B-WS/Bn`, never a bare `Bn` (BR-2) · **every touched plan
+  item registered** in `COMPLETION-CALLBACKS.md` (BR-3) · **a design is never a build** (BR-4). The full
+  rule lives in [`../development/WORKING-RULES.md`](../development/WORKING-RULES.md) §16.
 - **Rule 6/7** — update **all** relevant docs in the **same** change.
 - **Hostile-critic as a SEPARATE agent, with a command + output per claim.**
 - **RED-then-GREEN mutation proof, restores verified by md5.**

@@ -19,6 +19,7 @@ errors.
 | [`ai/ai-first/`](ai/ai-first/) | 9 files | **THE DIRECTION** — the architecture we are actually building toward. Read [`ai/ai-first/README.md`](ai/ai-first/README.md) first |
 | [`development/`](development/) | 29 files | **The live hub** — the one roadmap, the running architecture, the handover, the rules, the build order, the core-boundary, and the tier-0 audits. Start here to *work* |
 | [`analysis/`](analysis/) | ~20 files | Our 12-batch check of the direction against what we already have |
+| [`workspace-architecture/`](workspace-architecture/) | ~12 files | **The `B-WS` design workstream** — the dashboard & workspace widget architecture (owner's Message 6): interaction, Business-IR display, saved Functions, menus/grouping, threads, collaboration, extension. **Design only, never code** — its builds are named `CC-*`/`G-*` items. Read [`04-BRIDGE.md`](workspace-architecture/04-BRIDGE.md) first (it binds this workstream to the spine) |
 | `01-` … `16-` shelves | ~600 files | Our product documentation: policy, contracts, SRS, audits, certification, blueprints, the shipped product docs |
 | [`paperclip-hermes-study/`](paperclip-hermes-study/) · [`paperclip-value-study/`](paperclip-value-study/) | ~24 files | **Our own** studies *of* two other products — the distilled lessons |
 
@@ -53,6 +54,7 @@ building toward, and where it currently stands.
 | 4 | [`development/BACKLOG.md`](development/BACKLOG.md) | **The one roadmap** — everything left, in order. The always-current status lives here, not in this index |
 | 5 | [`development/ARCHITECTURE-request-outcomes.md`](development/ARCHITECTURE-request-outcomes.md) | **The owner's core features_pack** — a prompt ends as a **one-time answer**, a **model proposal** (new structure), or a **saved Function**; the triage (`G-21`) and the gate on the one that can change the database. Nothing in it is open |
 | 6 | [`07-canonical-hardening/OPEN-DECISIONS.md`](07-canonical-hardening/OPEN-DECISIONS.md) | **What is still undecided** — read before assuming anything is settled. Note: the live owner-decision list is [`development/NEEDS-YOU.md`](development/NEEDS-YOU.md) |
+| 7 | [`workspace-architecture/04-BRIDGE.md`](workspace-architecture/04-BRIDGE.md) → [`workspace-architecture/README.md`](workspace-architecture/README.md) | **The `B-WS` design workstream** — the dashboard & workspace widget architecture. The **bridge** first (it binds the workstream to the spine and answers *"which document do I trace for progress?"*), then the README's batch scoreboard |
 
 Then, if you want the product detail behind the direction: [`01-policy-and-plan/AI-FIRST-PLATFORM-POLICY.md`](01-policy-and-plan/AI-FIRST-PLATFORM-POLICY.md)
 (the binding policy), [`05-platform-audit-and-srs/03-srs.md`](05-platform-audit-and-srs/03-srs.md)

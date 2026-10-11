@@ -18,7 +18,8 @@ owner** — how to report, what not to close, and what to do with the front end.
 
 These mirror the top of `workspace/COOKBOOK.md` ("The three rules that override everything", which
 now carries rules 0–5). **This file is the fuller list** — it carries every standing override, and it
-is the copy kept in step as new rules are added (rule 15 below was added 2026-10-11). They are
+is the copy kept in step as new rules are added (rule 15 was added 2026-10-11; **rule 16 — the
+workstream-bridge rule — was added the same day**). They are
 repeated here because a rule a newcomer has to find is a rule that gets broken.
 
 0. **THE ORDER OF DEVELOPMENT IS THE VISION'S ORDER — and no task may jump ahead of it**
@@ -257,6 +258,38 @@ from the artefact, research-validate-write-then-build. Read them once, before to
     had been invisible in the register for two days **because the first small gap was left standing.**
     **What it forbids:** flagging a small, straightforward, plan-safe fix as "out of scope" or
     "future work" instead of doing it; and treating "I noted it" as equivalent to "I resolved it".
+
+16. **A parallel workstream is bound to this spine by a written contract — it may never run as a second,
+    unwired path** *(owner, 2026-10-11)*. **When a design/analysis workstream runs beside the build
+    spine** (the current one: **`B-WS`**, the workspace-architecture workstream), it **must** be bound to
+    the spine by four rules, written in a `04-BRIDGE.md` at the head of that workstream and **pointed at
+    from here and from `library/development/README.md`**:
+    **(a) ONE live task.** The `★ ACTIVE TASK` box at the top of [`../../JOURNAL.md`](../../JOURNAL.md)
+    is the single source of truth for *what is being worked on*; **the workstream's own README carries no
+    competing "what is next"** — it points *into* the box.
+    **(b) ONE numbering.** The workstream's internal batch numbers are written **`<WS>/Bn`** everywhere in
+    the spine (`B-WS/B8`), **never a bare `Bn`** — because a bare `B1`/`B2` already means **three different
+    things** in this project: the **Tier-B read rows** of [`README.md`](README.md) (`B1`…`B12`) and of
+    [`HANDOVER.md`](HANDOVER.md) (`:252` `B1`, `:258` `B2`), the **module-register** rows
+    (`CORE-MODULES-REGISTER.md:74` `B1 CRM`, `:75` `B2 Sales`), and the **agent-half** items (`B-05`,
+    `B-16`).
+    **(c) Every touched plan item is registered.** When the workstream specifies, refines, or finds a gap
+    in a `CC-*`/`G-*` item, that item's row in [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md) gets a
+    **`decided in <WS>/<batch>`** note (and a **new row** for a newly-found gap) **in the same change**
+    (rule 8). **No item may be built in two places, or marked done on one side while open on the other.**
+    **(d) A design is never a build.** The workstream produces specifications and decisions; **a
+    requirement is "done" only when its `03-MAPPING.md` BUILD-IT cell points at a plan item that has
+    actually landed** — measured in the code repo. **The workstream moves no box and touches no
+    `platform_points` number; only a landed build does.**
+    **Why it exists (the measured defect).** On 2026-10-11, `grep` proved the `B-WS` workstream was cited
+    by **nothing outside its own folder** — the spine did not know it existed, and it did not obey the
+    spine's "one live task" rule. A design workstream running beside the build spine without a contract is
+    exactly how a **dual path grows a gap, a duplicate build, or a false "done."** The contract is
+    [`../../library/workspace-architecture/04-BRIDGE.md`](../../library/workspace-architecture/04-BRIDGE.md).
+    **The owner's words, verbatim:** *"how are we bridging the work we will do here into the work we did
+    and managed via documentations like backlog, BUILD-ORDER, JOURNEY, COMPLETION-CALLBACKS,
+    platform_points, etc... systematically sync it so that this dual paths do not create gaps, bugs,
+    errors, flaws, or incomplete work."*
 
 ---
 
