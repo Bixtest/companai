@@ -8,6 +8,7 @@ import { createRequestContainer } from '@open-mercato/shared/lib/di/container'
 import type { RbacService } from '@open-mercato/core/modules/auth/services/rbacService'
 import { AiPendingActionRepository } from '../../../../../data/repositories/AiPendingActionRepository'
 import { hasRequiredFeatures } from '../../../../../lib/auth'
+import { resolveAgentBinding } from '../../../../../lib/agent-binding'
 import { serializePendingActionForClient } from '../../../../../lib/pending-action-client'
 import { getAgent, loadAgentRegistry } from '../../../../../lib/agent-registry'
 import { toolRegistry } from '../../../../../lib/tool-registry'
@@ -74,7 +75,7 @@ export const openApi: OpenApiRouteDoc = {
       ],
       errors: [
         { status: 401, description: 'Unauthenticated caller.' },
-        { status: 403, description: 'Caller lacks `ai_assistant.view`, a required agent feature, tool whitelist, or accesses attachments outside their tenant.' },
+        { status: 403, description: 'Caller lacks `ai_assistant.view`, a required agent feature, tool whitelist, or accesses attachments outside their tenant; or the calling AI worker\'s agent binding has been revoked (`agent_not_bound`).' },
         { status: 404, description: 'Pending action or agent not found in the caller scope.' },
         { status: 409, description: 'Pending action is not in `pending` status or has expired.' },
         { status: 412, description: 'Record version changed between propose and confirm, or the input schema no longer accepts the stored payload.' },
@@ -196,6 +197,20 @@ export async function POST(req: NextRequest, context: RouteContext): Promise<Res
     })
     if (!recheckResult.ok) {
       return fromRecheckFailure(recheckResult)
+    }
+
+    // CC-56 — the confirm EXECUTES the agent's tool, so it is an execution door
+    // too. Re-check the binding here (fail-closed for an `ai_worker`): a binding
+    // revoked between the dispatch that proposed this action and this confirm
+    // must STOP the run, not silently re-execute the tool. A human caller's
+    // resolver is a passthrough, so a human confirm is byte-identical to before.
+    const binding = await resolveAgentBinding({ em, auth, agentId: row.agentId })
+    if (!binding.bound) {
+      return jsonError(
+        403,
+        `Agent "${row.agentId}" is not bound to this principal.`,
+        'agent_not_bound',
+      )
     }
 
     const executeCtx: PendingActionExecuteContext = {

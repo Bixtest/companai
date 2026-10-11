@@ -11,9 +11,24 @@ const loadAllModuleToolsMock = jest.fn()
 const getAgentMock = jest.fn()
 const getToolMock = jest.fn()
 const attachmentFindMock = jest.fn()
+const findBindingMock = jest.fn()
 
 jest.mock('@open-mercato/shared/lib/auth/server', () => ({
   getAuthFromRequest: (...args: unknown[]) => authMock(...args),
+  // CC-56 — the real `resolveAgentBinding` imports `requirePrincipal` from this
+  // module; mirror it minimally so the confirm route exercises the same branch
+  // the dispatch routes do. A machine's id comes from `keyId` when present.
+  requirePrincipal: (auth: { sub?: string; keyId?: string | null } | null) => {
+    if (!auth?.sub) return null
+    const sub = auth.sub
+    if (sub.startsWith('ai_worker:')) {
+      return { kind: 'ai_worker', id: auth.keyId ?? sub.slice(10) }
+    }
+    if (sub.startsWith('api_key:')) {
+      return { kind: 'service', id: auth.keyId ?? sub.slice(8) }
+    }
+    return { kind: 'human', id: sub }
+  },
 }))
 
 jest.mock('@open-mercato/shared/lib/di/container', () => ({
@@ -41,6 +56,15 @@ jest.mock('../../../../../../data/repositories/AiAgentMutationPolicyOverrideRepo
   AiAgentMutationPolicyOverrideRepository: jest.fn().mockImplementation(() => ({
     get: policyOverrideGetMock,
   })),
+}))
+
+// CC-56 — the real `resolveAgentBinding` reads the binding through this repo.
+jest.mock('../../../../../../data/repositories/AiAgentBindingRepository', () => ({
+  AiAgentBindingRepository: class {
+    findBinding(...args: unknown[]) {
+      return findBindingMock(...args)
+    }
+  },
 }))
 
 jest.mock('../../../../../../lib/agent-registry', () => ({
@@ -335,5 +359,47 @@ describe('POST /api/ai/actions/:id/confirm route (Step 5.8)', () => {
     expect(response.status).toBe(500)
     const body = await response.json()
     expect(body.code).toBe('confirm_internal_error')
+  })
+
+  // --- CC-56: the confirm path re-checks the binding (fail-closed for ai_worker) ---
+
+  it('CC-56 — REFUSES an ai_worker whose binding was revoked (403 agent_not_bound)', async () => {
+    repoGetByIdMock.mockResolvedValueOnce(makeRow())
+    authMock.mockResolvedValue({ sub: 'ai_worker:key-1', tenantId: 'tenant-1', orgId: 'org-1' })
+    findBindingMock.mockResolvedValueOnce(null)
+    const handlerSpy = jest.fn()
+    getToolMock.mockReturnValueOnce(makeTool({ handler: handlerSpy }))
+
+    const response = await POST(buildRequest() as any, buildContext('pa_123'))
+    expect(response.status).toBe(403)
+    const body = await response.json()
+    expect(body.code).toBe('agent_not_bound')
+    // The tool must NOT have executed, and no state transition happened.
+    expect(handlerSpy).not.toHaveBeenCalled()
+    expect(repoSetStatusMock).not.toHaveBeenCalled()
+  })
+
+  it('CC-56 — ALLOWS an ai_worker WITH a live binding (200)', async () => {
+    repoGetByIdMock.mockResolvedValueOnce(makeRow())
+    authMock.mockResolvedValue({ sub: 'ai_worker:key-1', tenantId: 'tenant-1', orgId: 'org-1' })
+    findBindingMock.mockResolvedValueOnce({ toolAllowlist: null, requiredFeatures: [] })
+
+    const response = await POST(buildRequest() as any, buildContext('pa_123'))
+    expect(response.status).toBe(200)
+    const body = await response.json()
+    expect(body.ok).toBe(true)
+    expect(findBindingMock).toHaveBeenCalledTimes(1)
+  })
+
+  it('CC-56 — a HUMAN confirm is a passthrough (binding never consulted, even with no row)', async () => {
+    repoGetByIdMock.mockResolvedValueOnce(makeRow())
+    // authMock default is a human (sub: 'user-1'). Even if a binding lookup were
+    // made and found NOTHING, a human must NOT be refused — this is the
+    // discriminator a route wrongly applying the binding to humans would fail.
+    findBindingMock.mockResolvedValueOnce(null)
+
+    const response = await POST(buildRequest() as any, buildContext('pa_123'))
+    expect(response.status).toBe(200)
+    expect(findBindingMock).not.toHaveBeenCalled()
   })
 })

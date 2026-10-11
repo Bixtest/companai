@@ -165,4 +165,22 @@ describe('CC-27 / B6 — every agent dispatch site applies the binding gate', ()
     const missing = exportedDispatchFns.filter((name) => !DISPATCH_MARKERS.includes(name))
     expect(missing).toEqual([])
   })
+
+  it('CC-56 — the pending-action confirm path consults the binding', () => {
+    // The confirm route EXECUTES a stored tool (a one-hop-removed execution
+    // path). It does NOT call a dispatch entry point, so the scan above does not
+    // cover it; this assertion keeps its binding re-check from being silently
+    // dropped by a future refactor.
+    const rel = join('api', 'ai', 'actions', '[id]', 'confirm', 'route.ts')
+    const source = read(rel)
+    expect(source).toMatch(/import\s*\{[^}]*resolveAgentBinding[^}]*\}/)
+    // Strip comments first — a `// resolveAgentBinding(...)` must NOT satisfy the
+    // call check (the CC-55 scan uses `stripComments` for the same reason).
+    const withoutImport = stripComments(source).replace(
+      /import\s*\{[^}]*resolveAgentBinding[^}]*\}\s*from[^\n]*/,
+      '',
+    )
+    expect(withoutImport).toMatch(/resolveAgentBinding\s*\(/)
+    expect(source).toMatch(/agent_not_bound/)
+  })
 })
