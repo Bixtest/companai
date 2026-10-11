@@ -55,6 +55,37 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+### ✅ DONE — **`CC-61` (LIST row 19): the command contract is now uniform — `risk` · `approval` · `idempotency` exist and are recorded. `C6b` ☐→☑, so the ONE NUMBER MOVED: 72/321 → 73/321 = 23%.**
+**(2026-10-11; code repo `workspace/starting-kit`.)**
+
+**The task (rule 10c).** Row 19 — *"every state-changing action goes through one typed command, never a raw
+write"*. Measured first (rule 0b): the command bus is **real** (`shared/src/lib/commands/`, ~122 command files
+across ~18 modules, 20 test suites) — so the row's own claim **held**. What did **not** hold was **`C6b`** —
+*"the full contract uniform across every action"*: `CommandHandler` carried `capability` / `execute` / `undo` /
+`redo` and **no `risk`, `approval`, `idempotency` at all**.
+
+**Built.** The three facets as **optional** declarations on `CommandHandler` (`types.ts` — nothing existing
+breaks), and the bus **records** whatever a handler declares on the action log under `context.commandContract`
+(`command-bus.ts` — `commandContractMetadata` + the merge before `persistLog`). **Approval DECLARES; the
+authority layer ENFORCES** — a bus refusal would be a **second permission engine** (`S5`). `C6b` ☐→☑.
+
+**Proof.** `src/lib/commands` — **20 suites / 169 tests green**; whole `shared` — **2555 tests** (the one
+failing suite is the **known-environmental `CC-19`**, not this change); `tsc --noEmit` clean; **5 RED-then-GREEN
+mutations**, every restore **md5-verified**. **A separate-agent hostile critic found 1 REAL defect, fixed:** the
+first draft merged the contract **inside `buildLog`**, which returns null when a handler has no `buildLog` — so a
+declaring handler recorded **nothing** even though a log **is** written from caller metadata. Its `D2` (0 of ~93
+commands declare the fields) is **not** a defect but a named follow-on: **`CC-63`**.
+
+**Honest bounds.** The contract is uniform in **shape**; **adoption is 0** (`CC-63`). And **`S5` is measured,
+not closed** — the feature **matcher** is single (`featureMatch.ts`, 7 importers) but **two RBAC *services***
+share it, and that split is not yet justified.
+
+**★ NEXT = LIST row 21 / 21b** (Phase 6 — **Audit / provenance**), chosen by the vision's order: Phase 5's
+remaining 🟡 rows are blocked (**row 16** — `CC-51` deferred by you; **row 20** — `CC-42` is business work). It
+**starts with a rule-0b measurement** (what audit already exists) and has **no `CC-` item yet**.
+
+---
+
 ### ✅ DONE — **`CC-59`: the Business-IR chain now has its FIRST PRODUCTION CALLER — the wire `runBusinessQueryPrompt` plus the registered tool `business_ir.run_query`. Gated, tested, and verified by a separate-agent critic.**
 **(2026-10-11; code repo `workspace/starting-kit`; owner's go-ahead: *"execute the supplementary core queue"*.)**
 
