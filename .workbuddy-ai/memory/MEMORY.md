@@ -99,10 +99,16 @@ Worked example: `CC-43` "flagged, not fixed" **hid `CC-46`**.
   real defect: the run id was per-ms (two runs in one ms would share an id → the adapter's idempotent
   re-start → the second never streams) → exported `mintChatRunId` with a monotonic counter. Registered
   **`CC-69`** (the `answerQuestion` bypass still calls OpenCode directly — not a run) and **`CC-70`** (the
-  run's grant is carried but not consumed). **NEXT = R28-4** (give `cancelRun`/`completeRun` a production
-  caller), then **`CC-67`** (move the two remaining callers — what finally flips `B-05`/`N-8`). **Row 28's
-  own box stays `☐`**: its sentence needs *all* callers moved, and two remain (`CC-67`) plus the bypass.
-  Suite **115/1567 green**. **ONE NUMBER 75/321 (unchanged — derived).**
+  run's grant is carried but not consumed). **R28-4 ✅ DONE 2026-10-11** (code `2b1439c4…` route md5): **the run
+  is now CLOSED at the door** — `api/chat/route.ts` observes the client disconnect (`req.signal`, `{once:true}`)
+  and calls `port.cancelRun` then `port.completeRun` (cancel-BEFORE-complete → a stopped run records
+  `cancelled`, not `completed`), via one exported helper `closeChatRun(port, runId, outcome)`. **`cancelRun`/
+  `completeRun` got their FIRST production caller** (measured: none before). 8 tests (mock boundary = the PORT,
+  call order asserted), 6 mutations, a separate-agent hostile critic found **no real defect** (its one extra
+  probe — "a run that never streams is still closed" — was kept as a permanent test, rule 15). Suite
+  **116/1575 green**. **NEXT = `CC-67`** (move the two remaining callers — what finally flips `B-05`/`N-8`),
+  then **R28-5** (the "nothing bypasses" check). **Row 28's own box stays `☐`**: its sentence needs *all*
+  callers moved, and two remain (`CC-67`) plus the `CC-69` bypass. **ONE NUMBER 75/321 (unchanged — derived).**
 - **`CC-68` ✅ CLOSED 2026-10-11** (code `537e30b5`): a **non-deterministic TEST** in `mcp-dev-key-resolution.test.ts`
   (the TOCTOU case, both variants) — it raced the swap against the reader's `Promise.all`; **product was correct**.
   Fixed by stating the inode mismatch directly; mutation-proved; 5× full-suite green (1530/1530). Also guarded

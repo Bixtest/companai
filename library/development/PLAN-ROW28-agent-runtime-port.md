@@ -59,7 +59,7 @@ it directly."*
 | `B-05` | Runtime boundary decided: one typed port; the code has **no** port yet (OpenCode still occupies the slot) | ☐ |
 | `Port` (a) | The typed port exists: `describeCapabilities` · `startRun` · `streamRun` · `cancelRun` · `steerRun` · `resumeConversation` · `resolveToolCall` · `completeRun` | ☐ |
 | `Port` (b) | The envelope is admitted: identity minted by the server, secrets as **references** (not values), ids kept distinct | ☐ |
-| `Port` (c) | Failure is normal: `cancelRun` is bounded and safe to repeat; `completeRun` is safe to replay | ☐ |
+| `Port` (c) | Failure is normal: `cancelRun` is bounded and safe to repeat; `completeRun` is safe to replay — **built and now used in production (R28-4)**; the `☐` below is the ROW's box, kept open because the row needs the whole door used | ☐ |
 | `N-8` | Displace OpenCode: build the port, move the chat route, **then** delete OpenCode | ☐ |
 
 **Combined, the requirement is:** build the typed front door with the eight named operations and the
@@ -191,20 +191,89 @@ surface is invented.**
 ---
 
 ### R28-4 — Prove failure is normal: cancel is safe to repeat, complete is safe to replay
-**Status: BLOCKED on R28-1 (can be built with R28-2).**
+**Status: ✅ IN PROGRESS 2026-10-11 (requirement written below, before the code).**
 
 **What it is.** Make the door behave correctly when things go wrong: asking to cancel twice must be
 harmless, and re-sending a "run finished" message must not double-count. This is what the spec calls
 *"failure is normal, not exceptional."*
 
-**Prerequisite.** R28-1 (the door's shape). Can proceed alongside R28-2.
+**Prerequisite.** R28-1 (the door's shape) — ✅ DONE. R28-3 (a run path to hang the caller on) — ✅ DONE.
 
 **Takes points:** `Port` (c).
+
+#### R28-4 — the requirement (rule 10, step 3: written BEFORE the code)
+
+**Measured first (rule 0b), 2026-10-11.**
+
+| # | What the measurement showed | Where |
+|---|---|---|
+| 1 | `cancelRun` / `completeRun` have **no production caller at all** — outside the port, the adapter and their tests, the names do not appear anywhere in the tree | `grep -rn "cancelRun\|completeRun"` → only `ai-runtime-port.ts`, `opencode-port-adapter.ts`, and the two test files |
+| 2 | The chat route has **no cancel path** — it never observes a client disconnect and never stops a run | `grep -n "cancel\|abort\|AbortController" api/chat/route.ts` → none on the run path |
+| 3 | The **UI already has a Stop button** — and it already aborts something: the hook aborts its own `AbortController` (`fetch(..., { signal })`), which drops the browser's socket | `frontend/hooks/useCommandPalette.ts:1416` (`stopExecution`), `:556–569` (the fetch with `signal`) |
+| 4 | **But that client-side abort never tells the server to stop the run.** The route's `(async () => …)()` keeps calling `port.streamRun` and keeps writing SSE events to a writer nobody reads; the engine call runs to completion | `api/chat/route.ts:408–511` |
+
+**The requirement, in plain words.** *Two things must become true. (1) When the user presses Stop — or
+simply closes the tab — the server must notice and tell the door to cancel the run, so a run the user
+abandoned is not left running and is recorded as cancelled, not completed. (2) Every run that ends — for
+any reason: finished, failed, or cancelled — must report its outcome to the door once, so the door has a
+record of the run. Asking to cancel a second time must be harmless, and reporting a run finished a second
+time must not double-count. A person reading the chat route must still not see an engine named.*
+
+**Acceptance (each is a measurement, not a tag):**
+1. The chat route calls `port.cancelRun(runId)` when the request is aborted (the browser closed the
+   connection, or pressed Stop), **before** the run is completed.
+2. The chat route calls `port.completeRun(runId, result)` **once** at the end of every run, in the
+   existing `finally`, with the honest status (`cancelled` when the abort was seen, `completed`
+   otherwise) — the door's own record, not a second bookkeeping system.
+3. Repeating a cancel is harmless and repeating a completion does not double-count — **proved at the
+   route level**, not only in the adapter's own suite (the adapter's replay-safety already has its
+   unit tests; what was missing is the *caller*).
+4. `grep -n "cancel\|abort" route.ts` shows a cancel path; the route still imports **no engine** and the
+   R28-3 static guard still passes; the pre-existing behaviour tests pass **unmodified**.
+5. Suite green; route type-checks clean.
+
+#### R28-4 — the challenge (rule 9b: challenge the task before executing)
+
+**Challenge 1 — is a client-disconnect abort the *right* production caller for `cancelRun`, or must
+R28-4 wait for a caller with a real cancel affordance?** Measured (row 3 above): the affordance **already
+exists** — the UI's Stop button aborts the browser's own socket. So the honest gap is not "there is no
+Stop button"; it is **"Stop does not reach the server."** The right caller is therefore *the route
+observing the disconnect*, because that is exactly the moment the run should stop, and it covers both
+Stop **and** a closed tab with one mechanism. This is not a synthetic caller invented to make a box
+tick — it closes a real hole the user can already press a button for. **Decision: build it.**
+
+**Challenge 2 — should the route's cancel be a *new route* (a `POST /cancel`) instead of observing the
+disconnect?** Two honest options:
+- **(a) Observe the disconnect** (`req.signal`) — one mechanism, no new contract surface, covers Stop
+  and closed-tab alike; the client already closes the socket, so **nothing on the front end changes**.
+- **(b) Add a cancel endpoint** and have the Stop button call it — a new route, a new client call, and a
+  second way to reach the same outcome.
+
+**Decision: (a).** Reason: the client already signals the intent by closing the socket, so (a) needs no
+front-end change and no new contract surface, and it cannot be bypassed. (b) would add a route the
+architecture document does not name, for the same result — the scope-creep my rules warn against. If a
+richer affordance is ever needed (e.g. cancel *without* closing the stream), that is a **new design
+decision** and is registered, not improvised.
+
+**Challenge 3 — does `completeRun` duplicate bookkeeping the route already does?** The route already
+logs a "Chat complete" line with duration/tokens in its `finally`. `completeRun` is different: it is the
+**door's own record of the run** (§4.3's replay-safe completion), the thing a future engine consults to
+know a run is done. Adding it is not a second log; it is the run's lifecycle being closed at the door,
+which is what `Port` (c) asks for. The route's log stays.
+
+**Conclusion of the challenge:** R28-4 is **safe to build as scoped** — the route observes the disconnect
+and calls `cancelRun`; the `finally` calls `completeRun` once with the honest status; no new contract
+surface, no front-end change. **The one honest limit** (stated, not hidden): the OpenCode engine's
+in-flight HTTP call cannot be force-torn-down from the adapter, so the cancel is **cooperative** — the
+run is marked cancelled and the consumer stops being fed; that limit is already documented in the
+adapter (R28-2) and is repeated in the outcome below.
 
 ---
 
 ### R28-5 — Prove the door is the only way in (nothing else talks to an engine directly)
-**Status: BLOCKED on R28-3.**
+**Status: STARTABLE NOW (R28-3 done).** Note: with `CC-67` still open (two callers reach the engines
+directly), a full "nothing bypasses" check would fail today — so R28-5 is the check, and **`CC-67` must land
+first for it to pass**. The order is: `CC-67` → R28-5.
 
 **What it is.** A check that fails the build if any code besides the door reaches an AI engine directly.
 Without it, the door is a suggestion, and the next session can quietly bypass it.
@@ -282,8 +351,7 @@ Every sub-row that ends less than fully done gets (or keeps) a row in `COMPLETIO
 | R28-1 | ✅ **DONE 2026-10-11** | See §7.1 below. |
 | R28-2 | ✅ **DONE 2026-10-11** | See §7.2 below. |
 | R28-3 | ✅ **DONE 2026-10-11** | See §7.3 below. |
-| R28-3 | not started | — |
-| R28-4 | not started | — |
+| R28-4 | ✅ **DONE 2026-10-11** | See §7.4 below. |
 | R28-5 | not started | — |
 | R28-6 | out of row (N-8) | — |
 
@@ -468,6 +536,68 @@ keep their `☐` **on purpose**; §D's text was re-worded to say exactly what is
 
 **★ NEXT = sub-row R28-4** — give `cancelRun`/`completeRun` a production caller (so the third `Port` box can
 flip), then **`CC-67`** (move the two remaining callers — the change that finally flips `B-05` and `N-8`).
+
+---
+
+### §7.4 R28-4 — the run is closed at the door (cancel + complete) — BUILT (2026-10-11, code repo)
+
+**What landed.** `packages/ai-assistant/src/modules/ai_assistant/api/chat/route.ts` now **ends** every run
+at the door, and it is the first change that gives the port's `cancelRun` and `completeRun` a **production
+caller** (before this they had none — measured, `§R28-4` requirement):
+
+- a new exported helper **`closeChatRun(port, runId, outcome)`** — the ONE place a run is closed. If the
+  run was aborted it calls `port.cancelRun(runId)` **first**, then always calls
+  `port.completeRun(runId, { status })` with the honest status (`cancelled` when the abort was seen,
+  `completed` otherwise). Cancel-before-complete is what makes a cancelled run record `cancelled`: the
+  adapter checks `completed` first, so completing first would freeze the run as completed and the cancel
+  would then be a no-op;
+- in `POST`'s background block: a hoisted `runId`, an `aborted` flag, a listener on the **request's own
+  abort signal** (`req.signal`, `{ once: true }`, with an `aborted`-already check first), and a call to
+  `closeChatRun` in the existing `finally`.
+
+**Why the abort signal is the right caller (the challenge, answered).** The chat UI **already has a Stop
+button** — `frontend/hooks/useCommandPalette.ts:1416` (`stopExecution`) aborts the browser's own fetch
+(`:556–569`, `signal: controller.signal`). So the affordance existed; the gap was that **Stop never
+reached the server**. Observing `req.signal` closes that hole for Stop **and** a closed tab with one
+mechanism, and needs **no front-end change**. A separate `POST /cancel` route was rejected: it invents
+contract surface the architecture document does not name, for the same result.
+
+**The one honest limit (stated, not hidden).** The cancel is **cooperative** for the engine behind the door
+today: `cancelRun` marks the run cancelled and the consumer stops being fed further events, but the adapter
+holds no handle to force-tear-down the engine's in-flight call (adapter header, R28-2). This change does not
+pretend otherwise.
+
+**Proof.** `__tests__/chat-route-cancel-complete.test.ts` — **8 tests green** (the mock boundary is the
+**port**, so the route's lifecycle calls are observed in the order it makes them). The pre-existing
+`chat-route-ownership.test.ts` (8 tests) and `chat-route-through-port.test.ts` (15 tests reported, including
+the R28-3 static guard) pass **unmodified** — the behaviour a user sees did not change. Route type-checks
+clean; the **whole package suite green: 116 suites / 1575 tests** (R28-3 baseline 115 / 1567). **6 RED-then-
+GREEN mutations** (M1 cancel removed; M2 complete removed; M3 order flipped complete-before-cancel; M4 status
+hardcoded `completed`; M5 the abort listener removed; M6 `closeChatRun` skipped in `finally`), each restore
+**md5-verified** against `2b1439c43e8acd983c12cc4fd3fdff30`.
+
+**A hostile critic (separate agent) found NO real defects — every claim survived.** It attacked all six
+claims with its own probes and reported **none broken**, and it *added one probe of its own* which it then
+deleted: **a run that never streams is still closed** (`startRun` throws → the `finally` still completes
+it). That probe was correct, so it is now a **permanent test** (rule 15 — do not leave a good check in a
+temp file), and it is itself mutation-proved (gate the close on "streaming was reached" → that test alone
+goes RED). Two minor notes it raised, both honest and both addressed: (a) the abort listener is never
+*removed* — bounded by `{ once: true }` and harmless (the closure keeps only the `aborted` flag), so no
+action; (b) my *prompt to the critic* said "15 tests" for `chat-route-through-port` when the file has 17
+`it(` blocks (jest reports 15, two being nested/conditional) — a miscount in the prompt, not the docs; the
+docs are corrected here to say "15 tests reported".
+
+**No box moved — the honest outcome.** `Port` (c) asks for the *behaviour* (cancel bounded and repeatable;
+complete replay-safe). It is now true **and used in production** — but `Port` (c) as a point sits with
+`Port` (a)/(b) under the row's own sentence, and the row is not whole while **two other callers still reach
+an engine directly** (`CC-67`). `Port` (c) **could** be argued to completion on its own merits; it is left
+`☐` **on purpose**, consistent with how `Port` (a)/(b) were treated, because ticking one of the three while
+the row's door is still bypassed would be exactly the "one caller out of three" trap. **ONE NUMBER unchanged
+75 / 321 = 23%.**
+
+**★ NEXT = `CC-67`** — move the two remaining direct callers (`api/ai/chat/route.ts:688` `runAiAgentText`;
+`api/ai/run-object/route.ts:186` + `lib/business-ir-author.ts:160` `runAiAgentObject`) onto the door; that is
+the change that finally flips **`B-05`** and **`N-8`**. Then **R28-5** (the "nothing bypasses" check).
 
 ---
 

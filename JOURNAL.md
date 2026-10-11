@@ -55,7 +55,7 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
-### 🔵 IN PROGRESS — **Row 28 (Phase 8): *"the agent runtime sits behind one typed door — no other code talks to it directly."* Broken into six sub-rows. **R28-1, R28-2 and R28-3 ✅ DONE 2026-10-11 — the chat route now walks through the door. NEXT = R28-4.** No box moved (the row needs *all* callers moved).**
+### 🔵 IN PROGRESS — **Row 28 (Phase 8): *"the agent runtime sits behind one typed door — no other code talks to it directly."* Broken into six sub-rows. **R28-1, R28-2, R28-3 and R28-4 ✅ DONE 2026-10-11 — the chat route walks through the door and the run is now CLOSED there (cancel + complete). NEXT = `CC-67`.** No box moved (the row needs *all* callers moved).**
 **(2026-10-11; plan = [`library/development/PLAN-ROW28-agent-runtime-port.md`](library/development/PLAN-ROW28-agent-runtime-port.md).)**
 
 **What the row asks, in plain words.** Today the platform reaches its AI engine **two different ways,
@@ -82,8 +82,8 @@ OpenCode behind it"*).
 | **R28-1** | The typed port's **shape** — its eight operations + the envelope rules | ✅ **DONE 2026-10-11** (below) |
 | **R28-2** | **OpenCode fitted behind the door** (unchanged, just hidden) | ✅ **DONE 2026-10-11** (below) |
 | **R28-3** | The **chat screen moved onto the door** (the step that makes the row true) | ✅ **DONE 2026-10-11** (below) |
-| **R28-4** | Failure handled — cancel is safe to repeat, complete is safe to replay | ⏳ **NEXT** (startable now) |
-| **R28-5** | A check that **nothing** talks to an engine directly | blocked-cleared (R28-3 done) |
+| **R28-4** | Failure handled — cancel is safe to repeat, complete is safe to replay | ✅ **DONE 2026-10-11** (below) |
+| **R28-5** | A check that **nothing** talks to an engine directly | startable after `CC-67` |
 | **R28-6** | **Delete OpenCode** — separate, later step (`N-8`) | OUT of row 28 |
 
 **R28-1 DONE — what was built, and the honest headline.** `lib/ai-runtime-port.ts` — **definitions only,
@@ -171,8 +171,34 @@ directly"* — **two other callers still do** (`CC-67`) plus the registered bypa
 which is real and measured, but one caller out of three is not the row. `B-05`, `N-8` and the three `Port`
 boxes keep `☐` **on purpose**; §D was re-worded to say what is built. **ONE NUMBER unchanged 75 / 321 = 23%.**
 
-**★ NEXT = sub-row R28-4** (give `cancelRun`/`completeRun` a production caller), then **`CC-67`** (move the
-two remaining callers — the change that finally flips `B-05` and `N-8`).
+**R28-4 DONE — the run is now CLOSED at the door: cancel + complete, and failure is normal.** `api/chat/route.ts`
+gained the **one** place a run ends — an exported helper `closeChatRun(port, runId, outcome)` — and the run path
+now **observes the client's disconnect**: a listener on the request's own `req.signal` (**`{ once: true }`**,
+with an `aborted`-already check first) sets a flag, and the existing `finally` calls `closeChatRun`, which
+**cancels first then completes**, with the honest status (`cancelled` when the abort was seen, else `completed`).
+
+**The measurement that set the task (rule 0b).** `cancelRun`/`completeRun` had **no production caller at all**
+(`grep` found them only in the port, the adapter and their tests), and the chat route had **no cancel path**.
+**The challenge (rule 9b) — and why the abort signal is the right caller:** the chat UI *already has a Stop
+button* (`frontend/hooks/useCommandPalette.ts:1416` `stopExecution`), and it already aborts the browser's own
+fetch (`:556–569`, `signal: controller.signal`) — so the affordance existed; **the gap was that Stop never
+reached the server.** Observing `req.signal` closes it for Stop **and** a closed tab with one mechanism, and
+needs **no front-end change**. A separate `POST /cancel` route was rejected — it invents contract surface the
+architecture document does not name, for the same result. **The honest limit:** the cancel is **cooperative**
+(the adapter marks the run cancelled and stops feeding the consumer; it cannot force-tear-down the engine's
+in-flight call) — stated, not hidden.
+
+**Proof:** 8 new tests (`chat-route-cancel-complete.test.ts`; the mock boundary is **the port**, so the
+lifecycle call ORDER is asserted); the pre-existing behaviour tests pass **UNMODIFIED** (ownership 8, through-port
+15 reported); route type-checks clean; **116 suites / 1575 tests green**; **6 RED-then-GREEN mutations**
+(cancel removed; complete removed; order flipped; status hardcoded; abort listener removed; `closeChatRun`
+skipped in `finally`), route restored **md5-identical**. **A separate-agent hostile critic found NO real
+defect** — it attacked all six claims and broke none, and its one **extra** probe ("a run that never streams is
+still closed") was correct, so it is now a **permanent test** (rule 15) and is itself mutation-proved.
+
+**★ NEXT = `CC-67`** — move the two remaining direct callers (`runAiAgentText` at `api/ai/chat/route.ts:688`;
+`runAiAgentObject` at `api/ai/run-object/route.ts:186` + `lib/business-ir-author.ts:160`) onto the door. That
+is the change that finally flips **`B-05`** and **`N-8`**. Then **R28-5** (the "nothing bypasses" check).
 
 ---
 
