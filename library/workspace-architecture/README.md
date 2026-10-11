@@ -44,11 +44,15 @@ onto what we already have and onto the development plan** — so the build proce
 | # | Step | Status |
 |---|---|---|
 | 1 | Bookmark the position (this file) | ✅ **DONE** — this file |
-| 2 | Recon the reference systems + docs | 🔄 **IN PROGRESS** — see `01-RECON.md` |
-| 3 | The batched research plan | 🔄 **IN PROGRESS** — see `00-RESEARCH-PLAN.md` |
-| 4 | The detailed SRS | ⬜ not started |
-| 5 | Map SRS → current state → development plan | ⬜ not started |
+| 2 | Recon the reference systems + docs | ✅ **DONE (B2)** — `02-REFERENCE-SYSTEMS.md`; plus B1 `01-RECON.md` |
+| 3 | The batched research plan | ✅ **DONE** — `00-RESEARCH-PLAN.md` |
+| 4 | The detailed SRS | 🔄 **B1 + B2 done; B3–B9 to go** |
+| 5 | Map SRS → current state → development plan | ⬜ not started (B10) |
 | 6 | Integrate + index into the rest of the docs | ⬜ **deliberately deferred** (later stage) |
+
+**Batch progress:** **B1 ✅** (recon, measured) · **B2 ✅** (reference systems, verdict). **Next: B3**
+(the user–AI interaction + the Business-IR display). Commits: `2064046` (bookmark + plan),
+`82f72e8` (B1), `250f6c1` (B2).
 
 ### What the recon already established (so the next session does not redo it)
 
@@ -125,9 +129,10 @@ What does **not** exist is the artefact the owner asked for:
 |---|---|
 | `README.md` | This file — the workstream bookmark and the resume point. |
 | `00-RESEARCH-PLAN.md` | The **batches-based research plan** — what each batch reads, produces, and its exit gate. |
-| `01-RECON.md` | The **recon dossier** — the measured inventory of every reference system, document, and code surface this workstream rests on. |
-| `02-SRS-*.md` | The detailed SRS (to be written), one file per major area. |
-| `03-MAPPING.md` | The SRS → current state → development plan map (to be written). |
+| `01-RECON.md` | **B1** — the **recon dossier**: the measured inventory of every code surface this workstream rests on, and a verdict row per owner question. |
+| `02-REFERENCE-SYSTEMS.md` | **B2** — the **three reference systems** (Buzz / OpenRig / Paperclip) analysed from their own source, plus the **verdict and alternatives**. |
+| `02-SRS-*.md` | The detailed SRS (to be written: B3–B9). |
+| `03-MAPPING.md` | The SRS → current state → development plan map (B10). |
 
 ---
 
