@@ -68,6 +68,15 @@ only).**
 | C10 | **Localization resolution** | the fallback chain (requested → lang+region → lang → app default → platform) and the formatting contracts (numbers, dates, currency) | one resolution rule means labels, money and dates mean the same thing everywhere; per-module re-invention produces different answers to the same question | platform release |
 | C11 | **Error model** | the canonical error shape: code · message · details · field_errors · retryable · request/trace id (§74) | machine-readable, localizable, safe errors are what make automation and AI recovery possible | platform release |
 
+**Classification note (owner, 2026-10-11) — the Business IR is CORE, by this file's own test.** The owner ruled that
+the platform's *"main functionality"* is *"a user communicating with the database via AI prompts that create business IR
+layer nuggets that are executed on the database"*. Applying §0's test — *"would the platform stop being able to describe
+itself?"* — the **Business IR** (the typed description of a business request: `packages/shared/src/lib/business-ir/`,
+plus its authoring wire `authorBusinessQueryIr`) is **how the platform describes a business request**, so it belongs to
+Ring 1's *"command/action contract"* (C6) and is exactly the surface row **C2** names — *"the exact 'AI through Business
+IR accesses everything' hole the owner fears"*. It is **not** a Ring-3 domain pack. The full layer-and-wiring map lives
+in [`PLAN-SUPPLEMENTARY-CORE-QUEUE.md`](PLAN-SUPPLEMENTARY-CORE-QUEUE.md) §S1.1–§S1.3.
+
 **What "uncustomisable" means precisely.** Not "the code is hidden" — but:
 - there is **no setting** that alters it, and **no plugin** may replace it;
 - a tenant cannot change it, **and neither can a superadmin** — it moves only by a **platform release**,

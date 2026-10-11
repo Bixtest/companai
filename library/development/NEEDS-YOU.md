@@ -28,7 +28,7 @@ anything else first. Where an item is **not** a decision, it says so, and you ca
 
 ---
 
-## Part 1 — Decisions I need (**2 open** — `NY-22` (row 18: AI own-row-scope semantics) **OPEN — your call; the safe default (a) is already in place**; `NY-24` (the Business-IR authoring wire's first caller) **DECIDED 2026-10-11 — A now → C next → B later (staged + scheduled)**; `NY-23` (row 22 / `CC-44`: should a write endpoint with no permission check fail the build?) **decided 2026-10-11: Option A** (build the default-deny gate); `NY-21` (row 17 coverage) **decided 2026-10-11: Option A** (build the all-tables classification gate); `NY-20` (row 16 scope) **decided 2026-10-11: Option A**; `NY-19` **decided 2026-10-10** (owner chose Option A: build the read-gate coverage test → built as `CC-47`, row 15 ✅); `NY-18` **decided 2026-10-10** ("we follow your recommendations" → Option B, built as `CC-49`); `NY-16` and `NY-17` **decided 2026-10-10** (blank the value; Option B); `NY-15` decided 2026-10-09; `NY-14` closed 2026-10-06; `NY-1`, `NY-2`, `NY-8`, `NY-13` closed; `NY-4` is "nothing needed")
+## Part 1 — Decisions I need (**2 open** — `NY-22` (row 18: AI own-row-scope semantics) **OPEN — your call; the safe default (a) is already in place**; `NY-24` (the Business-IR authoring wire's first caller) **DECIDED 2026-10-11 — A now → C next → B later (staged + scheduled); AND the Business IR itself re-classified as CORE (owner, 2026-10-11), with every postponed layer + wiring point enumerated in `PLAN-SUPPLEMENTARY-CORE-QUEUE.md` §S1.1–§S1.3**; `NY-23` (row 22 / `CC-44`: should a write endpoint with no permission check fail the build?) **decided 2026-10-11: Option A** (build the default-deny gate); `NY-21` (row 17 coverage) **decided 2026-10-11: Option A** (build the all-tables classification gate); `NY-20` (row 16 scope) **decided 2026-10-11: Option A**; `NY-19` **decided 2026-10-10** (owner chose Option A: build the read-gate coverage test → built as `CC-47`, row 15 ✅); `NY-18` **decided 2026-10-10** ("we follow your recommendations" → Option B, built as `CC-49`); `NY-16` and `NY-17` **decided 2026-10-10** (blank the value; Option B); `NY-15` decided 2026-10-09; `NY-14` closed 2026-10-06; `NY-1`, `NY-2`, `NY-8`, `NY-13` closed; `NY-4` is "nothing needed")
 
 > **Numbering note.** Items are numbered once and **never reused**, so that a number you have already
 > quoted keeps meaning the same thing. Item 8 was appended here on 2026-10-05 and answered the same
@@ -529,7 +529,7 @@ mistaken for a working feature).
 **Recommendation (adopted): A now → C next → B later.** Each stage is **scheduled with a named trigger** in the
 supplementary plan and the register (`CC-58`), so no stage is forgotten and each is built at the right time.
 
-**Update 2026-10-11 (the owner’s follow-up challenge: *“is the best version doable already? if so, why not go straight to that?”*).** I measured the **whole** pipeline before answering (rule 0b) and found the answer **changes the size, not the order**: the Business-IR path is **five built, tested layers** — `schema.ts` → `authorBusinessQueryIr` (binding-gated by `CC-57`) → `bind.ts` → **`compileQuery`** → `recompile.ts` / **`user-function/run.ts`** — with **78 tests** (incl. a live-model smoke test), **but nothing in the running product reaches any of them**: `authorBusinessQueryIr` has no production caller, `compileQuery`’s only callers are **inside the same library**, and **no route anywhere** mentions the IR, the author, or the compiler. **So the wire is inert along its whole length.** That means: **Stage C** wires only the **head** (an AI tool authors an IR — but nothing compiles it, so the answer is still an object, not a result); **Stage B** is the honest destination and its size is **larger** than first stated — it must also wire the **compile** half (a shared-library capability + a read path), because a screen that shows a compiled answer is the **only** thing that exercises layers 3–5. **That extra work is core, not business** — it is now its own register row, **`CC-59`**, squarely inside the core plan.
+**Update 2026-10-11 (the owner’s follow-up challenge: *“is the best version doable already? if so, why not go straight to that?”*).** I measured the **whole** pipeline before answering (rule 0b) and found the answer **changes the size, not the order**: the Business-IR path is **five built, tested layers** — `schema.ts` → `authorBusinessQueryIr` (binding-gated by `CC-57`) → `bind.ts` → **`compileQuery`** → `recompile.ts` / **`user-function/run.ts`** — with tests (**78 passing** in the `business-ir` suite + **133** in the `user-function` suite = **211** across the five layers, incl. a live-model smoke test), **but nothing in the running product reaches any of them**: `authorBusinessQueryIr` has no production caller, `compileQuery`’s only callers are **inside the same library**, and **no route anywhere** mentions the IR, the author, or the compiler. **So the wire is inert along its whole length.** That means: **Stage C** wires only the **head** (an AI tool authors an IR — but nothing compiles it, so the answer is still an object, not a result); **Stage B** is the honest destination and its size is **larger** than first stated — it must also wire the **compile** half (a shared-library capability + a read path), because a screen that shows a compiled answer is the **only** thing that exercises layers 3–5. **That extra work is core, not business** — it is now its own register row, **`CC-59`**, squarely inside the core plan.
 
 **What this means for your question.** We **can** build the full pipeline now — nothing blocks it, and it is core work. The reason not to do it *this instant* is the **same rule you set on 2026-10-09**: it is the **business half’s screen** that is the natural consumer, and building the screen now would be **business-module work before the policy kernel is finished** — the exact reverse-order move you corrected. The **compile half** (`CC-59`), however, is **core and startable now** (it is a library capability + a read path, no screen). **So there is a real choice here, and it is yours** (rule 11):
 
@@ -543,6 +543,40 @@ supplementary plan and the register (`CC-58`), so no stage is forgotten and each
 
 **What is already done either way.** The wire exists and is binding-gated (`CC-57`); the coverage gate guards it;
 this decision changes **when** it is exercised, not whether it is safe.
+
+**Update 2026-10-11 (the owner's second answer — the re-classification and the "start executing" go-ahead).** The owner
+answered both parts of his own follow-up:
+
+> *"I am not sure the business ir issue is not a cor issue considering that the main functionality of the platform
+> will be a user communicating with thedatabase via Ai PROMPTS that create business IR layer nuggets that are executed
+> on the database to meet the user's inqueries. Saying so, we can follow your recomendations as long as you add details
+> about the postponed Business IR layers and wiring everywhere needed so we do not miss anything once we are done with
+> the tasks in the suplimentary implementation plan's pipeline. Once the core is done, I will share with you information
+> so we create a worksoace area in the frontend inspired by platforms like paperclip development we did on another
+> project, and documented in our codebase, Buzz AI, stack, etc... so we have that invironment where the user sends a
+> prompt to ai, ai create the business ir nugget that exesute it internally in the platform, which is the core of the
+> whole vision. Unless that changes anything in your plan, document and then we start executing the suplimentary
+> implimentation plan and update the documents of development accordingly as we go."*
+
+**What is now DECIDED and RECORDED:**
+
+1. **The Business IR is CORE.** Measured against the project's own test — [`CORE-BOUNDARY.md`](CORE-BOUNDARY.md) §0
+   (*"would the platform stop being able to describe itself?"*, line 21), Ring 1's *"command/action contract"* (line 40),
+   and row **C2** which names *"the exact 'AI through Business IR accesses everything' hole the owner fears"* (line 60).
+   The IR **is** how the platform describes a business request, so it is core. **Full statement:** the plan's **§S1.1**.
+2. **Every postponed Business-IR layer and wiring point is enumerated** — the plan's **§S1.2** table (L1–L5, W-A/W-B/W-C),
+   each with its state and the exact wiring point that makes it live. This is the single checklist to consult before
+   declaring the Business IR done.
+3. **The frontend workspace is the recorded destination** — the plan's **§S1.3**, quoting the owner. It reuses the two
+   wire halves (W-A + W-B); the owner will supply the reference material (Paperclip, Buzz AI, Stack, our codebase docs)
+   **once the core is done**. Recorded now so the item cannot be lost.
+4. **The staged schedule stands (Option 1):** A now → C when the AI tool surface is next touched (`CC-58`) → B when
+   business work resumes; and the **compile half `CC-59` rides in the core plan** (startable, no screen).
+5. **Go-ahead to execute:** *"document and then we start executing the suplimentary implimentation plan."* The docs are
+   updated (this block + plan §S1.1–§S1.3 + rule 15 + the register), and execution begins.
+
+**Nothing further is needed from you on this item** — the re-classification is recorded, the full layer map exists, and
+the workspace detail arrives after the core. **This item stays ✅ DECIDED.**
 
 ---
 

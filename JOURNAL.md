@@ -35,6 +35,23 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+### ✅ DONE — **rule 15 (solve-what-is-straightforward NOW) added; the Business IR re-classified as CORE; every postponed layer + wiring point enumerated so nothing is missed when the core is done**  
+**(2026-10-11; docs repo only — no code.)**
+
+**The owner’s Message-4 instruction (three parts, verbatim highlights).** (1) *“we should add a rule that manage this issue properly… [for] ‘anything that is solvable straghtforward and does not disrupt the overall development plan, we solve immediately… postpone fixing what is easily fixable can coverup gaps that fixing can expose.’”* (2) *“I am not sure the business ir issue is not a cor issue considering that the main functionality of the platform will be a user communicating with thedatabase via Ai PROMPTS that create business IR layer nuggets that are executed on the database to meet the user’s inqueries… add details about the postponed Business IR layers and wiring everywhere needed so we do not miss anything.”* (3) *“document and then we start executing the suplimentary implimentation plan and update the documents of development accordingly as we go.”*
+
+**Fact-checked first (rule 0b).** Re-measured the whole Business-IR pipeline from the code: `authorBusinessQueryIr` → **only its own definition** (no production caller); `compileQuery` → callers are `recompile.ts` + `user-function/{run,verify}.ts` + `fingerprint.ts`, **all inside the shared library**; `runUserFunction` → **no caller**; **0 route files** in `apps/mercato/src/app/api` mention the IR/author/compiler. Jest confirms the `business-ir` suite = **78 passed, 6 skipped** (the live-model smoke test). Confirmed the core test in [`CORE-BOUNDARY.md`](library/development/CORE-BOUNDARY.md) §0 (line 21), Ring 1’s *“command/action contract”* (line 40) and row **C2** (line 60 — *“the exact ‘AI through Business IR accesses everything’ hole the owner fears”*).
+
+**1 — Rule 15 added** to [`WORKING-RULES.md`](library/development/WORKING-RULES.md) §1 (house form, the owner’s words, the worked example: `CC-43` left *flagged* **hid `CC-46`**). The stale *“now six”* rule-count parenthetical was corrected in the same change (itself a rule-15 fix).
+
+**2 — The Business IR is CORE (re-classified).** Recorded in three places: the plan’s **§S1.1** (with the test), a dated note in `CORE-BOUNDARY.md` §2, and `BACKLOG.md`’s `CC-58` row. The **complete postponed-layer map** is the plan’s **§S1.2** — a table of every layer (`L1` schema → `L2` author → `L3` bind → `L4` compile → `L5` recompile/run) and every wiring point (`W-A` read path, `W-B` screen, `W-C` the frontend workspace), each with its state and the exact wiring that makes it live. The owner’s **frontend-workspace destination** (prompt → AI authors a Business-IR nugget → executed internally) is recorded verbatim in **§S1.3**, to be detailed once the core is done.
+
+**3 — Go-ahead recorded; execution begins.** `NEEDS-YOU.md` **`NY-24`** carries the second-answer block (5 recorded decisions); `BACKLOG.md` gained a **`CC-59`** row (the compile half) and a **frontend-workspace** row; `platform_points.md`’s FRONTIER NOW records the go-ahead and the re-classification; `COMPLETION-CALLBACKS.md`’s `CC-58` row was refined (only the *screen* is business-half — the wire is core). `LESSONS.md` **L124**.
+
+**Verification.** Every edited file: `raw diff == git diff -w` (no reflow), lines **LF-0 on disk AND in the blob**, no `/n` trap (all structured text written via **script files**, never heredocs — L123 held). Register re-checked: **59 rows, ids contiguous 1…59, no duplicates, no BAD-COLUMNS.** *(A first quick contiguity check falsely printed `False` — it compared ids in *file order*; the register is in narrative order. Correct check is set-based. Banked as **L124**.)* **ONE NUMBER unchanged** (72 / 321 = 22%).
+
+---
+
 ### ✅ DONE — **register contiguity restored (`CC-43`, `CC-46` added); the Business-IR pipeline’s SECOND unwired half measured and scheduled (`CC-59`)**  
 **(2026-10-11; docs repo only — no code.)**
 

@@ -16,9 +16,10 @@ owner** — how to report, what not to close, and what to do with the front end.
 
 ## 1. The rules that outrank everything
 
-These are also written at the top of `workspace/COOKBOOK.md` ("The three rules that override
-everything", now six). They are repeated here because a rule a newcomer has to find is a rule that
-gets broken.
+These mirror the top of `workspace/COOKBOOK.md` ("The three rules that override everything", which
+now carries rules 0–5). **This file is the fuller list** — it carries every standing override, and it
+is the copy kept in step as new rules are added (rule 15 below was added 2026-10-11). They are
+repeated here because a rule a newcomer has to find is a rule that gets broken.
 
 0. **THE ORDER OF DEVELOPMENT IS THE VISION'S ORDER — and no task may jump ahead of it**
    *(owner, 2026-10-09, after measuring the drift himself)*. **This rule governs *which task comes
@@ -225,6 +226,37 @@ from the artefact, research-validate-write-then-build. Read them once, before to
     the old module — it is re-expressed through the new platform's own concepts (the core boundary, the
     settings layer, the permission grammar, the function/widget model). Re-wiring an old module verbatim
     defeats the reason it was parked.
+
+15. **Anything that is straightforward to solve, and that does not disrupt the overall development plan,
+    is solved IMMEDIATELY — postponing a fix covers up the gaps that fixing would expose**
+    *(owner, 2026-10-11 — said after watching the `CC-43` register-row gap sit "flagged, not fixed" and
+    then, once fixed, immediately expose a second gap, `CC-46`, that the flag had hidden)*. **One rule,
+    binding on every task:**
+    **(a) If it is straightforward and it does not disturb the plan, do it now — do not schedule it.**
+    A small, self-contained fix (a missing row, a stale count, an unapplied correction, a one-line
+    wiring gap) is **solved in the change you are already making**, not written into a register to be
+    picked up "later". Scheduling it costs a future session a whole context-load to re-discover what
+    you already know now, and until it is done it is **a hole in the codebase**.
+    **(b) Postponement is for work that genuinely needs a trigger — nothing else.** You may defer an
+    item **only** when it is blocked on a real prerequisite (a layer that does not exist yet, the
+    owner's decision, a business half that is paused), and then **only** with the trigger named where
+    the next agent will read it (rule 8). "It is out of scope for this slice", "it is only a
+    documentation nit", and "someone should do it later" are **not** triggers.
+    **(c) The reason the rule exists: postponing a small fix HIDES the larger defect behind it.** A
+    gap left open is not one gap — it is a **place nobody looks**, so the next defect in the same spot
+    is never found. Fixing the small thing is how you *find* the big thing. His words, verbatim:
+    *"anything that is solvable straghtforward and does not disrupt the overall development plan, we
+    solve immediately. The more we puch till later the morewe risk a codebase accumulating many holes."*
+    And when he spoke to the `CC-43` case directly: *"postpone fixing what is easily fixable can
+    coverup gaps that fixing can expose."*
+    **Why this rule exists (the worked example).** `CC-43` (the permission catalogue's read half) was
+    DONE and proven on 2026-10-09, but it had **no register row** — so it was flagged *"a register-hygiene
+    issue, out of scope for this change"* and left. Acting on the owner's instruction, that gap was
+    fixed in-batch (2026-10-11) — **and fixing it immediately exposed `CC-46`** (all 53 searchable
+    entities' `aclFeatures` coverage, also DONE, also missing its row). Two finished, tested capabilities
+    had been invisible in the register for two days **because the first small gap was left standing.**
+    **What it forbids:** flagging a small, straightforward, plan-safe fix as "out of scope" or
+    "future work" instead of doing it; and treating "I noted it" as equivalent to "I resolved it".
 
 ---
 

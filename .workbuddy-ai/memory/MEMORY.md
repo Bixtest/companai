@@ -22,7 +22,8 @@
 - **Rule 8** schedule every partial build in `COMPLETION-CALLBACKS.md` in the same change. **9a** own the code
   you touch. **9b** challenge the task before executing. **10d** never stack on an unfinished foundation.
   **11** the owner decides *what* to build. **13** re-measure premises; when falsified, correct it *everywhere
-  it was copied*. **14b** migrations are provable.
+  it was copied*. **14b** migrations are provable. **15** solve the straightforward NOW — never schedule a
+  plan-safe small fix (postponing it hides the next gap).
 
 ## Section map
 - `platform_points.md` — SCOREBOARD (one number + one plain list, vision Phase 0→10 order) + byte-identical
@@ -64,6 +65,17 @@ The owner's standard: **an issue is only "reported" if it is COMPLETE.** A flag 
   the **full shortlist, ranked, with trade-offs and my recommendation**, then **one specific question**. A pointer
   with no candidates ("a fresh pick from the vision order", "the next task is yours") is banned.
 - **Never make the owner ask "what does that mean?".** If a sentence needs decoding to act on, it is not finished.
+
+## Rule 15 — solve the straightforward NOW (BINDING, owner 2026-10-11 — `WORKING-RULES.md` §1 rule 15)
+**Anything straightforward to solve that does not disrupt the overall plan is solved IMMEDIATELY — never scheduled.**
+Postponing a small fix **covers up the gaps that fixing would expose**: a gap left open is a place nobody looks, so
+the next defect in the same spot is never found. Defer **only** on a real prerequisite, and then **only** with the
+trigger named where the next agent reads it (rule 8). *"It is out of scope for this slice"*, *"only a doc nit"* and
+*"someone should do it later"* are **NOT** triggers. His words: *"anything that is solvable straghtforward and does
+not disrupt the overall development plan, we solve immediately. The more we puch till later the morewe risk a codebase
+accumulating many holes."* Worked example: `CC-43` left "flagged, not fixed" **hid `CC-46`** — fixing the first
+immediately exposed the second; two DONE, tested capabilities were invisible in the register for two days.
+
 
 ## Live frontier (2026-10-11, after `CC-57`; read `JOURNAL.md`'s `★ ACTIVE TASK` for the truth)
 - **Rows 7–9, 13–18 and 22 are ✅** (row 16 ✅-own-leg / 🟡 overall pending its team-leg `CC-51`). **PHASE 3–5 complete.**

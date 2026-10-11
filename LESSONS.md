@@ -3965,8 +3965,6 @@ change. (4) But do **not** over-claim: state plainly whether the hole is **live*
 runtime it guards), L121 (a change that adds an enumerable object drifts sibling pins); rule 9(a) (own the code
 you touch — including the gate you delivered), rule 13 (state the measured truth, live vs latent).*
 
-
-
 ## L123 — a `python3 - <<'PY'` heredoc through Git Bash **mangles `\n`** in string literals — write the script to a FILE instead
 
 **Seen in the `CC-58` docs change (2026-10-11).** I added a register-hygiene note by building it in a Python heredoc and writing it with `open(p,'wb')`. The note needed literal newlines inside its string (`"…CC-58 change:" + "\n\n" + "1. A duplicate…"`). On disk the result contained a **literal `/n`** — two characters, forward-slash and `n` — where a newline was intended, so the paragraph and the numbered list collapsed onto one physical line. A **separate-agent hostile critic** caught it (`od -c` showed `: / n \n`).
@@ -3977,3 +3975,12 @@ you touch — including the gate you delivered), rule 13 (state the measured tru
 
 *Cross-ref: the standing hazard note (prefer script files over heredocs); L122 (the critic found it — a separate agent verifying byte-level output is what caught it); rule 0 (only the code — here the *bytes* — is evidence).*
 
+## L124 — a **contiguity check that compares ids in FILE order** reports a perfectly contiguous register as broken
+
+**Seen in the 2026-10-11 docs change (the `CC-58`/`CC-59` re-classification).** After editing a register row I re-ran the register's own checks. My quick check did this: collect the `CC-n` ids **in the order they appear in the file**, then test `nums == list(range(1, len(nums)+1))`. It printed **`contiguous 1..N: False`**. The register was, in fact, **perfectly contiguous (1..59, no gaps, no duplicates)** — proven by the correct check (`set(nums)` covers `1..59`, and a `Counter` shows no id appears twice).
+
+**Why it happens.** The register file lists its rows in **narrative / thematic order**, not numeric order (a `CC-58` row can sit above a `CC-40` row, a DONE block can cite an earlier id again, etc.). Comparing the *file-ordered* id list to a monotone `range()` therefore fails **whenever the file is not sorted by id**, which it never is. The failure is **in the instrument, not the artefact** — exactly the standing lesson *"a `0` (or a `never read`) is a claim about the instrument, not the data"*, met in its positive twin: **a `False` from a mismatched check is a claim about the check, not the file.**
+
+**The rule.** (1) To prove **contiguity**, compare the **set** of ids to the expected set (`set(nums) == set(range(1, N+1))`), never the **sequence**. (2) To prove **no duplicates**, use a `Counter` (or `len(set(nums)) == len(nums)`) — never a positional scan. (3) To prove **order** (if order ever matters), sort first, or assert the specific ordering you actually require — and say **which** ordering you mean. (4) **When a check reports a defect, first confirm the check measures what its name claims** before "fixing" the artefact — a false `False` invites a repair that damages a healthy file. (5) Two routes: state the result from **two different checks** (set-based contiguity + set-size vs total) and require them to agree, the same standard as any number the owner will act on (rule 4).
+
+*Cross-ref: the standing "a 0 is a claim about the instrument" lesson; rule 4 (two routes, disagreeing instruments never averaged); L121 (a change that adds an enumerable object drifts sibling pins — pins need the right *shape* of check).*
