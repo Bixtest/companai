@@ -35,6 +35,21 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+### ✅ DONE — **register contiguity restored (`CC-43`, `CC-46` added); the Business-IR pipeline’s SECOND unwired half measured and scheduled (`CC-59`)**  
+**(2026-10-11; docs repo only — no code.)**
+
+**The owner’s instruction (2026-10-11, verbatim).** *“anything that is solvable straightforward and does not disrupt the overall development plan, we solve immediately. The more we push till later the more we risk a codebase accumulating many holes.”*
+
+**Solved immediately (register hygiene — the register’s own check 3).** Two ids were cited **CLOSED** elsewhere but had **no register row**, leaving contiguity gaps: **`CC-43`** (the permission catalogue’s read half — `readTenantSurfaces` + `GET /api/auth/permission-surfaces`, 27/27 tests + 5 mutations + hostile critic, closed 2026-10-09) and **`CC-46`** (all **53** searchable entities declare `aclFeatures` + the coverage gate, code `c03eca5c`, closed 2026-10-10). Both rows were **added** as `✅ DONE`. The register’s contiguity check now runs **clean: ids 1…58 with no gaps**, no duplicates, no malformed rows. Nothing was rebuilt — this was a recorded fact that had gone unwritten.
+
+**Measured (rule 0b) — the Business-IR pipeline has TWO unwired halves, not one.** Asked whether the *best* version is buildable now, I measured the whole path: **five built, tested layers** (`schema.ts` → `authorBusinessQueryIr` [binding-gated, `CC-57`] → `bind.ts` → **`compileQuery`** → `recompile.ts` / **`user-function/run.ts`**), **78 tests** incl. a live-model smoke test — **but nothing in the running product reaches any of them**: the author has no production caller; `compileQuery`’s only callers are **inside the same library**; `runUserFunction` has **no external caller**; and **no `api/**/route.ts` names the IR, the author, or the compiler**. The wire is inert along its whole length.
+
+**Scheduled (rule 8).** The compile half is now its own row **`CC-59`** — **core** work (a shared-library capability + a read path), squarely inside the core plan, **not** business. Its consumer is the Stage-B screen; Stage C (`CC-58`) wires only the head. `NEEDS-YOU.md` **`NY-24`** was updated with the measurement and a **3-option decision** (keep A→C→B / pull `CC-59` forward / pull the whole thing), with the note that **Option 2 is core and startable now** and **does not violate the owner’s order ruling** (no business screen).
+
+**Verification.** Register: all five own-checks clean (contiguous 1…59, 25 open, no dup, no malformed row); `raw diff == `git diff -w` for every edited file. **ONE NUMBER unchanged** (72 / 321 = 22%) — these are recorded facts and a scheduled row, not new scored work.
+
+---
+
 ### ✅ DONE — **the supplementary core queue: every open register item staged in the live docs; the Business-IR wire's first caller scheduled A→C→B (`CC-58`)**  
 **(2026-10-11; docs repo only — no code.)**
 

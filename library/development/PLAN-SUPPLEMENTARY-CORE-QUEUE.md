@@ -14,12 +14,14 @@ only honest if the trigger is **scheduled where the next agent will read it** (t
 So this plan: **(1)** goes through **every** open item in the register; **(2)** keeps its focus on the **core**
 (kernel, AI foundation, security kernel, schema engine, ops) and **excludes business modules**.
 
-**Scope discipline (measured, not asserted).** The register holds **24** open rows as of 2026-10-11 (derived,
+**Scope discipline (measured, not asserted).** The register holds **25** open rows as of 2026-10-11 (derived,
 not typed — the last row per id, non-`✅`): `CC-6`, `CC-7`, `CC-8`, `CC-9`, `CC-10`, `CC-11`, `CC-12`,
 `CC-13`, `CC-14`, `CC-15`, `CC-19`, `CC-20`, `CC-32`, `CC-33`, `CC-34`, `CC-35`, `CC-36`, `CC-38`, `CC-39`,
-`CC-41`, `CC-42`, `CC-51`, `CC-54`, `CC-58`. Of these, **one is business** (`CC-42` — its first caller is the
-`customers` deal pipeline, paused as business work) and is **excluded here**; the remaining **23 are core** and
-appear below.
+`CC-41`, `CC-42`, `CC-51`, `CC-54`, `CC-58`, `CC-59`. Of these, **one is business** (`CC-42` — its first caller is the
+`customers` deal pipeline, paused as business work) and is **excluded here**; the remaining **24 are core** and
+appear below. (`CC-58` + `CC-59` were both added 2026-10-11 — `CC-58` from `NY-24`, `CC-59` from the measurement
+that answered the owner's Stage-B question; `CC-43` and `CC-46` were missing register rows, added the same day —
+both DONE, so neither adds to the open count.)
 
 **How to use it.** Each item carries: **what it is** (plain words), **why it is open** (the gap), **its named
 trigger** (copied from the register — the register owns the truth), **its prerequisite**, and **what to do when
@@ -30,7 +32,7 @@ Written 2026-10-11 as a **plan** (rule 10c), not a build. No code is claimed.
 
 ---
 
-## §S1 — `CC-58`: the Business-IR wire's first caller (staged A → C → B) — **NEW, adopted from `NY-24`**
+## §S1 — `CC-58` + `CC-59`: the Business-IR wire's first caller (staged A → C → B) and its **unwired compile half** — **NEW, adopted from `NY-24`**
 
 **What it is.** `authorBusinessQueryIr` (`packages/ai-assistant/src/modules/ai_assistant/lib/business-ir-author.ts`)
 turns a plain-language request into the platform's structured **Business IR**. It is written, tested, and — since
@@ -45,7 +47,7 @@ been reached. It is **not a hole** (an unreachable path cannot be exploited); th
 never exercised by a real caller) and a **false "done"** (an unreachable item mistaken for a working feature).
 
 **The owner's decision (2026-10-11, `NY-24`): adopt the staged introduction — A now → C next → B later — on the
-condition that each stage is scheduled in the live docs.** This section, and register row `CC-58`, are that
+condition that each stage is scheduled in the live docs.** This section, and register rows `CC-58` (the head) + `CC-59` (the compile half), are that
 schedule.
 
 | Stage | What it means | Named trigger | Prerequisite | What to do when it fires |
@@ -53,6 +55,12 @@ schedule.
 | **A** *(adopted NOW — active)* | Leave it pinned, unreachable. The coverage gate (`binding-coverage.test.ts`, `IN_PROCESS_DISPATCH_SITES` **empty**, held by a positive pin) keeps it honest. Nothing is spent. | n/a — in force now. | none — `CC-57` landed the fail-closed + scope threading. | Nothing to build; keep the gate green. Do **not** remove the helper. |
 | **C** *(next)* | Register it as a **chat tool** so the **existing** AI chat path can ask it to author an IR — live **without** a new screen, staying inside the AI foundation, under the same binding. | **When the AI tool surface is next touched.** | none — the chat dispatch path and the binding are already wired (`CC-27`/`CC-55`/`CC-57`). | Add one tool registration that calls `authorBusinessQueryIr` with an `AuthContext` + `EntityManager`; add a test proving the binding is consulted; re-run the coverage gate. Size: **bounded** (one registration + tests). |
 | **B** *(later)* | Wire the full **business screen** — a person types a business question on a real screen and gets a compiled answer. | **When business work resumes** (the owner's ruling lifts). | the owner's ruling lifting (business half un-paused). | One route + one screen, reusing the `CC-57`-hardened helper. Size: **one route + one screen**. |
+
+
+
+**Measured 2026-10-11 (rule 0b) — the pipeline has TWO unwired halves, not one.** The Business-IR path is **five built, tested layers**: `schema.ts` (the IR's shape) → `authorBusinessQueryIr` (the model produces an IR; binding-gated by `CC-57`) → `bind.ts` (parameter binding) → `compile.ts` (`compileQuery` — the IR is validated against the business model) → `recompile.ts` + `user-function/run.ts` (run a saved Function). **All five exist and carry tests** (the `business-ir` suite alone has **78** assertions, including a live-model smoke test that Qwen2.5-7B produced a schema-valid IR for six different requests). **But NO route, screen, or tool reaches any of them:** `grep` for a production caller of `authorBusinessQueryIr` → only its own definition; `compileQuery`'s only callers are `recompile.ts` and `user-function/run.ts` **inside the same library**; `runUserFunction` has **no external caller**; and **no `api/**/route.ts` anywhere mentions `BusinessQueryIR`, `authorBusinessQueryIr`, or `compileQuery`**. **So the wire is inert along its whole length — not just at its head.**
+
+**What that changes about the stages (honest size).** **Stage C** — *“register the authoring helper as a chat tool”* — wires only the **head** of the pipeline: a chat tool that authors an IR returns the IR, but nothing **compiles** it, so the answer is still a typed object, not a result. Wiring the head is still the smallest real step (it exercises the `CC-57` binding end-to-end against a live caller), and it is exactly what `NY-24` adopted — but it must be stated as *“the head goes live”*, **not** *“the Business IR capability goes live”*. **Stage B** — the full business screen — therefore carries **more than “one route + one screen”**: it must also wire the **compile** half (`compileQuery` + the read path that executes the compiled query), because a screen that shows a person a compiled answer is the **only** thing that exercises layers 3–5. That extra wiring is **core work** (a shared-library capability + a read path), **not** business-module work — so it belongs in **this** (core) plan, and it is why Stage B is the honest destination and Stage C only the first switch.
 
 **Cross-ref:** [`NEEDS-YOU.md`](NEEDS-YOU.md) `NY-24`; `PLAN-CC-57-in-process-dispatch-scope.md`.
 
@@ -160,7 +168,7 @@ with no reader* — the anti-pattern row 1 already names.
 1. **The register owns the truth.** Every row above is a *view* of [`COMPLETION-CALLBACKS.md`](COMPLETION-CALLBACKS.md).
    When a trigger fires and an item is built, its register row flips to `✅` and this plan's row is updated in the
    **same** change.
-2. **Re-derive the open set, never type it.** The count (**24 open, 1 business, 23 core** as of 2026-10-11) is
+2. **Re-derive the open set, never type it.** The count (**25 open, 1 business, 24 core** as of 2026-10-11) is
    derived from the register's rows (the last row per id, non-`✅`) — the same rule the ONE NUMBER follows.
 3. **A new open item lands in the right cluster.** When a build stops short, its new register row is added **and**
    its cluster here is updated in the same change — so no core item is ever "one session away from forgotten".
