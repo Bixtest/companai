@@ -14,9 +14,8 @@ restore) → re-measure. Only when flawless: ALL docs updated in the SAME change
 Two sources of truth: `BACKLOG.md` (status) + `BUILD-ORDER.md` (order); FRONTIER = `platform_points.md`'s
 `▶ FRONTIER`; **only code is evidence**. SHARED-DOC CLOBBER HAZARD (twice): the owner saves from a
 stale copy — `git diff <path>` first, **commit immediately after every edit**, `owner_answers.md` = read,
-never write. Rules 9a · 10d · 11 (the owner decides *what*) · 13 (correct a falsified premise *everywhere*) · 15. Reporting: no flag without a full report (named · what · why · risk ·
-ranked lines + recommendation); **never end on "your call"** — shortlist, recommendation, then ONE
-specific question.
+never write. Rules 9a · 10d · 11 (the owner decides *what*) · 13 (correct a falsified premise *everywhere*) · 15. Reporting: no flag without a full report (named · plain meaning · why · risk ·
+**ranked actions + recommendation** · whether he must decide); **never end on "your call"**.
 
 ## Hazards
 Line endings: judge the COMMITTED BLOB (`git ls-files --eol`); `grep $'\r'` lies on a git pipe; Python
@@ -32,5 +31,5 @@ must enumerate the file classes it covers (**L132**).
 - **Phase 2: `P2-1` ✅ + `P2-2` ✅ DONE 2026-10-12.** `P2-2` = `lib/hermes-gateway-client.ts` + 21/21 (every event an `event`-envelope, `server.py::_event_frame:701`). `P2-1` = `docker/hermes/` + the **opt-in** `docker-compose.hermes.yml` (gate `handshake_gate.py` **PASSED 39.5s**). **L140** a compose network is an ownership claim (external + overridable) · **L141** the stack already ran the upstream `hermes-local` HTTP gateway, a different door, neither wired into the app; **RULED (`CC-74`): it stays until `P2-5` proves the pinned worker behind the port, then is retired in one change (compose comment + COOKBOOK + register) · **L142** worker stdout is the wire (logs → stderr; the gate asserts every stdout line is JSON).
 - **★ NEXT = `P2-3`** (port adapter; settle `session.steer` by measurement) → `P2-4` (Business-IR narrow tool) → `P2-5` → `P2-6` (exit-gate proof).
 - **`CC-73` OPEN:** `ai-assistant` had no type gate (TS18003) — fixed + `typecheck`; exposed **92 pre-existing errors in 27 `__tests__` files** (fix file-by-file; `exclude __tests__` was named and rejected).
-- **`CC-51` premise FALSIFIED:** the `team` concept EXISTS (`StaffTeam*` in `packages/core/.../staff/data/entities.ts`); `staff` is PARKED → enabling it is a product decision (**L137**).
+- **`CC-51` premise FALSIFIED:** the `team` concept EXISTS (`StaffTeam*` in `staff/data/entities.ts`); `staff` is PARKED → enabling it is a product decision (**L137**).
 - **Owner's ruling in force:** core architecture first — **business modules are GENERATED from the core workspace** (prompt → IR → Functions → modules), not hand-coded unless needed for testing. Docker ON (29.8.2).

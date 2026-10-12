@@ -4367,6 +4367,19 @@ if he cannot do anything with it, saying it is noise that hides the next real de
 cannot decode a line, treat it as a defect in the report, not a gap in his knowledge** — the sentence gets
 rewritten and the fix gets banked, in the same change, exactly as a falsified premise would be.
 
+**CORRECTED THE SAME NIGHT — the plain-English twin is still only half a report (the owner, second reply).** I
+fixed L143's rule (1) and his reply was *"This is better explained, yet still missing the most important part:
+Actions done or recommended. Just like your rules dictate. Stating an issue is good. But only when you state the
+action taken."* So the full shape of a limitation is **five parts, and the first version shipped two**: (a) the
+name, (b) **what it means in plain words**, (c) **why it exists / the risk if it is left**, (d) **the action
+already taken or the ranked lines with a recommendation**, and (e) **whether the owner must decide anything**.
+A clean translation of the problem is the invitation to the decision — it is not the decision. **Rule (2)'s
+test now reads: "can he act on this without asking me a question *and does the reply say what to do*?"** — a
+sentence that explains a gap but names no action still fails, because knowing the gap is not knowing the move.
+This is not a new rule; it is the standing reporting rule (*no flag without a full report — named · what it is ·
+why · risk · **ranked actions + trade-offs + a recommendation***) applied to limitations, which I had been
+treating as mere disclaimers attached at the end of a message.
+
 *Cross-ref: WORKING-RULES §2.3 (plain English — the owner is not a developer) and the reporting rules (no
 flag without a full report; never make the owner ask "what does that mean?"); `JOURNAL.md`'s P2-1 block (whose
 closing "Honest limits" line is the instance); L137/L138 (the same month's other two "accurate internally,
