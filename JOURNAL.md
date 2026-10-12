@@ -55,6 +55,46 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+### 🔍 MEASURED 2026-10-12 — **`CC-51` is smaller than documented, and its stated blocker is FALSE: the `team` concept already exists (but is parked).**
+
+**(Owner's ask: *"if CC-51 is straightforward and small to fix, maybe better we fix that first — now that we
+remembered it — so it is off the pipeline, then focus on phase 2"*.)**
+
+**Measured first (rule 0b), before deciding.** `CC-51` is row 16's **team-leg**: the "own + team" row scope. Its
+register entry and the plan's §7.2 both said B needs *"a real `team` concept the platform has never had — no team
+entity, no membership, nothing on `auth` (measured 2026-10-11)."* **That premise is falsified.** Measured
+2026-10-12 in the code repo:
+
+- **The `team` entity EXISTS.** `packages/core/src/modules/staff/data/entities.ts` declares **`StaffTeam`**
+  (`@Entity({ tableName: 'staff_teams' })`, `:5`), `StaffTeamRole` (`staff_team_roles`, `:36`) and
+  **`StaffTeamMember`** (`staff_team_members`, `:73`) carrying **`team_id`** (`:85`) **and `user_id`** (`:94`) —
+  the exact user↔team link B needs. Real API routes (`api/teams.ts` 214 lines, `api/team-members.ts` 305 lines),
+  commands, backend pages, seeds — **236 files**.
+- **Only ONE team concept exists** (all 7 `*team*` table names are in that one module) — so B would build on it,
+  not duplicate it (L136).
+- **What is genuinely missing** (B's real remainder): a `teamField`/`teamFeature` declaration pair (`OrmEntityConfig`
+  has only `ownerField`/`ownerFeature`, `factory.ts:206`); the "my teams → member ids" expansion (the resolver at
+  `factory.ts:1455-1483` resolves only the owner branch; `organizationScope.ts` has no team branch); and the third
+  role mode (`all | own | team`).
+- **A NEW blocker the register never named: the `staff` module is PARKED.** It sits in the reference section of
+  `apps/mercato/src/modules.ts` (off unless a developer enables it, alongside `sales`). B's plumbing can be built
+  without it, but **nothing can use team scope until teams are live — and enabling `staff` is a product
+  decision** (rule 11).
+
+**Verdict.** B's "large" half (entity + membership + schema + UI) is **already built**, so `CC-51` is *smaller*
+than documented — but it is **not** the small, self-contained fix the owner's condition hoped for, because it now
+gates on **enabling a parked module**, which is the owner's call, not a technical gap. **The register-entry
+wording was corrected in the same change (rule 13)** — in `COMPLETION-CALLBACKS.md` (`CC-51`),
+`PLAN-ROW16-own-team-row-scope.md` §1/§7.2, `PLAN-SUPPLEMENTARY-CORE-QUEUE.md`, `NEEDS-YOU.md`,
+`platform_points.md` (NOW cell + LIST row 16).
+
+**What this means for the order.** The honest reading of the owner's instruction: the condition ("straightforward
+and small") is **not met in the form the register leads you to expect** — but the *remainder* is genuinely small
+once the parked-module question is answered. So the answer is a question, not a build. (The memory file and this
+box carry it.)
+
+---
+
 ### ✅ HERMES PIN RE-PINNED to the newest source — **the old pin was 3,290 commits behind; now the pin names the copy the owner supplied.**
 **(2026-10-12; the owner's request: *"I downloaded and extracted the latest hermes version to `hermes-agent-main` … it is better that we use the most recent one. You can compare the difference if needed … Maybe the newest version provide other elements of an added value."*)**
 

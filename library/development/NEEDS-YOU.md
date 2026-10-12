@@ -123,8 +123,15 @@ tenant."* (BUILD-ORDER item 18: *"today scope is tenant + organization only."*)
 **What I measured in code (rule 0b).** The claim is **true** — scope today is exactly **three** dimensions:
 `tenantId`, `organizationId`, and an `organizationIds` allowlist (`shared/src/lib/api/crud.ts`
 `buildScopedWhere()`, applied in `shared/src/lib/crud/factory.ts` `withCtx()`). The user id (`auth.sub`) is read
-all over the factory **but only to stamp audit/event records — never to filter rows.** There is **no `team`
-concept at all** (no team entity, no membership, nothing on `auth`).
+all over the factory **but only to stamp audit/event records — never to filter rows.**
+
+> **CORRECTION 2026-10-12 (rule 13).** The sentence that followed — *"There is no `team` concept at all (no team
+> entity, no membership, nothing on `auth`)"* — was **falsified by re-measurement**. A real team concept **does**
+> exist: `StaffTeam` (`staff_teams`), `StaffTeamRole` and `StaffTeamMember` (`staff_team_members`, carrying both
+> `team_id` and `user_id`) in `packages/core/src/modules/staff/data/entities.ts`, with API routes, commands and
+> backend pages — **one** concept, 236 files. The row-scope claim above is unaffected (no team branch exists in
+> the scope resolver), and the **real** obstacle is that the `staff` module is **parked** in `modules.ts`. See
+> `COMPLETION-CALLBACKS.md` `CC-51` and `PLAN-ROW16-own-team-row-scope.md` §7.2.
 
 **The obstacle that decides the design.** "Own rows" needs a column that says *whose* row it is. **There is no
 shared owner column.** Most tables have none, and the few that do use **different names and types**:

@@ -4163,3 +4163,40 @@ became "three", and the pin's own premise was re-measured); rule 0b (measure fir
 measured, not assumed); `HERMES-PIN.md` §1.1 / §1.1.1.*
 
 
+
+---
+
+## L137 — **a measured "the concept does not exist" that greps ONE module is a claim about that module, not the platform**: over-generalising a true narrow scan is how a false blocker survives for a day and gets deferred as "large"
+
+**What happened (2026-10-12, measuring `CC-51` before building it — rule 0b).** `CC-51` is row 16's team-leg of
+own/team row scope. It had been deferred on a documented measurement: *"B additionally needs a real `team` concept
+the platform has never had — no team entity, no membership, nothing on `auth` (measured 2026-10-11)."* The scan
+behind it was real and *true*: `grep -rni "team" packages/core/src/modules/auth --include=*.ts` → only incidental
+matches, and `AuthContext` carries `{ sub, tenantId, orgId }`. But the **conclusion drawn from it** — "so the
+platform has no team concept, and B must invent one" — was false. Re-measured 2026-10-12 across the whole
+codebase: `packages/core/src/modules/staff/data/entities.ts` declares `StaffTeam` (`staff_teams`),
+`StaffTeamRole` and `StaffTeamMember` (`staff_team_members`, carrying **`team_id` and `user_id`**), with API
+routes, commands, backend pages and seeds — **236 files**, and the *only* team concept in the tree. The team-leg's
+"large" half (entity + membership + schema + UI) was already built; what remained was the row-scope plumbing. The
+false premise had been copied into **four** documents and had gated the task for a day.
+
+**Why it matters.** A negative search scoped to one module reads as a platform fact once the module name drops out
+of the sentence. *"No team concept in `auth`"* became *"the platform has never had a team concept"* — and that
+phrasing is what a later session reads as the blocker. The cost is not the wrong words: it is that a task is
+sized **"large — invents a concept"** instead of **"small — wires a declared dimension onto an existing one"**,
+so it never gets picked, and the module that would have answered the question sits one grep away.
+
+**The rule.** (1) **A negative measurement must record its scope** — write the path you searched (*"in
+`modules/auth`"*), not just the result, and never let the scope drop out of the sentence it is reused in. (2)
+**Before deferring a task as "invents a concept", search the whole codebase for that concept's nouns**
+(`grep -rn "tableName: '[^']*<noun"` over `packages/*/src`, plus the entity/API/command/UI surfaces) — one grep,
+minutes. (3) **A "never had" claim is a falsifiable premise under rule 13**: when it is falsified, correct it in
+*every* document that copied it, in the same change — here, four places. (4) When a premise flips from "must
+invent" to "must wire", **re-size the task out loud** — that is the difference between a deferred item and a
+pickable one.
+
+*Cross-ref: L135/L136 (the same day's other two falsified premises: a snapshot's provenance assumed absent, and a
+pin defending its first choice); rule 0b (measure first — the re-measure is what caught it); rule 13 (corrected
+everywhere it was copied); rule 15 (solve the straightforward now — the correction was made immediately, the
+*decision* it exposed was handed to the owner, which is rule 11); `COMPLETION-CALLBACKS.md` `CC-51`;
+`PLAN-ROW16-own-team-row-scope.md` §7.2.*

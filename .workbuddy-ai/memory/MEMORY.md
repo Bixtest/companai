@@ -97,8 +97,17 @@
   provenance — the zip comment holds the revision) / **L136** (≥2 copies = a defect; re-measure the pin when a
   newer copy arrives). Licence position: runtime MIT; all bundled `LICENSE` MIT/Apache-2.0; **closes `V-09`**.
 - **★ NEXT = Hermes track §9 `Phase 2`** (one worker, one tenant, one tool) — Phase 0 (pin) & Phase 1 (the port
-  with OpenCode behind it) are done. Alternatives: **`CC-51`** (row 16 team-leg — *measure first: if small, do it
-  first*), Phase 6 audit.
+  with OpenCode behind it) are done. Alternatives: Vision Phase 6 audit (no scaffold), Vision Phase 6.
+- **`CC-51` MEASURED 2026-10-12 — its premise was FALSIFIED (rule 13). NOT the small fix the owner hoped for.**
+  Row 16's team-leg. Register said B needs *"a real `team` concept the platform has never had"* — false: the
+  `team` concept EXISTS (`StaffTeam`/`StaffTeamRole`/`StaffTeamMember` with `team_id` **and `user_id`**,
+  `packages/core/src/modules/staff/data/entities.ts:5/36/73`, + API routes/commands/pages/seeds = 236 files; the
+  ONLY team concept in the tree). So B is SMALLER than documented — its "large" half is built. What remains:
+  `teamField`/`teamFeature` pair (`factory.ts:206` has only the owner pair), the "my teams → member ids"
+  expansion (`factory.ts:1455-1483` resolves only the owner branch), the third role mode.
+  **NEW blocker: the `staff` module is PARKED** (`apps/mercato/src/modules.ts` reference section, with `sales`) —
+  so **enabling `staff` is a PRODUCT decision (rule 11)**, and nothing can use team scope until teams are live.
+  Corrected in 4 docs + L137. **Answer handed to the owner as a question, not a build.**
 - **`CC-68` ✅ / `CC-67` lesson L131 / `CC-59` ✅** (Business-IR chain's first production caller `lib/business-ir-run.ts`
   + tool `ai-tools/business-ir-pack.ts`; the consumer gap = `CC-60`).
 - **Open `CC-` items:** `CC-69`/`CC-71` (**RULED 2026-10-12 — accepted as permanent named exceptions; revisit when

@@ -25,9 +25,17 @@ The resolver lives at `packages/core/src/modules/directory/utils/organizationSco
 (user id) **is** read all over `factory.ts` — but only to **stamp audit/event records**, never to filter rows.
 Measured: `grep -n "ctx.auth.sub" factory.ts` → 20+ hits, all in `userId:` event fields; **zero** in a `where`.
 
-**There is NO `team` concept.** Measured: `grep -rni "team" packages/core/src/modules/auth --include=*.ts`
+**There is no `team` concept on the `auth` module.** Measured: `grep -rni "team" packages/core/src/modules/auth --include=*.ts`
 → only incidental matches (a test file, an index re-export); no team entity, no team membership, no team id on
 `auth`. `AuthContext` carries `{ sub, tenantId, orgId }` only.
+
+> **CORRECTED 2026-10-12 (rule 13) — the conclusion this measurement was used to draw was FALSE.** "No team
+> concept in `auth`" is true and is what this line says. **What followed from it — *"therefore the platform has
+> no team concept at all"* — is false.** The platform **does** have a team concept: `StaffTeam`,
+> `StaffTeamRole` and `StaffTeamMember` (with both `team_id` and `user_id`) in
+> `packages/core/src/modules/staff/data/entities.ts`, plus API routes, commands and backend pages — 236 files,
+> and the **only** team concept in the codebase. The row-scope observation stands unchanged (there is no team
+> *branch* in the scope resolver); the "B must invent a concept" conclusion is withdrawn. See §7.2.
 
 ## 2. The obstacle that decides the design — there is no owner column
 
@@ -106,26 +114,53 @@ person *can* be restricted to their own rows, and a role with the normal scope i
 
 ### 7.2 What is deferred — **Option B (own + team) — the FUTURE ADDITION**
 
-Recorded here so it is never lost (rule 8 / the owner's explicit instruction). **B = A plus a real `team`
-concept**, which does not exist today in any form (measured 2026-10-11: no team entity, no membership, nothing
-on `auth`). B needs, as its own project:
+Recorded here so it is never lost (rule 8 / the owner's explicit instruction).
 
-1. **A `team` entity + membership** — a table plus a many-to-many (user ↔ team), tenant/org-scoped, with its
-   own CRUD and a manage screen. *(This is the item that makes B "large" — the rest of B is a filter.)*
-2. **A `teamField` on the per-entity `rowScope` declaration** (B's only change to the row-scope mechanism A
-   builds): where A filters `ownerField = caller`, B additionally allows `ownerField ∈ teamMemberIds(caller)`.
-3. **A resolution step** in `buildScopedWhere()` / the scope resolver
-   (`packages/core/src/modules/directory/utils/organizationScope.ts`) to expand "my teams" → the set of member
-   ids, cached like the org scope (the file already has a short-TTL cache + tag invalidation to copy).
-4. **A role-level third mode** — currently A's switch is all-or-own; B adds "team", so the role-level
-   enumeration becomes `all | own | team`.
+**⚠ THE PREMISE WAS FALSIFIED 2026-10-12 (rule 13) — read this correction before the list.**
+
+This section used to open: *"B = A plus a real `team` concept, which does not exist today in any form
+(measured 2026-10-11: no team entity, no membership, nothing on `auth`)."* **That measurement was wrong, and the
+error propagated into four documents** (this plan, `COMPLETION-CALLBACKS.md`'s `CC-51` row,
+`PLAN-SUPPLEMENTARY-CORE-QUEUE.md`, `NEEDS-YOU.md`).
+
+**What is actually there (measured 2026-10-12):** the platform **has** a real `team` concept — one, and only one.
+`packages/core/src/modules/staff/data/entities.ts` declares:
+
+- **`StaffTeam`** — `@Entity({ tableName: 'staff_teams' })` (`:5`), tenant/org-indexed, `name`/`is_active`.
+- **`StaffTeamRole`** — `staff_team_roles` (`:36`), with a nullable `team_id` FK (`:48`).
+- **`StaffTeamMember`** — `staff_team_members` (`:73`) with **`team_id`** (`:85`) **and `user_id`** (`:94`) — *the
+  user↔team link B needs, already modelled*.
+
+Around it: `api/teams.ts` (214 lines), `api/team-members.ts` (305 lines), `commands/teams.ts`,
+`commands/team-members.ts`, `commands/team-roles.ts`, backend pages (`staff/teams`, `staff/team-members`,
+`staff/team-roles`), seeds — **236 files**. Every `*team*` table name in the codebase is in that module, so B
+builds on the one concept rather than inventing a second (L136).
+
+**The real remainder of B** (the premise that made it "large" was false; what is left is the plumbing, not the
+concept):
+
+1. ~~**A `team` entity + membership** — a table plus a many-to-many (user ↔ team), tenant/org-scoped, with its
+   own CRUD and a manage screen.~~ **ALREADY BUILT** (above). B keeps its shape unchanged and must not build a
+   second one.
+2. **A `teamField`/`teamFeature` pair on the per-entity `rowScope` declaration** — A built only the
+   `ownerField`/`ownerFeature` pair (`OrmEntityConfig`, `packages/shared/src/lib/crud/factory.ts:206`), resolved
+   once in `withCtx()` (`:1455-1483`). B adds the team pair beside it, exactly mirrored.
+3. **A resolution step** in the scope resolver to expand "my teams" → the set of member ids, cached like the org
+   scope — read from `StaffTeamMember` (`team_id` where `user_id = caller`), in
+   `directory/utils/organizationScope.ts`, which has no team branch today. Its short-TTL cache + tag
+   invalidation is the pattern to copy.
+4. **A role-level third mode** — A's switch is all-or-own; B adds "team", so the enumeration becomes
+   `all | own | team`.
 5. **Its own hostile-critic + two-route + RED-then-GREEN pass and a coverage test**, per A.
+6. **A prerequisite this section never named (measured 2026-10-12): the `staff` module is PARKED.** It is in the
+   reference section of `apps/mercato/src/modules.ts`, off unless a developer enables it (alongside `sales`).
+   Items 2–5 can be built without it, but **nothing can *use* team scope until teams are live** — so B's real
+   first step is the owner's decision on enabling `staff` (rule 11: the owner decides *what* runs).
 
-**Why it is genuinely deferred, not lazy:** §2 — the blocker is that there is **no team concept and no shared
-owner column**. A can be built against the columns that exist; B must first invent a concept the platform has
-never had, with a schema + migrations + UI, which is a project in its own right. **Trigger to bring B back:**
-whenever the owner asks for team-based visibility, or when the first real caller needs it — whichever comes
-first. Scheduled in `COMPLETION-CALLBACKS.md` (**`CC-51`**) with that trigger named.
+**Why it is still deferred, on a corrected reasoning:** not "B must invent a concept" (it does not), but "B
+depends on `staff` being live, which is a product decision, and no caller needs team scope yet." **Trigger to
+bring B back:** whenever the owner asks for team-based visibility, or when the first real caller needs it —
+whichever comes first. Scheduled in `COMPLETION-CALLBACKS.md` (**`CC-51`**) with that trigger named.
 
 ### 7.3 Status of A
 
@@ -277,8 +312,10 @@ Every row below is an **observation from the code**, not prose. Path:line is the
 **Conclusion (rule 10d):** every prerequisite for **Option A is present and flawless today** — the builder, its
 five call sites, the ctx resolution point, the per-entity declaration surface, the coverage-test pattern, the
 single permission engine and its matcher. **No prerequisite is missing and none must be built first.** A is
-therefore buildable now, under the full protocol. **Option B's blocker (no team concept, row 11) is confirmed
-and correctly deferred as `CC-51`.**
+therefore buildable now, under the full protocol. **Option B's blocker — its own row 11 said "no team concept";
+that reading was FALSIFIED 2026-10-12 (rule 13: the team concept exists in `packages/core/src/modules/staff/`,
+but that module is parked), and B is correctly deferred as `CC-51` on the corrected reasoning — `staff` being
+live is a product decision, and no caller needs team scope yet.**
 
 **One risk noted up front (rule 9b — challenge the task):** the `.own` switch is only meaningful on entities
 that actually carry a uuid owner column **and** are wired through the CRUD factory. At the time of writing, the
@@ -308,7 +345,9 @@ Measured 2026-10-11, before writing code.
 
 **Rule 13 sweep (does A falsify any premise?):** No. A is additive; the wording "today scope is tenant +
 organization only" (row 16 / BUILD-ORDER 18) stays true for every entity that does not opt in, and the plan's
-§1/§2 measurements (no owner dim, no team concept) are re-confirmed in §9 and remain accurate.
+§1/§2 measurements are re-confirmed in §9. *(Amended 2026-10-12, rule 13: "no team concept" was true only of
+the `auth` module — the platform has a team concept in `staff`, which is parked. The owner-dimension
+measurement is unaffected.)*
 
 **Plan updates required by A (rule 10e):** `PLAN-ROW16` §7.3 (status → built), `COMPLETION-CALLBACKS.md`
 (`CC-50` close + `CC-51` unchanged), `BACKLOG.md` (`▶ FRONTIER` row 16 → ✅; `N-20`/`N-21` untouched),
