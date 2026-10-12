@@ -4230,3 +4230,105 @@ Measured 2026-10-12, immediately after L138, in the same package.
 **The rules.** (1) **Any `tsc`-based measurement must disable the incremental cache** (`--incremental false`, plus a `--tsBuildInfoFile` outside the repo) or it is not a measurement — and record that in the gate's own text, so the next run does not have to rediscover it. (2) **Two runs disagreeing is a measurement environment defect, not a code fact**: stop, find the cache, then re-measure. (3) **`git check-ignore` the artifacts a probe creates and delete them** — the probe configs used here left `tsconfig.probe*.tsbuildinfo` files behind, and a leftover cache is the next run's lie.
 
 *Cross-ref: L138 (the same measurement's first lesson — the gate that never ran); `CC-73`; rule 0b (a measurement that cannot be reproduced is not one).*
+
+---
+
+## L140 — **A compose service's network is an ownership claim, not a string**: I copied a network name from a *different* compose file and put my worker alone on it while the live stack ran on the next one — and my file could have deleted a network it did not own
+
+Measured 2026-10-12, discharging `P2-1` (`PLAN-HERMES-PHASE2-one-tenant-one-tool.md` §2.7).
+
+**What happened.** `docker-compose.hermes.yml` declared `mercato-network: {name: mercato-network, driver: bridge}`
+— a name copied from `docker-compose.yml`, which hardcodes it. The measurement falsified the copy:
+`docker network ls` returned **two** mercato networks, and `docker network inspect` showed my
+`mercato-hermes-gateway` **alone** on `mercato-network`, while all eight of the operator's running
+`*-local` containers (postgres, redis, mcp, meilisearch, model, opencode, app, plus its own Hermes) sat on
+`mercato-network-local`. The stack's compose files (`docker-compose.fullapp.yml`, `.fullapp.dev.yml`)
+declare `name: mercato-network-${DEPLOY_ENV:-local}`; the one I copied is used by the *other* stack, which
+was not running. The row had therefore shipped a service that could not reach anything it names, on a
+network this file itself created — and a plain `docker compose … down` on my file could have removed that
+network while another stack's definition still pointed at it.
+
+**Why it happened.** A compose file is read as a *text* ("the platform already uses `mercato-network`") when
+it is a *claim about a live node*. Two compose files can name the same thing and mean different things; only
+`docker ps` / `docker network inspect` / `docker compose ls` say which is true right now.
+
+**The rules.** (1) **Before wiring a network, measure the node**: `docker ps`, then
+`docker network inspect <name>` — which containers are on it, and which compose file actually created it
+(`docker inspect <container> --format '{{json .Config.Labels}}'` names the config file and project). A
+declared name with no running members is a warning, not a confirmation. (2) **`external: true` for a network
+you do not own**: the file can neither create nor remove it, so the failure mode (a `down` taking a
+neighbour's network) is structurally impossible — and make it overridable
+(`${HERMES_DOCKER_NETWORK:-mercato-network-local}`) because a different `DEPLOY_ENV` means a different
+name. (3) **Clean up the strays your wrong choice created**: the empty `mercato-network` my first version
+created stayed behind after the fix; `docker network rm` on a zero-endpoint network is safe and reversible
+(the declaring compose file recreates it). (4) **Prove the fix both ways**: `up` attaches where intended,
+`down` removes only your own container and leaves every neighbour, the network and the volumes — a
+before/after `docker ps` diff is the evidence.
+
+*Cross-ref: L141 (the same `docker ps` measurement's other finding: the stack already ran a Hermes);
+rule 0b (the measurement came before the fix); rule 13 (the falsified sentence — *"the same explicit name …
+so compose attaches this worker to the network the platform already uses"* — corrected in the compose file,
+in §2.6 decision 3 and in §2.7, and re-proved); `docker-compose.hermes.yml`'s `networks:` comment.*
+
+---
+
+## L141 — **`docker ps` before you design a service**: the product you are containerising was already running on that node, by someone else's door — and your docblock has to say why yours is a second door rather than a duplicate
+
+Measured 2026-10-12, the same command run that produced L140.
+
+**What happened.** `P2-1` was scoped and built as "the Hermes worker boots". After the fix, `docker ps` and
+`docker network inspect` showed the platform's own stack had been running a **`hermes-local`** container for
+days — image `nousresearch/hermes-agent:latest`, `command: ["gateway","run"]`, published on
+`127.0.0.1:8642`, state on the `mercato-hermes-data-local` volume — the **upstream HTTP gateway**, added in
+the operator's Sprint 0 step 3.5. Nothing about `P2-1` was wrong, but the plan had been written without ever
+asking what was already there, and a reader of `P2-1` alone could conclude "we now have Hermes" — twice.
+
+**Why it matters.** Two doors into the same product is a legitimate architecture choice (upstream HTTP over
+a floating `:latest` tag for humans; the pinned source over stdio for the platform's own typed port), but it
+is only legitimate when it is *stated*. Unstated, it reads as duplicate authority — exactly the risk the
+architecture's §10 table names. And the same measurement showed **zero** `HERMES*` references in
+`apps/mercato/src`: neither door is wired into the app yet, so "running" must never be written as
+"integrated".
+
+**The rules.** (1) **`docker ps` on the target node before writing a Dockerfile for a product that already
+exists there** — one command, and it either confirms "new" or hands you the difference. (2) **When a second
+door is intentional, write the distinction into the artifact itself** (the compose file's header now carries
+the comparison, the digest-verified pin vs the `:latest` image, and which door `P2-3` fronts) so no later
+reader has to reconstruct it. (3) **Never upgrade "running" to "wired"**: grep the app for the service's
+env vars and record the count — here, zero — so the status is measured, not implied.
+
+*Cross-ref: L140 (the same measurement); rule 13 (corrected everywhere); `PLAN-HERMES-PHASE2…` §2.7 (the
+record); `CC-72` (deleting OpenCode has the same "two doors" shape, and the same need to say which door is
+authoritative).*
+
+---
+
+## L142 — **A worker's stdout is the protocol channel, so every line of yours on it is data to the peer**: the fix is not care, it is an assertion that the channel carries nothing but parseable frames
+
+Measured 2026-10-12, building `docker/hermes/` for `P2-1`.
+
+**What happened.** Two ways to corrupt a channel you do not own, both hit in one build:
+
+1. **My own diagnostics on stdout.** The entrypoint and the digests verifier logged
+   *"verifying the pinned Hermes source…"* to **stdout** — the same fd the gateway speaks newline-delimited
+   JSON-RPC on. A peer reading frames would have parsed my English as data. Fixed by moving every log line
+   to **stderr** before the first boot.
+2. **A gateway quirk that read as a broken wire.** The gate driver sent its requests **without a JSON-RPC
+   `id`** — which makes them *notifications* — and the gateway **answered each one anyway** with `"id": null`.
+   The driver's ordered reader reported "responses shifted by one"; the wire had never moved. Fixed by
+   sending (and correlating by) explicit ids, and the trap is now a comment on the code that does it.
+
+**Why the fix is an assertion, not care.** Both failures are invisible in the logs of the thing that is
+failing, and both are one inattentive edit away from returning. So the gate asserts the invariant instead of
+trusting it: **every line the worker writes to stdout must parse as JSON**, and a violation is recorded as a
+channel-discipline failure with the offending bytes quoted. A rule that lives in a comment is a rule that
+dies at the next edit; a rule that lives in a failing assertion survives it.
+
+**The rules.** (1) **When a process's stdout is a wire, every diagnostic goes to stderr** — log to stderr by
+default and treat any stdout write as a protocol event. (2) **Correlate by id, never by arrival order**; and
+when a peer answers a *notification*, that is the peer's quirk, not a shift in the wire — reproduce it before
+concluding the protocol changed. (3) **Assert the channel, not the intent**: a driver that checks every frame
+parses catches your own pollution and the peer's mutiny in the same place.
+
+*Cross-ref: `PLAN-HERMES-PHASE2…` §2.7 (the gate that now asserts it); `docker/hermes/handshake_gate.py`
+(the assertion and the id-correlation); L139 (the same distrust of quiet output, one layer up).*

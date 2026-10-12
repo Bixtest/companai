@@ -116,8 +116,55 @@ the suite itself**, whose frames were the un-enveloped shape the real server nev
 
 **Next: `P2-1` — and it is now buildable here.** The owner started Docker (`docker info` → **29.8.2**), so the
 premise that made `P2-1`'s boot gate "UNPROVEN-HERE" is corrected in the plan (§2.2 + the row) rather than
-carried forward. `P2-1` is the honest next sub-row, then `P2-3` (the port adapter, `session.steer` settled by
-measurement).
+carried forward. `P2-1` was built next and is now done (the block below); the frontier is `P2-3` (the port
+adapter, `session.steer` settled by measurement).
+
+---
+
+### ✅ P2-1 DONE — **the pinned Hermes worker boots as a real process and answers the measured handshake: GATE PASSED in 39.5s.** *(2026-10-12)*
+
+**What it is.** `docker/hermes/` — `Dockerfile` (base `python:3.14-slim-bookworm`; `uv sync --frozen` from the
+**pin's own** `uv.lock`, transferred through a **named build context** so the build never copies the tree) ·
+`entrypoint.py` (digest-verify first, then `os.execvpe`) · `verify_pin.py` (the host harness's algorithm,
+8 threads) · `handshake_gate.py` (the exit-gate driver) — plus the **separate, opt-in**
+`docker-compose.hermes.yml`, per the owner's ruling. **Image 673 MB, built in 1m49s.**
+
+**The exit gate, measured (no stub, no mock — the process under test is the image):**
+`client.capabilities` → all **14** `server_requests` · `gateway.capabilities` →
+`{'per_session_exclusive_submit': True}` · `ping` → `{'pong': True}` · `gateway.ready` →
+`['change_events','replay_epoch','skin']` (so `P2-2`'s envelope unwrapping is now confirmed against the
+**live worker**, not only the stub) · `process.stop` → answered, worker exits, **5 stdout frames, every one
+JSON** → **GATE PASSED in 39.5s**. The compose cold start re-proves it: `PIN HOLDS — files 18248, digest
+ca760e97ff1ef1f0e2ed3deb0dfc2923` → `exec: python3 -m tui_gateway.entry` → the real `gateway.ready` frame.
+
+**The RED run.** The same gate pointed at `hermes-agent-main-older` was **refused** — `PIN BROKEN … actual
+3e3b81f2ac67a13b76c08f5140d9efe6 files 17367`, exit 1, **0 stdout frames** — which also **cross-validates the
+container's verifier against the host harness** (two implementations, two trees, identical digests).
+
+**Three things the measurement changed after the build — the reason this block exists rather than the first
+green log:**
+1. **The network was wrong (L140).** The file copied `docker-compose.yml`'s hardcoded `mercato-network`; the
+   running stack is on `mercato-network-local` and my worker sat **alone**. Fixed to
+   `${HERMES_DOCKER_NETWORK:-mercato-network-local}` with **`external: true`** — this file can now neither
+   create nor delete another stack's network — and proven both ways: `up` attaches beside the stack; `down`
+   removed **only** `mercato-hermes-gateway` and left all 8 platform containers, the network and both
+   `mercato-hermes-*` volumes intact. The stray empty network the first version created was removed.
+2. **The stack already ran a Hermes (L141).** `hermes-local` — the **upstream** image `nousresearch/hermes-agent:latest`,
+   `command: ["gateway","run"]`, HTTP on `127.0.0.1:8642`, from the owner's Sprint 0 step 3.5. A **different
+   door**: floating `:latest`, HTTP, unverified. This row is the **pinned source over stdio** — the door the
+   platform's own client speaks and `P2-3` fronts. The compose file's header now states the distinction, and
+   the record states that **neither door is wired into the app** (measured: **zero** `HERMES*` references in
+   `apps/mercato/src`).
+3. **Two wire-discipline bugs the gate now catches (L142).** My entrypoint logged to **stdout** — the gateway's
+   own JSON-RPC channel; moved to stderr. And the driver's first version omitted the JSON-RPC `id`, so it sent
+   *notifications*, and the gateway **answered each with `"id": null`** — which the ordered reader
+   read as a shifted wire. The gate now correlates by id and asserts **every stdout line parses as JSON**.
+
+**What it does NOT claim:** the worker is not behind the door (`P2-3`), does not serve a chat (`P2-5`), and is
+not `hermes-local`'s replacement. Full record: plan §2.7; lessons L140/L141/L142.
+
+**Next: `P2-3` — the port adapter.** `lib/hermes-port-adapter.ts` implementing `AiRuntimePort`, with
+`session.steer` settled **by measurement** before any capability is claimed for it.
 
 ---
 
