@@ -116,8 +116,8 @@ the suite itself**, whose frames were the un-enveloped shape the real server nev
 
 **Next: `P2-1` — and it is now buildable here.** The owner started Docker (`docker info` → **29.8.2**), so the
 premise that made `P2-1`'s boot gate "UNPROVEN-HERE" is corrected in the plan (§2.2 + the row) rather than
-carried forward. `P2-1` was built next and is now done (the block below); the frontier is `P2-3` (the port
-adapter, `session.steer` settled by measurement).
+carried forward. `P2-1` was built next and is now done (the block below); `P2-2` and `P2-3` followed, both
+discharged (the blocks below); **the frontier is now `P2-4`** — the one narrow tool through `resolveToolCall`.
 
 ---
 
