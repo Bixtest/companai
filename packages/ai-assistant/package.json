@@ -12,6 +12,7 @@
     "watch": "node watch.mjs",
     "mcp:dev": "mercato ai_assistant mcp:dev",
     "mcp:serve": "mercato ai_assistant mcp:serve-http",
+    "typecheck": "tsc --noEmit",
     "test": "jest --config jest.config.cjs --forceExit"
   },
   "exports": {

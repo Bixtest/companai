@@ -1,10 +1,13 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "extends": "../../tsconfig.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "noEmit": false,
-    "declaration": false,
-    "outDir": "./dist"
+    "noEmit": true,
+    // The native TypeScript 7 compiler resolves an inherited `typeRoots` but
+    // does NOT auto-include `@types/*` packages from it, so a global the tests
+    // need (`describe`/`it`/`expect`) or the `NodeJS` namespace stays undeclared
+    // unless it is named here. Named explicitly, not by accident.
+    "types": ["jest", "node"]
   },
   "include": ["src/**/*"]
 }
