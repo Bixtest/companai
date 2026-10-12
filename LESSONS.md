@@ -4200,3 +4200,33 @@ pin defending its first choice); rule 0b (measure first — the re-measure is wh
 everywhere it was copied); rule 15 (solve the straightforward now — the correction was made immediately, the
 *decision* it exposed was handed to the owner, which is rule 11); `COMPLETION-CALLBACKS.md` `CC-51`;
 `PLAN-ROW16-own-team-row-scope.md` §7.2.*
+
+---
+
+## L138 — **a type gate that has never run is not a gate**: `tsc -p .` returning TS18003 for a package means nobody has type-checked it in living memory, and the moment you make it run, expect the errors that were always there — **measure a gate's existence before you trust its silence**
+
+Measured 2026-10-12 while discharging `P2-2`'s *"`tsc` clean"* exit gate (`PLAN-HERMES-PHASE2-one-tenant-one-tool.md`).
+
+**What happened.** `node node_modules/typescript/bin/tsc -p packages/ai-assistant/tsconfig.json --noEmit` returned **one** error: TS18003, *"No inputs were found in config file"* — not a type error, a **config** error. The package's only `tsconfig.json` extended the **root** `tsconfig.json`, whose `exclude: ["node_modules","apps","packages"]` is resolved **from the extending config's directory**, so from `packages/ai-assistant/` the pattern `packages` matched **the package's own `src/**`**. Twenty of the twenty-one package/app configs in the repo extend `tsconfig.base.json`; this one was the sole anomaly, and it had been harmless-looking for as long as nobody ran the command.
+
+**Why the silence lasted.** Three commands could each have shown it, and none did: the **build** is esbuild (`node build.mjs`; no type-check, 238 entry points, "built successfully"), there was **no `typecheck` script** (unlike `packages/shared`), and **jest does not type-check in this repo** — `agent-runtime-loop-phase0.test.ts` carries 17 `tsc` errors and jest runs it 34/34 green. So the gate did not degrade; it never existed, and every "tests pass, build passes" was true while saying nothing about types.
+
+**Fixing it exposed 92 pre-existing type errors in 27 other `__tests__` files** — zero in production code, and both files the change added were clean. That is the shape to expect: **errors accumulate behind a gate that never ran, and they are never evenly distributed.**
+
+**The rules.** (1) **Before trusting a gate's silence, run the gate and look at what it actually checked** — a TS18003/TS6053/"no inputs" result is a *missing* gate, not a green one, and it must be fixed before the green means anything. (2) **When a package's tsconfig extends a config that excludes it, the exclusion still applies** — `exclude`/`include` survive `extends` and resolve relative to the config they came *from*; check the 20 siblings before assuming one is right. (3) **Assert a gate is real by pointing a known-bad file at it** — here, one file with 17 errors running green under jest while failing under `tsc` is the proof that jest was never the type gate. (4) **A newly-working gate is a finding, not a nuisance**: schedule what it exposes (`CC-73`) and resist the two-line escape hatch (`exclude __tests__`, which is what `packages/shared` already does) that would hide exactly the class of defect a hostile critic had just found.
+
+*Cross-ref: L139 (the same measurement's second lesson: a stale incremental cache lied three ways); `CC-73` (the 92 errors, scheduled); `PLAN-HERMES-PHASE2-one-tenant-one-tool.md` §4 `P2-2`; rule 0b (measure the gate, do not assume it); rule 15 (the tsconfig half was straightforward and was fixed in the same change).*
+
+---
+
+## L139 — **`--incremental` lied three times about the same file set**: a stale `*.tsbuildinfo` produced 6,551 → 36 → 95 errors for one unchanged config, so a type measurement is only a measurement when the cache is off
+
+Measured 2026-10-12, immediately after L138, in the same package.
+
+**What happened.** The same `tsc -p packages/ai-assistant/tsconfig.json --noEmit`, run three times against one unchanged tsconfig, reported **three different totals**: **6,551** errors (the first run after the config fix), then **36** (a re-run), then **95** (a run with `--incremental false`). No file changed between them. The package directory held **seven stale `*.tsbuildinfo` files** (`tsconfig.tsbuildinfo`, `tsconfig.cc5*.tsbuildinfo`, `tsconfig.typecheck-tmp.tsbuildinfo`, …), and `incremental: true` is set in `tsconfig.base.json`.
+
+**Why it matters.** A gate whose output is not reproducible cannot discharge anything. Had the 36-error run been taken at face value, `P2-2`'s gate would have been declared green on a **false** reading — and the false reading was the *quietest* one, which is the direction cache errors drift in.
+
+**The rules.** (1) **Any `tsc`-based measurement must disable the incremental cache** (`--incremental false`, plus a `--tsBuildInfoFile` outside the repo) or it is not a measurement — and record that in the gate's own text, so the next run does not have to rediscover it. (2) **Two runs disagreeing is a measurement environment defect, not a code fact**: stop, find the cache, then re-measure. (3) **`git check-ignore` the artifacts a probe creates and delete them** — the probe configs used here left `tsconfig.probe*.tsbuildinfo` files behind, and a leftover cache is the next run's lie.
+
+*Cross-ref: L138 (the same measurement's first lesson — the gate that never ran); `CC-73`; rule 0b (a measurement that cannot be reproduced is not one).*

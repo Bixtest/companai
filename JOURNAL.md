@@ -55,6 +55,72 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+### ✅ OWNER'S RULING 2026-10-12 — **the focus is the CORE ARCHITECTURE, and business modules are GENERATED, never hand-coded.**
+
+> *"Go straight to Hermes Phase 2. If you review the rules we have you will see the focus is on the core
+> architecture (like hermes, workspaces, etc...) over business modules. **We should not develop any business
+> modules functionalities unless needed for testing. Business modules should be generated from the core
+> workspace** where we send prompt to AI, get business IR, save the functions and categorize them as modules.
+> **That's the main vision and logic for the whole product — not developing dummy coded modules, traditional
+> ERP style."*
+
+**What this settles.** The queue's frontier is **Hermes §9 Phase 2** — *one worker, one tenant, one tool*
+(plan written first: [`PLAN-HERMES-PHASE2-one-tenant-one-tool.md`](library/development/PLAN-HERMES-PHASE2-one-tenant-one-tool.md)).
+It also restates, in one sentence, the rule the 2026-10-09 ruling implied: **the product's centre is the
+core (runtime, workspace, the prompt → business-IR → saved-Functions → module-categorisation loop), and a
+business module is an OUTPUT of that loop, not something we write by hand.** Concretely, from here on:
+
+- No CRM/Sales/WMS module functionality is built unless a core item genuinely needs it **for testing**.
+- The Business-IR chain (`lib/business-ir-author.ts` · `lib/business-ir-run.ts` ·
+  `ai-tools/business-ir-pack.ts`) **is** the spine, and it is the "one narrow tool" Phase 2 delivers to the
+  worker — so the core build and the vision's loop are the same work, not two.
+- `CC-51` (row 16 team-leg) stays parked: its real blocker is the **`staff` module being disabled** — a
+  product decision, and enabling an HR module is exactly the kind of build this ruling stops.
+
+---
+
+### ✅ P2-2 DONE — **the Hermes gateway client, proven against the real wire: 21/21 tests, RED-then-GREEN, critic-hardened.** *(2026-10-12; code commit `f5f85064`)*
+
+**What it is.** `packages/ai-assistant/src/modules/ai_assistant/lib/hermes-gateway-client.ts` (+ its suite) —
+the transport-and-protocol layer for the pinned Hermes TUI gateway: spawn/supervise the worker, newline-JSON
+framing both ways, id-correlated requests with timeouts, the measured handshake, `prompt.submit` +
+the event stream, `session.interrupt`/`steer`, `process.stop`, and `-32601` for an unhandled server→client
+request. Nothing in it knows about the port — that is `P2-3`.
+
+**The finding that mattered.** A hostile critic (a separate agent, per rule 10f) proved the header claim
+*"measured, not assumed"* was **true of the framing and false of the event stream**: the pinned gateway wraps
+**every** notification in an envelope — `server.py::_event_frame` (`:701`) →
+`{"jsonrpc":"2.0","method":"event","params":{"type":…,"session_id":…,"payload":{…}}}` — so the event's name is
+`params.type` and its payload is `params.payload`. The first draft dispatched on `frame.method`, which would
+have delivered every event to a listener for the literal string `"event"` and stalled `connect()` for the full
+timeout. **Upstream asserts the same shape** (`tests/e2e/core/parity/test_boot_contract.py:115`:
+`frame["method"] == "event"` and `params["type"] == "gateway.ready"`), so this is the protocol, not a reading.
+Two further defects (a pino-style logger call on our message-first logger; an unguarded `stdin.write` that
+throws on EPIPE) were verified against source and fixed with it — and the critic's finding **invalidated part of
+the suite itself**, whose frames were the un-enveloped shape the real server never produces.
+
+**The gates, with numbers.**
+- **jest 21/21** (was 17): the envelope unwrapping and bare-notification tolerance are now **named regression
+  tests**, plus a frame split mid-line and a CRLF-terminated frame. RED-then-GREEN: mutating the unwrapping turns
+  **8 of 21 RED**; restored **md5-identical** (`4416a886…`) → 21 GREEN.
+- **`tsc` clean — honestly qualified, and this is the honest part.** `P2-2`'s two files are error-free, but the
+  package's **type gate did not exist**: `tsc -p .` returned **TS18003**, because its tsconfig extended the
+  *root* config whose `exclude` swallows the package's own `src/**` — the only one of 21 configs not extending
+  `tsconfig.base.json`. Fixing it surfaced **92 pre-existing errors in 27 other `__tests__` files** (jest here
+  does not type-check: a file with 17 `tsc` errors runs 34/34 green). The tsconfig and a `typecheck` script are
+  fixed **in the same change**; the 92 are scheduled as **`CC-73`**, and the two measurements (the native
+  compiler needs an explicit `types` list; a stale `tsbuildinfo` reported 6,551 → 36 → 95 for one config) are
+  **L138/L139**.
+- **esbuild 238 entry points**; full package suite **117/119 suites / 1519 tests, 0 failures** — the 2 failing
+  suites are `isolated-vm`'s missing native build, proven identical **with this change stashed**.
+
+**Next: `P2-1` — and it is now buildable here.** The owner started Docker (`docker info` → **29.8.2**), so the
+premise that made `P2-1`'s boot gate "UNPROVEN-HERE" is corrected in the plan (§2.2 + the row) rather than
+carried forward. `P2-1` is the honest next sub-row, then `P2-3` (the port adapter, `session.steer` settled by
+measurement).
+
+---
+
 ### 🔍 MEASURED 2026-10-12 — **`CC-51` is smaller than documented, and its stated blocker is FALSE: the `team` concept already exists (but is parked).**
 
 **(Owner's ask: *"if CC-51 is straightforward and small to fix, maybe better we fix that first — now that we
