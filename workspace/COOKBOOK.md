@@ -1189,6 +1189,16 @@ Nothing else in the platform changes.
 **bridge networking and an explicit published port — not `network_mode: host`** (this is the fix for
 **B-01**; the official Docker guide's compose uses bridge + `ports: 8642:8642`).
 
+> **⚠ RETIREMENT PLAN — owner ruling 2026-10-12 (register row `CC-74`).** This service is the **upstream**
+> Hermes: a floating `:latest` image over HTTP on 8642, with no digest we control. Phase 2 added a **second,
+> pinned** door — the pinned source over **stdio**, digest-verified at every boot
+> (`docker-compose.hermes.yml`, the platform's own client, `P2-2`). **Ruled: keep this service until `P2-5`**
+> (engine selection at the door) **has landed and the pinned worker has served a real chat run through it,
+> then retire it in one change.** The steps are in `COMPLETION-CALLBACKS.md` `CC-74`: stop/remove
+> `hermes-local` (the `mercato-hermes-data-local` volume **stays** — it is the owner's state), delete this
+> service block + the `hermes_data` volume + the `HERMES_BIND`/`HERMES_PORT` wiring, and update this step and
+> `docker/README.md`. Keeping both doors forever is the architecture's *"duplicate authority"* risk (§10).
+
 **Give Hermes its own named volume — do not bind-mount a host folder.** Hermes keeps its state in
 SQLite in **WAL mode**. A host bind mount on Docker Desktop for Windows is a **cross-VM filesystem**
 (virtiofs/9p), where SQLite's WAL shared-memory is not coherent across the VM boundary; Hermes

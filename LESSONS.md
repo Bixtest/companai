@@ -4332,3 +4332,42 @@ parses catches your own pollution and the peer's mutiny in the same place.
 
 *Cross-ref: `PLAN-HERMES-PHASE2…` §2.7 (the gate that now asserts it); `docker/hermes/handshake_gate.py`
 (the assertion and the id-correlation); L139 (the same distrust of quiet output, one layer up).*
+
+---
+
+## L143 — **A disclaimer only its author can decode is not an honest limit — it is an unfinished report, and to the reader it reads as a hedge**: every "what this does NOT claim" line owes a plain-English twin before it leaves my hands
+
+Measured 2026-10-12, in the closing summary of `P2-1`. The owner's reply, verbatim: *"you are making random
+remarks like this that I dont get enough info about to give a feedback. Again breaching the rule of explaining
+in a way that I can understand. Putting it like you did seems like a trap you set for me to ignore so you skip
+some work."*
+
+**What I wrote.** *"Honest limits: `P2-1` does not put Hermes behind the door (`P2-3`), does not serve a chat
+(`P2-5`), and is not `hermes-local`'s replacement."* Three sub-row IDs, a "door", and a container name — in a
+message whose only job was to let a non-developer decide what happens next.
+
+**What it actually meant, and what should have been written.** (1) *"does not put Hermes behind the door"* =
+the platform's AI chat still runs on OpenCode; nothing a user clicks reaches the new worker. (2) *"does not
+serve a chat"* = no real conversation goes to it; it answers a scripted test handshake. (3) *"is not
+`hermes-local`'s replacement"* = two Hermes services now run in Docker and the old one has not been removed.
+Each is one sentence a non-developer can act on. I sent the register's shorthand instead of the translation —
+the exact thing §2.3 and the reporting rules exist to prevent.
+
+**Why it reads as a trap, and why that is the real defect.** A limitation the reader cannot decode gives him
+two losing options: nod through work he cannot judge, or challenge text he cannot read. Either way the writer
+looks covered. It was not intended as a hedge — but intent does not repair the effect: the owner must decide
+from these sentences, so an undecodable one costs him the decision. And *"Again"* means the mechanism, not the
+sentence, is at fault: I keep producing accurate-in-the-register, opaque-in-the-message claims.
+
+**The rules.** (1) **Every limitation ships with its plain-English twin in the same reply** — the IDs may stay
+in brackets, the meaning may never depend on them. (2) **One test before sending: could the owner act on this
+sentence without asking me a single question?** If not, it is unfinished — rewrite it in this turn, not in the
+reply to his follow-up. (3) **A limitation that is not actionable belongs in the worklog, not the message** —
+if he cannot do anything with it, saying it is noise that hides the next real decision. (4) **When he says he
+cannot decode a line, treat it as a defect in the report, not a gap in his knowledge** — the sentence gets
+rewritten and the fix gets banked, in the same change, exactly as a falsified premise would be.
+
+*Cross-ref: WORKING-RULES §2.3 (plain English — the owner is not a developer) and the reporting rules (no
+flag without a full report; never make the owner ask "what does that mean?"); `JOURNAL.md`'s P2-1 block (whose
+closing "Honest limits" line is the instance); L137/L138 (the same month's other two "accurate internally,
+misleading outside" findings).*

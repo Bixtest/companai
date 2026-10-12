@@ -168,6 +168,40 @@ not `hermes-local`'s replacement. Full record: plan §2.7; lessons L140/L141/L14
 
 ---
 
+### ✅ OWNER'S RULING 2026-10-12 — **the upstream `hermes-local` HTTP gateway STAYS until `P2-5` proves the pinned worker behind the port — then it is RETIRED.** *(registered as `CC-74`, and written into the compose file itself)*
+
+> *"we follow your recommendation as long as you note in the documentations when to retire it so we do not
+> forget that"*
+
+**The question, in plain terms.** The measurement during `P2-1` found the operator's stack already running
+**`hermes-local`** — the **upstream** Hermes image (`nousresearch/hermes-agent:latest`, a tag whose contents
+can change under us), speaking HTTP on `127.0.0.1:8642`, added back in Sprint 0 step 3.4/3.5. This week's
+`P2-1` added a **second** Hermes door — the **pinned source over stdio**, digest-verified at every boot —
+which is the door the platform's own client speaks and `P2-3` fronts. So: two doors, one unverifiable. The
+options were keep both / retire the old one now / retire it later.
+
+**Ruled: leave `hermes-local` running until `P2-5` (engine selection at the door) has landed AND the pinned
+worker has served a real chat run through it. Then retire it, in one change.**
+
+**Why the old one may stay until then:** it is the owner's Sprint 0 scaffolding, something may still be
+hitting port 8642 by hand, and removing it before the replacement is proven trades a working door for a
+promised one. **Why it may not stay forever:** two Hermes doors is exactly the *"duplicate authority"* risk
+the architecture's §10 table names — and only one of them is verifiable.
+
+**Recorded so it cannot be forgotten** (the owner's condition, honoured in the same change): **`CC-74`** in
+`COMPLETION-CALLBACKS.md` holds the full row (the two doors, the risk, the trigger, the five retirement
+steps); a **retirement comment now sits on the `hermes:` service block in `docker-compose.fullapp.yml`**
+itself; `docker/README.md` and `workspace/COOKBOOK.md` step 3.4 carry the pointer; plan §2.7.1 has the
+ruling. **Retirement = five steps, one change:** confirm the trigger → stop/remove `hermes-local` (the
+`mercato-hermes-data-local` volume **stays** — it is the owner's state) → delete the service block, the
+`hermes_data` volume and the `HERMES_BIND`/`HERMES_PORT` wiring → update COOKBOOK + `docker/README.md` →
+cross-ref §2.7/`CC-74`.
+
+**Measured today, for the record:** the app calls **neither** door — `grep -rn "HERMES"` over
+`apps/mercato/src` returns **zero** matches — so nothing breaks either way until `P2-5`.
+
+---
+
 ### 🔍 MEASURED 2026-10-12 — **`CC-51` is smaller than documented, and its stated blocker is FALSE: the `team` concept already exists (but is parked).**
 
 **(Owner's ask: *"if CC-51 is straightforward and small to fix, maybe better we fix that first — now that we

@@ -182,6 +182,27 @@ They are two different doors; neither is wired into the app today (measured: **z
 production, and the network default is an operator-environment measurement — a `fullapp` stack with a
 different `DEPLOY_ENV` needs `HERMES_DOCKER_NETWORK` set (the compose file documents it).
 
+### 2.7.1 OWNER RULING 2026-10-12 — **the upstream `hermes-local` HTTP gateway stays until `P2-5`, then it is retired** (registered as `CC-74`)
+
+Put to the owner as one question with a recommendation, after the `docker ps` measurement found the stack
+already running the upstream Hermes: keep it, retire it now, or retire it later. **Ruled (verbatim):**
+*"we follow your recommendation as long as you note in the documentations when to retire it so we do not
+forget that."* The recommendation accepted was **leave it until `P2-5` lands (engine selection at the door)
+and the pinned worker has served a real chat run through it — then retire it in one change.**
+
+**What was recorded so it cannot be forgotten, in the same change as the ruling:**
+- `COMPLETION-CALLBACKS.md` **`CC-74`** — the full row: what the two doors are, the risk (the architecture's
+  §10 *duplicate authority* risk, on a floating `:latest`), the trigger, and the five retirement steps.
+- `docker-compose.fullapp.yml` — the retirement plan is now a **comment on the `hermes:` service itself**,
+  the one place a future session will look when touching that stack.
+- `docker/README.md` + `workspace/COOKBOOK.md` step 3.4 — the same pointer.
+
+**Retirement, when the trigger fires (do all five, one change):** (1) confirm the pinned worker is behind the
+door and has served a real chat run; (2) `docker compose -f docker-compose.fullapp.yml stop hermes` + remove
+`hermes-local` — **leave the `mercato-hermes-data-local` volume in place** (owner's state; deleting it is a
+rule-11 decision); (3) delete the service block, the `hermes_data` volume and the `HERMES_BIND`/`HERMES_PORT`
+wiring; (4) update `workspace/COOKBOOK.md` steps 3.4/3.5 + `docker/README.md`; (5) cross-ref in §2.7 and `CC-74`.
+
 ---
 
 ## 3. Measured facts (rule 0b — measured in the pinned source and the code repo, 2026-10-12)
