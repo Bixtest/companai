@@ -42,6 +42,38 @@ curl http://localhost:4096/mcp             # {"open-mercato":{"status":"connecte
 
 Two operational notes: OpenCode reads the key **once at startup** — after a DB reset, `mcp:ensure-api-key --rotate`, or anything else that rotates the key, run `docker compose restart opencode`. And after restarting only the `app` container (which re-runs install/build in the shared volumes), restart `mcp` too once the app is back up.
 
+### Hermes — the pinned stdio worker (opt-in, separate file)
+
+The fullapp stacks also run a `hermes` service — the **upstream** image `nousresearch/hermes-agent:latest` with `command: ["gateway","run"]`, publishing the HTTP gateway on `${HERMES_PORT:-8642}` (Sprint 0 step 3.5). That is a *different door*: a floating `:latest` tag, HTTP, no port.
+
+Phase 2 adds a **second, separate** worker that runs the **pinned source over stdio** — the door the platform's own client (`packages/ai-assistant/.../lib/hermes-gateway-client.ts`) speaks:
+
+```bash
+# Start (builds from the pinned Hermes source at ../../hermes-agent-main, digest-verified at boot)
+docker compose -f docker-compose.hermes.yml up --build -d
+
+# Follow the boot — the gateway's own frames, including gateway.ready, land here
+docker compose -f docker-compose.hermes.yml logs -f
+
+# Stop (removes only this container; the platform stack, its network and volumes are untouched)
+docker compose -f docker-compose.hermes.yml down
+```
+
+| Setting | Default | Notes |
+|---------|---------|-------|
+| `HERMES_PIN_DIR` | `../../hermes-agent-main` | Pinned source, bind-mounted **read-only** at `/hermes-src`. The entrypoint re-computes its digest at boot and **refuses to start** on a mismatch (`HERMES_SKIP_PIN_VERIFY=1` disables it, loudly logged). |
+| `HERMES_PIN_DIGEST` | `ca760e97ff1ef1f0e2ed3deb0dfc2923` | The digest the mounted tree must produce (revision `3569e846…`). |
+| `HERMES_DOCKER_NETWORK` | `mercato-network-local` | The network is declared **`external: true`**, so this file can never create or delete one. Points at the fullapp stack's network by default; set it if your stack runs a different `DEPLOY_ENV`. |
+| `OM_AI_PROVIDER` / `OM_AI_MODEL` | `openai` / *(empty)* | Recorded on the run only — nothing calls a model before `gateway.ready`. |
+| `HERMES_MCP_URL` | `http://host.docker.internal:3001/mcp` | Reached through the host, so the worker needs no service DNS. |
+
+Why a separate file: the service is **opt-in** until Hermes is proven behind the platform's runtime port (`P2-3`+), the same reason OpenCode stays load-bearing. To exercise the worker by hand, drive it through the gate:
+
+```bash
+python docker/hermes/handshake_gate.py   # boots the image via docker run, proves the handshake + process.stop
+```
+
+
 ## Quick Start
 
 ```bash

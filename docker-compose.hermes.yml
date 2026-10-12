@@ -1,0 +1,116 @@
+# The Hermes TUI-gateway worker — a SEPARATE, opt-in compose file.
+#
+# WHY IT IS SEPARATE (the owner's ruling, 2026-10-12)
+# --------------------------------------------------
+# The choice was put to the owner as one question with a recommendation: add
+# Hermes to the shared `docker-compose*.yml` files (so it starts with the stack
+# for everyone), or keep it in its own file so it stays opt-in until Phase 2
+# proves it. **Ruled: separate file.** The reasoning is the one that keeps
+# OpenCode load-bearing — an engine that is not yet proven behind the door
+# should not start by default for every developer, and `P2-1` proves only that
+# the pinned worker boots and speaks the handshake. It is not behind the port
+# (`P2-3`), it does not serve the chat (`P2-5`).
+#
+#   docker compose -f docker-compose.hermes.yml up --build --detach
+#   docker compose -f docker-compose.hermes.yml logs --follow
+#   docker compose -f docker-compose.hermes.yml down
+#
+# WHAT IT RUNS
+# ------------
+# `python -m tui_gateway.entry` from the pinned source, speaking
+# newline-delimited JSON-RPC on stdio (measured: `tui_gateway/entry.py`'s
+# `main()`, `tui_gateway/transport.py`'s framing). There is no port to expose:
+# the platform spawns the worker and owns its pipes (that is `P2-3`'s adapter).
+# The gateway's own frames land in the container log, so the boot — including
+# the `gateway.ready` event — is inspectable from outside.
+#
+# IT IS NOT THE `hermes-local` SERVICE. The platform's own
+# `docker-compose.fullapp.yml` already runs `nousresearch/hermes-agent:latest`
+# with `command: ["gateway","run"]` and a published port (8642) — the upstream
+# **HTTP** gateway, built by someone else's release process. This file runs the
+# **pinned source** over **stdio**, the door the platform's own client
+# (`hermes-gateway-client.ts`, `P2-2`) speaks. Two different doors into Hermes;
+# this one exists because the chat integration goes through the typed port
+# (`P2-3`), and the image tag `:latest` cannot be digest-verified at boot while
+# the mounted pin can.
+#
+# WHAT IT NEEDS FROM THE HOST
+# ---------------------------
+#   HERMES_PIN_DIR   the pinned source tree. Defaults to `../../hermes-agent-main`,
+#                    which is correct for this repository layout (the code repo
+#                    lives at `workspace/starting-kit` inside the docs repo that
+#                    holds the pin). Override it if your pin lives elsewhere.
+#                    The tree is mounted READ-ONLY and digest-verified at boot,
+#                    so nothing may be written into it.
+#   HERMES_PIN_DIGEST  the digest the mounted tree must produce. Defaults to the
+#                    recorded pin (`ca760e97…`, revision `3569e846…`).
+#
+# Provider keys are read from the host environment exactly as the OpenCode
+# service reads them. The handshake needs neither a key nor a model — no model
+# is called before `gateway.ready` — so this file boots clean without them.
+
+services:
+  hermes-gateway:
+    build:
+      context: ./docker/hermes
+      # A NAMED build context: only the two manifests the Dockerfile COPYs are
+      # transferred, so the build costs kilobytes instead of the pin's 87 MB,
+      # and no second copy of the pin is created (L136).
+      additional_contexts:
+        hermes_pin: ${HERMES_PIN_DIR:-../../hermes-agent-main}
+    image: hermes-gateway:p2-1
+    container_name: mercato-hermes-gateway
+    restart: unless-stopped
+    environment:
+      # State root. Writable volume; the mounted source stays read-only.
+      HERMES_HOME: /var/lib/hermes
+      # The pin this worker is allowed to run.
+      HERMES_PIN_DIGEST: ${HERMES_PIN_DIGEST:-ca760e97ff1ef1f0e2ed3deb0dfc2923}
+      HERMES_SKIP_PIN_VERIFY: ${HERMES_SKIP_PIN_VERIFY:-}
+      # Provider selection, recorded on the run (P2-3 turns it into a gateway
+      # call). Same contract the platform already speaks for OpenCode.
+      OM_AI_PROVIDER: ${OM_AI_PROVIDER:-openai}
+      OM_AI_MODEL: ${OM_AI_MODEL:-}
+      # Provider credentials, forwarded only when the operator set them.
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      GOOGLE_GENERATIVE_AI_API_KEY: ${GOOGLE_GENERATIVE_AI_API_KEY:-}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      # Let the worker reach a service on the host (e.g. the platform's MCP).
+      HERMES_MCP_URL: ${HERMES_MCP_URL:-http://host.docker.internal:3001/mcp}
+    volumes:
+      # The pinned source, read-only: the code that runs is the pin, and the
+      # entrypoint proves it by digest before importing anything.
+      - ${HERMES_PIN_DIR:-../../hermes-agent-main}:/hermes-src:ro
+      - hermes_state:/var/lib/hermes
+    # The gateway's stdin is its client channel. Keeping it open means the
+    # worker waits for a client instead of seeing EOF and exiting; the client
+    # that attaches is `P2-3`'s adapter (or a hand-driven session for the gate).
+    stdin_open: true
+    tty: false
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - mercato-network
+
+volumes:
+  hermes_state:
+    name: mercato-hermes-state
+
+networks:
+  # WHICH NETWORK — measured 2026-10-12 (rule 0b), corrected after the fact.
+  # The first version of this file copied `docker-compose.yml`, which hardcodes
+  # `name: mercato-network` — and the measurement falsified that choice: the
+  # container on `mercato-network` was this worker alone, while everything that
+  # actually runs (`docker-compose.fullapp.yml`, and `.fullapp.dev.yml`) declares
+  # `name: mercato-network-${DEPLOY_ENV:-local}` = `mercato-network-local`, and
+  # the whole `*-local` stack — postgres, redis, mcp, meilisearch, model,
+  # opencode, app, plus the upstream `hermes-local` HTTP gateway on 8642 — sits
+  # on it. Default = the network the operator's stack really uses.
+  #
+  # EXTERNAL on purpose: this file must never create or destroy a network
+  # another stack owns. `docker compose -f docker-compose.hermes.yml down`
+  # cannot take the platform's network with it.
+  mercato-network:
+    name: ${HERMES_DOCKER_NETWORK:-mercato-network-local}
+    external: true
