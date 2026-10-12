@@ -242,6 +242,28 @@ box carry it.)
 
 ---
 
+### ✅ P2-3 DONE — **the port adapter: Hermes behind the door with an honest capability map (seven ✓, the tool door ✗), critic-hardened with three defects found and fixed.** *(2026-10-12)*
+
+`lib/hermes-port-adapter.ts` + 34 tests (plan `PLAN-HERMES-PHASE2-one-tenant-one-tool.md` §2.8 requirement written BEFORE the code, §2.9 the full discharge record).
+
+**What it is, in plain terms.** The platform now has a second engine that can sit behind its one typed door to an AI runtime. The adapter translates the door's eight operations into the worker's own protocol — every event name and payload measured in the pinned source first, nothing guessed. Two honest things it says out loud: **the tool door stays closed** (`resolveToolCall` throws and names the call, so no caller can believe a business operation is platform-gated by this engine — `P2-4` opens it), and **`steerRun` is real** — the first engine on the whole port that can add an instruction to a run that is already admitted, without opening a new conversation turn and without carrying any permission (the §2.4 verdict, settled by measurement in the worker's own source, with its three limits written down).
+
+**The evidence.** 37/37 tests GREEN; the whole package 120 suites / **1665 tests GREEN** (nothing that existed broke); `tsc` shows **0** errors in the new files against the 92 pre-existing `CC-73` errors. **RED-then-GREEN: 11 mutations, all RED, restored md5-identical (`706ad202…`).**
+
+**The hostile critic (a separate agent, command+output per claim) found three defects — each re-measured in the pinned source before the fix:**
+
+1. **A real correctness bug the suite could not see.** When you resume a conversation, the adapter sent the id you handed it. But the worker's resume answer carries a **different** id — the live one — and every later message must use *that* id, or the worker answers "session not found". The test double echoed back whatever it was asked, so all 33 tests passed with the bug sitting there. Fixed, plus a test whose double answers with a different id and proves the turn then goes to that id. **L144.**
+2. **A test that could not fail.** The proof that the stream cleans up after itself counted *messages sent* — a number that never changes when you emit an event, so it passed even with every cleanup line deleted. Rewritten to actually check that no listener is left registered, and the cleanup deletion is now caught (mutation M2). **L145.**
+3. **A small leak.** The stream cleaned up its event listeners but never its worker-exit handler, so a long-lived client grew one closure per streamed run. The `P2-2` client's `onExit` now hands back an unsubscribe (like its `on` already did) and the stream releases it with the rest.
+
+**One of the critic's own remarks was falsified by measurement — and that changed the build (rule 13).** The critic's closing note said a silent-but-alive worker could not be bounded because the door has no deadline. Measured: the door's envelope **already carries `deadline`** — *"so a run cannot outlive its admission"*. So the adapter now **honours the caller's own deadline**: an expired run errors instead of spending a turn; a turn that outlives it ends with an error event; a deadline that cannot be read binds nothing and is logged (fail safe, not fail fast). Three tests, and the two new mutations (M9/M10) are the proof they bite. The **other** engine behind the door (OpenCode) still ignores that field — registered as **`CC-76`** so the gap at the door level cannot be forgotten (**L146**: a finding, even a critic's, gets measured like any other claim — an absence claim needs absence evidence).
+
+**Named bound, recorded not hidden:** a steered instruction reaches the worker's **own** tools only — the platform's tool door is still shut until `P2-4`.
+
+**Next:** `P2-4` — the one narrow tool (the Business-IR pack) through `resolveToolCall`, every call re-authorized at execution time.
+
+---
+
 ### ✅ HERMES PIN RE-PINNED to the newest source — **the old pin was 3,290 commits behind; now the pin names the copy the owner supplied.**
 **(2026-10-12; the owner's request: *"I downloaded and extracted the latest hermes version to `hermes-agent-main` … it is better that we use the most recent one. You can compare the difference if needed … Maybe the newest version provide other elements of an added value."*)**
 

@@ -5,7 +5,7 @@ written BEFORE any code."* No Phase 2 code exists yet. This document is the requ
 below are executed against it, one sub-row at a time, under the full protocol (hostile critic,
 RED-then-GREEN, two-route).
 
-**Progress: `P2-1` ✅ (2026-10-12, §2.7) · `P2-2` ✅ (2026-10-12, §4) — NEXT = `P2-3`, the port adapter
+**Progress: `P2-1` ✅ (2026-10-12, §2.7) · `P2-2` ✅ (2026-10-12, §4) · `P2-3` ✅ (2026-10-12, §2.9) — NEXT = `P2-4`, the one narrow tool
 (`session.steer` settled by measurement before anything is claimed for it).**
 
 **Read it with:** [`ARCHITECTURE-hermes-integration.md`](ARCHITECTURE-hermes-integration.md) §9 (the
@@ -205,6 +205,83 @@ wiring; (4) update `workspace/COOKBOOK.md` steps 3.4/3.5 + `docker/README.md`; (
 
 ---
 
+## 2.8 `P2-3` — the requirement, measured before any adapter code was written (2026-10-12)
+
+**Why this section exists (rule 3).** `P2-3` is the sub-row that stacks on the two discharged rows: the worker
+boots (`P2-1`) and the client speaks its wire (`P2-2`). Everything below was measured in the pinned source
+and in this repo FIRST, so the adapter cannot encode a guess.
+
+**The two artefacts it stands on, measured:**
+| Fact | Measurement |
+|---|---|
+| The door | `lib/ai-runtime-port.ts` — eight operations + the §4.2 envelope; `steerRun` documented *"only if the approval semantics exist"*; `resolveToolCall(call, capabilityGrant)` *"the ONLY path to a business operation"*. |
+| The client | `lib/hermes-gateway-client.ts` (`P2-2`): `connect()` (the measured handshake), `on(method, listener)` (unwrapped events), `onServerRequest`, `onExit`, `request<TResult,TParams>()` (id-correlated), and the three typed helpers `submitPrompt(sessionId, text)` / `interruptSession(sessionId)` / `steerSession(sessionId, text)`. **The client has no session-create helper** — the adapter creates sessions through the generic `request('session.create', …)`. |
+| Session lifecycle | `contracts/sessions.py`: **`session.create`** (`SessionCreateParams`: `cols?, source?, cwd?, messages?, parent_session_id?, title?, model?, provider?, reasoning_effort?, fast?, service_tier?, close_on_disconnect, hidden, idempotency_key?` — *"a stable caller-chosen key so a retried create returns the SAME session instead of a duplicate child"*, #65410) → `{session_id, stored_session_id, message_count, messages, info}`; **`session.resume`** → `LiveSessionSnapshot` (`running?`, `status?` (a `LiveSessionStatus`), `inflight?`, `queued?`, …); **`session.usage`** → `Usage` (`model, input, output, reasoning, total, calls, …`); **`session.status`** → `{output: str}`. |
+| The turn | `prompt.submit` → `status ∈ streaming\|queued\|steered\|redirected`. Events (`contracts/events.py`, every one snake_case): `message.start` (**no payload**) · `message.delta` `{text, rendered?, verbose?}` · `reasoning.delta` (same shape) · **`message.complete`** `{text, usage?, status?, error?, failure_reason?, partial?, …}` with `TurnStatus ∈ complete\|error\|interrupted` · `session.usage` `{usage}` (*"mid-turn tick; `message.complete` carries the authoritative final usage"*) · `tool.start` `{tool_id, name, args?}` · `tool.complete` `{tool_id, name, result, summary?}` · `status.update` `{kind, text}` · `error`. |
+| Cancel | **`session.interrupt`** `{session_id, expected_hosted_task_id?}` (*"only interrupt if this hosted task is the running one"*) → `{status: interrupted\|not_interrupted, interrupted?, turn_isolation?}`. |
+| The 14 server requests | `client.capabilities` (§2.7): `approval, clarify, display.install.sudo, preview.act, preview.read, secret, setup_choose, sudo, terminal.read, tour, vault.code, vault.save_login, vault.unlock_prompt, window.read`. The port has no surface for them in this row; the client already answers anything unhandled `-32601`, so a turn never hangs. |
+
+**§2.4's `session.steer` claim — SETTLED BY MEASUREMENT, and it holds, with three named limits.**
+Measured in `contracts/sessions.py:629–641` + `methods_session_interrupt.py:82–144`:
+
+```
+SessionCorrectionParams(SessionParams): { session_id: str, text: str }
+SessionCorrectionResult:               { status: queued|redirected|rejected, text: str }
+"session.steer"    — "Inject text into the next tool result without interrupting the turn."
+"session.redirect" — "Redirect the active turn (queued for the next turn while the agent is still building)."
+handler: idle session → {status: rejected}; running + agent supports steer → {status: queued};
+         agent lacks steer → JSON-RPC error 4010; text is required (4002); the session is resolved
+         through the caller's own authority (`_current_session_steer_authority`), so the steer is ownership-checked.
+```
+
+**Verdict: `steerRun` is honestly supportable** — the first engine that can make the port's eight real
+rather than seven. The approval semantics §4.1 requires are met in the only way this door can meet them:
+a steer adds **instruction** to a run that is **already admitted** (its session is ownership-checked, it
+creates **no new user turn**, and it carries **no capability**), so it cannot widen authority. **Three named
+limits, carried into the adapter's docblock and its capability report:** (1) a `rejected` status means the run
+was **not in flight** — the adapter **throws** rather than silently queueing, because the gateway's own
+client would queue it as a normal next prompt and the platform's caller must make that choice itself; (2) a
+steer is spliced into the **next tool result**, so it is visible only after the current tool finishes — that
+timing is the engine's, and it is stated, not hidden; (3) steering reaches the worker's **own** tools — the
+platform's tool door stays ✗ until `P2-4`, so what a steered turn can *do* is not yet platform-gated.
+
+**The honest capability map this row must produce** (the OpenCode adapter's own standard — no pretending):
+`describeCapabilities ✓ · startRun ✓ · streamRun ✓ · cancelRun ✓ · **steerRun ✓** · resumeConversation ✓ ·
+resolveToolCall ✗ (P2-4) · completeRun ✓`. Health is reported from the **transport** (connected → `ok`,
+otherwise `down`) — not a model probe: the worker needs neither a key nor a model to reach `gateway.ready`
+(`P2-1`), and this door has no model-health endpoint. Usage from `message.complete` is emitted with
+`usageScope: 'run'` (the turn) and the mid-turn `session.usage` ticks with `usageScope: 'session'` — §4.3
+requires the scope to be stated, never guessed.
+
+**What this row does NOT claim.** It does not select the engine for a chat (`P2-5`), does not deliver the
+narrow tool (`P2-4`), does not move any caller, and performs no live model call — every proof here is
+against the measured wire.
+
+---
+
+## 2.9 `P2-3` DISCHARGED — the port adapter, critic-hardened, with the three defects it found (2026-10-12)
+
+**What landed (code commit in `starting-kit`).** `packages/ai-assistant/src/modules/ai_assistant/lib/hermes-port-adapter.ts` — `HermesPortAdapter implements AiRuntimePort`, standing on the `P2-2` client at a **structural** interface (`HermesGatewayPortClient`, fakeable without spawning the worker) — plus its suite `lib/__tests__/hermes-port-adapter.test.ts` (**34 tests**). One small contract change to the committed `P2-2` client: `onExit` now **returns an unsubscribe**, exactly like `on` (backward compatible — existing callers ignore the return).
+
+**The evidence gate.**
+- **37/37 GREEN** for the adapter; the **full package: 120 suites / 1665 tests GREEN** — the row breaks nothing that existed.
+- **`tsc` honestly qualified:** **0** errors in the two new files (and 0 in the touched client), against the package's **92 pre-existing** `CC-73` errors, unchanged (measured with `--incremental false`, L139).
+- **RED-then-GREEN:** **11 mutations, every one RED**, each restored md5-identical (`706ad202…`): the `D2` defect re-introduced · the `finally` cleanup deleted · a `rejected` steer swallowed · an errored/interrupted turn read as `done` · each usage scope swapped · `completeRun`'s replay guard removed · resume run ids collapsed · the idempotency key dropped · **the deadline check skipped · the deadline timer never armed**.
+
+**The separate-agent hostile critic found three defects. Each was re-measured in the pinned source BEFORE the fix (rule 0b/13), not taken on the critic's word:**
+
+1. **`D2` — correctness, the discharge blocker.** `resumeConversation` re-hydrated through `session.resume` and then **kept the caller's session id** as the run's session. Measured: `SessionResumeParams` takes the **stored id or an exact title** (*"the reply's `session_id` is the runtime id"*, `contracts/sessions.py`), and the gateway resolves every session-scoped RPC against its **live** sessions by the runtime id alone (`server.py::_sess_nowait` — a differing id is answered `4001 session not found`). So a resumed run whose stored id/title differs from the runtime id would 4001 on its **first turn**. The original fake echoed the requested id, so **all 33 tests passed with the defect present**. Fixed: the run adopts the reply's runtime id (the caller's value survives only as a fallback), with a covering test whose resume reply answers a *different* id and whose turn must then address it. **L144.**
+2. **`D1` — test integrity.** The "unsubscribes every event listener" test asserted `prompt.submit` **call counts** around an emission — a number no emission ever changes, so it passed **with every `off()` deleted**. Rewritten to read the fake's live listener sets and exit-handler count, and to assert a post-settle frame reaches nobody. Mutation M2 (cleanup deleted) now fails it. **L145.**
+3. **`D3` — a bounded leak.** `streamRun` unsubscribed its event listeners but never released its `onExit` handler, so a long-lived client accumulated one closure per streamed run. Fixed at both ends: the client's `onExit` returns an unsubscribe and `streamRun` releases it with the rest (the cleanup now covers **7 event listeners + the exit handler**).
+
+**The honest capability map this row delivers** (§2.8's requirement, met): `describeCapabilities ✓ · startRun ✓ · streamRun ✓ · cancelRun ✓ · steerRun ✓ · resumeConversation ✓ · resolveToolCall ✗ (P2-4) · completeRun ✓`; health from the **transport**, never a model probe; usage scoped `run` (the turn, from `message.complete`) and `session` (mid-turn ticks), stated never guessed (§4.3).
+
+**A premise corrected WHILE WRITING THIS RECORD (rule 13, applied to the critic's own claim).** The critic's C4 note said the port defines no deadline policy, so a wedged-but-alive turn could not be bounded. **Measured: false.** `lib/ai-runtime-port.ts`'s envelope carries **`deadline?: string | Date | null`** — *"a deadline, so a run cannot outlive its admission"* — a bound the **caller** already chooses (the OpenCode adapter ignores it; registered as **`CC-76`** so the door-level gap cannot be forgotten). So the adapter now **honours the envelope's own deadline**: a run whose deadline has already passed streams an error instead of spending a turn, a turn that outlives it ends with an error event, and an absent/`null`/unparseable deadline bounds nothing (a bound that cannot be read must fail safe, and is logged). **Three tests cover it**; mutations M9/M10 are the proof they bite. **L146.** What remains true is narrower than the first draft of this paragraph: nothing bounds a gateway that stays alive **without** an envelope deadline — that is now exactly what `CC-76` names, and it is no longer stated as a silent bound.
+
+**What this row does NOT claim** (unchanged, and now proven): it does not select an engine for a chat (`P2-5`), does not deliver the narrow tool (`P2-4`), moves no caller, and makes **no live model call** — every proof is against the measured wire. **The one remaining named bound, written into the code rather than left implicit:** a steered instruction reaches the **worker's own** tools only (§2.8's third limit — the platform's tool door is still shut until `P2-4`).
+
+---
+
 ## 3. Measured facts (rule 0b — measured in the pinned source and the code repo, 2026-10-12)
 
 ### 3.1 The run-path protocol surface — re-verified against the RE-PINNED copy
@@ -268,7 +345,7 @@ foundation order from §2.1.
 |---|---|---|
 | **P2-1** | **The worker boots.** `docker/hermes/` (image + entrypoint) and a compose service, mirroring `docker/opencode/`: pinned source mounted, `uv`-locked deps, the TUI gateway started on stdio, health from `ping`, config from `OM_AI_*` | ✅ **DISCHARGED 2026-10-12** — §2.7 holds the full record. Gate `docker/hermes/handshake_gate.py`: `client.capabilities` (all **14** `server_requests`), `gateway.capabilities` (`per_session_exclusive_submit: true`), `ping` → `{'pong': true}`, `gateway.ready` → `[change_events, replay_epoch, skin]`, `process.stop` — **GATE PASSED in 39.5 s**, no stub or mock, image built from the pin's own lock in 1m49 s. **RED:** the same gate against `hermes-agent-main-older` refused with `PIN BROKEN … 3e3b81f2… files 17367`, 0 stdout frames — cross-validating the container verifier against the host harness. Compose cold start re-proved the boot (`PIN HOLDS`, 18,248 files) on `mercato-network-local`, and `down` left the whole platform stack intact. **One premise corrected after the fact (rule 13):** the network is external + overridable — the first version copied `docker-compose.yml`'s hardcoded `mercato-network`, which the running stack does not use. |
 | **P2-2** | **The gateway client.** `lib/hermes-gateway-client.ts`: spawn/supervise the worker, newline-JSON framing both ways, typed request/response correlation, the handshake, `prompt.submit` + the event stream, `session.interrupt`/`steer`, `process.stop` | ✅ **DISCHARGED 2026-10-12** (commit `f5f85064`). Against a **protocol stub implementing the measured contract** (§3.1/§3.2), all four behaviours proven: handshake (with the snake_case wire keys), one streamed turn as ordered typed events, cancel, and **a malformed frame does not kill the stream**. **21/21 tests.** Hostile-critic-hardened: a separate agent found 3 real defects (every event is an `event`-enveloped frame, so nothing dispatched; a pino-style logger call on a message-first logger; an unguarded `stdin.write`), each verified against the pinned source and fixed — and the critic's finding invalidated part of the suite, whose frames were the *un-enveloped* shape the real server never writes. **RED-then-GREEN:** mutating the envelope unwrapping turns **8 of 21 RED**; restored md5-identical (`4416a886…`) → 21 GREEN. **`tsc` clean — honestly qualified:** `P2-2`'s own two files are error-free, but the package's type gate **did not exist** (`tsc -p .` = TS18003; it was the only one of 21 configs not extending `tsconfig.base.json`). Fixing that surfaced **92 pre-existing errors in 27 other `__tests__` files**, scheduled as **`CC-73`** with the native-compiler and stale-`tsbuildinfo` measurements recorded as **L138/L139**. Any `tsc` run on this package must pass `--incremental false` to be reproducible. |
-| **P2-3** | **The port adapter.** `lib/hermes-port-adapter.ts` implementing `AiRuntimePort`, with an **honest** capability map — measured against the client, ✗ where it is ✗ (no pretending; the OpenCode adapter's own standard) | `describeCapabilities()` reports the truth for all eight ops; the eight operations' contracts (idempotent `cancelRun`, replay-safe `completeRun`, usage with its scope stated) hold. The **`session.steer`** claim of §2.4 is settled by measurement, one way or the other |
+| **P2-3** | **The port adapter.** `lib/hermes-port-adapter.ts` implementing `AiRuntimePort`, with an **honest** capability map — measured against the client, ✗ where it is ✗ (no pretending; the OpenCode adapter's own standard) | ✅ **DISCHARGED 2026-10-12** — §2.9 holds the full record. **37/37 tests GREEN** (the event map, both usage scopes, the envelope's own deadline, idempotent start/cancel, replay-safe complete, the steer verdict's three limits, identifier distinctness); the **full package is 120 suites / 1665 tests GREEN**; `tsc` shows **0** errors in the new files against the 92 pre-existing (CC-73). The capability map is the honest one: **seven ✓, `resolveToolCall` ✗ (`P2-4`), `steerRun` ✓** — the first engine that makes the port's eight real. **Hostile critic (separate agent) found 3 defects, each verified against the pinned source before the fix:** `resumeConversation` kept the caller's stored id while the gateway resolves a turn by the **runtime** id only (the `D2` correctness defect — invisible to the original fake, which echoed the request); the unsubscribe proof was **vacuous** (it counted submits, which no emission changes); the `onExit` subscription was never released. All three fixed in the same change, and the critic's own "no deadline policy" aside was **falsified by measurement** (the envelope carries `deadline`; the adapter now honours it — the OpenCode half registered as `CC-76`, L146). **RED-then-GREEN:** **11 mutations, all RED**, restored md5-identical (`706ad202…`). **The one remaining named bound:** a steered instruction reaches the worker's own tools only (§2.8's third limit). |
 | **P2-4** | **The one narrow tool.** The Business-IR tool delivered to the worker, every call re-authorized at execution time through `resolveToolCall(call, capabilityGrant)` | A tool call **without** a grant is refused; a call **with** one is authorized per `S-02`; the runtime never widens the grant |
 | **P2-5** | **Selection at the door.** `resolveAiRuntimePort` becomes config-selected; OpenCode stays the default; the chosen implementation is recorded on the run | Swapping engines touches exactly one function; **`door-only-way-in.test.ts` still passes** (the door is still the only way in); OpenCode is untouched and still answers |
 | **P2-6** | **The exit gate proof** — cancellation · retry idempotency · usage capture · bounded memory/CPU · no cross-scope access, on one tenant then on two adversarial ones | All five, measured, on one tenant; then the two adversarial tenants: a run admitted for tenant A cannot read, name or affect tenant B — proven by a negative test that fails if any cross-scope frame exists |
