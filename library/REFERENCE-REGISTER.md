@@ -32,7 +32,7 @@ Three kinds of file live under `library/`:
 |---|---|---|
 | **Ours, hand-written** | documents we wrote: the development set, the analysis programme, the two studies, the kit docs | **Yes — all of them** |
 | **Ours, copied shelves** | `library/01-`…`library/16-` — byte-for-byte copies of earlier work, kept for provenance (see [`PROVENANCE.md`](PROVENANCE.md)) | No — they are source material, reached through the provenance note |
-| **Imported code** | `library/ai/hermes-agent-main` (17,201 files), `library/ai/paperclip-master` (8,300 files) — other people's runnable source, studied, not written by us | No — reached through the two studies |
+| **Imported code** | `hermes-agent-main/` (18,248 files — **the pinned Hermes snapshot**, revision `3569e846…`; see [`development/HERMES-PIN.md`](development/HERMES-PIN.md)), `library/ai/hermes-agent-main` (17,201 files — a superseded extract), `hermes-agent-main-older/` (17,367 files — a superseded extract), `library/ai/paperclip-master` (8,300 files) — other people's runnable source, studied, not written by us | No — reached through the two studies |
 
 **Measured scope:** 3,466 `.md` files sit under `library/`, but **2,866 of them are inside
 `library/ai/`** — the imported Hermes and Paperclip source trees plus the studied material. The

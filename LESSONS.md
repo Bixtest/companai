@@ -4129,14 +4129,37 @@ So `R28-6` was **not a buildable task**, and the honest verdict was **"trigger-b
 
 ---
 
-## L136 — **two copies of one thing in the tree is a defect even when each is "the same software"**: a pin must pick ONE and say why, because "which one did we read?" has a single answer or none
+## L136 — **two copies of one thing in the tree is a defect even when each is "the same software"**: a pin must pick ONE and say why, because "which one did we read?" has a single answer or none — **and when a THIRD arrives, the pin must re-measure, not defend its first choice**
 
-**What happened (2026-10-12, the same Phase 0).** The Hermes source exists in the tree **twice** — `library/ai/hermes-agent-main/` (17,201 files, mtime 2026-10-03, `pyproject.toml` md5 `a4ce871d…`) and `hermes-agent-main/` (17,367 files, mtime 2026-10-05, md5 `594dea19…`). They are **not** byte-identical: a **later, different extract** of the same product. Both are gitignored; nothing said which was authoritative. This is exactly the architecture's own **§10 "source-versus-image divergence"** risk — but sitting in **our** tree, not the product's.
+**What happened (2026-10-12, the same Phase 0).** The Hermes source exists in the tree three times.
+**First measured:** `library/ai/hermes-agent-main/` (17,201 files, mtime 2026-10-03, `pyproject.toml` md5
+`a4ce871d…`) and `hermes-agent-main/` (17,367 files, mtime 2026-10-05, md5 `594dea19…`) — **not** byte-identical:
+a **later, different** extract of the same product. Both gitignored; nothing said which was authoritative. This
+is exactly the architecture's own **§10 "source-versus-image divergence"** risk — but sitting in **our** tree,
+not the product's. The pin picked the first, `library/ai/hermes-agent-main/`.
+**Then, the same day:** the owner supplied a **third** copy at the root (18,248 files, revision `3569e846…`) and
+renamed the old root copy `hermes-agent-main-older/`. Measured against upstream, the *first* pin was **3,290
+commits behind** the new one (2026-10-03 → 2026-10-12). The pin **moved** to the newest.
 
-**Why it matters.** A digest over "the Hermes source" is meaningless while there are two. Worse, a reader who opens the *other* copy would find different code and different docs — and both would look correct, because neither is labelled. The divergence is invisible by default.
+**Why it matters.** A digest over "the Hermes source" is meaningless while there are two — or three. Worse, a
+reader who opens *any* of the other copies would find different code and different docs, and all would look
+correct, because none was labelled. And the *first* fix ("pick the one in the library") was itself a trap: it
+was a good reason only while there was **one** candidate; once a second arrived, the real question became
+**"which is newest?"**, and the answer moved. **A pin defends a choice by re-measuring its premise, not by
+restating it.**
 
-**The rule.** (1) When the same third-party source appears in more than one place, **the measure is a diff, not a glance** — compare file counts, mtimes and a few file hashes; "same product" is not "same snapshot." (2) A pin **names exactly ONE copy** and states why (here: the one that is byte-identical to the archive, `library/ai/hermes-agent-main/`); the other is left in place but explicitly marked **not the pinned one**. (3) Answer *"which revision are we reading?"* in **one** place a newcomer can find — the divergence is a documentation defect the moment it exists, not when someone trips on it.
+**The rule.** (1) When the same third-party source appears in more than one place, **the measure is a diff, not a
+glance** — compare file counts, mtimes, a few file hashes, and the whole-tree digest; "same product" is not "same
+snapshot." (2) A pin **names exactly ONE copy** and states why; the others are left in place but explicitly marked
+**not the pinned one**. (3) Answer *"which revision are we reading?"* in **one** place a newcomer can find. (4)
+**When the inputs to the choice change** — a newer copy arrives, upstream moves — **re-measure the choice**
+(which copy is newest? how far behind is the pin?) and, if it has moved, re-pin *and update the harness and the
+doc in the same change*, so the recorded digest and the ticked box still point at the same thing.
 
-*Cross-ref: rule 12 (judge the committed/invariant copy, not the rendered one); L135 (a snapshot carries its own provenance — the two copies differ *by revision*, which is how the divergence was caught); rule 13 (a stale "one Hermes" assumption corrected at source); `HERMES-PIN.md` §1.1.*
+*Cross-ref: rule 12 (judge the committed/invariant copy, not the rendered one); L135 (a snapshot carries its own
+provenance — the copies differ *by revision*, which is how the divergence was caught *and* how the new one's
+"newest" was proven); rule 13 (a falsified premise corrected everywhere it was copied — the "two copies" doctrine
+became "three", and the pin's own premise was re-measured); rule 0b (measure first; the 3,290-commit gap was
+measured, not assumed); `HERMES-PIN.md` §1.1 / §1.1.1.*
 
 

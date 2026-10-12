@@ -38,11 +38,6 @@
 - **Never end on "your call" / "you decide"** — give the ranked shortlist, my recommendation, then **one specific
   question**. **Never make the owner ask "what does that mean?"** — if it needs decoding to act on, it is unfinished.
 
-## Rule 15 — solve the straightforward NOW (BINDING)
-Anything straightforward that does not disrupt the plan is solved **immediately**, never scheduled — postponing
-hides the gaps that fixing would expose. Defer only on a real prerequisite, with the trigger named (rule 8).
-Worked example: `CC-43` "flagged, not fixed" **hid `CC-46`**.
-
 ## Section map
 - `platform_points.md` — SCOREBOARD (ONE number + plain list, vision Phase 0→10 order) + byte-identical `§A`–`§L`
   appendix. **The number is DERIVED from ticked boxes, never typed** (`§L derive-counts`). Markers `☑`/`✅`;
@@ -72,51 +67,45 @@ Worked example: `CC-43` "flagged, not fixed" **hid `CC-46`**.
   dynamic) — **L132** (`.ts`-only walk missed 36 `.tsx`; 4 of 6 import forms missed).
 
 ## Live frontier (2026-10-12 — read `JOURNAL.md`'s `★ ACTIVE TASK` for the truth)
-- **ONE NUMBER 76 / 321 = 24%** (weighted ≈24%), derived from §A–§K boxes; §L's **22nd** re-run, two routes agree.
-  *Banked traps:* a **split parent** (`- ` line carrying `▸ n/N`) is **never** a derivable tick — its `n` sub-points
-  are; whole point = `- ` + a box glyph, sub-point = `-   - `, **5+ spaces = annotation, never a unit**; **§L excluded**.
+- **ONE NUMBER 78 / 321 = 24%** (weighted ≈24%), derived from §A–§K boxes; §L's **24th** re-run, two routes agree.
+  (Was 76 before §9 Phase 0's two §D boxes ticked.) *Banked traps:* a **split parent** (`- ` line carrying `▸ n/N`)
+  is **never** a derivable tick — its `n` sub-points are; whole point = `- ` + a box glyph, sub-point = `-   - `,
+  **5+ spaces = annotation, never a unit**; **§L excluded**.
 - **▶ FRONTIER: NOW = Row 28 (Phase 8)** — *"the agent runtime sits behind ONE typed door; no other code talks to it
   directly."* Ids `B-05` / `Port`; related `N-8` (*"rewire first, delete second"*). Contract =
   `ARCHITECTURE-hermes-integration.md` §4 (eight §4.1 ops + §4.2 envelope). Plan = `PLAN-ROW28-agent-runtime-port.md`.
-- **Row 28 🔵 IN PROGRESS** — six sub-rows. **R28-1 ✅** `lib/ai-runtime-port.ts` (the port's shape; 8 ops, envelope,
-  secret refs). **R28-2 ✅** `lib/opencode-port-adapter.ts` (all 8, delegating to the UNCHANGED OpenCode engine).
-  **R28-3 ✅** (`61776eae`) — the chat route walks through the door. **R28-4 ✅** (`5ec1c83f`) — the run is CLOSED
-  at the door (`req.signal` → `cancelRun` then `completeRun`; first production caller). **`CC-67` ✅** (`6c3db27c`) —
-  the last three direct callers moved onto the door via `lib/agent-runtime-port-adapter.ts` (the platform's own
-  in-process runtime).
-- **`R28-5` ✅ DONE 2026-10-12 — the EXIT GATE: the door is PROVEN the only way in. `B-05` ✅ TICKED.** NEW test
-  `.../__tests__/door-only-way-in.test.ts`: whole-package `.ts`+`.tsx` scan (comment-stripped; ALL edge forms),
-  asserting ONLY 2 engines + 2 adapters + barrel + 2 named exceptions reach an engine. **Proof:** 118 suites /
-  1607 green; 12 mutations ALL RED. **Critic found 3 REAL defects** — `walk` missed `.tsx` (36 files),
-  detector missed 4 of 6 import forms (**L132**). `CC-69`'s reach is `api/chat/route.ts`; `api/health/route.ts`
-  = a 3rd exception → **`CC-71`**. `N-8` + 3×`Port` stay `☐` on their own blockers.
-- **★ RULED 2026-10-12 (owner-delegated) — option (b).** `CC-69` (chat `answerQuestion`) + `CC-71` (health) **ACCEPTED
-  as deliberate, permanent, named exceptions** — neither is a *run*, both auth-checked, both pinned by the shipped
-  test; **not a hole**. Port contract **NOT widened** now. **Revisit trigger: when Hermes lands.**
-- **`R28-6` ("delete OpenCode") MEASURED 2026-10-12 → TRIGGER-BLOCKED; registered as `CC-72`.** OpenCode is the
-  ONLY engine that answers a chat (Docker via `OPENCODE_URL`) → deleting it stands the door over a hole. Trigger =
-  *"Hermes wired behind the door (arch §9 Phase 2+)"*. **"OpenCode" is a NAME COLLISION** — the **engine** (delete,
-  when Hermes lands) vs a **load-bearing vestige** (`opencode-provider.ts` + `OPENCODE_*` env +
-  `api_keys.opencodeSessionId` = the platform's model-provider config — **never delete blind**). Critic UPHELD all
-  5 sub-claims. **L133.**
-- **⚠ CORRECTION 2026-10-12 (Phase 0 measurement — my prior "Hermes does not exist" was UNDER-SCOPED, rule 13).**
-  Hermes is **NOT** absent: **`git ls-files | grep -i hermes` in the CODE repo is empty, but the Hermes SOURCE
-  lives in the DOCS repo** as **two gitignored extracts** — `hermes-agent-main/` (17,367 files, mtime 2026-10-05)
-  and `library/ai/hermes-agent-main/` (17,201 files, mtime 2026-10-03) — **NOT byte-identical** (md5 of
-  `pyproject.toml` differs: root `594dea19…` vs library `a4ce871d…`). Upstream = **Nous Research "hermes-agent",
-  MIT, version `0.0.0`, no `.git`** → **the source revision cannot be recovered, it must be CREATED** (that is
-  exactly Phase 0). Deps are already pinned (`uv.lock`, `pm/uv.lock`, `pm/lock.json` → CPython **3.14.7**).
-  `CC-72`'s trigger is **unaffected** (the *engine behind the door* is still only OpenCode), but the *"there is no
-  Hermes"* wording was wrong and is corrected everywhere.
-- **Row 28's port shape is COMPLETE; no box moved (76/321).** ★ NEXT = **Hermes track** (arch §9 Phase 0),
-  or `CC-51`, or Phase 6 audit.
+- **Row 28 (Phase 8) ✅ COMPLETE — banked (all six sub-rows + `CC-67` + `R28-5`).** The agent runtime sits behind
+  ONE typed door: `lib/ai-runtime-port.ts` (8 ops + envelope, R28-1) → `lib/opencode-port-adapter.ts` (R28-2) +
+  `lib/agent-runtime-port-adapter.ts` (the platform's own runtime) → the chat route walks through it (R28-3) →
+  runs close at the door (R28-4). **`B-05` ✅.** **`R28-5` proved the door the only way in** (whole-package
+  `.ts`+`.tsx` scan, 118 suites/1607 green, 12 mutations RED; 2 named exceptions `CC-69`/`CC-71`). Plan =
+  `PLAN-ROW28-agent-runtime-port.md`.
+- **`R28-6` ("delete OpenCode") TRIGGER-BLOCKED → `CC-72`.** OpenCode is the ONLY engine that answers a chat →
+  deleting it stands the door over a hole. Trigger = *"Hermes wired behind the door (arch §9 Phase 2+)"*.
+  **"OpenCode" is a NAME COLLISION** — the **engine** (delete, when Hermes lands) vs a **load-bearing vestige**
+  (`opencode-provider.ts` + `OPENCODE_*` env + `api_keys.opencodeSessionId` = model-provider config — **never
+  delete blind**). **L133.**
+- **⚠ HERMES SOURCE (corrected 2026-10-12, rule 13 — "Hermes does not exist" was UNDER-SCOPED).** The **code**
+  repo has no Hermes (`git ls-files | grep -i hermes` → empty). The **docs** repo holds the Hermes **source** as
+  **THREE** gitignored extracts, none byte-identical: the **PINNED** root `hermes-agent-main/` (**18,248** files,
+  revision **`3569e846…`**, digest **`ca760e97ff1ef1f0e2ed3deb0dfc2923`**, byte-identical to the root zip);
+  `hermes-agent-main-older/` (17,367 files); `library/ai/hermes-agent-main/` (**17,201** files, revision
+  `eb044063…` — the *previous* pin, now **3,290 commits behind**). Upstream = **Nous Research "hermes-agent", MIT,
+  `version` 0.0.0, no `.git`**. **Re-PINNED 2026-10-12**: the pin **moved** from `library/ai/…` to the root copy
+  (owner supplied it; measured 3,290 commits ahead). Harness = `library/.hermes_pin.py --check` → **PIN HOLDS**;
+  doc = `library/development/HERMES-PIN.md`. `CC-72`'s trigger unaffected. **L135** (a snapshot carries its own
+  provenance — the zip comment holds the revision) / **L136** (≥2 copies = a defect; re-measure the pin when a
+  newer copy arrives). Licence position: runtime MIT; all bundled `LICENSE` MIT/Apache-2.0; **closes `V-09`**.
+- **★ NEXT = Hermes track §9 `Phase 2`** (one worker, one tenant, one tool) — Phase 0 (pin) & Phase 1 (the port
+  with OpenCode behind it) are done. Alternatives: **`CC-51`** (row 16 team-leg — *measure first: if small, do it
+  first*), Phase 6 audit.
 - **`CC-68` ✅ / `CC-67` lesson L131 / `CC-59` ✅** (Business-IR chain's first production caller `lib/business-ir-run.ts`
   + tool `ai-tools/business-ir-pack.ts`; the consumer gap = `CC-60`).
 - **Open `CC-` items:** `CC-69`/`CC-71` (**RULED 2026-10-12 — accepted as permanent named exceptions; revisit when
   Hermes lands**), **`CC-72` (delete-OpenCode — TRIGGER-BLOCKED on Hermes; do NOT build)**, `CC-70` (grant
-  carried-not-consumed), `CC-60`
-  (Business-IR tool → chat consumer), `CC-51` (row 16 team-leg — owner's go-ahead), `CC-54` (index rebuild),
-  `CC-19` (CI) — last three trigger-blocked; `CC-58` staged; `CC-32` gated on `G-09`.
+  carried-not-consumed), `CC-60` (Business-IR tool → chat consumer), **`CC-51` (row 16 team-leg — owner gave
+  conditional go-ahead 2026-10-12: *"if it is straightforward and small, fix it first"* → MEASURE it)**, `CC-54`
+  (index rebuild), `CC-19` (CI) — last two trigger-blocked; `CC-58` staged; `CC-32` gated on `G-09`.
 - **Owner's go-ahead in force:** execute the supplementary core queue (`PLAN-SUPPLEMENTARY-CORE-QUEUE.md`; docs
   `47177f1`, `caeface`); the Business IR is re-classified **CORE** (`CORE-BOUNDARY.md` §2 + plan §S1.1).
 

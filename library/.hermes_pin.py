@@ -22,15 +22,26 @@ that harness. It does two things and nothing else:
 
 WHAT THE PINNED SNAPSHOT IS
 ---------------------------
-`library/ai/hermes-agent-main/` — the extracted contents of
-`library/ai/hermes-agent-main.zip`, whose archive comment carries the upstream
-source revision: `eb044063235fbf7a4e68dd2970ade05dbe637ff3`.
+`hermes-agent-main/` (the repository root) — the extracted contents of the root
+`hermes-agent-main.zip`, whose archive comment carries the upstream source
+revision: `3569e8461ea721623fa16e6f01fb636157989fe6`.
 
-The OTHER copy at the repository root (`hermes-agent-main/`) is a *later,
-different* extract of the same product. The two are NOT byte-identical. This is
-exactly the "source-versus-image divergence" the architecture warns about (its
-§10 risk table). This pin deliberately names ONE of them so there is a single
-answer to "which Hermes are we reading".
+RE-PINNED 2026-10-12 (rule 13). The pin previously named
+`library/ai/hermes-agent-main/` (revision `eb044063…`). The owner then supplied a
+newer download at the root; measured against upstream, the old pin was **3,290
+commits behind** (2026-10-03 → 2026-10-12). The pin now names the NEWEST copy.
+
+There are THREE copies in the tree, and none is byte-identical to another (L136 —
+"two copies of one thing is a defect … a pin must pick ONE"):
+
+  | copy                                 | files  | revision   | is it the pin? |
+  |--------------------------------------|-------:|------------|----------------|
+  | `hermes-agent-main/` (root)          | 18,248 | `3569e846…`| **YES** — newest, byte-identical to the root zip |
+  | `hermes-agent-main-older/` (root)    | 17,367 | unknown    | no — a mid extract, kept for history |
+  | `library/ai/hermes-agent-main/`      | 17,201 | `eb044063…`| no — the PREVIOUS pin (now stale by 3,290 commits) |
+
+This pin deliberately names ONE so there is a single answer to "which Hermes are
+we reading".
 
 HOW TO RUN IT
 -------------
@@ -51,18 +62,21 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 # The ONE pinned snapshot. See the module docstring for why this and not the
-# root copy.
-PINNED = os.path.join(HERE, "ai", "hermes-agent-main")
+# other two copies. NOTE: this is the repository ROOT copy, reached by walking up
+# from library/ — the newest extract, byte-identical to the root zip.
+PINNED = os.path.normpath(os.path.join(HERE, "..", "hermes-agent-main"))
 
 # The upstream revision, read from the zip's own archive comment on 2026-10-12.
 # It is recorded here so the pin carries the source revision as well as the
 # content digest: the zip is the provenance, the digest is the proof.
-UPSTREAM_REVISION = "eb044063235fbf7a4e68dd2970ade05dbe637ff3"
+# Re-pinned 2026-10-12: was eb044063… (the old library/ai copy, 3,290 commits
+# behind this one); now 3569e846… (the newest download the owner supplied).
+UPSTREAM_REVISION = "3569e8461ea721623fa16e6f01fb636157989fe6"
 
 # The digest the snapshot must produce. Updated only when the snapshot is
 # deliberately re-pinned, and then only together with this file's own record in
 # HERMES-PIN.md.
-EXPECTED_DIGEST = "53b320bb83a155225ab4b36b3ad0dace"
+EXPECTED_DIGEST = "ca760e97ff1ef1f0e2ed3deb0dfc2923"
 
 
 def digest_of(root):
@@ -116,7 +130,7 @@ def main(argv):
         sys.stderr.write(
             "PIN ABSENT: the pinned snapshot is not on disk:\n  %s\n"
             "It is gitignored study material — restore it from\n"
-            "  library/ai/hermes-agent-main.zip\n"
+            "  hermes-agent-main.zip  (at the repository root)\n"
             "before this pin can be checked.\n" % PINNED
         )
         return 1
@@ -149,7 +163,7 @@ def main(argv):
         "If this change is deliberate, re-pin it: update EXPECTED_DIGEST in this\n"
         "file AND the digest recorded in library/development/HERMES-PIN.md, in the\n"
         "same change. If it is not deliberate, restore the snapshot from\n"
-        "library/ai/hermes-agent-main.zip.\n"
+        "hermes-agent-main.zip at the repository root.\n"
         % (EXPECTED_DIGEST, actual, count, PINNED)
     )
     return 1

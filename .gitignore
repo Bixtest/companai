@@ -58,12 +58,17 @@ companai.md
 # committed by accident. (Checked 2026-10-03.)
 library/ai/hermes-agent-main/
 
-# The same Hermes runtime source ALSO sits at the repository root — a second extract
-# of the same vendored code. The rule above already excludes vendored code; this
-# pattern simply never matched the root copy, so it showed up as untracked and could
-# have been swept in by a wildcard add. (Checked 2026-10-05, while building
-# library/development/BOOKMARKS.md and naming what is and is not in git.)
+# The SAME Hermes runtime source ALSO sits at the repository root — and there is
+# the PINNED copy (revision 3569e846…, 18,248 files; see development/HERMES-PIN.md).
+# A third, superseded extract sits beside it as `hermes-agent-main-older/`. The
+# rule above already excludes vendored code; the bare name never matched the root
+# copy, so it showed up as untracked and could have been swept in by a wildcard
+# add. NOTE a bare name is NOT a prefix glob: `hermes-agent-main/` does NOT match
+# `hermes-agent-main-older/`, which is why that copy needs its own line. (Checked
+# 2026-10-05; extended 2026-10-12 when the pin moved to the root and the third
+# copy appeared.)
 hermes-agent-main/
+hermes-agent-main-older/
 
 # TAKEN, 2026-10-04 — the owner said yes. The hand-written parts are versioned;
 # the copies are ignored. This supersedes the 2026-10-03 note below, which left

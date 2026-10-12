@@ -499,13 +499,13 @@ draft **fails its own premise.** The finding, in our terms:
   is no Python runtime, no worker, no Hermes process — nothing. (`§4` of this plan already says so:
   *"Hermes itself is NOT built here."*)
   *(**Correction 2026-10-12, rule 13 — the phrase "Hermes does not exist" was under-scoped.** The Hermes
-  **source** is NOT absent: it sits in the **docs** repo as two gitignored extracts — `library/ai/hermes-agent-main/`
-  (the *pinned* copy; 17,201 files, byte-identical to `library/ai/hermes-agent-main.zip`, whose archive comment
-  carries the upstream revision `eb044063235fbf7a4e68dd2970ade05dbe637ff3`) and the root `hermes-agent-main/`
-  (17,367 files — a **later, different** extract; the two are *not* byte-identical). The measurement above is
-  still true and the verdict is unchanged — what is absent is a Hermes **engine behind the door** — but a
-  sentence that says "Hermes does not exist" is false in the docs repo's terms, so it is corrected. See
-  **`HERMES-PIN.md`**.)*
+  **source** is NOT absent: it sits in the **docs** repo as **three** gitignored extracts — the **pinned** root
+  `hermes-agent-main/` (18,248 files, revision `3569e846…`, byte-identical to the root `hermes-agent-main.zip`;
+  re-pinned 2026-10-12), `hermes-agent-main-older/` (17,367 files), and `library/ai/hermes-agent-main/`
+  (17,201 files — the *previous* pin, revision `eb044063…`, now stale by 3,290 commits). The three are *not*
+  byte-identical. The measurement above is still true and the verdict is unchanged — what is absent is a Hermes
+  **engine behind the door** — but a sentence that says "Hermes does not exist" is false in the docs repo's terms,
+  so it is corrected. See **`HERMES-PIN.md`** §1.1/§1.1.1.)*
 - **OpenCode is the only engine that can actually answer a chat.** The live chat route
   (`api/chat/route.ts`) reaches it through the door (`createOpenCodePortAdapter`, `:122`, `:536`), and the
   engine runs as a **Docker service the platform points at** (`OPENCODE_URL`, default
@@ -625,7 +625,7 @@ Every sub-row that ends less than fully done gets (or keeps) a row in `COMPLETIO
   first engine that implements `resolveToolCall` (Hermes, §9 Phase 2+).
 - **`CC-72`** (new, R28-6) — **`R28-6` (delete OpenCode) is TRIGGER-BLOCKED: it would remove the only
   engine.** Measured 2026-10-12: no Hermes **engine** is wired in our code (the Hermes **source** *is* in the
-  docs repo — two gitignored extracts; corrected, rule 13 — but nothing behind the door); OpenCode is the only
+  docs repo — three gitignored extracts, the root one pinned; corrected, rule 13 — but nothing behind the door); OpenCode is the only
   engine that answers a chat. **Trigger:** a Hermes engine exists and is wired behind the door (architecture
   §9 Phase 2+). See §8 below.
 - **`N-8`'s second half** (delete OpenCode) — stays open and **trigger-blocked** (`CC-72`), with the trigger
@@ -1052,10 +1052,11 @@ delete half trigger-blocked).
 
 > **Rule-13 correction (2026-10-12):** three places in this plan's R28-5/R28-6 narrative say *"Hermes does
 > not exist"*. Measured against the **docs** repo, that is **under-scoped and false as written** — the Hermes
-> **source** lives there as two gitignored extracts (`library/ai/hermes-agent-main/`, the pinned copy =
-> the snapshot zip's contents, 17,201 files; and the root `hermes-agent-main/`, a later 17,367-file extract).
-> What is genuinely absent is a Hermes **engine behind the door**. The §8 verdict and `CC-72`'s trigger are
-> **unchanged**; only the wording is corrected, here and in the row's §5/§8 text above. See **`HERMES-PIN.md`**.
+> **source** lives there as **three** gitignored extracts (the **pinned** root `hermes-agent-main/`, the snapshot
+> zip's contents, 18,248 files, revision `3569e846…`; `hermes-agent-main-older/`, 17,367 files; and
+> `library/ai/hermes-agent-main/`, the previous pin, 17,201 files). What is genuinely absent is a Hermes **engine
+> behind the door**. The §8 verdict and `CC-72`'s trigger are **unchanged**; only the wording is corrected, here
+> and in the row's §5/§8 text above. See **`HERMES-PIN.md`**.
 
 - **Measured in code (this session):** §1 rows 1–6, all by reading the named files; the R28-1 proof
   (tests, `tsc`, mutations, the full-suite run).

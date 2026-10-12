@@ -55,6 +55,50 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+### ✅ HERMES PIN RE-PINNED to the newest source — **the old pin was 3,290 commits behind; now the pin names the copy the owner supplied.**
+**(2026-10-12; the owner's request: *"I downloaded and extracted the latest hermes version to `hermes-agent-main` … it is better that we use the most recent one. You can compare the difference if needed … Maybe the newest version provide other elements of an added value."*)**
+
+**What changed.** Phase 0's pin (the block below) named `library/ai/hermes-agent-main/` (17,201 files, revision
+`eb044063…`, 2026-10-03). The owner then downloaded a newer extract to the repository root and renamed the old
+root copy `hermes-agent-main-older`. **Measured (rule 0b), the new copy is decisively newer, so the pin now names
+it.**
+
+**The measurement — three copies, none byte-identical (L136):**
+
+| Copy | Path | Files | `pyproject.toml` md5 | Revision | Is it the pin? |
+|---|---|---:|---|---|---|
+| **The pinned snapshot** | `hermes-agent-main/` (root) | 18,248 | `11d88a68…` | **`3569e846…`** | **YES** |
+| The mid extract | `hermes-agent-main-older/` (root) | 17,367 | `594dea19…` | not recoverable | no |
+| The previous pin | `library/ai/hermes-agent-main/` | 17,201 | `a4ce871d…` | `eb044063…` | no |
+
+- **It is not a close call:** the old pin is **3,290 commits behind** (`git compare` upstream →
+  `ahead_by: 3290`; 2026-10-03 → 2026-10-12). The new copy is **byte-identical to the root
+  `hermes-agent-main.zip`** (18,248 files = the zip's 19,484 entries minus 1,236 dirs; three key-file hashes
+  match), and the zip's archive comment carries the revision `3569e846…` — confirmed a real upstream commit via
+  the API (*"fix(plugins): left-core startup installs back off exponentially instead of hourly forever"*,
+  2026-10-12T08:15:04Z).
+- **Added value is real, not cosmetic:** **1,138 files added, 91 removed, 4,454 of 17,110 common files
+  changed.** The `agent/` core — the runtime the port will drive — gained **29 modules** (`compaction_events.py`,
+  `reasoning_promotion.py`, `turn_recovery_codex.py`, `context_compressor_*`, `agent_runtime_helpers_*`,
+  `session_source.py`, …), plus 9 `gateway/`, 11 `tools/`, 6 `tui_gateway/` modules.
+- **Nothing the pin mapped broke:** all §3 entry files survive at near-identical size, `acp_adapter/` intact,
+  MIT unchanged, licence position unchanged (19 vs 18 `LICENSE` files; the addition is MIT).
+
+**What was updated in the same change (rule 6/13):** `library/.hermes_pin.py` (PINNED → root copy,
+`UPSTREAM_REVISION` → `3569e846…`, `EXPECTED_DIGEST` → `ca760e97…`); **`HERMES-PIN.md`** (§1.1 three-copies
+table + §1.1.1 the re-pin rationale, §1.2 the revision + upstream check, §1.3 the new digest, §2 the run block,
+§3 line counts, §4 the added MIT licence, §5/§6); this journal; `LESSONS.md` **L136** (two copies → three);
+`platform_points.md` §D note; `PLAN-ROW28-agent-runtime-port.md` rule-13 note; `REFERENCE-REGISTER.md`; the
+`.gitignore` comment. **`CC-72`'s trigger is unchanged.**
+
+**Proof.** `--check` → **PIN HOLDS** (revision `3569e846…`, 18,248 files, digest
+`ca760e97ff1ef1f0e2ed3deb0dfc2923`). RED-then-GREEN on the harness: appending one byte `x` to
+`hermes-agent-main/.python-version` moved the digest to `70a8507c13aca25c4e1681ae0d82ceb4`; restoring its md5
+(`9e0dac68…`) returned `ca760e97…` and PIN HOLDS. **No scoreboard change** — the two Phase 0 boxes were already
+ticked; the re-pin moved *which snapshot they point at*.
+
+---
+
 ### ✅ HERMES TRACK STARTED — **arch §9 `Phase 0` ("pin & map") DONE: the pin, the licence position, and the symbol map.**
 **(2026-10-12; the owner's explicit go-ahead, given once row 28 was verified complete: *"Start the Hermes track (arch §9 Phase 0) — pin & map. It's the prerequisite for the whole runtime future."*)**
 
@@ -78,6 +122,12 @@ They are **not** byte-identical — this is the *"source-versus-image divergence
 table, **found in our own tree**. The pin names ONE of them so no reader has to guess. **`CC-72`'s trigger is
 unchanged** (the engine behind the door is still only OpenCode); only the wording is corrected, in the register,
 the plan, the scoreboard, and here.
+
+> **SUPERSEDED — same day (rule 13).** The table above records the moment Phase 0 first landed: **two** copies,
+> pinned to `library/ai/hermes-agent-main/`. Within the day the owner supplied a **third** (newest) copy at the
+> root, and the pin moved to it — see **the RE-PINNED block above**. This block is kept as written so the record
+> of *that* moment is intact; it must be read *with* the block above, not instead of it. Three copies today, not
+> two.
 
 **What landed — the four exit-gate items, measured:**
 
