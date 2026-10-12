@@ -22,8 +22,12 @@
  *
  * **What is declared here vs what is enforced elsewhere.** `AH-1` declares the six §1.4 **fields**. Their
  * *enforcement* is not this task and is already tracked by its own item:
- * - the `runtime` **binding executes nothing** here — the `AiRuntimePort` (`invoke`/`status`/`cancel`) is
- *   `L-01`/`AH-5`;
+ * - the `runtime` **binding executes nothing** here — the `AiRuntimePort` now **exists**
+ *   (`lib/ai-runtime-port.ts`, built by row 28 / `R28-1`: the eight §4.1 operations
+ *   `describeCapabilities`/`startRun`/`streamRun`/`cancelRun`/`steerRun`/`resumeConversation`/
+ *   `resolveToolCall`/`completeRun`, the §4.2 envelope, secret *references*), but this file does not
+ *   *invoke* it — the `runtime` field merely **names** which runtime runs an agent's turns (the port's
+ *   **selector**, §1.5). Whose turns actually reach it is row 28's wiring (`R28-3`/`R28-4`/`CC-67`).
  * - `autonomy` is **declared** as a per-action-class field, but the `A0`–`A5` **gate** is `AH-2` (needs
  *   `G-04`);
  * - the AI-user ↔ agent **binding row** is `CC-27`, which waits on this object.
