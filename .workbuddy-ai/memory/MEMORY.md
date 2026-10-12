@@ -79,36 +79,36 @@ Worked example: `CC-43` "flagged, not fixed" **hid `CC-46`**.
   directly."* Ids `B-05` / `Port`; related `N-8` (*"rewire first, delete second"*). Contract =
   `ARCHITECTURE-hermes-integration.md` §4 (eight §4.1 ops + §4.2 envelope). Plan = `PLAN-ROW28-agent-runtime-port.md`.
 - **Row 28 🔵 IN PROGRESS** — six sub-rows. **R28-1 ✅** `lib/ai-runtime-port.ts` (the port's shape; 8 ops, envelope,
-  secret refs). **R28-2 ✅** `lib/opencode-port-adapter.ts` (all 8, delegating to the UNCHANGED OpenCode engine;
-  honest map — `steerRun`/`resolveToolCall` openly ✗). **R28-3 ✅** (`61776eae`) — the chat route walks through the
-  door (`api/chat/route.ts` imports the port; self-tested static guard). **R28-4 ✅** (`5ec1c83f`) — the run is CLOSED
-  at the door: `req.signal` (Stop/closed tab) → `cancelRun` then `completeRun` (cancel-BEFORE-complete → a stopped run
-  records `cancelled`); `cancelRun`/`completeRun` got their **first production caller**. **`CC-67` ✅** (`6c3db27c`) —
-  the **last three direct callers** moved onto the door via a **second adapter** `lib/agent-runtime-port-adapter.ts`
-  (the platform's **own in-process runtime**, `runAiAgentText`/`runAiAgentObject`, carrying the live container/auth on
-  its construction — no envelope field invented); `streamRun` never drains the single-use `Response` (`responseForRun`);
-  hostile critic's ONE real defect = the run was never CLOSED → fixed.
+  secret refs). **R28-2 ✅** `lib/opencode-port-adapter.ts` (all 8, delegating to the UNCHANGED OpenCode engine).
+  **R28-3 ✅** (`61776eae`) — the chat route walks through the door. **R28-4 ✅** (`5ec1c83f`) — the run is CLOSED
+  at the door (`req.signal` → `cancelRun` then `completeRun`; first production caller). **`CC-67` ✅** (`6c3db27c`) —
+  the last three direct callers moved onto the door via `lib/agent-runtime-port-adapter.ts` (the platform's own
+  in-process runtime).
 - **`R28-5` ✅ DONE 2026-10-12 — the EXIT GATE: the door is PROVEN the only way in. `B-05` ✅ TICKED.** NEW test
-  `.../__tests__/door-only-way-in.test.ts` (md5 `776404ff318404dbb4860f5438ebf583`): whole-package `.ts`+`.tsx`
-  scan (comment-stripped; ALL edge forms), asserting ONLY 2 engines + 2 adapters + barrel + 2 named exceptions
-  reach an engine. 11 assertions (incl. a derivation test + a `.tsx` self-check). **Proof:** 118 suites / 1607
-  green; type-clean; **12 mutations ALL RED, md5-restored**. **Critic (separate agent) found 3 REAL defects** —
-  `walk` missed `.tsx` (**36 files invisible**), detector missed 4 of 6 import forms, a false "derived" header
-  (**L132**). **Premise fixes (rule 13):** `CC-69`'s reach is `api/chat/route.ts` (not `api/ai/chat/route.ts`);
-  `api/health/route.ts` = a 3rd exception → **`CC-71`**. **Honest reading:** `B-05` ticks; `N-8` + 3×`Port` stay `☐`
-  on their own blockers.
-- **★ RULED 2026-10-12 (owner-delegated: "do what you find best for the platform long-term") — option (b).**
-  `CC-69` (chat `answerQuestion`) + `CC-71` (health endpoint) **ACCEPTED as deliberate, permanent, named
-  exceptions** — neither is a *run*, both auth-checked, both pinned by the shipped test; **not a hole**. The port
-  contract is **NOT widened now** (the engine behind the door is a placeholder `R28-6` deletes → shaping the door
-  around it = stacking on a foundation being replaced). **Revisit trigger: when Hermes lands.**
-- **`R28-6` ("delete OpenCode") MEASURED 2026-10-12 → TRIGGER-BLOCKED; registered as `CC-72`.** Hermes does not
-  exist (`git ls-files | grep -i hermes` → empty); OpenCode is the ONLY engine that answers a chat (Docker via
-  `OPENCODE_URL`) → deleting it stands the door over a hole. Trigger = *"Hermes wired behind the door (arch §9
-  Phase 2+)"*. **"OpenCode" is a NAME COLLISION** — the **engine** (delete, when Hermes lands) vs a **load-bearing
-  vestige** (`opencode-provider.ts` + `OPENCODE_*` env + `api_keys.opencodeSessionId` = the platform's model-provider
-  config — **never delete blind**). Separate-agent critic (asked to falsify) **UPHELD all 5 sub-claims**. **L133.**
-  **Row 28's port shape is COMPLETE; no box moved (76/321).** ★ NEXT = **Hermes track** (arch §9 Phase 0→2),
+  `.../__tests__/door-only-way-in.test.ts`: whole-package `.ts`+`.tsx` scan (comment-stripped; ALL edge forms),
+  asserting ONLY 2 engines + 2 adapters + barrel + 2 named exceptions reach an engine. **Proof:** 118 suites /
+  1607 green; 12 mutations ALL RED. **Critic found 3 REAL defects** — `walk` missed `.tsx` (36 files),
+  detector missed 4 of 6 import forms (**L132**). `CC-69`'s reach is `api/chat/route.ts`; `api/health/route.ts`
+  = a 3rd exception → **`CC-71`**. `N-8` + 3×`Port` stay `☐` on their own blockers.
+- **★ RULED 2026-10-12 (owner-delegated) — option (b).** `CC-69` (chat `answerQuestion`) + `CC-71` (health) **ACCEPTED
+  as deliberate, permanent, named exceptions** — neither is a *run*, both auth-checked, both pinned by the shipped
+  test; **not a hole**. Port contract **NOT widened** now. **Revisit trigger: when Hermes lands.**
+- **`R28-6` ("delete OpenCode") MEASURED 2026-10-12 → TRIGGER-BLOCKED; registered as `CC-72`.** OpenCode is the
+  ONLY engine that answers a chat (Docker via `OPENCODE_URL`) → deleting it stands the door over a hole. Trigger =
+  *"Hermes wired behind the door (arch §9 Phase 2+)"*. **"OpenCode" is a NAME COLLISION** — the **engine** (delete,
+  when Hermes lands) vs a **load-bearing vestige** (`opencode-provider.ts` + `OPENCODE_*` env +
+  `api_keys.opencodeSessionId` = the platform's model-provider config — **never delete blind**). Critic UPHELD all
+  5 sub-claims. **L133.**
+- **⚠ CORRECTION 2026-10-12 (Phase 0 measurement — my prior "Hermes does not exist" was UNDER-SCOPED, rule 13).**
+  Hermes is **NOT** absent: **`git ls-files | grep -i hermes` in the CODE repo is empty, but the Hermes SOURCE
+  lives in the DOCS repo** as **two gitignored extracts** — `hermes-agent-main/` (17,367 files, mtime 2026-10-05)
+  and `library/ai/hermes-agent-main/` (17,201 files, mtime 2026-10-03) — **NOT byte-identical** (md5 of
+  `pyproject.toml` differs: root `594dea19…` vs library `a4ce871d…`). Upstream = **Nous Research "hermes-agent",
+  MIT, version `0.0.0`, no `.git`** → **the source revision cannot be recovered, it must be CREATED** (that is
+  exactly Phase 0). Deps are already pinned (`uv.lock`, `pm/uv.lock`, `pm/lock.json` → CPython **3.14.7**).
+  `CC-72`'s trigger is **unaffected** (the *engine behind the door* is still only OpenCode), but the *"there is no
+  Hermes"* wording was wrong and is corrected everywhere.
+- **Row 28's port shape is COMPLETE; no box moved (76/321).** ★ NEXT = **Hermes track** (arch §9 Phase 0),
   or `CC-51`, or Phase 6 audit.
 - **`CC-68` ✅ / `CC-67` lesson L131 / `CC-59` ✅** (Business-IR chain's first production caller `lib/business-ir-run.ts`
   + tool `ai-tools/business-ir-pack.ts`; the consumer gap = `CC-60`).

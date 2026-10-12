@@ -55,6 +55,68 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+### ✅ HERMES TRACK STARTED — **arch §9 `Phase 0` ("pin & map") DONE: the pin, the licence position, and the symbol map.**
+**(2026-10-12; the owner's explicit go-ahead, given once row 28 was verified complete: *"Start the Hermes track (arch §9 Phase 0) — pin & map. It's the prerequisite for the whole runtime future."*)**
+
+**Why Phase 0 exists.** The Hermes runtime is the Python agent engine the platform will run **behind the door**.
+Until now nothing said *which* Hermes we are reading: it sits in the tree as gitignored study material, it has
+**no `.git`** and its `pyproject.toml` says `version = "0.0.0"`. Phase 0's exit gate names four things — a
+recorded digest, a harness that runs, a licence position **including optional components**, and the exact
+symbols to call. All four now exist, in **`library/development/HERMES-PIN.md`**.
+
+**A FINDING THAT CORRECTS THE PRIOR SESSION (rule 13).** The prior session recorded *"Hermes does not exist in
+this repository at all."* **That was under-scoped and false as written.** Measured this session: the **code**
+repo (`workspace/starting-kit`) has no Hermes (`git ls-files | grep -i hermes` → empty) — but the **docs repo
+holds the Hermes source** as **two gitignored extracts**:
+
+| Copy | Path | Files | `pyproject.toml` md5 | Is it the pin? |
+|---|---|---:|---|---|
+| **Pinned** | `library/ai/hermes-agent-main/` | 17,201 | `a4ce871d9d03fd3706516e15bff637bb` | **YES** — byte-identical to `library/ai/hermes-agent-main.zip` (verified via `unzip -p`) |
+| Root | `hermes-agent-main/` | 17,367 | `594dea190e4176caa117db2349071e6c` | no — a **later, different** extract |
+
+They are **not** byte-identical — this is the *"source-versus-image divergence"* of the architecture's §10 risk
+table, **found in our own tree**. The pin names ONE of them so no reader has to guess. **`CC-72`'s trigger is
+unchanged** (the engine behind the door is still only OpenCode); only the wording is corrected, in the register,
+the plan, the scoreboard, and here.
+
+**What landed — the four exit-gate items, measured:**
+
+1. **The pin (a digest + the source revision).** The pinned snapshot's whole-tree digest is
+   **`53b320bb83a155225ab4b36b3ad0dace`** (17,201 files; algorithm: sorted `<md5>  <relpath>` lines, hashed
+   again — reproducible by hand, stated in the doc). The **source revision IS recoverable** — the snapshot zip's
+   own archive comment carries **`eb044063235fbf7a4e68dd2970ade05dbe637ff3`** (the architecture's *"cannot be
+   recovered; it must be created"* is sharpened, not contradicted).
+2. **The harness runs.** `library/.hermes_pin.py --check` → **PIN HOLDS**. Deterministic (two runs equal);
+   proven **sensitive** (append one byte → digest changes; restore → matches, md5-verified). It is **not** the
+   version-compatibility harness — that stays deferred to **`N-11`** (trigger: the adapter exists); the two are
+   named separately so neither is mistaken for the other.
+3. **The licence position, including optional components.** Runtime = **MIT** (Nous Research). All **18**
+   bundled `LICENSE` files are **MIT or Apache-2.0** (`plugins/security-guidance` = Apache-2.0); **no copyleft
+   is bundled**. AGPL/GPL appears **only** as references to **separately-invoked** tools (10 hits, all `.md`),
+   under Hermes' own rule — *"never import it as a Python library … keeps Hermes Agent's MIT license clean"*.
+   Two obligations named, neither a blocker: keep the notices; keep invoke-don't-import. **This closes
+   `V-09`'s gate.**
+4. **The symbol map.** `tui_gateway/server.py` (JSON-RPC: `prompt.submit`, `session.*`, `client.capabilities`,
+   streaming events) · `gateway/platforms/api_server.py` (OpenAI-compatible `/v1/runs/{id}/…`) ·
+   `acp_adapter/` — all three read from Hermes' own `programmatic-integration.md` in the pinned snapshot.
+   **Which protocol the platform uses is decided when the adapter is built** (Phase 2), against the port's
+   eight operations — not here.
+
+**Proof + critic.** The two new files were attacked by a **separate-agent hostile critic**: **10 claims sound,
+1 real defect** — the doc's mutation digest was *unreproducible as written* (it did not state which byte was
+appended). **Fixed** (the byte is now stated; the number reproduces). The snapshot was mutated and
+md5-restored twice (by me and by the critic); **`--check` → PIN HOLDS** afterwards.
+
+**Honest headline.** **Phase 0 is DONE** — both `Phase 0` boxes in §D tick. The pin is the prerequisite for the
+whole Hermes track; the next frontier is **§9 Phase 2** (one worker, one tenant, one tool) — Phase 1 (the port
+with OpenCode behind it) is already our achieved state. **ONE NUMBER: 76 → 78 / 321 = 24%** (+2, the two
+`Phase 0` ticks; §L 23rd run, two routes agree). **One more thing, corrected while re-deriving:** the 22nd
+run's per-section breakdown (A 10 · B 5 · D 1 · K 2) was **stale** — the true pre-tick breakdown was
+**A 11 · B 7 · D 2 · K 1** (same total 76, four figures drifted and offset). The breakdown is re-derived and
+recorded in §L.
+
+---
+
 ### ✅ AUDIT — **Row 28 verified COMPLETE (all six sub-rows + `CC-67`), and ONE promised-but-undone item found and fixed (`ce.ts`).**
 **(2026-10-12; owner-requested completeness audit: *"verify that all row 28 steps are done and completed properly — because some of the steps you did not report back to me that you worked on."*)**
 
@@ -88,8 +150,9 @@ comment-only, suite re-run green (118/1607). *This is exactly the class the owne
 correction that was silently dropped, and an overclaim left standing for a reader to trust.*
 
 **Honest headline.** **Row 28 is complete for the port's shape** — every sub-row that can be built is built,
-proven, and green; `R28-6` is the one step that **cannot** be built (its replacement engine does not exist).
-The audit found **no other missed step** beyond `ce.ts`. **ONE NUMBER unchanged: 76 / 321 = 24%.**
+proven, and green; `R28-6` is the one step that **cannot** be built (its replacement engine is not wired behind
+the door). The audit found **no other missed step** beyond `ce.ts`. **ONE NUMBER: 76 → 78 / 321 = 24%** at the
+time of this audit it was **76 / 321 = 24%** (the two `Phase 0` ticks came in the Hermes block above).
 
 ---
  `CC-69`/`CC-71` RULED 2026-10-12: both are deliberate, permanent, named exceptions (a control message and a monitoring surface — neither is a run); the door's contract is NOT widened now (it would be shaped around OpenCode, which `R28-6` deletes). **`R28-6` (delete OpenCode) was MEASURED 2026-10-12 and found TRIGGER-BLOCKED** — Hermes does not exist, so deleting OpenCode would remove the only engine that answers a chat (registered as `CC-72`). So **row 28's build is COMPLETE for the port's shape**; the deletion waits on Hermes (architecture §9 Phase 2+).**

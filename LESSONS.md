@@ -4114,3 +4114,29 @@ So `R28-6` was **not a buildable task**, and the honest verdict was **"trigger-b
 **The rule.** (1) A plan's **"do X in the same change"** line is **work**, committed as such — it belongs in the same checklist the sub-rows are in, or it will be dropped exactly as this one was. (2) A **completeness audit greps the plan's own promises** (`"in the same change"`, `"correct it"`, `"must be updated"`, `TODO`) and verifies each against `git log <file>` / `git show --stat` — *"the status says done"* is not the same as *"every promised edit landed."* (3) When a plan promises a correction because a comment/claim is **false**, the false claim is a **defect** (rule 13), not a nicety: left standing, the next reader trusts it. (4) The audit's honest result is permitted to be *"all sound"* — but only after **measuring**, not after reading the status column.
 
 *Cross-ref: rule 13 (a falsified premise is corrected everywhere it was copied — here the correction was promised and not made); rule 9a (own the FULL codebase — the side-task was mine and was dropped); rule 10e (name what a change can touch — the row was named, then ignored); rule 15 (solve the straightforward now — the stale comment was fixed on discovery, not scheduled); L131/L133 (the sister "the honest verdict is no box moved / the task is blocked" lessons — an audit that finds one real gap and fixes it is the point of the audit).*
+
+---
+
+## L135 — **a snapshot with no `.git` still has a provenance**: a downloaded source archive can carry its own upstream revision, so *"we cannot know which revision this is"* must be measured, not assumed
+
+**What happened (2026-10-12, Hermes §9 Phase 0 "pin & map").** The architecture said the Hermes source revision *"cannot be recovered; it must be created."* Measured: the Hermes source sits in the tree as a **zip extract with no `.git`** and `version = "0.0.0"` — so on the surface, no revision. But `library/ai/hermes-agent-main.zip` carries a **commit hash in its own archive comment**: `unzip -z <zip>` → `eb044063235fbf7a4e68dd2970ade05dbe637ff3`. So the pin could carry **real provenance** (a revision) *and* **proof** (a content digest), rather than a made-up identifier. The pinned directory was also verified **byte-identical to the zip** (`unzip -p <zip> <member> | md5sum` matched the on-disk file; 17,201 files each).
+
+**Why it matters.** *"Cannot be recovered"* is an **assumption about the packaging**, not a fact about the content. A `git archive`/release zip is exactly the case where the revision travels **inside the archive** (comment, `.gitattributes` `export-subst`, a version file). Declaring the revision unrecoverable **without opening the archive's metadata** would have produced a pin with no provenance — a digest that proves *"this file is unchanged"* but cannot say *"this is Hermes at commit X."*
+
+**The rule.** (1) Before accepting *"the revision cannot be recovered"*, **open the archive's own metadata** — `unzip -z`/`unzip -l` (comment), a `VERSION`/`SOURCE_DATE_EPOCH`/`.gitattributes` `export-subst` marker, or a build-stamp file. (2) A pin should carry **both** provenance (a revision, if any) and proof (a content digest); if only the digest is recoverable, say so explicitly. (3) Verify the extracted directory against the archive **by hash**, not by eyeball — a "pinned" copy that silently differs from its own zip is worse than no pin.
+
+*Cross-ref: L128 ("not verified this round" is not "not built" — the same error shape: an unmeasured *"cannot"*); rule 0b (measure first); rule 13 (the architecture's *"cannot be recovered"* was corrected where copied); `HERMES-PIN.md` §1.2.*
+
+---
+
+## L136 — **two copies of one thing in the tree is a defect even when each is "the same software"**: a pin must pick ONE and say why, because "which one did we read?" has a single answer or none
+
+**What happened (2026-10-12, the same Phase 0).** The Hermes source exists in the tree **twice** — `library/ai/hermes-agent-main/` (17,201 files, mtime 2026-10-03, `pyproject.toml` md5 `a4ce871d…`) and `hermes-agent-main/` (17,367 files, mtime 2026-10-05, md5 `594dea19…`). They are **not** byte-identical: a **later, different extract** of the same product. Both are gitignored; nothing said which was authoritative. This is exactly the architecture's own **§10 "source-versus-image divergence"** risk — but sitting in **our** tree, not the product's.
+
+**Why it matters.** A digest over "the Hermes source" is meaningless while there are two. Worse, a reader who opens the *other* copy would find different code and different docs — and both would look correct, because neither is labelled. The divergence is invisible by default.
+
+**The rule.** (1) When the same third-party source appears in more than one place, **the measure is a diff, not a glance** — compare file counts, mtimes and a few file hashes; "same product" is not "same snapshot." (2) A pin **names exactly ONE copy** and states why (here: the one that is byte-identical to the archive, `library/ai/hermes-agent-main/`); the other is left in place but explicitly marked **not the pinned one**. (3) Answer *"which revision are we reading?"* in **one** place a newcomer can find — the divergence is a documentation defect the moment it exists, not when someone trips on it.
+
+*Cross-ref: rule 12 (judge the committed/invariant copy, not the rendered one); L135 (a snapshot carries its own provenance — the two copies differ *by revision*, which is how the divergence was caught); rule 13 (a stale "one Hermes" assumption corrected at source); `HERMES-PIN.md` §1.1.*
+
+

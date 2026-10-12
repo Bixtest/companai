@@ -495,9 +495,17 @@ draft **fails its own premise.** The finding, in our terms:
 
 **1. "Delete OpenCode" would delete the only working engine.** Measured (rule 0b, 2026-10-12):
 
-- **Hermes does not exist in this repository at all.** `git ls-files | grep -i hermes` → **empty**. There
+- **No Hermes engine exists in our code.** `git ls-files | grep -i hermes` in the code repo → **empty**. There
   is no Python runtime, no worker, no Hermes process — nothing. (`§4` of this plan already says so:
   *"Hermes itself is NOT built here."*)
+  *(**Correction 2026-10-12, rule 13 — the phrase "Hermes does not exist" was under-scoped.** The Hermes
+  **source** is NOT absent: it sits in the **docs** repo as two gitignored extracts — `library/ai/hermes-agent-main/`
+  (the *pinned* copy; 17,201 files, byte-identical to `library/ai/hermes-agent-main.zip`, whose archive comment
+  carries the upstream revision `eb044063235fbf7a4e68dd2970ade05dbe637ff3`) and the root `hermes-agent-main/`
+  (17,367 files — a **later, different** extract; the two are *not* byte-identical). The measurement above is
+  still true and the verdict is unchanged — what is absent is a Hermes **engine behind the door** — but a
+  sentence that says "Hermes does not exist" is false in the docs repo's terms, so it is corrected. See
+  **`HERMES-PIN.md`**.)*
 - **OpenCode is the only engine that can actually answer a chat.** The live chat route
   (`api/chat/route.ts`) reaches it through the door (`createOpenCodePortAdapter`, `:122`, `:536`), and the
   engine runs as a **Docker service the platform points at** (`OPENCODE_URL`, default
@@ -616,8 +624,10 @@ Every sub-row that ends less than fully done gets (or keeps) a row in `COMPLETIO
   adapter does not read it (it resolves tools internally and reports `resolveToolCall` ✗). **Trigger:** the
   first engine that implements `resolveToolCall` (Hermes, §9 Phase 2+).
 - **`CC-72`** (new, R28-6) — **`R28-6` (delete OpenCode) is TRIGGER-BLOCKED: it would remove the only
-  engine.** Measured 2026-10-12: Hermes does not exist in this repo; OpenCode is the only engine that answers
-  a chat. **Trigger:** Hermes exists and is wired behind the door (architecture §9 Phase 2+). See §8 below.
+  engine.** Measured 2026-10-12: no Hermes **engine** is wired in our code (the Hermes **source** *is* in the
+  docs repo — two gitignored extracts; corrected, rule 13 — but nothing behind the door); OpenCode is the only
+  engine that answers a chat. **Trigger:** a Hermes engine exists and is wired behind the door (architecture
+  §9 Phase 2+). See §8 below.
 - **`N-8`'s second half** (delete OpenCode) — stays open and **trigger-blocked** (`CC-72`), with the trigger
   named in §8 R28-6.
 
@@ -1025,15 +1035,27 @@ contract is NOT widened now**, because the engine behind it (OpenCode) is a plac
 shaping the contract around it today would be designing the door around an engine we are discarding. **The
 contract's shape is decided when Hermes lands** (the real engine). So the row's two reaches are **closed as
 decisions**. **What remains is `R28-6`** (delete OpenCode) — and it was **MEASURED 2026-10-12 and found
-TRIGGER-BLOCKED** (§8 below): Hermes does not exist in this repo, so deleting OpenCode would remove the
+TRIGGER-BLOCKED** (§8 below): no Hermes **engine** is wired (the Hermes **source** is in the docs repo as two
+gitignored extracts — corrected, rule 13 — but nothing behind the door), so deleting OpenCode would remove the
 **only** engine that answers a chat (registered as **`CC-72`**). **It is therefore NOT a buildable task** —
-the honest next work is the **Hermes track** (architecture §9 Phase 0→2), not a deletion. **ONE NUMBER**,
-re-derived honestly in §L's 22nd run: `B-05` ✅ and — the box question — `B-05` adds **1.0** point,
-**`N-8` stays open** (delete half trigger-blocked) — **76 / 321 = 24%**.
+the honest next work is the **Hermes track** (architecture §9 Phase 0→2), not a deletion. **AND THE HERMES TRACK
+STARTED 2026-10-12: arch §9 `Phase 0` ("pin & map") is DONE** — see **`HERMES-PIN.md`** (the pin: recorded source
+revision + whole-snapshot digest + the harness `library/.hermes_pin.py --check`; the licence position including
+optional components; the exact symbols mapped). **The next Hermes frontier is §9 Phase 2** (one worker, one tenant,
+one tool) — Phase 1 (the port with OpenCode behind it) is our achieved state. **ONE NUMBER**, re-derived honestly
+in §L's 23rd run: `B-05` ✅ (1.0) + the two `Phase 0` boxes ✅ (2.0) — **78 / 321 = 24%** (`N-8` stays open:
+delete half trigger-blocked).
 
 ---
 
 ## §8. Measured vs quoted (so nothing is overstated)
+
+> **Rule-13 correction (2026-10-12):** three places in this plan's R28-5/R28-6 narrative say *"Hermes does
+> not exist"*. Measured against the **docs** repo, that is **under-scoped and false as written** — the Hermes
+> **source** lives there as two gitignored extracts (`library/ai/hermes-agent-main/`, the pinned copy =
+> the snapshot zip's contents, 17,201 files; and the root `hermes-agent-main/`, a later 17,367-file extract).
+> What is genuinely absent is a Hermes **engine behind the door**. The §8 verdict and `CC-72`'s trigger are
+> **unchanged**; only the wording is corrected, here and in the row's §5/§8 text above. See **`HERMES-PIN.md`**.
 
 - **Measured in code (this session):** §1 rows 1–6, all by reading the named files; the R28-1 proof
   (tests, `tsc`, mutations, the full-suite run).
