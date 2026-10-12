@@ -55,7 +55,44 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
-### 🔵 IN PROGRESS — **Row 28 (Phase 8): *"the agent runtime sits behind one typed door — no other code talks to it directly."* Broken into six sub-rows. **R28-1, R28-2, R28-3, R28-4, `CC-67` ✅ DONE 2026-10-11, and **R28-5 ✅ DONE 2026-10-12 — the exit gate: the door is now PROVEN the only way in, and `B-05` is TICKED.** `CC-69`/`CC-71` RULED 2026-10-12: both are deliberate, permanent, named exceptions (a control message and a monitoring surface — neither is a run); the door's contract is NOT widened now (it would be shaped around OpenCode, which `R28-6` deletes). **`R28-6` (delete OpenCode) was MEASURED 2026-10-12 and found TRIGGER-BLOCKED** — Hermes does not exist, so deleting OpenCode would remove the only engine that answers a chat (registered as `CC-72`). So **row 28's build is COMPLETE for the port's shape**; the deletion waits on Hermes (architecture §9 Phase 2+).**
+### ✅ AUDIT — **Row 28 verified COMPLETE (all six sub-rows + `CC-67`), and ONE promised-but-undone item found and fixed (`ce.ts`).**
+**(2026-10-12; owner-requested completeness audit: *"verify that all row 28 steps are done and completed properly — because some of the steps you did not report back to me that you worked on."*)**
+
+**What the audit did.** Checked every row-28 sub-row's **claim against the live code** (not against the docs),
+and asked the specific question the owner raised: *is anything built-but-unreported, or promised-but-undone?*
+
+**Verified in code (all six sub-rows + the extra adapter):**
+
+| Sub-row | Code evidence (measured) | Verdict |
+|---|---|---|
+| **R28-1** — the port's shape | `lib/ai-runtime-port.ts` declares `AiRuntimePort` (`:308`) with **all eight** §4.1 ops; definitions-only, zero engine imports | ✅ present, correct |
+| **R28-2** — OpenCode behind the door | `lib/opencode-port-adapter.ts` — `class OpenCodePortAdapter implements AiRuntimePort` (`:159`) + factory (`:475`) | ✅ present, correct |
+| **R28-3** — chat route through the door | `api/chat/route.ts` — `port.startRun` (`:536`) → `port.streamRun` (`:537`); imports the adapter (`:17`); the run path imports **no** engine | ✅ present, correct |
+| **R28-4** — run closed at the door | `api/chat/route.ts` — `port.cancelRun` (`:103`), `port.completeRun` (`:109`), `req.signal` disconnect wiring (`:472–478`) | ✅ present, correct |
+| **R28-5** — the door is the only way in | `__tests__/door-only-way-in.test.ts` — whole-package `.ts`+`.tsx` scan; **118 suites / 1607 tests green** on the committed tree | ✅ present, correct |
+| **`CC-67`** — the platform runtime behind the door | `lib/agent-runtime-port-adapter.ts` — `implements AiRuntimePort` (`:199`); the three callers (`api/ai/chat/route.ts`, `api/ai/run-object/route.ts`, `lib/business-ir-author.ts`) all import the adapter, **no** engine import | ✅ present, correct |
+| **R28-6** — delete OpenCode | measured last turn → **trigger-blocked on Hermes** (`CC-72`); not a buildable task | ✅ correctly out-of-row |
+
+**Proof run this session.** The whole `ai-assistant` package suite was re-run **on the committed tree**:
+**118 suites / 1607 tests passed** — the same figure the docs record for R28-5, so no regression across
+R28-1…R28-5 and `CC-67`. The two adapters, the port, the chat route wiring, and the door-only-way-in proof all
+still hold. **All ten row-28 files exist; all six code commits + six docs commits are present and ordered.**
+
+**The ONE gap found (and fixed).** The plan's **§5 impact table** promised: *"`ce.ts`'s comment-only
+`AiRuntimePort` … **Correct it in the same change (rule 13)**."* **No row-28 commit touched `ce.ts`** — measured:
+`git log -- <ce.ts>` shows its last change was `b5a33c76` (a much earlier AH-1 slice), and `git show --stat` for
+each of `513bad41`/`743156dd`/`61776eae`/`5ec1c83f`/`6c3db27c`/`ab2f835a` **names `ce.ts` zero times.** So the
+comment still read that the `AiRuntimePort` *"(`invoke`/`status`/`cancel`) is `L-01`/`AH-5`"* — describing it as
+**unbuilt and owned elsewhere** — while the port has existed since R28-1. **Fixed now** (code `b8f53cb0`),
+comment-only, suite re-run green (118/1607). *This is exactly the class the owner asked about: a promised
+correction that was silently dropped, and an overclaim left standing for a reader to trust.*
+
+**Honest headline.** **Row 28 is complete for the port's shape** — every sub-row that can be built is built,
+proven, and green; `R28-6` is the one step that **cannot** be built (its replacement engine does not exist).
+The audit found **no other missed step** beyond `ce.ts`. **ONE NUMBER unchanged: 76 / 321 = 24%.**
+
+---
+ `CC-69`/`CC-71` RULED 2026-10-12: both are deliberate, permanent, named exceptions (a control message and a monitoring surface — neither is a run); the door's contract is NOT widened now (it would be shaped around OpenCode, which `R28-6` deletes). **`R28-6` (delete OpenCode) was MEASURED 2026-10-12 and found TRIGGER-BLOCKED** — Hermes does not exist, so deleting OpenCode would remove the only engine that answers a chat (registered as `CC-72`). So **row 28's build is COMPLETE for the port's shape**; the deletion waits on Hermes (architecture §9 Phase 2+).**
 **(2026-10-11 → 2026-10-12; plan = [`library/development/PLAN-ROW28-agent-runtime-port.md`](library/development/PLAN-ROW28-agent-runtime-port.md).)**
 
 **What the row asks, in plain words.** Today the platform reaches its AI engine **two different ways,

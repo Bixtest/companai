@@ -595,7 +595,7 @@ order stands: **`N-8` (rewire, when a replacement exists) → `R28-6` (delete)**
 | `lib/opencode-client.ts` / `opencode-handlers.ts` | Low — not modified in row 28, only wrapped | No edits until R28-6 |
 | The two other AI paths (`runAiText`, `runAiObject`) | None in row 28 | Explicitly out of scope (`§4`); registered as `CC-67` (now **✅ DONE**, §7.5) |
 | Any test that asserts the chat route imports OpenCode by name | Medium — the import moves | Find and update them in the same change (rule 10e) |
-| `ce.ts`'s comment-only `AiRuntimePort` | Low — a false "it exists" statement | Correct it in the same change (rule 13) |
+| `ce.ts`'s comment-only `AiRuntimePort` | Low — a false "it exists" statement | Correct it in the same change (rule 13) — **NOT done during R28-1; found by the 2026-10-12 completeness audit and fixed then** (code `b8f53cb0`): the comment still said the port *"is `L-01`/`AH-5`"* (unbuilt, owned elsewhere) with the stale ops `invoke`/`status`/`cancel`, though the port has existed since R28-1. Now states the truth (the port exists; this file only *names* the runtime; the wiring is `R28-3`/`R28-4`/`CC-67`). **Lesson `L134`.** |
 
 ---
 
