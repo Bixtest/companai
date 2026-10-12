@@ -380,6 +380,25 @@ services:
   # port — this is the fix for blocker B-01 (the upstream compose uses
   # network_mode: host, which Docker Desktop for Windows does not do properly).
   #
+  # ⚠ RETIREMENT PLAN — OWNER RULING 2026-10-12 (register row `CC-74`; do not forget).
+  # This is the UPSTREAM Hermes: a floating `:latest` image, HTTP, on
+  # `${HERMES_PORT:-8642}`, with no digest we control. The platform's own door is
+  # the PINNED source over stdio (`docker-compose.hermes.yml`), digest-verified
+  # at every boot.
+  #
+  # RULED: KEEP this service until the pinned worker is PROVEN BEHIND THE PORT —
+  # until Phase 2's `P2-5` lands (engine selection at the door) and the pinned
+  # worker has served a real chat run through it. Then RETIRE it in one change:
+  # delete this service block + the `hermes_data` volume + the
+  # `HERMES_BIND`/`HERMES_PORT` wiring, and update `workspace/COOKBOOK.md`
+  # (steps 3.4/3.5) and `docker/README.md`. Keeping both forever is the
+  # "duplicate authority" risk the architecture's §10 table names — two Hermes
+  # doors, one of them unverifiable.
+  #
+  # Why it may stay until then: something may still be hitting port 8642 by
+  # hand, and removing it before the replacement is proven would trade a
+  # working door for a promised one.
+  #
   # State lives on a NAMED VOLUME, deliberately not a host bind mount.
   # Hermes keeps its state in SQLite in WAL mode. A host bind mount on Docker
   # Desktop for Windows is a cross-VM filesystem (virtiofs/9p), where SQLite's

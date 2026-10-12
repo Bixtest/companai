@@ -73,6 +73,9 @@ Why a separate file: the service is **opt-in** until Hermes is proven behind the
 python docker/hermes/handshake_gate.py   # boots the image via docker run, proves the handshake + process.stop
 ```
 
+> **Retirement of the older `hermes` service (owner ruling 2026-10-12, `CC-74`):** the `hermes` service in the fullapp stacks is the **upstream** image (`nousresearch/hermes-agent:latest`, HTTP on 8642). It **stays until `P2-5`** — engine selection at the door — has landed and the pinned worker above has served a real chat run through it, and is then retired in one change (steps in `library/development/COMPLETION-CALLBACKS.md` `CC-74`, and as a comment on the service block in `docker-compose.fullapp.yml`). Keeping both forever is the architecture's *duplicate authority* risk.
+
+
 
 ## Quick Start
 
