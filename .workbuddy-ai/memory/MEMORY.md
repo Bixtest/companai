@@ -102,12 +102,16 @@ Worked example: `CC-43` "flagged, not fixed" **hid `CC-46`**.
   (its sole blocker WAS the proof); `N-8` keeps `☐` (delete half = `R28-6`); 3×`Port` keep `☐` on their OWN blockers
   (`steerRun`/`resolveToolCall` unsupported; `secretRefs` unpopulated + `CC-70`). The 2 non-run reaches (`CC-69`,
   `CC-71`) are named, pinned, registered.
-- **★ NEXT = an owner ruling on `CC-69`/`CC-71`** (rule 11: widen the port contract — richer health, a question/steer
-  op — or accept the two non-run reaches as permanent named exceptions), **or `R28-6`** (delete OpenCode = `N-8`'s
-  second half).
+- **★ RULED 2026-10-12 (owner-delegated: "do what you find best for the platform long-term") — option (b).**
+  `CC-69` (chat `answerQuestion`) + `CC-71` (health endpoint) **ACCEPTED as deliberate, permanent, named
+  exceptions** — neither is a *run*, both auth-checked, both pinned by the shipped test; **not a hole**. The port
+  contract is **NOT widened now** (the engine behind the door is a placeholder `R28-6` deletes → shaping the door
+  around it = stacking on a foundation being replaced). **Revisit trigger: when Hermes lands.** **★ NEXT = `R28-6`**
+  (delete OpenCode = `N-8`'s second half).
 - **`CC-68` ✅ / `CC-67` lesson L131 / `CC-59` ✅** (Business-IR chain's first production caller `lib/business-ir-run.ts`
   + tool `ai-tools/business-ir-pack.ts`; the consumer gap = `CC-60`).
-- **Open `CC-` items:** `CC-69`/`CC-71` (need the owner ruling), `CC-70` (grant carried-not-consumed), `CC-60`
+- **Open `CC-` items:** `CC-69`/`CC-71` (**RULED 2026-10-12 — accepted as permanent named exceptions; revisit when
+  Hermes lands**), `CC-70` (grant carried-not-consumed), `CC-60`
   (Business-IR tool → chat consumer), `CC-51` (row 16 team-leg — owner's go-ahead), `CC-54` (index rebuild),
   `CC-19` (CI) — last three trigger-blocked; `CC-58` staged; `CC-32` gated on `G-09`.
 - **Owner's go-ahead in force:** execute the supplementary core queue (`PLAN-SUPPLEMENTARY-CORE-QUEUE.md`; docs

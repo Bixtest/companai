@@ -55,7 +55,7 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
-### 🔵 IN PROGRESS — **Row 28 (Phase 8): *"the agent runtime sits behind one typed door — no other code talks to it directly."* Broken into six sub-rows. **R28-1, R28-2, R28-3, R28-4, `CC-67` ✅ DONE 2026-10-11, and **R28-5 ✅ DONE 2026-10-12 — the exit gate: the door is now PROVEN the only way in, and `B-05` is TICKED.** NEXT = an owner ruling on `CC-69`/`CC-71`, or `R28-6` (delete OpenCode = `N-8`'s second half).**
+### 🔵 IN PROGRESS — **Row 28 (Phase 8): *"the agent runtime sits behind one typed door — no other code talks to it directly."* Broken into six sub-rows. **R28-1, R28-2, R28-3, R28-4, `CC-67` ✅ DONE 2026-10-11, and **R28-5 ✅ DONE 2026-10-12 — the exit gate: the door is now PROVEN the only way in, and `B-05` is TICKED.** `CC-69`/`CC-71` RULED 2026-10-12: both are deliberate, permanent, named exceptions (a control message and a monitoring surface — neither is a run); the door's contract is NOT widened now (it would be shaped around OpenCode, which `R28-6` deletes). NEXT = `R28-6` (delete OpenCode = `N-8`'s second half).**
 **(2026-10-11 → 2026-10-12; plan = [`library/development/PLAN-ROW28-agent-runtime-port.md`](library/development/PLAN-ROW28-agent-runtime-port.md).)**
 
 **What the row asks, in plain words.** Today the platform reaches its AI engine **two different ways,
@@ -290,8 +290,11 @@ way in"*, now done). **`N-8` keeps `☐`** — its rewire half is proven, but it
 **The three `Port` boxes keep `☐`** on their **own** blockers (`steerRun`/`resolveToolCall` unsupported;
 `secretRefs` unpopulated + `CC-70`). **The two non-run exceptions do not block `B-05`.**
 
-**★ NEXT.** `CC-69` and `CC-71` need an **owner ruling** (rule 11) on the port's shape: either widen the port
-contract, or accept the two reaches as permanent named exceptions. **`R28-6`** (delete OpenCode) is separate.
+**★ NEXT.** `CC-69`/`CC-71` are **RULED 2026-10-12** (owner delegated): **both accepted as deliberate, named,
+permanent exceptions** — `CC-69` is a control message about a paused run, `CC-71` a monitoring surface; neither
+is a run, and the door's contract is **not** widened now (it would be shaped around OpenCode, which `R28-6`
+deletes; the shape is decided when Hermes lands). **Remaining build = `R28-6`** (delete OpenCode = `N-8`'s
+second half) — a separate step.
 
 ---
 

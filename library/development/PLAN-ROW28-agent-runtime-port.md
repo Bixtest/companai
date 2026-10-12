@@ -933,11 +933,15 @@ a run); **`N-8` ticks on its "rewire" half** (everything is rewired through the 
 "delete" half** (OpenCode still exists — `R28-6`). The two non-run exceptions do **not** block either, because
 they are recorded with callbacks, not silently tolerated.
 
-**★ NEXT.** `CC-69` and `CC-71` need an **owner ruling** (rule 11) on the port's shape: either widen the port
-contract (a richer health payload; an `answerQuestion` operation) or accept the two reaches as permanent named
-exceptions. `R28-6` (delete OpenCode) is a separate step. **ONE NUMBER**, re-derived honestly in §L's 22nd
-run: `B-05` ✅ and `N-8`'s rewire-half ✅ add **1.0** and **0.5** weighted points (see §L's worked entry) —
-**77 / 321 = 24%**.
+**★ NEXT.** `CC-69` and `CC-71` were **RULED 2026-10-12** (owner delegated: *"do what you find best for
+the platform long-term"*): **both are ACCEPTED as deliberate, named, permanent exceptions** — `CC-69` is a
+*control message about a paused run* (not a run), `CC-71` is a *monitoring surface* (not a run). **The door's
+contract is NOT widened now**, because the engine behind it (OpenCode) is a placeholder that `R28-6` deletes:
+shaping the contract around it today would be designing the door around an engine we are discarding. **The
+contract's shape is decided when Hermes lands** (the real engine). So the row's two reaches are **closed as
+decisions**; what remains is **`R28-6`** (delete OpenCode) — a separate step. **ONE NUMBER**, re-derived
+honestly in §L's 22nd run: `B-05` ✅ and — the box question — `B-05` adds **1.0** point, **`N-8` stays open**
+(delete half pending) — **76 / 321 = 24%**.
 
 ---
 
