@@ -252,9 +252,17 @@ export class HermesGatewayClient {
     }
   }
 
-  /** Fires when the worker process exits. */
-  onExit(handler: (code: number | null) => void): void {
+  /**
+   * Fires when the worker process exits. Returns an unsubscribe function, so a
+   * caller that streams a bounded number of runs on one long-lived client does
+   * not accumulate one closure per run.
+   */
+  onExit(handler: (code: number | null) => void): () => void {
     this.exitHandlers.push(handler)
+    return () => {
+      const index = this.exitHandlers.indexOf(handler)
+      if (index >= 0) this.exitHandlers.splice(index, 1)
+    }
   }
 
   /** One JSON-RPC call, correlated by id, bounded by `requestTimeoutMs`. */
