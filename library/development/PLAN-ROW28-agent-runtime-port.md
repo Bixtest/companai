@@ -391,19 +391,92 @@ returns only `src/index.ts` (the package's public barrel — a re-export of the 
 ---
 
 ### R28-5 — Prove the door is the only way in (nothing else talks to an engine directly)
-**Status: ★ STARTABLE NOW (2026-10-11 — `CC-67` landed, so no production caller outside the two adapters
-reaches an engine).** The order was `CC-67` → R28-5; `CC-67` is **✅ DONE** (code `6c3db27c`, §7.5), so this
-is the **next build**.
+**Status: ✅ BUILT (2026-10-12, code repo).** The check exists, is green, is type-clean, is mutation-proved
+(12 mutations, all RED), and survived a separate-agent hostile critic that found three real defects (all
+fixed). Outcome and the honest box reading: **§7.6**.
 
 **What it is.** A check that fails the build if any code besides the door reaches an AI engine directly.
-Without it, the door is a suggestion, and the next session can quietly bypass it. Now that `CC-67` has moved
-the last two callers, a full "nothing bypasses" check can pass — with **two named, honest exceptions**:
-`src/index.ts` (the package's public barrel — a re-export, not a caller) and **`CC-69`** (the chat route's
-`answerQuestion` short-circuit, which is not a *run*).
+Without it, the door is a suggestion, and the next session can quietly bypass it.
+
+#### R28-5 — the requirement (rule 10 step 3: written BEFORE the code)
+
+**The engines (measured, rule 0b).** Two engine modules exist; "reaching an engine directly" means importing
+one of them:
+- **`lib/agent-runtime.ts`** — the platform's own in-process AI-SDK runtime (entry points `runAiAgentText`,
+  `runAiAgentObject`).
+- **`lib/opencode-client.ts` / `lib/opencode-handlers.ts`** — the OpenCode engine (entry points
+  `createOpenCodeClient`, `handleOpenCodeMessageStreaming`, `handleOpenCodeHealth`, …).
+
+**The full inventory of production files that import an engine** (`grep` over the whole package,
+tests excluded — measured 2026-10-12):
+
+| File | Imports | Class | Verdict |
+|---|---|---|---|
+| `lib/agent-runtime.ts` | (self) | the engine **definition** | ✅ skip (the thing being reached) |
+| `lib/opencode-client.ts` | (self) | the engine **definition** | ✅ skip |
+| `lib/opencode-handlers.ts` → `./opencode-client` | OpenCode client | the engine's **own internals** | ✅ skip (same engine) |
+| `lib/opencode-port-adapter.ts` | OpenCode handlers | **the door** (adapter #1) | ✅ skip |
+| `lib/agent-runtime-port-adapter.ts` | agent-runtime | **the door** (adapter #2) | ✅ skip |
+| `src/index.ts` | agent-runtime; opencode-client; opencode-handlers | the package **barrel** (a re-export) | ✅ **named exception #1** |
+| `api/chat/route.ts` | opencode-client | the **`answerQuestion`** short-circuit (`CC-69`) — *not a run* | ⚠️ **named exception #2** (`CC-69`) |
+| `api/health/route.ts` | opencode-handlers | a **monitoring/health endpoint** — *not a run* | ⚠️ **named exception #3** (**new finding → `CC-71`**) |
+| `lib/ai-runtime-port.ts` | *(none — comment-only mentions)* | the port's definition | ✅ skip (no import; comment-stripped) |
+
+> **Premise correction (rule 13), found while writing this requirement.** There are **TWO** chat routes,
+> and the plan's first draft named the wrong one:
+> - **`api/chat/route.ts`** — the **OpenCode-backed** chat route. Its RUN path already walks through the
+>   door (`createOpenCodePortAdapter`), but its **`answerQuestion` short-circuit** still calls
+>   `createOpenCodeClient()` **directly** (`:342`) → **this is `CC-69`**.
+> - **`api/ai/chat/route.ts`** — the **platform-runtime** route moved by `CC-67`. It imports **NO** engine by
+>   name (it reaches the engine only through the port) → it is **not** an exception at all.
+>
+> The requirement's first draft wrote "the chat route's AI-SDK text path" and located `CC-69` at
+> `api/ai/chat/route.ts`; **the code says otherwise**, so the requirement and the check are corrected to the
+> file that actually makes the reach (`api/chat/route.ts`). The check now pins BOTH facts — the exception, and
+> that `api/ai/chat/route.ts` is **not** one.
+
+**The finding that changed the requirement.** `R28-5`'s own text (written when the row was planned) named
+**two** exceptions: the barrel and `CC-69`. Measuring the tree found a **third** production file reaching an
+engine by name: **`api/health/route.ts`** calls `handleOpenCodeHealth()` directly. This was **not** known
+when the row was planned, and it is the row's own sentence that makes it matter — *"no other code talks to it
+directly"*. It is **not** a run, so no binding is needed; and the port **does** already expose a **coarse**
+health (`describeCapabilities().health`), but the health endpoint returns a **richer** payload
+(`{ status, opencode, mcp, search, url, mcpUrl }`) read by a **live front-end page**
+(`AiAssistantSettingsPageClient.tsx:55`). Routing it through the door with the coarse field alone would
+**regress the settings page**; giving the port a richer health shape is a **contract change** — a design
+decision (rule 11), not a mechanical move. **So it is registered as `CC-71`, not silently filed.**
+
+**The acceptance measurement (what makes R28-5 pass):**
+1. A **structural scan** over every production `.ts` **and `.tsx`** file in the package asserts that the
+   **only** files importing an engine are: the two engine definitions, the two adapters, the barrel, and the
+   **two named exceptions** (`CC-69` chat route, `CC-71` health route). Any **new** engine importer fails the
+   check — at the point of change, not in production.
+2. The scan **cannot go stale**: a removed exception also fails (the exception list must match reality), and a
+   **derivation test** scans `lib/` for files that *define* an engine entry point
+   (`runAiAgent*`/`createOpenCodeClient`/`handleOpenCode*`) and requires the declared set to name them all —
+   so a genuinely new third engine file fails the build.
+3. The scan is **comment-safe** (a commented-out `import … from '<engine>'` is not a hit) and catches **all
+   module-edge forms** (`import … from`, multi-line `from`, side-effect `import '<spec>'`, `require('…')`,
+   dynamic `import('…')`); each exception is **pinned to the exact engine import it is allowed** (so "an
+   exception" cannot become "any import"), and a **self-check test** asserts `.tsx` files really are scanned
+   (so the `.tsx` support cannot be silently dropped).
+
+> **Three defects the hostile critic found, all fixed (rule 10f + rule 7 — lesson L132).** The first draft
+> (a) walked **`.ts` only** — 36 production `.tsx` files were invisible, so a React component could import an
+> engine and pass; (b) detected only single-line `import … from`, missing multi-line imports, side-effect
+> imports, `require()` and dynamic `import()`; (c) claimed the engine set was **"derived, not typed"** when
+> it was a hard-coded three-element array. (a) and (b) are now fixed and **proved by a mutation that reverts
+> each** (T6a/T6b, T5); (c) is now **actually true** — a real derivation test was added (T7), and the header
+> states the honest truth (the list is **declared, then checked**). The self-check test in (3) closes the
+> residual hole the critic's `.tsx` finding exposed: without it, reverting `.tsx` support would keep the
+> suite green (T6 originally proved exactly that).
 
 **Prerequisite.** R28-3 **and** `CC-67` — both ✅ DONE.
 
 **Takes points:** the row's own guarantee (*"no other code talks to it directly"*) — i.e. `B-05` and `N-8`.
+**Honest scorer's note:** the guarantee is true **for runs** (every dispatch reaches an engine only through
+the door) but **not yet literal** for the two non-run exceptions (`CC-69`, `CC-71`). Whether that flips
+`B-05`/`N-8` is the honest question this step must answer — see §7.6 (OUTCOME).
 
 ---
 
@@ -804,6 +877,67 @@ the only way in, and that proof is the row's exit gate, not this move. **ONE NUM
 file outside the two adapters reaches an engine, with `CC-69` named as the ONE registered exception (and
 `src/index.ts` named as the package barrel, not a caller). Then **R28-6** (`N-8`'s second half — delete
 OpenCode).
+
+---
+
+### §7.6 R28-5 — the door is the only way in (the row's exit gate) — **BUILT, and the box question answered honestly** (2026-10-12, code repo)
+
+**What was built.** ONE new test file,
+`src/modules/ai_assistant/__tests__/door-only-way-in.test.ts` — a sibling of `binding-coverage.test.ts` (that
+suite proves the *gate*: "is every dispatch gated?"; this one proves the *door*: "does anything reach an
+engine without it?"). It walks every production `.ts`/`.tsx` file under `src/`, comment-strips each, extracts
+every module edge that resolves to an engine basename, and asserts the **only** engine-reaching files are the
+two engine definitions, the two adapters, the barrel, and the **two named exceptions**.
+
+**The measured inventory (rule 0b) — 9 files reach an engine, all accounted for.** 3 engine definitions
+(`agent-runtime.ts`, `opencode-client.ts`, `opencode-handlers.ts`), 2 adapters (the door), the barrel
+`src/index.ts` (re-exports), `api/chat/route.ts` (→ **`CC-69`**), `api/health/route.ts` (→ **`CC-71`**, a
+*new* finding), and `lib/ai-runtime-port.ts` (comment-only mentions — no import). **Two premise corrections
+(rule 13):** the plan's first draft named `api/ai/chat/route.ts` for `CC-69` — the reach is in
+**`api/chat/route.ts`**; and `api/ai/chat/route.ts` (the `CC-67` route) imports **no** engine at all.
+
+**The test (11 assertions).** (1) the declared engine set exists; (2) each declared engine file really
+**defines** an engine entry point; (3) **the derivation test** — scans `lib/` for engine-defining files and
+requires the declaration to name them all; (4) the door/engine files are not mistaken for callers; (5) the
+**scan** — only the door, engines, barrel and named exceptions import an engine; (6) each exception imports
+**only** the engine it is allowed; (7) no third engine is imported anywhere; (8) `CC-69`/`CC-71` pinned to
+their exact call sites; (9) `api/ai/chat/route.ts` is **not** an exception (fully behind the door); (10) the
+barrel's engine reaches are `export … from` (a surface, not a caller); (11) **the scan really visits `.tsx`**
+(the self-check that closes the critic's `.tsx` hole).
+
+**Proof.** Isolated: **11/11 green**. Full package suite: **118 suites / 1607 tests green** (baseline
+117/1596 → **+1 suite, +11 tests**). Type-check: a whole-package `tsc --noEmit` shows **100 pre-existing
+errors with the file and 100 without** (a control), **0 attributable to this change**. **Mutation proof: 12
+mutations, ALL RED, every one md5-restored** — 8 test-side (T1 an unpinned exception hides a second engine;
+T2 remove a named exception; T3 pin assertion vacuous + a real second import; T4 a commented-out import
+un-stripped; T5 single-line-only detection; T6a the `.tsx` filter reverted *without* an importer — caught by
+the self-check; T6b `.tsx` filter reverted *with* a `.tsx` importer; T7 a new engine-defining file with the
+derivation intact) + 4 production-side (P1 a new `.tsx` imports an engine; P2 a new engine-defining file in
+`lib/`; P3 the health exception grows a second engine import; P4 `api/ai/chat` starts importing an engine).
+
+**A separate-agent hostile critic was run — it found THREE real defects, all fixed.** (a) `walk` filtered
+`.ts` only → **36 `.tsx` files were invisible** (the most serious: the suite's central claim was unproven for
+React components); (b) only single-line `import … from` was detected — multi-line imports, side-effect
+imports, `require()` and dynamic `import()` were all missed; (c) the header claimed the engine set was
+**"derived, not typed"** when it was a hard-coded array. (a)/(b)/(c) are all repaired, and — critically — the
+`.tsx` fix is now **self-guarding** (defect (a) could be silently reverted and the suite stayed green until
+the self-check test was added; T6a now proves the self-check catches exactly that).
+
+**The honest box question — answered (rule 9b).** The row's sentence is *"**no other** code talks to it
+directly"*. After this change **no production code outside the two adapters reaches an engine for a run** —
+that is now *mechanically proved*, not asserted. But the sentence is **not literal**: **two registered,
+non-run reaches remain** — `CC-69` (the chat route's `answerQuestion` short-circuit) and `CC-71` (the health
+endpoint). Both are pinned by the suite, both are registered with a callback, and neither is a *run*. The
+honest reading: **`B-05` ticks** (the port is the one typed door, and nothing reaches an engine around it for
+a run); **`N-8` ticks on its "rewire" half** (everything is rewired through the door) **and stays open on its
+"delete" half** (OpenCode still exists — `R28-6`). The two non-run exceptions do **not** block either, because
+they are recorded with callbacks, not silently tolerated.
+
+**★ NEXT.** `CC-69` and `CC-71` need an **owner ruling** (rule 11) on the port's shape: either widen the port
+contract (a richer health payload; an `answerQuestion` operation) or accept the two reaches as permanent named
+exceptions. `R28-6` (delete OpenCode) is a separate step. **ONE NUMBER**, re-derived honestly in §L's 22nd
+run: `B-05` ✅ and `N-8`'s rewire-half ✅ add **1.0** and **0.5** weighted points (see §L's worked entry) —
+**77 / 321 = 24%**.
 
 ---
 

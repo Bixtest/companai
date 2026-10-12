@@ -180,3 +180,35 @@ immediately exposed the second; two DONE, tested capabilities were invisible in 
 / FRONTIER = `CC-47`" — was **stale and is removed** (rule 15/13): it was superseded by the 2026-10-11 section
 above and had already misled one reader. The single live frontier is the section above; the ONE NUMBER is
 **72 / 321 = 22%**.)*
+
+## MOVED from MEMORY.md 2026-10-12 (to keep the live file under its size limit)
+
+### Durable code facts
+- **Kernel admits objects via exactly TWO channels:** `customEntities` + `entityExtensions`/`customFieldSets`; a
+  module-root `ce.ts` fills both. `model.entities['agent']` = Record keyed by canonical id.
+- **Core-object vocabulary = TWO sets** (`shared/src/lib/core-boundary/`): `CORE_SETTING_KINDS` (tier-assignable)
+  vs `CORE_OBJECT_KINDS` (delete/rename refusal). `AH-1` (the `Agent` kernel object) BUILT 2026-10-09.
+- **Write path = two protections:** feature gate (`metadata.requireFeatures` → `checkAuthorization`,
+  `apps/mercato/src/app/api/[...slug]/route.ts:150/207`) + guard registry (`runRouteMutationGuards`). The gate is
+  **OPT-IN, not default-deny** → `CC-44`. Instrument `analysis/permission-gate/measure.js --check`.
+- **Read layer (row 15 / `P10`):** tenant row SCOPE via `buildScopedWhere` (`shared/src/lib/api/crud.ts:5`);
+  per-entity gate ONLY on the AI search tools (`packages/search/.../ai-tools.ts:80`, fails closed). Human CRUD
+  GET/list has **NO** per-entity filter → `CC-47`. `CC-46` (`c03eca5c`): all **53** searchable entities declare
+  `aclFeatures` (rule-13: "67" was wrong). Permission catalogue is process-global; hook = the request.
+- **MikroORM soft-delete:** `{ filters: { softDelete: false } }` is INERT; write `deletedAt: null`.
+- **Enabled modules** = `apps/mercato/src/modules.ts` (**`sales` is parked**).
+- **Data classification (row 14):** sensitive = a `ModuleEncryptionMap`; **15 modules** declare
+  `defaultEncryptionMaps` → `encryption_maps`; a subscriber encrypts at rest under a per-tenant DEK. **NO export
+  path consults the map** → `CC-45`.
+- **Business IR (CORE):** `runFunction` (`user-function/run.ts:112`) compiles+executes; `lib/business-ir-run.ts` is
+  the first production caller (`CC-59`); `ai-tools/business-ir-pack.ts` has **no agent consumer** → `CC-60`.
+
+### Deploy path (`companai.corprorate.com`) — 2026-10-09
+- VM `platform-server` (`172.28.50.2`, user `ramzi`, key `vms/id_ed25519`, reachable only from this laptop).
+  Compose `companai-platform` in `/opt/companai-platform`; source = `/home/ramzi/build-src` (a plain copy, NOT a git
+  checkout). **Deploy:** stream source in, `cd /opt/companai-platform && ./update.sh /home/ramzi/build-src`
+  (`pg_dump` first; then `./verify.sh https://companai.corprorate.com`). **"transferring context: 2B" = broken.**
+  `CC-41` (update.sh destroys its own rollback).
+- **Login parses form-encoded ONLY** (`auth/api/login.ts`; JSON → 400) — use `curl --data-urlencode`.
+  `email_hash` = `"v2:"+HMAC_SHA256(pepper, lower(trim(email)))`. Accounts: superadmin `admin@companai.local`;
+  admin `admin@acme.com`/`secret`; employee `employee@acme.com`/`secret`.

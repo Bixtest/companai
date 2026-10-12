@@ -55,8 +55,8 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
-### 🔵 IN PROGRESS — **Row 28 (Phase 8): *"the agent runtime sits behind one typed door — no other code talks to it directly."* Broken into six sub-rows. **R28-1, R28-2, R28-3, R28-4 and `CC-67` ✅ DONE 2026-10-11 — the chat route walks through the door, the run is CLOSED there (cancel + complete), and the LAST THREE direct callers now walk through it too (a second adapter for the platform's own in-process runtime). NEXT = `R28-5`.** No box moved (the row's exit gate is the *proof* that nothing bypasses the door — R28-5).**
-**(2026-10-11; plan = [`library/development/PLAN-ROW28-agent-runtime-port.md`](library/development/PLAN-ROW28-agent-runtime-port.md).)**
+### 🔵 IN PROGRESS — **Row 28 (Phase 8): *"the agent runtime sits behind one typed door — no other code talks to it directly."* Broken into six sub-rows. **R28-1, R28-2, R28-3, R28-4, `CC-67` ✅ DONE 2026-10-11, and **R28-5 ✅ DONE 2026-10-12 — the exit gate: the door is now PROVEN the only way in, and `B-05` is TICKED.** NEXT = an owner ruling on `CC-69`/`CC-71`, or `R28-6` (delete OpenCode = `N-8`'s second half).**
+**(2026-10-11 → 2026-10-12; plan = [`library/development/PLAN-ROW28-agent-runtime-port.md`](library/development/PLAN-ROW28-agent-runtime-port.md).)**
 
 **What the row asks, in plain words.** Today the platform reaches its AI engine **two different ways,
 from many places, with nothing in between**: the chat screen calls **OpenCode directly**; two other
@@ -83,7 +83,7 @@ OpenCode behind it"*).
 | **R28-2** | **OpenCode fitted behind the door** (unchanged, just hidden) | ✅ **DONE 2026-10-11** (below) |
 | **R28-3** | The **chat screen moved onto the door** (the step that makes the row true) | ✅ **DONE 2026-10-11** (below) |
 | **R28-4** | Failure handled — cancel is safe to repeat, complete is safe to replay | ✅ **DONE 2026-10-11** (below) |
-| **R28-5** | A check that **nothing** talks to an engine directly | **★ NEXT** (the exit gate for `B-05`/`N-8` — now startable) |
+| **R28-5** | A check that **nothing** talks to an engine directly | ✅ **DONE 2026-10-12** (below) — the door is **proven** the only way in; **`B-05` ticked** |
 | **R28-6** | **Delete OpenCode** — separate, later step (`N-8`) | OUT of row 28 |
 | **`CC-67`** | The **last three direct callers** moved onto the door — a second adapter for the platform's own in-process runtime | ✅ **DONE 2026-10-11** (below) |
 
@@ -240,6 +240,58 @@ it directly"*, and that is a claim about **the whole codebase** — it is only t
 outside the two adapters reaches an engine, with **`CC-69`** named as the ONE registered bypass (the chat route's
 `answerQuestion` short-circuit — trigger-gated on an owner ruling) and **`src/index.ts`** named as the package
 barrel (a re-export, not a caller). This is the row's exit gate for **`B-05`** and **`N-8`**.
+
+---
+
+**R28-5 DONE — the door is PROVEN the only way in; `B-05` ticked. ONE NUMBER 75 → 76 / 321 = 24%.**
+**(2026-10-12; code repo `workspace/starting-kit`; docs = this change.)**
+
+**What was built.** ONE new test file,
+`packages/ai-assistant/src/modules/ai_assistant/__tests__/door-only-way-in.test.ts` — a **sibling** of
+`binding-coverage.test.ts` (that suite proves the *gate*: "is every dispatch gated?"; this one proves the
+*door*: "does anything reach an engine without it?"). It walks every production `.ts` **and `.tsx`** file under
+`src/`, comment-strips each, extracts every module edge that resolves to an engine basename, and asserts the
+**only** engine-reaching files are the two engine definitions, the two adapters, the barrel, and the **two
+named exceptions**.
+
+**The measured inventory (rule 0b).** 9 files reach an engine, all accounted for: 3 engine definitions
+(`agent-runtime.ts`, `opencode-client.ts`, `opencode-handlers.ts`), 2 adapters (the door), the barrel
+`src/index.ts` (re-exports), `api/chat/route.ts` (→ **`CC-69`**), `api/health/route.ts` (→ **`CC-71`**, a
+**new finding**), and `lib/ai-runtime-port.ts` (comment-only mentions — no import). **Two premise corrections
+(rule 13):** the plan's first draft named `api/ai/chat/route.ts` for `CC-69` — the reach is in
+**`api/chat/route.ts`**; and `api/ai/chat/route.ts` (the `CC-67` route) imports **no** engine at all.
+
+**The test — 11 assertions.** engine set real · each engine really DEFINES an entry point · **the derivation
+test** (scans `lib/` for engine-defining files, requires the declaration to name them all) · door/engine not
+mistaken for callers · **the scan** (only the door, engines, barrel and named exceptions import an engine) ·
+each exception imports only its allowed engine · no third engine imported · `CC-69`/`CC-71` pinned · 
+`api/ai/chat` NOT an exception · the barrel's reaches are `export … from` · **the scan really visits `.tsx`**
+(the self-check that closes the critic's hole).
+
+**Proof.** Isolated **11/11 green**; full package suite **118 suites / 1607 tests green** (baseline 117/1596 →
+**+1 suite, +11 tests**); type-check **100 pre-existing errors with the file, 100 without, 0 attributable**
+(a control); **12 mutations, ALL RED, every one md5-restored** (8 test-side T1–T7 + T6a/T6b, 4 production-side
+P1–P4).
+
+**A separate-agent hostile critic found THREE real defects — all fixed.** (a) `walk` filtered `.ts` only →
+**36 `.tsx` files were invisible** (the most serious — the suite's central claim was unproven for React
+components); (b) only single-line `import … from` was detected — multi-line imports, side-effect imports,
+`require()` and dynamic `import()` were all missed; (c) the header claimed the engine set was *"derived, not
+typed"* when it was a hard-coded array — **now really derived**, with an honest header. Critically, the `.tsx`
+fix is now **self-guarding**: without the new self-check test, reverting `.tsx` support kept the suite green
+(proved by mutation T6 in round 1) — so the fix could have been silently undone.
+
+**The honest box question — answered.** The row's sentence is *"**no other** code talks to it directly"*. After
+this change **no production code outside the two adapters reaches an engine for a run** — now *mechanically
+proved*. But the sentence is **not literal**: **two registered, non-run reaches remain** — `CC-69` (the chat
+route's `answerQuestion` short-circuit) and `CC-71` (the health endpoint). Both are pinned by the test, both
+carry callbacks, neither is a *run*. **So: `B-05` ticks** (its only blocker was *"prove the door is the only
+way in"*, now done). **`N-8` keeps `☐`** — its rewire half is proven, but its *delete* half (`R28-6`) is not.
+**The three `Port` boxes keep `☐`** on their **own** blockers (`steerRun`/`resolveToolCall` unsupported;
+`secretRefs` unpopulated + `CC-70`). **The two non-run exceptions do not block `B-05`.**
+
+**★ NEXT.** `CC-69` and `CC-71` need an **owner ruling** (rule 11) on the port's shape: either widen the port
+contract, or accept the two reaches as permanent named exceptions. **`R28-6`** (delete OpenCode) is separate.
 
 ---
 
