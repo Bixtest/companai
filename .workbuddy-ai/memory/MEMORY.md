@@ -89,29 +89,32 @@ Worked example: `CC-43` "flagged, not fixed" **hid `CC-46`**.
   its construction — no envelope field invented); `streamRun` never drains the single-use `Response` (`responseForRun`);
   hostile critic's ONE real defect = the run was never CLOSED → fixed.
 - **`R28-5` ✅ DONE 2026-10-12 — the EXIT GATE: the door is PROVEN the only way in. `B-05` ✅ TICKED.** NEW test
-  `packages/ai-assistant/.../__tests__/door-only-way-in.test.ts` (md5 `776404ff318404dbb4860f5438ebf583`): whole-package
-  `.ts`+`.tsx` scan (comment-stripped; ALL edge forms — `from`/multi-line/side-effect/`require`/dynamic `import`),
-  asserting the ONLY engine-reaching files = 2 engines + 2 adapters + barrel + **2 named exceptions**. 11 assertions
-  incl. a **derivation test** (scan `lib/` for engine-defining files) + a **`.tsx` self-check**. **Two premise
-  corrections (rule 13):** `CC-69`'s reach is in **`api/chat/route.ts`** (NOT `api/ai/chat/route.ts` — that route
-  imports no engine); **`api/health/route.ts`** is a THIRD exception → new **`CC-71`**. **Proof:** 11/11 isolated;
-  **118 suites / 1607 tests green** (baseline 117/1596 → +1/+11); type-check 100 errors with the file, 100 without
-  (control; +0); **12 mutations ALL RED, md5-restored** (8 test-side + 4 production-side). **Critic found 3 REAL
-  defects:** `walk` filtered `.ts` only → **36 `.tsx` files invisible** (most serious); detector missed 4 of 6 import
-  forms; a false "derived, not typed" header claim (now really derived). **L132.** **Honest reading:** `B-05` ticks
-  (its sole blocker WAS the proof); `N-8` keeps `☐` (delete half = `R28-6`); 3×`Port` keep `☐` on their OWN blockers
-  (`steerRun`/`resolveToolCall` unsupported; `secretRefs` unpopulated + `CC-70`). The 2 non-run reaches (`CC-69`,
-  `CC-71`) are named, pinned, registered.
+  `.../__tests__/door-only-way-in.test.ts` (md5 `776404ff318404dbb4860f5438ebf583`): whole-package `.ts`+`.tsx`
+  scan (comment-stripped; ALL edge forms), asserting ONLY 2 engines + 2 adapters + barrel + 2 named exceptions
+  reach an engine. 11 assertions (incl. a derivation test + a `.tsx` self-check). **Proof:** 118 suites / 1607
+  green; type-clean; **12 mutations ALL RED, md5-restored**. **Critic (separate agent) found 3 REAL defects** —
+  `walk` missed `.tsx` (**36 files invisible**), detector missed 4 of 6 import forms, a false "derived" header
+  (**L132**). **Premise fixes (rule 13):** `CC-69`'s reach is `api/chat/route.ts` (not `api/ai/chat/route.ts`);
+  `api/health/route.ts` = a 3rd exception → **`CC-71`**. **Honest reading:** `B-05` ticks; `N-8` + 3×`Port` stay `☐`
+  on their own blockers.
 - **★ RULED 2026-10-12 (owner-delegated: "do what you find best for the platform long-term") — option (b).**
   `CC-69` (chat `answerQuestion`) + `CC-71` (health endpoint) **ACCEPTED as deliberate, permanent, named
   exceptions** — neither is a *run*, both auth-checked, both pinned by the shipped test; **not a hole**. The port
   contract is **NOT widened now** (the engine behind the door is a placeholder `R28-6` deletes → shaping the door
-  around it = stacking on a foundation being replaced). **Revisit trigger: when Hermes lands.** **★ NEXT = `R28-6`**
-  (delete OpenCode = `N-8`'s second half).
+  around it = stacking on a foundation being replaced). **Revisit trigger: when Hermes lands.**
+- **`R28-6` ("delete OpenCode") MEASURED 2026-10-12 → TRIGGER-BLOCKED; registered as `CC-72`.** Hermes does not
+  exist (`git ls-files | grep -i hermes` → empty); OpenCode is the ONLY engine that answers a chat (Docker via
+  `OPENCODE_URL`) → deleting it stands the door over a hole. Trigger = *"Hermes wired behind the door (arch §9
+  Phase 2+)"*. **"OpenCode" is a NAME COLLISION** — the **engine** (delete, when Hermes lands) vs a **load-bearing
+  vestige** (`opencode-provider.ts` + `OPENCODE_*` env + `api_keys.opencodeSessionId` = the platform's model-provider
+  config — **never delete blind**). Separate-agent critic (asked to falsify) **UPHELD all 5 sub-claims**. **L133.**
+  **Row 28's port shape is COMPLETE; no box moved (76/321).** ★ NEXT = **Hermes track** (arch §9 Phase 0→2),
+  or `CC-51`, or Phase 6 audit.
 - **`CC-68` ✅ / `CC-67` lesson L131 / `CC-59` ✅** (Business-IR chain's first production caller `lib/business-ir-run.ts`
   + tool `ai-tools/business-ir-pack.ts`; the consumer gap = `CC-60`).
 - **Open `CC-` items:** `CC-69`/`CC-71` (**RULED 2026-10-12 — accepted as permanent named exceptions; revisit when
-  Hermes lands**), `CC-70` (grant carried-not-consumed), `CC-60`
+  Hermes lands**), **`CC-72` (delete-OpenCode — TRIGGER-BLOCKED on Hermes; do NOT build)**, `CC-70` (grant
+  carried-not-consumed), `CC-60`
   (Business-IR tool → chat consumer), `CC-51` (row 16 team-leg — owner's go-ahead), `CC-54` (index rebuild),
   `CC-19` (CI) — last three trigger-blocked; `CC-58` staged; `CC-32` gated on `G-09`.
 - **Owner's go-ahead in force:** execute the supplementary core queue (`PLAN-SUPPLEMENTARY-CORE-QUEUE.md`; docs

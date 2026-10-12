@@ -55,7 +55,7 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
-### 🔵 IN PROGRESS — **Row 28 (Phase 8): *"the agent runtime sits behind one typed door — no other code talks to it directly."* Broken into six sub-rows. **R28-1, R28-2, R28-3, R28-4, `CC-67` ✅ DONE 2026-10-11, and **R28-5 ✅ DONE 2026-10-12 — the exit gate: the door is now PROVEN the only way in, and `B-05` is TICKED.** `CC-69`/`CC-71` RULED 2026-10-12: both are deliberate, permanent, named exceptions (a control message and a monitoring surface — neither is a run); the door's contract is NOT widened now (it would be shaped around OpenCode, which `R28-6` deletes). NEXT = `R28-6` (delete OpenCode = `N-8`'s second half).**
+### 🔵 IN PROGRESS — **Row 28 (Phase 8): *"the agent runtime sits behind one typed door — no other code talks to it directly."* Broken into six sub-rows. **R28-1, R28-2, R28-3, R28-4, `CC-67` ✅ DONE 2026-10-11, and **R28-5 ✅ DONE 2026-10-12 — the exit gate: the door is now PROVEN the only way in, and `B-05` is TICKED.** `CC-69`/`CC-71` RULED 2026-10-12: both are deliberate, permanent, named exceptions (a control message and a monitoring surface — neither is a run); the door's contract is NOT widened now (it would be shaped around OpenCode, which `R28-6` deletes). **`R28-6` (delete OpenCode) was MEASURED 2026-10-12 and found TRIGGER-BLOCKED** — Hermes does not exist, so deleting OpenCode would remove the only engine that answers a chat (registered as `CC-72`). So **row 28's build is COMPLETE for the port's shape**; the deletion waits on Hermes (architecture §9 Phase 2+).**
 **(2026-10-11 → 2026-10-12; plan = [`library/development/PLAN-ROW28-agent-runtime-port.md`](library/development/PLAN-ROW28-agent-runtime-port.md).)**
 
 **What the row asks, in plain words.** Today the platform reaches its AI engine **two different ways,
@@ -295,6 +295,53 @@ permanent exceptions** — `CC-69` is a control message about a paused run, `CC-
 is a run, and the door's contract is **not** widened now (it would be shaped around OpenCode, which `R28-6`
 deletes; the shape is decided when Hermes lands). **Remaining build = `R28-6`** (delete OpenCode = `N-8`'s
 second half) — a separate step.
+
+---
+
+### ⛔ MEASURED, NOT BUILT — **`R28-6` ("delete OpenCode") is TRIGGER-BLOCKED: it would remove the only engine that answers a chat. Registered as `CC-72`.**
+**(2026-10-12; measured in code, rule 0b — no code changed.)**
+
+**The task, and the rule-9b challenge.** `R28-6`'s stored text was *"Remove OpenCode (its client, its
+handlers, its `OPENCODE_URL`) once the chat route is proven on the door."* I measured before building
+(rule 0b) and challenged the task before executing it (rule 9b). **The first draft fails its own premise.**
+
+**What was measured.**
+
+- **Hermes does not exist in this repository.** `git ls-files | grep -i hermes` → **empty**. No Python
+  runtime, no worker, nothing. (This plan's own §4 already says *"Hermes itself is NOT built here."*)
+- **OpenCode is the only engine that can answer a chat.** The live chat route reaches it through the door
+  (`api/chat/route.ts:122` / `:536` → `createOpenCodePortAdapter`); the engine runs as a **Docker service
+  the platform points at** (`OPENCODE_URL`, default `http://localhost:4096`; `docker/opencode/*`; wired in
+  every `docker-compose*.yml`). The platform's **own** runtime (`agent-runtime.ts`) is a *different* engine
+  on *other* routes — **not** a substitute for the OpenCode chat path.
+- **The architecture document states the gate verbatim** (`ARCHITECTURE-hermes-integration.md` §11):
+  *"**When OpenCode goes.** It is still load-bearing (`api/chat/route.ts` is wired to it), so it stays until
+  **N-8** rewires the platform chat. The decision settles **what replaces it**, not **when**."* Its §9
+  adoption order puts the replacement (**Hermes**) at **Phase 2+**, behind Phase 0 (pin & map) and Phase 1
+  (the port — our current, achieved state).
+
+**The verdict.** `R28-6` is a **deletion with nothing to delete *to*** — deleting OpenCode today would
+remove the only engine and leave the door standing over a hole. It is **trigger-blocked on Hermes**, not on
+effort. **It is not a buildable task** and must not be started.
+
+**A second finding — the draft was under-scoped (rule 13).** "OpenCode" names **two unrelated things** in
+this codebase: (1) **the engine** (`opencode-client.ts`, `opencode-handlers.ts`,
+`opencode-port-adapter.ts`, `docker/opencode/*`) — what `R28-6` deletes, **when Hermes lands**; and (2) a
+**naming vestige** — `shared/.../opencode-provider.ts`, the `OPENCODE_*` env names, and
+`api_keys.opencodeSessionId` — which is the platform's **own model-provider config** (Anthropic/OpenAI/
+Google) and its chat-session binding, and must **NOT** be deleted. A naive "delete everything matching
+`opencode`" would break the platform's own model selection.
+
+**What changed in the docs (same change).** The plan's `R28-6` section now carries the requirement + the
+challenge + the corrected prerequisite (the old "Prerequisite: R28-3 + `CC-67`" was **insufficient** — those
+prove the *door*, not a *replacement*; corrected per rule 13). Registered as **`CC-72`** with the trigger
+*"Hermes exists and is wired behind the door (architecture §9 Phase 2+)"*. `N-8`'s box note and the plan's
+status table updated. **No box moved** — `N-8`'s delete half is genuinely blocked, and the honest reading is
+that ticking it now would be a lie. **ONE NUMBER unchanged: 76 / 321 = 24%.**
+
+**The honest next work.** Row 28's **port shape is complete** (`B-05` ticked, the door proven). The
+deletion, and the three `Port` boxes behind it, wait on **Hermes** — which is the **architecture §9
+Phase 0→2 track**, a *different* workstream, not a row-28 sub-step.
 
 ---
 
