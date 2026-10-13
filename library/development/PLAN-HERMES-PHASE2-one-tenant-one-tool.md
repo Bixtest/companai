@@ -5,7 +5,7 @@ written BEFORE any code."* No Phase 2 code exists yet. This document is the requ
 below are executed against it, one sub-row at a time, under the full protocol (hostile critic,
 RED-then-GREEN, two-route).
 
-**Progress: `P2-1` ✅ (2026-10-12, §2.7) · `P2-2` ✅ (2026-10-12, §4) · `P2-3` ✅ (2026-10-12, §2.9) · `P2-4` ✅ (2026-10-13, §2.10) — NEXT = `P2-5`, engine selection at the door (the `CC-74` trigger that retires `hermes-local`)
+**Progress: `P2-1` ✅ (2026-10-12, §2.7) · `P2-2` ✅ (2026-10-12, §4) · `P2-3` ✅ (2026-10-12, §2.9) · `P2-4` ✅ (2026-10-13, §2.10) — NEXT = `P2-5`, engine selection at the door (**requirement §2.11 written 2026-10-13**, the `CC-74` trigger that retires `hermes-local`)
 (`session.steer` settled by measurement before anything is claimed for it).**
 
 **Read it with:** [`ARCHITECTURE-hermes-integration.md`](ARCHITECTURE-hermes-integration.md) §9 (the
@@ -334,6 +334,50 @@ Read with the owner's ruling on this row's build shape — *"proceed with recomm
 
 ---
 
+## 2.11 `P2-5` — the requirement, measured before any selector code is written (2026-10-13)
+
+**The owner's input (2026-10-13), recorded because it settles the one thing the §4 row left unnamed:**
+
+> "proceed as you recommended."
+
+The recommendation he approved, verbatim: *"the selector can choose Hermes; the default flips to Hermes when `P2-6`'s proof is green, and that same change deletes OpenCode."* So **this row's requirement owns the default-flip step** — the step no row owned when it was measured. `R28-6`'s trigger *requires* the flip ("an engine other than OpenCode … is selected by the door, and serves the chat run path") but does **not** own it; the gap is closed here rather than left to memory.
+
+**The measured facts (rule 0b — the code repo, 2026-10-13):**
+
+| Fact | Evidence |
+|---|---|
+| The engine choice is ONE **private** function inside ONE route | `resolveAiRuntimePort` (`api/chat/route.ts:118–126`) returns `createOpenCodePortAdapter({ auth, em })`. Not exported, not shared, not unit-testable in isolation |
+| The other two adapter construction sites are a **different engine family** | `api/ai/chat/route.ts:762` and `api/ai/run-object/route.ts:195` call `createAgentRuntimePortAdapter(...)` — the platform's own in-process runtime, not the chat engine |
+| The three adapters have **different** construction deps | `createOpenCodePortAdapter({auth, em})` · `createHermesPortAdapter(client: HermesGatewayPortClient)` · `createAgentRuntimePortAdapter({container, auth, input, …})` — a selector must know how to build each |
+| **NOTHING in production constructs a Hermes client** | `grep -rn "new HermesGatewayClient" packages/ai-assistant/src` → **one hit, and it is a test** (`hermes-gateway-client.test.ts:193`). The worker's spawn command/args and its supervision exist only as the opt-in compose service (`docker-compose.hermes.yml`: `python -m tui_gateway.entry`, stdio) |
+| The implementation name **already exists** on the door | `AiRuntimeCapabilities.implementation` (`lib/ai-runtime-port.ts:151`); `OPENCODE_RUNTIME_IMPLEMENTATION = 'opencode'` (`:404`), `HERMES_RUNTIME_IMPLEMENTATION = 'hermes'` (`hermes-port-adapter.ts:112`) |
+| The run's ledger record has **no home** for it | `AiRuntimeRunResult.provenance` carries `policyVersion` / `modelVersion` / `correlationId` (`lib/ai-runtime-port.ts:250–254`) — **no `implementation`** |
+| The envelope is server-minted and minimal, and must **NOT** be widened | §4.2 — identity + references only. `provenance` is already the ledger's own home (`:249`, *"Provenance for the ledger"*) |
+| Config today is **env** | `OPENCODE_URL` (`opencode-client.ts:492`), `OM_AI_*` / `OPENCODE_*` provider+model; §3.4 rules that Hermes "takes the same shape … config from our env" |
+| The door's structural proof must survive | `door-only-way-in.test.ts` (`R28-5`) asserts only the door / engines / adapters / barrel / two named exceptions reach an engine — a new selector module importing **adapters** is inside that rule |
+
+**What this row builds.**
+
+1. **The selector becomes config-selected.** `resolveAiRuntimePort` reads an env var (`AI_RUNTIME_ENGINE`, default `opencode` — the measured, consistent choice: every engine config today is env, §3.4) and constructs the named engine. OpenCode is the default, so **nothing changes for the product** until the variable says otherwise.
+2. **The selector is the ONE construction site for the chat engine, and it is testable in isolation.** Extracted from the route to `lib/resolve-ai-runtime-port.ts`, so the row's own exit gate (*"swapping engines touches exactly one function"*) is **proved by a test** rather than asserted in a docstring. It imports **adapters**, never engines (inside `R28-5`'s rule).
+3. **The Hermes branch is real, not a stub.** Selecting `hermes` builds a `HermesGatewayClient` with the worker's command/args from env (mirroring the compose service) and passes it to `createHermesPortAdapter`. This is the piece production has **never** had — measured above: only a test constructs one.
+4. **The chosen implementation is recorded on the run.** The selector returns `{ port, implementation }`; the run's provenance carries it (`AiRuntimeRunResult.provenance.implementation` — an optional, engine-agnostic field). The **envelope is NOT widened** (§4.2 keeps it minimal and server-minted; `provenance` is already the ledger's home).
+5. **The default-flip step is NAMED and OWNED here** — the gap this measurement found. *The selector can choose Hermes; the default flips to Hermes when `P2-6`'s exit-gate proof is green, and **that same change deletes OpenCode** (`R28-6`/`N-8`).*
+
+**What this row does NOT claim (named bounds):**
+
+- **The platform-runtime routes are NOT unified into this selector.** `api/ai/chat` and `api/ai/run-object` keep constructing their own adapter — a **different engine family** (in-process AI SDK, not the chat engine). Unifying them is a separate decision, not this row's.
+- **OpenCode is untouched and still answers.** The default does not move in this row; it moves only when `P2-6` proves Hermes. This row makes the swap *possible*, not *done*.
+- **`CC-76` is a co-requisite of the DELETION, not of this row.** The OpenCode adapter ignores the envelope `deadline`; deleting the engine before fixing it would close the gap *unmeasured* (the exact failure `CC-76` was registered to prevent). Fix it as its own change (rule 9a — `R28-2`'s file) before the flip-and-delete change.
+- **`CC-74` fires at `P2-6`, not here.** The upstream `hermes-local` HTTP gateway is retired when this row is discharged **and** a real chat run has been served by the pinned worker — the trigger already written into `CC-74` and the compose service comment.
+- **`CC-77` unchanged** — the grant is still a label; nothing in this row resolves it.
+
+**Exit gate.** (1) The selector is config-selected and the swap is **one function** — proven by a test that flips the env var and asserts the constructed port's `describeCapabilities().implementation` changes, with **no other file touched**. (2) `opencode` remains the default: with no env var set, the chat route builds the OpenCode adapter exactly as today. (3) The `hermes` branch builds a **real** client + adapter (no stub) and the run's provenance records `hermes`. (4) `door-only-way-in.test.ts` still passes — the door is still the only way in. (5) Nothing pre-existing breaks (full package suite); `tsc` **0 in the new files** against the 92 pre-existing (`CC-73`); mutations RED (md5-restored).
+
+**The step this row hands forward (named so it cannot be forgotten).** When `P2-6`'s proof is green → **flip the default to Hermes and delete OpenCode in the same change** (`R28-6` / `N-8`), with **`CC-76` fixed first**. Cross-referenced in `COMPLETION-CALLBACKS.md` against `CC-72` (`R28-6`) and `CC-74` so the step is discoverable in the register, not only here.
+
+---
+
 ## 3. Measured facts (rule 0b — measured in the pinned source and the code repo, 2026-10-12)
 
 ### 3.1 The run-path protocol surface — re-verified against the RE-PINNED copy
@@ -369,6 +413,11 @@ framing rule the client must honour on both directions.
 `packages/ai-assistant/.../api/chat/route.ts::resolveAiRuntimePort` (`:118`–`:126`) is the **one**
 place the engine is chosen, and it already says so in its own docstring: *"today it is OpenCode
 behind the port; a future engine swaps here and nowhere else."* Sub-row 5 changes only that function.
+**Refined 2026-10-13 (rule 13, `P2-5`'s requirement §2.11):** the function is currently **private to
+that route**; the row **extracts it to `lib/resolve-ai-runtime-port.ts`** and makes it config-selected
+(env `AI_RUNTIME_ENGINE`, default `opencode`) — the *"one place"* claim stays true, and the swap
+becomes testable in isolation rather than only assertable. The two `api/ai/*` routes construct their
+own adapter and are a **different engine family** — out of this row's scope.
 
 ### 3.4 The supervision pattern to copy
 
@@ -403,7 +452,7 @@ foundation order from §2.1.
 | **P2-2** | **The gateway client.** `lib/hermes-gateway-client.ts`: spawn/supervise the worker, newline-JSON framing both ways, typed request/response correlation, the handshake, `prompt.submit` + the event stream, `session.interrupt`/`steer`, `process.stop` | ✅ **DISCHARGED 2026-10-12** (commit `f5f85064`). Against a **protocol stub implementing the measured contract** (§3.1/§3.2), all four behaviours proven: handshake (with the snake_case wire keys), one streamed turn as ordered typed events, cancel, and **a malformed frame does not kill the stream**. **21/21 tests.** Hostile-critic-hardened: a separate agent found 3 real defects (every event is an `event`-enveloped frame, so nothing dispatched; a pino-style logger call on a message-first logger; an unguarded `stdin.write`), each verified against the pinned source and fixed — and the critic's finding invalidated part of the suite, whose frames were the *un-enveloped* shape the real server never writes. **RED-then-GREEN:** mutating the envelope unwrapping turns **8 of 21 RED**; restored md5-identical (`4416a886…`) → 21 GREEN. **`tsc` clean — honestly qualified:** `P2-2`'s own two files are error-free, but the package's type gate **did not exist** (`tsc -p .` = TS18003; it was the only one of 21 configs not extending `tsconfig.base.json`). Fixing that surfaced **92 pre-existing errors in 27 other `__tests__` files**, scheduled as **`CC-73`** with the native-compiler and stale-`tsbuildinfo` measurements recorded as **L138/L139**. Any `tsc` run on this package must pass `--incremental false` to be reproducible. |
 | **P2-3** | **The port adapter.** `lib/hermes-port-adapter.ts` implementing `AiRuntimePort`, with an **honest** capability map — measured against the client, ✗ where it is ✗ (no pretending; the OpenCode adapter's own standard) | ✅ **DISCHARGED 2026-10-12** — §2.9 holds the full record. **37/37 tests GREEN** (the event map, both usage scopes, the envelope's own deadline, idempotent start/cancel, replay-safe complete, the steer verdict's three limits, identifier distinctness); the **full package is 120 suites / 1665 tests GREEN**; `tsc` shows **0** errors in the new files against the 92 pre-existing (CC-73). The capability map is the honest one: **seven ✓, `resolveToolCall` ✗ (`P2-4`), `steerRun` ✓** — the first engine that makes the port's eight real. **Hostile critic (separate agent) found 3 defects, each verified against the pinned source before the fix:** `resumeConversation` kept the caller's stored id while the gateway resolves a turn by the **runtime** id only (the `D2` correctness defect — invisible to the original fake, which echoed the request); the unsubscribe proof was **vacuous** (it counted submits, which no emission changes); the `onExit` subscription was never released. All three fixed in the same change, and the critic's own "no deadline policy" aside was **falsified by measurement** (the envelope carries `deadline`; the adapter now honours it — the OpenCode half registered as `CC-76`, L146). **RED-then-GREEN:** **11 mutations, all RED**, restored md5-identical (`706ad202…`). **The one remaining named bound:** a steered instruction reaches the worker's own tools only (§2.8's third limit). |
 | **P2-4** | **The one narrow tool — the two-gate design (requirement §2.10).** The runner agent declared as a module built-in with a FIXED menu (`business_ir.run_query` — the tools it needs all the time); the effective menu recorded on the run at admission through the EXISTING machinery (agent's declared list ∩ binding ∩ permissions); the Hermes door's `resolveToolCall` enforcing TWO gates — the call's tool must be in the run's recorded menu, AND the grant must be the run's own — before execution reaches the platform's existing tool door under `S-02` | ✅ **DISCHARGED 2026-10-13** — §2.10 holds the full record. **94 GREEN** across the four Hermes/gate suites; the **full package is 122 suites / 1701 tests GREEN**; `tsc` **92 = the pre-existing count (`CC-73`), 0 in the new/changed files**. The honest map flips: **`resolveToolCall ✓`** — the port's eight operations are all real, for the first engine. **Hostile critic (separate agent) found 2 defects, both fixed:** the admission stored the execution **context by reference**, so a caller-side mutation after admission could **widen authority** (`isSuperAdmin:true` — a §8 violation; fixed by snapshotting the context field-by-field, regression test added, **L147**); and every test injected an executor, leaving the **default** seam (real `executeTool` under a fresh container) unproven — closed with a no-executor test. **My own catch:** the result-channel sink was opened *before* `streamRun`'s guards (a dead sink on a failed stream — **L147**). **RED-then-GREEN:** **10 mutations, all RED**, restored md5-identical. **Named bounds (registered the same change):** the features check stays at admission (the envelope carries no features); the grant is still a **label** (`CC-77`); the task-shaped starting menu is destination (`CC-78` — the door enforces whatever admission records); the live worker bridge (the worker's closed toolset cannot be offered a platform tool on the wire) is `CC-79`. |
-| **P2-5** | **Selection at the door.** `resolveAiRuntimePort` becomes config-selected; OpenCode stays the default; the chosen implementation is recorded on the run | Swapping engines touches exactly one function; **`door-only-way-in.test.ts` still passes** (the door is still the only way in); OpenCode is untouched and still answers |
+| **P2-5** | **Selection at the door (requirement §2.11, measured 2026-10-13).** `resolveAiRuntimePort` becomes config-selected (env `AI_RUNTIME_ENGINE`, default `opencode`) and is **extracted to `lib/resolve-ai-runtime-port.ts`** so the one-function swap is *testable*; the `hermes` branch builds a **real** `HermesGatewayClient` + adapter (production has never constructed one); the chosen implementation is recorded on the run (`provenance.implementation`, **envelope not widened**). **The default-flip step is owned here** (§2.11 item 5) | Swapping engines touches exactly one function (proved by a test that flips the env var and asserts `describeCapabilities().implementation` changes); **`door-only-way-in.test.ts` still passes** (the door is still the only way in); OpenCode is untouched and still answers; the platform-runtime routes are **not** unified (different engine family). **Named bounds:** the default does **not** move in this row (it moves when `P2-6` is green); `CC-76` (OpenCode ignores `deadline`) is a co-requisite of the **deletion**; `CC-74` fires at `P2-6` |
 | **P2-6** | **The exit gate proof** — cancellation · retry idempotency · usage capture · bounded memory/CPU · no cross-scope access, on one tenant then on two adversarial ones | All five, measured, on one tenant; then the two adversarial tenants: a run admitted for tenant A cannot read, name or affect tenant B — proven by a negative test that fails if any cross-scope frame exists |
 
 ---
