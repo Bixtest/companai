@@ -116,8 +116,8 @@ the suite itself**, whose frames were the un-enveloped shape the real server nev
 
 **Next: `P2-1` — and it is now buildable here.** The owner started Docker (`docker info` → **29.8.2**), so the
 premise that made `P2-1`'s boot gate "UNPROVEN-HERE" is corrected in the plan (§2.2 + the row) rather than
-carried forward. `P2-1` was built next and is now done (the block below); `P2-2` and `P2-3` followed, both
-discharged (the blocks below); **the frontier is now `P2-4`** — the one narrow tool through `resolveToolCall`.
+carried forward. `P2-1` was built next and is now done (the block below); `P2-2`, `P2-3` and `P2-4` followed,
+all discharged (the blocks below); **the frontier is now `P2-5`** — engine selection at the door.
 
 ---
 
@@ -239,6 +239,27 @@ wording was corrected in the same change (rule 13)** — in `COMPLETION-CALLBACK
 and small") is **not met in the form the register leads you to expect** — but the *remainder* is genuinely small
 once the parked-module question is answered. So the answer is a question, not a build. (The memory file and this
 box carry it.)
+
+---
+
+### ✅ P2-4 DONE — **the tool door opens: an admitted tool call now runs through the one door under two gates, and the agent — not the model — chooses the menu.** *(2026-10-13)*
+
+`lib/ai-tool-call-gate.ts` (new, the pure decision) + `lib/hermes-port-adapter.ts` (`resolveToolCall` made real) + the runner agent in `ai-agents.ts`; requirement written BEFORE the code (plan §2.10), full discharge record in §2.10 + the §4 row.
+
+**What it is, in plain terms.** Until today the Hermes engine behind the door could not run a business operation at all — the door said "not supported". Now it can, but only through **two gates that both must pass**, and the design answers the owner's own question (*"shouldn't the tool be selected based on the agent type?"*). A **built-in agent** (the query runner) is admitted with a **fixed menu of exactly one tool** — the Business-IR pack, the one it needs all the time; a **user-facing agent** will start with a menu shaped by the task in hand (`CC-78`). The **model never picks the menu**: the agent declares it, admission records it on the run, and the door enforces it. A tool call runs only if **(1) the call belongs to this run** and **(2) the tool is in the menu the agent was admitted with** — and a valid grant does **not** buy a tool the menu never named. That is the difference between "the model chooses its tools" (forbidden) and "the agent chooses, the door enforces" (built).
+
+**The evidence.** The four Hermes/gate suites **94 GREEN**; the whole package **122 suites / 1701 tests GREEN**; `tsc` **92 errors = exactly the pre-existing `CC-73` count, zero in the new or changed files**. The honest capability map flips to **`resolveToolCall ✓`** — for the first engine, all eight of the port's operations are real. **RED-then-GREEN: 10 mutations, all RED, restored md5-identical.**
+
+**The hostile critic (a separate agent, command+output per claim) found two defects — both fixed in the same change:**
+
+1. **A real authority-widening bug (the serious one).** The admission recorded the run's menu as a *copy*, but stored the execution **context by reference**. So a caller that kept its own reference and changed it *after* admission could silently escalate the run it had just admitted — the critic proved it live: flipping one field to "super admin" made the executed operation run as a super admin. That is exactly what the architecture forbids (*"the runtime may narrow the grant, never widen it"*). Fixed by snapshotting the context field-by-field, with a regression test that mutates the caller's copy afterwards and proves the recorded one does not move. **L147.**
+2. **A production path nobody had exercised.** Every test handed the door its own recorder, so the **default** path — the one production actually uses, which calls the platform's real `executeTool` — had never been run; the critic called it "a dead path in production". Closed with a test that builds the door with **no** recorder and proves the real path is taken, under a fresh container, with the admission-time context intact.
+
+**My own catch, before the critic ran.** The `P2-3` lesson (*a teardown must cover every exit path*) applies just as much to an **open**: the run's result channel was being opened *before* the three "this run cannot stream" checks, so a run that failed to start left a dead channel behind. Fixed by opening it only once the stream is genuinely live, with a test for both halves (nothing left behind on a failed stream; released when the turn ends). **L147** (same lesson).
+
+**Named bounds, recorded not hidden (each registered the same change):** the acting person's permissions are checked at **admission**, not re-derived at execution (the run's envelope carries no features); the "grant" is still a **label** — gate 2 proves a call belongs to *this run*, not that the caller was permitted the operation (**`CC-77`**); the **task-shaped** starting menu for user-facing agents is destination (**`CC-78`**); and the **live worker bridge** — the pinned worker's tools are a closed set it loads itself, so it cannot yet be offered a platform tool on the wire — is **`CC-79`**, built and proven in the live-run rows. One critic aside recorded for later: the adapter's run registry is never pruned — pre-existing (`P2-3`), and `P2-6`'s bounded-memory scope.
+
+**Next:** `P2-5` — engine selection at the door (OpenCode stays the default; the selector can pick Hermes), which is also the `CC-74` trigger that retires the old `hermes-local` service.
 
 ---
 

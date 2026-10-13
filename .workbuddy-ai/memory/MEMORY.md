@@ -21,30 +21,29 @@ recommendation** · whether he must decide); **never end on "your call"**.
 Judge line endings from the COMMITTED BLOB (`git ls-files --eol`); `grep $'\r'` lies on a git pipe;
 Python `open(p,'w')` flips LF→CRLF + md5 — write bytes. Any `tsc` measurement needs
 **`--incremental false`** (L139); jest does NOT type-check here (L138). Critic = SEPARATE agent,
-command+output per claim; a structural scan must enumerate the file classes it covers (L132).
-**Critic verdicts get MEASURED too — an absence claim needs absence evidence; a bound the door
-already defines as a field is an unfinished requirement (L146).** **Node 24:
+command+output per claim; a structural scan must enumerate the file classes it covers (L132);
+**the critic's verdicts get measured too (L146)**. **Node 24:
 `C:/Users/Ramzi/Downloads/companai/workspace/.toolchain/node24/node.exe`** (above `starting-kit`).
+`/tmp` differs between the Write tool (`C:\tmp`) and bash (`%TEMP%`) — use absolute paths in harnesses.
+
 ## Live frontier (truth = `JOURNAL.md`'s `★ ACTIVE TASK`)
 - **ONE NUMBER 78 / 321 = 24%**, derived (`.derive_platform_points.py`), never typed; split parents
   (`▸ n/N`) never count, 5+ spaces are annotations, §L excluded.
 - **Row 28 (Phase 8) ✅ COMPLETE** — the runtime sits behind ONE typed door (`R28-5` proved it);
   `R28-6` (delete OpenCode) trigger-blocked → `CC-72` (L133). **Hermes pin = root
   `hermes-agent-main/`** (rev `3569e846…`, digest `ca760e97…`); `--check` → PIN HOLDS (L135/L136).
-- **Phase 2: `P2-1` ✅ + `P2-2` ✅ + `P2-3` ✅ (2026-10-12).** `P2-3` = `lib/hermes-port-adapter.ts`
-  (8 ops on the measured wire; honest map 7 ✓ / `resolveToolCall` ✗ / `steerRun` ✓), 37/37, package
-  green, 11 mutations all RED. Lessons **L144** (an echo-fake hides a reply-shape bug) · **L145**
-  (observe the teardown) · **L146**. The envelope carries `deadline` — Hermes honours it, OpenCode
-  doesn't → **`CC-76`**. `hermes-local` retired after `P2-5` proves the worker (**`CC-74`**).
-- **★ NEXT = `P2-4`** (Business-IR first; owner confirmed). **Tools are already agent-selected on the
-  platform's own runtime** — `AiAgentDefinition.allowedTools` + `resolveAiAgentTools` + per-tool
-  `checkAgentPolicy`, narrowed by bindings (CC-55). **The door is agent-blind** (`resolveToolCall(call,
-  grant)` — no agentId) and **the grant is a LABEL** (`chat-turn:sub:runId`; resolves to nothing) ⇒
-  grant-only wiring lets the engine pick its own tools (§8 forbids). Owner asked 2026-10-13 (log =
-  finding + ranked options); recommended two gates: the agent's declared list AND the grant
-  (admission decides with features, the door enforces). **Re-write the requirement BEFORE code**
-  once he picks. → `P2-5` → `P2-6`.
-- **`CC-73` OPEN:** type gate fixed (TS18003); **92 pre-existing errors** in 27 `__tests__` files
-  (fix file-by-file). **`CC-51` FALSIFIED:** the `team` concept EXISTS (`StaffTeam*`); `staff` is
-  PARKED → enabling it is a product decision (L137). **Owner's ruling: core architecture first —
-  business modules are GENERATED from the core workspace.** Docker ON.
+- **Hermes Phase 2: `P2-1`✅ `P2-2`✅ `P2-3`✅ `P2-4`✅ (2026-10-13).** `P2-4` = the tool door OPENS:
+  `lib/ai-tool-call-gate.ts` (two pure gates) + the adapter's `resolveToolCall` (call→run correlation
+  from `tool.start`; gate 1 = grant is this run's own, gate 2 = tool in the run's recorded menu;
+  deny-by-default, identity → authority) + the runner agent (fixed 1-tool menu) + the tool-name
+  constant. **Map flips to `resolveToolCall ✓`** (first engine, all 8 real). 94 tests; package
+  122 suites / 1701 green; tsc 92 = the pre-existing `CC-73`, 0 new; **10 mutations RED** md5-restored.
+  Critic found 2 (context stored by reference = authority-widening, now a snapshot — **L147**;
+  default executor path unproven — closed). **`CC-77`** (grant is a label) · **`CC-78`** (task-shaped
+  menu) · **`CC-79`** (live worker bridge) open. Lessons **L144–L148**.
+- **★ NEXT = `P2-5`** — engine selection at the door (OpenCode default; the selector picks Hermes) =
+  the **`CC-74`** trigger that retires `hermes-local`. Then **`P2-6`** (the exit-gate proof).
+- **`CC-73` OPEN:** 92 pre-existing type errors in 27 `__tests__` files (fix file-by-file).
+  **`CC-76`**: OpenCode ignores the envelope `deadline`. **`CC-51` FALSIFIED:** the `team` concept
+  EXISTS (`StaffTeam*`); `staff` is PARKED → enabling it is a product decision (L137). **Owner's
+  ruling: core architecture first — business modules are GENERATED from the core workspace.** Docker ON.
