@@ -23,29 +23,27 @@ recommendation** · whether he must decide); **never end on "your call"**.
 structural scan must name the file classes it covers; **critic verdicts get measured too (L146)**.
 **Node 24: `…/.toolchain/node24/node.exe`** (above `starting-kit`). `/tmp` differs between the Write
 tool (`C:\tmp`) and bash (`%TEMP%`) — absolute paths in harnesses. **node→node spawn throws `EBUSY`
-here** — a node harness shelling out to jest silently fails without running it; drive children from
-BASH, and prove a GREEN baseline before any RED (**L149**). A test reaching a live service is not a
-unit test (mock the seam; **L150**).
+here** — drive children from BASH; prove a GREEN baseline before any RED (**L149**). A test reaching a
+live service is not a unit test (**L150**).
 
 ## Live frontier (truth = `JOURNAL.md`'s `★ ACTIVE TASK`)
 - **ONE NUMBER 78 / 321 = 24%**, derived (`.derive_platform_points.py`), never typed; split parents
   (`▸ n/N`) never count, 5+ spaces are annotations, §L excluded.
 - **Row 28 (Phase 8) ✅ COMPLETE** — one typed door (`R28-5` proved it); `R28-6` (delete OpenCode)
-  trigger-blocked → `CC-72`. **Hermes pin = root `hermes-agent-main/`** (rev `3569e846…`, digest
-  `ca760e97…`); `--check` → PIN HOLDS (L135/L136).
-- **Hermes Phase 2: `P2-1`✅ `P2-2`✅ `P2-3`✅ `P2-4`✅ `P2-5`✅.** `P2-4` = the tool door OPENS
-  (`ai-tool-call-gate.ts`; map → `resolveToolCall ✓`; 10 mutations RED; critic 2 fixed —
-  L147; `CC-77/78/79` open). **`P2-5` ✅ 2026-10-13 (§2.11)** = the engine is now SELECTABLE:
-  `lib/resolve-ai-runtime-port.ts` is the ONE config-selected site (env `AI_RUNTIME_ENGINE`, default
-  `opencode`; unknown throws, blank refused); the `hermes` branch builds a REAL client+adapter; the
-  engine is recorded on the run (`provenance.implementation`, envelope NOT widened); `mintChatRunId`'s
-  engine arg now required. **Default did NOT move.** 124 tests/6 suites; package
-  123/1723 green; tsc 92 = `CC-73`, 0 new; **13 mutations RED** (harness false-positive fixed —
-  **L149**; live-probe mock — **L150**); critic 2 fixed. Lessons **L144–L150**.
-- **★ NEXT = `P2-6`** — exit-gate proof (**requirement §2.12 written 2026-10-13**; cancel · retry
-  idempotency · usage · bounded mem/CPU · no cross-scope access). = the **`CC-74`** trigger and the gate
-  for **§2.11's owned default-flip + OpenCode deletion** (`R28-6`/`N-8`, `CC-76` first).
-- **`CC-73` OPEN:** 92 pre-existing type errors in 27 `__tests__` files (fix file-by-file).
-  **`CC-76`**: OpenCode ignores the envelope `deadline`. **`CC-51` FALSIFIED:** the `team` concept
-  EXISTS (`StaffTeam*`); `staff` is PARKED → enabling it is a product decision (L137). **Owner's
-  ruling: core architecture first — business modules are GENERATED from the core workspace.** Docker ON.
+  trigger-blocked → `CC-72`. Hermes pin = `HERMES-PIN.md`; `--check` → PIN HOLDS (L135/L136).
+- **Hermes Phase 2: `P2-1`–`P2-6` ALL ✅ (2026-10-13) — PHASE 2's EXIT GATE IS GREEN.** `P2-5` (§2.11) =
+  engine SELECTABLE (`lib/resolve-ai-runtime-port.ts`, env `AI_RUNTIME_ENGINE`, default `opencode`;
+  `provenance.implementation`; envelope NOT widened). **`P2-6` (§2.12)** = the exit gate: cancel · retry
+  idempotency · usage (scope stated) · bounded mem/CPU · no cross-scope access, on ONE tenant then TWO
+  adversarial. Built the two missing bounds in ONE shared file `lib/ai-runtime-bounds.ts`
+  (`resolveRunDeadline` = sooner of `deadline` & `budget`-from-admission; `pruneRunRegistry` = evict
+  finished, NEVER live), applied by BOTH chat adapters + the platform adapter; **`CC-76` FIXED** (OpenCode
+  honours the time bound; its timer SETTLES the stream). Package **125/1752 green**; tsc **92 = `CC-73`,
+  0 new**; **10 mutations RED**; critic **2 defects + 2 nits fixed** (D1 the bound must END the stream —
+  **L151**; D2 a THIRD `AiRuntimePort` impl was unbounded — **L152**). **Default did NOT move.** Lessons
+  **L144–L152**.
+- **★ NEXT = the step `P2-5`/`P2-6` jointly own:** flip the default to Hermes AND delete OpenCode in ONE
+  change (`R28-6`/`N-8`, `CC-76` now fixed) = also the **`CC-74`** trigger (retire `hermes-local`).
+- **`CC-73` OPEN:** 92 pre-existing type errors in 27 `__tests__` files. **`CC-76` ✅ FIXED.** **`CC-51`
+  FALSIFIED:** the `team` concept EXISTS (`StaffTeam*`); `staff` is PARKED → product decision (L137).
+  **Owner's ruling: core architecture first — business modules are GENERATED from the core workspace.** Docker ON.

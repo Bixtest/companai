@@ -268,6 +268,25 @@ box carry it.)
 
 ---
 
+### ✅ P2-6 DONE — **Phase 2's exit gate is green: on one tenant and then on two adversarial ones, the five properties hold — and the two missing bounds (a dropped `budget`, an unpruned registry) are now real, shared, and measured.** *(2026-10-13)*
+
+`lib/ai-runtime-bounds.ts` (new, shared) + both chat adapters + the platform adapter + three proof suites; requirement written BEFORE the code (plan §2.12), full discharge record in §2.12 + the §4 row. **The default did NOT move** — this row proves; the flip + OpenCode deletion is a **separate** change.
+
+**What it is, in plain terms.** This is the checkpoint that says "the runtime behind the door is safe to trust on its own": a run can be stopped, a retry cannot double-count, what a run costs is recorded with its scope stated, a run cannot outlive its time budget or fill memory forever, and one customer's run can never be seen or touched by another. Two of those were **not yet true** and are now built: the door's time **budget** was carried and dropped (both engines ignored it), and the run registry grew without bound. Both now live in **one shared file** so the two engines cannot drift apart, and the OpenCode half of the deadline gap (**`CC-76`**) is fixed. **The default engine is still OpenCode** — nothing changes for the user; this row only proves, it does not flip.
+
+**The evidence.** 6 suites / 127 tests green on the changed surface; the whole package **125 suites / 1752 tests GREEN**; `tsc` **92 = exactly the pre-existing `CC-73` count, zero in the P2-6 files** (the first run showed 4 new, in a test that simulates a mistyped value — fixed honestly, by casting to the wire value, not by weakening the check). **RED-then-GREEN: 10 mutations, all RED**, baselines proven GREEN first, restored md5-identical.
+
+**The hostile critic (a separate agent, command+output per claim) found two defects and two honesty problems — all fixed in the same change:**
+
+1. **The time bound stopped the output but did not END the run (the serious one).** OpenCode's timer set a flag and printed an error, but left the engine call awaiting — so a **stalled engine** left the run hanging forever, while Hermes' timer ended its stream. The two engines drifted, and the existing test hid it by releasing the engine *before* it waited. Fixed by racing the engine call against the deadline; a regression test now stalls the engine and proves the run still ends (**L151**).
+2. **A third engine implementation was unbounded.** The requirement said "both adapters" (the two chat engines), but there are **three** implementations of the door — the platform's own in-process adapter was also unpruned. Because the memory bound is stated for "the run registry", not two named adapters, the third now applies the same shared rule; its wall-clock bound is **named** (it hands the response body to its caller, so it does not own the stream) (**L152**).
+3. **A stringified budget was dropped in silence** — now accepted if numeric, logged if not.
+4. **Four of the eight "no cross-scope frame" assertions were vacuous** — no frame ever carries a tenant or principal id, so asserting their absence proved nothing; rewritten to the two identifiers that actually travel, each with a positive check.
+
+**Next:** the step this row and `P2-5` jointly own — **flip the default to Hermes and delete OpenCode in the same change** (`R28-6`/`N-8`, `CC-76` now fixed), which is also the **`CC-74`** trigger that retires the old `hermes-local` service.
+
+---
+
 ### ✅ P2-5 DONE — **the engine is now SELECTABLE at the door: one config-selected function builds the chat engine, and the run records which one served it — but the default did NOT move.** *(2026-10-13)*
 
 `lib/resolve-ai-runtime-port.ts` (new) + the route rewiring + the run-provenance recording; requirement written BEFORE the code (plan §2.11), full discharge record in §2.11 + the §4 row.
