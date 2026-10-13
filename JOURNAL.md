@@ -116,10 +116,12 @@ the suite itself**, whose frames were the un-enveloped shape the real server nev
 
 **Next: `P2-1` — and it is now buildable here.** The owner started Docker (`docker info` → **29.8.2**), so the
 premise that made `P2-1`'s boot gate "UNPROVEN-HERE" is corrected in the plan (§2.2 + the row) rather than
-carried forward. `P2-1` was built next and is now done (the block below); `P2-2`, `P2-3` and `P2-4` followed,
-all discharged (the blocks below); **the frontier is now `P2-5`** — engine selection at the door, whose
-requirement (**§2.11**, written 2026-10-13) now **OWNS the default-flip step**: the selector can choose
-Hermes; the default flips to Hermes when `P2-6`'s proof is green, and **that same change deletes OpenCode**.
+carried forward. `P2-1` was built next and is now done (the block below); `P2-2`, `P2-3`, `P2-4` and `P2-5`
+followed, all discharged (the blocks below); **the frontier is now `P2-6`** — the exit-gate proof (cancellation,
+retry idempotency, usage capture, bounded memory/CPU, no cross-scope access). `P2-5` discharged on 2026-10-13
+(§2.11): the engine is now **selectable** at the door (`lib/resolve-ai-runtime-port.ts`, env `AI_RUNTIME_ENGINE`,
+default `opencode`) — but the **default did NOT move**, and §2.11 **OWNS the default-flip step**: it flips to
+Hermes when `P2-6`'s proof is green, and **that same change deletes OpenCode** (`R28-6`/`N-8`, `CC-76` first).
 
 ---
 
@@ -261,7 +263,28 @@ box carry it.)
 
 **Named bounds, recorded not hidden (each registered the same change):** the acting person's permissions are checked at **admission**, not re-derived at execution (the run's envelope carries no features); the "grant" is still a **label** — gate 2 proves a call belongs to *this run*, not that the caller was permitted the operation (**`CC-77`**); the **task-shaped** starting menu for user-facing agents is destination (**`CC-78`**); and the **live worker bridge** — the pinned worker's tools are a closed set it loads itself, so it cannot yet be offered a platform tool on the wire — is **`CC-79`**, built and proven in the live-run rows. One critic aside recorded for later: the adapter's run registry is never pruned — pre-existing (`P2-3`), and `P2-6`'s bounded-memory scope.
 
-**Next:** `P2-5` — engine selection at the door (OpenCode stays the default; the selector can pick Hermes), which is also the `CC-74` trigger that retires the old `hermes-local` service.
+**Next:** `P2-5` — engine selection at the door (OpenCode stays the default; the selector can pick Hermes), which is also the `CC-74` trigger that retires the old `hermes-local` service. **(Done — the block below.)**
+
+---
+
+### ✅ P2-5 DONE — **the engine is now SELECTABLE at the door: one config-selected function builds the chat engine, and the run records which one served it — but the default did NOT move.** *(2026-10-13)*
+
+`lib/resolve-ai-runtime-port.ts` (new) + the route rewiring + the run-provenance recording; requirement written BEFORE the code (plan §2.11), full discharge record in §2.11 + the §4 row.
+
+**What it is, in plain terms.** Until today the platform could only ever run a chat on one engine, and the choice was buried as a private function inside a single route. Now there is **one small, testable function** that picks the engine: by default it still picks OpenCode (so **nothing changes for the user**), but a single setting (`AI_RUNTIME_ENGINE`) can point the door at Hermes — and the function that builds a **real** Hermes client is the piece production never had. Whichever engine serves a run is written onto that run's record, so the ledger can never claim a run was OpenCode when Hermes served it. **The default deliberately did not move** — that flip is owned by this row and happens only once `P2-6` proves Hermes serves a real run, at which point the same change deletes OpenCode.
+
+**The evidence.** 124 tests across 6 suites; the whole package **123 suites / 1723 tests GREEN**; `tsc` **92 errors = exactly the pre-existing `CC-73` count, zero in the new or changed files**. **RED-then-GREEN: 13 mutations, all RED, restored md5-identical.**
+
+**The hostile critic (a separate agent, command+output per claim) found two defects — both fixed in the same change:**
+
+1. **A field that was written but never read (the serious one).** The requirement said the run's record "must say which engine served it", and the field was added — but **neither adapter read it**, so it was accepted and silently dropped. Fixed in both adapters (each records it on the first completion, so a replay cannot rewrite it), with a test on each half.
+2. **A silent fallback on a blank setting.** An empty value selected OpenCode *silently*, so an operator who meant Hermes would believe Hermes was serving. Now a blank value is **refused** ("set but empty — refusing to guess"), making the "deny-by-default" claim literally true. Two weak structural tests the critic flagged were also tightened.
+
+**My own catch — and the reason the proof had to be rebuilt before it could be trusted.** The first mutation run printed "13/13 RED" in **one second**, which is impossible for 13 suites. A node harness that spawns jest was throwing a Windows `EBUSY` **before jest ever ran**, and mapping that to "RED" — so the "proof" was certifying mutations that had never been tested. The harness was rebuilt (as a bash loop) to **prove a GREEN baseline for every suite before trusting any RED**, and to treat a runner that fails to *start* as an error, not a caught mutation. The rebuild surfaced a second real defect: the new suite called the **live** OpenCode health probe, so it hung whenever Docker was down — a unit test depending on a running container, now mocked. With the repaired harness: **5 baselines GREEN, then 13 mutations RED**, restored md5-identical. **L149** (a harness must prove its own baseline) and **L150** (a test that reaches a live service is not a unit test).
+
+**Named bounds, recorded not hidden:** the platform's other two runtime routes are a **different engine family** and are not unified here; the default does **not** move until `P2-6` is green; `CC-76` (OpenCode ignores the deadline) must be fixed before the **deletion**; `CC-74` (retire the old `hermes-local` service) fires at `P2-6`, once a real run has been served by the pinned worker.
+
+**Next:** `P2-6` — the exit-gate proof (cancellation · retry idempotency · usage capture · bounded memory/CPU · no cross-scope access), which is the `CC-74` trigger and the gate that lets the owned default-flip + OpenCode deletion run.
 
 ---
 

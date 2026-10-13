@@ -18,31 +18,33 @@ Reporting: no flag without a full report (named · plain meaning · why · risk 
 recommendation** · whether he must decide); **never end on "your call"**.
 
 ## Hazards
-Line endings from the COMMITTED BLOB (`git ls-files --eol`); Python `open(p,'w')` flips LF→CRLF + md5
-— write bytes. `tsc` needs **`--incremental false`** (L139); jest does NOT type-check (L138). Critic =
-SEPARATE agent, command+output per claim; a structural scan must enumerate the file classes it covers
-(L132); **the critic's verdicts get measured too (L146)**. **Node 24: `…/workspace/.toolchain/node24/node.exe`**
-(above `starting-kit`). `/tmp` differs between the Write tool (`C:\tmp`) and bash (`%TEMP%`) — use absolute
-paths in harnesses.
+`tsc` needs **`--incremental false`** (L139); jest does NOT type-check (L138). Write bytes, not text
+(Python `open(p,'w')` flips LF→CRLF + md5). Critic = SEPARATE agent, command+output per claim; a
+structural scan must name the file classes it covers; **critic verdicts get measured too (L146)**.
+**Node 24: `…/.toolchain/node24/node.exe`** (above `starting-kit`). `/tmp` differs between the Write
+tool (`C:\tmp`) and bash (`%TEMP%`) — absolute paths in harnesses. **node→node spawn throws `EBUSY`
+here** — a node harness shelling out to jest silently fails without running it; drive children from
+BASH, and prove a GREEN baseline before any RED (**L149**). A test reaching a live service is not a
+unit test (mock the seam; **L150**).
 
 ## Live frontier (truth = `JOURNAL.md`'s `★ ACTIVE TASK`)
 - **ONE NUMBER 78 / 321 = 24%**, derived (`.derive_platform_points.py`), never typed; split parents
   (`▸ n/N`) never count, 5+ spaces are annotations, §L excluded.
-- **Row 28 (Phase 8) ✅ COMPLETE** — the runtime sits behind ONE typed door (`R28-5` proved it);
-  `R28-6` (delete OpenCode) trigger-blocked → `CC-72` (L133). **Hermes pin = root
-  `hermes-agent-main/`** (rev `3569e846…`, digest `ca760e97…`); `--check` → PIN HOLDS (L135/L136).
-- **Hermes Phase 2: `P2-1`✅ `P2-2`✅ `P2-3`✅ `P2-4`✅.** `P2-4` = the tool door OPENS:
-  `lib/ai-tool-call-gate.ts` (two pure gates) + the adapter's `resolveToolCall` (call→run from
-  `tool.start`; gate 1 = grant is this run's own, gate 2 = tool in the run's recorded menu;
-  deny-by-default, identity → authority) + the runner agent (fixed 1-tool menu). **Map flips to
-  `resolveToolCall ✓`** (first engine, all 8 real). 94 tests; package 122 suites / 1701 green; tsc 92 =
-  pre-existing `CC-73`, 0 new;   **10 mutations RED** md5-restored. Critic: 2 fixed (**L147**). **`CC-77`**·**`CC-78`**·**`CC-79`** open.
-  Lessons **L144–L148**.
-- **★ NEXT = `P2-5`** — engine selection at the door; **requirement §2.11 written 2026-10-13** (env
-  `AI_RUNTIME_ENGINE` default `opencode`; selector extracted to `lib/resolve-ai-runtime-port.ts`; the
-  `hermes` branch must build a REAL client — nothing in production constructs one today). **§2.11 OWNS
-  the default-flip**: flips to Hermes when `P2-6` is green, **same change deletes OpenCode** (`R28-6`),
-  with **`CC-76`** fixed first. = the **`CC-74`** trigger that retires `hermes-local`. Then **`P2-6`**.
+- **Row 28 (Phase 8) ✅ COMPLETE** — one typed door (`R28-5` proved it); `R28-6` (delete OpenCode)
+  trigger-blocked → `CC-72`. **Hermes pin = root `hermes-agent-main/`** (rev `3569e846…`, digest
+  `ca760e97…`); `--check` → PIN HOLDS (L135/L136).
+- **Hermes Phase 2: `P2-1`✅ `P2-2`✅ `P2-3`✅ `P2-4`✅ `P2-5`✅.** `P2-4` = the tool door OPENS
+  (`ai-tool-call-gate.ts`; map → `resolveToolCall ✓`, all 8 real; 10 mutations RED; critic 2 fixed —
+  L147; `CC-77/78/79` open). **`P2-5` ✅ 2026-10-13 (§2.11)** = the engine is now SELECTABLE:
+  `lib/resolve-ai-runtime-port.ts` is the ONE config-selected site (env `AI_RUNTIME_ENGINE`, default
+  `opencode`; unknown throws, blank refused); the `hermes` branch builds a REAL client+adapter; the
+  engine is recorded on the run (`provenance.implementation`, envelope NOT widened); `mintChatRunId`'s
+  engine arg now required. **Default did NOT move; OpenCode untouched.** 124 tests/6 suites; package
+  123/1723 green; tsc 92 = `CC-73`, 0 new; **13 mutations RED** (harness false-positive fixed —
+  **L149**; live-probe mock — **L150**); critic 2 fixed. Lessons **L144–L150**.
+- **★ NEXT = `P2-6`** — exit-gate proof (cancel · retry idempotency · usage · bounded mem/CPU · no
+  cross-scope access). = the **`CC-74`** trigger and the gate for **§2.11's owned default-flip +
+  OpenCode deletion** (`R28-6`/`N-8`, `CC-76` first).
 - **`CC-73` OPEN:** 92 pre-existing type errors in 27 `__tests__` files (fix file-by-file).
   **`CC-76`**: OpenCode ignores the envelope `deadline`. **`CC-51` FALSIFIED:** the `team` concept
   EXISTS (`StaffTeam*`); `staff` is PARKED → enabling it is a product decision (L137). **Owner's
