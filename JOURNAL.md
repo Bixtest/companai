@@ -117,8 +117,9 @@ the suite itself**, whose frames were the un-enveloped shape the real server nev
 **Next: `P2-1` — and it is now buildable here.** The owner started Docker (`docker info` → **29.8.2**), so the
 premise that made `P2-1`'s boot gate "UNPROVEN-HERE" is corrected in the plan (§2.2 + the row) rather than
 carried forward. `P2-1` was built next and is now done (the block below); `P2-2`, `P2-3`, `P2-4` and `P2-5`
-followed, all discharged (the blocks below); **the frontier is now `P2-6`** — the exit-gate proof (cancellation,
-retry idempotency, usage capture, bounded memory/CPU, no cross-scope access). `P2-5` discharged on 2026-10-13
+followed, all discharged (the blocks below); **the frontier is now `P2-6`** — the exit-gate proof (**requirement
+§2.12 written 2026-10-13**; cancellation, retry idempotency, usage capture, bounded memory/CPU, no cross-scope
+access). `P2-5` discharged on 2026-10-13
 (§2.11): the engine is now **selectable** at the door (`lib/resolve-ai-runtime-port.ts`, env `AI_RUNTIME_ENGINE`,
 default `opencode`) — but the **default did NOT move**, and §2.11 **OWNS the default-flip step**: it flips to
 Hermes when `P2-6`'s proof is green, and **that same change deletes OpenCode** (`R28-6`/`N-8`, `CC-76` first).

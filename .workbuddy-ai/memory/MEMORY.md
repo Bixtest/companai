@@ -34,17 +34,17 @@ unit test (mock the seam; **L150**).
   trigger-blocked → `CC-72`. **Hermes pin = root `hermes-agent-main/`** (rev `3569e846…`, digest
   `ca760e97…`); `--check` → PIN HOLDS (L135/L136).
 - **Hermes Phase 2: `P2-1`✅ `P2-2`✅ `P2-3`✅ `P2-4`✅ `P2-5`✅.** `P2-4` = the tool door OPENS
-  (`ai-tool-call-gate.ts`; map → `resolveToolCall ✓`, all 8 real; 10 mutations RED; critic 2 fixed —
+  (`ai-tool-call-gate.ts`; map → `resolveToolCall ✓`; 10 mutations RED; critic 2 fixed —
   L147; `CC-77/78/79` open). **`P2-5` ✅ 2026-10-13 (§2.11)** = the engine is now SELECTABLE:
   `lib/resolve-ai-runtime-port.ts` is the ONE config-selected site (env `AI_RUNTIME_ENGINE`, default
   `opencode`; unknown throws, blank refused); the `hermes` branch builds a REAL client+adapter; the
   engine is recorded on the run (`provenance.implementation`, envelope NOT widened); `mintChatRunId`'s
-  engine arg now required. **Default did NOT move; OpenCode untouched.** 124 tests/6 suites; package
+  engine arg now required. **Default did NOT move.** 124 tests/6 suites; package
   123/1723 green; tsc 92 = `CC-73`, 0 new; **13 mutations RED** (harness false-positive fixed —
   **L149**; live-probe mock — **L150**); critic 2 fixed. Lessons **L144–L150**.
-- **★ NEXT = `P2-6`** — exit-gate proof (cancel · retry idempotency · usage · bounded mem/CPU · no
-  cross-scope access). = the **`CC-74`** trigger and the gate for **§2.11's owned default-flip +
-  OpenCode deletion** (`R28-6`/`N-8`, `CC-76` first).
+- **★ NEXT = `P2-6`** — exit-gate proof (**requirement §2.12 written 2026-10-13**; cancel · retry
+  idempotency · usage · bounded mem/CPU · no cross-scope access). = the **`CC-74`** trigger and the gate
+  for **§2.11's owned default-flip + OpenCode deletion** (`R28-6`/`N-8`, `CC-76` first).
 - **`CC-73` OPEN:** 92 pre-existing type errors in 27 `__tests__` files (fix file-by-file).
   **`CC-76`**: OpenCode ignores the envelope `deadline`. **`CC-51` FALSIFIED:** the `team` concept
   EXISTS (`StaffTeam*`); `staff` is PARKED → enabling it is a product decision (L137). **Owner's
