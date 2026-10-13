@@ -643,6 +643,24 @@ describe('HermesPortAdapter (P2-3 — the second engine behind the door)', () =>
         alreadyComplete: false,
       })
     })
+
+    it('records the SERVING ENGINE on the run when the completion carries it (`P2-5`, §2.11)', async () => {
+      // The run's ledger entry must say WHICH engine served it. Recording it on
+      // the run — not merely accepting it — is what makes that true; without
+      // this, `provenance.implementation` is a write-only field.
+      await adapter.startRun(envelope())
+      await adapter.completeRun('run-1', {
+        status: 'completed',
+        provenance: { implementation: 'hermes' },
+      })
+      expect(adapter.getRun('run-1')?.implementation).toBe('hermes')
+    })
+
+    it('leaves the engine UNRECORDED when the completion carries none — never guessed', async () => {
+      await adapter.startRun(envelope())
+      await adapter.completeRun('run-1', { status: 'completed' })
+      expect(adapter.getRun('run-1')?.implementation).toBeUndefined()
+    })
   })
 
   describe('the identifiers stay distinct (§4.2)', () => {

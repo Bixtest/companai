@@ -100,6 +100,8 @@ const mockDescribeCapabilities = jest.fn()
 const mockSteerRun = jest.fn()
 const mockResumeConversation = jest.fn()
 const mockResolveToolCall = jest.fn()
+const mockHermesStartRun = jest.fn()
+const mockHermesCompleteRun = jest.fn()
 
 jest.mock('../lib/opencode-port-adapter', () => {
   const actual = jest.requireActual('../lib/opencode-port-adapter')
@@ -127,6 +129,32 @@ jest.mock('../lib/opencode-port-adapter', () => {
         portCalls.push('completeRun')
         return mockCompleteRun(...a)
       },
+    }),
+  }
+})
+
+/**
+ * `P2-5` — the SECOND engine, so the selection can be observed end to end. The
+ * selector is real (it is not mocked); only the adapter it builds is, so the
+ * suite proves the ROUTE records the engine the SELECTOR chose.
+ */
+jest.mock('../lib/hermes-port-adapter', () => {
+  const actual = jest.requireActual('../lib/hermes-port-adapter')
+  return {
+    __esModule: true,
+    ...actual,
+    createHermesPortAdapter: () => ({
+      describeCapabilities: async () => ({ implementation: 'hermes' }),
+      startRun: (...a: unknown[]) => mockHermesStartRun(...a),
+      streamRun: async (_runId: string, sink: (e: unknown) => Promise<void>) => {
+        await sink({ type: 'text', text: 'hi' })
+        await sink({ type: 'done', sessionId: 'ses_streamed' })
+      },
+      cancelRun: async () => ({ runId: 'r', cancelled: true }),
+      steerRun: async () => {},
+      resumeConversation: async () => ({ runId: 'r', runtimeSessionId: undefined }),
+      resolveToolCall: async () => ({ success: true, result: {} }),
+      completeRun: (...a: unknown[]) => mockHermesCompleteRun(...a),
     }),
   }
 })
@@ -176,6 +204,11 @@ beforeEach(() => {
   mockStartRun.mockResolvedValue({ runId: 'r', runtimeSessionId: undefined })
   mockCancelRun.mockResolvedValue({ runId: 'r', cancelled: true })
   mockCompleteRun.mockResolvedValue({ runId: 'r', completed: true, alreadyComplete: false })
+  mockHermesStartRun.mockImplementation(async (envelope: { runId: string }) => ({
+    runId: envelope.runId,
+    runtimeSessionId: undefined,
+  }))
+  mockHermesCompleteRun.mockResolvedValue({ runId: 'r', completed: true, alreadyComplete: false })
   mockStreamRun.mockImplementation(
     async (_runId: string, sink: (e: unknown) => Promise<void>) => {
       await sink({ type: 'text', text: 'hi' })
@@ -199,7 +232,12 @@ describe('R28-4 — a normal run is completed at the door, once', () => {
 
     expect(mockCompleteRun).toHaveBeenCalledTimes(1)
     // A finished run is completed, not cancelled — and no cancel was asked for.
-    expect(mockCompleteRun.mock.calls[0][1]).toEqual({ status: 'completed' })
+    // `P2-5` (§2.11): the completion also names the engine that served the run,
+    // so two engines' runs are distinguishable in the ledger.
+    expect(mockCompleteRun.mock.calls[0][1]).toEqual({
+      status: 'completed',
+      provenance: { implementation: 'opencode' },
+    })
     expect(mockCancelRun).not.toHaveBeenCalled()
   })
 
@@ -238,7 +276,10 @@ describe('R28-4 — a client disconnect cancels the run at the door', () => {
     // The door was told to cancel, and the run's outcome is `cancelled`.
     expect(mockCancelRun).toHaveBeenCalledTimes(1)
     expect(mockCompleteRun).toHaveBeenCalledTimes(1)
-    expect(mockCompleteRun.mock.calls[0][1]).toEqual({ status: 'cancelled' })
+    expect(mockCompleteRun.mock.calls[0][1]).toEqual({
+      status: 'cancelled',
+      provenance: { implementation: 'opencode' },
+    })
   })
 
   it('cancels BEFORE completing (so the adapter records the run cancelled, not completed)', async () => {
@@ -274,7 +315,10 @@ describe('R28-4 — closing a run is safe to repeat (failure is normal)', () => 
 
     expect(mockCancelRun).toHaveBeenCalledTimes(1)
     expect(mockCompleteRun).toHaveBeenCalledTimes(1)
-    expect(mockCompleteRun.mock.calls[0][1]).toEqual({ status: 'cancelled' })
+    expect(mockCompleteRun.mock.calls[0][1]).toEqual({
+      status: 'cancelled',
+      provenance: { implementation: 'opencode' },
+    })
   })
 
   it('a failed run is NOT recorded as completed-ok (the honest status survives the door)', async () => {
@@ -313,5 +357,47 @@ describe('R28-4 — closing a run is safe to repeat (failure is normal)', () => 
     await drainSseResponse(res)
 
     expect(mockCompleteRun).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('P2-5 (§2.11) — the engine is SELECTABLE, and the run records which one served it', () => {
+  afterEach(() => {
+    delete process.env.AI_RUNTIME_ENGINE
+  })
+
+  it('selects Hermes from the environment and records `hermes` on the run — id AND provenance', async () => {
+    process.env.AI_RUNTIME_ENGINE = 'hermes'
+
+    const req = buildRequest({ messages: [{ role: 'user', content: 'hi' }] })
+    const res = await POST(req as any)
+    await drainSseResponse(res)
+
+    // The Hermes port served the turn, and the OpenCode port was never built —
+    // the swap is a SELECTION, not a fallback.
+    expect(mockHermesStartRun).toHaveBeenCalledTimes(1)
+    expect(mockStartRun).not.toHaveBeenCalled()
+
+    // The run id names the engine that actually served it (not a hardcoded
+    // `opencode`), and the completion's provenance agrees.
+    const runId = (mockHermesStartRun.mock.calls[0][0] as { runId: string }).runId
+    expect(runId).toContain(':hermes:')
+    expect(runId).not.toContain(':opencode:')
+    expect(mockHermesCompleteRun.mock.calls[0][1]).toEqual({
+      status: 'completed',
+      provenance: { implementation: 'hermes' },
+    })
+  })
+
+  it('stays on OpenCode when the environment says nothing — the default is unchanged', async () => {
+    delete process.env.AI_RUNTIME_ENGINE
+
+    const req = buildRequest({ messages: [{ role: 'user', content: 'hi' }] })
+    const res = await POST(req as any)
+    await drainSseResponse(res)
+
+    expect(mockStartRun).toHaveBeenCalledTimes(1)
+    expect(mockHermesStartRun).not.toHaveBeenCalled()
+    const runId = (mockStartRun.mock.calls[0][0] as { runId: string }).runId
+    expect(runId).toContain(':opencode:')
   })
 })

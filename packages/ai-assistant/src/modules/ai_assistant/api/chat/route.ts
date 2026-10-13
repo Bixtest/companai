@@ -8,13 +8,13 @@ import { getAuthFromRequest } from '@open-mercato/shared/lib/auth/server'
 // `ARCHITECTURE-hermes-integration.md` §4/§9 Phase 1 ("the port, with OpenCode
 // behind it"). This file must not name an engine anywhere below this line.
 import {
-  OPENCODE_RUNTIME_IMPLEMENTATION,
   type AiRuntimeEnvelope,
   type AiRuntimePort,
   type AiRuntimeRunResult,
   type AiRuntimeStreamEvent,
 } from '../../lib/ai-runtime-port'
-import { createOpenCodePortAdapter, textInputRef } from '../../lib/opencode-port-adapter'
+import { textInputRef } from '../../lib/opencode-port-adapter'
+import { resolveAiRuntimePort } from '../../lib/resolve-ai-runtime-port'
 import { createRequestContainer } from '@open-mercato/shared/lib/di/container'
 import type { EntityManager } from '@mikro-orm/postgresql'
 import {
@@ -58,10 +58,20 @@ let runCounter = 0
  *  - **unique per run, not per millisecond** — a repeated run id is treated by
  *    the adapter as an idempotent re-start, so two runs sharing an id would
  *    make the second never stream. The monotonic counter removes that.
+ *
+ * `implementation` is the engine that will serve this turn (`P2-5`, §2.11). It is
+ * **required, not defaulted**: the id carries the engine name as its second
+ * segment, and a defaulted `opencode` would write a false engine into the audit
+ * record the moment a different engine served the run. The caller resolves the
+ * engine before minting, so it always knows which one it is.
  */
-export function mintChatRunId(conversationId: string, startedAt: number): string {
+export function mintChatRunId(
+  conversationId: string,
+  startedAt: number,
+  implementation: string,
+): string {
   const sequence = ++runCounter
-  return `${conversationId}:${OPENCODE_RUNTIME_IMPLEMENTATION}:run-${startedAt}-${sequence}`
+  return `${conversationId}:${implementation}:run-${startedAt}-${sequence}`
 }
 
 /**
@@ -94,7 +104,7 @@ export function mintChatRunId(conversationId: string, startedAt: number): string
 export async function closeChatRun(
   port: AiRuntimePort,
   runId: string,
-  outcome: { aborted: boolean; status?: AiRuntimeRunResult['status'] },
+  outcome: { aborted: boolean; status?: AiRuntimeRunResult['status']; implementation?: string },
 ): Promise<void> {
   const status: AiRuntimeRunResult['status'] = outcome.status ?? (outcome.aborted ? 'cancelled' : 'completed')
 
@@ -106,24 +116,26 @@ export async function closeChatRun(
   // Replay-safe (§4.3): a second completion does not double-count. `status` is
   // the honest outcome — `cancelled` when the abort was observed, so a run the
   // user stopped is recorded as stopped, never as finished.
-  await port.completeRun(runId, { status })
+  //
+  // `implementation` rides the result's provenance (`P2-5`, §2.11): once the
+  // engine is selectable, a run's ledger entry must say WHICH engine served it,
+  // or two engines' runs are indistinguishable in the record. It is omitted when
+  // the caller does not know, rather than guessed.
+  await port.completeRun(runId, {
+    status,
+    ...(outcome.implementation ? { provenance: { implementation: outcome.implementation } } : {}),
+  })
 }
 
 /**
- * The AI runtime door (row 28). One function so the **choice of engine** lives
- * in exactly one place: today it is OpenCode behind the port; a future engine
- * swaps here and nowhere else. Every caller in this file talks to the returned
- * `AiRuntimePort`, never to an engine by name.
+ * The engine choice used to live here, as a private function that could only
+ * ever return OpenCode (`P2-5`, §2.11). It is now
+ * `lib/resolve-ai-runtime-port.ts::resolveAiRuntimePort` — extracted so the row's
+ * claim (*"swapping engines touches exactly one function"*) is **provable by a
+ * test** rather than only assertable in a docstring. This file no longer
+ * constructs an adapter at all: it calls the selector and talks to the port it
+ * returns, never to an engine by name.
  */
-function resolveAiRuntimePort(deps: {
-  em: EntityManager
-  auth: { userId: string; tenantId: string | null; organizationId: string | null }
-}): AiRuntimePort {
-  return createOpenCodePortAdapter({
-    auth: deps.auth,
-    em: deps.em,
-  })
-}
 
 /**
  * System instructions injected at the start of new chat sessions.
@@ -309,9 +321,11 @@ export async function POST(req: NextRequest) {
     const container = await createRequestContainer()
     const em = container.resolve<EntityManager>('em')
 
-    // The AI runtime door. Every engine call below goes through `port`.
-    // The engine behind the door is chosen here and nowhere else.
-    const port = resolveAiRuntimePort({
+    // The AI runtime door. Every engine call below goes through `port`. The
+    // engine is chosen by the selector (§2.11), which also NAMES it back to us —
+    // so both the run id and the run's ledger provenance say which engine
+    // answered, instead of assuming OpenCode.
+    const { port, implementation } = resolveAiRuntimePort({
       em,
       auth: {
         userId: auth.sub,
@@ -511,7 +525,7 @@ export async function POST(req: NextRequest) {
         // The run id must be UNIQUE PER RUN, not merely per millisecond (see
         // `mintChatRunId`).
         const conversationId = sessionId ?? `chat:${actorIdentity.userId}:${chatStartTime}`
-        runId = mintChatRunId(conversationId, chatStartTime)
+        runId = mintChatRunId(conversationId, chatStartTime, implementation)
         const envelope: AiRuntimeEnvelope = {
           schemaVersion: 1,
           runId,
@@ -574,7 +588,7 @@ export async function POST(req: NextRequest) {
         // the one place the route treats it so.
         if (runId) {
           try {
-            await closeChatRun(port, runId, { aborted })
+            await closeChatRun(port, runId, { aborted, implementation })
           } catch (closeErr) {
             // Closing the run must never break the response — the user already
             // has (or has abandoned) the stream. Surface it to logs only.

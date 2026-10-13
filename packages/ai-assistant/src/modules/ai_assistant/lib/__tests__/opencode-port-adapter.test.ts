@@ -241,6 +241,23 @@ describe('OpenCodePortAdapter (R28-2 — the first engine behind the door)', () 
         alreadyComplete: false,
       })
     })
+
+    it('records the SERVING ENGINE on the run when the completion carries it (`P2-5`, §2.11)', async () => {
+      // Symmetric with the Hermes adapter: the run's record says WHICH engine
+      // served it, so a selectable engine cannot leave the field write-only.
+      await adapter.startRun(envelope())
+      await adapter.completeRun('run-1', {
+        status: 'completed',
+        provenance: { implementation: 'opencode' },
+      })
+      expect(adapter.getRun('run-1')?.implementation).toBe('opencode')
+    })
+
+    it('leaves the engine UNRECORDED when the completion carries none — never guessed', async () => {
+      await adapter.startRun(envelope())
+      await adapter.completeRun('run-1', { status: 'completed' })
+      expect(adapter.getRun('run-1')?.implementation).toBeUndefined()
+    })
   })
 
   describe('the operations OpenCode does NOT support say so', () => {

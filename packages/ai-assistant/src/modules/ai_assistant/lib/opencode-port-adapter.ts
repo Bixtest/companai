@@ -98,6 +98,14 @@ interface LiveRun {
   /** Set when `completeRun` has recorded the run; makes completion replay-safe. */
   completed: boolean
   /**
+   * `P2-5` (§2.11) — the engine that served this run, taken from the completion's
+   * `provenance.implementation` and recorded ON THE RUN (readable via `getRun`).
+   * Without this the caller's engine name is accepted by `completeRun` and
+   * dropped — a write-only field that would make *"recorded on the run"* an
+   * overclaim. Kept symmetric with the Hermes adapter.
+   */
+  implementation?: string
+  /**
    * Every in-flight `streamRun` of this run. A set, not a single slot, because
    * two concurrent streams must BOTH be abortable — a single slot would let a
    * cancel reach only the last one (hostile-critic defect 3b).
@@ -413,10 +421,14 @@ export class OpenCodePortAdapter implements AiRuntimePort {
       return { runId, completed: false, alreadyComplete: true }
     }
     run.completed = true
+    // `P2-5` — record WHICH engine served the run, so the ledger entry can say
+    // so. Set here (not on replay) so a second completion cannot rewrite it.
+    run.implementation = result.provenance?.implementation
     logger.debug('Run completed', {
       runId,
       status: result.status,
       usageScope: result.usage?.scope,
+      implementation: result.provenance?.implementation,
     })
     return { runId, completed: true, alreadyComplete: false }
   }

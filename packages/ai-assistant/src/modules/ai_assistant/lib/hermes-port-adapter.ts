@@ -147,6 +147,13 @@ interface HermesLiveRun {
   /** Set by `completeRun`; makes completion replay-safe (§4.3). */
   completed: boolean
   /**
+   * `P2-5` (§2.11) — the engine that served this run, taken from the completion's
+   * `provenance.implementation` and recorded on the run (readable via `getRun`),
+   * so the caller's engine name is not accepted and dropped. Kept symmetric with
+   * the OpenCode adapter.
+   */
+  implementation?: string
+  /**
    * `P2-4` — the effective tool menu recorded on this run at admission, and the
    * admission-time context it rests on. `undefined` until `attachRunToolMenu`
    * records them; a run with no recorded menu may call nothing (fail-closed).
@@ -794,10 +801,13 @@ export class HermesPortAdapter implements AiRuntimePort {
       return { runId, completed: false, alreadyComplete: true }
     }
     run.completed = true
+    // `P2-5` — record WHICH engine served the run (set here, not on replay).
+    run.implementation = result.provenance?.implementation
     logger.debug('Hermes run completed', {
       runId,
       status: result.status,
       usageScope: result.usage?.scope,
+      implementation: result.provenance?.implementation,
     })
     return { runId, completed: true, alreadyComplete: false }
   }

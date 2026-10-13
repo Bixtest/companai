@@ -79,6 +79,7 @@ jest.mock('../lib/user-role-ids', () => ({
 }))
 
 import { POST, mintChatRunId } from '../api/chat/route'
+import { OPENCODE_RUNTIME_IMPLEMENTATION } from '../lib/ai-runtime-port'
 
 function buildRequest(body: Record<string, unknown>): any {
   return { json: async () => body }
@@ -201,7 +202,7 @@ describe('R28-3 — the chat route reaches the engine through the port', () => {
 
 describe('R28-3 — run-id minting (§4.2)', () => {
   it('a run id is DISTINCT from its conversation id (a run is not a transcript)', () => {
-    const id = mintChatRunId('conv-abc', 1000)
+    const id = mintChatRunId('conv-abc', 1000, OPENCODE_RUNTIME_IMPLEMENTATION)
     expect(id).not.toBe('conv-abc')
     expect(id.startsWith('conv-abc')).toBe(true)
   })
@@ -209,30 +210,47 @@ describe('R28-3 — run-id minting (§4.2)', () => {
   it('the run id carries the conversation id, the engine name, the start time, and a per-run sequence', () => {
     // Assert the SHAPE, so a scheme that merely differs (e.g. a random suffix)
     // does not pass. The id must be legible: `<conv>:<engine>:run-<t>-<seq>`.
-    const id = mintChatRunId('conv-abc', 4242)
+    const id = mintChatRunId('conv-abc', 4242, OPENCODE_RUNTIME_IMPLEMENTATION)
     expect(id).toMatch(/^conv-abc:[^:]+:run-4242-\d+$/)
   })
 
+  it('carries the SELECTED engine, not a hardcoded one (`P2-5`, §2.11)', () => {
+    // The id's second segment IS the engine name, and it now comes from the
+    // caller that resolved the engine. Before `P2-5` it was the `opencode`
+    // constant — so a Hermes run would have been mislabelled in the audit
+    // record. Both engines are asserted, so a re-hardcoded `opencode` fails.
+    expect(mintChatRunId('conv-abc', 7, 'hermes')).toMatch(/^conv-abc:hermes:run-7-\d+$/)
+    expect(mintChatRunId('conv-abc', 7, OPENCODE_RUNTIME_IMPLEMENTATION)).toMatch(
+      /^conv-abc:opencode:run-7-\d+$/,
+    )
+    // The third argument is REQUIRED, not defaulted: a default would let a caller
+    // forget it and write `opencode` into a Hermes run's id. The type checker
+    // enforces that (a two-arg call is TS2554), and this pins it at RUNTIME too —
+    // a function's `length` counts parameters before the first default, so a
+    // defaulted third parameter would report 2.
+    expect(mintChatRunId.length).toBe(3)
+  })
+
   it('the sequence INCREMENTS monotonically across calls (not merely "differs")', () => {
-    const a = mintChatRunId('conv-abc', 1000)
-    const b = mintChatRunId('conv-abc', 1000)
-    const c = mintChatRunId('conv-abc', 1000)
+    const a = mintChatRunId('conv-abc', 1000, OPENCODE_RUNTIME_IMPLEMENTATION)
+    const b = mintChatRunId('conv-abc', 1000, OPENCODE_RUNTIME_IMPLEMENTATION)
+    const c = mintChatRunId('conv-abc', 1000, OPENCODE_RUNTIME_IMPLEMENTATION)
     const seq = (v: string) => Number(v.slice(v.lastIndexOf('-') + 1))
     expect(seq(b)).toBe(seq(a) + 1)
     expect(seq(c)).toBe(seq(b) + 1)
   })
 
   it('two runs in the SAME millisecond get DIFFERENT ids (unique per run, not per ms)', () => {
-    const a = mintChatRunId('conv-abc', 1000)
-    const b = mintChatRunId('conv-abc', 1000)
+    const a = mintChatRunId('conv-abc', 1000, OPENCODE_RUNTIME_IMPLEMENTATION)
+    const b = mintChatRunId('conv-abc', 1000, OPENCODE_RUNTIME_IMPLEMENTATION)
     expect(a).not.toBe(b)
   })
 
   it('the same conversation across time keeps producing fresh run ids', () => {
     const ids = new Set([
-      mintChatRunId('conv-abc', 1),
-      mintChatRunId('conv-abc', 1),
-      mintChatRunId('conv-abc', 2),
+      mintChatRunId('conv-abc', 1, OPENCODE_RUNTIME_IMPLEMENTATION),
+      mintChatRunId('conv-abc', 1, OPENCODE_RUNTIME_IMPLEMENTATION),
+      mintChatRunId('conv-abc', 2, OPENCODE_RUNTIME_IMPLEMENTATION),
     ])
     expect(ids.size).toBe(3)
   })

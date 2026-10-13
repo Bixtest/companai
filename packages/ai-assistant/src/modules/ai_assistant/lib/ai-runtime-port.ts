@@ -251,6 +251,16 @@ export interface AiRuntimeRunResult {
     policyVersion?: string
     modelVersion?: string
     correlationId?: string
+    /**
+     * Which engine served the run (`'opencode'`, `'hermes'`). `P2-5` (§2.11):
+     * once the engine is selectable, a run's ledger entry must say WHICH engine
+     * answered it — otherwise two engines' runs are indistinguishable in the
+     * record. Engine-agnostic and optional: an adapter that does not know leaves
+     * it out rather than guessing. The ENVELOPE is deliberately not widened for
+     * this (§4.2 keeps it minimal and server-minted); provenance is already the
+     * ledger's own home.
+     */
+    implementation?: string
   }
   /** A failure message, when `status` is not `completed`. */
   error?: string
