@@ -31,9 +31,11 @@ live service is not a unit test (**L150**).
   (`▸ n/N`) never count, 5+ spaces are annotations, §L excluded.
 - **Row 28 (Phase 8) ✅ COMPLETE** — one typed door (`R28-5` proved it); `R28-6` (delete OpenCode)
   trigger-blocked → `CC-72`. Hermes pin = `HERMES-PIN.md`; `--check` → PIN HOLDS (L135/L136).
-- **Hermes Phase 2: `P2-1`–`P2-6` ALL ✅ (2026-10-13) — PHASE 2's EXIT GATE IS GREEN.** `P2-5` (§2.11) =
-  engine SELECTABLE (`lib/resolve-ai-runtime-port.ts`, env `AI_RUNTIME_ENGINE`, default `opencode`;
-  `provenance.implementation`; envelope NOT widened). **`P2-6` (§2.12)** = the exit gate: cancel · retry
+- **Hermes Phase 2: `P2-1`–`P2-6` ✅ (2026-10-13)** — but **PHASE 2's *stated* exit gate is NOT yet green**
+  (**rule 13 correction**): §2.12 proved the five properties **through the port** (against a `FakeClient`),
+  and **no live turn has ever been driven**. `P2-5` (§2.11) = engine SELECTABLE
+  (`lib/resolve-ai-runtime-port.ts`, env `AI_RUNTIME_ENGINE`, default `opencode`;
+  `provenance.implementation`; envelope NOT widened). **`P2-6` (§2.12)** = cancel · retry
   idempotency · usage (scope stated) · bounded mem/CPU · no cross-scope access, on ONE tenant then TWO
   adversarial. Built the two missing bounds in ONE shared file `lib/ai-runtime-bounds.ts`
   (`resolveRunDeadline` = sooner of `deadline` & `budget`-from-admission; `pruneRunRegistry` = evict
@@ -42,8 +44,13 @@ live service is not a unit test (**L150**).
   0 new**; **10 mutations RED**; critic **2 defects + 2 nits fixed** (D1 the bound must END the stream —
   **L151**; D2 a THIRD `AiRuntimePort` impl was unbounded — **L152**). **Default did NOT move.** Lessons
   **L144–L152**.
-- **★ NEXT = the step `P2-5`/`P2-6` jointly own:** flip the default to Hermes AND delete OpenCode in ONE
-  change (`R28-6`/`N-8`, `CC-76` now fixed) = also the **`CC-74`** trigger (retire `hermes-local`).
+- **★ NEXT = `P2-7` (§2.13, requirement written 2026-10-13):** **Hermes must SERVE A LIVE TURN** through the
+  pinned worker (connect → `session.create` → `prompt.submit` → typed events), + the worker's model config
+  settled & forwarded (`docker-compose.hermes.yml` does NOT forward `OPENAI_BASE_URL` → the worker would
+  call api.openai.com with a local model name). Measured: `prompt.submit` never runs outside `__tests__`;
+  production never calls `HermesGatewayClient.connect()` → a `hermes` chat FAILS CLOSED at `startRun`. **The
+  switchover (the connection lifecycle + the default-flip + the OpenCode deletion `R28-6`/`N-8` + the
+  `CC-74` `hermes-local` retirement) is GATED on `P2-7`.**
 - **`CC-73` OPEN:** 92 pre-existing type errors in 27 `__tests__` files. **`CC-76` ✅ FIXED.** **`CC-51`
   FALSIFIED:** the `team` concept EXISTS (`StaffTeam*`); `staff` is PARKED → product decision (L137).
   **Owner's ruling: core architecture first — business modules are GENERATED from the core workspace.** Docker ON.

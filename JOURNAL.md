@@ -117,12 +117,16 @@ the suite itself**, whose frames were the un-enveloped shape the real server nev
 **Next: `P2-1` — and it is now buildable here.** The owner started Docker (`docker info` → **29.8.2**), so the
 premise that made `P2-1`'s boot gate "UNPROVEN-HERE" is corrected in the plan (§2.2 + the row) rather than
 carried forward. `P2-1` was built next and is now done (the block below); `P2-2`, `P2-3`, `P2-4` and `P2-5`
-followed, all discharged (the blocks below); **the frontier is now `P2-6`** — the exit-gate proof (**requirement
-§2.12 written 2026-10-13**; cancellation, retry idempotency, usage capture, bounded memory/CPU, no cross-scope
-access). `P2-5` discharged on 2026-10-13
-(§2.11): the engine is now **selectable** at the door (`lib/resolve-ai-runtime-port.ts`, env `AI_RUNTIME_ENGINE`,
-default `opencode`) — but the **default did NOT move**, and §2.11 **OWNS the default-flip step**: it flips to
-Hermes when `P2-6`'s proof is green, and **that same change deletes OpenCode** (`R28-6`/`N-8`, `CC-76` first).
+followed, all discharged (the blocks below); `P2-6` is now discharged (2026-10-13, §2.12) and **the frontier is
+now `P2-7`** — **Hermes must SERVE A LIVE TURN** through the pinned worker (**requirement §2.13 written
+2026-10-13**): the half of `P2-6`'s *stated* exit gate that §2.12 did not write (rule 13 — §2.12 proved the five
+properties **through the port**, against a `FakeClient`; **no live turn has ever been driven**, and production
+never connects the worker). `P2-5` discharged on 2026-10-13 (§2.11): the engine is now **selectable** at the door
+(`lib/resolve-ai-runtime-port.ts`, env `AI_RUNTIME_ENGINE`, default `opencode`) — but the **default did NOT
+move**. §2.11 **OWNS the default-flip step**: the flip to Hermes + the OpenCode deletion (`R28-6`/`N-8`, `CC-76`
+first) + the `CC-74` `hermes-local` retirement land as **one** change — and that change is now **GATED on `P2-7`**
+proving the live turn (flipping today would make every chat **fail closed**, since nothing constructs the worker
+connection).
 
 ---
 
@@ -268,6 +272,20 @@ box carry it.)
 
 ---
 
+### 📋 P2-7 — **the requirement written: Hermes must SERVE A LIVE TURN through the pinned worker — the half of `P2-6`'s *stated* exit gate that §2.12 did not write.** *(requirement §2.13 written 2026-10-13)*
+
+**Why this row exists — a premise corrected, not hidden (rule 13).** `P2-6`'s **stated** exit gate — in §2.11's own record and in the selector's docblock written during `P2-5` — is *"serving a live turn over Hermes"*, and §2.11 (lines 372, 385) says **`CC-74` fires at `P2-6`** *"when … a real chat run has been served by the pinned worker"*. But §2.12 — the requirement actually **written** for `P2-6` — scoped the gate to *the five properties, proven through the port*, and the discharge proved exactly that, **against a `FakeClient`**. So the word "green" was **true of §2.12 and false of §2.11**: the five properties are proven, **no live turn has ever been driven**. This row builds the other half.
+
+**What the measurement found (rule 0b, code repo + live stack, 2026-10-13).** `prompt.submit`/`submitPrompt` appear **only** in the client/adapter and are never executed outside `__tests__`; `docker/hermes/handshake_gate.py` drives only `ping`/capabilities/`gateway.ready`/`process.stop` — **no turn**. Production **never** calls `HermesGatewayClient.connect()` (the only `.connect(` calls are MCP clients), so a `hermes`-selected chat **fails closed** at `startRun` (`hermes-port-adapter.ts:346` throws *"not connected"*). The connection lifecycle is **unbuilt** (§2.11 deferred it: *"belongs with the live run, not with the selection"*). The worker is **UP** (`mercato-hermes-gateway`, Up 31h, image `hermes-gateway:p2-1`) and a local model is **UP** (`mercato-model-local`, llama.cpp, OpenAI-compatible). **But the worker's model config is MIS-WIRED:** its env carries `OM_AI_PROVIDER=openai` + `OM_AI_MODEL=Qwen2.5-7B-Instruct-Q4_K_M` (a **local** model) with **no `OPENAI_BASE_URL`**; `.env` sets `OPENAI_BASE_URL=http://model:8080/v1` but `docker-compose.hermes.yml:64-80` **does not forward it**, so the worker would call **api.openai.com** with a local model name.
+
+**What this row builds.** (1) **The live-turn proof** — a harness that drives a **real** turn through the port with the Hermes engine selected: connect the pinned worker → `session.create` → `prompt.submit` → read the adapter's ordered typed events, ending on a real `done`/`message.complete`. A **real model answer, not a fake** — the exact thing §2.11 named as `P2-6`'s gate. (2) **The worker's model config, settled and forwarded** — whatever the pinned worker actually reads to reach a model (measured in the worker's own source, not assumed from the platform's `OM_AI_*` convention) must be **forwarded by `docker-compose.hermes.yml`**, so it reaches a **reachable** model (the local one by preference — no cloud spend).
+
+**Named bounds.** It does **not** flip the default; the **switchover** (the production connection lifecycle + the default-flip + the OpenCode deletion `R28-6`/`N-8` + the `CC-74` `hermes-local` retirement) is the **next** row, gated on this one. The tool bridge stays **`CC-79`**.
+
+**The step handed forward:** when a live turn is proven → **the switchover**, as §2.11 item 5 owns.
+
+---
+
 ### ✅ P2-6 DONE — **Phase 2's exit gate is green: on one tenant and then on two adversarial ones, the five properties hold — and the two missing bounds (a dropped `budget`, an unpruned registry) are now real, shared, and measured.** *(2026-10-13)*
 
 `lib/ai-runtime-bounds.ts` (new, shared) + both chat adapters + the platform adapter + three proof suites; requirement written BEFORE the code (plan §2.12), full discharge record in §2.12 + the §4 row. **The default did NOT move** — this row proves; the flip + OpenCode deletion is a **separate** change.
@@ -283,7 +301,7 @@ box carry it.)
 3. **A stringified budget was dropped in silence** — now accepted if numeric, logged if not.
 4. **Four of the eight "no cross-scope frame" assertions were vacuous** — no frame ever carries a tenant or principal id, so asserting their absence proved nothing; rewritten to the two identifiers that actually travel, each with a positive check.
 
-**Next:** the step this row and `P2-5` jointly own — **flip the default to Hermes and delete OpenCode in the same change** (`R28-6`/`N-8`, `CC-76` now fixed), which is also the **`CC-74`** trigger that retires the old `hermes-local` service.
+**Next:** `P2-7` — **Hermes must SERVE A LIVE TURN** through the pinned worker (requirement §2.13). **⚠ Corrected here (rule 13):** this block's earlier wording said the next step was *"flip the default to Hermes and delete OpenCode … which is also the `CC-74` trigger"*. That is **not yet due** — §2.12 scoped `P2-6` to the five properties **through the port** (against a `FakeClient`), while §2.11's **stated** gate also required **a live turn**, which was never driven. Flipping today would make every chat **fail closed**. So `P2-7` builds the live turn first; **then** the switchover — the default-flip + OpenCode deletion (`R28-6`/`N-8`, `CC-76` fixed) + the `CC-74` `hermes-local` retirement — lands as one change.
 
 ---
 
@@ -302,9 +320,9 @@ box carry it.)
 
 **My own catch — and the reason the proof had to be rebuilt before it could be trusted.** The first mutation run printed "13/13 RED" in **one second**, which is impossible for 13 suites. A node harness that spawns jest was throwing a Windows `EBUSY` **before jest ever ran**, and mapping that to "RED" — so the "proof" was certifying mutations that had never been tested. The harness was rebuilt (as a bash loop) to **prove a GREEN baseline for every suite before trusting any RED**, and to treat a runner that fails to *start* as an error, not a caught mutation. The rebuild surfaced a second real defect: the new suite called the **live** OpenCode health probe, so it hung whenever Docker was down — a unit test depending on a running container, now mocked. With the repaired harness: **5 baselines GREEN, then 13 mutations RED**, restored md5-identical. **L149** (a harness must prove its own baseline) and **L150** (a test that reaches a live service is not a unit test).
 
-**Named bounds, recorded not hidden:** the platform's other two runtime routes are a **different engine family** and are not unified here; the default does **not** move until `P2-6` is green; `CC-76` (OpenCode ignores the deadline) must be fixed before the **deletion**; `CC-74` (retire the old `hermes-local` service) fires at `P2-6`, once a real run has been served by the pinned worker.
+**Named bounds, recorded not hidden:** the platform's other two runtime routes are a **different engine family** and are not unified here; the default does **not** move until Hermes serves a **live turn** *(**corrected 2026-10-13, rule 13:** this line originally said *"until `P2-6` is green"*, but §2.12 scoped `P2-6` to the five properties **through the port** — the live turn is its own row, **`P2-7`**, §2.13)*; `CC-76` (OpenCode ignores the deadline) must be fixed before the **deletion** *(**done** — `P2-6`)*; `CC-74` (retire the old `hermes-local` service) fires once **a real chat run has been served by the pinned worker** *(**corrected 2026-10-13, rule 13:** this line originally said *"fires at `P2-6`"* — that premise was false, since no live run was ever served; the trigger fires after **`P2-7`**)*.
 
-**Next:** `P2-6` — the exit-gate proof (cancellation · retry idempotency · usage capture · bounded memory/CPU · no cross-scope access), which is the `CC-74` trigger and the gate that lets the owned default-flip + OpenCode deletion run.
+**Next:** `P2-6` — the exit-gate proof (cancellation · retry idempotency · usage capture · bounded memory/CPU · no cross-scope access), which is the gate that lets the owned default-flip + OpenCode deletion run. *(**Corrected 2026-10-13, rule 13:** this line originally also called `P2-6` *"the `CC-74` trigger"*; §2.12 proved the five properties **through the port** but drove **no live turn**, so the `CC-74` trigger — *a real chat run served by the pinned worker* — is **not** met by `P2-6`. It is now owned by **`P2-7`** (§2.13), and the switchover is **gated** on it.)*
 
 ---
 
