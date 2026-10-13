@@ -59,19 +59,23 @@
  *                                  result, so it lands after the running tool
  *                                  finishes. That timing is the engine's.
  *                              (3) a steered turn reaches the WORKER's own
- *                                  tools; the platform's tool door stays ✗
- *                                  until `P2-4`.
+ *                                  tools; the platform's tool door is the
+ *                                  `resolveToolCall` path below.
  *   resumeConversation   ✓  `session.resume` on the session the caller names;
  *                            every resume is a FRESH run id (§4.2).
- *   resolveToolCall      ✗  Hermes runs its own tools inside the worker; the
- *                            platform resolves none of them through this door
- *                            yet. Reported unsupported so no caller believes a
- *                            tool call is platform-gated. (`P2-4`.)
+ *   resolveToolCall      ✓  (`P2-4`) an admitted platform tool call executes
+ *                            through this door under two gates — the call's
+ *                            tool is in the run's menu recorded at admission
+ *                            AND the presented grant is that run's own, in the
+ *                            order identity → authority, deny-by-default
+ *                            (`ai-tool-call-gate.ts`). The worker ALSO runs its
+ *                            own tools inside itself; the live bridge that lets
+ *                            it ask the platform mid-turn is `CC-79`.
  *   completeRun          ✓  this adapter's registry; replay-safe.
  *
- * The ✗ is a fact about today's wiring, not a defect in Hermes — and
- * `describeCapabilities` says so, the same way the OpenCode adapter reports its
- * own two ✗ operations.
+ * Every operation is now ✓ for Hermes — the first engine on the port whose
+ * eight are all real (`steerRun` settled §2.4 by measurement; `resolveToolCall`
+ * made real by `P2-4`).
  *
  * ─────────────────────────────────────────────────────────────────────────────
  * THE IDENTIFIERS (§4.2 — a run is not a conversation is not a session)
@@ -82,6 +86,11 @@
  */
 
 import { createLogger } from '@open-mercato/shared/lib/logger'
+import type { McpToolContext, ToolExecutionResult } from './types'
+import {
+  checkToolCallAdmitted,
+  describeToolCallRefusal,
+} from './ai-tool-call-gate'
 import {
   type AiRuntimeCancelResult,
   type AiRuntimeCapabilities,
@@ -137,11 +146,94 @@ interface HermesLiveRun {
   cancelled: boolean
   /** Set by `completeRun`; makes completion replay-safe (§4.3). */
   completed: boolean
+  /**
+   * `P2-4` — the effective tool menu recorded on this run at admission, and the
+   * admission-time context it rests on. `undefined` until `attachRunToolMenu`
+   * records them; a run with no recorded menu may call nothing (fail-closed).
+   * Written by the rail, read by the two gates — never by the model, the prompt
+   * or the engine.
+   */
+  toolMenu?: readonly string[]
+  admittedToolContext?: HermesAdmittedToolContext
+  /** The live stream's sink, while one is attached — the door's only result channel. */
+  streamSink?: AiRuntimeEventSink
+}
+
+/**
+ * `P2-4` — the execution-context snapshot recorded with the menu at admission.
+ *
+ * The envelope deliberately carries no features (`§4.2` keeps it minimal and
+ * server-minted), so the execution-time context cannot be derived from it. The
+ * admission point — where the acting person's auth context lives — records what
+ * the door may execute WITH, and the door re-checks the menu and the grant for
+ * every call. The features check therefore stays at admission (a named bound of
+ * §2.10); `S-02`'s responsible-user intersection is computed by `executeTool`
+ * itself (`checkToolAuthority`) from this context.
+ */
+export interface HermesAdmittedToolContext {
+  readonly tenantId: string | null
+  readonly organizationId: string | null
+  /** The acting principal's subject. */
+  readonly userId: string | null
+  readonly userFeatures: readonly string[]
+  readonly isSuperAdmin: boolean
+  /** S-02: the person a machine actor acts for. Absent is honest; never derived. */
+  readonly onBehalfOfUserId?: string | null
+}
+
+/** What admission records on a run: the effective menu and the context it rests on. */
+export interface HermesRunToolAdmission {
+  readonly tools: readonly string[]
+  readonly context: HermesAdmittedToolContext
+}
+
+/**
+ * The execution boundary: how a gated call reaches the platform's existing tool
+ * door. Injected so the door's gating can be proven without a DI container, a
+ * registry or a database (the same structural-seam pattern as
+ * `HermesGatewayPortClient`) — building the execution context is part of the
+ * seam, because a bootstrapped container is a production concern.
+ */
+export type HermesToolExecutor = (
+  call: AiRuntimeToolCall,
+  admitted: HermesAdmittedToolContext,
+) => Promise<ToolExecutionResult>
+
+/**
+ * The default executor: the platform's own authenticated tool door
+ * (`executeTool` — RBAC plus S-02's responsible-user intersection,
+ * `checkToolAuthority`), under a fresh request container per call — the same
+ * discipline the platform's own runtime uses (*"Create a fresh container per
+ * tool call so the EM is never stale"*, `lib/agent-tools.ts`). Both imports are
+ * dynamic so the adapter module itself carries no DI dependency.
+ */
+const executeThroughPlatformToolDoor: HermesToolExecutor = async (call, admitted) => {
+  const [{ executeTool }, { createRequestContainer }] = await Promise.all([
+    import('./tool-executor'),
+    import('@open-mercato/shared/lib/di/container'),
+  ])
+  const container = await createRequestContainer()
+  const context: McpToolContext = {
+    tenantId: admitted.tenantId,
+    organizationId: admitted.organizationId,
+    userId: admitted.userId,
+    container: container as unknown as McpToolContext['container'],
+    userFeatures: [...admitted.userFeatures],
+    isSuperAdmin: admitted.isSuperAdmin,
+    ...(admitted.onBehalfOfUserId !== undefined ? { onBehalfOfUserId: admitted.onBehalfOfUserId } : {}),
+  }
+  return executeTool(call.toolName, call.args, context)
 }
 
 /** Constructor deps. One adapter holds one client and one run registry. */
 export interface HermesPortAdapterDeps {
   client: HermesGatewayPortClient
+  /**
+   * `P2-4` — how a resolved tool call reaches the platform's tool door.
+   * Defaults to the real `executeTool`; tests inject a recorder so the gate
+   * logic is proven without a container, a registry or a database.
+   */
+  executeToolCall?: HermesToolExecutor
 }
 
 /** A `session.steer` result, as measured (`sessions.py::SessionCorrectionResult`). */
@@ -156,12 +248,21 @@ type HermesSteerStatus = 'queued' | 'redirected' | 'rejected'
  */
 export class HermesPortAdapter implements AiRuntimePort {
   private readonly client: HermesGatewayPortClient
+  private readonly executeToolCall: HermesToolExecutor
   private readonly runs = new Map<string, HermesLiveRun>()
+  /**
+   * `P2-4` — call id → the run that raised it, populated from the live turn's
+   * `tool.start` events and released when the turn ends. The port's
+   * `resolveToolCall(call, grant)` signature carries no run id, so this is how
+   * a call is correlated to the admission that can authorize it.
+   */
+  private readonly toolCallRuns = new Map<string, string>()
   /** Monotonic counter so every resume gets a distinct run id (§4.2). */
   private resumeCounter = 0
 
   constructor(deps: HermesPortAdapterDeps) {
     this.client = deps.client
+    this.executeToolCall = deps.executeToolCall ?? executeThroughPlatformToolDoor
   }
 
   /** The run registry, for tests and for `completeRun`'s replay safety. */
@@ -189,8 +290,11 @@ export class HermesPortAdapter implements AiRuntimePort {
         // §2.4 settled by measurement — the first ✓ on the whole port.
         steerRun: true,
         resumeConversation: true,
-        // P2-4 wires the platform's tool door; until then, no pretending.
-        resolveToolCall: false,
+        // P2-4: the door now executes an admitted platform tool call — two
+        // gates, deny-by-default, proven in the suite. The worker still runs
+        // its own tools inside itself; this ✓ is about the door's resolve
+        // path, not about the worker asking the platform live (CC-79).
+        resolveToolCall: true,
         completeRun: true,
       },
     }
@@ -290,6 +394,14 @@ export class HermesPortAdapter implements AiRuntimePort {
       return
     }
 
+    // P2-4: the door's only result channel is the run's own event stream, so a
+    // resolved tool call's outcome is emitted here. Opened ONLY once the stream
+    // is genuinely live — after every guard above has passed — and released in
+    // the `finally` below. Opening it before the guards would leave a dead sink
+    // on a run that never streamed (the L145 lesson: a teardown must cover
+    // every exit path, and so must an OPEN).
+    run.streamSink = onEvent
+
     const unsubscribes: Array<() => void> = []
     let deadlineTimer: ReturnType<typeof setTimeout> | null = null
     let settled = false
@@ -321,9 +433,14 @@ export class HermesPortAdapter implements AiRuntimePort {
     unsubscribes.push(
       this.client.on('tool.start', async (event) => {
         if (settled) return
+        const callId = String(event.params.tool_id ?? '')
+        // P2-4 — correlate this call to the run that raised it: the port's
+        // `resolveToolCall(call, grant)` carries no run id, and this event is
+        // the only place a live call is seen before it is resolved.
+        if (callId) this.toolCallRuns.set(callId, run.runId)
         await onEvent({
           type: 'tool-call',
-          id: String(event.params.tool_id ?? ''),
+          id: callId,
           toolName: String(event.params.name ?? ''),
           args: event.params.args ?? {},
         })
@@ -407,6 +524,13 @@ export class HermesPortAdapter implements AiRuntimePort {
     } finally {
       for (const off of unsubscribes) off()
       if (deadlineTimer !== null) clearTimeout(deadlineTimer)
+      // P2-4 — release this run's call correlations and its result channel with
+      // the rest of the stream's footprint: a settled run resolves nothing
+      // further, and a long-lived client keeps no per-turn closures behind it.
+      run.streamSink = undefined
+      for (const [callId, ownerRunId] of this.toolCallRuns) {
+        if (ownerRunId === run.runId) this.toolCallRuns.delete(callId)
+      }
     }
   }
 
@@ -552,17 +676,105 @@ export class HermesPortAdapter implements AiRuntimePort {
   }
 
   /**
-   * `resolveToolCall(call, capabilityGrant)` — UNSUPPORTED in this row.
+   * `resolveToolCall(call, capabilityGrant)` — **the only path to a business
+   * operation** (§4.1), and from `P2-4` a real one for the first engine on the
+   * port. Plan §2.10 holds the requirement; `lib/ai-tool-call-gate.ts` holds the
+   * pure decision.
    *
-   * Hermes runs its own tools inside the worker. The platform resolves none of
-   * them through this door yet, and saying otherwise would let a caller believe
-   * a business operation was platform-gated when it was not. (`P2-4` delivers
-   * the one narrow tool through this door, re-authorized at execution time.)
+   * **Two gates, deny-by-default, in the order identity → authority:**
+   *   1. the presented grant must be THIS run's own (absent or foreign → refused
+   *      before the menu is consulted, so a foreign caller learns nothing about
+   *      what the run may call);
+   *   2. the call's tool must be in the run's menu recorded at admission — and a
+   *      valid grant does NOT buy a tool the menu never named (§8: the runtime
+   *      may narrow the grant, never widen it).
+   *
+   * **Correlation.** The signature carries the call and the grant, not a run id,
+   * so the run is found through the calls a live turn already raised
+   * (`tool.start {tool_id}` — every call of a live turn passes through here).
+   * The grant is CHECKED, never used as an index: resolving by grant would make
+   * a foreign grant resolve to nothing and erase the distinction gate 1 exists
+   * to report. A call no live turn raised is refused as unknown — the
+   * caller-raised path (a route raising a call directly) is the live bridge's
+   * work (`CC-79`).
+   *
+   * **What this does not do:** re-derive the acting person's permissions at
+   * execution. The envelope carries no features and the adapter has no request
+   * context, so execution runs with the admission-time context recorded with the
+   * menu; `executeTool` itself computes S-02's responsible-user intersection
+   * (`checkToolAuthority`) and the RBAC check from that context. The result
+   * channel is the run's own stream: the contract returns void, so a live run's
+   * resolved result is emitted as the port's `tool-result` event.
    */
-  async resolveToolCall(call: AiRuntimeToolCall, _capabilityGrant: string): Promise<void> {
-    throw new Error(
-      `resolveToolCall is not supported by the ${HERMES_RUNTIME_IMPLEMENTATION} runtime (call ${call.id})`,
-    )
+  async resolveToolCall(call: AiRuntimeToolCall, capabilityGrant: string): Promise<void> {
+    const run = this.resolveRunForToolCall(call.id)
+    if (!run) {
+      throw new Error(
+        `resolveToolCall: no live run raised the call "${call.id}", so no admission can authorize it — a tool call must come from a run the door admitted (the caller-raised path is CC-79's live bridge)`,
+      )
+    }
+    if (run.cancelled) {
+      throw new Error(
+        `resolveToolCall: run ${run.runId} was cancelled; a cancelled run executes nothing (call ${call.id})`,
+      )
+    }
+
+    const decision = checkToolCallAdmitted({
+      toolName: call.toolName,
+      capabilityGrant,
+      run: {
+        capabilityGrantId: run.envelope.capabilityGrantId,
+        admittedToolMenu: run.toolMenu,
+      },
+    })
+    if (!decision.ok) {
+      throw new Error(describeToolCallRefusal(decision.reason, call.toolName))
+    }
+
+    const admittedContext = run.admittedToolContext
+    if (!admittedContext) {
+      // Unreachable while `attachRunToolMenu` is the only writer of `toolMenu`
+      // (it writes both together), and stated anyway: a menu without the
+      // context it rests on is not an admission, and guessing the context would
+      // be the door inventing authority.
+      throw new Error(
+        `resolveToolCall: run ${run.runId} has an admitted tool menu but no admission context; refusing (call ${call.id})`,
+      )
+    }
+
+    const result = await this.executeToolCall(call, admittedContext)
+    if (!result.success) {
+      throw new Error(
+        `Tool "${call.toolName}" was not executed: ${result.error ?? 'the platform tool door refused without stating a reason'}`,
+      )
+    }
+
+    // The contract returns void — the execution IS the delivery. Emitted on the
+    // run's own channel when one is live; a sink that rejects must not turn a
+    // completed execution into a failed one, so the delivery error is logged.
+    const sink = run.streamSink
+    if (sink) {
+      try {
+        await sink({ type: 'tool-result', id: call.id, result: result.result })
+      } catch (error) {
+        logger.warn('Hermes resolved a tool call but its result could not be delivered on the run stream', {
+          runId: run.runId,
+          callId: call.id,
+          err: error instanceof Error ? error.message : String(error),
+        })
+      }
+    } else {
+      logger.debug('Hermes resolved a tool call with no live stream to deliver the result on', {
+        runId: run.runId,
+        callId: call.id,
+      })
+    }
+  }
+
+  /** The run a live tool call belongs to, through the stream's correlation. */
+  private resolveRunForToolCall(callId: string): HermesLiveRun | undefined {
+    const runId = this.toolCallRuns.get(callId)
+    return runId ? this.runs.get(runId) : undefined
   }
 
   /**
@@ -589,6 +801,45 @@ export class HermesPortAdapter implements AiRuntimePort {
     })
     return { runId, completed: true, alreadyComplete: false }
   }
+}
+
+/**
+ * `P2-4` — the admission rail: records the run's effective tool menu and the
+ * admission-time context it rests on.
+ *
+ * The envelope carries **references, not bodies** (§4.2), and a run's tool menu
+ * is decided where the acting person's permissions live — at admission, by the
+ * platform's existing machinery (`resolveAiAgentTools`/`checkAgentPolicy`: the
+ * agent's declared list ∩ its binding ∩ the caller's features). The caller that
+ * admitted the run therefore records what it allowed, and the door enforces
+ * exactly that — admission decides, the door never widens (§2.10).
+ *
+ * Unlike the sibling `attachRunInput` (which ignores an unknown run so a late
+ * attachment is harmless), this one THROWS for an unknown run: silently
+ * ignoring the record would leave the run with no menu, and every tool call
+ * would be refused for a reason the caller never sees. Recording an admission
+ * is an explicit act; failing it loudly is the honest failure.
+ */
+export function attachRunToolMenu(
+  port: HermesPortAdapter,
+  runId: string,
+  admission: HermesRunToolAdmission,
+): void {
+  const run = port.getRun(runId)
+  if (!run) {
+    throw new Error(`attachRunToolMenu: no run "${runId}" — record a menu on a run that exists (startRun first)`)
+  }
+  run.toolMenu = [...admission.tools]
+  // A SNAPSHOT, not a reference: the menu array is copied and the context is
+  // copied field-by-field (including its `userFeatures` array). A caller that
+  // keeps its own reference and mutates it after recording must not be able to
+  // widen the run it just admitted — §8's "narrow, never widen" applies to the
+  // recorded admission as much as to the grant (the P2-4 critic's F4).
+  run.admittedToolContext = {
+    ...admission.context,
+    userFeatures: [...admission.context.userFeatures],
+  }
+  logger.debug('Hermes run tool menu recorded', { runId, tools: run.toolMenu })
 }
 
 /**

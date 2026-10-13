@@ -56,6 +56,14 @@ import { defineAiTool } from '../lib/ai-tool-definition'
 import type { AiToolDefinition } from '../lib/types'
 import { runBusinessQueryPrompt } from '../lib/business-ir-run'
 
+/**
+ * The tool's name, exported so callers (the runner agent's declared menu, the
+ * door's gate) import the constant rather than re-typing the string — the same
+ * discipline `BUSINESS_IR_AGENT_ID` follows, so the registry and the tool
+ * surface cannot drift apart.
+ */
+export const BUSINESS_IR_RUN_QUERY_TOOL_NAME = 'business_ir.run_query' as const
+
 const runQueryInput = z.object({
   prompt: z
     .string()
@@ -76,7 +84,7 @@ const runQueryInput = z.object({
  * the agent sees *why* nothing ran rather than a thrown error.
  */
 const runQueryTool = defineAiTool({
-  name: 'business_ir.run_query',
+  name: BUSINESS_IR_RUN_QUERY_TOOL_NAME,
   displayName: 'Run a business query',
   description:
     'Turn a plain-language business question into a typed Business IR, validate it against the ' +

@@ -27,6 +27,19 @@
  *     `BUSINESS_IR_AGENT_ID`, and this file imports that constant rather than
  *     re-typing the string — so the caller and the registry cannot drift apart.
  *
+ * **Second agent: `business_ir.query_runner` (`P2-4`, 2026-10-13).** The owner's
+ * design input: *"A system agent converting propmt to business ir may have
+ * specific tools it need all the time."* This is that agent — a module-declared
+ * built-in with a FIXED menu of exactly one tool, `business_ir.run_query` (the
+ * pack that makes the whole prompt → IR → validate → run chain callable). It is
+ * the **runner** half of the pair: the author (above) converts a prompt into a
+ * typed IR with no tools at all; this agent is admitted with the one tool it
+ * needs and hands it the question. Its fixed menu is recorded on the run at
+ * admission and enforced by the door's two gates (`lib/ai-tool-call-gate.ts`),
+ * so a model can call exactly that tool and nothing else — the menu is the
+ * agent's, never the model's. Requirement: `library/development/
+ * PLAN-HERMES-PHASE2-one-tenant-one-tool.md` §2.10.
+ *
  * **Measured 2026-10-06.** The system prompt below was validated against the real
  * local model (Qwen2.5-7B-Instruct-Q4_K_M), which emitted an IR the schema
  * accepted for **6 of 6** varied requests. The same instructions, given loosely,
@@ -42,6 +55,7 @@ import {
   businessQueryIrSchema,
 } from '@open-mercato/shared/lib/business-ir/schema'
 import { BUSINESS_IR_AGENT_ID } from './lib/business-ir-author'
+import { BUSINESS_IR_RUN_QUERY_TOOL_NAME } from './ai-tools/business-ir-pack'
 
 const MODULE_ID = 'ai_assistant'
 
@@ -125,6 +139,79 @@ const agent: AiAgentDefinition = {
   },
 }
 
-export const aiAgents: AiAgentDefinition[] = [agent]
+/**
+ * The runner agent's id. Imported by the door's admission rail and by the
+ * callers that start a run under it — the same anti-drift discipline
+ * `BUSINESS_IR_AGENT_ID` follows.
+ */
+export const BUSINESS_IR_RUNNER_AGENT_ID = 'business_ir.query_runner' as const
+
+/**
+ * The runner's instruction. The author above is a field list because its output
+ * is an object; this one is short because its job is a single decision: **call
+ * the one tool, with the question, and report what it says.** Everything that
+ * could tempt a model to answer from its own knowledge, or to dress the
+ * question up, is named and refused.
+ */
+const RUNNER_SYSTEM_PROMPT = [
+  'ROLE',
+  'You answer plain-language questions about the tenant\'s own business data.',
+  'You do it in exactly one way: call the tool "business_ir.run_query" with the',
+  'user\'s question as the prompt. The tool turns the question into a typed',
+  'business request, validates it against the business model, runs it, and',
+  'returns the rows. That result is the answer.',
+  '',
+  'RULES',
+  '- Always call the tool for any question about business data — customer',
+  '  counts, amounts, trends, lists, comparisons. There is no other way to',
+  '  answer, and your own knowledge is never a source for these answers.',
+  '- Pass the question as written. Do not rephrase it into something narrower,',
+  '  and do not add scope, tenant, organization, id or date fields of your own —',
+  '  the platform decides what the caller may see.',
+  '- The tool answers with a value, not an error: when it refuses (the person',
+  '  is not bound, the request does not compile, the engine fails), report that',
+  '  refusal plainly and stop. Never retry with a changed question, and never',
+  '  answer the question yourself instead.',
+  '- Present the rows the tool returned. Do not summarize away numbers, and do',
+  '  not add commentary the result does not support.',
+  '- You have this one tool and no others. A request that needs something else',
+  '  is outside what you can do — say so.',
+].join('\n')
+
+const runnerAgent: AiAgentDefinition = {
+  id: BUSINESS_IR_RUNNER_AGENT_ID,
+  moduleId: MODULE_ID,
+  label: 'Business IR Query Runner',
+  description:
+    'Answers a plain-language business question by running it through the ' +
+    'platform\'s own Business-IR chain — the question becomes a typed, validated ' +
+    'request and runs on the platform read path, scoped to the caller\'s ' +
+    'tenant/organization. Has exactly one tool, and cannot reach the data any ' +
+    'other way. Read-only.',
+  systemPrompt: RUNNER_SYSTEM_PROMPT,
+  // The fixed menu — "the specific tools it needs all the time" (the owner's
+  // design input, 2026-10-13). One tool, always. Recorded on the run at
+  // admission and enforced by the door's two gates, so the model can call this
+  // tool and nothing else. `CC-78` is the task-shaped menu for the user-facing
+  // side; a built-in's menu does not vary by task.
+  allowedTools: [BUSINESS_IR_RUN_QUERY_TOOL_NAME],
+  // Read-only in every sense: the tool is `isMutation: false` and tagged
+  // `read`, and the agent's own policy agrees. Scope comes from the
+  // authenticated request the tool context carries, never from the prompt.
+  readOnly: true,
+  mutationPolicy: 'read-only',
+  // The pack's own requirement (`requiredFeatures` on the tool definition) —
+  // declaring it here too keeps the agent-level gate and the tool-level gate
+  // saying the same thing, so a run is refused at admission rather than at the
+  // call if the acting person lacks the feature.
+  requiredFeatures: ['ai_assistant.view'],
+  keywords: ['query', 'report', 'business data', 'run', 'numbers'],
+  domain: 'ai_assistant',
+  dataCapabilities: {
+    operations: ['read'],
+  },
+}
+
+export const aiAgents: AiAgentDefinition[] = [agent, runnerAgent]
 
 export default aiAgents

@@ -186,8 +186,9 @@ describe('HermesPortAdapter (P2-3 — the second engine behind the door)', () =>
 
       expect(caps.implementation).toBe(HERMES_RUNTIME_IMPLEMENTATION)
       expect(caps.runtimeVersion).toBe('asked-version')
-      // §2.4's verdict: steerRun is the first ✓ on the whole port; the tool
-      // door stays ✗ until P2-4, and it is REPORTED that way, not pretended.
+      // §2.4's verdict: steerRun is the first ✓ on the whole port; P2-4 then
+      // made the tool door real for the first engine (two gates, deny by
+      // default — see `hermes-port-adapter-tools.test.ts`).
       expect(caps.operations).toEqual({
         describeCapabilities: true,
         startRun: true,
@@ -195,7 +196,7 @@ describe('HermesPortAdapter (P2-3 — the second engine behind the door)', () =>
         cancelRun: true,
         steerRun: true,
         resumeConversation: true,
-        resolveToolCall: false,
+        resolveToolCall: true,
         completeRun: true,
       })
     })
@@ -611,11 +612,16 @@ describe('HermesPortAdapter (P2-3 — the second engine behind the door)', () =>
     })
   })
 
-  describe('resolveToolCall — unsupported, and said so (P2-4 wires it)', () => {
-    it('throws, naming the call, so no caller believes a tool call is platform-gated', async () => {
-      await expect(adapter.resolveToolCall({ id: 'c-1', toolName: 'business.ir', args: {} }, 'grant-1')).rejects.toThrow(
-        /not supported by the hermes runtime \(call c-1\)/,
-      )
+  describe('resolveToolCall — a real door since P2-4', () => {
+    it('no longer reports itself unsupported: a call no live run raised is refused as unknown', async () => {
+      // P2-4 made this the first engine on the port that resolves a tool call.
+      // The two gates (deny-by-default) and the full plumbing live in
+      // `hermes-port-adapter-tools.test.ts`; what this suite still owns is that
+      // the door no longer answers "unsupported" for a call it cannot correlate
+      // — it refuses it as an unknown call, which is a different, honest answer.
+      await expect(
+        adapter.resolveToolCall({ id: 'c-1', toolName: 'business.ir', args: {} }, 'grant-1'),
+      ).rejects.toThrow(/no live run raised the call/)
     })
   })
 
