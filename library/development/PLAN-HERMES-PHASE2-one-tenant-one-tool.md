@@ -5,7 +5,7 @@ written BEFORE any code."* No Phase 2 code exists yet. This document is the requ
 below are executed against it, one sub-row at a time, under the full protocol (hostile critic,
 RED-then-GREEN, two-route).
 
-**Progress: `P2-1` ✅ (2026-10-12, §2.7) · `P2-2` ✅ (2026-10-12, §4) · `P2-3` ✅ (2026-10-12, §2.9) — NEXT = `P2-4`, the one narrow tool
+**Progress: `P2-1` ✅ (2026-10-12, §2.7) · `P2-2` ✅ (2026-10-12, §4) · `P2-3` ✅ (2026-10-12, §2.9) — NEXT = `P2-4`, the one narrow tool (requirement §2.10 — the two-gate design)
 (`session.steer` settled by measurement before anything is claimed for it).**
 
 **Read it with:** [`ARCHITECTURE-hermes-integration.md`](ARCHITECTURE-hermes-integration.md) §9 (the
@@ -282,6 +282,49 @@ against the measured wire.
 
 ---
 
+## 2.10 `P2-4` — the requirement, measured before any gate code is written (2026-10-13)
+
+**The owner's design input (2026-10-13), recorded verbatim because it decides the shape:**
+
+> "A system agent converting propmt to business ir may have specific tools it need all the time. An AI user may need completely different tools and has to start wih a different one depending on the task in hand."
+
+Read with the owner's ruling on this row's build shape — *"proceed with recommendations"*, i.e. the **two-gate design** recommended the same day from the measurement below. Two principles follow, and they are the requirement:
+
+1. **The menu is decided at ADMISSION, from the agent.** A system-kind agent has a FIXED menu (the tools it needs all the time). A user-facing agent's STARTING menu is task-shaped — the task in hand selects the first tool. Neither is decided by the model mid-run.
+2. **The DOOR enforces what admission allowed — it never widens.** A tool call executes only if (a) its tool is in the run's recorded menu AND (b) the run's own capability grant authorizes it. The runtime may narrow; it can never add.
+
+**The measured facts (rule 0b — the code repo, 2026-10-13):**
+
+| Fact | Evidence |
+|---|---|
+| Agent tool selection ALREADY EXISTS — per agent, not per kind | `AiAgentDefinition.allowedTools: string[]` (`lib/ai-agent-definition.ts:296`); `resolveAiAgentTools({agentId, authContext, boundScope})` builds the model's map from it, narrowed by any binding (`CC-55`, narrowing-only, `lib/agent-tools.ts:349-355`) and gated per tool by `checkAgentPolicy` (`lib/agent-policy.ts:157`) |
+| The five kinds are an ownership concept, NOT a tool selector | `AGENT_KINDS = ['personal','role','context','independent','system']` (`ce.ts:54`) — nothing reads a kind to pick tools |
+| The door is agent-BLIND | `resolveToolCall(call, capabilityGrant)` (`lib/ai-runtime-port.ts:354`) — no agent id, no menu. The envelope carries the real `agentId` (`:78`), so the identity is available at the call site through the run |
+| The "grant" is a LABEL today | both chat routes mint `capabilityGrantId: chat-turn:${auth.sub}:${runId}` (`api/ai/chat/route.ts:791`, `api/chat/route.ts:531`); nothing resolves it → gate 2 is a correlation check until `CC-77` lands |
+| The narrow tool exists, is LIVE on the tool door, and NO agent whitelists it | `ai-tools/business-ir-pack.ts` — `business_ir.run_query`, `requiredFeatures: ['ai_assistant.view']`, `isMutation: false`, handler scoped by the tool ctx only; the pack's own docblock: *"No agent whitelists it yet"* |
+| NO agent is declared anywhere in production | `defineAiAgent` has ZERO call sites in `packages/` + `apps/`; the registry loads a generated file only (`lib/agent-registry.ts`) → the owner's "system agent" must be DECLARED by this row |
+| The task-shaped menu is destination, not machinery | `pageContext` rides the run input (`attachRunInput`, `api/ai/chat/route.ts:799`) and nothing reads it to shape tools (`lib/agent-tools.ts:40` accepts it, unused) → `CC-78` |
+| The worker's tool surface is CLOSED | the pinned worker loads its own toolsets (`agent/agent_init.py:1093 _load_tools(agent, enabled_toolsets, disabled_toolsets)`); the wire exposes no tool-registration surface (`tui_gateway/contracts/`) → the live "worker asks the platform" bridge is `CC-79` |
+| Per-run rich data rides a measured rail, never the envelope | `attachRunInput(port, runId, input)` (`lib/agent-runtime-port-adapter.ts:473`) — *"the envelope carries references, not bodies (§4.2)… nothing the caller passes here enters it"* → the menu rides the same rail |
+
+**What this row builds.**
+
+1. **The system agent declared** — kind `system`, fixed menu `['business_ir.run_query']`, `requiredFeatures: ['ai_assistant.view']` (the pack's own requirement), chat execution. The owner's "specific tools it needs all the time".
+2. **The menu recorded on the run at admission** — on the Hermes adapter's own carrier (the `attachRunInput` pattern; the envelope is never widened). The effective menu is computed by the EXISTING machinery (`resolveAiAgentTools`/`checkAgentPolicy`), so binding-narrowing and permission gating are inherited, not rebuilt.
+3. **The two gates in `resolveToolCall`** — the first engine that can actually resolve a call. The call is correlated to its run (the stream already observes `tool.start {tool_id}`, so the adapter indexes call id → run), then **gate 1**: `call.toolName ∈ the run's recorded menu` (a call outside the menu is refused even WITH a grant — the agent's list is not advisory), then **gate 2**: the grant is present and is the run's OWN grant (absent or foreign → refused; the runtime never widens). Only then does execution reach the platform's existing tool door (`executeTool`) with the context taken from the run's admitted envelope, under the `S-02` rule the §4 row names.
+4. **The honest map flips**: `resolveToolCall ✓` for the Hermes adapter — the port's eight operations are all real, for the first engine.
+
+**What this row does NOT claim (named bounds, each registered in the same change):**
+
+- **The features check stays at admission.** The envelope deliberately does not carry the acting person's features and the adapter has no request context, so execution runs with the admission-time context the run recorded. Re-deriving permissions at execution time is later work.
+- **The grant is still a label.** Gate 2 proves the call belongs to THIS run under THIS run's grant; it does not yet prove the caller was permitted the operation, and it carries no expiry or scope. The grant resolver is **`CC-77`**.
+- **The task-shaped starting menu.** The door enforces whatever admission records, so the later shaping plugs in at admission without reopening the door; the shaping mechanism itself is **`CC-78`**.
+- **The live worker bridge.** The pinned worker cannot be offered a platform tool (closed toolset, no wire surface). This row proves the door through the port's own API (the §4.1 contract's own shape: the caller raises the call); the worker asking the platform live — the plugin `ctx.register_tool()` path plus the authenticated tool door — is **`CC-79`**, built and proven in the live-run rows.
+
+**Exit gate.** (1) A call whose tool is NOT in the run's recorded menu is refused — with a valid grant in hand (the widening-refusal test). (2) A call without a grant is refused; a call under a foreign run's grant is refused. (3) A call inside the menu under the run's own grant executes through `executeTool` with the S-02 context (tenant/principal scope, on-behalf-of preserved). (4) `describeCapabilities` reports `resolveToolCall ✓` and the suite proves the three refusals plus the success path. (5) Nothing pre-existing breaks (full package suite); `tsc` 0-in-the-new-files against the 92 pre-existing (`CC-73`); mutations RED.
+
+---
+
 ## 3. Measured facts (rule 0b — measured in the pinned source and the code repo, 2026-10-12)
 
 ### 3.1 The run-path protocol surface — re-verified against the RE-PINNED copy
@@ -331,8 +374,12 @@ env — *never* a second product surface (§11: "one interface (ours)").
 `lib/business-ir-author.ts` + `lib/business-ir-run.ts` + `ai-tools/business-ir-pack.ts`, with tests
 (`business-ir-author.test.ts`, `business-ir-run.test.ts`, `business-ir-pack.test.ts`). This is the
 "prompt → business IR" path the owner named as the product's main logic. Phase 2 delivers **this**
-tool to the worker, authorized at execution time under the existing `S-02` gate
+tool **through the door**, authorized at execution time under the existing `S-02` gate
 (`S-02` — tool-call authorization at execution time, deny-by-default, DONE `3add3a2`).
+**Premise corrected 2026-10-13 (rule 13):** the pinned worker's tool surface is its own closed
+toolset and the wire exposes no tool-registration surface, so the tool cannot be *offered* to the
+worker in this phase — the door is proven through the port's own API and the live bridge (a worker
+plugin calling the authenticated tool door as the acting principal) is registered as `CC-79`.
 
 ---
 
@@ -346,7 +393,7 @@ foundation order from §2.1.
 | **P2-1** | **The worker boots.** `docker/hermes/` (image + entrypoint) and a compose service, mirroring `docker/opencode/`: pinned source mounted, `uv`-locked deps, the TUI gateway started on stdio, health from `ping`, config from `OM_AI_*` | ✅ **DISCHARGED 2026-10-12** — §2.7 holds the full record. Gate `docker/hermes/handshake_gate.py`: `client.capabilities` (all **14** `server_requests`), `gateway.capabilities` (`per_session_exclusive_submit: true`), `ping` → `{'pong': true}`, `gateway.ready` → `[change_events, replay_epoch, skin]`, `process.stop` — **GATE PASSED in 39.5 s**, no stub or mock, image built from the pin's own lock in 1m49 s. **RED:** the same gate against `hermes-agent-main-older` refused with `PIN BROKEN … 3e3b81f2… files 17367`, 0 stdout frames — cross-validating the container verifier against the host harness. Compose cold start re-proved the boot (`PIN HOLDS`, 18,248 files) on `mercato-network-local`, and `down` left the whole platform stack intact. **One premise corrected after the fact (rule 13):** the network is external + overridable — the first version copied `docker-compose.yml`'s hardcoded `mercato-network`, which the running stack does not use. |
 | **P2-2** | **The gateway client.** `lib/hermes-gateway-client.ts`: spawn/supervise the worker, newline-JSON framing both ways, typed request/response correlation, the handshake, `prompt.submit` + the event stream, `session.interrupt`/`steer`, `process.stop` | ✅ **DISCHARGED 2026-10-12** (commit `f5f85064`). Against a **protocol stub implementing the measured contract** (§3.1/§3.2), all four behaviours proven: handshake (with the snake_case wire keys), one streamed turn as ordered typed events, cancel, and **a malformed frame does not kill the stream**. **21/21 tests.** Hostile-critic-hardened: a separate agent found 3 real defects (every event is an `event`-enveloped frame, so nothing dispatched; a pino-style logger call on a message-first logger; an unguarded `stdin.write`), each verified against the pinned source and fixed — and the critic's finding invalidated part of the suite, whose frames were the *un-enveloped* shape the real server never writes. **RED-then-GREEN:** mutating the envelope unwrapping turns **8 of 21 RED**; restored md5-identical (`4416a886…`) → 21 GREEN. **`tsc` clean — honestly qualified:** `P2-2`'s own two files are error-free, but the package's type gate **did not exist** (`tsc -p .` = TS18003; it was the only one of 21 configs not extending `tsconfig.base.json`). Fixing that surfaced **92 pre-existing errors in 27 other `__tests__` files**, scheduled as **`CC-73`** with the native-compiler and stale-`tsbuildinfo` measurements recorded as **L138/L139**. Any `tsc` run on this package must pass `--incremental false` to be reproducible. |
 | **P2-3** | **The port adapter.** `lib/hermes-port-adapter.ts` implementing `AiRuntimePort`, with an **honest** capability map — measured against the client, ✗ where it is ✗ (no pretending; the OpenCode adapter's own standard) | ✅ **DISCHARGED 2026-10-12** — §2.9 holds the full record. **37/37 tests GREEN** (the event map, both usage scopes, the envelope's own deadline, idempotent start/cancel, replay-safe complete, the steer verdict's three limits, identifier distinctness); the **full package is 120 suites / 1665 tests GREEN**; `tsc` shows **0** errors in the new files against the 92 pre-existing (CC-73). The capability map is the honest one: **seven ✓, `resolveToolCall` ✗ (`P2-4`), `steerRun` ✓** — the first engine that makes the port's eight real. **Hostile critic (separate agent) found 3 defects, each verified against the pinned source before the fix:** `resumeConversation` kept the caller's stored id while the gateway resolves a turn by the **runtime** id only (the `D2` correctness defect — invisible to the original fake, which echoed the request); the unsubscribe proof was **vacuous** (it counted submits, which no emission changes); the `onExit` subscription was never released. All three fixed in the same change, and the critic's own "no deadline policy" aside was **falsified by measurement** (the envelope carries `deadline`; the adapter now honours it — the OpenCode half registered as `CC-76`, L146). **RED-then-GREEN:** **11 mutations, all RED**, restored md5-identical (`706ad202…`). **The one remaining named bound:** a steered instruction reaches the worker's own tools only (§2.8's third limit). |
-| **P2-4** | **The one narrow tool.** The Business-IR tool delivered to the worker, every call re-authorized at execution time through `resolveToolCall(call, capabilityGrant)` | A tool call **without** a grant is refused; a call **with** one is authorized per `S-02`; the runtime never widens the grant |
+| **P2-4** | **The one narrow tool — the two-gate design (requirement §2.10).** The `system`-kind agent declared with a FIXED menu (`business_ir.run_query` — the tools it needs all the time); the effective menu recorded on the run at admission through the EXISTING machinery (agent's declared list ∩ binding ∩ permissions); the Hermes door's `resolveToolCall` enforcing TWO gates — the call's tool must be in the run's recorded menu, AND the grant must be the run's own — before execution reaches the platform's existing tool door under `S-02` | A tool call **without** a grant is refused; a call under a **foreign** run's grant is refused; a call whose tool is **outside the run's recorded menu is refused even with a valid grant** (the widening-refusal test); a call inside the menu under the run's own grant executes through `executeTool` with the S-02 context; `describeCapabilities` reports `resolveToolCall ✓`. **Named bounds (registered the same change):** the features check stays at admission (the envelope carries no features); the grant is still a **label** (`CC-77`); the task-shaped starting menu is destination (`CC-78` — the door enforces whatever admission records); the live worker bridge (the worker's closed toolset cannot be offered a platform tool on the wire) is `CC-79` |
 | **P2-5** | **Selection at the door.** `resolveAiRuntimePort` becomes config-selected; OpenCode stays the default; the chosen implementation is recorded on the run | Swapping engines touches exactly one function; **`door-only-way-in.test.ts` still passes** (the door is still the only way in); OpenCode is untouched and still answers |
 | **P2-6** | **The exit gate proof** — cancellation · retry idempotency · usage capture · bounded memory/CPU · no cross-scope access, on one tenant then on two adversarial ones | All five, measured, on one tenant; then the two adversarial tenants: a run admitted for tenant A cannot read, name or affect tenant B — proven by a negative test that fails if any cross-scope frame exists |
 
