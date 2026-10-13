@@ -50,7 +50,10 @@
  * (*"connect the client before starting a run"*). Connection is a **lifecycle**
  * decision — one worker per process, connected once — which belongs with the
  * live run, not with the selection. So this row constructs the client and names
- * the bound: serving a live turn over Hermes is `P2-6`'s exit gate. Until then a
+ * the bound: serving a live turn over Hermes is `P2-7`'s exit gate (§2.13;
+ * corrected 2026-10-13, rule 13 — this line said `P2-6`, but `P2-6` (§2.12) proved
+ * the five properties through the port against a `FakeClient` and drove no live
+ * turn, so the live turn became its own row). Until then a
  * `hermes`-selected chat fails **closed and loudly** at `startRun`, which is the
  * honest state — it never silently serves a different engine.
  *
@@ -189,7 +192,7 @@ export const HERMES_WORKER_ARGS_ENV = 'HERMES_WORKER_ARGS'
  *
  * Exported so the launch is directly testable: it is the one **pure** part of the
  * Hermes branch, and a wrong argv would otherwise surface only as a worker that
- * never boots — a `P2-6` failure with no obvious cause. The defaults mirror
+ * never boots — a `P2-7` failure with no obvious cause. The defaults mirror
  * `docker-compose.hermes.yml`; an operator whose worker runs in a container
  * overrides both (e.g. `docker` + `exec -i <container> python -m tui_gateway.entry`).
  */
