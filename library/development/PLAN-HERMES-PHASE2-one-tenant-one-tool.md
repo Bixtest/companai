@@ -460,6 +460,13 @@ The recommendation he approved, verbatim: *"the selector can choose Hermes; the 
 | **A local model is UP** | `mercato-model-local` (llama.cpp, OpenAI-compatible) Up 33h; the app reaches it via `OPENAI_BASE_URL=http://model:8080/v1` |
 | **The old door is still up** | `hermes-local` (upstream `:latest`, HTTP 8642) Up 33h — the `CC-74` retirement target |
 
+**MEASURED — the worker's own model-config mechanism (rule 0b, the pinned source + the live container, 2026-10-13).** So the build is not a guess:
+- **The worker ignores `OM_AI_PROVIDER`/`OM_AI_MODEL`.** They appear nowhere in its config system (its provider registry is `hermes_cli/auth.py` + `hermes_cli/providers.py`, keyed on `HERMES_*` / provider-specific env vars).
+- **It resolves its provider from `config.yaml model.provider`, else auto-detects from which API key is present** (`hermes_cli/auth.py:1629 resolve_provider()`). With `OPENAI_API_KEY=local` set and **no** config, it auto-detects **`openai-api`** — whose transport is **`codex_responses`** and whose base URL is **`OPENAI_BASE_URL`** (`auth.py:177`, `providers.py:34-35`), which the compose does **not** forward → it would call `https://api.openai.com/v1`.
+- **Its model** comes from `HERMES_MODEL`/`HERMES_INFERENCE_MODEL` (env) or config `model` (`tui_gateway/server.py:1544-1561`) — neither is set → a silent default.
+- **`HERMES_HOME=/var/lib/hermes` holds no `.env` and no config** (measured in the container) → the worker has **no model configured at all**.
+- **The local server supports BOTH transports:** `mercato-model-local` answers `/v1/chat/completions` **200** *and* `/v1/responses` **200** (model id `/models/Qwen2.5-7B-Instruct-Q4_K_M.gguf`; it accepts any requested model name). So the `openai-api` (`codex_responses`) path is **viable** — the minimal fix is to **forward `OPENAI_BASE_URL` and set `HERMES_MODEL`** in `docker-compose.hermes.yml`.
+
 **What this row builds.**
 
 1. **The live-turn proof.** A harness that drives a **real** turn through the port with the Hermes engine selected: connect the pinned worker → `session.create` → `prompt.submit` → read the adapter's ordered typed events, ending on a real `done`/`message.complete`. **A real model answer, not a fake** — the exact thing §2.11 named as `P2-6`'s gate.
