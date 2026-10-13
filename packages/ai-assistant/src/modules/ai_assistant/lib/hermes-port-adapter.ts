@@ -91,6 +91,7 @@ import {
   checkToolCallAdmitted,
   describeToolCallRefusal,
 } from './ai-tool-call-gate'
+import { pruneRunRegistry, resolveRunDeadline } from './ai-runtime-bounds'
 import {
   type AiRuntimeCancelResult,
   type AiRuntimeCapabilities,
@@ -142,6 +143,13 @@ interface HermesLiveRun {
   runId: string
   sessionId: string
   envelope: AiRuntimeEnvelope
+  /**
+   * `P2-6` (§2.12) — when this run was admitted. The envelope's
+   * `budget.milliseconds` is a DURATION, so the run's wall-clock bound is
+   * measured from here (the shared `resolveRunDeadline`), not from whenever a
+   * caller happens to ask.
+   */
+  admittedAt: number
   /** Set by `cancelRun`; a cancelled run streams nothing further. */
   cancelled: boolean
   /** Set by `completeRun`; makes completion replay-safe (§4.3). */
@@ -277,6 +285,15 @@ export class HermesPortAdapter implements AiRuntimePort {
     return this.runs.get(runId)
   }
 
+  /**
+   * `P2-6` (§2.12) — how many runs the adapter still retains. The memory bound
+   * is **asserted, not assumed**: a test drives more runs than the cap and reads
+   * this, so "the registry is bounded" is a measurement rather than a claim.
+   */
+  retainedRunCount(): number {
+    return this.runs.size
+  }
+
   async describeCapabilities(runtimeVersion?: string): Promise<AiRuntimeCapabilities> {
     return {
       implementation: HERMES_RUNTIME_IMPLEMENTATION,
@@ -340,10 +357,15 @@ export class HermesPortAdapter implements AiRuntimePort {
       runId: envelope.runId,
       sessionId,
       envelope,
+      admittedAt: Date.now(),
       cancelled: false,
       completed: false,
     }
     this.runs.set(envelope.runId, run)
+    // §2.12 — keep the registry bounded: once the cap is reached, FINISHED runs
+    // are evicted oldest-first. A live run is never evicted — it is still
+    // addressable by `cancelRun`/`streamRun`.
+    pruneRunRegistry(this.runs)
     logger.debug('Hermes run started', { runId: envelope.runId, sessionId })
     return { runId: envelope.runId, runtimeSessionId: sessionId }
   }
@@ -392,12 +414,14 @@ export class HermesPortAdapter implements AiRuntimePort {
     // honoured here: the turn is never sent on behalf of a cancelled run.
     if (run.cancelled) return
 
-    // §4.2's envelope carries `deadline` — "a deadline, so a run cannot outlive
-    // its admission". It is the CALLER's bound (not an adapter policy), so a run
-    // that is already out of time streams the error instead of spending a turn.
-    const deadlineAt = readDeadline(run.envelope)
+    // §4.2's envelope carries TWO time bounds — `deadline` (an instant) and
+    // `budget.milliseconds` (a duration). `resolveRunDeadline` takes the SOONER
+    // of them (§2.12), so a budget is a real bound and not a decoration. It is
+    // the CALLER's bound, not an adapter policy: a run already out of time
+    // streams the error instead of spending a turn.
+    const deadlineAt = resolveRunDeadline(run.envelope, run.admittedAt)
     if (deadlineAt !== null && deadlineAt <= Date.now()) {
-      await onEvent({ type: 'error', error: 'the run exceeded its admission deadline before it could stream' })
+      await onEvent({ type: 'error', error: 'the run exceeded its admission time bound before it could stream' })
       return
     }
 
@@ -513,7 +537,7 @@ export class HermesPortAdapter implements AiRuntimePort {
     if (deadlineAt !== null) {
       deadlineTimer = setTimeout(() => {
         if (settled) return
-        void onEvent({ type: 'error', error: 'the run exceeded its admission deadline while streaming' }).then(settle, settle)
+        void onEvent({ type: 'error', error: 'the run exceeded its admission time bound while streaming' }).then(settle, settle)
       }, deadlineAt - Date.now())
     }
 
@@ -669,10 +693,14 @@ export class HermesPortAdapter implements AiRuntimePort {
         capabilityGrantId: binding.capabilityGrantId,
         allowedInputRefs: input.text !== undefined ? [textInputRef(input.text)] : [],
       },
+      // A resume envelope carries no `deadline`/`budget` (it is built here, not
+      // admitted by the platform), so its bound is `null` — honest, not implied.
+      admittedAt: Date.now(),
       cancelled: false,
       completed: false,
     }
     this.runs.set(runId, run)
+    pruneRunRegistry(this.runs)
     return { runId, runtimeSessionId }
   }
 
@@ -853,25 +881,12 @@ export function attachRunToolMenu(
 }
 
 /**
- * Reads the envelope's own deadline (§4.2) as an epoch in milliseconds.
- *
- * A bound is honoured exactly when it can be read: absent, `null` or
- * unparseable values bound nothing and the unparseable ones are logged — a
- * deadline that fires because its value was garbage would kill healthy runs,
- * so the failure mode is chosen deliberately, not inherited from `new Date`.
+ * The run's wall-clock bound now lives in `ai-runtime-bounds.ts`
+ * (`resolveRunDeadline`), **shared with the OpenCode adapter** so the two engines
+ * cannot drift on what *bounded* means (§2.12) — and so the envelope's
+ * `budget.milliseconds` is honoured alongside `deadline`, which the local
+ * `readDeadline` this replaced never read.
  */
-function readDeadline(envelope: AiRuntimeEnvelope): number | null {
-  const { deadline } = envelope
-  if (deadline === undefined || deadline === null) return null
-  const parsed = deadline instanceof Date ? deadline.getTime() : new Date(deadline).getTime()
-  if (!Number.isFinite(parsed)) {
-    logger.warn('Hermes run envelope carried an unparseable deadline; no bound applied', {
-      deadline: String(deadline),
-    })
-    return null
-  }
-  return parsed
-}
 
 /**
  * How a caller attaches one turn's text to a run — the port's envelope carries

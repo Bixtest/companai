@@ -20,6 +20,7 @@
  */
 import type { AiRuntimeEnvelope } from '../ai-runtime-port'
 import { OPENCODE_RUNTIME_IMPLEMENTATION } from '../ai-runtime-port'
+import { DEFAULT_MAX_RETAINED_RUNS } from '../ai-runtime-bounds'
 
 const handleOpenCodeMessageStreamingMock = jest.fn()
 const handleOpenCodeHealthMock = jest.fn()
@@ -428,6 +429,152 @@ describe('OpenCodePortAdapter (R28-2 — the first engine behind the door)', () 
       })
       const request = handleOpenCodeMessageStreamingMock.mock.calls[0][0] as { message: string }
       expect(request.message).toBe('resume please')
+    })
+  })
+})
+
+describe('P2-6 §2.12 — the envelope\'s time bound is honoured (the CC-76 fix)', () => {
+  let adapter: OpenCodePortAdapter
+
+  beforeEach(() => {
+    adapter = new OpenCodePortAdapter()
+    handleOpenCodeMessageStreamingMock.mockReset()
+    handleOpenCodeHealthMock.mockReset()
+    handleOpenCodeMessageStreamingMock.mockResolvedValue(undefined)
+  })
+
+  it('a run whose DEADLINE has passed streams the error and spends no turn', async () => {
+    // Before P2-6 this engine ignored the envelope's deadline entirely (CC-76):
+    // an out-of-time run still cost a full turn.
+    await adapter.startRun(envelope({ runId: 'run-d', deadline: new Date(Date.now() - 1_000).toISOString() }))
+    const events: unknown[] = []
+    await adapter.streamRun('run-d', async (e) => {
+      events.push(e)
+    })
+    expect(events).toEqual([
+      { type: 'error', error: 'the run exceeded its admission time bound before it could stream' },
+    ])
+    expect(handleOpenCodeMessageStreamingMock).not.toHaveBeenCalled()
+  })
+
+  it('a run whose BUDGET.milliseconds has passed bounds the run too', async () => {
+    await adapter.startRun(envelope({ runId: 'run-b', budget: { milliseconds: 10 } }))
+    await new Promise((resolve) => setTimeout(resolve, 30))
+    const events: unknown[] = []
+    await adapter.streamRun('run-b', async (e) => {
+      events.push(e)
+    })
+    expect(events).toEqual([
+      { type: 'error', error: 'the run exceeded its admission time bound before it could stream' },
+    ])
+    expect(handleOpenCodeMessageStreamingMock).not.toHaveBeenCalled()
+  })
+
+  it('a run with NO bound streams normally — an absent bound is not a zero bound', async () => {
+    handleOpenCodeMessageStreamingMock.mockImplementation(
+      async (_req: unknown, onEvent: (e: unknown) => Promise<void>) => {
+        await onEvent({ type: 'done', sessionId: 'sess-1' })
+      },
+    )
+    await adapter.startRun(envelope({ runId: 'run-n' }))
+    const events: unknown[] = []
+    await adapter.streamRun('run-n', async (e) => {
+      events.push(e)
+    })
+    expect(events).toEqual([{ type: 'done', sessionId: 'sess-1' }])
+    expect(handleOpenCodeMessageStreamingMock).toHaveBeenCalledTimes(1)
+  })
+
+  it('a turn that OUTLIVES the bound reports it and stops forwarding — co-operatively, like a cancel', async () => {
+    let release!: () => void
+    const hold = new Promise<void>((resolve) => {
+      release = resolve
+    })
+    handleOpenCodeMessageStreamingMock.mockImplementation(
+      async (_req: unknown, onEvent: (e: unknown) => Promise<void>) => {
+        await onEvent({ type: 'text', content: 'before-the-bound' })
+        await hold
+        // This event arrives AFTER the bound passed; it must not be forwarded.
+        await onEvent({ type: 'text', content: 'after-the-bound' })
+      },
+    )
+    await adapter.startRun(envelope({ runId: 'run-m', budget: { milliseconds: 10 } }))
+    const events: unknown[] = []
+    const streaming = adapter.streamRun('run-m', async (e) => {
+      events.push(e)
+    })
+    await new Promise((resolve) => setTimeout(resolve, 30))
+    release()
+    await streaming
+
+    expect(events).toContainEqual({ type: 'text', content: 'before-the-bound' })
+    expect(events).not.toContainEqual({ type: 'text', content: 'after-the-bound' })
+    expect(events).toContainEqual({
+      type: 'error',
+      error: 'the run exceeded its admission time bound while streaming',
+    })
+  })
+
+  it('a run whose engine STALLS still ENDS at the bound — the timer settles the stream, not just a flag', async () => {
+    // The defect this pins: a timer that only set a flag left `streamRun`
+    // awaiting forever when the engine never yielded, so the CPU bound bounded
+    // nothing. Hermes settles its stream at the bound; this engine must too.
+    handleOpenCodeMessageStreamingMock.mockImplementation(() => new Promise<void>(() => {}))
+    await adapter.startRun(envelope({ runId: 'run-s', budget: { milliseconds: 10 } }))
+    const events: unknown[] = []
+    const outcome = await Promise.race([
+      adapter
+        .streamRun('run-s', async (e) => {
+          events.push(e)
+        })
+        .then(() => 'RESOLVED' as const),
+      new Promise<'STILL-PENDING'>((resolve) => setTimeout(() => resolve('STILL-PENDING'), 300)),
+    ])
+    expect(outcome).toBe('RESOLVED')
+    expect(events).toEqual([
+      { type: 'error', error: 'the run exceeded its admission time bound while streaming' },
+    ])
+  })
+})
+
+describe('P2-6 §2.12 — the run registry is BOUNDED (the same cap as every engine)', () => {
+  let adapter: OpenCodePortAdapter
+
+  beforeEach(() => {
+    adapter = new OpenCodePortAdapter()
+    handleOpenCodeMessageStreamingMock.mockReset()
+    handleOpenCodeHealthMock.mockReset()
+    handleOpenCodeMessageStreamingMock.mockResolvedValue(undefined)
+  })
+
+  it('past the cap, finished runs are evicted oldest-first and a LIVE run is kept', async () => {
+    // The cap lives in the SHARED `ai-runtime-bounds` module, so the two engines
+    // cannot drift: the same `pruneRunRegistry` runs in both. This test proves
+    // the OpenCode adapter actually CALLS it — the exit-gate suite proves the
+    // bound for Hermes only, and a rule that lives in one adapter but not the
+    // other is exactly the asymmetry P2-5's provenance fix had to repair.
+    //
+    // One run that never completes: it must survive every prune.
+    await adapter.startRun(envelope({ runId: 'live' }))
+
+    // Drive WELL past the cap, finishing each run so it is evictable.
+    const total = DEFAULT_MAX_RETAINED_RUNS + 25
+    for (let i = 0; i < total; i++) {
+      const id = `run-${i}`
+      await adapter.startRun(envelope({ runId: id }))
+      await adapter.completeRun(id, { status: 'completed' })
+    }
+
+    // The registry is BOUNDED — far below the number of runs started.
+    expect(adapter.retainedRunCount()).toBeLessThanOrEqual(DEFAULT_MAX_RETAINED_RUNS + 1)
+    // The oldest finished run was evicted; the live one never was.
+    expect(adapter.getRun('run-0')).toBeUndefined()
+    expect(adapter.getRun('live')).toBeDefined()
+    // A late completion for an evicted run is harmless, not a throw.
+    expect(await adapter.completeRun('run-0', { status: 'completed' })).toEqual({
+      runId: 'run-0',
+      completed: false,
+      alreadyComplete: false,
     })
   })
 })

@@ -48,6 +48,7 @@ import {
   attachRunInput,
 } from '../agent-runtime-port-adapter'
 import type { AiRuntimeEnvelope } from '../ai-runtime-port'
+import { DEFAULT_MAX_RETAINED_RUNS } from '../ai-runtime-bounds'
 
 const AUTH_CONTEXT = {
   tenantId: 'tenant-1',
@@ -295,5 +296,29 @@ describe('CC-67 — the platform runtime behind the door (behaviour, port contra
     await port.startRun(makeEnvelope('run-1'))
     const cancelled = await port.cancelRun('run-1')
     expect(cancelled.cancelled).toBe(true)
+  })
+})
+
+describe('P2-6 §2.12 — the platform registry is BOUNDED (the same shared cap)', () => {
+  // §2.12 states the memory bound for "the run registry", not for two named
+  // adapters, so the THIRD port implementation must honour it too — otherwise
+  // "a long-lived adapter cannot grow without bound" is false for one of the
+  // three. The cap lives in the shared `ai-runtime-bounds` module; this test
+  // proves the platform adapter actually CALLS it.
+  it('past the cap, finished runs are evicted oldest-first and a LIVE run is kept', async () => {
+    const port = makePort()
+    // One run that never completes: it must survive every prune.
+    await port.startRun(makeEnvelope('live'))
+
+    const total = DEFAULT_MAX_RETAINED_RUNS + 25
+    for (let i = 0; i < total; i++) {
+      const id = `run-${i}`
+      await port.startRun(makeEnvelope(id))
+      await port.completeRun(id, { status: 'completed' })
+    }
+
+    expect(port.retainedRunCount()).toBeLessThanOrEqual(DEFAULT_MAX_RETAINED_RUNS + 1)
+    expect(port.getRun('run-0')).toBeUndefined()
+    expect(port.getRun('live')).toBeDefined()
   })
 })

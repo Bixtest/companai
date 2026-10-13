@@ -103,6 +103,7 @@ import {
   type AiRuntimeStreamEvent,
   type AiRuntimeToolCall,
 } from './ai-runtime-port'
+import { pruneRunRegistry } from './ai-runtime-bounds'
 
 const logger = createLogger('ai_assistant').child({ component: 'agent-runtime-port' })
 
@@ -212,6 +213,15 @@ export class AgentRuntimePortAdapter implements AiRuntimePort {
   }
 
   /**
+   * `P2-6` (§2.12) — how many runs the adapter still retains. The memory bound
+   * is **asserted, not assumed**: a test drives more runs than the cap and reads
+   * this, so "the registry is bounded" is a measurement rather than a claim.
+   */
+  retainedRunCount(): number {
+    return this.runs.size
+  }
+
+  /**
    * `describeCapabilities(runtimeVersion)` — this engine is in-process, so its
    * health is "ok" when it is constructible at all (there is no remote to probe).
    * `steerRun` and `resolveToolCall` are reported UNSUPPORTED for the same
@@ -258,6 +268,13 @@ export class AgentRuntimePortAdapter implements AiRuntimePort {
       aborts: new Set(),
     }
     this.runs.set(envelope.runId, run)
+    // §2.12 — the SAME shared bound every adapter applies: once the cap is
+    // reached, FINISHED runs are evicted oldest-first and a live run is never
+    // evicted. This engine does not own its byte stream (it stashes a `Response`
+    // for the caller to drain), so it applies the MEMORY bound only; the
+    // wall-clock `deadline`/`budget` bound belongs to the two stream-owning chat
+    // adapters (Hermes, OpenCode).
+    pruneRunRegistry(this.runs)
     return { runId: envelope.runId, runtimeSessionId: run.sessionId ?? undefined }
   }
 
@@ -437,6 +454,8 @@ export class AgentRuntimePortAdapter implements AiRuntimePort {
       completed: false,
       aborts: new Set(),
     })
+    // §2.12 — the same shared memory bound as `startRun` (see there).
+    pruneRunRegistry(this.runs)
     return { runId, runtimeSessionId: sessionId ?? undefined }
   }
 

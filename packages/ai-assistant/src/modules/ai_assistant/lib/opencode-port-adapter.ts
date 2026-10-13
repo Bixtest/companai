@@ -76,6 +76,7 @@ import {
   type OpenCodeStreamEvent,
   type OpenCodeTestRequest,
 } from './opencode-handlers'
+import { pruneRunRegistry, resolveRunDeadline } from './ai-runtime-bounds'
 
 const logger = createLogger('ai_assistant').child({ component: 'opencode-port' })
 
@@ -90,6 +91,12 @@ interface LiveRun {
   runId: string
   sessionId: string | null
   envelope: AiRuntimeEnvelope
+  /**
+   * `P2-6` (§2.12) — when this run was admitted, so `budget.milliseconds` (a
+   * DURATION) is measured from the run rather than from the clock at the moment
+   * a caller happens to ask. The bound itself is shared (`resolveRunDeadline`).
+   */
+  admittedAt: number
   /** The auth/EM context needed to resume or answer a session, when supplied. */
   auth?: OpenCodeTestRequest['auth']
   em?: EntityManager
@@ -179,6 +186,15 @@ export class OpenCodePortAdapter implements AiRuntimePort {
     return this.runs.get(runId)
   }
 
+  /**
+   * `P2-6` (§2.12) — how many runs the adapter still retains. The memory bound
+   * is **asserted, not assumed**: a test drives more runs than the cap and reads
+   * this, so "the registry is bounded" is a measurement rather than a claim.
+   */
+  retainedRunCount(): number {
+    return this.runs.size
+  }
+
   async describeCapabilities(runtimeVersion?: string): Promise<AiRuntimeCapabilities> {
     let health: AiRuntimeCapabilities['health'] = 'unknown'
     try {
@@ -226,6 +242,7 @@ export class OpenCodePortAdapter implements AiRuntimePort {
       runId: envelope.runId,
       sessionId: envelope.runtimeSessionId ?? null,
       envelope,
+      admittedAt: Date.now(),
       auth: this.deps.auth,
       em: this.deps.em,
       cancelled: false,
@@ -233,6 +250,9 @@ export class OpenCodePortAdapter implements AiRuntimePort {
       aborts: new Set(),
     }
     this.runs.set(envelope.runId, run)
+    // §2.12 — keep the registry bounded: once the cap is reached, FINISHED runs
+    // are evicted oldest-first; a live run is never evicted.
+    pruneRunRegistry(this.runs)
     return { runId: envelope.runId, runtimeSessionId: run.sessionId ?? undefined }
   }
 
@@ -242,6 +262,16 @@ export class OpenCodePortAdapter implements AiRuntimePort {
    * Delegates to the unchanged `handleOpenCodeMessageStreaming`. The run must
    * have been started first (the door refuses an unadmitted run). A run
    * cancelled before streaming begins emits nothing and resolves.
+   *
+   * **The envelope's time bound is honoured (`P2-6` §2.12 — the `CC-76` fix).**
+   * §4.2 puts two bounds in the envelope — `deadline` (an instant) and
+   * `budget.milliseconds` (a duration) — and `resolveRunDeadline` takes the
+   * sooner of them. A run already out of time streams the error instead of
+   * spending a turn; a turn that outlives the bound reports it and stops
+   * forwarding. As with cancellation, the engine's in-flight HTTP call is NOT
+   * force-torn-down from here (this adapter holds no handle to do that), so the
+   * bound is honoured **co-operatively, at the next event** — the honest
+   * guarantee, stated rather than implied.
    */
   async streamRun(runId: string, onEvent: AiRuntimeEventSink): Promise<void> {
     const run = this.runs.get(runId)
@@ -259,8 +289,36 @@ export class OpenCodePortAdapter implements AiRuntimePort {
       return
     }
 
+    const deadlineAt = resolveRunDeadline(run.envelope, run.admittedAt)
+    if (deadlineAt !== null && deadlineAt <= Date.now()) {
+      await onEvent({ type: 'error', error: 'the run exceeded its admission time bound before it could stream' })
+      return
+    }
+
     const abort = new AbortController()
     run.aborts.add(abort)
+
+    let deadlineTimer: ReturnType<typeof setTimeout> | null = null
+    let deadlinePassed = false
+    // When the bound fires, the stream must END — not merely stop forwarding. A
+    // caller awaiting `streamRun` is unblocked the moment the run is out of
+    // time, even if the engine has stalled and will never yield. Hermes does the
+    // same through its `settle()`; without this promise the two engines drift
+    // (a stalled OpenCode turn would await forever while Hermes returned).
+    let settleDeadline!: () => void
+    const deadlineEnded = new Promise<void>((resolve) => {
+      settleDeadline = resolve
+    })
+    if (deadlineAt !== null) {
+      deadlineTimer = setTimeout(() => {
+        if (deadlinePassed) return
+        deadlinePassed = true
+        void onEvent({ type: 'error', error: 'the run exceeded its admission time bound while streaming' }).then(
+          settleDeadline,
+          settleDeadline,
+        )
+      }, deadlineAt - Date.now())
+    }
 
     const request: OpenCodeTestRequest = {
       message,
@@ -271,15 +329,14 @@ export class OpenCodePortAdapter implements AiRuntimePort {
     }
 
     try {
-      await handleOpenCodeMessageStreaming(request, async (event) => {
-        // Cooperative cancellation. `handleOpenCodeMessageStreaming` exposes no
-        // abort parameter (the engine's HTTP/SSE call cannot be interrupted
-        // mid-flight from here), so a cancel is honoured at the NEXT event:
-        // once `run.cancelled` is set, no further event is forwarded and the
-        // consumer simply stops seeing output. That is the honest guarantee —
-        // the run is marked cancelled and the consumer is not fed more of it;
-        // it is NOT a claim that the engine is torn down instantly.
-        if (run.cancelled || abort.signal.aborted) {
+      const engineCall = handleOpenCodeMessageStreaming(request, async (event) => {
+        // Cooperative cancellation AND the cooperative time bound. The engine
+        // exposes no abort parameter (the HTTP/SSE call cannot be interrupted
+        // mid-flight from here), so both are honoured at the NEXT event: once
+        // `run.cancelled` is set or the deadline has passed, no further event is
+        // forwarded and the consumer simply stops seeing output. That is the
+        // honest guarantee — it is NOT a claim the engine is torn down instantly.
+        if (run.cancelled || abort.signal.aborted || deadlinePassed) {
           return
         }
         // Adopt the session id the engine reports on `done` — the one place the
@@ -289,7 +346,12 @@ export class OpenCodePortAdapter implements AiRuntimePort {
         }
         await onEvent(toPortEvent(event))
       })
+      // End at the bound even if the engine never yields: the race lets the
+      // deadline resolve `streamRun`, while `deadlinePassed` keeps the stalled
+      // engine's later events from being forwarded.
+      await Promise.race([engineCall, deadlineEnded])
     } finally {
+      if (deadlineTimer !== null) clearTimeout(deadlineTimer)
       run.aborts.delete(abort)
     }
   }
@@ -374,6 +436,9 @@ export class OpenCodePortAdapter implements AiRuntimePort {
         capabilityGrantId: binding.capabilityGrantId,
         allowedInputRefs: input.text !== undefined ? [textInputRef(input.text)] : [],
       },
+      // A resume envelope carries no `deadline`/`budget` (built here, not
+      // admitted by the platform), so its bound is `null` — honest, not implied.
+      admittedAt: Date.now(),
       auth: this.deps.auth,
       em: this.deps.em,
       cancelled: false,
@@ -381,6 +446,7 @@ export class OpenCodePortAdapter implements AiRuntimePort {
       aborts: new Set(),
     }
     this.runs.set(runId, run)
+    pruneRunRegistry(this.runs)
     return { runId, runtimeSessionId: run.sessionId ?? undefined }
   }
 

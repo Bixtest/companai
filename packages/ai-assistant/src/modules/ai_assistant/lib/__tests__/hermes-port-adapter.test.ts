@@ -421,7 +421,7 @@ describe('HermesPortAdapter (P2-3 — the second engine behind the door)', () =>
       })
 
       expect(seen).toEqual([
-        { type: 'error', error: 'the run exceeded its admission deadline before it could stream' },
+        { type: 'error', error: 'the run exceeded its admission time bound before it could stream' },
       ])
       // The turn is never sent on behalf of a run that is already out of time.
       expect(client.callsOf('prompt.submit')).toHaveLength(0)
@@ -437,7 +437,7 @@ describe('HermesPortAdapter (P2-3 — the second engine behind the door)', () =>
       })
 
       expect(seen).toEqual([
-        { type: 'error', error: 'the run exceeded its admission deadline while streaming' },
+        { type: 'error', error: 'the run exceeded its admission time bound while streaming' },
       ])
     })
 
