@@ -302,6 +302,15 @@ costs, so the decision rests on facts:**
 - **`CC-81`** (from `CC-73`'s critic): the base `AiToolDefinition`/`McpToolDefinition` docblock
   (`lib/types.ts:115`) is a **false statement in the tree** — a narrowly-typed tool is *not*
   assignable to `unknown` under `strictFunctionTypes`. Both fixes are a design decision (rule 11).
+- **`CC-82`** (registered 2026-10-14 from the owner's architecture question): **the port carries no
+  settings** — measured, the Hermes wire is `session.create { idempotency_key }` + `prompt.submit
+  { text }` and nothing more, so the worker's model/toolset are deployment env vars and a per-agent
+  setting never reaches the engine that serves the chat. The recorded direction (owner, rule 11):
+  the **platform is the single control plane** — settings UI → platform DB (tenant/agent-scoped) →
+  applied per run through the port; the worker keeps only deployment-level engine settings. The
+  next widening step is **model first**, measured against the worker's own session contract. A
+  generic worker-config editor in the frontend is **rejected** (one global config file per
+  container serving every tenant; the env pin makes a config write a silent no-op).
 - **`CC-60`**: `business_ir.run_query` is live on the tool door (`POST /api/ai/tools/execute`) and
   MCP, but **no agent whitelists it** — there is no in-chat consumer yet.
 - **`B-WS/B9`** — the widget architecture, end to end (the *design* track; `B-WS/B1`–`B8` of 10
