@@ -17,6 +17,20 @@ Rules 9a · 10d · 11 (owner decides *what*) · 13 (falsified premise → correc
 Reporting: no flag without a full report (named · plain meaning · why · risk · **ranked actions +
 recommendation** · whether he must decide); **never end on "your call"**.
 
+## THREE TREES — never confuse (2026-10-14; owner's proceed/trash verdict pending)
+- `workspace/starting-kit` = the OLD thin integration lab (Hermes behind a port; no per-run identity,
+  no tenant-key door). Its `P2-*`/`CC-*` frontier is PARKED while this decision is open.
+- `Aiaiai/backend-starter` = UNRELATED children's-education starter; "paperclip" appears nowhere in it.
+- **`aissistant-package` = THE REAL PROJECT**: fork of upstream Paperclip 0.3.1 (baseline commit
+  `4feef987`), rebranded Aissistant/Companai — an AI-company OS: companies + polymorphic memberships,
+  agent org chart, hire → provision a real per-employee Hermes home → eval gate (M3-AGT-02) → board
+  approval → the 19.4k-line `heartbeat.ts` run engine. Hermes is integrated as 11 adapters with
+  **`hermes_acp` as the MANDATED product lane** (422 for anything else; break-glass env
+  `COMPANAI_ALLOW_LEGACY_ADAPTER_HIRES`): ACP over `docker exec -i` into ONE shared container,
+  `HERMES_HOME` selects the employee, per-run identity as env vars, ~30 native + 41 `paperclip*` MCP
+  tools, per-company `OPENAI_API_KEY` (AES-256-GCM) + a free local llama lane. Report →
+  `analysis/aissistant-package-architecture-2026-10-14.md`. **Study THIS tree, not the other two.**
+
 ## Hazards
 `tsc` needs **`--incremental false`** (L139); jest does NOT type-check (L138). Write bytes, not text
 (Python `open(p,'w')` flips LF→CRLF + md5). Critic = SEPARATE agent, command+output per claim; a
