@@ -266,6 +266,37 @@ are defensible; they trade latency tolerance against capability — a product de
 technical one. Recorded in the plan §2.15.1, and to be **re-measured, not assumed**, as step one of
 the build (rule 0b).
 
+**Measured in the pinned worker (2026-10-14, research turn) — what each side of the trade actually
+costs, so the decision rests on facts:**
+
+- **The default is the worker's own built-in set, not the platform's.** With
+  `HERMES_TUI_TOOLSETS` unset the gateway resolves the platform default `hermes-cli`
+  (`hermes_cli/platforms.py:15` → `toolsets.py:203` → the static `_HERMES_CORE_TOOLS` bundle,
+  `toolsets.py:11-39`): **55 tools** — web ×2 · browser ×18 · terminal ×2 · file ×4 · skills ×3 ·
+  kanban ×14 · and one each of vision, image_gen, tts, todo, memory, session_search, connections,
+  clarify, delegation, cronjob, computer_use, code_execution.
+- **Most of it was already un-callable in this deployment.** `kanban` is default-off on this
+  platform (`hermes_cli/tools_config.py:110`), and every remaining tool carries a runtime
+  `check_fn` (`tools/registry.py:739`): browser needs a browser install or the extension
+  (`tools/browser_tool.py:1317`), web needs a search-provider key (`tools/web_tools.py:562`),
+  image_gen needs FAL, tts an audio key, connections the managed gateway, computer_use a
+  cua-driver — none of which this compose sets. **The callable default was the local subset:
+  file, terminal, skills, todo, memory, session_search, clarify, delegation** (+ code_execution
+  when its sandbox check passes).
+- **Pinning is a selection, not a deletion.** The toolsets ship static in the image. The choice is
+  the comma list `HERMES_TUI_TOOLSETS` (`tui_gateway/server.py:2056`), validated against built-ins
+  **and enabled MCP server names** (`tui_gateway/server.py:2007-2046`); the persisted form is
+  `platform_toolsets.cli` in the worker's config, the subtraction is
+  `agent.disabled_toolsets`, and `all` means no restriction — auto-picking toolsets a future image
+  adds (`toolsets.py:385-392`). **Re-enabling costs one env value and a container restart — no
+  rebuild, no migration.**
+- **Future tools have two open doors:** a new *platform* tool lands inside `open-mercato`
+  automatically — the toolset IS the MCP server's discovered tools, so the 21 grows with the
+  platform (proven live in `P2-9a`); a new *worker* capability is one more name in the same comma
+  list.
+- **A bonus of the pin:** the chat-serving worker stops offering shell/file tools to the model —
+  a smaller attack surface for a process whose job is to serve the platform's own tools.
+
 ### Open items that are scheduled, not blocking
 
 - **`CC-81`** (from `CC-73`'s critic): the base `AiToolDefinition`/`McpToolDefinition` docblock
@@ -285,7 +316,10 @@ the build (rule 0b).
 3. **Rule 0b — measure before building:** re-measure the default-toolset prompt size and the
    OpenCode deletion surface (the plan names every file class; confirm it in code).
 4. Report the raise-ceiling vs shrink-toolset trade to the owner **before choosing** (rule 11),
-   with ranked options and a recommendation — the reporting standard.
+   with ranked options and a recommendation — the reporting standard. **Done 2026-10-14:** the
+   measured enumeration above is the decision input (what each side costs, that the loss is
+   config-reversible, how future tools arrive); **the decision itself is still the owner's** —
+   fold the enumeration into `P2-9b`'s requirement (§2.15.1) when the build starts.
 
 ---
 
