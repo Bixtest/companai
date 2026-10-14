@@ -69,8 +69,45 @@ services:
       HERMES_SKIP_PIN_VERIFY: ${HERMES_SKIP_PIN_VERIFY:-}
       # Provider selection, recorded on the run (P2-3 turns it into a gateway
       # call). Same contract the platform already speaks for OpenCode.
+      # NOTE (P2-7, §2.13 — measured): the Hermes WORKER does not read these. Its
+      # provider registry (`hermes_cli/auth.py` + `providers.py`) is keyed on
+      # `HERMES_*` and the per-provider key/base-URL vars, so `OM_AI_PROVIDER`/
+      # `OM_AI_MODEL` are inert here — kept only for the shared `.env` contract.
       OM_AI_PROVIDER: ${OM_AI_PROVIDER:-openai}
       OM_AI_MODEL: ${OM_AI_MODEL:-}
+      # ── THE WORKER'S OWN MODEL CONFIG (P2-7, §2.13) ────────────────────────
+      # The worker resolves its provider from `config.yaml model.provider`, else
+      # AUTO-DETECTS it from whichever API key is present (`resolve_provider()`,
+      # `hermes_cli/auth.py:1629`): with OPENAI_API_KEY set it selects
+      # `openai-api`, whose transport is `codex_responses` and whose base URL is
+      # `OPENAI_BASE_URL` (`auth.py:177`, `providers.py:34-35`). The platform's
+      # `.env` already sets `OPENAI_BASE_URL=http://model:8080/v1`, but this file
+      # did NOT forward it — so the worker called api.openai.com. Forward it, and
+      # name the model the worker asks for: its model comes from `HERMES_MODEL`
+      # (`tui_gateway/server.py:1544-1561`), not `OM_AI_MODEL`.
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-}
+      HERMES_MODEL: ${HERMES_MODEL:-${OM_AI_MODEL:-}}
+      # ── THE PREFILL GRACE (P2-7, §2.13 — measured) ─────────────────────────
+      # The worker aborts a turn whose provider has produced no event within its
+      # local-provider stale ceiling: `agent.local_stream_stale_timeout`, default
+      # **900s** (`agent/chat_completion_helpers.py:634-648`), overridable by this
+      # var. That ceiling must EXCEED the model's prefill time, and on the
+      # platform's own Sprint-0 stack it does not. Three real turns driven
+      # through the pinned worker on this 4-CPU box (Docker Desktop exposes 4 of
+      # the host's 8), each read from the model's own `prompt eval time` line —
+      # NOT the `progress =` fraction, which mis-states the total by up to 2.5x
+      # (LESSONS L153):
+      #   · 6105 tokens (toolset pinned to `search`)  → 608s  @ 10.1 tok/s
+      #   · 10,988 tokens (the DEFAULT toolsets)      → 1583s @ 6.94 tok/s
+      #   · 10,646 tokens (the DEFAULT toolsets, the PRODUCTION-SHAPED run,
+      #     test suite alongside)                     → ~1905s @ ~5.6 tok/s
+      # The third is the number the value below must beat: the 900s default
+      # aborts EVERY real turn on this stack, 1800s leaves only 217s over the
+      # second measurement, so the grace is **2400s** — 495s over the slowest
+      # prefill actually measured. The cost: a hung local provider takes 40 min
+      # to diagnose instead of 15. This is a HARDWARE grace, not a correctness
+      # knob — a deployment with a fast model never reaches it.
+      HERMES_LOCAL_STREAM_STALE_TIMEOUT: ${HERMES_LOCAL_STREAM_STALE_TIMEOUT:-2400}
       # Provider credentials, forwarded only when the operator set them.
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}

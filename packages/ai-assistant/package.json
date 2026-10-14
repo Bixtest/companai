@@ -13,7 +13,8 @@
     "mcp:dev": "mercato ai_assistant mcp:dev",
     "mcp:serve": "mercato ai_assistant mcp:serve-http",
     "typecheck": "tsc --noEmit",
-    "test": "jest --config jest.config.cjs --forceExit"
+    "test": "jest --config jest.config.cjs --forceExit",
+    "p2-7:live": "tsx scripts/hermes-live-turn.mts"
   },
   "exports": {
     ".": "./dist/index.js",
