@@ -4586,3 +4586,22 @@ because in an f-string the **expression lives inside the quotes**. Mutating the 
 **Why the mutation gate did not catch this.** The row's 18 mutants were written by the same author as the guards, so they varied the things the author was already thinking about. A mutation set is a **hypothesis about how the code could break**, and its blind spot is the author's blind spot. The critic's mutants came from a different hypothesis space — "what would a *later* developer plausibly write?" — which is why a plain f-string, not an exotic one, broke it. **A second, independent adversary is not redundancy; it is the only thing that tests the mutation set itself.**
 
 **The rules.** (1) **A guard naming a mechanism must assert the mechanism's USE** — the call site with its arguments, never the import, never the name in prose. (2) **Know your extractor's blind spot and state it** — a quote-anchored slice cannot see f-strings, `{}`/`%` interpolation, or concatenation; enumerate the forms and cover each, or assert on a parsed AST. (3) **A security assertion deserves an adversarial mutation** — "the secret is never logged" is exactly the kind of claim that gets a green test and a leaked credential. (4) **Give the mutation set to someone who did not write the code** — the author's mutants share the author's blind spot, and the fix is a different hypothesis space, not more mutants of the same kind. (5) **A `toContain` on a flag needs a boundary** — `toContain('--extra mcp')` is satisfied by `--extra mcp-bogus`, a typo that installs nothing; measured, and it passed.
+
+## L165 — the decisive run of a hermeticity fix is the DEFECTIVE condition, not the clean one — and a rule's test needs a fixture that CONTAINS the rule's subject (2026-10-14, `CC-80`)
+
+`CC-80` is the defect `P2-9a`'s gate exposed: the `ai-assistant` suite read the operator's shell, so exporting `OM_AI_PROVIDER=openai` turned **5 suites / 27 tests** red. The fix clears the provider axis once per test file (`test-env-hermetic.ts`, wired as `setupFilesAfterEnv`). Two things about proving it are the lesson.
+
+**1. A clean run proves nothing about a hermeticity fix.** The clean run was **already green before the fix** — it is the *baseline*, not the evidence. The evidence is the run in the condition the fix exists for:
+
+```
+# BEFORE the fix:  OM_AI_PROVIDER=openai OM_AI_MODEL=Qwen2.5-7B-Instruct <jest>
+#   → 5 failed suites / 27 failed tests / 1864 total
+# AFTER the fix:   the same two variables exported
+#   → 129 suites / 1890 tests GREEN
+```
+
+Both sides are now recorded as the acceptance criterion, and a mutation (dropping the PREFIX rule, keeping only the exact key list) turns the poisoned run **RED** again — 3 failed — which is what makes the acceptance a measurement of the fix rather than of the shell it ran in. **State the acceptance two-sidedly, and make the "defective" side the one you quote.**
+
+**2. The fix's own unit test was wrong on first write, and only the defective run caught it.** The suite asserted that the clearing policy includes `OM_AI_PROVIDER`, via `providerEnvKeys({})`. It does not — the function returns the keys *of the env it is given* that the policy covers, and an **empty fixture contains no key for a PREFIX rule to match**, so nine assertions failed. The mistake was a category error about the contract: "what does the policy cover" (a constant) versus "which of THESE keys does it cover" (a function of its input). Passing `process.env` would not have fixed it either — by the time the test runs, the setup has already cleared those keys, so the fixture would be empty for the same reason.
+
+**The rules.** (1) **Run the new test in the condition it exists for** — a hermeticity test's decisive run is the poisoned one; a clean run is the baseline, not the proof. (2) **A fixture must CONTAIN the subject the rule operates on** — a prefix rule observed through an empty object tests nothing, and it fails for a reason that looks like a product bug. (3) **Distinguish a CONSTANT from a FUNCTION of its input** before asserting — "the policy covers X" and "these keys include X" are different claims, and only the second is a function call. (4) **Passing the live object is not the safe default** — when the system under test has already mutated it (here, cleared it), `process.env` is as empty as `{}`; build the fixture explicitly. (5) **The two-sided acceptance belongs in the record**, not in a transcript: quote the RED and the GREEN, in that order.
