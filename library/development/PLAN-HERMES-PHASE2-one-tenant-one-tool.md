@@ -5,7 +5,7 @@ written BEFORE any code."* No Phase 2 code exists yet. This document is the requ
 below are executed against it, one sub-row at a time, under the full protocol (hostile critic,
 RED-then-GREEN, two-route).
 
-**Progress: `P2-1` ✅ (2026-10-12, §2.7) · `P2-2` ✅ (2026-10-12, §4) · `P2-3` ✅ (2026-10-12, §2.9) · `P2-4` ✅ (2026-10-13, §2.10) · `P2-5` ✅ (2026-10-13, §2.11) · `P2-6` ✅ (2026-10-13, §2.12 — the five properties, proven through the port) · **`P2-7` ✅ (2026-10-14, §2.13 — Hermes SERVED A LIVE TURN, twice, the second run production-shaped; the worker's model config is forwarded and guarded)** · **NEXT = `P2-8` — THE SWITCHOVER, part 1 (requirement §2.14 written 2026-10-14):** the production **connection lifecycle** — the worker serves the pin's **ws** transport (an identical wire protocol), the client connects to a **URL**, a `ping` health gate; **the default does NOT move in `P2-8`** — then `P2-9` (**one** change): the default-flip to Hermes + the OpenCode deletion (`R28-6`/`N-8`) + the `CC-74` `hermes-local` retirement, whose trigger is now **fully met**
+**Progress: `P2-1` ✅ (2026-10-12, §2.7) · `P2-2` ✅ (2026-10-12, §4) · `P2-3` ✅ (2026-10-12, §2.9) · `P2-4` ✅ (2026-10-13, §2.10) · `P2-5` ✅ (2026-10-13, §2.11) · `P2-6` ✅ (2026-10-13, §2.12 — the five properties, proven through the port) · **`P2-7` ✅ (2026-10-14, §2.13 — Hermes SERVED A LIVE TURN, twice, the second run production-shaped; the worker's model config is forwarded and guarded)** · **`P2-8` ✅ (2026-10-14, §2.14 — the worker's ws door is MOUNTED and the client CONNECTS it: a real turn served over the new transport with NO hand-spawned process, the `ping` health gate green, the default still `opencode`)** · **NEXT = `P2-9` — THE SWITCHOVER proper (ONE change):** the default-flip to Hermes + the OpenCode deletion (`R28-6`/`N-8`) + the `CC-74` `hermes-local` retirement, whose trigger is **fully met** since `P2-7`
 (`session.steer` settled by measurement before anything is claimed for it).**
 
 **Read it with:** [`ARCHITECTURE-hermes-integration.md`](ARCHITECTURE-hermes-integration.md) §9 (the
@@ -578,6 +578,133 @@ The model's own log confirms the turn from the other side: `total time = 1912921
 
 **The step this row hands forward.** Once the switchover lands, the port's remaining Hermes-shaped items are `CC-79` (the live worker bridge) and the `secretRefs`/`steerRun` bounds — and `N-8`'s remaining rewiring.
 
+### 2.14.1 `P2-8` — DISCHARGE RECORD (2026-10-14)
+
+**Verdict: `P2-8` holds. The platform can now CONNECT the worker — proven live, with no hand-spawned process — and the default did not move.**
+
+**What landed** (code repo `workspace/starting-kit`, branch `main`; docs repo, this change — rule 6/8):
+
+| Layer | File | What it is |
+|---|---|---|
+| **The door** | `docker/hermes/ws_host.py` (NEW) | A FastAPI app built lazily so the module imports where the pin is not on `sys.path`. Three legs: `GET /healthz`; `POST /internal/ws-ticket` (Bearer shared secret, `secrets.compare_digest`, the pin's `mint_ticket(user_id="companai-runtime", provider="companai")`); `WS /api/ws?ticket=…` (the pin's `consume_ticket`, pre-accept `close(4401)`, then `handle_ws(ws, auth_identity=…)` — the pin's own transport, verbatim) |
+| **The process** | `docker/hermes/ws_entry.py` (NEW) | The image CMD. Imports `tui_gateway.entry` and binds the socket **in the main thread** (fail-fast FATAL on a port conflict), serves uvicorn in a **daemon thread**, then runs `stdio_entry.main()` in the **main thread**. Token unset ⇒ the door does not listen and this is the stdio worker it has always been |
+| **The image** | `docker/hermes/Dockerfile` | COPYs the two files, `RUN python3 -m py_compile` all four (a syntax error must fail the build — it once FATALed 15s into every boot), CMD → `ws_entry.py`; the falsified "no port to expose" comment rewritten |
+| **The client seam** | `packages/ai-assistant/src/modules/ai_assistant/lib/hermes-gateway-transport.ts` (NEW) | `HermesGatewayTransport` (`send`/`onLine`/`onClose`/`close`/`ownsWorkerProcess`) + `createStdioTransport` (extracted from the client, its coverage moved with it) + `createWebSocketTransport`/`fetchHermesTicket` (Bearer header, never a URL; fresh single-use ticket per dial; 401/403 fail-fast; else 1s ×2 → 16s cap, ±25% jitter, 5 attempts, 10s per socket) |
+| **The client** | `lib/hermes-gateway-client.ts` | Re-pointed at the seam: `transportFactory?` option, `openTransport()`, onClose → failPending + onExit(code) + teardown, the handshake in try/catch → `failConnect` (a transport the **client** opened is closed; a spawned child stays the caller's), `stop()` sends `process.stop` **only** when `ownsWorkerProcess`. The port adapter is untouched except for the one death-message rewording its own test now names (a ws close code is not a process exit) |
+| **The config** | `lib/resolve-ai-runtime-port.ts` | `resolveHermesGatewayConnection` — `null` when unset (today's stdio client, the transitional path), a **loud refusal** on a URL without a token, trailing slash trimmed; `buildHermesClient` picks the ws client when configured, else the stdio client |
+| **The wiring** | `docker-compose.hermes.yml` · `docker-compose.fullapp.yml` · `docker/hermes/Dockerfile` | Worker: `HERMES_WS_TOKEN`/`HOST`/`PORT` (token a pass-through with an **empty** default; the door is **never published** to the host). App: `AI_RUNTIME_ENGINE:-opencode` (**the default did NOT move**), `HERMES_GATEWAY_URL:-http://hermes-gateway:8091`, `HERMES_WS_TOKEN` — each guarded by a suite that **parses** the mapping |
+
+**Gates.**
+
+- **Full package green: 128 suites / 1838 tests** under the pinned **Node 24** (**L154**; P2-7's 127/1771 = +1 suite, **+67 tests** — 1836 as first measured, 1838 after the critic's two new guards). The suites are re-pointed at a **ws fake**: the client suite's wire tests run `describe.each(['stdio','ws'])` over a shared `FakeHermesDoor`, so the framing, the handshake, the id-correlation, the exit subscription and the stop policy are proven on **both** transports by the same code paths. `handshake_gate.py`'s image constant moved to `hermes-gateway:p2-8`.
+- **`tsc` 92 = the pre-existing `CC-73`, 0 new** (`--incremental false`, **L139**). A first run showed **104** — **12 were new, all in the new transport test**, and were fixed (an event-emitter fake written as an object wrapping `on` instead of the method the contract declares; a cast through `unknown`). jest does not type-check here (**L138**), so the suite was green while `tsc` was not — the gate caught it.
+- **18 mutations all RED, md5-restored** (16 as first measured, **+M17/M18** after the critic; harness `apply_mutation.py`, byte-level, a pristine-md5 registry that refuses to mutate a file that is not pristine): secret on the URL · no 401 fail-fast · ws claims the worker process · `stop()` always retires · URL-without-token silent · unset URL not null · the `environment:` gate removed · Dockerfile comments read as instructions · a death leaves requests hanging · a multi-frame message read as one frame · `ports:` published · the worker token dropped · the CMD reverted · `ws_host.py` dropped from `py_compile` · the engine default flipped early · the app URL set to loopback · the EOF yields to the process exit (M17, D1) · the fake upgrade refusal loses its `onerror` leg (M18, N3).
+
+**The live proof (§2.14's exit gate, verbatim).** The worker was recreated from the compose with `HERMES_WS_TOKEN` set and a **loopback-only** port override held **outside both repos** (the committed default publishes nothing — now guarded). Commands and their output:
+
+```
+$ docker compose -f docker-compose.hermes.yml -f <proof-override>.yml up -d --no-deps hermes-gateway
+[Hermes ws-entry] the ws door is listening on 0.0.0.0:8091 (ticketed; the app connects HERMES_GATEWAY_URL here)
+[Hermes ws-entry] starting the stdio gateway channel
+
+$ curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:8091/healthz
+200
+$ curl -s -o /dev/null -w '%{http_code}\n' -X POST http://127.0.0.1:8091/internal/ws-ticket          # no secret
+401
+$ curl -s -X POST -H 'Authorization: Bearer <the door token>' http://127.0.0.1:8091/internal/ws-ticket
+{"ticket":"s0RweP0Hirt1oGSiBReuckX_qIt5FlBylO6C5gTgPIA","ttl_seconds":30}
+```
+
+**The `ping` health gate** (the seam against the live door — mint, upgrade, one RPC, pong):
+
+```
+$ P2_7_URL=http://127.0.0.1:8091 P2_7_WS_TOKEN=<token> tsx ping-probe.mts
+P2-8 ping health gate — dialing http://127.0.0.1:8091
+  dial: OPENED in 81ms (ticket minted fresh, upgrade accepted)
+  ping reply: {"jsonrpc":"2.0","id":1,"result":{"pong":true}}
+  pong: true — the health gate PASSED
+$ P2_7_URL=… P2_7_WS_TOKEN=the-wrong-secret tsx ping-probe.mts
+P2-8 ping health gate FAILED: the hermes ws mint leg answered 401
+```
+
+**A real turn through it — `P2-7`'s own harness, minus `docker exec`** (`yarn workspace @open-mercato/ai-assistant p2-8:live`, i.e. `scripts/hermes-live-turn.mts` with `P2_7_URL` + `P2_7_WS_TOKEN`):
+
+```
+P2-8 live-turn gate (the P2-7 harness over the worker ws door)
+  transport: ws door at http://127.0.0.1:8091 (no spawned process)
+    evt gateway.ready :: {"skin":{…}}
+  handshake: perSessionExclusiveSubmit=true serverRequests=14
+  startRun: runId=p2-7-live-1791956793979 runtimeSessionId=09a33a78
+    evt tool.start / tool.complete :: tool_search …
+    evt session.usage :: {"usage":{"model":"Qwen2.5-7B-Instruct-Q4_K_M","prompt":16725,…
+    evt message.complete :: {"text":"Hermes live turn OK. No matches found for the queries, …"
+  typed event types: ["tool-call","tool-result","metadata","text", … ,"metadata","done"]
+  ANSWER: "Hermes live turn OK. No matches found for the queries, but related tools are available."
+  PASS — a real turn answered and ended on done (25 events) in 183.4s
+  worker events seen: 41
+```
+
+No hand-spawned process: the harness's only transport is the door. The handshake (`client.capabilities` → `gateway.capabilities` → **`ping`→`pong`** → `gateway.ready`) passed, the `ping` health gate passed on its own, and a real turn — the model, the tool call, the usage frame and the final `done` — was served by the **running** worker over the new transport.
+
+**Re-proved on the REBUILT image, after the critic's `N6` fix (2026-10-14).** The critic's fixes touched `ws_host.py` (the secret trim) and the client, so the image was rebuilt (`docker compose … build hermes-gateway` → `Image hermes-gateway:p2-8 Built`) and **every** live leg below was re-run against that one artifact — no leg on this page is carried over from the pre-fix image:
+
+```
+$ curl -s -o /dev/null -w '  http %{http_code}\n' http://127.0.0.1:8091/healthz                # leg A
+  http 200
+$ curl -s -o /dev/null -w '  http %{http_code}\n' -X POST http://127.0.0.1:8091/internal/ws-ticket        # no secret
+  http 401
+$ curl -s -o /dev/null -w '  http %{http_code}\n' -X POST -H 'Authorization: Bearer <a WRONG secret>' …  # fail fast
+  http 401
+$ curl -s -X POST -H 'Authorization: Bearer <the door token>' …
+{"ticket":"OwJEt-1BUe9MKTF8-UzUBtbA2VbeQbfaWEmHBBsaeCQ","ttl_seconds":30}
+$ curl -s -X POST -H 'Authorization: Bearer  <the door token>  ' …      # N6: the padded header, both sides
+{"ticket":"5qzrGS9NDnBwBfRGY1z5eVWbdDzG00uXos2_r4Hd9eE","ttl_seconds":30}
+
+$ # leg: a ws TICKET is single use — mint one, upgrade with it, upgrade with it AGAIN
+  1st upgrade with this ticket   : ACCEPTED (HTTP 101)
+  2nd upgrade with same ticket   : REFUSED (HTTP 403)
+  SINGLE USE: PROVEN
+
+$ P2_7_URL=http://127.0.0.1:8091 P2_7_WS_TOKEN=<token> node ping-probe.mts          # the health gate, again
+P2-8 ping health gate — dialing http://127.0.0.1:8091
+  dial: OPENED in 98ms (ticket minted fresh, upgrade accepted)
+  ping reply: {"jsonrpc":"2.0","id":1,"result":{"pong":true}}
+  pong: true — the health gate PASSED
+
+$ yarn workspace @open-mercato/ai-assistant p2-8:live                # P2_7_URL + P2_7_WS_TOKEN, no docker exec
+P2-8 live-turn gate (the P2-7 harness over the worker ws door)
+  transport: ws door at http://127.0.0.1:8091 (no spawned process)
+  handshake: perSessionExclusiveSubmit=true serverRequests=14
+  startRun: runId=p2-7-live-1791962558438 runtimeSessionId=8c47523f
+    evt message.complete :: {"text":"HERMES LIVE TURN OK","usage":{…}}
+  typed event types: ["text","text","text","text","text","metadata","metadata","done"]
+  ANSWER: "HERMES LIVE TURN OK"
+  PASS — a real turn answered and ended on done (8 events) in 41.0s
+  worker events seen: 15
+```
+
+The first re-proof attempt of the padded header failed **on the shell side**, not the door's: `curl` answered *"no URL specified"* — a quoting/word-splitting failure in my own command line, so no request ever reached the door (the failure proves nothing either way about the trim). Fixed by building the header **as one variable** and passing it as a single `-H "$PAD"` argument — the leg then mints a ticket on the first try, which is what `N6`'s fix is for.
+
+**Two defects found during the build, both fixed in this change.**
+
+1. **The port adapter's death message changed but its test did not.** P2-8 reworded the exit event to *"the hermes worker **connection** ended mid-run"* (a ws close code is not a process exit); `hermes-port-adapter.test.ts` still asserted the old wording and the full gate went red on it. The wording is right for both transports; the test now names **why**.
+2. **Two of my own guards were vacuous — found by the mutation gate, not by reading.** The wiring suite's "a key that appears only in a comment does not satisfy the assertion" fixtures passed **with comment-stripping disabled** (measured: a probe that removed `stripComment` from the parser went GREEN). A comment-only key can never be parsed by a mapping reader, so the fixture could not fail. They were rewritten to put the key **both** in a comment and in another section of the same service (`labels:` / `deploy:`), with a real mapping asserted as the control — and the mutant that removes the `environment:` gate now turns them RED (**L156**).
+
+**The hostile critic, and what it found (2026-10-14).** A separate agent audited the delta against §2.14.1 with its own commands and mutants, and found **1 real defect + 5 nits — all fixed in this change:**
+
+- **D1 (real, medium-low) — the extraction changed the stdio death ordering.** The pre-seam client's `on('exit')` was its **only** exit path, so it was order-independent; the seam's first-wins `finish` let stdout **EOF** win whenever the pipe's `end` was dispatched before the child's `exit`, reporting `code null` and losing the worker's exit code from the run's error event (proved with a scratch probe against `git show HEAD:…hermes-gateway-client.ts`: *old `[end-first]` → `exits=[1]`*, new → `exits=[null]`). **Fixed:** an EOF death now yields **one macrotask** to the process exit, so the exit code is never lost, and stands on its own if no exit arrives. Guarded by a new test *and* by mutant **M17**.
+- **N2 — `close()` "safe to call twice" was an unproven contract claim** (a mutant making the second call throw stayed GREEN). Fixed with a test (double close → no throw, one close notification).
+- **N3 — the ws fake was unfaithful about a refused upgrade.** Real node 24 fires `onerror` **then** `onclose:1006` for an upgrade the door answers with a 403 (measured by the critic); the fake fired only `onclose`, so the suite pinned the message *"the upgrade was refused"*, which production never sees. **Fixed:** the fake fires both, in order, and the assertion now pins the production wording *"the socket failed to open"*. Guarded by mutant **M18**.
+- **N4 — `handshake.gatewayReady` was always `null` in ws mode.** The pin writes `gateway.ready` immediately after the accept, before the client's `ping`; the client subscribed only afterwards, so the event was already gone. **Fixed:** the wait is registered **before** the handshake sequence.
+- **N6 — the door did not trim its shared secret while the client did**, so a stray newline/trailing space in one service's env would be a silent, permanent 401. **Fixed:** `ws_host.py` strips both sides (the presented Bearer credential was already stripped).
+- **N5 — this record's own wording:** the table above says the port adapter is *untouched* while the same section records its reworded message. Corrected to name the change.
+
+**Gates after the fixes:** full package **128 suites / 1838 tests green** (1836 + the two new tests); `tsc` **92 = `CC-73`, 0 new**; **18 mutations all RED**, md5-restored; the door re-proved after the image rebuild (**"Re-proved on the REBUILT image"** above: healthz, both 401 legs, the clean mint, the padded mint, ticket single-use, the `ping` gate and a fresh 41.0s live turn — every leg on the post-fix artifact).
+
+**Named bounds (unchanged, and now tested).** The engine is still selected by env — **`AI_RUNTIME_ENGINE` still defaults to `opencode`, and the sole test that would catch an early flip is green**; a mid-run socket death ends that run and the **next** run dials afresh (connect-once — a mid-run `session.resume` is a named bound, not built); `stop()` on a shared door never retires the worker other clients are using; the door is **not published** to the host.
+
+**Next: `P2-9` — ONE change.** The default-flip to Hermes + the OpenCode deletion (`R28-6`/`N-8`) + the `hermes-local` retirement (`CC-74`), whose trigger was already fully met by `P2-7`. `CC-79` (the live worker bridge) is now the only item between the platform and a Hermes-served chat in production.
+
 ---
 
 ## 3. Measured facts (rule 0b — measured in the pinned source and the code repo, 2026-10-12)
@@ -657,7 +784,7 @@ foundation order from §2.1.
 | **P2-5** ✅ **DONE 2026-10-13** (§2.11 discharge record) | **Selection at the door (requirement §2.11, measured 2026-10-13).** `resolveAiRuntimePort` becomes config-selected (env `AI_RUNTIME_ENGINE`, default `opencode`) and is **extracted to `lib/resolve-ai-runtime-port.ts`** so the one-function swap is *testable*; the `hermes` branch builds a **real** `HermesGatewayClient` + adapter (production has never constructed one); the chosen implementation is recorded on the run (`provenance.implementation`, **envelope not widened**). **The default-flip step is owned here** (§2.11 item 5) | Swapping engines touches exactly one function (proved by a test that flips the env var and asserts `describeCapabilities().implementation` changes); **`door-only-way-in.test.ts` still passes** (the door is still the only way in); OpenCode is untouched and still answers; the platform-runtime routes are **not** unified (different engine family). **Named bounds:** the default does **not** move in this row (it moves when `P2-6` is green); `CC-76` (OpenCode ignores `deadline`) is a co-requisite of the **deletion**; `CC-74` fires at `P2-6` |
 | **P2-6** ✅ **DONE 2026-10-13** (§2.12 discharge record) | **The exit gate proof (requirement §2.12, measured 2026-10-13)** — cancellation · retry idempotency · usage capture · bounded memory/CPU · no cross-scope access, on one tenant then on two adversarial ones. **Builds the missing bound:** `lib/ai-runtime-bounds.ts` (NEW, shared by the engines) and **`CC-76` FIXED** (OpenCode now honours the envelope's time bound) | All five measured on one tenant; then the two adversarial tenants: a run admitted for tenant A cannot read, name or affect tenant B — proven by a negative test that fails if any cross-scope frame exists. **Gates:** full package **125 suites / 1752 green**; `tsc` **92 = the pre-existing `CC-73`, 0 new**; **10 mutations all RED** md5-restored. **Critic: 2 defects + 2 nits, all fixed** (D1 the bound must **END** the stream, not just flag it — **L151**; D2 the **third** `AiRuntimePort` implementation was unbounded — **L152**). **The default did NOT move** — this row proves; it does not flip. **⚠ CORRECTION (rule 13):** §2.12 scoped the gate to *the five properties through the port*; §2.11's **stated** gate also required **a live turn over Hermes**, which §2.12 did not write and this row did **not** build (the proof used a `FakeClient`). The missing half is **§2.13 (`P2-7`)** — and the flip is **gated** on it |
 | **P2-7** ✅ **DONE 2026-10-14** (§2.13 discharge record) | **Hermes serves a LIVE TURN (requirement §2.13, measured 2026-10-13/14)** — connect the pinned worker, `session.create`, `prompt.submit`, and read the adapter's ordered typed events: a **real** model answer, not a fake. Plus: the worker's model config settled and **forwarded** so it reaches a reachable (local) model | ✅ **DISCHARGED 2026-10-14** — §2.13 holds the record with the commands and their output. **Two live turns driven through the pinned worker**, the second **production-shaped** (no injected env — the compose change alone serves it): the worker reached the **local** model through `OPENAI_BASE_URL`, asked for `HERMES_MODEL`, and answered the gate's own prompt; the adapter's ordered typed events ended on a real `done`. **The worker's model wiring is now GUARDED** — a suite that parses the compose's `environment:` mapping (a key that appears only in a comment does not satisfy it), and the harness's judgement is a pure, unit-tested function so a mutation blinds it in milliseconds instead of after a 27-minute live run. **Gates:** full package **127 suites / 1771 tests green** (= 1752 + 19) under the pinned **Node 24** (**L154**); `tsc` **92 = the pre-existing `CC-73`, 0 new**; **7 mutations RED**, md5-restored. **Gated on this: the switchover** (connection lifecycle + default-flip + OpenCode deletion `R28-6`/`N-8` + `CC-74` retirement) — the gate is now OPEN |
-| **P2-8** | **The production CONNECTION LIFECYCLE (requirement §2.14, measured 2026-10-14).** The worker serves the pin's own **ws transport** — *identical wire protocol* (`tui_gateway/ws.py` reuses `dispatch` verbatim) — via a small aiohttp host in `docker/hermes/` that mounts `handle_ws` behind the pin's ticket auth, listening on `mercato-network-local`; the client's transport becomes a **seam** driven over ws instead of a spawned child; a `ping` health gate + a documented reconnect policy. Engine still selected by env (`AI_RUNTIME_ENGINE`) — **the default does NOT move here** | **No hand-spawned process:** a client connects the **running** worker over the new transport, the handshake and a `ping` health gate pass, and `P2-7`'s harness (minus `docker exec`) serves a real turn through it — command + output; the transport suites re-pointed at a **ws** fake; full package green; `tsc` 0 new; mutations RED |
+| **P2-8** ✅ **DONE 2026-10-14** (§2.14.1 discharge record) | **The production CONNECTION LIFECYCLE (requirement §2.14, measured 2026-10-14).** The worker serves the pin's own **ws transport** — *identical wire protocol* (`tui_gateway/ws.py` reuses `dispatch` verbatim) — via a small **FastAPI/uvicorn** host in `docker/hermes/` (rule-13 correction of "aiohttp") that mounts `handle_ws` behind the pin's ticket auth, listening on `mercato-network-local`; the client's transport becomes a **seam** driven over ws instead of a spawned child; a `ping` health gate + a documented reconnect policy. Engine still selected by env (`AI_RUNTIME_ENGINE`) — **the default does NOT move here** | ✅ **DISCHARGED 2026-10-14** — §2.14.1 holds the record with the commands and their output. **The door is mounted and the client connects it, live:** `healthz` 200, mint 401-without-secret / a single-use 30s ticket with it, `ping`→`{"pong":true}` over a fresh dial, a **real turn** (`tool_search`, the usage frame, a real model answer, a typed `done`) in **183.4s** through `P2-7`'s own harness **minus `docker exec`** — **no hand-spawned process**. **The suites are re-pointed at a ws fake:** the client suite's wire tests run `describe.each(['stdio','ws'])` over a shared `FakeHermesDoor` (+ a 23-test seam suite and a resolver suite), so both transports are proven by the same code. **Gates:** full package **128 suites / 1836 tests green** under the pinned **Node 24** (**L154**); `tsc` **92 = `CC-73`, 0 new** (a first run showed 104 — 12 new in the new test, all fixed); **16 mutations all RED** md5-restored. **Two defects found in the build, both fixed:** the port adapter's death message changed and its test did not; and **two of this row's own guards were VACUOUS** — the mutation gate proved it (a probe with comment-stripping disabled went GREEN), and the fixtures were rewritten to be catchable (**L156**). **The default did NOT move** — the sole test that would catch an early flip is green |
 | **P2-9** | **The switchover proper — ONE change.** The default flips to `hermes` in `lib/resolve-ai-runtime-port.ts`; OpenCode is **deleted** in the same change (`R28-6`/`N-8` — engine files, Docker service, `OPENCODE_URL`; the vestige re-named **separately** per `CC-72`); `hermes-local` is **retired** per `CC-74`'s steps (the `mercato-hermes-data-local` volume stays until the owner says so — rule 11) | `AI_RUNTIME_ENGINE` now **defaults to hermes**; `door-only-way-in.test.ts` still passes with the OpenCode engine **gone**; the retired door leaves **no** reference behind; full package green; `tsc` 0 new; mutations RED |
 
 ---
