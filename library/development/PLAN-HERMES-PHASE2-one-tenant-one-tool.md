@@ -713,7 +713,22 @@ ConnectionRefusedError: [Errno 111] Connection refused        ← nothing listen
 $ docker port mercato-hermes-gateway                          ← nothing published
 ```
 
-The worker's `.env` carries **no `HERMES_WS_TOKEN`** (measured: the only Hermes keys are `HERMES_PORT=8642` and a comment), and the service passes it through as `${HERMES_WS_TOKEN:-}` — an **empty** default — in both the worker compose and `docker-compose.fullapp.yml`'s app service. So in the stack as committed the door is **off**, which is the safe direction (the worker is the stdio worker it has always been, and OpenCode is still the default) but is also **`P2-9`'s hard prerequisite**: a flipped default with an empty token would dial `http://hermes-gateway:8091` and **fail closed at the mint leg with 401** (fail-fast is deliberate — a wrong secret must not retry forever, `M2`). **`P2-9` must set that one value in the operator's `.env` (both services read it) before the flip lands**, or the flip buys nothing. Flagged to the owner in the report for this row: this is his environment, and a token in `.env` is a rule-11 decision, not a cleanup step.
+The worker's `.env` carried **no `HERMES_WS_TOKEN`** (measured: the only Hermes keys were `HERMES_PORT=8642` and a comment), and the service passes it through as `${HERMES_WS_TOKEN:-}` — an **empty** default — in both the worker compose and `docker-compose.fullapp.yml`'s app service. So in the stack as committed the door was **off**, which is the safe direction (the worker is the stdio worker it has always been, and OpenCode is still the default) but was also **`P2-9`'s hard prerequisite**: a flipped default with an empty token would dial `http://hermes-gateway:8091` and **fail closed at the mint leg with 401** (fail-fast is deliberate — a wrong secret must not retry forever, `M2`).
+
+**DISCHARGED 2026-10-14 (the owner's answer to the flag).** The owner chose *"you supply the value"*, then asked me to generate one — so one now exists: **48 random bytes, base64url (`secrets.token_urlsafe(48)`, 64 characters), appended to the stack's git-ignored `.env`** (line 47, under a comment naming its role). The value is deliberately **not** recorded anywhere in either repository — the door never exposes it, the app never logs it, and `.gitignore:44` keeps it out of git; the only evidence needed is that the door answers `401` without it and `200` with it, measured on the recreated worker:
+
+```
+$ docker compose -f docker-compose.hermes.yml up -d --no-deps --force-recreate hermes-gateway   # no shell token
+[Hermes ws-entry] the ws door is listening on 0.0.0.0:8091 (ticketed; the app connects HERMES_GATEWAY_URL here)
+$ docker exec mercato-hermes-gateway python3 - <<PY …
+  healthz                   : 200
+  mint, NO secret           : 401
+  mint, WITH the .env token : 200
+  ticket ttl                : 30 seconds
+PY
+```
+
+So `P2-9`'s prerequisite **is met**: compose reads the token from `.env` into the worker (and would into the app), the door is listening, and the mint leg is authenticated. Rotation, if ever needed: change that one value and recreate the worker + the app — the old value stops answering within the 30s any outstanding ticket lives (there is no expiry on the token itself; the single-use ticket is what makes it short-lived).
 
 **Next: `P2-9` — ONE change.** The default-flip to Hermes + the OpenCode deletion (`R28-6`/`N-8`) + the `hermes-local` retirement (`CC-74`), whose trigger was already fully met by `P2-7`. `CC-79` (the live worker bridge) is now the only item between the platform and a Hermes-served chat in production. **Prerequisite, measured above: set `HERMES_WS_TOKEN` in the stack's `.env`** (one value, read by the worker service and the app service), or the flip fails closed at the mint leg.
 
