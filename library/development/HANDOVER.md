@@ -297,7 +297,57 @@ costs, so the decision rests on facts:**
 - **A bonus of the pin:** the chat-serving worker stops offering shell/file tools to the model —
   a smaller attack surface for a process whose job is to serve the platform's own tools.
 
+### The Paperclip+Hermes study's verdict on our architecture (read in full 2026-10-14)
+
+The owner asked whether the control-plane/worker split is really the best architecture or just the
+concept we happen to have. The study (`library/paperclip-hermes-study/`, 11 batches, read in full
+this day) answers with evidence, not loyalty:
+
+- **CONFIRMED — the seam is right, and twice over.** Paperclip, the closest product in existence to
+  our agent half, is a control plane that defines only `invoke/status/cancel` and never owns the
+  runtime (batch 01; `doc/SPEC.md:240-248`, `doc/GOAL.md:54`). The sibling's own ADR-001
+  (`reboot/12-ARCHITECTURE-DECISION-COMPANAI.md`) reached the same shape independently: an
+  `AiRuntimePort` of six narrow ports, browser never talking to Hermes — the same port name and
+  shape our `lib/ai-runtime-port.ts` implements. L-01: the seam is the load-bearing decision.
+- **FALSIFIED — the study's own claim that our advantage is "Hermes in-process".** Our Hermes is a
+  digest-pinned **worker container** behind the ws door (P2-8), and the study's binary (in-process
+  write-through vs HTTP-with-only-the-DB) is false for Hermes anyway: the pin ships a session REST
+  surface (`/api/sessions/{id}/chat` + history, `api_server.py:3613-3614`). Corrected in
+  `findings/10` §8 (rule 13). Our hybrid — external pinned worker + in-worker seam
+  (`ws_host.py`/`mcp_bootstrap.py`) — gets the write-through **without** giving up the boundary.
+- **The owner's settings instinct: right in direction, refined in mechanism.** The sibling answered
+  this exact question (INV-03): ~19 of 122 Hermes capabilities reach the end user; ~46 admin
+  settings converge on **declarative `FieldDef`s with a `secret` flag**, exposed as declarations
+  rather than hand-built screens; iframing/proxying the Hermes dashboard rejected for four reasons
+  (one profile, its own auth, destructive operations, second admin authority). D-07: hire/provisioning
+  is a **server transaction**, never an ops script. So: settings must be product-reachable and
+  changeable (the instinct) — as a curated declarative subset with one canonical owner per fact
+  (the discipline). This refines `CC-82`: the generic config editor stays rejected; the positive
+  pattern to adopt is the declared subset.
+- **Warnings that map onto our live work.** D-06 "two owners of one fact … produces no error — only
+  a system that quietly disagrees with itself" is exactly `CC-82`'s measured smell
+  (`OM_AI_PROVIDER` inert on the worker). D-04: never fold model/config into a session key —
+  directly constrains `CC-82`'s "model first" widening, or a per-agent model change would silently
+  fork the worker session. R-11: per-employee containers caused the sibling's adopted-container
+  incident — we are on the right side (one shared worker). L-16: copy `usageBasis`
+  (per_run | session_cumulative) when usage accounting lands. Batch 03 (the owner's most-watched
+  batch): when we build the task layer, a wake is a durable row, one typed funnel, schedule → work
+  item, capped catch-up, conservative recovery that never silently reassigns.
+- **Rooms, when they come:** a room is **one session per agent** — a shared Hermes session is
+  impossible (N-03, no author column); every message carries its speaker label (the merge is not
+  optional); and Hermes already ships hosted rooms (128 members, event log, replica takeover) —
+  look hard at them before designing our own (D-01, batch 07 §9).
+
 ### Open items that are scheduled, not blocking
+
+- **`CC-83`** (registered 2026-10-14 from the study re-read): **`P2-9b` retires the only door that
+  can write a session.** Measured: the ws door has no message-append RPC; the append primitive
+  exists in the pin (`hermes_state_messages.py:449`); the one currently reachable write surface is
+  `POST /api/sessions/{id}/chat` on the `hermes-local`/`gateway run` service — **the service
+  `CC-74` retires in `P2-9b`**. Trigger: when the `P2-9b` build starts. Ranked: **(1)** land
+  `session.append_messages` on our own ws bootstrap (the `ws_host.py` pattern) **before or with**
+  the retirement — *recommended*; **(2)** keep hermes-local until (1) is proven; **(3)** retire
+  first and rely on prompt compensation — rejected: it permanently forecloses D-05(a).
 
 - **`CC-81`** (from `CC-73`'s critic): the base `AiToolDefinition`/`McpToolDefinition` docblock
   (`lib/types.ts:115`) is a **false statement in the tree** — a narrowly-typed tool is *not*

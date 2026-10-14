@@ -415,3 +415,67 @@ design task with an obvious safe default — and §3.11, the model registry — 
 - **If you are looking for a decision:** §6 has the only one that is open.
 - **If you are about to rebuild something:** check §4d first — four things in this space are already
   known to be false, and one of them ("resume is broken") was ours to fix, not Hermes'.
+
+---
+
+## 8. Measured correction, 2026-10-14 — §5.1's premise does not hold on our base *as built*
+
+Written after the full study was re-read against the Phase-2 build (rule 0b: the repo is the truth;
+this study is a hypothesis about it). §5.1 claims our one structural advantage over Paperclip is that
+**"Hermes is in-process and not a network service"**, so we can "write through the runtime's own
+session path" while "a pure HTTP control plane *cannot* do this; it has only the DB". **Both halves
+of that claim are wrong for the platform as it now stands**, and the correction changes one
+consequence in the target design:
+
+**What was measured (all 2026-10-14, in `workspace/starting-kit` against the pinned Hermes source):**
+
+1. **Our Hermes is not in-process.** It is a **separate, digest-pinned worker container**
+   (`docker-compose.hermes.yml`, service `hermes-gateway`, image `hermes-gateway:p2-9a`, pin digest
+   `ca760e97…`), and the app cannot run it: the app container has no Python and no Docker socket, so
+   it **connects** the worker by URL. The door is the pin's own ws transport (`tui_gateway/ws.py`)
+   mounted beside stdio by this platform's own bootstrap (`docker/hermes/ws_host.py` +
+   `ws_entry.py`, P2-8). Architecturally we are the network-door case §5.1 says "cannot".
+2. **§5.1's premise is also wrong about HTTP control planes in general.** "It has only the DB" is
+   true of *Paperclip's* four-endpoint client (batch 06 §1.2: create-run, events, status, stop — no
+   message surface). It is **not** true of Hermes: the pinned source ships its own session REST
+   surface on the other door — `POST /api/sessions/{id}/chat` loads the stored transcript and runs a
+   turn (`gateway/platforms/api_server.py:3613-3614`), plus `/api/sessions/{id}/messages`, fork,
+   model-lock (batch 07 §7). **The runtime's own session path is itself an HTTP surface.** Paperclip
+   chose a client too narrow to reach it; that is their limitation, not HTTP's.
+3. **The append primitive exists in the pin, on both write paths.** `append_message` and
+   `append_messages_batch` are in the pinned tree (`hermes_state_messages.py:380`, `:449`) — the
+   batch-08 room mechanism is present in the exact source this platform runs.
+4. **Our door does not expose it — yet.** The measured RPC surface of the ws door is session
+   *lifecycle* (`session.create/list/resume/close/compress/interrupt/delete/archive/title/branch_stored/
+   active_list/events`), `prompt.submit` (+attachments), `approval.*`, `subagent.steer`,
+   `delegation.*`, `spawn_tree.*`, `session.foreign.*` (import *another backend's* session), and the
+   config/tools/toolsets/profiles/mcp/skills families (`tui_gateway/methods_session.py`,
+   `methods_session_control.py`, `methods_prompt.py`, `methods_session_foreign.py`). **No method
+   appends an arbitrary message into a live session.** So batch 08's option (a) — write through the
+   runtime's own session path — is not reachable today, on either door we actually serve.
+
+**The corrected conclusion.** The *conclusion* (close the warm-session gap, D-05) stands; the
+*premise* (only in-process gets there) does not. On our base the write-through is reachable three
+ways, none requiring Hermes to move into the app:
+
+- **(i) An in-worker RPC on our existing seam — recommended.** This platform already runs its own
+  Python inside the worker (`ws_host.py`, `ws_entry.py`, `mcp_bootstrap.py` — the P2-8/P2-9a
+  pattern). Adding one method (e.g. `session.append_messages`) served by that same bootstrap and
+  calling the pin's own `append_messages_batch` **is** writing through the runtime's session path —
+  over the network door, with the port boundary intact and the worker still replaceable and
+  mock-testable (which §5.1 correctly requires).
+- **(ii) The api_server door.** `POST /api/sessions/{id}/chat` on the `gateway run` service
+  (port 8642) already persists a message and runs a turn with history loaded. ⚠️ **That service is
+  the `hermes-local` service `P2-9b` plans to retire (`CC-74`)** — retiring it without (i) in place
+  removes the only currently reachable session-write surface. Registered as **`CC-83`**.
+- **(iii) The fallbacks** — evict-and-reload (`session.close` exists on the door; blunt, discards
+  the warm agent) and prompt compensation (bounded, duplicated content), batch 08's options (b)/(c).
+
+**What this does *not* change.** The port stays (L-01 is untouched and, if anything, better
+confirmed: Paperclip's invoke/status/cancel and the sibling's ADR-001 `AiRuntimePort`-of-six-ports
+reached the same shape this platform's `lib/ai-runtime-port.ts` implements). The control-plane /
+runtime ownership boundary stands. What falls is only the sentence claiming in-process as our
+structural advantage — our hybrid (external pinned worker + in-worker seam) gets the same
+write-through benefit *without* giving up the network boundary, which is a better position than
+either predecessor had. **A study that hides its own correction is not trustworthy (batch 00's
+rule); that is why this section exists.**
