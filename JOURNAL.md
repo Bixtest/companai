@@ -117,16 +117,7 @@ the suite itself**, whose frames were the un-enveloped shape the real server nev
 **Next: `P2-1` — and it is now buildable here.** The owner started Docker (`docker info` → **29.8.2**), so the
 premise that made `P2-1`'s boot gate "UNPROVEN-HERE" is corrected in the plan (§2.2 + the row) rather than
 carried forward. `P2-1` was built next and is now done (the block below); `P2-2`, `P2-3`, `P2-4` and `P2-5`
-followed, all discharged (the blocks below); `P2-6` is now discharged (2026-10-13, §2.12) and **the frontier is
-now `P2-7`** — **Hermes must SERVE A LIVE TURN** through the pinned worker (**requirement §2.13 written
-2026-10-13**): the half of `P2-6`'s *stated* exit gate that §2.12 did not write (rule 13 — §2.12 proved the five
-properties **through the port**, against a `FakeClient`; **no live turn has ever been driven**, and production
-never connects the worker). `P2-5` discharged on 2026-10-13 (§2.11): the engine is now **selectable** at the door
-(`lib/resolve-ai-runtime-port.ts`, env `AI_RUNTIME_ENGINE`, default `opencode`) — but the **default did NOT
-move**. §2.11 **OWNS the default-flip step**: the flip to Hermes + the OpenCode deletion (`R28-6`/`N-8`, `CC-76`
-first) + the `CC-74` `hermes-local` retirement land as **one** change — and that change is now **GATED on `P2-7`**
-proving the live turn (flipping today would make every chat **fail closed**, since nothing constructs the worker
-connection).
+followed, all discharged (the blocks below); `P2-6` is now discharged (2026-10-13, §2.12) and **`P2-7` is discharged too (2026-10-14, §2.13)** — **Hermes SERVED A LIVE TURN through the pinned worker**, twice, the second **production-shaped** (the compose change alone: the forwarded `OPENAI_BASE_URL` + `HERMES_MODEL` + the measured prefill grace). The worker returned a **real model answer** and the adapter's ordered typed events ended on a real `done` — the gate §2.13 named, and the missing half of `P2-6`'s *stated* exit gate. **The frontier is now THE SWITCHOVER** — build the production **connection lifecycle**, flip the default engine to Hermes, delete OpenCode (`R28-6`/`N-8`, `CC-76` already fixed) and retire `hermes-local` (`CC-74`), as **one** change (§2.11 item 5 owns it); `CC-74`'s trigger is now **fully met**. Its requirement is written **BEFORE** any code — the next block's first act.
 
 ---
 
@@ -269,6 +260,20 @@ box carry it.)
 **Named bounds, recorded not hidden (each registered the same change):** the acting person's permissions are checked at **admission**, not re-derived at execution (the run's envelope carries no features); the "grant" is still a **label** — gate 2 proves a call belongs to *this run*, not that the caller was permitted the operation (**`CC-77`**); the **task-shaped** starting menu for user-facing agents is destination (**`CC-78`**); and the **live worker bridge** — the pinned worker's tools are a closed set it loads itself, so it cannot yet be offered a platform tool on the wire — is **`CC-79`**, built and proven in the live-run rows. One critic aside recorded for later: the adapter's run registry is never pruned — pre-existing (`P2-3`), and `P2-6`'s bounded-memory scope.
 
 **Next:** `P2-5` — engine selection at the door (OpenCode stays the default; the selector can pick Hermes), which is also the `CC-74` trigger that retires the old `hermes-local` service. **(Done — the block below.)**
+
+---
+
+### ✅ P2-7 DONE — **Hermes SERVED A LIVE TURN through the pinned worker: the worker reached the LOCAL model and answered a real prompt, and the adapter's ordered typed events ended on a real `done` — proved TWICE, the second time production-shaped (the compose change alone).** *(2026-10-14)*
+
+`scripts/hermes-live-turn.mts` (the harness) · `lib/hermes-live-turn-verdict.ts` (its pure, unit-tested judgement) · `__tests__/hermes-worker-wiring.test.ts` (guards the compose wiring) · `docker-compose.hermes.yml` (the forwards) · the `p2-7:live` script. Requirement written BEFORE the code (plan §2.13); full discharge record in §2.13.1 + the §4 row.
+
+**What it is, in plain terms.** Until today nothing had ever driven a **real** turn through the Hermes worker — every test used a fake, and production never even connected. This row closes that: the harness connects the **pinned** worker in its own container, starts a run through the door (`startRun`), submits a prompt, and reads the events the adapter produces. The worker asked **its own** model — the local Qwen on this machine, reached through the URL the compose now forwards — and answered `HERMES LIVE TURN OK`; the adapter's typed events ended on a real `done`. The second run injected **nothing**: it read the container's own environment, so the **compose change alone** is what makes the worker reach the right model. And the wiring was broken in exactly the way only a live turn finds: the compose named none of the worker's own model config, so it would have called OpenAI's servers with a local model's name — measured, fixed, and now guarded by a suite that reads the compose's real `environment:` mapping (a key that appears only in a **comment** does not count).
+
+**The evidence.** 19 tests across the two new suites; the full package **127 suites / 1771 tests GREEN** (= 1752 + 19) under the pinned **Node 24**; `tsc` **92 = the pre-existing `CC-73`, 0 new**; **7 mutations all RED**, md5-restored. Production-shaped run: `PASS — a real turn answered and ended on done (9 events) in 1955.4s`, `exit=0`, answer `"HERMES LIVE TURN OK"`, usage `input:10646 output:6`, event shape `["status","text","text","text","text","text","metadata","metadata","done"]`.
+
+**What the forensic pass corrected (rule 13).** (1) The grace value first chosen (1800s) rested on one measurement, while the default-toolsets prompt measures **10,646–10,988 tokens (~1,905s prefill under load)** — the comment now cites all three measured turns and 2400s beats the slowest with 495s of margin. (2) The interim prompt-size estimate was **2.5× off** the model's own `prompt eval time` line (**L153**). (3) A gate run on the shell's node 22.22.2 falsely showed **2 unloadable suites** — the repo pins node 24 and `isolated-vm` ships no win32 abi-127 prebuild (**L154**). (4) The first production-shaped run's `PASS` line was lost when the background-task registry expired; the turn was re-driven with its output **teed to a file** (**L155**).
+
+**Next: the switchover** — **one** change (§2.11 item 5 owns it): build the production **connection lifecycle** → flip the default engine to Hermes → delete OpenCode (`R28-6`/`N-8`) → retire `hermes-local` (`CC-74` — its trigger is now **fully met**: the selection half by `P2-5`, the live-run half by this row). **Its requirement (§2.14) is written BEFORE any code.**
 
 ---
 

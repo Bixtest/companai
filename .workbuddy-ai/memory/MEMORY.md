@@ -44,13 +44,18 @@ live service is not a unit test (**L150**).
   0 new**; **10 mutations RED**; critic **2 defects + 2 nits fixed** (D1 the bound must END the stream —
   **L151**; D2 a THIRD `AiRuntimePort` impl was unbounded — **L152**). **Default did NOT move.** Lessons
   **L144–L152**.
-- **★ NEXT = `P2-7` (§2.13, requirement written 2026-10-13):** **Hermes must SERVE A LIVE TURN** through the
-  pinned worker (connect → `session.create` → `prompt.submit` → typed events), + the worker's model config
-  settled & forwarded (`docker-compose.hermes.yml` does NOT forward `OPENAI_BASE_URL` → the worker would
-  call api.openai.com with a local model name). Measured: `prompt.submit` never runs outside `__tests__`;
-  production never calls `HermesGatewayClient.connect()` → a `hermes` chat FAILS CLOSED at `startRun`. **The
-  switchover (the connection lifecycle + the default-flip + the OpenCode deletion `R28-6`/`N-8` + the
-  `CC-74` `hermes-local` retirement) is GATED on `P2-7`.**
+- **★ `P2-7` (§2.13) ✅ DONE 2026-10-14 — Hermes SERVED A LIVE TURN, twice, the second production-shaped**
+  (the compose change alone). Compose now forwards `OPENAI_BASE_URL` + `HERMES_MODEL` (the worker's OWN
+  mechanism — it ignores `OM_AI_*`) + `HERMES_LOCAL_STREAM_STALE_TIMEOUT: 2400` (measured prefill grace;
+  the worker's 900 s default aborts every real turn on 4 CPUs). Landed: `scripts/hermes-live-turn.mts`
+  (harness), `lib/hermes-live-turn-verdict.ts` (pure judgement) + 2 suites (19 tests), the wiring suite that
+  PARSES the compose `environment:` mapping, `p2-7:live`. Package **127 suites / 1771 green** (under the
+  PINNED Node 24 — **L154**); tsc **92 = `CC-73`, 0 new**; **7 mutations RED** md5-restored. Lessons
+  **L153** (`progress =` is not the total: read `prompt eval time`) · **L154** (gates run on the pinned
+  runtime — wrong node = different test SET) · **L155** (tee long-run evidence; task registries expire).
+- **★ NEXT = THE SWITCHOVER — ONE change (§2.11 item 5 owns it):** production **connection lifecycle** →
+  **default-flip to Hermes** → **delete OpenCode** (`R28-6`/`N-8`) → **retire `hermes-local`** (`CC-74` —
+  trigger now FULLY met: selection half `P2-5` + live-run half `P2-7`). Requirement (§2.14) BEFORE any code.
 - **`CC-73` OPEN:** 92 pre-existing type errors in 27 `__tests__` files. **`CC-76` ✅ FIXED.** **`CC-51`
   FALSIFIED:** the `team` concept EXISTS (`StaffTeam*`); `staff` is PARKED → product decision (L137).
   **Owner's ruling: core architecture first — business modules are GENERATED from the core workspace.** Docker ON.
