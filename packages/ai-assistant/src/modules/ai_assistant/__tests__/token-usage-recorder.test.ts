@@ -33,6 +33,8 @@ function makeInput(overrides: Partial<RecordTokenUsageInput> = {}): RecordTokenU
       tenantId: 'tenant-1',
       organizationId: null,
       userId: 'user-1',
+      features: [],
+      isSuperAdmin: false,
     },
     agentId: 'catalog.assistant',
     moduleId: 'catalog',
@@ -121,7 +123,9 @@ describe('recordTokenUsage — R12 compliance', () => {
   it('returns immediately without writing when tenantId is falsy', async () => {
     const warnSpy = testLogger.warn
     warnSpy.mockClear()
-    const input = makeInput({ authContext: { tenantId: null, organizationId: null, userId: 'user-1' } })
+    const input = makeInput({
+      authContext: { tenantId: null, organizationId: null, userId: 'user-1', features: [], isSuperAdmin: false },
+    })
     const container = makeContainer({})
     await expect(recordTokenUsage(input, container)).resolves.toBeUndefined()
     expect(warnSpy).not.toHaveBeenCalled()

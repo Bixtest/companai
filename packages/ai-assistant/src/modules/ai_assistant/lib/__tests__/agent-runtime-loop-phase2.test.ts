@@ -32,7 +32,8 @@ jest.mock('ai', () => {
     generateObject: (...args: unknown[]) => generateObjectMock(...args),
     stepCountIs: (count: number) => stepCountIsMock(count),
     hasToolCall: (name: string) => hasToolCallMock(name),
-    convertToModelMessages: (...args: unknown[]) => convertToModelMessagesMock(...args),
+    convertToModelMessages: (...args: unknown[]) =>
+      convertToModelMessagesMock(...(args as Parameters<typeof convertToModelMessagesMock>)),
   }
 })
 

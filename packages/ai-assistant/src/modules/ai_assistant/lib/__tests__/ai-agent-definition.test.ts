@@ -40,8 +40,15 @@ describe('defineAiTool', () => {
     expect(tool.supportsAttachments).toBe(true)
   })
 
-  it('returns an object assignable to AiToolDefinition and McpToolDefinition (BC)', () => {
-    const built = defineAiTool({
+  it('returns an object assignable to the base AiToolDefinition and McpToolDefinition when authored with the base input type (BC)', () => {
+    // `defineAiTool` infers the input type from the schema (`Record<string, never>` for
+    // `z.object({})`). `handler` and `isDestructive` are function-typed *properties*, so
+    // TS checks their parameters contravariantly and a NARROW input is not assignable to
+    // the default `unknown` — so the earlier form of this test asserted something false.
+    // The tool is therefore authored with the base input type. What this now pins is the
+    // builder's RETURN TYPE (that `defineAiTool` still yields a base-conforming object);
+    // the narrow-input friction is a real defect, recorded as `CC-81`.
+    const built = defineAiTool<unknown, { pong: boolean }>({
       name: 'meta.ping',
       description: 'Ping',
       inputSchema: z.object({}),

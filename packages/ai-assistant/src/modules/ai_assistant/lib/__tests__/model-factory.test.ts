@@ -113,7 +113,13 @@ function makeMultiProviderRegistry(
   const registry: AiModelFactoryRegistry = {
     resolveFirstConfigured: (options) =>
       spy(options) as ReturnType<AiModelFactoryRegistry['resolveFirstConfigured']>,
-    get: (id: string) => providers.find((p) => p.id === id) ?? null,
+    // `FakeProvider` is a deliberately reduced stand-in; the registry's `get` is typed
+    // to `LlmProvider`, so the fake is asserted to that slot (it is only ever read
+    // through the fields the factory uses).
+    get: (id: string) =>
+      (providers.find((p) => p.id === id) ?? null) as unknown as ReturnType<
+        NonNullable<AiModelFactoryRegistry['get']>
+      >,
   }
   return { registry, spy }
 }
@@ -326,9 +332,18 @@ describe('createModelFactory', () => {
 
   it('omits the provider order when no AI provider env is set', () => {
     const provider = makeProvider()
-    const resolveFirstConfiguredSpy = jest.fn(() => provider as unknown as ReturnType<
-      NonNullable<CreateModelFactoryDependencies['registry']>['resolveFirstConfigured']
-    >)
+    // Declared with the resolver's own parameter so `.mock.calls[0][0]` is the options
+    // object the assertion reads (jest infers `[]` otherwise).
+    const resolveFirstConfiguredSpy = jest.fn(
+      (
+        _options?: Parameters<
+          NonNullable<CreateModelFactoryDependencies['registry']>['resolveFirstConfigured']
+        >[0],
+      ) =>
+        provider as unknown as ReturnType<
+          NonNullable<CreateModelFactoryDependencies['registry']>['resolveFirstConfigured']
+        >,
+    )
     const factory = createModelFactory(
       fakeContainer,
       makeFactoryDeps(provider, {}, { resolveFirstConfiguredSpy }),

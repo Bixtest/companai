@@ -190,7 +190,6 @@ function makeAgent(
   overrides: Partial<AiAgentDefinition> & Pick<AiAgentDefinition, 'id'>,
 ): AiAgentDefinition {
   return {
-    id: overrides.id,
     moduleId: 'catalog',
     label: `${overrides.id} label`,
     description: `${overrides.id} description`,

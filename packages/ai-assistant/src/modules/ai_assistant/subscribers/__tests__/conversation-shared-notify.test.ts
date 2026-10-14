@@ -53,7 +53,12 @@ describe('conversation-shared-notify subscriber', () => {
   })
 
   it('persists a resolved default-locale title and body, not the raw i18n key', async () => {
-    const create = jest.fn(async () => ({ ok: true }))
+    const create = jest.fn(
+      async (
+        _input: Record<string, unknown>,
+        _scope: { tenantId: string; organizationId: string | null },
+      ) => ({ ok: true }),
+    )
     const ctx = makeCtx(create)
 
     await handleConversationShared(makePayload(), ctx)
@@ -67,7 +72,12 @@ describe('conversation-shared-notify subscriber', () => {
   })
 
   it('still calls the notification service with the recipient tenant scope', async () => {
-    const create = jest.fn(async () => ({ ok: true }))
+    const create = jest.fn(
+      async (
+        _input: Record<string, unknown>,
+        _scope: { tenantId: string; organizationId: string | null },
+      ) => ({ ok: true }),
+    )
     const ctx = makeCtx(create)
 
     await handleConversationShared(makePayload(), ctx)
@@ -77,7 +87,12 @@ describe('conversation-shared-notify subscriber', () => {
   })
 
   it('returns early without calling create when participantUserId is missing', async () => {
-    const create = jest.fn(async () => ({ ok: true }))
+    const create = jest.fn(
+      async (
+        _input: Record<string, unknown>,
+        _scope: { tenantId: string; organizationId: string | null },
+      ) => ({ ok: true }),
+    )
     const ctx = makeCtx(create)
 
     await handleConversationShared(
@@ -89,7 +104,12 @@ describe('conversation-shared-notify subscriber', () => {
   })
 
   it('returns early without calling create when tenantId is missing', async () => {
-    const create = jest.fn(async () => ({ ok: true }))
+    const create = jest.fn(
+      async (
+        _input: Record<string, unknown>,
+        _scope: { tenantId: string; organizationId: string | null },
+      ) => ({ ok: true }),
+    )
     const ctx = makeCtx(create)
 
     await handleConversationShared(
@@ -103,7 +123,12 @@ describe('conversation-shared-notify subscriber', () => {
   it('falls back to the i18n key when the dictionary lookup throws', async () => {
     const i18nServer = jest.requireMock('@open-mercato/shared/lib/i18n/server')
     i18nServer.loadDictionary.mockRejectedValueOnce(new Error('dictionary unavailable'))
-    const create = jest.fn(async () => ({ ok: true }))
+    const create = jest.fn(
+      async (
+        _input: Record<string, unknown>,
+        _scope: { tenantId: string; organizationId: string | null },
+      ) => ({ ok: true }),
+    )
     const ctx = makeCtx(create)
 
     await handleConversationShared(makePayload(), ctx)

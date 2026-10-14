@@ -20,6 +20,7 @@
  */
 
 import type { AiAgentDefinition } from '../ai-agent-definition'
+import type { BusinessQueryIR } from '@open-mercato/shared/lib/business-ir/types'
 
 const generateObjectMock = jest.fn()
 const streamObjectMock = jest.fn()
@@ -35,7 +36,8 @@ jest.mock('ai', () => {
     streamObject: (...args: unknown[]) => streamObjectMock(...args),
     streamText: (...args: unknown[]) => streamTextMock(...args),
     stepCountIs: (...args: unknown[]) => stepCountIsMock(...(args as [number])),
-    convertToModelMessages: (...args: unknown[]) => convertToModelMessagesMock(...args),
+    convertToModelMessages: (...args: unknown[]) =>
+      convertToModelMessagesMock(...(args as Parameters<typeof convertToModelMessagesMock>)),
   }
 })
 
@@ -169,7 +171,15 @@ function makeEngine(overrides?: {
   const query = jest.fn(async (_entity: string, _opts?: QueryOptions) => {
     if (overrides?.reject) throw overrides.reject
     const items = overrides?.items ?? [{ id: 'row-1' }, { id: 'row-2' }]
-    return { items, total: overrides?.total ?? items.length }
+    // `QueryResult` carries `page`/`pageSize` alongside `items`/`total`. No caller in
+    // this suite reads them today, but a fake that omits required fields is exactly the
+    // class of defect the type gate exists to catch, so the fake returns the full result.
+    return {
+      items,
+      total: overrides?.total ?? items.length,
+      page: 1,
+      pageSize: items.length,
+    }
   })
   return { query }
 }
@@ -189,12 +199,16 @@ function callInput(overrides: {
     em: {} as unknown as RunBusinessQueryPromptInput['em'],
     model,
     bindings: overrides.bindings ?? bindings,
-    engine: overrides.engine ?? makeEngine(),
+    // `QueryRunner.query` is generic (`Promise<QueryResult<T>>`); a jest mock cannot be
+    // generic, so the spy is asserted to the port's shape here. The spy itself stays a
+    // `jest.Mock` (the tests read `engine.query.mock.calls`), so the cast lives at the
+    // one place the engine is handed to the caller.
+    engine: (overrides.engine ?? makeEngine()) as unknown as RunBusinessQueryPromptInput['engine'],
   }
 }
 
 /** A model answer that is a valid `BusinessQueryIR` for the model above. */
-const GOOD_IR = {
+const GOOD_IR: BusinessQueryIR = {
   operation: 'list',
   entity: 'external_conversation',
   dimensions: ['subject', 'unread_count'],

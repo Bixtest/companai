@@ -252,14 +252,18 @@ describe('WS-C integration — tool-pack coverage', () => {
         registerMcpTool(tool as never)
       }
       // Plus an extra tool the agent does NOT whitelist; MUST NOT appear.
-      registerMcpTool({
+      // `isMutation` is an `AiToolDefinition` field; `registerMcpTool` takes the base
+      // `McpToolDefinition`, which does not declare it. The tool is typed first, so the
+      // excess-property check does not reject the field the runtime honours.
+      const writeTool: AiToolDefinition<Record<string, never>, Record<string, never>> = {
         name: 'catalog.update_product',
         description: 'write tool',
         inputSchema: z.object({}),
         handler: async () => ({}),
         isMutation: true,
         requiredFeatures: ['catalog.products.manage'],
-      })
+      }
+      registerMcpTool(writeTool)
 
       seedAgentRegistryForTests([
         makeAgent({

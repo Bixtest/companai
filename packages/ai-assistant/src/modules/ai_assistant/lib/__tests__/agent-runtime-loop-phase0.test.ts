@@ -62,6 +62,16 @@ function makeAgent(
   }
 }
 
+/**
+ * ai-sdk 6.0.177 dropped `tools` from `PrepareStepResult` (see the docblock on
+ * `mergeStepOverrides`), but that function still inspects a caller-supplied,
+ * type-asserted `tools` map. The tests build the same asserted shape; this alias
+ * names it once so the cast is stated rather than scattered.
+ */
+type PrepareStepWithTools = NonNullable<PrepareStepResult<ToolSet>> & {
+  tools?: Record<string, unknown>
+}
+
 // ---------------------------------------------------------------------------
 // resolveEffectiveLoopConfig
 // ---------------------------------------------------------------------------
@@ -191,7 +201,7 @@ describe('translateStopConditions', () => {
   })
 
   it('passes kind:custom predicates through as-is', () => {
-    const customStop = jest.fn(() => false) as unknown as import('ai').StopCondition<Record<string, unknown>>
+    const customStop = jest.fn(() => false) as unknown as import('ai').StopCondition<ToolSet>
     const result = translateStopConditions({
       maxSteps: 10,
       stopWhen: { kind: 'custom', stop: customStop },
@@ -249,12 +259,14 @@ describe('mergeStepOverrides', () => {
 
   it('merges model from userOverride', () => {
     const fakeModel = { id: 'gpt-5-mini' } as unknown as import('ai').LanguageModel
-    const result = mergeStepOverrides({}, { model: fakeModel }, agent, wrappedRegistry)
+    // `mergeStepOverrides` can return an undefined `wrapperOverride` (its type says so),
+    // but this test passes `{}`, so the result is defined — asserted, not assumed.
+    const result = mergeStepOverrides({}, { model: fakeModel }, agent, wrappedRegistry)!
     expect(result.model).toBe(fakeModel)
   })
 
   it('merges toolChoice from userOverride', () => {
-    const result = mergeStepOverrides({}, { toolChoice: 'none' }, agent, wrappedRegistry)
+    const result = mergeStepOverrides({}, { toolChoice: 'none' }, agent, wrappedRegistry)!
     expect(result.toolChoice).toBe('none')
   })
 
@@ -264,7 +276,7 @@ describe('mergeStepOverrides', () => {
       { activeTools: ['mod.read', 'mod.write', 'outside.tool'] },
       agent,
       wrappedRegistry,
-    )
+    )!
     expect(result.activeTools).toEqual(['mod.read', 'mod.write'])
   })
 
@@ -274,7 +286,7 @@ describe('mergeStepOverrides', () => {
       { activeTools: ['mod__read', 'outside__tool'] },
       agent,
       wrappedRegistry,
-    )
+    )!
     expect(result.activeTools).toEqual(['mod.read'])
   })
 
@@ -282,11 +294,11 @@ describe('mergeStepOverrides', () => {
     const rawHandler = { execute: jest.fn() }
     const result = mergeStepOverrides(
       {},
-      { tools: { mod__read: rawHandler } as unknown as PrepareStepResult<ToolSet>['tools'] },
+      { tools: { mod__read: rawHandler } } as unknown as PrepareStepWithTools,
       agent,
       wrappedRegistry,
-    )
-    expect((result.tools as Record<string, unknown>)['mod__read']).toBe(wrappedRead)
+    )!
+    expect((result as PrepareStepWithTools).tools?.['mod__read']).toBe(wrappedRead)
   })
 
   it('drops user tools not present in wrappedRegistry with a warning', () => {
@@ -295,11 +307,11 @@ describe('mergeStepOverrides', () => {
     const rawHandler = { execute: jest.fn() }
     const result = mergeStepOverrides(
       {},
-      { tools: { unknown__tool: rawHandler } as unknown as PrepareStepResult<ToolSet>['tools'] },
+      { tools: { unknown__tool: rawHandler } } as unknown as PrepareStepWithTools,
       agent,
       wrappedRegistry,
-    )
-    expect((result.tools as Record<string, unknown>)['unknown__tool']).toBeUndefined()
+    )!
+    expect((result as PrepareStepWithTools).tools?.['unknown__tool']).toBeUndefined()
     expect(consoleSpy).toHaveBeenCalledWith(
       expect.any(String),
       expect.objectContaining({ toolName: 'unknown__tool' }),
@@ -320,7 +332,7 @@ describe('mergeStepOverrides', () => {
     expect(() =>
       mergeStepOverrides(
         {},
-        { tools: { mod__write: rawMutationHandler } as unknown as PrepareStepResult<ToolSet>['tools'] },
+        { tools: { mod__write: rawMutationHandler } } as unknown as PrepareStepWithTools,
         agent,
         wrappedRegistry,
       ),
@@ -355,7 +367,7 @@ describe('buildWrapperPrepareStep', () => {
       steps: [],
       messages: [],
       model: {} as never,
-    })
+    } as unknown as Parameters<typeof prepareStep>[0])
 
     expect(result?.activeTools).toEqual(['mod__read', 'mod__write'])
   })

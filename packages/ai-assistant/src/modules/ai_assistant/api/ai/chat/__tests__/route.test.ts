@@ -298,7 +298,7 @@ describe('POST /api/ai/chat', () => {
         id: 'catalog.extract',
         moduleId: 'catalog',
         executionMode: 'object',
-        output: { schema: z.object({ title: z.string() }) },
+        output: { schemaName: 'catalog_extract', schema: z.object({ title: z.string() }) },
       }),
     ])
 

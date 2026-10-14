@@ -165,8 +165,11 @@ describe('Phase 0 — `defineAiTool()` return value is compatible with the plain
     expect(builderTool.supportsAttachments).toBeUndefined()
   })
 
-  it('builder output is assignable to both AiToolDefinition and McpToolDefinition', () => {
-    const built = defineAiTool({
+  it('builder output is assignable to both AiToolDefinition and McpToolDefinition when authored with the base input type', () => {
+    // See `ai-agent-definition.test.ts`: the base interfaces are checked contravariantly
+    // on `handler`/`isDestructive`, so a narrow-input tool is not base-assignable (CC-81).
+    // The tool is authored with the base input type, which pins the builder's return type.
+    const built = defineAiTool<unknown, { pong: boolean }>({
       name: 'meta.ping',
       description: 'Ping',
       inputSchema: z.object({}),

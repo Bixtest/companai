@@ -18,7 +18,7 @@ let idCounter = 0
 function mockEm() {
   const store: Row[] = []
 
-  const find = async (_entity: unknown, where: any): Promise<Row[]> => {
+  const find = async (_entity: unknown, where: any, _options?: any): Promise<Row[]> => {
     return store.filter((row) => {
       if (where?.agentId && row.agentId !== where.agentId) return false
       if (where?.tenantId && row.tenantId !== where.tenantId) return false

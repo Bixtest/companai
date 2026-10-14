@@ -36,7 +36,8 @@ jest.mock('ai', () => {
     streamObject: (...args: unknown[]) => streamObjectMock(...args),
     streamText: (...args: unknown[]) => streamTextMock(...args),
     stepCountIs: (...args: unknown[]) => stepCountIsMock(...(args as [number])),
-    convertToModelMessages: (...args: unknown[]) => convertToModelMessagesMock(...args),
+    convertToModelMessages: (...args: unknown[]) =>
+      convertToModelMessagesMock(...(args as Parameters<typeof convertToModelMessagesMock>)),
   }
 })
 

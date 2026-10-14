@@ -250,12 +250,16 @@ describe('createAiApiOperationRunner', () => {
     const result = await runner.run({ method: 'GET', path: '/customers/people' })
 
     expect(result.success).toBe(true)
-    expect(resolved).not.toBeNull()
-    expect(resolved?.tenantId).toBe('tenant-1')
-    expect(resolved?.orgId).toBe('org-1')
-    expect(resolved?.userId).toBe('user-1')
-    expect(resolved?.sub).toBe('user-1')
-    expect(resolved?.isSuperAdmin).toBe(true)
+    // TS cannot see the assignment made inside the async handler, so it narrows
+    // `resolved` to its initializer (`null`); `resolved?.tenantId` then reads a property
+    // off `never`. The cast restores the declared type — the run is what fills it.
+    const captured = resolved as AuthContext
+    expect(captured).not.toBeNull()
+    expect(captured?.tenantId).toBe('tenant-1')
+    expect(captured?.orgId).toBe('org-1')
+    expect(captured?.userId).toBe('user-1')
+    expect(captured?.sub).toBe('user-1')
+    expect(captured?.isSuperAdmin).toBe(true)
   })
 
   it('normalizes a 4xx JSON error response into { success: false, statusCode, error, details }', async () => {

@@ -1,7 +1,7 @@
 import { AiTokenUsageRepository } from '../AiTokenUsageRepository'
 
 function makeRepository() {
-  const execute = jest.fn(async () => [{ already_seen: false }])
+  const execute = jest.fn(async (_sql: string) => [{ already_seen: false }])
   const em = {
     getConnection: () => ({ execute }),
   }

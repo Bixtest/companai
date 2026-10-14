@@ -21,7 +21,7 @@ jest.mock('@open-mercato/core/modules/attachments/data/entities', () => ({
 }))
 
 const resolveAttachmentAbsolutePathMock = jest.fn(
-  (_partition: string, storagePath: string) => `/fake/root/${storagePath}`,
+  (_partition: string, storagePath: string, _driver?: string | null) => `/fake/root/${storagePath}`,
 )
 
 jest.mock('@open-mercato/core/modules/attachments/lib/storage', () => ({

@@ -29,8 +29,12 @@ function makeBaseCtx(): McpToolContext {
   }
 }
 
-function asExecutionCtx(tool: AiToolDefinition, base: McpToolContext = makeBaseCtx()): AiToolExecutionContext {
-  return { ...base, tool }
+// Accepts ANY tool definition: `AiToolDefinition`'s `isDestructive` is a function of
+// its input, so a narrowly-typed tool (e.g. `Record<string, never>`) is not assignable
+// to the default `AiToolDefinition<unknown, unknown>`. The helper stores whatever tool
+// it is given; the runtime does not care about the input type.
+function asExecutionCtx(tool: unknown, base: McpToolContext = makeBaseCtx()): AiToolExecutionContext {
+  return { ...base, tool: tool as AiToolDefinition }
 }
 
 function mockRunnerWith(response: AiApiOperationResponse<unknown>): jest.Mock {
@@ -111,8 +115,18 @@ describe('defineApiBackedAiTool', () => {
       path: '/customers/people',
       query: { search: 'taylor' },
     }
-    const toOperation = jest.fn(() => operation)
-    const mapResponse = jest.fn((response: AiApiOperationResponse<{ items: unknown[] }>) => response.data?.items ?? [])
+    // Declared with the tool's REAL parameter lists so `.mock.calls[0]` is the tuple
+    // the assertions destructure (jest infers `[]` / `[response]` otherwise).
+    const toOperation = jest.fn(
+      (_input: { search: string }, _ctx: AiToolExecutionContext) => operation,
+    )
+    const mapResponse = jest.fn(
+      (
+        response: AiApiOperationResponse<{ items: unknown[] }>,
+        _input: { search: string },
+        _ctx: AiToolExecutionContext,
+      ) => response.data?.items ?? [],
+    )
     const run = mockRunnerWith({ success: true, statusCode: 200, data: { items: [{ id: 'p1' }] } })
 
     const tool = defineApiBackedAiTool<{ search: string }, { items: unknown[] }, unknown[]>({

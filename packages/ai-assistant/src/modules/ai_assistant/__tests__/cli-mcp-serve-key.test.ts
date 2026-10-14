@@ -9,7 +9,7 @@ jest.mock('@open-mercato/shared/lib/di/container', () => ({
 }))
 
 jest.mock('../lib/mcp-server', () => ({
-  runMcpServer: (...args: unknown[]) => mockRunMcpServer(...args),
+  runMcpServer: (...args: unknown[]) => mockRunMcpServer(...(args as Parameters<typeof mockRunMcpServer>)),
 }))
 
 function getMcpServe(): ModuleCli {

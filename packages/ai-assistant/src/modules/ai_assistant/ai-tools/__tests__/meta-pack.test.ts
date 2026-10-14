@@ -15,10 +15,31 @@ import {
 import * as agentRegistry from '../../lib/agent-registry'
 import metaAiTools from '../meta-pack'
 
-function findTool(name: string) {
+/**
+ * `metaAiTools` is a tuple of three tools with three different input types, so
+ * `.find()` returns their union and calling `.handler()` on that union demands the
+ * **intersection** of every tool's input. These tests exercise each tool with the
+ * inputs that tool takes — including partial ones, to prove the runtime validation —
+ * so the helper returns a loose view of the tool.
+ *
+ * TRADE-OFF (accepted, deliberate): the loose `handler` input means a wrong-TYPED input
+ * would not be a compile error here. That is the point — these tests assert RUNTIME
+ * behaviour on arbitrary input, which is what a validator test is for. The production
+ * tools keep their own strict inputs; nothing in this file widens them.
+ */
+type MetaToolUnderTest = {
+  name: string
+  description: string
+  inputSchema: { parse: (input: unknown) => unknown }
+  requiredFeatures?: string[]
+  isMutation?: boolean
+  handler: (input: Record<string, unknown>, context: unknown) => Promise<unknown>
+}
+
+function findTool(name: string): MetaToolUnderTest {
   const tool = metaAiTools.find((entry) => entry.name === name)
   if (!tool) throw new Error(`tool ${name} missing`)
-  return tool
+  return tool as unknown as MetaToolUnderTest
 }
 
 function makeAgent(overrides: Partial<AiAgentDefinition> & Pick<AiAgentDefinition, 'id' | 'moduleId'>): AiAgentDefinition {

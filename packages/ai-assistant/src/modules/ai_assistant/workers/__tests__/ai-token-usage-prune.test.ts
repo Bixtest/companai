@@ -2,7 +2,9 @@ import { runTokenUsagePrune } from '../ai-token-usage-prune'
 import type { EntityManager } from '@mikro-orm/postgresql'
 
 type ExecuteResult = { affectedRows?: number; rowCount?: number }
-type ConnectionExecuteSpy = jest.Mock<Promise<unknown[]> | Promise<ExecuteResult>>
+// The spy returns EITHER rows OR an `ExecuteResult`, and an `async` function's type is
+// `Promise<A | B>` — not `Promise<A> | Promise<B>`. The alias states the real shape.
+type ConnectionExecuteSpy = jest.Mock<Promise<ExecuteResult | unknown[]>>
 
 interface ConnectionStub {
   execute: ConnectionExecuteSpy

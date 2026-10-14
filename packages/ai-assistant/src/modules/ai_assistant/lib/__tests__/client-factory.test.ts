@@ -1,10 +1,10 @@
 import { createMcpClient } from '../client-factory'
 
-const mockConnect = jest.fn(async () => ({ listTools: jest.fn(), callTool: jest.fn(), close: jest.fn() }))
+const mockConnect = jest.fn(async (_options: unknown) => ({ listTools: jest.fn(), callTool: jest.fn(), close: jest.fn() }))
 
 jest.mock('../mcp-client', () => ({
   McpClient: {
-    connect: (...args: unknown[]) => mockConnect(...args),
+    connect: (...args: unknown[]) => mockConnect(...(args as Parameters<typeof mockConnect>)),
   },
 }))
 
