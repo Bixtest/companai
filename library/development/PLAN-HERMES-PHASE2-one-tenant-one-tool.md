@@ -703,7 +703,19 @@ The first re-proof attempt of the padded header failed **on the shell side**, no
 
 **Named bounds (unchanged, and now tested).** The engine is still selected by env — **`AI_RUNTIME_ENGINE` still defaults to `opencode`, and the sole test that would catch an early flip is green**; a mid-run socket death ends that run and the **next** run dials afresh (connect-once — a mid-run `session.resume` is a named bound, not built); `stop()` on a shared door never retires the worker other clients are using; the door is **not published** to the host.
 
-**Next: `P2-9` — ONE change.** The default-flip to Hermes + the OpenCode deletion (`R28-6`/`N-8`) + the `hermes-local` retirement (`CC-74`), whose trigger was already fully met by `P2-7`. `CC-79` (the live worker bridge) is now the only item between the platform and a Hermes-served chat in production.
+**One more bound, measured on the committed stack (2026-10-14, after the commit) — the door is OFF until the operator sets a token.** The recreate above and the proof both carried `HERMES_WS_TOKEN` through the shell. Recreating the worker from the committed compose with that shell variable **unset** measured the fail-safe:
+
+```
+$ docker compose -f docker-compose.hermes.yml up -d --no-deps --force-recreate hermes-gateway
+[Hermes ws-entry] HERMES_WS_TOKEN is not set — the ws door is disabled; the stdio channel serves as before
+$ docker exec mercato-hermes-gateway python3 -c "…urlopen('http://127.0.0.1:8091/healthz')…"
+ConnectionRefusedError: [Errno 111] Connection refused        ← nothing listens
+$ docker port mercato-hermes-gateway                          ← nothing published
+```
+
+The worker's `.env` carries **no `HERMES_WS_TOKEN`** (measured: the only Hermes keys are `HERMES_PORT=8642` and a comment), and the service passes it through as `${HERMES_WS_TOKEN:-}` — an **empty** default — in both the worker compose and `docker-compose.fullapp.yml`'s app service. So in the stack as committed the door is **off**, which is the safe direction (the worker is the stdio worker it has always been, and OpenCode is still the default) but is also **`P2-9`'s hard prerequisite**: a flipped default with an empty token would dial `http://hermes-gateway:8091` and **fail closed at the mint leg with 401** (fail-fast is deliberate — a wrong secret must not retry forever, `M2`). **`P2-9` must set that one value in the operator's `.env` (both services read it) before the flip lands**, or the flip buys nothing. Flagged to the owner in the report for this row: this is his environment, and a token in `.env` is a rule-11 decision, not a cleanup step.
+
+**Next: `P2-9` — ONE change.** The default-flip to Hermes + the OpenCode deletion (`R28-6`/`N-8`) + the `hermes-local` retirement (`CC-74`), whose trigger was already fully met by `P2-7`. `CC-79` (the live worker bridge) is now the only item between the platform and a Hermes-served chat in production. **Prerequisite, measured above: set `HERMES_WS_TOKEN` in the stack's `.env`** (one value, read by the worker service and the app service), or the flip fails closed at the mint leg.
 
 ---
 
