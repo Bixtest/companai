@@ -56,6 +56,8 @@ const REPO_ROOT = join(__dirname, '..', '..', '..', '..', '..', '..')
 const COMPOSE = join(REPO_ROOT, 'docker-compose.hermes.yml')
 const FULLAPP_COMPOSE = join(REPO_ROOT, 'docker-compose.fullapp.yml')
 const DOCKERFILE = join(REPO_ROOT, 'docker', 'hermes', 'Dockerfile')
+const ENTRYPOINT = join(REPO_ROOT, 'docker', 'hermes', 'entrypoint.py')
+const MCP_BOOTSTRAP = join(REPO_ROOT, 'docker', 'hermes', 'mcp_bootstrap.py')
 
 /** Removes a trailing `#` comment, but never inside a quoted scalar. */
 function stripComment(line: string): string {
@@ -184,6 +186,144 @@ export function logicalLines(source: string): string[] {
   }
   if (carry !== '') out.push(carry)
   return out
+}
+
+/**
+ * The `volumes:` LIST of one service, as `{source, target, mode}` triples.
+ *
+ * SHORT-form entries only (`src:tgt[:mode]`) — which is the form this compose
+ * uses and the form the `P2-9a` assertion is about. A rewrite into long form
+ * (`type: volume`) parses to NOTHING rather than to a wrong answer, so it goes
+ * RED here instead of silently satisfying the mount guard.
+ *
+ * The target is taken at the LAST colon rather than by splitting on `:`, because
+ * the pin mount's source is itself colon-bearing (`${HERMES_PIN_DIR:-../../…}`).
+ * A naive `split(':')` mis-parses that entry, which is how this helper would
+ * become the vacuous one.
+ */
+export function serviceVolumeMounts(
+  source: string,
+  service: string,
+): Array<{ source: string; target: string; mode: string }> {
+  const out: Array<{ source: string; target: string; mode: string }> = []
+  let inServices = false
+  let inService = false
+  let inVolumes = false
+
+  for (const raw of source.split(/\r?\n/)) {
+    const text = stripComment(raw).replace(/\s+$/, '')
+    if (text.trim() === '') continue
+    const indent = text.length - text.trimStart().length
+    const body = text.trim()
+
+    if (indent === 0) {
+      inServices = body === 'services:'
+      inService = false
+      inVolumes = false
+      continue
+    }
+    if (!inServices) continue
+    if (indent === 2) {
+      inService = body === `${service}:`
+      inVolumes = false
+      continue
+    }
+    if (!inService) continue
+    if (indent === 4) {
+      inVolumes = body === 'volumes:'
+      continue
+    }
+    if (inVolumes && indent >= 6 && body.startsWith('- ')) {
+      const raw = body.slice(2).trim()
+      const modeMatch = /:(ro|rw|z|Z|cached|delegated|consistent)$/.exec(raw)
+      const mode = modeMatch ? modeMatch[1] : ''
+      const withoutMode = modeMatch ? raw.slice(0, -modeMatch[0].length) : raw
+      const cut = withoutMode.lastIndexOf(':')
+      if (cut <= 0) continue
+      out.push({
+        source: withoutMode.slice(0, cut).trim(),
+        target: withoutMode.slice(cut + 1).trim(),
+        mode,
+      })
+    }
+  }
+  return out
+}
+
+/**
+ * The TOP-LEVEL `volumes:` block as `Map<key, {name, external}>`.
+ *
+ * Only the indent-0 `volumes:` block is read, so a service's own `volumes:` list
+ * (indent 4) can never be mistaken for a volume DECLARATION. `name` is kept as
+ * written — the assertion is about the exact interpolation, not its expansion.
+ */
+export function topLevelVolumes(source: string): Map<string, { name: string; external: boolean }> {
+  const out = new Map<string, { name: string; external: boolean }>()
+  let inVolumes = false
+  let current: string | null = null
+
+  for (const raw of source.split(/\r?\n/)) {
+    const text = stripComment(raw).replace(/\s+$/, '')
+    if (text.trim() === '') continue
+    const indent = text.length - text.trimStart().length
+    const body = text.trim()
+
+    if (indent === 0) {
+      inVolumes = body === 'volumes:'
+      current = null
+      continue
+    }
+    if (!inVolumes) continue
+    if (indent === 2) {
+      const match = /^([A-Za-z_][A-Za-z0-9_]*):$/.exec(body)
+      current = match ? match[1] : null
+      if (current) out.set(current, { name: '', external: false })
+      continue
+    }
+    if (current !== null && indent >= 4) {
+      const entry = out.get(current)
+      if (!entry) continue
+      if (body.startsWith('name:')) entry.name = body.slice('name:'.length).trim()
+      else if (body === 'external: true') entry.external = true
+    }
+  }
+  return out
+}
+
+/**
+ * The EXPRESSION part of every `log(`/`note(` call, with each `len(key)` removed.
+ *
+ * Two sources are joined, because an expression reaches a log call in two shapes
+ * and ONE of them is invisible to the other:
+ *
+ *   · everything after the format string's closing quote — the `%`/`+`/`,` form
+ *     (`log("... %s ..." % (source, len(key)))`);
+ *   · every `{…}` interpolation INSIDE the quoted text — the **f-string** form
+ *     (`log(f"... {key}")`), where the expression lives precisely where the
+ *     first source cannot look.
+ *
+ * Asserting on this rather than on the whole line is what separates the
+ * IDENTIFIER `key` from the English word "key" in the message text
+ * (*"waiting up to %ds for the MCP key at %s"*). A whole-line check cannot make
+ * that distinction, and a pattern for one leak shape (`/% key/`) misses the
+ * others — so the check is "strip the lengths, then the identifier must be gone".
+ *
+ * ⚠ The f-string source is not decoration. Measured: with only the first source,
+ * a mutant that rewrote the entrypoint's line to
+ * `log(f"... ({len(key)} chars): {key}")` — i.e. that PRINTS THE SECRET — left
+ * this suite 53/53 GREEN, including the test named "never its value". The guard
+ * was vacuous against the most idiomatic Python form of the very leak it names.
+ */
+export function loggedExpressions(source: string, call: RegExp): string {
+  const pieces: string[] = []
+  for (const row of source.split(/\r?\n/)) {
+    if (!call.test(row)) continue
+    const cut = Math.max(row.lastIndexOf('"'), row.lastIndexOf("'"))
+    pieces.push(cut === -1 ? row : row.slice(cut + 1))
+    // `{…}` groups inside the quoted text: an f-string's expressions.
+    for (const match of row.matchAll(/\{([^{}]*)\}/g)) pieces.push(match[1])
+  }
+  return pieces.join('\n').split('len(key)').join('')
 }
 
 describe('P2-7 — docker-compose.hermes.yml forwards the worker’s own model wiring', () => {
@@ -446,5 +586,351 @@ describe('P2-8 — docker/hermes/Dockerfile serves the door and keeps it compili
       'CMD ["python3", "-m", "tui_gateway.entry"]',
     ])
     expect(parsed.some((line) => line.includes('ws_entry.py'))).toBe(false)
+  })
+})
+
+/**
+ * `P2-9a` (§2.15) — **the platform's 21 MCP tools reach a Hermes-served chat.**
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ * THE REGRESSION THIS SUITE PREVENTS
+ * ─────────────────────────────────────────────────────────────────────────────
+ * `P2-9`'s requirement measured, before any code, that OpenCode is live and
+ * connected to the platform's own MCP server (`{"open-mercato":{"status":
+ * "connected"}}`, 21 tools) while the pinned worker had **no** MCP config and
+ * **no MCP SDK** — so flipping the default to Hermes and deleting OpenCode, as
+ * §2.14 sketched it, would have removed 21 tools the chat can call today. That
+ * is a capability regression, and it is what `CC-79` names.
+ *
+ * `P2-9a` closes it additively: the image installs the pin's own `mcp` extra,
+ * the entrypoint resolves the credential and writes the worker's `mcp_servers`
+ * entry, and the compose wires the URL, the key and the shared volume. Four
+ * files carry that, and each one has a failure mode a later edit could
+ * reintroduce silently:
+ *
+ *   · the compose — a URL default that is unreachable from the worker, a
+ *     dropped credential, or a WRITABLE key mount;
+ *   · the Dockerfile — an `uv sync` without the extra (the client goes inert
+ *     again: `register_mcp_servers` returns `[]` when the SDK is missing);
+ *   · the entrypoint — a bootstrap whose stdout is inherited (a corrupt frame
+ *     on the gateway's channel) or which runs before the pin is verified;
+ *   · the bootstrap — the credential written to the persistent volume instead
+ *     of the pin's `${VAR}` placeholder.
+ *
+ * Every assertion below is written against a COMMENT-STRIPPED view for the same
+ * reason the `P2-7`/`P2-8` blocks above are: these files' own comments name
+ * every key and file being asserted, so a substring check would pass with the
+ * wiring deleted.
+ */
+describe('P2-9a — docker-compose.hermes.yml wires the platform’s MCP server', () => {
+  const source = readFileSync(COMPOSE, 'utf8')
+  const env = serviceEnvironment(source, 'hermes-gateway')
+  const mounts = serviceVolumeMounts(source, 'hermes-gateway')
+  const volumes = topLevelVolumes(source)
+
+  it('parses the RIGHT service (the worker, not a neighbour)', () => {
+    expect(env.get('HERMES_PIN_DIGEST')).toBeDefined()
+    expect(mounts.some((mount) => mount.target === '/hermes-src')).toBe(true)
+  })
+
+  it('points the worker at the IN-NETWORK MCP service, not the host gateway', () => {
+    // Measured 2026-10-14: `getent hosts mcp` inside this worker → 172.18.0.2 on
+    // `mercato-network-local`, i.e. a sibling it can reach by name. The previous
+    // default (`host.docker.internal`) is the APP's own convention and the wrong
+    // one here; the OpenCode service already uses this in-network form.
+    expect(env.get('HERMES_MCP_URL')).toBe('${HERMES_MCP_URL:-http://mcp:3001/mcp}')
+  })
+
+  it('passes the MCP credential through with an EMPTY default', () => {
+    // Same ordering as `docker/opencode/entrypoint.sh`: the env var wins, and
+    // `${VAR:-}` keeps a stack that never set it byte-for-byte bootable. A
+    // literal here would be a secret committed to the repo.
+    expect(env.get('MCP_SERVER_API_KEY')).toBe('${MCP_SERVER_API_KEY:-}')
+  })
+
+  it('names the shared key file the `mcp` service provisions', () => {
+    // The fallback leg, and the SAME path the OpenCode service reads — the
+    // volume is the platform's, not this file's.
+    expect(env.get('MCP_SERVER_API_KEY_FILE')).toBe('/run/mcp-shared/mcp-api-key')
+  })
+
+  it('mounts the shared key volume READ-ONLY', () => {
+    const mount = mounts.find((entry) => entry.target === '/run/mcp-shared')
+    expect(mount).toBeDefined()
+    expect(mount?.source).toBe('mcp_shared')
+    // Read-only matters: this worker EXECUTES MODEL-GENERATED CODE. A writable
+    // mount would let a turn rotate or replace the platform's MCP key.
+    expect(mount?.mode).toBe('ro')
+  })
+
+  it('declares that volume EXTERNAL, named as the fullapp stack names it', () => {
+    // EXTERNAL for the same reason the network is: `down` in this file must not
+    // take the platform's MCP key volume with it. The name tracks the fullapp
+    // file's own `${DEPLOY_ENV:-local}` suffix so both files address one volume.
+    const declared = volumes.get('mcp_shared')
+    expect(declared).toBeDefined()
+    expect(declared?.external).toBe(true)
+    expect(declared?.name).toBe(
+      '${HERMES_MCP_SHARED_VOLUME:-mercato-mcp-shared-${DEPLOY_ENV:-local}}',
+    )
+  })
+
+  it('a mount OUTSIDE the service’s volumes: list does not satisfy the assertion', () => {
+    // The fix's comments name the mount, and a compose service has several other
+    // places a `- src:tgt` line can sit. The mount appears in THREE of them — a
+    // comment, a `labels:` list on the SAME service, and another service's
+    // `volumes:` — and the parser must see none. `/hermes-src` is the control:
+    // the parser does read a real list.
+    //
+    // The `labels:` leg is what makes the `inVolumes` gate testable at all:
+    // another service's list is already excluded by the `inService` gate, so a
+    // fixture with only that leg stays GREEN when `inVolumes` is deleted.
+    const fixture = [
+      'services:',
+      '  hermes-gateway:',
+      '    # - mcp_shared:/run/mcp-shared:ro  (documented, NOT mounted)',
+      '    volumes:',
+      '      - ${HERMES_PIN_DIR:-../../hermes-agent-main}:/hermes-src:ro',
+      '    labels:',
+      '      - mcp_shared:/run/mcp-shared:ro',
+      '  other:',
+      '    volumes:',
+      '      - mcp_shared:/run/mcp-shared:ro',
+    ].join('\n')
+    const parsed = serviceVolumeMounts(fixture, 'hermes-gateway')
+    expect(parsed.some((mount) => mount.source === 'mcp_shared')).toBe(false)
+    expect(parsed.some((mount) => mount.target === '/hermes-src')).toBe(true)
+  })
+
+  it('parses a colon-bearing source (the pin mount) without losing its target', () => {
+    // `split(':')` would turn the pin mount into four fields and read
+    // `-../../hermes-agent-main}` as its target. This is the property that keeps
+    // the mount guard above from being satisfied by the WRONG entry.
+    const fixture = [
+      'services:',
+      '  hermes-gateway:',
+      '    volumes:',
+      '      - ${HERMES_PIN_DIR:-../../hermes-agent-main}:/hermes-src:ro',
+      '      - mcp_shared:/run/mcp-shared:ro',
+    ].join('\n')
+    const parsed = serviceVolumeMounts(fixture, 'hermes-gateway')
+    expect(parsed).toEqual([
+      { source: '${HERMES_PIN_DIR:-../../hermes-agent-main}', target: '/hermes-src', mode: 'ro' },
+      { source: 'mcp_shared', target: '/run/mcp-shared', mode: 'ro' },
+    ])
+  })
+
+  it('does not read a service’s own volumes: list as a volume DECLARATION', () => {
+    const fixture = [
+      'services:',
+      '  hermes-gateway:',
+      '    volumes:',
+      '      - mcp_shared:/run/mcp-shared:ro',
+      'volumes:',
+      '  hermes_state:',
+      '    name: mercato-hermes-state',
+    ].join('\n')
+    const declared = topLevelVolumes(fixture)
+    expect(declared.has('mcp_shared')).toBe(false)
+    expect(declared.get('hermes_state')?.name).toBe('mercato-hermes-state')
+  })
+})
+
+describe('P2-9a — docker/hermes/Dockerfile installs the SDK and ships the bootstrap', () => {
+  const source = readFileSync(DOCKERFILE, 'utf8')
+  const lines = logicalLines(source).map((line) => line.trim())
+
+  it('asks uv for the pin’s OWN mcp extra (measured absent before it)', () => {
+    // Measured before the fix: `import mcp` → ModuleNotFoundError; the client
+    // was INERT (`SDK available: False`, `DISCOVERED: 0`) because
+    // `register_mcp_servers` begins `if not _core._ensure_mcp_sdk(): return []`.
+    const sync = lines.filter((line) => line.includes('uv sync'))
+    expect(sync).toHaveLength(1)
+    // Anchored with a boundary: a bare `toContain('--extra mcp')` is satisfied by
+    // `--extra mcp-bogus` (measured), i.e. by a typo that installs nothing.
+    expect(sync[0]).toMatch(/--extra\s+mcp(\s|$)/)
+  })
+
+  it('keeps --frozen: the extra is installable frozen only because the lock has it', () => {
+    // Measured in the pin: `uv.lock` carries `{ name = "mcp", marker = "extra ==
+    // 'mcp'", specifier = "==2.0.0" }` (and httpx2/starlette). The `mcp = false`
+    // under `[tool.uv.exclude-newer-package]` is an exclude-newer EXEMPTION, not
+    // an exclusion — it is why the lock resolves the package at all. Dropping
+    // `--frozen` would let uv re-resolve and float a transitive the lock pinned.
+    const sync = lines.filter((line) => line.includes('uv sync'))
+    expect(sync[0]).toContain('--frozen')
+    expect(sync[0]).toContain('--no-install-project')
+  })
+
+  it('COPYs the bootstrap and compile-checks it', () => {
+    expect(lines.filter((line) => /^COPY\b/.test(line) && line.includes('mcp_bootstrap.py'))).toHaveLength(1)
+    const compileLines = lines.filter((line) => line.includes('py_compile'))
+    expect(compileLines).toHaveLength(1)
+    expect(compileLines[0]).toContain('mcp_bootstrap.py')
+  })
+
+  it('ignores a file named ONLY in a comment (the parse is not a substring search)', () => {
+    const fixture = [
+      '# The image ships mcp_bootstrap.py and installs `uv sync --extra mcp`.',
+      'RUN cd /build && uv sync --frozen --no-install-project --no-dev --python 3.14',
+    ].join('\n')
+    const parsed = logicalLines(fixture).map((line) => line.trim())
+    expect(parsed.some((line) => line.includes('--extra mcp'))).toBe(false)
+    expect(parsed.some((line) => line.includes('mcp_bootstrap.py'))).toBe(false)
+  })
+})
+
+describe('P2-9a — docker/hermes/entrypoint.py writes the entry, after the pin, quietly', () => {
+  const source = readFileSync(ENTRYPOINT, 'utf8')
+
+  it('runs the bootstrap as a subprocess with its stdout DISCARDED', () => {
+    // The pin's config modules are CLI code and print (its migration path writes
+    // banners). This process's stdout is the gateway's JSON-RPC channel, where a
+    // stray print is a corrupt frame — the same rule `verify_pin.py` and the
+    // gateway itself follow. `stdout=DEVNULL` is what makes the import safe.
+    expect(source).toMatch(
+      /subprocess\.run\(\s*\[sys\.executable,\s*bootstrap,\s*SOURCE_DIR\],\s*stdout=subprocess\.DEVNULL\s*,?\s*\)/,
+    )
+  })
+
+  it('runs it AFTER the pin digest check, never before', () => {
+    // The bootstrap imports `hermes_cli.config` from the mounted tree. Importing
+    // the pin from an UNVERIFIED mount is the single thing this ordering exists
+    // to prevent, so the order is asserted rather than assumed.
+    const verifyAt = source.indexOf('verify_pin.py')
+    const bootstrapAt = source.indexOf('bootstrap = os.path.join')
+    expect(verifyAt).toBeGreaterThan(-1)
+    expect(bootstrapAt).toBeGreaterThan(-1)
+    expect(bootstrapAt).toBeGreaterThan(verifyAt)
+  })
+
+  it('puts the resolved credential into the WORKER’s environment', () => {
+    // `config.yaml` holds the literal `${MCP_SERVER_API_KEY}` and the pin
+    // resolves it from `os.environ` at read time (measured: `get_secret` falls
+    // through to `os.environ` in a single-profile deployment). The worker's
+    // environment is the one this file builds for its final `execvpe`, so
+    // without this line the placeholder stays literal and every call 401s.
+    expect(source).toContain('os.environ[MCP_KEY_ENV] = key')
+  })
+
+  it('logs the credential’s SOURCE and LENGTH, never its value', () => {
+    // These lines land in `docker compose logs`. Only the source and the length
+    // may appear. See `loggedExpressions` for why the assertion is written on
+    // the call's EXPRESSION rather than on the whole line — the message text
+    // contains the English word "key" legitimately.
+    const line = source.split(/\r?\n/).find((row) => row.includes('MCP credential resolved from'))
+    expect(line).toBeDefined()
+    expect(line).toContain('len(key)')
+    expect(loggedExpressions(source, /\blog\(/)).not.toMatch(/\bkey\b/)
+  })
+
+  it('treats a REFUSED bootstrap as fatal, and an ABSENT credential as not', () => {
+    // The distinction is the whole point: a deployment that configured no
+    // credential may boot without tools (loudly), but one that ASKED for the
+    // platform's tools and did not get them must not boot and silently look
+    // healthy — that is the exact regression P2-9a exists to prevent.
+    //
+    // SCOPED to the region after the bootstrap is resolved. An unscoped
+    // `/if\s+result\.returncode\s*!=\s*0:\s*fail\(/` over the whole file is
+    // satisfied by the PIN-verification check near the top of `main()`, so the
+    // mutant that downgrades THIS one to a `log(` stays GREEN — measured: it did
+    // exactly that, and this is the fix.
+    const bootstrapAt = source.indexOf('bootstrap = os.path.join')
+    expect(bootstrapAt).toBeGreaterThan(-1)
+    expect(source.slice(bootstrapAt)).toMatch(/if\s+result\.returncode\s*!=\s*0:\s*fail\(/)
+  })
+})
+
+describe('P2-9a — docker/hermes/mcp_bootstrap.py uses the pin’s writer and PROVES the result', () => {
+  const source = readFileSync(MCP_BOOTSTRAP, 'utf8')
+
+  it('writes through the pin’s own writer, not hand-rolled YAML', () => {
+    // `_save_mcp_server` is what `hermes mcp add` calls: it validates through
+    // `validate_mcp_server_entry`, writes atomically, and sets the pin's file
+    // permissions. Writing YAML here would drift from that schema.
+    expect(source).toContain('from hermes_cli.mcp_config import _save_mcp_server')
+    // ⚠ The IMPORT is not the claim; the CALL is. Measured: replacing
+    // `_save_mcp_server(server_name, entry)` with a hand-rolled write while
+    // leaving the import in place left this suite 53/53 GREEN — including this
+    // very test, whose name says "not hand-rolled YAML". Anchor on the call site.
+    expect(source).toMatch(/_save_mcp_server\(\s*server_name\s*,\s*entry\s*\)/)
+  })
+
+  it('reads the entry BACK through the pin’s own reader', () => {
+    // `save_config` normalises and strips defaults before writing, so "I called
+    // the writer" is not evidence the file holds what was asked for. Measured so
+    // the round-trip is known to hold: `mcp_servers` is absent from
+    // `DEFAULT_CONFIG` (it is in `_EXTRA_KNOWN_ROOT_KEYS`), so the strip pass
+    // cannot drop the section.
+    expect(source).toContain('from hermes_cli.config import load_config')
+  })
+
+  it('reads the RAW file to prove the placeholder is what is at rest', () => {
+    // `read_raw_config()` is the file as written ("no defaults merged, no
+    // migration"). This is the read that answers *is the secret at rest?*
+    //
+    // Anchored on the CALL SITE, not the bare name: this module's docstring
+    // explains both readers by name, so `toContain('read_raw_config()')` would
+    // be satisfied by the prose alone — a vacuous guard of exactly the kind the
+    // blocks above exist to prevent.
+    expect(source).toContain('from hermes_cli.config import load_config, read_raw_config')
+    expect(source).toContain('read_raw_config().get("mcp_servers")')
+  })
+
+  it('checks AT-REST with the raw reader and NOT the expanded one (the measured defect)', () => {
+    // The first version of the bootstrap compared the placeholder against
+    // `load_config()` — which `_load_config_impl` ends by running through
+    // `_expand_env_vars(normalized)`, so it returns the RESOLVED credential. The
+    // proof then saw a value that is indistinguishable from a secret written to
+    // disk, and correctly REFUSED to boot. Reading the wrong view makes the
+    // at-rest claim untestable, so the pairing is asserted: the raw read comes
+    // first and is what feeds the placeholder comparison.
+    const rawAt = source.indexOf('read_raw_config().get("mcp_servers")')
+    const expandedAt = source.indexOf('load_config().get("mcp_servers")')
+    expect(rawAt).toBeGreaterThan(-1)
+    expect(expandedAt).toBeGreaterThan(rawAt)
+    expect(source.slice(rawAt, expandedAt)).toContain('!= PLACEHOLDER')
+  })
+
+  it('reads the EXPANDED config to prove the runtime resolves it', () => {
+    // The leg that would otherwise fail as a 401 mid-turn: `load_config()` is
+    // the pin's own load path (normalise → expand `${VAR}` from the process
+    // environment), i.e. the same view `_load_mcp_config()` reads at turn time.
+    expect(source).toContain('load_config().get("mcp_servers")')
+    expect(source).toContain('!= key')
+  })
+
+  it('carries the `${VAR}` placeholder, never the credential', () => {
+    // `config.yaml` lives in a PERSISTENT volume. Writing the key into it would
+    // put the secret at rest and make rotation a volume edit; the placeholder is
+    // the pin's own documented form for secrets.
+    expect(source).toContain('PLACEHOLDER = "${" + KEY_ENV + "}"')
+    expect(source).toContain('"x-api-key": PLACEHOLDER')
+  })
+
+  it('exits 0 with no entry when there is no credential (fail-soft, and loud)', () => {
+    // Mirrors the ws door's shape: a deployment that cannot authenticate does
+    // not get an entry that would 401 on every turn. The worker still serves
+    // chat; it just has no platform tools, and says so on stderr.
+    //
+    // Read as a SLICE rather than a whole-file `toContain`, so the assertion is
+    // about the absent-credential BRANCH: `note(` and `return 0` must sit inside
+    // it, between the `if not key:` guard and the next guard.
+    const start = source.indexOf('if not key:')
+    const end = source.indexOf('if not url:')
+    expect(start).toBeGreaterThan(-1)
+    expect(end).toBeGreaterThan(start)
+    const absentBranch = source.slice(start, end)
+    expect(absentBranch).toContain('note(')
+    expect(absentBranch).toContain('return 0')
+    expect(source).toContain('No config entry was written')
+  })
+
+  it('never prints the credential', () => {
+    // Same shape as the entrypoint's check, for the same reason: `note(` lines
+    // land in `docker compose logs`, so only the LENGTH may appear.
+    const noteLines = source.split(/\r?\n/).filter((row) => /\bnote\(/.test(row))
+    expect(noteLines.some((row) => row.includes('len(key)'))).toBe(true)
+    expect(loggedExpressions(source, /\bnote\(/)).not.toMatch(/\bkey\b/)
   })
 })

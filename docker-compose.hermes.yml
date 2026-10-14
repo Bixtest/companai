@@ -48,6 +48,25 @@
 # Provider keys are read from the host environment exactly as the OpenCode
 # service reads them. The handshake needs neither a key nor a model — no model
 # is called before `gateway.ready` — so this file boots clean without them.
+#
+# The platform's MCP tools (`P2-9a`) need one more thing from the host: the
+# credential the `mcp` service provisioned. It comes from `MCP_SERVER_API_KEY`
+# or, when that is unset, from the shared `mcp_shared` volume this file mounts
+# read-only — the same ordering OpenCode uses.
+#
+# TWO PRECONDITIONS, and they fail DIFFERENTLY. Measured while hardening this
+# file (a hostile critic raised it), so neither is mistaken for the other:
+#   · The VOLUME must EXIST. It is declared `external` — like the network, and
+#     for the same reason: this file must never create or destroy something
+#     another stack owns. So on a host where `docker-compose.fullapp.yml` has
+#     never run, this service cannot start AT ALL: compose fails at volume
+#     resolution, *before* the entrypoint's fail-soft path can run. Create the
+#     volume (or bring fullapp up once) first. The `up` lines above therefore
+#     describe a host that already runs the platform — which is what this file
+#     is for.
+#   · The CREDENTIAL may be ABSENT, and that is NOT an error. The worker still
+#     boots and still serves chat; it simply has no platform tools, and both the
+#     entrypoint and the bootstrap say so on stderr.
 
 services:
   hermes-gateway:
@@ -58,7 +77,7 @@ services:
       # and no second copy of the pin is created (L136).
       additional_contexts:
         hermes_pin: ${HERMES_PIN_DIR:-../../hermes-agent-main}
-    image: hermes-gateway:p2-8
+    image: hermes-gateway:p2-9a
     container_name: mercato-hermes-gateway
     restart: unless-stopped
     environment:
@@ -113,8 +132,29 @@ services:
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       GOOGLE_GENERATIVE_AI_API_KEY: ${GOOGLE_GENERATIVE_AI_API_KEY:-}
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
-      # Let the worker reach a service on the host (e.g. the platform's MCP).
-      HERMES_MCP_URL: ${HERMES_MCP_URL:-http://host.docker.internal:3001/mcp}
+      # Let the worker reach the platform's MCP server. The default is the
+      # IN-NETWORK service name, matching the OpenCode service's own
+      # `OPENCODE_MCP_URL` default — measured: `getent hosts mcp` inside this
+      # worker resolves to 172.18.0.2 on `mercato-network-local`, and the app
+      # container's own default was `host.docker.internal`, which the worker
+      # cannot use to reach a sibling on the shared network.
+      HERMES_MCP_URL: ${HERMES_MCP_URL:-http://mcp:3001/mcp}
+      # ── THE PLATFORM'S MCP TOOLS (P2-9a, §2.15 — measured) ────────────────
+      # The pinned worker ships a COMPLETE MCP client, but its SDK was not in
+      # this image and it had no `mcp_servers` config — so a Hermes-served chat
+      # could call NONE of the 21 platform tools an OpenCode-served chat can.
+      # `entrypoint.py` resolves this credential and `mcp_bootstrap.py` writes
+      # the worker's `mcp_servers` entry naming the URL above; the entry holds
+      # the placeholder `${MCP_SERVER_API_KEY}`, resolved at read time from the
+      # worker's own environment, so the secret is never written to the state
+      # volume and a rotation needs no volume edit. Same ordering as OpenCode:
+      # the env var wins, the shared key file is the fallback.
+      MCP_SERVER_API_KEY: ${MCP_SERVER_API_KEY:-}
+      MCP_SERVER_API_KEY_FILE: /run/mcp-shared/mcp-api-key
+      # Bounded wait for that file when the env var is unset (the `mcp` service
+      # provisions it after its own boot, so a cold start races). Only paid when
+      # the credential is genuinely absent.
+      HERMES_MCP_KEY_WAIT_SECONDS: ${HERMES_MCP_KEY_WAIT_SECONDS:-60}
       # ── THE WEBSOCKET DOOR (P2-8, §2.14 — measured) ───────────────────────
       # The pin's own ws transport (`tui_gateway/ws.py` — identical wire, the
       # same `server.dispatch`), mounted by `ws_host.py` in a thread beside
@@ -133,6 +173,12 @@ services:
       # entrypoint proves it by digest before importing anything.
       - ${HERMES_PIN_DIR:-../../hermes-agent-main}:/hermes-src:ro
       - hermes_state:/var/lib/hermes
+      # The MCP credential the `mcp` service provisions (P2-9a). READ-ONLY, and
+      # the SAME volume the OpenCode and mcp services share — this file never
+      # creates or owns it (see the `volumes:` block at the bottom). The key is
+      # read by the entrypoint and carried in the worker's environment; it is
+      # never copied into `hermes_state`.
+      - mcp_shared:/run/mcp-shared:ro
     # The gateway's stdin is its client channel. Keeping it open means the
     # worker waits for a client instead of seeing EOF and exiting; the client
     # that attaches is `P2-3`'s adapter (or a hand-driven session for the gate).
@@ -150,6 +196,15 @@ services:
 volumes:
   hermes_state:
     name: mercato-hermes-state
+  # The MCP credential volume, owned by `docker-compose.fullapp.yml` (the `mcp`
+  # service writes the key into it; OpenCode reads it). EXTERNAL for the same
+  # reason the network is: this file must never create or destroy a volume
+  # another stack owns — `down` here cannot take the platform's MCP key with it.
+  # The name tracks the fullapp file's own `${DEPLOY_ENV:-local}` suffix, so the
+  # two files address the same volume by default.
+  mcp_shared:
+    name: ${HERMES_MCP_SHARED_VOLUME:-mercato-mcp-shared-${DEPLOY_ENV:-local}}
+    external: true
 
 networks:
   # WHICH NETWORK — measured 2026-10-12 (rule 0b), corrected after the fact.

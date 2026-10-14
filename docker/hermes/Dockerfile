@@ -44,9 +44,24 @@ RUN curl -fsSL "https://github.com/astral-sh/uv/releases/download/${UV_VERSION}/
 # because the project itself is the mounted source at run time; `--frozen`
 # because the lock is the authority. `--no-dev` matches the runtime surface:
 # the dev group is explicitly excluded upstream too (`[tool.uv] default-groups = []`).
+#
+# `--extra mcp` — P2-9a, measured absent before it (rule 0b). The pinned source
+# ships a COMPLETE MCP client (`tools/mcp_tool_discovery.py`,
+# `tools/mcp_tool.py`, `tools/mcp_tool_transport.py`) but declares the SDK as an
+# optional extra, and a probe inside the running worker printed
+# `ModuleNotFoundError: No module named 'mcp'` / `SDK available: False` /
+# `DISCOVERED: 0` — `register_mcp_servers` begins
+# `if not _core._ensure_mcp_sdk(): return []`, so the client was INERT and the
+# chat could call none of the platform's 21 MCP tools. The extra is the pin's
+# own (`mcp==2.0.0`, `httpx2==2.7.0`, `starlette==1.3.1` — `pyproject.toml`),
+# and `--frozen` still holds because `uv.lock` already resolves all three
+# (measured: the lock carries `extra == 'mcp'` markers for each). Note that the
+# `mcp = false` line under `[tool.uv.exclude-newer-package]` is an
+# exclude-newer EXEMPTION, not an exclusion — it is why the lock has the package
+# at all.
 COPY --from=hermes_pin pyproject.toml uv.lock /build/
 RUN cd /build \
-    && uv sync --frozen --no-install-project --no-dev --python 3.14 \
+    && uv sync --frozen --no-install-project --no-dev --extra mcp --python 3.14 \
     && rm -rf /root/.cache/uv
 
 ENV HERMES_VENV=/build/.venv
@@ -63,12 +78,12 @@ RUN useradd -m -s /bin/bash hermes \
 USER hermes
 WORKDIR /hermes-src
 
-COPY --chown=hermes:hermes entrypoint.py verify_pin.py ws_host.py ws_entry.py /opt/hermes/
+COPY --chown=hermes:hermes entrypoint.py verify_pin.py ws_host.py ws_entry.py mcp_bootstrap.py /opt/hermes/
 
 # A syntax error in these files used to surface only at container boot (the
 # live run caught one). Compile-check at build time: a broken image fails
 # HERE, in seconds, instead of in a FATAL log line after a 15-second boot.
-RUN python3 -m py_compile /opt/hermes/entrypoint.py /opt/hermes/ws_host.py /opt/hermes/ws_entry.py
+RUN python3 -m py_compile /opt/hermes/entrypoint.py /opt/hermes/ws_host.py /opt/hermes/ws_entry.py /opt/hermes/mcp_bootstrap.py
 
 # The gateway speaks newline-delimited JSON-RPC on stdio, so for years this
 # image exposed no port: the platform spawned the worker and owned its pipes
