@@ -50,6 +50,28 @@
  *      unhandled one is answered `-32601` (the contract's own instruction).
  *
  * ─────────────────────────────────────────────────────────────────────────────
+ * THE TRANSPORT IS A SEAM (P2-8)
+ * ─────────────────────────────────────────────────────────────────────────────
+ * The pinned worker speaks this ONE protocol over two transports
+ * (`tui_gateway/ws.py`: *"Wire protocol is identical to stdio"*). Until P2-8
+ * this client could only drive a SPAWNED worker over its pipes — and the app
+ * container has neither a Python runtime nor the Docker socket to spawn one.
+ * So the transport became a seam (`./hermes-gateway-transport`): this class
+ * speaks `HermesGatewayTransport`, and the wiring is chosen at construction —
+ * `transportFactory` (a ws door dialed by URL, the production shape) or the
+ * original spawn (`command`/`args`/`spawn`). The framing, handshake,
+ * id-correlation and event dispatch below are IDENTICAL in both cases; the
+ * framing alone lives in the transport. The public surface is unchanged, so
+ * `hermes-port-adapter.ts` does not know which transport is underneath.
+ *
+ * The lifecycle is **connect-once**: one client = one connection = one run
+ * (the port is resolved per chat run). A transport that dies mid-run ends
+ * that run — its close code rides the port's error event — and the next run
+ * connects afresh. A mid-run `session.resume` is a later row's correctness
+ * question, not this client's reconnect feature (see the transport module's
+ * header for the full documented policy).
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
  * WHAT THIS FILE IS NOT
  * ─────────────────────────────────────────────────────────────────────────────
  * It is not the port adapter, not the worker, and not the narrow tool. It does
@@ -60,6 +82,7 @@
 
 import { createLogger } from '@open-mercato/shared/lib/logger'
 import { spawn as defaultSpawn } from 'child_process'
+import { createStdioTransport, type HermesGatewayTransport } from './hermes-gateway-transport'
 
 const logger = createLogger('ai_assistant').child({ component: 'hermes-gateway-client' })
 
@@ -99,8 +122,12 @@ export type HermesGatewaySpawn = (
 ) => HermesGatewayProcess
 
 export interface HermesGatewayClientOptions {
-  /** The worker command (e.g. `hermes` or `python -m tui_gateway`). */
-  command: string
+  /**
+   * The worker command (e.g. `hermes` or `python -m tui_gateway`). Required
+   * unless `transportFactory` is given — that path spawns nothing, so it
+   * needs no command.
+   */
+  command?: string
   /** argv for the command. **Never put a secret here** — use `env`. */
   args?: string[]
   /**
@@ -112,6 +139,12 @@ export interface HermesGatewayClientOptions {
   requestTimeoutMs?: number
   /** Injectable spawn, for tests. Defaults to `child_process.spawn`. */
   spawn?: HermesGatewaySpawn
+  /**
+   * When present, the client drives THIS transport instead of spawning a
+   * child — the production shape (the worker's ws door, dialed by URL).
+   * Omitted, the stdio transport is built from `command`/`args`/`spawn`.
+   */
+  transportFactory?: () => Promise<HermesGatewayTransport>
 }
 
 /** The handshake facts a caller needs before it sends a turn. */
@@ -142,11 +175,14 @@ type Pending = {
 const DEFAULT_REQUEST_TIMEOUT_MS = 30_000
 
 /**
- * A stdio JSON-RPC client for one Hermes TUI gateway.
+ * A JSON-RPC client for one Hermes TUI gateway — over any transport.
  *
- * The lifecycle is deliberate and matches the pinned transport: `connect()`
- * spawns the worker, performs the handshake, and resolves; `stop()` sends
- * `process.stop` and then kills the child. One client talks to **one** worker.
+ * The lifecycle is deliberate and matches the pinned protocol: `connect()`
+ * opens the transport, performs the handshake, and resolves; `stop()` closes
+ * it. One client talks to **one** worker connection. Which transport is
+ * underneath is the caller's choice (the header documents the seam): a
+ * spawned stdio child (the client's original shape) or the worker's ws door
+ * dialed by URL (production since P2-8).
  */
 export class HermesGatewayClient {
   private readonly options: HermesGatewayClientOptions
@@ -158,9 +194,8 @@ export class HermesGatewayClient {
   private readonly pending = new Map<number | string, Pending>()
   private readonly serverRequestHandlers = new Map<string, (params: Record<string, unknown>) => unknown>()
 
-  private process: HermesGatewayProcess | null = null
+  private transport: HermesGatewayTransport | null = null
   private nextId = 1
-  private stdoutBuffer = ''
   private closed = false
   private exitHandlers: Array<(code: number | null) => void> = []
   private handshakeResult: HermesGatewayHandshake | null = null
@@ -182,52 +217,105 @@ export class HermesGatewayClient {
   }
 
   /**
-   * Spawn the worker and complete the handshake.
+   * Open the transport and complete the handshake.
    *
    * Measured order (`contracts/liveness.py`, `contracts/events.py`): announce
    * what we handle (`client.capabilities`) → ask what the build enforces
    * (`gateway.capabilities`) → cheapest liveness probe (`ping`) → wait for the
-   * `gateway.ready` event. A failure at any step leaves **no half-connected
-   * client hanging**: the promise rejects and the caller still owns the child
-   * (killing it is the caller's decision, so a retry can inspect the exit).
+   * `gateway.ready` event. That final `ping` is the **health gate over the new
+   * transport** (P2-8): a door whose ws upgrade succeeds but whose gateway
+   * does not answer never reports connected. A failure at any step leaves
+   * **no half-connected client hanging**: the promise rejects, the transport
+   * is closed, and the caller still owns the decision to retry.
    */
   async connect(): Promise<HermesGatewayHandshake> {
-    if (this.process) throw new Error('hermes gateway client is already connected')
+    if (this.transport) throw new Error('hermes gateway client is already connected')
 
-    const args = this.options.args ?? []
-    this.process = this.spawn(this.options.command, args, {
-      env: { ...process.env, ...(this.options.env ?? {}) },
-      stdio: ['pipe', 'pipe', 'pipe'],
+    this.closed = false
+    this.transport = await this.openTransport()
+    const transport = this.transport
+
+    // The transport's death is this client's exit: pending requests fail, the
+    // exit subscribers fire with the close code, and the client tears down.
+    // Our OWN close() marks `closed` first, so it never reads as a peer death.
+    transport.onClose((info) => {
+      if (this.closed) return
+      this.closed = true
+      this.failPending(new Error(`the hermes gateway transport ended (${info.reason})`))
+      for (const handler of this.exitHandlers) handler(info.code)
+      this.teardown()
     })
+    transport.onLine((line) => this.handleFrame(line))
 
-    this.attachStream(this.process)
+    // Subscribe to `gateway.ready` BEFORE the handshake starts. The pin writes
+    // it immediately after the accept (`tui_gateway/ws.py`), so over the ws
+    // door it is already in flight before the first `request` — subscribing
+    // after the `ping` would lose it and report `gatewayReady: null` forever.
+    const ready = this.waitForEvent('gateway.ready', this.requestTimeoutMs).catch(() => null)
 
     // Announce what we handle. `server_requests: true` is a promise: Hermes may
     // send us clarify/approval requests, and anything we do not handle gets a
     // -32601 immediately (see `handleFrame`) rather than hanging the turn.
-    const clientCapabilities = await this.request<
-      { server_requests: string[]; declines_not_shown: boolean },
-      { server_requests: boolean }
-    >('client.capabilities', { server_requests: true })
+    try {
+      const clientCapabilities = await this.request<
+        { server_requests: string[]; declines_not_shown: boolean },
+        { server_requests: boolean }
+      >('client.capabilities', { server_requests: true })
 
-    const gatewayCapabilities = await this.request<{ per_session_exclusive_submit: boolean }, Record<string, never>>(
-      'gateway.capabilities',
-      {},
-    )
+      const gatewayCapabilities = await this.request<{ per_session_exclusive_submit: boolean }, Record<string, never>>(
+        'gateway.capabilities',
+        {},
+      )
 
-    const pong = await this.request<{ pong: boolean }, Record<string, never>>('ping', {})
-    if (!pong.pong) {
-      throw new Error('hermes gateway answered ping without pong')
+      const pong = await this.request<{ pong: boolean }, Record<string, never>>('ping', {})
+      if (!pong.pong) {
+        await this.failConnect('hermes gateway answered ping without pong')
+      }
+
+      this.handshakeResult = {
+        gatewayCapabilities: { perSessionExclusiveSubmit: gatewayCapabilities.per_session_exclusive_submit },
+        serverRequestMethods: clientCapabilities.server_requests,
+        gatewayReady: await ready,
+      }
+      return this.handshakeResult
+    } catch (error) {
+      // A handshake that fails at ANY step — a refusal OR a timeout — must not
+      // leave the transport open behind it (a leaked ws socket is invisible;
+      // the caller sees only the throw). A transport the CLIENT opened (the ws
+      // door) is closed here; a spawned child stays the caller's, as P2-2
+      // documented, so a retry can still inspect its exit.
+      await this.failConnect(error instanceof Error ? error.message : String(error))
+      throw error // unreachable: failConnect throws
     }
+  }
 
-    const ready = await this.waitForEvent('gateway.ready', this.requestTimeoutMs).catch(() => null)
-
-    this.handshakeResult = {
-      gatewayCapabilities: { perSessionExclusiveSubmit: gatewayCapabilities.per_session_exclusive_submit },
-      serverRequestMethods: clientCapabilities.server_requests,
-      gatewayReady: ready,
+  /** A handshake step failed: clean up, then let the caller see the throw. */
+  private async failConnect(message: string): Promise<never> {
+    this.closed = true
+    this.failPending(new Error(message))
+    const transport = this.transport
+    this.transport = null
+    if (transport && !transport.ownsWorkerProcess) {
+      await transport.close()
     }
-    return this.handshakeResult
+    throw new Error(message)
+  }
+
+  /** Build the transport: the injected factory (ws door) or a spawned stdio child. */
+  private async openTransport(): Promise<HermesGatewayTransport> {
+    if (this.options.transportFactory) {
+      return this.options.transportFactory()
+    }
+    const command = this.options.command
+    if (!command) {
+      throw new Error('hermes gateway client needs either a command to spawn or a transportFactory to connect')
+    }
+    const args = this.options.args ?? []
+    const spawned = this.spawn(command, args, {
+      env: { ...process.env, ...(this.options.env ?? {}) },
+      stdio: ['pipe', 'pipe', 'pipe'],
+    })
+    return createStdioTransport(spawned)
   }
 
   /** Register a handler for one server→client request method. */
@@ -267,7 +355,7 @@ export class HermesGatewayClient {
 
   /** One JSON-RPC call, correlated by id, bounded by `requestTimeoutMs`. */
   async request<TResult = unknown, TParams = Record<string, never>>(method: string, params: TParams): Promise<TResult> {
-    const process = this.requireProcess()
+    const transport = this.requireTransport()
     const id = this.nextId++
     const payload = JSON.stringify({ jsonrpc: '2.0', id, method, params })
 
@@ -281,11 +369,12 @@ export class HermesGatewayClient {
         reject,
         timer,
       })
-      // One write per frame, flushed by the transport per its own contract. A
-      // write to a dead pipe throws SYNCHRONOUSLY (EPIPE), not as a rejection,
-      // so this client is the only thing that can stop it taking the caller down.
+      // One write per frame; the transport owns its framing and flush. A
+      // write to a dead peer can throw SYNCHRONOUSLY (EPIPE on a pipe, a
+      // closed socket on ws), so this client is the only thing that can stop
+      // it taking the caller down.
       try {
-        process.stdin.write(payload + '\n')
+        transport.send(payload)
       } catch (error) {
         clearTimeout(timer)
         this.pending.delete(id)
@@ -317,74 +406,35 @@ export class HermesGatewayClient {
     })
   }
 
-  /** `process.stop` — ask the worker to retire, then kill the child. */
+  /** `process.stop` — retire the worker we OWN (a spawned child), then stop. */
   async stop(): Promise<void> {
-    const process = this.process
-    if (!process) return
+    const transport = this.transport
+    if (!transport) return
     this.closed = true
-    try {
-      await this.request<Record<string, unknown>, Record<string, never>>('process.stop', {})
-    } catch (error) {
-      // A stop that fails is not a reason to leak the child: log and kill.
-      logger.debug('hermes gateway process.stop was not answered; killing the child', {
-        err: error instanceof Error ? error.message : String(error),
-      })
-    } finally {
-      // Whatever is in flight has nowhere to go now.
-      this.failPending(new Error('hermes gateway client was stopped'))
-      process.kill()
-      this.teardown()
+    if (transport.ownsWorkerProcess) {
+      // The ws door is SHARED: closing our socket must never retire a worker
+      // other clients are still using, so `process.stop` is for the child.
+      try {
+        await this.request<Record<string, unknown>, Record<string, never>>('process.stop', {})
+      } catch (error) {
+        // A stop that fails is not a reason to leak the child: log and kill.
+        logger.debug('hermes gateway process.stop was not answered; closing the transport', {
+          err: error instanceof Error ? error.message : String(error),
+        })
+      }
     }
+    // Whatever is in flight has nowhere to go now.
+    this.failPending(new Error('hermes gateway client was stopped'))
+    await transport.close()
+    this.teardown()
   }
 
   // ── internals ────────────────────────────────────────────────────────────
 
-  private requireProcess(): HermesGatewayProcess {
-    const process = this.process
-    if (!process) throw new Error('hermes gateway client is not connected')
-    return process
-  }
-
-  private attachStream(process: HermesGatewayProcess): void {
-    process.stdout.on('data', (chunk) => {
-      this.stdoutBuffer += typeof chunk === 'string' ? chunk : chunk.toString('utf8')
-      // Newline-delimited frames: split on \n and keep the trailing partial, so
-      // a frame split across two chunks is reassembled rather than lost.
-      let index = this.stdoutBuffer.indexOf('\n')
-      while (index !== -1) {
-        const line = this.stdoutBuffer.slice(0, index).replace(/\r$/, '').trim()
-        this.stdoutBuffer = this.stdoutBuffer.slice(index + 1)
-        if (line) this.handleFrame(line)
-        index = this.stdoutBuffer.indexOf('\n')
-      }
-    })
-    process.stdout.on('end', () => {
-      this.closed = true
-      this.failPending(new Error('hermes gateway closed its stdout'))
-    })
-    process.stderr?.on('data', (chunk) => {
-      const text = typeof chunk === 'string' ? chunk : chunk.toString('utf8')
-      logger.debug('hermes gateway stderr', { stderr: text.trim() })
-    })
-    // A real stream surfaces a dead peer as an async 'error'. Without a listener
-    // that is an uncaught exception, so it is attached even though the fake in
-    // the suite has no such stream.
-    process.stdin.on?.('error', (error: unknown) => {
-      logger.debug('hermes gateway stdin error', {
-        err: error instanceof Error ? error.message : String(error),
-      })
-      this.failPending(error instanceof Error ? error : new Error(String(error)))
-    })
-    process.on('exit', (code: unknown) => {
-      this.closed = true
-      this.failPending(new Error(`hermes gateway exited (code ${String(code)})`))
-      for (const handler of this.exitHandlers) handler(typeof code === 'number' ? code : null)
-      this.teardown()
-    })
-    process.on('error', (error: unknown) => {
-      this.closed = true
-      this.failPending(error instanceof Error ? error : new Error(String(error)))
-    })
+  private requireTransport(): HermesGatewayTransport {
+    const transport = this.transport
+    if (!transport) throw new Error('hermes gateway client is not connected')
+    return transport
   }
 
   /**
@@ -453,7 +503,6 @@ export class HermesGatewayClient {
   }
 
   private async answerServerRequest(frame: Record<string, unknown>, method: string): Promise<void> {
-    const process = this.requireProcess()
     const id = frame.id as number | string
     const handler = this.serverRequestHandlers.get(method)
     if (!handler) {
@@ -476,10 +525,10 @@ export class HermesGatewayClient {
     }
   }
 
-  /** Write one frame, tolerating a pipe that has already gone away. */
+  /** Write one frame, tolerating a peer that has already gone away. */
   private writeFrame(frame: Record<string, unknown>): void {
     try {
-      this.requireProcess().stdin.write(JSON.stringify(frame) + '\n')
+      this.transport?.send(JSON.stringify(frame))
     } catch (error) {
       logger.debug('hermes gateway could not write a frame; the peer is gone', {
         err: error instanceof Error ? error.message : String(error),
@@ -532,7 +581,7 @@ export class HermesGatewayClient {
 
   private teardown(): void {
     if (!this.closed) return
-    this.process = null
+    this.transport = null
     this.listeners.clear()
     this.wildcardListeners.clear()
     this.serverRequestHandlers.clear()

@@ -329,7 +329,7 @@ describe('HermesPortAdapter (P2-3 — the second engine behind the door)', () =>
       expect(seen[1]).toEqual({ type: 'error', error: 'the turn ended with status interrupted' })
     })
 
-    it('ends the stream with an error when the worker dies mid-run, instead of hanging', async () => {
+    it('ends the stream with an error when the worker connection ends mid-run, instead of hanging', async () => {
       await adapter.startRun(envelope())
       client.script = [{ method: 'message.delta', params: { text: 'half a ' } }]
 
@@ -343,7 +343,10 @@ describe('HermesPortAdapter (P2-3 — the second engine behind the door)', () =>
 
       expect(seen).toEqual([
         { type: 'text', content: 'half a ' },
-        { type: 'error', error: 'the hermes worker exited mid-run (code 1)' },
+        // "connection ended", not "exited" (P2-8, §2.14): the same subscription
+        // carries a stdio child's exit code and a ws socket's close code, and
+        // only the first of those is a process actually exiting.
+        { type: 'error', error: 'the hermes worker connection ended mid-run (code 1)' },
       ])
     })
 

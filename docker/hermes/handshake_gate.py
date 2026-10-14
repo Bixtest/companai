@@ -41,7 +41,7 @@ import sys
 import threading
 import time
 
-DEFAULT_IMAGE = "hermes-gateway:p2-1"
+DEFAULT_IMAGE = "hermes-gateway:p2-8"
 DEFAULT_SOURCE = os.path.join("..", "..", "hermes-agent-main")
 
 # Two different clocks, because the boot and the conversation are different:

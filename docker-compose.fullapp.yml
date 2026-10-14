@@ -207,6 +207,21 @@ services:
       # Point OpenCode clients at the sibling opencode service (the code default
       # http://localhost:4096 is unreachable from inside the app container).
       OPENCODE_URL: ${OPENCODE_URL:-http://opencode:4096}
+      # ── THE RUNTIME ENGINE DOOR (P2-5) AND THE HERMES WS DOOR (P2-8, §2.14) ──
+      # Which engine serves the chat. The accepted names live in
+      # `lib/resolve-ai-runtime-port.ts` (`opencode` | `hermes`); unset or
+      # blank-meaning would fall back to the default below. P2-8 does NOT move
+      # the default — the switchover (P2-9) flips this one value.
+      AI_RUNTIME_ENGINE: ${AI_RUNTIME_ENGINE:-opencode}
+      # The pinned Hermes worker's WebSocket door: the sibling service, the
+      # internal port (never published to the host). The app container has
+      # neither Python nor the Docker socket, so it CONNECTS this URL instead
+      # of spawning the worker — a single-use ticket per connection, minted
+      # over the shared secret below (the same value the worker service
+      # carries; empty ⇒ the worker's door does not listen and the client
+      # refuses loudly at resolution rather than dialing a 401).
+      HERMES_GATEWAY_URL: ${HERMES_GATEWAY_URL:-http://hermes-gateway:8091}
+      HERMES_WS_TOKEN: ${HERMES_WS_TOKEN:-}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       GOOGLE_GENERATIVE_AI_API_KEY: ${GOOGLE_GENERATIVE_AI_API_KEY:-}

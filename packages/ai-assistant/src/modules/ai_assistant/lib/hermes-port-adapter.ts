@@ -527,7 +527,9 @@ export class HermesPortAdapter implements AiRuntimePort {
     unsubscribes.push(
       this.client.onExit((code) => {
         if (settled) return
-        void onEvent({ type: 'error', error: `the hermes worker exited mid-run (code ${String(code)})` }).then(settle, settle)
+        // A ws transport carries its socket close code here (1006 = abnormal),
+        // a stdio transport the child's exit code — the wording covers both.
+        void onEvent({ type: 'error', error: `the hermes worker connection ended mid-run (code ${String(code)})` }).then(settle, settle)
       }),
     )
 

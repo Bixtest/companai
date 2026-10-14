@@ -63,11 +63,22 @@ RUN useradd -m -s /bin/bash hermes \
 USER hermes
 WORKDIR /hermes-src
 
-COPY --chown=hermes:hermes entrypoint.py verify_pin.py /opt/hermes/
+COPY --chown=hermes:hermes entrypoint.py verify_pin.py ws_host.py ws_entry.py /opt/hermes/
 
-# The gateway speaks newline-delimited JSON-RPC on stdio, so there is no port
-# to expose: the platform spawns the worker and owns its pipes (P2-3's adapter
-# does exactly that). `docker compose logs` shows the gateway's own frames,
-# which is how the boot is inspected from outside.
+# A syntax error in these files used to surface only at container boot (the
+# live run caught one). Compile-check at build time: a broken image fails
+# HERE, in seconds, instead of in a FATAL log line after a 15-second boot.
+RUN python3 -m py_compile /opt/hermes/entrypoint.py /opt/hermes/ws_host.py /opt/hermes/ws_entry.py
+
+# The gateway speaks newline-delimited JSON-RPC on stdio, so for years this
+# image exposed no port: the platform spawned the worker and owned its pipes
+# (P2-3's adapter does exactly that). P2-8 changes that — the pinned worker's
+# OWN WebSocket transport (`tui_gateway/ws.py`: the same `server.dispatch`,
+# the identical wire) is mounted by `ws_host.py` and served by `ws_entry.py`
+# in a thread beside the stdio channel, behind the pin's ticket auth, so the
+# app container connects it over the Docker network by URL. The door only
+# listens when `HERMES_WS_TOKEN` is set; unset, this process is the stdio
+# worker it has always been (`docker-compose.hermes.yml` owns the default
+# port 8091, internal to the network — never published to the host).
 ENTRYPOINT ["python3", "/opt/hermes/entrypoint.py"]
-CMD ["python3", "-m", "tui_gateway.entry"]
+CMD ["python3", "/opt/hermes/ws_entry.py"]

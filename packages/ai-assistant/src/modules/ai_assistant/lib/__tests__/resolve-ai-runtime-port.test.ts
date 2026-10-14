@@ -41,10 +41,13 @@ jest.mock('../opencode-handlers', () => ({
 import type { EntityManager } from '@mikro-orm/postgresql'
 import {
   AI_RUNTIME_ENGINE_ENV,
+  HERMES_GATEWAY_URL_ENV,
+  HERMES_WS_TOKEN_ENV,
   HERMES_WORKER_ARGS_ENV,
   HERMES_WORKER_COMMAND_ENV,
   resolveAiRuntimeEngine,
   resolveAiRuntimePort,
+  resolveHermesGatewayConnection,
   resolveHermesWorkerLaunch,
 } from '../resolve-ai-runtime-port'
 import { HERMES_RUNTIME_IMPLEMENTATION, HermesPortAdapter } from '../hermes-port-adapter'
@@ -266,5 +269,37 @@ describe('P2-5 — the swap is ONE function, proved structurally', () => {
       expect(selector).not.toMatch(new RegExp(`require\\(\\s*'\\./${engine}'`))
       expect(selector).not.toMatch(new RegExp(`import\\(\\s*'\\./${engine}'`))
     }
+  })
+})
+
+describe('P2-8 — the ws door the client connects, resolved from the environment', () => {
+  it('is null when no URL is configured (the spawn client is the fallback)', () => {
+    expect(resolveHermesGatewayConnection({})).toBeNull()
+    expect(resolveHermesGatewayConnection({ [HERMES_GATEWAY_URL_ENV]: '   ' })).toBeNull()
+  })
+
+  it('returns the URL and the token, trailing slash trimmed', () => {
+    expect(
+      resolveHermesGatewayConnection({
+        [HERMES_GATEWAY_URL_ENV]: 'http://hermes-gateway:8091/',
+        [HERMES_WS_TOKEN_ENV]: 'sk-shared',
+      }),
+    ).toEqual({ url: 'http://hermes-gateway:8091', token: 'sk-shared' })
+  })
+
+  it('REFUSES a URL with no token — never a silent unauthenticated dial', () => {
+    // The door answers every mint with 401 when the secret is missing, so a
+    // silent fallback would surface as a first-chat hang. The refusal names
+    // the fix (the same value the WORKER service carries).
+    expect(() => resolveHermesGatewayConnection({ [HERMES_GATEWAY_URL_ENV]: 'http://hermes-gateway:8091' })).toThrow(
+      /HERMES_GATEWAY_URL is set .* but HERMES_WS_TOKEN is not/,
+    )
+  })
+
+  it('the engine default does NOT move here (P2-9 owns the flip)', () => {
+    // The compose default is `opencode`; this row proves the ws door, it does
+    // not select it.
+    expect(resolveAiRuntimeEngine({})).toBe('opencode')
+    expect(resolveAiRuntimeEngine({ [AI_RUNTIME_ENGINE_ENV]: 'hermes' })).toBe('hermes')
   })
 })

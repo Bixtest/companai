@@ -23,17 +23,22 @@
  * needing another ten-minute live run to notice.
  *
  * ─────────────────────────────────────────────────────────────────────────────
- * HOW IT LAUNCHES THE WORKER (production-mirroring, not a mock)
+ * HOW IT REACHES THE WORKER (two modes; the second is the production shape)
  * ─────────────────────────────────────────────────────────────────────────────
- * Production's client spawns the worker as a child (stdio). Here the worker runs
- * in the operator's container, so the launch is
- * `docker exec -i <container> python -m tui_gateway.entry` — the same argv shape
- * `resolveHermesWorkerLaunch` documents. The container carries the platform's
- * env (`OPENAI_API_KEY`, `OPENAI_BASE_URL`, …); `P2_7_EXTRA_ENV` injects
- * additional vars for a **pre-deploy** proof (a JSON object), so the wiring can
- * be proven before `docker-compose.hermes.yml` is changed and the worker rebuilt.
- * With `P2_7_EXTRA_ENV` **unset** the worker reads the container's own env — the
- * production-shaped run.
+ * **stdio mode (default)** — the `P2-7` shape: `docker exec -i <container>
+ * python -m tui_gateway.entry`, the same argv `resolveHermesWorkerLaunch`
+ * documents. The container carries the platform's env (`OPENAI_API_KEY`,
+ * `OPENAI_BASE_URL`, …); `P2_7_EXTRA_ENV` injects additional vars for a
+ * **pre-deploy** proof (a JSON object). With `P2_7_EXTRA_ENV` **unset** the
+ * worker reads the container's own env — the production-shaped run.
+ *
+ * **ws mode (`P2_7_URL` set)** — the `P2-8` production shape, and this row's
+ * exit gate: **no hand-spawned process at all**. The harness connects the
+ * worker's own WebSocket door (`tui_gateway/ws.py` — the identical wire) at
+ * that URL, exactly the way the app does: mint a single-use ticket over the
+ * shared secret (`P2_7_WS_TOKEN`), upgrade `/api/ws?ticket=…`. Everything
+ * after `connect()` — the handshake, the run, the judgement — is the same
+ * code, which is the seam's whole point.
  *
  * ─────────────────────────────────────────────────────────────────────────────
  * MEASURED 2026-10-13/14 (why the env knobs below are what they are)
@@ -62,11 +67,18 @@
  *   # production-shaped: reads the CONTAINER's env (compose must be applied first)
  *   P2_7_EXTRA_ENV='{"HERMES_TUI_TOOLSETS":"search"}' \
  *     npx tsx packages/ai-assistant/scripts/hermes-live-turn.mts
+ *   # P2-8: over the worker's ws door — NO spawned process
+ *   P2_7_URL=http://127.0.0.1:8091 P2_7_WS_TOKEN=<the door's token> \
+ *     npx tsx packages/ai-assistant/scripts/hermes-live-turn.mts
  *
  * Exit 0 = a real turn was served and ended on a typed `done`; 1 otherwise.
  */
 
 import { HermesGatewayClient } from '../src/modules/ai_assistant/lib/hermes-gateway-client'
+import {
+  createWebSocketTransport,
+  fetchHermesTicket,
+} from '../src/modules/ai_assistant/lib/hermes-gateway-transport'
 import {
   createHermesPortAdapter,
   textInputRef,
@@ -99,12 +111,47 @@ function workerArgs(): string[] {
   return args
 }
 
-async function main(): Promise<number> {
+/**
+ * The client, in the mode the environment names.
+ *
+ * `P2_7_URL` set ⇒ the ws door (P2-8's shape: connect, do not spawn) — the
+ * ticket leg is the door's own, with the shared secret in a header. Unset ⇒
+ * the P2-7 docker-exec spawn. The dial is bounded fast: the door is already
+ * up by the time a turn runs, so 3 quick attempts, not the service boot's.
+ */
+function buildClient(): { client: HermesGatewayClient; description: string } {
+  const url = (process.env.P2_7_URL ?? '').trim()
+  if (url !== '') {
+    const token = (process.env.P2_7_WS_TOKEN ?? '').trim()
+    if (token === '') {
+      throw new Error('P2_7_URL is set but P2_7_WS_TOKEN is not — the door refuses every mint with 401')
+    }
+    return {
+      description: `ws door at ${url} (no spawned process)`,
+      client: new HermesGatewayClient({
+        requestTimeoutMs: 120_000,
+        transportFactory: () =>
+          createWebSocketTransport({
+            url,
+            fetchTicket: () => fetchHermesTicket({ baseUrl: url, token }),
+            attempts: 3,
+            baseDelayMs: 500,
+            maxDelayMs: 4_000,
+          }),
+      }),
+    }
+  }
   const args = workerArgs()
-  console.log('P2-7 live-turn gate')
-  console.log(`  spawn: docker ${args.join(' ')}`)
+  return {
+    description: `docker ${args.join(' ')}`,
+    client: new HermesGatewayClient({ command: 'docker', args, requestTimeoutMs: 120_000 }),
+  }
+}
 
-  const client = new HermesGatewayClient({ command: 'docker', args, requestTimeoutMs: 120_000 })
+async function main(): Promise<number> {
+  const { client, description } = buildClient()
+  console.log('P2-8 live-turn gate (the P2-7 harness over the worker ws door)')
+  console.log(`  transport: ${description}`)
 
   // Log every event the worker emits, so the proof is visible even if the
   // adapter's own listeners change. This is diagnostic, not the assertion.

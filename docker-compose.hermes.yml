@@ -58,7 +58,7 @@ services:
       # and no second copy of the pin is created (L136).
       additional_contexts:
         hermes_pin: ${HERMES_PIN_DIR:-../../hermes-agent-main}
-    image: hermes-gateway:p2-1
+    image: hermes-gateway:p2-8
     container_name: mercato-hermes-gateway
     restart: unless-stopped
     environment:
@@ -115,6 +115,19 @@ services:
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
       # Let the worker reach a service on the host (e.g. the platform's MCP).
       HERMES_MCP_URL: ${HERMES_MCP_URL:-http://host.docker.internal:3001/mcp}
+      # ── THE WEBSOCKET DOOR (P2-8, §2.14 — measured) ───────────────────────
+      # The pin's own ws transport (`tui_gateway/ws.py` — identical wire, the
+      # same `server.dispatch`), mounted by `ws_host.py` in a thread beside
+      # the stdio channel. The app container has neither Python nor the
+      # Docker socket, so it cannot spawn this worker: it CONNECTS it, by URL,
+      # over the shared Docker network — `ws_entry.py` (the CMD below) is the
+      # process that serves it. Three legs, the pin's own ticket auth: the
+      # app POSTs a mint request carrying the shared secret, gets a
+      # single-use 30s ticket, and upgrades `/api/ws?ticket=…` (4401 on a bad
+      # ticket, exactly the pin's convention).
+      HERMES_WS_TOKEN: ${HERMES_WS_TOKEN:-}
+      HERMES_WS_HOST: ${HERMES_WS_HOST:-0.0.0.0}
+      HERMES_WS_PORT: ${HERMES_WS_PORT:-8091}
     volumes:
       # The pinned source, read-only: the code that runs is the pin, and the
       # entrypoint proves it by digest before importing anything.
@@ -123,6 +136,10 @@ services:
     # The gateway's stdin is its client channel. Keeping it open means the
     # worker waits for a client instead of seeing EOF and exiting; the client
     # that attaches is `P2-3`'s adapter (or a hand-driven session for the gate).
+    # The process that owns it is `ws_entry.py` (the image CMD, P2-8): the
+    # stdio entry runs in the MAIN thread as always, with the ws door in a
+    # daemon thread beside it — one `tui_gateway.server`, two transports, the
+    # desktop product's in-process shape.
     stdin_open: true
     tty: false
     extra_hosts:

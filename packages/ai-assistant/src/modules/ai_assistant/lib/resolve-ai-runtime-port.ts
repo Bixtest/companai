@@ -72,6 +72,10 @@ import {
   type HermesGatewayPortClient,
 } from './hermes-port-adapter'
 import { HermesGatewayClient } from './hermes-gateway-client'
+import {
+  createWebSocketTransport,
+  fetchHermesTicket,
+} from './hermes-gateway-transport'
 
 /** The engines this selector knows. Adding one here is the whole swap. */
 export type AiRuntimeEngine = 'opencode' | 'hermes'
@@ -187,6 +191,40 @@ function normalizeEngine(raw: string | undefined, source: string): AiRuntimeEngi
 export const HERMES_WORKER_COMMAND_ENV = 'HERMES_WORKER_COMMAND'
 export const HERMES_WORKER_ARGS_ENV = 'HERMES_WORKER_ARGS'
 
+/** The environment variables that name the worker's WebSocket door (P2-8). */
+export const HERMES_GATEWAY_URL_ENV = 'HERMES_GATEWAY_URL'
+export const HERMES_WS_TOKEN_ENV = 'HERMES_WS_TOKEN'
+
+/**
+ * The ws door the app connects, resolved from the environment.
+ *
+ * `null` when the operator configured no URL — then the Hermes client is the
+ * **spawn** client below, which is P2-8's transitional seam (the platform's
+ * own container cannot spawn the worker: measured, no Python and no Docker
+ * socket). The compose file sets the URL to the sibling service, so in the
+ * deployed stack the ws door is THE path.
+ *
+ * A URL with **no token is a loud refusal**, not a fallback: dialing a door
+ * that will refuse every mint with 401 is a failure shaped like a hang, and
+ * an operator who set one variable and not the other must hear it at
+ * resolution — with the fix named — not at the first chat run.
+ */
+export function resolveHermesGatewayConnection(
+  env: EngineEnv = process.env,
+): { url: string; token: string } | null {
+  const url = (env[HERMES_GATEWAY_URL_ENV] ?? '').trim()
+  if (url === '') return null
+  const token = (env[HERMES_WS_TOKEN_ENV] ?? '').trim()
+  if (token === '') {
+    throw new Error(
+      `${HERMES_GATEWAY_URL_ENV} is set (${url}) but ${HERMES_WS_TOKEN_ENV} is not — refusing to dial the ` +
+        `Hermes ws door without the shared secret; set ${HERMES_WS_TOKEN_ENV} to the same value the ` +
+        'worker service carries',
+    )
+  }
+  return { url: url.replace(/\/+$/, ''), token }
+}
+
 /**
  * The worker launch, resolved from the environment.
  *
@@ -233,13 +271,32 @@ function parseArgs(raw: string): string[] {
 /**
  * Build the worker client from the environment.
  *
- * The client merges the platform's own environment into the worker's (it spawns
- * with `{ ...process.env, ...options.env }`), so provider keys reach the worker
- * the same way the compose service passes them — nothing extra is assembled
- * here, and no secret is placed on argv (argv is world-readable; the client's
- * own docblock says so).
+ * Two shapes, one seam (P2-8): when `HERMES_GATEWAY_URL` names the worker's
+ * ws door the client is built to **connect** it — the transport dials the
+ * door, minting a single-use ticket per dial with the shared secret in a
+ * header. Otherwise the stdio client is built from the worker launch, which
+ * is how the P2-7 harness (and a host-side worker a developer runs by hand)
+ * still reaches it. The compose file sets the URL to the sibling service, so
+ * the deployed stack takes the first shape.
+ *
+ * The client merges the platform's own environment into the worker's when it
+ * spawns (`{ ...process.env, ...options.env }`), so provider keys reach a
+ * spawned worker the same way the compose service passes them — and no
+ * secret is placed on argv (argv is world-readable; the client's own
+ * docblock says so).
  */
 function buildHermesClient(env: EngineEnv): HermesGatewayPortClient {
+  const connection = resolveHermesGatewayConnection(env)
+  if (connection) {
+    const { url, token } = connection
+    return new HermesGatewayClient({
+      transportFactory: () =>
+        createWebSocketTransport({
+          url,
+          fetchTicket: () => fetchHermesTicket({ baseUrl: url, token }),
+        }),
+    })
+  }
   const { command, args } = resolveHermesWorkerLaunch(env)
   return new HermesGatewayClient({ command, args })
 }
