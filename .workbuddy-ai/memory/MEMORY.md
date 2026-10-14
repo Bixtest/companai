@@ -53,9 +53,14 @@ live service is not a unit test (**L150**).
   PINNED Node 24 — **L154**); tsc **92 = `CC-73`, 0 new**; **7 mutations RED** md5-restored. Lessons
   **L153** (`progress =` is not the total: read `prompt eval time`) · **L154** (gates run on the pinned
   runtime — wrong node = different test SET) · **L155** (tee long-run evidence; task registries expire).
-- **★ NEXT = THE SWITCHOVER — ONE change (§2.11 item 5 owns it):** production **connection lifecycle** →
-  **default-flip to Hermes** → **delete OpenCode** (`R28-6`/`N-8`) → **retire `hermes-local`** (`CC-74` —
-  trigger now FULLY met: selection half `P2-5` + live-run half `P2-7`). Requirement (§2.14) BEFORE any code.
+- **★ NEXT = `P2-8` (§2.14, requirement written 2026-10-14) — THE SWITCHOVER, part 1: the production
+  CONNECTION LIFECYCLE.** The worker serves the pin's own **ws** transport (`tui_gateway/ws.py` — identical
+  wire protocol, `dispatch` reused verbatim; a HOST-MOUNTED library, nothing in the entrypoint mounts it)
+  via a small aiohttp host in `docker/hermes/` behind the pin's ticket auth, on `mercato-network-local`;
+  the client's transport becomes a seam over ws; `ping` health gate + reconnect. **The default does NOT
+  move in `P2-8`.** Measured: the app container has **no Python and no Docker socket** → `docker exec`
+  (the harness's shape) is unavailable to production. Then **`P2-9` — ONE change**: the default-flip +
+  the OpenCode deletion (`R28-6`/`N-8`) + the `CC-74` `hermes-local` retirement (trigger fully met).
 - **`CC-73` OPEN:** 92 pre-existing type errors in 27 `__tests__` files. **`CC-76` ✅ FIXED.** **`CC-51`
   FALSIFIED:** the `team` concept EXISTS (`StaffTeam*`); `staff` is PARKED → product decision (L137).
   **Owner's ruling: core architecture first — business modules are GENERATED from the core workspace.** Docker ON.
