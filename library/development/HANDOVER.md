@@ -352,6 +352,14 @@ this day) answers with evidence, not loyalty:
 - **`CC-81`** (from `CC-73`'s critic): the base `AiToolDefinition`/`McpToolDefinition` docblock
   (`lib/types.ts:115`) is a **false statement in the tree** — a narrowly-typed tool is *not*
   assignable to `unknown` under `strictFunctionTypes`. Both fixes are a design decision (rule 11).
+- **`CC-84`** (new 2026-10-14, from the owner's tenancy question): the worker's MCP tool calls
+  authenticate as **one service identity** — the superadmin's `__mcp_server__` key
+  (`mcp-ensure-api-key.ts` → `auth.ts` → every tool's `ctx`) — so a Hermes-served turn executes
+  platform tools **outside** the conversation's tenant/user authority; and one shared worker home
+  (`HERMES_HOME`) with no per-tenant profiles, though the door's session methods all carry a
+  `profile`. Invisible in single-tenant dev; a cross-tenant authorization gap the moment a second
+  tenant exists. Ranked fix + recommendation in the `COMPLETION-CALLBACKS.md` row; sequencing
+  relative to `P2-9b` is a rule-11 decision.
 - **`CC-82`** (registered 2026-10-14 from the owner's architecture question): **the port carries no
   settings** — measured, the Hermes wire is `session.create { idempotency_key }` + `prompt.submit
   { text }` and nothing more, so the worker's model/toolset are deployment env vars and a per-agent

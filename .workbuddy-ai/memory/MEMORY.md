@@ -101,6 +101,14 @@ live service is not a unit test (**L150**).
   assignable from a narrowly-typed tool, so the interfaces' own docblock (`lib/types.ts:115`) is a **false
   statement in the tree**. Both fixes are a **design decision (rule 11)** — (a) method syntax (bivariant) or
   (b) correct the docblock + a typed-helper pattern. Scheduled, not fixed. **`CC-76` ✅ FIXED.**
+- **`CC-84` OPEN (new 2026-10-14, the owner's tenancy question):** the worker's MCP tool calls authenticate
+  as ONE service identity — the superadmin's `__mcp_server__` key (`mcp-ensure-api-key.ts` → `auth.ts` →
+  every tool's `ctx`) — so a Hermes-served turn executes platform tools OUTSIDE the conversation's
+  tenant/user; plus one shared `HERMES_HOME`, no per-tenant profiles (`profile` on every door session
+  method, unused). Invisible single-tenant; a cross-tenant superadmin gap with a 2nd tenant. **Rule-13
+  correction to `P2-9a`:** its whoami "real tenant/user" was the SERVICE identity, not the chat user.
+  Ranked: per-run minted credential (recommended) → interim single-tenant fail-closed guard → doc-only
+  rejected. Sequencing vs `P2-9b` = rule-11. **`CC-83` OPEN:** `P2-9b` retires the only session-write door.
   **`CC-51` FALSIFIED:** the `team` concept EXISTS (`StaffTeam*`); `staff` is PARKED → product decision
   (L137). **Owner's ruling: core architecture first — business modules are GENERATED from the core
   workspace.** Docker ON.
