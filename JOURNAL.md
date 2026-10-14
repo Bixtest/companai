@@ -263,7 +263,34 @@ box carry it.)
 
 ---
 
-### ⚠️ P2-9 — **the requirement is written and the premise CORRECTED before any code: the switchover as §2.14 sketched it would remove the chat's 21 platform tools.** *(2026-10-14, plan §2.15 — requirement only; no code yet)*
+### ✅ P2-9a DONE — **the bridge is built and PROVEN LIVE: a Hermes-served chat called one of the platform's 21 MCP tools and read a real platform result back — `CC-79` is DISCHARGED, and the default did NOT move.** *(2026-10-14, §2.15.1)*
+
+**What it is, in plain terms.** `P2-9`'s measurement found that the switchover as originally sketched would take the chat's **21 platform tools** away with OpenCode. The owner chose option 1 — preserve the capability first. This row builds that bridge. The pinned worker already **ships a complete MCP client**; it was inert for exactly two measured reasons: the **SDK was not installed** in its image, and it had **no `mcp_servers` config**. So the row installs the pin's own `mcp` extra (`uv sync --frozen --extra mcp` — the pin's `uv.lock` already resolves `mcp==2.0.0`/`httpx2`/`starlette`, so nothing in its resolution is disturbed), writes the server entry **through the pin's own writer** (`_save_mcp_server`, so it passes the pin's validator and the default-strip pass rather than being hand-edited into a volume), and forwards the key the worker needs.
+
+**The exit gate, met — a live turn, and a real platform answer.** Driving `P2-7`'s own harness against the `p2-9a` image:
+
+```
+    evt tool.complete :: {"name":"tool_search","args":{"queries":["mcp__open_mercato__context_whoami"]}, …}
+    evt tool.complete :: {"name":"mcp__open_mercato__context_whoami","args":{},
+                          "labels":[{"kind":"mcp","app":"Open Mercato","action":"context whoami"}, …]}
+  ANSWER: {"result":{"tenantId":"2867a986-…","userId":"df4356e6-…","isSuperAdmin":true,
+                     "features":[ … ],"featureCount":25}}
+  PASS — a real turn answered and ended on done (287 events) in 859.1s
+```
+
+The answer is the platform's **own** `context.whoami` result — a real tenant, a real user, `isSuperAdmin: true`, **25 real feature keys** — reached by the model through `tool_search` → the MCP call, labelled by the worker's own toolset machinery as `{"kind":"mcp","app":"Open Mercato"}`. Re-measured on the restored stack: **`DISCOVERED: 21`**, toolset `open-mercato tools=21 mcp=21`, and `open-mercato` **present in `ENABLED TOOLSETS (cli)`** — so the model is genuinely offered them, not merely registered.
+
+**The proof that reads the right VIEW (L159).** The bootstrap verifies itself with **two** reads: `read_raw_config()` (the file as written — proves the **placeholder** is at rest, so no secret is in the volume) and `load_config()` (env-**expanded** — proves the runtime resolves it to the key). One read alone is a lie: the first cannot see a broken resolution, the second cannot tell a resolved placeholder from a leaked secret. Measured live: `config.yaml` holds `x-api-key: ${MCP_SERVER_API_KEY}` and the pre-existing `onboarding.seen.profile_build_offered` was **preserved**. The bootstrap runs as a subprocess with **stdout suppressed** (the pin's CLI modules print; stdout is the frame channel); **no credential ⇒ fail-soft, a refused bootstrap ⇒ fatal.**
+
+**The gates, and one NEW pre-existing defect the gate exposed (`CC-80`).** Wiring suite **53/53**; full package **128 suites / 1864 tests GREEN**; `tsc` **92 = the pre-existing `CC-73`, 0 new**; **18/18 mutations RED**, byte-restored (md5s in §2.15.1). The first full-package run read **5 failed / 27 failed** — investigated rather than assumed: all five suites pass **in isolation**, all five are **byte-identical to `2128cf96`**, and the throw (`AiModelFactoryError: no_provider_configured`) comes from **unchanged** `model-factory.ts`. Reproduced **exactly** by exporting the app's own provider config (`OM_AI_PROVIDER=openai OM_AI_MODEL=…` → the same 5 suites, the same 27 tests), and characterised one variable at a time. A cross-file env **leak** was ruled out with a positive control (an instrumented run printed **128** probe inits and **zero** env changes). **The suites are simply not hermetic against the ambient environment** — invisible from a clean shell, which is how the gate above was read. Recorded as **`CC-80`** and **L163**.
+
+**Two live defects fixed while proving it, both mine.** (1) `HERMES_MCP_URL` pointed at the unreachable `host.docker.internal`; it now points at the platform's own service (`http://mcp:3001/mcp`). (2) The probe discovered that the key must be in the **worker's own environment** for `${MCP_SERVER_API_KEY}` to resolve at read time — so the entrypoint exports it, and a bare `docker exec` (which sees only the container's *base* env) shows `DISCOVERED: 0`, which is exactly why the live proof must be a **turn**, not a probe.
+
+**Next: `P2-9b` — the switchover.** One change: the default-flip, the OpenCode deletion (`R28-6`/`N-8`), the `hermes-local` retirement (`CC-74`). Its requirement is §2.15. **One hazard carried forward and recorded:** with the worker's **default** toolset set the prompt measures **~16,757 tokens**, and a cold prefill at the measured ~5.5 tok/s puts a first turn at **≈3000 s** — **longer than the worker's own `HERMES_LOCAL_STREAM_STALE_TIMEOUT: 2400`** ceiling. The proof above isolated the **capability** (it pinned `HERMES_TUI_TOOLSETS: open-mercato` through `P2-7`'s out-of-repo override) and does **not** claim a production-shaped default-toolset turn.
+
+---
+
+### ⚠️ P2-9 — **the requirement is written and the premise CORRECTED before any code: the switchover as §2.14 sketched it would remove the chat's 21 platform tools.** *(2026-10-14, plan §2.15 — requirement only; the `P2-9a` half is DISCHARGED above)*
 
 **What was measured (rule 0b, the live stack).** `P2-8`'s plan called `CC-79` *"unaffected"* by the switchover. That is **false**, and the live stack says so: `mercato-opencode-local` is healthy and **connected to the platform's own MCP server** (`curl …:4096/mcp` → `{"open-mercato":{"status":"connected"}}`), and that server (`mercato-mcp-local`) exposes **21 tools** (`GET http://mcp:3001/health` → `{"status":"ok","tools":21}`). So **an OpenCode-served chat can call 21 platform tools today**, and deleting OpenCode removes that capability — which is exactly what `CC-79` names.
 

@@ -770,6 +770,83 @@ So `P2-9`'s prerequisite **is met**: compose reads the token from `.env` into th
 
 ---
 
+### 2.15.1 `P2-9a` — DISCHARGE RECORD (2026-10-14)
+
+**Option 1 was chosen, and the capability is preserved: a Hermes-served chat can now call the platform's own MCP tools — 21 of them — and a live turn called one and read a real platform result back. `CC-79` is DISCHARGED.**
+
+**The exit gate — a live turn whose model calls a platform tool and reads a real result (command + output).** The turn was driven by the `P2-7` harness (`packages/ai-assistant/scripts/hermes-live-turn.mts`), against the `p2-9a` image, on the restored stack:
+
+```
+P2_7_TIMEOUT_MS=2700000 node_modules/.bin/tsx packages/ai-assistant/scripts/hermes-live-turn.mts
+```
+
+The decisive lines (captured to a file at launch — **L155**):
+
+```
+    evt tool.complete :: {"tool_id":"call_aRUu2MWveB0mTipcIkc17enaTdbmfDP2","name":"tool_search",
+                          "args":{"queries":["mcp__open_mercato__context_whoami"]}, …}
+    evt tool.complete :: {"tool_id":"call_ZZyNSLz79rlUgFLp1rWjyiHRBuVhSZuP",
+                          "name":"mcp__open_mercato__context_whoami","args":{},
+                          "labels":[{"kind":"mcp","app":"Open Mercato","action":"context whoami"}, …]}
+  ANSWER: "{\n  \"result\": {\n    \"tenantId\": \"2867a986-…\",\n    \"userId\": \"df4356e6-…\",
+           \"isSuperAdmin\": true,\n    \"features\": [ … ],\n    \"featureCount\": 25\n  }\n}"
+  PASS — a real turn answered and ended on done (287 events) in 859.1s
+```
+
+The answer is **not** an echo and not a mock: it is the platform's own `context.whoami` result — a real tenant id, a real user id, `isSuperAdmin: true`, and **25 real feature keys** (`inbox_ops.*`, `webhooks.*`, `channel_gmail.*`, `communication_channels.*` …). The model reached it the way a Hermes agent would: a `tool_search` for `mcp__open_mercato__context_whoami`, then the MCP call, labelled by the worker's own toolset machinery as `{"kind":"mcp","app":"Open Mercato"}`. **That is `CC-79`'s own trigger check, and it is green.**
+
+**What landed (four code files + one suite), and what each proves.**
+
+- **`docker/hermes/Dockerfile`** — `--extra mcp` added to `uv sync --frozen --no-install-project --no-dev`. The pin declares `mcp = ["mcp==2.0.0", "httpx2==2.7.0", "starlette==1.3.1"]` and its `uv.lock` already resolves all three, so the frozen sync installs them without touching the pin's resolution. Measured in the running worker: **`mcp 2.0.0`, `httpx2 2.7.0`, `starlette 1.3.1`, and `ClientSession` + `streamable_http_client` import OK.** `mcp_bootstrap.py` was added to the image's `py_compile` gate.
+- **`docker/hermes/mcp_bootstrap.py` (new)** — writes `mcp_servers.open-mercato` **through the pin's own writer** (`_save_mcp_server`), so the entry passes the pin's `validate_mcp_server_entry` and the default-strip pass rather than being hand-written into a volume. The credential is stored as the **placeholder** `${MCP_SERVER_API_KEY}`, never the secret.
+- **`docker/hermes/entrypoint.py`** — resolves the key (env first, then `MCP_SERVER_API_KEY_FILE`, with a bounded wait), exports it into the worker's own environment so the placeholder resolves **at read time**, and runs the bootstrap as a subprocess with **stdout suppressed** (the pin's CLI modules print; stdout is the frame channel). No credential ⇒ a note and a clean boot (**fail-soft**); a refused or failed bootstrap ⇒ non-zero (**fatal**).
+- **`docker-compose.hermes.yml`** — the MCP URL now points at the platform's own service (`http://mcp:3001/mcp`, not the unreachable `host.docker.internal`), the key env + key-file env are forwarded, and the shared key volume is mounted read-only.
+- **`__tests__/hermes-worker-wiring.test.ts`** — grown from 25 to **53 tests**: the compose `environment:` **mapping** is parsed (a key named only in a comment does not satisfy it), the Dockerfile's `uv sync` flags and `py_compile` list are asserted, the entrypoint's resolution order and the subprocess's suppressed stdout are asserted, and the bootstrap's **two reads** are asserted as call sites.
+
+**The proof that reads the right VIEW (L159).** The bootstrap verifies itself with **two** reads, because one of them alone is a lie. `read_raw_config()` returns the file **as written** — so it proves the placeholder is at rest (no secret leaked into the volume). `load_config()` is **env-expanded** — so it proves the worker's runtime resolves the placeholder to the key. Reading only the first would have missed a broken runtime resolution; reading only the second would have been unable to tell a resolved placeholder from a leaked secret. Measured live, both hold:
+
+```
+--- /var/lib/hermes/config.yaml (key redacted) ---
+onboarding:
+  seen:
+    profile_build_offered: true      # the pre-existing key was PRESERVED
+_config_version: 50
+mcp_servers:
+  open-mercato:
+    url: http://mcp:3001/mcp
+    headers:
+      x-api-key: ${MCP_SERVER_API_KEY}   # placeholder AT REST
+```
+
+**Discovery re-measured on the restored stack (the worker is running the `p2-9a` image right now).** A probe using the pin's own machinery:
+
+```
+DISCOVERED: 21
+TOOLSETS CARRYING MCP TOOLS: 1
+  open-mercato                   tools= 21 mcp=21  MCP server 'open-mercato' tools
+ENABLED TOOLSETS (cli): ['browser', …, 'open-mercato', 'project', …]
+```
+
+`open-mercato` is not merely registered — it is in the set the gateway **enables for a `cli` session**, which is why the live turn's `tool_search` could find `mcp__open_mercato__*` at all. (One line of the probe did not resolve — `_toolset_rows({}, with_tools=True)` needs a session, so it raises `NameError: _sessions`. That is a **limitation of the probe**, not of the worker; the enabled-toolset line and the live tool call are the evidence.)
+
+**The gates.** `hermes-worker-wiring.test.ts` **53 / 53 green**; the **full `ai-assistant` package is 128 suites / 1864 tests GREEN**; `tsc --noEmit --incremental false` = **92 = the pre-existing `CC-73` baseline, 0 new** (no error mentions `mcp_bootstrap` or the wiring suite); **18 / 18 mutations RED**, each restored byte-identical (`md5sum`: `docker-compose.hermes.yml` `1f48f4f7bdad6569658795597eb5973f`, `docker/hermes/Dockerfile` `d257b273d30808e7fd47deb31d9bcba5`, `docker/hermes/entrypoint.py` `c4e94c1f2186d8acda765e02cccc4f8e`, `docker/hermes/mcp_bootstrap.py` `127b1bdd2cadf21f03225033e6fb7dea`, the suite `d0156283b050e9f69f9a9a45bf3de8d1`).
+
+**⚠ A NEW, PRE-EXISTING DEFECT FOUND WHILE RUNNING THE GATE — the gate is environment-sensitive (registered `CC-80`).** The first full-package run of this row read **5 failed suites / 27 failed tests**. Measured, not assumed (rule 0b): all five suites **pass in isolation**, all five are **byte-identical to `2128cf96`**, and the throw is `AiModelFactoryError: no_provider_configured` from `model-factory.ts:699` — which is **unchanged code**. The cause was then reproduced **exactly** by exporting the app's own provider config into the shell before the run:
+
+```
+OM_AI_PROVIDER=openai OM_AI_MODEL=Qwen2.5-7B-Instruct <jest>   →  5 failed / 27 failed / 1864 total
+```
+
+Characterised: `OM_AI_PROVIDER=openai` alone ⇒ 3 failed; `OPENCODE_PROVIDER=openai` (legacy) alone ⇒ 3 failed; `OM_AI_MODEL=openai/gpt-4o` alone ⇒ 3 failed; `OM_AI_MODEL=Qwen2.5-7B-Instruct` alone ⇒ 1 failed. The five suites **mock** the provider registry, but `model-factory.resolveModel` reads the **global** provider from the ambient environment, so an exported `OM_AI_PROVIDER` pins the model to a provider their mock does not offer. A cross-file **leak** was ruled out with a positive control: an instrumented run printed **128** probe inits and **zero** env changes across all 128 files. So the suites are **not hermetic against the ambient environment** — a defect that predates this row and is invisible whenever the gate is run from a clean shell. **The gate is green from a clean environment (128 / 1864), which is how it was read for this discharge; `CC-80` records the fix.** Lesson **L163**.
+
+**What this row did NOT do (named bounds, unchanged).** **The default did not move** — `AI_RUNTIME_ENGINE` still defaults to `opencode`, and production still does not construct the worker connection (that is `P2-8`'s lifecycle, already landed). Nothing was deleted: OpenCode, `hermes-local`, `CC-69`'s question operation and `CC-71`'s health panel all stand exactly as they were — that is the point of choosing option 1. No box moved (ONE NUMBER unchanged).
+
+**A measurement carried forward into `P2-9b` (named as its own hazard).** With the worker's **default** toolset set, the prompt measures **~16,757 tokens**. On this stack the model server has 4 slots and a 65536-token context; a cold prefill at the measured ~5.5 tok/s puts a first turn at **≈3000 s**, which is **longer than the worker's own `HERMES_LOCAL_STREAM_STALE_TIMEOUT: 2400` ceiling** (the value `P2-7` measured as the prefill grace). The live proof above therefore isolated the **capability** — it pinned `HERMES_TUI_TOOLSETS: open-mercato` through the same out-of-repo override `P2-7` used — and **did not** claim a production-shaped default-toolset turn. `P2-9b` must either raise the ceiling to cover the real prompt or shrink the offered toolset; the number is recorded here so it is not rediscovered late.
+
+**Next: `P2-9b` — the switchover.** One change: the **default-flip** to Hermes, the **OpenCode deletion** (`R28-6`/`N-8`), and the **`hermes-local` retirement** (`CC-74`, trigger fully met). Its requirement is §2.15, above; its added hazard is the paragraph immediately above; `CC-79` no longer blocks it.
+
+---
+
 ## 3. Measured facts (rule 0b — measured in the pinned source and the code repo, 2026-10-12)
 
 ### 3.1 The run-path protocol surface — re-verified against the RE-PINNED copy
