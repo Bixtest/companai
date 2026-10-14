@@ -14,7 +14,10 @@ written for exactly that person — and this revision is written for an agent th
 continue the development work.** Read it top to bottom once (about 20 minutes), then
 follow §2 to actually get working. Everything else in the project is reachable from here.
 
-**Written 2026-10-05, revision 32 (2026-10-11). Owner: Ramzi. Development machine: `BIXMASERVER` (Windows 10 Pro).**
+**Written 2026-10-05, revision 33 (2026-10-14). Owner: Ramzi. Development machine: `BIXMASERVER` (Windows 10 Pro).**
+**This revision adds the handoff snapshot — the ★ section between this intro and §0 (measured
+2026-10-14): the live frontier (Hermes Phase 2, `P2-1`–`P2-9a` discharged), the exact point the work
+was interrupted (`P2-9b`, queued and not started), and the one owner decision that gates it.**
 **This revision records row 27 (Phase 7 — *"told when blocked, noticed and suggested to"*): MEASURED, with its one
 startable half built.** Measured: **`S3` ("told when refused") is half there** — the dispatcher's refusal already
 returns a localised message **plus the missing feature list** (403, `apps/mercato/src/app/api/[...slug]/route.ts:249`)
@@ -199,6 +202,90 @@ page and the `★ ACTIVE TASK` box disagree about *what is being worked on now*,
 > For *what is left*, read [`BACKLOG.md`](BACKLOG.md). For *what happened*, read
 > [`../../JOURNAL.md`](../../JOURNAL.md). For *what to avoid*, read [`../../LESSONS.md`](../../LESSONS.md).
 > **The message that starts a new session is [`START-PROMPT.md`](START-PROMPT.md).**
+
+---
+
+## ★ WHERE WE ARE NOW, AND WHERE THE WORK WAS INTERRUPTED — measured 2026-10-14
+
+**This section is the handoff snapshot for an agent picking the work up cold.** It states the live
+frontier, the exact point the last session stopped, and the one decision that gates the next build.
+The `★ ACTIVE TASK` box in [`../../JOURNAL.md`](../../JOURNAL.md) remains the single live-task
+record (line 9 above) — this section is its measured context, not a replacement.
+
+### Where we are now
+
+| | |
+|---|---|
+| **The live frontier** | **Hermes Phase 2** — *"one worker, one tenant, one tool"* (plan: [`PLAN-HERMES-PHASE2-one-tenant-one-tool.md`](PLAN-HERMES-PHASE2-one-tenant-one-tool.md)). Per the owner's 2026-10-12 ruling, the focus is the **core architecture**, and **business modules are generated from the core workspace, never hand-coded**. |
+| **Phase 2 progress** | **`P2-1` … `P2-9a` all DISCHARGED.** The last, **`P2-9a` (the MCP bridge)**: a live Hermes turn **called a platform tool** (`mcp__open_mercato__context_whoami`) and read a real platform result back — `PASS — a real turn answered and ended on done (287 events) in 859.1s`; **`CC-79` discharged**. Before it: `P2-8` (the worker's **ws door** + the client's transport seam — a real turn served with **no hand-spawned process**), `P2-7` (Hermes served a live turn, twice, the second production-shaped), `CC-80` (the suite is **hermetic** — two-sided acceptance measured on both the clean and the poisoned shell), and `CC-73` (below). **The default engine did NOT move in any of them — it is still `opencode`.** |
+| **The last thing done** | **`CC-73` DISCHARGED 2026-10-14, 15:53–15:54** — the `ai-assistant` type gate turned on: **92 pre-existing, test-only errors fixed across 27 `__tests__` files, production untouched**; `tsc --noEmit --incremental false` **exit 0** (was 92); package **129 suites / 1890 tests green**; 4 reverts restored exactly 17 errors, md5-verified; a separate-agent hostile critic found 1 MEDIUM + 3 LOW/NIT, all fixed — the MEDIUM became **`CC-81`**. Docs + memory synced in the same change. |
+| **Repo state** | **Both repos clean — nothing uncommitted, nothing mid-edit.** Docs repo (this one) HEAD **`d8059ea`** (the memory refresh closing `CC-73`); code repo (`workspace/starting-kit`) HEAD **`2ee74ba6`** (`CC-73`). |
+| **The gates** (pinned Node 24 — `workspace/.toolchain/node24/node.exe`, never `npx`) | `ai-assistant` package **129 suites / 1890 tests GREEN**; `tsc --noEmit --incremental false` **exit 0**. |
+| **The ONE NUMBER** | **78 / 321 = 24%** — unchanged (`P2-9a`, `CC-80`, `CC-73` each move no box). Derived by the two routes recorded in `platform_points.md` §L; never typed. |
+| **The stack** | Runs from the committed compose. The Hermes worker serves its **ws door** (the pin's own wire protocol) — **fail-closed unless `HERMES_WS_TOKEN` is set**, which it is, in the **git-ignored `.env`** (48 random bytes, never committed, never logged). A real turn was last served through the production client on 2026-10-14. |
+| **`CC-59`, for the record** | Completed 2026-10-11 (code `83f88bd3`, docs `95b5a24`): the Business-IR chain's **first production caller** — `lib/business-ir-run.ts` (`runBusinessQueryPrompt`: prompt → IR → compile → execute, every refusal a value, `B5e` guardrails) + `ai-tools/business-ir-pack.ts` (`business_ir.run_query`). Its consumer gap is **`CC-60`** (below). |
+
+### Where the work was interrupted — the exact point
+
+**The last session ended immediately after `CC-73`'s discharge** (docs `72e9b00`, then the memory
+refresh `d8059ea`, 2026-10-14 15:54). The queue's NEXT item was written down and **not started —
+zero lines of code**:
+
+> **★ NEXT = `P2-9b` — THE SWITCHOVER.** ONE change, three parts:
+>
+> 1. **The default-flip** — `AI_RUNTIME_ENGINE` now defaults to `hermes`
+>    (`lib/resolve-ai-runtime-port.ts`; the `opencode` branch and `OPENCODE_RUNTIME_IMPLEMENTATION`
+>    go with the engine).
+> 2. **The OpenCode deletion** (`R28-6` / `N-8`) — engine files (`opencode-client.ts`,
+>    `opencode-handlers.ts`, `opencode-port-adapter.ts`, `docker/opencode/`), the six OpenCode test
+>    files, the three **hidden importers** (`src/index.ts` barrel · `api/chat/route.ts`'s
+>    `answerQuestion` short-circuit — `CC-69` · `api/health/route.ts` — `CC-71`), the `opencode:`
+>    service blocks (3 compose files) + `OPENCODE_URL`/`OPENCODE_MCP_URL`/`OPENCODE_PORT` + the CI
+>    build step; rewrite `door-only-way-in.test.ts` (≥6 assertions hard-code the engine set) and the
+>    four suites that assert the default is `opencode`. **`CC-72`'s warning is binding: "opencode"
+>    names two things** — the engine (delete) and the model-provider naming vestige
+>    (`opencode-provider.ts`, `OPENCODE_PROVIDER`/`OPENCODE_MODEL`/`OPENCODE_*_API_KEY`,
+>    `api_keys.opencodeSessionId`) which must **NOT** be deleted — a naive `grep -ri opencode | xargs rm`
+>    breaks model selection.
+> 3. **The `hermes-local` retirement** (`CC-74`, trigger fully met) — the `mercato-hermes-data-local`
+>    volume stays until the owner says so (rule 11).
+
+**Why it stopped there — the measured hazard that gates its first step (rule 11: the owner decides
+the *what*):**
+
+- With the worker's **default** toolset set, the prompt measures **~16,757 tokens**;
+- a cold prefill at the measured **~5.5 tok/s** puts a first turn at **≈3000 s**;
+- that **exceeds the worker's own `HERMES_LOCAL_STREAM_STALE_TIMEOUT: 2400` ceiling** — the value
+  `P2-7` measured as the prefill grace;
+- the `P2-9a` live proof pinned `HERMES_TUI_TOOLSETS: open-mercato` to isolate the capability, so it
+  does **not** claim a production-shaped default-toolset turn.
+
+**The trade to put to the owner before any code:** **(a) raise the stale-timeout ceiling** to cover
+the real prompt, or **(b) shrink the offered toolset** so the prompt fits the current ceiling. Both
+are defensible; they trade latency tolerance against capability — a product decision, not a
+technical one. Recorded in the plan §2.15.1, and to be **re-measured, not assumed**, as step one of
+the build (rule 0b).
+
+### Open items that are scheduled, not blocking
+
+- **`CC-81`** (from `CC-73`'s critic): the base `AiToolDefinition`/`McpToolDefinition` docblock
+  (`lib/types.ts:115`) is a **false statement in the tree** — a narrowly-typed tool is *not*
+  assignable to `unknown` under `strictFunctionTypes`. Both fixes are a design decision (rule 11).
+- **`CC-60`**: `business_ir.run_query` is live on the tool door (`POST /api/ai/tools/execute`) and
+  MCP, but **no agent whitelists it** — there is no in-chat consumer yet.
+- **`B-WS/B9`** — the widget architecture, end to end (the *design* track; `B-WS/B1`–`B8` of 10
+  done; a design is never a build, so it moves no box — BR-4).
+
+### The first moves for whoever picks this up
+
+1. Read the `★ ACTIVE TASK` box in [`../../JOURNAL.md`](../../JOURNAL.md) — the live task record.
+2. `P2-9b`'s requirement is **§2.15** of
+   [`PLAN-HERMES-PHASE2-one-tenant-one-tool.md`](PLAN-HERMES-PHASE2-one-tenant-one-tool.md); its
+   hazard paragraph is **§2.15.1**.
+3. **Rule 0b — measure before building:** re-measure the default-toolset prompt size and the
+   OpenCode deletion surface (the plan names every file class; confirm it in code).
+4. Report the raise-ceiling vs shrink-toolset trade to the owner **before choosing** (rule 11),
+   with ranked options and a recommendation — the reporting standard.
 
 ---
 
