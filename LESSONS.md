@@ -4562,3 +4562,27 @@ AiModelFactoryError: The resolved model is pinned to provider "openai", but that
 **Why this matters more than the five suites.** The protocol's central claim is *"only code is evidence"*, and its gate is the full package green. A gate whose verdict flips because the operator's shell had `.env` sourced is a gate that can report RED on a correct tree — and, worse, GREEN while a suite is quietly dependent on ambient configuration. `P2-9b` deletes the engine whose env names (`OPENCODE_PROVIDER`/`OPENCODE_MODEL`) are precisely the aliases this defect reads, so the exposure is about to get wider, not narrower.
 
 **The rules.** (1) **Mocking a collaborator does not hermeticise the process** — anything the unit reads from `process.env` is still live; a suite that claims "deterministic, hermetic, provider-agnostic" must clear the ambient keys or pass them explicitly. (2) **A gate's verdict is part of the gate** — record the environment a gate was read in, and re-run from a clean shell before believing a RED. (3) **Reproduce before you explain** — the exact failure set was reproduced by setting two variables, which converted a mystery into a two-line command. (4) **A negative result needs a positive control** — "the probe printed nothing" is worthless until the probe proves it ran (128 inits), and the probe's own blind spot (constant variables) must be stated. (5) **Check the failing files against HEAD first** — `git diff --quiet HEAD -- <file>` for each turned "is it mine?" into a fact in one command.
+
+## L164 — a guard that names a MECHANISM must assert its USE, not its import — and an f-string puts the expression where a quote-anchored extractor cannot see it (2026-10-14, `P2-9a`)
+
+Two vacuous guards, found by a **separate-agent hostile critic** in the `P2-9a` wiring suite, each proven by an actual mutation, and each invisible to every gate the row had already run (53/53 green, 18/18 mutants RED — because the mutation set was written by the same hand that wrote the guards).
+
+**Trap 1 — the import is not the call.** The test is literally named *"writes through the pin's own writer, not hand-rolled YAML"*, and it asserted:
+
+```ts
+expect(source).toContain('from hermes_cli.mcp_config import _save_mcp_server')
+```
+
+That is the **import**. Replacing the call site with a hand-rolled write while leaving the import in place left the suite **53/53 green** — the test whose entire purpose is "not hand-rolled YAML" cannot fail when the YAML is hand-rolled. Fix: anchor on the call with its arguments, `/_save_mcp_server\(\s*server_name\s*,\s*entry\s*\)/`.
+
+**Trap 2 — the f-string hides the expression inside the literal.** The guard *"logs the credential's SOURCE and LENGTH, never its value"* worked by taking everything **after the last quote** of each `log(` line — the `%`/`+`/`,` argument part — then stripping `len(key)` and asserting the identifier `key` is absent. That is exactly right for `log("... %s ..." % (source, len(key)))`. It is blind to:
+
+```python
+log(f"MCP credential resolved from {source} ({len(key)} chars): {key}")
+```
+
+because in an f-string the **expression lives inside the quotes**. Mutating the entrypoint to that line — i.e. **printing the secret** — left the suite **53/53 green**, including the test named "never its value". The guard was vacuous against the most idiomatic Python form of the very leak it names, and the leak lands in `docker compose logs`. Fix: also extract every `{…}` group from the line and check those.
+
+**Why the mutation gate did not catch this.** The row's 18 mutants were written by the same author as the guards, so they varied the things the author was already thinking about. A mutation set is a **hypothesis about how the code could break**, and its blind spot is the author's blind spot. The critic's mutants came from a different hypothesis space — "what would a *later* developer plausibly write?" — which is why a plain f-string, not an exotic one, broke it. **A second, independent adversary is not redundancy; it is the only thing that tests the mutation set itself.**
+
+**The rules.** (1) **A guard naming a mechanism must assert the mechanism's USE** — the call site with its arguments, never the import, never the name in prose. (2) **Know your extractor's blind spot and state it** — a quote-anchored slice cannot see f-strings, `{}`/`%` interpolation, or concatenation; enumerate the forms and cover each, or assert on a parsed AST. (3) **A security assertion deserves an adversarial mutation** — "the secret is never logged" is exactly the kind of claim that gets a green test and a leaked credential. (4) **Give the mutation set to someone who did not write the code** — the author's mutants share the author's blind spot, and the fix is a different hypothesis space, not more mutants of the same kind. (5) **A `toContain` on a flag needs a boundary** — `toContain('--extra mcp')` is satisfied by `--extra mcp-bogus`, a typo that installs nothing; measured, and it passed.
