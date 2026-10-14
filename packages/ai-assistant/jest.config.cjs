@@ -6,6 +6,15 @@ module.exports = {
   testEnvironment: 'node',
   watchman: false,
   rootDir: '.',
+  // `CC-80` — the suite was NOT hermetic against the ambient provider
+  // environment: exporting the app's own config (`OM_AI_PROVIDER=openai`,
+  // `OM_AI_MODEL=…`) turned 5 suites / 27 tests RED, because
+  // `lib/model-factory.ts` reads the provider axis from `process.env` while the
+  // affected suites mock the *registry*, not the *environment*. This runs once
+  // per test file, before the file is loaded, and clears the provider-axis
+  // variables (restoring them afterwards). See `test-env-hermetic.ts` for the
+  // measurement and the two-sided acceptance.
+  setupFilesAfterEnv: ['<rootDir>/test-env-hermetic.ts'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
   moduleNameMapper: {
     '^@open-mercato/ai-assistant/(.*)$': '<rootDir>/src/$1',
