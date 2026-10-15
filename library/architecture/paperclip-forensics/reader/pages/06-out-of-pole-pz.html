@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 06 — Out-of-pole findings (PZ) — Paperclip Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-06" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 06</span>
+      <div class="header-title-wrap">
+        <div class="header-title">Out-of-Pole (PZ)</div>
+        <div class="header-subtitle">Paperclip Platform Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/06-out-of-pole-findings.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #059669">DONE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">1,769</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">9 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">187</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-15</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 06 Architecture Guide (Default)</option>
+            <optgroup label="Strategic Architecture">
+              <option value="master">Executive Topology: the three poles, the engine, and the seam</option>
+            </optgroup>
+            <optgroup label="Foundations">
+              <option value="00">Batch 00: The pin, the two doc roots, and the method</option>
+              <option value="01">Batch 01: Core model, heartbeat protocol &amp; adapter ring</option>
+            </optgroup>
+            <optgroup label="Pole 1 — The Aissistant">
+              <option value="02">Batch 02: The aissistant — four layers &amp; lifecycle</option>
+            </optgroup>
+            <optgroup label="Pole 2 — The Workspace">
+              <option value="03">Batch 03: The workspace — portable markdown company</option>
+            </optgroup>
+            <optgroup label="Pole 3 — Automations">
+              <option value="04">Batch 04: Automations — finite runs, durable continuity</option>
+            </optgroup>
+            <optgroup label="Cross-Cutting">
+              <option value="05">Batch 05: Widgets &amp; frontend — tokens, gate, baseline</option>
+            </optgroup>
+            <optgroup label="Escape Hatch">
+              <option value="06">Batch 06: Out-of-pole (PZ) — governance &amp; the tenancy crack</option>
+            </optgroup>
+            <optgroup label="Strategic Decision">
+              <option value="07">Batch 07: The synthesis — transfer matrix &amp; four forks</option>
+            </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 06 VISUAL GUIDE — ESCAPE HATCH (PZ)</div>
+    <h4>Out-of-pole findings that still change how we build</h4>
+    <p>Governance, observability, self-development and the single-tenant wall cracking at the edges</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 320" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-06" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-06" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+      </defs>
+      <g transform="translate(20, 20)">
+        <rect width="210" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">MCP GOVERNANCE</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Risk levels per tool</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Writes quarantined first</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Disable preserves the audit</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#1d4ed8">A model for our MCP door</text>
+      </g>
+      <g transform="translate(245, 20)">
+        <rect width="210" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">OBSERVABILITY</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">OpenTelemetry spans</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Two-project Sentry split</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Every agent turn is traceable</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">Debug-by-trace, not guess</text>
+      </g>
+      <g transform="translate(470, 20)">
+        <rect width="210" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">SELF-DEVELOPMENT</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Scoped .mdc rules + AGENTS.md</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">31 first-party dev skills</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">The platform builds itself</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#6d28d9">Powerful — and a risk</text>
+      </g>
+      <g transform="translate(695, 20)">
+        <rect width="205" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">IN-TREE EVALS</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Evals live beside the code</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Run in CI, not a side tool</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Quality is enforced, not hoped</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">Take this wholesale</text>
+      </g>
+
+      <rect x="20" y="190" width="880" height="120" rx="10" fill="#ef4444" fill-opacity="0.07" stroke="#ef4444" stroke-width="1.6"/>
+      <text x="40" y="218" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#b91c1c">THE HONEST LIMIT: the single-tenant wall cracks at the edges</text>
+      <text x="40" y="244" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">Paperclip is single-tenant by design. Where it meets cloud + customer-success surfaces, the wall needs patching —</text>
+      <text x="40" y="264" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">and it is patched with fail-closed environment flags rather than a true tenancy layer. Our platform must supply that layer.</text>
+      <text x="40" y="290" font-family="system-ui, sans-serif" font-size="11.5" font-weight="600" fill="#b91c1c">This is the single most important out-of-pole finding for our seam design.</text>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="paperclip-study-batch-06-out-of-pole-findings-pz">Paperclip Study — Batch 06: out-of-pole findings (PZ)<a href="#batch-06/paperclip-study-batch-06-out-of-pole-findings-pz" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Status:</strong> DONE — 2026-10-15 · <strong>Pole tag: PZ</strong> — findings that do not sit cleanly inside P1/P2/P3 but
+&quot;fit our vision, project, architecture, or a potential use case or added value for the end user&quot; (the owner&#39;s
+escape hatch).
+<strong>Sources read:</strong> <code>doc/MCP-ACCESS-GOVERNANCE.md</code>, <code>doc/public-mcp.md</code>, <code>doc/observability.md</code>,
+<code>rules/README.md</code> + <code>rules/*.mdc</code>, <code>.agents/skills/</code> (31 skills), <code>doc/evals.md</code>, <code>doc/CUSTOMER-SUCCESS- INSPECTION.md</code>, <code>AGENTS.md</code>, <code>doc/DEVELOPING.md</code> (head), <code>doc/SEARCH.md</code>.</p>
+<p>Each finding carries a <strong>one-line reason it is kept</strong>, per the owner&#39;s instruction.</p>
+<hr>
+<h2 id="0-plain-words-what-is-in-this-batch-and-why">§0 — Plain words: what is in this batch and why<a href="#batch-06/0-plain-words-what-is-in-this-batch-and-why" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>These are the things Paperclip does that are <strong>bigger than one pole</strong> or that <strong>do not fit any pole</strong> — the
+way it governs who may touch what (MCP), the way it watches itself (observability), the way it develops
+itself with agents (skills + rules + verify loops), the way it tests agents fairly (evals), and the cracks in
+its single-tenant wall where cloud features are appearing (customer-success inspection). Each is kept because
+it maps onto something our vision, platform, or users will need.</p>
+<hr>
+<h2 id="1-mcp-access-governance-pz">§1 — MCP access governance (PZ)<a href="#batch-06/1-mcp-access-governance-pz" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>doc/MCP-ACCESS-GOVERNANCE.md</code> (32,060 B) + <code>doc/public-mcp.md</code> (31,387 B) describe how Paperclip governs
+<strong>Model Context Protocol</strong> connections — the same protocol our platform uses for Hermes tool bridging.</p>
+<p>Measured structure:</p>
+<ul>
+<li><strong>Mental model + canonical integration model</strong> (<code>:25</code>, <code>:64</code>); &quot;Install the example application +
+connection + profile in one call&quot;; a <strong>bundled smoke check</strong> that &quot;validates an allowed read, a denied
+write, <strong>audit visibility</strong>&quot; (<code>:85</code>).</li>
+<li><strong>Paperclip as MCP endpoint vs MCP gateway</strong> (<code>:97</code>) — it distinguishes <em>being</em> an MCP server from
+<em>proxying</em> MCP servers, which is exactly the distinction our Hermes bridge had to make.</li>
+<li><strong>Managed connections</strong> with a lifecycle: create → <strong>health check (no secrets in output)</strong> → <strong>catalog
+refresh (pulls schema, sets risk levels, quarantines unexpected writes)</strong> → enable → <strong>disable (does not
+delete; preserves audit history)</strong> (<code>:148–190</code>).</li>
+</ul>
+<p><strong>Plain gloss:</strong> Paperclip treats each MCP connection like a <strong>regulated door</strong>: it pulls the schema, assigns
+a risk level, <strong>quarantines anything that unexpectedly tries to write</strong>, and keeps the audit trail even after
+you turn it off. For a platform whose agents call external tools on a customer&#39;s behalf, this is the
+governance shape we will need.</p>
+<p><strong>Kept because:</strong> our Hermes bridge exposes platform tools to an agent; Paperclip&#39;s model is a direct
+upgrade path for governing exactly that surface (risk levels + quarantine + audit-preserving disable).</p>
+<hr>
+<h2 id="2-observability-opentelemetry-sentry-pz">§2 — Observability: OpenTelemetry + Sentry (PZ)<a href="#batch-06/2-observability-opentelemetry-sentry-pz" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>doc/observability.md</code> (103,111 B) is a full observability spec:</p>
+<ul>
+<li><strong>OTel tracing</strong> with peer-dependency install, <code>OTEL_*</code> env config, protocol choice
+(<code>grpc | http/protobuf | http/json</code>), service identity attached to every span (<code>:66–118</code>).</li>
+<li><strong><code>service.version</code> resolution order</strong> (<code>:118</code>) — the running identity is derived, not assumed.</li>
+<li><strong>Controller preparation phases</strong> traced (<code>:164</code>), and <strong>Native Runner Trace Spans</strong> (<code>:243</code>) — the runner
+is instrumented.</li>
+<li><strong>Sentry error monitoring</strong>, <strong>two Sentry projects</strong>, <strong>DSN delivery to the browser</strong> (<code>:356–441</code>).</li>
+</ul>
+<p><strong>Plain gloss:</strong> the platform is <strong>instrumented to be debugged in production</strong> — traces across the control
+plane and the runner, and error monitoring split into server+browser. Agent systems fail in <em>time-dependent,
+distributed</em> ways; without traces you cannot tell &quot;stuck&quot; from &quot;working&quot;. Our platform will need this.</p>
+<p><strong>Kept because:</strong> a multi-tenant agent platform cannot be operated blind; Paperclip&#39;s OTel+runner-span shape
+is a concrete target for our own observability, and the Hermes study (b03, b07) already showed the cost of
+not being able to see what a run is doing.</p>
+<hr>
+<h2 id="3-the-platform-develops-itself-with-agents-pz-the-strongest-hidden-finding">§3 — The platform develops itself with agents (PZ) — the strongest "hidden" finding<a href="#batch-06/3-the-platform-develops-itself-with-agents-pz-the-strongest-hidden-finding" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Paperclip is <strong>built by agents, and it ships the machinery for that</strong>:</p>
+<ul>
+<li><strong><code>rules/</code> — architectural guidance as scoped <code>.mdc</code> files</strong> (<code>rules/README.md</code>): each has a <code>description</code>
+and an <code>alwaysApply</code> boolean, with <code>globs</code> for scoped rules; <strong>root <code>AGENTS.md</code> tells coding agents to read
+matching rules before editing</strong>; the rule body stays the single source of truth and is <strong>wired into the
+hosted reviewer</strong> (<code>.greptile/files.json</code>, <code>.greptile/rules.md</code>). Existing rules include
+<code>heartbeat-execution-boundaries.mdc</code>, <code>database-migration-snapshots.mdc</code>,
+<code>runtime-dependency-boundaries.mdc</code>, <code>product-harness-responsibility.mdc</code>.</li>
+<li><strong><code>.agents/skills/</code> — 31 first-party skills for developing Paperclip</strong>, including
+<code>company-creator</code>, <code>create-agent-adapter</code>, <code>create-external-bot-integration</code>, <code>check-pr</code>, <code>verify-paperclip</code>,
+<code>paperclip-dev-workspace-run-verify-fix</code>, <code>prcheckloop</code>, <code>terminal-bench-loop</code>, <code>test-audit</code>,
+<code>diagnose-why-work-stopped</code>, <code>fix-slow-queries</code>, <code>doc-maintenance</code>, <code>maintain-storybook</code>, <code>release</code>.</li>
+<li><strong>Four agent-tool config folders in-tree</strong>: <code>.agents/</code>, <code>.claude/</code>, <code>.codex/</code>, <code>.devin/</code> — the repo is
+set up for <strong>any</strong> coding agent.</li>
+</ul>
+<p><strong>Plain gloss:</strong> the platform <strong>practises what it ships</strong> — it uses agents, skills, and scoped rules to
+maintain itself, and it explicitly supports <em>any</em> coding agent doing so. This is the clearest evidence that
+their &quot;agents as workers&quot; thesis is real and not marketing.</p>
+<p><strong>Kept because:</strong> this is the strongest match to our vision of an <strong>agent-run company</strong>. If our platform is to
+be built and maintained with agents, Paperclip&#39;s <strong>scoped-rule + first-party-skill-package + verify-loop</strong>
+pattern is the most transferable process finding in the whole study — independent of any code we reuse.
+*(This also explains the repeated <code>verify</code>/<code>prcheckloop</code>/<code>terminal-bench-loop</code> skills at the top of the list.)</p>
+<hr>
+<h2 id="4-evals-testing-agents-fairly-pz">§4 — Evals: testing agents fairly (PZ)<a href="#batch-06/4-evals-testing-agents-fairly-pz" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>doc/evals.md</code> (28,556 B) + <code>evals/promptfoo/</code> (measured present). The platform ships an <strong>eval harness</strong>
+(Promptfoo-based) with prompts like <code>heartbeat-system.txt</code>.</p>
+<p><strong>Cross-study note (Hermes b06 / our own M3-AGT-02):</strong> our platform already has an <strong>eval gate</strong> on the hire
+path (the Hermes forensics study recorded <code>M3-AGT-02</code>). Paperclip independently arrived at shipping an eval
+harness. <strong>Two platforms, same conclusion: an agent platform needs an eval system.</strong> That convergence is
+itself a signal for the mapping step.</p>
+<p><strong>Kept because:</strong> evals are the difference between &quot;we hired some agents&quot; and &quot;we can prove our agents are
+fit for the job&quot; — foundational to our vision.</p>
+<hr>
+<h2 id="5-the-practical-corpus-developing-search-cli-tasks-pz">§5 — The practical corpus: DEVELOPING, SEARCH, CLI, TASKS (PZ)<a href="#batch-06/5-the-practical-corpus-developing-search-cli-tasks-pz" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Measured, useful single artefacts a later build phase can mine directly:</p>
+<ul>
+<li><strong><code>doc/DEVELOPING.md</code> is the single largest doc (161,651 B)</strong> — the developer manual (workspace layout,
+checkouts, run-verify-fix loops).</li>
+<li><strong><code>doc/CLI.md</code> (56,070 B)</strong> + <code>cli/src/</code> (46,128 LOC) — a real CLI.</li>
+<li><strong><code>doc/SEARCH.md</code></strong> — how search works across the surface.</li>
+<li><strong><code>doc/TASKS.md</code> / <code>doc/TASKS-mcp.md</code></strong> — the task/MCP work registries.</li>
+<li><strong><code>docs/api/*</code></strong> — a documented REST API (<code>activity</code>, <code>agents</code>, <code>approvals</code>, <code>companies</code>, <code>costs</code>,
+<code>dashboard</code>, …), plus <code>server/src/routes/openapi.ts</code> (measured: OpenAPI generation exists).</li>
+</ul>
+<p><strong>Kept because:</strong> these are <strong>directly minable</strong> by our build phase and reduce design guesswork; a documented
+public API + CLI is a concrete integration surface for us.</p>
+<hr>
+<h2 id="6-the-single-tenant-wall-is-already-cracking-cloud-customer-success-pz">§6 — The single-tenant wall is already cracking: cloud / customer-success (PZ)<a href="#batch-06/6-the-single-tenant-wall-is-already-cracking-cloud-customer-success-pz" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>doc/CUSTOMER-SUCCESS-INSPECTION.md</code> + <code>server/src/routes/customer-success.ts</code> describe a <strong>Cloud inspection
+broker</strong>: authority and tenant-read endpoints <strong>disabled unless explicitly enabled by env flag</strong>
+(<code>PAPERCLIP_CUSTOMER_SUCCESS_AUTHORITY_ENABLED</code>, <code>…_INSPECTION_ENABLED</code>), accepting <strong>only a strict
+instance/company-derived managed-run JWT</strong>, and requiring <strong>the agent&#39;s Ed25519 identity + an active running
+heartbeat</strong> (paused/finished agents rejected). A separate <code>cloud.ts</code> route and a &quot;CloudAccessGate&quot; surface
+exist (batch 05 §, <code>CloudAccessGate.tsx</code>).</p>
+<p><strong>Plain gloss:</strong> even though Paperclip calls itself single-tenant self-host, it has begun building the
+<strong>hosted, multi-customer edge</strong> — with strict flags and identity gates. This is the crack the owner&#39;s plan
+(&quot;later we fix the hermes-per-tenant issue&quot;) will need to widen.</p>
+<p><strong>Kept because:</strong> it is the one place Paperclip itself walks toward multi-tenancy, so it is the most relevant
+prior art for our hardest known problem — and its <strong>fail-closed, env-gated, strict-JWT</strong> posture is a good
+model for how to add tenancy without weakening the base.</p>
+<hr>
+<h2 id="7-divergences-found-in-this-batch">§7 — Divergences found in this batch <span class="seal-badge" style="background:#fef2f2; color:#dc2626; border-color:#fca5a5; font-size: 0.65em; vertical-align: middle;">⚠️ FINDING NOTE</span><a href="#batch-06/7-divergences-found-in-this-batch" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Claim</th>
+<th>Reality</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>D1</strong></td>
+<td><code>SPEC.md:433</code> says &quot;Single-tenant, self-hostable. Not a SaaS.&quot;</td>
+<td>The tree ships <strong>cloud routes, a CloudAccessGate, customer-success inspection broker, and a Tailscale HTTPS broker package</strong></td>
+<td><strong>Divergence that is really a <em>direction</em>:</strong> the base is single-tenant; cloud is being added at the edge behind flags. Recorded because the SPEC&#39;s flat claim understates where the product is actually going.</td>
+</tr>
+<tr>
+<td><strong>D2</strong></td>
+<td><code>rules/README.md:9</code> says &quot;Cursor does not automatically load it as <code>.cursor/rules/</code>&quot;</td>
+<td>Yet <code>.agents/</code>, <code>.claude/</code>, <code>.codex/</code>, <code>.devin/</code> all exist — multiple agents are supported</td>
+<td><strong>Not a contradiction</strong>: the caveat is that the <code>.mdc</code> files are a <em>repo convention</em> wired through <code>AGENTS.md</code> + Greptile, not a Cursor-native path. Recorded to avoid misreading the rule system as Cursor-only.</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="8-carried-forward">§8 — Carried forward<a href="#batch-06/8-carried-forward" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Carry</th>
+<th>To</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>C6-1</strong></td>
+<td><strong>MCP access governance</strong>: risk levels, <strong>quarantine unexpected writes</strong>, audit-preserving disable, endpoint-vs-gateway distinction.</td>
+<td>mapping (Hermes bridge)</td>
+</tr>
+<tr>
+<td><strong>C6-2</strong></td>
+<td><strong>Observability</strong>: OTel traces incl. <strong>runner spans</strong> + two-project Sentry + browser DSN.</td>
+<td>PX-F, platform</td>
+</tr>
+<tr>
+<td><strong>C6-3</strong></td>
+<td><strong>The platform develops itself with agents</strong>: scoped <code>.mdc</code> rules + <code>AGENTS.md</code> wiring + 31 first-party dev skills + verify/prloop skills; <strong>any</strong> coding agent supported (<code>.agents/.claude/.codex/.devin</code>).</td>
+<td>all (process)</td>
+</tr>
+<tr>
+<td><strong>C6-4</strong></td>
+<td><strong>Evals ship in-tree</strong> (<code>evals/promptfoo</code>) — converges with our own M3-AGT-02 eval gate.</td>
+<td>P1, mapping</td>
+</tr>
+<tr>
+<td><strong>C6-5</strong></td>
+<td><strong>Minable corpus</strong>: <code>DEVELOPING.md</code> (162 KB), documented REST API + OpenAPI, a real CLI, <code>SEARCH.md</code>.</td>
+<td>build phase</td>
+</tr>
+<tr>
+<td><strong>C6-6</strong></td>
+<td><strong>The tenancy crack</strong>: cloud routes + customer-success broker behind <strong>fail-closed env flags</strong> + strict managed-run JWT + Ed25519.</td>
+<td>mapping (multi-tenant)</td>
+</tr>
+<tr>
+<td><strong>C6-7</strong></td>
+<td><strong><code>company-creator</code> + <code>create-agent-adapter</code> skills</strong> — the platform can be extended by an agent following a skill.</td>
+<td>PZ, P1</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="9-value-questions-q1-user-q2-vision">§9 — Value questions (Q1 user / Q2 vision)<a href="#batch-06/9-value-questions-q1-user-q2-vision" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>Q1 — how does this serve a real user use case?</strong>
+Indirectly but powerfully: governance (MCP), observability, and evals are what let a user <strong>trust</strong> the
+system when it misbehaves — they can see the trace, see why a write was denied, see that an agent passed its
+eval. And the self-development machinery means the product <strong>improves faster</strong> than a hand-built one.</p>
+<p><strong>Q2 — how does this serve an AI-first business &amp; resources planner?</strong>
+The strongest PZ findings are process, not features: <strong>(C6-3) a platform that builds itself with agents using
+scoped rules and packaged skills</strong> is the closest thing in the survey to <em>living our own vision</em>, and
+<strong>(C6-6) the fail-closed tenancy crack</strong> is the most relevant prior art for the one problem we know we must
+solve beyond Paperclip. <strong>(C6-1) MCP governance</strong> and <strong>(C6-4) in-tree evals</strong> are direct upgrades to
+surfaces we already have (the Hermes bridge, the M3-AGT-02 gate).</p>
+<hr>
+<p><em>Batch 06 of 07 complete. Divergences: 2 (1 direction, 1 clarification). Carried: C6-1…C6-7.
+Next: <code>07-SYNTHESIS.md</code> — the per-pole synthesis and what goes to the mapping step.</em></p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="05-widgets-frontend.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">Widgets &amp; Frontend</span>
+                </a>
+              
+
+              <a href="../index.html#batch-06" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              
+                <a href="07-the-synthesis.html" class="nav-page-btn" style="text-align:right;">
+                  <span class="nav-btn-sub">Next Batch →</span>
+                  <span class="nav-btn-title">The Synthesis</span>
+                </a>
+              
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#0-plain-words-what-is-in-this-batch-and-why" class="toc-link">§0 — Plain words: what is in this batch and why</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#1-mcp-access-governance-pz" class="toc-link">§1 — MCP access governance (PZ)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#2-observability-opentelemetry-sentry-pz" class="toc-link">§2 — Observability: OpenTelemetry + Sentry (PZ)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-the-platform-develops-itself-with-agents-pz-the-strongest-hidden-finding" class="toc-link">§3 — The platform develops itself with agents (PZ) — the strongest &quot;hidden&quot; finding</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-evals-testing-agents-fairly-pz" class="toc-link">§4 — Evals: testing agents fairly (PZ)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-the-practical-corpus-developing-search-cli-tasks-pz" class="toc-link">§5 — The practical corpus: DEVELOPING, SEARCH, CLI, TASKS (PZ)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-the-single-tenant-wall-is-already-cracking-cloud-customer-success-pz" class="toc-link">§6 — The single-tenant wall is already cracking: cloud / customer-success (PZ)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-divergences-found-in-this-batch" class="toc-link">§7 — Divergences found in this batch</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#8-carried-forward" class="toc-link">§8 — Carried forward</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#9-value-questions-q1-user-q2-vision" class="toc-link">§9 — Value questions (Q1 user / Q2 vision)</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('paperclip_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('paperclip_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('paperclip_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('paperclip_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.PaperclipReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Paperclip Platform Study — Executive Master Reader</title>
+  <link rel="stylesheet" href="assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <!-- Reading Progress Bar -->
+  <div id="readingProgressBar"></div>
+
+  <!-- Master App Header -->
+  <header class="app-header">
+    <div class="header-left">
+      <button class="tool-btn" id="sidebarToggleBtn" aria-label="Toggle Navigation" title="Toggle Documents Menu">☰</button>
+      <span class="brand-badge">Forensics</span>
+      <div class="header-title-wrap">
+        <div class="header-title">Paperclip Platform Study <span style="font-size:0.75rem; color:var(--text-muted); font-weight:normal;">(Upstream Paperclip 0.3.1 — the aissistant ancestor)</span></div>
+        <div class="header-subtitle">8 Unabridged Batches • Extract Pin 10,447 files • Verified-Code Authority</div>
+      </div>
+    </div>
+
+    <!-- Header Controls -->
+    <div class="header-controls">
+      <!-- Font Size Slider Group -->
+      <div class="font-slider-group" title="Adjust reading font size relatively">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn" title="Decrease font size (A-)">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider" aria-label="Font Size">
+        <button class="font-btn" id="fontIncBtn" title="Increase font size (A+)">A+</button>
+        <button class="font-btn" id="fontResetBtn" title="Reset font size to 16px" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <!-- Font Family Switcher -->
+      <select id="fontSelect" class="tool-btn" style="cursor:pointer;" title="Switch font typography">
+        <option value="sans">Modern Sans</option>
+        <option value="serif">Classic Serif</option>
+        <option value="mono">Technical Mono</option>
+      </select>
+
+      <!-- Reading Width Switcher -->
+      <select id="widthSelect" class="tool-btn" style="cursor:pointer;" title="Adjust reading column width">
+        <option value="reading">Column: Reading (760px)</option>
+        <option value="standard" selected>Column: Standard (900px)</option>
+        <option value="wide">Column: Wide (1180px)</option>
+        <option value="full">Column: Full Width</option>
+      </select>
+
+      <!-- Theme Selector -->
+      <div class="theme-selector" title="Choose color theme">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <!-- Architecture Guides Button -->
+      <button class="tool-btn" id="headerGalleryBtn" title="Explore all 9 visual architecture guides (Press 'A')">
+        <span>🏛️</span>
+        <span>Architecture Guides</span>
+        <kbd style="font-size:0.68rem; background:var(--border-color); padding:0.1rem 0.3rem; border-radius:3px;">A</kbd>
+      </button>
+
+      <!-- Search Trigger -->
+      <button class="tool-btn" id="searchTrigger" title="Search all 8 documents (Press '/')">
+        <span>🔍</span>
+        <span>Search</span>
+        <kbd style="font-size:0.68rem; background:var(--border-color); padding:0.1rem 0.3rem; border-radius:3px;">/</kbd>
+      </button>
+    </div>
+  </header>
+
+  <!-- App Main Layout -->
+  <div class="app-layout">
+    <!-- Left Navigation Sidebar -->
+    <aside class="sidebar-left" id="sidebarLeft">
+      <div class="sidebar-search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="sidebarFilterInput" class="search-input" placeholder="Filter batches...">
+      </div>
+
+      <nav class="sidebar-docs-list" id="sidebarDocsList">
+        
+    <a href="#batch-00" class="doc-nav-item active" data-id="batch-00">
+      <div class="doc-nav-item-top">
+        <span class="doc-nav-batch">Batch 00</span>
+        <span class="doc-nav-badge badge-done">DONE</span>
+      </div>
+      <div class="doc-nav-title">The Pin &amp; Method</div>
+      <div class="doc-nav-meta">
+        <span>2,012 words</span>
+        <span>•</span>
+        <span>10 min</span>
+      </div>
+    </a>
+  
+
+    <a href="#batch-01" class="doc-nav-item " data-id="batch-01">
+      <div class="doc-nav-item-top">
+        <span class="doc-nav-batch">Batch 01</span>
+        <span class="doc-nav-badge badge-done">DONE</span>
+      </div>
+      <div class="doc-nav-title">Platform Overview</div>
+      <div class="doc-nav-meta">
+        <span>2,330 words</span>
+        <span>•</span>
+        <span>12 min</span>
+      </div>
+    </a>
+  
+
+    <a href="#batch-02" class="doc-nav-item " data-id="batch-02">
+      <div class="doc-nav-item-top">
+        <span class="doc-nav-batch">Batch 02</span>
+        <span class="doc-nav-badge badge-done">DONE</span>
+      </div>
+      <div class="doc-nav-title">The Aissistant (P1)</div>
+      <div class="doc-nav-meta">
+        <span>2,290 words</span>
+        <span>•</span>
+        <span>11 min</span>
+      </div>
+    </a>
+  
+
+    <a href="#batch-03" class="doc-nav-item " data-id="batch-03">
+      <div class="doc-nav-item-top">
+        <span class="doc-nav-batch">Batch 03</span>
+        <span class="doc-nav-badge badge-done">DONE</span>
+      </div>
+      <div class="doc-nav-title">The Workspace (P2)</div>
+      <div class="doc-nav-meta">
+        <span>1,996 words</span>
+        <span>•</span>
+        <span>10 min</span>
+      </div>
+    </a>
+  
+
+    <a href="#batch-04" class="doc-nav-item " data-id="batch-04">
+      <div class="doc-nav-item-top">
+        <span class="doc-nav-batch">Batch 04</span>
+        <span class="doc-nav-badge badge-done">DONE</span>
+      </div>
+      <div class="doc-nav-title">Automations (P3)</div>
+      <div class="doc-nav-meta">
+        <span>2,370 words</span>
+        <span>•</span>
+        <span>12 min</span>
+      </div>
+    </a>
+  
+
+    <a href="#batch-05" class="doc-nav-item " data-id="batch-05">
+      <div class="doc-nav-item-top">
+        <span class="doc-nav-batch">Batch 05</span>
+        <span class="doc-nav-badge badge-done">DONE</span>
+      </div>
+      <div class="doc-nav-title">Widgets &amp; Frontend</div>
+      <div class="doc-nav-meta">
+        <span>1,948 words</span>
+        <span>•</span>
+        <span>10 min</span>
+      </div>
+    </a>
+  
+
+    <a href="#batch-06" class="doc-nav-item " data-id="batch-06">
+      <div class="doc-nav-item-top">
+        <span class="doc-nav-batch">Batch 06</span>
+        <span class="doc-nav-badge badge-done">DONE</span>
+      </div>
+      <div class="doc-nav-title">Out-of-Pole (PZ)</div>
+      <div class="doc-nav-meta">
+        <span>1,769 words</span>
+        <span>•</span>
+        <span>9 min</span>
+      </div>
+    </a>
+  
+
+    <a href="#batch-07" class="doc-nav-item " data-id="batch-07">
+      <div class="doc-nav-item-top">
+        <span class="doc-nav-batch">Batch 07</span>
+        <span class="doc-nav-badge badge-complete">COMPLETE</span>
+      </div>
+      <div class="doc-nav-title">The Synthesis</div>
+      <div class="doc-nav-meta">
+        <span>1,893 words</span>
+        <span>•</span>
+        <span>9 min</span>
+      </div>
+    </a>
+  
+      </nav>
+
+      <div class="sidebar-footer">
+        <span>8 Batches • 100% Verified</span>
+        <span>Three-Pole Frame</span>
+      </div>
+    </aside>
+
+    <!-- Workspace Main Reader -->
+    <main class="reader-workspace">
+      <!-- Sub-header bar inside reader -->
+      <div class="reader-sub-header">
+        <div class="sub-header-left">
+          <span style="font-weight: 700; color: var(--primary);">Document View:</span>
+          <div class="view-toggle-wrap">
+            <button class="view-toggle-btn active" id="viewRenderedBtn">Rendered Reading View</button>
+            <button class="view-toggle-btn" id="viewRawBtn">Verbatim Raw Markdown</button>
+          </div>
+        </div>
+
+        <div class="sub-header-right">
+          <button class="tool-btn" id="readerGalleryBtn" style="font-size:0.75rem; padding: 0.25rem 0.6rem;" title="Explore all architecture guides">
+            <span>🏛️ Architecture Explorer</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Scrolling Reader Canvas -->
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <!-- Document Seal & Metadata Card -->
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • ZERO CONTENT OMITTED</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">Paperclip Extract Pin</span>
+              </div>
+              <div class="seal-stats-grid" id="docSealStats">
+                
+    <div class="seal-stat-item">
+      <span class="stat-label">Document Status</span>
+      <span class="stat-value" style="color: #d97706">DONE</span>
+    </div>
+    <div class="seal-stat-item">
+      <span class="stat-label">Text Fidelity</span>
+      <span class="stat-value" style="color: #059669;">100% UNABRIDGED</span>
+    </div>
+    <div class="seal-stat-item">
+      <span class="stat-label">Word Count</span>
+      <span class="stat-value">2,012</span>
+    </div>
+    <div class="seal-stat-item">
+      <span class="stat-label">Est. Reading Time</span>
+      <span class="stat-value">10 min</span>
+    </div>
+    <div class="seal-stat-item">
+      <span class="stat-label">Source Lines</span>
+      <span class="stat-value">216</span>
+    </div>
+    <div class="seal-stat-item">
+      <span class="stat-label">Verified Date</span>
+      <span class="stat-value">2026-10-15</span>
+    </div>
+  
+              </div>
+            </div>
+
+            <!-- Explanatory Graphical Representation Section -->
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Document Default Architecture Guide</option>
+            <optgroup label="Strategic Architecture">
+              <option value="master">Executive Topology: the three poles, the engine, and the seam</option>
+            </optgroup>
+            <optgroup label="Foundations">
+              <option value="00">Batch 00: The pin, the two doc roots, and the method</option>
+              <option value="01">Batch 01: Core model, heartbeat protocol &amp; adapter ring</option>
+            </optgroup>
+            <optgroup label="Pole 1 — The Aissistant">
+              <option value="02">Batch 02: The aissistant — four layers &amp; lifecycle</option>
+            </optgroup>
+            <optgroup label="Pole 2 — The Workspace">
+              <option value="03">Batch 03: The workspace — portable markdown company</option>
+            </optgroup>
+            <optgroup label="Pole 3 — Automations">
+              <option value="04">Batch 04: Automations — finite runs, durable continuity</option>
+            </optgroup>
+            <optgroup label="Cross-Cutting">
+              <option value="05">Batch 05: Widgets &amp; frontend — tokens, gate, baseline</option>
+            </optgroup>
+            <optgroup label="Escape Hatch">
+              <option value="06">Batch 06: Out-of-pole (PZ) — governance &amp; the tenancy crack</option>
+            </optgroup>
+            <optgroup label="Strategic Decision">
+              <option value="07">Batch 07: The synthesis — transfer matrix &amp; four forks</option>
+            </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <button type="button" class="tool-btn" id="openGalleryBtn" title="Explore all 9 visual architecture guides">
+                    <span>🏛️ All Guides</span>
+                  </button>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">EXECUTIVE ARCHITECTURE MAP</div>
+    <h4>Paperclip Platform Study Topology: the three poles, the engine, and the seam</h4>
+    <p>Where each studied mechanism lands, and where Paperclip must be enclosed by our own tenancy and Hermes integration</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 960 500" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-m" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-m" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+      </defs>
+
+      <!-- Outer boundary: our platform -->
+      <rect x="20" y="20" width="920" height="460" rx="16" fill="var(--surface-card, #ffffff)" fill-opacity="0.4" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" stroke-dasharray="6,4"/>
+      <text x="45" y="52" font-family="system-ui, sans-serif" font-size="16" font-weight="700" fill="var(--diagram-accent, #7c3aed)">OUR PLATFORM — MERCATO (multi-tenant AI-company OS)</text>
+      <text x="45" y="72" font-family="system-ui, sans-serif" font-size="12" fill="var(--text-muted, #64748b)">Tenant boundary • per-company credentials • the designed seam that encloses Hermes</text>
+
+      <!-- Three poles as columns -->
+      <!-- POLE 1 -->
+      <g transform="translate(45, 100)">
+        <rect width="270" height="250" rx="12" fill="var(--surface-card, #ffffff)" stroke="#7c3aed" stroke-width="1.8"/>
+        <rect x="14" y="14" width="118" height="22" rx="4" fill="#7c3aed" fill-opacity="0.15"/>
+        <text x="20" y="30" font-family="system-ui, sans-serif" font-size="10.5" font-weight="700" fill="#6d28d9">POLE 1 — AISASSISTANT</text>
+        <text x="14" y="60" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="var(--text-primary, #0f172a)">The AI user in the platform</text>
+        <text x="14" y="82" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">Versatile • integratable • rich</text>
+        <text x="14" y="106" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• 4 separable layers (b02)</text>
+        <text x="14" y="124" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• Agent lifecycle machine (b02)</text>
+        <text x="14" y="142" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• Ed25519 identity (b02)</text>
+        <text x="14" y="160" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• Memory-as-binding (b02)</text>
+        <rect x="14" y="176" width="242" height="20" rx="4" fill="#f59e0b" fill-opacity="0.15"/>
+        <text x="22" y="190" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#b45309">Served by Hermes via the seam</text>
+        <text x="14" y="216" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-muted, #64748b)">Two host contexts: workspaces +</text>
+        <text x="14" y="232" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-muted, #64748b)">automations (more in the studio)</text>
+      </g>
+
+      <!-- POLE 2 -->
+      <g transform="translate(345, 100)">
+        <rect width="270" height="250" rx="12" fill="var(--surface-card, #ffffff)" stroke="#2563eb" stroke-width="1.8"/>
+        <rect x="14" y="14" width="108" height="22" rx="4" fill="#2563eb" fill-opacity="0.15"/>
+        <text x="20" y="30" font-family="system-ui, sans-serif" font-size="10.5" font-weight="700" fill="#1d4ed8">POLE 2 — WORKSPACE</text>
+        <text x="14" y="60" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="var(--text-primary, #0f172a)">The compatibility surface</text>
+        <text x="14" y="82" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">Adapts to mixed use-cases</text>
+        <text x="14" y="106" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• Portable md company pkg (b03)</text>
+        <text x="14" y="124" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• Typed task tree (b03)</text>
+        <text x="14" y="142" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• Two link types (b03)</text>
+        <text x="14" y="160" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• Directory restore locks (b03)</text>
+        <rect x="14" y="176" width="242" height="20" rx="4" fill="#10b981" fill-opacity="0.15"/>
+        <text x="22" y="190" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#059669">Paperclip is a strong foundation</text>
+        <text x="14" y="216" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-muted, #64748b)">Widgets &amp; frontend wiring ride on</text>
+        <text x="14" y="232" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-muted, #64748b)">this pole (b05)</text>
+      </g>
+
+      <!-- POLE 3 -->
+      <g transform="translate(645, 100)">
+        <rect width="270" height="250" rx="12" fill="var(--surface-card, #ffffff)" stroke="#059669" stroke-width="1.8"/>
+        <rect x="14" y="14" width="118" height="22" rx="4" fill="#059669" fill-opacity="0.15"/>
+        <text x="20" y="30" font-family="system-ui, sans-serif" font-size="10.5" font-weight="700" fill="#047857">POLE 3 — AUTOMATIONS</text>
+        <text x="14" y="60" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="var(--text-primary, #0f172a)">Agents work on assigned tasks</text>
+        <text x="14" y="82" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">Paperclip is the blueprint here</text>
+        <text x="14" y="106" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• Runs finite; continuity in DB (b04)</text>
+        <text x="14" y="124" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• 5 continuation kinds (b04)</text>
+        <text x="14" y="142" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• Reconciler + DOT-2 loop (b04)</text>
+        <text x="14" y="160" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• Watchdog + budgets (b04)</text>
+        <rect x="14" y="176" width="242" height="20" rx="4" fill="#10b981" fill-opacity="0.15"/>
+        <text x="22" y="190" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#059669">Strongest pole — take nearly all</text>
+        <text x="14" y="216" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-muted, #64748b)">Heartbeat protocol drives each</text>
+        <text x="14" y="232" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-muted, #64748b)">adapter, incl. the Hermes lane</text>
+      </g>
+
+      <!-- Bottom band: the engine + the escape hatch -->
+      <g transform="translate(45, 370)">
+        <rect width="550" height="90" rx="10" fill="#10b981" fill-opacity="0.08" stroke="#10b981" stroke-width="1.6"/>
+        <text x="18" y="28" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#047857">HERMES ENGINE (the main AI engine — integrated, never forked)</text>
+        <text x="18" y="50" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">Reached through ONE typed door. All evolution we need happens on OUR side, then maps onto Hermes.</text>
+        <text x="18" y="72" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">Paperclip's own adapter contract (11 adapters, b01) is the pattern we reuse — never a second engine.</text>
+      </g>
+
+      <g transform="translate(615, 370)">
+        <rect width="300" height="90" rx="10" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.4"/>
+        <text x="16" y="26" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="var(--text-primary, #0f172a)">ESCAPE HATCH (PZ) — b06</text>
+        <text x="16" y="46" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">MCP governance • OTel + Sentry</text>
+        <text x="16" y="62" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Self-development with agents</text>
+        <text x="16" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">In-tree evals • single-tenant crack</text>
+      </g>
+
+      <!-- Seam arrows from poles down into the engine -->
+      <path d="M 180 350 L 180 368" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" fill="none" marker-end="url(#arr-m)"/>
+      <path d="M 480 350 L 480 368" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" fill="none" marker-end="url(#arr-m)"/>
+      <path d="M 780 350 L 640 368" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" fill="none" marker-end="url(#arr-m)"/>
+    </svg>
+  </div>
+</div><br/>
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 00 VISUAL GUIDE</div>
+    <h4>The pin, the two doc roots, and the study method</h4>
+    <p>How the extract was pinned, where the documentation lives, and the 10-rule method that verifies every claim in code</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 300" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-00" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-00" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+      </defs>
+      <g transform="translate(20, 20)">
+        <rect width="200" height="120" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">STEP 1: THE EXTRACT</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">An extract, not a clone</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">No .git — identity is the ZIP</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">10,447 files extracted</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">md5 package.json pinned</text>
+      </g>
+      <path d="M 220 80 L 258 80" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-00)"/>
+      <g transform="translate(262, 20)">
+        <rect width="200" height="120" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">STEP 2: TWO DOC ROOTS</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">doc/ — 375 files (7.56 MB)</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">docs/ — 78 files (0.53 MB)</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">All .md: 952 / 12.07 MB</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#b45309">A caveat, not a defect</text>
+      </g>
+      <path d="M 462 80 L 500 80" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-00)"/>
+      <g transform="translate(504, 20)">
+        <rect width="200" height="120" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">STEP 3: CODE SCALE</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">~1M lines TS / 7,416 files</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">services/ 535k lines / 1,220 f</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">tests/ 487k lines / 798 files</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#b45309">Tests ~48% of the tree</text>
+      </g>
+      <path d="M 704 80 L 742 80" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-00)"/>
+      <g transform="translate(746, 20)">
+        <rect width="154" height="120" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">STEP 4: THE FRAME</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">P1 aissistant</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">P2 workspace</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">P3 automations</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">+ PX widgets/front</text>
+      </g>
+      <rect x="20" y="165" width="880" height="115" rx="10" fill="#7c3aed" fill-opacity="0.08" stroke="#7c3aed" stroke-width="1.6"/>
+      <text x="40" y="195" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#6d28d9">THE 10-RULE METHOD — every load-bearing claim is opened in the code, not taken from the docs</text>
+      <text x="40" y="220" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">Rules 1–4: pin first · measure before claiming · quote file+line · separate the docs' word from the code's word.</text>
+      <text x="40" y="240" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">Rules 5–7: name the pole · mark what fits · mark what does NOT fit and why.</text>
+      <text x="40" y="260" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">Rules 8–10: record divergences · keep it additive across studies · end on a ranked recommendation.</text>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <!-- 100% Unabridged Rendered Markdown Body -->
+            <article class="markdown-body" id="renderedContent">
+              <h1 id="paperclip-study-batch-00-the-pin-the-method-and-what-this-study-is">Paperclip Study — Batch 00: the pin, the method, and what this study is<a href="#batch-00/paperclip-study-batch-00-the-pin-the-method-and-what-this-study-is" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Folder:</strong> <code>library/architecture/paperclip-forensics/</code> · <strong>Status:</strong> OPEN — begun 2026-10-15
+<strong>This is a clean forensic study</strong>, run the same way as <code>library/hermes-forensics/</code>. It reads ONE source
+tree, measures it, and verifies every load-bearing claim against the source code. Nothing from any earlier
+Paperclip analysis is reused, referenced, or assumed.</p>
+<p><strong>Why this platform is first.</strong> Paperclip is the <strong>upstream ancestor of our own product</strong> — our
+<code>aissistant-package</code> is a fork of upstream Paperclip 0.3.1 (baseline commit <code>4feef987</code>), rebranded
+Aissistant/Companai. So this study reads the <strong>upstream</strong> project on its own terms (per the owner&#39;s ruling:
+<em>&quot;Upstream standalone first&quot;</em>); the comparison against our fork is a <strong>later bridge pass</strong>, not this study.</p>
+<hr>
+<h2 id="1-the-pin-task-zero-answered-by-measurement">1. THE PIN — task zero, answered by measurement<a href="#batch-00/1-the-pin-task-zero-answered-by-measurement" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>The source of this study is:</strong>
+<code>C:/Users/Ramzi/Downloads/companai/library/architecture/platforms/_extracted/paperclip-master</code>
+(extracted from <code>platforms/paperclip-master (1).zip</code>, which itself came from
+<code>https://github.com/paperclipai/paperclip</code>).</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Fact</th>
+<th>Value</th>
+<th>How measured</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Origin</td>
+<td><code>https://github.com/paperclipai/paperclip</code> (<code>master</code>)</td>
+<td>the owner&#39;s <code>platforms/references.md</code></td>
+</tr>
+<tr>
+<td>Zip</td>
+<td><code>platforms/paperclip-master (1).zip</code> (52 MB, 11,388 entries)</td>
+<td><code>ls</code>, <code>unzip -l</code></td>
+</tr>
+<tr>
+<td>Extracted</td>
+<td>2026-10-15, 13:21 (all files share this mtime)</td>
+<td><code>ls --time-style=full-iso</code></td>
+</tr>
+<tr>
+<td><code>.git</code> present?</td>
+<td><strong>NO</strong> — this is an extract, not a clone</td>
+<td><code>ls -d .git</code> → absent</td>
+</tr>
+<tr>
+<td>Total files</td>
+<td><strong>10,447</strong></td>
+<td><code>find . -type f | wc -l</code></td>
+</tr>
+<tr>
+<td><code>package.json</code> md5</td>
+<td><strong><code>e912c83c715dba5c7c55469d4de899cb</code></strong></td>
+<td><code>md5sum</code></td>
+</tr>
+<tr>
+<td>Declared version</td>
+<td><strong>none</strong> (<code>package.json</code> carries no <code>version</code>)</td>
+<td><code>json.load</code></td>
+</tr>
+<tr>
+<td>Product</td>
+<td><strong>Paperclip</strong> by Paperclip AI; licence <strong>MIT</strong></td>
+<td><code>package.json</code>, <code>LICENSE</code>, <code>README.md</code></td>
+</tr>
+<tr>
+<td>Runtime</td>
+<td><strong>Node <code>&gt;=24.11.0</code></strong>, <strong>pnpm <code>9.15.4</code></strong></td>
+<td><code>package.json</code> (<code>engines</code>, <code>packageManager</code>)</td>
+</tr>
+<tr>
+<td>Product one-liner</td>
+<td><em>&quot;the app people use to manage AI agents for work&quot;</em>; <em>&quot;If OpenClaw is an employee, Paperclip is the company.&quot;</em></td>
+<td><code>README.md</code></td>
+</tr>
+</tbody></table></div>
+<h3 id="1-1-the-identity-limit-stated-not-glossed">1.1 The identity limit (stated, not glossed)<a href="#batch-00/1-1-the-identity-limit-stated-not-glossed" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>There is <strong>no <code>.git</code></strong>, so the exact upstream commit cannot be read from the tree, and <code>package.json</code> carries
+<strong>no version field</strong> — worse than Hermes, whose <code>version = &quot;0.0.0&quot;</code> at least existed. <strong>The md5 of
+<code>package.json</code> plus the file count plus the extraction date is the whole identity we can assert.</strong> A reader
+reproducing this study must match those three numbers. <strong>Any claim here about &quot;the latest Paperclip&quot; is a
+claim about this extract, dated 2026-10-15.</strong></p>
+<p><strong>The one date clue we do have:</strong> the newest in-tree dated artefacts are <code>doc/architecture/ runner-rich-acp-validation-2026-09-30.json</code> and <code>doc/adapter-model-audit-2026-10-02.md</code>. So the tree is
+<strong>no older than 2026-10-02</strong> and was snapshotted on/before 2026-10-15. That narrows it; it does not pin it.</p>
+<hr>
+<h2 id="2-what-the-tree-contains-measured">2. What the tree contains (measured)<a href="#batch-00/2-what-the-tree-contains-measured" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="2-1-documentation-note-the-two-doc-roots">2.1 Documentation — note the TWO doc roots<a href="#batch-00/2-1-documentation-note-the-two-doc-roots" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>Paperclip ships documentation in <strong>two distinct places</strong>, and they are different in kind:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Root</th>
+<th align="right">Files</th>
+<th align="right">Bytes</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><code>doc/</code></strong></td>
+<td align="right"><strong>375</strong></td>
+<td align="right"><strong>7,561,781</strong></td>
+<td>The <strong>engineering</strong> corpus: specs, architecture notes, audits, plans, run logs, design sheets</td>
+</tr>
+<tr>
+<td><strong><code>docs/</code></strong></td>
+<td align="right"><strong>78</strong></td>
+<td align="right"><strong>531,639</strong></td>
+<td>The <strong>public/user</strong> documentation site (Mintlify-style: <code>docs.json</code>, API refs, guides, start)</td>
+</tr>
+<tr>
+<td>all <code>.md</code> in tree</td>
+<td align="right"><strong>952</strong></td>
+<td align="right"><strong>12,069,398</strong></td>
+<td>includes package readmes, skill docs, etc.</td>
+</tr>
+</tbody></table></div>
+<p><strong>This is a divergence from the Hermes study&#39;s shape and is worth stating up front:</strong> Hermes had ONE docs root
+(<code>website/docs/</code>, 455 files / 8.9 MB). Paperclip has a <strong>split</strong> root, and its <code>doc/</code> corpus is <strong>larger than
+Hermes&#39;s whole docs tree</strong> (7.56 MB vs 8.9 MB) while being <strong>internal-facing</strong>. The <code>doc/</code> corpus is the
+richer source for architecture; <code>docs/</code> is the point-of-view of a user reading the product site.</p>
+<h3 id="2-2-source-code-typescript-monorepo">2.2 Source code (TypeScript monorepo)<a href="#batch-00/2-2-source-code-typescript-monorepo" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Area</th>
+<th align="right">Files</th>
+<th align="right">Lines</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>server/src/services/</code></td>
+<td align="right">1,220</td>
+<td align="right"><strong>535,237</strong></td>
+</tr>
+<tr>
+<td><code>packages/paperclip-runner/</code></td>
+<td align="right">—</td>
+<td align="right"><strong>221,706</strong></td>
+</tr>
+<tr>
+<td><code>packages/adapter-utils/</code></td>
+<td align="right">—</td>
+<td align="right">84,728</td>
+</tr>
+<tr>
+<td><code>packages/plugins/</code></td>
+<td align="right">—</td>
+<td align="right">81,820</td>
+</tr>
+<tr>
+<td><code>packages/adapters/</code></td>
+<td align="right">—</td>
+<td align="right">73,201</td>
+</tr>
+<tr>
+<td><code>packages/shared/</code></td>
+<td align="right">—</td>
+<td align="right">60,799</td>
+</tr>
+<tr>
+<td><code>cli/</code></td>
+<td align="right">—</td>
+<td align="right">46,128</td>
+</tr>
+<tr>
+<td><code>server/src/routes/</code></td>
+<td align="right">94</td>
+<td align="right">82,750</td>
+</tr>
+<tr>
+<td><code>packages/db/</code></td>
+<td align="right">—</td>
+<td align="right">27,577</td>
+</tr>
+<tr>
+<td><code>ui/src/</code></td>
+<td align="right">—</td>
+<td align="right">14,771</td>
+</tr>
+<tr>
+<td><strong><code>.ts</code>/<code>.tsx</code> in tree (excl. <code>node_modules</code>)</strong></td>
+<td align="right"><strong>7,416</strong></td>
+<td align="right"><strong>~1,000,000</strong> (see note)</td>
+</tr>
+</tbody></table></div>
+<p><strong>Note on the LOC totals:</strong> two different measurements are in play and they do not add up simply, because
+<code>server/src/services</code> (535k) is counted once and the per-package figures come from <code>find … | xargs cat | wc -l</code>
+over different filters. The <strong>honest headline</strong> is: <strong>~1M lines of TypeScript across ~7,400 files</strong>, with
+<strong><code>server/src/services/</code> alone at 535k lines / 1,220 files</strong> and <strong><code>packages/paperclip-runner/</code> at 222k</strong>.
+The test corpus is large and included: <code>server/src/__tests__/</code> is <strong>487,642 lines / 798 files</strong> — i.e. roughly
+<strong>half of <code>server/src</code>&#39;s total is tests</strong>. Every figure in later batches will be produced by a command at
+the time of writing, per rule 2; the numbers above are the opening survey only.</p>
+<h3 id="2-3-the-monorepo-shape-measured">2.3 The monorepo shape (measured)<a href="#batch-00/2-3-the-monorepo-shape-measured" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<ul>
+<li><strong><code>server/</code></strong> — the Node API server: <code>services/</code> (the bulk), <code>routes/</code>, <code>modules/</code>, <code>middleware/</code>,
+<code>adapters/</code>, <code>realtime/</code>, <code>secrets/</code>, <code>auth/</code>, <code>storage/</code>.</li>
+<li><strong><code>ui/</code></strong> — the React app: <strong>801 <code>.tsx</code> components</strong> under <code>ui/src/components/</code>; a Storybook surface.</li>
+<li><strong><code>packages/</code></strong> — 15 workspace packages: <code>paperclip-runner</code> (the execution engine), <code>adapters</code>,
+<code>adapter-utils</code>, <code>plugins</code>, <code>shared</code>, <code>db</code>, <code>mcp-server</code>, <code>skills-catalog</code>, <code>teams-catalog</code>,
+<code>paperclip-eval-kernel</code>, plus MCP demos and a Tailscale HTTPS broker.</li>
+<li><strong><code>cli/</code></strong>, <strong><code>tools/</code></strong>, <strong><code>scripts/</code></strong>, <strong><code>tests/</code></strong>, <strong><code>evals/</code></strong>, <strong><code>integrations/</code></strong>, <strong><code>maps/</code></strong>.</li>
+<li><strong>Agent-facing assets:</strong> <code>skills/</code>, <code>skills-releases/</code>, <code>.agents/skills/</code>, <code>rules/</code>, <code>AGENTS.md</code>.</li>
+<li><strong>Every major AI coding agent has its own config folder in-tree:</strong> <code>.agents/</code>, <code>.claude/</code>, <code>.codex/</code>,
+<code>.devin/</code>. That is itself a finding about the product&#39;s stance (it is built to be worked on by agents).</li>
+</ul>
+<hr>
+<h2 id="3-the-method-how-every-batch-is-produced">3. The method (how every batch is produced)<a href="#batch-00/3-the-method-how-every-batch-is-produced" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>The method is <strong>inherited verbatim from the Hermes study</strong>, because it earned its keep — plus one addition
+(the pole frame) that this stage of the project requires.</p>
+<ol>
+<li><strong>Docs are claims; code is the authority.</strong> Every load-bearing statement a doc makes is checked against
+the TypeScript source. Where they disagree, <strong>the code wins and the disagreement is recorded</strong>.</li>
+<li><strong>Every number is measured at the time of writing</strong>, never carried from memory or from an older document.</li>
+<li><strong>Claims carry their evidence</strong>: a line resting on code cites the file and line it was read at.</li>
+<li><strong>Two value questions per capability</strong>, per the owner&#39;s standing instruction:<ul>
+<li><strong>Q1 · USER VALUE</strong> — how does this serve a real use case for a person using the platform?</li>
+<li><strong>Q2 · VISION VALUE</strong> — how does this serve the vision of an AI-first business &amp; resources planner,
+now and long-run, including versatility and integratability?</li>
+</ul>
+</li>
+<li><strong>No comparison to our own platform inside the batches.</strong> Understanding first; the cross-platform mapping
+is a <strong>separate later pass</strong> (the owner&#39;s step: <em>&quot;we start mapping each pole findings across the
+platforms with what we have already in mercato&quot;</em>).</li>
+<li><strong>Every capability is named, including ones we will not use.</strong> Nothing is silently dropped.</li>
+<li><strong>Findings are additive and never overwrite history</strong> (rule 7 from Hermes; see also §3.2 for the
+cross-study form).</li>
+<li><strong>Plain words</strong> — every capability gets a one-sentence plain gloss before any detail.</li>
+<li><strong>THE POLE FRAME (new to this study).</strong> Every capability finding is <strong>tagged with which of the three
+poles it informs</strong> — see §3.1 — so the later cross-platform mapping is a per-pole join rather than a
+re-read of nine studies.</li>
+<li><strong>The retirement rule (C13-14, inherited).</strong> Before reusing any setting, key, feature or module named in
+an older document or another platform&#39;s doc, <strong>search that platform&#39;s migrations/config for a
+retirement entry.</strong> A silently-removed feature is the most valuable kind of finding (Hermes Taught us
+this with <code>security.tirith_*</code>).</li>
+</ol>
+<h3 id="3-1-the-pole-frame-the-three-poles-defined-once">3.1 The pole frame — the three poles, defined once<a href="#batch-00/3-1-the-pole-frame-the-three-poles-defined-once" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>The owner defined three poles plus two cross-cutting concerns. Every batch tags its findings against them:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Tag</th>
+<th>Pole</th>
+<th>The owner&#39;s words (abridged)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>P1</strong></td>
+<td><strong>The aissistant</strong> (the AI user / agent)</td>
+<td><em>engineer the agent to be versatile, integratable, and rich featured architecture in itself, deployable in different contexts and needs (workspaces, automations, later the studio)</em></td>
+</tr>
+<tr>
+<td><strong>P2</strong></td>
+<td><strong>The workspace</strong></td>
+<td><em>highly functional, versatile, integratable, rich featured architecture that adapts and provides the compatibility of the mix of current and future features, use-cases and needs</em></td>
+</tr>
+<tr>
+<td><strong>P3</strong></td>
+<td><strong>Automations</strong></td>
+<td><em>where agents work on assigned tasks, assign tasks, etc. Paperclip is a blueprint for that</em></td>
+</tr>
+<tr>
+<td><strong>PX-W</strong></td>
+<td><strong>Widgets architecture</strong></td>
+<td>cross-cutting: the composable UI surface</td>
+</tr>
+<tr>
+<td><strong>PX-F</strong></td>
+<td><strong>Frontend wiring &amp; construction</strong></td>
+<td>cross-cutting: how the surface is built and wired</td>
+</tr>
+</tbody></table></div>
+<p><strong>Plus one escape hatch, per the owner:</strong> <em>&quot;add any other findings you identify there that can fit our
+vision, project, architecture, or a potential use case or added value for the end user.&quot;</em> Those are tagged
+<strong>PZ</strong> (out-of-pole findings) with a one-line reason for keeping them.</p>
+<h3 id="3-2-additive-across-studies-like-rule-7-within-a-study">3.2 Additive across studies, like rule 7 within a study<a href="#batch-00/3-2-additive-across-studies-like-rule-7-within-a-study" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>This study does not rewrite the Hermes study. Where a Paperclip finding <strong>confirms, contradicts or extends</strong>
+a Hermes finding, it is recorded as a cross-study note naming the Hermes batch — so a reader can trace both
+directions. Cross-study notes are <strong>observations</strong>, never decisions; the mapping step decides.</p>
+<hr>
+<h2 id="4-the-batch-plan-each-documented-as-it-is-completed">4. The batch plan (each documented as it is completed)<a href="#batch-00/4-the-batch-plan-each-documented-as-it-is-completed" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Per the owner&#39;s ruling, findings are organised <strong>per pole</strong> — each platform study gets <strong>one file per pole</strong>,
+plus an overview, plus a &quot;fits the vision&quot; file. For Paperclip:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Batch / File</th>
+<th>Pole</th>
+<th>What it answers</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>00</strong></td>
+<td><strong>This file</strong> — pin and method</td>
+<td>—</td>
+<td>task zero + method + pole frame</td>
+</tr>
+<tr>
+<td><strong>01</strong></td>
+<td><code>findings/01-platform-overview.md</code></td>
+<td>—</td>
+<td>What is Paperclip? the company/agent/task model, the heartbeat, the control plane</td>
+</tr>
+<tr>
+<td><strong>02</strong></td>
+<td><code>findings/02-the-aissistant.md</code></td>
+<td><strong>P1</strong></td>
+<td>the agent: identity, personas, adapters, config, lifecycle, skills, memory, permissions</td>
+</tr>
+<tr>
+<td><strong>03</strong></td>
+<td><code>findings/03-the-workspace.md</code></td>
+<td><strong>P2</strong></td>
+<td>companies, projects, task hierarchy, artifacts, channels, documents, the operator surface</td>
+</tr>
+<tr>
+<td><strong>04</strong></td>
+<td><code>findings/04-automations.md</code></td>
+<td><strong>P3</strong></td>
+<td>heartbeats, runs, scheduling, wake recovery, budgets, approvals, the board, the runner</td>
+</tr>
+<tr>
+<td><strong>05</strong></td>
+<td><code>findings/05-widgets-and-frontend.md</code></td>
+<td><strong>PX-W / PX-F</strong></td>
+<td>the UI system, tokens, component inventory, Storybook, the app shell</td>
+</tr>
+<tr>
+<td><strong>06</strong></td>
+<td><code>findings/06-out-of-pole-findings.md</code></td>
+<td><strong>PZ</strong></td>
+<td>everything else that fits our vision/use-cases</td>
+</tr>
+<tr>
+<td><strong>07</strong></td>
+<td><code>findings/07-SYNTHESIS.md</code></td>
+<td>all</td>
+<td>what Paperclip teaches each pole; the bridge to our fork is a LATER pass</td>
+</tr>
+</tbody></table></div>
+<p><strong>Each batch document carries:</strong> (a) what was read and its measured size; (b) a <strong>capability table tagged
+by pole</strong> with <strong>Q1 · Q2</strong>; (c) the code verification with <code>file:line</code> evidence and any <strong>doc-vs-code
+divergence</strong>; (d) findings carried forward.</p>
+<hr>
+<h2 id="5-ground-rules-restated-as-a-checklist-the-reader-can-hold-this-study-to">5. Ground rules restated as a checklist the reader can hold this study to<a href="#batch-00/5-ground-rules-restated-as-a-checklist-the-reader-can-hold-this-study-to" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<ul>
+<li>Is the claim measured, or remembered? → must be measured.</li>
+<li>Does the line rest on a doc, or on code? → code where it matters.</li>
+<li>If doc and code disagree, is the disagreement recorded? → must be.</li>
+<li>Is every capability named, including the ones we will not use? → must be.</li>
+<li>Is every finding <strong>tagged with its pole</strong> (P1/P2/P3/PX-W/PX-F/PZ)? → must be.</li>
+<li>Are the two value questions answered in the owner&#39;s words? → yes, per capability.</li>
+<li>Is there any comparison to our own platform in a batch? → must be none; that is the later mapping pass.</li>
+<li>Before reusing an older-doc setting, was the retirement rule run (rule 10)? → must be.</li>
+</ul>
+<hr>
+<h2 id="6-how-this-study-relates-to-the-workshop-folder">6. How this study relates to the workshop folder<a href="#batch-00/6-how-this-study-relates-to-the-workshop-folder" class="heading-anchor" title="Direct link to this section">#</a></h2>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>text</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code>library/architecture/
+├── hermes-forensics/          # the Hermes study (mirror of library/hermes-forensics/ — see note)
+├── paperclip-forensics/       # THIS study
+│   ├── 00-PIN-AND-METHOD.md
+│   └── findings/              # 01..07
+├── reader/                    # the Hermes reader (user-facing HTML) — one reader per platform, per owner
+└── platforms/
+    ├── *.zip                  # the raw platform archives (gitignored)
+    ├── references.md          # repo link per platform
+    └── _extracted/            # working trees (gitignored)
+</code></pre>
+</div>
+<p><strong>Note on the mirror:</strong> <code>architecture/hermes-forensics/</code> is byte-identical to <code>library/hermes-forensics/</code>
+(verified by <code>diff -rq</code>, 0 differences on 2026-10-15). <strong>Two live copies of the same markdown is a clobber
+hazard</strong> — the standing rule applies: <code>git diff &lt;path&gt;</code> before editing, and know WHICH copy you are editing.
+The authoritative copy is <code>library/hermes-forensics/</code>; <code>architecture/hermes-forensics/</code> exists so the reader
+and the workshop sit together.</p>
+<hr>
+<p><em>Batch 00 of 07. Begun 2026-10-15. Next: <code>findings/01-platform-overview.md</code>.</em></p>
+
+            </article>
+
+            <!-- Verbatim Raw Markdown Display (for transparency & verification) -->
+            <pre class="verbatim-raw-container" id="rawContentArea"># Paperclip Study — Batch 00: the pin, the method, and what this study is
+
+**Folder:** `library/architecture/paperclip-forensics/` · **Status:** OPEN — begun 2026-10-15
+**This is a clean forensic study**, run the same way as `library/hermes-forensics/`. It reads ONE source
+tree, measures it, and verifies every load-bearing claim against the source code. Nothing from any earlier
+Paperclip analysis is reused, referenced, or assumed.
+
+**Why this platform is first.** Paperclip is the **upstream ancestor of our own product** — our
+`aissistant-package` is a fork of upstream Paperclip 0.3.1 (baseline commit `4feef987`), rebranded
+Aissistant/Companai. So this study reads the **upstream** project on its own terms (per the owner&#039;s ruling:
+*&quot;Upstream standalone first&quot;*); the comparison against our fork is a **later bridge pass**, not this study.
+
+---
+
+## 1. THE PIN — task zero, answered by measurement
+
+**The source of this study is:**
+`C:/Users/Ramzi/Downloads/companai/library/architecture/platforms/_extracted/paperclip-master`
+(extracted from `platforms/paperclip-master (1).zip`, which itself came from
+`https://github.com/paperclipai/paperclip`).
+
+| Fact | Value | How measured |
+|---|---|---|
+| Origin | `https://github.com/paperclipai/paperclip` (`master`) | the owner&#039;s `platforms/references.md` |
+| Zip | `platforms/paperclip-master (1).zip` (52 MB, 11,388 entries) | `ls`, `unzip -l` |
+| Extracted | 2026-10-15, 13:21 (all files share this mtime) | `ls --time-style=full-iso` |
+| `.git` present? | **NO** — this is an extract, not a clone | `ls -d .git` → absent |
+| Total files | **10,447** | `find . -type f \| wc -l` |
+| `package.json` md5 | **`e912c83c715dba5c7c55469d4de899cb`** | `md5sum` |
+| Declared version | **none** (`package.json` carries no `version`) | `json.load` |
+| Product | **Paperclip** by Paperclip AI; licence **MIT** | `package.json`, `LICENSE`, `README.md` |
+| Runtime | **Node `&gt;=24.11.0`**, **pnpm `9.15.4`** | `package.json` (`engines`, `packageManager`) |
+| Product one-liner | *&quot;the app people use to manage AI agents for work&quot;*; *&quot;If OpenClaw is an employee, Paperclip is the company.&quot;* | `README.md` |
+
+### 1.1 The identity limit (stated, not glossed)
+
+There is **no `.git`**, so the exact upstream commit cannot be read from the tree, and `package.json` carries
+**no version field** — worse than Hermes, whose `version = &quot;0.0.0&quot;` at least existed. **The md5 of
+`package.json` plus the file count plus the extraction date is the whole identity we can assert.** A reader
+reproducing this study must match those three numbers. **Any claim here about &quot;the latest Paperclip&quot; is a
+claim about this extract, dated 2026-10-15.**
+
+**The one date clue we do have:** the newest in-tree dated artefacts are `doc/architecture/
+runner-rich-acp-validation-2026-09-30.json` and `doc/adapter-model-audit-2026-10-02.md`. So the tree is
+**no older than 2026-10-02** and was snapshotted on/before 2026-10-15. That narrows it; it does not pin it.
+
+---
+
+## 2. What the tree contains (measured)
+
+### 2.1 Documentation — note the TWO doc roots
+
+Paperclip ships documentation in **two distinct places**, and they are different in kind:
+
+| Root | Files | Bytes | What it is |
+|---|---:|---:|---|
+| **`doc/`** | **375** | **7,561,781** | The **engineering** corpus: specs, architecture notes, audits, plans, run logs, design sheets |
+| **`docs/`** | **78** | **531,639** | The **public/user** documentation site (Mintlify-style: `docs.json`, API refs, guides, start) |
+| all `.md` in tree | **952** | **12,069,398** | includes package readmes, skill docs, etc. |
+
+**This is a divergence from the Hermes study&#039;s shape and is worth stating up front:** Hermes had ONE docs root
+(`website/docs/`, 455 files / 8.9 MB). Paperclip has a **split** root, and its `doc/` corpus is **larger than
+Hermes&#039;s whole docs tree** (7.56 MB vs 8.9 MB) while being **internal-facing**. The `doc/` corpus is the
+richer source for architecture; `docs/` is the point-of-view of a user reading the product site.
+
+### 2.2 Source code (TypeScript monorepo)
+
+| Area | Files | Lines |
+|---|---:|---:|
+| `server/src/services/` | 1,220 | **535,237** |
+| `packages/paperclip-runner/` | — | **221,706** |
+| `packages/adapter-utils/` | — | 84,728 |
+| `packages/plugins/` | — | 81,820 |
+| `packages/adapters/` | — | 73,201 |
+| `packages/shared/` | — | 60,799 |
+| `cli/` | — | 46,128 |
+| `server/src/routes/` | 94 | 82,750 |
+| `packages/db/` | — | 27,577 |
+| `ui/src/` | — | 14,771 |
+| **`.ts`/`.tsx` in tree (excl. `node_modules`)** | **7,416** | **~1,000,000** (see note) |
+
+**Note on the LOC totals:** two different measurements are in play and they do not add up simply, because
+`server/src/services` (535k) is counted once and the per-package figures come from `find … | xargs cat | wc -l`
+over different filters. The **honest headline** is: **~1M lines of TypeScript across ~7,400 files**, with
+**`server/src/services/` alone at 535k lines / 1,220 files** and **`packages/paperclip-runner/` at 222k**.
+The test corpus is large and included: `server/src/__tests__/` is **487,642 lines / 798 files** — i.e. roughly
+**half of `server/src`&#039;s total is tests**. Every figure in later batches will be produced by a command at
+the time of writing, per rule 2; the numbers above are the opening survey only.
+
+### 2.3 The monorepo shape (measured)
+
+- **`server/`** — the Node API server: `services/` (the bulk), `routes/`, `modules/`, `middleware/`,
+  `adapters/`, `realtime/`, `secrets/`, `auth/`, `storage/`.
+- **`ui/`** — the React app: **801 `.tsx` components** under `ui/src/components/`; a Storybook surface.
+- **`packages/`** — 15 workspace packages: `paperclip-runner` (the execution engine), `adapters`,
+  `adapter-utils`, `plugins`, `shared`, `db`, `mcp-server`, `skills-catalog`, `teams-catalog`,
+  `paperclip-eval-kernel`, plus MCP demos and a Tailscale HTTPS broker.
+- **`cli/`**, **`tools/`**, **`scripts/`**, **`tests/`**, **`evals/`**, **`integrations/`**, **`maps/`**.
+- **Agent-facing assets:** `skills/`, `skills-releases/`, `.agents/skills/`, `rules/`, `AGENTS.md`.
+- **Every major AI coding agent has its own config folder in-tree:** `.agents/`, `.claude/`, `.codex/`,
+  `.devin/`. That is itself a finding about the product&#039;s stance (it is built to be worked on by agents).
+
+---
+
+## 3. The method (how every batch is produced)
+
+The method is **inherited verbatim from the Hermes study**, because it earned its keep — plus one addition
+(the pole frame) that this stage of the project requires.
+
+1. **Docs are claims; code is the authority.** Every load-bearing statement a doc makes is checked against
+   the TypeScript source. Where they disagree, **the code wins and the disagreement is recorded**.
+2. **Every number is measured at the time of writing**, never carried from memory or from an older document.
+3. **Claims carry their evidence**: a line resting on code cites the file and line it was read at.
+4. **Two value questions per capability**, per the owner&#039;s standing instruction:
+   - **Q1 · USER VALUE** — how does this serve a real use case for a person using the platform?
+   - **Q2 · VISION VALUE** — how does this serve the vision of an AI-first business &amp; resources planner,
+     now and long-run, including versatility and integratability?
+5. **No comparison to our own platform inside the batches.** Understanding first; the cross-platform mapping
+   is a **separate later pass** (the owner&#039;s step: *&quot;we start mapping each pole findings across the
+   platforms with what we have already in mercato&quot;*).
+6. **Every capability is named, including ones we will not use.** Nothing is silently dropped.
+7. **Findings are additive and never overwrite history** (rule 7 from Hermes; see also §3.2 for the
+   cross-study form).
+8. **Plain words** — every capability gets a one-sentence plain gloss before any detail.
+9. **THE POLE FRAME (new to this study).** Every capability finding is **tagged with which of the three
+   poles it informs** — see §3.1 — so the later cross-platform mapping is a per-pole join rather than a
+   re-read of nine studies.
+10. **The retirement rule (C13-14, inherited).** Before reusing any setting, key, feature or module named in
+    an older document or another platform&#039;s doc, **search that platform&#039;s migrations/config for a
+    retirement entry.** A silently-removed feature is the most valuable kind of finding (Hermes Taught us
+    this with `security.tirith_*`).
+
+### 3.1 The pole frame — the three poles, defined once
+
+The owner defined three poles plus two cross-cutting concerns. Every batch tags its findings against them:
+
+| Tag | Pole | The owner&#039;s words (abridged) |
+|---|---|---|
+| **P1** | **The aissistant** (the AI user / agent) | *engineer the agent to be versatile, integratable, and rich featured architecture in itself, deployable in different contexts and needs (workspaces, automations, later the studio)* |
+| **P2** | **The workspace** | *highly functional, versatile, integratable, rich featured architecture that adapts and provides the compatibility of the mix of current and future features, use-cases and needs* |
+| **P3** | **Automations** | *where agents work on assigned tasks, assign tasks, etc. Paperclip is a blueprint for that* |
+| **PX-W** | **Widgets architecture** | cross-cutting: the composable UI surface |
+| **PX-F** | **Frontend wiring &amp; construction** | cross-cutting: how the surface is built and wired |
+
+**Plus one escape hatch, per the owner:** *&quot;add any other findings you identify there that can fit our
+vision, project, architecture, or a potential use case or added value for the end user.&quot;* Those are tagged
+**PZ** (out-of-pole findings) with a one-line reason for keeping them.
+
+### 3.2 Additive across studies, like rule 7 within a study
+
+This study does not rewrite the Hermes study. Where a Paperclip finding **confirms, contradicts or extends**
+a Hermes finding, it is recorded as a cross-study note naming the Hermes batch — so a reader can trace both
+directions. Cross-study notes are **observations**, never decisions; the mapping step decides.
+
+---
+
+## 4. The batch plan (each documented as it is completed)
+
+Per the owner&#039;s ruling, findings are organised **per pole** — each platform study gets **one file per pole**,
+plus an overview, plus a &quot;fits the vision&quot; file. For Paperclip:
+
+| # | Batch / File | Pole | What it answers |
+|---|---|---|---|
+| **00** | **This file** — pin and method | — | task zero + method + pole frame |
+| **01** | `findings/01-platform-overview.md` | — | What is Paperclip? the company/agent/task model, the heartbeat, the control plane |
+| **02** | `findings/02-the-aissistant.md` | **P1** | the agent: identity, personas, adapters, config, lifecycle, skills, memory, permissions |
+| **03** | `findings/03-the-workspace.md` | **P2** | companies, projects, task hierarchy, artifacts, channels, documents, the operator surface |
+| **04** | `findings/04-automations.md` | **P3** | heartbeats, runs, scheduling, wake recovery, budgets, approvals, the board, the runner |
+| **05** | `findings/05-widgets-and-frontend.md` | **PX-W / PX-F** | the UI system, tokens, component inventory, Storybook, the app shell |
+| **06** | `findings/06-out-of-pole-findings.md` | **PZ** | everything else that fits our vision/use-cases |
+| **07** | `findings/07-SYNTHESIS.md` | all | what Paperclip teaches each pole; the bridge to our fork is a LATER pass |
+
+**Each batch document carries:** (a) what was read and its measured size; (b) a **capability table tagged
+by pole** with **Q1 · Q2**; (c) the code verification with `file:line` evidence and any **doc-vs-code
+divergence**; (d) findings carried forward.
+
+---
+
+## 5. Ground rules restated as a checklist the reader can hold this study to
+
+- Is the claim measured, or remembered? → must be measured.
+- Does the line rest on a doc, or on code? → code where it matters.
+- If doc and code disagree, is the disagreement recorded? → must be.
+- Is every capability named, including the ones we will not use? → must be.
+- Is every finding **tagged with its pole** (P1/P2/P3/PX-W/PX-F/PZ)? → must be.
+- Are the two value questions answered in the owner&#039;s words? → yes, per capability.
+- Is there any comparison to our own platform in a batch? → must be none; that is the later mapping pass.
+- Before reusing an older-doc setting, was the retirement rule run (rule 10)? → must be.
+
+---
+
+## 6. How this study relates to the workshop folder
+
+```
+library/architecture/
+├── hermes-forensics/          # the Hermes study (mirror of library/hermes-forensics/ — see note)
+├── paperclip-forensics/       # THIS study
+│   ├── 00-PIN-AND-METHOD.md
+│   └── findings/              # 01..07
+├── reader/                    # the Hermes reader (user-facing HTML) — one reader per platform, per owner
+└── platforms/
+    ├── *.zip                  # the raw platform archives (gitignored)
+    ├── references.md          # repo link per platform
+    └── _extracted/            # working trees (gitignored)
+```
+
+**Note on the mirror:** `architecture/hermes-forensics/` is byte-identical to `library/hermes-forensics/`
+(verified by `diff -rq`, 0 differences on 2026-10-15). **Two live copies of the same markdown is a clobber
+hazard** — the standing rule applies: `git diff &lt;path&gt;` before editing, and know WHICH copy you are editing.
+The authoritative copy is `library/hermes-forensics/`; `architecture/hermes-forensics/` exists so the reader
+and the workshop sit together.
+
+---
+
+*Batch 00 of 07. Begun 2026-10-15. Next: `findings/01-platform-overview.md`.*
+</pre>
+
+            <!-- Bottom Navigation Bar (Prev / Next Batch) -->
+            <footer class="reader-nav-footer">
+              <a href="#" class="nav-page-btn" id="prevDocBtn" style="visibility:hidden;">
+                <span class="nav-btn-sub">← Previous Batch</span>
+                <span class="nav-btn-title" id="prevDocTitle">Batch 00</span>
+              </a>
+              <div style="font-size: 0.8rem; color: var(--text-muted); text-align: center;">
+                Use keyboard <kbd style="background:var(--bg-surface-muted); padding:0.2rem 0.4rem; border-radius:4px;">[</kbd> and <kbd style="background:var(--bg-surface-muted); padding:0.2rem 0.4rem; border-radius:4px;">]</kbd> to navigate
+              </div>
+              <a href="#batch-01" class="nav-page-btn" id="nextDocBtn" style="text-align: right;">
+                <span class="nav-btn-sub">Next Batch →</span>
+                <span class="nav-btn-title" id="nextDocTitle">Platform Overview</span>
+              </a>
+            </footer>
+
+          </div>
+        </div>
+
+        <!-- Sticky Right Table of Contents Sidebar -->
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+            <span style="font-size:0.68rem; font-weight:normal; color:var(--text-muted);">Scrollspy</span>
+          </div>
+          <ul class="toc-list" id="tocList">
+            
+    <li class="toc-item level-2">
+      <a href="#batch-00/1-the-pin-task-zero-answered-by-measurement" class="toc-link" data-target="1-the-pin-task-zero-answered-by-measurement">
+        1. THE PIN — task zero, answered by measurement
+      </a>
+    </li>
+  
+
+    <li class="toc-item level-3">
+      <a href="#batch-00/1-1-the-identity-limit-stated-not-glossed" class="toc-link" data-target="1-1-the-identity-limit-stated-not-glossed">
+        1.1 The identity limit (stated, not glossed)
+      </a>
+    </li>
+  
+
+    <li class="toc-item level-2">
+      <a href="#batch-00/2-what-the-tree-contains-measured" class="toc-link" data-target="2-what-the-tree-contains-measured">
+        2. What the tree contains (measured)
+      </a>
+    </li>
+  
+
+    <li class="toc-item level-3">
+      <a href="#batch-00/2-1-documentation-note-the-two-doc-roots" class="toc-link" data-target="2-1-documentation-note-the-two-doc-roots">
+        2.1 Documentation — note the TWO doc roots
+      </a>
+    </li>
+  
+
+    <li class="toc-item level-3">
+      <a href="#batch-00/2-2-source-code-typescript-monorepo" class="toc-link" data-target="2-2-source-code-typescript-monorepo">
+        2.2 Source code (TypeScript monorepo)
+      </a>
+    </li>
+  
+
+    <li class="toc-item level-3">
+      <a href="#batch-00/2-3-the-monorepo-shape-measured" class="toc-link" data-target="2-3-the-monorepo-shape-measured">
+        2.3 The monorepo shape (measured)
+      </a>
+    </li>
+  
+
+    <li class="toc-item level-2">
+      <a href="#batch-00/3-the-method-how-every-batch-is-produced" class="toc-link" data-target="3-the-method-how-every-batch-is-produced">
+        3. The method (how every batch is produced)
+      </a>
+    </li>
+  
+
+    <li class="toc-item level-3">
+      <a href="#batch-00/3-1-the-pole-frame-the-three-poles-defined-once" class="toc-link" data-target="3-1-the-pole-frame-the-three-poles-defined-once">
+        3.1 The pole frame — the three poles, defined once
+      </a>
+    </li>
+  
+
+    <li class="toc-item level-3">
+      <a href="#batch-00/3-2-additive-across-studies-like-rule-7-within-a-study" class="toc-link" data-target="3-2-additive-across-studies-like-rule-7-within-a-study">
+        3.2 Additive across studies, like rule 7 within a study
+      </a>
+    </li>
+  
+
+    <li class="toc-item level-2">
+      <a href="#batch-00/4-the-batch-plan-each-documented-as-it-is-completed" class="toc-link" data-target="4-the-batch-plan-each-documented-as-it-is-completed">
+        4. The batch plan (each documented as it is completed)
+      </a>
+    </li>
+  
+
+    <li class="toc-item level-2">
+      <a href="#batch-00/5-ground-rules-restated-as-a-checklist-the-reader-can-hold-this-study-to" class="toc-link" data-target="5-ground-rules-restated-as-a-checklist-the-reader-can-hold-this-study-to">
+        5. Ground rules restated as a checklist the reader can hold this study to
+      </a>
+    </li>
+  
+
+    <li class="toc-item level-2">
+      <a href="#batch-00/6-how-this-study-relates-to-the-workshop-folder" class="toc-link" data-target="6-how-this-study-relates-to-the-workshop-folder">
+        6. How this study relates to the workshop folder
+      </a>
+    </li>
+  
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <!-- Global Full-Text Search Modal -->
+  <div class="search-modal-backdrop" id="searchModal">
+    <div class="search-modal-card">
+      <div class="modal-search-header">
+        <span style="font-size: 1.2rem;">🔍</span>
+        <input type="text" id="modalSearchInput" class="modal-search-input" placeholder="Search across all 8 study batches..." autofocus>
+        <button class="tool-btn" id="closeSearchBtn" style="padding: 0.25rem 0.5rem;">Esc</button>
+      </div>
+      <div class="modal-results-list" id="modalResultsList">
+        <!-- Search results list -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Global Architecture Gallery Modal -->
+  <div class="gallery-modal-backdrop" id="galleryModal">
+    <div class="gallery-modal-card">
+      <div class="gallery-modal-header">
+        <div style="display: flex; align-items: center; gap: 0.6rem;">
+          <span style="font-size: 1.3rem;">🏛️</span>
+          <div>
+            <div style="font-weight: 700; font-size: 1.1rem; color: var(--text-primary);">Paperclip Architectural Guides &amp; Decision Models</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">9 Interactive Study Visual Models • Call up any architecture piece on demand</div>
+          </div>
+        </div>
+        <button class="tool-btn" id="closeGalleryBtn" style="padding: 0.25rem 0.6rem;">Esc</button>
+      </div>
+
+      <!-- Detail View Area when a diagram is selected in gallery -->
+      <div class="gallery-detail-container" id="galleryDetailContainer" style="display: none;">
+        <div class="gallery-detail-bar">
+          <button class="tool-btn" id="backToGalleryGridBtn">← Back to All Guides</button>
+          <span id="galleryDetailTitle" style="font-weight: 700; color: var(--primary);"></span>
+          <button class="tool-btn active" id="galleryJumpToDocBtn">Open Batch Document →</button>
+        </div>
+        <div class="gallery-detail-svg" id="galleryDetailSvg"></div>
+      </div>
+
+      <!-- Grid of all 9 Architecture Cards -->
+      <div class="gallery-cards-grid" id="galleryCardsGrid">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Script Data & Controller -->
+  <script src="assets/docs-data.js"></script>
+  <script src="assets/reader.js"></script>
+</body>
+</html>

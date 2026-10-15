@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 04 — Automations (P3) — Paperclip Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-04" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 04</span>
+      <div class="header-title-wrap">
+        <div class="header-title">Automations (P3)</div>
+        <div class="header-subtitle">Paperclip Platform Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/04-automations.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #059669">DONE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">2,370</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">12 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">249</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-15</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 04 Architecture Guide (Default)</option>
+            <optgroup label="Strategic Architecture">
+              <option value="master">Executive Topology: the three poles, the engine, and the seam</option>
+            </optgroup>
+            <optgroup label="Foundations">
+              <option value="00">Batch 00: The pin, the two doc roots, and the method</option>
+              <option value="01">Batch 01: Core model, heartbeat protocol &amp; adapter ring</option>
+            </optgroup>
+            <optgroup label="Pole 1 — The Aissistant">
+              <option value="02">Batch 02: The aissistant — four layers &amp; lifecycle</option>
+            </optgroup>
+            <optgroup label="Pole 2 — The Workspace">
+              <option value="03">Batch 03: The workspace — portable markdown company</option>
+            </optgroup>
+            <optgroup label="Pole 3 — Automations">
+              <option value="04">Batch 04: Automations — finite runs, durable continuity</option>
+            </optgroup>
+            <optgroup label="Cross-Cutting">
+              <option value="05">Batch 05: Widgets &amp; frontend — tokens, gate, baseline</option>
+            </optgroup>
+            <optgroup label="Escape Hatch">
+              <option value="06">Batch 06: Out-of-pole (PZ) — governance &amp; the tenancy crack</option>
+            </optgroup>
+            <optgroup label="Strategic Decision">
+              <option value="07">Batch 07: The synthesis — transfer matrix &amp; four forks</option>
+            </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 04 VISUAL GUIDE — POLE 3</div>
+    <h4>Automations: runs are finite, continuity lives in the database</h4>
+    <p>The single law that makes long-running agent work survivable — plus the reconciler, the DOT-2 loop and the watchdog</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 360" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-04" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-04" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+      </defs>
+      <rect x="20" y="20" width="880" height="58" rx="10" fill="#059669" fill-opacity="0.10" stroke="#059669" stroke-width="1.6"/>
+      <text x="40" y="46" font-family="system-ui, sans-serif" font-size="13.5" font-weight="700" fill="#047857">CORE LAW: a run is FINITE. Continuity is NOT a live process — it is a row in the database.</text>
+      <text x="40" y="66" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">Processes die. Rows survive. The system can always ask "what was I doing?" because it wrote it down.</text>
+
+      <g transform="translate(20, 95)">
+        <rect width="285" height="160" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE THREE-WAY INVARIANT</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">1 · live path — something is running</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">2 · durable wait — a row awaits a wake</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">3 · visible disposition — a human can see</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#b45309">Break one and work vanishes.</text>
+      </g>
+      <g transform="translate(320, 95)">
+        <rect width="285" height="160" rx="8" fill="var(--surface-card, #ffffff)" stroke="#7c3aed" stroke-width="1.6"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#6d28d9">FIVE CONTINUATION KINDS</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• same_agent — keep going</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• retry — try again</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• delegated_issue — hand off</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">• response_wake — a reply arrives</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#6d28d9">• monitor — watch + wake</text>
+      </g>
+      <g transform="translate(620, 95)">
+        <rect width="280" height="160" rx="8" fill="var(--surface-card, #ffffff)" stroke="#10b981" stroke-width="1.6"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#047857">IDEMPOTENCY KEYS</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Each continuation carries a key.</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Fire it twice → one effect.</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">This is what stops double-charges</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">and double-work on retries.</text>
+      </g>
+
+      <g transform="translate(20, 275)">
+        <rect width="430" height="70" rx="10" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.4"/>
+        <text x="16" y="26" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="var(--text-primary, #0f172a)">THE RECONCILER — reconcileStrandedAssignedIssues()</text>
+        <text x="16" y="48" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">A task assigned to an agent that died mid-run must not stay stuck forever.</text>
+        <text x="16" y="62" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">The reconciler notices and re-opens it — the safety net under the core law.</text>
+      </g>
+
+      <g transform="translate(470, 275)">
+        <rect width="430" height="70" rx="10" fill="#7c3aed" fill-opacity="0.08" stroke="#7c3aed" stroke-width="1.6"/>
+        <text x="16" y="26" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#6d28d9">THE DOT-2 LOOP — a documented real production bug</text>
+        <text x="16" y="48" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">The poller was slowed to "fix" a race. The true fix: correct the CONTRACT.</text>
+        <text x="16" y="62" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">"Fix the contract, never slow the poller." A rare, honest artefact.</text>
+      </g>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="paperclip-study-batch-04-automations-p3">Paperclip Study — Batch 04: automations (P3)<a href="#batch-04/paperclip-study-batch-04-automations-p3" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Status:</strong> DONE — 2026-10-15 · <strong>Pole tag: P3 — automations</strong> (where agents work on assigned tasks, assign
+tasks, run on their own; the owner: <em>&quot;Paperclip is a blueprint for that&quot;</em>).
+<strong>Sources read:</strong> <code>doc/architecture/durable-continuation-scheduler.md</code> (full), <code>doc/architecture/paperclip-runner.md</code>
+(ADR), <code>doc/TASK-WATCHDOG.md</code>, <code>doc/idle-sleep-safety.md</code>, <code>doc/dependency-wake-recovery.md</code>,
+<code>doc/native-workspace-finalization-recovery.md</code>, <code>server/src/services/heartbeat/</code> survey, plus code verification.</p>
+<blockquote>
+<p><strong>This is the deepest part of Paperclip and the richest pole for us.</strong> The heartbeat service directory
+alone measures <strong>36,251 lines across 46 files</strong>, including single files of 190 KB (<code>queue.ts</code>), 146 KB
+(<code>workspaces.ts</code>), 119 KB (<code>run-preparation.ts</code>), 100 KB (<code>recovery.ts</code>). This batch reads the <em>design</em>
+docs and verifies the <em>mechanisms</em> exist; it does not read 36k lines.</p>
+</blockquote>
+<hr>
+<h2 id="0-plain-words-what-automations-are-in-paperclip">§0 — Plain words: what "automations" are in Paperclip<a href="#batch-04/0-plain-words-what-automations-are-in-paperclip" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>An automation is <strong>a heartbeat run</strong>: Paperclip wakes an agent, the agent does a bounded piece of work,
+records a terminal result, and <strong>exits</strong>. Paperclip <em>does not keep the agent alive between turns</em> — if more
+work is needed, that intent is written into the database and a <strong>new</strong> run is created later. Around that
+simple loop sits a serious engineering apparatus: a scheduler, a recovery unit, a retry unit, a watchdog, a
+budget governor, and an approval gate. <strong>Most of this batch is about that apparatus, because that is the part
+that is hard to build and the part our platform will need.</strong></p>
+<hr>
+<h2 id="1-the-core-loop-and-its-single-design-law">§1 — The core loop and its single design law<a href="#batch-04/1-the-core-loop-and-its-single-design-law" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>The law (measured, <code>durable-continuation-scheduler.md:3–5</code>):</strong> <em>&quot;Paperclip does not keep an agent process
+alive between turns. A heartbeat run is finite: it starts, performs work, records a terminal result, and
+exits. If work must continue later, Paperclip represents that intent in database state and creates another
+heartbeat run when the continuation becomes eligible.&quot;</em></p>
+<p><strong>Plain gloss:</strong> an agent is <strong>not</strong> a long-lived daemon. It is a series of <strong>short, recorded jobs</strong>. All the
+continuity lives in the database, not in a process. This is why the platform can restart without losing work,
+and why &quot;recovery&quot; is a first-class subsystem rather than an afterthought.</p>
+<p><strong>The invariant that governs everything (measured, same doc):</strong> <em>&quot;an assigned open issue should have either
+a <strong>live execution path</strong>, a <strong>durable reason to wait</strong>, or a <strong>visible terminal/blocking disposition</strong>.&quot;</em></p>
+<hr>
+<h2 id="2-the-scheduler-measured-verified-in-code">§2 — The scheduler (measured, verified in code)<a href="#batch-04/2-the-scheduler-measured-verified-in-code" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<ul>
+<li>Enabled unless <code>HEARTBEAT_SCHEDULER_ENABLED=false</code>; interval <code>HEARTBEAT_SCHEDULER_INTERVAL_MS</code>,
+<strong>default 30,000 ms, clamped to a minimum of 10,000 ms</strong> (<code>:19–25</code>).</li>
+<li><strong>Code verification:</strong> <code>server/src/config.ts:385–386</code>
+(<code>heartbeatSchedulerEnabled: process.env.HEARTBEAT_SCHEDULER_ENABLED !== &quot;false&quot;</code>,
+<code>heartbeatSchedulerIntervalMs: Math.max(10000, Number(process.env.HEARTBEAT_SCHEDULER_INTERVAL_MS) || 30000)</code>).
+<strong>VERIFIED IN CODE.</strong></li>
+<li>The tick does, in order: <strong>reap orphaned runs → promote due retries → resume already-queued work → run
+stranded-issue reconciliation</strong> (<code>:27–35</code>).</li>
+<li><strong>The interval is polling cadence, not a latency promise</strong> — stated explicitly (<code>:33–35</code>), an unusually
+honest caveat.</li>
+</ul>
+<hr>
+<h2 id="3-continuations-the-agent-can-ask-for-another-turn-measured-verified">§3 — Continuations: the agent can *ask* for another turn (measured, verified)<a href="#batch-04/3-continuations-the-agent-can-ask-for-another-turn-measured-verified" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>A native run result may report <strong><code>yielded</code></strong> with a <strong>continuation</strong> of one of five kinds
+(<code>durable-continuation-scheduler.md</code>; <strong>code: <code>server/src/services/native-runtime/evidence-classifier.ts:70</code></strong>):</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>text</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code>kind: &quot;same_agent&quot; | &quot;retry&quot; | &quot;delegated_issue&quot; | &quot;response_wake&quot; | &quot;monitor&quot;
+</code></pre>
+</div>
+<p>plus a summary and an <strong>idempotency key</strong>. The status arbiter keeps the issue <code>in_progress</code> and emits an
+<code>enqueue_continuation</code> effect; the <strong>status-decision committer materializes it as an idempotent
+<code>agent_wakeup_requests</code> row</strong> (<code>:52–68</code>). Monitor continuations use <code>monitor_due</code>; others use
+<code>issue_status_changed</code>.</p>
+<p><strong>Code verification:</strong> <code>evidence-classifier.ts:70,398</code> (the union and its validation),
+<code>native-board-response-wait.ts:143,170</code> (the <code>response_wake</code> rule: <em>&quot;Only an unchanged, directly admitted
+Board comment can make response_wake a…&quot;</em>), and the persisted table
+<strong><code>packages/db/src/schema/agent_wakeup_requests.ts</code></strong>. <strong>VERIFIED IN CODE.</strong></p>
+<p><strong>Plain gloss:</strong> this is the <strong>&quot;I&#39;m not done, wake me later&quot;</strong> mechanism, and it is <strong>durable</strong> — the request
+is a database row, so it survives a restart. <strong>Idempotency keys</strong> mean the same intent cannot be executed
+twice, which is the difference between a scheduler and a source of duplicate work.</p>
+<hr>
+<h2 id="4-the-stranded-issue-reconciler-the-safety-net-measured-verified">§4 — The stranded-issue reconciler (the safety net) (measured, verified)<a href="#batch-04/4-the-stranded-issue-reconciler-the-safety-net-measured-verified" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>reconcileStrandedAssignedIssues()</code> scans agent-owned issues in <code>todo</code>/<code>in_progress</code>/relevant <code>in_review</code>,
+and before waking anyone it checks a list of reasons <strong>not</strong> to (<code>:70–90</code>):
+active/queued execution exists · a pending interaction or durable wait exists · the issue/tree is paused ·
+a provider-quota monitor is pending · the run was <strong>explicitly cancelled by an operator</strong> · the agent is not
+invokable · budget/retry policy prevents a run · <strong>recovery has failed enough times that the issue should be
+escalated instead</strong>.</p>
+<p>Eligible <code>in_progress</code> issues with no live path get an automated wake tagged
+<code>wakeReason: issue_continuation_needed</code>, <code>source: issue.continuation_recovery</code> (<code>:92–100</code>).</p>
+<p><strong>Code verification:</strong> <code>server/src/services/recovery/service.ts:4397</code> defines
+<code>reconcileStrandedAssignedIssues</code>, exported at <code>:6369</code>. <strong>VERIFIED IN CODE.</strong></p>
+<p><strong>Plain gloss:</strong> the reconciler is <strong>the liveness repair unit</strong>. If an agent stopped for no good reason, this
+notices and re-wakes it — <em>but</em> it has a long list of legitimate reasons to leave things alone, and one of
+them is <strong>&quot;a human cancelled this&quot;</strong> (it must not undo a human).</p>
+<hr>
+<h2 id="5-the-dot-2-loop-a-named-production-failure-and-its-fix-measured">§5 — The DOT-2 loop: a named production failure and its fix (measured)<a href="#batch-04/5-the-dot-2-loop-a-named-production-failure-and-its-fix-measured" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>This is one of the most valuable things in the whole study: Paperclip <strong>documents a real bug it shipped and
+fixed</strong>, with the full causal chain (<code>:102–130</code>).</p>
+<p><strong>What happened:</strong> DOT-2&#39;s runner kept producing a successful <code>done</code> result, but the <strong>native evidence
+classifier did not accept the model&#39;s evidence references</strong>, so status arbitration kept the issue
+<code>in_progress</code> and created another continuation. Each new run exited with <code>in_progress</code> + no live/wait path,
+so the reconciler queued <code>issue_continuation_needed</code> again on the next ~30-second tick. The new run got the
+original task title (the model envelope had omitted the wake-comment text), so it <strong>repeated the same answer,
+forever</strong>.</p>
+<p><strong>The fix has two parts</strong> (<code>:124–130</code>): (1) native model input now contains the <strong>redacted server-authored
+task prompt including the current wake comment</strong>; (2) ordinary low-risk completion can <strong>accept a
+schema-valid completion claim</strong>, while tools, governed effects, interactions and approvals keep independent
+authorization gates.</p>
+<p><strong>And the diagnostic advice is itself a lesson</strong> (<code>:132–155</code>): *&quot;Repeated successful runs with
+<code>wakeReason: issue_continuation_needed</code>, an authoritative decision of <code>in_progress</code>, and no durable wait path
+usually mean the result/disposition contract is failing to converge. <strong>Fix the status or continuation
+decision; increasing the polling interval only hides the bug.</strong>&quot;*</p>
+<p><strong>Plain gloss:</strong> this is the <strong>classic infinite-loop failure mode of any recovery engine</strong> — a liveness
+mechanism that keeps &quot;fixing&quot; a state it never actually changes. Paperclip&#39;s answer is the right one and
+worth copying wholesale: <strong>make the completion contract converge, don&#39;t slow the poller down.</strong></p>
+<hr>
+<h2 id="6-the-task-watchdog-automated-verification-of-stopped-work-measured">§6 — The task watchdog — automated verification of stopped work (measured)<a href="#batch-04/6-the-task-watchdog-automated-verification-of-stopped-work-measured" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>doc/TASK-WATCHDOG.md</code>: a <strong>watchdog is an agent assigned to verify a stopped issue tree</strong> and put it back
+in motion <strong>when stopping was a mistake</strong> (<code>:17–22</code>). It watches one issue + its non-watchdog descendants.
+When every leaf comes to rest (done/cancelled/blocked/in_review/waiting) <strong>and there is no live continuation
+path</strong>, Paperclip wakes the watchdog to <strong>read the evidence and decide whether the stop is legitimate</strong>.</p>
+<p><strong>The failure modes it exists for</strong> (measured, verbatim sense, <code>:27–32</code>): agents stop &quot;for the wrong
+reasons&quot; — misreading a blocker, accepting a stale plan confirmation, declaring done <strong>without proof</strong>,
+leaving an issue <code>in_review</code> <strong>with no real reviewer</strong>, or giving up on a recoverable failure. <strong>&quot;None of
+those failures wake anyone on their own — the tree just sits.&quot;</strong></p>
+<p>It is <strong>verification-shaped, not execution-shaped</strong>: it reads what other agents claimed, checks it against
+the thread evidence, and either <strong>accepts the stop or restores a live path</strong>. It is <strong>opt-in per issue</strong>
+(&quot;no global watch-everything mode&quot;).</p>
+<p><strong>Plain gloss:</strong> the watchdog is a <strong>second pair of eyes on &quot;are you sure you&#39;re done?&quot;</strong> — a dedicated
+reviewer agent for work that quietly stalled. This is a genuinely novel mechanism and maps onto our vision&#39;s
+need for agents that <em>check each other&#39;s work</em>, not just do it.</p>
+<hr>
+<h2 id="7-the-runner-separating-execution-from-the-control-plane-measured-adr">§7 — The runner: separating execution from the control plane (measured, ADR)<a href="#batch-04/7-the-runner-separating-execution-from-the-control-plane-measured-adr" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>doc/architecture/paperclip-runner.md</code> is a real <strong>ADR</strong> (Status: Proposed, 2026-08-24): *&quot;Paperclip is a
+control plane… Add a standalone package named <code>@paperclipai/paperclip-runner</code>. The package owns the
+language-neutral <strong>Paperclip Runner Protocol (PRP)</strong>, the <strong>Rust</strong> runner process, provider drivers,
+deterministic replay, and semantic action dispatch contracts.&quot;* It is <strong>behind one explicit adapter
+(<code>paperclip_runner</code>) and one default-off instance flag</strong>, qualified for Codex/OpenCode/Claude Managed/AWS
+AgentCore + pinned ACPX profiles.</p>
+<p><strong>Its goals are the P3 design goals</strong> (<code>:32–38</code>): keep runner ownership <strong>outside the server process</strong>;
+<strong>preserve Paperclip as the authority</strong> for identity/policy/workflow; <strong>recover a run after runner/network
+interruption without duplicate effects</strong>; <strong>expose only actions the current run is allowed to use</strong>; make
+the protocol <strong>deterministic across TypeScript and Rust</strong>; and <strong>change nothing</strong> for existing adapters.</p>
+<p><strong>Non-goals</strong> (<code>:40–43</code>): <em>&quot;Replace existing direct adapters. Move business authorization or issue status
+policy into Rust.&quot;</em> — i.e. <strong>the runner never becomes a second control plane.</strong></p>
+<p><strong>Code verification:</strong> <code>packages/paperclip-runner/</code> measured at <strong>221,706 lines</strong> — the second-largest area
+in the repo. <strong>VERIFIED IN CODE</strong> (the package is real and large).</p>
+<p><strong>Plain gloss:</strong> Paperclip took the &quot;run the agent somewhere else, keep the brain here&quot; decision and wrote
+it down as an ADR, with <strong>deterministic replay</strong> so a network blip can&#39;t double-charge or double-act. This is
+exactly the &quot;execution seam&quot; our platform will need for Hermes, and the ADR&#39;s <strong>non-goals</strong> are as useful as
+its goals.</p>
+<hr>
+<h2 id="8-budgets-approvals-routines-and-idle-sleep-measured">§8 — Budgets, approvals, routines and idle-sleep (measured)<a href="#batch-04/8-budgets-approvals-routines-and-idle-sleep-measured" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<ul>
+<li><strong>Budgets &amp; costs:</strong> <code>server/src/routes/costs.ts</code>; batch 01 §2.7&#39;s three tiers (visibility → soft alert →
+hard ceiling → auto-pause) are the governing model.</li>
+<li><strong>Approvals:</strong> <code>server/src/routes/approvals.ts</code>; the board gate (batch 01). The <code>run</code> layer uses approval
+env like <code>PAPERCLIP_APPROVAL_ID</code> (heartbeat-protocol step 2, batch 01 §2.3).</li>
+<li><strong>Routines:</strong> <code>server/src/routes/routines.ts</code> — recurring tasks (portable as recurring <code>TASK.md</code>,
+per <code>AGENTCOMPANIES_SPEC_INVENTORY.md</code>). <strong>This is P3&#39;s &quot;scheduled work&quot; primitive.</strong></li>
+<li><strong>Idle-sleep safety</strong> (<code>doc/idle-sleep-safety.md</code>): a hosting protocol that lets an instance <strong>sleep when
+truly idle</strong> — a <strong>TTL-bounded drain hold</strong> (5–300 s), polled by the host, where <em>&quot;<code>present</code>, <code>unknown</code>,
+missing fields, or errors <strong>must keep the instance awake</strong>&quot;</em> and <em>&quot;<code>quiescent</code> alone is not
+authorization&quot;</em>. New tenant requests get <strong>503 + <code>Retry-After: 1</code></strong> during a hold. A <strong>scheduled-routine
+wake</strong> extension requires a <strong>durable host alarm</strong>.
+<strong>Plain gloss:</strong> a <strong>fail-awake</strong> sleep protocol — it sleeps only on a positive, unexpired, owner-matched
+proof, and anything ambiguous keeps it awake. That is the right default for a system that must not drop
+work, and it maps onto our multi-tenant hosting economics.</li>
+</ul>
+<hr>
+<h2 id="9-divergences-found-in-this-batch">§9 — Divergences found in this batch <span class="seal-badge" style="background:#fef2f2; color:#dc2626; border-color:#fca5a5; font-size: 0.65em; vertical-align: middle;">⚠️ FINDING NOTE</span><a href="#batch-04/9-divergences-found-in-this-batch" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Claim</th>
+<th>Reality</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>D1</strong></td>
+<td>The runner ADR is &quot;Status: Proposed&quot;</td>
+<td><code>packages/paperclip-runner/</code> is <strong>221,706 lines of real code</strong>, and the ADR itself says &quot;The implementation remains behind one explicit experimental adapter and one default-off instance flag&quot;</td>
+<td><strong>Status label is behind reality, deliberately.</strong> The <em>system</em> is built; the <em>rollout</em> is gated. Not an error — but a reader must not treat &quot;Proposed&quot; as &quot;not built&quot;.</td>
+</tr>
+<tr>
+<td><strong>D2</strong></td>
+<td>Batch 01 called the heartbeat &quot;a protocol, not a runtime&quot; (<code>SPEC.md:234</code>)</td>
+<td>The shipped tree has a <strong>large scheduling/recovery/retry engine</strong> around it</td>
+<td><strong>Both true at different levels:</strong> the <em>agent-facing</em> heartbeat is a protocol; the <em>control-plane</em> side is a heavy runtime. The SPEC softens this; the code and <code>durable-continuation-scheduler.md</code> are the authority.</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="10-carried-forward">§10 — Carried forward<a href="#batch-04/10-carried-forward" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Carry</th>
+<th>To</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>C4-1</strong></td>
+<td><strong>Runs are finite; continuity lives in the DB, not in a process.</strong></td>
+<td>P3 (core)</td>
+</tr>
+<tr>
+<td><strong>C4-2</strong></td>
+<td><strong>The three-way invariant</strong>: live path · durable wait · visible disposition.</td>
+<td>P3</td>
+</tr>
+<tr>
+<td><strong>C4-3</strong></td>
+<td><strong>Five continuation kinds</strong> (<code>same_agent/retry/delegated_issue/response_wake/monitor</code>) + <strong>idempotency keys</strong>.</td>
+<td>P3</td>
+</tr>
+<tr>
+<td><strong>C4-4</strong></td>
+<td><strong>Stranded-issue reconciler</strong> with a long &quot;reasons NOT to wake&quot; guard list, incl. <strong>honour human cancellation</strong>.</td>
+<td>P3</td>
+</tr>
+<tr>
+<td><strong>C4-5</strong></td>
+<td><strong>The DOT-2 lesson</strong>: fix the completion contract to converge; never slow the poller to hide it.</td>
+<td>P3, all</td>
+</tr>
+<tr>
+<td><strong>C4-6</strong></td>
+<td><strong>Task watchdog</strong>: an opt-in <em>verification-shaped</em> agent that audits stopped work and restores a live path.</td>
+<td>P3, PZ</td>
+</tr>
+<tr>
+<td><strong>C4-7</strong></td>
+<td><strong>Runner as a separate process behind a protocol (PRP)</strong>, deterministic replay, <strong>never a second control plane</strong>.</td>
+<td>P3, P1</td>
+</tr>
+<tr>
+<td><strong>C4-8</strong></td>
+<td><strong>Budgets</strong>: visibility → soft alert → hard ceiling → auto-pause → board override.</td>
+<td>P3, P2</td>
+</tr>
+<tr>
+<td><strong>C4-9</strong></td>
+<td><strong>Routines</strong> (recurring tasks), portable as recurring <code>TASK.md</code>.</td>
+<td>P3</td>
+</tr>
+<tr>
+<td><strong>C4-10</strong></td>
+<td><strong>Fail-awake idle sleep</strong>: TTL-bounded, owner-matched, ambiguous ⇒ stay awake; 503+Retry-After gate.</td>
+<td>P3, PZ</td>
+</tr>
+<tr>
+<td><strong>C4-11</strong></td>
+<td><strong>Scheduler defaults</strong>: 30 s, floor 10 s, tick order (reap → promote → resume → reconcile).</td>
+<td>P3</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="11-value-questions-q1-user-q2-vision">§11 — Value questions (Q1 user / Q2 vision)<a href="#batch-04/11-value-questions-q1-user-q2-vision" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>Q1 — how does this serve a real user use case?</strong>
+It makes a fleet of agents <strong>survivable and self-healing</strong>: work resumes after a crash, an agent that stops
+wrongly gets re-woken, a wrongly-stopped tree gets a second opinion from a watchdog, and money stops at a
+ceiling. For the user, the difference is <em>&quot;it keeps working while I sleep&quot;</em> versus <em>&quot;I babysit it.&quot;</em></p>
+<p><strong>Q2 — how does this serve an AI-first business &amp; resources planner?</strong>
+This pole is where Paperclip most clearly <strong>is the blueprint</strong>, exactly as the owner said. Four mechanisms
+are load-bearing for us: (1) <strong>finite runs + durable intent (C4-1/C4-2)</strong> — the only way to run agents as
+reliable business processes rather than long-lived pets; (2) <strong>continuations with idempotency (C4-3)</strong> — an
+automation that can <em>safely</em> schedule its own next step; (3) <strong>the reconciler + watchdog (C4-4/C4-6)</strong> — a
+planner needs automatic detection of stalled work and automatic verification of &quot;done&quot;, or it cannot be
+trusted with a business; and (4) <strong>the runner seam with deterministic replay (C4-7)</strong> — precisely how we
+will run Hermes safely behind our own authority. The DOT-2 lesson (C4-5) is the single most important
+engineering warning in the study: <strong>recovery engines fail by looping, and the fix is always the contract,
+never the timer.</strong></p>
+<hr>
+<p><em>Batch 04 of 07 complete. Divergences: 2 (both label/level, not fact). Carried: C4-1…C4-11.
+Next: <code>05-widgets-and-frontend.md</code> (PX-W / PX-F).</em></p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="03-the-workspace-p2.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">The Workspace (P2)</span>
+                </a>
+              
+
+              <a href="../index.html#batch-04" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              
+                <a href="05-widgets-frontend.html" class="nav-page-btn" style="text-align:right;">
+                  <span class="nav-btn-sub">Next Batch →</span>
+                  <span class="nav-btn-title">Widgets &amp; Frontend</span>
+                </a>
+              
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#0-plain-words-what-automations-are-in-paperclip" class="toc-link">§0 — Plain words: what &quot;automations&quot; are in Paperclip</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#1-the-core-loop-and-its-single-design-law" class="toc-link">§1 — The core loop and its single design law</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#2-the-scheduler-measured-verified-in-code" class="toc-link">§2 — The scheduler (measured, verified in code)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-continuations-the-agent-can-ask-for-another-turn-measured-verified" class="toc-link">§3 — Continuations: the agent can *ask* for another turn (measured, verified)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-the-stranded-issue-reconciler-the-safety-net-measured-verified" class="toc-link">§4 — The stranded-issue reconciler (the safety net) (measured, verified)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-the-dot-2-loop-a-named-production-failure-and-its-fix-measured" class="toc-link">§5 — The DOT-2 loop: a named production failure and its fix (measured)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-the-task-watchdog-automated-verification-of-stopped-work-measured" class="toc-link">§6 — The task watchdog — automated verification of stopped work (measured)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-the-runner-separating-execution-from-the-control-plane-measured-adr" class="toc-link">§7 — The runner: separating execution from the control plane (measured, ADR)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#8-budgets-approvals-routines-and-idle-sleep-measured" class="toc-link">§8 — Budgets, approvals, routines and idle-sleep (measured)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#9-divergences-found-in-this-batch" class="toc-link">§9 — Divergences found in this batch</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#10-carried-forward" class="toc-link">§10 — Carried forward</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#11-value-questions-q1-user-q2-vision" class="toc-link">§11 — Value questions (Q1 user / Q2 vision)</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('paperclip_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('paperclip_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('paperclip_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('paperclip_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.PaperclipReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

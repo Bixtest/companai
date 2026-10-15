@@ -150,3 +150,11 @@ analysis/d2-gap/d2.err
 # Extracted platform source trees for the architecture studies. Huge, regenerable
 # from the .zip files sitting next to them (which are themselves ignored above).
 library/architecture/platforms/_extracted/
+
+# A SECOND copy of the Hermes forensics study, placed inside the workshop folder so
+# the architecture stage reads as one tree. The original `library/hermes-forensics/`
+# is already versioned (14 files); a duplicate adds no history and would silently
+# drift from the original. The owner chose to ignore the copy rather than track it
+# (2026-10-15). NOTE a trailing slash matches the directory only, which is what we
+# want — a bare name would also catch any future `hermes-forensics-*` sibling.
+library/architecture/hermes-forensics/

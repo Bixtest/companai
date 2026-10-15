@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 05 — Widgets and the frontend (PX-W / PX-F) — Paperclip Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-05" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 05</span>
+      <div class="header-title-wrap">
+        <div class="header-title">Widgets &amp; Frontend</div>
+        <div class="header-subtitle">Paperclip Platform Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/05-widgets-and-frontend.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #059669">DONE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">1,948</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">10 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">218</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-15</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 05 Architecture Guide (Default)</option>
+            <optgroup label="Strategic Architecture">
+              <option value="master">Executive Topology: the three poles, the engine, and the seam</option>
+            </optgroup>
+            <optgroup label="Foundations">
+              <option value="00">Batch 00: The pin, the two doc roots, and the method</option>
+              <option value="01">Batch 01: Core model, heartbeat protocol &amp; adapter ring</option>
+            </optgroup>
+            <optgroup label="Pole 1 — The Aissistant">
+              <option value="02">Batch 02: The aissistant — four layers &amp; lifecycle</option>
+            </optgroup>
+            <optgroup label="Pole 2 — The Workspace">
+              <option value="03">Batch 03: The workspace — portable markdown company</option>
+            </optgroup>
+            <optgroup label="Pole 3 — Automations">
+              <option value="04">Batch 04: Automations — finite runs, durable continuity</option>
+            </optgroup>
+            <optgroup label="Cross-Cutting">
+              <option value="05">Batch 05: Widgets &amp; frontend — tokens, gate, baseline</option>
+            </optgroup>
+            <optgroup label="Escape Hatch">
+              <option value="06">Batch 06: Out-of-pole (PZ) — governance &amp; the tenancy crack</option>
+            </optgroup>
+            <optgroup label="Strategic Decision">
+              <option value="07">Batch 07: The synthesis — transfer matrix &amp; four forks</option>
+            </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 05 VISUAL GUIDE — WIDGETS &amp; FRONTEND</div>
+    <h4>One token source, a mechanical gate, and a written decision memory</h4>
+    <p>Paperclip makes design decisions that cannot silently rot — and stops exactly at the widget-composer boundary</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 330" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-05" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-05" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+      </defs>
+      <g transform="translate(20, 20)">
+        <rect width="285" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">ONE TOKEN SOURCE</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">ui/src/index.css</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Tailwind v4 · @theme inline</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Baked at BUILD time</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">Change once → everywhere</text>
+      </g>
+      <g transform="translate(320, 20)">
+        <rect width="285" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="#2563eb" stroke-width="1.6"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#1d4ed8">MECHANICAL TOKEN GATE</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">check:token-gates command</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Fails the build on a raw value</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Not a review convention — a gate</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#1d4ed8">Cannot be forgotten</text>
+      </g>
+      <g transform="translate(620, 20)">
+        <rect width="280" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="#f59e0b" stroke-width="1.6"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#b45309">510-IMAGE BASELINE</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">255 stories × light + dark</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Visual diffs are reviewed</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">A layout break is caught, not felt</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#b45309">Regression = red image</text>
+      </g>
+
+      <g transform="translate(20, 190)">
+        <rect width="540" height="125" rx="10" fill="var(--surface-card, #ffffff)" stroke="#7c3aed" stroke-width="1.6"/>
+        <text x="16" y="28" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#6d28d9">THE DECISION SHEET — written memory for design</text>
+        <text x="16" y="52" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">Every UI choice is recorded with its reason, in a sheet the team actually reads.</text>
+        <text x="16" y="74" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">Newcomers inherit WHY, not just WHAT — the same discipline this study itself follows.</text>
+        <rect x="16" y="88" width="508" height="26" rx="5" fill="#10b981" fill-opacity="0.12"/>
+        <text x="24" y="105" font-family="system-ui, sans-serif" font-size="10.5" font-weight="600" fill="#059669">Also: an in-app DesignGuide so the pattern is discoverable while building.</text>
+      </g>
+
+      <g transform="translate(580, 190)">
+        <rect width="320" height="125" rx="10" fill="#ef4444" fill-opacity="0.07" stroke="#ef4444" stroke-width="1.6"/>
+        <text x="16" y="28" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#b91c1c">THE BOUNDARY: no widget composer</text>
+        <text x="16" y="52" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">Paperclip has components and pages, but no</text>
+        <text x="16" y="70" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">general widget system an end-user can compose.</text>
+        <text x="16" y="94" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">Our widgets architecture must be built — the</text>
+        <text x="16" y="112" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">token discipline here is the part we adopt.</text>
+      </g>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="paperclip-study-batch-05-widgets-and-the-frontend-px-w-px-f">Paperclip Study — Batch 05: widgets and the frontend (PX-W / PX-F)<a href="#batch-05/paperclip-study-batch-05-widgets-and-the-frontend-px-w-px-f" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Status:</strong> DONE — 2026-10-15 · <strong>Pole tags: PX-W (widgets architecture) and PX-F (frontend wiring &amp;
+construction)</strong>.
+<strong>Sources read:</strong> <code>DESIGN.md</code> (full, batch 01), <code>doc/design/CHANGING-THE-UI.md</code>, <code>doc/design/ COMPONENT-INVENTORY.md</code>, <code>doc/design/DECISION-SHEET.md</code>, <code>doc/spec/ui.md</code> (51,809 B, referenced),
+<code>ui/src/</code> structure measured in code.</p>
+<p><strong>The headline:</strong> Paperclip&#39;s frontend is governed by <strong>the most disciplined design system I have seen in
+this survey so far</strong> — a single token source, an enforced gate, a 510-image visual baseline, and a written
+decision log of every judgement call. Almost all of batch 05 is about <strong>how that discipline works</strong>, because
+that discipline <em>is</em> the widget architecture.</p>
+<hr>
+<h2 id="0-plain-words-what-the-frontend-is-and-why-it-is-worth-this-much-space">§0 — Plain words: what the frontend is, and why it is worth this much space<a href="#batch-05/0-plain-words-what-the-frontend-is-and-why-it-is-worth-this-much-space" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>The UI is a React app with <strong>~303 components and 73 pages</strong> (<code>COMPONENT-INVENTORY.md</code> counts table). That is
+a lot of surface, and the reason it does not dissolve into chaos is a set of hard rules: <strong>every colour, size,
+spacing and corner radius is a named value in one file</strong> (<code>ui/src/index.css</code>); <strong>components never use raw
+values, only tokens</strong>; and <strong>a check script refuses to let you break that rule</strong>. The proof that nothing
+changed visually is <strong>510 baseline screenshots</strong>. Changing the whole app&#39;s look can be <strong>editing one token</strong>.</p>
+<p><strong>Plain gloss:</strong> the frontend is built like a <strong>printed book with a type specimen</strong> — you change the specimen
+sheet, the whole book re-typesets, and a photographic proof shows nothing else moved.</p>
+<hr>
+<h2 id="1-the-three-layer-model-measured-changing-the-ui-md">§1 — The three-layer model (measured, `CHANGING-THE-UI.md`)<a href="#batch-05/1-the-three-layer-model-measured-changing-the-ui-md" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>The mental model is stated in one minute (<code>:5–12</code>):</p>
+<ol>
+<li><strong>Tokens</strong> — &quot;every color, text size, spacing, radius, and shadow is a named value in
+<code>ui/src/index.css</code>. Change a token, and every surface using it follows.&quot;</li>
+<li><strong>Components</strong> — &quot;consume tokens, never raw values. One component per job (one Button, one Card, one
+ToggleSwitch).&quot;</li>
+<li><strong>Screenshots</strong> — &quot;<strong>510 baseline images (255 stories × light/dark)</strong> … They are the proof of what the UI
+looks like. Any visual change shows up as a screenshot diff; no visual change proves itself the same way.&quot;</li>
+</ol>
+<p><strong>And the governance rule that makes it hold</strong> (<code>:14–16</code>, <code>DESIGN.md:9</code>): <em>&quot;If you disagree with a rule,
+change <code>DESIGN.md</code> first (with review) — don&#39;t quietly diverge in code.&quot;</em></p>
+<p><strong>Cross-study note:</strong> nothing in the Hermes study had an equivalent. Hermes has docs and a dashboard; it does
+not have a <strong>token gate + visual baseline + decision log</strong>. This is a genuine Paperclip strength and the
+clearest single contribution to <strong>PX-W</strong>.</p>
+<hr>
+<h2 id="2-the-three-commands-enforcement-not-encouragement-measured">§2 — The three commands — enforcement, not encouragement (measured)<a href="#batch-05/2-the-three-commands-enforcement-not-encouragement-measured" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>CHANGING-THE-UI.md</code> §&quot;The three commands&quot;:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>bash</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-bash">pnpm check:token-gates              # am I allowed to write this? (no hardcoded values)
+pnpm test:storybook-visual          # what does my change look like? (diff vs baseline)
+pnpm test:storybook-visual:update   # accept my intentional changes as the new baseline
+</code></pre>
+</div>
+<p><code>DESIGN.md:120–128</code> states what &quot;compliant&quot; means: <strong>zero hardcoded hex, zero arbitrary spacing, zero raw
+font-size</strong> in <code>ui/src/components/**</code> and <code>ui/src/pages/**</code> outside the token layer and a documented
+allowlist; and <strong><code>pnpm build</code>, <code>pnpm typecheck</code>, <code>pnpm build-storybook</code> must pass.</strong></p>
+<p><strong>Plain gloss:</strong> compliance is <strong>mechanically checked</strong>, not left to reviewers. A hardcoded colour <strong>fails a
+gate</strong>, so drift is impossible-by-default rather than a code-review accident.</p>
+<hr>
+<h2 id="3-the-token-tiers-measured-design-md-2125">§3 — The token tiers (measured, `DESIGN.md:21–25`)<a href="#batch-05/3-the-token-tiers-measured-design-md-2125" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>One token source, <code>ui/src/index.css</code> (Tailwind v4; no tailwind config file). Three tiers:</p>
+<ol>
+<li><strong>Semantic</strong> — shadcn core: <code>--background</code>, <code>--foreground</code>, <code>--card</code>, <code>--primary</code>, <code>--muted</code>, <code>--destructive</code>,
+<code>--border</code>, <code>--ring</code>, <code>--sidebar-*</code>, <code>--chart-1..5</code> (OKLCH, light/dark overrides).</li>
+<li><strong>Brand</strong> — agent gradients <code>--agent-1a/1b…10a/10b</code>, status hues <code>--status-task-*</code> / <code>--status-agent-*</code>.</li>
+<li><strong>Domain</strong> — <code>--chip-match-*</code>, doc-annotation highlights, motion/typography tokens.</li>
+</ol>
+<p><strong>Notable single knobs</strong> (<code>CHANGING-THE-UI.md:34–40</code>): <code>--radius</code> drives the <strong>whole corner ladder</strong>
+(sm→4xl derived); the <code>--status-task-*</code>/<code>--status-agent-*</code> family is <strong>the app-wide status vocabulary</strong> —
+&quot;chips, charts, bars, live dots all follow it&quot;.</p>
+<p><strong>The Tailwind v4 gotcha, recorded for us</strong> (<code>DESIGN.md:19</code>): <em>&quot;<code>@theme inline</code> bakes literal values at build
+time. Any token that must be runtime-tunable must be defined in a NON-inline block.&quot;</em> This is why the motion
+tokens live in <code>:root</code>, not <code>@theme inline</code> (<code>DESIGN.md:149–152</code>).</p>
+<p><strong>Plain gloss:</strong> there is <strong>one vocabulary of visual values</strong>, tiered by meaning, and the platform knows a
+build-time vs runtime trap that would bite any team that copied the pattern naively.</p>
+<hr>
+<h2 id="4-the-decision-sheet-the-design-system-has-a-memory-measured">§4 — The decision sheet: the design system has a memory (measured)<a href="#batch-05/4-the-decision-sheet-the-design-system-has-a-memory-measured" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>doc/design/DECISION-SHEET.md</code> (41 KB) is a <strong>log of every open design question with its recommendation,
+blast radius, and final status</strong> — <code>APPROVED</code> / <code>OVERRIDDEN</code> / <code>DEFERRED</code>, with a commit hash where done.
+Examples (measured, verbatim sense):</p>
+<ul>
+<li><strong>A1</strong> two byte-identical status-badge maps → collapsed; <em>&quot;<code>agentStatusBadge</code> had ZERO importing call
+sites, so it was deleted outright&quot;</em> (<code>done 5ecc0f9e4</code>).</li>
+<li><strong>B2</strong> 3,115 Tailwind palette-class sites / 145 files → <strong>&quot;Own future run (Run 4)… NOT wholesale now, NOT
+permanent exemption.&quot;</strong></li>
+<li><strong>C11</strong> the sidebar agents section → unified onto <code>SidebarNavItem</code>; <em>&quot;Wholesale shadcn Sidebar adoption
+REJECTED for now… (highest-regression chrome)&quot;</em>.</li>
+<li>Three <strong>gallery feedback rounds</strong> with user rulings recorded and their visual consequences (e.g. &quot;RUNNING =
+status blue, not cyan/teal&quot;).</li>
+</ul>
+<p><strong>Plain gloss:</strong> the design system <strong>keeps its own minutes</strong>. Every &quot;why is this like that?&quot; question has a
+written answer, and every deliberate exception has a reason attached. This is the thing that makes a
+303-component surface <em>maintainable</em> rather than merely large — and it is a <strong>documentation practice our PX-W
+should copy</strong>, independent of any specific component.</p>
+<hr>
+<h2 id="5-the-component-inventory-and-the-primitives-measured">§5 — The component inventory and the primitives (measured)<a href="#batch-05/5-the-component-inventory-and-the-primitives-measured" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>COMPONENT-INVENTORY.md</code> counts (measured table):</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Area</th>
+<th align="right">Count</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Shared primitives (<code>ui/src/components/ui/</code>)</td>
+<td align="right"><strong>24</strong></td>
+</tr>
+<tr>
+<td>Feature components, flat (<code>ui/src/components/*.tsx</code>)</td>
+<td align="right">178</td>
+</tr>
+<tr>
+<td>Feature components, nested subdirs</td>
+<td align="right">28</td>
+</tr>
+<tr>
+<td><strong>Feature components total</strong></td>
+<td align="right"><strong>206</strong></td>
+</tr>
+<tr>
+<td>Pages (<code>ui/src/pages/</code>)</td>
+<td align="right">73</td>
+</tr>
+<tr>
+<td><strong>Grand total</strong></td>
+<td align="right"><strong>~303</strong></td>
+</tr>
+</tbody></table></div>
+<p><strong>The 24 primitives are real and conventional</strong> (measured, <code>ui/src/components/ui/</code>): <code>button</code>, <code>card</code>, <code>badge</code>,
+<code>dialog</code>, <code>alert-dialog</code>, <code>sheet</code>, <code>popover</code>, <code>dropdown-menu</code>, <code>select</code>, <code>input</code>, <code>textarea</code>, <code>label</code>,
+<code>checkbox</code>, <code>radio-card</code>, <code>tabs</code>, <code>tooltip</code>, <code>avatar</code>, <code>breadcrumb</code>, <code>command</code>, <code>collapsible</code>, <code>separator</code>,
+<code>scroll-area</code>, <code>skeleton</code>, <code>resizable-panels</code>, <code>attachment</code>, <code>toggle-switch</code> — i.e. <strong>a shadcn-style base set</strong>.</p>
+<p><strong>Plain gloss:</strong> a small, canonical primitive set (24) under a large feature surface (206) — the shape
+<code>DESIGN.md</code> principle 1 demands (&quot;one component per job; variants are props, not new components&quot;).</p>
+<p><strong>Feature areas by component count</strong> (measured): <code>task-chat/</code> 71, <code>ui/</code> 27, <code>ai-connections/</code> 20, <code>voice/</code> 15,
+<code>task-side-panel/</code> 13, <code>skill-studio/</code> 12, <code>onboarding/</code> 12, <code>artifacts/</code> 12.</p>
+<p><strong>Cross-connection to P1/P2/P3</strong> — the UI carries the poles&#39; surfaces: <code>task-chat/</code> (P2/P3 conversation),
+<code>artifacts/</code> (P2 deliverables), <code>skill-studio/</code> (P1 skills), <code>agents/</code> + <code>new-agent/</code> (P1), <code>routine-*</code>
+(P3 routines), <code>issue-*</code> (P2 tasks). <strong>The frontend is where all three poles meet the user.</strong></p>
+<hr>
+<h2 id="6-the-app-shell-and-the-design-guide-measured">§6 — The app shell and the "design guide" (measured)<a href="#batch-05/6-the-app-shell-and-the-design-guide-measured" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<ul>
+<li>Entry: <code>ui/src/main.tsx</code>, <code>ui/src/App.tsx</code> (with routing tests <code>App.*.test.tsx</code>); title <code>Paperclip</code>
+(<code>ui/index.html</code>).</li>
+<li>There is an in-app <strong><code>DesignGuide</code> page</strong> (<code>ui/src/pages/DesignGuide.tsx</code>) — the design system documents
+itself <strong>inside the product</strong> (<code>DESIGN.md:9</code>: &quot;Storybook is the verification surface — it documents the
+system; it does not define it&quot;).</li>
+<li>Storybook is the verification surface: <strong><code>pnpm build-storybook</code></strong>, <code>ui/storybook/stories/</code>, with
+agent-persona visual suites run under <strong>Playwright 1.62.1 (Noble image)</strong> for &quot;authoritative Linux
+baselines&quot; (<code>doc/agent-personas.md:95–120</code>).</li>
+</ul>
+<p><strong>Plain gloss:</strong> the design system has <strong>three faces that agree</strong>: the rules (<code>DESIGN.md</code>), the proofs
+(Storybook screenshots), and an <strong>in-app guide</strong> a person can open. That triad is a mature pattern worth
+carrying.</p>
+<hr>
+<h2 id="7-why-this-batch-matters-for-widgets">§7 — Why this batch matters for "widgets"<a href="#batch-05/7-why-this-batch-matters-for-widgets" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>The owner named &quot;the widgets architecture&quot; as a cross-cutting concern. Paperclip&#39;s answer to &quot;what is a
+widget?&quot; is effectively: <strong>a component that consumes tokens, has one job, and is proven by a screenshot.</strong> It
+does not ship a formal &quot;widget registry&quot; or a drag-and-drop composer (no such thing appears in the surfaces
+listed) — its composability comes from <strong>primitive + feature components + tokens</strong>, not from a runtime widget
+system.</p>
+<p><strong>Plain gloss (important for the mapping step):</strong> Paperclip gives us a <strong>world-class component <em>system</em></strong> but
+<strong>not a widget <em>composer</em></strong>. If our plan needs users to assemble dashboards from widgets, Paperclip is the
+<strong>styling and discipline model</strong>, not the widget engine. That distinction is recorded now so the mapping step
+does not over-claim.</p>
+<hr>
+<h2 id="8-divergences-found-in-this-batch">§8 — Divergences found in this batch <span class="seal-badge" style="background:#fef2f2; color:#dc2626; border-color:#fca5a5; font-size: 0.65em; vertical-align: middle;">⚠️ FINDING NOTE</span><a href="#batch-05/8-divergences-found-in-this-batch" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Claim</th>
+<th>Reality</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>D1</strong></td>
+<td><code>DESIGN.md:123</code> says &quot;there are only <del>24&quot; primitives; <code>:123</code> also says &quot;</del>46 existing stories&quot;; and it references &quot;~277&quot; feature components</td>
+<td><code>COMPONENT-INVENTORY.md</code> measures <strong>24 primitives</strong>, 206 feature components, and <strong><code>DESIGN.md:123</code>&#39;s own scope note reconciles to &quot;24 + ~277 = 303&quot;</strong> vs the inventory&#39;s 206+73+24 = 303</td>
+<td><strong>Reconciled — the two docs&#39; counts agree on the total (303) via different splits.</strong> Not a divergence; recorded so the numbers are not mistaken for contradictions.</td>
+</tr>
+<tr>
+<td><strong>D2</strong></td>
+<td>A reader might expect a &quot;widget&quot; concept</td>
+<td>No widget registry/composer exists; composability is token+component based</td>
+<td><strong>Concept absence, stated plainly.</strong> Not an error — a boundary of what Paperclip teaches.</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="9-carried-forward">§9 — Carried forward<a href="#batch-05/9-carried-forward" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Carry</th>
+<th>To</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>C5-1</strong></td>
+<td><strong>One token source</strong> (<code>ui/src/index.css</code>), Tailwind v4, <code>@theme inline</code> bakes at build time so runtime-tunable tokens need a non-inline block.</td>
+<td>PX-W (core)</td>
+</tr>
+<tr>
+<td><strong>C5-2</strong></td>
+<td><strong>Mechanical token gate</strong> (<code>check:token-gates</code>) — compliance is enforced, not reviewed.</td>
+<td>PX-W</td>
+</tr>
+<tr>
+<td><strong>C5-3</strong></td>
+<td><strong>510-image visual baseline</strong> = the proof of &quot;no visual change&quot;.</td>
+<td>PX-W, PX-F</td>
+</tr>
+<tr>
+<td><strong>C5-4</strong></td>
+<td><strong>The decision sheet</strong> — the design system keeps written minutes per judgement call.</td>
+<td>PX-W (practice)</td>
+</tr>
+<tr>
+<td><strong>C5-5</strong></td>
+<td><strong>24 canonical primitives under a 206-component feature surface</strong>; variants as props.</td>
+<td>PX-W</td>
+</tr>
+<tr>
+<td><strong>C5-6</strong></td>
+<td><strong>The three faces agree</strong>: rules (<code>DESIGN.md</code>) · proofs (Storybook) · <strong>in-app <code>DesignGuide</code></strong>.</td>
+<td>PX-W</td>
+</tr>
+<tr>
+<td><strong>C5-7</strong></td>
+<td><strong>Status is one vocabulary</strong> (<code>--status-task-*</code>/<code>--status-agent-*</code>) used by chips, charts, bars, dots.</td>
+<td>PX-W, P2</td>
+</tr>
+<tr>
+<td><strong>C5-8</strong></td>
+<td><strong>Single-knob design</strong>: <code>--radius</code> drives the whole corner ladder.</td>
+<td>PX-W</td>
+</tr>
+<tr>
+<td><strong>C5-9</strong></td>
+<td><strong>No widget composer</strong> — Paperclip teaches a component <em>system</em>, not a widget <em>runtime</em>.</td>
+<td>mapping (boundary)</td>
+</tr>
+<tr>
+<td><strong>C5-10</strong></td>
+<td>Existing allowed debt, explicit: ~3,115 Tailwind palette-class sites deferred to a named &quot;Run 4&quot;, not exempted.</td>
+<td>PX-F</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="10-value-questions-q1-user-q2-vision">§10 — Value questions (Q1 user / Q2 vision)<a href="#batch-05/10-value-questions-q1-user-q2-vision" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>Q1 — how does this serve a real user use case?</strong>
+A user gets a UI that is <strong>consistent by construction</strong> — one green, one blue for &quot;running&quot;, one corner
+radius, one status vocabulary across every screen — and a product whose look can be <strong>rethemed safely</strong>
+without breaking layouts. Consistency is not a luxury in an operator console; it is what lets a person scan.</p>
+<p><strong>Q2 — how does this serve an AI-first business &amp; resources planner?</strong>
+Four practices are directly reusable for <strong>PX-W</strong> and <strong>PX-F</strong>: (1) the <strong>single token source + mechanical
+gate (C5-1/C5-2)</strong> — the only way a 300-component surface stays coherent as it grows; (2) the <strong>visual
+baseline as proof (C5-3)</strong> — for a platform built largely by agents, &quot;prove nothing moved&quot; must be
+automatic; (3) <strong>the decision sheet (C5-4)</strong> — a written memory for design judgement, which is exactly what
+an agent-maintained codebase needs; (4) <strong>the one status vocabulary (C5-7)</strong> — a resources planner <em>is</em> a
+status-reading tool. The recorded boundary (C5-9) matters just as much: if our vision needs a <strong>widget
+composer</strong>, Paperclip gives the styling discipline but we must <strong>build the composer</strong> — that is a real
+build-vs-adopt decision for the mapping step.</p>
+<hr>
+<p><em>Batch 05 of 07 complete. Divergences: 2 (1 reconciled, 1 concept-absence). Carried: C5-1…C5-10.
+Next: <code>06-out-of-pole-findings.md</code> (PZ).</em></p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="04-automations-p3.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">Automations (P3)</span>
+                </a>
+              
+
+              <a href="../index.html#batch-05" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              
+                <a href="06-out-of-pole-pz.html" class="nav-page-btn" style="text-align:right;">
+                  <span class="nav-btn-sub">Next Batch →</span>
+                  <span class="nav-btn-title">Out-of-Pole (PZ)</span>
+                </a>
+              
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#0-plain-words-what-the-frontend-is-and-why-it-is-worth-this-much-space" class="toc-link">§0 — Plain words: what the frontend is, and why it is worth this much space</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#1-the-three-layer-model-measured-changing-the-ui-md" class="toc-link">§1 — The three-layer model (measured, CHANGING-THE-UI.md)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#2-the-three-commands-enforcement-not-encouragement-measured" class="toc-link">§2 — The three commands — enforcement, not encouragement (measured)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-the-token-tiers-measured-design-md-2125" class="toc-link">§3 — The token tiers (measured, DESIGN.md:21–25)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-the-decision-sheet-the-design-system-has-a-memory-measured" class="toc-link">§4 — The decision sheet: the design system has a memory (measured)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-the-component-inventory-and-the-primitives-measured" class="toc-link">§5 — The component inventory and the primitives (measured)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-the-app-shell-and-the-design-guide-measured" class="toc-link">§6 — The app shell and the &quot;design guide&quot; (measured)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-why-this-batch-matters-for-widgets" class="toc-link">§7 — Why this batch matters for &quot;widgets&quot;</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#8-divergences-found-in-this-batch" class="toc-link">§8 — Divergences found in this batch</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#9-carried-forward" class="toc-link">§9 — Carried forward</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#10-value-questions-q1-user-q2-vision" class="toc-link">§10 — Value questions (Q1 user / Q2 vision)</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('paperclip_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('paperclip_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('paperclip_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('paperclip_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.PaperclipReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

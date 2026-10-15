@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 01 — The platform overview — Paperclip Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-01" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 01</span>
+      <div class="header-title-wrap">
+        <div class="header-title">Platform Overview</div>
+        <div class="header-subtitle">Paperclip Platform Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/01-platform-overview.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #059669">DONE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">2,330</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">12 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">230</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-15</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 01 Architecture Guide (Default)</option>
+            <optgroup label="Strategic Architecture">
+              <option value="master">Executive Topology: the three poles, the engine, and the seam</option>
+            </optgroup>
+            <optgroup label="Foundations">
+              <option value="00">Batch 00: The pin, the two doc roots, and the method</option>
+              <option value="01">Batch 01: Core model, heartbeat protocol &amp; adapter ring</option>
+            </optgroup>
+            <optgroup label="Pole 1 — The Aissistant">
+              <option value="02">Batch 02: The aissistant — four layers &amp; lifecycle</option>
+            </optgroup>
+            <optgroup label="Pole 2 — The Workspace">
+              <option value="03">Batch 03: The workspace — portable markdown company</option>
+            </optgroup>
+            <optgroup label="Pole 3 — Automations">
+              <option value="04">Batch 04: Automations — finite runs, durable continuity</option>
+            </optgroup>
+            <optgroup label="Cross-Cutting">
+              <option value="05">Batch 05: Widgets &amp; frontend — tokens, gate, baseline</option>
+            </optgroup>
+            <optgroup label="Escape Hatch">
+              <option value="06">Batch 06: Out-of-pole (PZ) — governance &amp; the tenancy crack</option>
+            </optgroup>
+            <optgroup label="Strategic Decision">
+              <option value="07">Batch 07: The synthesis — transfer matrix &amp; four forks</option>
+            </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 01 VISUAL GUIDE</div>
+    <h4>The core model, the heartbeat protocol, and the adapter ring</h4>
+    <p>Company → projects → milestones → issues, held together by one callable contract and eleven adapters</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 320" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-01" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-01" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+      </defs>
+      <rect x="20" y="20" width="880" height="70" rx="10" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.4"/>
+      <text x="40" y="48" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="var(--text-primary, #0f172a)">Company (no standalone goal — direction comes from Initiatives)</text>
+      <text x="40" y="72" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">Projects → Milestones → Issues → Sub-issues. The Board is the single human operator (V1); hires and strategy are Board-gated.</text>
+
+      <g transform="translate(20, 110)">
+        <rect width="270" height="190" rx="10" fill="var(--surface-card, #ffffff)" stroke="#2563eb" stroke-width="1.6"/>
+        <text x="16" y="30" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#1d4ed8">HEARTBEAT = A PROTOCOL</text>
+        <text x="16" y="54" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">Three methods only:</text>
+        <text x="16" y="76" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• invoke(…) — start a turn</text>
+        <text x="16" y="96" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• status(…) — read state</text>
+        <text x="16" y="116" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• cancel(…) — stop a run</text>
+        <rect x="16" y="134" width="238" height="42" rx="6" fill="#10b981" fill-opacity="0.12"/>
+        <text x="24" y="152" font-family="system-ui, sans-serif" font-size="10.5" font-weight="700" fill="#059669">MINIMUM CONTRACT</text>
+        <text x="24" y="168" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">"Be callable." Nothing more is required.</text>
+      </g>
+
+      <g transform="translate(310, 110)">
+        <rect width="270" height="190" rx="10" fill="var(--surface-card, #ffffff)" stroke="#7c3aed" stroke-width="1.6"/>
+        <text x="16" y="30" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#6d28d9">11 ADAPTERS</text>
+        <text x="16" y="54" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">One registry, one interface:</text>
+        <text x="16" y="76" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• native / cli / container kinds</text>
+        <text x="16" y="96" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• … incl. hermes + hermes-gateway</text>
+        <rect x="16" y="114" width="238" height="62" rx="6" fill="#7c3aed" fill-opacity="0.10"/>
+        <text x="24" y="132" font-family="system-ui, sans-serif" font-size="10.5" font-weight="700" fill="#6d28d9">WHY THIS MATTERS TO US</text>
+        <text x="24" y="148" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Paperclip already treats "the engine" as</text>
+        <text x="24" y="164" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">an adapter — the same seam we need.</text>
+      </g>
+
+      <g transform="translate(600, 110)">
+        <rect width="300" height="190" rx="10" fill="var(--surface-card, #ffffff)" stroke="#b45309" stroke-width="1.6"/>
+        <text x="16" y="30" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#b45309">WHAT IT DOES *NOT* HAVE</text>
+        <text x="16" y="54" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• No chat bus — tasks + comments</text>
+        <text x="16" y="74" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• Single-tenant by design (b01 §3)</text>
+        <text x="16" y="94" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• No goal field on the company</text>
+        <text x="16" y="114" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• Cost is tracked per agent/task/etc.</text>
+        <rect x="16" y="134" width="268" height="42" rx="6" fill="#f59e0b" fill-opacity="0.14"/>
+        <text x="24" y="152" font-family="system-ui, sans-serif" font-size="10.5" font-weight="700" fill="#b45309">OUR SEAM ADDS THE TENANT WALL</text>
+        <text x="24" y="168" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Paperclip never needed one — we do.</text>
+      </g>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="paperclip-study-batch-01-the-platform-overview">Paperclip Study — Batch 01: the platform overview<a href="#batch-01/paperclip-study-batch-01-the-platform-overview" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Status:</strong> DONE — 2026-10-15 · <strong>Pole tag:</strong> foundational (feeds all poles)
+<strong>Source:</strong> the pin in <code>00-PIN-AND-METHOD.md</code> (10,447 files; <code>package.json</code> md5 <code>e912c83c715dba5c7c55469d4de899cb</code>).
+<strong>Method:</strong> docs are claims, code is the authority (rule 1); every number measured (rule 2); claims cite
+<code>file:line</code> (rule 3); poles tagged (rule 9); no comparison to our platform inside batches (rule 5).</p>
+<hr>
+<h2 id="0-plain-words-what-paperclip-is">§0 — Plain words: what Paperclip is<a href="#batch-01/0-plain-words-what-paperclip-is" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>Paperclip is the app you use to run a company whose entire staff are AI agents.</strong> You describe a goal,
+it hires agents (a CEO first, then a team under them), and each agent wakes on a schedule — a &quot;heartbeat&quot; —
+to look at its assigned work and do it. You watch from a dashboard, set budgets, and approve the big
+decisions. The company&#39;s work is a <strong>tree of tasks</strong>, and every task exists to serve the task above it,
+all the way up to the company goal.</p>
+<p>The tagline says the whole design stance in one line: <strong>&quot;If OpenClaw is an <em>employee</em>, Paperclip is the
+<em>company</em>.&quot;</strong> (<code>README.md</code>). OpenClaw-class tools run one agent; Paperclip is the org chart, the budget
+book, the task board, and the governance layer around many of them.</p>
+<p><strong>Why it matters to us:</strong> our <code>aissistant-package</code> is a <strong>fork of this project</strong> (baseline commit
+<code>4feef987</code>, rebranded). So this is not a stranger&#39;s design — it is the design our own product grew out of.
+This batch maps what that design <em>is</em>, before the pole batches judge how well each part serves our three
+poles.</p>
+<hr>
+<h2 id="1-what-was-read-measured">§1 — What was read (measured)<a href="#batch-01/1-what-was-read-measured" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Item</th>
+<th align="right">Size</th>
+<th>Why read</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>README.md</code></td>
+<td align="right">35,791 B</td>
+<td>the product stance</td>
+</tr>
+<tr>
+<td><code>doc/PRODUCT.md</code></td>
+<td align="right">22,645 B</td>
+<td>the canonical core-concept definitions</td>
+</tr>
+<tr>
+<td><code>doc/SPEC.md</code></td>
+<td align="right">46,878 B</td>
+<td>the draft control-plane specification (13 numbered sections)</td>
+</tr>
+<tr>
+<td><code>DESIGN.md</code></td>
+<td align="right">16,155 B</td>
+<td>the design-language and UI-system statement</td>
+</tr>
+<tr>
+<td><code>docs/guides/agent-developer/heartbeat-protocol.md</code></td>
+<td align="right">128 lines</td>
+<td>the agent&#39;s own step-by-step contract</td>
+</tr>
+<tr>
+<td><code>doc/SPEC.md</code> §1–§8</td>
+<td align="right">lines 7–440</td>
+<td>company, agent, org, heartbeat, comms, cost, bootstrap, deployment</td>
+</tr>
+</tbody></table></div>
+<p><strong>Two doc roots exist</strong> (batch 00 §2.1): <code>doc/</code> (375 files / 7.56 MB, engineering-facing) and <code>docs/</code>
+(78 files / 532 KB, public site). The core model lives in <code>doc/PRODUCT.md</code> + <code>doc/SPEC.md</code>.</p>
+<hr>
+<h2 id="2-the-core-model-verified">§2 — The core model, verified<a href="#batch-01/2-the-core-model-verified" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="2-1-the-four-first-class-objects">2.1 The four first-class objects<a href="#batch-01/2-1-the-four-first-class-objects" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Object</th>
+<th>What it is</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Company</strong></td>
+<td>The top container. One Paperclip instance runs <strong>multiple companies</strong>. A company has <strong>no standalone goal field</strong> — its direction is its set of <strong>Initiatives</strong>.</td>
+<td><code>doc/SPEC.md:7–12</code></td>
+</tr>
+<tr>
+<td><strong>Agent</strong></td>
+<td>Every employee is an agent. Has identity, org position, an <strong>adapter type + adapter-specific config blob</strong>, status, and cost data.</td>
+<td><code>doc/SPEC.md:92–100</code>, <code>doc/PRODUCT.md:19–23</code></td>
+</tr>
+<tr>
+<td><strong>Task (issue)</strong></td>
+<td>Hierarchical work. <code>Initiative → Projects → Milestones → Issues → Sub-issues</code>. Every task traces to a parent up to the company goal.</td>
+<td><code>doc/SPEC.md:352–355</code>, <code>doc/PRODUCT.md:53–59</code></td>
+</tr>
+<tr>
+<td><strong>Board</strong></td>
+<td>The human oversight layer. V1 is a <strong>single human operator</strong> with unrestricted access.</td>
+<td><code>doc/SPEC.md:22–34</code></td>
+</tr>
+</tbody></table></div>
+<p><strong>Doc-vs-code note (measured):</strong> <code>doc/SPEC.md</code> is explicitly a <strong>living DRAFT</strong> (&quot;Living document — updated
+incrementally during spec interviews&quot;, <code>doc/SPEC.md:3</code>) with many <code>[DRAFT]</code> and <code>TBD</code> markers and open
+questions. <strong>So the SPEC is a design intent, not a description of the shipped code.</strong> Where later batches
+need ground truth, they read the code — exactly the Hermes discipline. This is the single most important
+caveat in the whole study: <strong>Paperclip&#39;s own spec is ahead of, and looser than, its implementation.</strong></p>
+<h3 id="2-2-the-task-tree-and-the-why-chain">2.2 The task tree and the "why" chain<a href="#batch-01/2-2-the-task-tree-and-the-why-chain" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>The defining property (<code>doc/PRODUCT.md:53–59</code>): <em>&quot;At any moment, every piece of work must trace back to the
+company&#39;s top-level goal through a chain of parent tasks… This is what keeps autonomous agents aligned —
+they can always answer &#39;why am I doing this?&#39;&quot;</em></p>
+<p><strong>Plain gloss:</strong> work is not a flat to-do list; it is a <strong>justification tree</strong>. An agent can always walk up
+from &quot;I am writing ad copy&quot; to &quot;…because we need 100 more signups … because we need $2k this week … because
+the goal is $1M MRR.&quot; This is the mechanism that keeps many autonomous agents pulling in one direction.</p>
+<h3 id="2-3-the-heartbeat-the-thing-that-makes-agents-run">2.3 The heartbeat — the thing that makes agents *run*<a href="#batch-01/2-3-the-heartbeat-the-thing-that-makes-agents-run" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><strong>The heartbeat is a protocol, not a runtime</strong> (<code>doc/SPEC.md:234–237</code>). Paperclip decides <strong>when</strong> to wake
+an agent, <strong>how</strong> to invoke it (which adapter), and <strong>what context</strong> to hand it (thin ping vs fat payload).
+It deliberately does <strong>not</strong> control how long the agent runs or what it does — <em>&quot;that is entirely up to the
+agent&quot;</em>. The full contract is three adapter methods (<code>doc/SPEC.md:262–268</code>):</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>text</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code>invoke(agentConfig, context?) → void     // start the agent&#39;s cycle
+status(agentConfig) → AgentStatus        // running? finished? errored?
+cancel(agentConfig) → void               // graceful stop (for pause/resume)
+</code></pre>
+</div>
+<p><strong>The agent&#39;s own side of the contract</strong> is a 9-step procedure (<code>docs/guides/agent-developer/ heartbeat-protocol.md</code>): identity → approval follow-up → get assignments → pick work → <strong>checkout</strong> →
+understand context → do the work → update status → delegate. The load-bearing rules: <em>&quot;Always checkout
+before working&quot;</em>, <em>&quot;Never retry a 409&quot;</em> (the task belongs to someone else), <em>&quot;Never cancel cross-team
+tasks — reassign to your manager&quot;</em>, and <em>&quot;Use child issues instead of polling&quot;</em>.</p>
+<p><strong>Plain gloss:</strong> the heartbeat is a <strong>wake-up slip</strong>. Paperclip knocks; the agent reads its inbox, <em>claims</em>
+a task so two agents never fight over it (the checkout/409 rule is a locking protocol), does the work,
+writes down what it did, and hands back a clear next action before going quiet again.</p>
+<h3 id="2-4-three-ways-an-agent-can-run-and-the-adapter-boundary">2.4 Three ways an agent can run, and the adapter boundary<a href="#batch-01/2-4-three-ways-an-agent-can-run-and-the-adapter-boundary" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>doc/PRODUCT.md:42–51</code> names four execution styles, and the shipped adapters match (<code>packages/adapters/</code>
+measured):</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Adapter dir</th>
+<th>What it runs</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>claude-local</code>, <code>codex-local</code>, <code>gemini-local</code>, <code>grok-local</code>, <code>kimi-local</code>, <code>opencode-local</code>, <code>pi-local</code>, <code>cursor-local</code>, <code>cursor-cloud</code></td>
+<td>local/cloud <strong>coding-agent</strong> runtimes</td>
+</tr>
+<tr>
+<td><code>openclaw-gateway</code></td>
+<td>an OpenClaw agent via its gateway</td>
+</tr>
+<tr>
+<td><strong><code>hermes</code></strong>, <strong><code>hermes-gateway</code></strong></td>
+<td><strong>a Hermes agent</strong> — directly relevant to us, since Hermes is our chosen engine</td>
+</tr>
+<tr>
+<td>generic <code>process</code> / <code>http</code></td>
+<td><code>server/src/adapters/process</code>, <code>server/src/adapters/http</code></td>
+</tr>
+</tbody></table></div>
+<p><strong>The adapter boundary is the platform&#39;s central design commitment</strong> (<code>doc/PRODUCT.md:51</code>): <em>&quot;the adapter is
+still the boundary: if a runtime can be invoked, observed, and authorized, Paperclip can coordinate it.&quot;</em>
+And critically (<code>doc/SPEC.md:110–112</code>): <strong>&quot;Concepts like SOUL.md and HEARTBEAT.md are <em>not part of the
+Paperclip protocol</em>. They are adapter-specific configurations.&quot;</strong></p>
+<p><strong>Cross-study note (Hermes b13 §3.1):</strong> Hermes <em>does</em> ship <code>SOUL.md</code> as a first-class base persona. Paperclip
+deliberately pushes that concept down into the adapter. So the two platforms drew the &quot;who is this agent&quot;
+line in <strong>opposite places</strong> — Hermes centralises persona, Paperclip externalises it. This is a real
+architectural fork in the road and belongs in the mapping step, not here.</p>
+<h3 id="2-5-minimum-contract-and-integration-levels">2.5 Minimum contract and integration levels<a href="#batch-01/2-5-minimum-contract-and-integration-levels" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>A useful, unusually honest piece of design (<code>doc/SPEC.md:150–172</code>): the <strong>minimum</strong> to be a Paperclip agent
+is <strong>&quot;be callable&quot;</strong> — no requirement to report back at all. Above that, three levels:</p>
+<ol>
+<li><strong>Callable</strong> (minimum) — Paperclip can start you.</li>
+<li><strong>Status reporting</strong> — you report success/failure/in-progress.</li>
+<li><strong>Fully instrumented</strong> — status + cost + task updates + logs, bidirectional.</li>
+</ol>
+<p><strong>Plain gloss:</strong> Paperclip will coordinate a &quot;dumb&quot; agent that just runs a command and says nothing — it
+infers liveness from whether the process is alive. Richer agents get richer integration. <strong>This is a
+deliberately low floor</strong>, which is what lets it sit in front of a dozen different runtimes.</p>
+<h3 id="2-6-communication-happens-through-the-task-system-there-is-no-chat-bus">2.6 Communication happens *through the task system* — there is no chat bus<a href="#batch-01/2-6-communication-happens-through-the-task-system-there-is-no-chat-bus" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>doc/SPEC.md:307–330</code>: <em>&quot;All agent communication flows through the task system… There is no separate
+messaging or chat system. Tasks are the communication channel.&quot;</em> Delegation = create + assign a task;
+coordination = comment on a task; status = update task fields. An agent&#39;s &quot;inbox&quot; is <em>tasks assigned to me +
+comments on tasks I&#39;m in</em>.</p>
+<p><strong>Important nuance (same section, measured):</strong> there <strong>is</strong> an <strong>experimental</strong> Agent Chat, flagged
+<code>enableAgentChat</code> <strong>disabled by default</strong> — and it too is secretly a task (&quot;one persistent task per person
+and agent&quot;). So the rule &quot;tasks are the only channel&quot; is <em>true at the protocol level</em> and <em>softened by an
+experimental UI layer that is still tasks underneath</em>. This is the kind of claim that needs the caveat
+attached, and the caveat is in the source on the same page.</p>
+<h3 id="2-7-cost-and-budgets-are-first-class">2.7 Cost and budgets are first-class<a href="#batch-01/2-7-cost-and-budgets-are-first-class" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>doc/SPEC.md:356–390</code>: costs tracked <strong>per agent / per task / per project / per company</strong>, in <strong>tokens and
+dollars</strong>, with <strong>billing codes</strong> on tasks so that when Agent A asks Agent B to do work, <strong>B&#39;s cost rolls up
+to A&#39;s request</strong>. Three budget tiers: <strong>visibility → soft alerts → hard ceiling</strong> (hit the ceiling, the
+agent auto-pauses, board is notified and can override).</p>
+<p><strong>Plain gloss:</strong> the money is modelled the way a real company models it — every unit of work has a price,
+and the price travels up the org chart to whoever asked for the work.</p>
+<h3 id="2-8-bootstrap-how-a-company-goes-from-empty-to-running">2.8 Bootstrap: how a company goes from empty to running<a href="#batch-01/2-8-bootstrap-how-a-company-goes-from-empty-to-running" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>doc/SPEC.md:391–410</code> — a 6-step sequence: create company + initiatives → define top-level tasks → create
+the <strong>CEO agent</strong> (from a default template) → CEO&#39;s <strong>first heartbeat proposes a strategic breakdown</strong> →
+<strong>the Board approves that plan</strong> → the CEO executes (creates tasks, proposes hires, delegates). Hires are
+<strong>Board-gated</strong> (<code>doc/SPEC.md:26–34</code>).</p>
+<p><strong>Plain gloss:</strong> you don&#39;t hand-build the org. You state the goal, create one CEO, and the company <strong>grows
+itself under human approval</strong> — the human approves the hiring plan and the strategy, not every task.</p>
+<hr>
+<h2 id="3-deployment-model-measured-and-directly-relevant-to-us">§3 — Deployment model (measured, and directly relevant to us)<a href="#batch-01/3-deployment-model-measured-and-directly-relevant-to-us" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>doc/SPEC.md:433–437</code>: <strong>&quot;Single-tenant, self-hostable. Not a SaaS. One instance = one operator&#39;s
+companies.&quot;</strong> This is the same shape as Hermes (single-operator), and it is exactly the constraint our
+product must break — we are building multi-tenant. <strong>It is recorded here as a fact about Paperclip, not as
+a comparison</strong>; the mapping step handles the implication.</p>
+<p><code>packages/db/src/migrations/</code> is a large numbered SQL migration set (measured: migrations numbered into the
+<code>0200s</code>+, e.g. <code>0235_heartbeat_run_event_sequence_uniqueness.sql</code>) — so the platform carries its data model
+forward through <strong>numbered migrations</strong>, the same mechanism as Hermes. <strong>The retirement rule (batch 00
+rule 10) applies to Paperclip too</strong> and will be run before any later batch reuses a setting from an older
+Paperclip doc.</p>
+<hr>
+<h2 id="4-divergences-found-in-this-batch">§4 — Divergences found in this batch <span class="seal-badge" style="background:#fef2f2; color:#dc2626; border-color:#fca5a5; font-size: 0.65em; vertical-align: middle;">⚠️ FINDING NOTE</span><a href="#batch-01/4-divergences-found-in-this-batch" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Claim (where)</th>
+<th>Reality (measured)</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>D1</strong></td>
+<td><code>doc/SPEC.md</code> reads as a specification</td>
+<td>It is a <strong>living DRAFT</strong> with <code>[DRAFT]</code>/<code>TBD</code>/open-questions throughout (<code>SPEC.md:3</code>) and describes V1 as MVP in places the tree has clearly moved past</td>
+<td><strong>NOT a divergence of fact — a divergence of <em>genre</em>.</strong> The SPEC is intent, not description. Recorded so no later batch treats it as ground truth.</td>
+</tr>
+<tr>
+<td><strong>D2</strong></td>
+<td>&quot;There is no separate messaging or chat system&quot; (<code>SPEC.md:329</code>)</td>
+<td>An experimental <strong>Agent Chat</strong> exists, disabled by default, built on a hidden per-agent task</td>
+<td><strong>TRUE at protocol level, softened by an experimental layer.</strong> The source itself carries the caveat on the same page — no deception, but the headline claim alone would mislead.</td>
+</tr>
+</tbody></table></div>
+<p><strong>No hard factual divergences found yet</strong> (this batch read mostly intent documents). The first code-authority
+divergence checks begin in the pole batches, where specific numbers are claimed.</p>
+<hr>
+<h2 id="5-carried-forward">§5 — Carried forward<a href="#batch-01/5-carried-forward" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Carry</th>
+<th>To</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>C1-1</strong></td>
+<td>The task <strong>justification tree</strong> (every task → parent → … → initiative) is the alignment mechanism.</td>
+<td>P2, P3</td>
+</tr>
+<tr>
+<td><strong>C1-2</strong></td>
+<td>The <strong>heartbeat is a protocol</strong> (invoke/status/cancel) with a deliberately <strong>low floor</strong> (&quot;be callable&quot;).</td>
+<td>P1, P3</td>
+</tr>
+<tr>
+<td><strong>C1-3</strong></td>
+<td>The <strong>adapter boundary</strong>: persona/SOUL/HEARTBEAT is <em>adapter-specific, not protocol</em> — the opposite split to Hermes.</td>
+<td>P1</td>
+</tr>
+<tr>
+<td><strong>C1-4</strong></td>
+<td><strong>Checkout / 409</strong> is a task-locking protocol preventing two agents fighting over one task.</td>
+<td>P3</td>
+</tr>
+<tr>
+<td><strong>C1-5</strong></td>
+<td><strong>No chat bus</strong>; tasks + comments are the only protocol channel (with an experimental chat that is still a task).</td>
+<td>P2, P3</td>
+</tr>
+<tr>
+<td><strong>C1-6</strong></td>
+<td><strong>Cost per agent/task/project/company + billing codes</strong> that roll child cost up to the requestor.</td>
+<td>P3</td>
+</tr>
+<tr>
+<td><strong>C1-7</strong></td>
+<td><strong>Board = single human operator, unrestricted</strong>, V1; hires and strategy are Board-gated.</td>
+<td>P2, P3</td>
+</tr>
+<tr>
+<td><strong>C1-8</strong></td>
+<td><strong>Bootstrap</strong>: goal → CEO → first heartbeat proposes the org → human approves → company grows itself.</td>
+<td>P1, P3</td>
+</tr>
+<tr>
+<td><strong>C1-9</strong></td>
+<td><strong>Exportable org config</strong> (template vs snapshot) — a company is a portable artefact.</td>
+<td>P2, PZ</td>
+</tr>
+<tr>
+<td><strong>C1-10</strong></td>
+<td><strong>Single-tenant self-host</strong> is the shipped model; <strong>numbered DB migrations</strong> carry the schema (retirement rule applies).</td>
+<td>all</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="6-value-questions-q1-user-q2-vision">§6 — Value questions (Q1 user / Q2 vision)<a href="#batch-01/6-value-questions-q1-user-q2-vision" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>Q1 — how does this serve a real user use case?</strong>
+It gives a person a <strong>control room for a team of AI workers</strong>: one goal in, an org that builds itself under
+approval, a task board where all work is visible and justified, a wallet with per-worker spend, and a big
+red button (the Board) that can pause anyone. The user&#39;s job shifts from <em>doing the work</em> to <em>setting
+direction and approving plan</em>s.</p>
+<p><strong>Q2 — how does this serve an AI-first business &amp; resources planner?</strong>
+Three of its mechanisms are load-bearing for that vision and recur across the poles: (1) the <strong>justification
+tree</strong>, because a planner must always be able to answer &quot;why is the company spending on this?&quot;; (2) <strong>cost
+with billing-code roll-up</strong>, because a resources planner <em>is</em> a cost-attribution engine; and (3) the
+<strong>heartbeat-with-a-low-floor</strong>, because versatility (&quot;coordinate any runtime that can be invoked&quot;) is exactly
+what a platform that must integrate many engines needs. The single-tenant model (§3) is the one part that
+does <strong>not</strong> fit the vision as-is — and that is precisely why the owner&#39;s plan ends with <em>&quot;later we fix the
+hermes-per-tenant issue.&quot;</em></p>
+<hr>
+<p><em>Batch 01 of 07 complete. Divergences: 2 (both genre/caveat, not fact). Carried: C1-1…C1-10.
+Next: <code>02-the-aissistant.md</code> (P1).</em></p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="00-the-pin-method.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">The Pin &amp; Method</span>
+                </a>
+              
+
+              <a href="../index.html#batch-01" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              
+                <a href="02-the-aissistant-p1.html" class="nav-page-btn" style="text-align:right;">
+                  <span class="nav-btn-sub">Next Batch →</span>
+                  <span class="nav-btn-title">The Aissistant (P1)</span>
+                </a>
+              
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#0-plain-words-what-paperclip-is" class="toc-link">§0 — Plain words: what Paperclip is</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#1-what-was-read-measured" class="toc-link">§1 — What was read (measured)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#2-the-core-model-verified" class="toc-link">§2 — The core model, verified</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-1-the-four-first-class-objects" class="toc-link">2.1 The four first-class objects</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-2-the-task-tree-and-the-why-chain" class="toc-link">2.2 The task tree and the &quot;why&quot; chain</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-3-the-heartbeat-the-thing-that-makes-agents-run" class="toc-link">2.3 The heartbeat — the thing that makes agents *run*</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-4-three-ways-an-agent-can-run-and-the-adapter-boundary" class="toc-link">2.4 Three ways an agent can run, and the adapter boundary</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-5-minimum-contract-and-integration-levels" class="toc-link">2.5 Minimum contract and integration levels</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-6-communication-happens-through-the-task-system-there-is-no-chat-bus" class="toc-link">2.6 Communication happens *through the task system* — there is no chat bus</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-7-cost-and-budgets-are-first-class" class="toc-link">2.7 Cost and budgets are first-class</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-8-bootstrap-how-a-company-goes-from-empty-to-running" class="toc-link">2.8 Bootstrap: how a company goes from empty to running</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-deployment-model-measured-and-directly-relevant-to-us" class="toc-link">§3 — Deployment model (measured, and directly relevant to us)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-divergences-found-in-this-batch" class="toc-link">§4 — Divergences found in this batch</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-carried-forward" class="toc-link">§5 — Carried forward</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-value-questions-q1-user-q2-vision" class="toc-link">§6 — Value questions (Q1 user / Q2 vision)</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('paperclip_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('paperclip_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('paperclip_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('paperclip_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.PaperclipReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

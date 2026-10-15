@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 03 — The workspace (P2) — Paperclip Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-03" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 03</span>
+      <div class="header-title-wrap">
+        <div class="header-title">The Workspace (P2)</div>
+        <div class="header-subtitle">Paperclip Platform Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/03-the-workspace.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #059669">DONE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">1,996</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">10 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">209</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-15</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 03 Architecture Guide (Default)</option>
+            <optgroup label="Strategic Architecture">
+              <option value="master">Executive Topology: the three poles, the engine, and the seam</option>
+            </optgroup>
+            <optgroup label="Foundations">
+              <option value="00">Batch 00: The pin, the two doc roots, and the method</option>
+              <option value="01">Batch 01: Core model, heartbeat protocol &amp; adapter ring</option>
+            </optgroup>
+            <optgroup label="Pole 1 — The Aissistant">
+              <option value="02">Batch 02: The aissistant — four layers &amp; lifecycle</option>
+            </optgroup>
+            <optgroup label="Pole 2 — The Workspace">
+              <option value="03">Batch 03: The workspace — portable markdown company</option>
+            </optgroup>
+            <optgroup label="Pole 3 — Automations">
+              <option value="04">Batch 04: Automations — finite runs, durable continuity</option>
+            </optgroup>
+            <optgroup label="Cross-Cutting">
+              <option value="05">Batch 05: Widgets &amp; frontend — tokens, gate, baseline</option>
+            </optgroup>
+            <optgroup label="Escape Hatch">
+              <option value="06">Batch 06: Out-of-pole (PZ) — governance &amp; the tenancy crack</option>
+            </optgroup>
+            <optgroup label="Strategic Decision">
+              <option value="07">Batch 07: The synthesis — transfer matrix &amp; four forks</option>
+            </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 03 VISUAL GUIDE — POLE 2</div>
+    <h4>The workspace: a company as a portable markdown package</h4>
+    <p>The whole company travels as files — markdown is canonical, git is the container, slugs are the identity</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 330" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-03" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-03" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+      </defs>
+      <g transform="translate(20, 20)">
+        <rect width="300" height="230" rx="10" fill="var(--surface-card, #ffffff)" stroke="#2563eb" stroke-width="1.6"/>
+        <text x="16" y="30" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#1d4ed8">THE PACKAGE (agentcompanies/v1)</text>
+        <text x="16" y="56" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">COMPANY.md    — the company</text>
+        <text x="16" y="76" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">TEAM.md       — who is on the team</text>
+        <text x="16" y="96" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">AGENTS.md     — each agent's soul</text>
+        <text x="16" y="116" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">PROJECT.md    — a project</text>
+        <text x="16" y="136" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">TASK.md       — a task</text>
+        <text x="16" y="156" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">SKILL.md      — a company skill</text>
+        <text x="16" y="176" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">.paperclip.yaml — machine config</text>
+        <rect x="16" y="190" width="268" height="24" rx="4" fill="#10b981" fill-opacity="0.14"/>
+        <text x="24" y="207" font-family="system-ui, sans-serif" font-size="10.5" font-weight="700" fill="#059669">Markdown canonical • slugs = identity</text>
+      </g>
+
+      <g transform="translate(340, 20)">
+        <rect width="270" height="230" rx="10" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.4"/>
+        <text x="16" y="30" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE TYPED TASK TREE</text>
+        <text x="16" y="56" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">A finite state machine per task:</text>
+        <text x="16" y="78" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">open → in_progress → blocked</text>
+        <text x="16" y="96" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">→ in_review → done / cancelled</text>
+        <text x="16" y="122" font-family="system-ui, sans-serif" font-size="11.5" font-weight="600" fill="#1d4ed8">TWO LINK TYPES (kept apart):</text>
+        <text x="16" y="142" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">• hierarchy — parent / child</text>
+        <text x="16" y="160" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">• blockers — must-finish-first</text>
+        <rect x="16" y="176" width="238" height="40" rx="6" fill="#7c3aed" fill-opacity="0.10"/>
+        <text x="24" y="194" font-family="system-ui, sans-serif" font-size="10.5" font-weight="700" fill="#6d28d9">Mix them and you get deadlocks.</text>
+        <text x="24" y="210" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Paperclip keeps them separate.</text>
+      </g>
+
+      <g transform="translate(630, 20)">
+        <rect width="270" height="230" rx="10" fill="var(--surface-card, #ffffff)" stroke="#b45309" stroke-width="1.6"/>
+        <text x="16" y="30" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#b45309">CONCURRENCY DISCIPLINE</text>
+        <text x="16" y="58" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">Directory-level restore locks:</text>
+        <text x="16" y="80" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">• SQLite BEGIN IMMEDIATE</text>
+        <text x="16" y="98" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">• 30-second hold</text>
+        <text x="16" y="116" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">• fail-closed on contention</text>
+        <rect x="16" y="134" width="238" height="78" rx="6" fill="#f59e0b" fill-opacity="0.12"/>
+        <text x="24" y="154" font-family="system-ui, sans-serif" font-size="10.5" font-weight="700" fill="#b45309">WHY THIS IS RARE</text>
+        <text x="24" y="172" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Most systems let two restores</text>
+        <text x="24" y="188" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">run at once and corrupt the tree.</text>
+        <text x="24" y="204" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Paperclip refuses instead.</text>
+      </g>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="paperclip-study-batch-03-the-workspace-p2">Paperclip Study — Batch 03: the workspace (P2)<a href="#batch-03/paperclip-study-batch-03-the-workspace-p2" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Status:</strong> DONE — 2026-10-15 · <strong>Pole tag: P2 — the workspace</strong> (highly functional, versatile, integratable,
+rich-featured; adapts to a mix of current and future features, use-cases and needs).
+<strong>Sources read:</strong> <code>docs/companies/companies-spec.md</code> (596 lines), <code>doc/AGENTCOMPANIES_SPEC_INVENTORY.md</code>,
+<code>doc/project-repositories.md</code>, <code>doc/execution-semantics.md</code>, <code>doc/workspace-restore-locks.md</code>,
+<code>doc/PRODUCT.md</code> (task model + company skills), plus routes/dirs measured in code.</p>
+<blockquote>
+<p><strong>Naming caution.</strong> Paperclip uses &quot;workspace&quot; in <strong>two different senses</strong>: (a) the <strong>company/project
+container</strong> a person operates in (this batch, P2), and (b) a <strong>filesystem checkout</strong> an agent runs inside
+(<code>doc/project-repositories.md</code>, <code>doc/workspace-restore-locks.md</code>). Both are in this batch; they are kept
+clearly apart because our own product uses &quot;workspace&quot; in sense (a).</p>
+</blockquote>
+<hr>
+<h2 id="0-plain-words-what-the-workspace-is-in-paperclip">§0 — Plain words: what the workspace is in Paperclip<a href="#batch-03/0-plain-words-what-the-workspace-is-in-paperclip" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>A <strong>company</strong> is the workspace. Under it sit <strong>projects</strong>, and work lives in a <strong>tree of tasks</strong> that all
+trace up to the company&#39;s goal. The surface a person actually operates is a <strong>control plane</strong>: a task board,
+a company directory, documents attached to work, and an audit stream. The single most transferable idea in
+this batch is that <strong>the whole company is a portable markdown package</strong> — a folder of <code>.md</code> files you can
+git-clone, fork, and share, with the database as a <em>derived</em> view.</p>
+<hr>
+<h2 id="1-the-company-as-a-portable-artefact-the-headline-finding">§1 — The company as a *portable artefact* (the headline finding)<a href="#batch-03/1-the-company-as-a-portable-artefact-the-headline-finding" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>docs/companies/companies-spec.md</code> (<code>agentcompanies/v1-draft</code>) defines a <strong>markdown-first package format</strong>.
+This is the most P2-relevant mechanism in the platform.</p>
+<p><strong>Core principles (measured, <code>:26–37</code>):</strong></p>
+<ol>
+<li><strong>Markdown is canonical.</strong> 2. <strong>Git repositories are valid package containers.</strong> 3. Registries are optional
+discovery layers, <em>not</em> authorities. 4. <code>SKILL.md</code> stays owned by the Agent Skills spec. 5. External refs must
+be <strong>pinnable to immutable Git commits</strong>. 6. Attribution/licence survive import+export. 7. <strong>Slugs and
+relative paths are the portable identity layer, not database ids.</strong> 8. Conventional folder structure works
+without verbose wiring. 9. Vendor fidelity lives in <strong>extensions</strong>, not the base package.</li>
+</ol>
+<p><strong>Package kinds</strong> — a root is identified by ONE primary markdown file (<code>:38–50</code>): <code>COMPANY.md</code>, <code>TEAM.md</code>,
+<code>AGENTS.md</code>, <code>PROJECT.md</code>, <code>TASK.md</code>, <code>SKILL.md</code>.</p>
+<p><strong>Reserved layout</strong> (<code>:51–85</code>):</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>text</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code>COMPANY.md   TEAM.md   AGENTS.md   PROJECT.md   TASK.md   SKILL.md
+agents/&lt;slug&gt;/AGENTS.md
+teams/&lt;slug&gt;/TEAM.md
+projects/&lt;slug&gt;/PROJECT.md
+projects/&lt;slug&gt;/tasks/&lt;slug&gt;/TASK.md
+tasks/&lt;slug&gt;/TASK.md
+skills/&lt;slug&gt;/SKILL.md
+.paperclip.yaml      ← vendor extension sidecar
+HEARTBEAT.md  SOUL.md  TOOLS.md  README.md  assets/  scripts/  references/
+</code></pre>
+</div>
+<p><strong>Common frontmatter</strong> (<code>:86–116</code>): <code>schema</code>, <code>kind</code>, <code>slug</code>, <code>name</code>, <code>description</code>, <code>version</code>, <code>license</code>,
+<code>authors</code>, <code>homepage</code>, <code>tags</code>, <code>metadata</code>, <code>sources</code>. Exporters <strong>omit empty/default fields</strong>.</p>
+<p><strong>Code verification:</strong> the inventory (<code>doc/AGENTCOMPANIES_SPEC_INVENTORY.md</code>) names the real implementation —
+<code>packages/shared/src/types/company-portability.ts</code> + <code>validators/company-portability.ts</code> (shared contract),
+<code>server/src/services/company-portability.ts</code> (&quot;core portability service… import (graph resolution, collision
+handling, entity creation)&quot;), <code>server/src/routes/companies.ts</code> (export/import/preview endpoints),
+<code>server/src/services/company-export-readme.ts</code> (<strong>generates README.md + a Mermaid org-chart for exports</strong>).
+<strong>VERIFIED IN CODE</strong> (files exist and are described as the live implementation, not a plan).</p>
+<p><strong>Plain gloss:</strong> a company in Paperclip is <strong>a git-cloneable folder of markdown</strong>. You can export your
+company as a template (&quot;here&#39;s a pre-built marketing-agency org&quot;), fork someone else&#39;s, or version-control
+your org chart. The database is not the truth — <strong>the markdown is</strong>, and the DB is rebuilt from it on import.</p>
+<p><strong>Cross-study note (Hermes b13 §3.1 / b12):</strong> Hermes ships <strong>skills and profiles as files</strong> but has no
+equivalent &quot;the whole tenant is a portable markdown package&quot;. This is a <strong>Paperclip strength</strong> and it maps
+directly onto our platform&#39;s need for companies/workspaces that can be templated and forked.</p>
+<hr>
+<h2 id="2-the-task-tree-and-the-four-first-class-objects-measured">§2 — The task tree and the four first-class objects (measured)<a href="#batch-03/2-the-task-tree-and-the-four-first-class-objects-measured" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>From batch 01 §2.1, restated for P2 with the hierarchy (<code>doc/SPEC.md:352–355</code>, <code>doc/PRODUCT.md:53–59</code>):</p>
+<p><strong><code>Initiative (company goal) → Projects → Milestones → Issues → Sub-issues</code>.</strong></p>
+<p><strong>Execution semantics are specified</strong> (<code>doc/execution-semantics.md</code>) — and this is where the workspace&#39;s
+behaviour actually lives:</p>
+<ul>
+<li><strong>§1 Core Model</strong>, <strong>§2 Assignee Semantics</strong> (who owns work), <strong>§3 Status Semantics</strong> with a precise
+vocabulary: <code>backlog</code>, <code>todo</code>, <code>in_progress</code>, <code>blocked</code>, <code>in_review</code>, <code>done</code>, <code>cancelled</code> — <strong>each with its
+own rules</strong> (e.g. <code>done</code> at <code>:159</code>, <code>blocked</code> at <code>:73</code> with §5&#39;s &quot;Known execution waits at admission&quot;).</li>
+<li><strong>§4 Agent-owned vs User-owned execution</strong> — work ownership is explicit.</li>
+<li><strong>§5 Checkout and Active Execution</strong> — the single-writer lock per task (cross-ref batch 01&#39;s 409 rule).</li>
+<li><strong>§6 Parent/Sub-Issue vs Blockers</strong> — <strong>two different relations</strong> (<code>parentId</code> vs <code>blockedByIssueIds</code>), plus
+child→parent reporting, review delegation, and <strong>&quot;The Courier Pattern (Lateral Coordination)&quot;</strong>.</li>
+<li><strong>§7 Accepted-Plan Execution</strong> with an <strong>exact-once fingerprint</strong> and a durable compatibility claim.</li>
+<li><strong>§8 Non-Terminal Issue Liveness Contract</strong>.</li>
+</ul>
+<p><strong>Plain gloss:</strong> the workspace is not a loose list — it has a <strong>typed task state machine</strong> and <strong>two distinct
+link types</strong> (hierarchy = <em>why</em>; blocker = <em>what&#39;s in the way</em>). Keeping those separate is what lets an agent
+answer &quot;why am I doing this&quot; (§ hierarchy) separately from &quot;what&#39;s stopping me&quot; (§ blockers).</p>
+<p><strong>Code verification:</strong> routes exist for all of it — <code>server/src/routes/issues.ts</code>, <code>projects.ts</code>,
+<code>companies.ts</code>, <code>activity.ts</code>, <code>dashboard.ts</code>, <code>issue-tree-control.ts</code>, <code>issues-checkout-wakeup.ts</code>.
+<strong>VERIFIED IN CODE</strong> (files present, matching the doc&#39;s model).</p>
+<hr>
+<h2 id="3-the-operator-surface-what-a-person-actually-sees">§3 — The operator surface: what a person actually sees<a href="#batch-03/3-the-operator-surface-what-a-person-actually-sees" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>P2 is &quot;the workspace&quot; as an experience, not just a data model. From the routes and docs:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Surface</th>
+<th>Backing</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Dashboard</strong></td>
+<td><code>server/src/routes/dashboard.ts</code></td>
+<td>the operator&#39;s home: state scanning</td>
+</tr>
+<tr>
+<td><strong>Task board / issue tree</strong></td>
+<td><code>routes/issues.ts</code>, <code>issue-tree-control.ts</code></td>
+<td>the work, hierarchically</td>
+</tr>
+<tr>
+<td><strong>Companies &amp; directory</strong></td>
+<td><code>routes/companies.ts</code></td>
+<td>the org, members, roles</td>
+</tr>
+<tr>
+<td><strong>Activity / audit</strong></td>
+<td><code>routes/activity.ts</code></td>
+<td>the audit trail</td>
+</tr>
+<tr>
+<td><strong>Documents on work</strong></td>
+<td><code>roadmap</code>: issue documents (PRODUCT.md)</td>
+<td>work-attached docs</td>
+</tr>
+<tr>
+<td><strong>Search</strong></td>
+<td><code>doc/SEARCH.md</code>, <code>routes/dashboard.ts</code></td>
+<td>find anything</td>
+</tr>
+<tr>
+<td><strong>Attention</strong></td>
+<td><code>routes/attention.ts</code></td>
+<td>what needs me now</td>
+</tr>
+</tbody></table></div>
+<p><strong>The design stance</strong> (<code>DESIGN.md:11–13</code>, read in full): <em>&quot;Paperclip is an operational control plane… The user
+is an operator scanning state and making decisions. Every screen should answer, in order: <strong>what is happening,
+does it need me, what do I do about it.</strong> Density in service of scanning beats whitespace in service of
+aesthetics — but density comes from information, never from chrome.&quot;</em></p>
+<p><strong>Plain gloss:</strong> the workspace is built for a person whose job is <strong>triage</strong> — scan, decide, act — not for
+someone doing the work. The &quot;what is happening / does it need me / what do I do&quot; ordering is a genuine
+product principle and is worth carrying into our workspace design.</p>
+<hr>
+<h2 id="4-company-level-skills-and-policy-a-p2-governance-mechanism">§4 — Company-level skills and policy (a P2 governance mechanism)<a href="#batch-03/4-company-level-skills-and-policy-a-p2-governance-mechanism" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>doc/PRODUCT.md:95–139</code> (&quot;Company Skills and Policy&quot;) plus <code>server/src/routes/company-skills.ts</code> and
+<code>company-skill-policy.ts</code>: a company can hold <strong>skills and a policy about them</strong>, so the <em>workspace</em> governs
+what its agents may load — not just the individual agent. <strong>Code verification:</strong> both routes exist.
+<strong>This is the workspace exercising authority over its members&#39; capabilities</strong>, which is a P2 governance
+pattern (our platform will need the same: a workspace policy about what agents may do inside it).</p>
+<hr>
+<h2 id="5-the-filesystem-sense-of-workspace-agents-running-in-checkouts">§5 — The filesystem sense of "workspace" (agents running in checkouts)<a href="#batch-03/5-the-filesystem-sense-of-workspace-agents-running-in-checkouts" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Because our product must eventually run agents <em>inside</em> a workspace, the second sense matters too:</p>
+<ul>
+<li><strong>Project repositories</strong> (<code>doc/project-repositories.md</code>): a project can bind <strong>GitHub repositories</strong>;
+selected repos become <strong>normal project workspaces</strong> with <code>metadata.githubRepositoryId</code>; <strong>one workspace
+stays primary</strong>; tasks <strong>materialize the other repositories as editable checkouts</strong> inside their workspace.
+Access is resolved through the <strong>caller&#39;s authorized GitHub grants</strong> before creating anything; a selection
+<strong>never delegates credentials</strong>; low-trust review runs cannot use the persistent-clone fallback.</li>
+<li><strong>Workspace restore locks</strong> (<code>doc/workspace-restore-locks.md</code>): writes to canonical target directories are
+<strong>serialized by per-target SQLite <code>BEGIN IMMEDIATE</code> file locks</strong> under <code>&lt;instance root&gt;/locks/directory-merge</code>,
+outside the writable target, with a <strong>30-second</strong> retry ceiling and a PID-only owner file for diagnostics
+(<em>&quot;Missing, stale, or incorrect metadata cannot grant or retain ownership&quot;</em>). Network filesystems without
+reliable SQLite locking are <strong>not supported</strong>.</li>
+</ul>
+<p><strong>Plain gloss:</strong> when agents share folders, Paperclip <strong>locks the folder, not the database row</strong>, and it fails
+closed on ill-matched metadata. This is a hard-won, concrete answer to &quot;two agents touched the same
+directory&quot; — and it is exactly the class of problem our workspace engine will face.</p>
+<p><strong>Code verification:</strong> <code>server/src/routes/task-workspaces.ts</code> and <code>server/src/services/heartbeat/ workspaces.ts</code> (measured: <strong>146,149 B in one file</strong>) implement the workspace lifecycle.
+<strong>VERIFIED IN CODE.</strong></p>
+<hr>
+<h2 id="6-divergences-found-in-this-batch">§6 — Divergences found in this batch <span class="seal-badge" style="background:#fef2f2; color:#dc2626; border-color:#fca5a5; font-size: 0.65em; vertical-align: middle;">⚠️ FINDING NOTE</span><a href="#batch-03/6-divergences-found-in-this-batch" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Claim</th>
+<th>Reality</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>D1</strong></td>
+<td><code>doc/PRODUCT.md</code> §Core Concepts describes &quot;task&quot; throughout</td>
+<td>The same doc and <code>DESIGN.md:35</code> state the canonical term <strong>should</strong> be <em>task</em> (never <em>issue</em>), yet the <strong>code and routes still say <code>issues</code></strong> (<code>routes/issues.ts</code>, <code>/api/issues/...</code>)</td>
+<td><strong>Terminology divergence, by design-in-progress.</strong> DESIGN.md explicitly schedules the task-rename as a later run. Recorded so no later batch is confused by <code>issue</code> in code meaning &quot;task&quot; in product.</td>
+</tr>
+<tr>
+<td><strong>D2</strong></td>
+<td>SPEC §1 &quot;A Company does not have a standalone goal field&quot;</td>
+<td><code>doc/project-repositories.md:11</code> says projects support <strong>&quot;goal links&quot;</strong> and <code>PRODUCT.md</code> says company &quot;has a goal&quot;</td>
+<td><strong>Soft contradiction between two docs.</strong> Likely: the <em>goal</em> is an <strong>Initiative</strong> object, not a company column — so &quot;has a goal&quot; is true semantically and false structurally. Flagged; code would settle it in the mapping step.</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="7-carried-forward">§7 — Carried forward<a href="#batch-03/7-carried-forward" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Carry</th>
+<th>To</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>C3-1</strong></td>
+<td><strong>The company is a portable markdown package</strong> (<code>agentcompanies/v1</code>): canonical md, git containers, slugs as identity, <code>.paperclip.yaml</code> extensions.</td>
+<td>P2 (core), mapping</td>
+</tr>
+<tr>
+<td><strong>C3-2</strong></td>
+<td><strong>Export as template vs snapshot</strong> (structure-only vs full state) — forkable orgs.</td>
+<td>P2, PZ</td>
+</tr>
+<tr>
+<td><strong>C3-3</strong></td>
+<td><strong>Typed task state machine</strong> (<code>backlog/todo/in_progress/blocked/in_review/done/cancelled</code>) + <strong>two link types</strong> (hierarchy vs blockers).</td>
+<td>P2, P3</td>
+</tr>
+<tr>
+<td><strong>C3-4</strong></td>
+<td><strong>Operator-first screen rule</strong>: <em>what is happening / does it need me / what do I do</em>.</td>
+<td>PX-W, P2</td>
+</tr>
+<tr>
+<td><strong>C3-5</strong></td>
+<td><strong>Company skills + policy</strong>: the workspace governs its members&#39; capabilities.</td>
+<td>P2, P1</td>
+</tr>
+<tr>
+<td><strong>C3-6</strong></td>
+<td><strong>Project repositories → per-task checkouts</strong>, credentials never delegated, one primary workspace.</td>
+<td>P2, P3</td>
+</tr>
+<tr>
+<td><strong>C3-7</strong></td>
+<td><strong>Directory-level restore locks</strong> (SQLite <code>BEGIN IMMEDIATE</code>, 30 s ceiling, fail-closed on bad metadata).</td>
+<td>P2, P3</td>
+</tr>
+<tr>
+<td><strong>C3-8</strong></td>
+<td><strong>Courier pattern</strong> (lateral coordination) as a named inter-agent work pattern.</td>
+<td>P3</td>
+</tr>
+<tr>
+<td><strong>C3-9</strong></td>
+<td><strong>README + Mermaid org-chart generated on export</strong> — the org chart is a rendered artefact.</td>
+<td>PZ, PX-W</td>
+</tr>
+<tr>
+<td><strong>C3-10</strong></td>
+<td><strong>Docs are a mix of settled and in-progress</strong> (<code>issue</code>→<code>task</code> rename scheduled); treat product vocabulary as <em>transitioning</em>.</td>
+<td>all</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="8-value-questions-q1-user-q2-vision">§8 — Value questions (Q1 user / Q2 vision)<a href="#batch-03/8-value-questions-q1-user-q2-vision" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>Q1 — how does this serve a real user use case?</strong>
+It gives the user a <strong>workspace they can template and share</strong> (clone a working org, not a blank one), a <strong>task
+board that always answers &quot;why&quot;</strong>, a <strong>directory + audit trail</strong> so they can see who did what, and a
+<strong>triage-shaped UI</strong> that tells them what needs them. For a person running a company of AI workers, the
+portable-package idea is the killer feature: <em>start from a proven org</em>.</p>
+<p><strong>Q2 — how does this serve an AI-first business &amp; resources planner?</strong>
+Three carry directly: (1) <strong>C3-1, the company-as-markdown-package</strong> — a planner that can define, version and
+fork whole business configurations is exactly a &quot;resources planner&quot;, and it is the strongest single idea
+Paperclip offers P2; (2) <strong>C3-3, the typed task model with separate hierarchy and blocker links</strong> — the
+planner needs both &quot;why&quot; and &quot;what&#39;s blocking&quot;; (3) <strong>C3-5, workspace-level skill policy</strong> — a planner must
+be able to say &quot;inside this workspace, these capabilities are permitted&quot;, which is governance the workspace
+owns. The single-tenant assumption again does not fit, but <strong>the portability format is tenant-agnostic</strong> and
+survives the multi-tenant rework intact.</p>
+<hr>
+<p><em>Batch 03 of 07 complete. Divergences: 2 (both explainable, recorded). Carried: C3-1…C3-10.
+Next: <code>04-automations.md</code> (P3).</em></p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="02-the-aissistant-p1.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">The Aissistant (P1)</span>
+                </a>
+              
+
+              <a href="../index.html#batch-03" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              
+                <a href="04-automations-p3.html" class="nav-page-btn" style="text-align:right;">
+                  <span class="nav-btn-sub">Next Batch →</span>
+                  <span class="nav-btn-title">Automations (P3)</span>
+                </a>
+              
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#0-plain-words-what-the-workspace-is-in-paperclip" class="toc-link">§0 — Plain words: what the workspace is in Paperclip</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#1-the-company-as-a-portable-artefact-the-headline-finding" class="toc-link">§1 — The company as a *portable artefact* (the headline finding)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#2-the-task-tree-and-the-four-first-class-objects-measured" class="toc-link">§2 — The task tree and the four first-class objects (measured)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-the-operator-surface-what-a-person-actually-sees" class="toc-link">§3 — The operator surface: what a person actually sees</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-company-level-skills-and-policy-a-p2-governance-mechanism" class="toc-link">§4 — Company-level skills and policy (a P2 governance mechanism)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-the-filesystem-sense-of-workspace-agents-running-in-checkouts" class="toc-link">§5 — The filesystem sense of &quot;workspace&quot; (agents running in checkouts)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-divergences-found-in-this-batch" class="toc-link">§6 — Divergences found in this batch</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-carried-forward" class="toc-link">§7 — Carried forward</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#8-value-questions-q1-user-q2-vision" class="toc-link">§8 — Value questions (Q1 user / Q2 vision)</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('paperclip_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('paperclip_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('paperclip_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('paperclip_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.PaperclipReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

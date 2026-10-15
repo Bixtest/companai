@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 07 — The synthesis — Paperclip Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-07" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 07</span>
+      <div class="header-title-wrap">
+        <div class="header-title">The Synthesis</div>
+        <div class="header-subtitle">Paperclip Platform Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/07-SYNTHESIS.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #4f46e5">COMPLETE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">1,893</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">9 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">182</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-15</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 07 Architecture Guide (Default)</option>
+            <optgroup label="Strategic Architecture">
+              <option value="master">Executive Topology: the three poles, the engine, and the seam</option>
+            </optgroup>
+            <optgroup label="Foundations">
+              <option value="00">Batch 00: The pin, the two doc roots, and the method</option>
+              <option value="01">Batch 01: Core model, heartbeat protocol &amp; adapter ring</option>
+            </optgroup>
+            <optgroup label="Pole 1 — The Aissistant">
+              <option value="02">Batch 02: The aissistant — four layers &amp; lifecycle</option>
+            </optgroup>
+            <optgroup label="Pole 2 — The Workspace">
+              <option value="03">Batch 03: The workspace — portable markdown company</option>
+            </optgroup>
+            <optgroup label="Pole 3 — Automations">
+              <option value="04">Batch 04: Automations — finite runs, durable continuity</option>
+            </optgroup>
+            <optgroup label="Cross-Cutting">
+              <option value="05">Batch 05: Widgets &amp; frontend — tokens, gate, baseline</option>
+            </optgroup>
+            <optgroup label="Escape Hatch">
+              <option value="06">Batch 06: Out-of-pole (PZ) — governance &amp; the tenancy crack</option>
+            </optgroup>
+            <optgroup label="Strategic Decision">
+              <option value="07">Batch 07: The synthesis — transfer matrix &amp; four forks</option>
+            </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 07 VISUAL GUIDE — STRATEGIC DECISION</div>
+    <h4>The synthesis: what to take, what to guard, and the four forks against Hermes</h4>
+    <p>The transfer matrix that closes the Paperclip study and feeds the coming cross-platform mapping step</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 340" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-07" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-07" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+      </defs>
+      <g transform="translate(20, 20)">
+        <rect width="430" height="150" rx="10" fill="#10b981" fill-opacity="0.09" stroke="#10b981" stroke-width="1.6"/>
+        <text x="16" y="30" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#047857">★ TAKE — ranked mechanisms</text>
+        <text x="16" y="56" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">1 · The finite-run / durable-continuity law (P3)</text>
+        <text x="16" y="74" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">2 · The typed task tree with two link types (P2)</text>
+        <text x="16" y="92" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">3 · The agent-lifecycle state machine (P1)</text>
+        <text x="16" y="110" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">4 · The portable markdown company package (P2)</text>
+        <text x="16" y="128" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">5 · The reconciler + idempotency keys (P3)</text>
+        <text x="16" y="146" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">… 12 ranked mechanisms in total (§3 of the synthesis)</text>
+      </g>
+
+      <g transform="translate(470, 20)">
+        <rect width="430" height="150" rx="10" fill="#ef4444" fill-opacity="0.07" stroke="#ef4444" stroke-width="1.6"/>
+        <text x="16" y="30" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#b91c1c">✗ DO NOT ASSUME — it does not give us</text>
+        <text x="16" y="56" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">• Multi-tenancy — single-tenant by design</text>
+        <text x="16" y="74" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">• A widget composer — components only</text>
+        <text x="16" y="92" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">• A rich persona / memory layer — thin</text>
+        <text x="16" y="110" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">• A final SPEC — the docs are a draft</text>
+        <text x="16" y="128" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">• A chat bus — it chose tasks + comments</text>
+        <text x="16" y="146" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">Each gap is OUR work, not a hidden feature.</text>
+      </g>
+
+      <rect x="20" y="190" width="880" height="130" rx="10" fill="#7c3aed" fill-opacity="0.08" stroke="#7c3aed" stroke-width="1.6"/>
+      <text x="40" y="218" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#6d28d9">THE FOUR CROSS-STUDY FORKS vs HERMES — where each side draws the boundary</text>
+      <text x="40" y="246" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">Paperclip draws every boundary LOWER (it delegates persona, memory, runtime stance and tenancy).</text>
+      <text x="40" y="266" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">Hermes draws every boundary HIGHER (it owns persona, memory, runtime stance). Neither is wrong — they are different bets.</text>
+      <text x="40" y="292" font-family="system-ui, sans-serif" font-size="11.5" font-weight="600" fill="#6d28d9">Our seam must decide, per boundary, which side wins — and Hermes wins where it is already stronger.</text>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="paperclip-study-batch-07-the-synthesis">Paperclip Study — Batch 07: the synthesis<a href="#batch-07/paperclip-study-batch-07-the-synthesis" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Status:</strong> DONE — 2026-10-15 · <strong>Pole tag:</strong> all · <strong>Closes the Paperclip study (7 of 7).</strong>
+<strong>Method:</strong> this document draws ONLY on batches 01–06 of this study. Every claim about Paperclip points back
+to the batch that measured it. <strong>It makes no comparison against our own platform&#39;s code</strong> — that is the
+<strong>mapping step</strong>, which the owner&#39;s plan schedules next (<em>&quot;we start mapping each pole findings across the
+platforms with what we have already in mercato&quot;</em>). Where it names the mapping step, it is naming a <strong>to-do</strong>,
+not doing it.</p>
+<hr>
+<h2 id="0-plain-words-what-this-document-is">§0 — Plain words: what this document is<a href="#batch-07/0-plain-words-what-this-document-is" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Six batches measured Paperclip doc-by-doc and file-by-file, and tagged every finding with a pole. This
+closing document does the one thing the batches were forbidden to do: <strong>say what Paperclip teaches each pole,
+ranked, so the mapping step has a clean shopping list.</strong></p>
+<p><strong>One framing to hold:</strong> Paperclip is our product&#39;s <strong>ancestor</strong>. We forked it. So this is not &quot;a stranger&#39;s
+design we might copy&quot; — it is <strong>the design we grew out of</strong>, and the study is the first time we have read it
+forensically.</p>
+<hr>
+<h2 id="1-what-the-study-measured-in-one-page">§1 — What the study measured, in one page<a href="#batch-07/1-what-the-study-measured-in-one-page" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<ul>
+<li><strong>Pin:</strong> 10,447 files; <code>package.json</code> md5 <code>e912c83c715dba5c7c55469d4de899cb</code>; extracted <strong>2026-10-15 13:21</strong>;
+<strong>no <code>.git</code></strong>; <strong>no version field</strong>; newest in-tree dated artefact 2026-10-02 (batch 00).</li>
+<li><strong>Scale:</strong> <del>1M lines TypeScript / 7,416 files; <code>server/src/services/</code> <strong>535,237 lines / 1,220 files</strong>;
+<code>packages/paperclip-runner/</code> <strong>221,706</strong>; <code>ui/src/</code> <strong>801 <code>.tsx</code> components</strong>, **</del>303** counted
+components+pages; <code>server/src/__tests__/</code> <strong>487,642 lines</strong> (~half of <code>server/</code> is tests).</li>
+<li><strong>Docs:</strong> <strong>two roots</strong> — <code>doc/</code> (375 files / 7.56 MB, engineering) + <code>docs/</code> (78 / 532 KB, public).</li>
+<li><strong>Divergences found: 10 across six batches</strong> — but <strong>not one was a false factual claim</strong>. They are:
+3 &quot;genre&quot; caveats (the SPEC is a living DRAFT, batches 01/02); 2 in-progress-terminology (issue→task,
+batch 03); 1 reconciled count (batch 05); 1 concept-absence (no widget composer, batch 05); 2
+label/level (runner &quot;Proposed&quot; is built, batch 04); 1 direction (single-tenant wall is cracking, batch 06).
+<strong>Paperclip&#39;s docs are unusually honest</strong> — several divergences are the docs <em>themselves</em> stating the
+caveat.</li>
+<li><strong>The single best artefact:</strong> <code>doc/architecture/durable-continuation-scheduler.md</code> — it documents a <strong>real
+production bug (the DOT-2 loop) and its fix</strong> with the full causal chain (batch 04 §5).</li>
+</ul>
+<hr>
+<h2 id="2-the-three-poles-headlined">§2 — The three poles, headlined<a href="#batch-07/2-the-three-poles-headlined" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="p1-the-aissistant-batch-02">P1 — The aissistant (batch 02)<a href="#batch-07/p1-the-aissistant-batch-02" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><strong>What Paperclip&#39;s agent IS:</strong> four <strong>separable layers</strong> it refuses to let merge — <strong>body</strong> (adapter), <strong>soul</strong>
+(persistent files: <code>AGENTS.md</code> + notes), <strong>identity</strong> (persistent Ed25519), <strong>permissions</strong> (defaults that
+never include sandbox escape). The body contract is <strong>three methods</strong> (<code>invoke</code>/<code>status</code>/<code>cancel</code>); persona
+<strong>meaning is adapter-owned, not protocol-owned</strong>; hiring is a <strong>gated pipeline with a real liveness probe</strong>
+before <code>ready</code>; memory is a <strong>binding + small contract</strong> with the engine behind it.</p>
+<h3 id="p2-the-workspace-batch-03">P2 — The workspace (batch 03)<a href="#batch-07/p2-the-workspace-batch-03" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><strong>The headline of the whole study:</strong> a company is a <strong>portable markdown package</strong> (<code>agentcompanies/v1</code>:
+<code>COMPANY.md</code>, <code>TEAM.md</code>, <code>AGENTS.md</code>, <code>PROJECT.md</code>, <code>TASK.md</code>, <code>SKILL.md</code>, <code>.paperclip.yaml</code>); <strong>markdown is
+canonical, git repos are containers, slugs are the portable identity, the DB is derived</strong>. On top of that: a
+<strong>typed task state machine</strong>, <strong>two link types</strong> (hierarchy = <em>why</em>, blockers = <em>what&#39;s in the way</em>),
+<strong>workspace-level skill policy</strong>, and a <strong>triage-shaped operator surface</strong> (&quot;what is happening / does it need
+me / what do I do&quot;).</p>
+<h3 id="p3-automations-batch-04">P3 — Automations (batch 04)<a href="#batch-07/p3-automations-batch-04" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>The owner called Paperclip &quot;a blueprint&quot; for this pole, and the study agrees <strong>most strongly here</strong>. <strong>Runs
+are finite; continuity lives in the DB.</strong> Around that: the <strong>three-way invariant</strong> (live path · durable wait ·
+visible disposition); <strong>five continuation kinds with idempotency keys</strong>; a <strong>stranded-issue reconciler</strong> with
+a long &quot;reasons NOT to wake&quot; list that <strong>honours human cancellation</strong>; the <strong>DOT-2 lesson</strong> (fix the contract,
+never slow the poller); the opt-in <strong>verification-shaped task watchdog</strong>; the <strong>runner seam</strong> (PRP, Rust,
+deterministic replay, <em>never a second control plane</em>); budgets with a hard ceiling; routines; and a
+<strong>fail-awake idle-sleep</strong> protocol.</p>
+<hr>
+<h2 id="3-the-ranked-transferable-mechanisms-the-shopping-list-for-the-mapping-step">§3 — The ranked transferable mechanisms (the shopping list for the mapping step)<a href="#batch-07/3-the-ranked-transferable-mechanisms-the-shopping-list-for-the-mapping-step" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Ranked by how much they teach us, <strong>not</strong> by how easy they are to copy. Each names its pole and its batch.</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Mechanism</th>
+<th>Pole</th>
+<th>Batch</th>
+<th>Why it ranks here</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>1</strong></td>
+<td><strong>The company as a portable markdown package</strong></td>
+<td>P2</td>
+<td>03</td>
+<td>The single most reusable idea: companies/workspaces as verifiable, forkable, version-controlled artefacts. Tenant-agnostic — survives our multi-tenant rework.</td>
+</tr>
+<tr>
+<td><strong>2</strong></td>
+<td><strong>Finite runs + durable intent + idempotent continuations</strong></td>
+<td>P3</td>
+<td>04</td>
+<td>The only way to run agents as <em>reliable business processes</em>. Includes the five continuation kinds and idempotency keys.</td>
+</tr>
+<tr>
+<td><strong>3</strong></td>
+<td><strong>The DOT-2 lesson</strong> (fix the completion contract; never slow the poller)</td>
+<td>P3</td>
+<td>04</td>
+<td>The most important engineering <em>warning</em> in the study. Every recovery engine loops; this is the named cure.</td>
+</tr>
+<tr>
+<td><strong>4</strong></td>
+<td><strong>The four separable agent layers</strong></td>
+<td>P1</td>
+<td>02</td>
+<td>The schema for a worker redeployable across workspaces/automations/studio — exactly the owner&#39;s &quot;versatile, integratable&quot; requirement.</td>
+</tr>
+<tr>
+<td><strong>5</strong></td>
+<td><strong>The task watchdog</strong> (verification-shaped review of stopped work)</td>
+<td>P3</td>
+<td>04</td>
+<td>A genuinely novel mechanism: agents that audit <em>other agents&#39;</em> &quot;done&quot;. Rare and valuable.</td>
+</tr>
+<tr>
+<td><strong>6</strong></td>
+<td><strong>The runner seam with deterministic replay</strong></td>
+<td>P3/P1</td>
+<td>04</td>
+<td>Precisely the execution seam our Hermes integration needs; its <strong>non-goals</strong> are as useful as its goals.</td>
+</tr>
+<tr>
+<td><strong>7</strong></td>
+<td><strong>The design system discipline</strong> (token gate + 510-image baseline + decision sheet)</td>
+<td>PX-W</td>
+<td>05</td>
+<td>The strongest frontend contribution: makes a 300-component, agent-maintained surface coherent.</td>
+</tr>
+<tr>
+<td><strong>8</strong></td>
+<td><strong>Scoped rules + first-party dev skills</strong> (the platform builds itself with agents)</td>
+<td>PZ</td>
+<td>06</td>
+<td>The clearest proof their thesis is real; the most transferable <em>process</em> finding.</td>
+</tr>
+<tr>
+<td><strong>9</strong></td>
+<td><strong>MCP access governance</strong> (risk levels, quarantine writes, audit-preserving disable)</td>
+<td>PZ</td>
+<td>06</td>
+<td>A direct upgrade path for our Hermes tool bridge.</td>
+</tr>
+<tr>
+<td><strong>10</strong></td>
+<td><strong>Gated hire with a real liveness probe</strong></td>
+<td>P1</td>
+<td>02</td>
+<td>Don&#39;t &quot;employ&quot; a worker you have never seen run.</td>
+</tr>
+<tr>
+<td><strong>11</strong></td>
+<td><strong>The typed task model with two link types</strong></td>
+<td>P2</td>
+<td>03</td>
+<td>&quot;Why&quot; and &quot;what&#39;s blocking&quot; must be separate relations.</td>
+</tr>
+<tr>
+<td><strong>12</strong></td>
+<td><strong>Fail-awake idle sleep</strong></td>
+<td>PZ</td>
+<td>04/06</td>
+<td>The right default for a system that must not drop work; matters for our hosting economics.</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="4-what-paperclip-does-not-give-us-stated-so-the-mapping-step-does-not-over-claim">§4 — What Paperclip does NOT give us (stated, so the mapping step does not over-claim)<a href="#batch-07/4-what-paperclip-does-not-give-us-stated-so-the-mapping-step-does-not-over-claim" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Honesty about boundaries is the point of this section:</p>
+<ol>
+<li><strong>No multi-tenancy.</strong> The model is <strong>single-tenant self-host</strong> (<code>SPEC.md:433</code>); cloud/tenancy exists only as
+a <strong>fail-closed crack</strong> at the edge (batch 06 §6). <strong>The owner&#39;s known hard problem — tenant-per-agent — is
+not solved here.</strong></li>
+<li><strong>No widget composer.</strong> Paperclip teaches a component <em>system</em> (tokens + primitives + visual proof), <strong>not a
+runtime widget/dashboard builder</strong> (batch 05 §7). If our vision needs user-composed widgets/automations,
+that is a <strong>build</strong>, not an adopt.</li>
+<li><strong>Persona/memory are intentionally thin.</strong> Paperclip delegates both to the adapter/provider (batches
+02 §1.2/§3). If our aissistant needs <strong>first-class</strong> persona and memory, we supply the substance; Paperclip
+supplies the seam.</li>
+<li><strong>Docs are partly intent.</strong> <code>SPEC.md</code> is a <strong>living DRAFT</strong> (batches 01/02); treat it as a design intent,
+not a description. The <strong>code and <code>doc/architecture/*</code> + <code>doc/*.md</code> are the authority.</strong></li>
+<li><strong>This study read the docs + verified mechanisms; it did not read all ~1M lines.</strong> Claims about <em>how</em>
+specific subsystems behave in edge cases are out of scope and would need a code pass.</li>
+</ol>
+<hr>
+<h2 id="5-cross-study-notes-paperclip-vs-the-hermes-study">§5 — Cross-study notes (Paperclip vs the Hermes study)<a href="#batch-07/5-cross-study-notes-paperclip-vs-the-hermes-study" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Recorded as <strong>observations for the mapping step</strong>, never decisions. Four genuine forks in the road:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Dimension</th>
+<th>Hermes (Hermes study)</th>
+<th>Paperclip (this study)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Persona/identity</strong></td>
+<td><strong>Owned centrally</strong> (<code>SOUL.md</code>, <code>personality.py</code>, 14 built-ins — b13 §3.1)</td>
+<td><strong>Adapter-owned</strong>, Paperclip owns the folder (b02 §1.2)</td>
+</tr>
+<tr>
+<td><strong>Memory</strong></td>
+<td><strong>Built-in engine</strong> (files, char caps — b04)</td>
+<td><strong>Binding + small contract</strong>, engine behind it (b02 §3)</td>
+</tr>
+<tr>
+<td><strong>Runtime stance</strong></td>
+<td>Hermes is an <strong>ACP server</strong>; others are clients (b10)</td>
+<td>Every runtime is an <strong>adapter Paperclip drives</strong>, incl. Hermes (b01 §2.4)</td>
+</tr>
+<tr>
+<td><strong>Tenancy</strong></td>
+<td>single-operator profiles (isolation, not tenancy — b12)</td>
+<td>single-tenant self-host (b03 §3, b06 §6)</td>
+</tr>
+</tbody></table></div>
+<p><strong>The pattern:</strong> on every one of these, <strong>Paperclip draws the boundary <em>lower</em> (more delegated), Hermes draws
+it <em>higher</em> (more owned)</strong>. That is the central architectural difference between our two studied systems and
+the crux the mapping step must resolve for each pole.</p>
+<hr>
+<h2 id="6-what-this-study-does-not-claim-the-limits-stated">§6 — What this study does NOT claim (the limits, stated)<a href="#batch-07/6-what-this-study-does-not-claim-the-limits-stated" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<ol>
+<li><strong>One tree, one date.</strong> Every figure is about the extract pinned in batch 00 — 10,447 files, md5
+<code>e912c83c…</code>, extracted 2026-10-15. No <code>.git</code>, no version field ⇒ the exact commit is unknowable.</li>
+<li><strong>It studies UPSTREAM, not our fork.</strong> Per the owner&#39;s ruling (&quot;Upstream standalone first&quot;), this study
+reads <code>paperclipai/paperclip</code> on its own terms. <strong>The bridge to our <code>aissistant-package</code> fork is a later
+pass</strong> and is not attempted here.</li>
+<li><strong>&quot;Better&quot; is not asserted.</strong> §2–§3 rank <em>what Paperclip teaches</em>, not whether Paperclip beats anyone. Any
+comparison to our platform belongs to the mapping step.</li>
+<li><strong>The code was sampled, not exhausted.</strong> Mechanism existence and key numbers were verified in code; a full
+read of ~1M lines was not attempted and is not claimed.</li>
+<li><strong>The SPEC is intent.</strong> See §4.4.</li>
+</ol>
+<hr>
+<h2 id="7-the-single-recommendation-in-one-paragraph">§7 — The single recommendation, in one paragraph<a href="#batch-07/7-the-single-recommendation-in-one-paragraph" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>Treat Paperclip as the foundation of P2 (the workspace) and P3 (automations), and as a <em>seam-provider</em> for
+P1 — then write the requirements from ranked §3, not from the code.</strong> Concretely: adopt the <strong>portable
+markdown company package</strong>, the <strong>finite-run + durable-continuation</strong> model with the <strong>DOT-2 discipline</strong>, the
+<strong>four-layer agent schema</strong>, and the <strong>design-system discipline</strong> as four written requirements — because each
+is tenant-agnostic, each is proven by a shipped system, and together they cover the three poles. Do <strong>not</strong>
+adopt the single-tenant model (we must outgrow it), the missing widget composer (we must build it), or the
+thin persona/memory (we must supply it) — those are the three places our product must go <em>beyond</em> its
+ancestor. The mapping step — Paperclip findings joined against <code>mercato</code> — is the next task, and this study is
+its input.</p>
+<p><strong>The one thing the owner must decide:</strong> whether these <strong>seven platform studies proceed one-at-a-time in this
+same shape</strong> (per-pole findings, then a synthesis each), and whether the <strong>mapping step runs once after all
+platforms</strong> or <strong>per-platform as we go</strong> — because that choice changes the shape of the docs the reader will
+hold. Recommendation: <strong>study each platform the same way, and run the mapping once at the end</strong> (it is a
+per-pole join across nine studies, and doing it nine times would duplicate the same comparison).</p>
+<hr>
+<h2 id="8-the-study-s-own-ledger">§8 — The study's own ledger<a href="#batch-07/8-the-study-s-own-ledger" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>Batches complete:</strong> 00–07 (8 files).
+<strong>Divergences:</strong> 10 across six batches, <strong>none a false fact</strong> (§1).
+<strong>Files written:</strong> <code>00-PIN-AND-METHOD.md</code>, <code>findings/01-platform-overview.md</code>, <code>02-the-aissistant.md</code>,
+<code>03-the-workspace.md</code>, <code>04-automations.md</code>, <code>05-widgets-and-frontend.md</code>, <code>06-out-of-pole-findings.md</code>,
+<code>07-SYNTHESIS.md</code>.
+<strong>Commits (explicit paths):</strong> batch 00–02 → <code>9ae258f</code>; batches 03–04 → <code>97b4dfc</code>; batch 05 → <em>(this
+session)</em>; batches 06–07 → <em>(this session)</em>.
+<strong>All files byte-clean (0 CR, no BOM), each measured, each carrying its poles and its value answers.</strong></p>
+<hr>
+<p><em>Paperclip study closed, 7 of 7 (+ pin). Next (not this study): the reader, and the remaining platforms —
+<code>crewAI</code>, <code>multica</code>, <code>gastown</code>, <code>n8n</code>, <code>buzz</code>, <code>openrig</code>, <code>mattermost</code>, <code>zulip</code> — then the mapping step.</em></p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="06-out-of-pole-pz.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">Out-of-Pole (PZ)</span>
+                </a>
+              
+
+              <a href="../index.html#batch-07" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              <div></div>
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#0-plain-words-what-this-document-is" class="toc-link">§0 — Plain words: what this document is</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#1-what-the-study-measured-in-one-page" class="toc-link">§1 — What the study measured, in one page</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#2-the-three-poles-headlined" class="toc-link">§2 — The three poles, headlined</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#p1-the-aissistant-batch-02" class="toc-link">P1 — The aissistant (batch 02)</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#p2-the-workspace-batch-03" class="toc-link">P2 — The workspace (batch 03)</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#p3-automations-batch-04" class="toc-link">P3 — Automations (batch 04)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-the-ranked-transferable-mechanisms-the-shopping-list-for-the-mapping-step" class="toc-link">§3 — The ranked transferable mechanisms (the shopping list for the mapping step)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-what-paperclip-does-not-give-us-stated-so-the-mapping-step-does-not-over-claim" class="toc-link">§4 — What Paperclip does NOT give us (stated, so the mapping step does not over-claim)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-cross-study-notes-paperclip-vs-the-hermes-study" class="toc-link">§5 — Cross-study notes (Paperclip vs the Hermes study)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-what-this-study-does-not-claim-the-limits-stated" class="toc-link">§6 — What this study does NOT claim (the limits, stated)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-the-single-recommendation-in-one-paragraph" class="toc-link">§7 — The single recommendation, in one paragraph</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#8-the-study-s-own-ledger" class="toc-link">§8 — The study&#039;s own ledger</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('paperclip_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('paperclip_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('paperclip_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('paperclip_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.PaperclipReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

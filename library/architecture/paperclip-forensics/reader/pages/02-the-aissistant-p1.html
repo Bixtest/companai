@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 02 — The aissistant (P1) — Paperclip Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-02" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 02</span>
+      <div class="header-title-wrap">
+        <div class="header-title">The Aissistant (P1)</div>
+        <div class="header-subtitle">Paperclip Platform Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/02-the-aissistant.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #059669">DONE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">2,290</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">11 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">250</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-15</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 02 Architecture Guide (Default)</option>
+            <optgroup label="Strategic Architecture">
+              <option value="master">Executive Topology: the three poles, the engine, and the seam</option>
+            </optgroup>
+            <optgroup label="Foundations">
+              <option value="00">Batch 00: The pin, the two doc roots, and the method</option>
+              <option value="01">Batch 01: Core model, heartbeat protocol &amp; adapter ring</option>
+            </optgroup>
+            <optgroup label="Pole 1 — The Aissistant">
+              <option value="02">Batch 02: The aissistant — four layers &amp; lifecycle</option>
+            </optgroup>
+            <optgroup label="Pole 2 — The Workspace">
+              <option value="03">Batch 03: The workspace — portable markdown company</option>
+            </optgroup>
+            <optgroup label="Pole 3 — Automations">
+              <option value="04">Batch 04: Automations — finite runs, durable continuity</option>
+            </optgroup>
+            <optgroup label="Cross-Cutting">
+              <option value="05">Batch 05: Widgets &amp; frontend — tokens, gate, baseline</option>
+            </optgroup>
+            <optgroup label="Escape Hatch">
+              <option value="06">Batch 06: Out-of-pole (PZ) — governance &amp; the tenancy crack</option>
+            </optgroup>
+            <optgroup label="Strategic Decision">
+              <option value="07">Batch 07: The synthesis — transfer matrix &amp; four forks</option>
+            </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 02 VISUAL GUIDE — POLE 1</div>
+    <h4>The aissistant: four separable layers and a real lifecycle machine</h4>
+    <p>Body, soul, identity and permissions are independent — so each can be upgraded or swapped without touching the others</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 340" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-02" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-02" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+      </defs>
+      <g transform="translate(20, 20)">
+        <rect width="210" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">1 · BODY (ADAPTER)</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">How the agent is called</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">native · cli · container</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Swappable per agent</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#6d28d9">= the runtime stance</text>
+      </g>
+      <g transform="translate(245, 20)">
+        <rect width="210" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">2 · SOUL (FILES)</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">AGENTS.md + notes</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Persistent across runs</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Plain files, git-friendly</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">Not a DB blob</text>
+      </g>
+      <g transform="translate(470, 20)">
+        <rect width="210" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">3 · IDENTITY</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Ed25519 keypair</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Generated per agent</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">agent_seal proof</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#1d4ed8">routes/agents.ts</text>
+      </g>
+      <g transform="translate(695, 20)">
+        <rect width="205" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">4 · PERMISSIONS</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Explicit allow-list</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Sandbox escape NEVER default</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Revocation is permanent</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#b45309">fail-closed</text>
+      </g>
+
+      <rect x="20" y="190" width="880" height="130" rx="10" fill="var(--surface-card, #ffffff)" stroke="#7c3aed" stroke-width="1.6"/>
+      <text x="40" y="218" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#6d28d9">THE AGENT-LIFECYCLE STATE MACHINE (not a boolean)</text>
+      <g font-family="system-ui, sans-serif" font-size="11" font-weight="600">
+        <rect x="40" y="236" width="118" height="30" rx="15" fill="#f59e0b" fill-opacity="0.16" stroke="#f59e0b"/>
+        <text x="58" y="256" fill="#b45309">pending_approval</text>
+        <rect x="188" y="236" width="96" height="30" rx="15" fill="#3b82f6" fill-opacity="0.14" stroke="#3b82f6"/>
+        <text x="214" y="256" fill="#1d4ed8">preparing</text>
+        <rect x="314" y="236" width="92" height="30" rx="15" fill="#3b82f6" fill-opacity="0.14" stroke="#3b82f6"/>
+        <text x="338" y="256" fill="#1d4ed8">verifying</text>
+        <rect x="436" y="236" width="86" height="30" rx="15" fill="#10b981" fill-opacity="0.16" stroke="#10b981"/>
+        <text x="466" y="256" fill="#059669">ready</text>
+        <rect x="552" y="236" width="104" height="30" rx="15" fill="#8b5cf6" fill-opacity="0.14" stroke="#8b5cf6"/>
+        <text x="574" y="256" fill="#6d28d9">pause/resume</text>
+        <rect x="686" y="236" width="96" height="30" rx="15" fill="#ef4444" fill-opacity="0.14" stroke="#ef4444"/>
+        <text x="714" y="256" fill="#b91c1c">terminate</text>
+      </g>
+      <text x="40" y="298" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">A hire must pass an eval gate before it ever reaches "ready" — the same discipline we want for a provisioned Hermes home.</text>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="paperclip-study-batch-02-the-aissistant-p1">Paperclip Study — Batch 02: the aissistant (P1)<a href="#batch-02/paperclip-study-batch-02-the-aissistant-p1" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Status:</strong> DONE — 2026-10-15 · <strong>Pole tag: P1 — the aissistant</strong> (the AI user / agent: versatile,
+integratable, rich-featured in itself, deployable in different contexts).
+<strong>Sources read:</strong> <code>doc/AGENT-LIFECYCLE.md</code> (318 lines/17,858 B), <code>doc/AGENT-IDENTITY.md</code> (104/11,483 B),
+<code>doc/agent-files.md</code> (302/19,244 B), <code>doc/agent-personas.md</code> (190/11,573 B), <code>doc/agent-permission-defaults.md</code>
+(31/…B), <code>doc/memory-landscape.md</code> (176/10,142 B), <code>doc/SPEC.md</code> §2 (Agent Model), plus code verification.</p>
+<hr>
+<h2 id="0-plain-words-what-the-aissistant-is-in-paperclip">§0 — Plain words: what "the aissistant" is in Paperclip<a href="#batch-02/0-plain-words-what-the-aissistant-is-in-paperclip" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>An agent in Paperclip is <strong>a worker with four separable layers</strong>: a <strong>body</strong> (how it runs — its adapter), a
+<strong>soul</strong> (its persistent files — <code>AGENTS.md</code>, notes, memory), a <strong>cryptographic identity</strong> (Ed25519 keys so
+it can be recognised and authenticated), and a <strong>permission set</strong> (what it may do, granted by default and
+then narrowed). Paperclip deliberately keeps these four apart, and it keeps the <em>soul</em> configurable by the
+adapter rather than baked into the protocol. That separation is the single most transferable thing in this
+batch.</p>
+<hr>
+<h2 id="1-the-four-layers-of-an-agent-verified">§1 — The four layers of an agent (verified)<a href="#batch-02/1-the-four-layers-of-an-agent-verified" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="1-1-the-body-adapters-measured-packages-adapters">1.1 The body — adapters (measured, `packages/adapters/`)<a href="#batch-02/1-1-the-body-adapters-measured-packages-adapters" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>Paperclip&#39;s agent does not have <em>a</em> runtime; it has an <strong>adapter type plus an adapter-specific config blob</strong>
+(<code>doc/SPEC.md:110–118</code>). The shipped adapter packages (measured):</p>
+<p><code>claude-local</code>, <code>codex-local</code>, <code>gemini-local</code>, <code>grok-local</code>, <code>kimi-local</code>, <code>opencode-local</code>, <code>pi-local</code>,
+<code>cursor-local</code>, <code>cursor-cloud</code>, <code>openclaw-gateway</code>, <strong><code>hermes</code></strong>, <strong><code>hermes-gateway</code></strong> — plus the generic
+<code>process</code> and <code>http</code> adapters under <code>server/src/adapters/</code>.</p>
+<p><strong>Every adapter implements exactly three methods</strong> (<code>doc/SPEC.md:262–268</code>): <code>invoke</code>, <code>status</code>, <code>cancel</code>.
+That is the whole contract. <strong>Code verification:</strong> the adapter registry is real —
+<code>server/src/adapters/registry.ts</code>, <code>server/src/adapters/registry.test.ts</code>, <code>server/src/adapters/types.ts</code>,
+and plugins load through <code>server/src/adapters/plugin-loader.ts</code>. <strong>VERIFIED IN CODE.</strong></p>
+<p><strong>Plain gloss:</strong> you can swap an agent&#39;s &quot;body&quot; (Claude Code → Hermes → a bare shell command) without
+changing anything above it, because Paperclip only ever calls the same three verbs. <strong>This is the
+versatility mechanism</strong> — and it is the same &quot;one typed door&quot; idea our own platform arrived at for the
+Hermes integration.</p>
+<p><strong>Cross-study note (Hermes b13/b10):</strong> Hermes positions itself as an <strong>ACP server</strong> and treats other
+runtimes as <em>clients</em>; Paperclip treats every runtime (including Hermes) as an <strong>adapter it drives</strong>. Both
+models exist for the same reason — the boundary must be one narrow interface — but they point in opposite
+directions. Both are viable; the mapping step decides which side our product should stand on.</p>
+<h3 id="1-2-the-soul-persistent-agent-files-measured-doc-agent-files-md">1.2 The soul — persistent agent files (measured, `doc/agent-files.md`)<a href="#batch-02/1-2-the-soul-persistent-agent-files-measured-doc-agent-files-md" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>Each managed agent has <strong>one current directory</strong>, scoped by company and agent, with the layout
+(<code>doc/agent-files.md:14–29</code>):</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>text</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code>&lt;instance&gt;/companies/&lt;company&gt;/agents/&lt;agent&gt;/
+  instructions/          ← current agent files (the Instructions Editor)
+    AGENTS.md            ← the entry file (identity/instructions)
+    notes/               ← ordinary files + nested folders the agent may create
+    any-supported-file
+  file-sync/             ← controller-only operational state (NOT user storage)
+</code></pre>
+</div>
+<p>Load-bearing facts (all measured in that file):</p>
+<ul>
+<li><strong><code>AGENTS.md</code> is the entry file</strong> and <strong>cannot be deleted</strong>; it must stay valid UTF-8, ≤ 1 MiB.</li>
+<li>Agents may <strong>create ordinary files and nested folders</strong> for &quot;notes, memory, and other personal working
+material&quot; (<code>:4</code>). <strong>This is Paperclip&#39;s answer to persona/memory: files in the agent&#39;s own directory.</strong></li>
+<li>The agent runs in a <strong>private working copy</strong> (<code>AGENT_HOME</code>) of those files under the agent lock; the
+canonical folder is restored and diffs are synced back at the stop boundary (<code>:112</code>+, &quot;Run lifecycle&quot;).</li>
+<li>Limits are explicit and bounded: <strong>100,000 entries, 256 MiB/file, 2 GiB total</strong>; symlinks/hardlinks/
+special files <strong>rejected</strong>; storage limits <strong>never pause an agent</strong> (<code>:62–78</code>).</li>
+<li>File-level delta sync, not block-level; canonical manifests <strong>contain no file contents</strong> (<code>:99–104</code>).</li>
+<li><code>canCreateAgents</code> / <code>canCreateSkills</code> and <strong><code>agents:configure</code></strong> govern who may edit whose files
+(<code>doc/agent-permission-defaults.md:9,14–15</code>).</li>
+</ul>
+<p><strong>Plain gloss:</strong> the agent is <strong>a folder with an instruction file at the centre</strong>, versioned per run, and the
+whole thing is inspectable and editable from a UI (&quot;the Instructions Editor&quot;). Persona is <em>files</em>, not a
+database column — and <strong>the adapter decides the file&#39;s meaning</strong> (<code>doc/SPEC.md:112</code>: &quot;SOUL.md … HEARTBEAT.md
+are adapter-specific configurations&quot;).</p>
+<p><strong>Cross-study note (Hermes b13 §3.1):</strong> Hermes has the same primitive (<code>SOUL.md</code> + profile home) but
+<strong>owns the concept centrally</strong>. Paperclip owns the <em>folder and the sync</em> and delegates the <em>meaning</em>.
+Same primitive, opposite ownership — recorded for the mapping step.</p>
+<h3 id="1-3-the-identity-cryptographic-permanent-per-agent-measured">1.3 The identity — cryptographic, permanent, per-agent (measured)<a href="#batch-02/1-3-the-identity-cryptographic-permanent-per-agent-measured" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>doc/AGENT-IDENTITY.md</code> (+ code):</p>
+<ul>
+<li>Agents have <strong>persistent Ed25519 identities</strong>, generated at creation or lazily on next managed run (<code>:1–6</code>).</li>
+<li>Stored in <code>agent_identity_keys</code> (agent home DB); <strong>one identity per agent, company-consistent</strong>; deleting
+an agent cascades to its identity (<code>:10–14</code>).</li>
+<li>Keys are <strong>SPKI PEM (public) / PKCS#8 PEM (private)</strong>; <code>keyId = sha256:</code> + base64url SHA-256 of the public
+SPKI DER (<code>:16–18</code>).</li>
+<li>Private material is <strong>encrypted</strong> via the <code>local_encrypted</code> provider, wrapped by
+<code>PAPERCLIP_SECRETS_MASTER_KEY</code>, file published atomically <code>0600</code> (<code>:18–22</code>).</li>
+<li>Delivered to managed runs as <strong>server-owned env vars</strong>: <code>PAPERCLIP_AGENT_KEY_ID</code>,
+<code>PAPERCLIP_AGENT_PUBLIC_KEY</code>, <code>PAPERCLIP_AGENT_PRIVATE_KEY</code> (<code>:34–40</code>).</li>
+<li><strong>Renames, model changes, pauses, resumes, restarts preserve the keypair</strong>; a bad master key/corrupt
+ciphertext <strong>fails the run and does NOT auto-replace the key</strong> (<code>:24–28</code>).</li>
+</ul>
+<p><strong>Code verification:</strong> <code>server/src/routes/agents.ts:2162</code> (<code>generateKeyPairSync(&quot;ed25519&quot;)</code>),
+<code>server/src/routes/access.ts:538</code>, and the OKP/Ed25519 check in <code>server/src/routes/customer-success.ts:30</code>.
+<strong>VERIFIED IN CODE.</strong></p>
+<p><strong>Plain gloss:</strong> every worker has a <strong>cryptographic passport that survives restarts and is never silently
+replaced</strong>. Note the honest limit the doc states: this &quot;does not grant external authorization or change
+bearer-token access&quot; (<code>:1–6</code> — the key is identity, not permission).</p>
+<h3 id="1-4-the-permissions-defaults-then-narrowing-measured-doc-agent-permission-defaults-md">1.4 The permissions — defaults, then narrowing (measured, `doc/agent-permission-defaults.md`)<a href="#batch-02/1-4-the-permissions-defaults-then-narrowing-measured-doc-agent-permission-defaults-md" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>A new <strong>standard</strong> agent is granted a concrete set by default (<code>:7–17</code>): <code>agents:configure</code>,
+<code>agents:suggest-changes</code>, <code>skills:create</code>, <code>skills:suggest-changes</code>, <code>tools:manage_connections</code>,
+<code>tools:manage_profiles</code>, <code>tools:view_audit</code>, <code>tools:use</code>, <code>tools:manage_runtime</code>,
+<code>audit:view_agent_actions</code>, <code>inbox:manage</code>, <code>tasks:assign</code>, <code>tasks:assign_scope</code>,
+<code>tasks:manage_active_checkouts</code>, plus <code>canCreateAgents</code>/<code>canCreateSkills</code>.</p>
+<p><strong>Deliberately NOT granted</strong> (<code>:19–25</code>): <code>agents:create</code> (as a grant row), <code>environments:manage</code>,
+<code>tools:admin</code>, <code>users:invite</code>, <code>users:manage_permissions</code>, <code>pipelines:write</code>, <code>joins:approve</code>.</p>
+<p>Two design details worth keeping:</p>
+<ol>
+<li><strong>Deny-by-direction on dangerous surfaces:</strong> agent-authenticated callers <strong>cannot</strong> set process-adapter
+config, change host command/args/workdir/sandbox, or <strong>restore host-executed workspace commands through a
+configuration revision</strong> (<code>:25</code>). &quot;This keeps host-executed commands under board control.&quot;</li>
+<li><strong>No silent backfill:</strong> <em>&quot;There is no permission backfill or upgrade migration for existing agents&quot;</em>, and
+<em>&quot;a grant removed by an operator stays removed; ordinary updates and startup do not reapply it&quot;</em> (<code>:29</code>).</li>
+</ol>
+<p><strong>Exceptions:</strong> the rich defaults are <strong>withheld from low-trust agents and managed built-in agents</strong> (<code>:29</code>).</p>
+<p><strong>Plain gloss:</strong> a new worker gets <em>useful</em> powers by default, but <strong>never the powers that let it escape the
+sandbox or rewrite its own execution</strong>, and a human&#39;s decision to revoke a power is <strong>permanent</strong>. This is a
+mature permission posture and belongs in P1.</p>
+<hr>
+<h2 id="2-the-lifecycle-an-implemented-state-machine-verified">§2 — The lifecycle — an implemented state machine (verified)<a href="#batch-02/2-the-lifecycle-an-implemented-state-machine-verified" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>doc/AGENT-LIFECYCLE.md</code> describes hire → verify → ready → pause/resume → terminate as a <strong>real state
+machine</strong>, and it is in code (<code>server/src/modules/agent-lifecycle/</code> with <code>domain/</code>, <code>application/</code>,
+<code>adapters/</code>, <code>__tests__/</code>).</p>
+<p><strong>States (measured, <code>doc/AGENT-LIFECYCLE.md:36–55</code>):</strong></p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>State</th>
+<th>Meaning</th>
+<th>Next</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>pending_approval</code></td>
+<td>hire needs board approval</td>
+<td><code>preparing</code> / <code>rejected</code></td>
+</tr>
+<tr>
+<td><code>preparing</code></td>
+<td>required plugins prepare the agent</td>
+<td><code>verifying</code></td>
+</tr>
+<tr>
+<td><code>verifying</code></td>
+<td>host tests the saved harness config</td>
+<td><code>ready</code></td>
+</tr>
+<tr>
+<td><code>ready</code></td>
+<td>lifecycle permits work</td>
+<td><code>pausing</code> / <code>terminating</code></td>
+</tr>
+<tr>
+<td><code>pausing</code> → <code>paused</code></td>
+<td>host stops work; pause hold</td>
+<td><code>resuming</code> / <code>terminating</code></td>
+</tr>
+<tr>
+<td><code>resuming</code></td>
+<td>plugins restart resources</td>
+<td>(state saved before pause)</td>
+</tr>
+<tr>
+<td><code>terminating</code> → <code>cleaning_up</code> → <code>terminated</code></td>
+<td>revoke keys, stop, remove resources</td>
+<td>none</td>
+</tr>
+<tr>
+<td><code>rejected</code></td>
+<td>board rejected the hire</td>
+<td>none</td>
+</tr>
+</tbody></table></div>
+<p><strong>Code verification:</strong> <code>server/src/modules/agent-lifecycle/index.ts:20</code> defines
+<code>policyStates = [&quot;preparing&quot;,&quot;verifying&quot;,&quot;ready&quot;,&quot;pausing&quot;,&quot;paused&quot;,&quot;resuming&quot;]</code>, and <code>:53</code> reads
+<code>agent.lifecycleState</code>. <strong>VERIFIED IN CODE.</strong></p>
+<p><strong>Design commitments in the lifecycle worth naming:</strong></p>
+<ul>
+<li><strong>Every hire/transition command owns its transaction</strong>; callers never pass a transaction (<code>:6–7</code>).</li>
+<li><strong>Config updates accept only <code>AGENT_CONFIGURATION_FIELDS</code></strong> and <strong>reject identity, company, accounting
+totals, timestamp, lifecycle fields</strong> (<code>:26–29</code>) — the four layers of §1 <strong>cannot be cross-contaminated
+through the config channel</strong>.</li>
+<li><strong>Queue-then-ready:</strong> messages during setup are queued until verification completes; on <code>ready</code> the
+scheduler is asked to dispatch <strong>immediately</strong>, and if dispatch fails <strong>readiness stays committed</strong> and a
+sweep retries — <strong>setup is not repeated</strong> (<code>:57–62</code>).</li>
+<li><strong>Verification is a real probe:</strong> native OpenCode verification &quot;checks the selected model with the real
+hello probe&quot; and authentication failures/unavailable models/timeouts <strong>block readiness</strong> (<code>:64–68</code>).</li>
+<li><strong>A failed command does not save the config change</strong> (<code>updateAndTransition</code>, <code>:88–89</code>).</li>
+</ul>
+<p><strong>Plain gloss:</strong> hiring a worker is not &quot;insert a row&quot; — it is a <strong>gated pipeline</strong> (approve → prepare →
+verify the runtime actually works → ready), and a worker <strong>cannot start work until its body has been proven
+to run</strong>. This is the structural answer to &quot;how do you know a hired agent works?&quot; and it is directly
+relevant to P1 and P3.</p>
+<hr>
+<h2 id="3-memory-a-designed-non-decision-measured-doc-memory-landscape-md">§3 — Memory: a designed *non*-decision (measured, `doc/memory-landscape.md`)<a href="#batch-02/3-memory-a-designed-non-decision-measured-doc-memory-landscape-md" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Paperclip surveyed the memory-tool landscape and <strong>chose not to build one</strong>. Its recommendation (<code>:143–176</code>)
+is a <strong>two-layer model</strong>:</p>
+<ol>
+<li><strong>Paperclip owns the binding + control plane</strong> — which provider is in effect per company/agent/project;
+provenance back to comments/documents/runs/activity; cost/latency reporting; browse surfaces; governance
+on destructive ops.</li>
+<li><strong>The provider adapter owns the engine</strong> — extraction, embeddings, ranking, profile synthesis,
+contradiction resolution, forgetting, storage.</li>
+</ol>
+<p>The <strong>portable core contract stays small</strong> (<code>:135–141</code>): ingest/write, search/recall, browse/inspect, get by
+handle, forget/correct, usage reporting. Optional capability flags cover profile synthesis, async ingest,
+multimodal, tool/skill memory, graph browsing.</p>
+<p><strong>Plain gloss:</strong> Paperclip treats memory like Paperclip treats agents — <strong>a narrow contract with a swappable
+engine behind it</strong>. It explicitly aims to support &quot;a local markdown-first baseline&quot; (like <code>memsearch</code>) up to
+hosted services (<code>mem0</code>, <code>supermemory</code>) <strong>without becoming a monolithic memory engine</strong>.</p>
+<p><strong>Cross-study note (Hermes b04):</strong> Hermes <em>does</em> ship a built-in memory system (files with hard char caps,
+<code>memory_char_limit: 2200</code>). So on memory the two platforms again split: <strong>Hermes owns the engine, Paperclip
+owns only the binding.</strong> Both are defensible; a platform that must integrate many engines leans Paperclip&#39;s
+way, which is the owner&#39;s stated direction. Recorded for the mapping step.</p>
+<hr>
+<h2 id="4-divergences-found-in-this-batch">§4 — Divergences found in this batch <span class="seal-badge" style="background:#fef2f2; color:#dc2626; border-color:#fca5a5; font-size: 0.65em; vertical-align: middle;">⚠️ FINDING NOTE</span><a href="#batch-02/4-divergences-found-in-this-batch" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>No hard doc-vs-code divergences</strong> — every load-bearing claim in §1–§3 that I checked against code held
+(Ed25519 generation, the lifecycle <code>policyStates</code>, the adapter registry and its three-method contract, the
+<code>agent-lifecycle</code> module layout). Two <strong>caveats</strong> are recorded rather than divergences:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Claim</th>
+<th>Reality</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>D1</strong></td>
+<td>SPEC §2 reads as a settled agent model</td>
+<td>Many <code>[DRAFT]</code>/open-questions markers; e.g. &quot;Is this a strict tree or can agents report to multiple managers?&quot; is still open (<code>SPEC.md:229–233</code>)</td>
+<td><strong>Genre caveat</strong> (same as batch 01 D1) — SPEC is intent</td>
+</tr>
+<tr>
+<td><strong>D2</strong></td>
+<td><code>doc/agent-files.md</code> reads as current</td>
+<td>It contains explicit <strong>&quot;Existing installations&quot;</strong> / upgrade sections (<code>:280–311</code>), i.e. the model has already changed once and carries compatibility paths</td>
+<td><strong>Caveat:</strong> the file model is evolving; treat layout specifics as moveable</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="5-carried-forward">§5 — Carried forward<a href="#batch-02/5-carried-forward" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Carry</th>
+<th>To</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>C2-1</strong></td>
+<td><strong>Four separable layers</strong> (body/adapter · soul/files · identity/keys · permissions) that config updates cannot cross-contaminate.</td>
+<td>P1 (core), mapping</td>
+</tr>
+<tr>
+<td><strong>C2-2</strong></td>
+<td><strong>Three-method adapter contract</strong> (<code>invoke</code>/<code>status</code>/<code>cancel</code>) is the whole body interface.</td>
+<td>P1, P3</td>
+</tr>
+<tr>
+<td><strong>C2-3</strong></td>
+<td><strong>Soul = a per-agent folder</strong> with a non-deletable <code>AGENTS.md</code> entry + free-form notes/memory.</td>
+<td>P1</td>
+</tr>
+<tr>
+<td><strong>C2-4</strong></td>
+<td><strong>Persona meaning is adapter-owned</strong>, not protocol-owned (opposite to Hermes).</td>
+<td>P1, mapping</td>
+</tr>
+<tr>
+<td><strong>C2-5</strong></td>
+<td><strong>Persistent Ed25519 identity</strong>, restart-surviving, never auto-replaced, delivered as env vars.</td>
+<td>P1, P3</td>
+</tr>
+<tr>
+<td><strong>C2-6</strong></td>
+<td><strong>Permission defaults that never include escape-the-sandbox powers</strong>, and <strong>revocation is permanent</strong>.</td>
+<td>P1, P2</td>
+</tr>
+<tr>
+<td><strong>C2-7</strong></td>
+<td><strong>Hire is a gated pipeline with a real liveness probe</strong> before <code>ready</code>.</td>
+<td>P1, P3</td>
+</tr>
+<tr>
+<td><strong>C2-8</strong></td>
+<td><strong>Config channel is field-whitelisted</strong> — identity/company/accounting/lifecycle are not settable through it.</td>
+<td>P1, P2</td>
+</tr>
+<tr>
+<td><strong>C2-9</strong></td>
+<td><strong>Memory is a binding + small contract</strong>, engine behind it (markdown-first baseline to hosted).</td>
+<td>P1, PZ</td>
+</tr>
+<tr>
+<td><strong>C2-10</strong></td>
+<td><strong>Agent visual identity</strong> is a real subsystem: <code>AgentAvatar</code>/<code>AgentIdentity</code>/<code>AgentCharacter</code>, 17 palettes, on-demand image API, Storybook-verified, reduced-motion aware.</td>
+<td>PX-W, P1</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="6-value-questions-q1-user-q2-vision">§6 — Value questions (Q1 user / Q2 vision)<a href="#batch-02/6-value-questions-q1-user-q2-vision" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>Q1 — how does this serve a real user use case?</strong>
+It lets a person <strong>hire, trust, and manage a worker without trusting it blindly</strong>: the worker proves it can
+run before it starts; it has a stable identity; it has a private folder the user can read and edit; and it
+gets useful powers but never the ones that would let it escape. For the user, that is the difference between
+an agent you babysit and an agent you can delegate to.</p>
+<p><strong>Q2 — how does this serve an AI-first business &amp; resources planner?</strong>
+Four things are directly reusable for &quot;engineer the agent to be versatile, integratable and rich-featured&quot;:
+(1) the <strong>four-layer separation (C2-1)</strong> — it is the schema for a worker that can be redeployed across
+workspaces/automations/studio without redesign; (2) the <strong>three-method body contract (C2-2)</strong> — the exact
+versatility seam; (3) the <strong>gated hire with a real probe (C2-7)</strong> — a planner must not &quot;employ&quot; a worker it
+has never seen run; (4) <strong>memory-as-binding (C2-9)</strong> — keeps the planner free to switch engines per tenant.
+The one thing Paperclip does that our vision must outgrow is the <strong>single-operator assumption</strong>; P1&#39;s worker
+model is otherwise the cleanest of the three poles&#39; foundations.</p>
+<hr>
+<p><em>Batch 02 of 07 complete. Divergences: 0 (2 caveats). Carried: C2-1…C2-10. Next: <code>03-the-workspace.md</code> (P2).</em></p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="01-platform-overview.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">Platform Overview</span>
+                </a>
+              
+
+              <a href="../index.html#batch-02" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              
+                <a href="03-the-workspace-p2.html" class="nav-page-btn" style="text-align:right;">
+                  <span class="nav-btn-sub">Next Batch →</span>
+                  <span class="nav-btn-title">The Workspace (P2)</span>
+                </a>
+              
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#0-plain-words-what-the-aissistant-is-in-paperclip" class="toc-link">§0 — Plain words: what &quot;the aissistant&quot; is in Paperclip</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#1-the-four-layers-of-an-agent-verified" class="toc-link">§1 — The four layers of an agent (verified)</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#1-1-the-body-adapters-measured-packages-adapters" class="toc-link">1.1 The body — adapters (measured, packages/adapters/)</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#1-2-the-soul-persistent-agent-files-measured-doc-agent-files-md" class="toc-link">1.2 The soul — persistent agent files (measured, doc/agent-files.md)</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#1-3-the-identity-cryptographic-permanent-per-agent-measured" class="toc-link">1.3 The identity — cryptographic, permanent, per-agent (measured)</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#1-4-the-permissions-defaults-then-narrowing-measured-doc-agent-permission-defaults-md" class="toc-link">1.4 The permissions — defaults, then narrowing (measured, doc/agent-permission-defaults.md)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#2-the-lifecycle-an-implemented-state-machine-verified" class="toc-link">§2 — The lifecycle — an implemented state machine (verified)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-memory-a-designed-non-decision-measured-doc-memory-landscape-md" class="toc-link">§3 — Memory: a designed *non*-decision (measured, doc/memory-landscape.md)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-divergences-found-in-this-batch" class="toc-link">§4 — Divergences found in this batch</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-carried-forward" class="toc-link">§5 — Carried forward</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-value-questions-q1-user-q2-vision" class="toc-link">§6 — Value questions (Q1 user / Q2 vision)</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('paperclip_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('paperclip_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('paperclip_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('paperclip_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.PaperclipReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>
