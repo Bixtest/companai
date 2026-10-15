@@ -27,7 +27,7 @@ it is the most honest document in a repo.
 | 2 | Paperclip 0.3.1 | ✅ CLOSED 7/7 | **P2/P3 = strength**, P1 = seam-provider. No multi-tenancy, no widget composer. |
 | 3 | CrewAI 1.15.28 | ✅ CLOSED 7/7 | **Mechanism donor, NOT an architecture template.** Executor yes, **delivery no**, **tenancy nowhere**. |
 | 4 | **Multica 0.2.0** | ✅ **CLOSED 7/7 + reader** | **All three poles real. The closest neighbour studied.** No widget model; no engine of its own. |
-| 5 | **Gas Town 1.2.1** | 🔵 **b00–b06 done** | Go multi-agent orchestration: Town/Rig + **7 TOML roles** + Claude Code in tmux + a Beads ledger. **The watchdog chain is made of agents.** Agents ARE beads; a **13-preset provider registry**; `gt prime` infers the role from the directory; **the Hook is the durability primitive**; **ZFC** = transport, don't decide; **47 embedded TOML formulas** (patrol prose is tested); **a three-layer sandbox** (mTLS CA + denylist / CLI allow-list → 403 / git smart-HTTP proxy); **13 shell-script plugins with "no AI interpretation"**. Frontend = CLI (5× the rest) + Bubble Tea TUI + an HTMX/SSE dashboard; **NO widget model** (4th platform with none). 48% of `internal/` lines are tests. |
+| 5 | **Gas Town 1.2.1** | ✅ **CLOSED 7/7 + reader** | Go multi-agent orchestration. **The watchdog chain is made of agents.** Agents ARE beads; **13-preset provider registry**; `gt prime` infers the role from the directory; **the Hook is the durability primitive**; **ZFC** = transport, don't decide; **47 tested TOML formulas**; **a three-layer sandbox** (mTLS CA + denylist / CLI allow-list → 403 / git smart-HTTP proxy); **13 shell-script plugins, "no AI interpretation"**. Frontend = CLI (5× the rest); **NO widget model** (4th platform with none). **Top 4 ranked mechanisms are DECIDED LIMITS.** |
 | — | n8n, buzz, openrig, mattermost, zulip | ⬜ 5 remain | Order not fixed — **ASK before extracting more.** |
 
 **Multica b01 (`4cf7f35`, 19 findings, 584 lines, 0 CR):** a Go+TS *product*, not a library
@@ -114,9 +114,8 @@ UTF-8); corrected. **The engine was NOT fully platform-agnostic**: 4 hardcoded
 "CrewAI" strings in `generate-reader.js` + `window.CrewAIReader` (a broken gallery
 modal) + a hardcoded `crewai_reader_` storage prefix in `assets/reader.js` — all
 fixed; 0 stale refs.
-**★ NEXT: the GASTOWN study — b00 `c47f47f` … b06 `d14a821` done; batch 07
-(the synthesis) next**, then the gastown reader. Then n8n, buzz, openrig, mattermost,
-zulip — **ASK before extracting more** — then the cross-platform mapping pass.
+**★ NEXT: the remaining FIVE platforms — n8n, buzz, openrig, mattermost, zulip.
+ASK before extracting more.** Then the cross-platform mapping pass.
 
 ## Standing hazards (still bite)
 - **Git-Bash `grep -c $'\r'` LIES** — byte truth is `tr -cd '\r' < f | wc -c`; verify the

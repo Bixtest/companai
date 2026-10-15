@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 04 — Automations (P3) — Gas Town Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-04" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 04</span>
+      <div class="header-title-wrap">
+        <div class="header-title">Automations (P3)</div>
+        <div class="header-subtitle">Gas Town Platform Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/04-automations.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #059669">DONE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">2,933</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">15 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">306</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-15</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 04 Architecture Guide (Default)</option>
+            <optgroup label="Strategic Architecture">
+              <option value="master">Executive Topology: the three poles and four decided limits</option>
+            </optgroup>
+            <optgroup label="Foundations">
+              <option value="00">Batch 00: The pin, the identity hazard, and the test ratio</option>
+              <option value="01">Batch 01: The control plane — CLI, daemon, dashboard</option>
+            </optgroup>
+            <optgroup label="Pole 1 — The Aissistant">
+              <option value="02">Batch 02: The aissistant — an agent is a bead</option>
+            </optgroup>
+            <optgroup label="Pole 2 — The Workspace">
+              <option value="03">Batch 03: The workspace — a filesystem container</option>
+            </optgroup>
+            <optgroup label="Pole 3 — Automations">
+              <option value="04">Batch 04: Automations — formulas, mail, the watchdog chain</option>
+            </optgroup>
+            <optgroup label="Cross-Cutting">
+              <option value="05">Batch 05: Widgets &amp; frontend — and the absent widget model</option>
+            </optgroup>
+            <optgroup label="Escape Hatch">
+              <option value="06">Batch 06: Out-of-pole — sandbox, rotator, plugins</option>
+            </optgroup>
+            <optgroup label="Strategic Decision">
+              <option value="07">Batch 07: The synthesis — mechanisms and decided limits</option>
+            </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 04 VISUAL GUIDE</div>
+    <h4>Automations: workflows as data, and a watchdog chain with a base case</h4>
+    <p>47 tested formulas, a real mail bus, and the answer to who watches the watchers</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 350" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-04" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-04" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+        <marker id="arrr-04" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#ef4444"/>
+        </marker>
+      </defs>
+      <g transform="translate(20, 20)">
+        <rect width="200" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">1 · THE FORMULAS</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">47 .formula.toml embedded</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">convoy · workflow · expansion · aspect</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Pour → durable sub-wisps</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">the PROSE IS TESTED</text>
+      </g>
+      <path d="M 220 95 L 258 95" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-04)"/>
+      <g transform="translate(262, 20)">
+        <rect width="200" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">2 · THE MAIL BUS</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">beads-backed</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">lists · queues · announce</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">queue OR interrupt delivery</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">3s idle-or-queue fallback</text>
+      </g>
+      <path d="M 462 95 L 500 95" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-04)"/>
+      <g transform="translate(504, 20)">
+        <rect width="200" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">3 · THE REFINERY</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">batch-then-bisect</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">batch 5 · wait 30s</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">retry before bisecting</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">safety stop = a bead LABEL</text>
+      </g>
+      <path d="M 704 95 L 742 95" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-04)"/>
+      <g transform="translate(746, 20)">
+        <rect width="154" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">4 · RECOVERY</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">re-dispatch capped at 3</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">5m cooldown</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">then escalate to Mayor</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">the reaper decides NOTHING</text>
+      </g>
+      <rect x="20" y="196" width="880" height="136" rx="10" fill="#7c3aed" fill-opacity="0.08" stroke="#7c3aed" stroke-width="1.6"/>
+      <text x="40" y="222" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#6d28d9">THE WATCHDOG CHAIN — AND ITS NAMED BASE CASE</text>
+      <text x="40" y="248" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">daemon → Boot (a dog, fresh each tick, wakes the Deacon via gt nudge) → Deacon (heartbeat = a FILE, 5m/20m thresholds)</text>
+      <text x="40" y="268" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">→ Witness → Polecat — each level decides whether the level below is alive.</text>
+      <text x="40" y="294" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">THE RECURSION, ANSWERED: Witnesses read the Deacon's agent-bead last_activity TIMESTAMP and escalate only if stale —</text>
+      <text x="40" y="314" font-family="system-ui, sans-serif" font-size="11.5" font-weight="600" fill="#6d28d9">"instead of sending heartbeat mail" (mol-deacon-patrol). The patrol formula is a design document.</text>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="batch-04-automations-p3">Batch 04 — Automations (P3)<a href="#batch-04/batch-04-automations-p3" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Study:</strong> Gas Town <code>1.2.1</code> · <strong>Batch:</strong> 04 of 07 · <strong>Status:</strong> COMPLETE
+<strong>Source:</strong> <code>github.com/gastownhall/gastown</code> → <code>platforms/_extracted/gastown-main</code> (module <code>github.com/steveyegge/gastown</code>)
+<strong>Zip md5:</strong> <code>f2485c1baa647967a31a878224a09503</code> · <strong>Method:</strong> rules 1-10 of <code>00-PIN-AND-METHOD.md</code>.
+Every claim carries <code>file:line</code>. Docs are claims; the code is the authority.</p>
+<hr>
+<h2 id="0-what-this-batch-had-to-answer">0. What this batch had to answer<a href="#batch-04/0-what-this-batch-had-to-answer" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>P3 is <strong>automations</strong> — where agents work on assigned tasks. Batch 01 found the shape (a daemon of named
+dogs, a watchdog chain made of agents). This batch opens the delivery layer up.</p>
+<p>Short answer, measured:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Question</th>
+<th>Gas Town&#39;s answer</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>What <em>is</em> a workflow?</td>
+<td><strong>A TOML formula</strong> — 47 of them embedded in the binary, in four types</td>
+<td>F04-01</td>
+</tr>
+<tr>
+<td>How do agents talk?</td>
+<td><strong>Mail</strong> — a beads-backed bus with addresses, lists, queues, announce channels, and two delivery modes</td>
+<td>F04-02</td>
+</tr>
+<tr>
+<td>How is the system kept alive?</td>
+<td><strong>Patrol formulas</strong> that are themselves design documents — with an <em>Idle Town Principle</em> and an answer to <em>&quot;who watches the watchers&quot;</em></td>
+<td>F04-03</td>
+</tr>
+<tr>
+<td>How is code merged?</td>
+<td>The <strong>Refinery</strong>: a batch-then-bisect merge queue with an operator <strong>safety stop</strong></td>
+<td>F04-04</td>
+</tr>
+<tr>
+<td>What happens when work fails?</td>
+<td><strong>Re-dispatch with a cap</strong>, then escalate to the Mayor; plus stale-hook detection and a reaper</td>
+<td>F04-05</td>
+</tr>
+<tr>
+<td>How do batches of work progress?</td>
+<td><strong>Convoys</strong> that feed the next ready issue <em>reactively</em></td>
+<td>F04-06</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="1-the-formula-library-behaviour-as-data">1. The formula library — behaviour as data<a href="#batch-04/1-the-formula-library-behaviour-as-data" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="1-1-47-formulas-embedded-in-the-binary">1.1 47 formulas, embedded in the binary<a href="#batch-04/1-1-47-formulas-embedded-in-the-binary" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>internal/formula/formulas/</code> holds <strong>47 <code>.formula.toml</code> files</strong>, compiled in (the same <code>go:embed</code>
+pattern as the roles, batch 01 §4). The library is not decoration — it is the product&#39;s whole workflow
+catalogue, and the names show the domain:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Group</th>
+<th>Formulas</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Patrols</strong></td>
+<td><code>mol-deacon-patrol</code>, <code>mol-refinery-patrol</code>, <code>mol-witness-patrol</code>, <code>mol-pr-feedback-patrol</code></td>
+</tr>
+<tr>
+<td><strong>Dogs</strong> (maintenance)</td>
+<td><code>mol-dog-backup</code>, <code>mol-dog-checkpoint</code>, <code>mol-dog-compactor</code>, <code>mol-dog-doctor</code>, <code>mol-dog-jsonl</code>, <code>mol-dog-phantom-db</code>, <code>mol-dog-reaper</code>, <code>mol-dog-stale-db</code></td>
+</tr>
+<tr>
+<td><strong>Polecat work</strong></td>
+<td><code>mol-polecat-work</code>, <code>…-monorepo</code>, <code>…-monorepo-tdd</code>, <code>mol-polecat-lease</code>, <code>mol-polecat-code-review</code>, <code>mol-polecat-conflict-resolve</code>, <code>mol-polecat-review-pr</code></td>
+</tr>
+<tr>
+<td><strong>Convoy</strong></td>
+<td><code>mol-convoy-feed</code>, <code>mol-convoy-cleanup</code></td>
+</tr>
+<tr>
+<td><strong>Boot / shutdown</strong></td>
+<td><code>mol-boot-triage</code>, <code>mol-gastown-boot</code>, <code>mol-shutdown-dance</code>, <code>mol-town-shutdown</code></td>
+</tr>
+<tr>
+<td><strong>Generic workflows</strong></td>
+<td><code>code-review</code>, <code>design</code>, <code>security-audit</code>, <code>tdd-cycle</code>, <code>rule-of-five</code>, <code>shiny</code>, <code>shiny-secure</code>, <code>shiny-enterprise</code>, <code>towers-of-hanoi{,-7,-9,-10}</code></td>
+</tr>
+</tbody></table></div>
+<p><em>(The <code>towers-of-hanoi</code> set is a test fixture — a canonical algorithm shipped as a formula. Named here
+because rule 6 says name everything, including what we would not use.)</em></p>
+<h3 id="1-2-four-formula-types">1.2 Four formula types<a href="#batch-04/1-2-four-formula-types" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>formula/types.go:10-24</code> declares them, with a one-line definition each:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Type</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><code>convoy</code></strong></td>
+<td><em>&quot;Parallel execution of legs with synthesis&quot;</em></td>
+</tr>
+<tr>
+<td><strong><code>workflow</code></strong></td>
+<td><em>&quot;Sequential steps with dependencies&quot;</em></td>
+</tr>
+<tr>
+<td><strong><code>expansion</code></strong></td>
+<td><em>&quot;Template-based step generation&quot;</em></td>
+</tr>
+<tr>
+<td><strong><code>aspect</code></strong></td>
+<td><em>&quot;Multi-aspect parallel analysis (like convoy but for analysis)&quot;</em></td>
+</tr>
+</tbody></table></div>
+<p>The <code>Formula</code> struct (<code>types.go:32-45</code>) carries <code>Name</code>, <code>Description</code>, <code>Type</code>, <code>Version</code>, and three
+fields worth naming:</p>
+<ul>
+<li><strong><code>Pour</code></strong> — <em>&quot;If true, steps are materialized as sub-wisps with checkpoint recovery. Default false
+(inline/root-only).&quot;</em> A formula can be <strong>run inline or poured into the ledger</strong> as durable sub-steps.</li>
+<li><strong><code>Agent</code></strong> — <em>&quot;Default agent for all legs (GH#2118)&quot;</em> — the whole formula runs on one agent unless
+overridden.</li>
+<li><strong><code>ReviewOnly</code></strong> — <em>&quot;If true, all legs are analysis-only — no code commits expected (gt-kvf).&quot;</em> A
+workflow can be declared incapable of writing code.</li>
+</ul>
+<h3 id="1-3-the-formula-s-content-is-tested">1.3 The formula's *content* is tested<a href="#batch-04/1-3-the-formula-s-content-is-tested" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>formula/boot_triage_test.go:9-31</code> asserts that <code>mol-boot-triage.formula.toml</code> <strong>contains</strong>
+<code>gt nudge --mode=immediate deacon &quot;Boot wake: please check your inbox and pending work&quot;</code> and <strong>forbids</strong>
+three strings, including <code>tmux send-keys -t hq-deacon</code> and <code>&quot;sleep 1&quot;</code> — with the failure message
+<em>&quot;boot triage formula still contains forbidden raw tmux wake guidance&quot;</em>.</p>
+<p><strong>The finding:</strong> the platform does not merely ship prose instructions; it <strong>writes tests against the
+prose</strong>, so a documented rule (&quot;Raw tmux send-keys is blocked for Boot&quot;) cannot silently regress. That is
+the strongest form of &quot;behaviour as data&quot; seen in the study.</p>
+<hr>
+<h2 id="2-mail-a-real-message-bus">2. Mail — a real message bus<a href="#batch-04/2-mail-a-real-message-bus" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>internal/mail/</code> (<code>mailbox.go</code>, <code>router.go</code>, <code>delivery.go</code>, <code>resolve.go</code>, <code>store.go</code>, <code>dog_address.go</code>,
+<code>types.go</code>) is <strong>beads-backed messaging</strong>: <em>&quot;Mailbox manages messages for an identity via beads. When
+<code>store</code> is non-nil, beads-mode methods use the in-process <code>beadsdk.Storage</code> directly instead of shelling
+out to the <code>bd</code> CLI&quot;</em> (<code>mailbox.go:32-34</code>).</p>
+<h3 id="2-1-the-addressing-model">2.1 The addressing model<a href="#batch-04/2-1-the-addressing-model" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<ul>
+<li><strong>Addresses are mail-style</strong> (batch 02 §2): <code>gastown/Toast</code>, <code>mayor/</code>, <code>gastown/polecats/Toast</code>.</li>
+<li><strong><code>router.go</code> routes to three kinds of target</strong>, each with its own error: mailing <strong>lists</strong>
+(<code>ErrUnknownList</code>), <strong>queues</strong> (<code>ErrUnknownQueue</code>), and <strong>announce channels</strong> (<code>ErrUnknownAnnounce</code>)
+(<code>router.go:25-31</code>).</li>
+</ul>
+<h3 id="2-2-priorities-types-and-two-delivery-modes">2.2 Priorities, types, and two delivery modes<a href="#batch-04/2-2-priorities-types-and-two-delivery-modes" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>Priorities are <code>low</code> / <code>normal</code> / <code>high</code> / <strong><code>urgent</code></strong>; types are <code>task</code>, <code>escalation</code>,
+<strong><code>scavenge</code></strong> (<em>&quot;optional first-come-first-served work&quot;</em>), <code>notification</code>, <code>reply</code> (<code>types.go:10-46</code>).</p>
+<p>The <strong>delivery mode</strong> is the important part (<code>types.go:52-59</code>):</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Behaviour</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><code>DeliveryQueue</code></strong> <em>(default)</em></td>
+<td>the message waits in the mailbox; <em>&quot;Agent checks with <code>gt mail check</code>&quot;</em></td>
+</tr>
+<tr>
+<td><strong><code>DeliveryInterrupt</code></strong></td>
+<td><em>&quot;injects a system-reminder <strong>directly into the agent&#39;s session</strong>. Use for lifecycle events, URGENT priority, or stuck detection.&quot;</em></td>
+</tr>
+</tbody></table></div>
+<p><strong>So a message can either wait or interrupt the agent mid-turn</strong> — and the code names when interruption
+is appropriate.</p>
+<h3 id="2-3-the-delivery-fallback">2.3 The delivery fallback<a href="#batch-04/2-3-the-delivery-fallback" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>router.go:33-34</code> declares <code>DefaultIdleNotifyTimeout = 3 * time.Second</code> — <em>&quot;how long the router waits for
+a recipient&#39;s session to become idle before falling back to a queued nudge.&quot;</em></p>
+<p><strong>That is batch 03&#39;s ZFC/graceful-degradation principle in the messaging layer:</strong> try to deliver live; if
+the recipient is busy, queue it instead of forcing it.</p>
+<hr>
+<h2 id="3-the-patrol-loops-and-their-prose-is-the-design">3. The patrol loops — and their prose is the design<a href="#batch-04/3-the-patrol-loops-and-their-prose-is-the-design" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="3-1-the-deacon-s-heartbeat-is-a-file">3.1 The Deacon's heartbeat is a file<a href="#batch-04/3-1-the-deacon-s-heartbeat-is-a-file" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>deacon/heartbeat.go:11-40</code>: the Deacon <strong>writes a heartbeat file</strong> each wake cycle
+(<code>Heartbeat{Timestamp, Cycle, LastAction, HealthyAgents, …}</code>), and the <strong>Go daemon reads it</strong> to decide
+whether to poke. Two compiled-in thresholds, <strong>configurable via <code>operational.deacon.*</code></strong>:</p>
+<ul>
+<li><strong>stale = 5 minutes</strong></li>
+<li><strong>very stale = 20 minutes</strong> — and the reason is given: <em>&quot;Must be greater than patrol backoff-max (15m)
+to avoid false positives during legitimate await-signal sleep.&quot;</em></li>
+</ul>
+<p><strong>Plainly:</strong> the watchdog&#39;s liveness is a file the watchdog writes, with a threshold tuned against another
+component&#39;s sleep window — and both numbers are documented.</p>
+<h3 id="3-2-the-patrol-formula-is-a-design-document">3.2 The patrol formula is a design document<a href="#batch-04/3-2-the-patrol-formula-is-a-design-document" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>mol-deacon-patrol.formula.toml</code> is the richest single document found in this study. Its sections:</p>
+<p><strong>&quot;Idle Town Principle&quot;</strong> (<code>:6</code>) — <em>&quot;The Deacon should be <strong>silent/invisible when the town is healthy and
+idle</strong>.&quot;</em> Concretely: skip health nudges when no active work exists; sleep 60+ seconds between cycles;
+<em>&quot;Let the feed subscription wake agents on actual events&quot;</em>; <em>&quot;the daemon (10-minute heartbeat) is the
+safety net for dead sessions.&quot;</em></p>
+<p><strong>&quot;Mayor Nudge Policy&quot;</strong> (<code>:17</code>) — *&quot;<strong>NEVER nudge the Mayor for health checks, pings, or routine
+status.</strong> … Health pings to the Mayor are a <strong>ZFC violation</strong> — they burn Mayor context on ceremony
+instead of work. <strong>The Mayor is your boss, not a subordinate to be monitored.</strong>&quot;*</p>
+<p><strong>&quot;Second-Order Monitoring&quot;</strong> (<code>:28-36</code>) — the answer to the recursion:</p>
+<blockquote>
+<p><em>&quot;Witnesses <strong>passively</strong> monitor Deacon health by checking the Deacon&#39;s agent bead <code>last_activity</code>
+timestamp. This prevents the <strong>&#39;who watches the watchers&#39;</strong> problem — if the Deacon dies, Witnesses
+detect it and escalate to the Mayor. No WITNESS_PING mail is sent … This avoids heartbeat mail spam.&quot;</em></p>
+</blockquote>
+<p><strong>&quot;Abbreviated Patrol Mode&quot;</strong> (<code>:38</code>) — when <code>await-signal</code> reports <code>EFFORT: reduced</code>, most steps are
+<strong>skipped</strong> and only the heartbeat always runs.</p>
+<p><strong>The finding, stated plainly:</strong> the supervision design is not in a design doc — it is in the <strong>patrol
+formula the agent executes</strong>, with a stated idle policy, a stated escalation policy (with the reason:
+<em>don&#39;t burn the boss&#39;s context</em>), and an explicit resolution of the watchdog recursion (monitor the
+<strong>timestamp</strong>, don&#39;t send mail).</p>
+<h3 id="3-3-the-rest-of-the-chain">3.3 The rest of the chain<a href="#batch-04/3-3-the-rest-of-the-chain" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<ul>
+<li><strong>Boot</strong> (<code>boot/boot.go:1-5</code>) — <em>&quot;a dog that runs fresh on each daemon tick, deciding whether to
+wake/nudge/interrupt the Deacon or let it continue.&quot;</em> Its formula (<code>mol-boot-triage</code>) is the one whose
+content is tested (§1.3), and the test forbids <strong>raw tmux wakes</strong> — the wake must go through
+<code>gt nudge</code>.</li>
+<li><strong>Dogs</strong> (<code>dog/manager.go</code>) — <em>&quot;Manager handles dog lifecycle in the kennel&quot;</em>, with errors
+<code>ErrDogExists</code>, <code>ErrDogNotFound</code>, <strong><code>ErrDogWorking</code></strong> (<em>&quot;dog is currently working&quot;</em>), <code>ErrNoRigs</code>,
+<code>ErrInvalidName</code>. Dogs are <strong>addressable</strong> (<code>mail/dog_address.go</code>) and have their own session manager.</li>
+<li><strong>Witness</strong> — per-rig, over the polecats (batch 01 §4.3), with its own patrol formula.</li>
+<li><strong>Stuck detection</strong> (<code>deacon/stuck.go:18-22</code>): ping timeout <strong>30s</strong>, <strong>3</strong> consecutive failures before a
+force-kill, <strong>5m</strong> cooldown between force-kills — all overridable via <code>operational.deacon.*</code>.</li>
+</ul>
+<hr>
+<h2 id="4-the-refinery-the-merge-queue">4. The Refinery — the merge queue<a href="#batch-04/4-the-refinery-the-merge-queue" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>internal/refinery/</code> (<code>batch.go</code>, <code>engineer.go</code>, <code>manager.go</code>, <code>pr_provider*.go</code>, <code>safety_stop.go</code>,
+<code>score.go</code>, <code>terminal_mr.go</code>, <code>work_bead_close.go</code>) is the merge queue, and its <strong>batch config is the
+design</strong> (<code>batch.go:11-26</code>):</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Default</th>
+<th>The comment&#39;s reasoning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>MaxBatchSize</code></td>
+<td><strong>5</strong></td>
+<td>*&quot;Larger batches increase throughput but increase bisection cost <strong>O(log N)</strong>.&quot;*</td>
+</tr>
+<tr>
+<td><code>BatchWaitTime</code></td>
+<td><strong>30s</strong></td>
+<td>how long to wait for the batch to fill; 0 = process immediately</td>
+</tr>
+<tr>
+<td><code>RetryBatchOnFlaky</code></td>
+<td><strong>true</strong></td>
+<td><em>&quot;Retry the full batch once before bisecting when tests fail. This avoids blaming an innocent MR for a flaky test.&quot;</em></td>
+</tr>
+</tbody></table></div>
+<p><strong>So the merge queue is a <em>batch-then-bisect</em> design</strong>, and it explicitly anticipates <strong>flaky tests</strong> as a
+first-class concern rather than an anomaly.</p>
+<p><strong>The operator guard:</strong> <code>refinery/safety_stop.go:14-16</code> — <em>&quot;<code>ErrSafetyStopped</code> is returned when the
+refinery agent bead carries an active <strong>safety-stop label</strong>. The label is the <strong>durable
+operator-cleared guard</strong>.&quot;</em> A human stops the merge queue by <strong>labelling a bead</strong>; it stays stopped until
+a human removes the label. (A <code>SafetyStop</code> carries <code>AgentID</code>, <code>Label</code>, <code>StopID</code>, and <code>Reason()</code>.)</p>
+<p>The Refinery also has <strong>pluggable PR providers</strong> (<code>pr_provider_github.go</code>, <code>pr_provider_bitbucket.go</code>) —
+so the merge target is not hard-coded to one host.</p>
+<hr>
+<h2 id="5-recovery">5. Recovery<a href="#batch-04/5-recovery" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Mechanism</th>
+<th>Shape</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Re-dispatch</strong></td>
+<td>A bead can be re-dispatched up to <strong>3</strong> times, with a <strong>5m</strong> cooldown <em>&quot;to prevent thrashing when a bead keeps killing polecats&quot;</em>; beyond that it <strong>escalates to the Mayor</strong> instead of re-slinging</td>
+<td><code>deacon/redispatch.go:20-28</code></td>
+</tr>
+<tr>
+<td><strong>Stale hooks</strong></td>
+<td>a bead hooked longer than <code>MaxAge</code> is considered stale (with a <code>DryRun</code> mode)</td>
+<td><code>deacon/stale_hooks.go:20-27</code></td>
+</tr>
+<tr>
+<td><strong>The reaper</strong></td>
+<td>SQL cleanup for wisps and issues — and <strong>it makes no decisions</strong></td>
+<td><code>reaper/reaper.go:1-6</code></td>
+</tr>
+<tr>
+<td><strong>Health / keepalive</strong></td>
+<td><code>health/health.go</code>, <code>keepalive/keepalive.go</code></td>
+<td>—</td>
+</tr>
+</tbody></table></div>
+<p><strong>The reaper&#39;s header is the clearest statement of ZFC in code</strong> (<code>reaper.go:1-6</code>):</p>
+<blockquote>
+<p><em>&quot;These functions are the &#39;callable helper functions&#39; for the Dog-driven <code>mol-dog-reaper</code> formula. They
+<strong>execute SQL operations but do not make eligibility decisions</strong> — the Dog (or daemon orchestrator)
+<strong>decides</strong> what to reap, purge, and auto-close based on the formula.&quot;</em></p>
+</blockquote>
+<p><strong>And it carries a retirement</strong> (<code>reaper.go:28-31</code>): <em>&quot;GH#2385: Removed legacy <code>gt</code> and <code>bd</code> names —
+modern towns use <code>hq</code> … their presence in the fallback caused <strong>phantom DB errors</strong>.&quot;</em></p>
+<hr>
+<h2 id="6-convoys-reactive-feeding">6. Convoys — reactive feeding<a href="#batch-04/6-convoys-reactive-feeding" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>convoy/operations.go:1-2</code> — <em>&quot;Package convoy provides convoy tracking operations: finding tracking
+convoys, checking completion, feeding ready issues, and dispatching via <code>gt sling</code>.&quot;</em> And the mechanism
+is stated at <code>:20-24</code>:</p>
+<blockquote>
+<p><em>&quot;<code>CheckConvoysForIssue</code> finds any convoys tracking the given issue and triggers convoy completion
+checks. If the convoy is not complete, it <strong>reactively feeds the next ready issue</strong> to keep the convoy
+progressing <strong>without waiting for polling-based patrol cycles</strong>. The check is <strong>idempotent</strong>.&quot;</em></p>
+</blockquote>
+<p><strong>The finding:</strong> the next unit of work is released <strong>by the completion event</strong>, not by a poll — and the
+operation is explicitly idempotent so it can be called from anywhere.</p>
+<hr>
+<h2 id="7-the-retirement-ledger-rule-10">7. The retirement ledger (rule 10)<a href="#batch-04/7-the-retirement-ledger-rule-10" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Where</th>
+<th>What was retired</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>reaper/reaper.go:28-31</code></td>
+<td>the legacy <code>gt</code> and <code>bd</code> database names in the fallback list</td>
+<td><em>&quot;modern towns use <code>hq</code> … their presence in the fallback caused <strong>phantom DB errors</strong>&quot;</em> (GH#2385)</td>
+</tr>
+<tr>
+<td><code>formula/boot_triage_test.go</code></td>
+<td><strong>raw tmux wake guidance</strong> in the boot formula</td>
+<td>forbidden by test: <em>&quot;Raw tmux send-keys is blocked for Boot&quot;</em></td>
+</tr>
+<tr>
+<td><em>(batch 01/02/03)</em></td>
+<td>roles → TOML; provider switches → a struct; per-agent hook packages → one installer; decision engines removed for ZFC</td>
+<td>—</td>
+</tr>
+</tbody></table></div>
+<p><strong>The first is the most concrete yet:</strong> a <strong>stale database name in a fallback list</strong> produced <em>phantom
+errors</em>, and the fix is recorded with its issue number. A fallback that is never exercised is exactly
+where a stale name survives — the same class of hazard as an unpopulated seam.</p>
+<hr>
+<h2 id="8-findings">8. Findings<a href="#batch-04/8-findings" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Tagged by pole; answered against <strong>Q1 · USER VALUE</strong> and <strong>Q2 · VISION VALUE</strong>.</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Finding</th>
+<th>Pole</th>
+<th>Q1 · User value</th>
+<th>Q2 · Vision value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>F04-01</strong></td>
+<td><strong>47 workflows as embedded TOML formulas</strong>, in four types (convoy/workflow/expansion/aspect), with <code>Pour</code> (durable sub-steps), a default agent, and a review-only mode.</td>
+<td>P3</td>
+<td>Every routine the product knows is inspectable and editable.</td>
+<td>The workflow catalogue is data that ships with the binary.</td>
+</tr>
+<tr>
+<td><strong>F04-02</strong></td>
+<td><strong>The formula&#39;s <em>content</em> is tested</strong> — a test forbids raw tmux wakes in the boot formula.</td>
+<td>P3/PZ</td>
+<td>A documented rule cannot silently regress.</td>
+<td>Prose and tests held together.</td>
+</tr>
+<tr>
+<td><strong>F04-03</strong></td>
+<td><strong>Mail is a real bus</strong>: beads-backed, mail-style addresses, lists/queues/announce, priorities, and <strong>two delivery modes</strong> (queue vs interrupt).</td>
+<td>P3</td>
+<td>Urgent things reach a busy agent; the rest wait.</td>
+<td>Message urgency maps to a delivery strategy.</td>
+</tr>
+<tr>
+<td><strong>F04-04</strong></td>
+<td><strong>The 3-second idle-or-queue fallback</strong> in the router.</td>
+<td>P3</td>
+<td>Nothing is lost when the recipient is mid-task.</td>
+<td>Graceful degradation in the messaging layer.</td>
+</tr>
+<tr>
+<td><strong>F04-05</strong></td>
+<td><strong>The Deacon&#39;s heartbeat is a file</strong>, read by the daemon, with thresholds (5m/20m) tuned against another component&#39;s sleep window and overridable by config.</td>
+<td>P3</td>
+<td>A dead supervisor is detected and poked.</td>
+<td>Liveness with a documented, tunable budget.</td>
+</tr>
+<tr>
+<td><strong>F04-06</strong></td>
+<td><strong>The patrol formula is a design document</strong> — an <em>Idle Town Principle</em>, a <em>Mayor Nudge Policy</em> (nudging the Mayor for health is a <em>&quot;ZFC violation&quot;</em>), and an <strong>explicit answer to &quot;who watches the watchers&quot;</strong> (monitor a timestamp, don&#39;t send mail).</td>
+<td>P3</td>
+<td>The system is quiet when healthy and escalates only real problems.</td>
+<td>The supervision policy is executable, and the recursion is resolved on purpose.</td>
+</tr>
+<tr>
+<td><strong>F04-07</strong></td>
+<td><strong>The watchdog chain has a named base case</strong> — Boot is <em>&quot;a dog that runs fresh on each daemon tick&quot;</em> and must wake the Deacon through <code>gt nudge</code>, never raw tmux.</td>
+<td>P3</td>
+<td>The supervisor restarts itself without a human.</td>
+<td>The recursion is closed by a component that is re-created every tick.</td>
+</tr>
+<tr>
+<td><strong>F04-08</strong></td>
+<td><strong>A batch-then-bisect merge queue</strong> with <code>MaxBatchSize</code>/<code>BatchWaitTime</code>/<code>RetryBatchOnFlaky</code>, and an explicit note that bisection is <code>O(log N)</code> and flaky tests get one retry before anyone is blamed.</td>
+<td>P3</td>
+<td>Merges are fast, and a flaky test does not fail an innocent change.</td>
+<td>Throughput traded against cost, with flakiness designed for.</td>
+</tr>
+<tr>
+<td><strong>F04-09</strong></td>
+<td><strong>An operator safety stop as a bead label</strong> — <em>&quot;the durable operator-cleared guard&quot;</em>.</td>
+<td>P3</td>
+<td>A human can halt merging and it stays halted.</td>
+<td>The stop is in the same durable store as the work.</td>
+</tr>
+<tr>
+<td><strong>F04-10</strong></td>
+<td><strong>Re-dispatch with a cap and a cooldown, then escalation to the Mayor</strong> — <em>&quot;prevents thrashing when a bead keeps killing polecats&quot;</em>.</td>
+<td>P3</td>
+<td>A poisonous task stops cycling and reaches a human.</td>
+<td>Bounded retries with an escalation path.</td>
+</tr>
+<tr>
+<td><strong>F04-11</strong></td>
+<td><strong>The reaper executes SQL but makes no decisions</strong> — the Dog decides, from a formula.</td>
+<td>P3/PZ</td>
+<td>Cleanup is predictable and attributable.</td>
+<td>ZFC stated at the exact point where a helper could have been tempted to decide.</td>
+</tr>
+<tr>
+<td><strong>F04-12</strong></td>
+<td><strong>Convoys feed the next issue reactively</strong>, not on a poll, and the operation is idempotent.</td>
+<td>P3</td>
+<td>Work flows as soon as it is unblocked.</td>
+<td>Event-driven progression with safe re-entry.</td>
+</tr>
+<tr>
+<td><strong>F04-13</strong></td>
+<td><strong>The retirement ledger</strong>: a legacy DB name in a <em>fallback</em> produced phantom errors; raw tmux wakes are forbidden by test.</td>
+<td>PZ</td>
+<td>(indirect) — fewer phantom failures.</td>
+<td>A fallback list is where a stale name hides.</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="9-divergences-and-honest-bounds">9. Divergences and honest bounds <span class="seal-badge" style="background:#fef2f2; color:#dc2626; border-color:#fca5a5; font-size: 0.65em; vertical-align: middle;">⚠️ FINDING NOTE</span><a href="#batch-04/9-divergences-and-honest-bounds" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<ul>
+<li><strong>No doc-vs-code divergence was needed</strong>; the formula prose, the code comments and the tests agree, and
+where a rule exists it is enforced (F04-02).</li>
+<li><strong>Bound:</strong> this batch read the <strong>delivery layer</strong> — the formula library, mail, the patrols, the merge
+queue, recovery, and convoys. It did <strong>not</strong> read the daemon&#39;s own scheduling loop in full
+(<code>daemon/daemon.go</code> is large) nor every formula&#39;s body; the four patrol formulas are the ones read.</li>
+<li><strong>Bound:</strong> <code>refinery/score.go</code>, <code>engineer.go</code> and <code>terminal_mr.go</code> are <strong>named</strong> but not analysed; the
+merge <em>decision</em> logic beyond batching/bisection is not claimed here.</li>
+<li><strong>Bound:</strong> the <code>mol-dog-*</code> formulas are <strong>listed</strong> (8 of them) and the reaper&#39;s contract is read; the
+other seven dogs&#39; bodies are not, and are named rather than half-covered.</li>
+<li><strong>Bound (stated plainly):</strong> the Deacon patrol&#39;s prose is quoted for <strong>what it demands</strong>, which is the
+finding; it is a long document and a later batch could read more of it.</li>
+</ul>
+<hr>
+<h2 id="10-carried-forward-to-batch-07-the-synthesis">10. Carried forward to batch 07 (the synthesis)<a href="#batch-04/10-carried-forward-to-batch-07-the-synthesis" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Three candidates for the highest transferable value, to be ranked in batch 07:</p>
+<ol>
+<li><strong>Workflows as embedded TOML with tested prose (F04-01 / F04-02)</strong> — 47 formulas, four types, and a
+test that forbids a specific instruction from reappearing.</li>
+<li><strong>The patrol formula as an executable design document (F04-06)</strong> — an idle policy, an escalation policy
+with its reason, and a named resolution of the watchdog recursion.</li>
+<li><strong>The batch-then-bisect merge queue with a flaky-test retry and a bead-label safety stop
+(F04-08 / F04-09)</strong> — throughput, cost and operator control in one small config.</li>
+</ol>
+<p>All three are <strong>observations</strong>, not decisions. The cross-platform mapping is a later pass (rule 5).</p>
+<hr>
+<p><em>Batch 04 of 07. Read from source on 2026-10-15. Next: <code>findings/05-widgets-and-frontend.md</code>.</em></p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="03-the-workspace-p2.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">The Workspace (P2)</span>
+                </a>
+              
+
+              <a href="../index.html#batch-04" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              
+                <a href="05-widgets-frontend.html" class="nav-page-btn" style="text-align:right;">
+                  <span class="nav-btn-sub">Next Batch →</span>
+                  <span class="nav-btn-title">Widgets &amp; Frontend</span>
+                </a>
+              
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#0-what-this-batch-had-to-answer" class="toc-link">0. What this batch had to answer</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#1-the-formula-library-behaviour-as-data" class="toc-link">1. The formula library — behaviour as data</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#1-1-47-formulas-embedded-in-the-binary" class="toc-link">1.1 47 formulas, embedded in the binary</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#1-2-four-formula-types" class="toc-link">1.2 Four formula types</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#1-3-the-formula-s-content-is-tested" class="toc-link">1.3 The formula&#039;s *content* is tested</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#2-mail-a-real-message-bus" class="toc-link">2. Mail — a real message bus</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-1-the-addressing-model" class="toc-link">2.1 The addressing model</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-2-priorities-types-and-two-delivery-modes" class="toc-link">2.2 Priorities, types, and two delivery modes</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-3-the-delivery-fallback" class="toc-link">2.3 The delivery fallback</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-the-patrol-loops-and-their-prose-is-the-design" class="toc-link">3. The patrol loops — and their prose is the design</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-1-the-deacon-s-heartbeat-is-a-file" class="toc-link">3.1 The Deacon&#039;s heartbeat is a file</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-2-the-patrol-formula-is-a-design-document" class="toc-link">3.2 The patrol formula is a design document</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-3-the-rest-of-the-chain" class="toc-link">3.3 The rest of the chain</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-the-refinery-the-merge-queue" class="toc-link">4. The Refinery — the merge queue</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-recovery" class="toc-link">5. Recovery</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-convoys-reactive-feeding" class="toc-link">6. Convoys — reactive feeding</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-the-retirement-ledger-rule-10" class="toc-link">7. The retirement ledger (rule 10)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#8-findings" class="toc-link">8. Findings</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#9-divergences-and-honest-bounds" class="toc-link">9. Divergences and honest bounds</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#10-carried-forward-to-batch-07-the-synthesis" class="toc-link">10. Carried forward to batch 07 (the synthesis)</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('gastown_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('gastown_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('gastown_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('gastown_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.GasTownReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 03 — The workspace (P2) — Gas Town Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-03" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 03</span>
+      <div class="header-title-wrap">
+        <div class="header-title">The Workspace (P2)</div>
+        <div class="header-subtitle">Gas Town Platform Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/03-the-workspace.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #059669">DONE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">2,926</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">15 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">331</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-15</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 03 Architecture Guide (Default)</option>
+            <optgroup label="Strategic Architecture">
+              <option value="master">Executive Topology: the three poles and four decided limits</option>
+            </optgroup>
+            <optgroup label="Foundations">
+              <option value="00">Batch 00: The pin, the identity hazard, and the test ratio</option>
+              <option value="01">Batch 01: The control plane — CLI, daemon, dashboard</option>
+            </optgroup>
+            <optgroup label="Pole 1 — The Aissistant">
+              <option value="02">Batch 02: The aissistant — an agent is a bead</option>
+            </optgroup>
+            <optgroup label="Pole 2 — The Workspace">
+              <option value="03">Batch 03: The workspace — a filesystem container</option>
+            </optgroup>
+            <optgroup label="Pole 3 — Automations">
+              <option value="04">Batch 04: Automations — formulas, mail, the watchdog chain</option>
+            </optgroup>
+            <optgroup label="Cross-Cutting">
+              <option value="05">Batch 05: Widgets &amp; frontend — and the absent widget model</option>
+            </optgroup>
+            <optgroup label="Escape Hatch">
+              <option value="06">Batch 06: Out-of-pole — sandbox, rotator, plugins</option>
+            </optgroup>
+            <optgroup label="Strategic Decision">
+              <option value="07">Batch 07: The synthesis — mechanisms and decided limits</option>
+            </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 03 VISUAL GUIDE</div>
+    <h4>The workspace: a filesystem container and its durability primitive</h4>
+    <p>The town is discovered by walking up; config is a four-layer stack; the Hook survives restarts</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 350" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-03" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-03" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+        <marker id="arrr-03" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#ef4444"/>
+        </marker>
+      </defs>
+      <rect x="20" y="20" width="880" height="150" rx="12" fill="var(--surface-card, #ffffff)" fill-opacity="0.4" stroke="#2563eb" stroke-width="2" stroke-dasharray="6,4"/>
+      <text x="40" y="46" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#1d4ed8">THE TOWN IS DISCOVERED, NOT CONFIGURED — walk UP for mayor/town.json</text>
+      <g transform="translate(40, 60)">
+        <rect width="200" height="96" rx="8" fill="var(--surface-card, #ffffff)" stroke="#2563eb" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">TOWN</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">~/gt/ — the management HQ</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">TownConfig = identity only</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">owner email · public name</text>
+      </g>
+      <g transform="translate(256, 60)">
+        <rect width="200" height="96" rx="8" fill="var(--surface-card, #ffffff)" stroke="#2563eb" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">RIG</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">a managed repository</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Polecats · Crew · Witness</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">the org chart is a DIR TREE</text>
+      </g>
+      <g transform="translate(472, 60)">
+        <rect width="200" height="96" rx="8" fill="var(--surface-card, #ffffff)" stroke="#2563eb" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE CONFIG STACK</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">system → town → bead → wisp</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">a returned SOURCE per value</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="#b45309">a local VETO (SourceBlocked)</text>
+      </g>
+      <g transform="translate(688, 60)">
+        <rect width="200" height="96" rx="8" fill="var(--surface-card, #ffffff)" stroke="#2563eb" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE LEDGER</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">durable issues</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">+ ephemeral WISPS</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="#b45309">merged EXPLICITLY</text>
+      </g>
+      <rect x="20" y="196" width="430" height="136" rx="10" fill="#059669" fill-opacity="0.08" stroke="#059669" stroke-width="1.6"/>
+      <text x="38" y="222" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#047857">THE HOOK IS THE DURABILITY PRIMITIVE</text>
+      <text x="38" y="246" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">"work on your hook survives session restarts,</text>
+      <text x="38" y="266" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)"> context compaction, and handoffs" (hook.go:33)</text>
+      <text x="38" y="290" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">The SESSION is ephemeral; the POINTER is not.</text>
+      <text x="38" y="314" font-family="system-ui, sans-serif" font-size="10.5" font-weight="600" fill="#047857">gt sling (keep context) vs gt handoff (fresh context).</text>
+      <rect x="470" y="196" width="430" height="136" rx="10" fill="#7c3aed" fill-opacity="0.08" stroke="#7c3aed" stroke-width="1.6"/>
+      <text x="488" y="222" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#6d28d9">ZFC — ZERO FRAMEWORK COGNITION</text>
+      <text x="488" y="246" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">"Gas Town provides TRANSPORT (tmux, hooks, nudges)</text>
+      <text x="488" y="266" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">but doesn't make decisions for agents."</text>
+      <text x="488" y="290" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">52 in-code references · a changelog of removals</text>
+      <text x="488" y="314" font-family="system-ui, sans-serif" font-size="10.5" font-weight="600" fill="#6d28d9">The clearest stated-and-enforced philosophy in the study.</text>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="batch-03-the-workspace-p2">Batch 03 — The Workspace (P2)<a href="#batch-03/batch-03-the-workspace-p2" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Study:</strong> Gas Town <code>1.2.1</code> · <strong>Batch:</strong> 03 of 07 · <strong>Status:</strong> COMPLETE
+<strong>Source:</strong> <code>github.com/gastownhall/gastown</code> → <code>platforms/_extracted/gastown-main</code> (module <code>github.com/steveyegge/gastown</code>)
+<strong>Zip md5:</strong> <code>f2485c1baa647967a31a878224a09503</code> · <strong>Method:</strong> rules 1-10 of <code>00-PIN-AND-METHOD.md</code>.
+Every claim carries <code>file:line</code>. Docs are claims; the code is the authority.</p>
+<hr>
+<h2 id="0-what-this-batch-had-to-answer">0. What this batch had to answer<a href="#batch-03/0-what-this-batch-had-to-answer" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>P2 is <strong>the workspace</strong> — the container a person operates in. Batch 01 found that Gas Town&#39;s container
+is <strong>the filesystem</strong> (a Town of Rigs of agent directories). This batch opens it up: how the container is
+found and configured, what the &quot;Hook&quot; actually is, how the ledger stores work, and what philosophy holds
+the whole thing together.</p>
+<p>Short answer, measured:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Question</th>
+<th>Gas Town&#39;s answer</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>How is the workspace found?</td>
+<td><strong>By walking up the path</strong> for a marker file (<code>mayor/town.json</code>)</td>
+<td>F03-01</td>
+</tr>
+<tr>
+<td>How is it configured?</td>
+<td>A <strong>4-layer stack</strong> (system → town → bead → wisp) with per-key <em>stacking</em> vs <em>override</em>, and a local <strong>veto</strong></td>
+<td>F03-02</td>
+</tr>
+<tr>
+<td>What is a &quot;Hook&quot;?</td>
+<td><strong>The durability primitive</strong> — a pointer on the agent bead that survives restarts</td>
+<td>F03-03</td>
+</tr>
+<tr>
+<td>How does work survive a restart?</td>
+<td>The agent re-reads its hook <strong>at session start</strong> — the work is never held in the session</td>
+<td>F03-03</td>
+</tr>
+<tr>
+<td>What does the ledger store?</td>
+<td><strong>Two tiers</strong>: durable issues and ephemeral <em>wisps</em>, merged explicitly by readers</td>
+<td>F03-04</td>
+</tr>
+<tr>
+<td>What holds it together?</td>
+<td><strong>ZFC — &quot;Zero Framework Cognition&quot;</strong>: the framework transports, the agent decides</td>
+<td>F03-06</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="1-town-and-rig-the-containers-found-by-path">1. Town and Rig — the containers, found by path<a href="#batch-03/1-town-and-rig-the-containers-found-by-path" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="1-1-the-town-is-discovered-not-configured">1.1 The town is discovered, not configured<a href="#batch-03/1-1-the-town-is-discovered-not-configured" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>workspace/find.go:20-25</code> declares the markers:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>go</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-go">PrimaryMarker   = &quot;mayor/town.json&quot;   // the main config file that identifies a workspace
+SecondaryMarker = &quot;mayor&quot;             // an alternative indicator at the town level
+</code></pre>
+</div>
+<p><code>Find(startDir)</code> <strong>walks up</strong> from the given directory, prefers the primary marker, and — the
+interesting part — <em>&quot;Always continues to the outermost workspace, correctly handling nested workspace
+structures (e.g., rig directories with their own <code>mayor/town.json</code>)&quot;</em> (<code>find.go:27-31</code>).</p>
+<p><strong>Plainly:</strong> a Gas Town workspace is <strong>wherever the path says it is</strong>. There is no registry, no
+connection string, no environment variable required — the tool walks upward until it finds the town, and
+deliberately keeps going so a nested rig cannot shadow the real one.</p>
+<h3 id="1-2-the-config-types-separate-identity-from-behaviour-on-purpose">1.2 The config types separate identity from behaviour, on purpose<a href="#batch-03/1-2-the-config-types-separate-identity-from-behaviour-on-purpose" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>config/types.go</code> defines three distinct town-level types, and the comment states why
+(<code>types.go:26-27</code>): <em>&quot;This is separate from <code>TownConfig</code> (identity) to keep configuration concerns
+distinct.&quot;</em></p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Holds</th>
+<th>Note</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><code>TownConfig</code></strong></td>
+<td><code>Type</code>, <code>Version</code>, <code>Name</code>, <strong><code>Owner</code></strong> (<em>&quot;owner email (entity identity)&quot;</em>), <code>PublicName</code>, <code>CreatedAt</code></td>
+<td><strong>identity only</strong></td>
+</tr>
+<tr>
+<td><strong><code>MayorConfig</code></strong></td>
+<td>theme, daemon settings, deacon settings, <code>DefaultCrewName</code></td>
+<td>town behaviour</td>
+</tr>
+<tr>
+<td><strong><code>TownSettings</code></strong></td>
+<td>CLI theme, <code>DefaultAgent</code>, and agent config applying to all rigs</td>
+<td>town defaults, overridable per rig</td>
+</tr>
+</tbody></table></div>
+<p><strong>The finding:</strong> a town has an <strong>identity</strong> (a name, an owner email, a public name) that is stored
+separately from its <strong>behaviour</strong>. Identity is what other entities address; behaviour is what this
+machine does.</p>
+<hr>
+<h2 id="2-the-config-stack-four-layers-and-a-veto">2. The config stack — four layers, and a veto<a href="#batch-03/2-the-config-stack-four-layers-and-a-veto" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>rig/config.go:13-22</code> declares where a value can come from:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>go</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-go">SourceWisp    = &quot;wisp&quot;    // Local wisp layer (.beads-wisp/config/)
+SourceBead    = &quot;bead&quot;    // Rig identity bead labels
+SourceTown    = &quot;town&quot;    // Town defaults (~/gt/settings/config.json)
+SourceSystem  = &quot;system&quot;  // Compiled-in system defaults
+SourceBlocked = &quot;blocked&quot; // Explicitly blocked at wisp layer
+SourceNone    = &quot;none&quot;
+</code></pre>
+</div>
+<p>And <code>ConfigResult{Value, Source}</code> returns <strong>both the value and where it came from</strong> — so a lookup can
+always answer <em>&quot;why is this setting what it is?&quot;</em></p>
+<p><strong>Two mechanics make it more than a merge:</strong></p>
+<ol>
+<li><strong>Per-key semantics.</strong> <code>rig/config.go:44-45</code>: <em>&quot;<code>StackingKeys</code> defines which keys use <strong>stacking</strong>
+semantics (values add up). All other keys use <strong>override</strong> semantics (first non-nil wins).&quot;</em> So some
+keys accumulate and some replace — declared per key, not globally.</li>
+<li><strong>A veto layer.</strong> <code>SourceBlocked</code> — <em>&quot;Explicitly blocked at wisp layer&quot;</em> — lets the <strong>local,
+never-synced</strong> layer <strong>refuse</strong> a value set above it. The lowest layer can say no.</li>
+</ol>
+<p><strong>Compiled-in defaults</strong> (<code>rig/config.go:34-42</code>) include <code>status: operational</code>, <code>auto_restart: true</code>,
+<code>auto_start_on_up: false</code>, <strong><code>max_polecats: 10</code></strong>, <code>priority_adjustment: 0</code>, <code>dnd: false</code>,
+<code>polecat_branch_template: &quot;&quot;</code>, and <strong><code>default_formula: &quot;mol-polecat-work&quot;</code></strong> — i.e. the default workflow
+for a new polecat is named, not hard-coded.</p>
+<p><strong>Plainly:</strong> configuration is a <strong>stack you can inspect</strong>, with a local veto and per-key arithmetic. It is
+closer to a resolver than to a settings file.</p>
+<hr>
+<h2 id="3-the-hook-the-durability-primitive">3. The Hook — the durability primitive<a href="#batch-03/3-the-hook-the-durability-primitive" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>This is the batch&#39;s most important finding, and the command&#39;s own help states it (<code>cmd/hook.go:33-37</code>):</p>
+<blockquote>
+<p><em>&quot;The hook is the <strong>&#39;durability primitive&#39;</strong> — work on your hook survives session restarts, context
+compaction, and handoffs. When you restart (via <code>gt handoff</code>), your SessionStart hook finds the attached
+work and you continue from where you left off.&quot;</em></p>
+</blockquote>
+<h3 id="3-1-what-a-hook-is-mechanically">3.1 What a hook is, mechanically<a href="#batch-03/3-1-what-a-hook-is-mechanically" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>A hook is <strong>a field on the agent&#39;s bead</strong> — <code>HookBead</code> (batch 02 §1), serialized as the line
+<code>hook_bead: &lt;bead-id&gt;</code> in the agent bead&#39;s description (<code>beads_agent.go:90-93</code>). When it is empty the line
+reads <code>hook_bead: null</code>.</p>
+<p>So the whole mechanism is: <strong>an agent is told which work item it owns, and that pointer is stored in the
+same ledger as the work.</strong></p>
+<h3 id="3-2-why-that-makes-it-durable">3.2 Why that makes it durable<a href="#batch-03/3-2-why-that-makes-it-durable" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>The session is <strong>ephemeral</strong>; the pointer is <strong>not</strong>. On restart, the agent&#39;s session-start hook runs
+<code>gt prime</code> (batch 02 §5.1), which reads the agent bead, finds <code>hook_bead</code>, and hands the agent its work
+back. <strong>Nothing about the agent&#39;s task lives in the session</strong>, so losing the session loses nothing.</p>
+<p>That is what makes the stated principle <strong>GUPP</strong> (<em>&quot;If there is work on your Hook, YOU MUST RUN IT&quot;</em>,
+<code>docs/glossary.md</code>) implementable: &quot;is there work?&quot; is a <strong>field lookup</strong>, not a memory.</p>
+<h3 id="3-3-the-verbs-around-it">3.3 The verbs around it<a href="#batch-03/3-3-the-verbs-around-it" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>cmd/hook.go:41-47</code> names the family, and the distinction between them is the whole point:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Command</th>
+<th>What it does</th>
+<th>Context</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>gt hook &lt;bead&gt;</code></td>
+<td>attach work to a hook (yours, or another agent&#39;s)</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong><code>gt sling &lt;bead&gt;</code></strong></td>
+<td><strong>Hook + start now</strong></td>
+<td><strong>keeps</strong> the current context</td>
+</tr>
+<tr>
+<td><strong><code>gt handoff &lt;bead&gt;</code></strong></td>
+<td><strong>Hook + restart</strong></td>
+<td><strong>fresh</strong> context</td>
+</tr>
+<tr>
+<td><code>gt unsling</code></td>
+<td>remove work from the hook</td>
+<td>—</td>
+</tr>
+</tbody></table></div>
+<p><strong>Plainly:</strong> &quot;assign this work and keep going&quot; and &quot;assign this work and start clean&quot; are <strong>two different
+verbs</strong>, and the difference is exactly the context. A durable pointer makes that choice cheap.</p>
+<hr>
+<h2 id="4-the-ledger-s-two-tiers">4. The ledger's two tiers<a href="#batch-03/4-the-ledger-s-two-tiers" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="4-1-durable-issues-and-ephemeral-wisps">4.1 Durable issues and ephemeral wisps<a href="#batch-03/4-1-durable-issues-and-ephemeral-wisps" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>cmd/hooked_work.go:11-13</code> is explicit:</p>
+<blockquote>
+<p><em>&quot;lists matching <strong>durable issues and ephemeral wisps</strong>. Hooked molecule roots can live in <strong>either
+table</strong>, so active-work readers must <strong>explicitly merge both sources</strong> instead of relying on issue-only
+<code>bd list</code> output.&quot;</em></p>
+</blockquote>
+<p>And the record carries the flag: <code>Issue.Ephemeral</code> — <em>&quot;Wisp/ephemeral issues, not synced to git&quot;</em>
+(<code>beads/beads.go:197</code>); queries pass <code>Ephemeral</code> to choose <em>&quot;search wisps table (ephemeral issues) instead
+of issues table&quot;</em> (<code>beads.go:509</code>).</p>
+<p><strong>So the ledger has two tables with different durability contracts</strong> — one git-synced and shared, one
+local and transient — and the readers are written to merge them. The trap is named in the comment: a
+reader that queries only the durable table <strong>silently misses half the work</strong>.</p>
+<h3 id="4-2-the-work-record">4.2 The work record<a href="#batch-03/4-2-the-work-record" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>beads/beads.go:176-205</code> (the <code>Issue</code> type) is a familiar issue-tracker shape — <code>title</code>, <code>description</code>,
+<code>design</code>, <code>notes</code>, <code>status</code>, <code>priority</code>, <code>type</code>, timestamps, <code>parent</code>, <code>assignee</code>, <code>labels</code> — plus
+<strong>graph fields</strong> (<code>Children</code>, <code>DependsOn</code>, <code>Blocks</code>, <code>BlockedBy</code>), an <code>ExternalRef</code>, and the
+<strong>agent-bead slots</strong> (<code>HookBead</code>, <code>AgentState</code>).</p>
+<p><strong>And the retirement appears a second time</strong>, on this struct too (<code>beads.go:205</code>): <em>&quot;Note: <code>role_bead</code>
+field removed — role definitions are now config-based.&quot;</em> The same deletion is recorded on both the agent
+record and the work record, which is what you would expect if a field was removed from a shared shape.</p>
+<h3 id="4-3-where-the-two-tiers-live">4.3 Where the two tiers live<a href="#batch-03/4-3-where-the-two-tiers-live" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>wisp/types.go:9</code> → <code>WispDir = &quot;.beads&quot;</code>; <code>wisp/config.go:17</code> → <code>WispConfigDir = &quot;.beads-wisp&quot;</code>, described
+as <em>&quot;local-only and never synced via git&quot;</em>. Both sit inside the repo tree; neither is pushed.</p>
+<hr>
+<h2 id="5-git-backed-worktrees-and-a-guard-that-says-no">5. Git-backed: worktrees, and a guard that says no<a href="#batch-03/5-git-backed-worktrees-and-a-guard-that-says-no" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>internal/git/</code> is <em>&quot;a wrapper for git operations via subprocess&quot;</em> (<code>git/git.go:1</code>) — git is driven as a
+command, not linked as a library — and it handles <strong>worktrees</strong> explicitly (<code>git.go:338-339</code>, <code>:416</code>,
+<code>:439</code>).</p>
+<p><strong>Two design decisions are worth naming, and both are stated in the code:</strong></p>
+<ol>
+<li><strong>Errors carry raw output for the agent, deliberately.</strong> <code>GitError</code> holds <code>Command</code>, <code>Args</code>, <code>Stdout</code>,
+<code>Stderr</code> and the underlying error, with the comment (<code>git.go:25-28</code>): <em>&quot;<strong>ZFC:</strong> Callers observe the raw
+output and decide what to do. The error interface methods provide human-readable messages, but <strong>agents
+should use Stdout/Stderr for programmatic observation</strong>.&quot;</em> A git failure is not interpreted for the
+agent; it is <strong>transported</strong> to it.</li>
+<li><strong>A guard refuses to mutate the town root.</strong> <code>ErrUnsafeTownRootGitMutation</code> — <em>&quot;unsafe git mutation
+targets Gas Town town root&quot;</em> (<code>git.go:70-72</code>) — and <code>EnsureSafeMutationWorkDir</code> fails when a mutating
+operation&#39;s effective worktree <strong>is the town root</strong> (<code>git.go:264-276</code>). The platform protects its own
+container from the agents inside it.</li>
+</ol>
+<hr>
+<h2 id="6-zfc-zero-framework-cognition-the-philosophy-stated-in-the-docs">6. ZFC — "Zero Framework Cognition", the philosophy stated in the docs<a href="#batch-03/6-zfc-zero-framework-cognition-the-philosophy-stated-in-the-docs" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>docs/agent-provider-integration.md:619-623</code> defines the platform&#39;s design principle outright:</p>
+<blockquote>
+<p><strong>&quot;### ZFC: Zero Framework Cognition</strong>
+The agent decides what to do with instructions. Gas Town provides <strong>transport</strong> (tmux, hooks, nudges)
+but <strong>doesn&#39;t make decisions for agents</strong>. The interface is about <strong>communication channels, not control
+flow</strong>.&quot;*</p>
+</blockquote>
+<p>And the section immediately after it, <strong>&quot;Graceful Degradation&quot;</strong> (<code>:625-631</code>), is the same principle
+applied to capabilities:</p>
+<blockquote>
+<p><em>&quot;Every capability has a fallback:</em>
+<em>- No hooks? → Startup fallback commands via tmux</em>
+<em>- No prompt mode? → Nudge delivery</em>
+<em>- No resume? → Fresh session with handoff mail</em>
+<em>- No process API? → Tmux pane_current_command&quot;</em></p>
+</blockquote>
+<p><strong>This is the single best explanation of the platform found in the study.</strong> It explains three earlier
+findings at once: why the nudge queue has two delivery paths (batch 02 §5.3), why git errors are handed
+over raw (§5 above), and why the role is inferred from a directory rather than pushed (batch 02 §5.1).
+The framework <strong>moves information</strong>; it does not decide.</p>
+<p><strong>ZFC is not just documented — it is enforced by refactoring.</strong> The token appears <strong>52 times</strong> in
+non-test Go, and the <code>CHANGELOG.md</code> records <strong>removals</strong> made to comply:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Changelog</th>
+<th>What was removed for ZFC</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>:471</code>, <code>:634</code></td>
+<td><em>&quot;<strong>Removed ZFC-violating decision engine</strong>&quot;</em> from Boot triage (twice)</td>
+</tr>
+<tr>
+<td><code>:607</code></td>
+<td><em>&quot;Hardcoded thresholds&quot;</em> → <strong><code>OperationalConfig</code> for config-driven thresholds (ZFC)</strong></td>
+</tr>
+<tr>
+<td><code>:626</code></td>
+<td><em>&quot;Replaced screen-scraping with structured signals&quot;</em> (ZFC violation)</td>
+</tr>
+<tr>
+<td><code>:631</code></td>
+<td><em>&quot;Removed dead <code>findTownRoot</code> filesystem inference&quot;</em> (ZFC)</td>
+</tr>
+<tr>
+<td><code>:794</code></td>
+<td><em>&quot;Remove redundant <code>Status.Running</code> field&quot;</em> (ZFC compliance)</td>
+</tr>
+</tbody></table></div>
+<p><strong>Plainly:</strong> the principle has a name, a definition, a fallback table, and a <strong>history of code deleted to
+honour it</strong>. That combination is rare, and it is the strongest &quot;stated philosophy, enforced&quot; finding in
+the study.</p>
+<hr>
+<h2 id="7-the-autonomous-interactive-split">7. The autonomous / interactive split<a href="#batch-03/7-the-autonomous-interactive-split" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>hookutil/roletype.go:12-22</code> classifies every role, and its comment says it is authoritative:</p>
+<blockquote>
+<p><em>&quot;<code>IsAutonomousRole</code> returns true if the given role operates <strong>without human prompting</strong> and needs
+<strong>automatic mail injection on startup</strong>. Autonomous roles: polecat, witness, refinery, deacon, boot.
+Interactive roles: mayor, crew (and anything else). <strong>This is the single source of truth for the
+autonomous/interactive classification</strong> used by all hook installer packages … and the runtime fallback
+logic.&quot;</em></p>
+</blockquote>
+<p><strong>The finding:</strong> the workspace distinguishes agents <strong>that must be woken with work</strong> from agents <strong>that
+wait for a person</strong>, and that distinction drives what gets injected at startup. It is a two-line function
+that encodes a real product decision — and it is named as the single source of truth, so the hook
+installers cannot drift from it.</p>
+<hr>
+<h2 id="8-the-retirement-ledger-rule-10">8. The retirement ledger (rule 10)<a href="#batch-03/8-the-retirement-ledger-rule-10" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>This batch&#39;s ledger is unusually rich, because the project&#39;s own changelog records the removals:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Where</th>
+<th>What was retired</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>CHANGELOG:471,634</code></td>
+<td>the <strong>Boot triage decision engine</strong></td>
+<td><em>&quot;ZFC-violating&quot;</em> — the framework was deciding</td>
+</tr>
+<tr>
+<td><code>CHANGELOG:631</code></td>
+<td><strong><code>findTownRoot</code> filesystem inference</strong> in the Refinery</td>
+<td>ZFC — dead inference</td>
+</tr>
+<tr>
+<td><code>CHANGELOG:607</code></td>
+<td><strong>hardcoded thresholds</strong></td>
+<td>replaced by <code>OperationalConfig</code> (config-driven)</td>
+</tr>
+<tr>
+<td><code>CHANGELOG:626</code></td>
+<td><strong>screen-scraping</strong> for state</td>
+<td>replaced by structured signals</td>
+</tr>
+<tr>
+<td><code>CHANGELOG:794</code></td>
+<td>the <strong><code>Status.Running</code> field</strong></td>
+<td>ZFC compliance</td>
+</tr>
+<tr>
+<td><code>beads/beads.go:205</code> + <code>beads_agent.go:49</code></td>
+<td>the <strong><code>role_bead</code> field</strong> (on <em>both</em> the work and agent records)</td>
+<td>roles are config-based now</td>
+</tr>
+</tbody></table></div>
+<p><strong>The pattern, now complete across three batches:</strong> Gas Town repeatedly <strong>removes decision-making from
+the framework</strong> — whether that is a field, a threshold, an inference, or a whole triage engine — and moves
+it either <strong>into config</strong> or <strong>to the agent</strong>. The changelog is the ledger of that campaign.</p>
+<hr>
+<h2 id="9-findings">9. Findings<a href="#batch-03/9-findings" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Tagged by pole; answered against <strong>Q1 · USER VALUE</strong> and <strong>Q2 · VISION VALUE</strong>.</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Finding</th>
+<th>Pole</th>
+<th>Q1 · User value</th>
+<th>Q2 · Vision value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>F03-01</strong></td>
+<td><strong>The town is discovered by walking up the path</strong> for <code>mayor/town.json</code>, and the search deliberately continues to the <strong>outermost</strong> match so nested rigs cannot shadow it.</td>
+<td>P2</td>
+<td>It just works from any directory inside the workspace.</td>
+<td>The container is a location, not a record — no registry to keep.</td>
+</tr>
+<tr>
+<td><strong>F03-02</strong></td>
+<td><strong>A 4-layer config stack</strong> (system → town → bead → wisp) with <strong>per-key stacking vs override</strong>, a returned <strong>source</strong>, and a local <strong>veto</strong> (<code>SourceBlocked</code>).</td>
+<td>P2</td>
+<td>A setting can always be explained, and the local machine can refuse one.</td>
+<td>Configuration as a resolver with inspectable provenance.</td>
+</tr>
+<tr>
+<td><strong>F03-03</strong></td>
+<td><strong>The Hook is the durability primitive</strong> — a <code>hook_bead</code> pointer on the agent bead; the session is ephemeral and the work is not.</td>
+<td>P2/P3</td>
+<td>Restart, compaction or handoff never loses the task.</td>
+<td>Durability by re-reading a pointer, not by persisting a session.</td>
+</tr>
+<tr>
+<td><strong>F03-04</strong></td>
+<td><strong><code>sling</code> vs <code>handoff</code></strong> — hook-and-keep-context vs hook-and-restart are two verbs.</td>
+<td>P2/P3</td>
+<td>You choose whether a hand-over keeps the thread.</td>
+<td>The context decision is explicit, not implied.</td>
+</tr>
+<tr>
+<td><strong>F03-05</strong></td>
+<td><strong>A two-tier ledger</strong> — durable issues and ephemeral wisps in separate tables, <strong>merged explicitly</strong>, with the merge trap named in a comment.</td>
+<td>P2</td>
+<td>Scratch work does not pollute the shared history.</td>
+<td>Two durability contracts over one work model.</td>
+</tr>
+<tr>
+<td><strong>F03-06</strong></td>
+<td><strong>ZFC — &quot;Zero Framework Cognition&quot;</strong> — the framework <strong>transports</strong> (tmux, hooks, nudges) and does not decide; with a <strong>graceful-degradation fallback per capability</strong>, 52 in-code references, and a changelog of removals that honour it.</td>
+<td>P2/PZ</td>
+<td>The agent is never second-guessed by the tool.</td>
+<td>A named, enforced design philosophy — the clearest one in the study.</td>
+</tr>
+<tr>
+<td><strong>F03-07</strong></td>
+<td><strong>The autonomous/interactive split</strong> — <code>polecat/witness/refinery/deacon/boot</code> are woken with work; <code>mayor/crew</code> wait for a person; named as the single source of truth.</td>
+<td>P2/P1</td>
+<td>The right agents get moving on their own.</td>
+<td>One classification drives all startup injection.</td>
+</tr>
+<tr>
+<td><strong>F03-08</strong></td>
+<td><strong>Git is a subprocess whose errors carry raw stdout/stderr for the agent</strong>, by stated rule.</td>
+<td>P2</td>
+<td>The agent sees the real failure, not a paraphrase.</td>
+<td>The framework transports a signal instead of interpreting it.</td>
+</tr>
+<tr>
+<td><strong>F03-09</strong></td>
+<td><strong>A guard that refuses to mutate the town root</strong> (<code>ErrUnsafeTownRootGitMutation</code>).</td>
+<td>P2</td>
+<td>An agent cannot wreck the workspace container itself.</td>
+<td>The platform protects its own structure from its agents.</td>
+</tr>
+<tr>
+<td><strong>F03-10</strong></td>
+<td><strong>Town identity is stored apart from town behaviour</strong> (<code>TownConfig</code> vs <code>MayorConfig</code>/<code>TownSettings</code>), with the reason in a comment.</td>
+<td>P2</td>
+<td>A town has a name and an owner that are not settings.</td>
+<td>Identity is a first-class, addressable thing.</td>
+</tr>
+<tr>
+<td><strong>F03-11</strong></td>
+<td><strong>The retirement ledger</strong>: decision engines, inference, thresholds and a field removed <strong>for ZFC</strong> — recorded in the changelog.</td>
+<td>PZ</td>
+<td>(indirect) — less magic in the middle.</td>
+<td>A principle with a deletion history is a principle that is actually held.</td>
+</tr>
+<tr>
+<td><strong>F03-12</strong></td>
+<td><strong>The <code>role_bead</code> removal is recorded on <em>both</em> the work and agent records.</strong></td>
+<td>PZ</td>
+<td>(indirect)</td>
+<td>A shared shape&#39;s deletion is noted everywhere it appeared.</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="10-divergences-and-honest-bounds">10. Divergences and honest bounds <span class="seal-badge" style="background:#fef2f2; color:#dc2626; border-color:#fca5a5; font-size: 0.65em; vertical-align: middle;">⚠️ FINDING NOTE</span><a href="#batch-03/10-divergences-and-honest-bounds" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<ul>
+<li><strong>One doc-vs-code divergence found, and it is minor:</strong> <code>wisp/io.go:10-11</code> says <code>EnsureDir</code> <em>&quot;ensures the
+<code>.beads</code> directory exists&quot;</em> while the constant it uses is <code>WispDir = &quot;.beads&quot;</code> — consistent in code, but
+the wisp layer&#39;s <strong>two</strong> directories (<code>.beads</code> for data, <code>.beads-wisp</code> for config) are easy to confuse.
+Recorded so a later batch does not conflate them.</li>
+<li><strong>Bound:</strong> this batch read the <strong>container</strong> — discovery, config, the hook primitive, the ledger&#39;s two
+tiers, the git guard, the philosophy and the role split. It did <strong>not</strong> read the merge queue, the
+patrols or the scheduler — those are batch 04.</li>
+<li><strong>Bound:</strong> the <code>mol</code> (molecule) subsystem is <strong>named</strong> (<code>molecule.go</code>, <code>molecule_dag.go</code>,
+<code>molecule_attach.go</code>, <code>molecule_await_event.go</code>, …) and its role in the hook is stated, but its internals
+are not; <code>MEOW</code> as a decomposition model is batch 04&#39;s subject.</li>
+<li><strong>Bound (stated plainly):</strong> the ZFC changelog entries are <strong>claims by the project about its own
+history</strong>, and this batch cites them as <em>the project&#39;s account</em>, which is what a changelog is. The code
+evidence — 52 <code>ZFC:</code> comments and the <code>GitError</code> design — is what makes the principle real rather than
+rhetorical.</li>
+</ul>
+<hr>
+<h2 id="11-carried-forward-to-batch-07-the-synthesis">11. Carried forward to batch 07 (the synthesis)<a href="#batch-03/11-carried-forward-to-batch-07-the-synthesis" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Three candidates for the highest transferable value, to be ranked in batch 07:</p>
+<ol>
+<li><strong>The Hook as a durability primitive (F03-03)</strong> — an ephemeral session over a durable pointer, with
+<code>sling</code> and <code>handoff</code> as the two verbs. The cheapest restart-safety mechanism found in the study.</li>
+<li><strong>ZFC (F03-06)</strong> — a named principle (&quot;transport, don&#39;t decide&quot;) with a per-capability fallback table
+and a deletion history. Directly relevant to how our own layer should behave toward an agent.</li>
+<li><strong>The config stack with a local veto (F03-02)</strong> — four layers, per-key arithmetic, a returned source,
+and the lowest layer able to refuse.</li>
+</ol>
+<p>All three are <strong>observations</strong>, not decisions. The cross-platform mapping is a later pass (rule 5).</p>
+<hr>
+<p><em>Batch 03 of 07. Read from source on 2026-10-15. Next: <code>findings/04-automations.md</code>.</em></p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="02-the-aissistant-p1.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">The Aissistant (P1)</span>
+                </a>
+              
+
+              <a href="../index.html#batch-03" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              
+                <a href="04-automations-p3.html" class="nav-page-btn" style="text-align:right;">
+                  <span class="nav-btn-sub">Next Batch →</span>
+                  <span class="nav-btn-title">Automations (P3)</span>
+                </a>
+              
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#0-what-this-batch-had-to-answer" class="toc-link">0. What this batch had to answer</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#1-town-and-rig-the-containers-found-by-path" class="toc-link">1. Town and Rig — the containers, found by path</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#1-1-the-town-is-discovered-not-configured" class="toc-link">1.1 The town is discovered, not configured</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#1-2-the-config-types-separate-identity-from-behaviour-on-purpose" class="toc-link">1.2 The config types separate identity from behaviour, on purpose</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#2-the-config-stack-four-layers-and-a-veto" class="toc-link">2. The config stack — four layers, and a veto</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-the-hook-the-durability-primitive" class="toc-link">3. The Hook — the durability primitive</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-1-what-a-hook-is-mechanically" class="toc-link">3.1 What a hook is, mechanically</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-2-why-that-makes-it-durable" class="toc-link">3.2 Why that makes it durable</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-3-the-verbs-around-it" class="toc-link">3.3 The verbs around it</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-the-ledger-s-two-tiers" class="toc-link">4. The ledger&#039;s two tiers</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-1-durable-issues-and-ephemeral-wisps" class="toc-link">4.1 Durable issues and ephemeral wisps</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-2-the-work-record" class="toc-link">4.2 The work record</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-3-where-the-two-tiers-live" class="toc-link">4.3 Where the two tiers live</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-git-backed-worktrees-and-a-guard-that-says-no" class="toc-link">5. Git-backed: worktrees, and a guard that says no</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-zfc-zero-framework-cognition-the-philosophy-stated-in-the-docs" class="toc-link">6. ZFC — &quot;Zero Framework Cognition&quot;, the philosophy stated in the docs</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-the-autonomous-interactive-split" class="toc-link">7. The autonomous / interactive split</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#8-the-retirement-ledger-rule-10" class="toc-link">8. The retirement ledger (rule 10)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#9-findings" class="toc-link">9. Findings</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#10-divergences-and-honest-bounds" class="toc-link">10. Divergences and honest bounds</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#11-carried-forward-to-batch-07-the-synthesis" class="toc-link">11. Carried forward to batch 07 (the synthesis)</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('gastown_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('gastown_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('gastown_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('gastown_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.GasTownReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

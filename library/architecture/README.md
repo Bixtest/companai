@@ -42,7 +42,7 @@ library/architecture/
 ├── paperclip-forensics/       ← the Paperclip study (DONE, 7 batches + pin) + reader/
 ├── crewai-forensics/          ← the CrewAI study (DONE, 7 batches + pin) + reader/
 ├── multica-forensics/         ← the Multica study (DONE, 7 batches + pin) + reader/
-├── gastown-forensics/         ← the Gas Town study (IN PROGRESS: 00 + findings/01..06)
+├── gastown-forensics/         ← the Gas Town study (DONE, 7 batches + pin) + reader/
 │   ├── 00-PIN-AND-METHOD.md
 │   └── findings/01..07
 ├── reader/                    ← the Hermes reader (HTML)
@@ -61,6 +61,7 @@ one: double-click its `index.html`, or `node serve.js` inside its `reader/` fold
 - **Paperclip reader** → `paperclip-forensics/reader/` (port 3100)
 - **CrewAI reader** → `crewai-forensics/reader/` (port 3200)
 - **Multica reader** → `multica-forensics/reader/` (port 3300)
+- **Gas Town reader** → `gastown-forensics/reader/` (port 3400)
 
 **The markdown is the source of truth.** Readers are generated from it and never edited by hand.
 
@@ -74,7 +75,7 @@ one: double-click its `index.html`, or `node serve.js` inside its `reader/` fold
 | **Paperclip** | `paperclipai/paperclip` | **STUDIED — 7 batches + pin (ancestor of our fork)** |
 | **crewAI** | `crewaiinc/crewai` | **STUDIED — 7 batches + pin + reader** |
 | **multica** | `multica-ai/multica` | **STUDIED — 7 batches + pin + reader (75 findings). The closest neighbour studied: all three poles are real.** |
-| **gastown** | `gastownhall/gastown` | **IN PROGRESS — b00–b06 done; the synthesis (b07) next, then the reader** |
+| **gastown** | `gastownhall/gastown` | **STUDIED — 7 batches + pin + reader (68 findings). Mechanism source + boundary-setting reference.** |
 | n8n | `n8n-io/n8n` | to study |
 | buzz | `block/buzz` | to study |
 | openrig | `mvschwarz/openrig` | to study |
@@ -112,5 +113,4 @@ fixed later.
 
 ---
 
-*Begun 2026-10-15. Hermes, Paperclip, CrewAI and Multica closed; Gas Town in progress (b06 of 07); five
-platforms remain.*
+*Begun 2026-10-15. Hermes, Paperclip, CrewAI, Multica and Gas Town closed; five platforms remain.*

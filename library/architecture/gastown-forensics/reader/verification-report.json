@@ -1,0 +1,107 @@
+{
+  "verifiedAt": "2026-10-15T18:50:50.366Z",
+  "targetDirectory": "library/architecture/gastown-forensics",
+  "totalDocuments": 8,
+  "totalCharacters": 149356,
+  "totalWords": 22954,
+  "totalLines": 2421,
+  "textFidelityGuarantee": "100% Unabridged. Zero words or sections omitted or modified.",
+  "documents": [
+    {
+      "id": "batch-00",
+      "batch": "00",
+      "file": "00-PIN-AND-METHOD.md",
+      "title": "Batch 00 — The pin, the method, and what this study is",
+      "status": "DONE",
+      "chars": 18566,
+      "words": 2796,
+      "lines": 289,
+      "tocCount": 15,
+      "fidelityVerified": true
+    },
+    {
+      "id": "batch-01",
+      "batch": "01",
+      "file": "findings/01-platform-overview.md",
+      "title": "Batch 01 — The platform overview",
+      "status": "DONE",
+      "chars": 20928,
+      "words": 3191,
+      "lines": 335,
+      "tocCount": 22,
+      "fidelityVerified": true
+    },
+    {
+      "id": "batch-02",
+      "batch": "02",
+      "file": "findings/02-the-aissistant.md",
+      "title": "Batch 02 — The aissistant (P1)",
+      "status": "DONE",
+      "chars": 20928,
+      "words": 3099,
+      "lines": 337,
+      "tocCount": 17,
+      "fidelityVerified": true
+    },
+    {
+      "id": "batch-03",
+      "batch": "03",
+      "file": "findings/03-the-workspace.md",
+      "title": "Batch 03 — The workspace (P2)",
+      "status": "DONE",
+      "chars": 19557,
+      "words": 2926,
+      "lines": 331,
+      "tocCount": 20,
+      "fidelityVerified": true
+    },
+    {
+      "id": "batch-04",
+      "batch": "04",
+      "file": "findings/04-automations.md",
+      "title": "Batch 04 — Automations (P3)",
+      "status": "DONE",
+      "chars": 19435,
+      "words": 2933,
+      "lines": 306,
+      "tocCount": 20,
+      "fidelityVerified": true
+    },
+    {
+      "id": "batch-05",
+      "batch": "05",
+      "file": "findings/05-widgets-and-frontend.md",
+      "title": "Batch 05 — Widgets and the frontend (PX-W / PX-F)",
+      "status": "DONE",
+      "chars": 13223,
+      "words": 2052,
+      "lines": 233,
+      "tocCount": 17,
+      "fidelityVerified": true
+    },
+    {
+      "id": "batch-06",
+      "batch": "06",
+      "file": "findings/06-out-of-pole.md",
+      "title": "Batch 06 — Out-of-pole findings (PZ)",
+      "status": "DONE",
+      "chars": 12790,
+      "words": 1946,
+      "lines": 234,
+      "tocCount": 16,
+      "fidelityVerified": true
+    },
+    {
+      "id": "batch-07",
+      "batch": "07",
+      "file": "findings/07-SYNTHESIS.md",
+      "title": "Batch 07 — The synthesis",
+      "status": "COMPLETE",
+      "chars": 23929,
+      "words": 4011,
+      "lines": 356,
+      "tocCount": 15,
+      "fidelityVerified": true
+    }
+  ]
+}

@@ -1,0 +1,1484 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gas Town Platform Study — Executive Master Reader</title>
+  <link rel="stylesheet" href="assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <!-- Reading Progress Bar -->
+  <div id="readingProgressBar"></div>
+
+  <!-- Master App Header -->
+  <header class="app-header">
+    <div class="header-left">
+      <button class="tool-btn" id="sidebarToggleBtn" aria-label="Toggle Navigation" title="Toggle Documents Menu">☰</button>
+      <span class="brand-badge">Forensics</span>
+      <div class="header-title-wrap">
+        <div class="header-title">Gas Town Platform Study <span style="font-size:0.75rem; color:var(--text-muted); font-weight:normal;">(Upstream Gas Town 1.2.1 — a single-machine Go harness for driving AI coding agents)</span></div>
+        <div class="header-subtitle">8 Unabridged Batches • 1,231 Go Files / 474,724 Lines • 292 CLI Commands • Verified-Code Authority</div>
+      </div>
+    </div>
+
+    <!-- Header Controls -->
+    <div class="header-controls">
+      <!-- Font Size Slider Group -->
+      <div class="font-slider-group" title="Adjust reading font size relatively">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn" title="Decrease font size (A-)">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider" aria-label="Font Size">
+        <button class="font-btn" id="fontIncBtn" title="Increase font size (A+)">A+</button>
+        <button class="font-btn" id="fontResetBtn" title="Reset font size to 16px" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <!-- Font Family Switcher -->
+      <select id="fontSelect" class="tool-btn" style="cursor:pointer;" title="Switch font typography">
+        <option value="sans">Modern Sans</option>
+        <option value="serif">Classic Serif</option>
+        <option value="mono">Technical Mono</option>
+      </select>
+
+      <!-- Reading Width Switcher -->
+      <select id="widthSelect" class="tool-btn" style="cursor:pointer;" title="Adjust reading column width">
+        <option value="reading">Column: Reading (760px)</option>
+        <option value="standard" selected>Column: Standard (900px)</option>
+        <option value="wide">Column: Wide (1180px)</option>
+        <option value="full">Column: Full Width</option>
+      </select>
+
+      <!-- Theme Selector -->
+      <div class="theme-selector" title="Choose color theme">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <!-- Architecture Guides Button -->
+      <button class="tool-btn" id="headerGalleryBtn" title="Explore all 9 visual architecture guides (Press 'A')">
+        <span>🏛️</span>
+        <span>Architecture Guides</span>
+        <kbd style="font-size:0.68rem; background:var(--border-color); padding:0.1rem 0.3rem; border-radius:3px;">A</kbd>
+      </button>
+
+      <!-- Search Trigger -->
+      <button class="tool-btn" id="searchTrigger" title="Search all 8 documents (Press '/')">
+        <span>🔍</span>
+        <span>Search</span>
+        <kbd style="font-size:0.68rem; background:var(--border-color); padding:0.1rem 0.3rem; border-radius:3px;">/</kbd>
+      </button>
+    </div>
+  </header>
+
+  <!-- App Main Layout -->
+  <div class="app-layout">
+    <!-- Left Navigation Sidebar -->
+    <aside class="sidebar-left" id="sidebarLeft">
+      <div class="sidebar-search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="sidebarFilterInput" class="search-input" placeholder="Filter batches...">
+      </div>
+
+      <nav class="sidebar-docs-list" id="sidebarDocsList">
+        
+    <a href="#batch-00" class="doc-nav-item active" data-id="batch-00">
+      <div class="doc-nav-item-top">
+        <span class="doc-nav-batch">Batch 00</span>
+        <span class="doc-nav-badge badge-done">DONE</span>
+      </div>
+      <div class="doc-nav-title">The Pin &amp; Method</div>
+      <div class="doc-nav-meta">
+        <span>2,796 words</span>
+        <span>•</span>
+        <span>14 min</span>
+      </div>
+    </a>
+  
+
+    <a href="#batch-01" class="doc-nav-item " data-id="batch-01">
+      <div class="doc-nav-item-top">
+        <span class="doc-nav-batch">Batch 01</span>
+        <span class="doc-nav-badge badge-done">DONE</span>
+      </div>
+      <div class="doc-nav-title">Platform Overview</div>
+      <div class="doc-nav-meta">
+        <span>3,191 words</span>
+        <span>•</span>
+        <span>16 min</span>
+      </div>
+    </a>
+  
+
+    <a href="#batch-02" class="doc-nav-item " data-id="batch-02">
+      <div class="doc-nav-item-top">
+        <span class="doc-nav-batch">Batch 02</span>
+        <span class="doc-nav-badge badge-done">DONE</span>
+      </div>
+      <div class="doc-nav-title">The Aissistant (P1)</div>
+      <div class="doc-nav-meta">
+        <span>3,099 words</span>
+        <span>•</span>
+        <span>15 min</span>
+      </div>
+    </a>
+  
+
+    <a href="#batch-03" class="doc-nav-item " data-id="batch-03">
+      <div class="doc-nav-item-top">
+        <span class="doc-nav-batch">Batch 03</span>
+        <span class="doc-nav-badge badge-done">DONE</span>
+      </div>
+      <div class="doc-nav-title">The Workspace (P2)</div>
+      <div class="doc-nav-meta">
+        <span>2,926 words</span>
+        <span>•</span>
+        <span>15 min</span>
+      </div>
+    </a>
+  
+
+    <a href="#batch-04" class="doc-nav-item " data-id="batch-04">
+      <div class="doc-nav-item-top">
+        <span class="doc-nav-batch">Batch 04</span>
+        <span class="doc-nav-badge badge-done">DONE</span>
+      </div>
+      <div class="doc-nav-title">Automations (P3)</div>
+      <div class="doc-nav-meta">
+        <span>2,933 words</span>
+        <span>•</span>
+        <span>15 min</span>
+      </div>
+    </a>
+  
+
+    <a href="#batch-05" class="doc-nav-item " data-id="batch-05">
+      <div class="doc-nav-item-top">
+        <span class="doc-nav-batch">Batch 05</span>
+        <span class="doc-nav-badge badge-done">DONE</span>
+      </div>
+      <div class="doc-nav-title">Widgets &amp; Frontend</div>
+      <div class="doc-nav-meta">
+        <span>2,052 words</span>
+        <span>•</span>
+        <span>10 min</span>
+      </div>
+    </a>
+  
+
+    <a href="#batch-06" class="doc-nav-item " data-id="batch-06">
+      <div class="doc-nav-item-top">
+        <span class="doc-nav-batch">Batch 06</span>
+        <span class="doc-nav-badge badge-done">DONE</span>
+      </div>
+      <div class="doc-nav-title">Out-of-Pole (PZ)</div>
+      <div class="doc-nav-meta">
+        <span>1,946 words</span>
+        <span>•</span>
+        <span>10 min</span>
+      </div>
+    </a>
+  
+
+    <a href="#batch-07" class="doc-nav-item " data-id="batch-07">
+      <div class="doc-nav-item-top">
+        <span class="doc-nav-batch">Batch 07</span>
+        <span class="doc-nav-badge badge-complete">COMPLETE</span>
+      </div>
+      <div class="doc-nav-title">The Synthesis</div>
+      <div class="doc-nav-meta">
+        <span>4,011 words</span>
+        <span>•</span>
+        <span>20 min</span>
+      </div>
+    </a>
+  
+      </nav>
+
+      <div class="sidebar-footer">
+        <span>8 Batches • 68 Findings</span>
+        <span>Three-Pole Frame</span>
+      </div>
+    </aside>
+
+    <!-- Workspace Main Reader -->
+    <main class="reader-workspace">
+      <!-- Sub-header bar inside reader -->
+      <div class="reader-sub-header">
+        <div class="sub-header-left">
+          <span style="font-weight: 700; color: var(--primary);">Document View:</span>
+          <div class="view-toggle-wrap">
+            <button class="view-toggle-btn active" id="viewRenderedBtn">Rendered Reading View</button>
+            <button class="view-toggle-btn" id="viewRawBtn">Verbatim Raw Markdown</button>
+          </div>
+        </div>
+
+        <div class="sub-header-right">
+          <button class="tool-btn" id="readerGalleryBtn" style="font-size:0.75rem; padding: 0.25rem 0.6rem;" title="Explore all architecture guides">
+            <span>🏛️ Architecture Explorer</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Scrolling Reader Canvas -->
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <!-- Document Seal & Metadata Card -->
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • ZERO CONTENT OMITTED</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">Gas Town Extract Pin</span>
+              </div>
+              <div class="seal-stats-grid" id="docSealStats">
+                
+    <div class="seal-stat-item">
+      <span class="stat-label">Document Status</span>
+      <span class="stat-value" style="color: #d97706">DONE</span>
+    </div>
+    <div class="seal-stat-item">
+      <span class="stat-label">Text Fidelity</span>
+      <span class="stat-value" style="color: #059669;">100% UNABRIDGED</span>
+    </div>
+    <div class="seal-stat-item">
+      <span class="stat-label">Word Count</span>
+      <span class="stat-value">2,796</span>
+    </div>
+    <div class="seal-stat-item">
+      <span class="stat-label">Est. Reading Time</span>
+      <span class="stat-value">14 min</span>
+    </div>
+    <div class="seal-stat-item">
+      <span class="stat-label">Source Lines</span>
+      <span class="stat-value">289</span>
+    </div>
+    <div class="seal-stat-item">
+      <span class="stat-label">Verified Date</span>
+      <span class="stat-value">2026-10-15</span>
+    </div>
+  
+              </div>
+            </div>
+
+            <!-- Explanatory Graphical Representation Section -->
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Document Default Architecture Guide</option>
+            <optgroup label="Strategic Architecture">
+              <option value="master">Executive Topology: the three poles and four decided limits</option>
+            </optgroup>
+            <optgroup label="Foundations">
+              <option value="00">Batch 00: The pin, the identity hazard, and the test ratio</option>
+              <option value="01">Batch 01: The control plane — CLI, daemon, dashboard</option>
+            </optgroup>
+            <optgroup label="Pole 1 — The Aissistant">
+              <option value="02">Batch 02: The aissistant — an agent is a bead</option>
+            </optgroup>
+            <optgroup label="Pole 2 — The Workspace">
+              <option value="03">Batch 03: The workspace — a filesystem container</option>
+            </optgroup>
+            <optgroup label="Pole 3 — Automations">
+              <option value="04">Batch 04: Automations — formulas, mail, the watchdog chain</option>
+            </optgroup>
+            <optgroup label="Cross-Cutting">
+              <option value="05">Batch 05: Widgets &amp; frontend — and the absent widget model</option>
+            </optgroup>
+            <optgroup label="Escape Hatch">
+              <option value="06">Batch 06: Out-of-pole — sandbox, rotator, plugins</option>
+            </optgroup>
+            <optgroup label="Strategic Decision">
+              <option value="07">Batch 07: The synthesis — mechanisms and decided limits</option>
+            </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <button type="button" class="tool-btn" id="openGalleryBtn" title="Explore all 9 visual architecture guides">
+                    <span>🏛️ All Guides</span>
+                  </button>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">EXECUTIVE ARCHITECTURE MAP</div>
+    <h4>Gas Town Platform Study Topology: three poles, and four decided limits</h4>
+    <p>Where each studied mechanism lands, and the boundaries the platform states about itself</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 960 520" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-m" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-m" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+        <marker id="arrr-m" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#ef4444"/>
+        </marker>
+      </defs>
+
+      <!-- Outer boundary -->
+      <rect x="20" y="20" width="920" height="480" rx="16" fill="var(--surface-card, #ffffff)" fill-opacity="0.4" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" stroke-dasharray="6,4"/>
+      <text x="45" y="52" font-family="system-ui, sans-serif" font-size="16" font-weight="700" fill="var(--diagram-accent, #7c3aed)">GAS TOWN 1.2.1 — A SINGLE-MACHINE GO HARNESS FOR DRIVING AI CODING AGENTS</text>
+      <text x="45" y="72" font-family="system-ui, sans-serif" font-size="12" fill="var(--text-muted, #64748b)">1,231 Go files / 474,724 lines · 77 packages · 292 CLI commands · 46 % of Go files are tests</text>
+
+      <!-- POLE 1 -->
+      <g transform="translate(45, 100)">
+        <rect width="270" height="250" rx="12" fill="var(--surface-card, #ffffff)" stroke="#7c3aed" stroke-width="1.8"/>
+        <rect x="14" y="14" width="118" height="22" rx="4" fill="#7c3aed" fill-opacity="0.15"/>
+        <text x="20" y="30" font-family="system-ui, sans-serif" font-size="10.5" font-weight="700" fill="#6d28d9">POLE 1 — AISASSISTANT</text>
+        <text x="14" y="60" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="var(--text-primary, #0f172a)">An agent is a bead</text>
+        <text x="14" y="82" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">Everything about it is data</text>
+        <text x="14" y="106" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• fields in the description (b02)</text>
+        <text x="14" y="124" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• identity = a mail address (b02)</text>
+        <text x="14" y="142" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• 13-preset registry (b02)</text>
+        <text x="14" y="160" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• gt prime reads the dir (b02)</text>
+        <rect x="14" y="176" width="242" height="20" rx="4" fill="#ef4444" fill-opacity="0.13"/>
+        <text x="22" y="190" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#b91c1c">No engine of its own — CLIs only</text>
+        <text x="14" y="216" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-muted, #64748b)">The provider is always an</text>
+        <text x="14" y="232" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-muted, #64748b)">external process the host runs</text>
+      </g>
+
+      <!-- POLE 2 -->
+      <g transform="translate(345, 100)">
+        <rect width="270" height="250" rx="12" fill="var(--surface-card, #ffffff)" stroke="#2563eb" stroke-width="1.8"/>
+        <rect x="14" y="14" width="108" height="22" rx="4" fill="#2563eb" fill-opacity="0.15"/>
+        <text x="20" y="30" font-family="system-ui, sans-serif" font-size="10.5" font-weight="700" fill="#1d4ed8">POLE 2 — WORKSPACE</text>
+        <text x="14" y="60" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="var(--text-primary, #0f172a)">A filesystem workspace</text>
+        <text x="14" y="82" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">Discovered by walking up the path</text>
+        <text x="14" y="106" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• 4-layer config + a veto (b03)</text>
+        <text x="14" y="124" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• THE HOOK = durability (b03)</text>
+        <text x="14" y="142" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• durable + ephemeral wisps (b03)</text>
+        <text x="14" y="160" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• identity ≠ behaviour (b03)</text>
+        <rect x="14" y="176" width="242" height="20" rx="4" fill="#ef4444" fill-opacity="0.13"/>
+        <text x="22" y="190" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#b91c1c">One mayor per machine</text>
+        <text x="14" y="216" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-muted, #64748b)">Multi-town needs containers/VMs —</text>
+        <text x="14" y="232" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-muted, #64748b)">stated outright in the code</text>
+      </g>
+
+      <!-- POLE 3 -->
+      <g transform="translate(645, 100)">
+        <rect width="270" height="250" rx="12" fill="var(--surface-card, #ffffff)" stroke="#059669" stroke-width="1.8"/>
+        <rect x="14" y="14" width="118" height="22" rx="4" fill="#059669" fill-opacity="0.15"/>
+        <text x="20" y="30" font-family="system-ui, sans-serif" font-size="10.5" font-weight="700" fill="#047857">POLE 3 — AUTOMATIONS</text>
+        <text x="14" y="60" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="var(--text-primary, #0f172a)">A real delivery layer</text>
+        <text x="14" y="82" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">And the supervision is a document</text>
+        <text x="14" y="106" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• 47 TOML formulas, tested (b04)</text>
+        <text x="14" y="124" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• mail: queue OR interrupt (b04)</text>
+        <text x="14" y="142" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• batch-then-bisect merge (b04)</text>
+        <text x="14" y="160" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• capped re-dispatch → Mayor (b04)</text>
+        <rect x="14" y="176" width="242" height="20" rx="4" fill="#10b981" fill-opacity="0.14"/>
+        <text x="22" y="190" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#047857">The watchdog chain has a base case</text>
+        <text x="14" y="216" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-muted, #64748b)">daemon → Boot → Deacon →</text>
+        <text x="14" y="232" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-muted, #64748b)">Witness → Polecat</text>
+      </g>
+
+      <!-- Bottom band: the decided limits -->
+      <g transform="translate(45, 370)">
+        <rect width="880" height="52" rx="10" fill="#7c3aed" fill-opacity="0.08" stroke="#7c3aed" stroke-width="1.6"/>
+        <text x="18" y="24" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#6d28d9">GAS TOWN — A MECHANISM SOURCE AND A BOUNDARY-SETTING REFERENCE</text>
+        <text x="18" y="43" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Take the Hook, ZFC, the three-layer sandbox, the registry, the tested formulas. Treat its refusals as signposts.</text>
+      </g>
+
+      <g transform="translate(45, 432)">
+        <rect width="430" height="52" rx="10" fill="#ef4444" fill-opacity="0.08" stroke="#ef4444" stroke-width="1.6"/>
+        <text x="16" y="22" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#b91c1c">ABSENT — TENANCY & ENGINE</text>
+        <text x="16" y="42" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">One town per machine; the ledger is Beads (external); the engine is the user's CLI.</text>
+      </g>
+
+      <g transform="translate(495, 432)">
+        <rect width="430" height="52" rx="10" fill="#ef4444" fill-opacity="0.08" stroke="#ef4444" stroke-width="1.6"/>
+        <text x="16" y="22" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#b91c1c">ABSENT — COMPOSITION & A SCHEDULER</text>
+        <text x="16" y="42" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">No widget model (0 composers); patrols are prompts + ticks, not a job graph.</text>
+      </g>
+    </svg>
+  </div>
+</div><br/>
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 00 VISUAL GUIDE</div>
+    <h4>The pin, the identity hazard, and the test-ratio hazard</h4>
+    <p>How the extract was pinned, why two identities disagree, and why every line count must state its basis</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 320" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-00" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-00" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+        <marker id="arrr-00" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#ef4444"/>
+        </marker>
+      </defs>
+      <g transform="translate(20, 20)">
+        <rect width="200" height="120" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">STEP 1: THE EXTRACT</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">An extract, not a clone</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">No .git — identity is the ZIP</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">1,737 entries / 1,563 files</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">md5 f2485c1b… pinned</text>
+      </g>
+      <path d="M 220 80 L 258 80" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-00)"/>
+      <g transform="translate(262, 20)">
+        <rect width="200" height="120" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">STEP 2: IDENTITY</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">REPO: gastownhall/gastown</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">MODULE: steveyegge/gastown</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">npm @gastown/gt 1.2.1</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#b45309">Re-homed, path not rewritten</text>
+      </g>
+      <path d="M 462 80 L 500 80" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-00)"/>
+      <g transform="translate(504, 20)">
+        <rect width="200" height="120" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">STEP 3: THE SHAPE</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">1,231 .go / 474,724 lines</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">77 package directories</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">cmd/ = 697 lines, 3 binaries</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">CLI-dominant, not docs</text>
+      </g>
+      <path d="M 704 80 L 742 80" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-00)"/>
+      <g transform="translate(746, 20)">
+        <rect width="154" height="120" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">STEP 4: THE FRAME</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">P1 aissistant</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">P2 workspace</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">P3 automations</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">+ PX widgets/front</text>
+      </g>
+      <rect x="20" y="170" width="880" height="130" rx="10" fill="#7c3aed" fill-opacity="0.08" stroke="#7c3aed" stroke-width="1.6"/>
+      <text x="40" y="198" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#6d28d9">THE HAZARD THAT CHANGES EVERY COUNT — 46 % OF GO FILES ARE TESTS</text>
+      <text x="40" y="224" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">568 of 1,231 Go files are _test.go. In internal/ the split is 247,851 production vs 225,046 test lines.</text>
+      <text x="40" y="244" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">A "lines of Go" reading is HALF TEST CODE unless it says otherwise — every count in this study states its basis.</text>
+      <text x="40" y="268" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">Rule 1 applies as a habit, not a suspicion: the docs here are excellent and almost true.</text>
+      <text x="40" y="288" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#6d28d9">The highest test ratio of any platform studied.</text>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <!-- 100% Unabridged Rendered Markdown Body -->
+            <article class="markdown-body" id="renderedContent">
+              <h1 id="gas-town-study-batch-00-the-pin-the-method-and-what-this-study-is">Gas Town Study — Batch 00: the pin, the method, and what this study is<a href="#batch-00/gas-town-study-batch-00-the-pin-the-method-and-what-this-study-is" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Folder:</strong> <code>library/architecture/gastown-forensics/</code> · <strong>Status:</strong> OPEN — begun 2026-10-15
+<strong>This is a clean forensic study</strong>, run the same way as <code>library/hermes-forensics/</code>,
+<code>library/architecture/paperclip-forensics/</code>, <code>library/architecture/crewai-forensics/</code> and
+<code>library/architecture/multica-forensics/</code>. It reads ONE source tree, measures it, and verifies every
+load-bearing claim against the source code. <strong>Nothing from any earlier study is reused, referenced, or
+assumed</strong> — Gas Town is read on its own terms.</p>
+<p><strong>Why this platform is fourth.</strong> The owner&#39;s ruling was <em>&quot;one platform at a time&quot;</em>: Paperclip
+(<code>9ae258f</code>→<code>f1e5dea</code>), <strong>CrewAI second</strong> (<code>dcd4675</code>→<code>d81c86e</code>), <strong>Multica third</strong> (<code>20dc339</code>→<code>4cdac9c</code>),
+<strong>Gas Town fourth</strong>. The first three sat at three different points: Paperclip is a company/task-runner,
+CrewAI is an agent framework, and Multica is a workspace where humans and agents work one board. <strong>Gas
+Town is the first platform studied that is explicitly a <em>multi-agent orchestration workspace</em> — it
+coordinates many agents (Claude Code, Copilot, Codex, Gemini) across projects with persistent,
+git-backed work tracking and a role taxonomy.</strong> That makes it the sharpest test yet of the three poles,
+and the most dangerous to read casually, because <em>similarity invites the assumption that it is already
+the thing we want</em>. Per the method, <strong>the code decides, not the README.</strong></p>
+<hr>
+<h2 id="1-the-pin-task-zero-answered-by-measurement">1. THE PIN — task zero, answered by measurement<a href="#batch-00/1-the-pin-task-zero-answered-by-measurement" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>The source of this study is:</strong>
+<code>C:/Users/Ramzi/Downloads/companai/library/architecture/platforms/_extracted/gastown-main</code>
+(extracted from <code>platforms/gastown-main.zip</code>, which came from
+<code>https://github.com/gastownhall/gastown</code>).</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Fact</th>
+<th>Value</th>
+<th>How measured</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Origin</td>
+<td><code>https://github.com/gastownhall/gastown</code> (<code>main</code>)</td>
+<td>the owner&#39;s <code>platforms/references.md</code></td>
+</tr>
+<tr>
+<td><strong>Go module path</strong></td>
+<td><strong><code>github.com/steveyegge/gastown</code></strong></td>
+<td><code>go.mod:1</code></td>
+</tr>
+<tr>
+<td>Zip</td>
+<td><code>platforms/gastown-main.zip</code> — <strong>5,829,083 B</strong> (5.56 MB)</td>
+<td><code>ls -la</code></td>
+</tr>
+<tr>
+<td><strong>Zip md5</strong></td>
+<td><strong><code>f2485c1baa647967a31a878224a09503</code></strong></td>
+<td><code>md5sum</code></td>
+</tr>
+<tr>
+<td>Zip entries</td>
+<td><strong>1,737 = 174 directories + 1,563 files</strong></td>
+<td><code>unzip -l</code> + a walk</td>
+</tr>
+<tr>
+<td>Extracted</td>
+<td>2026-10-15 (all files share the zip&#39;s mtimes)</td>
+<td><code>ls</code></td>
+</tr>
+<tr>
+<td><strong><code>.git</code> present?</strong></td>
+<td><strong>NO</strong> — this is an extract, not a clone</td>
+<td><code>ls -d .git</code> → absent</td>
+</tr>
+<tr>
+<td>Total files on disk</td>
+<td><strong>1,563</strong></td>
+<td>Python <code>os.walk</code></td>
+</tr>
+<tr>
+<td>Total bytes on disk</td>
+<td><strong>23,491,369</strong> (22.4 MB)</td>
+<td>Python <code>os.walk</code></td>
+</tr>
+<tr>
+<td>Declared version</td>
+<td><strong>npm <code>@gastown/gt</code> <code>1.2.1</code></strong> (<code>npm-package/package.json</code>)</td>
+<td><code>package.json</code></td>
+</tr>
+<tr>
+<td>Go version</td>
+<td><strong><code>go 1.26.2</code></strong></td>
+<td><code>go.mod:3</code></td>
+</tr>
+<tr>
+<td>Language</td>
+<td><strong>Go</strong> — 1,231 files / 474,724 lines</td>
+<td>walk + line count</td>
+</tr>
+<tr>
+<td>Product one-liner</td>
+<td><em>&quot;Multi-agent orchestration system for Claude Code, GitHub Copilot, and other AI agents with persistent work tracking&quot;</em></td>
+<td><code>README.md:3</code></td>
+</tr>
+<tr>
+<td>Vision one-liner</td>
+<td><em>&quot;an agentic development environment for managing multiple Claude Code instances simultaneously using the <code>gt</code> and <code>bd</code> (Beads) binaries, coordinated with tmux in git-managed directories&quot;</em></td>
+<td><code>docs/glossary.md:3</code></td>
+</tr>
+<tr>
+<td>Key md5s</td>
+<td><code>README.md</code> <code>ebe2ed3a…</code> · <code>go.mod</code> <code>7c4cb38d…</code> · <code>go.sum</code> <code>c2035ac4…</code> · <code>AGENTS.md</code> <code>3b36f0a8…</code> · <code>CHANGELOG.md</code> <code>d79212dd…</code> · <code>LICENSE</code> <code>a516aaa0…</code> · <code>npm-package/package.json</code> <code>cde1a196…</code> · <code>.beads/config.yaml</code> <code>e84c66fc…</code></td>
+<td><code>md5sum</code></td>
+</tr>
+</tbody></table></div>
+<h3 id="1-1-the-identity-limit-stated-not-glossed">1.1 The identity limit (stated, not glossed)<a href="#batch-00/1-1-the-identity-limit-stated-not-glossed" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>There is <strong>no <code>.git</code></strong>, so the exact upstream commit cannot be read from the tree. Two identities must
+be kept apart, and the difference is itself a finding to verify:</p>
+<ul>
+<li><strong>The repository is <code>gastownhall/gastown</code></strong> (the owner&#39;s <code>references.md</code>).</li>
+<li><strong>The Go module is <code>github.com/steveyegge/gastown</code></strong> (<code>go.mod:1</code>).</li>
+</ul>
+<p>So the project has moved or been re-homed between an author&#39;s namespace and an organisation&#39;s, and the
+module path was <strong>not</strong> rewritten to match. A reader reproducing this study must match the zip md5, not
+a commit. <strong>Any claim here about &quot;the latest Gas Town&quot; is a claim about this extract.</strong></p>
+<p><strong>Version clue:</strong> the npm wrapper carries a real semver (<code>1.2.1</code>) and <code>CHANGELOG.md</code> follows <em>Keep a
+Changelog</em>; the changelog&#39;s top entry is <code>## [Unreleased]</code>. Where a batch needs to know &quot;is this
+current&quot;, it says so explicitly rather than assuming.</p>
+<hr>
+<h2 id="2-what-the-tree-contains-measured">2. What the tree contains (measured)<a href="#batch-00/2-what-the-tree-contains-measured" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="2-1-this-tree-is-code-a-go-product-with-a-real-doc-set">2.1 This tree is CODE — a Go product with a real doc set<a href="#batch-00/2-1-this-tree-is-code-a-go-product-with-a-real-doc-set" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>Measured by extension over the whole tree:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Extension</th>
+<th align="right">Files</th>
+<th align="right">Lines</th>
+<th align="right">Bytes</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><code>.go</code></strong></td>
+<td align="right"><strong>1,231</strong></td>
+<td align="right"><strong>474,724</strong></td>
+<td align="right">14,602,075</td>
+<td><strong>the product — the overwhelming majority</strong></td>
+</tr>
+<tr>
+<td><code>.md</code></td>
+<td align="right">117</td>
+<td align="right">33,189</td>
+<td align="right">1,307,528</td>
+<td>docs + templates + agent instructions</td>
+</tr>
+<tr>
+<td><code>.toml</code></td>
+<td align="right">57</td>
+<td align="right">—</td>
+<td align="right">688,113</td>
+<td>formulas / config</td>
+</tr>
+<tr>
+<td><code>.jsonl</code></td>
+<td align="right">6</td>
+<td align="right">—</td>
+<td align="right"><strong>4,979,661</strong></td>
+<td><strong>large data files — the largest single byte block after Go</strong></td>
+</tr>
+<tr>
+<td><code>.json</code></td>
+<td align="right">26</td>
+<td align="right">17,074</td>
+<td align="right">789,676</td>
+<td>manifests, configs, fixtures</td>
+</tr>
+<tr>
+<td><code>.sh</code></td>
+<td align="right">38</td>
+<td align="right">7,391</td>
+<td align="right">251,793</td>
+<td>scripts</td>
+</tr>
+<tr>
+<td><code>.yaml</code> / <code>.yml</code></td>
+<td align="right">30</td>
+<td align="right">4,795</td>
+<td align="right">178,141</td>
+<td>config</td>
+</tr>
+<tr>
+<td><code>.js</code></td>
+<td align="right">6</td>
+<td align="right">3,838</td>
+<td align="right">152,142</td>
+<td>the npm wrapper</td>
+</tr>
+<tr>
+<td><code>.tmpl</code></td>
+<td align="right">13</td>
+<td align="right">—</td>
+<td align="right">121,597</td>
+<td>templates</td>
+</tr>
+<tr>
+<td><code>.py</code></td>
+<td align="right">4</td>
+<td align="right">1,211</td>
+<td align="right">42,260</td>
+<td>tooling</td>
+</tr>
+</tbody></table></div>
+<p><strong>The hazard here is neither CrewAI&#39;s (93 % docs) nor Multica&#39;s (code-dominant with persuasive docs).</strong>
+Gas Town is <strong>a Go product whose docs are a real but modest surface (~24.6k lines in <code>docs/</code>)</strong>, and it
+carries a <strong>few very large <code>.jsonl</code> data files</strong> (~5 MB, 21 % of all bytes) that a line-count reading
+would miss entirely. <strong>Rule 1 applies as always: the README is a claim; the <code>.go</code> tree is the authority.</strong></p>
+<h3 id="2-2-the-measured-shape-per-area">2.2 The measured shape (per area)<a href="#batch-00/2-2-the-measured-shape-per-area" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Area</th>
+<th align="right">Files (go/md/js)</th>
+<th align="right">Lines</th>
+<th align="right">Bytes</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><code>internal/</code></strong></td>
+<td align="right"><strong>1,235</strong></td>
+<td align="right"><strong>477,544</strong></td>
+<td align="right">14,724,333</td>
+<td><strong>the product — 60+ packages</strong></td>
+</tr>
+<tr>
+<td><code>docs/</code></td>
+<td align="right">68</td>
+<td align="right">24,592</td>
+<td align="right">991,181</td>
+<td>the concept, design and guide set</td>
+</tr>
+<tr>
+<td><code>plugins/</code></td>
+<td align="right">15</td>
+<td align="right">3,220</td>
+<td align="right">97,518</td>
+<td>10 plugin directories</td>
+</tr>
+<tr>
+<td><code>templates/</code></td>
+<td align="right">2</td>
+<td align="right">483</td>
+<td align="right">15,514</td>
+<td>agent instruction templates</td>
+</tr>
+<tr>
+<td><code>cmd/</code></td>
+<td align="right">6</td>
+<td align="right">697</td>
+<td align="right">23,029</td>
+<td><strong>three binaries</strong></td>
+</tr>
+<tr>
+<td><code>gt-model-eval/</code></td>
+<td align="right">2</td>
+<td align="right">252</td>
+<td align="right">11,173</td>
+<td>a model-evaluation harness</td>
+</tr>
+<tr>
+<td><code>npm-package/</code></td>
+<td align="right">4</td>
+<td align="right">365</td>
+<td align="right">9,924</td>
+<td>the <code>@gastown/gt</code> npm wrapper</td>
+</tr>
+<tr>
+<td><code>pr-sheriff-evidence/</code></td>
+<td align="right">1</td>
+<td align="right">26</td>
+<td align="right">2,150</td>
+<td>evidence for the PR-sheriff feature</td>
+</tr>
+</tbody></table></div>
+<p><strong>The ratio is the finding.</strong> <code>cmd/</code> is <strong>6 files / 697 lines</strong> for three binaries — the CLI entry is a
+thin shell, and essentially everything lives in <code>internal/</code>. This is the opposite of a &quot;CLI with a
+library&quot;; it is a product whose binaries are almost entirely <code>internal/</code>.</p>
+<h3 id="2-3-the-go-module-map-measured-the-object-of-batches-0106">2.3 The Go module map (measured — the object of batches 01–06)<a href="#batch-00/2-3-the-go-module-map-measured-the-object-of-batches-0106" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><strong>1,231 <code>.go</code> files across 77 package directories, of which 568 are <code>_test.go</code></strong> — i.e. <strong>46 % of all Go
+files are tests.</strong> That is the highest test ratio of any platform studied so far and must be stated up
+front, because a naive &quot;lines of Go&quot; reading is half test code.</p>
+<p><code>cmd/</code> holds <strong>three binaries</strong>: <code>gt</code> (the main CLI), <code>gt-proxy-client</code>, <code>gt-proxy-server</code>.</p>
+<p><code>internal/</code> holds 60+ packages, and <strong>the names are the vocabulary of the product</strong> (verify each, do not
+assume): <code>acp</code> · <code>activity</code> · <code>agent</code> · <code>agentlog</code> · <code>beads</code> · <code>bitbucket</code> · <code>boot</code> · <code>channelevents</code> ·
+<code>checkpoint</code> · <code>cli</code> · <code>cmd</code> · <code>config</code> · <code>connection</code> · <code>convoy</code> · <code>crew</code> · <code>daemon</code> · <code>deacon</code> · <code>deps</code> ·
+<code>doctor</code> · <code>dog</code> · <code>doltserver</code> · <code>estop</code> · <code>events</code> · <code>feed</code> · <code>formula</code> · <code>git</code> · <code>github</code> · <code>health</code> ·
+<code>hooks</code> · <code>hookutil</code> · <code>keepalive</code> · <code>krc</code> · <code>lock</code> · <code>mail</code> · <code>mayor</code> · <code>mq</code> · <code>nudge</code> · <code>plugin</code> ·
+<code>polecat</code> · <code>protocol</code> · <code>proxy</code> · <code>quota</code> · <code>reaper</code> · <code>refinery</code> · <code>rig</code> · <code>runtime</code> · <code>scheduler</code> ·
+<code>session</code> · <code>shell</code> · <code>state</code> · <code>style</code> · <code>suggest</code> · <code>telemetry</code> · <code>templates</code> · <code>testutil</code> · <code>tmux</code> ·
+<code>townlog</code> · <code>tui</code>.</p>
+<h3 id="2-4-the-role-taxonomy-the-part-most-relevant-to-all-three-poles">2.4 The role taxonomy — the part most relevant to all three poles<a href="#batch-00/2-4-the-role-taxonomy-the-part-most-relevant-to-all-three-poles" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>docs/glossary.md</code> and <code>docs/overview.md</code> describe a <strong>role taxonomy</strong>, and these are <em>claims to verify
+in code</em>, not conclusions. The names, as the docs state them:</p>
+<ul>
+<li><strong>Town</strong> (<code>~/gt/</code>) — the management headquarters; <strong>Rig</strong> — a project repo under management.</li>
+<li><strong>Town-level:</strong> <strong>Mayor</strong> (chief-of-staff coordinator), <strong>Deacon</strong> (a watchdog running patrol cycles),
+<strong>Dogs</strong> (the Deacon&#39;s maintenance crew), <strong>Boot</strong> (a Dog that checks the Deacon every 5 minutes).</li>
+<li><strong>Rig-level:</strong> <strong>Polecat</strong> (<em>&quot;persistent identity but ephemeral sessions&quot;</em>, working in isolated git
+worktrees), <strong>Refinery</strong> (the merge queue), <strong>Witness</strong> (a patrol agent over Polecats), <strong>Crew</strong>
+(long-lived named agents).</li>
+<li><strong>Work units:</strong> <strong>Bead</strong> (<em>&quot;git-backed atomic work unit stored in Dolt&quot;</em>), <strong>Formula</strong> (a TOML
+workflow template), and a decomposition vocabulary around <strong>MEOW</strong> (<em>Molecular Expression of Work</em>).</li>
+<li><strong>Stated principles:</strong> <strong>GUPP</strong> (<em>&quot;If there is work on your Hook, YOU MUST RUN IT&quot;</em>), <strong>NDI</strong>
+(<em>Nondeterministic Idempotence</em>).</li>
+</ul>
+<p><strong>Two things are already visible and must be verified, not assumed:</strong> (a) Gas Town ships <strong>an <code>acp</code>
+package</strong> and a <strong><code>tmux</code> package</strong> — the same agent-protocol lane our project mandates, driven through
+tmux sessions; (b) there is <strong>a <code>mail</code> package</strong> and <strong>a <code>convoy</code> package</strong> — i.e. named hand-off and
+batching primitives. Both belong in the pole batches, read from code.</p>
+<blockquote>
+<p><strong>Hypothesis for batch 01, not a finding:</strong> Gas Town&#39;s role taxonomy (Mayor/Deacon/Dog/Boot) may be the
+<em>direct analogue</em> of the &quot;watchdog + recovery&quot; idea our own delivery layer needs, and its Polecat
+(<em>persistent identity, ephemeral session</em>) may be the sharpest expression of the machine/teammate split
+found in Multica. Per rule 0b, batch 01 measures first.</p>
+</blockquote>
+<h3 id="2-5-agent-facing-assets-and-the-external-ledger">2.5 Agent-facing assets and the external ledger<a href="#batch-00/2-5-agent-facing-assets-and-the-external-ledger" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<ul>
+<li><strong><code>AGENTS.md</code> (185 lines) is a pointer</strong>, not the context: it says <em>&quot;See <code>CLAUDE.md</code> for complete agent
+context&quot;</em> and <em>&quot;Full context is injected by <code>gt prime</code> at session start&quot;</em>, then carries a
+<strong>Beads Workflow Integration</strong> section. So the repo&#39;s agent instructions are <strong>generated/injected by the
+product itself</strong>, not hand-written into the file — a posture worth verifying.</li>
+<li><strong><code>.beads/</code></strong> (config + <code>PRIME.md</code> + <code>README.md</code>) declares the issue tracker: <strong>Beads</strong>, an external
+project (<code>github.com/steveyegge/beads</code>) with two CLIs — <strong><code>bd</code></strong> (issue CRUD) and <strong><code>bv</code></strong> (read-only
+graph triage) — storing issues as <strong><code>.beads/issues.jsonl</code></strong>, synced like code.</li>
+<li><strong><code>templates/</code></strong> holds <code>agents/</code>, <code>polecat-CLAUDE.md</code>, <code>witness-CLAUDE.md</code> — the per-role instruction
+templates.</li>
+</ul>
+<h3 id="2-6-what-is-not-here-named-now-to-guard-the-reading">2.6 What is NOT here (named now, to guard the reading)<a href="#batch-00/2-6-what-is-not-here-named-now-to-guard-the-reading" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<ul>
+<li><strong>No <code>.git</code></strong> — identity is the zip (§1.1).</li>
+<li><strong>No <code>node_modules</code></strong> (correct); <code>go.sum</code> is present, so dependency identity is readable.</li>
+<li><strong>The repository name and the module path disagree</strong> (§1.1) — a later batch must not treat either as
+the other.</li>
+<li><strong><code>docs/</code> is a real surface (~24.6k lines)</strong> and will be readable — which is exactly why rule 1 must
+bite: a well-written doc set is a claim set, not evidence.</li>
+</ul>
+<hr>
+<h2 id="3-the-method-how-every-batch-is-produced">3. The method (how every batch is produced)<a href="#batch-00/3-the-method-how-every-batch-is-produced" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>The method is <strong>inherited verbatim</strong> from the Hermes, Paperclip, CrewAI and Multica studies (rules 1–10),
+with the pole frame (§3.1) and the additive-across-studies rule (§3.2) as before.</p>
+<ol>
+<li><strong>Docs are claims; code is the authority.</strong> Every load-bearing statement is checked against the
+source. Where they disagree, <strong>the code wins and the disagreement is recorded.</strong></li>
+<li><strong>Every number is measured at the time of writing</strong>, never carried from memory or an older document.</li>
+<li><strong>Claims carry their evidence</strong>: a line resting on code cites the file and line it was read at.</li>
+<li><strong>Two value questions per capability</strong>: <strong>Q1 · USER VALUE</strong> (how it serves a person using the platform)
+and <strong>Q2 · VISION VALUE</strong> (how it serves the AI-first business &amp; resources planner vision, incl.
+versatility and integratability).</li>
+<li><strong>No comparison to our own platform inside the batches.</strong> The cross-platform mapping is a separate
+later pass.</li>
+<li><strong>Every capability is named, including ones we will not use.</strong> Nothing is silently dropped.</li>
+<li><strong>Findings are additive and never overwrite history.</strong></li>
+<li><strong>Plain words</strong> — every capability gets a one-sentence plain gloss before any detail.</li>
+<li><strong>THE POLE FRAME.</strong> Every finding is tagged <strong>P1 / P2 / P3 / PX-W / PX-F / PZ</strong>.</li>
+<li><strong>The retirement rule.</strong> Before reusing any setting/key/module named in an older document or another
+platform&#39;s doc, <strong>search this platform&#39;s migrations/config/CHANGELOG for a retirement entry.</strong> With a
+Keep-a-Changelog history and a git-backed ledger, Gas Town is a rich retirement surface.</li>
+</ol>
+<h3 id="3-1-the-pole-frame-the-three-poles-defined-once">3.1 The pole frame — the three poles, defined once<a href="#batch-00/3-1-the-pole-frame-the-three-poles-defined-once" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Tag</th>
+<th>Pole</th>
+<th>The owner&#39;s words (abridged)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>P1</strong></td>
+<td><strong>The aissistant</strong> (the AI user / agent)</td>
+<td><em>versatile, integratable, rich featured architecture in itself, deployable in different contexts (workspaces, automations, later the studio)</em></td>
+</tr>
+<tr>
+<td><strong>P2</strong></td>
+<td><strong>The workspace</strong></td>
+<td><em>highly functional, versatile, integratable, rich featured, adaptable to the mix of current and future features, use-cases and needs</em></td>
+</tr>
+<tr>
+<td><strong>P3</strong></td>
+<td><strong>Automations</strong></td>
+<td><em>where agents work on assigned tasks, assign tasks, etc. Paperclip is a blueprint</em></td>
+</tr>
+<tr>
+<td><strong>PX-W</strong></td>
+<td><strong>Widgets architecture</strong></td>
+<td>cross-cutting: the composable UI surface</td>
+</tr>
+<tr>
+<td><strong>PX-F</strong></td>
+<td><strong>Frontend wiring &amp; construction</strong></td>
+<td>cross-cutting: how the surface is built and wired</td>
+</tr>
+</tbody></table></div>
+<p><strong>Plus one escape hatch (PZ):</strong> <em>&quot;any other findings you identify there that can fit our vision, project,
+architecture, or a potential use case or added value for the end user.&quot;</em> Tagged <strong>PZ</strong> with a one-line
+reason for keeping them.</p>
+<h3 id="3-2-additive-across-studies-like-rule-7-within-a-study">3.2 Additive across studies, like rule 7 within a study<a href="#batch-00/3-2-additive-across-studies-like-rule-7-within-a-study" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>This study does not rewrite the Hermes, Paperclip, CrewAI or Multica studies. Where a Gas Town finding
+<strong>confirms, contradicts or extends</strong> an earlier finding, it is recorded as a cross-study note naming the
+earlier batch — so a reader can trace both directions. Cross-study notes are <strong>observations</strong>, never
+decisions.</p>
+<hr>
+<h2 id="4-the-batch-plan-each-documented-as-it-is-completed">4. The batch plan (each documented as it is completed)<a href="#batch-00/4-the-batch-plan-each-documented-as-it-is-completed" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Findings are organised <strong>per pole</strong>, one file per pole, plus an overview and a synthesis. Gas Town is a
+<strong>Go product with a role taxonomy and an external ledger</strong>, so the pole weighting will differ from all
+four earlier studies — but the structure is identical so the later mapping is a per-pole join.</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Batch / File</th>
+<th>Pole</th>
+<th>What it answers</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>00</strong></td>
+<td><strong>This file</strong> — pin and method</td>
+<td>—</td>
+<td>task zero + method + pole frame</td>
+</tr>
+<tr>
+<td><strong>01</strong></td>
+<td><code>findings/01-platform-overview.md</code></td>
+<td>—</td>
+<td>What is Gas Town? the Town/Rig model, the <code>gt</code> CLI, the daemon, the role taxonomy, the control plane</td>
+</tr>
+<tr>
+<td><strong>02</strong></td>
+<td><code>findings/02-the-aissistant.md</code></td>
+<td><strong>P1</strong></td>
+<td>what an &quot;agent&quot; is here: polecat / crew / witness / mayor as records, identity, sessions, the <code>acp</code>/<code>tmux</code> runtime, skills and instructions</td>
+</tr>
+<tr>
+<td><strong>03</strong></td>
+<td><code>findings/03-the-workspace.md</code></td>
+<td><strong>P2</strong></td>
+<td>Town and Rig, the git-backed Hooks, the Beads ledger, config, membership/identity</td>
+</tr>
+<tr>
+<td><strong>04</strong></td>
+<td><code>findings/04-automations.md</code></td>
+<td><strong>P3</strong></td>
+<td>the scheduler, mailboxes, convoys, patrols (Deacon/Dog/Boot), the merge queue (Refinery), recovery</td>
+</tr>
+<tr>
+<td><strong>05</strong></td>
+<td><code>findings/05-widgets-and-frontend.md</code></td>
+<td><strong>PX-W / PX-F</strong></td>
+<td>the <code>tui</code> package, the terminal surface, any web surface, the widget model</td>
+</tr>
+<tr>
+<td><strong>06</strong></td>
+<td><code>findings/06-out-of-pole.md</code></td>
+<td><strong>PZ</strong></td>
+<td>everything else that fits our vision (security, quota, telemetry, plugins, the proxy, doctor/health)</td>
+</tr>
+<tr>
+<td><strong>07</strong></td>
+<td><code>findings/07-SYNTHESIS.md</code></td>
+<td>all</td>
+<td>what Gas Town teaches each pole; ranking; the bridge to the other four studies is a LATER pass</td>
+</tr>
+</tbody></table></div>
+<p><strong>Each batch document carries:</strong> (a) what was read and its measured size; (b) a <strong>capability table tagged
+by pole</strong> with <strong>Q1 · Q2</strong>; (c) the code verification with <code>file:line</code> evidence and any <strong>doc-vs-code
+divergence</strong>; (d) findings carried forward.</p>
+<blockquote>
+<p><strong>A note on the pole weighting, stated up front.</strong> Gas Town&#39;s <em>stated purpose</em> is multi-agent
+orchestration with persistent work tracking, so the temptation to score it as &quot;already done&quot; is high
+here. The batches answer the <strong>three value questions in the opposite direction too</strong>: not only &quot;does it
+fit our poles&quot; but <strong>&quot;where does it draw its boundaries, and are they ours?&quot;</strong> — because a close
+neighbour is the hardest to reuse and the easiest to copy badly. That question is answered in the batch
+notes and ranked in batch 07, never assumed.</p>
+</blockquote>
+<hr>
+<h2 id="5-ground-rules-restated-as-a-checklist-the-reader-can-hold-this-study-to">5. Ground rules restated as a checklist the reader can hold this study to<a href="#batch-00/5-ground-rules-restated-as-a-checklist-the-reader-can-hold-this-study-to" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<ul>
+<li>Is the claim measured, or remembered? → must be measured.</li>
+<li>Does the line rest on a doc, or on code? → <strong>code, always.</strong></li>
+<li>If doc and code disagree, is the disagreement recorded? → must be.</li>
+<li>Is every capability named, including the ones we will not use? → must be.</li>
+<li>Is every finding <strong>tagged with its pole</strong> (P1/P2/P3/PX-W/PX-F/PZ)? → must be.</li>
+<li>Are the two value questions answered in the owner&#39;s words? → yes, per capability.</li>
+<li>Is there any comparison to our own platform in a batch? → must be none; that is the later mapping pass.</li>
+<li>Before reusing an older-doc setting, was the retirement rule run (rule 10)? → must be.</li>
+<li><strong>Is a test file being counted as product code?</strong> → with <strong>568 of 1,231 Go files being tests</strong>, every
+line count in this study states whether it includes tests.</li>
+</ul>
+<hr>
+<h2 id="6-how-this-study-relates-to-the-workshop-folder">6. How this study relates to the workshop folder<a href="#batch-00/6-how-this-study-relates-to-the-workshop-folder" class="heading-anchor" title="Direct link to this section">#</a></h2>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>text</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code>library/architecture/
+├── hermes-forensics/          # the Hermes study (mirror; gitignored copy)
+├── paperclip-forensics/       # the Paperclip study (CLOSED 7/7) + reader/
+├── crewai-forensics/          # the CrewAI study (CLOSED 7/7) + reader/
+├── multica-forensics/         # the Multica study (CLOSED 7/7) + reader/
+├── gastown-forensics/         # THIS study
+│   ├── 00-PIN-AND-METHOD.md
+│   └── findings/              # 01..07
+├── reader/                    # the Hermes reader (user-facing HTML)
+└── platforms/
+    ├── *.zip                  # the raw platform archives (gitignored)
+    ├── references.md          # repo link per platform
+    └── _extracted/            # working trees (gitignored) — gastown-main here
+</code></pre>
+</div>
+<p><strong>Per-platform reader:</strong> a reader for Gas Town is built at the <strong>end</strong> of this study, from its markdown,
+using the platform-agnostic generator proven for Paperclip, CrewAI and Multica (<code>generate-reader.js</code> + a
+<code>DOCS_CONFIG</code> block + a <code>diagrams.js</code>). <strong>The markdown is the source of truth; the reader renders it and
+never edits it.</strong> <em>(One caution carried in from the Multica reader — lesson L168: the generator is not
+fully platform-agnostic, so a rebrand must be verified by grepping the new tree for the old name.)</em></p>
+<hr>
+<p><em>Batch 00 of 07. Begun 2026-10-15. Next: <code>findings/01-platform-overview.md</code>.</em></p>
+
+            </article>
+
+            <!-- Verbatim Raw Markdown Display (for transparency & verification) -->
+            <pre class="verbatim-raw-container" id="rawContentArea"># Gas Town Study — Batch 00: the pin, the method, and what this study is
+
+**Folder:** `library/architecture/gastown-forensics/` · **Status:** OPEN — begun 2026-10-15
+**This is a clean forensic study**, run the same way as `library/hermes-forensics/`,
+`library/architecture/paperclip-forensics/`, `library/architecture/crewai-forensics/` and
+`library/architecture/multica-forensics/`. It reads ONE source tree, measures it, and verifies every
+load-bearing claim against the source code. **Nothing from any earlier study is reused, referenced, or
+assumed** — Gas Town is read on its own terms.
+
+**Why this platform is fourth.** The owner&#039;s ruling was *&quot;one platform at a time&quot;*: Paperclip
+(`9ae258f`→`f1e5dea`), **CrewAI second** (`dcd4675`→`d81c86e`), **Multica third** (`20dc339`→`4cdac9c`),
+**Gas Town fourth**. The first three sat at three different points: Paperclip is a company/task-runner,
+CrewAI is an agent framework, and Multica is a workspace where humans and agents work one board. **Gas
+Town is the first platform studied that is explicitly a *multi-agent orchestration workspace* — it
+coordinates many agents (Claude Code, Copilot, Codex, Gemini) across projects with persistent,
+git-backed work tracking and a role taxonomy.** That makes it the sharpest test yet of the three poles,
+and the most dangerous to read casually, because *similarity invites the assumption that it is already
+the thing we want*. Per the method, **the code decides, not the README.**
+
+---
+
+## 1. THE PIN — task zero, answered by measurement
+
+**The source of this study is:**
+`C:/Users/Ramzi/Downloads/companai/library/architecture/platforms/_extracted/gastown-main`
+(extracted from `platforms/gastown-main.zip`, which came from
+`https://github.com/gastownhall/gastown`).
+
+| Fact | Value | How measured |
+|---|---|---|
+| Origin | `https://github.com/gastownhall/gastown` (`main`) | the owner&#039;s `platforms/references.md` |
+| **Go module path** | **`github.com/steveyegge/gastown`** | `go.mod:1` |
+| Zip | `platforms/gastown-main.zip` — **5,829,083 B** (5.56 MB) | `ls -la` |
+| **Zip md5** | **`f2485c1baa647967a31a878224a09503`** | `md5sum` |
+| Zip entries | **1,737 = 174 directories + 1,563 files** | `unzip -l` + a walk |
+| Extracted | 2026-10-15 (all files share the zip&#039;s mtimes) | `ls` |
+| **`.git` present?** | **NO** — this is an extract, not a clone | `ls -d .git` → absent |
+| Total files on disk | **1,563** | Python `os.walk` |
+| Total bytes on disk | **23,491,369** (22.4 MB) | Python `os.walk` |
+| Declared version | **npm `@gastown/gt` `1.2.1`** (`npm-package/package.json`) | `package.json` |
+| Go version | **`go 1.26.2`** | `go.mod:3` |
+| Language | **Go** — 1,231 files / 474,724 lines | walk + line count |
+| Product one-liner | *&quot;Multi-agent orchestration system for Claude Code, GitHub Copilot, and other AI agents with persistent work tracking&quot;* | `README.md:3` |
+| Vision one-liner | *&quot;an agentic development environment for managing multiple Claude Code instances simultaneously using the `gt` and `bd` (Beads) binaries, coordinated with tmux in git-managed directories&quot;* | `docs/glossary.md:3` |
+| Key md5s | `README.md` `ebe2ed3a…` · `go.mod` `7c4cb38d…` · `go.sum` `c2035ac4…` · `AGENTS.md` `3b36f0a8…` · `CHANGELOG.md` `d79212dd…` · `LICENSE` `a516aaa0…` · `npm-package/package.json` `cde1a196…` · `.beads/config.yaml` `e84c66fc…` | `md5sum` |
+
+### 1.1 The identity limit (stated, not glossed)
+
+There is **no `.git`**, so the exact upstream commit cannot be read from the tree. Two identities must
+be kept apart, and the difference is itself a finding to verify:
+
+- **The repository is `gastownhall/gastown`** (the owner&#039;s `references.md`).
+- **The Go module is `github.com/steveyegge/gastown`** (`go.mod:1`).
+
+So the project has moved or been re-homed between an author&#039;s namespace and an organisation&#039;s, and the
+module path was **not** rewritten to match. A reader reproducing this study must match the zip md5, not
+a commit. **Any claim here about &quot;the latest Gas Town&quot; is a claim about this extract.**
+
+**Version clue:** the npm wrapper carries a real semver (`1.2.1`) and `CHANGELOG.md` follows *Keep a
+Changelog*; the changelog&#039;s top entry is `## [Unreleased]`. Where a batch needs to know &quot;is this
+current&quot;, it says so explicitly rather than assuming.
+
+---
+
+## 2. What the tree contains (measured)
+
+### 2.1 This tree is CODE — a Go product with a real doc set
+
+Measured by extension over the whole tree:
+
+| Extension | Files | Lines | Bytes | What it is |
+|---|---:|---:|---:|---|
+| **`.go`** | **1,231** | **474,724** | 14,602,075 | **the product — the overwhelming majority** |
+| `.md` | 117 | 33,189 | 1,307,528 | docs + templates + agent instructions |
+| `.toml` | 57 | — | 688,113 | formulas / config |
+| `.jsonl` | 6 | — | **4,979,661** | **large data files — the largest single byte block after Go** |
+| `.json` | 26 | 17,074 | 789,676 | manifests, configs, fixtures |
+| `.sh` | 38 | 7,391 | 251,793 | scripts |
+| `.yaml` / `.yml` | 30 | 4,795 | 178,141 | config |
+| `.js` | 6 | 3,838 | 152,142 | the npm wrapper |
+| `.tmpl` | 13 | — | 121,597 | templates |
+| `.py` | 4 | 1,211 | 42,260 | tooling |
+
+**The hazard here is neither CrewAI&#039;s (93 % docs) nor Multica&#039;s (code-dominant with persuasive docs).**
+Gas Town is **a Go product whose docs are a real but modest surface (~24.6k lines in `docs/`)**, and it
+carries a **few very large `.jsonl` data files** (~5 MB, 21 % of all bytes) that a line-count reading
+would miss entirely. **Rule 1 applies as always: the README is a claim; the `.go` tree is the authority.**
+
+### 2.2 The measured shape (per area)
+
+| Area | Files (go/md/js) | Lines | Bytes | What it is |
+|---|---:|---:|---:|---|
+| **`internal/`** | **1,235** | **477,544** | 14,724,333 | **the product — 60+ packages** |
+| `docs/` | 68 | 24,592 | 991,181 | the concept, design and guide set |
+| `plugins/` | 15 | 3,220 | 97,518 | 10 plugin directories |
+| `templates/` | 2 | 483 | 15,514 | agent instruction templates |
+| `cmd/` | 6 | 697 | 23,029 | **three binaries** |
+| `gt-model-eval/` | 2 | 252 | 11,173 | a model-evaluation harness |
+| `npm-package/` | 4 | 365 | 9,924 | the `@gastown/gt` npm wrapper |
+| `pr-sheriff-evidence/` | 1 | 26 | 2,150 | evidence for the PR-sheriff feature |
+
+**The ratio is the finding.** `cmd/` is **6 files / 697 lines** for three binaries — the CLI entry is a
+thin shell, and essentially everything lives in `internal/`. This is the opposite of a &quot;CLI with a
+library&quot;; it is a product whose binaries are almost entirely `internal/`.
+
+### 2.3 The Go module map (measured — the object of batches 01–06)
+
+**1,231 `.go` files across 77 package directories, of which 568 are `_test.go`** — i.e. **46 % of all Go
+files are tests.** That is the highest test ratio of any platform studied so far and must be stated up
+front, because a naive &quot;lines of Go&quot; reading is half test code.
+
+`cmd/` holds **three binaries**: `gt` (the main CLI), `gt-proxy-client`, `gt-proxy-server`.
+
+`internal/` holds 60+ packages, and **the names are the vocabulary of the product** (verify each, do not
+assume): `acp` · `activity` · `agent` · `agentlog` · `beads` · `bitbucket` · `boot` · `channelevents` ·
+`checkpoint` · `cli` · `cmd` · `config` · `connection` · `convoy` · `crew` · `daemon` · `deacon` · `deps` ·
+`doctor` · `dog` · `doltserver` · `estop` · `events` · `feed` · `formula` · `git` · `github` · `health` ·
+`hooks` · `hookutil` · `keepalive` · `krc` · `lock` · `mail` · `mayor` · `mq` · `nudge` · `plugin` ·
+`polecat` · `protocol` · `proxy` · `quota` · `reaper` · `refinery` · `rig` · `runtime` · `scheduler` ·
+`session` · `shell` · `state` · `style` · `suggest` · `telemetry` · `templates` · `testutil` · `tmux` ·
+`townlog` · `tui`.
+
+### 2.4 The role taxonomy — the part most relevant to all three poles
+
+`docs/glossary.md` and `docs/overview.md` describe a **role taxonomy**, and these are *claims to verify
+in code*, not conclusions. The names, as the docs state them:
+
+- **Town** (`~/gt/`) — the management headquarters; **Rig** — a project repo under management.
+- **Town-level:** **Mayor** (chief-of-staff coordinator), **Deacon** (a watchdog running patrol cycles),
+  **Dogs** (the Deacon&#039;s maintenance crew), **Boot** (a Dog that checks the Deacon every 5 minutes).
+- **Rig-level:** **Polecat** (*&quot;persistent identity but ephemeral sessions&quot;*, working in isolated git
+  worktrees), **Refinery** (the merge queue), **Witness** (a patrol agent over Polecats), **Crew**
+  (long-lived named agents).
+- **Work units:** **Bead** (*&quot;git-backed atomic work unit stored in Dolt&quot;*), **Formula** (a TOML
+  workflow template), and a decomposition vocabulary around **MEOW** (*Molecular Expression of Work*).
+- **Stated principles:** **GUPP** (*&quot;If there is work on your Hook, YOU MUST RUN IT&quot;*), **NDI**
+  (*Nondeterministic Idempotence*).
+
+**Two things are already visible and must be verified, not assumed:** (a) Gas Town ships **an `acp`
+package** and a **`tmux` package** — the same agent-protocol lane our project mandates, driven through
+tmux sessions; (b) there is **a `mail` package** and **a `convoy` package** — i.e. named hand-off and
+batching primitives. Both belong in the pole batches, read from code.
+
+&gt; **Hypothesis for batch 01, not a finding:** Gas Town&#039;s role taxonomy (Mayor/Deacon/Dog/Boot) may be the
+&gt; *direct analogue* of the &quot;watchdog + recovery&quot; idea our own delivery layer needs, and its Polecat
+&gt; (*persistent identity, ephemeral session*) may be the sharpest expression of the machine/teammate split
+&gt; found in Multica. Per rule 0b, batch 01 measures first.
+
+### 2.5 Agent-facing assets and the external ledger
+
+- **`AGENTS.md` (185 lines) is a pointer**, not the context: it says *&quot;See `CLAUDE.md` for complete agent
+  context&quot;* and *&quot;Full context is injected by `gt prime` at session start&quot;*, then carries a
+  **Beads Workflow Integration** section. So the repo&#039;s agent instructions are **generated/injected by the
+  product itself**, not hand-written into the file — a posture worth verifying.
+- **`.beads/`** (config + `PRIME.md` + `README.md`) declares the issue tracker: **Beads**, an external
+  project (`github.com/steveyegge/beads`) with two CLIs — **`bd`** (issue CRUD) and **`bv`** (read-only
+  graph triage) — storing issues as **`.beads/issues.jsonl`**, synced like code.
+- **`templates/`** holds `agents/`, `polecat-CLAUDE.md`, `witness-CLAUDE.md` — the per-role instruction
+  templates.
+
+### 2.6 What is NOT here (named now, to guard the reading)
+
+- **No `.git`** — identity is the zip (§1.1).
+- **No `node_modules`** (correct); `go.sum` is present, so dependency identity is readable.
+- **The repository name and the module path disagree** (§1.1) — a later batch must not treat either as
+  the other.
+- **`docs/` is a real surface (~24.6k lines)** and will be readable — which is exactly why rule 1 must
+  bite: a well-written doc set is a claim set, not evidence.
+
+---
+
+## 3. The method (how every batch is produced)
+
+The method is **inherited verbatim** from the Hermes, Paperclip, CrewAI and Multica studies (rules 1–10),
+with the pole frame (§3.1) and the additive-across-studies rule (§3.2) as before.
+
+1. **Docs are claims; code is the authority.** Every load-bearing statement is checked against the
+   source. Where they disagree, **the code wins and the disagreement is recorded.**
+2. **Every number is measured at the time of writing**, never carried from memory or an older document.
+3. **Claims carry their evidence**: a line resting on code cites the file and line it was read at.
+4. **Two value questions per capability**: **Q1 · USER VALUE** (how it serves a person using the platform)
+   and **Q2 · VISION VALUE** (how it serves the AI-first business &amp; resources planner vision, incl.
+   versatility and integratability).
+5. **No comparison to our own platform inside the batches.** The cross-platform mapping is a separate
+   later pass.
+6. **Every capability is named, including ones we will not use.** Nothing is silently dropped.
+7. **Findings are additive and never overwrite history.**
+8. **Plain words** — every capability gets a one-sentence plain gloss before any detail.
+9. **THE POLE FRAME.** Every finding is tagged **P1 / P2 / P3 / PX-W / PX-F / PZ**.
+10. **The retirement rule.** Before reusing any setting/key/module named in an older document or another
+    platform&#039;s doc, **search this platform&#039;s migrations/config/CHANGELOG for a retirement entry.** With a
+    Keep-a-Changelog history and a git-backed ledger, Gas Town is a rich retirement surface.
+
+### 3.1 The pole frame — the three poles, defined once
+
+| Tag | Pole | The owner&#039;s words (abridged) |
+|---|---|---|
+| **P1** | **The aissistant** (the AI user / agent) | *versatile, integratable, rich featured architecture in itself, deployable in different contexts (workspaces, automations, later the studio)* |
+| **P2** | **The workspace** | *highly functional, versatile, integratable, rich featured, adaptable to the mix of current and future features, use-cases and needs* |
+| **P3** | **Automations** | *where agents work on assigned tasks, assign tasks, etc. Paperclip is a blueprint* |
+| **PX-W** | **Widgets architecture** | cross-cutting: the composable UI surface |
+| **PX-F** | **Frontend wiring &amp; construction** | cross-cutting: how the surface is built and wired |
+
+**Plus one escape hatch (PZ):** *&quot;any other findings you identify there that can fit our vision, project,
+architecture, or a potential use case or added value for the end user.&quot;* Tagged **PZ** with a one-line
+reason for keeping them.
+
+### 3.2 Additive across studies, like rule 7 within a study
+
+This study does not rewrite the Hermes, Paperclip, CrewAI or Multica studies. Where a Gas Town finding
+**confirms, contradicts or extends** an earlier finding, it is recorded as a cross-study note naming the
+earlier batch — so a reader can trace both directions. Cross-study notes are **observations**, never
+decisions.
+
+---
+
+## 4. The batch plan (each documented as it is completed)
+
+Findings are organised **per pole**, one file per pole, plus an overview and a synthesis. Gas Town is a
+**Go product with a role taxonomy and an external ledger**, so the pole weighting will differ from all
+four earlier studies — but the structure is identical so the later mapping is a per-pole join.
+
+| # | Batch / File | Pole | What it answers |
+|---|---|---|---|
+| **00** | **This file** — pin and method | — | task zero + method + pole frame |
+| **01** | `findings/01-platform-overview.md` | — | What is Gas Town? the Town/Rig model, the `gt` CLI, the daemon, the role taxonomy, the control plane |
+| **02** | `findings/02-the-aissistant.md` | **P1** | what an &quot;agent&quot; is here: polecat / crew / witness / mayor as records, identity, sessions, the `acp`/`tmux` runtime, skills and instructions |
+| **03** | `findings/03-the-workspace.md` | **P2** | Town and Rig, the git-backed Hooks, the Beads ledger, config, membership/identity |
+| **04** | `findings/04-automations.md` | **P3** | the scheduler, mailboxes, convoys, patrols (Deacon/Dog/Boot), the merge queue (Refinery), recovery |
+| **05** | `findings/05-widgets-and-frontend.md` | **PX-W / PX-F** | the `tui` package, the terminal surface, any web surface, the widget model |
+| **06** | `findings/06-out-of-pole.md` | **PZ** | everything else that fits our vision (security, quota, telemetry, plugins, the proxy, doctor/health) |
+| **07** | `findings/07-SYNTHESIS.md` | all | what Gas Town teaches each pole; ranking; the bridge to the other four studies is a LATER pass |
+
+**Each batch document carries:** (a) what was read and its measured size; (b) a **capability table tagged
+by pole** with **Q1 · Q2**; (c) the code verification with `file:line` evidence and any **doc-vs-code
+divergence**; (d) findings carried forward.
+
+&gt; **A note on the pole weighting, stated up front.** Gas Town&#039;s *stated purpose* is multi-agent
+&gt; orchestration with persistent work tracking, so the temptation to score it as &quot;already done&quot; is high
+&gt; here. The batches answer the **three value questions in the opposite direction too**: not only &quot;does it
+&gt; fit our poles&quot; but **&quot;where does it draw its boundaries, and are they ours?&quot;** — because a close
+&gt; neighbour is the hardest to reuse and the easiest to copy badly. That question is answered in the batch
+&gt; notes and ranked in batch 07, never assumed.
+
+---
+
+## 5. Ground rules restated as a checklist the reader can hold this study to
+
+- Is the claim measured, or remembered? → must be measured.
+- Does the line rest on a doc, or on code? → **code, always.**
+- If doc and code disagree, is the disagreement recorded? → must be.
+- Is every capability named, including the ones we will not use? → must be.
+- Is every finding **tagged with its pole** (P1/P2/P3/PX-W/PX-F/PZ)? → must be.
+- Are the two value questions answered in the owner&#039;s words? → yes, per capability.
+- Is there any comparison to our own platform in a batch? → must be none; that is the later mapping pass.
+- Before reusing an older-doc setting, was the retirement rule run (rule 10)? → must be.
+- **Is a test file being counted as product code?** → with **568 of 1,231 Go files being tests**, every
+  line count in this study states whether it includes tests.
+
+---
+
+## 6. How this study relates to the workshop folder
+
+```
+library/architecture/
+├── hermes-forensics/          # the Hermes study (mirror; gitignored copy)
+├── paperclip-forensics/       # the Paperclip study (CLOSED 7/7) + reader/
+├── crewai-forensics/          # the CrewAI study (CLOSED 7/7) + reader/
+├── multica-forensics/         # the Multica study (CLOSED 7/7) + reader/
+├── gastown-forensics/         # THIS study
+│   ├── 00-PIN-AND-METHOD.md
+│   └── findings/              # 01..07
+├── reader/                    # the Hermes reader (user-facing HTML)
+└── platforms/
+    ├── *.zip                  # the raw platform archives (gitignored)
+    ├── references.md          # repo link per platform
+    └── _extracted/            # working trees (gitignored) — gastown-main here
+```
+
+**Per-platform reader:** a reader for Gas Town is built at the **end** of this study, from its markdown,
+using the platform-agnostic generator proven for Paperclip, CrewAI and Multica (`generate-reader.js` + a
+`DOCS_CONFIG` block + a `diagrams.js`). **The markdown is the source of truth; the reader renders it and
+never edits it.** *(One caution carried in from the Multica reader — lesson L168: the generator is not
+fully platform-agnostic, so a rebrand must be verified by grepping the new tree for the old name.)*
+
+---
+
+*Batch 00 of 07. Begun 2026-10-15. Next: `findings/01-platform-overview.md`.*
+</pre>
+
+            <!-- Bottom Navigation Bar (Prev / Next Batch) -->
+            <footer class="reader-nav-footer">
+              <a href="#" class="nav-page-btn" id="prevDocBtn" style="visibility:hidden;">
+                <span class="nav-btn-sub">← Previous Batch</span>
+                <span class="nav-btn-title" id="prevDocTitle">Batch 00</span>
+              </a>
+              <div style="font-size: 0.8rem; color: var(--text-muted); text-align: center;">
+                Use keyboard <kbd style="background:var(--bg-surface-muted); padding:0.2rem 0.4rem; border-radius:4px;">[</kbd> and <kbd style="background:var(--bg-surface-muted); padding:0.2rem 0.4rem; border-radius:4px;">]</kbd> to navigate
+              </div>
+              <a href="#batch-01" class="nav-page-btn" id="nextDocBtn" style="text-align: right;">
+                <span class="nav-btn-sub">Next Batch →</span>
+                <span class="nav-btn-title" id="nextDocTitle">Platform Overview</span>
+              </a>
+            </footer>
+
+          </div>
+        </div>
+
+        <!-- Sticky Right Table of Contents Sidebar -->
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+            <span style="font-size:0.68rem; font-weight:normal; color:var(--text-muted);">Scrollspy</span>
+          </div>
+          <ul class="toc-list" id="tocList">
+            
+    <li class="toc-item level-2">
+      <a href="#batch-00/1-the-pin-task-zero-answered-by-measurement" class="toc-link" data-target="1-the-pin-task-zero-answered-by-measurement">
+        1. THE PIN — task zero, answered by measurement
+      </a>
+    </li>
+  
+
+    <li class="toc-item level-3">
+      <a href="#batch-00/1-1-the-identity-limit-stated-not-glossed" class="toc-link" data-target="1-1-the-identity-limit-stated-not-glossed">
+        1.1 The identity limit (stated, not glossed)
+      </a>
+    </li>
+  
+
+    <li class="toc-item level-2">
+      <a href="#batch-00/2-what-the-tree-contains-measured" class="toc-link" data-target="2-what-the-tree-contains-measured">
+        2. What the tree contains (measured)
+      </a>
+    </li>
+  
+
+    <li class="toc-item level-3">
+      <a href="#batch-00/2-1-this-tree-is-code-a-go-product-with-a-real-doc-set" class="toc-link" data-target="2-1-this-tree-is-code-a-go-product-with-a-real-doc-set">
+        2.1 This tree is CODE — a Go product with a real doc set
+      </a>
+    </li>
+  
+
+    <li class="toc-item level-3">
+      <a href="#batch-00/2-2-the-measured-shape-per-area" class="toc-link" data-target="2-2-the-measured-shape-per-area">
+        2.2 The measured shape (per area)
+      </a>
+    </li>
+  
+
+    <li class="toc-item level-3">
+      <a href="#batch-00/2-3-the-go-module-map-measured-the-object-of-batches-0106" class="toc-link" data-target="2-3-the-go-module-map-measured-the-object-of-batches-0106">
+        2.3 The Go module map (measured — the object of batches 01–06)
+      </a>
+    </li>
+  
+
+    <li class="toc-item level-3">
+      <a href="#batch-00/2-4-the-role-taxonomy-the-part-most-relevant-to-all-three-poles" class="toc-link" data-target="2-4-the-role-taxonomy-the-part-most-relevant-to-all-three-poles">
+        2.4 The role taxonomy — the part most relevant to all three poles
+      </a>
+    </li>
+  
+
+    <li class="toc-item level-3">
+      <a href="#batch-00/2-5-agent-facing-assets-and-the-external-ledger" class="toc-link" data-target="2-5-agent-facing-assets-and-the-external-ledger">
+        2.5 Agent-facing assets and the external ledger
+      </a>
+    </li>
+  
+
+    <li class="toc-item level-3">
+      <a href="#batch-00/2-6-what-is-not-here-named-now-to-guard-the-reading" class="toc-link" data-target="2-6-what-is-not-here-named-now-to-guard-the-reading">
+        2.6 What is NOT here (named now, to guard the reading)
+      </a>
+    </li>
+  
+
+    <li class="toc-item level-2">
+      <a href="#batch-00/3-the-method-how-every-batch-is-produced" class="toc-link" data-target="3-the-method-how-every-batch-is-produced">
+        3. The method (how every batch is produced)
+      </a>
+    </li>
+  
+
+    <li class="toc-item level-3">
+      <a href="#batch-00/3-1-the-pole-frame-the-three-poles-defined-once" class="toc-link" data-target="3-1-the-pole-frame-the-three-poles-defined-once">
+        3.1 The pole frame — the three poles, defined once
+      </a>
+    </li>
+  
+
+    <li class="toc-item level-3">
+      <a href="#batch-00/3-2-additive-across-studies-like-rule-7-within-a-study" class="toc-link" data-target="3-2-additive-across-studies-like-rule-7-within-a-study">
+        3.2 Additive across studies, like rule 7 within a study
+      </a>
+    </li>
+  
+
+    <li class="toc-item level-2">
+      <a href="#batch-00/4-the-batch-plan-each-documented-as-it-is-completed" class="toc-link" data-target="4-the-batch-plan-each-documented-as-it-is-completed">
+        4. The batch plan (each documented as it is completed)
+      </a>
+    </li>
+  
+
+    <li class="toc-item level-2">
+      <a href="#batch-00/5-ground-rules-restated-as-a-checklist-the-reader-can-hold-this-study-to" class="toc-link" data-target="5-ground-rules-restated-as-a-checklist-the-reader-can-hold-this-study-to">
+        5. Ground rules restated as a checklist the reader can hold this study to
+      </a>
+    </li>
+  
+
+    <li class="toc-item level-2">
+      <a href="#batch-00/6-how-this-study-relates-to-the-workshop-folder" class="toc-link" data-target="6-how-this-study-relates-to-the-workshop-folder">
+        6. How this study relates to the workshop folder
+      </a>
+    </li>
+  
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <!-- Global Full-Text Search Modal -->
+  <div class="search-modal-backdrop" id="searchModal">
+    <div class="search-modal-card">
+      <div class="modal-search-header">
+        <span style="font-size: 1.2rem;">🔍</span>
+        <input type="text" id="modalSearchInput" class="modal-search-input" placeholder="Search across all 8 study batches..." autofocus>
+        <button class="tool-btn" id="closeSearchBtn" style="padding: 0.25rem 0.5rem;">Esc</button>
+      </div>
+      <div class="modal-results-list" id="modalResultsList">
+        <!-- Search results list -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Global Architecture Gallery Modal -->
+  <div class="gallery-modal-backdrop" id="galleryModal">
+    <div class="gallery-modal-card">
+      <div class="gallery-modal-header">
+        <div style="display: flex; align-items: center; gap: 0.6rem;">
+          <span style="font-size: 1.3rem;">🏛️</span>
+          <div>
+            <div style="font-weight: 700; font-size: 1.1rem; color: var(--text-primary);">Gas Town Architectural Guides &amp; Decision Models</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">9 Interactive Study Visual Models • Call up any architecture piece on demand</div>
+          </div>
+        </div>
+        <button class="tool-btn" id="closeGalleryBtn" style="padding: 0.25rem 0.6rem;">Esc</button>
+      </div>
+
+      <!-- Detail View Area when a diagram is selected in gallery -->
+      <div class="gallery-detail-container" id="galleryDetailContainer" style="display: none;">
+        <div class="gallery-detail-bar">
+          <button class="tool-btn" id="backToGalleryGridBtn">← Back to All Guides</button>
+          <span id="galleryDetailTitle" style="font-weight: 700; color: var(--primary);"></span>
+          <button class="tool-btn active" id="galleryJumpToDocBtn">Open Batch Document →</button>
+        </div>
+        <div class="gallery-detail-svg" id="galleryDetailSvg"></div>
+      </div>
+
+      <!-- Grid of all 9 Architecture Cards -->
+      <div class="gallery-cards-grid" id="galleryCardsGrid">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Script Data & Controller -->
+  <script src="assets/docs-data.js"></script>
+  <script src="assets/reader.js"></script>
+</body>
+</html>

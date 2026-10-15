@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 07 — The synthesis — Gas Town Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-07" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 07</span>
+      <div class="header-title-wrap">
+        <div class="header-title">The Synthesis</div>
+        <div class="header-subtitle">Gas Town Platform Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/07-SYNTHESIS.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #4f46e5">COMPLETE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">4,011</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">20 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">356</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-15</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 07 Architecture Guide (Default)</option>
+            <optgroup label="Strategic Architecture">
+              <option value="master">Executive Topology: the three poles and four decided limits</option>
+            </optgroup>
+            <optgroup label="Foundations">
+              <option value="00">Batch 00: The pin, the identity hazard, and the test ratio</option>
+              <option value="01">Batch 01: The control plane — CLI, daemon, dashboard</option>
+            </optgroup>
+            <optgroup label="Pole 1 — The Aissistant">
+              <option value="02">Batch 02: The aissistant — an agent is a bead</option>
+            </optgroup>
+            <optgroup label="Pole 2 — The Workspace">
+              <option value="03">Batch 03: The workspace — a filesystem container</option>
+            </optgroup>
+            <optgroup label="Pole 3 — Automations">
+              <option value="04">Batch 04: Automations — formulas, mail, the watchdog chain</option>
+            </optgroup>
+            <optgroup label="Cross-Cutting">
+              <option value="05">Batch 05: Widgets &amp; frontend — and the absent widget model</option>
+            </optgroup>
+            <optgroup label="Escape Hatch">
+              <option value="06">Batch 06: Out-of-pole — sandbox, rotator, plugins</option>
+            </optgroup>
+            <optgroup label="Strategic Decision">
+              <option value="07">Batch 07: The synthesis — mechanisms and decided limits</option>
+            </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 07 VISUAL GUIDE</div>
+    <h4>The synthesis: twelve mechanisms, four of them decided limits</h4>
+    <p>What to carry forward, and what is ours to build</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 360" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-07" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-07" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+        <marker id="arrr-07" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#ef4444"/>
+        </marker>
+      </defs>
+      <g transform="translate(20, 20)">
+        <rect width="210" height="160" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">TOP 4 — THE LIMITS</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">1. the Hook (durability)</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">2. ZFC (transport, does not decide)</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">3. the three-layer sandbox</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#6d28d9">4. the watchdog base case</text>
+      </g>
+      <path d="M 230 100 L 268 100" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-07)"/>
+      <g transform="translate(272, 20)">
+        <rect width="210" height="160" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">NEXT — THE MODELS</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">5. the 13-preset registry</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">6. 47 tested formulas</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">7. the 4-layer config stack</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#6d28d9">8. plugins = shell scripts</text>
+      </g>
+      <path d="M 482 100 L 520 100" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-07)"/>
+      <g transform="translate(524, 20)">
+        <rect width="180" height="160" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE PAGE</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">1,231 Go files</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">474,724 lines</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">46 % are tests</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">292 CLI commands</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">68 findings</text>
+      </g>
+      <path d="M 704 100 L 742 100" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-07)"/>
+      <g transform="translate(746, 20)">
+        <rect width="154" height="160" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE VERDICT</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">mechanism source</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">+ boundary-setting</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">reference</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#b45309">not a template</text>
+      </g>
+      <rect x="20" y="206" width="880" height="130" rx="10" fill="#7c3aed" fill-opacity="0.08" stroke="#7c3aed" stroke-width="1.6"/>
+      <text x="40" y="234" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#6d28d9">THE FIVE LOAD-BEARING FINDINGS — if the mapping pass reads only five lines, these are the five</text>
+      <text x="40" y="260" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">F03-03 the Hook is the durability primitive · F03-06 ZFC — Zero Framework Cognition</text>
+      <text x="40" y="282" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">F04-07 the watchdog chain's named base case · F06-02/03/04 the three-layer sandbox</text>
+      <text x="40" y="312" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#6d28d9">F05-06 no widget model — and four of the five are decided limits, not features.</text>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="batch-07-the-synthesis">Batch 07 — The Synthesis<a href="#batch-07/batch-07-the-synthesis" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Study:</strong> Gas Town <code>1.2.1</code> · <strong>Batch:</strong> 07 of 07 · <strong>Status:</strong> COMPLETE
+<strong>Source:</strong> <code>github.com/gastownhall/gastown</code> → <code>platforms/_extracted/gastown-main</code> (module <code>github.com/steveyegge/gastown</code>)
+<strong>Zip md5:</strong> <code>f2485c1baa647967a31a878224a09503</code> · <strong>License:</strong> see <code>LICENSE</code></p>
+<p><strong>Scope of this batch.</strong> Batches 00–06 measured Gas Town from code. This batch does what a synthesis
+must: state the platform&#39;s verdict in plain words, name the mechanisms worth carrying into the mapping
+pass, state plainly what Gas Town does <strong>not</strong> give us, and answer the two value questions the method
+requires. It is a <em>reading</em> of the six batches — no new claims about the source are introduced here, and
+every claim restates a <code>file:line</code> already established in its originating batch.</p>
+<p><strong>Method rules in force.</strong> Code is the authority; docs are claims (rule 1). No comparison to our own
+platform (rule 5) — this batch compares <strong>batches to each other</strong>, never Gas Town to our own platform;
+that is the mapping pass&#39;s job. Pole-tag everything (rule 9). Name every capability (rule 6). Answer the
+two value questions (rule 4). Report the negatives. Correct earlier batches where later evidence demands
+it (rule 13). Run the retirement rule (rule 10).</p>
+<hr>
+<h2 id="7-1-the-measured-page">7.1 The measured page<a href="#batch-07/7-1-the-measured-page" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Everything below was counted or read, not estimated.</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Quantity</th>
+<th>Measured</th>
+<th>Source batch</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Zip md5</td>
+<td><code>f2485c1baa647967a31a878224a09503</code></td>
+<td>00</td>
+</tr>
+<tr>
+<td>Archive</td>
+<td><strong>1,737 entries = 174 dirs + 1,563 files</strong>; <strong>23,491,369 B</strong> on disk; <strong>no <code>.git</code></strong></td>
+<td>00</td>
+</tr>
+<tr>
+<td>Declared version</td>
+<td><strong>npm <code>@gastown/gt</code> <code>1.2.1</code></strong>; <strong>go 1.26.2</strong>; module <code>github.com/steveyegge/gastown</code></td>
+<td>00</td>
+</tr>
+<tr>
+<td>Identity hazard</td>
+<td>the <strong>repo</strong> is <code>gastownhall/gastown</code>, the <strong>module</strong> is <code>steveyegge/gastown</code></td>
+<td>00</td>
+</tr>
+<tr>
+<td>Go</td>
+<td><strong>1,231 files / 474,724 lines</strong> across <strong>77 package directories</strong></td>
+<td>00, 01</td>
+</tr>
+<tr>
+<td><strong>Test ratio</strong></td>
+<td><strong>568 of 1,231 Go files (46 %)</strong>; in <code>internal/</code> <strong>225,046 test lines of 472,897 (48 %)</strong></td>
+<td>00</td>
+</tr>
+<tr>
+<td><code>internal/cmd/</code></td>
+<td><strong>103,691 production lines</strong> — the largest package; <strong>292 commands</strong></td>
+<td>01</td>
+</tr>
+<tr>
+<td><code>cmd/</code> entry</td>
+<td><strong>6 files / 697 lines</strong> for <strong>three binaries</strong></td>
+<td>01</td>
+</tr>
+<tr>
+<td><code>docs/</code></td>
+<td>68 files / 24,592 lines</td>
+<td>00</td>
+</tr>
+<tr>
+<td>Roles</td>
+<td><strong>7 TOML role files</strong>, embedded; <strong>8 role constants in code</strong> (incl. <code>overseer</code>)</td>
+<td>01, 02</td>
+</tr>
+<tr>
+<td>Provider presets</td>
+<td><strong>13 built-in</strong>, 1 struct each; <strong>9 hook template providers</strong></td>
+<td>02</td>
+</tr>
+<tr>
+<td>Ledger</td>
+<td>durable issues + <strong>ephemeral wisps</strong>, merged explicitly; agent fields in the description; state as <strong>labels</strong></td>
+<td>02, 03</td>
+</tr>
+<tr>
+<td>Formulas</td>
+<td><strong>47 <code>.formula.toml</code></strong> embedded, 4 types</td>
+<td>04</td>
+</tr>
+<tr>
+<td>Mail</td>
+<td>beads-backed; lists / queues / announce; <strong>2 delivery modes</strong>; 3s idle-or-queue</td>
+<td>04</td>
+</tr>
+<tr>
+<td>Merge queue</td>
+<td><strong>batch-then-bisect</strong>: batch 5, wait 30s, flaky retry on</td>
+<td>04</td>
+</tr>
+<tr>
+<td>Plugins</td>
+<td><strong>13 directories</strong>, <code>plugin.md</code> + <code>run.sh</code>; <strong>2,069 lines</strong> of shell</td>
+<td>06</td>
+</tr>
+<tr>
+<td>Doctor</td>
+<td><strong>20,485 lines / 75 fixable checks</strong></td>
+<td>06</td>
+</tr>
+<tr>
+<td>Frontend</td>
+<td>CLI <strong>103,691</strong> · web <strong>15,488</strong> · TUI ~4,319 · style ~1,503</td>
+<td>05</td>
+</tr>
+<tr>
+<td>ZFC references</td>
+<td><strong>52</strong> in non-test Go</td>
+<td>03, 04</td>
+</tr>
+<tr>
+<td><strong>Findings written</strong></td>
+<td><strong>68</strong> (12 + 12 + 12 + 13 + 9 + 10 across batches 01–06)</td>
+<td>all</td>
+</tr>
+<tr>
+<td>Retirement entries</td>
+<td><strong>4</strong> recorded across batches 04–06 (+ batch 01&#39;s correction)</td>
+<td>all</td>
+</tr>
+</tbody></table></div>
+<p><strong>➜ F7-1 [foundational] — Gas Town is a <strong>terminal product with an agent-runner inside it</strong>: 103,691 lines
+of CLI against ~20,000 for the entire web and TUI layer combined, and 46 % of its Go files are tests.</strong>
+<strong>Plain meaning:</strong> this is a Go CLI that manages AI agents; the UI is a second door, not the product.
+<strong>Why it matters:</strong> every finding below is weighted accordingly — and the method&#39;s first rule mattered
+here for a different reason than in the other four studies: the docs are excellent and <em>almost</em> true, so
+rule 1 had to be applied as a habit rather than a suspicion.</p>
+<hr>
+<h2 id="7-2-the-three-poles-headlined">7.2 The three poles, headlined<a href="#batch-07/7-2-the-three-poles-headlined" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="pole-1-the-aissistant">Pole 1 — The aissistant<a href="#batch-07/pole-1-the-aissistant" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><strong>An agent is a bead, and everything about it is data.</strong></p>
+<p>The agent is <strong>a row in the same ledger as its work</strong> (F02-01): fields stored as <code>key: value</code> lines in the
+bead&#39;s <strong>description</strong>, written under a file lock, with operational state as <strong>labels</strong>. Identity is
+<code>{Role, Rig, Name, Prefix}</code> parsed from a <strong>mail-style address</strong> (F02-02) — agents are addressable like
+email. The provider is chosen from a <strong>13-preset registry</strong> whose one struct carries launch, process
+detection, resume semantics, hooks and prompt mode, governed by a written rule: <em>&quot;No provider-string
+switch statements should exist outside this registry&quot;</em> (F02-03). The agent&#39;s instructions arrive through
+<strong><code>gt prime</code></strong>, which <strong>infers the role from the directory the process is standing in</strong> (F02-05).</p>
+<p><strong>Pole 1 verdict, plainly:</strong> the <em>agent model</em> is declarative, data-driven and inspectable, and the
+runtime is explicitly someone else&#39;s CLI. What it does <strong>not</strong> have is an engine of its own — the provider
+is always an external process.</p>
+<h3 id="pole-2-the-workspace">Pole 2 — The workspace<a href="#batch-07/pole-2-the-workspace" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><strong>A filesystem workspace, discovered by walking up the path.</strong></p>
+<p>Town and Rig are <strong>directories</strong> (F03-01): the town is found by walking up for <code>mayor/town.json</code>, and the
+search deliberately continues to the <strong>outermost</strong> match so a nested rig cannot shadow it. The config is a
+<strong>four-layer stack</strong> — system → town → bead → wisp — with a returned <strong>source</strong> per value, per-key
+<em>stacking vs override</em> arithmetic, and a local <strong>veto</strong> (<code>SourceBlocked</code>) (F03-02). The ledger has <strong>two
+tiers</strong>: durable issues and ephemeral <em>wisps</em>, merged explicitly by readers (F03-05). And the container&#39;s
+durability primitive is the <strong>Hook</strong> — a pointer on the agent bead that survives restart, compaction and
+handoff (F03-03).</p>
+<p><strong>Pole 2 verdict, plainly:</strong> it is a workspace in the truest sense — a path you can <code>cd</code> into, a config
+stack you can interrogate, and a work ledger with two durability contracts. What it does <strong>not</strong> have is
+<strong>tenancy</strong>: <em>&quot;One mayor per machine — multi-town requires containers/VMs for isolation&quot;</em>
+(<code>session/names.go:15</code>), stated outright.</p>
+<h3 id="pole-3-automations">Pole 3 — Automations<a href="#batch-07/pole-3-automations" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><strong>The delivery layer, and the supervision design is a document the agents execute.</strong></p>
+<p>Work flows through <strong>mail</strong> (queued or <strong>interrupting the session</strong>), through <strong>hooks</strong> (<code>sling</code> = assign
+and keep context; <code>handoff</code> = assign and start fresh), and through <strong>convoys</strong> that feed the next ready
+issue <strong>reactively</strong> rather than on a poll (F04-03/04/12). The whole workflow catalogue is <strong>47 embedded
+TOML formulas</strong>, and their prose is <strong>tested</strong> (F04-01/02). Recovery is bounded and escalating: re-dispatch
+<strong>capped at 3</strong> with a cooldown, then to the Mayor (F04-10). The merge queue is <strong>batch-then-bisect</strong> with
+a flaky-test retry and a bead-label <strong>safety stop</strong> (F04-08/09).</p>
+<p><strong>The supervision chain is the distinctive part</strong> (F04-06/07): daemon → <strong>Boot</strong> (a dog that runs fresh
+each tick and must wake the Deacon through <code>gt nudge</code>, never raw tmux) → <strong>Deacon</strong> (its heartbeat is a
+file the daemon reads) → <strong>Witness</strong> → <strong>Polecat</strong> — and the patrol formula answers the recursion
+explicitly: the watchers read a <strong>timestamp</strong> and escalate only if it goes stale, <em>&quot;instead of sending
+heartbeat mail&quot;</em>.</p>
+<p><strong>Pole 3 verdict, plainly:</strong> work arrives, is queued, leased, retried, merged and attributed — and the
+watchdog chain has a named base case. What it does <strong>not</strong> have is a <strong>scheduler abstraction</strong>: patrols
+are agent prompts and daemon ticks, not a job graph.</p>
+<h3 id="px-w-px-f-widgets-and-frontend">PX-W / PX-F — Widgets and frontend<a href="#batch-07/px-w-px-f-widgets-and-frontend" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><strong>The CLI is the UI, and there is no widget model.</strong></p>
+<p>Measured: the CLI is <strong>~5× the entire web + TUI layer combined</strong> (F05-01). The terminal is a designed
+layer — Lipgloss over an <strong>Ayu theme</strong> — that <strong>degrades to raw text in agent mode</strong> (F05-02/03). The TUI
+is <strong>Bubble Tea</strong>, two surfaces. The web dashboard is <strong>one page, thirteen panels</strong>, HTMX 1.9.10 + SSE, no
+build step, its information architecture an <strong>interface of 14 fetch methods</strong>, and a <strong>response cache with
+a serialising mutex</strong> because two refreshing tabs would cause <em>&quot;cascading <code>bd</code> process storms&quot;</em>
+(F05-04/05/09).</p>
+<p><strong>And the widget model is measured absent</strong> (F05-06): zero composers; <em>&quot;widget&quot;</em> in 7 incidental files;
+the dashboard is a fixed grid with tabs.</p>
+<p><strong>PX verdict, plainly:</strong> one command surface, three doors — cheap, honest, and complete for its users.
+The composition layer is <strong>not here</strong>, and this is the <strong>fourth platform</strong> with none.</p>
+<hr>
+<h2 id="7-3-the-ranked-mechanisms-what-to-carry-forward">7.3 The ranked mechanisms — what to carry forward<a href="#batch-07/7-3-the-ranked-mechanisms-what-to-carry-forward" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Ranked by how much they would cost us to derive ourselves — value-first, not novelty-first.</p>
+<ol>
+<li><strong>The Hook as a durability primitive</strong> [P2/P3] — an ephemeral session over a durable <code>hook_bead</code>
+pointer, with <code>sling</code> (keep context) and <code>handoff</code> (fresh context) as two verbs. The cheapest
+restart-safety mechanism in the study. (§3.3)</li>
+<li><strong>ZFC — &quot;Zero Framework Cognition&quot;</strong> [P2/PZ] — <em>&quot;Gas Town provides transport but doesn&#39;t make
+decisions for agents… communication channels, not control flow&quot;</em>; 52 in-code references; a
+per-capability fallback table; and a <strong>changelog of removals made to honour it</strong>. The clearest
+stated-and-enforced philosophy in the study. (§3.6, §4.5)</li>
+<li><strong>The three-layer sandbox</strong> [PZ] — mTLS CA + certificate denylist, a CLI allow-list enforced with
+<strong>403</strong>, and a git smart-HTTP proxy so containers never reach GitHub. Each layer states its intent.
+(§6.2)</li>
+<li><strong>The watchdog chain with a named base case</strong> [P3] — Boot → Deacon → Witness → Polecat, where Boot is
+re-created every tick and the patrol formula answers <em>&quot;who watches the watchers&quot;</em> with a timestamp and
+no mail. (§4.6)</li>
+<li><strong>The provider registry</strong> [P1] — 13 presets, one struct each, with the anti-switch rule written down
+and enforced by the type. (§2.3)</li>
+<li><strong>47 workflows as embedded TOML, with tested prose</strong> [P3] — four formula types, <code>Pour</code> for durable
+sub-steps, and a test that forbids a specific instruction from reappearing. (§4.1)</li>
+<li><strong>The four-layer config stack with a local veto</strong> [P2] — system → town → bead → wisp, a returned
+source, per-key arithmetic. (§3.2)</li>
+<li><strong>Plugins as deterministic shell scripts</strong> [PZ] — 13 directories, a gate, bead-label tracking,
+execution metadata — <em>&quot;no AI interpretation&quot;</em>. ZFC applied to the extension model. (§6.5)</li>
+<li><strong>The batch-then-bisect merge queue</strong> [P3] — throughput vs O(log N) cost, a flaky-test retry so an
+innocent MR is not blamed, and an operator safety stop as a bead label. (§4.4)</li>
+<li><strong>Doctor as 75 fixable checks</strong> [PZ] — a check that repairs, with the reason cited. (§6.4)</li>
+<li><strong>One command surface, three doors</strong> [PX-F] — CLI, Bubble Tea TUI and an HTMX/SSE dashboard, all
+reading the same 292 commands. (§5.1)</li>
+<li><strong>Agent mode returns raw text</strong> [PX-F/PZ] — the presentation layer has a deliberate machine mode.
+(§5.2)</li>
+</ol>
+<p><strong>➜ F7-2 [synthesis] — The top four are all about <em>honesty of boundaries</em>: a primitive that says where
+durability lives, a philosophy that says who decides, a sandbox that says what may not be touched, and a
+watchdog chain that says who watches the watchers.</strong> <strong>Plain meaning:</strong> Gas Town&#39;s best contributions are
+not features but <strong>decided limits</strong>, each written down. <strong>Why it matters:</strong> decided limits are cheap to
+adopt and expensive to invent — and unlike a feature, a limit cannot be half-copied.</p>
+<hr>
+<h2 id="7-4-what-gas-town-does-not-give-us">7.4 What Gas Town does NOT give us<a href="#batch-07/7-4-what-gas-town-does-not-give-us" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Stated as plainly as the positives, because a study that only lists features is useless.</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Absent capability</th>
+<th>Measured how</th>
+<th>Batch</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>A widget / composition model</strong></td>
+<td>0 composers; <em>&quot;widget&quot;</em> in 7 incidental files; a fixed 13-panel grid</td>
+<td>05</td>
+</tr>
+<tr>
+<td><strong>Tenancy of any kind</strong></td>
+<td><em>&quot;One mayor per machine — multi-town requires containers/VMs for isolation&quot;</em> (<code>names.go:15</code>)</td>
+<td>01</td>
+</tr>
+<tr>
+<td><strong>An engine of its own</strong></td>
+<td>every preset is an external CLI; the platform adapts and drives</td>
+<td>02</td>
+</tr>
+<tr>
+<td><strong>A scheduler abstraction</strong></td>
+<td>patrols are agent prompts + daemon ticks, not a job graph with dependencies</td>
+<td>04</td>
+</tr>
+<tr>
+<td><strong>A database of its own for work</strong></td>
+<td>the ledger is an <strong>external</strong> project (Beads), wrapped</td>
+<td>03</td>
+</tr>
+<tr>
+<td><strong>A deployable agent runtime</strong></td>
+<td>the runtime is the host&#39;s tmux and the user&#39;s CLI install</td>
+<td>02</td>
+</tr>
+<tr>
+<td><strong>Cross-platform account rotation</strong></td>
+<td>the keychain swap is <code>//go:build darwin</code> only</td>
+<td>06</td>
+</tr>
+<tr>
+<td><strong>A live <code>team</code>-like membership model</strong></td>
+<td>crew are user-managed workspaces; there is no permission model between agents</td>
+<td>03</td>
+</tr>
+</tbody></table></div>
+<p><strong>➜ F7-3 [synthesis] — The absences cluster into one sentence: Gas Town is a <strong>single-machine, CLI-shaped
+harness for driving other people&#39;s coding agents</strong>, and it is honest about every boundary it draws.</strong>
+<strong>Plain meaning:</strong> it solves the <em>delivery and supervision</em> problem brilliantly for one operator on one
+machine, and it explicitly delegates the rest (the ledger, the engine, tenancy) to other systems or to the
+host. <strong>Why it matters:</strong> it tells the mapping pass what to take (mechanisms and decided limits) and what
+not to look for here (a tenant model, an engine, a widget surface).</p>
+<hr>
+<h2 id="7-5-the-consistency-check-across-batches">7.5 The consistency check across batches<a href="#batch-07/7-5-the-consistency-check-across-batches" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>A synthesis must look for contradictions between its own inputs. Four were found and are recorded rather
+than smoothed:</p>
+<ol>
+<li><strong>Roles: 7 vs 8.</strong> Batch 01 counted seven TOML role files; batch 02 found <strong>eight</strong> role constants in
+<code>session/identity.go</code>, including <code>overseer</code>, which <em>&quot;has no session&quot;</em>. Both are true: the config model
+has seven; the identity model has eight. Recorded as F02-04, not reconciled by deleting one.</li>
+<li><strong>Plugins: 10 vs 13.</strong> Batch 01 stated ten plugin directories; batch 06 measured <strong>thirteen</strong> (with
+11 carrying a <code>run.sh</code>, 2,069 lines). The earlier number was a head-of-list count. <strong>Corrected in batch
+06 per rule 13</strong>, and the correction is recorded rather than applied silently.</li>
+<li><strong>&quot;Git-backed hooks&quot; — two different hooks.</strong> The PIN&#39;s phrase resolves to two unrelated things: the
+<strong>Hook</strong> (the durability pointer, batch 03) and the <strong>hooks installer</strong> (Claude Code&#39;s settings.json,
+batch 02). Both are real; the word is overloaded. Recorded so a later batch does not conflate them.</li>
+<li><strong>The frontier is consistent.</strong> Every batch found the same boundary in a different place — the
+framework transports, the agent decides, and something else owns the engine and the ledger. That is a
+coherent design, not a coincidence of readings.</li>
+</ol>
+<p><strong>➜ F7-4 [synthesis] — No batch was falsified by a later batch; one was corrected, and one ambiguity was
+resolved by naming both meanings.</strong> <strong>Plain meaning:</strong> the 68 findings hold together as one body of
+evidence. <strong>Why it matters:</strong> the mapping pass can use them as one corpus, with the plugin count corrected
+and the two &quot;hooks&quot; distinguished.</p>
+<hr>
+<h2 id="7-6-the-two-value-questions-rule-4">7.6 The two value questions (rule 4)<a href="#batch-07/7-6-the-two-value-questions-rule-4" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="q1-what-does-this-platform-do-for-its-own-users">Q1 — What does this platform do for *its own users*?<a href="#batch-07/q1-what-does-this-platform-do-for-its-own-users" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><strong>For a developer running AI coding agents across several projects: a great deal, and it is the point of
+the product.</strong> You get a workspace where agents are colleagues with roles and mailboxes; work that
+survives a restart because it lives on a hook; a merge queue that does not blame an innocent change for a
+flaky test; a system that stays silent when healthy and escalates only real problems; a sandbox that keeps
+agents inside their tools and away from the network; and an operator switch that halts merging until you
+remove it. The divergences are minimal — and where the docs and code disagree, the code is <em>more</em>
+specific, which is the best of the four shapes encountered.</p>
+<p><strong>Verdict on Q1:</strong> as a <strong>single-machine, CLI-shaped harness for driving AI coding agents</strong>, this is
+mature, coherent, and unusually well-documented by its own code. Its limits (one town per machine, an
+external ledger, external engines) are <strong>not gaps for its users</strong> — a solo developer with a laptop does not
+need tenancy, and their agent CLIs are already installed.</p>
+<h3 id="q2-what-does-it-do-for-our-vision">Q2 — What does it do for *our vision*?<a href="#batch-07/q2-what-does-it-do-for-our-vision" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><strong>A great deal as a mechanism source, and a clear set of boundaries it refuses to cross.</strong> Gas Town is the
+first platform studied that is aimed at the same target, and the most instructive thing about it is <em>how
+narrowly it draws its lines</em>: one town per machine (stated), an external ledger (chosen), an external
+engine (chosen), and <strong>no widget model</strong> (measured). What it <em>does</em> offer is a set of <strong>decided limits</strong>,
+each written down: ZFC (transport, don&#39;t decide), the Hook (durability lives here), the sandbox (this may
+not be touched), and the watchdog base case (this is who watches the watchers).</p>
+<p><strong>Verdict on Q2:</strong> Gas Town is a <strong>mechanism source and a boundary-setting reference</strong> — take the Hook,
+the provider registry, the tested formulas, the three-layer sandbox and the patrol-as-document; and treat
+its refusals (tenancy, an engine, a widget surface) as <strong>signposts about what we must own</strong>, not as gaps
+to fill from here.</p>
+<p><strong>➜ F7-5 [synthesis] — The two questions point the same way, as with the closest neighbour in the
+study: excellent for its users, directly instructive for our delivery and supervision layers — and
+explicitly empty on tenancy, engine and composition.</strong> <strong>Plain meaning:</strong> the closer a platform is to the
+target, the more valuable its <em>decided limits</em> become, because a limit is the thing you cannot copy by
+accident.</p>
+<hr>
+<h2 id="7-7-the-finding-index">7.7 The finding index<a href="#batch-07/7-7-the-finding-index" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Consolidated for the mapping pass. Format: <code>id · pole · one line · batch §</code>.</p>
+<p><strong>Foundations</strong> — the pin, the identity hazard (repo vs module), the 46 % test ratio, the CLI-dominant
+shape, and the 10-rule method · 00 §1–§6.</p>
+<p><strong>Pole 1 — the aissistant</strong> — F02-01 an agent is a bead, fields in the description, state as labels [P1]
+02 §1 · F02-02 identity as a mail address, 8 roles incl. <code>overseer</code> [P1/PZ] 02 §2 · F02-03 the 13-preset
+provider registry with the anti-switch rule [P1] 02 §3 · F02-04 the overseer divergence [P1/PZ] 02 §2.1 ·
+F02-05 <code>gt prime</code> infers the role from the directory [P1] 02 §5.1 · F02-06 the nudge queue&#39;s two delivery
+paths [P1] 02 §5.3 · F02-07 operational state as bead labels [P1] 02 §1 · F02-08 behaviour enforced by a
+stern prompt template [P1] 02 §6 · F02-09 the completion block so supervision reads the ledger [P1/P3] 02
+§7 · F02-10 the agent reports its own mess [P1] 02 §7 · F02-11 <code>groq-compound</code> re-points another provider&#39;s
+base URL [P1/PZ] 02 §3 · F02-12 config moved out of the ledger into code-as-data [PZ] 02 §8.</p>
+<p><strong>Pole 2 — the workspace</strong> — F03-01 the town is discovered by walking up the path [P2] 03 §1.1 · F03-02 the
+four-layer config stack with a local veto [P2] 03 §2 · F03-03 the Hook is the durability primitive [P2/P3]
+03 §3 · F03-04 <code>sling</code> vs <code>handoff</code> [P2/P3] 03 §3.3 · F03-05 a two-tier ledger merged explicitly [P2] 03
+§4 · F03-06 ZFC — Zero Framework Cognition [P2/PZ] 03 §6 · F03-07 the autonomous/interactive split [P2/P1]
+03 §7 · F03-08 git errors carry raw output [P2] 03 §5 · F03-09 a guard refuses to mutate the town root [P2]
+03 §5 · F03-10 identity stored apart from behaviour [P2] 03 §1.2 · F03-11 the ZFC removal ledger [PZ] 03 §8
+· F03-12 <code>role_bead</code> removed on both records [PZ] 03 §4.2.</p>
+<p><strong>Pole 3 — automations</strong> — F04-01 47 embedded formulas in four types [P3] 04 §1 · F04-02 the formula&#39;s
+prose is tested [P3/PZ] 04 §1.3 · F04-03 mail is a real bus [P3] 04 §2 · F04-04 the 3s idle-or-queue
+fallback [P3] 04 §2.3 · F04-05 the Deacon&#39;s heartbeat is a file [P3] 04 §3.1 · F04-06 the patrol formula is
+a design document [P3] 04 §3.2 · F04-07 the watchdog chain&#39;s named base case [P3] 04 §3.3 · F04-08 the
+batch-then-bisect merge queue [P3] 04 §4 · F04-09 an operator safety stop as a bead label [P3] 04 §4 ·
+F04-10 capped re-dispatch then escalate [P3] 04 §5 · F04-11 the reaper executes but decides nothing [P3/PZ]
+04 §5 · F04-12 convoys feed reactively [P3] 04 §6 · F04-13 a fallback list is where a stale name hides [PZ]
+04 §7.</p>
+<p><strong>Widgets / frontend</strong> — F05-01 three surfaces, one implementation [PX-F] 05 §1 · F05-02 a themed semantic
+terminal style layer [PX-F] 05 §2.1 · F05-03 agent mode returns raw text [PX-F/PZ] 05 §2.2 · F05-04 the
+fetcher interface as information architecture [PX-F] 05 §4.3 · F05-05 the dashboard throttles what it
+stands on [PX-F/PZ] 05 §4.4 · <strong>F05-06 no widget model [PX-W] 05 §6</strong> · F05-07 the TUI is Bubble Tea [PX-F]
+05 §3 · F05-08 a removed package left as a no-op stub [PZ] 05 §3 · F05-09 a server-rendered frontend with
+no build step [PX-F] 05 §4.</p>
+<p><strong>Out-of-pole</strong> — F06-01 the quota rotator swaps accounts [PZ] 06 §1 · F06-02 an mTLS CA with a certificate
+denylist [PZ] 06 §2.1 · F06-03 a CLI allow-list enforced with 403 [PZ] 06 §2.2 · F06-04 a git smart-HTTP
+proxy [PZ] 06 §2.3 · F06-05 OTel telemetry with a run ID [PZ] 06 §3 · F06-06 75 fixable doctor checks [PZ]
+06 §4 · F06-07 plugins as shell scripts with a metadata contract [PZ] 06 §5 · F06-08 plugins are scoped
+[PZ] 06 §5 · F06-09 per-runtime agent logs are parsed [PZ/P1] 06 §6 · F06-10 the plugin-count correction
+[PZ] 06 §7.</p>
+<p><strong>Synthesis</strong> — F7-1 the measured page [—] §7.1 · F7-2 twelve mechanisms ranked [—] §7.3 · F7-3 the
+absences cluster [—] §7.4 · F7-4 one correction, one ambiguity named [—] §7.5 · F7-5 the two questions
+answered [—] §7.6.</p>
+<p><strong>➜ F7-6 [synthesis] — 68 findings, five of them load-bearing: F03-03 (the Hook), F03-06 (ZFC), F04-07
+(the watchdog base case), F06-02/03/04 (the three-layer sandbox), F05-06 (no widget model).</strong> <strong>Plain
+meaning:</strong> if the mapping pass reads only five lines, these are the five — and four of the five are
+<em>decided limits</em> rather than features. <strong>Why it matters:</strong> it gives the next stage a prioritised entry
+point instead of 68 flat rows.</p>
+<hr>
+<h2 id="7-8-the-platform-verdict-in-one-paragraph">7.8 The platform verdict, in one paragraph<a href="#batch-07/7-8-the-platform-verdict-in-one-paragraph" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>Gas Town <code>1.2.1</code> is a single-machine, CLI-shaped Go harness for driving other people&#39;s AI coding agents
+across projects, and it is the most honest platform in this workshop about where it stops.</strong> Its
+architecture is genuinely instructive: an <strong>agent is a bead</strong> whose fields live in its description and
+whose state lives in labels; a <strong>13-preset provider registry</strong> whose one struct carries everything
+provider-specific and whose anti-switch rule is written down; <strong><code>gt prime</code></strong> that infers an agent&#39;s role
+from the directory it stands in; a <strong>Hook</strong> that makes work survive restart, compaction and handoff;
+<strong>47 embedded TOML formulas</strong> whose prose is tested; a <strong>three-layer sandbox</strong> (mTLS CA + denylist, a CLI
+allow-list enforced with 403, a git smart-HTTP proxy); <strong>75 fixable doctor checks</strong>; and a <strong>watchdog
+chain of agents</strong> with a named base case and an explicit answer to <em>&quot;who watches the watchers&quot;</em>. Its
+philosophy is named and enforced — <strong>ZFC: the framework transports, the agent decides</strong> — with a
+changelog of code deleted to honour it. Where it stops is equally clear and equally stated: <strong>one town per
+machine</strong> (containers for isolation), an <strong>external ledger</strong> (Beads), <strong>external engines</strong> (the agent
+CLIs), and <strong>no widget model at all</strong>. The correct posture toward it is therefore <strong>mechanism source and
+boundary-setting reference</strong> — take the Hook, the registry, the tested formulas, the sandbox and the
+patrol-as-document; and treat its refusals as signposts about what we must own.</p>
+<hr>
+<h2 id="7-9-batch-07-checklist">7.9 Batch 07 — checklist<a href="#batch-07/7-9-batch-07-checklist" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<ul>
+<li><input checked="" disabled="" type="checkbox"> Read from source only; no new source claims introduced (all restate verified findings).</li>
+<li><input checked="" disabled="" type="checkbox"> Every finding carries its originating batch and section.</li>
+<li><input checked="" disabled="" type="checkbox"> No comparison to our own platform (rule 5) — internal batch-to-batch consistency only (§7.5).</li>
+<li><input checked="" disabled="" type="checkbox"> Both value questions answered separately (rule 4, §7.6).</li>
+<li><input checked="" disabled="" type="checkbox"> Absences reported as findings, not omitted (rule 6, §7.4).</li>
+<li><input checked="" disabled="" type="checkbox"> Four cross-batch consistencies recorded, none smoothed; one correction applied and recorded
+(rule 13, §7.5).</li>
+<li><input checked="" disabled="" type="checkbox"> Retirement rule honoured: no earlier finding deleted to fit the synthesis (rule 10).</li>
+<li><input checked="" disabled="" type="checkbox"> 6 synthesis findings: F7-1…F7-6, plus the complete finding index (§7.7).</li>
+</ul>
+<p>The Gas Town study is complete: <strong>pin (00) + 68 findings across six pole batches (01–06) + this
+synthesis (07).</strong> The reader is built from this markdown, at the end, with the platform-agnostic
+generator — and no study markdown is edited to fit it.</p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="06-out-of-pole-pz.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">Out-of-Pole (PZ)</span>
+                </a>
+              
+
+              <a href="../index.html#batch-07" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              <div></div>
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#7-1-the-measured-page" class="toc-link">7.1 The measured page</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-2-the-three-poles-headlined" class="toc-link">7.2 The three poles, headlined</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#pole-1-the-aissistant" class="toc-link">Pole 1 — The aissistant</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#pole-2-the-workspace" class="toc-link">Pole 2 — The workspace</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#pole-3-automations" class="toc-link">Pole 3 — Automations</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#px-w-px-f-widgets-and-frontend" class="toc-link">PX-W / PX-F — Widgets and frontend</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-3-the-ranked-mechanisms-what-to-carry-forward" class="toc-link">7.3 The ranked mechanisms — what to carry forward</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-4-what-gas-town-does-not-give-us" class="toc-link">7.4 What Gas Town does NOT give us</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-5-the-consistency-check-across-batches" class="toc-link">7.5 The consistency check across batches</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-6-the-two-value-questions-rule-4" class="toc-link">7.6 The two value questions (rule 4)</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#q1-what-does-this-platform-do-for-its-own-users" class="toc-link">Q1 — What does this platform do for *its own users*?</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#q2-what-does-it-do-for-our-vision" class="toc-link">Q2 — What does it do for *our vision*?</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-7-the-finding-index" class="toc-link">7.7 The finding index</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-8-the-platform-verdict-in-one-paragraph" class="toc-link">7.8 The platform verdict, in one paragraph</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-9-batch-07-checklist" class="toc-link">7.9 Batch 07 — checklist</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('gastown_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('gastown_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('gastown_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('gastown_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.GasTownReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

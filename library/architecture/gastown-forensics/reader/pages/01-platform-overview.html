@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 01 — The platform overview — Gas Town Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-01" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 01</span>
+      <div class="header-title-wrap">
+        <div class="header-title">Platform Overview</div>
+        <div class="header-subtitle">Gas Town Platform Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/01-platform-overview.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #059669">DONE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">3,191</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">16 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">335</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-15</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 01 Architecture Guide (Default)</option>
+            <optgroup label="Strategic Architecture">
+              <option value="master">Executive Topology: the three poles and four decided limits</option>
+            </optgroup>
+            <optgroup label="Foundations">
+              <option value="00">Batch 00: The pin, the identity hazard, and the test ratio</option>
+              <option value="01">Batch 01: The control plane — CLI, daemon, dashboard</option>
+            </optgroup>
+            <optgroup label="Pole 1 — The Aissistant">
+              <option value="02">Batch 02: The aissistant — an agent is a bead</option>
+            </optgroup>
+            <optgroup label="Pole 2 — The Workspace">
+              <option value="03">Batch 03: The workspace — a filesystem container</option>
+            </optgroup>
+            <optgroup label="Pole 3 — Automations">
+              <option value="04">Batch 04: Automations — formulas, mail, the watchdog chain</option>
+            </optgroup>
+            <optgroup label="Cross-Cutting">
+              <option value="05">Batch 05: Widgets &amp; frontend — and the absent widget model</option>
+            </optgroup>
+            <optgroup label="Escape Hatch">
+              <option value="06">Batch 06: Out-of-pole — sandbox, rotator, plugins</option>
+            </optgroup>
+            <optgroup label="Strategic Decision">
+              <option value="07">Batch 07: The synthesis — mechanisms and decided limits</option>
+            </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 01 VISUAL GUIDE</div>
+    <h4>The control plane: one CLI, one daemon, one dashboard</h4>
+    <p>What Gas Town is made of, and the Town/Rig model the whole thing rests on</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 340" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-01" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-01" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+        <marker id="arrr-01" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#ef4444"/>
+        </marker>
+      </defs>
+      <g transform="translate(20, 20)">
+        <rect width="210" height="140" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE CLI</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">internal/cmd/ — 103,691 lines</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">292 cobra commands</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">cmd/gt is TEN lines</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#6d28d9">the largest package</text>
+      </g>
+      <path d="M 230 90 L 268 90" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-01)"/>
+      <g transform="translate(272, 20)">
+        <rect width="210" height="140" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE DAEMON</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">named, testable jobs</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">checkpoint_dog · doctor_dog</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">quota_dog · compactor_dog</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">convoy_manager · reaper</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">a supervisor of small routines</text>
+      </g>
+      <path d="M 482 90 L 520 90" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-01)"/>
+      <g transform="translate(524, 20)">
+        <rect width="180" height="140" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE DASHBOARD</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">POST /api/run</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">runs a gt command string</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">one surface, two doors</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">no second implementation</text>
+      </g>
+      <path d="M 704 90 L 742 90" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-01)"/>
+      <g transform="translate(746, 20)">
+        <rect width="154" height="140" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE BINARIES</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">gt</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">gt-proxy-client</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">gt-proxy-server</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">cmd/ = 697 lines</text>
+      </g>
+      <rect x="20" y="186" width="880" height="130" rx="10" fill="#7c3aed" fill-opacity="0.08" stroke="#7c3aed" stroke-width="1.6"/>
+      <text x="40" y="214" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#6d28d9">TOWN / RIG — THE CONTAINER IS A FILESYSTEM</text>
+      <text x="40" y="240" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">Town (~/gt/) contains Rigs; a Rig contains its agent directories: polecats/ · crew/ · refinery/rig/ · witness/ · mayor/rig/.</text>
+      <text x="40" y="260" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">The role taxonomy is DATA — 7 TOML files embedded in the binary, each carrying scope, session, env, health and nudge.</text>
+      <text x="40" y="286" font-family="system-ui, sans-serif" font-size="11.5" font-weight="600" fill="#6d28d9">THE WATCHDOG CHAIN: daemon → Boot → Deacon → Witness → Polecat — each deciding whether the level below is alive.</text>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="batch-01-platform-overview">Batch 01 — Platform Overview<a href="#batch-01/batch-01-platform-overview" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Study:</strong> Gas Town <code>1.2.1</code> · <strong>Batch:</strong> 01 of 07 · <strong>Status:</strong> COMPLETE
+<strong>Source:</strong> <code>github.com/gastownhall/gastown</code> → <code>platforms/_extracted/gastown-main</code> (module <code>github.com/steveyegge/gastown</code>)
+<strong>Zip md5:</strong> <code>f2485c1baa647967a31a878224a09503</code> · <strong>License:</strong> see <code>LICENSE</code>
+<strong>Method:</strong> rules 1-10 of <code>00-PIN-AND-METHOD.md</code>. Every claim carries <code>file:line</code>.
+Docs are claims; code is the authority. Nothing in this file was inferred from a README.</p>
+<hr>
+<h2 id="0-what-this-batch-had-to-answer">0. What this batch had to answer<a href="#batch-01/0-what-this-batch-had-to-answer" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Gas Town is not a library and not a framework. It is a <strong>product</strong>: a CLI (<code>gt</code>), a background <strong>daemon</strong>,
+a <strong>web dashboard</strong>, and a <strong>role taxonomy of AI agents</strong> coordinated through <strong>tmux</strong> and a git-backed
+ledger. So the question for batch 01 is: <strong>what is the shape of the machine, and does it already solve
+the three poles we are building toward?</strong></p>
+<p>Short answer, measured:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Pole</th>
+<th>Gas Town&#39;s answer</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>P1 — the assistant</strong></td>
+<td>A <strong>role taxonomy as data</strong> (7 TOML role definitions) + a <strong>tmux session per agent</strong> + an <strong>ACP proxy</strong></td>
+<td><strong>Real, and unusual: the agent&#39;s identity is a config file, not a row</strong> (F01-04, F01-05)</td>
+</tr>
+<tr>
+<td><strong>P2 — the workspace</strong></td>
+<td><strong>Town</strong> (the HQ) and <strong>Rig</strong> (a managed repo) with a fixed agent directory layout</td>
+<td><strong>Real, and it is a filesystem workspace, not a database tenant</strong> (F01-03)</td>
+</tr>
+<tr>
+<td><strong>P3 — automations</strong></td>
+<td>A <strong>daemon</strong> with <strong>named dogs</strong> (checkpoint/compactor/doctor/quota), a <strong>Boot watchdog that is itself an agent</strong>, a <strong>merge-queue Refinery</strong>, and a <strong>town-wide E-stop</strong></td>
+<td><strong>Real, and the watchdog chain is the most distinctive mechanism found</strong> (F01-06, F01-07)</td>
+</tr>
+</tbody></table></div>
+<p>Everything in this batch is the <em>platform</em> layer. The three pole-specific batches (02, 03, 04) go deeper;
+this one establishes that there is something there to go deeper into.</p>
+<hr>
+<h2 id="1-the-measured-shape">1. The measured shape<a href="#batch-01/1-the-measured-shape" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>All numbers below were measured on the extraction, not taken from any manifest.</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Area</th>
+<th align="right">Files</th>
+<th align="right">Lines</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>internal/</code></td>
+<td align="right">1,235</td>
+<td align="right"><strong>477,544</strong></td>
+<td>60+ packages — essentially the whole product</td>
+</tr>
+<tr>
+<td><code>docs/</code></td>
+<td align="right">68</td>
+<td align="right">24,592</td>
+<td>concepts, design, guides, glossary</td>
+</tr>
+<tr>
+<td><code>plugins/</code></td>
+<td align="right">15</td>
+<td align="right">3,220</td>
+<td>10 plugin directories</td>
+</tr>
+<tr>
+<td><code>cmd/</code></td>
+<td align="right">6</td>
+<td align="right">697</td>
+<td><strong>three binaries</strong> (<code>gt</code>, <code>gt-proxy-client</code>, <code>gt-proxy-server</code>)</td>
+</tr>
+<tr>
+<td><code>templates/</code></td>
+<td align="right">2</td>
+<td align="right">483</td>
+<td>per-role agent instruction templates</td>
+</tr>
+<tr>
+<td>Go total</td>
+<td align="right"><strong>1,231 files</strong></td>
+<td align="right"><strong>474,724</strong></td>
+<td>across <strong>77 package directories</strong></td>
+</tr>
+</tbody></table></div>
+<p><strong>Two counting hazards measured before any finding was written.</strong></p>
+<ol>
+<li><strong>46 % of Go <em>files</em> are tests</strong> — <strong>568 of 1,231</strong> are <code>_test.go</code>, and in <code>internal/</code> the split is
+<strong>247,851 production lines vs 225,046 test lines (48 %)</strong>. A &quot;lines of Go&quot; figure for this project is
+<strong>half test code</strong> unless it says otherwise. Every count in this study states its basis.</li>
+<li><strong><code>cmd/</code> is a 697-line shell for three binaries.</strong> <code>cmd/gt/main.go</code> is ten lines
+(<code>main.go:1-10</code>) — it calls <code>cmd.Execute()</code> and exits. <strong>The real command surface is <code>internal/cmd/</code>,
+which is 103,691 production lines</strong> — the single largest package in the tree.</li>
+</ol>
+<hr>
+<h2 id="2-the-control-plane-one-cli-one-daemon-one-dashboard">2. The control plane: one CLI, one daemon, one dashboard<a href="#batch-01/2-the-control-plane-one-cli-one-daemon-one-dashboard" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="2-1-the-cli-is-the-product-s-spine">2.1 The CLI is the product's spine<a href="#batch-01/2-1-the-cli-is-the-product-s-spine" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>internal/cmd/</code> defines <strong>292 distinct commands</strong> (measured by counting cobra <code>Use:</code> declarations). The
+surface is enormous and the names are the domain: <code>agents</code>, <code>bead</code>, <code>beads</code>, <code>boot</code>, <code>broadcast</code>,
+<code>capacity</code>, <code>channel</code>, <code>checkpoint</code>, <code>claim</code>, <code>commit</code>, <code>convoy</code>, <code>deacon</code>, <code>doctor</code>, <code>estop</code>, <code>hook</code>,
+<code>mail</code>, <code>mayor</code>, <code>merge</code>, <code>nudge</code>, <code>patrol</code>, <code>polecat</code>, <code>prime</code>, <code>refinery</code>, <code>rig</code>, <code>sling</code>, <code>status</code>,
+<code>witness</code>, and ~270 more.</p>
+<p><strong>Plainly:</strong> Gas Town is operated by typing commands, and almost every capability has a verb. That is the
+opposite of a product with a thin CLI and a fat UI.</p>
+<h3 id="2-2-the-daemon-is-the-runtime">2.2 The daemon is the runtime<a href="#batch-01/2-2-the-daemon-is-the-runtime" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>internal/daemon/daemon.go</code> imports the whole domain in one file (<code>daemon.go:1-45</code>): <code>beads</code>, <code>boot</code>,
+<code>config</code>, <code>deacon</code>, <code>deps</code>, <code>doltserver</code>, <code>estop</code>, <code>events</code>, <code>feed</code>, <code>git</code>, <code>mayor</code>, <code>polecat</code>,
+<code>refinery</code>, <code>rig</code>, <code>session</code>, <code>telemetry</code>, <code>tmux</code>, <code>wisp</code>, <code>witness</code>.</p>
+<p>It is not a single loop. It has <strong>named, separate maintenance jobs</strong>, several of them literally called
+<strong>dogs</strong> — <code>checkpoint_dog.go</code>, <code>compactor_dog.go</code>, <code>doctor_dog.go</code>, <code>quota_dog.go</code>, <code>dog_molecule.go</code> —
+plus <code>convoy_manager.go</code>, <code>dolt.go</code>, <code>dolt_backup.go</code>, <code>jsonl_git_backup.go</code>, <code>krc_pruner.go</code>,
+<code>log_rotation.go</code>, <code>pressure.go</code>.</p>
+<p><strong>The finding:</strong> the daemon is a <strong>supervisor of named, individually-testable maintenance routines</strong>, not
+a monolith — and it names them after the product&#39;s own metaphor.</p>
+<h3 id="2-3-the-dashboard-is-a-web-shell-over-the-cli">2.3 The dashboard is a web shell over the CLI<a href="#batch-01/2-3-the-dashboard-is-a-web-shell-over-the-cli" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>internal/web/</code> is an HTTP server (<code>api.go</code>, <code>handler.go</code>, <code>commands.go</code>, <code>fetcher.go</code>, <code>validate.go</code>)
+with <code>static/</code> (<code>dashboard.css</code>, <code>dashboard.js</code>) and <code>templates/</code> (<code>convoy.html</code>). Its API is explicit:
+<code>CommandRequest</code> is <em>&quot;the JSON request body for <code>/api/run</code>&quot;</em>, and its own comment says <em>&quot;Command is the
+<code>gt</code> command to run (without the <code>gt</code> prefix). Example: <code>status --json</code> or <code>mail inbox</code>&quot;</em>
+(<code>api.go:25-36</code>).</p>
+<p><strong>Plainly:</strong> the web UI <strong>shells out to the same CLI a human types</strong>. There is one command surface, and
+the dashboard is a second front door onto it — not a second implementation.</p>
+<hr>
+<h2 id="3-town-and-rig-a-filesystem-workspace">3. Town and Rig — a filesystem workspace<a href="#batch-01/3-town-and-rig-a-filesystem-workspace" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="3-1-the-two-containers">3.1 The two containers<a href="#batch-01/3-1-the-two-containers" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<ul>
+<li><strong>Town</strong> — the management HQ (the docs say <code>~/gt/</code>), holding town-level agents and the daemon.</li>
+<li><strong>Rig</strong> — <em>&quot;a managed repository in the workspace&quot;</em> (<code>rig/types.go:8-9</code>), i.e. a project under
+management.</li>
+</ul>
+<p>The <code>Rig</code> record (<code>rig/types.go:9-40</code>) is the whole model, and three of its fields are worth naming:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Field</th>
+<th>What it is</th>
+<th>Why it matters</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>Name</code>, <code>Path</code></td>
+<td>the rig&#39;s identity and directory</td>
+<td>a rig <strong>is</strong> a directory</td>
+</tr>
+<tr>
+<td><code>GitURL</code>, <strong><code>PushURL</code></strong></td>
+<td>fetch URL, and an <strong>optional separate push URL</strong></td>
+<td><em>&quot;an optional push URL for read-only upstreams. When set, polecats push here instead of to <code>GitURL</code> (e.g., personal fork)&quot;</em> — a fork workflow built into the record</td>
+</tr>
+<tr>
+<td><code>Polecats</code>, <code>Crew</code>, <code>HasWitness</code>, <code>HasRefinery</code>, <code>HasMayor</code></td>
+<td>the agents in the rig</td>
+<td>the rig <strong>contains</strong> its agents, as lists</td>
+</tr>
+</tbody></table></div>
+<h3 id="3-2-the-layout-is-fixed-and-declared">3.2 The layout is fixed and declared<a href="#batch-01/3-2-the-layout-is-fixed-and-declared" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>rig/types.go:48-54</code> declares the standard agent directories:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>go</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-go">var AgentDirs = []string{
+    &quot;polecats&quot;,
+    &quot;crew&quot;,
+    &quot;refinery/rig&quot;,
+    &quot;witness&quot;,
+    &quot;mayor/rig&quot;,
+}
+</code></pre>
+</div>
+<p><strong>The finding, stated plainly:</strong> Gas Town&#39;s workspace is <strong>the filesystem</strong> — a town directory containing
+rig directories containing agent directories containing git worktrees. There is no tenant database here;
+the container is a path, and the unit of isolation is a directory.</p>
+<hr>
+<h2 id="4-the-role-taxonomy-and-it-is-data">4. The role taxonomy — and it is DATA<a href="#batch-01/4-the-role-taxonomy-and-it-is-data" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="4-1-seven-roles-as-toml-files-embedded-in-the-binary">4.1 Seven roles, as TOML files embedded in the binary<a href="#batch-01/4-1-seven-roles-as-toml-files-embedded-in-the-binary" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>The roles are <strong>not</strong> code paths. They are seven TOML files — <code>crew.toml</code>, <code>deacon.toml</code>, <code>dog.toml</code>,
+<code>mayor.toml</code>, <code>polecat.toml</code>, <code>refinery.toml</code>, <code>witness.toml</code> — compiled into the binary
+(<code>//go:embed roles/*.toml</code>, <code>config/roles.go:15</code>) and parsed into a <code>RoleDefinition</code>
+(<code>config/roles.go:20</code>):</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>go</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-go">type RoleDefinition struct {
+    Role           string            // mayor, deacon, witness, refinery, polecat, crew, dog
+    Scope          string            // &quot;town&quot; or &quot;rig&quot;
+    Session        RoleSessionConfig // tmux session pattern + work_dir + start_command
+    Env            map[string]string
+    Health         RoleHealthConfig
+    Nudge          string            // the initial prompt
+    PromptTemplate string
+}
+</code></pre>
+</div>
+<p><strong>A retirement is recorded in its own comment</strong> (<code>config/roles.go:19</code>): <em>&quot;This replaces the role bead
+system with config files.&quot;</em> Roles used to be beads; they are now config. (See §8.)</p>
+<h3 id="4-2-what-a-role-actually-declares">4.2 What a role actually declares<a href="#batch-01/4-2-what-a-role-actually-declares" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>Read from the TOML files themselves:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Role</th>
+<th>Scope</th>
+<th>Session pattern</th>
+<th><code>work_dir</code></th>
+<th>The <code>nudge</code> (its first prompt)</th>
+<th><code>stuck_threshold</code></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>mayor</strong></td>
+<td>town</td>
+<td><code>hq-mayor</code></td>
+<td><code>{town}/mayor</code></td>
+<td><em>&quot;Check mail and hook status, then act accordingly.&quot;</em></td>
+<td>1h</td>
+</tr>
+<tr>
+<td><strong>deacon</strong></td>
+<td>town</td>
+<td><code>hq-deacon</code></td>
+<td><code>{town}</code></td>
+<td><em>&quot;Run <code>gt prime</code> to check patrol status and begin heartbeat cycle.&quot;</em></td>
+<td>1h</td>
+</tr>
+<tr>
+<td><strong>dog</strong></td>
+<td>town</td>
+<td><code>gt-dog-{name}</code></td>
+<td><code>{town}/deacon/dogs/{name}</code></td>
+<td><em>&quot;Check your hook for work assignments.&quot;</em></td>
+<td>2h</td>
+</tr>
+<tr>
+<td><strong>polecat</strong></td>
+<td>rig</td>
+<td><code>{prefix}-{name}</code></td>
+<td><code>{town}/{rig}/polecats/{name}</code></td>
+<td><em>&quot;Check your hook for work assignments.&quot;</em></td>
+<td>2h</td>
+</tr>
+<tr>
+<td><strong>witness</strong></td>
+<td>rig</td>
+<td><code>{prefix}-witness</code></td>
+<td><code>{town}/{rig}/witness</code></td>
+<td><em>&quot;Run <code>gt prime</code> to check worker status and begin patrol cycle.&quot;</em></td>
+<td>1h</td>
+</tr>
+<tr>
+<td><strong>refinery</strong></td>
+<td>rig</td>
+<td><code>{prefix}-refinery</code></td>
+<td><code>{town}/{rig}/refinery/rig</code></td>
+<td><em>&quot;Run <code>gt prime</code> to check merge queue and begin processing.&quot;</em></td>
+<td>2h</td>
+</tr>
+<tr>
+<td><strong>crew</strong></td>
+<td>rig</td>
+<td><code>{prefix}-crew-{name}</code></td>
+<td><code>{town}/{rig}/crew/{name}</code></td>
+<td><em>&quot;Check your hook and mail, then act accordingly.&quot;</em></td>
+<td>4h</td>
+</tr>
+</tbody></table></div>
+<p><em>(All seven TOML files were read; every row above is from the file itself. Each file&#39;s own header comment
+also states its intent — e.g. dog: &quot;Town-level workers for cross-rig tasks. <strong>Dispatched by Deacon</strong>&quot;;
+crew: &quot;Persistent user-managed workspaces. Multiple per rig.&quot;)</em></p>
+<p><strong>Four things are worth stating plainly:</strong></p>
+<ol>
+<li><strong>Scope is <code>town</code> or <code>rig</code></strong> — the two containers of §3 are the two scopes a role can have.</li>
+<li><strong>The agent&#39;s first prompt is data</strong> (<code>nudge</code>), and it is short — <em>&quot;Check your hook for work
+assignments.&quot;</em> The agent is told to go look for work, not given work.</li>
+<li><strong>Every role carries a health policy</strong>: <code>ping_timeout</code> (30s), <code>consecutive_failures</code> (3),
+<code>kill_cooldown</code> (5m), and a per-role <code>stuck_threshold</code> (<strong>1h</strong> for the town coordinators, <strong>2h</strong> for
+workers, <strong>4h</strong> for crew). <strong>The liveness policy is per-role configuration.</strong></li>
+<li><strong><code>start_command = &quot;exec claude --dangerously-skip-permissions&quot;</code> in all seven</strong> — the agent <em>is a
+Claude Code process</em>. That is the subject of §5.</li>
+<li><strong><code>work_dir</code> shows the hierarchy as paths</strong>: a dog lives under <code>{town}/deacon/dogs/{name}</code>, a polecat
+under <code>{town}/{rig}/polecats/{name}</code>. The org chart is a directory tree.</li>
+</ol>
+<h3 id="4-3-the-roles-as-the-docs-describe-them-claims-to-verify-in-batches-02-04">4.3 The roles, as the docs describe them (claims to verify in batches 02/04)<a href="#batch-01/4-3-the-roles-as-the-docs-describe-them-claims-to-verify-in-batches-02-04" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>docs/glossary.md</code> and <code>docs/overview.md</code> describe: <strong>Mayor</strong> (town chief-of-staff), <strong>Deacon</strong> (a
+watchdog running patrol cycles), <strong>Dogs</strong> (the Deacon&#39;s maintenance crew), <strong>Boot</strong> (a Dog that checks the
+Deacon every 5 minutes), <strong>Polecat</strong> (<em>&quot;persistent identity but ephemeral sessions&quot;</em>), <strong>Refinery</strong> (the
+merge queue), <strong>Witness</strong> (a patrol agent over Polecats), <strong>Crew</strong> (long-lived named agents).</p>
+<p><strong>Verified in code in this batch:</strong> the seven role files exist; <code>dog</code> and <code>boot</code> are real; <code>polecat</code>&#39;s
+doc comment in the repo&#39;s own glossary (<em>persistent identity, ephemeral sessions</em>) matches the TOML&#39;s
+<code>work_dir</code> (<code>{town}/{rig}/polecats/{name}</code> — a <strong>named, persistent</strong> directory). The rest is batch 02/04&#39;s
+job, and is named here rather than assumed.</p>
+<hr>
+<h2 id="5-the-agent-runtime-claude-code-in-tmux-driven-over-acp">5. The agent runtime: Claude Code in tmux, driven over ACP<a href="#batch-01/5-the-agent-runtime-claude-code-in-tmux-driven-over-acp" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="5-1-the-agent-is-a-tmux-session">5.1 The agent is a tmux session<a href="#batch-01/5-1-the-agent-is-a-tmux-session" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>Every role declares a <code>session.pattern</code> and a <code>work_dir</code>, and the daemon drives sessions through
+<code>internal/tmux/</code> (which carries platform-specific files — <code>descendants_windows.go</code>,
+<code>process_group_unix.go</code>, <code>flock_unix.go</code>, <code>socket_guard_unix.go</code>, <code>sysproc_unix.go</code> — i.e. <strong>real process
+management</strong>, not just &quot;run a command&quot;).</p>
+<p><strong>Plainly:</strong> an &quot;agent&quot; in Gas Town is <strong>a Claude Code process inside a named tmux session, in a
+directory</strong>. The identity is the session name; the workspace is the work_dir.</p>
+<h3 id="5-2-acp-is-proxied-and-there-is-a-propulsion-concept">5.2 ACP is proxied, and there is a "propulsion" concept<a href="#batch-01/5-2-acp-is-proxied-and-there-is-a-propulsion-concept" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>internal/acp/</code> holds <code>proxy.go</code>, <code>propulsion.go</code> (plus per-OS variants). The proxy <strong>intercepts the agent
+protocol stream</strong> — the test file <code>forward_from_agent_test.go</code> distinguishes <em>&quot;standard message (not
+propelled/injected)&quot;</em> from a propelled one — and <code>propulsion.go</code> imports <code>internal/nudge</code>.</p>
+<p>This is where the product&#39;s stated principle <strong>GUPP</strong> (<em>&quot;If there is work on your Hook, YOU MUST RUN
+IT&quot;</em>, <code>docs/glossary.md</code>) becomes code: the proxy can <strong>propel</strong> the agent, and there is a <strong>nudge</strong>
+package. The mechanism is real; its exact semantics are batch 02&#39;s subject.</p>
+<hr>
+<h2 id="6-the-ledger-beads">6. The ledger: Beads<a href="#batch-01/6-the-ledger-beads" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Gas Town&#39;s work tracking is <strong>an external project</strong>: <code>github.com/steveyegge/beads</code>. It arrives three ways,
+and all three are visible in the tree:</p>
+<ul>
+<li><strong>A Go SDK dependency</strong> — <code>internal/beads/beads.go</code> imports <code>beadsdk &quot;github.com/steveyegge/beads&quot;</code>.</li>
+<li><strong>A CLI subprocess</strong> — the same file is <em>&quot;a wrapper for the <code>bd</code> (beads) CLI&quot;</em> (<code>beads.go:1</code>), spawning
+<code>bd</code> and probing its capabilities (e.g. caching whether the installed <code>bd</code> supports <code>--allow-stale</code>).</li>
+<li><strong>A repo-local store</strong> — <code>.beads/</code> in the tree (<code>config.yaml</code>, <code>PRIME.md</code>, <code>README.md</code>), with issues as
+<code>.beads/issues.jsonl</code> <em>&quot;synced like code&quot;</em>.</li>
+</ul>
+<p><strong>The finding:</strong> the ledger is <strong>not built here</strong> — it is a dependency the product wraps. And the wrapper
+is not thin: <code>internal/beads/</code> spans ~12,246 production lines with sub-concerns for <code>agent_ids</code>, <code>audit</code>,
+<code>channel</code>, <code>delegation</code>, <code>dog</code>, <code>escalation</code>, <code>group</code>, <code>merge_slot</code>, <code>mr</code> (merge request) and <code>queue</code>.</p>
+<p>One more thing is visible and worth naming: <code>beads.go:25-31</code> records a <strong>deliberate narrowing</strong> —
+<em>&quot;ZFC: Only define errors that don&#39;t require stderr parsing for decisions. <code>ErrNotARepo</code> and
+<code>ErrSyncConflict</code> were removed — agents should handle these directly.&quot;</em> An error type was <strong>retired</strong> in
+favour of the agent handling the condition. (See §8.)</p>
+<hr>
+<h2 id="7-town-wide-controls">7. Town-wide controls<a href="#batch-01/7-town-wide-controls" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Three controls sit above every rig:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Control</th>
+<th>What it does</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>E-stop</strong></td>
+<td><em>&quot;a town-wide mechanism to pause all agent work… a sentinel file (<code>ESTOP</code>) at the town root. When present, all agents should be frozen (<code>SIGTSTP</code>) and the daemon should not restart them.&quot;</em> — <strong>the Mayor is exempt so it can coordinate recovery.</strong></td>
+<td><code>estop/estop.go:1-11</code></td>
+</tr>
+<tr>
+<td><strong>Boot</strong></td>
+<td><em>&quot;the daemon&#39;s entry point for Deacon triage. Boot is a dog that runs fresh on each daemon tick, deciding whether to wake/nudge/interrupt the Deacon or let it continue. This centralizes the &#39;when to wake&#39; decision in an agent.&quot;</em></td>
+<td><code>boot/boot.go:1-5</code></td>
+</tr>
+<tr>
+<td><strong>Wisp</strong></td>
+<td><code>.beads-wisp/</code> — config storage that is <em>&quot;local-only and never synced via git&quot;</em></td>
+<td><code>wisp/config.go:1-16,31</code></td>
+</tr>
+</tbody></table></div>
+<p><strong>Two of these are the study&#39;s most interesting early findings, and both are stated by the code itself:</strong></p>
+<ul>
+<li><strong>The watchdog chain is made of agents.</strong> Boot is <em>&quot;a dog that runs fresh on each daemon tick&quot;</em> whose job
+is to decide whether to <strong>wake the Deacon</strong> — and the Deacon is the thing that watches the workers. So
+the supervision hierarchy is: <strong>daemon → Boot (an agent) → Deacon (an agent) → Witness (an agent) →
+Polecat (an agent)</strong>, each level deciding whether the level below is alive. That is a chain of
+accountability implemented <em>in the same material as the workers</em>.</li>
+<li><strong>The E-stop has one deliberate exception, stated in a comment</strong>: <em>&quot;The Mayor is exempt from E-stop so
+it can coordinate recovery.&quot;</em> A global stop with exactly one named bypass, and a reason.</li>
+</ul>
+<hr>
+<h2 id="8-the-retirement-ledger-rule-10">8. The retirement ledger (rule 10)<a href="#batch-01/8-the-retirement-ledger-rule-10" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Location</th>
+<th>What was retired</th>
+<th>Why (its own words)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>config/roles.go:19</code></td>
+<td><strong>the role <em>bead</em> system</strong></td>
+<td><em>&quot;This replaces the role bead system with config files.&quot;</em> — roles moved from the ledger to TOML</td>
+</tr>
+<tr>
+<td><code>beads/beads.go:25-31</code></td>
+<td><strong><code>ErrNotARepo</code> and <code>ErrSyncConflict</code></strong></td>
+<td><em>&quot;ZFC: Only define errors that don&#39;t require stderr parsing for decisions… agents should handle these directly.&quot;</em></td>
+</tr>
+<tr>
+<td><code>wisp/config.go:16,31</code></td>
+<td><em>(not a retirement but a stated boundary)</em></td>
+<td>wisp config is <em>&quot;never synced via git&quot;</em> — a deliberate local-only tier</td>
+</tr>
+</tbody></table></div>
+<p><strong>The first is the study&#39;s first real retirement, and it is a good one:</strong> a concept (roles) <strong>moved out of
+the ledger and into configuration</strong>, and the comment records it. A reader of the current code would see
+seven TOML files and never know roles were once beads.</p>
+<hr>
+<h2 id="9-findings">9. Findings<a href="#batch-01/9-findings" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Tagged by pole; answered against <strong>Q1 · USER VALUE</strong> and <strong>Q2 · VISION VALUE</strong>.</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Finding</th>
+<th>Pole</th>
+<th>Q1 · User value</th>
+<th>Q2 · Vision value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>F01-01</strong></td>
+<td><strong>The CLI is the spine</strong> — 292 commands in <code>internal/cmd/</code> (103,691 prod lines); the entry binary is ten lines.</td>
+<td>P2/P3</td>
+<td>Every capability has a verb you can type, script and pipe.</td>
+<td>A single command surface a UI, an agent, or a person can all drive.</td>
+</tr>
+<tr>
+<td><strong>F01-02</strong></td>
+<td><strong>The dashboard is a shell over the CLI</strong> — <code>POST /api/run</code> executes a <code>gt</code> command string.</td>
+<td>PX-F</td>
+<td>The web view shows exactly what the CLI shows.</td>
+<td>One implementation, two front doors — no second source of truth.</td>
+</tr>
+<tr>
+<td><strong>F01-03</strong></td>
+<td><strong>Town / Rig is a filesystem model</strong> — a rig <em>is</em> a directory; <code>AgentDirs</code> fixes the layout; <code>Rig</code> carries a separate <code>PushURL</code> for forks.</td>
+<td>P2</td>
+<td>A project is a folder you can <code>cd</code> into and inspect.</td>
+<td>The container is a path; isolation is a directory.</td>
+</tr>
+<tr>
+<td><strong>F01-04</strong></td>
+<td><strong>The role taxonomy is data</strong> — 7 embedded TOML files → <code>RoleDefinition</code> (scope, session, env, health, nudge, template).</td>
+<td>P1</td>
+<td>Roles can be read and changed as configuration.</td>
+<td>The agent model is declarative and portable.</td>
+</tr>
+<tr>
+<td><strong>F01-05</strong></td>
+<td><strong>The agent is a Claude Code process in a named tmux session</strong>, with a per-role health policy and an ACP proxy that can <em>propel</em> it.</td>
+<td>P1</td>
+<td>Agents are real processes you can attach to and watch.</td>
+<td>The runtime is an external engine, driven through a protocol seam.</td>
+</tr>
+<tr>
+<td><strong>F01-06</strong></td>
+<td><strong>The watchdog chain is made of agents</strong> — Boot (a dog) decides whether to wake the Deacon, which watches the Witness, which watches the Polecats.</td>
+<td>P3</td>
+<td>The system recovers itself without a human watching.</td>
+<td>Supervision is implemented in the same material as the work.</td>
+</tr>
+<tr>
+<td><strong>F01-07</strong></td>
+<td><strong>A town-wide E-stop with exactly one named exemption</strong> (the Mayor, so it can coordinate recovery).</td>
+<td>P3/PZ</td>
+<td>One switch freezes everything without losing the recovery path.</td>
+<td>A global control with a reasoned, documented bypass.</td>
+</tr>
+<tr>
+<td><strong>F01-08</strong></td>
+<td><strong>Named, individually-testable daemon jobs</strong> — <code>checkpoint_dog</code>, <code>compactor_dog</code>, <code>doctor_dog</code>, <code>quota_dog</code>, <code>convoy_manager</code>, …</td>
+<td>P3</td>
+<td>Maintenance is legible instead of one opaque loop.</td>
+<td>The supervisor is a set of small, named routines.</td>
+</tr>
+<tr>
+<td><strong>F01-09</strong></td>
+<td><strong>The ledger is an external dependency, wrapped</strong> — Beads via SDK + <code>bd</code> subprocess + <code>.beads/issues.jsonl</code>, wrapped by ~12k lines.</td>
+<td>P2/P3</td>
+<td>Issues live next to the code and sync with git.</td>
+<td>Work tracking is not rebuilt; it is integrated.</td>
+</tr>
+<tr>
+<td><strong>F01-10</strong></td>
+<td><strong>A local-only config tier</strong> (<code>.beads-wisp</code>, <em>&quot;never synced via git&quot;</em>) beside the git-backed store.</td>
+<td>PZ</td>
+<td>Machine-specific settings do not pollute the repo.</td>
+<td>A deliberate split between durable shared state and local state.</td>
+</tr>
+<tr>
+<td><strong>F01-11</strong></td>
+<td><strong>The retirement ledger&#39;s first entry</strong>: roles moved from <strong>beads to TOML</strong>, recorded in the code&#39;s own comment.</td>
+<td>PZ</td>
+<td>(indirect) — roles are now editable config.</td>
+<td>Concepts can migrate between layers, and the move is recorded.</td>
+</tr>
+<tr>
+<td><strong>F01-12</strong></td>
+<td><strong>A measured hazard, stated</strong>: <strong>46 % of Go files (48 % of <code>internal/</code> lines) are tests</strong>.</td>
+<td>PZ</td>
+<td>(indirect) — the product is heavily tested.</td>
+<td>Every line count must declare its basis.</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="10-divergences-and-honest-bounds">10. Divergences and honest bounds <span class="seal-badge" style="background:#fef2f2; color:#dc2626; border-color:#fca5a5; font-size: 0.65em; vertical-align: middle;">⚠️ FINDING NOTE</span><a href="#batch-01/10-divergences-and-honest-bounds" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<ul>
+<li><strong>No doc-vs-code divergence was needed to reach these findings.</strong> Where the docs describe a mechanism
+(the role taxonomy, the E-stop, Boot), the code agrees and says more. This is closer to the Multica
+shape than the CrewAI shape.</li>
+<li><strong>Bound (stated plainly):</strong> this batch read the <strong>platform layer</strong> — the CLI surface, the daemon&#39;s
+structure, the containers, the roles, the runtime seam, the ledger, and the town-wide controls. It did
+<strong>not</strong> read the semantics of the roles in operation (how a polecat is dispatched, what a witness patrol
+does, how the merge queue decides) — those are batches 02 and 04, and are named rather than half-covered.</li>
+<li><strong>Bound:</strong> the <code>acp</code> proxy and the <code>propulsion</code>/<code>nudge</code> mechanism are <strong>located and named</strong>, not
+explained. Their semantics belong to batch 02.</li>
+<li><strong>Bound:</strong> <code>docs/</code> (24,592 lines) was used only to <em>name</em> claims to verify, never as authority (rule 1).</li>
+</ul>
+<hr>
+<h2 id="11-carried-forward-to-batch-07-the-synthesis">11. Carried forward to batch 07 (the synthesis)<a href="#batch-01/11-carried-forward-to-batch-07-the-synthesis" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Three candidates for the highest transferable value, to be ranked in batch 07:</p>
+<ol>
+<li><strong>The role taxonomy as data (F01-04)</strong> — seven embedded TOML definitions carrying scope, session
+shape, environment, a health policy and the agent&#39;s first prompt. The cleanest declarative agent model
+seen in the study so far.</li>
+<li><strong>The watchdog chain made of agents (F01-06)</strong> — Boot → Deacon → Witness → Polecat, where each level
+decides whether the level below is alive. It is the most distinctive supervision design in the study.</li>
+<li><strong>The one-surface, two-doors pattern (F01-01 / F01-02)</strong> — 292 CLI commands, with the web dashboard
+executing the <em>same</em> commands rather than reimplementing them.</li>
+</ol>
+<p>All three are <strong>observations</strong>, not decisions. The cross-platform mapping is a later pass (rule 5).</p>
+<hr>
+<p><em>Batch 01 of 07. Read from source on 2026-10-15. Next: <code>findings/02-the-aissistant.md</code>.</em></p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="00-the-pin-method.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">The Pin &amp; Method</span>
+                </a>
+              
+
+              <a href="../index.html#batch-01" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              
+                <a href="02-the-aissistant-p1.html" class="nav-page-btn" style="text-align:right;">
+                  <span class="nav-btn-sub">Next Batch →</span>
+                  <span class="nav-btn-title">The Aissistant (P1)</span>
+                </a>
+              
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#0-what-this-batch-had-to-answer" class="toc-link">0. What this batch had to answer</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#1-the-measured-shape" class="toc-link">1. The measured shape</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#2-the-control-plane-one-cli-one-daemon-one-dashboard" class="toc-link">2. The control plane: one CLI, one daemon, one dashboard</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-1-the-cli-is-the-product-s-spine" class="toc-link">2.1 The CLI is the product&#039;s spine</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-2-the-daemon-is-the-runtime" class="toc-link">2.2 The daemon is the runtime</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-3-the-dashboard-is-a-web-shell-over-the-cli" class="toc-link">2.3 The dashboard is a web shell over the CLI</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-town-and-rig-a-filesystem-workspace" class="toc-link">3. Town and Rig — a filesystem workspace</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-1-the-two-containers" class="toc-link">3.1 The two containers</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-2-the-layout-is-fixed-and-declared" class="toc-link">3.2 The layout is fixed and declared</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-the-role-taxonomy-and-it-is-data" class="toc-link">4. The role taxonomy — and it is DATA</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-1-seven-roles-as-toml-files-embedded-in-the-binary" class="toc-link">4.1 Seven roles, as TOML files embedded in the binary</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-2-what-a-role-actually-declares" class="toc-link">4.2 What a role actually declares</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-3-the-roles-as-the-docs-describe-them-claims-to-verify-in-batches-02-04" class="toc-link">4.3 The roles, as the docs describe them (claims to verify in batches 02/04)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-the-agent-runtime-claude-code-in-tmux-driven-over-acp" class="toc-link">5. The agent runtime: Claude Code in tmux, driven over ACP</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#5-1-the-agent-is-a-tmux-session" class="toc-link">5.1 The agent is a tmux session</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#5-2-acp-is-proxied-and-there-is-a-propulsion-concept" class="toc-link">5.2 ACP is proxied, and there is a &quot;propulsion&quot; concept</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-the-ledger-beads" class="toc-link">6. The ledger: Beads</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-town-wide-controls" class="toc-link">7. Town-wide controls</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#8-the-retirement-ledger-rule-10" class="toc-link">8. The retirement ledger (rule 10)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#9-findings" class="toc-link">9. Findings</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#10-divergences-and-honest-bounds" class="toc-link">10. Divergences and honest bounds</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#11-carried-forward-to-batch-07-the-synthesis" class="toc-link">11. Carried forward to batch 07 (the synthesis)</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('gastown_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('gastown_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('gastown_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('gastown_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.GasTownReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

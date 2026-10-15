@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 05 — Widgets and the frontend (PX-W / PX-F) — Gas Town Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-05" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 05</span>
+      <div class="header-title-wrap">
+        <div class="header-title">Widgets &amp; Frontend</div>
+        <div class="header-subtitle">Gas Town Platform Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/05-widgets-and-frontend.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #059669">DONE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">2,052</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">10 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">233</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-15</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 05 Architecture Guide (Default)</option>
+            <optgroup label="Strategic Architecture">
+              <option value="master">Executive Topology: the three poles and four decided limits</option>
+            </optgroup>
+            <optgroup label="Foundations">
+              <option value="00">Batch 00: The pin, the identity hazard, and the test ratio</option>
+              <option value="01">Batch 01: The control plane — CLI, daemon, dashboard</option>
+            </optgroup>
+            <optgroup label="Pole 1 — The Aissistant">
+              <option value="02">Batch 02: The aissistant — an agent is a bead</option>
+            </optgroup>
+            <optgroup label="Pole 2 — The Workspace">
+              <option value="03">Batch 03: The workspace — a filesystem container</option>
+            </optgroup>
+            <optgroup label="Pole 3 — Automations">
+              <option value="04">Batch 04: Automations — formulas, mail, the watchdog chain</option>
+            </optgroup>
+            <optgroup label="Cross-Cutting">
+              <option value="05">Batch 05: Widgets &amp; frontend — and the absent widget model</option>
+            </optgroup>
+            <optgroup label="Escape Hatch">
+              <option value="06">Batch 06: Out-of-pole — sandbox, rotator, plugins</option>
+            </optgroup>
+            <optgroup label="Strategic Decision">
+              <option value="07">Batch 07: The synthesis — mechanisms and decided limits</option>
+            </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 05 VISUAL GUIDE</div>
+    <h4>Widgets and frontend: the CLI is the UI, and there is no widget model</h4>
+    <p>Three doors onto one command surface — and a measured absence</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 350" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-05" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-05" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+        <marker id="arrr-05" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#ef4444"/>
+        </marker>
+      </defs>
+      <g transform="translate(20, 20)">
+        <rect width="200" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE SHAPE</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">CLI 103,691 lines</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">web 15,488 · TUI ~4,319</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">292 commands</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#6d28d9">the CLI is ~5x the rest</text>
+      </g>
+      <path d="M 220 95 L 258 95" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-05)"/>
+      <g transform="translate(262, 20)">
+        <rect width="200" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE STYLE</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Lipgloss over an AYU theme</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Success · Warning · Error · Info</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">agent mode → RAW text</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">graceful degradation</text>
+      </g>
+      <path d="M 462 95 L 500 95" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-05)"/>
+      <g transform="translate(504, 20)">
+        <rect width="200" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE TUI</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Bubble Tea (4 files)</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">convoy/ · feed/</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">model · view · keys</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">one surface at a time</text>
+      </g>
+      <path d="M 704 95 L 742 95" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-05)"/>
+      <g transform="translate(746, 20)">
+        <rect width="154" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE DASHBOARD</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">ONE page · 13 panels</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">HTMX 1.9.10 + SSE</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">CSRF meta token</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">no build step</text>
+      </g>
+      <rect x="20" y="196" width="430" height="136" rx="10" fill="#ef4444" fill-opacity="0.08" stroke="#ef4444" stroke-width="1.6"/>
+      <text x="38" y="222" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#b91c1c">THE NEGATIVE: NO WIDGET MODEL</text>
+      <text x="38" y="246" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">0 composers found anywhere in the tree</text>
+      <text x="38" y="266" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">"widget" in 7 files — all incidental</text>
+      <text x="38" y="286" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">the dashboard is a FIXED 13-panel grid</text>
+      <text x="38" y="312" font-family="system-ui, sans-serif" font-size="10.5" font-weight="600" fill="#b91c1c">The FOURTH platform with none (Paperclip, CrewAI, Multica).</text>
+      <rect x="470" y="196" width="430" height="136" rx="10" fill="#059669" fill-opacity="0.08" stroke="#059669" stroke-width="1.6"/>
+      <text x="488" y="222" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#047857">THE COST IS MEASURED</text>
+      <text x="488" y="246" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">A response cache with a SERIALISING mutex</text>
+      <text x="488" y="266" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">exists because two tabs refreshing at once</text>
+      <text x="488" y="286" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">would cause "cascading bd process storms"</text>
+      <text x="488" y="312" font-family="system-ui, sans-serif" font-size="10.5" font-weight="600" fill="#047857">(GH#2618) — one surface, two doors, named cost.</text>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="batch-05-widgets-and-frontend-px-w-px-f">Batch 05 — Widgets and Frontend (PX-W / PX-F)<a href="#batch-05/batch-05-widgets-and-frontend-px-w-px-f" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Study:</strong> Gas Town <code>1.2.1</code> · <strong>Batch:</strong> 05 of 07 · <strong>Status:</strong> COMPLETE
+<strong>Source:</strong> <code>github.com/gastownhall/gastown</code> → <code>platforms/_extracted/gastown-main</code> (module <code>github.com/steveyegge/gastown</code>)
+<strong>Zip md5:</strong> <code>f2485c1baa647967a31a878224a09503</code> · <strong>Method:</strong> rules 1-10 of <code>00-PIN-AND-METHOD.md</code>.
+Every claim carries <code>file:line</code>. Docs are claims; the code is the authority.</p>
+<hr>
+<h2 id="0-what-this-batch-had-to-answer">0. What this batch had to answer<a href="#batch-05/0-what-this-batch-had-to-answer" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Two cross-cutting questions. <strong>PX-F</strong> is how the surface is built and wired; <strong>PX-W</strong> is the composable UI
+surface.</p>
+<p>Short answer, measured:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Question</th>
+<th>Gas Town&#39;s answer</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>What are the surfaces?</td>
+<td><strong>Three</strong>: the CLI (292 commands), a <strong>Bubble Tea</strong> TUI (2 surfaces), and a web dashboard</td>
+<td>F05-01</td>
+</tr>
+<tr>
+<td>Which is primary?</td>
+<td><strong>The CLI</strong> — everything else is a second door onto it</td>
+<td>F05-05</td>
+</tr>
+<tr>
+<td>How is terminal output styled?</td>
+<td><strong>Lipgloss over an Ayu theme</strong> in <code>internal/ui/</code>, with a shared semantic palette</td>
+<td>F05-02</td>
+</tr>
+<tr>
+<td>How does it degrade for machines?</td>
+<td><strong>Agent mode returns raw text</strong> — no colour, no glamour</td>
+<td>F05-03</td>
+</tr>
+<tr>
+<td>What is the web dashboard?</td>
+<td><strong>One page, 13 panels</strong>, HTMX 1.9.10 + SSE, driven by a 14-method fetcher</td>
+<td>F05-04</td>
+</tr>
+<tr>
+<td><strong>Is there a widget model?</strong></td>
+<td><strong>No.</strong> Measured: zero composers; &quot;widget&quot; appears in 7 files, all incidental</td>
+<td>F05-06</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="1-the-surface-inventory-measured">1. The surface inventory, measured<a href="#batch-05/1-the-surface-inventory-measured" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Surface</th>
+<th align="right">Files</th>
+<th align="right">Lines</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>CLI</strong> (<code>internal/cmd/</code>)</td>
+<td align="right">~150</td>
+<td align="right"><strong>103,691</strong></td>
+<td>292 commands — the primary surface</td>
+</tr>
+<tr>
+<td><strong>Web dashboard</strong> (<code>internal/web/</code>)</td>
+<td align="right">12 + 3 assets</td>
+<td align="right"><strong>15,488</strong> <em>(css 3,770 · js 3,232 · html 1,079)</em></td>
+<td>one page, 13 panels</td>
+</tr>
+<tr>
+<td><strong>TUI</strong> (<code>internal/tui/</code>)</td>
+<td align="right">11</td>
+<td align="right">~4,319</td>
+<td>Bubble Tea, two surfaces</td>
+</tr>
+<tr>
+<td><strong>Style / theme</strong> (<code>internal/ui/</code>, <code>internal/style/</code>)</td>
+<td align="right">6</td>
+<td align="right">~1,503</td>
+<td>Lipgloss + Ayu</td>
+</tr>
+</tbody></table></div>
+<p><strong>The ratio is the finding.</strong> The <strong>CLI is ~5× the entire web + TUI layer combined</strong> (103,691 lines vs
+19,807), and ~7× the dashboard alone (15,488). Gas Town is a terminal product with a dashboard attached
+— the same shape Multica had (a shared frontend dwarfing the apps), but pointed at a different end of the
+same idea.</p>
+<hr>
+<h2 id="2-the-cli-is-the-ui-and-its-styling-degrades-for-machines">2. The CLI is the UI — and its styling degrades for machines<a href="#batch-05/2-the-cli-is-the-ui-and-its-styling-degrades-for-machines" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="2-1-a-themed-style-layer">2.1 A themed style layer<a href="#batch-05/2-1-a-themed-style-layer" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>internal/style/style.go:1-2</code> — <em>&quot;Package style provides consistent terminal styling using <strong>Lipgloss</strong>.
+Uses the <strong>Ayu theme</strong> colors from <code>internal/ui</code> for semantic consistency.&quot;</em> The palette is small and
+semantic, not decorative: <code>Success</code>, <code>Warning</code>, <code>Error</code>, <code>Info</code> (each with its own colour from the theme).</p>
+<p><code>internal/ui/</code> adds the rendering pieces: <code>markdown.go</code> (<strong>glamour</strong>), <code>pager.go</code>, <code>styles.go</code>,
+<code>terminal.go</code>.</p>
+<h3 id="2-2-the-degradation-rule">2.2 The degradation rule<a href="#batch-05/2-2-the-degradation-rule" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>internal/ui/markdown.go:11-13</code> — and the same pattern repeats down the file:</p>
+<blockquote>
+<p><em>&quot;Returns raw markdown on failure for <strong>graceful degradation</strong>.&quot;</em> … <em>&quot;<strong>agent mode outputs plain text for
+machine parsing</strong>&quot;</em></p>
+</blockquote>
+<p><code>RenderMarkdown</code> therefore <strong>returns the raw markdown</strong> when <code>IsAgentMode()</code> is true or colour is
+disabled — with the reason stated. This is batch 03&#39;s ZFC/graceful-degradation principle in the
+presentation layer: a machine-readable form exists and is chosen deliberately.</p>
+<p><em>(<code>getTerminalWidth</code> caps wrapping at 100 characters — <em>&quot;research suggests 50-75 optimal, 80-100
+comfortable&quot;</em> — falling back to 80. A measured default, stated.)</em></p>
+<hr>
+<h2 id="3-the-tui-bubble-tea-one-surface-at-a-time">3. The TUI — Bubble Tea, one surface at a time<a href="#batch-05/3-the-tui-bubble-tea-one-surface-at-a-time" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>internal/tui/</code> holds <strong>two</strong> surfaces, each in the standard Bubble Tea shape (<code>model.go</code>, <code>view.go</code>,
+<code>keys.go</code>):</p>
+<ul>
+<li><strong><code>convoy/</code></strong> — the convoy tracker (<code>internal/tui/convoy/</code>)</li>
+<li><strong><code>feed/</code></strong> — the live activity feed (<code>internal/tui/feed/</code>), whose files (<code>convoy.go</code>,
+<code>convoy_issues.go</code>, <code>events.go</code>, <code>mq_source.go</code>) show it subscribing to several event sources</li>
+</ul>
+<p>The dependency is real: <strong>4 files import <code>charmbracelet/bubbletea</code></strong> (plus <code>bubbles/help</code>,
+<code>bubbles/key</code>) — the TUI is built on the ecosystem&#39;s standard framework, not a hand-rolled renderer.</p>
+<p><strong>And the feed carries a retirement in its own source</strong> (<code>tui/feed/mq_source.go:8-9</code>):</p>
+<blockquote>
+<p><em>&quot;<code>MQEventSource</code> was used to read MQ lifecycle events from <code>mq_events.jsonl</code>. <strong>The <code>mrqueue</code> package
+has been removed</strong>, so this is now a <strong>no-op stub</strong>. MR events can be observed via beads activity
+instead.&quot;</em></p>
+</blockquote>
+<p><code>NewMQEventSource</code> <em>&quot;creates a stub source that produces no events.&quot;</em> The seam was kept and the
+implementation removed — the CrewAI lesson (<code>a seam nobody populates is indistinguishable from a feature nobody shipped</code>) in a third platform, and here the code says so in its own comment.</p>
+<hr>
+<h2 id="4-the-web-dashboard-one-page-thirteen-panels">4. The web dashboard — one page, thirteen panels<a href="#batch-05/4-the-web-dashboard-one-page-thirteen-panels" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="4-1-the-shape">4.1 The shape<a href="#batch-05/4-1-the-shape" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>internal/web/templates/convoy.html</code> is <strong>1,079 lines</strong> containing <strong>13 panels</strong> (measured: 13 ×
+<code>class=&quot;panel&quot;</code>, 13 × <code>panel-header</code>) inside a <code>panels</code> grid with <code>panel-tabs</code>, plus a <strong>command
+palette</strong>, mail <strong>compose/reply</strong> forms, and convoy create/add-issue flows. <code>dashboard.css</code> (3,770 lines)
+and <code>dashboard.js</code> (3,232 lines) are <strong>embedded</strong> (<code>//go:embed static</code>).</p>
+<p><strong>The page ids show the surface&#39;s vocabulary</strong>: <code>activity-timeline</code>, <code>command-palette-overlay</code>,
+<code>compose-subject</code>/<code>compose-body</code>/<code>compose-mail-btn</code>, <code>convoy-create-*</code>, <code>convoy-add-issue-*</code>,
+<code>connection-status</code>.</p>
+<h3 id="4-2-the-wiring-htmx-sse">4.2 The wiring: HTMX + SSE<a href="#batch-05/4-2-the-wiring-htmx-sse" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>dashboard.js:22-31</code> opens an <strong><code>EventSource(&#39;/api/events&#39;)</code></strong> with reconnect backoff (1s → 30s max) and
+a live connection indicator; the template loads <strong>HTMX 1.9.10</strong>; and the top of the script installs
+<strong>CSRF protection</strong> — <em>&quot;Inject dashboard token into all POST requests to prevent cross-site request
+forgery&quot;</em> — reading a <code>meta[name=&quot;dashboard-token&quot;]</code>.</p>
+<p><strong>So the dashboard is server-rendered with partial updates (HTMX) pushed by server-sent events (SSE)</strong> —
+no build step, no framework bundle, one CDN script.</p>
+<h3 id="4-3-the-data-model-is-an-interface">4.3 The data model is an interface<a href="#batch-05/4-3-the-data-model-is-an-interface" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>internal/web/handler.go:23-37</code> declares <code>ConvoyFetcher</code> with <strong>14 methods</strong> — <code>FetchConvoys</code>,
+<code>FetchMergeQueue</code>, <code>FetchWorkers</code>, <code>FetchMail</code>, <code>FetchRigs</code>, <code>FetchDogs</code>, <code>FetchEscalations</code>,
+<code>FetchHealth</code>, <code>FetchQueues</code>, <code>FetchSessions</code>, <code>FetchHooks</code>, <code>FetchMayor</code>, <code>FetchIssues</code>,
+<code>FetchActivity</code>.</p>
+<p><strong>That interface is the dashboard&#39;s entire information architecture.</strong> Whatever a dashboard needs, it
+must ask for through one named method — so adding a view is adding a fetcher method, and the page and
+the API cannot drift apart.</p>
+<h3 id="4-4-the-cache-exists-because-the-cli-is-slow">4.4 The cache exists because the CLI is slow<a href="#batch-05/4-4-the-cache-exists-because-the-cli-is-slow" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>handler.go:53-55</code> — <em>&quot;Response cache: prevents <strong>cascading <code>bd</code> process storms</strong> when multiple browser
+tabs or htmx auto-refresh requests arrive faster than fetches complete. See <strong>GH#2618</strong>.&quot;</em> And the
+handler carries <code>cacheTTL</code>, <code>cacheInUse</code> (<em>&quot;serializes concurrent fetches (only one runs at a time)&quot;</em>) and
+a per-view <code>expandCacheEntry</code>.</p>
+<p><strong>The finding, stated plainly:</strong> the dashboard is fast only because it <strong>throttles the thing underneath
+it</strong> — each panel fetch shells out to <code>bd</code> (batch 01 §2.3), so two tabs refreshing at once would spawn a
+storm of processes. That is the real cost of the &quot;one surface, two doors&quot; design, and the code names it
+with an issue number.</p>
+<hr>
+<h2 id="5-one-command-surface-two-doors">5. One command surface, two doors<a href="#batch-05/5-one-command-surface-two-doors" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Recapped from batch 01 because it is the frontend architecture: the dashboard does <strong>not</strong> reimplement
+anything. <code>POST /api/run</code> takes a <code>gt</code> command string (<code>web/api.go:25</code>), and the panels read from the
+same ledgers and the same <code>bd</code> CLI the human uses.</p>
+<p><strong>Three surfaces, one implementation</strong> — the CLI, the Bubble Tea TUI and the HTMX dashboard are three
+renders of one command surface. That is why the CLI is 103,691 lines and the rest is 15,488.</p>
+<hr>
+<h2 id="6-no-widget-model-the-negative-measured">6. No widget model — the negative, measured<a href="#batch-05/6-no-widget-model-the-negative-measured" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>The PIN asked whether a widget model exists. Measured: <strong>it does not.</strong></p>
+<ul>
+<li>A search for <code>widget</code> / <code>composer</code> / <code>component registry</code> across <code>.go</code>, <code>.js</code>, <code>.html</code> and <code>.css</code>
+finds <strong>7 files, all incidental</strong> — e.g. <code>cmd/hook.go:90</code> uses <em>&quot;Fix the widget bug&quot;</em> as an <strong>example
+subject</strong> in a help string, and the rest are test fixtures and formatters.</li>
+<li>There is no component registry, no composer, no arrangement surface.</li>
+</ul>
+<p><strong>The dashboard is a fixed grid of 13 panels with tabs</strong> — a wall, not a composable surface. A user
+cannot add, remove or arrange a panel; they can filter and navigate.</p>
+<p><strong>This is the fourth platform in the study with no widget architecture</strong> (Paperclip, CrewAI and Multica
+had none either). Recorded as the PX-W verdict.</p>
+<hr>
+<h2 id="7-the-retirement-ledger-rule-10">7. The retirement ledger (rule 10)<a href="#batch-05/7-the-retirement-ledger-rule-10" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Where</th>
+<th>What was retired</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>tui/feed/mq_source.go:8-9</code></td>
+<td>the <strong><code>mrqueue</code> package</strong>, and its <code>mq_events.jsonl</code> event source</td>
+<td><em>&quot;The mrqueue package has been removed, so this is now a no-op stub … MR events can be observed via beads activity instead&quot;</em></td>
+</tr>
+<tr>
+<td><em>(earlier batches)</em></td>
+<td>roles → TOML; provider switches → a struct; per-agent hook packages → one installer; decision engines; legacy DB names</td>
+<td>—</td>
+</tr>
+</tbody></table></div>
+<p><strong>The pattern across five batches is now unmistakable:</strong> Gas Town&#39;s frontend is not where its
+distinctiveness lies — it is where things are <strong>removed</strong>. A package is dropped, its seam is left as a
+stub, and the replacement (read beads activity) is named in the same comment.</p>
+<hr>
+<h2 id="8-findings">8. Findings<a href="#batch-05/8-findings" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Tagged by pole; answered against <strong>Q1 · USER VALUE</strong> and <strong>Q2 · VISION VALUE</strong>.</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Finding</th>
+<th>Pole</th>
+<th>Q1 · User value</th>
+<th>Q2 · Vision value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>F05-01</strong></td>
+<td><strong>Three surfaces, one implementation</strong> — the CLI (292 commands), a Bubble Tea TUI (2 surfaces), and an HTMX/SSE dashboard; the CLI is ~7× the other two combined.</td>
+<td>PX-F</td>
+<td>Use whichever surface fits: a terminal, a TUI, or a browser.</td>
+<td>One command surface, many renders — no second source of truth.</td>
+</tr>
+<tr>
+<td><strong>F05-02</strong></td>
+<td><strong>A themed, semantic terminal style layer</strong> — Lipgloss over an Ayu theme, with a small palette (<code>Success</code>/<code>Warning</code>/<code>Error</code>/<code>Info</code>).</td>
+<td>PX-F</td>
+<td>Output is consistent and readable.</td>
+<td>A shared visual language across every command.</td>
+</tr>
+<tr>
+<td><strong>F05-03</strong></td>
+<td><strong>Agent mode returns raw text</strong> — <code>RenderMarkdown</code> skips glamour and colour when a machine is reading.</td>
+<td>PX-F/PZ</td>
+<td>Scripts and agents can parse output reliably.</td>
+<td>The presentation layer has a deliberate machine mode.</td>
+</tr>
+<tr>
+<td><strong>F05-04</strong></td>
+<td><strong>The dashboard&#39;s information architecture is an interface</strong> — <code>ConvoyFetcher</code> with 14 named fetch methods.</td>
+<td>PX-F</td>
+<td>The page and the API cannot drift.</td>
+<td>Views are declared as data contracts, not ad-hoc calls.</td>
+</tr>
+<tr>
+<td><strong>F05-05</strong></td>
+<td><strong>The dashboard throttles what it stands on</strong> — a response cache with a serialising mutex, added because two refreshing tabs would cause <em>&quot;cascading <code>bd</code> process storms&quot;</em> (GH#2618).</td>
+<td>PX-F/PZ</td>
+<td>The page stays responsive.</td>
+<td>The cost of one-surface-two-doors is measured and documented.</td>
+</tr>
+<tr>
+<td><strong>F05-06</strong></td>
+<td><strong>No widget model</strong> — 0 composers; &quot;widget&quot; in 7 incidental files; the UI is a fixed 13-panel grid with tabs.</td>
+<td>PX-W</td>
+<td>(n/a)</td>
+<td>A clear negative: the composition layer is not here either.</td>
+</tr>
+<tr>
+<td><strong>F05-07</strong></td>
+<td><strong>The TUI is Bubble Tea, one surface at a time</strong> (<code>convoy/</code>, <code>feed/</code>), each in model/view/keys form.</td>
+<td>PX-F</td>
+<td>A live terminal view without leaving the shell.</td>
+<td>The terminal surface is a first-class, framework-built one.</td>
+</tr>
+<tr>
+<td><strong>F05-08</strong></td>
+<td><strong>A removed package left as a no-op stub</strong>, with the replacement named in the same comment.</td>
+<td>PZ</td>
+<td>(indirect)</td>
+<td>A seam nobody populates — and this time the code says so.</td>
+</tr>
+<tr>
+<td><strong>F05-09</strong></td>
+<td><strong>The dashboard is server-rendered with no build step</strong> — HTMX 1.9.10 + SSE + a CSRF meta token, all assets embedded.</td>
+<td>PX-F</td>
+<td>No toolchain to run it.</td>
+<td>A frontend that ships inside the binary.</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="9-divergences-and-honest-bounds">9. Divergences and honest bounds <span class="seal-badge" style="background:#fef2f2; color:#dc2626; border-color:#fca5a5; font-size: 0.65em; vertical-align: middle;">⚠️ FINDING NOTE</span><a href="#batch-05/9-divergences-and-honest-bounds" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<ul>
+<li><strong>No doc-vs-code divergence was needed</strong>; the frontend&#39;s behaviour matches its comments, and the one
+notable decision (the cache) is documented with an issue number.</li>
+<li><strong>Bound:</strong> this batch read the <strong>surfaces</strong> — the CLI&#39;s style layer, the TUI, the dashboard, and the
+absence of a widget model. It did <strong>not</strong> read <code>dashboard.js</code>&#39;s 3,232 lines line by line, nor every
+panel&#39;s template; the surface shape, its wiring, its data contract and its cost are what is claimed.</li>
+<li><strong>Bound:</strong> <code>internal/ui/</code>&#39;s colour constants (the Ayu palette) were <strong>located</strong> (<code>ColorPass</code>,
+<code>ColorWarn</code>, <code>ColorFail</code> used by the style layer) but the full palette was not transcribed.</li>
+<li><strong>Bound (stated plainly):</strong> the &quot;no widget model&quot; verdict rests on a search for <code>widget</code>/<code>composer</code>/
+<code>component registry</code> across the tree. A composition surface under an unexpected name would not be
+caught by that search; the honest phrasing is <em>&quot;no widget or composer model exists under any name this
+batch searched for.&quot;</em></li>
+</ul>
+<hr>
+<h2 id="10-carried-forward-to-batch-07-the-synthesis">10. Carried forward to batch 07 (the synthesis)<a href="#batch-05/10-carried-forward-to-batch-07-the-synthesis" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Two candidates for the highest transferable value, to be ranked in batch 07:</p>
+<ol>
+<li><strong>One command surface, three doors (F05-01)</strong> — the CLI, a Bubble Tea TUI and an HTMX/SSE dashboard,
+all reading the same 292 commands, with the CLI dwarfing the other two. A cheap and honest way to ship
+three surfaces.</li>
+<li><strong>The fetcher interface as information architecture (F05-04)</strong> — 14 named methods that define what the
+dashboard may ask for, so page and API cannot drift.</li>
+</ol>
+<p>All are <strong>observations</strong>, not decisions. The cross-platform mapping is a later pass (rule 5).</p>
+<hr>
+<p><em>Batch 05 of 07. Read from source on 2026-10-15. Next: <code>findings/06-out-of-pole.md</code>.</em></p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="04-automations-p3.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">Automations (P3)</span>
+                </a>
+              
+
+              <a href="../index.html#batch-05" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              
+                <a href="06-out-of-pole-pz.html" class="nav-page-btn" style="text-align:right;">
+                  <span class="nav-btn-sub">Next Batch →</span>
+                  <span class="nav-btn-title">Out-of-Pole (PZ)</span>
+                </a>
+              
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#0-what-this-batch-had-to-answer" class="toc-link">0. What this batch had to answer</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#1-the-surface-inventory-measured" class="toc-link">1. The surface inventory, measured</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#2-the-cli-is-the-ui-and-its-styling-degrades-for-machines" class="toc-link">2. The CLI is the UI — and its styling degrades for machines</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-1-a-themed-style-layer" class="toc-link">2.1 A themed style layer</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-2-the-degradation-rule" class="toc-link">2.2 The degradation rule</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-the-tui-bubble-tea-one-surface-at-a-time" class="toc-link">3. The TUI — Bubble Tea, one surface at a time</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-the-web-dashboard-one-page-thirteen-panels" class="toc-link">4. The web dashboard — one page, thirteen panels</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-1-the-shape" class="toc-link">4.1 The shape</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-2-the-wiring-htmx-sse" class="toc-link">4.2 The wiring: HTMX + SSE</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-3-the-data-model-is-an-interface" class="toc-link">4.3 The data model is an interface</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-4-the-cache-exists-because-the-cli-is-slow" class="toc-link">4.4 The cache exists because the CLI is slow</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-one-command-surface-two-doors" class="toc-link">5. One command surface, two doors</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-no-widget-model-the-negative-measured" class="toc-link">6. No widget model — the negative, measured</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-the-retirement-ledger-rule-10" class="toc-link">7. The retirement ledger (rule 10)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#8-findings" class="toc-link">8. Findings</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#9-divergences-and-honest-bounds" class="toc-link">9. Divergences and honest bounds</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#10-carried-forward-to-batch-07-the-synthesis" class="toc-link">10. Carried forward to batch 07 (the synthesis)</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('gastown_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('gastown_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('gastown_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('gastown_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.GasTownReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 02 — The aissistant (P1) — Gas Town Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-02" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 02</span>
+      <div class="header-title-wrap">
+        <div class="header-title">The Aissistant (P1)</div>
+        <div class="header-subtitle">Gas Town Platform Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/02-the-aissistant.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #059669">DONE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">3,099</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">15 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">337</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-15</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 02 Architecture Guide (Default)</option>
+            <optgroup label="Strategic Architecture">
+              <option value="master">Executive Topology: the three poles and four decided limits</option>
+            </optgroup>
+            <optgroup label="Foundations">
+              <option value="00">Batch 00: The pin, the identity hazard, and the test ratio</option>
+              <option value="01">Batch 01: The control plane — CLI, daemon, dashboard</option>
+            </optgroup>
+            <optgroup label="Pole 1 — The Aissistant">
+              <option value="02">Batch 02: The aissistant — an agent is a bead</option>
+            </optgroup>
+            <optgroup label="Pole 2 — The Workspace">
+              <option value="03">Batch 03: The workspace — a filesystem container</option>
+            </optgroup>
+            <optgroup label="Pole 3 — Automations">
+              <option value="04">Batch 04: Automations — formulas, mail, the watchdog chain</option>
+            </optgroup>
+            <optgroup label="Cross-Cutting">
+              <option value="05">Batch 05: Widgets &amp; frontend — and the absent widget model</option>
+            </optgroup>
+            <optgroup label="Escape Hatch">
+              <option value="06">Batch 06: Out-of-pole — sandbox, rotator, plugins</option>
+            </optgroup>
+            <optgroup label="Strategic Decision">
+              <option value="07">Batch 07: The synthesis — mechanisms and decided limits</option>
+            </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 02 VISUAL GUIDE</div>
+    <h4>The aissistant: an agent is a bead, and the role comes from the directory</h4>
+    <p>The agent record, the provider registry, and how the agent learns what it is</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 350" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-02" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-02" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+        <marker id="arrr-02" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#ef4444"/>
+        </marker>
+      </defs>
+      <g transform="translate(20, 20)">
+        <rect width="210" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE BEAD</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">AgentFields in the description</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">"key: value" lines, file-locked</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">hook_bead · agent_state</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">cleanup_status (self-reported)</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#6d28d9">state ALSO as bead labels</text>
+      </g>
+      <path d="M 230 95 L 268 95" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-02)"/>
+      <g transform="translate(272, 20)">
+        <rect width="210" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE IDENTITY</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">{Role, Rig, Name, Prefix}</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">parsed from a MAIL ADDRESS</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">8 roles incl. overseer</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#b45309">7 TOML files — a divergence</text>
+      </g>
+      <path d="M 482 95 L 520 95" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-02)"/>
+      <g transform="translate(524, 20)">
+        <rect width="180" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE REGISTRY</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">13 presets, one struct each</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">claude · gemini · codex · …</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">ProcessNames · ResumeFlag</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">"no provider switches"</text>
+      </g>
+      <path d="M 704 95 L 742 95" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-02)"/>
+      <g transform="translate(746, 20)">
+        <rect width="154" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE INJECTOR</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">gt prime</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">infers role from the DIR</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">runs as SessionStart hook</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">5-step session-ID fallback</text>
+      </g>
+      <rect x="20" y="196" width="430" height="136" rx="10" fill="#7c3aed" fill-opacity="0.08" stroke="#7c3aed" stroke-width="1.6"/>
+      <text x="38" y="222" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#6d28d9">THE NUDGE HAS TWO PATHS</text>
+      <text x="38" y="246" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">Claude Code drains its queue via the UserPromptSubmit hook</text>
+      <text x="38" y="266" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">Gemini/Codex have no equivalent → a background poller</text>
+      <text x="38" y="290" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">waits for idle, then injects via tmux</text>
+      <text x="38" y="314" font-family="system-ui, sans-serif" font-size="10.5" font-weight="600" fill="#6d28d9">A depended-on capability with no uniform primitive.</text>
+      <rect x="470" y="196" width="430" height="136" rx="10" fill="#ef4444" fill-opacity="0.08" stroke="#ef4444" stroke-width="1.6"/>
+      <text x="488" y="222" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#b91c1c">BEHAVIOUR IS A PROMPT TEMPLATE</text>
+      <text x="488" y="246" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">templates/polecat-CLAUDE.md — 296 lines</text>
+      <text x="488" y="266" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">"THE IDLE POLECAT HERESY" — you MUST run gt done</text>
+      <text x="488" y="286" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">"SINGLE-TASK FOCUS" — one job, one bead</text>
+      <text x="488" y="312" font-family="system-ui, sans-serif" font-size="10.5" font-weight="600" fill="#b91c1c">Where code cannot enforce it, the prompt says so bluntly.</text>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="batch-02-the-aissistant-p1">Batch 02 — The Aissistant (P1)<a href="#batch-02/batch-02-the-aissistant-p1" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Study:</strong> Gas Town <code>1.2.1</code> · <strong>Batch:</strong> 02 of 07 · <strong>Status:</strong> COMPLETE
+<strong>Source:</strong> <code>github.com/gastownhall/gastown</code> → <code>platforms/_extracted/gastown-main</code> (module <code>github.com/steveyegge/gastown</code>)
+<strong>Zip md5:</strong> <code>f2485c1baa647967a31a878224a09503</code> · <strong>Method:</strong> rules 1-10 of <code>00-PIN-AND-METHOD.md</code>.
+Every claim carries <code>file:line</code>. Docs are claims; the code is the authority.</p>
+<hr>
+<h2 id="0-what-this-batch-had-to-answer">0. What this batch had to answer<a href="#batch-02/0-what-this-batch-had-to-answer" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>P1 is <strong>the aissistant</strong> — what an agent <em>is</em> here, what runs it, how it is configured, what it can do,
+and how it is kept alive. Batch 01 found the shape (7 TOML roles, Claude Code in tmux). This batch opens
+the agent up.</p>
+<p>Short answer, measured:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Question</th>
+<th>Gas Town&#39;s answer</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>What is an agent?</td>
+<td><strong>A bead</strong> — an issue-tracker row whose description holds <code>key: value</code> fields</td>
+<td>F02-01</td>
+</tr>
+<tr>
+<td>What is its identity?</td>
+<td><code>AgentIdentity{Role, Rig, Name, Prefix}</code>, parsed from a <strong>mail-style address</strong></td>
+<td>F02-02</td>
+</tr>
+<tr>
+<td>What runs it?</td>
+<td>A <strong>Claude Code process in a named tmux session</strong>, chosen from a <strong>13-preset registry</strong></td>
+<td>F02-03</td>
+</tr>
+<tr>
+<td>How does it get its instructions?</td>
+<td><strong><code>gt prime</code></strong> — a CLI command that infers the role <strong>from the directory</strong> and is wired into the runtime&#39;s session-start hook</td>
+<td>F02-05</td>
+</tr>
+<tr>
+<td>How is it nudged mid-run?</td>
+<td>A <strong>nudge queue</strong> whose delivery differs per runtime (Claude drains via a hook; Gemini/Codex need a poller)</td>
+<td>F02-06</td>
+</tr>
+<tr>
+<td>How is its state tracked?</td>
+<td><strong>As bead labels</strong> (<code>idle:3</code>, <code>backoff:2m</code>) and a completion block on the bead</td>
+<td>F02-07</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="1-the-agent-as-a-record-a-bead-with-key-value-fields">1. The agent as a record — a bead with `key: value` fields<a href="#batch-02/1-the-agent-as-a-record-a-bead-with-key-value-fields" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Gas Town has <strong>no agent table</strong>. An agent is a <strong>bead</strong> in the same ledger as the work it does
+(§ batch 01 §6), and its structured fields live <strong>in the bead&#39;s description text</strong>:</p>
+<blockquote>
+<p>*&quot;AgentFields holds structured fields for agent beads. <strong>These are stored as <code>key: value</code> lines in the
+description.</strong>&quot;* — <code>beads/beads_agent.go:39-40</code></p>
+</blockquote>
+<p>The fields (<code>beads/beads_agent.go:40-66</code>), read in full:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>RoleType</code></td>
+<td>polecat, witness, refinery, deacon, mayor</td>
+</tr>
+<tr>
+<td><code>Rig</code></td>
+<td>the rig (empty for town-level agents)</td>
+</tr>
+<tr>
+<td><strong><code>AgentState</code></strong></td>
+<td>spawning, working, done, stuck, escalated, idle, running, nuked</td>
+</tr>
+<tr>
+<td><strong><code>HookBead</code></strong></td>
+<td><strong>the currently pinned work bead ID</strong></td>
+</tr>
+<tr>
+<td><code>CleanupStatus</code></td>
+<td><em>&quot;ZFC: polecat self-reports git state (clean, has_uncommitted, has_stash, has_unpushed)&quot;</em></td>
+</tr>
+<tr>
+<td><code>ActiveMR</code></td>
+<td>the active merge-request bead</td>
+</tr>
+<tr>
+<td><code>NotificationLevel</code></td>
+<td><code>verbose</code> / <code>normal</code> / <code>muted</code> — <strong>DND as a field</strong></td>
+</tr>
+<tr>
+<td><code>Mode</code></td>
+<td><code>&quot;&quot;</code> (normal) or <strong><code>&quot;ralph&quot;</code></strong> (<em>the Ralph Wiggum loop</em>)</td>
+</tr>
+<tr>
+<td><code>ExitType</code>, <code>MRID</code>, <code>Branch</code>, <code>LastSourceIssue</code>, <code>MRFailed</code>, <code>PushFailed</code>, <code>CompletionTime</code></td>
+<td>the completion block, written by <code>gt done</code></td>
+</tr>
+</tbody></table></div>
+<p><strong>Two things are worth stating plainly.</strong></p>
+<ol>
+<li><strong>The agent&#39;s state is not a column — it is text that happens to be parseable.</strong> There is no schema
+for an agent; there is a description with <code>key: value</code> lines, written under a <strong>file lock</strong>
+(<code>lockAgentBead</code>, <code>beads_agent.go:19-36</code>) so concurrent read-modify-write cannot race.</li>
+<li><strong>The retirement is recorded in the struct itself</strong> (<code>beads_agent.go:49</code>): <em>&quot;Note: <strong>RoleBead field
+removed</strong> — role definitions are now config-based. See <code>internal/config/roles/*.toml</code>.&quot;</em> A field was
+deleted from the agent record and its replacement named in the same comment. (Batch 01 recorded the
+other half of the same move.)</li>
+</ol>
+<p><strong>Operational state is a <em>second</em> mechanism</strong>: <code>gt agents state &lt;agent-bead&gt;</code> reads and writes state as
+<strong>bead labels</strong>, not description fields — <em>&quot;Labels are stored as <code>key:value</code> pairs (e.g., <code>idle:3</code>,
+<code>backoff:2m</code>)&quot;</em> (<code>cmd/agent_state.go:36</code>). So an agent carries <strong>description fields</strong> (identity-ish) and
+<strong>labels</strong> (operational counters), both on the same bead.</p>
+<hr>
+<h2 id="2-identity-a-role-a-rig-a-name-and-a-prefix">2. Identity — a role, a rig, a name, and a prefix<a href="#batch-02/2-identity-a-role-a-rig-a-name-and-a-prefix" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>session/identity.go:24-29</code>:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>go</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-go">type AgentIdentity struct {
+    Role   Role   // mayor, deacon, witness, refinery, crew, polecat, dog
+    Rig    string // rig name (empty for mayor/deacon/dog)
+    Name   string // crew/polecat/dog name (empty for mayor/deacon/witness/refinery)
+    Prefix string // beads prefix for rig-level agents (e.g. &quot;gt&quot;, &quot;bd&quot;, &quot;hop&quot;)
+}
+</code></pre>
+</div>
+<p><strong>An identity is parsed from a mail-style address</strong> (<code>ParseAddress</code>, <code>identity.go:31</code>): <code>mayor</code>,
+<code>deacon</code>, or a <code>&lt;rig&gt;/&lt;name&gt;</code> form. <strong>Agents are addressable like email</strong> — and batch 01 saw that the
+<code>mail</code> package is a real subsystem, so this is not decoration.</p>
+<h3 id="2-1-the-role-constants-hold-one-more-role-than-the-toml-files">2.1 The role constants hold one more role than the TOML files<a href="#batch-02/2-1-the-role-constants-hold-one-more-role-than-the-toml-files" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>session/identity.go:12-21</code> declares <strong>eight</strong> roles: <code>mayor</code>, <code>deacon</code>, <strong><code>overseer</code></strong>, <code>witness</code>,
+<code>refinery</code>, <code>crew</code>, <code>polecat</code>, <code>dog</code>. Batch 01 found <strong>seven</strong> TOML role files. The difference is
+<strong><code>overseer</code></strong>, and the code says why in a single line (<code>identity.go:43</code>): <em>&quot;overseer has no session&quot;</em>.</p>
+<p><strong>So &quot;overseer&quot; is a role with an identity and no runtime</strong> — a real divergence between the identity
+model and the role-config model, recorded here rather than smoothed. It is batch 04&#39;s job to find what
+an overseer does.</p>
+<h3 id="2-2-identity-is-also-a-bead-id-with-two-namespaces">2.2 Identity is also a bead ID, with two namespaces<a href="#batch-02/2-2-identity-is-also-a-bead-id-with-two-namespaces" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>beads/agent_ids.go:11-12,20-38</code> gives the town-level agents bead IDs with an <strong><code>hq-</code> prefix</strong>, stored in
+<code>~/gt/.beads/</code>, distinct from rig-level beads (which use a project prefix):</p>
+<ul>
+<li><code>hq-mayor</code>, <code>hq-deacon</code> — singletons</li>
+<li><code>hq-dog-&lt;name&gt;</code> — named town agents</li>
+<li><code>hq-&lt;role&gt;-role</code> — <strong>role definition beads</strong>, which batch 01 found are now vestigial (roles moved to
+TOML). The helper still exists; the thing it names has moved.</li>
+</ul>
+<hr>
+<h2 id="3-the-provider-registry-13-presets-one-source-of-truth">3. The provider registry — 13 presets, one source of truth<a href="#batch-02/3-the-provider-registry-13-presets-one-source-of-truth" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>config/agents.go</code> (1,241 lines) is the <strong>agent-preset registry</strong>, and its own header states the rule:</p>
+<blockquote>
+<p>*&quot;This is the <strong>single source of truth</strong> for all agent-specific behavior. Adding a new agent = adding a
+<code>builtinPresets</code> entry + optional hook installer. <strong>No provider-string switch statements should exist
+outside this registry.</strong>&quot;* — <code>config/agents.go:58-60</code></p>
+</blockquote>
+<p><strong>13 built-in presets</strong> (measured): <code>claude</code>, <code>gemini</code>, <code>codex</code>, <code>kiro</code>, <code>cursor</code>, <code>auggie</code>, <code>amp</code>,
+<code>opencode</code>, <code>copilot</code>, <code>pi</code>, <code>omp</code>, <code>vibe</code>, <code>groq-compound</code>.</p>
+<p>Each <code>AgentPresetInfo</code> (<code>config/agents.go:61</code>) carries everything provider-specific:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Field</th>
+<th>What it encodes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>Command</code>, <code>Args</code>, <code>Env</code></td>
+<td>how to launch it</td>
+</tr>
+<tr>
+<td><code>ProcessNames</code></td>
+<td><strong>how to tell it is running</strong> — checked against tmux&#39;s <code>pane_current_command</code> (e.g. <code>[&quot;node&quot;]</code> for Claude)</td>
+</tr>
+<tr>
+<td><code>SessionIDEnv</code>, <code>ResumeFlag</code>, <code>ContinueFlag</code>, <code>ResumeStyle</code></td>
+<td><strong>how to resume a session</strong> — <code>&quot;flag&quot;</code> (<code>--resume &lt;id&gt;</code>) or <code>&quot;subcommand&quot;</code> (<code>codex resume &lt;id&gt;</code>)</td>
+</tr>
+<tr>
+<td><code>SupportsHooks</code>, <code>SupportsForkSession</code></td>
+<td>capability flags</td>
+</tr>
+<tr>
+<td><code>PromptMode</code></td>
+<td><code>&quot;arg&quot;</code> or <code>&quot;none&quot;</code> — how the first prompt is delivered</td>
+</tr>
+<tr>
+<td><code>ConfigDirEnv</code>, <code>ConfigDir</code></td>
+<td>where the runtime keeps config (e.g. <code>CLAUDE_CONFIG_DIR</code>, <code>.claude</code>)</td>
+</tr>
+<tr>
+<td><code>HooksProvider</code>, <code>HooksDir</code>, <code>HooksSettingsFile</code>, <code>HooksInformational</code>, <code>HooksUseSettingsDir</code></td>
+<td>how hooks are installed for that runtime</td>
+</tr>
+</tbody></table></div>
+<p><strong>A second retirement is stated in the struct</strong>: the block is labelled <em>&quot;Runtime default fields
+(<strong>replaces scattered <code>default*()</code> switch statements</strong>)&quot;</em> (<code>config/agents.go:110</code>). Provider behaviour
+moved from switch statements into data.</p>
+<p><strong>Two details worth naming:</strong></p>
+<ul>
+<li><strong><code>groq-compound</code> uses the Claude binary as a proxy.</strong> Its comment (<code>agents.go:49-53</code>): <em>&quot;routes the
+Claude CLI to Groq&#39;s compound-beta model via Groq&#39;s OpenAI-compatible API endpoint. The <code>claude</code> binary
+acts as the SDK proxy; <code>ANTHROPIC_BASE_URL</code> and <code>ANTHROPIC_API_KEY</code> are overridden at runtime … and
+<code>GROQ_API_KEY</code> is read dynamically and <strong>never stored in config files</strong>.&quot;</em> A provider is emulated by
+re-pointing another provider&#39;s base URL — and the secret is kept out of config by rule.</li>
+<li><strong>A custom preset is supported</strong> (<code>agents.go:1064</code> shows a <code>my-agent-cli</code> example in the loader&#39;s
+documentation), so the registry is open, not closed.</li>
+</ul>
+<hr>
+<h2 id="4-the-session-one-agent-one-tmux-session">4. The session — one agent, one tmux session<a href="#batch-02/4-the-session-one-agent-one-tmux-session" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>session/names.go</code> builds every session name, and its comments carry a <strong>hard boundary</strong>:</p>
+<ul>
+<li><code>MayorSessionName()</code> → <code>hq-mayor</code>, with <em>&quot;<strong>One mayor per machine</strong> — multi-town requires
+containers/VMs for isolation&quot;</em> (<code>names.go:15</code>).</li>
+<li><code>DeaconSessionName()</code> → <code>hq-deacon</code>, the same boundary (<code>names.go:21</code>).</li>
+<li><code>WitnessSessionName(rigPrefix)</code> → <code>{rigPrefix}-witness</code>; <code>RefinerySessionName</code> → <code>{rigPrefix}-refinery</code>;
+<code>CrewSessionName(rigPrefix, name)</code> → <code>{rigPrefix}-crew-{name}</code>.</li>
+</ul>
+<p><strong>The boundary, stated plainly:</strong> Gas Town is <strong>single-town per machine</strong>; the product does not pretend
+otherwise, and names containers/VMs as the isolation mechanism. (Batch 03 takes this up as a tenancy
+finding.)</p>
+<p><code>internal/session/</code> is not a thin naming helper — it carries <code>identity.go</code>, <code>lifecycle.go</code>, <code>registry.go</code>,
+<code>stale.go</code>, <code>startup.go</code>, <code>pidtrack.go</code>, <code>agent_logging_{unix,windows}.go</code>, <code>legacy_socket.go</code>,
+<code>window_tint.go</code>, <code>town.go</code>. That is <strong>real process and session management</strong>, per-OS.</p>
+<hr>
+<h2 id="5-how-the-runtime-is-wired">5. How the runtime is wired<a href="#batch-02/5-how-the-runtime-is-wired" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="5-1-gt-prime-the-instruction-injector-and-the-role-comes-from-the-directory">5.1 `gt prime` — the instruction injector, and the role comes from the directory<a href="#batch-02/5-1-gt-prime-the-instruction-injector-and-the-role-comes-from-the-directory" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>gt prime</code> is the mechanism by which an agent learns what it is. Its contract (<code>cmd/prime.go:71-90</code>) is
+explicit:</p>
+<blockquote>
+<p><em>&quot;<strong>Detect the agent role from the current directory</strong> and output context.</em>
+<em>- Town root → Neutral (no role inferred; use <code>GT_ROLE</code>)</em>
+<em>- <code>mayor/</code> or <code>&lt;rig&gt;/mayor/</code> → Mayor context</em>
+<em>- <code>&lt;rig&gt;/witness/rig/</code> → Witness context</em>
+<em>- <code>&lt;rig&gt;/refinery/rig/</code> → Refinery context</em>
+<em>- <code>&lt;rig&gt;/polecats/&lt;name&gt;/</code> → Polecat context&quot;</em></p>
+</blockquote>
+<p><strong>The role is inferred from where the process is standing.</strong> That is the directory-is-the-org-chart
+finding of batch 01, now seen from the agent&#39;s side.</p>
+<p><code>prime</code> runs in <strong>hook mode</strong> (<code>--hook</code>) at session start, and its session-ID resolution has <strong>five
+fallbacks in priority order</strong> (<code>GT_SESSION_ID</code> → <code>CLAUDE_SESSION_ID</code> → persisted <code>.runtime/session_id</code> →
+stdin JSON → a generated UUID), with the source read from <code>GT_HOOK_SOURCE</code> or stdin. The command&#39;s own
+help shows the wiring for two runtimes:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>text</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code>Claude Code  (.claude/settings.json):  &quot;SessionStart&quot;: [{&quot;hooks&quot;:[{&quot;type&quot;:&quot;command&quot;,&quot;command&quot;:&quot;gt prime --hook&quot;}]}]
+Gemini CLI   (.gemini/settings.json):  &quot;SessionStart&quot;: &quot;export GT_SESSION_ID=$(uuidgen) GT_HOOK_SOURCE=startup &amp;&amp; gt prime --hook&quot;
+</code></pre>
+</div>
+<p><strong>Plainly:</strong> the agent&#39;s context is not baked into a prompt string at launch — it is <strong>produced by a CLI
+command the runtime calls</strong>, and that command works out the role from the filesystem.</p>
+<h3 id="5-2-the-hooks-installer-one-installer-not-one-package-per-agent">5.2 The hooks installer — one installer, not one package per agent<a href="#batch-02/5-2-the-hooks-installer-one-installer-not-one-package-per-agent" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>hooks/installer.go:1-8</code> states a consolidation:</p>
+<blockquote>
+<p><em>&quot;Instead of per-agent packages (<code>claude/</code>, <code>gemini/</code>, <code>cursor/</code>, etc.) each containing near-identical
+boilerplate, this package embeds all agent templates and provides <strong>a single generic installer</strong> that
+reads template metadata from <code>AgentPresetInfo</code>.&quot;</em></p>
+</blockquote>
+<p>There are <strong>9 hook template providers</strong> (<code>hooks/templates/</code>: <code>claude</code>, <code>codex</code>, <code>copilot</code>, <code>cursor</code>,
+<code>gemini</code>, <code>omp</code>, <code>opencode</code>, <code>pi</code>, <code>vibe</code>), and Claude&#39;s carries <strong>two modes</strong> —
+<code>settings-autonomous.json</code> and <code>settings-interactive.json</code>. The installer&#39;s documented safety rule is
+worth naming: it creates the file if absent, overwrites <strong>only</strong> when the existing file contains known
+stale patterns, and otherwise <strong>does not clobber</strong> — because a user may have customized the settings
+(<code>installer.go:22-30</code>).</p>
+<h3 id="5-3-the-nudge-queue-delivery-differs-per-runtime">5.3 The nudge queue — delivery differs per runtime<a href="#batch-02/5-3-the-nudge-queue-delivery-differs-per-runtime" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>nudge/poller.go:1-9</code> is one of the sharpest cross-runtime findings in the study:</p>
+<blockquote>
+<p><em>&quot;provides a background nudge-queue poller for agents that <strong>lack turn-boundary drain hooks</strong> (e.g.,
+Gemini, Codex). <strong>Claude Code drains its queue via the <code>UserPromptSubmit</code> hook on every turn.</strong> Other
+runtimes have no equivalent hook, so queued nudges would sit undelivered forever. The poller … polls
+the queue every <code>PollInterval</code>, <strong>waits for the agent to be idle</strong>, then drains and injects the
+formatted nudges via tmux.&quot;</em></p>
+</blockquote>
+<p><strong>The finding:</strong> a capability the product <em>depends on</em> (delivering a nudge) has <strong>no uniform primitive</strong>,
+so it is implemented <strong>two ways</strong> and selected per provider — a hook where one exists, a poller where it
+does not. That is the honest consequence of building on other people&#39;s CLIs.</p>
+<hr>
+<h2 id="6-the-instructions-are-prompt-templates-and-they-are-stern">6. The instructions are prompt templates, and they are stern<a href="#batch-02/6-the-instructions-are-prompt-templates-and-they-are-stern" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>templates/polecat-CLAUDE.md</code> (296 lines) and <code>templates/witness-CLAUDE.md</code> (187 lines) are the actual
+role instructions. They are not neutral descriptions; they are <strong>directives</strong>, and two sections are worth
+quoting because they show the coordination problem being solved in prose:</p>
+<blockquote>
+<p><strong>&quot;🚨 THE IDLE POLECAT HERESY 🚨&quot;</strong> — <em>&quot;After completing work, you MUST run <code>gt done</code>. No exceptions.&quot;</em>
+… *&quot;The &#39;Idle Polecat&#39; is a critical system failure: a polecat that completed work but sits idle
+instead of running <code>gt done</code>. <strong>There is no approval step.</strong>&quot;* … *&quot;<strong>Your session should NEVER end
+without running <code>gt done</code>.</strong>&quot;* (<code>templates/polecat-CLAUDE.md:5-27</code>)</p>
+</blockquote>
+<blockquote>
+<p><strong>&quot;🚨 SINGLE-TASK FOCUS 🚨&quot;</strong> — *&quot;<strong>You have ONE job: work your pinned bead until done.</strong>&quot;* … <em>&quot;File
+discovered work as beads (<code>bd create</code>) but don&#39;t fix it yourself.&quot;</em> (<code>:28-40</code>)</p>
+</blockquote>
+<p><strong>The finding:</strong> the agent&#39;s correct behaviour is enforced by <strong>a long, emphatic prompt</strong>, and the prompt
+names the failure mode it is preventing (<em>the idle polecat</em>). Where the platform cannot enforce a
+behaviour in code, it writes the behaviour down — and the writing is deliberately blunt.</p>
+<hr>
+<h2 id="7-the-lifecycle">7. The lifecycle<a href="#batch-02/7-the-lifecycle" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<ul>
+<li><strong>Eight states</strong> on the agent bead: <code>spawning</code>, <code>working</code>, <code>done</code>, <code>stuck</code>, <code>escalated</code>, <code>idle</code>,
+<code>running</code>, <code>nuked</code> (<code>beads_agent.go:43</code>).</li>
+<li><strong>A completion block</strong> written by <code>gt done</code>: <code>ExitType</code> (<code>COMPLETED</code>, <code>ESCALATED</code>, <code>DEFERRED</code>,
+<code>PHASE_COMPLETE</code>), <code>MRID</code>, <code>Branch</code>, <code>MRFailed</code>, <code>PushFailed</code>, <code>CompletionTime</code>
+(<code>beads_agent.go:54-66</code>). The fields exist so that <strong>the Witness can discover completion from the bead
+instead of from a mail message</strong> — the comment says exactly that.</li>
+<li><strong>A self-reported cleanup status</strong>: the polecat reports its own git state (<code>clean</code>,
+<code>has_uncommitted</code>, <code>has_stash</code>, <code>has_unpushed</code>) — the agent is asked to account for its own mess.</li>
+<li><strong><code>gt seance</code></strong> — <em>&quot;Talk to your predecessor sessions&quot;</em> (<code>cmd/seance.go:36</code>), paired with
+<code>SupportsForkSession</code> in the preset registry (§3). Sessions can be forked and consulted, not just
+resumed.</li>
+<li><strong>Per-role health policy</strong> (batch 01 §4.2): ping 30s, 3 consecutive failures, 5m kill cooldown, and a
+per-role <code>stuck_threshold</code> of 1h / 2h / 4h.</li>
+</ul>
+<hr>
+<h2 id="8-the-retirement-ledger-rule-10">8. The retirement ledger (rule 10)<a href="#batch-02/8-the-retirement-ledger-rule-10" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Location</th>
+<th>What was retired</th>
+<th>Why (its own words)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>beads/beads_agent.go:49</code></td>
+<td><strong>the <code>RoleBead</code> field on the agent record</strong></td>
+<td><em>&quot;role definitions are now config-based&quot;</em></td>
+</tr>
+<tr>
+<td><code>config/agents.go:110</code></td>
+<td><strong>scattered <code>default*()</code> switch statements</strong></td>
+<td>replaced by runtime-default fields on the preset</td>
+</tr>
+<tr>
+<td><code>hooks/installer.go:3-6</code></td>
+<td><strong>per-agent packages</strong> (<code>claude/</code>, <code>gemini/</code>, …)</td>
+<td>replaced by one generic installer + embedded templates</td>
+</tr>
+<tr>
+<td><code>config/roles.go:19</code> <em>(batch 01)</em></td>
+<td>the role <strong>bead</strong> system</td>
+<td>replaced by TOML config</td>
+</tr>
+</tbody></table></div>
+<p><strong>The pattern across the two batches is now visible and worth naming: Gas Town moved <em>agent
+configuration out of the ledger and into code-as-data</em>.</strong> Roles became TOML; provider behaviour became a
+struct; hook boilerplate became templates; a <code>RoleBead</code> field was deleted. The ledger kept the <strong>work</strong>
+and the <strong>agent&#39;s live state</strong>; the <strong>configuration</strong> moved to files that ship with the binary.</p>
+<hr>
+<h2 id="9-findings">9. Findings<a href="#batch-02/9-findings" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Tagged by pole; answered against <strong>Q1 · USER VALUE</strong> and <strong>Q2 · VISION VALUE</strong>.</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Finding</th>
+<th>Pole</th>
+<th>Q1 · User value</th>
+<th>Q2 · Vision value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>F02-01</strong></td>
+<td><strong>An agent is a bead</strong> — structured fields stored as <code>key: value</code> lines in the description, written under a file lock.</td>
+<td>P1</td>
+<td>An agent is inspectable with the same tool as its work.</td>
+<td>No second store; the agent lives where the work lives.</td>
+</tr>
+<tr>
+<td><strong>F02-02</strong></td>
+<td><strong>Identity = <code>{Role, Rig, Name, Prefix}</code>, parsed from a mail-style address</strong>; agents are addressable like email.</td>
+<td>P1</td>
+<td>You can mail a colleague by name.</td>
+<td>Identity is a string that routes, not a row that joins.</td>
+</tr>
+<tr>
+<td><strong>F02-03</strong></td>
+<td><strong>A 13-preset provider registry</strong> — one struct per provider carrying launch, resume, process-detection, hooks and prompt mode; <em>&quot;no provider-string switch statements should exist outside this registry.&quot;</em></td>
+<td>P1</td>
+<td>Any supported CLI works the same way.</td>
+<td>Provider behaviour is data, and the rule against switches is written down.</td>
+</tr>
+<tr>
+<td><strong>F02-04</strong></td>
+<td><strong><code>overseer</code> is a role with an identity and no session</strong> — a real divergence between the identity model and the 7 role-config files.</td>
+<td>P1/PZ</td>
+<td>(indirect)</td>
+<td>The model admits a non-runtime role; recorded, not smoothed.</td>
+</tr>
+<tr>
+<td><strong>F02-05</strong></td>
+<td><strong><code>gt prime</code> infers the role from the directory</strong> and injects context, wired into the runtime&#39;s session-start hook, with a 5-step session-ID fallback.</td>
+<td>P1</td>
+<td>The agent knows what it is from where it is.</td>
+<td>Context is produced by a command, not frozen into a launch string.</td>
+</tr>
+<tr>
+<td><strong>F02-06</strong></td>
+<td><strong>The nudge queue has two delivery paths</strong> — a hook where the runtime has one (Claude), a poller where it does not (Gemini/Codex).</td>
+<td>P1</td>
+<td>Instructions arrive even on runtimes that cannot receive them natively.</td>
+<td>A depended-on capability with no uniform primitive is implemented twice, honestly.</td>
+</tr>
+<tr>
+<td><strong>F02-07</strong></td>
+<td><strong>Operational state as bead labels</strong> (<code>idle:3</code>, <code>backoff:2m</code>) beside the description fields.</td>
+<td>P1</td>
+<td>Counters and backoff are visible and editable.</td>
+<td>Cheap extensible state without a schema change.</td>
+</tr>
+<tr>
+<td><strong>F02-08</strong></td>
+<td><strong>Behaviour is enforced by a stern prompt template</strong> (296 lines for a polecat) that names the failure mode — <em>&quot;THE IDLE POLECAT HERESY&quot;</em>.</td>
+<td>P1</td>
+<td>Agents actually finish and report.</td>
+<td>Where code cannot enforce a behaviour, the platform writes it down bluntly.</td>
+</tr>
+<tr>
+<td><strong>F02-09</strong></td>
+<td><strong>The completion block exists so supervision reads the ledger, not mail</strong> — <code>ExitType</code>/<code>MRID</code>/<code>Branch</code>/<code>CompletionTime</code> on the bead.</td>
+<td>P1/P3</td>
+<td>Completion is discoverable without a message.</td>
+<td>State lives in the durable store, not in a transient channel.</td>
+</tr>
+<tr>
+<td><strong>F02-10</strong></td>
+<td><strong>The agent reports its own mess</strong> — <code>CleanupStatus</code> (clean / has_uncommitted / has_stash / has_unpushed).</td>
+<td>P1</td>
+<td>Leftover work is not silently lost.</td>
+<td>Self-accounting as a first-class field.</td>
+</tr>
+<tr>
+<td><strong>F02-11</strong></td>
+<td><strong><code>groq-compound</code> re-points another provider&#39;s base URL</strong> and keeps the key out of config by rule.</td>
+<td>P1/PZ</td>
+<td>A model can be swapped without a new integration.</td>
+<td>Provider emulation at the transport layer; secrets stay in the environment.</td>
+</tr>
+<tr>
+<td><strong>F02-12</strong></td>
+<td><strong>The retirement ledger</strong>: config moved <strong>out of the ledger into code-as-data</strong> (RoleBead → TOML; switches → a struct; per-agent packages → one installer).</td>
+<td>PZ</td>
+<td>(indirect) — less duplicated boilerplate.</td>
+<td>A clear direction of travel: the ledger holds work and live state; config ships with the binary.</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="10-divergences-and-honest-bounds">10. Divergences and honest bounds <span class="seal-badge" style="background:#fef2f2; color:#dc2626; border-color:#fca5a5; font-size: 0.65em; vertical-align: middle;">⚠️ FINDING NOTE</span><a href="#batch-02/10-divergences-and-honest-bounds" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<ul>
+<li><strong>One real divergence found and recorded:</strong> the identity model has <strong>8 roles</strong> (including <code>overseer</code>)
+while the role-config model has <strong>7 files</strong> — and the code states that <code>overseer</code> <em>&quot;has no session&quot;</em>.
+Not smoothed (F02-04).</li>
+<li><strong>Bound:</strong> this batch read the <strong>agent record, identity, provider registry, session wiring, instruction
+injection, nudge delivery and lifecycle</strong>. It did <strong>not</strong> trace what each role <em>does</em> in operation
+(how a polecat is dispatched, what a witness patrol examines, how the Refinery decides) — those are
+batch 04&#39;s subject, and are named rather than half-covered.</li>
+<li><strong>Bound:</strong> <code>gt prime</code>&#39;s <strong>output</strong> was not read in full (it has its own files — <code>prime_output.go</code>,
+<code>prime_session.go</code>, <code>prime_molecule.go</code>); this batch established what it is, when it runs and how the
+role is resolved.</li>
+<li><strong>Bound (stated plainly):</strong> the polecat/witness templates are quoted for the <strong>behaviour they demand</strong>,
+not summarised as a whole; 296 and 187 lines respectively, and a later batch may find more in them.</li>
+<li><strong>No doc-vs-code divergence was needed</strong>; where the docs describe the agent model, the code agrees and
+says more.</li>
+</ul>
+<hr>
+<h2 id="11-carried-forward-to-batch-07-the-synthesis">11. Carried forward to batch 07 (the synthesis)<a href="#batch-02/11-carried-forward-to-batch-07-the-synthesis" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Three candidates for the highest transferable value, to be ranked in batch 07:</p>
+<ol>
+<li><strong>The provider registry (F02-03)</strong> — 13 presets, one struct each, with the anti-switch rule written
+down. The cleanest multi-provider seam in the study so far.</li>
+<li><strong><code>gt prime</code> (F02-05)</strong> — context injected by a command that infers identity <strong>from the filesystem</strong>,
+with a 5-step session-ID fallback. A very cheap way to give an agent a self-model.</li>
+<li><strong>The nudge queue&#39;s two delivery paths (F02-06)</strong> — an honest answer to a capability that does not
+exist uniformly across runtimes.</li>
+</ol>
+<p>All three are <strong>observations</strong>, not decisions. The cross-platform mapping is a later pass (rule 5).</p>
+<hr>
+<p><em>Batch 02 of 07. Read from source on 2026-10-15. Next: <code>findings/03-the-workspace.md</code>.</em></p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="01-platform-overview.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">Platform Overview</span>
+                </a>
+              
+
+              <a href="../index.html#batch-02" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              
+                <a href="03-the-workspace-p2.html" class="nav-page-btn" style="text-align:right;">
+                  <span class="nav-btn-sub">Next Batch →</span>
+                  <span class="nav-btn-title">The Workspace (P2)</span>
+                </a>
+              
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#0-what-this-batch-had-to-answer" class="toc-link">0. What this batch had to answer</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#1-the-agent-as-a-record-a-bead-with-key-value-fields" class="toc-link">1. The agent as a record — a bead with key: value fields</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#2-identity-a-role-a-rig-a-name-and-a-prefix" class="toc-link">2. Identity — a role, a rig, a name, and a prefix</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-1-the-role-constants-hold-one-more-role-than-the-toml-files" class="toc-link">2.1 The role constants hold one more role than the TOML files</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-2-identity-is-also-a-bead-id-with-two-namespaces" class="toc-link">2.2 Identity is also a bead ID, with two namespaces</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-the-provider-registry-13-presets-one-source-of-truth" class="toc-link">3. The provider registry — 13 presets, one source of truth</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-the-session-one-agent-one-tmux-session" class="toc-link">4. The session — one agent, one tmux session</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-how-the-runtime-is-wired" class="toc-link">5. How the runtime is wired</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#5-1-gt-prime-the-instruction-injector-and-the-role-comes-from-the-directory" class="toc-link">5.1 gt prime — the instruction injector, and the role comes from the directory</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#5-2-the-hooks-installer-one-installer-not-one-package-per-agent" class="toc-link">5.2 The hooks installer — one installer, not one package per agent</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#5-3-the-nudge-queue-delivery-differs-per-runtime" class="toc-link">5.3 The nudge queue — delivery differs per runtime</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-the-instructions-are-prompt-templates-and-they-are-stern" class="toc-link">6. The instructions are prompt templates, and they are stern</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-the-lifecycle" class="toc-link">7. The lifecycle</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#8-the-retirement-ledger-rule-10" class="toc-link">8. The retirement ledger (rule 10)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#9-findings" class="toc-link">9. Findings</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#10-divergences-and-honest-bounds" class="toc-link">10. Divergences and honest bounds</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#11-carried-forward-to-batch-07-the-synthesis" class="toc-link">11. Carried forward to batch 07 (the synthesis)</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('gastown_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('gastown_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('gastown_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('gastown_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.GasTownReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>
