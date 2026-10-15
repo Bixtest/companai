@@ -26,7 +26,7 @@ it is the most honest document in a repo.
 | 1 | Hermes forensics | ✅ CLOSED 13/13 | Main AI engine; never fork it. "OpenCode" = a provider, not a coding agent. |
 | 2 | Paperclip 0.3.1 | ✅ CLOSED 7/7 | **P2/P3 = strength**, P1 = seam-provider. No multi-tenancy, no widget composer. |
 | 3 | CrewAI 1.15.28 | ✅ CLOSED 7/7 | **Mechanism donor, NOT an architecture template.** Executor yes, **delivery no**, **tenancy nowhere**. |
-| 4 | **Multica 0.2.0** | 🔵 **b01+b02+b03+b04 done** | **All three poles are real and implemented.** Strongest finding: the machine/teammate split. |
+| 4 | **Multica 0.2.0** | 🔵 **b01–b05 done** | **All three poles are real and implemented.** Strongest finding: the machine/teammate split. |
 | — | gastown, n8n, buzz, openrig, mattermost, zulip | ⬜ 6 remain | Order not fixed — **ASK before extracting more.** |
 
 **Multica b01 (`4cf7f35`, 19 findings, 584 lines, 0 CR):** a Go+TS *product*, not a library
@@ -77,7 +77,21 @@ platform + 14 `agent_error.*`; the prefix classifies). Wakeups = a revision fenc
 + a receipt dedup table. **Retirement: the chat-pending marker and the
 terminal-completed index were EACH built, dropped and rebuilt twice** — the
 migration chain, not the schema, is the truth.
-**Next: `findings/05-widgets-and-frontend.md` (PX-W / PX-F).**
+
+**Multica b05 (`daef743`, widgets+frontend, PX-W/PX-F; 286 lines / 0 CR):**
+`packages/views` 1,192 files/304k lines; `core` 511/87k; `ui` 79/10.7k (46
+primitives); mobile 303/35k; web 165/29k; desktop 153/25k; ui-lab 33/5.9k — the
+**shared layer ≈ 5× the app layer**. PX-F: a 3-package layering whose constraints
+are **prohibitions** (core: no react-dom/localStorage/process.env → `StorageAdapter`;
+ui: no core imports; views: no stores/next/*/react-router-dom → `NavigationAdapter`
+/`useNavigation`/`AppLink`). Query owns server data, Zustand client state; UI JSON
+goes through zod + `parseWithFallback`, never `as T` (deployed desktop clients talk
+to newer backends). PX-W: role-named tokens whose comments carry the history (51
+ad-hoc font sizes / 370 arbitrary values → 10 role-named steps; colors pinned by
+WCAG); component contracts in `packages/ui/docs/` powering **UI Lab**. **THE
+NEGATIVE: NO widget/composer model** (0 composers; `widget` in 13 incidental files)
+— second platform with none (Paperclip had none).
+**Next: `findings/06-out-of-pole.md` (PZ).**
 
 ## Standing hazards (still bite)
 - **Git-Bash `grep -c $'\r'` LIES** — byte truth is `tr -cd '\r' < f | wc -c`; verify the
