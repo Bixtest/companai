@@ -291,6 +291,41 @@ from the artefact, research-validate-write-then-build. Read them once, before to
     platform_points, etc... systematically sync it so that this dual paths do not create gaps, bugs,
     errors, flaws, or incomplete work."*
 
+17. **BUILD ON WHAT EXISTS, OR CHANGE IT DELIBERATELY — never invent a new piece before asking whether
+    the existing one is the better foundation** *(owner, 2026-10-15)*. **Every development decision — not
+    just the OpenCode/Hermes question — begins with one explicit question, asked and *answered in
+    writing*, before any new architectural piece is proposed:**
+    > ***"Is what already exists the best thing to build on top of, underneath, or around — or should we
+    > change it, optimise it, upgrade it, or replace it?"***
+    **The owner's words, verbatim:** *"Whether we use something that is built for a codebase to use
+    Hermes on the top or under it depends on the specific answer to one question: Does it serve Hermes,
+    our platform, and the end-user use cases more to create new architectural pieces for that, or does
+    the already existing ones built serve that evolution of the project in the best, richest, and most
+    optimised manner? That is the key question, always, for every development decision we make, even
+    beyond opencode-hermes transition. 'Is what already exists the best to build on the top of, under,
+    or around, or should we change it, optimise it, uprate it, etc…?' I think that is worth adding as a
+    permanent rule for work. That's the end target. And it defines the options we take and decisions we
+    make."*
+    **What it binds, in three parts:**
+    **(a) The question is asked *before* a new piece is proposed** — a plan, a requirement, or a design
+    that introduces a new module/adapter/service/layer must first state **what existing thing it builds
+    on**, and why that existing thing is (or is not) the right foundation. "We need a new X" is not an
+    answer; "we have Y, and it is/ is not the right base because …" is.
+    **(b) The answer is *measured*, not assumed** — the existing thing is read in the code (rule 0b)
+    before it is judged, because the memory of what a thing does and what it actually does have diverged
+    in this project before.
+    **(c) The three outcomes are all legitimate, and the choice is *stated*** — **build on it** /
+    **build around it** / **change, optimise, upgrade, or replace it**. What is forbidden is doing any of
+    the three **silently**, or inventing a second copy of something that already exists (the "second copy
+    of something we already run" the analysis already forbids — DB-10).
+    **Why it exists.** The owner raised it while deciding the OpenCode/Hermes transition: the temptation
+    is to assume the path of least resistance (keep, or replace) instead of *asking the question* — and
+    this project's stated conviction is that every architectural decision gets **one** such analysis, in
+    the open, before it is taken. **It applies to every decision, not only OpenCode** — the owner's own
+    examples: why not capitalise on Hermes group chats for workspace threads; why not capitalise on
+    Hermes kanban/tools/plugins as nuggets callable from workspaces — *"not as it, but as an added value
+    to what serves our platform best."*
+
 ---
 
 ## 2. How to work with the owner
@@ -371,7 +406,10 @@ that still need work). Updating the front end helps me testing the micros as you
 - **If a rule stops being true**, delete it — do not leave it to be obeyed after it is wrong.
 - **Keep it short.** This is a page the agent reads once at the start; a long page defeats its purpose.
 
-*Last updated: 2026-10-11 — **rule 9(a) strengthened** on the owner's instruction: ownership is of the
+*Last updated: 2026-10-15 — **added rule 17** — the owner's permanent architectural-evaluation rule
+(*"is what already exists the best to build on top of, under, or around — or should we change/optimise/
+upgrade it?"*), on his instruction, and restated as applying to **every** development decision, not only
+the OpenCode/Hermes transition; his words are quoted verbatim in the rule. Previously 2026-10-11 — **rule 9(a) strengthened** on the owner's instruction: ownership is of the
 **full codebase while you are working on it, not just your own diff** — any flawed/incomplete/bugged/
 error-carrying code, and any required test, is either fixed or scheduled in the right document, never left
 as "pre-existing, not mine". Previously 2026-10-08 — added rule 10 (build every task as a PACKAGE: study
