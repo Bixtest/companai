@@ -1,0 +1,150 @@
+# Batch 00 — The pin, the method, and what this study is
+
+**Folder:** `library/hermes-forensics/` · **Status:** OPEN — begun 2026-10-15
+**This is a clean forensic study.** It reads ONE source tree, measures it, and verifies every
+load-bearing claim against the source code. Nothing from any earlier Hermes analysis is reused,
+referenced, or assumed. Where this study reaches a conclusion that contradicts older material, the
+older material is ignored by instruction, not silently patched.
+
+---
+
+## 1. THE PIN — task zero, answered by measurement
+
+**The source of this study is:**
+`C:/Users/Ramzi/Downloads/companai/hermes-agent-main/hermes-agent-main`
+
+| Fact | Value | How measured |
+|---|---|---|
+| Origin | `https://github.com/NousResearch/hermes-agent` (`main`) | the owner's instruction, 2026-10-15 |
+| Extracted | 2026-10-15, 09:57 (all files share this mtime) | `ls -la` |
+| `.git` present? | **NO** — this is an extract, not a clone | `ls -d .git` → absent |
+| Total files | **19,728** | `find . -type f \| wc -l` |
+| `pyproject.toml` md5 | **`f57f729d4b251547a5a9e2565ce1e726`** | `md5sum` |
+| Declared version | `0.0.0` (the upstream default; carries no identity) | `pyproject.toml` |
+| Product | **Hermes Agent** by Nous Research; licence **MIT** | `pyproject.toml`, `README.md` |
+| Python support | `>=3.11,<3.15` | `pyproject.toml` |
+
+### 1.1 Why the pin needed re-taking (rule 13 — a premise changed)
+
+The repository's existing pin record (`library/development/HERMES-PIN.md`) names a **different** copy:
+the repository-root `hermes-agent-main/`, 18,248 files, `pyproject.toml` md5 `11d88a68…`. **That copy
+no longer exists as a copy** — the owner replaced it. Measured today:
+
+| | Old pin's target | **This study's source** |
+|---|---|---|
+| Path | `hermes-agent-main/` (root) | `hermes-agent-main/hermes-agent-main/` |
+| Files | 18,248 | **19,728** |
+| `pyproject.toml` md5 | `11d88a68…` | **`f57f729d…`** |
+| Status | **gone** (the root folder now contains only this nested copy) | present |
+
+The two hashes differ and the new tree holds **1,480 more files**. So this is not the same snapshot under
+a new name — it is a **newer extract of the same product**, and the pin must name it explicitly. This
+document is that pin. **Any figure in this study is a figure about THIS tree and no other.**
+
+### 1.2 The honest limit on "which commit is this?"
+
+There is **no `.git`**, so the exact upstream commit cannot be read from the tree, and `version = "0.0.0"`
+carries no identity. **The md5 of `pyproject.toml` plus the file count plus the extraction date is the
+whole identity we can assert.** A reader wanting to reproduce this study must match those three numbers.
+This is stated, not glossed: **any claim here about "the latest Hermes" is a claim about this extract,
+dated 2026-10-15.**
+
+---
+
+## 2. What the tree contains (measured)
+
+### 2.1 Documentation
+
+| Folder under `website/docs/` | Files | Bytes |
+|---|---:|---:|
+| `user-guide/` | 336 | 5,692,748 |
+| `developer-guide/` | 61 | 1,290,691 |
+| `guides/` | 36 | 390,910 |
+| `reference/` | 15 | 525,371 |
+| `getting-started/` | 8 | 163,353 |
+| `integrations/` | 4 | 129,028 |
+| **Total `.md`/`.mdx`** | **455** | **8.9 MB** |
+
+`user-guide/` holds five subfolders: `features/`, `messaging/`, `skills/`, `secrets/`, `egress/`.
+
+### 2.2 Source code (Python)
+
+| Directory | Files | Lines |
+|---|---:|---:|
+| `hermes_cli/` | 731 | 285,370 |
+| `agent/` | 362 | 139,601 |
+| `tools/` | 353 | 125,785 |
+| `gateway/` | 307 | 121,603 |
+| `plugins/` | 225 | 75,879 |
+| `tui_gateway/` | 116 | 45,456 |
+| `cron/` | 45 | 19,128 |
+| `skills/` | 50 | 11,590 |
+| `acp_adapter/` | 19 | 5,846 |
+| `hermes_platform/` | 15 | 2,049 |
+| `providers/` | 2 | 1,154 |
+| **Total (these dirs)** | **1,819** | **698,487** |
+
+Non-Python top-level trees also present: `web/`, `website/`, `apps/` (desktop), `native/`, `ui-tui/`,
+`tests/`, `tests-js/`, `evals/`, `optional-skills/`, `optional-mcps/`, `plugin-catalog/`, `docker/`,
+`nix/`, `scripts/`, `pm/` (its package manager), `locales/`, `contributors/`, `assets/`.
+
+---
+
+## 3. The method (how every batch is produced)
+
+**This is forensics, so the discipline is fixed and stated up front:**
+
+1. **Docs are claims; code is the authority.** Every load-bearing statement a doc makes is checked against
+   the Python source. Where they disagree, **the code wins and the disagreement is recorded** as a finding.
+2. **Every number is measured at the time of writing**, never carried from memory or from an older
+   document. File counts, line counts and hashes are produced by a command and quoted with their result.
+3. **Claims carry their evidence**: a batch line that rests on code cites the file and line it was read at.
+4. **Two value questions per capability**, per the owner's instruction:
+   - **Q1 · USER VALUE** — *how does this serve a real use case for a person using the platform?*
+   - **Q2 · VISION VALUE** — *how does this serve the vision of an AI-first business & resources planner,
+     now and long-run, including versatility and integratability?*
+5. **No comparison to our own platform inside the batches.** Understanding first; comparison is the
+   synthesis's (Batch 12) job alone.
+6. **Every capability is named, including ones we will not use.** Nothing is silently dropped.
+7. **Findings are additive and never overwrite history**: a later batch that changes an earlier batch's
+   line says so explicitly rather than editing it away.
+8. **Plain words** — every capability gets a one-sentence plain gloss before any detail.
+
+---
+
+## 4. The batch plan (each documented as it is completed)
+
+| # | Batch | Primary docs | Code to verify against |
+|---|---|---|---|
+| **00** | **This file** — pin and method | — | — |
+| **01** | The agent loop + conversation model | `developer-guide/agent-loop.md`, `user-guide/features/tools.md`, `reference/toolsets-reference.md`, `reference/tools-reference.md`, `user-guide/features/overview.md` | `agent/conversation_loop.py`, `agent/tool_executor.py`, `agent/agent_init.py`, `agent/iteration_budget.py`, `agent/agent_runtime_helpers.py`, `agent/context_compressor.py` |
+| **02** | Bots, profiles and group chats | `user-guide/bot-mode.md`, `profiles.md`, `multi-profile-gateways.md`, `profile-distributions.md` | `agent/`, `gateway/` profile code |
+| **03** | Skills — the learning loop | `features/skills.md`, `developer-guide/creating-skills.md`, `reference/skills-catalog.md`, `user-guide/skills/*` | `tools/` skill tools, `skills/` |
+| **04** | Memory and context | `features/memory.md`, `memory-providers.md`, `context-files.md`, `context-references.md`, `developer-guide/context-compression-and-caching.md` | `agent/context_compressor.py`, memory modules |
+| **05** | Tools, MCP and the gateway | `features/mcp.md`, `tool-gateway.md`, `tool-search.md`, `developer-guide/adding-tools.md`, `reference/mcp-config-reference.md` | `tools/`, `gateway/` |
+| **06** | Scheduling, delegation and the board | `features/cron.md`, `delegation.md`, `kanban*.md`, `loops.md`, `goals.md`, `heartbeat.md` | `cron/`, delegation + kanban tool code |
+| **07** | Sessions, dashboard and settings surface | `user-guide/sessions.md`, `features/web-dashboard.md`, `desktop.md`, `reference/cli-commands.md`, `slash-commands.md` | `web/`, dashboard backend |
+| **08** | Security, approvals, secrets, sandboxing | `user-guide/security.md`, `secrets/*`, `egress/*`, `developer-guide/gateway-internals.md` | approval/secrets/sandbox code |
+| **09** | Models and providers | `user-guide/configuring-models.md`, `local-models.md`, `integrations/providers.md`, `features/provider-routing.md`, `fallback-providers.md`, `credential-pools.md` | `providers/`, `agent/agent_init.py`, `auxiliary_client` |
+| **10** | Code execution, plugins and extensibility | `features/code-execution.md`, `plugins.md`, `extending-the-dashboard.md` | `tools/` code-exec, `plugins/` |
+| **11** | Channels, voice and media | `user-guide/messaging/*`, `features/voice-mode.md`, `tts.md`, `vision.md`, `image-generation.md`, `browser.md` | `gateway/platforms/`, media tool code |
+| **12** | **The synthesis** | all of the above | — |
+
+**Each batch document carries:** (a) what was read and its measured size; (b) the capability table with
+**Q1 · Q2 · Phase**; (c) the code verification, with file:line evidence, and any **doc-vs-code
+divergence** found; (d) items carried forward.
+
+---
+
+## 5. Ground rules restated as a checklist the reader can hold this study to
+
+- Is the claim measured, or remembered? → must be measured.
+- Does the line rest on a doc, or on code? → code where it matters.
+- If doc and code disagree, is the disagreement recorded? → must be.
+- Is every capability named, including the ones we will not use? → must be.
+- Are the two value questions answered in the owner's words? → yes, per capability.
+- Is there any comparison to our own platform in a batch (`01`–`11`)? → must be none; that is Batch 12.
+
+---
+
+*Batch 00 of 12. Begun 2026-10-15. Next: `01-agent-loop-and-conversation.md`.*
