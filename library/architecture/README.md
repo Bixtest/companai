@@ -77,7 +77,7 @@ one: double-click its `index.html`, or `node serve.js` inside its `reader/` fold
 | **crewAI** | `crewaiinc/crewai` | **STUDIED — 7 batches + pin + reader** |
 | **multica** | `multica-ai/multica` | **STUDIED — 7 batches + pin + reader (75 findings). The closest neighbour studied: all three poles are real.** |
 | **gastown** | `gastownhall/gastown` | **STUDIED — 7 batches + pin + reader (68 findings). Mechanism source + boundary-setting reference.** |
-| **n8n** | `n8n-io/n8n` | **IN PROGRESS — b00–b06 done; the synthesis (b07) next, then the reader** |
+| **n8n** | `n8n-io/n8n` | **STUDIED — 7 batches + pin (73 findings). The first platform with a real composition surface. Reader next.** |
 | buzz | `block/buzz` | to study |
 | openrig | `mvschwarz/openrig` | to study |
 | mattermost | `mattermost/mattermost` | to study |

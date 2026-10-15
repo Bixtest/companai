@@ -27,97 +27,42 @@ it is the most honest document in a repo.
 | 2 | Paperclip 0.3.1 | ✅ CLOSED 7/7 | **P2/P3 = strength**, P1 = seam-provider. No multi-tenancy, no widget composer. |
 | 3 | CrewAI 1.15.28 | ✅ CLOSED 7/7 | **Mechanism donor, NOT an architecture template.** Executor yes, **delivery no**, **tenancy nowhere**. |
 | 4 | **Multica 0.2.0** | ✅ **CLOSED 7/7 + reader** | **All three poles real. The closest neighbour studied.** No widget model; no engine of its own. |
-| 5 | **Gas Town 1.2.1** | ✅ **CLOSED 7/7 + reader** | Go multi-agent orchestration. **The watchdog chain is made of agents.** Agents ARE beads; **13-preset provider registry**; `gt prime` infers the role from the directory; **the Hook is the durability primitive**; **ZFC** = transport, don't decide; **47 tested TOML formulas**; **a three-layer sandbox** (mTLS CA + denylist / CLI allow-list → 403 / git smart-HTTP proxy); **13 shell-script plugins, "no AI interpretation"**. Frontend = CLI (5× the rest); **NO widget model** (4th platform with none). **Top 4 ranked mechanisms are DECIDED LIMITS.** |
-| 6 | **n8n 2.44.0** | 🔵 **b00–b06 done** | TS monorepo: 22,715 `.ts` / 57 `@n8n` packages; 563 built-in nodes. **A v2 engine that is a documented SCAFFOLD with 6 ADRs — and the ADRs are ACCURATE** (`MAX_IN_PROCESS_WAIT_MS = 65_000`). **P1 strong:** `@n8n/agents` v0.29.0 — fluent builder, SKILL.md skills, sub-agents with suspend/resume, guardrails = allow|stop(code), cost as a guardrail, untrusted tool output. **P2: a real tenancy model** — `Project` `personal|team`, membership as a join row with a Role by slug, **10 roles + 206 `resource:action` scopes** (4 of 5 `.ee`), `User` ≠ `AuthIdentity`. **P3 has the study's best security surface:** expressions run in an **isolate pool** with a **zod-validated RPC boundary**, and observability is a **sampling policy**. **★ PX-W: THE FIRST PLATFORM WITH A REAL COMPOSITION SURFACE** — a **canvas of 7 element types**, a **129-component design system enforced by its own ESLint plugin**, and **CRDT collaboration on y-websocket with awareness**. **PZ: two ratchets** (299 hashed architectural violations + 110 boundary issues), a **pinned agent harness**, and **`agent-check.mjs` withholding full output to save the agent's context**. **FAIR-CODE** — `.ee` unlicensed, incl. `ai-workflow-builder.ee`. Extracted to `C:\n8n` (MAX_PATH). |
+| 5 | **Gas Town 1.2.1** | ✅ **CLOSED 7/7 + reader** | Go multi-agent orchestration. **The watchdog chain is made of agents**; agents ARE beads; 13-preset provider registry; `gt prime` infers the role from the directory; **the Hook is the durability primitive**; **ZFC** = transport, don't decide; 47 tested TOML formulas; a **three-layer sandbox** (mTLS CA + denylist / CLI allow-list → 403 / git smart-HTTP proxy); 13 shell-script plugins, "no AI interpretation". Frontend = CLI (5× the rest); **NO widget model**. **Top 4 ranked mechanisms are DECIDED LIMITS.** |
+| 6 | **n8n 2.44.0** | ✅ **CLOSED 7/7 + 73 findings** | TS monorepo: 22,715 `.ts` (**65% of bytes**) / 57 `@n8n` packages; 563 built-in nodes. **A v2 engine that is a documented SCAFFOLD with 6 ACCURATE ADRs** (`MAX_IN_PROCESS_WAIT_MS = 65_000`). **P1:** `@n8n/agents` v0.29.0 — lazy fluent builder (25+ methods, `build()` protected), SKILL.md skills (72 KB cap, content-hashed), sub-agents w/ suspend/resume, **guardrails = `allow`\|`stop(code)`** at 2 moments, cost-as-guardrail + `SpendLedger`, untrusted tool output. **P2: a real tenancy model** — `Project` `personal\|team`, membership = composite-key join row w/ Role by slug, **10 roles (2-level) + 206 `resource:action` scopes** (4 of 5 `.ee`), `User` ≠ `AuthIdentity`. **P3: the study's best security surface** — expressions in an **isolate pool** (scales to zero) behind a **zod-validated RPC boundary** (*"TS types are erased at runtime and contribute zero security"*); observability = a **sampling policy**. **★ PX-W: THE FIRST PLATFORM WITH A REAL COMPOSITION SURFACE** — a **canvas of 7 element types**, a **129-component design system enforced by its own ESLint plugin**, **CRDT on y-websocket with awareness**. **PZ: two ratchets** (299 hashed arch violations + 110 boundary issues), a **pinned agent harness** (`harness-v0.6.0`), `agent-check.mjs` (excerpt to the agent, full output to disk). **FAIR-CODE** — `.ee` unlicensed, incl. `ai-workflow-builder.ee`. Extracted to `C:\n8n` (MAX_PATH). **Reader (port 3500) is the NEXT build.** |
 | — | buzz, openrig, mattermost, zulip | ⬜ 4 remain | Order not fixed — **ASK before extracting more.** |
 
-**Multica b01 (`4cf7f35`, 19 findings, 584 lines, 0 CR):** a Go+TS *product*, not a library
-(2,036 Go files / 801,066 lines; 598 up-migrations; 144 tables). `agent_runtime` (the machine)
-and `agent` (the teammate) are two rows, `UNIQUE (workspace_id, daemon_id, provider)` — the
-one-tenant-one-engine primitive. `ClaimAgentTask` = real `FOR UPDATE SKIP LOCKED` + prepare
-lease + 4 named sweepers; a 14+14 failure taxonomy with an `agent_error.` prefix; a DB-backed
-distributed cron whose `sys_cron_executions` is lease *and* audit log; autopilot as data.
-**Hermes driven via a hard-coded `hermes acp`** with the profile handshake mirrored from
-Hermes's own CLI (upstream GH #8878 cited); `hermes_test.go` = 4,860 lines, 2nd-largest in
-`pkg/agent/`. **CC-84 narrowed, not solved:** a `mat_` task token makes the task the
-credential's scope, but the engine is still shared.
+**Multica (75 findings, b01 `4cf7f35` … b07 `afed823`) — the 3 load-bearing facts.**
+*(Full per-batch detail → `extended_deep_memory.md` + daily logs.)*
+1. **Machine ≠ teammate.** `agent_runtime` (the machine) and `agent` (the teammate) are two rows,
+   `UNIQUE (workspace_id, daemon_id, provider)` — **the one-tenant-one-engine primitive**; `runtime_id`
+   NOT NULL RESTRICT. Skills are TWO kinds (structured workspace vs runtime/CLI disable-only); permissions
+   = `permission_mode` + a stacking `agent_invocation_target` allow-list, **deny-by-default**. **CC-84
+   narrowed, not solved** (a `mat_` task token scopes a task, but the engine is still shared).
+2. **The one-statement claim** (`agent.sql:749-810`): `FOR UPDATE SKIP LOCKED` + a total order +
+   per-(issue,agent) serialization + the runtime-health gate **inside** the claim; a prepare lease + 4
+   named sweepers; a **27-value failure taxonomy** (13 platform + 14 `agent_error.*`; the prefix
+   classifies). `sys_cron_executions` = the row is **both the distributed lease and the audit log**.
+   **Retirement is the lesson:** the chat-pending marker AND the terminal-completed index were each
+   built, dropped and rebuilt twice — *the migration chain, not the schema, is the truth.*
+3. **The container: 144 tables, 82 carry `workspace_id`** (the tenant fence). Members
+   `owner|admin|member` + invitations; **the last owner is protected in 3 code paths**. Git = a repo
+   registry + a multi-workspace GitHub install + an issue↔PR join (`007` moved Git issue→workspace).
+   PX-F: a 3-package layering whose constraints are **prohibitions** (core: no react-dom/localStorage/
+   process.env → `StorageAdapter`; ui: no core imports; views: no stores/next/*/react-router-dom →
+   `NavigationAdapter`); UI JSON goes through zod + `parseWithFallback`, **never `as T`** (deployed
+   desktop clients talk to newer backends). **THE NEGATIVE: NO widget/composer model** (0 composers) —
+   second platform with none. Migration `344` **deletes the ENTIRE Plugin V1** (14 DROP TABLEs) → 3
+   tables; 225 .mdx = 45 pages × 5 languages; `pkg/redact` on the WRITE path.
+**Reader built** (copy the engine, swap `BRAND`+`DOCS_CONFIG`+`diagrams.js`): 8 docs / 26,624 words /
+**177,688 chars**, 8/8 `fidelityVerified`, port 3300. **Fidelity verified two ways** — the HOW-TO's
+"byte count" check was WRONG (bytes 178,931 ≠ chars 177,688; the gap is UTF-8); corrected. **The engine
+was NOT fully platform-agnostic**: 4 hardcoded "CrewAI" strings + `window.CrewAIReader` + a
+`crewai_reader_` storage prefix — all fixed; 0 stale refs.
 
-**Multica b02 (`f2dba7e`, the aissistant, P1; 368 lines / 0 CR):** the agent
-surface, read from source. Machine/teammate split (`agent_runtime` + `agent`,
-`runtime_id` NOT NULL RESTRICT); one `Backend` interface, 24 structs / 25 keys;
-`SupportedTypes` whitelist kept in lockstep with the DB CHECK by hand; the
-`agent` table = 29 columns over 598 up-migrations (229 mention it); later
-migrations promoted fields OUT of the legacy `runtime_config` jsonb into typed
-columns, stored **runtime-native** (not neutralised). Skills are TWO kinds
-(workspace structured vs runtime/CLI disable-only). Permissions =
-`permission_mode` + a stacking `agent_invocation_target` allow-list,
-deny-by-default (MUL-3963 closed an admin-bypass hole); A2A judged by the
-top-of-chain human originator. **Retirement ledger: 4 retirements** (008/032/
-109/126) + 129→130 reversing the Composio originator==owner gate.
-
-**Multica b03 (`6dfd0ab`, the workspace, P2; 306 lines / 0 CR):** the container.
-**144 unique tables; 82 carry `workspace_id`** (the tenant fence). Members
-`owner|admin|member` + invitations (7-day expiry, role capped at admin, partial
-unique on pending); the **last owner is protected** in three code paths. Issues
-= 32 columns; a per-workspace human number; triage split OFF `status`;
-duplicate = a cancelled issue with a pointer; stages = barrier groups; **two
-custom-field layers** (free jsonb bag for machines vs typed catalog keyed by
-UUID). Projects have a lead that may be a **member or an agent**; resources are
-polymorphic. Git = a repo registry (url+ref) + a multi-workspace GitHub install
-+ an issue↔PR join; `007` dropped `issue.repository` (Git moved issue→workspace).
-`attribution_fail_closed` = a per-workspace switch to refuse unattributable runs.
-
-**Multica b04 (`109b66c`, automations, P3; 330 lines / 0 CR):** the delivery
-layer. One-statement claim (`agent.sql:749-810`): `FOR UPDATE SKIP LOCKED` + a
-total order + per-(issue,agent) serialization + the runtime-health gate INSIDE
-the claim. A prepare lease + attempt/heartbeat columns + **4 named sweepers**.
-`sys_cron_executions` = the row is both the distributed lease and the audit log
-(unique `(job, scope, plan_time)`, no materialised stale state, lease_token).
-Autopilot as data (definition+triggers+runs, `concurrency_policy`, versioned
-rules, a per-trigger responsible publisher). **27-value failure taxonomy** (13
-platform + 14 `agent_error.*`; the prefix classifies). Wakeups = a revision fence
-+ a receipt dedup table. **Retirement: the chat-pending marker and the
-terminal-completed index were EACH built, dropped and rebuilt twice** — the
-migration chain, not the schema, is the truth.
-
-**Multica b05 (`daef743`, widgets+frontend, PX-W/PX-F; 286 lines / 0 CR):**
-`packages/views` 1,192 files/304k lines; `core` 511/87k; `ui` 79/10.7k (46
-primitives); mobile 303/35k; web 165/29k; desktop 153/25k; ui-lab 33/5.9k — the
-**shared layer ≈ 5× the app layer**. PX-F: a 3-package layering whose constraints
-are **prohibitions** (core: no react-dom/localStorage/process.env → `StorageAdapter`;
-ui: no core imports; views: no stores/next/*/react-router-dom → `NavigationAdapter`
-/`useNavigation`/`AppLink`). Query owns server data, Zustand client state; UI JSON
-goes through zod + `parseWithFallback`, never `as T` (deployed desktop clients talk
-to newer backends). PX-W: role-named tokens whose comments carry the history (51
-ad-hoc font sizes / 370 arbitrary values → 10 role-named steps; colors pinned by
-WCAG); component contracts in `packages/ui/docs/` powering **UI Lab**. **THE
-NEGATIVE: NO widget/composer model** (0 composers; `widget` in 13 incidental files)
-— second platform with none (Paperclip had none).
-
-**Multica b06 (`c5042c1`, out-of-pole, PZ; 312 lines / 0 CR):** security perimeter
-(credential caches; a middleware stack with CSP + a SEPARATE plugin rate limit);
-`pkg/redact` on the WRITE path (each rule's comment names the leak it closes);
-**the sharpest retirement in the study — migration `344` deletes the ENTIRE Plugin
-V1 (verified: 14 DROP TABLEs), replaced by 3 tables**; the V2 contract =
-Action/Hook/Resource + a capability gate that fails installation loudly; MCP
-consumed + served (reusing the non-inheriting skill pattern); `124` generalizes
-lark_* → 10 channel_* with a documented zero-downtime cutover (2 invariants);
-first-party `DO_NOT_TRACK` telemetry; enforcement separated from commercial policy;
-225 .mdx = 45 pages × 5 languages.
-
-**Multica b07 + READER (`afed823`, synthesis; 361 lines / 0 CR):** 75 findings
-(19+14+12+11+9+10). Ranked mechanisms (top 3): machine/teammate split ·
-one-statement claim · row-as-lease scheduler. **Reader built** (copy the engine,
-swap `BRAND`+`DOCS_CONFIG`+`diagrams.js`): 8 docs / 26,624 words / **177,688 chars**,
-8/8 `fidelityVerified`, port 3300. **Fidelity verified two ways** — and the HOW-TO's
-"byte count" stability check was WRONG (bytes 178,931 ≠ chars 177,688; the gap is
-UTF-8); corrected. **The engine was NOT fully platform-agnostic**: 4 hardcoded
-"CrewAI" strings in `generate-reader.js` + `window.CrewAIReader` (a broken gallery
-modal) + a hardcoded `crewai_reader_` storage prefix in `assets/reader.js` — all
-fixed; 0 stale refs.
-**★ NEXT: the N8N study — b00 `65f0889` … b06 `8d06da8` done; batch 07 (the
-synthesis) next**, then the n8n reader. Then buzz, openrig, mattermost, zulip — **ASK
-before extracting more** — then the cross-platform mapping pass.
+**★ STUDY CHAIN (all six CLOSED):** Hermes 13/13 · Paperclip · CrewAI · Multica (+reader) · Gas Town
+(+reader) · **n8n `65f0889`…`8d06da8` (b00–b06) + `142e568` (b07 synthesis)**. **NEXT = the n8n
+reader (port 3500)**, then buzz / openrig / mattermost / zulip — **ASK before extracting more
+(~700 MB each; order not fixed)** — then the cross-platform mapping pass.
 
 ## Standing hazards (still bite)
 - **Git-Bash `grep -c $'\r'` LIES** — byte truth is `tr -cd '\r' < f | wc -c`; verify the
