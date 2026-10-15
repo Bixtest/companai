@@ -533,9 +533,196 @@ its last version is the current one.** Every edit is committed immediately so th
 (`git show <commit>:<path>`).
 
 **Current list:** DP-01 ✅ answered · DP-02 ✅ answered · DP-03 ✅ answered · DP-04 ✅ approved · DP-05 ✅
-answered · DP-06 ✅ answered · DP-07 ✅ answered · DP-08 ✅ answered · **DP-09 ⏳ · DP-10 ⏳ · DP-11 ⏳ (B6's
-questions — still open; they live in `owner_answers.md`, not here)** · DP-12 ✅ answered · DP-13 ✅ answered ·
-DP-14 ✅ answered · **DP-15 🆕 raised (The Studio — a new workstream)** — none blocking the SRS.
+answered · DP-06 ✅ answered · DP-07 ✅ answered · DP-08 ✅ answered · **DP-09 ✅ answered (2026-10-15) ·
+DP-10 ✅ answered (2026-10-15) · DP-11 ✅ answered (2026-10-15)** · DP-12 ✅ answered · DP-13 ✅ answered ·
+DP-14 ✅ answered · **DP-15 ✅ answered (2026-10-15)** — none blocking the SRS.
+
+**DP-09 / DP-10 / DP-11 / DP-15 — ANSWERED 2026-10-15 (the owner's four answers; the agent's reply, its
+challenges, and the one open sub-question are in the section below).** The owner's second-round ruling on
+DP-09's follow-up question — **"letting AI agents directly call another AI agent will be great if managed
+properly. We can add that later if complicated now. We can start by letting humans call AI agents. A good
+compromise is to allow an AI agent to *recommend* adding another AI agent, then a human makes the call."** —
+**settles the participant model**: *human-invoked now, AI-recommends-and-human-decides as the bridge, direct
+agent-to-agent as a later addition.* Measured while writing it down, so the compromise is not a blank page:
+the runtime **already** intercepts any `isMutation: true` tool call and turns it into a **pending action a
+human confirms** (`lib/agent-tools.ts:413-419`), and the authority layer **already** caps every machine actor
+at **"approve first"** (`shared/src/lib/authority/decision.ts:205`, the `approval` obligation at `:446`).
+"AI recommends → human decides" is therefore **the shape our own runtime already enforces**, reused — not a
+new mechanism. **What it means for the participant decision (the "kind-of-participant vs side-table" choice
+the agent raised):** the recommendation path needs *no* agent-as-participant at all — it is a **message** with
+an **action a human clicks**, so the table can stay human-only for phase one and an agent row becomes a later,
+additive change. See the full entry below.
+
+---
+
+## PART 3 — THE FOUR DECISIONS OF 2026-10-15, IN FULL
+
+**Why this section exists.** DP-09, DP-10, DP-11 and DP-15 were answered **briefly, in conversation** rather
+than in this file. A one-line answer is not a specification, so each is written out here with: **the owner's
+words · what it settles in code terms · what the agent challenged · what is still open.** `B9` and `B10`
+are written **from this section** — if a line here and a line in `B9` disagree, this section is the source.
+
+---
+
+### DP-09 ✅ — An AI agent is an "AI person"; humans call it by `@`; task-running agents live outside the workspace
+
+**The owner's words (2026-10-15, verbatim).** *"ai agents are just like human staff, they are AI persons.
+That's why we studied the other platform 'chats' documentations. An agent is called by @ it. AI agents that
+work on specific tasks end to end are managed outside the workspaces. That's where we clone basically what
+paperclip does."* And, on the follow-up: *"letting ai agents directly call another ai agent will be great if
+managed properly. We can add that later if complicated now. we can start by leting human call ai agents. A
+good compromise is to allow ai agent to recommend adding a another ai agent then a human make the call."*
+
+**What it settles, in code terms.**
+
+1. **A person calls an agent by `@`** — the call surface is the chat editor's mention hook
+   (`packages/ui/src/primitives/rich-editor.tsx:1270`: `onMention ?? (() => exec('insertText','@'))`). The
+   **hook exists**; the **picker does not**. The fork (Paperclip) implements mentions as
+   `[label](agent://<agentId>)` links — a reference we may borrow, not a protocol we adopt (B8's rule).
+2. **An agent may be a thread participant** — but see (3): **not in phase one.**
+3. **The order is fixed: human-invoked → AI-recommends/human-decides → direct agent-to-agent.** The owner
+   explicitly permits deferring the last step ("we can add that later if complicated now") and names the
+   bridge ("AI recommends … then a human makes the call").
+4. **Task-running agents are outside the workspace** — that is the Hermes/Paperclip-shaped track, a
+   **separate workstream**, not this screen. This is consistent with the existing `agency`/employee model in
+   the real project tree.
+
+**What the agent challenged (and the answer).** The agent asked whether an agent could be a thread
+participant *with no human owner*, because that decided "kind-of-participant" vs "side-table". **The owner's
+answer removes the need to choose now:** phase one has **no** agent-as-participant, because
+"AI recommends → human decides" is a **message carrying an action**, not a membership. Therefore:
+**the participant table stays human-only for phase one**, and an agent row is a **later, additive** change
+(a `kind` column), taken when direct agent participation is actually built. **This is a deliberate deferral,
+not an oversight** — and it is the cheapest possible position, because the table needs no migration now.
+
+**Measured support (so the deferral is safe, rule 0b).**
+- `AiChatConversationParticipant` (`packages/ai-assistant/.../data/entities.ts:826-864`) has
+  `userId: uuid` **NOT NULL** and `role: 'owner'|'viewer'|'commenter'` — **no principal kind** today.
+- The runtime **already** turns a mutation tool call into a **pending action a human confirms**
+  (`lib/agent-tools.ts:413-419`, `canInterceptMutations`); the authority layer **already** caps any machine
+  actor at **approve-first** (`shared/src/lib/authority/decision.ts:205`; obligation at `:446`; test
+  *"caps an AI worker at approve-first"*, `decision.test.ts:180`).
+- **Consequence:** "AI recommends adding another agent, a human decides" is the **same shape** our runtime
+  already enforces for mutations. The build is a **reuse**, and `CC-78` (the task-shaped tool menu) is the
+  named home for the agent-facing side.
+
+**Still open:** none for phase one. (The "kind-of-participant" question is answered by deferral.)
+
+---
+
+### DP-10 ✅ — The workspace is the one place threads are managed (the owner asked for the architecture)
+
+**The owner's words (2026-10-15, verbatim).** *"my initial assumption is for the workspace to be the one
+place i the platform where we manage threads. But analyze an recommend the best architecure for that."*
+
+**What it settles.** The workspace is the **surface** where threads are listed and managed; the **thread** is
+the existing persisted container. They are **not rivals**, and **no new store is needed**.
+
+**The recommended architecture (the agent's analysis, as asked).**
+
+| Layer | What it is | State |
+|---|---|---|
+| **The thread** | the container: conversation + participants + messages | **built** (`ai_chat_conversations` / `_participants` / `ai_chat_messages`; 38 tests) |
+| **The workspace** | the **screen** that lists threads and shows the active one | **does not exist** (no workspace `.tsx` in `apps/mercato`) |
+| **The dock** | the small chat panel on other pages — **the same thread**, not a second kind | exists as a UI surface; its relationship to the workspace screen is **the thing `B9` must define** |
+| **"Which page it belongs to"** | already a **property of the thread**, not a separate feature | **built** (`AiChatConversation.pageContext`, `jsonb`, `entities.ts:776`) and it already reaches the tool context (`lib/agent-tools.ts:40`) |
+
+**The rule the agent recommends `B9` adopt:** *the workspace is the surface; the thread is the container;
+the dock is the same thread seen small; a thread's page-anchoring is a property it carries.* This follows
+from what is already built, and it means the workspace screen is **one list plus one open thread** — not a
+new data model.
+
+**Still open (a small one, for when he sees the screen): one thread per page per person, or many?**
+Both are supported today; they are different products. Recorded here so it is decided by looking, not by
+guessing.
+
+---
+
+### DP-11 ✅ — Nuggets: captions, copying, a toolbar — and the add-data path
+
+**The owner's words (2026-10-15, verbatim).** *"commenting on the thread enough for now if commenting on the
+specific data is over complicated - but we can have pending tasks in the development documentation for later
+to do the moe advanswed step. Maybe each data 'nugget' in the thread can have a caption that if I add
+anywhere in the chat like %caption_name% and click on it, either it opens as a modal (maybe better this way
+so the user stays in the chat whee he is) or the chat scrolls up to show the user that data. Also, there can
+be a feature for a data nuget to copy it to a new thread created to discuss it. We should have functions
+toolbar for data nuggets that we add features to later, for example, convert data to report, export data,
+etc... For now I can convert the function that generated that data to a permanent function and save it in
+menu category. Note that we are talking so far about existing data outpu and analysis. Make sure the
+architecture to add data to database is clear and ready,for example can the nugget in the thread be a form
+to fill (now we are not talking changing data schema but ading the data to the one existing). we should be
+able to call saved functions from within the thread whether the function nugget is data output (shows data
+from the db in a certain way), data analysis and processing, or input form."*
+
+**What it settles — the nugget model, in three kinds (the owner's own taxonomy).**
+
+| Kind | What it is | Measured state |
+|---|---|---|
+| **Output nugget** | shows data from the database a certain way | the five-layer chain is **built** (341 tests) incl. the `CC-59` caller; **no screen shows it** |
+| **Analysis nugget** | data analysis / processing | rides the same chain (the analysis half is the same read path) |
+| **Form nugget** | a form that adds data to the **existing** schema | the **type** exists (`BusinessCommandIR` = `{ command, inputs, requested_by, idempotency_key }`, `business-ir/types.ts:213-218`), carried on `UserFunction.businessCommandIr?` (`user-function/types.ts:126`), schema at `business-ir/schema.ts:303/:342`; the command bus is real (~122 files); **the form and the write gate are not built** |
+
+**The behaviours, as specified.**
+
+- **`%caption_name%`** — a nugget carries a caption; typing `%name%` anywhere in the chat makes it a link
+  that (a) opens the nugget as a **modal** (*"maybe better this way so the user stays in the chat"*) or
+  (b) scrolls the chat to it. **Measured:** the `%word%` shape collides with **nothing** in the messages
+  module (regex scan returned 0 matches). **Challenge raised:** a percentage in prose (`"up 5% this month"`)
+  must not be mistaken for a caption; the agreed rule should be **"a caption counts only when the token names
+  a nugget that exists in that thread."**
+- **Copy a nugget into a new thread** — to discuss it apart from the original.
+- **A functions toolbar on every nugget**, growing over time (convert-to-report, export, …). **Now:** *"I can
+  convert the function that generated that data to a permanent function and save it in menu category."*
+- **Saved functions callable from within a thread**, in all three kinds.
+- **The add-data path must be "clear and ready."** The answer, in one line: **a `BusinessCommandIR` names an
+  existing command and its inputs — nothing else** — which is exactly the owner's "not changing the schema,
+  adding to the existing one." **Two conditions the agent named honestly:** the form must set the
+  `idempotency_key` (the field exists), and the command must declare its **risk / approval** — and
+  **measured, 0 of ~93 commands declare those** (`CC-63`, from `CC-61`). So the form nugget's **face** is
+  designed now and its **write path** is wired **after** those two gates exist.
+- **The advanced step is PARKED** at the owner's instruction → **`BACKLOG.md` `N-22`** (per-datum anchoring:
+  comment a specific cell/row/figure; the two hazards — an anchor must survive a re-run, and must be
+  permission-checked at the datum — are named there).
+
+**Still open:** none that blocks `B9`. The `%caption%` escape rule is a design line for `B9`.
+
+---
+
+### DP-15 ✅ — The Studio: what is needed now, and the correction to "we already did some work"
+
+**The owner's words (2026-10-15, verbatim).** *"There are some functionalities required in The Studio that
+need to be done at this stage (for example: the permissions management - which I am assuming we already did
+some work on, but you need to check). Other features lke visual daa editor we can wait with it till later.
+We dont need to already build The Studio now as ling as the minimal functions needed for the platform to be
+tested and work securely for phase one is done on its own."*
+
+**The check he asked for — measured, and it splits his assumption in two.**
+
+| Piece | State (measured) |
+|---|---|
+| The **catalogue of permission surfaces** | **built** — `packages/shared/src/lib/permissions/catalogue.ts` (337 lines); it declares two blocks per surface and is **explicitly not a second engine** |
+| The **single matcher** that reads a grant | **built** — `shared/src/lib/auth/featureMatch.ts`, 7 non-test importers, and both the AI helper and the customer side delegate to it |
+| The screens that **assign** roles/permissions | **built** (admin pages exist) |
+| The **write path defaults to deny** | **NOT built** — it is opt-in (`CC-44`) |
+| The **human read path filters per row** | **NOT built** — `CC-47` |
+| The **two-gate rule** (human gate + AI gate) | **designed, never built** (DP-04 / B-perms) |
+| **Two RBAC services** (staff vs customer) | exists; the **matcher** is single, the **services** are two — a stated justification, not a second engine |
+
+**So: "we already did some work" is true of the catalogue and the matcher, false of the gates.** In plain
+terms: the platform can **list** and **assign** permissions; it cannot yet **enforce** them where it matters.
+For a **secure phase one**, the two missing rows are what "secure" means, and both are already named in our
+own register (`CC-44`, `CC-47`) — **not new discoveries.**
+
+**What it settles.** The Studio as a **place** is deferred (the owner's own call); **scene: the Studio becomes
+the surface of DP-04's engine**, as already recommended in DP-15's original entry. The **visual database
+editor** waits. What phase one needs is **the two gates**, not a new screen.
+
+**Still open:** none that blocks `B9`/`B10` — the two gates are already scheduled items.
+
+---
+
+*Added 2026-10-15. This section is written from the conversation, deliberately, because the owner answered
+in conversation; it is what `B9`/`B10` are written from.*
 
 **B8 (2026-10-11) — the reference-system decision, recorded. No new DP.** B8 answers **Q10** with **one
 choice + reasons + alternatives** (`02-REFERENCE-SYSTEMS.md` §5 + §9): **build our own workspace layer;
