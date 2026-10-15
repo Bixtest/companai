@@ -49,39 +49,44 @@ onto what we already have and onto the development plan** — so the build proce
 | 1 | Bookmark the position (this file)           | ✅ **DONE** — this file                                             |
 | 2 | Recon the reference systems + docs          | ✅ **DONE (B2)** — `02-REFERENCE-SYSTEMS.md`; plus B1 `01-RECON.md` |
 | 3 | The batched research plan                   | ✅ **DONE** — `00-RESEARCH-PLAN.md`                                 |
-| 4 | The detailed SRS                            | 🔄 **B1–B8 done; B9 to go**                                        |
-| 5 | Map SRS → current state → development plan  | 🔄 **first draft done (B8)** — `03-MAPPING.md`; finalised in B10    |
-| 6 | Bridge to the spine + integrate + index     | 🔄 **BRIDGED (B8)** — `04-BRIDGE.md` + `WORKING-RULES.md` rule 16 + the pointer rows; **indexing done** |
+| 4 | The detailed SRS                            | ✅ **DONE — B1–B9** (`02-SRS-01`…`02-SRS-06`)                       |
+| 5 | Map SRS → current state → development plan  | ✅ **DONE — `03-MAPPING.md` completed in B10 (2026-10-15)**          |
+| 6 | Bridge to the spine + integrate + index     | ✅ **BRIDGED (B8)** — `04-BRIDGE.md` + `WORKING-RULES.md` rule 16 + the pointer rows; **indexing done** |
 
 **Batch progress:** **B1 ✅** (recon, measured) · **B2 ✅** (reference systems, verdict) · **B3 ✅** (the
 user–AI interaction + the Business-IR display) · **B4 ✅** (the prompt→function lifecycle) · **B5 ✅** (naming,
 menus, grouping, and the organic non-business wiring) · **B6 ✅** (threads and collaboration) · **B7 ✅**
 (extensibility: adding tools and widgets) · **B8 ✅** (the reference-system decision, reconciled to our
-plan + the `03-MAPPING.md` first draft + the bridge). **The next batch in the bookkeeping sense is B9**
-(the widget architecture, end to end) — **but the live task is whatever the `★ ACTIVE TASK` box says
-(rule BR-1); this line is a scoreboard fact, not a competing "what is next."**
+plan + the `03-MAPPING.md` first draft + the bridge) · **B9 ✅ DONE 2026-10-15** (`02-SRS-06-widget-architecture.md`
+— every part of the workspace named have/build/borrow; the workspace screen specified; the nugget model per
+DP-11) · **B10 ✅ DONE 2026-10-15** (`03-MAPPING.md` completed — the **decisions list** §6 + the **final audit**
+§7, every requirement carrying a destination). **THE DESIGN WORKSTREAM IS COMPLETE** — what follows is the
+build (no build started by these documents — bridge rule BR-4).
 Commits: `2064046` (bookmark + plan), `82f72e8` (B1), `250f6c1` (B2),
 `7131195` (B3), `bd4de50` (B4 + the B1 Q3 correction), `7634dcb` (README + memory), `72c20e2` (B5,
 critic-corrected), `c8c0fdf` (B6, critic-corrected), `6c19925` (owner DP-08), `59afc53` (B7),
 `43173e3` (DP-12/13/14 + DP-15), `96e962c` (the two new workstreams), `9b5af4d` (B8), **the bridge =
-this change**.
+this change**; **B9 = `5165f2d`**, **B10 = `4be8165`** (2026-10-15).
 
-**Owner decisions recorded so far (all in `discussion_points.md`):** DP-01 **wiring first, storage second** ·
-DP-02 **show "permissions not checked"** · DP-03 **a schema-change request is a permissions question first** ·
-**DP-04 APPROVED — a dedicated permissions-architecture batch**, with the owner's **two-gate rule**: check
-permission **on the way in** (may this user *request* this?) **and on the way back** (may this user *see* the
-outcome?), engineered to **protect without destroying optimization**. DP-05 (the schema-change "explain and
-route" branch ships early; the build pool waits on DP-04) · DP-06 (a recipe may sit in several menu homes but
-carries **one** permission set everywhere) · DP-07 (a recipe may open as a page, a panel, or both — chosen per
-recipe) · **DP-08 (menu categories are FLAT for now; nesting is a later switch with no recipe re-saved)** ·
-**DP-12 (follow the recommendation — tenant authoring behind DP-04 — but SEQUENCE every affected build so it
-is built only when its prerequisite exists)** · **DP-13 (it is a permissions question → belongs in "The
-Studio"; "allow you to use it" ≠ "post it into your interface")** · **DP-14 (follow the recommendation;
-ownership · sharing · review · placement are ONE subject)** · **DP-15 ("The Studio" — one hub for functions,
-widgets, widget pages, menu items + a database editor, on the DP-04 engine — raised for approval).**
-**DP-09/10/11 (B6's) remain ⏳ open — they live in `owner_answers.md`.**
-**The SRS batches B8–B10 are NOT blocked** — they proceed; only permissions-*dependent builds* queue behind
-B-perms → B-studio.
+**Owner decisions — ALL 15 ANSWERED.** DP-01 **wiring first, storage second** · DP-02 **show "permissions not
+checked"** · DP-03 **a schema-change request is a permissions question first** · **DP-04 APPROVED — a
+dedicated permissions-architecture batch**, with the two-gate rule (check **in** and **back**; protect
+without destroying optimization) · DP-05 (the "explain and route" branch ships early; the build pool waits on
+DP-04) · DP-06 (a recipe may sit in several menu homes but carries **one** permission set everywhere) · DP-07
+(a recipe may open as a page, a panel, or both — per recipe) · **DP-08 (flat categories for now)** · **DP-09
+(2026-10-15 — AI agents are "AI persons"; a **human calls** them by `@`; an agent may **recommend** adding
+another and a **human decides**; direct agent-to-agent comes **later**. Participant row stays human-only in
+phase one — the recommend-path reuses the existing "human confirms a pending action" machinery)** · **DP-10
+(2026-10-15 — the workspace is the one place threads are managed; **the workspace is the surface, the thread
+is the container**, no new store)** · **DP-11 (2026-10-15 — nuggets: captions `%name%`, copy-to-new-thread, a
+growing toolbar; comment the thread for now; the add-data path is to the **existing** schema; the advanced
+per-datum step is parked as `N-22`)** · **DP-12 (sequence every build behind its prerequisite)** · **DP-13
+(it is a permissions question → belongs in "The Studio"; "allow you to use it" ≠ "post it into your
+interface")** · **DP-14 (ownership · sharing · review · placement are ONE subject)** · **DP-15 (2026-10-15 —
+The Studio as a place is deferred; only its phase-one functions are needed; **measured**: the catalogue,
+matcher and assign screens ARE built, the default-deny write gate (`CC-44`) and per-row read filter (`CC-47`)
+are NOT)**. **Detail: `discussion_points.md` Part 3 (the four answers of 2026-10-15, written out in full).**
+**The SRS batches are COMPLETE** — only permissions-*dependent builds* queue behind B-perms → B-studio.
 
 **B6's finding B7 must carry:** the kit **already persists threads** (`ai_chat_conversations`,
 `ai_chat_conversation_participants`, `ai_chat_messages` — 36 + 2 tests passing) and **already models human
