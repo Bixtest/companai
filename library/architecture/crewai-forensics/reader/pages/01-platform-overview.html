@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 01 — The platform overview — CrewAI Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-01" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 01</span>
+      <div class="header-title-wrap">
+        <div class="header-title">Platform Overview</div>
+        <div class="header-subtitle">CrewAI Platform Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/01-platform-overview.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #059669">DONE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">3,273</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">16 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">365</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-15</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 01 Architecture Guide (Default)</option>
+            <optgroup label="Strategic Architecture">
+              <option value="master">Executive Topology: three poles, one executor, two absent clusters</option>
+            </optgroup>
+            <optgroup label="Foundations">
+              <option value="00">Batch 00: The pin, the 93% docs hazard, and the method</option>
+              <option value="01">Batch 01: The one door, the spine &amp; the second paradigm</option>
+            </optgroup>
+            <optgroup label="Pole 1 — The Aissistant">
+              <option value="02">Batch 02: The aissistant — a small agent &amp; an empty seam</option>
+            </optgroup>
+            <optgroup label="Pole 2 — The Workspace">
+              <option value="03">Batch 03: The workspace — a folder that binds text to code</option>
+            </optgroup>
+            <optgroup label="Pole 3 — Automations">
+              <option value="04">Batch 04: Automations — executor yes, delivery no</option>
+            </optgroup>
+            <optgroup label="Cross-Cutting">
+              <option value="05">Batch 05: Widgets &amp; frontend — empty front, real protocol</option>
+            </optgroup>
+            <optgroup label="Escape Hatch">
+              <option value="06">Batch 06: Out-of-pole (PZ) — the tenancy question, closed</option>
+            </optgroup>
+            <optgroup label="Strategic Decision">
+              <option value="07">Batch 07: The synthesis — transfer matrix &amp; the verdict</option>
+            </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 01 VISUAL GUIDE</div>
+    <h4>The one door in, the observability spine, and the second paradigm</h4>
+    <p>Four nouns, one kickoff, a 163-event bus, and a Flow that runs as a graph beside the Crew that runs as a list</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 330" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-01" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-01" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+        <marker id="arrr-01" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#ef4444"/>
+        </marker>
+      </defs>
+      <rect x="20" y="20" width="880" height="70" rx="10" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.4"/>
+      <text x="40" y="48" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="var(--text-primary, #0f172a)">FOUR NOUNS: Agent · Task · Crew · Flow — the surface is deliberately tiny</text>
+      <text x="40" y="72" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">An agent has a role, a goal, a backstory and a model. A task has a description and an expected output. A crew is agents + tasks + a process.</text>
+
+      <g transform="translate(20, 110)">
+        <rect width="270" height="200" rx="10" fill="var(--surface-card, #ffffff)" stroke="#2563eb" stroke-width="1.6"/>
+        <text x="16" y="30" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#1d4ed8">kickoff() — THE ONE DOOR</text>
+        <text x="16" y="54" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">crew.py:995. Everything else is config.</text>
+        <text x="16" y="76" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• Process = ten lines total</text>
+        <text x="16" y="96" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• "Hierarchical" = one manager agent</text>
+        <text x="16" y="116" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• Per-run id minted on kickoff</text>
+        <rect x="16" y="134" width="238" height="50" rx="6" fill="#f59e0b" fill-opacity="0.14"/>
+        <text x="24" y="153" font-family="system-ui, sans-serif" font-size="10.5" font-weight="700" fill="#b45309">NOT A REAL HIERARCHY</text>
+        <text x="24" y="170" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Two tools, no depth — an org chart</text>
+        <text x="24" y="184" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">is NOT the thing to copy from here.</text>
+      </g>
+
+      <g transform="translate(310, 110)">
+        <rect width="290" height="200" rx="10" fill="var(--surface-card, #ffffff)" stroke="#7c3aed" stroke-width="1.6"/>
+        <text x="16" y="30" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#6d28d9">TWO CONTROL LAYERS</text>
+        <text x="16" y="54" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">An observability spine + an interceptor:</text>
+        <text x="16" y="78" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• 163 typed events (event_bus.py:95)</text>
+        <text x="16" y="98" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• Ordered sync + async handlers</text>
+        <text x="16" y="118" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• Replay of the recorded stream</text>
+        <text x="16" y="138" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• 10 hook points (dispatch.py:40)</text>
+        <rect x="16" y="152" width="258" height="32" rx="6" fill="#7c3aed" fill-opacity="0.10"/>
+        <text x="24" y="172" font-family="system-ui, sans-serif" font-size="10.5" font-weight="600" fill="#6d28d9">A hook may ABORT the operation (HookAborted).</text>
+      </g>
+
+      <g transform="translate(620, 110)">
+        <rect width="280" height="200" rx="10" fill="var(--surface-card, #ffffff)" stroke="#059669" stroke-width="1.6"/>
+        <text x="16" y="30" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#047857">THE SECOND PARADIGM: FLOW</text>
+        <text x="16" y="54" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">A Crew is a list. A Flow is a graph.</text>
+        <text x="16" y="78" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• Steps joined by events (flow.py:33)</text>
+        <text x="16" y="98" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• Suspend / resume mid-graph</text>
+        <text x="16" y="118" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• State persisted between steps</text>
+        <rect x="16" y="134" width="248" height="50" rx="6" fill="#10b981" fill-opacity="0.12"/>
+        <text x="24" y="153" font-family="system-ui, sans-serif" font-size="10.5" font-weight="700" fill="#059669">ALSO: SKILLS</text>
+        <text x="24" y="170" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">SKILL.md, loaded in three levels</text>
+        <text x="24" y="184" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">(metadata → instructions → files).</text>
+      </g>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="batch-01-what-crewai-is-the-crew-agent-task-model-and-the-control-plane">Batch 01 — What CrewAI Is: the crew / agent / task model and the control plane<a href="#batch-01/batch-01-what-crewai-is-the-crew-agent-task-model-and-the-control-plane" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<blockquote>
+<p><strong>Pole:</strong> — (orientation batch; findings are tagged with their pole so the later mapping pass can lift them)
+<strong>Status:</strong> read from <code>lib/**/*.py</code> only. No claim below rests on <code>docs/**/*.mdx</code>.
+<strong>Tree under study:</strong> <code>library/architecture/platforms/_extracted/crewAI-main/</code> (pin: <code>00-PIN-AND-METHOD.md</code>).</p>
+</blockquote>
+<hr>
+<h2 id="0-in-plain-words-what-this-thing-is">0. In plain words — what this thing is<a href="#batch-01/0-in-plain-words-what-this-thing-is" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>CrewAI is a <strong>Python library for orchestrating a team of AI agents</strong>. You declare the team in code:</p>
+<ul>
+<li>an <strong>agent</strong> — a role (&quot;Senior Researcher&quot;), a goal, a backstory, and a model to think with;</li>
+<li>a <strong>task</strong> — a piece of work with a description and an expected output, assigned to one agent;</li>
+<li>a <strong>crew</strong> — the list of agents + the list of tasks + a <strong>process</strong> (the order they run in).</li>
+</ul>
+<p>Then you call <code>crew.kickoff()</code> and the library runs the loop: it asks the model what to do, executes any
+tool the model asks for, feeds the result back, and repeats until the agent produces a final answer.
+CrewAI ships <strong>two ways to organise that work</strong>: a <strong>Crew</strong> (a team working a task list) and a <strong>Flow</strong>
+(a graph of steps joined by events). Both are code-first; there is no required server, no required database
+and no required UI. That is the whole shape of the product.</p>
+<p>Everything below is the evidence for that paragraph.</p>
+<hr>
+<h2 id="1-what-was-read-and-its-measured-size">1. What was read, and its measured size<a href="#batch-01/1-what-was-read-and-its-measured-size" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Source-only sizes (<code>lib/&lt;pkg&gt;/src/**/*.py</code>), measured this session:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>package</th>
+<th align="right"><code>.py</code> files</th>
+<th align="right">lines</th>
+<th align="right">bytes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>crewai</code> (the framework)</td>
+<td align="right">535</td>
+<td align="right">129,336</td>
+<td align="right">4,625,458</td>
+</tr>
+<tr>
+<td><code>crewai-core</code> (shared core)</td>
+<td align="right">29</td>
+<td align="right">138,480</td>
+<td align="right">7,960,420</td>
+</tr>
+<tr>
+<td><code>crewai-tools</code> (tool library)</td>
+<td align="right">263</td>
+<td align="right">27,272</td>
+<td align="right">979,144</td>
+</tr>
+<tr>
+<td><code>cli</code> (the <code>crewai</code> command)</td>
+<td align="right">81</td>
+<td align="right">19,543</td>
+<td align="right">700,264</td>
+</tr>
+<tr>
+<td><code>crewai-files</code> (file handling)</td>
+<td align="right">33</td>
+<td align="right">8,165</td>
+<td align="right">251,425</td>
+</tr>
+<tr>
+<td><code>devtools</code></td>
+<td align="right">6</td>
+<td align="right">3,619</td>
+<td align="right">121,856</td>
+</tr>
+</tbody></table></div>
+<p>Whole tree including tests: <strong>1,411 <code>.py</code> files / 492,582 lines</strong>. Docs: <strong>33,251 <code>.mdx</code> files</strong> —
+i.e. <strong>93% of every file in the tree is documentation</strong>, which is why the pin&#39;s rule 1 (&quot;code is the
+authority, docs are claims&quot;) is not a preference in this study but the only way to avoid reading the same
+page 45 times.</p>
+<p><strong>One correction to the obvious reading of that table:</strong> <code>crewai-core</code> shows 138,480 lines, but
+<strong>134,056 of those lines are a single generated file</strong> — <code>crewai_core/platform_catalog.py</code> (7,808,174 B), a
+machine-generated catalog of third-party SaaS apps and their tools. Without it, <code>crewai-core</code> is
+<strong>4,424 lines</strong>. The file says so itself in its header:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>text</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code>lib/crewai-core/src/crewai_core/platform_catalog.py:1  &quot;&quot;&quot;Generated CrewAI Platform application catalog.
+...  1. Fetch the latest Platform catalog YAML from crewai-plus/db/clipper.
+...  2. Parse the YAML source instead of editing this generated catalog by hand.
+</code></pre>
+</div>
+<p>So the <em>hand-written</em> core is small; the bulk is data.</p>
+<p>The files this batch leans on:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>file</th>
+<th align="right">lines</th>
+<th align="right">bytes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>lib/crewai/src/crewai/crew.py</code></td>
+<td align="right">2,559</td>
+<td align="right">97,215</td>
+</tr>
+<tr>
+<td><code>lib/crewai/src/crewai/task.py</code></td>
+<td align="right">1,566</td>
+<td align="right">60,186</td>
+</tr>
+<tr>
+<td><code>lib/crewai/src/crewai/agent/core.py</code></td>
+<td align="right">2,289</td>
+<td align="right">88,701</td>
+</tr>
+<tr>
+<td><code>lib/crewai/src/crewai/llm.py</code></td>
+<td align="right">2,779</td>
+<td align="right">108,701</td>
+</tr>
+<tr>
+<td><code>lib/crewai/src/crewai/flow/runtime/__init__.py</code></td>
+<td align="right">4,051</td>
+<td align="right">166,791</td>
+</tr>
+<tr>
+<td><code>lib/crewai/src/crewai/agents/crew_agent_executor.py</code></td>
+<td align="right">1,667</td>
+<td align="right">63,209</td>
+</tr>
+<tr>
+<td><code>lib/crewai/src/crewai/agents/agent_builder/base_agent.py</code></td>
+<td align="right">814</td>
+<td align="right">32,517</td>
+</tr>
+<tr>
+<td><code>lib/crewai/src/crewai/experimental/agent_executor.py</code></td>
+<td align="right">3,363</td>
+<td align="right">130,005</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="2-the-public-surface-what-the-library-hands-you">2. The public surface — what the library hands you<a href="#batch-01/2-the-public-surface-what-the-library-hands-you" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>The top-level package re-exports the model objects (<code>lib/crewai/src/crewai/__init__.py</code>):</p>
+<ul>
+<li><code>Agent</code>, <code>Crew</code>, <code>Flow</code>, <code>Task</code> — the four nouns you author with;</li>
+<li><code>LLM</code>, <code>Process</code>, <code>Knowledge</code>, <code>RuntimeState</code>;</li>
+<li><code>CrewOutput</code>, <code>TaskOutput</code>, <code>LiteAgentOutput</code> — the three result shapes;</li>
+<li><code>LLMGuardrail</code>, <code>PlanningConfig</code>, <code>Memory</code> (lazy — it pulls <code>lancedb</code>, so importing it is opt-in).</li>
+</ul>
+<p><strong>Plain meaning:</strong> the <em>authoring</em> vocabulary is four nouns; <code>Process</code> is the only knob that changes how
+they run; and every run ends in one of three serialisable result objects. That is a deliberately small
+public surface over a very large private one — a discipline worth noting for our own SRS.</p>
+<hr>
+<h2 id="3-the-execution-model-read-from-code">3. The execution model, read from code<a href="#batch-01/3-the-execution-model-read-from-code" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="3-1-process-the-whole-of-it">3.1 `Process` — the whole of it<a href="#batch-01/3-1-process-the-whole-of-it" class="heading-anchor" title="Direct link to this section">#</a></h3>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>text</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code>lib/crewai/src/crewai/process.py:4   class Process(str, Enum):
+lib/crewai/src/crewai/process.py:9       sequential = &quot;sequential&quot;
+lib/crewai/src/crewai/process.py:10      hierarchical = &quot;hierarchical&quot;
+lib/crewai/src/crewai/process.py:11      # TODO: consensual = &#39;consensual&#39;
+</code></pre>
+</div>
+<p><strong>Ten lines.</strong> The entire &quot;how does the team run&quot; vocabulary is <strong>two values</strong>, and the third
+(<code>consensual</code>) is a comment. <code>Crew.process</code> defaults to <code>sequential</code> (<code>crew.py:254</code>), and
+<code>kickoff()</code> raises for anything else it does not implement (<code>crew.py:1060-1062</code>).</p>
+<h3 id="3-2-kickoff-the-one-door-in">3.2 `kickoff()` — the one door in<a href="#batch-01/3-2-kickoff-the-one-door-in" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>Crew.kickoff()</code> (<code>crew.py:995</code>) is the synchronous entry point. In order (verified at the cited lines):</p>
+<ol>
+<li><code>apply_checkpoint(...)</code> — if resuming, hand off to the restored instance (<code>crew.py:1013-1015</code>);</li>
+<li><strong>if streaming</strong>, wrap the whole run in a chunk generator and return early (<code>crew.py:1017-1041</code>) —
+streaming is implemented by re-entering <code>kickoff</code> with <code>stream=False</code>;</li>
+<li>open an OpenTelemetry baggage context carrying <code>crew_context</code> (<code>crew.py:1043-1046</code>);</li>
+<li>enter a runtime scope on the event bus, then <code>begin_execution(tracing=...)</code> mints a <strong>per-run uuid</strong>
+(<code>crew.py:1050-1052</code>) — see §3.5;</li>
+<li>dispatch to <code>_run_sequential_process()</code> or <code>_run_hierarchical_process()</code> (<code>crew.py:1055-1058</code>);</li>
+<li>run <code>after_kickoff_callbacks</code>, then <code>_post_kickoff</code>, then compute usage metrics (<code>crew.py:1064-1069</code>);</li>
+<li>in <code>finally</code>: drain memory writes, clear files, detach baggage, <code>end_execution</code>, exit the bus scope
+(<code>crew.py:1087-1094</code>).</li>
+</ol>
+<p><strong>Every failure path</strong> emits <code>CrewKickoffFailedEvent</code> and re-raises (<code>crew.py:1072-1086</code>).</p>
+<h3 id="3-3-the-task-loop">3.3 The task loop<a href="#batch-01/3-3-the-task-loop" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>_execute_tasks()</code> (<code>crew.py:1571</code>) is the actual loop. For each task it:</p>
+<ul>
+<li>asks <code>prepare_task_execution</code> whether to skip (checkpoint replay) (<code>crew.py:1596-1600</code>);</li>
+<li>handles a <code>ConditionalTask</code> by evaluating its condition and possibly recording a skip
+(<code>crew.py:1602-1608</code>);</li>
+<li><strong>if <code>task.async_execution</code></strong>, submits it as a <code>Future</code> and moves on (<code>crew.py:1610-1619</code>);</li>
+<li><strong>otherwise</strong> flushes any pending futures first (<code>crew.py:1621-1625</code>), builds the context from prior
+outputs (<code>crew.py:1627</code>), calls <code>task.execute_sync(...)</code>, appends the output, processes the result and
+stores an execution log (<code>crew.py:1628-1635</code>);</li>
+<li>flushes trailing futures, then builds the <code>CrewOutput</code> from the collected <code>TaskOutput</code>s
+(<code>crew.py:1637-1640</code>).</li>
+</ul>
+<p><strong>Plain meaning:</strong> <em>sequential</em> is a <code>for</code> loop with an <strong>inline asynchronous escape hatch</strong>. That is the
+entire concurrency story for a Crew — there is no scheduler, no worker pool of its own.</p>
+<h3 id="3-4-hierarchical-one-extra-agent-nothing-more">3.4 Hierarchical = one extra agent, nothing more<a href="#batch-01/3-4-hierarchical-one-extra-agent-nothing-more" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>_run_hierarchical_process()</code> (<code>crew.py:1526</code>) does exactly one thing before running the same loop:
+it calls <code>_create_manager_agent()</code> (<code>crew.py:1528</code>). That method (<code>crew.py:1531</code>) either takes your
+supplied <code>manager_agent</code> — and <strong>refuses one that has tools</strong> (<code>crew.py:1535-1542</code>) — or builds a default
+manager <code>Agent</code> whose tools are <code>AgentTools(agents=self.agents).tools()</code> (<code>crew.py:1546-1554</code>).</p>
+<p><code>AgentTools</code> (<code>tools/agent_tools/agent_tools.py:16</code>) returns exactly <strong>two tools</strong>: <code>DelegateWorkTool</code> and
+<code>AskQuestionTool</code>. Delegation itself (<code>tools/agent_tools/base_agent_tools.py:46</code>) resolves a coworker <strong>by
+fuzzy role name</strong> and then constructs a fresh <code>Task</code> for that agent and executes it
+(<code>base_agent_tools.py:112-120</code>).</p>
+<p><strong>So &quot;hierarchical&quot; is not a hierarchy.</strong> It is the sequential loop plus a manager agent holding two tools
+that let it hand work to named colleagues. There is no depth limit, no reporting tree and no budget
+enforcement in this file. That is a real finding for our P3 pole (below).</p>
+<h3 id="3-5-per-run-identity-the-trace-spine">3.5 Per-run identity — the trace spine<a href="#batch-01/3-5-per-run-identity-the-trace-spine" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>execution.py</code> is small (259 lines) and worth reading whole. A <strong>per-run uuid</strong> is minted on the kickoff
+path — not on the event bus — because bus handlers run on worker threads and cannot publish contextvars
+back (<code>execution.py:9-11</code>). <code>begin_execution</code> creates it only for the <strong>outermost</strong> run; nested kickoffs
+inherit it (<code>execution.py:97-101</code>). A host that already owns a run id can call <code>set_execution_uuid</code> and
+<code>begin_execution</code> will not overwrite it (<code>execution.py:12-13</code>, <code>70-78</code>).</p>
+<p><strong>Plain meaning:</strong> CrewAI has a first-class notion of <em>&quot;this run&quot;</em>, separate from <em>&quot;this crew object&quot;</em> —
+and it is designed so an outer system (a server, a queue worker) can supply the identity.</p>
+<h3 id="3-6-the-agent-reasoning-loop">3.6 The agent reasoning loop<a href="#batch-01/3-6-the-agent-reasoning-loop" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>Inside a task, execution delegates to <code>agent.execute_task(...)</code> (<code>task.py:853</code>) via <code>_execute_core</code>
+(<code>task.py:809</code>). The agent&#39;s executor is <code>CrewAgentExecutor</code> (<code>agents/crew_agent_executor.py:98</code>) — unless
+the newer <code>experimental/agent_executor.py</code> (3,363 lines) is selected. The loop (<code>crew_agent_executor.py:331</code>)
+<strong>branches on capability</strong>:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>text</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code>crew_agent_executor.py:340   use_native_tools = (
+crew_agent_executor.py:341       hasattr(self.llm, &quot;supports_function_calling&quot;)
+crew_agent_executor.py:344       and self.original_tools
+...:347   if use_native_tools: return self._invoke_loop_native_tools()
+...:350   return self._invoke_loop_react()
+</code></pre>
+</div>
+<ul>
+<li><strong><code>_invoke_loop_native_tools()</code></strong> (<code>:505</code>) — the model returns structured tool calls; the loop executes
+them and feeds results back.</li>
+<li><strong><code>_invoke_loop_react()</code></strong> (<code>:352</code>) — the classic text pattern: tool definitions are embedded in the
+prompt, the model emits <code>Action / Action Input</code> text, which is parsed and executed
+(<code>:414-450</code>).</li>
+</ul>
+<p>Both share the same guards: a max-iteration check (<code>:365-373</code>), an RPM limiter (<code>:375</code>), context-window
+handling (<code>:468-477</code>) and a <code>finally: self.iterations += 1</code> (<code>:480-481</code>).</p>
+<p><strong>This is the single most important architectural fact in the batch:</strong> <em>tool-calling is an optimisation on
+top of a text-reasoning loop, not the loop itself.</em> A model without function calling still drives the same
+agent, only through prompt-parsed text. Our platform inherits this for free if we keep the loop
+model-agnostic.</p>
+<h3 id="3-7-task-output-guardrails-and-the-step-hooks">3.7 Task output, guardrails and the step hooks<a href="#batch-01/3-7-task-output-guardrails-and-the-step-hooks" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>_execute_core</code> (<code>task.py:809</code>) also shows the <strong>extension points</strong>:</p>
+<ul>
+<li>a <strong>pre-step hook</strong> dispatch with <code>StepContext(kind=&quot;task&quot;, ...)</code> (<code>task.py:838-850</code>) and a matching
+<strong>post-step hook</strong> (<code>task.py:910-920</code>);</li>
+<li><strong>guardrails</strong> — a list of validator functions run in order, then a single guardrail
+(<code>task.py:892-908</code>), each able to retry up to <code>guardrail_max_retries</code> (default 3, <code>task.py:279-281</code>);</li>
+<li><code>task.callback</code> and the crew-wide <code>task_callback</code> both fire after the output is set (<code>task.py:925-939</code>);</li>
+<li><code>output_file</code> writes the result to disk (<code>task.py:941-951</code>);</li>
+<li><code>TaskStartedEvent</code> / <code>TaskCompletedEvent</code> / <code>TaskFailedEvent</code> are emitted around all of it
+(<code>task.py:834</code>, <code>952-955</code>, <code>958-962</code>).</li>
+</ul>
+<p>Guardrails accept <strong>either a function or a natural-language description</strong> (<code>task.py:252-273</code>) — i.e. an
+LLM-judged guardrail is a first-class option, not a bolted-on library.</p>
+<hr>
+<h2 id="4-the-control-plane">4. The control plane<a href="#batch-01/4-the-control-plane" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="4-1-the-event-bus-is-the-observability-spine">4.1 The event bus is the observability spine<a href="#batch-01/4-1-the-event-bus-is-the-observability-spine" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>events/event_bus.py</code> defines <code>CrewAIEventsBus</code> (<code>:95</code>) — a <strong>singleton</strong> (<code>:132</code>) with:</p>
+<ul>
+<li><strong>sync handlers on a 10-worker thread pool</strong> and <strong>async handlers on a dedicated daemon event loop</strong>,
+both lazily started on first emit (<code>:166-191</code>);</li>
+<li><strong>dependency ordering</strong> between handlers (<code>_handler_dependencies</code>, <code>:123</code>; <code>Depends[...]</code>);</li>
+<li>a <strong>runtime scope</strong> and an entity registry (<code>:318-338</code>);</li>
+<li><strong>replay</strong> support (<code>:673</code>) — events can be re-emitted, which is what makes checkpoint replay and the
+TUI possible;</li>
+<li>a bounded <code>flush(timeout=30.0)</code> (<code>:734</code>).</li>
+</ul>
+<p>The event vocabulary is <strong>163 event classes</strong> across 20 files; the two largest families are
+<code>a2a_events.py</code> (32) and <code>flow_events.py</code> (20). Every one of the ~120 checkpoint trigger names in
+<code>state/checkpoint_config.py:14-143</code> is an event name.</p>
+<p><strong>Plain meaning:</strong> &quot;what happened during the run&quot; is a first-class, addressable thing in this framework,
+not a log line. The same bus feeds checkpoints, tracing, the TUI and any external listener.</p>
+<h3 id="4-2-hooks-a-second-coarser-interception-layer">4.2 Hooks — a second, coarser interception layer<a href="#batch-01/4-2-hooks-a-second-coarser-interception-layer" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>hooks/dispatch.py:40</code> defines <code>InterceptionPoint</code> with <strong>10 points</strong>: execution start/input/output/end;
+pre/post model call; pre/post tool call; pre/post step. Hooks are registered <strong>globally</strong>
+(<code>register</code>, <code>:119</code>) or <strong>scoped to one execution</strong> (<code>scoped_hooks</code>, <code>:159</code>; <code>register_scoped</code>, <code>:177</code>),
+and a hook may <strong>abort</strong> the intercepted operation by raising <code>HookAborted</code> (<code>:75</code>).</p>
+<p><strong>Contrast worth carrying forward:</strong> the event bus is <em>after-the-fact notification</em>; hooks are
+<em>before-the-fact interception</em> with the power to block. Both exist, and both are model-agnostic.</p>
+<h3 id="4-3-the-cli-the-nearest-thing-to-a-product-surface">4.3 The CLI — the nearest thing to a product surface<a href="#batch-01/4-3-the-cli-the-nearest-thing-to-a-product-surface" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>lib/cli/src/crewai_cli/</code> (~55 modules) is the operational shell:
+<code>create_crew.py</code>, <code>create_flow.py</code>, <code>run_crew.py</code>, <code>train_crew.py</code>, <code>evaluate_crew.py</code>,
+<code>kickoff_flow.py</code>, <code>replay_from_task.py</code>, <code>reset_memories_command.py</code>, <code>checkpoint_cli.py</code> +
+<code>checkpoint_tui.py</code>, <code>memory_tui.py</code>, <code>crew_run_tui.py</code>, <code>crew_chat.py</code>, <code>plot_flow.py</code>, plus
+<code>deploy/</code> (<code>main.py</code>, <code>validate.py</code>, <code>archive.py</code>) and <code>authentication/</code>, <code>organization/</code>, <code>triggers/</code>.</p>
+<p><code>crew_run_tui.py</code> (129,891 B) and <code>checkpoint_tui.py</code> are <strong>text UIs</strong> — the closest CrewAI comes to an
+end-user interface, and they are terminal-only.</p>
+<h3 id="4-4-persistence-and-checkpointing">4.4 Persistence and checkpointing<a href="#batch-01/4-4-persistence-and-checkpointing" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>state/checkpoint_config.py</code> defines <code>CheckpointConfig</code> (<code>:160</code>): a <code>location</code> (default
+<code>./.checkpoints</code>), a <strong>list of events that trigger a write</strong> (default <code>[&quot;task_completed&quot;]</code>, <code>[&quot;*&quot;]</code> for
+every event), a pluggable <strong>provider</strong> (<code>JsonProvider</code> default, <code>SqliteProvider</code> option, discriminated on
+<code>provider_type</code>), a <code>max_checkpoints</code> retention, and a <code>restore_from</code> path.
+<code>Crew.from_checkpoint</code> (<code>crew.py:432</code>) and <code>Crew.fork(...)</code> (<code>crew.py:457</code>, with a <code>branch</code> argument)
+rebuild a runnable object from stored state; <code>_restore_runtime</code> (<code>crew.py:481</code>) and
+<code>_rebind_memory_views</code> (<code>crew.py:543</code>) repair the private attributes that are not serialised.</p>
+<p><strong>Plain meaning:</strong> a run is <strong>checkpointable and forkable</strong> — you can snapshot mid-run, resume, or branch
+a run into two. For our P3 pole (automations that must survive a restart) this is the single most
+reusable idea in the batch.</p>
+<h3 id="4-5-declarative-definition-the-flow-contract">4.5 Declarative definition — the flow contract<a href="#batch-01/4-5-declarative-definition-the-flow-contract" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>project/crew_loader.py</code> loads a <code>Crew</code> from a <strong>JSON/JSONC definition file</strong> (<code>load_crew</code>, <code>:25</code>), and
+<code>flow/flow_definition.py</code> defines a fully serialisable <code>FlowDefinition</code> (<code>:714</code>) with <strong>17 component
+models</strong>: state (dict / pydantic / json-schema / unknown), config, persistence, human-feedback, and
+<strong>eight action kinds</strong> — code, tool, crew, agent, expression, script, each-step, each-action — plus
+<code>FlowMethodDefinition</code>.</p>
+<p><strong>Plain meaning:</strong> the whole graph can be written as <strong>data</strong>, not only as Python. A crew or flow
+authored in code and one loaded from a file produce the same runtime object.</p>
+<hr>
+<h2 id="5-the-second-paradigm-flows">5. The second paradigm — Flows<a href="#batch-01/5-the-second-paradigm-flows" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>Flow</code> (<code>flow/flow.py:33</code>) composes a conversational mixin onto the runtime engine
+(<code>flow/runtime/__init__.py:444</code>). Authoring is by decorators — <code>start</code>, <code>listen</code>, <code>router</code>, and the
+combinators <code>or_</code> / <code>and_</code> (<code>flow/dsl/</code>). A <code>Flow</code> is a <code>BaseModel</code> with a metaclass (<code>FlowMeta</code>, <code>:391</code>)
+that captures the decorated methods into a definition.</p>
+<p>The runtime adds what a Crew does not have: <strong>listener graphs</strong> (<code>_listener_methods</code>, <code>:569</code>), <strong>routers</strong>
+(<code>_is_router</code>, <code>:599</code>), <strong>racing groups</strong> for <code>or_</code> triggers (<code>_build_racing_groups</code>, <code>:1132</code>;
+<code>_execute_racing_listeners</code>, <code>:1205</code>), <strong>human feedback / suspend-and-resume</strong>
+(<code>from_pending</code> <code>:1257</code>, <code>resume</code> <code>:1345</code>, <code>resume_async</code> <code>:1398</code>), <strong>state persistence</strong>
+(<code>_restore_state</code>, <code>:1936</code>; <code>reload</code>, <code>:1964</code>), and its own <code>kickoff</code> / <code>kickoff_async</code> (<code>:2099</code>, <code>:2164</code>).</p>
+<p><strong>Plain meaning:</strong> <strong>Crew = a team given a task list. Flow = a state machine with a ruler.</strong> Both end in
+the same event bus, the same hooks and the same checkpoint store. When our automations need branching,
+retries, pauses for human approval or durable state, the Flow is the half of CrewAI to study.</p>
+<hr>
+<h2 id="6-findings-tagged-by-pole">6. Findings, tagged by pole<a href="#batch-01/6-findings-tagged-by-pole" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<blockquote>
+<p>Value questions, in the owner&#39;s frame: <strong>Q1</strong> = would a <em>user</em> of our platform want this? <strong>Q2</strong> = does it
+fit <em>our vision</em>? Every row is a capability CrewAI actually ships, read from code.</p>
+</blockquote>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Finding (capability)</th>
+<th>Pole</th>
+<th>What it is, in plain words</th>
+<th>Q1</th>
+<th>Q2</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1.1</td>
+<td><strong>Four-noun authoring model</strong></td>
+<td>P1 / P3</td>
+<td>You build from Agent · Task · Crew · Flow only; the surface is deliberately tiny and everything else is configuration.</td>
+<td>yes</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>1.2</td>
+<td><strong>Text reasoning loop with native tool-calling as an optimisation</strong></td>
+<td>P1</td>
+<td>The agent works by asking the model what to do and parsing the reply; tool-calling is a faster path when the model supports it, never a requirement.</td>
+<td>yes</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>1.3</td>
+<td><strong>Two processes, one loop</strong></td>
+<td>P3</td>
+<td>&quot;Hierarchical&quot; is the same loop plus a manager agent holding delegate/ask tools — not a real hierarchy.</td>
+<td>partial</td>
+<td>partial</td>
+</tr>
+<tr>
+<td>1.4</td>
+<td><strong>Per-run identity separate from the object</strong></td>
+<td>P3 / P2</td>
+<td>Every run has its own id, minted on the kickoff path, and an outer host may supply it.</td>
+<td>no (invisible)</td>
+<td><strong>yes</strong></td>
+</tr>
+<tr>
+<td>1.5</td>
+<td><strong>Event bus as the observability spine</strong></td>
+<td>P3 / PX-F</td>
+<td>163 typed events on a singleton bus with dependency-ordered, sync + async handlers, and replay.</td>
+<td>yes</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>1.6</td>
+<td><strong>Hooks that can block</strong></td>
+<td>P3 / P1</td>
+<td>A second interception layer (10 points) where a registered hook may abort the operation.</td>
+<td>partial</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>1.7</td>
+<td><strong>Checkpoint, resume and fork</strong></td>
+<td>P3</td>
+<td>A run can be snapshotted on chosen events, resumed later, or branched into two.</td>
+<td>yes</td>
+<td><strong>yes</strong></td>
+</tr>
+<tr>
+<td>1.8</td>
+<td><strong>Fully declarative crew/flow definition</strong></td>
+<td>P2 / P3</td>
+<td>The same graph can be loaded from JSON/YAML instead of Python code.</td>
+<td>partial</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>1.9</td>
+<td><strong>Guardrails that may be functions <em>or</em> descriptions</strong></td>
+<td>P1 / P3</td>
+<td>Output validation is pluggable, retries up to N, and can be an LLM judgement rather than code.</td>
+<td>yes</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>1.10</td>
+<td><strong>Async execution as an inline escape hatch</strong></td>
+<td>P3</td>
+<td>A task can be marked async; the loop then keeps going and collects the result later.</td>
+<td>partial</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>1.11</td>
+<td><strong>Skills with progressive disclosure</strong></td>
+<td>P1 / P2</td>
+<td><code>SKILL.md</code> files discoverable from disk or a registry, loaded in three levels (metadata → instructions → resources).</td>
+<td>yes</td>
+<td><strong>yes</strong></td>
+</tr>
+<tr>
+<td>1.12</td>
+<td><strong>Dual identity + fingerprint for auditing</strong></td>
+<td>PZ</td>
+<td>Every agent has a human-readable id and a <code>Fingerprint</code> uuid, with bounded metadata.</td>
+<td>no</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>1.13</td>
+<td><strong>CLI + terminal UIs, no web UI</strong></td>
+<td>PX-F</td>
+<td>The product surface is a command line and text dashboards; there is no in-tree browser UI.</td>
+<td>no</td>
+<td>noted</td>
+</tr>
+<tr>
+<td>1.14</td>
+<td><strong>Streaming implemented as re-entry</strong></td>
+<td>PX-F / P1</td>
+<td>Streaming output is the same run, re-entered with a chunk generator in front.</td>
+<td>yes</td>
+<td>yes</td>
+</tr>
+</tbody></table></div>
+<p><strong>Reading the table:</strong> two rows carry the most weight for us. <strong>1.4</strong> (per-run identity) and <strong>1.7</strong>
+(checkpoint/resume/fork) are the two things our automations pole cannot be built well without, and both
+are isolated, small, and copyable in idea. <strong>1.3</strong> is the load-bearing negative: if we ever want real
+hierarchies (an AI company&#39;s org chart), CrewAI&#39;s own &quot;hierarchical&quot; process is <strong>not</strong> the thing to copy —
+it is one agent with two delegation tools.</p>
+<hr>
+<h2 id="7-doc-vs-code-divergences-recorded">7. Doc-vs-code divergences recorded <span class="seal-badge" style="background:#fef2f2; color:#dc2626; border-color:#fca5a5; font-size: 0.65em; vertical-align: middle;">⚠️ FINDING NOTE</span><a href="#batch-01/7-doc-vs-code-divergences-recorded" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>The pin&#39;s rule 6 requires the disagreement be written down, not smoothed over.</p>
+<ol>
+<li><strong>&quot;Hierarchical&quot; is under-sold by its own name.</strong> Code (<code>crew.py:1531-1556</code>) shows a manager agent with
+exactly two tools; there is no depth, budget or reporting structure. A reader of the docs could
+reasonably expect an org chart and would not find one.</li>
+<li><strong><code>crewai-core</code> is 97% generated data.</strong> The package reads as a large core library by line count
+(138,480) but is 4,424 hand-written lines plus one generated catalog. Any &quot;CrewAI&#39;s core is huge&quot;
+inference from raw counts is wrong.</li>
+<li><strong><code>Process</code> has a dead third value.</strong> <code>consensual</code> exists only as a comment (<code>process.py:11</code>) while
+<code>kickoff</code> raises <code>NotImplementedError</code> for anything other than the two live values
+(<code>crew.py:1059-1062</code>).</li>
+<li><strong><code>function_calling_llm</code>, <code>allow_code_execution</code>, <code>multimodal</code>, <code>reasoning</code> are all deprecated in
+code</strong> (<code>crew.py:294</code>; <code>agent/core.py:295-297</code>, <code>307-309</code>, <code>332-341</code>) — the framework is actively
+retiring surface area while the docs describe it as current.</li>
+</ol>
+<hr>
+<h2 id="8-carried-forward-to-the-next-batch">8. Carried forward to the next batch<a href="#batch-01/8-carried-forward-to-the-next-batch" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<ul>
+<li><strong>The agent is the next unit of study (Batch 02).</strong> Everything in §3.6 hangs off <code>Agent</code>; the class is
+2,289 lines (<code>agent/core.py</code>) and its abstract base is 814 lines (<code>agents/agent_builder/base_agent.py</code>)
+with <strong>six abstract methods</strong> (<code>execute_task</code>, <code>aexecute_task</code>, <code>create_agent_executor</code>,
+<code>get_delegation_tools</code>, <code>get_platform_tools</code>, <code>get_mcp_tools</code> — <code>base_agent.py:668-701</code>). That abstract
+surface is the exact set of things our own aissistant must decide how to do.</li>
+<li><strong>Two tool sources are already named there</strong> — <code>get_platform_tools</code> and <code>get_mcp_tools</code>. Our platform&#39;s
+MCP bridge (<code>P2-9a</code>) and its tool registry are the same two problems; Batch 02 reads how CrewAI solves
+them.</li>
+<li><strong>Keep the two paradigms separate in later batches.</strong> Crew results flow through <code>CrewOutput</code>; flow
+results do not. Do not merge them when mapping.</li>
+</ul>
+<hr>
+<p><em>Batch 01 of 07. Written 2026-10-15. Every line number above is <code>file:line</code> in
+<code>library/architecture/platforms/_extracted/crewAI-main/</code>. Next: <code>findings/02-the-aissistant.md</code> (P1).</em></p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="00-the-pin-method.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">The Pin &amp; Method</span>
+                </a>
+              
+
+              <a href="../index.html#batch-01" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              
+                <a href="02-the-aissistant-p1.html" class="nav-page-btn" style="text-align:right;">
+                  <span class="nav-btn-sub">Next Batch →</span>
+                  <span class="nav-btn-title">The Aissistant (P1)</span>
+                </a>
+              
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#0-in-plain-words-what-this-thing-is" class="toc-link">0. In plain words — what this thing is</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#1-what-was-read-and-its-measured-size" class="toc-link">1. What was read, and its measured size</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#2-the-public-surface-what-the-library-hands-you" class="toc-link">2. The public surface — what the library hands you</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-the-execution-model-read-from-code" class="toc-link">3. The execution model, read from code</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-1-process-the-whole-of-it" class="toc-link">3.1 Process — the whole of it</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-2-kickoff-the-one-door-in" class="toc-link">3.2 kickoff() — the one door in</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-3-the-task-loop" class="toc-link">3.3 The task loop</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-4-hierarchical-one-extra-agent-nothing-more" class="toc-link">3.4 Hierarchical = one extra agent, nothing more</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-5-per-run-identity-the-trace-spine" class="toc-link">3.5 Per-run identity — the trace spine</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-6-the-agent-reasoning-loop" class="toc-link">3.6 The agent reasoning loop</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-7-task-output-guardrails-and-the-step-hooks" class="toc-link">3.7 Task output, guardrails and the step hooks</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-the-control-plane" class="toc-link">4. The control plane</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-1-the-event-bus-is-the-observability-spine" class="toc-link">4.1 The event bus is the observability spine</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-2-hooks-a-second-coarser-interception-layer" class="toc-link">4.2 Hooks — a second, coarser interception layer</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-3-the-cli-the-nearest-thing-to-a-product-surface" class="toc-link">4.3 The CLI — the nearest thing to a product surface</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-4-persistence-and-checkpointing" class="toc-link">4.4 Persistence and checkpointing</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-5-declarative-definition-the-flow-contract" class="toc-link">4.5 Declarative definition — the flow contract</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-the-second-paradigm-flows" class="toc-link">5. The second paradigm — Flows</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-findings-tagged-by-pole" class="toc-link">6. Findings, tagged by pole</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-doc-vs-code-divergences-recorded" class="toc-link">7. Doc-vs-code divergences recorded</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#8-carried-forward-to-the-next-batch" class="toc-link">8. Carried forward to the next batch</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('crewai_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('crewai_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('crewai_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('crewai_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.CrewAIReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

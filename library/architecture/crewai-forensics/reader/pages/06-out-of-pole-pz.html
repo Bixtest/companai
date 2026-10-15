@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 06 — Out-of-pole findings (PZ) — CrewAI Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-06" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 06</span>
+      <div class="header-title-wrap">
+        <div class="header-title">Out-of-Pole (PZ)</div>
+        <div class="header-subtitle">CrewAI Platform Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/06-out-of-pole.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #059669">DONE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">2,720</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">14 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">292</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-15</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 06 Architecture Guide (Default)</option>
+            <optgroup label="Strategic Architecture">
+              <option value="master">Executive Topology: three poles, one executor, two absent clusters</option>
+            </optgroup>
+            <optgroup label="Foundations">
+              <option value="00">Batch 00: The pin, the 93% docs hazard, and the method</option>
+              <option value="01">Batch 01: The one door, the spine &amp; the second paradigm</option>
+            </optgroup>
+            <optgroup label="Pole 1 — The Aissistant">
+              <option value="02">Batch 02: The aissistant — a small agent &amp; an empty seam</option>
+            </optgroup>
+            <optgroup label="Pole 2 — The Workspace">
+              <option value="03">Batch 03: The workspace — a folder that binds text to code</option>
+            </optgroup>
+            <optgroup label="Pole 3 — Automations">
+              <option value="04">Batch 04: Automations — executor yes, delivery no</option>
+            </optgroup>
+            <optgroup label="Cross-Cutting">
+              <option value="05">Batch 05: Widgets &amp; frontend — empty front, real protocol</option>
+            </optgroup>
+            <optgroup label="Escape Hatch">
+              <option value="06">Batch 06: Out-of-pole (PZ) — the tenancy question, closed</option>
+            </optgroup>
+            <optgroup label="Strategic Decision">
+              <option value="07">Batch 07: The synthesis — transfer matrix &amp; the verdict</option>
+            </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 06 VISUAL GUIDE — OUT-OF-POLE (PZ)</div>
+    <h4>The tenancy question, closed — and the surfaces that still matter</h4>
+    <p>Three of the four purposes a tenancy model is made of are literal TODOs in the shipped source</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 350" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-06" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-06" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+        <marker id="arrr-06" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#ef4444"/>
+        </marker>
+      </defs>
+      <rect x="20" y="20" width="880" height="120" rx="10" fill="#ef4444" fill-opacity="0.07" stroke="#ef4444" stroke-width="1.6"/>
+      <text x="40" y="48" font-family="system-ui, sans-serif" font-size="13.5" font-weight="700" fill="#b91c1c">SecurityConfig — 274 lines across four files, and its own docstring admits the gaps</text>
+      <text x="40" y="74" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• Authentication credentials … *TODO*  (security_config.py:25)</text>
+      <text x="40" y="94" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• Scoping rules … *TODO*  (:27)          • Impersonation / delegation tokens … *TODO*  (:28)</text>
+      <text x="40" y="118" font-family="system-ui, sans-serif" font-size="11.5" font-weight="600" fill="#b91c1c">The only field that exists is fingerprint — who you are, what you may see, acting for someone: all unimplemented.</text>
+      <text x="40" y="134" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-muted, #64748b)">Those three ARE a tenancy model. The word "tenant" appears in twelve files; not one is a tenancy model.</text>
+
+      <g transform="translate(20, 155)">
+        <rect width="210" height="175" rx="8" fill="var(--surface-card, #ffffff)" stroke="#10b981" stroke-width="1.4"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#047857">IDENTITY (the one that IS built)</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Dual id: readable name + uuid</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">fingerprint.py:41-50</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Random by default</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">DETERMINISTIC from a seed (uuid5)</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">Stable identity, no database</text>
+      </g>
+      <g transform="translate(245, 155)">
+        <rect width="210" height="175" rx="8" fill="var(--surface-card, #ffffff)" stroke="#f59e0b" stroke-width="1.4"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#b45309">AUTH WITHOUT AUTHORIZATION</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Five pure OAuth providers</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">base_provider.py:10-46</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">They log you IN</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Nothing decides what you may DO</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#b45309">No roles, no scopes, no policy</text>
+      </g>
+      <g transform="translate(470, 155)">
+        <rect width="210" height="175" rx="8" fill="var(--surface-card, #ffffff)" stroke="#7c3aed" stroke-width="1.4"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#6d28d9">TELEMETRY & THE ENTERPRISE</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">OTLP, opt-out</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">A checkable privacy claim in-source</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">telemetry.py:1-9</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Enterprise = a token vs a remote service</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#6d28d9">Not data partitioning</text>
+      </g>
+      <g transform="translate(695, 155)">
+        <rect width="205" height="175" rx="8" fill="var(--surface-card, #ffffff)" stroke="#2563eb" stroke-width="1.4"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#1d4ed8">THE UNUSED SEAM</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">ToolFilterContext is well-shaped</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">mcp/filters.py:17-26</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">and unpopulated</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">A tenant would go here</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#1d4ed8">A wiring task for us</text>
+      </g>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="crewai-forensics-batch-06-out-of-pole-pz-and-closing-the-tenancy-question">CrewAI forensics — Batch 06: out-of-pole (PZ), and closing the tenancy question<a href="#batch-06/crewai-forensics-batch-06-out-of-pole-pz-and-closing-the-tenancy-question" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>What belongs in this batch.</strong> Everything the pole batches did not claim: the security layer, the
+identity story, telemetry, the auth/enterprise surfaces, the MCP client, and the docs practice.
+It also <strong>closes the question Batch 04 §4.6 left open</strong>: does CrewAI have a tenancy model?</p>
+<p><strong>Method rules in force.</strong> Read from <code>lib/**/*.py</code> only; <code>docs/**/*.mdx</code> never used as authority
+(rule 1). Every claim carries <code>file:line</code>. No platform comparison inside a batch (rule 5). Pole-tag
+every finding (rule 9); name every capability (rule 6), including absences. Report divergences and
+correct earlier batches where the evidence now demands it (rule 13).</p>
+<p>Paths relative to <code>library/architecture/platforms/_extracted/crewAI-main/</code>. Version <code>1.15.28</code>.</p>
+<hr>
+<h2 id="6-0-answer-to-the-open-question-there-is-no-tenancy-model">6.0 Answer to the open question: there is no tenancy model<a href="#batch-06/6-0-answer-to-the-open-question-there-is-no-tenancy-model" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Batch 04 could not find a tenant concept; this batch resolves it by reading the security layer in
+full. The security directory is <strong>274 lines across four files</strong>, and the central class is
+<code>SecurityConfig</code> (<code>security/security_config.py:20</code>). Its own docstring lists what it is <em>for</em>:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>text</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code>- Authentication credentials *TODO*          (security_config.py:25)
+- Identity information (agent fingerprints)
+- Scoping rules *TODO*                      (:27)
+- Impersonation/delegation tokens *TODO*    (:28)
+</code></pre>
+</div>
+<p>And the only field it actually has is:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>python</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-python">fingerprint: Fingerprint = Field(                 # security_config.py:39
+    default_factory=Fingerprint, description=&quot;Unique identifier for the component&quot;
+)
+</code></pre>
+</div>
+<p>Three of the four purposes are literally <code>TODO</code> in the shipped source. <code>Authentication credentials</code>,
+<code>Scoping rules</code> and <code>Impersonation/delegation tokens</code> are <strong>unimplemented</strong> — and those three are
+exactly the three things a tenancy model is made of (who you are, what you may see, acting on
+behalf of someone).</p>
+<p>The word &quot;tenant&quot; was searched for across both packages. It appears in twelve files
+(<code>crewai/**</code> + <code>crewai_core/**</code>), and <strong>not one is a tenancy model</strong>: they are ChromaDB/RAG config
+(<code>rag/chromadb/config.py</code>, <code>constants.py</code>, <code>factory.py</code>), Azure/OpenAI embedding provider types
+(<code>rag/embeddings/providers/…</code>), the skills registry (a publish scope, not a data scope),
+<code>utilities/agent_utils.py</code>, and two files of <em>generated catalog prose</em></p>
+<p>(<code>crewai_core/platform_catalog.py</code> — which quotes other products&#39; documentation) plus <code>plus_api.py</code>
+(HTTP calls to the hosted service). There is no tenant type, no tenant column, no tenant parameter
+on any data path.</p>
+<p>What <em>does</em> exist is <strong>organization</strong>, and it lives in the hosted API, not here:</p>
+<p><code>lib/cli/src/crewai_cli/organization/main.py:12</code> <code>class OrganizationCommand(...)</code> — <code>list()</code>
+(<code>:17</code>) and <code>switch(org_id)</code> (<code>:53</code>) both call <code>self.plus_api_client.get_organizations()</code>
+(<code>:19</code>, <code>:55</code>). The client is <code>PlusAPI</code> (<code>crewai_core/plus_api.py:149</code>) with a <code>base_url</code>
+(<code>:182</code>), and <code>get_organizations</code> (<code>:455</code>) / <code>get_triggers</code> (<code>:552</code>) are ordinary HTTP calls.</p>
+<p><strong>➜ F6-1 [PZ → corrects the frontier] — CrewAI has NO tenancy model; it has a <em>hosted account</em>
+model reached over HTTP.</strong> <strong>Plain meaning:</strong> the open-source framework knows nothing about who
+owns what data. There is a hook for authentication, scoping and impersonation, and it is empty with
+a <code>TODO</code> in the docstring. The user&#39;s <em>organizations</em> exist only inside CrewAI&#39;s SaaS (called AMP),
+surfaced here as an HTTP client. <strong>Why it matters — this is the load-bearing finding of the entire
+CrewAI study:</strong> the platform we are evaluating as a reference for a multi-tenant AI-company OS
+<strong>has no multi-tenancy at all</strong>, at any layer we can read. Every tenant-shaped requirement we have
+must be built, not adapted. Batch 02&#39;s <code>UserWarning</code> naming a single
+<code>CREWAI_ENTERPRISE_ACTION_AUTH_TOKEN</code> (<code>agent/core.py:1387-1391</code>) is now explained: the enterprise
+&quot;boundary&quot; is a <strong>token check against a remote service</strong>, not a data-partitioning scheme.</p>
+<hr>
+<h2 id="6-1-identity-the-one-thing-that-is-implemented">6.1 Identity: the one thing that IS implemented<a href="#batch-06/6-1-identity-the-one-thing-that-is-implemented" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>security/fingerprint.py:41</code> <code>class Fingerprint(BaseModel)</code>, docstring at <code>:42-50</code>: <em>&quot;Each agent has
+dual identifiers: Human-readable ID: For debugging and reference (derived from role if not
+specified) — Fingerprint UUID: Unique runtime identifier for tracking and auditing.&quot;</em></p>
+<p>The mechanics:</p>
+<ul>
+<li>Default identity is <strong>random per instance</strong>: <code>_uuid_str: str = PrivateAttr(default_factory=lambda: str(uuid4()))</code> (<code>:54</code>), and <code>_created_at</code> alongside it (<code>:55</code> region).</li>
+<li>A <strong>deterministic</strong> identity is available when you supply a seed:
+<code>_generate_uuid(cls, seed)</code> returns <code>str(uuid5(CREW_AI_NAMESPACE, seed))</code> (<code>:88</code>) — a <strong>name-based
+UUID in a fixed namespace</strong> (<code>security/constants.py:11-15</code>, a hard-coded UUID literal — and even
+here the module&#39;s own note says <em>&quot;TODO: Determine if CREW_AI_NAMESPACE should be made dynamic or
+configurable&quot;</em>, <code>:7</code>), so the same seed always yields the same id.</li>
+<li><code>generate(...)</code> (<code>:91</code>) walks the inheritance chain and rewrites <code>_uuid_str</code> via
+<code>fingerprint.__dict__[&quot;_uuid_str&quot;] = cls._generate_uuid(seed)</code> (<code>:106</code>).</li>
+<li>Round-trips via <code>to_dict</code> (<code>:123</code>) / <code>from_dict</code> (<code>:136</code>), with the uuid restored at <code>:151</code>.</li>
+<li>Value semantics: <code>__eq__</code> compares <code>uuid_str</code> (<code>:116</code>), <code>__hash__</code> hashes it (<code>:121</code>) — so a
+fingerprint is usable as a dict key, which is how you would key anything <em>by</em> identity.</li>
+<li><code>metadata</code> is validated (<code>_validate_metadata</code>, <code>:17</code>): string keys (<code>:24</code>), <strong>one level of nesting
+only</strong> (<code>:33</code>), and a <strong>10 KB cap</strong> (<code>:35</code>), raising at <code>:36</code>.</li>
+</ul>
+<p><strong>➜ F6-2 [P1/PZ] — Identity is a dual id: a human-readable role-derived name plus a UUID, random by
+default and deterministic from a seed on demand, carrying one level of validated metadata.</strong>
+<strong>Plain meaning:</strong> every agent gets two names — one you can read, one the machine tracks — and you
+can either let it be random or derive it reproducibly from a string. <strong>Why it matters:</strong> the
+<em>deterministic-from-seed</em> option is the useful half. It means identity can be <strong>stable across
+processes without a database</strong> — derive it from a known string and you get the same id every time.
+That is a genuinely reusable primitive for our per-employee identity, and it is the closest CrewAI
+gets to &quot;an agent is a record&quot;: an agent is <em>addressable</em>, but it is <strong>not filed anywhere</strong> (nothing
+stores fingerprints; there is no registry).</p>
+<hr>
+<h2 id="6-2-auth-seven-pure-oauth-adapters-no-authorization">6.2 Auth: seven pure OAuth adapters, no authorization<a href="#batch-06/6-2-auth-seven-pure-oauth-adapters-no-authorization" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>crewai_core/auth/providers/base_provider.py:10</code> <code>class BaseProvider(ABC)</code> — a provider is <em>only</em> a
+set of URL getters. Seven abstract methods: <code>get_authorize_url</code> (<code>:17</code>), <code>get_token_url</code> (<code>:21</code>),
+<code>get_jwks_url</code> (<code>:25</code>), <code>get_issuer</code> (<code>:29</code>), <code>get_audience</code> (<code>:33</code>), <code>get_client_id</code> (<code>:37</code>). Two
+concrete defaults: <code>get_required_fields</code> returns <code>[]</code> (<code>:42</code>) and <code>get_oauth_scopes()</code> returns
+<code>[&quot;openid&quot;, &quot;profile&quot;, &quot;email&quot;]</code> (<code>:46</code>).</p>
+<p>Five implementations ship: <code>auth0</code>, <code>entra_id</code>, <code>keycloak</code>, <code>okta</code>, <code>workos</code> — with both a core copy
+(<code>crewai_core/auth/providers/</code>, 46–49 lines each) and a CLI copy
+(<code>cli/authentication/providers/</code>). There is also <code>crewai_core/auth/oauth2.py</code> (186 lines,
+<code>Oauth2Settings</code>) and <code>crewai_core/token_manager.py</code> (159 lines).</p>
+<p><strong>➜ F6-3 [PZ] — Authentication is plumbing (URLs and a token), and there is no authorization
+anywhere.</strong> <strong>Plain meaning:</strong> CrewAI can log you in against five common identity providers, and
+then it stops — it has no notion of what a logged-in principal is allowed to do. <strong>Why it matters:</strong>
+the distinction to carry into the SRS is sharp and worth stating plainly: <em>CrewAI has
+authentication (login) and no authorization (permission)</em>. The single
+<code>allowed_components</code> allow-list from Batch 05 §5.3.5 — which filters a widget vocabulary — is the
+only real enforcement mechanism found anywhere in the study, and it is about UI components, not
+about data or roles.</p>
+<hr>
+<h2 id="6-3-the-enterprise-surface-is-a-cli-configuration-command">6.3 The enterprise surface is a CLI configuration command<a href="#batch-06/6-3-the-enterprise-surface-is-a-cli-configuration-command" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>cli/enterprise/main.py:16</code> <code>class EnterpriseConfigureCommand(BaseCommand)</code>. Its whole job, per
+<code>configure(enterprise_url)</code> (<code>:21</code>):</p>
+<ol>
+<li>strip a trailing slash (<code>:23</code>),</li>
+<li>fetch <code>f&quot;{enterprise_url}/auth/parameters&quot;</code> (<code>:41</code>),</li>
+<li>store the result as OAuth settings (<code>:27</code>), with <code>enterprise_base_url</code> persisted (<code>:75</code>).</li>
+</ol>
+<p>It prints <em>&quot;Successfully configured CrewAI AMP with OAuth2 settings from …&quot;</em> (<code>:30</code>).</p>
+<p><strong>➜ F6-4 [PZ] — &quot;Enterprise&quot; means pointing the tool at a server that describes its own OAuth
+settings.</strong> <strong>Plain meaning:</strong> the enterprise integration is a bootstrap: the CLI asks the corporate
+server how to authenticate, and stores the answer. <strong>Why it matters:</strong> this confirms the pattern of
+§6.0/§6.1 — everything that looks like &quot;the platform manages organisations/tenants&quot; resolves to
+<strong>a remote service plus a client that talks to it</strong>. The open-source half is deliberately thin, and
+we should treat the hosted half as out of scope for study (its code is not in this tree).</p>
+<hr>
+<h2 id="6-4-telemetry-otlp-opt-out-and-an-explicit-data-minimisation-claim">6.4 Telemetry: OTLP, opt-out, and an explicit data-minimisation claim<a href="#batch-06/6-4-telemetry-otlp-opt-out-and-an-explicit-data-minimisation-claim" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>crewai_core/telemetry.py</code> (671 lines) is the leaf telemetry layer, used by both the framework and
+the CLI. The docstring states the promise (<code>:1-9</code>): <em>&quot;No prompts, task descriptions, agent
+backstories/goals, responses, or sensitive data are collected.&quot;</em></p>
+<p>Mechanics: OTLP over HTTP via <code>OTLPSpanExporter</code>, to a hard-coded endpoint
+<code>CREWAI_TELEMETRY_BASE_URL = &quot;https://telemetry.crewai.com:4319&quot;</code> (<code>:45</code>), posting to
+<code>f&quot;{CREWAI_TELEMETRY_BASE_URL}/v1/traces&quot;</code> (<code>:312</code>), service name <code>&quot;crewAI-telemetry&quot;</code> (<code>:46</code>),
+tracer <code>&quot;crewai.telemetry&quot;</code> (<code>:48</code>). Opt-out is an env flag via <code>_is_telemetry_disabled</code> (<code>:354</code>)
+honouring <code>OTEL_SDK_DISABLED</code> (<code>:356</code>). The resource is enriched with environment facts from
+<code>crewai_core/runtime_env.py</code> (<code>detect_coding_agent</code>, <code>detect_cpu_band</code>, <code>detect_runtime_context</code>,
+imported <code>:39-43</code>) and a project id from <code>get_project_id</code> (<code>:38</code>).</p>
+<p><strong>➜ F6-5 [PZ] — Telemetry is standard OTLP with a hard-coded first-party endpoint and a flag-based
+opt-out, plus an explicit list of what is <em>not</em> sent.</strong> <strong>Plain meaning:</strong> usage data goes to the
+vendor unless you set an environment variable, and the code names the categories it deliberately
+excludes. <strong>Why it matters:</strong> two reusable lessons. (a) The <strong>hard-coded endpoint</strong> means the
+telemetry target is not configurable — a decision we should make the opposite way. (b) The
+<strong>explicit exclusion list in the source docstring</strong> is a good practice worth copying: it makes the
+privacy claim checkable in code rather than promised in a policy document.</p>
+<hr>
+<h2 id="6-5-the-mcp-client-and-the-seam-that-stayed-empty">6.5 The MCP client, and the seam that stayed empty<a href="#batch-06/6-5-the-mcp-client-and-the-seam-that-stayed-empty" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Batch 02 found that CrewAI ships a <code>ToolFilterContext(agent, server_name, run_context)</code>
+(<code>mcp/filters.py:17</code>) which nothing populates. This batch read the surrounding client to size it:
+<code>mcp/</code> is <strong>2,716 lines</strong> — <code>client.py</code> (799), <code>tool_resolver.py</code> (686), <code>exceptions.py</code> (271),
+<code>transports/http.py</code> (195), <code>stdio.py</code> (169), <code>filters.py</code> (163), <code>config.py</code> (123),
+<code>transports/base.py</code> (115), <code>sse.py</code> (112).</p>
+<p>The seam itself is a pydantic model with three fields, and every one of them is the <em>right</em> field:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>python</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-python">class ToolFilterContext(BaseModel):                          # mcp/filters.py:17
+    agent: Any = Field(..., description=&quot;The agent requesting tools.&quot;)        # :24
+    server_name: str = Field(..., description=&quot;Name of the MCP server.&quot;)      # :25
+    run_context: dict[str, Any] | None = Field(...)                          # :26
+</code></pre>
+</div>
+<p>and its docstring example (<code>:150</code>) filters on <code>context.agent.role == &quot;Code Reviewer&quot;</code>.</p>
+<p><strong>➜ F6-6 [P1/PZ] — The MCP tool-filtering seam is well-shaped and unused.</strong> <code>agent</code> +
+<code>server_name</code> + <code>run_context</code> is precisely the triple a per-tenant or per-role tool policy needs,
+and the example in the source filters by role. <strong>Plain meaning:</strong> the hook for &quot;this agent, on this
+server, in this run, may see these tools&quot; exists and is documented — but nothing in the framework
+supplies a policy to it. <strong>Why it matters:</strong> it is the <em>second</em> real permission-shaped seam (after
+Batch 05&#39;s <code>allowed_components</code>), and it is the one aimed at <strong>tools</strong> rather than widgets. Both are
+&quot;the framework provides an empty slot where policy goes&quot; — which is a pattern, and possibly a
+warning: a seam nobody populates is indistinguishable from a feature nobody shipped.</p>
+<hr>
+<h2 id="6-6-the-docs-practice-restated-with-its-consequence">6.6 The docs practice, restated with its consequence<a href="#batch-06/6-6-the-docs-practice-restated-with-its-consequence" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Batch 00 pinned the hazard: <code>docs/</code> is <strong>33,251 <code>.mdx</code> files / 292 MB</strong>, 45 version-trees × 4
+languages. Batch 05 D5-2 found the site config is Mintlify (<code>docs/docs.json</code>, 3.16 MB,
+<code>&quot;$schema&quot;: &quot;https://mintlify.com/docs.json&quot;</code>). The consequence for method is worth restating here
+because it is the reason every batch in this study reads <code>.py</code>:</p>
+<p>There are <strong>45 copies</strong> of the same documentation, one per released version, from <code>edge</code> through
+<code>v1.10.0</code>…<code>v1.15.28</code>, times four natural languages (<code>ar</code>/<code>en</code>/<code>ko</code>/<code>pt-BR</code>). Any claim read from a
+<code>.mdx</code> file is therefore (a) of unknown vintage relative to <code>lib/</code>, and (b) one of 180 near-copies.
+<code>AGENTS.md</code> and <code>DOCS_TRANSLATIONS.md</code> at the repo root exist to manage this archive.</p>
+<p><strong>➜ F6-7 [PZ] — The documentation is a versioned, translated, externally-rendered archive, and it
+cannot be an authority for any behavioural claim.</strong> <strong>Plain meaning:</strong> there is 292 MB of docs, but
+it is 180 versions of the same text, published by a third party, and it drifts from the code (four
+divergences found in Batch 01 alone; more in 02–05). <strong>Why it matters:</strong> this is the single
+strongest justification for the study&#39;s first rule, and it is a <em>design</em> lesson too: a
+docs-as-product decision (translate everything, keep every version) makes the docs <strong>unusable as
+reference</strong> while making them look authoritative. For our own platform, one authoritative source
+per fact, generated from the code where possible, is the opposite choice.</p>
+<hr>
+<h2 id="6-7-the-cross-cutting-ledger-what-the-whole-study-found-by-surface">6.7 The cross-cutting ledger (what the whole study found, by surface)<a href="#batch-06/6-7-the-cross-cutting-ledger-what-the-whole-study-found-by-surface" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>This is not the synthesis batch (that is batch 07), but the out-of-pole material is best recorded
+as one ledger. Every row cites a batch.</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Surface</th>
+<th>Present?</th>
+<th>Where</th>
+<th>Batch</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Per-run identity</td>
+<td>✅</td>
+<td>contextvar minted on kickoff (<code>execution.py:9-11</code>)</td>
+<td>01</td>
+</tr>
+<tr>
+<td>Per-agent identity</td>
+<td>✅ addressable, ❌ filed</td>
+<td>dual id + <code>uuid5</code> seed (<code>security/fingerprint.py:41-88</code>)</td>
+<td>02, <strong>06</strong></td>
+</tr>
+<tr>
+<td>Typed event bus (163 events)</td>
+<td>✅</td>
+<td><code>events/event_bus.py:95</code></td>
+<td>01</td>
+</tr>
+<tr>
+<td>Hooks (10 interception points)</td>
+<td>✅</td>
+<td><code>hooks/dispatch.py:40</code></td>
+<td>01</td>
+</tr>
+<tr>
+<td>Checkpoint / resume / fork</td>
+<td>✅</td>
+<td><code>state/checkpoint_config.py:160</code></td>
+<td>01</td>
+</tr>
+<tr>
+<td>Durable per-method flow state</td>
+<td>✅</td>
+<td><code>flow/persistence/sqlite.py:44</code></td>
+<td><strong>04</strong></td>
+</tr>
+<tr>
+<td>Scheduler / queue / worker / cron</td>
+<td>❌</td>
+<td>(searched, absent)</td>
+<td><strong>04</strong></td>
+</tr>
+<tr>
+<td>Trigger delivery</td>
+<td>❌ (convention only)</td>
+<td><code>templates/*/main.py</code> + hosted API</td>
+<td><strong>04, 05</strong></td>
+</tr>
+<tr>
+<td>Retry / backoff / expiry / ownership</td>
+<td>❌</td>
+<td>(absent)</td>
+<td><strong>04</strong></td>
+</tr>
+<tr>
+<td>Widget component catalogue</td>
+<td>✅ 18 typed</td>
+<td><code>a2ui/catalog.py</code></td>
+<td><strong>05</strong></td>
+</tr>
+<tr>
+<td>Widget permission subsetting</td>
+<td>✅ <strong>enforced</strong></td>
+<td><code>allowed_components</code> (<code>client_extension.py:397</code>)</td>
+<td><strong>05</strong></td>
+</tr>
+<tr>
+<td>Tool permission subsetting</td>
+<td>⚠️ seam only</td>
+<td><code>ToolFilterContext</code> (<code>mcp/filters.py:17</code>), unpopulated</td>
+<td>02, <strong>06</strong></td>
+</tr>
+<tr>
+<td>Authentication</td>
+<td>✅ 5 providers</td>
+<td><code>auth/providers/</code></td>
+<td><strong>06</strong></td>
+</tr>
+<tr>
+<td>Authorization / roles</td>
+<td>❌</td>
+<td>(absent)</td>
+<td><strong>06</strong></td>
+</tr>
+<tr>
+<td>Tenancy</td>
+<td>❌</td>
+<td>(searched — absent; orgs are hosted)</td>
+<td><strong>04, 06</strong></td>
+</tr>
+<tr>
+<td>Agent-as-record / org chart</td>
+<td>❌</td>
+<td>(no registry, no org model)</td>
+<td>02, <strong>06</strong></td>
+</tr>
+<tr>
+<td>Telemetry (OTLP)</td>
+<td>✅</td>
+<td><code>crewai_core/telemetry.py:45</code></td>
+<td><strong>06</strong></td>
+</tr>
+<tr>
+<td>Web frontend</td>
+<td>❌</td>
+<td>(searched — absent)</td>
+<td><strong>05</strong></td>
+</tr>
+<tr>
+<td>Generated diagram from the definition</td>
+<td>✅</td>
+<td><code>flow.plot()</code> → HTML</td>
+<td><strong>04, 05</strong></td>
+</tr>
+</tbody></table></div>
+<p><strong>➜ F6-8 [PZ → synthesis input] — Read as a ledger, CrewAI&#39;s shape is: a superb <em>execution and
+observability</em> engine with identity primitives, wrapped in a thin client for a hosted account
+service, with no persistence of <em>who owns what</em> and no delivery layer.</strong> <strong>Plain meaning:</strong> the
+parts that are excellent are the parts about running work and watching it. The parts about
+<em>organisation, ownership, permission and delivery</em> are either absent or pushed to a SaaS whose code
+is not here. <strong>Why it matters:</strong> this is the sentence the mapping pass should start from. It tells
+us, before we compare anything to mercato, that CrewAI will be a rich source for the poles that are
+about <em>how work executes</em> and a very thin source for the poles about <em>who it belongs to</em>.</p>
+<hr>
+<h2 id="6-8-divergences-and-corrections">6.8 Divergences and corrections <span class="seal-badge" style="background:#fef2f2; color:#dc2626; border-color:#fca5a5; font-size: 0.65em; vertical-align: middle;">⚠️ FINDING NOTE</span><a href="#batch-06/6-8-divergences-and-corrections" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Claim</th>
+<th>Measured reality</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>D6-1</strong></td>
+<td><code>SecurityConfig</code> configures authentication, scoping and impersonation.</td>
+<td>Its docstring marks all three as <code>*TODO*</code> (<code>security_config.py:25,27,28</code>); only <code>fingerprint</code> is implemented (<code>:39</code>).</td>
+<td><strong>The API promises a security model it does not have.</strong> Most important divergence in the study.</td>
+</tr>
+<tr>
+<td><strong>D6-2</strong></td>
+<td>CrewAI supports organisations.</td>
+<td><code>OrganizationCommand</code> calls the hosted Plus API (<code>organization/main.py:19,55</code>); there is no org model in the framework.</td>
+<td>Organisations are a <strong>SaaS account feature</strong>.</td>
+</tr>
+<tr>
+<td><strong>D6-3</strong></td>
+<td>&quot;Enterprise&quot; is an integration layer.</td>
+<td><code>EnterpriseConfigureCommand</code> fetches OAuth parameters from a URL and stores them (<code>enterprise/main.py:21-75</code>).</td>
+<td>It is a <strong>bootstrap/config command</strong>, not a tenancy layer.</td>
+</tr>
+<tr>
+<td><strong>D6-4</strong></td>
+<td>The tool filter exists.</td>
+<td><code>ToolFilterContext</code> is a well-shaped three-field model (<code>mcp/filters.py:17-26</code>) that nothing populates.</td>
+<td>A seam without a supplier. Recorded, not resolved.</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="6-9-batch-06-checklist">6.9 Batch 06 — checklist<a href="#batch-06/6-9-batch-06-checklist" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<ul>
+<li><input checked="" disabled="" type="checkbox"> Read from <code>lib/**/*.py</code> only; <code>docs/**/*.mdx</code> never used as authority.</li>
+<li><input checked="" disabled="" type="checkbox"> Every claim carries <code>file:line</code>; citations re-verified at write time.</li>
+<li><input checked="" disabled="" type="checkbox"> No platform comparison inside the batch (rule 5).</li>
+<li><input checked="" disabled="" type="checkbox"> Every finding pole-tagged (rule 9); every capability named (rule 6), including absences.</li>
+<li><input checked="" disabled="" type="checkbox"> Divergences recorded (rule 6), including one that corrects the open question from batch 04.</li>
+<li><input checked="" disabled="" type="checkbox"> Retirement rule honoured (C13-14).</li>
+<li><input checked="" disabled="" type="checkbox"> 8 findings: F6-1…F6-8, plus a cross-cutting ledger (§6.7) that batch 07 will consume.</li>
+</ul>
+<p><strong>Batch 07 (synthesis + reader)</strong> is the last one. It will: (a) write the platform-level verdict
+from the six batches&#39; findings, (b) carry the two value questions (rule 4) explicitly, (c) produce
+the consolidated finding index for the mapping pass, and (d) build the CrewAI reader — from the
+markdown, at the end, using the platform-agnostic generator, exactly as the Paperclip reader was
+built. <strong>It will not edit any study markdown to fit the reader</strong> (the standing directive).</p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="05-widgets-frontend.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">Widgets &amp; Frontend</span>
+                </a>
+              
+
+              <a href="../index.html#batch-06" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              
+                <a href="07-the-synthesis.html" class="nav-page-btn" style="text-align:right;">
+                  <span class="nav-btn-sub">Next Batch →</span>
+                  <span class="nav-btn-title">The Synthesis</span>
+                </a>
+              
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#6-0-answer-to-the-open-question-there-is-no-tenancy-model" class="toc-link">6.0 Answer to the open question: there is no tenancy model</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-1-identity-the-one-thing-that-is-implemented" class="toc-link">6.1 Identity: the one thing that IS implemented</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-2-auth-seven-pure-oauth-adapters-no-authorization" class="toc-link">6.2 Auth: seven pure OAuth adapters, no authorization</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-3-the-enterprise-surface-is-a-cli-configuration-command" class="toc-link">6.3 The enterprise surface is a CLI configuration command</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-4-telemetry-otlp-opt-out-and-an-explicit-data-minimisation-claim" class="toc-link">6.4 Telemetry: OTLP, opt-out, and an explicit data-minimisation claim</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-5-the-mcp-client-and-the-seam-that-stayed-empty" class="toc-link">6.5 The MCP client, and the seam that stayed empty</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-6-the-docs-practice-restated-with-its-consequence" class="toc-link">6.6 The docs practice, restated with its consequence</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-7-the-cross-cutting-ledger-what-the-whole-study-found-by-surface" class="toc-link">6.7 The cross-cutting ledger (what the whole study found, by surface)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-8-divergences-and-corrections" class="toc-link">6.8 Divergences and corrections</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-9-batch-06-checklist" class="toc-link">6.9 Batch 06 — checklist</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('crewai_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('crewai_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('crewai_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('crewai_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.CrewAIReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 03 — The workspace (P2) — CrewAI Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-03" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 03</span>
+      <div class="header-title-wrap">
+        <div class="header-title">The Workspace (P2)</div>
+        <div class="header-subtitle">CrewAI Platform Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/03-the-workspace.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #059669">DONE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">2,459</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">12 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">293</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-15</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 03 Architecture Guide (Default)</option>
+            <optgroup label="Strategic Architecture">
+              <option value="master">Executive Topology: three poles, one executor, two absent clusters</option>
+            </optgroup>
+            <optgroup label="Foundations">
+              <option value="00">Batch 00: The pin, the 93% docs hazard, and the method</option>
+              <option value="01">Batch 01: The one door, the spine &amp; the second paradigm</option>
+            </optgroup>
+            <optgroup label="Pole 1 — The Aissistant">
+              <option value="02">Batch 02: The aissistant — a small agent &amp; an empty seam</option>
+            </optgroup>
+            <optgroup label="Pole 2 — The Workspace">
+              <option value="03">Batch 03: The workspace — a folder that binds text to code</option>
+            </optgroup>
+            <optgroup label="Pole 3 — Automations">
+              <option value="04">Batch 04: Automations — executor yes, delivery no</option>
+            </optgroup>
+            <optgroup label="Cross-Cutting">
+              <option value="05">Batch 05: Widgets &amp; frontend — empty front, real protocol</option>
+            </optgroup>
+            <optgroup label="Escape Hatch">
+              <option value="06">Batch 06: Out-of-pole (PZ) — the tenancy question, closed</option>
+            </optgroup>
+            <optgroup label="Strategic Decision">
+              <option value="07">Batch 07: The synthesis — transfer matrix &amp; the verdict</option>
+            </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 03 VISUAL GUIDE — POLE 2</div>
+    <h4>The workspace: a folder that binds text to code by name</h4>
+    <p>How a directory of YAML describes a team, how strings become live objects, and where the folder model stops short of a container of records</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 340" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-03" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-03" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+        <marker id="arrr-03" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#ef4444"/>
+        </marker>
+      </defs>
+      <g transform="translate(20, 20)">
+        <rect width="290" height="240" rx="10" fill="var(--surface-card, #ffffff)" stroke="#2563eb" stroke-width="1.6"/>
+        <text x="16" y="30" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#1d4ed8">A WORKSPACE = A TEXT FOLDER</text>
+        <text x="16" y="56" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">agents.yaml   — who is on the crew</text>
+        <text x="16" y="76" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">tasks.yaml    — the work to do</text>
+        <text x="16" y="96" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">crew.py       — the @CrewBase binding</text>
+        <text x="16" y="116" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">tools/        — tool source</text>
+        <text x="16" y="136" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">knowledge/    — known documents</text>
+        <text x="16" y="156" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">skills/       — SKILL.md files</text>
+        <rect x="16" y="174" width="258" height="50" rx="6" fill="#10b981" fill-opacity="0.12"/>
+        <text x="24" y="193" font-family="system-ui, sans-serif" font-size="10.5" font-weight="700" fill="#059669">SHIPS RUNNABLE, NOT EMPTY</text>
+        <text x="24" y="210" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">A new workspace runs a real crew,</text>
+        <text x="24" y="224" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">so the intended shape is demonstrated.</text>
+      </g>
+
+      <g transform="translate(330, 20)">
+        <rect width="270" height="240" rx="10" fill="var(--surface-card, #ffffff)" stroke="#7c3aed" stroke-width="1.6"/>
+        <text x="16" y="30" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#6d28d9">THE BINDING, BY NAME</text>
+        <text x="16" y="56" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">YAML says "researcher".</text>
+        <text x="16" y="76" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">Python holds the live object.</text>
+        <text x="16" y="98" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">crew_base.py:621-671 resolves it,</text>
+        <text x="16" y="116" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">falling back to the raw string.</text>
+        <text x="16" y="142" font-family="system-ui, sans-serif" font-size="11.5" font-weight="600" fill="#6d28d9">ONE DEFINITION, 3 SYNTAXES</text>
+        <text x="16" y="162" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">Decorators · JSON · YAML all build</text>
+        <text x="16" y="180" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">the same CrewDefinition:297.</text>
+        <rect x="16" y="196" width="238" height="30" rx="6" fill="#7c3aed" fill-opacity="0.10"/>
+        <text x="24" y="215" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">The cleanest answer seen to config-vs-code.</text>
+      </g>
+
+      <g transform="translate(620, 20)">
+        <rect width="280" height="240" rx="10" fill="var(--surface-card, #ffffff)" stroke="#b45309" stroke-width="1.6"/>
+        <text x="16" y="30" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#b45309">WHERE THE MODEL STOPS</text>
+        <text x="16" y="56" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">Files are a real 4-part subsystem:</text>
+        <text x="16" y="78" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">coerce → constrain → format → upload</text>
+        <text x="16" y="96" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">FileMode: strict / auto / warn / chunk</text>
+        <text x="16" y="118" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">Knowledge: 10 source types, by similarity</text>
+        <rect x="16" y="136" width="248" height="88" rx="6" fill="#f59e0b" fill-opacity="0.12"/>
+        <text x="24" y="156" font-family="system-ui, sans-serif" font-size="10.5" font-weight="700" fill="#b45309">THE GAP (F3-12)</text>
+        <text x="24" y="174" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">The workspace holds FILES that</text>
+        <text x="24" y="190" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">describe agents. It never holds</text>
+        <text x="24" y="206" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">agents as records. Two different</text>
+        <text x="24" y="220" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">objects — do not conflate them.</text>
+      </g>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="batch-03-pole-2-the-workspace">Batch 03 — Pole 2: the workspace<a href="#batch-03/batch-03-pole-2-the-workspace" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<blockquote>
+<p><strong>Pole:</strong> <strong>P2 — the workspace.</strong> <em>The container where the work lives</em>: projects, the units of
+organisation, files, knowledge, and the surface a user operates.
+<strong>Status:</strong> read from <code>lib/**/*.py</code> only. Every claim carries <code>file:line</code>.</p>
+</blockquote>
+<hr>
+<h2 id="0-in-plain-words-where-does-a-crewai-workspace-live">0. In plain words — where does a CrewAI "workspace" live?<a href="#batch-03/0-in-plain-words-where-does-a-crewai-workspace-live" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>CrewAI has <strong>no server-side workspace</strong>. What it has is a <strong>project folder on your disk</strong>, generated by a
+command, whose contents are plain text:</p>
+<ul>
+<li><code>agents.yaml</code> — the team, written as data (each entry is a role/goal/backstory with <code>{variables}</code>);</li>
+<li><code>tasks.yaml</code> — the work, written as data (each entry names the agent that does it);</li>
+<li><code>crew.py</code> — a small Python file that <em>binds</em> the two together with decorators;</li>
+<li><code>main.py</code> — a command file with verbs (<code>run</code>, <code>train</code>, <code>replay</code>, <code>test</code>, <code>run_with_trigger</code>);</li>
+<li><code>tools/</code> — your custom tools; <code>knowledge/</code> — documents; <code>skills/</code> — SKILL.md packs.</li>
+</ul>
+<p>Then <code>crewai create crew &lt;name&gt;</code> scaffolds that folder, and <code>crewai deploy</code> zips it and posts it to
+CrewAI&#39;s cloud. <strong>So &quot;the workspace&quot; in CrewAI is a git-friendly directory plus a deployment story</strong> — not
+a database, not a tenant, not a UI. The interesting engineering is in <em>how the YAML and the Python are
+reconciled</em>, and in <em>how files are handled</em>; both are worth taking.</p>
+<hr>
+<h2 id="1-what-was-read-and-its-measured-size">1. What was read, and its measured size<a href="#batch-03/1-what-was-read-and-its-measured-size" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>file / dir</th>
+<th align="right">lines</th>
+<th>note</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>lib/cli/src/crewai_cli/create_crew.py</code></td>
+<td align="right">329</td>
+<td>the scaffolder</td>
+</tr>
+<tr>
+<td><code>lib/cli/src/crewai_cli/create_flow.py</code></td>
+<td align="right">161</td>
+<td>the flow scaffolder</td>
+</tr>
+<tr>
+<td><code>lib/cli/src/crewai_cli/templates/crew/**</code></td>
+<td align="right">—</td>
+<td>the whole project template</td>
+</tr>
+<tr>
+<td><code>lib/cli/src/crewai_cli/cli.py</code></td>
+<td align="right">1,452</td>
+<td>the command surface</td>
+</tr>
+<tr>
+<td><code>lib/cli/src/crewai_cli/run_crew.py</code></td>
+<td align="right">874</td>
+<td>the runner</td>
+</tr>
+<tr>
+<td><code>lib/cli/src/crewai_cli/deploy/{main,validate,archive}.py</code></td>
+<td align="right">2,287</td>
+<td>the deploy path</td>
+</tr>
+<tr>
+<td><code>lib/crewai/src/crewai/project/crew_base.py</code> (<code>@CrewBase</code>)</td>
+<td align="right">836</td>
+<td>YAML↔Python binding</td>
+</tr>
+<tr>
+<td><code>lib/crewai/src/crewai/project/annotations.py</code> (the decorators)</td>
+<td align="right">305</td>
+<td><code>@agent</code> <code>@task</code> <code>@crew</code></td>
+</tr>
+<tr>
+<td><code>lib/crewai/src/crewai/project/crew_definition.py</code></td>
+<td align="right">—</td>
+<td>the serialisable definition</td>
+</tr>
+<tr>
+<td><code>lib/crewai/src/crewai/knowledge/**</code></td>
+<td align="right">10 sources</td>
+<td>the knowledge substrate</td>
+</tr>
+<tr>
+<td><code>lib/crewai-files/src/crewai_files/**</code></td>
+<td align="right">33 files / 8,165 lines</td>
+<td>the file layer</td>
+</tr>
+<tr>
+<td><code>lib/crewai/src/crewai/mcp/**</code></td>
+<td align="right">4 transports</td>
+<td>the tool-server layer</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="2-the-project-template-a-workspace-as-a-folder">2. The project template — a workspace as a folder<a href="#batch-03/2-the-project-template-a-workspace-as-a-folder" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>create_folder_structure</code> (<code>create_crew.py:48</code>) is the scaffolder&#39;s core, and it is <strong>unusually careful
+about naming</strong> — it validates a project name against Python&#39;s own rules before creating anything:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>text</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code>create_crew.py:59    folder_name = name.replace(&quot; &quot;, &quot;_&quot;).replace(&quot;-&quot;, &quot;_&quot;).lower()
+create_crew.py:72    if folder_name[0].isdigit():  raise ValueError(...)
+create_crew.py:77    if keyword.iskeyword(folder_name):  raise ValueError(...)
+create_crew.py:82    if not folder_name.isidentifier():  raise ValueError(...)
+create_crew.py:88    if folder_name in reserved_names:  raise ValueError(...)
+create_crew.py:95    class_name = name.replace(...).title().replace(&quot; &quot;, &quot;&quot;)
+</code></pre>
+</div>
+<p>and then creates a <strong>fixed layout</strong> (<code>:148-155</code>):</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>text</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code>create_crew.py:148   folder_path.mkdir(parents=True)
+create_crew.py:149   (folder_path / &quot;tests&quot;).mkdir(exist_ok=True)
+create_crew.py:150   (folder_path / &quot;knowledge&quot;).mkdir(exist_ok=True)
+create_crew.py:152   (folder_path / &quot;src&quot; / folder_name).mkdir(parents=True)
+create_crew.py:153   (folder_path / &quot;src&quot; / folder_name / &quot;tools&quot;).mkdir(parents=True)
+create_crew.py:154   (folder_path / &quot;src&quot; / folder_name / &quot;config&quot;).mkdir(parents=True)
+create_crew.py:155   copy_assistant_instructions(folder_path)   # writes AGENTS.md/CLAUDE.md/…
+</code></pre>
+</div>
+<p><strong>Every rejection is a named error, not a crash</strong> — a digit-leading name, a Python keyword, a name that
+is not an identifier, a reserved script name. This is the kind of validation our own &quot;create a workspace&quot;
+flow should have, and it costs nothing to copy.</p>
+<h3 id="2-1-the-template-is-a-working-example-not-an-empty-skeleton">2.1 The template is a *working example*, not an empty skeleton<a href="#batch-03/2-1-the-template-is-a-working-example-not-an-empty-skeleton" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>templates/crew/</code> ships <code>config/agents.yaml</code>, <code>config/tasks.yaml</code>, <code>crew.py</code>, <code>main.py</code>, <code>pyproject.toml</code>,
+<code>README.md</code>, <code>knowledge/user_preference.txt</code>, <code>skills/</code>, and <code>tools/custom_tool.py</code>. The agent YAML is a
+real two-agent crew:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>yaml</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-yaml"># templates/crew/config/agents.yaml
+researcher:
+  role: &gt;
+    {topic} Senior Data Researcher
+  goal: &gt;
+    Uncover cutting-edge developments in {topic}
+  backstory: &gt;
+    You&#39;re a seasoned researcher with a knack for uncovering the latest
+    developments in {topic}. ...
+</code></pre>
+</div>
+<p><strong>Plain meaning:</strong> the <em>shape</em> of a workspace is <strong>config-as-data with <code>{placeholder}</code> variables</strong>, and the
+template proves the shape by being runnable. There is also a parallel <code>templates/crew/json_crew/</code> and
+<code>templates/declarative_flow/flow.yaml</code> — i.e. CrewAI ships <strong>three project flavours</strong>: decorator-Python,
+JSON, and declarative-YAML flow.</p>
+<h3 id="2-2-main-py-is-the-workspace-verbs-surface">2.2 `main.py` is the "workspace verbs" surface<a href="#batch-03/2-2-main-py-is-the-workspace-verbs-surface" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>The generated <code>main.py</code> defines exactly <strong>five verbs</strong>, and they are the vocabulary of a runnable
+workspace: <code>run()</code>, <code>train()</code>, <code>replay()</code>, <code>test()</code>, <code>run_with_trigger()</code>. <code>run_with_trigger</code> is the
+interesting one — it takes a <strong>JSON payload on argv</strong>, wraps it as <code>crewai_trigger_payload</code>, and kicks
+off:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>python</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-python">trigger_payload = json.loads(sys.argv[1])
+inputs = {&quot;crewai_trigger_payload&quot;: trigger_payload, &quot;topic&quot;: &quot;&quot;, &quot;current_year&quot;: &quot;&quot;}
+result = {{crew_name}}().crew().kickoff(inputs=inputs)
+</code></pre>
+</div>
+<p><strong>Plain meaning:</strong> CrewAI&#39;s workspace has a <strong>built-in idea of being triggered by an external event with
+a JSON payload</strong> — which is precisely our P3 (automations) seam, surfaced in the P2 file.</p>
+<hr>
+<h2 id="3-the-binding-how-yaml-meets-python">3. The binding: how YAML meets Python<a href="#batch-03/3-the-binding-how-yaml-meets-python" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>The <code>@CrewBase</code> decorator (<code>project/crew_base.py:814</code>, metaclass <code>_CrewBaseType</code>) turns an ordinary class
+into a crew definition. The decorators that mark its methods are tiny and uniform
+(<code>project/annotations.py</code>): <code>@agent</code> (<code>:78</code>), <code>@task</code> (<code>:66</code>), <code>@llm</code> (<code>:90</code>), <code>before_kickoff</code> (<code>:42</code>),
+<code>after_kickoff</code> (<code>:54</code>) — each simply wraps the method in a typed marker object <strong>and memoises it</strong>
+(<code>annotations.py:75,87,99</code>).</p>
+<p>At construction time the framework:</p>
+<ol>
+<li>resolves the config paths and base directory (<code>crew_base.py:135</code>, <code>:147</code>);</li>
+<li>loads the two YAML files into <code>agents_config</code> / <code>tasks_config</code> (<code>load_configurations</code>, <code>:368</code>;
+<code>_load_config</code>, <code>:337</code>; <code>load_yaml</code>, <code>:378</code>);</li>
+<li><strong>maps YAML string references to live objects</strong> — <code>map_all_agent_variables</code> (<code>:621</code>) and
+<code>map_all_task_variables</code> (<code>:689</code>).</li>
+</ol>
+<p>The mapping is the clever part (<code>_map_agent_variables</code>, <code>:643</code>). A YAML entry may name an <code>llm</code>, a
+<code>tools</code> list, a <code>cache_handler</code>, or a <code>step_callback</code> <strong>as a string</strong>; the mapper looks the name up among
+the class&#39;s marked methods and calls it:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>text</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code>crew_base.py:663   if llm := agent_info.get(&quot;llm&quot;):
+crew_base.py:664       factory = llms.get(llm)
+crew_base.py:665       self.agents_config[agent_name][&quot;llm&quot;] = factory() if factory else llm
+crew_base.py:667   if tools := agent_info.get(&quot;tools&quot;):
+crew_base.py:669       self.agents_config[agent_name][&quot;tools&quot;] = [tool_functions[tool]() for tool in tools]
+</code></pre>
+</div>
+<p><strong>Plain meaning:</strong> the YAML is <strong>not a second source of truth that can drift</strong> — it is a <em>reference by
+name</em> into the Python class. <code>llm: my_llm</code> in YAML becomes whatever <code>@llm def my_llm()</code> returns. If the
+name is not found, the <strong>string is kept as-is</strong> (<code>:665</code>), which is how a raw model name can appear
+directly in the YAML. This is a <em>typed string-reference resolution</em> pattern, and it is a cleaner answer
+to &quot;config vs code&quot; than either duplicating values or code-generating them.</p>
+<p>Both <code>crew.py</code> (decorators) and <code>json_loader.py</code> (<code>JSONCrewProject</code>, <code>:158</code>) resolve to the same
+<code>CrewDefinition</code> model (<code>project/crew_definition.py:297</code>) — <strong>one definition, three authoring syntaxes.</strong></p>
+<hr>
+<h2 id="4-files-a-first-class-subsystem-not-an-afterthought">4. Files — a first-class subsystem, not an afterthought<a href="#batch-03/4-files-a-first-class-subsystem-not-an-afterthought" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>crewai-files</code> is a separate package (33 files / 8,165 lines) for one reason: <strong>a file must be delivered
+to a model differently depending on which model you use.</strong> The structure shows it plainly:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>text</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code>core/        types.py (ImageFile, PDFFile, TextFile, AudioFile), sources.py, resolved.py
+processing/  constraints.py, transformers.py, validators.py, enums.py
+formatting/  anthropic.py, bedrock.py, gemini.py, openai.py, api.py
+uploaders/   anthropic.py, bedrock.py, gemini.py, openai.py, base.py, factory.py
+resolution/  resolver.py
+cache/       upload_cache.py, cleanup.py, metrics.py
+</code></pre>
+</div>
+<ul>
+<li><strong><code>FileMode = Literal[&quot;strict&quot;, &quot;auto&quot;, &quot;warn&quot;, &quot;chunk&quot;]</code></strong> (<code>core/types.py:67</code>) — four policies for how
+to handle a file a provider cannot accept directly (e.g. chunk it, warn, or refuse).</li>
+<li><strong><code>_FileSourceCoercer</code></strong> (<code>core/types.py:28</code>) accepts a <code>str</code> (path <em>or</em> URL), a <code>Path</code>, <code>bytes</code>, or a
+stream, and coerces it into one of <code>FilePath</code> / <code>FileUrl</code> / <code>FileBytes</code> / <code>FileStream</code> (<code>:32-46</code>).</li>
+<li><strong><code>FileUploader</code></strong> (<code>uploaders/base.py:31</code>) is the provider contract: <code>provider_name</code> (<code>:39</code>) and
+<code>upload(file, purpose) -&gt; UploadResult</code> (<code>:43</code>), where <code>UploadResult</code> (<code>:13</code>) carries <code>file_id</code>,
+<code>provider</code>, <code>content_type</code>, <code>file_uri</code>, <strong><code>expires_at</code></strong>.</li>
+<li><strong><code>upload_cache.py</code></strong> caches uploads by content hash with a TTL and a <strong>max entry count</strong>, so the same
+file is not re-uploaded to the same provider twice (<code>cache/upload_cache.py</code>).</li>
+</ul>
+<p><strong>Plain meaning:</strong> this is the pattern to copy when files enter an AI system: <strong>model the source, the
+constraints, the per-provider format, and the cache as four separate things</strong>, and let a <code>factory</code> choose
+the uploader. The <code>expires_at</code> on an upload is a detail our platform will otherwise forget.</p>
+<hr>
+<h2 id="5-knowledge-the-readable-content-substrate">5. Knowledge — the readable content substrate<a href="#batch-03/5-knowledge-the-readable-content-substrate" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>Knowledge</code> (<code>knowledge/knowledge.py:88</code>) is a <code>BaseModel</code> that owns <code>sources</code> and an <code>embedder</code>, and
+exposes three methods: <code>query(...)</code> (<code>:135</code>), <code>add_sources()</code> (<code>:154</code>), <code>reset()</code> (<code>:162</code>). Ten source
+types ship in <code>knowledge/source/</code>:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>text</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code>base_knowledge_source.py · base_file_knowledge_source.py
+text_file · pdf · csv · excel · json · string · crew_docling (documents via Docling)
+</code></pre>
+</div>
+<p><strong>Plain meaning:</strong> &quot;knowledge&quot; is <strong>a known document set attached to an agent or a crew, queried by
+similarity</strong> — deliberately simpler than memory (which is written during the run; knowledge is added
+before it). The <code>collection_name</code> on an agent&#39;s knowledge defaults to its <strong>role</strong>
+(<code>agent/core.py:587</code>), which is a neat but <em>implicit</em> tenancy key — worth noting and <strong>not</strong> worth
+copying blindly (roles are not unique).</p>
+<hr>
+<h2 id="6-mcp-transports-the-workspace-s-tool-server-door">6. MCP transports — the workspace's tool-server door<a href="#batch-03/6-mcp-transports-the-workspace-s-tool-server-door" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>mcp/transports/</code> contains exactly four files: <code>base.py</code>, <code>stdio.py</code>, <code>http.py</code>, <code>sse.py</code>. Three
+transports, one base. Combined with the config models of Batch 02 (<code>MCPServerStdio</code> / <code>MCPServerHTTP</code> /
+<code>MCPServerSSE</code>), the picture is complete: <strong>CrewAI treats &quot;an external tool server&quot; as a configured
+endpoint with a transport, an optional credential header, and an optional tool filter.</strong></p>
+<p><strong>Plain meaning:</strong> the MCP layer is small, complete and boring on purpose — which is what a
+<em>transport seam</em> should be. Our own <code>lib/hermes-gateway-transport.ts</code> seam is the same idea, and this
+batch confirms the shape is standard.</p>
+<hr>
+<h2 id="7-deploy-the-workspace-s-other-half">7. Deploy — the workspace's other half<a href="#batch-03/7-deploy-the-workspace-s-other-half" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>lib/cli/src/crewai_cli/deploy/</code> is 2,287 lines: <code>validate.py</code> (1,206), <code>main.py</code> (913), <code>archive.py</code>
+(168). <code>DeployCommand</code> (<code>deploy/main.py:274</code>) is a <code>BaseCommand</code> + <code>PlusAPIMixin</code> — i.e. it talks to
+CrewAI&#39;s own cloud (&quot;Plus&quot; API). Before deploying it:</p>
+<ul>
+<li>refuses on a <strong>running comparison</strong> (<code>_refuse_on_running_comparison</code>, <code>:193</code>);</li>
+<li>requires a <strong>lockfile</strong> (<code>_needs_lockfile_for_deploy</code>, <code>:225</code>; <code>_ensure_lockfile_for_deploy</code>, <code>:233</code>);</li>
+<li>runs <strong>predeploy validation</strong> (<code>_run_predeploy_validation</code>, <code>:31</code>);</li>
+<li>prepares the project (<code>_prepare_project_for_deploy</code>, <code>:252</code>) and archives it (<code>archive.py</code>).</li>
+</ul>
+<p><strong>Plain meaning:</strong> CrewAI&#39;s answer to &quot;where does this live?&quot; is <strong>a zip of the folder, shipped to their
+cloud, with a validation gate in front</strong>. That is a <em>hosted-service</em> answer, not a workspace-as-data
+answer. It is also the clearest place where our platform&#39;s needs diverge from CrewAI&#39;s — recorded as a
+divergence below, not as a finding to copy.</p>
+<hr>
+<h2 id="8-findings-tagged-by-pole">8. Findings, tagged by pole<a href="#batch-03/8-findings-tagged-by-pole" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Finding (capability)</th>
+<th>Pole</th>
+<th>Plain words</th>
+<th>Q1</th>
+<th>Q2</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>3.1</td>
+<td><strong>A workspace is a text folder</strong></td>
+<td>P2</td>
+<td>Config as YAML, wiring as a small Python file, tools/knowledge/skills as subfolders.</td>
+<td>yes</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>3.2</td>
+<td><strong>Scaffolder validates the name against the language&#39;s rules</strong></td>
+<td>P2</td>
+<td>Five named rejections <em>before</em> anything is created (digit, keyword, identifier, reserved, empty).</td>
+<td>yes</td>
+<td><strong>yes</strong></td>
+</tr>
+<tr>
+<td>3.3</td>
+<td><strong>The template is runnable, not empty</strong></td>
+<td>P2</td>
+<td>A new workspace ships a working two-agent crew, so the shape is demonstrated.</td>
+<td>yes</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>3.4</td>
+<td><strong>String-reference resolution from config to code</strong></td>
+<td>P2 / P1</td>
+<td>YAML names an <code>llm</code>/<code>tool</code>/<code>callback</code>; the framework resolves it to a live object <strong>by name</strong>, falling back to the raw string.</td>
+<td>partial</td>
+<td><strong>yes</strong></td>
+</tr>
+<tr>
+<td>3.5</td>
+<td><strong>One definition, three authoring syntaxes</strong></td>
+<td>P2</td>
+<td>Decorators, JSON and declarative YAML all produce the same <code>CrewDefinition</code>.</td>
+<td>partial</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>3.6</td>
+<td><strong>Workspace verbs</strong></td>
+<td>P2 / P3</td>
+<td><code>run</code> · <code>train</code> · <code>replay</code> · <code>test</code> · <code>run_with_trigger</code> — the last takes a JSON payload from the outside.</td>
+<td>yes</td>
+<td><strong>yes</strong></td>
+</tr>
+<tr>
+<td>3.7</td>
+<td><strong>Files as a four-part subsystem</strong></td>
+<td>P2</td>
+<td>Source coercion → constraints/transform → per-provider format → upload with a cache and expiry.</td>
+<td>yes</td>
+<td><strong>yes</strong></td>
+</tr>
+<tr>
+<td>3.8</td>
+<td><strong><code>FileMode</code> = strict/auto/warn/chunk</strong></td>
+<td>P2</td>
+<td>An explicit policy for &quot;the model cannot take this file&quot;; not a silent failure.</td>
+<td>yes</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>3.9</td>
+<td><strong>Knowledge = a known document set, added before the run</strong></td>
+<td>P1 / P2</td>
+<td>Ten source types; queried by similarity; separate from run-time memory.</td>
+<td>yes</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>3.10</td>
+<td><strong>MCP = 3 transports behind one base</strong></td>
+<td>P2</td>
+<td>stdio / HTTP / SSE, each configurable with its own credential header.</td>
+<td>yes</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>3.11</td>
+<td><strong>Deploy = validate → lockfile → zip → vendor cloud</strong></td>
+<td>PZ</td>
+<td>The workspace&#39;s distribution story is a hosted upload, refusing on a running deployment.</td>
+<td>no</td>
+<td>noted</td>
+</tr>
+<tr>
+<td>3.12</td>
+<td><strong>The agent does not exist as a record</strong></td>
+<td>P2</td>
+<td><strong>The gap:</strong> the workspace holds <em>files that describe</em> agents; it never holds agents as data.</td>
+<td>—</td>
+<td>—</td>
+</tr>
+</tbody></table></div>
+<p><strong>Reading the table.</strong> <strong>3.2</strong>, <strong>3.4</strong> and <strong>3.7</strong> are the three things worth carrying into our SRS.
+<strong>3.2</strong> is cheap and improves every future &quot;create&quot; flow. <strong>3.4</strong> is the cleanest answer we have seen to
+the config-vs-code tension that has already cost this project rework. <strong>3.7</strong> is a <em>complete</em> file model,
+and files entering an AI system is certain to be needed. <strong>3.12</strong> is the honest gap: CrewAI&#39;s workspace is
+a <strong>folder of descriptions</strong>, and our workspace must be <strong>a container of records</strong> — the two are not the
+same object and must not be conflated in the mapping pass.</p>
+<hr>
+<h2 id="9-doc-vs-code-divergences-recorded">9. Doc-vs-code divergences recorded <span class="seal-badge" style="background:#fef2f2; color:#dc2626; border-color:#fca5a5; font-size: 0.65em; vertical-align: middle;">⚠️ FINDING NOTE</span><a href="#batch-03/9-doc-vs-code-divergences-recorded" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<ol>
+<li><strong>The docs say &quot;workspace&quot;; the code has a folder.</strong> There is no workspace entity, no workspace id and
+no workspace-level permission anywhere in <code>lib/**</code>. Anything a reader infers about a <em>shared</em> or
+<em>multi-user</em> workspace is not in the code.</li>
+<li><strong><code>agents.yaml</code> config paths are optional and fail soft.</strong> <code>_load_config</code> logs a warning and returns
+<code>{}</code> when the file is missing (<code>crew_base.py:354-359</code>), so a mis-named config file produces <strong>an empty
+crew</strong>, not an error — a silent-failure path of exactly the kind this project has been burnt by.</li>
+<li><strong>Knowledge collection name defaults to the agent&#39;s <em>role</em></strong> (<code>agent/core.py:587</code>). Roles are not
+unique, so two agents with the same role share a knowledge collection. Not documented as a hazard.</li>
+<li><strong><code>deploy</code> requires a lockfile</strong>, so deploying a project without one fails at a step the docs present
+as optional (<code>deploy/main.py:225</code>).</li>
+</ol>
+<hr>
+<h2 id="10-carried-forward">10. Carried forward<a href="#batch-03/10-carried-forward" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<ul>
+<li><strong>Batch 04 (P3 automations)</strong> will take the two threads this batch opened: <strong>3.6</strong> (<code>run_with_trigger</code>,
+ the JSON-payload door into a crew) and the Flow engine&#39;s durability, and test whether CrewAI has a real
+notion of <em>a task arriving and being scheduled</em>.</li>
+<li><strong>The gap recorded in 3.12 becomes a standing question for the mapping pass:</strong> CrewAI&#39;s <em>folder</em> and our
+<em>record-store</em> workspace are different objects; the mapping must say which CrewAI ideas survive the
+change of substrate.</li>
+<li><strong><code>3.4</code> (string-reference resolution)</strong> is a candidate pattern for our own config-vs-code problem; note
+it for the SRS, and do not resolve it here.</li>
+</ul>
+<hr>
+<p><em>Batch 03 of 07. Written 2026-10-15. Every line number is <code>file:line</code> in
+<code>library/architecture/platforms/_extracted/crewAI-main/</code>. No comparison to our platform is made here beyond
+naming the gap — the mapping pass comes later. Next: <code>findings/04-automations.md</code> (P3).</em></p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="02-the-aissistant-p1.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">The Aissistant (P1)</span>
+                </a>
+              
+
+              <a href="../index.html#batch-03" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              
+                <a href="04-automations-p3.html" class="nav-page-btn" style="text-align:right;">
+                  <span class="nav-btn-sub">Next Batch →</span>
+                  <span class="nav-btn-title">Automations (P3)</span>
+                </a>
+              
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#0-in-plain-words-where-does-a-crewai-workspace-live" class="toc-link">0. In plain words — where does a CrewAI &quot;workspace&quot; live?</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#1-what-was-read-and-its-measured-size" class="toc-link">1. What was read, and its measured size</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#2-the-project-template-a-workspace-as-a-folder" class="toc-link">2. The project template — a workspace as a folder</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-1-the-template-is-a-working-example-not-an-empty-skeleton" class="toc-link">2.1 The template is a *working example*, not an empty skeleton</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-2-main-py-is-the-workspace-verbs-surface" class="toc-link">2.2 main.py is the &quot;workspace verbs&quot; surface</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-the-binding-how-yaml-meets-python" class="toc-link">3. The binding: how YAML meets Python</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-files-a-first-class-subsystem-not-an-afterthought" class="toc-link">4. Files — a first-class subsystem, not an afterthought</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-knowledge-the-readable-content-substrate" class="toc-link">5. Knowledge — the readable content substrate</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-mcp-transports-the-workspace-s-tool-server-door" class="toc-link">6. MCP transports — the workspace&#039;s tool-server door</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-deploy-the-workspace-s-other-half" class="toc-link">7. Deploy — the workspace&#039;s other half</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#8-findings-tagged-by-pole" class="toc-link">8. Findings, tagged by pole</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#9-doc-vs-code-divergences-recorded" class="toc-link">9. Doc-vs-code divergences recorded</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#10-carried-forward" class="toc-link">10. Carried forward</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('crewai_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('crewai_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('crewai_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('crewai_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.CrewAIReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

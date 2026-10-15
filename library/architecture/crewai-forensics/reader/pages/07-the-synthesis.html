@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 07 — The synthesis — CrewAI Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-07" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 07</span>
+      <div class="header-title-wrap">
+        <div class="header-title">The Synthesis</div>
+        <div class="header-subtitle">CrewAI Platform Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/07-SYNTHESIS.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #4f46e5">COMPLETE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">4,407</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">22 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">400</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-15</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 07 Architecture Guide (Default)</option>
+            <optgroup label="Strategic Architecture">
+              <option value="master">Executive Topology: three poles, one executor, two absent clusters</option>
+            </optgroup>
+            <optgroup label="Foundations">
+              <option value="00">Batch 00: The pin, the 93% docs hazard, and the method</option>
+              <option value="01">Batch 01: The one door, the spine &amp; the second paradigm</option>
+            </optgroup>
+            <optgroup label="Pole 1 — The Aissistant">
+              <option value="02">Batch 02: The aissistant — a small agent &amp; an empty seam</option>
+            </optgroup>
+            <optgroup label="Pole 2 — The Workspace">
+              <option value="03">Batch 03: The workspace — a folder that binds text to code</option>
+            </optgroup>
+            <optgroup label="Pole 3 — Automations">
+              <option value="04">Batch 04: Automations — executor yes, delivery no</option>
+            </optgroup>
+            <optgroup label="Cross-Cutting">
+              <option value="05">Batch 05: Widgets &amp; frontend — empty front, real protocol</option>
+            </optgroup>
+            <optgroup label="Escape Hatch">
+              <option value="06">Batch 06: Out-of-pole (PZ) — the tenancy question, closed</option>
+            </optgroup>
+            <optgroup label="Strategic Decision">
+              <option value="07">Batch 07: The synthesis — transfer matrix &amp; the verdict</option>
+            </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 07 VISUAL GUIDE — STRATEGIC DECISION</div>
+    <h4>The synthesis: what to take, what it does not give us, and the verdict</h4>
+    <p>The transfer matrix that closes the CrewAI study and feeds the coming cross-platform mapping step</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 360" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-07" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-07" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+        <marker id="arrr-07" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#ef4444"/>
+        </marker>
+      </defs>
+      <g transform="translate(20, 20)">
+        <rect width="430" height="165" rx="10" fill="#10b981" fill-opacity="0.09" stroke="#10b981" stroke-width="1.6"/>
+        <text x="16" y="30" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#047857">★ TAKE — ranked mechanisms</text>
+        <text x="16" y="56" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">1 · Widget catalogue + allowed_components enforcement (PX-W)</text>
+        <text x="16" y="74" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">2 · Progress as a set of completed names (P3)</text>
+        <text x="16" y="92" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">3 · First-wins or_ racing, with the and_ rule (P3)</text>
+        <text x="16" y="110" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">4 · Deterministic identity from a seed (P1)</text>
+        <text x="16" y="128" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">5 · The typed tool-failure precedent chain (P1)</text>
+        <text x="16" y="146" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">… 12 ranked mechanisms in total (§7.3)</text>
+        <text x="16" y="162" font-family="system-ui, sans-serif" font-size="10.5" font-weight="600" fill="#059669">The top three are about bounded vocabulary and honest state — not scale.</text>
+      </g>
+
+      <g transform="translate(470, 20)">
+        <rect width="430" height="165" rx="10" fill="#ef4444" fill-opacity="0.07" stroke="#ef4444" stroke-width="1.6"/>
+        <text x="16" y="30" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#b91c1c">✗ DO NOT ASSUME — it does not give us</text>
+        <text x="16" y="56" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">• Tenancy of any kind — none, at any layer</text>
+        <text x="16" y="74" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">• Authorization / roles — login only</text>
+        <text x="16" y="92" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">• Agent as a stored record — computed, never filed</text>
+        <text x="16" y="110" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">• Organisation / reporting structure</text>
+        <text x="16" y="128" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">• A queue, worker, scheduler or clock</text>
+        <text x="16" y="146" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">• A web frontend, or a renderer for A2UI</text>
+        <text x="16" y="162" font-family="system-ui, sans-serif" font-size="10.5" font-weight="600" fill="#b91c1c">These are BUILD, not adapt — before the mapping pass looks at any row.</text>
+      </g>
+
+      <rect x="20" y="200" width="880" height="140" rx="10" fill="#7c3aed" fill-opacity="0.08" stroke="#7c3aed" stroke-width="1.6"/>
+      <text x="40" y="228" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#6d28d9">THE VERDICT IN ONE PARAGRAPH: mechanism donor, not architecture template</text>
+      <text x="40" y="254" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">CrewAI is a mature, well-abstracted Python framework for declaring and executing agent workflows on one machine for one owner.</text>
+      <text x="40" y="274" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">Its scope ends precisely where our hard problems begin: no tenancy, no authorization, no agent records, no org, no queue, no delivery.</text>
+      <text x="40" y="298" font-family="system-ui, sans-serif" font-size="11.5" font-weight="600" fill="#6d28d9">Take the cheques it writes; build the ownership and delivery layers ourselves, without looking for a model of them here.</text>
+      <text x="40" y="322" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-muted, #64748b)">Where this study's 67 findings collide with a candidate platform's, the collision is recorded — not smoothed (rule 13).</text>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="crewai-forensics-batch-07-the-synthesis">CrewAI forensics — Batch 07: the synthesis<a href="#batch-07/crewai-forensics-batch-07-the-synthesis" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Scope of this batch.</strong> Batches 00–06 measured CrewAI from code. This batch does what a synthesis
+must: state the platform&#39;s verdict in plain words, name the mechanisms worth carrying into the
+mapping pass, state plainly what CrewAI does <strong>not</strong> give us, and answer the two value questions
+the method requires. It is a <em>reading</em> of the six batches — no new claims about the source are
+introduced here, and every claim restates a <code>file:line</code> already established and verified in its
+originating batch.</p>
+<p><strong>Method rules in force.</strong> Read from <code>lib/**/*.py</code> only; <code>docs/**/*.mdx</code> never used as authority
+(rule 1). No platform comparison (rule 5) — this batch compares <strong>batches to each other</strong>, never
+CrewAI to our platform; that is the mapping pass&#39;s job. Pole-tag everything (rule 9). Name every
+capability (rule 6). Answer the two value questions (rule 4). Report the negatives (rule 6).
+Correct earlier batches where later evidence demands it (rule 13).</p>
+<p>Version <code>1.15.28</code>. Tree: <code>library/architecture/platforms/_extracted/crewAI-main/</code>.</p>
+<hr>
+<h2 id="7-1-the-measured-page">7.1 The measured page<a href="#batch-07/7-1-the-measured-page" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Everything below was counted or read, not estimated.</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Quantity</th>
+<th>Measured</th>
+<th>Source batch</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Zip md5</td>
+<td><code>cd93b15634e2c83ed371553b89533324</code></td>
+<td>00</td>
+</tr>
+<tr>
+<td>Archive</td>
+<td>41,081 entries / 35,755 files / 430 MB; <strong>no <code>.git</code></strong></td>
+<td>00</td>
+</tr>
+<tr>
+<td>Version</td>
+<td><code>__version__ = &quot;1.15.28&quot;</code></td>
+<td>00</td>
+</tr>
+<tr>
+<td>Workspace members</td>
+<td><strong>6</strong> (<code>crewai</code>, <code>crewai-core</code>, <code>crewai-tools</code>, <code>cli</code>, <code>crewai-files</code>, <code>devtools</code>)</td>
+<td>00</td>
+</tr>
+<tr>
+<td><code>lib/**</code> Python</td>
+<td><strong>1,411 <code>.py</code> / 492,582 lines</strong></td>
+<td>00</td>
+</tr>
+<tr>
+<td><code>docs/</code></td>
+<td><strong>33,251 <code>.mdx</code> / 292 MB = 93% of every file</strong>; 45 version-trees × 4 languages</td>
+<td>00</td>
+</tr>
+<tr>
+<td><code>crewai-core</code></td>
+<td>138,480 lines, of which <strong>134,056 = one generated catalog file</strong></td>
+<td>00</td>
+</tr>
+<tr>
+<td>Hand-written <code>crewai-core</code></td>
+<td><strong>4,424 lines</strong></td>
+<td>00</td>
+</tr>
+<tr>
+<td>Flow engine</td>
+<td><code>flow/runtime/__init__.py</code> = <strong>4,051 lines</strong></td>
+<td>04</td>
+</tr>
+<tr>
+<td>A2A</td>
+<td><strong>13,955 lines</strong></td>
+<td>04</td>
+</tr>
+<tr>
+<td>A2UI</td>
+<td><strong>3,669 lines</strong> (18 components, 2 protocol generations)</td>
+<td>05</td>
+</tr>
+<tr>
+<td>MCP client</td>
+<td><strong>2,716 lines</strong></td>
+<td>06</td>
+</tr>
+<tr>
+<td>Textual TUI</td>
+<td><strong>3,278 lines</strong> (plus 871 + 393 + 565 in three more)</td>
+<td>05</td>
+</tr>
+<tr>
+<td>Security layer</td>
+<td><strong>274 lines</strong> (and 3 of 4 purposes are <code>TODO</code>)</td>
+<td>06</td>
+</tr>
+<tr>
+<td>CLI</td>
+<td>19,543 lines</td>
+<td>03</td>
+</tr>
+<tr>
+<td>Typed events</td>
+<td><strong>163 classes</strong></td>
+<td>01</td>
+</tr>
+<tr>
+<td>Findings written</td>
+<td><strong>67</strong> (14 + 12 + 12 + 12 + 10 + 8 across batches 01–06, plus 00&#39;s pin)</td>
+<td>all</td>
+</tr>
+<tr>
+<td>Divergences recorded</td>
+<td><strong>23</strong> (4 + 4 + 4 + 4 + 3 + 4)</td>
+<td>all</td>
+</tr>
+</tbody></table></div>
+<p><strong>➜ F7-1 [foundational] — The archive is 93 % documentation and 7 % code, the docs are 180
+near-copies, and one file is 27 % of the &quot;core&quot; package.</strong> <strong>Plain meaning:</strong> any study that read
+the docs would have read the same claim 180 times; any study that judged by line count would think
+<code>crewai-core</code> is huge when 97 % of it is a generated catalog. <strong>Why it matters:</strong> the method&#39;s first
+rule was load-bearing, not stylistic, and the two hazards were measured before any finding was
+written.</p>
+<hr>
+<h2 id="7-2-the-three-poles-headlined">7.2 The three poles, headlined<a href="#batch-07/7-2-the-three-poles-headlined" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="pole-1-the-aissistant">Pole 1 — The aissistant<a href="#batch-07/pole-1-the-aissistant" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><strong>CrewAI has a genuinely good <em>agent</em> and a genuinely absent <em>member</em>.</strong></p>
+<p>What is strong: an agent is a small, honest object — persona is three fields (<code>role</code>/<code>goal</code>/
+<code>backstory</code>, <code>agents/agent_builder/base_agent.py:256-258</code>), identity is a frozen uuid (<code>:255</code>), and
+the whole extension surface is exactly <strong>six abstract methods</strong> (<code>:668-701</code>): <code>execute_task</code>,
+<code>aexecute_task</code>, <code>create_agent_executor</code>, <code>get_delegation_tools</code>, <code>get_platform_tools</code>,
+<code>get_mcp_tools</code>. That is a complete and readable definition of &quot;what an agent must be able to do&quot;.
+The executor branches on capability — native tool-calling (<code>crew_agent_executor.py:505</code>) sits on top
+of a ReAct text loop (<code>:352</code>), so tool-calling is an <em>optimisation</em>, not the loop, and the framework
+stays model-agnostic. Memory is top-5 recall (<code>agent/core.py:787-795</code>). Planning is explicit and
+tiered (<code>agent/planning_config.py:11</code>, three effort levels <code>:79</code>, its own <code>llm</code> <code>:143</code>). Tool
+failure is typed all the way down, with a <strong>precedent chain</strong> <code>tool → task → agent → crew → WARN</code>
+(<code>tools/tool_failure.py:35-71</code>, <code>:185-208</code>) — a real answer to &quot;what happens when a tool breaks&quot;.</p>
+<p>What is absent: an agent is <strong>not a record</strong>. There is no registry, no table, no directory of
+agents; a fingerprint is generated and then held in memory or passed explicitly. Identity itself is
+excellent as a <em>primitive</em> — dual id (human-readable name + uuid, <code>security/fingerprint.py:41-50</code>),
+random by default, <strong>deterministic from a seed</strong> via <code>uuid5</code> (<code>:88</code>), carrying one level of
+validated metadata (<code>:17-36</code>) — but nothing files it. There is no org chart, no reporting line, no
+lifecycle beyond construction and execution.</p>
+<p><strong>Pole 1 verdict, plainly:</strong> CrewAI teaches us what an <em>agent</em> is and gives us an identity primitive
+we can compute without a database. It does not give us an <em>employee</em> — nothing that is hired,
+recorded, placed in an organisation, or retired. That half is ours.</p>
+<h3 id="pole-2-the-workspace">Pole 2 — The workspace<a href="#batch-07/pole-2-the-workspace" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><strong>CrewAI&#39;s workspace is a folder, and the interesting part is how the folder binds to code.</strong></p>
+<p>A project is real and opinionated: a scaffolder with five <em>named</em> name-rejections
+(<code>cli/create_crew.py:59-95</code>) and a fixed layout (<code>:148-155</code>); a runnable template whose <code>main.py</code>
+exposes the verbs <code>run</code>/<code>train</code>/<code>replay</code>/<code>test</code>/<code>run_with_trigger</code>; and a YAML↔Python binding that
+resolves <strong>string references</strong> (<code>project/crew_base.py:621-671</code> — YAML says <code>&quot;researcher&quot;</code>, Python
+holds the object) with a single <code>CrewDefinition</code> (<code>project/crew_definition.py:297</code>) materialised from
+three different syntaxes. Files are a first-class subsystem (<code>crewai-files</code>: four
+<code>FileMode</code> values <code>core/types.py:67</code>, a coercion layer <code>:28</code>, an uploader with an <code>expires_at</code>
+<code>uploaders/base.py:13/:31</code>, an upload cache). Knowledge is one class (<code>knowledge/knowledge.py:88</code>)
+with ten source types and a per-agent collection name of <code>self.role</code> (<code>agent/core.py:587</code>).</p>
+<p><strong>Pole 2 verdict, plainly:</strong> the <em>folder contract</em> — how a directory of YAML describes a team, and
+how those strings resolve into objects — is the reusable idea. But again there is <strong>no tenancy</strong>: a
+workspace is one folder owned by one person running one process. No sharing, no membership, no
+permissions on the folder.</p>
+<h3 id="pole-3-automations">Pole 3 — Automations<a href="#batch-07/pole-3-automations" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><strong>This is the sharpest finding in the study, and it is a clean split.</strong></p>
+<p>What CrewAI does <em>not</em> have, measured by search: <strong>no scheduler, no queue, no worker, no clock,
+no cron, no retry, no backoff, no expiry, no ownership record.</strong> &quot;Trigger&quot; is a naming convention —
+<code>crewai_trigger_payload</code> is an ordinary <code>kickoff(inputs=…)</code> key the runtime injects into a start
+method that <em>declares</em> the parameter (<code>flow/runtime/__init__.py:2868-2903</code>), silently dropped
+with a log line if it doesn&#39;t (<code>:2883-2886</code>); and the only definitions of <code>run_with_trigger</code> in the
+tree are in two scaffolding templates, parsing <code>sys.argv[1]</code> as JSON by hand. Delegation — &quot;assign a
+task to a teammate&quot; — is an <strong>inline, synchronous, unrecorded function call</strong>: it builds a throwaway
+<code>Task</code> and calls <code>execute_task</code> on the calling thread
+(<code>tools/agent_tools/base_agent_tools.py:112-120</code>).</p>
+<p>What CrewAI does have, and it is good: a <strong>declared workflow graph</strong> (<code>Flow</code>) with first-wins racing
+on <code>or_</code> — including the subtle and <em>correct</em> rule that only exclusively-fed alternatives race,
+because cancelling a member of an <code>and_</code> would make it unsatisfiable forever
+(<code>flow/runtime/__init__.py:1132-1178</code>, enforced at <code>:1205-1254</code>); progress represented as <strong>a set of
+completed method names</strong> (<code>:184</code>, <code>:243</code>, <code>:3306</code>), which is exactly the durable-friendly shape;
+<strong>two</strong> durability systems — append-only per-method rows (<code>flow/persistence/sqlite.py:44</code>, schema at
+<code>:113-138</code>) and whole-run checkpoints (<code>state/checkpoint_config.py</code>) — which the engine <strong>forbids
+combining</strong> with a <code>ValueError</code> (<code>:2128-2133</code>); and one genuine &quot;wait for an outside event&quot;
+primitive: a <code>pending_feedback</code> row plus <code>from_pending(flow_id).resume(text)</code>
+(<code>:1256</code>, <code>:1345</code>), whose own docstring names a webhook handler as the thing that calls it
+(<code>:1372-1375</code>) — because <strong>nothing in CrewAI does.</strong></p>
+<p><strong>Pole 3 verdict, plainly:</strong> CrewAI supplies an excellent <em>executor</em> and a credible <em>durability
+store</em>, and <strong>no delivery layer at all</strong>. Work does not arrive; it is started. Nothing is responsible
+for a paused run.</p>
+<h3 id="px-w-px-f-widgets-and-frontend">PX-W / PX-F — Widgets and frontend<a href="#batch-07/px-w-px-f-widgets-and-frontend" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><strong>An empty frontend and a real widget protocol.</strong></p>
+<p>Measured: no <code>package.json</code>, no HTML/Vue/Svelte outside <code>docs/</code>, no JS or TS anywhere — CrewAI ships
+<strong>no frontend of any kind</strong> (F5-1). What exists is four unrelated surfaces: a 3,278-line Textual
+TUI that is essentially a live subscriber to the event bus (F5-10), a Jinja2 renderer that draws the
+flow from the same <code>FlowDefinition</code> the engine executes (<code>flow/runtime/__init__.py:4002</code>,
+<code>visualization/</code>), a Mintlify docs site it does not build (D5-2), and — the real find — <strong>A2UI</strong>
+(<code>a2a/extensions/a2ui/</code>, 3,669 lines): a <em>declarative widget protocol</em> with four message kinds
+(<code>models.py:106/123/134/148</code>), an 18-component typed catalogue with bindings, composition and
+actions (<code>catalog.py</code>), two protocol generations side by side whose deltas are the design decisions
+(<code>prompt.py:118-141</code>), produced by <strong>prompt augmentation rather than tool calls</strong> (<code>inject_tools</code> is
+an explicit no-op, <code>client_extension.py:212-213</code>), with <code>allowed_components</code> <strong>enforced on the
+response</strong> (<code>:397</code>, <code>:426</code>).</p>
+<p><strong>PX verdict, plainly:</strong> the frontend layer is entirely ours to build; the <em>vocabulary</em> and the
+<em>subsetting rule</em> are worth taking.</p>
+<hr>
+<h2 id="7-3-the-ranked-mechanisms-what-to-carry-forward">7.3 The ranked mechanisms — what to carry forward<a href="#batch-07/7-3-the-ranked-mechanisms-what-to-carry-forward" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Ranked by how much they would cost us to derive ourselves, i.e. value-first, not novelty-first.</p>
+<ol>
+<li><strong>The widget catalogue + <code>allowed_components</code> enforcement</strong> [PX-W] — a closed, typed set of 18
+components (<code>a2ui/catalog.py</code>) and, crucially, a subset <strong>checked on the way out</strong>
+(<code>client_extension.py:397</code>), not merely advertised in the prompt. <em>The only real enforcement
+mechanism found anywhere in the study.</em> (§5.3.2, §5.3.5)</li>
+<li><strong>Progress as a set of completed names</strong> [P3] — the representation that makes a workflow
+resumable in a fresh process without a scheduler (<code>flow/runtime/__init__.py:184</code>, <code>:3306</code>).
+(§4.4.2)</li>
+<li><strong>First-wins <code>or_</code> racing, with the unsatisfiable-<code>and_</code> rule</strong> [P3] — a non-obvious semantic,
+already correct, with the pitfall documented in the source&#39;s own comment (<code>:1132-1178</code>). (§4.4.1)</li>
+<li><strong>Deterministic identity from a seed</strong> [P1] — <code>uuid5(NAMESPACE, seed)</code>
+(<code>security/fingerprint.py:88</code>): stable identity across processes with <strong>no database</strong>. (§6.1)</li>
+<li><strong>The tool-failure precedent chain</strong> [P1] — typed failure with escalation
+<code>tool → task → agent → crew → WARN</code> (<code>tools/tool_failure.py:35-71</code>): a complete answer to
+&quot;what happens when a tool breaks&quot;, which most systems leave undefined. (§6.5)</li>
+<li><strong>The two-layer observability stack</strong> [foundational] — 163 typed events on a singleton bus with
+dependency-ordered handlers and replay (<code>events/event_bus.py:95</code>, <code>:673</code>), plus a coarser hook
+layer of 10 interception points that can <strong>abort</strong> (<code>hooks/dispatch.py:40</code>, <code>HookAborted:75</code>).
+(§7.5)</li>
+<li><strong>The <code>FlowDefinition</code>: one declaration, executed and drawn</strong> [P3/PX] — the same data drives the
+engine and the diagram (<code>flow/flow_definition.py</code>, <code>flow/visualization/builder.py</code>), so the
+picture cannot drift from the code. (§4.4.4, §5.4)</li>
+<li><strong>Checkpoint / resume / fork</strong> [P3] — <code>from_checkpoint</code>, <code>fork(branch=…)</code>, <code>restore_from_state_id</code>
+(<code>state/checkpoint_config.py</code>, <code>flow/runtime/__init__.py:2164-2189</code>), with the deliberate detail
+that a restored run gets a <strong>fresh id</strong> so history is preserved rather than overwritten. (§4.2.2)</li>
+<li><strong>An explicit data-minimisation claim in the source</strong> [PZ] — the telemetry docstring names the
+categories it does <em>not</em> send (<code>crewai_core/telemetry.py:1-9</code>): a privacy claim that is checkable
+in code rather than promised in a policy. (§6.4)</li>
+<li><strong>The six-method agent contract</strong> [P1] — <code>base_agent.py:668-701</code> is a compact, complete
+statement of what an agent must be able to do; useful as a checklist for our own aissistant.
+(§7.2)</li>
+<li><strong>Intra-run declarative parallelism</strong> [P3] — <code>Task.async_execution</code> + a <code>Future</code> list
+(<code>crew.py:1592</code>, <code>:1610-1619</code>): cheap, useful, and clearly <em>not</em> scheduling. (§4.3.2)</li>
+<li><strong>Hook-based extension without forking</strong> [PZ] — the hook layer lets a host observe and veto
+without touching framework internals; the pattern we would want for our own integration points.
+(§7.5)</li>
+</ol>
+<p><strong>➜ F7-2 [synthesis] — Twelve mechanisms worth carrying; the top three are all about <em>bounded
+vocabulary and honest state</em>, not about scale.</strong> <strong>Plain meaning:</strong> what CrewAI got most right is
+small: a fixed menu of things you may say, a way to write down where a run got to, and a rule for
+what happens when two paths race. <strong>Why it matters:</strong> these are cheap to adopt and expensive to
+invent, and none of them requires adopting CrewAI itself.</p>
+<hr>
+<h2 id="7-4-what-crewai-does-not-give-us">7.4 What CrewAI does NOT give us<a href="#batch-07/7-4-what-crewai-does-not-give-us" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Stated as plainly as the positives, because a study that only lists features is useless.</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Absent capability</th>
+<th>Measured how</th>
+<th>Batch</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Tenancy of any kind</strong></td>
+<td>no tenant type/column/param anywhere; <code>SecurityConfig</code> marks auth, scoping and impersonation <code>*TODO*</code> (<code>security/security_config.py:25,27,28</code>)</td>
+<td>06</td>
+</tr>
+<tr>
+<td><strong>Authorization / roles</strong></td>
+<td>five OAuth providers exist to <em>log you in</em> (<code>auth/providers/base_provider.py:10-46</code>); nothing decides what you may do</td>
+<td>06</td>
+</tr>
+<tr>
+<td><strong>Agent as a stored record</strong></td>
+<td>fingerprints are computed and passed, never filed; no registry</td>
+<td>02, 06</td>
+</tr>
+<tr>
+<td><strong>Organisation / reporting structure</strong></td>
+<td>no org model in the framework; organisations are a hosted-SaaS feature (<code>organization/main.py:19,55</code>)</td>
+<td>06</td>
+</tr>
+<tr>
+<td><strong>Hire / provision / retire lifecycle</strong></td>
+<td>agents are constructed and executed; there is no lifecycle</td>
+<td>02</td>
+</tr>
+<tr>
+<td><strong>A queue, worker, scheduler or clock</strong></td>
+<td>searched in both packages — none</td>
+<td>04</td>
+</tr>
+<tr>
+<td><strong>Trigger <em>delivery</em></strong></td>
+<td>a dict key plus a naming convention; hosted API does the rest</td>
+<td>04, 05</td>
+</tr>
+<tr>
+<td><strong>Retry / backoff / expiry / ownership of pending work</strong></td>
+<td>a pending run that nobody resumes stays pending, silently</td>
+<td>04</td>
+</tr>
+<tr>
+<td><strong>Task assignment as a handoff</strong></td>
+<td>delegation is an inline call that blocks the assigner</td>
+<td>04</td>
+</tr>
+<tr>
+<td><strong>A web frontend</strong></td>
+<td>no JS/TS/HTML app anywhere</td>
+<td>05</td>
+</tr>
+<tr>
+<td><strong>A renderer for the widget protocol</strong></td>
+<td>A2UI describes UI; nothing here draws it</td>
+<td>05</td>
+</tr>
+<tr>
+<td><strong>Docs usable as reference</strong></td>
+<td>180 near-copies across 45 versions × 4 languages, rendered by a third party</td>
+<td>00, 06</td>
+</tr>
+<tr>
+<td><strong>A populated tool-permission seam</strong></td>
+<td><code>ToolFilterContext</code> is well-shaped and unused (<code>mcp/filters.py:17-26</code>)</td>
+<td>02, 06</td>
+</tr>
+</tbody></table></div>
+<p><strong>➜ F7-3 [synthesis] — The absences cluster into one sentence: CrewAI has no model of <em>who owns
+what</em>, and no model of <em>work that arrives</em>.</strong> <strong>Plain meaning:</strong> it is a tool for running and
+watching a workflow that you start, as a person who is already logged in. Everything about
+ownership (tenants, roles, employees, records) and everything about delivery (queues, schedules,
+handoffs, responsibility) is outside it. <strong>Why it matters:</strong> these two clusters are, by construction,
+the parts of an &quot;AI-company OS&quot; that must exist — so they are the parts we cannot source from this
+platform at all. The mapping pass should treat them as <strong>build</strong>, not <strong>adapt</strong>, before it looks at
+any table row.</p>
+<hr>
+<h2 id="7-5-the-consistency-check-across-batches">7.5 The consistency check across batches<a href="#batch-07/7-5-the-consistency-check-across-batches" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>A synthesis must look for contradictions between its own inputs. Four were found and are recorded
+rather than smoothed:</p>
+<ol>
+<li><strong>Triggers.</strong> Batch 04 said &quot;trigger exists only in user templates&quot;. Batch 05 found a
+<code>TriggersCommand</code> (<code>cli/triggers/main.py:14</code>) and corrected this (D5-1): triggers are a <strong>hosted
+API feature</strong> driven <em>through</em> the template convention. Both statements are true of different
+layers; the correction stands.</li>
+<li><strong>Durability.</strong> Batch 01 recorded checkpoint/resume/fork as <em>the</em> reusability find; Batch 04
+found it is <strong>one of two</strong> state systems, mutually exclusive with <code>@persist</code> (D4-3), and that
+neither has an owner. Same mechanism, more complete picture.</li>
+<li><strong>Permissions.</strong> Batch 02 found the MCP tool-filter seam <strong>empty</strong>. Batch 05 found
+<code>allowed_components</code> <strong>enforced</strong>. These are not contradictory — they are two different seams,
+one of which happens to have a supplier — but the pattern (a well-shaped empty slot) is a warning
+worth carrying: <em>a seam nobody populates is indistinguishable from a feature nobody shipped.</em></li>
+<li><strong>Security.</strong> Batch 02 saw a <code>UserWarning</code> naming a single enterprise token and read it as a
+boundary. Batch 06 read <code>SecurityConfig</code> and found three of four purposes are <code>TODO</code> (D6-1),
+which <strong>explains</strong> the earlier observation rather than contradicting it: the boundary is a token
+check against a remote service.</li>
+</ol>
+<p><strong>➜ F7-4 [synthesis] — No batch was falsified by a later batch; four were completed by one.</strong>
+<strong>Plain meaning:</strong> the study held together, and each correction made the picture larger rather than
+replacing it. <strong>Why it matters:</strong> it means the 67 findings can be used as one body of evidence in
+the mapping pass, with the four corrections applied, rather than needing a re-read.</p>
+<hr>
+<h2 id="7-6-the-two-value-questions-rule-4">7.6 The two value questions (rule 4)<a href="#batch-07/7-6-the-two-value-questions-rule-4" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>The method requires each platform to be judged against two questions, kept separate. Both are
+answered from the measured material above.</p>
+<h3 id="q1-what-does-this-platform-do-for-its-own-users">Q1 — What does this platform do for *its own users*?<a href="#batch-07/q1-what-does-this-platform-do-for-its-own-users" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><strong>For a Python developer building an agent workflow today: a lot, and honestly.</strong> You get a
+scaffolded project with a working template, a team abstraction and a state-machine abstraction that
+each fit different problems, a model-agnostic agent loop with a real planning tier, typed tool
+failures with escalation, durable run state with resume and fork, 163 events and a hook layer for
+observation and veto, an MCP client with four transports, a skills system, a terminal UI that shows
+you what is happening, and a diagram of your own workflow generated from your own declaration. The
+divergences are documentation drift, not broken behaviour: the four per batch are mostly the docs
+selling features that the code deprecates or under-sells.</p>
+<p><strong>Verdict on Q1:</strong> as a <em>framework for building and running agent workflows on one machine for one
+owner</em>, this is mature, coherent and its abstractions are well-chosen. The gaps we care about
+(tenancy, ownership, delivery) are <strong>not gaps for its users</strong> — a solo developer does not need a
+tenant model, and starting the process themselves is normal.</p>
+<h3 id="q2-what-does-it-do-for-our-vision">Q2 — What does it do for *our vision*?<a href="#batch-07/q2-what-does-it-do-for-our-vision" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><strong>Much less than its quality suggests, and for a structural reason.</strong> Our vision needs three things
+CrewAI does not attempt: (a) many independent companies whose data must never mix, (b) employees
+that are <em>records</em> with identity, placement and lifecycle, and (c) work that <em>arrives</em> — assigned,
+queued, owned, retried. On all three, measured: absent. What it <em>does</em> offer our vision is a set of
+<strong>mechanisms</strong> (§7.3) that are individually valuable and largely orthogonal to those three: a
+component catalogue with enforcement, a durable progress representation, racing semantics, seed-based
+identity, typed tool failure, and a one-declaration-executed-and-drawn workflow model.</p>
+<p><strong>Verdict on Q2:</strong> CrewAI is a <strong>rich mechanism source and a poor architecture template</strong>. We should
+take mechanisms from it — especially the three ranked first — and we should <strong>not</strong> look to it for
+how to structure ownership, organisation or delivery, because it has deliberately decided not to
+have those. Its own architecture&#39;s most instructive feature is where it <em>stops</em>: at the edge of a
+hosted service, with a <code>TODO</code> in the docstring of the class that would have gone further.</p>
+<p><strong>➜ F7-5 [synthesis] — The two questions give opposite-looking answers, and both are correct: an
+excellent framework for its users, a limited guide for our vision — because its scope ends exactly
+where our hard problems begin.</strong> <strong>Plain meaning:</strong> this platform is good at the part that is not
+our problem, and silent on the part that is. <strong>Why it matters:</strong> it tells the mapping pass what to
+expect before it opens the table — <strong>adapt</strong> the mechanisms, <strong>build</strong> the ownership and delivery
+layers, and stop looking for a tenancy model here.</p>
+<hr>
+<h2 id="7-7-the-finding-index">7.7 The finding index<a href="#batch-07/7-7-the-finding-index" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Consolidated for the mapping pass. Format: <code>id · pole · one line · batch §</code>.</p>
+<p><strong>Foundations</strong> — F1-1 identity is per-run contextvar minted on kickoff [P3] 01 §1.4 · F1-2 process
+is ten lines / two values [P1] 01 §1.2 (hierarchical = same loop + a manager agent with two tools) ·
+F1-3 <code>kickoff()</code> is the one door [PZ] 01 §1.1 · F1-4 event bus: 163 typed events, replay, flush
+[PZ] 01 §1.3 · F1-5 hooks: 10 interception points, aborts allowed [PZ] 01 §1.3 · F1-6
+checkpoint/resume/fork [P3] 01 §1.7 · F1-7 declarative <code>CrewDefinition</code> + <code>FlowDefinition</code> [P2] 01
+§1.1 · F1-8 Flow as second paradigm [P3] 01 §1.1 · F1-9 Skills with 3-level disclosure + versioned
+registry [P1/P2] 01 §1.8.</p>
+<p><strong>Pole 1 — the aissistant</strong> — F2-1 persona is three fields + frozen uuid [P1] 02 §2.1 · F2-2 six
+abstract methods = the complete agent contract [P1] 02 §2.2 · F2-3 ordered prompt assembly [P1] 02
+§2.3 · F2-4 memory as top-5 recall [P1] 02 §2.4 · F2-5 <code>PlanningConfig</code> with three effort levels and
+its own llm [P1] 02 §2.5 · F2-6 four tool doors [P1] 02 §2.6 · F2-7 MCP <code>ToolFilterContext(agent, server_name, run_context)</code> ships but is unpopulated [P1/PZ] 02 §2.7 · F2-8 typed tool failure with
+the precedent chain [P1] 02 §2.8 · F2-9 the enterprise boundary is one token [PZ] 02 §2.9 · F2-10
+dual identity + <code>Fingerprint</code> [P1] 02 §2.10 · F2-11 tool-calling is an optimisation on a ReAct loop
+[P1] 02 §2.2 · F2-12 delegation tools are the manager&#39;s only tools [P3] 02 §2.6.</p>
+<p><strong>Pole 2 — the workspace</strong> — F3-1 scaffolder with five named rejections + fixed layout [P2] 03 §3.1 ·
+F3-2 runnable template with five verbs [P2] 03 §3.2 · F3-3 <code>@CrewBase</code> YAML↔Python binding [P2] 03
+§3.3 · F3-4 string-reference resolution [P2] 03 §3.3 · F3-5 one <code>CrewDefinition</code> from three syntaxes
+[P2] 03 §3.4 · F3-6 file subsystem with four modes [P2] 03 §3.5 · F3-7 uploader with <code>expires_at</code> +
+cache [P2] 03 §3.5 · F3-8 <code>run_with_trigger</code> as the payload door [P3] 03 §3.6 · F3-9 <code>Knowledge</code> with
+ten source types [P2] 03 §3.7 · F3-10 collection name = <code>self.role</code> [P1/P2] 03 §3.7 · F3-11 MCP
+transports: stdio/http/sse [P2] 03 §3.8 · F3-12 deploy requires a lockfile [P2] 03 §3.9.</p>
+<p><strong>Pole 3 — automations</strong> — F4-1 no scheduling substrate exists [P3] 04 §4.0 · F4-2 trigger is a
+naming convention [P3] 04 §4.1 · F4-3 two mutually-exclusive durability systems [P3] 04 §4.2 ·
+F4-4 the one wait-for-event primitive is a pause you resume by hand [P3] 04 §4.2.3 · F4-5 <code>ask()</code>
+blocks a thread [P3] 04 §4.2.4 · F4-6 delegation is an inline unrecorded call [P3] 04 §4.3.1 ·
+F4-7 concurrency is a per-task boolean + Future list [P3] 04 §4.3.2 · F4-8 A2A is federation, not
+scheduling [PZ→P3] 04 §4.3.3 · F4-9 <code>or_</code> first-wins with loser cancellation [P3] 04 §4.4.1 · F4-10
+progress = a set of completed names [P3] 04 §4.4.2 · F4-11 replay is hydration, not deterministic
+re-execution [P3] 04 §4.4.3 · F4-12 the graph renders to standalone HTML [PX] 04 §4.4.4.</p>
+<p><strong>Widgets / frontend</strong> — F5-1 no frontend of any kind [PX-F] 05 §5.1 · F5-2 four unrelated interface
+surfaces [PX-F] 05 §5.2 · F5-3 the four-message surface protocol [PX-W] 05 §5.3.1 · F5-4 18 typed
+components with bindings/composition/actions [PX-W] 05 §5.3.2 · F5-5 two protocol generations side by
+side [PX-W] 05 §5.3.3 · F5-6 widgets via prompt augmentation, not tool calls [PX-W] 05 §5.3.4 ·
+<strong>F5-7 <code>allowed_components</code> enforced on the response [PX-W] 05 §5.3.5</strong> · F5-8 A2UI is an A2A
+extension, not a platform feature [PX-W] 05 §5.3.6 · F5-9 the only generated frontend is built from
+the executed definition [PX-F] 05 §5.4 · F5-10 the UI is a subscriber, not a caller [PX-F] 05 §5.5.</p>
+<p><strong>Out-of-pole</strong> — <strong>F6-1 no tenancy model [PZ] 06 §6.0</strong> · F6-2 dual identity, seed-deterministic
+[P1] 06 §6.1 · F6-3 authentication without authorization [PZ] 06 §6.2 · F6-4 &quot;enterprise&quot; is a
+config command [PZ] 06 §6.3 · F6-5 OTLP with a hard-coded endpoint and a checkable privacy claim
+[PZ] 06 §6.4 · F6-6 the well-shaped unused tool seam [P1/PZ] 06 §6.5 · F6-7 docs cannot be an
+authority [PZ] 06 §6.6 · F6-8 the cross-cutting ledger [PZ] 06 §6.7.</p>
+<p><strong>Synthesis</strong> — F7-1 the measured page [—] §7.1 · F7-2 twelve mechanisms ranked [—] §7.3 · F7-3 the
+absences cluster [—] §7.4 · F7-4 four completions, no falsifications [—] §7.5 · F7-5 the two
+questions answered [—] §7.6.</p>
+<p><strong>➜ F7-6 [synthesis] — 67 findings, five of them load-bearing: F6-1 (no tenancy), F5-7 (the one real
+enforcement), F4-10 (durable progress), F4-1 (no delivery), F6-2 (seed identity).</strong> <strong>Plain meaning:</strong>
+if the mapping pass reads only five lines, these are the five. <strong>Why it matters:</strong> it gives the next
+stage a prioritised entry point instead of 67 flat rows.</p>
+<hr>
+<h2 id="7-8-the-platform-verdict-in-one-paragraph">7.8 The platform verdict, in one paragraph<a href="#batch-07/7-8-the-platform-verdict-in-one-paragraph" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>CrewAI 1.15.28 is a mature, well-abstracted Python framework for declaring and executing agent
+workflows on one machine for one owner.</strong> Its code is honest — the interesting behaviours are
+findable and readable, its agent contract is six methods, its agent loop is model-agnostic, its tool
+failures are typed and escalate, its workflows are declarable and both executed and drawn from the
+same definition, and its widget protocol has a bounded typed catalogue with real enforcement. Its
+scope ends precisely where our hard problems begin: it has <strong>no tenancy, no authorization, no agent
+records, no organisation, no queue, no scheduler, and no delivery layer</strong>, and the class that would
+have carried the first of those marks three of its four purposes <code>*TODO*</code> in its own docstring. The
+correct posture toward it is therefore <strong>mechanism donor, not architecture template</strong> — take the
+catalogue-with-enforcement, the completed-names progress representation, the racing semantics, the
+seed-derived identity, and the typed failure chain; and build the ownership and delivery layers
+ourselves, without looking for a model of them here.</p>
+<hr>
+<h2 id="7-9-batch-07-checklist">7.9 Batch 07 — checklist<a href="#batch-07/7-9-batch-07-checklist" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<ul>
+<li><input checked="" disabled="" type="checkbox"> Read from <code>lib/**/*.py</code> only; no new source claims introduced (all restate verified findings).</li>
+<li><input checked="" disabled="" type="checkbox"> Every finding carries its originating batch and section.</li>
+<li><input checked="" disabled="" type="checkbox"> No platform comparison (rule 5) — internal batch-to-batch consistency only (§7.5).</li>
+<li><input checked="" disabled="" type="checkbox"> Both value questions answered separately (rule 4, §7.6).</li>
+<li><input checked="" disabled="" type="checkbox"> Absences reported as findings, not omitted (rule 6, §7.4).</li>
+<li><input checked="" disabled="" type="checkbox"> Four cross-batch consistencies recorded, none smoothed (rule 13, §7.5).</li>
+<li><input checked="" disabled="" type="checkbox"> Retirement rule honoured: no earlier finding deleted to fit the synthesis (C13-14).</li>
+<li><input checked="" disabled="" type="checkbox"> 6 synthesis findings: F7-1…F7-6, plus a complete finding index (§7.7).</li>
+</ul>
+<p>The CrewAI study is complete: <strong>pin (00) + 67 findings across six pole batches (01–06) + this
+synthesis (07).</strong> The reader is built from this markdown, at the end, with the platform-agnostic
+generator — and no study markdown is edited to fit it.</p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="06-out-of-pole-pz.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">Out-of-Pole (PZ)</span>
+                </a>
+              
+
+              <a href="../index.html#batch-07" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              <div></div>
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#7-1-the-measured-page" class="toc-link">7.1 The measured page</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-2-the-three-poles-headlined" class="toc-link">7.2 The three poles, headlined</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#pole-1-the-aissistant" class="toc-link">Pole 1 — The aissistant</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#pole-2-the-workspace" class="toc-link">Pole 2 — The workspace</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#pole-3-automations" class="toc-link">Pole 3 — Automations</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#px-w-px-f-widgets-and-frontend" class="toc-link">PX-W / PX-F — Widgets and frontend</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-3-the-ranked-mechanisms-what-to-carry-forward" class="toc-link">7.3 The ranked mechanisms — what to carry forward</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-4-what-crewai-does-not-give-us" class="toc-link">7.4 What CrewAI does NOT give us</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-5-the-consistency-check-across-batches" class="toc-link">7.5 The consistency check across batches</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-6-the-two-value-questions-rule-4" class="toc-link">7.6 The two value questions (rule 4)</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#q1-what-does-this-platform-do-for-its-own-users" class="toc-link">Q1 — What does this platform do for *its own users*?</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#q2-what-does-it-do-for-our-vision" class="toc-link">Q2 — What does it do for *our vision*?</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-7-the-finding-index" class="toc-link">7.7 The finding index</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-8-the-platform-verdict-in-one-paragraph" class="toc-link">7.8 The platform verdict, in one paragraph</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-9-batch-07-checklist" class="toc-link">7.9 Batch 07 — checklist</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('crewai_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('crewai_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('crewai_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('crewai_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.CrewAIReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

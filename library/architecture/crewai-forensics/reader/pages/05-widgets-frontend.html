@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 05 — Widgets and the frontend (PX-W / PX-F) — CrewAI Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-05" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 05</span>
+      <div class="header-title-wrap">
+        <div class="header-title">Widgets &amp; Frontend</div>
+        <div class="header-subtitle">CrewAI Platform Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/05-widgets-and-frontend.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #059669">DONE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">3,297</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">16 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">350</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-15</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 05 Architecture Guide (Default)</option>
+            <optgroup label="Strategic Architecture">
+              <option value="master">Executive Topology: three poles, one executor, two absent clusters</option>
+            </optgroup>
+            <optgroup label="Foundations">
+              <option value="00">Batch 00: The pin, the 93% docs hazard, and the method</option>
+              <option value="01">Batch 01: The one door, the spine &amp; the second paradigm</option>
+            </optgroup>
+            <optgroup label="Pole 1 — The Aissistant">
+              <option value="02">Batch 02: The aissistant — a small agent &amp; an empty seam</option>
+            </optgroup>
+            <optgroup label="Pole 2 — The Workspace">
+              <option value="03">Batch 03: The workspace — a folder that binds text to code</option>
+            </optgroup>
+            <optgroup label="Pole 3 — Automations">
+              <option value="04">Batch 04: Automations — executor yes, delivery no</option>
+            </optgroup>
+            <optgroup label="Cross-Cutting">
+              <option value="05">Batch 05: Widgets &amp; frontend — empty front, real protocol</option>
+            </optgroup>
+            <optgroup label="Escape Hatch">
+              <option value="06">Batch 06: Out-of-pole (PZ) — the tenancy question, closed</option>
+            </optgroup>
+            <optgroup label="Strategic Decision">
+              <option value="07">Batch 07: The synthesis — transfer matrix &amp; the verdict</option>
+            </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 05 VISUAL GUIDE — WIDGETS &amp; FRONTEND</div>
+    <h4>An empty frontend, and the only real widget architecture found in the study</h4>
+    <p>A2UI: a four-message protocol, an 18-component typed catalogue, and a permission rule enforced on the way OUT</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 350" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-05" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-05" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+        <marker id="arrr-05" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#ef4444"/>
+        </marker>
+      </defs>
+      <g transform="translate(20, 20)">
+        <rect width="210" height="145" rx="8" fill="var(--surface-card, #ffffff)" stroke="#ef4444" stroke-width="1.6"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#b91c1c">THERE IS NO FRONTEND</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">No package.json, no bundler</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">No JS or TS anywhere</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">No HTML app, no renderer</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#b91c1c">The whole layer is ours</text>
+      </g>
+      <g transform="translate(245, 20)">
+        <rect width="210" height="145" rx="8" fill="var(--surface-card, #ffffff)" stroke="#7c3aed" stroke-width="1.6"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#6d28d9">A2UI — 4 MESSAGES</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">BeginRendering · SurfaceUpdate</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">DataModelUpdate · DeleteSurface</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">models.py:106/123/134/148</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#6d28d9">A render tree + data model</text>
+      </g>
+      <g transform="translate(470, 20)">
+        <rect width="210" height="145" rx="8" fill="var(--surface-card, #ffffff)" stroke="#2563eb" stroke-width="1.6"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#1d4ed8">18 TYPED COMPONENTS</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Ordinary UI primitives</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Bindings, composition, actions</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Data addressed by path (BoundValue)</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#1d4ed8">A bounded, closed vocabulary</text>
+      </g>
+      <g transform="translate(695, 20)">
+        <rect width="205" height="145" rx="8" fill="var(--surface-card, #ffffff)" stroke="#f59e0b" stroke-width="1.6"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#b45309">PROMPT-AUGMENTED</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">inject_tools is a no-op</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">The UI request rides in the prompt</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">client_extension.py:212-213</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#b45309">A deliberate choice, not tool calls</text>
+      </g>
+
+      <rect x="20" y="185" width="430" height="145" rx="10" fill="#10b981" fill-opacity="0.09" stroke="#10b981" stroke-width="1.6"/>
+      <text x="40" y="213" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#047857">THE KEY IDEA: allowed_components enforced on the RESPONSE</text>
+      <text x="40" y="239" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">A widget subset is not merely advertised in the prompt — it is checked</text>
+      <text x="40" y="259" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">when the answer comes back (client_extension.py:397, :426).</text>
+      <text x="40" y="283" font-family="system-ui, sans-serif" font-size="11.5" font-weight="600" fill="#059669">This is the only real enforcement mechanism found anywhere in the study.</text>
+      <text x="40" y="311" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-muted, #64748b)">Two protocol generations sit side by side; their deltas are the design decisions.</text>
+
+      <g transform="translate(470, 185)">
+        <rect width="430" height="145" rx="10" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.4"/>
+        <text x="20" y="28" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE OTHER SURFACES (all outside the web)</text>
+        <text x="20" y="54" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">• A 3,278-line terminal TUI — a live subscriber to the event bus</text>
+        <text x="20" y="76" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">• flow.plot() — draws the flow from the same definition it runs</text>
+        <text x="20" y="98" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">• A Mintlify docs site it does not build</text>
+        <rect x="20" y="112" width="390" height="20" rx="4" fill="#7c3aed" fill-opacity="0.10"/>
+        <text x="28" y="126" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Take the vocabulary + the subsetting rule. Build the renderer and the frontend.</text>
+      </g>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="crewai-forensics-batch-05-widgets-and-frontend-px-w-px-f">CrewAI forensics — Batch 05: widgets and frontend (PX-W / PX-F)<a href="#batch-05/crewai-forensics-batch-05-widgets-and-frontend-px-w-px-f" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Batch retargeted, as promised in Batch 04.</strong> CrewAI has <strong>no in-tree web UI</strong>. That is now a
+measured fact, not an assumption (§5.1). The useful question is therefore not &quot;what is their web
+app like&quot; but: <strong>what interface surfaces exist in this tree, and which of them is a widget
+architecture?</strong></p>
+<p><strong>Method rules in force.</strong> Read from <code>lib/**/*.py</code> only; <code>docs/**/*.mdx</code> never used as authority
+(rule 1). Every claim carries <code>file:line</code>. No platform comparison inside a batch (rule 5). Pole-tag
+every finding (rule 9); name every capability (rule 6); report the negative findings too (rule 6 —
+a capability that is <em>absent</em> is a finding).</p>
+<p>Paths relative to <code>library/architecture/platforms/_extracted/crewAI-main/</code>. Version <code>1.15.28</code>.</p>
+<hr>
+<h2 id="5-1-first-the-negative-there-is-no-frontend-here">5.1 First, the negative: there is no frontend here<a href="#batch-05/5-1-first-the-negative-there-is-no-frontend-here" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Measured by direct search, not inferred:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>text</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code>find . -name &quot;package.json&quot; -not -path &quot;*/node_modules/*&quot;     → nothing
+find . -type f \( -name &quot;*.html&quot; -o -name &quot;*.vue&quot; -o -name &quot;*.svelte&quot; \) \
+     -not -path &quot;./docs/*&quot; -not -path &quot;*/node_modules/*&quot;      → nothing
+</code></pre>
+</div>
+<p>The top level is <code>docs/ · lib/ · scripts/</code> plus Python config (<code>pyproject.toml</code>, <code>uv.lock</code>,
+<code>conftest.py</code>) and <code>.github/</code>. The workspace is <strong>six Python members</strong>; there is no <code>web/</code>, no
+<code>ui/</code>, no <code>frontend/</code>, no build toolchain, no JS runtime anywhere in the source.</p>
+<p><strong>➜ F5-1 [PX-F] — CrewAI ships no frontend of any kind.</strong> Everything a user sees is produced by
+Python: terminal output, a terminal app, an HTML file written to disk, or JSON handed to <em>someone
+else&#39;s</em> renderer. <strong>Plain meaning:</strong> if we are studying this platform for frontend construction
+patterns, there is nothing to study — and that is itself the finding. <strong>Why it matters:</strong> the
+widget/frontend pole cannot be sourced from CrewAI&#39;s UI layer. It can ONLY be sourced from the two
+places where CrewAI had to <em>define a component vocabulary</em> and hand it to something else
+(§5.3 A2UI, §5.4 the flow diagram). Those two are genuinely valuable; the absence is not.</p>
+<hr>
+<h2 id="5-2-the-interface-surfaces-that-do-exist">5.2 The interface surfaces that DO exist<a href="#batch-05/5-2-the-interface-surfaces-that-do-exist" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Four, and they are very different from each other:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Surface</th>
+<th>What it is</th>
+<th>Where</th>
+<th>Size</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Terminal app</strong></td>
+<td>a full-screen Textual TUI for watching a crew run</td>
+<td><code>lib/cli/src/crewai_cli/crew_run_tui.py</code></td>
+<td><strong>3,278 lines</strong></td>
+</tr>
+<tr>
+<td><strong>Terminal app (×3 more)</strong></td>
+<td>checkpoint TUI, memory TUI, picker</td>
+<td><code>checkpoint_tui.py</code>, <code>memory_tui.py</code>, <code>tui_picker.py</code></td>
+<td>871 + 393 + 565</td>
+</tr>
+<tr>
+<td><strong>Static diagram</strong></td>
+<td>a flow drawn to a standalone HTML file</td>
+<td><code>flow/visualization/</code></td>
+<td>878 lines</td>
+</tr>
+<tr>
+<td><strong>Widget protocol</strong></td>
+<td>a declarative UI vocabulary sent <em>to a client that renders it</em></td>
+<td><code>a2a/extensions/a2ui/</code></td>
+<td><strong>3,669 lines</strong></td>
+</tr>
+</tbody></table></div>
+<p>Plus, on the output side rather than the input side: <code>rich</code> consoles and tables used throughout the
+CLI (e.g. <code>triggers/main.py:5-11</code>, <code>:100-113</code>), and the docs <strong>site</strong>, which is not built here at
+all — <code>docs/docs.json</code> is a 3.16 MB <strong>Mintlify</strong> config (<code>&quot;$schema&quot;: &quot;https://mintlify.com/docs.json&quot;</code>, <code>&quot;theme&quot;: &quot;aspen&quot;</code>), i.e. a hosted documentation SaaS consuming
+markdown.</p>
+<p><strong>➜ F5-2 [PX-F] — The four surfaces are four different technologies with no shared vocabulary.</strong>
+A Textual app (<code>crew_run_tui.py</code>), a Jinja2+HTML renderer (<code>visualization/</code>), a JSON widget
+protocol (<code>a2ui/</code>), and an external SaaS. <strong>Plain meaning:</strong> CrewAI did not build &quot;a UI layer&quot;; it
+built four independent things that each happen to show something. <strong>Why it matters:</strong> for our own
+platform this is a warning, not a model. There is no &quot;CrewAI widget system&quot; to adopt — there are
+four unrelated interfaces, and only the JSON one (<code>a2ui</code>) is architecture rather than a screen.</p>
+<hr>
+<h2 id="5-3-a2ui-the-actual-widget-architecture-the-important-find">5.3 A2UI — the actual widget architecture (the important find)<a href="#batch-05/5-3-a2ui-the-actual-widget-architecture-the-important-find" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>lib/crewai/src/crewai/a2a/extensions/a2ui/</code> is titled, in its own docstring,
+<strong>&quot;A2UI (Agent to UI) declarative UI protocol support for CrewAI&quot;</strong>
+(<code>a2ui/__init__.py:1</code>). It is 3,669 lines and it is the most complete widget architecture in the
+tree. It is <em>not</em> a UI — it is a <strong>protocol by which an agent describes a UI for someone else to
+render</strong>.</p>
+<h3 id="5-3-1-the-message-vocabulary-a-render-tree-protocol-with-a-data-model">5.3.1 The message vocabulary: a render-tree protocol with a data model<a href="#batch-05/5-3-1-the-message-vocabulary-a-render-tree-protocol-with-a-data-model" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>a2ui/models.py</code> defines the wire format. There are exactly four server→client message kinds, and
+each is a named class:</p>
+<ul>
+<li><code>BeginRendering</code> (<code>:106</code>) — <code>surface_id</code> (<code>:109</code>, aliased <code>surfaceId</code>), a catalog id (<code>:114</code>),
+and optional surface styling (<code>:117</code>). Docstring: <em>&quot;Signals the client to begin rendering a
+surface.&quot;</em></li>
+<li><code>SurfaceUpdate</code> (<code>:123</code>) — <em>&quot;Updates a surface with a new set of components&quot;</em> (<code>:124</code>);
+<code>surface_id</code> (<code>:126</code>) plus <code>components</code>, <code>min_length=1</code> (<code>:128</code>).</li>
+<li><code>DataModelUpdate</code> (<code>:134</code>) — <em>&quot;Updates the data model for a surface&quot;</em> (<code>:135</code>); keyed by
+<code>surface_id</code> (<code>:137</code>).</li>
+<li><code>DeleteSurface</code> (<code>:148</code>) — <em>&quot;Signals the client to delete a surface&quot;</em> (<code>:149</code>).</li>
+</ul>
+<p>They are unified in one envelope, <code>A2UIMessage</code> (<code>:158</code>), whose four optional fields are exactly
+those four (<code>:166-180</code>), with a validator at <code>:190-192</code> enforcing <strong>exactly one message kind per
+envelope</strong> (matching the prompt&#39;s <em>&quot;emit exactly ONE per message&quot;</em> — <code>prompt.py:53</code>).</p>
+<p>The client→server direction is <code>A2UIEvent</code> (<code>:220</code>) / <code>UserAction</code> (<code>:200</code>), where a user action
+carries <code>surface_id</code> (<code>:204</code>) — i.e. an action knows <em>which surface</em> it came from. <code>A2UIResponse</code>
+(<code>:242</code>) is the aggregate reply.</p>
+<p><strong>➜ F5-3 [PX-W] — The widget architecture is a four-message protocol: create surface, set
+components, set data, delete surface — plus an action coming back.</strong> <strong>Plain meaning:</strong> the agent
+does not draw pixels; it sends <em>&quot;here is a panel, here are the pieces in it, here is the data they
+show&quot;</em>, and the receiving app does the drawing. <strong>Why it matters:</strong> this is a clean separation we
+can adopt wholesale — <strong>render-tree + data-model + events</strong>, with the data model addressed by path
+(<code>BoundValue.path</code> at <code>:23</code>, sibling to <code>literal_string</code>/<code>literal_number</code>/<code>literal_boolean</code>/
+<code>literal_array</code> at <code>:15-22</code>). It means the same agent UI can be rendered by any client that speaks
+the catalog.</p>
+<h3 id="5-3-2-the-catalog-18-named-components-and-they-are-ordinary-ui-primitives">5.3.2 The catalog: 18 named components, and they are ordinary UI primitives<a href="#batch-05/5-3-2-the-catalog-18-named-components-and-they-are-ordinary-ui-primitives" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>a2ui/catalog.py</code> is the widget vocabulary. The exported set (<code>a2ui/__init__.py:3-22</code>) is:
+<strong>Text, Image, Video, AudioPlayer, Icon, Row, Column, List, Card, Tabs, Divider, Modal, Button,
+CheckBox, TextField, DateTimeInput, MultipleChoice, Slider</strong> — 18 components. Their class
+definitions are in <code>catalog.py</code>: <code>Text</code> (<code>:141</code>), <code>Image</code> (<code>:152</code>), <code>Icon</code> (<code>:234</code>),
+<code>Video</code> (<code>:242</code>), <code>AudioPlayer</code> (<code>:250</code>), <code>Row</code> (<code>:261</code>), <code>Column</code> (<code>:278</code>), <code>List</code> (<code>:295</code>),
+<code>Card</code> (<code>:309</code>), <code>Tabs</code> (<code>:317</code>), <code>Divider</code> (<code>:327</code>), <code>Modal</code> (<code>:337</code>), <code>Button</code> (<code>:350</code>),
+<code>CheckBox</code> (<code>:362</code>), <code>TextField</code> (<code>:373</code>), <code>DateTimeInput</code> (<code>:392</code>), <code>MultipleChoice</code> (<code>:410</code>),
+<code>Slider</code> (<code>:430</code>).</p>
+<p>Supporting types make it a real vocabulary rather than a list: bindings (<code>StringBinding:14</code>,
+<code>NumberBinding:25</code>, <code>BooleanBinding:36</code>, <code>ArrayBinding:47</code>), composition (<code>ChildrenDef:58</code>,
+<code>ChildTemplate:73</code> — a template for repeated children), and interaction (<code>Action:112</code>,
+<code>ActionContextEntry:86</code>, <code>ActionBoundValue:95</code>, <code>TabItem:123</code>, <code>MultipleChoiceOption:132</code>).</p>
+<p><strong>➜ F5-4 [PX-W] — A closed, typed component catalogue of 18 primitives, with bindings,
+composition, and actions.</strong> <strong>Plain meaning:</strong> there is a fixed menu of widgets, and a definition
+says which one, where it sits, what it shows, and what it does when clicked. <strong>Why it matters:</strong>
+&quot;closed and typed&quot; is the decision that makes it safe — the client can only ever be asked to render
+something in the catalogue. Compare: an open HTML string would be an injection surface. This is the
+argument for <em>our</em> widget system being a catalogue too.</p>
+<h3 id="5-3-3-the-two-version-split-and-why-it-is-instructive">5.3.3 The two-version split, and why it is instructive<a href="#batch-05/5-3-3-the-two-version-split-and-why-it-is-instructive" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>There are <strong>two catalogs in one module</strong>, side by side:</p>
+<ul>
+<li><p><strong>v0.8</strong> — <code>A2UI_EXTENSION_URI = &quot;https://a2ui.org/a2a-extension/a2ui/v0.8&quot;</code>
+(<code>server_extension.py:23</code>), MIME type <code>&quot;application/json+a2ui&quot;</code> (<code>:22</code>), and <strong>nested</strong> components
+— a component wrapper containing exactly one component-type key (<code>prompt.py:56-57</code>).</p>
+</li>
+<li><p><strong>v0.9</strong> — <code>A2UI_V09_EXTENSION_URI</code> (<code>:27</code>), <code>A2UI_V09_BASIC_CATALOG_ID</code> (<code>:28</code>), and a
+<strong>flat</strong> component form, explicitly documented in the prompt with the reason:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>text</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code>COMPONENT FORMAT (flat, NOT nested):
+{&quot;id&quot;: &quot;myText&quot;, &quot;component&quot;: &quot;Text&quot;, &quot;text&quot;: &quot;Hello world&quot;, &quot;variant&quot;: &quot;h1&quot;}
+{&quot;id&quot;: &quot;myBtn&quot;, &quot;component&quot;: &quot;Button&quot;, &quot;child&quot;: &quot;myText&quot;, &quot;action&quot;: {&quot;event&quot;: {&quot;name&quot;: &quot;click&quot;}}}
+</code></pre>
+</div>
+<p>(<code>prompt.py:129-132</code>), plus <code>createSurface</code> / <code>updateComponents</code> / <code>updateDataModel</code> /
+<code>deleteSurface</code> replacing <code>beginRendering</code> / <code>surfaceUpdate</code> / <code>dataModelUpdate</code> /
+<code>deleteSurface</code> (<code>:118-127</code>).</p>
+</li>
+</ul>
+<p>v0.9 adds what v0.8 lacked: <code>id: &quot;root&quot;</code> as a required anchor (<code>:124</code>), a <code>theme</code> block
+(<code>primaryColor</code>, <code>iconUrl</code>, <code>agentDisplayName</code> — <code>:119-121</code>), JSON-Pointer data paths (<code>:125-126</code>),
+and <strong>client-side functions</strong> — <code>{&quot;call&quot;: &quot;functionName&quot;, &quot;args&quot;: {...}}</code> (<code>:137</code>), with a distinct
+action shape for server events vs local function calls (<code>:140-141</code>).</p>
+<p><strong>➜ F5-5 [PX-W] — The protocol has two generations living side by side, and the differences are
+exactly the hard design decisions.</strong> <strong>Plain meaning:</strong> v0.8 nested each component inside a wrapper;
+v0.9 flattened it, anchored the tree at a required <code>root</code>, added themes, JSON-Pointer data paths,
+and a distinction between &quot;call the server&quot; and &quot;call a local function&quot;. <strong>Why it matters:</strong> those
+four deltas are the design review we would otherwise have to do ourselves — especially the
+flat-vs-nested choice (flat is easier for an LLM to emit reliably) and the
+server-event-vs-local-function split, which is a <em>security</em> boundary: one crosses the network, the
+other runs in the user&#39;s app.</p>
+<h3 id="5-3-4-how-the-widget-is-produced-prompt-augmentation-not-tool-calls">5.3.4 How the widget is produced: prompt augmentation, not tool calls<a href="#batch-05/5-3-4-how-the-widget-is-produced-prompt-augmentation-not-tool-calls" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>This is the architecturally decisive part.</p>
+<p><code>a2ui/client_extension.py:212-213</code>:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>python</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-python">def inject_tools(self, agent: Agent) -&gt; None:
+    &quot;&quot;&quot;No-op — A2UI uses prompt augmentation rather than tool injection.&quot;&quot;&quot;
+</code></pre>
+</div>
+<p>And the counterfactual is named in the class docstring at <code>:182</code>: <em>&quot;Implements the <code>A2AExtension</code>
+protocol to inject A2UI prompt…&quot;</em>. So instead of giving the model a <code>render_ui(...)</code> tool, the
+extension <strong>appends a system-prompt fragment</strong> that teaches the model the protocol:</p>
+<p><code>a2ui/prompt.py:19</code> <code>build_a2ui_system_prompt(catalog_id=None, allowed_components=None)</code> returns a
+fragment of the form (<code>:48-81</code>):</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>text</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code>&lt;A2UI_INSTRUCTIONS&gt;
+You can generate rich, declarative UI by emitting A2UI JSON messages.
+
+CATALOG: {catalog_label}
+AVAILABLE COMPONENTS: {&quot;, &quot;.join(components)}
+...
+SCHEMA:
+{schema_json}
+&lt;/A2UI_INSTRUCTIONS&gt;
+</code></pre>
+</div>
+<p>The schema is not hand-written — it is loaded and serialised into the prompt
+(<code>:42-43</code> <code>load_schema(&quot;server_to_client_with_standard_catalog&quot;, version=&quot;v0.8&quot;)</code> then
+<code>json.dumps(..., indent=2)</code> at <code>:45-46</code>), and the v0.9 variant does the same with
+<code>load_schema(&quot;server_to_client&quot;, version=&quot;v0.9&quot;)</code> (<code>:106</code>). The component list is
+<code>sorted(allowed_components if allowed_components is not None else STANDARD_CATALOG_COMPONENTS)</code>
+(<code>:99-101</code>).</p>
+<p>Then the <strong>response</strong> is parsed back out of the model&#39;s text — <code>_extract_and_validate</code> (<code>:455</code>),
+<code>_try_validate</code> (<code>:464</code>), and the v0.9 twins (<code>:477</code>, <code>:486</code>), with
+<code>process_response</code> (<code>:304</code>), <code>prepare_message_metadata</code> (<code>:343</code>), <code>augment_prompt</code> (<code>:286</code>), and
+<code>is_ready</code> (<code>:174</code>).</p>
+<p><strong>➜ F5-6 [PX-W] — The widget channel is the prompt and the response text — there is no tool call
+and no schema-validated function.</strong> <strong>Plain meaning:</strong> the agent is <em>told</em>, in its instructions, how
+to write UI, and the platform then fishes JSON objects out of its reply and validates them.
+<strong>Why it matters:</strong> this is the opposite of the tool-calling approach and it has a clear
+consequence — <strong>the model can produce invalid UI</strong>, so every response must be extracted and
+validated (<code>_extract_and_validate</code>). It also means the widget vocabulary is bounded by what the
+prompt can describe, which is why <code>allowed_components</code> exists. If our platform renders widgets, we
+must decide this same question (prompt-augmented vs tool-caled) and own the validation either way.</p>
+<h3 id="5-3-5-allowed-components-the-widget-permission-seam">5.3.5 `allowed_components` — the widget permission seam<a href="#batch-05/5-3-5-allowed-components-the-widget-permission-seam" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>allowed_components</code> is threaded through the whole path: <code>build_a2ui_system_prompt(..., allowed_components=None)</code> (<code>prompt.py:21</code>), <code>build_a2ui_v09_system_prompt(..., allowed_components=None)</code> (<code>:86</code>), and — critically — it is enforced on the <em>response</em> as well as
+advertised in the <em>prompt</em>:</p>
+<p><code>a2ui/client_extension.py:397</code> <code>_filter_components(msg: A2UIMessageDict, allowed: set[str])</code> and
+<code>:426</code> <code>_filter_components_v09(...)</code>.</p>
+<p><strong>➜ F5-7 [PX-W → cross-cutting] — The widget set is subsettable, and the subset is enforced on the
+way out, not just advertised on the way in.</strong> <strong>Plain meaning:</strong> you can tell an agent &quot;you may use
+these six widgets, not the whole catalogue&quot;, and the platform will strip anything outside that set
+from its output. <strong>Why it matters:</strong> this is the <em>first</em> place in the whole CrewAI study where a
+per-tenant or per-role restriction is enforced rather than merely configured — compare Batch 02&#39;s
+finding that the MCP <code>ToolFilterContext(agent, server_name, run_context)</code> seam ships
+<strong>unpopulated</strong> (<code>mcp/filters.py:17-35</code>). Here the same idea is real: a bounded vocabulary, named,
+checked on both sides. <strong>This is the single most reusable widget-pole idea in the batch</strong>, and it
+belongs on the mapping table.</p>
+<h3 id="5-3-6-the-extension-hook-contract">5.3.6 The extension hook contract<a href="#batch-05/5-3-6-the-extension-hook-contract" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>A2UI plugs in through the generic extension system (<code>a2a/extensions/base.py</code>):
+<code>A2AExtension</code> is a <code>Protocol</code> (<code>:57</code>), <code>ExtensionRegistry</code> at <code>:167</code>, and the server side has two
+async hooks — <code>on_request(self, context: ExtensionContext)</code> and <code>on_response(self, context, result)</code> (<code>a2ui/server_extension.py:80</code>, <code>:97</code>) — with <code>params()</code> (<code>:72</code>) declaring what the
+extension advertises. The server extension is a pydantic model (<code>:31</code>) whose <code>uri</code> defaults to the
+v0.8 URI (<code>:48</code>) and is switched to v0.9 in <code>__init__</code> (<code>:69</code>).</p>
+<p><strong>➜ F5-8 [PX-W] — The widget protocol is an <em>extension</em> of the A2A protocol, not a platform
+feature.</strong> <strong>Plain meaning:</strong> A2UI rides on the agent-to-agent protocol as an add-on that can
+rewrite requests and responses. <strong>Why it matters:</strong> it means the widget channel is a <em>transport
+concern</em> in their design, not a UI-layer concern. For us that is a useful contrast — our widgets
+will likely be a first-class platform surface, and we should be explicit that we are making the
+opposite choice deliberately.</p>
+<hr>
+<h2 id="5-4-the-second-artefact-the-flow-diagram">5.4 The second artefact: the flow diagram<a href="#batch-05/5-4-the-second-artefact-the-flow-diagram" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Already noted in Batch 04 §4.4.4; recorded here under its own pole.</p>
+<p><code>flow/runtime/__init__.py:4002</code> <code>plot(filename=&quot;crewai_flow.html&quot;, show=True)</code> — emits a
+<code>FlowPlotEvent</code> (<code>:4011-4017</code>), builds <code>build_flow_structure(self)</code> (in <code>visualization/builder.py</code>,
+343 lines), and renders via <code>render_interactive(structure, ...)</code>
+(<code>visualization/renderers/interactive.py</code>, 466 lines): a Jinja2 environment
+(<code>:397-400</code>, <code>FileSystemLoader</code>, <code>select_autoescape([&quot;html&quot;,&quot;xml&quot;,&quot;css&quot;,&quot;js&quot;])</code>), template
+<code>interactive_flow.html.j2</code> (<code>:440</code>), plus <code>style.css</code> (<code>:413</code>) and <code>interactive.js</code> (<code>:423</code>) loaded
+from <code>visualization/assets/</code> — confirmed present — writing the finished HTML at <code>:461</code>.</p>
+<p><strong>➜ F5-9 [PX-F] — The only <em>generated frontend</em> in the tree is a self-contained HTML file built
+from the same data the engine executes.</strong> <strong>Plain meaning:</strong> the automation graph draws itself, and
+because the picture comes from the <code>FlowDefinition</code> rather than from hand-drawn markup, the diagram
+cannot disagree with the running code. <strong>Why it matters:</strong> <em>one definition, executed and drawn</em> is
+the property worth stealing. It is also the ONLY renderer here that is generated rather than
+hand-authored, and it needs no server — so it is the cheapest possible model for any &quot;show me this
+workflow&quot; view we build.</p>
+<hr>
+<h2 id="5-5-the-terminal-apps">5.5 The terminal apps<a href="#batch-05/5-5-the-terminal-apps" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>lib/cli/src/crewai_cli/crew_run_tui.py</code> — 3,278 lines, docstring: <em>&quot;Full-screen Textual TUI for
+crew execution. Two-column layout: left sidebar (tasks/agents/tokens) + main content (task header,
+plan checklist, activity timeline, streaming output).&quot;</em> (<code>:1-4</code>).</p>
+<p>It is a real app, not a print loop: a <code>TraceConsentScreen(ModalScreen[bool])</code> (<code>:210</code>) with its own
+<code>BINDINGS</code> (<code>:261</code>) and <code>compose</code> (<code>:267</code>); the main <code>CrewRunApp(App[Any])</code> (<code>:409</code>) with
+<code>BINDINGS</code> (<code>:561</code>) mapping <code>q</code>/<code>s</code>/<code>l</code> to quit/sidebar/logs and <code>t</code>/<code>e</code>/<code>d</code> to
+traces/evaluate/deploy (<code>:562-567</code>), arrow keys to log scroll, and Enter to expand (<code>:568-570</code>);
+and <code>compose</code> at <code>:693</code>. Its colours are a named brand palette (<code>:33-40</code>) and its state is explicit
+(<code>:587-624</code>): <code>_task_statuses</code> (<code>:593</code>), <code>_task_state_by_key</code> (<code>:600</code>, with a comment explaining it
+keys completion events to the right task <em>&quot;even when tasks run async/overlapping&quot;</em>), <code>_timeline</code>
+(<code>:602</code>), token counters (<code>:605-609</code>), streaming buffers (<code>:611-614</code>), and <code>_plan_step_status</code>
+(<code>:617</code>). It subscribes to the event bus via <code>textual</code>&#39;s <code>@work</code> (<code>:25</code>).</p>
+<p>The other three are smaller and each answers one question: <code>checkpoint_tui.py</code> (871) — pick a
+checkpoint to restore; <code>memory_tui.py</code> (393) — inspect memory; <code>tui_picker.py</code> (565) — choose
+something from a list. <code>crew_chat.py</code> is 23 lines (a stub).</p>
+<p><strong>➜ F5-10 [PX-F] — The richest UI is a terminal app that is essentially a <em>live view of the event
+bus</em>.</strong> <strong>Plain meaning:</strong> the TUI subscribes to the same 163 typed events the engine already
+emits (Batch 01 §1.3) and renders them as a sidebar, a timeline, and streamed text. <strong>Why it
+matters:</strong> this is a genuinely good architectural lesson independent of the terminal: <strong>the UI is a
+subscriber, not a caller.</strong> Nothing in the TUI reaches into the engine; it listens. Whichever
+surface we build, an event-bus subscription is the seam that keeps it from coupling to the runtime.</p>
+<hr>
+<h2 id="5-6-divergences-and-corrections">5.6 Divergences and corrections <span class="seal-badge" style="background:#fef2f2; color:#dc2626; border-color:#fca5a5; font-size: 0.65em; vertical-align: middle;">⚠️ FINDING NOTE</span><a href="#batch-05/5-6-divergences-and-corrections" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Claim</th>
+<th>Measured reality</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>D5-1</strong></td>
+<td>Batch 04 implied triggers exist only in user templates.</td>
+<td>The CLI <strong>does</strong> ship a <code>TriggersCommand</code> (<code>triggers/main.py:14</code>) with <code>list_triggers</code> (<code>:23</code>) and <code>execute_with_trigger</code> (<code>:37</code>) — but both call <code>self.plus_api_client</code> (<code>:27</code>, <code>:51</code>), i.e. triggers live on <strong>CrewAI&#39;s hosted Plus API</strong>, not in this tree; and execution shells out to <code>uv run run_with_trigger &lt;json&gt;</code> (<code>:127-128</code>), the template function from Batch 04.</td>
+<td><strong>Rule 13 correction:</strong> triggers are a <em>hosted SaaS</em> feature driven <em>through</em> the template convention. Batch 04&#39;s statement stands for the engine; this adds the delivery path.</td>
+</tr>
+<tr>
+<td><strong>D5-2</strong></td>
+<td>The docs are part of the product.</td>
+<td><code>docs/docs.json</code> (3.16 MB) is a <strong>Mintlify</strong> site config (<code>&quot;$schema&quot;: &quot;https://mintlify.com/docs.json&quot;</code>, <code>&quot;theme&quot;: &quot;aspen&quot;</code>). The site is built and served by a third-party SaaS from markdown; nothing here builds it.</td>
+<td>The docs tree is a <strong>claims archive consumed by an external renderer</strong>. Consistent with Batch 00&#39;s 33,251-<code>.mdx</code> hazard and the method&#39;s rule 1.</td>
+</tr>
+<tr>
+<td><strong>D5-3</strong></td>
+<td>A2UI is a UI.</td>
+<td>Its own <code>inject_tools</code> is a <strong>no-op</strong> with the explicit comment <em>&quot;A2UI uses prompt augmentation rather than tool injection&quot;</em> (<code>client_extension.py:212-213</code>).</td>
+<td>It is a <strong>protocol</strong> — a description of UI, plus prompt/response machinery — with no renderer in this tree. Say &quot;widget <em>protocol</em>&quot;, never &quot;widget system&quot;, when writing the SRS.</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="5-7-gap-statement-what-the-widget-frontend-pole-can-take-from-crewai">5.7 Gap statement — what the widget/frontend pole can take from CrewAI<a href="#batch-05/5-7-gap-statement-what-the-widget-frontend-pole-can-take-from-crewai" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Need (PX-W / PX-F)</th>
+<th>CrewAI&#39;s offering</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>A component vocabulary</td>
+<td>18 typed components + bindings + composition + actions (<code>catalog.py</code>)</td>
+<td><strong>present, directly reusable as a shape</strong></td>
+</tr>
+<tr>
+<td>A render-tree protocol</td>
+<td>surface + components + data model + delete + action (<code>models.py</code>)</td>
+<td><strong>present, clean</strong></td>
+</tr>
+<tr>
+<td>Data binding</td>
+<td>literal-or-path <code>BoundValue</code> (<code>models.py:12-26</code>), JSON Pointers in v0.9</td>
+<td><strong>present</strong></td>
+</tr>
+<tr>
+<td>Widget subsetting / permissions</td>
+<td><code>allowed_components</code>, enforced on prompt <strong>and</strong> response (<code>prompt.py:21</code>, <code>client_extension.py:397</code>)</td>
+<td><strong>present — the key idea</strong></td>
+</tr>
+<tr>
+<td>A widget <em>catalogue version</em> story</td>
+<td>two gardens side by side (v0.8 nested, v0.9 flat) with the deltas documented</td>
+<td><strong>present as a cautionary tale</strong></td>
+</tr>
+<tr>
+<td>How the UI is requested</td>
+<td>prompt augmentation + response extraction/validation — <strong>not</strong> tool calls</td>
+<td><strong>a choice to make deliberately, either way</strong></td>
+</tr>
+<tr>
+<td>A renderer</td>
+<td><strong>none</strong> — no JS, no HTML app, no component runtime</td>
+<td><strong>absent</strong></td>
+</tr>
+<tr>
+<td>A frontend build</td>
+<td><strong>none</strong> — no <code>package.json</code>, no bundler, no TS</td>
+<td><strong>absent</strong></td>
+</tr>
+<tr>
+<td>A live view of a run</td>
+<td>Textual TUI subscribing to the event bus (3,278 lines)</td>
+<td><strong>present (terminal)</strong></td>
+</tr>
+<tr>
+<td>A generated view of a definition</td>
+<td><code>flow.plot()</code> → standalone HTML from the <code>FlowDefinition</code></td>
+<td><strong>present, cheap, correct</strong></td>
+</tr>
+<tr>
+<td>A web surface</td>
+<td><strong>none anywhere</strong></td>
+<td><strong>absent</strong></td>
+</tr>
+</tbody></table></div>
+<p><strong>One sentence for the SRS:</strong> <em>CrewAI&#39;s frontend pole is empty, and its widget pole is a
+well-designed <strong>protocol</strong> with a bounded, typed, subsettable catalogue — the vocabulary and the
+subsetting rule are worth carrying forward; the renderer, the transport choice, and the whole
+frontend layer are ours to build.</em></p>
+<hr>
+<h2 id="5-8-batch-05-checklist">5.8 Batch 05 — checklist<a href="#batch-05/5-8-batch-05-checklist" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<ul>
+<li><input checked="" disabled="" type="checkbox"> Read from <code>lib/**/*.py</code> only; <code>docs/**/*.mdx</code> never used as authority.</li>
+<li><input checked="" disabled="" type="checkbox"> Every claim carries <code>file:line</code>; citations re-verified with <code>sed -n</code>/<code>grep -n</code> at write time.</li>
+<li><input checked="" disabled="" type="checkbox"> No platform comparison inside the batch (rule 5).</li>
+<li><input checked="" disabled="" type="checkbox"> Every finding pole-tagged (rule 9); every capability named (rule 6), <strong>including the absences</strong>.</li>
+<li><input checked="" disabled="" type="checkbox"> Divergences recorded, and a <strong>rule 13 correction</strong> of Batch 04&#39;s trigger statement (D5-1).</li>
+<li><input checked="" disabled="" type="checkbox"> Retirement rule honoured: nothing deleted to fit a narrative (C13-14).</li>
+<li><input checked="" disabled="" type="checkbox"> 10 findings: F5-1…F5-10.</li>
+</ul>
+<p><strong>Batch 06 (PZ out-of-pole)</strong> takes the cross-cutting material neither P1/P2/P3/PX claimed:
+security (<code>security/</code>), telemetry/tracing, the auth providers in
+<code>crewai_core/auth</code> + <code>cli/authentication/providers/</code> (auth0, entra_id, keycloak, okta, workos —
+the enterprise identity story Batch 02 left open), the MCP/A2A surfaces, the docs practice, and the
+<code>enterprise/</code> CLI module. It also <strong>closes the tenancy question</strong> Batch 04 §4.6 left open.</p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="04-automations-p3.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">Automations (P3)</span>
+                </a>
+              
+
+              <a href="../index.html#batch-05" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              
+                <a href="06-out-of-pole-pz.html" class="nav-page-btn" style="text-align:right;">
+                  <span class="nav-btn-sub">Next Batch →</span>
+                  <span class="nav-btn-title">Out-of-Pole (PZ)</span>
+                </a>
+              
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#5-1-first-the-negative-there-is-no-frontend-here" class="toc-link">5.1 First, the negative: there is no frontend here</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-2-the-interface-surfaces-that-do-exist" class="toc-link">5.2 The interface surfaces that DO exist</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-3-a2ui-the-actual-widget-architecture-the-important-find" class="toc-link">5.3 A2UI — the actual widget architecture (the important find)</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#5-3-1-the-message-vocabulary-a-render-tree-protocol-with-a-data-model" class="toc-link">5.3.1 The message vocabulary: a render-tree protocol with a data model</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#5-3-2-the-catalog-18-named-components-and-they-are-ordinary-ui-primitives" class="toc-link">5.3.2 The catalog: 18 named components, and they are ordinary UI primitives</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#5-3-3-the-two-version-split-and-why-it-is-instructive" class="toc-link">5.3.3 The two-version split, and why it is instructive</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#5-3-4-how-the-widget-is-produced-prompt-augmentation-not-tool-calls" class="toc-link">5.3.4 How the widget is produced: prompt augmentation, not tool calls</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#5-3-5-allowed-components-the-widget-permission-seam" class="toc-link">5.3.5 allowed_components — the widget permission seam</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#5-3-6-the-extension-hook-contract" class="toc-link">5.3.6 The extension hook contract</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-4-the-second-artefact-the-flow-diagram" class="toc-link">5.4 The second artefact: the flow diagram</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-5-the-terminal-apps" class="toc-link">5.5 The terminal apps</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-6-divergences-and-corrections" class="toc-link">5.6 Divergences and corrections</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-7-gap-statement-what-the-widget-frontend-pole-can-take-from-crewai" class="toc-link">5.7 Gap statement — what the widget/frontend pole can take from CrewAI</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-8-batch-05-checklist" class="toc-link">5.8 Batch 05 — checklist</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('crewai_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('crewai_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('crewai_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('crewai_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.CrewAIReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

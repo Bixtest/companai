@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 02 — The aissistant (P1) — CrewAI Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-02" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 02</span>
+      <div class="header-title-wrap">
+        <div class="header-title">The Aissistant (P1)</div>
+        <div class="header-subtitle">CrewAI Platform Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/02-the-aissistant.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #059669">DONE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">2,832</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">14 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">335</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-15</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 02 Architecture Guide (Default)</option>
+            <optgroup label="Strategic Architecture">
+              <option value="master">Executive Topology: three poles, one executor, two absent clusters</option>
+            </optgroup>
+            <optgroup label="Foundations">
+              <option value="00">Batch 00: The pin, the 93% docs hazard, and the method</option>
+              <option value="01">Batch 01: The one door, the spine &amp; the second paradigm</option>
+            </optgroup>
+            <optgroup label="Pole 1 — The Aissistant">
+              <option value="02">Batch 02: The aissistant — a small agent &amp; an empty seam</option>
+            </optgroup>
+            <optgroup label="Pole 2 — The Workspace">
+              <option value="03">Batch 03: The workspace — a folder that binds text to code</option>
+            </optgroup>
+            <optgroup label="Pole 3 — Automations">
+              <option value="04">Batch 04: Automations — executor yes, delivery no</option>
+            </optgroup>
+            <optgroup label="Cross-Cutting">
+              <option value="05">Batch 05: Widgets &amp; frontend — empty front, real protocol</option>
+            </optgroup>
+            <optgroup label="Escape Hatch">
+              <option value="06">Batch 06: Out-of-pole (PZ) — the tenancy question, closed</option>
+            </optgroup>
+            <optgroup label="Strategic Decision">
+              <option value="07">Batch 07: The synthesis — transfer matrix &amp; the verdict</option>
+            </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 02 VISUAL GUIDE — POLE 1</div>
+    <h4>The aissistant: a small honest agent, and the seam waiting to be filled</h4>
+    <p>Persona is three strings; capability is six methods; failure is typed; and the tenant-scoped toolset is a wiring task, not a redesign</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 350" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-02" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-02" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+        <marker id="arrr-02" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#ef4444"/>
+        </marker>
+      </defs>
+      <g transform="translate(20, 20)">
+        <rect width="210" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">PERSONA = 3 STRINGS</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">role · goal · backstory</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">base_agent.py:256-258</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Identity is a frozen uuid</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#b45309">No name/tenant/lifecycle</text>
+      </g>
+      <g transform="translate(245, 20)">
+        <rect width="210" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">CAPABILITY = 6 METHODS</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">base_agent.py:668-701</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">executeTask · aexecuteTask</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">createExecutor · 3 tool getters</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#6d28d9">A complete agent contract</text>
+      </g>
+      <g transform="translate(470, 20)">
+        <rect width="210" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE LOOP IS ReAct</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Text reasoning by default</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Native tool-calling is an OPTIMISATION</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">crew_agent_executor.py:352/:505</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">Model-agnostic by design</text>
+      </g>
+      <g transform="translate(695, 20)">
+        <rect width="205" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">FAILURE IS TYPED</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Structured data + retryable flag</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">tool_failure.py:35-71</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Escalates tool→task→agent→crew</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#1d4ed8">Answers "tool broke, now what"</text>
+      </g>
+
+      <rect x="20" y="190" width="880" height="140" rx="10" fill="#2563eb" fill-opacity="0.08" stroke="#2563eb" stroke-width="1.6"/>
+      <text x="40" y="218" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#1d4ed8">THE MOST ACTIONABLE FINDING: the tool filter already takes a run context — and nothing fills it</text>
+      <text x="40" y="244" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">ToolFilterContext(agent, server_name, run_context) — mcp/filters.py:17-35 — receives everything a tenant-scoped toolset would need.</text>
+      <text x="40" y="264" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">The seam exists, is well-shaped, and is unpopulated. A tenant-scoped toolset is therefore a WIRING task for us — not a redesign of the agent.</text>
+      <rect x="40" y="282" width="840" height="32" rx="6" fill="#10b981" fill-opacity="0.12"/>
+      <text x="52" y="303" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#059669">But: an agent is a VALUE OBJECT, not a record — no persistence, no tenancy, no org, no lifecycle. That half is ours.</text>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="batch-02-pole-1-the-aissistant">Batch 02 — Pole 1: the aissistant<a href="#batch-02/batch-02-pole-1-the-aissistant" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<blockquote>
+<p><strong>Pole:</strong> <strong>P1 — the aissistant.</strong> <em>The AI user in our platform</em> (the entity called by <code>@</code>, given a role,
+a memory and tools, that does work on a user&#39;s behalf).
+<strong>Status:</strong> read from <code>lib/**/*.py</code> only. Every claim carries <code>file:line</code>.</p>
+</blockquote>
+<hr>
+<h2 id="0-in-plain-words-what-an-agent-is-in-crewai">0. In plain words — what an "agent" is in CrewAI<a href="#batch-02/0-in-plain-words-what-an-agent-is-in-crewai" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>An agent is <strong>a job description that can think</strong>. You give it three pieces of text — <em>who it is</em> (<code>role</code>),
+<em>what it wants</em> (<code>goal</code>), and <em>the story behind it</em> (<code>backstory</code>) — plus <strong>a list of tools</strong> it may use.
+Everything else is optional: which model to think with, how many steps it may take, whether it can ask
+colleagues for help, what memories to consult, which documents it can look up, and what to do when a tool
+fails.</p>
+<p>When it runs, the framework assembles <strong>one big prompt</strong> out of those parts, hands it to the model, reads
+back either a tool request or a final answer, and repeats. <strong>The agent has no identity outside the run</strong> —
+it is a Pydantic model (a validated data object), not a stored row, not a service.</p>
+<p><strong>What the pole needs and what is missing is the point of this batch.</strong> CrewAI gives us the <em>shape</em> of an
+aissistant — persona, context assembly, tool sources, failure policy — but it deliberately gives it <strong>no
+tenancy, no persistence of the agent itself, and no organisation</strong>. Those gaps are ours to fill.</p>
+<hr>
+<h2 id="1-what-was-read-and-its-measured-size">1. What was read, and its measured size<a href="#batch-02/1-what-was-read-and-its-measured-size" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>file</th>
+<th align="right">lines</th>
+<th align="right">bytes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>lib/crewai/src/crewai/agent/core.py</code> (the <code>Agent</code>)</td>
+<td align="right">2,289</td>
+<td align="right">88,701</td>
+</tr>
+<tr>
+<td><code>lib/crewai/src/crewai/agents/agent_builder/base_agent.py</code> (the abstract base)</td>
+<td align="right">814</td>
+<td align="right">32,517</td>
+</tr>
+<tr>
+<td><code>lib/crewai/src/crewai/agent/planning_config.py</code> (<code>PlanningConfig</code>)</td>
+<td align="right">152</td>
+<td align="right">5,825</td>
+</tr>
+<tr>
+<td><code>lib/crewai/src/crewai/agents/crew_agent_executor.py</code> (the loop)</td>
+<td align="right">1,667</td>
+<td align="right">63,209</td>
+</tr>
+<tr>
+<td><code>lib/crewai/src/crewai/tools/tool_failure.py</code> (typed failure + policy)</td>
+<td align="right">336</td>
+<td align="right">—</td>
+</tr>
+<tr>
+<td><code>lib/crewai/src/crewai/mcp/tool_resolver.py</code> + <code>config.py</code> + <code>filters.py</code> (MCP)</td>
+<td align="right">3 files</td>
+<td align="right">—</td>
+</tr>
+<tr>
+<td><code>lib/crewai/src/crewai/tools/agent_tools/*</code> (delegation)</td>
+<td align="right">6 files</td>
+<td align="right">362</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="2-the-persona-three-strings-and-a-model">2. The persona — three strings and a model<a href="#batch-02/2-the-persona-three-strings-and-a-model" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>BaseAgent</code> (<code>agents/agent_builder/base_agent.py:187</code>) is the abstract contract every agent must satisfy.
+The identity fields are exactly three required strings (<code>base_agent.py:256-258</code>):</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>text</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code>base_agent.py:256   role: str = Field(description=&quot;Role of the agent&quot;)
+base_agent.py:257   goal: str = Field(description=&quot;Objective of the agent&quot;)
+base_agent.py:258   backstory: str = Field(description=&quot;Backstory of the agent&quot;)
+</code></pre>
+</div>
+<p>Plus a stable <code>id</code> (a frozen <code>UUID4</code>, auto-generated — <code>base_agent.py:255</code>) and a <code>config</code> dict
+(<code>:259</code>) that is <strong>excluded from serialisation</strong> (<code>exclude=True</code>).</p>
+<p><strong>Plain meaning:</strong> an agent&#39;s personality is three strings, and its identity is a uuid the framework
+mints. There is <strong>no name field, no avatar, no tenant, no owner, no lifecycle state</strong>. In our platform an
+aissistant is a <em>hired colleague</em> with a record; here it is a value object.</p>
+<h3 id="2-1-the-knobs-all-read-from-the-fields">2.1 The knobs (all read from the fields)<a href="#batch-02/2-1-the-knobs-all-read-from-the-fields" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>field</th>
+<th>line</th>
+<th>default</th>
+<th>what it does, plainly</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>llm</code></td>
+<td><code>base_agent.py:314</code></td>
+<td><code>None</code></td>
+<td>the model to think with (a string, a config object, or a live LLM)</td>
+</tr>
+<tr>
+<td><code>max_iter</code></td>
+<td><code>base_agent.py:286</code></td>
+<td><strong>25</strong></td>
+<td>how many think→act steps before giving up</td>
+</tr>
+<tr>
+<td><code>max_rpm</code></td>
+<td><code>base_agent.py:275</code></td>
+<td><code>None</code></td>
+<td>a rate limit on model calls per minute</td>
+</tr>
+<tr>
+<td><code>allow_delegation</code></td>
+<td><code>base_agent.py:279</code></td>
+<td><code>False</code></td>
+<td>may it hand work to colleagues? (off by default)</td>
+</tr>
+<tr>
+<td><code>cache</code></td>
+<td><code>base_agent.py:262</code></td>
+<td><code>True</code></td>
+<td>whether tool results may be cached — <strong>but caching is opt-in</strong></td>
+</tr>
+<tr>
+<td><code>tool_failure_policy</code></td>
+<td><code>base_agent.py:289</code></td>
+<td><code>None</code> (→ <code>warn</code>)</td>
+<td>what to do when a tool reports failure</td>
+</tr>
+<tr>
+<td><code>max_retry_limit</code></td>
+<td><code>agent/core.py:302</code></td>
+<td><strong>2</strong></td>
+<td>retries when the agent errors</td>
+</tr>
+<tr>
+<td><code>respect_context_window</code></td>
+<td><code>agent/core.py:298</code></td>
+<td><code>True</code></td>
+<td>summarise old messages rather than overflow the model</td>
+</tr>
+<tr>
+<td><code>max_execution_time</code></td>
+<td><code>agent/core.py:258</code></td>
+<td><code>None</code></td>
+<td>a wall-clock cap on one task</td>
+</tr>
+<tr>
+<td><code>security_config</code></td>
+<td><code>base_agent.py:353</code></td>
+<td>default</td>
+<td>carries the agent&#39;s <strong>fingerprint</strong> (audit id)</td>
+</tr>
+<tr>
+<td><code>checkpoint</code></td>
+<td><code>base_agent.py:357</code></td>
+<td><code>None</code></td>
+<td>whether this agent&#39;s state is checkpointed</td>
+</tr>
+<tr>
+<td><code>apps</code></td>
+<td><code>base_agent.py:375</code></td>
+<td><code>None</code></td>
+<td><strong>platform tools</strong> — SaaS apps it may act through</td>
+</tr>
+<tr>
+<td><code>mcps</code></td>
+<td><code>base_agent.py:379</code></td>
+<td><code>None</code></td>
+<td><strong>MCP servers</strong> — external tool servers it may call</td>
+</tr>
+<tr>
+<td><code>memory</code></td>
+<td><code>base_agent.py:383</code></td>
+<td><code>False</code></td>
+<td>the agent&#39;s own memory store</td>
+</tr>
+</tbody></table></div>
+<p><strong>Plain meaning of the two lines that matter most for us:</strong> <code>apps</code> and <code>mcps</code> are <strong>two separate doors for
+external capability</strong>. One is &quot;the vendor&#39;s own platform of connected apps&quot;; the other is &quot;any MCP server,
+local or remote&quot;. They are configured per agent but <strong>carry no tenant or user identity</strong> — see §5.</p>
+<hr>
+<h2 id="3-context-assembly-how-one-prompt-is-built">3. Context assembly — how one prompt is built<a href="#batch-02/3-context-assembly-how-one-prompt-is-built" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>Agent.execute_task()</code> (<code>agent/core.py:957</code>) is the P1 entry point. It builds the prompt in a <strong>fixed,
+readable order</strong> — this is the single most reusable thing in the batch:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>text</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code>agent/core.py:978    task_prompt = self._prepare_task_execution(task, context)   # persona + memory
+agent/core.py:981    task_prompt = handle_knowledge_retrieval(...)               # knowledge base
+agent/core.py:992    task_prompt = self._finalize_task_prompt(task_prompt, tools, task)  # skills + tools
+agent/core.py:995    crewai_event_bus.emit(AgentExecutionStartedEvent(...))
+agent/core.py:1005   validate_max_execution_time(self.max_execution_time)
+agent/core.py:1007   result = self._execute_with_timeout(...)  # or _execute_without_timeout
+</code></pre>
+</div>
+<p>and inside <code>_prepare_task_execution</code> (<code>:678</code>) the ordering is explicit:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>text</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code>agent/core.py:701   task_prompt = task.prompt()
+agent/core.py:702   task_prompt = build_task_prompt_with_schema(task, task_prompt)
+agent/core.py:703   task_prompt = format_task_with_context(task_prompt, context)
+agent/core.py:704   return self._retrieve_memory_context(task, task_prompt)
+</code></pre>
+</div>
+<p><strong>So the assembly line is: task description → output schema → context from earlier tasks → memory →
+knowledge → skills → tools → training data.</strong> Each layer <em>appends to the same string</em>. There is no
+separate &quot;system prompt object&quot; that survives the call; the prompt is rebuilt for every task.</p>
+<h3 id="3-1-memory-is-a-retrieval-not-a-transcript">3.1 Memory is a retrieval, not a transcript<a href="#batch-02/3-1-memory-is-a-retrieval-not-a-transcript" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>_retrieve_memory_context</code> (<code>agent/core.py:757</code>) is short and worth quoting in full behaviour:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>text</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code>agent/core.py:787   if unified_memory is not None:
+agent/core.py:788       query = task.description
+agent/core.py:789       matches = unified_memory.recall(query, limit=5)
+agent/core.py:791       memory = &quot;Relevant memories:\n&quot; + &quot;\n&quot;.join(m.format() for m in matches)
+agent/core.py:795       task_prompt += I18N_DEFAULT.slice(&quot;memory&quot;).format(memory=memory)
+</code></pre>
+</div>
+<p><strong>Plain meaning:</strong> memory enters the prompt as <strong>the top 5 recalled items for the task&#39;s own description
+text</strong> — not as a conversation history. The framework starts a <code>MemoryRetrievalStartedEvent</code>, times it,
+and on failure <strong>degrades to no memory</strong> — <em>unless</em> the failure was a <code>HookAborted</code>, which propagates
+(<code>:819-821</code>). That last detail is a small but important design rule: <em>a policy refusal is not a soft
+failure.</em></p>
+<p><strong>The agent&#39;s own memory and the crew&#39;s memory are the same object chosen by precedence</strong> — agent first,
+crew second (<code>:784-786</code>). There is no per-agent isolation of memory beyond whichever store you attach.</p>
+<hr>
+<h2 id="4-planning-an-optional-think-first-pass">4. Planning — an optional think-first pass<a href="#batch-02/4-planning-an-optional-think-first-pass" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>PlanningConfig</code> (<code>agent/planning_config.py:11</code>) turns on a <strong>plan-before-acting</strong> cycle with <strong>three
+effort levels</strong> (<code>:79</code>):</p>
+<ul>
+<li><code>&quot;low&quot;</code> — no per-step observation LLM call; a heuristic only;</li>
+<li><code>&quot;medium&quot;</code> (default) — observe each step with the LLM; replan only on failure;</li>
+<li><code>&quot;high&quot;</code> — full observation pipeline: observe every step, then decide/refine/replan, with <strong>early
+goal-achievement detection</strong>.</li>
+</ul>
+<p>Other bounds: <code>max_steps</code> (20), <code>max_replans</code> (3), <code>max_step_iterations</code> (15), <code>step_timeout</code> (None), and a
+<strong>separate <code>llm</code> for planning</strong> (<code>:143</code>).</p>
+<p><strong>Plain meaning:</strong> &quot;planning&quot; is a <strong>budget dial, not a mode</strong> — and the dial is expressed in <em>how many
+extra model calls</em> you are willing to pay for. For our platform this is the pattern to copy: reason harder
+only where the value justifies the cost, and let the <em>planning</em> model differ from the <em>acting</em> model.</p>
+<hr>
+<h2 id="5-tool-sources-four-doors-and-the-one-our-platform-needs">5. Tool sources — four doors, and the one our platform needs<a href="#batch-02/5-tool-sources-four-doors-and-the-one-our-platform-needs" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>BaseAgent</code> declares <strong>six abstract methods</strong> (<code>base_agent.py:668-701</code>) — the exact contract any agent
+implementation must satisfy:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>text</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code>base_agent.py:669   def execute_task(...)          # run one task
+base_agent.py:678   async def aexecute_task(...)   # the async twin
+base_agent.py:687   def create_agent_executor(...) # build the reasoning loop
+base_agent.py:691   def get_delegation_tools(...)  # colleague-asking tools
+base_agent.py:695   def get_platform_tools(...)    # SaaS-app tools
+base_agent.py:699   def get_mcp_tools(...)         # MCP-server tools
+</code></pre>
+</div>
+<p>Four of those six are <strong>about where tools come from</strong>. The <code>Agent</code> implementations:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>door</th>
+<th>method</th>
+<th>how it works</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Delegation</strong></td>
+<td><code>agent/core.py:1358</code></td>
+<td>wraps every crew-mate as <code>DelegateWorkTool</code> + <code>AskQuestionTool</code> (<code>tools/agent_tools/agent_tools.py:22-36</code>)</td>
+</tr>
+<tr>
+<td><strong>Platform apps</strong></td>
+<td><code>agent/core.py:1362</code></td>
+<td>resolves <code>apps=[...]</code> selectors via <code>crewai_tools.CrewaiPlatformTools</code> (<code>:1379</code>)</td>
+</tr>
+<tr>
+<td><strong>MCP servers</strong></td>
+<td><code>agent/core.py:1398</code></td>
+<td>delegates to <code>MCPToolResolver.resolve(mcps)</code> (<code>mcp/tool_resolver.py:81</code>)</td>
+</tr>
+<tr>
+<td><strong>Skills</strong></td>
+<td><code>agent/core.py:631</code></td>
+<td>injects a <code>LoadSkillTool</code> that reveals more instructions on demand</td>
+</tr>
+</tbody></table></div>
+<h3 id="5-1-the-platform-apps-door-and-the-warning-that-names-our-own-problem">5.1 The platform-apps door, and the warning that names our own problem<a href="#batch-02/5-1-the-platform-apps-door-and-the-warning-that-names-our-own-problem" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>get_platform_tools</code> (<code>agent/core.py:1362</code>) resolves app selectors and, when a declared app resolves to
+<strong>no tools</strong>, emits a <code>UserWarning</code> that names <strong>the agent, its apps, and the credential</strong>:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>text</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code>agent/core.py:1387   warnings.warn(
+agent/core.py:1388       f&quot;Agent &#39;{self.role}&#39; declares apps [{app_names}] but none &quot;
+agent/core.py:1389       &quot;resolved to any tools; the agent will run without them and may &quot;
+...:1391       &quot;are connected, and that CREWAI_ENTERPRISE_ACTION_AUTH_TOKEN is set.&quot;
+</code></pre>
+</div>
+<p><strong>This is the same failure mode as our open <code>CC-84</code>:</strong> a capability is configured for an agent, the
+credential that would authorise it is a <strong>single process-wide token</strong>, and when the token is wrong the
+agent silently loses its tools. CrewAI&#39;s answer is only to <em>warn louder</em>. It does not scope the token per
+agent, per run, or per tenant.</p>
+<p><code>get_platform_tools</code> also <strong>swallows the exception</strong> and logs it (<code>:1380-1381</code>), so a hard failure
+degrades to &quot;no tools&quot; rather than aborting. That is a deliberate choice, and a debatable one.</p>
+<h3 id="5-2-the-mcp-door-three-transports-a-filter-and-a-per-server-credential">5.2 The MCP door — three transports, a filter, and a per-server credential<a href="#batch-02/5-2-the-mcp-door-three-transports-a-filter-and-a-per-server-credential" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>The MCP config models (<code>mcp/config.py</code>) are small and complete:</p>
+<ul>
+<li><code>MCPServerStdio</code> (<code>:12</code>) — <code>command</code>, <code>args</code>, <code>env</code>, <code>tool_filter</code>, <code>cache_tools_list</code>;</li>
+<li><code>MCPServerHTTP</code> (<code>:53</code>) — <code>url</code>, <strong><code>headers</code></strong>, <code>streamable</code>, <code>tool_filter</code>;</li>
+<li><code>MCPServerSSE</code> (<code>:90</code>) — <code>url</code>, <code>headers</code>, <code>tool_filter</code>.</li>
+</ul>
+<p><code>MCPToolResolver.resolve</code> (<code>mcp/tool_resolver.py:81</code>) accepts <strong>three flavours of reference</strong>: a typed
+config object, an <code>https://</code> URL, or a bare AMP slug like <code>notion</code> / <code>notion#search</code> (<code>:86-91</code>). The
+resolver <strong>owns the client connections</strong> and must tear them down via <code>cleanup()</code> (<code>:66-69</code>) — which the
+agent does in <code>_cleanup_mcp_clients</code> (<code>agent/core.py:1409</code>).</p>
+<p><strong>The filter is the interesting part</strong> (<code>mcp/filters.py</code>):</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>text</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code>filters.py:17    class ToolFilterContext(BaseModel):
+filters.py:24        agent: Any
+filters.py:25        server_name: str
+filters.py:26        run_context: dict[str, Any] | None
+filters.py:32    ToolFilter = Callable[[ToolFilterContext, dict], bool] | Callable[[dict], bool]
+</code></pre>
+</div>
+<p>with <code>StaticToolFilter</code> (allow/block lists; <strong>block beats allow</strong> — <code>filters.py:82</code>) and
+<code>create_dynamic_tool_filter</code> (<code>:130</code>) whose docstring example is literally <em>&quot;block dangerous tools for
+Code Reviewers&quot;</em> (<code>:150-152</code>).</p>
+<p><strong>Plain meaning:</strong> CrewAI has a <strong>per-invocation tool-filtering seam</strong> that receives the agent, the
+server name and a run context — i.e. <strong>the exact hook where a tenant-scoped toolset would be computed</strong>.
+It ships the seam and wires <code>run_context</code> through, but the framework itself never populates a tenant into
+it. <em>That is the half-built capability worth taking.</em></p>
+<hr>
+<h2 id="6-failure-is-typed-and-the-policy-has-a-precedence-chain">6. Failure is typed, and the policy has a precedence chain<a href="#batch-02/6-failure-is-typed-and-the-policy-has-a-precedence-chain" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>tools/tool_failure.py</code> is one of the cleanest pieces of the whole tree.</p>
+<p>A tool can report failure <strong>with structure</strong> instead of an error string:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>text</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code>tool_failure.py:71   class ToolFailure(BaseModel):     # message, reason, code, retryable, details
+tool_failure.py:35   class ToolFailureReason(str, Enum):
+tool_failure.py:38       TOOL_REPORTED · EXCEPTION · MCP_ERROR · USAGE_LIMIT · UNKNOWN_TOOL · INVALID_INPUT
+tool_failure.py:57   class ToolFailurePolicy(str, Enum):
+tool_failure.py:60       IGNORE · WARN · RAISE
+</code></pre>
+</div>
+<p><code>ToolFailureRecord</code> (<code>:111</code>) adds <strong>where</strong> the failure happened (<code>tool_name</code>, <code>tool_args</code>, <code>agent_role</code>,
+<code>task_name</code>, <code>task_id</code>) and lands on <code>TaskOutput.tool_failures</code> <strong>and</strong> the event bus, so <em>&quot;consumers never
+parse a string to learn that a step failed&quot;</em> (<code>:114-116</code>).</p>
+<p>The policy is <strong>resolved most-specific-first</strong> (<code>tool → task → agent → crew → WARN</code>):</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>text</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code>tool_failure.py:185   Most specific wins: tool, task, agent, crew, then WARN.
+tool_failure.py:192   for source in (tool, original_tool, task, agent, crew):
+</code></pre>
+</div>
+<p>and a malformed policy is ignored with a warning rather than taking down the call (<code>:201-207</code>).</p>
+<p><strong>Plain meaning:</strong> this is a <strong>mature, copyable error model</strong>. A failure carries <em>what</em>, <em>where</em>, <em>whether
+retrying could help</em>, and <em>a machine code</em>; consumers get it as data; and the reaction is a one-word
+policy that inherits down a documented chain. <strong>CrewAI and our platform both need this</strong> — and the
+<code>retryable</code> flag plus the <code>code</code> field are exactly what a retrying automation needs.</p>
+<hr>
+<h2 id="7-identity-and-audit">7. Identity and audit<a href="#batch-02/7-identity-and-audit" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>security/fingerprint.py:41</code> defines <code>Fingerprint</code>: a <code>uuid_str</code> + <code>created_at</code> + a <strong>size-bounded
+<code>metadata</code> dict</strong> (10 KB max, one level of nesting — <code>:17-38</code>). The docstring states the intent plainly:
+<em>&quot;Each agent has dual identifiers: Human-readable ID … and Fingerprint UUID: Unique runtime identifier for
+tracking and auditing.&quot;</em></p>
+<p><strong>Plain meaning:</strong> the <em>audit identity</em> is separated from the <em>authoring identity</em>. A copy of an agent,
+or an agent re-created with the same role, gets a fresh fingerprint. For us, that is the difference
+between &quot;the Researcher&quot; (a role) and &quot;this Researcher&#39;s run on Tuesday&quot; (an auditable event).</p>
+<hr>
+<h2 id="8-findings-tagged-by-pole">8. Findings, tagged by pole<a href="#batch-02/8-findings-tagged-by-pole" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Finding (capability)</th>
+<th>Pole</th>
+<th>Plain words</th>
+<th>Q1</th>
+<th>Q2</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>2.1</td>
+<td><strong>Persona = role + goal + backstory</strong></td>
+<td>P1</td>
+<td>Identity is three strings; no name/avatar/owner/tenant/lifecycle in the model.</td>
+<td>yes</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>2.2</td>
+<td><strong>Ordered context assembly</strong></td>
+<td>P1</td>
+<td>One prompt is built in a fixed order: task → schema → context → memory → knowledge → skills → tools.</td>
+<td>yes</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>2.3</td>
+<td><strong>Memory as top-N recall, not a transcript</strong></td>
+<td>P1</td>
+<td>Memory is <em>retrieved by the task text</em> (5 items) and degrades to nothing on failure — unless a hook aborts.</td>
+<td>yes</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>2.4</td>
+<td><strong>Planning as a budget dial with 3 levels</strong></td>
+<td>P1 / P3</td>
+<td>Think-first pass is optional and priced in extra model calls; the planning model can differ from the acting model.</td>
+<td>yes</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>2.5</td>
+<td><strong>Four tool doors on one abstract base</strong></td>
+<td>P1 / P2</td>
+<td>Delegation, platform apps, MCP servers and skills are four separate, declared sources.</td>
+<td>yes</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>2.6</td>
+<td><strong>Per-invocation tool filter with a run context</strong></td>
+<td>P1 / PZ</td>
+<td>A seam receives (agent, server, run context) → keep/drop each tool. <strong>The tenant would go here — it is not populated.</strong></td>
+<td>partial</td>
+<td><strong>yes</strong></td>
+</tr>
+<tr>
+<td>2.7</td>
+<td><strong>Typed tool failures + inherited policy</strong></td>
+<td>P1 / P3</td>
+<td>Failures are structured data with a <code>retryable</code> flag and a machine <code>code</code>; reaction is one word inherited tool→task→agent→crew.</td>
+<td>yes</td>
+<td><strong>yes</strong></td>
+</tr>
+<tr>
+<td>2.8</td>
+<td><strong>Dual identity (role + fingerprint uuid)</strong></td>
+<td>PZ</td>
+<td>Audit identity is separate from authoring identity; metadata is size-bounded.</td>
+<td>no</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>2.9</td>
+<td><strong>MCP: 3 transports + per-server headers</strong></td>
+<td>P2 / PZ</td>
+<td>stdio / streamable-HTTP / SSE, each able to carry its own auth headers.</td>
+<td>yes</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>2.10</td>
+<td><strong><code>max_iter</code> = 25, <code>max_retry_limit</code> = 2, <code>respect_context_window</code> = true</strong></td>
+<td>P1 / P3</td>
+<td>The framework ships <em>default safety bounds</em>, not &quot;unlimited unless told&quot;.</td>
+<td>yes</td>
+<td><strong>yes</strong></td>
+</tr>
+<tr>
+<td>2.11</td>
+<td><strong>Context-window overflow is handled by summarisation</strong></td>
+<td>P1</td>
+<td>Long runs summarise rather than crash.</td>
+<td>yes</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>2.12</td>
+<td><strong>Agent is a value object, not a record</strong></td>
+<td>P1 / P2</td>
+<td><strong>The gap:</strong> no persistence, no tenancy, no org, no lifecycle. Ours to build.</td>
+<td>—</td>
+<td>—</td>
+</tr>
+</tbody></table></div>
+<p><strong>Reading the table.</strong> Three rows are the platform-relevant core. <strong>2.6</strong> — the tool filter already takes
+a <code>run_context</code>, so <strong>a tenant-scoped toolset is a wiring task, not a redesign</strong>; this is the single most
+actionable finding for our aissistant. <strong>2.7</strong> — the typed-failure model is mature and directly answers how
+an automation should react to a broken tool. <strong>2.12</strong> — the gap is <em>explicit and useful</em>: CrewAI has
+almost nothing of what our P2 (workspace) and P3 (automations) poles need for agent <em>identity over time</em>,
+and pretending otherwise would be the sloppy work the owner warned against.</p>
+<hr>
+<h2 id="9-doc-vs-code-divergences-recorded">9. Doc-vs-code divergences recorded <span class="seal-badge" style="background:#fef2f2; color:#dc2626; border-color:#fca5a5; font-size: 0.65em; vertical-align: middle;">⚠️ FINDING NOTE</span><a href="#batch-02/9-doc-vs-code-divergences-recorded" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<ol>
+<li><strong><code>allow_code_execution</code> still exists but is a trap.</strong> It is <code>deprecated=True</code> (<code>agent/core.py:293-297</code>)
+and <code>get_code_execution_tools</code> only emits a <code>DeprecationWarning</code> pointing at E2B/Modal (<code>:1422-1430</code>).
+Code that <em>looks</em> like it enables a sandbox does nothing.</li>
+<li><strong><code>cache=True</code> is the default on the agent but caching is off.</strong> The field defaults <code>True</code>
+(<code>base_agent.py:262</code>) yet the docstring and <code>_setup_agent_executor</code> (<code>agent/core.py:552-572</code>) make clear
+caching only activates on an explicit opt-in. A reader who trusts the default would be wrong about
+behaviour.</li>
+<li><strong><code>i18n</code> on the agent is deprecated in favour of a crew-level prompt file</strong> (<code>base_agent.py:308-311</code>).</li>
+<li><strong><code>get_platform_tools</code> swallows its own errors</strong> (<code>agent/core.py:1380-1381</code>) and can leave an agent
+silently toolless while only <em>warning</em> (<code>:1387</code>). The docstring admits the symptom; the code keeps the
+behaviour.</li>
+</ol>
+<hr>
+<h2 id="10-carried-forward">10. Carried forward<a href="#batch-02/10-carried-forward" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<ul>
+<li><strong>Batch 03 (P2 the workspace)</strong> must ask the question this batch raises: <em>if an agent is only a value
+object, where does a CrewAI &quot;workspace&quot; live?</em> The answer is likely <code>project/</code>, the CLI, and the
+<code>crewai-files</code> package — read those next.</li>
+<li><strong>Batch 04 (P3 automations)</strong> will take <strong>2.7 (typed failures)</strong> and <strong>2.4 (planning as a budget)</strong> and
+test them against Flow&#39;s durability.</li>
+<li><strong>Mapping note for later (not now):</strong> the tool-filter <code>run_context</code> (<code>2.6</code>) and the single
+<code>CREWAI_ENTERPRISE_ACTION_AUTH_TOKEN</code> (<code>agent/core.py:1391</code>) are the two halves of our <code>CC-84</code>. Record
+them as a pair; do not resolve them in this study.</li>
+</ul>
+<hr>
+<p><em>Batch 02 of 07. Written 2026-10-15. Every line number is <code>file:line</code> in
+<code>library/architecture/platforms/_extracted/crewAI-main/</code>. No comparison to our platform is made here — the
+mapping pass comes later. Next: <code>findings/03-the-workspace.md</code> (P2).</em></p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="01-platform-overview.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">Platform Overview</span>
+                </a>
+              
+
+              <a href="../index.html#batch-02" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              
+                <a href="03-the-workspace-p2.html" class="nav-page-btn" style="text-align:right;">
+                  <span class="nav-btn-sub">Next Batch →</span>
+                  <span class="nav-btn-title">The Workspace (P2)</span>
+                </a>
+              
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#0-in-plain-words-what-an-agent-is-in-crewai" class="toc-link">0. In plain words — what an &quot;agent&quot; is in CrewAI</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#1-what-was-read-and-its-measured-size" class="toc-link">1. What was read, and its measured size</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#2-the-persona-three-strings-and-a-model" class="toc-link">2. The persona — three strings and a model</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-1-the-knobs-all-read-from-the-fields" class="toc-link">2.1 The knobs (all read from the fields)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-context-assembly-how-one-prompt-is-built" class="toc-link">3. Context assembly — how one prompt is built</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-1-memory-is-a-retrieval-not-a-transcript" class="toc-link">3.1 Memory is a retrieval, not a transcript</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-planning-an-optional-think-first-pass" class="toc-link">4. Planning — an optional think-first pass</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-tool-sources-four-doors-and-the-one-our-platform-needs" class="toc-link">5. Tool sources — four doors, and the one our platform needs</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#5-1-the-platform-apps-door-and-the-warning-that-names-our-own-problem" class="toc-link">5.1 The platform-apps door, and the warning that names our own problem</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#5-2-the-mcp-door-three-transports-a-filter-and-a-per-server-credential" class="toc-link">5.2 The MCP door — three transports, a filter, and a per-server credential</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-failure-is-typed-and-the-policy-has-a-precedence-chain" class="toc-link">6. Failure is typed, and the policy has a precedence chain</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-identity-and-audit" class="toc-link">7. Identity and audit</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#8-findings-tagged-by-pole" class="toc-link">8. Findings, tagged by pole</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#9-doc-vs-code-divergences-recorded" class="toc-link">9. Doc-vs-code divergences recorded</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#10-carried-forward" class="toc-link">10. Carried forward</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('crewai_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('crewai_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('crewai_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('crewai_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.CrewAIReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>
