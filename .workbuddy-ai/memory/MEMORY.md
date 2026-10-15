@@ -28,7 +28,8 @@ it is the most honest document in a repo.
 | 3 | CrewAI 1.15.28 | ✅ CLOSED 7/7 | **Mechanism donor, NOT an architecture template.** Executor yes, **delivery no**, **tenancy nowhere**. |
 | 4 | **Multica 0.2.0** | ✅ **CLOSED 7/7 + reader** | **All three poles real. The closest neighbour studied.** No widget model; no engine of its own. |
 | 5 | **Gas Town 1.2.1** | ✅ **CLOSED 7/7 + reader** | Go multi-agent orchestration. **The watchdog chain is made of agents.** Agents ARE beads; **13-preset provider registry**; `gt prime` infers the role from the directory; **the Hook is the durability primitive**; **ZFC** = transport, don't decide; **47 tested TOML formulas**; **a three-layer sandbox** (mTLS CA + denylist / CLI allow-list → 403 / git smart-HTTP proxy); **13 shell-script plugins, "no AI interpretation"**. Frontend = CLI (5× the rest); **NO widget model** (4th platform with none). **Top 4 ranked mechanisms are DECIDED LIMITS.** |
-| — | n8n, buzz, openrig, mattermost, zulip | ⬜ 5 remain | Order not fixed — **ASK before extracting more.** |
+| 6 | **n8n 2.44.0** | 🔵 **b00 (pin) done** | TS monorepo: 22,715 `.ts` / 57 `@n8n` packages. **FAIR-CODE, not open source** — `.ee` files unlicensed, incl. **`ai-workflow-builder.ee`**. The first platform with a real visual canvas (PX-W). Extracted to `C:\n8n` (MAX_PATH). |
+| — | buzz, openrig, mattermost, zulip | ⬜ 4 remain | Order not fixed — **ASK before extracting more.** |
 
 **Multica b01 (`4cf7f35`, 19 findings, 584 lines, 0 CR):** a Go+TS *product*, not a library
 (2,036 Go files / 801,066 lines; 598 up-migrations; 144 tables). `agent_runtime` (the machine)
@@ -114,8 +115,9 @@ UTF-8); corrected. **The engine was NOT fully platform-agnostic**: 4 hardcoded
 "CrewAI" strings in `generate-reader.js` + `window.CrewAIReader` (a broken gallery
 modal) + a hardcoded `crewai_reader_` storage prefix in `assets/reader.js` — all
 fixed; 0 stale refs.
-**★ NEXT: the remaining FIVE platforms — n8n, buzz, openrig, mattermost, zulip.
-ASK before extracting more.** Then the cross-platform mapping pass.
+**★ NEXT: the N8N study — b00 (pin) done `65f0889`; batch 01 (platform overview)
+next.** Then 02–07 + the n8n reader. Then buzz, openrig, mattermost, zulip — **ASK
+before extracting more** — then the cross-platform mapping pass.
 
 ## Standing hazards (still bite)
 - **Git-Bash `grep -c $'\r'` LIES** — byte truth is `tr -cd '\r' < f | wc -c`; verify the
