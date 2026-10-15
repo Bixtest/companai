@@ -43,7 +43,7 @@ library/architecture/
 ├── crewai-forensics/          ← the CrewAI study (DONE, 7 batches + pin) + reader/
 ├── multica-forensics/         ← the Multica study (DONE, 7 batches + pin) + reader/
 ├── gastown-forensics/         ← the Gas Town study (DONE, 7 batches + pin) + reader/
-├── n8n-forensics/             ← the n8n study (IN PROGRESS: 00 + findings/01..04)
+├── n8n-forensics/             ← the n8n study (IN PROGRESS: 00 + findings/01..05)
 │   ├── 00-PIN-AND-METHOD.md
 │   └── findings/01..07
 ├── reader/                    ← the Hermes reader (HTML)
@@ -77,7 +77,7 @@ one: double-click its `index.html`, or `node serve.js` inside its `reader/` fold
 | **crewAI** | `crewaiinc/crewai` | **STUDIED — 7 batches + pin + reader** |
 | **multica** | `multica-ai/multica` | **STUDIED — 7 batches + pin + reader (75 findings). The closest neighbour studied: all three poles are real.** |
 | **gastown** | `gastownhall/gastown` | **STUDIED — 7 batches + pin + reader (68 findings). Mechanism source + boundary-setting reference.** |
-| **n8n** | `n8n-io/n8n` | **IN PROGRESS — b00–b04 done; 2 batches left (b05 widgets/frontend, b06 out-of-pole)** |
+| **n8n** | `n8n-io/n8n` | **IN PROGRESS — b00–b05 done; 1 batch left (b06), then the synthesis** |
 | buzz | `block/buzz` | to study |
 | openrig | `mvschwarz/openrig` | to study |
 | mattermost | `mattermost/mattermost` | to study |
@@ -114,5 +114,5 @@ fixed later.
 
 ---
 
-*Begun 2026-10-15. Hermes, Paperclip, CrewAI, Multica and Gas Town closed; n8n in progress (b04 of 07);
+*Begun 2026-10-15. Hermes, Paperclip, CrewAI, Multica and Gas Town closed; n8n in progress (b05 of 07);
 four platforms remain.*
