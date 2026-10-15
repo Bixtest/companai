@@ -146,3 +146,7 @@ library/ai/source-docs/*
 # `inbox_ops`.)
 analysis/d2-gap/d2.json
 analysis/d2-gap/d2.err
+
+# Extracted platform source trees for the architecture studies. Huge, regenerable
+# from the .zip files sitting next to them (which are themselves ignored above).
+library/architecture/platforms/_extracted/
