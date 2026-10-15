@@ -26,7 +26,7 @@ it is the most honest document in a repo.
 | 1 | Hermes forensics | ✅ CLOSED 13/13 | Main AI engine; never fork it. "OpenCode" = a provider, not a coding agent. |
 | 2 | Paperclip 0.3.1 | ✅ CLOSED 7/7 | **P2/P3 = strength**, P1 = seam-provider. No multi-tenancy, no widget composer. |
 | 3 | CrewAI 1.15.28 | ✅ CLOSED 7/7 | **Mechanism donor, NOT an architecture template.** Executor yes, **delivery no**, **tenancy nowhere**. |
-| 4 | **Multica 0.2.0** | 🔵 **b01–b05 done** | **All three poles are real and implemented.** Strongest finding: the machine/teammate split. |
+| 4 | **Multica 0.2.0** | 🔵 **b01–b06 done** | **All three poles are real and implemented.** Strongest finding: the machine/teammate split. |
 | — | gastown, n8n, buzz, openrig, mattermost, zulip | ⬜ 6 remain | Order not fixed — **ASK before extracting more.** |
 
 **Multica b01 (`4cf7f35`, 19 findings, 584 lines, 0 CR):** a Go+TS *product*, not a library
@@ -91,7 +91,18 @@ ad-hoc font sizes / 370 arbitrary values → 10 role-named steps; colors pinned 
 WCAG); component contracts in `packages/ui/docs/` powering **UI Lab**. **THE
 NEGATIVE: NO widget/composer model** (0 composers; `widget` in 13 incidental files)
 — second platform with none (Paperclip had none).
-**Next: `findings/06-out-of-pole.md` (PZ).**
+
+**Multica b06 (`c5042c1`, out-of-pole, PZ; 312 lines / 0 CR):** security perimeter
+(credential caches; a middleware stack with CSP + a SEPARATE plugin rate limit);
+`pkg/redact` on the WRITE path (each rule's comment names the leak it closes);
+**the sharpest retirement in the study — migration `344` deletes the ENTIRE Plugin
+V1 (verified: 14 DROP TABLEs), replaced by 3 tables**; the V2 contract =
+Action/Hook/Resource + a capability gate that fails installation loudly; MCP
+consumed + served (reusing the non-inheriting skill pattern); `124` generalizes
+lark_* → 10 channel_* with a documented zero-downtime cutover (2 invariants);
+first-party `DO_NOT_TRACK` telemetry; enforcement separated from commercial policy;
+225 .mdx = 45 pages × 5 languages.
+**Next: `findings/07-SYNTHESIS.md` (all poles), then the Multica reader.**
 
 ## Standing hazards (still bite)
 - **Git-Bash `grep -c $'\r'` LIES** — byte truth is `tr -cd '\r' < f | wc -c`; verify the
