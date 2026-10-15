@@ -1,8 +1,8 @@
 # 03 — The Mapping: every workspace requirement → what we have, or the plan item that builds it
 
-**Status:** **first draft — begun in B8, completed in B10.** Every row is filled from a measurement
-(B1–B7) or a named plan item; **no row is filled from imagination.**
-**Date begun:** 2026-10-11.
+**Status:** **COMPLETED in `B-WS/B10` (2026-10-15).** Every row is filled from a measurement
+(B1–B7, re-verified 2026-10-15) or a named plan item; **no row is filled from imagination.**
+**Date begun:** 2026-10-11. **Date completed:** 2026-10-15 (§6 = the decisions list; §7 = the final audit).
 **The owner's instruction this file answers** (Message 6, verbatim): *"Once fully featured detailed
 srs is created, then we match that to what we have and map it all within our development plan so we
 proceed on solid bases."*
@@ -43,7 +43,7 @@ build. The ten rows below are Q1–Q9 and Q11.)*
 | **Q8** | How do we **add tools** to the workspace as we go? | `02-SRS-05` | three extension routes (platform-shipped / tenant-authored / AI-proposed) | §2 R11 |
 | **Q9** | Same for the **widgets** architecture? | `02-SRS-05`, and **B9** (`02-SRS-06`) | the widget = the rendering object; three routes; preview + sandbox + trust levels | §2 R12; §4 |
 | **Q10** | **Forensically analyse the three systems; decide what fits best, or propose alternatives** | **B8** — `02-REFERENCE-SYSTEMS.md` §5 + §9 | one choice (build ours; borrow ideas per layer) + reasons + alternatives, each reconciled to a plan item | §4 (no SRS row — a decision, not a build) |
-| **Q11** | The **widgetized structure** for the **dashboard** and the **workspaces** | **B9** — `02-SRS-06` | *(filled by B9)* | §4 |
+| **Q11** | The **widgetized structure** for the **dashboard** and the **workspaces** | **B9** — `02-SRS-06` | **§1 of `02-SRS-06` — the scoreboard:** the definition, IR, registry and threads are ours already; the **runtime, renderer, screen, `@` resolver and the two remaining extension routes are the build**. The **workspace screen is specified** (`02-SRS-06` §7) and **does not exist yet** | §2 R12; §4 |
 
 ---
 
@@ -59,7 +59,7 @@ supporting evidence is a measurement in that SRS file.
 |---|---|
 | **What** | A user's plain-language request is triaged into exactly one of **three endings**: a one-time answer, a model proposal, or a **save-as-Function** offer. *"The user decides, the platform proposes."* |
 | **HAVE IT** | ✅ **`request-outcome/triage.ts`** (`triageRequest` `:82`), **`request-outcome/gate.ts`** (`canOfferSaveAsFunction` `:80`), **`request-outcome/types.ts`** (`RequestOutcome` `:51`, `REQUEST_OUTCOMES` `:57`). Measured in B4. |
-| **BUILD IT** | ⬜ the **screen** that runs the triage for a person — **`CC-58` Stage B** (trigger: *business work resumes*). **Stage C merged with `CC-59`** (both were the one core caller) and is **DONE 2026-10-11**; its in-chat consumer is **`CC-60`**. |
+| **BUILD IT** | ⬜ the **screen** that runs the triage for a person — **`CC-58` Stage B** (trigger: *business work resumes*). **Stage C merged with `CC-59`** (both were the one core caller) and is **DONE 2026-10-11**; its in-chat consumer is **`CC-60`** — ✅ **`CC-60` is DONE 2026-10-13 (`P2-4`)**: `ai-agents.ts:181-213` declares `business_ir.query_runner` with the tool whitelisted (corrected 2026-10-15; the row had gone stale — see `COMPLETION-CALLBACKS.md` CC-60). |
 | **Prerequisite / trigger** | Stage C: none (`CC-57` landed the binding). Stage B: the owner's ruling lifting (business half un-paused). |
 | **Source** | `02-SRS-01`; `PLAN-SUPPLEMENTARY-CORE-QUEUE.md` §S1 |
 
@@ -69,8 +69,8 @@ supporting evidence is a measurement in that SRS file.
 |---|---|
 | **What** | The model turns a plain-language request into the platform's structured **Business IR**; before the model is asked, the actor's **agent binding** is resolved (fail-closed). |
 | **HAVE IT** | ✅ **`business-ir-author.ts`** `authorBusinessQueryIr` — binding-gated (`agent_not_bound`) + scope-threaded, per **`CC-57`** (code `1bb61557`). |
-| **BUILD IT** | ✅ **`CC-59` DONE 2026-10-11** (code `83f88bd3`) — the caller exists: `runBusinessQueryPrompt` (`lib/business-ir-run.ts`) + the registered tool **`business_ir.run_query`** (`ai-tools/business-ir-pack.ts`). What remains is the tool's **in-chat consumer** — **`CC-60`**. *(This row read "⬜ `CC-59` — startable now" until 2026-10-11; corrected the same day `CC-59` landed — rule 13.)* |
-| **Prerequisite / trigger** | none — **built**; **`CC-60`** fires when the AI tool surface is next touched |
+| **BUILD IT** | ✅ **`CC-59` DONE 2026-10-11** (code `83f88bd3`) — the caller exists: `runBusinessQueryPrompt` (`lib/business-ir-run.ts`) + the registered tool **`business_ir.run_query`** (`ai-tools/business-ir-pack.ts`). ~~What remains is the tool's **in-chat consumer** — **`CC-60`**~~ ✅ **`CC-60` DONE 2026-10-13 (`P2-4`)** and the row corrected 2026-10-15: `ai-agents.ts:181-213` declares `business_ir.query_runner` (chat-mode, `allowedTools: [business_ir.run_query]`, read-only, `requiredFeatures: ['ai_assistant.view']`). *(This row read "⬜ `CC-59` — startable now" until 2026-10-11, corrected the day `CC-59` landed — rule 13.)* |
+| **Prerequisite / trigger** | none — **built** |
 | **Source** | `02-SRS-01`, `02-SRS-02`; §S1.2 rows L2/L4/L5 |
 
 ### R3 — Display: the Business-IR nugget shows its progress and result in business terms
@@ -150,12 +150,12 @@ supporting evidence is a measurement in that SRS file.
 
 | | |
 |---|---|
-| **What** | The AI is a **participant**, not merely the thread's `agent_id`. |
-| **HAVE IT** | ⬜ **NOT built** — B6 gap 1: today the AI is the thread's `agent_id`, not a participant row. |
-| **BUILD IT** | ⬜ **the AI-as-participant build** — a participant row for the agent, so the same collaboration model covers humans and AI (B6 gap 1) |
+| **What** | The AI is a **participant**, not merely the thread's `agent_id`. *(B10 update: the owner's DP-09 ruling (2026-10-15) makes this **phase-two** — read the two rows below before treating this as a phase-one requirement.)* |
+| **HAVE IT** | ⬜ **NOT built** — B6 gap 1: today the AI is the thread's `agent_id`, not a participant row. **Measured 2026-10-15:** `AiChatConversationParticipant` (`data/entities.ts:826`) has `userId: uuid` NOT NULL and `role: owner\|viewer\|commenter` — **no principal kind**. |
+| **BUILD IT** | ⬜ **the AI-as-participant build** — a participant row for the agent (an additive `kind` column), so the same collaboration model covers humans and AI (B6 gap 1). **Not phase one** — see the trigger. |
 | **BORROW IT** | ✅ **Buzz's "humans and agents are the same kind of colleague"** (B2 §1a) |
-| **Prerequisite / trigger** | **DP-09** (the owner's open decision: *is the AI a participant or the thread's agent?*) — **this row is blocked on the owner.** |
-| **Source** | `02-SRS-04`; B6; `owner_answers.md` DP-09 |
+| **Prerequisite / trigger** | ✅ **DP-09 ANSWERED 2026-10-15 — DEFERRED, not blocked.** The owner's ruling: a **human calls an agent** (phase one, by `@`); an agent **recommends** adding another and **a human decides**; direct agent-to-agent comes **later** ("we can add that later if complicated now"). **Consequence:** phase one needs **no** participant-row change, because "recommend" is a **message carrying an action**, not a membership. **Measured reason the deferral is cheap:** the runtime **already** turns a mutating tool call into a **pending action a human confirms** (`lib/agent-tools.ts:413-419`) and the authority layer **already** caps every machine actor at **approve-first** (`shared/src/lib/authority/decision.ts:205`). **Trigger: when direct agent participation is wanted.** |
+| **Source** | `02-SRS-04`; B6; `discussion_points.md` **Part 3** (DP-09); `02-SRS-06` §5 |
 
 ### R11 — Extension: adding a **tool** over time
 
@@ -174,10 +174,10 @@ supporting evidence is a measurement in that SRS file.
 |---|---|
 | **What** | A new panel/analytic/button is added the same way, through the widget architecture. |
 | **HAVE IT** | ✅ the **widget = two files** (`widgets/injection/<name>/widget.ts` + `widgets/injection-table.ts`), component widgets (`injection.ts:243`) and declarative data widgets (`:450`); **64 `widgets/` dirs** (31 under `dist/`) — measured B7 |
-| **BUILD IT** | ⬜ Routes 2 and 3 for widgets (same as R11); the **frontend workspace surface** itself — **B9** (`02-SRS-06`) |
+| **BUILD IT** | ⬜ Routes 2 and 3 for widgets (same as R11); **the workspace runtime + semantic renderer** (`02-SRS-06` §4) — ⬜ **THE FRONTEND WORKSPACE SURFACE — now SPECIFIED in `02-SRS-06` §7** (measured 2026-10-15: it **does not exist**; `apps/mercato` has no workspace page and the backend is a `[...slug]` catch-all). What exists is the AI chat surface (`ui/src/ai/AiChat.tsx`, `AiDock.tsx`, `conversation-store.ts`). **The rule B9 adopts:** *the workspace is the surface, the thread is the container, the dock is the same thread seen small, page-anchoring is a property the thread carries.* |
 | **BORROW IT** | ✅ the kit's **build-time discovery + runtime loader** shape (matches OpenRig's "thin clients over one daemon", B2 §2b O-2) |
-| **Prerequisite / trigger** | **B9** (the SRS), then WS-1 (B-perms) |
-| **Source** | `02-SRS-05`; **B9 to complete** |
+| **Prerequisite / trigger** | **B9 ✅ DONE (this file's Q11 row), then WS-1 (B-perms)** for the permission-dependent half; the screen itself needs the **join** (`R6`/`CC-62`) and **`R4` persistence** (`CC-32`/`G-09`) to show a *saved* Function — but **a live query nugget** (no save) needs only the `CC-59` caller, which is **built**. |
+| **Source** | `02-SRS-05`; **B9 ✅ — `02-SRS-06`** |
 
 ---
 
@@ -217,18 +217,18 @@ per-module hook** — every ingredient is core or generic. The field itself is b
 
 ---
 
-## §4 — What B9 and B10 fill in
+## §4 — What B9 and B10 filled in *(completed 2026-10-15)*
 
-| Column | Owner | When |
+| Column | Owner | State |
 |---|---|---|
-| §1 row **Q11** (the widgetized structure) | **B9** — `02-SRS-06-widget-architecture.md` | next batch |
-| R12's "BUILD IT" detail (the frontend workspace surface) | **B9** | next batch |
-| The **owner's decisions list** (every open `DP-*`, stated in the reporting standard) | **B10** | after B9 |
-| The final **have/build/borrow** audit (every row re-verified against code) | **B10** | after B9 |
+| §1 row **Q11** (the widgetized structure) | **B9** — `02-SRS-06-widget-architecture.md` | ✅ **DONE 2026-10-15** — the Q11 row above now carries B9's verdict; the workspace screen is specified (`02-SRS-06` §7) |
+| R12's "BUILD IT" detail (the frontend workspace surface) | **B9** | ✅ **DONE** — the row above records the measured absence and B9's adopted rule |
+| The **owner's decisions list** (every open `DP-*`, stated in the reporting standard) | **B10** | ✅ **DONE — §6 below** |
+| The final **have/build/borrow** audit (every row re-verified against code) | **B10** | ✅ **DONE — §7 below** |
 
 **Cross-refs:** [`00-RESEARCH-PLAN.md`](00-RESEARCH-PLAN.md) §B8–B10; [`02-REFERENCE-SYSTEMS.md`](02-REFERENCE-SYSTEMS.md)
-§9 (the verdict this maps from); [`discussion_points.md`](discussion_points.md) (the owner's open
-decisions); `library/development/PLAN-SUPPLEMENTARY-CORE-QUEUE.md` (the `CC-*` items).
+§9 (the verdict this maps from); [`discussion_points.md`](discussion_points.md) (the owner's decisions);
+`library/development/PLAN-SUPPLEMENTARY-CORE-QUEUE.md` (the `CC-*` items).
 
 ---
 
@@ -273,3 +273,96 @@ five in one change (rule 13), or leave `216-241` as the accepted **region** refe
 where a *precise* line is claimed.
 
 *End of the B8 first draft of the mapping. Completed in B10.*
+
+---
+
+## §6 — THE DECISIONS LIST (`B-WS/B10` — the owner's, stated in the reporting standard)
+
+**What this is.** Every decision that is the **owner's**, in one place, each with **the decision · what it
+means in plain words · why it matters · the risk · a recommendation · whether he must decide at all.**
+*(Rule 11: a decision that is the owner's is not ours to close.)*
+
+**Status: 15 of 15 answered.** The table is the **record**; **Part 3 of [`discussion_points.md`](discussion_points.md)
+is the source** for DP-09/10/11/15 (answered in conversation 2026-10-15 and written out in full there).
+
+### §6.1 — Answered, and what each settles
+
+| # | The decision | In plain words | Settles (code term) |
+|---|---|---|---|
+| **DP-01** | Chain live first, storage second | *make a question produce a real result before building the filing cabinet that saves it* | unblocked `CC-59`; `R4`/`CC-32` stays gated on `G-09` |
+| **DP-02** | Say "permissions were not checked" | *never let an unchecked thing look checked* | honesty line on the save path |
+| **DP-03** | A schema-change request is a permissions question first | *ask who may do this, then route it — don't just refuse* | spawned `DP-04`/`DP-05` |
+| **DP-04** | A dedicated permissions workstream, with the **two-gate rule** | *check permission going in **and** coming back — without wrecking speed* | **WS-1 / B-perms** APPROVED; its opening items are `CC-44` (write gate is opt-in) and `CC-47` (no per-row read filter) |
+| **DP-05** | "Explain and route" ships early; the build-pool waits | *the dead end becomes a routed request now; carrying it out waits on the permissions engine* | sequenced behind WS-1 |
+| **DP-06** | A recipe may sit in several menu homes, **one** permission set everywhere | *put it in two menus if useful — but it can never mean two different permissions* | one permission set, many placements |
+| **DP-07** | A recipe opens as a page, a panel, or both — **chosen per recipe** | *the author decides how it opens* | `R6`'s placement carries the choice |
+| **DP-08** | Menu categories are **FLAT** for now | *one flat list; nesting is a later switch with nothing re-saved* | the group is a pure function of the path |
+| **DP-09** | Agents are **AI persons**; a **human calls** them by `@`; an agent may **recommend** adding another and a **human decides**; agent-to-agent **later** | *start with people calling agents; the smart suggestion is still a suggestion* | **participant row stays human-only in phase one** (§2 R10); the recommend-path **reuses** the existing "human confirms a pending action" machinery (`agent-tools.ts:413-419`, `authority/decision.ts:205`) |
+| **DP-10** | The workspace is the **one place threads are managed** | *one screen for conversations* | **the workspace is the surface, the thread is the container** — no new store (`02-SRS-06` §7); one small leftover: one thread per page or many |
+| **DP-11** | Nuggets have captions (`%name%`), can be copied to a new thread, carry a growing toolbar; **comment the thread for now**; the add-data path must be **clear and ready** | *name a panel, jump to it, spin it into its own chat; adding data goes to the **existing** schema only* | three nugget kinds (output/analysis/form); the form's **face** now, its **write** after the two gates; the advanced per-datum step **parked** → `N-22` |
+| **DP-12** | Follow the recommendation, but **sequence every build behind its prerequisite** | *build each piece only when the thing it needs exists* | binding order: `B1…B10` → `B-perms` → `B-studio` → dependent builds |
+| **DP-13** | Review-by-change-class; it belongs in **The Studio**; **"allow you to use it" ≠ "post it into your interface"** | *showing someone a thing is not the same as pushing it into their screen — that would be spam* | WS-2 owns the "available to" vs "placed into" distinction |
+| **DP-14** | A departed author's widgets have a **defined fate**; it belongs in The Studio | *ownership, sharing, review and placement are **one** subject* | WS-2 |
+| **DP-15** | The Studio as a **place** waits; **some of its functions** are needed now (permissions management); the visual data editor waits | *we don't need the whole hub — only the security the platform needs to be testable and safe in phase one* | **measured:** catalogue + matcher + assign screens ARE built; **default-deny (`CC-44`) and the per-row read filter (`CC-47`) are NOT**; the Studio becomes the surface of WS-1's engine |
+
+### §6.2 — What is still **open**, and its classification
+
+| # | Open item | Whose | Must he decide **now**? |
+|---|---|---|---|
+| 1 | **One thread per page per person, or many?** (`DP-10`'s leftover) | **owner** | **No** — best decided by *seeing* the workspace screen. Recommendation: build the "many" default (it is a superset — a single-thread-per-page rule can be added later without data loss). |
+| 2 | **The `%caption%` escape rule** — a caption counts only when the token names a nugget that exists in that thread | **owner may overrule** | **No** — B9 adopts it as a design default; the alternative (*any* `%word%` is a caption) breaks on ordinary percentages. |
+| 3 | **Modal vs scroll** for a caption click | **owner may overrule** | **No** — B9 adopts **modal-first** (the owner's own lean); scroll is the fallback. |
+| 4 | **`#` references** (the vision's `@`/`#` system) — `@` is settled, `#` is unresolved | design (`G-09`) | **No** — it is `G-09`'s subject, not a blocker. |
+| 5 | **AI-as-participant** (the participant `kind`) | **owner already ruled** (DP-09) | **No** — deferred with a named trigger. |
+| 6 | **The advanced data-anchoring** (per-datum comments) | **owner already ruled** (DP-11) | **No** — parked as `N-22`. |
+| 7 | **The Studio's scope** (WS-2) | **owner already ruled** (DP-15) | **No** — the engine (WS-1) comes first. |
+
+**None of the seven blocks `B9`/`B10`.** Six are already ruled or scheduled; one (item 1) is better decided
+by looking at the screen than by reasoning about it.
+
+---
+
+## §7 — THE FINAL AUDIT (`B-WS/B10`): every requirement's destination, no row left floating
+
+**The rule this section applies** (`00-RESEARCH-PLAN.md`, B10's exit gate, verbatim): *"every SRS requirement
+has a **destination** (built / planned item / owner decision); no requirement is left floating."*
+
+**Measured 2026-10-15.** Eleven of the twelve R-rows were re-checked against the code; the changes since the
+B8 draft are named, not silently absorbed.
+
+| Row | Destination | State measured 2026-10-15 |
+|---|---|---|
+| **R1** triage → three endings | ✅ **BUILT** (`triage.ts`, `gate.ts`, `types.ts`) + `CC-58` Stage B (the screen) | unchanged; the `CC-60` pointer corrected (§2 R1) |
+| **R2** the AI authors the IR | ✅ **BUILT** (`business-ir-author.ts`; `CC-57` gate) | unchanged |
+| **R3** the nugget's progress feed | ⬜ **BUILD** — part of `CC-58` Stage B | unchanged (design only) |
+| **R4** save a Function | ⬜ **BUILD** — `CC-32`, gated on **`G-09`** | unchanged |
+| **R5** run it with no LLM | ✅ **BUILT** (`user-function/run.ts:112`) | unchanged |
+| **R6** the menu **join** | ⬜ **BUILD** — **`CC-62`** (the `placement` field) | unchanged; confirmed still absent |
+| **R7** grouping confers no authority | ⬜ **BUILD** — a constraint on R6's projector | unchanged |
+| **R8** threads persisted | ✅ **BUILT** (`entities.ts:736/826/899`); ⬜ the lifecycle | unchanged |
+| **R9** humans in a thread | ✅ **BUILT** (participants + repo); ⬜ anchoring/presence | unchanged |
+| **R10** AI in a thread | ⏸ **DEFERRED by the owner's DP-09 ruling** — was "blocked" | **CHANGED** — §2 R10 rewritten; the deferral is cheap (no migration) |
+| **R11** adding a tool | ✅ Route 1 built; ⬜ Routes 2/3 | unchanged |
+| **R12** adding a widget + **the screen** | ✅ Route 1 built; ⬜ Routes 2/3; ⬜ **the screen — now specified** | **CHANGED** — `02-SRS-06` §7; the absence measured |
+
+**Result: 12 of 12 rows carry a destination. Zero floating.** Three rows changed since B8 (R10, R12, and the
+`CC-60` pointer inside R1/R2); eight are unchanged; one (R3) remains design-only by design.
+
+**What is NOT claimed.** This audit re-verified the rows **this workstream owns** (R1–R12 and the Q-rows). It
+did **not** re-measure the whole spine's `CC-*` register — that is not B10's subject, and `§5b` records the
+one citation defect still carried in four other files, deliberately left for its own pass.
+
+### §7b — The build set this audit confirms (so no row is forgotten)
+
+| Item | What it builds | Prerequisite / trigger |
+|---|---|---|
+| **`CC-62`** | the join (`R6`/`R7`), the thread lifecycle (`R8`), anchoring/presence (`R9`), routes 2/3 (`R11`/`R12`) | `B9`/`B10` **now done**; then per item (`G-09`, WS-1) |
+| **the workspace screen** | `02-SRS-06` §7 — the surface | the join + `CC-32` for a *saved* Function; a **live query nugget** needs only `CC-59` (built) |
+| **`CC-32`** | Function persistence (`R4`) | **`G-09`** |
+| **`CC-44` / `CC-47`** | the two gates phase-one "secure" means (DP-15) | startable; they are WS-1's opening items |
+| **`N-22`** | the parked advanced anchoring (DP-11) | owner asks, or `CC-47` completes |
+
+---
+
+*Completed in `B-WS/B10`, 2026-10-15. Owner: Ramzi. The design workstream's batches B1–B10 are now DONE;
+what follows is the build (no build is started by this document — bridge rule BR-4).*
