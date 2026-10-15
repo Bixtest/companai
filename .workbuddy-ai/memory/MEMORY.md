@@ -28,7 +28,7 @@ it is the most honest document in a repo.
 | 3 | CrewAI 1.15.28 | ✅ CLOSED 7/7 | **Mechanism donor, NOT an architecture template.** Executor yes, **delivery no**, **tenancy nowhere**. |
 | 4 | **Multica 0.2.0** | ✅ **CLOSED 7/7 + reader** | **All three poles real. The closest neighbour studied.** No widget model; no engine of its own. |
 | 5 | **Gas Town 1.2.1** | ✅ **CLOSED 7/7 + reader** | Go multi-agent orchestration. **The watchdog chain is made of agents.** Agents ARE beads; **13-preset provider registry**; `gt prime` infers the role from the directory; **the Hook is the durability primitive**; **ZFC** = transport, don't decide; **47 tested TOML formulas**; **a three-layer sandbox** (mTLS CA + denylist / CLI allow-list → 403 / git smart-HTTP proxy); **13 shell-script plugins, "no AI interpretation"**. Frontend = CLI (5× the rest); **NO widget model** (4th platform with none). **Top 4 ranked mechanisms are DECIDED LIMITS.** |
-| 6 | **n8n 2.44.0** | 🔵 **b00–b03 done** | TS monorepo: 22,715 `.ts` / 57 `@n8n` packages; 563 built-in nodes. **A v2 engine that is a documented SCAFFOLD with 6 ADRs.** **P1 strong:** `@n8n/agents` v0.29.0 — fluent builder, SKILL.md skills, sub-agents with suspend/resume, guardrails = allow|stop(code), cost as a guardrail, untrusted tool output. **P2 is the headline: a real tenancy model** — `Project` with `type: 'personal' | 'team'`, membership as a join row with a Role by slug, **10 roles (4 global + 6 resource-level) and 206 `resource:action` scopes** (4 of 5 scope files `.ee`), `User` ≠ `AuthIdentity`, and **S3/Azure storage `.ee`**. **FAIR-CODE** — `.ee` unlicensed, incl. `ai-workflow-builder.ee`. Extracted to `C:\n8n` (MAX_PATH). |
+| 6 | **n8n 2.44.0** | 🔵 **b00–b04 done** | TS monorepo: 22,715 `.ts` / 57 `@n8n` packages; 563 built-in nodes. **A v2 engine that is a documented SCAFFOLD with 6 ADRs — and the ADRs are ACCURATE** (`MAX_IN_PROCESS_WAIT_MS = 65_000`, the exact constant the ADR names). **P1 strong:** `@n8n/agents` v0.29.0 — fluent builder, SKILL.md skills, sub-agents with suspend/resume, guardrails = allow|stop(code), cost as a guardrail, untrusted tool output. **P2 is the headline: a real tenancy model** — `Project` `personal|team`, membership as a join row with a Role by slug, **10 roles + 206 `resource:action` scopes** (4 of 5 `.ee`), `User` ≠ `AuthIdentity`, S3/Azure storage `.ee`. **P3 has the study's best security surface:** expressions run in an **isolate pool** with a **zod-validated RPC boundary** ("TS types are erased at runtime and contribute zero security"), and observability is a **sampling policy**. **FAIR-CODE** — `.ee` unlicensed, incl. `ai-workflow-builder.ee`. Extracted to `C:\n8n` (MAX_PATH). |
 | — | buzz, openrig, mattermost, zulip | ⬜ 4 remain | Order not fixed — **ASK before extracting more.** |
 
 **Multica b01 (`4cf7f35`, 19 findings, 584 lines, 0 CR):** a Go+TS *product*, not a library
@@ -115,9 +115,9 @@ UTF-8); corrected. **The engine was NOT fully platform-agnostic**: 4 hardcoded
 "CrewAI" strings in `generate-reader.js` + `window.CrewAIReader` (a broken gallery
 modal) + a hardcoded `crewai_reader_` storage prefix in `assets/reader.js` — all
 fixed; 0 stale refs.
-**★ NEXT: the N8N study — b00 `65f0889`, b01 `a3cbe32`, b02 `20ee845`, b03 `20422c8`
-done; batch 04 (automations, P3) next.** Then 05–07 + the n8n reader. Then buzz,
-openrig, mattermost, zulip — **ASK before extracting more** — then the cross-platform mapping pass.
+**★ NEXT: the N8N study — b00 `65f0889` … b04 `acbaa0f` done; batch 05 (widgets/
+frontend, PX) next.** Then 06–07 + the n8n reader. Then buzz, openrig, mattermost,
+zulip — **ASK before extracting more** — then the cross-platform mapping pass.
 
 ## Standing hazards (still bite)
 - **Git-Bash `grep -c $'\r'` LIES** — byte truth is `tr -cd '\r' < f | wc -c`; verify the
