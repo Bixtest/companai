@@ -26,7 +26,7 @@ it is the most honest document in a repo.
 | 1 | Hermes forensics | ✅ CLOSED 13/13 | Main AI engine; never fork it. "OpenCode" = a provider, not a coding agent. |
 | 2 | Paperclip 0.3.1 | ✅ CLOSED 7/7 | **P2/P3 = strength**, P1 = seam-provider. No multi-tenancy, no widget composer. |
 | 3 | CrewAI 1.15.28 | ✅ CLOSED 7/7 | **Mechanism donor, NOT an architecture template.** Executor yes, **delivery no**, **tenancy nowhere**. |
-| 4 | **Multica 0.2.0** | 🔵 **b01 done** | **All three poles are real and implemented.** Strongest finding: the machine/teammate split. |
+| 4 | **Multica 0.2.0** | 🔵 **b01+b02 done** | **All three poles are real and implemented.** Strongest finding: the machine/teammate split. |
 | — | gastown, n8n, buzz, openrig, mattermost, zulip | ⬜ 6 remain | Order not fixed — **ASK before extracting more.** |
 
 **Multica b01 (`4cf7f35`, 19 findings, 584 lines, 0 CR):** a Go+TS *product*, not a library
@@ -38,7 +38,21 @@ distributed cron whose `sys_cron_executions` is lease *and* audit log; autopilot
 **Hermes driven via a hard-coded `hermes acp`** with the profile handshake mirrored from
 Hermes's own CLI (upstream GH #8878 cited); `hermes_test.go` = 4,860 lines, 2nd-largest in
 `pkg/agent/`. **CC-84 narrowed, not solved:** a `mat_` task token makes the task the
-credential's scope, but the engine is still shared. **Next: `findings/02-the-assistant-p1.md`.**
+credential's scope, but the engine is still shared.
+
+**Multica b02 (`f2dba7e`, the aissistant, P1; 368 lines / 0 CR):** the agent
+surface, read from source. Machine/teammate split (`agent_runtime` + `agent`,
+`runtime_id` NOT NULL RESTRICT); one `Backend` interface, 24 structs / 25 keys;
+`SupportedTypes` whitelist kept in lockstep with the DB CHECK by hand; the
+`agent` table = 29 columns over 598 up-migrations (229 mention it); later
+migrations promoted fields OUT of the legacy `runtime_config` jsonb into typed
+columns, stored **runtime-native** (not neutralised). Skills are TWO kinds
+(workspace structured vs runtime/CLI disable-only). Permissions =
+`permission_mode` + a stacking `agent_invocation_target` allow-list,
+deny-by-default (MUL-3963 closed an admin-bypass hole); A2A judged by the
+top-of-chain human originator. **Retirement ledger: 4 retirements** (008/032/
+109/126) + 129→130 reversing the Composio originator==owner gate.
+**Next: `findings/03-the-workspace.md` (P2).**
 
 ## Standing hazards (still bite)
 - **Git-Bash `grep -c $'\r'` LIES** — byte truth is `tr -cd '\r' < f | wc -c`; verify the

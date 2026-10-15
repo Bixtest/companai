@@ -39,10 +39,11 @@ studies.
 library/architecture/
 ├── README.md                  ← you are here
 ├── hermes-forensics/          ← the Hermes study (mirror of library/hermes-forensics/)
-├── paperclip-forensics/       ← the Paperclip study (DONE, 7 batches + pin)
+├── paperclip-forensics/       ← the Paperclip study (DONE, 7 batches + pin) + reader/
+├── crewai-forensics/          ← the CrewAI study (DONE, 7 batches + pin) + reader/
+├── multica-forensics/         ← the Multica study (IN PROGRESS: 00 + findings/01..02)
 │   ├── 00-PIN-AND-METHOD.md
-│   ├── findings/01..07
-│   └── reader/                ← the user-friendly HTML reader for this study
+│   └── findings/01..07
 ├── reader/                    ← the Hermes reader (HTML)
 └── platforms/                 ← the raw platform archives + references
     ├── *.zip                  (gitignored)
@@ -57,6 +58,7 @@ one: double-click its `index.html`, or `node serve.js` inside its `reader/` fold
 
 - **Hermes reader** → `reader/` (port 3000)
 - **Paperclip reader** → `paperclip-forensics/reader/` (port 3100)
+- **CrewAI reader** → `crewai-forensics/reader/` (port 3200)
 
 **The markdown is the source of truth.** Readers are generated from it and never edited by hand.
 
@@ -66,9 +68,10 @@ one: double-click its `index.html`, or `node serve.js` inside its `reader/` fold
 
 | Platform | Repo | Status |
 |---|---|---|
+| **Hermes** | `NousResearch/hermes-agent` | **STUDIED — 13/13 (the main engine; never forked)** |
 | **Paperclip** | `paperclipai/paperclip` | **STUDIED — 7 batches + pin (ancestor of our fork)** |
-| crewAI | `crewaiinc/crewai` | to study |
-| multica | `multica-ai/multica` | to study |
+| **crewAI** | `crewaiinc/crewai` | **STUDIED — 7 batches + pin + reader** |
+| **multica** | `multica-ai/multica` | **IN PROGRESS — b00 (pin) + b01 (overview) + b02 (the aissistant); 5 batches left** |
 | gastown | `gastownhall/gastown` | to study |
 | n8n | `n8n-io/n8n` | to study |
 | buzz | `block/buzz` | to study |
@@ -107,4 +110,5 @@ fixed later.
 
 ---
 
-*Begun 2026-10-15. Paperclip study closed; the remaining eight platforms are next.*
+*Begun 2026-10-15. Hermes, Paperclip and CrewAI closed; Multica in progress (b02 of 07); the remaining six
+platforms are next.*
