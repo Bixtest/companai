@@ -1,133 +1,99 @@
 # Project memory — Companai / open-mercato (ACTIVE, SHORT form)
 
-> Detail → `extended_deep_memory.md` + daily logs. New work: HERE + today's log.
+> Detail → `extended_deep_memory.md` + daily logs (`YYYY-MM-DD.md`) + `JOURNAL.md`. New work: HERE + log.
 
-## Protocol (short)
+## Protocol & standing rules (binding)
 Next task ONLY from `JOURNAL.md`'s `★ ACTIVE TASK` (order = `BUILD-ORDER.md`). Requirement = task +
-`platform_points.md` points, **written BEFORE any code**; **rule 0b — measure the code FIRST**. Then
-plan → execute → **separate-agent** hostile critic → **RED-then-GREEN** (md5 restore) → re-measure.
-Only when flawless: ALL docs in the SAME change + commit. **Never `git add -A`** — explicit paths,
-BOTH repos (docs `C:/Users/Ramzi/Downloads/companai`; code `../workspace/starting-kit`).
-
-## Standing rules (binding)
+`platform_points.md` points, **written BEFORE any code**; **rule 0b — measure the code FIRST**. Then plan →
+execute → **separate-agent** hostile critic → **RED-then-GREEN** (md5 restore) → re-measure. Only when
+flawless: ALL docs in the SAME change + commit. **Never `git add -A`** — explicit paths, BOTH repos (docs
+`C:/Users/Ramzi/Downloads/companai`; code `../workspace/starting-kit`).
 Two sources of truth: `BACKLOG.md` (status) + `BUILD-ORDER.md` (order); FRONTIER = `platform_points.md`'s
-`▶ FRONTIER`; **only code is evidence**. SHARED-DOC CLOBBER HAZARD: the owner saves from a stale copy —
-`git diff <path>` first, **commit immediately after every edit**; `owner_answers.md` read-only.
-Rules 9a · 10d · 11 (owner decides *what*) · 13 (falsified premise → correct *everywhere*) · 15.
-Reporting: no flag without a full report (named · plain meaning · why · risk · **ranked actions +
-recommendation** · whether he must decide); **never end on "your call"**.
+`▶ FRONTIER`; **only code is evidence**. **SHARED-DOC CLOBBER HAZARD:** owner saves from a stale copy —
+`git diff <path>` first, **commit immediately after every edit**; `owner_answers.md` read-only. Rules 9a ·
+10d · 11 (owner decides *what*) · 13 (falsified premise → correct *everywhere*) · 15–17. Reporting: no flag
+without a full report (named · plain meaning · why · risk · **ranked actions + recommendation** · whether he
+must decide); **never end on "your call"**.
 
-## THREE TREES — never confuse (2026-10-14; owner's proceed/trash verdict pending)
-- `workspace/starting-kit` = the OLD thin integration lab (Hermes behind a port; no per-run identity,
-  no tenant-key door). Its `P2-*`/`CC-*` frontier is PARKED while this decision is open.
-- `Aiaiai/backend-starter` = UNRELATED children's-education starter; "paperclip" appears nowhere in it.
-- **`aissistant-package` = THE REAL PROJECT**: fork of upstream Paperclip 0.3.1 (baseline commit
-  `4feef987`), rebranded Aissistant/Companai — an AI-company OS: companies + polymorphic memberships,
-  agent org chart, hire → provision a real per-employee Hermes home → eval gate (M3-AGT-02) → board
-  approval → the 19.4k-line `heartbeat.ts` run engine. Hermes is integrated as 11 adapters with
-  **`hermes_acp` as the MANDATED product lane** (422 for anything else; break-glass env
-  `COMPANAI_ALLOW_LEGACY_ADAPTER_HIRES`): ACP over `docker exec -i` into ONE shared container,
-  `HERMES_HOME` selects the employee, per-run identity as env vars, ~30 native + 41 `paperclip*` MCP
-  tools, per-company `OPENAI_API_KEY` (AES-256-GCM) + a free local llama lane. Report →
-  `analysis/aissistant-package-architecture-2026-10-14.md`. **Study THIS tree, not the other two.**
+## THREE TREES — never confuse
+- `workspace/starting-kit` = OLD thin integration lab (Hermes behind a port). `P2-*`/`CC-*` frontier PARKED.
+- `Aiaiai/backend-starter` = UNRELATED children's-education starter; "paperclip" absent.
+- **`aissistant-package` = THE REAL PROJECT**: fork of upstream Paperclip 0.3.1 (baseline `4feef987`), rebranded
+  Aissistant/Companai — AI-company OS: companies + polymorphic memberships, agent org chart, hire → provision a
+  per-employee Hermes home → eval gate → board approval → the 19.4k-line `heartbeat.ts` run engine. Hermes = 11
+  adapters, **`hermes_acp` the MANDATED lane** (422 else; break-glass `COMPANAI_ALLOW_LEGACY_ADAPTER_HIRES`):
+  ACP over `docker exec -i` into ONE shared container, `HERMES_HOME` selects the employee, per-run identity as
+  env vars, ~30 native + 41 `paperclip*` MCP tools, per-company `OPENAI_API_KEY` (AES-256-GCM) + a free local
+  llama lane. Report → `analysis/aissistant-package-architecture-2026-10-14.md`. **Study THIS tree.**
 
 ## Hazards
-`tsc` needs **`--incremental false`** (L139); jest does NOT type-check (L138). Write bytes, not text
-(Python `open(p,'w')` flips LF→CRLF + md5). Critic = SEPARATE agent, command+output per claim; a
-structural scan must name the file classes it covers; **critic verdicts get measured too (L146)**.
-**Node 24: `…/.toolchain/node24/node.exe`** (above `starting-kit`). `/tmp` differs between the Write
-tool (`C:\tmp`) and bash (`%TEMP%`) — absolute paths in harnesses. **node→node spawn throws `EBUSY`
-here** — drive children from BASH; prove a GREEN baseline before any RED (**L149**). A test reaching a
-live service is not a unit test (**L150**).
+`tsc` needs **`--incremental false`** (L139); jest does NOT type-check (L138). **Git-Bash `grep -c $'\r'` LIES
+(reports CRs on LF-only files); byte truth = `tr -cd '\r' < f | wc -c`;** `core.autocrlf=true` commit warnings
+are noise — verify the STAGED BLOB via `git show :path`. Critic = SEPARATE agent, command+output per claim; a
+structural scan must name the file classes it covers; **critic verdicts get measured too (L146)**. Node:
+`…/.toolchain/node24/node.exe` above `starting-kit`; managed `…\binaries\node\versions\22.22.2-6\node.exe`.
+`/tmp` differs between Write (`C:\tmp`) and bash (`%TEMP%`) — absolute paths. **node→node spawn = `EBUSY`** —
+drive children from BASH; GREEN baseline before any RED (L149). Live-service test ≠ unit test (L150). Gates on
+the PINNED runtime (L154). Write BYTES not text (Python `open(p,'w')` flips LF→CRLF).
 
 ## Live frontier (truth = `JOURNAL.md`'s `★ ACTIVE TASK`)
-- **ONE NUMBER 78 / 321 = 24%**, derived (`.derive_platform_points.py`), never typed; split parents
-  (`▸ n/N`) never count, 5+ spaces are annotations, §L excluded.
-- **Row 28 (Phase 8) ✅ COMPLETE** — one typed door (`R28-5` proved it); `R28-6` (delete OpenCode)
-  trigger-blocked → `CC-72`. Hermes pin = `HERMES-PIN.md`; `--check` → PIN HOLDS (L135/L136).
-- **Hermes Phase 2: `P2-1`–`P2-6` ✅ (2026-10-13)** — but **PHASE 2's *stated* exit gate is NOT yet green**
-  (**rule 13 correction**): §2.12 proved the five properties **through the port** (against a `FakeClient`),
-  and **no live turn has ever been driven**. `P2-5` (§2.11) = engine SELECTABLE
-  (`lib/resolve-ai-runtime-port.ts`, env `AI_RUNTIME_ENGINE`, default `opencode`;
-  `provenance.implementation`; envelope NOT widened). **`P2-6` (§2.12)** = cancel · retry
-  idempotency · usage (scope stated) · bounded mem/CPU · no cross-scope access, on ONE tenant then TWO
-  adversarial. Built the two missing bounds in ONE shared file `lib/ai-runtime-bounds.ts`
-  (`resolveRunDeadline` = sooner of `deadline` & `budget`-from-admission; `pruneRunRegistry` = evict
-  finished, NEVER live), applied by BOTH chat adapters + the platform adapter; **`CC-76` FIXED** (OpenCode
-  honours the time bound; its timer SETTLES the stream). Package **125/1752 green**; tsc **92 = `CC-73`,
-  0 new**; **10 mutations RED**; critic **2 defects + 2 nits fixed** (D1 the bound must END the stream —
-  **L151**; D2 a THIRD `AiRuntimePort` impl was unbounded — **L152**). **Default did NOT move.** Lessons
-  **L144–L152**.
-- **★ `P2-7` (§2.13) ✅ DONE 2026-10-14 — Hermes SERVED A LIVE TURN, twice, the second production-shaped**
-  (the compose change alone). Compose now forwards `OPENAI_BASE_URL` + `HERMES_MODEL` (the worker's OWN
-  mechanism — it ignores `OM_AI_*`) + `HERMES_LOCAL_STREAM_STALE_TIMEOUT: 2400` (measured prefill grace;
-  the worker's 900 s default aborts every real turn on 4 CPUs). Landed: `scripts/hermes-live-turn.mts`
-  (harness), `lib/hermes-live-turn-verdict.ts` (pure judgement) + 2 suites (19 tests), the wiring suite that
-  PARSES the compose `environment:` mapping, `p2-7:live`. Package **127 suites / 1771 green** (under the
-  PINNED Node 24 — **L154**); tsc **92 = `CC-73`, 0 new**; **7 mutations RED** md5-restored. Lessons
-  **L153** (`progress =` is not the total: read `prompt eval time`) · **L154** (gates run on the pinned
-  runtime — wrong node = different test SET) · **L155** (tee long-run evidence; task registries expire).
-- **★ `P2-8` (§2.14.1) ✅ DONE 2026-10-14** — the production CONNECTION LIFECYCLE: the worker serves the
-  pin's own **ws** door (`docker/hermes/ws_host.py` + `ws_entry.py` — **FastAPI/uvicorn**, NOT aiohttp: the
-  image ships no aiohttp) and the client connects it through a transport **seam**
-  (`lib/hermes-gateway-transport.ts`). A real turn was served over the door with **NO hand-spawned
-  process**. Package **128 / 1838**; tsc 92; 18 mutations RED. **Default did NOT move.**
-- **★ `P2-9a` (§2.15.1) ✅ DONE 2026-10-14 — THE MCP BRIDGE, exit gate met LIVE; `CC-79` DISCHARGED.**
-  A Hermes turn **called a platform tool**: `tool_search` → `mcp__open_mercato__context_whoami` → the
-  platform's own `context.whoami` result (real tenant/user, `isSuperAdmin: true`, 25 features);
-  `PASS … on done (287 events) in 859.1s`. `DISCOVERED: 21`; toolset `open-mercato tools=21 mcp=21`.
-  Code `e7915da4`: `docker/hermes/mcp_bootstrap.py` (writes through the pin's OWN `_save_mcp_server`;
-  credential = **placeholder** `${MCP_SERVER_API_KEY}`), Dockerfile `--extra mcp`, entrypoint
-  `resolve_mcp_key` + exports the key into the **worker's env** + bootstrap subprocess with **stdout
-  suppressed**, compose MCP URL `http://mcp:3001/mcp` + `mcp_shared` ro/**external**. Wiring suite 53.
-  **The two-read proof (L159):** `read_raw_config()` (as-written → placeholder AT REST) AND
-  `load_config()` (env-expanded → runtime resolves it) — one read cannot tell a resolved placeholder
-  from a leaked secret. **A separate-agent critic found 3 VACUOUS GUARDS + a boot regression, all fixed
-  (L164)** — worst: *"never logs its value"* could not see an **f-string**, so a mutant that PRINTED the
-  credential stayed 53/53 GREEN; and *"writes through the pin's writer"* asserted only the **import**.
-  The author's own 18 mutants could not find them.
-- **★ `CC-80` ✅ DISCHARGED 2026-10-14 (found by `P2-9a`'s gate).** The suite read the **shell**: exporting
-  `OM_AI_PROVIDER=openai OM_AI_MODEL=…` turned **5 suites / 27 tests** RED (all five byte-identical to
-  `2128cf96`, throwing from **unchanged** `model-factory.ts`). Fix: `test-env-hermetic.ts` +
-  `setupFilesAfterEnv`, clearing the provider axis **by prefix** (`OM_AI_`, `OPENCODE_`) + credentials.
-  **Two-sided acceptance BOTH measured: clean 129/1890 GREEN, poisoned 129/1890 GREEN** (was 5/27 RED);
-  a prefix-rule mutant turns the poisoned run RED again. Code `8c793e30`. Lessons **L163** (discovery) ·
-  **L165** (a clean run is the BASELINE, not the proof; and a PREFIX rule needs a fixture that CONTAINS
-  its subject).
-- **★ NEXT = `P2-9b` — ONE change**: default-flip to Hermes + OpenCode deletion (`R28-6`/`N-8`) +
-  `CC-74` `hermes-local` retirement. **Recorded hazard:** the worker's **default** toolset set measures
-  **~16,757 tokens**; cold prefill (~3000 s at ~5.5 tok/s) exceeds `HERMES_LOCAL_STREAM_STALE_TIMEOUT:
-  2400` — the `P2-9a` proof pinned `HERMES_TUI_TOOLSETS: open-mercato` and does NOT claim a
-  production-shaped default-toolset turn.
-- **★ `CC-73` ✅ DISCHARGED 2026-10-14 — done BEFORE `P2-9b` (owner delegated the order).** The
-  `ai-assistant` type gate had been *decorative* (it extended the ROOT `tsconfig.json`, whose `exclude`
-  swallowed the package's own `src/**` → `tsc -p .` = **TS18003**). Turning it on exposed **92 type errors,
-  all `__tests__`, production clean**; **jest does NOT type-check (L138) and the build is esbuild**, so
-  neither command a developer runs would ever show them. Fixed: **27 test files, 0 production files**,
-  `tsconfig.json` untouched (option (2), excluding `**/__tests__/**`, stays REJECTED — it would hide the
-  class `P2-2`'s critic found). Gate **exit 0** (was 92); package **129/1890 GREEN** (= the CC-80
-  baseline); **4 reverts restored 17 errors**, md5-restored. Critic (separate agent) **1 MEDIUM + 3
-  LOW/NIT** — the MEDIUM: two BC tests asserted *"assignable to `AiToolDefinition`/`McpToolDefinition`"*
-  and the claim was **FALSE, not stale** (function-typed **properties** → contravariant params → a narrow
-  input is NOT assignable to `unknown`); my first fix silenced it while leaving the title claiming the old
-  thing → **titles+comments rewritten, friction registered as `CC-81`** (L166/L167). Moves **no box**.
-- **`CC-81` OPEN (new, from `CC-73`'s critic):** the base `AiToolDefinition`/`McpToolDefinition` are NOT
-  assignable from a narrowly-typed tool, so the interfaces' own docblock (`lib/types.ts:115`) is a **false
-  statement in the tree**. Both fixes are a **design decision (rule 11)** — (a) method syntax (bivariant) or
-  (b) correct the docblock + a typed-helper pattern. Scheduled, not fixed. **`CC-76` ✅ FIXED.**
-- **`CC-84` OPEN (new 2026-10-14, the owner's tenancy question):** the worker's MCP tool calls authenticate
-  as ONE service identity — the superadmin's `__mcp_server__` key (`mcp-ensure-api-key.ts` → `auth.ts` →
-  every tool's `ctx`) — so a Hermes-served turn executes platform tools OUTSIDE the conversation's
-  tenant/user; plus one shared `HERMES_HOME`, no per-tenant profiles (`profile` on every door session
-  method, unused). Invisible single-tenant; a cross-tenant superadmin gap with a 2nd tenant. **Rule-13
-  correction to `P2-9a`:** its whoami "real tenant/user" was the SERVICE identity, not the chat user.
-  Ranked: per-run minted credential (recommended) → interim single-tenant fail-closed guard → doc-only
-  rejected. Sequencing vs `P2-9b` = rule-11. **`CC-83` OPEN:** `P2-9b` retires the only session-write door.
-  **`CC-51` FALSIFIED:** the `team` concept EXISTS (`StaffTeam*`); `staff` is PARKED → product decision
-  (L137). **Owner's ruling: core architecture first — business modules are GENERATED from the core
-  workspace.** Docker ON.
-- **Lessons added this session: L159–L167** (L159 wrong-VIEW proof · L160 Git Bash path rewriting ·
-  L161 docstring-satisfied guards · L162 compose blast radius is the PROJECT · L163 non-hermetic suite ·
-  L164 import-is-not-the-call + f-string blind spot · L165 the defective condition is the proof ·
-  L166 a type fix must restore the CLAIM (the test title is part of it) · L167 a test-helper cast erases N
-  types — document the trade-off; a fake missing required fields is invisible behind a cast).
+- **ONE NUMBER 78 / 321 = 24%**, derived, never typed. Row 28 ✅ — `R28-6` (delete OpenCode) → `CC-72`.
+  Hermes pin = `HERMES-PIN.md`; `--check` → PIN HOLDS.
+- **Hermes Phase 2 DONE (`P2-1`…`P2-9a`), measured, defaults NOT moved.** 129/1890; tsc 92=0 new. Last:
+  **`P2-9a` MCP BRIDGE, gate met LIVE** (`context.whoami`; `CC-79` discharged; `e7915da4`).
+- **★ NEXT = `P2-9b` — ONE change**: default-flip to Hermes + OpenCode deletion (`R28-6`/`N-8`) + `CC-74`.
+  **Hazard:** worker **default** toolset ≈16,757 tokens; cold prefill (~3000 s) > `…STALE_TIMEOUT: 2400` —
+  `P2-9a` pinned `HERMES_TUI_TOOLSETS: open-mercato`.
+- **Open:** `CC-81` (base tool types NOT assignable from a narrow tool; docblock `lib/types.ts:115` false) ·
+  **`CC-84` tenancy:** worker MCP calls authenticate as ONE superadmin identity → a Hermes turn runs platform
+  tools OUTSIDE the chat's tenant/user; one shared `HERMES_HOME`. Ranked: per-run minted credential (rec) →
+  interim single-tenant fail-closed guard → doc-only rejected. **`CC-83`:** `P2-9b` retires the only session-write
+  door. **`CC-51` FALSIFIED:** `team` EXISTS; `staff` PARKED. **Owner: core architecture first — business modules
+  GENERATED from the core workspace.** Docker ON.
+
+## Hermes forensics — CLOSED 13/13 · Paperclip study — CLOSED 7/7
+- **Hermes** `library/hermes-forensics/` (00 + `01`–`13`; pin: no `.git`, 19,728 files, `pyproject.toml` md5
+  `f57f729d4b251547a5a9e2565ce1e726`). Method = docs are claims, code is authority. 4 doc-vs-code divergences;
+  batch 10 §9 (**"OpenCode" = a provider, not the coding agent**); batch 13 (prior analysis = HYPOTHESES;
+  **C13-14: search config migrations for a retirement entry before reusing any older-doc setting**).
+  `security.tirith_*` retired via migration 49→50. **Build UNDER. Steps 2–3 NOT started.** `edee95d`→`f3f83ec`.
+- **Paperclip** `library/architecture/paperclip-forensics/` (`9ae258f`/`97b4dfc`/`2bef78d`; reader `f1e5dea`).
+  Upstream 0.3.1 = the aissistant's ancestor (no `.git`, 10,447 files; `package.json` md5
+  `e912c83c715dba5c7c55469d4de899cb`). **P2/P3 = its strength** (finite runs + durable DB continuity; 5
+  continuation kinds + idempotency keys; reconciler; typed task tree TWO link types; portable md company pkg;
+  directory restore locks); **P1 = seam-provider** (4 separable layers; agent lifecycle machine; Ed25519;
+  memory-as-binding); **does NOT give**: multi-tenancy, a widget composer, rich persona/memory, a final SPEC.
+  **4 forks vs Hermes:** Paperclip draws boundaries LOWER, Hermes HIGHER — **Hermes wins where already stronger.**
+
+## ★ ARCHITECTURE WORKSHOP — `library/architecture/` (NEW stage)
+**Goal:** study platforms ONE AT A TIME; find what fits the **three poles** (**P1 aissistant · P2 workspace · P3
+automations**) + widgets/frontend (PX-W/PX-F) + escape hatch (PZ); then **map** each pole across ALL platforms
+against mercato → a clean **SRS**; then build **one-tenant ↔ one-Hermes**. **No development before a written
+requirement. Hermes must NOT be forked/edited. Markdown is the source of truth — never edit it to fit a reader.**
+**Layout:** `README.md` · `<platform>-forensics/` (`00-PIN-AND-METHOD.md` + `findings/01..NN`) · `platforms/`
+(zips + `references.md`; extracts under `platforms/_extracted/`, **gitignored**).
+**A study's reader** = the platform-agnostic engine (`generate-reader.js` + `DOCS_CONFIG` + `diagrams.js` +
+`reader.js/css`, `marked.min.js`, `serve.js`); emits `index.html` (SPA) + `pages/` + `assets/docs-data.js` +
+`verification-report.json`; 4 themes, search, gallery, `[`/`]`, `diagram:id` pills. **Ports:** Hermes 3000 ·
+Paperclip 3100. **Gotcha:** source `.md` comes from `SOURCE_DIR` — the **parent** if the generator sits in a
+`reader/` folder, else `__dirname`. Built at the END of a study.
+- **Paperclip ✅ CLOSED 7/7** — see the section above; reader `f1e5dea`.
+- **CrewAI 🔵 IN PROGRESS (2026-10-15).** `crewai-forensics/` = 00 pin + `findings/01` (0 CR). Tree
+  `platforms/_extracted/crewAI-main/`; `__version__ = "1.15.28"`. **HAZARD:** 1,411 `.py` / 492,582 lines but
+  `docs/` = **33,251 `.mdx` = 93% of files** → read `lib/**/*.py` ONLY. **B01 established the control plane:**
+  `Process` = 2 values and **"hierarchical" is NOT a hierarchy** (same loop + a manager agent with 2 tools);
+  `kickoff()` the one door; `_execute_tasks` = a for-loop + inline async escape hatch; `execution.py` = per-run
+  uuid; **agent loop branches on capability — native tool-calling is an OPTIMISATION on a ReAct TEXT loop**;
+  event bus = 163 typed events + replay; hooks = 10 points that can ABORT; **checkpoint/resume/FORK**;
+  declarative JSON loader + `FlowDefinition`; **Flows = 2nd paradigm** (routers, racing, human-feedback
+  suspend/resume); **Skills** = SKILL.md + 3-level disclosure + `@org/name@version` registry. 14 pole-tagged
+  findings. **NEXT = batch 02 (P1):** `agent/core.py` + `base_agent.py`'s 6 abstract methods + platform/MCP tools.
+- **★ Remaining 8 platforms:** multica, gastown, n8n, buzz, openrig, mattermost, zulip (crewAI in progress).
+  Order beyond "Paperclip first" **not fixed — ASK before extracting ~700 MB more.** Then the **mapping step.**
+
+## Lessons L144–L167
+L149 GREEN baseline before RED · L150 live-service test ≠ unit test · L151 the bound must END the stream · L152 a
+THIRD impl was unbounded · L153 `progress =` ≠ total · L154 gates on the PINNED runtime · L155 tee long-run
+evidence · L159 wrong-VIEW proof · L160 Git Bash path rewriting · L161 docstring-satisfied guards · L162 compose
+blast radius = the PROJECT · L163 non-hermetic suite · L164 import ≠ the call + f-string blind spot · L165 a
+clean run is the BASELINE · L166 a type fix must restore the CLAIM · L167 a test-helper cast erases N types.
