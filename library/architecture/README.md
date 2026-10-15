@@ -42,7 +42,7 @@ library/architecture/
 ├── paperclip-forensics/       ← the Paperclip study (DONE, 7 batches + pin) + reader/
 ├── crewai-forensics/          ← the CrewAI study (DONE, 7 batches + pin) + reader/
 ├── multica-forensics/         ← the Multica study (DONE, 7 batches + pin) + reader/
-├── gastown-forensics/         ← the Gas Town study (IN PROGRESS: 00 + findings/01..02)
+├── gastown-forensics/         ← the Gas Town study (IN PROGRESS: 00 + findings/01..03)
 │   ├── 00-PIN-AND-METHOD.md
 │   └── findings/01..07
 ├── reader/                    ← the Hermes reader (HTML)
@@ -74,7 +74,7 @@ one: double-click its `index.html`, or `node serve.js` inside its `reader/` fold
 | **Paperclip** | `paperclipai/paperclip` | **STUDIED — 7 batches + pin (ancestor of our fork)** |
 | **crewAI** | `crewaiinc/crewai` | **STUDIED — 7 batches + pin + reader** |
 | **multica** | `multica-ai/multica` | **STUDIED — 7 batches + pin + reader (75 findings). The closest neighbour studied: all three poles are real.** |
-| **gastown** | `gastownhall/gastown` | **IN PROGRESS — b00 (pin) + b01 (overview) + b02 (the aissistant); 4 batches left** |
+| **gastown** | `gastownhall/gastown` | **IN PROGRESS — b00 (pin) + b01 (overview) + b02 (the aissistant) + b03 (the workspace); 3 batches left** |
 | n8n | `n8n-io/n8n` | to study |
 | buzz | `block/buzz` | to study |
 | openrig | `mvschwarz/openrig` | to study |
@@ -112,5 +112,5 @@ fixed later.
 
 ---
 
-*Begun 2026-10-15. Hermes, Paperclip, CrewAI and Multica closed; Gas Town in progress (b02 of 07); five
+*Begun 2026-10-15. Hermes, Paperclip, CrewAI and Multica closed; Gas Town in progress (b03 of 07); five
 platforms remain.*
