@@ -28,13 +28,13 @@ must decide); **never end on "your call"**.
 
 ## Hazards
 `tsc` needs **`--incremental false`** (L139); jest does NOT type-check (L138). **Git-Bash `grep -c $'\r'` LIES
-(reports CRs on LF-only files); byte truth = `tr -cd '\r' < f | wc -c`;** `core.autocrlf=true` commit warnings
-are noise — verify the STAGED BLOB via `git show :path`. Critic = SEPARATE agent, command+output per claim; a
-structural scan must name the file classes it covers; **critic verdicts get measured too (L146)**. Node:
-`…/.toolchain/node24/node.exe` above `starting-kit`; managed `…\binaries\node\versions\22.22.2-6\node.exe`.
-`/tmp` differs between Write (`C:\tmp`) and bash (`%TEMP%`) — absolute paths. **node→node spawn = `EBUSY`** —
-drive children from BASH; GREEN baseline before any RED (L149). Live-service test ≠ unit test (L150). Gates on
-the PINNED runtime (L154). Write BYTES not text (Python `open(p,'w')` flips LF→CRLF).
+(reports CRs on LF-only files); byte truth = `tr -cd '\r' < f | wc -c`;** autocrlf commit warnings are noise —
+verify the STAGED BLOB via `git show :path`. Critic = SEPARATE agent, command+output per claim; a structural scan
+must name the file classes it covers; **critic verdicts get measured too (L146)**. Node: managed
+`…\binaries\node\versions\22.22.2-6\node.exe` (Hermes code tree: `…/.toolchain/node24/node.exe`). `/tmp` differs
+between Write (`C:\tmp`) and bash (`%TEMP%`) — use absolute paths. **node→node spawn = `EBUSY`** — drive children
+from BASH (L149). Live-service test ≠ unit test (L150). Gates on the PINNED runtime (L154). Write BYTES not text
+(Python `open(p,'w')` flips LF→CRLF — pass `newline=''`).
 
 ## Live frontier (truth = `JOURNAL.md`'s `★ ACTIVE TASK`)
 - **ONE NUMBER 78 / 321 = 24%**, derived, never typed. Row 28 ✅ — `R28-6` (delete OpenCode) → `CC-72`.
@@ -51,19 +51,17 @@ the PINNED runtime (L154). Write BYTES not text (Python `open(p,'w')` flips LF�
   door. **`CC-51` FALSIFIED:** `team` EXISTS; `staff` PARKED. **Owner: core architecture first — business modules
   GENERATED from the core workspace.** Docker ON.
 
-## Hermes forensics — CLOSED 13/13 · Paperclip study — CLOSED 7/7
-- **Hermes** `library/hermes-forensics/` (00 + `01`–`13`; pin: no `.git`, 19,728 files, `pyproject.toml` md5
-  `f57f729d4b251547a5a9e2565ce1e726`). Method = docs are claims, code is authority. 4 doc-vs-code divergences;
-  batch 10 §9 (**"OpenCode" = a provider, not the coding agent**); batch 13 (prior analysis = HYPOTHESES;
-  **C13-14: search config migrations for a retirement entry before reusing any older-doc setting**).
-  `security.tirith_*` retired via migration 49→50. **Build UNDER. Steps 2–3 NOT started.** `edee95d`→`f3f83ec`.
-- **Paperclip** `library/architecture/paperclip-forensics/` (`9ae258f`/`97b4dfc`/`2bef78d`; reader `f1e5dea`).
-  Upstream 0.3.1 = the aissistant's ancestor (no `.git`, 10,447 files; `package.json` md5
-  `e912c83c715dba5c7c55469d4de899cb`). **P2/P3 = its strength** (finite runs + durable DB continuity; 5
-  continuation kinds + idempotency keys; reconciler; typed task tree TWO link types; portable md company pkg;
-  directory restore locks); **P1 = seam-provider** (4 separable layers; agent lifecycle machine; Ed25519;
-  memory-as-binding); **does NOT give**: multi-tenancy, a widget composer, rich persona/memory, a final SPEC.
-  **4 forks vs Hermes:** Paperclip draws boundaries LOWER, Hermes HIGHER — **Hermes wins where already stronger.**
+## Prior studies — both CLOSED (detail → extended memory + daily logs + their readers)
+- **Hermes forensics** `library/hermes-forensics/` (00 + `01`–`13`, CLOSED 13/13). Pin: no `.git`, 19,728 files,
+  `pyproject.toml` md5 `f57f729d4b251547a5a9e2565ce1e726`. Rule: docs = claims, code = authority. 4 divergences
+  (incl. **"OpenCode" = a provider, not the coding agent**). **C13-14: search config migrations for a retirement
+  entry before reusing any older-doc setting** (`security.tirith_*` retired 49→50). Build-under steps 2–3 NOT
+  started. `edee95d`→`f3f83ec`. Reader port 3000.
+- **Paperclip** `library/architecture/paperclip-forensics/` CLOSED 7/7 (`9ae258f`/`97b4dfc`/`2bef78d`; reader
+  `f1e5dea`). Upstream 0.3.1 = the aissistant's ancestor (no `.git`, 10,447 files; `package.json` md5
+  `e912c83c715dba5c7c55469d4de899cb`). **P2/P3 = its strength**; **P1 = seam-provider**; **does NOT give**:
+  multi-tenancy, widget composer, rich persona/memory, a final SPEC. **4 forks vs Hermes** — Paperclip draws
+  boundaries LOWER, Hermes HIGHER; **Hermes wins where already stronger**. Reader port 3100.
 
 ## ★ ARCHITECTURE WORKSHOP — `library/architecture/` (NEW stage)
 **Goal:** study platforms ONE AT A TIME; find what fits the **three poles** (**P1 aissistant · P2 workspace · P3
@@ -78,18 +76,34 @@ requirement. Hermes must NOT be forked/edited. Markdown is the source of truth �
 Paperclip 3100. **Gotcha:** source `.md` comes from `SOURCE_DIR` — the **parent** if the generator sits in a
 `reader/` folder, else `__dirname`. Built at the END of a study.
 - **Paperclip ✅ CLOSED 7/7** — see the section above; reader `f1e5dea`.
-- **CrewAI 🔵 IN PROGRESS (2026-10-15).** `crewai-forensics/` = 00 pin + `findings/01` (0 CR). Tree
-  `platforms/_extracted/crewAI-main/`; `__version__ = "1.15.28"`. **HAZARD:** 1,411 `.py` / 492,582 lines but
-  `docs/` = **33,251 `.mdx` = 93% of files** → read `lib/**/*.py` ONLY. **B01 established the control plane:**
-  `Process` = 2 values and **"hierarchical" is NOT a hierarchy** (same loop + a manager agent with 2 tools);
-  `kickoff()` the one door; `_execute_tasks` = a for-loop + inline async escape hatch; `execution.py` = per-run
-  uuid; **agent loop branches on capability — native tool-calling is an OPTIMISATION on a ReAct TEXT loop**;
-  event bus = 163 typed events + replay; hooks = 10 points that can ABORT; **checkpoint/resume/FORK**;
-  declarative JSON loader + `FlowDefinition`; **Flows = 2nd paradigm** (routers, racing, human-feedback
-  suspend/resume); **Skills** = SKILL.md + 3-level disclosure + `@org/name@version` registry. 14 pole-tagged
-  findings. **NEXT = batch 02 (P1):** `agent/core.py` + `base_agent.py`'s 6 abstract methods + platform/MCP tools.
-- **★ Remaining 8 platforms:** multica, gastown, n8n, buzz, openrig, mattermost, zulip (crewAI in progress).
-  Order beyond "Paperclip first" **not fixed — ASK before extracting ~700 MB more.** Then the **mapping step.**
+- **CrewAI ✅ CLOSED 7/7 (2026-10-15).** `crewai-forensics/`: 00 pin + `findings/01`–`07`, all 0 CR; commits
+  `dcd4675`(00/01) `b9a1200`(02) `4fe2113`(03) `4ebe4f8`(04) `29dc6fe`(05) `e81ad83`(06) `c5feb74`(07) +
+  reader **`d81c86e`**. **67 findings** (14+12+12+12+10+8 + 6 synthesis), **23 divergences**. Tree
+  `platforms/_extracted/crewAI-main/`; `1.15.28`; zip md5 `cd93b15634e2c83ed371553b89533324`; no `.git`.
+  **HAZARD:** 1,411 `.py` / 492,582 lines but `docs/` = **33,251 `.mdx` / 292 MB = 93% of files** (45 version
+  trees × 4 langs) → read `lib/**/*.py` ONLY; `crewai-core` 138,480 lines is **97% one generated catalog**
+  (`platform_catalog.py`), hand-written core = 4,424. **VERDICT: mechanism donor, NOT an architecture template**
+  — an excellent *executor* + credible *durability store*, **no delivery layer** and **no tenancy at any layer**.
+  **P3:** no scheduler/queue/worker/clock/retry/backoff/expiry (measured by search; Redis = lock+cache only);
+  trigger = a `kickoff(inputs=…)` key **silently dropped** if undeclared; **TWO mutually-exclusive durability
+  systems** (`ValueError`); pause+`from_pending().resume()` = the one external-wait primitive, caller in its own
+  docstring = a webhook **nobody ships**; delegation = inline blocking call; **Flow** = declared graph, `or_`/`and_`
+  first-wins (only exclusively-fed race), progress = **completed-name set**, `plot()`→HTML.
+  **P1:** persona = 3 fields; capability = **6 abstract methods** (`base_agent.py:668-701`); tool-calling is an
+  **optimisation on a ReAct text loop**; typed `ToolFailure` chain tool→task→agent→crew; `ToolFilterContext`
+  (agent, server, run_context) **well-shaped & UNPOPULATED = a wiring task for tenant-scoping**; agent = value
+  object, **not a record** (no registry/org/lifecycle). **P2:** folder + five named name-rejections;
+  YAML↔Python **string-reference resolution** (`crew_base.py:621-671`); one `CrewDefinition` from 3 syntaxes;
+  `crewai-files` 4-part subsystem + `FileMode`; Knowledge (10 source types); workspace **holds files describing
+  agents, never agents as records**. **PX:** **no frontend at all**; **A2UI** = the only real widget architecture
+  (4 messages, **18-component** typed catalog, prompt-augmented, **`allowed_components` enforced on the RESPONSE**
+  = the only real enforcement mechanism in the study). **PZ/tenancy CLOSED:** `SecurityConfig` (274 lines) marks
+  auth/scoping/impersonation **`*TODO*`** (`security_config.py:25,27,28`) — the 3 things a tenancy model IS;
+  only `fingerprint`; orgs are hosted HTTP. **12 ranked mechanisms** — top 3 = catalogue+enforcement, completed-name
+  progress, `or_` racing. **13 named absences.** Reader live on **port 3200**.
+- **★ Remaining 7 platforms:** multica, gastown, n8n, buzz, openrig, mattermost, zulip. Order beyond "Paperclip
+  first, CrewAI second" **not fixed — ASK before extracting ~700 MB more.** Then the **mapping step** (poles ×
+  platforms vs mercato → SRS), then build **one-tenant ↔ one-Hermes**.
 
 ## Lessons L144–L167
 L149 GREEN baseline before RED · L150 live-service test ≠ unit test · L151 the bound must END the stream · L152 a
@@ -97,3 +111,5 @@ THIRD impl was unbounded · L153 `progress =` ≠ total · L154 gates on the PIN
 evidence · L159 wrong-VIEW proof · L160 Git Bash path rewriting · L161 docstring-satisfied guards · L162 compose
 blast radius = the PROJECT · L163 non-hermetic suite · L164 import ≠ the call + f-string blind spot · L165 a
 clean run is the BASELINE · L166 a type fix must restore the CLAIM · L167 a test-helper cast erases N types.
+**Study-method lessons (2026-10-15):** count FIRST (a doc tree can be 93% of a repo and hide the code) · the same
+claim repeated 180× is one claim, not evidence · a generated file can be 97% of a "core" package by line count.
