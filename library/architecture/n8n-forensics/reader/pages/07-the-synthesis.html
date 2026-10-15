@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 07 — The synthesis — n8n Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-07" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 07</span>
+      <div class="header-title-wrap">
+        <div class="header-title">The Synthesis</div>
+        <div class="header-subtitle">n8n Platform Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/07-SYNTHESIS.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #4f46e5">COMPLETE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">5,971</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">30 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">480</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-15</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 07 Architecture Guide (Default)</option>
+            <optgroup label="Strategic Architecture">
+              <option value="master">Executive Topology: the three poles, the composition surface, and the licence line</option>
+            </optgroup>
+            <optgroup label="Foundations">
+              <option value="00">Batch 00: The pin, the MAX_PATH extraction, and the licence gate</option>
+              <option value="01">Batch 01: The overview — two engines, one a documented scaffold</option>
+            </optgroup>
+            <optgroup label="Pole 1 — The Aissistant">
+              <option value="02">Batch 02: The aissistant — an agent is a configuration</option>
+            </optgroup>
+            <optgroup label="Pole 2 — The Workspace">
+              <option value="03">Batch 03: The workspace — a real tenancy model</option>
+            </optgroup>
+            <optgroup label="Pole 3 — Automations">
+              <option value="04">Batch 04: Automations — the isolation boundary and an accurate ADR</option>
+            </optgroup>
+            <optgroup label="Cross-Cutting">
+              <option value="05">Batch 05: Widgets &amp; frontend — the first composition surface</option>
+            </optgroup>
+            <optgroup label="Escape Hatch">
+              <option value="06">Batch 06: Out-of-pole — two ratchets and an empty promise</option>
+            </optgroup>
+            <optgroup label="Strategic Decision">
+              <option value="07">Batch 07: The synthesis — mechanisms behind a licence line</option>
+            </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 07 VISUAL GUIDE</div>
+    <h4>The synthesis: fourteen mechanisms, and the five that matter most</h4>
+    <p>What to carry forward, and what is ours to build behind the licence line</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 360" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-07" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-07" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+        <marker id="arrr-07" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#ef4444"/>
+        </marker>
+      </defs>
+      <g transform="translate(20, 20)">
+        <rect width="210" height="160" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">TOP 4 — THE SEAMS</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">1. the isolation boundary</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">2. allow|stop(code) ×2</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">3. the SKILL.md contract</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#6d28d9">4. cost as a guardrail</text>
+      </g>
+      <path d="M 230 100 L 268 100" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-07)"/>
+      <g transform="translate(272, 20)">
+        <rect width="210" height="160" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">NEXT — THE MODELS</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">5. the accurate ADR practice</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">6. the two ratchets</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">7. the tenancy vocabulary</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#6d28d9">8. the canvas + design system</text>
+      </g>
+      <path d="M 482 100 L 520 100" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-07)"/>
+      <g transform="translate(524, 20)">
+        <rect width="180" height="160" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE PAGE</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">22,715 .ts files</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">65 % of bytes</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">57 @n8n packages</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">563 built-in nodes</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">73 findings</text>
+      </g>
+      <path d="M 704 100 L 742 100" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-07)"/>
+      <g transform="translate(746, 20)">
+        <rect width="154" height="160" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE VERDICT</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">mechanism source</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">+ composition-surface</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">reference</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#b45309">behind a licence line</text>
+      </g>
+      <rect x="20" y="206" width="880" height="130" rx="10" fill="#7c3aed" fill-opacity="0.08" stroke="#7c3aed" stroke-width="1.6"/>
+      <text x="40" y="234" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#6d28d9">THE FIVE LOAD-BEARING FINDINGS — if the mapping pass reads only five lines, these are the five</text>
+      <text x="40" y="260" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">F04-03 the zod-validated isolation boundary · F02-05/06 the guardrails + untrusted tool output</text>
+      <text x="40" y="282" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">F02-03 the SKILL.md contract · F05-05 the canvas (the study's first composition surface)</text>
+      <text x="40" y="312" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#6d28d9">F06-01/02 the two ratchets — and unlike Gas Town's, these are mechanisms with ONE implementation point.</text>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="batch-07-the-synthesis">Batch 07 — The Synthesis<a href="#batch-07/batch-07-the-synthesis" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Study:</strong> n8n <code>2.44.0</code> · <strong>Batch:</strong> 07 of 07 · <strong>Status:</strong> COMPLETE
+<strong>Source:</strong> <code>C:\n8n</code> (extract of <code>platforms/n8n-master.zip</code>) · <strong>Zip md5:</strong> <code>7cc78a5ea124ba2c270bccabf282d9ed</code> · <strong>License:</strong> fair-code — read only, nothing here is a licence to copy (§ batch 00 §2.5)</p>
+<p><strong>Scope of this batch.</strong> Batches 00–06 measured n8n from code. This batch does what a synthesis must:
+state the platform&#39;s verdict in plain words, name the mechanisms worth carrying into the mapping pass,
+state plainly what n8n does <strong>not</strong> give us, and answer the two value questions the method requires.
+It is a <em>reading</em> of the six batches — no new claim about the source is introduced here, and every claim
+restates a <code>file:line</code> already established in its originating batch.</p>
+<p><strong>Method rules in force.</strong> Code is the authority; docs are claims (rule 1). No comparison to our own
+platform (rule 5) — this batch compares <strong>batches to each other</strong>, never n8n to our own platform; that is
+the mapping pass&#39;s job. Pole-tag everything (rule 9). Name every capability, including the ones we will
+not use (rule 6). Answer the two value questions (rule 4). Report the negatives. Correct earlier batches
+where later evidence demands it (rule 13). Run the retirement rule before reusing an older-doc setting
+(rule 10). <strong>And the owner&#39;s §7 directive</strong> — <em>what fits the vision</em> and <em>what could be taken further</em> —
+which §7.7 carries, as <strong>observations, never decisions</strong>.</p>
+<hr>
+<h2 id="7-1-the-measured-page">7.1 The measured page<a href="#batch-07/7-1-the-measured-page" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Everything below was counted or read, not estimated.</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Quantity</th>
+<th>Measured</th>
+<th>Source batch</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Zip md5</td>
+<td><code>7cc78a5ea124ba2c270bccabf282d9ed</code></td>
+<td>00</td>
+</tr>
+<tr>
+<td>Archive</td>
+<td><strong>38,689 entries = 7,060 dirs + 31,629 files</strong>; <strong>76,776,813 B</strong> zip; <strong>218,643,247 B</strong> on disk</td>
+<td>00</td>
+</tr>
+<tr>
+<td>Extraction</td>
+<td><strong><code>C:\n8n</code> — verified exact: 31,629 of 31,629 files, 0 missing, 0 extra</strong> (not the workspace: MAX_PATH)</td>
+<td>00</td>
+</tr>
+<tr>
+<td>Declared version</td>
+<td><strong><code>2.44.0</code></strong> (<code>n8n-monorepo</code>); Node ≥ 24 · <strong>pnpm 12.4.2</strong> · <strong>Turborepo</strong></td>
+<td>00</td>
+</tr>
+<tr>
+<td>Identity limit</td>
+<td><strong>no <code>.git</code></strong> — the exact upstream commit cannot be read; &quot;latest n8n&quot; means <em>this extract</em></td>
+<td>00</td>
+</tr>
+<tr>
+<td><code>.ts</code> files</td>
+<td><strong>22,715</strong> (141,917,795 B — <strong>65 % of all bytes</strong>)</td>
+<td>00</td>
+</tr>
+<tr>
+<td><strong>Test ratio</strong></td>
+<td><strong>15,266 product + 7,449 test = 32.8 % by filename</strong></td>
+<td>00</td>
+</tr>
+<tr>
+<td><code>.vue</code> files</td>
+<td><strong>1,409</strong> in batch 00&#39;s whole-tree count · <strong>1,351</strong> inside <code>packages/frontend</code> (batch 05)</td>
+<td>00, 05</td>
+</tr>
+<tr>
+<td><strong><code>packages/</code></strong></td>
+<td><strong>30,740 files / 208,063,359 B = 95 % of the tree</strong></td>
+<td>00</td>
+</tr>
+<tr>
+<td><code>@n8n</code> packages</td>
+<td><strong>57</strong> internal packages + 9 top-level groups</td>
+<td>00</td>
+</tr>
+<tr>
+<td>CLI</td>
+<td><strong>26 operator commands</strong> (27 files) — audit, db revert, engine, execute, export/import, license, publish, start, webhook, worker…</td>
+<td>01</td>
+</tr>
+<tr>
+<td>Engines</td>
+<td><strong>two</strong> — a shipped service-based engine in <code>packages/core</code>, and a <strong>v2 engine its own README calls <em>&quot;a scaffold … not yet wired into n8n&quot;</em></strong></td>
+<td>01</td>
+</tr>
+<tr>
+<td>ADRs</td>
+<td><strong>6</strong> in the v2 engine — durable execution, token-authorized resume, control/data plane split</td>
+<td>01</td>
+</tr>
+<tr>
+<td>Nodes</td>
+<td><strong>563</strong> built-in <code>.node.ts</code> (&quot;1,500+&quot; is community nodes — a distribution claim, marked)</td>
+<td>01</td>
+</tr>
+<tr>
+<td><code>@n8n/agents</code></td>
+<td><strong>v0.29.0</strong> — 133 runtime files + 42 SDK files + 40 workspace files</td>
+<td>02</td>
+</tr>
+<tr>
+<td>Skills</td>
+<td>a <strong><code>SKILL.md</code></strong> validated, <strong>72 KB output cap</strong>, content-hashed linked files, declared MCP deps</td>
+<td>02</td>
+</tr>
+<tr>
+<td>Model catalog</td>
+<td>fetched from <strong><code>models.dev</code></strong> — USD-per-million-token cost + context limits, provider aliases</td>
+<td>02</td>
+</tr>
+<tr>
+<td>Tenancy</td>
+<td><strong><code>Project</code> <code>personal | team</code></strong>; <strong>10 roles</strong> (4 global + 6 resource-level); <strong>206 <code>resource:action</code> scopes</strong> (4 of 5 scope files are <code>.ee</code>)</td>
+<td>03</td>
+</tr>
+<tr>
+<td>Identity</td>
+<td><strong><code>User</code> + <code>AuthIdentity</code> + <code>ApiKey</code></strong> — one person, several logins, unique per provider</td>
+<td>03</td>
+</tr>
+<tr>
+<td>Expression sandbox</td>
+<td><strong>isolate pool</strong> scaling to zero when idle; <strong>zod-validated RPC boundary</strong>; two backends (isolated-vm, QuickJS)</td>
+<td>04</td>
+</tr>
+<tr>
+<td>Wait model</td>
+<td>short waits <strong>in-process</strong>; <strong>two sentinel dates</strong> (year 3000 / 2999); the v2 ADR&#39;s &quot;under 65 s&quot; = the real <strong><code>65_000</code></strong></td>
+<td>04</td>
+</tr>
+<tr>
+<td>Observability</td>
+<td>a <strong>sampling policy</strong> — drop signal-free spans; DB/HTTP only when slow; poll triggers at <strong>0.1 %</strong></td>
+<td>04</td>
+</tr>
+<tr>
+<td>Frontend</td>
+<td><strong><code>editor-ui</code> + 12 <code>@n8n</code> packages</strong>; <strong>129 design-system components</strong> enforced by their own ESLint plugin</td>
+<td>05</td>
+</tr>
+<tr>
+<td>Composition surface</td>
+<td><strong>a canvas of 7 element types</strong>; <strong>CRDT on y-websocket with awareness</strong>; <code>create-node</code> scaffolder</td>
+<td>05</td>
+</tr>
+<tr>
+<td>Quality gates</td>
+<td><strong>299 hashed architectural violations</strong> (6 rules) + <strong>110 boundary issues</strong> — two ratchets that can only shrink</td>
+<td>06</td>
+</tr>
+<tr>
+<td>Agent harness</td>
+<td><strong>pinned + lock-validated</strong> (<code>cat-bot</code> <code>harness-v0.6.0</code>); <code>agent-check.mjs</code> shows the agent an excerpt only</td>
+<td>06</td>
+</tr>
+<tr>
+<td>Licence enforcement</td>
+<td>a <strong>13-line <code>@licensed</code> method decorator</strong> on route metadata — marked, not wrapped</td>
+<td>06</td>
+</tr>
+<tr>
+<td>Telemetry</td>
+<td>PostHog, <strong>enabled by default</strong>, project key as a hardcoded default</td>
+<td>06</td>
+</tr>
+<tr>
+<td>Extensions</td>
+<td><strong><code>packages/extensions/</code> holds one file — <code>.gitkeep</code>, 0 bytes</strong></td>
+<td>06</td>
+</tr>
+<tr>
+<td><strong>Findings written</strong></td>
+<td><strong>73</strong> (12 + 13 + 12 + 12 + 12 + 12 across batches 01–06)</td>
+<td>all</td>
+</tr>
+<tr>
+<td>Corrections recorded</td>
+<td><strong>1</strong> in batch 06 (the &quot;extensions&quot; subject) + the batch-01 silent-tenancy resolution</td>
+<td>all</td>
+</tr>
+</tbody></table></div>
+<p><strong>➜ F7-1 [foundational] — n8n is a <strong>code-dominant TypeScript monorepo in which a real composition
+surface exists for the first time in this study</strong>: 22,715 <code>.ts</code> files at 65 % of all bytes, 57 internal
+packages, 563 built-in nodes, and a Vue frontend of 1,351 files carrying a 129-component design system
+and a canvas.</strong> <strong>Plain meaning:</strong> this is a product cut into packages, with its interface — not its
+engine — as the largest and most deliberate part. <strong>Why it matters:</strong> every finding below is weighted
+accordingly, and the study&#39;s predicted headline (batch 00: <em>&quot;PX-W is expected to be the strongest&quot;</em>) is
+<strong>confirmed by measurement, not assumed</strong>.</p>
+<hr>
+<h2 id="7-2-the-three-poles-headlined">7.2 The three poles, headlined<a href="#batch-07/7-2-the-three-poles-headlined" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="pole-1-the-aissistant">Pole 1 — The aissistant<a href="#batch-07/pole-1-the-aissistant" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><strong>An agent is a configuration object built by a fluent API, and its safety is written as two questions
+asked at two moments.</strong></p>
+<p><code>@n8n/agents</code> v0.29.0 is the AI surface (F02-01): an <code>Agent</code> is a <strong>builder with 25+ configuration
+methods</strong>, lazily built, and <em>&quot;user code never calls <code>.build()</code>&quot;</em> — <code>build()</code> is <code>protected</code>. So an agent
+is <strong>data you describe</strong>, not a class you inherit. Capability arrives as a <strong><code>SKILL.md</code></strong> (F02-03):
+validated, with a <strong>72 KB output cap</strong>, <strong>content-hashed</strong> linked files, a UI contract, an invocation
+policy, declared MCP dependencies, and a schema-versioned registry — <em>the most complete declarative-
+capability design in the study</em>. Delegation is a <strong>first-class tool with suspend/resume</strong>, a max-children
+cap and a difficulty rating (F02-04). Cost is a <strong>guardrail</strong>, not a report (F02-07): a <code>SpendLedger</code>
+idempotent per <code>callId</code>, a per-session cap and a monthly budget. And the two primitives that make it
+safe are small and exact (F02-05/06): a guardrail is <strong><code>allow</code> or <code>stop(code)</code></strong>, run <strong>before a model
+call and before a tool call</strong>; and <strong>tool output is untrusted input</strong> — invisible Unicode stripped,
+wrapped with its source.</p>
+<p><strong>Pole 1 verdict, plainly:</strong> the agent model is <strong>declarative, priced, and defended by default</strong> — the
+prompt-injection defence and the spend stop are built in, not bolted on. What it does <strong>not</strong> have is a
+tenancy-aware tool door of its own: the agent&#39;s tools are its tools, and where an MCP server or a
+platform tool is reached, the identity it reaches them as is <strong>not</strong> decided here (the seam is the
+platform&#39;s, batch 03).</p>
+<h3 id="pole-2-the-workspace">Pole 2 — The workspace<a href="#batch-07/pole-2-the-workspace" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><strong>The container is one object with two modes, membership is a row, and permissions are a vocabulary
+rather than a question.</strong></p>
+<p>The container is <strong><code>Project</code></strong>, and its <code>type</code> is <code>personal | team</code> (F03-01) — your private space and
+your team&#39;s space are <strong>the same object</strong>, so there is no second hierarchy to maintain. Membership is a
+<strong>join row keyed <code>(userId, projectId)</code> carrying a Role by slug</strong> (F03-02), which is why a custom role
+needs no migration. Roles are <strong>two-level</strong> (F03-03): a <strong>global</strong> role for the instance
+(<code>owner</code>/<code>admin</code>/<code>member</code>/<code>chatUser</code>) and a <strong>resource-level</strong> role for the thing — <em>&quot;what can I do
+anywhere&quot;</em> and <em>&quot;what can I do to this&quot;</em> kept apart. Underneath, permissions are <strong>206
+<code>resource:action</code> scopes</strong> (F03-04): nothing asks <em>&quot;are you an admin?&quot;</em>, it asks <em>&quot;may you do X to
+this&quot;</em>. Identity is separated from login (F03-05) — <strong><code>User</code> ≠ <code>AuthIdentity</code></strong>, one person, several
+identities, unique per provider. Sharing reuses the membership primitive (F03-06): a <strong>join row plus a
+role</strong>, for workflows and credentials alike. Variables are <strong>project-scoped or explicitly global</strong>
+(F03-07), and workflows are <strong>versioned, one active version, shared not copied</strong> (F03-09).</p>
+<p><strong>Pole 2 verdict, plainly:</strong> this is a <strong>real tenancy model</strong> — the strongest of the six studied — where
+the container, the membership and the permission are three clean, separate things. What it does <strong>not</strong>
+have is a per-datum read filter: the scopes gate <em>actions</em>, and where a row-level read decision is
+needed, that is a finer grain than the scope vocabulary expresses (a boundary, not a gap).</p>
+<h3 id="pole-3-automations">Pole 3 — Automations<a href="#batch-07/pole-3-automations" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><strong>A workflow engine whose best security decision is one sentence, and whose durability rule is a
+written, accurate ADR.</strong></p>
+<p>The shipped engine is service-based (F04-01): a hook registry, a poll manager, a routing node,
+scheduled tasks, an <strong>external-secrets proxy</strong>. But the finding that travels furthest is in the
+expression runtime (F04-02/03): expressions run in a <strong>pool of isolates that scales to zero when idle</strong>,
+with a <strong>no-partial-state invariant</strong> written down, across a <strong>zod-validated RPC boundary</strong> whose own
+comment states the rule the whole study should remember — <em><strong>&quot;TS types are erased at runtime and
+contribute zero security.&quot;</strong></em> Durability is a written ADR, and it is <strong>accurate</strong> (F04-05): <em>&quot;a pause must
+be a status of the step row; it must not be a state of a process&quot;</em>, and its &quot;under 65 seconds&quot; is the
+real <code>65_000</code> in code. Long-lived resumption is authorized by a <strong>token on the URL</strong>, in two kinds
+(execution-bound, step-bound) with two opposite-direction tokens to prevent replay (F01-08). The human is
+a <strong>node with a rendered form</strong> (F04-07). Observability is a <strong>sampling policy</strong> (F04-08): three
+constants decide what is worth recording <em>before</em> anything is recorded.</p>
+<p><strong>Pole 3 verdict, plainly:</strong> work is started, waited on, approved, resumed and observed — with the
+<strong>security boundary and the durability rule both stated in prose before the code</strong>. What it does <strong>not</strong>
+have is a <em>design-time</em> job graph: the engine executes workflows, but the v2 engine that would make
+durable execution a first-class property is <strong>still a scaffold</strong> (F01-03), so the durable model is
+<strong>designed and documented, not yet shipped</strong>.</p>
+<h3 id="px-w-px-f-widgets-and-frontend">PX-W / PX-F — Widgets and frontend<a href="#batch-07/px-w-px-f-widgets-and-frontend" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><strong>The composition surface this workshop has been looking for, and it is enforced by its own linter.</strong></p>
+<p>Measured: the frontend is <strong>1,351 <code>.vue</code> files</strong> (F05-01) built from <strong><code>editor-ui</code> + 12 <code>@n8n</code>
+packages</strong> (F05-02), with <strong>129 design-system components</strong> documented by tokens and <strong>enforced by their
+own ESLint plugin</strong> (F05-03) — a design system that <em>cannot drift</em>. The composition surface is a
+<strong>canvas of seven element types</strong>: nodes, edges, handles, groups, selection, background, buttons (F05-05),
+with a layout engine and a mapping layer (F05-09). Collaboration is a <strong>CRDT layer on the y-websocket
+protocol with awareness</strong> — presence and cursors as a separate channel from document sync (F05-06) — with
+<code>CanvasCollaborationPill</code> / <code>CanvasThinkingPill</code> making both presence and AI activity visible (F05-10).
+Third parties author nodes through <strong><code>create-node</code></strong>, declaratively or programmatically, CLI-scaffolded
+(F05-08).</p>
+<p><strong>PX verdict, plainly:</strong> <strong>this is the first platform in the study with a real widget / composition
+model</strong> — the four closed studies each measured <strong>none</strong> (Paperclip none, Multica none, Gas Town none,
+and Paperclip&#39;s claim to a composer is <em>not</em> one). It is not a widget <em>composer</em> in the drag-any-element
+sense; it is a <strong>typed canvas of workflow elements with a shared editing surface</strong>. That distinction is
+the finding.</p>
+<hr>
+<h2 id="7-3-the-ranked-mechanisms-what-to-carry-forward">7.3 The ranked mechanisms — what to carry forward<a href="#batch-07/7-3-the-ranked-mechanisms-what-to-carry-forward" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Ranked by how much they would cost us to derive ourselves — value-first, not novelty-first.</p>
+<ol>
+<li><strong>The zod-validated isolation boundary</strong> [P3/PZ] — expressions in an isolate pool, a validated RPC
+edge, and the sentence that makes it portable: <em>&quot;TS types are erased at runtime and contribute zero
+security.&quot;</em> The most transferable security decision in the study. (§4.2)</li>
+<li><strong>The two guardrail primitives + untrusted tool output</strong> [P1/PZ] — <strong><code>allow</code> or <code>stop(code)</code></strong>, run
+before a model call and before a tool call; tool results stripped of invisible Unicode and wrapped
+with their source. A small, complete, measurable prompt-injection defence. (§2.5, §2.6)</li>
+<li><strong>The <code>SKILL.md</code> contract</strong> [P1] — validated, <strong>72 KB capped</strong>, content-hashed, with an invocation
+policy and declared MCP dependencies. The most complete declarative-capability design in the study.
+(§2.3)</li>
+<li><strong>Cost as a guardrail with a spend ledger</strong> [P1] — idempotent per <code>callId</code>, a per-session cap and a
+monthly budget; <strong>overspend stops instead of reporting</strong>. (§2.6.1)</li>
+<li><strong>The ADR practice, proven accurate</strong> [P3/PZ] — six decisions written, dated and owned <em>in the repo</em>,
+including for code not yet shipped; and the ADR names the exact constant it will change (<code>65_000</code>).
+(§1.4)</li>
+<li><strong>The two ratchets</strong> [PZ] — <strong>299 hashed architectural violations</strong> across 6 rules and <strong>110 boundary
+issues</strong>, in baselines CI can only reduce. The retirement rule turned into a build gate. (§6.1)</li>
+<li><strong>The durable-execution rule + token-authorized resume</strong> [P3] — <em>&quot;a pause is a status of the step row,
+not a state of a process&quot;</em>; two URL kinds, two opposite-direction tokens, replay-proof. (§1.4, §4.3)</li>
+<li><strong>The two-mode container + the scope vocabulary</strong> [P2] — <code>Project</code> <code>personal | team</code> in one column;
+<strong>206 <code>resource:action</code> scopes</strong>; roles two-level. The cleanest tenancy model in the study. (§3.1–§3.3)</li>
+<li><strong><code>INodeType</code> as the composition primitive</strong> [PX-W] — a description plus optional behaviours, with
+<code>supplyData</code> already serving as the AI-tool seam and a chat handler beside it. (§1.5)</li>
+<li><strong>The canvas + the enforced design system</strong> [PX-W/PX-F] — a seven-element-type canvas, a layout
+engine, a CRDT collaboration layer with awareness, and <strong>129 components enforced by a lint rule</strong>.
+(§5.3–§5.5)</li>
+<li><strong>Observability as a sampling policy</strong> [P3/PZ] — three constants decide what is recorded before
+anything is recorded. (§4.5)</li>
+<li><strong>The pinned, validated agent harness + the context budget</strong> [PZ] — agents as a supply chain
+(<code>harness-v0.6.0</code>, lock-validated); full output to disk, <strong>an excerpt to the agent</strong> (<code>agent-check.mjs</code>).
+(§6.2, §6.3)</li>
+<li><strong>Licence-as-metadata</strong> [PZ/P2] — a <strong>13-line <code>@licensed</code> decorator</strong> marking route metadata; one
+registry enforces it; a feature is <strong>marked, not wrapped</strong>. (§6.4)</li>
+<li><strong>The model catalog as fetched data</strong> [P1] — cost and context limits carried with the model, so
+<em>&quot;no lock-in&quot;</em> is measurable and price feeds the guardrail. (§2.8)</li>
+</ol>
+<p><strong>➜ F7-2 [synthesis] — The top four are all about <strong>making a limit enforceable at one seam</strong>: validate
+every value that crosses the boundary, decide allow-or-stop at the two moments that matter, cap the
+capability&#39;s output, and cap the money — each written once and applied everywhere.</strong> <strong>Plain meaning:</strong>
+n8n&#39;s best contributions are <strong>one-sentence rules with one implementation point</strong>, not features. <strong>Why it
+matters:</strong> a rule at one seam is cheap to adopt, cheap to prove, and impossible to half-copy — the same
+property that made Gas Town&#39;s <em>decided limits</em> the most valuable thing there.</p>
+<hr>
+<h2 id="7-4-what-n8n-does-not-give-us">7.4 What n8n does NOT give us<a href="#batch-07/7-4-what-n8n-does-not-give-us" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Stated as plainly as the positives, because a study that only lists features is useless.</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Absent capability</th>
+<th>Measured how</th>
+<th>Batch</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>A shipped durable-execution engine</strong></td>
+<td>the v2 engine&#39;s own README: <em>&quot;a scaffold … not yet wired into n8n&quot;</em>; the ADRs describe it</td>
+<td>01</td>
+</tr>
+<tr>
+<td><strong>A per-datum / row-level read filter</strong></td>
+<td>permissions are <strong>206 action scopes</strong>, not row predicates; the grain is the action</td>
+<td>03</td>
+</tr>
+<tr>
+<td><strong>A single agent runtime of its own</strong></td>
+<td>the AI surface is a <strong>builder + SDK</strong>, not an engine; the model is fetched, the tools are the caller&#39;s</td>
+<td>02</td>
+</tr>
+<tr>
+<td><strong>A tenancy-aware tool door for the agent</strong></td>
+<td>the agent&#39;s tools are its own; where a tool reaches a platform, the principal is <strong>not decided in the AI surface</strong></td>
+<td>02, 03</td>
+</tr>
+<tr>
+<td><strong>The commercial core is copyable</strong></td>
+<td><strong><code>.ee</code> files are unlicensed</strong>, incl. <code>ai-workflow-builder.ee</code> and 4 of the 5 scope files</td>
+<td>00, 03</td>
+</tr>
+<tr>
+<td><strong>Telemetry is opt-in</strong></td>
+<td>PostHog <strong>enabled by default</strong>, key as a hardcoded default</td>
+<td>06</td>
+</tr>
+<tr>
+<td><strong>A populated extensions mechanism</strong></td>
+<td><strong><code>packages/extensions/</code> is one <code>.gitkeep</code>, 0 bytes</strong> — a name, not a capability</td>
+<td>06</td>
+</tr>
+<tr>
+<td><strong>A widget <em>composer</em> of arbitrary elements</strong></td>
+<td>the canvas composes <strong>workflow elements</strong> (7 types), not general-purpose UI widgets</td>
+<td>05</td>
+</tr>
+<tr>
+<td><strong>Public-domain licensing</strong></td>
+<td><strong>fair-code / Sustainable Use License</strong>, not open source</td>
+<td>00</td>
+</tr>
+</tbody></table></div>
+<p>**➜ F7-3 [synthesis] — The absences cluster into one sentence: n8n is a <strong>fair-code workflow-automation
+product with an outstanding composition surface and a real tenancy model, whose durability engine is
+designed but not yet shipped and whose commercial core is not copyable.</strong> <strong>Plain meaning:</strong> the parts
+most valuable to us (the isolation boundary, the guardrails, the skill contract, the two ratchets) are in
+the <strong>readable, Sustainable-Use-licensed</strong> majority; the parts that are <code>.ee</code> we may <strong>read to understand
+and must reimplement to use</strong>. <strong>Why it matters:</strong> it tells the mapping pass exactly what posture to take
+— <em>read the architecture, reimplement what is worth having</em> — and warns it that the &quot;extensions&quot; seam and
+the &quot;shipped durable engine&quot; are the two places a careless reader would over-claim.</p>
+<hr>
+<h2 id="7-5-the-consistency-check-across-batches">7.5 The consistency check across batches<a href="#batch-07/7-5-the-consistency-check-across-batches" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>A synthesis must look for contradictions between its own inputs. Three were found and are recorded rather
+than smoothed, and one correction was applied and recorded in the batch that made it.</p>
+<ol>
+<li><strong><code>.vue</code> count: 1,409 vs 1,351.</strong> Batch 00 counted <strong>1,409</strong> <code>.vue</code> files over the <strong>whole tree</strong>;
+batch 05 counted <strong>1,351</strong> inside <strong><code>packages/frontend</code></strong>. Both are true and they measure different
+things: the tree count includes <code>.vue</code> files elsewhere (test fixtures, tooling). Recorded, not
+reconciled by deleting one — the synthesis states the basis of each, as the pin&#39;s checklist requires.</li>
+<li><strong>The CLI&#39;s silence on tenancy (batch 01) was not a missing model.</strong> Batch 01 recorded that the CLI
+has <strong>no</strong> tenant/project/workspace verb (F01-11) and carried the question to batch 03. Batch 03
+answered it: the <strong>server</strong> has a full tenancy model (Projects, membership, 206 scopes); the CLI is an
+<strong>operator tool</strong> for one installation. <strong>Recorded as F03-10</strong> — a resolution, not a guess. This is the
+one place the synthesis is entitled to say &quot;batch 03 closed batch 01&#39;s question,&quot; and it does so with
+the evidence, not the assertion.</li>
+<li><strong>&quot;Extensions&quot; was a name, not a mechanism.</strong> The batch-00 plan named <em>&quot;extensions&quot;</em> as a PZ subject,
+implying a mechanism at <code>packages/extensions/</code>. Batch 06 measured that directory as <strong>one <code>.gitkeep</code>,
+0 bytes</strong>, and went to find the real mechanism elsewhere. <strong>Corrected in batch 06 per rule 13, and
+recorded</strong> (F06-08) rather than silently amended. The synthesis carries the correction, not the plan.</li>
+<li><strong>The frontier is consistent.</strong> Every batch found the same shape from a different side: a <strong>code-first
+product whose seams are named and whose limits are stated</strong> — the engine is honest about being a
+scaffold, the licence is explicit about what is not licensed, the extensions directory is an empty
+promise recorded as empty. That is a coherent posture, not a coincidence of readings.</li>
+</ol>
+<p><strong>➜ F7-4 [synthesis] — No batch was falsified by a later batch; one question was closed with evidence,
+one count had its basis stated, and one plan item was corrected by measurement.</strong> <strong>Plain meaning:</strong> the
+73 findings hold together as <strong>one body of evidence</strong>. <strong>Why it matters:</strong> the mapping pass can use them
+as one corpus, with the <code>.vue</code> basis stated, batch 01&#39;s tenancy question marked closed by batch 03, and
+the &quot;extensions&quot; subject corrected.</p>
+<hr>
+<h2 id="7-6-the-two-value-questions-rule-4">7.6 The two value questions (rule 4)<a href="#batch-07/7-6-the-two-value-questions-rule-4" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="q1-what-does-this-platform-do-for-its-own-users">Q1 — What does this platform do for *its own users*?<a href="#batch-07/q1-what-does-this-platform-do-for-its-own-users" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><strong>For a team that wants to automate work with a visual canvas and code where it is needed: it does a
+great deal, and the AI surface is now part of the product rather than a bolt-on.</strong> You get a canvas of
+nodes and edges you compose by hand, with <strong>presence and cursors</strong> while a colleague edits beside you
+(F05-05/06); <strong>129 design-system components</strong> that keep it consistent without a style meeting (F05-03); an
+<strong>agent builder</strong> whose skills are checked packages and whose spend is capped before it can run away
+(F02-03/07); <strong>MCP servers that plug in as ordinary tools</strong> (F02-10); expressions that are <strong>contained and
+cost nothing when idle</strong> (F04-02); a human-approval node with a real form (F04-07); and <strong>two ratchets</strong>
+that make the codebase get better by construction (F06-01/02). The divergences are few, and where docs and
+code disagree the code is <em>more</em> precise — the same happy shape found in Gas Town.</p>
+<p><strong>Verdict on Q1:</strong> as a <strong>workflow-automation product with a real tenancy model and a real composition
+surface</strong>, this is the <strong>most complete platform studied</strong>, and mature for its users. Its limits are not
+gaps for them: a team on one instance does not need per-datum read filters, and the durable v2 engine is
+the vendor&#39;s roadmap, not a missing feature of the product they run today.</p>
+<h3 id="q2-what-does-it-do-for-our-vision">Q2 — What does it do for *our vision*?<a href="#batch-07/q2-what-does-it-do-for-our-vision" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><strong>A great deal as a mechanism source, and it answers a question the workshop has been carrying for five
+studies: what a composition surface actually looks like.</strong> n8n is the <strong>first platform measured to have
+one</strong> — a seven-element-type canvas, a layout engine, and a CRDT collaboration layer with awareness —
+which the four closed studies could not show. Inside the readable majority it also offers the study&#39;s
+best <strong>portable security decision</strong> (the validated isolation boundary and its one-sentence rule), its best
+<strong>declarative capability</strong> (the <code>SKILL.md</code> contract), its best <strong>tenancy vocabulary</strong> (206 scopes,
+two-level roles, <code>personal | team</code>), and a <strong>retirement rule turned into CI</strong> (the two ratchets).</p>
+<p><strong>Verdict on Q2:</strong> n8n is a <strong>mechanism source and a composition-surface reference</strong> — take the isolation
+boundary, the two guardrail primitives, the skill contract, the cost-as-guardrail, the ADR practice, the
+ratchets, the tenancy vocabulary and the canvas-plus-design-system; and treat its <code>.ee</code> boundary and its
+scaffold engine as <strong>the line between what we may read and what we must build</strong>, not as gaps to fill from
+here.</p>
+<p><strong>➜ F7-5 [synthesis] — The two questions point the same way, and for the first time one of the answers is
+a <em>shape</em> rather than a mechanism: n8n shows what a composition surface is, and it also shows — in <code>.ee</code>
+and in a scaffold — exactly where the copyable part of the product stops.</strong> <strong>Plain meaning:</strong> the closer
+a platform gets to the whole vision, the more important its <strong>licence line</strong> becomes, because that line is
+where <em>understanding</em> ends and <em>building</em> begins.</p>
+<hr>
+<h2 id="7-7-the-finding-index">7.7 The finding index<a href="#batch-07/7-7-the-finding-index" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Consolidated for the mapping pass. Format: <code>id · pole · one line · batch §</code>.</p>
+<p><strong>Foundations</strong> — the pin (md5 <code>7cc78a5e…</code>, 31,629 files, extract-verified), the MAX_PATH extraction
+hazard, the identity limit (no <code>.git</code>), the code-dominant shape (65 % of bytes are <code>.ts</code>), the 32.8 %
+test ratio, and the fair-code licence that governs every reuse question · 00 §1–§6.</p>
+<p><strong>Pole 1 — the aissistant</strong> — F02-01 the agent is a lazy-built configuration object [P1] 02 §2 · F02-02 a
+133-file runtime organised by concern [P1] 02 §1 · F02-03 the <code>SKILL.md</code> contract, 72 KB capped,
+content-hashed [P1] 02 §3 · F02-04 sub-agent delegation with suspend/resume and a max-children cap
+[P1] 02 §4 · F02-05 a guardrail is <code>allow</code> or <code>stop(code)</code> at two points [P1/PZ] 02 §6 · F02-06 tool
+output is untrusted input, stripped and wrapped [P1/PZ] 02 §5 · F02-07 cost is a guardrail with a spend
+ledger [P1] 02 §6.1 · F02-08 model choice is fetched data with price and limits [P1] 02 §9 · F02-09
+memory is an observation log with a reflector [P1] 02 §7 · F02-10 an MCP client that connects lazily and
+deduplicates [P1] 02 §8 · F02-11 tools are deferred (<code>LOAD_TOOL</code>/<code>SEARCH_TOOLS</code>) [P1] 02 §5 · F02-12 the
+agent can keep a plan [P1] 02 §5 · F02-13 <code>ai-node-sdk</code> is a 1-file barrel, not a feature — recorded so it
+is not misread [PZ] 02 §1.</p>
+<p><strong>Pole 2 — the workspace</strong> — F03-01 <code>Project</code> with <code>type: personal | team</code> [P2] 03 §1 · F03-02 membership
+is a composite-key join row carrying a Role by slug [P2] 03 §2 · F03-03 roles are two-level, global +
+resource [P2] 03 §3.1 · F03-04 206 <code>resource:action</code> scopes, 4 of 5 files <code>.ee</code> [P2] 03 §3.2 · F03-05
+<code>User</code> ≠ <code>AuthIdentity</code> [P2] 03 §4 · F03-06 sharing is the same primitive as membership [P2] 03 §5 ·
+F03-07 variables are project-scoped or global [P2] 03 §6.1 · F03-08 <code>ByteStore</code> is pluggable, S3/Azure are
+<code>.ee</code> [P2/PZ] 03 §6.2 · F03-09 workflows are versioned, one active version, shared not copied [P2] 03 §6.3
+· F03-10 the CLI&#39;s silence was not the product&#39;s — the tenancy model is the server&#39;s [P2] 03 §7 ·
+F03-11 <code>roleMappingRules</code> many-to-many for external role mapping [P2/PZ] 03 §7 · F03-12
+<code>customTelemetryTags</code> on <code>Project</code> [PZ] 03 §7.</p>
+<p><strong>Pole 3 — automations</strong> — F04-01 the service-based shipped engine [P3] 04 §1 · F04-02 the idle-scaling
+isolate pool with a no-partial-state invariant [P3/PZ] 04 §2.1 · F04-03 the zod-validated RPC boundary —
+<em>&quot;TS types … contribute zero security&quot;</em> [P3/PZ] 04 §2.2 · F04-04 short waits sleep in-process, trade
+stated [P3] 04 §3 · F04-05 the v2 ADR is accurate (<code>65_000</code>) [P3/PZ] 04 §3 · F04-06 two sentinel dates for
+&quot;wait forever&quot; vs &quot;wait for a sub-execution&quot; [P3] 04 §3 · F04-07 human approval is a node with a rendered
+form [P3/PX-W] 04 §4 · F04-08 observability is a sampling policy [P3/PZ] 04 §5 · F04-09 four expression
+failure classes, classified [P3/PZ] 04 §2.3 · F04-10 two isolation backends behind one <code>Tournament</code>
+bridge [PZ] 04 §2.2 · F04-11 an <code>external-secrets-proxy</code> seam [P3/PZ] 04 §1 · F04-12 pluggable tracing
+backends [PZ] 04 §5.</p>
+<p><strong>Widgets / frontend</strong> — F05-01 1,351 <code>.vue</code> files — the frontend is a product [PX-F] 05 §1 · F05-02
+<code>editor-ui</code> + 12 packages [PX-F] 05 §2 · F05-03 129 components enforced by their own ESLint plugin
+[PX-F] 05 §3 · F05-04 a frontend <code>AGENTS.md</code> with an isolation rule and icon discipline [PX-F] 05 §6 ·
+<strong>F05-05 the canvas of seven element types [PX-W] 05 §4.1</strong> · <strong>F05-06 CRDT on y-websocket with awareness
+[PX-W] 05 §5</strong> · F05-07 pluggable modules with a hard isolation rule [PX-F] 05 §6 · F05-08 <code>create-node</code>,
+declarative and programmatic [PX-W] 05 §7 · F05-09 a canvas layout engine and agent-node geometry [PX-W]
+05 §4.2 · F05-10 canvas-specific components — presence and AI activity as UI [PX-W] 05 §4.2 · F05-11 a
+styleguide with tokens and a <code>VariableTable</code> [PX-F] 05 §3 · F05-12 the frontend is Vue, with <code>el-plus</code> and
+Pinia — recorded per rule 6 [PX-F] 05 §1.</p>
+<p><strong>Out-of-pole</strong> — F06-01 a hashed baseline of 299 architectural violations that can only shrink [PZ]
+06 §1.2 · F06-02 a boundaries baseline of 110 issues [PZ] 06 §1.1 · F06-03 a pinned, lock-validated agent
+harness from a separate repo [PZ] 06 §2 · F06-04 <code>agent-check.mjs</code> files the output, shows the agent an
+excerpt [PZ] 06 §3 · F06-05 licence enforcement is a <code>@licensed</code> decorator on route metadata [PZ/P2]
+06 §4 · F06-06 telemetry is opt-out, default on, key in source [PZ] 06 §5 · F06-07 community packages are
+scanned for provenance [PZ] 06 §6 · <strong>F06-08 <code>packages/extensions/</code> is empty — a name is not a capability
+[PZ] 06 §7</strong> · F06-09 the <code>@Env</code> JSDoc is public documentation [PZ] 06 §1 · F06-10 a real scripts
+toolchain of executable guardrails [PZ] 06 §1 · F06-11 <code>lefthook.yml</code> wires the git gates [PZ] 06 §1 ·
+F06-12 <code>agent-setup.mjs</code> gives each agent an isolated working directory [PZ] 06 §2.</p>
+<p><strong>Synthesis</strong> — F7-1 the measured page [—] §7.1 · F7-2 fourteen mechanisms ranked [—] §7.3 · F7-3 the
+absences cluster [—] §7.4 · F7-4 three consistencies recorded, one correction carried [—] §7.5 · F7-5 the
+two questions answered [—] §7.6 · F7-6 the owner&#39;s §7 directive, as observations [—] §7.8 · F7-7 the
+five load-bearing findings named [—] §7.7.</p>
+<p><strong>➜ F7-7 [synthesis] — 73 findings, five of them load-bearing: F04-03 (the validated isolation
+boundary), F02-05/06 (the guardrails + untrusted tool output), F02-03 (the skill contract), F05-05 (the
+canvas — the study&#39;s first composition surface), and F06-01/02 (the two ratchets).</strong> <strong>Plain meaning:</strong> if
+the mapping pass reads only five lines, these are the five — and unlike Gas Town&#39;s, only one of them is a
+<em>decided limit</em>; the rest are <strong>mechanisms with one implementation point</strong>. <strong>Why it matters:</strong> it gives
+the next stage a prioritised entry point, and it names where this platform&#39;s value is different in kind
+from the previous five.</p>
+<hr>
+<h2 id="7-8-the-owner-s-7-directive-what-fits-and-what-could-be-taken-further">7.8 The owner's §7 directive — what fits, and what could be taken further<a href="#batch-07/7-8-the-owner-s-7-directive-what-fits-and-what-could-be-taken-further" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>The pin&#39;s §5 records the owner&#39;s two questions. This section answers them <strong>as observations, never as
+decisions</strong> (rule 5 stops at the observation; the mapping pass and the owner decide), and the licence
+gate from batch 00 §2.5 travels with every one.</p>
+<p><strong>What fits the vision (measured, per capability).</strong> Answered per capability across batches 01–06, and
+ranked in §7.3. In one paragraph: the <strong>isolation boundary and its rule</strong> (F04-03) fit any place we run
+untrusted code; the <strong>two guardrail primitives and untrusted tool output</strong> (F02-05/06) fit the aissistant
+pole directly; the <strong>skill contract</strong> (F02-03) is a shape our capability layer can adopt; <strong>cost as a
+guardrail</strong> (F02-07) fits wherever a model call has a budget; the <strong>ADR practice</strong> (F01-06) fits our own
+design record; the <strong>two ratchets</strong> (F06-01/02) fit our quality gates; the <strong>two-mode container and the
+scope vocabulary</strong> (F03-01/03/04) fit the workspace pole; and the <strong>canvas + enforced design system</strong>
+(F05-03/05) fit the widgets pole — the workshop&#39;s long-open question.</p>
+<p><strong>What could be taken further (observations only).</strong> Each names a mechanism and the shape of an
+extension, and <strong>stops</strong>:</p>
+<ul>
+<li><strong>The scope vocabulary → a per-datum filter.</strong> The 206 action scopes gate <em>actions</em>; n8n has no row
+predicate. <em>Observation:</em> the same <code>resource:action</code> pattern could carry a <strong>row predicate</strong> beside the
+action, but n8n does not do it and the mapping pass decides whether it should be built. (§3.3)</li>
+<li><strong>The two ratchets → a ratchet on our own boundaries.</strong> The pattern is <strong>measured, hashed debt in a
+baseline that CI only reduces</strong>. <em>Observation:</em> it is a general mechanism — it could hold any
+violation count we choose, not only n8n&#39;s six rules. (§6.1)</li>
+<li><strong>The canvas → a composition surface for our nuggets.</strong> The canvas composes <strong>workflow elements</strong>.
+<em>Observation:</em> the same seven-element-type distinction (element, edge, handle, group, selection,
+background, control) could describe a <strong>nugget surface</strong>, but that is our design decision, not n8n&#39;s.
+(§5.4)</li>
+<li><strong>The skill contract → our declarative capability.</strong> <em>Observation:</em> the <code>SKILL.md</code> shape (validated,
+capped, content-hashed, with declared dependencies) is a <strong>complete</strong> design; whether our capability
+layer adopts it verbatim, in part, or not at all is a decision for the mapping pass. (§2.3)</li>
+<li><strong>The agent harness → our own agent quality loop.</strong> <em>Observation:</em> the pinned, lock-validated harness
+plus the excerpt-to-the-agent context budget is a <strong>pattern for running an AI agent on our own
+repository</strong>, which is a decision we have not yet made. (§6.2/6.3)</li>
+<li><strong>The licence line as a design input.</strong> <em>Observation:</em> <code>.ee</code> marks the exact boundary between
+<em>readable architecture</em> and <em>unlicensed feature</em>; in a later build, the same seam discipline (a marker
+on the route, one registry) could express <strong>our own</strong> commercial boundary. (§6.4)</li>
+</ul>
+<p><strong>➜ F7-6 [synthesis] — Six observations, each a <strong>shape we could extend</strong>, none a decision.</strong> <strong>Plain
+meaning:</strong> n8n offers at least six mechanisms that are <em>general enough to push further</em> — a scope
+vocabulary that could carry row predicates, a ratchet that could hold any debt, a canvas that could
+describe nuggets, a skill contract, an agent harness, and a licence seam. <strong>Why it matters:</strong> it turns the
+synthesis from a list of what n8n <em>is</em> into a short list of what n8n <em>could become in our hands</em> — which
+is exactly what the owner&#39;s §7 directive asked for, held at the observation line.</p>
+<hr>
+<h2 id="7-9-the-platform-verdict-in-one-paragraph">7.9 The platform verdict, in one paragraph<a href="#batch-07/7-9-the-platform-verdict-in-one-paragraph" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>n8n <code>2.44.0</code> is a fair-code workflow-automation product, and it is the most complete platform this
+workshop has studied.</strong> It is a <strong>code-dominant TypeScript monorepo</strong> — 22,715 <code>.ts</code> files at 65 % of all
+bytes, 57 internal packages, one Turborepo, one pnpm lockfile — whose AI surface (<code>@n8n/agents</code> v0.29.0)
+is a <strong>lazy-built agent configuration object</strong> with <strong><code>SKILL.md</code> skills</strong>, <strong><code>allow</code>/<code>stop(code)</code>
+guardrails</strong> at the two moments that matter, <strong>tool output treated as untrusted</strong>, and <strong>cost as a
+guardrail with a spend ledger</strong>. Its workspace is a <strong>real tenancy model</strong> — a <code>Project</code> that is
+<code>personal | team</code>, membership as a composite-key join row, <strong>10 roles</strong> two-level, and <strong>206
+<code>resource:action</code> scopes</strong> — with <code>User</code> separated from <code>AuthIdentity</code>. Its automations rest on the
+study&#39;s single best portable security decision — expressions in an <strong>isolate pool</strong> behind a
+<strong>zod-validated RPC boundary</strong>, under the sentence <em>&quot;TS types are erased at runtime and contribute zero
+security&quot;</em> — plus a durable-execution rule written and <strong>accurate</strong> in an ADR (<em>&quot;a pause is a status of
+the step row&quot;</em>), and observability as a <strong>sampling policy</strong>. And its frontend is the <strong>first real
+composition surface in the study</strong>: a canvas of seven element types, a layout engine, <strong>CRDT collaboration
+with awareness</strong>, and <strong>129 design-system components enforced by their own linter</strong>. It is honest about
+its limits — its durable v2 engine is a <strong>documented scaffold</strong>, its <code>packages/extensions/</code> is an <strong>empty
+directory</strong>, and its commercial core is <strong><code>.ee</code> and unlicensed</strong>. The correct posture toward it is
+therefore <strong>mechanism source, composition-surface reference, and a licence line to respect</strong>: read the
+architecture in the Sustainable-Use-licensed majority, <strong>reimplement what is worth having</strong>, and treat
+the <code>.ee</code> boundary and the scaffold engine as the exact place where understanding ends and building
+begins.</p>
+<hr>
+<h2 id="7-10-batch-07-checklist">7.10 Batch 07 — checklist<a href="#batch-07/7-10-batch-07-checklist" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<ul>
+<li><input checked="" disabled="" type="checkbox"> Read from source only; no new source claims introduced (all restate verified findings).</li>
+<li><input checked="" disabled="" type="checkbox"> Every finding carries its originating batch and section (§7.7 index).</li>
+<li><input checked="" disabled="" type="checkbox"> No comparison to our own platform (rule 5) — internal batch-to-batch consistency only (§7.5); the
+owner&#39;s §7 notes are held as <strong>observations</strong> (§7.8).</li>
+<li><input checked="" disabled="" type="checkbox"> Both value questions answered separately (rule 4, §7.6).</li>
+<li><input checked="" disabled="" type="checkbox"> Absences reported as findings, not omitted (rule 6, §7.4).</li>
+<li><input checked="" disabled="" type="checkbox"> Three cross-batch consistencies recorded, none smoothed; one correction (the &quot;extensions&quot; subject)
+carried from batch 06 rather than reapplied (rule 13, §7.5).</li>
+<li><input checked="" disabled="" type="checkbox"> Retirement rule honoured: no earlier finding deleted to fit the synthesis (rule 10).</li>
+<li><input checked="" disabled="" type="checkbox"> The licence gate applied to every &quot;take it further&quot; observation (§7.8; batch 00 §2.5).</li>
+<li><input checked="" disabled="" type="checkbox"> 7 synthesis findings: F7-1…F7-7, plus the complete finding index (§7.7).</li>
+</ul>
+<p>The n8n study is complete: <strong>pin (00) + 73 findings across six pole batches (01–06) + this synthesis
+(07).</strong> The reader is built from this markdown, at the end, with the platform-agnostic generator — and
+no study markdown is edited to fit it.</p>
+<hr>
+<p><em>Batch 07 of 07. Written 2026-10-15. The n8n study is CLOSED. Next: the n8n reader, then the next
+platform (order not fixed — ask before extracting another ~700 MB).</em></p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="06-out-of-pole-pz.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">Out-of-Pole (PZ)</span>
+                </a>
+              
+
+              <a href="../index.html#batch-07" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              <div></div>
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#7-1-the-measured-page" class="toc-link">7.1 The measured page</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-2-the-three-poles-headlined" class="toc-link">7.2 The three poles, headlined</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#pole-1-the-aissistant" class="toc-link">Pole 1 — The aissistant</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#pole-2-the-workspace" class="toc-link">Pole 2 — The workspace</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#pole-3-automations" class="toc-link">Pole 3 — Automations</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#px-w-px-f-widgets-and-frontend" class="toc-link">PX-W / PX-F — Widgets and frontend</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-3-the-ranked-mechanisms-what-to-carry-forward" class="toc-link">7.3 The ranked mechanisms — what to carry forward</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-4-what-n8n-does-not-give-us" class="toc-link">7.4 What n8n does NOT give us</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-5-the-consistency-check-across-batches" class="toc-link">7.5 The consistency check across batches</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-6-the-two-value-questions-rule-4" class="toc-link">7.6 The two value questions (rule 4)</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#q1-what-does-this-platform-do-for-its-own-users" class="toc-link">Q1 — What does this platform do for *its own users*?</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#q2-what-does-it-do-for-our-vision" class="toc-link">Q2 — What does it do for *our vision*?</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-7-the-finding-index" class="toc-link">7.7 The finding index</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-8-the-owner-s-7-directive-what-fits-and-what-could-be-taken-further" class="toc-link">7.8 The owner&#039;s §7 directive — what fits, and what could be taken further</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-9-the-platform-verdict-in-one-paragraph" class="toc-link">7.9 The platform verdict, in one paragraph</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-10-batch-07-checklist" class="toc-link">7.10 Batch 07 — checklist</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('n8n_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('n8n_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('n8n_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('n8n_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.N8nReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

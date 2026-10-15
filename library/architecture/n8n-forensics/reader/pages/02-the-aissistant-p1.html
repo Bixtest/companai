@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 02 — The aissistant (P1) — n8n Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-02" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 02</span>
+      <div class="header-title-wrap">
+        <div class="header-title">The Aissistant (P1)</div>
+        <div class="header-subtitle">n8n Platform Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/02-the-aissistant.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #059669">DONE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">2,841</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">14 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">325</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-15</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 02 Architecture Guide (Default)</option>
+            <optgroup label="Strategic Architecture">
+              <option value="master">Executive Topology: the three poles, the composition surface, and the licence line</option>
+            </optgroup>
+            <optgroup label="Foundations">
+              <option value="00">Batch 00: The pin, the MAX_PATH extraction, and the licence gate</option>
+              <option value="01">Batch 01: The overview — two engines, one a documented scaffold</option>
+            </optgroup>
+            <optgroup label="Pole 1 — The Aissistant">
+              <option value="02">Batch 02: The aissistant — an agent is a configuration</option>
+            </optgroup>
+            <optgroup label="Pole 2 — The Workspace">
+              <option value="03">Batch 03: The workspace — a real tenancy model</option>
+            </optgroup>
+            <optgroup label="Pole 3 — Automations">
+              <option value="04">Batch 04: Automations — the isolation boundary and an accurate ADR</option>
+            </optgroup>
+            <optgroup label="Cross-Cutting">
+              <option value="05">Batch 05: Widgets &amp; frontend — the first composition surface</option>
+            </optgroup>
+            <optgroup label="Escape Hatch">
+              <option value="06">Batch 06: Out-of-pole — two ratchets and an empty promise</option>
+            </optgroup>
+            <optgroup label="Strategic Decision">
+              <option value="07">Batch 07: The synthesis — mechanisms behind a licence line</option>
+            </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 02 VISUAL GUIDE</div>
+    <h4>The aissistant: an agent is a configuration, and safety is two questions</h4>
+    <p>The builder, the skill contract, and the two primitives that make an agent safe</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 350" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-02" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-02" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+        <marker id="arrr-02" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#ef4444"/>
+        </marker>
+      </defs>
+      <g transform="translate(20, 20)">
+        <rect width="210" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE BUILDER</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">@n8n/agents v0.29.0</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">25+ configuration methods</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">lazily built — build() is</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">PROTECTED (user code never</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#6d28d9">calls it) — an agent is data</text>
+      </g>
+      <path d="M 230 95 L 268 95" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-02)"/>
+      <g transform="translate(272, 20)">
+        <rect width="210" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE SKILL</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">a validated SKILL.md</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">72 KB output cap</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">content-hashed linked files</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">declared MCP dependencies</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">the study’s most complete</text>
+      </g>
+      <path d="M 482 95 L 520 95" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-02)"/>
+      <g transform="translate(524, 20)">
+        <rect width="180" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">DELEGATION</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">a first-class tool</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">suspend / resume</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">a max-children cap</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">+ a difficulty rating</text>
+      </g>
+      <path d="M 704 95 L 742 95" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-02)"/>
+      <g transform="translate(746, 20)">
+        <rect width="154" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE COST STOP</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">a SpendLedger</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">idempotent per callId</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">a per-session cap</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">+ a monthly budget</text>
+      </g>
+      <rect x="20" y="196" width="430" height="136" rx="10" fill="#059669" fill-opacity="0.08" stroke="#059669" stroke-width="1.6"/>
+      <text x="38" y="222" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#047857">TWO PRIMITIVES, TWO MOMENTS</text>
+      <text x="38" y="246" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">1 · a guardrail IS "allow" or "stop(code)"</text>
+      <text x="38" y="266" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">   run BEFORE a model call AND before a tool call</text>
+      <text x="38" y="290" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">2 · tool output is UNTRUSTED input — invisible</text>
+      <text x="38" y="310" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">   Unicode stripped, wrapped with its source</text>
+      <rect x="470" y="196" width="430" height="136" rx="10" fill="#ef4444" fill-opacity="0.08" stroke="#ef4444" stroke-width="1.6"/>
+      <text x="488" y="222" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#b91c1c">THE BOUNDARY OF THIS POLE</text>
+      <text x="488" y="246" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">The agent's tools are its tools. Where a tool reaches</text>
+      <text x="488" y="266" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">an MCP server or a platform capability, the IDENTITY</text>
+      <text x="488" y="286" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">it reaches them as is not decided here.</text>
+      <text x="488" y="312" font-family="system-ui, sans-serif" font-size="10.5" font-weight="600" fill="#b91c1c">The tenancy-aware tool door is the platform's (b03).</text>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="batch-02-the-aissistant-p1">Batch 02 — The Aissistant (P1)<a href="#batch-02/batch-02-the-aissistant-p1" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Study:</strong> n8n <code>2.44.0</code> · <strong>Batch:</strong> 02 of 07 · <strong>Status:</strong> COMPLETE
+<strong>Source:</strong> <code>C:\n8n</code> · <strong>Zip md5:</strong> <code>7cc78a5ea124ba2c270bccabf282d9ed</code> · <strong>License:</strong> fair-code (§ batch 00)
+<strong>Method:</strong> rules 1-10 of <code>00-PIN-AND-METHOD.md</code>. Every claim carries <code>file:line</code>.</p>
+<hr>
+<h2 id="0-what-this-batch-had-to-answer">0. What this batch had to answer<a href="#batch-02/0-what-this-batch-had-to-answer" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>P1 is <strong>the aissistant</strong> — what an agent <em>is</em> here, how it is configured, what it can do, and how it is
+kept safe. Batch 01 found the platform. This batch opens the agent up.</p>
+<p>Short answer, measured:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Question</th>
+<th>n8n&#39;s answer</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>What is the AI surface?</td>
+<td><strong><code>@n8n/agents</code> v0.29.0</strong> — <em>&quot;AI agent SDK for n8n&#39;s code-first execution engine&quot;</em> — 133 runtime files, 42 SDK files, 40 workspace files</td>
+<td>F02-01</td>
+</tr>
+<tr>
+<td>What is an agent?</td>
+<td>A <strong>fluent builder</strong> (<code>Agent</code>) with 25+ configuration methods, lazy-built; <em>&quot;user code never calls <code>.build()</code>&quot;</em></td>
+<td>F02-02</td>
+</tr>
+<tr>
+<td>What is a skill?</td>
+<td><strong>A <code>SKILL.md</code> file</strong>, validated, with a <strong>72 KB cap</strong>, content-addressed linked files, and an optional <strong>MCP server dependency</strong></td>
+<td>F02-03</td>
+</tr>
+<tr>
+<td>Can agents delegate?</td>
+<td><strong>Yes — with suspend and resume</strong>, a max-children limit, and a difficulty field</td>
+<td>F02-04</td>
+</tr>
+<tr>
+<td>How is it kept safe?</td>
+<td><strong>Guardrails</strong> (<code>allow</code> or <code>stop</code> with a code) run <strong>before a model call and before a tool call</strong>; tool output is treated as <strong>untrusted</strong>, stripped of invisible Unicode and wrapped with its source</td>
+<td>F02-05/06</td>
+</tr>
+<tr>
+<td>How is it kept affordable?</td>
+<td>A <strong>budget guardrail</strong> with a <strong>spend ledger</strong>, a per-session cost cap and a monthly budget</td>
+<td>F02-07</td>
+</tr>
+<tr>
+<td>What models can it use?</td>
+<td>A catalog <strong>fetched from <code>models.dev</code></strong>, carrying per-million-token cost and context limits, with provider aliases</td>
+<td>F02-08</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="1-the-ai-surface-measured">1. The AI surface, measured<a href="#batch-02/1-the-ai-surface-measured" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>packages/@n8n/agents</code> — <strong>v0.29.0</strong>, described as <em>&quot;AI agent SDK for n8n&#39;s code-first execution
+engine&quot;</em> (<code>package.json</code>).</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Directory</th>
+<th align="right">Files</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><code>runtime/</code></strong></td>
+<td align="right"><strong>133</strong></td>
+<td>the running agent: loop, state, streaming, model, memory, mcp, tools, guardrails, telemetry, skills</td>
+</tr>
+<tr>
+<td><code>__tests__/</code></td>
+<td align="right">372</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong><code>sdk/</code></strong></td>
+<td align="right"><strong>42</strong></td>
+<td>the fluent builders and entry points</td>
+</tr>
+<tr>
+<td><strong><code>workspace/</code></strong></td>
+<td align="right"><strong>40</strong></td>
+<td>the agent&#39;s workspace</td>
+</tr>
+<tr>
+<td><strong><code>types/</code></strong></td>
+<td align="right"><strong>26</strong></td>
+<td>public types (sdk / runtime / telemetry)</td>
+</tr>
+<tr>
+<td><code>evals/</code></td>
+<td align="right">11</td>
+<td>evaluation primitives</td>
+</tr>
+<tr>
+<td><strong><code>skills/</code></strong></td>
+<td align="right"><strong>7</strong></td>
+<td>the skill contract, validator, registry, prompt</td>
+</tr>
+<tr>
+<td><code>utils/</code></td>
+<td align="right">6</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>vector-stores/</code></td>
+<td align="right">4</td>
+<td>vector store integration</td>
+</tr>
+<tr>
+<td><code>storage/</code>, <code>integrations/</code></td>
+<td align="right">2 / 1</td>
+<td>—</td>
+</tr>
+</tbody></table></div>
+<p><strong>The AI packages in the monorepo</strong> (<code>packages/@n8n/</code>): <code>agents</code>, <code>ai-node-sdk</code>, <code>ai-utilities</code>,
+<strong><code>ai-workflow-builder.ee</code></strong> (unlicensed), <code>instance-ai</code>, <code>nodes-langchain</code>, <code>mcp-apps</code>, <code>mcp-browser</code>,
+<code>mcp-browser-extension</code>.</p>
+<p><strong>Note on <code>ai-node-sdk</code>:</strong> it holds <strong>one file</strong> (<code>index.ts</code>) — a barrel. It is the public re-export
+surface, not the implementation. Named here so a later reader does not mistake a 1-file package for a
+1-file feature.</p>
+<hr>
+<h2 id="2-what-an-agent-is-a-fluent-builder-and-a-rule-about-it">2. What an agent is: a fluent builder, and a rule about it<a href="#batch-02/2-what-an-agent-is-a-fluent-builder-and-a-rule-about-it" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>src/sdk/agent.ts</code> defines <code>class Agent</code>, and the package&#39;s own <code>AGENTS.md</code> states the design rule:</p>
+<blockquote>
+<p><em>&quot;<strong>Builder pattern with lazy build</strong> — all public primitives use a fluent builder API. <strong>User code
+never calls <code>.build()</code>.</strong> Builders are passed directly to the consuming method (e.g. <code>agent.tool(myTool)</code>)
+which calls <code>.build()</code> internally. <code>Agent</code> has <code>generate()</code>/<code>stream()</code> directly on the class, which
+lazy-build via <code>ensureBuilt()</code> on first call. <code>build()</code> is <strong><code>protected</code></strong> on <code>Agent</code> to keep it out of
+the public API.&quot;</em></p>
+</blockquote>
+<p>And a second rule: <em>&quot;<strong>Zod for schemas</strong> — all input/output schemas use Zod.&quot;</em></p>
+<p><strong>The configuration surface (measured, 25+ methods)</strong> — each one a capability:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Method</th>
+<th>What it adds</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>model(providerOrIdOrConfig, modelName?)</code> · <code>modelFetch(fetch)</code></td>
+<td>the model, or a custom fetch</td>
+</tr>
+<tr>
+<td><code>instructions(text, options?)</code></td>
+<td>the system prompt</td>
+</tr>
+<tr>
+<td><strong><code>volatileInstructionsProvider(provider)</code></strong></td>
+<td>instructions supplied <strong>at runtime</strong>, per call</td>
+</tr>
+<tr>
+<td><code>tool(t)</code> · <strong><code>deferredTool(t, options)</code></strong></td>
+<td>tools, and tools <strong>loaded on demand</strong></td>
+</tr>
+<tr>
+<td><strong><code>skills(sourceOrSkills)</code></strong></td>
+<td>a skill source</td>
+</tr>
+<tr>
+<td><code>providerTool(builtProviderTool)</code></td>
+<td>provider-defined tools</td>
+</tr>
+<tr>
+<td><code>memory(m)</code> · <code>memoryTaskObserver(observer)</code></td>
+<td>memory, and an observer on memory tasks</td>
+</tr>
+<tr>
+<td><code>fileStore(store)</code> · <code>vectorStore(...)</code></td>
+<td>a file store, a vector store</td>
+</tr>
+<tr>
+<td><strong><code>middleware(m)</code></strong></td>
+<td>middleware</td>
+</tr>
+<tr>
+<td><strong><code>inputGuardrail(g)</code> · <code>outputGuardrail(g)</code></strong></td>
+<td>guardrails on input and output</td>
+</tr>
+<tr>
+<td><strong><code>eval(e)</code></strong></td>
+<td>evaluations</td>
+</tr>
+<tr>
+<td><strong><code>checkpoint(storage)</code></strong></td>
+<td>checkpointing (<code>&#39;memory&#39;</code> or a store)</td>
+</tr>
+<tr>
+<td><code>structuredOutput(schema)</code></td>
+<td>a Zod or JSONSchema7 output contract</td>
+</tr>
+<tr>
+<td><code>reasoning(level)</code></td>
+<td>a reasoning level</td>
+</tr>
+<tr>
+<td><strong><code>promptCaching(config)</code></strong></td>
+<td>prompt caching</td>
+</tr>
+<tr>
+<td><code>telemetry(t)</code> · <code>toolCallConcurrency(n)</code></td>
+<td>telemetry, concurrency</td>
+</tr>
+<tr>
+<td><code>generate(...)</code> (line 774) · <code>stream(...)</code> (line 789)</td>
+<td>the two entry points</td>
+</tr>
+</tbody></table></div>
+<p><strong>➜ F02-01 [foundational] — An n8n agent is a <strong>configuration object with a lazy build</strong>, not a class
+you subclass.</strong> <strong>Plain meaning:</strong> you <em>describe</em> an agent — its model, its instructions, its tools, its
+skills, its guardrails, its memory — and calling <code>generate()</code> or <code>stream()</code> builds it on first use.
+<strong>Why it matters:</strong> the agent is <strong>data</strong>, and the builder is the only API; there is no inheritance
+hierarchy to learn or to fork.</p>
+<p><strong>The runtime that runs it</strong> (<code>src/runtime/</code>, 133 files) is organised by concern:
+<code>loop/</code> (the agent loop, <code>agent-runtime</code>), <code>state/</code> (<code>event-bus</code>, <code>run-state</code>), <code>streaming/</code>, <code>model/</code>,
+<code>memory/</code>, <code>mcp/</code>, <code>tools/</code>, <code>guardrails/</code>, <code>telemetry/</code>, <code>skills/</code>.</p>
+<hr>
+<h2 id="3-skills-a-skill-md-contract-with-real-teeth">3. Skills — a `SKILL.md` contract with real teeth<a href="#batch-02/3-skills-a-skill-md-contract-with-real-teeth" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>src/skills/types.ts</code> is the contract, and it is more specific than &quot;a prompt file&quot;:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>ts</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-ts">export const RUNTIME_SKILL_FILE_NAME = &#39;SKILL.md&#39;;
+/** Maximum UTF-8 bytes of instruction or linked-file content before truncation. */
+export const RUNTIME_SKILL_MAX_OUTPUT_BYTES = 72 * 1024;
+export const SKILL_LOAD_TOOL_NAME = &#39;load_skill&#39;;
+export const RUNTIME_SKILL_LINKED_FILE_GROUPS =
+  [&#39;references&#39;, &#39;templates&#39;, &#39;scripts&#39;, &#39;assets&#39;, &#39;examples&#39;];
+</code></pre>
+</div>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Type</th>
+<th>What it carries</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>RuntimeSkillLinkedFile</code></td>
+<td><code>{ path, bytes, sha256 }</code> — <strong>content-addressed</strong> linked files</td>
+</tr>
+<tr>
+<td><code>RuntimeSkillIndexEntry</code></td>
+<td><code>{ name, description, recommendedTools? }</code> — an index that can <strong>recommend tools</strong></td>
+</tr>
+<tr>
+<td><code>RuntimeSkillInterfaceContract</code></td>
+<td><code>{ displayName, shortDescription, defaultPrompt, icon, brandColor }</code> — <strong>a UI contract</strong></td>
+</tr>
+<tr>
+<td><code>RuntimeSkillPolicyContract</code></td>
+<td><code>{ allowImplicitInvocation?, product? }</code> — <strong>a policy</strong>: may it be invoked without being named?</td>
+</tr>
+<tr>
+<td><code>RuntimeSkillMcpServerDependency</code></td>
+<td><code>{ name, description?, transport?, url? }</code> — <strong>a skill can require an MCP server</strong></td>
+</tr>
+<tr>
+<td><code>RuntimeSkillRegistry</code></td>
+<td>a registry with <code>RUNTIME_SKILL_REGISTRY_SCHEMA_VERSION = 1</code></td>
+</tr>
+</tbody></table></div>
+<p>And the package provides <code>parseRuntimeSkillMarkdown</code>, <code>RUNTIME_SKILL_NAME_PATTERN</code> and
+<code>validateRuntimeSkill</code> — so <strong>a skill is parsed and validated, not just read</strong>.</p>
+<p><strong>➜ F02-03 [foundational] — A skill is a validated <code>SKILL.md</code> with a hard output cap, content-hashed
+linked files, a presentation contract, an invocation policy, and declared dependencies.</strong> <strong>Plain
+meaning:</strong> a skill is a small, checked package — not a paragraph of prompt — and the platform decides
+whether it may be used without being asked. <strong>Why it matters:</strong> it is the most complete <em>declarative
+capability</em> design in the study, and it is portable as an idea even though the licence is not.</p>
+<hr>
+<h2 id="4-sub-agents-delegation-with-suspend-and-resume">4. Sub-agents — delegation with suspend and resume<a href="#batch-02/4-sub-agents-delegation-with-suspend-and-resume" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>src/runtime/tools/</code> holds the mechanism, and the schemas name its states:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>File / symbol</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>delegate-sub-agent-tool.ts</code> · <code>delegate-sub-agent-runner.ts</code></td>
+<td>the tool and its runner</td>
+</tr>
+<tr>
+<td><code>sub-agent-task-path.ts</code> → <code>DEFAULT_SUB_AGENT_MAX_CHILDREN</code></td>
+<td><strong>a cap on how many sub-agents one agent may spawn</strong></td>
+</tr>
+<tr>
+<td><code>delegateSubAgentInputSchema</code> · <code>delegateSubAgentModeInputSchema</code></td>
+<td>the request</td>
+</tr>
+<tr>
+<td><strong><code>delegateSubAgentSuspendSchema</code> · <code>delegateSubAgentResumeSchema</code></strong></td>
+<td><strong>a sub-agent can be suspended and resumed</strong></td>
+</tr>
+<tr>
+<td><code>delegateSubAgentBackgroundOutputSchema</code></td>
+<td>a background (fire-and-forget) delegation output</td>
+</tr>
+<tr>
+<td><code>DelegateSubAgentPolicy</code> · <code>SubAgentTaskDifficulty</code></td>
+<td>a policy, and a difficulty rating on the task</td>
+</tr>
+<tr>
+<td><code>INLINE_SUB_AGENT_ID</code></td>
+<td>an inline sub-agent (no separate process)</td>
+</tr>
+</tbody></table></div>
+<p><strong>➜ F02-04 [foundational] — Sub-agent delegation is a first-class tool with a max-children cap, a task
+difficulty, a policy, and suspend/resume.</strong> <strong>Plain meaning:</strong> an agent can hand work to a child agent,
+pause it, and pick it up later — and the platform limits how deep the delegation can go. <strong>Why it
+matters:</strong> it is the cleanest answer in the study to <em>&quot;how does one agent use another without the system
+falling over&quot;</em> — and it rhymes with the durable-execution ADR from batch 01.</p>
+<hr>
+<h2 id="5-tools-deferred-guarded-and-attributed">5. Tools — deferred, guarded, and attributed<a href="#batch-02/5-tools-deferred-guarded-and-attributed" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>src/runtime/tools/</code> (16 files) is where the safety lives:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>File</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><code>untrusted-tool-output.ts</code></strong></td>
+<td>treats tool output as <strong>untrusted</strong>: <code>stripInvisibleUnicode(text)</code> then <code>wrapUntrustedData(sanitized, …)</code>, attributed by <code>{ name, mcpServerName, mcpToolName }</code>, with the notice <em>&quot;The following media is untrusted external reference data.&quot;</em></td>
+</tr>
+<tr>
+<td><code>deferred-tool-manager.ts</code></td>
+<td><strong>tools loaded on demand</strong> (<code>LOAD_TOOL_TOOL_NAME</code>, <code>SEARCH_TOOLS_TOOL_NAME</code>)</td>
+</tr>
+<tr>
+<td><code>tool-call-executor.ts</code> · <code>tool-call-runner.ts</code></td>
+<td>execution and concurrency</td>
+</tr>
+<tr>
+<td><code>tool-result-guard.ts</code></td>
+<td>a result guard</td>
+</tr>
+<tr>
+<td><code>fix-tool-call.ts</code></td>
+<td>repairs a malformed tool call</td>
+</tr>
+<tr>
+<td><code>write-todos-tool.ts</code> · <code>planner-todos-tool.ts</code> · <code>todos-core.ts</code></td>
+<td>a <strong>todo/planning tool</strong> — the agent can keep a plan</td>
+</tr>
+<tr>
+<td><code>tool-adapter.ts</code> · <code>sdk-owned-tool.ts</code></td>
+<td>adapters, and which tools the SDK owns</td>
+</tr>
+</tbody></table></div>
+<p><strong>➜ F02-06 [foundational] — Tool output is untrusted input.</strong> Every tool result is stripped of
+invisible Unicode and wrapped with its source before the model sees it. <strong>Plain meaning:</strong> the platform
+assumes a tool — or anything a tool read — may be trying to talk to the model, and it neutralises that.
+<strong>Why it matters:</strong> prompt-injection defence is designed in, not bolted on, and it is measurable in the
+code.</p>
+<hr>
+<h2 id="6-guardrails-a-two-action-decision-run-at-two-points">6. Guardrails — a two-action decision, run at two points<a href="#batch-02/6-guardrails-a-two-action-decision-run-at-two-points" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>src/types/sdk/guardrail.ts:15</code> defines the whole vocabulary:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>ts</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-ts">export type GuardrailDecision = { action: &#39;allow&#39; } | { action: &#39;stop&#39;; code: string };
+</code></pre>
+</div>
+<p>And the hook surface (<code>:43-45</code>):</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>ts</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-ts">before?(ctx: GuardrailModelCallContext): Promise&lt;GuardrailDecision | undefined&gt;;
+beforeTool?(ctx: GuardrailToolCallContext): Promise&lt;GuardrailDecision | undefined&gt;;
+</code></pre>
+</div>
+<p><strong>➜ F02-05 [foundational] — A guardrail is a function that can veto a model call or a tool call, and its
+only answers are <em>allow</em> or <em>stop with a code</em>.</strong> <strong>Plain meaning:</strong> there is exactly one interception
+contract, and it is applied at the two places an agent can spend money or touch the world. <strong>Why it
+matters:</strong> a one-decision vocabulary is what makes a policy enforceable; a richer one becomes a
+negotiation.</p>
+<h3 id="6-1-the-budget-guardrail-spend-as-a-first-class-concern">6.1 The budget guardrail — spend as a first-class concern<a href="#batch-02/6-1-the-budget-guardrail-spend-as-a-first-class-concern" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>src/runtime/guardrails/budget-guardrail.ts</code> defines:</p>
+<ul>
+<li><strong><code>SpendLedger</code></strong> — <code>add(callId, entries)</code> (<em><strong>&quot;idempotent on <code>callId</code>&quot;</strong></em>), <code>read(key)</code>;</li>
+<li><code>SpendEntry { key, usd }</code>, <code>SpendTotal { key, totalUsd, previousUsd }</code>;</li>
+<li><code>BudgetGuardrailOptions</code> — <code>sessionCostCapUsd</code>, <strong><code>monthlyBudgetUsd</code></strong>, plus <code>sessionId</code>/<code>agentId</code>.</li>
+</ul>
+<p><strong>➜ F02-07 [foundational] — Cost is a guardrail, not a report.</strong> An agent can be capped <strong>per session and
+per month</strong>, and the ledger that enforces it is idempotent per call. <strong>Plain meaning:</strong> the same contract
+that stops a dangerous tool also stops an expensive one. <strong>Why it matters:</strong> for a platform whose users
+pay for tokens, &quot;stop&quot; is the only durable answer to overspend.</p>
+<hr>
+<h2 id="7-memory-an-observation-log-with-a-reflector">7. Memory — an observation log with a reflector<a href="#batch-02/7-memory-an-observation-log-with-a-reflector" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>src/runtime/memory/</code> (17 files) is a real subsystem, not a message buffer:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>File</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>episodic-memory.ts</code> · <code>episodic-memory-capture.ts</code></td>
+<td>episodic memory and its capture</td>
+</tr>
+<tr>
+<td><strong><code>observation-log-observer.ts</code> · <code>observation-log-reflector.ts</code></strong></td>
+<td><strong>an observer and a <em>reflector</em></strong> — memory is consolidated, not just stored</td>
+</tr>
+<tr>
+<td><code>observation-log-renderer.ts</code> · <code>observation-log-store.ts</code> · <code>observation-log-defaults.ts</code></td>
+<td>how it is rendered, stored and defaulted</td>
+</tr>
+<tr>
+<td><code>memory-orchestrator.ts</code> · <code>memory-lifecycle.ts</code> · <code>memory-store.ts</code></td>
+<td>orchestration, lifecycle, store</td>
+</tr>
+<tr>
+<td><code>scoped-memory-task-runner.ts</code></td>
+<td>memory tasks, scoped</td>
+</tr>
+<tr>
+<td><code>tool-result-memory.ts</code></td>
+<td>remembering tool results</td>
+</tr>
+<tr>
+<td><code>title-generation.ts</code></td>
+<td>generating titles (for memory entries)</td>
+</tr>
+<tr>
+<td><code>strip-orphaned-tool-messages.ts</code></td>
+<td>cleaning up orphaned tool messages</td>
+</tr>
+</tbody></table></div>
+<p><strong>➜ F02-09 [foundational] — Memory is an <em>observation log with a reflector</em>.</strong> <strong>Plain meaning:</strong> the
+agent observes, and something periodically <strong>reflects</strong> on what it observed and consolidates it — the
+same shape as a human sleep cycle. <strong>Why it matters:</strong> it is a designed answer to &quot;how does an agent
+remember without its context growing forever&quot;, and it is absent from the other platforms studied.</p>
+<hr>
+<h2 id="8-mcp-one-client-lazily-connected">8. MCP — one client, lazily connected<a href="#batch-02/8-mcp-one-client-lazily-connected" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>src/sdk/mcp-client.ts</code>:</p>
+<blockquote>
+<p><em>&quot;Manages connections to one or more MCP servers and exposes their tools as a <strong>flat list of
+<code>BuiltTool</code></strong> instances. Connections are established <strong>lazily on the first <code>listTools()</code> call</strong> and kept
+alive until <code>close()</code>. Both operations <strong>deduplicate concurrent calls</strong> via stored promises, so calling
+<code>listTools()</code> from multiple concurrent <code>generate()</code> runs is safe.&quot;</em></p>
+</blockquote>
+<p><strong>And a skill can require an MCP server</strong> (§3), so the two systems compose.</p>
+<hr>
+<h2 id="9-model-flexibility-a-catalog-fetched-from-models-dev">9. Model flexibility — a catalog fetched from models.dev<a href="#batch-02/9-model-flexibility-a-catalog-fetched-from-models-dev" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>src/sdk/catalog.ts</code>:</p>
+<ul>
+<li><strong><code>MODELS_DEV_URL = &#39;https://models.dev/api.json&#39;</code></strong> — the catalog is <strong>fetched from an external
+service</strong>, not hard-coded;</li>
+<li><code>MODELS_DEV_PROVIDER_ALIASES</code> — <code>amazon-bedrock</code> → <code>aws-bedrock</code>, <code>azure</code>/<code>azure-cognitive-services</code> →
+<code>azure-openai</code> (so n8n&#39;s names are normalised against the catalog&#39;s);</li>
+<li><strong><code>ModelCost</code></strong> — <code>{ input, output, cacheRead?, cacheWrite? }</code> <strong>USD per million tokens</strong>;</li>
+<li><strong><code>ModelLimits</code></strong> — <code>{ context?, output? }</code> — the context window and the output cap;</li>
+<li><code>getModelCost(...)</code> is imported by the agent builder — <strong>so cost data flows straight into the budget
+guardrail</strong> (§6.1).</li>
+</ul>
+<p><code>src/runtime/model/</code> holds the per-provider handling: <code>google-vertex.ts</code>, <code>openai-api-style.ts</code>,
+<code>provider-credentials.ts</code>, <strong><code>provider-quirks.ts</code></strong> (a quirks layer), <code>lazy-ai.ts</code>, <code>prompt-cache.ts</code>,
+<code>model-token-counter.ts</code>, <code>model-factory.ts</code>.</p>
+<p><strong>➜ F02-08 [foundational] — Model choice is data, fetched at runtime, and it carries price and limits.</strong>
+<strong>Plain meaning:</strong> the agent asks a catalogue what a model costs and how much context it has, and the
+budget guardrail uses that to decide whether to stop. <strong>Why it matters:</strong> &quot;no lock-in&quot; becomes
+measurable rather than a slogan, and cost-awareness is wired into the same decision path as safety.</p>
+<hr>
+<h2 id="10-findings">10. Findings<a href="#batch-02/10-findings" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Tagged by pole; answered against <strong>Q1 · USER VALUE</strong> and <strong>Q2 · VISION VALUE</strong>.</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Finding</th>
+<th>Pole</th>
+<th>Q1 · User value</th>
+<th>Q2 · Vision value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>F02-01</strong></td>
+<td><strong>An agent is a configuration object with a lazy build</strong> — a fluent <code>Agent</code> builder with 25+ methods; <em>&quot;user code never calls <code>.build()</code>&quot;</em>; <code>build()</code> is <code>protected</code>.</td>
+<td>P1</td>
+<td>You describe an agent; you do not inherit one.</td>
+<td>The agent is data, and the builder is the only API.</td>
+</tr>
+<tr>
+<td><strong>F02-02</strong></td>
+<td><strong>A 133-file runtime organised by concern</strong> — loop, state, streaming, model, memory, mcp, tools, guardrails, telemetry, skills.</td>
+<td>P1</td>
+<td>(indirect) — the agent is thorough.</td>
+<td>A runtime you can read one concern at a time.</td>
+</tr>
+<tr>
+<td><strong>F02-03</strong></td>
+<td><strong>A skill is a validated <code>SKILL.md</code></strong> — 72 KB output cap, content-hashed linked files, a UI contract, an invocation policy, declared MCP dependencies, a schema-versioned registry.</td>
+<td>P1</td>
+<td>Skills are small, checked packages.</td>
+<td>The most complete declarative-capability design in the study.</td>
+</tr>
+<tr>
+<td><strong>F02-04</strong></td>
+<td><strong>Sub-agent delegation with suspend/resume</strong>, a max-children cap, a difficulty rating and a policy.</td>
+<td>P1</td>
+<td>One agent can use another, safely and reversibly.</td>
+<td>A designed answer to agent-to-agent work.</td>
+</tr>
+<tr>
+<td><strong>F02-05</strong></td>
+<td><strong>A guardrail is <code>allow</code> or <code>stop(code)</code>, run before a model call and before a tool call.</strong></td>
+<td>P1/PZ</td>
+<td>One interception contract at the two places that matter.</td>
+<td>A one-decision vocabulary makes a policy enforceable.</td>
+</tr>
+<tr>
+<td><strong>F02-06</strong></td>
+<td><strong>Tool output is untrusted input</strong> — invisible Unicode stripped, wrapped with its source (<code>mcp:server</code> / tool name).</td>
+<td>P1/PZ</td>
+<td>Prompt injection is defended against by default.</td>
+<td>Safety designed in, and measurable.</td>
+</tr>
+<tr>
+<td><strong>F02-07</strong></td>
+<td><strong>Cost is a guardrail</strong> — a <code>SpendLedger</code> idempotent per <code>callId</code>, a per-session cap and a monthly budget.</td>
+<td>P1</td>
+<td>Overspend stops instead of reporting.</td>
+<td>The stop path serves money as well as safety.</td>
+</tr>
+<tr>
+<td><strong>F02-08</strong></td>
+<td><strong>Model choice is fetched data</strong> — a catalog from <code>models.dev</code> carrying USD-per-million-token cost and context limits, with provider aliases.</td>
+<td>P1</td>
+<td>Switching model costs nothing but a string.</td>
+<td>&quot;No lock-in&quot; becomes measurable, and cost feeds the guardrail.</td>
+</tr>
+<tr>
+<td><strong>F02-09</strong></td>
+<td><strong>Memory is an observation log with a reflector</strong> (plus capture, orchestration, lifecycle, scoped tasks, title generation).</td>
+<td>P1</td>
+<td>The agent remembers without its context growing forever.</td>
+<td>A designed consolidation cycle.</td>
+</tr>
+<tr>
+<td><strong>F02-10</strong></td>
+<td><strong>An MCP client that connects lazily, deduplicates, and exposes MCP tools as ordinary tools.</strong></td>
+<td>P1</td>
+<td>MCP servers plug in with no special handling.</td>
+<td>One tool list regardless of where a tool came from.</td>
+</tr>
+<tr>
+<td><strong>F02-11</strong></td>
+<td><strong>Tools are deferred</strong> (<code>LOAD_TOOL</code> / <code>SEARCH_TOOLS</code>) — a large toolset does not have to be in the prompt.</td>
+<td>P1</td>
+<td>Many tools without a huge context.</td>
+<td>Tool discovery as a designed capability.</td>
+</tr>
+<tr>
+<td><strong>F02-12</strong></td>
+<td><strong>The agent can keep a plan</strong> — <code>write-todos-tool</code>, <code>planner-todos-tool</code>, <code>todos-core</code>.</td>
+<td>P1</td>
+<td>Long tasks stay on track.</td>
+<td>Planning as a built-in tool, not a prompt trick.</td>
+</tr>
+<tr>
+<td><strong>F02-13</strong></td>
+<td><strong><code>ai-node-sdk</code> is a 1-file barrel</strong>, not a 1-file feature (recorded so it is not misread).</td>
+<td>PZ</td>
+<td>(indirect)</td>
+<td>Named per rule 6.</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="11-divergences-and-honest-bounds">11. Divergences and honest bounds <span class="seal-badge" style="background:#fef2f2; color:#dc2626; border-color:#fca5a5; font-size: 0.65em; vertical-align: middle;">⚠️ FINDING NOTE</span><a href="#batch-02/11-divergences-and-honest-bounds" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<ul>
+<li><strong>No doc-vs-code divergence was needed.</strong> The package&#39;s own <code>AGENTS.md</code> describes conventions that the
+code follows (lazy build, Zod schemas, no <code>_</code> prefixes) — the best case for rule 1, and it is worth
+saying so plainly rather than inventing a divergence.</li>
+<li><strong>Bound:</strong> this batch read the <strong>agent SDK and its runtime</strong> — the builder, the runtime&#39;s concern
+split, skills, sub-agents, tools, guardrails, memory, MCP and the model catalog. It did <strong>not</strong> read
+the 372 test files, the 40-file <code>workspace/</code> directory, or <code>nodes-langchain</code> (the node-level LangChain
+integration); those are named rather than half-covered.</li>
+<li><strong>Bound:</strong> <code>evals/</code> (11 files) is <strong>named</strong> as a capability and not analysed — the evaluation
+primitives are batch 04/07&#39;s subject.</li>
+<li><strong>Bound (stated plainly):</strong> the guardrail&#39;s <code>before</code>/<code>beforeTool</code> hooks are read from the <strong>type
+definitions</strong>; the guardrail runner&#39;s execution order is not claimed here.</li>
+</ul>
+<hr>
+<h2 id="12-carried-forward-to-batch-07-the-synthesis">12. Carried forward to batch 07 (the synthesis)<a href="#batch-02/12-carried-forward-to-batch-07-the-synthesis" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Four candidates for the highest transferable value, to be ranked in batch 07:</p>
+<ol>
+<li><strong>The skill contract (F02-03)</strong> — <code>SKILL.md</code>, validated, capped, content-hashed, with a policy and
+declared dependencies. The most portable declarative-capability design in the study.</li>
+<li><strong>The two guardrail primitives (F02-05 / F02-07)</strong> — <code>allow</code> or <code>stop(code)</code>, before a model call or
+a tool call, with spend as a first-class reason to stop.</li>
+<li><strong>Untrusted tool output (F02-06)</strong> — strip, wrap, attribute. A small, complete, measurable defence.</li>
+<li><strong>Sub-agent delegation with suspend/resume and a max-children cap (F02-04)</strong> — agent-to-agent work
+with a designed limit.</li>
+</ol>
+<p>All four are <strong>observations</strong>, not decisions. The cross-platform mapping is a later pass (rule 5).</p>
+<hr>
+<p><em>Batch 02 of 07. Read from source on 2026-10-15. Next: <code>findings/03-the-workspace.md</code>.</em></p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="01-platform-overview.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">Platform Overview</span>
+                </a>
+              
+
+              <a href="../index.html#batch-02" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              
+                <a href="03-the-workspace-p2.html" class="nav-page-btn" style="text-align:right;">
+                  <span class="nav-btn-sub">Next Batch →</span>
+                  <span class="nav-btn-title">The Workspace (P2)</span>
+                </a>
+              
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#0-what-this-batch-had-to-answer" class="toc-link">0. What this batch had to answer</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#1-the-ai-surface-measured" class="toc-link">1. The AI surface, measured</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#2-what-an-agent-is-a-fluent-builder-and-a-rule-about-it" class="toc-link">2. What an agent is: a fluent builder, and a rule about it</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-skills-a-skill-md-contract-with-real-teeth" class="toc-link">3. Skills — a SKILL.md contract with real teeth</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-sub-agents-delegation-with-suspend-and-resume" class="toc-link">4. Sub-agents — delegation with suspend and resume</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-tools-deferred-guarded-and-attributed" class="toc-link">5. Tools — deferred, guarded, and attributed</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-guardrails-a-two-action-decision-run-at-two-points" class="toc-link">6. Guardrails — a two-action decision, run at two points</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#6-1-the-budget-guardrail-spend-as-a-first-class-concern" class="toc-link">6.1 The budget guardrail — spend as a first-class concern</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-memory-an-observation-log-with-a-reflector" class="toc-link">7. Memory — an observation log with a reflector</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#8-mcp-one-client-lazily-connected" class="toc-link">8. MCP — one client, lazily connected</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#9-model-flexibility-a-catalog-fetched-from-models-dev" class="toc-link">9. Model flexibility — a catalog fetched from models.dev</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#10-findings" class="toc-link">10. Findings</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#11-divergences-and-honest-bounds" class="toc-link">11. Divergences and honest bounds</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#12-carried-forward-to-batch-07-the-synthesis" class="toc-link">12. Carried forward to batch 07 (the synthesis)</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('n8n_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('n8n_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('n8n_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('n8n_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.N8nReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

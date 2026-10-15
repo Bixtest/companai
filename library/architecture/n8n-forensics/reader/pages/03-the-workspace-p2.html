@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 03 — The workspace (P2) — n8n Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-03" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 03</span>
+      <div class="header-title-wrap">
+        <div class="header-title">The Workspace (P2)</div>
+        <div class="header-subtitle">n8n Platform Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/03-the-workspace.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #059669">DONE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">2,303</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">12 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">297</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-15</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 03 Architecture Guide (Default)</option>
+            <optgroup label="Strategic Architecture">
+              <option value="master">Executive Topology: the three poles, the composition surface, and the licence line</option>
+            </optgroup>
+            <optgroup label="Foundations">
+              <option value="00">Batch 00: The pin, the MAX_PATH extraction, and the licence gate</option>
+              <option value="01">Batch 01: The overview — two engines, one a documented scaffold</option>
+            </optgroup>
+            <optgroup label="Pole 1 — The Aissistant">
+              <option value="02">Batch 02: The aissistant — an agent is a configuration</option>
+            </optgroup>
+            <optgroup label="Pole 2 — The Workspace">
+              <option value="03">Batch 03: The workspace — a real tenancy model</option>
+            </optgroup>
+            <optgroup label="Pole 3 — Automations">
+              <option value="04">Batch 04: Automations — the isolation boundary and an accurate ADR</option>
+            </optgroup>
+            <optgroup label="Cross-Cutting">
+              <option value="05">Batch 05: Widgets &amp; frontend — the first composition surface</option>
+            </optgroup>
+            <optgroup label="Escape Hatch">
+              <option value="06">Batch 06: Out-of-pole — two ratchets and an empty promise</option>
+            </optgroup>
+            <optgroup label="Strategic Decision">
+              <option value="07">Batch 07: The synthesis — mechanisms behind a licence line</option>
+            </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 03 VISUAL GUIDE</div>
+    <h4>The workspace: the cleanest tenancy model in the study</h4>
+    <p>One container with two modes, membership as a row, and permissions as a vocabulary</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 350" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-03" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-03" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+        <marker id="arrr-03" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#ef4444"/>
+        </marker>
+      </defs>
+      <rect x="20" y="20" width="880" height="150" rx="12" fill="var(--surface-card, #ffffff)" fill-opacity="0.4" stroke="#2563eb" stroke-width="2" stroke-dasharray="6,4"/>
+      <text x="40" y="46" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#1d4ed8">ONE OBJECT, TWO MODES — Project.type = personal | team</text>
+      <g transform="translate(40, 60)">
+        <rect width="200" height="96" rx="8" fill="var(--surface-card, #ffffff)" stroke="#2563eb" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE CONTAINER</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Project: personal | team</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">your space & your team’s are</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">the SAME object</text>
+      </g>
+      <g transform="translate(256, 60)">
+        <rect width="200" height="96" rx="8" fill="var(--surface-card, #ffffff)" stroke="#2563eb" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE MEMBERSHIP</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">a join row (userId, projectId)</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">carrying a Role by SLUG</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">custom role → no migration</text>
+      </g>
+      <g transform="translate(472, 60)">
+        <rect width="200" height="96" rx="8" fill="var(--surface-card, #ffffff)" stroke="#2563eb" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE ROLES</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">global (owner/admin/member)</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">+ resource-level, per thing</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">2 levels, kept apart</text>
+      </g>
+      <g transform="translate(688, 60)">
+        <rect width="200" height="96" rx="8" fill="var(--surface-card, #ffffff)" stroke="#2563eb" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE IDENTITY</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">User + AuthIdentity + ApiKey</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">one person, several logins</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">unique per provider</text>
+      </g>
+      <rect x="20" y="196" width="430" height="136" rx="10" fill="#7c3aed" fill-opacity="0.08" stroke="#7c3aed" stroke-width="1.6"/>
+      <text x="38" y="222" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#6d28d9">206 resource:action SCOPES</text>
+      <text x="38" y="246" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">Nothing asks "are you an admin?" — it asks</text>
+      <text x="38" y="266" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">"may you do X to this?" A vocabulary, not a question.</text>
+      <text x="38" y="290" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">4 of the 5 scope files are .ee — read, reimplement.</text>
+      <text x="38" y="314" font-family="system-ui, sans-serif" font-size="10.5" font-weight="600" fill="#6d28d9">Sharing reuses membership: a join row + a role.</text>
+      <rect x="470" y="196" width="430" height="136" rx="10" fill="#b45309" fill-opacity="0.08" stroke="#b45309" stroke-width="1.6"/>
+      <text x="488" y="222" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#b45309">THE BOUNDARY — ACTIONS, NOT ROWS</text>
+      <text x="488" y="246" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">The scopes gate ACTIONS. Where a ROW-LEVEL read</text>
+      <text x="488" y="266" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">decision is needed, that is a finer grain than the scope</text>
+      <text x="488" y="286" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">vocabulary expresses — a boundary, not a gap.</text>
+      <text x="488" y="312" font-family="system-ui, sans-serif" font-size="10.5" font-weight="600" fill="#b45309">Batch 01's CLI silence: the model is the server's (F03-10).</text>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="batch-03-the-workspace-p2">Batch 03 — The Workspace (P2)<a href="#batch-03/batch-03-the-workspace-p2" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Study:</strong> n8n <code>2.44.0</code> · <strong>Batch:</strong> 03 of 07 · <strong>Status:</strong> COMPLETE
+<strong>Source:</strong> <code>C:\n8n</code> · <strong>Zip md5:</strong> <code>7cc78a5ea124ba2c270bccabf282d9ed</code> · <strong>License:</strong> fair-code (§ batch 00)
+<strong>Method:</strong> rules 1-10 of <code>00-PIN-AND-METHOD.md</code>. Every claim carries <code>file:line</code>.</p>
+<hr>
+<h2 id="0-what-this-batch-had-to-answer">0. What this batch had to answer<a href="#batch-03/0-what-this-batch-had-to-answer" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>P2 is <strong>the workspace</strong> — the container a person or team operates in. Batch 01 recorded a specific
+question and left it open: <strong>the CLI has no tenancy notion at all</strong> (no tenant, project or workspace
+verb). So this batch&#39;s job is to find out whether the <em>server</em> does.</p>
+<p><strong>It does, and the answer is the headline of the whole study so far.</strong></p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Question</th>
+<th>n8n&#39;s answer</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Is there a container?</td>
+<td><strong><code>Project</code></strong> — with <code>type: &#39;personal&#39; | &#39;team&#39;</code></td>
+<td>F03-01</td>
+</tr>
+<tr>
+<td>How is membership held?</td>
+<td><strong><code>ProjectRelation</code></strong> — a composite key of (userId, projectId) plus a <strong>Role joined by slug</strong></td>
+<td>F03-02</td>
+</tr>
+<tr>
+<td>What are the roles?</td>
+<td><strong>10 built-in roles</strong>: 4 global (<code>global:owner/admin/member/chatUser</code>) and 6 resource-level</td>
+<td>F03-03</td>
+</tr>
+<tr>
+<td>How are permissions expressed?</td>
+<td><strong>206 scopes</strong> in a <code>resource:action</code> vocabulary, split into global + project + sharing scopes</td>
+<td>F03-04</td>
+</tr>
+<tr>
+<td>How is identity held?</td>
+<td><strong><code>User</code> + <code>AuthIdentity</code> + <code>ApiKey</code></strong> — a user can hold several identities, one per provider</td>
+<td>F03-05</td>
+</tr>
+<tr>
+<td>How are things shared?</td>
+<td><strong><code>SharedWorkflow</code> / <code>SharedCredentials</code></strong> with a <em>sharing role</em>, plus project-scoped secrets-provider access</td>
+<td>F03-06</td>
+</tr>
+<tr>
+<td>Where do variables live?</td>
+<td><strong>Project-scoped or global</strong> — <em>&quot;If null, it&#39;s a global variable&quot;</em></td>
+<td>F03-07</td>
+</tr>
+<tr>
+<td>Where does data live?</td>
+<td>A <strong><code>ByteStore</code> interface with a registry</strong> — and the S3 and Azure backends are <code>.ee</code> (unlicensed)</td>
+<td>F03-08</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="1-the-container-project-and-it-is-two-things-at-once">1. The container: `Project`, and it is two things at once<a href="#batch-03/1-the-container-project-and-it-is-two-things-at-once" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>packages/@n8n/db/src/entities/project.ts</code>:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>ts</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-ts">@Entity()
+export class Project extends WithTimestampsAndStringId {
+	@Column({ length: 255 }) name: string;
+	@Column({ type: &#39;varchar&#39;, length: 36 })
+	type: &#39;personal&#39; | &#39;team&#39;;
+	…
+	@OneToMany(&#39;ProjectRelation&#39;, &#39;project&#39;) projectRelations: ProjectRelation[];
+	@OneToMany(&#39;SharedCredentials&#39;, &#39;project&#39;) sharedCredentials: SharedCredentials[];
+	@OneToMany(&#39;SharedWorkflow&#39;, &#39;project&#39;) sharedWorkflows: SharedWorkflow[];
+	@OneToMany(&#39;ProjectSecretsProviderAccess&#39;, &#39;project&#39;) secretsProviderAccess: ProjectSecretsProviderAccess[];
+	@OneToMany(&#39;Variables&#39;, &#39;project&#39;) variables: Variables[];
+	@ManyToMany(&#39;RoleMappingRule&#39;, (rule) =&gt; rule.projects) roleMappingRules: RoleMappingRule[];
+	@Column({ type: String, nullable: true }) creatorId: string | null;
+	@ManyToOne(&#39;User&#39;, { onDelete: &#39;SET NULL&#39; }) creator?: Relation&lt;User&gt;;
+}
+</code></pre>
+</div>
+<p><strong>➜ F03-01 [foundational] — The workspace container is a <code>Project</code>, and its <code>type</code> is either
+<code>&#39;personal&#39;</code> or <code>&#39;team&#39;</code>.</strong> <strong>Plain meaning:</strong> the same object is both <em>your private space</em> and <em>a team&#39;s
+shared space</em>, and the only difference is one column. <strong>Why it matters:</strong> it is a <strong>two-mode container</strong>
+— one model serves solo use and collaboration without a second hierarchy. That is the simplest tenancy
+shape that still scales to teams, and it is measured, not assumed.</p>
+<p>Also on the entity: <code>icon</code> (<code>{ type: &#39;emoji&#39; | &#39;icon&#39;; value }</code>), <code>description</code>, <strong><code>customTelemetryTags</code></strong>,
+and <code>creatorId</code> with <strong><code>onDelete: &#39;SET NULL&#39;</code></strong> (a project outlives its creator).</p>
+<hr>
+<h2 id="2-membership-a-composite-key-and-a-role">2. Membership: a composite key and a role<a href="#batch-03/2-membership-a-composite-key-and-a-role" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>packages/@n8n/db/src/entities/project-relation.ts</code>:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>ts</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-ts">@Entity()
+export class ProjectRelation extends WithTimestamps {
+	@ManyToOne(&#39;Role&#39;, &#39;projectRelations&#39;)
+	@JoinColumn({ name: &#39;role&#39;, referencedColumnName: &#39;slug&#39; })
+	role: Role;
+	@ManyToOne(&#39;User&#39;, &#39;projectRelations&#39;) user: User;
+	@PrimaryColumn(&#39;uuid&#39;) userId: string;
+	@ManyToOne(&#39;Project&#39;, &#39;projectRelations&#39;) project: Project;
+	@PrimaryColumn() projectId: string;
+}
+</code></pre>
+</div>
+<p><strong>➜ F03-02 [foundational] — Membership is a join row keyed on (userId, projectId) that carries a Role
+referenced by its <em>slug</em>.</strong> <strong>Plain meaning:</strong> &quot;who is in this project, and as what&quot; is one row, and the
+role is a named thing rather than an enum — so a role can be created without a migration. <strong>Why it
+matters:</strong> the composite key makes membership a first-class relation (not a column on either side), and
+the slug reference is what makes custom roles possible at all.</p>
+<hr>
+<h2 id="3-the-permission-model-10-roles-206-scopes">3. The permission model: 10 roles, 206 scopes<a href="#batch-03/3-the-permission-model-10-roles-206-scopes" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="3-1-the-roles">3.1 The roles<a href="#batch-03/3-1-the-roles" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>packages/@n8n/permissions/src/roles/all-roles.ts</code> — <strong>10 built-in role slugs</strong> (measured):</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Scope of the role</th>
+<th>Slugs</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Global</strong> (the instance)</td>
+<td><code>global:owner</code> · <code>global:admin</code> · <code>global:member</code> · <code>global:chatUser</code></td>
+</tr>
+<tr>
+<td><strong>Workflow</strong></td>
+<td><code>workflow:owner</code> · <code>workflow:editor</code></td>
+</tr>
+<tr>
+<td><strong>Credential</strong></td>
+<td><code>credential:owner</code> · <code>credential:user</code></td>
+</tr>
+<tr>
+<td><strong>Secrets provider connection</strong></td>
+<td><code>secretsProviderConnection:owner</code> · <code>secretsProviderConnection:user</code></td>
+</tr>
+</tbody></table></div>
+<p>And <code>packages/@n8n/db/src/constants.ts:52-54</code> exposes the global three as
+<code>GLOBAL_OWNER_ROLE</code> / <code>GLOBAL_ADMIN_ROLE</code> / <code>GLOBAL_MEMBER_ROLE</code>.</p>
+<p><strong>➜ F03-03 [foundational] — Roles are two-level: a global role for the instance, and a resource-level
+role for what you are in a project.</strong> <strong>Plain meaning:</strong> &quot;what you can do anywhere&quot; and &quot;what you can do
+to this thing&quot; are different questions with different vocabularies. <strong>Why it matters:</strong> it is the
+difference between <em>a tenant&#39;s admin</em> and <em>a document&#39;s editor</em>, and conflating them is the usual way a
+permissions model goes wrong.</p>
+<h3 id="3-2-the-scopes">3.2 The scopes<a href="#batch-03/3-2-the-scopes" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><strong>206 scope slugs</strong> measured across five files in <code>permissions/src/roles/scopes/</code>:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>File</th>
+<th>What it scopes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>global-scopes.ee.ts</code></td>
+<td>instance-wide abilities</td>
+</tr>
+<tr>
+<td><strong><code>project-scopes.ee.ts</code></strong></td>
+<td><strong>project-level abilities</strong></td>
+</tr>
+<tr>
+<td><code>workflow-sharing-scopes.ee.ts</code></td>
+<td>what a sharing role may do to a shared workflow</td>
+</tr>
+<tr>
+<td><code>credential-sharing-scopes.ee.ts</code></td>
+<td>the same for credentials</td>
+</tr>
+<tr>
+<td><code>secrets-provider-connection-sharing-scopes.ee.ts</code></td>
+<td>the same for secrets-provider connections</td>
+</tr>
+</tbody></table></div>
+<p>The vocabulary is <code>resource:action</code> — <code>credential:create</code>, <code>credential:share</code>, <code>credential:use</code>,
+<code>credential:move</code>, <code>workflow:execute</code>, <code>workflow:read</code>… <strong>and four of the five scope files are <code>.ee</code>
+(enterprise-licensed).</strong></p>
+<p><strong>➜ F03-04 [foundational] — Permissions are 206 <code>resource:action</code> scopes, grouped into global, project
+and three sharing domains.</strong> <strong>Plain meaning:</strong> the system never asks &quot;is this user an admin?&quot; — it asks
+&quot;may this principal perform <code>credential:share</code> on this thing?&quot; <strong>Why it matters:</strong> a capability list is
+auditable and composable in a way a role list is not, and it is the model that survives a feature being
+added. <strong>But note the licence:</strong> the scope definitions that make this work are largely enterprise files.</p>
+<hr>
+<h2 id="4-identity-a-user-several-identities-and-keys">4. Identity: a user, several identities, and keys<a href="#batch-03/4-identity-a-user-several-identities-and-keys" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>packages/@n8n/db/src/entities/user.ts</code> — <code>User</code> <strong>implements both <code>IUser</code> and <code>AuthPrincipal</code></strong>, with
+<code>id</code> (uuid), <code>email</code> (unique, lowercased by a transformer), <code>firstName</code>, <code>lastName</code>, <code>password</code>.</p>
+<p><code>packages/@n8n/db/src/entities/auth-identity.ts</code>:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>ts</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-ts">@Entity()
+@Unique([&#39;providerId&#39;, &#39;providerType&#39;])
+export class AuthIdentity extends WithTimestamps {
+	@Column() userId: string;
+	@ManyToOne(() =&gt; User, (user) =&gt; user.authIdentities) user: User;
+	@PrimaryColumn({ length: 255 }) providerId: string;
+	@PrimaryColumn() providerType: AuthProviderType;
+	// … static create(user, providerId, providerType = &#39;ldap&#39;)
+}
+</code></pre>
+</div>
+<p><strong>➜ F03-05 [foundational] — A <code>User</code> is separate from their <code>AuthIdentity</code>, and one user may hold
+several identities — one per provider — unique on (providerId, providerType).</strong> <strong>Plain meaning:</strong> the
+same person can sign in through LDAP and something else and still be one person with one set of
+permissions. <strong>Why it matters:</strong> it is the difference between an account and a login, and it is what
+makes SSO and migration possible without duplicating people. (The <code>create()</code> default is <code>&#39;ldap&#39;</code>, which
+tells you which provider n8n expects first.)</p>
+<p><code>User</code> also relates to <code>ApiKey</code> and <code>ProjectRelation</code>, so <strong>keys and memberships both hang off the
+person, not the login</strong>.</p>
+<hr>
+<h2 id="5-sharing-the-mechanism-that-makes-team-projects-work">5. Sharing — the mechanism that makes `team` projects work<a href="#batch-03/5-sharing-the-mechanism-that-makes-team-projects-work" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>packages/@n8n/db/src/entities/shared-workflow.ts</code>:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>ts</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-ts">@Entity()
+export class SharedWorkflow extends WithTimestamps {
+	@Column({ type: &#39;varchar&#39; }) role: WorkflowSharingRole;   // from @n8n/permissions
+	@ManyToOne(&#39;WorkflowEntity&#39;, &#39;shared&#39;) workflow: WorkflowEntity;
+	@PrimaryColumn() workflowId: string;
+	@ManyToOne(&#39;Project&#39;, &#39;sharedWorkflows&#39;) project: Project;
+	@PrimaryColumn() projectId: string;
+}
+</code></pre>
+</div>
+<p>So <strong>sharing is a join row carrying a sharing role</strong> — the same shape as membership. <code>SharedCredentials</code>
+mirrors it, and <code>ProjectSecretsProviderAccess</code> (<code>project-secrets-provider-access.ts</code>) governs which
+project may use which secrets provider.</p>
+<p><strong>➜ F03-06 [foundational] — Sharing is the same primitive as membership: a join row plus a role.</strong>
+<strong>Plain meaning:</strong> putting a workflow in front of a team and putting a person in a team are the <em>same
+operation</em> with a different subject. <strong>Why it matters:</strong> one relation type covers both, which is why the
+model stays small as it grows.</p>
+<hr>
+<h2 id="6-variables-storage-and-versioning">6. Variables, storage, and versioning<a href="#batch-03/6-variables-storage-and-versioning" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="6-1-variables-are-project-scoped-or-global">6.1 Variables are project-scoped — or global<a href="#batch-03/6-1-variables-are-project-scoped-or-global" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>packages/@n8n/db/src/entities/variables.ts</code>:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>ts</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-ts">@Entity()
+export class Variables extends WithStringId {
+	@Column(&#39;text&#39;) key: string;
+	@Column(&#39;text&#39;, { default: &#39;string&#39; }) type: string;
+	@Column(&#39;text&#39;) value: string;
+	// If null, it&#39;s a global variable
+	@ManyToOne(&#39;Project&#39;, { onDelete: &#39;CASCADE&#39;, nullable: true }) project: Project | null;
+}
+</code></pre>
+</div>
+<p><strong>➜ F03-07 [foundational] — A variable belongs to a project, or to no project (global), and the comment
+says so.</strong> <strong>Plain meaning:</strong> configuration has a scope, and &quot;unscoped&quot; is an explicit value rather than
+an accident. <strong>Why it matters:</strong> it is the two-level shape from §3.1 again, applied to data — and
+<code>onDelete: &#39;CASCADE&#39;</code> means a project&#39;s variables die with it.</p>
+<h3 id="6-2-storage-is-an-interface-and-two-backends-are-enterprise">6.2 Storage is an interface — and two backends are enterprise<a href="#batch-03/6-2-storage-is-an-interface-and-two-backends-are-enterprise" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>packages/@n8n/blob-storage/src/</code> holds a <strong><code>ByteStore</code> interface</strong> with a <strong><code>byte-store-registry.ts</code></strong>
+and these implementations:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>File</th>
+<th>Backend</th>
+<th>Licensed?</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>fs-byte-store.ts</code></td>
+<td>the local filesystem</td>
+<td>Sustainable Use</td>
+</tr>
+<tr>
+<td><strong><code>azure-byte-store.ee.ts</code></strong></td>
+<td>Azure Blob</td>
+<td><strong><code>.ee</code> — enterprise</strong></td>
+</tr>
+<tr>
+<td><strong><code>s3-byte-store.ee.ts</code></strong></td>
+<td>S3</td>
+<td><strong><code>.ee</code> — enterprise</strong></td>
+</tr>
+<tr>
+<td><code>object-store/</code>, <code>json-store.ts</code>, <code>azure-blob/</code></td>
+<td>supporting</td>
+<td>mixed</td>
+</tr>
+</tbody></table></div>
+<p><strong>➜ F03-08 [foundational] — Binary storage is a pluggable <code>ByteStore</code>, and the two cloud backends are
+enterprise-licensed.</strong> <strong>Plain meaning:</strong> self-hosters get the filesystem; S3 and Azure cost money. <strong>Why
+it matters:</strong> it is a clean seam (a registry and an interface), and it is a precise example of how n8n
+draws its commercial line — <em>not</em> by crippling the architecture, but by licensing two adapters.</p>
+<h3 id="6-3-workflows-are-versioned-and-shared">6.3 Workflows are versioned and shared<a href="#batch-03/6-3-workflows-are-versioned-and-shared" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>packages/@n8n/db/src/entities/workflow-entity.ts</code> carries <code>shared: SharedWorkflow[]</code>,
+<code>activeVersionId</code> (nullable), a version column (<code>default: 1</code>), and a relation to <code>WorkflowHistory</code>.</p>
+<p><strong>➜ F03-09 [foundational] — A workflow is versioned, has one active version, and is shared by a join
+row.</strong> <strong>Plain meaning:</strong> editing a workflow does not destroy its history, and sharing it does not copy
+it. <strong>Why it matters:</strong> versioning plus sharing is what lets a team change something safely.</p>
+<hr>
+<h2 id="7-findings">7. Findings<a href="#batch-03/7-findings" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Tagged by pole; answered against <strong>Q1 · USER VALUE</strong> and <strong>Q2 · VISION VALUE</strong>.</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Finding</th>
+<th>Pole</th>
+<th>Q1 · User value</th>
+<th>Q2 · Vision value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>F03-01</strong></td>
+<td><strong><code>Project</code> with <code>type: &#39;personal&#39; | &#39;team&#39;</code></strong> — one object, two modes.</td>
+<td>P2</td>
+<td>Your private space and your team&#39;s space are the same thing.</td>
+<td>A two-mode container; no second hierarchy.</td>
+</tr>
+<tr>
+<td><strong>F03-02</strong></td>
+<td><strong>Membership is a join row keyed (userId, projectId) carrying a Role by slug.</strong></td>
+<td>P2</td>
+<td>Being in a project is a real relation.</td>
+<td>Composite-key membership; custom roles without migrations.</td>
+</tr>
+<tr>
+<td><strong>F03-03</strong></td>
+<td><strong>Two-level roles</strong> — 4 global (<code>owner</code>/<code>admin</code>/<code>member</code>/<code>chatUser</code>) and 6 resource-level.</td>
+<td>P2</td>
+<td>&quot;What can I do anywhere&quot; vs &quot;what can I do to this&quot;.</td>
+<td>Admin-of-a-tenant vs editor-of-a-thing, kept apart.</td>
+</tr>
+<tr>
+<td><strong>F03-04</strong></td>
+<td><strong>206 <code>resource:action</code> scopes</strong> across global, project and three sharing domains — and <strong>four of the five scope files are <code>.ee</code></strong>.</td>
+<td>P2</td>
+<td>Nothing asks &quot;are you an admin?&quot;; it asks &quot;may you do X to this&quot;.</td>
+<td>An auditable, composable capability model.</td>
+</tr>
+<tr>
+<td><strong>F03-05</strong></td>
+<td><strong><code>User</code> ≠ <code>AuthIdentity</code></strong> — one person, several identities, unique per provider.</td>
+<td>P2</td>
+<td>Sign in two ways, stay one person.</td>
+<td>Accounts separated from logins; SSO becomes possible.</td>
+</tr>
+<tr>
+<td><strong>F03-06</strong></td>
+<td><strong>Sharing is the same primitive as membership</strong> — a join row plus a role, for workflows and credentials.</td>
+<td>P2</td>
+<td>Put a workflow in front of a team the way you put a person in it.</td>
+<td>One relation type covers both.</td>
+</tr>
+<tr>
+<td><strong>F03-07</strong></td>
+<td><strong>Variables are project-scoped or global</strong>, with <code>CASCADE</code> on the project.</td>
+<td>P2</td>
+<td>Settings have a scope, and unscoped is explicit.</td>
+<td>The two-level shape applied to data.</td>
+</tr>
+<tr>
+<td><strong>F03-08</strong></td>
+<td><strong><code>ByteStore</code> is pluggable, and S3/Azure are <code>.ee</code>.</strong></td>
+<td>P2/PZ</td>
+<td>Self-hosters get the filesystem; clouds cost money.</td>
+<td>A clean seam; the commercial line is drawn on adapters.</td>
+</tr>
+<tr>
+<td><strong>F03-09</strong></td>
+<td><strong>Workflows are versioned, have one active version, and are shared not copied.</strong></td>
+<td>P2</td>
+<td>Edit safely; share without duplicating.</td>
+<td>Versioning + sharing is what makes team work safe.</td>
+</tr>
+<tr>
+<td><strong>F03-10</strong></td>
+<td><strong>The CLI&#39;s silence on tenancy was not the product&#39;s</strong> — the server has a full model; the CLI is an operator tool.</td>
+<td>P2</td>
+<td>(resolves batch 01&#39;s open question)</td>
+<td>A recorded resolution, not a guess.</td>
+</tr>
+<tr>
+<td><strong>F03-11</strong></td>
+<td><strong><code>roleMappingRules</code> are many-to-many with projects</strong> — so external role mappings can be declared per project.</td>
+<td>P2/PZ</td>
+<td>Map your SSO groups to n8n roles.</td>
+<td>Declarative external-role mapping.</td>
+</tr>
+<tr>
+<td><strong>F03-12</strong></td>
+<td><strong><code>customTelemetryTags</code> is a column on <code>Project</code></strong> — telemetry is scoped by container.</td>
+<td>PZ</td>
+<td>(indirect)</td>
+<td>Observability tagged at the tenancy boundary.</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="8-divergences-and-honest-bounds">8. Divergences and honest bounds <span class="seal-badge" style="background:#fef2f2; color:#dc2626; border-color:#fca5a5; font-size: 0.65em; vertical-align: middle;">⚠️ FINDING NOTE</span><a href="#batch-03/8-divergences-and-honest-bounds" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<ul>
+<li><strong>One question from batch 01 is now resolved, and it resolves <em>against</em> the CLI&#39;s silence.</strong> Batch 01
+recorded that the CLI has no tenancy notion; this batch measured a full tenancy model in the server.
+Both are true — the CLI is an operator tool and the server is the product. <strong>Recorded as F03-10 rather
+than quietly overwriting the earlier note.</strong></li>
+<li><strong>Bound:</strong> this batch read the <strong>data model and permissions</strong> — <code>Project</code>, <code>ProjectRelation</code>, <code>Role</code>,
+<code>Scope</code>, <code>User</code>, <code>AuthIdentity</code>, sharing, variables, blob storage, workflow versioning. It did <strong>not</strong>
+read the <strong>enforcement</strong> path (how a scope is checked at request time), the LDAP/SAML/OAuth flows, or
+the enterprise <code>role-mapping-rule</code> mechanics; those are named rather than half-covered.</li>
+<li><strong>Bound:</strong> the <strong>206</strong> figure counts <strong>scope slugs across the five scope files</strong>; scopes may be
+composed, and the effective count of distinct abilities is a different (larger) number. The figure is
+stated as what it measures.</li>
+<li><strong>Bound (stated plainly):</strong> the <code>.ee</code> marking is read from <strong>filenames</strong> (<code>.ee.ts</code> / <code>.ee</code> dirs), which
+is exactly what <code>LICENSE.md</code> says governs. A file&#39;s licence is a legal fact this study cannot verify
+beyond what the licence text declares.</li>
+</ul>
+<hr>
+<h2 id="9-carried-forward-to-batch-07-the-synthesis">9. Carried forward to batch 07 (the synthesis)<a href="#batch-03/9-carried-forward-to-batch-07-the-synthesis" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Four candidates for the highest transferable value, to be ranked in batch 07:</p>
+<ol>
+<li><strong>The two-mode container (F03-01)</strong> — <code>personal | team</code> in one column. The simplest tenancy shape that
+still supports teams.</li>
+<li><strong>The two-level role model (F03-03 / F03-04)</strong> — global roles for the instance, resource-level roles
+for the thing, and 206 <code>resource:action</code> scopes instead of role checks.</li>
+<li><strong><code>User</code> separated from <code>AuthIdentity</code> (F03-05)</strong> — one person, several logins, one permission set.</li>
+<li><strong>Sharing as the same primitive as membership (F03-06)</strong> — one join-row-plus-role relation for both.</li>
+</ol>
+<p>All four are <strong>observations</strong>, not decisions. The cross-platform mapping is a later pass (rule 5).</p>
+<hr>
+<p><em>Batch 03 of 07. Read from source on 2026-10-15. Next: <code>findings/04-automations.md</code>.</em></p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="02-the-aissistant-p1.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">The Aissistant (P1)</span>
+                </a>
+              
+
+              <a href="../index.html#batch-03" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              
+                <a href="04-automations-p3.html" class="nav-page-btn" style="text-align:right;">
+                  <span class="nav-btn-sub">Next Batch →</span>
+                  <span class="nav-btn-title">Automations (P3)</span>
+                </a>
+              
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#0-what-this-batch-had-to-answer" class="toc-link">0. What this batch had to answer</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#1-the-container-project-and-it-is-two-things-at-once" class="toc-link">1. The container: Project, and it is two things at once</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#2-membership-a-composite-key-and-a-role" class="toc-link">2. Membership: a composite key and a role</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-the-permission-model-10-roles-206-scopes" class="toc-link">3. The permission model: 10 roles, 206 scopes</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-1-the-roles" class="toc-link">3.1 The roles</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-2-the-scopes" class="toc-link">3.2 The scopes</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-identity-a-user-several-identities-and-keys" class="toc-link">4. Identity: a user, several identities, and keys</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-sharing-the-mechanism-that-makes-team-projects-work" class="toc-link">5. Sharing — the mechanism that makes team projects work</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-variables-storage-and-versioning" class="toc-link">6. Variables, storage, and versioning</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#6-1-variables-are-project-scoped-or-global" class="toc-link">6.1 Variables are project-scoped — or global</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#6-2-storage-is-an-interface-and-two-backends-are-enterprise" class="toc-link">6.2 Storage is an interface — and two backends are enterprise</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#6-3-workflows-are-versioned-and-shared" class="toc-link">6.3 Workflows are versioned and shared</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-findings" class="toc-link">7. Findings</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#8-divergences-and-honest-bounds" class="toc-link">8. Divergences and honest bounds</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#9-carried-forward-to-batch-07-the-synthesis" class="toc-link">9. Carried forward to batch 07 (the synthesis)</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('n8n_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('n8n_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('n8n_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('n8n_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.N8nReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

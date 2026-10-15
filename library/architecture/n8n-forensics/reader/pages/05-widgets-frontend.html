@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 05 — Widgets and the frontend (PX-W / PX-F) — n8n Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-05" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 05</span>
+      <div class="header-title-wrap">
+        <div class="header-title">Widgets &amp; Frontend</div>
+        <div class="header-subtitle">n8n Platform Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/05-widgets-and-frontend.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #059669">DONE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">2,120</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">11 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">267</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-15</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 05 Architecture Guide (Default)</option>
+            <optgroup label="Strategic Architecture">
+              <option value="master">Executive Topology: the three poles, the composition surface, and the licence line</option>
+            </optgroup>
+            <optgroup label="Foundations">
+              <option value="00">Batch 00: The pin, the MAX_PATH extraction, and the licence gate</option>
+              <option value="01">Batch 01: The overview — two engines, one a documented scaffold</option>
+            </optgroup>
+            <optgroup label="Pole 1 — The Aissistant">
+              <option value="02">Batch 02: The aissistant — an agent is a configuration</option>
+            </optgroup>
+            <optgroup label="Pole 2 — The Workspace">
+              <option value="03">Batch 03: The workspace — a real tenancy model</option>
+            </optgroup>
+            <optgroup label="Pole 3 — Automations">
+              <option value="04">Batch 04: Automations — the isolation boundary and an accurate ADR</option>
+            </optgroup>
+            <optgroup label="Cross-Cutting">
+              <option value="05">Batch 05: Widgets &amp; frontend — the first composition surface</option>
+            </optgroup>
+            <optgroup label="Escape Hatch">
+              <option value="06">Batch 06: Out-of-pole — two ratchets and an empty promise</option>
+            </optgroup>
+            <optgroup label="Strategic Decision">
+              <option value="07">Batch 07: The synthesis — mechanisms behind a licence line</option>
+            </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 05 VISUAL GUIDE</div>
+    <h4>Widgets and frontend: THE FIRST REAL COMPOSITION SURFACE</h4>
+    <p>A canvas of seven element types, a lint-enforced design system, and CRDT collaboration</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 350" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-05" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-05" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+        <marker id="arrr-05" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#ef4444"/>
+        </marker>
+      </defs>
+      <g transform="translate(20, 20)">
+        <rect width="200" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE SHAPE</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">1,351 .vue files</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">editor-ui + 12 packages</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">a Vue frontend that is</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#6d28d9">a PRODUCT, not a shell</text>
+      </g>
+      <path d="M 220 95 L 258 95" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-05)"/>
+      <g transform="translate(262, 20)">
+        <rect width="200" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE DESIGN SYSTEM</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">129 components</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">documented by tokens</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">ENFORCED by their own</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">ESLint plugin — cannot drift</text>
+      </g>
+      <path d="M 462 95 L 500 95" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-05)"/>
+      <g transform="translate(504, 20)">
+        <rect width="200" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE CANVAS</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">7 element types:</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">nodes · edges · handles</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">groups · selection</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">background · controls</text>
+      </g>
+      <path d="M 704 95 L 742 95" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-05)"/>
+      <g transform="translate(746, 20)">
+        <rect width="154" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">COLLABORATION</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">a CRDT layer</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">on y-websocket</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">with AWARENESS:</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">presence + cursors</text>
+      </g>
+      <rect x="20" y="196" width="430" height="136" rx="10" fill="#059669" fill-opacity="0.08" stroke="#059669" stroke-width="1.6"/>
+      <text x="38" y="222" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#047857">THE POSITIVE — A STUDY FIRST</text>
+      <text x="38" y="246" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">This is the FIRST platform in the study with a real</text>
+      <text x="38" y="266" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">widget / composition model. The four closed studies</text>
+      <text x="38" y="286" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">each measured NONE (Paperclip, CrewAI, Multica,</text>
+      <text x="38" y="306" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">Gas Town). Presence and AI activity are UI.</text>
+      <rect x="470" y="196" width="430" height="136" rx="10" fill="#b45309" fill-opacity="0.08" stroke="#b45309" stroke-width="1.6"/>
+      <text x="488" y="222" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#b45309">THE DISTINCTION THAT IS THE FINDING</text>
+      <text x="488" y="246" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">It is NOT a widget composer in the drag-any-element</text>
+      <text x="488" y="266" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">sense. It is a TYPED canvas of workflow elements</text>
+      <text x="488" y="286" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">with a shared editing surface.</text>
+      <text x="488" y="312" font-family="system-ui, sans-serif" font-size="10.5" font-weight="600" fill="#b45309">Third parties author nodes via create-node (declarative).</text>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="batch-05-widgets-and-frontend-px-w-px-f">Batch 05 — Widgets and Frontend (PX-W / PX-F)<a href="#batch-05/batch-05-widgets-and-frontend-px-w-px-f" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Study:</strong> n8n <code>2.44.0</code> · <strong>Batch:</strong> 05 of 07 · <strong>Status:</strong> COMPLETE
+<strong>Source:</strong> <code>C:\n8n</code> · <strong>Zip md5:</strong> <code>7cc78a5ea124ba2c270bccabf282d9ed</code> · <strong>License:</strong> fair-code (§ batch 00)
+<strong>Method:</strong> rules 1-10 of <code>00-PIN-AND-METHOD.md</code>. Every claim carries <code>file:line</code>.</p>
+<hr>
+<h2 id="0-what-this-batch-had-to-answer">0. What this batch had to answer<a href="#batch-05/0-what-this-batch-had-to-answer" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Two cross-cutting questions. <strong>PX-F</strong> is how the surface is built; <strong>PX-W</strong> is the composable surface
+itself. Batch 00 predicted that <strong>PX-W would be the strongest pole of any platform studied</strong> — the four
+closed studies were each measured to have <em>no</em> widget or composition model at all.</p>
+<p><strong>It is, and the measurement says so.</strong></p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Question</th>
+<th>n8n&#39;s answer</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>How big is the frontend?</td>
+<td><strong>1,351 <code>.vue</code> files</strong> in <code>packages/frontend</code></td>
+<td>F05-01</td>
+</tr>
+<tr>
+<td>What is it made of?</td>
+<td><strong><code>editor-ui</code></strong> + <strong>12 <code>@n8n</code> frontend packages</strong></td>
+<td>F05-02</td>
+</tr>
+<tr>
+<td>Is there a design system?</td>
+<td><strong>129 components</strong>, an <strong>ESLint plugin that enforces it</strong>, and a <strong>styleguide with tokens</strong></td>
+<td>F05-03/04</td>
+</tr>
+<tr>
+<td><strong>Is there a composition surface?</strong></td>
+<td><strong>Yes — a canvas</strong> built from nodes, edges, handles, groups, selection, background and buttons</td>
+<td>F05-05</td>
+</tr>
+<tr>
+<td>Can people edit together?</td>
+<td><strong>Yes — a CRDT layer</strong> following the <strong>y-websocket protocol</strong>, with <strong>awareness</strong> (presence and cursors)</td>
+<td>F05-06</td>
+</tr>
+<tr>
+<td>Can features be added?</td>
+<td><strong>Pluggable modules</strong> with a hard isolation rule: <em>&quot;A module must never import <code>@/…</code>&quot;</em></td>
+<td>F05-07</td>
+</tr>
+<tr>
+<td>Can third parties add nodes?</td>
+<td><strong><code>create-node</code></strong> — a CLI scaffolder with <strong>declarative</strong> and <strong>programmatic</strong> templates</td>
+<td>F05-08</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="1-the-measured-surface">1. The measured surface<a href="#batch-05/1-the-measured-surface" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Quantity</th>
+<th>Measured</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>.vue</code> files in <code>packages/frontend</code></td>
+<td><strong>1,351</strong></td>
+</tr>
+<tr>
+<td><code>@n8n</code> frontend packages</td>
+<td><strong>12</strong></td>
+</tr>
+<tr>
+<td>Design-system components</td>
+<td><strong>129</strong></td>
+</tr>
+<tr>
+<td><code>editor-ui/src/features/</code></td>
+<td><strong>16 feature modules</strong></td>
+</tr>
+<tr>
+<td>Canvas element types</td>
+<td><strong>7</strong></td>
+</tr>
+<tr>
+<td>CRDT package files</td>
+<td><strong>35</strong></td>
+</tr>
+</tbody></table></div>
+<p><strong>The shape:</strong> <code>packages/frontend/</code> holds <strong><code>editor-ui/</code></strong> (the Vue app) and <strong><code>@n8n/</code></strong> (12 shared
+packages). <code>editor-ui/src/</code> has <code>app/</code>, <strong><code>features/</code></strong>, <code>experiments/</code>, and the shims.</p>
+<hr>
+<h2 id="2-the-frontend-packages">2. The frontend packages<a href="#batch-05/2-the-frontend-packages" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>packages/frontend/@n8n/</code> — <strong>12 packages</strong>:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Package</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><code>design-system</code></strong></td>
+<td>the component library — <strong>129 components</strong></td>
+</tr>
+<tr>
+<td><strong><code>eslint-plugin-design-system</code></strong></td>
+<td><strong>an ESLint plugin that enforces the design system</strong></td>
+</tr>
+<tr>
+<td><code>frontend-module-sdk</code> + <code>module-cli</code></td>
+<td>the module system</td>
+</tr>
+<tr>
+<td><code>chat</code></td>
+<td>the chat surface</td>
+</tr>
+<tr>
+<td><code>composables</code></td>
+<td>shared Vue composables</td>
+</tr>
+<tr>
+<td><code>frontend-constants</code> · <code>frontend-utils</code> · <code>frontend-test-utils</code> · <code>frontend-vite-config</code></td>
+<td>infrastructure</td>
+</tr>
+<tr>
+<td><code>i18n</code></td>
+<td>internationalisation</td>
+</tr>
+<tr>
+<td><code>rest-api-client</code> · <code>stores</code></td>
+<td>data and state</td>
+</tr>
+</tbody></table></div>
+<p><strong>➜ F05-02 [foundational] — The frontend is a Vue app plus twelve shared packages, and the component
+library is one of them with its own enforcement plugin.</strong> <strong>Plain meaning:</strong> the UI is not one folder —
+it is a product with a library, a module system, a style guide and a linter that knows the difference.
+<strong>Why it matters:</strong> it is the first platform studied whose frontend is <em>built like a product</em> rather than
+bolted onto a server.</p>
+<hr>
+<h2 id="3-the-design-system-and-it-is-enforced">3. The design system — and it is enforced<a href="#batch-05/3-the-design-system-and-it-is-enforced" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>packages/frontend/@n8n/design-system/src/</code> holds <code>components/</code> (<strong>129</strong>), <code>composables/</code>, <code>css/</code>,
+<code>directives/</code>, <code>icons/</code>, <code>locale/</code>, <code>mixins/</code>, <strong><code>styleguide/</code></strong>, <code>types/</code>, <code>plugin.ts</code>, <code>constants.ts</code>.</p>
+<p><strong>The components are named to a convention</strong> — <code>N8nActionDropdown</code>, <code>N8nAlert</code>, <code>N8nAiModelSelectorDropdown</code>,
+<code>CodeDiff</code>, <code>DateRangeButton</code>, <code>IconTextButton</code> — <strong>and the canvas has its own components</strong>:
+<strong><code>CanvasPill</code>, <code>CanvasCollaborationPill</code>, <code>CanvasThinkingPill</code></strong>, <code>AskAssistantButton</code>,
+<code>AskAssistantChat</code>, <code>BlinkingCursor</code>.</p>
+<p><strong>And it is enforced, in two ways:</strong></p>
+<ol>
+<li><strong><code>eslint-plugin-design-system</code></strong> — rules including <code>require-teleported-tooltip-in-dropdown</code>
+(<code>rules/require-teleported-tooltip-in-dropdown.ts</code>), which is exactly the guidance in the frontend&#39;s
+<code>AGENTS.md</code>.</li>
+<li><strong>A styleguide with tokens</strong> — <code>styleguide/</code> holds <code>colour.mdx</code>, <strong><code>css-tokens.mdx</code></strong>, <code>motion.mdx</code>,
+<code>shadow.mdx</code>, <strong><code>spacing-size.mdx</code></strong>, <code>type.mdx</code> and <code>VariableTable.vue</code>.</li>
+</ol>
+<p><strong>➜ F05-03 [foundational] — The design system is 129 components, documented with tokens (colour, CSS
+tokens, motion, shadow, spacing) and enforced by its own ESLint plugin.</strong> <strong>Plain meaning:</strong> &quot;use the
+design system&quot; is not a convention — it is a lint rule that fails a build. <strong>Why it matters:</strong> a design
+system that is only written down drifts; one that is linted does not.</p>
+<p><strong>➜ F05-04 [foundational] — The frontend&#39;s <code>AGENTS.md</code> is a real engineering record</strong>, carrying rules a
+contributor could not guess:</p>
+<ul>
+<li><em>&quot;Frontend feature modules are at <code>packages/modules/&lt;name&gt;/frontend</code>, <strong>and not</strong> in
+<code>editor-ui/src/features</code>&quot;</em>;</li>
+<li><em><strong>&quot;A module must never import <code>@/…</code> or another <code>@n8n/frontend-module-*</code>&quot;</strong></em>;</li>
+<li><em>&quot;Use keys from <code>updatedIconSet</code> only — <strong><code>deprecatedIconSet</code> entries must not be used in new code</strong>&quot;</em>;</li>
+<li><em>&quot;Use centralized constants from <code>@/app/constants/durations</code> instead of hardcoding&quot;</em>, with the
+categories <strong><code>UI</code>, <code>INPUT</code>, <code>API</code>, <code>TELEMETRY</code>, <code>COLLABORATION</code>, <code>CONNECTION</code></strong>.</li>
+</ul>
+<p><strong>Why it matters:</strong> the isolation rule is the one that makes a pluggable frontend possible, and the icon
+deprecation discipline is a retirement rule (rule 10) living in a contributing guide rather than a
+changelog.</p>
+<hr>
+<h2 id="4-the-canvas-the-composition-surface">4. The canvas — the composition surface<a href="#batch-05/4-the-canvas-the-composition-surface" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>packages/frontend/editor-ui/src/features/workflows/canvas/</code> holds <strong><code>Canvas.vue</code></strong> and
+<strong><code>WorkflowCanvas.vue</code></strong>, plus <code>canvas.eventBus.ts</code>, <code>canvas.types.ts</code>, <code>canvas.utils.ts</code>,
+<code>nodeGroups.utils.ts</code>, <code>emptyGroup.utils.ts</code>, <code>iconLuma.utils.ts</code>, <code>composables/</code>, <code>stores/</code>,
+<code>experimental/</code>.</p>
+<h3 id="4-1-the-seven-element-types">4.1 The seven element types<a href="#batch-05/4-1-the-seven-element-types" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>canvas/components/elements/</code> holds exactly seven directories:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Element</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><code>nodes</code></strong></td>
+<td>the workflow steps</td>
+</tr>
+<tr>
+<td><strong><code>edges</code></strong></td>
+<td>the connections between them</td>
+</tr>
+<tr>
+<td><strong><code>handles</code></strong></td>
+<td>the connection points on a node</td>
+</tr>
+<tr>
+<td><strong><code>groups</code></strong></td>
+<td>visual grouping of nodes</td>
+</tr>
+<tr>
+<td><strong><code>selection</code></strong></td>
+<td>multi-select behaviour</td>
+</tr>
+<tr>
+<td><strong><code>background</code></strong></td>
+<td>the canvas background (grid)</td>
+</tr>
+<tr>
+<td><strong><code>buttons</code></strong></td>
+<td>canvas controls</td>
+</tr>
+</tbody></table></div>
+<p><strong>➜ F05-05 [foundational] — The composition surface is a graph canvas built from seven element types:
+nodes, edges, handles, groups, selection, background and buttons.</strong> <strong>Plain meaning:</strong> a user composes a
+workflow by placing nodes and drawing edges between handles — the thing the four earlier platforms were
+measured <em>not</em> to have. <strong>Why it matters:</strong> this is the answer to the workshop&#39;s PX-W question, and it is
+a <em>graph editor</em>, not a form builder.</p>
+<h3 id="4-2-the-canvas-has-a-layout-engine-and-knows-where-agents-go">4.2 The canvas has a layout engine and knows where agents go<a href="#batch-05/4-2-the-canvas-has-a-layout-engine-and-knows-where-agents-go" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>canvas/composables/</code> holds <strong><code>useCanvasLayout.ts</code></strong> (with guards), <code>useCanvasMapping.ts</code> (plus a
+<code>.groups</code> variant), <strong><code>useCanvasAgentNodeGeometry.ts</code></strong>, <code>useCanvasGroupIdStorage.ts</code>, <code>useCanvas.ts</code>,
+and <code>nodeGroupTelemetry.utils.ts</code>.</p>
+<p><strong>➜ F05-09 [foundational] — The canvas has a layout engine, a mapping layer, and dedicated geometry for
+agent nodes.</strong> <strong>Plain meaning:</strong> the surface is not a passive renderer — it computes where things go,
+and it treats AI agent nodes as a shape of their own. <strong>Why it matters:</strong> a composition surface that
+knows how to lay itself out is what separates a canvas from a diagram.</p>
+<hr>
+<h2 id="5-collaboration-a-crdt-layer-with-awareness">5. Collaboration — a CRDT layer with awareness<a href="#batch-05/5-collaboration-a-crdt-layer-with-awareness" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>packages/@n8n/crdt/</code> — <strong>35 files</strong>: <code>awareness/</code>, <code>protocol.ts</code>, <code>providers/</code>, <code>sync/</code>,
+<code>transports/</code>, <code>types.ts</code>, <strong><code>undo/</code></strong>, <code>utils.ts</code>.</p>
+<p><strong>The protocol</strong> (<code>src/protocol.ts</code>) is the finding:</p>
+<blockquote>
+<p><em>&quot;WebSocket message protocol constants. <strong>Following the y-websocket protocol</strong>, messages are prefixed
+with a type byte to multiplex different message types over the same connection.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Server protocol format: <code>[messageType: u8, ...payload]</code> · Worker protocol format:
+<code>[messageType: u8, docIdLen: u16, docId: utf8, ...payload]</code>&quot;</em></p>
+</blockquote>
+<p>And the message types name the whole model:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Constant</th>
+<th>Value</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>MESSAGE_SYNC</code></td>
+<td>0</td>
+<td><em>&quot;contains CRDT document updates&quot;</em></td>
+</tr>
+<tr>
+<td><strong><code>MESSAGE_AWARENESS</code></strong></td>
+<td>1</td>
+<td><em><strong>&quot;ephemeral presence/cursor data&quot;</strong></em></td>
+</tr>
+<tr>
+<td><code>MESSAGE_SUBSCRIBE</code> / <code>MESSAGE_UNSUBSCRIBE</code></td>
+<td>2 / 3</td>
+<td>subscribe to / release a document</td>
+</tr>
+<tr>
+<td><code>MESSAGE_CONNECTED</code></td>
+<td>—</td>
+<td>connection established</td>
+</tr>
+</tbody></table></div>
+<p><strong>➜ F05-06 [foundational] — Multiple people edit the same workflow through a CRDT layer that follows the
+y-websocket protocol, with a separate awareness channel for presence and cursors.</strong> <strong>Plain meaning:</strong>
+two people can drag nodes on one canvas at once, and each can see the other&#39;s cursor — and the sync
+protocol is a standard one, not invented here. <strong>Why it matters:</strong> it is the difference between a shared
+<em>file</em> and a shared <em>surface</em>, and the <code>features/collaboration/</code> directory plus the
+<code>CanvasCollaborationPill</code> component show it is wired into the UI.</p>
+<p><strong>And there is an <code>undo/</code> directory</strong> — collaborative undo is its own problem, and n8n ships a module
+for it.</p>
+<hr>
+<h2 id="6-the-module-system-isolation-by-rule">6. The module system — isolation by rule<a href="#batch-05/6-the-module-system-isolation-by-rule" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>editor-ui/src/features/</code> holds <strong>16 modules</strong>: <code>agents</code>, <code>ai</code>, <strong><code>collaboration</code></strong> (with a <code>projects/</code>
+sub-module), <code>core</code>, <code>credentials</code>, <code>execution</code>, <code>integrations</code>, <code>ndv</code>, <code>resolvers</code>, <code>roles</code>,
+<code>settings</code>, <code>setupPanel</code>, <code>shared</code>, <strong><code>workflow-reviews</code></strong>, <code>workflows</code>.</p>
+<p>**➜ F05-07 [foundational] — The editor&#39;s features are pluggable modules, and the isolation rule is
+explicit: a module owns its tsconfig, lint config and vitest config, and <em>must never import <code>@/…</code> or
+another <code>@n8n/frontend-module-*</code></em>.** <strong>Plain meaning:</strong> a feature cannot reach into the app or into a
+sibling — it talks through the module SDK. <strong>Why it matters:</strong> it is what makes the frontend extensible
+rather than merely large, and it is enforced by a stated rule rather than by hope.</p>
+<hr>
+<h2 id="7-third-parties-create-node">7. Third parties: `create-node`<a href="#batch-05/7-third-parties-create-node" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>packages/@n8n/create-node/</code> is a <strong>CLI scaffolder</strong> (<code>npm create @n8n/node</code>) whose README documents
+<strong>three templates</strong>:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Template</th>
+<th>What it produces</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><code>declarative/custom</code></strong></td>
+<td><em>&quot;a minimal declarative node structure&quot;</em></td>
+</tr>
+<tr>
+<td><code>declarative/github-issues</code></td>
+<td>a worked GitHub Issues example</td>
+</tr>
+<tr>
+<td><strong><code>programmatic/example</code></strong></td>
+<td><em>&quot;a full programmatic node with advanced features&quot;</em></td>
+</tr>
+</tbody></table></div>
+<p><strong>➜ F05-08 [foundational] — A node can be authored two ways — declaratively (a description object) or
+programmatically (code) — and a CLI scaffolds either.</strong> <strong>Plain meaning:</strong> the 563 built-in nodes and the
+community&#39;s nodes come from the <em>same</em> authoring model, and the easiest path needs no code. <strong>Why it
+matters:</strong> it is how &quot;1,500+ integrations&quot; is actually maintained, and the declarative path is what makes
+an integration a <em>data file</em> rather than a merge request.</p>
+<hr>
+<h2 id="8-findings">8. Findings<a href="#batch-05/8-findings" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Tagged by pole; answered against <strong>Q1 · USER VALUE</strong> and <strong>Q2 · VISION VALUE</strong>.</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Finding</th>
+<th>Pole</th>
+<th>Q1 · User value</th>
+<th>Q2 · Vision value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>F05-01</strong></td>
+<td><strong>1,351 <code>.vue</code> files</strong> — the frontend is a product, not a view layer.</td>
+<td>PX-F</td>
+<td>(indirect) — the editor is thorough.</td>
+<td>A frontend built like a product.</td>
+</tr>
+<tr>
+<td><strong>F05-02</strong></td>
+<td><strong><code>editor-ui</code> + 12 <code>@n8n</code> packages</strong>, the component library among them.</td>
+<td>PX-F</td>
+<td>One install, one toolchain.</td>
+<td>A frontend with a real internal boundary.</td>
+</tr>
+<tr>
+<td><strong>F05-03</strong></td>
+<td><strong>129 design-system components, documented with tokens, enforced by its own ESLint plugin.</strong></td>
+<td>PX-F</td>
+<td>The UI is consistent and the rule is automatic.</td>
+<td>A design system that cannot drift.</td>
+</tr>
+<tr>
+<td><strong>F05-04</strong></td>
+<td><strong>A frontend <code>AGENTS.md</code> with an isolation rule, an icon deprecation discipline and centralised durations.</strong></td>
+<td>PX-F</td>
+<td>(indirect)</td>
+<td>Rules that make a pluggable frontend possible.</td>
+</tr>
+<tr>
+<td><strong>F05-05</strong></td>
+<td><strong>A canvas of seven element types</strong> — nodes, edges, handles, groups, selection, background, buttons.</td>
+<td>PX-W</td>
+<td>Compose a workflow by placing nodes and drawing edges.</td>
+<td>The composition surface the four earlier platforms lacked.</td>
+</tr>
+<tr>
+<td><strong>F05-06</strong></td>
+<td><strong>A CRDT layer on the y-websocket protocol with awareness</strong> — plus collaborative <code>undo/</code>.</td>
+<td>PX-W</td>
+<td>Edit one workflow together, see each other&#39;s cursors.</td>
+<td>A shared <em>surface</em>, not a shared file.</td>
+</tr>
+<tr>
+<td><strong>F05-07</strong></td>
+<td><strong>Pluggable feature modules with an isolation rule.</strong></td>
+<td>PX-F</td>
+<td>The editor grows without rotting.</td>
+<td>Extensible rather than merely large.</td>
+</tr>
+<tr>
+<td><strong>F05-08</strong></td>
+<td><strong><code>create-node</code></strong> — declarative and programmatic authoring, CLI-scaffolded.</td>
+<td>PX-W</td>
+<td>Add an integration without writing much code.</td>
+<td>The same authoring model for built-in and community nodes.</td>
+</tr>
+<tr>
+<td><strong>F05-09</strong></td>
+<td><strong>A canvas layout engine, a mapping layer, and agent-node geometry.</strong></td>
+<td>PX-W</td>
+<td>The canvas arranges itself; agent nodes have their own shape.</td>
+<td>A surface that computes, not just renders.</td>
+</tr>
+<tr>
+<td><strong>F05-10</strong></td>
+<td><strong>Canvas-specific components</strong> (<code>CanvasPill</code>, <code>CanvasCollaborationPill</code>, <code>CanvasThinkingPill</code>).</td>
+<td>PX-W</td>
+<td>Presence and AI activity are visible on the canvas.</td>
+<td>Collaboration and AI state as first-class UI.</td>
+</tr>
+<tr>
+<td><strong>F05-11</strong></td>
+<td><strong>A styleguide with tokens</strong> (colour, CSS tokens, motion, shadow, spacing, <strong>type</strong>) and a <code>VariableTable</code>.</td>
+<td>PX-F</td>
+<td>The design language is inspectable.</td>
+<td>Tokens as documentation, not folklore.</td>
+</tr>
+<tr>
+<td><strong>F05-12</strong></td>
+<td><strong>The frontend is Vue</strong> — 1,351 <code>.vue</code> files, with <code>el-plus</code> components and Pinia stores.</td>
+<td>PX-F</td>
+<td>(n/a)</td>
+<td>Recorded per rule 6.</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="9-divergences-and-honest-bounds">9. Divergences and honest bounds <span class="seal-badge" style="background:#fef2f2; color:#dc2626; border-color:#fca5a5; font-size: 0.65em; vertical-align: middle;">⚠️ FINDING NOTE</span><a href="#batch-05/9-divergences-and-honest-bounds" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<ul>
+<li><strong>No doc-vs-code divergence was needed</strong>; the frontend&#39;s <code>AGENTS.md</code> describes rules the code
+follows (module isolation, icon sets, centralised durations) and the ESLint plugin enforces one of
+them. Stated plainly rather than inventing a divergence.</li>
+<li><strong>Bound:</strong> this batch read the <strong>frontend&#39;s shape</strong> — the packages, the design system, the canvas&#39;s
+element types, the CRDT protocol, the module system and the node scaffolder. It did <strong>not</strong> read
+<code>Canvas.vue</code> or <code>WorkflowCanvas.vue</code> in full (they are large), the layout algorithm, or the
+collaboration store&#39;s internals; those are named rather than half-covered.</li>
+<li><strong>Bound:</strong> the CRDT protocol is read from <code>protocol.ts</code>&#39;s <strong>constants and doc comments</strong>; the sync
+algorithm itself (<code>sync/</code>, <code>providers/</code>, <code>transports/</code>) is named, not analysed.</li>
+<li><strong>Bound (stated plainly):</strong> <code>create-node</code>&#39;s <code>bin/</code> script is 11 lines (a launcher); the templates
+themselves live in a separate package and were not read.</li>
+</ul>
+<hr>
+<h2 id="10-carried-forward-to-batch-07-the-synthesis">10. Carried forward to batch 07 (the synthesis)<a href="#batch-05/10-carried-forward-to-batch-07-the-synthesis" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Four candidates for the highest transferable value, to be ranked in batch 07:</p>
+<ol>
+<li><strong>The canvas as a graph of seven element types (F05-05)</strong> — nodes, edges, handles, groups, selection,
+background, buttons. The composition surface the workshop&#39;s PX-W pole has been looking for.</li>
+<li><strong>The design system enforced by its own linter (F05-03)</strong> — 129 components, tokens, and a rule that
+fails a build.</li>
+<li><strong>Collaboration on the y-websocket protocol with awareness (F05-06)</strong> — presence and cursors as a
+separate channel from document sync.</li>
+<li><strong>Declarative <em>and</em> programmatic node authoring, CLI-scaffolded (F05-08)</strong> — the model that makes an
+integration a data file.</li>
+</ol>
+<p>All four are <strong>observations</strong>, not decisions. The cross-platform mapping is a later pass (rule 5).</p>
+<hr>
+<p><em>Batch 05 of 07. Read from source on 2026-10-15. Next: <code>findings/06-out-of-pole.md</code>.</em></p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="04-automations-p3.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">Automations (P3)</span>
+                </a>
+              
+
+              <a href="../index.html#batch-05" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              
+                <a href="06-out-of-pole-pz.html" class="nav-page-btn" style="text-align:right;">
+                  <span class="nav-btn-sub">Next Batch →</span>
+                  <span class="nav-btn-title">Out-of-Pole (PZ)</span>
+                </a>
+              
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#0-what-this-batch-had-to-answer" class="toc-link">0. What this batch had to answer</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#1-the-measured-surface" class="toc-link">1. The measured surface</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#2-the-frontend-packages" class="toc-link">2. The frontend packages</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-the-design-system-and-it-is-enforced" class="toc-link">3. The design system — and it is enforced</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-the-canvas-the-composition-surface" class="toc-link">4. The canvas — the composition surface</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-1-the-seven-element-types" class="toc-link">4.1 The seven element types</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-2-the-canvas-has-a-layout-engine-and-knows-where-agents-go" class="toc-link">4.2 The canvas has a layout engine and knows where agents go</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-collaboration-a-crdt-layer-with-awareness" class="toc-link">5. Collaboration — a CRDT layer with awareness</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-the-module-system-isolation-by-rule" class="toc-link">6. The module system — isolation by rule</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-third-parties-create-node" class="toc-link">7. Third parties: create-node</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#8-findings" class="toc-link">8. Findings</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#9-divergences-and-honest-bounds" class="toc-link">9. Divergences and honest bounds</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#10-carried-forward-to-batch-07-the-synthesis" class="toc-link">10. Carried forward to batch 07 (the synthesis)</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('n8n_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('n8n_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('n8n_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('n8n_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.N8nReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>
