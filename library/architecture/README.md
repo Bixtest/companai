@@ -41,7 +41,7 @@ library/architecture/
 ├── hermes-forensics/          ← the Hermes study (mirror of library/hermes-forensics/)
 ├── paperclip-forensics/       ← the Paperclip study (DONE, 7 batches + pin) + reader/
 ├── crewai-forensics/          ← the CrewAI study (DONE, 7 batches + pin) + reader/
-├── multica-forensics/         ← the Multica study (IN PROGRESS: 00 + findings/01..02)
+├── multica-forensics/         ← the Multica study (IN PROGRESS: 00 + findings/01..03)
 │   ├── 00-PIN-AND-METHOD.md
 │   └── findings/01..07
 ├── reader/                    ← the Hermes reader (HTML)
@@ -71,7 +71,7 @@ one: double-click its `index.html`, or `node serve.js` inside its `reader/` fold
 | **Hermes** | `NousResearch/hermes-agent` | **STUDIED — 13/13 (the main engine; never forked)** |
 | **Paperclip** | `paperclipai/paperclip` | **STUDIED — 7 batches + pin (ancestor of our fork)** |
 | **crewAI** | `crewaiinc/crewai` | **STUDIED — 7 batches + pin + reader** |
-| **multica** | `multica-ai/multica` | **IN PROGRESS — b00 (pin) + b01 (overview) + b02 (the aissistant); 5 batches left** |
+| **multica** | `multica-ai/multica` | **IN PROGRESS — b00 (pin) + b01 (overview) + b02 (the aissistant) + b03 (the workspace); 4 batches left** |
 | gastown | `gastownhall/gastown` | to study |
 | n8n | `n8n-io/n8n` | to study |
 | buzz | `block/buzz` | to study |
@@ -110,5 +110,5 @@ fixed later.
 
 ---
 
-*Begun 2026-10-15. Hermes, Paperclip and CrewAI closed; Multica in progress (b02 of 07); the remaining six
+*Begun 2026-10-15. Hermes, Paperclip and CrewAI closed; Multica in progress (b03 of 07); the remaining six
 platforms are next.*

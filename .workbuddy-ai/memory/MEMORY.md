@@ -26,7 +26,7 @@ it is the most honest document in a repo.
 | 1 | Hermes forensics | ✅ CLOSED 13/13 | Main AI engine; never fork it. "OpenCode" = a provider, not a coding agent. |
 | 2 | Paperclip 0.3.1 | ✅ CLOSED 7/7 | **P2/P3 = strength**, P1 = seam-provider. No multi-tenancy, no widget composer. |
 | 3 | CrewAI 1.15.28 | ✅ CLOSED 7/7 | **Mechanism donor, NOT an architecture template.** Executor yes, **delivery no**, **tenancy nowhere**. |
-| 4 | **Multica 0.2.0** | 🔵 **b01+b02 done** | **All three poles are real and implemented.** Strongest finding: the machine/teammate split. |
+| 4 | **Multica 0.2.0** | 🔵 **b01+b02+b03 done** | **All three poles are real and implemented.** Strongest finding: the machine/teammate split. |
 | — | gastown, n8n, buzz, openrig, mattermost, zulip | ⬜ 6 remain | Order not fixed — **ASK before extracting more.** |
 
 **Multica b01 (`4cf7f35`, 19 findings, 584 lines, 0 CR):** a Go+TS *product*, not a library
@@ -52,7 +52,19 @@ columns, stored **runtime-native** (not neutralised). Skills are TWO kinds
 deny-by-default (MUL-3963 closed an admin-bypass hole); A2A judged by the
 top-of-chain human originator. **Retirement ledger: 4 retirements** (008/032/
 109/126) + 129→130 reversing the Composio originator==owner gate.
-**Next: `findings/03-the-workspace.md` (P2).**
+
+**Multica b03 (`6dfd0ab`, the workspace, P2; 306 lines / 0 CR):** the container.
+**144 unique tables; 82 carry `workspace_id`** (the tenant fence). Members
+`owner|admin|member` + invitations (7-day expiry, role capped at admin, partial
+unique on pending); the **last owner is protected** in three code paths. Issues
+= 32 columns; a per-workspace human number; triage split OFF `status`;
+duplicate = a cancelled issue with a pointer; stages = barrier groups; **two
+custom-field layers** (free jsonb bag for machines vs typed catalog keyed by
+UUID). Projects have a lead that may be a **member or an agent**; resources are
+polymorphic. Git = a repo registry (url+ref) + a multi-workspace GitHub install
++ an issue↔PR join; `007` dropped `issue.repository` (Git moved issue→workspace).
+`attribution_fail_closed` = a per-workspace switch to refuse unattributable runs.
+**Next: `findings/04-automations.md` (P3).**
 
 ## Standing hazards (still bite)
 - **Git-Bash `grep -c $'\r'` LIES** — byte truth is `tr -cd '\r' < f | wc -c`; verify the
