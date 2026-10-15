@@ -110,6 +110,41 @@ Non-Python top-level trees also present: `web/`, `website/`, `apps/` (desktop), 
    line says so explicitly rather than editing it away.
 8. **Plain words** — every capability gets a one-sentence plain gloss before any detail.
 
+### 3.1 THE SECOND ROUND — added 2026-10-15, at the owner's instruction
+
+The owner asked for a **second pass of the same task**: go back through the **prior** Hermes analysis in
+`library/analysis/findings/`, find anything this study missed, check whether it still works **in the new
+tree**, and fold what survives into these documents. That pass is **Batch 13**, and it changes the method
+in exactly two ways:
+
+**Rule 9 — the second-round rule (prior analysis is a source of hypotheses, code is the authority).**
+An older document is never evidence that a thing is true **now**. It is evidence that someone once believed
+it and had a reason to. So the second round processes an older claim in four steps, and stops at the first
+honest answer:
+
+1. **Read the claim** and say plainly what it asserts.
+2. **Search the new tree for the mechanism it names** — the module, the key, the command, the file.
+3. **Verify the mechanism still does what the claim says**, at a cited `file:line` (rule 3).
+4. If the mechanism is **absent**, do not conclude "the claim is stale and move on". Run rule 10, below.
+
+A prior claim may be recorded as one of four outcomes only: **STILL TRUE** (mechanism present and behaving) ·
+**CHANGED** (mechanism present, behaviour differs — record the difference) · **REMOVED** (mechanism gone;
+record how it went and what replaced it, if anything) · **NEVER TRUE HERE** (the claim was about a different
+tree, e.g. the earlier 18,248-file extract, and does not apply to this pin).
+
+**Rule 10 — the retirement rule (C13-14).** Before reusing **any** setting, key, flag or feature named in
+an older document, **search the configuration migrations for a retirement entry.** Hermes carries its
+config forward through numbered migrations (`hermes_cli/config_migrations.py`), and a retired feature is
+often not merely unread — its keys are **actively dropped on upgrade**, so a plan built on it fails
+silently rather than loudly. This rule exists because the second round found exactly that: `security.tirith_*`
+was treated as live — and even blamed for a production incident — in the older material, while the new tree
+retires those keys in migration 49→50 and nothing reads them. **A removal is a finding; a silent removal is
+the most valuable kind of finding, because nothing points at it.**
+
+**Rule 11 — additive across rounds, like rule 7 within a round.** Batch 13 does not rewrite Batches 01–12.
+It records what the second round added, changed or removed, and **names the batch each correction touches**,
+so a reader can trace both directions.
+
 ---
 
 ## 4. The batch plan (each documented as it is completed)
@@ -129,10 +164,19 @@ Non-Python top-level trees also present: `web/`, `website/`, `apps/` (desktop), 
 | **10** | Code execution, plugins and extensibility | `features/code-execution.md`, `plugins.md`, `extending-the-dashboard.md` | `tools/` code-exec, `plugins/` |
 | **11** | Channels, voice and media | `user-guide/messaging/*`, `features/voice-mode.md`, `tts.md`, `vision.md`, `image-generation.md`, `browser.md` | `gateway/platforms/`, media tool code |
 | **12** | **The synthesis** | all of the above | — |
+| **13** | **Prior-coverage audit (the second round)** | `library/analysis/findings/07-hermes-capability-map.md`, `08-hermes-fact-check.md` | the whole new tree — re-verified, never assumed |
 
 **Each batch document carries:** (a) what was read and its measured size; (b) the capability table with
 **Q1 · Q2 · Phase**; (c) the code verification, with file:line evidence, and any **doc-vs-code
 divergence** found; (d) items carried forward.
+
+**Batch 13 differs by design** — it is an **audit**, not a fresh survey. It carries: (a) the prior sources
+and their measured sizes, plus the version gap between them and this pin; (b) an **N-row coverage table**
+(gap subject → which prior file raised it → verified in the new tree, `file:line` → outcome per rule 9);
+(c) any **REMOVED** items, proved four ways (no live reference; the migration that retires it; the docs'
+own removal notes; the remaining hits being historical); (d) any **external records** the study cannot
+re-derive, carried explicitly as hazards; (e) the C13-n consolidated findings; (f) Q1/Q2 for the audit
+itself.
 
 ---
 
@@ -144,7 +188,10 @@ divergence** found; (d) items carried forward.
 - Is every capability named, including the ones we will not use? → must be.
 - Are the two value questions answered in the owner's words? → yes, per capability.
 - Is there any comparison to our own platform in a batch (`01`–`11`)? → must be none; that is Batch 12.
+- *(second round)* Is a prior claim re-verified in the **new** tree, or only quoted? → must be re-verified.
+- *(second round)* Before reusing an older setting, was the config migrations file searched for a
+  retirement entry (rule 10)? → must be.
 
 ---
 
-*Batch 00 of 12. Begun 2026-10-15. Next: `01-agent-loop-and-conversation.md`.*
+*Batch 00 of 13. Begun 2026-10-15. §3.1 (the second round) added 2026-10-15. Next: `01-agent-loop-and-conversation.md`.*

@@ -1,9 +1,10 @@
 # Batch 12 — The synthesis
 
-**Status:** COMPLETE — closes the study
+**Status:** COMPLETE — closes the study (with the batch-13 second-round addendum at §8)
 **Date:** 2026-10-15
 **Method:** this document draws ONLY on batches 01–11 of this study. Every claim it makes about Hermes points back to the batch and section that measured it. Every claim it makes about our own platform is marked as **judgement**, not measurement, because this study did not re-measure the platform.
 **Source:** `hermes-agent-main/hermes-agent-main` @ pin (19,728 files; pyproject md5 `f57f729d4b251547a5a9e2565ce1e726`).
+**Second round:** batch 13 re-audited the *prior* Hermes analysis against this pin and is folded in at **§8** — it changes the risk picture in two places (the `security.tirith_*` removal and the integration register) but leaves the §7 recommendation standing.
 
 ---
 
@@ -37,6 +38,8 @@ Nine batches carried verified findings. The honest headline numbers:
 - **One premise correction that matters most** (b10 §9): **"OpenCode" in Hermes is a model *provider*, not the OpenCode coding agent** — 1,008 code references, all in the provider sense; no spawn path exists.
 
 The batches that carried the most transferable material, in order: **11** (the egress proxy), **08** (approvals, secrets, sandboxing), **10** (the plugin contract and governance), **06** (scheduling/delegation/the board), **04** (memory and context).
+
+**Added by the second round (batch 13, §8):** the study's **one removal** — `security.tirith_*` retired in config migration 49→50 — and **eleven gap subjects** the twelve batches had not named, two of which are reusable patterns worth adding to §3 on the next revision (the model-blind secret-use mechanism and transparent per-turn rollback).
 
 ---
 
@@ -219,16 +222,56 @@ Written here so no reader over-reads the study:
 3. **"Better" means "better for our shape."** Hermes's single-operator model is not a defect; it is a different product. Where §2 says we do something "better", read it as *better for a multi-tenant planner*.
 4. **Patterns are cheap, products are expensive.** §3 mostly recommends *patterns*. That distinction is deliberate and load-bearing.
 5. **Divergences were found in both directions.** The docs were right far more often than wrong (4 divergences in 11 batches). This is evidence of a well-maintained product, and it is reported because reporting only the misses would be dishonest.
+6. **The synthesis was written *before* the second round.** §2 and §3 were assembled from batches 01–11. **Batch 13 re-audited the *prior* analysis and changed the risk picture in two ways — see §8.** Read §2 and §3 as complete for the twelve batches, and §8 as the correction on top.
+
+---
+
+## §8 — Addendum: what the second round changed (batch 13)
+
+The owner asked for a second pass over the **prior** Hermes analysis (`library/analysis/findings/07`, `08`)
+to catch anything the twelve batches missed, re-verified in the **new** tree. That pass is Batch 13 and it
+did not overturn any §4 recommendation — but it **changes the risk picture in two places**, and both belong
+in the synthesis proper:
+
+**8.1 — `security.tirith_*` is gone (C13-11, high priority).** The prior material treated Hermes's bundled
+`tirith` scanner as a **live safety control**, and even blamed a production incident on it. The new tree
+retires its four keys in **config migration 49→50** (`hermes_cli/config_migrations.py`: *"the bundled
+tirith scanner left Hermes. Nothing reads its keys now, so they are dropped; nothing replaces them."*).
+This changes the risk picture in the direction that matters most for us: **a security control we might have
+counted on is absent, and its removal is silent** — a config carrying `tirith_*` keys is not warned, the
+keys are simply dropped. Any plan resting on it fails quietly. Because of this, **the §7 tier-1 list is
+unaffected but its *justification* is sharpened**: the egress credential-injection model and the env scrub
+are not extras on top of a scanner — for the class of risk tirith covered, they (and the secret-source
+ladder in tier 2) are the controls that actually exist.
+
+**8.2 — the integration register is the prior material's real asset (C13-12).** `library/analysis/findings/08`
+holds a **22-lesson register of integration failures** (L-001…L-022) and five named production incidents.
+This study has **no equivalent** and cannot re-derive it from code — a lesson learned from a failure is not
+in the tree. It is carried forward as a **hazard list**, not as evidence: before any Hermes integration is
+built, those 22 lessons should be read as a checklist of things that already went wrong once.
+
+**8.3 — eleven gap subjects added (C13-1…C13-10, C13-13).** The second round found eleven capabilities the
+twelve batches had not named — personality/soul layering, the fail-safe e-stop, MoA, transparent per-turn
+checkpoints, the learning graph, trajectories, LSP integration, the model-blind browser vault, security
+audits, pets/the OpenClaw path. **None changes a §4 recommendation**, but two are *reusable patterns* worth
+adding to the §3 "move into our platform" list when it is next revised: **the model-blind secret-use
+mechanism** (C13-8, exact-origin + CDP-only injection + redaction registration) and **transparent per-turn
+rollback** (C13-4). They sit behind the three already recommended because they solve a narrower problem, but
+for an agent that acts on a customer's behalf they are the right shape.
+
+**What the second round did NOT change:** the **build UNDER** recommendation (§7), the tiering, and the one
+decision the owner must make. Batch 13 is an audit; it added coverage and corrected two risk facts, and it
+left the engineering judgement standing.
 
 ---
 
 ## §6 — The study's own ledger
 
-**Batches complete:** 00–12 (12 of 12).
+**Batches complete:** 00–13 (13 of 13, including the second round).
 
 | Batch | File | Divergences | Corrections |
 |---|---|---|---|
-| 00 | `00-PIN-AND-METHOD.md` | — | pin re-taken (new tree) |
+| 00 | `00-PIN-AND-METHOD.md` | — | pin re-taken (new tree); **§3.1 second-round method added (rule 9/10/11)** |
 | 01 | `01-agent-loop-and-conversation.md` | 2 | — |
 | 02 | `02-bots-profiles-and-group-chats.md` | 1 | — |
 | 03 | `03-skills-and-the-learning-loop.md` | 0 | — |
@@ -241,10 +284,11 @@ Written here so no reader over-reads the study:
 | 10 | `10-code-execution-plugins-and-extensibility.md` | 0 | **"OpenCode" = a provider** |
 | 11 | `11-channels-voice-and-media.md` | 0 | egress doc path |
 | **12** | **this file** | — | — |
+| **13** | **`13-prior-coverage-audit.md`** (the second round) | — | **1 removal (`security.tirith_*`), 11 gap subjects added, 1 external register carried, rule C13-14 added** |
 
-**Totals:** 4 doc-vs-code divergences; 4 corrections to my own earlier notes; 1 premise correction of consequence (OpenCode).
+**Totals:** 4 doc-vs-code divergences; 4 corrections to my own earlier notes; 1 premise correction of consequence (OpenCode); **1 removal found in the second round**.
 
-**Commits:** `edee95d` (00–01), `66ae2be` (02–03), `0a51aff` (04), `0b9c793` (05), `6575635` (06), `20d2636` (07), `139c5b2` (08), `599c4f9` (09), `ed7f0d7` (10), `6e10374` (11), plus 12.
+**Commits:** `edee95d` (00–01), `66ae2be` (02–03), `0a51aff` (04), `0b9c793` (05), `6575635` (06), `20d2636` (07), `139c5b2` (08), `599c4f9` (09), `ed7f0d7` (10), `6e10374` (11), `89e759a` (12), `648f8b0` (13).
 
 ---
 
@@ -256,4 +300,4 @@ Written here so no reader over-reads the study:
 
 ---
 
-*Batch 12 of 12 complete. The study is closed. All twelve batch documents sit in `library/hermes-forensics/findings/`, each committed as it was written, each byte-clean (0 CR), each carrying its own measurement, its divergences, and its value answers.*
+*Batch 12 of 13 complete. All thirteen batch documents sit in `library/hermes-forensics/findings/`, each committed as it was written, each byte-clean (0 CR), each carrying its own measurement, its divergences, and its value answers. Batch 13 (the second round, the owner's prior-coverage audit) is folded in at §8; the study is closed and the build-UNDER recommendation stands.*
