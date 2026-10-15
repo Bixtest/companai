@@ -26,7 +26,7 @@ it is the most honest document in a repo.
 | 1 | Hermes forensics | ✅ CLOSED 13/13 | Main AI engine; never fork it. "OpenCode" = a provider, not a coding agent. |
 | 2 | Paperclip 0.3.1 | ✅ CLOSED 7/7 | **P2/P3 = strength**, P1 = seam-provider. No multi-tenancy, no widget composer. |
 | 3 | CrewAI 1.15.28 | ✅ CLOSED 7/7 | **Mechanism donor, NOT an architecture template.** Executor yes, **delivery no**, **tenancy nowhere**. |
-| 4 | **Multica 0.2.0** | 🔵 **b01+b02+b03 done** | **All three poles are real and implemented.** Strongest finding: the machine/teammate split. |
+| 4 | **Multica 0.2.0** | 🔵 **b01+b02+b03+b04 done** | **All three poles are real and implemented.** Strongest finding: the machine/teammate split. |
 | — | gastown, n8n, buzz, openrig, mattermost, zulip | ⬜ 6 remain | Order not fixed — **ASK before extracting more.** |
 
 **Multica b01 (`4cf7f35`, 19 findings, 584 lines, 0 CR):** a Go+TS *product*, not a library
@@ -64,7 +64,20 @@ UUID). Projects have a lead that may be a **member or an agent**; resources are
 polymorphic. Git = a repo registry (url+ref) + a multi-workspace GitHub install
 + an issue↔PR join; `007` dropped `issue.repository` (Git moved issue→workspace).
 `attribution_fail_closed` = a per-workspace switch to refuse unattributable runs.
-**Next: `findings/04-automations.md` (P3).**
+
+**Multica b04 (`109b66c`, automations, P3; 330 lines / 0 CR):** the delivery
+layer. One-statement claim (`agent.sql:749-810`): `FOR UPDATE SKIP LOCKED` + a
+total order + per-(issue,agent) serialization + the runtime-health gate INSIDE
+the claim. A prepare lease + attempt/heartbeat columns + **4 named sweepers**.
+`sys_cron_executions` = the row is both the distributed lease and the audit log
+(unique `(job, scope, plan_time)`, no materialised stale state, lease_token).
+Autopilot as data (definition+triggers+runs, `concurrency_policy`, versioned
+rules, a per-trigger responsible publisher). **27-value failure taxonomy** (13
+platform + 14 `agent_error.*`; the prefix classifies). Wakeups = a revision fence
++ a receipt dedup table. **Retirement: the chat-pending marker and the
+terminal-completed index were EACH built, dropped and rebuilt twice** — the
+migration chain, not the schema, is the truth.
+**Next: `findings/05-widgets-and-frontend.md` (PX-W / PX-F).**
 
 ## Standing hazards (still bite)
 - **Git-Bash `grep -c $'\r'` LIES** — byte truth is `tr -cd '\r' < f | wc -c`; verify the
