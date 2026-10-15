@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 07 — The synthesis — Multica Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-07" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 07</span>
+      <div class="header-title-wrap">
+        <div class="header-title">The Synthesis</div>
+        <div class="header-subtitle">Multica Platform Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/07-SYNTHESIS.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #4f46e5">COMPLETE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">3,942</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">20 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">362</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-15</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 07 Architecture Guide (Default)</option>
+            <optgroup label="Strategic Architecture">
+              <option value="master">Executive Topology: the three poles and the two absent layers</option>
+            </optgroup>
+            <optgroup label="Foundations">
+              <option value="00">Batch 00: The pin, the shape, and the method</option>
+              <option value="01">Batch 01: The control plane — server, daemon, queue, cron, fence</option>
+            </optgroup>
+            <optgroup label="Pole 1 — The Aissistant">
+              <option value="02">Batch 02: The aissistant — machine, teammate, one seam</option>
+            </optgroup>
+            <optgroup label="Pole 2 — The Workspace">
+              <option value="03">Batch 03: The workspace — a fenced tenant</option>
+            </optgroup>
+            <optgroup label="Pole 3 — Automations">
+              <option value="04">Batch 04: Automations — the delivery layer</option>
+            </optgroup>
+            <optgroup label="Cross-Cutting">
+              <option value="05">Batch 05: Widgets &amp; frontend — and the absent widget model</option>
+            </optgroup>
+            <optgroup label="Escape Hatch">
+              <option value="06">Batch 06: Out-of-pole — perimeter, plugin reset, cutover</option>
+            </optgroup>
+            <optgroup label="Strategic Decision">
+              <option value="07">Batch 07: The synthesis — ranked mechanisms and the verdict</option>
+            </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 07 VISUAL GUIDE</div>
+    <h4>The synthesis: what to carry forward, and what is ours to build</h4>
+    <p>75 findings ranked into mechanisms worth taking, and the two layers Multica does not have</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 360" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-07" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-07" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+        <marker id="arrr-07" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#ef4444"/>
+        </marker>
+      </defs>
+      <g transform="translate(20, 20)">
+        <rect width="210" height="160" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">TOP 3 — THE SEAMS</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">1. machine / teammate split</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">   agent_runtime + agent</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">2. the one-statement claim</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">   FOR UPDATE SKIP LOCKED</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#6d28d9">3. the row-as-lease scheduler</text>
+      </g>
+      <path d="M 230 100 L 268 100" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-07)"/>
+      <g transform="translate(272, 20)">
+        <rect width="210" height="160" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">NEXT — THE MODELS</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">4. deny-by-default invocation</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">5. failure taxonomy w/ prefix</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">6. layering w/ prohibitions</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">7. role-named tokens</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#6d28d9">8. non-inheriting bindings</text>
+      </g>
+      <path d="M 482 100 L 520 100" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-07)"/>
+      <g transform="translate(524, 20)">
+        <rect width="180" height="160" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE PAGE</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">598 up-migrations</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">144 tables / 82 fenced</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">27 failure values</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">225 .mdx = 45 × 5</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">75 findings</text>
+      </g>
+      <path d="M 704 100 L 742 100" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-07)"/>
+      <g transform="translate(746, 20)">
+        <rect width="154" height="160" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE VERDICT</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">architecture reference</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">+ mechanism source</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">for all three poles</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#b45309">build the other two</text>
+      </g>
+      <rect x="20" y="206" width="880" height="130" rx="10" fill="#7c3aed" fill-opacity="0.08" stroke="#7c3aed" stroke-width="1.6"/>
+      <text x="40" y="234" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#6d28d9">THE FIVE LOAD-BEARING FINDINGS — if the mapping pass reads only five lines, these are the five</text>
+      <text x="40" y="260" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">F02-01 the machine/teammate split · F04-01 the one-statement claim · F04-04 the row-as-lease scheduler</text>
+      <text x="40" y="282" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">F02-09 deny-by-default invocation · F05-06 no widget model</text>
+      <text x="40" y="312" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#6d28d9">No comparison to our own platform was made here (rule 5); the cross-platform mapping is a later pass.</text>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="batch-07-the-synthesis">Batch 07 — The Synthesis<a href="#batch-07/batch-07-the-synthesis" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Study:</strong> Multica <code>0.2.0</code> · <strong>Batch:</strong> 07 of 07 · <strong>Status:</strong> COMPLETE
+<strong>Source:</strong> <code>github.com/multica-ai/multica</code> → <code>platforms/_extracted/multica-main</code>
+<strong>Zip md5:</strong> <code>30ddc64af536212e25a6c00db5672b82</code> · <strong>License:</strong> Apache-2.0 + Multica conditions</p>
+<p><strong>Scope of this batch.</strong> Batches 00–06 measured Multica from code. This batch does what a synthesis
+must: state the platform&#39;s verdict in plain words, name the mechanisms worth carrying into the mapping
+pass, state plainly what Multica does <strong>not</strong> give us, and answer the two value questions the method
+requires. It is a <em>reading</em> of the six batches — no new claims about the source are introduced here, and
+every claim restates a <code>file:line</code> already established in its originating batch.</p>
+<p><strong>Method rules in force.</strong> Code is the authority; docs are claims (rule 1). No comparison to our own
+platform (rule 5) — this batch compares <strong>batches to each other</strong>, never Multica to <code>mercato</code>. Pole-tag
+everything (rule 9). Name every capability, including the ones we will not use (rule 6). Answer the two
+value questions (rule 4). Report the negatives. Correct earlier batches where later evidence demands it
+(rule 13). Run the retirement rule (rule 10).</p>
+<hr>
+<h2 id="7-1-the-measured-page">7.1 The measured page<a href="#batch-07/7-1-the-measured-page" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Everything below was counted or read, not estimated.</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Quantity</th>
+<th>Measured</th>
+<th>Source batch</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Zip md5</td>
+<td><code>30ddc64af536212e25a6c00db5672b82</code></td>
+<td>00</td>
+</tr>
+<tr>
+<td>Archive</td>
+<td><strong>7,013 entries</strong> (474 dirs + 6,539 files); <strong>64,416,699 B</strong> on disk; <strong>no <code>.git</code></strong></td>
+<td>00</td>
+</tr>
+<tr>
+<td>Version</td>
+<td><code>&quot;version&quot;: &quot;0.2.0&quot;</code> (root <code>package.json</code>)</td>
+<td>00</td>
+</tr>
+<tr>
+<td>Backend (<code>server/</code>, Go)</td>
+<td><strong>2,036 files / 801,066 lines</strong></td>
+<td>00</td>
+</tr>
+<tr>
+<td>Frontend packages (<code>packages/</code>)</td>
+<td>1,784 files / 402,307 lines</td>
+<td>00</td>
+</tr>
+<tr>
+<td>Apps (<code>apps/</code>)</td>
+<td>682 files / 97,262 lines (web · desktop · mobile · docs · ui-lab)</td>
+<td>00</td>
+</tr>
+<tr>
+<td>Migrations</td>
+<td><strong>598 up-migrations</strong> (1,196 files with downs)</td>
+<td>00</td>
+</tr>
+<tr>
+<td>Tables created</td>
+<td><strong>144 unique</strong></td>
+<td>03</td>
+</tr>
+<tr>
+<td>Tables carrying <code>workspace_id</code></td>
+<td><strong>82 of 144</strong> — the tenant fence</td>
+<td>03</td>
+</tr>
+<tr>
+<td>Migrations mentioning <code>agent</code></td>
+<td><strong>229</strong>; of those, <strong>25</strong> touch the <code>agent</code> table</td>
+<td>02</td>
+</tr>
+<tr>
+<td>The <code>agent</code> table</td>
+<td><strong>29 columns</strong></td>
+<td>02</td>
+</tr>
+<tr>
+<td>Provider adapters</td>
+<td><strong>24 backend structs for 25 provider keys</strong></td>
+<td>02</td>
+</tr>
+<tr>
+<td>Failure taxonomy</td>
+<td><strong>27 values</strong> (13 platform-side + 14 <code>agent_error.*</code>)</td>
+<td>04</td>
+</tr>
+<tr>
+<td>Channel tables</td>
+<td><strong>10 <code>channel_*</code></strong> generalized from Lark</td>
+<td>06</td>
+</tr>
+<tr>
+<td>Docs site</td>
+<td><strong>225 <code>.mdx</code> = 45 pages × 5 languages</strong></td>
+<td>06</td>
+</tr>
+<tr>
+<td>Repo conventions</td>
+<td><code>AGENTS.md</code> — 127 lines / <strong>12 sections</strong></td>
+<td>06</td>
+</tr>
+<tr>
+<td>Frontend split</td>
+<td>shared ≈ <strong>402k lines</strong> vs apps ≈ <strong>60k</strong> (≈5:1)</td>
+<td>05</td>
+</tr>
+<tr>
+<td><strong>Findings written</strong></td>
+<td><strong>75</strong> (19 + 14 + 12 + 11 + 9 + 10 across batches 01–06)</td>
+<td>all</td>
+</tr>
+<tr>
+<td>Retirement entries</td>
+<td><strong>17 distinct</strong> removed objects recorded across batches 02–06</td>
+<td>all</td>
+</tr>
+</tbody></table></div>
+<p><strong>➜ F7-1 [foundational] — This is a <em>product</em>, not a framework or a doc archive: ~1.3M measured lines of
+Go + TypeScript, 144 tables over 598 migrations, and — the one number that changes the whole study —
+<code>workspace_id</code> on 82 of 144 tables.</strong> <strong>Plain meaning:</strong> unlike CrewAI (93 % documentation) and unlike
+Paperclip (a task-runner), Multica is a running multi-surface product that already implements the three
+poles. <strong>Why it matters:</strong> rule 1 had to bite hardest here, because a platform whose landing page
+describes our own vision is the one most likely to be mistaken for the thing itself. Every finding below
+was read from source.</p>
+<hr>
+<h2 id="7-2-the-three-poles-headlined">7.2 The three poles, headlined<a href="#batch-07/7-2-the-three-poles-headlined" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="pole-1-the-aissistant">Pole 1 — The aissistant<a href="#batch-07/pole-1-the-aissistant" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><strong>Multica has both a stored teammate and the machine that runs it, and it separates them on purpose.</strong></p>
+<p>The load-bearing shape is the <strong>machine / teammate split</strong> (<code>004_agent_runtime_loop.up.sql:1-18</code>):
+<code>agent_runtime</code> is the machine (daemon, provider, <code>online</code>/<code>offline</code>, <code>UNIQUE (workspace_id, daemon_id, provider)</code>), and <code>agent</code> is the teammate, bound by <code>agent.runtime_id NOT NULL … ON DELETE RESTRICT</code>
+(<code>:70-73</code>). One runtime hosts many agents; neither can outlive the other.</p>
+<p>Above it, the engine is a <strong>single seam</strong>: one <code>Backend</code> interface (<code>pkg/agent/agent.go:18-23</code>) with
+<strong>24 backend structs for 25 provider keys</strong> (<code>qoder</code>/<code>qoderclicn</code> share one). The whitelist is closed and
+its own comment lists every migration that widened it. A workspace may define a <strong>custom runtime</strong>
+(<code>runtime_profile</code>, <code>120</code>) — but only on an officially-supported family, and with <code>fixed_args</code> only.</p>
+<p>The teammate&#39;s configuration is <strong>12 typed columns</strong>, and three of them (model / thinking / service tier)
+are stored <strong>runtime-native, not neutralised</strong> — the value the picker shows is the value the CLI accepts
+(<code>050</code>, <code>095</code>, <code>212</code>). Its <strong>permissions are deny-by-default</strong> (<code>permission_mode</code> + a stacking
+allow-list, <code>130</code>), and agent-to-agent calls are judged by the <strong>human at the top of the chain</strong>
+(<code>agent_access.go:33-36</code>) — closing a real privacy hole where an admin could otherwise run someone&#39;s
+private agent and use that owner&#39;s connections.</p>
+<p><strong>Pole 1 verdict, plainly:</strong> Multica supplies a complete answer to &quot;what is an agent, what runs it, how
+is it configured, and who may make it run&quot; — a stored colleague, a swappable engine behind one interface,
+and an explicit authorization model with its reason recorded in the migration.</p>
+<h3 id="pole-2-the-workspace">Pole 2 — The workspace<a href="#batch-07/pole-2-the-workspace" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><strong>The workspace is a real tenant root, and the fence is in the schema.</strong></p>
+<p>Measured: <strong>82 of 144 tables carry <code>workspace_id</code></strong> in their own <code>CREATE TABLE</code>. The other 62 are child or
+join tables that inherit the tenant, or genuinely global rows (<code>user</code>, <code>personal_access_token</code>,
+<code>maintenance_job</code>).</p>
+<p>Inside it: three roles with the <strong>last owner protected in three code paths</strong>; invitations with a 7-day
+expiry and a partial-unique &quot;one pending&quot; rule; a 32-column <strong>issue</strong> with a per-workspace human number,
+a tree, barrier <strong>stages</strong>, <strong>triage split off <code>status</code></strong>, a duplicate pointer, and <strong>two custom-field
+layers</strong> (a free bag for machines, a typed catalog for people, keyed by definition UUID so renames never
+rewrite data); <strong>projects</strong> whose lead may be a <strong>member or an agent</strong>; and <strong>Git</strong> as three layers (a
+repo registry, a multi-workspace installation, an issue↔PR join).</p>
+<p><strong>Pole 2 verdict, plainly:</strong> the container is not a folder — it is a fenced tenant with members, work
+items, projects, a code link, and a <strong>per-workspace policy switch</strong> (<code>attribution_fail_closed</code>) that can
+refuse a run it cannot attribute to a human.</p>
+<h3 id="pole-3-automations">Pole 3 — Automations<a href="#batch-07/pole-3-automations" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><strong>This is the layer the study was told to look for, and it is real.</strong></p>
+<p>The claim is <strong>one SQL statement</strong> (<code>pkg/db/queries/agent.sql:749-810</code>): <code>FOR UPDATE SKIP LOCKED</code>, a total
+order (<code>priority DESC, created_at ASC, id ASC</code>), <strong>per-work-item serialization</strong> (so different agents
+share an issue while one agent never double-runs), and the <strong>runtime-health gate inside the claim</strong>.</p>
+<p>Around it: a <strong>prepare lease</strong> bounding the dispatched-but-never-started gap; attempt counters and a
+per-task heartbeat; <strong>four named sweepers</strong>, one per way a task can die; a <strong>row-as-lease scheduler</strong>
+(<code>sys_cron_executions</code>, <code>113</code>) where the row is both the distributed lock and the audit log, with lease
+tokens and a <strong>per-job catch-up decision</strong>; <strong>autopilot as data</strong> (definition + triggers + runs, with a
+concurrency policy and a per-trigger responsible publisher); and a <strong>27-value failure taxonomy</strong> where the
+<code>agent_error.</code> prefix makes &quot;whose fault is this?&quot; a string operation.</p>
+<p><strong>Pole 3 verdict, plainly:</strong> work <em>arrives</em>. It is queued, claimed, leased, retried, swept and attributed
+— and the platform assumes machines die at every step.</p>
+<h3 id="px-w-px-f-widgets-and-frontend">PX-W / PX-F — Widgets and frontend<a href="#batch-07/px-w-px-f-widgets-and-frontend" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><strong>A strong frontend architecture and no widget model at all.</strong></p>
+<p>The frontend is <strong>shared-first</strong>: ~402k shared lines against ~60k app lines (≈5:1). It is held together by
+a strict three-package layering whose rules are <strong>prohibitions</strong> (<code>AGENTS.md:11-24</code>) — <code>core</code> may not
+touch a browser, <code>ui</code> may not import business logic, <code>views</code> may not name a framework — with the platform
+differences collected into <strong>named adapters</strong> (<code>StorageAdapter</code>, <code>NavigationAdapter</code>, <code>useNavigation</code>,
+<code>&lt;AppLink&gt;</code>).</p>
+<p>The visual layer is a <strong>role-named token system</strong> whose comments carry its own history (51 ad-hoc font
+sizes → 10 role-named steps; two colors pinned by WCAG measurement), plus <strong>component contracts</strong> that
+also drive a tested <strong>UI Lab</strong> workbench.</p>
+<p><strong>And the widget model is measured absent:</strong> zero composers, and &quot;widget&quot; appears in only 13 code files,
+all incidental.</p>
+<p><strong>PX verdict, plainly:</strong> the <em>architecture</em> is the transferable part; the <em>composition layer</em> is not here.</p>
+<hr>
+<h2 id="7-3-the-ranked-mechanisms-what-to-carry-forward">7.3 The ranked mechanisms — what to carry forward<a href="#batch-07/7-3-the-ranked-mechanisms-what-to-carry-forward" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Ranked by how much they would cost us to derive ourselves — value-first, not novelty-first.</p>
+<ol>
+<li><strong>The machine / teammate split</strong> [P1] — <code>agent_runtime</code> (the machine) and <code>agent</code> (the teammate) as two
+rows, bound <code>NOT NULL … ON DELETE RESTRICT</code> (<code>004:1-18</code>, <code>:70-73</code>). <em>The cleanest &quot;one engine, many
+colleagues&quot; primitive in the study.</em> (§2.2.1)</li>
+<li><strong>The single-statement claim</strong> [P3] — <code>FOR UPDATE SKIP LOCKED</code> + a total order + per-work-item
+serialization + the runtime-health gate, all in one <code>UPDATE</code> (<code>agent.sql:749-810</code>). (§4.2)</li>
+<li><strong>The row-as-lease scheduler</strong> [P3] — <code>sys_cron_executions</code> unifies the distributed lock and the audit
+log; no materialised stale state; lease tokens guard every live mutation (<code>113</code>). (§4.6)</li>
+<li><strong>The deny-by-default invocation model</strong> [P1] — <code>permission_mode</code> + a stacking allow-list, A2A judged
+by the top-of-chain human, with the privacy hole it closed recorded (<code>130</code>,
+<code>agent_access.go:73-133</code>). (§2.5)</li>
+<li><strong>The failure taxonomy with a classifying prefix</strong> [P3] — 27 values, 13 platform + 14 <code>agent_error.*</code>,
+with the renaming rule written down (<code>pkg/taskfailure/failure.go</code>). (§4.5)</li>
+<li><strong>The strict frontend layering with named prohibitions + adapters</strong> [PX-F] — <code>views → core + ui</code>, with
+<code>StorageAdapter</code> / <code>NavigationAdapter</code> as the only platform seams (<code>AGENTS.md:11-24</code>). (§5.2–§5.3)</li>
+<li><strong>The role-named token system with its history attached</strong> [PX-W] — and the two WCAG measurements that
+pin its quiet colors (<code>tokens.css:67-122</code>, <code>:187-206</code>). (§5.4)</li>
+<li><strong>The non-inheriting binding pattern</strong> [PZ/P1] — a workspace library plus an explicit per-agent binding
+with a toggle, used <strong>twice</strong> (skills, MCP servers; <code>008</code>, <code>315</code>). (§6.5)</li>
+<li><strong>The two custom-field layers</strong> [P2] — a free jsonb bag for machines (<code>105</code>) and a typed catalog keyed
+by definition UUID for people (<code>191</code>). (§3.3.4)</li>
+<li><strong>The retirement ledger as a practice</strong> [PZ] — 17 recorded removals, including <strong>one migration that
+deletes 14 tables</strong> because they never shipped (<code>344</code>). (§6.4)</li>
+<li><strong>Write-path secret redaction</strong> [PZ] — ordered rules, each comment naming the leak it closes
+(<code>pkg/redact</code>). (§6.2)</li>
+<li><strong>The plugin contract + capability gate</strong> [PZ] — three relations (Action/Hook/Resource) and a gate
+that <em>&quot;fails installation loudly&quot;</em> (<code>plugincontract</code>, <code>capabilities.go:8-40</code>). (§6.4)</li>
+</ol>
+<p><strong>➜ F7-2 [synthesis] — The top three are all about <em>the seam between a machine and a colleague, and the
+honest claim of work</em> — not about features.</strong> <strong>Plain meaning:</strong> what Multica got most right is structural:
+separate the engine from the teammate, claim work in one atomic statement, and make the scheduler&#39;s record
+the same row as its lock. <strong>Why it matters:</strong> these are expensive to invent and cheap to adopt, and none
+requires adopting Multica&#39;s product.</p>
+<hr>
+<h2 id="7-4-what-multica-does-not-give-us">7.4 What Multica does NOT give us<a href="#batch-07/7-4-what-multica-does-not-give-us" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Stated as plainly as the positives, because a study that only lists features is useless.</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Absent capability</th>
+<th>Measured how</th>
+<th>Batch</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>A widget / composition model</strong></td>
+<td>0 composers; <code>widget</code> in 13 incidental code files</td>
+<td>05</td>
+</tr>
+<tr>
+<td><strong>An agent <em>runtime</em> of its own</strong></td>
+<td>the engine is a <em>third-party CLI</em> behind <code>Backend</code>; Multica runs adapters, not a model loop</td>
+<td>02</td>
+</tr>
+<tr>
+<td><strong>A unified engine</strong></td>
+<td>24 backends, 25 keys, each provider its own adapter — no single execution model</td>
+<td>02</td>
+</tr>
+<tr>
+<td><strong>A shared <code>team</code> concept that is live</strong></td>
+<td>the invocation <code>team</code> target is <em>&quot;stored but NOT effective in V1&quot;</em> (<code>130</code>)</td>
+<td>02</td>
+</tr>
+<tr>
+<td><strong>An event bus / streaming substrate of its own</strong></td>
+<td>realtime exists (<code>internal/realtime</code>), but the delivery spine is a <strong>table</strong>, not a bus</td>
+<td>04</td>
+</tr>
+<tr>
+<td><strong>Per-datum commenting / annotation</strong></td>
+<td>the nugget/annotation layer is not present; comments are on issues</td>
+<td>03</td>
+</tr>
+<tr>
+<td><strong>A &quot;studio&quot; / visual builder</strong></td>
+<td>the agent builder is a chat draft (<code>252</code>), not a canvas</td>
+<td>02</td>
+</tr>
+<tr>
+<td><strong>Foreign keys on relationship tables</strong></td>
+<td>a deliberate house rule: <code>agent_invocation_target</code>, <code>runtime_profile</code>, the <code>channel_*</code> tables all carry <strong>none</strong>; integrity is application-owned</td>
+<td>02, 03, 06</td>
+</tr>
+</tbody></table></div>
+<p><strong>➜ F7-3 [synthesis] — The absences cluster into one sentence: Multica has no <em>composition layer</em> and no
+<em>engine of its own</em>.</strong> <strong>Plain meaning:</strong> it is a workspace that drives other people&#39;s coding agents and
+organises the work; it does not invent the agent runtime, and it does not let a user arrange the UI out of
+parts. <strong>Why it matters:</strong> if the vision wants a widget surface or a self-owned engine, <strong>those are ours
+to build</strong> — they cannot be sourced from this platform. The mapping pass should treat them as <strong>build</strong>,
+not <strong>adapt</strong>.</p>
+<hr>
+<h2 id="7-5-the-consistency-check-across-batches">7.5 The consistency check across batches<a href="#batch-07/7-5-the-consistency-check-across-batches" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>A synthesis must look for contradictions between its own inputs. Four were found and are recorded rather
+than smoothed:</p>
+<ol>
+<li><strong>Triage.</strong> Batch 03 read <code>triage_state</code> as a current column. The migration (<code>483</code>) shows it was
+<strong>moved off <code>status</code></strong> — a design correction <em>inside</em> the platform, not a contradiction in the study,
+and it is recorded as the reason the column exists.</li>
+<li><strong>The plugin system.</strong> Batch 01 saw <code>plugincontract</code> and <code>plugin_*</code> tables as a feature. Batch 06 read
+<code>344</code> and found <strong>the V1 (14 tables) was deleted outright</strong> and replaced by three. Both are true of
+different points in time; the correction stands, and it is the sharpest retirement in the study.</li>
+<li><strong>The failure <code>Reason</code> line.</strong> Batch 01&#39;s own self-review corrected a line number (<code>44</code>→<code>49</code>) before
+commit — a small, recorded fix rather than a silent edit (rule 13 in practice).</li>
+<li><strong>The engine default.</strong> Across the study the engine is always a <em>provider behind a seam</em>; no batch found
+a place where Multica runs a model loop itself. This is <strong>consistent</strong> across batches 01, 02 and 04, and
+it is why F7-3 names &quot;no engine of its own&quot; as an absence rather than a gap in reading.</li>
+</ol>
+<p><strong>➜ F7-4 [synthesis] — No batch was falsified by a later batch; two were completed by one.</strong> <strong>Plain
+meaning:</strong> the study held together, and each correction made the picture larger. <strong>Why it matters:</strong> the 75
+findings can be used as one body of evidence in the mapping pass, with the corrections applied.</p>
+<hr>
+<h2 id="7-6-the-two-value-questions-rule-4">7.6 The two value questions (rule 4)<a href="#batch-07/7-6-the-two-value-questions-rule-4" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>The method requires each platform to be judged against two questions, kept separate.</p>
+<h3 id="q1-what-does-this-platform-do-for-its-own-users">Q1 — What does this platform do for *its own users*?<a href="#batch-07/q1-what-does-this-platform-do-for-its-own-users" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><strong>For a team that wants AI coding agents to show up on a board: a great deal, and it is the point of the
+product.</strong> You get a workspace where agents are colleagues you can see, assign to and share; a queue that
+survives a laptop sleeping; a scheduler that runs periodic work exactly once across many servers; an
+automation you configure rather than script; failures you can actually diagnose; and a frontend that works
+the same on web and desktop. The divergences are almost non-existent here — the migrations and comments
+<em>agree</em> with the code, and where a decision was reversed (the Composio gate, the plugin V1) the reversal
+is recorded.</p>
+<p><strong>Verdict on Q1:</strong> as a <em>workspace where humans and AI agents work one board</em>, this is mature and
+coherent, and it is unusually honest about its own history.</p>
+<h3 id="q2-what-does-it-do-for-our-vision">Q2 — What does it do for *our vision*?<a href="#batch-07/q2-what-does-it-do-for-our-vision" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><strong>A great deal on the poles, and nothing on the two things we would have to own.</strong> Multica is the first
+platform studied that is aimed at the same target: it has a real aissistant (a stored teammate + a machine</p>
+<ul>
+<li>an authorization model), a real workspace (a fenced tenant with work items, projects and code), and a
+real delivery layer (queue, lease, sweepers, scheduler, autopilot). What it does <strong>not</strong> have is a
+<strong>composition layer</strong> (no widgets) and an <strong>engine of its own</strong> (it drives third-party CLIs). And its
+closest-neighbour risk is real: because its stated purpose is ours, the temptation is to treat it as
+&quot;already done&quot; — which the study resisted by reading the code and finding where it <strong>stops</strong>.</li>
+</ul>
+<p><strong>Verdict on Q2:</strong> Multica is a <strong>rich architecture reference and a genuine mechanism source</strong> for all
+three poles — the strongest of the three platforms studied so far — and it is <strong>silent</strong> on the widget
+surface and on a self-owned engine. Take the machine/teammate split, the claim, the row-as-lease
+scheduler, the invocation model and the frontend layering; <strong>build</strong> the composition layer and the engine.</p>
+<p><strong>➜ F7-5 [synthesis] — The two questions point the same way, which is unusual: excellent for its users,
+and directly instructive for two of our three poles — while being explicitly empty on the third.</strong>
+<strong>Plain meaning:</strong> unlike the earlier platforms, this one is worth reading closely for <em>how</em> to structure
+the workspace and the delivery layer. <strong>Why it matters:</strong> it tells the mapping pass where to spend its
+attention — and where not to.</p>
+<hr>
+<h2 id="7-7-the-finding-index">7.7 The finding index<a href="#batch-07/7-7-the-finding-index" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Consolidated for the mapping pass. Format: <code>id · pole · one line · batch §</code>.</p>
+<p><strong>Foundations</strong> — F01-01 the machine/teammate split is real and tested [P1] 01 · F01-02 a stored <code>agent</code> +
+<code>agent_runtime</code> + a per-provider adapter [P1] 01 · F01-03 … F01-19 (the platform overview: the queue, the
+claim, the distributed cron, the autopilot, the failure taxonomy, the task-token fence, the Hermes lane).
+<em>(Batch 01 wrote 19 findings; they are indexed in full in <code>01-platform-overview.md</code>.)</em></p>
+<p><strong>Pole 1 — the aissistant</strong> — F02-01 machine/teammate split [P1] 02 §2.1 · F02-02 one <code>Backend</code> interface,
+24 structs / 25 keys [P1] 02 §2.2 · F02-03 closed whitelist in Go + Postgres [P1] 02 §2.3 · F02-04
+<code>runtime_profile</code> custom runtimes [P1] 02 §2.4 · F02-05 <code>BuiltinRuntime</code> descriptor [P1] 02 §2.5 ·
+F02-06 the 12-column config, runtime-native values [P1] 02 §3 · F02-07 the catalog knows what it does not
+know [P1] 02 §3.1 · F02-08 two kinds of skill [P1] 02 §4 · F02-09 deny-by-default invocation [P1] 02 §5 ·
+F02-10 A2A judged by the top-of-chain human [P1] 02 §5.4 · F02-11 product-defined agents [P1] 02 §6 ·
+F02-12 the lifecycle (status, archive, concurrency, builder draft) [P1] 02 §7 · F02-13 the agent-side
+retirement ledger [PZ] 02 §8 · F02-14 &quot;denied&quot; kept apart from &quot;unknown&quot; [P1] 02 §5.5.</p>
+<p><strong>Pole 2 — the workspace</strong> — F03-01 the tenant fence (82/144) [P2] 03 §1 · F03-02 three roles +
+invitations [P2] 03 §2 · F03-03 the last owner protected [P2] 03 §2.2 · F03-04 the invitation shape [P2]
+03 §2.1 · F03-05 the per-workspace human number [P2] 03 §3.2 · F03-06 the 32-column issue + two
+custom-field layers [P2] 03 §3 · F03-07 projects with a member-or-agent lead [P2] 03 §4 · F03-08 the three
+Git layers [P2] 03 §5 · F03-09 <code>attribution_fail_closed</code> [P2] 03 §6 · F03-10 saved views with a privacy
+bound [P2/PX-F] 03 §3.5 · F03-11 the workspace-side retirement ledger [PZ] 03 §7 · F03-12 a migration as
+a bug post-mortem (<code>044</code>) [PZ] 03 §1.2.</p>
+<p><strong>Pole 3 — automations</strong> — F04-01 the one-statement claim [P3] 04 §2 · F04-02 leases + heartbeat [P3]
+04 §3 · F04-03 four named sweepers [P3] 04 §4 · F04-04 the row-as-lease scheduler [P3] 04 §6 · F04-05
+autopilot as data [P3] 04 §7 · F04-06 the 27-value failure taxonomy [P3] 04 §5 · F04-07 wakeups with a
+revision fence [P3] 04 §8 · F04-08 the prepare lease [P3] 04 §3 · F04-09 <code>awakeclock</code> [P3] 04 §9 ·
+F04-10 recovery as a bounded, measured walk [P3] 04 §9 · F04-11 the queue&#39;s retirement ledger (rebuilt
+twice) [PZ] 04 §10.</p>
+<p><strong>Widgets / frontend</strong> — F05-01 the strict three-package layering [PX-F] 05 §2 · F05-02 the platform
+adapters [PX-F] 05 §3 · F05-03 the role-named token system with its history [PX-W/PX-F] 05 §4 ·
+F05-04 component contracts [PX-W] 05 §5 · F05-05 UI Lab [PX-W] 05 §6 · <strong>F05-06 no widget model [PX-W]
+05 §8</strong> · F05-07 the state/API boundaries [PX-F] 05 §7 · F05-08 the deployed-client rule [PX-F] 05 §7 ·
+F05-09 the shared:app ratio [PX-F] 05 §1.</p>
+<p><strong>Out-of-pole</strong> — F06-01 the layered security perimeter [PZ] 06 §1 · F06-02 write-path redaction [PZ]
+06 §2 · F06-03 the three-relation plugin contract [PZ] 06 §4.2 · F06-04 the capability gate [PZ] 06 §4.2 ·
+F06-05 the non-inheriting binding pattern, used twice [PZ] 06 §5 · F06-06 the cutover as a deployment
+problem [PZ] 06 §6 · F06-07 first-party opt-out telemetry [PZ] 06 §7 · F06-08 conventions in the repo [PZ]
+06 §8 · F06-09 enforcement separated from commercial policy [PZ] 06 §9 · F06-10 <strong>the deleted subsystem</strong>
+[PZ] 06 §4.1.</p>
+<p><strong>Synthesis</strong> — F7-1 the measured page [—] §7.1 · F7-2 twelve mechanisms ranked [—] §7.3 · F7-3 the
+absences cluster [—] §7.4 · F7-4 no falsifications, two completions [—] §7.5 · F7-5 the two questions
+answered [—] §7.6.</p>
+<p><strong>➜ F7-6 [synthesis] — 75 findings, five of them load-bearing: F02-01 (the machine/teammate split),
+F04-01 (the one-statement claim), F04-04 (the row-as-lease scheduler), F02-09 (deny-by-default
+invocation), F05-06 (no widget model).</strong> <strong>Plain meaning:</strong> if the mapping pass reads only five lines,
+these are the five. <strong>Why it matters:</strong> it gives the next stage a prioritised entry point instead of 75
+flat rows.</p>
+<hr>
+<h2 id="7-8-the-platform-verdict-in-one-paragraph">7.8 The platform verdict, in one paragraph<a href="#batch-07/7-8-the-platform-verdict-in-one-paragraph" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>Multica <code>0.2.0</code> is a source-available, multi-surface product — a Go backend, a local daemon, and web,
+desktop and mobile clients — for a workspace where humans and AI coding agents work one board, and it is
+the closest thing to our own target that this workshop has studied.</strong> Its architecture is genuinely
+instructive: it separates the <strong>machine</strong> (<code>agent_runtime</code>) from the <strong>teammate</strong> (<code>agent</code>) with a
+restricting foreign key; it runs any of <strong>24 provider adapters behind one interface</strong>; it claims work in a
+<strong>single atomic SQL statement</strong> with per-work-item serialization and a health gate inside it; it makes the
+<strong>scheduler&#39;s record the same row as its distributed lease</strong>; it classifies <strong>every failure</strong> into a
+27-value taxonomy with a prefix that turns &quot;whose fault&quot; into a string operation; it fences <strong>82 of its 144
+tables</strong> by workspace and governs invocation <strong>deny-by-default</strong> with agent-to-agent calls judged by the
+human at the top; and it keeps its frontend <strong>shared-first</strong> (~5:1) behind named platform adapters with a
+role-named token system whose comments record the mistakes it fixed. Its migrations and comments are
+unusually honest — they record what was reversed (the Composio gate), what was rebuilt twice (the
+chat-pending marker), and what was <strong>deleted outright</strong> (a 14-table plugin V1 that never shipped). Where it
+stops is equally clear: it has <strong>no composition layer</strong> (no widget model exists at all) and <strong>no engine of
+its own</strong> (it drives third-party CLIs). The correct posture toward it is therefore <strong>both an architecture
+reference and a mechanism source for the three poles</strong> — and <strong>build</strong>, not adapt, for the widget surface
+and any self-owned engine.</p>
+<hr>
+<h2 id="7-9-batch-07-checklist">7.9 Batch 07 — checklist<a href="#batch-07/7-9-batch-07-checklist" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<ul>
+<li><input checked="" disabled="" type="checkbox"> Read from source only; no new source claims introduced (all restate verified findings).</li>
+<li><input checked="" disabled="" type="checkbox"> Every finding carries its originating batch and section.</li>
+<li><input checked="" disabled="" type="checkbox"> No comparison to our own platform (rule 5) — internal batch-to-batch consistency only (§7.5).</li>
+<li><input checked="" disabled="" type="checkbox"> Both value questions answered separately (rule 4, §7.6).</li>
+<li><input checked="" disabled="" type="checkbox"> Absences reported as findings, not omitted (rule 6, §7.4).</li>
+<li><input checked="" disabled="" type="checkbox"> Four cross-batch consistencies recorded, none smoothed (rule 13, §7.5).</li>
+<li><input checked="" disabled="" type="checkbox"> Retirement rule honoured: no earlier finding deleted to fit the synthesis (rule 10).</li>
+<li><input checked="" disabled="" type="checkbox"> 6 synthesis findings: F7-1…F7-6, plus the complete finding index (§7.7).</li>
+</ul>
+<p>The Multica study is complete: <strong>pin (00) + 75 findings across six pole batches (01–06) + this synthesis
+(07).</strong> The reader is built from this markdown, at the end, with the platform-agnostic generator — and no
+study markdown is edited to fit it.</p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="06-out-of-pole-pz.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">Out-of-Pole (PZ)</span>
+                </a>
+              
+
+              <a href="../index.html#batch-07" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              <div></div>
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#7-1-the-measured-page" class="toc-link">7.1 The measured page</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-2-the-three-poles-headlined" class="toc-link">7.2 The three poles, headlined</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#pole-1-the-aissistant" class="toc-link">Pole 1 — The aissistant</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#pole-2-the-workspace" class="toc-link">Pole 2 — The workspace</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#pole-3-automations" class="toc-link">Pole 3 — Automations</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#px-w-px-f-widgets-and-frontend" class="toc-link">PX-W / PX-F — Widgets and frontend</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-3-the-ranked-mechanisms-what-to-carry-forward" class="toc-link">7.3 The ranked mechanisms — what to carry forward</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-4-what-multica-does-not-give-us" class="toc-link">7.4 What Multica does NOT give us</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-5-the-consistency-check-across-batches" class="toc-link">7.5 The consistency check across batches</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-6-the-two-value-questions-rule-4" class="toc-link">7.6 The two value questions (rule 4)</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#q1-what-does-this-platform-do-for-its-own-users" class="toc-link">Q1 — What does this platform do for *its own users*?</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#q2-what-does-it-do-for-our-vision" class="toc-link">Q2 — What does it do for *our vision*?</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-7-the-finding-index" class="toc-link">7.7 The finding index</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-8-the-platform-verdict-in-one-paragraph" class="toc-link">7.8 The platform verdict, in one paragraph</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-9-batch-07-checklist" class="toc-link">7.9 Batch 07 — checklist</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('multica_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('multica_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('multica_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('multica_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.MulticaReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

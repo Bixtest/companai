@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 01 — The platform overview — Multica Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-01" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 01</span>
+      <div class="header-title-wrap">
+        <div class="header-title">Platform Overview</div>
+        <div class="header-subtitle">Multica Platform Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/01-platform-overview.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #059669">DONE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">4,791</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">24 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">585</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-15</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 01 Architecture Guide (Default)</option>
+            <optgroup label="Strategic Architecture">
+              <option value="master">Executive Topology: the three poles and the two absent layers</option>
+            </optgroup>
+            <optgroup label="Foundations">
+              <option value="00">Batch 00: The pin, the shape, and the method</option>
+              <option value="01">Batch 01: The control plane — server, daemon, queue, cron, fence</option>
+            </optgroup>
+            <optgroup label="Pole 1 — The Aissistant">
+              <option value="02">Batch 02: The aissistant — machine, teammate, one seam</option>
+            </optgroup>
+            <optgroup label="Pole 2 — The Workspace">
+              <option value="03">Batch 03: The workspace — a fenced tenant</option>
+            </optgroup>
+            <optgroup label="Pole 3 — Automations">
+              <option value="04">Batch 04: Automations — the delivery layer</option>
+            </optgroup>
+            <optgroup label="Cross-Cutting">
+              <option value="05">Batch 05: Widgets &amp; frontend — and the absent widget model</option>
+            </optgroup>
+            <optgroup label="Escape Hatch">
+              <option value="06">Batch 06: Out-of-pole — perimeter, plugin reset, cutover</option>
+            </optgroup>
+            <optgroup label="Strategic Decision">
+              <option value="07">Batch 07: The synthesis — ranked mechanisms and the verdict</option>
+            </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 01 VISUAL GUIDE</div>
+    <h4>The control plane: a server, a daemon, and one board</h4>
+    <p>What Multica is made of, and the three mechanisms that make the poles possible</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 340" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-01" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-01" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+        <marker id="arrr-01" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#ef4444"/>
+        </marker>
+      </defs>
+      <g transform="translate(20, 20)">
+        <rect width="210" height="140" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE SURFACES</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">server/ — Go backend (Chi, sqlc)</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">daemon/ — the local exec plane</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">apps/web — Next.js 16</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">apps/desktop — Electron</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#1d4ed8">apps/mobile — Expo (independent)</text>
+      </g>
+      <path d="M 230 90 L 268 90" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-01)"/>
+      <g transform="translate(272, 20)">
+        <rect width="210" height="140" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE QUEUE</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">agent_task_queue — a real table</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">status: queued→dispatched→running</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">…→completed | failed | cancelled</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">priority + created_at ordering</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">FOR UPDATE SKIP LOCKED claim</text>
+      </g>
+      <path d="M 482 90 L 520 90" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-01)"/>
+      <g transform="translate(524, 20)">
+        <rect width="180" height="140" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE CRON</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">sys_cron_executions</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">row = lease AND audit log</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">unique (job, scope, plan_time)</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">lease_token guards writes</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">no materialised STALE</text>
+      </g>
+      <path d="M 704 90 L 742 90" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-01)"/>
+      <g transform="translate(746, 20)">
+        <rect width="154" height="140" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE FENCE</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">workspace = tenant root</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">mat_ task token scopes a run</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">82/144 tables carry ws_id</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">one runtime, many agents</text>
+      </g>
+      <rect x="20" y="186" width="880" height="130" rx="10" fill="#7c3aed" fill-opacity="0.08" stroke="#7c3aed" stroke-width="1.6"/>
+      <text x="40" y="214" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#6d28d9">THE HEADLINE — the machine / teammate split (004_agent_runtime_loop.up.sql:1-18)</text>
+      <text x="40" y="240" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">agent_runtime is THE MACHINE: (workspace, daemon, provider, online/offline, last_seen_at), UNIQUE (workspace_id, daemon_id, provider).</text>
+      <text x="40" y="260" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">agent is THE TEAMMATE: a stored colleague, bound by agent.runtime_id NOT NULL … ON DELETE RESTRICT (:70-73).</text>
+      <text x="40" y="286" font-family="system-ui, sans-serif" font-size="11.5" font-weight="600" fill="#6d28d9">One engine instance, many colleagues — the primitive a tenant needs, and the strongest finding of the study.</text>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="batch-01-platform-overview">Batch 01 — Platform Overview<a href="#batch-01/batch-01-platform-overview" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Study:</strong> Multica <code>0.2.0</code> · <strong>Batch:</strong> 01 of 07 · <strong>Status:</strong> COMPLETE
+<strong>Source:</strong> <code>github.com/multica-ai/multica</code> → <code>platforms/_extracted/multica-main</code>
+<strong>Zip md5:</strong> <code>30ddc64af536212e25a6c00db5672b82</code> · <strong>License:</strong> Apache-2.0 + Multica conditions
+<strong>Method:</strong> rules 1-10 of <code>00-PIN-AND-METHOD.md</code>. Every claim carries <code>file:line</code>.
+Docs are claims; code is the authority. Nothing in this file was inferred from a README.</p>
+<hr>
+<h2 id="0-what-this-batch-had-to-answer">0. What this batch had to answer<a href="#batch-01/0-what-this-batch-had-to-answer" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Multica is not a library. It is not a framework. It is a <strong>product</strong>: a hosted web app, a
+desktop app, a mobile app, a CLI, and a background daemon that runs on the user&#39;s own machine
+and drives third-party agent CLIs. CrewAI — the platform we finished last week — was a
+Python library you import. Multica is the thing that would have had to be built <em>around</em>
+CrewAI for CrewAI to be usable by a team.</p>
+<p>So the question for batch 01 is: <strong>what is the shape of the machine, and does it already
+solve the three poles we are building toward?</strong></p>
+<p>Short answer, measured:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Pole</th>
+<th>Multica&#39;s answer</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>P1 - the assistant</strong></td>
+<td>A stored <code>agent</code> record + an <code>agent_runtime</code> row + a per-provider Go adapter</td>
+<td><strong>Real - the strongest finding of this study, and it is tested</strong> (F01-02, F01-03, F01-19)</td>
+</tr>
+<tr>
+<td><strong>P2 - the workspace</strong></td>
+<td><code>workspace</code> is the tenant root, fenced by a task-scoped credential</td>
+<td><strong>Real, and it fences the agent&#39;s blast radius</strong> (F01-11, F01-12)</td>
+</tr>
+<tr>
+<td><strong>P3 - automations</strong></td>
+<td>A literal queue table, a <code>FOR UPDATE SKIP LOCKED</code> claim, a distributed cron, an autopilot, and a named failure taxonomy</td>
+<td><strong>Real, and this is exactly the layer CrewAI was measured to lack</strong> (F01-05 ... F01-10)</td>
+</tr>
+</tbody></table></div>
+<p>Everything in this batch is the <em>platform</em> layer. The three pole-specific batches (02, 03, 04)
+go deeper; this one establishes that there is something there to go deeper into.</p>
+<hr>
+<h2 id="1-the-measured-shape">1. The measured shape<a href="#batch-01/1-the-measured-shape" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>All numbers below were measured on the extraction, not taken from any manifest.</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Area</th>
+<th>Files</th>
+<th>Lines</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>server/</code> (Go)</td>
+<td>2,036</td>
+<td>801,066</td>
+<td>the whole backend</td>
+</tr>
+<tr>
+<td><code>packages/</code> (TS/TSX)</td>
+<td>1,784</td>
+<td>402,307</td>
+<td>shared libraries</td>
+</tr>
+<tr>
+<td><code>apps/</code></td>
+<td>682</td>
+<td>97,262</td>
+<td><code>web</code> (Next.js 16), <code>desktop</code> (Electron), <code>mobile</code> (Expo), <code>docs</code></td>
+</tr>
+<tr>
+<td><code>e2e/</code> (TS)</td>
+<td>31</td>
+<td>4,457</td>
+<td>Playwright</td>
+</tr>
+<tr>
+<td><code>server/migrations</code></td>
+<td>-</td>
+<td>-</td>
+<td><strong>598 up-migrations</strong> (1,196 files with downs)</td>
+</tr>
+<tr>
+<td><code>apps/docs</code></td>
+<td>225 <code>.mdx</code></td>
+<td>-</td>
+<td>5 languages: <code>en/zh/ja/ko/fr</code></td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td><strong>7,013 zip entries</strong> (474 dirs + 6,539 files)</td>
+<td>-</td>
+<td><strong>64,416,699 B</strong> on disk</td>
+</tr>
+</tbody></table></div>
+<p><strong>Three counting hazards found before they could poison a finding.</strong></p>
+<p><strong>(a) Generated code.</strong> <code>server/pkg/db/generated/</code> is <strong>54,147 Go lines</strong> - 6.8% of the
+backend. Its header is explicit: <code>// Code generated by sqlc. DO NOT EDIT.</code>
+(<code>server/pkg/db/generated/agent.sql.go:1-4</code>). sqlc compiles <code>server/pkg/db/queries/*.sql</code> into
+Go. <strong>The authority is the <code>.sql</code> file; the generated Go is a derivative.</strong> Counting generated
+lines as design is the same mistake as counting CrewAI&#39;s 292 MB of docs as design.</p>
+<p><strong>(b) The handler directory is enormous for a reason.</strong> <code>server/internal/handler/</code> holds
+<strong>130 non-test Go files / 77,593 lines</strong> - nearly a tenth of the backend. That is not one fat
+layer; it is the HTTP surface of a multi-product company (see section 12).</p>
+<p><strong>(c) Tests outnumber production in the agent package.</strong> <code>server/pkg/agent/</code> holds <strong>36,364
+non-test lines</strong> but <strong>56,468 test lines</strong> - the tests are 155% of the code they test. Any
+statement about &quot;the size of the Hermes integration&quot; that counts test files is measuring the
+wrong thing by a factor of ~1.5. <em>Measured: <code>wc -l pkg/agent/*_test.go</code> -&gt; 56,468 total.</em></p>
+<h3 id="the-go-backend-by-area-non-test-lines">The Go backend, by area (non-test lines)<a href="#batch-01/the-go-backend-by-area-non-test-lines" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Directory</th>
+<th>Lines</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>internal/handler</code></td>
+<td>77,593</td>
+<td>HTTP handlers - 130 files</td>
+</tr>
+<tr>
+<td><code>pkg/db/generated</code></td>
+<td>54,147</td>
+<td>sqlc output (derived - see above)</td>
+</tr>
+<tr>
+<td><code>pkg/agent</code></td>
+<td>36,364</td>
+<td><strong>provider adapters + ACP session machinery</strong> - 77 files</td>
+</tr>
+<tr>
+<td><code>internal/service</code></td>
+<td>23,960</td>
+<td>business logic</td>
+</tr>
+<tr>
+<td><code>internal/daemon</code> + <code>execenv</code></td>
+<td>26,226 + 17,781</td>
+<td>the local daemon and process execution</td>
+</tr>
+<tr>
+<td><code>cmd/multica</code></td>
+<td>21,902</td>
+<td>the CLI client</td>
+</tr>
+<tr>
+<td><code>internal/integrations/</code></td>
+<td>lark 11,429 / wecom 15,825 / dingtalk 5,909 / slack 4,503 / telegram 5,648</td>
+<td>chat-platform bridges</td>
+</tr>
+<tr>
+<td><code>internal/scheduler</code></td>
+<td>(small - see F01-08)</td>
+<td>DB-backed distributed cron</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="2-the-data-model-the-tenant-spine">2. The data model: the tenant spine<a href="#batch-01/2-the-data-model-the-tenant-spine" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>server/migrations/001_init.up.sql</code> establishes the whole ontology in one file. Read it as a
+sentence: <strong>a workspace has members; members and agents work on issues; issues have comments;
+agents take tasks from a queue; daemons keep the connection alive.</strong></p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>text</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code>workspace --&lt; member (role: owner|admin|member)
+    |
+    |--&lt; agent --&lt; agent_task_queue -- issue
+    |        |
+    |        +-- daemon_connection (per agent, status connected|disconnected)
+    |
+    +--&lt; issue --&lt; comment (author_type: member|agent|system)
+             +-- inbox_item (severity)
+</code></pre>
+</div>
+<p>Measured specifics from <code>001_init.up.sql</code>:</p>
+<ul>
+<li><strong><code>workspace</code></strong> is the tenant root. Every table below it carries <code>workspace_id UUID NOT NULL REFERENCES workspace(id) ON DELETE CASCADE</code>. There is no unscoped row.</li>
+<li><strong><code>member</code></strong> has a <code>role TEXT CHECK (role IN (&#39;owner&#39;,&#39;admin&#39;,&#39;member&#39;))</code>.</li>
+<li><strong><code>agent</code></strong> is a <em>stored record</em>, not a process: <code>runtime_mode CHECK (runtime_mode IN (&#39;local&#39;,&#39;cloud&#39;))</code>, <code>status CHECK (status IN (&#39;idle&#39;,&#39;working&#39;,&#39;blocked&#39;,&#39;error&#39;,&#39;offline&#39;))</code>,
+<code>max_concurrent_tasks INT NOT NULL DEFAULT 1</code>, <code>owner_id</code>. An agent is a colleague with a
+concurrency limit.</li>
+<li><strong><code>issue</code></strong> carries a <strong>polymorphic assignee</strong>: <code>assignee_type IN (&#39;member&#39;,&#39;agent&#39;)</code> +
+<code>assignee_id</code>. Also <code>acceptance_criteria JSONB</code>, <code>context_refs JSONB</code>, and a 7-value status
+CHECK.</li>
+<li><strong><code>comment</code></strong> is polymorphic on the author too: <code>author_type</code> (member/agent/system).</li>
+<li><strong><code>activity_log</code></strong> is polymorphic on the actor: <code>actor_type IN (&#39;member&#39;,&#39;agent&#39;,&#39;system&#39;)</code>.</li>
+<li><strong><code>agent_task_queue</code></strong>: <code>status</code> in <code>queued|dispatched|running|completed|failed|cancelled</code>,
+with <code>priority INT NOT NULL DEFAULT 0</code> (<code>001_init.up.sql:133</code>). The lease column is <strong>not</strong>
+here - it arrives later, in a two-line migration named for the concept (see section 4.3).</li>
+</ul>
+<p><strong>F01-01 - An agent is a first-class coworker, not a tool.</strong> The polymorphic assignee/author/
+actor columns mean the data model refuses to distinguish &quot;a human did this&quot; from &quot;an agent did
+this&quot; at the storage layer. Any UI list of &quot;who is on this issue&quot; renders both without a
+special case. <em>Pole: P2, P1. Relevance: Q2 - the workspace pole.</em></p>
+<p><strong>144 unique tables</strong> were created across the 598-migration history (measured by counting
+distinct <code>CREATE TABLE</code> targets). Six migrations contain <code>DROP TABLE</code>; eight carry
+RETIRED/DEPRECATED markers. The migration history is therefore a <strong>readable archive of what
+Multica believed and then stopped believing</strong> - see F01-18.</p>
+<hr>
+<h2 id="3-the-single-most-important-finding-the-machine-and-the-teammate-are-two-rows">3. The single most important finding: the machine and the teammate are two rows<a href="#batch-01/3-the-single-most-important-finding-the-machine-and-the-teammate-are-two-rows" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>server/migrations/004_agent_runtime_loop.up.sql</code> splits what most systems conflate:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>sql</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-sql">CREATE TABLE agent_runtime (
+    id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    workspace_id UUID NOT NULL REFERENCES workspace(id) ON DELETE CASCADE,
+    daemon_id    TEXT,
+    name         TEXT NOT NULL,
+    runtime_mode TEXT NOT NULL CHECK (runtime_mode IN (&#39;local&#39;,&#39;cloud&#39;)),
+    provider     TEXT NOT NULL,
+    status       TEXT NOT NULL DEFAULT &#39;offline&#39; CHECK (status IN (&#39;online&#39;,&#39;offline&#39;)),
+    device_info  TEXT NOT NULL DEFAULT &#39;&#39;,
+    metadata     JSONB NOT NULL DEFAULT &#39;{}&#39;,
+    last_seen_at TIMESTAMPTZ,
+    UNIQUE (workspace_id, daemon_id, provider)
+);
+ALTER TABLE agent ADD COLUMN runtime_id UUID;
+</code></pre>
+</div>
+<p>(<code>server/migrations/004_agent_runtime_loop.up.sql:1-18</code>)</p>
+<ul>
+<li><strong><code>agent_runtime</code> is the machine.</strong> One row per (workspace, daemon, provider). It holds
+<code>status</code> online/offline and <code>last_seen_at</code> - the <em>liveness of a process on someone&#39;s laptop</em>.</li>
+<li><strong><code>agent</code> is the teammate.</strong> It gains a <code>runtime_id</code> FK pointing at the machine that runs it.</li>
+<li>The migration <strong>backfills</strong> <code>agent_runtime</code> from the old <code>agent.runtime_config</code>, so the split
+was a deliberate refactor of live data, not a greenfield guess.</li>
+</ul>
+<p><strong>F01-02 - Multica separated &quot;the machine that can execute&quot; from &quot;the colleague that is
+assigned work.&quot;</strong> <em>Pole: P1, P2. Relevance: Q1, Q2.</em></p>
+<p><strong>F01-03 - <code>UNIQUE (workspace_id, daemon_id, provider)</code> is the one-tenant-one-engine
+primitive.</strong> One daemon produces one runtime row <strong>per provider</strong>. That means: one Hermes
+process, one <code>HERMES_HOME</code>, one provider bucket - and <em>many</em> <code>agent</code> rows pointing at it. The
+multiplexing primitive we need for one-tenant-one-Hermes already exists here, expressed as a
+unique constraint rather than as code. <em>Pole: P1. Relevance: Q1.</em></p>
+<p><strong>F01-04 - The claim is made by the runtime, not by the agent.</strong> <code>ClaimAgentTask</code>
+(<code>server/pkg/db/queries/agent.sql:749-808</code>) selects pending work <strong>for a <code>runtime_id</code></strong>, then
+dispatches to the specific agent. One connection, many agents, one lease. <em>Pole: P1, P3.
+Relevance: Q1, Q3.</em></p>
+<hr>
+<h2 id="4-the-delivery-layer-the-thing-crewai-did-not-have">4. The delivery layer - the thing CrewAI did not have<a href="#batch-01/4-the-delivery-layer-the-thing-crewai-did-not-have" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>We closed CrewAI with the verdict <em>&quot;executor yes, delivery no.&quot;</em> Multica is the control group.
+Here is the delivery layer, measured.</p>
+<h3 id="4-1-a-literal-queue-table">4.1 A literal queue table<a href="#batch-01/4-1-a-literal-queue-table" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>agent_task_queue</code> is not an abstraction over a broker. It is a Postgres table with an index
+built for the claim:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>sql</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-sql">CREATE INDEX idx_agent_task_queue_runtime_pending
+    ON agent_task_queue (runtime_id, priority DESC, created_at ASC)
+    WHERE status IN (&#39;queued&#39;,&#39;dispatched&#39;);
+</code></pre>
+</div>
+<p>(<code>server/migrations/004_agent_runtime_loop.up.sql:90</code>)</p>
+<h3 id="4-2-a-real-claim">4.2 A real claim<a href="#batch-01/4-2-a-real-claim" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>ClaimAgentTask</code> - <code>server/pkg/db/queries/agent.sql:749-808</code>:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>sql</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-sql">-- name: ClaimAgentTask :one
+... ORDER BY priority DESC, created_at ASC, id ASC
+    FOR UPDATE SKIP LOCKED
+    LIMIT 1 ...
+UPDATE ... SET status = &#39;dispatched&#39;,
+    prepare_lease_expires_at = now() + make_interval(secs =&gt; @prepare_lease_secs::double precision)
+</code></pre>
+</div>
+<p><strong>F01-05 - The claim is a genuine work-queue primitive.</strong> <code>FOR UPDATE SKIP LOCKED</code> means two
+daemons racing for the same queue cannot double-claim; the tie-break <code>priority DESC, created_at ASC, id ASC</code> is total and deterministic (the <code>id ASC</code> tiebreak is what makes it a <em>stable</em>
+order, not a best-effort one); and the claim is a two-step <strong>prepare -&gt; lease</strong> rather than a
+bare status flip. <em>Pole: P3. Relevance: Q3.</em></p>
+<h3 id="4-3-a-lease-and-the-sweepers-that-reclaim-it">4.3 A lease, and the sweepers that reclaim it<a href="#batch-01/4-3-a-lease-and-the-sweepers-that-reclaim-it" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>prepare_lease_expires_at</code> is set at claim time. If the daemon dies mid-prepare, the row is
+stranded in <code>dispatched</code> forever unless something cleans it. Multica has that something -
+<code>server/cmd/server/runtime_sweeper.go</code> plus sweepers in <code>server/internal/service/task.go</code>,
+named in the taxonomy&#39;s own header:</p>
+<blockquote>
+<p><em>&quot;emitted by server-side sweepers (<code>ExpireStaleQueuedTasks</code>, <code>FailStaleTasks</code>,
+<code>FailTasksForOfflineRuntimes</code>, <code>RecoverOrphanedTasksForRuntime</code>)&quot;</em></p>
+<ul>
+<li><code>server/pkg/taskfailure/failure.go:38-41</code></li>
+</ul>
+</blockquote>
+<p>The lease column itself was introduced by <code>server/migrations/124_task_prepare_lease.up.sql</code></p>
+<ul>
+<li>a file whose entire contents are two lines:</li>
+</ul>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>sql</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-sql">ALTER TABLE agent_task_queue
+  ADD COLUMN prepare_lease_expires_at TIMESTAMPTZ;
+</code></pre>
+</div>
+<p>A migration named after the <em>concept</em> rather than after the ticket is a good sign: someone
+intended the lease to be findable.</p>
+<p><strong>F01-06 - A lease without a sweeper is a leak with a good name.</strong> Multica pairs them, and it
+names the four sweepers that own the four ways a task can strand: never claimed, claimed and
+stalled, runtime went dark, runtime came back with orphans. <em>Pole: P3. Relevance: Q3.</em></p>
+<h3 id="4-4-a-canonical-failure-taxonomy">4.4 A canonical failure taxonomy<a href="#batch-01/4-4-a-canonical-failure-taxonomy" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>server/pkg/taskfailure/failure.go</code> is a 346-line package whose header is a small case study
+in operational maturity:</p>
+<blockquote>
+<p><em>&quot;until MUL-1949, server/daemon code wrote one of a small handful of coarse failure_reason
+values (&quot;agent_error&quot;, &quot;timeout&quot;, &quot;runtime_offline&quot;, ...). The &quot;agent_error&quot; bucket grew to
+<strong>~30% of all failures</strong> and hid the real cause (provider 401, quota exceeded, context
+overflow, runner crash, etc.) inside the free-form <code>error</code> text column.&quot;</em></p>
+<ul>
+<li><code>server/pkg/taskfailure/failure.go:6-11</code></li>
+</ul>
+</blockquote>
+<p>The fix: a typed enum (<code>type Reason string</code>, <code>failure.go:49</code>) split into <strong>14 platform-side
+reasons</strong> (no prefix - the failure is Multica&#39;s fault: <code>queued_expired</code>, <code>runtime_offline</code>,
+<code>runtime_reconnect_timeout</code>, <code>timeout</code>, <code>iteration_limit</code>, <code>agent_blocked</code>,
+<code>api_invalid_request</code>, <code>skill_bundle_unavailable</code>, <code>runtime_cli_timeout</code>,
+<code>environment_prepare_failed</code>, <code>invalid_task_identity</code>, <code>runtime_access_denied</code>, ...) and <strong>14
+agent-side reasons</strong> with an <code>agent_error.</code> prefix, plus <code>AllReasons()</code> at <code>failure.go:342</code> to
+pre-warm the Prometheus label set.</p>
+<p><strong>F01-07 - The failure taxonomy is the observability substrate of a delivery layer.</strong> A queue
+without a named failure vocabulary produces dashboards that say &quot;30% failed, reason unknown.&quot;
+The <code>agent_error.</code> prefix is the key design move: it makes &quot;was this the platform&#39;s fault or
+the agent&#39;s fault?&quot; a <em>string operation</em> instead of a human reading free text. <em>Pole: P3.
+Relevance: Q3.</em></p>
+<h3 id="4-5-the-event-contract-and-what-it-deliberately-excludes">4.5 The event contract, and what it deliberately excludes<a href="#batch-01/4-5-the-event-contract-and-what-it-deliberately-excludes" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>server/pkg/eventcontract/events.go</code> names business facts: <code>task.queued</code> (<code>:20</code>),
+<code>task.dispatched</code> (<code>:21</code>), and the rest of the task lifecycle. Two lists matter:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>go</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-go">// WakeupTypes lists only facts with transactional capture, not every bus event.
+var WakeupTypes = []string{...}          // events.go:35
+var LifecycleTypes = []string{EventIssueCreated, EventIssueDeleted}   // events.go:46
+</code></pre>
+</div>
+<p>The comment is the finding: <strong><code>WakeupTypes</code> is restricted to facts captured <em>in the same
+transaction</em> as the state change.</strong> <code>LifecycleTypes</code> excludes <code>issue.created</code>/<code>issue.deleted</code>
+because a subscription requires an already-existing issue. This is Multica&#39;s answer to
+CrewAI&#39;s <code>pending_feedback</code>: a suspended issue can only be woken by a fact that was recorded
+atomically with the thing that would wake it. <em>Pole: P3. Relevance: Q3.</em></p>
+<hr>
+<h2 id="5-the-scheduler-a-distributed-cron-that-audits-itself">5. The scheduler: a distributed cron that audits itself<a href="#batch-01/5-the-scheduler-a-distributed-cron-that-audits-itself" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>server/internal/scheduler/</code> is small in line count and large in idea. It is a
+<strong>database-backed distributed cron</strong>: the database is both the lease and the audit log.</p>
+<p><strong>F01-08 - The scheduler&#39;s state lives in <code>sys_cron_executions</code>, which doubles as its audit
+trail.</strong> The unique key is <code>(job_name, scope_kind, scope_id, plan_time)</code> - that is the
+deduplication primitive: two replicas that both wake at the same <code>plan_time</code> for the same
+scope cannot both run the same logical execution. A <code>RunnerID</code> column makes multi-replica
+safety visible in the data rather than implied. <code>TickInterval</code> defaults to 30 s.</p>
+<p><code>JobSpec</code> (<code>server/internal/scheduler/spec.go</code>) carries the full vocabulary an operator
+actually needs: <code>Cadence</code>, <code>ScheduleDelay</code>, <code>CatchUpMode</code> (<code>latest_only</code> | <code>every_plan</code>),
+<code>CatchUpWindow</code>, <code>MaxPlansPerTick</code>, <code>RunTimeout</code>, <code>StaleTimeout</code>, <code>HeartbeatInterval</code>,
+<code>MaxAttempts</code>, <code>RetryBackoff</code>, <code>AllowStaleReentry</code>, and a <code>PlansForScope</code> hook for arbitrary
+cron expressions.</p>
+<p><strong>F01-09 - <code>CatchUpMode</code> is the interesting one.</strong> A cron that was down for six hours has a
+decision to make: run once now (<code>latest_only</code>) or run six times to catch up (<code>every_plan</code>).
+Multica makes that a per-job, declared choice with a bounded <code>CatchUpWindow</code> and
+<code>MaxPlansPerTick</code>, instead of the usual silent behaviour of &quot;whatever the loop happens to
+do.&quot; <code>AllowStaleReentry</code> is the deliberate escape hatch for jobs that <em>should</em> re-enter a
+stale execution. <em>Pole: P3. Relevance: Q3.</em></p>
+<p>Registered jobs (measured by grepping the registration site): <strong>autopilot, child-done,
+issue-wakeup, plugin-hook, search-index, task-usage.</strong> Note that <code>issue-wakeup</code> is the
+scheduler-side half of the <code>WakeupTypes</code> contract in section 4.5.</p>
+<hr>
+<h2 id="6-autopilot-a-trigger-is-a-row-and-a-run-is-a-row">6. Autopilot: a trigger is a row, and a run is a row<a href="#batch-01/6-autopilot-a-trigger-is-a-row-and-a-run-is-a-row" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>server/migrations/042_autopilot.up.sql</code> models automation as data, not code:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>text</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code>autopilot --&lt; autopilot_trigger (kind: schedule | webhook | api)
+    |              +-- cron_expression, timezone, next_run_at
+    +--&lt; autopilot_run (status: pending | issue_created | running | skipped | completed | failed)
+</code></pre>
+</div>
+<ul>
+<li><code>autopilot_trigger.kind</code> covers the three ways an automation can start: <strong>a clock, an inbound
+webhook, or an API call.</strong> <code>cron_expression</code> + <code>timezone</code> + <code>next_run_at</code> mean the schedule
+is stored and inspectable, and the &quot;next run&quot; is a column an operator can query.</li>
+<li><code>autopilot_run.concurrency_policy</code> (<code>skip</code> | <code>queue</code> | <code>replace</code>) is the decision about what
+happens when a run fires while the previous one is still going. This is the classic
+automation bug, expressed as a declared enum.</li>
+<li><code>origin_type</code> / <code>origin_id</code> on <code>issue</code> close the loop: an issue created by an automation
+knows which automation created it.</li>
+</ul>
+<p><strong>F01-10 - Autopilot is the pole-3 seed, and it is honest about its three triggers.</strong> The
+important structural point is that <code>autopilot_run</code> is a <em>separate table</em> from
+<code>agent_task_queue</code>: a trigger firing produces a run record, and a run produces queued tasks.
+The automation layer and the work layer are not the same layer. <em>Pole: P3. Relevance: Q3.</em></p>
+<hr>
+<h2 id="7-tenancy-and-identity-the-fence-around-the-agent">7. Tenancy and identity: the fence around the agent<a href="#batch-01/7-tenancy-and-identity-the-fence-around-the-agent" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>This is the section that speaks directly to our own open hazard.</p>
+<h3 id="7-1-a-task-scoped-credential">7.1 A task-scoped credential<a href="#batch-01/7-1-a-task-scoped-credential" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>server/migrations/108_task_token.up.sql</code> (ticket <strong>MUL-2600</strong>) introduces a <code>mat_</code>-prefixed
+short-lived token minted <strong>at claim time</strong>, bound to a <code>(task_id, agent_id, workspace_id, user_id)</code> tuple. The server treats it as <strong>authoritative for actor identity</strong>.</p>
+<p>The migration header records the practice it replaced, in its own words: the daemon used to
+inject the daemon <em>owner&#39;s</em> <code>MULTICA_TOKEN</code>. That meant an agent process held a credential
+with the blast radius of the human who installed the daemon.</p>
+<p><strong>F01-11 - Multica&#39;s answer to &quot;how much can an agent do?&quot; is: mint it a credential that names
+the exact task it is working on.</strong> The token&#39;s binding is the scope. <code>invalid_task_identity</code>
+is even one of the platform-side failure reasons in section 4.4 - the fence is enforced <em>and</em>
+observable. <em>Pole: P2. Relevance: Q2.</em></p>
+<h3 id="7-2-the-workspace-resolution-chain">7.2 The workspace resolution chain<a href="#batch-01/7-2-the-workspace-resolution-chain" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>server/internal/middleware/workspace.go</code> - <code>ResolveWorkspaceIDFromRequest</code> (<code>:68</code>) and
+<code>resolveWorkspaceUUID</code> (<code>:113</code>) implement a documented priority chain:</p>
+<ol>
+<li><strong>task-token binding</strong> (<code>X-Actor-Source == &quot;task_token&quot;</code>) - <em>authoritative, and cannot be
+re-negotiated by the client</em> (<code>workspace.go:55</code>, <code>:106</code>)</li>
+<li>middleware context</li>
+<li><code>X-Workspace-Slug</code> / <code>?workspace_slug</code></li>
+<li><code>X-Workspace-ID</code> / <code>?workspace_id</code> (CLI/daemon compatibility)</li>
+</ol>
+<p><strong>F01-12 - The priority chain is the security boundary, and it is written down as an ordered
+list in the source.</strong> The first entry winning is what makes the rest safe: the later headers
+are conveniences for humans and CLIs, not negotiation surfaces for an agent process.
+<em>Pole: P2. Relevance: Q2.</em></p>
+<h3 id="7-3-invocation-is-fail-closed">7.3 Invocation is fail-closed<a href="#batch-01/7-3-invocation-is-fail-closed" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>server/internal/service/agent_invocation.go</code> - <code>CanMemberInvokeAgent</code> (<code>:21</code>) and
+<code>memberMayInvokeAgent</code> (<code>:36</code>) start from &quot;no&quot; and open up: <code>agent.PermissionMode != &quot;public_to&quot;</code> short-circuits at <code>:44</code>, meaning anything that is not explicitly public is gated
+by membership. <code>ListAgentInvocationTargets</code> exists so the UI can enumerate who <em>may</em> be
+invoked rather than discovering it by trying.</p>
+<p><strong>F01-13 - Permission is enumerated, not inferred.</strong> <em>Pole: P1, P2. Relevance: Q1, Q2.</em></p>
+<hr>
+<h2 id="8-hermes-in-multica-our-lane-confirmed">8. Hermes in Multica - our lane, confirmed<a href="#batch-01/8-hermes-in-multica-our-lane-confirmed" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>We predicted in the pin that Multica drives Hermes. It does, and the shape is close to ours.</p>
+<p><code>server/pkg/agent/hermes.go</code>:</p>
+<ul>
+<li><code>hermesACPSubcommand = &quot;acp&quot;</code> (<code>hermes.go:144</code>) - <strong>the backend always launches
+<code>hermes acp</code></strong>. This is the same mandated product lane we arrived at independently.</li>
+<li><code>hermesBlockedArgs</code> (<code>hermes.go:37</code>) - a map of flags the daemon hard-codes and that must
+not be overridden by a caller.</li>
+<li><code>ParseHermesProfileArgs</code> (<code>hermes.go:81</code>) and <code>HermesProfileSelection</code> (<code>:66</code>) parse
+<code>-p/--profile</code> out of <code>custom_args</code>, and the file explicitly says it <em>mirrors</em>
+<code>hermes_cli.main._apply_profile_override</code> <strong>step 1b</strong>. Multica read Hermes&#39;s own CLI
+internals to get the handshake right.</li>
+<li>The file cites <strong>upstream GH #8878</strong> - a known argparse handshake bug - as the reason global
+flags must precede the <code>acp</code> subcommand. A vendored workaround for an upstream bug, with
+the bug&#39;s URL in a comment, is a maintenance artefact we should copy.</li>
+<li>Per-task <strong><code>HERMES_HOME</code> overlay</strong> via <code>execenv.ResolveHermesProfile</code>
+(<code>server/internal/daemon/execenv/</code>).</li>
+</ul>
+<p><strong>F01-14 - Multica drives Hermes through <code>hermes acp</code>, and it enforces the subcommand rather
+than trusting the caller.</strong> <em>Pole: P1. Relevance: Q1.</em></p>
+<p><strong>F01-15 - The profile handshake is mirrored from Hermes&#39;s own CLI code, bug-for-bug.</strong> When
+you integrate a CLI you do not control, you inherit its argument parser. Multica&#39;s response
+was to <em>read the parser</em> and to record the upstream issue number. <em>Pole: P1. Relevance: Q1.</em></p>
+<p><strong>F01-16 - The ACP machinery is provider-agnostic.</strong> <code>pkg/agent/</code> has 77 non-test files, of
+which 25 are one-per-provider adapters (<code>hermes.go</code>, <code>claude.go</code>, <code>codex.go</code>, <code>cursor.go</code>,
+<code>copilot.go</code>, <code>opencode.go</code>, <code>openclaw.go</code>, <code>pi.go</code>, <code>qoder.go</code>, <code>qwen.go</code>, <code>grok.go</code>,
+<code>dim.go</code>, <code>zeroclaw.go</code>, <code>antigravity.go</code>, <code>codearts.go</code>, <code>codebuddy.go</code>, <code>dsh.go</code>,
+<code>deveco.go</code>, <code>kimi.go</code>, <code>kiro.go</code>, <code>mcode.go</code>, <code>omp_session.go</code>, <code>qwenpaw.go</code>, <code>reasonix.go</code>,
+<code>traecli.go</code>). The other ~52 files are <strong>shared</strong>: <code>acp_session.go</code>, <code>acp_terminal.go</code>,
+<code>acp_usage.go</code>, <code>acp_deliverable.go</code>, <code>mcp_config.go</code>, <code>models.go</code>, <code>launch.go</code>,
+<code>exec_format.go</code>, <code>stream_scanner.go</code>, <code>thinking.go</code>. The README claims &quot;26 of them today&quot;
+(<code>README.md:166</code>) - close to the measured 25, and one provider may hide in a subdirectory.
+The correct use of a doc claim is as a checksum, not as the finding.</p>
+<p><strong>F01-19 - Hermes is the second-most-tested provider in the whole package.</strong>
+<code>pkg/agent/hermes_test.go</code> is <strong>4,860 lines</strong> - behind only <code>codex_test.go</code> (6,288) and well
+ahead of <code>models_test.go</code> (1,914), <code>kimi_test.go</code> (1,876) and <code>opencode_test.go</code> (1,850).
+Multica did not bolt Hermes on as an afterthought; it wrote a test surface for it second only
+to Codex. <em>Pole: P1. Relevance: Q1 - and the single most encouraging signal in this batch,
+because it means the Hermes lane in this codebase is exercised, not aspirational.</em></p>
+<p><strong>F01-17 - Skills are thin here, and that is itself a measurement.</strong> <code>server/pkg/skillbundle/</code>
+is ~120 lines; <code>server/internal/skill/</code> has <code>binary.go</code>, <code>frontmatter.go</code>, <code>reserved.go</code>; the
+built-in bundles are <code>multica-onboarding</code> and <code>multica-platform</code> in
+<code>server/internal/service/builtin_skills/</code>. Multica chose to put capability into the <em>provider</em>
+rather than into its own skill layer. <em>Pole: P1. Relevance: Q1 - and a caution for us.</em></p>
+<hr>
+<h2 id="9-the-migration-history-is-an-archive-of-decisions-not-just-schema">9. The migration history is an archive of decisions, not just schema<a href="#batch-01/9-the-migration-history-is-an-archive-of-decisions-not-just-schema" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>F01-18 - 598 up-migrations is the most honest document in this repository.</strong> Six contain
+<code>DROP TABLE</code>; eight carry RETIRED/DEPRECATED markers. The one to read first:</p>
+<p><code>server/migrations/344_plugin_v2_reset.up.sql</code> dropped <strong>14 plugin tables</strong> wholesale plus 11
+triggers and functions - and stated the reason <em>in the migration itself</em>: the system &quot;never
+left its feature flag, holds no production data.&quot; It then described the replacement: <strong>one
+<code>plugin_installation</code> row + <code>plugin_storage</code> + <code>plugin_secret</code>.</strong></p>
+<p>That is rule 10 executed properly by someone else: a whole subsystem deleted, with the reason
+and the successor written into the artefact that performs the deletion. We should copy the
+<em>practice</em>, not the schema. <em>Pole: P3. Relevance: Q3.</em></p>
+<p>The rest of the archive, measured: <code>042_autopilot</code> (the P3 seed), <code>004_agent_runtime_loop</code>
+(the machine/teammate split), <code>108_task_token</code> (the fence), and <code>005_daemon_pairing</code> with
+<code>029_drop_daemon_pairing</code> - a subsystem added and then removed, a pairing model that did not
+survive contact with reality. A repository that deletes things on the record is a repository
+we can trust to have measured what it kept.</p>
+<hr>
+<h2 id="10-doc-versus-code-divergences">10. Doc-versus-code divergences <span class="seal-badge" style="background:#fef2f2; color:#dc2626; border-color:#fca5a5; font-size: 0.65em; vertical-align: middle;">⚠️ FINDING NOTE</span><a href="#batch-01/10-doc-versus-code-divergences" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Rule 1 exists because docs flatter. These are the divergences found in batch 01.</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Doc claim</th>
+<th>Code measurement</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>D01-1</td>
+<td>README <code>:166</code> - &quot;26 [providers] today&quot;</td>
+<td>25 one-per-provider <code>.go</code> files in <code>pkg/agent/</code></td>
+<td><strong>Close.</strong> Off by one; treated as a checksum, not a count.</td>
+</tr>
+<tr>
+<td>D01-2</td>
+<td>README <code>:173</code> - Hermes listed in the provider table with CLI <code>hermes</code></td>
+<td><code>hermes.go</code> exists and drives <code>hermes acp</code></td>
+<td><strong>Accurate</strong>, and it confirms our lane is a first-class product path for someone else.</td>
+</tr>
+<tr>
+<td>D01-3</td>
+<td>VISION/README describe &quot;agents as teammates&quot; on a board</td>
+<td><code>agent</code> row + polymorphic assignee/author/actor</td>
+<td><strong>Accurate</strong> - and this is the dangerous kind: the doc is right, so you stop checking.</td>
+</tr>
+<tr>
+<td>D01-4</td>
+<td>The docs site is 225 <code>.mdx</code> in 5 languages</td>
+<td><code>apps/docs</code></td>
+<td>Docs are ~3% of the tree here - the <em>opposite</em> of CrewAI&#39;s 93%. <strong>The hazard inverts: with small docs, rule 1 still binds, because a small persuasive doc is exactly what makes you skip the code.</strong></td>
+</tr>
+<tr>
+<td>D01-5</td>
+<td>README describes &quot;Build with AI&quot; generating an agent</td>
+<td>not verified in batch 01</td>
+<td><strong>Deferred to batch 02.</strong></td>
+</tr>
+</tbody></table></div>
+<p><strong>The divergence that is not a divergence.</strong> <code>README.md</code> reads like a description of the
+platform we are building - teammates on a board, a workspace, automations. That is not
+evidence that Multica is right for us; it is evidence that our three poles are the <em>natural</em>
+shape of this problem, which is worth knowing and worth nothing on its own.</p>
+<hr>
+<h2 id="11-what-is-not-here-yet">11. What is NOT here (yet)<a href="#batch-01/11-what-is-not-here-yet" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Measured absences, stated as absences and not as judgements:</p>
+<ul>
+<li><strong>No per-tenant Hermes home in this codebase.</strong> <code>agent_runtime</code> is unique per
+<code>(workspace_id, daemon_id, provider)</code>, and <code>HERMES_HOME</code> is resolved per <em>task</em> through
+<code>execenv</code>. The tenancy-of-the-engine question is answered at the <em>daemon</em> level (one daemon
+per workspace, by the unique constraint), not at the <em>home</em> level. Our CC-84 hazard is
+therefore <strong>not</strong> solved by copying this shape - it is <em>narrowed</em>, because the agent&#39;s
+credential is task-scoped (section 7.1) even though the engine is shared.</li>
+<li><strong>No scheduler-side multi-tenancy abstraction read.</strong> <code>sys_cron_executions</code> is scoped by
+<code>(job_name, scope_kind, scope_id, plan_time)</code>, and <code>scope_kind</code>/<code>scope_id</code> is the tenancy
+hook - but batch 01 did not read the scoping implementation. <strong>Deferred to batch 03.</strong></li>
+<li><strong>No verified shared-engine-per-workspace <em>deployment</em>.</strong> The unique constraint makes one
+runtime per (workspace, daemon, provider) a database fact. Whether Multica actually <em>runs</em>
+one Hermes process per workspace in production, or many workspaces against one daemon, is
+not visible from the schema. <strong>Deferred to batch 02</strong> - <code>internal/daemon/</code> is where the
+answer lives.</li>
+<li><strong>Route count.</strong> See section 12 - measured now, but the <em>shape</em> of the API surface is a
+batch-02 question.</li>
+</ul>
+<hr>
+<h2 id="12-the-route-count-measured-properly">12. The route count, measured properly<a href="#batch-01/12-the-route-count-measured-properly" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>The pin flagged this as unresolved. It is now measured, with the method stated so the number
+can be defended or refuted.</p>
+<p><strong>Method:</strong> grep for HTTP verb registrations in the one file that owns the router,
+<code>server/cmd/server/router.go</code> (2,717 lines). Routes are registered against
+<code>publicapiv1.Path*</code> constants rather than inline literals, which is why earlier attempts that
+matched inline strings returned 19, then 58, then 1,175 - all three were measuring the wrong
+thing.</p>
+<p><strong>Result: 469 route registrations</strong> - 185 <code>GET</code>, 176 <code>POST</code>, 56 <code>DELETE</code>, 31 <code>PUT</code>,
+21 <code>PATCH</code>.</p>
+<p><strong>Cross-check:</strong> a repo-wide grep for verb registrations outside <code>router.go</code> returned 339
+hits, <strong>all of them in <code>cmd/multica/</code></strong> - that is the CLI acting as an HTTP <em>client</em>
+(<code>responseHeaders.Get(...)</code>, <code>r.URL.Query().Get(&quot;token&quot;)</code>), not a server registering routes.
+So 469 is the defensible count for the server&#39;s route table, and the 339 are a separate
+population (the CLI&#39;s outbound calls) that must not be added to it.</p>
+<p><strong>Caveat carried forward:</strong> 469 counts <em>registration lines</em>. Some are group registrations
+(<code>r.With(authRL).Post(&quot;/auth/send-code&quot;, ...)</code>) and some may share a handler. The number is a
+size signal, not an endpoint inventory. Batch 02 will produce the inventory if it is needed.</p>
+<hr>
+<h2 id="13-findings-table">13. Findings table<a href="#batch-01/13-findings-table" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Finding (one line)</th>
+<th>Pole</th>
+<th>Relevance</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>F01-01</td>
+<td>Assignee/author/actor are polymorphic - an agent is a first-class coworker</td>
+<td>P2, P1</td>
+<td>Q2</td>
+</tr>
+<tr>
+<td>F01-02</td>
+<td>The machine (<code>agent_runtime</code>) and the teammate (<code>agent</code>) are two separate rows</td>
+<td>P1, P2</td>
+<td>Q1, Q2</td>
+</tr>
+<tr>
+<td>F01-03</td>
+<td><code>UNIQUE (workspace_id, daemon_id, provider)</code> is the one-daemon-one-engine primitive</td>
+<td>P1</td>
+<td>Q1</td>
+</tr>
+<tr>
+<td>F01-04</td>
+<td>The claim is made per <strong>runtime</strong>, then dispatched to an agent</td>
+<td>P1, P3</td>
+<td>Q1, Q3</td>
+</tr>
+<tr>
+<td>F01-05</td>
+<td><code>ClaimAgentTask</code> is a real <code>FOR UPDATE SKIP LOCKED</code> claim with a total tie-break</td>
+<td>P3</td>
+<td>Q3</td>
+</tr>
+<tr>
+<td>F01-06</td>
+<td>The prepare lease is paired with four named staleness sweepers</td>
+<td>P3</td>
+<td>Q3</td>
+</tr>
+<tr>
+<td>F01-07</td>
+<td>A 14+14 canonical failure taxonomy, with an <code>agent_error.</code> prefix for agent-side faults</td>
+<td>P3</td>
+<td>Q3</td>
+</tr>
+<tr>
+<td>F01-08</td>
+<td>The scheduler&#39;s <code>sys_cron_executions</code> is simultaneously its lease and its audit log</td>
+<td>P3</td>
+<td>Q3</td>
+</tr>
+<tr>
+<td>F01-09</td>
+<td><code>CatchUpMode</code> makes &quot;missed six hours of cron&quot; a declared per-job decision</td>
+<td>P3</td>
+<td>Q3</td>
+</tr>
+<tr>
+<td>F01-10</td>
+<td>Autopilot is modelled as data (trigger -&gt; run), separate from the work queue</td>
+<td>P3</td>
+<td>Q3</td>
+</tr>
+<tr>
+<td>F01-11</td>
+<td>A <code>mat_</code> task-scoped token makes the task the credential&#39;s scope</td>
+<td>P2</td>
+<td>Q2</td>
+</tr>
+<tr>
+<td>F01-12</td>
+<td>Workspace resolution is an ordered chain whose first entry cannot be renegotiated</td>
+<td>P2</td>
+<td>Q2</td>
+</tr>
+<tr>
+<td>F01-13</td>
+<td>Invocation permission is fail-closed and enumerated, not inferred</td>
+<td>P1, P2</td>
+<td>Q1, Q2</td>
+</tr>
+<tr>
+<td>F01-14</td>
+<td>Hermes is driven through a hard-coded <code>hermes acp</code> subcommand with blocked args</td>
+<td>P1</td>
+<td>Q1</td>
+</tr>
+<tr>
+<td>F01-15</td>
+<td>The Hermes profile handshake is mirrored from Hermes&#39;s own CLI, with the upstream bug cited</td>
+<td>P1</td>
+<td>Q1</td>
+</tr>
+<tr>
+<td>F01-16</td>
+<td>25 provider adapters sit on ~52 shared ACP/mcp/model files - the lane is generic</td>
+<td>P1</td>
+<td>Q1</td>
+</tr>
+<tr>
+<td>F01-17</td>
+<td>Skills are ~120 lines + 2 built-in bundles; capability lives in the provider</td>
+<td>P1</td>
+<td>Q1</td>
+</tr>
+<tr>
+<td>F01-18</td>
+<td>598 migrations, 6 DROPs, 8 retired markers - a decision archive, not just schema</td>
+<td>P3</td>
+<td>Q3</td>
+</tr>
+<tr>
+<td>F01-19</td>
+<td>Hermes has the second-largest test surface in <code>pkg/agent/</code> (4,860 lines)</td>
+<td>P1</td>
+<td>Q1</td>
+</tr>
+</tbody></table></div>
+<p><strong>19 findings. Zero from a README.</strong></p>
+<hr>
+<h2 id="14-carried-forward">14. Carried forward<a href="#batch-01/14-carried-forward" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>Into batch 02 (P1 - the assistant):</strong></p>
+<ul>
+<li>Read <code>pkg/agent/acp_session.go</code>, <code>acp_terminal.go</code>, <code>acp_usage.go</code>, <code>acp_deliverable.go</code> -
+the shared ACP machinery that Hermes rides on. Is an ACP session <em>ours</em> in shape?</li>
+<li>Read <code>pkg/agent/hermes_test.go</code> (4,860 lines) - what Multica chose to <em>assert</em> about the
+Hermes lane is as informative as what it chose to build.</li>
+<li><code>internal/daemon/execenv/</code> - how <code>HERMES_HOME</code> is actually resolved per task. This is the
+single highest-value file set for our CC-84 hazard.</li>
+<li><code>runtime_version_no</code> vs <code>task_version_no</code> - a versioning pair seen in <code>agent.sql</code> whose
+coupling was <strong>not</strong> resolved in batch 01. Do not cite either until read.</li>
+</ul>
+<p><strong>Into batch 03 (P2 - the workspace):</strong></p>
+<ul>
+<li><code>sys_cron_executions</code> scoping (<code>scope_kind</code>/<code>scope_id</code>) - is tenancy a first-class concept
+in the scheduler, or an afterthought?</li>
+<li>The daemon pairing subsystem that was added in <code>005</code> and dropped in <code>029</code> - <em>why</em> it failed
+is worth more than the schema.</li>
+</ul>
+<p><strong>Into batch 04 (P3 - automations):</strong></p>
+<ul>
+<li>Full autopilot concurrency/quota tables, and what &quot;quota&quot; gates against.</li>
+<li>The six registered scheduler jobs in detail, especially <code>issue-wakeup</code> vs <code>WakeupTypes</code>.</li>
+</ul>
+<p><strong>Into batch 05 (PX-W / PX-F - widgets and frontend):</strong></p>
+<ul>
+<li><code>internal/integrations/</code> is <strong>43,314 lines</strong> across lark/wecom/dingtalk/slack/telegram -
+5.4% of the backend spent on chat bridges. Whether any of it maps to our widget story is an
+open question, but the <em>existence</em> of that spend is a signal about where Multica&#39;s centre of
+gravity actually is.</li>
+</ul>
+<hr>
+<p><em>Batch 01 of 07. Complete 2026-10-15. Next: <code>findings/02-the-assistant-p1.md</code>.</em></p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="00-the-pin-method.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">The Pin &amp; Method</span>
+                </a>
+              
+
+              <a href="../index.html#batch-01" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              
+                <a href="02-the-aissistant-p1.html" class="nav-page-btn" style="text-align:right;">
+                  <span class="nav-btn-sub">Next Batch →</span>
+                  <span class="nav-btn-title">The Aissistant (P1)</span>
+                </a>
+              
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#0-what-this-batch-had-to-answer" class="toc-link">0. What this batch had to answer</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#1-the-measured-shape" class="toc-link">1. The measured shape</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#the-go-backend-by-area-non-test-lines" class="toc-link">The Go backend, by area (non-test lines)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#2-the-data-model-the-tenant-spine" class="toc-link">2. The data model: the tenant spine</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-the-single-most-important-finding-the-machine-and-the-teammate-are-two-rows" class="toc-link">3. The single most important finding: the machine and the teammate are two rows</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-the-delivery-layer-the-thing-crewai-did-not-have" class="toc-link">4. The delivery layer - the thing CrewAI did not have</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-1-a-literal-queue-table" class="toc-link">4.1 A literal queue table</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-2-a-real-claim" class="toc-link">4.2 A real claim</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-3-a-lease-and-the-sweepers-that-reclaim-it" class="toc-link">4.3 A lease, and the sweepers that reclaim it</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-4-a-canonical-failure-taxonomy" class="toc-link">4.4 A canonical failure taxonomy</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-5-the-event-contract-and-what-it-deliberately-excludes" class="toc-link">4.5 The event contract, and what it deliberately excludes</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-the-scheduler-a-distributed-cron-that-audits-itself" class="toc-link">5. The scheduler: a distributed cron that audits itself</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-autopilot-a-trigger-is-a-row-and-a-run-is-a-row" class="toc-link">6. Autopilot: a trigger is a row, and a run is a row</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-tenancy-and-identity-the-fence-around-the-agent" class="toc-link">7. Tenancy and identity: the fence around the agent</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#7-1-a-task-scoped-credential" class="toc-link">7.1 A task-scoped credential</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#7-2-the-workspace-resolution-chain" class="toc-link">7.2 The workspace resolution chain</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#7-3-invocation-is-fail-closed" class="toc-link">7.3 Invocation is fail-closed</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#8-hermes-in-multica-our-lane-confirmed" class="toc-link">8. Hermes in Multica - our lane, confirmed</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#9-the-migration-history-is-an-archive-of-decisions-not-just-schema" class="toc-link">9. The migration history is an archive of decisions, not just schema</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#10-doc-versus-code-divergences" class="toc-link">10. Doc-versus-code divergences</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#11-what-is-not-here-yet" class="toc-link">11. What is NOT here (yet)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#12-the-route-count-measured-properly" class="toc-link">12. The route count, measured properly</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#13-findings-table" class="toc-link">13. Findings table</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#14-carried-forward" class="toc-link">14. Carried forward</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('multica_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('multica_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('multica_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('multica_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.MulticaReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

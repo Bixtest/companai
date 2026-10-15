@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 02 — The aissistant (P1) — Multica Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-02" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 02</span>
+      <div class="header-title-wrap">
+        <div class="header-title">The Aissistant (P1)</div>
+        <div class="header-subtitle">Multica Platform Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/02-the-aissistant.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #059669">DONE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">3,489</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">17 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">369</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-15</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 02 Architecture Guide (Default)</option>
+            <optgroup label="Strategic Architecture">
+              <option value="master">Executive Topology: the three poles and the two absent layers</option>
+            </optgroup>
+            <optgroup label="Foundations">
+              <option value="00">Batch 00: The pin, the shape, and the method</option>
+              <option value="01">Batch 01: The control plane — server, daemon, queue, cron, fence</option>
+            </optgroup>
+            <optgroup label="Pole 1 — The Aissistant">
+              <option value="02">Batch 02: The aissistant — machine, teammate, one seam</option>
+            </optgroup>
+            <optgroup label="Pole 2 — The Workspace">
+              <option value="03">Batch 03: The workspace — a fenced tenant</option>
+            </optgroup>
+            <optgroup label="Pole 3 — Automations">
+              <option value="04">Batch 04: Automations — the delivery layer</option>
+            </optgroup>
+            <optgroup label="Cross-Cutting">
+              <option value="05">Batch 05: Widgets &amp; frontend — and the absent widget model</option>
+            </optgroup>
+            <optgroup label="Escape Hatch">
+              <option value="06">Batch 06: Out-of-pole — perimeter, plugin reset, cutover</option>
+            </optgroup>
+            <optgroup label="Strategic Decision">
+              <option value="07">Batch 07: The synthesis — ranked mechanisms and the verdict</option>
+            </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 02 VISUAL GUIDE</div>
+    <h4>The aissistant: a stored teammate, a machine, and one engine seam</h4>
+    <p>What an agent is, what runs it, how it is configured, and who may make it run</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 350" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-02" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-02" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+        <marker id="arrr-02" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#ef4444"/>
+        </marker>
+      </defs>
+      <g transform="translate(20, 20)">
+        <rect width="210" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE MACHINE</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">agent_runtime</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">workspace · daemon · provider</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">status: online | offline</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">last_seen_at → the health gate</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#6d28d9">UNIQUE (ws, daemon, provider)</text>
+      </g>
+      <path d="M 230 95 L 268 95" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-02)"/>
+      <g transform="translate(272, 20)">
+        <rect width="210" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE TEAMMATE</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">agent — 29 columns</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">runtime_id NOT NULL RESTRICT</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">model / thinking / service_tier</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">instructions · custom_env/args</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#b45309">runtime-native, not neutralised</text>
+      </g>
+      <path d="M 482 95 L 520 95" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-02)"/>
+      <g transform="translate(524, 20)">
+        <rect width="180" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE SEAM</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Backend interface</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Execute(ctx, prompt, opts)</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">24 structs / 25 provider keys</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">SupportedTypes = closed list</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">kept in lockstep w/ DB CHECK</text>
+      </g>
+      <path d="M 704 95 L 742 95" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-02)"/>
+      <g transform="translate(746, 20)">
+        <rect width="154" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">WHO MAY RUN</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">permission_mode</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">private | public_to</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">agent_invocation_target</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">workspace | member | team</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">deny-by-default</text>
+      </g>
+      <rect x="20" y="196" width="430" height="136" rx="10" fill="#7c3aed" fill-opacity="0.08" stroke="#7c3aed" stroke-width="1.6"/>
+      <text x="38" y="222" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#6d28d9">THE INVOCATION GATE (agent_access.go:73-133)</text>
+      <text x="38" y="246" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">1. the owner may always invoke their own agent</text>
+      <text x="38" y="266" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">2. if not public_to → FALSE (no admin bypass, no A2A bypass)</text>
+      <text x="38" y="286" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">3. else walk the targets and OR-match them</text>
+      <text x="38" y="312" font-family="system-ui, sans-serif" font-size="10.5" font-weight="600" fill="#6d28d9">A2A is judged by the top-of-chain HUMAN originator.</text>
+      <rect x="470" y="196" width="430" height="136" rx="10" fill="#ef4444" fill-opacity="0.08" stroke="#ef4444" stroke-width="1.6"/>
+      <text x="488" y="222" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#b91c1c">WHAT IT DOES NOT HAVE</text>
+      <text x="488" y="246" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">• an engine of its own — the provider is a third-party CLI</text>
+      <text x="488" y="266" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">• a live team concept — the team target is stored but inert</text>
+      <text x="488" y="286" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">• one unified execution model — 24 adapters, not one loop</text>
+      <text x="488" y="312" font-family="system-ui, sans-serif" font-size="10.5" font-weight="600" fill="#b91c1c">The seam is real; the engine behind it is not Multica's.</text>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="batch-02-the-aissistant-p1">Batch 02 — The Aissistant (P1)<a href="#batch-02/batch-02-the-aissistant-p1" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Study:</strong> Multica <code>0.2.0</code> · <strong>Batch:</strong> 02 of 07 · <strong>Status:</strong> COMPLETE
+<strong>Source:</strong> <code>github.com/multica-ai/multica</code> → <code>platforms/_extracted/multica-main</code>
+<strong>Zip md5:</strong> <code>30ddc64af536212e25a6c00db5672b82</code> · <strong>License:</strong> Apache-2.0 + Multica conditions
+<strong>Method:</strong> rules 1-10 of <code>00-PIN-AND-METHOD.md</code>. Every claim carries <code>file:line</code>.
+Docs are claims; code is the authority. Nothing in this file was inferred from a README.</p>
+<hr>
+<h2 id="0-what-this-batch-had-to-answer">0. What this batch had to answer<a href="#batch-02/0-what-this-batch-had-to-answer" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>P1 is <strong>the aissistant</strong> — the AI user: what it <em>is</em>, what runs it, how it is configured, what it can
+do, and who is allowed to make it run. Batch 01 established that an <code>agent</code> exists as a stored row and
+is dispatched work through a queue. This batch opens the row up.</p>
+<p>Short answer, measured:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Question</th>
+<th>Multica&#39;s answer</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>What is an &quot;agent&quot;?</td>
+<td>A stored <strong>teammate</strong> (<code>agent</code>) bound to a stored <strong>machine</strong> (<code>agent_runtime</code>). Two rows, not one.</td>
+<td>F02-01</td>
+</tr>
+<tr>
+<td>What runs it?</td>
+<td>One Go interface (<code>Backend.Execute</code>) behind <strong>24 backend structs</strong> for <strong>25 provider keys</strong></td>
+<td>F02-02</td>
+</tr>
+<tr>
+<td>What is the provider whitelist?</td>
+<td>A closed <code>SupportedTypes</code> list kept in lockstep with a DB <code>CHECK</code> by hand + migrations</td>
+<td>F02-03</td>
+</tr>
+<tr>
+<td>Can a workspace define its own runtime?</td>
+<td>Yes — <code>runtime_profile</code>, based only on an officially-supported family</td>
+<td>F02-04</td>
+</tr>
+<tr>
+<td>How is one agent different from another?</td>
+<td><strong>12 per-agent columns</strong> (<code>model</code>, <code>thinking_level</code>, <code>custom_env</code>, <code>custom_args</code>, <code>mcp_config</code>, <code>instructions</code>, …)</td>
+<td>F02-06</td>
+</tr>
+<tr>
+<td>What are its skills?</td>
+<td><strong>Two kinds</strong>: workspace skills (structured, M2M) and runtime skills (the CLI&#39;s own)</td>
+<td>F02-08</td>
+</tr>
+<tr>
+<td>Who may make it run?</td>
+<td><code>permission_mode</code> (<code>private</code> | <code>public_to</code>) + an allow-list of <strong>invocation targets</strong>, <strong>deny-by-default</strong></td>
+<td>F02-09</td>
+</tr>
+</tbody></table></div>
+<p>Everything here is the <em>agent</em> layer. The workspace (batch 03), the scheduler/dispatch (batch 04) and
+the UI (batch 05) are separate; this file stops at the agent boundary.</p>
+<hr>
+<h2 id="1-the-agent-record-the-durable-shape">1. The agent record — the durable shape<a href="#batch-02/1-the-agent-record-the-durable-shape" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Measured: <strong>598 up-migrations</strong> in <code>server/migrations/</code>; <strong>229</strong> mention <code>agent</code>; <strong>25</strong> touch the
+<code>agent</code> table itself. The agent is the most-evolved table in the schema.</p>
+<p>The current column set is the <code>Agent</code> struct in the sqlc output, <code>pkg/db/generated/models.go:25-57</code>
+(<strong>29 columns</strong>). Grouped by what they do:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Group</th>
+<th>Columns</th>
+<th>Added by</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Identity</strong></td>
+<td><code>id</code>, <code>workspace_id</code>, <code>name</code>, <code>avatar_url</code>, <code>owner_id</code>, <code>created_at</code>, <code>updated_at</code></td>
+<td><code>001_init</code></td>
+</tr>
+<tr>
+<td><strong>Runtime binding</strong></td>
+<td><code>runtime_mode</code> (<code>local</code>|<code>cloud</code>), <code>runtime_config</code> (jsonb), <code>runtime_id</code></td>
+<td><code>001_init</code>; <code>runtime_id</code> by <code>004</code></td>
+</tr>
+<tr>
+<td><strong>Who may run it</strong></td>
+<td><code>visibility</code> (legacy), <code>permission_mode</code> (<code>private</code>|<code>public_to</code>)</td>
+<td><code>001_init</code>; <code>permission_mode</code> by <code>130</code></td>
+</tr>
+<tr>
+<td><strong>Kind</strong></td>
+<td><code>kind</code> (<code>user</code>|<code>system</code>), <code>system_key</code></td>
+<td><code>163</code></td>
+</tr>
+<tr>
+<td><strong>Lifecycle</strong></td>
+<td><code>status</code> (<code>idle</code>|<code>working</code>|<code>blocked</code>|<code>error</code>|<code>offline</code>), <code>archived_at</code>, <code>archived_by</code></td>
+<td><code>001_init</code>; archive by <code>031</code></td>
+</tr>
+<tr>
+<td><strong>Capacity</strong></td>
+<td><code>max_concurrent_tasks</code></td>
+<td><code>001_init</code>; default 1→6 by <code>023</code></td>
+</tr>
+<tr>
+<td><strong>Behaviour</strong></td>
+<td><code>description</code>, <code>instructions</code></td>
+<td><code>002</code>; <code>021</code></td>
+</tr>
+<tr>
+<td><strong>Launch config</strong></td>
+<td><code>custom_env</code> (jsonb), <code>custom_args</code> (jsonb)</td>
+<td><code>040</code>; <code>041</code></td>
+</tr>
+<tr>
+<td><strong>Model config</strong></td>
+<td><code>model</code>, <code>thinking_level</code>, <code>service_tier</code></td>
+<td><code>050</code>; <code>095</code>; <code>212</code></td>
+</tr>
+<tr>
+<td><strong>MCP config</strong></td>
+<td><code>mcp_config</code> (jsonb)</td>
+<td><code>046</code></td>
+</tr>
+<tr>
+<td><strong>Skills</strong></td>
+<td><code>disabled_runtime_skills</code> (jsonb)</td>
+<td><code>206</code></td>
+</tr>
+<tr>
+<td><strong>Integrations</strong></td>
+<td><code>composio_toolkit_allowlist</code> (text[])</td>
+<td><code>129</code></td>
+</tr>
+<tr>
+<td><strong>UI affordance</strong></td>
+<td><code>conversation_starters</code> (jsonb)</td>
+<td><code>404</code>, renamed by <code>432</code></td>
+</tr>
+</tbody></table></div>
+<p><strong>The one detail worth stating plainly.</strong> <code>runtime_config</code> (jsonb, from <code>001_init</code>) is the <em>legacy</em>
+free-form config. The later migrations did not extend it — they <strong>promoted fields out of it into
+typed columns</strong> (<code>model</code>, <code>thinking_level</code>, <code>service_tier</code>, <code>custom_env</code>, <code>custom_args</code>, <code>mcp_config</code>).
+Migration <code>050_agent_model.up.sql</code> says why in its own words: <em>&quot;Previously the only way to pick a model
+per agent was via custom_env / custom_args; a first-class column lets the UI render a dropdown and keeps
+Codex-style app-server providers (which reject <code>-m</code> in custom_args) working without CLI flags.&quot;</em> A
+jsonb blob was replaced by columns the moment a UI had to render a picker over them.</p>
+<hr>
+<h2 id="2-provider-runtime-the-machine-teammate-split-the-load-bearing-finding">2. Provider + runtime — the machine / teammate split (the load-bearing finding)<a href="#batch-02/2-provider-runtime-the-machine-teammate-split-the-load-bearing-finding" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="2-1-two-rows-deliberately">2.1 Two rows, deliberately<a href="#batch-02/2-1-two-rows-deliberately" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>004_agent_runtime_loop.up.sql</code> splits the thing that <em>is</em> from the thing that <em>runs</em>:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>text</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code>agent_runtime (id, workspace_id, daemon_id, name, runtime_mode, provider,
+               status[online|offline], device_info, metadata, last_seen_at,
+               UNIQUE (workspace_id, daemon_id, provider))          -- 004:1-15
+agent.runtime_id  -&gt;  agent_runtime(id)  ON DELETE RESTRICT (NOT NULL) -- 004:70-73
+</code></pre>
+</div>
+<p><code>agent_runtime</code> is <strong>the machine</strong> — a daemon, on a host, for one provider. <code>agent</code> is <strong>the teammate</strong>
+— a stored colleague that a runtime runs. One runtime hosts many agents; <code>agent.runtime_id</code> is
+<code>NOT NULL</code> and <code>ON DELETE RESTRICT</code>, so an agent cannot outlive the machine it is bound to, and a
+machine cannot be deleted while it still owns an agent.</p>
+<h3 id="2-2-one-interface-24-implementations">2.2 One interface, 24 implementations<a href="#batch-02/2-2-one-interface-24-implementations" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>pkg/agent/agent.go:18-23</code> is the whole seam:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>go</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-go">type Backend interface {
+	Execute(ctx context.Context, prompt string, opts ExecOptions) (*Session, error)
+}
+</code></pre>
+</div>
+<p>Every provider is a struct implementing that one method — <strong>24 backend structs</strong> in <code>pkg/agent/</code>
+(<code>claudeBackend</code>, <code>codexBackend</code>, <code>hermesBackend</code>, <code>opencodeBackend</code>, <code>cursorBackend</code>, …). <code>New()</code>
+(<code>agent.go:437</code>) is a <code>switch</code> over the provider key that returns the right one.</p>
+<p><strong>24 structs, 25 keys.</strong> <code>SupportedTypes</code> (<code>agent.go:369-395</code>) lists <strong>25</strong> provider keys; the
+difference is <code>qoder</code> and <code>qoderclicn</code>, which share one ACP backend — the comment at <code>agent.go:362-364</code>
+states the reason: <em>&quot;keeping both provider keys lets the daemon auto-detect and register the
+international and China-region binaries independently.&quot;</em></p>
+<h3 id="2-3-the-whitelist-is-closed-and-kept-closed-by-hand">2.3 The whitelist is closed, and kept closed by hand<a href="#batch-02/2-3-the-whitelist-is-closed-and-kept-closed-by-hand" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>SupportedTypes</code> is the canonical whitelist, and its own comment (<code>agent.go:352-368</code>) records that it
+<strong>MUST stay in lockstep</strong> with the <code>runtime_profile.protocol_family</code> CHECK constraint — and then lists
+<strong>every migration that widened it</strong> (<code>120</code>, <code>134</code>, <code>136</code>, <code>175</code>, <code>179</code>, <code>202</code>, <code>242</code>, <code>253</code>, <code>254</code>,
+<code>313</code>, <code>342</code>, <code>370</code>, <code>403</code>, <code>441</code>). That is a real anti-drift discipline: the same set is enforced in
+Go and in Postgres, and every time it grew, a migration recorded it.</p>
+<h3 id="2-4-a-workspace-may-define-its-own-runtime-within-the-whitelist">2.4 A workspace may define its own runtime — within the whitelist<a href="#batch-02/2-4-a-workspace-may-define-its-own-runtime-within-the-whitelist" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>120_runtime_profile.up.sql</code> adds <code>runtime_profile</code>: a workspace-level definition of a custom runtime
+(an in-house wrapper of an official CLI). Its <code>protocol_family</code> may only be a value in
+<code>SupportedTypes</code>. Two rules in its header are worth carrying forward:</p>
+<ul>
+<li><strong>No new foreign keys</strong> — &quot;Referential integrity policy (house rule): this migration does NOT add any
+new database foreign keys or ON DELETE cascades.&quot; Cleanup is application code&#39;s job.</li>
+<li><strong>The profile carries no per-agent args.</strong> Its only args column is <code>fixed_args</code> (the args <em>every</em>
+agent on that runtime must inherit). Per-agent args stay on <code>agent.custom_args</code>.</li>
+</ul>
+<h3 id="2-5-adding-a-fork-is-a-descriptor-not-a-rewrite">2.5 Adding a fork is a descriptor, not a rewrite<a href="#batch-02/2-5-adding-a-fork-is-a-descriptor-not-a-rewrite" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>pkg/agent/builtin_runtimes.go:18-85</code> declares <code>BuiltinRuntime</code> — <em>&quot;the single declaration site for a
+runtime identity.&quot;</em> Its header states that <code>agents_probe.go</code>, <code>config.go</code>, display names, execenv skill
+paths, <code>ListModels</code> and the frontend maps <strong>all derive from this</strong>, so <em>&quot;adding a new compatible fork of
+an existing runtime is a descriptor entry, not a cross-stack change.&quot;</em> Today the list has <strong>one</strong> entry
+(<code>omp</code> → the <code>pi</code> family, <code>builtin_runtimes.go:86-</code>), which is exactly the shape being described: a fork
+that cost one struct literal.</p>
+<hr>
+<h2 id="3-the-configuration-surface-what-makes-one-agent-different-from-another">3. The configuration surface — what makes one agent different from another<a href="#batch-02/3-the-configuration-surface-what-makes-one-agent-different-from-another" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Twelve per-agent columns (§1). Three of them are worth naming because of a shared design choice:</p>
+<ul>
+<li><code>model</code> (<code>050</code>), <code>thinking_level</code> (<code>095</code>), <code>service_tier</code> (<code>212</code>).</li>
+<li><code>095_agent_thinking_level.up.sql</code> stores <em>&quot;the runtime-native string … rather than a cross-runtime
+abstraction, so the user-visible value matches what each CLI&#39;s own UI advertises (see MUL-2339). NULL
+means &#39;use the runtime/model default&#39;.&quot;</em></li>
+<li><code>212_agent_service_tier.up.sql</code> does the same: <em>&quot;the value is the runtime-native catalog ID reported
+by <code>codex debug models --bundled</code> … NULL means &#39;inherit&#39;.&quot;</em></li>
+</ul>
+<p><strong>The choice, stated plainly:</strong> Multica does <strong>not</strong> invent a neutral vocabulary and translate it per
+provider. It stores the provider&#39;s own token and passes it through. The cost is that the value means
+different things on different runtimes; the benefit is that what the user sees is what the CLI accepts.</p>
+<h3 id="3-1-the-model-catalog-knows-what-it-does-not-know">3.1 The model catalog knows what it does not know<a href="#batch-02/3-1-the-model-catalog-knows-what-it-does-not-know" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>pkg/agent/models.go</code> is 3,003 lines of model discovery, and its types encode honesty:</p>
+<ul>
+<li><code>Catalog</code> (<code>models.go:108</code>) separates <code>Models</code>, <code>Unavailable</code>, <code>Fallback</code> and <code>CLIThinkingLevels</code>.</li>
+<li><code>UnavailableModel</code> (<code>models.go:64</code>) is <em>&quot;a model the runtime named but will not run on this host&quot;</em> —
+kept in a <strong>separate list</strong> so it can never be mistaken for selectable.</li>
+<li><code>Catalog.Verified()</code> (<code>models.go:147</code>) reports whether the catalog is the runtime&#39;s <em>own</em> answer. Its
+docstring is the rule: a fallback or an empty catalog means <strong>&quot;unknown&quot;, not &quot;unsupported&quot;</strong> — the
+saved value goes to the CLI as-is and the CLI is the judge.</li>
+<li><code>Fallback</code> must never enter the day-scale cache, or <em>&quot;one transient failure [becomes] the answer for
+24h&quot;</em> (<code>models.go:120-127</code>, MUL-5549).</li>
+</ul>
+<hr>
+<h2 id="4-skills-two-different-things-share-the-word">4. Skills — two different things share the word<a href="#batch-02/4-skills-two-different-things-share-the-word" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="4-1-workspace-skills-structured-many-to-many">4.1 Workspace skills (structured, many-to-many)<a href="#batch-02/4-1-workspace-skills-structured-many-to-many" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>008_structured_skills.up.sql</code> created three tables: <code>skill</code> (workspace-level: <code>name</code>, <code>description</code>,
+<code>content</code>, <code>config</code>), <code>skill_file</code> (supporting files by path), and <code>agent_skill</code> (the M2M join). The
+same migration <strong>dropped the earlier text <code>skills</code> column</strong> from <code>agent</code> (see §8).</p>
+<p>A workspace skill&#39;s content is a <code>SKILL.md</code>. <code>internal/skill/frontmatter.go:27</code> parses its YAML
+frontmatter for <code>name</code>/<code>description</code>, and <code>internal/skill/reserved.go:12,25</code> reserves the filename
+<code>SKILL.md</code> — a supporting file may not claim the path the daemon writes the primary content to, and the
+check cleans the path first so <code>./SKILL.md</code> and <code>sub/../SKILL.md</code> are caught too.</p>
+<h3 id="4-2-runtime-skills-the-cli-s-own">4.2 Runtime skills (the CLI's own)<a href="#batch-02/4-2-runtime-skills-the-cli-s-own" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>206_agent_disabled_runtime_skills.up.sql</code> added <code>disabled_runtime_skills</code>. These are <strong>not</strong> workspace
+skills: they are skills the <em>provider CLI</em> ships, and the column is a per-agent <strong>disable list</strong>.
+<code>internal/daemon/execenv/runtime_skill_policy.go:17</code> defines <code>RuntimeSkillRefForEnv{Root, Key, Name, Plugin}</code> — <em>&quot;a runtime-local skill for provider-specific task environment filtering.&quot;</em> So a workspace
+skill is authored and shared; a runtime skill is inherited from the CLI and can only be switched off.</p>
+<h3 id="4-3-skill-bundles-are-hashed">4.3 Skill bundles are hashed<a href="#batch-02/4-3-skill-bundles-are-hashed" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>pkg/skillbundle/hash.go</code> exists to hash a skill bundle. (Its use is on the dispatch path; the mechanics
+belong to batch 04.)</p>
+<hr>
+<h2 id="5-permissions-the-security-critical-half">5. Permissions — the security-critical half<a href="#batch-02/5-permissions-the-security-critical-half" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="5-1-two-questions-deliberately-separated">5.1 Two questions, deliberately separated<a href="#batch-02/5-1-two-questions-deliberately-separated" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>internal/handler/agent_access.go:13-23</code> states the split in its own words:</p>
+<blockquote>
+<p><em>&quot;Two distinct questions, previously conflated in <code>canAccessPrivateAgent</code>:</em>
+<em>- &quot;can this actor SEE / open this agent in the UI&quot; → <code>canAccessPrivateAgent</code></em>
+<em>- &quot;can this actor TRIGGER a run for this agent&quot; → <code>canInvokeAgent</code></em>
+<em>The invoke gate is the security-critical one: a workspace admin must NOT be able to invoke someone&#39;s
+private agent (and thereby use that owner&#39;s Composio/OAuth connections) just because they are an
+admin. Admin retains management + inventory visibility, not the ability to run.&quot;</em></p>
+</blockquote>
+<h3 id="5-2-the-model">5.2 The model<a href="#batch-02/5-2-the-model" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>130_agent_invocation_permission.up.sql</code> (MUL-3963) replaced the overloaded <code>visibility</code> column with:</p>
+<ul>
+<li><code>agent.permission_mode</code>: <strong><code>private</code></strong> (owner only — <em>no admin bypass, no A2A bypass</em>) or
+<strong><code>public_to</code></strong> (an allow-list decides).</li>
+<li><code>agent_invocation_target</code>: one row per <code>(agent, target_type, target_id)</code>, <code>target_type ∈ {workspace, member, team}</code>. Targets <strong>stack</strong>, and the gate <strong>OR-matches</strong> them. <code>team</code> is <em>&quot;reserved … stored
+but NOT effective in V1 (no team membership source yet).&quot;</em></li>
+<li><code>visibility</code> is <strong>kept and derived</strong> — <em>&quot;so old clients never see a permission WIDENING.&quot;</em> It is no
+longer an authorization source.</li>
+</ul>
+<p>The default is <code>private</code>, and the migration says why: <em>&quot;Default private = deny-by-default.&quot;</em></p>
+<h3 id="5-3-the-gate-read-in-code">5.3 The gate, read in code<a href="#batch-02/5-3-the-gate-read-in-code" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>internal/handler/agent_access.go:73</code> <code>invokeAgentDecision</code>:</p>
+<ol>
+<li>Owner may always invoke their own agent (<code>:82</code>).</li>
+<li>If <code>permission_mode != &quot;public_to&quot;</code> → <strong>false</strong>, deny-by-default (<code>:86-90</code>).</li>
+<li>Otherwise walk the targets (<code>:115-131</code>): <code>workspace</code> admits a workspace member — and, as a
+<em>&quot;deliberate, product-approved exception&quot;</em> (<code>:99-106</code>), also admits agent/system principals so a
+webhook or automation can trigger a workspace-shared agent with no human at the top of the chain;
+<code>member</code> requires the matching human; <code>team</code> admits no one in V1.</li>
+</ol>
+<h3 id="5-4-agent-to-agent-is-judged-by-the-human-at-the-top">5.4 Agent-to-agent is judged by the human at the top<a href="#batch-02/5-4-agent-to-agent-is-judged-by-the-human-at-the-top" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>The rule (<code>agent_access.go:33-36</code>): <em>&quot;A2A is judged by the top-of-chain human originator, never by the
+immediate agent actor: if user U triggers agent A and A @-mentions agent B, B is only invocable when U
+(the originator) is in B&#39;s allow-list. This prevents agents from forming a channel that bypasses the
+owner&#39;s white-list.&quot;</em></p>
+<h3 id="5-5-denied-is-kept-apart-from-unknown">5.5 "Denied" is kept apart from "unknown"<a href="#batch-02/5-5-denied-is-kept-apart-from-unknown" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>internal/service/agent_invocation.go:21-50</code> is the durable-trigger twin of the gate. Its comment draws
+the distinction that matters for a scheduler: <code>(false, nil)</code> is a real verdict; <code>(false, err)</code> is <em>&quot;we
+do not know&quot;</em>. The durable path (<code>CanMemberInvokeAgent</code>) fails <strong>closed</strong> on a lookup error, while the
+interactive path wants the error so it can retry rather than tell a person they lack a permission they
+have. Collapsing the two <em>&quot;is what turns one transient database error into … a person told they lack a
+permission they have.&quot;</em></p>
+<h3 id="5-6-no-foreign-keys">5.6 No foreign keys<a href="#batch-02/5-6-no-foreign-keys" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>130</code>&#39;s header states the house rule again: <code>agent_invocation_target</code> carries <strong>no</strong> FKs; the
+application maintains the relationships (targets pruned on member removal; agent rows cleaned on
+hard-delete). The migration explains the one real hazard this creates — a re-invited user must not
+inherit stale grants — and the app-level function that prevents it.</p>
+<hr>
+<h2 id="6-product-defined-agents">6. Product-defined agents<a href="#batch-02/6-product-defined-agents" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>163_agent_builder.up.sql</code> added <code>kind (&#39;user&#39;|&#39;system&#39;)</code> and <code>system_key</code>. A <code>system</code> agent is one the
+<strong>product</strong> defines, not the user:</p>
+<ul>
+<li><strong>Mika</strong> — a product onboarding agent: <code>internal/handler/mika_agent.go:125,172,192</code> create agents with
+<code>system_key = service.MikaSystemKey</code>, and <code>mika_onboarding.go:99</code> recognises them.</li>
+<li><strong>The agent builder</strong> — the agent that <em>builds</em> agents: <code>agent_builder.go:115-116</code> sets
+<code>system_key = &lt;prefix&gt; + flowID</code>, and <code>:509-511</code> guards by <code>kind == &quot;system&quot; &amp;&amp; prefix match</code>.</li>
+</ul>
+<p><code>172_agent_system_identity_index.up.sql</code> adds a <strong>partial unique index</strong> —
+<code>UNIQUE (workspace_id, owner_id, runtime_id, system_key) WHERE system_key IS NOT NULL</code> — so a given
+product agent exists once per (owner, runtime) and user agents are unconstrained. The index is created
+<code>CONCURRENTLY</code> in a <strong>single-statement migration</strong>, because <em>&quot;concurrent index creation cannot run in a
+transaction or a multi-command migration.&quot;</em></p>
+<hr>
+<h2 id="7-the-lifecycle">7. The lifecycle<a href="#batch-02/7-the-lifecycle" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<ul>
+<li><code>status ∈ {idle, working, blocked, error, offline}</code> (<code>001_init</code>) — the teammate&#39;s live state.</li>
+<li><code>archived_at</code> / <code>archived_by</code> (<code>031</code>) — <strong>soft delete</strong>, <em>&quot;soft-delete replacement.&quot;</em> Agents are
+normally archived, not deleted, so related rows (invocation targets, drafts) persist across
+archive/restore.</li>
+<li><code>max_concurrent_tasks</code> — default <strong>1</strong>, raised to <strong>6</strong> by <code>023</code>, which also back-filled existing rows
+set to 1. (Batch 04 covers how the queue honours it.)</li>
+<li><code>agent_builder_draft</code> (<code>252</code>) — the half-typed configuration of an agent being created by
+conversation, made a <strong>server-owned object</strong> so it survives a reload. <code>draft</code> is <strong>opaque to the
+server</strong> (<em>&quot;teaching Postgres and the handler about it would create a second definition to keep in
+sync for no gain&quot;</em>), and <code>chat_session_id</code> is the primary key so the write path is a plain upsert.</li>
+</ul>
+<hr>
+<h2 id="8-the-retirement-ledger-rule-10">8. The retirement ledger (rule 10)<a href="#batch-02/8-the-retirement-ledger-rule-10" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Multica was predicted to be the richest retirement surface of the three studies, and it is. Four
+retirements found, each with its reason recorded in the migration itself:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Migration</th>
+<th>What was removed</th>
+<th>Why (the migration&#39;s own words)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>008_structured_skills</code></td>
+<td><code>agent.skills</code> (TEXT)</td>
+<td>replaced by the structured <code>skill</code> + <code>agent_skill</code> model</td>
+</tr>
+<tr>
+<td><code>032_drop_agent_triggers</code></td>
+<td><code>agent.triggers</code>, <code>agent.tools</code> (JSONB)</td>
+<td><em>&quot;Trigger behavior … is now always enabled (hardcoded). Tools was a placeholder field never used at runtime.&quot;</em></td>
+</tr>
+<tr>
+<td><code>109_drop_agent_skills_local</code></td>
+<td><code>agent.skills_local</code></td>
+<td><em>&quot;the unreleased per-agent local skill toggle&quot;</em> — reverted</td>
+</tr>
+<tr>
+<td><code>126_runtime_profile_drop_gemini</code></td>
+<td><code>gemini</code> from the <code>protocol_family</code> CHECK</td>
+<td>removed from the whitelist (constraint re-added <code>NOT VALID</code> so historical rows upgrade cleanly)</td>
+</tr>
+</tbody></table></div>
+<p>One further evolution, not a removal: migration <code>129</code> gated the Composio overlay on
+<strong><code>originator == agent.owner_id</code></strong>, and migration <code>130</code> <strong>reversed that rule</strong> — the overlay now follows
+invocation permission and uses the owner&#39;s connection, and the migration rewrites the column comments
+to say the old gate <em>&quot;is gone.&quot;</em> The column comments are <em>the</em> documentation for this, because they
+drive the sqlc-generated doc comments in <code>models.go</code>.</p>
+<p><strong>The lesson the ledger teaches:</strong> the durable truth of &quot;what an agent is&quot; is not any one doc — it is
+the migration chain, read in order. Three of these four retirements would be invisible to a reader of
+the current schema alone.</p>
+<hr>
+<h2 id="9-findings">9. Findings<a href="#batch-02/9-findings" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Each finding is tagged by pole and answered against the two value questions: <strong>Q1 · USER VALUE</strong> (how it
+serves a person using the platform) and <strong>Q2 · VISION VALUE</strong> (how it serves the AI-first business &amp;
+resources planner vision, incl. versatility and integratability).</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Finding</th>
+<th>Pole</th>
+<th>Q1 · User value</th>
+<th>Q2 · Vision value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>F02-01</strong></td>
+<td><strong>The machine / teammate split</strong> — <code>agent</code> (teammate) bound to <code>agent_runtime</code> (machine) by a <code>NOT NULL</code> <code>RESTRICT</code> FK.</td>
+<td>P1</td>
+<td>You add a colleague without caring which host runs it; the host can be replaced without losing the colleague.</td>
+<td>The exact primitive a tenant needs: an engine instance that many agents share.</td>
+</tr>
+<tr>
+<td><strong>F02-02</strong></td>
+<td><strong>One <code>Backend</code> interface, 24 implementations for 25 providers.</strong></td>
+<td>P1</td>
+<td>Every provider behaves the same from the platform&#39;s side.</td>
+<td>The engine is swappable behind one method — the seam that lets a new engine be added without touching callers.</td>
+</tr>
+<tr>
+<td><strong>F02-03</strong></td>
+<td><strong>A closed provider whitelist enforced in Go <em>and</em> Postgres, kept in lockstep by hand + a migration log.</strong></td>
+<td>P1</td>
+<td>You cannot pick a provider the platform has not tested.</td>
+<td>A safe, auditable list of engines; widening it is a recorded act, not an accident.</td>
+</tr>
+<tr>
+<td><strong>F02-04</strong></td>
+<td><strong><code>runtime_profile</code></strong> — a workspace may define a custom runtime, based only on a supported family; args are <code>fixed_args</code> only.</td>
+<td>P1</td>
+<td>A team can wrap an in-house CLI and share it.</td>
+<td>Extensibility without letting a workspace invent an unsupported engine.</td>
+</tr>
+<tr>
+<td><strong>F02-05</strong></td>
+<td><strong><code>BuiltinRuntime</code> descriptor</strong> — one declaration site; a new fork is one entry.</td>
+<td>P1</td>
+<td>A new compatible runtime appears everywhere at once.</td>
+<td>Cheap, low-risk extensibility.</td>
+</tr>
+<tr>
+<td><strong>F02-06</strong></td>
+<td><strong>The per-agent config surface (12 columns); model/thinking/tier stored runtime-native, not neutralised.</strong></td>
+<td>P1</td>
+<td>The picker shows exactly what the CLI accepts.</td>
+<td>Per-agent capability without a translation layer to maintain.</td>
+</tr>
+<tr>
+<td><strong>F02-07</strong></td>
+<td><strong>The catalog knows what it does not know</strong> (<code>Verified</code>, <code>Fallback</code>, <code>Unavailable</code>).</td>
+<td>P1</td>
+<td>The UI never offers a model the host cannot run.</td>
+<td>Honest capability reporting; a failed probe is &quot;unknown&quot;, never a silent downgrade.</td>
+</tr>
+<tr>
+<td><strong>F02-08</strong></td>
+<td><strong>Two kinds of skill</strong> — workspace (structured, M2M) vs runtime (CLI-owned, disable-only).</td>
+<td>P1</td>
+<td>You author and share skills; you switch off ones the CLI ships.</td>
+<td>One vocabulary, two lifecycles, no conflation.</td>
+</tr>
+<tr>
+<td><strong>F02-09</strong></td>
+<td><strong>Invocation permission: <code>permission_mode</code> + a stacking allow-list, deny-by-default; the admin-bypass privacy hole closed.</strong></td>
+<td>P1</td>
+<td>A private agent cannot be run by an admin or a stranger.</td>
+<td>Authorization is explicit and default-deny — the posture the vision requires.</td>
+</tr>
+<tr>
+<td><strong>F02-10</strong></td>
+<td><strong>A2A is judged by the top-of-chain human originator.</strong></td>
+<td>P1</td>
+<td>Agents cannot quietly chain around a person&#39;s allow-list.</td>
+<td>Agent collaboration stays inside the human&#39;s grant.</td>
+</tr>
+<tr>
+<td><strong>F02-11</strong></td>
+<td><strong>Product-defined agents</strong> (<code>kind=system</code>, <code>system_key</code>) with a partial unique index.</td>
+<td>P1</td>
+<td>The product&#39;s own helper agents are distinguishable from yours.</td>
+<td>The platform can ship first-party agents without polluting user space.</td>
+</tr>
+<tr>
+<td><strong>F02-12</strong></td>
+<td><strong>The lifecycle: live <code>status</code>, soft archive, <code>max_concurrent_tasks</code> (1→6), a server-owned builder draft.</strong></td>
+<td>P1</td>
+<td>A colleague can be paused, archived and edited mid-creation without loss.</td>
+<td>Durable, restartable configuration.</td>
+</tr>
+<tr>
+<td><strong>F02-13</strong></td>
+<td><strong>The retirement ledger</strong> — 4 retirements, each with its reason; the schema is a history, not a snapshot.</td>
+<td>PZ</td>
+<td>(indirect) — the feature set you see is the one that survived.</td>
+<td>Rule 10 proved valuable: three retirements are invisible in the current schema.</td>
+</tr>
+<tr>
+<td><strong>F02-14</strong></td>
+<td><strong>&quot;Denied&quot; kept apart from &quot;unknown&quot;</strong> on the durable invocation path (fail closed; the interactive path retries).</td>
+<td>P1</td>
+<td>A person is never wrongly told they lack a permission.</td>
+<td>Correctness under transient failure — the difference between a retry and a false denial.</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="10-divergences-and-honest-bounds">10. Divergences and honest bounds <span class="seal-badge" style="background:#fef2f2; color:#dc2626; border-color:#fca5a5; font-size: 0.65em; vertical-align: middle;">⚠️ FINDING NOTE</span><a href="#batch-02/10-divergences-and-honest-bounds" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<ul>
+<li><strong>No divergence between docs and code was needed to reach these findings</strong> — the migration headers and
+Go doc-comments are unusually candid here, and where they explain a decision they agree with the code.
+This is the opposite of the CrewAI study&#39;s shape (93% docs, 45 duplicated trees); here the docs are
+small and the <em>comments in code</em> carry the design record.</li>
+<li><strong>Bound (stated, not glossed):</strong> this batch read the <strong>agent</strong> surface only. How a run is actually
+claimed, dispatched, retried and recovered is batch 04; how the workspace fences the agent&#39;s blast
+radius is batch 03; the agent&#39;s UI is batch 05.</li>
+<li><strong>Bound:</strong> <code>conversation_starters</code> arrived in migration <code>404</code> and was renamed in <code>432</code>; the feature is
+unreleased, so its shape may move. It is recorded as present, not as stable.</li>
+<li><strong>Bound:</strong> the <code>team</code> invocation target is <strong>stored but inert</strong> in V1 — the column exists, the gate
+treats it as admitting no one. Recorded as a reserved seam, not a capability.</li>
+</ul>
+<hr>
+<h2 id="11-carried-forward-to-batch-07-the-synthesis">11. Carried forward to batch 07 (the synthesis)<a href="#batch-02/11-carried-forward-to-batch-07-the-synthesis" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Two findings are candidates for the highest transferable value and will be ranked in batch 07:</p>
+<ol>
+<li><strong>The machine / teammate split (F02-01)</strong> — an <code>agent_runtime</code> that many <code>agent</code> rows bind to, with a
+<code>RESTRICT</code> FK. It is the cleanest expression seen so far of &quot;one engine instance, many colleagues&quot;.</li>
+<li><strong>The invocation-permission model (F02-09 / F02-10)</strong> — a deny-by-default gate, an explicit stacking
+allow-list, and A2A judged by the top-of-chain human. It is the most complete authorization model in
+the study so far, and the one whose <em>reason</em> (a real privacy hole) is recorded in the migration.</li>
+</ol>
+<p>Both are <strong>observations</strong>, not decisions. The cross-platform mapping is a later pass (rule 5).</p>
+<hr>
+<p><em>Batch 02 of 07. Read from source on 2026-10-15. Next: <code>findings/03-the-workspace.md</code>.</em></p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="01-platform-overview.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">Platform Overview</span>
+                </a>
+              
+
+              <a href="../index.html#batch-02" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              
+                <a href="03-the-workspace-p2.html" class="nav-page-btn" style="text-align:right;">
+                  <span class="nav-btn-sub">Next Batch →</span>
+                  <span class="nav-btn-title">The Workspace (P2)</span>
+                </a>
+              
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#0-what-this-batch-had-to-answer" class="toc-link">0. What this batch had to answer</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#1-the-agent-record-the-durable-shape" class="toc-link">1. The agent record — the durable shape</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#2-provider-runtime-the-machine-teammate-split-the-load-bearing-finding" class="toc-link">2. Provider + runtime — the machine / teammate split (the load-bearing finding)</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-1-two-rows-deliberately" class="toc-link">2.1 Two rows, deliberately</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-2-one-interface-24-implementations" class="toc-link">2.2 One interface, 24 implementations</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-3-the-whitelist-is-closed-and-kept-closed-by-hand" class="toc-link">2.3 The whitelist is closed, and kept closed by hand</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-4-a-workspace-may-define-its-own-runtime-within-the-whitelist" class="toc-link">2.4 A workspace may define its own runtime — within the whitelist</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-5-adding-a-fork-is-a-descriptor-not-a-rewrite" class="toc-link">2.5 Adding a fork is a descriptor, not a rewrite</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-the-configuration-surface-what-makes-one-agent-different-from-another" class="toc-link">3. The configuration surface — what makes one agent different from another</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-1-the-model-catalog-knows-what-it-does-not-know" class="toc-link">3.1 The model catalog knows what it does not know</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-skills-two-different-things-share-the-word" class="toc-link">4. Skills — two different things share the word</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-1-workspace-skills-structured-many-to-many" class="toc-link">4.1 Workspace skills (structured, many-to-many)</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-2-runtime-skills-the-cli-s-own" class="toc-link">4.2 Runtime skills (the CLI&#039;s own)</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-3-skill-bundles-are-hashed" class="toc-link">4.3 Skill bundles are hashed</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-permissions-the-security-critical-half" class="toc-link">5. Permissions — the security-critical half</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#5-1-two-questions-deliberately-separated" class="toc-link">5.1 Two questions, deliberately separated</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#5-2-the-model" class="toc-link">5.2 The model</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#5-3-the-gate-read-in-code" class="toc-link">5.3 The gate, read in code</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#5-4-agent-to-agent-is-judged-by-the-human-at-the-top" class="toc-link">5.4 Agent-to-agent is judged by the human at the top</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#5-5-denied-is-kept-apart-from-unknown" class="toc-link">5.5 &quot;Denied&quot; is kept apart from &quot;unknown&quot;</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#5-6-no-foreign-keys" class="toc-link">5.6 No foreign keys</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-product-defined-agents" class="toc-link">6. Product-defined agents</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-the-lifecycle" class="toc-link">7. The lifecycle</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#8-the-retirement-ledger-rule-10" class="toc-link">8. The retirement ledger (rule 10)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#9-findings" class="toc-link">9. Findings</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#10-divergences-and-honest-bounds" class="toc-link">10. Divergences and honest bounds</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#11-carried-forward-to-batch-07-the-synthesis" class="toc-link">11. Carried forward to batch 07 (the synthesis)</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('multica_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('multica_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('multica_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('multica_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.MulticaReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

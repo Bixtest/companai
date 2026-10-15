@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 04 — Automations (P3) — Multica Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-04" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 04</span>
+      <div class="header-title-wrap">
+        <div class="header-title">Automations (P3)</div>
+        <div class="header-subtitle">Multica Platform Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/04-automations.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #059669">DONE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">2,938</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">15 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">331</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-15</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 04 Architecture Guide (Default)</option>
+            <optgroup label="Strategic Architecture">
+              <option value="master">Executive Topology: the three poles and the two absent layers</option>
+            </optgroup>
+            <optgroup label="Foundations">
+              <option value="00">Batch 00: The pin, the shape, and the method</option>
+              <option value="01">Batch 01: The control plane — server, daemon, queue, cron, fence</option>
+            </optgroup>
+            <optgroup label="Pole 1 — The Aissistant">
+              <option value="02">Batch 02: The aissistant — machine, teammate, one seam</option>
+            </optgroup>
+            <optgroup label="Pole 2 — The Workspace">
+              <option value="03">Batch 03: The workspace — a fenced tenant</option>
+            </optgroup>
+            <optgroup label="Pole 3 — Automations">
+              <option value="04">Batch 04: Automations — the delivery layer</option>
+            </optgroup>
+            <optgroup label="Cross-Cutting">
+              <option value="05">Batch 05: Widgets &amp; frontend — and the absent widget model</option>
+            </optgroup>
+            <optgroup label="Escape Hatch">
+              <option value="06">Batch 06: Out-of-pole — perimeter, plugin reset, cutover</option>
+            </optgroup>
+            <optgroup label="Strategic Decision">
+              <option value="07">Batch 07: The synthesis — ranked mechanisms and the verdict</option>
+            </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 04 VISUAL GUIDE</div>
+    <h4>Automations: the delivery layer</h4>
+    <p>A one-statement claim, leases, named sweepers, a row-as-lease scheduler, and a failure taxonomy</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 350" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-04" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-04" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+        <marker id="arrr-04" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#ef4444"/>
+        </marker>
+      </defs>
+      <g transform="translate(20, 20)">
+        <rect width="210" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">1 · THE CLAIM</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">UPDATE … WHERE id = (</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">  SELECT … WHERE status=queued</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">  ORDER BY priority, created, id</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">  LIMIT 1</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">  FOR UPDATE SKIP LOCKED)</text>
+      </g>
+      <path d="M 230 95 L 268 95" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-04)"/>
+      <g transform="translate(272, 20)">
+        <rect width="210" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">2 · THE LEASE</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">prepare_lease_expires_at (124)</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">bounds dispatched→never-started</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">attempt / max_attempts (055)</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">parent_task_id — a retry chain</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">last_heartbeat_at</text>
+      </g>
+      <path d="M 482 95 L 520 95" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-04)"/>
+      <g transform="translate(524, 20)">
+        <rect width="180" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">3 · THE SWEEPERS</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">ExpireStaleQueuedTasks</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">FailStaleTasks</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">FailTasksForOfflineRuntimes</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">FailExpiredRuntimeReconnects</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">RecoverOrphanedTasks…</text>
+      </g>
+      <path d="M 704 95 L 742 95" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-04)"/>
+      <g transform="translate(746, 20)">
+        <rect width="154" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">4 · THE SCHEDULER</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">sys_cron_executions</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">row = lease + audit</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">lease_token</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">catch-up per job</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">no materialised STALE</text>
+      </g>
+      <rect x="20" y="196" width="430" height="136" rx="10" fill="#059669" fill-opacity="0.08" stroke="#059669" stroke-width="1.6"/>
+      <text x="38" y="222" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#047857">THE CLAIM'S THREE RULES</text>
+      <text x="38" y="246" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">1. a TOTAL order — priority DESC, created_at ASC, id ASC</text>
+      <text x="38" y="266" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">2. per-work-item serialization — one agent never double-runs</text>
+      <text x="38" y="286" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">3. the runtime-health gate INSIDE the claim</text>
+      <text x="38" y="312" font-family="system-ui, sans-serif" font-size="10.5" font-weight="600" fill="#047857">A task is never handed to a machine the platform believes is gone.</text>
+      <rect x="470" y="196" width="430" height="136" rx="10" fill="#7c3aed" fill-opacity="0.08" stroke="#7c3aed" stroke-width="1.6"/>
+      <text x="488" y="222" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#6d28d9">THE FAILURE TAXONOMY — 27 VALUES</text>
+      <text x="488" y="246" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">13 platform-side (no prefix): queued_expired, runtime_offline, timeout, …</text>
+      <text x="488" y="266" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">14 agent-side, all prefixed agent_error. — produced by Classify(rawError)</text>
+      <text x="488" y="286" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">IsAgentError is then a STRING PREFIX check, not a list</text>
+      <text x="488" y="312" font-family="system-ui, sans-serif" font-size="10.5" font-weight="600" fill="#6d28d9">"Whose fault is this?" became a string operation.</text>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="batch-04-automations-p3">Batch 04 — Automations (P3)<a href="#batch-04/batch-04-automations-p3" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Study:</strong> Multica <code>0.2.0</code> · <strong>Batch:</strong> 04 of 07 · <strong>Status:</strong> COMPLETE
+<strong>Source:</strong> <code>github.com/multica-ai/multica</code> → <code>platforms/_extracted/multica-main</code>
+<strong>Zip md5:</strong> <code>30ddc64af536212e25a6c00db5672b82</code> · <strong>License:</strong> Apache-2.0 + Multica conditions
+<strong>Method:</strong> rules 1-10 of <code>00-PIN-AND-METHOD.md</code>. Every claim carries <code>file:line</code>.
+Docs are claims; code is the authority. Nothing in this file was inferred from a README.</p>
+<hr>
+<h2 id="0-what-this-batch-had-to-answer">0. What this batch had to answer<a href="#batch-04/0-what-this-batch-had-to-answer" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>P3 is <strong>automations</strong> — where agents work on assigned tasks. Batch 01 named this <em>&quot;the layer CrewAI
+was measured to lack&quot;</em>: a real queue, a claim, a scheduler and a failure taxonomy. This batch opens the
+delivery layer up.</p>
+<p>Short answer, measured:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Question</th>
+<th>Multica&#39;s answer</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>How is work queued and claimed?</td>
+<td>A literal <code>agent_task_queue</code> table claimed by <code>FOR UPDATE SKIP LOCKED</code>, ordered <code>priority DESC, created_at ASC, id ASC</code></td>
+<td>F04-01</td>
+</tr>
+<tr>
+<td>How is a claim kept honest?</td>
+<td>A <strong>prepare lease</strong> + attempt counters + a per-task heartbeat; four named sweepers clean up the dead</td>
+<td>F04-02/03</td>
+</tr>
+<tr>
+<td>How does a periodic job run once across many app instances?</td>
+<td><code>sys_cron_executions</code> — the row <strong>is</strong> the lease <strong>and</strong> the audit entry</td>
+<td>F04-04</td>
+</tr>
+<tr>
+<td>What is an &quot;autopilot&quot;?</td>
+<td>A stored automation: a trigger (schedule/webhook/api) → a run → an issue and/or a task</td>
+<td>F04-05</td>
+</tr>
+<tr>
+<td>How are failures classified?</td>
+<td>A canonical 27-value taxonomy, 13 platform-side + 14 <code>agent_error.*</code></td>
+<td>F04-06</td>
+</tr>
+<tr>
+<td>How do deferred events (wakeups) work?</td>
+<td><code>issue_wakeup</code> — a durable rule with a revision fence and a receipt dedup table</td>
+<td>F04-07</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="1-the-queue-a-literal-table">1. The queue — a literal table<a href="#batch-04/1-the-queue-a-literal-table" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>agent_task_queue</code> (<code>001_init</code>) is not a broker; it is a table:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>text</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code>agent_task_queue (id, agent_id, issue_id, status, priority, dispatched_at, started_at,
+                  completed_at, result, error, created_at)              -- 001_init
+  status ∈ {queued, dispatched, running, completed, failed, cancelled, waiting_local_directory}
+</code></pre>
+</div>
+<p>Later migrations added the columns that make it a <em>durable</em> queue rather than a list:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Column(s)</th>
+<th>Migration</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>runtime_id</code> (NOT NULL)</td>
+<td><code>004</code></td>
+<td>the claim is per <strong>runtime</strong>, not per agent (§3)</td>
+</tr>
+<tr>
+<td><code>attempt</code>, <code>max_attempts</code> (default 2), <code>parent_task_id</code>, <code>failure_reason</code>, <code>last_heartbeat_at</code></td>
+<td><code>055</code></td>
+<td>retry/lease bookkeeping — <em>&quot;so the runtime sweeper and the daemon startup recovery path can distinguish &#39;fresh attempt&#39; from &#39;auto-rerun after orphan&#39;&quot;</em></td>
+</tr>
+<tr>
+<td><code>initiator_user_id</code></td>
+<td><code>117</code></td>
+<td>who physically sent the trigger</td>
+</tr>
+<tr>
+<td><code>originator_user_id</code></td>
+<td><code>129</code></td>
+<td>the <strong>top-of-chain human</strong> (§ batch 02, F02-10)</td>
+</tr>
+<tr>
+<td><code>prepare_lease_expires_at</code></td>
+<td><code>124</code></td>
+<td>the prepare lease (§3)</td>
+</tr>
+</tbody></table></div>
+<p>The distinction between <code>initiator</code> and <code>originator</code> is stated in <code>129</code>&#39;s header and matters: for an
+agent fan-out the <em>initiator</em> is another agent, so attribution needs the human at the top of the chain —
+the same value batch 02 found the invocation gate reading.</p>
+<hr>
+<h2 id="2-the-claim-one-sql-statement">2. The claim — one SQL statement<a href="#batch-04/2-the-claim-one-sql-statement" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>The whole claim is a single statement, <code>pkg/db/queries/agent.sql:749-810</code> (<code>ClaimAgentTask</code>). Its shape
+is the finding:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>sql</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-sql">UPDATE agent_task_queue
+SET status = &#39;dispatched&#39;, dispatched_at = now(),
+    prepare_lease_expires_at = now() + make_interval(secs =&gt; @prepare_lease_secs)
+WHERE id = (
+    SELECT atq.id FROM agent_task_queue atq
+    WHERE atq.agent_id = @agent_id AND atq.runtime_id = @runtime_id
+      AND atq.status = &#39;queued&#39;
+      AND ( … the wakeup revision fence … )
+      AND EXISTS ( … the runtime is online and recently seen … )
+      AND NOT EXISTS ( … no active sibling for this issue / chat / quick-create … )
+    ORDER BY atq.priority DESC, atq.created_at ASC, atq.id ASC
+    LIMIT 1
+    FOR UPDATE SKIP LOCKED
+)
+RETURNING *;
+</code></pre>
+</div>
+<p>Four things are worth naming:</p>
+<ol>
+<li><strong><code>FOR UPDATE SKIP LOCKED</code></strong> (<code>:808</code>) — replicas never fight over the same row; the loser moves on.</li>
+<li><strong>The order is total</strong> — <code>priority DESC, created_at ASC, id ASC</code>. The <code>id</code> tiebreak means two rows
+created in the same microsecond still have a stable order, so the queue is deterministic.</li>
+<li><strong>Serialization is per work-item, not per agent.</strong> The <code>NOT EXISTS</code> block (<code>:789-805</code>) forbids a
+second active task for the same <code>(issue, agent)</code> — <em>&quot;This allows different agents to work on the same
+issue in parallel while preventing a single agent from running duplicate tasks.&quot;</em> Chat tasks serialize
+on <code>chat_session_id</code>; quick-create tasks (all four FKs NULL) serialize against each other, <em>&quot;otherwise
+a user mashing the create button could fire concurrent quick-creates.&quot;</em></li>
+<li><strong>The runtime health gate is inside the claim.</strong> The <code>EXISTS</code> block (<code>:770-788</code>) requires the bound
+runtime to be <code>online</code> and seen within <code>runtime_stale_secs</code> — so a task is never handed to a machine
+the platform already believes is gone. And the persisted <code>runtime_id</code> is <em>not</em> authority: the query
+re-checks <code>a.runtime_id = atq.runtime_id</code> after a rebind (<code>:775-776</code>).</li>
+</ol>
+<hr>
+<h2 id="3-leases-and-retries">3. Leases and retries<a href="#batch-04/3-leases-and-retries" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Three mechanisms keep a claim honest:</p>
+<ul>
+<li><strong>The prepare lease</strong> (<code>124</code>). The claim sets <code>prepare_lease_expires_at = now() + prepare_lease_secs</code>
+(<code>agent.sql:763</code>). A dispatched-but-never-started task therefore expires on its own, and a sweeper can
+reclaim it — the gap between &quot;handed out&quot; and &quot;actually running&quot; is bounded.</li>
+<li><strong>Attempts</strong> (<code>055</code>). <code>attempt</code> starts at 1, <code>max_attempts</code> defaults to 2 (1 disables retry), and
+<code>parent_task_id</code> points back to the task a retry re-attempts. The <code>failure_reason</code> decides <em>whether</em> to
+retry: <code>055</code>&#39;s comment lists the coarse classifiers the auto-retry path reads.</li>
+<li><strong>A per-task heartbeat</strong> (<code>055</code>, <code>last_heartbeat_at</code>). <em>&quot;the runtime heartbeat already drives runtime
+liveness, but per-task timestamps let us tell stale tasks apart from long-running ones.&quot;</em></li>
+</ul>
+<p><strong>The distinction that makes this a delivery layer and not a queue:</strong> a task is not just &quot;running&quot; — it
+carries <em>how many times it has run</em>, <em>what it is retrying</em>, and <em>when it last proved it was alive</em>.</p>
+<hr>
+<h2 id="4-the-sweepers-four-named-janitors">4. The sweepers — four named janitors<a href="#batch-04/4-the-sweepers-four-named-janitors" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>internal/service/task.go</code> carries the recovery functions, each named for the condition it repairs:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Line</th>
+<th>Repairs</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>ExpireStaleQueuedTasks</code></td>
+<td><code>:5979</code></td>
+<td>a task that sat <code>queued</code> past its TTL without a claim (autopilot backlog while the runtime is offline)</td>
+</tr>
+<tr>
+<td><code>FailStaleTasks</code></td>
+<td><code>:5972</code></td>
+<td>a task that went silent past its heartbeat budget</td>
+</tr>
+<tr>
+<td><code>FailTasksForOfflineRuntimes</code></td>
+<td><code>:5957</code></td>
+<td>tasks bound to a runtime that went offline</td>
+</tr>
+<tr>
+<td><code>FailExpiredRuntimeReconnectRetries</code></td>
+<td><code>:5965</code></td>
+<td>reconnect attempts that ran out of time</td>
+</tr>
+<tr>
+<td><code>RecoverOrphanedTasksForRuntime</code></td>
+<td><code>:5986</code></td>
+<td>tasks orphaned by a runtime restart</td>
+</tr>
+</tbody></table></div>
+<p><strong>Plainly:</strong> the platform assumes machines die. Every way a task can get stuck has a named, separate
+repair — and the repairs are idempotent by construction (they act on a status predicate, so a second run
+matches nothing).</p>
+<hr>
+<h2 id="5-the-failure-taxonomy-27-values-and-why">5. The failure taxonomy — 27 values, and why<a href="#batch-04/5-the-failure-taxonomy-27-values-and-why" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>pkg/taskfailure/failure.go</code> is the canonical list, and its header is the study-worthy part. Until
+MUL-1949, failures were a handful of coarse strings, and <em>&quot;&#39;agent_error&#39; grew to ~30% of all failures and
+hid the real cause (provider 401, quota exceeded, context overflow, runner crash, etc.) inside the
+free-form <code>error</code> text column.&quot;</em> The fix lifted the classifier into the <strong>write path</strong> so a row is
+refined when first stored, and split the values into two groups by prefix:</p>
+<ul>
+<li><strong>13 platform-side</strong> values, no prefix — emitted by the sweepers and the daemon when the fault is the
+platform&#39;s (<code>queued_expired</code>, <code>runtime_offline</code>, <code>runtime_reconnect_timeout</code>, <code>runtime_recovery</code>,
+<code>timeout</code>, <code>iteration_limit</code>, <code>agent_blocked</code>, <code>api_invalid_request</code>, <code>skill_bundle_unavailable</code>,
+<code>runtime_cli_timeout</code>, <code>environment_prepare_failed</code>, <code>invalid_task_identity</code>, <code>runtime_access_denied</code>).</li>
+<li><strong>14 agent-side</strong> values, all prefixed <strong><code>agent_error.</code></strong> — produced by <code>Classify(rawError)</code> when the
+agent process surfaced an error.</li>
+</ul>
+<p><code>IsAgentError</code> is then a <strong>string-prefix check</strong>, not a list. The header also records the two rules that
+keep it stable: <em>&quot;the string forms … are persisted into the database and surfaced as Prometheus labels.
+Renaming a value is a breaking change.&quot;</em> And a new classifier-derived value <em>requires a matching SQL
+backfill rule</em>, while a new platform-side value may be added directly because no historical rows need
+re-classifying.</p>
+<p><strong>The transferable idea:</strong> a prefix turns &quot;whose fault is this?&quot; from a judgement into a string operation.</p>
+<hr>
+<h2 id="6-the-scheduler-the-row-is-the-lease-and-the-audit-log">6. The scheduler — the row is the lease and the audit log<a href="#batch-04/6-the-scheduler-the-row-is-the-lease-and-the-audit-log" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>113_sys_cron_executions.up.sql</code> adds <code>sys_cron_executions</code>, and its header states the design:</p>
+<blockquote>
+<p><em>&quot;One row represents a single planned execution of a registered system job for a single scope at a
+single canonical UTC <code>plan_time</code> bucket — the row is both the distributed lease and the audit log
+entry.&quot;</em></p>
+</blockquote>
+<p>Invariants, each stated in the migration and enforced in the schema:</p>
+<ul>
+<li><strong>The unique key <code>(job_name, scope_kind, scope_id, plan_time)</code> is <em>&quot;the only thing standing between two
+app instances and a double-run.&quot;</em></strong> Scope defaults to <code>&#39;global&#39;</code> for both kind and id so a global job
+lands on the same uniqueness slot <strong>without NULL semantics</strong>.</li>
+<li><strong>No <code>STALE</code> state.</strong> Stale is computed — <code>status=&#39;RUNNING&#39; AND stale_after &lt; now()</code> — <em>&quot;which keeps
+lease theft a single UPDATE.&quot;</em></li>
+<li><strong>Lease ownership via <code>lease_token</code>,</strong> rotated on every claim/steal. Every mutation that touches a live
+lease must match <code>id = $id AND lease_token = $token AND status = &#39;RUNNING&#39;</code>; a runner that lost its
+lease sees <code>RowsAffected = 0</code> and stops, <em>&quot;so it cannot rewrite a newer attempt&#39;s state.&quot;</em></li>
+<li><strong><code>attempt</code>/<code>max_attempts</code> are bounded by CHECK</strong> so <em>&quot;a buggy handler cannot &#39;escape&#39; the retry
+envelope.&quot;</em></li>
+</ul>
+<p>Above the table, <code>internal/scheduler/spec.go</code> declares each job as a <code>JobSpec</code>: <code>Cadence</code>,
+<code>ScheduleDelay</code>, <code>CatchUpMode</code>, <code>CatchUpWindow</code>, <code>MaxPlansPerTick</code>, <code>RunTimeout</code>, <code>StaleTimeout</code>,
+<code>HeartbeatInterval</code>, <code>AllowStaleReentry</code>, <code>MaxAttempts</code>, <code>RetryBackoff</code>, <code>Scopes</code>. Two design choices
+stand out:</p>
+<ul>
+<li><strong>Catch-up is a declared per-job decision.</strong> <code>CatchUpMode</code> (<code>spec.go:24-38</code>) is either
+<code>CatchUpLatestOnly</code> (the handler has its own watermark) or <code>CatchUpEveryPlan</code> (each bucket has
+independent meaning). <em>&quot;The cron was down for six hours&quot;</em> becomes a decision the job author makes once,
+not a runtime guess.</li>
+<li><strong><code>AllowStaleReentry</code> is opt-in.</strong> A non-idempotent job sets it false; a stale lease then goes to
+<code>FAILED</code> with <code>error_code=&#39;stale_timeout&#39;</code> and needs manual repair, rather than being silently re-run.</li>
+</ul>
+<p>The registered jobs are declared in Go and inserted on demand — the migration explicitly <em>&quot;does NOT
+register any jobs.&quot;</em> Today&#39;s set includes <code>autopilot_schedule_dispatch</code>
+(<code>jobs_autopilot.go:22</code>), <code>issue_wakeup_dispatch</code>, <code>issue_child_event_sweep</code>,
+<code>rollup_task_usage_hourly</code> and <code>prune_search_index_changes</code>. Each has a <strong>stable name</strong> because it is the
+audit key: <em>&quot;renaming it would orphan historic rows.&quot;</em></p>
+<hr>
+<h2 id="7-autopilots-automation-as-data">7. Autopilots — automation as data<a href="#batch-04/7-autopilots-automation-as-data" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>042_autopilot.up.sql</code> models an automation as three tables, and the shape is the point:</p>
+<ul>
+<li><strong><code>autopilot</code></strong> — the definition: <code>assignee_id</code> (an agent), <code>status ∈ {active, paused, archived}</code>,
+<code>execution_mode ∈ {create_issue, run_only}</code>, <code>issue_title_template</code>, and <strong><code>concurrency_policy ∈ {skip, queue, replace}</code></strong> — what to do when a run is already in flight.</li>
+<li><strong><code>autopilot_trigger</code></strong> — <em>how</em> it fires: <code>kind ∈ {schedule, webhook, api}</code>, <code>cron_expression</code>,
+<code>timezone</code>, <code>next_run_at</code>, <code>webhook_token</code>, <code>last_fired_at</code>. A <strong>partial index</strong> on <code>next_run_at</code> where
+<code>enabled = true AND kind = &#39;schedule&#39;</code> is exactly the scheduler&#39;s due-work scan.</li>
+<li><strong><code>autopilot_run</code></strong> — one execution: <code>source ∈ {schedule, manual, webhook, api}</code>, <code>status ∈ {pending, issue_created, running, skipped, completed, failed}</code>, and links to the <code>issue_id</code> and <code>task_id</code> it
+produced.</li>
+</ul>
+<p>Later migrations add the hardening: <code>091</code> webhook triggers, <code>124</code> <code>planned_at</code>, <code>186</code>/<code>187</code>
+<code>autopilot_rule_version</code> (a versioned rule so a firing can name the configuration it ran under), and
+<code>189</code> the <strong>responsible publisher</strong> — <em>&quot;an autopilot … run is accountable to the human RESPONSIBLE for
+the firing trigger&#39;s current effective configuration — initially whoever created the trigger, then
+TRANSFERRED to whoever later makes a substantive edit.&quot;</em> It is stored <strong>on the trigger row, not derived
+from the autopilot-scoped <code>rule_version</code>,</strong> <em>&quot;precisely so per-trigger granularity holds.&quot;</em> And the
+migration is explicit about the boundary: this is <em>&quot;consumed only for attribution … never
+authorization.&quot;</em></p>
+<p><strong>The finding:</strong> the automation is a stored, versioned, attributed object — not a cron entry. <code>042</code>&#39;s own
+one-liner is <em>&quot;scheduled/triggered automations that assign recurring work to AI Agents.&quot;</em></p>
+<hr>
+<h2 id="8-wakeups-deferred-revision-fenced-events">8. Wakeups — deferred, revision-fenced events<a href="#batch-04/8-wakeups-deferred-revision-fenced-events" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>509_issue_wakeup.up.sql</code> (19 lines) adds two tables that together are a small durable event system:</p>
+<ul>
+<li><strong><code>issue_wakeup</code></strong> — a rule: <code>kind ∈ {event, at, every, cron}</code>, <code>mode ∈ {once, continuous}</code>,
+<code>event_types text[]</code>, optional <code>filter_agent_id</code>/<code>filter_task_id</code>, <code>interval_seconds</code>,
+<code>cron_expression</code>, <code>timezone</code>, <code>next_fire_at</code>, <code>enabled</code>, <code>disabled_at</code>, and a <strong><code>revision</code></strong> counter.</li>
+<li><strong><code>issue_wakeup_receipt</code></strong> — a dedup record: one row per <code>(wakeup_id, revision, event_key)</code>, with
+<code>task_id</code> and <code>processed_at</code>.</li>
+</ul>
+<p>The revision fence is what makes the design safe: the claim query (<code>agent.sql:769</code>) only claims a task
+whose wakeup still exists, is <strong>not disabled</strong>, and whose <strong><code>revision</code> matches</strong> the revision the task
+was created under — so editing a wakeup invalidates tasks queued under the old rule instead of letting a
+stale trigger fire. The receipt table makes &quot;did this event already fire?&quot; a uniqueness check, so a
+replayed event does not double-run.</p>
+<p><strong>Plainly:</strong> a wakeup is a rule with a version, and a receipt log with a unique key — a deferred event
+that cannot fire twice and cannot fire under a rule that no longer exists.</p>
+<hr>
+<h2 id="9-recovery-as-a-bounded-resumable-walk">9. Recovery as a bounded, resumable walk<a href="#batch-04/9-recovery-as-a-bounded-resumable-walk" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>internal/delegatedrecoverybackfill/backfill.go</code> is a backfill, and its header documents the measured
+design: it retires recovery comments already settled by a terminal receipt, walking in batches. Its own
+comment records a <strong>measurement</strong> — <em>&quot;Measured on a synthetic table of 500k comments / 200k tasks / 50k
+unsettled recoveries, total walk time is flat across batch size — 50×228ms at 1000, 10×1016ms at 5000,
+5×2199ms at 10000, all ~11s&quot;</em> — and states when it is safe to run (<em>&quot;after every backend in a rolling
+deployment carries the writing code&quot;</em>).</p>
+<p><strong>Why it is a P3 finding:</strong> the delivery layer&#39;s history is repaired by a <strong>bounded, resumable,
+measured</strong> job rather than a one-shot script — the same posture as the sweepers.</p>
+<hr>
+<h2 id="10-the-retirement-ledger-rule-10">10. The retirement ledger (rule 10)<a href="#batch-04/10-the-retirement-ledger-rule-10" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Migration</th>
+<th>What was removed</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>043_fix_orphaned_autopilot_runs</code></td>
+<td>orphaned autopilot runs</td>
+<td>repaired an early model&#39;s orphans</td>
+</tr>
+<tr>
+<td><code>058_drop_autopilot_priority_and_project_id</code></td>
+<td>autopilot <code>priority</code> + <code>project_id</code></td>
+<td>the autopilot scheduling model was simplified (batch 03 recorded this too)</td>
+</tr>
+<tr>
+<td><code>144_drop_agent_task_queue_chat_pending_v1</code></td>
+<td>the v1 chat-pending marker</td>
+<td>superseded by v2 (<code>143</code>), itself superseded by v3 (<code>255</code>) — <strong>the queue&#39;s chat-pending concept went through three versions</strong></td>
+</tr>
+<tr>
+<td><code>256_drop_agent_task_queue_chat_pending_v2</code></td>
+<td>the v2 chat-pending marker</td>
+<td>superseded by v3 (<code>255</code>)</td>
+</tr>
+<tr>
+<td><code>262_drop_agent_task_queue_terminal_completed_at_v1</code></td>
+<td>the v1 terminal-completed index</td>
+<td>replaced by v2 (<code>261</code>)</td>
+</tr>
+</tbody></table></div>
+<p><strong>The lesson here is sharper than in earlier batches:</strong> the <em>same</em> concept (a &quot;chat is waiting on a
+task&quot; marker, a &quot;terminal completed_at&quot; index) was built, dropped and rebuilt <strong>twice</strong>. A reader of the
+current schema sees one index and one marker; the migrations show the two that came before. This is the
+strongest evidence yet that the migration chain — not the schema — is the durable truth.</p>
+<hr>
+<h2 id="11-findings">11. Findings<a href="#batch-04/11-findings" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Tagged by pole; answered against <strong>Q1 · USER VALUE</strong> and <strong>Q2 · VISION VALUE</strong>.</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Finding</th>
+<th>Pole</th>
+<th>Q1 · User value</th>
+<th>Q2 · Vision value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>F04-01</strong></td>
+<td><strong>A literal queue table</strong> with a single-statement claim (<code>FOR UPDATE SKIP LOCKED</code>, total order, per-work-item serialization, runtime health gate inside the claim).</td>
+<td>P3</td>
+<td>Work is picked up fairly and never double-run.</td>
+<td>The delivery primitive — a real queue without a broker.</td>
+</tr>
+<tr>
+<td><strong>F04-02</strong></td>
+<td><strong>Leases</strong> — a prepare lease for the dispatch gap, attempt counters, and a per-task heartbeat.</td>
+<td>P3</td>
+<td>A stuck hand-off self-heals instead of hanging forever.</td>
+<td>Bounded, self-repairing delivery.</td>
+</tr>
+<tr>
+<td><strong>F04-03</strong></td>
+<td><strong>Four named sweepers</strong>, one per way a task can die.</td>
+<td>P3</td>
+<td>A dead machine does not strand a user&#39;s task.</td>
+<td>Recovery is explicit and idempotent, not hoped-for.</td>
+</tr>
+<tr>
+<td><strong>F04-04</strong></td>
+<td><strong><code>sys_cron_executions</code></strong> — the row is both the distributed lease and the audit log; lease tokens; no materialised stale state; declared catch-up.</td>
+<td>P3</td>
+<td>Periodic work runs once, not twice.</td>
+<td>A scheduler a single process cannot corrupt, with a per-job catch-up decision.</td>
+</tr>
+<tr>
+<td><strong>F04-05</strong></td>
+<td><strong>Autopilot as data</strong> — definition + triggers + runs, with <code>concurrency_policy</code>, versioned rules and a per-trigger responsible publisher.</td>
+<td>P3</td>
+<td>Recurring work is a thing you configure, not a script.</td>
+<td>Automation is stored, versioned and attributed.</td>
+</tr>
+<tr>
+<td><strong>F04-06</strong></td>
+<td><strong>A 27-value failure taxonomy</strong>, 13 platform + 14 <code>agent_error.*</code>, with the prefix as the classifier.</td>
+<td>P3</td>
+<td>Failures are diagnosable (&quot;the platform&#39;s fault or the agent&#39;s?&quot;).</td>
+<td>Failures become a metric label, not free text.</td>
+</tr>
+<tr>
+<td><strong>F04-07</strong></td>
+<td><strong>Wakeups</strong> — a revision-fenced rule plus a receipt dedup table.</td>
+<td>P3</td>
+<td>A deferred action fires exactly once, under the rule you last set.</td>
+<td>Durable, versioned eventing.</td>
+</tr>
+<tr>
+<td><strong>F04-08</strong></td>
+<td><strong>The prepare lease</strong> closes the gap between &quot;dispatched&quot; and &quot;running&quot;.</td>
+<td>P3</td>
+<td>A task handed to a machine that never starts does not vanish.</td>
+<td>The dispatch hand-off is bounded.</td>
+</tr>
+<tr>
+<td><strong>F04-09</strong></td>
+<td><strong><code>awakeclock</code></strong> — a clock that advances only while the host is awake, so a liveness budget is not confused by a laptop sleeping.</td>
+<td>P3</td>
+<td>A suspended machine does not look like a hung one.</td>
+<td>Correct liveness measurement across hosts.</td>
+</tr>
+<tr>
+<td><strong>F04-10</strong></td>
+<td><strong>Recovery as a bounded, measured, resumable walk</strong> (<code>delegatedrecoverybackfill</code>), with its own performance measurement in the header.</td>
+<td>P3</td>
+<td>(indirect) — history is repaired without a stall.</td>
+<td>Repair that is safe to run and re-run in production.</td>
+</tr>
+<tr>
+<td><strong>F04-11</strong></td>
+<td><strong>The retirement ledger</strong> — chat-pending and terminal-index concepts each built, dropped and rebuilt twice.</td>
+<td>PZ</td>
+<td>(indirect) — the queue you get is the third design.</td>
+<td>Rule 10 pays hardest here: the schema hides two prior designs.</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="12-divergences-and-honest-bounds">12. Divergences and honest bounds <span class="seal-badge" style="background:#fef2f2; color:#dc2626; border-color:#fca5a5; font-size: 0.65em; vertical-align: middle;">⚠️ FINDING NOTE</span><a href="#batch-04/12-divergences-and-honest-bounds" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<ul>
+<li><strong>No doc-vs-code divergence was needed</strong>; the migration headers and Go comments carry the design record
+and agree with the code, as in batches 02 and 03.</li>
+<li><strong>Bound:</strong> this batch read the delivery <em>mechanisms</em> (queue, claim, lease, sweepers, scheduler,
+autopilot, wakeups). It did <strong>not</strong> read the daemon&#39;s execution loop itself (<code>internal/daemon/</code>), which
+is where a claimed task is actually run — that is a P1/P3 boundary and is named here rather than
+half-covered.</li>
+<li><strong>Bound:</strong> <code>AutopilotScheduleDispatchJob</code> <em>&quot;replaces the legacy <code>cmd/server/autopilot_scheduler.go</code>
+goroutine (MUL-3551)&quot;</em> — the old in-process scheduler is gone; this batch records the replacement, not
+the removed code (which is not in the tree).</li>
+<li><strong>Bound:</strong> the <code>sys_cron_executions</code> retention/prune path exists as an index in <code>113</code>; this batch did
+not open the prune handler.</li>
+</ul>
+<hr>
+<h2 id="13-carried-forward-to-batch-07-the-synthesis">13. Carried forward to batch 07 (the synthesis)<a href="#batch-04/13-carried-forward-to-batch-07-the-synthesis" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Three candidates for the highest transferable value, to be ranked in batch 07:</p>
+<ol>
+<li><strong>The single-statement claim (F04-01)</strong> — a total order, per-work-item serialization, and a runtime
+health gate all inside one <code>UPDATE … FOR UPDATE SKIP LOCKED</code>. It is the most complete &quot;claim&quot; seen in
+the study.</li>
+<li><strong>The row-as-lease scheduler (F04-04)</strong> — <code>sys_cron_executions</code> unifies the distributed lock and the
+audit log in one row, with lease tokens and declared catch-up.</li>
+<li><strong>The failure taxonomy (F04-06)</strong> — 27 values split by a prefix, so &quot;whose fault&quot; is a string
+operation, with the renaming rule written down.</li>
+</ol>
+<p>All three are <strong>observations</strong>, not decisions. The cross-platform mapping is a later pass (rule 5).</p>
+<hr>
+<p><em>Batch 04 of 07. Read from source on 2026-10-15. Next: <code>findings/05-widgets-and-frontend.md</code>.</em></p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="03-the-workspace-p2.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">The Workspace (P2)</span>
+                </a>
+              
+
+              <a href="../index.html#batch-04" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              
+                <a href="05-widgets-frontend.html" class="nav-page-btn" style="text-align:right;">
+                  <span class="nav-btn-sub">Next Batch →</span>
+                  <span class="nav-btn-title">Widgets &amp; Frontend</span>
+                </a>
+              
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#0-what-this-batch-had-to-answer" class="toc-link">0. What this batch had to answer</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#1-the-queue-a-literal-table" class="toc-link">1. The queue — a literal table</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#2-the-claim-one-sql-statement" class="toc-link">2. The claim — one SQL statement</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-leases-and-retries" class="toc-link">3. Leases and retries</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-the-sweepers-four-named-janitors" class="toc-link">4. The sweepers — four named janitors</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-the-failure-taxonomy-27-values-and-why" class="toc-link">5. The failure taxonomy — 27 values, and why</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-the-scheduler-the-row-is-the-lease-and-the-audit-log" class="toc-link">6. The scheduler — the row is the lease and the audit log</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-autopilots-automation-as-data" class="toc-link">7. Autopilots — automation as data</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#8-wakeups-deferred-revision-fenced-events" class="toc-link">8. Wakeups — deferred, revision-fenced events</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#9-recovery-as-a-bounded-resumable-walk" class="toc-link">9. Recovery as a bounded, resumable walk</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#10-the-retirement-ledger-rule-10" class="toc-link">10. The retirement ledger (rule 10)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#11-findings" class="toc-link">11. Findings</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#12-divergences-and-honest-bounds" class="toc-link">12. Divergences and honest bounds</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#13-carried-forward-to-batch-07-the-synthesis" class="toc-link">13. Carried forward to batch 07 (the synthesis)</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('multica_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('multica_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('multica_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('multica_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.MulticaReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

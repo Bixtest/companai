@@ -26,7 +26,7 @@ it is the most honest document in a repo.
 | 1 | Hermes forensics | ✅ CLOSED 13/13 | Main AI engine; never fork it. "OpenCode" = a provider, not a coding agent. |
 | 2 | Paperclip 0.3.1 | ✅ CLOSED 7/7 | **P2/P3 = strength**, P1 = seam-provider. No multi-tenancy, no widget composer. |
 | 3 | CrewAI 1.15.28 | ✅ CLOSED 7/7 | **Mechanism donor, NOT an architecture template.** Executor yes, **delivery no**, **tenancy nowhere**. |
-| 4 | **Multica 0.2.0** | 🔵 **b01–b06 done** | **All three poles are real and implemented.** Strongest finding: the machine/teammate split. |
+| 4 | **Multica 0.2.0** | ✅ **CLOSED 7/7 + reader** | **All three poles real. The closest neighbour studied.** No widget model; no engine of its own. |
 | — | gastown, n8n, buzz, openrig, mattermost, zulip | ⬜ 6 remain | Order not fixed — **ASK before extracting more.** |
 
 **Multica b01 (`4cf7f35`, 19 findings, 584 lines, 0 CR):** a Go+TS *product*, not a library
@@ -102,7 +102,19 @@ consumed + served (reusing the non-inheriting skill pattern); `124` generalizes
 lark_* → 10 channel_* with a documented zero-downtime cutover (2 invariants);
 first-party `DO_NOT_TRACK` telemetry; enforcement separated from commercial policy;
 225 .mdx = 45 pages × 5 languages.
-**Next: `findings/07-SYNTHESIS.md` (all poles), then the Multica reader.**
+
+**Multica b07 + READER (`afed823`, synthesis; 361 lines / 0 CR):** 75 findings
+(19+14+12+11+9+10). Ranked mechanisms (top 3): machine/teammate split ·
+one-statement claim · row-as-lease scheduler. **Reader built** (copy the engine,
+swap `BRAND`+`DOCS_CONFIG`+`diagrams.js`): 8 docs / 26,624 words / **177,688 chars**,
+8/8 `fidelityVerified`, port 3300. **Fidelity verified two ways** — and the HOW-TO's
+"byte count" stability check was WRONG (bytes 178,931 ≠ chars 177,688; the gap is
+UTF-8); corrected. **The engine was NOT fully platform-agnostic**: 4 hardcoded
+"CrewAI" strings in `generate-reader.js` + `window.CrewAIReader` (a broken gallery
+modal) + a hardcoded `crewai_reader_` storage prefix in `assets/reader.js` — all
+fixed; 0 stale refs.
+**★ NEXT: the remaining six platforms (gastown, n8n, buzz, openrig, mattermost, zulip)
+— ASK before extracting more — then the cross-platform mapping pass.**
 
 ## Standing hazards (still bite)
 - **Git-Bash `grep -c $'\r'` LIES** — byte truth is `tr -cd '\r' < f | wc -c`; verify the

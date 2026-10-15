@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 05 — Widgets and the frontend (PX-W / PX-F) — Multica Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-05" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 05</span>
+      <div class="header-title-wrap">
+        <div class="header-title">Widgets &amp; Frontend</div>
+        <div class="header-subtitle">Multica Platform Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/05-widgets-and-frontend.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #059669">DONE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">2,762</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">14 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">287</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-15</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 05 Architecture Guide (Default)</option>
+            <optgroup label="Strategic Architecture">
+              <option value="master">Executive Topology: the three poles and the two absent layers</option>
+            </optgroup>
+            <optgroup label="Foundations">
+              <option value="00">Batch 00: The pin, the shape, and the method</option>
+              <option value="01">Batch 01: The control plane — server, daemon, queue, cron, fence</option>
+            </optgroup>
+            <optgroup label="Pole 1 — The Aissistant">
+              <option value="02">Batch 02: The aissistant — machine, teammate, one seam</option>
+            </optgroup>
+            <optgroup label="Pole 2 — The Workspace">
+              <option value="03">Batch 03: The workspace — a fenced tenant</option>
+            </optgroup>
+            <optgroup label="Pole 3 — Automations">
+              <option value="04">Batch 04: Automations — the delivery layer</option>
+            </optgroup>
+            <optgroup label="Cross-Cutting">
+              <option value="05">Batch 05: Widgets &amp; frontend — and the absent widget model</option>
+            </optgroup>
+            <optgroup label="Escape Hatch">
+              <option value="06">Batch 06: Out-of-pole — perimeter, plugin reset, cutover</option>
+            </optgroup>
+            <optgroup label="Strategic Decision">
+              <option value="07">Batch 07: The synthesis — ranked mechanisms and the verdict</option>
+            </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 05 VISUAL GUIDE</div>
+    <h4>Widgets and frontend: a shared-first architecture, and no widget model</h4>
+    <p>A strict layering whose rules are prohibitions, named adapters, a role-named token system — and a measured absence</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 350" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-05" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-05" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+        <marker id="arrr-05" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#ef4444"/>
+        </marker>
+      </defs>
+      <g transform="translate(20, 20)">
+        <rect width="200" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE SHARED LAYER</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">packages/views — 304,348 lines</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">packages/core — 86,914 lines</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">packages/ui — 10,689 lines</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">  46 primitives</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#6d28d9">≈402k shared vs ≈60k apps</text>
+      </g>
+      <path d="M 220 95 L 258 95" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-05)"/>
+      <g transform="translate(262, 20)">
+        <rect width="200" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE PROHIBITIONS</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">core: no react-dom</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">core: no localStorage → StorageAdapter</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">core: no process.env</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">ui: no @multica/core imports</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#b45309">views: no stores/next/router</text>
+      </g>
+      <path d="M 462 95 L 500 95" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-05)"/>
+      <g transform="translate(504, 20)">
+        <rect width="180" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE ADAPTERS</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">StorageAdapter</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">NavigationAdapter</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">useNavigation()</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)"><AppLink></text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">WindowOverlay (desktop)</text>
+      </g>
+      <path d="M 684 95 L 722 95" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-05)"/>
+      <g transform="translate(726, 20)">
+        <rect width="174" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE TOKENS</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">role-named type scale</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">51 ad-hoc sizes → 10 steps</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">surface system</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">colors pinned by WCAG</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">UI Lab proves contrast</text>
+      </g>
+      <rect x="20" y="196" width="430" height="136" rx="10" fill="#ef4444" fill-opacity="0.08" stroke="#ef4444" stroke-width="1.6"/>
+      <text x="38" y="222" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#b91c1c">THE NEGATIVE: NO WIDGET / COMPOSER MODEL</text>
+      <text x="38" y="246" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">0 composers found anywhere in the tree</text>
+      <text x="38" y="266" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">"widget" appears in 13 code files — all incidental</text>
+      <text x="38" y="286" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">the UI is composed of fixed pages and business components</text>
+      <text x="38" y="312" font-family="system-ui, sans-serif" font-size="10.5" font-weight="600" fill="#b91c1c">Second platform with no widget architecture (Paperclip had none).</text>
+      <rect x="470" y="196" width="430" height="136" rx="10" fill="#059669" fill-opacity="0.08" stroke="#059669" stroke-width="1.6"/>
+      <text x="488" y="222" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#047857">TWO RULES WORTH CARRYING</text>
+      <text x="488" y="246" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">• TanStack Query owns server data; Zustand owns client state</text>
+      <text x="488" y="266" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">• only auth/workspace stores may call api.* directly</text>
+      <text x="488" y="286" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">• optimistic updates need 4 conditions (predictable, rare, …)</text>
+      <text x="488" y="312" font-family="system-ui, sans-serif" font-size="10.5" font-weight="600" fill="#047857">UI JSON is validated (zod + parseWithFallback), never cast.</text>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="batch-05-widgets-and-frontend-px-w-px-f">Batch 05 — Widgets and Frontend (PX-W / PX-F)<a href="#batch-05/batch-05-widgets-and-frontend-px-w-px-f" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Study:</strong> Multica <code>0.2.0</code> · <strong>Batch:</strong> 05 of 07 · <strong>Status:</strong> COMPLETE
+<strong>Source:</strong> <code>github.com/multica-ai/multica</code> → <code>platforms/_extracted/multica-main</code>
+<strong>Zip md5:</strong> <code>30ddc64af536212e25a6c00db5672b82</code> · <strong>License:</strong> Apache-2.0 + Multica conditions
+<strong>Method:</strong> rules 1-10 of <code>00-PIN-AND-METHOD.md</code>. Every claim carries <code>file:line</code>.
+Docs are claims; code is the authority. Nothing in this file was inferred from a README.</p>
+<hr>
+<h2 id="0-what-this-batch-had-to-answer">0. What this batch had to answer<a href="#batch-05/0-what-this-batch-had-to-answer" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Two cross-cutting questions. <strong>PX-F (frontend wiring)</strong> is how the surface is built and shared across
+platforms; <strong>PX-W (widgets)</strong> is the composable UI surface.</p>
+<p>Short answer, measured:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Question</th>
+<th>Multica&#39;s answer</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>How is the frontend split?</td>
+<td>Three shared packages + three apps, with a <strong>strict dependency direction</strong> (<code>views → core + ui</code>; core and ui independent)</td>
+<td>F05-01</td>
+</tr>
+<tr>
+<td>How do web, desktop and mobile share code?</td>
+<td><strong>Platform adapters</strong> — <code>NavigationAdapter</code>, <code>StorageAdapter</code>, <code>useNavigation</code>, <code>&lt;AppLink&gt;</code></td>
+<td>F05-02</td>
+</tr>
+<tr>
+<td>How is visual consistency kept?</td>
+<td>A <strong>design-token system</strong> with a role-named type scale and WCAG-pinned colors</td>
+<td>F05-03</td>
+</tr>
+<tr>
+<td>How are components kept consistent?</td>
+<td><strong>Written component contracts</strong> (<code>packages/ui/docs/</code>) that also power a live workbench</td>
+<td>F05-04/05</td>
+</tr>
+<tr>
+<td><strong>Is there a widget/composer model?</strong></td>
+<td><strong>No.</strong> Measured: zero composer, and &quot;widget&quot; appears in 13 code files, all incidental</td>
+<td>F05-06</td>
+</tr>
+<tr>
+<td>How is state divided?</td>
+<td>TanStack Query owns server data; Zustand owns client state; <strong>only auth/workspace stores may call the API</strong></td>
+<td>F05-07</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="1-the-shape-measured">1. The shape, measured<a href="#batch-05/1-the-shape-measured" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Surface</th>
+<th align="right">Files (<code>.ts</code>/<code>.tsx</code>)</th>
+<th align="right">Lines</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>packages/views</code></td>
+<td align="right">1,192</td>
+<td align="right">304,348</td>
+<td><strong>the shared pages</strong> (the largest frontend surface by far)</td>
+</tr>
+<tr>
+<td><code>packages/core</code></td>
+<td align="right">511</td>
+<td align="right">86,914</td>
+<td>headless logic: API client, query hooks, shared stores</td>
+</tr>
+<tr>
+<td><code>apps/mobile</code></td>
+<td align="right">303</td>
+<td align="right">35,496</td>
+<td>Expo / React Native client (<strong>independent</strong>)</td>
+</tr>
+<tr>
+<td><code>apps/web</code></td>
+<td align="right">165</td>
+<td align="right">29,196</td>
+<td>Next.js 16 routes/layouts</td>
+</tr>
+<tr>
+<td><code>apps/desktop</code></td>
+<td align="right">153</td>
+<td align="right">24,676</td>
+<td>Electron app</td>
+</tr>
+<tr>
+<td><code>packages/ui</code></td>
+<td align="right">79</td>
+<td align="right">10,689</td>
+<td>UI primitives + tokens (<strong>46 primitives</strong> in <code>components/ui/</code>)</td>
+</tr>
+<tr>
+<td><code>apps/ui-lab</code></td>
+<td align="right">33</td>
+<td align="right">5,949</td>
+<td>the component workbench</td>
+</tr>
+</tbody></table></div>
+<p><strong>The finding is the ratio.</strong> The <em>shared</em> layer (<code>views</code> + <code>core</code> + <code>ui</code> = 1,782 files / <del>402k lines) is
+roughly <strong>five times</strong> the app layers that consume it (</del>60k lines). Multica built a product where almost
+all of the frontend is shared and the per-platform code is thin — which is the whole point of §2–§3.</p>
+<p><em>(A measurement note: a first pass with <code>xargs wc -l</code> returned nonsense — <code>apps/mobile</code> reported 303 files
+and 181 lines — because the argument list was split. The table above is from a second, independent count
+that walks the tree in Python. The discrepancy is recorded because rule 2 says measure, and because a
+wrong line count is exactly the kind of number that quietly poisons a finding.)</em></p>
+<hr>
+<h2 id="2-the-package-boundaries-a-layering-with-named-constraints">2. The package boundaries — a layering with named constraints<a href="#batch-05/2-the-package-boundaries-a-layering-with-named-constraints" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>AGENTS.md:11-24</code> is a table of responsibilities, and it is unusually specific. Each row states not only
+what a package <em>is</em> but what it <strong>may not</strong> do:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Location</th>
+<th>Responsibility and constraints</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>packages/core/</code></td>
+<td>*&quot;Headless logic, API client, Query hooks, shared Zustand stores. <strong>No UI libraries, <code>react-dom</code>, <code>localStorage</code>, or <code>process.env</code></strong>; use <code>StorageAdapter</code> for persistence.&quot;*</td>
+</tr>
+<tr>
+<td><code>packages/ui/</code></td>
+<td>*&quot;UI primitives and shared styles. <strong>No business logic or <code>@multica/core</code> imports.</strong>&quot;*</td>
+</tr>
+<tr>
+<td><code>packages/views/</code></td>
+<td>*&quot;Shared web/desktop pages and business components. <strong>No store definitions, <code>next/*</code>, or <code>react-router-dom</code></strong>; use <code>NavigationAdapter</code>, <code>useNavigation()</code>, and <code>&lt;AppLink&gt;</code>.&quot;*</td>
+</tr>
+<tr>
+<td><code>apps/web/</code></td>
+<td><em>&quot;Next.js routes/layouts and web-only UI. Framework APIs stay here.&quot;</em></td>
+</tr>
+<tr>
+<td><code>apps/desktop/</code></td>
+<td><em>&quot;Electron and desktop-only UI/state.&quot;</em></td>
+</tr>
+<tr>
+<td><code>apps/mobile/</code></td>
+<td><em>&quot;Independent Expo/React Native client: owns UI, state, hooks, providers, i18n, build, and release.&quot;</em></td>
+</tr>
+</tbody></table></div>
+<p>And the one line that makes it enforceable (<code>AGENTS.md:22</code>): <em>&quot;Dependency direction is <code>views → core + ui</code>; core and ui remain independent.&quot;</em></p>
+<p><strong>Plainly:</strong> <code>core</code> cannot know about a browser (no <code>localStorage</code>, no <code>process.env</code>), <code>ui</code> cannot know
+about the business, and <code>views</code> cannot know which framework renders it. Each constraint is a <strong>seam
+waiting to be filled by an adapter</strong> — which is exactly §3.</p>
+<hr>
+<h2 id="3-the-platform-adapter-seam">3. The platform-adapter seam<a href="#batch-05/3-the-platform-adapter-seam" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>The constraints in §2 are only possible because the platform-specific parts are named and injected:</p>
+<ul>
+<li><strong><code>StorageAdapter</code></strong> — <code>core</code> persists through it instead of <code>localStorage</code>, so the same store works on
+web, in Electron, and (in its own client) on mobile.</li>
+<li><strong><code>NavigationAdapter</code> / <code>useNavigation()</code> / <code>&lt;AppLink&gt;</code></strong> — <code>views</code> navigates through these instead of
+<code>next/*</code> or <code>react-router-dom</code>, so one page component works under Next.js and under the desktop router.</li>
+<li><strong><code>WindowOverlay</code></strong> (<code>AGENTS.md:89</code>) — desktop&#39;s pre-workspace one-shot flows (create workspace, accept
+invite) are <strong>window overlays, not routes</strong>, so they do not pollute the tab model.</li>
+<li><strong><code>setCurrentWorkspace(slug, uuid)</code></strong> (<code>AGENTS.md:90</code>) — desktop route layouts own the workspace
+identity; the adapter is the only thing that knows both the slug and the uuid.</li>
+</ul>
+<p><strong>The finding:</strong> the platform differences are collected into a handful of <strong>named adapters</strong>, and the
+shared layer is written against those names. That is what lets ~400k lines of shared frontend run on three
+platforms.</p>
+<hr>
+<h2 id="4-the-design-token-system-and-the-history-in-its-comments">4. The design-token system — and the history in its comments<a href="#batch-05/4-the-design-token-system-and-the-history-in-its-comments" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>packages/ui/styles/tokens.css</code> (315 lines) is the single source of visual truth, <em>&quot;shared across Web +
+Desktop&quot;</em> (<code>tokens.css:1</code>). Three parts:</p>
+<h3 id="4-1-a-role-named-type-scale">4.1 A role-named type scale<a href="#batch-05/4-1-a-role-named-type-scale" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>tokens.css:67-122</code> declares <strong>ten</strong> text steps — <code>micro</code> (11), <code>caption</code> (12), <code>label</code> (13), <code>body</code> (14),
+<code>body-lg</code> (15), <code>title-sm</code> (16), <code>title</code> (18), <code>title-lg</code> (20), <code>display-sm</code> (24), <code>display</code> (36) — each
+with its own line-height. The comment above it is a <strong>measurement of the problem it fixed</strong>:</p>
+<blockquote>
+<p><em>&quot;There was no <code>--text-*</code> token here before, so sizes grew ad hoc: <strong>51 distinct font sizes across web +
+desktop, 370 of them written as arbitrary values, including half-pixel steps (10.5 / 11.5 / 12.5 / 13.5
+/ 14.5 / 15.5px) that nobody chose deliberately</strong> — they appeared because there was no step to reach
+for.&quot;</em></p>
+</blockquote>
+<p>And the rule that keeps it from drifting: <em>&quot;The steps are named for the role the text plays, not for a
+t-shirt size … &#39;what is this text for&#39; has an answer a reader can check, &#39;is this sm or base&#39; does not.&quot;</em>
+Six of the ten steps <strong>deliberately keep Tailwind&#39;s exact size/line-height pairs</strong> so switching to them
+moves nothing on screen — a migration that costs no visual change.</p>
+<h3 id="4-2-a-surface-system">4.2 A surface system<a href="#batch-05/4-2-a-surface-system" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>tokens.css:146-175</code> names the layers: <code>--app-shell</code> (the quiet outer frame), <code>--page-canvas</code> (where lists
+and conversations live), <code>--surface</code> (bounded content groups), <code>--surface-raised</code> (ephemeral overlays), and
+<code>--surface-selected</code>. Two shadow tokens separate <em>menus</em> (lighter, they hover above a trigger) from
+<em>windows</em> (dials/sheets).</p>
+<h3 id="4-3-colors-pinned-by-contrast-not-taste">4.3 Colors pinned by contrast, not taste<a href="#batch-05/4-3-colors-pinned-by-contrast-not-taste" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>Two comments state a WCAG constraint as the reason for a value:</p>
+<ul>
+<li><code>--muted-foreground</code> (<code>tokens.css:187-194</code>): <em>&quot;Lightness is pinned by WCAG AA, not by taste … At the old
+0.552 that pair was 3.98:1; 0.505 clears 4.5:1 on all of app-shell / page-canvas / sidebar /
+sidebar-accent / muted / surface-selected / surface, with the worst case at 4.88:1. Raise it and the nav
+labels fail again.&quot;</em></li>
+<li><code>--faint-foreground</code> (<code>tokens.css:195-206</code>): a step <em>&quot;below muted, for marks that are not text&quot;</em>,
+created because the alternative people reached for was alpha — <em>&quot;152 call sites of
+<code>text-muted-foreground/30..80</code> — and alpha on light surfaces lands between 1.5:1 and 3.8:1, which fails
+even the 3:1 floor for non-text.&quot;</em> It is explicitly <strong>not valid for text</strong>, and the comment says why
+there is no third text step (AA caps it 0.018 L away from muted — <em>&quot;a difference no one can see&quot;</em>).</li>
+</ul>
+<p><strong>The finding:</strong> the token file is not a palette; it is a <strong>set of decisions with their measurements
+attached</strong>, including the two failure modes (half-pixel sizes; alpha for quiet marks) that created it.</p>
+<hr>
+<h2 id="5-component-contracts-documentation-that-is-also-a-tool">5. Component contracts — documentation that is also a tool<a href="#batch-05/5-component-contracts-documentation-that-is-also-a-tool" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>packages/ui/docs/</code> holds <code>button.md</code> (47 lines) and <code>dialog.md</code> (57 lines), each in <strong>two languages</strong>
+(<code>.md</code> and <code>.zh.md</code>). They are not API dumps; they are <strong>contracts with a &quot;Correct&quot; and an &quot;Avoid&quot;
+section</strong>. <code>button.md</code> states the rule (<em>&quot;Use Button for actions. Use a navigation link for destinations.
+Keep one dominant action per dialog or form.&quot;</em>), a variant table, and then the failure it prevents:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>tsx</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-tsx">// Avoid
+&lt;Button variant=&quot;primary&quot; loading&gt;Save&lt;/Button&gt;
+&lt;Button className=&quot;h-6 bg-blue-500 px-2&quot;&gt;Save&lt;/Button&gt;
+</code></pre>
+</div>
+<blockquote>
+<p><em>&quot;<code>primary</code> and <code>loading</code> are not supported props. Choose a supported size and semantic variant before
+overriding geometry or colors.&quot;</em></p>
+</blockquote>
+<p>And <code>AGENTS.md:104</code> ties the contract to a tool: <em>&quot;These component contracts also power UI Lab
+documentation.&quot;</em></p>
+<hr>
+<h2 id="6-ui-lab-the-design-system-workbench">6. UI Lab — the design-system workbench<a href="#batch-05/6-ui-lab-the-design-system-workbench" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>apps/ui-lab</code> (33 files / 5,949 lines) is a Vite app that renders the design system for inspection. It is
+not a storybook clone; it carries <strong>real tooling</strong>:</p>
+<ul>
+<li><code>color.ts</code> / <code>contrast.ts</code> use <code>colorjs.io</code> to convert between hex and OKLCH and to <strong>compute contrast
+against a composited background stack</strong> (<code>resolveBackground</code> composites the layered surfaces and
+<em>&quot;throws when the canvas is not opaque&quot;</em>).</li>
+<li><code>color-editor.tsx</code> / <code>color-usage.tsx</code> — edit a token and see where it is used.</li>
+<li><code>component-rules.tsx</code> — the rules from §5, rendered.</li>
+<li><code>contrast.test.ts</code>, <code>colors-scene.test.ts</code>, <code>catalog.test.ts</code> — the workbench is <strong>tested</strong>.</li>
+</ul>
+<p><code>button.md</code> states the boundary precisely: *&quot;UI Lab exports a CSS patch for
+<code>packages/ui/styles/tokens.css</code>. Review the original and edited previews in both themes, merge declarations
+into the matching blocks, then review the source diff. <strong>Saving a browser design does not apply it to
+product code.</strong>&quot;* The workbench proposes; the token file and a reviewed diff decide.</p>
+<hr>
+<h2 id="7-state-and-api-boundaries">7. State and API boundaries<a href="#batch-05/7-state-and-api-boundaries" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>AGENTS.md:50-62</code> (State Rules) and <code>:63-70</code> (API Compatibility) draw the frontend&#39;s data boundaries:</p>
+<ul>
+<li><strong>TanStack Query owns server data; Zustand owns client state</strong> (filters, drafts, modals, tab layout) —
+<em>&quot;persist only durable preferences/drafts/layout, not server data or ephemeral UI state.&quot;</em></li>
+<li><strong>Only auth/workspace stores may call <code>api.*</code> directly</strong>; <em>&quot;other server interactions belong in
+queries/mutations.&quot;</em></li>
+<li><strong>WebSocket events patch or invalidate Query caches, not Zustand payloads.</strong></li>
+<li><strong>Optimistic patches have four conditions</strong> — <em>&quot;a predictable result, rare failure, trivial rollback,
+and staying on the current screen&quot;</em> — plus snapshot/rollback rules.</li>
+<li><strong>Create/delete/leave flows await the server</strong> before navigating; <em>&quot;do not optimistically delete
+entities.&quot;</em></li>
+<li><strong>Installed desktop clients may talk to newer backends</strong>, so UI-consumed JSON <em>&quot;passes through a zod
+schema and <code>parseWithFallback</code>, not an <code>as T</code> cast&quot;</em> (<code>AGENTS.md:67</code>), and unknown server enums get
+fallbacks.</li>
+</ul>
+<p><strong>The last rule is the interesting one for PX-F:</strong> an installed desktop app is a <em>deployed client</em> that
+cannot be force-upgraded, so the API boundary is treated as <strong>untrusted in both directions</strong> — the client
+validates what it receives rather than casting it.</p>
+<hr>
+<h2 id="8-the-widget-model-measured-absent">8. The widget model — measured absent<a href="#batch-05/8-the-widget-model-measured-absent" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>The PIN asked whether Multica has &quot;the widget model&quot;. Measured: <strong>it does not.</strong></p>
+<ul>
+<li>A full-tree search for <code>widget</code> across <code>.ts</code>/<code>.tsx</code>/<code>.go</code>/<code>.sql</code> finds <strong>13 files</strong>, and every one is
+incidental — an <code>autosize-textarea.tsx</code>, a few tests, a PR-list component using the word in a comment.
+There is <strong>no <code>Widget</code> type, no widget registry, no composer</strong>.</li>
+<li>A search for any composer (<code>widgetComposer</code>, <code>block composer</code>, <code>widget-composer</code>) returns <strong>nothing</strong>.</li>
+</ul>
+<p><strong>So the answer to PX-W is a negative, and it is a finding, not a gap in this batch.</strong> Multica&#39;s UI is
+composed of <strong>pages and business components</strong> in <code>packages/views</code> (1,192 files), assembled into fixed
+screens — not of user-arrangeable widgets. It has the <em>pieces</em> a widget system would need (46 primitives,
+a token system, adapters, contracts) but it never builds the composition layer on top.</p>
+<p><strong>This is the second platform in the study with no widget architecture</strong> (Paperclip had none either).
+Recorded here as the PX-W verdict; the cross-platform comparison is batch 07&#39;s job (rule 5).</p>
+<hr>
+<h2 id="9-the-retirement-ledger-rule-10">9. The retirement ledger (rule 10)<a href="#batch-05/9-the-retirement-ledger-rule-10" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Migration</th>
+<th>What was removed</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>144</code> / <code>256</code></td>
+<td>the v1 and v2 chat-pending markers</td>
+<td>superseded (recorded in batch 04 — the <em>frontend</em> concept behind them, &quot;chat is waiting on a task&quot;, was rebuilt twice)</td>
+</tr>
+</tbody></table></div>
+<p>The frontend has no migration history of its own (it is not in the database). Its &quot;retirements&quot; are
+visible only as the <em>shape</em> it converged to — most clearly in the token file&#39;s own account of the 51
+ad-hoc sizes it replaced (§4.1). <strong>That comment is this batch&#39;s retirement entry</strong>: it records a design
+that was removed and why.</p>
+<hr>
+<h2 id="10-findings">10. Findings<a href="#batch-05/10-findings" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Tagged by pole; answered against <strong>Q1 · USER VALUE</strong> and <strong>Q2 · VISION VALUE</strong>.</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Finding</th>
+<th>Pole</th>
+<th>Q1 · User value</th>
+<th>Q2 · Vision value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>F05-01</strong></td>
+<td><strong>A strict three-package layering</strong> with named <em>prohibitions</em> (<code>views → core + ui</code>; core and ui independent; no <code>localStorage</code>, no <code>next/*</code>, no stores in views).</td>
+<td>PX-F</td>
+<td>One consistent product across web and desktop.</td>
+<td>A frontend that can be re-hosted on a new platform without rewriting the pages.</td>
+</tr>
+<tr>
+<td><strong>F05-02</strong></td>
+<td><strong>Platform adapters</strong> — <code>NavigationAdapter</code>, <code>StorageAdapter</code>, <code>useNavigation</code>, <code>&lt;AppLink&gt;</code>, <code>WindowOverlay</code>.</td>
+<td>PX-F</td>
+<td>The same feature behaves natively everywhere.</td>
+<td>Platform differences are collected into named seams, not spread through the code.</td>
+</tr>
+<tr>
+<td><strong>F05-03</strong></td>
+<td><strong>A role-named design-token system</strong>, with the type scale&#39;s history (51 sizes → 10 role-named steps) and colors pinned by WCAG measurement.</td>
+<td>PX-W / PX-F</td>
+<td>The UI looks deliberate and stays readable.</td>
+<td>A reusable visual language with its rules written down.</td>
+</tr>
+<tr>
+<td><strong>F05-04</strong></td>
+<td><strong>Component contracts</strong> (<code>packages/ui/docs/*.md</code>) with &quot;Correct&quot;/&quot;Avoid&quot; sections, in two languages.</td>
+<td>PX-W</td>
+<td>Components are used the way they were designed.</td>
+<td>Documentation a newcomer (or an agent) can be held to.</td>
+</tr>
+<tr>
+<td><strong>F05-05</strong></td>
+<td><strong>UI Lab</strong> — a tested workbench with real OKLCH/contrast tooling that <em>proposes</em> token changes for review, never applies them.</td>
+<td>PX-W</td>
+<td>Colors and components can be inspected and proven accessible.</td>
+<td>A design system with its own verification, and a human review gate.</td>
+</tr>
+<tr>
+<td><strong>F05-06</strong></td>
+<td><strong>No widget model</strong> — measured absent (0 composers; 13 incidental mentions).</td>
+<td>PX-W</td>
+<td>(n/a)</td>
+<td>A clear negative: the composition layer is not borrowed from here.</td>
+</tr>
+<tr>
+<td><strong>F05-07</strong></td>
+<td><strong>State/API boundaries</strong> — Query owns server data, Zustand owns client state, only auth/workspace stores call the API, optimistic updates have four conditions.</td>
+<td>PX-F</td>
+<td>The UI does not show stale or invented data.</td>
+<td>Predictable data flow; the server stays the source of truth.</td>
+</tr>
+<tr>
+<td><strong>F05-08</strong></td>
+<td><strong>The deployed-client rule</strong> — UI JSON passes through zod + <code>parseWithFallback</code>, never an <code>as T</code> cast, because installed desktop clients may talk to newer backends.</td>
+<td>PX-F</td>
+<td>An older app keeps working against a newer server.</td>
+<td>Compatibility is enforced at the boundary, not hoped for.</td>
+</tr>
+<tr>
+<td><strong>F05-09</strong></td>
+<td><strong>The shared:app ratio</strong> — ~402k shared lines vs ~60k app lines (≈5:1).</td>
+<td>PX-F</td>
+<td>(indirect) — one product, three platforms.</td>
+<td>The frontend investment is in the shared layer.</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="11-divergences-and-honest-bounds">11. Divergences and honest bounds <span class="seal-badge" style="background:#fef2f2; color:#dc2626; border-color:#fca5a5; font-size: 0.65em; vertical-align: middle;">⚠️ FINDING NOTE</span><a href="#batch-05/11-divergences-and-honest-bounds" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<ul>
+<li><strong>No doc-vs-code divergence was needed.</strong> The frontend&#39;s &quot;documents&quot; are <code>AGENTS.md</code> (the rules) and
+<code>packages/ui/docs/</code> (the contracts), and both match the code.</li>
+<li><strong>Bound:</strong> this batch read the <strong>architecture and the conventions</strong>, not the rendering of individual
+screens. The issue board, the chat surface and the editor are named as living in <code>packages/views</code> but
+were not read screen by screen — that is a depth call, not an omission.</li>
+<li><strong>Bound:</strong> the mobile app has its own <code>AGENTS.md</code> (<code>apps/mobile/AGENTS.md</code>) and its own rules; this batch
+read the root file and the boundary table, and states that mobile is an <strong>independent client</strong> rather
+than claiming to have read its internals.</li>
+<li><strong>Bound (stated plainly):</strong> the &quot;no widget model&quot; verdict (§8) is a <em>negative</em> claim. It rests on a
+full-tree search for the term and for any composer. A widget system under an unexpected name would not
+be caught by that search; the honest phrasing is <em>&quot;no widget or composer model exists under any name this
+batch searched for.&quot;</em></li>
+</ul>
+<hr>
+<h2 id="12-carried-forward-to-batch-07-the-synthesis">12. Carried forward to batch 07 (the synthesis)<a href="#batch-05/12-carried-forward-to-batch-07-the-synthesis" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Three candidates for the highest transferable value, to be ranked in batch 07:</p>
+<ol>
+<li><strong>The package-boundary + adapter pattern (F05-01 / F05-02)</strong> — a strict layering whose constraints are
+<em>prohibitions</em>, with the platform differences collected into named adapters. It is the cleanest
+multi-platform frontend seam in the study.</li>
+<li><strong>The token system with its history attached (F05-03)</strong> — a role-named scale, and comments that record
+the 51 ad-hoc sizes and the WCAG measurements behind each pinned color.</li>
+<li><strong>The negative on widgets (F05-06)</strong> — the composition layer is not available here; if the vision wants
+a widget surface, it is <strong>not</strong> borrowed from Multica.</li>
+</ol>
+<p>All three are <strong>observations</strong>, not decisions. The cross-platform mapping is a later pass (rule 5).</p>
+<hr>
+<p><em>Batch 05 of 07. Read from source on 2026-10-15. Next: <code>findings/06-out-of-pole.md</code>.</em></p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="04-automations-p3.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">Automations (P3)</span>
+                </a>
+              
+
+              <a href="../index.html#batch-05" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              
+                <a href="06-out-of-pole-pz.html" class="nav-page-btn" style="text-align:right;">
+                  <span class="nav-btn-sub">Next Batch →</span>
+                  <span class="nav-btn-title">Out-of-Pole (PZ)</span>
+                </a>
+              
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#0-what-this-batch-had-to-answer" class="toc-link">0. What this batch had to answer</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#1-the-shape-measured" class="toc-link">1. The shape, measured</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#2-the-package-boundaries-a-layering-with-named-constraints" class="toc-link">2. The package boundaries — a layering with named constraints</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-the-platform-adapter-seam" class="toc-link">3. The platform-adapter seam</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-the-design-token-system-and-the-history-in-its-comments" class="toc-link">4. The design-token system — and the history in its comments</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-1-a-role-named-type-scale" class="toc-link">4.1 A role-named type scale</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-2-a-surface-system" class="toc-link">4.2 A surface system</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-3-colors-pinned-by-contrast-not-taste" class="toc-link">4.3 Colors pinned by contrast, not taste</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-component-contracts-documentation-that-is-also-a-tool" class="toc-link">5. Component contracts — documentation that is also a tool</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-ui-lab-the-design-system-workbench" class="toc-link">6. UI Lab — the design-system workbench</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-state-and-api-boundaries" class="toc-link">7. State and API boundaries</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#8-the-widget-model-measured-absent" class="toc-link">8. The widget model — measured absent</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#9-the-retirement-ledger-rule-10" class="toc-link">9. The retirement ledger (rule 10)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#10-findings" class="toc-link">10. Findings</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#11-divergences-and-honest-bounds" class="toc-link">11. Divergences and honest bounds</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#12-carried-forward-to-batch-07-the-synthesis" class="toc-link">12. Carried forward to batch 07 (the synthesis)</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('multica_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('multica_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('multica_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('multica_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.MulticaReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

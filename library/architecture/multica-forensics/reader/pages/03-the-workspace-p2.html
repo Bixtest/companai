@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 03 — The workspace (P2) — Multica Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-03" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 03</span>
+      <div class="header-title-wrap">
+        <div class="header-title">The Workspace (P2)</div>
+        <div class="header-subtitle">Multica Platform Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/03-the-workspace.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #059669">DONE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">2,900</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">15 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">307</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-15</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 03 Architecture Guide (Default)</option>
+            <optgroup label="Strategic Architecture">
+              <option value="master">Executive Topology: the three poles and the two absent layers</option>
+            </optgroup>
+            <optgroup label="Foundations">
+              <option value="00">Batch 00: The pin, the shape, and the method</option>
+              <option value="01">Batch 01: The control plane — server, daemon, queue, cron, fence</option>
+            </optgroup>
+            <optgroup label="Pole 1 — The Aissistant">
+              <option value="02">Batch 02: The aissistant — machine, teammate, one seam</option>
+            </optgroup>
+            <optgroup label="Pole 2 — The Workspace">
+              <option value="03">Batch 03: The workspace — a fenced tenant</option>
+            </optgroup>
+            <optgroup label="Pole 3 — Automations">
+              <option value="04">Batch 04: Automations — the delivery layer</option>
+            </optgroup>
+            <optgroup label="Cross-Cutting">
+              <option value="05">Batch 05: Widgets &amp; frontend — and the absent widget model</option>
+            </optgroup>
+            <optgroup label="Escape Hatch">
+              <option value="06">Batch 06: Out-of-pole — perimeter, plugin reset, cutover</option>
+            </optgroup>
+            <optgroup label="Strategic Decision">
+              <option value="07">Batch 07: The synthesis — ranked mechanisms and the verdict</option>
+            </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 03 VISUAL GUIDE</div>
+    <h4>The workspace: a fenced tenant, and the work that lives in it</h4>
+    <p>82 of 144 tables carry workspace_id; members, issues, projects and the code link sit inside the fence</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 350" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-03" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-03" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+        <marker id="arrr-03" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#ef4444"/>
+        </marker>
+      </defs>
+      <rect x="20" y="20" width="880" height="150" rx="12" fill="var(--surface-card, #ffffff)" fill-opacity="0.4" stroke="#2563eb" stroke-width="2" stroke-dasharray="6,4"/>
+      <text x="40" y="46" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#1d4ed8">THE TENANT FENCE — 144 tables, 82 carry workspace_id</text>
+      <g transform="translate(40, 60)">
+        <rect width="200" height="96" rx="8" fill="var(--surface-card, #ffffff)" stroke="#2563eb" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">MEMBERS</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">owner | admin | member</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">invitations: 7-day expiry</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">last owner protected (x3)</text>
+      </g>
+      <g transform="translate(256, 60)">
+        <rect width="200" height="96" rx="8" fill="var(--surface-card, #ffffff)" stroke="#2563eb" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">ISSUES</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">32 columns</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">number · stage · triage_state</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="#b45309">metadata + typed properties</text>
+      </g>
+      <g transform="translate(472, 60)">
+        <rect width="200" height="96" rx="8" fill="var(--surface-card, #ffffff)" stroke="#2563eb" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">PROJECTS</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">status · priority · dates</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">lead: member OR agent</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">polymorphic resources</text>
+      </g>
+      <g transform="translate(688, 60)">
+        <rect width="200" height="96" rx="8" fill="var(--surface-card, #ffffff)" stroke="#2563eb" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">CODE</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">workspace.repos (url + ref)</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">github_installation (multi-ws)</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">issue ↔ PR join</text>
+      </g>
+      <rect x="20" y="196" width="430" height="136" rx="10" fill="#2563eb" fill-opacity="0.08" stroke="#2563eb" stroke-width="1.6"/>
+      <text x="38" y="222" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#1d4ed8">TWO CUSTOM-FIELD LAYERS, DELIBERATELY SPLIT</text>
+      <text x="38" y="246" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">issue.metadata (105) — a free jsonb bag for MACHINES, 8 KB, primitives</text>
+      <text x="38" y="266" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">issue_property + issue.properties (191) — a TYPED catalog for PEOPLE, 16 KB</text>
+      <text x="38" y="290" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">values are keyed by definition UUID, so a rename never rewrites data</text>
+      <text x="38" y="314" font-family="system-ui, sans-serif" font-size="10.5" font-weight="600" fill="#1d4ed8">Definitions are archived, never deleted — history stays resolvable.</text>
+      <rect x="470" y="196" width="430" height="136" rx="10" fill="#ef4444" fill-opacity="0.08" stroke="#ef4444" stroke-width="1.6"/>
+      <text x="488" y="222" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#b91c1c">THREE DESIGN DECISIONS RECORDED IN MIGRATIONS</text>
+      <text x="488" y="246" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">• triage moved OFF status onto its own column (483)</text>
+      <text x="488" y="266" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">• a duplicate is a cancelled issue with a pointer (536)</text>
+      <text x="488" y="286" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">• stages are barrier groups among siblings (123)</text>
+      <text x="488" y="312" font-family="system-ui, sans-serif" font-size="10.5" font-weight="600" fill="#b91c1c">The migration chain, not the schema, is the durable truth.</text>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="batch-03-the-workspace-p2">Batch 03 — The Workspace (P2)<a href="#batch-03/batch-03-the-workspace-p2" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Study:</strong> Multica <code>0.2.0</code> · <strong>Batch:</strong> 03 of 07 · <strong>Status:</strong> COMPLETE
+<strong>Source:</strong> <code>github.com/multica-ai/multica</code> → <code>platforms/_extracted/multica-main</code>
+<strong>Zip md5:</strong> <code>30ddc64af536212e25a6c00db5672b82</code> · <strong>License:</strong> Apache-2.0 + Multica conditions
+<strong>Method:</strong> rules 1-10 of <code>00-PIN-AND-METHOD.md</code>. Every claim carries <code>file:line</code>.
+Docs are claims; code is the authority. Nothing in this file was inferred from a README.</p>
+<hr>
+<h2 id="0-what-this-batch-had-to-answer">0. What this batch had to answer<a href="#batch-03/0-what-this-batch-had-to-answer" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>P2 is <strong>the workspace</strong> — the container a person operates in. Batch 01 established that <code>workspace</code> is
+the tenant root and is fenced by a task-scoped credential; this batch opens the container up: who is in
+it, what work lives in it, and how it is tied to code.</p>
+<p>Short answer, measured:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Question</th>
+<th>Multica&#39;s answer</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>What is the tenant root?</td>
+<td><code>workspace</code> — <strong>82 of 144 tables</strong> carry a <code>workspace_id</code> directly</td>
+<td>F03-01</td>
+</tr>
+<tr>
+<td>Who is in it, and what may they do?</td>
+<td>A <code>member</code> row with role <code>owner</code>/<code>admin</code>/<code>member</code>; invitations carry a 7-day expiry</td>
+<td>F03-04</td>
+</tr>
+<tr>
+<td>What is the work item?</td>
+<td><code>issue</code> — a 30-column work record with a per-workspace human number, a tree, stages, triage, and custom properties</td>
+<td>F03-06</td>
+</tr>
+<tr>
+<td>What is a project?</td>
+<td>A planning container (<code>status</code>, <code>priority</code>, <code>start</code>/<code>due</code>, a lead that may be a <strong>member or an agent</strong>)</td>
+<td>F03-07</td>
+</tr>
+<tr>
+<td>How is code linked?</td>
+<td>A per-workspace repo registry + a GitHub App installation + issue↔PR links</td>
+<td>F03-08</td>
+</tr>
+<tr>
+<td>What makes one workspace different?</td>
+<td><code>settings</code> (jsonb) + <code>context</code> + a per-workspace <strong>fail-closed attribution</strong> switch</td>
+<td>F03-09</td>
+</tr>
+</tbody></table></div>
+<p>Everything here is the <em>container</em>. The agent (batch 02), the scheduler (batch 04) and the UI (batch 05)
+are separate.</p>
+<hr>
+<h2 id="1-the-workspace-record-the-tenant-root">1. The workspace record — the tenant root<a href="#batch-03/1-the-workspace-record-the-tenant-root" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>001_init.up.sql</code> creates <code>workspace</code>; the current shape is <code>pkg/db/generated/models.go:1723-1738</code>
+(13 columns):</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Added by</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>id</code>, <code>name</code>, <code>slug</code> (UNIQUE), <code>description</code>, <code>settings</code> (jsonb), <code>created_at</code>, <code>updated_at</code></td>
+<td><code>001_init</code></td>
+<td>the tenant root</td>
+</tr>
+<tr>
+<td><code>context</code> (TEXT)</td>
+<td><code>006</code></td>
+<td>free-form workspace context</td>
+</tr>
+<tr>
+<td><code>repos</code> (jsonb, default <code>[]</code>)</td>
+<td><code>014</code></td>
+<td>the repo registry (§5)</td>
+</tr>
+<tr>
+<td><code>issue_prefix</code>, <code>issue_counter</code></td>
+<td><code>020</code></td>
+<td>the human-readable issue-ID source (§3.2)</td>
+</tr>
+<tr>
+<td><code>avatar_url</code></td>
+<td><code>111</code></td>
+<td>display</td>
+</tr>
+<tr>
+<td><code>attribution_fail_closed</code> (bool, default FALSE)</td>
+<td><code>188</code></td>
+<td>the compliance switch (§6)</td>
+</tr>
+</tbody></table></div>
+<h3 id="1-1-the-fence-measured">1.1 The fence, measured<a href="#batch-03/1-1-the-fence-measured" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>Measured over the whole migration set: <strong>144 unique tables created</strong>, and <strong>82 of them carry a
+<code>workspace_id</code> column in their own <code>CREATE TABLE</code> block</strong>. The other <strong>62</strong> are either join/child tables
+that inherit the tenant through a parent (e.g. <code>agent_skill</code>, <code>comment</code>, <code>issue_subscriber</code>) or genuinely
+global rows (e.g. <code>user</code>, <code>personal_access_token</code>, <code>maintenance_job</code>, <code>instance_telemetry_state</code>).</p>
+<p><strong>Plainly:</strong> <code>workspace_id</code> is the tenant key, and it sits on the majority of the schema. This is the
+same fence batch 01 found enforced at runtime by a task-scoped credential (<code>mat_</code> token); here it is the
+storage half of the same idea.</p>
+<h3 id="1-2-a-real-bug-recorded-in-a-migration">1.2 A real bug, recorded in a migration<a href="#batch-03/1-2-a-real-bug-recorded-in-a-migration" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>044_fix_workspace_fallback_slug.up.sql</code> is worth reading as a lesson. The frontend&#39;s slug generator fell
+back to the literal string <code>&quot;workspace&quot;</code> when a name produced no valid slug characters — <em>&quot;Chinese /
+Japanese / emoji / Arabic names all stripped to empty by the <code>/[^a-z0-9]+/g</code> regex.&quot;</em> The first
+non-ASCII-named workspace on any instance silently got <code>slug = &quot;workspace&quot;</code>, which (a) produced a
+confusing URL and (b) <strong>blocked every later non-ASCII-named workspace with a 409</strong> on the unique index.
+The migration renames the literal fallback to <code>workspace-&lt;8 hex chars&gt;</code>, and is careful to patch <strong>only</strong>
+that literal, because other odd slugs <em>&quot;are valid per the regex and the user might have chosen them
+intentionally.&quot;</em></p>
+<p><strong>The transferable lesson:</strong> an auto-generated unique key needs a fallback that is unique, and the fix
+has to be surgical — a broad &quot;clean up all odd slugs&quot; would have renamed values users chose on purpose.</p>
+<hr>
+<h2 id="2-members-and-roles">2. Members and roles<a href="#batch-03/2-members-and-roles" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>member</code> (<code>001_init</code>) is a 5-column join: <code>(workspace_id, user_id)</code> UNIQUE, <code>role ∈ {owner, admin, member}</code>. That is the whole model — three roles, one row per person per workspace.</p>
+<h3 id="2-1-invitations">2.1 Invitations<a href="#batch-03/2-1-invitations" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>041_workspace_invitation.up.sql</code> adds <code>workspace_invitation</code>: <code>inviter_id</code>, <code>invitee_email</code>,
+<code>invitee_user_id</code>, <code>role ∈ {admin, member}</code> (<strong>not</strong> owner), <code>status ∈ {pending, accepted, declined, expired}</code>, and <code>expires_at DEFAULT now() + INTERVAL &#39;7 days&#39;</code>. A <strong>partial unique index</strong> —
+<code>UNIQUE (workspace_id, invitee_email) WHERE status = &#39;pending&#39;</code> — enforces <em>&quot;only one pending invitation
+per workspace + email at a time&quot;</em>, and two more partial indexes make the pending lookups fast. The
+partial index is the interesting part: it makes &quot;one <em>pending</em> invite&quot; a database rule while allowing
+the history of past invites to accumulate.</p>
+<h3 id="2-2-the-rules-that-protect-the-last-owner">2.2 The rules that protect the last owner<a href="#batch-03/2-2-the-rules-that-protect-the-last-owner" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>internal/handler/workspace.go</code> carries the member-management rules, and one is repeated in three places
+— update (<code>:618-628</code>), delete (<code>:678-688</code>) and leave (<code>:724-734</code>):</p>
+<ul>
+<li>only an <code>owner</code> may touch an <code>owner</code> role (<code>:613-616</code>, <code>:673-676</code>);</li>
+<li><strong>the workspace must always keep at least one owner</strong> — demoting, removing or leaving as the last
+owner is a <code>400</code> (<em>&quot;workspace must have at least one owner&quot;</em>).</li>
+</ul>
+<p>Two further mechanisms are worth naming because they show the container is live, not just stored:</p>
+<ul>
+<li>a <strong>membership cache</strong> is invalidated on every role change and removal (<code>:639</code>, <code>:700</code>);</li>
+<li>removing a member <strong>revokes</strong> their access and <strong>disconnects</strong> their live connection
+(<code>revokeAndRemoveMember</code>, <code>h.Hub.DisconnectMember</code>, <code>:691-704</code>).</li>
+</ul>
+<hr>
+<h2 id="3-the-work-item-issues">3. The work item — issues<a href="#batch-03/3-the-work-item-issues" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="3-1-the-record">3.1 The record<a href="#batch-03/3-1-the-record" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>issue</code> (<code>001_init</code>) has grown to <strong>32 columns</strong> (<code>models.go:818-849</code>). The base fields are the obvious
+ones (title, description, <code>status</code>, <code>priority</code>, <code>assignee_type ∈ {member, agent}</code>, <code>creator_type</code>,
+<code>parent_issue_id</code>, <code>acceptance_criteria</code>, <code>context_refs</code>, <code>position</code>, dates). The later columns are the
+study-worthy ones:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Migration</th>
+<th>What it added</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>number</code></td>
+<td><code>020</code></td>
+<td>a per-workspace human number</td>
+</tr>
+<tr>
+<td><code>project_id</code></td>
+<td><code>034</code></td>
+<td>the project link</td>
+</tr>
+<tr>
+<td><code>origin_type</code> / <code>origin_id</code></td>
+<td><code>042</code>/<code>060</code></td>
+<td>where the issue came from (quick-create, chat, agent)</td>
+</tr>
+<tr>
+<td><code>first_executed_at</code></td>
+<td><code>050</code></td>
+<td>when an agent first ran it</td>
+</tr>
+<tr>
+<td><code>start_date</code></td>
+<td><code>091</code>, <code>112</code></td>
+<td>a planned start (calendar <code>DATE</code>)</td>
+</tr>
+<tr>
+<td><code>metadata</code></td>
+<td><code>105</code></td>
+<td>a small jsonb KV bag for pipeline state</td>
+</tr>
+<tr>
+<td><code>stage</code></td>
+<td><code>123</code></td>
+<td>ordered barrier groups among siblings</td>
+</tr>
+<tr>
+<td><code>revision</code></td>
+<td><code>265</code> area</td>
+<td>optimistic-concurrency counter</td>
+</tr>
+<tr>
+<td><code>last_activity_at</code></td>
+<td><code>360</code></td>
+<td>activity ordering</td>
+</tr>
+<tr>
+<td><code>triage_state</code></td>
+<td><code>483</code></td>
+<td>&quot;is this work at all&quot;, split off <code>status</code></td>
+</tr>
+<tr>
+<td><code>properties</code></td>
+<td><code>191</code></td>
+<td>typed custom properties</td>
+</tr>
+<tr>
+<td><code>duplicate_of_issue_id</code></td>
+<td><code>536</code></td>
+<td>which issue a cancelled issue duplicates</td>
+</tr>
+</tbody></table></div>
+<h3 id="3-2-the-human-number">3.2 The human number<a href="#batch-03/3-2-the-human-number" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>020_issue_number.up.sql</code> gives every workspace an <code>issue_prefix</code> (first 3 letters of the name, uppercased)
+and an <code>issue_counter</code>, and every issue a <code>number</code>, with <code>UNIQUE (workspace_id, number)</code>. The migration
+<strong>back-fills</strong> both — sequential numbers by <code>created_at</code>, then the counter set to the max — so the feature
+arrives without a gap. That is a small thing done properly: a human ID that is unique per workspace,
+stable, and derived once.</p>
+<h3 id="3-3-three-design-decisions-recorded-in-migrations">3.3 Three design decisions recorded in migrations<a href="#batch-03/3-3-three-design-decisions-recorded-in-migrations" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<ul>
+<li><strong>Triage is its own column, not a status.</strong> <code>483_issue_triage_state.up.sql</code> moved Triage off <code>status</code>:
+<em>&quot;<code>status</code> answers &#39;how far along is this work&#39;; Triage answers &#39;is this work at all&#39;. Holding the
+second question in the first field makes every reader of <code>status</code> re-answer it, which is where the
+scattered <code>&lt;&gt; &#39;triage&#39;</code> checks came from.&quot;</em> <code>NULL</code> means an ordinary issue.</li>
+<li><strong>A duplicate is a cancelled issue with a pointer</strong>, not a status (<code>536</code>): <em>&quot;there is no duplicate
+status … Reopening an issue is therefore how a mark is removed.&quot;</em> The migration also ships the column
+<strong>before</strong> the code that writes it (<em>&quot;the expand half&quot;</em>), so the feature is safe to roll back.</li>
+<li><strong>Stages are barrier groups</strong> (<code>123</code>): <code>stage</code> orders sub-issues under one parent; the parent wake
+fires only when the <strong>lowest unfinished stage</strong> closes, so an unstaged sibling set wakes once, not on
+every child.</li>
+</ul>
+<h3 id="3-4-custom-fields-two-layers">3.4 Custom fields — two layers<a href="#batch-03/3-4-custom-fields-two-layers" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>Multica has <strong>two</strong> custom-field mechanisms, deliberately split:</p>
+<ul>
+<li><code>issue.metadata</code> (<code>105</code>) — a small jsonb KV bag agents write pipeline state into (PR number, status,
+waiting-on). Bounded to 8 KB, <code>jsonb_path_ops</code> GIN, values must be primitives.</li>
+<li><code>issue_property</code> + <code>issue.properties</code> (<code>191</code>) — <strong>typed</strong> custom properties: a workspace-level
+<em>catalog</em> of definitions (<code>text</code>, <code>number</code>, <code>select</code>, <code>multi_select</code>, <code>date</code>, <code>checkbox</code>, <code>url</code>),
+structurally a sibling of <code>issue_label</code>, with per-issue values keyed by <strong>definition UUID</strong>. Values
+are bounded to 16 KB. Definitions are <strong>archived, never deleted</strong>, so historical values stay
+resolvable, and <em>&quot;keys are UUIDs so definition renames never require value migrations.&quot;</em></li>
+</ul>
+<p>The split is the finding: a <strong>free bag for machines</strong> and a <strong>typed catalog for people</strong>, with the
+typed one keyed by UUID so a rename never rewrites data.</p>
+<h3 id="3-5-attention-and-history">3.5 Attention and history<a href="#batch-03/3-5-attention-and-history" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<ul>
+<li><code>issue_subscriber</code> (<code>015</code>) records <em>who</em> is subscribed and <em>why</em> (<code>creator</code>, <code>assignee</code>, <code>commenter</code>,
+<code>mentioned</code>, <code>manual</code>) — the reason is stored, not inferred.</li>
+<li><code>issue_reaction</code> (<code>027</code>) is emoji reactions from members <strong>or agents</strong>, unique per <code>(issue, actor, emoji)</code>.</li>
+<li><code>issue_view</code> (<code>265</code>, widened by <code>269</code>) is the <strong>saved view</strong>: a named, server-backed filter
+(<code>scope_type ∈ {workspace, my, project}</code>, a jsonb <code>query</code>, a jsonb <code>display</code>), with <code>visibility</code>
+<code>private</code>/<code>workspace</code> and a CHECK that <strong>My Issues views are always private</strong> — <em>&quot;sharing it would
+leak a per-user perspective that renders differently for every member.&quot;</em> The <code>display</code> half <em>&quot;only
+seeds the first open and is overridden per user locally&quot;</em>, so the shared identity is the filter, not
+the layout.</li>
+</ul>
+<hr>
+<h2 id="4-projects-the-planning-container">4. Projects — the planning container<a href="#batch-03/4-projects-the-planning-container" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>034_projects.up.sql</code> adds <code>project</code>: <code>title</code>, <code>description</code>, <code>icon</code>, <code>status ∈ {planned, in_progress, paused, completed, cancelled}</code>, and a <strong>lead that may be a member or an agent</strong> (<code>lead_type ∈ {member, agent}</code>, <code>lead_id</code>). <code>035</code> adds <code>priority</code>; <code>166</code> adds <code>start_date</code>/<code>due_date</code> as calendar <code>DATE</code>
+columns (<em>&quot;carrying no time-of-day or timezone, so &#39;Mar 1&#39; means Mar 1 for every viewer&quot;</em>); <code>214</code> lets a
+chat session belong to a project.</p>
+<p><code>065_project_resources.up.sql</code> adds <code>project_resource</code>: a <strong>polymorphic</strong> typed pointer from a project to
+an external resource — <code>resource_type</code> is a free string and <code>resource_ref</code> is JSONB, so <em>&quot;adding a new
+type requires zero schema changes.&quot;</em> Today <code>github_repo</code> is the used type; notion pages, docs, URLs and
+files are the named future. The whole table is 12 lines and that is the point: one shape that will not
+need a migration per resource type.</p>
+<hr>
+<h2 id="5-git-vcs-the-code-link">5. Git / VCS — the code link<a href="#batch-03/5-git-vcs-the-code-link" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Three layers, all keyed by workspace:</p>
+<ol>
+<li><strong>The registry.</strong> <code>workspace.repos</code> (jsonb, <code>014</code>) lists the repos a workspace works on. The daemon
+reads them through <code>GetWorkspaceRepos</code> (<code>internal/daemon/client.go:1098</code>) as <code>RepoData{URL, Description, Ref}</code> (<code>internal/daemon/types.go:39-43</code>) — so a repo is a <strong>url + a ref</strong>, not a clone
+the platform owns.</li>
+<li><strong>The installation.</strong> <code>github_installation</code> (<code>079</code>) records a connected GitHub App installation
+(<code>installation_id</code>, account login/type). <code>133_github_installation_multi_workspace.up.sql</code> <strong>widens
+the uniqueness key</strong> from <code>UNIQUE (installation_id)</code> to <code>UNIQUE (workspace_id, installation_id)</code> —
+fixing a real bug where connecting the same org in a second workspace <em>&quot;silently overwrote the first
+workspace&#39;s binding row (#4823).&quot;</em> It then adds a standalone index because the new composite key
+cannot serve a bare <code>installation_id</code> lookup — a good example of a uniqueness change that must be
+paired with an index change.</li>
+<li><strong>The PR mirror.</strong> <code>github_pull_request</code> (<code>079</code>) mirrors PR state (<code>open</code>/<code>closed</code>/<code>merged</code>/<code>draft</code>),
+unique per <code>(workspace, owner, repo, number)</code>, and <code>issue_pull_request</code> joins issues to PRs with who
+linked them.</li>
+</ol>
+<p><strong>The retirement here:</strong> <code>007_drop_issue_repository.up.sql</code> dropped an early <code>issue.repository</code> column.
+Git started <strong>on the issue</strong> and moved <strong>to the workspace</strong> — the registry (<code>014</code>) and the installation
+(<code>079</code>) are the replacement. Reading only the current schema, you would never know the issue ever held
+a repo.</p>
+<hr>
+<h2 id="6-the-workspace-as-policy-surface">6. The workspace as policy surface<a href="#batch-03/6-the-workspace-as-policy-surface" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<ul>
+<li><code>settings</code> (jsonb, <code>001_init</code>) — a free workspace-config bag.</li>
+<li><code>notification_preference</code> (<code>064</code>) — per <code>(workspace, user)</code> jsonb preferences, UNIQUE on the pair.</li>
+<li><strong><code>attribution_fail_closed</code></strong> (<code>188</code>) — the one that matters. The platform&#39;s accountable-human
+waterfall degrades to <code>owner_fallback</code> when no precise human resolves, <em>&quot;so every run has an
+accountable human by default.&quot;</em> A compliance workspace can instead <strong>opt in to fail-closed</strong>: a run
+that cannot be attributed to a precise human is <strong>refused at enqueue</strong> rather than run under a degraded
+label. Default <code>FALSE</code> preserves the old behaviour. The migration&#39;s own comment draws the line that
+keeps this safe: <em>&quot;Never affects authorization (<code>originator_user_id</code>).&quot;</em></li>
+</ul>
+<p><strong>Why this is a P2 finding:</strong> it is a <strong>per-tenant policy switch</strong> for a governance concern, defaulted
+off, with its non-interference with authorization stated explicitly. The container decides how strict to
+be; the platform does not decide for it.</p>
+<hr>
+<h2 id="7-the-retirement-ledger-rule-10">7. The retirement ledger (rule 10)<a href="#batch-03/7-the-retirement-ledger-rule-10" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Migration</th>
+<th>What was removed</th>
+<th>Why (the migration&#39;s own words)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>007_drop_issue_repository</code></td>
+<td><code>issue.repository</code></td>
+<td>Git moved from the issue to the workspace registry (§5)</td>
+</tr>
+<tr>
+<td><code>058_drop_autopilot_priority_and_project_id</code></td>
+<td>autopilot&#39;s <code>priority</code> + <code>project_id</code></td>
+<td>autopilot&#39;s scheduling model was simplified</td>
+</tr>
+<tr>
+<td><code>053_drop_orphan_onboarding_current_step</code></td>
+<td>an orphan onboarding step</td>
+<td>superseded onboarding flow</td>
+</tr>
+<tr>
+<td><code>269_issue_view_workspace_variant</code></td>
+<td>an old <code>issue_view</code> CHECK</td>
+<td>replaced by a wider, paired constraint (§3.5)</td>
+</tr>
+</tbody></table></div>
+<p>(These are the P2-side retirements; batch 02 recorded the agent-side four. Together the two batches show
+the schema is a <strong>history</strong>, not a snapshot — the single most repeated lesson of this study.)</p>
+<hr>
+<h2 id="8-findings">8. Findings<a href="#batch-03/8-findings" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Tagged by pole; answered against <strong>Q1 · USER VALUE</strong> (how it serves a person) and <strong>Q2 · VISION VALUE</strong>
+(how it serves the AI-first business &amp; resources planner vision, incl. versatility and integratability).</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Finding</th>
+<th>Pole</th>
+<th>Q1 · User value</th>
+<th>Q2 · Vision value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>F03-01</strong></td>
+<td><strong>The workspace is the tenant root</strong>, and the fence is on <strong>82 of 144 tables</strong> (<code>workspace_id</code>).</td>
+<td>P2</td>
+<td>Everything a team does lives in one place, and one team cannot see another&#39;s.</td>
+<td>A clean multi-tenant storage model — the storage half of the runtime credential fence.</td>
+</tr>
+<tr>
+<td><strong>F03-02</strong></td>
+<td><strong>Three roles</strong> (<code>owner</code>/<code>admin</code>/<code>member</code>) + <strong>invitations</strong> with a 7-day expiry and a partial-unique &quot;one pending&quot; rule.</td>
+<td>P2</td>
+<td>Joining a team is a clear, expiring, single invite.</td>
+<td>Simple, enforceable membership with a real lifecycle.</td>
+</tr>
+<tr>
+<td><strong>F03-03</strong></td>
+<td><strong>The last owner is protected</strong> in three code paths; removal revokes access and disconnects the live session.</td>
+<td>P2</td>
+<td>A workspace can never be locked out of itself.</td>
+<td>No orphaned tenants.</td>
+</tr>
+<tr>
+<td><strong>F03-04</strong></td>
+<td><strong>Invitation shape</strong> — role capped at admin (never owner), expiry defaulted, pending-uniqueness partial index.</td>
+<td>P2</td>
+<td>You cannot be invited straight to owner.</td>
+<td>Escalation has a path, not a shortcut.</td>
+</tr>
+<tr>
+<td><strong>F03-05</strong></td>
+<td><strong>A per-workspace human issue number</strong> (<code>prefix</code> + <code>counter</code> + <code>UNIQUE (workspace, number)</code>), back-filled.</td>
+<td>P2</td>
+<td>Issues have stable, readable IDs.</td>
+<td>Human-facing identity without a global sequence.</td>
+</tr>
+<tr>
+<td><strong>F03-06</strong></td>
+<td><strong>The issue is a 32-column record</strong> with a tree, barrier <strong>stages</strong>, <strong>triage as its own attribute</strong>, a <strong>duplicate pointer</strong>, and <strong>two custom-field layers</strong>.</td>
+<td>P2</td>
+<td>Rich, structured work items that can express real project shapes.</td>
+<td>A work-item model deep enough to hold a real plan, extensible without a migration per field.</td>
+</tr>
+<tr>
+<td><strong>F03-07</strong></td>
+<td><strong>Projects</strong> — a planning container with dates, priority, and a lead that may be a <strong>member or an agent</strong>; resources are <strong>polymorphic</strong> (<code>resource_type</code> + jsonb ref).</td>
+<td>P2</td>
+<td>Plans group work and can be led by a person or an AI.</td>
+<td>Scheduling objects that accept a machine as a first-class owner.</td>
+</tr>
+<tr>
+<td><strong>F03-08</strong></td>
+<td><strong>The code link is three layers</strong> — a repo registry (url+ref), a GitHub installation (multi-workspace), and an issue↔PR join.</td>
+<td>P2</td>
+<td>Work is tied to real code and pull requests.</td>
+<td>Integration without the platform owning a clone.</td>
+</tr>
+<tr>
+<td><strong>F03-09</strong></td>
+<td><strong><code>attribution_fail_closed</code></strong> — a per-workspace switch to refuse an unattributable run, defaulted off, explicitly not affecting authorization.</td>
+<td>P2</td>
+<td>A regulated team can refuse runs it cannot attribute.</td>
+<td>Governance is a per-tenant policy, not a platform-wide hard rule.</td>
+</tr>
+<tr>
+<td><strong>F03-10</strong></td>
+<td><strong>Saved views</strong> — a named filter (<code>query</code> is the shared identity) with per-user display and a CHECK that <strong>My Issues is always private</strong>.</td>
+<td>P2 / PX-F</td>
+<td>A team shares a view of the work without sharing each other&#39;s perspective.</td>
+<td>A reusable, shareable lens over the data with a privacy bound built in.</td>
+</tr>
+<tr>
+<td><strong>F03-11</strong></td>
+<td><strong>The retirement ledger</strong> — Git moved issue→workspace; autopilot fields and an onboarding step removed.</td>
+<td>PZ</td>
+<td>(indirect) — the product you see is the one that survived.</td>
+<td>Rule 10 pays again: the current schema hides where Git used to live.</td>
+</tr>
+<tr>
+<td><strong>F03-12</strong></td>
+<td><strong>A migration as a bug post-mortem</strong> (<code>044</code>) — an auto-slug fallback that collided on non-ASCII names, fixed surgically.</td>
+<td>PZ</td>
+<td>Non-Latin workspace names work.</td>
+<td>The fix that patches only the literal bug, not every odd value.</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="9-divergences-and-honest-bounds">9. Divergences and honest bounds <span class="seal-badge" style="background:#fef2f2; color:#dc2626; border-color:#fca5a5; font-size: 0.65em; vertical-align: middle;">⚠️ FINDING NOTE</span><a href="#batch-03/9-divergences-and-honest-bounds" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<ul>
+<li><strong>No doc-vs-code divergence was needed</strong> for these findings; as in batch 02, the migration headers carry
+the design record and agree with the code. The one <em>narrative</em> worth flagging: <code>issue.repository</code> was
+real and is gone (§5) — a reader of the current schema alone would be wrong about where Git lives.</li>
+<li><strong>Bound:</strong> the <code>repos</code> registry is a <em>list</em>, and this batch measured its shape and its reader
+(<code>GetWorkspaceRepos</code>), not the daemon&#39;s clone/refresh behaviour — that is batch 04.</li>
+<li><strong>Bound:</strong> <code>metadata</code> and <code>properties</code> are both jsonb bags, but they are <strong>not</strong> interchangeable; the
+batch states the split (§3.4) rather than treating them as one mechanism.</li>
+<li><strong>Bound:</strong> the UI of all of this (views, boards, the workspace screen) is batch 05; this batch read the
+storage and the rules, not the rendering.</li>
+</ul>
+<hr>
+<h2 id="10-carried-forward-to-batch-07-the-synthesis">10. Carried forward to batch 07 (the synthesis)<a href="#batch-03/10-carried-forward-to-batch-07-the-synthesis" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Three candidates for the highest transferable value, to be ranked in batch 07:</p>
+<ol>
+<li><strong>The workspace-as-tenant fence (F03-01)</strong> — 82 of 144 tables carry <code>workspace_id</code>, matching the
+runtime credential fence of batch 01. The two halves together are the strongest tenancy story in the
+study.</li>
+<li><strong>The issue model (F03-06)</strong> — a work item with a tree, barrier stages, a triage attribute split from
+status, a duplicate pointer, and a <strong>two-layer custom-field design</strong> (free bag for machines, typed
+catalog for people, keyed by UUID).</li>
+<li><strong>The per-tenant policy switch (F03-09)</strong> — <code>attribution_fail_closed</code>, defaulted off, with its
+non-interference with authorization stated explicitly.</li>
+</ol>
+<p>All three are <strong>observations</strong>, not decisions. The cross-platform mapping is a later pass (rule 5).</p>
+<hr>
+<p><em>Batch 03 of 07. Read from source on 2026-10-15. Next: <code>findings/04-automations.md</code>.</em></p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="02-the-aissistant-p1.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">The Aissistant (P1)</span>
+                </a>
+              
+
+              <a href="../index.html#batch-03" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              
+                <a href="04-automations-p3.html" class="nav-page-btn" style="text-align:right;">
+                  <span class="nav-btn-sub">Next Batch →</span>
+                  <span class="nav-btn-title">Automations (P3)</span>
+                </a>
+              
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#0-what-this-batch-had-to-answer" class="toc-link">0. What this batch had to answer</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#1-the-workspace-record-the-tenant-root" class="toc-link">1. The workspace record — the tenant root</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#1-1-the-fence-measured" class="toc-link">1.1 The fence, measured</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#1-2-a-real-bug-recorded-in-a-migration" class="toc-link">1.2 A real bug, recorded in a migration</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#2-members-and-roles" class="toc-link">2. Members and roles</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-1-invitations" class="toc-link">2.1 Invitations</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-2-the-rules-that-protect-the-last-owner" class="toc-link">2.2 The rules that protect the last owner</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-the-work-item-issues" class="toc-link">3. The work item — issues</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-1-the-record" class="toc-link">3.1 The record</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-2-the-human-number" class="toc-link">3.2 The human number</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-3-three-design-decisions-recorded-in-migrations" class="toc-link">3.3 Three design decisions recorded in migrations</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-4-custom-fields-two-layers" class="toc-link">3.4 Custom fields — two layers</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-5-attention-and-history" class="toc-link">3.5 Attention and history</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-projects-the-planning-container" class="toc-link">4. Projects — the planning container</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-git-vcs-the-code-link" class="toc-link">5. Git / VCS — the code link</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-the-workspace-as-policy-surface" class="toc-link">6. The workspace as policy surface</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-the-retirement-ledger-rule-10" class="toc-link">7. The retirement ledger (rule 10)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#8-findings" class="toc-link">8. Findings</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#9-divergences-and-honest-bounds" class="toc-link">9. Divergences and honest bounds</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#10-carried-forward-to-batch-07-the-synthesis" class="toc-link">10. Carried forward to batch 07 (the synthesis)</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('multica_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('multica_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('multica_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('multica_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.MulticaReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>
