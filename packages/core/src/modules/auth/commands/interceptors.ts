@@ -86,7 +86,7 @@ const REVIEWED_GATE = 'A4'
  * - **Replays of an already-approved act**, which would otherwise be held again
  *   and produce a queue that cannot be emptied.
  */
-const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 /**
  * The id of the record a command acts on, when it names one.
@@ -95,6 +95,15 @@ const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3
  * keyed on the id alone: a slug or a numeric id from some other command's
  * payload could otherwise collide with a genuine record's lock and constrain the
  * wrong thing. A create has no id, and nothing is looked up for it.
+ *
+ * **Shape only — no version or variant constraint** (T-32). The pattern this
+ * replaced demanded an RFC-4122 v1–v5 id: every v4 id passes and every v7 id
+ * fails, so a v7-id record reached the resolver with `recordId: null`,
+ * `resourceCeilingFor` returned early on `!recordId`, and no lock was looked up
+ * at all. Version and variant are properties of the *generator* — the `uuid`
+ * column accepts any version, `gen_random_uuid()` merely defaults to v4 — while
+ * the shape is what keeps a slug from colliding with a lock. Same shape as
+ * `sync-run-service.ts` and `grantChecks.ts`.
  */
 function readRecordId(input: unknown): string | null {
   if (!input || typeof input !== 'object') return null
@@ -160,9 +169,10 @@ export const authorityCommandGate: CommandInterceptor = {
     //
     // `payload.id` rather than an entity type plus an id: the bus carries a
     // capability and no entity type, so keying a lock on both would need a
-    // per-command declaration across every command. Record ids are v4 UUIDs, so
-    // the id alone identifies a record in any practical sense — see PROGRESS
-    // under *G5, the blocking design question*.
+    // per-command declaration across every command. Record ids are UUIDs —
+    // today v4 (`gen_random_uuid()`), and the `uuid` column accepts any
+    // version — so the id alone identifies a record in any practical sense —
+    // see PROGRESS under *G5, the blocking design question*.
     const recordId = readRecordId(input)
     const decision = await enforcement.decideFor(
       subject,
