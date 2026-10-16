@@ -111,6 +111,8 @@
     "check:client-boundaries:fail": "node scripts/check-client-boundaries.mjs --fail",
     "check:time-bombs": "node scripts/time-bomb-scanner.mjs",
     "check:one-truth": "node scripts/check-one-truth.mjs",
+    "check:escape-hatches": "node scripts/check-escape-hatches.mjs",
+    "check:escape-hatches:fail": "node scripts/check-escape-hatches.mjs --fail",
     "check:time-bombs:fail": "node scripts/time-bomb-scanner.mjs --fail",
     "agents:check-budget": "node scripts/check-agents-md-budget.mjs"
   },
