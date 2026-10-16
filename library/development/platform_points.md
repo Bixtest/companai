@@ -1240,7 +1240,10 @@ both ways in a one-off container — so it was flattened in place before the dig
 executions (the harness, a separate `os.scandir` walk, and the worker's own `verify_pin.py`), with every key
 symbol re-verified present — so no compatibility debt, but the `P2-1`…`P2-9a` live-turn proofs ran against the
 previous revision and should be re-run (**`CC-86`**). A half-done re-pin had left the worker **crash-looping**
-(1,834 restarts) — recorded as a lesson. The stale-timeout gate (`P2-9b`) is **RULED**: Option 1 (keep 2,400 s),
+(1,834 restarts) — recorded as a lesson. **And the re-pinned worker served a real live turn the same day**
+(ws door: `TURN DONE in 2280.4 s`, `usage.prompt = 16572`), which also settled the `P2-9b` prompt size —
+**16,572–16,725 tokens**, so the cold production turn **completes but uses 95 % of the 2,400 s ceiling**.
+The stale-timeout gate (`P2-9b`) is **RULED**: Option 1 (keep 2,400 s),
 recorded in `DECISION-p2-9b-stale-timeout-trade.md` §6, and the process failure became **rule 18**. **Nothing in
 this round ticks a box.** **Two independent routes agree (31st consecutive re-run):**
 `library/development/.derive_platform_points.py` returns **78** (§A 11/31 · B 7/38 · C 14/28 · D 4/39 · E 2/18 ·

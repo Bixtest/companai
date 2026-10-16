@@ -106,6 +106,11 @@ The owner supplied a still-newer download (zip dated 2026-10-15, revision
   now holds again (§2). *(`.hermes_pin.py`'s own contract names this exact
   failure: a deliberate change must update the digest in the same change, or
   restore the snapshot.)*
+- **The rename also left a copy UNIGNORED.** `hermes-agent-main-newer/` (18,248
+  files) was untracked and **not** matched by `.gitignore` (`git check-ignore` →
+  *NOT IGNORED*; `git status` showed it as `??`) — one wildcard add away from
+  committing a whole third-party tree. The ignore line was added in the same
+  change (L169).
 - **The digest and the count, after flattening:** **19,728 files**, digest
   **`07ee857bdab59a875317035d8aaad4d6`** — computed twice by methods that share no
   failure mode (`os.walk` in the harness; an independent `os.scandir` walk) and

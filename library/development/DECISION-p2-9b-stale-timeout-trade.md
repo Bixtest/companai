@@ -193,7 +193,8 @@ model server's own log records the whole: the production-shaped turn's `prompt e
 cache_read_tokens 6,079 = 16,725`. The "DEFAULT toolsets" row is `10,988 + 6,022 = 17,010`. **So the true
 full prompt was ~16,725–17,010 tokens all along** — the figures above were the uncached slice, and the
 plan's ~16,757 hazard was **right about the prompt** (see §4.3). *(The `search` row's cache split is not
-in the DB; 6,105 stands as recorded.)*
+in the DB; 6,105 stands as recorded.)* **On the current pin (2026-10-16) a real production turn measured
+`usage.prompt = 16572` and `TURN DONE in 2280.4 s`** — a fourth row, in §4.3's table.
 
 The 2,400 s ceiling was set against the third row: **495 s of headroom over the slowest prefill
 actually measured** — and the measured prefill for that 16,725-token prompt is **1,778.8 s**, so the
@@ -257,13 +258,19 @@ because the default toolset was already narrow.
 (~6.7k tokens) + the conversation. **The system prompt — not the tool catalogue — is the second-biggest
 block**, and no tool-side change can reach it.
 
-**What this means for the ceiling — the honest reading.** The measured full-prompt prefill is
-**1,778.8 s at 9.40 tok/s**, i.e. inside the 2,400 s clock with **~620 s to spare**. But the same box has
-also measured **5.6–7.8 tok/s**, where 16,725 tokens costs **2,140–2,990 s**. **The ceiling holds on the
-measured rate and is marginal on the slow one.** That is a *measure-and-configure* situation exactly as
-the ruling framed it — and the lever that would move it is the **system prompt**, not the tool set.
-*(A fresh production turn through the ws door on the re-pinned worker is running to confirm the figure on
-the current pin; its `prompt eval time` line is folded in when it lands.)*
+**What this means for the ceiling — the honest reading, now confirmed on the current pin.** Two measured
+production turns bracket it:
+
+| Turn | Prompt | Prefill | Headroom under 2,400 s |
+|---|---|---|---|
+| 2026-10-14 production-shaped (`…_a43f3d`) | 16,725 | **1,778.8 s** (9.40 tok/s) | ~620 s |
+| **2026-10-16, on the re-pinned worker** (`20261016_100451_37afd4`) | **16,572** | **2,280.4 s** (7.32 tok/s) | **~120 s** |
+
+The second is a **real turn driven end-to-end through the ws door** — ticket minted, `session.create`,
+`prompt.submit`, a real model answer (`"ready"`), and `usage.prompt = 16572` matching the model server's
+own `prompt eval time = 2262809.92 ms / 16572 tokens`. **So the cold turn completes — but it used 95 % of
+the 2,400 s clock.** The ceiling holds on this box and is **marginal**; the lever that would move it is
+the **system prompt** (26.5k chars, ~6.7k tokens), not the tool set.
 
 *(Route note, kept: the live RPCs do not expose the assembly — `tools.list` returns per-toolset name
 lists only, and `tools.show` explicitly requests `get_tool_definitions(skip_tool_search_assembly=True)`,
@@ -291,13 +298,13 @@ timings dict in this build reports no `cached_n` field, but the contrast is unam
 
 **What this does and does not establish — the confounds, named:**
 
-- **The first turn may be killed, not merely slow — and §4.3 has now settled which.** The true prompt
-  is **16,725 tokens** (§4.3, corrected 2026-10-16), and the prefill **measured for exactly that prompt
-  is 1,778.8 s** — so the cold first turn **completes**, with ~620 s of headroom. The earlier "~3,000 s"
-  was an extrapolation at 5.5 tok/s; the same box has also measured 5.6–7.8 tok/s, where 16,725 tokens
-  costs **2,140–2,990 s** and would breach. **So the first turn completes on the measured rate and is
-  marginal on the slow one.** The probe measured two *completed* calls; whether an *aborted* first turn
-  leaves its slot cache alive for the retry is **untested** — an open dependency, not a proven path.
+- **The first turn is not killed — but it is close, and §4.3 has now measured it twice.** The true prompt
+  is **16,725–16,572 tokens** (§4.3, corrected 2026-10-16). The 2026-10-14 turn prefilled in **1,778.8 s**
+  (9.40 tok/s, ~620 s of headroom); the **2026-10-16 turn on the re-pinned worker prefilled in 2,280.4 s**
+  (7.32 tok/s, **~120 s of headroom — 95 % of the clock**). The earlier "~3,000 s" was an extrapolation at
+  5.5 tok/s. **So the cold first turn completes, with very little room.** The probe measured two *completed*
+  calls; whether an *aborted* first turn leaves its slot cache alive for the retry is **untested** — an
+  open dependency, not a proven path.
 - **An identical prefix is not a growing prefix.** Production turns extend the conversation each
   turn. "A warm turn pays only the delta" is the standard longest-prefix-match behavior
   **extrapolated** from the identical-prefix measurement, not directly measured.

@@ -251,6 +251,8 @@ The owner renamed the previous Hermes snapshot aside and extracted a newer downl
 
 **The pin is now `hermes-agent-main/` — revision `db44c462…`, 19,728 files, digest `07ee857b…`** (two independent routes agree: the harness's `os.walk` and a separate `os.scandir` walk; the worker's own `verify_pin.py` is a third). Every key symbol was re-verified present, so there is **no compatibility debt** — but the `P2-1`…`P2-9a` live proofs ran against the previous revision and are re-scheduled as **`CC-86`**. The rename had also left the old copy **untracked and NOT ignored** (`.gitignore` fixed in the same change). **Record: `HERMES-PIN.md` §1.1.2; lesson L169.**
 
+**And the re-pinned worker was proven live the same day** — a real turn driven end-to-end through the ws door (`TURN DONE in 2280.4 s`, `usage.prompt = 16572`, the model answering `"ready"`). That turn is also the confirming half of the `P2-9b` measurement: the true production prompt is **16,572–16,725 tokens** (not the compose's 10,988 — that was the *uncached* slice), and the cold turn **completes but uses 95% of the 2,400 s ceiling** (~120 s of headroom).
+
 ---
 
 ### ✅ P2-4 DONE — **the tool door opens: an admitted tool call now runs through the one door under two gates, and the agent — not the model — chooses the menu.** *(2026-10-13)*
