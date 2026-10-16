@@ -253,11 +253,17 @@ integer**. `AGENTS.md` states the policy:
 > would do the job — it usually will, and you get realtime fan-out, NIP-29
 > scoping, and the existing auth pipeline for free.
 
-Measured: **`crates/buzz-core/src/kind.rs` is 1,177 lines and defines 157
-`pub const` kinds.** That is the platform's composition vocabulary — 157 nouns an
-extension can be built from. Three of them are visible from batch 04/05 work:
-`KIND_APPROVAL_REQUEST = 46010`, `KIND_FORUM_POST = 45001`, and canvas'
-`kind:40100`; and the batch-04 workflow definition was `kind 30620`.
+Measured: **`crates/buzz-core/src/kind.rs` is 1,177 lines and holds 157 `pub const`
+in total** — of which **135 are `KIND_*: u32` declarations** and **136 are entries in
+`ALL_KINDS`**, the array the file documents as *"All registered kind constants — used
+for duplicate detection and iteration."* *(Precision added in batch 07 — the array is
+`135 declared − 3 unregistered + 4 RELAY_ADMIN_* aliases`. The three declared but
+unregistered kinds — `KIND_AUTH` 22242, `KIND_NOSTR_IDENTITY_BINDING` 24243,
+`KIND_PUSH_LEASE` 30350 — are infrastructure events, not content.)* That is the
+platform's composition vocabulary — 136 nouns an extension can be built from. Three
+of them are visible from batch 04/05 work: `KIND_APPROVAL_REQUEST = 46010`,
+`KIND_FORUM_POST = 45001`, and canvas' `kind:40100`; and the batch-04 workflow
+definition was `kind 30620`.
 
 **This is the pivot the study should carry.** Where a widget platform composes
 *UI elements*, buzz composes *signed events with integer types*, and the UI is a
@@ -649,7 +655,7 @@ vs. two hand-maintained engines).
 
 `desktop/src/shared/constants/kinds.ts` is **176 lines**;
 `mobile/lib/shared/relay/nostr_models.dart` is **391 lines**; the source of truth
-`crates/buzz-core/src/kind.rs` is **1,177 lines / 157 constants**.
+`crates/buzz-core/src/kind.rs` is **1,177 lines / 135 declared kinds / 136 registered in `ALL_KINDS`**. *(corrected in batch 07; see F7-1)*
 
 `AGENTS.md` states the contract: *"event kinds must stay in sync with
 `desktop/src/shared/constants/kinds.ts`."* Measured: **`kinds.ts` has a test
@@ -790,7 +796,7 @@ assumed. 27 `widget` hits tree-wide, all accounted for; the only `CREATE TABLE
 widgets` is a negative fixture inside a `#[test]`. **Fifth platform in the study
 with none.**
 
-**F5-2.** The composition unit is the **Nostr event kind**: 157 `pub const` kinds
+**F5-2.** The composition unit is the **Nostr event kind**: 136 registered kinds (135 declared `KIND_*`, plus 4 `RELAY_ADMIN_*` aliases, minus 3 unregistered)
 in a 1,177-line `kind.rs`, with a stated policy of *"prefer a new kind over a new
 HTTP endpoint."* Extensibility is of data and behaviour, never of layout.
 
@@ -904,7 +910,7 @@ desktop's) has no executable backing either.
 
 **D5-3. The event-kind mirror has no lockstep check.** `AGENTS.md` requires
 `nostr_models.dart` to stay in sync with `kinds.ts`, and `kinds.ts` to mirror
-`kind.rs` (157 constants). Measured: `kinds.test.mjs` tests behaviour, not
+`kind.rs` (136 registered kinds; 157 total `pub const`). Measured: `kinds.test.mjs` tests behaviour, not
 parity; there is **no test comparing the three files and no generator.** Given
 F5-2 (kinds *are* the composition vocabulary), this is the weakest link in the
 extension story — and it is the exact problem the emoji generator *did* solve
@@ -924,7 +930,7 @@ completeness.
 ## 7. Pole verdict
 
 **PX-W — widgets / composition.** **Absent as a model; present as a committed
-alternative.** buzz composes *signed events with integer types* (157 kinds) and
+alternative.** buzz composes *signed events with integer types* (136 registered kinds) and
 renders them with a fixed UI, rather than composing UI elements. It has exactly
 one composition-shaped surface (Channel Canvas / `kind:40100`), and that surface
 is a **document with optimistic concurrency**, not a widget tree. Its design
