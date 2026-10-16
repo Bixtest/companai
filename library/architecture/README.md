@@ -49,9 +49,9 @@ library/architecture/
 ├── buzz-forensics/            ← the buzz study (DONE, 7 batches + pin) + reader/
 │   ├── 00-PIN-AND-METHOD.md
 │   └── findings/01..07
-├── openrig-forensics/         ← the OpenRig study (IN PROGRESS: 00; findings/01..07 pending)
+├── openrig-forensics/         ← the OpenRig study (DONE, 7 batches + pin) + reader/
 │   ├── 00-PIN-AND-METHOD.md
-│   └── findings/
+│   └── findings/01..07
 ├── reader/                    ← the Hermes reader (HTML)
 └── platforms/                 ← the raw platform archives + references
     ├── *.zip                  (gitignored)
@@ -71,7 +71,7 @@ one: double-click its `index.html`, or `node serve.js` inside its `reader/` fold
 - **Gas Town reader** → `gastown-forensics/reader/` (port 3400)
 - **n8n reader** → `n8n-forensics/reader/` (port 3500)
 - **buzz reader** → `buzz-forensics/reader/` (port 3600)
-- **OpenRig reader** → `openrig-forensics/reader/` (port 3700, built after the batches)
+- **OpenRig reader** → `openrig-forensics/reader/` (port 3700)
 
 **The markdown is the source of truth.** Readers are generated from it and never edited by hand.
 
@@ -88,8 +88,7 @@ one: double-click its `index.html`, or `node serve.js` inside its `reader/` fold
 | **gastown** | `gastownhall/gastown` | **STUDIED — 7 batches + pin + reader (68 findings). Mechanism source + boundary-setting reference.** |
 | **n8n** | `n8n-io/n8n` | **STUDIED — 7 batches + pin (73 findings) + reader (port 3500). The first platform with a real composition surface.** |
 | buzz | `block/buzz` | **STUDIED — 7 batches + pin (90 findings) + reader (`bfc3833`, port 3600).** Nostr-based team workspace; Apache-2.0; 34 Rust crates; formally verified tenancy. |
-| openrig | `mvschwarz/openrig` | **IN PROGRESS — batch 00 (pin + method).** Orchestration substrate for Claude Code + Codex; Apache-2.0; 0.6.10; TS monorepo (4 pkgs). |
-| openrig | `mvschwarz/openrig` | to study |
+| **openrig** | `mvschwarz/openrig` | **STUDIED — 7 batches + pin (79 findings) + reader (port 3700).** Orchestration substrate for **unmodified** Claude Code + Codex in tmux; Apache-2.0; 0.6.10; TS monorepo (4 pkgs). **The first platform in the study with NO tenancy at all** (0 `tenant_id`); **the strongest P1 permission seam** (the two-surface rule); and **the study's most transferable PZ** (the gate culture). No widget model. |
 | mattermost | `mattermost/mattermost` | to study |
 | zulip | `zulip/zulip` | to study |
 
@@ -125,5 +124,5 @@ fixed later.
 ---
 
 *Begun 2026-10-15. Hermes, Paperclip, CrewAI, Multica and Gas Town closed; n8n closed (7 batches
-+ reader 3500); buzz closed (7 batches + reader 3600); **OpenRig in progress (batch 00 of 08)**;
-two platforms remain (mattermost, zulip).*
++ reader 3500); buzz closed (7 batches + reader 3600); **OpenRig closed (7 batches + reader 3700)**;
+two platforms remain (**mattermost, zulip** — order not fixed; ask before extracting).*

@@ -29,16 +29,17 @@ honest document in a repo.**
 | 5 | Gas Town 1.2.1 | ✅ 7/7 **+ r3400** | Go multi-agent orchestration. **The watchdog chain is made of agents**; Hook = durability primitive; ZFC = transport, don't decide; 3-layer sandbox. **NO widget model.** Top mechanisms = DECIDED LIMITS. |
 | 6 | n8n 2.44.0 | ✅ 7/7, 73 findings, **r3500** | **P1:** `@n8n/agents` (SKILL.md, sub-agents, guardrails). **P2:** `Project personal\|team`, **10 roles + 206 scopes**. **★ PX-W: FIRST real composition surface** — canvas of 7 element types, 129-component design system + own ESLint plugin, CRDT on y-websocket. Reader 8 docs / 153,204 chars. |
 | 7 | buzz 0.5.28 | ✅ 7/7 **+ r3600** | **Team workspace on Nostr (NIP-01)**; relay = source of truth; **community = tenant** (host-resolved, TLA+/Tamarin + prose contract). 34 Rust crates, 62 migrations, **90 findings**. Reader 8 docs / **347,516 chars**. |
-| 8 | **openrig 0.6.10** | 🔵 **b00–b04 done** | TS monorepo; daemon+CLI+TUI+MCP orchestrating **unmodified Claude Code / Codex** in tmux. **★ P2: NO tenancy at all — first in the study** (0 `tenant_id`; static bearer token = fully privileged; boundary = loopback/Tailscale). **P1: the two-surface rule** (launch flags may be deterministic code; config-file policy may NOT) → 5 permission policies (`locked`/`standard`⭐/`open` + `yolo`/`auto`). **P3: the hot-potato closure contract**; `THE ROW CARRIES THE OBLIGATION EXACTLY-ONCE; THE WAKE IS AT-LEAST-ONCE`. 3,685 files, 105 migrations, daemon :7433. **RIGGED rename hazard** (284 occ / 85 files). |
+| 8 | **openrig 0.6.10** | ✅ **7/7** (reader 3700 next) | TS monorepo; daemon+CLI+TUI+MCP orchestrating **unmodified Claude Code / Codex** in tmux. **★ P2: NO tenancy at all — first in the study** (0 `tenant_id`; static bearer token = fully privileged; boundary = loopback/Tailscale). **P1: the two-surface rule** (launch flags may be deterministic code; config-file policy may NOT) → 5 permission policies (`locked`/`standard`⭐/`open` + `yolo`/`auto`). **★ PZ = the study's most transferable: the gate culture** — 4-rail exclusion ledger (green-with-exclusions + **mechanical expiry**; ships EMPTY by design), *"a green is only as good as what could have been red"*, *"two reads of the same flag can diverge; one cannot"*. **★ PX: NO widget model (6th in study)** — the one composition system (Context Packs) composes **prompts**. **★ The digital-twin harness** (real UI + fixtures typechecked vs real interfaces → drift breaks the build). 3,685 files, 105 migrations, daemon :7433, 79 findings / 34 divergences. **RIGGED rename hazard** (284 occ / 85 files). |
 | — | mattermost, zulip | ⬜ 2 remain | Order not fixed — **ASK before extracting more (~700 MB / ~63 MB).** |
 
-**★ STUDY CHAIN (7 CLOSED, all with readers):** Hermes 13/13 · Paperclip · CrewAI · Multica (+r3300) ·
-Gas Town (+r3400) · n8n (+r3500) · **buzz (study DONE, reader `bfc3833`, port 3600)** — then
-**openrig (IN PROGRESS)** — then **ASK** for the 9th — then the cross-platform mapping pass.
+**★ STUDY CHAIN (8 CLOSED, readers pending for openrig):** Hermes 13/13 · Paperclip · CrewAI ·
+Multica (+r3300) · Gas Town (+r3400) · n8n (+r3500) · buzz (+r3600) · **openrig (study DONE
+`1d56d22`; reader 3700 next)** — then **ASK** for the 9th (mattermost / zulip) — then the
+cross-platform mapping pass.
 
-**OpenRig chain so far:** `d7114a8` (b00 pin+method) · `2989111` (b01 overview) · `5f5fa77`
-(b02 aissistant/P1) · `206530e` (b03 workspace/P2) · **`0b1d6dc` (b04 automations/P3)**.
-Remaining: b05 widgets+frontend (PX-W/PX-F) · b06 out-of-pole (PZ) · b07 synthesis · **reader 3700**.
+**OpenRig chain:** `d7114a8` (b00) · `2989111` (b01) · `5f5fa77` (b02) · `206530e` (b03) ·
+`0b1d6dc` (b04) · `bae9a99` (b05) · `031022d` (b06) · **`1d56d22` (b07 synthesis)** — **COMPLETE**.
+Remaining: **reader 3700**.
 
 **buzz (b00 `4304e7f` → b07 `87d9135`; reader `bfc3833`) — load-bearing facts.** *(Detail → logs 2026-10-16 + findings files.)*
 1. **★ An event log is NOT a widget model.** buzz composes signed events w/ integer kinds (136 in
