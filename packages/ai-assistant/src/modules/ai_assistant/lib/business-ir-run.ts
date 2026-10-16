@@ -36,6 +36,10 @@
  *   - a **default row limit** and a **maximum time range**, applied when the IR
  *     states neither — so a vague prompt cannot ask for an unbounded scan
  *     ({@link applyDefaultBounds});
+ *   - a **per-entity authorization gate** before the engine read (T-02,
+ *     critical/urgent) — the caller's `features` rode this chain from the tool
+ *     and were read by nothing, so the read was scoped by tenant and checked
+ *     by no permission at all;
  *   - the **resolved IR plus the compiled plan and provenance** ride out on the
  *     result, so a person and an auditor can see exactly what was asked and what
  *     ran, not just the rows ({@link BusinessQueryOutcome}).
@@ -58,6 +62,8 @@ import type {
   CompiledQueryPlan,
   IrDiagnostic,
 } from '@open-mercato/shared/lib/business-ir/types'
+import type { SearchEntityConfig } from '@open-mercato/shared/modules/search'
+import { hasAllFeatures } from '@open-mercato/shared/security/features'
 import {
   authorBusinessQueryIr,
   type AuthorBusinessQueryIrResult,
@@ -87,6 +93,7 @@ export type BusinessQueryFailureCode =
   | 'schema_rejected'
   | 'compile_failed'
   | 'no_binding'
+  | 'not_authorized'
   | 'engine_failed'
 
 /**
@@ -175,6 +182,75 @@ function scopeFromSession(authContext: AiChatRequestContext): CompileContext {
 }
 
 /**
+ * The per-entity gate the engine read used to run without (T-02,
+ * critical/urgent).
+ *
+ * ★ THE HOLE IT CLOSES. `features` was passed into this chain by the tool
+ * (`business-ir-pack.ts`: `features: ctx.userFeatures` rides the
+ * `authContext`) and **read by nothing**: the compile step uses the scope,
+ * the authoring step uses the agent binding, and `engine.query` ran with no
+ * per-entity check at all. So `business_ir.run_query` — a tool whose
+ * `requiredFeatures` is `ai_assistant.view`, a view feature with no
+ * capability descriptor, so `getCapabilityDescriptor` returns `null` and the
+ * R5 decision path permits on absence — could read any entity the caller's
+ * tenant holds, scoped by tenant but not by permission. The only guard on
+ * which rows came back was the prompt itself.
+ *
+ * ★ WHY THIS SHAPE. It is the check the search module's own AI tools already
+ * perform — `authorizeEntityAccess` in
+ * `packages/search/src/modules/search/ai-tools.ts:86`, which gates
+ * `search_get` / `search_aggregate` behind every entity's `aclFeatures` (all
+ * 53 entities declare them). Copied rather than imported because the two
+ * packages do not depend on each other: the search module's own docblock
+ * records that it must not depend on `ai-assistant`, and the reverse is the
+ * same rule.
+ *
+ * ★ FAIL-CLOSED, the way the donor is: an entity with no config, or a config
+ * with no `aclFeatures`, is a refusal — never a pass — and a missing
+ * container is a refusal too, because without it the access rules cannot be
+ * read at all. A superadmin bypasses, the way the donor does. The features
+ * come from the session's `authContext`, the same values the tool passed in.
+ */
+function authorizeEntityRead(
+  entityId: string,
+  authContext: AiChatRequestContext,
+  container: unknown,
+): { ok: true } | { ok: false; reason: string } {
+  const resolve = (container as { resolve?: (name: string) => unknown } | undefined)?.resolve
+  if (typeof resolve !== 'function') {
+    return {
+      ok: false,
+      reason: `No container to resolve the search indexer from, so the access rules for "${entityId}" cannot be read; access denied.`,
+    }
+  }
+  const searchIndexer = resolve('searchIndexer') as
+    | { getEntityConfig?: (id: string) => SearchEntityConfig | undefined }
+    | undefined
+  const config = searchIndexer?.getEntityConfig?.(entityId)
+  if (!config) {
+    return {
+      ok: false,
+      reason: `Entity "${entityId}" is not configured for search, so its access rules are unknown; access denied.`,
+    }
+  }
+  if (authContext.isSuperAdmin) return { ok: true }
+  const required = config.aclFeatures
+  if (!required || required.length === 0) {
+    return {
+      ok: false,
+      reason: `Entity "${entityId}" declares no aclFeatures, so nobody may read it through this path; access denied.`,
+    }
+  }
+  if (!hasAllFeatures(authContext.features ?? [], required)) {
+    return {
+      ok: false,
+      reason: `Insufficient permissions for entity "${entityId}". Required: ${required.join(', ')}`,
+    }
+  }
+  return { ok: true }
+}
+
+/**
  * Apply the defensive bounds the literature names as mandatory (`B5e`).
  *
  * Two independent guardrails, each only when the IR stated nothing:
@@ -236,7 +312,9 @@ export function applyDefaultBounds(
  *   5. **Apply the bounds** (`B5e`).
  *   6. **Resolve the physical binding** — a canonical entity with no physical
  *      target is a refusal, not an empty read.
- *   7. **Execute** — one `engine.query`, on the platform's existing read path.
+ *   7. **Authorize the read, per entity** — {@link authorizeEntityRead}, the
+ *      same `aclFeatures` gate the search module's own AI tools use (T-02).
+ *   8. **Execute** — one `engine.query`, on the platform's existing read path.
  *
  * Nothing here writes, and no new query capability is introduced.
  */
@@ -317,7 +395,23 @@ export async function runBusinessQueryPrompt(
     }
   }
 
-  /* ---- 7. execute, on the platform's existing read path ---------- */
+  /* ---- 7. authorize the read, per entity (T-02) ----------------- */
+
+  // ★ The per-entity gate. The read used to start here, unguarded:
+  // scoped by tenant, checked by the agent binding, and permission-checked
+  // by nothing. The caller's features have been in `authContext` since the
+  // tool passed them — this is where they are finally read.
+  const entityGate = authorizeEntityRead(binding.platformEntityId, input.authContext, input.container)
+  if (!entityGate.ok) {
+    return {
+      ok: false,
+      code: 'not_authorized',
+      reason: entityGate.reason,
+      details: { entity: binding.platformEntityId },
+    }
+  }
+
+  /* ---- 8. execute, on the platform's existing read path ---------- */
 
   let result: Awaited<ReturnType<QueryRunner['query']>>
   try {

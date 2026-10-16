@@ -184,12 +184,36 @@ function makeEngine(overrides?: {
   return { query }
 }
 
+/**
+ * The search indexer the per-entity gate consults (T-02).
+ *
+ * The gate runs before every engine read, so every fixture that reaches one
+ * must carry the access rules — the production tool always resolves the same
+ * `searchIndexer` from its container. The aclFeature matches the base
+ * context's wildcard grant (`features: ['*']`), and the base context is a
+ * superadmin anyway; the gate's own refusals are proven in
+ * `business-ir-run.authorization.test.ts`.
+ */
+const SEARCH_INDEXER = {
+  getEntityConfig: (id: string) =>
+    id === 'communication_channels:external_conversation'
+      ? { aclFeatures: ['communication_channels.external_conversation.view'] }
+      : undefined,
+}
+
+function makeContainer() {
+  return {
+    resolve: jest.fn((token: string) => (token === 'searchIndexer' ? SEARCH_INDEXER : undefined)),
+  }
+}
+
 function callInput(overrides: {
   prompt: string
   engine?: ReturnType<typeof makeEngine>
   authContext?: typeof baseAuthContext
   auth?: typeof humanAuth
   bindings?: ReturnType<typeof createBindingsFromDeclarations>
+  container?: ReturnType<typeof makeContainer>
 }): RunBusinessQueryPromptInput {
   const { model, bindings } = getModel()
   return {
@@ -199,6 +223,7 @@ function callInput(overrides: {
     em: {} as unknown as RunBusinessQueryPromptInput['em'],
     model,
     bindings: overrides.bindings ?? bindings,
+    container: overrides.container ?? makeContainer(),
     // `QueryRunner.query` is generic (`Promise<QueryResult<T>>`); a jest mock cannot be
     // generic, so the spy is asserted to the port's shape here. The spy itself stays a
     // `jest.Mock` (the tests read `engine.query.mock.calls`), so the cast lives at the
