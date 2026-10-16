@@ -101,14 +101,18 @@ Each retirement goes in the ledger with its reason (SR-44).
 
 ## 7. The shape of the SRS
 
-**52 requirements**, `SR-01` … `SR-46` plus the sub-lettered additions made during the
+**53 requirements**, `SR-01` … `SR-46` plus the sub-lettered additions made during the
 2026-10-16 correction pass (`SR-19a`, `SR-19b`, `SR-21a`, `SR-22a`, `SR-32a`, `SR-33a`,
 `SR-35a`). Each carries its source platforms, its mercato status, and — where it applies — the
 existing register item it extends (`CC-*`, `G-*`, `M*`). The register is in `08-THE-SRS.md`.
 
-**Status counts, corrected:** HAVE 3 (`SR-01`, `SR-18`, `SR-35`) · BUILD 10 · BORROW 31 ·
-RE-ENGINEER 2 (`SR-10`, `SR-27`). The first version's counts (4/8/31/3) were arithmetic
-against a table that did not contain them.
+**Status counts, corrected and complete:** HAVE 3 (`SR-01`, `SR-18`, `SR-35`) · BUILD 10 ·
+BORROW 38 · RE-ENGINEER 2 (`SR-10`, `SR-27`). 3 + 10 + 38 + 2 = **53**. The first version's
+counts (4/8/31/3) were arithmetic against a table that did not contain them; the second
+version said BORROW 31 while the register actually held 38 — the sub-lettered rows had been
+added to the pole files but never carried into the register. Now fixed: every sub-lettered row
+is a row in `08-THE-SRS.md`, and the counts were re-measured against the register, not
+recomputed from memory.
 
 ---
 

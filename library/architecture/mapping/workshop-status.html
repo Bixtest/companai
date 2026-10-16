@@ -90,19 +90,26 @@
     <p>So the answer to "what will you do with the stale pages?" is: <b>nothing — there are none.</b> Every reader is live and one-per-family, which is exactly the documented layout.</p>
   </div>
 
+  <div class="correction">
+    <h3>Second correction — the mapping was rebuilt from the markdown, not the digests</h3>
+    <p>The first mapping pass was written from compressed digests. You asked whether the readers or the markdown had been the source: <b>neither</b>. The pass was redone against all <b>77 findings markdowns</b> in six batches — one per pole, then the out-of-pole and extras, then the summary.</p>
+    <p><b>34 corrections</b> were applied across eight files, every one marked <code>[C]</code> and traceable to a findings file, and the whole correction table is recorded in <code>00-PIN-AND-METHOD §8</code> so the register's provenance is auditable. The requirements grew from 46 to <b>53</b> (46 base + 7 sub-lettered). Four new rules came out of it — including the one that bites hardest: <b>an agent that reads one pole's files cannot say a mechanism "does not exist"</b>, only that it is not in the files it was given. Two such findings were themselves wrong and were caught by grepping the corpus directly.</p>
+    <p>Examples of what changed: the Hermes sub-agent cap is <b>250</b>, not 50; buzz's proof surface is TLA+ <b>13</b> invariants and Tamarin <b>32</b> lemmas, not 12 and 21; CrewAI has a <b>real widget protocol</b> and lands at <b>L7</b>, not L2; Paperclip declares <b>no version</b>; Multica has <b>no</b> approve-first layer — it makes machines first-class owners.</p>
+  </div>
+
   <section>
     <h2>Where the workshop stands</h2>
     <div class="lede">
       <b>Nine platform studies are closed. The cross-platform mapping pass is done.</b>
       Nine digests (one per platform) plus one mercato digest were mapped pole by pole into
-      <b>46 requirements — <code>SR-01</code> … <code>SR-46</code></b> — now written to
+      <b>53 requirements — <code>SR-01</code> … <code>SR-46</code>, plus seven sub-lettered additions</b> — now written to
       <code>library/architecture/mapping/</code>. Mattermost stays unstudied pending your ask,
       and joins later as a tenth column with no rework.
     </div>
     <div class="grid g3">
       <div class="stat"><b>9</b><span>platform studies closed, each with findings + its own reader</span></div>
-      <div class="stat"><b>46</b><span>requirements written — <code>SR-01…SR-46</code></span></div>
-      <div class="stat"><b>2 / 9</b><span>platforms with a widget model — n8n and zulip</span></div>
+      <div class="stat"><b>53</b><span>requirements written — <code>SR-01…SR-46</code> + seven sub-lettered</span></div>
+      <div class="stat"><b>2 + 1</b><span>widget models — n8n and zulip, plus CrewAI's protocol</span></div>
       <div class="stat good"><b>P18</b><span>guard engine complete, authority layer test-pinned — our strongest pole</span></div>
       <div class="stat mid"><b>P2-1…9a</b><span>Hermes gateway live behind a typed port — the seam is real</span></div>
       <div class="stat bad"><b>0</b><span>of ~93 commands declare risk or approval (<code>CC-63</code>)</span></div>
@@ -160,7 +167,7 @@
   </section>
 
   <section>
-    <h2>The requirement register — <code>SR-01 … SR-46</code></h2>
+    <h2>The requirement register — <code>SR-01 … SR-46</code> + seven sub-lettered</h2>
     <div class="filters" id="filters"></div>
     <div style="overflow-x:auto">
     <table id="srs">
@@ -217,7 +224,7 @@
         <tr><td><code>mapping/findings/04-automations.md</code></td><td>P3 — target + SR-19…26</td></tr>
         <tr><td><code>mapping/findings/05-widgets-and-frontend.md</code></td><td>PX-W + PX-F — target + SR-27…36</td></tr>
         <tr><td><code>mapping/findings/06-out-of-pole.md</code></td><td>Inspired additions + the gathered guard pole (PZ) — SR-37…46</td></tr>
-        <tr><td><code>mapping/findings/07-SYNTHESIS.md</code></td><td>The re-engineered whole; the layer stack; what we retire</td></tr>
+        <tr><td><code>mapping/findings/07-SYNTHESIS.md</code></td><td>The re-engineered whole; the layer stack; what we retire — status counts HAVE 3 / BUILD 10 / BORROW 31 / RE-ENGINEER 2</td></tr>
         <tr><td><code>mapping/findings/08-THE-SRS.md</code></td><td>The full register, traced, with sequencing and the mattermost slot</td></tr>
       </tbody>
     </table>
@@ -225,7 +232,7 @@
 
   <footer>
     Markdown is the source of truth — this report reads from it and never edits it. &nbsp;·&nbsp;
-    Nine platform digests + one mercato digest, mapped pole by pole. &nbsp;·&nbsp; No code was written in this pass.
+    Nine platform studies mapped pole by pole from all 77 findings markdowns. &nbsp;·&nbsp; No code was written in this pass.
   </footer>
 </div>
 
@@ -233,15 +240,15 @@
 const platforms = [
   {n:"Hermes", v:"forensics", verdict:"The engine itself. Never forked, never edited.",
    mech:"Build UNDER — the engine behind a typed port, mechanisms taken selectively and tiered.",
-   poles:"P1 = the engine", note:"One standing contradiction, reported not resolved: the sub-agent cap is 50 in one place and 250 in another. Decide by measurement.",
+   poles:"P1 = the engine",    note:"The cap is 250, not 50 — the corpus resolved its own contradiction in the correction pass.",
    findings:13, pages:13},
-  {n:"Paperclip", v:"0.3.1", verdict:"The foundation of P2 and P3; a seam-provider for P1.",
-   mech:"The workspace/automation foundation shape, with no multi-tenancy and no composer.",
-   poles:"P2 ★ · P3 ★ · P1 seam", note:"Weakest P1 of the nine — and that is fine, because the seam is real.",
+  {n:"Paperclip", v:"no version", verdict:"The foundation of P2 and P3; a seam-provider for P1.",
+   mech:"The workspace/automation foundation shape — the portable-markdown company package, with no multi-tenancy and no composer.",
+   poles:"P2 ★ · P3 ★ · P1 seam", note:"Not a weak P1 — its own words: the cleanest of the three poles' foundations.",
    findings:7, pages:8},
   {n:"CrewAI", v:"1.15.28", verdict:"A rich mechanism source and a poor architecture template.",
-   mech:"The A2UI protocol — the study's only piece of aissistant behaviour with real enforcement.",
-   poles:"P1 donor only", note:"Executor yes, delivery no, tenancy nowhere. Take the protocol shape, nothing else.",
+   mech:"The A2UI widget protocol — 3,669 lines, an 18-component typed catalog, <code>allowed_components</code> enforced on the response. Plus the typed tool filter with <code>run_context</code>.",
+   poles:"PX-W (L7) · P2 typed filter", note:"Executor yes, delivery no, tenancy nowhere. Landed at L7, not L2 as the first pass had it.",
    findings:7, pages:8},
   {n:"Multica", v:"0.2.0", verdict:"Both an architecture reference and a mechanism source for the three poles.",
    mech:"Machine ≠ teammate — <code>UNIQUE (workspace_id, daemon_id, provider)</code> is the one-tenant-one-engine primitive.",
@@ -256,7 +263,7 @@ const platforms = [
    poles:"PX-W ★ · P2 ★ · P3 ★", note:"One of only two platforms with a widget model.",
    findings:7, pages:8},
   {n:"buzz", v:"0.5.28", verdict:"A communication substrate with a proof surface.",
-   mech:"The proof surface — TLA+ (12 invariants), Tamarin (21 lemmas), a 1,110-line prose contract, and a LIMITS.md naming 7 blind spots.",
+   mech:"The proof surface — TLA+ (13 invariants), Tamarin (32 lemmas), a 1,110-line prose contract, and a LIMITS.md naming 7 blind spots.",
    poles:"P2 community=tenant · PZ ★", note:"Honest ledger: the approval gate is dead code; 2 of 7 automation actions are stubs; bypass-permissions is its default.",
    findings:7, pages:8},
   {n:"openrig", v:"0.6.10", verdict:"Will not give us tenancy or a composition surface — it has neither — but it may give us the most transferable honesty machinery in the study.",
@@ -274,11 +281,11 @@ const srs = [
   ["SR-02","P1","<code>agent</code> ≠ <code>agent_runtime</code>; uniqueness key as a DB constraint","Multica","BORROW","—"],
   ["SR-03","P1","Permission policy ladder as data (locked/standard/open+yolo/auto)","openrig","BORROW","—"],
   ["SR-04","P1","Two-surface rule: policy set by code, never by config alone","openrig","BORROW","—"],
-  ["SR-05","P1","Sub-agent spawn cap, measured not guessed; spawn ledger","Hermes, zulip","BUILD","—"],
+  ["SR-05","P1","Sub-agent spawn cap (measured) + spawn ledger","n8n (max-children); Hermes (iteration cap)","BUILD","—"],
   ["SR-06","P1","Skills as versioned <code>SKILL.md</code> artifacts","n8n, Hermes","BORROW","—"],
   ["SR-07","P1","A bot is a participant, not a parallel agent object","zulip","BORROW","—"],
   ["SR-08","P1","The triage core gets a production caller","mercato","BUILD","G-21, CC-59, CC-60"],
-  ["SR-09","P1","A2UI-style protocol contract with enforcement","CrewAI","BORROW","—"],
+  ["SR-09","P1","Typed tool filter with <code>run_context</code>; typed tool failures","CrewAI","BORROW","—"],
   ["SR-10","P2","Ambient tenancy: tenant derived from the request","zulip","RE-ENGINEER","—"],
   ["SR-11","P2","Scope enters once — collapse the double entry","mercato, zulip","BUILD","CC-84"],
   ["SR-12","P2","One tenant ↔ one engine home; per-run credential","Multica, CC-84","BUILD","CC-84"],
@@ -287,13 +294,17 @@ const srs = [
   ["SR-15","P2","Audit log with topology-encoded event numbering","zulip","BORROW","—"],
   ["SR-16","P2","Personal / team workspace kinds","n8n","BORROW","—"],
   ["SR-17","P2","Tenancy contract + prose + conformance harness + LIMITS.md","buzz","BORROW","—"],
-  ["SR-18","P2","Machine actors capped at approve-first, test-pinned","Multica, mercato","HAVE","authority layer"],
+  ["SR-18","P2","Machine actors capped at approve-first, test-pinned","mercato only","HAVE","authority layer"],
   ["SR-19","P3","Durable wake queue: at-least-once, retries in payload, late cutoff","zulip","BUILD","—"],
+  ["SR-19a","P3","Budget per event, not just per queue — enforced by the worker","zulip (MAX_CONSUME_SECONDS = 30 SIGALRM)","BORROW","—"],
+  ["SR-19b","P3","The row carries the obligation exactly-once; the wake is at-least-once","openrig","BORROW","—"],
   ["SR-20","P3","One-statement claim with health gate inside","Multica","BORROW","—"],
   ["SR-21","P3","Closed failure taxonomy per attempt","Multica","BORROW","—"],
+  ["SR-21a","P3","Recovery is a named set of sweepers, one per way a task can die","Multica (F04-03)","BORROW","—"],
   ["SR-22","P3","Every command declares risk + approval + expiry","mercato, buzz","BUILD","CC-63"],
+  ["SR-22a","P3","Increasing the polling interval only hides the bug","Paperclip (DOT-2 lesson)","BORROW","—"],
   ["SR-23","P3","Transport does not decide","Gas Town","BORROW","—"],
-  ["SR-24","P3","Durable hooks for side effects","Gas Town","BORROW","—"],
+  ["SR-24","P3","Durable hooks for side effects","Gas Town (P2 file, F03-03)","BORROW","—"],
   ["SR-25","P3","Event-kind registry; kinds over endpoints","buzz","BORROW","—"],
   ["SR-26","P3","Every approval gate ships a test that fires it","buzz","BUILD","—"],
   ["SR-27","PX-W","Widget = append-only log; state derived by replay","zulip","RE-ENGINEER","—"],
@@ -302,14 +313,17 @@ const srs = [
   ["SR-30","PX-W","Generic bridge: any backend drives any widget","zulip","BORROW","—"],
   ["SR-31","PX-W","Widget-kind registry; kinds register themselves","zulip","BORROW","—"],
   ["SR-32","PX-W","Composition canvas with CRDT collaboration","n8n","BORROW","—"],
+  ["SR-32a","PX-W","Widget protocol: declarative UI vocabulary, 18-component typed catalog, <code>allowed_components</code> enforced on the response","CrewAI","BORROW","—"],
   ["SR-33","PX-F","Design system + own ESLint plugin guarding composition","n8n","BORROW","—"],
+  ["SR-33a","PX-F","Deliberate non-features recorded: no plugin model, no dynamic loading","zulip","BORROW","—"],
   ["SR-34","PX-F","Prohibition-constrained 3-package frontend layering","Multica","BORROW","—"],
   ["SR-35","PX-W","UMES injection as the widget entry point","mercato","HAVE","kit"],
+  ["SR-35a","PX-F","Frontend as information architecture: a fetcher interface beats a widget tree","Gas Town (ConvoyFetcher)","BORROW","—"],
   ["SR-36","PX-F","Dashboard + perspective screens","mercato","BUILD","M5"],
-  ["SR-37","out","Plugin/module registry with full lifecycle","buzz, Multica","BORROW","—"],
+  ["SR-37","out","Plugin/module registry with full lifecycle","Hermes, Multica","BORROW","—"],
   ["SR-38","out","Digital-twin harness; drift breaks the build","openrig","BORROW","—"],
   ["SR-39","PZ","One-truth check across every representation of a contract","zulip","BORROW","—"],
-  ["SR-40","PZ","Feature-level ratchet only a human can raise","zulip","BORROW","—"],
+  ["SR-40","PZ","Feature-level ratchet only a human can raise — build fails when a <code>ZF-</code> marker is left behind","zulip","BORROW","—"],
   ["SR-41","PZ","Named, greppable escape hatches","zulip","BORROW","—"],
   ["SR-42","PZ","Exclusion ledger with mechanical expiry; ships empty","openrig","BORROW","—"],
   ["SR-43","PZ","Proof beside prose: contract + falsifiable check + LIMITS.md","buzz","BORROW","—"],

@@ -1,7 +1,8 @@
 # 08 — THE SRS
 
-**The requirement set produced by the mapping pass. 46 requirements, `SR-01` … `SR-46`,
-across six poles.**
+**The requirement set produced by the mapping pass. 53 requirements — `SR-01` … `SR-46`
+plus seven sub-lettered additions (`SR-19a`, `SR-19b`, `SR-21a`, `SR-22a`, `SR-32a`, `SR-33a`,
+`SR-35a`) — across six poles.**
 
 **The frame (owner, 2026-10-16):** *"we are not limited by what mercato allows. we want to
 engineer the best, richest, most versatile and integratable version of each pole plus the
@@ -49,9 +50,13 @@ duplicated.
 | SR-17 | P2 | Tenancy contract + prose + conformance harness + `LIMITS.md` | buzz | BORROW | — |
 | SR-18 | P2 | Machine actors capped at approve-first, test-pinned | mercato only (Multica's P2 file has **zero** mentions of approve/authority; it makes machines *first-class owners*, the opposite) | HAVE | authority layer | **[C]**
 | SR-19 | P3 | Durable wake queue: at-least-once, retries in payload, late cutoff | zulip | BUILD | — |
+| SR-19a | P3 | Budget per event, not just per queue — a single event gets bounded time; a batch gets n × that, enforced by the worker | zulip (`04-automations §4.2`, `MAX_CONSUME_SECONDS = 30` SIGALRM) | BORROW | — |
+| SR-19b | P3 | The row carries the obligation exactly-once; the wake is at-least-once — baton and wake committed in one transaction | openrig (`04-automations §4`, §5) | BORROW | — |
 | SR-20 | P3 | One-statement claim with health gate inside | Multica | BORROW | — |
 | SR-21 | P3 | Closed failure taxonomy per attempt | Multica | BORROW | — |
+| SR-21a | P3 | Recovery is a named set of sweepers, one per way a task can die — not a generic retry | Multica (`04-automations §4`, F04-03) | BORROW | — |
 | SR-22 | P3 | Every command declares risk + approval + expiry | mercato, buzz | BUILD | `CC-63` |
+| SR-22a | P3 | Increasing the polling interval only hides the bug — a reconciler that honours human cancellation beats a slower poller | Paperclip (`04-automations §5`, the DOT-2 lesson) | BORROW | — |
 | SR-23 | P3 | Transport does not decide | Gas Town | BORROW | — |
 | SR-24 | P3 | Durable hooks for side effects | Gas Town (`03-the-workspace §3`, **F03-03** — "The Hook is the durability primitive", a `hook_bead` pointer on the agent bead; session ephemeral, work not) | BORROW | — | **[C]** cited from the P2 file, not the P3 file
 | SR-25 | P3 | Event-kind registry; kinds over endpoints | buzz | BORROW | — |
@@ -64,8 +69,10 @@ duplicated.
 | SR-32 | PX-W | Composition canvas with CRDT collaboration | n8n | BORROW | — |
 | SR-32a | PX-W | **Widget protocol, not widget model** — a declarative UI vocabulary a client renders; an 18-component typed catalog whose `allowed_components` is enforced **on the response**, not just advertised in the prompt | CrewAI (`05-widgets-and-frontend §5.3` — "A2UI — the actual widget architecture (the important find)", 3,669 lines) | BORROW | — | **[C] new row** The markdown's own discipline: "Say 'widget *protocol*', never 'widget system'" — no renderer ships in the tree |
 | SR-33 | PX-F | Design system + own ESLint plugin guarding composition | n8n | BORROW | — |
+| SR-33a | PX-F | Deliberate non-features recorded: no plugin model, no dynamic loading, no schema versioning | zulip (`05-widgets-and-frontend §5.5`) | BORROW | — |
 | SR-34 | PX-F | Prohibition-constrained 3-package layering | Multica | BORROW | — |
 | SR-35 | PX-W | UMES injection as the widget entry point | mercato | HAVE | kit |
+| SR-35a | PX-F | Frontend as information architecture: a fetcher interface of ~14 methods beats a widget tree | Gas Town (`ConvoyFetcher`, F05-04) | BORROW | — |
 | SR-36 | PX-F | Dashboard + perspective screens | mercato | BUILD | `M5` |
 | SR-37 | out | Plugin/module registry with full lifecycle | Hermes (`12-SYNTHESIS §3.2` versioned compat contract + deprecation window), Multica (`07-SYNTHESIS §7.3 #12` plugin contract) | BORROW | — | **[C]** buzz's synthesis has no plugin mechanism; Multica's `344` deletes Plugin V1 entirely (14 DROP TABLEs → 3 tables)
 | SR-38 | out | Digital-twin harness; drift breaks the build | openrig | BORROW | — |
@@ -78,8 +85,10 @@ duplicated.
 | SR-45 | out | Kinds-over-endpoints policy with conformance test | buzz | BORROW | — |
 | SR-46 | out | Two-reads lint: any setting read twice must be read once | openrig | BORROW | — |
 
-**Count by status:** HAVE 3 (`SR-01`, `SR-18`, `SR-35`) · BUILD 10 · BORROW 31 ·
-RE-ENGINEER 2 (`SR-10`, `SR-27`). 3 + 10 + 31 + 2 = 46.
+**Count by status:** HAVE 3 (`SR-01`, `SR-18`, `SR-35`) · BUILD 10 · BORROW 38 ·
+RE-ENGINEER 2 (`SR-10`, `SR-27`). 3 + 10 + 38 + 2 = **53 rows** — the 46 base requirements
+plus seven sub-lettered additions (`SR-19a`, `SR-19b`, `SR-21a`, `SR-22a`, `SR-32a`, `SR-33a`,
+`SR-35a`). None of the sub-lettered rows change a parent row's status.
 
 **Trigger corrections applied in this pass:**
 
