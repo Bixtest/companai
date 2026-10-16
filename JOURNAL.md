@@ -7,6 +7,35 @@ read [`INDEX.md`](INDEX.md). This file answers **"how did we get here?"**
 
 ---
 
+## 2026-10-17 (night) — the urgent set closes: `T-13`, `T-14`, and `T-45`
+
+**`T-13` / `T-14` — the two live compose defects (`CC-98`).** `--jinja` added to the llama.cpp `model`
+service in `docker-compose.fullapp.yml` (the only file that runs it) — without it llama.cpp never applied
+the model's own chat template, so tool calling was silently degraded. `OPENAI_BASE_URL` forwarded to the
+`mcp` service in `docker-compose.fullapp.yml` and `docker-compose.fullapp.dev.yml`, mirroring
+`docker-compose.hermes.yml:107` — without it the embedding lane silently called `api.openai.com`. Verified
+**live, not just parsed**: both files pass `docker compose config`; the `model` and `mcp` containers were
+recreated, and `docker inspect` reads back `--jinja` in the model's args and
+`OPENAI_BASE_URL=http://model:8080/v1` in the mcp env; both healthy.
+
+**`T-45` — a locked record is refused now (`CC-97` closed, Option A).** The command gate computed the
+record lock's `A0` and then **ignored it** (`HELD_GATES = {A1,A2}`, `interceptors.ts:56`), so a locked
+record was writable by any holder of the capability — the route guard cannot make that refusal, because
+`refusalFor` threads no record id and the gate is the only production path that does. The owner chose
+**Option A — the gate refuses** — over threading the recordId into the route guard. A new
+`AuthorityRefusedError` (403 — "you may not", distinct from the held case's 202) carries the binding rule
+and its reason; the gate's own docblock claim ("`A0` is left to the route guard") was corrected by name
+(rule 13). Proof: the T-32 pin "still passes a locked record" is **flipped** to "refuses a locked record";
+3 mutations run for real, each killing exactly its named tests, the file restored **byte-identical**
+(`f3c1017b…`); **811 tests / 90 suites** across `src/modules/auth`; `tsc --noEmit --incremental false` and
+eslint clean. Register: **54 closed · 43 open · 97 total**.
+
+**▶ NEXT:** the tooling set's remainder (`CC-91` — `SR-38` digital-twin harness, `SR-46` two-reads lint) —
+clear the missing `workspace/.toolchain/node24` first — then identity (`SR-02`/`SR-07`) → `SR-12` →
+`P2-9b`.
+
+---
+
 ## ★ ACTIVE TASK — what is being worked on right now
 
 > ### 🔴 OWNER'S RULING 2026-10-09 — THE ORDER IS THE VISION'S ORDER, AND THE SCOREBOARD IS PLAIN ENGLISH

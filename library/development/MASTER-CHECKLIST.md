@@ -41,8 +41,32 @@ largely built — while the **platform skeleton underneath it is only starting**
 
 ## 2. ▶ The frontier — what is being built now
 
-- **★ LAST DONE — 2026-10-17 (evening): `T-32` — a v7 record id no longer hides a record's lock — BUILT
-  (`13c6206f`).** The audit's A1-09: `readRecordId` (`interceptors.ts:89`) accepted only RFC-4122 v1–v5
+- **★ LAST DONE — 2026-10-17 (night): `T-13` + `T-14` — the two live compose defects — BUILT (`CC-98`),
+  and `T-45` — a locked record is refused now — BUILT (`CC-97` closed).** The urgent set is now clear.
+  - **`T-13` — `--jinja` added to the llama.cpp `model` service** (`docker-compose.fullapp.yml`, the only
+    file that runs it). Without it llama.cpp does not format tool calls through the model's own chat
+    template, so tool calling was silently degraded.
+  - **`T-14` — `OPENAI_BASE_URL` forwarded to the `mcp` service** in `docker-compose.fullapp.yml` and
+    `docker-compose.fullapp.dev.yml`, mirroring `docker-compose.hermes.yml:107`; without it the embedding
+    lane silently called `api.openai.com`.
+  - **Verified live, not just parsed:** both files pass `docker compose config`; the model and mcp
+    containers were recreated and read back — `docker inspect` shows `--jinja` in the model's args and
+    `OPENAI_BASE_URL=http://model:8080/v1` in the mcp env; both healthy.
+  - **`T-45` — a locked record is refused, not passed — BUILT (Option A, the owner's ruling).** The gate
+    computed the lock's `A0` and then ignored it (`HELD_GATES = {A1,A2}`, `interceptors.ts:56`), so an
+    `A0` fell through to "gate permits the act to run now". It excluded `A0` believing `RbacService` had
+    already refused it — true for a *capability* refusal, false for a *record lock*, which the route guard
+    cannot make because `refusalFor` threads no record id and the gate is the only path that does. The
+    gate now refuses `A0` with a new `AuthorityRefusedError` (403 — "you may not", distinct from the held
+    case's 202); the gate's own docblock claim was corrected by name (rule 13).
+  - **Proof:** 21 tests across the two gate suites (the T-32 pin "still passes a locked record" is flipped
+    to "refuses a locked record"); **3 mutations run for real, each killing exactly its named tests** —
+    remove the branch (the 4 refusal tests), mislabel `REFUSAL_GATE` (the same 4), wrong status (the
+    status assertion) — file restored **byte-identical** (`f3c1017b…`); 71 tests across all 13 auth
+    command suites; `tsc --noEmit --incremental false` clean, eslint clean.
+
+- **★ AND EARLIER — 2026-10-17 (evening): `T-32` — a v7 record id no longer hides a record's lock — BUILT
+  (`13c6206f`).** *(Superseded as LAST DONE by the compose/`T-45` block above.)* The audit's A1-09: `readRecordId` (`interceptors.ts:89`) accepted only RFC-4122 v1–v5
   ids — version nibble `[1-5]`, variant nibble `[89ab]` — so a valid v7 id failed the pattern, reached
   the resolver as `recordId: null`, and `resourceCeilingFor` (`authorityEnforcementService.ts:335`)
   returns early on `!recordId`: **the lock was never looked up** — no ceiling, no project context, no
@@ -69,15 +93,10 @@ largely built — while the **platform skeleton underneath it is only starting**
     threading → all 5 threading tests). Verified: 19 tests across the two gate suites, 809 tests /
     90 suites across `src/modules/auth`, `tsc --noEmit --incremental false` clean, eslint clean; both
     files pure LF, no BOM.
-  - **★ WHAT IT DOES NOT CLOSE, PINNED RATHER THAN LATENT — `T-45` / `CC-97`:** a **locked** record
-    still passes the gate. The lock rules are right (`locked` → A0, `restricted` → A2, `open` → null,
-    reads exempt, unreadable → `locked`, fail-closed), but the gate does not hold A0 **by design**
-    ("RbacService has already made it at the route guard") — true for capability refusals, false for
-    record-lock ones, since `refusalFor` threads no recordId, so a record-lock ceiling can never surface
-    there either. Net effect: a locked record is writable by any actor holding the capability. Ranked
-    high, urgency scheduled, action DOCUMENT — the owner decides where the refusal belongs (a gate hold,
-    or the route guard threading the recordId). Pinned by the test "still passes a locked record: the
-    gate does not hold A0, by design" so the gap is visible rather than latent.
+  - **★ WHAT IT EXPOSED, NOW CLOSED — `T-45` / `CC-97`:** building T-32 revealed that a **locked** record
+    still passed the gate. That is fixed in the block above — the gate now refuses `A0` — so `CC-97` is
+    closed and the pinning test was flipped from "still passes a locked record" to "refuses a locked
+    record".
 
 - **★ AND EARLIER THE SAME DAY — 2026-10-17 (afternoon): the two CRITICALs, `T-01` and `T-02` — BOTH
   BUILT (`fa974bb1`, `60a6714f`).**
@@ -447,7 +466,8 @@ The `CC-*` codes are the fine-grained items behind the rows above — the cuts, 
 | CC-94 | **`T-01` — the delegation route lent authority the lender did not have — BUILT 2026-10-17 (`fa974bb1`).** The route's guard is `{requireAuth, requireFeatures:[auth.delegations.manage]}` and the grantor principal was derived from the caller and never checked against the capability: a user holding only `auth.delegations.manage` could lend `api_keys.manage` (minting identities) or `directory.tenants.manage` to anybody, or to themselves, while `.delegable: false` had zero production readers. **Three checks now run in the route before `delegations.grant` — and ONE MORE than the triage's fix sentence named:** (1) the **grantor-holds** check, added first, which extends the route's own header principle ("nobody may lend authority they do not hold") from the grantor id to the caller's own holdings; (2) a capability declared `delegable: false` may never appear in a delegation; (3) a self-delegation needs an explicit authority ceiling, because a delegation is an independent authority source at use time, so a self-delegation with a null ceiling outlives the holdings that justified it. **Proof:** 9 tests in `packages/core/src/modules/auth/api/__tests__/delegations.route.test.ts` driving the real route handler with service doubles; 3 mutations run for real, each killing exactly its own test; **the decisive assertion in every refusal case is that THE WRITE NEVER HAPPENED** — `delegations.grant` was never called, not merely a 403 returned after it. Verified: 216 tests across all 18 auth API suites, `tsc --noEmit --incremental false` clean, eslint clean | ✅ closed |
 | CC-95 | **`T-02` — `business_ir.run_query` checked scope but not authorization — BUILT 2026-10-17 (`60a6714f`).** `features: ctx.userFeatures` rode the `authContext` into the Business-IR chain and was read by nothing: the compile step used the scope, the authoring step used the agent binding, and `engine.query` ran with no per-entity check at all — so the tool (whose `requiredFeatures` is `ai_assistant.view`, a view feature with no capability descriptor, so the capability path permits on absence) could read any entity the caller's tenant held. The only guard on which rows came back was the prompt itself. **One gate before the engine read:** `authorizeEntityRead` in `packages/ai-assistant/src/modules/ai_assistant/lib/business-ir-run.ts`, copied from `authorizeEntityAccess` (`packages/search/src/modules/search/ai-tools.ts:86`, all 53 entities' `aclFeatures` behind it) because the two packages must not depend on each other. Fail-closed the way the donor is: no config → refusal, no `aclFeatures` → refusal, no container → refusal; superadmin bypasses (the donor's rule, preserved deliberately and pinned by a test). **Proof:** 8 tests in `business-ir-run.authorization.test.ts`; 7 mutations run for real, each killing exactly its named test; **the decisive assertion in every refusal case is that THE READ NEVER HAPPENED** — `engine.query` was never called, not a refusal after the rows came back. The existing run suite's fixtures were **completed, not weakened** (they passed no container, so the fail-closed gate would have refused every happy path). Verified: 43 tests across 5 business-ir suites, `tsc --noEmit --incremental false` clean, eslint clean | ✅ closed |
 | CC-96 | **`T-32` — a v7 record id no longer hides a record's lock — BUILT 2026-10-17 (`13c6206f`).** The hole (audit A1-09, `08-FORENSIC-AUDIT.md` §13/§14): `readRecordId` at `packages/core/src/modules/auth/commands/interceptors.ts:89` accepted only RFC-4122 v1–v5 ids — version nibble pinned to `[1-5]`, variant nibble to `[89ab]` — so a valid v7 id failed the pattern, reached the resolver as `recordId: null`, and `resourceCeilingFor` (`authorityEnforcementService.ts:335`) returns early on `!recordId`: the lock was never looked up — no ceiling, no project context, no grade. The command gate is the **only production caller that threads a recordId** (`refusalFor` at `rbacService.ts:595` calls `decideFor` with no options; the AI tool path threads only `onBehalfOfUserId`), so this one pattern was the single point where record locks reach the resolver. **Fix:** shape only, no version or variant constraint — `/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i`. The triage recorded `[1-5]` → `[0-9a-f]`; re-measured per rule 13, the variant nibble is the same class of over-strictness (a valid UUID with a non-RFC variant bypasses the lookup identically), so the fix takes the shape to its logical end. In-repo precedent: `sync-run-service.ts:7` and `grantChecks.ts:46` use exactly this shape, and `crud/ids.ts:5` shows the house relaxing in the same direction with `[1-8]`. Version and variant are properties of the **generator**, not the record: ids are v4 today (`gen_random_uuid()`) but the `uuid` column accepts any version, and imports/sync/future migrations can carry v7. **Proof:** 7 tests in `packages/core/src/modules/auth/commands/__tests__/authority-command-gate.record-id.test.ts`, driving the real gate and the real `AuthorityEnforcementService` with a stub lock reader; 4 mutations run for real, the file restored byte-clean between runs, each killing exactly its named tests: M1 (restore the pre-fix pattern) kills both hole tests + uppercase + locked; M2 (accept any string) kills the slug/numeric guard; M3 (drop `/i`) kills uppercase; M4 (remove the threading) kills all 5 threading tests. The decisive assertion is that **the lookup happened at all** — `stateFor` called with the record's real id; a restricted record named by a v7 id is then **held** at A2. Verified: 19 tests across the two gate suites, 809 tests / 90 suites across `src/modules/auth`, `tsc --noEmit --incremental false` clean, eslint clean; both files pure LF, no BOM | ✅ closed |
-| CC-97 | **`T-45` — a locked record's refusal has no production consumer on the command path — FOUND while building T-32, documented not fixed.** The record-lock rules themselves are right (`record-locks.ts`: `locked` → A0, `restricted` → A2, `open` → null, reads E0 exempt, unreadable → `locked`, fail-closed): the audit's §14 note said only the *lookup* fails open, and T-32 fixed the lookup. But the command gate does not hold A0 by design ("RbacService has already made it at the route guard") — true for capability refusals, false for record-lock ones, since `refusalFor` (`rbacService.ts:595`) calls `decideFor(subject, feature, scope)` with no options, so a record-lock ceiling can never surface there either. Net effect: a locked record is writable by any actor holding the capability. Ranked high, urgency scheduled (the owner decides where the refusal belongs — a gate hold, or the route guard threading the recordId), action DOCUMENT. Pinned rather than left latent: the T-32 suite carries the test "still passes a locked record: the gate does not hold A0, by design" | ☐ open |
+| CC-97 | **`T-45` — a locked record's refusal has no production consumer on the command path — FOUND while building T-32, documented not fixed.** The record-lock rules themselves are right (`record-locks.ts`: `locked` → A0, `restricted` → A2, `open` → null, reads E0 exempt, unreadable → `locked`, fail-closed): the audit's §14 note said only the *lookup* fails open, and T-32 fixed the lookup. But the command gate does not hold A0 by design ("RbacService has already made it at the route guard") — true for capability refusals, false for record-lock ones, since `refusalFor` (`rbacService.ts:595`) calls `decideFor(subject, feature, scope)` with no options, so a record-lock ceiling can never surface there either. Net effect: a locked record is writable by any actor holding the capability. Ranked high, urgency scheduled (the owner decides where the refusal belongs — a gate hold, or the route guard threading the recordId), action DOCUMENT. Pinned rather than left latent: the T-32 suite carries the test "still passes a locked record: the gate does not hold A0, by design". **BUILT 2026-10-17 (Option A, the owner's ruling):** the gate now refuses `A0` with a new `AuthorityRefusedError` (403 — "you may not", distinct from the held case's 202); the pinning test was flipped from "still passes a locked record" to "refuses a locked record". 21 tests across the two gate suites; 3 mutations run for real, each killing exactly its named tests (remove the branch / mislabel `REFUSAL_GATE` → the 4 refusal tests; wrong status → the status assertion), file restored byte-identical (`f3c1017b…`); 71 tests across all 13 auth command suites; `tsc` + eslint clean | ✅ closed |
+| CC-98 | **`T-13` + `T-14` — the two live compose defects — BUILT 2026-10-17.** `T-13`: `--jinja` was absent from every compose file, so llama.cpp never applied the model's own chat template and tool calling was silently degraded — added to the `model` service command in `docker-compose.fullapp.yml` (the only file that runs `ghcr.io/ggml-org/llama.cpp:server`). `T-14`: the `mcp` service carried `OPENAI_API_KEY` but no `OPENAI_BASE_URL`, so its embedding lane silently called `api.openai.com` — the same defect `docker-compose.hermes.yml:107` already fixed for the Hermes gateway; `OPENAI_BASE_URL` forwarded to the `mcp` service in both `docker-compose.fullapp.yml` and `docker-compose.fullapp.dev.yml`. **Verified live, not just parsed:** `docker compose config` parses and resolves both files; the `model` and `mcp` containers were recreated and read back — `docker inspect` shows `--jinja` in the model's args and `OPENAI_BASE_URL=http://model:8080/v1` in the mcp env; both healthy | ✅ closed |
 
 ---
 
@@ -688,3 +708,24 @@ CRITICALs demoted to "AND EARLIER THE SAME DAY (afternoon)" with their full reco
 **▶ NEXT** is **T-13/T-14** (the two live compose defects), then the tooling set's remainder. The triage
 document was updated in the same pass: the T-32 action cell, the new T-45 register row, the new §2.4
 section (the hole, the named deviation, the proof, and the gap), the §0 verdict and the §4 order table.
+
+**Re-synced 2026-10-17 (eighth pass) — the two compose defects BUILT (`CC-98`), and `T-45` CLOSED
+(`CC-97`) on the owner's ruling (Option A).** `T-13`: `--jinja` added to the llama.cpp `model` service
+command in `docker-compose.fullapp.yml` (the only file that runs it) — without it llama.cpp never applied
+the model's own chat template, so tool calling was silently degraded. `T-14`: `OPENAI_BASE_URL` forwarded
+to the `mcp` service in `docker-compose.fullapp.yml` and `docker-compose.fullapp.dev.yml`, mirroring
+`docker-compose.hermes.yml:107` — without it the embedding lane silently called `api.openai.com`. **Both
+verified live, not just parsed:** the `model` and `mcp` containers were recreated and read back
+(`docker inspect` shows `--jinja` in the model's args and `OPENAI_BASE_URL=http://model:8080/v1` in the
+mcp env); both healthy. **`T-45`** — the owner chose Option A over threading the recordId into the route
+guard: the gate now **refuses `A0`** via a new `AuthorityRefusedError` (403 — "you may not", distinct from
+the held case's 202), instead of passing it through; the gate's own docblock claim ("`A0` is left to the
+route guard") was corrected by name (rule 13). **Proof:** 21 tests across the two gate suites — the T-32
+pin "still passes a locked record" flipped to "refuses a locked record" — and 3 mutations run for real,
+each killing exactly its named tests (remove the branch / mislabel `REFUSAL_GATE` → the 4 refusal tests;
+wrong status → the status assertion), the file restored byte-identical (`f3c1017b…`); 71 tests across all
+13 auth command suites; `tsc` + eslint clean. **The register now reads 54 closed · 43 open · 97 total**,
+`CC-97` closed and `CC-98` added-and-closed. The frontier in §2 was rewritten so the compose defects and
+`T-45` are **LAST DONE**, `T-32` demoted to "AND EARLIER", and **▶ NEXT** is the tooling set's remainder
+(`SR-38` + `SR-46`) — with the `.toolchain/node24` gap named as the thing to clear first. The triage
+document was updated in the same pass: the T-13/T-14/T-45 action cells and the built notes.

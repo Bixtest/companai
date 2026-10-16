@@ -43,7 +43,8 @@ design declares and nothing reads. **Both are now built** (T-01 `fa974bb1`, T-02
 §2.1 and §2.2), as is the class-level mechanism that would have caught them (`SR-47`, T-03). **T-32 — the
 one-character UUID fail-open — is now built as well** (`13c6206f`, 2026-10-17; see §2.4), and building it
 exposed one new finding of its own: **T-45**, a locked record's refusal has no production consumer on the
-command path.
+command path — **now built too** (Option A, the owner's ruling, 2026-10-17; see §2.5), along with the two live
+compose defects **T-13** and **T-14**. **The register's urgent set is closed.**
 
 **The single most useful thing in the audit is its §18 structural observation**, and it is the finding I
 would act on first, ahead of both CRITICALs: there is no automated mechanism that notices a declared control
@@ -78,8 +79,8 @@ Sorted by rank, then by the audit's own priority. "Src" is the `preview/` docume
 | **T-10** | 11 §2 | **Accessibility linting is installed and never switched on** | 🔬 CONFIRMED | high | postponed | DOCUMENT |
 | **T-11** | 11 §3 | **RTL is half-built, and its own source comment says it is finished** | 📐 CONFIRMED | high | scheduled | DOCUMENT |
 | **T-12** | 11 §4 | **`/backend` crashes if the `dashboards` module is switched off** | 🔬 CONFIRMED | high | scheduled | EXECUTE |
-| **T-13** | 07 §7.2 | **`--jinja` is absent from every compose file** — tool calling may be silently degraded | 🔬 CONFIRMED | high | urgent | EXECUTE |
-| **T-14** | 07 §7.2 | **The `mcp` service has no `OPENAI_BASE_URL`** — its embedding lane calls `api.openai.com` | 🔬 CONFIRMED | high | urgent | EXECUTE |
+| **T-13** | 07 §7.2 | **`--jinja` is absent from every compose file** — tool calling may be silently degraded | 🔬 CONFIRMED | high | urgent | EXECUTE — ✅ **BUILT 2026-10-17** (`docker-compose.fullapp.yml`; verified live — the model container's args carry `--jinja`) |
+| **T-14** | 07 §7.2 | **The `mcp` service has no `OPENAI_BASE_URL`** — its embedding lane calls `api.openai.com` | 🔬 CONFIRMED | high | urgent | EXECUTE — ✅ **BUILT 2026-10-17** (forwarded in both compose files; verified live — the mcp container's env reads `OPENAI_BASE_URL=http://model:8080/v1`) |
 
 ### 1.3 MEDIUM
 
@@ -115,7 +116,7 @@ Sorted by rank, then by the audit's own priority. "Src" is the `preview/` docume
 | **T-42** | 07 §6.2 | No `llamacpp` preset — the open-source lane squats on `OPENAI_*` | 🔬 CONFIRMED | medium | scheduled | EXECUTE |
 | **T-43** | 09 §1.2 | `detectRepeatedRequest` exists and has zero callers — "show the saving" is unwired | 🔬 CONFIRMED | small | scheduled | DOCUMENT |
 | **T-44** | 08 §16 / 09 §2.1 | `G-04` — the data axis — does not exist, and the compiler says so loudly on every compile | 🔬 CONFIRMED | critical | scheduled | DOCUMENT |
-| **T-45** | new — found while building T-32 | A locked record's refusal has no production consumer on the command path: the gate does not hold A0 by design ("RbacService has already made it at the route guard"), and `refusalFor` threads no recordId, so a locked record is writable by any actor holding the capability | 🔬 CONFIRMED | high | scheduled | DOCUMENT |
+| **T-45** | new — found while building T-32 | A locked record's refusal has no production consumer on the command path: the gate does not hold A0 by design ("RbacService has already made it at the route guard"), and `refusalFor` threads no recordId, so a locked record is writable by any actor holding the capability | 🔬 CONFIRMED | high | **done** | ✅ **BUILT 2026-10-17 (Option A — the owner's ruling)**; the gate now refuses `A0`. See §2.5 |
 
 ### 1.4 Already fixed — do not re-fix
 
@@ -311,6 +312,33 @@ refusal belongs, and it is **pinned by a test** in the new suite rather than lef
 > files pure LF, no BOM. The build also exposed **T-45**, documented above and pinned by the test "still
 > passes a locked record: the gate does not hold A0, by design".
 
+### 2.5 T-45 — the locked record's refusal, built (Option A)
+
+**The decision, and who made it.** T-45 asked *where the refusal belongs*. The owner ruled **Option A: the
+gate refuses**. It is the smaller change and the only correct one, because the command gate is the **only
+production path that threads a record id** — `refusalFor` (`rbacService.ts:595`) threads none, so the route
+guard cannot see a record lock at all.
+
+**The hole, verified in code.** The gate computes the lock's ceiling — `recordLockCeiling('locked', <non-read>)
+=== 'A0'` (`shared/src/modules/record-locks.ts`) — and then **ignored it**: `HELD_GATES = new Set(['A1','A2'])`
+(`interceptors.ts:56`), so an `A0` fell through to *"gate permits the act to run now"*. The gate excluded `A0`
+on the stated belief that `RbacService` had already refused it — true for a *capability* refusal (the route
+guard answers before the bus runs, so the gate never sees one), **false for a record lock**, which the route
+guard cannot make.
+
+**The fix.** The gate now **refuses `A0`**, via a new `AuthorityRefusedError` (403 — "you may not", kept
+distinct from the held case's 202 — the three outcomes stay tellable apart), carrying the binding rule and its
+reason the way a hold does. The gate's own docblock claim ("`A0` is left to the route guard") was corrected by
+name (rule 13).
+
+> ✅ **T-45 WAS BUILT, 2026-10-17.** The pinning test "still passes a locked record: the gate does not hold
+> A0, by design" is **flipped** to "refuses a locked record" — the gap is closed, not merely visible. PROOF:
+> 21 tests across the two gate suites; **3 mutations run for real, each killing exactly its named tests** —
+> M1 remove the refusal branch (pre-T-45 behaviour) kills the 4 refusal tests, M2 mislabel `REFUSAL_GATE`
+> kills the same 4, M3 wrong status (202 for 403) kills the status assertion — the file restored
+> **byte-identical** (`f3c1017bb14cc3c438566ca67ecbad3f`); 71 tests across all 13 auth command suites, **811
+> tests / 90 suites across `src/modules/auth`**, `tsc --noEmit --incremental false` clean, eslint clean.
+
 ---
 
 ## 3. What the audit got right about its own process — and why that matters here
@@ -338,7 +366,7 @@ is the one substantive recommendation this document adds.
 | 1 | **`SR-47` — the declared-control coverage check** (T-03) — ✅ **BUILT 2026-10-17** | It is the class, not an instance. The workshop already owns the mechanism. Doing it first means T-01, T-08, T-29 and the next three are caught mechanically rather than patched one at a time |
 | 2 | **T-01 and T-02** — the two CRITICALs — ✅ **BOTH BUILT 2026-10-17** (`fa974bb1`, `60a6714f`) | Live privilege-escalation and data-exposure routes, both reachable from an ordinary role, both one function to close, both with the code to copy already in the repo |
 | 3 | **T-32** — `UUID_PATTERN` shape-only fix — ✅ **BUILT 2026-10-17** (`13c6206f`) | One character of over-strictness. Locked records became writable by a v7-id payload, because the gate is the only production path that threads a recordId — and the build exposed T-45, a locked record's refusal has no production consumer |
-| 4 | **T-13 and T-14** — `--jinja` and the `mcp` base URL — **next** | Both are one line in a compose file, both are live today, and T-14 is the difference between the embedding lane working and it silently calling `api.openai.com` |
+| 4 | **T-13 and T-14** — `--jinja` and the `mcp` base URL — ✅ **BUILT 2026-10-17** | Both were one line in a compose file, both were live, and T-14 was the difference between the embedding lane working and it silently calling `api.openai.com` |
 | 5 | **T-04, T-05, T-06** — the count gap, the double approve, the ledger hole | The three HIGHs that break a central guarantee with a green test suite behind them |
 | 6 | **T-07, T-27, T-16, T-17** — the fail-open flips | Four small edits that each remove a silent failure mode, and T-27 is the one that lets an `auth: null` context accept a foreign tenant |
 | 7 | **T-09, T-12** — repair the DS lint, guard `/backend` | T-09 unlocks thirty rule categories; T-12 removes a documented crash trap |
