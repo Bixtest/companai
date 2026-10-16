@@ -6,8 +6,10 @@ import { writeDirectWriteAuditLog } from '@open-mercato/shared/lib/crud/audit-wr
 import type { OpenApiRouteDoc } from '@open-mercato/shared/lib/openapi'
 import { AUTONOMY_GATES } from '@open-mercato/shared/modules/capabilities'
 import { MAX_DELEGATION_DAYS, delegationWindowProblem } from '@open-mercato/shared/modules/delegations'
+import { getCapabilityDescriptor } from '@open-mercato/shared/lib/capabilities/registry'
 import { derivePrincipal } from '@open-mercato/shared/lib/auth/principal'
 import type { DelegationService } from '@open-mercato/core/modules/auth/services/delegationService'
+import type { RbacService } from '@open-mercato/core/modules/auth/services/rbacService'
 import { beginAuthMutationGuard } from '../../mutation-guard'
 
 /**
@@ -16,6 +18,15 @@ import { beginAuthMutationGuard } from '../../mutation-guard'
  * The grantor is **always the caller**, never a field in the request. Accepting a
  * grantor id would let anybody lend authority they do not hold by naming somebody
  * who does, which turns the whole feature into a privilege-escalation route.
+ *
+ * The same principle covers the caller's own holdings — lending what you do not
+ * hold is the same escalation wearing the other hat, and until 2026-10-17 the
+ * route guarded only `auth.delegations.manage` and never the capability being
+ * lent. A grant now passes three checks before it writes: the grantor holds the
+ * capability (the RbacService, the same call the dispatcher's `requireFeatures`
+ * makes for the route's own feature), the capability is not declared
+ * `delegable: false`, and a delegation to yourself carries an explicit ceiling.
+ * The comments at each check say why each exists.
  */
 
 const FEATURE_MANAGE = 'auth.delegations.manage'
@@ -115,6 +126,69 @@ export async function POST(req: Request): Promise<NextResponse> {
   const principal = derivePrincipal(auth)
   if (!principal) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  // ★ What the route used to miss (T-01, critical/urgent): the guard config
+  // above requires `auth.delegations.manage` — the permission to *manage*
+  // delegations — and never the capability being *lent*. A caller holding
+  // nothing else could mint `api_keys.manage` (an identity factory) or
+  // `directory.tenants.manage` for anybody, including themselves. Three
+  // checks, in the order of how badly getting one wrong would end:
+
+  // 1. The grantor must actually hold what they are lending. This is the
+  //    check the dispatcher's `requireFeatures` performs for the route's own
+  //    feature, performed here for the *lent* one — same service, same call
+  //    shape (`checkAuthorization` in `apps/mercato/src/app/api/[...slug]/
+  //    route.ts:215`). The header principle at the top of this file — nobody
+  //    may lend authority they do not hold — applied only to the grantor *id*
+  //    before; without this it never applied to the caller's own holdings.
+  //    Scoped to the delegation's target organization: lending in org B what
+  //    you hold only in org A widens the grant.
+  const rbac = container.resolve('rbacService') as RbacService
+  const grantorHolds = await rbac.userHasAllFeatures(auth.sub, [parsed.data.capabilityId], {
+    tenantId: auth.tenantId,
+    organizationId: parsed.data.organizationId ?? null,
+  })
+  if (!grantorHolds) {
+    return NextResponse.json(
+      { error: 'Forbidden', requiredFeatures: [parsed.data.capabilityId] },
+      { status: 403 },
+    )
+  }
+
+  // 2. A capability declared `delegable: false` may never appear in a
+  //    delegation, whoever holds it. The descriptor registry is the one place
+  //    the risk semantics live — a check that lived only in this route would
+  //    be a second, parallel permission system (the registry's own docblock
+  //    makes exactly this point). Measured 2026-10-17: 23 declarations,
+  //    every one of them `false`, zero `true` — a capability that declares
+  //    delegability at all declares it non-delegable, and
+  //    `auth.delegations.manage` itself is one of them. Absent descriptor =
+  //    not refused, deliberately: `registerCapabilityDescriptors` skips
+  //    features without one, and the platform's standing position is to
+  //    enforce on presence rather than absence (the same reasoning
+  //    `tool-authority.ts:136-139` records for the R5 decision path).
+  const descriptor = getCapabilityDescriptor(parsed.data.capabilityId)
+  if (descriptor && descriptor.delegable === false) {
+    return NextResponse.json(
+      { error: `capability "${parsed.data.capabilityId}" is declared delegable: false and may not be lent` },
+      { status: 403 },
+    )
+  }
+
+  // 3. A self-delegation with no ceiling is authority laundering. The
+  //    grantor's holdings are consulted here, at grant time — but a
+  //    delegation is an independent authority source at *use* time: the
+  //    resolver reads the record, not the grantor's current ACL
+  //    (`DelegationService.activeFor` → `selectActiveDelegation`). Lending
+  //    yourself an unbounded capability therefore outlives the very holdings
+  //    that justified it. A self-delegation *with* an explicit ceiling is
+  //    still allowed: the ceiling bounds it and the reasoning is on record.
+  if (parsed.data.granteePrincipalId === principal.id && parsed.data.authorityCeiling == null) {
+    return NextResponse.json(
+      { error: 'a delegation to yourself needs an explicit authority ceiling' },
+      { status: 403 },
+    )
+  }
+
   const granted = await delegations.grant({
     granteePrincipalId: parsed.data.granteePrincipalId,
     granteeKind: parsed.data.granteeKind,
@@ -168,6 +242,7 @@ export const openApi: OpenApiRouteDoc = {
       responses: [
         { status: 200, description: 'The delegation' },
         { status: 400, description: 'Invalid request, or a window longer than the maximum' },
+        { status: 403, description: 'The grantor does not hold the capability, the capability is declared delegable: false, or a self-delegation carries no ceiling' },
         { status: 404, description: 'No such delegation in this tenant' },
       ],
     },
