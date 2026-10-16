@@ -29,7 +29,7 @@ the same claim repeated 180× is one claim. **Read the migration history: the mo
 | 4 | **Multica 0.2.0** | ✅ 7/7 **+ reader 3300** | **All three poles real — the closest neighbour.** No widget model; no engine of its own. |
 | 5 | **Gas Town 1.2.1** | ✅ 7/7 **+ reader** | Go multi-agent orchestration. **The watchdog chain is made of agents**; agents ARE beads; Hook = the durability primitive; ZFC = transport, don't decide; 3-layer sandbox. **NO widget model.** Top mechanisms are DECIDED LIMITS. |
 | 6 | **n8n 2.44.0** | ✅ 7/7, 73 findings, **reader 3500** | TS monorepo, 22,715 `.ts` (65% of bytes), 57 pkgs, 563 nodes. **P1:** `@n8n/agents` v0.29.0 (fluent builder, SKILL.md, sub-agents, guardrails=`allow`\|`stop(code)`, cost-as-guardrail). **P2:** `Project personal\|team`, **10 roles + 206 `resource:action` scopes**, `User` ≠ `AuthIdentity`. **P3:** best security surface pre-buzz (isolate pool + zod RPC boundary; observability = sampling policy). **★ PX-W: FIRST real composition surface** — canvas of **7 element types**, **129-component design system** w/ its own ESLint plugin, **CRDT on y-websocket**. **PZ:** 299 hashed arch violations + 110 boundary issues; `agent-check.mjs` (excerpt→agent, full→disk). FAIR-CODE (`.ee` unlicensed). Reader: 8 docs / 23,092 words / 153,204 chars, 8/8 fidelity. |
-| 7 | **buzz 0.5.28** | ✅ **7/7 WRITTEN** (reader pending) | **Self-hosted team workspace on Nostr (NIP-01)** — every action is a signed event with a `kind`; the relay is the single source of truth; **community = tenant** (host-resolved) with **TLA+/Tamarin + a prose contract**. Apache-2.0, no licence gate. 34 Rust crates, 62 migrations, 11 `VISION_*.md`. Reader → port **3600**. |
+| 7 | **buzz 0.5.28** | ✅ **7/7 + reader 3600** | **Self-hosted team workspace on Nostr (NIP-01)** — every action is a signed event with a `kind`; the relay is the single source of truth; **community = tenant** (host-resolved) with **TLA+/Tamarin + a prose contract**. Apache-2.0, no licence gate. 34 Rust crates, 62 migrations, 11 `VISION_*.md`. **90 findings**. Reader: 8 docs / 52,730 words / **347,516 chars** / 8/8 fidelity (char total = source JS code-units exactly). |
 | — | openrig, mattermost, zulip | ⬜ 3 remain | Order not fixed — **ASK before extracting more (~700 MB each).** |
 
 **buzz (b00 `4304e7f` → b07 `87d9135`) — the load-bearing facts.**
@@ -108,8 +108,8 @@ the same claim repeated 180× is one claim. **Read the migration history: the mo
    `344` deletes the ENTIRE Plugin V1 (14 DROP TABLEs) → 3 tables. Reader: 8 docs / 26,624 words,
    port 3300 — the engine was NOT platform-agnostic (4 hardcoded "CrewAI" strings; fixed).
 
-**★ STUDY CHAIN (7 CLOSED + buzz reader pending):** Hermes 13/13 · Paperclip · CrewAI · Multica
-(+r3300) · Gas Town (+reader) · n8n (+r3500) · **buzz (study DONE; reader port 3600 next)** —
+**★ STUDY CHAIN (7 CLOSED, all with readers):** Hermes 13/13 · Paperclip · CrewAI · Multica
+(+r3300) · Gas Town (+r3400) · n8n (+r3500) · **buzz (study DONE + reader `bfc3833`, port 3600)** —
 then **ASK** which of openrig / mattermost / zulip is 8th — then the cross-platform mapping pass.
 
 ## Standing hazards (still bite)
