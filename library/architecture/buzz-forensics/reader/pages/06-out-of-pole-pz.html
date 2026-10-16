@@ -1,0 +1,1860 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 06 — Out-of-pole findings (PZ) — buzz Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-06" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 06</span>
+      <div class="header-title-wrap">
+        <div class="header-title">Out-of-Pole (PZ)</div>
+        <div class="header-subtitle">buzz Platform Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/06-out-of-pole.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #059669">DONE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">11,535</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">58 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">1261</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-16</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 06 Architecture Guide (Default)</option>
+            <optgroup label="Strategic Architecture">
+              <option value="master">Executive Topology: the workspace is the event log, and the isolation is proven</option>
+            </optgroup>
+            <optgroup label="Foundations">
+              <option value="00">Batch 00: The pin, the extraction, and the rename hazard</option>
+              <option value="01">Batch 01: The overview — the event is the whole API</option>
+            </optgroup>
+            <optgroup label="Pole 1 — The Aissistant">
+              <option value="02">Batch 02: The aissistant — an agent is a colleague</option>
+            </optgroup>
+            <optgroup label="Pole 2 — The Workspace">
+              <option value="03">Batch 03: The workspace — three fences over one store</option>
+            </optgroup>
+            <optgroup label="Pole 3 — Automations">
+              <option value="04">Batch 04: Automations — deterministic at-most-once</option>
+            </optgroup>
+            <optgroup label="Cross-Cutting">
+              <option value="05">Batch 05: Widgets &amp; frontend — a proven negative</option>
+            </optgroup>
+            <optgroup label="Escape Hatch">
+              <option value="06">Batch 06: Out-of-pole — five artefacts, three languages</option>
+            </optgroup>
+            <optgroup label="Strategic Decision">
+              <option value="07">Batch 07: The synthesis — where buzz sits, what we take</option>
+            </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 06 VISUAL GUIDE</div>
+    <h4>Out-of-pole: five safety artefacts across three languages</h4>
+    <p>The study's strongest PZ surface, and the gate that documents its own blind spots</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 380" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-06" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-06" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+        <marker id="arrr-06" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#ef4444"/>
+        </marker>
+      </defs>
+      <g transform="translate(20, 20)">
+        <rect width="200" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE PROSE CONTRACT</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">docs/multi-tenant-relay.md</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">1,110 lines, status: draft</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">5 named NON-GOALS</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">10 axioms, each admitted</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">per deployment</text>
+        <text x="12" y="129" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">a §Conformance gate per axiom</text>
+      </g>
+      <path d="M 220 95 L 258 95" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-06)"/>
+      <g transform="translate(262, 20)">
+        <rect width="200" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE MECHANIZED MODELS</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">MultiTenantRelay.tla</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">1,142 lines · 12 invariants</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">13 mutations, 6 confirmed red</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#b45309">4 DELIBERATELY-FALSE probes</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">MultiTenantAuth.spthy</text>
+        <text x="12" y="129" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">21 lemmas — proven UNDER key compromise</text>
+      </g>
+      <path d="M 462 95 L 500 95" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-06)"/>
+      <g transform="translate(504, 20)">
+        <rect width="200" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE RUNTIME HALF</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">buzz-conformance crate</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">checks EXECUTIONS, not code</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">the checker re-implements the spec</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">EmitGuard = a Drop guard</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">a silent omission becomes a failure</text>
+      </g>
+      <rect x="20" y="190" width="880" height="170" rx="10" fill="#10b981" fill-opacity="0.08" stroke="#10b981" stroke-width="1.8"/>
+      <text x="40" y="218" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#047857">★ LIMITS.md — THE BATCH'S #1 RECOMMENDATION</text>
+      <text x="40" y="246" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">"The runtime conformance harness is NOT a proof." The file that says so names SEVEN things the gate does</text>
+      <text x="40" y="266" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">not catch, names the owner of each gap, names the WRONG answer to the open design question, and states</text>
+      <text x="40" y="286" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">plainly which half of itself is NOT ARMED (the read seam). A gate that publishes its own blind spots is</text>
+      <text x="40" y="306" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">worth more than a gate that reports green — because a reader can CALIBRATE what a pass means.</text>
+      <text x="40" y="336" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#047857">Pair it with the mutation test — "prove the tripwire fires" — and every other guard becomes trustworthy.</text>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="buzz-batch-06-the-out-of-pole-surface-pz">buzz — Batch 06: the out-of-pole surface (PZ)<a href="#batch-06/buzz-batch-06-the-out-of-pole-surface-pz" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Pole:</strong> PZ (the escape hatch — everything that does not sit on P1 aissistant, P2
+workspace, P3 automations, PX-W widgets, or PX-F frontend).
+<strong>Source studied:</strong> <code>buzz-main</code> @ v0.5.28, the extracted tree under
+<code>platforms/_extracted/buzz-main/</code>.
+<strong>Method:</strong> rule 0b / count FIRST, rule 1 / docs are claims, code is the
+authority, rule 6 / name the capability, rule 10 / the retirement rule.</p>
+<p>This batch covers six things that have no home in the pole frame:</p>
+<ol>
+<li><strong>The type fence</strong> — how buzz encodes &quot;the server resolves the tenant&quot; in Rust
+(§1). This is the <em>foundation</em> the whole multi-tenant story rests on, and buzz
+is unusually honest about where the fence stops.</li>
+<li><strong>The formal models</strong> — <code>MultiTenantRelay.tla</code> (1,142 lines) and
+<code>MultiTenantAuth.spthy</code> (748 lines), read as <em>models to be verified</em>, not
+guarantees to be accepted (§2). <strong>The most rigorous formal-methods artefacts in
+this study.</strong></li>
+<li><strong>The runtime conformance harness</strong> — a 2,638-line gate that replays the
+relay&#39;s live decisions against a Rust re-implementation of the spec&#39;s <code>Next</code>
+relation, and <strong>names the half of itself that is not yet armed</strong> (§3).</li>
+<li><strong>The audit chain</strong> — a per-community hash chain with a <em>versioned</em> encoding
+whose v2 fixed a real ambiguity in v1 (§4).</li>
+<li><strong>The security perimeter</strong> — a 13-boundary egress guard with a
+<strong>source-scanning inventory test that proves its own tripwires fire</strong> (§5).</li>
+<li><strong>The retirement surface and the rename hazard</strong> — buzz · sprout · sprig, with
+the rename documented in the CHANGELOG as a sequence of PRs (§6).</li>
+</ol>
+<p>The batch&#39;s headline: <strong>buzz is the first platform in this study that treats its
+own safety claims as artefacts to be <em>disproved</em> rather than asserted</strong> — and then
+writes down exactly which of them are still unproven. §7 collects the recommendation.</p>
+<hr>
+<h2 id="0-what-i-measured-rule-0b-counts-first">0. What I measured (rule 0b — counts first)<a href="#batch-06/0-what-i-measured-rule-0b-counts-first" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>The crate map — 34 crates</strong> (from <code>Cargo.toml</code>, which excludes
+<code>desktop/src-tauri</code> as a separate workspace):</p>
+<p><code>buzz-acp</code> · <code>buzz-admin</code> · <code>buzz-agent</code> · <code>buzz-audio-client</code> · <code>buzz-audit</code> ·
+<code>buzz-auth</code> · <code>buzz-backend-kubernetes</code> · <code>buzz-cli</code> · <strong><code>buzz-conformance</code></strong> ·
+<code>buzz-core</code> · <code>buzz-datastore-tracing</code> · <code>buzz-db</code> · <code>buzz-deletion</code> ·
+<code>buzz-dev-mcp</code> · <code>buzz-feature-flags</code> · <code>buzz-media</code> · <code>buzz-mesh-smoke</code> ·
+<code>buzz-pair-relay</code> · <code>buzz-pairing-cli</code> · <code>buzz-persona</code> · <code>buzz-pubsub</code> ·
+<code>buzz-push-gateway</code> · <code>buzz-relay</code> · <code>buzz-relay-mesh</code> · <code>buzz-sdk</code> ·
+<code>buzz-search</code> · <code>buzz-test-client</code> · <code>buzz-voice</code> · <code>buzz-workflow</code> ·
+<code>buzz-ws-client</code> · <code>git-credential-nostr</code> · <code>git-sign-nostr</code> · <code>ifc-core</code> ·
+<strong><code>sprig</code></strong>.</p>
+<p>Four of those are load-bearing for this batch and their sizes are:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Crate</th>
+<th align="right">Files</th>
+<th align="right">Lines</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>buzz-core</code> (<code>tenant.rs</code>)</td>
+<td align="right">1 module</td>
+<td align="right"><strong>352</strong></td>
+<td>the type fence (§1)</td>
+</tr>
+<tr>
+<td><code>buzz-conformance</code> (all)</td>
+<td align="right">7 <code>.rs</code> + 2 <code>.md</code> + 5 fixtures</td>
+<td align="right"><strong>1,775</strong></td>
+<td>the runtime gate (§3)</td>
+</tr>
+<tr>
+<td><code>buzz-audit</code></td>
+<td align="right">6</td>
+<td align="right"><strong>1,276</strong></td>
+<td>the hash chain (§4)</td>
+</tr>
+<tr>
+<td><code>buzz-auth</code></td>
+<td align="right">23</td>
+<td align="right"><strong>12,908</strong></td>
+<td>NIP-42/98, NIP-fi, replay, rate limit (§5)</td>
+</tr>
+<tr>
+<td><code>buzz-backend-kubernetes</code></td>
+<td align="right">—</td>
+<td align="right"><strong>6,429</strong></td>
+<td>rolling deploy / reconcile (§6)</td>
+</tr>
+<tr>
+<td><code>buzz-pubsub</code></td>
+<td align="right">—</td>
+<td align="right"><strong>2,614</strong></td>
+<td>cross-pod fan-out (§5)</td>
+</tr>
+</tbody></table></div>
+<p>Two things the counts say before any reading:</p>
+<ul>
+<li><strong><code>buzz-conformance</code> is a real crate with a real test surface</strong> — 1,775 lines
+and, per its own <code>LIMITS.md</code>, <strong>16 tests across three surfaces</strong> (9 checker + 5
+fixture-replay + 2 guard). This is not a stub.</li>
+<li><strong>The formal models ship their runner configs</strong> —
+<code>MultiTenantRelay.cfg</code> and <code>GitOnObjectStore.cfg</code> are present alongside the
+<code>.tla</code> files, including a concrete <code>CONSTANTS</code> block with two communities, five
+channels, three hosts, and one actor. <strong>The model is runnable, not decorative.</strong></li>
+</ul>
+<p>And one measurement that frames the whole batch: <strong><code>docs/spec/</code> holds three
+files, and <code>crates/buzz-core/src/pairing/</code> holds a fourth</strong> —
+<code>MultiTenantRelay.tla</code> 61,202 B · <code>MultiTenantAuth.spthy</code> 31,956 B ·
+<code>GitOnObjectStore.tla</code> 13,872 B · <code>NIP-AB.spthy</code> 15,147 B. <strong>Four formal models,
+~122 KB, in a product repository.</strong> In this study, that is unique.</p>
+<p>The fifth PZ document is not in <code>docs/spec/</code> at all: <strong><code>docs/multi-tenant-relay.md</code>,
+1,110 lines / 74,264 B, status <code>draft</code></strong> — the <strong>prose contract</strong> the Tamarin header
+defers to (§2.3). It is longer than any single formal model and it is the document
+that binds them to each other, to the deployment (via ten named axioms and a
+<code>§Conformance</code> gate per axiom), and to named code seams (via
+<code>§Implementation Correspondence</code>). Counting it changes the shape of the batch: PZ
+here is <strong>five artefacts across three languages</strong> — prose, TLA+, Tamarin — not a
+stack of <code>.tla</code> files.</p>
+<p>One further count belongs in the same table, because it is the mechanism P3 rests
+on: <strong>the NIP-98 replay guard is a pluggable trait with a Redis implementation</strong> —
+<code>Nip98ReplayGuard</code> (<code>buzz-auth/src/nip98_replay.rs</code>, <code>DEFAULT_REPLAY_TTL_SECS = 120</code>,
+a <code>MAX_REPLAY_TTL_SECS</code> ceiling, and a compile-time <code>assert!(… &gt;= 120)</code>) plus
+<code>buzz_pubsub::RedisNip98ReplayGuard</code>, a literal <code>SET key 1 NX EX &lt;ttl&gt;</code> over a
+community-scoped key. <strong>The seen-set is shared and cross-pod.</strong> This matters for
+D6-1: the prose contract says the opposite about the shipped HA path.</p>
+<hr>
+<h2 id="1-pz-the-type-fence-and-an-honest-account-of-where-it-stops">1. PZ — the type fence, and an honest account of where it stops<a href="#batch-06/1-pz-the-type-fence-and-an-honest-account-of-where-it-stops" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="1-1-the-one-invariant-everything-rests-on">1.1 The one invariant everything rests on<a href="#batch-06/1-1-the-one-invariant-everything-rests-on" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>crates/buzz-core/src/tenant.rs</code> (352 lines) is the smallest load-bearing file in
+the platform. Its module doc states the invariant in one sentence:</p>
+<blockquote>
+<p>The whole multi-tenant safety story rests on one invariant from the formal model
+(conformance &quot;row zero&quot;): a request&#39;s community is <em>resolved from the connection
+host by the server</em>, never supplied or influenced by the client.</p>
+</blockquote>
+<p>Two types carry it:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>rust</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-rust">#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub struct CommunityId(Uuid);          // opaque newtype
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct TenantContext {
+    community: CommunityId,            // private
+    host: String,                      // private
+}
+</code></pre>
+</div>
+<p><code>CommunityId</code> is deliberately <strong>not</strong> <code>Default</code>, <strong>not</strong> <code>Deserialize</code>, and has
+<strong>no <code>From&lt;Uuid&gt;</code></strong>. The only constructors are <code>CommunityId::from_uuid</code> (documented
+as <em>&quot;intentionally not a parse-from-client entry point&quot;</em>) and
+<code>TenantContext::resolved</code>, whose doc says <em>&quot;Call this <strong>only</strong> from the
+host-resolution path.&quot;</em></p>
+<p><strong>The consequence is stated as a type-signature argument</strong> — <code>NewAuditEntry</code> in the
+audit crate (§4) is typed with <code>CommunityId</code> rather than <code>Uuid</code> <em>&quot;so the provenance
+rule is visible in the signature&quot;</em>, and it is deliberately <strong>not
+<code>Serialize</code>/<code>Deserialize</code></strong> so that <em>&quot;there is no path by which a client-supplied
+blob becomes a <code>NewAuditEntry</code> (and thus a <code>CommunityId</code>).&quot;</em> buzz uses Rust&#39;s type
+system to make &quot;where did this tenant id come from?&quot; a question the compiler
+partly answers.</p>
+<h3 id="1-2-the-self-limiting-paragraph">1.2 ★ The self-limiting paragraph<a href="#batch-06/1-2-the-self-limiting-paragraph" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>This is the part I did not expect, and it is the most quotable thing in the batch.
+The module doc continues:</p>
+<blockquote>
+<p>This is a <strong>lint-and-review fence, not a compiler fence.</strong>
+<code>TenantContext::resolved</code> and <code>CommunityId::from_uuid</code> are public so the
+host-resolution path (in another crate) can call them — which means a determined
+caller elsewhere <em>could</em> call them too. The migration-lint harness forbids
+constructing a <code>TenantContext</code> outside host resolution and tests; the type only
+removes the <em>accidental</em> path (deserializing a client-chosen community), and
+review/lint closes the deliberate one. <strong>We say this plainly rather than
+overclaim a guarantee the <code>pub</code> API doesn&#39;t give.</strong></p>
+</blockquote>
+<p><strong>Rule 6 — name the capability:</strong> the capability is <em>structural prevention of the
+accidental path, plus a lint for the deliberate one.</em> It is <strong>not</strong> a compiler
+guarantee, and buzz says so in the same file that provides it. Every one of the
+three mechanisms is named with its own scope:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Mechanism</th>
+<th>What it prevents</th>
+<th>What it does not</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>The type (no <code>Default</code>/<code>Deserialize</code>/<code>From&lt;Uuid&gt;</code>)</td>
+<td>the <strong>accidental</strong> path — deserialising a client-chosen community</td>
+<td>a determined caller inside the crate graph</td>
+</tr>
+<tr>
+<td>The migration lint</td>
+<td>constructing a <code>TenantContext</code> outside host resolution and tests</td>
+<td>a caller that goes around the lint</td>
+</tr>
+<tr>
+<td>Review</td>
+<td>the deliberate case</td>
+<td>—</td>
+</tr>
+</tbody></table></div>
+<p>This is the exact discipline our own <code>library/development/WORKING-RULES.md</code> asks
+for, applied to a safety claim. <strong>A type fence documented as a lint fence is more
+trustworthy than a type fence claimed to be a proof</strong>, because the reader knows
+where to look for the hole.</p>
+<h3 id="1-3-the-host-normalization-rule-and-why-it-is-one-function">1.3 The host normalization rule, and why it is one function<a href="#batch-06/1-3-the-host-normalization-rule-and-why-it-is-one-function" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>The fence has a second half: the host string must normalize identically on both
+sides, or a community gets split into two tenants. <code>normalize_host</code> is <em>&quot;the <strong>one</strong>
+normalization rule shared by both sides of the fence&quot;</em>:</p>
+<ul>
+<li>ASCII-lowercase (RFC 3986 hosts are case-insensitive);</li>
+<li>strip a <strong>single</strong> trailing dot (the FQDN root label);</li>
+<li>strip a <strong>default</strong> port suffix (<code>:80</code>, <code>:443</code>) — <em>&quot;non-default ports are kept,
+since a deployment may legitimately serve different communities on different
+ports of the same name.&quot;</em></li>
+</ul>
+<p>The docblock gives the design consequence directly: <em>&quot;Because both sides agree by
+construction, <code>Relay.Example</code>, <code>relay.example.</code>, and <code>relay.example:443</code> all
+resolve to the one community — <strong>they can never split into distinct tenants</strong>.&quot;</em>
+And an empty result is <strong>fail-closed</strong>: <em>&quot;resolution treats an empty or unmapped
+host as a fail-closed rejection, never a default tenant.&quot;</em></p>
+<p>Three companion functions close the practical gaps, each with a stated failure it
+prevents:</p>
+<ul>
+<li><strong><code>validate_community_host</code></strong> — accepts <em>only</em> a bare <code>name[:port]</code> of DNS
+labels, so schemes/paths/queries/userinfo/IP-brackets are <em>&quot;all rejected rather
+than normalized away.&quot;</em> The test enumerates 18 rejections including
+<code>&quot;user@buzz.example&quot;</code>, <code>&quot;[::1]&quot;</code>, <code>&quot;buzz.example.&quot;</code> (trailing dot rejected on
+the <em>input</em> side), and a 64-char label.</li>
+<li><strong><code>relay_url_authority</code></strong> — extracts the authority from a relay URL <em>&quot;in the same
+normalized shape as request <code>Host</code> headers&quot;</em>, preserving an explicit non-default
+port and IPv6 brackets, <strong>&quot;both of which a naive <code>host_str()</code> drops.&quot;</strong> Its test
+names the concrete bug it prevents: <em>&quot;the admin lookup misses the community
+startup seeded.&quot;</em></li>
+<li><strong>The IPv6 note</strong> — the port-strip only touches an exact <code>:80</code>/<code>:443</code> suffix
+<em>&quot;so IPv6 literals like <code>[::1]</code> (which contain colons but no trailing
+<code>:80</code>/<code>:443</code>) are left intact.&quot;</em></li>
+</ul>
+<p><strong>This is the batch&#39;s first pattern:</strong> the fence is not one type, it is <strong>a
+provable invariant plus the small functions that make it hold at every real
+boundary</strong>, each documented with the concrete failure it prevents.</p>
+<h3 id="1-4-the-migration-lint-a-structural-rule-enforced-over-the-whole-schema">1.4 The migration lint — a structural rule enforced over the whole schema<a href="#batch-06/1-4-the-migration-lint-a-structural-rule-enforced-over-the-whole-schema" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>The type fence is backed by a <strong>schema lint</strong> in
+<code>crates/buzz-db/src/runtime/migration.rs</code>, and it is a genuine structural check,
+not a sample test. Three of its tests define the rule:</p>
+<ul>
+<li><code>migration_lint_detects_tables_missing_community_id_by_default</code> — a table that
+is &quot;scoped&quot; (i.e. not listed in <code>_operator_global_tables</code>) <strong>must</strong> have a
+<code>NOT NULL community_id</code>.</li>
+<li><code>migration_lint_detects_scoped_key_constraints_not_led_by_community_id</code> — every
+scoped <strong>PRIMARY KEY / UNIQUE / FOREIGN KEY</strong> must be <strong>led by <code>community_id</code></strong>.</li>
+<li><code>migration_lint_accepts_scoped_key_constraints_led_by_community_id</code> — the
+positive case.</li>
+</ul>
+<p>and two more run it <strong>over the entire migration set</strong>:</p>
+<ul>
+<li><code>all_non_operator_global_tables_have_not_null_community_id</code> — <em>&quot;every table not
+listed in <code>_operator_global_tables</code> must carry NOT NULL community_id.&quot;</em></li>
+<li><code>scoped_primary_key_unique_and_foreign_key_constraints_lead_with_community_id</code>.</li>
+</ul>
+<p><strong>This is the load-bearing enforcement mechanism for the whole tenancy claim</strong>, and
+three details matter:</p>
+<ol>
+<li><strong>There is an explicit, auditable escape hatch</strong> — <code>_operator_global_tables</code>, a
+table whose rows are <code>(table_name, reason)</code>. To make a table global you must
+<strong>insert a row naming the reason</strong>, in the migration. The exemption is data with
+a justification column, not a comment.</li>
+<li><strong>The constraint rule is scoped-key-led-by-community.</strong> Every index and FK must
+<em>lead</em> with <code>community_id</code>, so a scoped lookup is a prefix seek <strong>by
+construction</strong> — you cannot write a query that reads across tenants without
+noticing the key shape. This is the schema-level analogue of §1.1&#39;s type fence.</li>
+<li><strong>The linter is tested on synthetic SQL, including a negative fixture.</strong> That is
+why <code>CREATE TABLE widgets</code> appears in the tree at all — it is the deliberate
+&quot;table that fails the lint&quot;. (This is the same fixture that made batch 05&#39;s
+widget negative result <em>provable</em>.)</li>
+<li><strong>Measured:</strong> <strong>62 migrations</strong> (<code>0001_initial_schema.sql</code> …
+<code>0062_system_channel_type.sql</code>), <strong>24 <code>DROP TABLE</code>/<code>DROP COLUMN</code>/<code>RENAME TO</code>
+statements</strong> across them, and <strong>zero <code>CREATE POLICY</code></strong> — there is <strong>no
+Postgres RLS in the migrations</strong>. Rule 1 applies: the tenancy enforcement is
+<em>application-level plus lint</em>, not <em>database-enforced by RLS</em>. That is a
+legitimate choice (RLS has its own operational costs) but it must be stated,
+because a reader who assumes RLS would over-trust the schema. buzz&#39;s own TLA+
+model actually <em>models an RLS-shaped defence</em> (<code>ReadForgotPredicateWithRLS</code>,
+mutation <strong>M4</strong>) <em>and</em> the application predicate, which is the honest way to
+cover both.</li>
+</ol>
+<hr>
+<h2 id="2-pz-the-formal-models">2. PZ — the formal models<a href="#batch-06/2-pz-the-formal-models" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="2-1-multitenantrelay-tla-1-142-lines-13-mutations-several-confirmed-red">2.1 `MultiTenantRelay.tla` — 1,142 lines, 13 mutations, several confirmed red<a href="#batch-06/2-1-multitenantrelay-tla-1-142-lines-13-mutations-several-confirmed-red" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>The model&#39;s header states what its obligation is, and it is <strong>not</strong> the naive one:</p>
+<blockquote>
+<p>The master proof obligation is NOT merely &quot;no row with the wrong <code>community_id</code>
+is returned.&quot; The theorem contract is <strong>non-interference</strong> encoded as a
+label/taint invariant: every state element and every observation carries the
+community labels that influence it; <strong>no value labeled outside a connection&#39;s
+resolved community may flow into that connection&#39;s typed observational
+interface.</strong></p>
+</blockquote>
+<p>That is an information-flow property, and it is stronger than row-scoping. buzz
+then applies the discipline that makes a formal model trustworthy — <strong>it says what
+it does not model</strong>:</p>
+<blockquote>
+<p><strong>C1 carve-out (not modeled as a security theorem):</strong> bandwidth-limited physical
+resource timing channels such as buffer cache, autovacuum, planner stats, hot
+partition tails, and connection-pool latency.</p>
+</blockquote>
+<p>and then enumerates the channels it <em>does</em> model and close (<strong>C2</strong>): the
+event-id existence oracle, the constraint/error surface, and projection rebuild.
+<strong>Every carve-out and every closed channel is named.</strong> A model that lists its own
+exclusions is a model a reviewer can audit.</p>
+<p><strong>The 13 invariants</strong> (all measured in <code>Safety</code>, lines 1129–1142):</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Invariant</th>
+<th>What it states</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>Inv_NonInterference</code></td>
+<td><code>∀ o ∈ observations : o.labels ⊆ {o.community}</code> — the master property</td>
+</tr>
+<tr>
+<td><code>Inv_LabelPropagation</code></td>
+<td>labels are <em>derived</em>, not annotated: a <code>ResultRows</code> observation&#39;s labels equal its rows&#39; labels</td>
+</tr>
+<tr>
+<td><code>Inv_ReadConfinement</code></td>
+<td>every returned row&#39;s community equals the observation&#39;s</td>
+</tr>
+<tr>
+<td><code>Inv_ResolutionFence</code></td>
+<td>persisted writes are labelled by the <strong>resolved</strong> community, never a client claim</td>
+</tr>
+<tr>
+<td><code>Inv_HostBindingFence</code></td>
+<td>every accepted write carries its host, and <code>HostCommunity[host] = w.community</code></td>
+</tr>
+<tr>
+<td><code>Inv_ChannelCommunityImmutable</code></td>
+<td>a channel is stamped at most once; ownership rows agree</td>
+</tr>
+<tr>
+<td><code>Inv_AdmissionFence</code></td>
+<td>NIP-43 admission is scoped by <code>(community, actor)</code>, not relay-global</td>
+</tr>
+<tr>
+<td><code>Inv_AcceptedWritesPersist</code></td>
+<td>an accepted append stays in the log</td>
+</tr>
+<tr>
+<td><code>Inv_MessageKeyUnique</code></td>
+<td>ids are unique <strong>within a community</strong>, not globally</td>
+</tr>
+<tr>
+<td><code>Inv_NoTenantContextFailsClosed</code></td>
+<td>a missing tenant context serves <strong>no rows</strong></td>
+</tr>
+<tr>
+<td><code>Inv_ProjectionDerived</code></td>
+<td>projections are derived-only</td>
+</tr>
+<tr>
+<td><code>Inv_SanitizedErrors</code></td>
+<td>the only client-visible error surface is a closed alphabet</td>
+</tr>
+<tr>
+<td><code>TypeOK</code></td>
+<td>the state is well-typed</td>
+</tr>
+</tbody></table></div>
+<p><strong>The mutations are the real evidence, and they are unusually specific.</strong> M1–M13
+each name a <em>concrete regression</em>, and <strong>six are labelled &quot;Confirmed red&quot; with the
+trace length</strong>:</p>
+<ul>
+<li><strong>M3</strong> — <em>&quot;WriteDuplicate conflict on id only … not (community,id) → cross-community
+suppression labels a B write result with A … <strong>Confirmed red: Safety violated at
+depth 3</strong> (see <code>GlobalConflictRows</code>).&quot;</em></li>
+<li><strong>M8</strong> — an A-host operating on a B-channel *&quot;→ an accepted write or recorded
+duplicate carries a host whose mapping ≠ its stamp. <strong>Confirmed red:</strong> … a 2-state
+trace (<code>Init -&gt; WriteInsert</code>) for the insert path and a 3-state trace
+(<code>Init -&gt; WriteInsert -&gt; WriteDuplicate</code>) for the duplicate path. <strong>(Trace length,
+not TLC&#39;s run-dependent &quot;depth of complete graph search&quot; line.)</strong>&quot;*</li>
+<li><strong>M9</strong>, <strong>M10</strong>, <strong>M11</strong>, <strong>M12</strong>, <strong>M13</strong> — same treatment, each with the trace.</li>
+</ul>
+<p>That parenthetical in M8 is worth dwelling on: the author distinguishes <strong>trace
+length</strong> from <strong>TLC&#39;s reported search depth</strong>, because the latter is an artefact of
+the model-checker&#39;s execution order and is <em>not</em> a stable property. Getting that
+right requires having actually run TLC and noticed the number move. <strong>This is a
+model that was executed, not one that was written to look rigorous.</strong></p>
+<p><strong>And the model guards against its own vacuity.</strong> Six invariants are deliberately
+<strong>false</strong> — <code>Probe_OpenAuthRegistration_Unreachable</code>, <code>Probe_CreatedChannel_Unreachable</code>,
+<code>Probe_HostFeedRead_Unreachable</code>, <code>Probe_HostAuxRead_Unreachable</code> — with the
+mechanism spelled out:</p>
+<blockquote>
+<p>These are intentionally false invariants: checking one ad hoc with <code>INVARIANT</code>
+(plus the normal constraints) must produce a short counterexample trace. <strong>If it
+stays green, the corresponding action is unreachable and the safety proof is
+vacuous there.</strong></p>
+</blockquote>
+<p><strong>A safety proof is only as good as the state space it covers</strong>, and buzz
+instrumented the coverage of its own proof. This is the single best idea in the
+batch.</p>
+<h3 id="2-2-multitenantauth-spthy-748-lines-21-lemmas-and-honest-drafting">2.2 `MultiTenantAuth.spthy` — 748 lines, 21 lemmas, and honest drafting<a href="#batch-06/2-2-multitenantauth-spthy-748-lines-21-lemmas-and-honest-drafting" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>The Tamarin model covers <em>symbolic</em> security: NIP-98 minting, stamped bearer-token
+use, per-community signing keys, and independent per-community audit chains. It
+opens by naming its own status:</p>
+<blockquote>
+<p><strong>Final theorem wording is expected to be tightened by the prose contract in
+<code>docs/multi-tenant-relay.md</code>. Until then these lemmas are the intended shape,
+not the final public statement.</strong></p>
+</blockquote>
+<p>Measured: <strong>8 security lemmas and 13 anti-vacuity lemmas</strong> (21 total). The
+security ones, grouped by the claim they support:</p>
+<ul>
+<li><strong>S1 — token confinement.</strong> <code>token_confinement</code> (a token authorises only in its
+stamped community) and — the one that makes it meaningful —
+<strong><code>leaked_token_blast_radius_contained</code></strong>: the same confinement <strong>holds even when
+<code>Leak_Token</code> gives the bearer token to the adversary.</strong> Proving a property <em>under
+key compromise</em> is the difference between a security lemma and a tautology.</li>
+<li><strong>S1-host — the confused-deputy fence.</strong> <code>channelless_use_confined_to_host_community</code>,
+<code>channelbearing_use_agrees_with_host</code>, <code>channelless_token_agrees_with_host</code>,
+<code>host_token_mismatch_not_authorized</code>. The comment names the <em>current</em> weakness
+this closes: <em>&quot;Today the relay resolves a channel-bearing op&#39;s community from the
+<code>h</code> tag (the channel mapping) alone; this lemma proves that the host must <strong>ALSO</strong>
+agree, so an A-host presenting a B-channel-bearing request cannot authorize as B.&quot;</em></li>
+<li><strong>S2 — mint integrity.</strong> four lemmas that every minted token has exactly one
+stamp and every requested channel resolved to that stamp, plus
+<code>cross_community_mint_yields_no_token_for_that_request</code>.</li>
+<li><strong>S3 — system events.</strong> acceptance requires the <strong>same</strong> community&#39;s key <em>or that
+key&#39;s compromise</em> — and, separately, <strong><code>other_community_key_compromise_does_not_authorize</code></strong>:
+compromising B&#39;s key does not authorise into A, <em>&quot;because the signed preimage
+includes the community id.&quot;</em></li>
+<li><strong>S5 — NIP-43 admission.</strong> <code>nip43_admission_confined_to_signing_community</code> and its
+sibling <code>other_community_key_compromise_does_not_admit</code>, with the reason:
+<em>&quot;B&#39;s key cannot mint an admission into A.&quot;</em></li>
+<li><strong>S4 — audit.</strong> <code>audit_append_advances_same_community_head</code> and
+<code>cross_community_audit_splice_attempt_is_not_append</code>.</li>
+</ul>
+<p><strong>Three techniques are worth naming</strong> (rule 6):</p>
+<ol>
+<li><strong>Mutation hooks are <em>in</em> the model.</strong> The docblocks refer to
+<code>MUTATION_Use_Token_ChannelLess_Ignore_Host</code> and <code>MUTATION_Use_Token_Ignore_Host</code>
+— <em>&quot;enabling … falsifies this fast.&quot;</em> The model ships the switches that break it,
+so a reviewer can watch the lemma go red rather than take its word.</li>
+<li><strong>Single-fact lemma design, with the reason stated.</strong> Two lemmas are explicitly
+shaped to read <strong>one</strong> action fact: <em>&quot;A single-fact assertion means a
+counterexample is one rule instance, not a multi-fact join or adversary
+reconstruction.&quot;</em> The lemma&#39;s <em>shape</em> is an engineering decision to make
+falsification cheap, and it is documented.</li>
+<li><strong>&quot;Host wins over the token&#39;s stamp&quot;</strong> — stated as the tie-break rule, with the
+note that the <strong>proof is what forced the rule</strong>: <em>&quot;In the real rule both are
+<code>comm</code> (host wins), so the confinement lemma is [satisfiable].&quot;</em></li>
+</ol>
+<p><strong>Matching the model to the code.</strong> The <code>.tla</code> grounds itself in named source:
+*&quot;<code>crates/buzz-db/src/event.rs</code>: <code>EventQuery</code> has <code>channel_id</code>/<code>channel_ids</code> but
+<strong>no <code>community_id</code></strong>; inserts use <code>ON CONFLICT DO NOTHING</code>&quot;* and
+*&quot;<code>crates/buzz-db/src/channel.rs</code>: <code>get_accessible_channel_ids</code> currently unions
+<strong>all</strong> open channels in the DB; <strong>that unscoped variant is the explicit I1
+mutation.</strong>&quot;* The model points at the exact current code that motivates it.</p>
+<h3 id="2-3-docs-multi-tenant-relay-md-the-prose-contract-1-110-lines">2.3 ★ `docs/multi-tenant-relay.md` — the prose contract, 1,110 lines<a href="#batch-06/2-3-docs-multi-tenant-relay-md-the-prose-contract-1-110-lines" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>The <code>.spthy</code> header defers its &quot;final theorem wording&quot; to <em>&quot;the prose contract in
+<code>docs/multi-tenant-relay.md</code>.&quot;</em> That contract exists: <strong><code>docs/multi-tenant-relay.md</code>,
+1,110 lines / 74,264 B, status <code>draft</code>.</strong> It is the single most important document in
+this batch, because it is the <strong>prose layer that binds the two mechanized models to
+each other, to the deployment, and to named code seams</strong> — and it is the artefact
+that makes buzz&#39;s PZ content a <em>system</em> rather than four files of formalism. Its
+structure, in order: Abstract · <strong>Scope and Non-Goals</strong> · System Model · Isolation
+Boundary (with a <em>typed observational interface</em> and <em>label-propagation rules</em>) ·
+<strong>Axioms</strong> · <strong>Safety Theorems</strong> · <strong>Conformance</strong> · Prior Art · Mechanized
+Verification · <strong>Implementation Correspondence</strong> · Summary.</p>
+<p>Four things in it are worth carrying forward (rule 6 names them):</p>
+<p><strong>1. The Non-Goals section names five things it does <em>not</em> prove, and the naming is
+the claim.</strong> It proves safety, not liveness/performance (empirical, <em>&quot;characterized
+by the perf rig, not by theorem&quot;</em>); not Postgres internals (RLS, MVCC, <code>ON CONFLICT</code>
+are <em>trusted and stated as axioms</em> — <em>&quot;We prove our composition on top of them; we
+do not reprove them&quot;</em>); not the crypto primitives (Schnorr/BIP-340, NIP-98 binding,
+second-preimage resistance are <em>&quot;the Tamarin model&#39;s equational theory, not
+reproven&quot;</em>); not physical-resource isolation (communities share <em>&quot;an id space, time
+partitions, a connection pool, and a CPU&quot;</em> — a named C1 carve-out); and not
+<strong>above-the-interface client leakage</strong> (a leaked <code>nevent</code>, screenshot, or log can
+hand a user an out-of-band id from community A — and the doc still walks the
+consequence: <em>&quot;the composite-index closure (A-RLS-5) means the probe still reveals
+nothing&quot;</em>, then states the residual plainly: closing it <em>&quot;for any weaker index shape
+is above the interface and is the client&#39;s obligation, not the relay&#39;s&quot;</em>). The
+paragraph closes with the sentence that should be the workshop&#39;s own standard:</p>
+<blockquote>
+<p><strong>Stating this boundary is part of the claim. &quot;Provably isolated&quot; without naming
+the trust boundary does not survive scrutiny; &quot;isolation is machine-checkable
+relative to these stated axioms, with every shared logical channel either closed
+in-model or closed by a named axiom&quot; does.</strong></p>
+</blockquote>
+<p><strong>2. Every axiom is a <em>testable assumption admitted per deployment</em>, not a piece of
+prose.</strong> The <strong>Axioms</strong> section lists ten, and the load-bearing ones are labelled:</p>
+<ul>
+<li><strong>A-RLS-1..5</strong> — the SQL-level backstop: RLS enabled with a restrictive policy on
+every tenant-bearing table (1); the request role is non-superuser, <code>NOBYPASSRLS</code>,
+non-owner-or-FORCE (2); <code>app.community_id</code> is set transaction-locally via
+<code>SET LOCAL</code> before any query (3); no <code>SECURITY DEFINER</code>/<code>leakproof</code> function in the
+request path reads tenant tables without re-establishing context (4); and —
+the closure that makes the existence-oracle argument work — <strong>uniqueness and FK
+constraints include <code>community_id</code></strong>, so a foreign id can never collide with a
+local one and reveal its existence (5).</li>
+<li><strong>P-APPEND</strong> — append is <code>INSERT … ON CONFLICT (community_id, created_at, id) DO NOTHING</code> (idempotent, tenant-keyed).</li>
+<li><strong>P-SIG</strong> — no one can forge a valid BIP-340 Schnorr signature.</li>
+<li><strong>P-RESOLVE</strong> — <code>resolve : channel_id → community_id</code> is a total function over
+channels, read under the operation&#39;s own snapshot.</li>
+<li><strong>P-RESOLVE-HOST</strong> — <code>resolve_host : host → community_id ∪ {⊥}</code>, the upstream
+mapping; an unmapped host binds to no community and the connection is rejected
+<strong>fail-closed, never defaulted</strong>.</li>
+<li><strong>A_HASH</strong> — the event id is second-preimage resistant.</li>
+<li><strong>P3</strong> — NIP-98 mint freshness (the one the <em>Conformance</em> section then tests
+against the deployment).</li>
+</ul>
+<p>Then <strong>§Conformance maps each axiom to a gate that must pass or the deployment is
+rejected</strong>: A-RLS-1..5 by a startup/CI assertion suite that <em>enumerates every
+tenant-bearing table</em>; P-RESOLVE by the <code>channels.community_id NOT NULL</code> constraint
+plus an immutability migration lint; P-SIG/A_HASH by <em>&quot;using the audited libraries
+the rest of Buzz uses&quot;</em>; and P3 by the NIP-98 seen-set, with <strong>two structural gates
+stated as conformance checks precisely because <em>&quot;the implementation is silent if
+either is violated&quot;</em></strong> — a capacity-vs-rate inequality
+(<code>capacity ≥ peak NIP-98 RPS × 120 s</code>) and the per-pod scope. <strong>An axiom that cannot
+be checked is not an axiom here; it is a wish, and the doc does not have any.</strong></p>
+<p><strong>3. The Implementation Correspondence section is where the abstraction is paid
+for.</strong> It maps model obligations to <em>named code seams</em> with line numbers — and, more
+importantly, <strong>flags the ones that are invisible to both proofs</strong>:</p>
+<blockquote>
+<p><em>&quot;it is invisible to both the labeling invariant and the Tamarin lemmas (the
+proofs would silently weaken, not fail), so it is enforced by a migration lint.&quot;</em></p>
+</blockquote>
+<p>That sentence is the batch&#39;s intellectual centre (and the same idea as F6-13): some
+obligations <strong>do not go red when you break them</strong> — the proof just proves less, and
+you never find out. The doc names exactly which ones (the composite index; the
+immutability of <code>channels.community_id</code>; the <code>RelayInfo::build</code> signature) and moves
+each to a <strong>lint that fails the build</strong> instead of a theorem that silently narrows.
+It also enumerates the shared logical channels the move to a row-level boundary
+creates and closes each by name: NIP-11 identity, Git Smart HTTP namespaces, Blossom
+media descriptors, Redis pub/sub <strong>keys</strong> (<code>buzz:{community}:channel:{channel_id}</code>
+— the current unprefixed keys are <em>&quot;admissible only for the degenerate
+single-community deployment or physically isolated Redis&quot;</em>), the Postgres FTS index
+(<em>&quot;shared infrastructure, not a shared result space&quot;</em>), workflow trigger evaluation,
+and relay membership (<code>(community_id, pubkey)</code> — mechanized, not asserted, via
+<code>admittedMembers</code>/<code>IsAdmitted</code> and mutation M9).</p>
+<p><strong>4. The Subscription-pipeline abstraction is the honest half of the &quot;coarser, not
+wrong&quot; admission.</strong> The mechanized models represent the <code>REQ → register → match → fan-out → access-filter → EVENT/EOSE</code> pipeline as synchronous <code>Read*</code> actions with
+<em>&quot;no <code>sub_id</code>, no <code>Register</code>, no <code>Match</code>, no <code>FanOut</code>, no <code>EOSE</code>, no filter state.&quot;</em>
+The doc says the refinement from aggregate to per-sub-stream is <em>&quot;coarser than the
+interface, not wrong&quot;</em> — <strong>and then does not leave it there.</strong> It states a
+<strong>governing rule</strong>: <em>&quot;Every observation kind enumerated in §The typed observational
+interface must either (i) be discharged by a TLA+ invariant or Tamarin lemma, or
+(ii) appear by name in this subsection with a code-fence and a closure
+obligation. New observation kinds … require a new entry here in the same commit.&quot;</em>
+It then discharges the three it names — <strong>EOSE cardinality</strong> (count equals the
+filtered, scope-resolved set), <strong>EOSE → late-EVENT temporal pairing</strong> (the closure
+being the visibility short-circuit at <code>event.rs:91-96</code>, <em>&quot;a transient DB error during
+the late-EVENT window returns an empty fan-out for the whole event, not a relaxed
+predicate&quot;</em>), and <strong><code>sub_id</code> reuse/collisions</strong> (per-connection namespace, proven
+from <code>SubRegistry.subs</code> being keyed <code>entry(conn_id)…</code>). The doc even names what the
+rule <em>caught</em>: <em>&quot;This rule is what surfaced F1 (A_HASH closure mis-attribution) and
+F2 (the subscription-pipeline abstraction itself).&quot;</em></p>
+<p><strong>Verdict on this document (rule 1 applied to a doc that talks about itself).</strong> It is
+an unusually honest artefact — it names its trust boundary, its five non-goals, the
+obligations invisible to its own proofs, and the one abstraction it does not
+mechanize. Its weakness is the ordinary one: <strong>it is a snapshot, and the code moves</strong>
+— see <strong>D6-1</strong>, where its P3/deployment status is now behind the shipped code. Read
+it as <em>the design contract of the multi-tenant move</em>, not as the current state of
+<code>main</code>; the invariants it names are still the right invariants, but its <em>status</em>
+sentences have aged.</p>
+<hr>
+<h2 id="3-pz-the-runtime-conformance-harness">3. PZ — the runtime conformance harness<a href="#batch-06/3-pz-the-runtime-conformance-harness" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="3-1-the-north-star">3.1 The north star<a href="#batch-06/3-1-the-north-star" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>crates/buzz-conformance</code> exists to answer one question, stated at the top of
+<code>TRACE_SCHEMA.md</code>:</p>
+<blockquote>
+<p>Don&#39;t ask &quot;did the model pass.&quot; Ask <strong>&quot;did the running code emit a trace the
+model accepts.&quot;</strong></p>
+</blockquote>
+<p>The mechanism: the relay emits one <code>TraceStep</code> per decision at the
+<strong>ingest/auth/read seam</strong>; the checker replays the trace against a <strong>Rust
+re-implementation of the spec&#39;s <code>Next</code> relation</strong> — and, stated explicitly,
+<strong>&quot;it does not call any production reducer.&quot;</strong> The checker is independent of the
+code it checks.</p>
+<p><strong>Measured structure:</strong></p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Piece</th>
+<th align="right">Lines</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>src/lib.rs</code></td>
+<td align="right">—</td>
+<td><code>SCHEMA_VERSION = 1</code>, the <code>TraceAction</code> enum, the <code>Tracer</code> trait</td>
+</tr>
+<tr>
+<td><code>src/transitions.rs</code></td>
+<td align="right">—</td>
+<td>the spec&#39;s <code>Next</code>, re-implemented (<code>check_step</code>, <code>bootstrap</code>)</td>
+</tr>
+<tr>
+<td><code>src/checker.rs</code></td>
+<td align="right">—</td>
+<td>the replay engine + <strong>9 unit tests</strong></td>
+</tr>
+<tr>
+<td><code>tests/proptest_checker.rs</code></td>
+<td align="right">431</td>
+<td>property tests</td>
+</tr>
+<tr>
+<td><code>tests/replay_fixtures.rs</code></td>
+<td align="right">324</td>
+<td><strong>5 tests</strong> over committed JSONL traces</td>
+</tr>
+<tr>
+<td><code>crates/buzz-relay/src/conformance/mod.rs</code></td>
+<td align="right">784</td>
+<td>the emitter + <code>EmitGuard</code> + <strong>2 self-tests</strong></td>
+</tr>
+<tr>
+<td><code>crates/buzz-relay/src/conformance/tracers.rs</code></td>
+<td align="right">79</td>
+<td><code>NoopTracer</code> (prod default) / <code>JsonlTracer</code></td>
+</tr>
+</tbody></table></div>
+<h3 id="3-2-the-three-projection-rules-and-why-each-is-load-bearing">3.2 ★ The three projection rules, and why each is load-bearing<a href="#batch-06/3-2-the-three-projection-rules-and-why-each-is-load-bearing" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>TRACE_SCHEMA.md</code> devotes a section to &quot;Three projection rules that are
+load-bearing&quot; — <em>&quot;the places a buggy relay could emit an in-spec trace if you
+normalized away the violation.&quot;</em> This is the design pattern to steal:</p>
+<ol>
+<li><strong><code>claimed_community</code> is recorded separately from <code>resolved_community</code>.</strong> <em>&quot;If
+they ever disagree, the spec says &#39;resolved wins&#39;; the trace must show both so
+M2 (claimed-driven auth) can bite.&quot;</em> <strong>If you project away the claim, you
+cannot detect claim-driven authorisation.</strong></li>
+<li><strong><code>row_communities</code> is a <code>Vec</code>, not a <code>Set</code>, and is not filtered to the resolved
+tenant.</strong> <em>&quot;If two rows in the result set belong to different communities, the
+checker must see both labels — otherwise it cannot fail closed on
+<code>Inv_ReadConfinement</code>.&quot;</em> <strong>A <code>Set</code> would silently dedupe the leak; filtering
+would delete the evidence.</strong> The projection is shaped so the <em>violation survives
+projection</em>.</li>
+<li><strong><code>SanitizedReason</code> is a closed alphabet.</strong> <em>&quot;A fourth variant is a CI failure,
+not a silent bucket.&quot;</em></li>
+</ol>
+<p><strong>And the projection deliberately discloses nothing new.</strong> The <code>state</code> block
+carries a <strong>16-hex prefix of the authed pubkey</strong>, with the justification: <em>&quot;The
+<code>actor</code> prefix is a <em>hash already</em> from the client&#39;s POV (Schnorr X-only) — so the
+prefix discloses nothing the relay&#39;s existing logs don&#39;t already. This avoids
+dragging a hash dep into observability code.&quot;</em> The read projection records <em>&quot;the
+server-resolved community UUID&quot;</em> and explicitly <strong>not</strong> <em>&quot;client-claimed <code>h</code> tag,
+event id, payload&quot;</em> — a table that states both what each field carries and what it
+does not.</p>
+<h3 id="3-3-emitguard-a-drop-guard-that-turns-a-silent-omission-into-a-failure">3.3 `EmitGuard` — a `Drop` guard that turns a silent omission into a failure<a href="#batch-06/3-3-emitguard-a-drop-guard-that-turns-a-silent-omission-into-a-failure" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>The mechanism is small and elegant (measured, <code>mod.rs</code>):</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>rust</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-rust">pub struct EmitGuard { inner: Arc&lt;dyn Tracer&gt;, state: AbstractState,
+                       counter: Arc&lt;AtomicUsize&gt;, kind: &amp;&#39;static str }
+
+impl Drop for EmitGuard {
+    fn drop(&amp;mut self) {
+        if self.counter.load(Relaxed) == 0 {
+            self.inner.record(TraceStep::new(
+                TraceAction::ImplBug { kind: self.kind.to_string() },
+                self.state.clone()));
+        }
+    }
+}
+</code></pre>
+</div>
+<p>A <code>CountingTracer</code> wrapper bumps a counter on every emit; <strong>if the seam exits with
+zero emits, <code>Drop</code> records an <code>ImplBug</code>, which the checker treats as a
+<code>CoverageBreach</code> and fails closed.</strong> The docblock states the property: <em>&quot;an entry to
+a critical seam that doesn&#39;t emit <em>any</em> action records <code>ImplBug</code>, which fails
+closed.&quot;</em></p>
+<p><strong>The subtle part is the <code>enabled()</code> delegation</strong>, and the comment says why:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>rust</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-rust">/// Delegate, never inherit the `true` default. This wrapper is transparent:
+/// whether emits are observed is a property of the tracer underneath it.
+/// Returning `true` over a `NoopTracer` would reintroduce the overhead the gate
+/// exists to remove; returning `false` over a real tracer would suppress the
+/// emits whose absence the `EmitGuard` reports as a coverage breach.
+fn enabled(&amp;self) -&gt; bool { self.inner.enabled() }
+</code></pre>
+</div>
+<p><strong>A transparent wrapper that must not inherit a default, with both wrong answers
+named.</strong> This is the same class of care as batch 05&#39;s <code>CountingTracer</code>-adjacent
+reasoning and n8n&#39;s pinned constants.</p>
+<h3 id="3-4-limits-md-the-harness-documenting-what-it-does-not-catch">3.4 ★★ `LIMITS.md` — the harness documenting what it does not catch<a href="#batch-06/3-4-limits-md-the-harness-documenting-what-it-does-not-catch" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>This is the single most valuable document in the batch, and it is the reason to
+trust everything else. Its opening:</p>
+<blockquote>
+<p>The runtime conformance harness is <strong>not a proof.</strong> It says only this: <em>for the
+executions that actually ran with tracing on</em>, the relay&#39;s ingest/read decisions
+matched a trace the spec accepts. <strong>Coverage is exactly the set of code paths
+exercised — no more, no less.</strong> This file says what the gate <strong>doesn&#39;t</strong> catch,
+so reviewers and operators don&#39;t read more into a green run than is there.</p>
+</blockquote>
+<p>Then it enumerates seven blind spots, in each case naming the owner:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Blind spot</th>
+<th>Stated reason</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>DB-layer leaks the projection doesn&#39;t read</strong></td>
+<td>how the emitter computes <code>row_community</code> <em>&quot;is the design question for the held-back <code>req.rs</code> patch — the honest options are per-row channel→community lookup, or recording the resolved community uniformly (<strong>which makes the gate decorative for read confinement</strong>).&quot;</em></td>
+</tr>
+<tr>
+<td><strong>Cross-pod leaks</strong></td>
+<td><em>&quot;The harness traces one process … Cross-pod attacks are Sami&#39;s adversarial lane, not the conformance gate&#39;s.&quot;</em></td>
+</tr>
+<tr>
+<td><strong>Time-bounded properties</strong></td>
+<td><em>&quot;The spec is untimed; the gate is untimed.&quot;</em></td>
+</tr>
+<tr>
+<td><strong>Pubsub fan-out</strong></td>
+<td><em>&quot;Fan-out is <strong>not</strong> a spec action&quot;</em> — a leak <em>&quot;shows up in the receiver&#39;s ingest/read trace, not the publisher&#39;s.&quot;</em></td>
+</tr>
+<tr>
+<td><strong>Type-level fence violations</strong></td>
+<td><em>&quot;<code>CommunityId</code> having no <code>From&lt;Uuid&gt;</code> is enforced by the Rust compiler, not by this gate. If somebody adds <code>From&lt;Uuid&gt;</code> for <code>CommunityId</code>, the production fence is broken and <strong>this gate won&#39;t say so</strong>.&quot;</em></td>
+</tr>
+<tr>
+<td><strong>Spec bugs</strong></td>
+<td><em>&quot;The checker re-implements the spec; if the spec is wrong, both pass. Spec correctness is the proof obligation of <code>MultiTenantRelay.tla</code>, machine-checked by TLC.&quot;</em></td>
+</tr>
+<tr>
+<td><strong>Coverage can only fire on armed paths</strong></td>
+<td><em>&quot;If a new endpoint is added that bypasses <code>EmitGuard::arm</code>, the gate is blind.&quot;</em></td>
+</tr>
+</tbody></table></div>
+<p><strong>And the biggest admission is at the top: half the gate is not armed.</strong></p>
+<blockquote>
+<p>the read-seam half of the gate is <strong>not yet armed</strong> … The integration replay
+(live relay → <code>JsonlTracer</code> → <code>check_trace</code>) lands with the read-seam patch onto
+Max&#39;s <code>req.rs</code> work.</p>
+</blockquote>
+<p><code>TRACE_SCHEMA.md</code> corroborates it in the emitter table: <em>&quot;<code>handlers/req.rs</code> —
+<strong>held back</strong> — additive patch for integration onto Max&#39;s <code>req.rs</code> work.&quot;</em></p>
+<p><strong>Rule 1 and rule 6 together:</strong> the capability is <em>a write-path conformance gate
+with a designed read-path extension that has not landed.</em> A lesser document would
+have shipped the gate silently. buzz <strong>names the missing half, names the owner, and
+names the design question that must be answered before it lands.</strong> It even names
+the wrong answer (<em>&quot;which makes the gate decorative&quot;</em>).</p>
+<p><strong>The self-test discipline is equally careful.</strong> <code>LIMITS.md</code> states the CI
+contract as <strong>three surfaces totalling 16 tests</strong>, with the mutate-bite <em>proven</em> —
+<em>&quot;mutate-bite proven for the NI, <code>IllegalTransition</code>, and <code>CoverageBreach</code>
+gates&quot;</em> — and the checker&#39;s own test list (measured) includes
+<code>empty_trace_is_coverage_breach</code>, <code>cross_community_row_bites_non_interference</code>,
+<code>auth_allow_with_foreign_claim_bites_m2</code>,
+<code>state_after_changing_mid_request_is_state_mismatch</code>, and
+<code>required_critical_action_missing_bites_coverage_breach</code>. <strong>Every assertion that
+the gate <em>bites</em> has a test that makes it bite.</strong></p>
+<p>And the honest operational note: <em>&quot;<code>Tracer = NoopTracer</code> (the production default)
+makes every emit and guard arm a no-op call … The gate is <strong>observation only</strong> —
+it does not feed back into the decision. Turning it off only loses observability.&quot;</em>
+<strong>A safety mechanism that cannot change behaviour cannot break production</strong> — which
+is exactly why it is safe to ship on by default in CI and off by default in prod.</p>
+<hr>
+<h2 id="4-pz-the-audit-chain-and-a-hash-versioning-lesson">4. PZ — the audit chain, and a hash-versioning lesson<a href="#batch-06/4-pz-the-audit-chain-and-a-hash-versioning-lesson" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>crates/buzz-audit</code> is 1,276 lines. The chain model is stated in <code>entry.rs</code>:</p>
+<blockquote>
+<p>Rows are keyed <code>(community_id, seq)</code>: <code>seq</code> is monotonic <em>within one community</em>,
+and <code>prev_hash</code> chains to the previous entry <em>of the same community</em>. <strong>The chain
+is independent per tenant.</strong></p>
+</blockquote>
+<p>So there is <strong>no single global audit log</strong> — each community has its own chain, and
+<code>community_id</code> <strong>leads the hash preimage</strong> (<code>append_tlv(&amp;mut encoded, 1, entry.community_id.as_bytes())</code>). <code>hash.rs</code> has a test asserting exactly the
+property this buys: <code>community_id_is_part_of_identity</code> — <em>&quot;the same logical entry in
+two communities hashes differently, so a row can&#39;t be replayed across chains.&quot;</em></p>
+<h3 id="4-1-the-versioned-encoding-and-the-bug-v1-had">4.1 The versioned encoding, and the bug v1 had<a href="#batch-06/4-1-the-versioned-encoding-and-the-bug-v1-had" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>CURRENT_HASH_VERSION = 2</code>, and <strong>v1 is retained for historical rows</strong>. The comment
+on v1&#39;s function is a candid bug report:</p>
+<blockquote>
+<p><code>// Preserve historical digests. This encoding retains its original ambiguity;</code>
+<code>// only the version 2 writer prevents bytes from moving between fields.</code></p>
+</blockquote>
+<p>Two tests <strong>prove the ambiguity was real</strong>, by exhibiting two <em>different</em> entries
+that v1 hashed identically:</p>
+<ul>
+<li><code>object_id_and_detail_have_distinct_boundaries</code> — in v1, <code>object_id=&quot;record1&quot;</code> +
+<code>detail=23</code> and <code>object_id=&quot;record12&quot;</code> + <code>detail=3</code> <strong>both concatenate to
+<code>&quot;record123&quot;</code></strong>. <em>&quot;The old encoding concatenated both pairs as <code>&quot;record123&quot;</code>.&quot;</em></li>
+<li><code>actor_and_object_id_have_distinct_boundaries</code> — <em>&quot;Moving the old presence byte
+into the object ID preserved its hash.&quot;</em></li>
+</ul>
+<p>v2 fixes it with <strong>TLV</strong> (tag + big-endian u64 length + value) — <em>&quot;Version 2 uses
+one-byte tags and big-endian u64 byte lengths … absent optional fields are omitted,
+while present empty values retain their tag and zero length.&quot;</em> A third test,
+<code>omitted_fields_are_distinct_from_empty_values</code>, asserts the distinction v1 could
+not make.</p>
+<p><strong>Rule 10, the retirement rule, lands cleanly here</strong>: v1 is <strong>not deleted</strong> — it is
+<em>retained and labelled as ambiguous</em>, because the historical digests depend on it.
+<code>encoding_versions_have_stable_digests</code> pins <strong>both</strong> digests as hex constants and
+asserts an unknown version is a typed error
+(<code>Err(AuditError::UnsupportedHashVersion { version: 99 })</code>). <strong>Retrofitting a
+hash format without invalidating history is exactly the shape rule 10 asks for.</strong></p>
+<h3 id="4-2-the-timestamp-trap-found-and-closed-at-the-enforcement-point">4.2 The timestamp trap, found and closed at the enforcement point<a href="#batch-06/4-2-the-timestamp-trap-found-and-closed-at-the-enforcement-point" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>The best single piece of engineering in the crate is <code>to_storage_precision</code>, and its
+docblock names the failure precisely:</p>
+<blockquote>
+<p><code>audit_log.created_at</code> is <code>TIMESTAMPTZ</code>, which Postgres keeps at <strong>microsecond</strong>
+resolution. <code>compute_hash</code> covers <code>created_at.to_rfc3339()</code>, and <strong>that string&#39;s
+sub-second digit count follows the value</strong> (chrono emits 0, 3, 6 or 9 digits), so
+a timestamp carrying nanoseconds hashes to a digest that <strong>can never be recomputed
+from the stored row</strong> — the entry is written with one preimage and verified
+against another. <strong>Every <code>created_at</code> must therefore pass through here <em>before</em> it
+is hashed and stored, so the in-memory entry and the row are byte-identical.</strong></p>
+</blockquote>
+<p>The test <code>rfc3339_sub_second_width_follows_the_value</code> pins the <em>preimage</em>, not the
+digest, and says why: <em>&quot;...which is what made every entry fail <code>verify_chain</code> with
+<code>HashMismatch</code>.&quot;</em> And — the discriminating detail — the fix is applied <strong>inside
+<code>compute_hash</code> itself</strong> (<code>compute_hash_normalizes_sub_microsecond_timestamps</code>:
+<em>&quot;even handed an untruncated <code>created_at</code>, <code>compute_hash</code> digests the
+storage-precision value, so a write path that forgot to truncate cannot split the
+write/read preimage&quot;</em>). <strong>The normalization is at the enforcement point, not at the
+call site</strong>, so a future caller cannot forget it.</p>
+<p><code>canonical_json</code> is the second piece: sorted keys, deterministic output, and an
+explicit refusal to swallow errors — <em>&quot;a hash must never silently stand in an empty
+value for a real payload.&quot;</em> That is Review-Proven Rule 1 (from batch 05&#39;s
+<code>AGENTS.md</code>) applied inside a hash function: <strong>never collapse a failure into a
+plausible-looking success.</strong></p>
+<hr>
+<h2 id="5-pz-the-security-perimeter">5. PZ — the security perimeter<a href="#batch-06/5-pz-the-security-perimeter" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="5-1-the-egress-guard-13-boundaries-and-a-self-proving-inventory">5.1 ★ The egress guard — 13 boundaries and a self-proving inventory<a href="#batch-06/5-1-the-egress-guard-13-boundaries-and-a-self-proving-inventory" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>desktop/src-tauri/src/egress_guard.rs</code> is <strong>63 lines of implementation</strong> and
+protects a single rule: <strong>the local NIP-49 key backup (<code>ncryptsec1…</code>) must never be
+transmitted to a relay.</strong> Its docblock opens with a <strong>13-row table</strong>, each row
+naming a boundary and its file:</p>
+<blockquote>
+<p>| 1 | <code>submit_signed_event_at_with_keys</code> (funnel for <code>submit_event*</code>) | <code>relay/submit.rs</code> |
+| 2 | <code>sync_managed_agent_profile</code> | <code>relay.rs</code> |
+… | 13 | <code>fetch_feedback_attachment</code> (attachment URL, before signing) | <code>commands/admin/attachment.rs</code> |</p>
+</blockquote>
+<p>The guard itself is 12 lines: reject if the text contains <code>ncryptsec1</code> <strong>or its
+all-uppercase form</strong> <code>NCRYPTSEC1</code>. The uppercase handling is justified: <em>&quot;Bech32 also
+permits an ALL-UPPERCASE encoding of the same payload (BIP-173); an uppercased valid
+backup decodes identically … Mixed case is invalid bech32 and cannot decode — a
+substring matching either all-lower or all-upper prefix covers every decodable
+form.&quot;</em></p>
+<p><strong>Scope is stated with its own exception:</strong> *&quot;Scope: <code>ncryptsec1</code> only. The raw
+<code>nsec</code> intentionally transits the NIP-44-encrypted pairing session … guarding it
+here would break pairing. <strong>Raw-key DLP is separate policy work.</strong>&quot;* The guard&#39;s
+boundary is explicit, and the unguarded case is named as owned elsewhere.</p>
+<p><strong>The reason this is a top-tier finding is the test file — 510 lines, and it is not
+a unit test suite.</strong> It has three layers:</p>
+<ol>
+<li><p><strong>Unit behaviour</strong> (5 tests) — including <code>passes_clean_payloads_including_raw_nsec</code>,
+which asserts the raw <code>nsec</code> is <strong>not</strong> blocked (so the scope is pinned in both
+directions), and <code>byte_variant_matches_text_variant</code>, which passes invalid UTF-8
+<em>around</em> an intact <code>ncryptsec</code> and asserts the guard still trips.</p>
+</li>
+<li><p><strong>Runtime injection per boundary</strong> — each test <em>&quot;drives the real production
+function with an ncryptsec-bearing payload and asserts the guard aborts the
+operation <strong>before any network I/O</strong> (no listener exists at the target address; a
+distinctive guard error — not a connection error — proves the abort happened
+first).&quot;</em> They point at <code>http://127.0.0.1:9</code> (<em>&quot;discard port — must never be
+reached&quot;</em>). <strong>The seam is the production function, not a helper</strong> — batch 05&#39;s
+Review-Proven Rule 3, made executable.</p>
+</li>
+<li><p><strong>★★ The structural tripwire</strong> — <code>EVENTS_INVENTORY</code>, a table of
+<code>(file suffix, expected non-comment /events occurrences, expected guard-call sites)</code> scanned over all of <code>src-tauri/src</code>, with the design stated:</p>
+<blockquote>
+<p>Every entry pairs the URL-construction count with the guard-call count for that
+file, so <strong>BOTH</strong> of these fail the scan (not just a brand-new file):</p>
+<ul>
+<li>adding an unguarded ninth <code>/events</code> site inside an already-listed file, and</li>
+<li>removing/refactoring away a guard call while its egress site remains.</li>
+</ul>
+</blockquote>
+<p><strong>And the tripwire proves itself with three mutation-style tests:</strong>
+<code>inventory_scan_catches_new_site_in_allowlisted_file</code>,
+<code>inventory_scan_catches_removed_guard_call</code>, and
+<code>inventory_scan_catches_new_unlisted_file</code>. The first <em>injects</em> a new
+<code>/events</code> site into <code>relay.rs</code> in memory and asserts the scan catches it.</p>
+<p>The needles are <strong>assembled at runtime</strong> — <code>fn events_needle() -&gt; String { [&quot;/ev&quot;, &quot;ents&quot;].concat() }</code> — with the reason: <em>&quot;so this scan file itself
+contains no contiguous match and needs no self-referential inventory row.&quot;</em>
+<strong>The scanner cannot match itself</strong>, which is the bug every hand-rolled scanner
+has.</p>
+<p>And a second allowlist test, <code>ncryptsec_handling_is_confined_to_allowlisted_files</code>,
+asserts that <code>ncryptsec</code> / <code>EncryptedSecretKey</code> / <code>nip49</code> appear <strong>only</strong> in 20
+named files. A new file touching NIP-49 material fails the build.</p>
+</li>
+</ol>
+<p><strong>Rule 6 — the capability is four things at once:</strong> a fail-closed runtime check, a
+complete inventory of the boundaries it covers, a source scan that fails when a new
+boundary appears unguarded, and a <strong>mutation test proving the source scan fires.</strong>
+That last one is what separates a guard from a gesture — the same discipline as
+<code>LIMITS.md</code>&#39;s <em>&quot;mutate-bite proven&quot;</em>.</p>
+<h3 id="5-2-the-auth-crate-replay-rate-limits-and-the-drafts">5.2 The auth crate: replay, rate limits, and the drafts<a href="#batch-06/5-2-the-auth-crate-replay-rate-limits-and-the-drafts" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>Measured: <code>buzz-auth</code> is <strong>23 files / 12,908 lines</strong>, covering NIP-42, NIP-98,
+<strong>NIP-fi</strong> (a 15-file identity-federation subsystem with its own JWKS, verifier, and
+startup modules), replay protection, and rate limiting. Three items matter here:</p>
+<ul>
+<li><strong>NIP-98 replay protection</strong> (<code>nip98_replay.rs</code>, 249 lines) states the shape and
+the arithmetic: <em>&quot;shared state (Redis), atomic set-if-absent, TTL ≥ 120s&quot;</em>, keyed
+community-scoped, because <em>&quot;with multiple relay pods … an in-process cache (moka,
+DashMap) does not carry the freshness proof across pods, so replay protection is a
+§5 hard gate.&quot;</em> The <strong>order</strong> is specified and justified: <em>&quot;Verify first, then
+mark. Burning a seen-set slot on a forgery would let an attacker who knows a
+future event id of a victim DoS the legitimate event.&quot;</em> And the TTL derives from
+the clock-skew tolerance: <em>&quot;±60s, so the window over which a duplicate event id is
+even plausible is 2×60 = 120s.&quot;</em> <strong>A number derived from another number, with the
+derivation shown</strong> — that is the batch-04 discipline again.</li>
+<li><strong>Rate limiting</strong> states its own algorithmic limitation <strong>in the module doc, with
+a warning glyph</strong>: <em>&quot;⚠️ Fixed windows allow up to <strong>2× burst at boundaries</strong>.
+Upgrade to sliding window or token bucket for strict limiting.&quot;</em> A known weakness,
+documented at the top of the file that has it.</li>
+<li><strong><code>nip_fi/deny_map.rs</code> and <code>denial.rs</code></strong> exist as separate modules, which suggests
+a deny-by-default posture, but <strong>I did not read them in this batch</strong> — recorded as
+unread, not as claimed (rule 1).</li>
+</ul>
+<h3 id="5-3-what-the-perimeter-does-not-have">5.3 What the perimeter does *not* have<a href="#batch-06/5-3-what-the-perimeter-does-not-have" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>Stated plainly, because a security section without negatives is marketing:</p>
+<ul>
+<li><strong>No Postgres RLS</strong> (measured: zero <code>CREATE POLICY</code> in 62 migrations). Tenancy is
+application + lint enforced (§1.4).</li>
+<li><strong>The egress guard covers <code>ncryptsec</code> only</strong>, by design; raw-key DLP is <em>&quot;separate
+policy work&quot;</em> per its own docblock.</li>
+<li><strong>Cross-pod leaks are explicitly out of the conformance gate&#39;s scope</strong> (§3.4).</li>
+<li><strong>The read-seam half of the conformance gate is not armed</strong> (§3.4).</li>
+</ul>
+<hr>
+<h2 id="6-pz-the-retirement-surface-and-the-rename-hazard">6. PZ — the retirement surface and the rename hazard<a href="#batch-06/6-pz-the-retirement-surface-and-the-rename-hazard" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="6-1-the-rename-documented-as-prs">6.1 ★ The rename, documented as PRs<a href="#batch-06/6-1-the-rename-documented-as-prs" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>Batch 00 recorded the hazard: <strong>the product renames itself in-tree — buzz · sprout ·
+sprig.</strong> The CHANGELOG (2,567 lines, 103 version headings) shows it was a <strong>real
+retirement, executed over many PRs.</strong> Measured entries, in CHANGELOG order:</p>
+<ul>
+<li><code>refactor: rename sprout backend to buzz (#958)</code></li>
+<li><code>fix(release): update repository name check from block/sprout to block/buzz (#1012)</code></li>
+<li><code>fix(cli): publish ephemeral events over WebSocket via sprout-ws-client (#876)</code></li>
+<li><code>feat(sprout-dev-mcp): add read_file tool … (#928)</code></li>
+<li><code>docs: fix stale sprout repo references in RELEASING.md (#1043)</code></li>
+<li><code>docs: update sprout repository references and document buzz mem (#1333)</code></li>
+<li><code>sprout-agent: make Databricks defaults env-only (#868)</code></li>
+</ul>
+<p><strong>The residue that never got renamed</strong> (measured, still present in v0.5.28):</p>
+<ul>
+<li><code>Cargo.toml</code> <code>[workspace.package]</code> — <strong><code>repository = &quot;https://github.com/block/sprout&quot;</code></strong>.
+The <em>product</em> is buzz; the <em>workspace metadata</em> still points at the sprout URL.
+Confirmed as a live inconsistency, not a historical artefact.</li>
+<li><code>AGENTS.md</code> — <strong><code>squareup/sprout-oss</code></strong> and <strong><code>squareup/sprout-backend-blox</code></strong>
+appear in the repo-topology table and its ASCII diagram, with the pipeline
+<code>buzz → sprout-oss (relay Docker image → ECR)</code>.</li>
+<li><strong><code>crates/sprig/</code></strong> — a real, listed workspace member.</li>
+<li><code>scripts/build-sprig.sh</code>, <code>scripts/sprig-entrypoint.sh</code>.</li>
+</ul>
+<p><strong>Rule 10 verdict:</strong> three names, one product, and the rename is <strong>documented in the
+CHANGELOG as a sequence of scoped PRs rather than as a single sweep</strong> — which is the
+<em>right</em> way to do it (small, reviewable, each step shippable) and is also <em>why a
+residue survives</em>. <code>sprout</code> in the workspace metadata and <code>sprig</code> as a crate name
+are the two that will mislead a future reader. <strong>Names are an unusually active
+retirement surface here</strong>, and the CHANGELOG is the audit trail.</p>
+<h3 id="6-2-sprig-a-busybox-style-argv-0-multiplexer">6.2 `sprig` — a busybox-style argv[0] multiplexer<a href="#batch-06/6-2-sprig-a-busybox-style-argv-0-multiplexer" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>This is a small, genuinely interesting discovery. <code>crates/sprig/src/main.rs</code>
+dispatches on <strong>the basename of <code>argv[0]</code></strong>:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>rust</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-rust">let cmd = Path::new(&amp;argv0).file_name()...to_ascii_lowercase();
+match cmd.as_str() {
+    &quot;buzz-acp&quot; | &quot;git-credential-nostr&quot; | &quot;git-sign-nostr&quot; =&gt; buzz_acp::run(),
+    &quot;buzz-agent&quot; =&gt; buzz_agent::run(),
+    &quot;sprig&quot; =&gt; match args.nth(1) {
+        Some(&quot;-V&quot;) | Some(&quot;--version&quot;) =&gt; println!(&quot;sprig {}&quot;, CARGO_PKG_VERSION),
+        Some(&quot;-h&quot;) | Some(&quot;--help&quot;) | None =&gt; { print_usage();
+            Err(&quot;error: invoke Sprig via a personality symlink&quot;.into()) }
+        ...
+</code></pre>
+</div>
+<p><strong>One binary, several personalities installed as symlinks</strong> — the busybox pattern.
+The error message names the mechanism directly: <em>&quot;invoke Sprig via a personality
+symlink.&quot;</em> Measured consumers: <code>scripts/build-sprig.sh</code>, <code>scripts/sprig-entrypoint.sh</code>,
+and the k8s backend crate&#39;s image/config modules.</p>
+<p><strong>Why it belongs in PZ:</strong> it is a <em>packaging</em> decision that changes how the
+deployment model works (one container image, many command names) and that depends
+on <code>argv[0]</code> surviving the container entrypoint. It is the kind of thing the pole
+frame has no slot for, and it is exactly the kind of thing that silently breaks when
+a process manager invokes a binary by absolute path.</p>
+<h3 id="6-3-the-deployment-surface">6.3 The deployment surface<a href="#batch-06/6-3-the-deployment-surface" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>Measured: <code>buzz-backend-kubernetes</code> is <strong>6,429 lines</strong> across a clean module split —
+<code>cluster.rs</code>, <code>config.rs</code>, <code>image.rs</code>, <code>intent.rs</code>, <code>observe.rs</code>, <code>pod.rs</code>,
+<code>reconcile.rs</code>, <code>wire.rs</code> — plus <code>tests/wire_fixtures.rs</code>. The presence of <strong>both</strong>
+<code>intent.rs</code> and <code>observe.rs</code> and a <code>reconcile.rs</code> says the shape is <strong>declarative
+reconciliation</strong> (desired state → observed state → reconcile) rather than imperative
+orchestration, and <code>wire_fixtures.rs</code> pins the HTTP wire format to fixtures.</p>
+<p><code>desktop/src-tauri/src/commands/canvas.rs</code> (batch 05) <em>&quot;needs relay-side
+linearization (phase 2)&quot;</em> and <code>nip98_replay.rs</code>&#39;s multi-pod requirement (§5.2) are
+the two places where the <strong>multi-pod</strong> deployment model changes a correctness
+argument. Both are named in-tree. <strong>Recorded but not pursued in this batch</strong> — the
+deployment story is a batch of its own and the pole frame does not ask for it.</p>
+<hr>
+<h2 id="7-findings-f6-n">7. Findings (F6-n)<a href="#batch-06/7-findings-f6-n" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>F6-1.</strong> <strong><code>CommunityId</code> is an opaque newtype with no <code>Default</code>, no <code>Deserialize</code>,
+and no <code>From&lt;Uuid&gt;</code></strong> — the provenance invariant made type-visible, and <code>NewAuditEntry</code>
+is deliberately non-deserializable so <em>&quot;there is no path by which a client-supplied
+blob becomes a <code>CommunityId</code>.&quot;</em></p>
+<p><strong>F6-2.</strong> ★ <strong>The fence documents its own limit.</strong> <em>&quot;This is a <strong>lint-and-review
+fence, not a compiler fence</strong> … the type only removes the <em>accidental</em> path … We say
+this plainly rather than overclaim a guarantee the <code>pub</code> API doesn&#39;t give.&quot;</em> Three
+mechanisms, three scopes, stated in the same file.</p>
+<p><strong>F6-3.</strong> <strong>Host normalization is one shared function</strong> with a stated consequence
+(<em>&quot;they can never split into distinct tenants&quot;</em>), plus <code>validate_community_host</code> and
+<code>relay_url_authority</code> closing the input and URL sides — the latter keeping the port
+and IPv6 brackets <em>&quot;both of which a naive <code>host_str()</code> drops.&quot;</em></p>
+<p><strong>F6-4.</strong> ★★ <strong>The migration lint is the load-bearing tenancy enforcement</strong>: every
+scoped table must have <code>NOT NULL community_id</code>, and every scoped PK/UNIQUE/FK must
+<strong>lead with <code>community_id</code></strong>. The escape hatch is a table of exemptions <strong>with a
+<code>reason</code> column</strong>. Measured over all <strong>62 migrations</strong>.</p>
+<p><strong>F6-5.</strong> <strong>There is no Postgres RLS</strong> (zero <code>CREATE POLICY</code> in 62 migrations) —
+tenancy is application + lint enforced. The TLA+ model nonetheless covers <strong>both</strong>
+the RLS-shaped and the application-predicate defence (mutation M4 vs M1).</p>
+<p><strong>F6-6.</strong> ★ <strong><code>MultiTenantRelay.tla</code> — 1,142 lines, 12 safety invariants, 13 named
+mutations, 6 &quot;Confirmed red&quot; with trace lengths.</strong> The obligation is
+<strong>non-interference via a label/taint invariant</strong>, not row-scoping. It states a
+<strong>C1 carve-out</strong> for timing channels, and its M8 note distinguishes <strong>trace length</strong>
+from TLC&#39;s <em>&quot;run-dependent &#39;depth of complete graph search&#39;&quot;</em> line — evidence it was
+actually run.</p>
+<p><strong>F6-7.</strong> ★★ <strong>The TLA+ model guards against its own vacuity</strong> with four
+deliberately-false <code>Probe_*_Unreachable</code> invariants: <em>&quot;If it stays green, the
+corresponding action is unreachable and the safety proof is vacuous there.&quot;</em>
+<strong>Instrumenting proof coverage is the best idea in the batch.</strong></p>
+<p><strong>F6-8.</strong> <strong><code>MultiTenantAuth.spthy</code> — 748 lines, 8 security lemmas + 13 anti-vacuity
+lemmas</strong>, and it <strong>drafts honestly</strong>: <em>&quot;these lemmas are the intended shape, not the
+final public statement.&quot;</em> Its strongest lemma is
+<strong><code>leaked_token_blast_radius_contained</code></strong> — confinement <em>held under adversary key
+compromise</em>. Mutation switches (<code>MUTATION_Use_Token_Ignore_Host</code>) ship <strong>in the
+model</strong>, and the S1-host lemmas close <em>&quot;the confused-deputy fence&quot;</em> the current
+<code>h</code>-tag-only resolution leaves open.</p>
+<p><strong>F6-9.</strong> ★★ <strong>The runtime conformance gate is independent of the code it checks</strong> —
+<em>&quot;it does not call any production reducer&quot;</em> — and its north star reframes the
+question: <em>&quot;Don&#39;t ask &#39;did the model pass&#39;. Ask &#39;did the running code emit a trace
+the model accepts&#39;.&quot;</em></p>
+<p><strong>F6-10.</strong> <strong>Three projection rules make the violation survive projection</strong>:
+<code>claimed_community</code> recorded separately from <code>resolved_community</code>;
+<code>row_communities</code> a <strong><code>Vec</code> not a <code>Set</code></strong> and unfiltered (<em>&quot;a <code>Set</code> would dedupe the
+leak; filtering would delete the evidence&quot;</em>); and <code>SanitizedReason</code> a <strong>closed
+alphabet</strong> (<em>&quot;a fourth variant is a CI failure, not a silent bucket&quot;</em>).</p>
+<p><strong>F6-11.</strong> <strong><code>EmitGuard</code> turns a silent omission into a <code>CoverageBreach</code></strong> via a
+<code>Drop</code> guard, and its <code>enabled()</code> delegating comment names <strong>both</strong> wrong answers
+(<em>&quot;returning <code>true</code> over a <code>NoopTracer</code> would reintroduce the overhead … returning
+<code>false</code> over a real tracer would suppress the emits whose absence the guard
+reports&quot;</em>).</p>
+<p><strong>F6-12.</strong> ★★★ <strong><code>LIMITS.md</code> documents seven blind spots, each with an owner, and
+declares that the read-seam half of the gate is &quot;not yet armed.&quot;</strong> It names the
+design question (<em>&quot;per-row channel→community lookup, or recording the resolved
+community uniformly — <strong>which makes the gate decorative for read confinement</strong>&quot;</em>)
+and the owner (<em>&quot;Eva&#39;s review call&quot;</em>). <strong>A gate that ships its own limits is a gate
+you can trust.</strong></p>
+<p><strong>F6-13.</strong> <strong>The gate is observation-only and cannot change behaviour</strong> (<em>&quot;it does
+not feed back into the decision … turning it off only loses observability&quot;</em>) — which
+is <em>why</em> it is safe to arm in CI and leave <code>NoopTracer</code> in production.</p>
+<p><strong>F6-14.</strong> <strong>The audit chain is per-community</strong>, keyed <code>(community_id, seq)</code>, and
+<code>community_id</code> leads the hash preimage with a test asserting the same entry in two
+communities hashes differently (<em>&quot;a row can&#39;t be replayed across chains&quot;</em>).
+<strong>Rule 10 is honoured exactly</strong>: v1 is <strong>retained, not deleted</strong>, labelled <em>&quot;this
+encoding retains its original ambiguity&quot;</em>, with <strong>both</strong> digests pinned as hex
+constants and an unknown version a typed error.</p>
+<p><strong>F6-15.</strong> ★ <strong>Two tests prove the v1 encoding was genuinely ambiguous</strong>:
+<code>object_id=&quot;record1&quot;</code>+<code>detail=23</code> and <code>object_id=&quot;record12&quot;</code>+<code>detail=3</code> both
+concatenated to <code>&quot;record123&quot;</code>. v2 fixes it with TLV (tag + big-endian u64 length).</p>
+<p><strong>F6-16.</strong> ★ <strong>The RFC-3339 sub-second-width trap was found and closed at the
+enforcement point.</strong> chrono emits 0/3/6/9 fractional digits <em>depending on the value</em>,
+so a nanosecond timestamp and its microsecond truncation are different strings —
+<em>&quot;which is what made every entry fail <code>verify_chain</code> with <code>HashMismatch</code>.&quot;</em> The fix
+lives <strong>inside <code>compute_hash</code></strong>, not at the call site. <code>canonical_json</code> refuses to
+substitute a placeholder: <em>&quot;a hash must never silently stand in an empty value for a
+real payload.&quot;</em></p>
+<p><strong>F6-17.</strong> ★★ <strong>The egress guard covers 13 named boundaries with a source-scanning
+inventory</strong> that pins <strong>both</strong> the <code>/events</code>-site count <strong>and</strong> the guard-call count
+per file, so it catches a <strong>new site in a listed file</strong> <em>and</em> <strong>a removed guard
+call</strong> — and it <strong>proves itself</strong> with three mutation-style tests. Its needles are
+assembled at runtime so <em>&quot;this scan file itself contains no contiguous match.&quot;</em></p>
+<p><strong>F6-18.</strong> <strong>The egress guard&#39;s scope is stated with its exception</strong> (<em>&quot;raw <code>nsec</code>
+intentionally transits the NIP-44-encrypted pairing session … Raw-key DLP is
+separate policy work&quot;</em>) and pinned in both directions by a test asserting the raw
+<code>nsec</code> is <strong>not</strong> blocked.</p>
+<p><strong>F6-19.</strong> <strong>Every boundary injection test drives the real production function</strong>
+against a discard port (<em>&quot;must never be reached&quot;</em>) and argues the abort happened
+first because the error is the guard&#39;s, not a connection error. <strong>Review-Proven Rule
+3 (bind the production seam, be falsifiable) made executable.</strong></p>
+<p><strong>F6-20.</strong> <strong>NIP-98 replay protection is a cross-pod hard gate</strong> with the derivation
+shown: TTL ≥ <strong>120 s</strong> because the clock-skew tolerance is <strong>±60 s</strong>, and the order
+is <em>&quot;verify first, then mark&quot;</em> so a forgery cannot burn a seen-set slot and DoS the
+legitimate event.</p>
+<p><strong>F6-21.</strong> <strong>Rate limiting states its own weakness in its module doc, with a
+warning glyph</strong>: fixed windows allow up to <strong>2× burst at boundaries</strong>.</p>
+<p><strong>F6-22.</strong> ★ <strong>The rename is a documented retirement</strong> — <code>sprout → buzz</code> executed as
+scoped PRs (#958, #1012, #1043, #1333), with <strong>residue that never got renamed</strong>:
+<code>Cargo.toml</code>&#39;s <code>repository = &quot;…/block/sprout&quot;</code>, <code>squareup/sprout-oss</code> in <code>AGENTS.md</code>,
+and <strong><code>crates/sprig/</code></strong>. Three names, one product.</p>
+<p><strong>F6-23.</strong> <strong><code>sprig</code> is a busybox-style <code>argv[0]</code> multiplexer</strong> — one binary,
+several personalities installed as symlinks, dispatching on the basename of
+<code>argv[0]</code>, with the mechanism named in its own error message (<em>&quot;invoke Sprig via a
+personality symlink&quot;</em>).</p>
+<p><strong>F6-24.</strong> <strong>Four formal models (~122 KB) ship in a product repo</strong> —
+<code>MultiTenantRelay.tla</code> (61,202 B), <code>MultiTenantAuth.spthy</code> (31,956 B),
+<code>GitOnObjectStore.tla</code> (13,872 B), <code>NIP-AB.spthy</code> (15,147 B) — <strong>with their TLC
+runner configs including concrete <code>CONSTANTS</code>.</strong> Unique in this study.</p>
+<p><strong>F6-25.</strong> <strong>The k8s backend is 6,429 lines as declarative reconciliation</strong>
+(<code>intent.rs</code> + <code>observe.rs</code> + <code>reconcile.rs</code>) with wire fixtures pinned to a test
+file.</p>
+<p><strong>F6-26.</strong> ★★ <strong>The prose contract <code>docs/multi-tenant-relay.md</code> (1,110 lines,
+<code>draft</code>) is the batch&#39;s highest-value artefact, and it is built to be <em>falsifiable
+about itself</em>.</strong> It states, in one document, a <strong>Scope and Non-Goals</strong> section naming
+<strong>five</strong> properties it does <em>not</em> prove; a <strong>typed observational interface</strong> plus
+<strong>label-propagation rules</strong>; <strong>ten axioms</strong> (A-RLS-1..5 · P-APPEND · P-SIG ·
+P-RESOLVE · P-RESOLVE-HOST · A_HASH · P3) each <em>admitted per deployment</em> by a named
+<strong><code>§Conformance</code> gate that rejects the deployment if it fails</strong>; <strong>Safety Theorems</strong>
+mechanized in TLA+ and Tamarin; <strong>Prior Art</strong> (Goguen &amp; Meseguer 1982 for
+non-interference; Sabelfeld &amp; Myers for label-flow; Jacqueline/LWeb as the closest
+mechanized analogs; the confused-deputy framing for resolution-as-capability); and an
+<strong>Implementation Correspondence</strong> section that maps each obligation to a code seam
+<em>and names the ones that would fail silently if broken</em> (<em>&quot;invisible to both the
+labeling invariant and the Tamarin lemmas (the proofs would silently weaken, not
+fail), so it is enforced by a migration lint&quot;</em>). Its governing sentence is the
+workshop&#39;s own standard: <em>&quot;&#39;Provably isolated&#39; without naming the trust boundary does
+not survive scrutiny.&quot;</em> See §2.3.</p>
+<p><strong>F6-27.</strong> <strong>NIP-98 replay protection is a pluggable trait with a <em>shared,
+cross-pod, community-scoped</em> Redis implementation — and the cross-pod case is tested
+by name.</strong> <code>Nip98ReplayGuard</code> (<code>buzz-auth/src/nip98_replay.rs</code>) carries
+<code>DEFAULT_REPLAY_TTL_SECS = 120</code> as the <em>floor</em> and a <code>MAX_REPLAY_TTL_SECS</code> ceiling,
+with <strong>compile-time assertions</strong> (<code>assert!(DEFAULT_REPLAY_TTL_SECS &gt;= 120)</code>)
+preventing the doc&#39;s arithmetic from drifting from the constant. The shipped
+implementation, <code>buzz_pubsub::RedisNip98ReplayGuard</code>, is a literal
+<strong><code>SET key 1 NX EX &lt;ttl&gt;</code></strong> over a <strong>community-scoped</strong> key, with the ttl <em>clamped</em>
+into <code>[floor, ceiling]</code>. The guard error path <strong>fails closed</strong>. And the HA scenario
+the prose contract worries about is mechanized as a test —
+<code>nip98_replay_guard_rejects_cross_pod_replay_on_bridge_path</code> builds two guards over
+one pool, has pod A claim an event id, and asserts pod B is rejected <strong>within</strong> a
+community while a <strong>different</strong> community is admitted. <strong>The code is stricter than
+the prose spec claims (§D6-1).</strong></p>
+<hr>
+<h2 id="8-divergences-d6-n-where-a-doc-and-the-code-disagree">8. Divergences (D6-n) — where a doc and the code disagree <span class="seal-badge" style="background:#fef2f2; color:#dc2626; border-color:#fca5a5; font-size: 0.65em; vertical-align: middle;">⚠️ FINDING NOTE</span><a href="#batch-06/8-divergences-d6-n-where-a-doc-and-the-code-disagree" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>D6-1. <code>docs/multi-tenant-relay.md</code> says its own P3 obligation is not carried in
+the shipped HA deployment and tells the operator to add a shared seen-set — but the
+code has since closed exactly that gap, and the shipped chart now requires the store
+it says is missing.</strong> This is the sharpest divergence in the batch, and it runs in
+the <strong>unusual direction</strong>: the <em>spec is behind the code</em>, not ahead of it.</p>
+<p>The prose contract&#39;s §Conformance states that the seen-set is
+<em>&quot;<code>Arc&lt;AppState&gt;</code>-scoped, not cross-pod&quot;</em>, that <em>&quot;the shipped HA examples
+(<code>replicaCount: 3</code>) are <strong>P3-non-conforming as shipped</strong> unless the operator adds&quot;</em>
+either a header-stable sticky-routing annotation or *&quot;(b) a shared seen-set backed
+by a store with atomic insert-if-absent and TTL ≥ 120 s (e.g. Redis …). <strong>This is
+the recommended path.</strong>&quot;* §Implementation Correspondence repeats it: <em>&quot;today&#39;s
+in-process moka cache carries P3 for the chart default (<code>replicaCount: 1</code>) … but the
+shipped HA examples … do <strong>not</strong> carry P3 as shipped.&quot;</em></p>
+<p><strong>The code no longer matches either sentence.</strong> Measured:</p>
+<ul>
+<li>The seen-set is <strong>no longer in-process.</strong> There is a <code>Nip98ReplayGuard</code> trait in
+<code>crates/buzz-auth/src/nip98_replay.rs</code> (with <code>DEFAULT_REPLAY_TTL_SECS = 120</code> and a
+<code>MAX_REPLAY_TTL_SECS</code> ceiling) and a <strong>Redis implementation</strong>,
+<code>buzz_pubsub::RedisNip98ReplayGuard</code> (<code>crates/buzz-pubsub/src/nip98_replay.rs</code>),
+whose docblock names the seam: <em>&quot;The correctness boundary is the shared,
+community-scoped Redis seen-set on <code>AppState</code>, not process-local memory.&quot;</em> The
+mechanism is a literal <strong><code>SET key 1 NX EX &lt;ttl&gt;</code></strong> — atomic set-if-absent — with
+the ttl <strong>clamped</strong> to <code>[DEFAULT_REPLAY_TTL_SECS, MAX_REPLAY_TTL_SECS]</code> so <em>&quot;a
+buggy caller cannot send a Redis-incompatible <code>EX</code> arg or pin a slot for
+implausibly long.&quot;</em> The exactly-recommended path (b) is the shipped one.</li>
+<li>The floor is a <strong>compile-time invariant, not a comment</strong>:
+<code>assert!(DEFAULT_REPLAY_TTL_SECS &gt;= 120);</code> and
+<code>assert!(DEFAULT_REPLAY_TTL_SECS &lt; MAX_REPLAY_TTL_SECS);</code> live in the trait&#39;s own
+test block, so the doc&#39;s <em>&quot;TTL ≥ 120 s&quot;</em> prose cannot drift from the constant
+silently.</li>
+<li>The cross-pod case is <strong>tested by name</strong>:
+<code>nip98_replay_guard_rejects_cross_pod_replay_on_bridge_path</code> builds two guards
+over one pool, lets pod A claim an event id, and asserts pod B on the <strong>same</strong>
+community is rejected while a <strong>different</strong> community is admitted. That is the
+doc&#39;s own HA scenario, mechanized.</li>
+<li>Failure is <strong>fail-closed at the guard boundary</strong>: the guard error path <em>&quot;rejects
+the request fail-closed&quot;</em> (<code>bridge.rs</code>, <code>check_nip98_replay_with_guard</code>), matching
+the doc&#39;s <em>&quot;A failing test or an unmet gate rejects the deployment.&quot;</em></li>
+</ul>
+<p>And the deployment side agrees with the <em>code</em>, not with the spec: the chart README
+says <strong>&quot;<code>replicaCount &gt; 1</code> hard-requires Redis&quot;</strong> and <strong>&quot;The chart template-fails if
+the Redis invariant is broken at <code>replicaCount &gt; 1</code>. No silent degradation&quot;</strong> — and
+the chart&#39;s own test suite proves it, asserting <code>failedTemplate</code> with the message
+<strong><code>&quot;minimum replica count 3 requires Redis&quot;</code></strong> (<code>tests/validation_test.yaml</code>). The
+chart&#39;s stated reason for that requirement is <code>buzz-pubsub</code> fan-out, not the replay
+guard directly; but the store it <em>forces</em> on every HA release is the same shared
+store the replay guard reads, so the operator on the recommended path is not &quot;adding&quot;
+a shared seen-set — the topologies the chart will render already have one. On the
+path the spec called non-conforming, that is no longer a silent gap.</p>
+<p><strong>Why it matters.</strong> A reader who trusts the prose contract walks away believing
+buzz&#39;s HA ships non-conforming and needs an operator fix; the code and the chart
+claim the opposite. This is the <strong>second-order version of the batch-00 rename
+hazard</strong>: not a name left behind, but a <em>safety status</em> left behind. It is benign in
+the safe direction (the code is stricter than the doc claims), which is why it is a
+divergence to <em>record</em> rather than a hazard to <em>fix</em> — but it is exactly the class of
+error rule 1 exists to catch, and the prose spec is the <strong>most likely place in the
+whole repo for a false negative to hide</strong>, because it is long, confident, and cites
+line numbers that no longer resolve (<code>state.nip98_seen</code>, <code>state.rs:249</code>/<code>:407</code> and
+<code>bridge.rs:76-94</code> are all stale; <code>check_nip98_replay</code> is now <code>bridge.rs:276</code>).</p>
+<p><strong>D6-2. The conformance harness&#39;s own schema doc describes emit sites in
+<code>handlers/req.rs</code> as <em>&quot;held back&quot;</em> while <code>LIMITS.md</code> states the read-seam half is
+<em>&quot;not yet armed.&quot;</em> The two docs agree</strong> — I record this as a <strong>non-divergence
+deliberately</strong>, because it is the rare case in this study where two documents describe
+the same incomplete feature <em>identically and honestly</em>. Worth one line so the batch-07
+synthesis does not mistake a consistent admission for a contradiction.</p>
+<p><strong>D6-3. <code>AGENTS.md</code>&#39;s repo-topology table still describes the pipeline as
+<code>buzz → sprout-oss</code>, and <code>Cargo.toml</code> still names the <code>sprout</code> repository URL,</strong>
+while the product, the crate names, the CHANGELOG, and the release tooling all say
+buzz. The rename is complete in code and <strong>incomplete in metadata.</strong> This is the
+rename hazard from batch 00, confirmed as a live inconsistency rather than a
+historical note.</p>
+<p><strong>D6-4. The TLA+ model&#39;s grounding comments describe <code>crates/buzz-db/src/event.rs</code>
+as having <em>&quot;no <code>community_id</code>&quot;</em> and <code>get_accessible_channel_ids</code> as <em>&quot;currently
+unions all open channels in the DB.&quot;</em></strong> Both are described as <strong>today&#39;s code</strong> and
+both are cited as the <strong>motivation for a mutation</strong> (I1). The model is written
+<strong>against a known-current weakness</strong>, which means its unmutated pass is a statement
+about the <em>intended</em> post-fix behaviour, not necessarily about the shipped code.
+buzz says so (<em>&quot;that unscoped variant is the explicit I1 mutation&quot;</em>), and it is the
+single most important caveat for anyone reading the <code>.tla</code> file as a claim about
+<code>main</code>. <strong>Not a doc error — a doc-to-intended-state mapping</strong> — but recorded because
+a reader who skips the header would over-read the file.</p>
+<hr>
+<h2 id="9-pole-verdict">9. Pole verdict<a href="#batch-06/9-pole-verdict" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>PZ — the out-of-pole surface.</strong> buzz&#39;s PZ content is <strong>the strongest of any
+platform in this study</strong>, and it is not an accident of one module: it is a
+<strong>consistent practice</strong> of treating safety claims as artefacts that must survive
+attempted falsification.</p>
+<p>Four mechanisms demonstrate it, and they are the same idea at four layers:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Mechanism</th>
+<th>How it proves itself</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Type</strong></td>
+<td><code>CommunityId</code> newtype, no <code>Deserialize</code>/<code>From&lt;Uuid&gt;</code></td>
+<td>documents that it is a <strong>lint</strong> fence, not a compiler fence (F6-2)</td>
+</tr>
+<tr>
+<td><strong>Schema</strong></td>
+<td>migration lint: <code>NOT NULL community_id</code>, community-led keys</td>
+<td>runs over <strong>all 62 migrations</strong>; negative fixture included (F6-4)</td>
+</tr>
+<tr>
+<td><strong>Model</strong></td>
+<td><code>.tla</code> 12 invariants + 13 mutations + 4 <strong>false</strong> probes</td>
+<td><strong>6 mutations &quot;Confirmed red&quot;</strong> with trace lengths; probes catch a <strong>vacuous</strong> proof (F6-6, F6-7)</td>
+</tr>
+<tr>
+<td><strong>Runtime</strong></td>
+<td>16-test conformance gate with <code>EmitGuard</code></td>
+<td><strong>mutation-bite proven</strong>; <code>LIMITS.md</code> names <strong>7 blind spots</strong> and the <strong>unarmed half</strong> (F6-12)</td>
+</tr>
+</tbody></table></div>
+<p>And a fifth, at the boundary: <strong>the egress guard&#39;s source scan is itself
+mutation-tested</strong> (F6-17). At every layer, the question buzz asks is not <em>&quot;does it
+work?&quot;</em> but <em><strong>&quot;does it fail when it should?&quot;</strong></em> — and where the answer is <em>&quot;we
+don&#39;t know yet,&quot;</em> the document says so.</p>
+<p><strong>The single most valuable artefact is <code>LIMITS.md</code>.</strong> A gate that publishes the list
+of things it cannot catch, names the owner of each gap, names the <em>wrong</em> answer to
+the open design question, and states which half of itself is not armed is worth more
+than a gate that reports green — because a reader can calibrate.</p>
+<p><strong>Two smaller PZ notes.</strong> The <strong>audit chain&#39;s versioned encoding</strong> (F6-14, F6-15) is
+a textbook rule-10 retirement: v1 is retained and labelled ambiguous, its ambiguity
+is <em>proven by a test</em>, and v2 fixes it without invalidating history. And the
+<strong>rename hazard</strong> (F6-22, F6-23) is confirmed live: three names for one product, a
+<code>argv[0]</code> multiplexer named <code>sprig</code>, and a <code>sprout</code> URL still in the workspace
+manifest.</p>
+<p><strong>What PZ does not have, stated plainly.</strong> No RLS. Raw-key DLP is deferred. Cross-pod
+leaks are out of the conformance gate&#39;s scope. The read-seam conformance half is not
+armed. PZ&#39;s own prose contract has <strong>aged behind the code</strong> on its P3/HA status
+(D6-1). <strong>Every one of these is stated in-tree by buzz itself</strong> — the non-negatives
+by design, the last by drift — which is exactly why the rest of the PZ surface is
+credible.</p>
+<hr>
+<h2 id="10-ranked-actions">10. Ranked actions<a href="#batch-06/10-ranked-actions" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Action</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td><strong>Adopt <code>LIMITS.md</code> as a required artefact for every gate, ratchet, and guard we ship</strong> — name the blind spots, the owners, and any half that is not armed.</td>
+<td>It is the cheapest and highest-value pattern in the batch, and it makes every other mechanism trustworthy (F6-12).</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Adopt &quot;prove the guard&#39;s tripwire fires&quot;</strong> — a mutation-style test that injects the violation in memory and asserts the check catches it.</td>
+<td>buzz does this for the egress inventory, the conformance gate, and the TLA+ probes. <strong>A check without this test is a gesture</strong> (F6-7, F6-12, F6-17).</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>Adopt &quot;project so the violation survives projection&quot;</strong> — record claimed <em>and</em> resolved; use a <code>Vec</code> not a <code>Set</code>; never filter the evidence; close error alphabets.</td>
+<td>The three rules are general and each has a stated wrong answer (F6-10).</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>Adopt the structural-inventory test with a <em>paired</em> count</strong> (sites vs guard-calls) and <strong>runtime-assembled needles</strong> so the scanner cannot match itself.</td>
+<td>It catches both a new unguarded site <em>and</em> a removed guard, which a plain allowlist cannot (F6-17).</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>Adopt the type fence <em>with its own limit stated</em></strong> — a newtype for the tenant key, no <code>Deserialize</code>/<code>From</code>, plus a lint for construction, plus the sentence saying which is which.</td>
+<td>The honesty is the feature; an over-claimed fence is worse than an honestly-scoped one (F6-2).</td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>Adopt the schema lint</strong> — every scoped table <code>NOT NULL &lt;tenant&gt;</code>, every scoped key <strong>led by</strong> <code>&lt;tenant&gt;</code>, with an exemption table carrying a <strong><code>reason</code> column</strong>.</td>
+<td>It is the load-bearing enforcement for any tenancy claim, and the exemption table makes the exceptions auditable (F6-4).</td>
+</tr>
+<tr>
+<td>7</td>
+<td><strong>Adopt &quot;normalize at the enforcement point, not the call site&quot;</strong> (the RFC-3339/microsecond fix) and <strong>pin the preimage, not just the digest</strong>.</td>
+<td>A future caller cannot forget it, and pinning the preimage names the <em>trap</em> rather than the symptom (F6-16).</td>
+</tr>
+<tr>
+<td>8</td>
+<td><strong>Adopt hash-versioning discipline</strong> — version the encoding, retain the old one, label its known ambiguity, and pin both digests.</td>
+<td>Exactly rule 10, with a worked example of why the ambiguity test is the valuable part (F6-14, F6-15).</td>
+</tr>
+<tr>
+<td>9</td>
+<td><strong>Fold the formal-methods practice into our own SRS work at one small scale</strong>: pick the tenancy invariant, write the mutations <em>and the false probes</em> first, and only then check it.</td>
+<td>We do not need TLA+ to copy the practice. <strong>The transferable idea is the mutation list and the vacuity probe</strong>, not the tool (F6-6, F6-7).</td>
+</tr>
+<tr>
+<td>10</td>
+<td><strong>Keep the rename hazard on the retirement checklist</strong> — grep the <em>metadata</em> (manifest <code>repository</code>, CI topology docs), not just the code.</td>
+<td>buzz&#39;s rename is complete in code and incomplete in metadata; that is the residue that misleads a newcomer (F6-22, D6-3).</td>
+</tr>
+<tr>
+<td>11</td>
+<td><strong>Write the prose contract <em>beside</em> the formalism, and make its status sentences carry dates or gates</strong> — a Non-Goals section, one axiom per assumption, and a <code>§Conformance</code> gate per axiom.</td>
+<td>buzz&#39;s <code>docs/multi-tenant-relay.md</code> is the best template in the study for stating a safety claim (<em>&quot;stating this boundary is part of the claim&quot;</em>), and its one weakness is exactly the fixable one: its <strong>status sentences aged behind the code</strong> (F6-26, D6-1).</td>
+</tr>
+<tr>
+<td>12</td>
+<td><strong>Make the freshness TTL a compile-time floor, and test the cross-node case by name.</strong></td>
+<td><code>assert!(DEFAULT_REPLAY_TTL_SECS &gt;= 120)</code> plus <code>nip98_replay_guard_rejects_cross_pod_replay_on_bridge_path</code> is how a number derived from another number stays true (F6-27).</td>
+</tr>
+</tbody></table></div>
+<p><strong>Recommendation.</strong> Take <strong>#1, #2, #3, #4, #7</strong> — <code>LIMITS.md</code> for every gate, a
+mutation test that proves the tripwire fires, the three projection rules, the
+paired-count inventory with self-immune needles, and normalize-at-the-enforcement-point
+with preimage pinning. These five are small, transfer without any of buzz&#39;s stack,
+and each has a <em>stated wrong answer</em> in the source that tells us what we would get
+wrong. <strong>#5, #6, #8 are for when we build the tenancy layer itself</strong> — they are the
+patterns our own <code>CC-84</code> work will need, and buzz is the best worked example in the
+study. Treat the formal models (<strong>#9</strong>) as a <strong>practice to borrow at one small
+scale, not a toolchain to adopt</strong>; the transferable idea is the mutation list.
+<strong>#11 is the one to act on immediately for our own SRS work</strong> — the prose contract is
+cheap, it is what makes the formalism legible to a non-specialist, and its single
+failure mode (status drift) is preventable with the discipline we already apply to
+retired mechanisms. <strong>#12 is a two-line habit</strong> for any TTL or window we ship.</p>
+<hr>
+<p><strong>Next:</strong> <code>findings/07-synthesis.md</code> — the batch that ranks buzz&#39;s mechanisms across
+all six poles, states what buzz contributes to the cross-platform mapping, and
+records which mechanisms are decided limits. Then the <strong>buzz reader on port 3600</strong>,
+built from the markdown, and only then the ask about the next platform
+(openrig / mattermost / zulip).</p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="05-widgets-frontend.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">Widgets &amp; Frontend</span>
+                </a>
+              
+
+              <a href="../index.html#batch-06" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              
+                <a href="07-the-synthesis.html" class="nav-page-btn" style="text-align:right;">
+                  <span class="nav-btn-sub">Next Batch →</span>
+                  <span class="nav-btn-title">The Synthesis</span>
+                </a>
+              
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#0-what-i-measured-rule-0b-counts-first" class="toc-link">0. What I measured (rule 0b — counts first)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#1-pz-the-type-fence-and-an-honest-account-of-where-it-stops" class="toc-link">1. PZ — the type fence, and an honest account of where it stops</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#1-1-the-one-invariant-everything-rests-on" class="toc-link">1.1 The one invariant everything rests on</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#1-2-the-self-limiting-paragraph" class="toc-link">1.2 ★ The self-limiting paragraph</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#1-3-the-host-normalization-rule-and-why-it-is-one-function" class="toc-link">1.3 The host normalization rule, and why it is one function</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#1-4-the-migration-lint-a-structural-rule-enforced-over-the-whole-schema" class="toc-link">1.4 The migration lint — a structural rule enforced over the whole schema</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#2-pz-the-formal-models" class="toc-link">2. PZ — the formal models</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-1-multitenantrelay-tla-1-142-lines-13-mutations-several-confirmed-red" class="toc-link">2.1 MultiTenantRelay.tla — 1,142 lines, 13 mutations, several confirmed red</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-2-multitenantauth-spthy-748-lines-21-lemmas-and-honest-drafting" class="toc-link">2.2 MultiTenantAuth.spthy — 748 lines, 21 lemmas, and honest drafting</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-3-docs-multi-tenant-relay-md-the-prose-contract-1-110-lines" class="toc-link">2.3 ★ docs/multi-tenant-relay.md — the prose contract, 1,110 lines</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-pz-the-runtime-conformance-harness" class="toc-link">3. PZ — the runtime conformance harness</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-1-the-north-star" class="toc-link">3.1 The north star</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-2-the-three-projection-rules-and-why-each-is-load-bearing" class="toc-link">3.2 ★ The three projection rules, and why each is load-bearing</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-3-emitguard-a-drop-guard-that-turns-a-silent-omission-into-a-failure" class="toc-link">3.3 EmitGuard — a Drop guard that turns a silent omission into a failure</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-4-limits-md-the-harness-documenting-what-it-does-not-catch" class="toc-link">3.4 ★★ LIMITS.md — the harness documenting what it does not catch</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-pz-the-audit-chain-and-a-hash-versioning-lesson" class="toc-link">4. PZ — the audit chain, and a hash-versioning lesson</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-1-the-versioned-encoding-and-the-bug-v1-had" class="toc-link">4.1 The versioned encoding, and the bug v1 had</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-2-the-timestamp-trap-found-and-closed-at-the-enforcement-point" class="toc-link">4.2 The timestamp trap, found and closed at the enforcement point</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-pz-the-security-perimeter" class="toc-link">5. PZ — the security perimeter</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#5-1-the-egress-guard-13-boundaries-and-a-self-proving-inventory" class="toc-link">5.1 ★ The egress guard — 13 boundaries and a self-proving inventory</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#5-2-the-auth-crate-replay-rate-limits-and-the-drafts" class="toc-link">5.2 The auth crate: replay, rate limits, and the drafts</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#5-3-what-the-perimeter-does-not-have" class="toc-link">5.3 What the perimeter does *not* have</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-pz-the-retirement-surface-and-the-rename-hazard" class="toc-link">6. PZ — the retirement surface and the rename hazard</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#6-1-the-rename-documented-as-prs" class="toc-link">6.1 ★ The rename, documented as PRs</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#6-2-sprig-a-busybox-style-argv-0-multiplexer" class="toc-link">6.2 sprig — a busybox-style argv[0] multiplexer</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#6-3-the-deployment-surface" class="toc-link">6.3 The deployment surface</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-findings-f6-n" class="toc-link">7. Findings (F6-n)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#8-divergences-d6-n-where-a-doc-and-the-code-disagree" class="toc-link">8. Divergences (D6-n) — where a doc and the code disagree</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#9-pole-verdict" class="toc-link">9. Pole verdict</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#10-ranked-actions" class="toc-link">10. Ranked actions</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('buzz_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('buzz_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('buzz_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('buzz_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.BuzzReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

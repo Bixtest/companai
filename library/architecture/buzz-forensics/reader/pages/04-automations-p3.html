@@ -1,0 +1,1588 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 04 — Automations (P3) — buzz Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-04" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 04</span>
+      <div class="header-title-wrap">
+        <div class="header-title">Automations (P3)</div>
+        <div class="header-subtitle">buzz Platform Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/04-automations.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #059669">DONE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">8,974</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">45 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">1006</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-16</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 04 Architecture Guide (Default)</option>
+            <optgroup label="Strategic Architecture">
+              <option value="master">Executive Topology: the workspace is the event log, and the isolation is proven</option>
+            </optgroup>
+            <optgroup label="Foundations">
+              <option value="00">Batch 00: The pin, the extraction, and the rename hazard</option>
+              <option value="01">Batch 01: The overview — the event is the whole API</option>
+            </optgroup>
+            <optgroup label="Pole 1 — The Aissistant">
+              <option value="02">Batch 02: The aissistant — an agent is a colleague</option>
+            </optgroup>
+            <optgroup label="Pole 2 — The Workspace">
+              <option value="03">Batch 03: The workspace — three fences over one store</option>
+            </optgroup>
+            <optgroup label="Pole 3 — Automations">
+              <option value="04">Batch 04: Automations — deterministic at-most-once</option>
+            </optgroup>
+            <optgroup label="Cross-Cutting">
+              <option value="05">Batch 05: Widgets &amp; frontend — a proven negative</option>
+            </optgroup>
+            <optgroup label="Escape Hatch">
+              <option value="06">Batch 06: Out-of-pole — five artefacts, three languages</option>
+            </optgroup>
+            <optgroup label="Strategic Decision">
+              <option value="07">Batch 07: The synthesis — where buzz sits, what we take</option>
+            </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 04 VISUAL GUIDE</div>
+    <h4>Automations: deterministic at-most-once, and a gate at every door</h4>
+    <p>One authority function, four call sites, and a cron whose dedupe is determinism</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 360" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-04" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-04" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+        <marker id="arrr-04" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#ef4444"/>
+        </marker>
+      </defs>
+      <g transform="translate(20, 20)">
+        <rect width="200" height="140" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">DEFINITION</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">YAML authored</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">canonical JSON stored</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">stored as kind 30620</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">5 triggers (doc said 4)</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">7 actions (2 are stubs)</text>
+        <text x="12" y="129" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">validation is a real gate</text>
+      </g>
+      <path d="M 220 90 L 258 90" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-04)"/>
+      <g transform="translate(262, 20)">
+        <rect width="200" height="140" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">EXECUTION</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">sequential, single-pass</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">templates: single-pass, non-recursive</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">conditions: evalexpr + 3 defences</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">author comes from the SIGNATURE</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">PartialProgress keeps the trace</text>
+      </g>
+      <path d="M 462 90 L 500 90" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-04)"/>
+      <g transform="translate(504, 20)">
+        <rect width="200" height="140" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE 4 DOORS</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">event door (fire-and-forget)</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">cron door (60 s loop)</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">webhook door</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">manual trigger</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">one gate, called at all four</text>
+        <text x="12" y="129" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">fail-closed, before the claim</text>
+      </g>
+      <g transform="translate(20, 180)">
+        <rect width="880" height="160" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE CRON TRICK — AND THE HONEST HOLE</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">The at-most-once claim is DETERMINISTIC, not locked: the instant is in the key, so a PK conflict is the dedupe.</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">No lock, no coordinator, restart-safe — and the interval anchor is read back from the claim table.</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)"></text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">But: the approval gate is DEAD CODE by measurement. WaitingApproval is never written and</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">create_approval has ZERO production callers, so ~330 lines of grant / deny / resume are unreachable.</text>
+        <text x="12" y="129" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">The token, the hash, the scoping and the fail-closed approver check are all done — the MINT is missing.</text>
+        <text x="12" y="146" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)"></text>
+        <text x="12" y="163" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">And the conformance suite REFUSES to fake a green run, naming pending_lane WF-08 as its blocker.</text>
+      </g>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="buzz-batch-04-the-automations-p3">buzz — Batch 04: the automations (P3)<a href="#batch-04/buzz-batch-04-the-automations-p3" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Pole: P3 (automations) — how work runs without a human pressing a button.</strong>
+<strong>Source:</strong> <code>platforms/_extracted/buzz-main/</code> at <code>v0.5.28</code>. <strong>Rule 1 applies: the code is the
+authority. Every number below was counted in the tree; every claim the docs make is checked
+against the code and the divergences are recorded, not smoothed over.</strong></p>
+<p><strong>Read for this batch:</strong> <code>crates/buzz-workflow/</code> (5 files, <strong>5,263 lines</strong>),
+<code>crates/buzz-db/src/store/workflow.rs</code> (<strong>2,925 lines</strong>) + <code>store/workflow/deletion.rs</code>
+(210 lines), the workflow tables in <code>migrations/0001_initial_schema.sql</code>,
+<code>crates/buzz-relay/src/handlers/command_executor.rs</code> (1,639 lines — the command half),
+<code>crates/buzz-relay/src/api/bridge.rs</code> (the webhook route),
+<code>crates/buzz-relay/src/webhook_secret.rs</code> (161), <code>crates/buzz-relay/src/workflow_sink.rs</code>
+(1,525), <code>crates/buzz-relay/src/handlers/side_effects.rs</code> (the revocation path), and
+the workflow UI under <code>desktop/src/features/workflows/</code>.</p>
+<hr>
+<h2 id="1-the-shape-one-crate-five-files-and-an-unusually-honest-header">1. The shape: one crate, five files, and an unusually honest header<a href="#batch-04/1-the-shape-one-crate-five-files-and-an-unusually-honest-header" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><code>buzz-workflow</code> is <strong>small by this study&#39;s standards</strong> — 5,263 lines, five modules:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>File</th>
+<th>Lines</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>schema.rs</code></td>
+<td>1,001</td>
+<td>The YAML/JSON definition types and all validation</td>
+</tr>
+<tr>
+<td><code>executor.rs</code></td>
+<td>1,981</td>
+<td>Sequential execution, templates, conditions, action dispatch</td>
+</tr>
+<tr>
+<td><code>lib.rs</code></td>
+<td>2,090</td>
+<td>The engine, the event hook, the cron loop, authority gates</td>
+</tr>
+<tr>
+<td><code>error.rs</code></td>
+<td>114</td>
+<td>The error enum <strong>and its stable <code>code()</code> mapping</strong></td>
+</tr>
+<tr>
+<td><code>action_sink.rs</code></td>
+<td><strong>77</strong></td>
+<td><strong>The trait, and nothing else</strong> — the seam</td>
+</tr>
+</tbody></table></div>
+<p>The crate header is worth quoting because it is the kind of honesty this study rewards:</p>
+<blockquote>
+<p><em>&quot;Action dispatch uses placeholder implementations that log intent. Real event emission is
+wired in WF-07/08 (relay integration).&quot;</em> — <code>executor.rs:9-10</code></p>
+</blockquote>
+<p>That sentence is <strong>the batch in miniature</strong>: buzz ships a complete, validated, well-tested
+<em>definition language and execution model</em> for automations, and a <strong>separately wired
+side-effect layer</strong> — and the seam between them is one 77-line trait. Section 6 is about
+what that seam does and doesn&#39;t carry.</p>
+<p><strong>One measured design fact that stands out immediately.</strong> The engine has <strong>no queue</strong>.
+<code>max_concurrent</code> is a <strong>100-permit semaphore</strong> and the acquire is <code>try_acquire()</code> — a run
+that finds no permit <strong>fails immediately</strong> with <code>CapacityExceeded</code> (<code>executor.rs:1071-1076</code>,
+<code>1121-1126</code>). This is self-declared: <em>&quot;Does NOT queue workflow runs when at capacity —
+returns <code>CapacityExceeded</code> immediately&quot;</em> (<code>ARCHITECTURE.md:663</code>). <strong>It is the opposite of
+every scheduler mechanism the earlier platforms in this study offered</strong>, and it means buzz&#39;s
+automation layer is <strong>deliberately lossy under load</strong> — a re-trigger is possible, a backlog
+is not.</p>
+<hr>
+<h2 id="2-the-definition-language-yaml-authored-canonical-json-stored">2. The definition language — YAML authored, canonical JSON stored<a href="#batch-04/2-the-definition-language-yaml-authored-canonical-json-stored" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Workflows are authored in YAML and stored as <strong>canonical JSON</strong>, and <code>parse_yaml</code> validates
+then re-serialises (<code>schema.rs:311-317</code>). The stored <code>definition</code> is that JSON; the
+<code>definition_hash</code> is a SHA-256 over it. The definition carries five top-level fields —
+<code>name</code>, <code>description</code>, <code>trigger</code>, <code>steps</code>, <code>enabled</code> (default <code>true</code>) — and the shape is
+the same one every platform in this study arrived at: <strong>a trigger, then an ordered list of
+steps.</strong></p>
+<h3 id="2-1-triggers-the-code-has-five-the-doc-says-four">2.1 Triggers — the code has FIVE; the doc says four<a href="#batch-04/2-1-triggers-the-code-has-five-the-doc-says-four" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>This is the batch&#39;s first <strong>rule-1 divergence</strong>, and it is a clean one.</p>
+<p><code>TriggerDef</code> is a serde <strong>internally-tagged enum</strong> on the key <code>on:</code>
+(<code>schema.rs:36-71</code>). Counting the variants in the code:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Variant</th>
+<th>YAML tag</th>
+<th>Fires on</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td><code>MessagePosted</code></td>
+<td><code>on: message_posted</code></td>
+<td>kind <strong>9</strong> (<code>KIND_STREAM_MESSAGE</code>) in the workflow&#39;s channel</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>ReactionAdded</code></td>
+<td><code>on: reaction_added</code></td>
+<td>kind <strong>7</strong> (<code>KIND_REACTION</code>)</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong><code>DiffPosted</code></strong></td>
+<td><code>on: diff_posted</code></td>
+<td>kind <strong>40008</strong> (<code>KIND_STREAM_MESSAGE_DIFF</code>)</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>Schedule</code></td>
+<td><code>on: schedule</code></td>
+<td>the cron loop (<code>cron:</code> XOR <code>interval:</code>)</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>Webhook</code></td>
+<td><code>on: webhook</code></td>
+<td><code>POST /hooks/{id}</code></td>
+</tr>
+</tbody></table></div>
+<p><strong><code>ARCHITECTURE.md:632</code> states &quot;4 trigger types: <code>message_posted</code>, <code>reaction_added</code>,
+<code>schedule</code>, <code>webhook</code>&quot; — and omits <code>diff_posted</code>.</strong> The code has it, the tests cover it
+(<code>lib.rs:1533-1545</code>, <code>schema.rs:984-1000</code>), and <code>trigger_matches_event</code> matches it against
+kind 40008 (<code>lib.rs:1043</code>). <strong>The doc is stale, not the code.</strong> A reader who trusted the
+doc would not know a diff-review trigger existed.</p>
+<p><strong>The mapping is deliberately exact.</strong> <code>trigger_matches_event</code> compares <strong>single kind
+numbers</strong>, not ranges (<code>lib.rs:1038-1047</code>), and the tests pin it hard: <code>message_posted</code>
+matches 9 and <strong>must not</strong> match 7 (reaction), 45001 (forum post) or 40002 (v2 stream
+message); <code>diff_posted</code> matches 40008 only (<code>lib.rs:1438-1545</code>). This is the kind-integer
+model holding under test: <strong>a new feature is a new kind, and no old trigger silently adopts
+it.</strong></p>
+<p><strong>Trigger filters are <code>evalexpr</code>, evaluated at fire time, not match time.</strong> <code>MessagePosted</code>,
+<code>ReactionAdded</code> and <code>DiffPosted</code> each carry an optional <code>filter:</code> expression; the tests
+state the split explicitly — <em>&quot;the filter expression is evaluated at execution time, not
+trigger-matching time&quot;</em> (<code>lib.rs:1466</code>). <code>ReactionAdded</code> additionally carries an optional
+<code>emoji:</code> which <strong>is</strong> checked at selection time (<code>should_fire_workflow</code>, <code>lib.rs:888-902</code>).</p>
+<h3 id="2-2-the-schedule-trigger-has-three-self-defending-rules">2.2 The `Schedule` trigger has three self-defending rules<a href="#batch-04/2-2-the-schedule-trigger-has-three-self-defending-rules" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>The schedule trigger carries two mutually exclusive fields and <strong>validates all three
+combinations at definition time</strong> (<code>schema.rs:244-275</code>):</p>
+<ol>
+<li><strong>Neither <code>cron</code> nor <code>interval</code></strong> → rejected (&quot;requires either &#39;cron&#39; or &#39;interval&#39;&quot;).</li>
+<li><strong>Both</strong> → rejected (&quot;cannot specify both&quot;).</li>
+<li><strong>A sub-minute interval</strong> → rejected, and the error message names the reason:
+<em>&quot;interval must be at least 60s (cron loop ticks every 60 seconds)&quot;</em> (<code>schema.rs:269-273</code>).</li>
+</ol>
+<p>Rule 3 is the kind of thing a careful engineer writes and a careless one doesn&#39;t: <strong>the
+scheduler&#39;s tick period is a hard constraint on the definition language, so it is enforced
+where the author can see it rather than silently mis-firing at runtime.</strong> The comment even
+carries the fix number — <code>// Fix 4:</code>.</p>
+<p><strong>Cron is normalised, not rejected.</strong> The <code>cron</code> crate wants 7 fields
+(<code>sec min hour dom month dow year</code>); buzz accepts <strong>standard 5-field cron</strong> and normalises
+by prepending <code>0</code> and appending <code>*</code> (<code>normalize_cron</code>, <code>schema.rs:299-306</code>). 5-, 6- and
+7-field forms are all accepted and all unit-tested (<code>schema.rs:828-946</code>). <strong>This is a small
+interoperability decision with a large effect</strong>: an author pastes a familiar
+<code>0 9 * * 1-5</code> and it works.</p>
+<h3 id="2-3-actions-seven-and-two-of-them-do-not-work">2.3 Actions — seven, and two of them do not work<a href="#batch-04/2-3-actions-seven-and-two-of-them-do-not-work" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>ActionDef</code> is serde-tagged on <code>action:</code> (<code>schema.rs:93-155</code>). <strong>Seven variants</strong>, and the
+count matches the documentation exactly:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Action</th>
+<th>Fields</th>
+<th>Executor behaviour</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>send_message</code></td>
+<td><code>text</code>, <code>channel?</code>, <code>reply_in_thread?</code></td>
+<td><strong>Real</strong> — through the action sink</td>
+</tr>
+<tr>
+<td><code>send_dm</code></td>
+<td><code>to</code>, <code>text</code></td>
+<td><strong><code>NotImplemented</code></strong> 🚧 WF-07</td>
+</tr>
+<tr>
+<td><code>set_channel_topic</code></td>
+<td><code>topic</code></td>
+<td><strong><code>NotImplemented</code></strong> 🚧 WF-07</td>
+</tr>
+<tr>
+<td><code>add_reaction</code></td>
+<td><code>emoji</code></td>
+<td>Real, <strong>but only under the <code>reqwest</code> feature</strong></td>
+</tr>
+<tr>
+<td><code>call_webhook</code></td>
+<td><code>url</code>, <code>method?</code>, <code>headers?</code>, <code>body?</code></td>
+<td>Real under <code>reqwest</code>; falls back to <code>skipped: true</code></td>
+</tr>
+<tr>
+<td><code>request_approval</code></td>
+<td><code>from</code>, <code>message</code>, <code>timeout?</code> (default <code>24h</code>)</td>
+<td>Returns <code>Suspended</code> — <strong>and the caller cannot use it</strong> (section 5)</td>
+</tr>
+<tr>
+<td><code>delay</code></td>
+<td><code>duration</code></td>
+<td>Real <code>tokio::time::sleep</code>, <strong>capped at 270 s</strong></td>
+</tr>
+</tbody></table></div>
+<p><strong>Two actions are honest stubs.</strong> <code>SendDm</code> and <code>SetChannelTopic</code> both <code>warn!</code> then return
+<code>WorkflowError::NotImplemented</code> (<code>executor.rs:655-665</code>), with <code>// TODO (WF-07)</code> comments.
+<code>ARCHITECTURE.md:956</code> declares this in its Known Limitations table — <strong>the doc and the code
+agree here</strong>, which is worth noting because they don&#39;t everywhere.</p>
+<p><strong><code>delay</code> has a cap the doc gets wrong.</strong> <code>ARCHITECTURE.md:636</code> says &quot;delay | Pause
+execution (max 300 seconds)&quot;. The code caps at <strong>270 seconds</strong> — <code>MAX_DELAY_SECS: u64 = 270</code>
+(<code>executor.rs:751</code>) — and the comment explains precisely why:</p>
+<blockquote>
+<p><em>&quot;Cap delay at 270 seconds (4.5 minutes) — must be less than default_timeout_secs (300s)
+to avoid non-deterministic StepTimeout. Long delays (hours/days) should use the scheduled
+resume pattern (future work: WF-09).&quot;</em></p>
+</blockquote>
+<p><strong>This is a second rule-1 divergence, and a much better one than the first</strong>, because the
+code is not just different from the doc — <strong>the code is right and the doc is a
+simplification of a non-obvious interaction.</strong> A 300-second delay under a 300-second step
+timeout is a race; the author found it and left 30 seconds of headroom. The doc rounded.</p>
+<h3 id="2-4-validation-is-a-real-gate-not-a-formality">2.4 Validation is a real gate, not a formality<a href="#batch-04/2-4-validation-is-a-real-gate-not-a-formality" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>WorkflowDef::validate</code> (<code>schema.rs:173-278</code>) enforces five things, each with a test:</p>
+<ol>
+<li><strong>Name non-empty</strong> after <code>trim()</code> (so whitespace-only is rejected).</li>
+<li><strong>At least one step.</strong></li>
+<li><strong>Step IDs are <code>[A-Za-z0-9_]{1,64}</code></strong> — and the reason is stated in the error, not just
+the code: <em>&quot;Step IDs become variable names like <code>steps_{id}_output_{field}</code>&quot;</em>
+(<code>schema.rs:186-193</code>). <strong>A step ID containing <code>-</code> would make <code>evalexpr</code> read
+<code>steps_my-step_output_field</code> as a subtraction</strong> — the test at <code>schema.rs:880-897</code> says so
+in a comment. This is <strong>variable-name injection closed at the definition boundary</strong>.</li>
+<li><strong>Step IDs unique.</strong></li>
+<li><strong><code>reply_in_thread: true</code> requires a message-based trigger</strong> — rejected on <code>schedule</code> and
+<code>webhook</code> <strong>at definition time</strong>, with the error explaining that those triggers <em>&quot;have no
+message to reply to&quot;</em> (<code>schema.rs:216-242</code>). Explicitly <code>reply_in_thread: false</code> is fine
+on a schedule (test at <code>schema.rs:560-564</code>).</li>
+</ol>
+<p><strong>Point 5 is a design decision stated as a validation rule</strong>: buzz would rather refuse to
+save a definition than save one that fails silently at 3 a.m. with nobody watching.</p>
+<h3 id="2-5-one-flag-with-security-weight-requires-elevated-authority">2.5 One flag with security weight: `requires_elevated_authority`<a href="#batch-04/2-5-one-flag-with-security-weight-requires-elevated-authority" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>WorkflowDef::requires_elevated_authority()</code> is <strong>9 lines</strong> (<code>schema.rs:165-169</code>) and it is
+the whole of SEC-006&#39;s premise:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>rust</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-rust">self.steps.iter().any(|s| matches!(s.action, ActionDef::CallWebhook { .. }))
+</code></pre>
+</div>
+<p><strong>If a definition contains a <code>call_webhook</code> step, it needs owner-or-admin authority — to
+save it and to run it.</strong> The doc comment gives the reason in one sentence that is the
+correct reason: <em>&quot;a workflow forwards channel content with the <strong>owner&#39;s</strong> standing
+authority long after the save.&quot;</em> This is the <strong>confused-deputy</strong> problem named exactly, and
+it is the load-bearing security idea of the whole P3 layer. Section 6.2 traces where it is
+enforced.</p>
+<hr>
+<h2 id="3-the-executor-sequential-single-pass-and-explicit-about-partial-failure">3. The executor — sequential, single-pass, and explicit about partial failure<a href="#batch-04/3-the-executor-sequential-single-pass-and-explicit-about-partial-failure" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>The executor is <strong>sequential by construction</strong>. <code>execute_steps</code> is a <code>for</code> loop over
+<code>def.steps.iter().enumerate()</code> (<code>executor.rs:1188</code>). There is no parallelism, no branching
+graph, no fan-out — a workflow is a <strong>straight line with optional skip gates.</strong> Compared to
+the graph engines of earlier platforms in this study, this is a <strong>deliberately smaller
+language</strong>, and the schema keeps it that way by having no <code>goto</code>, no <code>parallel</code>, no
+<code>foreach</code>.</p>
+<p>Per step, four things happen in a fixed order (<code>executor.rs:1194-1300</code>):</p>
+<ol>
+<li><strong>Condition.</strong> If <code>if:</code> is present, evaluate it. <code>Ok(true)</code> → run; <code>Ok(false)</code> → push a
+<code>&quot;skipped&quot;</code> trace entry and <code>continue</code>; <code>Err</code> → <strong>return the error with the trace so
+far</strong>.</li>
+<li><strong>Template resolution.</strong> Substitute <code>{{...}}</code> in every action field.</li>
+<li><strong>Dispatch under timeout.</strong> <code>tokio::time::timeout(step.timeout_secs.unwrap_or(default), …)</code>
+— default <strong>300 s</strong>.</li>
+<li><strong>Store the output</strong> in <code>step_outputs</code> keyed by step ID, so later steps can reference
+<code>{{steps.ID.output.FIELD}}</code>.</li>
+</ol>
+<p><strong>The <code>PartialProgress</code> pattern is the study-worthy part.</strong> Every failure path returns
+<code>(WorkflowError, PartialProgress)</code> where <code>PartialProgress { step_index, trace }</code>
+(<code>error.rs:9-15</code>) carries the trace of steps that <em>did</em> complete. The comment says why:
+<em>&quot;rather than losing it when the in-memory <code>Vec</code> is dropped&quot;</em> — and <code>finalize_run</code> writes
+that partial trace to the DB alongside the failure (<code>lib.rs:278-303</code>). <strong>A failed run is
+still a readable run.</strong> Three platforms in this study lost the trace on failure; buzz
+returns it as a value.</p>
+<h3 id="3-1-templates-single-pass-non-recursive-and-unknown-keys-stay-literal">3.1 Templates: single-pass, non-recursive, and unknown keys stay literal<a href="#batch-04/3-1-templates-single-pass-non-recursive-and-unknown-keys-stay-literal" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>resolve_template</code> (<code>executor.rs:74-127</code>) supports two namespaces:</p>
+<ul>
+<li><code>{{trigger.X}}</code> — <code>text</code>, <code>author</code>, <code>channel_id</code>, <code>timestamp</code>, <code>emoji</code>, <code>message_id</code>,
+plus <strong>any key from the webhook body</strong> (<code>TriggerContext::get_field</code>, <code>executor.rs:53-63</code>).</li>
+<li><code>{{steps.STEP_ID.output.FIELD}}</code> — one level of JSON object navigation only
+(<code>json_get_str</code>, <code>executor.rs:158-166</code>).</li>
+</ul>
+<p><strong>Two filters exist</strong>, and the second one is a security decision:</p>
+<ul>
+<li><code>| truncate(N)</code> — first N <strong>characters</strong> (not bytes; the test asserts <code>chars().count() == 5</code>).</li>
+<li><code>| npub</code> — hex pubkey → full bech32 <code>npub</code>.</li>
+</ul>
+<p>The comment on <code>npub</code> is worth quoting because it is the kind of reasoning this study looks
+for: <em>&quot;full bech32 npub — <strong>truncated prefixes are grindable</strong>&quot;</em> (<code>executor.rs:194</code>). The
+legacy alias <code>truncate_pubkey</code> is kept but now produces a <strong>full</strong> npub, i.e. <strong>the name is
+the bug that was fixed and the alias is kept for compatibility.</strong> A reader who assumed
+<code>truncate_pubkey</code> truncates would be wrong; the test pins the new behaviour
+(<code>executor.rs:1381-1394</code>).</p>
+<p><strong>Three deliberate behaviours that are all &quot;fail soft&quot;:</strong></p>
+<ul>
+<li><strong>Unknown <code>{{key}}</code> is left as literal text</strong>, not an error and not empty
+(<code>executor.rs:113-119</code>). Test: <code>resolve_unknown_variable_left_literal</code>.</li>
+<li><strong>Unclosed <code>{{</code> is emitted literally</strong> and parsing stops, no panic
+(<code>executor.rs:90-98</code>).</li>
+<li><strong>A non-pubkey passed to <code>| npub</code> passes through unchanged</strong> (test
+<code>executor.rs:1694-1705</code>).</li>
+</ul>
+<p>But an <strong>unknown filter name is an error</strong> (<code>TemplateError</code>, <code>executor.rs:202-204</code>) — the
+line is between <em>&quot;data we don&#39;t have yet&quot;</em> (soft) and <em>&quot;a directive we don&#39;t understand&quot;</em>
+(hard). That is a defensible place to draw it.</p>
+<h3 id="3-2-conditions-evalexpr-with-three-defences-around-it">3.2 Conditions: `evalexpr`, with three defences around it<a href="#batch-04/3-2-conditions-evalexpr-with-three-defences-around-it" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>evaluate_condition</code> (<code>executor.rs:363-398</code>) is the most carefully defended piece of the
+executor, and the defences are stated as comments that name the attack:</p>
+<ol>
+<li><strong><code>EVAL_TIMEOUT = 100 ms</code></strong> — <em>&quot;<code>evalexpr</code> is not designed for adversarial input — a
+deeply nested or recursive expression can spin indefinitely&quot;</em> (<code>executor.rs:350-355</code>).</li>
+<li><strong><code>MAX_EXPR_LEN = 4096</code></strong> — and the comment admits the limit of the first defence:
+<em>&quot;The spawn_blocking thread <strong>cannot be cancelled</strong> by <code>tokio::time::timeout</code> — it will
+run to completion even after timeout. Length-limiting the expression prevents worst-case
+O(2^n) evaluation paths.&quot;</em> (<code>executor.rs:371-381</code>).</li>
+<li><strong>Variable-name collision defence on webhook fields.</strong> Webhook body keys are registered
+<strong>first</strong>, as <code>trigger_{key}</code>, and any key starting with <code>trigger_</code> or <code>steps_</code> is
+<strong>skipped</strong> — <em>&quot;so that standard trigger fields inserted below always take precedence and
+cannot be spoofed&quot;</em> (<code>executor.rs:282-292</code>).</li>
+</ol>
+<p><strong>Defence 3 is the one that matters for P3.</strong> A webhook is an unauthenticated-by-content
+input path; without the skip, a caller could POST <code>{&quot;text&quot;: &quot;P1&quot;}</code> and <strong>overwrite
+<code>trigger_text</code></strong>, forging the very field an <code>if:</code> filter compares against. The code closes
+it, and the ordering comment says exactly which way the paint goes.</p>
+<p><strong>Four custom functions are registered</strong> because <code>evalexpr</code> v11 ships without them:
+<code>str_contains</code>, <code>str_starts_with</code>, <code>str_ends_with</code>, <code>str_len</code> (<code>executor.rs:240-280</code>).</p>
+<p><strong>The dot-to-underscore translation is documented as a table</strong> (<code>executor.rs:212-222</code>) —
+<code>trigger.text</code> → <code>trigger_text</code>. <strong>And <code>trigger_is_reply</code> is deliberately a boolean, not a
+string</strong> (<code>executor.rs:308-314</code>) so a filter can write <code>trigger_is_reply == false</code>.</p>
+<h3 id="3-3-trigger-is-reply-a-predicate-that-had-to-be-re-derived-three-times">3.3 `trigger_is_reply` — a predicate that had to be re-derived three times<a href="#batch-04/3-3-trigger-is-reply-a-predicate-that-had-to-be-re-derived-three-times" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>event_is_reply</code> (<code>lib.rs:1012-1016</code>) does <strong>not</strong> look for any <code>e</code> tag. It delegates to
+<code>buzz_core::nip10::parse_thread_markers</code> and returns <code>.reply.is_some()</code> — with a comment
+explaining the lockstep requirement:</p>
+<blockquote>
+<p><em>&quot;a <code>root</code> marker alone is top-level, and a marker with a malformed (non-64-hex) event id
+is ignored by ingest, so it must not flip <code>trigger_is_reply</code> either — else a
+<code>trigger_is_reply == false</code> workflow would skip a message ingest stored as a new
+top-level post.&quot;</em></p>
+</blockquote>
+<p><strong>Five tests</strong> pin every corner (<code>lib.rs:1609-1743</code>): root+reply → reply; reply only →
+reply; <strong>root only → not a reply</strong>; bare <code>e</code> tag → not a reply; malformed reply id → not a
+reply; valid root + malformed reply → not a reply. <strong>This is a predicate that exists in
+three places (ingest, NIP-10 parser, here) and the test suite is what keeps them in
+lockstep.</strong> It&#39;s the clearest example in this batch of the study&#39;s rule that <em>a claim
+repeated in N places is still one claim</em> — and buzz <strong>delegates rather than repeats</strong>, which
+is why it holds.</p>
+<h3 id="3-4-author-comes-from-the-signature-never-from-a-tag">3.4 `author` comes from the signature, never from a tag<a href="#batch-04/3-4-author-comes-from-the-signature-never-from-a-tag" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>build_trigger_context</code> (<code>lib.rs:942-1003</code>) sets <code>author = event.event.pubkey.to_hex()</code>, and
+the comment states the rule:</p>
+<blockquote>
+<p><em>&quot;Workflow conditions make authorization decisions from <code>trigger_author</code>, so it must come
+from the event signature. An <code>actor</code> tag is ordinary signer-controlled metadata and cannot
+speak for another pubkey.&quot;</em></p>
+</blockquote>
+<p><strong>There is a test named <code>build_trigger_context_ignores_actor_tag</code></strong> where the signer
+forges an <code>actor</code> tag naming a different pubkey, and the assertion is that the context
+carries the <strong>signer</strong>. This is the P1 batch&#39;s NIP-OA/attestation theme reappearing as a
+one-line rule in P3: <strong>the signature is the identity; every tag is a claim about identity
+that must be verified separately or ignored.</strong></p>
+<p><strong>Reactions get special handling</strong> (NIP-25): for kind 7, <code>emoji</code> = content, and
+<code>message_id</code> = the target, found by scanning <code>e</code> tags <strong>in reverse</strong> for the first 64-hex
+value (<code>lib.rs:963-988</code>). The test <code>test_build_trigger_context_reaction_multiple_e_tags</code>
+proves the <strong>last</strong> <code>e</code> tag wins, not the first — so a reaction to a thread reply attaches
+to the reply, not the thread root.</p>
+<hr>
+<h2 id="4-the-engine-three-doors-into-a-run-and-one-gate-in-front-of-all-of-them">4. The engine — three doors into a run, and one gate in front of all of them<a href="#batch-04/4-the-engine-three-doors-into-a-run-and-one-gate-in-front-of-all-of-them" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>A workflow run can be created by exactly <strong>three</strong> paths, and this batch found them by
+counting <code>create_workflow_run</code> callers:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Door</th>
+<th>Entry point</th>
+<th>Trigger kind</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Event</strong></td>
+<td><code>WorkflowEngine::on_event</code> (<code>lib.rs:320-443</code>)</td>
+<td><code>message_posted</code>, <code>reaction_added</code>, <code>diff_posted</code></td>
+</tr>
+<tr>
+<td><strong>Schedule</strong></td>
+<td><code>WorkflowEngine::run</code> cron loop (<code>lib.rs:489-749</code>)</td>
+<td><code>schedule</code></td>
+</tr>
+<tr>
+<td><strong>Webhook</strong></td>
+<td><code>workflow_webhook</code> (<code>api/bridge.rs:2426</code>)</td>
+<td><code>webhook</code></td>
+</tr>
+<tr>
+<td><em>(Manual)</em></td>
+<td><code>handle_workflow_trigger</code> (<code>command_executor.rs:815</code>)</td>
+<td>any — a signed command event</td>
+</tr>
+</tbody></table></div>
+<h3 id="4-1-the-event-door-fire-and-forget-and-loop-proofed-twice">4.1 The event door: fire-and-forget, and loop-proofed twice<a href="#batch-04/4-1-the-event-door-fire-and-forget-and-loop-proofed-twice" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>on_event</code> is called from the relay&#39;s ingest pipeline as <strong>step 11</strong>, <em>after</em> the event is
+stored, and it is <strong>spawned</strong> — <code>ARCHITECTURE.md:291</code> says <em>&quot;audit and workflow triggers are
+spawned as independent async tasks. A failure in either does not fail the event
+submission.&quot;</em> <strong>The workflow layer cannot break message delivery.</strong> That is a good property
+and it is stated as one.</p>
+<p><strong>Infinite loops are prevented at two independent layers</strong> — belt and braces:</p>
+<ol>
+<li><strong>Kind exclusion, before any work.</strong> <code>is_workflow_execution_kind(kind)</code> — kinds
+<strong>46001–46012</strong> — returns early (<code>lib.rs:336-339</code>). The range function is a <code>const fn</code>
+with its own doc comment: <em>&quot;These must not trigger workflows (prevents infinite loops).&quot;</em>
+(<code>kind.rs:837-840</code>).</li>
+<li><strong>A tag exclusion.</strong> <code>ARCHITECTURE.md:295</code> adds <em>&quot;relay-signed messages with
+<code>buzz:workflow</code> tag, and <code>KIND_GIFT_WRAP</code> are excluded&quot;</em> — and the sink <strong>sets that tag</strong>
+on every message it emits (section 6.3). So <strong>a workflow that posts a message cannot
+re-trigger itself through the message-posted door.</strong></li>
+</ol>
+<p><strong>The test <code>workflow_execution_kinds_do_not_match_any_trigger</code></strong> asserts the range
+<code>KIND_WORKFLOW_TRIGGERED ..= KIND_WORKFLOW_APPROVAL_DENIED</code> matches neither trigger
+(<code>lib.rs:1487-1510</code>). <strong>Two mechanisms, because one of them (<code>is_..._kind</code>) is a filter the
+caller must remember to apply, and the other (<code>buzz:workflow</code> tag) is a property of the
+emitted event.</strong> That redundancy is the right call.</p>
+<h3 id="4-2-the-cache-a-10-second-window-with-a-stated-deliberate-non-guarantee">4.2 The cache: a 10-second window with a stated, deliberate non-guarantee<a href="#batch-04/4-2-the-cache-a-10-second-window-with-a-stated-deliberate-non-guarantee" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>The enabled-workflow list per <code>(community_id, channel_id)</code> is cached in a <strong>moka</strong> cache,
+capacity 10,000, <strong>TTL 10 s</strong> (<code>lib.rs:103-105, 118-121</code>). The doc comment is unusually
+explicit about the limits of the invalidation:</p>
+<blockquote>
+<p><em>&quot;the relay invalidates this cache on its own pod at the two workflow mutation sites
+(command upsert, NIP-09 deletion). There is deliberately no cross-pod invalidation —
+<strong>workflow triggering is not an access-control fence</strong>, so the worst case on another pod
+is a just-deleted workflow firing (or a just-created one missing events) for up to the
+TTL.&quot;</em></p>
+</blockquote>
+<p><strong>This is the correct framing and this study has not seen it stated so cleanly elsewhere</strong>:
+the cache is allowed to be stale <strong>because correctness does not depend on it</strong>. What <em>does</em>
+depend on it — authority — is checked <strong>per fire</strong>, not per cache fill (section 4.4). The
+design pays one extra <code>SELECT</code>-free path for events and zero correctness.</p>
+<h3 id="4-3-the-cron-loop-a-deterministic-claim-key-is-the-whole-trick">4.3 The cron loop: a deterministic claim key is the whole trick<a href="#batch-04/4-3-the-cron-loop-a-deterministic-claim-key-is-the-whole-trick" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>WorkflowEngine::run</code> (<code>lib.rs:489-749</code>) is a <code>loop { sleep(60s); … }</code>. For each enabled
+schedule workflow it computes a <strong><code>scheduled_for</code> instant</strong> and then makes a <strong>durable
+claim</strong> against it.</p>
+<p><strong>The insight is that <code>scheduled_for</code> must be a function of the schedule, not of the
+clock.</strong> <code>cron_fire_instant</code> (<code>lib.rs:765-785</code>) uses <strong>window-based matching</strong>:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>rust</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-rust">let window_start = now - chrono::Duration::seconds(window_secs);
+sched.after(&amp;window_start).next().filter(|t| *t &lt;= now)
+</code></pre>
+</div>
+<p>and returns <strong>the cron&#39;s own scheduled instant</strong>, never <code>now</code>. The comment states the
+cross-pod consequence:</p>
+<blockquote>
+<p><em>&quot;The returned instant is the cron&#39;s own scheduled time (not <code>now</code>), so <strong>every pod
+evaluating the same expression in the same window computes the same value</strong> — making it a
+safe, deterministic claim anchor for cross-pod at-most-once firing.&quot;</em></p>
+</blockquote>
+<p>Window matching also <strong>tolerates tick drift</strong>: the test
+<code>cron_fire_instant_within_drift_window_anchors_on_scheduled_time</code> fires at 09:00:45 for a
+<code>0 9 * * *</code> schedule and asserts the anchor is <strong>09:00:00</strong> — so a second pod ticking five
+seconds later computes the <strong>identical claim key</strong>.</p>
+<p><strong>Interval triggers get the same treatment via bucket quantisation.</strong>
+<code>interval_fire_instant</code> (<code>lib.rs:796-822</code>) computes <code>floor(now / interval) * interval</code> from
+the Unix epoch, so two pods at 12:34:56 and 12:59:01 on a 1 h interval <strong>both</strong> floor to
+12:00:00 (test <code>interval_fire_instant_quantizes_to_bucket_boundary</code>).</p>
+<p><strong>The claim SQL is a single <code>INSERT … ON CONFLICT DO NOTHING</code></strong> (<code>store/workflow.rs:530-544</code>):</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>sql</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-sql">INSERT INTO scheduled_workflow_fires (community_id, workflow_id, scheduled_for)
+SELECT w.community_id, w.id, $3 FROM workflows w
+WHERE w.community_id = $1 AND w.id = $2
+ON CONFLICT (community_id, workflow_id, scheduled_for) DO NOTHING
+RETURNING …
+</code></pre>
+</div>
+<p><strong>The loser gets zero rows and skips before creating a run or doing anything else.</strong> The PK
+is the mutex. This is the <strong>third</strong> platform in this study to use <code>INSERT</code>-conflict as the
+dedupe primitive, and the storage layer&#39;s own comment names the design lineage — <em>&quot;Plan §5:
+the at-most-once cron fire claim.&quot;</em></p>
+<h3 id="4-4-the-authority-gate-one-function-called-at-four-doors-before-the-claim">4.4 The authority gate: one function, called at four doors, before the claim<a href="#batch-04/4-4-the-authority-gate-one-function-called-at-four-doors-before-the-claim" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>check_owner_authority</code> (<code>lib.rs:148-171</code>) is <strong>fail-closed by construction</strong> — a lookup
+<em>error</em> is <code>Unauthorized</code>, not <code>Ok</code>:</p>
+<blockquote>
+<p><em>&quot;Any lookup error denies (fail-closed): a removed owner must never keep exfiltration
+authority because a membership read happened to fail.&quot;</em></p>
+</blockquote>
+<p>The pure decision is 6 lines (<code>owner_authority_allows</code>, <code>lib.rs:1029-1035</code>) and has <strong>three
+dedicated tests</strong>:</p>
+<ul>
+<li><strong>not a member → deny, always</strong> (even for ordinary definitions);</li>
+<li><strong>member → allowed for ordinary definitions</strong>;</li>
+<li><strong>elevated definition → <code>owner</code> or <code>admin</code> only</strong> — a plain <code>member</code> is refused.</li>
+</ul>
+<p><strong>Where it is called is the design.</strong> All four doors call it <strong>immediately before creating
+the run</strong>:</p>
+<ul>
+<li>event door: <code>lib.rs:393-402</code></li>
+<li>cron door: <code>lib.rs:606-615</code> — and the comment explains the <em>ordering</em>: <strong>before</strong> the
+claim, because <em>&quot;placing the gate after the claim would let a revoked owner&#39;s workflow
+consume the at-most-once fire slot (claims are never re-fired), turning revocation into a
+denial-of-fire for a later re-enable.&quot;</em></li>
+<li>webhook door: <code>bridge.rs:2529-2533</code></li>
+<li>manual trigger door: <code>command_executor.rs:872-880</code></li>
+</ul>
+<p><strong>That cron-ordering comment is the sharpest single sentence in this batch.</strong> It identifies
+a real bug class — <em>revocation as a resource-exhaustion attack on your own future</em> — and
+fixes it by moving a check, not by adding a mechanism.</p>
+<p><strong>And there is a durable second half.</strong> When a member is removed from a channel,
+<code>disable_departed_member_workflows</code> (<code>side_effects.rs:199-231</code>) sets <code>enabled = FALSE</code> on
+their workflows and invalidates the cache. The comment states the division of labour:</p>
+<blockquote>
+<p><em>&quot;A workflow runs with its owner&#39;s standing authority; once the owner is no longer a
+member their workflows must stop firing on every path … The per-fire authority gate in
+<code>buzz-workflow</code> is the <strong>fail-closed backstop</strong>; this makes the revocation <strong>durable and
+immediately visible</strong>.&quot;</em></p>
+</blockquote>
+<p><strong>Failures of the disable write are logged, not propagated</strong> — <em>&quot;membership removal has
+already been committed, and the per-fire gate still denies a removed owner even if this
+disable write is lost.&quot;</em> <strong>Two mechanisms, one load-bearing, one for latency</strong> — and the
+code says which is which. This is the study&#39;s pattern of <em>&quot;correctness does not depend on
+the fast path&quot;</em> appearing a second time in one batch.</p>
+<h3 id="4-5-the-interval-cold-start-a-liveness-bug-found-and-fixed-in-tree">4.5 The interval cold-start: a liveness bug found and fixed in-tree<a href="#batch-04/4-5-the-interval-cold-start-a-liveness-bug-found-and-fixed-in-tree" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>The interval path has a genuinely subtle failure and the fix is documented in full at
+<code>lib.rs:445-476</code>. A brand-new interval workflow has <strong>no in-memory anchor and no prior
+claim</strong>, so <code>last</code> resolves to <code>None</code>; <code>interval_should_fire</code> then defaults <code>last = now</code>,
+<strong>suppresses</strong>, and writes nothing. But the in-memory anchor is only written <em>after a
+successful claim</em>, and <strong>no claim is attempted until the prefilter passes</strong> — so <em>&quot;every
+subsequent tick repeats with <code>last = None</code> and the workflow suppresses forever.&quot;</em></p>
+<p><strong>The fix is to seed <code>now</code> on the <code>None</code> suppress path only</strong> — <em>&quot;We seed ONLY when <code>last</code>
+was <code>None</code>; when <code>last</code> is <code>Some</code> we are correctly mid-interval and must not advance the
+anchor, or it would never elapse.&quot;</em> <strong>Three tests</strong> cover it, including a regression for
+the inverse bug: <code>interval_prefilter_does_not_advance_existing_anchor_on_suppress</code>.</p>
+<p>The test module header even names the person who found it — <em>&quot;Interval cold-start liveness
+(Max&#39;s blocker on the scheduled lane)&quot;</em> — which is the kind of provenance a future reader
+needs and which most codebases throw away.</p>
+<h3 id="4-6-two-small-things-the-loop-does-right">4.6 Two small things the loop does right<a href="#batch-04/4-6-two-small-things-the-loop-does-right" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<ul>
+<li><strong>The anchor is pruned.</strong> <code>last_fired.retain(…)</code> against the active set each tick
+(<code>lib.rs:741-747</code>), so the in-memory map can&#39;t grow forever as workflows are deleted.
+The comment labels it <code>// Fix 1</code>.</li>
+<li><strong>A failed run-insert keeps the claim.</strong> If <code>create_workflow_run</code> fails after a won claim,
+the row <strong>stays with <code>workflow_run_id</code> NULL</strong> and is not re-fired — <em>&quot;at-most-once is
+preserved over exactly-once on transient run-insert failures.&quot;</em> <strong>The team chose the
+failure mode explicitly and said so.</strong> <code>attach_scheduled_workflow_run</code> is a <em>separate,
+best-effort</em> link for audit forensics only.</li>
+</ul>
+<hr>
+<h2 id="5-the-approval-gate-infrastructure-built-wiring-absent-and-dead-code-by-measurement">5. The approval gate — infrastructure built, wiring absent, and **dead code by measurement**<a href="#batch-04/5-the-approval-gate-infrastructure-built-wiring-absent-and-dead-code-by-measurement" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>This is the batch&#39;s largest finding and it needed counting, not reading.</p>
+<p><strong>What the docs say:</strong> <code>ARCHITECTURE.md:650</code> and <code>:955</code>, and <code>VISION.md:127</code> and <code>:231</code> all
+say the same thing — the schema, REST endpoints, MCP tool and UI exist; <strong>the executor does
+not persist the approval token or suspend execution</strong>, so a run that hits <code>request_approval</code>
+is marked <strong>Failed</strong> (🚧 WF-08). <code>VISION.md:127</code> summarises it as <em>&quot;The infrastructure is
+there; the wiring is next.&quot;</em></p>
+<p><strong>What the code does</strong> — and the docs are substantially right, but the measurement goes
+further:</p>
+<ol>
+<li><code>dispatch_action</code> handles <code>RequestApproval</code> by generating a token and returning
+<code>StepResult::Suspended { approval_token }</code> (<code>executor.rs:725-744</code>), with the literal
+<code>// TODO (WF-08): create approval record in DB, emit kind:46010.</code></li>
+<li><code>execute_steps</code> sees <code>Suspended</code> and <strong>returns early</strong> with the token in the
+<code>ExecutionResult</code> (<code>executor.rs:1279-1292</code>).</li>
+<li><code>finalize_run</code> receives that result, sees <code>approval_token.is_some()</code>, logs
+<em>&quot;Workflow hit approval gate — not yet implemented, marking as failed&quot;</em>, and writes
+<code>RunStatus::Failed</code> with <code>error_code: &quot;approval_not_supported&quot;</code> (<code>lib.rs:229-256</code>).
+The comment is explicit about the choice: <em>&quot;Fail explicitly rather than creating
+unreachable WaitingApproval rows.&quot;</em></li>
+</ol>
+<p><strong>So far the doc is accurate. Now the measurement.</strong></p>
+<p><code>RunStatus::WaitingApproval</code> exists (<code>store/workflow.rs:89</code>) and <strong>grep finds it in exactly
+three kinds of place: its own definition/parse/display, two <em>comparisons</em> in
+<code>command_executor.rs</code>, and the comment above.</strong> <strong>No production code path ever <em>writes</em>
+it.</strong> The two comparisons are <code>if run.status != RunStatus::WaitingApproval { warn!(…); return; }</code> at <code>command_executor.rs:1231</code> and <code>:1290</code> — i.e. <strong>guards that can only ever
+take the bail-out branch.</strong></p>
+<p>And <code>create_approval</code> — the function that would mint the row — has <strong>zero production
+callers</strong>. Every hit is a test file (<code>admission_postgres_tests.rs</code>, <code>deletion_tests.rs</code>,
+<code>store/workflow.rs</code>&#39;s own tests).</p>
+<p><strong>Therefore: <code>handle_approval_grant</code> (<code>command_executor.rs:1020-1130</code>),
+<code>handle_approval_deny</code> (1132→) and <code>resume_workflow_after_approval</code> (1273-1352) — roughly
+<strong>330 lines of approval plumbing</strong> — are reachable only from a run state that nothing can
+produce.</strong> An approval can be granted only if a pending approval exists; a pending approval
+can only be created by <code>create_approval</code>; <code>create_approval</code> is never called in production.
+<strong>The chain is air-gapped from its own precondition.</strong></p>
+<p><strong>And the project knows this.</strong> The multi-tenant conformance suite leaves the approval lane
+as an explicit <code>pending_lane</code>:</p>
+<blockquote>
+<p><em>&quot;nothing <em>mints</em> a pending approval over the wire: the executor&#39;s approval gate is an
+explicit TODO … and <code>create_approval</code> is only reached from unit tests. <strong>A green
+end-to-end approval-isolation test therefore cannot be exercised today; writing one would
+violate this file&#39;s contract (a green run can never be faked by an empty/DB-only body).</strong>
+It lands with WF-08.&quot;</em> — <code>conformance_multitenant.rs:1864-1871</code></p>
+</blockquote>
+<p><strong>That is an exemplary engineering artefact.</strong> The team refused to write a test that would
+pass without testing anything, and instead wrote a <strong>named obligation with its dependency
+named</strong> (<code>WF-08 (approval minting)</code>) and the reason the fence it will exercise is <em>already
+landed</em> (<code>get_approval_by_stored_hash(community, hash)</code> is community-scoped today). <strong>A
+pending lane that names its blocker is worth more than a green test that means nothing.</strong></p>
+<p><strong>And the security work is genuinely done.</strong> <code>workflow_approvals</code> has <strong>PK
+<code>(community_id, token)</code></strong> where <code>token</code> is a <strong>SHA-256 hash</strong>, never plaintext
+(<code>store/workflow.rs:34-40</code>, migration <code>0001:411-431</code>). <code>check_approver_spec</code>
+(<code>command_executor.rs:995-1018</code>) accepts <strong>only</strong> an exact 64-hex pubkey match or the
+literals <code>&quot;&quot;</code>/<code>&quot;any&quot;</code>, and <strong>fails closed on anything else</strong> — <em>&quot;approver spec &#39;{}&#39; is not
+yet supported&quot;</em>. The <code>from: &quot;@release-manager&quot;</code> role syntax that <code>schema.rs:142</code> documents
+is therefore <strong>reachable in YAML and refused at grant time</strong> — a documented-but-unsupported
+field, which is a rule-1 divergence of the third kind (the schema is wider than the
+enforcer). <code>generate_approval_token</code> uses <code>Uuid::new_v4()</code> from the OS CSPRNG and
+<strong>deliberately does not mix in <code>run_id</code>/<code>step_id</code></strong> — <em>&quot;the UUID&#39;s own randomness is
+sufficient and avoids the predictability of time-based entropy&quot;</em> (<code>executor.rs:785-793</code>).</p>
+<p><strong>Verdict on the approval gate: the fence is built, the gate is not.</strong> buzz has a complete,
+hashed-token, community-scoped approval <em>data model</em> and a complete, correctly-guarded
+approval <em>command handler</em>, connected by <strong>a missing call.</strong> This is the study&#39;s cleanest
+example of <em>&quot;infrastructure exists&quot;</em> meaning something precise: <strong>the hard parts (scoping,
+hashing, fail-closed authorisation) are done; the missing part is one <code>create_approval</code> call
+and one status write.</strong></p>
+<hr>
+<h2 id="6-the-side-effect-seam-and-the-one-interface-that-carries-everything">6. The side-effect seam — and the one interface that carries everything<a href="#batch-04/6-the-side-effect-seam-and-the-one-interface-that-carries-everything" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="6-1-the-sink-is-77-lines-and-it-replaced-an-http-loopback">6.1 The sink is 77 lines and it replaced an HTTP loopback<a href="#batch-04/6-1-the-sink-is-77-lines-and-it-replaced-an-http-loopback" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>ActionSink</code> (<code>action_sink.rs</code>) is one trait with <strong>one method</strong>, returning
+<code>Pin&lt;Box&lt;dyn Future&gt;&gt;</code> for dyn-compatibility (the engine stores <code>Arc&lt;dyn ActionSink&gt;</code>). The
+doc comment records <em>why it exists</em>:</p>
+<blockquote>
+<p><em>&quot;This replaces the HTTP loopback where the executor POSTed to the relay&#39;s REST API
+(<strong>which failed with 401 auth errors</strong>).&quot;</em></p>
+</blockquote>
+<p><strong>A production bug, named, with its replacement.</strong> And the design consequence is good:
+<code>buzz-workflow</code> <strong>never</strong> depends on <code>buzz-relay</code> (confirmed in <code>Cargo.toml</code> — <code>buzz-core</code>,
+<code>buzz-db</code>, <code>buzz-deletion</code>, plus pure utility crates). The dependency arrow points <strong>in</strong>:
+the relay implements the trait and hands it to the engine via <code>set_action_sink</code>
+(<code>lib.rs:177-181</code>), a <code>OnceLock</code> that <strong>panics if set twice</strong>.</p>
+<h3 id="6-2-the-sink-is-the-third-place-the-community-fence-is-re-checked">6.2 The sink is the third place the community fence is re-checked<a href="#batch-04/6-2-the-sink-is-the-third-place-the-community-fence-is-re-checked" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>RelayActionSink::send_message</code> (<code>workflow_sink.rs:205-…</code>) does its own tenant binding, and
+the comment explains why it can&#39;t trust anything downstream:</p>
+<blockquote>
+<p><em>&quot;The run carries its owning community. Re-deriving the tenant from <code>config.relay_url</code>
+would post a community-B workflow&#39;s output into the deployment/default community under
+N&gt;1. Read the community&#39;s host back to form a complete <code>TenantContext</code> (<strong>host is for
+labelling only — the community is already fixed</strong> and is never re-derived from it). Fail
+closed if the community no longer maps to a host.&quot;</em></p>
+</blockquote>
+<p>Then it <strong>re-checks membership</strong> at the destination: <code>is_member_cached(…)</code>, and if the owner
+is not a member <strong>and</strong> the channel is not <code>open</code>, it refuses
+(<code>workflow_sink.rs:270-280</code>). <strong>So the owner&#39;s authority is checked three times on one run</strong>
+— at run creation, at the per-fire gate, and at the side effect. Not redundant by accident:
+the engine <em>can outlive the request that spawned it</em> (stated at <code>executor.rs:549-552</code>), and
+a long-lived task must not carry a stale authorisation.</p>
+<h3 id="6-3-the-emitted-message-carries-provenance-in-tags-and-one-tag-is-authority-bearing">6.3 The emitted message carries provenance in tags, and one tag is authority-bearing<a href="#batch-04/6-3-the-emitted-message-carries-provenance-in-tags-and-one-tag-is-authority-bearing" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>Every workflow-posted message is signed <strong>by the relay keypair</strong> with the owner attributed
+in tags (<code>workflow_sink.rs:305-330</code>):</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Tag</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>p</code> (owner hex)</td>
+<td>attribution</td>
+</tr>
+<tr>
+<td><code>h</code> (channel UUID)</td>
+<td>NIP-29 channel scope, canonical</td>
+</tr>
+<tr>
+<td><code>buzz:workflow</code> = <code>&quot;true&quot;</code></td>
+<td><strong>prevents recursive triggering</strong></td>
+</tr>
+<tr>
+<td><code>buzz:workflow-owner</code></td>
+<td>lets harnesses apply the owner&#39;s inbound policy after verifying the relay signature</td>
+</tr>
+<tr>
+<td><code>p</code> per resolved mention</td>
+<td>preserves wake/feed behaviour</td>
+</tr>
+<tr>
+<td><code>buzz:workflow-mention</code></td>
+<td><strong>only</strong> when the target was named in the owner&#39;s <strong>stored, unrendered</strong> template</td>
+</tr>
+</tbody></table></div>
+<p><strong>That last row is the subtle one, and it is a security boundary.</strong> The sink takes <strong>two</strong>
+versions of the text: <code>text</code> (rendered, may contain <code>{{trigger.text}}</code> substitutions) and
+<code>authored_text</code> (the owner&#39;s stored template). The doc comment on the trait parameter says
+it outright: <em>&quot;consumers must use this rather than trigger-controlled rendered output when
+attaching authority-bearing metadata&quot;</em> (<code>action_sink.rs:59-61</code>). The plan comment in the
+sink is blunter: *&quot;<strong>trigger-controlled template substitutions cannot create it.</strong>&quot;*</p>
+<p><strong>So an attacker who can cause a workflow to fire with a crafted message body cannot forge a
+<code>buzz:workflow-mention</code> tag naming an agent</strong> — because that tag is built from the
+<em>author&#39;s</em> stored text, not the <em>trigger&#39;s</em> content. <strong>This is the template-injection
+variant of the confused-deputy problem, closed by carrying two strings instead of one.</strong></p>
+<p><code>resolve_mention_pubkeys</code> (<code>workflow_sink.rs:44-…</code>) defines the reverse-parse contract and
+its doc comment is a list of five deliberate conservatisms — members only, exact display
+name, greedy-longest non-overlapping, and <strong>ambiguous names wake no one</strong> (<em>&quot;arbitrary
+selection would silently misroute and tagging all of them is a false-wake firehose&quot;</em>).</p>
+<h3 id="6-4-call-webhook-is-the-one-action-with-a-real-ssrf-defence">6.4 `call_webhook` is the one action with a real SSRF defence<a href="#batch-04/6-4-call-webhook-is-the-one-action-with-a-real-ssrf-defence" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>call_webhook_impl</code> (<code>executor.rs:874-962</code>) plus <code>check_ssrf</code> (838-867) is defensive
+programming worth recording in full, because each line names its attack:</p>
+<ol>
+<li><strong>DNS is resolved once and pinned into the client</strong> via <code>.resolve(host, SocketAddr)</code> —
+<em>&quot;without pinning, reqwest performs its own DNS resolution which could return a different
+address than the one validated above (DNS rebinding TOCTOU).&quot;</em></li>
+<li><strong>Every resolved IP is checked</strong> against <code>is_private_ip</code>; <strong>any</strong> private address rejects
+the whole request.</li>
+<li><strong><code>.no_proxy()</code></strong> — <em>&quot;A system proxy would resolve the original hostname itself, bypassing
+the validated and pinned address.&quot;</em></li>
+<li><strong><code>.redirect(Policy::none())</code></strong> — <em>&quot;a redirect to an internal host bypasses the SSRF check.&quot;</em></li>
+<li><strong>10-second timeout.</strong></li>
+<li><strong>The response is read in chunks with a 1 MiB cap</strong> — <em>&quot;<code>resp.bytes()</code> would buffer the
+entire body before we could check the size; chunked reading lets us abort early.&quot;</em></li>
+</ol>
+<p><strong>Six defences, six stated reasons, and items 3 and 4 are the two that most SSRF
+implementations miss.</strong> The <code>ARCHITECTURE.md:873</code> security table lists <code>CallWebhook</code> as an
+application point for the shared validation pattern; <code>:892</code> correctly notes the webhook
+<em>secret</em> is <strong>not</strong> an HMAC (<em>&quot;compares the secret directly, not a body MAC&quot;</em>) — the doc is
+honest about the weaker construction rather than overclaiming.</p>
+<h3 id="6-5-the-webhook-door-same-generic-404-for-four-different-failures">6.5 The webhook door: same generic 404 for four different failures<a href="#batch-04/6-5-the-webhook-door-same-generic-404-for-four-different-failures" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>workflow_webhook</code> (<code>bridge.rs:2426-2586</code>) is the unauthenticated-by-default entry point,
+and its dominant design decision is <strong>one indistinguishable error</strong>:</p>
+<ul>
+<li><strong>Row zero binds the tenant from the request <code>Host</code></strong>, not from the workflow row —
+<em>&quot;a request for community A&#39;s host may only reach community A&#39;s workflows, even when the
+same workflow UUID also exists in community B.&quot;</em></li>
+<li><strong>Unmapped host, lookup failure, and non-existent-in-this-community all return the same
+generic 404</strong> — <em>&quot;so a caller cannot probe which hosts or workflow ids exist on other
+tenants.&quot;</em></li>
+<li><strong>A wrong secret returns the same 404</strong>, not 401/403 — <em>&quot;Until the caller proves the
+secret, every failure answers like a missing workflow, so the response never reveals that
+the workflow exists, its trigger type, or whether a secret was configured.&quot;</em></li>
+<li><strong>A revoked owner returns the same 404</strong> — <em>&quot;so a revoked-owner workflow is
+indistinguishable from a nonexistent one.&quot;</em></li>
+<li><strong>A workflow with no <code>channel_id</code> fails closed</strong> — <em>&quot;No channel scope means no channel
+authority to verify.&quot;</em></li>
+</ul>
+<p><strong>Four distinct failure causes, one byte-identical response.</strong> This is the enumeration-oracle
+defence, and the multi-tenant conformance suite tests it directly
+(<code>workflow_trigger_is_community_confined</code> asserts the rejection <em>&quot;must be the generic
+<code>workflow not found</code> (no enumeration oracle)&quot;</em> — with a <strong>positive control</strong> that the same
+trigger succeeds under host A, so the rejection can&#39;t be attributed to an untriggerable
+workflow).</p>
+<p><strong>The secret is stored inside the definition JSON</strong> under <code>_webhook_secret</code>
+(<code>webhook_secret.rs</code>), and the module documents a <strong>hash-ordering contract</strong> that was
+evidently once violated:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>text</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code>1. Build/update the definition JSON.
+2. inject_secret(&amp;mut def, &amp;secret)   ← secret is now part of def
+3. Compute definition_hash over def   ← hash covers the secret
+4. Persist def + hash
+</code></pre>
+</div>
+<blockquote>
+<p><em>&quot;Reversing steps 2 and 3 (the previous bug) means the hash is computed over a definition
+that does not yet contain <code>_webhook_secret</code>, so every subsequent comparison fails.&quot;</em></p>
+</blockquote>
+<p><strong>A retired bug, documented as an ordering contract, with the failure mode named.</strong> Secret
+comparison is a hand-rolled XOR-fold constant-time compare, and the code <strong>admits its own
+limit</strong>: <em>&quot;a length mismatch is revealed immediately (not constant-time), but an attacker who
+can observe response latency already knows the expected length from the generation algorithm
+(UUID v4 → always 36 bytes), so leaking the length check provides no additional
+information.&quot;</em> <strong>An honest caveat beats a claimed constant-time compare that isn&#39;t.</strong></p>
+<h3 id="6-6-send-message-re-validates-the-channel-on-every-hop">6.6 `send_message` re-validates the channel on every hop<a href="#batch-04/6-6-send-message-re-validates-the-channel-on-every-hop" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>The one action that really works validates more than the docs suggest: content non-empty
+(not just non-NULL — <code>text.trim().is_empty()</code> → <code>EmptyContent</code>), UUID parse, <strong>channel
+exists</strong>, <strong>channel not archived</strong> (<code>channel.archived_at.is_some()</code> → <code>ChannelArchived</code>),
+owner is a member <strong>or</strong> the channel is <code>open</code>, and author pubkey parses. Five refusals
+before a byte is written.</p>
+<p><strong>A channel-scope decision worth noting:</strong> <code>resolve_send_message_channel</code>
+(<code>executor.rs:486-528</code>) <strong>forbids cross-channel posting</strong> for a channel-bound workflow —
+the override must <strong>equal</strong> the workflow&#39;s channel or it&#39;s an <code>InvalidDefinition</code>
+(<em>&quot;channel override must match the workflow channel&quot;</em>), with two tests pinning both the
+refusal and the legitimate global-workflow case. So a definition cannot be used to make a
+workflow post into an unrelated channel it happens not to be scoped to.</p>
+<hr>
+<h2 id="7-the-schema-four-tables-and-the-community-fence-is-a-composite-pk">7. The schema — four tables, and the community fence is a composite PK<a href="#batch-04/7-the-schema-four-tables-and-the-community-fence-is-a-composite-pk" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Four workflow tables, all created in <code>0001_initial_schema.sql</code>, all keyed by
+<code>(community_id, …)</code> (<code>:362-466</code>):</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Table</th>
+<th>PK</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>workflows</code></td>
+<td><code>(community_id, id)</code></td>
+<td>FKs to <code>communities</code>, <code>users(community_id, pubkey)</code>, <code>channels(community_id, id)</code></td>
+</tr>
+<tr>
+<td><code>workflow_runs</code></td>
+<td><code>(community_id, id)</code></td>
+<td>FK to <code>workflows</code> <strong><code>ON DELETE CASCADE</code></strong></td>
+</tr>
+<tr>
+<td><code>workflow_approvals</code></td>
+<td><code>(community_id, token)</code></td>
+<td><code>token</code> = <strong>SHA-256 hash</strong>; two cascading FKs</td>
+</tr>
+<tr>
+<td><code>scheduled_workflow_fires</code></td>
+<td><code>(community_id, workflow_id, scheduled_for)</code></td>
+<td>FK to runs uses <strong><code>ON DELETE NO ACTION</code></strong></td>
+</tr>
+</tbody></table></div>
+<p><strong>Two choices in this table set are worth calling out because the migration comments
+<em>justify</em> them rather than just declaring them</strong> — this schema is unusually well-annotated:</p>
+<ol>
+<li><strong><code>workflow_approvals</code>&#39; PK is <code>(community_id, token)</code>, not <code>(token)</code></strong> — <em>&quot;token-hash
+lookup scoped: approval token grants cannot act on another community&#39;s same hash
+(conformance).&quot;</em> <strong>The same hash value in two communities is two different rows.</strong></li>
+<li><strong>The claim→run FK is <code>NO ACTION</code>, deliberately not <code>SET NULL</code></strong>, and the comment gives
+the mechanical reason: <em>&quot;<code>community_id</code> is shared with the claim PK and is NOT NULL, so
+SET NULL is unimplementable here; a future delete of a still-linked run is blocked rather
+than orphaning the at-most-once claim row.&quot;</em> <strong>A DDL constraint explained by the
+constraint that made the obvious option impossible.</strong></li>
+</ol>
+<p><strong><code>idx_workflows_enabled</code> is a partial index</strong> (<code>WHERE enabled</code>) — <em>&quot;Scheduler scans enabled
+schedule workflows; community_id returned per row so side effects run under the owning
+tenant&#39;s context.&quot;</em> And <code>definition_hash</code> is stored beside <code>definition</code> so
+<em>&quot;the same signed command cannot silently redefine a live workflow.&quot;</em></p>
+<p><strong>The deletion path is a fourth door and it is careful.</strong> <code>delete_workflow_by_coordinate</code>
+(<code>store/workflow/deletion.rs:30-43</code>) shares a <strong>replacement advisory lock</strong> with definition
+saves, <strong>treats a deletion older than the live definition as a no-op</strong> (<em>&quot;clients may
+intentionally publish backdated definitions&quot;</em>), and <strong>retains no tombstone</strong>. The doc states
+the policy: <em>&quot;Deletion is not a permanent coordinate ban: clients may publish a distinct
+signed definition afterward, including a backdated version, to recreate the workflow.&quot;</em>
+<strong>A deletion policy stated as a policy, with its rejected alternative (&quot;a deletion
+watermark&quot;) named.</strong> <code>WorkflowDeletionOutcome</code> returns <code>channel_id</code> <strong>for trigger-cache
+invalidation</strong> — the invalidation the cache comment promised.</p>
+<p><strong>Every list query is bounded.</strong> <code>LIST_DEFAULT_LIMIT = 100</code>, <code>LIST_MAX_LIMIT = 1000</code>, and
+the module header states the rule: <em>&quot;Never uses string interpolation for query values — all
+user data goes through bind parameters&quot;</em> + <em>&quot;Approval tokens are stored as SHA-256 hashes
+(never plaintext)&quot;</em> + <em>&quot;All list queries have a bounded LIMIT to prevent unbounded scans.&quot;</em>
+<strong>Three stated invariants at the top of the file; all three verifiable in the file.</strong></p>
+<h3 id="7-1-the-definition-language-is-a-nostr-event-kind-30620">7.1 The definition language is a Nostr event — kind 30620<a href="#batch-04/7-1-the-definition-language-is-a-nostr-event-kind-30620" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>Workflows are <strong>not</strong> created through a REST endpoint in normal use; they are created by
+publishing a <strong>kind 30620</strong> event (<code>KIND_WORKFLOW_DEF</code>), a <strong>NIP-33 parameterized
+replaceable</strong> (range 30000–39999, <code>d</code>-tag = the workflow UUID), whose <strong>content is the
+YAML</strong> (<code>handle_workflow_def</code>, <code>command_executor.rs:638-700</code>). There is a compile-time
+assertion that 30620 lands in the replaceable range (<code>kind.rs:912</code>).</p>
+<p>The <strong>execution</strong> kinds (46001–46012) are the <em>observations</em>: <code>TRIGGERED</code>, <code>STEP_STARTED</code>,
+<code>STEP_COMPLETED</code>, <code>STEP_FAILED</code>, <code>COMPLETED</code>, <code>FAILED</code>, <code>CANCELLED</code>,
+<code>APPROVAL_{REQUESTED,GRANTED,DENIED}</code> — <strong>twelve kinds that describe a run.</strong> And
+<code>KIND_WORKFLOW_TRIGGER</code> (46020) / <code>KIND_APPROVAL_GRANT</code> (46030) / <code>KIND_APPROVAL_DENY</code>
+(46031) are the <strong>commands</strong>. So the whole feature is <strong>commands in, observations out, all
+through the same event log</strong> — the batch-01 thesis holding in P3.</p>
+<p><strong>Note this is not a NIP.</strong> <code>docs/nips/</code> has 20 files; <strong>none is a workflow NIP.</strong> The
+workflow protocol is specified in <code>ARCHITECTURE.md</code> §buzz-workflow, and the only workflow
+obligation in <code>docs/multi-tenant-conformance.md</code> is <strong>row 49</strong> (&quot;Workflows, runs, approvals,
+webhooks, schedules&quot;). <strong>buzz has standardised 20 of its own extensions and left its
+automation engine as an internal architecture chapter</strong> — a deliberate boundary, and one a
+reader should know before looking for the spec.</p>
+<hr>
+<h2 id="8-the-frontend-of-p3-57-files-and-a-real-authoring-ui">8. The frontend of P3 — 57 files, and a real authoring UI<a href="#batch-04/8-the-frontend-of-p3-57-files-and-a-real-authoring-ui" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>The workflow UI is not a stub. <strong>57 product <code>.ts</code>/<code>.tsx</code> files, 11,804 product lines, plus
+2,645 test lines</strong> under <code>desktop/src/features/workflows/</code> and <code>desktop/src/shared/api/</code>.
+That is a <strong>substantial authoring surface</strong>, and it includes editors that plainly encode the
+same rules the Rust schema enforces:</p>
+<p><code>CronExpressionInput</code>, <code>WorkflowScheduleFields</code>, <code>WorkflowTriggerConditions</code>,
+<code>WorkflowMessageTextConditionEditor</code>, <code>WorkflowWebhookHeadersEditor</code>,
+<code>WorkflowWebhookSecretDialog</code>, <code>WorkflowDurationField</code>, <code>WorkflowEmojiField</code>,
+<code>WorkflowFormBuilder</code>, <code>WorkflowTemplateTextarea</code>, <code>WorkflowRunTrace</code>,
+<code>WorkflowApprovalCard</code>, <code>WorkflowYamlDocument</code>, plus pure-logic modules
+(<code>cronExpression.ts</code>, <code>workflowConditionExpression.ts</code>, <code>workflowDuration.ts</code>,
+<code>workflowTemplateVariables.ts</code>) each with its own test.</p>
+<p><strong>Two details worth recording, because they show the schema rules escaped the crate and
+reached the author:</strong></p>
+<ul>
+<li><code>workflowDuration.ts</code> exists, which means the duration grammar is a <strong>shared contract</strong>
+between the Rust parser and the UI — and the UI can refuse a sub-60 s interval before the
+server does.</li>
+<li><code>WorkflowApprovalCard.tsx</code> exists — <strong>a UI for a feature whose engine half is not wired</strong>
+(section 5). This is the &quot;infrastructure is there&quot; claim made visible: the card is built,
+the run never gets to a state where it&#39;s shown.</li>
+</ul>
+<p><strong><code>desktop/src/features/workflows/</code> is the P3 surface, and the batch-05 frontend pass will
+read it properly</strong> — here it is noted only as evidence that buzz treats automations as a
+<strong>first-class product surface with a form-based editor and a raw-YAML view</strong>, not as an
+API-only feature.</p>
+<hr>
+<h2 id="9-what-buzz-s-p3-does-not-have-measured-not-assumed">9. What buzz's P3 does *not* have (measured, not assumed)<a href="#batch-04/9-what-buzz-s-p3-does-not-have-measured-not-assumed" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Negative results, each verified by search rather than by absence of memory:</p>
+<ul>
+<li><strong>No queue.</strong> <code>try_acquire</code> + <code>CapacityExceeded</code>; no backpressure, no retry, no dead-letter.
+Self-declared (<code>ARCHITECTURE.md:663</code>).</li>
+<li><strong>No parallelism and no branching in a workflow.</strong> A step list is a straight line; there is
+no <code>parallel</code>, <code>foreach</code>, <code>switch</code>, or <code>goto</code> in <code>ActionDef</code>/<code>Step</code>.</li>
+<li><strong>No retry policy on any action.</strong> <code>call_webhook</code> has a timeout; no attempt count.</li>
+<li><strong>No run-history retention policy in code.</strong> <code>workflow_runs</code> are <em>&quot;not pruned today&quot;</em>
+(stated in the <code>0001</code> comment); <code>scheduled_workflow_fires</code> <strong>does</strong> have
+<code>prune_scheduled_workflow_fires_before</code>, with a retention warning attached
+(<code>store/workflow.rs:626-632</code>).</li>
+<li><strong>No idempotency key on the webhook door beyond the secret.</strong> A hostile caller with a valid
+secret can create runs at will; the only limiter is the 100-permit semaphore.</li>
+<li><strong>No approval-gate wiring</strong> (section 5), and <strong>no role-based approver</strong> — <code>from: &quot;@release-manager&quot;</code> parses but <code>check_approver_spec</code> rejects it.</li>
+<li><strong>No <code>send_dm</code> and no <code>set_channel_topic</code></strong> (WF-07 stubs).</li>
+<li><strong>No workflow NIP</strong>, and no <code>docs/</code> page for workflows (section 7.1).</li>
+<li><strong><code>delay</code> cannot express hours.</strong> 270 s cap (WF-09 named for the scheduled-resume pattern).</li>
+</ul>
+<hr>
+<h2 id="10-findings">10. Findings<a href="#batch-04/10-findings" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>F4-1 — The engine has no queue, on purpose, and it fails loudly.</strong> <code>max_concurrent = 100</code>,
+<code>try_acquire()</code>, <code>CapacityExceeded</code> returned immediately. <code>ARCHITECTURE.md:663</code> declares it.
+<strong>A workflow run under load is dropped, not deferred</strong> — and the drop is a <em>typed</em> error
+recorded on the run, not a hang.</p>
+<p><strong>F4-2 — The docs under-count triggers: the code has 5, the doc says 4.</strong> <code>diff_posted</code>
+(kind 40008) is implemented, tested, and matched — and absent from
+<code>ARCHITECTURE.md:632</code>&#39;s list. Rule-1 divergence, code correct, doc stale.</p>
+<p><strong>F4-3 — The docs over-state the delay cap: <code>ARCHITECTURE.md:636</code> says 300 s, the code caps
+at 270 s.</strong> The comment gives the reason (must be &lt; the 300 s default step timeout to avoid a
+non-deterministic <code>StepTimeout</code>). <strong>Here the code is not just newer — it is more correct than
+the doc.</strong> Divergence #2.</p>
+<p><strong>F4-4 — <code>from: &quot;@role&quot;</code> in <code>request_approval</code> parses and is refused at grant time.</strong>
+<code>schema.rs:142</code> documents a role mention; <code>check_approver_spec</code> (<code>command_executor.rs:995</code>)
+accepts only a 64-hex pubkey or <code>&quot;&quot;</code>/<code>&quot;any&quot;</code> and <strong>fails closed</strong> on anything else. <strong>The
+definition language is wider than the enforcer</strong> — a third kind of divergence, and the safe
+direction for it to be wrong in.</p>
+<p><strong>F4-5 — The approval chain is air-gapped from its own precondition, and the project says
+so.</strong> <code>WaitingApproval</code> is <strong>never written</strong> by production code; <code>create_approval</code> has <strong>zero
+production callers</strong>; therefore ~330 lines of grant/deny/resume in <code>command_executor.rs</code> are
+unreachable. The conformance suite leaves the lane as a <strong>named <code>pending_lane</code> that refuses
+to fake a green</strong> — <em>&quot;writing one would violate this file&#39;s contract.&quot;</em> <strong>The best artefact
+in this batch is a test that was deliberately not written.</strong></p>
+<p><strong>F4-6 — <code>if:</code> filters are defended against webhook-body variable spoofing.</strong> Webhook keys
+are registered <strong>first</strong>, as <code>trigger_{key}</code>, and any key starting with <code>trigger_</code>/<code>steps_</code>
+is <strong>skipped</strong> so the standard fields cannot be overwritten (<code>executor.rs:282-292</code>). Without
+this, <code>POST {&quot;text&quot;: &quot;P1&quot;}</code> would forge the field a filter compares against.</p>
+<p><strong>F4-7 — <code>authored_text</code> vs rendered <code>text</code> closes template injection of authority tags.</strong>
+The sink receives both; <code>buzz:workflow-mention</code> is built <strong>only</strong> from the owner&#39;s stored
+template, so <em>&quot;trigger-controlled template substitutions cannot create it.&quot;</em> A second string
+carried through one interface is the whole defence.</p>
+<p><strong>F4-8 — Determinism, not locking, is the cross-pod at-most-once primitive.</strong> <code>scheduled_for</code>
+is the <strong>cron&#39;s own instant</strong> (window matching) or the <strong>interval bucket boundary</strong>
+(floor-division quantisation), so every pod computes the <strong>same</strong> claim key and the PK
+<code>(community_id, workflow_id, scheduled_for)</code> + <code>ON CONFLICT DO NOTHING</code> resolves the race in
+one statement. <strong>No distributed lock is involved.</strong></p>
+<p><strong>F4-9 — The authority gate is called at all four doors, and at the cron door it is
+deliberately placed <em>before</em> the claim.</strong> The comment names the bug class it avoids:
+<em>&quot;placing the gate after the claim would let a revoked owner&#39;s workflow consume the
+at-most-once fire slot … turning revocation into a denial-of-fire for a later re-enable.&quot;</em>
+<strong>A check moved, not a mechanism added.</strong></p>
+<p><strong>F4-10 — Revocation is durable (a disable write) <em>and</em> fail-closed (a per-fire gate), and
+the code says which is load-bearing.</strong> <em>&quot;Failures are logged, not propagated … the per-fire
+gate still denies a removed owner even if this disable write is lost.&quot;</em></p>
+<p><strong>F4-11 — The webhook door answers four distinct failures with one byte-identical generic
+404</strong>, tested with a <strong>positive control</strong> so the rejection can&#39;t be misattributed.
+Enumeration-oracle defence, stated and exercised.</p>
+<p><strong>F4-12 — <code>call_webhook</code> carries six SSRF defences with six stated reasons</strong>, including the
+two usually missed (<code>no_proxy</code> — a system proxy re-resolves the hostname; redirects disabled
+— a 302 to an internal host bypasses the check) and a <strong>pinned-DNS client built per request</strong>
+against rebinding TOCTOU.</p>
+<p><strong>F4-13 — The interval cold-start liveness bug was found, fixed, and regression-tested in
+both directions</strong> — seed only on the <code>None</code> suppress path, never advance a <code>Some</code> anchor.
+Test names the reporter. <strong>A subtle bug with a durable memory.</strong></p>
+<p><strong>F4-14 — The data model is complete where it matters and the missing part is one call.</strong>
+<code>workflow_approvals</code> has PK <code>(community_id, token)</code> with a <strong>hashed</strong> token and cascading
+FKs; the grant path is community-scoped and fail-closed. <strong>&quot;Infrastructure is there&quot; is
+literally true: the hard parts are done.</strong> What is absent is the <em>call</em>.</p>
+<p><strong>F4-15 — The whole feature is events.</strong> Definitions arrive as <strong>kind 30620</strong> (NIP-33
+replaceable, YAML in <code>content</code>); commands are 46020/46030/46031; observations are
+46001–46012. <strong>There is no workflow NIP</strong> — the spec is an <code>ARCHITECTURE.md</code> chapter, and the
+only conformance obligation is row 49 of <code>multi-tenant-conformance.md</code>. buzz standardised 20
+extensions and <strong>chose not to standardise this one.</strong></p>
+<hr>
+<h2 id="11-documents-that-claim-things-the-code-contradicts">11. Documents that claim things the code contradicts<a href="#batch-04/11-documents-that-claim-things-the-code-contradicts" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Collected in one place, because rule 1 says the divergence <em>is</em> the finding:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Claim</th>
+<th>Where</th>
+<th>Reality in code</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>D4-1</td>
+<td>&quot;<strong>4 trigger types</strong>&quot;</td>
+<td><code>ARCHITECTURE.md:632</code></td>
+<td><strong>5</strong> — <code>diff_posted</code> (kind 40008) is implemented and tested</td>
+</tr>
+<tr>
+<td>D4-2</td>
+<td><code>delay</code> &quot;max <strong>300</strong> seconds&quot;</td>
+<td><code>ARCHITECTURE.md:636</code></td>
+<td><strong>270 s</strong> (<code>executor.rs:751</code>), to stay under the 300 s default step timeout</td>
+</tr>
+<tr>
+<td>D4-3</td>
+<td><code>request_approval</code> <code>from:</code> accepts a <strong>role</strong></td>
+<td><code>schema.rs:142</code> (doc comment)</td>
+<td><code>check_approver_spec</code> accepts only an exact 64-hex pubkey, <code>&quot;&quot;</code>, or <code>&quot;any&quot;</code>; <strong>roles fail closed</strong></td>
+</tr>
+<tr>
+<td>D4-4</td>
+<td>&quot;approval gates … the engine does not yet persist the token&quot;</td>
+<td><code>ARCHITECTURE.md:650</code>, <code>:955</code>, <code>VISION.md:127</code></td>
+<td><strong>Accurate</strong> — and the measurement adds that <code>WaitingApproval</code> is <em>never written</em> and <code>create_approval</code> has <em>zero production callers</em>, so the grant path is unreachable, not merely unwired</td>
+</tr>
+<tr>
+<td>D4-5</td>
+<td>The workflow engine &quot;is fully implemented&quot; (cron)</td>
+<td><code>ARCHITECTURE.md:652</code></td>
+<td><strong>Accurate</strong> — with the caveat that a <em>failed run-insert</em> leaves the claim held (at-most-once over exactly-once, stated)</td>
+</tr>
+</tbody></table></div>
+<p><strong>Two divergences where the doc is stale, one where the doc is wider than the enforcer, and
+two where the doc is right and the code merely needed counting to see how right.</strong> The
+<em>correct</em> direction of the approval claim (D4-4) is worth noting: the project&#39;s own docs
+<strong>under</strong>-state the gap, and the conformance suite states it precisely. <strong>The most accurate
+document about the approval gate is a skipped test.</strong></p>
+<hr>
+<h2 id="12-the-pole-plainly">12. The pole, plainly<a href="#batch-04/12-the-pole-plainly" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>What P3 is:</strong> a <strong>channel-scoped, YAML-authored, sequentially-executed automation engine</strong>
+whose triggers, actions, commands and observations are all <strong>signed events in one log</strong>. Five
+triggers, seven actions (two of them stubs), a real template language with one level of step
+output, real conditions with three defences, a 60-second cron loop whose dedupe is
+<strong>determinism rather than locking</strong>, one authority gate called at all four doors, and one
+77-line side-effect seam that the relay implements.</p>
+<p><strong>What is genuinely strong:</strong></p>
+<ul>
+<li><strong>The cross-pod at-most-once claim.</strong> Deterministic instant + PK conflict = no locks, no
+coordinator, restart-safe, and the interval anchor is read back from the claim table.</li>
+<li><strong><code>check_owner_authority</code>&#39;s placement and its fail-closed shape.</strong> Four doors, one
+function, and the ordering argument at the cron door is a real bug class named and closed.</li>
+<li><strong>The SSRF work on <code>call_webhook</code>.</strong> Six defences with six reasons; two of them
+(<code>no_proxy</code>, no-redirect) are the ones implementations usually miss.</li>
+<li><strong>The two-string seam (<code>text</code> vs <code>authored_text</code>).</strong> Template injection of authority tags
+closed with one extra parameter.</li>
+<li><strong><code>PartialProgress</code>.</strong> A failed run keeps its trace. Three earlier platforms lost it.</li>
+<li><strong>The <code>pending_lane</code> refusal.</strong> A test deliberately not written, with its blocker named.</li>
+<li><strong><code>trigger_is_reply</code> delegating to the shared parser</strong> rather than re-deriving the
+predicate — and five tests pinning every corner of agreement.</li>
+</ul>
+<p><strong>What is genuinely weak or incomplete, stated without softening:</strong></p>
+<ul>
+<li><strong>Approval gates do not work</strong>, and not in the &quot;unwired&quot; sense the docs imply — the whole
+grant/deny/resume path is <strong>dead code</strong>. The token, the hash, the scoping and the fail-closed
+approver check are done; the <em>mint</em> is missing.</li>
+<li><strong>Two of seven actions are stubs</strong> (<code>send_dm</code>, <code>set_channel_topic</code>), so a definition using
+them saves successfully and fails at run time.</li>
+<li><strong>No queue, no retry, no parallelism, no branching.</strong> Under load a run is dropped; a
+transient webhook failure is permanent.</li>
+<li><strong><code>add_reaction</code> and <code>call_webhook</code> are feature-gated on <code>reqwest</code>, and the <em>non</em>-featured
+path returns <code>{&quot;skipped&quot;: true}</code> with the run reporting <code>Completed</code></strong> — a green run that
+performed no side effect. <strong>I checked whether this bites in practice, and it does not in the
+shipped topology:</strong> <code>crates/buzz-relay/Cargo.toml:67</code> declares
+<code>buzz-workflow = { workspace = true, features = [&quot;reqwest&quot;] }</code>, so the relay always enables
+it. <strong>The correct statement is therefore a latent hazard, not a live bug</strong> — the graceful
+degrade is the right call for a library, but <em>any other consumer of <code>buzz-workflow</code> that
+forgets the feature gets silently-green no-op steps</em>, and the run trace will not say so.
+Worth recording precisely because the failure mode is invisible by construction.</li>
+<li><strong>The doc drift on triggers and the delay cap</strong> — small, but both are the kind of number a
+reader would rely on.</li>
+</ul>
+<p><strong>The one-line verdict for the mapping pass:</strong> <em>buzz&#39;s P3 is a <strong>small, careful, event-native
+automation engine whose security thinking is ahead of its feature completeness</strong> — the
+concurrency story is deterministic rather than locked, the authority story is fail-closed at
+every door, and the approval story is a finished data model waiting on one missing call.</em></p>
+<hr>
+<p><strong>Batch 04 of 07. Written 2026-10-16. Next: <code>findings/05-widgets-and-frontend.md</code> (PX-W /
+PX-F) — the composition surface and the frontend architecture: whether buzz has a widget or
+composer model at all (four platforms so far have none), the desktop React 19 + Tauri 2
+client&#39;s structure, the Flutter mobile tree, the design-token story, and the deepest question
+this platform poses — <strong>is an event log the same thing as a widget model?</strong> Then batch 06
+(out-of-pole, PZ) and batch 07 (synthesis).</strong></p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="03-the-workspace-p2.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">The Workspace (P2)</span>
+                </a>
+              
+
+              <a href="../index.html#batch-04" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              
+                <a href="05-widgets-frontend.html" class="nav-page-btn" style="text-align:right;">
+                  <span class="nav-btn-sub">Next Batch →</span>
+                  <span class="nav-btn-title">Widgets &amp; Frontend</span>
+                </a>
+              
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#1-the-shape-one-crate-five-files-and-an-unusually-honest-header" class="toc-link">1. The shape: one crate, five files, and an unusually honest header</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#2-the-definition-language-yaml-authored-canonical-json-stored" class="toc-link">2. The definition language — YAML authored, canonical JSON stored</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-1-triggers-the-code-has-five-the-doc-says-four" class="toc-link">2.1 Triggers — the code has FIVE; the doc says four</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-2-the-schedule-trigger-has-three-self-defending-rules" class="toc-link">2.2 The Schedule trigger has three self-defending rules</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-3-actions-seven-and-two-of-them-do-not-work" class="toc-link">2.3 Actions — seven, and two of them do not work</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-4-validation-is-a-real-gate-not-a-formality" class="toc-link">2.4 Validation is a real gate, not a formality</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-5-one-flag-with-security-weight-requires-elevated-authority" class="toc-link">2.5 One flag with security weight: requires_elevated_authority</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-the-executor-sequential-single-pass-and-explicit-about-partial-failure" class="toc-link">3. The executor — sequential, single-pass, and explicit about partial failure</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-1-templates-single-pass-non-recursive-and-unknown-keys-stay-literal" class="toc-link">3.1 Templates: single-pass, non-recursive, and unknown keys stay literal</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-2-conditions-evalexpr-with-three-defences-around-it" class="toc-link">3.2 Conditions: evalexpr, with three defences around it</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-3-trigger-is-reply-a-predicate-that-had-to-be-re-derived-three-times" class="toc-link">3.3 trigger_is_reply — a predicate that had to be re-derived three times</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-4-author-comes-from-the-signature-never-from-a-tag" class="toc-link">3.4 author comes from the signature, never from a tag</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-the-engine-three-doors-into-a-run-and-one-gate-in-front-of-all-of-them" class="toc-link">4. The engine — three doors into a run, and one gate in front of all of them</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-1-the-event-door-fire-and-forget-and-loop-proofed-twice" class="toc-link">4.1 The event door: fire-and-forget, and loop-proofed twice</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-2-the-cache-a-10-second-window-with-a-stated-deliberate-non-guarantee" class="toc-link">4.2 The cache: a 10-second window with a stated, deliberate non-guarantee</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-3-the-cron-loop-a-deterministic-claim-key-is-the-whole-trick" class="toc-link">4.3 The cron loop: a deterministic claim key is the whole trick</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-4-the-authority-gate-one-function-called-at-four-doors-before-the-claim" class="toc-link">4.4 The authority gate: one function, called at four doors, before the claim</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-5-the-interval-cold-start-a-liveness-bug-found-and-fixed-in-tree" class="toc-link">4.5 The interval cold-start: a liveness bug found and fixed in-tree</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-6-two-small-things-the-loop-does-right" class="toc-link">4.6 Two small things the loop does right</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-the-approval-gate-infrastructure-built-wiring-absent-and-dead-code-by-measurement" class="toc-link">5. The approval gate — infrastructure built, wiring absent, and dead code by measurement</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-the-side-effect-seam-and-the-one-interface-that-carries-everything" class="toc-link">6. The side-effect seam — and the one interface that carries everything</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#6-1-the-sink-is-77-lines-and-it-replaced-an-http-loopback" class="toc-link">6.1 The sink is 77 lines and it replaced an HTTP loopback</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#6-2-the-sink-is-the-third-place-the-community-fence-is-re-checked" class="toc-link">6.2 The sink is the third place the community fence is re-checked</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#6-3-the-emitted-message-carries-provenance-in-tags-and-one-tag-is-authority-bearing" class="toc-link">6.3 The emitted message carries provenance in tags, and one tag is authority-bearing</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#6-4-call-webhook-is-the-one-action-with-a-real-ssrf-defence" class="toc-link">6.4 call_webhook is the one action with a real SSRF defence</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#6-5-the-webhook-door-same-generic-404-for-four-different-failures" class="toc-link">6.5 The webhook door: same generic 404 for four different failures</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#6-6-send-message-re-validates-the-channel-on-every-hop" class="toc-link">6.6 send_message re-validates the channel on every hop</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-the-schema-four-tables-and-the-community-fence-is-a-composite-pk" class="toc-link">7. The schema — four tables, and the community fence is a composite PK</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#7-1-the-definition-language-is-a-nostr-event-kind-30620" class="toc-link">7.1 The definition language is a Nostr event — kind 30620</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#8-the-frontend-of-p3-57-files-and-a-real-authoring-ui" class="toc-link">8. The frontend of P3 — 57 files, and a real authoring UI</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#9-what-buzz-s-p3-does-not-have-measured-not-assumed" class="toc-link">9. What buzz&#039;s P3 does *not* have (measured, not assumed)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#10-findings" class="toc-link">10. Findings</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#11-documents-that-claim-things-the-code-contradicts" class="toc-link">11. Documents that claim things the code contradicts</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#12-the-pole-plainly" class="toc-link">12. The pole, plainly</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('buzz_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('buzz_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('buzz_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('buzz_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.BuzzReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

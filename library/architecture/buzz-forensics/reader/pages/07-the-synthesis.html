@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 07 — The synthesis — buzz Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-07" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 07</span>
+      <div class="header-title-wrap">
+        <div class="header-title">The Synthesis</div>
+        <div class="header-subtitle">buzz Platform Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/07-synthesis.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #4f46e5">COMPLETE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">4,208</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">21 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">340</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-16</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 07 Architecture Guide (Default)</option>
+            <optgroup label="Strategic Architecture">
+              <option value="master">Executive Topology: the workspace is the event log, and the isolation is proven</option>
+            </optgroup>
+            <optgroup label="Foundations">
+              <option value="00">Batch 00: The pin, the extraction, and the rename hazard</option>
+              <option value="01">Batch 01: The overview — the event is the whole API</option>
+            </optgroup>
+            <optgroup label="Pole 1 — The Aissistant">
+              <option value="02">Batch 02: The aissistant — an agent is a colleague</option>
+            </optgroup>
+            <optgroup label="Pole 2 — The Workspace">
+              <option value="03">Batch 03: The workspace — three fences over one store</option>
+            </optgroup>
+            <optgroup label="Pole 3 — Automations">
+              <option value="04">Batch 04: Automations — deterministic at-most-once</option>
+            </optgroup>
+            <optgroup label="Cross-Cutting">
+              <option value="05">Batch 05: Widgets &amp; frontend — a proven negative</option>
+            </optgroup>
+            <optgroup label="Escape Hatch">
+              <option value="06">Batch 06: Out-of-pole — five artefacts, three languages</option>
+            </optgroup>
+            <optgroup label="Strategic Decision">
+              <option value="07">Batch 07: The synthesis — where buzz sits, what we take</option>
+            </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 07 VISUAL GUIDE</div>
+    <h4>The synthesis: where buzz sits, and what we take</h4>
+    <p>Seven platforms ranked, three tiers of mechanism, and one recommendation</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 380" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-07" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-07" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+        <marker id="arrr-07" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#ef4444"/>
+        </marker>
+      </defs>
+      <g transform="translate(20, 20)">
+        <rect width="280" height="170" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">TIER 1 — ADOPT NOW (8)</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">1 · LIMITS.md for every gate</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">2 · "prove the tripwire fires"</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">3 · the guard-as-document</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">4 · the three projection rules</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">5 · normalize at the enforcement point</text>
+        <text x="12" y="129" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">6 · the generation fence</text>
+        <text x="12" y="146" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">7 · the prose contract</text>
+        <text x="12" y="163" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">8 · _Avoid_: anti-vocabulary lists</text>
+      </g>
+      <path d="M 300 105 L 330 105" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-07)"/>
+      <g transform="translate(334, 20)">
+        <rect width="280" height="170" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">TIER 2 — TENANCY TIER (7)</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">9 · the schema lint</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">10 · the type fence + its limit</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">11 · isolation as non-interference</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">12 · schema as desired-state</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">13 · the runtime conformance gate</text>
+        <text x="12" y="129" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">14 · hash-versioning discipline</text>
+        <text x="12" y="146" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">15 · deletion as a lifecycle</text>
+        <text x="12" y="163" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">→ for when WE build the tenancy layer</text>
+      </g>
+      <path d="M 614 105 L 644 105" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-07)"/>
+      <g transform="translate(648, 20)">
+        <rect width="252" height="170" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">TIER 3 — OBSERVE LATER (7)</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">16 · the authority gate at every door</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">17 · deterministic at-most-once cron</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">18 · the build-split verification</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">19 · fail-open / fail-closed flags</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">20 · the egress guard inventory</text>
+        <text x="12" y="129" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">21 · two dials, one virtual rem</text>
+        <text x="12" y="146" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">22 · the rename hazard on the checklist</text>
+      </g>
+      <rect x="20" y="210" width="880" height="150" rx="10" fill="#7c3aed" fill-opacity="0.08" stroke="#7c3aed" stroke-width="1.8"/>
+      <text x="40" y="238" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#6d28d9">THE VERDICT, AND THE RANKED ORDER ACROSS ALL SEVEN STUDIED PLATFORMS</text>
+      <text x="40" y="264" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">1 · buzz (the proof surface) · 2 · Multica (the closest architectural neighbour) · 3 · n8n (the composition surface)</text>
+      <text x="40" y="284" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">4 · Gas Town · 5 · Hermes · 6 · Paperclip · 7 · CrewAI.</text>
+      <text x="40" y="310" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">RECOMMENDATION: take ALL FIVE in §9 — LIMITS.md · the mutation test · the guard-as-document · the prose</text>
+      <text x="40" y="330" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">contract · the rename-hazard checklist line. Four of the five are documents or tests, not systems.</text>
+      <text x="40" y="352" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#6d28d9">Each has a STATED WRONG ANSWER in the buzz source — so we know what we would get wrong improvising it.</text>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="buzz-study-batch-07-the-synthesis">buzz Study — Batch 07: the synthesis<a href="#batch-07/buzz-study-batch-07-the-synthesis" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Folder:</strong> <code>library/architecture/buzz-forensics/</code> · <strong>Batch 07 of 07</strong> · <strong>Written 2026-10-16</strong>
+<strong>Source:</strong> <code>library/architecture/platforms/_extracted/buzz-main/</code> — the extract of
+<code>buzz-main.zip</code> (md5 <code>1219b15bef421e560e818fc000e7d72e</code>), <strong>v0.5.28</strong>.
+<strong>Rules in force:</strong> 0b (count first) · 1 (docs are claims, code is authority) · 5 (no
+comparison <em>to our own platform</em> inside a batch — this batch keeps the same discipline and
+records cross-platform observations as <strong>observations</strong>, with the decisions left to the owner
+at the mapping pass) · 6 (name every capability) · 9 (pole-tag everything) · 10 (the
+retirement rule) · 13 (never let a number stand unverified).</p>
+<p><strong>What this batch is.</strong> Batches 01–06 read buzz. This batch does three things and nothing else:</p>
+<ol>
+<li><strong>Ranks buzz&#39;s mechanisms</strong> — the ones that are evidence-backed and worth carrying, in the
+order I would act on them, each with the finding ids that back it.</li>
+<li><strong>States what buzz contributes to the cross-platform mapping</strong> — the poles it is strong on,
+the poles it is absent on, and the <em>one structural answer</em> it gives that no earlier platform
+gave.</li>
+<li><strong>Records the decided limits</strong> — the mechanisms that are good <em>and that we will not adopt</em>,
+with the reason, so a later agent does not re-litigate them.</li>
+</ol>
+<p>It is <strong>not</strong> the mapping pass. It does not decide what we build. It hands the owner a ranked,
+sourced menu.</p>
+<hr>
+<h2 id="0-what-the-study-measured-the-counts-in-one-place">0. What the study measured (the counts, in one place)<a href="#batch-07/0-what-the-study-measured-the-counts-in-one-place" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Six batches, 6,000+ lines of findings, every load-bearing claim checked against the source.</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Batch</th>
+<th>Pole</th>
+<th>Written</th>
+<th>Headline</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>00</td>
+<td>pin + method</td>
+<td>✅</td>
+<td>the pin: <code>v0.5.28</code>, 5,807 files, 118-char max path, no <code>.git</code>; the <strong>rename hazard</strong> (buzz · sprout · sprig) named up front</td>
+</tr>
+<tr>
+<td>01</td>
+<td>overview</td>
+<td>✅</td>
+<td>the workspace <strong>is</strong> the event log; <strong>136 registered event kinds</strong>; the client is bigger than the server; 11 <code>VISION_*</code> docs</td>
+</tr>
+<tr>
+<td>02</td>
+<td><strong>P1</strong> aissistant</td>
+<td>✅</td>
+<td>agent = keypair + membership; memory is a custom NIP; <strong>6 tools</strong>; default permission mode is <strong><code>bypass-permissions</code></strong></td>
+</tr>
+<tr>
+<td>03</td>
+<td><strong>P2</strong> workspace</td>
+<td>✅</td>
+<td><strong>57 tables, 41 fenced</strong>; isolation is <strong>non-interference</strong>, proven; the shipped HA is <strong>self-declared non-conforming</strong></td>
+</tr>
+<tr>
+<td>04</td>
+<td><strong>P3</strong> automations</td>
+<td>✅</td>
+<td>event-native automation; <strong>deterministic cron, not locked</strong>; approval gate is <strong>dead code</strong>; 2 of 7 actions are stubs</td>
+</tr>
+<tr>
+<td>05</td>
+<td><strong>PX-W / PX-F</strong></td>
+<td>✅</td>
+<td><strong>no widget model</strong> (5th platform with none); <strong>the guard-as-document pattern</strong>; desktop is ~93% of the frontend</td>
+</tr>
+<tr>
+<td>06</td>
+<td><strong>PZ</strong> out-of-pole</td>
+<td>✅</td>
+<td>five safety artefacts across three languages; the <strong>prose contract</strong>; <code>LIMITS.md</code>; the versioned audit chain</td>
+</tr>
+</tbody></table></div>
+<p><strong>Measurement spine (rule 0b):</strong> 34 crates · 62 migrations · <strong>135 <code>KIND_*</code> event-kind
+declarations, 136 entries in <code>ALL_KINDS</code></strong> · 57 tables (41 with <code>community_id</code>) · 5 PZ artefacts
+(~196 KB counting the prose contract, of which 4 formal models ~122 KB in <code>.tla</code>/<code>.spthy</code>) ·
+7 surfaces · 11 vision docs · 5 frontend apps · <code>desktop/</code> 3,424 files vs <code>crates/</code> 645.</p>
+<p><strong>A number reconciled during this synthesis (rule 13).</strong> Batch 01 reported <strong>135 / 136</strong>; batch 05
+reported <strong>157</strong>. Both were measuring real things in the same 1,177-line file, and the truth is
+that <strong>all three numbers exist</strong>: <strong>157</strong> total <code>pub const</code> (kinds <em>and</em> non-kind limits),
+<strong>135</strong> <code>KIND_*: u32</code> declarations, and <strong>136</strong> entries in <code>ALL_KINDS</code>. The array is 136 because
+it holds the 135 declared kinds <strong>minus three deliberately unregistered</strong> ones
+(<code>KIND_AUTH</code> 22242, <code>KIND_NOSTR_IDENTITY_BINDING</code> 24243, <code>KIND_PUSH_LEASE</code> 30350 — infrastructure,
+not content) <strong>plus four alias constants that are not <code>KIND_</code>-prefixed</strong> (<code>RELAY_ADMIN_ADD_MEMBER</code>,
+<code>RELAY_ADMIN_REMOVE_MEMBER</code>, <code>RELAY_ADMIN_CHANGE_ROLE</code>, <code>RELAY_ADMIN_SET_WORKSPACE_PROFILE</code>).
+<strong>The platform&#39;s registered content-kind vocabulary is 136.</strong> Batch 05&#39;s &quot;157 kinds&quot; is corrected
+to this; batch 01&#39;s <code>135/136</code> was right. Recorded as <strong>F7-1</strong>.</p>
+<p><strong>F7-1 · &quot;The kinds count&quot; is three counts, and the right one for a capability claim is 136.</strong>
+<code>crates/buzz-core/src/kind.rs</code> (1,177 lines) holds <strong>157</strong> <code>pub const</code> (kinds <em>and</em> non-kind
+limits), <strong>135</strong> <code>KIND_*: u32</code> declarations, and <strong>136</strong> entries in <code>ALL_KINDS</code>. The array is
+documented as <em>&quot;All registered kind constants — used for duplicate detection and iteration&quot;</em> and
+is <code>135 declared − 3 unregistered + 4 aliases</code>. The three declared-but-unregistered kinds
+(<code>KIND_AUTH</code> 22242, <code>KIND_NOSTR_IDENTITY_BINDING</code> 24243, <code>KIND_PUSH_LEASE</code> 30350) are
+<strong>infrastructure events, not content</strong>; the four additions are the <code>RELAY_ADMIN_*</code> aliases.
+<strong>Batch 01&#39;s <code>135/136</code> was correct; batch 05&#39;s &quot;157 kinds&quot; was the imprecise one</strong> and is
+corrected in place.</p>
+<p><strong>F7-2 · The study&#39;s two headline answers, in one place.</strong> (i) <em>An event log is not a widget
+model</em> — proven by measurement in batch 05 (27 <code>widget</code> hits tree-wide, all accounted for; no
+composer anywhere). (ii) <em>A platform can prove isolation and then check its running code against
+the proof</em> — the TLA+ / Tamarin / prose-contract / conformance-gate stack of batches 03 and 06.
+These are the two things a later agent should know buzz for.</p>
+<hr>
+<h2 id="1-the-ranked-mechanisms">1. The ranked mechanisms<a href="#batch-07/1-the-ranked-mechanisms" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Ranked by <strong>what I would act on first</strong>, not by how impressive they are. Each row names the
+finding ids that carry the evidence, so every claim is traceable into the batch that measured it.
+&quot;Transfer cost&quot; is against <strong>our</strong> stack, judged from the finding, not buzz&#39;s.</p>
+<h3 id="tier-1-adopt-cheap-general-and-each-answers-a-defect-class-we-have-already-recorded">Tier 1 — adopt; cheap, general, and each answers a defect class we have already recorded<a href="#batch-07/tier-1-adopt-cheap-general-and-each-answers-a-defect-class-we-have-already-recorded" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Mechanism</th>
+<th>What it is, plainly</th>
+<th>Evidence</th>
+<th>Transfer cost</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>1</strong></td>
+<td><strong><code>LIMITS.md</code> — the gate that documents what it cannot catch</strong></td>
+<td>Every guard, ratchet and gate ships with a file naming its blind spots, the owner of each gap, and any half that is <strong>not armed</strong>.</td>
+<td>F6-12, F6-26, §PZ</td>
+<td><strong>Very low</strong> — a markdown file and a discipline</td>
+</tr>
+<tr>
+<td><strong>2</strong></td>
+<td><strong>&quot;Prove the tripwire fires&quot; (the mutation test)</strong></td>
+<td>For every check, a second test injects the violation and asserts the check catches it. A check without this test is a gesture.</td>
+<td>F6-7, F6-12, F6-17</td>
+<td><strong>Low</strong> — one extra test per guard</td>
+</tr>
+<tr>
+<td><strong>3</strong></td>
+<td><strong>The guard-as-document pattern</strong></td>
+<td>A frontend/architecture rule as an executable check: a shared <code>-core</code> script, a per-app wrapper, a <strong>reason-annotated</strong> allowlist keyed per-rule, and a place in the default gate.</td>
+<td>F5-3, F5-4, F5-7</td>
+<td><strong>Low</strong></td>
+</tr>
+<tr>
+<td><strong>4</strong></td>
+<td><strong>The three projection rules (for any evidence a check reads)</strong></td>
+<td>Record claimed <strong>and</strong> resolved; use a <code>Vec</code> not a <code>Set</code>; never filter the evidence; close error alphabets. Each has a <em>stated wrong answer</em>.</td>
+<td>F6-10</td>
+<td><strong>Low</strong> — rules, not code</td>
+</tr>
+<tr>
+<td><strong>5</strong></td>
+<td><strong>Normalize at the enforcement point, not the call site</strong></td>
+<td>The RFC-3339 sub-second fix: enforce the canonical form where the decision is made, so a future caller cannot forget. Pin the <strong>preimage</strong>, not only the digest.</td>
+<td>F6-16</td>
+<td><strong>Low</strong></td>
+</tr>
+<tr>
+<td><strong>6</strong></td>
+<td><strong>The generation fence at async boundaries</strong></td>
+<td>On every <code>await</code>, re-read a generation counter and refuse if it moved; pass an explicit scope assertion.</td>
+<td>F5-9</td>
+<td><strong>Low</strong>; already a written rule in buzz — same defect class as our stale-state rows</td>
+</tr>
+<tr>
+<td><strong>7</strong></td>
+<td><strong>The prose contract beside the formalism</strong></td>
+<td>A Scope/Non-Goals section, <strong>one axiom per assumption</strong>, a conformance gate per axiom, and an Implementation-Correspondence section that names the obligations which <strong>fail silently</strong>.</td>
+<td>F6-26, D6-1</td>
+<td><strong>Low</strong> — it is a document; the discipline is stating the boundary</td>
+</tr>
+<tr>
+<td><strong>8</strong></td>
+<td><strong><code>_Avoid_:</code> anti-vocabulary lists / <code>CONTEXT.md</code></strong></td>
+<td>A glossary that names the words <em>not</em> to use — the cheapest defence against the L168 vocabulary-drift hazard.</td>
+<td>F5-17, D5-3</td>
+<td><strong>Very low</strong></td>
+</tr>
+</tbody></table></div>
+<h3 id="tier-2-adopt-when-we-build-the-tenancy-layer-buzz-is-the-study-s-best-worked-example">Tier 2 — adopt when we build the tenancy layer (buzz is the study's best worked example)<a href="#batch-07/tier-2-adopt-when-we-build-the-tenancy-layer-buzz-is-the-study-s-best-worked-example" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Mechanism</th>
+<th>What it is, plainly</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>9</strong></td>
+<td><strong>The schema lint for the tenant fence</strong></td>
+<td>Every scoped table <code>NOT NULL &lt;tenant&gt;</code>; every scoped key <strong>led by</strong> <code>&lt;tenant&gt;</code>; with an <strong>exemption table carrying a <code>reason</code> column</strong> so the exceptions are auditable. Runs over all 62 migrations.</td>
+<td>F3-1, F6-4</td>
+</tr>
+<tr>
+<td><strong>10</strong></td>
+<td><strong>The type fence <em>with its own limit stated</em></strong></td>
+<td>A newtype for the tenant key, no <code>Deserialize</code>/<code>From</code>, plus a lint for construction, plus the sentence that says which part is a lint and which is a compiler guarantee.</td>
+<td>F3-1, F6-2</td>
+</tr>
+<tr>
+<td><strong>11</strong></td>
+<td><strong>Isolation as non-interference, not as a WHERE clause</strong></td>
+<td>State the property as <em>&quot;A&#39;s actions do not change B&#39;s observations&quot;</em>, enumerate the shared logical channels, and either close each in-model or by a named axiom.</td>
+<td>F3-2, F3-3, F6-26</td>
+</tr>
+<tr>
+<td><strong>12</strong></td>
+<td><strong>The schema as desired-state, one file per table, each naming its conformance clause</strong></td>
+<td>A column can be traced to the property it exists for; the fence exceptions live in one reviewable diff.</td>
+<td>F3-6</td>
+</tr>
+<tr>
+<td><strong>13</strong></td>
+<td><strong>The runtime conformance gate over the running code</strong></td>
+<td>A crate that checks <em>executions</em> against the model, with the checker <strong>deliberately re-implementing</strong> the spec so production helpers cannot hide a bug from both sides.</td>
+<td>F3-3, F6-12</td>
+</tr>
+<tr>
+<td><strong>14</strong></td>
+<td><strong>Hash-versioning discipline</strong></td>
+<td>Version the encoding, retain the old one, <strong>label its known ambiguity</strong>, and pin both digests — with a test that proves the ambiguity.</td>
+<td>F6-14, F6-15</td>
+</tr>
+<tr>
+<td><strong>15</strong></td>
+<td><strong>Deletion as a lifecycle, not a <code>DELETE</code></strong></td>
+<td>A staged, idempotent teardown state machine; consent asserted with three distinct pubkeys (requester, attestor, executor).</td>
+<td>F3-7</td>
+</tr>
+</tbody></table></div>
+<h3 id="tier-3-observe-excellent-and-a-solution-to-a-problem-we-do-not-yet-have">Tier 3 — observe; excellent, and a solution to a problem we do not yet have<a href="#batch-07/tier-3-observe-excellent-and-a-solution-to-a-problem-we-do-not-yet-have" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Mechanism</th>
+<th>Evidence</th>
+<th>Why it waits</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>16</td>
+<td>The <strong>egoist/authority gate at every door</strong> (one function, four call sites, before the claim)</td>
+<td>F4-x, §P3</td>
+<td>we do not yet have four doors</td>
+</tr>
+<tr>
+<td>17</td>
+<td><strong>Deterministic at-most-once cron</strong> (instant-in-key + PK conflict ⇒ no lock, no coordinator)</td>
+<td>§P3</td>
+<td>needs the tenancy/scheduling layer first</td>
+</tr>
+<tr>
+<td>18</td>
+<td>The <strong>internal/OSS build split verified by building both and scanning emitted output</strong></td>
+<td>F5-13</td>
+<td>a problem for when we ship two variants</td>
+</tr>
+<tr>
+<td>19</td>
+<td><strong>Fail-open vs fail-closed feature flags</strong>, with the answer written next to each gate</td>
+<td>F5-12</td>
+<td>adopt the <em>discipline</em> now, the machinery later</td>
+</tr>
+<tr>
+<td>20</td>
+<td>The <strong>egress guard with a self-proving source inventory</strong> (paired counts, self-immune needles)</td>
+<td>F6-17</td>
+<td>strong; needs a real egress surface to guard</td>
+</tr>
+<tr>
+<td>21</td>
+<td><strong>Two independent dials through one virtual rem</strong> (typography), with the <code>lineHeight</code> scale rem-relative</td>
+<td>F5-6</td>
+<td>frontend-only; adopt with the design system</td>
+</tr>
+<tr>
+<td>22</td>
+<td><strong>The rename hazard on the retirement checklist</strong> (grep the <em>metadata</em>, not just the code)</td>
+<td>F6-22, D6-3</td>
+<td>adopt now as a checklist line</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="2-how-buzz-maps-across-the-poles">2. How buzz maps across the poles<a href="#batch-07/2-how-buzz-maps-across-the-poles" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>The workshop&#39;s method asks, for each pole, what the platform has. Measured, buzz&#39;s shape is
+<strong>sharp and unusual</strong>: it is the first platform in the study that is strong on <strong>two adjacent
+poles and a proof surface</strong>, and <em>structurally absent</em> on the pole the study keeps expecting.</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Pole</th>
+<th>buzz&#39;s answer</th>
+<th>Strength</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>P1 · aissistant</strong></td>
+<td><strong>Real but thin, and deliberately so.</strong> Agent = keypair + channel membership; identity is a person&#39;s identity; memory is a custom NIP (NIP-AE); <strong>6 tools</strong>, not 60; two binaries (<code>buzz-agent</code>, <code>buzz-dev-mcp</code>); the harness (<code>buzz-acp</code>) swaps either half. <strong>The default permission mode is <code>bypass-permissions</code></strong> (F2-2).</td>
+<td><strong>Medium</strong> — a genuine, minimal, standards-native P1; the safety default is the finding</td>
+</tr>
+<tr>
+<td><strong>P2 · workspace</strong></td>
+<td><strong>Strong.</strong> The workspace <strong>is</strong> the event log; one table, three lenses (Stream/Forum/Workflow differ by kind, not storage); 57 tables with a <strong>lintable</strong> tenant fence; membership-as-access with five role names.</td>
+<td><strong>Strong</strong></td>
+</tr>
+<tr>
+<td><strong>P3 · automations</strong></td>
+<td><strong>Real and event-native, ahead on security, behind on completeness.</strong> YAML definitions stored as canonical JSON; five triggers, seven actions (<strong>two are stubs</strong>); the approval gate is <strong>dead code</strong>; the cron is deterministic rather than locked.</td>
+<td><strong>Medium</strong></td>
+</tr>
+<tr>
+<td><strong>PX-W · widgets/composition</strong></td>
+<td><strong>Absent as a model — the fifth platform in the study with none.</strong> The composition unit is the <strong>event kind</strong> (136 registered in <code>ALL_KINDS</code>). The one composition-shaped surface (Channel Canvas, <code>kind:40100</code>) is a document with optimistic concurrency, not a widget tree.</td>
+<td><strong>Absent</strong></td>
+</tr>
+<tr>
+<td><strong>PX-F · frontend</strong></td>
+<td><strong>Desktop-first and polyglot.</strong> Desktop ~93% of the frontend; a 194k-line Rust bridge with 385 commands; mobile is a <strong>zero-Rust</strong> Dart re-implementation; web/admin ~1.1% combined.</td>
+<td><strong>Strong</strong></td>
+</tr>
+<tr>
+<td><strong>PZ · out-of-pole</strong></td>
+<td><strong>The strongest in the study, and the reason this platform was worth studying.</strong> Five safety artefacts across <strong>three languages</strong> — prose, TLA+, Tamarin.</td>
+<td><strong>Very strong</strong></td>
+</tr>
+</tbody></table></div>
+<p><strong>The shape in one sentence.</strong> buzz is a <strong>communication substrate with a proof surface</strong>: it
+invests heavily in <em>isolation, safety and the correctness of one shared log</em>, and lightly in
+<em>the things that sit on top of it</em> — which is the exact inverse of a workflow tool.</p>
+<hr>
+<h2 id="3-buzz-s-one-structural-answer">3. buzz's one structural answer<a href="#batch-07/3-buzz-s-one-structural-answer" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Every platform in this study has posed the same question in a different way: <em>what is the unit
+you compose?</em> The answers so far have mostly been <strong>UI or task units</strong> — a widget, a node, a
+bead, a step. <strong>buzz&#39;s answer is different, and it is the most checkable one:</strong></p>
+<blockquote>
+<p><strong>The unit you compose is the event kind.</strong></p>
+</blockquote>
+<p>One <code>kind: u32</code> registry (136 registered kinds), one append-only log, and every surface — a message, a
+reaction, a workflow step, a canvas edit, a code-review approval, a git event, an agent job —
+is <strong>the same object with a different integer</strong>. Extension means <em>&quot;add a kind&quot;</em>, and the
+protocol (<code>NIP-01</code>) is <strong>public and shared</strong>, not bespoke (F1-1, F1-7, F5-2).</p>
+<p><strong>Why this is worth recording, whether or not we adopt it.</strong> It gives the study a clean
+<strong>counter-position</strong> to a composition model, and buzz states the trade honestly: an event log
+buys <strong>extensibility of data and behaviour</strong> (new kinds, new handlers, realtime fan-out,
+scoping, auth — for free); a widget model buys <strong>extensibility of layout and interface</strong>
+(someone who is not a programmer assembling a surface out of parts). buzz has the first in full
+and the second <strong>not at all</strong>, and it is <em>coherent</em> about it (F5 §7). <strong>The batch-05 question —
+&quot;is an event log the same thing as a widget model?&quot; — has a proven answer: No, and buzz is the
+clean demonstration of why.</strong></p>
+<p><strong>The second structural answer, from PZ.</strong> buzz does not <em>assert</em> its isolation; it <strong>proves it
+and then checks the running code against the proof</strong> — a TLA+ model for isolation, a Tamarin
+model for authorization, a prose contract binding both to the deployment and to named code
+seams, and a runtime conformance crate that replays real executions against the model. <strong>No
+earlier platform in the study separates &quot;the model&quot; from &quot;the running code&quot; and then closes the
+gap with a gate.</strong> That separation is the transferable idea; the TLA+ toolchain is not required
+to copy it (F3-3, F6-12, F6-26).</p>
+<hr>
+<h2 id="4-decided-limits-good-mechanisms-we-will-not-adopt-with-the-reason">4. Decided limits — good mechanisms we will not adopt, with the reason<a href="#batch-07/4-decided-limits-good-mechanisms-we-will-not-adopt-with-the-reason" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Recording these so a later agent does not re-open them. Each is <em>strong in buzz</em> and <em>wrong for
+us now</em> — not weak.</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Mechanism</th>
+<th>Why it is a decided limit</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>L-1</strong></td>
+<td><strong>The event-log-as-everything architecture</strong></td>
+<td>It is buzz&#39;s whole identity, and adopting it would replace our data model, our tenancy model and our UI model at once. <strong>Study the trade (extensibility of behaviour vs of layout); do not copy the substrate.</strong></td>
+</tr>
+<tr>
+<td><strong>L-2</strong></td>
+<td><strong>TLA+ / Tamarin as a toolchain</strong></td>
+<td>The practice is transferable at one small scale (see #11); the <strong>toolchain is not</strong>. We do not have the invariants pinned well enough to mechanize, and adopting the tools before the invariants would invert the order rule 0 sets.</td>
+</tr>
+<tr>
+<td><strong>L-3</strong></td>
+<td><strong>Nostr as the wire protocol</strong></td>
+<td>Interesting as a <em>proof that a public protocol can be the whole API</em>; it is a re-platforming, not a mechanism to lift. The transferable part is <strong>&quot;the wire format is the contract&quot;</strong>, recorded as an observation.</td>
+</tr>
+<tr>
+<td><strong>L-4</strong></td>
+<td><strong>The polyglot frontend (Rust bridge + React + Dart + Flutter)</strong></td>
+<td>buzz pays for it deliberately and can afford it; it multiplies our maintenance surface. The transferable parts are the <strong>guards</strong> and the <strong>token model</strong>, not the stack.</td>
+</tr>
+<tr>
+<td><strong>L-5</strong></td>
+<td><strong>The 34-crate workspace</strong></td>
+<td>The crate count is a consequence of the substrate choice, not a goal. <strong>Take the fences (lint, type, conformance); leave the topology.</strong></td>
+</tr>
+<tr>
+<td><strong>L-6</strong></td>
+<td><strong><code>bypass-permissions</code> as a default</strong></td>
+<td>It is a documented choice in buzz and it is <strong>the exact opposite of our default-deny posture</strong> (F2-2). Record it as a <em>contrast</em>, not a candidate.</td>
+</tr>
+<tr>
+<td><strong>L-7</strong></td>
+<td><strong>The four formal models shipping in a product repo</strong></td>
+<td>The <em>practice</em> (models as artefacts) is tier-2; shipping <code>.tla</code>/<code>.spthy</code> files is a decided limit for us until the invariants exist.</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="5-the-honest-ledger-what-buzz-does-not-have">5. The honest ledger — what buzz does *not* have<a href="#batch-07/5-the-honest-ledger-what-buzz-does-not-have" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>A synthesis that lists only strengths is marketing. Every item below is <strong>stated by buzz in-tree</strong>
+or <strong>measured in this study</strong>, and each is carried into the mapping pass as a <em>known-open</em>, not a
+surprise.</p>
+<p><strong>Structural absences (measured):</strong></p>
+<ul>
+<li><strong>No widget/composer model</strong> — the fifth platform in the study with none (F5-1, F5-2).</li>
+<li><strong>No Postgres RLS</strong> — zero <code>CREATE POLICY</code> across 62 migrations; tenancy is application + lint
+enforced (F6-§5.3).</li>
+<li><strong>No peer-to-peer event path</strong> — the mesh transport (<code>buzz-relay-mesh</code>, iroh) is a <em>separate</em>
+question from the event path (F1-4).</li>
+</ul>
+<p><strong>Feature incompleteness (buzz&#39;s own, or measured in code):</strong></p>
+<ul>
+<li><strong>Approval gates do not work</strong> — the whole grant/deny/resume path is <strong>dead code by
+measurement</strong>; the data model is finished, the <em>mint</em> is missing (§P3).</li>
+<li><strong>2 of 7 automation actions are stubs</strong> (<code>send_dm</code>, <code>set_channel_topic</code>) — a definition using
+them saves and fails at run time (§P3).</li>
+<li><strong>The <code>bypass-permissions</code> default</strong> and a documented policy switch that does not exist (F2-2).</li>
+<li><strong>Cross-pod leaks are explicitly out of the conformance gate&#39;s scope</strong>, and <strong>the read-seam
+half of the gate is not armed</strong> (§PZ, <code>LIMITS.md</code>).</li>
+</ul>
+<p><strong>Aged artefacts (drift, not gaps):</strong></p>
+<ul>
+<li><strong>PZ&#39;s own prose contract has aged behind the code</strong> on its P3/HA status — the shipped Redis
+replay guard and the chart&#39;s template-fail have closed the gap the doc still describes as open
+(<strong>D6-1</strong>). The code is <em>stricter</em> than the doc claims.</li>
+<li><strong>The rename hazard is a live metadata inconsistency</strong> — complete in code, incomplete in
+<code>Cargo.toml</code>&#39;s <code>repository</code> and <code>AGENTS.md</code>&#39;s topology table (F6-22, D6-3).</li>
+</ul>
+<hr>
+<h2 id="6-rule-10-the-retirement-surface">6. Rule 10 — the retirement surface<a href="#batch-07/6-rule-10-the-retirement-surface" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>buzz has <strong>the richest retirement surface in the study</strong>, and it is a real teaching case for the
+retirement rule.</p>
+<ul>
+<li><strong>23 of 62 migrations carry a drop/remove/retire flavour.</strong></li>
+<li><strong>The sharpest single retirement</strong> is the whole Phase-A NIP-FI authority ledger — migration
+<code>0044</code> drops <strong>14 tables with <code>CASCADE</code></strong>, with the reason recorded in the file itself (F1-9).</li>
+<li><strong>A product rename executed as scoped PRs</strong> (<code>sprout → buzz</code>; #958, #1012, #1043, #1333) with
+<strong>residue that never got renamed</strong> — the <code>sprout</code> repo URL, <code>squareup/sprout-oss</code> in
+<code>AGENTS.md</code>, and a crate directory still named <code>sprig</code> (F6-22). <strong>This is the second-order
+hazard</strong>: a rename done in code and left in metadata.</li>
+<li><strong>A hash encoding retired correctly</strong> — v1 retained, its ambiguity labelled and <em>proven by a
+test</em>, v2 shipped without invalidating history (F6-14, F6-15). <strong>This is rule 10 done right.</strong></li>
+</ul>
+<p><strong>The lesson worth carrying:</strong> a rename is not finished when the code compiles; it is finished
+when the <em>metadata</em> — manifests, topology docs, CI names — has been grepped too, and when any
+residue is either renamed or <strong>documented as deliberate</strong>.</p>
+<hr>
+<h2 id="7-what-this-study-did-not-do-limits-of-the-evidence">7. What this study did NOT do (limits of the evidence)<a href="#batch-07/7-what-this-study-did-not-do-limits-of-the-evidence" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Stated because a reader must know what is <strong>not</strong> behind these claims.</p>
+<ul>
+<li><strong>No <code>.git</code></strong> — the extract has no history, so &quot;the latest buzz&quot; means <em>this extract, at
+<code>v0.5.28</code></em>. The provenance is unusually rich (commit SHAs in the changelog) but the working
+tree is a snapshot (batch 00).</li>
+<li><strong>No execution</strong> — nothing here is a claim about runtime behaviour under load. Every claim is
+read from source (rule 1).</li>
+<li><strong>Unread surfaces, recorded as unread:</strong> the two crate-local denial modules
+(<code>nip_fi/deny_map.rs</code>, <code>denial.rs</code>) were not read (F6-§5.2); the Kubernetes provider&#39;s
+end-to-end state is unresolved (F2-7); the Flutter mobile tree was measured but not fully read
+(F5-§3.4).</li>
+<li><strong>The mobile client&#39;s parity is not verified</strong> — it is a zero-Rust re-implementation, and
+whether it agrees with the desktop on every kind is a <strong>contract with no lockstep check</strong>
+(D5-3).</li>
+<li><strong>No comparison to our own platform inside any batch</strong> (rule 5). Cross-platform observations
+live in this batch only, as <strong>observations</strong>; the decisions are the owner&#39;s at the mapping pass.</li>
+</ul>
+<hr>
+<h2 id="8-where-buzz-sits-in-the-study-s-ranked-order">8. Where buzz sits in the study's ranked order<a href="#batch-07/8-where-buzz-sits-in-the-study-s-ranked-order" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Across the seven platforms studied, ranking is by <strong>how much transferable mechanism per unit of
+study effort</strong>, not by product quality.</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Rank</th>
+<th>Platform</th>
+<th>Why it sits here</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td><strong>buzz</strong></td>
+<td><strong>The proof surface</strong> — the only platform that proves isolation <em>and</em> checks the running code, plus a rich retirement surface and a proven answer to the widget question. Highest transferable-mechanism density in PZ.</td>
+<td>✅ closed</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Multica</strong></td>
+<td>The closest <em>architectural</em> neighbour on all three poles; the machine/teammate split and the one-statement claim. No proof surface.</td>
+<td>✅ closed</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>n8n</strong></td>
+<td>The first real composition surface (a canvas of 7 element types) plus the best security surface before buzz; a doc-driven scaffold whose ADRs are accurate.</td>
+<td>✅ closed</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>Gas Town</strong></td>
+<td>The watchdog chain made of agents; the Hook as the durability primitive; a three-layer sandbox. Decided limits in the top mechanisms.</td>
+<td>✅ closed</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>Hermes</strong></td>
+<td>The main AI engine; <strong>never fork it</strong>. Not a platform to copy — a service to drive.</td>
+<td>✅ closed</td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>Paperclip</strong></td>
+<td>P2/P3 strength, P1 as a seam-provider; no multi-tenancy, no composer.</td>
+<td>✅ closed</td>
+</tr>
+<tr>
+<td>7</td>
+<td><strong>CrewAI</strong></td>
+<td>A <strong>mechanism donor, not an architecture template</strong> — executor yes, delivery no, tenancy nowhere.</td>
+<td>✅ closed</td>
+</tr>
+</tbody></table></div>
+<p><strong>Note on this table.</strong> The ranking is <em>this study&#39;s own</em>, formed by comparing the six closed
+platforms&#39; recorded findings against buzz&#39;s, which is why it can be written here and not inside a
+batch (rule 5). It is an observation for the mapping pass, not a decision.</p>
+<hr>
+<h2 id="9-ranked-actions-for-the-mapping-pass">9. Ranked actions for the mapping pass<a href="#batch-07/9-ranked-actions-for-the-mapping-pass" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>The five actions I would put in front of the owner first, each sourced, each small, none
+requiring buzz&#39;s stack.</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Action</th>
+<th>Sourced from</th>
+<th>Cost</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>1</strong></td>
+<td><strong>Adopt <code>LIMITS.md</code> for every gate, ratchet and guard we ship</strong> — name the blind spots, the owners, and any unarmed half.</td>
+<td>F6-12, F6-26</td>
+<td>a file + a discipline</td>
+</tr>
+<tr>
+<td><strong>2</strong></td>
+<td><strong>Adopt &quot;prove the tripwire fires&quot;</strong> — one mutation-style test per check, asserting the check catches the injected violation.</td>
+<td>F6-7, F6-12, F6-17</td>
+<td>low</td>
+</tr>
+<tr>
+<td><strong>3</strong></td>
+<td><strong>Adopt the guard-as-document pattern</strong> for our two or three most-broken frontend/architecture rules: a <code>-core</code> script, a per-app wrapper, a reason-annotated allowlist, a place in the default gate.</td>
+<td>F5-3, F5-4</td>
+<td>low</td>
+</tr>
+<tr>
+<td><strong>4</strong></td>
+<td><strong>Write the prose contract beside any formalism we produce</strong> — non-goals, one axiom per assumption, a gate per axiom, and the obligations that fail silently named <em>by name</em>.</td>
+<td>F6-26, D6-1</td>
+<td>low</td>
+</tr>
+<tr>
+<td><strong>5</strong></td>
+<td><strong>Put the rename hazard on the retirement checklist</strong> — grep the <em>metadata</em> (manifests, topology docs, CI names), not only the code, and document any deliberate residue.</td>
+<td>F6-22, D6-3</td>
+<td>a checklist line</td>
+</tr>
+</tbody></table></div>
+<p><strong>Recommendation.</strong> Take <strong>all five</strong>. They are the cheapest, most general mechanisms in the
+entire seven-platform study; four of the five are <em>documents or tests</em>, not systems; and each one
+has a <strong>stated wrong answer</strong> in the buzz source that tells us exactly what we would get wrong if
+we improvised it. The tenancy-tier mechanisms (Tier 2) are held for when the tenancy layer itself
+is built, where buzz is the study&#39;s best worked example — that is a <em>mapping-pass</em> decision, not
+a synthesis decision.</p>
+<hr>
+<h2 id="10-the-verdict-in-plain-english">10. The verdict, in plain English<a href="#batch-07/10-the-verdict-in-plain-english" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>Named.</strong> The buzz study is complete: seven batches, six findings documents plus the pin, every
+load-bearing claim checked against <code>v0.5.28</code>.</p>
+<p><strong>Plain meaning.</strong> buzz is a <strong>team workspace built on a public protocol</strong>, where every action —
+a message, a reaction, a workflow step, a code review, a git event — is a <strong>signed event with an
+integer type</strong> in one append-only log, and where the workspace&#39;s tenant isolation is not asserted
+but <strong>proven with formal methods and then re-checked against the running code</strong>. It invests
+heavily in <em>isolation and correctness</em> and lightly in the things above them.</p>
+<p><strong>Why it was worth the seventh slot.</strong> Because it closed the widget question with evidence
+(<strong>an event log is not a widget model, and buzz is the clean proof</strong>), because it is the only
+platform with a <strong>proof surface</strong>, and because it produced two mechanism families the study did
+not previously have: the <strong>guard-as-document</strong> pattern, and the <strong>gate-that-documents-its-own-
+blind-spots</strong> (<code>LIMITS.md</code>).</p>
+<p><strong>Risk.</strong> The study&#39;s claims are bounded by a <strong>snapshot with no git history</strong> and <strong>no
+execution</strong>; and buzz&#39;s own prose contract has <strong>aged behind its code</strong> on one safety status —
+which is itself the most instructive finding in the batch, because it is the second-order version
+of the rename hazard: <em>a safety status left behind</em>.</p>
+<p><strong>Ranked actions.</strong> Five, all cheap, all sourced, all in §9. <strong>Recommendation: take all five.</strong></p>
+<p><strong>And the one thing to do before anything else:</strong> the <strong>buzz reader on port 3600</strong>, built from
+this markdown, using the shared engine (<code>generate-reader.js</code> + <code>DOCS_CONFIG</code> + <code>diagrams.js</code>)
+copied and rebranded — <strong>copy, never rewrite</strong> — then fidelity-verified the two ways the n8n
+reader taught us.</p>
+<hr>
+<p><strong>Batch 07 of 07 — the buzz study is written.</strong> Next: the <strong>buzz reader (port 3600)</strong>, built
+from the markdown. <strong>Then, and only then, the ask</strong>: which platform is studied eighth —
+<code>openrig</code>, <code>mattermost</code>, or <code>zulip</code> (order not fixed; the owner decides).</p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="06-out-of-pole-pz.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">Out-of-Pole (PZ)</span>
+                </a>
+              
+
+              <a href="../index.html#batch-07" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              <div></div>
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#0-what-the-study-measured-the-counts-in-one-place" class="toc-link">0. What the study measured (the counts, in one place)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#1-the-ranked-mechanisms" class="toc-link">1. The ranked mechanisms</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#tier-1-adopt-cheap-general-and-each-answers-a-defect-class-we-have-already-recorded" class="toc-link">Tier 1 — adopt; cheap, general, and each answers a defect class we have already recorded</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#tier-2-adopt-when-we-build-the-tenancy-layer-buzz-is-the-study-s-best-worked-example" class="toc-link">Tier 2 — adopt when we build the tenancy layer (buzz is the study&#039;s best worked example)</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#tier-3-observe-excellent-and-a-solution-to-a-problem-we-do-not-yet-have" class="toc-link">Tier 3 — observe; excellent, and a solution to a problem we do not yet have</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#2-how-buzz-maps-across-the-poles" class="toc-link">2. How buzz maps across the poles</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-buzz-s-one-structural-answer" class="toc-link">3. buzz&#039;s one structural answer</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-decided-limits-good-mechanisms-we-will-not-adopt-with-the-reason" class="toc-link">4. Decided limits — good mechanisms we will not adopt, with the reason</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-the-honest-ledger-what-buzz-does-not-have" class="toc-link">5. The honest ledger — what buzz does *not* have</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-rule-10-the-retirement-surface" class="toc-link">6. Rule 10 — the retirement surface</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-what-this-study-did-not-do-limits-of-the-evidence" class="toc-link">7. What this study did NOT do (limits of the evidence)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#8-where-buzz-sits-in-the-study-s-ranked-order" class="toc-link">8. Where buzz sits in the study&#039;s ranked order</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#9-ranked-actions-for-the-mapping-pass" class="toc-link">9. Ranked actions for the mapping pass</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#10-the-verdict-in-plain-english" class="toc-link">10. The verdict, in plain English</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('buzz_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('buzz_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('buzz_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('buzz_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.BuzzReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

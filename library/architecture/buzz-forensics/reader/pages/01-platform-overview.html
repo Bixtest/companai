@@ -1,0 +1,1346 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 01 — The platform overview — buzz Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-01" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 01</span>
+      <div class="header-title-wrap">
+        <div class="header-title">Platform Overview</div>
+        <div class="header-subtitle">buzz Platform Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/01-platform-overview.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #059669">DONE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">4,586</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">23 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">476</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-16</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 01 Architecture Guide (Default)</option>
+            <optgroup label="Strategic Architecture">
+              <option value="master">Executive Topology: the workspace is the event log, and the isolation is proven</option>
+            </optgroup>
+            <optgroup label="Foundations">
+              <option value="00">Batch 00: The pin, the extraction, and the rename hazard</option>
+              <option value="01">Batch 01: The overview — the event is the whole API</option>
+            </optgroup>
+            <optgroup label="Pole 1 — The Aissistant">
+              <option value="02">Batch 02: The aissistant — an agent is a colleague</option>
+            </optgroup>
+            <optgroup label="Pole 2 — The Workspace">
+              <option value="03">Batch 03: The workspace — three fences over one store</option>
+            </optgroup>
+            <optgroup label="Pole 3 — Automations">
+              <option value="04">Batch 04: Automations — deterministic at-most-once</option>
+            </optgroup>
+            <optgroup label="Cross-Cutting">
+              <option value="05">Batch 05: Widgets &amp; frontend — a proven negative</option>
+            </optgroup>
+            <optgroup label="Escape Hatch">
+              <option value="06">Batch 06: Out-of-pole — five artefacts, three languages</option>
+            </optgroup>
+            <optgroup label="Strategic Decision">
+              <option value="07">Batch 07: The synthesis — where buzz sits, what we take</option>
+            </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 01 VISUAL GUIDE</div>
+    <h4>The platform overview: the event is the whole API</h4>
+    <p>One log, one kind integer, three lenses over the same storage</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 340" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-01" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-01" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+        <marker id="arrr-01" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#ef4444"/>
+        </marker>
+      </defs>
+      <g transform="translate(20, 20)">
+        <rect width="210" height="140" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE UNIT</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">a signed Nostr event</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">six fields, one integer</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">kind: u32 decides everything</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">136 registered kinds</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">add a kind, not an endpoint</text>
+      </g>
+      <path d="M 230 90 L 268 90" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-01)"/>
+      <g transform="translate(272, 20)">
+        <rect width="210" height="140" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE STORE</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">one append-only log</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">idempotent append</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">channel_id is a LOCALITY</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">one search_tsv, no per-surface table</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">the relay = the truth</text>
+      </g>
+      <path d="M 482 90 L 520 90" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-01)"/>
+      <g transform="translate(524, 20)">
+        <rect width="210" height="140" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE SURFACES</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Stream / Forum / Workflow</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">differ by KIND, not storage</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">7 surfaces; 3 clients</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">the client tree > the server</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">one log, three lenses</text>
+      </g>
+      <g transform="translate(20, 180)">
+        <rect width="460" height="140" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">WHAT THE REGISTRY PROVES ABOUT THE PRODUCT</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">The kind registry is the real feature list — read it, not the docs.</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">A doc claimed 127 kinds; another claimed 80. The code holds 136.</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Moderation commands (9040-9044) are EXECUTED, never stored —</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">so "everything is just an event" has a measured boundary, enforced</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">by a compile-time assertion.</text>
+      </g>
+      <g transform="translate(500, 180)">
+        <rect width="400" height="140" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE ONE-SENTENCE GLOSS</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">"A workspace where humans and agents build</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">together, on a relay you own."</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)"></text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Premise: the workspace IS the event log.</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Everything below follows from that choice.</text>
+      </g>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="buzz-study-batch-01-the-platform-overview">buzz Study — Batch 01: the platform overview<a href="#batch-01/buzz-study-batch-01-the-platform-overview" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Folder:</strong> <code>library/architecture/buzz-forensics/</code> · <strong>Batch 01 of 07</strong> · <strong>Status:</strong> OPEN
+<strong>What this batch answers:</strong> <em>What IS buzz</em> — the protocol it speaks, the shape of the monorepo, the
+relay at its centre, the surfaces it presents, and the tenant model underneath. It is the <strong>map</strong>;
+batches 02–06 drill into one pole each.</p>
+<p><strong>Rule 5 reminder:</strong> no comparison to our own platform appears in this batch. Cross-platform notes are
+<strong>observations</strong> carried only where an earlier <em>study</em> (not our product) is named.</p>
+<p><strong>Rule 1 reminder:</strong> every load-bearing claim below was read from the source at the time of writing,
+and <strong>three doc-vs-code divergences were found and are recorded in §5</strong>. The code wins in each case.</p>
+<hr>
+<h2 id="1-what-was-read-and-its-measured-size">1. What was read, and its measured size<a href="#batch-01/1-what-was-read-and-its-measured-size" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Source</th>
+<th align="right">Size</th>
+<th>What it gave</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>ARCHITECTURE.md</code></td>
+<td align="right"><strong>956 lines / 57,799 B</strong></td>
+<td>the authoritative system design; the crate reference; <strong>a &quot;Known Limitations&quot; section that names its own gaps</strong></td>
+</tr>
+<tr>
+<td><code>README.md</code></td>
+<td align="right">16,231 B (≈330 lines)</td>
+<td>the product framing, the crate map, the quick start, <strong>a &quot;Works today / Being wired up / Strong opinions, pending code&quot; table</strong></td>
+</tr>
+<tr>
+<td><code>VISION.md</code></td>
+<td align="right"><strong>246 lines / 13,507 B</strong></td>
+<td><em>&quot;The relay is the workspace&quot;</em>; the 7 surfaces; the Access table; the Communities section</td>
+</tr>
+<tr>
+<td><code>NOSTR.md</code></td>
+<td align="right"><strong>398 lines</strong></td>
+<td>the protocol primer; <strong>a NIP-29 client-compatibility matrix (what works / what doesn&#39;t)</strong></td>
+</tr>
+<tr>
+<td><code>crates/buzz-core/src/kind.rs</code></td>
+<td align="right"><strong>1,177 lines</strong></td>
+<td><strong>the kind registry — the protocol&#39;s actual vocabulary, in code</strong></td>
+</tr>
+<tr>
+<td><code>Cargo.toml</code> + <code>Cargo.lock</code></td>
+<td align="right">7,403 B + 297,508 B</td>
+<td>the 34-crate workspace, the pinned dependency surface</td>
+</tr>
+<tr>
+<td><code>migrations/</code></td>
+<td align="right"><strong>62 files / 263,055 B</strong></td>
+<td>the schema&#39;s real history</td>
+</tr>
+<tr>
+<td><code>schema/tables/public/</code></td>
+<td align="right"><strong>57 table files</strong></td>
+<td>the desired-state schema, one file per table</td>
+</tr>
+<tr>
+<td><code>crates/buzz-relay/src/</code></td>
+<td align="right"><strong>161,380 lines / 119 files</strong></td>
+<td>the server&#39;s real structure (handlers, api, audio, tunnel, admission)</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="2-the-one-sentence-gloss-then-the-detail">2. The one-sentence gloss, then the detail<a href="#batch-01/2-the-one-sentence-gloss-then-the-detail" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<blockquote>
+<p><strong>buzz is a self-hosted team workspace — chat, forum, DMs, agents, workflows, code hosting and voice —
+built on the Nostr protocol, where every one of those things is the SAME object: a cryptographically
+signed event with a <code>kind</code> integer, stored in one log, behind one relay, inside one community.</strong></p>
+</blockquote>
+<p>Everything below is a consequence of that sentence. <strong>The design bet is that one substrate replaces
+seven tools</strong> — the README states it directly: <em>&quot;one community can do what teams currently fake with
+chat, forges, bots, CI dashboards, release tools, search indexes, and a pile of glue code.&quot;</em></p>
+<hr>
+<h2 id="3-the-protocol-nostr-nip-01-and-why-the-choice-is-load-bearing">3. The protocol — Nostr NIP-01, and why the choice is load-bearing<a href="#batch-01/3-the-protocol-nostr-nip-01-and-why-the-choice-is-load-bearing" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="3-1-the-event-is-the-whole-api">3.1 The event is the whole API<a href="#batch-01/3-1-the-event-is-the-whole-api" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>Every action in buzz is a JSON object with exactly six fields (<code>ARCHITECTURE.md</code> §2):</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>json</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-json">{
+  &quot;id&quot;:      &quot;&lt;sha256 of canonical serialization&gt;&quot;,
+  &quot;pubkey&quot;:  &quot;&lt;secp256k1 public key, hex&gt;&quot;,
+  &quot;kind&quot;:    &lt;unsigned integer&gt;,
+  &quot;tags&quot;:    [[&quot;e&quot;, &quot;&lt;event-id&gt;&quot;], [&quot;p&quot;, &quot;&lt;pubkey&gt;&quot;], ...],
+  &quot;content&quot;: &quot;&lt;JSON payload or plain text&gt;&quot;,
+  &quot;sig&quot;:     &quot;&lt;Schnorr signature over id&gt;&quot;
+}
+</code></pre>
+</div>
+<p><strong>Plain meaning:</strong> there is no REST resource model for conversation. A message, a reaction, a vote, a
+workflow step, a huddle join, a git patch and an audit entry are <strong>all the same six fields</strong> — they are
+distinguished only by the integer in <code>kind</code>. <strong>Why it matters:</strong> the relay&#39;s dispatch is a single
+<code>match</code> on an integer. <strong>Adding a feature is adding a kind number, and the README&#39;s claim is that this
+is a zero-breaking-change operation</strong> — <em>&quot;New message type? New kind integer. Zero breaking changes.&quot;</em></p>
+<h3 id="3-2-the-kind-registry-measured-in-code-and-the-divergence">3.2 The kind registry — measured in code, and the divergence <span class="seal-badge" style="background:#fef2f2; color:#dc2626; border-color:#fca5a5; font-size: 0.65em; vertical-align: middle;">⚠️ FINDING NOTE</span><a href="#batch-01/3-2-the-kind-registry-measured-in-code-and-the-divergence" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><strong>The <code>kind</code> integer is the protocol.</strong> <code>crates/buzz-core/src/kind.rs</code> is the source of truth, and the
+measurement is:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Measure</th>
+<th align="right">Value</th>
+<th>How measured</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>pub const KIND_*</code> constants</td>
+<td align="right"><strong>135</strong></td>
+<td><code>grep -c &#39;pub const KIND_&#39; crates/buzz-core/src/kind.rs</code></td>
+</tr>
+<tr>
+<td>Entries in the exported <code>ALL_KINDS: &amp;[u32]</code> array</td>
+<td align="right"><strong>136</strong></td>
+<td>parsed the array literal</td>
+</tr>
+<tr>
+<td>Duplicates in <code>ALL_KINDS</code></td>
+<td align="right"><strong>0</strong></td>
+<td>a test in the file enforces this (<code>no_duplicate_kind_values</code>)</td>
+</tr>
+<tr>
+<td><code>KIND_AUTH</code> (22242) in <code>ALL_KINDS</code>?</td>
+<td align="right"><strong>absent</strong></td>
+<td>verified — it is deliberately excluded (AUTH events are never stored)</td>
+</tr>
+</tbody></table></div>
+<blockquote>
+<p><strong>⚠️ DIVERGENCE (doc vs code) — recorded per rule 1.</strong> <code>ARCHITECTURE.md</code> makes <strong>two different
+claims about the same number in the same document</strong>: §2 says <em>&quot;exports the full registry as
+<code>ALL_KINDS: &amp;[u32]</code> (<strong>127 kinds</strong> at the time of writing)&quot;</em>, and §6 says <em>&quot;<code>pub const ALL_KINDS: &amp;[u32]</code>
+// <strong>80 entries</strong> (KIND_AUTH excluded — never stored)&quot;</em>. <strong>Both are stale.</strong> The code holds <strong>135 kind
+constants and 136 array entries.</strong> The likely explanation of the 80 is that it counted only the
+<em>custom</em> (40000+) kinds; the 127 is an older snapshot. <strong>The code wins: this study uses 135/136.</strong></p>
+</blockquote>
+<p><strong>The kinds are the domain.</strong> Reading the registry is reading the product&#39;s feature list — and this is
+the single most useful artefact in the repo, because <strong>rule 1 says the registry cannot lie about what
+exists</strong>. Selected, with their real values:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Kind</th>
+<th>Constant</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0 / 1 / 3 / 5 / 7</td>
+<td><code>PROFILE</code> <code>TEXT_NOTE</code> <code>CONTACT_LIST</code> <code>DELETION</code> <code>REACTION</code></td>
+<td><strong>standard Nostr</strong> — buzz inherits the base protocol</td>
+</tr>
+<tr>
+<td><strong>9</strong></td>
+<td><code>STREAM_MESSAGE</code></td>
+<td><strong>a chat message — NIP-29 group chat</strong></td>
+</tr>
+<tr>
+<td>40002 / 40003 / 40004–40008</td>
+<td><code>STREAM_MESSAGE_V2</code> <code>_EDIT</code> <code>_PINNED</code> <code>_BOOKMARKED</code> <code>_SCHEDULED</code> <code>_REMINDER</code> <code>_DIFF</code></td>
+<td><strong>buzz-custom message extensions</strong></td>
+</tr>
+<tr>
+<td><strong>40100</strong></td>
+<td><code>CANVAS</code></td>
+<td><strong>a canvas edit event — the collaborative surface</strong></td>
+</tr>
+<tr>
+<td>45001 / 45002 / 45003</td>
+<td><code>FORUM_POST</code> <code>FORUM_VOTE</code> <code>FORUM_COMMENT</code></td>
+<td><strong>the Forum surface, as events</strong></td>
+</tr>
+<tr>
+<td><strong>43001–43006</strong></td>
+<td><code>JOB_REQUEST</code> <code>_ACCEPTED</code> <code>_PROGRESS</code> <code>_RESULT</code> <code>_CANCEL</code> <code>_ERROR</code></td>
+<td><strong>the agent job protocol — six kinds</strong></td>
+</tr>
+<tr>
+<td>44200</td>
+<td><code>AGENT_TURN_METRIC</code></td>
+<td>an agent turn&#39;s cost/latency, as a stored event</td>
+</tr>
+<tr>
+<td><strong>46001–46012</strong></td>
+<td><code>WORKFLOW_*</code></td>
+<td><strong>workflow run lifecycle — 12 kinds (triggered, step started/completed/failed, completed, failed, cancelled, approval requested/granted/denied)</strong></td>
+</tr>
+<tr>
+<td>46020 / 46030 / 46031</td>
+<td><code>WORKFLOW_TRIGGER</code> <code>APPROVAL_GRANT</code> <code>APPROVAL_DENY</code></td>
+<td>trigger + human-approval commands</td>
+</tr>
+<tr>
+<td><strong>48100–48106</strong></td>
+<td><code>HUDDLE_STARTED</code> <code>_PARTICIPANT_JOINED</code> <code>_PARTICIPANT_LEFT</code> <code>_ENDED</code> <code>_LIVENESS</code> <code>_GUIDELINES</code></td>
+<td><strong>voice — the huddle lifecycle, as events</strong></td>
+</tr>
+<tr>
+<td><strong>1617–1633</strong></td>
+<td><code>GIT_PATCH</code> <code>GIT_PULL_REQUEST</code> <code>GIT_PR_UPDATE</code> <code>GIT_ISSUE</code> <code>GIT_STATUS_OPEN/_MERGED/_CLOSED/_DRAFT</code></td>
+<td><strong>git — NIP-34, as events</strong></td>
+</tr>
+<tr>
+<td>30617 / 30618 / 30621</td>
+<td><code>GIT_REPO_ANNOUNCEMENT</code> <code>GIT_REPO_STATE</code> <code>PROJECT</code></td>
+<td>repo + multi-repo project coordinates</td>
+</tr>
+<tr>
+<td><strong>45010 / 45011</strong></td>
+<td><code>ARTIFACT</code> <code>ARTIFACT_REMOVAL</code></td>
+<td><strong>the artifact system (worked in batch 03)</strong></td>
+</tr>
+<tr>
+<td>30174–30179</td>
+<td><code>AGENT_ENGRAM</code> <code>PERSONA</code> <code>TEAM</code> <code>MANAGED_AGENT</code> <code>TEAM_CATALOG</code> <code>PRIVATE_MANAGED_AGENT</code></td>
+<td><strong>the agent-identity kinds (batch 02)</strong></td>
+</tr>
+<tr>
+<td>20001 / 20002 / 20003</td>
+<td><code>PRESENCE_UPDATE</code> <code>TYPING_INDICATOR</code> <code>AGENT_PRESENCE</code></td>
+<td><strong>ephemeral (never stored)</strong></td>
+</tr>
+<tr>
+<td>22242 / 27235 / 24242</td>
+<td><code>AUTH</code> <code>HTTP_AUTH</code> <code>BLOSSOM_AUTH</code></td>
+<td>auth: NIP-42, NIP-98, Blossom</td>
+</tr>
+<tr>
+<td>9000–9022</td>
+<td><code>NIP29_*</code></td>
+<td><strong>the NIP-29 group-management command set</strong> — create group, add/remove user, edit metadata, leave, join</td>
+</tr>
+<tr>
+<td>9040–9044</td>
+<td><code>MODERATION_*</code></td>
+<td><strong>moderation commands (ban, unban, timeout, untimeout, resolve report)</strong> — <em>commands, not stored events</em></td>
+</tr>
+<tr>
+<td>1984</td>
+<td><code>REPORT</code></td>
+<td>a moderation report — persisted but <strong>never fanned out</strong></td>
+</tr>
+</tbody></table></div>
+<p><strong>Two observations the registry forces, both facts and not opinions:</strong></p>
+<ol>
+<li><strong>Moderation commands (9040–9044) are &quot;executed, never stored&quot;</strong> — the code comment says so, and a
+compile-time assertion enforces it (<code>is_moderation_command_kind</code>). <strong>So not every kind is an event
+in the log: some are commands the relay consumes.</strong> This is the first crack in the &quot;everything is
+just an event&quot; simplification and batch 02/03 must respect it.</li>
+<li><strong><code>KIND_AUTH</code> is excluded from <code>ALL_KINDS</code> and a compile-time <code>assert!</code> bounds <code>KIND_CANVAS</code>,
+<code>KIND_HUDDLE_GUIDELINES</code> and <code>KIND_AUTH</code> to <code>u16::MAX</code></strong> — i.e. <strong>the code pins a sub-range of kinds
+at compile time.</strong> That is a real constraint discoverable only from the source.</li>
+</ol>
+<h3 id="3-3-the-wire-protocol-eight-messages-three-limits">3.3 The wire protocol — eight messages, three limits<a href="#batch-01/3-3-the-wire-protocol-eight-messages-three-limits" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>The full WebSocket vocabulary is eight messages (<code>ARCHITECTURE.md</code> §2). Three hard limits are declared:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Constant</th>
+<th align="right">Value</th>
+<th>Plain meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>MAX_FRAME_BYTES</code></td>
+<td align="right"><strong>65,536</strong></td>
+<td>a single WebSocket frame may not exceed 64 KiB</td>
+</tr>
+<tr>
+<td><code>MAX_SUBSCRIPTIONS</code></td>
+<td align="right"><strong>1024</strong></td>
+<td>per connection</td>
+</tr>
+<tr>
+<td><code>MAX_HISTORICAL_LIMIT</code></td>
+<td align="right"><strong>500</strong></td>
+<td>events returned per filter on a backfill</td>
+</tr>
+</tbody></table></div>
+<h3 id="3-4-nip-29-interop-the-protocol-is-shared-not-bespoke">3.4 NIP-29 interop — the protocol is *shared*, not bespoke<a href="#batch-01/3-4-nip-29-interop-the-protocol-is-shared-not-bespoke" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>NOSTR.md</code> (398 lines) is a <strong>compatibility matrix</strong>: buzz speaks <strong>NIP-29 (relay-based groups)
+natively</strong>, so <strong>a third-party Nostr client can connect to a buzz relay and chat</strong>. The matrix is
+honest — it marks two features ⚠️:</p>
+<ul>
+<li><strong>Edits (<code>kind:40003</code>) and rich content (<code>kind:40002</code>) &quot;work on the wire but are Buzz-only — no
+standard NIP-29 client renders these&quot;.</strong></li>
+</ul>
+<p><strong>Plain meaning:</strong> buzz is a <strong>protocol citizen with a bespoke extension layer</strong>. A plain Nostr client
+works for the base conversation; the extensions are where buzz&#39;s own features live. <strong>This is a real
+strategic choice</strong> — the workspace is not a walled garden at the wire level.</p>
+<p><strong>And <code>NOSTR.md</code> records a retirement in its own first line:</strong> <em>&quot;The old <strong>NIP-28 compatibility proxy
+has been removed</strong>.&quot;</em> (Rule 10: a retirement entry, found by reading.)</p>
+<hr>
+<h2 id="4-the-monorepo-measured-shape">4. The monorepo — measured shape<a href="#batch-01/4-the-monorepo-measured-shape" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="4-1-a-polyglot-workspace-rust-at-the-centre">4.1 A polyglot workspace, Rust at the centre<a href="#batch-01/4-1-a-polyglot-workspace-rust-at-the-centre" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Area</th>
+<th align="right">Files</th>
+<th align="right">Bytes</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><code>desktop/</code></strong></td>
+<td align="right"><strong>3,424</strong></td>
+<td align="right"><strong>47,007,177</strong></td>
+<td><strong>Tauri 2 + React 19 desktop app — the largest area</strong></td>
+</tr>
+<tr>
+<td><strong><code>crates/</code></strong></td>
+<td align="right"><strong>645</strong></td>
+<td align="right"><strong>21,720,897</strong></td>
+<td><strong>the Rust server + tools — 34 crates</strong></td>
+</tr>
+<tr>
+<td><code>mobile/</code></td>
+<td align="right">904</td>
+<td align="right">15,272,755</td>
+<td>Flutter (iOS + Android)</td>
+</tr>
+<tr>
+<td><code>docs/</code></td>
+<td align="right">82</td>
+<td align="right">11,596,274</td>
+<td>docs <strong>incl. screenshots</strong></td>
+</tr>
+<tr>
+<td><code>benchmarks/</code></td>
+<td align="right">116</td>
+<td align="right">1,344,876</td>
+<td>benchmarks</td>
+</tr>
+<tr>
+<td><code>migrations/</code></td>
+<td align="right">62</td>
+<td align="right">263,055</td>
+<td>schema history</td>
+</tr>
+<tr>
+<td><code>schema/</code></td>
+<td align="right">147</td>
+<td align="right">112,370</td>
+<td>desired-state schema</td>
+</tr>
+<tr>
+<td><code>web/</code> · <code>admin-web/</code> · <code>deploy/</code> · <code>scripts/</code></td>
+<td align="right">—</td>
+<td align="right">—</td>
+<td>browser client, admin console, deployment, tooling</td>
+</tr>
+</tbody></table></div>
+<p><strong>★ The first structural surprise of this study: the CLIENT is bigger than the SERVER.</strong>
+<code>desktop/</code> is <strong>5× the file count and 2× the bytes</strong> of <code>crates/</code>. In n8n the product WAS the packages;
+here the product is <strong>a server plus three first-class clients</strong> (desktop, mobile, web). <strong>Anything this
+study concludes about &quot;the product&quot; must say which of the four it means.</strong></p>
+<h3 id="4-2-the-34-crates-in-dependency-order">4.2 The 34 crates, in dependency order<a href="#batch-01/4-2-the-34-crates-in-dependency-order" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>buzz-core</code> is <strong>zero-I/O</strong> and everything builds on it; <code>buzz-relay</code> orchestrates all subsystems and
+<strong>is the only crate that does so</strong> (<code>ARCHITECTURE.md</code> §1):</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>text</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code>buzz-core  (zero I/O — types, Schnorr verify, filter matching, the kind registry)
+   ├── buzz-db          (Postgres: events, channels, tokens, workflows, audit)
+   ├── buzz-auth        (NIP-42, NIP-98, API tokens, scopes)
+   ├── buzz-pubsub      (Redis pub/sub, presence, typing)
+   ├── buzz-search      (Postgres FTS)
+   ├── buzz-audit       (hash-chain tamper-evident log)
+   └── buzz-workflow    (YAML-as-code automation engine)
+        └── buzz-relay   (ties everything together — the server)
+
+buzz-acp   (ACP harness: relay @mentions → AI agents)   buzz-sdk   (typed event builders)
+buzz-cli   (agent-first CLI, JSON in / JSON out)        buzz-media (Blossom/S3)
+buzz-admin (operator CLI)                               buzz-test-client (E2E harness)
+</code></pre>
+</div>
+<p><strong>★ The isolation rule is the load-bearing architectural constraint, and it is stated as a
+prohibition:</strong> *&quot;<code>buzz-workflow</code> never calls <code>buzz-pubsub</code>, <code>buzz-search</code> never calls <code>buzz-db</code>…
+<strong>Cross-subsystem coordination happens only through the relay.</strong>&quot;* <strong>There is exactly one sanctioned
+exception, and the doc names it:</strong> <em>&quot;<code>buzz-audit</code>, which calls <code>buzz_db::deletion::guard_community_write</code>
+to admit each audit append into its community before taking the chain lock.&quot;</em></p>
+<p><strong>Why this matters for a reader:</strong> a prohibition is a checkable design rule, and the exception is
+declared. <strong>This is the third study in the chain where the architecture is expressed as what is
+FORBIDDEN rather than what is possible</strong> (Multica&#39;s PX-F layering was the second) — and it is the
+cleanest such statement so far, because it is about <em>crate boundaries</em> rather than UI folders.</p>
+<h3 id="4-3-the-client-is-three-clients-not-one">4.3 The client is three clients, not one<a href="#batch-01/4-3-the-client-is-three-clients-not-one" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Client</th>
+<th>Stack</th>
+<th>Measured</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Desktop</strong></td>
+<td><strong>Tauri 2 + React 19</strong></td>
+<td><code>desktop/</code> 3,424 files / 47 MB; supports <strong>all seven surfaces</strong></td>
+</tr>
+<tr>
+<td><strong>Mobile</strong></td>
+<td><strong>Flutter</strong></td>
+<td><code>mobile/</code> 904 files / 15.3 MB; <code>.dart</code> 695 files / 7.3 MB</td>
+</tr>
+<tr>
+<td><strong>Web</strong></td>
+<td>browser client</td>
+<td><code>web/</code> 66 files; the repo browser at <code>myproject.com</code></td>
+</tr>
+<tr>
+<td><strong>Admin</strong></td>
+<td>admin console</td>
+<td><code>admin-web/</code> 17 files; <strong>&quot;browse and moderate every community&quot;</strong> (v0.5.28 changelog)</td>
+</tr>
+</tbody></table></div>
+<p><strong>CZ NOTE:</strong> the desktop app is where the composite surfaces live (canvas), and the mobile app is a
+<strong>partial</strong> surface (README: mobile is in <em>&quot;🚧 Being wired up&quot;</em>). Batch 05 reads all four.</p>
+<hr>
+<h2 id="5-the-relay-the-single-source-of-truth">5. The relay — the single source of truth<a href="#batch-01/5-the-relay-the-single-source-of-truth" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="5-1-the-claim-and-the-code-behind-it">5.1 The claim, and the code behind it<a href="#batch-01/5-1-the-claim-and-the-code-behind-it" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>ARCHITECTURE.md</code> §1 is unambiguous: <em>&quot;<strong>The relay is the single source of truth.</strong> All reads and writes
+flow through it. <strong>There is no peer-to-peer event exchange, no gossip, no replication</strong> — just clients
+connecting to one relay over WebSocket.&quot;</em></p>
+<p><strong>Measured against the code:</strong> <code>crates/buzz-relay/src/</code> is <strong>161,380 lines across 119 files</strong> — the
+largest crate by far (<code>buzz-db</code> is 83,502; <code>buzz-acp</code> 61,140; <code>buzz-agent</code> 41,813; <code>buzz-core</code> 11,108;
+<code>buzz-media</code> 9,572; <code>buzz-workflow</code> 5,263). <strong>The relay is 32 % of all Rust lines in the repo.</strong> The
+claim holds at the structural level.</p>
+<p><strong>But the code contains a nuance the doc&#39;s summary omits, and rule 1 requires recording it:</strong> there is a
+<strong><code>crates/buzz-relay-mesh</code></strong> crate using <strong><code>iroh</code></strong> (a peer-to-peer transport) and a
+<strong><code>crates/buzz-relay/src/tunnel/</code></strong> directory. <strong>So &quot;no peer-to-peer event exchange&quot; is true of the
+<em>event</em> path today, while a <em>mesh</em> transport exists as a separate crate</strong> (note the comment in
+<code>Cargo.toml</code>: <em>&quot;Inter-relay mesh transport (buzz-relay-mesh)&quot;</em>). <strong>Batch 06 reads the mesh and states
+exactly what it does and does not carry.</strong> The doc&#39;s sentence is about the <strong>event log</strong>; the mesh is a
+different question, and it is not silently dropped here.</p>
+<h3 id="5-2-the-event-pipeline-11-steps-and-which-are-fire-and-forget">5.2 The event pipeline — 11 steps, and which are fire-and-forget<a href="#batch-01/5-2-the-event-pipeline-11-steps-and-which-are-fire-and-forget" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>ARCHITECTURE.md</code> §4 gives the exact order. <strong>The load-bearing parts:</strong></p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>text</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code>1. AUTH CHECK    → 2. PUBKEY MATCH → 3. KIND_AUTH REJECT → 4. EPHEMERAL ROUTE
+5. VERIFY        (spawn_blocking — Schnorr + SHA-256)    → 6. MEMBERSHIP
+7. DB INSERT     (idempotent; search_tsv generated synchronously)
+8. REDIS PUBLISH (if channel-scoped)  → 9. FAN-OUT  → [OK sent to client]
+10. AUDIT LOG    (spawned async, fire-and-forget)
+11. WORKFLOW TRIGGER (spawned async, excludes kinds 46001–46012)
+</code></pre>
+</div>
+<p><strong>Three facts worth naming, each with a consequence:</strong></p>
+<ul>
+<li><strong>The client is told <code>OK</code> AFTER fan-out, not after the DB insert</strong> (step 9, not step 7). The doc says
+so explicitly.</li>
+<li><strong>Audit and workflow are fire-and-forget</strong> — <em>&quot;a failure in either does not fail the event
+submission.&quot;</em> <strong>Plain meaning:</strong> an accepted event is accepted even if the audit write later fails.
+That is a deliberate availability-over-strictness trade, and it is stated.</li>
+<li><strong>There is no asynchronous search indexer at all.</strong> Search is a <strong>generated Postgres column</strong>
+(<code>events.search_tsv</code>, populated on insert, GIN-indexed). <strong><code>buzz-search</code> only queries it.</strong> This
+removes an entire class of &quot;index drifted from source&quot; bugs — and it is why two of buzz&#39;s &quot;Known
+Limitations&quot; are absences rather than defects.</li>
+</ul>
+<h3 id="5-3-the-fan-out-security-boundary-a-rule-stated-twice-in-two-places">5.3 The fan-out security boundary (a rule stated twice, in two places)<a href="#batch-01/5-3-the-fan-out-security-boundary-a-rule-stated-twice-in-two-places" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><strong>★ This is the strongest single security statement in the batch:</strong></p>
+<blockquote>
+<p>Step 9 (fan-out) <strong>explicitly excludes global subscriptions</strong> (no <code>channel_id</code> constraint) from
+channel-scoped events — <strong>global subscriptions do NOT receive events from private channels,
+regardless of filter match.</strong> This is a deliberate security boundary.</p>
+</blockquote>
+<p>And the subscription system implements it as <strong>three tiers</strong>, where tier 3 (global) is consulted <strong>only
+for non-channel-scoped events</strong>. <strong>A private-channel message cannot reach a global subscriber.</strong> The REQ
+handler additionally <strong>checks channel access BEFORE registering the subscription</strong>, to close a
+race window — and the code comment names the race: <em>&quot;a non-member receives live fan-out events from a
+private channel between registration and the access check.&quot;</em></p>
+<p><strong>This is the kind of finding the study exists to collect: a security boundary that is named, placed,
+and explained at the exact point where it would otherwise leak.</strong></p>
+<h3 id="5-4-the-known-limitations-section-buzz-names-its-own-gaps">5.4 The Known Limitations section — buzz names its own gaps<a href="#batch-01/5-4-the-known-limitations-section-buzz-names-its-own-gaps" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>ARCHITECTURE.md</code> §9 is titled <strong>&quot;Known Limitations — these are verified gaps in the current
+implementation, not design aspirations.&quot;</strong> <strong>Six gaps are listed</strong>, and two are unusually candid:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Gap</th>
+<th>The doc&#39;s own words</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>No sqlx offline query cache</td>
+<td><code>sqlx::query()</code> (runtime) not <code>query!()</code> (compile-time) — <em>&quot;Queries are not validated at compile time.&quot;</em></td>
+</tr>
+<tr>
+<td><strong>2</strong></td>
+<td><strong>No rate limiting implementation</strong></td>
+<td>*&quot;<code>RateLimiter</code> trait exists… <strong>Only implementation is <code>AlwaysAllowRateLimiter</code> (test stub)… rate limiting is not currently enforced.</strong>&quot;* <code>RateLimitConfig</code> defines <strong>4 tiers (human, agent-standard, agent-elevated, agent-platform)</strong> as a design target</td>
+</tr>
+<tr>
+<td>3</td>
+<td>No typing REST endpoint</td>
+<td>typers are not queryable, only online/away</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Huddle recording not built</td>
+<td>kinds reserved, no producer</td>
+</tr>
+<tr>
+<td><strong>5</strong></td>
+<td><strong>Approval gates not wired end-to-end</strong></td>
+<td><em>&quot;runs that hit an approval gate are marked as Failed (🚧 WF-08)&quot;</em></td>
+</tr>
+<tr>
+<td><strong>6</strong></td>
+<td><strong>Workflow actions partially stubbed</strong></td>
+<td><code>send_dm</code> and <code>set_channel_topic</code> <em>&quot;return <code>NotImplemented</code>&quot;</em> (🚧 WF-07)</td>
+</tr>
+</tbody></table></div>
+<p><strong>Why this is the most valuable section in the repo:</strong> it is the <strong>counterweight</strong>. buzz&#39;s vision docs are
+ambitious (11 <code>VISION_*.md</code> files, §6 below); §9 is the honest ledger of what is not built. <strong>A study
+that read only the vision would be wrong about the product; a study that read only §9 would be wrong
+about the direction. Both are needed.</strong></p>
+<p><strong>CZ NOTE (cross-study, observation only):</strong> n8n&#39;s synthesis found its ADRs <em>accurate</em>; buzz&#39;s
+limitations section is the same species of honest artefact — <strong>a self-written defect list that lets rule
+1 be checked cheaply.</strong> Gas Town and Multica had partial versions of this; buzz&#39;s is the most explicit.</p>
+<hr>
+<h2 id="6-the-surfaces-and-the-docs">6. The surfaces and the docs<a href="#batch-01/6-the-surfaces-and-the-docs" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="6-1-seven-surfaces-three-lenses-over-one-log">6.1 Seven surfaces, three lenses over one log<a href="#batch-01/6-1-seven-surfaces-three-lenses-over-one-log" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>VISION.md</code> names <strong>seven surfaces</strong>, and the sentence that ties them together is <em>&quot;One event log. One
+search index. Three lenses.&quot;</em></p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Surface</th>
+<th>Model</th>
+<th>Default notifications</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>🏠 <strong>Home</strong></td>
+<td>personalized feed</td>
+<td>—</td>
+</tr>
+<tr>
+<td>💬 <strong>Stream</strong></td>
+<td>topic-based real-time chat (Slack-like)</td>
+<td><strong>Zero</strong></td>
+</tr>
+<tr>
+<td>📋 <strong>Forum</strong></td>
+<td>async long-form threads (Discourse-like)</td>
+<td><strong>Zero</strong></td>
+</tr>
+<tr>
+<td>✉️ <strong>DMs</strong></td>
+<td>1:1 and group, <strong>up to 9</strong></td>
+<td>URGENT only</td>
+</tr>
+<tr>
+<td>🤖 <strong>Agents</strong></td>
+<td>directory · your agents · job board</td>
+<td>—</td>
+</tr>
+<tr>
+<td>⚡ <strong>Workflows</strong></td>
+<td>YAML-as-code automation + traces</td>
+<td>Approvals only</td>
+</tr>
+<tr>
+<td>🔍 <strong>Search</strong></td>
+<td>Cmd+K · instant · full-text</td>
+<td>—</td>
+</tr>
+</tbody></table></div>
+<p><strong>★ The &quot;three lenses&quot; claim is the architectural thesis, and it is measurable:</strong> Stream
+(<code>kind:9</code>), Forum (<code>kind:45001/45003</code>) and Workflow (<code>kind:46001–46012</code>) are <strong>different kinds in the
+SAME <code>events</code> table, indexed by the SAME <code>search_tsv</code>, delivered through the SAME fan-out.</strong> The
+difference is <strong>the client&#39;s rendering and the notification policy</strong> — not the storage. <em>&quot;Stream —
+Slack-like, fast… Forum — Discourse-like, slow… Workflow — structured, traceable.&quot;</em>
+<strong>Plain meaning: buzz does not have three products with a bridge; it has one log with three faces.</strong>
+That is the boldest design decision in the platform and <strong>batch 03 tests whether the code backs it.</strong></p>
+<h3 id="6-2-the-access-model-one-gate-five-role-names">6.2 The Access model — one gate, five role names<a href="#batch-01/6-2-the-access-model-one-gate-five-role-names" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>*&quot;The relay enforces all access control. <strong>Channel membership is the only gate.</strong>&quot;*</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Visibility</th>
+<th>Join</th>
+<th>Create</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Open channels</td>
+<td>searchable by all members</td>
+<td>self-join</td>
+<td>any member</td>
+</tr>
+<tr>
+<td>Private channels</td>
+<td>hidden, invite-only</td>
+<td>invited by member</td>
+<td>any member</td>
+</tr>
+<tr>
+<td>DMs</td>
+<td>participants only</td>
+<td>N/A (≤9)</td>
+<td>any member</td>
+</tr>
+<tr>
+<td><strong>Guests</strong></td>
+<td><strong>scoped to specific channels</strong></td>
+<td>invited</td>
+<td>N/A</td>
+</tr>
+</tbody></table></div>
+<p><strong>and <code>buzz-db</code> declares five member roles: <code>Owner</code>, <code>Admin</code>, <code>Member</code>, <code>Guest</code>, <code>Bot</code>.</strong>
+<strong>★ <code>Bot</code> is a first-class membership role</strong> — the same five-slot vocabulary a person gets.
+<code>VISION.md</code> says the quiet part: <em>&quot;Auth is simple — authenticated or not. Channel membership gates
+content visibility.&quot;</em> <strong>Plain meaning: buzz does NOT have a permission-flag system; it has ONE gate
+(membership) and identity (the keypair).</strong> A guest is not &quot;a user with restricted scopes&quot; — <strong>a guest is
+a member of fewer channels.</strong> This is a distinctly different shape from every earlier platform in the
+study (Multica&#39;s roles+scopes; n8n&#39;s 10 roles + 206 scopes) and <strong>batch 03 reads its consequences.</strong></p>
+<h3 id="6-3-the-communities-model-and-why-this-study-was-chosen-for-the-tenancy-question">6.3 The Communities model — and why this study was chosen for the tenancy question<a href="#batch-01/6-3-the-communities-model-and-why-this-study-was-chosen-for-the-tenancy-question" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>ARCHITECTURE.md</code> §1 states the rule in code-shaped form:</p>
+<blockquote>
+<p><strong><code>req.community = resolve_host(connection.host)</code></strong> is established <strong>before</strong> AUTH, EVENT, REQ, REST,
+media, git, search, workflow, or pub/sub handling. <strong>Unknown hosts fail closed</strong>, and NIP-98/API-token
+stamps must <strong>agree with</strong> the host-derived community rather than overriding it.</p>
+</blockquote>
+<p><strong>Plain meaning:</strong> <em>the URL is the tenant.</em> There is no tenant tag on the wire (the Nostr format does
+not grow one) — the <strong>host</strong> determines the community, and <strong>everything is scoped under it</strong>: rows,
+cache keys, search documents, workflow state, media metadata, git repo pointers, and <strong>audit chains</strong>.</p>
+<p><strong>★ And this study&#39;s first genuinely novel artefact lives here: the isolation is PROVEN, not asserted.</strong>
+<code>VISION.md</code>: <em>&quot;Isolation is the boundary, not a filter… This is proven, not asserted: the multi-tenant
+relay spec mechanizes isolation in <strong>TLA+</strong> and authorization in <strong>Tamarin</strong>, with every guarantee
+<strong>mutation-tested</strong>.&quot;</em> <strong>Measured — the proof inputs are IN the tree:</strong></p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>File</th>
+<th align="right">Size</th>
+<th>Models</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>docs/spec/MultiTenantRelay.tla</code></td>
+<td align="right"><strong>61,202 B</strong></td>
+<td><strong>isolation</strong> (TLA+)</td>
+</tr>
+<tr>
+<td><code>docs/spec/MultiTenantAuth.spthy</code></td>
+<td align="right"><strong>31,956 B</strong></td>
+<td><strong>authorization</strong> (Tamarin prover)</td>
+</tr>
+<tr>
+<td><code>docs/spec/GitOnObjectStore.tla</code></td>
+<td align="right">13,872 B</td>
+<td>git-on-object-storage correctness</td>
+</tr>
+<tr>
+<td><code>crates/buzz-core/src/pairing/NIP-AB.spthy</code></td>
+<td align="right">—</td>
+<td>the pairing protocol</td>
+</tr>
+<tr>
+<td><code>docs/multi-tenant-relay.md</code></td>
+<td align="right"><strong>1,110 lines</strong></td>
+<td>the spec itself</td>
+</tr>
+</tbody></table></div>
+<p><strong>This is the first platform in the study to ship machine-checkable models of its guarantees.</strong> Batch 03
+reads them <strong>as models to verify against the code (rule 1)</strong> — not as guarantees to accept. <strong>And the
+honest reading today is already visible in §5.4 + the crate map:</strong> the <em>semantic</em> boundary is designed
+and modelled, while <code>RateLimitConfig</code>&#39;s four tiers and sqlx compile-time checking are <strong>declared
+targets, not enforcement.</strong></p>
+<h3 id="6-4-the-doc-set-eleven-vision-docs">6.4 The doc set: eleven VISION docs<a href="#batch-01/6-4-the-doc-set-eleven-vision-docs" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><strong>Measured: 11 <code>VISION_*.md</code> files</strong> (plus <code>CONTEXT.md</code>), totaling ~78 KB — and they are not variants of
+one document, they are <strong>eleven different bet-the-product essays</strong>:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Doc</th>
+<th align="right">Size</th>
+<th>The bet</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>VISION.md</code></td>
+<td align="right">13,507 B</td>
+<td><strong>the relay is the workspace</strong> — the master doc</td>
+</tr>
+<tr>
+<td><code>VISION_PROJECTS.md</code></td>
+<td align="right"><strong>15,808 B</strong></td>
+<td><strong>the biggest of the eleven</strong> — projects/repos in the same room</td>
+</tr>
+<tr>
+<td><code>VISION_SOVEREIGN.md</code></td>
+<td align="right">13,541 B</td>
+<td>run your own, or an operator hosts thousands</td>
+</tr>
+<tr>
+<td><code>VISION_REMOTE_AGENTS.md</code></td>
+<td align="right">8,922 B</td>
+<td>agents that live elsewhere (batch 02)</td>
+</tr>
+<tr>
+<td><code>VISION_MODERATION.md</code></td>
+<td align="right">7,783 B</td>
+<td>moderation as a first-class surface (batch 06)</td>
+</tr>
+<tr>
+<td><code>VISION_MOBILE.md</code></td>
+<td align="right">6,866 B</td>
+<td>the Flutter client</td>
+</tr>
+<tr>
+<td><code>VISION_ACTIVITY.md</code> / <code>_MESH.md</code> / <code>_AGENT.md</code></td>
+<td align="right">5,208 / 4,607 / 4,501 B</td>
+<td>activity feed · relay mesh · the agent</td>
+</tr>
+</tbody></table></div>
+<p><strong>★ The doc culture is the opposite hazard from CrewAI&#39;s.</strong> CrewAI&#39;s repo was 93 % documentation and hid
+its code. buzz has <strong>~78 KB of vision docs against ~502,880 lines of Rust</strong> — the docs are a small
+fraction, they are <em>forward-looking</em>, and the <strong>code is 60× the docs by size.</strong> <strong>The hazard here is not
+&quot;docs hide the code&quot; but &quot;the docs describe a future the code has not reached&quot;</strong> — which is exactly why
+§5.4 (Known Limitations) and rule 1 matter so much.</p>
+<hr>
+<h2 id="7-capability-table-tagged-by-pole">7. Capability table (tagged by pole)<a href="#batch-01/7-capability-table-tagged-by-pole" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>The batch-01 map, tagged so batches 02–06 inherit the frame.</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>Plain gloss</th>
+<th>Pole</th>
+<th>Q1 · USER VALUE</th>
+<th>Q2 · VISION VALUE</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>One signed event log</strong></td>
+<td>every action is the same six-field object</td>
+<td><strong>P2</strong></td>
+<td>one place where messages, code review, approvals and automation all live and are searchable together</td>
+<td>a single substrate means one subscription/search/audit model instead of N</td>
+</tr>
+<tr>
+<td><strong>The <code>kind</code> registry</strong></td>
+<td>features are integers, not tables</td>
+<td><strong>P2 / PX-F</strong></td>
+<td>new features never break an old client</td>
+<td><strong>additive evolution without migration</strong> — the property our own workspace needs most</td>
+</tr>
+<tr>
+<td><strong>7 surfaces, 3 lenses</strong></td>
+<td>chat/forum/workflows are views over one log</td>
+<td><strong>P2 / PX-W</strong></td>
+<td>the right shape for the conversation (fast vs. slow) without a second tool</td>
+<td>one storage + one index + N renderings = <strong>lowest duplication ceiling in the study</strong></td>
+</tr>
+<tr>
+<td><strong>Membership-is-the-only-gate</strong></td>
+<td>access = which rooms you are in</td>
+<td><strong>P2</strong></td>
+<td>simple, explainable access — no permission matrix to audit</td>
+<td><strong>identity-scoped, not flag-scoped</strong> — the primitive we keep needing (cf. <code>CC-84</code>)</td>
+</tr>
+<tr>
+<td><strong>Community = the URL</strong></td>
+<td>the hostname is the tenant</td>
+<td><strong>P2</strong></td>
+<td>a workspace has a name and a door; nothing else to configure</td>
+<td><strong>a tenant boundary that needs no new protocol field</strong></td>
+</tr>
+<tr>
+<td><strong>Formal isolation models</strong></td>
+<td>TLA+/Tamarin proofs ship in-tree</td>
+<td><strong>P2 / PZ</strong></td>
+<td>(indirect) a boundary that can be verified rather than trusted</td>
+<td><strong>the study&#39;s first machine-checkable tenancy guarantee</strong> — a method to borrow even if the code is not</td>
+</tr>
+<tr>
+<td><strong>Relay is the single source of truth</strong></td>
+<td>one process owns all state</td>
+<td><strong>P2 / P3</strong></td>
+<td>predictable: no replication lag, no split brain</td>
+<td>a clear ownership model (and the doc states the mesh exception — §5.1)</td>
+</tr>
+<tr>
+<td><strong>Fan-out excludes global subscribers</strong></td>
+<td>private rooms cannot leak to a global listener</td>
+<td><strong>P2</strong></td>
+<td>a private channel is actually private</td>
+<td>a <strong>named</strong> security boundary placed at the exact leak point</td>
+</tr>
+<tr>
+<td><strong>Fire-and-forget audit/workflow</strong></td>
+<td>an event is accepted before audit completes</td>
+<td><strong>P3</strong></td>
+<td>chat never blocks on the automation layer</td>
+<td><strong>availability-over-strictness, declared</strong> — a trade to weigh, not copy blindly</td>
+</tr>
+<tr>
+<td><strong><code>buzz-core</code> zero-I/O + one-way crate deps</strong></td>
+<td>the shared layer cannot grow teeth</td>
+<td><strong>PX-F / PZ</strong></td>
+<td>(indirect) a fast, small core</td>
+<td><strong>constraint-as-architecture</strong> — third study where prohibitions are the design</td>
+</tr>
+<tr>
+<td><strong>NIP-29 interop</strong></td>
+<td>a plain Nostr client can connect and chat</td>
+<td><strong>PZ</strong></td>
+<td>your workspace is not a walled garden</td>
+<td><strong>protocol citizenship</strong> — a standard wire format with a bespoke extension layer</td>
+</tr>
+<tr>
+<td><strong>Known Limitations §9</strong></td>
+<td>the repo names its own gaps</td>
+<td><strong>PZ</strong></td>
+<td>honest expectations</td>
+<td><strong>the artefact that makes rule 1 cheap</strong> — a self-written defect list</td>
+</tr>
+<tr>
+<td><strong>The relay is 32 % of all Rust</strong></td>
+<td>one crate owns the wiring</td>
+<td><strong>P3 / PZ</strong></td>
+<td>one thing to operate</td>
+<td>a concentration <strong>risk and a clarity</strong> in the same fact</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="8-findings-carried-forward-into-batches-0206">8. Findings carried forward (into batches 02–06)<a href="#batch-01/8-findings-carried-forward-into-batches-0206" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>F1-1 · The kind registry is the product&#39;s true feature list, and it disagrees with the docs.</strong>
+135 constants / 136 array entries in <code>kind.rs</code> vs. <strong>two different stale numbers in one document</strong>
+(127 and 80). <strong>Action for later batches: any &quot;what exists&quot; claim is read from <code>kind.rs</code> first.</strong></p>
+<p><strong>F1-2 · Not every kind is an event.</strong> Moderation commands (9040–9044) are <strong>executed, never stored</strong>,
+enforced by a compile-time assertion. <strong>The &quot;everything is an event&quot; simplification has a measured
+boundary.</strong> → batch 02/03 confirm the full boundary set.</p>
+<p><strong>F1-3 · The client is bigger than the server.</strong> <code>desktop/</code> 3,424 files / 47 MB vs. <code>crates/</code> 645 /
+21.7 MB. <strong>Any &quot;the product is X&quot; statement must name which of server / desktop / mobile / web.</strong></p>
+<p><strong>F1-4 · There is a mesh transport the summary omits.</strong> <code>buzz-relay-mesh</code> (iroh) + <code>src/tunnel/</code> exist
+alongside the &quot;no peer-to-peer&quot; claim. <strong>The claim is about the event path; the mesh is a separate
+question.</strong> → batch 06.</p>
+<p><strong>F1-5 · One gate, five role names, and <code>Bot</code> is one of them.</strong> Access is membership, not permissions.
+→ batch 03 is where this is tested.</p>
+<p><strong>F1-6 · Isolation is modelled formally, and enforcement is partly a target.</strong> TLA+/Tamarin inputs
+ship in-tree; <code>RateLimitConfig</code>&#39;s 4 tiers and sqlx compile-time checking are <strong>declared, not enforced</strong>.
+<strong>The model and the enforcement must be read as two different things.</strong> → batch 03.</p>
+<p><strong>F1-7 · Three surfaces are one table.</strong> Stream/Forum/Workflow differ by kind and client rendering, not
+storage. <strong>This is the platform&#39;s boldest claim and the most checkable.</strong> → batch 03/05.</p>
+<p><strong>F1-8 · Six self-declared gaps, two of them material.</strong> Approval gates mark runs <strong>Failed</strong>; <code>send_dm</code>
+and <code>set_channel_topic</code> return <strong>NotImplemented</strong>. <strong>The automation pole (batch 04) inherits these as
+known-open, and any capability claim there must be checked against them.</strong></p>
+<p><strong>F1-9 · Two retirements already found by reading.</strong> The <strong>NIP-28 compatibility proxy</strong> was removed
+(<code>NOSTR.md:1</code>); migration <strong><code>0044_drop_nip_fi_ledger.sql</code></strong> drops the entire Phase-A NIP-FI authority
+ledger (<strong>14 tables, <code>CASCADE</code></strong>) with the reason recorded in the file: <em>&quot;OSS Buzz is stateless for
+identity… the durable ledger tables are dead code.&quot;</em> <strong>Rule 10 has a real surface here — 23 of 62
+migrations carry a drop/remove/retire flavour.</strong></p>
+<hr>
+<h2 id="9-what-batch-01-does-not-claim">9. What batch 01 does NOT claim<a href="#batch-01/9-what-batch-01-does-not-claim" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<ul>
+<li><strong>It does not claim buzz works as advertised.</strong> §5.4 lists six self-declared gaps; the vision docs
+describe a future. Batch 01 maps the <em>territory</em>; later batches test the <em>claims</em>.</li>
+<li><strong>It does not rank mechanisms.</strong> That is batch 07&#39;s job.</li>
+<li><strong>It does not compare buzz to our own platform.</strong> Rule 5; that is the later mapping pass.</li>
+<li><strong>It does not read the formal models.</strong> It records that they exist (§6.3) and defers the reading to
+batch 03, where the tenancy boundary belongs.</li>
+</ul>
+<hr>
+<p><em>Batch 01 of 07. Written 2026-10-16. Next: <code>findings/02-the-aissistant.md</code> (P1) — <code>buzz-agent</code>,
+<code>buzz-acp</code>, <code>buzz-dev-mcp</code>, agent identity and keys, the job protocol (kinds 43001–43006), personas,
+managed agents, and remote agents.</em></p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="00-the-pin-method.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">The Pin &amp; Method</span>
+                </a>
+              
+
+              <a href="../index.html#batch-01" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              
+                <a href="02-the-aissistant-p1.html" class="nav-page-btn" style="text-align:right;">
+                  <span class="nav-btn-sub">Next Batch →</span>
+                  <span class="nav-btn-title">The Aissistant (P1)</span>
+                </a>
+              
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#1-what-was-read-and-its-measured-size" class="toc-link">1. What was read, and its measured size</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#2-the-one-sentence-gloss-then-the-detail" class="toc-link">2. The one-sentence gloss, then the detail</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-the-protocol-nostr-nip-01-and-why-the-choice-is-load-bearing" class="toc-link">3. The protocol — Nostr NIP-01, and why the choice is load-bearing</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-1-the-event-is-the-whole-api" class="toc-link">3.1 The event is the whole API</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-2-the-kind-registry-measured-in-code-and-the-divergence" class="toc-link">3.2 The kind registry — measured in code, and the divergence</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-3-the-wire-protocol-eight-messages-three-limits" class="toc-link">3.3 The wire protocol — eight messages, three limits</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-4-nip-29-interop-the-protocol-is-shared-not-bespoke" class="toc-link">3.4 NIP-29 interop — the protocol is *shared*, not bespoke</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-the-monorepo-measured-shape" class="toc-link">4. The monorepo — measured shape</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-1-a-polyglot-workspace-rust-at-the-centre" class="toc-link">4.1 A polyglot workspace, Rust at the centre</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-2-the-34-crates-in-dependency-order" class="toc-link">4.2 The 34 crates, in dependency order</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-3-the-client-is-three-clients-not-one" class="toc-link">4.3 The client is three clients, not one</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-the-relay-the-single-source-of-truth" class="toc-link">5. The relay — the single source of truth</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#5-1-the-claim-and-the-code-behind-it" class="toc-link">5.1 The claim, and the code behind it</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#5-2-the-event-pipeline-11-steps-and-which-are-fire-and-forget" class="toc-link">5.2 The event pipeline — 11 steps, and which are fire-and-forget</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#5-3-the-fan-out-security-boundary-a-rule-stated-twice-in-two-places" class="toc-link">5.3 The fan-out security boundary (a rule stated twice, in two places)</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#5-4-the-known-limitations-section-buzz-names-its-own-gaps" class="toc-link">5.4 The Known Limitations section — buzz names its own gaps</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-the-surfaces-and-the-docs" class="toc-link">6. The surfaces and the docs</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#6-1-seven-surfaces-three-lenses-over-one-log" class="toc-link">6.1 Seven surfaces, three lenses over one log</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#6-2-the-access-model-one-gate-five-role-names" class="toc-link">6.2 The Access model — one gate, five role names</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#6-3-the-communities-model-and-why-this-study-was-chosen-for-the-tenancy-question" class="toc-link">6.3 The Communities model — and why this study was chosen for the tenancy question</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#6-4-the-doc-set-eleven-vision-docs" class="toc-link">6.4 The doc set: eleven VISION docs</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-capability-table-tagged-by-pole" class="toc-link">7. Capability table (tagged by pole)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#8-findings-carried-forward-into-batches-0206" class="toc-link">8. Findings carried forward (into batches 02–06)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#9-what-batch-01-does-not-claim" class="toc-link">9. What batch 01 does NOT claim</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('buzz_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('buzz_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('buzz_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('buzz_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.BuzzReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

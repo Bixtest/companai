@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 02 — The aissistant (P1) — buzz Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-02" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 02</span>
+      <div class="header-title-wrap">
+        <div class="header-title">The Aissistant (P1)</div>
+        <div class="header-subtitle">buzz Platform Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/02-the-aissistant.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #059669">DONE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">5,223</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">26 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">499</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-16</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 02 Architecture Guide (Default)</option>
+            <optgroup label="Strategic Architecture">
+              <option value="master">Executive Topology: the workspace is the event log, and the isolation is proven</option>
+            </optgroup>
+            <optgroup label="Foundations">
+              <option value="00">Batch 00: The pin, the extraction, and the rename hazard</option>
+              <option value="01">Batch 01: The overview — the event is the whole API</option>
+            </optgroup>
+            <optgroup label="Pole 1 — The Aissistant">
+              <option value="02">Batch 02: The aissistant — an agent is a colleague</option>
+            </optgroup>
+            <optgroup label="Pole 2 — The Workspace">
+              <option value="03">Batch 03: The workspace — three fences over one store</option>
+            </optgroup>
+            <optgroup label="Pole 3 — Automations">
+              <option value="04">Batch 04: Automations — deterministic at-most-once</option>
+            </optgroup>
+            <optgroup label="Cross-Cutting">
+              <option value="05">Batch 05: Widgets &amp; frontend — a proven negative</option>
+            </optgroup>
+            <optgroup label="Escape Hatch">
+              <option value="06">Batch 06: Out-of-pole — five artefacts, three languages</option>
+            </optgroup>
+            <optgroup label="Strategic Decision">
+              <option value="07">Batch 07: The synthesis — where buzz sits, what we take</option>
+            </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 02 VISUAL GUIDE</div>
+    <h4>The aissistant: an agent is a colleague</h4>
+    <p>Identity like a person's, memory as a custom NIP, and a six-tool surface</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 340" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-02" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-02" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+        <marker id="arrr-02" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#ef4444"/>
+        </marker>
+      </defs>
+      <g transform="translate(20, 20)">
+        <rect width="210" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">IDENTITY & OWNERSHIP</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">agent = a keypair</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">+ channel memberships</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">a member like any person</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">NIP-OA owner attestation</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">attests — never impersonates</text>
+        <text x="12" y="129" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">authorship is never rewritten</text>
+      </g>
+      <path d="M 230 95 L 268 95" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-02)"/>
+      <g transform="translate(272, 20)">
+        <rect width="210" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">MEMORY</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">NIP-AE "Agent Engrams"</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">kind:30174</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">NIP-44 encrypted</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">to the (agent, owner) pair</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">the owner can always read it</text>
+        <text x="12" y="129" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">community-scoped too</text>
+      </g>
+      <path d="M 482 95 L 520 95" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-02)"/>
+      <g transform="translate(524, 20)">
+        <rect width="210" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE TOOL SURFACE</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">six tools, not sixty</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">descriptions coach the model</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">shell: 8 KB to model, 10 MB to disk</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">ACP / MCP both swappable</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">a surface small enough to reason about</text>
+        <text x="12" y="129" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">two binaries: buzz-agent + buzz-dev-mcp</text>
+      </g>
+      <rect x="20" y="190" width="880" height="110" rx="10" fill="#ef4444" fill-opacity="0.08" stroke="#ef4444" stroke-width="1.6"/>
+      <text x="40" y="216" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#b91c1c">THE SAFETY POSTURE STARTS HERE</text>
+      <text x="40" y="242" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">The default permission mode is bypass-permissions. There is a six-rung ladder (default → auto → acceptEdits →</text>
+      <text x="40" y="262" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">bypass → dontAsk → plan) and a plan rung that executes nothing — but the default sits at the permissive end.</text>
+      <text x="40" y="286" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#b91c1c">Any statement about buzz's agent safety must begin at this line, not at the ladder.</text>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="buzz-study-batch-02-the-aissistant-p1">buzz Study — Batch 02: the aissistant (P1)<a href="#batch-02/buzz-study-batch-02-the-aissistant-p1" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Folder:</strong> <code>library/architecture/buzz-forensics/</code> · <strong>Batch 02 of 07</strong> · <strong>Pole: P1 — the aissistant</strong></p>
+<p><strong>What this batch answers:</strong> what buzz offers the AI user/agent — the agent runtime, the harness, the
+tool surface, the model layer, agent identity and ownership, agent memory, and the job protocol. <strong>This
+is where buzz is most distinctive</strong>, because its premise is that <strong>an agent is a member, not a bot</strong>:
+same keypair type, same channel membership, same audit trail as a person.</p>
+<p><strong>Rule 5 reminder:</strong> no comparison to our own platform. <strong>Rule 1 reminder:</strong> four doc-vs-code
+divergences were found and are recorded in <strong>§7</strong> — one of them material.</p>
+<hr>
+<h2 id="1-what-was-read-and-its-measured-size">1. What was read, and its measured size<a href="#batch-02/1-what-was-read-and-its-measured-size" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Source</th>
+<th align="right">Size</th>
+<th>What it gave</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>VISION_AGENT.md</code></td>
+<td align="right">4,501 B</td>
+<td>the two-binary thesis: <code>buzz-agent</code> (ACP) + <code>buzz-dev-mcp</code> (MCP)</td>
+</tr>
+<tr>
+<td><code>VISION_REMOTE_AGENTS.md</code></td>
+<td align="right"><strong>8,922 B</strong></td>
+<td>agents that outlive the laptop — <strong>the &quot;same agent, new body&quot; doctrine</strong></td>
+</tr>
+<tr>
+<td><code>crates/buzz-agent/src/</code></td>
+<td align="right"><strong>41,813 lines / 36 files</strong></td>
+<td>the agent runtime; <code>llm.rs</code> alone is <strong>8,049 lines</strong></td>
+</tr>
+<tr>
+<td><code>crates/buzz-acp/src/</code></td>
+<td align="right"><strong>61,140 lines</strong></td>
+<td>the harness — <code>lib.rs</code> 13,608 · <code>pool.rs</code> 12,447 · <code>queue.rs</code> 7,417 · <code>relay.rs</code> 7,014</td>
+</tr>
+<tr>
+<td><code>crates/buzz-dev-mcp/src/</code></td>
+<td align="right"><strong>~5,220 lines / 13 files</strong></td>
+<td><strong>the entire tool surface — 6 tools + 2 hooks</strong></td>
+</tr>
+<tr>
+<td><code>crates/buzz-core/src/engram.rs</code> + <code>NIP-AE.md</code></td>
+<td align="right">—</td>
+<td><strong>agent memory, NIP-44-encrypted</strong></td>
+</tr>
+<tr>
+<td><code>crates/buzz-acp/src/config.rs</code></td>
+<td align="right">2,718 lines</td>
+<td>the harness&#39;s config surface — <strong>26 documented env vars</strong></td>
+</tr>
+<tr>
+<td><code>docs/nips/NIP-OA.md</code> · <code>NIP-PMA.md</code></td>
+<td align="right">—</td>
+<td><strong>owner attestation</strong> and the private managed-agent aggregate</td>
+</tr>
+<tr>
+<td><code>scripts/model-capabilities.json</code> + <code>normative-corpus.json</code></td>
+<td align="right">69,179 B + 88,776 B</td>
+<td><strong>the model layer, as a hand-curated manifest</strong></td>
+</tr>
+<tr>
+<td><code>.env.example</code></td>
+<td align="right">20,095 B</td>
+<td>the real, documented configuration surface</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="2-the-one-sentence-gloss">2. The one-sentence gloss<a href="#batch-02/2-the-one-sentence-gloss" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<blockquote>
+<p><strong>buzz treats an agent as a colleague with its own key</strong>: it gets a keypair, a name, a profile on the
+relay, its own channel memberships, its own memory (encrypted to itself and its owner), its own audit
+trail, and a job board — and the runtime that executes it is deliberately <strong>two small binaries read
+in an afternoon</strong>, not a framework.</p>
+</blockquote>
+<p>The README&#39;s phrasing is the sharpest: <em>&quot;<strong>Agents are members, not bots.</strong> Add an agent to a channel
+the same way you add a person.&quot;</em> And: <em>&quot;Scoped by identity, not by permission flags — the same way
+you&#39;d scope a teammate.&quot;</em></p>
+<hr>
+<h2 id="3-the-two-binary-doctrine-buzz-agent-buzz-dev-mcp">3. The two-binary doctrine — `buzz-agent` + `buzz-dev-mcp`<a href="#batch-02/3-the-two-binary-doctrine-buzz-agent-buzz-dev-mcp" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="3-1-the-thesis-stated-by-its-authors">3.1 The thesis, stated by its authors<a href="#batch-02/3-1-the-thesis-stated-by-its-authors" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>VISION_AGENT.md</code> opens with a constraint, not a feature: <em>&quot;A coding agent should be small enough to
+hold in your head. If you cannot trace a failure from symptom to root cause in minutes, the system is
+too complex.&quot;</em> And the reason is given plainly: <strong>auditability</strong> — <em>&quot;A senior engineer can read both
+binaries in a sitting. There are no abstractions reserved for future flexibility.&quot;</em></p>
+<p><strong>The architecture is two pipes and two protocols, with no coupling:</strong></p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>text</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code>Any ACP client (Zed, JetBrains, buzz-acp, custom)
+        |  stdio ACP (JSON-RPC 2.0)
+        v
+  buzz-agent (up to 8 concurrent sessions, configurable cap)
+        |  stdio MCP (JSON-RPC 2.0) — one server set per session
+        v
+  buzz-dev-mcp (or any MCP server)
+        |
+        v
+  shell · read_file · str_replace · todo · shell PATH: rg + tree
+</code></pre>
+</div>
+<p><strong>The decoupling is the point, and it is stated twice:</strong> <em>&quot;The agent does not know what MCP server it
+talks to. The MCP server does not know what agent is calling it. They compose through protocols, not
+imports.&quot;</em> <strong>Plain meaning: you can swap either half</strong> — <code>buzz-agent</code> behind Zed, or <code>buzz-dev-mcp</code>
+behind Claude Code — <strong>without a custom adapter.</strong> The stated consequence: *&quot;Run ten agents behind
+Buzz with different MCP configurations. <strong>Swap the LLM provider with one environment variable.</strong>&quot;*</p>
+<h3 id="3-2-the-tool-surface-is-deliberately-tiny-and-that-is-measurable">3.2 The tool surface is deliberately tiny — and that is measurable<a href="#batch-02/3-2-the-tool-surface-is-deliberately-tiny-and-that-is-measurable" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><strong>★ This is the single most quotable finding of the batch, and it is a size measurement.</strong></p>
+<p><code>crates/buzz-dev-mcp/src/lib.rs</code> (211 lines) declares <strong>the entire tool surface: 6 tools + 2 lifecycle
+hooks.</strong></p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>What it does (from its own description)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><code>shell</code></strong></td>
+<td><em>&quot;Run a shell command (bash by default; set <code>BUZZ_SHELL</code>…). <strong>Ephemeral process per call. Output tail-truncated to ~8KB for the LLM; full output (first 10MB) saved to artifact file.</strong> <code>timeout_ms</code> defaults to 120000, capped at 1,200,000.&quot;</em> Plus a <strong>narrowed PATH</strong> carrying <code>rg</code> and <code>tree</code> as buzz-shipped binaries</td>
+</tr>
+<tr>
+<td><strong><code>read_file</code></strong></td>
+<td>line-numbered read with <code>offset</code>/<code>limit</code> (default 2000) — <em>&quot;Prefer over cat/head/tail.&quot;</em></td>
+</tr>
+<tr>
+<td><strong><code>view_image</code></strong></td>
+<td>returns an <strong>MCP image content block</strong> for multimodal models; resizes to 1568 px longest edge; <strong>20 MiB source cap, ~4 MiB on the wire</strong></td>
+</tr>
+<tr>
+<td><strong><code>str_replace</code></strong></td>
+<td>atomic find-and-replace; <code>old_str</code> <strong>must occur exactly once unless <code>replace_all</code></strong>; returns a unified diff — <em>&quot;Prefer over sed/awk.&quot;</em></td>
+</tr>
+<tr>
+<td><strong><code>todo</code></strong></td>
+<td>*&quot;Session checklist <strong>only</strong> for work that must continue across turns or survive context compaction. <strong>Do not use for work you can finish in the current turn.</strong>&quot;*</td>
+</tr>
+<tr>
+<td><strong><code>_Stop</code></strong> (hook)</td>
+<td>returns open todo items; <em>&quot;Used by the agent&#39;s <code>_Stop</code> lifecycle hook to <strong>advise against ending with incomplete work</strong>.&quot;</em></td>
+</tr>
+<tr>
+<td><strong><code>_PostCompact</code></strong> (hook)</td>
+<td><em>&quot;Agent invokes after handoff; returns todo state for <strong>re-injection</strong>.&quot;</em></td>
+</tr>
+</tbody></table></div>
+<p><strong>Why this matters, in plain words:</strong> this platform&#39;s agent is given <strong>six things it can do plus two
+lifecycle callbacks</strong> — and the descriptions themselves are <em>coaching</em>, telling the model when <strong>not</strong>
+to use a tool (<code>todo</code>: &quot;do not use for work you can finish in the current turn&quot;) and which smaller tool
+to prefer (<code>read_file</code> over <code>cat</code>; <code>rg</code> over <code>grep</code>; <code>str_replace</code> over <code>sed</code>). <strong>The tool surface is a
+design argument, not a capability dump.</strong></p>
+<p><strong>★ And a detail with a real consequence for context economy:</strong> <code>shell</code> <strong>truncates output to ~8 KB for
+the model while writing up to 10 MB to an artifact file.</strong> That is the same discipline n8n&#39;s
+<code>agent-check.mjs</code> applied (<strong>excerpt to the agent, full output to disk</strong>) — reached independently, here
+<strong>built into the tool itself.</strong> <em>CZ observation (rule 5-safe — cross-study note, not a comparison to
+our platform): this study&#39;s fourth instance of &quot;the agent sees the head, the disk keeps the whole&quot;.</em></p>
+<h3 id="3-3-a-hidden-economy-trick-one-binary-four-personalities">3.3 A hidden economy trick: one binary, four personalities<a href="#batch-02/3-3-a-hidden-economy-trick-one-binary-four-personalities" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>buzz-dev-mcp/src/lib.rs</code> <strong>dispatches on <code>argv[0]</code></strong> (&quot;Multicall dispatch&quot;):</p>
+<ul>
+<li>argv[0] <code>rg</code> → a ripgrep-compatible personality (<code>exit</code>s before any runtime is built — <em>&quot;No tracing, no
+tokio, no allocations beyond argv parsing&quot;</em>);</li>
+<li>argv[0] <code>tree</code> → a <code>tree</code>-compatible personality;</li>
+<li>argv[0] <code>buzz</code> → the buzz relay CLI;</li>
+<li>anything else → the <strong>MCP server itself</strong>.</li>
+</ul>
+<p><strong>Plain meaning: the MCP server, a grep and a tree listing are the same binary, chosen by filename.</strong>
+Why it matters: <strong>the shell PATH is narrowed to <em>this one binary</em> under three names</strong> — so the agent&#39;s
+<code>rg</code>/<code>tree</code> are buzz&#39;s, not the host machine&#39;s, and the PATH can stay small. <strong>This is a containment
+technique worth naming on its own</strong> and is picked up again in batch 06.</p>
+<h3 id="3-4-hardened-by-construction-the-invariants-are-asserted-not-aspirational">3.4 Hardened by construction — the invariants are asserted, not aspirational<a href="#batch-02/3-4-hardened-by-construction-the-invariants-are-asserted-not-aspirational" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>VISION_AGENT.md</code> states the design principles as <strong>prohibitions</strong>, which is the same pattern batch 01
+found in the crate graph: <strong>zero unsafe · zero panics · bounded process lifetime · bounded output sizes
+· bounded history · process-group kill on every exit path · file edits resolve against the working
+directory.</strong> And the file header in <code>buzz-dev-mcp/src/lib.rs</code> <strong>enforces the first one at the compiler
+level</strong>:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>rust</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-rust">#![cfg_attr(not(windows), forbid(unsafe_code))]
+#![cfg_attr(windows, deny(unsafe_code))]
+</code></pre>
+</div>
+<p><strong>Plain meaning: on non-Windows the crate <em>cannot compile</em> if anyone adds <code>unsafe</code>. On Windows it is a
+hard error too, but expressed as <code>deny</code> because a Windows necessity forces the escape.</strong> That is a
+one-line, checkable statement of intent — exactly what &quot;hardened&quot; means when written down.</p>
+<p><strong>And a second, sharper invariant lives at the top of <code>private_managed_agent.rs</code>:</strong></p>
+<blockquote>
+<p><em>&quot;This module defines and validates the <strong>inert wire format only</strong>. Relays <strong>must not accept</strong>
+<code>KIND_PRIVATE_MANAGED_AGENT</code> until the dedicated privacy and aggregate-CAS transactions are
+deployed.&quot;</em></p>
+</blockquote>
+<p><strong>Plain meaning: the codec was landed <em>before</em> the capability, and the code says so and refuses to
+work.</strong> That is a rare and honest engineering posture — <strong>the wire format is frozen, the feature is
+explicitly off</strong> — and it is the same species as the &quot;Known Limitations&quot; section in batch 01.</p>
+<hr>
+<h2 id="4-the-harness-buzz-acp-and-its-config-surface">4. The harness — `buzz-acp`, and its config surface<a href="#batch-02/4-the-harness-buzz-acp-and-its-config-surface" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="4-1-what-it-does">4.1 What it does<a href="#batch-02/4-1-what-it-does" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>buzz-acp</code> bridges <strong>relay events → AI agent subprocesses</strong> over ACP. <code>ARCHITECTURE.md</code> §6 counts the
+modules (LOC): <code>relay.rs</code> 3,143 · <code>queue.rs</code> 2,565 · <code>main.rs</code> 2,457 · <code>pool.rs</code> 2,253 · <code>config.rs</code>
+1,903 · <code>acp.rs</code> 1,785 · <code>filter.rs</code> 814.</p>
+<p><strong>The behaviors that matter:</strong></p>
+<ul>
+<li><strong>A pool of 1–32 agent subprocesses</strong> with a claim/return lifecycle.</li>
+<li><strong>Per-channel queuing: at most ONE prompt in flight per channel</strong> — later <code>@mention</code>s queue.</li>
+<li><strong>Crash recovery</strong>: a crashed subprocess is detected and <strong>respawned</strong>.</li>
+<li><strong>Agents are addressed by <code>@mention</code></strong> and discovered via REST channel listing.</li>
+</ul>
+<p><strong>What it does not do, in its own words: <em>&quot;Does NOT: persist state.&quot;</em></strong> The harness is stateless; state
+lives on the relay (<code>buzz-core</code>&#39;s engrams and the relay&#39;s event log).</p>
+<h3 id="4-2-the-configuration-surface-26-documented-variables-and-one-that-is-a-lie">4.2 The configuration surface — 26 documented variables, and one that is a lie<a href="#batch-02/4-2-the-configuration-surface-26-documented-variables-and-one-that-is-a-lie" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><strong>.env.example is 20,095 B and the harness&#39;s documented surface is exactly 26 <code>BUZZ_ACP_*</code> variables</strong>
+(measured). They divide into:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Group</th>
+<th>Variables</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Which agent</strong></td>
+<td><code>AGENT_COMMAND</code> (<code>goose</code>), <code>AGENT_ARGS</code> (<code>acp</code>), <code>MCP_COMMAND</code>, <code>AGENTS</code> (pool size 1)</td>
+<td><strong>the harness is agent-agnostic — <code>goose</code>, <code>claude-agent-acp</code>, <code>codex-acp</code> are all named in the source</strong></td>
+</tr>
+<tr>
+<td><strong>Which model</strong></td>
+<td><code>MODEL</code></td>
+<td>one variable</td>
+</tr>
+<tr>
+<td><strong>Identity</strong></td>
+<td><code>PRIVATE_KEY</code></td>
+<td>the agent&#39;s own key</td>
+</tr>
+<tr>
+<td><strong>What it listens to</strong></td>
+<td><code>SUBSCRIBE</code> (<code>mentions</code>), <code>KINDS</code>, <code>CHANNELS</code>, <code>NO_MENTION_FILTER</code>, <code>DEDUP</code> (<code>queue</code>), <code>NO_IGNORE_SELF</code></td>
+<td><strong><code>KINDS</code> = the agent can subscribe by kind, not only by mention</strong></td>
+</tr>
+<tr>
+<td><strong>Session &amp; context</strong></td>
+<td><code>SESSION_POLICY</code> (<code>channel</code>|<code>thread</code>), <code>CONTEXT_MESSAGE_LIMIT</code> (12), <code>MAX_TURNS_PER_SESSION</code> (0), <code>EVENT_BUFFER</code> (256), <code>TURN_TIMEOUT</code> (320)</td>
+<td>see §4.3 — <strong><code>SESSION_POLICY</code> is the interesting one</strong></td>
+</tr>
+<tr>
+<td><strong>Personality</strong></td>
+<td><code>SYSTEM_PROMPT</code>, <code>SYSTEM_PROMPT_FILE</code>, <code>INITIAL_MESSAGE</code></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Lifecycle</strong></td>
+<td><code>HEARTBEAT_INTERVAL</code>, <code>HEARTBEAT_PROMPT</code>(+<code>_FILE</code>)</td>
+<td><strong>a heartbeat that can <em>prompt</em> the agent</strong></td>
+</tr>
+<tr>
+<td><strong>Presence</strong></td>
+<td><code>NO_PRESENCE</code>, <code>NO_TYPING</code></td>
+<td>presence and typing indicators are <strong>opt-out</strong>, not opt-in</td>
+</tr>
+<tr>
+<td><strong>Config file</strong></td>
+<td><code>CONFIG</code> (<code>./buzz-acp.toml</code>)</td>
+<td></td>
+</tr>
+</tbody></table></div>
+<p><strong>★ <code>SESSION_POLICY=channel|thread</code> is the load-bearing one</strong>, and the comment on it is a lesson in
+shipping: *&quot;gives each canonical channel thread its own isolated provider session; direct messages stay
+conversation-scoped either way. <strong>Ships as &quot;channel&quot; so thread scoping can be canaried and rolled back
+without code changes.</strong>&quot;* <strong>Plain meaning: a behaviour change was shipped as a configuration default so
+it could be reversed without a deploy</strong> — a canary expressed as a config value.</p>
+<h3 id="4-3-the-permission-model-six-modes-and-the-default-is-bypass">4.3 The permission model — six modes, and the default is BYPASS<a href="#batch-02/4-3-the-permission-model-six-modes-and-the-default-is-bypass" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>buzz-acp/src/config.rs:127</code> defines <strong><code>PermissionMode</code> with six values</strong>, with wire strings pinned by
+a test (<code>test_permission_mode_wire_strings</code>):</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Wire string</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>Default</code></td>
+<td><code>default</code></td>
+<td><em>&quot;Agent&#39;s built-in behaviour (permission requests per tool call).&quot;</em></td>
+</tr>
+<tr>
+<td><code>Auto</code></td>
+<td><code>auto</code></td>
+<td><em>&quot;Fully autonomous execution; <strong>model-gated</strong> (requires <code>supportsAutoMode</code>). Degrades gracefully to <code>default</code> when the session&#39;s active model does not support it.&quot;</em></td>
+</tr>
+<tr>
+<td><code>AcceptEdits</code></td>
+<td><code>acceptEdits</code></td>
+<td><em>&quot;Auto-approve file edits, still ask for other tools.&quot;</em></td>
+</tr>
+<tr>
+<td><code>BypassPermissions</code></td>
+<td><code>bypassPermissions</code></td>
+<td><em>&quot;Skip the permission flow entirely.&quot;</em></td>
+</tr>
+<tr>
+<td><code>DontAsk</code></td>
+<td><code>dontAsk</code></td>
+<td><em>&quot;Never prompt; <strong>reject</strong> anything that would require permission.&quot;</em></td>
+</tr>
+<tr>
+<td><code>Plan</code></td>
+<td><code>plan</code></td>
+<td><em>&quot;Planning-only mode (<strong>no tool execution</strong>).&quot;</em></td>
+</tr>
+</tbody></table></div>
+<blockquote>
+<p><strong>★★ THE MATERIAL DIVERGENCE OF THIS BATCH — and it is a security-relevant one.</strong>
+The CLI declares <strong><code>default_value = &quot;bypass-permissions&quot;</code></strong> for <code>permission_mode</code>
+(<code>config.rs:473</code>), and the test fixture at <code>config.rs:1578</code> confirms
+<code>permission_mode: PermissionMode::BypassPermissions</code>. <strong>So the out-of-the-box harness runs the agent
+with NO permission prompts at all.</strong> Meanwhile the module doc at <code>buzz-agent/src/permission.rs:4</code>
+describes a different world: <em>&quot;buzz-agent asks the client to authorize <strong>every</strong> LLM-issued MCP tool
+call <em>before</em> executing it; the client applies <strong><code>BUZZ_ACP_PERMISSION_POLICY</code></strong> and answers.&quot;</em>
+<strong><code>BUZZ_ACP_PERMISSION_POLICY</code> DOES NOT EXIST.</strong> It is not in the 26 documented variables, not in
+<code>.env.example</code>, and not referenced anywhere else in the tree (verified by full-tree grep). <strong>The
+comment names an environment variable that was never built, and describes a default that the CLI
+overrides to <code>bypassPermissions</code>.</strong>
+<strong>Both halves are recorded because they matter differently:</strong> the <em>mechanism</em> exists and is real (the
+permission broker in <code>buzz-agent/src/permission.rs</code> is ~1,000 lines with documented invariants); the
+<em>policy switch</em> is documented under a name that does not exist; and the <em>default</em> is permissive.</p>
+</blockquote>
+<p><strong>And the broker itself is worth a line</strong> — its invariants are stated precisely, which is the batch&#39;s
+recurring signature: <em>&quot;<strong>Claim-before-wake / at-most-once</strong> — deliver removes the entry before waking
+the waiter, so each id resolves at most once&quot;</em>; <em>&quot;<strong>Undeliverable asks are terminal</strong> … fails closed
+immediately rather than leaving a resident waiter to timeout — a closed wire can never carry the reply&quot;</em>;
+<em>&quot;<strong>Abort-safe cleanup</strong> … its <code>Drop</code> synchronously removes the still-pending entry and releases the
+slot, covering task abort/panic.&quot;</em></p>
+<hr>
+<h2 id="5-the-model-layer-a-manifest-not-code">5. The model layer — a manifest, not code<a href="#batch-02/5-the-model-layer-a-manifest-not-code" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>★ buzz&#39;s model layer is a 69 KB hand-curated JSON manifest, read by two languages.</strong> Measured from
+<code>scripts/model-capabilities.json</code>:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Measure</th>
+<th align="right">Value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>exact_records</code></td>
+<td align="right"><strong>57</strong></td>
+</tr>
+<tr>
+<td><code>family_rules</code></td>
+<td align="right"><strong>19</strong></td>
+</tr>
+<tr>
+<td><code>provider_fallbacks</code></td>
+<td align="right"><strong>6</strong></td>
+</tr>
+<tr>
+<td><code>databricks_v2_known_models</code></td>
+<td align="right">2</td>
+</tr>
+<tr>
+<td><code>normative-corpus.json</code> (the cross-language contract)</td>
+<td align="right">88,776 B</td>
+</tr>
+</tbody></table></div>
+<p><strong>The design is explicit and unusual</strong> (<code>model_capabilities.rs</code> header + the manifest&#39;s own
+<code>_comment</code>):</p>
+<ul>
+<li>The manifest is <em>&quot;<strong>the single source of truth</strong> for every model&#39;s <strong>six-axis capability profile</strong>
+(thinking mode, supported efforts, default effort, Databricks v2 wire route, normalization policy, and
+picker label).&quot;</em></li>
+<li>It is <strong>embedded at compile time</strong> in Rust (<code>include_str!</code> + strict <code>serde</code> with <code>deny_unknown_fields</code><ul>
+<li>real enums) and <strong>imported</strong> in TypeScript (<strong>JSON import + zod</strong>).</li>
+</ul>
+</li>
+<li><strong>&quot;No codegen.&quot;</strong> Both interpreters read the same hand-curated file, and <em>&quot;the shared normative corpus
+(<code>scripts/normative-corpus.json</code>) is the cross-language contract that guarantees they agree.&quot;</em></li>
+<li><strong>Exact records are authoritative and do NOT inherit from family rules</strong> — and the manifest says
+divergence is <em>&quot;legal and sometimes correct (e.g. provider-advertised effort overrides).&quot;</em></li>
+<li>Provenance is in the file: each exact record carries a <code>_provenance</code> string naming the source and the
+verification date — e.g. <em>&quot;native Messages with adaptive thinking and output_config.effort=high
+<strong>verified by synthetic tool-result round trip on 2026-09-23</strong>.&quot;</em></li>
+</ul>
+<p><strong>Why this is a genuinely different answer:</strong> a model&#39;s capabilities are <strong>data with a
+cross-language contract</strong>, not logic duplicated in two places. <strong>The two implementations cannot drift
+silently, because a third artefact (the corpus) is the referee.</strong> <em>CZ note (cross-study, observation):
+n8n&#39;s <code>MAX_IN_PROCESS_WAIT_MS</code> was a constant whose accuracy could be checked; here the whole model
+matrix is a versioned document whose consistency is checkable.</em></p>
+<p><strong>The providers are five</strong> (<code>config.rs:427</code>): <code>Anthropic</code> · <code>OpenAi</code> · <code>Databricks</code> (serving-endpoints,
+OAuth 2.0 PKCE or static token) · <code>DatabricksV2</code> (AI-gateway routing by model family) · <strong><code>OpenRouter</code></strong>.
+Plus an <strong>OpenAI-compatible</strong> escape hatch, and the <code>BUZZ_ACP_MODEL</code> variable — <em>&quot;swap the LLM provider
+with one environment variable&quot;</em> is backed by real code.</p>
+<p><strong>Two facts a reader should hold:</strong> (1) the catalog supports <strong>discovery</strong> (Databricks workspace
+endpoints + Unity Catalog model services, paginated, with retry policy and body caps) — so the model
+list is not hardcoded; (2) <strong>thinking effort is a first-class axis</strong> with five levels (<code>low</code>→<code>max</code>) and
+four activation modes (<code>adaptive</code>, <code>manual-budget</code>, <code>none</code>, <code>omit-fields</code>).</p>
+<hr>
+<h2 id="6-agent-identity-ownership-memory-jobs-and-the-body">6. Agent identity, ownership, memory, jobs, and the body<a href="#batch-02/6-agent-identity-ownership-memory-jobs-and-the-body" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="6-1-identity-same-as-a-person-s">6.1 Identity: same as a person's<a href="#batch-02/6-1-identity-same-as-a-person-s" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>VISION.md</code>: <strong>humans and agents get the same thing</strong> — <em>&quot;secp256k1 keypair (Nostr-native) ·
+<code>alice@example.com</code> NIP-05 handle · NIP-42 Schnorr auth (humans) or <strong>NIP-98</strong> Schnorr auth (agents) ·
+<strong>Bot role on agent channel membership</strong>.&quot;</em></p>
+<p><strong>The distinction between human and agent auth is which NIP signs the event</strong> (42 for humans, 98 for
+agents), not a different credential class. <strong>And the <code>Bot</code> role is one of the five channel-member roles</strong>
+(<code>Owner</code>/<code>Admin</code>/<code>Member</code>/<code>Guest</code>/<strong><code>Bot</code></strong>) — measured in batch 01. <strong>Plain meaning: an agent&#39;s
+identity is a keypair, and its access is channel membership — the same two primitives a person gets.</strong></p>
+<h3 id="6-2-ownership-nip-oa-an-attestation-that-does-not-rewrite-authorship">6.2 Ownership: **NIP-OA**, an attestation that does NOT rewrite authorship<a href="#batch-02/6-2-ownership-nip-oa-an-attestation-that-does-not-rewrite-authorship" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>agent_owner_pubkey</code> is a column on <code>users</code> and a field in <code>AuthContext</code> (<code>buzz-auth/src/lib.rs:103</code>).
+The relationship is defined by <strong>NIP-OA &quot;Owner Attestation&quot;</strong>, and its non-goals are the interesting
+part:</p>
+<blockquote>
+<p><em>&quot;This NIP defines an optional <code>auth</code> tag by which an owner key authorizes an agent key to publish
+events <strong>under the agent&#39;s own authorship</strong>.&quot;</em>
+Non-goals: <em>&quot;does not define impersonation · does not define key derivation · <strong>does not define
+relay-side author rewriting</strong>.&quot;</em></p>
+</blockquote>
+<p><strong>Plain meaning: the owner does not become the author.</strong> The agent still signs its own events; the
+<code>auth</code> tag is <em>&quot;an <strong>authorization evidence only</strong>&quot;</em> — a reusable capability, explicitly <strong>not</strong> a
+NIP-26 delegation of the event&#39;s semantic authorship. <strong>And a valid <code>auth</code> tag lets the relay apply
+owner policy</strong> (e.g. the earlier finding, in batch 01, that an owner&#39;s single <code>kind:20003</code> heartbeat can
+set presence for up to 256 of its own agents).</p>
+<p><strong>★ This is the mechanic behind the README&#39;s central claim — <em>&quot;Scoped by identity, not by permission
+flags&quot;</em> — and it is the cleanest answer to the &quot;who does the agent act as?&quot; question found in this study
+so far: the agent acts as itself, and the owner holds an attestation that the relay can read.</strong></p>
+<h3 id="6-3-memory-nip-ae-agent-engrams-encrypted-to-the-agentowner-pair">6.3 Memory: **NIP-AE "Agent Engrams"**, encrypted to the agent–owner pair<a href="#batch-02/6-3-memory-nip-ae-agent-engrams-encrypted-to-the-agentowner-pair" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>Agent memory is a <strong>custom NIP</strong>, not a database table. <code>NIP-AE.md</code> defines <strong><code>kind:30174</code></strong> events
+signed by the agent&#39;s key and <strong>encrypted with NIP-44</strong> using the conversation key between agent and
+owner. Measured properties:</p>
+<ul>
+<li><strong>Because NIP-44&#39;s key is symmetric, <em>&quot;both parties decrypt every event; the owner can always read
+everything the agent remembers.&quot;</em></strong> (An explicit, and honest, design choice stated in the spec.)</li>
+<li><strong>Memory is scoped to a single <code>(agent pubkey, owner pubkey)</code> pair</strong> — <em>&quot;An agent serving multiple
+owners holds an independent memory per pair.&quot;</em></li>
+<li><strong>A reserved slug <code>core</code></strong> holds the agent&#39;s identity engram; everything else lives under <code>mem/…</code>.</li>
+<li><strong><code>D_TAG_DOMAIN = &quot;agent-memory/v1/d-tag&quot;</code></strong> — <em>&quot;Versioned independently of the NIP number; future
+revisions MUST change it.&quot;</em></li>
+<li><strong>Limits</strong>: NIP-44 plaintext max 65,535 B; slug max 255 B.</li>
+<li>A dedicated kind was chosen <strong>for namespace isolation</strong>: <em>&quot;<code>core</code> and <code>mem/…</code> slugs cannot collide
+with another app&#39;s <code>d</code> tag choices, regardless of agent reuse.&quot;</em></li>
+</ul>
+<p><strong>Plain meaning: an agent&#39;s memory is encrypted Nostr events addressed by slug, owned by the
+agent–owner pair, portable across relays, and readable by the owner by construction.</strong> <code>buzz-core</code>&#39;s
+<code>engram.rs</code> is <strong>I/O-free</strong> (<em>&quot;does not talk to relays or filesystems&quot;</em>) — the crypto and the parsing are
+separated from the transport, and <em>&quot;callers wire it to a transport and a key source.&quot;</em></p>
+<p><strong>★ And a consequence the spec is honest about:</strong> <em>&quot;agents that rotate relays without migrating their
+heads will lose access to memory not also present on retained relays.&quot;</em> <strong>Memory portability is real
+but manual.</strong></p>
+<h3 id="6-4-the-job-protocol-six-kinds-and-a-directory-surface">6.4 The job protocol — six kinds, and a directory surface<a href="#batch-02/6-4-the-job-protocol-six-kinds-and-a-directory-surface" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>Batch 01 measured the job kinds: <strong><code>43001 JOB_REQUEST</code> · <code>43002 ACCEPTED</code> · <code>43003 PROGRESS</code> ·
+<code>43004 RESULT</code> · <code>43005 CANCEL</code> · <code>43006 ERROR</code></strong>. Plus <code>44200 AGENT_TURN_METRIC</code> — <strong>an agent turn&#39;s
+metric stored as an event</strong>, which is what makes agent cost observable through the same log as
+everything else. And <code>VISION.md</code> names a <strong>🤖 Agents surface</strong>: <em>&quot;Directory. Your agents. <strong>Job
+board</strong>.&quot;</em></p>
+<p><strong>Plain meaning: assigning work to an agent is publishing a signed job request, and the whole
+lifecycle — accepted, progressing, result, error — is events in the same log as the conversation.</strong></p>
+<h3 id="6-5-the-body-and-the-doctrine-that-says-the-body-does-not-matter">6.5 The body, and the doctrine that says the body does not matter<a href="#batch-02/6-5-the-body-and-the-doctrine-that-says-the-body-does-not-matter" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><strong>★ <code>VISION_REMOTE_AGENTS.md</code> (8,922 B) is the most philosophically forceful document in the repo, and
+it is an architecture argument, not a feature pitch.</strong> Its thesis: *&quot;An agent in Buzz is more than just
+a process. It has a keypair, a name, a durable history, a reputation — all on the relay. But today its
+<strong>body</strong> is borrowed: it runs while a desktop app runs, on hardware that sleeps when a human does. <strong>The
+agent&#39;s home is the relay; the machine is just where it happens to be working.</strong>&quot;*</p>
+<p><strong>The load-bearing design rule, stated as an axiom:</strong></p>
+<blockquote>
+<p><strong>&quot;After deploy, the desktop retains no substrate control channel.&quot;</strong> Launch is <em>&quot;a single one-way
+handoff&quot;</em> — the desktop resolves the provider through one narrow path, stages one artifact, refuses an
+unknown protocol version, and <em>&quot;hands over a launch payload it never persists.&quot;</em> From then on
+everything flows through the relay.</p>
+</blockquote>
+<p><strong>And the consequence is a genuinely novel lifecycle control: agents that reap themselves.</strong> *&quot;A timer
+that owes nothing to the agent&#39;s workload watches for silence, and after hours of quiet it finishes
+what&#39;s in flight, says goodbye to the relay, and exits. <strong>Not killed — finished.</strong> The default state of
+a remote agent is &#39;not running&#39;, which is also the default state of the rest of the team at 3am.
+<strong>Compute is rented by attention.</strong>&quot;*</p>
+<p><strong>The document then lists its own honest costs — the study&#39;s fourth instance of a platform naming its
+gaps</strong> — and they are specific: <em>&quot;<strong>You bring the substrate</strong> … <strong>Handing over the key is a decision</strong>
+… On Kubernetes, that key rests as a Secret: anyone the cluster trusts to read secrets in that namespace
+can read it … <strong>No backchannel cuts both ways</strong> … <strong>Self-reaping needs a living reaper</strong> — a body wedged
+badly enough to stop running its own timer cannot finish itself … <strong>The body&#39;s state is mortal</strong> …
+<strong>Presence can lag the truth, but not for long</strong> … by at most about three minutes if it doesn&#39;t.&quot;</em></p>
+<p><strong>The substrate contract is stated so it is NOT about containers:</strong> *&quot;a provider … must honor never
+mentions containers: <strong>preserve the agent&#39;s identity and fail closed with its key · converge to a single
+live instance no matter how deploys race · let presence describe conversational availability rather than
+substrate health · bound the instance&#39;s lifetime · keep secrets out of configuration.</strong>&quot;* <strong>And the
+limit of the guarantee is stated too:</strong> *&quot;a conformance suite pins those behaviors — it establishes that
+a <strong>provider honors the contract, not that arbitrary code is safe to hand a key</strong>; choosing a provider,
+like choosing a cluster, <strong>remains a trust decision you make deliberately.</strong>&quot;*</p>
+<p><strong>★ One measured caveat (rule 1).</strong> <code>buzz-backend-kubernetes</code> is a real crate, and
+<code>buzz-relay/src/tunnel/</code> exists — so the remote-agent substrate path is present in code. <strong>But
+<code>VISION_REMOTE_AGENTS.md</code> is a vision doc, and batch 01&#39;s finding F1-8 (six self-declared gaps) shows
+vision and implementation must be read apart.</strong> <strong>The doctrine is the artefact of interest; whether the
+Kubernetes provider is wired end-to-end is a batch-06 question, not this one.</strong></p>
+<h3 id="6-6-personas-and-managed-agents-the-organisational-layer">6.6 Personas and managed agents — the organisational layer<a href="#batch-02/6-6-personas-and-managed-agents-the-organisational-layer" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<ul>
+<li><strong><code>buzz-persona</code></strong> — <em>&quot;agent persona packs&quot;</em>: modules for <code>manifest</code>, <code>merge</code>, <code>pack</code>, <code>persona</code>,
+<code>resolve</code>, <code>validate</code>. <strong>A persona is a versioned, validated bundle</strong>, and <code>KIND_PERSONA = 30175</code> /
+<code>KIND_TEAM = 30176</code> / <code>KIND_TEAM_CATALOG = 30178</code> make personas and <strong>teams</strong> addressable events.</li>
+<li><strong><code>KIND_MANAGED_AGENT = 30177</code></strong> (public) and <strong><code>KIND_PRIVATE_MANAGED_AGENT = 30179</code></strong> (private).</li>
+<li><strong>★ <code>NIP-PMA</code> is a reservation with teeth.</strong> *&quot;<code>draft</code> — <strong>protocol/codec reservation only. Relays
+MUST reject this kind until privacy, transactional CAS, backup/restore, revocation, and capability
+gates are deployed.</strong>&quot;* The aggregate&#39;s coordinate is <strong><code>(owner pubkey, 30179, agent pubkey)</code></strong>, and
+it is described as <em>&quot;the only durable authority after a per-agent migration is independently
+verified.&quot;</em> Its envelope is strict: exactly <code>d</code> (agent pubkey), <code>g</code> (generation), <code>prev</code> (predecessor),
+<code>state = active|deleted</code>. <strong>The private payload is NIP-44-encrypted with hard caps</strong> — 256 env vars,
+16,384 B per value, a max generation of 2^53−1.</li>
+<li><strong>Consequence:</strong> <em>&quot;Kinds <code>30175</code> and <code>30177</code> remain public/compatibility projections&quot;</em> — <strong>i.e. the
+public persona/managed-agent kinds are the compatibility view of a private aggregate that is designed
+but not deployed.</strong></li>
+</ul>
+<p><strong>Plain meaning: buzz has thought about the organisational layer (agents with personas, belonging to
+teams, with a private configuration containing environment variables), has specified it, and has
+deliberately not switched it on.</strong> That is the same posture as <code>private_managed_agent.rs</code> (§3.4).</p>
+<hr>
+<h2 id="7-doc-vs-code-divergences-found-in-this-batch-rule-1">7. Doc-vs-code divergences found in this batch (rule 1) <span class="seal-badge" style="background:#fef2f2; color:#dc2626; border-color:#fca5a5; font-size: 0.65em; vertical-align: middle;">⚠️ FINDING NOTE</span><a href="#batch-02/7-doc-vs-code-divergences-found-in-this-batch-rule-1" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Claim</th>
+<th>Where</th>
+<th>The code</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>D2-1</strong></td>
+<td><em>&quot;the client applies <code>BUZZ_ACP_PERMISSION_POLICY</code>&quot;</em></td>
+<td><code>buzz-agent/src/permission.rs:4</code> (module doc)</td>
+<td><strong>The variable does not exist</strong> — not in <code>.env.example</code>&#39;s 26 <code>BUZZ_ACP_*</code> vars, not referenced anywhere else in the tree</td>
+<td><strong>Stale doc reference.</strong> The mechanism exists; the named switch does not</td>
+</tr>
+<tr>
+<td><strong>D2-2</strong></td>
+<td><em>&quot;the agent asks the client to authorize <strong>every</strong> LLM-issued MCP tool call before executing it&quot;</em></td>
+<td>same file</td>
+<td>CLI default is <strong><code>bypass-permissions</code></strong> (<code>config.rs:473</code>), test-confirmed at <code>config.rs:1578</code> — <em>&quot;Skip the permission flow entirely&quot;</em></td>
+<td><strong>The described behaviour is one mode of six, and NOT the default.</strong> Material for any security question</td>
+</tr>
+<tr>
+<td><strong>D2-3</strong></td>
+<td><em>&quot;<code>buzz-agent</code> … up to <strong>8</strong> concurrent sessions&quot;</em></td>
+<td><code>VISION_AGENT.md</code></td>
+<td>Consistent with the source (a <strong>configurable cap, default 8</strong>, stated in the same doc)</td>
+<td><strong>Consistent</strong> — recorded because the number recurs and should be cited as configurable</td>
+</tr>
+<tr>
+<td><strong>D2-4</strong></td>
+<td><em>&quot;Ten agents in parallel behind Buzz&quot;</em></td>
+<td><code>VISION_AGENT.md</code></td>
+<td>Harness pool is <strong>1–32</strong> (<code>ARCHITECTURE.md</code> §6)</td>
+<td><strong>Consistent</strong> — the vision&#39;s &quot;ten&quot; is an example; the code&#39;s ceiling is 32</td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="8-capability-table-tagged-by-pole">8. Capability table (tagged by pole)<a href="#batch-02/8-capability-table-tagged-by-pole" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>Plain gloss</th>
+<th>Pole</th>
+<th>Q1 · USER VALUE</th>
+<th>Q2 · VISION VALUE</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Agent = keypair + membership</strong></td>
+<td>the agent is a colleague, not a bot account</td>
+<td><strong>P1</strong></td>
+<td>an agent joins a room like a person; you scope it by <em>where it is</em>, not by a flag matrix</td>
+<td><strong>the identity-scoped access primitive this project keeps needing</strong> — no permission engine to build</td>
+</tr>
+<tr>
+<td><strong>Agent memory as NIP-AE engrams</strong></td>
+<td>encrypted, owner-readable, per-(agent,owner) memory</td>
+<td><strong>P1</strong></td>
+<td>the agent remembers, and <strong>you can always read what it remembers</strong></td>
+<td><strong>memory that is portable, encrypted, and auditable by the owner</strong> — a shape worth studying closely</td>
+</tr>
+<tr>
+<td><strong>Six-tool MCP surface</strong></td>
+<td>the agent can do six things, and the descriptions coach it</td>
+<td><strong>P1 / PX-F</strong></td>
+<td>predictable, auditable behaviour; a small context cost</td>
+<td><strong>a tool surface small enough to reason about</strong> — the opposite of tool sprawl</td>
+</tr>
+<tr>
+<td><strong><code>shell</code> truncate-to-8KB / full-to-disk</strong></td>
+<td>the model sees the head, the disk keeps everything</td>
+<td><strong>P1</strong></td>
+<td>long command output does not blow up the conversation</td>
+<td><strong>context economy built into the tool</strong> — a pattern to keep</td>
+</tr>
+<tr>
+<td><strong>ACP/MCP both sides swappable</strong></td>
+<td>either half can be replaced without a custom adapter</td>
+<td><strong>P1 / PZ</strong></td>
+<td>bring your own agent; bring your own tools</td>
+<td><strong>protocol-native composition</strong> — no framework lock-in</td>
+</tr>
+<tr>
+<td><strong>The model manifest + corpus</strong></td>
+<td>model capabilities are data with a cross-language referee</td>
+<td><strong>P1 / PX-F</strong></td>
+<td>adding a model is a data edit, not a code change</td>
+<td><strong>a capability matrix that cannot silently drift between two implementations</strong></td>
+</tr>
+<tr>
+<td><strong>NIP-OA owner attestation</strong></td>
+<td>the owner authorizes; the agent remains the author</td>
+<td><strong>P1 / P2</strong></td>
+<td>an agent&#39;s actions are always attributable to the agent, with a readable owner link</td>
+<td><strong>provenance that survives without an impersonation model</strong></td>
+</tr>
+<tr>
+<td><strong>Six-mode permission ladder</strong></td>
+<td>default→auto→acceptEdits→bypass→dontAsk→plan</td>
+<td><strong>P1 / PZ</strong></td>
+<td>autonomy is adjustable from &quot;ask me&quot; to &quot;plan only&quot;</td>
+<td>a <strong>ladder with a <code>plan</code> rung</strong> — planning-only is a first-class mode</td>
+</tr>
+<tr>
+<td><strong><code>plan</code> mode (no tool execution)</strong></td>
+<td>the agent can be told to think without acting</td>
+<td><strong>P1 / PZ</strong></td>
+<td>safe rehearsal before commitment</td>
+<td><strong>a mode our own automation will want</strong></td>
+</tr>
+<tr>
+<td><strong>Job protocol (6 kinds) + job board</strong></td>
+<td>assigned work is signed events with a lifecycle</td>
+<td><strong>P1 / P3</strong></td>
+<td>delegation with an auditable trail</td>
+<td>handed off to batch 04 as the <strong>bridge between the agent pole and the automation pole</strong></td>
+</tr>
+<tr>
+<td><strong>Self-reaping remote agents</strong></td>
+<td>compute rented by attention; the agent exits when quiet</td>
+<td><strong>P1 / P3</strong></td>
+<td>agents stop billing when unused</td>
+<td><strong>lifecycle control with no control plane</strong> — an unusual and attractive economics</td>
+</tr>
+<tr>
+<td><strong>&quot;No substrate control channel&quot;</strong></td>
+<td>after deploy the desktop holds no backdoor</td>
+<td><strong>P1 / PZ</strong></td>
+<td>nothing to leak, nothing to port</td>
+<td><strong>a management plane deliberately not built</strong></td>
+</tr>
+<tr>
+<td><strong>Multicall binary (<code>rg</code>/<code>tree</code>/<code>buzz</code>)</strong></td>
+<td>one binary, four personalities via argv[0]</td>
+<td><strong>PZ</strong></td>
+<td>a narrowed, predictable PATH</td>
+<td><strong>containment by packaging</strong> — picked up in batch 06</td>
+</tr>
+<tr>
+<td><strong>NIP-PMA reservation with <code>MUST reject</code></strong></td>
+<td>the codec shipped before the feature, and refuses to work</td>
+<td><strong>PZ</strong></td>
+<td>(indirect) an unshipped feature cannot be exploited</td>
+<td><strong>an honest pre-landing posture</strong> — a technique worth naming</td>
+</tr>
+<tr>
+<td><strong><code>zero unsafe</code> / <code>deny</code> at compile time</strong></td>
+<td>the compiler enforces the hardening claim</td>
+<td><strong>PZ</strong></td>
+<td>fewer whole bug classes</td>
+<td><strong>constraint-as-architecture, third instance</strong></td>
+</tr>
+</tbody></table></div>
+<hr>
+<h2 id="9-findings-carried-forward-into-batches-0307">9. Findings carried forward (into batches 03–07)<a href="#batch-02/9-findings-carried-forward-into-batches-0307" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>F2-1 · An agent is a keypair + channel memberships, and the owner holds an attestation — not a
+delegation.</strong> NIP-OA&#39;s non-goals explicitly refuse impersonation and author rewriting. <strong>The agent acts
+as itself; the owner&#39;s authority is a readable tag.</strong> → this is the P1 mechanism batch 07 weighs.</p>
+<p><strong>F2-2 · The default permission mode is <code>bypass-permissions</code>, and a documented policy switch does not
+exist</strong> (§7 D2-1/D2-2). <strong>Any statement about buzz&#39;s agent safety posture must start here.</strong> → batch 06
+(security perimeter) inherits this.</p>
+<p><strong>F2-3 · The tool surface is six tools + two hooks, and the descriptions coach the model.</strong> The
+<code>~8 KB to the model / 10 MB to disk</code> split is built into <code>shell</code> itself. → batch 05 (PX-W/PX-F) reads
+the tool schema as a UI-surface question.</p>
+<p><strong>F2-4 · Model capability is a 69 KB manifest with a shared normative corpus as a cross-language
+referee — no codegen.</strong> 57 exact records, 19 family rules, 6 fallbacks, 5 providers. → batch 05 for the
+TypeScript side.</p>
+<p><strong>F2-5 · Agent memory is a custom NIP (NIP-AE, <code>kind:30174</code>), NIP-44-encrypted to the
+<code>(agent, owner)</code> pair, slug-addressed, with the owner able to read everything.</strong> → batch 03 reads it
+beside the tenancy boundary (memory is <em>community</em>-scoped too: VISION_AGENT says <em>&quot;no agent state is
+inherited across hosts&quot;</em>).</p>
+<p><strong>F2-6 · The job protocol is six kinds (<code>43001</code>–<code>43006</code>) plus a stored turn metric (<code>44200</code>), and the
+Agents surface includes a job board.</strong> → <strong>batch 04 (P3) must treat this as part of the automation
+pole</strong>, or the pole will be under-read.</p>
+<p><strong>F2-7 · The remote-agent doctrine is &quot;the desktop retains no substrate control channel&quot;, and self-reaping
+replaces a supervisor.</strong> Its honest-costs section is the batch&#39;s second self-written defect list. <strong>The
+Kubernetes provider&#39;s end-to-end state is unresolved here</strong> → batch 06.</p>
+<p><strong>F2-8 · Two features are specified and deliberately OFF</strong>: the NIP-PMA private managed-agent aggregate
+(<em>&quot;Relays MUST reject this kind&quot;</em>) and the whole <code>private_managed_agent.rs</code> codec (<em>&quot;inert wire format
+only&quot;</em>). <strong>Neither is a gap; both are reservations.</strong> → batch 06.</p>
+<p><strong>F2-9 · <code>SESSION_POLICY=channel|thread</code> shipped as a config default specifically so it could be canaried
+and rolled back without code changes.</strong> A small finding with a large lesson: <strong>a behaviour change can be
+expressed as a reversible default.</strong></p>
+<hr>
+<h2 id="10-what-batch-02-does-not-claim">10. What batch 02 does NOT claim<a href="#batch-02/10-what-batch-02-does-not-claim" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<ul>
+<li><strong>It does not claim buzz&#39;s agent system is safer or riskier than any other.</strong> It records five
+measured facts (default = bypass, no rate limiting from batch 01, a permission broker with stated
+invariants, a shell at operator trust level, a self-declared &quot;handing over the key is a decision&quot;).
+<strong>Weighing them is batch 06 and the mapping pass.</strong></li>
+<li><strong>It does not read the LLM layer</strong> (<code>llm.rs</code>, 8,049 lines) beyond its provider list and the manifest —
+the provider/wire mechanics belong to batch 05&#39;s frontend/plumbing view only if they touch the client.</li>
+<li><strong>It does not compare buzz to our own platform.</strong> Rule 5.</li>
+</ul>
+<hr>
+<p><em>Batch 02 of 07. Written 2026-10-16. Next: <code>findings/03-the-workspace.md</code> (P2) — the event store, the
+channel/forum/DM model, <code>buzz-auth</code>, <code>buzz-core::tenant</code>, the community boundary, the TLA+/Tamarin
+isolation models read as models, <code>buzz-db</code> + the 62 migrations, and the artifact system.</em></p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="01-platform-overview.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">Platform Overview</span>
+                </a>
+              
+
+              <a href="../index.html#batch-02" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              
+                <a href="03-the-workspace-p2.html" class="nav-page-btn" style="text-align:right;">
+                  <span class="nav-btn-sub">Next Batch →</span>
+                  <span class="nav-btn-title">The Workspace (P2)</span>
+                </a>
+              
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#1-what-was-read-and-its-measured-size" class="toc-link">1. What was read, and its measured size</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#2-the-one-sentence-gloss" class="toc-link">2. The one-sentence gloss</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-the-two-binary-doctrine-buzz-agent-buzz-dev-mcp" class="toc-link">3. The two-binary doctrine — buzz-agent + buzz-dev-mcp</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-1-the-thesis-stated-by-its-authors" class="toc-link">3.1 The thesis, stated by its authors</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-2-the-tool-surface-is-deliberately-tiny-and-that-is-measurable" class="toc-link">3.2 The tool surface is deliberately tiny — and that is measurable</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-3-a-hidden-economy-trick-one-binary-four-personalities" class="toc-link">3.3 A hidden economy trick: one binary, four personalities</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-4-hardened-by-construction-the-invariants-are-asserted-not-aspirational" class="toc-link">3.4 Hardened by construction — the invariants are asserted, not aspirational</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-the-harness-buzz-acp-and-its-config-surface" class="toc-link">4. The harness — buzz-acp, and its config surface</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-1-what-it-does" class="toc-link">4.1 What it does</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-2-the-configuration-surface-26-documented-variables-and-one-that-is-a-lie" class="toc-link">4.2 The configuration surface — 26 documented variables, and one that is a lie</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-3-the-permission-model-six-modes-and-the-default-is-bypass" class="toc-link">4.3 The permission model — six modes, and the default is BYPASS</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-the-model-layer-a-manifest-not-code" class="toc-link">5. The model layer — a manifest, not code</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-agent-identity-ownership-memory-jobs-and-the-body" class="toc-link">6. Agent identity, ownership, memory, jobs, and the body</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#6-1-identity-same-as-a-person-s" class="toc-link">6.1 Identity: same as a person&#039;s</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#6-2-ownership-nip-oa-an-attestation-that-does-not-rewrite-authorship" class="toc-link">6.2 Ownership: NIP-OA, an attestation that does NOT rewrite authorship</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#6-3-memory-nip-ae-agent-engrams-encrypted-to-the-agentowner-pair" class="toc-link">6.3 Memory: NIP-AE &quot;Agent Engrams&quot;, encrypted to the agent–owner pair</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#6-4-the-job-protocol-six-kinds-and-a-directory-surface" class="toc-link">6.4 The job protocol — six kinds, and a directory surface</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#6-5-the-body-and-the-doctrine-that-says-the-body-does-not-matter" class="toc-link">6.5 The body, and the doctrine that says the body does not matter</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#6-6-personas-and-managed-agents-the-organisational-layer" class="toc-link">6.6 Personas and managed agents — the organisational layer</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-doc-vs-code-divergences-found-in-this-batch-rule-1" class="toc-link">7. Doc-vs-code divergences found in this batch (rule 1)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#8-capability-table-tagged-by-pole" class="toc-link">8. Capability table (tagged by pole)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#9-findings-carried-forward-into-batches-0307" class="toc-link">9. Findings carried forward (into batches 03–07)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#10-what-batch-02-does-not-claim" class="toc-link">10. What batch 02 does NOT claim</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('buzz_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('buzz_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('buzz_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('buzz_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.BuzzReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

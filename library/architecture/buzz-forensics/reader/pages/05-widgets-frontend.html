@@ -1,0 +1,1576 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 05 — Widgets and the frontend (PX-W / PX-F) — buzz Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-05" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 05</span>
+      <div class="header-title-wrap">
+        <div class="header-title">Widgets &amp; Frontend</div>
+        <div class="header-subtitle">buzz Platform Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">findings/05-widgets-and-frontend.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #059669">DONE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">8,707</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">44 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">1010</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-16</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 05 Architecture Guide (Default)</option>
+            <optgroup label="Strategic Architecture">
+              <option value="master">Executive Topology: the workspace is the event log, and the isolation is proven</option>
+            </optgroup>
+            <optgroup label="Foundations">
+              <option value="00">Batch 00: The pin, the extraction, and the rename hazard</option>
+              <option value="01">Batch 01: The overview — the event is the whole API</option>
+            </optgroup>
+            <optgroup label="Pole 1 — The Aissistant">
+              <option value="02">Batch 02: The aissistant — an agent is a colleague</option>
+            </optgroup>
+            <optgroup label="Pole 2 — The Workspace">
+              <option value="03">Batch 03: The workspace — three fences over one store</option>
+            </optgroup>
+            <optgroup label="Pole 3 — Automations">
+              <option value="04">Batch 04: Automations — deterministic at-most-once</option>
+            </optgroup>
+            <optgroup label="Cross-Cutting">
+              <option value="05">Batch 05: Widgets &amp; frontend — a proven negative</option>
+            </optgroup>
+            <optgroup label="Escape Hatch">
+              <option value="06">Batch 06: Out-of-pole — five artefacts, three languages</option>
+            </optgroup>
+            <optgroup label="Strategic Decision">
+              <option value="07">Batch 07: The synthesis — where buzz sits, what we take</option>
+            </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 05 VISUAL GUIDE</div>
+    <h4>Widgets &amp; frontend: a proven negative, and a guard-as-document</h4>
+    <p>No composer anywhere — and the pattern buzz uses instead of one</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 360" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-05" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-05" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+        <marker id="arrr-05" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#ef4444"/>
+        </marker>
+      </defs>
+      <g transform="translate(20, 20)">
+        <rect width="200" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE NEGATIVE (MEASURED)</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">no widget model</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">no composer</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">27 "widget" hits tree-wide,</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">all accounted for</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#b91c1c">the only CREATE TABLE widgets</text>
+        <text x="12" y="129" font-family="system-ui, sans-serif" font-size="10.5" fill="#b91c1c">is a negative fixture in a #[test]</text>
+      </g>
+      <path d="M 220 95 L 258 95" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-05)"/>
+      <g transform="translate(262, 20)">
+        <rect width="200" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">WHAT COMPOSES INSTEAD</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">the EVENT KIND</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">136 registered kinds</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">add a kind, not a component</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Channel Canvas (40100) is a</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">document, not a widget tree</text>
+        <text x="12" y="129" font-family="system-ui, sans-serif" font-size="10.5" fill="#b45309">an event log is NOT a widget model</text>
+      </g>
+      <path d="M 462 95 L 500 95" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-05)"/>
+      <g transform="translate(504, 20)">
+        <rect width="200" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE GUARD-AS-DOCUMENT</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">a shared -core script</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">+ a thin per-app wrapper</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">+ a reason-annotated allowlist</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">+ a place in the default gate</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">check-px-text (design)</text>
+        <text x="12" y="129" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">check-pubkey-truncation (security)</text>
+      </g>
+      <g transform="translate(20, 190)">
+        <rect width="430" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THE SECURITY RULE THAT TRANSFERS</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">check-pubkey-truncation is an executable</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">SECURITY invariant, not a style rule:</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)"></text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">a truncated identifier a human TRUSTS is</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">FORGEABLE by vanity-grinding. Ad-hoc</text>
+        <text x="12" y="129" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">truncation had fragmented into 5 formats.</text>
+      </g>
+      <g transform="translate(470, 190)">
+        <rect width="430" height="150" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">THREE ALLOWLIST MECHANISMS, KEYED PER RULE</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">allowedFiles — for the canonical module.</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">overrides — keyed by whichever of literal /</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">line number is STABLE for that rule.</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">a wholesale .test. exclusion.</text>
+        <text x="12" y="112" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)"></text>
+        <text x="12" y="129" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">The choice of key shape is per-rule — that is</text>
+        <text x="12" y="146" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">the part a naive port gets wrong.</text>
+      </g>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="buzz-batch-05-the-composition-surface-and-the-frontend-px-w-px-f">buzz — Batch 05: the composition surface and the frontend (PX-W / PX-F)<a href="#batch-05/buzz-batch-05-the-composition-surface-and-the-frontend-px-w-px-f" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Pole:</strong> PX-W (widgets / composition) and PX-F (frontend).
+<strong>Source studied:</strong> <code>buzz-main</code> @ v0.5.28, the extracted tree under
+<code>platforms/_extracted/buzz-main/</code>.
+<strong>Method:</strong> rule 0b / count FIRST, rule 1 / docs are claims, code is the
+authority. Every number below was measured in this tree; every claim that comes
+from a doc is labelled as a claim and then checked.</p>
+<p>This batch answers two questions:</p>
+<ol>
+<li><strong>PX-W</strong> — does buzz have a widget or composer model? What is its composition
+surface, if any?</li>
+<li><strong>PX-F</strong> — what is its frontend architecture, and what does it teach?</li>
+</ol>
+<p>The headline is already established from the batch-04 close and is <em>proven</em>, not
+assumed, in §1: <strong>buzz has no widget model and no composer.</strong> It is the fifth
+platform in this study with none.</p>
+<p>The batch&#39;s <em>positive</em> contribution is unusual and is the reason it is worth
+reading: buzz encodes two of its design and security rules as <strong>executable CI
+guards</strong> — <code>check-px-text</code> and <code>check-pubkey-truncation</code> — each of which carries
+a <strong>stated root cause</strong> (a regression that actually shipped) and a <strong>narrow,
+reason-annotated allowlist</strong>. That is a different way of answering &quot;how does the
+frontend stay consistent?&quot; than a component registry (n8n) or a linter plugin
+(n8n&#39;s ESLint plugin). It is the guard-as-document pattern, and it is the thing
+this batch recommends studying.</p>
+<hr>
+<h2 id="0-what-i-measured-rule-0b-counts-first">0. What I measured (rule 0b — counts first)<a href="#batch-05/0-what-i-measured-rule-0b-counts-first" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="0-1-the-polyglot-footprint">0.1 The polyglot footprint<a href="#batch-05/0-1-the-polyglot-footprint" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>The workspace is not one app. It is <strong>four or five clients over one Rust core</strong>,
+and the line counts are wildly asymmetric:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Surface</th>
+<th align="right">Files</th>
+<th align="right">Lines</th>
+<th>Language(s)</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>crates/</code> (Rust workspace)</td>
+<td align="right">—</td>
+<td align="right">—</td>
+<td>Rust</td>
+<td>the relay + core + workflow (batch 04 studied one crate)</td>
+</tr>
+<tr>
+<td><code>desktop/</code></td>
+<td align="right"><strong>3,424</strong></td>
+<td align="right"><strong>656,805</strong></td>
+<td>724 <code>.tsx</code> / 181,514 · 1,220 <code>.ts</code> / 273,554 · 504 <code>.rs</code> / 201,517</td>
+<td>Tauri 2 + React 19 + Vite</td>
+</tr>
+<tr>
+<td>— of which <code>desktop/src-tauri/src</code></td>
+<td align="right"><strong>478</strong> <code>.rs</code></td>
+<td align="right"><strong>194,385</strong></td>
+<td>Rust</td>
+<td>the Tauri bridge only</td>
+</tr>
+<tr>
+<td><code>mobile/</code></td>
+<td align="right"><strong>904</strong></td>
+<td align="right">—</td>
+<td><strong>695</strong> <code>.dart</code> / 218,357, <strong>zero</strong> Rust</td>
+<td>Flutter</td>
+</tr>
+<tr>
+<td><code>web/</code></td>
+<td align="right">66</td>
+<td align="right">4,719</td>
+<td>TS/TSX</td>
+<td>a small read-only client</td>
+</tr>
+<tr>
+<td><code>admin-web/</code></td>
+<td align="right">17</td>
+<td align="right">2,721</td>
+<td>TS/TSX</td>
+<td>a single-page admin console</td>
+</tr>
+<tr>
+<td>workflow UI (inside desktop)</td>
+<td align="right">57 product</td>
+<td align="right">11,804 product + 2,645 test</td>
+<td>TS/TSX</td>
+<td>the P3 frontend from batch 04</td>
+</tr>
+</tbody></table></div>
+<p>Two of these counts carry real consequences:</p>
+<ul>
+<li><strong>Desktop is ~93% of the frontend line count</strong> (656,805 of ~700k). The web and
+admin clients together are <strong>7,440 lines</strong> — about <strong>1.1%</strong> of desktop. This is
+a desktop-first product with two satellite thin clients, not a
+share-everything web stack.</li>
+<li><strong><code>desktop/src-tauri/src</code> is 194,385 lines of Rust across 478 files — almost
+30% of all desktop lines.</strong> The bridge is not a thin shim. It is a second
+application living inside the desktop app. Any &quot;buzz desktop&quot; claim that treats
+the Tauri layer as glue is wrong; §3 measures what is actually in it.</li>
+<li><strong>Mobile has ZERO Rust.</strong> 218,357 lines of Dart over 695 files, with no shared
+core with desktop. This is the single most important PX-F divergence in the
+platform: the Rust crates are shared <em>everywhere except mobile</em>. Mobile is a
+full, independent re-implementation of the client logic in Dart.</li>
+</ul>
+<h3 id="0-2-the-widget-negative-proven-not-assumed">0.2 The widget negative — proven, not assumed<a href="#batch-05/0-2-the-widget-negative-proven-not-assumed" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>A tree-wide search for <code>widget</code> outside Flutter/Dart returned <strong>27 hits</strong>, and all
+27 are accounted for:</p>
+<ul>
+<li><strong>Flutter documentation and Dart API</strong> — <code>Widget</code>, <code>HookConsumerWidget</code>,
+<code>ConsumerWidget</code> in <code>mobile/</code> are the Flutter framework&#39;s own word, not a
+product concept.</li>
+<li><strong>A handful of React component <em>nicknames</em> in comments</strong> — e.g. a code comment
+reading &quot;The <code>PubKey</code> widget&quot; when the file defines a component. Prose, not a
+model.</li>
+<li><strong><code>CREATE TABLE widgets</code> — which exists ONLY inside a <code>#[test]</code>.</strong> The
+statement appears in
+<code>migration_lint_detects_tables_missing_community_id_by_default</code>, where it is
+<em>the example of a table that fails the lint</em> (a table with no <code>community_id</code>
+column). <code>grep -rn &quot;CREATE TABLE widgets&quot; migrations/</code> returns <strong>nothing</strong>. The
+only &quot;widgets table&quot; in buzz is a deliberate negative fixture.</li>
+</ul>
+<p>So: no widget registry, no composer model, no element-type schema, no drag-target
+composition surface. <strong>buzz is the fifth platform in the study with no
+widget/composer model</strong> (Paperclip and Multica had none; Gas Town&#39;s frontend is a
+CLI; and this one is the fifth). Rule 6: name the capability — the capability is
+<strong>absent</strong>, and the absence is verified by searching for the <em>thing</em>, not for the
+word.</p>
+<h3 id="0-3-what-buzz-has-instead-of-a-composer">0.3 What buzz has *instead* of a composer<a href="#batch-05/0-3-what-buzz-has-instead-of-a-composer" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>The products it ships are surfaces, not compositions:</p>
+<ul>
+<li><strong><code>desktop/src/features/</code> carries 31 feature directories</strong> — <code>admin-console</code>,
+<code>agent-memory</code>, <code>agents</code>, <code>channel-templates</code>, <code>channels</code>, <code>chat</code>,
+<code>communities</code>, <code>community-members</code>, <code>custom-emoji</code>, <code>forum</code>, <code>gifs</code>, <code>home</code>,
+<code>huddle</code>, <code>identity-archive</code>, <code>local-archive</code>, <code>mesh-compute</code>, <code>messages</code>,
+<code>moderation</code>, <code>notifications</code>, <code>onboarding</code>, <code>presence</code>, <code>profile</code>, <code>projects</code>,
+<code>pulse</code>, <code>reminders</code>, <code>search</code>, <code>settings</code>, <code>sidebar</code>, <code>terminal</code>,
+<code>user-status</code>, <code>workflows</code>.</li>
+<li><strong><code>desktop/src/app/</code> carries 82 files</strong> — the shell, routing, overlays, and the
+community remount boundary.</li>
+<li><strong><code>desktop/src/shared/ui/</code> carries 149 files</strong>, of which <strong>71 are <code>.tsx</code>
+primitives</strong> — a shadcn/ui component library, vendored.</li>
+</ul>
+<p>These are <em>fixed</em> features with <em>fixed</em> screens. There is no place where an
+operator or an agent assembles a new surface out of parts. <strong>The composition unit
+in buzz is the event kind</strong> (§1.4) — you extend the product by adding a <code>kind</code>
+integer and a handler, not by composing widgets.</p>
+<hr>
+<h2 id="1-px-w-the-composition-surface">1. PX-W — the composition surface<a href="#batch-05/1-px-w-the-composition-surface" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="1-1-the-composition-surface-is-a-canvas-and-the-canvas-is-an-event">1.1 The composition surface is a canvas, and the canvas is an event<a href="#batch-05/1-1-the-composition-surface-is-a-canvas-and-the-canvas-is-an-event" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>buzz <em>does</em> have one thing that looks like a composition surface: <strong>Channel
+Canvas</strong> (<code>kind:40100</code>). Each channel may hold a single shared canvas document
+that any member with edit rights can edit.</p>
+<p>The implementation is instructive precisely because it is <strong>not</strong> a widget model:</p>
+<ul>
+<li><code>desktop/src-tauri/src/commands/canvas.rs</code> — <code>get_canvas</code> / <code>set_canvas</code> are
+Tauri commands that read and write <strong>one event</strong> for a channel.</li>
+<li><code>desktop/src/shared/api/canvasTypes.ts</code> — the whole data model is
+<code>{ content, eventId, updatedAt, author }</code> plus a revision cursor. There is no
+element list, no component type, no layout tree.</li>
+<li><code>desktop/src/features/channels/ui/ChannelCanvas.tsx</code> (270 lines) renders
+markdown and a textarea, with history.</li>
+</ul>
+<p>The canvas is <strong>a document with optimistic concurrency</strong>, not a composition
+model. <code>set_canvas</code> implements a genuinely careful two-stage concurrency check
+(documented in its own comments):</p>
+<ol>
+<li><strong>Pre-write precondition</strong> — read the live head; if the caller&#39;s
+<code>expected_revision</code> no longer matches, return a frozen conflict marker. This
+catches the realistic stale-edit case.</li>
+<li><strong>Post-write supersession check</strong> — after the relay accepts the write, re-read
+the head once and confirm our event is the head (or reachable through its
+ancestry chain). If a stranger head won, return <code>CANVAS_SUPERSEDED</code> while
+<em>preserving our revision in history</em> — not losing it.</li>
+</ol>
+<p>Two things about this are worth carrying forward:</p>
+<ul>
+<li><strong>A failed verification read is reported as <code>verified: false</code>, not as a failed
+save.</strong> The comment states the rule explicitly: <em>&quot;A failed verification read
+must never masquerade as a failed save; the caller reports success with
+<code>verified: false</code>.&quot;</em> The write was already accepted, so the honest report is
+&quot;durable but unverified&quot;. This is the same discipline we saw in batch 04&#39;s
+<code>PartialProgress</code> — buzz repeatedly refuses to collapse two distinct outcomes
+into one boolean.</li>
+<li><strong>The residual race is named and deferred, not hidden.</strong> The comments say the
+remaining window (a competitor landing after the post-write read) <em>&quot;needs
+relay-side linearization (phase 2).&quot;</em> A known limit, written down, with the fix
+named.</li>
+</ul>
+<p><code>canvas_write_created_at</code> is the <em>single home</em> for canvas timestamp discipline:
+an accepted save stamps <code>created_at = max(now, head + 1)</code> so it sorts strictly
+ahead of the head it read under <code>(created_at DESC, id ASC)</code>, and the helper
+refuses a head timestamped far in the future. That is a <strong>write-ordering
+invariant enforced in one function</strong>, which is the closest this platform comes to
+a composition contract.</p>
+<p><strong>Verdict for PX-W:</strong> the canvas is a <strong>composition-shaped surface with a
+document model</strong>, not a widget model. It composes <em>content</em> (markdown), not
+<em>components</em>.</p>
+<h3 id="1-2-the-design-system-is-a-vendored-component-library-not-a-registry">1.2 The design system is a vendored component library, not a registry<a href="#batch-05/1-2-the-design-system-is-a-vendored-component-library-not-a-registry" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<ul>
+<li><code>desktop/components.json</code> is <strong>shadcn/ui config</strong>: <code>&quot;style&quot;: &quot;new-york&quot;</code>,
+<code>&quot;baseColor&quot;: &quot;zinc&quot;</code>, <code>&quot;cssVariables&quot;: true</code>, aliases into
+<code>@/shared/ui</code> and <code>@/shared/lib/cn</code>.</li>
+<li><code>desktop/src/shared/ui/</code> holds <strong>71 primitive <code>.tsx</code> files</strong> plus supporting
+modules (<code>alert-dialog</code>, <code>button</code>, <code>dialog</code>, <code>dropdown-menu</code>, <code>popover</code>,
+<code>sheet</code>, <code>tabs</code>, <code>tooltip</code>, …) — the standard shadcn set, vendored into the
+repo.</li>
+</ul>
+<p>Rule 6 — name the capability: there is <strong>no component registry, no schema, and no
+per-component contract file</strong>. There is a <em>directory of components</em>. Contrast n8n
+(batch 06 of that study), which enforces a 129-component design system with its
+own ESLint plugin, and Multica, whose <code>packages/ui/docs/</code> contracts power a UI
+Lab. buzz has neither: the components exist and are used, but nothing formalises
+what a component <em>is</em> beyond being a <code>.tsx</code> file in <code>shared/ui</code>.</p>
+<h3 id="1-3-the-design-token-story-is-the-strongest-px-w-content-in-the-platform">1.3 The design-token story is the strongest PX-W content in the platform<a href="#batch-05/1-3-the-design-token-story-is-the-strongest-px-w-content-in-the-platform" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>The token layer is where buzz does its most careful thinking, and it is
+<strong>measurable</strong>.</p>
+<p><strong>Two independent dials, composed deliberately.</strong> <code>typography.css</code> documents the
+model in its own header:</p>
+<ul>
+<li><strong>Cmd +/- zoom</strong> scales the <em>real</em> root <code>&lt;html&gt;</code> font-size
+(<code>useWebviewZoomShortcuts.ts</code>). Every rem in the app — text, gaps, widths,
+radii — grows and shrinks together. The zoom factor is clamped to
+<code>[0.75, 1.5]</code> with a <code>0.1</code> step and persisted under <code>buzz:text-scale</code>. <strong>This
+is true zoom.</strong></li>
+<li><strong>The Font size preference</strong> sets <code>data-font-size</code> on the root and nudges
+<em>only the type scale</em>. Text changes without moving layout.</li>
+</ul>
+<p>They compose through <strong>one virtual rem</strong>:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>css</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-css">--buzz-type-scale: 1;
+--buzz-type-rem: calc(1rem * var(--buzz-type-scale));
+--text-base: var(--buzz-type-rem);
+--text-sm:  calc(var(--buzz-type-rem) * 0.875);
+</code></pre>
+</div>
+<p>Because <code>--buzz-type-rem</code> is itself defined in <code>rem</code>, it <strong>rides on top of zoom
+automatically</strong>, and the preference scales it alone. At default preference and
+zoom it equals 16px, making <code>text-sm</code> 14px. The preference values are stated as
+ratios so the contract survives a future base change:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>css</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-css">:root[data-font-size=&quot;smaller&quot;] { --buzz-type-scale: calc(13 / 14); }
+:root[data-font-size=&quot;larger&quot;]  { --buzz-type-scale: calc(15 / 14); }
+</code></pre>
+</div>
+<p>The documented conversation contract is <strong>13 / 14 / 15px</strong> before keyboard zoom,
+and <code>AGENTS.md</code> records the <em>reason</em> it must stay tokenised: <em>&quot;Keep those
+relationships tokenized rather than restoring a fixed 16px chat baseline or
+hardcoding preference-specific values in components.&quot;</em></p>
+<p><code>tailwind.config.js</code> then makes the sub-<code>text-xs</code> ramp <strong>rem-relative too</strong>:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>js</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-js">&quot;2xs&quot;: &quot;calc(var(--buzz-type-rem) * 0.6875)&quot;, // 11px at 16px type rem
+&quot;3xs&quot;: &quot;calc(var(--buzz-type-rem) * 0.5)&quot;,    // 8px at 16px type rem
+badge: &quot;calc(var(--buzz-type-rem) * 0.625)&quot;,  // 10px at 16px type rem
+</code></pre>
+</div>
+<p>and — the detail I did not expect — <strong>the <code>lineHeight</code> scale is rem-relative as
+well</strong>, with a stated reason: <em>&quot;Keep fixed Tailwind line-height utilities in the
+typography scale so Cmd +/- cannot enlarge glyphs inside an unchanged line box.&quot;</em>
+That is a zoom-correctness argument applied to a token most codebases never
+touch, and it is the kind of thing that only gets written down after it has gone
+wrong.</p>
+<p><strong>What the config comments carry.</strong> The comments in <code>tailwind.config.js</code> are
+themselves the history: <em>&quot;These replaced the dozens of arbitrary <code>text-[…rem]</code>
+literals that had drifted apart pixel-by-pixel&quot;</em>, <em>&quot;Do NOT reintroduce arbitrary
+<code>text-[…rem]</code> / <code>text-[…px]</code> literals; the px-text guard rejects them.&quot;</em> The
+config is enforcing a <strong>one-scale consolidation</strong> and says so.</p>
+<h3 id="1-4-the-real-composition-unit-is-the-event-kind">1.4 The real composition unit is the event kind<a href="#batch-05/1-4-the-real-composition-unit-is-the-event-kind" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>buzz&#39;s answer to &quot;what is the unit you compose with?&quot; is the <strong>Nostr event kind
+integer</strong>. <code>AGENTS.md</code> states the policy:</p>
+<blockquote>
+<p><strong>Prefer Nostr events over new HTTP endpoints</strong> … model the operation as a
+Nostr event (a new kind in <code>buzz-core/src/kind.rs</code>, a handler in
+<code>buzz-relay</code>) rather than adding endpoint-specific JSON APIs … If you find
+yourself reaching for a new HTTP endpoint, first check whether an event kind
+would do the job — it usually will, and you get realtime fan-out, NIP-29
+scoping, and the existing auth pipeline for free.</p>
+</blockquote>
+<p>Measured: <strong><code>crates/buzz-core/src/kind.rs</code> is 1,177 lines and holds 157 <code>pub const</code>
+in total</strong> — of which <strong>135 are <code>KIND_*: u32</code> declarations</strong> and <strong>136 are entries in
+<code>ALL_KINDS</code></strong>, the array the file documents as <em>&quot;All registered kind constants — used
+for duplicate detection and iteration.&quot;</em> <em>(Precision added in batch 07 — the array is
+<code>135 declared − 3 unregistered + 4 RELAY_ADMIN_* aliases</code>. The three declared but
+unregistered kinds — <code>KIND_AUTH</code> 22242, <code>KIND_NOSTR_IDENTITY_BINDING</code> 24243,
+<code>KIND_PUSH_LEASE</code> 30350 — are infrastructure events, not content.)</em> That is the
+platform&#39;s composition vocabulary — 136 nouns an extension can be built from. Three
+of them are visible from batch 04/05 work: <code>KIND_APPROVAL_REQUEST = 46010</code>,
+<code>KIND_FORUM_POST = 45001</code>, and canvas&#39; <code>kind:40100</code>; and the batch-04 workflow
+definition was <code>kind 30620</code>.</p>
+<p><strong>This is the pivot the study should carry.</strong> Where a widget platform composes
+<em>UI elements</em>, buzz composes <em>signed events with integer types</em>, and the UI is a
+fixed renderer over them. It is a coherent, fully-committed alternative — and it
+is why buzz has no composer. <strong>The event log is not the same thing as a widget
+model</strong>: an event log gives you extensibility of <em>data and behaviour</em>, while a
+widget model gives you extensibility of <em>layout and interface</em>. buzz chose the
+first and has none of the second. (This was the &quot;deepest question this platform
+poses&quot; flagged at the batch-04 close; §6 answers it directly.)</p>
+<hr>
+<h2 id="2-px-w-the-two-ci-guards-the-recommendation">2. PX-W — the two CI guards (the recommendation)<a href="#batch-05/2-px-w-the-two-ci-guards-the-recommendation" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>This is the section worth acting on. buzz encodes two frontend rules as
+<strong>executable checks wired into CI</strong>, and each guard is structured identically:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>text</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code>scripts/check-&lt;rule&gt;-core.mjs         ← the shared, app-agnostic engine
+&lt;app&gt;/scripts/check-&lt;rule&gt;.mjs        ← a thin per-app wrapper: rules + allowlists
+&lt;app&gt;/package.json &quot;check&quot; script     ← wired into the app&#39;s check target
+justfile &quot;check&quot;                      ← wired into the repo-wide gate
+</code></pre>
+</div>
+<p><strong>Two rules are implemented this way:</strong></p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Guard</th>
+<th>Core</th>
+<th>Desktop wrapper</th>
+<th>Web wrapper</th>
+<th>Mobile wrapper</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>check-px-text</code></td>
+<td><code>scripts/check-px-text-core.mjs</code> (129 lines)</td>
+<td><code>desktop/scripts/check-px-text.mjs</code> (39 lines)</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>check-pubkey-truncation</code></td>
+<td><code>scripts/check-pubkey-truncation-core.mjs</code></td>
+<td><code>desktop/scripts/check-pubkey-truncation.mjs</code></td>
+<td><code>web/scripts/check-pubkey-truncation.mjs</code></td>
+<td>—</td>
+</tr>
+</tbody></table></div>
+<p>Note the asymmetry: <strong><code>check-px-text</code> is desktop-only; <code>check-pubkey-truncation</code>
+is desktop + web.</strong> A guard is applied where the rule is true, not everywhere for
+uniformity. That is a deliberate, visible scope choice.</p>
+<h3 id="2-1-guard-1-check-px-text-design-rule-as-executable-check">2.1 Guard 1 — `check-px-text`: design rule as executable check<a href="#batch-05/2-1-guard-1-check-px-text-design-rule-as-executable-check" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>The core&#39;s docblock states the root cause and the fix:</p>
+<blockquote>
+<p>Zoom (Cmd +/-) scales the root <code>&lt;html&gt;</code> font-size, so only <strong>rem</strong>-based text
+scales. Hardcoded px text sizes (<code>text-[15px]</code>, <code>font-size: 15px</code>) freeze
+against zoom — <strong>that&#39;s the timeline regression we fixed</strong>. This guard stops new
+px text sizes from creeping back in.</p>
+</blockquote>
+<p>It flags two forms:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>js</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-js">const TEXT_ARBITRARY_RE = /\btext-\[\d+(?:\.\d+)?(?:px|rem|em)\]/g;
+const FONT_SIZE_PX_RE   = /(?&lt;!-)\bfont-size:\s*\d+(?:\.\d+)?px/g;
+</code></pre>
+</div>
+<p>Three engineering details stand out, all measured in the file:</p>
+<ul>
+<li><strong>It rejects arbitrary <code>rem</code> too, not just <code>px</code></strong> — and says why: <em>&quot;Arbitrary
+rem literals re-fragment the scale we just consolidated.&quot;</em> A guard that only
+blocked <code>px</code> would let 51 distinct <code>text-[0.NNrem]</code> values drift back in. <strong>The
+rule is &quot;one scale&quot;, not &quot;no pixels&quot;.</strong></li>
+<li><strong>The regex has a negative lookbehind</strong> <code>(?&lt;!-)</code> before <code>font-size</code> so it does
+NOT match CSS custom properties like <code>--font-size:</code> — which <em>&quot;merely contain
+the substring&quot;</em> and belong to third-party widgets. This is a false-positive the
+author hit and closed.</li>
+<li><strong>Windows path handling is done explicitly</strong>, with the reason in a comment:
+<em>&quot;<code>rules[].root</code> and the <code>overrides</code> keys are authored with <code>/</code>, but
+<code>path.relative</code> yields <code>\</code> on Windows — so every comparison against them has to
+happen in posix form or <strong>it silently matches nothing</strong>.&quot;</em> A cross-platform
+guard that would otherwise pass vacuously on Windows.</li>
+</ul>
+<p><strong>The allowlist is the part to copy.</strong> Desktop&#39;s four entries are keyed by
+<code>relativePath:matchedLiteral</code> — matching the <em>literal</em>, not the line number:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>js</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-js">const overrides = new Set([
+  &quot;src/features/settings/ui/ProfileSettingsCard.tsx:text-[6rem]&quot;,
+  &quot;src/features/onboarding/ui/AvatarStep.tsx:text-[6rem]&quot;,
+  &quot;src/features/agents/ui/AgentCreationPreview.tsx:text-[4rem]&quot;,
+  &quot;src/features/agents/ui/AgentCreationPreview.tsx:text-[6rem]&quot;,
+]);
+</code></pre>
+</div>
+<p>The wrapper&#39;s comment gives the reason: <em>&quot;Matching the literal keeps these
+exceptions stable when unrelated edits move lines.&quot;</em> Compare this to a
+line-number allowlist, which breaks every time someone inserts a line above it.
+And the four exceptions are all the <strong>same kind of thing</strong> — fixed-size avatar
+emoji glyphs sized to their avatar box, not readable message text. The allowlist
+has a <em>thesis</em>, not just entries.</p>
+<h3 id="2-2-guard-2-check-pubkey-truncation-a-security-rule-as-executable-check">2.2 Guard 2 — `check-pubkey-truncation`: a security rule as executable check<a href="#batch-05/2-2-guard-2-check-pubkey-truncation-a-security-rule-as-executable-check" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>This guard is better than the first, because the rule it enforces is a security
+invariant with a one-line proof. The core&#39;s docblock:</p>
+<blockquote>
+<p>A truncated pubkey prefix is <strong>forgeable by vanity-grinding</strong>, so display
+truncation must be consistent and centralized: the canonical <code>truncateNpub</code>
+(identity keys — compact npub) and <code>truncatePubkey</code> (generic hex identifiers
+such as event/blob IDs) … <strong>Ad-hoc <code>pubkey.slice(0, N)</code> display forms
+fragmented into five formats before this guard existed.</strong></p>
+</blockquote>
+<p>That is a genuinely sharp piece of reasoning, and it generalises far beyond
+Nostr: <strong>any truncated identifier that a human uses to make a trust decision is
+grindable to a collision by an attacker.</strong> If five different parts of your UI
+truncate the same key five different ways, a user who learns &quot;my contact is
+<code>npub1abc…</code>&quot; can be fooled by a key that renders to the same prefix. The fix has
+two parts — centralise the truncation, and make the <em>insecure</em> pattern a build
+failure:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>js</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-js">const PUBKEY_SLICE_RE =
+  /\b[A-Za-z_$][\w$]*(?:[Pp]ubkey|[Pp]ub_key|[Nn]pub)[\w$]*\??\.(?:slice|substring)\(|\b(?:pubkey|npub)\??\.(?:slice|substring)\(/g;
+</code></pre>
+</div>
+<p>It deliberately matches the <em>shapes</em> of ad-hoc truncation
+(<code>.slice(</code>/<code>.substring(</code> on any identifier whose name mentions pubkey/npub) —
+not a fixed list of call sites.</p>
+<p><strong>The allowlist design here is the most instructive artefact in the batch.</strong>
+Three mechanisms, each with a different justification:</p>
+<ol>
+<li><strong><code>allowedFiles</code> — the canonical module itself.</strong>
+<code>src/shared/lib/pubkey.ts</code> is where truncation is <em>supposed</em> to happen, so it
+is exempted by path. Desktop also allows <code>src/testing/e2eBridge.ts</code> with the
+reason <em>&quot;fabricates ids/nsecs from pubkeys; nothing here is a user-facing
+identity display.&quot;</em></li>
+<li><strong><code>overrides</code> — <code>relativePath:lineNumber</code>, one entry per line, each with a
+written reason.</strong> Desktop&#39;s seven entries are grouped by <em>category</em>, and the
+comments name the category: array windows (<code>first N pubkeys</code>, not string
+truncation), colour/initials derivation (<em>&quot;clearly decorative (paired with a
+full <code>truncatePubkey</code> aria-label)&quot;</em>), a <code>clientId</code> that happens not to be a
+pubkey, a debug log, an error-message prefix.</li>
+<li><strong><code>.test.</code> files are excluded wholesale</strong> in the core.</li>
+</ol>
+<p>Notice the deliberate difference between the two guards&#39; override keys:
+<code>check-px-text</code> pins the <strong>literal</strong> (stable under line moves), while
+<code>check-pubkey-truncation</code> pins the <strong>line number</strong> (a <code>slice()</code> call has no
+distinguishing literal). The choice is made per-guard according to what is
+stable, and the reason is written in each file. That is exactly the discipline
+rule 6 asks for.</p>
+<h3 id="2-3-why-this-pattern-is-the-batch-s-recommendation">2.3 Why this pattern is the batch's recommendation<a href="#batch-05/2-3-why-this-pattern-is-the-batch-s-recommendation" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>Three properties make the guard pattern worth adopting:</p>
+<ul>
+<li><strong>The guard carries its own history.</strong> Both cores state the regression that
+motivated them (PR #891 for px-text; <em>&quot;five formats&quot;</em> for truncation). A future
+contributor reading the guard learns <em>why</em>, not just <em>what</em>.</li>
+<li><strong>The allowlist is the design record.</strong> Every exception has a reason, and the
+reasons cluster into a small number of legitimate categories. To add a new
+exception you must write a sentence justifying it — so the allowlist does not
+silently grow.</li>
+<li><strong>The enforcement is in the default gate.</strong> Desktop&#39;s <code>pnpm check</code> runs
+<code>biome check . &amp;&amp; pnpm check:px-text &amp;&amp; pnpm check:pubkey-truncation</code>, and the
+repo-wide <code>just check</code> calls <code>desktop-check</code>, which calls <code>pnpm check</code>. A
+developer cannot commit a violation without seeing it.</li>
+</ul>
+<p><strong>The runner-up pattern in the same family is the differential file-size
+ratchet</strong> (<code>scripts/check-file-sizes-core.mjs</code>, <code>desktop/scripts/file-size-policy.mjs</code>).
+It is the third shared-core guard, and its design is the cleanest statement of
+&quot;ratchet, don&#39;t freeze&quot; I have seen in this study:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>js</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-js">export function allowedLineCount(baseLines, maxLines) {
+  return baseLines == null || baseLines &lt;= maxLines ? maxLines : baseLines;
+}
+export function evaluateFileSize({ baseLines, candidateLines, maxLines }) {
+  const limit = allowedLineCount(baseLines, maxLines);
+  return { limit, violates: candidateLines &gt; limit };
+}
+</code></pre>
+</div>
+<p>with the failure message stating the contract: <em>&quot;Keep new files at or below the
+limit; files already over it may not grow.&quot;</em> Per-surface limits are explicit and
+different — <strong>desktop frontend 1,200 / desktop Rust 1,500 / mobile 1,200 / web
+1,000</strong> — and the policy file carries a comment recording a bug that was fixed:
+the <code>src-tauri/crates</code> root had to be added because <em>&quot;a crate under
+<code>src-tauri/crates/</code> is born outside the repo&#39;s one size discipline — silently,
+since the check still exits 0.&quot;</em> <strong>A guard with a comment naming its own past
+blind spot is a guard you can trust.</strong> The ratchet is deliberately
+<strong>differential</strong> — it inspects only files changed from the merge base, <em>&quot;so this
+stays cheap enough to run unconditionally without dividing path filters&quot;</em> — which
+is why it can sit in <code>just check</code> and CI without slowing anyone down.</p>
+<hr>
+<h2 id="3-px-f-the-desktop-architecture">3. PX-F — the desktop architecture<a href="#batch-05/3-px-f-the-desktop-architecture" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="3-1-the-tauri-bridge-is-a-second-application">3.1 The Tauri bridge is a second application<a href="#batch-05/3-1-the-tauri-bridge-is-a-second-application" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>Measured: <strong><code>desktop/src-tauri/src</code> is 478 <code>.rs</code> files / 194,385 lines</strong>, and
+<strong>385 <code>#[tauri::command]</code> functions</strong> across <strong>111 files in
+<code>src-tauri/src/commands/</code></strong>. The bridge is where a very large fraction of the
+product&#39;s behaviour actually lives.</p>
+<p>What is in it (from <code>src-tauri/src/</code>, top level):</p>
+<ul>
+<li><strong>Sync and transport</strong> — <code>event_sync.rs</code> (+ three test files:
+<code>event_sync_team_catalog_tests</code>, <code>event_sync_team_events_tests</code>,
+<code>event_sync_tests</code>), <code>native_relay_client.rs</code> (+ three test files),
+<code>native_websocket.rs</code> / <code>native_websocket_batch.rs</code>, <code>relay/</code>, <code>relay.rs</code>,
+<code>relay_admission.rs</code>.</li>
+<li><strong>Local state and identity</strong> — <code>app_state.rs</code> + four sibling
+<code>app_state_*.rs</code> modules (<code>_accessors</code>, <code>_keyring</code>, <code>_pending_channels</code>,
+<code>_tests</code>), <code>identity_storage.rs</code>, <code>key_backup.rs</code>, <code>hpke_key_backup.rs</code>
+(+ test), <code>secret_store.rs</code>, <code>archive/</code>.</li>
+<li><strong>A local database</strong> — <code>migration.rs</code> plus <strong>eight</strong> <code>migration_*_tests.rs</code>
+files (<code>_avatar</code>, <code>_command</code>, <code>_databricks</code>, <code>_sync_guard</code>, <code>_team_dir</code>,
+<code>_tests</code>, <code>_test_support</code>, and the base <code>migration_tests.rs</code>). Desktop keeps a
+local store and migrates it.</li>
+<li><strong>Native surfaces</strong> — <code>app_menu.rs</code>, <code>tray_menu.rs</code>, <code>macos_notifications.rs</code>,
+<code>mouse_nav.rs</code>, <code>ptt_shortcut.rs</code> (push-to-talk), <code>prevent_sleep.rs</code>,
+<code>webkit_rendering.rs</code>, <code>linux_media.rs</code>, <code>initial_window.rs</code>.</li>
+<li><strong>A terminal runtime</strong> — <code>terminal_runtime.rs</code> / <code>terminal_runtime/</code>,
+<code>terminal_transport.rs</code>.</li>
+<li><strong>Mesh compute / local LLM</strong> — <code>mesh_llm.rs</code> / <code>mesh_llm/</code>,
+<code>mesh_llm_stubs.rs</code>, <code>managed_agents/</code>.</li>
+<li><strong>An egress guard</strong> — <code>egress_guard.rs</code> (+ <code>egress_guard_tests.rs</code>), and
+<code>media_proxy.rs</code>.</li>
+</ul>
+<p>Rule 6 — name the capability: <strong>desktop is a full client with a native
+application behind it</strong>, not a web UI in a window. The 385 commands are the
+interface between a React front end and a Rust program that owns the database,
+the identity, the terminal, and the network.</p>
+<p><strong>One detail worth carrying.</strong> <code>commands/canvas.rs</code> shows the <em>house style</em> of
+these commands: they take <code>expected_relay_url</code> and <code>expected_signer_pubkey</code> as
+parameters and call an <code>assert_expected_scope</code> helper that refuses the operation
+if the community or identity changed mid-flight. <code>commands/bestie.rs</code> shows the
+same pattern applied more strictly — it captures
+<code>state.workspace_apply_generation</code> before an <code>await</code>, re-reads it after, and
+returns <em>&quot;active workspace changed while resolving Bestie&quot;</em> if it moved; and it
+re-verifies the assignment after the round-trip. <strong>This is the generation-fence
+pattern from the Review-Proven Rules (§3.3, rule 2) applied at the command
+boundary.</strong> It is the same stale-state discipline we saw in Multica&#39;s batches and
+in buzz&#39;s own P3, implemented in Rust at the Tauri seam.</p>
+<h3 id="3-2-the-shared-layering-is-enforced-by-convention-plus-a-guard-triad">3.2 The `shared/` layering is enforced by *convention* plus a guard triad<a href="#batch-05/3-2-the-shared-layering-is-enforced-by-convention-plus-a-guard-triad" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>desktop/src/shared/</code> is split into ten subdirectories, measured by file count:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Directory</th>
+<th align="right">Files</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>api/</code></td>
+<td align="right">130</td>
+<td>Tauri command wrappers, relay client, types</td>
+</tr>
+<tr>
+<td><code>ui/</code></td>
+<td align="right">149</td>
+<td>the 71 shadcn primitives + app-wide components</td>
+</tr>
+<tr>
+<td><code>lib/</code></td>
+<td align="right">102</td>
+<td>utilities (<code>cn</code>, <code>pubkey</code>, <code>platform</code>, media)</td>
+</tr>
+<tr>
+<td><code>styles/</code></td>
+<td align="right">21</td>
+<td>the global CSS layers</td>
+</tr>
+<tr>
+<td><code>hooks/</code></td>
+<td align="right">15</td>
+<td>shared React hooks</td>
+</tr>
+<tr>
+<td><code>layout/</code></td>
+<td align="right">14</td>
+<td>shell layout pieces</td>
+</tr>
+<tr>
+<td><code>theme/</code></td>
+<td align="right">13</td>
+<td>the adaptive theme engine + sync</td>
+</tr>
+<tr>
+<td><code>features/</code></td>
+<td align="right">10</td>
+<td>the feature-flag system (§4)</td>
+</tr>
+<tr>
+<td><code>context/</code></td>
+<td align="right">4</td>
+<td>shared React contexts</td>
+</tr>
+<tr>
+<td><code>constants/</code></td>
+<td align="right">2</td>
+<td>kinds and constants</td>
+</tr>
+</tbody></table></div>
+<p><code>desktop/src/app/</code> (82 files) is the shell; <code>desktop/src/features/</code> (31
+directories) is the product. <strong>The dependency rule is stated in <code>AGENTS.md</code>:
+&quot;Feature modules must not import from other feature modules — only from
+<code>shared/</code>&quot;</strong> — and, critically, <strong>I searched for an ESLint rule or any
+enforcement and found none.</strong> There is no <code>no-restricted-imports</code> config, no
+custom lint plugin, no test. The boundary is a <strong>written convention with no
+executable check</strong>.</p>
+<p>Rule 1 applies honestly here: <strong>the docs claim the boundary; the code does not
+enforce it.</strong> This is a <em>divergence</em> (D5-1) and I record it as one rather than
+softening it. It is also the most direct contrast in the batch — buzz enforces
+<em>px-text</em> and <em>pubkey truncation</em> with executable guards, but enforces
+<em>architectural layering</em> with prose. The pattern it chose for design and security
+rules was not applied to structure.</p>
+<p>The linting story is consistent with a small team that trusts itself: <strong>the repo
+uses Biome, not ESLint</strong> — <code>desktop/biome.json</code> is a two-line file
+(<code>{&quot;extends&quot;: [&quot;../biome.json&quot;]}</code>) over a root <code>biome.json</code> with
+<code>&quot;recommended&quot;: true</code> plus exactly one rule override
+(<code>suspicious.noUnknownAtRules: &quot;off&quot;</code>, because Tailwind&#39;s <code>@apply</code> and friends
+look like unknown at-rules). Measured: <strong>there is no <code>eslint.config.*</code> or
+<code>.eslintrc*</code> anywhere in the tree.</strong> The linter is fast and opinionated and does
+<strong>not</strong> carry architecture rules.</p>
+<h3 id="3-3-agents-md-the-institutional-knowledge-layer">3.3 `AGENTS.md` — the institutional knowledge layer<a href="#batch-05/3-3-agents-md-the-institutional-knowledge-layer" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>AGENTS.md</code> is <strong>794 lines</strong> and is not a style guide. Its &quot;Review-Proven Rules&quot;
+section is <strong>empirically derived from review history</strong> and says so:</p>
+<blockquote>
+<p>These rules distill the recurring findings from the last 25 PRs&#39; review
+threads — <strong>53% of substantive review findings were repeats of the clusters
+below</strong>, and reviewed PRs averaged ~5 review rounds. A second, independent
+mining pass over 71 agent-review rooms (303 findings, Aug 18–29) confirmed the
+same clusters and <strong>measured how often authors actually fix each class once
+flagged: test-seam binding and unbounded-resource findings were fixed 100% of
+the time, swallowed-error findings 90%, stale-state races 70%</strong> — these are not
+style opinions, they are defects authors agree with on sight. Each cites the
+PRs where reviewers litigated it.</p>
+</blockquote>
+<p>This is unusual and worth naming: the rules carry <strong>measured fix rates</strong> and
+<strong>PR citations per rule</strong>. There are eight rules; four matter for this study:</p>
+<ol>
+<li><strong>Every caught failure must leave a durable retry record or propagate.</strong> Never
+catch-log-and-return-success; never convert a terminal failure into an
+authoritative success/empty result; never delete the durable journal an
+operation depends on before its retry succeeded. (This is the <em>same</em> rule
+buzz&#39;s P3 follows with <code>PartialProgress</code>, and the same one the retirement rule
+in <code>library/development/WORKING-RULES.md</code> encodes.)</li>
+<li><strong>Fence async results by generation.</strong> A completing in-flight probe must
+verify it is still the newest before writing its result. (§3.1&#39;s <code>bestie.rs</code>
+is this rule, implemented.)</li>
+<li><strong>Regression tests must bind the production seam and be falsifiable.</strong> <em>&quot;A
+guard whose removal doesn&#39;t fail any test protects nothing.&quot;</em> — the direct
+test of whether a guard is real.</li>
+<li><strong>Bound every resource, loop, and process tree.</strong> Cap captured output; retry
+loops need backoff <em>and a terminal state</em>.</li>
+</ol>
+<p>Plus three that are squarely frontend:</p>
+<ol start="6">
+<li><strong>&quot;A guard that hides the only recovery affordance is a functional failure.&quot;</strong>
+Before adding a visibility predicate, ask whether the user still has a way
+back.</li>
+<li><strong>Audit assistive semantics on every new visual component.</strong> The
+agent-review lanes flagged accessibility on 44 findings in the Aug 18–29
+window — the second-largest cluster — and authors fixed the concrete ones.
+Rule: <em>&quot;one owner per actionable label, no duplicate screen-reader stops, and
+explicit semantics for every interactive element.&quot;</em></li>
+<li><strong>Every input modality is a first-class seam.</strong> Keyboard, pointer, and hotkey
+paths must not silently diverge (a <code>Shift+Space</code> treated as <code>Space</code> because
+the guard omitted <code>shiftKey</code>; modifier keys dropped on the non-mouse path).
+<em>&quot;When adding an input handler, enumerate the modalities that can reach it and
+test the non-primary ones — that&#39;s where the defects were.&quot;</em></li>
+</ol>
+<p>Rule 7 and rule 8 are the two I would carry into our own SRS verbatim. Rule 8 in
+particular is a <em>testable</em> statement about coverage that most frontends never
+write down: <strong>the input modality is the seam, and the primary modality is the one
+that gets tested.</strong></p>
+<p><code>AGENTS.md</code> also carries a <strong><code>CONTEXT.md</code> glossary (53 lines) with <code>_Avoid_:</code>
+anti-vocabulary lists</strong> — each term names the word you must <em>not</em> use for it.
+That is a small, cheap mechanism against vocabulary drift, and it is the same
+class of protection as the L168 hazard from our own rules (copying another
+platform&#39;s words without checking they mean the same thing here).</p>
+<h3 id="3-4-the-mobile-tree-an-independent-re-implementation">3.4 The mobile tree — an independent re-implementation<a href="#batch-05/3-4-the-mobile-tree-an-independent-re-implementation" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>Measured: <strong><code>mobile/lib</code> is 456 Dart files</strong> — 280 under <code>lib/features/</code> and 174
+under <code>lib/shared/</code> — i.e. roughly the desktop app&#39;s <em>shape</em> (<code>features</code> +
+<code>shared</code>) implemented in a different language with no shared core.</p>
+<p>The rules in <code>AGENTS.md</code> are specific and enforceable at review:</p>
+<ul>
+<li><strong>&quot;NEVER use <code>StatefulWidget</code>&quot;</strong> — state is Riverpod; local state is
+<code>flutter_hooks</code> via <code>HookConsumerWidget</code> / <code>ConsumerWidget</code>.</li>
+<li><strong>&quot;Feature modules must not import from other feature modules — only from
+<code>shared/</code>.&quot;</strong> — the <em>same</em> boundary as desktop, and here too I found no
+executable enforcement; <code>mobile/analysis_options.yaml</code> is
+<code>include: package:flutter_lints/flutter.yaml</code> plus <code>prefer_single_quotes: true</code>
+and <strong><code>custom_lint</code> plugins declared in <code>pubspec.yaml</code> (riverpod_lint) that
+have no custom rule package behind them</strong> — <code>mobile/packages/</code> does not exist.
+So the mobile boundary is prose as well (D5-2).</li>
+<li><strong>&quot;Prefer <code>context.colors</code> and <code>context.textTheme</code> (via theme extensions) over
+raw <code>Theme.of(context)</code>.&quot;</strong></li>
+<li><strong>&quot;Do NOT use <code>print()</code>&quot;</strong> — use <code>debugPrint()</code> or structured logging.</li>
+<li><strong>&quot;One public widget per file; push private sub-widgets (<code>_Foo</code>) into sibling
+<code>part</code> files.&quot;</strong> — a file-organisation rule, reinforced by the 1,200-line
+ceiling.</li>
+<li><strong>&quot;Multi-tenant model / identity&quot;</strong> — the mobile tree has its own
+<code>lib/features/pairing/</code> and <code>lib/features/invites/</code> that desktop does not.</li>
+</ul>
+<p>The theme system is where mobile is <em>most</em> interesting, because it is a <strong>full
+re-implementation of the desktop engine in Dart</strong>, and the port is documented as
+such:</p>
+<ul>
+<li><code>mobile/lib/shared/theme/adaptive_theme.dart</code> opens: <em>&quot;Ported from
+<code>desktop/src/shared/theme/adaptive-theme.ts</code>.&quot;</em></li>
+<li><code>mobile/lib/shared/theme/theme_catalog.dart</code> opens: <em>&quot;Static catalog of all 60
+Shiki syntax theme color definitions&quot;</em> — the same Shiki theme JSON desktop&#39;s
+<code>theme-loader.ts</code> reads, projected into Dart constants.</li>
+</ul>
+<p>Measured sizes: desktop <code>shared/theme/*.ts(x)</code> = <strong>3,249 lines</strong>; mobile
+<code>shared/theme/*.dart</code> = <strong>3,533 lines</strong>. Two independent implementations of one
+design language, <strong>1,000+ lines each</strong>, with <strong>no shared source of truth and no
+parity test</strong> (I searched: no theme parity test exists).</p>
+<p>The <em>one</em> place the two clients <em>are</em> forced together is the emoji dataset, and
+the mechanism is worth copying: <code>mobile/scripts/generate-emoji-data.mjs</code> projects
+<code>@emoji-mart/data/sets/15/native.json</code> — <em>&quot;the same dataset the desktop picker
+uses so the two clients cannot drift&quot;</em> — into a committed JSON asset, and the
+generator <strong>fails loudly if the desktop install is missing</strong> with the fix in the
+message. Same glyphs, same ids, same names, same shortcodes, same category order,
+by construction. <code>just mobile-emoji-data</code> regenerates it after a dependency bump.
+<strong>This is the pattern the theme system does NOT use</strong> — and the contrast is the
+finding: buzz solved client drift for emoji with a generator and left it unsolved
+for themes, and the difference is visible in the file counts (one committed asset
+vs. two hand-maintained engines).</p>
+<h3 id="3-5-the-event-kind-mirror-a-contract-with-no-lockstep-check">3.5 The event-kind mirror — a contract with no lockstep check<a href="#batch-05/3-5-the-event-kind-mirror-a-contract-with-no-lockstep-check" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>desktop/src/shared/constants/kinds.ts</code> is <strong>176 lines</strong>;
+<code>mobile/lib/shared/relay/nostr_models.dart</code> is <strong>391 lines</strong>; the source of truth
+<code>crates/buzz-core/src/kind.rs</code> is <strong>1,177 lines / 135 declared kinds / 136 registered in <code>ALL_KINDS</code></strong>. <em>(corrected in batch 07; see F7-1)</em></p>
+<p><code>AGENTS.md</code> states the contract: <em>&quot;event kinds must stay in sync with
+<code>desktop/src/shared/constants/kinds.ts</code>.&quot;</em> Measured: <strong><code>kinds.ts</code> has a test
+(<code>kinds.test.mjs</code>) but it tests <em>behaviour</em> (<code>isConversationalUnreadKind</code>), not
+<em>parity with Rust</em>.</strong> I found no test asserting that the TS/Dart constants equal
+the Rust constants, and no generated file. So the mirror is maintained <strong>by
+hand, across three languages, with no lockstep check</strong> (D5-3).</p>
+<p>The specific risk is stated in the file&#39;s own comments: several kinds carry a
+comment pinning their <em>tag shape</em> to <em>&quot;<code>buzz-sdk</code> builders + relay
+<code>moderation_commands.rs</code>&quot;</em> — i.e. the contract exists in prose between files.
+For a platform whose entire composition vocabulary is these integers (§1.4),
+hand-maintained mirrors are the weakest link in the extension story.</p>
+<hr>
+<h2 id="4-px-f-the-feature-flag-system-and-the-internal-oss-split">4. PX-F — the feature-flag system and the internal/OSS split<a href="#batch-05/4-px-f-the-feature-flag-system-and-the-internal-oss-split" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>This is the most <em>product-specific</em> machinery in the batch, and it is clean.</p>
+<h3 id="4-1-the-manifest-is-json-validated-by-zod-and-fail-open">4.1 The manifest is JSON, validated by zod, and **fail-open**<a href="#batch-05/4-1-the-manifest-is-json-validated-by-zod-and-fail-open" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>desktop/src/shared/features/manifest.ts</code> loads <code>@features-manifest</code>
+(<code>preview-features.json</code>) and <strong>runtime-validates it with zod at startup</strong>:</p>
+<blockquote>
+<p>On parse failure we fall back to an empty manifest and log a console warning.
+The app keeps working; gated UI stays hidden; nothing accidentally leaks.</p>
+</blockquote>
+<p>The semantic contract — stated in three places (<code>types.ts</code>, <code>manifest.ts</code>,
+<code>useFeatureEnabled.ts</code>) because it is easy to get wrong — is:</p>
+<blockquote>
+<p>The manifest (<code>preview-features.json</code>) lists ONLY preview features —
+membership signals &quot;this needs gating.&quot; <strong>Anything not in the manifest is
+treated as stable and renders unconditionally (fail-open).</strong></p>
+</blockquote>
+<p>So: <strong>in the manifest → gated (user override, then manifest default, off if
+omitted); not in the manifest → always on.</strong> The stated consequence is
+deliberate: <em>&quot;A stray <code>&lt;FeatureGate feature=&quot;removed-id&quot;&gt;</code> will never hide UI.&quot;</em>
+An unknown id logs a dev warning and returns <code>true</code>.</p>
+<p>This is the <em>opposite</em> of the safe default most flag systems choose, and the
+reasoning is sound for this product: a flag&#39;s absence must not be able to hide a
+working feature, because that failure mode is invisible and unrecoverable for the
+user. <strong>Fail-open on an unknown gate, fail-closed on the production build split
+(§4.2).</strong> Two different answers to &quot;what does missing mean?&quot;, each chosen for the
+failure it prevents.</p>
+<p>Also worth noting: the manifest combines two sources — the shipped JSON and
+<code>protectedFeatureDefinitions</code> from <code>@protected-features</code> (<code>[...manifest.features, ...protectedFeatureDefinitions]</code>) — so the internal build merges its protected
+definitions into the same validated manifest rather than branching the code.</p>
+<p>At the <em>client</em> level the hook uses <code>useSyncExternalStore</code> with a
+<strong>deliberately cached snapshot</strong>. The comment explains the hazard precisely:
+returning <code>JSON.stringify(getOverrides())</code> fresh each render <em>&quot;would produce a new
+string each tick → infinite re-render&quot;</em>, so the serialised form is cached and a
+new parsed object is minted only when it changes. It also supplies an explicit
+<code>getServerSnapshot</code> returning <code>&quot;{}&quot;</code> with the reason: <em>&quot;Buzz is a Tauri desktop
+app and does not currently SSR. Returning an explicit empty-state snapshot is
+safer than omitting this argument.&quot;</em> <strong>Two subtle React correctness notes, both
+written down, both in a file whose job is otherwise trivial.</strong> Cross-window sync
+is handled by listening for the <code>storage</code> event on the overrides key, mirroring
+an existing house pattern (<code>useChannelSections</code> / <code>useChannelStars</code> /
+<code>useChannelMutes</code> / <code>useThreadFollows</code>).</p>
+<h3 id="4-2-protectedfeatures-an-internal-public-build-split-with-a-verified-contract">4.2 `protectedFeatures/` — an internal/public build split with a **verified** contract<a href="#batch-05/4-2-protectedfeatures-an-internal-public-build-split-with-a-verified-contract" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>buzz ships two desktop builds from one source tree, and <strong>the protected content
+is excluded from the OSS build by construction, not by <code>.env</code> discipline.</strong></p>
+<p>The layout, measured:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>text</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code>desktop/src/protectedFeatures/
+  internal.ts      → protectedFeatureDefinitions = [{ id: &quot;bestie&quot;, … }]
+  internalUi.ts    → the REAL implementations (11 exports)
+  public.ts        → protectedFeatureDefinitions = []
+  publicUi.ts      → the same 11 exports, every one a no-op/null
+  bestie/          → 15 files: the actual feature
+</code></pre>
+</div>
+<p>The mechanism is a <strong>build-time module alias</strong>: <code>@protected-features</code> resolves to
+<code>internal.ts</code>/<code>internalUi.ts</code> in the internal build and <code>public.ts</code>/<code>publicUi.ts</code>
+in the OSS build. Every public counterpart is a documented no-op —
+<code>ProtectedGlobalOverlay</code> returns <code>null</code>, <code>useProtectedVisibleDirectMessages</code>
+returns <code>channels</code> unchanged. <strong>The OSS build does not contain the feature&#39;s
+code; it contains a stub of the same shape.</strong></p>
+<p>And the contract is <strong>verified by building both</strong>.
+<code>desktop/scripts/build-protected-feature-artifacts.mjs</code> builds <em>both</em> variants
+(the unselected one into a temp dir), then asserts:</p>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>js</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code class="language-js">const protectedContent = /\bbestie\b|chief of staff|builtin:bestie/iu;
+const internalManifestMarker = &quot;Try a personal agent that is always close at hand&quot;;
+if (protectedContent.test(ossText)) throw new Error(
+  &quot;Official OSS desktop artifact contains protected Bestie/Chief content&quot;);
+if (!internalText.includes(internalManifestMarker)) throw new Error(
+  &quot;Protected internal desktop artifact is missing the Bestie manifest&quot;);
+</code></pre>
+</div>
+<p>It scans the <strong>emitted</strong> <code>.css/.html/.js/.json</code> chunks, not the source — so the
+check cannot be fooled by a feature that leaks only through the bundler. Both
+directions are asserted: <strong>no protected string in OSS, and the marker present in
+internal</strong> (a build that silently produced an empty internal variant also
+fails). <code>VITE_BUZZ_BESTIE</code> is <em>pinned explicitly</em> to <code>&quot;1&quot;</code>/<code>&quot;0&quot;</code> for each child
+with the reason: <em>&quot;Deleting the OSS value lets Vite reload <code>=1</code> from <code>.env.local</code>
+or a mode-specific env file.&quot;</em> That is a real leak closed.</p>
+<p>The Tauri side is guarded by the same discipline: <code>desktop/scripts/tauri-command.mjs</code>
+wraps the Tauri CLI so each packaging invocation gets a <strong>private output
+directory</strong>, and it hands <code>frontendDist</code> a path <strong>relative</strong> to
+<code>tauri.conf.json</code>&#39;s directory — with the reason spelled out:</p>
+<blockquote>
+<p><code>frontendDist</code> deserializes into an untagged enum whose first variant is a URL,
+and <strong>a Windows absolute path parses as one — <code>C:</code> becomes the scheme.</strong> Tauri
+then embeds <strong>zero assets, exits 0, and the app boots to
+<code>ERR_FILE_NOT_FOUND</code>.</strong></p>
+</blockquote>
+<p>So the rule is: never let <code>frontendDist</code> be absolute, and there is a test
+(<code>tauriCommand.test.mjs</code>) asserting it stays relative, running <strong>two opposite
+variants concurrently</strong> to prove they cannot overwrite each other&#39;s assets. <strong>A
+silent-success failure mode, closed by a wrapper plus a test that reproduces it.</strong>
+This is rule 3 from §3.3 (&quot;falsifiable, bound to the production seam&quot;) actually
+applied — the test spawns the real wrapper.</p>
+<p><strong>Scope note for the study:</strong> the split is not, by itself, a tenancy mechanism.
+It separates a <em>commercial</em> feature from an <em>OSS</em> build. The tenant boundary
+remains the community (batch 03). I record the split here because it is a PX-F
+architecture pattern with a verified contract, <strong>not</strong> because it is tenancy.</p>
+<hr>
+<h2 id="5-findings-f5-n">5. Findings (F5-n)<a href="#batch-05/5-findings-f5-n" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>F5-1.</strong> buzz has <strong>no widget model and no composer</strong> — proven by search, not
+assumed. 27 <code>widget</code> hits tree-wide, all accounted for; the only <code>CREATE TABLE widgets</code> is a negative fixture inside a <code>#[test]</code>. <strong>Fifth platform in the study
+with none.</strong></p>
+<p><strong>F5-2.</strong> The composition unit is the <strong>Nostr event kind</strong>: 136 registered kinds (135 declared <code>KIND_*</code>, plus 4 <code>RELAY_ADMIN_*</code> aliases, minus 3 unregistered)
+in a 1,177-line <code>kind.rs</code>, with a stated policy of <em>&quot;prefer a new kind over a new
+HTTP endpoint.&quot;</em> Extensibility is of data and behaviour, never of layout.</p>
+<p><strong>F5-3.</strong> <strong>Two frontend rules are encoded as CI guards with shared cores</strong> —
+<code>check-px-text</code> (desktop) and <code>check-pubkey-truncation</code> (desktop + web). Each
+core states its root cause and carries a narrow, reason-annotated allowlist. The
+two guards use <em>different</em> allowlist key shapes (literal vs line number), chosen
+per-guard and explained in-file. <strong>This is the batch&#39;s recommendation.</strong></p>
+<p><strong>F5-4.</strong> <code>check-pubkey-truncation</code> enforces a <strong>security invariant</strong>:
+truncated identifiers a human trusts are <strong>forgeable by vanity-grinding</strong>;
+ad-hoc truncation had fragmented into five formats. The fix is
+centralise-plus-fail-the-build. <strong>Generalises far beyond Nostr.</strong></p>
+<p><strong>F5-5.</strong> <code>check-px-text</code> enforces <strong>&quot;one scale&quot;, not &quot;no pixels&quot;</strong> — it rejects
+arbitrary <code>rem</code>/<code>em</code> too, because those <em>&quot;re-fragment the scale.&quot;</em> One-scale is
+the actual rule; px is just its loudest symptom.</p>
+<p><strong>F5-6.</strong> The design-token model is the strongest PX-W content: <strong>two independent
+dials</strong> (Cmd +/- true zoom over the real root rem, and a text-only Font size
+preference) composed through <strong>one virtual rem</strong> <code>--buzz-type-rem</code>, with the
+<strong><code>lineHeight</code> scale made rem-relative too</strong> so zoom cannot enlarge glyphs inside
+a fixed line box. Documented contract: 13/14/15px conversation text before zoom.</p>
+<p><strong>F5-7.</strong> A <strong>differential file-size ratchet</strong> (third shared-core guard) with
+per-surface limits (desktop FE 1,200 / desktop Rust 1,500 / mobile 1,200 / web
+1,000), explicitly <strong>ratchet-not-freeze</strong> (<em>&quot;files already over it may not
+grow&quot;</em>), deliberately differential so it is cheap enough to run unconditionally,
+and carrying a comment naming a past blind spot (<code>src-tauri/crates</code> was silently
+ungoverned).</p>
+<p><strong>F5-8.</strong> <strong>Desktop&#39;s Tauri bridge is a second application</strong> —
+<code>src-tauri/src</code> is <strong>478 files / 194,385 lines</strong> with <strong>385 <code>#[tauri::command]</code>s
+in 111 files</strong>; it owns the local database (8 migration test files), identity,
+terminal, media, mesh LLM, and an egress guard.</p>
+<p><strong>F5-9.</strong> <strong>The generation-fence pattern is implemented at the Tauri command
+boundary.</strong> <code>bestie.rs</code> snapshots <code>workspace_apply_generation</code>, <code>await</code>s,
+re-reads, and refuses if it moved; <code>canvas.rs</code> takes
+<code>expected_relay_url</code>/<code>expected_signer_pubkey</code> and asserts scope. This is
+Review-Proven Rule 2 as executable code.</p>
+<p><strong>F5-10.</strong> <strong>Mobile is a full independent re-implementation with ZERO Rust</strong> —
+456 Dart files / 695 files / 218,357 lines, including a <strong>3,533-line theme
+engine ported from desktop&#39;s 3,249-line TS engine, with no shared source and no
+parity test.</strong> The Rust crates are shared everywhere <em>except</em> mobile.</p>
+<p><strong>F5-11.</strong> <strong>Client drift is solved for exactly one artefact and left unsolved
+for the rest.</strong> Emoji is projected from desktop&#39;s <code>emoji-mart</code> data by a
+generator (<code>mobile-emoji-data</code>) that <em>fails loudly</em> if the source is missing, so
+shortcodes cannot drift; event kinds and themes are hand-maintained mirrors with
+no lockstep check.</p>
+<p><strong>F5-12.</strong> <strong>The feature-flag system is fail-open on unknown gates and
+fail-closed on the production build split</strong> — two opposite answers to &quot;what does
+missing mean?&quot;, each chosen for the failure it prevents. The manifest is
+zod-validated at startup; invalid → empty manifest → <em>&quot;nothing accidentally
+leaks.&quot;</em></p>
+<p><strong>F5-13.</strong> <strong>The internal/OSS split is verified by building both variants and
+scanning the emitted chunks</strong>, in both directions (no protected string in OSS;
+marker present in internal). <code>VITE_BUZZ_BESTIE</code> is pinned explicitly so an
+<code>.env.local</code> cannot leak the internal build into OSS.</p>
+<p><strong>F5-14.</strong> <strong>A silent-success failure mode is closed by a wrapper plus a test.</strong>
+Tauri&#39;s <code>frontendDist</code> untagged enum parses a Windows absolute path as a URL
+(<code>C:</code> = scheme) and then <strong>embeds zero assets, exits 0, and boots to
+<code>ERR_FILE_NOT_FOUND</code></strong>. Closed by always emitting a config-relative path, with a
+test that spawns the real wrapper and runs both variants concurrently.</p>
+<p><strong>F5-15.</strong> <strong><code>AGENTS.md</code> is an empirical institutional-knowledge layer, not a
+style guide</strong> — 794 lines whose Review-Proven Rules cite the PRs where each was
+litigated and report <strong>measured fix rates</strong> (100% / 90% / 70%) and the mining
+method (last 25 PRs, 53% repeat rate; a second pass over 71 agent-review rooms /
+303 findings).</p>
+<p><strong>F5-16.</strong> <strong>The canvas <code>set_canvas</code> two-stage concurrency check</strong> is a
+documented, honest design: pre-write precondition returns a frozen conflict
+marker; post-write supersession re-reads and returns <code>CANVAS_SUPERSEDED</code> while
+<em>preserving the revision in history</em>; and a <strong>failed verification read reports
+<code>verified: false</code>, never a failed save.</strong> The residual race is named and deferred
+to <em>&quot;relay-side linearization (phase 2).&quot;</em></p>
+<p><strong>F5-17.</strong> <strong><code>CONTEXT.md</code> is a 53-line glossary whose entries carry <code>_Avoid_:</code>
+anti-vocabulary lists</strong> — a cheap, concrete defence against vocabulary drift of
+the same class as our own L168 hazard.</p>
+<p><strong>F5-18.</strong> The product ships <strong>two thin satellite clients</strong>: <code>web/</code> (66 files /
+4,719 lines) and <code>admin-web/</code> (17 files / 2,721 lines), together <strong>~1.1% of
+desktop&#39;s line count</strong>. Desktop is 93% of the frontend.</p>
+<hr>
+<h2 id="6-divergences-d5-n-where-a-doc-and-the-code-disagree">6. Divergences (D5-n) — where a doc and the code disagree <span class="seal-badge" style="background:#fef2f2; color:#dc2626; border-color:#fca5a5; font-size: 0.65em; vertical-align: middle;">⚠️ FINDING NOTE</span><a href="#batch-05/6-divergences-d5-n-where-a-doc-and-the-code-disagree" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>D5-1. The feature-module boundary is prose, not enforcement.</strong> <code>AGENTS.md:730</code>
+states <em>&quot;Feature modules must not import from other feature modules — only from
+<code>shared/</code>.&quot;</em> Measured: <strong>no <code>no-restricted-imports</code>, no custom lint plugin, no
+test</strong> anywhere in the tree. The rule is real as a convention and absent as a
+check. <strong>Notably, buzz enforces <em>design</em> and <em>security</em> rules executably (F5-3)
+and leaves <em>architectural</em> rules to prose.</strong> Framing: a convention with no
+enforcement is not wrong, but it is a <em>different kind of thing</em> from the guards
+next to it, and the docs do not distinguish them.</p>
+<p><strong>D5-2. Mobile&#39;s <code>custom_lint</code> is declared with no custom rule package.</strong>
+<code>mobile/pubspec.yaml</code> declares <code>custom_lint</code> and <code>riverpod_lint</code>, and
+<code>analysis_options.yaml</code> enables <code>plugins: [custom_lint]</code> — but <strong>there is no
+<code>mobile/packages/</code> and no custom lint builder in the tree</strong>, so the plugin slot
+is occupied by third-party rules only. The mobile boundary rule (same words as
+desktop&#39;s) has no executable backing either.</p>
+<p><strong>D5-3. The event-kind mirror has no lockstep check.</strong> <code>AGENTS.md</code> requires
+<code>nostr_models.dart</code> to stay in sync with <code>kinds.ts</code>, and <code>kinds.ts</code> to mirror
+<code>kind.rs</code> (136 registered kinds; 157 total <code>pub const</code>). Measured: <code>kinds.test.mjs</code> tests behaviour, not
+parity; there is <strong>no test comparing the three files and no generator.</strong> Given
+F5-2 (kinds <em>are</em> the composition vocabulary), this is the weakest link in the
+extension story — and it is the exact problem the emoji generator <em>did</em> solve
+(F5-11), which shows the team knows the pattern.</p>
+<p><strong>D5-4. <code>AGENTS.md</code>&#39;s px-text guidance says &quot;allowlisted by <code>path:line</code>&quot; while
+the desktop wrapper allowlists by <code>path:literal</code>.</strong> <code>AGENTS.md</code> (Desktop App §)
+says <em>&quot;Genuinely decorative glyphs … are allowlisted by <code>path:line</code> in that
+script&quot;</em>; the script&#39;s own comment says matching the literal <em>&quot;keeps these
+exceptions stable when unrelated edits move lines&quot;</em>, and the keys are
+<code>…tsx:text-[6rem]</code>. <strong>The code is correct and the doc is stale</strong> — a small
+instance of the batch-04 pattern (doc lags the code it describes), recorded for
+completeness.</p>
+<hr>
+<h2 id="7-pole-verdict">7. Pole verdict<a href="#batch-05/7-pole-verdict" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>PX-W — widgets / composition.</strong> <strong>Absent as a model; present as a committed
+alternative.</strong> buzz composes <em>signed events with integer types</em> (136 registered kinds) and
+renders them with a fixed UI, rather than composing UI elements. It has exactly
+one composition-shaped surface (Channel Canvas / <code>kind:40100</code>), and that surface
+is a <strong>document with optimistic concurrency</strong>, not a widget tree. Its design
+system is a <strong>vendored shadcn component directory with no registry and no
+per-component contract.</strong> <strong>Fifth platform in the study with no widget/composer
+model.</strong></p>
+<p>What PX-W <em>does</em> contribute, and the reason to keep this batch, is the
+<strong>guard-as-document</strong> pattern: two rules (<code>check-px-text</code>,
+<code>check-pubkey-truncation</code>) plus a size ratchet, each with a shared core, a
+stated root cause, a narrowly-scoped reason-annotated allowlist, and a place in
+the default gate. That is a different and cheaper answer to &quot;how does a frontend
+stay consistent?&quot; than a component registry (n8n) or a UI Lab (Multica), and it
+scales down to a small team.</p>
+<p><strong>PX-F — frontend.</strong> <strong>Desktop-first and polyglot, with the core shared
+everywhere except mobile.</strong> Desktop (Tauri 2 + React 19 + Vite + Tailwind +
+shadcn + Biome) is ~93% of the frontend and carries a <strong>194k-line Rust bridge</strong>
+with <strong>385 commands</strong>. Mobile is a <strong>full Dart re-implementation with zero Rust</strong>,
+including a hand-ported 3,533-line theme engine. Web and admin are ~1.1% combined
+thin clients.</p>
+<p>The frontend&#39;s distinctive quality is <strong>how much of its hard-won knowledge is
+written down in an executable or citable form</strong>: the token model states its two
+dials and its line-height rationale; the guards state their root causes; the
+review rules cite PRs and measured fix rates; the feature flags state
+fail-open/fail-closed and why; the build split is verified by building both
+variants. Where buzz has <em>not</em> done this — architectural layering (D5-1) and the
+cross-language kind mirror (D5-3) — is exactly where the gaps are.</p>
+<p><strong>The batch&#39;s answer to the question it inherited.</strong> <em>Is an event log the same
+thing as a widget model?</em> <strong>No, and buzz is the clean demonstration of why.</strong> An
+event log gives you extensibility of <strong>data and behaviour</strong> — new kinds, new
+handlers, realtime fan-out, scoping, auth for free (F5-2). A widget model gives
+you extensibility of <strong>layout and interface</strong> — someone who is not a programmer
+assembling a surface out of parts. buzz has the first in full and the second not
+at all, and it is <em>coherent</em> about it: the surface set is fixed, the data model
+is open, and the extension path is &quot;add a kind&quot;. That is a legitimate product
+position, and it is <strong>the clearest statement in the study of what a platform
+loses when it chooses an event log over a composer.</strong></p>
+<hr>
+<h2 id="8-ranked-actions">8. Ranked actions<a href="#batch-05/8-ranked-actions" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Action</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td><strong>Adopt the guard-as-document pattern</strong> for our own two or three most-broken frontend rules: a <code>scripts/check-&lt;rule&gt;-core.mjs</code>, a per-app wrapper carrying a reason-annotated allowlist, and a place in the default <code>check</code> gate.</td>
+<td>It is cheap, it scales down, and it is the one PX-W artefact here that transfers without buzz&#39;s stack (F5-3, F5-4).</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Copy the <em>three</em> allowlist mechanisms, not one</strong> — <code>allowedFiles</code> for the canonical module, <code>overrides</code> keyed by whichever of literal/line is <em>stable for that rule</em>, and a wholesale <code>.test.</code> exclusion.</td>
+<td>The choice of key shape is per-rule and is the part a naive port gets wrong (F5-3).</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>Adopt the fail-open/fail-closed asymmetry for feature gates</strong> and write the answer to &quot;what does <em>missing</em> mean?&quot; next to every gate.</td>
+<td>Two opposite answers, each chosen for the failure it prevents, both stated (F5-12).</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>Adopt &quot;two independent dials through one virtual rem&quot;</strong> for typography, including making the <strong><code>lineHeight</code> scale rem-relative</strong>.</td>
+<td>It is the strongest PX-W content and the line-height half is the part nobody thinks of (F5-6).</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>Adopt the emoji-generator pattern for every cross-client constant</strong> we will have — kinds, tokens, colour schemes.</td>
+<td>buzz proves the pattern works and proves the cost of not applying it (F5-11, D5-3).</td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>Adopt the differential size ratchet</strong> with per-surface limits and a <em>ratchet-not-freeze</em> rule.</td>
+<td>Cheap enough to run unconditionally, and it catches the one-file disaster before review (F5-7).</td>
+</tr>
+<tr>
+<td>7</td>
+<td><strong>Adopt the generation fence at every async boundary</strong> (<code>await</code> → re-read a generation → refuse if moved), and the explicit <em>scope assertion</em> parameters.</td>
+<td>Already written as a rule in buzz&#39;s own review rules and implemented in Rust here; it is the same defect class as our own stale-state findings (F5-9).</td>
+</tr>
+<tr>
+<td>8</td>
+<td><strong>Adopt &quot;verify the build split by building both and scanning the emitted output&quot;</strong> whenever we ship two variants from one tree.</td>
+<td>Catches leaks the source-level check misses, and catches the <em>empty</em> variant (F5-13).</td>
+</tr>
+<tr>
+<td>9</td>
+<td><strong>Adopt <code>CONTEXT.md</code>-style <code>_Avoid_:</code> anti-vocabulary lists.</strong></td>
+<td>Cheapest possible defence against the L168 vocabulary-drift hazard (F5-17).</td>
+</tr>
+<tr>
+<td>10</td>
+<td><strong>Study the <code>AGENTS.md</code> Review-Proven Rules format</strong> — PR citations per rule, measured fix rates, and the <em>method</em> — before we write our own agent rules.</td>
+<td>A rule with a citation and a fix rate is checked; a rule without one is a preference (F5-15).</td>
+</tr>
+</tbody></table></div>
+<p><strong>Recommendation.</strong> Take <strong>#1, #2, #4, #7, #9</strong> — the guard-as-document pattern
+(including its three allowlist mechanisms), the two-dials-one-rem typography
+model with the rem-relative line-height scale, the generation fence at async
+boundaries, and the <code>_Avoid_:</code> glossary. These five are cheap, transfer without
+buzz&#39;s stack, and each answers a defect class this study has already recorded.
+Treat the internal/OSS split (F5-13) and the Tauri packaging wrapper (F5-14) as
+<strong>patterns to remember for when a silent-success failure mode or a variant leak
+actually appears</strong> — they are excellent, and they are solutions to problems we do
+not yet have.</p>
+<hr>
+<p><strong>Next:</strong> <code>findings/06-out-of-pole.md</code> (PZ) — the security perimeter, the
+observability story, the formal-methods-in-tree material
+(<code>MultiTenantRelay.tla</code> / <code>MultiTenantAuth.spthy</code> / <code>GitOnObjectStore.tla</code>), the
+conformance harness, and anything that does not sit on the three poles. Then
+batch 07 (synthesis), and only then the buzz reader on port 3600, built from the
+markdown.</p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              
+                <a href="04-automations-p3.html" class="nav-page-btn">
+                  <span class="nav-btn-sub">← Previous Batch</span>
+                  <span class="nav-btn-title">Automations (P3)</span>
+                </a>
+              
+
+              <a href="../index.html#batch-05" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              
+                <a href="06-out-of-pole-pz.html" class="nav-page-btn" style="text-align:right;">
+                  <span class="nav-btn-sub">Next Batch →</span>
+                  <span class="nav-btn-title">Out-of-Pole (PZ)</span>
+                </a>
+              
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#0-what-i-measured-rule-0b-counts-first" class="toc-link">0. What I measured (rule 0b — counts first)</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#0-1-the-polyglot-footprint" class="toc-link">0.1 The polyglot footprint</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#0-2-the-widget-negative-proven-not-assumed" class="toc-link">0.2 The widget negative — proven, not assumed</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#0-3-what-buzz-has-instead-of-a-composer" class="toc-link">0.3 What buzz has *instead* of a composer</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#1-px-w-the-composition-surface" class="toc-link">1. PX-W — the composition surface</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#1-1-the-composition-surface-is-a-canvas-and-the-canvas-is-an-event" class="toc-link">1.1 The composition surface is a canvas, and the canvas is an event</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#1-2-the-design-system-is-a-vendored-component-library-not-a-registry" class="toc-link">1.2 The design system is a vendored component library, not a registry</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#1-3-the-design-token-story-is-the-strongest-px-w-content-in-the-platform" class="toc-link">1.3 The design-token story is the strongest PX-W content in the platform</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#1-4-the-real-composition-unit-is-the-event-kind" class="toc-link">1.4 The real composition unit is the event kind</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#2-px-w-the-two-ci-guards-the-recommendation" class="toc-link">2. PX-W — the two CI guards (the recommendation)</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-1-guard-1-check-px-text-design-rule-as-executable-check" class="toc-link">2.1 Guard 1 — check-px-text: design rule as executable check</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-2-guard-2-check-pubkey-truncation-a-security-rule-as-executable-check" class="toc-link">2.2 Guard 2 — check-pubkey-truncation: a security rule as executable check</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-3-why-this-pattern-is-the-batch-s-recommendation" class="toc-link">2.3 Why this pattern is the batch&#039;s recommendation</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-px-f-the-desktop-architecture" class="toc-link">3. PX-F — the desktop architecture</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-1-the-tauri-bridge-is-a-second-application" class="toc-link">3.1 The Tauri bridge is a second application</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-2-the-shared-layering-is-enforced-by-convention-plus-a-guard-triad" class="toc-link">3.2 The shared/ layering is enforced by *convention* plus a guard triad</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-3-agents-md-the-institutional-knowledge-layer" class="toc-link">3.3 AGENTS.md — the institutional knowledge layer</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-4-the-mobile-tree-an-independent-re-implementation" class="toc-link">3.4 The mobile tree — an independent re-implementation</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-5-the-event-kind-mirror-a-contract-with-no-lockstep-check" class="toc-link">3.5 The event-kind mirror — a contract with no lockstep check</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-px-f-the-feature-flag-system-and-the-internal-oss-split" class="toc-link">4. PX-F — the feature-flag system and the internal/OSS split</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-1-the-manifest-is-json-validated-by-zod-and-fail-open" class="toc-link">4.1 The manifest is JSON, validated by zod, and fail-open</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#4-2-protectedfeatures-an-internal-public-build-split-with-a-verified-contract" class="toc-link">4.2 protectedFeatures/ — an internal/public build split with a verified contract</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-findings-f5-n" class="toc-link">5. Findings (F5-n)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-divergences-d5-n-where-a-doc-and-the-code-disagree" class="toc-link">6. Divergences (D5-n) — where a doc and the code disagree</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-pole-verdict" class="toc-link">7. Pole verdict</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#8-ranked-actions" class="toc-link">8. Ranked actions</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('buzz_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('buzz_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('buzz_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('buzz_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.BuzzReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

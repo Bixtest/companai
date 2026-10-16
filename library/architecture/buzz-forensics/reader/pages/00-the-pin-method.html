@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batch 00 — The pin, the method, and what this study is — buzz Forensics</title>
+  <link rel="stylesheet" href="../assets/reader.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-font="sans">
+
+  <div id="readingProgressBar"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../index.html#batch-00" class="tool-btn" style="text-decoration:none;">← Master Index</a>
+      <span class="brand-badge">Batch 00</span>
+      <div class="header-title-wrap">
+        <div class="header-title">The Pin &amp; Method</div>
+        <div class="header-subtitle">buzz Platform Study (100% Unabridged)</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="font-slider-group">
+        <span class="font-slider-label">Font:</span>
+        <button class="font-btn" id="fontDecBtn">A-</button>
+        <input type="range" min="12" max="28" value="16" step="1" id="fontSizeSlider" class="font-slider">
+        <button class="font-btn" id="fontIncBtn">A+</button>
+        <button class="font-btn" id="fontResetBtn" style="font-size:0.7rem; color:var(--text-muted);">Reset</button>
+        <span class="font-size-val" id="fontSizeVal">100% (16px)</span>
+      </div>
+
+      <div class="theme-selector">
+        <button class="theme-pill active" data-theme="light">☀️ Light</button>
+        <button class="theme-pill" data-theme="dark">🌙 Dark</button>
+        <button class="theme-pill" data-theme="sepia">📜 Sepia</button>
+        <button class="theme-pill" data-theme="night">🌌 Night</button>
+      </div>
+
+      <a href="../index.html" class="tool-btn" style="text-decoration:none;">Master SPA</a>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <main class="reader-workspace">
+      <div class="reader-canvas" id="readerCanvas">
+        <div class="reader-article-container">
+          <div class="article-inner">
+            
+            <div class="doc-seal-card">
+              <div class="doc-seal-header">
+                <div class="seal-badge">
+                  <span class="seal-icon">🛡️</span>
+                  <span>TEXT INTEGRITY VERIFIED • 100% UNABRIDGED ORIGINAL</span>
+                </div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">00-PIN-AND-METHOD.md</span>
+              </div>
+              <div class="seal-stats-grid">
+                <div class="seal-stat-item">
+                  <span class="stat-label">Document Status</span>
+                  <span class="stat-value" style="color: #059669">DONE</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Word Count</span>
+                  <span class="stat-value">3,428</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Reading Time</span>
+                  <span class="stat-value">17 min</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Lines</span>
+                  <span class="stat-value">341</span>
+                </div>
+                <div class="seal-stat-item">
+                  <span class="stat-label">Verified Date</span>
+                  <span class="stat-value">2026-10-16</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="diagram-section" id="diagramSection">
+              <div class="diagram-switcher-bar">
+                <div class="diagram-switcher-left">
+                  <span class="diagram-switcher-label">🏛️ Visual Architecture:</span>
+                  <select class="diagram-select" id="diagramSelect">
+                    <option value="default" selected>★ Batch 00 Architecture Guide (Default)</option>
+            <optgroup label="Strategic Architecture">
+              <option value="master">Executive Topology: the workspace is the event log, and the isolation is proven</option>
+            </optgroup>
+            <optgroup label="Foundations">
+              <option value="00">Batch 00: The pin, the extraction, and the rename hazard</option>
+              <option value="01">Batch 01: The overview — the event is the whole API</option>
+            </optgroup>
+            <optgroup label="Pole 1 — The Aissistant">
+              <option value="02">Batch 02: The aissistant — an agent is a colleague</option>
+            </optgroup>
+            <optgroup label="Pole 2 — The Workspace">
+              <option value="03">Batch 03: The workspace — three fences over one store</option>
+            </optgroup>
+            <optgroup label="Pole 3 — Automations">
+              <option value="04">Batch 04: Automations — deterministic at-most-once</option>
+            </optgroup>
+            <optgroup label="Cross-Cutting">
+              <option value="05">Batch 05: Widgets &amp; frontend — a proven negative</option>
+            </optgroup>
+            <optgroup label="Escape Hatch">
+              <option value="06">Batch 06: Out-of-pole — five artefacts, three languages</option>
+            </optgroup>
+            <optgroup label="Strategic Decision">
+              <option value="07">Batch 07: The synthesis — where buzz sits, what we take</option>
+            </optgroup>
+                  </select>
+                </div>
+                <div class="diagram-switcher-right">
+                  <a href="../index.html" class="tool-btn" style="text-decoration:none;" title="Open Master Gallery">
+                    <span>🏛️ All Guides</span>
+                  </a>
+                  <button type="button" class="tool-btn" id="diagramToggleBtn" title="Collapse or expand guide">
+                    <span id="diagramToggleIcon">▼ Collapse</span>
+                  </button>
+                </div>
+              </div>
+              <div class="diagram-content" id="diagramContainer">
+                
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">EXECUTIVE ARCHITECTURE MAP</div>
+    <h4>buzz Platform Study Topology: the workspace is the event log, and the isolation is proven</h4>
+    <p>Where each studied mechanism lands, and the one absence that defines the platform</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 960 520" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-m" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-m" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+        <marker id="arrr-m" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#ef4444"/>
+        </marker>
+      </defs>
+
+      <!-- Outer boundary -->
+      <rect x="20" y="20" width="920" height="480" rx="16" fill="var(--surface-card, #ffffff)" fill-opacity="0.4" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" stroke-dasharray="6,4"/>
+      <text x="45" y="52" font-family="system-ui, sans-serif" font-size="16" font-weight="700" fill="var(--diagram-accent, #7c3aed)">buzz 0.5.28 — A SELF-HOSTED TEAM WORKSPACE ON NOSTR (NIP-01)</text>
+      <text x="45" y="72" font-family="system-ui, sans-serif" font-size="12" fill="var(--text-muted, #64748b)">34 Rust crates · 62 migrations · 136 registered event kinds · every action is a signed event in one log</text>
+
+      <!-- POLE 1 -->
+      <g transform="translate(45, 100)">
+        <rect width="270" height="250" rx="12" fill="var(--surface-card, #ffffff)" stroke="#7c3aed" stroke-width="1.8"/>
+        <rect x="14" y="14" width="118" height="22" rx="4" fill="#7c3aed" fill-opacity="0.15"/>
+        <text x="20" y="30" font-family="system-ui, sans-serif" font-size="10.5" font-weight="700" fill="#6d28d9">POLE 1 — AISASSISTANT</text>
+        <text x="14" y="60" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="var(--text-primary, #0f172a)">An agent is a keypair</text>
+        <text x="14" y="82" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">A colleague, not a bot account</text>
+        <text x="14" y="106" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• agent = key + membership (b02)</text>
+        <text x="14" y="124" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• memory = NIP-AE engrams (b02)</text>
+        <text x="14" y="142" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• six tools, descriptions coach (b02)</text>
+        <text x="14" y="160" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• NIP-OA: owner attests, not acts (b02)</text>
+        <rect x="14" y="176" width="242" height="20" rx="4" fill="#ef4444" fill-opacity="0.13"/>
+        <text x="22" y="190" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#b91c1c">Default mode: bypass-permissions</text>
+        <text x="14" y="216" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-muted, #64748b)">The safety posture starts here —</text>
+        <text x="14" y="232" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-muted, #64748b)">the opposite of our default-deny</text>
+      </g>
+
+      <!-- POLE 2 -->
+      <g transform="translate(345, 100)">
+        <rect width="270" height="250" rx="12" fill="var(--surface-card, #ffffff)" stroke="#2563eb" stroke-width="1.8"/>
+        <rect x="14" y="14" width="108" height="22" rx="4" fill="#2563eb" fill-opacity="0.15"/>
+        <text x="20" y="30" font-family="system-ui, sans-serif" font-size="10.5" font-weight="700" fill="#1d4ed8">POLE 2 — WORKSPACE</text>
+        <text x="14" y="60" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="var(--text-primary, #0f172a)">Strong — the event log IS it</text>
+        <text x="14" y="82" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">One table, three lenses</text>
+        <text x="14" y="106" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• 57 tables, 41 fenced by community (b03)</text>
+        <text x="14" y="124" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• Stream/Forum/Workflow = kind (b03)</text>
+        <text x="14" y="142" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• membership is the access gate (b03)</text>
+        <text x="14" y="160" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• the fence is LINTABLE (b03)</text>
+        <rect x="14" y="176" width="242" height="20" rx="4" fill="#10b981" fill-opacity="0.14"/>
+        <text x="22" y="190" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#047857">Isolation = non-interference</text>
+        <text x="14" y="216" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-muted, #64748b)">Proven in TLA+, then checked</text>
+        <text x="14" y="232" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-muted, #64748b)">against the running code (b03/b06)</text>
+      </g>
+
+      <!-- POLE 3 -->
+      <g transform="translate(645, 100)">
+        <rect width="270" height="250" rx="12" fill="var(--surface-card, #ffffff)" stroke="#059669" stroke-width="1.8"/>
+        <rect x="14" y="14" width="118" height="22" rx="4" fill="#059669" fill-opacity="0.15"/>
+        <text x="20" y="30" font-family="system-ui, sans-serif" font-size="10.5" font-weight="700" fill="#047857">POLE 3 — AUTOMATIONS</text>
+        <text x="14" y="60" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="var(--text-primary, #0f172a)">Event-native, security first</text>
+        <text x="14" y="82" font-family="system-ui, sans-serif" font-size="11" fill="var(--text-secondary, #475569)">Ahead of its feature completeness</text>
+        <text x="14" y="106" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• YAML in, canonical JSON stored (b04)</text>
+        <text x="14" y="124" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• 5 triggers, 7 actions (2 stubs) (b04)</text>
+        <text x="14" y="142" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• cron = deterministic, not locked (b04)</text>
+        <text x="14" y="160" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">• authority gate at all 4 doors (b04)</text>
+        <rect x="14" y="176" width="242" height="20" rx="4" fill="#ef4444" fill-opacity="0.13"/>
+        <text x="22" y="190" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="#b91c1c">The approval gate is dead code</text>
+        <text x="14" y="216" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-muted, #64748b)">~330 lines unreachable; the</text>
+        <text x="14" y="232" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-muted, #64748b)">mint is missing (b04, F4-5)</text>
+      </g>
+
+      <!-- Bottom band: the verdict -->
+      <g transform="translate(45, 370)">
+        <rect width="880" height="52" rx="10" fill="#7c3aed" fill-opacity="0.08" stroke="#7c3aed" stroke-width="1.6"/>
+        <text x="18" y="24" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#6d28d9">buzz — A COMMUNICATION SUBSTRATE WITH A PROOF SURFACE</text>
+        <text x="18" y="43" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Take the guard-as-document pattern, LIMITS.md, the mutation test, the projection rules, and the prose contract beside the formalism.</text>
+      </g>
+
+      <g transform="translate(45, 432)">
+        <rect width="430" height="52" rx="10" fill="#ef4444" fill-opacity="0.08" stroke="#ef4444" stroke-width="1.6"/>
+        <text x="16" y="22" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#b91c1c">THE PROVEN NEGATIVE — NO WIDGET MODEL</text>
+        <text x="16" y="42" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">The FIFTH platform with no composer. An event log extends data and behaviour — never layout (b05).</text>
+      </g>
+
+      <g transform="translate(495, 432)">
+        <rect width="430" height="52" rx="10" fill="#10b981" fill-opacity="0.08" stroke="#10b981" stroke-width="1.6"/>
+        <text x="16" y="22" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#047857">THE PROOF SURFACE — FIVE ARTEFACTS</text>
+        <text x="16" y="42" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">A prose contract + TLA+ + Tamarin + a runtime conformance harness whose LIMITS.md names its own blind spots (b06).</text>
+      </g>
+    </svg>
+  </div>
+</div><br/>
+<div class="diagram-wrapper">
+  <div class="diagram-header">
+    <div class="diagram-badge">BATCH 00 VISUAL GUIDE</div>
+    <h4>The pin, the extraction, and the name that confuses every reader</h4>
+    <p>How the extract was pinned, where it lived, and the three names for one product</p>
+  </div>
+  <div class="diagram-svg-container">
+    <svg viewBox="0 0 920 320" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+
+      <defs>
+        <marker id="arr-00" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--diagram-accent, #7c3aed)"/>
+        </marker>
+        <marker id="arrg-00" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+        </marker>
+        <marker id="arrr-00" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#ef4444"/>
+        </marker>
+      </defs>
+      <g transform="translate(20, 20)">
+        <rect width="200" height="120" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">STEP 1: THE EXTRACT</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">An extract, not a clone</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">No .git — identity is the ZIP</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">6,492 entries / 5,807 files</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">md5 1219b15b… pinned</text>
+      </g>
+      <path d="M 220 80 L 258 80" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-00)"/>
+      <g transform="translate(262, 20)">
+        <rect width="200" height="120" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">STEP 2: EXTRACTION</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">MAX_PATH: max 118 chars</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">no limit hit</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">5,807 of 5,807 files</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">0 missing, 0 extra</text>
+      </g>
+      <path d="M 462 80 L 500 80" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-00)"/>
+      <g transform="translate(504, 20)">
+        <rect width="200" height="120" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">STEP 3: THE SHAPE</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">34 Rust crates</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">Tauri desktop + Flutter mobile</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">the CLIENT > the server</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">polyglot monorepo</text>
+      </g>
+      <path d="M 704 80 L 742 80" stroke="var(--diagram-accent, #7c3aed)" stroke-width="2" marker-end="url(#arr-00)"/>
+      <g transform="translate(746, 20)">
+        <rect width="154" height="120" rx="8" fill="var(--surface-card, #ffffff)" stroke="var(--border-color, #e2e8f0)" stroke-width="1.2"/>
+        <text x="12" y="26" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="var(--text-primary, #0f172a)">STEP 4: THE FRAME</text>
+        <text x="12" y="44" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">P1 aissistant</text>
+        <text x="12" y="61" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">P2 workspace</text>
+        <text x="12" y="78" font-family="system-ui, sans-serif" font-size="10.5" fill="var(--text-secondary, #475569)">P3 automations</text>
+        <text x="12" y="95" font-family="system-ui, sans-serif" font-size="10.5" fill="#059669">+ PX / PZ</text>
+      </g>
+      <rect x="20" y="170" width="880" height="130" rx="10" fill="#ef4444" fill-opacity="0.08" stroke="#ef4444" stroke-width="1.6"/>
+      <text x="40" y="198" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#b91c1c">THE RENAME HAZARD — THREE NAMES, ONE PRODUCT</text>
+      <text x="40" y="224" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">The product is buzz, and its own tree still says sprout and sprig. Cargo.toml's repository points at</text>
+      <text x="40" y="244" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">github.com/block/sprout; AGENTS.md still names squareup/sprout-oss; and a whole crate is named sprig.</text>
+      <text x="40" y="264" font-family="system-ui, sans-serif" font-size="11.5" fill="var(--text-secondary, #475569)">The rename was executed as scoped PRs (#958, #1012, #1043, #1333) — complete in code, incomplete in metadata.</text>
+      <text x="40" y="288" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#b91c1c">A rename is not finished until the METADATA has been grepped too.</text>
+    </svg>
+  </div>
+</div>
+              </div>
+            </section>
+
+            <article class="markdown-body">
+              <h1 id="buzz-study-batch-00-the-pin-the-method-and-what-this-study-is">buzz Study — Batch 00: the pin, the method, and what this study is<a href="#batch-00/buzz-study-batch-00-the-pin-the-method-and-what-this-study-is" class="heading-anchor" title="Direct link to this section">#</a></h1>
+<p><strong>Folder:</strong> <code>library/architecture/buzz-forensics/</code> · <strong>Status:</strong> OPEN — begun 2026-10-16
+<strong>This is a clean forensic study</strong>, run the same way as <code>hermes-forensics/</code>,
+<code>paperclip-forensics/</code>, <code>crewai-forensics/</code>, <code>multica-forensics/</code>, <code>gastown-forensics/</code> and
+<code>n8n-forensics/</code>. It reads ONE source tree, measures it, and verifies every load-bearing claim
+against the source code. <strong>Nothing from any earlier study is reused, referenced, or assumed</strong> — buzz is
+read on its own terms.</p>
+<p><strong>Why this platform is seventh.</strong> The owner&#39;s ruling was <em>&quot;one platform at a time&quot;</em>: Hermes, Paperclip,
+CrewAI, Multica, Gas Town and n8n are closed. <strong>buzz is seventh</strong> — the owner named it with one word,
+<em>&quot;buzz&quot;</em>, following the workshop&#39;s own order. It is the first platform in this study that is <strong>not
+primarily a workflow tool or an agent orchestrator, but a communication substrate</strong>: a team workspace
+built on a public protocol (Nostr), where a message, a reaction, a workflow step, a canvas edit, a code
+review approval and a git event are <strong>all the same kind of object</strong> — a signed event in one log. Six
+platforms have now been measured against the three poles; <strong>buzz is the first whose stated premise is
+that the workspace <em>is</em> the event log</strong>, and the first whose tenant boundary is <strong>proven with formal
+methods</strong> rather than asserted in prose.</p>
+<p><strong>The owner&#39;s directive carried into this study</strong> (from the n8n brief, still in force): identify what
+fits the vision <strong>and</strong> what could be <em>taken further</em>. Per the method, the batches stay
+comparison-free — the &quot;take it further&quot; notes are <strong>observations</strong> in the synthesis, and the decisions
+stay the owner&#39;s at the mapping pass.</p>
+<hr>
+<h2 id="1-the-pin-task-zero-answered-by-measurement">1. THE PIN — task zero, answered by measurement<a href="#batch-00/1-the-pin-task-zero-answered-by-measurement" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p><strong>The source of this study is: <code>library/architecture/platforms/_extracted/buzz-main/</code></strong> — extracted from
+<code>library/architecture/platforms/buzz-main.zip</code>, which came from <code>https://github.com/block/buzz</code>.</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Fact</th>
+<th>Value</th>
+<th>How measured</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Origin</td>
+<td><code>https://github.com/block/buzz</code> (<code>main</code>)</td>
+<td>the owner&#39;s <code>platforms/references.md</code></td>
+</tr>
+<tr>
+<td><strong>Zip md5</strong></td>
+<td><strong><code>1219b15bef421e560e818fc000e7d72e</code></strong></td>
+<td><code>md5sum</code></td>
+</tr>
+<tr>
+<td>Zip</td>
+<td><code>platforms/buzz-main.zip</code> — <strong>48,764,159 B</strong> (46.5 MB)</td>
+<td><code>ls -la</code></td>
+</tr>
+<tr>
+<td>Zip entries</td>
+<td><strong>6,492 = 685 directories + 5,807 files</strong></td>
+<td><code>zipfile.namelist()</code></td>
+</tr>
+<tr>
+<td>Uncompressed (on disk)</td>
+<td><strong>100,444,402 B</strong> (95.8 MB)</td>
+<td><code>du -sb</code> over the extract</td>
+</tr>
+<tr>
+<td><strong>Extraction</strong></td>
+<td><code>platforms/_extracted/buzz-main/</code> — <strong>verified exact: 5,807 of 5,807 files, 0 missing, 0 extra</strong></td>
+<td>a Python set-diff of the zip&#39;s namelist against the disk</td>
+</tr>
+<tr>
+<td><strong>MAX_PATH check</strong></td>
+<td><strong>max path = 118 characters</strong> — no limit hit</td>
+<td><code>find | awk &#39;{print length($0)}&#39; | sort | tail -1</code></td>
+</tr>
+<tr>
+<td><strong><code>.git</code> present?</strong></td>
+<td><strong>NO</strong> — this is an extract, not a clone</td>
+<td><code>ls -d .git</code> → absent</td>
+</tr>
+<tr>
+<td><strong>Declared version</strong></td>
+<td><strong><code>v0.5.28</code></strong> (the top <code>##</code> heading of <code>CHANGELOG.md</code>)</td>
+<td>root <code>CHANGELOG.md:3</code></td>
+</tr>
+<tr>
+<td>Product one-liner</td>
+<td><em>&quot;A workspace where humans and agents build together, on a relay you own.&quot;</em></td>
+<td><code>README.md:5</code></td>
+</tr>
+<tr>
+<td>Vision one-liner</td>
+<td><em>&quot;The relay is the workspace&quot;</em></td>
+<td><code>VISION.md:1</code></td>
+</tr>
+<tr>
+<td>Toolchain</td>
+<td><strong>Rust <code>1.95.0</code></strong> (<code>rust-toolchain.toml</code>) · crate edition 2021, <code>rust-version = 1.88.0</code> · <strong>pnpm <code>11.4.0</code></strong> · Tauri 2 + React 19 (desktop) · Flutter (mobile)</td>
+<td><code>rust-toolchain.toml</code>, <code>Cargo.toml</code>, <code>package.json</code></td>
+</tr>
+<tr>
+<td>Key md5s</td>
+<td><code>README.md</code> <code>882234719c51f81fa3cc4ba317319e74</code> · <code>ARCHITECTURE.md</code> <code>fc969585e197f6fdafefd4e57de346a3</code> · <code>VISION.md</code> <code>73784cb454cd21ed5841adac193260ef</code> · <code>CHANGELOG.md</code> <code>24a7ee80382670303fc4fbe9c975130d</code></td>
+<td><code>md5sum</code></td>
+</tr>
+</tbody></table></div>
+<h3 id="1-1-the-identity-limit-stated-not-glossed">1.1 The identity limit (stated, not glossed)<a href="#batch-00/1-1-the-identity-limit-stated-not-glossed" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>There is <strong>no <code>.git</code></strong>, so the exact upstream commit cannot be read from the tree. What <em>is</em> readable is
+the <strong>latest changelog release heading — <code>v0.5.28</code></strong> — and, unusually, the changelog entries carry
+<strong>the upstream commit SHAs and PR numbers inline</strong> (<code>… ([#8186](https://github.com/block/buzz/pull/8186)) ([</code>8f66f705…<code>](https://github.com/block/buzz/commit/8f66f705…))</code>). <strong>The tree is richer in provenance than
+n8n&#39;s was</strong>: 445,253 bytes of changelog with real commit hashes. <strong>Any claim here about &quot;the latest
+buzz&quot; is a claim about this extract, at <code>v0.5.28</code>.</strong></p>
+<p><strong>⚠️ A naming hazard a later reader must be told, because it will confuse them.</strong> The product is called
+<strong>buzz</strong>, but the code speaks three other names:</p>
+<ul>
+<li>the Cargo workspace <code>repository</code> field points at <strong><code>https://github.com/block/sprout</code></strong> (a former name);</li>
+<li>the root <code>package.json</code> names the JS workspace <strong><code>buzz-workspace</code></strong>, and one crate is <strong><code>sprig</code></strong>
+(there is a whole <code>Dockerfile.sprig</code> and a <code>[profile.sprig]</code> release profile);</li>
+<li>the zip is <strong><code>buzz-main.zip</code></strong> and every crate is prefixed <strong><code>buzz-</code></strong>.</li>
+</ul>
+<p>So <strong>buzz · sprout · sprig all appear in the same tree and mean the same product at different times.</strong>
+This is the study&#39;s first measured rename; it is recorded here so no batch mistakes &quot;sprout&quot; or &quot;sprig&quot;
+for a second product or a dependency.</p>
+<h3 id="1-2-where-the-extract-lives-and-why-it-is-where-n8n-is-not">1.2 Where the extract lives, and why it is where n8n is not<a href="#batch-00/1-2-where-the-extract-lives-and-why-it-is-where-n8n-is-not" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>Unlike n8n (which had to be extracted to <code>C:\n8n</code> because its longest paths exceeded Windows&#39; 260-char
+<code>MAX_PATH</code>), <strong>buzz extracted cleanly into the conventional location</strong> <code>platforms/_extracted/buzz-main</code>.
+The measured reason: <strong>buzz&#39;s longest path is 118 characters</strong> — far under the limit. <strong>The
+conventional location is correct for this study; nothing special is required to reproduce it.</strong></p>
+<hr>
+<h2 id="2-what-the-tree-contains-measured">2. What the tree contains (measured)<a href="#batch-00/2-what-the-tree-contains-measured" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<h3 id="2-1-this-tree-is-code-a-polyglot-monorepo">2.1 This tree is CODE — a polyglot monorepo<a href="#batch-00/2-1-this-tree-is-code-a-polyglot-monorepo" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>Measured by extension over the whole tree (files / bytes):</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Extension</th>
+<th align="right">Files</th>
+<th align="right">Bytes</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><code>.rs</code></strong></td>
+<td align="right"><strong>1,043</strong></td>
+<td align="right"><strong>27,620,949</strong></td>
+<td><strong>the server — the product&#39;s centre of gravity</strong></td>
+</tr>
+<tr>
+<td><code>.ts</code></td>
+<td align="right"><strong>1,251</strong></td>
+<td align="right">9,345,266</td>
+<td>TS clients + tooling; <strong>the most files</strong></td>
+</tr>
+<tr>
+<td><code>.tsx</code></td>
+<td align="right">756</td>
+<td align="right">6,241,124</td>
+<td>the <strong>React</strong> desktop/web surface</td>
+</tr>
+<tr>
+<td><code>.dart</code></td>
+<td align="right"><strong>695</strong></td>
+<td align="right">7,265,890</td>
+<td>the <strong>Flutter</strong> mobile app</td>
+</tr>
+<tr>
+<td><code>.mjs</code></td>
+<td align="right">773</td>
+<td align="right">5,454,301</td>
+<td>scripts</td>
+</tr>
+<tr>
+<td><code>.sql</code></td>
+<td align="right"><strong>221</strong></td>
+<td align="right">413,869</td>
+<td>migrations + schema</td>
+</tr>
+<tr>
+<td><code>.md</code></td>
+<td align="right">175</td>
+<td align="right">2,363,321</td>
+<td>docs (see §2.4)</td>
+</tr>
+<tr>
+<td><code>.png</code></td>
+<td align="right">137</td>
+<td align="right"><strong>22,227,625</strong></td>
+<td><strong>screenshots and assets — the single largest byte block after <code>.rs</code></strong></td>
+</tr>
+<tr>
+<td><code>.swift</code></td>
+<td align="right">73</td>
+<td align="right">848,801</td>
+<td>iOS glue</td>
+</tr>
+</tbody></table></div>
+<p><strong>Two facts stand out immediately, and both are hazards of the same kind as earlier studies:</strong></p>
+<ul>
+<li><strong>Rust is the product.</strong> <code>.rs</code> is 27.6 MB against <code>.ts</code>+<code>.tsx</code> at 15.6 MB — <strong>the server was chosen
+deliberately and is the majority language by bytes.</strong> A reader who assumes &quot;another TS monorepo&quot;
+(as n8n was) will misread this study.</li>
+<li><strong><code>.png</code> is 22.2 MB — nearly as much as all the Rust.</strong> The screenshots in <code>docs/assets/screenshots/</code>
+are a large fraction of the repo by bytes. <strong>A &quot;repo size&quot; reading here is ~22 % pictures</strong>, and a
+byte-share table that ignores this will overstate the code&#39;s share of the download.</li>
+</ul>
+<h3 id="2-2-the-measured-shape-per-area">2.2 The measured shape (per area)<a href="#batch-00/2-2-the-measured-shape-per-area" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Area</th>
+<th align="right">Files</th>
+<th align="right">Bytes</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><code>desktop/</code></strong></td>
+<td align="right"><strong>3,424</strong></td>
+<td align="right"><strong>47,007,177</strong></td>
+<td><strong>the Tauri + React desktop app — the largest area by both counts</strong></td>
+</tr>
+<tr>
+<td><strong><code>crates/</code></strong></td>
+<td align="right">645</td>
+<td align="right"><strong>21,720,897</strong></td>
+<td><strong>the Rust server — 34 crates</strong></td>
+</tr>
+<tr>
+<td><code>mobile/</code></td>
+<td align="right">904</td>
+<td align="right">15,272,755</td>
+<td>the Flutter app</td>
+</tr>
+<tr>
+<td><code>docs/</code></td>
+<td align="right">82</td>
+<td align="right"><strong>11,596,274</strong></td>
+<td>docs <strong>including the screenshots</strong> (the <code>.png</code> weight above)</td>
+</tr>
+<tr>
+<td><code>benchmarks/</code></td>
+<td align="right">116</td>
+<td align="right">1,344,876</td>
+<td>benchmarks</td>
+</tr>
+<tr>
+<td><code>migrations/</code></td>
+<td align="right">62</td>
+<td align="right">263,055</td>
+<td><strong>62 migrations</strong></td>
+</tr>
+<tr>
+<td><code>schema/</code></td>
+<td align="right">147</td>
+<td align="right">112,370</td>
+<td>the desired-state schema, <strong>one file per table</strong></td>
+</tr>
+<tr>
+<td><code>web/</code>, <code>admin-web/</code>, <code>deploy/</code>, <code>scripts/</code></td>
+<td align="right">…</td>
+<td align="right">…</td>
+<td>the web client, the admin console, deployment, tooling</td>
+</tr>
+</tbody></table></div>
+<p><strong>The shape is the opposite of what &quot;a Nostr relay&quot; suggests.</strong> The Rust server is <strong>34 crates /
+645 files</strong>, but the <strong>desktop app is 5× its file count and 2× its bytes</strong>. <strong>The client is bigger than
+the server here</strong> — the first platform in this study where that is true by a wide margin.</p>
+<h3 id="2-3-the-test-ratio-measured-before-any-finding-was-written-and-corrected">2.3 The test ratio — measured before any finding was written, and corrected<a href="#batch-00/2-3-the-test-ratio-measured-before-any-finding-was-written-and-corrected" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><strong>This is the study&#39;s most important measurement, because the first reading of it was wrong.</strong></p>
+<ul>
+<li><p><strong>By filename</strong> the count says <strong>45 of 537 <code>.rs</code> files in <code>crates/</code> are tests — an 8.4 % share by
+file, or 0.3 % if you only count files literally named <code>*_test.rs</code>.</strong> That is what a naive pass finds.</p>
+</li>
+<li><p><strong>By lines</strong> — counting <code>tests/</code>, <code>benches/</code> and <code>examples/</code> directories as test, and splitting each
+inline <code>#[cfg(test)]</code> module out of its file — the truth is:</p>
+<p><strong><code>crates/</code> = 502,880 Rust lines = 194,631 product + 308,249 test → a 61.3 % test share.</strong></p>
+</li>
+</ul>
+<p><strong>The filename count and the line count differ by a factor of ~7 by file and ~200× on the &quot;0.3 %&quot;
+reading — and the real answer is the HIGHEST test share in the entire study</strong> (Gas Town 46 %, Multica
+48 %, n8n 32.8 %). <strong>The reason is structural:</strong> buzz writes its tests <strong>inline in the same file</strong>, after
+a <code>#[cfg(test)]</code> marker, so the <em>file</em> is a product file and the <em>majority of its lines</em> are test. <strong>Any
+&quot;lines of Rust&quot; figure in this study is 61.3 % test code unless it says otherwise — and this pin says so
+once, here, so every later batch can cite it.</strong></p>
+<p><em>(The correction is recorded rather than quietly fixed, because it is rule 1 in action: the first number
+was a filename artifact, the code was the authority, and the disagreement is now on the record.)</em></p>
+<h3 id="2-4-the-module-map-measured-the-object-of-batches-0106">2.4 The module map (measured — the object of batches 01–06)<a href="#batch-00/2-4-the-module-map-measured-the-object-of-batches-0106" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><strong>34 Rust crates</strong> (<code>crates/</code>, the YAML workspace member list names 34 + <code>examples/countdown-bot</code>):</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Group</th>
+<th>Crates</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Protocol / core</strong></td>
+<td><code>buzz-core</code> (event, kind, filter, tenant, channel, thread_window, pairing) · <code>ifc-core</code></td>
+</tr>
+<tr>
+<td><strong>Server</strong></td>
+<td><strong><code>buzz-relay</code></strong> · <code>buzz-pubsub</code> · <code>buzz-db</code> · <code>buzz-auth</code> · <code>buzz-search</code> · <code>buzz-audit</code> · <code>buzz-deletion</code> · <code>buzz-media</code> · <code>buzz-workflow</code> · <code>buzz-push-gateway</code> · <code>buzz-backend-kubernetes</code> · <code>buzz-datastore-tracing</code></td>
+</tr>
+<tr>
+<td><strong>Agents</strong></td>
+<td><strong><code>buzz-acp</code></strong> · <strong><code>buzz-agent</code></strong> · <strong><code>buzz-dev-mcp</code></strong> · <code>buzz-persona</code> · <code>buzz-voice</code> · <code>buzz-audio-client</code></td>
+</tr>
+<tr>
+<td><strong>Clients / SDK</strong></td>
+<td><code>buzz-sdk</code> · <code>buzz-cli</code> · <code>buzz-ws-client</code> · <code>buzz-test-client</code> · <code>buzz-admin</code> · <code>buzz-pairing-cli</code></td>
+</tr>
+<tr>
+<td><strong>Mesh / federation</strong></td>
+<td><code>buzz-relay-mesh</code> (uses <strong>iroh</strong>) · <code>buzz-pair-relay</code> · <code>buzz-mesh-smoke</code></td>
+</tr>
+<tr>
+<td><strong>Git</strong></td>
+<td><code>git-credential-nostr</code> · <code>git-sign-nostr</code></td>
+</tr>
+<tr>
+<td><strong>Platform</strong></td>
+<td><code>buzz-feature-flags</code> · <code>buzz-conformance</code> · <strong><code>sprig</code></strong> (the deploy-anywhere installer)</td>
+</tr>
+</tbody></table></div>
+<p><strong>The names are the domain, and they already answer the three poles</strong> (verify each; do not assume):
+<strong>P1</strong> = <code>buzz-agent</code> + <code>buzz-acp</code> + <code>buzz-dev-mcp</code>; <strong>P2</strong> = <code>buzz-relay</code> + <code>buzz-auth</code> + <code>buzz-db</code> +
+<code>buzz-core::tenant</code>; <strong>P3</strong> = <code>buzz-workflow</code>.</p>
+<h3 id="2-5-the-doc-set-22-root-markdown-files-11-of-them-vision">2.5 The doc set — 22 root markdown files, 11 of them VISION<a href="#batch-00/2-5-the-doc-set-22-root-markdown-files-11-of-them-vision" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<ul>
+<li><strong>11 <code>VISION_*.md</code> docs</strong> — <code>VISION.md</code> plus <code>_SOVEREIGN</code>, <code>_PROJECTS</code>, <code>_AGENT</code>, <code>_MESH</code>,
+<code>_MOBILE</code>, <code>_MODERATION</code>, <code>_REMOTE_AGENTS</code>, <code>_ACTIVITY</code>, and one <code>CONTEXT.md</code>.</li>
+<li><strong><code>ARCHITECTURE.md</code> 956 lines / 57,799 B</strong> — the relay model and the community/host authority rule.</li>
+<li><strong><code>NOSTR.md</code> 398 lines</strong> — the protocol primer.</li>
+<li><strong><code>AGENTS.md</code> 794 lines / 41,038 B</strong> — the repo&#39;s own agent-instruction file (as n8n had).</li>
+<li><strong><code>docs/multi-tenant-relay.md</code> 1,110 lines</strong> — the tenant-boundary spec.</li>
+<li><strong><code>docs/formal/</code> + <code>docs/spec/</code></strong> — see §2.6.</li>
+<li><strong>20 custom NIPs</strong> (<code>docs/nips/NIP-*.md</code>, 22 files counting the two <code>NIP-MP</code> fixture JSONs):
+<code>AA AE AM AO AP AR CL CW DV ER FA FI GS IA MP OA PL PMA RS WP</code> — i.e. buzz defines its own
+protocol extension set beyond standard Nostr.</li>
+<li><strong><code>Justfile</code> 1,354 lines</strong> — the task runner (the repo&#39;s real command surface).</li>
+</ul>
+<h3 id="2-6-the-measured-oddity-formal-method-proofs-live-in-the-tree">2.6 The measured oddity: formal-method proofs live IN the tree<a href="#batch-00/2-6-the-measured-oddity-formal-method-proofs-live-in-the-tree" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>This is the first platform studied to ship <strong>machine-checkable models of its own guarantees</strong>:</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>File</th>
+<th>Size</th>
+<th>What it models</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><code>docs/spec/MultiTenantRelay.tla</code></strong></td>
+<td><strong>61,202 B</strong></td>
+<td><strong>the multi-tenant relay — isolation</strong> (TLA+)</td>
+</tr>
+<tr>
+<td><strong><code>docs/spec/MultiTenantAuth.spthy</code></strong></td>
+<td><strong>31,956 B</strong></td>
+<td><strong>authorization</strong> (Tamarin prover)</td>
+</tr>
+<tr>
+<td><code>docs/spec/GitOnObjectStore.tla</code></td>
+<td>13,872 B</td>
+<td>git-on-object-storage correctness</td>
+</tr>
+<tr>
+<td><code>crates/buzz-core/src/pairing/NIP-AB.spthy</code></td>
+<td>—</td>
+<td>the pairing protocol</td>
+</tr>
+</tbody></table></div>
+<p><strong>The vision doc claims <em>&quot;Isolation is the boundary, not a filter… proven, not asserted&quot;</em> — and the
+prover inputs are present to be checked.</strong> Under rule 1 this is not a claim to accept on the doc&#39;s word;
+it is a <strong>model to be read in batch 02/03</strong>, but its <em>existence</em> is a measured fact about the tree.</p>
+<h3 id="2-7-the-licence-apache-2-0-and-it-is-not-a-gate">2.7 The licence — Apache-2.0, and it is NOT a gate<a href="#batch-00/2-7-the-licence-apache-2-0-and-it-is-not-a-gate" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p><code>LICENSE</code> is the <strong>Apache License, Version 2.0</strong> in full; <code>Cargo.toml</code> declares
+<code>license = &quot;Apache-2.0&quot;</code>. <strong>There is no <code>.ee</code>-style carve-out, no &quot;Sustainable Use&quot; clause, no
+enterprise directory.</strong> This is the study&#39;s <strong>first genuinely open-source platform</strong> — and it is a sharp
+contrast with n8n (§2.5 of that pin: fair-code, <code>.ee</code> unlicensed, <code>ai-workflow-builder.ee</code> gated).
+<strong>Recorded because it changes one thing materially:</strong> unlike n8n, where the licence constrains every
+&quot;can we take this?&quot; question, here the licence does not. <strong>The constraint is architectural, not legal</strong> —
+which is exactly why the study still reads the code rather than assuming &quot;open source means usable&quot;.</p>
+<hr>
+<h2 id="3-the-method-how-every-batch-is-produced">3. The method (how every batch is produced)<a href="#batch-00/3-the-method-how-every-batch-is-produced" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>The method is <strong>inherited verbatim</strong> from the six closed studies (rules 1–10), with the pole frame
+(§3.1) and the additive-across-studies rule (§3.2) as before.</p>
+<ol>
+<li><strong>Docs are claims; code is the authority.</strong> Every load-bearing statement is checked against the
+source. Where they disagree, <strong>the code wins and the disagreement is recorded.</strong></li>
+<li><strong>Every number is measured at the time of writing</strong>, never carried from memory or an older document.</li>
+<li><strong>Claims carry their evidence</strong>: a line resting on code cites the file and line it was read at.</li>
+<li><strong>Two value questions per capability</strong>: <strong>Q1 · USER VALUE</strong> (how it serves a person using the platform)
+and <strong>Q2 · VISION VALUE</strong> (how it serves the AI-first business &amp; resources planner vision, incl.
+versatility and integratability).</li>
+<li><strong>No comparison to our own platform inside the batches.</strong> The cross-platform mapping is a separate
+later pass.</li>
+<li><strong>Every capability is named, including ones we will not use.</strong> Nothing is silently dropped.</li>
+<li><strong>Findings are additive and never overwrite history.</strong></li>
+<li><strong>Plain words</strong> — every capability gets a one-sentence plain gloss before any detail.</li>
+<li><strong>THE POLE FRAME.</strong> Every finding is tagged <strong>P1 / P2 / P3 / PX-W / PX-F / PZ</strong>.</li>
+<li><strong>The retirement rule.</strong> Before reusing any setting/key/module named in an older document or another
+platform&#39;s doc, <strong>search this platform&#39;s config/CHANGELOG for a retirement entry.</strong> buzz has a
+<strong>445 KB changelog with inline commit hashes</strong>, and it <strong>renames its own product</strong> (§1.1) — so the
+retirement surface here is unusually active.</li>
+</ol>
+<h3 id="3-1-the-pole-frame-the-three-poles-defined-once">3.1 The pole frame — the three poles, defined once<a href="#batch-00/3-1-the-pole-frame-the-three-poles-defined-once" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>Tag</th>
+<th>Pole</th>
+<th>The owner&#39;s words (abridged)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>P1</strong></td>
+<td><strong>The aissistant</strong> (the AI user / agent)</td>
+<td><em>versatile, integratable, rich featured architecture in itself, deployable in different contexts (workspaces, automations, later the studio)</em></td>
+</tr>
+<tr>
+<td><strong>P2</strong></td>
+<td><strong>The workspace</strong></td>
+<td><em>highly functional, versatile, integratable, rich featured, adaptable to the mix of current and future features, use-cases and needs</em></td>
+</tr>
+<tr>
+<td><strong>P3</strong></td>
+<td><strong>Automations</strong></td>
+<td><em>where agents work on assigned tasks, assign tasks, etc. Paperclip is a blueprint</em></td>
+</tr>
+<tr>
+<td><strong>PX-W</strong></td>
+<td><strong>Widgets architecture</strong></td>
+<td>cross-cutting: the composable UI surface</td>
+</tr>
+<tr>
+<td><strong>PX-F</strong></td>
+<td><strong>Frontend wiring &amp; construction</strong></td>
+<td>cross-cutting: how the surface is built and wired</td>
+</tr>
+</tbody></table></div>
+<p><strong>Plus one escape hatch (PZ):</strong> <em>&quot;any other findings you identify there that can fit our vision, project,
+architecture, or a potential use case or added value for the end user.&quot;</em> Tagged <strong>PZ</strong> with a one-line
+reason for keeping them.</p>
+<h3 id="3-2-additive-across-studies-like-rule-7-within-a-study">3.2 Additive across studies, like rule 7 within a study<a href="#batch-00/3-2-additive-across-studies-like-rule-7-within-a-study" class="heading-anchor" title="Direct link to this section">#</a></h3>
+<p>This study does not rewrite the six closed studies. Where a buzz finding <strong>confirms, contradicts or
+extends</strong> an earlier finding, it is recorded as a cross-study note naming the earlier batch — so a
+reader can trace both directions. Cross-study notes are <strong>observations</strong>, never decisions.</p>
+<hr>
+<h2 id="4-the-batch-plan-each-documented-as-it-is-completed">4. The batch plan (each documented as it is completed)<a href="#batch-00/4-the-batch-plan-each-documented-as-it-is-completed" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Findings are organised <strong>per pole</strong>, one file per pole, plus an overview and a synthesis. buzz&#39;s pole
+weighting is expected to differ from all six earlier studies — <strong>P2 (the workspace/tenancy boundary) and
+P1 (agents-as-members) are expected to be the strongest, P3 possibly the thinnest</strong> — but the structure
+is identical so the later mapping is a per-pole join.</p>
+<div class="table-container"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Batch / File</th>
+<th>Pole</th>
+<th>What it answers</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>00</strong></td>
+<td><strong>This file</strong> — pin and method</td>
+<td>—</td>
+<td>task zero + method + pole frame</td>
+</tr>
+<tr>
+<td><strong>01</strong></td>
+<td><code>findings/01-platform-overview.md</code></td>
+<td>—</td>
+<td>What is buzz? the protocol (Nostr/NIP-01), the crate map, the relay, the surfaces, the community model</td>
+</tr>
+<tr>
+<td><strong>02</strong></td>
+<td><code>findings/02-the-aissistant.md</code></td>
+<td><strong>P1</strong></td>
+<td>the agent surface: <code>buzz-agent</code>, <code>buzz-acp</code>, <code>buzz-dev-mcp</code>, agent identity/keys, the ACP harness, <code>buzz-persona</code>, remote agents</td>
+</tr>
+<tr>
+<td><strong>03</strong></td>
+<td><code>findings/03-the-workspace.md</code></td>
+<td><strong>P2</strong></td>
+<td>the workspace: the event log, channels/DMs/forum, <code>buzz-auth</code>, <code>buzz-core::tenant</code>, the community boundary, <strong>the TLA+/Tamarin isolation model</strong>, <code>buzz-db</code> + migrations</td>
+</tr>
+<tr>
+<td><strong>04</strong></td>
+<td><code>findings/04-automations.md</code></td>
+<td><strong>P3</strong></td>
+<td><code>buzz-workflow</code>: YAML-as-code, triggers (message/reaction/schedule/webhook), approval gates, traces, huddles</td>
+</tr>
+<tr>
+<td><strong>05</strong></td>
+<td><code>findings/05-widgets-and-frontend.md</code></td>
+<td><strong>PX-W / PX-F</strong></td>
+<td><strong>the composition surface</strong>: the Tauri/React desktop app, canvases, the Flutter mobile app, the web/admin clients, the design system</td>
+</tr>
+<tr>
+<td><strong>06</strong></td>
+<td><code>findings/06-out-of-pole.md</code></td>
+<td><strong>PZ</strong></td>
+<td>everything else: search, audit, media, git hosting, relay mesh/federation, voice, feature flags, <code>sprig</code>, deployment, moderation, security</td>
+</tr>
+<tr>
+<td><strong>07</strong></td>
+<td><code>findings/07-SYNTHESIS.md</code></td>
+<td>all</td>
+<td>what buzz teaches each pole; the ranked mechanisms; <strong>and the &quot;what fits / what could be taken further&quot; notes</strong></td>
+</tr>
+</tbody></table></div>
+<p><strong>Each batch document carries:</strong> (a) what was read and its measured size; (b) a <strong>capability table tagged
+by pole</strong> with <strong>Q1 · Q2</strong>; (c) the code verification with <code>file:line</code> evidence and any <strong>doc-vs-code
+divergence</strong>; (d) findings carried forward.</p>
+<hr>
+<h2 id="5-the-owner-s-directive-for-this-study">5. The owner's directive for this study<a href="#batch-00/5-the-owner-s-directive-for-this-study" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<p>Carried forward from the n8n brief, unchanged:</p>
+<ol>
+<li><strong>What fits the vision</strong> — answered per capability in the batches and ranked in batch 07.</li>
+<li><strong>What could be taken further</strong> — recorded as <strong>observations</strong> in batch 07 §7, never as decisions.</li>
+</ol>
+<p><strong>The method&#39;s discipline still holds inside the batches:</strong> rule 5 (no comparison to our own platform)
+applies to batches 01–06. The synthesis (§7) may name a mechanism as <em>extensible</em> — e.g. &quot;this pattern
+would allow X&quot; — but it must stop at the observation. <strong>The mapping pass and the owner decide.</strong></p>
+<p><strong>And — unlike n8n — there is no licence gate to carry.</strong> Apache-2.0 (§2.7). The discipline that
+replaces it is the study&#39;s own: <strong>read every claim against the code, because open source means readable,
+not correct.</strong></p>
+<hr>
+<h2 id="6-ground-rules-restated-as-a-checklist-the-reader-can-hold-this-study-to">6. Ground rules restated as a checklist the reader can hold this study to<a href="#batch-00/6-ground-rules-restated-as-a-checklist-the-reader-can-hold-this-study-to" class="heading-anchor" title="Direct link to this section">#</a></h2>
+<ul>
+<li>Is the claim measured, or remembered? → must be measured.</li>
+<li>Does the line rest on a doc, or on code? → <strong>code, always.</strong></li>
+<li>If doc and code disagree, is the disagreement recorded? → must be.</li>
+<li>Is every capability named, including the ones we will not use? → must be.</li>
+<li>Is every finding <strong>tagged with its pole</strong> (P1/P2/P3/PX-W/PX-F/PZ)? → must be.</li>
+<li>Are the two value questions answered in the owner&#39;s words? → yes, per capability.</li>
+<li>Is there any comparison to our own platform in a batch? → must be none; that is the later mapping pass.</li>
+<li>Before reusing an older-doc setting, was the retirement rule run (rule 10)? → must be — <strong>and note
+that this platform renames itself (buzz/sprout/sprig, §1.1), so names are a retirement surface.</strong></li>
+<li><strong>Does the line count say whether it includes tests?</strong> → with <strong>61.3 % of <code>crates/</code> Rust lines being
+tests</strong>, every count in this study states its basis.</li>
+<li><strong>Is a formal-methods file being read as a guarantee?</strong> → no: it is a <strong>model</strong> to verify against the
+code (rule 1).</li>
+</ul>
+<hr>
+<h2 id="7-how-this-study-relates-to-the-workshop-folder">7. How this study relates to the workshop folder<a href="#batch-00/7-how-this-study-relates-to-the-workshop-folder" class="heading-anchor" title="Direct link to this section">#</a></h2>
+
+<div class="code-block-wrapper">
+  <div class="code-block-header">
+    <span>text</span>
+    <button class="code-copy-btn" type="button">Copy</button>
+  </div>
+  <pre><code>library/architecture/
+├── hermes-forensics/          # the Hermes study (mirror; gitignored copy)
+├── paperclip-forensics/       # the Paperclip study (CLOSED 7/7) + reader/
+├── crewai-forensics/          # the CrewAI study (CLOSED 7/7) + reader/
+├── multica-forensics/         # the Multica study (CLOSED 7/7) + reader/
+├── gastown-forensics/         # the Gas Town study (CLOSED 7/7) + reader/
+├── n8n-forensics/             # the n8n study (CLOSED 7/7) + reader/ (port 3500)
+├── buzz-forensics/            # THIS study
+│   ├── 00-PIN-AND-METHOD.md
+│   └── findings/              # 01..07
+├── reader/                    # the Hermes reader (user-facing HTML)
+└── platforms/
+    ├── *.zip                  # the raw platform archives (gitignored)
+    ├── references.md          # repo link per platform
+    └── _extracted/            # working trees (gitignored) — buzz is here, cleanly (§1.2)
+</code></pre>
+</div>
+<p><strong>Per-platform reader:</strong> a reader for buzz is built at the <strong>end</strong> of this study, from its markdown,
+using the platform-agnostic generator proven for Paperclip, CrewAI, Multica, Gas Town and n8n
+(<code>generate-reader.js</code> + a <code>DOCS_CONFIG</code> block + a <code>diagrams.js</code>). <strong>The markdown is the source of truth;
+the reader renders it and never edits it.</strong> Ports used so far: 3000 Hermes · 3100 Paperclip · 3200
+CrewAI · 3300 Multica · 3400 Gas Town · <strong>3500 n8n</strong> → <strong>buzz will be port 3600.</strong></p>
+<p><em>(Three cautions carried in from earlier readers: the engine is not fully platform-agnostic — lesson
+L168, where a copied <code>assets/reader.js</code> still defined <code>window.GasTownReader</code> while the pages called
+<code>window.N8nReader</code>; a copy-then-swap is exactly where another platform&#39;s vocabulary leaks in, so the new
+tree must be grepped for the old platform&#39;s vocabulary before building; and a whitespace/encoding check
+must count <strong>characters</strong>, not bytes — the HOW-TO&#39;s earlier &quot;byte count&quot; stability check was wrong.)</em></p>
+<hr>
+<p><em>Batch 00 of 07. Begun 2026-10-16. Next: <code>findings/01-platform-overview.md</code>.</em></p>
+
+            </article>
+
+            <footer class="reader-nav-footer">
+              <div></div>
+
+              <a href="../index.html#batch-00" class="tool-btn" style="text-decoration:none;">Back to All Batches</a>
+
+              
+                <a href="01-platform-overview.html" class="nav-page-btn" style="text-align:right;">
+                  <span class="nav-btn-sub">Next Batch →</span>
+                  <span class="nav-btn-title">Platform Overview</span>
+                </a>
+              
+            </footer>
+
+          </div>
+        </div>
+
+        <aside class="sidebar-right">
+          <div class="toc-header">
+            <span>On This Page</span>
+          </div>
+          <ul class="toc-list">
+            
+              <li class="toc-item level-2">
+                <a href="#1-the-pin-task-zero-answered-by-measurement" class="toc-link">1. THE PIN — task zero, answered by measurement</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#1-1-the-identity-limit-stated-not-glossed" class="toc-link">1.1 The identity limit (stated, not glossed)</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#1-2-where-the-extract-lives-and-why-it-is-where-n8n-is-not" class="toc-link">1.2 Where the extract lives, and why it is where n8n is not</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#2-what-the-tree-contains-measured" class="toc-link">2. What the tree contains (measured)</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-1-this-tree-is-code-a-polyglot-monorepo" class="toc-link">2.1 This tree is CODE — a polyglot monorepo</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-2-the-measured-shape-per-area" class="toc-link">2.2 The measured shape (per area)</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-3-the-test-ratio-measured-before-any-finding-was-written-and-corrected" class="toc-link">2.3 The test ratio — measured before any finding was written, and corrected</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-4-the-module-map-measured-the-object-of-batches-0106" class="toc-link">2.4 The module map (measured — the object of batches 01–06)</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-5-the-doc-set-22-root-markdown-files-11-of-them-vision" class="toc-link">2.5 The doc set — 22 root markdown files, 11 of them VISION</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-6-the-measured-oddity-formal-method-proofs-live-in-the-tree" class="toc-link">2.6 The measured oddity: formal-method proofs live IN the tree</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#2-7-the-licence-apache-2-0-and-it-is-not-a-gate" class="toc-link">2.7 The licence — Apache-2.0, and it is NOT a gate</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#3-the-method-how-every-batch-is-produced" class="toc-link">3. The method (how every batch is produced)</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-1-the-pole-frame-the-three-poles-defined-once" class="toc-link">3.1 The pole frame — the three poles, defined once</a>
+              </li>
+            
+
+              <li class="toc-item level-3">
+                <a href="#3-2-additive-across-studies-like-rule-7-within-a-study" class="toc-link">3.2 Additive across studies, like rule 7 within a study</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#4-the-batch-plan-each-documented-as-it-is-completed" class="toc-link">4. The batch plan (each documented as it is completed)</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#5-the-owner-s-directive-for-this-study" class="toc-link">5. The owner&#039;s directive for this study</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#6-ground-rules-restated-as-a-checklist-the-reader-can-hold-this-study-to" class="toc-link">6. Ground rules restated as a checklist the reader can hold this study to</a>
+              </li>
+            
+
+              <li class="toc-item level-2">
+                <a href="#7-how-this-study-relates-to-the-workshop-folder" class="toc-link">7. How this study relates to the workshop folder</a>
+              </li>
+            
+          </ul>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <script src="../assets/docs-data.js"></script>
+  <script>
+    // Lightweight controller for standalone pages
+    const slider = document.getElementById('fontSizeSlider');
+    const val = document.getElementById('fontSizeVal');
+    const dec = document.getElementById('fontDecBtn');
+    const inc = document.getElementById('fontIncBtn');
+    const rst = document.getElementById('fontResetBtn');
+    const prog = document.getElementById('readingProgressBar');
+    const canvas = document.getElementById('readerCanvas');
+
+    function setFont(size) {
+      size = Math.min(Math.max(size, 12), 28);
+      document.documentElement.style.setProperty('--content-font-size', size + 'px');
+      slider.value = size;
+      val.textContent = Math.round((size/16)*100) + '% (' + size + 'px)';
+      localStorage.setItem('buzz_reader_font_size', size);
+    }
+
+    const saved = localStorage.getItem('buzz_reader_font_size');
+    if (saved) setFont(parseInt(saved, 10));
+
+    slider.addEventListener('input', e => setFont(parseInt(e.target.value, 10)));
+    dec.addEventListener('click', () => setFont(parseInt(slider.value, 10) - 1));
+    inc.addEventListener('click', () => setFont(parseInt(slider.value, 10) + 1));
+    rst.addEventListener('click', () => setFont(16));
+
+    document.querySelectorAll('.theme-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        document.documentElement.setAttribute('data-theme', theme);
+        document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p === btn));
+        localStorage.setItem('buzz_reader_theme', theme);
+      });
+    });
+
+    const savedTheme = localStorage.getItem('buzz_reader_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.querySelectorAll('.theme-pill').forEach(p => p.classList.toggle('active', p.dataset.theme === savedTheme));
+    }
+
+    canvas.addEventListener('scroll', () => {
+      const total = canvas.scrollHeight - canvas.clientHeight;
+      prog.style.width = total > 0 ? ((canvas.scrollTop / total) * 100) + '%' : '0%';
+    });
+
+    // Standalone Diagram Switcher
+    const diagramContainer = document.getElementById('diagramContainer');
+    const diagramSelect = document.getElementById('diagramSelect');
+    const diagramSection = document.getElementById('diagramSection');
+    const diagramToggleBtn = document.getElementById('diagramToggleBtn');
+    const defaultDiagramHtml = diagramContainer ? diagramContainer.innerHTML : '';
+
+    if (diagramSelect && diagramContainer) {
+      diagramSelect.addEventListener('change', (e) => {
+        const choice = e.target.value;
+        if (choice === 'default') {
+          diagramContainer.innerHTML = defaultDiagramHtml;
+        } else if (window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[choice]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[choice].html;
+        }
+      });
+    }
+
+    let diagramVisible = true;
+    if (diagramToggleBtn && diagramSection) {
+      diagramToggleBtn.addEventListener('click', () => {
+        diagramVisible = !diagramVisible;
+        diagramSection.classList.toggle('collapsed', !diagramVisible);
+        const icon = document.getElementById('diagramToggleIcon');
+        if (icon) icon.textContent = diagramVisible ? '▼ Collapse' : '▶ Expand Guide';
+      });
+    }
+
+    // Interactive in-text diagram pill support
+    window.BuzzReader = {
+      switchDiagram: function(id) {
+        if (diagramSelect) diagramSelect.value = id;
+        if (diagramContainer && window.DIAGRAMS_MAP && window.DIAGRAMS_MAP[id]) {
+          diagramContainer.innerHTML = window.DIAGRAMS_MAP[id].html;
+          if (diagramSection && diagramSection.classList.contains('collapsed')) {
+            diagramSection.classList.remove('collapsed');
+          }
+          diagramContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    };
+
+    // Code copy buttons delegate
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('code-copy-btn')) {
+        const pre = e.target.closest('.code-block-wrapper').querySelector('pre');
+        if (pre) {
+          navigator.clipboard.writeText(pre.innerText).then(() => {
+            const originalText = e.target.textContent;
+            e.target.textContent = 'Copied! ✓';
+            setTimeout(() => { e.target.textContent = originalText; }, 2000);
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>
