@@ -29,8 +29,40 @@ it is the most honest document in a repo.
 | 4 | **Multica 0.2.0** | ✅ **CLOSED 7/7 + reader** | **All three poles real. The closest neighbour studied.** No widget model; no engine of its own. |
 | 5 | **Gas Town 1.2.1** | ✅ **CLOSED 7/7 + reader** | Go multi-agent orchestration. **The watchdog chain is made of agents**; agents ARE beads; 13-preset provider registry; `gt prime` infers the role from the directory; **the Hook is the durability primitive**; **ZFC** = transport, don't decide; 47 tested TOML formulas; a **three-layer sandbox** (mTLS CA + denylist / CLI allow-list → 403 / git smart-HTTP proxy); 13 shell-script plugins, "no AI interpretation". Frontend = CLI (5× the rest); **NO widget model**. **Top 4 ranked mechanisms are DECIDED LIMITS.** |
 | 6 | **n8n 2.44.0** | ✅ **CLOSED 7/7 + 73 findings + reader (3500)** | TS monorepo: 22,715 `.ts` (**65% of bytes**) / 57 `@n8n` packages; 563 built-in nodes. **A v2 engine that is a documented SCAFFOLD with 6 ACCURATE ADRs** (`MAX_IN_PROCESS_WAIT_MS = 65_000`). **P1:** `@n8n/agents` v0.29.0 — lazy fluent builder, SKILL.md skills (72 KB cap), sub-agents w/ suspend/resume, **guardrails = `allow`\|`stop(code)`**, cost-as-guardrail + `SpendLedger`. **P2: a real tenancy model** — `Project` `personal\|team`, membership = composite-key join row w/ Role by slug, **10 roles + 206 `resource:action` scopes**, `User` ≠ `AuthIdentity`. **P3: the study's best security surface** — expressions in an **isolate pool** behind a **zod-validated RPC boundary** (*"TS types are erased at runtime and contribute zero security"*); observability = a **sampling policy**. **★ PX-W: the FIRST platform with a real composition surface** — a **canvas of 7 element types**, a **129-component design system enforced by its own ESLint plugin**, **CRDT on y-websocket**. **PZ: two ratchets** (299 hashed arch violations + 110 boundary issues), **pinned agent harness**, `agent-check.mjs` (excerpt to agent, full output to disk). **FAIR-CODE** — `.ee` unlicensed. Reader: 8 docs / 23,092 words / **153,204 chars**, 8/8 fidelity, port 3500. |
-| 7 | **buzz 0.5.28** | 🟡 **b00 in progress** | **Self-hosted team-communication platform on Nostr (NIP-01) — every action is a signed event with a `kind`; the relay is the single source of truth; community = tenant (URL-is-authoritative) with TLA+/Tamarin proofs.** Apache-2.0, **no licence gate**. Polyglot: **34 Rust crates / 501,445 prod LOC** + Tauri desktop + Flutter mobile + web. **Test share 60.9% by lines** — highest in the study (a filename count said 0.3%; off by ~200×). 11 `VISION_*.md`; 20 custom NIPs; 62 migrations. Reader will be port **3600**. |
+| 7 | **buzz 0.5.28** | 🟠 **b00–b05 done** | **Self-hosted team-communication platform on Nostr (NIP-01) — every action is a signed event with a `kind`; the relay is the single source of truth; community = tenant (URL-is-authoritative) with TLA+/Tamarin proofs.** Apache-2.0, **no licence gate**. Polyglot: **34 Rust crates / 501,445 prod LOC** + Tauri desktop + Flutter mobile + web. **Test share 60.9% by lines** — highest in the study. 11 `VISION_*.md`; 20 custom NIPs; 62 migrations. Reader will be port **3600**. |
 | — | openrig, mattermost, zulip | ⬜ 3 remain | Order not fixed — **ASK before extracting more (~700 MB each).** |
+
+**buzz (b00 `4304e7f` … b05 `aad1f45`) — the load-bearing facts so far.**
+*(Full per-batch detail → today's + recent daily logs.)*
+1. **★ ARCHITECTURE WORKSHOP rules applied:** rule 1 (docs are claims), rule 0b (count FIRST), rule 10 (retirement).
+   Commits: b01 `78c19c5` · b02 `b5d04f7` (P1 aissistant) · b03 `5778017` (P2 workspace) · b04 `c9bbfc1`
+   (P3 automations) · **b05 `aad1f45` (PX-W/F widgets+frontend)**.
+2. **b04 (P3)**: workflow crate = 5 files / 5,263 lines, 77-line `ActionSink` seam; **5 triggers in code vs
+   the doc's 4**; delay caps at **270 s not the doc's 300 s**; **`WaitingApproval` is never written +
+   `create_approval` has ZERO production callers → ~330 lines of grant/deny/resume are unreachable dead code**
+   (F4-5) — and the conformance suite *refuses to fake a green*, naming `pending_lane WF-08` as its blocker;
+   cross-pod at-most-once is **deterministic, not locked** (`INSERT … ON CONFLICT DO NOTHING`).
+3. **★ b05 (PX-W/F) = the batch to cite.** **buzz has NO widget model and NO composer — FIFTH platform with
+   none** (proven: 27 `widget` hits tree-wide, all accounted for; the only `CREATE TABLE widgets` is a
+   *negative fixture inside a `#[test]`*). **The composition unit is the Nostr event kind** (157 `pub const`
+   in a 1,177-line `kind.rs`; policy = *"prefer a new kind over a new HTTP endpoint"*). **★ Answers the
+   inherited question: an event log is NOT a widget model** — it extends *data + behaviour*, never *layout*.
+   **★★ THE RECOMMENDATION: the guard-as-document pattern** — shared core + thin per-app wrapper
+   (`rules` + reason-annotated allowlist) → `package.json check` → `justfile check`. Two rules:
+   **`check-px-text`** (root cause = PR #891 zoom regression; rejects arbitrary `rem`/`em` TOO → *"the rule
+   is one scale, not no pixels"*) and **`check-pubkey-truncation`** (**a SECURITY invariant**: a truncated
+   identifier a human trusts is **forgeable by vanity-grinding**; ad-hoc truncation had fragmented into 5
+   formats) + a **differential file-size ratchet** (*ratchet-not-freeze*; limits 1,200 FE / 1,500 Rust /
+   1,200 mobile / 1,000 web). **★ THREE allowlist mechanisms, keyed by whatever is STABLE per-guard**
+   (literal for px-text, line number for pubkey; `allowedFiles` for the canonical module; `.test.` excluded).
+   **Design tokens = TWO dials through ONE virtual rem** (`--buzz-type-rem`), incl. a **rem-relative
+   `lineHeight` scale**. **Desktop `src-tauri/src` = 478 `.rs` / 194,385 lines / 385 `#[tauri::command]`**
+   → the bridge is a SECOND APPLICATION. **Mobile = 456 Dart files, ZERO Rust** (a full independent
+   re-implementation; its theme engine is 3,533 Dart lines ported from desktop's 3,249 TS lines, NO shared
+   source). Feature flags **fail-OPEN on unknown gates, fail-CLOSED on the build split**; the
+   `protectedFeatures/` internal/OSS split is **verified by building BOTH variants and scanning emitted
+   chunks** (a commercial split, NOT tenancy). **D5-1/2/3: buzz enforces DESIGN + SECURITY rules executably
+   and leaves ARCHITECTURE (feature-module imports) and the cross-language kind mirror to PROSE.**
 
 **Multica (75 findings, b01 `4cf7f35` … b07 `afed823`) — the 3 load-bearing facts.**
 *(Full per-batch detail → `extended_deep_memory.md` + daily logs.)*
@@ -56,8 +88,8 @@ it is the most honest document in a repo.
    platform-agnostic**: 4 hardcoded "CrewAI" strings + `window.CrewAIReader` + a `crewai_reader_`
    prefix — all fixed.
 
-**★ STUDY CHAIN (six CLOSED, the 7th open):** Hermes 13/13 · Paperclip · CrewAI · Multica (+reader)
-· Gas Town (+reader) · **n8n (+reader, port 3500)** · **buzz (b00, port 3600)** — then
+**★ STUDY CHAIN (six CLOSED + the 7th open):** Hermes 13/13 · Paperclip · CrewAI · Multica (+reader)
+· Gas Town (+reader) · **n8n (+reader, port 3500)** · **buzz (b00–b05, port 3600)** — then
 openrig / mattermost / zulip — **ASK before extracting more** — then the cross-platform mapping pass.
 
 ## Standing hazards (still bite)
