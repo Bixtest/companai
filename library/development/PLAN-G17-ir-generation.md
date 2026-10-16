@@ -1,7 +1,9 @@
 # G-17 — the AI that emits the Business IR (schema-constrained generation)
 
 **Status:** step 1 (research) and step 2 (validate) **done 2026-10-06**. Step 3 (cookbook) and step 4
-(build) not started. **This document corrects a measurement error in `BACKLOG.md`'s G-17 row.**
+(build) **done 2026-10-06** — §4 below is the step-4 record; the full measured outcome is in
+`BACKLOG.md`'s G-17 row ("BUILT AND MEASURED 2026-10-06; the live-model question is answered") and
+`workspace/COOKBOOK.md` *Sprint G-17*. **This document corrects a measurement error in `BACKLOG.md`'s G-17 row.**
 
 **What G-17 is.** The AI-first vision's decisive loop is *need → the AI writes a **Business IR** →
 the platform **validates** it → it runs → a person confirms → saved as a Function → runs with zero AI*.
