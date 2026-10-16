@@ -9,6 +9,20 @@
 > all point to the box. (Owner's instruction, 2026-10-06. If you are reading this months later, the
 > task will have changed many times — **go to the box**, do not trust this line.)
 
+> **★★ CURRENT STATE — 2026-10-16 (revision 34).** The project is at the end of a deliberate
+> **development pause**. The **platform-study + mapping stage is DONE**: nine platforms studied and
+> mapped into **53 architecture requirements** (`SR-*`) in `library/architecture/mapping/`. A new
+> platform, **activepieces**, was added (pending study, alongside **mattermost**). The **ONE NUMBER is
+> unchanged at 78 / 321 = 24%**. **★ START WITH THE MASTER CHECKLIST** —
+> [`library/development/MASTER-CHECKLIST.html`](MASTER-CHECKLIST.html) (text twin
+> [`MASTER-CHECKLIST.md`](MASTER-CHECKLIST.md)): the one plain-English index over the whole lifecycle —
+> every checklist row, every open item with its trigger, the platform study, and the requirements — so
+> you never hunt to learn what a code-name means or where it sits. The **build frontier is paused, not
+> gone**: `P2-9b` (the Hermes switchover) is the next build when development resumes, gated by the
+> owner's stale-timeout decision (see `HANDOVER.md` revision-34 banner). **No code has been written
+> since 2026-10-14.** What is open for the owner: the `P2-9b` stale-timeout trade, and whether to start
+> the tooling set + `SR-08` while the two platform studies run in parallel.
+
 **What this file is.** The ready-to-paste first message for the agent that inherits this project and
 continues the development. It is short on purpose: it tells the agent what to read, how to set up,
 and the rules it may not break — and **nothing about "what is next", because what is next changes
@@ -46,6 +60,14 @@ direction gets buried.
 **Tier A — the ones that fix the direction, the live decisions, and where we actually are:**
 
     a. library/WHAT-WE-ARE-BUILDING.md        <- the product in plain English. START HERE.
+    a2. library/development/MASTER-CHECKLIST.html
+                                              <- THE ONE INDEX (owner asked for it 2026-10-16): every
+                                                 checklist row, every open item with its trigger, the
+                                                 platform study, and the 53 SR requirements -- in plain
+                                                 English, with tick-boxes. Open it in a browser; its
+                                                 text twin is MASTER-CHECKLIST.md. Use it to resolve any
+                                                 code-name (CC-nn, G-nn, SR-nn) to what it means and
+                                                 where it sits, without hunting across files
     b. INDEX.md                               <- the map of every folder
     c. library/development/HANDOVER.md        <- written for you: what exists, the traps, the rules
     d. library/development/BACKLOG.md         <- what is left, in order. The one plan

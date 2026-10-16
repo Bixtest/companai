@@ -205,7 +205,42 @@ page and the `★ ACTIVE TASK` box disagree about *what is being worked on now*,
 
 ---
 
-## ★ WHERE WE ARE NOW, AND WHERE THE WORK WAS INTERRUPTED — measured 2026-10-14
+## ★★ READ THIS FIRST — WHERE WE ARE NOW (measured 2026-10-16, revision 34)
+
+**The 2026-10-14 snapshot below is now historical context, not the live frontier.** After a deliberate
+**development pause**, the owner chose to finish the **platform architecture** before resuming builds.
+What changed and where things stand:
+
+- **★ START HERE — [`MASTER-CHECKLIST.html`](MASTER-CHECKLIST.html)** (its text twin:
+  [`MASTER-CHECKLIST.md`](MASTER-CHECKLIST.md)). This is the **one plain-English index** over the whole
+  development lifecycle — every checklist row, every open item with its trigger, the platform study, and
+  the architecture requirements — built so nobody has to hunt to learn what a code-name (e.g. `CC-84`)
+  means or where it sits. **The owner asked for exactly this on 2026-10-16.**
+- **The platform-study + mapping stage is DONE.** Nine platforms studied (Hermes, Paperclip, CrewAI,
+  Multica, Gas Town, n8n, buzz, openrig, zulip) and mapped into **53 architecture requirements**
+  (`SR-*`) in [`../architecture/mapping/findings/08-THE-SRS.md`](../architecture/mapping/findings/08-THE-SRS.md),
+  with the filterable register in
+  [`../architecture/mapping/workshop-status.html`](../architecture/mapping/workshop-status.html).
+- **A new platform was added:** **activepieces** (`activepieces-main.zip` on disk, repo
+  `activepieces/activepieces`) — pending study, alongside **mattermost** (also pending your ask). Both
+  join as new `SR-*` columns with **no rework**.
+- **The ONE NUMBER is unchanged at 78 / 321 = 24%** (the mapping pass writes no code, so no box moved).
+- **The build frontier is paused, not gone.** `P2-9b` (below) is still the next build when development
+  resumes — its first step (the Hermes default-flip) is gated by the owner's stale-timeout decision
+  (below). The R28-6 OpenCode deletion is the same switchover seen from the door's side (`CC-72`).
+
+**What is genuinely open for the owner's decision now:** (1) the `P2-9b` stale-timeout trade — raise the
+ceiling or shrink the toolset (below); (2) whether to start the **tooling set + `SR-08`** (my
+recommendation — they come from already-closed platforms, so mattermost/activepieces cannot rewrite
+them) while the two platform studies run in parallel, or hold all development until the studies close.
+
+---
+
+## ★ WHERE WE ARE NOW, AND WHERE THE WORK WAS INTERRUPTED — measured 2026-10-14 (historical)
+
+> The snapshot below was the live frontier on 2026-10-14, at the end of the last build session. It is
+> kept in full for its measurements; the **current** state is the 2026-10-16 banner above. Where the two
+> touch the same item, the banner wins.
 
 **This section is the handoff snapshot for an agent picking the work up cold.** It states the live
 frontier, the exact point the last session stopped, and the one decision that gates the next build.

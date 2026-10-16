@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Master Checklist — everything we are building, in one place</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --card:#ffffff; --ink:#1a1d21; --muted:#6b7280; --line:#e5e7eb;
+    --accent:#4f46e5; --accent-soft:#eef2ff;
+    --done-bg:#dcfce7; --done-ink:#15803d;
+    --partial-bg:#fef9c3; --partial-ink:#a16207;
+    --open-bg:#f1f5f9; --open-ink:#64748b;
+    --absent-bg:#fee2e2; --absent-ink:#b91c1c;
+    --trigger-bg:#fff7ed; --trigger-ink:#c2410c;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  .wrap{max-width:1180px;margin:0 auto;padding:28px 22px 60px}
+  h1{font-size:25px;margin:0 0 4px;letter-spacing:-.01em}
+  .sub{color:var(--muted);font-size:13.5px;margin:0 0 22px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;
+    padding:18px 20px;margin:0 0 18px;box-shadow:0 1px 2px rgba(16,24,40,.04)}
+  h2{font-size:16px;margin:0 0 12px;display:flex;align-items:center;gap:8px}
+  h2 .dot{width:9px;height:9px;border-radius:50%;background:var(--accent)}
+  .lede{font-size:14px;color:#374151;margin:0 0 6px}
+  code{background:#f3f4f6;border:1px solid var(--line);border-radius:5px;padding:0 5px;
+    font:12.5px/1.4 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+
+  /* headline stats */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:0 0 6px}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .stat b{display:block;font-size:26px;line-height:1.1;letter-spacing:-.02em}
+  .stat span{display:block;color:var(--muted);font-size:12.5px;margin-top:3px}
+  .bar{height:10px;background:var(--open-bg);border-radius:99px;overflow:hidden;margin:12px 0 4px;
+    display:flex}
+  .bar i{display:block;height:100%}
+  .bar .d{background:#22c55e} .bar .p{background:#eab308} .bar .o{background:#cbd5e1}
+  .barlbl{display:flex;justify-content:space-between;color:var(--muted);font-size:12px}
+
+  /* frontier */
+  .frontier{background:linear-gradient(180deg,#fffbeb,#fff);border:1px solid #fde68a}
+  .frontier .now{font-size:14.5px}
+  .frontier .now b{color:#92400e}
+
+  /* filter tabs */
+  .tabs{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 12px}
+  .tab{border:1px solid var(--line);background:#fff;border-radius:99px;padding:5px 13px;
+    font-size:12.5px;cursor:pointer;color:#374151;user-select:none}
+  .tab:hover{border-color:#c7d2fe}
+  .tab.on{background:var(--accent);border-color:var(--accent);color:#fff}
+  .tab .n{opacity:.7;font-size:11px;margin-left:3px}
+
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th{text-align:left;color:var(--muted);font-weight:600;font-size:11.5px;text-transform:uppercase;
+    letter-spacing:.04em;padding:8px 10px;border-bottom:1px solid var(--line)}
+  td{padding:9px 10px;border-bottom:1px solid #f1f2f4;vertical-align:top}
+  tr.ph td{background:#fafbfc;font-weight:700;color:#374151;font-size:12.5px;
+    text-transform:uppercase;letter-spacing:.03em}
+  .id{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;color:var(--accent);
+    white-space:nowrap;font-weight:600}
+  .desc{color:#1f2937}
+  .ids{color:var(--muted);font-size:12px}
+  .badge{display:inline-block;border-radius:99px;padding:2px 10px;font-size:11.5px;font-weight:600;
+    white-space:nowrap}
+  .b-done{background:var(--done-bg);color:var(--done-ink)}
+  .b-partial{background:var(--partial-bg);color:var(--partial-ink)}
+  .b-open{background:var(--open-bg);color:var(--open-ink)}
+  .b-absent{background:var(--absent-bg);color:var(--absent-ink)}
+  .b-trig{background:var(--trigger-bg);color:var(--trigger-ink)}
+  tr.hidden{display:none}
+  .kick{color:var(--muted);font-size:12.5px}
+
+  details{border:1px solid var(--line);border-radius:10px;margin:0 0 10px;background:#fff}
+  details[open]{box-shadow:0 1px 3px rgba(16,24,40,.06)}
+  summary{cursor:pointer;padding:12px 16px;font-weight:600;font-size:13.5px;list-style:none;
+    display:flex;align-items:center;gap:10px}
+  summary::-webkit-details-marker{display:none}
+  summary .chev{color:var(--muted);transition:transform .15s;font-size:12px}
+  details[open] summary .chev{transform:rotate(90deg)}
+  summary .cnt{margin-left:auto;color:var(--muted);font-weight:500;font-size:12px}
+  .dbody{padding:0 16px 14px}
+  .dbody table{font-size:13px}
+  .plain{color:#374151}
+  .trig{color:var(--trigger-ink);font-size:12.5px}
+
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .pill{display:inline-block;border-radius:8px;padding:3px 9px;font-size:12px;margin:2px 4px 2px 0;
+    background:#f3f4f6;border:1px solid var(--line)}
+  .pill.ok{background:var(--done-bg);color:var(--done-ink);border-color:#bbf7d0}
+  .pill.pend{background:var(--open-bg);color:var(--open-ink)}
+  footer{color:var(--muted);font-size:12px;text-align:center;margin-top:26px;line-height:1.7}
+  a{color:var(--accent)}
+  @media(max-width:820px){.stats{grid-template-columns:1fr 1fr}.two{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>The Master Checklist</h1>
+  <p class="sub">Everything we are building — one list, plain English, tick-boxes and status.
+    &nbsp;·&nbsp; Companai / open-mercato &nbsp;·&nbsp; 2026-10-16 &nbsp;·&nbsp; self-contained, works offline</p>
+
+  <!-- HEADLINE -->
+  <div class="card">
+    <h2><span class="dot"></span>Where the whole project stands</h2>
+    <p class="lede" id="headline"></p>
+    <div class="bar"><i class="d" id="barD"></i><i class="p" id="barP"></i></div>
+    <div class="barlbl"><span id="lblD"></span><span id="lblP"></span><span id="lblO"></span></div>
+    <p class="kick" style="margin-top:10px">
+      The work that is <b>done</b> sits high in the stack — the AI-first loop is largely built. The
+      <b>platform skeleton underneath it is only starting</b>, so the next work goes <b>down the stack</b>
+      (the skeleton), not sideways into business modules. Source of truth:
+      <code>platform_points.md</code> THE ONE NUMBER — derived from the boxes, never typed.
+    </p>
+  </div>
+
+  <!-- FRONTIER -->
+  <div class="card frontier">
+    <h2><span class="dot" style="background:#f59e0b"></span>▶ The frontier — what is being built now</h2>
+    <p class="now" id="frontier"></p>
+    <p class="kick" style="margin-top:8px">Every other item below is either done, partial with a named
+      remainder, or open with its trigger named. You should never need to dig to find "what's next".</p>
+  </div>
+
+  <!-- THE CHECKLIST -->
+  <div class="card">
+    <h2><span class="dot"></span>The checklist — <span id="rowCount">47</span> rows, build order</h2>
+    <p class="kick" style="margin:0 0 12px">Filter by phase or status. A row's IDs point at the register
+      items that build it — you never have to hunt for what a code-name means.</p>
+    <div class="tabs" id="tabs"></div>
+    <table>
+      <thead><tr><th style="width:52px">Row</th><th>What you can do after this</th>
+        <th style="width:96px">Status</th><th style="width:150px">Register IDs</th></tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+
+  <!-- OPEN WORK -->
+  <div class="card">
+    <h2><span class="dot"></span>Open work — every unfinished item, with its trigger</h2>
+    <p class="kick" style="margin:0 0 14px">The one place to see what is left. The <b>trigger</b> is the
+      observable event that makes an item startable — "when X lands" is a trigger; "later" is not.</p>
+    <div id="openwork"></div>
+  </div>
+
+  <!-- REQUIREMENTS + PLATFORMS -->
+  <div class="two">
+    <div class="card">
+      <h2><span class="dot"></span>Platform study — 11 platforms</h2>
+      <p class="kick" style="margin:0 0 12px">Nine closed. Two pending your ask — they join as columns,
+        no rework.</p>
+      <div id="platforms"></div>
+    </div>
+    <div class="card">
+      <h2><span class="dot"></span>Architecture requirements (SR)</h2>
+      <p class="kick" style="margin:0 0 12px">What the nine-platform mapping produced. These feed the
+        build queue as <code>CC-*</code> items. Source:
+        <code>library/architecture/mapping/findings/08-THE-SRS.md</code></p>
+      <div id="reqs"></div>
+    </div>
+  </div>
+
+  <footer>
+    Markdown is the source of truth; this reads from <code>platform_points.md</code>,
+    <code>BACKLOG.md</code> and <code>library/architecture/mapping/</code> — and is kept current with them.
+    &nbsp;·&nbsp; Statuses: <span class="badge b-done">done</span>
+    <span class="badge b-partial">partial</span> <span class="badge b-open">open</span>
+    <span class="badge b-absent">absent</span> &nbsp;·&nbsp; No code was written to build this view.
+  </footer>
+</div>
+
+<script>
+/* ---------- DATA (mirrors platform_points.md THE LIST, 2026-10-16) ---------- */
+const PHASES = {
+  0:"Phase 0 — Immutable platform primitives",
+  1:"Phase 1 — Identity",
+  2:"Phase 2 — Multi-tenancy",
+  3:"Phase 3 — The policy kernel",
+  4:"Phase 4 — Data classification / secrets",
+  5:"Phase 5 — Query / command enforcement",
+  6:"Phase 6 — Audit / provenance",
+  7:"Phase 7 — Business Agent Gateway",
+  8:"Phase 8 — Hermes adapter (agent runtime)",
+  9:"Phase 9 — Functions / Widgets / Workspace",
+  10:"Phase 10 — First business capability",
+  11:"Phase 11+ — later (horizontal, scale)"
+};
+const ROWS = [
+ [1,0,"Every record everywhere has a stable ID, an owner, a version and a who-changed-it trail.","partial","C1–C11 / P0-spec · open CC-12, CC-6, CC-20"],
+ [2,0,"The platform can always answer what-is-this, who-owns-it, what-depends-on-it from one registry.","done","G-01 / Metadata Registry"],
+ [3,1,"You can create users, log in, reset a password, and have a session that knows who you are.","done","P1"],
+ [4,1,"An agent is a real object — owned by someone, acting as someone, with a role.","done","AH-1"],
+ [5,2,"You can run several organisations (tenants) with hard walls between them.","done","P2"],
+ [6,2,"You can organise a tenant into units/departments and scope data to them.","done","P2"],
+ [7,3,"You can define roles and give them permissions, enforced on every write — not just in the UI.","done","P3"],
+ [8,3,"Creating a table or column forces the permission question — it can no longer be forgotten.","done","SD-1 / S2 / P3a / P3b"],
+ [9,3,"The permission rules are stored (not just in memory) and read back by the running app.","done","P3b / M3e"],
+ [10,3,"Every write passes one gate that can allow, refuse, or ask a human first.","done","P18 / D0–D3"],
+ [11,3,"You can change behaviour by setting, not by deploying code.","done","D1"],
+ [12,3,"A high-impact change can be sent for approval instead of silently allowed.","done","D3 · open CC-15, CC-38"],
+ [13,3,"You can see the rules that govern a structure, and change them from a screen.","done","SD-4 / SD-5 · open CC-34"],
+ [14,4,"Sensitive fields and secrets are marked and treated specially — never logged, never exported by accident.","done","P4"],
+ [15,5,"Every read is filtered by permission at the data layer — not by hiding a button.","done","P10 / CC-46 / CC-47"],
+ [16,5,"You can restrict a person to their own rows / their team's rows, not just their whole tenant.","partial","CC-50 (own-leg done) · CC-51 (team-leg, your go-ahead)"],
+ [17,5,"Permission coverage reaches every table — a new table cannot be created un-gated.","done","CC-52"],
+ [18,5,"The AI's read path goes through the same column- and row-level gates as a human.","done","CC-53 · open CC-54"],
+ [19,5,"Every state-changing action goes through one typed command, never a raw write.","done","S5 / CC-61 · open CC-63"],
+ [20,5,"A generic state-machine engine exists so any stage→stage flow can be declared once.","partial","G-22 (Slice 2A built) · CC-42 (Slice 2B, business work)"],
+ [22,5,"An AI user can run only the agents bound to it — and nothing else.","partial","CC-27 core done · CC-55/56/57 legs done"],
+ [21,6,"You can see who did what, when, on which record — and export it for compliance.","done","P4 · open CC-64, CC-65"],
+ ["21b",6,"Audit history is independent of the business record (you cannot edit your own past).","done","P4a (hash-chained ledger)"],
+ [23,7,"You can type a request in ordinary words and the platform turns it into a typed business request.","done","G-02 / G-17 · open CC-58, CC-60"],
+ [24,7,"The AI is structurally constrained to produce a valid request — it cannot hallucinate a table.","done","G-17"],
+ [25,7,"The platform validates deterministically before anything runs.","done","G-02"],
+ [26,7,"Every request ends in one of three known ways (answer, proposed change, or saved Function).","done","G-21 · open CC-13"],
+ [27,7,"The user is told when blocked, and noticed and suggested to — not left guessing.","partial","S3 / S8 · open CC-66, CC-8, CC-9"],
+ [28,8,"The agent runtime sits behind one typed door — no other code talks to it directly.","partial","B-05 / Port (R28-1…5 done) · R28-6 = CC-72 delete"],
+ [29,8,"An AI user can be bound to a specific agent, with specific tools and scope.","done","CC-27 (same item as row 22)"],
+ [30,8,"Each AI job declares which model it uses (local or cloud) — one picture, no surprises.","open","S6"],
+ [31,9,"You ask for something new, verify it, and save it as a Function that then runs with zero AI.","done","G-03"],
+ [32,9,"A Function's lifecycle (draft → published → archived) is an enforced state machine.","done","G-03 · open CC-32"],
+ [33,9,"A published Function never calls a model at run time — proven by test.","done","G-03"],
+ [34,9,"A Function runs from a Widget with typed inputs and outputs.","done","G-07"],
+ [35,9,"You can place Functions and Widgets on a Workspace and share it.","open","B-WS design track · CC-62 build set"],
+ [36,10,"A complete business vertical (e.g. Customer + Sales) runs end-to-end on the finished skeleton.","partial","B1–B14"],
+ [37,10,"CRM: leads, contacts, deals, pipeline.","done","B1 (built early)"],
+ [38,10,"Sales: orders, quotes, invoices, returns.","done","B2 (built early)"],
+ [39,10,"Catalog: products and pricing.","done","B3 (built early)"],
+ [40,10,"Inventory / WMS: stock and warehouses.","done","B4 (built early)"],
+ [41,10,"Finance / accounting (GL, AP/AR).","absent","B5 / M1"],
+ [42,10,"Procurement / purchasing.","absent","B6 / M2"],
+ [43,10,"HR / people (payroll absent).","partial","B7"],
+ [44,10,"Projects, shipping, payments, customer portal.","partial","B8–B14"],
+ [45,11,"Entitlements (what a plan includes) are separated from permissions (what a person may do).","open","blueprint §50"],
+ [46,11,"Deployment, operations and the dev-doc set are complete.","open","J / K · CC-19, CC-41"]
+];
+
+/* ---------- OPEN WORK (mirrors platform_points.md ⏳ OPEN WORK) ---------- */
+const OPEN = [
+ ["1","CC-12","The universal Resource envelope — the stable id / owner / version trail every object should share. (The registry half is done; the envelope is not.)","When its first real consumer exists."],
+ ["1","CC-6","The row-level rule of the data axis — per-record view / manage.","When G-04 (the data-axis layer) lands."],
+ ["1","CC-20","A custom field's permission is granted, but nothing reads it.","When G-04 lands."],
+ ["7","CC-10","The HTTP authorization path passes no invoker (the tool door does) — two paths, two answers.","When rbacService.refusedByAuthority is next touched."],
+ ["7","CC-11","enforce is not armed for any tenant — capable and fail-closed; arming is the operator's per-tenant decision.","Your decision — needs you."],
+ ["8","CC-33","The structural guard sees row writes, not raw DDL — a DROP TABLE / re-type / FK change is invisible to it.","When a migration-time / DDL-time check path exists."],
+ ["8","CC-35","A structural re-type labelled 'create' would escape the guard.","When any writer can label a re-type 'create'."],
+ ["8","CC-36","Several foreign guard-input builders omit actorKind.","When a guard reads actorKind on those paths."],
+ ["8","CC-39","The actor check reads live ACL state inside a guard's validate — an extra DB round-trip.","When the guard input carries the actor's ACL."],
+ ["9","CC-7","The permission catalogue is in-process for recorded surfaces — a recorded field lives for the process, not a durable row.","The next G-04 / G-09 migration."],
+ ["12","CC-15","No live route proves the escalation (202 + a pending_acts row) end-to-end.","When a live route asserts the 202 end-to-end."],
+ ["12","CC-38","The escalate outcome has no approval-layer wiring — nobody files the pending act.","When the approval layer gains a guard-origin intake."],
+ ["12","CC-14","The escalation branch in the three parked modules is commented out, so it never compiles or runs.","When those modules are un-parked (a business decision)."],
+ ["13","CC-34","The read / reference verbs are grammar postures, not enforceable — a guard only fires on writes.","When a read-path enforcement point exists."],
+ ["16","CC-51","Row 16 Option B — own + TEAM row scope. The own-leg (CC-50) is built; team adds the dimension.","Your go-ahead — you deferred it."],
+ ["18","CC-54","The index-time presenter can still promote any string field into the stored search title.","When an index rebuild is next performed."],
+ ["19","CC-63","The command contract is uniform in shape — but risk / approval / idempotency are declared by 0 of ~93 production commands.","When a command is next touched, or the audit record gains a consumer."],
+ ["20","CC-42","G-22 Slice 2B — the state-machine engine's first caller is the customers deal pipeline. (Business work.)","When business work resumes."],
+ ["21 / 21b","CC-64 · CC-65","The audit phase is BUILT; two cracks remain — an undo's trace bypasses the ledger, and action_logs has no retention path.","CC-64: when the ledger/undo path is next touched. CC-65: your retention policy."],
+ ["23","CC-58","The Business-IR authoring wire's person-facing screen — the head + compile half are live; the screen is not.","When business work resumes."],
+ ["23","CC-60","The business_ir.run_query tool is registered, but no agent whitelists it — a chat assistant cannot call it yet.","When the AI tool surface is next touched, or a general assistant agent is added."],
+ ["26","CC-13","G-21's schema-mutation IR kind, its UI, and its database row are not built.","When the schema-mutation IR kind exists."],
+ ["27","CC-8","tool-test-runner.ts runs a read-tool handler ungated (reachable only from the superadmin CLI).","When the tool-test CLI gains an HTTP surface."],
+ ["27","CC-9","catalog/customers context calls a tool handler directly with userId: null.","When page-context hydration gains a subject."],
+ ["28","CC-67","Row 28's door: R28-1…R28-5 DONE (the port, the first engine, the chat route onto it, the run closed, the exit gate). R28-6 = deleting OpenCode (CC-72) — trigger-blocked: it is still the only engine behind the door.","When a second engine (Hermes) is wired behind the door."],
+ ["27","CC-66","Row 27's four open parts — the similarity signal is BUILT; the reduced-marker, the history read, the offer, and never-acts-without-asking remain.","(1) when G-04 lands. (2) startable now. (3) the frontend. (4) after (2)+(3)."],
+ ["31","CC-32","A saved Function has no persistence — so it has no delete path to guard, and cannot be loaded by id.","When G-09 gives a saved Function a durable row."],
+ ["35","CC-62","The workspace build set — every requirement the B-WS design mapped as BUILD IT: the menu join, thread lifecycle, collaboration, AI-as-participant, extension routes.","Mixed — the join/lifecycle ride G-09/CC-32; AI-as-participant needs your DP-09; extensions need WS-1 + B-WS/B9."],
+ ["46","CC-19","dynamicLoader.tsconfig.test.ts fails under the full suite (EBUSY) but passes alone — environmental, not a code defect.","The first CI run."],
+ ["46","CC-41","update.sh rebuilt onto the same tag, so the outgoing image could not be restored. Fixed; what remains is to watch it run.","The next update.sh run (the following deploy)."]
+];
+
+/* ---------- PLATFORM STUDY ---------- */
+const PLATFORMS = [
+ ["Hermes","the main AI engine — never forked","ok"],
+ ["Paperclip","ancestor of our fork","ok"],
+ ["CrewAI","mechanism donor","ok"],
+ ["Multica","closest neighbour","ok"],
+ ["Gas Town","durability + honesty","ok"],
+ ["n8n","first real composition surface","ok"],
+ ["buzz","community = tenant","ok"],
+ ["openrig","gate culture, no tenancy","ok"],
+ ["zulip","strongest P2 + first widget model","ok"],
+ ["mattermost","pending your ask","pend"],
+ ["activepieces","newly added — pending study","pend"]
+];
+
+/* ---------- FRONTIER ---------- */
+const FRONTIER = `<b>NOW — Row 28 (Phase 8):</b> the agent runtime behind one typed door.
+  Sub-rows <b>R28-1 … R28-5 are DONE</b> (the port's shape · the first engine · the chat route moved
+  onto it · the run closed at the door · the exit gate). <b>R28-6 (deleting OpenCode, CC-72) is
+  trigger-blocked</b> until a second engine — Hermes — is wired behind the door.
+  <b>ALSO NOW:</b> Row 16 team-leg (CC-51 — your go-ahead) and the B-WS/B9 widget design.
+  <b>Behind it:</b> the platform skeleton work (Phase 5 remainders).`;
+
+/* ---------- RENDER ---------- */
+const S = {done:"Done",partial:"Partial",open:"Open",absent:"Absent"};
+const BC = {done:"b-done",partial:"b-partial",open:"b-open",absent:"b-absent"};
+
+// counts
+const c = {done:0,partial:0,open:0,absent:0};
+ROWS.forEach(r=>c[r[3]]++);
+const total = ROWS.length;
+document.getElementById('headline').innerHTML =
+  `<b>${total} checklist rows across ${Object.keys(PHASES).length} phases.</b>
+   <b style="color:var(--done-ink)">${c.done} done</b> ·
+   <b style="color:var(--partial-ink)">${c.partial} partial</b> ·
+   <b style="color:var(--open-ink)">${c.open} open</b> ·
+   <b style="color:var(--absent-ink)">${c.absent} absent</b>.
+   The finer-grained count is <b>78 of 321 units (~24%)</b> — derived from the boxes, never typed.`;
+document.getElementById('barD').style.width = (c.done/total*100)+'%';
+document.getElementById('barP').style.width = (c.partial/total*100)+'%';
+document.getElementById('lblD').textContent = c.done+' done';
+document.getElementById('lblP').textContent = c.partial+' partial';
+document.getElementById('lblO').textContent = (c.open+c.absent)+' open / absent';
+document.getElementById('frontier').innerHTML = FRONTIER;
+
+// checklist table with phase groups
+let curPhase = -1;
+const tb = document.getElementById('tbody');
+ROWS.forEach(r=>{
+  if(r[1]!==curPhase){curPhase=r[1];
+    const tr=document.createElement('tr');tr.className='ph';tr.dataset.phase=curPhase;
+    tr.innerHTML=`<td colspan="4">${PHASES[curPhase]}</td>`;tb.appendChild(tr);}
+  const tr=document.createElement('tr');
+  tr.dataset.status=r[3];tr.dataset.phase=r[1];
+  tr.innerHTML=`<td class="id">${r[0]}</td>
+    <td class="desc">${r[2]}</td>
+    <td><span class="badge ${BC[r[3]]}">${S[r[3]]}</span></td>
+    <td class="ids">${r[4]}</td>`;
+  tb.appendChild(tr);
+});
+
+// tabs
+const tabs=[["all","All rows"],["done","Done"],["partial","Partial"],["open","Open"],["absent","Absent"]];
+const tabBox=document.getElementById('tabs');
+tabs.forEach(([k,label],i)=>{
+  const n = k==="all"?total : c[k];
+  const el=document.createElement('span');el.className='tab'+(i===0?' on':'');
+  el.innerHTML=`${label}<span class="n">${n}</span>`;el.dataset.k=k;
+  el.onclick=()=>{document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+    el.classList.add('on');applyFilter(k);};
+  tabBox.appendChild(el);
+});
+function applyFilter(k){
+  document.querySelectorAll('#tbody tr').forEach(tr=>{
+    if(tr.classList.contains('ph')){tr.style.display = (k==='all')?'':'none';return;}
+    tr.style.display = (k==='all'||tr.dataset.status===k)?'':'none';
+  });
+}
+
+// open work — grouped by row
+const ow=document.getElementById('openwork');
+let lastRow=null, det=null;
+OPEN.forEach(o=>{
+  if(o[0]!==lastRow){lastRow=o[0];
+    det=document.createElement('details');
+    det.innerHTML=`<summary><span class="chev">▶</span>Row ${o[0]}<span class="cnt"></span></summary>
+      <div class="dbody"><table><thead><tr><th style="width:110px">Item</th>
+      <th>What it is, in plain words</th><th style="width:230px">Trigger — when it can be built</th>
+      </tr></thead><tbody></tbody></table></div>`;
+    ow.appendChild(det);}
+  const tb2=det.querySelector('tbody');
+  const tr=document.createElement('tr');
+  tr.innerHTML=`<td class="id">${o[1]}</td><td class="plain">${o[2]}</td>
+    <td class="trig">${o[3]}</td>`;
+  tb2.appendChild(tr);
+  const cnt=det.querySelector('.cnt');
+  cnt.textContent=tb2.children.length+' item'+(tb2.children.length>1?'s':'');
+});
+
+// platforms
+const pl=document.getElementById('platforms');
+PLATFORMS.forEach(p=>{
+  const s=document.createElement('span');
+  s.className='pill '+(p[2]==='ok'?'ok':'pend');
+  s.innerHTML=`<b>${p[0]}</b> — ${p[1]}`;
+  pl.appendChild(s);
+});
+
+// requirements summary (full register is in the SRS file)
+const REQSUMMARY = [
+ ["P1 — the aissistant","SR-01…09","9 reqs"],
+ ["P2 — the workspace","SR-10…18","9 reqs"],
+ ["P3 — automations","SR-19…26","11 reqs"],
+ ["PX-W / PX-F — widgets & frontend","SR-27…36","12 reqs"],
+ ["Out of pole + guard (PZ)","SR-37…46","12 reqs"]
+];
+const rq=document.getElementById('reqs');
+REQSUMMARY.forEach(r=>{
+  const d=document.createElement('div');
+  d.style.cssText='display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #f1f2f4;font-size:13px';
+  d.innerHTML=`<span><b>${r[0]}</b> <span class="ids">${r[1]}</span></span><span class="ids">${r[2]}</span>`;
+  rq.appendChild(d);
+});
+const note=document.createElement('p');
+note.className='kick';note.style.marginTop='10px';
+note.innerHTML=`<b>53 requirements total</b> — statuses HAVE 3 / BUILD 10 / BORROW 38 / RE-ENGINEER 2.
+  The full filterable register is in <code>08-THE-SRS.md</code> and the
+  <code>workshop-status.html</code> report.`;
+rq.appendChild(note);
+</script>
+</body>
+</html>
