@@ -28,41 +28,37 @@ it is the most honest document in a repo.
 | 3 | CrewAI 1.15.28 | ✅ CLOSED 7/7 | **Mechanism donor, NOT an architecture template.** Executor yes, **delivery no**, **tenancy nowhere**. |
 | 4 | **Multica 0.2.0** | ✅ **CLOSED 7/7 + reader** | **All three poles real. The closest neighbour studied.** No widget model; no engine of its own. |
 | 5 | **Gas Town 1.2.1** | ✅ **CLOSED 7/7 + reader** | Go multi-agent orchestration. **The watchdog chain is made of agents**; agents ARE beads; 13-preset provider registry; `gt prime` infers the role from the directory; **the Hook is the durability primitive**; **ZFC** = transport, don't decide; 47 tested TOML formulas; a **three-layer sandbox** (mTLS CA + denylist / CLI allow-list → 403 / git smart-HTTP proxy); 13 shell-script plugins, "no AI interpretation". Frontend = CLI (5× the rest); **NO widget model**. **Top 4 ranked mechanisms are DECIDED LIMITS.** |
-| 6 | **n8n 2.44.0** | ✅ **CLOSED 7/7 + 73 findings** | TS monorepo: 22,715 `.ts` (**65% of bytes**) / 57 `@n8n` packages; 563 built-in nodes. **A v2 engine that is a documented SCAFFOLD with 6 ACCURATE ADRs** (`MAX_IN_PROCESS_WAIT_MS = 65_000`). **P1:** `@n8n/agents` v0.29.0 — lazy fluent builder (25+ methods, `build()` protected), SKILL.md skills (72 KB cap, content-hashed), sub-agents w/ suspend/resume, **guardrails = `allow`\|`stop(code)`** at 2 moments, cost-as-guardrail + `SpendLedger`, untrusted tool output. **P2: a real tenancy model** — `Project` `personal\|team`, membership = composite-key join row w/ Role by slug, **10 roles (2-level) + 206 `resource:action` scopes** (4 of 5 `.ee`), `User` ≠ `AuthIdentity`. **P3: the study's best security surface** — expressions in an **isolate pool** (scales to zero) behind a **zod-validated RPC boundary** (*"TS types are erased at runtime and contribute zero security"*); observability = a **sampling policy**. **★ PX-W: THE FIRST PLATFORM WITH A REAL COMPOSITION SURFACE** — a **canvas of 7 element types**, a **129-component design system enforced by its own ESLint plugin**, **CRDT on y-websocket with awareness**. **PZ: two ratchets** (299 hashed arch violations + 110 boundary issues), a **pinned agent harness** (`harness-v0.6.0`), `agent-check.mjs` (excerpt to the agent, full output to disk). **FAIR-CODE** — `.ee` unlicensed, incl. `ai-workflow-builder.ee`. Extracted to `C:\n8n` (MAX_PATH). **Reader (port 3500) is the NEXT build.** |
-| — | buzz, openrig, mattermost, zulip | ⬜ 4 remain | Order not fixed — **ASK before extracting more.** |
+| 6 | **n8n 2.44.0** | ✅ **CLOSED 7/7 + 73 findings + reader (3500)** | TS monorepo: 22,715 `.ts` (**65% of bytes**) / 57 `@n8n` packages; 563 built-in nodes. **A v2 engine that is a documented SCAFFOLD with 6 ACCURATE ADRs** (`MAX_IN_PROCESS_WAIT_MS = 65_000`). **P1:** `@n8n/agents` v0.29.0 — lazy fluent builder, SKILL.md skills (72 KB cap), sub-agents w/ suspend/resume, **guardrails = `allow`\|`stop(code)`**, cost-as-guardrail + `SpendLedger`. **P2: a real tenancy model** — `Project` `personal\|team`, membership = composite-key join row w/ Role by slug, **10 roles + 206 `resource:action` scopes**, `User` ≠ `AuthIdentity`. **P3: the study's best security surface** — expressions in an **isolate pool** behind a **zod-validated RPC boundary** (*"TS types are erased at runtime and contribute zero security"*); observability = a **sampling policy**. **★ PX-W: the FIRST platform with a real composition surface** — a **canvas of 7 element types**, a **129-component design system enforced by its own ESLint plugin**, **CRDT on y-websocket**. **PZ: two ratchets** (299 hashed arch violations + 110 boundary issues), **pinned agent harness**, `agent-check.mjs` (excerpt to agent, full output to disk). **FAIR-CODE** — `.ee` unlicensed. Reader: 8 docs / 23,092 words / **153,204 chars**, 8/8 fidelity, port 3500. |
+| 7 | **buzz 0.5.28** | 🟡 **b00 in progress** | **Self-hosted team-communication platform on Nostr (NIP-01) — every action is a signed event with a `kind`; the relay is the single source of truth; community = tenant (URL-is-authoritative) with TLA+/Tamarin proofs.** Apache-2.0, **no licence gate**. Polyglot: **34 Rust crates / 501,445 prod LOC** + Tauri desktop + Flutter mobile + web. **Test share 60.9% by lines** — highest in the study (a filename count said 0.3%; off by ~200×). 11 `VISION_*.md`; 20 custom NIPs; 62 migrations. Reader will be port **3600**. |
+| — | openrig, mattermost, zulip | ⬜ 3 remain | Order not fixed — **ASK before extracting more (~700 MB each).** |
 
 **Multica (75 findings, b01 `4cf7f35` … b07 `afed823`) — the 3 load-bearing facts.**
 *(Full per-batch detail → `extended_deep_memory.md` + daily logs.)*
-1. **Machine ≠ teammate.** `agent_runtime` (the machine) and `agent` (the teammate) are two rows,
+1. **Machine ≠ teammate.** `agent_runtime` (the machine) vs `agent` (the teammate), two rows,
    `UNIQUE (workspace_id, daemon_id, provider)` — **the one-tenant-one-engine primitive**; `runtime_id`
    NOT NULL RESTRICT. Skills are TWO kinds (structured workspace vs runtime/CLI disable-only); permissions
    = `permission_mode` + a stacking `agent_invocation_target` allow-list, **deny-by-default**. **CC-84
    narrowed, not solved** (a `mat_` task token scopes a task, but the engine is still shared).
 2. **The one-statement claim** (`agent.sql:749-810`): `FOR UPDATE SKIP LOCKED` + a total order +
    per-(issue,agent) serialization + the runtime-health gate **inside** the claim; a prepare lease + 4
-   named sweepers; a **27-value failure taxonomy** (13 platform + 14 `agent_error.*`; the prefix
-   classifies). `sys_cron_executions` = the row is **both the distributed lease and the audit log**.
-   **Retirement is the lesson:** the chat-pending marker AND the terminal-completed index were each
-   built, dropped and rebuilt twice — *the migration chain, not the schema, is the truth.*
+   named sweepers; a **27-value failure taxonomy** (13 platform + 14 `agent_error.*`). `sys_cron_executions`
+   = the row is **both the distributed lease and the audit log**. **Retirement is the lesson:** the
+   chat-pending marker AND the terminal-completed index were each built, dropped and rebuilt twice —
+   *the migration chain, not the schema, is the truth.*
 3. **The container: 144 tables, 82 carry `workspace_id`** (the tenant fence). Members
-   `owner|admin|member` + invitations; **the last owner is protected in 3 code paths**. Git = a repo
-   registry + a multi-workspace GitHub install + an issue↔PR join (`007` moved Git issue→workspace).
-   PX-F: a 3-package layering whose constraints are **prohibitions** (core: no react-dom/localStorage/
-   process.env → `StorageAdapter`; ui: no core imports; views: no stores/next/*/react-router-dom →
-   `NavigationAdapter`); UI JSON goes through zod + `parseWithFallback`, **never `as T`** (deployed
-   desktop clients talk to newer backends). **THE NEGATIVE: NO widget/composer model** (0 composers) —
+   `owner|admin|member`; **the last owner is protected in 3 code paths**. Git = a repo registry +
+   a multi-workspace GitHub install + an issue↔PR join. PX-F: a 3-package layering whose constraints
+   are **prohibitions** (core: no react-dom/localStorage/process.env → `StorageAdapter`); UI JSON goes
+   through zod + `parseWithFallback`, **never `as T`**. **THE NEGATIVE: NO widget/composer model** —
    second platform with none. Migration `344` **deletes the ENTIRE Plugin V1** (14 DROP TABLEs) → 3
-   tables; 225 .mdx = 45 pages × 5 languages; `pkg/redact` on the WRITE path.
-**Reader built** (copy the engine, swap `BRAND`+`DOCS_CONFIG`+`diagrams.js`): 8 docs / 26,624 words /
-**177,688 chars**, 8/8 `fidelityVerified`, port 3300. **Fidelity verified two ways** — the HOW-TO's
-"byte count" check was WRONG (bytes 178,931 ≠ chars 177,688; the gap is UTF-8); corrected. **The engine
-was NOT fully platform-agnostic**: 4 hardcoded "CrewAI" strings + `window.CrewAIReader` + a
-`crewai_reader_` storage prefix — all fixed; 0 stale refs.
+   tables. Reader: 8 docs / 26,624 words / 177,688 chars, port 3300 — **verified two ways** (the
+   HOW-TO's "byte count" check was WRONG; bytes ≠ chars, the gap is UTF-8). **The engine was NOT fully
+   platform-agnostic**: 4 hardcoded "CrewAI" strings + `window.CrewAIReader` + a `crewai_reader_`
+   prefix — all fixed.
 
-**★ STUDY CHAIN (all six CLOSED):** Hermes 13/13 · Paperclip · CrewAI · Multica (+reader) · Gas Town
-(+reader) · **n8n `65f0889`…`8d06da8` (b00–b06) + `142e568` (b07 synthesis)**. **NEXT = the n8n
-reader (port 3500)**, then buzz / openrig / mattermost / zulip — **ASK before extracting more
-(~700 MB each; order not fixed)** — then the cross-platform mapping pass.
+**★ STUDY CHAIN (six CLOSED, the 7th open):** Hermes 13/13 · Paperclip · CrewAI · Multica (+reader)
+· Gas Town (+reader) · **n8n (+reader, port 3500)** · **buzz (b00, port 3600)** — then
+openrig / mattermost / zulip — **ASK before extracting more** — then the cross-platform mapping pass.
 
 ## Standing hazards (still bite)
 - **Git-Bash `grep -c $'\r'` LIES** — byte truth is `tr -cd '\r' < f | wc -c`; verify the

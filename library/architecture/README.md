@@ -63,6 +63,7 @@ one: double-click its `index.html`, or `node serve.js` inside its `reader/` fold
 - **CrewAI reader** → `crewai-forensics/reader/` (port 3200)
 - **Multica reader** → `multica-forensics/reader/` (port 3300)
 - **Gas Town reader** → `gastown-forensics/reader/` (port 3400)
+- **n8n reader** → `n8n-forensics/reader/` (port 3500)
 
 **The markdown is the source of truth.** Readers are generated from it and never edited by hand.
 
@@ -77,8 +78,8 @@ one: double-click its `index.html`, or `node serve.js` inside its `reader/` fold
 | **crewAI** | `crewaiinc/crewai` | **STUDIED — 7 batches + pin + reader** |
 | **multica** | `multica-ai/multica` | **STUDIED — 7 batches + pin + reader (75 findings). The closest neighbour studied: all three poles are real.** |
 | **gastown** | `gastownhall/gastown` | **STUDIED — 7 batches + pin + reader (68 findings). Mechanism source + boundary-setting reference.** |
-| **n8n** | `n8n-io/n8n` | **STUDIED — 7 batches + pin (73 findings). The first platform with a real composition surface. Reader next.** |
-| buzz | `block/buzz` | to study |
+| **n8n** | `n8n-io/n8n` | **STUDIED — 7 batches + pin (73 findings) + reader (port 3500). The first platform with a real composition surface.** |
+| buzz | `block/buzz` | **IN PROGRESS — batch 00 (pin + method).** Nostr-based team workspace; Apache-2.0; 34 Rust crates.
 | openrig | `mvschwarz/openrig` | to study |
 | mattermost | `mattermost/mattermost` | to study |
 | zulip | `zulip/zulip` | to study |
