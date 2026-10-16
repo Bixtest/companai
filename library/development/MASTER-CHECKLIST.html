@@ -13,6 +13,7 @@
     --open-bg:#f1f5f9; --open-ink:#64748b;
     --absent-bg:#fee2e2; --absent-ink:#b91c1c;
     --trigger-bg:#fff7ed; --trigger-ink:#c2410c;
+    --reeng-bg:#ede9fe; --reeng-ink:#6d28d9;
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--ink);
@@ -69,6 +70,7 @@
   .b-open{background:var(--open-bg);color:var(--open-ink)}
   .b-absent{background:var(--absent-bg);color:var(--absent-ink)}
   .b-trig{background:var(--trigger-bg);color:var(--trigger-ink)}
+  .b-reeng{background:var(--reeng-bg);color:var(--reeng-ink)}
   tr.hidden{display:none}
   .kick{color:var(--muted);font-size:12.5px}
 
@@ -162,6 +164,24 @@
     </table>
   </div>
 
+  <!-- SR REGISTER -->
+  <div class="card">
+    <h2><span class="dot"></span>The architecture requirements (SR) — every one, with its address</h2>
+    <p class="kick" style="margin:0 0 12px">What the nine-platform mapping produced — the requirement
+      register, read straight from <code>08-THE-SRS.md</code>. <b>Status meanings:</b>
+      <b>HAVE</b> = exists and is named · <b>BUILD</b> = planned, a register item builds it ·
+      <b>BORROW</b> = the mechanism comes from a platform study · <b>RE-ENGINEER</b> = the target
+      exceeds what mercato does today. <b id="srCount"></b> The sequencing rule: the tooling set
+      (<code>SR-38</code>/<code>39</code>/<code>41</code>/<code>46</code>) lands <b>first</b> — no
+      blockers — and <code>SR-08</code> has no prerequisite at all.</p>
+    <div class="tabs" id="srtabs"></div>
+    <table>
+      <thead><tr><th style="width:84px">Item</th><th>What it is</th>
+        <th style="width:118px">State</th></tr></thead>
+      <tbody id="srtbody"></tbody>
+    </table>
+  </div>
+
   <!-- REQUIREMENTS + PLATFORMS -->
   <div class="two">
     <div class="card">
@@ -186,7 +206,9 @@
     <span class="badge b-partial">partial</span> <span class="badge b-open">open</span>
     <span class="badge b-absent">absent</span> &nbsp;·&nbsp; No code was written to build this view.
     <br><b>Last audit 2026-10-16:</b> the register section added — all 83 <code>CC-*</code> items now carry
-    an address here (45 closed · 38 open); <code>CC-60</code> closed (done by <code>P2-4</code>, verified in
+    an address here (45 closed · 38 open); the SR register added — all 53 architecture requirements carry
+    an address (3 HAVE · 10 BUILD · 38 BORROW · 2 RE-ENGINEER), read straight from the SRS;
+    <code>CC-60</code> closed (done by <code>P2-4</code>, verified in
     code — the runner agent's fixed one-tool menu); <code>CC-67</code> closed and <code>CC-72</code> is the
     open row-28 item; the frontier boxes aligned across BACKLOG / platform_points / JOURNAL.
   </footer>
@@ -409,6 +431,63 @@ const REGISTER = [
  ["CC-84","The worker's tool calls carry ONE identity (the superadmin's) — the live Hermes path bypasses per-user, per-tenant authority","open"],
 ];
 
+/* ---------- SR REGISTER (mirrors 08-THE-SRS.md, read straight from the register, 2026-10-16) ---------- */
+const SRSREG = [
+ ["SR-01","P1","Typed engine port; nothing above it imports Hermes","have","Hermes"],
+ ["SR-02","P1","An agent is not its runtime; uniqueness key as a DB constraint","borrow","Multica"],
+ ["SR-03","P1","Permission policy ladder as data","borrow","openrig"],
+ ["SR-04","P1","Two-surface rule: policy set by code, never config","borrow","openrig"],
+ ["SR-05","P1","Sub-agent spawn cap (measured) + spawn ledger","build","n8n, Hermes"],
+ ["SR-06","P1","Skills as versioned SKILL.md artifacts","borrow","n8n, Hermes"],
+ ["SR-07","P1","A bot is a participant, not a parallel object","borrow","zulip"],
+ ["SR-08","P1","The triage core gets a production caller","build","mercato"],
+ ["SR-09","P1","Typed tool filter with run_context; typed tool failures","borrow","CrewAI"],
+ ["SR-10","P2","Ambient tenancy: tenant derived from the request","re-eng","zulip"],
+ ["SR-11","P2","Scope enters once — collapse the double entry","build","mercato, zulip"],
+ ["SR-12","P2","One tenant ↔ one engine home; per-run credential","build","Multica"],
+ ["SR-13","P2","Identity keys unique per realm, DB-enforced","borrow","zulip"],
+ ["SR-14","P2","Scope registry with a build-time ratchet","borrow","n8n"],
+ ["SR-15","P2","Audit log with topology-encoded event numbering","borrow","zulip"],
+ ["SR-16","P2","Personal / team workspace kinds","borrow","n8n"],
+ ["SR-17","P2","Tenancy contract + prose + conformance harness + LIMITS.md","borrow","buzz"],
+ ["SR-18","P2","Machine actors capped at approve-first, test-pinned","have","mercato"],
+ ["SR-19","P3","Durable wake queue: at-least-once, retries in payload, late cutoff","build","zulip"],
+ ["SR-19a","P3","Budget per event, not just per queue — a single event gets bounded time","borrow","zulip"],
+ ["SR-19b","P3","The row carries the obligation exactly-once; the wake is at-least-once","borrow","openrig"],
+ ["SR-20","P3","One-statement claim with health gate inside","borrow","Multica"],
+ ["SR-21","P3","Closed failure taxonomy per attempt","borrow","Multica"],
+ ["SR-21a","P3","Recovery is a named set of sweepers, one per way a task can die — not a generic retry","borrow","Multica"],
+ ["SR-22","P3","Every command declares risk + approval + expiry","build","mercato, buzz"],
+ ["SR-22a","P3","A slower poller only hides the bug — a reconciler that honours human cancellation beats it","borrow","Paperclip"],
+ ["SR-23","P3","Transport does not decide","borrow","Gas Town"],
+ ["SR-24","P3","Durable hooks for side effects","borrow","Gas Town"],
+ ["SR-25","P3","Event-kind registry; kinds over endpoints","borrow","buzz"],
+ ["SR-26","P3","Every approval gate ships a test that fires it","build","buzz"],
+ ["SR-27","PX-W","Widget = append-only log; state by replay","re-eng","zulip"],
+ ["SR-28","PX-W","Discriminated-union contract over widget kinds","build","zulip"],
+ ["SR-29","PX-W","One generic renderer: WidgetIR → DOM","build","zulip, mercato"],
+ ["SR-30","PX-W","Generic bridge: any backend drives any widget","borrow","zulip"],
+ ["SR-31","PX-W","Widget-kind registry; kinds register themselves","borrow","zulip"],
+ ["SR-32","PX-W","Composition canvas with CRDT collaboration","borrow","n8n"],
+ ["SR-32a","PX-W","Widget protocol, not widget model — a declarative UI vocabulary a client renders","borrow","CrewAI"],
+ ["SR-33","PX-F","Design system + own ESLint plugin guarding composition","borrow","n8n"],
+ ["SR-33a","PX-F","Deliberate non-features recorded: no plugin model, no dynamic loading, no schema versioning","borrow","zulip"],
+ ["SR-34","PX-F","Prohibition-constrained 3-package layering","borrow","Multica"],
+ ["SR-35","PX-W","UMES injection as the widget entry point","have","mercato"],
+ ["SR-35a","PX-F","Frontend as information architecture: a fetcher interface beats a widget tree","borrow","Gas Town"],
+ ["SR-36","PX-F","Dashboard + perspective screens","build","mercato"],
+ ["SR-37","out","Plugin/module registry with full lifecycle","borrow","Hermes, Multica"],
+ ["SR-38","out","Digital-twin harness; drift breaks the build","borrow","openrig"],
+ ["SR-39","PZ","One-truth check across every representation","borrow","zulip"],
+ ["SR-40","PZ","Feature-level ratchet only a human can raise","borrow","zulip"],
+ ["SR-41","PZ","Named, greppable escape hatches","borrow","zulip"],
+ ["SR-42","PZ","Exclusion ledger with mechanical expiry; ships empty","borrow","openrig"],
+ ["SR-43","PZ","Proof beside prose: contract + falsifiable check + LIMITS.md","borrow","buzz"],
+ ["SR-44","PZ","Retirement ledger; renames are tracked hazards","borrow","buzz, openrig"],
+ ["SR-45","out","Kinds-over-endpoints policy with conformance test","borrow","buzz"],
+ ["SR-46","out","Two-reads lint: any setting read twice must be read once","borrow","openrig"],
+];
+
 /* ---------- RENDER ---------- */
 const S = {done:"Done",partial:"Partial",open:"Open",absent:"Absent"};
 const BC = {done:"b-done",partial:"b-partial",open:"b-open",absent:"b-absent"};
@@ -511,6 +590,36 @@ rtabs.forEach(([k,label],i)=>{
       tr.style.display = (k==='all'||tr.dataset.rs===k)?'':'none';
     });};
   rtabBox.appendChild(el);
+});
+
+// SR register — every architecture requirement, with tabs
+const SRBADGE={have:'b-done',build:'b-partial',borrow:'b-open','re-eng':'b-reeng'};
+const SRLABEL={have:'HAVE',build:'BUILD',borrow:'BORROW','re-eng':'RE-ENGINEER'};
+const sc={have:0,build:0,borrow:0,'re-eng':0};
+SRSREG.forEach(r=>sc[r[3]]++);
+document.getElementById('srCount').innerHTML =
+  `<b>${SRSREG.length} total — ${sc.have} HAVE · ${sc.build} BUILD · ${sc.borrow} BORROW · ${sc['re-eng']} RE-ENGINEER.</b>`;
+const stb=document.getElementById('srtbody');
+SRSREG.forEach(r=>{
+  const tr=document.createElement('tr');
+  tr.dataset.rs=r[3];
+  tr.innerHTML=`<td class="id">${r[0]}</td>
+    <td class="desc"><b>${r[1]}</b> — ${r[2]} <span class="ids">· from ${r[4]}</span></td>
+    <td><span class="badge ${SRBADGE[r[3]]}">${SRLABEL[r[3]]}</span></td>`;
+  stb.appendChild(tr);
+});
+const stabs=[["all","All items"],["have","HAVE"],["todo","To do"]];
+const stabBox=document.getElementById('srtabs');
+stabs.forEach(([k,label],i)=>{
+  const n=k==='all'?SRSREG.length:(k==='have'?sc.have:SRSREG.length-sc.have);
+  const el=document.createElement('span');el.className='tab'+(i===0?' on':'');
+  el.innerHTML=`${label}<span class="n">${n}</span>`;el.dataset.k=k;
+  el.onclick=()=>{stabBox.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+    el.classList.add('on');
+    stb.querySelectorAll('tr').forEach(tr=>{
+      tr.style.display=(k==='all'||(k==='have'?tr.dataset.rs==='have':tr.dataset.rs!=='have'))?'':'none';
+    });};
+  stabBox.appendChild(el);
 });
 
 // platforms

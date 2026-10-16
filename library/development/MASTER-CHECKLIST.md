@@ -235,13 +235,78 @@ Nine closed; two pending your ask. They join as new `SR-*` columns, **no rework*
 - ⬜ **Pending your ask:** **mattermost** (226 MB zip on disk) · **activepieces** (added 2026-10-16 —
   `activepieces-main.zip` on disk, repo `activepieces/activepieces`)
 
+---
+
+## 7. The architecture requirements (SR) — every one, with its address
+
 The mapping output — **53 requirements** across the poles — is in
 `library/architecture/mapping/findings/08-THE-SRS.md`, with the filterable register in
-`library/architecture/mapping/workshop-status.html`.
+`library/architecture/mapping/workshop-status.html`. **Every one of them has an address here** — the
+table below, read straight from that register (its wording, not a rewrite). **Status meanings:**
+**HAVE** = exists and is named · **BUILD** = planned, a register item builds it · **BORROW** = the
+mechanism comes from a platform study · **RE-ENGINEER** = the target exceeds what mercato does today.
+**3 HAVE · 10 BUILD · 38 BORROW · 2 RE-ENGINEER = 53.** The sequencing rule from the SRS: the tooling
+set (`SR-38`/`39`/`41`/`46`) lands **first** — no blockers — and `SR-08` has no prerequisite at all.
+
+| Item | Pole | What it is | From | State | Extends / gate |
+|---|---|---|---|---|---|
+| SR-01 | P1 | Typed engine port; nothing above it imports Hermes | Hermes | ✅ HAVE | `P2-1…P2-9a` (built) |
+| SR-02 | P1 | An agent is not its runtime; uniqueness key as a DB constraint | Multica | ☐ BORROW | — |
+| SR-03 | P1 | Permission policy ladder as data | openrig | ☐ BORROW | — |
+| SR-04 | P1 | Two-surface rule: policy set by code, never config | openrig | ☐ BORROW | — |
+| SR-05 | P1 | Sub-agent spawn cap (measured) + spawn ledger | n8n, Hermes | ☐ BUILD | corrected in the SRS (rule 13) |
+| SR-06 | P1 | Skills as versioned `SKILL.md` artifacts | n8n, Hermes | ☐ BORROW | — |
+| SR-07 | P1 | A bot is a participant, not a parallel object | zulip | ☐ BORROW | — |
+| SR-08 | P1 | The triage core gets a production caller | mercato | ☐ BUILD | `G-21`, `CC-59`, `CC-60` — no prerequisite |
+| SR-09 | P1 | Typed tool filter with `run_context`; typed tool failures | CrewAI | ☐ BORROW | A2UI moved to `SR-32a` |
+| SR-10 | P2 | Ambient tenancy: tenant derived from the request | zulip | ☐ RE-ENGINEER | — |
+| SR-11 | P2 | Scope enters once — collapse the double entry | mercato, zulip | ☐ BUILD | `CC-84` |
+| SR-12 | P2 | One tenant ↔ one engine home; per-run credential | Multica | ☐ BUILD | `CC-84` — gates `P2-9b` |
+| SR-13 | P2 | Identity keys unique per realm, DB-enforced | zulip | ☐ BORROW | — |
+| SR-14 | P2 | Scope registry with a build-time ratchet | n8n | ☐ BORROW | — |
+| SR-15 | P2 | Audit log with topology-encoded event numbering | zulip | ☐ BORROW | — |
+| SR-16 | P2 | Personal / team workspace kinds | n8n | ☐ BORROW | — |
+| SR-17 | P2 | Tenancy contract + prose + conformance harness + `LIMITS.md` | buzz | ☐ BORROW | — |
+| SR-18 | P2 | Machine actors capped at approve-first, test-pinned | mercato | ✅ HAVE | authority layer (test-pinned) |
+| SR-19 | P3 | Durable wake queue: at-least-once, retries in payload, late cutoff | zulip | ☐ BUILD | — |
+| SR-19a | P3 | Budget per event, not just per queue — a single event gets bounded time | zulip | ☐ BORROW | `MAX_CONSUME_SECONDS = 30` (SIGALRM) |
+| SR-19b | P3 | The row carries the obligation exactly-once; the wake is at-least-once | openrig | ☐ BORROW | baton + wake committed in one transaction |
+| SR-20 | P3 | One-statement claim with health gate inside | Multica | ☐ BORROW | — |
+| SR-21 | P3 | Closed failure taxonomy per attempt | Multica | ☐ BORROW | — |
+| SR-21a | P3 | Recovery is a named set of sweepers, one per way a task can die — not a generic retry | Multica | ☐ BORROW | F04-03 |
+| SR-22 | P3 | Every command declares risk + approval + expiry | mercato, buzz | ☐ BUILD | `CC-63` |
+| SR-22a | P3 | A slower poller only hides the bug — a reconciler that honours human cancellation beats it | Paperclip | ☐ BORROW | the DOT-2 lesson |
+| SR-23 | P3 | Transport does not decide | Gas Town | ☐ BORROW | "Zero Framework Cognition" |
+| SR-24 | P3 | Durable hooks for side effects | Gas Town | ☐ BORROW | F03-03 — cited from the P2 file |
+| SR-25 | P3 | Event-kind registry; kinds over endpoints | buzz | ☐ BORROW | — |
+| SR-26 | P3 | Every approval gate ships a test that fires it | buzz | ☐ BUILD | — |
+| SR-27 | PX-W | Widget = append-only log; state by replay | zulip | ☐ RE-ENGINEER | — |
+| SR-28 | PX-W | Discriminated-union contract over widget kinds | zulip | ☐ BUILD | — |
+| SR-29 | PX-W | One generic renderer: `WidgetIR` → DOM | zulip, mercato | ☐ BUILD | — |
+| SR-30 | PX-W | Generic bridge: any backend drives any widget | zulip | ☐ BORROW | — |
+| SR-31 | PX-W | Widget-kind registry; kinds register themselves | zulip | ☐ BORROW | — |
+| SR-32 | PX-W | Composition canvas with CRDT collaboration | n8n | ☐ BORROW | — |
+| SR-32a | PX-W | Widget **protocol**, not widget model — a declarative UI vocabulary a client renders | CrewAI | ☐ BORROW | new row; the A2UI find |
+| SR-33 | PX-F | Design system + own ESLint plugin guarding composition | n8n | ☐ BORROW | — |
+| SR-33a | PX-F | Deliberate non-features recorded: no plugin model, no dynamic loading, no schema versioning | zulip | ☐ BORROW | — |
+| SR-34 | PX-F | Prohibition-constrained 3-package layering | Multica | ☐ BORROW | — |
+| SR-35 | PX-W | UMES injection as the widget entry point | mercato | ✅ HAVE | kit |
+| SR-35a | PX-F | Frontend as information architecture: a fetcher interface beats a widget tree | Gas Town | ☐ BORROW | the `ConvoyFetcher` find |
+| SR-36 | PX-F | Dashboard + perspective screens | mercato | ☐ BUILD | `M5` |
+| SR-37 | out | Plugin/module registry with full lifecycle | Hermes, Multica | ☐ BORROW | corrected in the SRS (rule 13) |
+| SR-38 | out | Digital-twin harness; drift breaks the build | openrig | ☐ BORROW | **the next task — prerequisites measured in code** |
+| SR-39 | **PZ** | One-truth check across every representation | zulip | ☐ BORROW | — |
+| SR-40 | **PZ** | Feature-level ratchet only a human can raise | zulip | ☐ BORROW | trigger corrected in the SRS |
+| SR-41 | **PZ** | Named, greppable escape hatches | zulip | ☐ BORROW | — |
+| SR-42 | **PZ** | Exclusion ledger with mechanical expiry; ships empty | openrig | ☐ BORROW | — |
+| SR-43 | **PZ** | Proof beside prose: contract + falsifiable check + `LIMITS.md` | buzz | ☐ BORROW | — |
+| SR-44 | **PZ** | Retirement ledger; renames are tracked hazards | buzz, openrig | ☐ BORROW | — |
+| SR-45 | out | Kinds-over-endpoints policy with conformance test | buzz | ☐ BORROW | — |
+| SR-46 | out | Two-reads lint: any setting read twice must be read once | openrig | ☐ BORROW | — |
 
 ---
 
-## 7. How this file relates to the other registers (no conflicts)
+## 8. How this file relates to the other registers (no conflicts)
 
 | Document | Role |
 |---|---|
@@ -254,7 +319,7 @@ The mapping output — **53 requirements** across the poles — is in
 
 ---
 
-## 8. Keeping it current
+## 9. Keeping it current
 
 When a status changes: update it here **and** in `platform_points.md` (the number is derived from the
 boxes, never typed), then re-open the HTML — its data block mirrors this list and is marked with the
@@ -262,6 +327,7 @@ date it was last synced. If this index and a register disagree, **the register w
 the defect** — fix it here.
 
 **Last synced:** 2026-10-16 (audit — the register section added: all 83 `CC-*` items carry an address;
-`CC-60` closed by `P2-4` and `CC-67` closed, both verified in code and in the callbacks register;
-`CC-72` is the open row-28 item; the frontier boxes aligned across BACKLOG / platform_points /
-JOURNAL).
+the SR register added: all 53 architecture requirements carry an address (3 HAVE · 10 BUILD ·
+38 BORROW · 2 RE-ENGINEER), read straight from `08-THE-SRS.md`; `CC-60` closed by `P2-4` and
+`CC-67` closed, both verified in code and in the callbacks register; `CC-72` is the open row-28
+item; the frontier boxes aligned across BACKLOG / platform_points / JOURNAL).
