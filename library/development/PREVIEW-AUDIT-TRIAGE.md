@@ -40,7 +40,10 @@ false**. Two of the audit's claims are now outdated because the work they named 
 five of its own measurements needed correcting. The two CRITICAL authorization defects **were both still open
 at triage time — both reachable from an ordinary HTTP route, and both the same defect shape**: a control the
 design declares and nothing reads. **Both are now built** (T-01 `fa974bb1`, T-02 `60a6714f`, 2026-10-17; see
-§2.1 and §2.2), as is the class-level mechanism that would have caught them (`SR-47`, T-03).
+§2.1 and §2.2), as is the class-level mechanism that would have caught them (`SR-47`, T-03). **T-32 — the
+one-character UUID fail-open — is now built as well** (`13c6206f`, 2026-10-17; see §2.4), and building it
+exposed one new finding of its own: **T-45**, a locked record's refusal has no production consumer on the
+command path.
 
 **The single most useful thing in the audit is its §18 structural observation**, and it is the finding I
 would act on first, ahead of both CRITICALs: there is no automated mechanism that notices a declared control
@@ -99,7 +102,7 @@ Sorted by rank, then by the audit's own priority. "Src" is the `preview/` docume
 | **T-29** | 08 §12 C-1 | The C6 command contract is dead at runtime — zero declarations | 🔬 CONFIRMED (shape) | medium | scheduled | EXECUTE |
 | **T-30** | 08 §12 L-1 | Optimistic locking is client-opt-in **and the reader fails open** (five early `ok: true` returns) | 🔬 CONFIRMED | medium | scheduled | EXECUTE |
 | **T-31** | 08 §13 A1-08 | The autonomy matrix exempts humans entirely | 🔬 CONFIRMED, **but deliberate** | small | postponed | DOCUMENT |
-| **T-32** | 08 §13 A1-09 | `UUID_PATTERN` rejects UUIDv7, so locked records are writable | 🔬 CONFIRMED | small | urgent | EXECUTE |
+| **T-32** | 08 §13 A1-09 | `UUID_PATTERN` rejects UUIDv7, so locked records are writable | 🔬 CONFIRMED | small | urgent | ✅ **BUILT** `13c6206f` — see §2.4 |
 | **T-33** | 08 §13 A1-11 | `resourceKind`/`resourceId` are unhashed in the ledger | 🔬 CONFIRMED | medium | scheduled | EXECUTE |
 | **T-34** | 08 §13 A1-14 | `authorityPolicyProblems` has zero production callers | 🔬 CONFIRMED | small | scheduled | EXECUTE |
 | **T-35** | 08 §13 A2-06 | The sandbox's `maxOutputSize` and `maxApiCalls` are declared and dropped | 🔬 CONFIRMED | small | scheduled | EXECUTE |
@@ -112,6 +115,7 @@ Sorted by rank, then by the audit's own priority. "Src" is the `preview/` docume
 | **T-42** | 07 §6.2 | No `llamacpp` preset — the open-source lane squats on `OPENAI_*` | 🔬 CONFIRMED | medium | scheduled | EXECUTE |
 | **T-43** | 09 §1.2 | `detectRepeatedRequest` exists and has zero callers — "show the saving" is unwired | 🔬 CONFIRMED | small | scheduled | DOCUMENT |
 | **T-44** | 08 §16 / 09 §2.1 | `G-04` — the data axis — does not exist, and the compiler says so loudly on every compile | 🔬 CONFIRMED | critical | scheduled | DOCUMENT |
+| **T-45** | new — found while building T-32 | A locked record's refusal has no production consumer on the command path: the gate does not hold A0 by design ("RbacService has already made it at the route guard"), and `refusalFor` threads no recordId, so a locked record is writable by any actor holding the capability | 🔬 CONFIRMED | high | scheduled | DOCUMENT |
 
 ### 1.4 Already fixed — do not re-fix
 
@@ -258,6 +262,55 @@ one instance. `SR-47` closes the class.
 > T-03 is now closed; **T-01 is now built as well** (`fa974bb1`, 2026-10-17); **T-08, T-29 and T-43 remain
 > open and are still the work.**
 
+### 2.4 T-32 — the UUID pattern, built — and the gap the build exposed
+
+`readRecordId` (`packages/core/src/modules/auth/commands/interceptors.ts:89`) accepts only RFC-4122 v1–v5
+ids: the pattern pins the version nibble to `[1-5]` and the variant nibble to `[89ab]`. A valid UUIDv7 id —
+a shape the Postgres `uuid` column accepts, and one imports, sync jobs and future migrations can carry —
+fails the pattern, `readRecordId` returns `null`, the id reaches `AuthorityEnforcementService.decideFor` as
+`recordId: null`, and `resourceCeilingFor` (line 335) returns early on `!recordId`. The record's lock is
+**never looked up** — no ceiling, no project context, no grade.
+
+This one pattern mattered out of proportion to its size because the command gate is the **only production
+caller that threads a recordId**. `refusalFor` — the route guard's path (`rbacService.ts:595`) — calls
+`decideFor(subject, feature, scope)` with no options; the AI tool path threads only `onBehalfOfUserId`. The
+gate's `readRecordId` was the single point where record locks reach the resolver at all. And the house tests
+could not have caught it: every existing gate test mocks `decideFor` entirely (QT-02 — the mock ignores its
+arguments, so deleting the threading outright would have left the suite green).
+
+**The fix goes one step beyond the recorded one, and by name (rule 13).** The triage recorded
+`[1-5]` → `[0-9a-f]`; re-measured, the variant nibble is the same class of over-strictness — a valid UUID
+with a non-RFC variant bypasses the lookup identically — so the fix takes the shape to its logical end:
+`/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i`. In-repo precedent, measured:
+`sync-run-service.ts:7` and `grantChecks.ts:46` use exactly this shape, and `crud/ids.ts:5` shows the house
+relaxing in the same direction with `[1-8]`. Shape-only is the right line because version and variant are
+properties of the **generator**, not the record — ids are v4 today (`gen_random_uuid()`), but nothing
+constrains them to it, and the shape is what keeps a slug or numeric id from colliding with a lock, which is
+the docblock's stated purpose.
+
+**The gap the build exposed — T-45 (new, ranked high, scheduled, DOCUMENT).** The lock rules themselves are
+right (`locked` → A0, `restricted` → A2, `open` → null, reads exempt, unreadable → `locked`, fail-closed —
+the audit's §14 note said only the *lookup* fails open, and the build fixed the lookup). But a **locked**
+record still passes the gate: the gate does not hold A0 by design, on the reasoning that RbacService has
+already made it at the route guard — true for capability refusals, false for record-lock ones, because
+`refusalFor` threads no recordId, so a record-lock ceiling can never surface there either. Net effect: a
+locked record is writable by any actor holding the capability. It needs the owner's decision on where the
+refusal belongs, and it is **pinned by a test** in the new suite rather than left latent.
+
+> ✅ **T-32 WAS BUILT, 2026-10-17, `13c6206f`.** The shape-only pattern above, with the docblock rewritten to
+> carry the rationale ("shape only — no version or variant constraint… version and variant are properties of
+> the *generator*… same shape as `sync-run-service.ts` and `grantChecks.ts`"). PROOF: 7 tests in
+> `packages/core/src/modules/auth/commands/__tests__/authority-command-gate.record-id.test.ts`, driving the
+> real gate and the real `AuthorityEnforcementService` with a stub lock reader — **the decisive assertion is
+> that the lookup happened at all**: `stateFor` called with the record's real id, after which a restricted
+> record named by a v7 id is **held** at A2. 4 mutations run for real, the file restored byte-clean between
+> runs, each killing exactly its named tests: M1 (restore the pre-fix pattern) kills both hole tests +
+> uppercase + locked; M2 (accept any string) kills the slug/numeric guard; M3 (drop `/i`) kills uppercase;
+> M4 (remove the threading) kills all 5 threading tests. Verified: 19 tests across the two gate suites, 809
+> tests / 90 suites across `src/modules/auth`, `tsc --noEmit --incremental false` clean, eslint clean; both
+> files pure LF, no BOM. The build also exposed **T-45**, documented above and pinned by the test "still
+> passes a locked record: the gate does not hold A0, by design".
+
 ---
 
 ## 3. What the audit got right about its own process — and why that matters here
@@ -284,8 +337,8 @@ is the one substantive recommendation this document adds.
 |---|---|---|
 | 1 | **`SR-47` — the declared-control coverage check** (T-03) — ✅ **BUILT 2026-10-17** | It is the class, not an instance. The workshop already owns the mechanism. Doing it first means T-01, T-08, T-29 and the next three are caught mechanically rather than patched one at a time |
 | 2 | **T-01 and T-02** — the two CRITICALs — ✅ **BOTH BUILT 2026-10-17** (`fa974bb1`, `60a6714f`) | Live privilege-escalation and data-exposure routes, both reachable from an ordinary role, both one function to close, both with the code to copy already in the repo |
-| 3 | **T-32** — `UUID_PATTERN` `[1-5]` → `[0-9a-f]` — **next** | One character. Locked records become writable by a v7-id payload. There is no reason to leave a one-character fail-open in place |
-| 4 | **T-13 and T-14** — `--jinja` and the `mcp` base URL | Both are one line in a compose file, both are live today, and T-14 is the difference between the embedding lane working and it silently calling `api.openai.com` |
+| 3 | **T-32** — `UUID_PATTERN` shape-only fix — ✅ **BUILT 2026-10-17** (`13c6206f`) | One character of over-strictness. Locked records became writable by a v7-id payload, because the gate is the only production path that threads a recordId — and the build exposed T-45, a locked record's refusal has no production consumer |
+| 4 | **T-13 and T-14** — `--jinja` and the `mcp` base URL — **next** | Both are one line in a compose file, both are live today, and T-14 is the difference between the embedding lane working and it silently calling `api.openai.com` |
 | 5 | **T-04, T-05, T-06** — the count gap, the double approve, the ledger hole | The three HIGHs that break a central guarantee with a green test suite behind them |
 | 6 | **T-07, T-27, T-16, T-17** — the fail-open flips | Four small edits that each remove a silent failure mode, and T-27 is the one that lets an `auth: null` context accept a foreign tenant |
 | 7 | **T-09, T-12** — repair the DS lint, guard `/backend` | T-09 unlocks thirty rule categories; T-12 removes a documented crash trap |

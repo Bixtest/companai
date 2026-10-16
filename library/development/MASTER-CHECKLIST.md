@@ -41,35 +41,56 @@ largely built — while the **platform skeleton underneath it is only starting**
 
 ## 2. ▶ The frontier — what is being built now
 
-- **★ LAST DONE — 2026-10-17: the two CRITICALs, `T-01` and `T-02` — BOTH BUILT (`fa974bb1`,
-  `60a6714f`).** The two authorization defects the `preview/` audit found and the triage ranked
-  alongside the class-level check — both closed on the same day `SR-47` landed.
-  - **`T-01` — a delegation no longer lends authority the lender does not have (`fa974bb1`).** The
-    route's guard requires `auth.delegations.manage` and never the capability being granted, and the
-    grantor principal was derived from the caller and never checked — so a holder of the manage
-    feature alone could lend `api_keys.manage` (minting identities) to anybody, or to themselves,
-    while `.delegable: false` had **zero production readers**. **Three checks now run before
-    `delegations.grant`, one more than the triage's fix sentence named:** the grantor-holds check
-    (the route's own header principle — "nobody may lend authority they do not hold" — applied to
-    the caller's own holdings, not just the grantor id), the `delegable: false` refusal, and the
-    self-delegation ceiling (a delegation is an independent authority source at use time, so a
-    self-delegation with a null ceiling outlives the holdings that justified it). 9 tests, 3
-    mutations run for real, each killing exactly its own test; **the decisive assertion is that the
-    write never happened** — `grant` was never called, not a 403 returned after it.
-  - **`T-02` — the business-query tool no longer reads an entity the caller has no permission for
-    (`60a6714f`).** `features: ctx.userFeatures` rode the chain from the tool
-    (`business-ir-pack.ts:129`) and was read by nothing, so `engine.query` ran unguarded: any caller
-    with the tool's own `ai_assistant.view` (a view feature with no capability descriptor, so the
-    capability path permits on absence) could read any entity their tenant held — **the only guard
-    on which rows came back was the prompt itself**. One gate before the engine read, copied from
-    the search module's `authorizeEntityAccess` (`search/ai-tools.ts:86`, 53 entities'
-    `aclFeatures` behind it) because the two packages must not depend on each other, fail-closed
-    the way the donor is (no config, no `aclFeatures`, no container → refusal; superadmin bypasses,
-    the donor's rule, preserved deliberately and pinned by a test). 8 tests, 7 mutations run for
-    real, each killing exactly its named test; **the decisive assertion is that the read never
-    happened** — `engine.query` was never called. The existing run suite's fixtures were
-    **completed, not weakened** — they passed no container, so the fail-closed gate would have
-    refused every happy path.
+- **★ LAST DONE — 2026-10-17 (evening): `T-32` — a v7 record id no longer hides a record's lock — BUILT
+  (`13c6206f`).** The audit's A1-09: `readRecordId` (`interceptors.ts:89`) accepted only RFC-4122 v1–v5
+  ids — version nibble `[1-5]`, variant nibble `[89ab]` — so a valid v7 id failed the pattern, reached
+  the resolver as `recordId: null`, and `resourceCeilingFor` (`authorityEnforcementService.ts:335`)
+  returns early on `!recordId`: **the lock was never looked up** — no ceiling, no project context, no
+  grade. The command gate is the **only production caller that threads a recordId** (`refusalFor` at
+  `rbacService.ts:595` calls `decideFor` with no options; the AI tool path threads only
+  `onBehalfOfUserId`), so this one pattern was the single point where record locks reach the resolver.
+  And the house tests could not have caught it: every existing gate test mocks `decideFor` entirely
+  (QT-02 — the mock ignores its arguments, so deleting the threading would leave a green suite).
+  - **The fix goes one step beyond the recorded one, by name (rule 13).** The triage recorded
+    `[1-5]` → `[0-9a-f]`; re-measured, the variant nibble is the same class of over-strictness (a valid
+    UUID with a non-RFC variant bypasses the lookup identically), so the fix takes the shape to its
+    logical end — `/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i`. In-repo precedent
+    measured: `sync-run-service.ts:7` and `grantChecks.ts:46` use exactly this shape; `crud/ids.ts:5`
+    shows the house relaxing in the same direction with `[1-8]`. Version and variant are properties of
+    the **generator**, not the record — ids are v4 today (`gen_random_uuid()`) but the `uuid` column
+    accepts any version and imports/sync/future migrations can carry v7; the shape is what keeps a slug
+    or numeric id from colliding with a lock, which is the docblock's stated purpose.
+  - **Proof:** 7 tests in `authority-command-gate.record-id.test.ts`, driving the real gate and the real
+    `AuthorityEnforcementService` with a stub lock reader; **the decisive assertion is that the lookup
+    happened at all** — `stateFor` called with the record's real id, after which a restricted record
+    named by a v7 id is **held** at A2. 4 mutations run for real, the file restored byte-clean between
+    runs, each killing exactly its named tests (M1 restore the pre-fix pattern → the hole ×2 + uppercase
+    + locked; M2 accept any string → the slug/numeric guard; M3 drop `/i` → uppercase; M4 remove the
+    threading → all 5 threading tests). Verified: 19 tests across the two gate suites, 809 tests /
+    90 suites across `src/modules/auth`, `tsc --noEmit --incremental false` clean, eslint clean; both
+    files pure LF, no BOM.
+  - **★ WHAT IT DOES NOT CLOSE, PINNED RATHER THAN LATENT — `T-45` / `CC-97`:** a **locked** record
+    still passes the gate. The lock rules are right (`locked` → A0, `restricted` → A2, `open` → null,
+    reads exempt, unreadable → `locked`, fail-closed), but the gate does not hold A0 **by design**
+    ("RbacService has already made it at the route guard") — true for capability refusals, false for
+    record-lock ones, since `refusalFor` threads no recordId, so a record-lock ceiling can never surface
+    there either. Net effect: a locked record is writable by any actor holding the capability. Ranked
+    high, urgency scheduled, action DOCUMENT — the owner decides where the refusal belongs (a gate hold,
+    or the route guard threading the recordId). Pinned by the test "still passes a locked record: the
+    gate does not hold A0, by design" so the gap is visible rather than latent.
+
+- **★ AND EARLIER THE SAME DAY — 2026-10-17 (afternoon): the two CRITICALs, `T-01` and `T-02` — BOTH
+  BUILT (`fa974bb1`, `60a6714f`).**
+  *(Superseded as LAST DONE by `T-32` above; the full record is in `CC-94` and `CC-95`.)*
+  - **`T-01` (`fa974bb1`):** a delegation no longer lends authority the lender does not have. The route's
+    guard required `auth.delegations.manage` and never the capability being granted; three checks now run
+    before `delegations.grant` — the grantor-holds check, the `delegable: false` refusal, and the
+    self-delegation ceiling — one more than the triage's fix sentence named. 9 tests, 3 mutations run for
+    real; **the decisive assertion is that the write never happened**.
+  - **`T-02` (`60a6714f`):** the business-query tool no longer reads an entity the caller has no
+    permission for. One fail-closed gate before `engine.query`, copied from the search module's
+    `authorizeEntityAccess` because the two packages must not depend on each other. 8 tests, 7 mutations
+    run for real; **the decisive assertion is that the read never happened**.
 
 - **★ AND EARLIER THE SAME DAY — 2026-10-17: `SR-47`, the declared-control coverage check — BUILT,
   `52383e09`.**
@@ -123,13 +144,12 @@ largely built — while the **platform skeleton underneath it is only starting**
   **What remains open:** **T-08, T-29 and T-43** — the check reports them, it does not
   fix them. T-03 itself is closed, and **T-01 is now built**.
 
-- **▶ NEXT — T-32, the one-character fix:** `UUID_PATTERN`'s `[1-5]` → `[0-9a-f]` — a v7 id
-  currently fails the match, so no lock lookup runs and a locked record is writable. **Then the two
-  live compose defects** (T-13 `--jinja`, absent from every compose file; T-14 the `mcp` service's
-  missing base URL, which is the difference between the embedding lane working and it silently
-  calling `api.openai.com`). **Then the tooling set's remainder** (`CC-91` — `SR-38` digital-twin
-  harness, `SR-46` two-reads lint), and the sequence behind it unchanged: identity
-  (`SR-02`/`SR-07`) → `SR-12` → `P2-9b`. The two CRITICALs do not delay any of these — they were
+- **▶ NEXT — the two live compose defects:** **T-13** — `--jinja` is absent from every compose file;
+  **T-14** — the `mcp` service's missing base URL, which is the difference between the embedding lane
+  working and it silently calling `api.openai.com`. Both are one line in a compose file, both live
+  today. **Then the tooling set's remainder** (`CC-91` — `SR-38` digital-twin harness, `SR-46`
+  two-reads lint), and the sequence behind it unchanged: identity (`SR-02`/`SR-07`) → `SR-12` (the
+  fix for open `CC-84`) → `P2-9b`. The two CRITICALs and T-32 do not delay any of these — they were
   the urgent pair, and `SR-47` remains the item that makes the next findings arrive as a build
   failure instead of a discovery.
 
@@ -328,7 +348,7 @@ The `CC-*` codes are the fine-grained items behind the rows above — the cuts, 
 **Every one has an address here**: a code you meet anywhere in the documents resolves on this page.
 **Closed** = built and proven (tests, mutations, a separate-agent hostile critic — the record is in
 `COMPLETION-CALLBACKS.md`). States were read item by item from that register, not scanned by keyword.
-**CC-75 was never assigned** — the numbering skips it. **51 closed · 43 open · 94 total.**
+**CC-75 was never assigned** — the numbering skips it. **52 closed · 44 open · 96 total.**
 
 | Item | What it is, in plain words | State |
 |---|---|---|
@@ -426,6 +446,8 @@ The `CC-*` codes are the fine-grained items behind the rows above — the cuts, 
 | CC-93 | **`SR-47` — the declared-control coverage check — BUILT 2026-10-17 (`52383e09`).** The item the triage's own ranking put **first, ahead of both CRITICAL patches**, and the reason it went first: six findings were the same finding, and a patch closes an instance while this closes the class. **What shipped:** `scripts/check-declared-controls.mjs` (a registry of six controls), `scripts/__tests__/check-declared-controls.test.mjs` (**10/10**), `scripts/verify-declared-controls-mutations.mjs` (a mutation-proof harness), and `check:declared-controls` / `:fail` in `package.json`. **Measured on the real repo at `b183df58`:** `capability-delegable` **UNCOVERED** (24 declarations, 0 production consumers, 0 test); `trust-demote-if-evidence-demands` **UNCOVERED** (1 decl, 0 prod, **4 test** — a public `TrustService` method whose only callers are its own test); `authority-policy-problems` **UNCOVERED** (1/0/**3**); `business-widget-frontend-vocabulary` **UNCOVERED** (1/0/**5**, and `ir.ts:217`/`:227` are self-calls); `request-repeat-detector` **UNCOVERED** (1/0/**13** — the most-tested dead control in the repo); `command-contract-c6` **DEAD-INPUT** (reader wired at `command-bus.ts:452`, **0 producers**). **★ THE TEST COLUMN IS THE FINDING:** every one of these controls has a full test suite and not one production consumer — **tested and wired are different things, and only the second is protection.** **★ THREE SHAPES, because "nobody calls it" is not the only way a control dies:** `field` (declared, never read), `export` (exported, called only by its own test), and `input` — **new, and the one that most deserves a check** — where the reader is wired and the producer is absent, so the C6 contract returns `null` for every handler while looking completely alive. **★ A SECOND FINDING FROM THE BUILD:** a mechanical census of every exported symbol with no production consumer puts the whole class at **3,658 of 14,311 (25.6%)** — **not** a defect count (most of it is zod schemas and type aliases exported as a module's declared surface), which is why the registry is **curated** and the census is a figure to watch, not a gate to trip. Publishing 3,658 findings would bury the six that are real — the same noise problem `SR-41` avoided. **★ THE CHECK WAS WRONG TWICE WHILE BEING BUILT, both times in the dangerous direction** (a dead control reading as *wired*): (1) string literals were not stripped, so `auth/acl.ts:112`'s sentence **"Emphatically not itself delegable:"** read as a declaration site — a raw grep reports 29 `.delegable` declarations where the true count is **24**, five of them prose inside `note:` strings; (2) regex literals were not stripped, so the registry's own `consumer: /\.delegable\b|\[['"]delegable['"]\]/` — a quote inside a character class — read as a string delimiter, the `\.delegable` before it survived, and **the check reported itself as the control's consumer**. `strip()` now removes string, comment **and** regex-literal contents before any pattern is applied, keeping length and newlines so line numbers stay true. **★ SIX MUTATIONS PROVE THE SUITE HAS TEETH** — regex, string and comment stripping disabled; same-file consumers always counted; a declaration counting as its own consumer; test files never walked. Each must fail the suite **in the right case**; a mutation caught in the wrong case is reported NOT PROVEN, not as a pass. All six proven, and the harness restores the checker byte-identical or refuses to report success. **★ Default mode reports and exits 0**, because all six controls are currently uncovered and a check that is red from its first commit gets switched off — the exact failure this script exists to catch. `--fail` is the enforcement mode, for when the backlog is cleared. Same report-now / enforce-later split as `SR-41`. **The 7 failures in the wider scripts suite are pre-existing and environmental** (`dev-memory-sampler` reads `/proc`; `dev-splash` and `watch-packages` have their own) — proven by stashing this commit's only tracked change and re-running the same files: they fail identically at HEAD. **Remainder — the six findings themselves are still open:** T-01, T-02, T-08, T-29, T-43. The check reports them; it does not fix them (T-01 has since been built — see CC-94) | ✅ closed |
 | CC-94 | **`T-01` — the delegation route lent authority the lender did not have — BUILT 2026-10-17 (`fa974bb1`).** The route's guard is `{requireAuth, requireFeatures:[auth.delegations.manage]}` and the grantor principal was derived from the caller and never checked against the capability: a user holding only `auth.delegations.manage` could lend `api_keys.manage` (minting identities) or `directory.tenants.manage` to anybody, or to themselves, while `.delegable: false` had zero production readers. **Three checks now run in the route before `delegations.grant` — and ONE MORE than the triage's fix sentence named:** (1) the **grantor-holds** check, added first, which extends the route's own header principle ("nobody may lend authority they do not hold") from the grantor id to the caller's own holdings; (2) a capability declared `delegable: false` may never appear in a delegation; (3) a self-delegation needs an explicit authority ceiling, because a delegation is an independent authority source at use time, so a self-delegation with a null ceiling outlives the holdings that justified it. **Proof:** 9 tests in `packages/core/src/modules/auth/api/__tests__/delegations.route.test.ts` driving the real route handler with service doubles; 3 mutations run for real, each killing exactly its own test; **the decisive assertion in every refusal case is that THE WRITE NEVER HAPPENED** — `delegations.grant` was never called, not merely a 403 returned after it. Verified: 216 tests across all 18 auth API suites, `tsc --noEmit --incremental false` clean, eslint clean | ✅ closed |
 | CC-95 | **`T-02` — `business_ir.run_query` checked scope but not authorization — BUILT 2026-10-17 (`60a6714f`).** `features: ctx.userFeatures` rode the `authContext` into the Business-IR chain and was read by nothing: the compile step used the scope, the authoring step used the agent binding, and `engine.query` ran with no per-entity check at all — so the tool (whose `requiredFeatures` is `ai_assistant.view`, a view feature with no capability descriptor, so the capability path permits on absence) could read any entity the caller's tenant held. The only guard on which rows came back was the prompt itself. **One gate before the engine read:** `authorizeEntityRead` in `packages/ai-assistant/src/modules/ai_assistant/lib/business-ir-run.ts`, copied from `authorizeEntityAccess` (`packages/search/src/modules/search/ai-tools.ts:86`, all 53 entities' `aclFeatures` behind it) because the two packages must not depend on each other. Fail-closed the way the donor is: no config → refusal, no `aclFeatures` → refusal, no container → refusal; superadmin bypasses (the donor's rule, preserved deliberately and pinned by a test). **Proof:** 8 tests in `business-ir-run.authorization.test.ts`; 7 mutations run for real, each killing exactly its named test; **the decisive assertion in every refusal case is that THE READ NEVER HAPPENED** — `engine.query` was never called, not a refusal after the rows came back. The existing run suite's fixtures were **completed, not weakened** (they passed no container, so the fail-closed gate would have refused every happy path). Verified: 43 tests across 5 business-ir suites, `tsc --noEmit --incremental false` clean, eslint clean | ✅ closed |
+| CC-96 | **`T-32` — a v7 record id no longer hides a record's lock — BUILT 2026-10-17 (`13c6206f`).** The hole (audit A1-09, `08-FORENSIC-AUDIT.md` §13/§14): `readRecordId` at `packages/core/src/modules/auth/commands/interceptors.ts:89` accepted only RFC-4122 v1–v5 ids — version nibble pinned to `[1-5]`, variant nibble to `[89ab]` — so a valid v7 id failed the pattern, reached the resolver as `recordId: null`, and `resourceCeilingFor` (`authorityEnforcementService.ts:335`) returns early on `!recordId`: the lock was never looked up — no ceiling, no project context, no grade. The command gate is the **only production caller that threads a recordId** (`refusalFor` at `rbacService.ts:595` calls `decideFor` with no options; the AI tool path threads only `onBehalfOfUserId`), so this one pattern was the single point where record locks reach the resolver. **Fix:** shape only, no version or variant constraint — `/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i`. The triage recorded `[1-5]` → `[0-9a-f]`; re-measured per rule 13, the variant nibble is the same class of over-strictness (a valid UUID with a non-RFC variant bypasses the lookup identically), so the fix takes the shape to its logical end. In-repo precedent: `sync-run-service.ts:7` and `grantChecks.ts:46` use exactly this shape, and `crud/ids.ts:5` shows the house relaxing in the same direction with `[1-8]`. Version and variant are properties of the **generator**, not the record: ids are v4 today (`gen_random_uuid()`) but the `uuid` column accepts any version, and imports/sync/future migrations can carry v7. **Proof:** 7 tests in `packages/core/src/modules/auth/commands/__tests__/authority-command-gate.record-id.test.ts`, driving the real gate and the real `AuthorityEnforcementService` with a stub lock reader; 4 mutations run for real, the file restored byte-clean between runs, each killing exactly its named tests: M1 (restore the pre-fix pattern) kills both hole tests + uppercase + locked; M2 (accept any string) kills the slug/numeric guard; M3 (drop `/i`) kills uppercase; M4 (remove the threading) kills all 5 threading tests. The decisive assertion is that **the lookup happened at all** — `stateFor` called with the record's real id; a restricted record named by a v7 id is then **held** at A2. Verified: 19 tests across the two gate suites, 809 tests / 90 suites across `src/modules/auth`, `tsc --noEmit --incremental false` clean, eslint clean; both files pure LF, no BOM | ✅ closed |
+| CC-97 | **`T-45` — a locked record's refusal has no production consumer on the command path — FOUND while building T-32, documented not fixed.** The record-lock rules themselves are right (`record-locks.ts`: `locked` → A0, `restricted` → A2, `open` → null, reads E0 exempt, unreadable → `locked`, fail-closed): the audit's §14 note said only the *lookup* fails open, and T-32 fixed the lookup. But the command gate does not hold A0 by design ("RbacService has already made it at the route guard") — true for capability refusals, false for record-lock ones, since `refusalFor` (`rbacService.ts:595`) calls `decideFor(subject, feature, scope)` with no options, so a record-lock ceiling can never surface there either. Net effect: a locked record is writable by any actor holding the capability. Ranked high, urgency scheduled (the owner decides where the refusal belongs — a gate hold, or the route guard threading the recordId), action DOCUMENT. Pinned rather than left latent: the T-32 suite carries the test "still passes a locked record: the gate does not hold A0, by design" | ☐ open |
 
 ---
 
@@ -646,3 +668,23 @@ closed. The frontier in §2 was rewritten so the two CRITICALs are **LAST DONE**
 EARLIER THE SAME DAY"; **▶ NEXT** is **T-32**, then **T-13/T-14**, then the tooling set's remainder. The
 triage document was updated in the same pass: the T-01/T-02 action cells, the §2.1/§2.2 built notes (with
 T-01's extension beyond the fix sentence recorded), the §0 verdict paragraph and the §4 order table.
+
+**Re-synced 2026-10-17 (seventh pass) — `T-32` BUILT (`CC-96`), and the gap it exposed recorded (`CC-97`).**
+The one-character `UUID_PATTERN` fix the triage ranked urgent: `readRecordId`
+(`interceptors.ts:89`) accepted only RFC-4122 v1–v5 ids, so a valid v7 id failed the match, reached the
+resolver as `recordId: null`, and `resourceCeilingFor` early-returned on `!recordId` — **the lock was never
+looked up**. The fix goes one step beyond the recorded one, by name (rule 13): the variant nibble `[89ab]`
+is the same class of over-strictness as `[1-5]`, so the pattern is now **shape only**, the exact shape
+`sync-run-service.ts:7` and `grantChecks.ts:46` already use. **Proof:** 7 tests driving the real gate and
+the real service with a stub lock reader — **the decisive assertion is that the lookup happened at all**,
+after which a restricted record named by a v7 id is **held** at A2 — and 4 mutations run for real, each
+killing exactly its named tests. **★ The build exposed one new finding, `T-45` / `CC-97`, documented not
+fixed:** a *locked* record still passes the gate, because the gate does not hold A0 by design and
+`refusalFor` threads no recordId, so a record-lock ceiling has no production consumer on the command path.
+Ranked high, urgency scheduled, action DOCUMENT — the owner decides where the refusal belongs — and pinned
+by a test so the gap is visible rather than latent. **The register now reads 52 closed · 44 open · 96
+total**, `CC-96` closed and `CC-97` open. The frontier in §2 was rewritten so **T-32 is LAST DONE**, the two
+CRITICALs demoted to "AND EARLIER THE SAME DAY (afternoon)" with their full record in `CC-94`/`CC-95`, and
+**▶ NEXT** is **T-13/T-14** (the two live compose defects), then the tooling set's remainder. The triage
+document was updated in the same pass: the T-32 action cell, the new T-45 register row, the new §2.4
+section (the hole, the named deviation, the proof, and the gap), the §0 verdict and the §4 order table.
