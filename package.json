@@ -113,6 +113,8 @@
     "check:one-truth": "node scripts/check-one-truth.mjs",
     "check:escape-hatches": "node scripts/check-escape-hatches.mjs",
     "check:escape-hatches:fail": "node scripts/check-escape-hatches.mjs --fail",
+    "check:declared-controls": "node scripts/check-declared-controls.mjs",
+    "check:declared-controls:fail": "node scripts/check-declared-controls.mjs --fail",
     "check:time-bombs:fail": "node scripts/time-bomb-scanner.mjs --fail",
     "agents:check-budget": "node scripts/check-agents-md-budget.mjs"
   },
