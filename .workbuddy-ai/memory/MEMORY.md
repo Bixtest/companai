@@ -5,10 +5,15 @@
 ## ★ ARCHITECTURE WORKSHOP — `library/architecture/`
 **Method (binding):** study platforms ONE AT A TIME; find what fits the **three poles** (P1
 aissistant · P2 workspace · P3 automations) + widgets/frontend (PX-W/PX-F) + escape hatch (PZ);
-then **map** each pole across ALL platforms vs mercato → a clean **SRS**; then build
-**one-tenant ↔ one-Hermes**. **No development before a written requirement. Hermes is NOT forked
-or edited. Markdown is the source of truth — never edited to fit a reader.** Readers: copy +
-rebrand, never rewrite.
+**then map each pole across ALL platforms vs mercato → a clean SRS; then build one-tenant ↔
+one-Hermes.** **No development before a written requirement. Hermes is NOT forked or edited.
+Markdown is the source of truth — never edited to fit a reader.** Readers: copy + rebrand,
+never rewrite.
+**★ THE MAPPING FRAME (owner, 2026-10-16): we are NOT limited by what mercato allows.** For
+each pole, engineer the **best, richest, most versatile, most integratable** version — plus
+every extra feature/plugin/module/idea the nine platforms inspire — then re-engineer
+accordingly. HAVE/BUILD/BORROW stays as the ledger; the ceiling is the target design, not
+mercato's current state. → `library/architecture/mapping/` (00-PIN-AND-METHOD + findings/01..08).
 
 **Rule 1: docs are claims, code is the authority.** **Rule 13: a committed number can be wrong —
 re-measure, commit the fix *by name*.**
@@ -27,8 +32,8 @@ re-measure, commit the fix *by name*.**
 — **mattermost** ⬜ **ASK before extracting** (226 MB zip on disk; activepieces 106 MB unlisted).
 **Widget model: only n8n + zulip.**
 
-**★ STUDY CHAIN: 9 CLOSED, readers built.** Next: ASK for the 10th, then the
-**cross-platform mapping pass**.
+**★ STUDY CHAIN: 9 CLOSED, readers built. MAPPING PASS = RUNNING** (`mapping/findings/01..08`,
+requirements `SR-01…SR-nn`). mattermost joins later as a **10th column** (no rework).
 
 ## Standing hazards
 - **Line endings:** repo commits **CRLF as-is**; CR count == line count is NORMAL — do not "fix"

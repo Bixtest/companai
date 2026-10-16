@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Architecture Workshop — Status &amp; Mapping Report</title>
+<style>
+  :root{
+    --bg:#f7f8fa; --card:#ffffff; --ink:#1a1d21; --muted:#5b6470; --line:#e3e6ea;
+    --accent:#2563eb; --accent-soft:#eff4ff;
+    --have:#15803d; --have-bg:#f0fdf4;
+    --build:#a16207; --build-bg:#fefce8;
+    --borrow:#1d4ed8; --borrow-bg:#eff6ff;
+    --reeng:#9333ea; --reeng-bg:#faf5ff;
+    --warn:#b91c1c; --warn-bg:#fef2f2;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;}
+  .wrap{max-width:1180px;margin:0 auto;padding:28px 22px 80px}
+  h1{font-size:27px;margin:0 0 6px;letter-spacing:-.3px}
+  h2{font-size:20px;margin:0 0 14px;padding-bottom:9px;border-bottom:2px solid var(--line)}
+  h3{font-size:16px;margin:22px 0 8px}
+  .sub{color:var(--muted);margin:0 0 26px;font-size:14px}
+  section{background:var(--card);border:1px solid var(--line);border-radius:12px;
+    padding:22px 24px;margin:0 0 22px}
+  .lede{font-size:15px;color:#333;background:var(--accent-soft);border-left:4px solid var(--accent);
+    padding:12px 16px;border-radius:0 8px 8px 0;margin:0 0 18px}
+  .grid{display:grid;gap:12px}
+  .g2{grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+  .g3{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+  .stat{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+  .stat b{display:block;font-size:26px;line-height:1.2;letter-spacing:-.5px}
+  .stat span{font-size:12.5px;color:var(--muted)}
+  .stat.good b{color:var(--have)} .stat.bad b{color:var(--warn)} .stat.mid b{color:var(--build)}
+  .platform{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:0;overflow:hidden}
+  .platform summary{cursor:pointer;padding:13px 16px;font-weight:600;list-style:none;
+    display:flex;justify-content:space-between;align-items:center;gap:10px}
+  .platform summary::-webkit-details-marker{display:none}
+  .platform summary::after{content:"+";color:var(--muted);font-size:19px;font-weight:400}
+  .platform[open] summary::after{content:"\2212"}
+  .platform summary:hover{background:#eef1f5}
+  .platform .body{padding:0 16px 15px;border-top:1px solid var(--line);font-size:13.8px}
+  .pill{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
+  .p-have{background:var(--have-bg);color:var(--have)}
+  .p-build{background:var(--build-bg);color:var(--build)}
+  .p-borrow{background:var(--borrow-bg);color:var(--borrow)}
+  .p-reeng{background:var(--reeng-bg);color:var(--reeng)}
+  table{width:100%;border-collapse:collapse;font-size:13.2px;margin-top:6px}
+  th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);
+    padding:8px 9px;border-bottom:2px solid var(--line);white-space:nowrap}
+  td{padding:8px 9px;border-bottom:1px solid #eef0f3;vertical-align:top}
+  tr:hover td{background:#fafbfc}
+  code{background:#eef1f5;padding:1px 5px;border-radius:4px;font-size:12.4px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  .filters{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 14px}
+  .filters button{border:1px solid var(--line);background:var(--card);color:var(--muted);
+    padding:5px 13px;border-radius:20px;cursor:pointer;font-size:12.5px;font-weight:600}
+  .filters button:hover{border-color:var(--accent);color:var(--accent)}
+  .filters button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+  .correction{background:var(--warn-bg);border:1px solid #fecaca;border-left:4px solid var(--warn);
+    border-radius:0 10px 10px 0;padding:16px 20px;margin:0 0 22px}
+  .correction h3{margin:0 0 8px;color:var(--warn);font-size:15px}
+  .correction p{margin:0 0 8px;font-size:13.8px}
+  .correction p:last-child{margin:0}
+  .layers{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;
+    background:#1e2430;color:#dbe3ee;border-radius:10px;padding:18px;overflow-x:auto;line-height:1.75}
+  .layers b{color:#fff} .layers i{color:#8fa3bf;font-style:normal}
+  .path{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:13px;margin:10px 0 0}
+  .path span{background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:5px 11px;font-weight:600}
+  .path i{color:var(--muted);font-style:normal}
+  .opts{margin:12px 0 0;padding-left:20px;font-size:13.8px}
+  .opts li{margin:7px 0}
+  .opts b{color:var(--have)}
+  footer{color:var(--muted);font-size:12.5px;text-align:center;padding:8px 0 0}
+  .tag{font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:5px;padding:1px 6px;margin-left:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Architecture Workshop — Status &amp; Mapping Report</h1>
+  <p class="sub">Companai / open-mercato &nbsp;·&nbsp; <code>library/architecture/</code> &nbsp;·&nbsp; 2026-10-16 &nbsp;·&nbsp; self-contained, works offline</p>
+
+  <div class="correction">
+    <h3>Correction first — an audit of mine turned out to be an audit of nothing</h3>
+    <p>While checking the reader pages I was auditing a 78-page tree at <code>webapp/</code>. I measured it: it exists in <b>no directory, no branch, no commit</b> — zero hits in git history, zero files on disk. The classification I had built was against phantom paths.</p>
+    <p>The real inventory, measured: <b>86 HTML files, all tracked</b> — one reader per platform family (Hermes 13 pages, the other eight 8 pages each), plus <b>98 markdown</b> files of findings. <b>Nothing is stale. Nothing needs deleting.</b> Rule 13 applied to my own work: re-measure, then report the fix by name.</p>
+    <p>So the answer to "what will you do with the stale pages?" is: <b>nothing — there are none.</b> Every reader is live and one-per-family, which is exactly the documented layout.</p>
+  </div>
+
+  <section>
+    <h2>Where the workshop stands</h2>
+    <div class="lede">
+      <b>Nine platform studies are closed. The cross-platform mapping pass is done.</b>
+      Nine digests (one per platform) plus one mercato digest were mapped pole by pole into
+      <b>46 requirements — <code>SR-01</code> … <code>SR-46</code></b> — now written to
+      <code>library/architecture/mapping/</code>. Mattermost stays unstudied pending your ask,
+      and joins later as a tenth column with no rework.
+    </div>
+    <div class="grid g3">
+      <div class="stat"><b>9</b><span>platform studies closed, each with findings + its own reader</span></div>
+      <div class="stat"><b>46</b><span>requirements written — <code>SR-01…SR-46</code></span></div>
+      <div class="stat"><b>2 / 9</b><span>platforms with a widget model — n8n and zulip</span></div>
+      <div class="stat good"><b>P18</b><span>guard engine complete, authority layer test-pinned — our strongest pole</span></div>
+      <div class="stat mid"><b>P2-1…9a</b><span>Hermes gateway live behind a typed port — the seam is real</span></div>
+      <div class="stat bad"><b>0</b><span>of ~93 commands declare risk or approval (<code>CC-63</code>)</span></div>
+      <div class="stat bad"><b>CC-84</b><span>open — one superadmin identity, one shared <code>HERMES_HOME</code></span></div>
+      <div class="stat mid"><b>G-21</b><span>triage core built as a library, no production caller</span></div>
+      <div class="stat bad"><b>—</b><span>no durable wake / task queue exists anywhere</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>The frame you set for this pass</h2>
+    <p style="margin:0 0 6px;font-size:14.5px">Your words, and they are now the rule for every requirement row:</p>
+    <blockquote style="margin:0 0 14px;padding:12px 16px;background:var(--accent-soft);border-radius:8px;
+      border-left:4px solid var(--accent);font-size:14.5px">
+      <i>"we are not limited by what mercato allows. we want to engineer the best, richest,
+      most versatile and integratable version of each pole plus the extra features, plugins,
+      modules, ideas, architecture, etc the platforms inspire and reengineer accordingly."</i>
+    </blockquote>
+    <p style="margin:0;font-size:13.8px;color:var(--muted)">
+      The ledger keeps its four columns — <span class="pill p-have">HAVE</span>
+      <span class="pill p-build">BUILD</span> <span class="pill p-borrow">BORROW</span>
+      <span class="pill p-reeng">RE-ENGINEER</span> — but the ceiling is the target design,
+      not mercato's current state. A target that is merely "what we already do, tidied" is not a target.
+    </p>
+  </section>
+
+  <section>
+    <h2>The nine studies</h2>
+    <p style="margin:0 0 12px;font-size:13.6px;color:var(--muted)">Click a platform to expand. Every verdict and mechanism is cited in that platform's <code>findings/</code>.</p>
+    <div class="grid g2" id="platforms"></div>
+  </section>
+
+  <section>
+    <h2>The re-engineered whole — the layer stack</h2>
+    <pre class="layers"><b>L7  COMPOSITION</b>   canvas · widget log · generic renderer · CRDT        <i>n8n + zulip   (SR-27…33)</i>
+<b>L6  FRONTEND</b>      design system + ESLint plugin · prohibition layering      <i>n8n + Multica (SR-33…36)</i>
+<b>L5  THE GUARD</b>     exclusion ledger · one-truth check · ratchet · escape      <i>openrig+zulip (SR-39…44)</i>
+<b>L4  AUTOMATIONS</b>   durable wake queue · one-statement claim · risk declared  <i>zulip+Multica (SR-19…26)</i>
+<b>L3  WORKSPACE</b>     ambient realm · scope-once · per-tenant engine home       <i>zulip+Multica (SR-10…18)</i>
+<b>L2  AISSISTANT</b>    typed port · agent ≠ runtime · permission ladder · skills <i>Hermes+openrig (SR-01…09)</i>
+<b>L1  THE ENGINE</b>    Hermes, unmodified, behind the typed port                  <i>Hermes — "Build UNDER"</i></pre>
+    <p style="margin:12px 0 0;font-size:13.8px">
+      Everything above L1 is ours to build. <b>L1 is taken, never forked.</b>
+      The integration surface that makes it "integrable" is four decisions, all borrowed:
+      the typed port (swappable engine), the generic bridge (others compose on our surface),
+      the event-kind registry (extend by adding a kind, not an endpoint), and the plugin
+      lifecycle (register → version → enable → disable → <b>retire, chained and reasoned</b>).
+    </p>
+    <h3>What this frame retires</h3>
+    <div class="path">
+      <span>the double scope entry</span><i>→</i><span>one derived value (SR-11)</span><i>→</i>
+      <span>the shared HERMES_HOME</span><i>→</i><span>per-tenant engine homes (SR-12)</span><i>→</i>
+      <span>OpenCode as default engine</span><i>→</i><span>P2-9b switchover</span>
+    </div>
+  </section>
+
+  <section>
+    <h2>The requirement register — <code>SR-01 … SR-46</code></h2>
+    <div class="filters" id="filters"></div>
+    <div style="overflow-x:auto">
+    <table id="srs">
+      <thead><tr><th>ID</th><th>Pole</th><th>Requirement</th><th>Source</th><th>Status</th><th>Register</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    </div>
+    <p id="count" style="margin:12px 0 0;font-size:12.8px;color:var(--muted)"></p>
+  </section>
+
+  <section>
+    <h2>Sequencing — the critical path</h2>
+    <p style="margin:0 0 4px;font-size:13.8px">Tooling lands first and unblocks everything after it. The path then runs through identity → tenancy → durability → composition.</p>
+    <div class="path">
+      <span>SR-38 · 39 · 41 · 46</span><i>tooling, no blockers</i><i>→</i>
+      <span>SR-02 + SR-07</span><i>identity, together</i><i>→</i>
+      <span>SR-12</span><i>= CC-84, gates P2-9b</i><i>→</i>
+      <span>SR-10 + SR-11</span><i>ambient tenancy</i><i>→</i>
+      <span>SR-13</span><i>per-realm identity</i><i>→</i>
+      <span>SR-19</span><i>durable wake</i><i>→</i>
+      <span>SR-22</span><i>= CC-63, risk declared</i><i>→</i>
+      <span>SR-27</span><i>widget = log</i><i>→</i>
+      <span>SR-29</span><i>renderer</i><i>→</i>
+      <span>SR-32</span><i>canvas</i><i>→</i>
+      <span>SR-36</span><i>= M5, dashboard</i>
+    </div>
+    <p style="margin:12px 0 0;font-size:13.8px">
+      <b>SR-08</b> (wire the triage core) has <b>no prerequisite at all</b> — the cheapest item in the register, and it can land today.
+    </p>
+  </section>
+
+  <section>
+    <h2>The live code frontier</h2>
+    <h3 style="margin-top:4px">CC-84 — tenancy, the defect that drove the whole study</h3>
+    <p style="margin:0;font-size:13.8px">Every worker MCP call authenticates as one superadmin service identity, so a Hermes turn can run platform tools <b>outside the chat's tenant</b>. There is one shared <code>HERMES_HOME</code>.</p>
+    <ul class="opts">
+      <li><b>Per-run minted credential</b> — recommended; it is SR-12, and it gates P2-9b.</li>
+      <li>Interim fail-closed guard — buys time, does not fix the boundary.</li>
+      <li>Doc-only — rejected: a documented defect is still a defect.</li>
+    </ul>
+    <h3>P2-9b — THE SWITCHOVER</h3>
+    <p style="margin:0;font-size:13.8px">Default-flip <code>AI_RUNTIME_ENGINE</code> to Hermes, delete OpenCode, retire <code>CC-74</code>. Gated by the measured stale-timeout-vs-toolset trade — and by SR-12 landing first.</p>
+  </section>
+
+  <section>
+    <h2>What is written to disk</h2>
+    <table>
+      <thead><tr><th>Path</th><th>Contents</th></tr></thead>
+      <tbody>
+        <tr><td><code>mapping/00-PIN-AND-METHOD.md</code></td><td>The method, the frame, the four columns, the rules this pass obeys</td></tr>
+        <tr><td><code>mapping/findings/01-platform-overview.md</code></td><td>The nine at a glance; each pole's target</td></tr>
+        <tr><td><code>mapping/findings/02-the-aissistant.md</code></td><td>P1 — target + SR-01…09</td></tr>
+        <tr><td><code>mapping/findings/03-the-workspace.md</code></td><td>P2 — target + SR-10…18</td></tr>
+        <tr><td><code>mapping/findings/04-automations.md</code></td><td>P3 — target + SR-19…26</td></tr>
+        <tr><td><code>mapping/findings/05-widgets-and-frontend.md</code></td><td>PX-W + PX-F — target + SR-27…36</td></tr>
+        <tr><td><code>mapping/findings/06-out-of-pole.md</code></td><td>Inspired additions + the gathered guard pole (PZ) — SR-37…46</td></tr>
+        <tr><td><code>mapping/findings/07-SYNTHESIS.md</code></td><td>The re-engineered whole; the layer stack; what we retire</td></tr>
+        <tr><td><code>mapping/findings/08-THE-SRS.md</code></td><td>The full register, traced, with sequencing and the mattermost slot</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <footer>
+    Markdown is the source of truth — this report reads from it and never edits it. &nbsp;·&nbsp;
+    Nine platform digests + one mercato digest, mapped pole by pole. &nbsp;·&nbsp; No code was written in this pass.
+  </footer>
+</div>
+
+<script>
+const platforms = [
+  {n:"Hermes", v:"forensics", verdict:"The engine itself. Never forked, never edited.",
+   mech:"Build UNDER — the engine behind a typed port, mechanisms taken selectively and tiered.",
+   poles:"P1 = the engine", note:"One standing contradiction, reported not resolved: the sub-agent cap is 50 in one place and 250 in another. Decide by measurement.",
+   findings:13, pages:13},
+  {n:"Paperclip", v:"0.3.1", verdict:"The foundation of P2 and P3; a seam-provider for P1.",
+   mech:"The workspace/automation foundation shape, with no multi-tenancy and no composer.",
+   poles:"P2 ★ · P3 ★ · P1 seam", note:"Weakest P1 of the nine — and that is fine, because the seam is real.",
+   findings:7, pages:8},
+  {n:"CrewAI", v:"1.15.28", verdict:"A rich mechanism source and a poor architecture template.",
+   mech:"The A2UI protocol — the study's only piece of aissistant behaviour with real enforcement.",
+   poles:"P1 donor only", note:"Executor yes, delivery no, tenancy nowhere. Take the protocol shape, nothing else.",
+   findings:7, pages:8},
+  {n:"Multica", v:"0.2.0", verdict:"Both an architecture reference and a mechanism source for the three poles.",
+   mech:"Machine ≠ teammate — <code>UNIQUE (workspace_id, daemon_id, provider)</code> is the one-tenant-one-engine primitive.",
+   poles:"P1 ★ · P2 ★ · P3 ★", note:"The closest architectural neighbour. 144 tables, 82 carry <code>workspace_id</code>.",
+   findings:7, pages:8},
+  {n:"Gas Town", v:"1.2.1", verdict:"The most honest platform in the workshop about where it stops.",
+   mech:"Hook = the durability primitive; the watchdog chain is made of agents; ZFC = transport, don't decide.",
+   poles:"P3 mechanisms", note:"No tenancy. Its value is entirely in the durability and honesty mechanisms.",
+   findings:7, pages:8},
+  {n:"n8n", v:"2.44.0", verdict:"An outstanding composition surface and a real tenancy model, whose durability engine is designed but not yet shipped.",
+   mech:"The composition canvas — 7 element types, a 129-component design system, its own ESLint plugin, CRDT on y-websocket.",
+   poles:"PX-W ★ · P2 ★ · P3 ★", note:"One of only two platforms with a widget model.",
+   findings:7, pages:8},
+  {n:"buzz", v:"0.5.28", verdict:"A communication substrate with a proof surface.",
+   mech:"The proof surface — TLA+ (12 invariants), Tamarin (21 lemmas), a 1,110-line prose contract, and a LIMITS.md naming 7 blind spots.",
+   poles:"P2 community=tenant · PZ ★", note:"Honest ledger: the approval gate is dead code; 2 of 7 automation actions are stubs; bypass-permissions is its default.",
+   findings:7, pages:8},
+  {n:"openrig", v:"0.6.10", verdict:"Will not give us tenancy or a composition surface — it has neither — but it may give us the most transferable honesty machinery in the study.",
+   mech:"The gate culture — a 4-rail exclusion ledger with mechanical expiry that ships empty, plus the digital-twin harness.",
+   poles:"P1 policies · PZ ★", note:"No tenancy at all: 0 <code>tenant_id</code> occurrences, a static bearer token, and loopback/Tailscale as the boundary.",
+   findings:7, pages:8},
+  {n:"zulip", v:"12.0-dev", verdict:"Make the wrong thing hard to do, then catch the rest automatically.",
+   mech:"The ambient realm — the tenant comes from the request's Host header and the fence is one comparison. Plus the first real widget model: an append-only SubMessage log, state by replay.",
+   poles:"P2 ★ STRONGEST · PX-W ★ FIRST · PZ ★ densest", note:"P1 is deliberately tiny — one LLM feature fenced five ways, and a bot IS a UserProfile.",
+   findings:7, pages:8}
+];
+
+const srs = [
+  ["SR-01","P1","Typed engine port; nothing above it imports Hermes","Hermes","HAVE","P2-1…9a"],
+  ["SR-02","P1","<code>agent</code> ≠ <code>agent_runtime</code>; uniqueness key as a DB constraint","Multica","BORROW","—"],
+  ["SR-03","P1","Permission policy ladder as data (locked/standard/open+yolo/auto)","openrig","BORROW","—"],
+  ["SR-04","P1","Two-surface rule: policy set by code, never by config alone","openrig","BORROW","—"],
+  ["SR-05","P1","Sub-agent spawn cap, measured not guessed; spawn ledger","Hermes, zulip","BUILD","—"],
+  ["SR-06","P1","Skills as versioned <code>SKILL.md</code> artifacts","n8n, Hermes","BORROW","—"],
+  ["SR-07","P1","A bot is a participant, not a parallel agent object","zulip","BORROW","—"],
+  ["SR-08","P1","The triage core gets a production caller","mercato","BUILD","G-21, CC-59, CC-60"],
+  ["SR-09","P1","A2UI-style protocol contract with enforcement","CrewAI","BORROW","—"],
+  ["SR-10","P2","Ambient tenancy: tenant derived from the request","zulip","RE-ENGINEER","—"],
+  ["SR-11","P2","Scope enters once — collapse the double entry","mercato, zulip","BUILD","CC-84"],
+  ["SR-12","P2","One tenant ↔ one engine home; per-run credential","Multica, CC-84","BUILD","CC-84"],
+  ["SR-13","P2","Identity keys unique per realm, DB-enforced","zulip","BORROW","—"],
+  ["SR-14","P2","Scope registry with a build-time ratchet","n8n","BORROW","—"],
+  ["SR-15","P2","Audit log with topology-encoded event numbering","zulip","BORROW","—"],
+  ["SR-16","P2","Personal / team workspace kinds","n8n","BORROW","—"],
+  ["SR-17","P2","Tenancy contract + prose + conformance harness + LIMITS.md","buzz","BORROW","—"],
+  ["SR-18","P2","Machine actors capped at approve-first, test-pinned","Multica, mercato","HAVE","authority layer"],
+  ["SR-19","P3","Durable wake queue: at-least-once, retries in payload, late cutoff","zulip","BUILD","—"],
+  ["SR-20","P3","One-statement claim with health gate inside","Multica","BORROW","—"],
+  ["SR-21","P3","Closed failure taxonomy per attempt","Multica","BORROW","—"],
+  ["SR-22","P3","Every command declares risk + approval + expiry","mercato, buzz","BUILD","CC-63"],
+  ["SR-23","P3","Transport does not decide","Gas Town","BORROW","—"],
+  ["SR-24","P3","Durable hooks for side effects","Gas Town","BORROW","—"],
+  ["SR-25","P3","Event-kind registry; kinds over endpoints","buzz","BORROW","—"],
+  ["SR-26","P3","Every approval gate ships a test that fires it","buzz","BUILD","—"],
+  ["SR-27","PX-W","Widget = append-only log; state derived by replay","zulip","RE-ENGINEER","—"],
+  ["SR-28","PX-W","Discriminated-union contract over widget kinds","zulip","BUILD","—"],
+  ["SR-29","PX-W","One generic renderer: WidgetIR → DOM","zulip, mercato","BUILD","—"],
+  ["SR-30","PX-W","Generic bridge: any backend drives any widget","zulip","BORROW","—"],
+  ["SR-31","PX-W","Widget-kind registry; kinds register themselves","zulip","BORROW","—"],
+  ["SR-32","PX-W","Composition canvas with CRDT collaboration","n8n","BORROW","—"],
+  ["SR-33","PX-F","Design system + own ESLint plugin guarding composition","n8n","BORROW","—"],
+  ["SR-34","PX-F","Prohibition-constrained 3-package frontend layering","Multica","BORROW","—"],
+  ["SR-35","PX-W","UMES injection as the widget entry point","mercato","HAVE","kit"],
+  ["SR-36","PX-F","Dashboard + perspective screens","mercato","BUILD","M5"],
+  ["SR-37","out","Plugin/module registry with full lifecycle","buzz, Multica","BORROW","—"],
+  ["SR-38","out","Digital-twin harness; drift breaks the build","openrig","BORROW","—"],
+  ["SR-39","PZ","One-truth check across every representation of a contract","zulip","BORROW","—"],
+  ["SR-40","PZ","Feature-level ratchet only a human can raise","zulip","BORROW","—"],
+  ["SR-41","PZ","Named, greppable escape hatches","zulip","BORROW","—"],
+  ["SR-42","PZ","Exclusion ledger with mechanical expiry; ships empty","openrig","BORROW","—"],
+  ["SR-43","PZ","Proof beside prose: contract + falsifiable check + LIMITS.md","buzz","BORROW","—"],
+  ["SR-44","PZ","Retirement ledger; renames are tracked hazards","buzz, openrig","BORROW","—"],
+  ["SR-45","out","Kinds-over-endpoints policy with conformance test","buzz","BORROW","—"],
+  ["SR-46","out","Two-reads lint: any setting read twice must be read once","openrig","BORROW","—"]
+];
+
+const pw = document.getElementById('platforms');
+platforms.forEach(p => {
+  const d = document.createElement('details');
+  d.className = 'platform';
+  d.innerHTML = `<summary><span>${p.n} <span class="tag">${p.v}</span></span>
+    <span style="font-weight:400;font-size:12.5px;color:var(--muted)">${p.poles}</span></summary>
+    <div class="body">
+      <p style="margin:10px 0 8px"><b>Verdict:</b> ${p.verdict}</p>
+      <p style="margin:0 0 8px"><b>The mechanism we take:</b> ${p.mech}</p>
+      <p style="margin:0 0 10px;color:var(--muted);font-size:13px">${p.note}</p>
+      <p style="margin:0;font-size:12.5px;color:var(--muted)">${p.findings} findings files · ${p.pages} reader pages</p>
+    </div>`;
+  pw.appendChild(d);
+});
+
+const tb = document.querySelector('#srs tbody');
+const filters = document.getElementById('filters');
+const poles = ['all','P1','P2','P3','PX-W','PX-F','PZ','out'];
+const statuses = ['all','HAVE','BUILD','BORROW','RE-ENGINEER'];
+let fp = 'all', fs = 'all';
+
+function pill(s){ return `<span class="pill p-${s.toLowerCase().replace('-','').replace('engineer','')}">${s}</span>`; }
+
+function render(){
+  tb.innerHTML = '';
+  let n = 0;
+  srs.forEach(r => {
+    if (fp !== 'all' && r[1] !== fp) return;
+    if (fs !== 'all' && r[4] !== fs) return;
+    n++;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td><code>${r[0]}</code></td><td>${r[1]}</td><td>${r[2]}</td>
+      <td style="font-size:12.5px">${r[3]}</td><td>${pill(r[4])}</td>
+      <td style="font-size:12.3px;color:var(--muted)">${r[5]}</td>`;
+    tb.appendChild(tr);
+  });
+  document.getElementById('count').textContent =
+    `Showing ${n} of ${srs.length} requirements` +
+    (fp!=='all'?` · pole ${fp}`:'') + (fs!=='all'?` · status ${fs}`:'');
+}
+
+function mkBtn(label, val, get, set){
+  const b = document.createElement('button');
+  b.textContent = label;
+  if (get() === val) b.className = 'on';
+  b.onclick = () => { set(val); [...filters.children].forEach(c=>c.classList.remove('on')); b.classList.add('on'); render(); };
+  return b;
+}
+
+poles.forEach(p => filters.appendChild(mkBtn(p==='all'?'All poles':p, p, ()=>fp, v=>fp=v)));
+const sep = document.createElement('span');
+sep.style.cssText = 'width:1px;background:var(--line);margin:4px 4px';
+filters.appendChild(sep);
+statuses.forEach(s => filters.appendChild(mkBtn(s==='all'?'All statuses':s, s, ()=>fs, v=>fs=v)));
+
+render();
+</script>
+</body>
+</html>
