@@ -72,6 +72,10 @@ here; sub-row 1's boot is proven on a machine with a running daemon.
 operation **both** engines behind the door today report ✗ (`describeCapabilities().operations`).
 Hermes is therefore the first candidate that could make the port's eight real rather than seven —
 recorded here as a measured fact for sub-row 3, not as a claim until the adapter proves it.
+**UPDATE 2026-10-16 (rule 13):** the mounted revision moved again (to `db44c462…`, 19,728 files — see
+[`HERMES-PIN.md`](HERMES-PIN.md) §1.1.2). The claim was re-checked in the **new** tree and **still holds**:
+`session.steer` and `subagent.steer` are present (17 files, incl. `gateway/session_busy_controls.py:13`,
+`gateway/session_ancillary.py:33-34`, `acp_adapter/gateway_commands.py:58`).
 
 **2.5 The "one narrow tool" must come from the vision's spine, not a business module.** The owner's
 ruling 2026-10-12: *business modules should be generated from the core workspace (prompt → AI →
@@ -97,7 +101,7 @@ source and in this repo *before* the image was built, so the build cannot quietl
 | Entry point | `tui_gateway/entry.py` ends in `main()` under `if __name__ == "__main__"` → `python -m tui_gateway.entry`. |
 | State root | `hermes_constants.get_default_hermes_root()` honours **`HERMES_HOME`** → set it to a writable path (`/var/lib/hermes`); nothing in the source tree is written at runtime. |
 | Boot needs no model | `main()` reaches the `gateway.ready` write with only best-effort steps before it (truststore, heartbeat refresher, orphan sweep, **backgrounded** MCP discovery — *"so a dead MCP server can't freeze startup"*). So the handshake gate needs **no API key and no model**. |
-| Source is 18,248 files | Vendoring it into the code repo would create a **second** copy — the defect **L136** names. |
+| Source is 18,248 files | Vendoring it into the code repo would create a **second** copy — the defect **L136** names. *(The mounted tree is **19,728** files after the 2026-10-16 re-pin; the argument is unchanged.)* |
 
 **The three decisions that follow (each measured, each recorded):**
 1. **The pin is mounted read-only, not vendored.** `docker-compose.hermes.yml` bind-mounts
@@ -105,7 +109,8 @@ source and in this repo *before* the image was built, so the build cannot quietl
    then **re-computes the pin digest at boot** (the same algorithm as `library/.hermes_pin.py`: sorted
    `"<md5>  <relpath>"` lines, md5 of the join) and **refuses to start** unless it equals
    `ca760e97ff1ef1f0e2ed3deb0dfc2923` — so the guarantee is a runtime assertion on the code that actually
-   runs, not a claim about a build. Skip only via an explicit, loudly-logged `HERMES_SKIP_PIN_VERIFY=1`.
+   runs, not a claim about a build. *(Re-pinned 2026-10-16: the recorded digest is now
+   `07ee857bdab59a875317035d8aaad4d6`, and `docker-compose.hermes.yml`'s `HERMES_PIN_DIGEST` default follows.)* Skip only via an explicit, loudly-logged `HERMES_SKIP_PIN_VERIFY=1`.
    Bytecode writing is disabled (`PYTHONDONTWRITEBYTECODE=1`) so no `__pycache__` can touch the mounted
    digest or fail on a read-only mount.
 2. **The dependency closure is built from the pin, without copying the tree.** The Dockerfile declares a

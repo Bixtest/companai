@@ -505,7 +505,10 @@ draft **fails its own premise.** The finding, in our terms:
   (17,201 files — the *previous* pin, revision `eb044063…`, now stale by 3,290 commits). The three are *not*
   byte-identical. The measurement above is still true and the verdict is unchanged — what is absent is a Hermes
   **engine behind the door** — but a sentence that says "Hermes does not exist" is false in the docs repo's terms,
-  so it is corrected. See **`HERMES-PIN.md`** §1.1/§1.1.1.)*
+  so it is corrected. See **`HERMES-PIN.md`** §1.1/§1.1.1.)* **UPDATE 2026-10-16:** there are now **four**
+  extracts — the pin moved to a newer download (`hermes-agent-main/`, revision `db44c462…`, 19,728 files), and the
+  2026-10-12 pin survives renamed aside as `hermes-agent-main-newer/` (`3569e846…`, 18,248 files). See
+  `HERMES-PIN.md` §1.1.2.
 - **OpenCode is the only engine that can actually answer a chat.** The live chat route
   (`api/chat/route.ts`) reaches it through the door (`createOpenCodePortAdapter`, `:122`, `:536`), and the
   engine runs as a **Docker service the platform points at** (`OPENCODE_URL`, default
@@ -1056,7 +1059,9 @@ delete half trigger-blocked).
 > zip's contents, 18,248 files, revision `3569e846…`; `hermes-agent-main-older/`, 17,367 files; and
 > `library/ai/hermes-agent-main/`, the previous pin, 17,201 files). What is genuinely absent is a Hermes **engine
 > behind the door**. The §8 verdict and `CC-72`'s trigger are **unchanged**; only the wording is corrected, here
-> and in the row's §5/§8 text above. See **`HERMES-PIN.md`**.
+> and in the row's §5/§8 text above. See **`HERMES-PIN.md`**. **UPDATE 2026-10-16:** the extract count is now
+**four** and the pin is `hermes-agent-main/` (`db44c462…`, 19,728 files); the 2026-10-12 pin survives as
+`hermes-agent-main-newer/` — see `HERMES-PIN.md` §1.1.2.
 
 - **Measured in code (this session):** §1 rows 1–6, all by reading the named files; the R28-1 proof
   (tests, `tsc`, mutations, the full-suite run).

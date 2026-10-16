@@ -431,7 +431,7 @@ consequence in the target design:
 
 1. **Our Hermes is not in-process.** It is a **separate, digest-pinned worker container**
    (`docker-compose.hermes.yml`, service `hermes-gateway`, image `hermes-gateway:p2-9a`, pin digest
-   `ca760e97…`), and the app cannot run it: the app container has no Python and no Docker socket, so
+   `ca760e97…` — **re-pinned 2026-10-16 to `07ee857b…`, 19,728 files; see `HERMES-PIN.md` §1.1.2**), and the app cannot run it: the app container has no Python and no Docker socket, so
    it **connects** the worker by URL. The door is the pin's own ws transport (`tui_gateway/ws.py`)
    mounted beside stdio by this platform's own bootstrap (`docker/hermes/ws_host.py` +
    `ws_entry.py`, P2-8). Architecturally we are the network-door case §5.1 says "cannot".

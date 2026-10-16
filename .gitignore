@@ -52,22 +52,27 @@ keys/
 # it can be read and judged, but it must never be committed. See library/ai/README.md.
 companai.md
 
-# The Hermes runtime source, extracted into the library for reading. 17,570 files
-# of somebody else's code. The rule at the top of this file already excludes
+# The Hermes runtime source, extracted into the library for reading. 17,201 files
+# of somebody else's code (the 2026-10-03 note said 17,570 — re-measured 2026-10-16).
+# The rule at the top of this file already excludes
 # vendored code; this is the largest instance of it, and the one most likely to be
-# committed by accident. (Checked 2026-10-03.)
+# committed by accident. (Checked 2026-10-03; count corrected 2026-10-16.)
 library/ai/hermes-agent-main/
 
-# The SAME Hermes runtime source ALSO sits at the repository root — and there is
-# the PINNED copy (revision 3569e846…, 18,248 files; see development/HERMES-PIN.md).
-# A third, superseded extract sits beside it as `hermes-agent-main-older/`. The
-# rule above already excludes vendored code; the bare name never matched the root
-# copy, so it showed up as untracked and could have been swept in by a wildcard
-# add. NOTE a bare name is NOT a prefix glob: `hermes-agent-main/` does NOT match
-# `hermes-agent-main-older/`, which is why that copy needs its own line. (Checked
-# 2026-10-05; extended 2026-10-12 when the pin moved to the root and the third
-# copy appeared.)
+# The SAME Hermes runtime source ALSO sits at the repository root — in FOUR extracts
+# side by side. The PINNED copy is `hermes-agent-main/` (revision db44c462…, 19,728
+# files, digest 07ee857b…; see development/HERMES-PIN.md). `hermes-agent-main-newer/`
+# is the PREVIOUS pin (revision 3569e846…, 18,248 files), renamed aside by the owner
+# on 2026-10-15; `hermes-agent-main-older/` (17,367 files) is a superseded extract.
+# The rule above already excludes vendored code; the bare name never matched the
+# sibling copies, so they showed up as untracked and could have been swept in by a
+# wildcard add. NOTE a bare name is NOT a prefix glob: `hermes-agent-main/` does NOT
+# match `hermes-agent-main-newer/`, which is why EACH copy needs its own line.
+# (Checked 2026-10-05; extended 2026-10-12 when the pin moved to the root; the
+# `-newer` line added 2026-10-16 — the owner's rename left an 18,248-file tree
+# untracked and NOT ignored, `git check-ignore` → NOT IGNORED.)
 hermes-agent-main/
+hermes-agent-main-newer/
 hermes-agent-main-older/
 
 # TAKEN, 2026-10-04 — the owner said yes. The hand-written parts are versioned;

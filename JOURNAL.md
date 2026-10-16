@@ -242,6 +242,17 @@ box carry it.)
 
 ---
 
+### ✅ The Hermes pin RE-TAKEN — **the worker was crash-looping (1,834 restarts) on a half-done re-pin, and the new extract could not import at the depth it landed — both found by measurement and fixed.** *(2026-10-16)*
+
+The owner renamed the previous Hermes snapshot aside and extracted a newer download under the standard name (*"I renamed older version of hermes and extracted a new version with the same standard name."*). Two failures followed, both caught by measuring rather than guessing:
+
+- **The worker crash-looped 1,834 times.** `mercato-hermes-gateway` verifies the pin at boot and **refused to start**: *"PIN BROKEN — expected `ca760e97…` actual `84fb84bf…` files 19728."* The guard was **working** — the recorded digest had simply not moved with the folder. The old snapshot was not gone: it survived, renamed aside as `hermes-agent-main-newer/` (`3569e846…`, 18,248 files).
+- **The new extract landed one level too deep** (`hermes-agent-main/hermes-agent-main/…`), and the worker's `PYTHONPATH=/hermes-src` cannot import it — measured both ways in a one-off container (`ModuleNotFoundError: No module named 'tui_gateway'` nested; `IMPORT OK` flattened). Flattened in place, then digested.
+
+**The pin is now `hermes-agent-main/` — revision `db44c462…`, 19,728 files, digest `07ee857b…`** (two independent routes agree: the harness's `os.walk` and a separate `os.scandir` walk; the worker's own `verify_pin.py` is a third). Every key symbol was re-verified present, so there is **no compatibility debt** — but the `P2-1`…`P2-9a` live proofs ran against the previous revision and are re-scheduled as **`CC-86`**. The rename had also left the old copy **untracked and NOT ignored** (`.gitignore` fixed in the same change). **Record: `HERMES-PIN.md` §1.1.2; lesson L169.**
+
+---
+
 ### ✅ P2-4 DONE — **the tool door opens: an admitted tool call now runs through the one door under two gates, and the agent — not the model — chooses the menu.** *(2026-10-13)*
 
 `lib/ai-tool-call-gate.ts` (new, the pure decision) + `lib/hermes-port-adapter.ts` (`resolveToolCall` made real) + the runner agent in `ai-agents.ts`; requirement written BEFORE the code (plan §2.10), full discharge record in §2.10 + the §4 row.

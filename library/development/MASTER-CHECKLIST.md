@@ -142,7 +142,7 @@ The `CC-*` codes are the fine-grained items behind the rows above — the cuts, 
 **Every one has an address here**: a code you meet anywhere in the documents resolves on this page.
 **Closed** = built and proven (tests, mutations, a separate-agent hostile critic — the record is in
 `COMPLETION-CALLBACKS.md`). States were read item by item from that register, not scanned by keyword.
-**CC-75 was never assigned** — the numbering skips it. **45 closed · 38 open · 83 total.**
+**CC-75 was never assigned** — the numbering skips it. **45 closed · 41 open · 86 total.**
 
 | Item | What it is, in plain words | State |
 |---|---|---|
@@ -229,6 +229,9 @@ The `CC-*` codes are the fine-grained items behind the rows above — the cuts, 
 | CC-82 | The port carries no settings (model / toolset / prompt are deployment constants on the Hermes path) | ☐ open |
 | CC-83 | P2-9b retires the only door that can write into a Hermes session | ☐ open |
 | CC-84 | The worker's tool calls carry ONE identity (the superadmin's) — the live Hermes path bypasses per-user, per-tenant authority | ☐ open |
+| CC-85 | The worker's MCP key lives only in the process the entrypoint starts — a worker spawned any other way gets a 401 from the MCP server and loses its tools | ☐ open |
+| CC-86 | The live Hermes proofs (`P2-1`…`P2-9a`) were taken against the previous pin revision — re-run them against the mounted tree | ☐ open |
+| CC-87 | The architecture reader is a generated bundle printing a stale pin — regenerate it from the study sources | ☐ open |
 
 ---
 

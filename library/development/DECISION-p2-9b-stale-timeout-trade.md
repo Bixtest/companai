@@ -175,18 +175,29 @@ theoretical; it ran.
 
 ### 4.1 The prefill table (three measured turns, plus the plan's hazard figure)
 
-Each measured row was read from the model's own `prompt eval time` line — not the `progress =`
-fraction, which mis-states the total by up to 2.5× (LESSONS L153).
+The prefill and speed columns were read from the model's own `prompt eval time` line — not the
+`progress =` fraction, which mis-states the total by up to 2.5× (LESSONS L153). The token column is the
+recorded `input_tokens`; see the correction below.
 
-| Prompt | Tokens | Prefill | Speed |
+| Prompt | Tokens (as recorded) | Prefill | Speed |
 |---|---|---|---|
 | Toolset pinned to `search` | 6,105 | 608 s | 10.1 tok/s |
-| **DEFAULT toolsets** | 10,988 | **1,583 s** | 6.94 tok/s |
-| DEFAULT toolsets, production-shaped run | 10,646 | ~1,905 s | ~5.6 tok/s |
+| **DEFAULT toolsets** | 10,988 *(uncached)* | **1,583 s** | 6.94 tok/s |
+| DEFAULT toolsets, production-shaped run | 10,646 *(uncached)* | ~1,905 s | ~5.6 tok/s |
 | The plan's hazard figure | ~16,757 | ~3,000 s | ~5.5 tok/s |
 
+**Correction 2026-10-16 (rule 13) — the token column above is the UNCACHED `input_tokens`, not the
+prompt.** The worker's own state DB (`sessions` / `session_model_usage`) records both halves, and the
+model server's own log records the whole: the production-shaped turn's `prompt eval time` reads
+**`1778806.43 ms / 16725 tokens` (9.40 tok/s)**, and its DB row is `input_tokens 10,646 +
+cache_read_tokens 6,079 = 16,725`. The "DEFAULT toolsets" row is `10,988 + 6,022 = 17,010`. **So the true
+full prompt was ~16,725–17,010 tokens all along** — the figures above were the uncached slice, and the
+plan's ~16,757 hazard was **right about the prompt** (see §4.3). *(The `search` row's cache split is not
+in the DB; 6,105 stands as recorded.)*
+
 The 2,400 s ceiling was set against the third row: **495 s of headroom over the slowest prefill
-actually measured.** The compose says so itself: *"a HARDWARE grace, not a correctness knob — a
+actually measured** — and the measured prefill for that 16,725-token prompt is **1,778.8 s**, so the
+headroom over the real figure is **~620 s**. The compose says so itself: *"a HARDWARE grace, not a correctness knob — a
 deployment with a fast model never reaches it."*
 
 ### 4.2 The stale ceiling, exactly (read in code, this session)
@@ -206,22 +217,59 @@ give a local server the same prefill grace. Two properties matter for this decis
 Context-scaling (`_scale_stale_timeout_for_context`) only engages above 50k estimated tokens — at our
 ~11–17k scale the 2,400 s stands as-is.
 
-### 4.3 The 16,757 figure needs re-measuring before it gates anything (Rule 13)
+### 4.3 The 16,757 figure, re-measured — and the compose's "10,988" was the UNCACHED slice, not the prompt (Rule 13)
 
 The compose's own measurement of "the DEFAULT toolsets" is **10,988 tokens**; the plan's hazard
-paragraph carries **~16,757**. The delta is ~5,769 tokens, and **two hypotheses explain it — both
-unproven:** (a) the 16,757 figure predates the bridge's arrival and describes a prompt the worker no
-longer builds — the delta is roughly the size of the 21 MCP tool schemas the platform exposes
-(≈275 tokens per schema on average, itself an unverified arithmetic guess); (b) the two figures were
-measured under different conditions — the compose itself prices a production-shaped run at ~1,905 s
-against the 1,583 s of the plain default-toolsets run, so conditions alone move the number.
-**The number that gates the decision must be re-measured from the worker's own assembled array.**
-(The route, measured this session: the live RPCs do **not** expose it — `tools.list` returns
-per-toolset name lists only, and `tools.show` explicitly requests
-`get_tool_definitions(skip_tool_search_assembly=True)`, i.e. the **pre-assembly** array
-(`tui_gateway/methods_tools.py:1325-1326`). The only route is running the assembly inside the
-worker's own process; the earlier host-side import probes died on host memory pressure — exit 137 —
-and that method is retired.)
+paragraph carries **~16,757**. The delta is ~5,769 tokens, and two hypotheses explained it. The
+re-measurement **falsifies one and resolves the other** — but not the way this section first guessed.
+
+**Correction one — the 10,988 was not the prompt.** The worker's own state DB
+(`/var/lib/hermes/state.db`, read 2026-10-16) stores both halves of every turn's usage, and the model
+server's own log stores the whole:
+
+| Turn (session) | `input_tokens` | `cache_read_tokens` | **total** | model's own `prompt eval time` |
+|---|---|---|---|---|
+| 2026-10-13 "DEFAULT toolsets" (`…_8c7864`) | 10,988 | 6,022 | **17,010** | — |
+| 2026-10-14 production-shaped (`…_a43f3d`) | 10,646 | 6,079 | **16,725** | **`1778806.43 ms / 16725 tokens` (9.40 tok/s)** |
+
+So **the true full prompt was ~16,725 tokens all along**; the compose's three figures were the
+**uncached** slice of it. The plan's ~16,757 hazard was **right about the prompt** — it was never a
+pre-bridge artefact.
+
+**Correction two — the bridge shrinks the full CATALOG, not the worker's default.** The assembly was run
+in the worker's own process (`discover_mcp_tools()` → `get_tool_definitions()`), and the model's own
+`/tokenize` priced each array:
+
+| Array | Tools | JSON bytes | model's own tokens |
+|---|---|---|---|
+| Pre-bridge, `skip_tool_search_assembly=True` — **the full catalog** (incl. the 21 MCP) | 53 | 67,829 | **15,254** |
+| **Assembled** (bridge ON — **the production shape**) | 20 | 42,140 | **9,502** |
+
+The bridge defers 36 tools behind `tool_search`/`tool_describe`/`tool_call`
+(`assembly_report`: `activated: true`, `deferred_count: 36`, `deferred_tokens: 7,777`). **But the
+worker's DEFAULT selection is not that 53-tool catalog.** The DB's recorded tool payloads put the
+default at **24 collapsed definitions (43,798 chars)** against the assembled **20 (42,619 chars)** — a
+change of ~1,200 chars, **≈300 tokens**. So hypothesis (a) — *"16,757 predates the bridge and describes
+a prompt the worker no longer builds"* — is **FALSIFIED**: the bridge's real-world effect is small,
+because the default toolset was already narrow.
+
+**What actually fills the 16,725.** The assembled tool array (9,502) + a **26,549-char system prompt**
+(~6.7k tokens) + the conversation. **The system prompt — not the tool catalogue — is the second-biggest
+block**, and no tool-side change can reach it.
+
+**What this means for the ceiling — the honest reading.** The measured full-prompt prefill is
+**1,778.8 s at 9.40 tok/s**, i.e. inside the 2,400 s clock with **~620 s to spare**. But the same box has
+also measured **5.6–7.8 tok/s**, where 16,725 tokens costs **2,140–2,990 s**. **The ceiling holds on the
+measured rate and is marginal on the slow one.** That is a *measure-and-configure* situation exactly as
+the ruling framed it — and the lever that would move it is the **system prompt**, not the tool set.
+*(A fresh production turn through the ws door on the re-pinned worker is running to confirm the figure on
+the current pin; its `prompt eval time` line is folded in when it lands.)*
+
+*(Route note, kept: the live RPCs do not expose the assembly — `tools.list` returns per-toolset name
+lists only, and `tools.show` explicitly requests `get_tool_definitions(skip_tool_search_assembly=True)`,
+i.e. the pre-assembly array (`tui_gateway/methods_tools.py:1325-1326`). The assembly must be run inside
+the worker's own process. The earlier "host memory pressure — exit 137" note was **wrong**: the 137 was
+the absent process of a crash-looping container, not an OOM (L169).)*
 
 ### 4.4 Warm turns are already cheap — measured, this session
 
@@ -243,13 +291,13 @@ timings dict in this build reports no `cached_n` field, but the contrast is unam
 
 **What this does and does not establish — the confounds, named:**
 
-- **The first turn may be killed, not merely slow.** At the hazard figure the cold prefill
-  (~3,000 s) *exceeds* the 2,400 s ceiling — if 16,757 is the true number, the first turn is
-  aborted, not paid. At the compose's own measured default (10,988 → 1,583 s) it completes.
-  **Which number is true decides whether a cold conversation can start at all — which is exactly
-  why §4.3 gates this decision.** The probe measured two *completed* calls; whether an *aborted*
-  first turn leaves its slot cache alive for the retry is **untested** — an open dependency, not a
-  proven path.
+- **The first turn may be killed, not merely slow — and §4.3 has now settled which.** The true prompt
+  is **16,725 tokens** (§4.3, corrected 2026-10-16), and the prefill **measured for exactly that prompt
+  is 1,778.8 s** — so the cold first turn **completes**, with ~620 s of headroom. The earlier "~3,000 s"
+  was an extrapolation at 5.5 tok/s; the same box has also measured 5.6–7.8 tok/s, where 16,725 tokens
+  costs **2,140–2,990 s** and would breach. **So the first turn completes on the measured rate and is
+  marginal on the slow one.** The probe measured two *completed* calls; whether an *aborted* first turn
+  leaves its slot cache alive for the retry is **untested** — an open dependency, not a proven path.
 - **An identical prefix is not a growing prefix.** Production turns extend the conversation each
   turn. "A warm turn pays only the delta" is the standard longest-prefix-match behavior
   **extrapolated** from the identical-prefix measurement, not directly measured.
@@ -261,7 +309,7 @@ timings dict in this build reports no `cached_n` field, but the contrast is unam
 **The consequence that survives every caveat:** the 2,400 s hazard is a cold-start cost, not an
 every-turn cost. A warm turn re-ingests only the delta — the new user message and the last reply —
 and the probe shows that reuse is real on the deployed server. The cold turn itself is a one-time
-cost per conversation whose size §4.3 must still establish.
+cost per conversation whose size §4.3 has now established (**16,725 tokens**).
 
 ---
 

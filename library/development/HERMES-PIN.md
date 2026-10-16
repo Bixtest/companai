@@ -1,7 +1,8 @@
 # The Hermes pin — Phase 0 of the Hermes track
 
-**Status: Phase 0 is DONE (2026-10-12), and the pin was RE-PINNED to the newest
-source the same day.** This document *is* the pin. It records the source digest,
+**Status: Phase 0 is DONE (2026-10-12); the pin was RE-PINNED to the newest source
+the same day, and RE-PINNED AGAIN 2026-10-16** when the owner supplied a
+still-newer download. This document *is* the pin. It records the source digest,
 the compatibility harness that checks it, the exact symbols the platform will
 call, and the licence position — the four things Phase 0's exit gate names. It is
 written for a reader who has never seen the Hermes source.
@@ -27,28 +28,29 @@ names this exactly (`ARCHITECTURE-hermes-integration.md` §9, Phase 0):
 *"Create the pin that does not exist (a recorded source digest and a
 compatibility harness)."* **This document is that pin.**
 
-### 1.1 There are THREE Hermes copies, and none is byte-identical to another
+### 1.1 There are FOUR Hermes copies, and none is byte-identical to another
 
-Measured 2026-10-12. All three are gitignored (`.gitignore` line 59 names
-`library/ai/hermes-agent-main/`; lines 70–71 name the two root copies — note a
-bare `hermes-agent-main/` is **not** a prefix glob, so `hermes-agent-main-older/`
-carries its own line).
+Measured 2026-10-12, re-measured 2026-10-16 after the second re-pin. All are
+gitignored (`.gitignore` line 59 names `library/ai/hermes-agent-main/`; the root
+copies carry their own lines — note a bare `hermes-agent-main/` is **not** a
+prefix glob).
 
 | Copy | Path | Files | `pyproject.toml` md5 | Revision | mtime | Is it the pin? |
 |---|---|---:|---|---|---|---|
-| **The pinned snapshot** | `hermes-agent-main/` (repo root) | 18,248 | `11d88a68bc3749f2de73195dd9204cf8` | `3569e846…` | 2026-10-12 | **YES** — newest, byte-identical to the root `hermes-agent-main.zip` |
+| **The pinned snapshot** | `hermes-agent-main/` (repo root) | 19,728 | `f57f729d4b251547a5a9e2565ce1e726` | `db44c462…` | 2026-10-15 | **YES** — newest; the 2026-10-15 download, flattened to the mount-root layout (§1.1.2) |
+| The previous pin | `hermes-agent-main-newer/` (repo root) | 18,248 | `11d88a68bc3749f2de73195dd9204cf8` | `3569e846…` | 2026-10-12 | no — the 2026-10-12 pin, renamed aside by the owner on 2026-10-15 |
 | The mid extract | `hermes-agent-main-older/` (repo root) | 17,367 | `594dea190e4176caa117db2349071e6c` | not recoverable | 2026-10-05 | no — kept for history |
-| The previous pin | `library/ai/hermes-agent-main/` | 17,201 | `a4ce871d9d03fd3706516e15bff637bb` | `eb044063…` | 2026-10-03 | no — **now stale by 3,290 commits** |
+| The pin before that | `library/ai/hermes-agent-main/` | 17,201 | `a4ce871d9d03fd3706516e15bff637bb` | `eb044063…` | 2026-10-03 | no — superseded 2026-10-12 |
 
-They differ in content (three different `pyproject.toml` hashes) and in file
+They differ in content (four different `pyproject.toml` hashes) and in file
 count. **This is the "source-versus-image divergence" the architecture's §10 risk
-table warns about**, found in our own tree: three extracts of one product, at
+table warns about**, found in our own tree: four extracts of one product, at
 different revisions, with nothing saying which is which.
 
 **The pin names exactly ONE of them — the repository-root `hermes-agent-main/`,
-the newest extract — as *the* Hermes we read and will run.** The other two are
-left where they are (deleting another project's material is not this programme's
-call) but neither is the pinned one. A new reader must not have to guess.
+the newest extract — as *the* Hermes we read and will run.** The others are left
+where they are (deleting another project's material is not this programme's call)
+but none is the pinned one. A new reader must not have to guess.
 
 #### 1.1.1 RE-PINNED 2026-10-12 — and why (rule 13)
 
@@ -79,6 +81,55 @@ the library"* was a good reason only while there was **one** candidate. Once a
 second arrived, the question became *"which is newest?"* — and the answer moved.
 A pin must re-measure its own premise when the premise's inputs change.
 
+#### 1.1.2 RE-PINNED 2026-10-16 — the current pin, and the flattening (rule 13)
+
+The owner supplied a still-newer download (zip dated 2026-10-15, revision
+`db44c462…`) and, on 2026-10-15, **renamed the previous pin aside** (it is now
+`hermes-agent-main-newer/`, byte-identical to what `hermes-agent-main/` held) and
+**extracted the new one under the standard name** `hermes-agent-main/`. Measured
+2026-10-16:
+
+- **The extract carried one extra nesting level** —
+  `hermes-agent-main/hermes-agent-main/…` — because the zip's own root entry is
+  `hermes-agent-main/` and it was unpacked inside a directory of that same name.
+  **That layout cannot run**: the worker's entrypoint sets
+  `PYTHONPATH=/hermes-src` and `chdir`s there, so the package must sit *directly*
+  at the mount root. Measured both ways in a one-off container: the double-nested
+  tree → `ModuleNotFoundError: No module named 'tui_gateway'`; the single-nested
+  tree → `IMPORT OK`. **The tree was FLATTENED to the mount-root layout before the
+  digest was taken** (an in-place rename of the inner directory onto the outer
+  name; no content changed — the flatten is proven by the zip check in §6).
+- **A half-done re-pin had been crash-looping the worker.** With the tree replaced
+  but the digest not updated, `mercato-hermes-gateway` failed its boot
+  verification on every restart — **1,834 restarts**, the log repeating
+  *"PIN BROKEN — the mounted tree is not the snapshot that was pinned"*. The pin
+  now holds again (§2). *(`.hermes_pin.py`'s own contract names this exact
+  failure: a deliberate change must update the digest in the same change, or
+  restore the snapshot.)*
+- **The digest and the count, after flattening:** **19,728 files**, digest
+  **`07ee857bdab59a875317035d8aaad4d6`** — computed twice by methods that share no
+  failure mode (`os.walk` in the harness; an independent `os.scandir` walk) and
+  both agreeing.
+- **The map still holds (§3), re-measured:** every entry symbol survives —
+  `_event_frame` (`tui_gateway/server.py:717`, was `:701`), `register_method`
+  (`:906`), `handle_ws` (`tui_gateway/ws.py:354`), `acp_adapter/` (19 files), and
+  the stale-ceiling seam (`agent/chat_completion_helpers.py:634-646`,
+  `HERMES_LOCAL_STREAM_STALE_TIMEOUT`, 900 s default) **unchanged**. `server.py`
+  shrank 3,692→2,185 lines (an internal refactor), but no symbol the platform
+  calls moved out of reach. **So this re-pin raises no compatibility debt**, the
+  same conclusion the 2026-10-12 re-pin reached.
+- **The zip is the snapshot:** `unzip -p` member hashes match the tree on disk for
+  `pyproject.toml` (`f57f729d…`), `AGENTS.md` (`ab9c77f0…` — unchanged since the
+  previous pin), `README.md` (`2ebde40d…` — unchanged), `model_tools.py` and
+  `tools/tool_search.py`.
+
+**What this re-pin costs, named:** the `P2-1`…`P2-9a` discharge proofs were made
+against the **2026-10-12** revision (`3569e846…`); the worker now runs
+`db44c462…`. The symbols are verified present and the worker boots healthy
+(measured: `PIN HOLDS`, `MCP BRIDGE READY`, the ws door bound, `gateway.ready`
+emitted), but the *live-turn* proofs should be re-run against the running revision
+— **scheduled, not assumed** (`COMPLETION-CALLBACKS.md`, `CC-86`).
+
 ### 1.2 Where the source revision comes from — it *was* recoverable
 
 The architecture says the source revision *"cannot be recovered; it must be
@@ -88,14 +139,18 @@ created."* **That is now sharper than it needs to be, and this pin corrects it
 archive comment**:
 
 ```
-3569e8461ea721623fa16e6f01fb636157989fe6
+db44c46208f1b421b4ecb7e56bf9d68b0423906f
 ```
 
-Verified 2026-10-12: the new zip's member hashes are byte-identical to the new
-snapshot (`pyproject.toml` md5 `11d88a68…`, `AGENTS.md` md5 `ab9c77f0…`,
-`README.md` md5 `2ebde40d…` all match when read through `unzip -p`; file counts
-18,248 = 18,248 — the zip lists 19,484 *entries* of which 1,236 are directory
-entries, leaving 18,248 files).
+Verified 2026-10-16 (the current pin): the 2026-10-15 zip lists 20,966 *entries*
+of which 1,238 are directory entries, leaving **19,728 files** — the count the
+flattened tree on disk has. Member hashes match through `unzip -p`
+(`pyproject.toml` `f57f729d…`, `AGENTS.md` `ab9c77f0…`, `README.md` `2ebde40d…`,
+`model_tools.py`, `tools/tool_search.py`).
+
+The **2026-10-12** pin used the same mechanism: its zip's comment carried
+`3569e846…`, and its 19,484 entries minus 1,236 directory entries left 18,248
+files.
 
 The same technique recovered the **previous** pin's revision (`eb044063…`, from
 `library/ai/hermes-agent-main.zip`) and the revision of the owner's new download
@@ -123,15 +178,17 @@ this repository's tooling:
 **The pinned digest — this is the value the harness enforces:**
 
 ```
-ca760e97ff1ef1f0e2ed3deb0dfc2923
+07ee857bdab59a875317035d8aaad4d6
 ```
 
-Recorded from a run of the harness on 2026-10-12 (18,248 files). **This replaced
-the previous pin's digest `53b320bb83a155225ab4b36b3ad0dace` (17,201 files,
-`library/ai/hermes-agent-main/`) in the same change as the re-pin (§1.1.1).** For
-reference, the third copy `hermes-agent-main-older/` digests to
-`3e3b81f2ac67a13b76c08f5140d9efe6` (17,367 files) — all three are distinct,
-which is exactly why the pin must name one.
+Recorded from a run of the harness on 2026-10-16 (**19,728 files**, the flattened
+2026-10-15 snapshot). **This replaced the 2026-10-12 pin's digest
+`ca760e97ff1ef1f0e2ed3deb0dfc2923` (18,248 files) in the same change as the
+re-pin (§1.1.2).** For reference, the other copies digest to `ca760e97…`
+(18,248 files — the 2026-10-12 pin, now `hermes-agent-main-newer/`),
+`3e3b81f2ac67a13b76c08f5140d9efe6` (17,367 files, `hermes-agent-main-older/`) and
+`53b320bb83a155225ab4b36b3ad0dace` (17,201 files, `library/ai/hermes-agent-main/`)
+— all distinct, which is exactly why the pin must name one.
 
 ---
 
@@ -151,9 +208,9 @@ nothing), `--quiet` (print only the digest). A clean run prints:
 
 ```
 PIN HOLDS
-  revision : 3569e8461ea721623fa16e6f01fb636157989fe6
-  files    : 18248
-  digest   : ca760e97ff1ef1f0e2ed3deb0dfc2923
+  revision : db44c46208f1b421b4ecb7e56bf9d68b0423906f
+  files    : 19728
+  digest   : 07ee857bdab59a875317035d8aaad4d6
 ```
 
 **Proven (2026-10-12, re-proved against the re-pinned snapshot the same day).**
@@ -167,6 +224,14 @@ restoring the file to its original md5 (`9e0dac68…`, recreated with
 printed PIN HOLDS again. So the digest tracks content exactly, and a changed
 snapshot cannot pass silently. (The byte `x` is stated because the number depends
 on *which* byte is appended — `X` yields a different digest than `x`.)
+
+**Re-proved 2026-10-16 (the current pin).** The harness computed `07ee857b…` /
+19,728 files, and an **independent `os.scandir` walk** (written separately from
+the harness's `os.walk`) produced the identical digest — two implementations
+sharing no traversal code, agreeing (rule 4). The worker's own boot verifier
+(`verify_pin.py`, the harness's algorithm, running in the image) printed
+`PIN HOLDS` on the flattened tree at 19,728 files / `07ee857b…` — a third,
+independent execution of the same algorithm, in a different runtime.
 
 ### 2.1 What this harness is *not*
 
@@ -192,17 +257,19 @@ verified present in the pinned snapshot.
 
 | Protocol | Transport | Entry file (pinned snapshot) | Symbols |
 |---|---|---|---|
-| **TUI gateway JSON-RPC** | JSON-RPC over stdio, or WebSocket | `tui_gateway/server.py` (3,692 lines) · `tui_gateway/ws.py` (477 lines) | `prompt.submit` · `session.create/list/activate/close/interrupt/history/branch/steer/resume/compress/status/usage` · `command.dispatch/resolve` · `client.capabilities` · `gateway.capabilities` · `reload.mcp/env` · `process.stop` · `subagent.interrupt/steer` — **and the events** `message.delta`, `message.complete`, `tool.start/generating/complete`, `gateway.ready`, `request.cancel` |
-| **API server (OpenAI-compatible)** | HTTP + Server-Sent Events | `gateway/platforms/api_server.py` (4,619 lines) | `POST /v1/chat/completions` · `POST /v1/responses` · `POST /v1/runs` → `run_id` (202) · `GET /v1/runs/{id}` · `GET /v1/runs/{id}/events` (SSE) · `POST /v1/runs/{id}/approval` · `POST /v1/runs/{id}/steer` · `POST /v1/runs/{id}/stop` · `GET /v1/capabilities` · `GET /v1/models` |
+| **TUI gateway JSON-RPC** | JSON-RPC over stdio, or WebSocket | `tui_gateway/server.py` (2,185 lines) · `tui_gateway/ws.py` (539 lines) | `prompt.submit` · `session.create/list/activate/close/interrupt/history/branch/steer/resume/compress/status/usage` · `command.dispatch/resolve` · `client.capabilities` · `gateway.capabilities` · `reload.mcp/env` · `process.stop` · `subagent.interrupt/steer` — **and the events** `message.delta`, `message.complete`, `tool.start/generating/complete`, `gateway.ready`, `request.cancel` |
+| **API server (OpenAI-compatible)** | HTTP + Server-Sent Events | `gateway/platforms/api_server.py` (4,612 lines) | `POST /v1/chat/completions` · `POST /v1/responses` · `POST /v1/runs` → `run_id` (202) · `GET /v1/runs/{id}` · `GET /v1/runs/{id}/events` (SSE) · `POST /v1/runs/{id}/approval` · `POST /v1/runs/{id}/steer` · `POST /v1/runs/{id}/stop` · `GET /v1/capabilities` · `GET /v1/models` |
 | **ACP** | JSON-RPC over stdio | `acp_adapter/` | Agent Client Protocol — session creation, prompt submission, streaming chunks, tool-call events, permission requests, fork, cancel (IDE clients) |
 
-Line counts are from the **re-pinned** snapshot (`hermes-agent-main/`); every
-entry file was re-verified present after the re-pin (§1.1.1), with the previous
-pin's counts alongside for the record: `tui_gateway/server.py` 3,672→3,692 ·
-`tui_gateway/ws.py` 477→477 · `gateway/platforms/api_server.py` 4,646→4,619 ·
-`programmatic-integration.md` 226→227. The map is read from Hermes' own
-`website/docs/developer-guide/programmatic-integration.md` in the pinned
-snapshot, not from a report about it.
+Line counts are from the **current** snapshot (`hermes-agent-main/`, the
+2026-10-16 pin); every entry file was re-verified present after each re-pin. The
+counts across the three pins, for the record: `tui_gateway/server.py`
+3,672→3,692→**2,185** · `tui_gateway/ws.py` 477→477→**539** ·
+`gateway/platforms/api_server.py` 4,646→4,619→**4,612** ·
+`programmatic-integration.md` 226→227→**249**. (`server.py`'s 2026-10-16 drop is
+an internal refactor; its entry symbols are unchanged — §1.1.2.) The map is read
+from Hermes' own `website/docs/developer-guide/programmatic-integration.md` in the
+pinned snapshot, not from a report about it.
 
 ### 3.1 Which one the platform will use — and why it is not decided here
 
@@ -361,9 +428,9 @@ means what it says.
 
 ## 6. How this was verified (rule 0)
 
-Every claim above is from a command and its output, run 2026-10-12, against the
-pinned snapshot — not from a report about it. The re-pin (§1.1.1) re-measured
-every claim against the new copy.
+Every claim above is from a command and its output — run 2026-10-12 against the
+then-pinned snapshot, and **re-run 2026-10-16** against the current one (§1.1.2)
+— not from a report about it.
 
 - **Three copies exist and differ:** `md5sum` of `pyproject.toml` in all three
   trees (`11d88a68…` / `594dea19…` / `a4ce871d…`); `find … | wc -l` → 18,248 /
@@ -393,3 +460,29 @@ every claim against the new copy.
 - **The licence position:** every `LICENSE*` file in the tree read; the
   `pyproject.toml` and `package.json` licence fields; the AGPL/GPL references
   read in their own files, in context.
+
+**2026-10-16 (the current pin — the second re-pin).**
+
+- **The layout, measured both ways:** a one-off container from
+  `hermes-gateway:p2-9a` with each tree mounted at `/hermes-src` and
+  `PYTHONPATH=/hermes-src` → double-nested =
+  `ModuleNotFoundError: No module named 'tui_gateway'`; single-nested =
+  `IMPORT OK`. The flatten is what the worker's boot requires.
+- **The digest, two routes:** `.hermes_pin.py --print` → `07ee857b…` / 19,728
+  files; an independent `os.scandir` implementation → the identical value.
+- **The tree is the zip:** `unzip -p` member md5s vs the disk files (5 sampled:
+  `pyproject.toml`, `AGENTS.md`, `README.md`, `model_tools.py`,
+  `tools/tool_search.py`) all MATCH.
+- **The symbols:** `_event_frame` at `tui_gateway/server.py:717`,
+  `register_method` at `:906`, `handle_ws` at `tui_gateway/ws.py:354`,
+  `acp_adapter/` 19 files, and `agent/chat_completion_helpers.py:634-646`
+  (`local_stream_stale_timeout`) — all present, by `grep -n` / `wc -l`.
+- **The worker boots on it:** `docker compose … up -d --force-recreate` →
+  `PIN HOLDS` (19,728 / `07ee857b…`), `MCP BRIDGE READY` (`open-mercato`,
+  `http://mcp:3001/mcp`), the ws door bound on `:8091`, and a real
+  `gateway.ready` frame — no restart loop (it had run 1,834 restarts on the
+  half-done re-pin).
+- **The zip revision:** `zipfile.ZipFile(...).comment` →
+  `db44c46208f1b421b4ecb7e56bf9d68b0423906f`; the archive's internal mtimes are
+  all 2026-10-15 00:57:52 (a single stamp — the download date), which is what
+  dates it newer than the 2026-10-12 pin.

@@ -24,21 +24,32 @@ WHAT THE PINNED SNAPSHOT IS
 ---------------------------
 `hermes-agent-main/` (the repository root) — the extracted contents of the root
 `hermes-agent-main.zip`, whose archive comment carries the upstream source
-revision: `3569e8461ea721623fa16e6f01fb636157989fe6`.
+revision: `db44c46208f1b421b4ecb7e56bf9d68b0423906f`.
+
+RE-PINNED 2026-10-16 (rule 13) — the newest source again. The owner renamed the
+previous pin aside and extracted a newer download under the standard name
+`hermes-agent-main/` (zip dated 2026-10-15, revision `db44c462…`, newer than the
+`3569e846…` of the 2026-10-12 pin). The extract carried ONE EXTRA NESTING LEVEL
+(`hermes-agent-main/hermes-agent-main/…`); the worker runs with
+`PYTHONPATH=/hermes-src` against the mounted root, so that layout cannot import
+(`ModuleNotFoundError: tui_gateway` — measured). The tree was FLATTENED to the
+documented single-nested layout BEFORE the digest below was taken. Measured:
+19,728 files, digest `07ee857b…`.
 
 RE-PINNED 2026-10-12 (rule 13). The pin previously named
 `library/ai/hermes-agent-main/` (revision `eb044063…`). The owner then supplied a
 newer download at the root; measured against upstream, the old pin was **3,290
 commits behind** (2026-10-03 → 2026-10-12). The pin now names the NEWEST copy.
 
-There are THREE copies in the tree, and none is byte-identical to another (L136 —
+There are FOUR copies in the tree, and none is byte-identical to another (L136 —
 "two copies of one thing is a defect … a pin must pick ONE"):
 
-  | copy                                 | files  | revision   | is it the pin? |
-  |--------------------------------------|-------:|------------|----------------|
-  | `hermes-agent-main/` (root)          | 18,248 | `3569e846…`| **YES** — newest, byte-identical to the root zip |
-  | `hermes-agent-main-older/` (root)    | 17,367 | unknown    | no — a mid extract, kept for history |
-  | `library/ai/hermes-agent-main/`      | 17,201 | `eb044063…`| no — the PREVIOUS pin (now stale by 3,290 commits) |
+  | copy                              | files  | revision    | is it the pin? |
+  |-----------------------------------|-------:|-------------|----------------|
+  | `hermes-agent-main/` (root)       | 19,728 | `db44c462…` | **YES** — newest, the flattened extract of the 2026-10-15 zip |
+  | `hermes-agent-main-newer/` (root) | 18,248 | `3569e846…` | no — the PREVIOUS pin, renamed aside by the owner 2026-10-15 |
+  | `hermes-agent-main-older/` (root) | 17,367 | unknown     | no — a mid extract, kept for history |
+  | `library/ai/hermes-agent-main/`   | 17,201 | `eb044063…` | no — the pin before that |
 
 This pin deliberately names ONE so there is a single answer to "which Hermes are
 we reading".
@@ -66,17 +77,17 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 # from library/ — the newest extract, byte-identical to the root zip.
 PINNED = os.path.normpath(os.path.join(HERE, "..", "hermes-agent-main"))
 
-# The upstream revision, read from the zip's own archive comment on 2026-10-12.
-# It is recorded here so the pin carries the source revision as well as the
-# content digest: the zip is the provenance, the digest is the proof.
-# Re-pinned 2026-10-12: was eb044063… (the old library/ai copy, 3,290 commits
-# behind this one); now 3569e846… (the newest download the owner supplied).
-UPSTREAM_REVISION = "3569e8461ea721623fa16e6f01fb636157989fe6"
+# The upstream revision, read from the zip's own archive comment. It is recorded
+# here so the pin carries the source revision as well as the content digest: the
+# zip is the provenance, the digest is the proof.
+# Re-pinned 2026-10-16: was 3569e846… (the 2026-10-12 pin, now renamed aside at
+# hermes-agent-main-newer/); now db44c462… (the owner's 2026-10-15 download).
+UPSTREAM_REVISION = "db44c46208f1b421b4ecb7e56bf9d68b0423906f"
 
 # The digest the snapshot must produce. Updated only when the snapshot is
 # deliberately re-pinned, and then only together with this file's own record in
 # HERMES-PIN.md.
-EXPECTED_DIGEST = "ca760e97ff1ef1f0e2ed3deb0dfc2923"
+EXPECTED_DIGEST = "07ee857bdab59a875317035d8aaad4d6"
 
 
 def digest_of(root):

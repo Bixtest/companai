@@ -41,6 +41,25 @@ The two hashes differ and the new tree holds **1,480 more files**. So this is no
 a new name — it is a **newer extract of the same product**, and the pin must name it explicitly. This
 document is that pin. **Any figure in this study is a figure about THIS tree and no other.**
 
+#### 1.1.1 UPDATE (2026-10-16) — the path changed, and the old copy is NOT gone (rule 13)
+
+Two facts in the table above were measured again on 2026-10-16 and corrected:
+
+- **The path.** This study measured the tree at `hermes-agent-main/hermes-agent-main/` — the extract had
+  landed one level too deep. The worker's `entrypoint.py` sets `PYTHONPATH=/hermes-src` and execs
+  `python3 /opt/hermes/ws_entry.py`, which does `from tui_gateway import entry`; that import **fails** when
+  the package sits one level down (measured both ways in a one-off container:
+  `ModuleNotFoundError: No module named 'tui_gateway'` nested, `IMPORT OK` flattened). So the tree was
+  **flattened in place** on 2026-10-16 and the same 19,728 files now sit at the repository-root
+  `hermes-agent-main/`. **The content is unchanged; only the depth is.** The whole-tree digest taken after
+  the flatten is `07ee857bdab59a875317035d8aaad4d6` (the nested form digested to `84fb84bf…`).
+- **The old copy is NOT gone.** The table's "Status: **gone**" was under-scoped. The 2026-10-12 pin was
+  **renamed aside, not deleted** — it survives as `hermes-agent-main-newer/` (18,248 files, `pyproject.toml`
+  md5 `11d88a68…`, revision `3569e846…`). The repository therefore holds **four** Hermes extracts, not
+  three, and the pinned one is `hermes-agent-main/`.
+
+Everything else in this study is unaffected: it measured the 19,728-file tree and still does.
+
 ### 1.2 The honest limit on "which commit is this?"
 
 There is **no `.git`**, so the exact upstream commit cannot be read from the tree, and `version = "0.0.0"`
