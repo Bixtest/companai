@@ -59,7 +59,7 @@ Sorted by rank, then by the audit's own priority. "Src" is the `preview/` docume
 |---|---|---|---|---|---|---|
 | **T-01** | 08 §1 | **A delegation lends authority the lender does not have.** The route grants any `capabilityId` to any grantee; nothing checks the grantor holds it; `.delegable: false` has **zero** production readers | 🔬 CONFIRMED | critical | **urgent** | EXECUTE |
 | **T-02** | 08 §2 | **The AI's business-query tool checks scope but not authorization.** `features` is passed into the Business-IR chain and never read; `engine.query` runs unguarded | 🔬 CONFIRMED | critical | **urgent** | EXECUTE |
-| **T-03** | 08 §18, 09 §3.1, 10 §1.2 | **No test for "this declared control has a consumer."** The root cause behind T-01, T-08 and T-29 | 🔬 CONFIRMED | critical | **urgent** | EXECUTE — `SR-42` |
+| **T-03** | 08 §18, 09 §3.1, 10 §1.2 | **No test for "this declared control has a consumer."** The root cause behind T-01, T-08 and T-29 | 🔬 CONFIRMED | critical | **urgent** | EXECUTE — `SR-47` ✅ **BUILT 2026-10-17** (see §1.5 `C-07` for why the label changed) |
 
 ### 1.2 HIGH
 
@@ -133,10 +133,13 @@ Rule 13 — a committed number can be wrong; re-measure, and commit the fix by n
 | **C-04** | §15 QT-01 cited `authority/__tests__/decision.test.ts:296-303` | **`packages/shared/src/lib/authority/__tests__/decision.test.ts`**, same shape | The test moved into `shared` |
 | **C-05** | §11 §10: 9 arbitrary media queries | **6** in source | Excluding tests and built output; and they are `window.matchMedia` JS calls rather than CSS media queries |
 | **C-06** | *(this document's own header)* "197,912 words" | **45,652 words**, 287,331 bytes | 📐 `wc -w` and `wc -c` over the 13 files. The 197,912 figure is not reproducible by any measure of this folder — it was inherited unverified from an earlier session's note. **Rule 13 applied to my own work.** |
+| **C-07** | *(this document's own ranking)* named the declared-control check **`SR-42`** | The check is **`SR-47`**. `SR-42` was already assigned in the SRS to **openrig's exclusion ledger with mechanical expiry** | 📐 `library/architecture/mapping/findings/08-THE-SRS.md` lines 78–86 and `MASTER-CHECKLIST`'s `SRSREG` both carry `SR-42` = "Exclusion ledger with mechanical expiry; ships empty". The triage's §4 ranking reused a live label without checking the register, so the same ID pointed at two unrelated requirements — and the second one would have been silently overwritten the moment anyone built the first. **Rule 13 applied to my own work, a second time.** `SR-47` is the next free number in the SRS. Corrected in all four documents; the two legitimate `SR-42` rows are untouched. |
 
-**One of these six is a correction to my own work, not the audit's** — `C-06` is the headline number of this
-very document, and it was wrong until 16 October. It is listed here rather than quietly fixed, because the
-register's own method commits the fix *by name*.
+**Two of these seven are corrections to my own work, not the audit's** — `C-06` is the headline number of this
+very document, and `C-07` is the ID this document's own ranking invented for the work it ranked first. Both
+were wrong until 17 October. They are listed here rather than quietly fixed, because the register's own
+method commits the fix *by name* — and `C-07` in particular is the kind of error that a document which
+exists to enforce "one name, one thing" cannot afford to make.
 
 ### 1.6 Not validated
 
@@ -213,12 +216,23 @@ are the same finding.**
 
 The workshop already owns the mechanism. `SR-39`'s `check-one-truth.mjs` is a registry-driven check that
 fails when copies disagree; `SR-41`'s `check-escape-hatches.mjs` is a census that fails when a hole carries
-no reason. Both were committed today. **`SR-42` is the same shape pointed at declared controls**: a registry
+no reason. Both were committed today. **`SR-47` is the same shape pointed at declared controls**: a registry
 of declared controls, each naming at least one production reader, asserted by a test that fails when either
 side is empty. It would have caught T-01, T-08 and T-29 at build time, and the next three automatically.
 
 **This is why it is ranked critical and scheduled urgent, ahead of the individual patches.** A patch closes
-one instance. `SR-42` closes the class.
+one instance. `SR-47` closes the class.
+
+> ✅ **`SR-47` WAS BUILT, 2026-10-17.** `scripts/check-declared-controls.mjs` in the code repo, committed as
+> `52383e09`. Six controls registered; **five UNCOVERED and one DEAD-INPUT**, exactly as predicted. Two things
+> the build added beyond the plan: the **DEAD-INPUT shape** (the C6 contract's reader *is* wired at
+> `command-bus.ts:452` and zero handlers write the field, so it returns `null` for every handler — a dead
+> control that looks completely alive, and harder to see than a function nobody calls), and a **wider census**
+> that put the class at **3,658 of 14,311 exported symbols (25.6%)** with no production consumer — a figure to
+> watch, not a gate to trip, and the reason the registry is curated rather than automatic. The check was also
+> **wrong twice while being built, both times in the dangerous direction** (a dead control reading as wired),
+> which is why `strip()` removes string, comment *and* regex-literal contents before any pattern is applied.
+> T-03 is now closed; **T-01, T-08, T-29 and T-43 remain open and are still the work.**
 
 ---
 
@@ -244,7 +258,7 @@ is the one substantive recommendation this document adds.
 
 | # | The work | Why here |
 |---|---|---|
-| 1 | **`SR-42` — the declared-control coverage check** (T-03) | It is the class, not an instance. The workshop already owns the mechanism. Doing it first means T-01, T-08, T-29 and the next three are caught mechanically rather than patched one at a time |
+| 1 | **`SR-47` — the declared-control coverage check** (T-03) — ✅ **BUILT 2026-10-17** | It is the class, not an instance. The workshop already owns the mechanism. Doing it first means T-01, T-08, T-29 and the next three are caught mechanically rather than patched one at a time |
 | 2 | **T-01 and T-02** — the two CRITICALs | Live privilege-escalation and data-exposure routes, both reachable from an ordinary role, both one function to close, both with the code to copy already in the repo |
 | 3 | **T-32** — `UUID_PATTERN` `[1-5]` → `[0-9a-f]` | One character. Locked records become writable by a v7-id payload. There is no reason to leave a one-character fail-open in place |
 | 4 | **T-13 and T-14** — `--jinja` and the `mcp` base URL | Both are one line in a compose file, both are live today, and T-14 is the difference between the embedding lane working and it silently calling `api.openai.com` |

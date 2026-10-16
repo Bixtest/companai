@@ -84,11 +84,43 @@ duplicated.
 | SR-44 | **PZ** | Retirement ledger; renames are tracked hazards | buzz, openrig | BORROW | — |
 | SR-45 | out | Kinds-over-endpoints policy with conformance test | buzz | BORROW | — |
 | SR-46 | out | Two-reads lint: any setting read twice must be read once | openrig | BORROW | — |
+| SR-47 | **PZ** | Declared-control coverage: a control nobody reads is reported, not shipped | mercato — the `preview/` audit's §18 class | BUILD | ✅ **`CC-93`, `52383e09`, 2026-10-17** |
 
-**Count by status:** HAVE 3 (`SR-01`, `SR-18`, `SR-35`) · BUILD 10 · BORROW 38 ·
-RE-ENGINEER 2 (`SR-10`, `SR-27`). 3 + 10 + 38 + 2 = **53 rows** — the 46 base requirements
+**Count by status:** HAVE 3 (`SR-01`, `SR-18`, `SR-35`) · BUILD 11 · BORROW 38 ·
+RE-ENGINEER 2 (`SR-10`, `SR-27`). 3 + 11 + 38 + 2 = **54 rows** — the 46 base requirements
 plus seven sub-lettered additions (`SR-19a`, `SR-19b`, `SR-21a`, `SR-22a`, `SR-32a`, `SR-33a`,
-`SR-35a`). None of the sub-lettered rows change a parent row's status.
+`SR-35a`) plus `SR-47`. None of the sub-lettered rows change a parent row's status.
+
+**★ `SR-47` IS THE ONE ROW THAT CAME FROM OUR OWN CODEBASE RATHER THAN A PLATFORM STUDY — and it was
+added under the wrong number first.** The `preview/` audit's §18 thesis was that six separate findings
+were the same finding: a control the code declares and nobody reads. `.delegable` (declared at 24 sites,
+read 0x), `demoteIfEvidenceDemands` (a public `TrustService` method with 4 callers, all its own test),
+`authorityPolicyProblems` (3 callers, all its own test), `findFrontendVocabulary` (5, plus two
+self-calls), `detectRepeatedRequest` (13, the most-tested dead control in the repo), and the C6 command
+contract — whose reader *is* wired at `command-bus.ts:452` while **zero handlers declare
+`risk`/`approval`/`idempotency`**, so it returns `null` for every handler. **That last one is a third
+shape of dead control** — `input`: the reader is wired and the producer is absent, so the control looks
+completely alive while doing nothing.
+
+**Built 2026-10-17** as `scripts/check-declared-controls.mjs` + a 10/10 test +
+`scripts/verify-declared-controls-mutations.mjs` + `check:declared-controls`/`:fail`. **Five of the six
+read UNCOVERED and one reads DEAD-INPUT**, exactly as predicted — and **the test column is the finding**:
+every one of these controls has a full test suite and not one production consumer. Tested and wired are
+different things, and only the second is protection.
+
+**★ A SECOND FINDING FROM THE BUILD, and a limit on this row's own scope:** a mechanical census of every
+exported symbol with no production consumer puts the class at **3,658 of 14,311 (25.6 %)**. That is **not**
+a defect count — most of it is zod schemas and type aliases exported as a module's declared surface — so
+the shipped check uses a **curated registry** of six controls, and the census is a figure to watch, not a
+gate to trip. Publishing 3,658 findings would bury the six that are real, which is the same noise problem
+`SR-41` avoided when it refused to fold `as any` into the escape-hatch count.
+
+**★ AND THE CORRECTION THAT PRODUCED THIS ROW'S NUMBER (`C-07`):** the `preview/` triage's §4 ranking
+first named this check **`SR-42`** — which was already assigned, above, to *openrig's exclusion ledger
+with mechanical expiry*. One ID, two unrelated requirements, and the second would have been silently
+overwritten the moment anyone built the first. **`SR-47` is the next free number.** The correction is
+recorded in `PREVIEW-AUDIT-TRIAGE.md` §1.5 and in the `CC-92`/`CC-93` register rows. **Rule 13 applies to
+a document that exists to enforce "one name, one thing" as much as to anyone else's numbers.**
 
 **Trigger corrections applied in this pass:**
 

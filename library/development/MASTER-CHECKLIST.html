@@ -347,7 +347,71 @@ const PLATFORMS = [
 ];
 
 /* ---------- FRONTIER ---------- */
-const FRONTIER = `<b>LAST DONE — 2026-10-16 (late): the <code>preview/</code> audit, triaged and validated —
+const FRONTIER = `<b>LAST DONE — 2026-10-17: <code>SR-47</code>, the declared-control coverage check — BUILT,
+  <code>52383e09</code>.</b> The item the triage's own ranking put <b>first, ahead of both CRITICAL
+  patches</b>, and the reason it went first: <b>six findings in the register are the SAME finding</b> —
+  <code>.delegable</code>, <code>demoteIfEvidenceDemands</code>, the C6 command contract,
+  <code>authorityPolicyProblems</code>, <code>findFrontendVocabulary</code>,
+  <code>detectRepeatedRequest</code>, every one declared, every one with <b>zero production readers</b>,
+  every one <b>invisible to the build</b>. A patch closes an instance; this closes the class.
+  <br><b>WHAT SHIPPED:</b> <code>scripts/check-declared-controls.mjs</code> (a registry of six controls) +
+  a <b>10/10</b> test + <code>scripts/verify-declared-controls-mutations.mjs</code> (a mutation-proof
+  harness) + <code>check:declared-controls</code> / <code>:fail</code>.
+  <br><b>SIX CONTROLS REGISTERED; FIVE READ UNCOVERED AND ONE READS DEAD-INPUT</b>, exactly as predicted.
+  <b>The test column is the finding</b> — every one has a full test suite and not one production consumer:
+
+  <table class="mini"><thead><tr><th>control</th><th>verdict</th><th>decl</th><th>prod</th><th>test</th></tr></thead><tbody>
+  <tr><td><code>capability-delegable</code></td><td>UNCOVERED</td><td>24</td><td>0</td><td>0</td></tr>
+  <tr><td><code>trust-demote-if-evidence-demands</code></td><td>UNCOVERED</td><td>1</td><td>0</td><td>4</td></tr>
+  <tr><td><code>authority-policy-problems</code></td><td>UNCOVERED</td><td>1</td><td>0</td><td>3</td></tr>
+  <tr><td><code>business-widget-frontend-vocabulary</code></td><td>UNCOVERED</td><td>1</td><td>0</td><td>5</td></tr>
+  <tr><td><code>request-repeat-detector</code></td><td>UNCOVERED</td><td>1</td><td>0</td><td>13</td></tr>
+  <tr><td><code>command-contract-c6</code></td><td><b>DEAD-INPUT</b></td><td>1</td><td>1</td><td>4</td></tr>
+  </tbody></table>
+
+  <br><b>★ THREE SHAPES, because "nobody calls it" is not the only way a control dies.</b> <code>field</code>
+  (declared, never read), <code>export</code> (exported, called only by its own test), and — <b>new, and the
+  one that most deserves a check</b> — <code>input</code>: the C6 contract's reader <i>is</i> wired
+  (<code>command-bus.ts:452</code>) and <b>zero handlers declare <code>risk</code>/<code>approval</code>/
+  <code>idempotency</code></b>, so it returns <code>null</code> for every handler. <b>A dead control that
+  looks completely alive.</b>
+  <br><b>★ A SECOND FINDING FROM THE BUILD — the class is far wider than the six.</b> A mechanical census of
+  every exported symbol with no production consumer puts it at <b>3,658 of 14,311 (25.6 %)</b>. That is
+  <b>not</b> a defect count — most of it is zod schemas and type aliases exported as a module's declared
+  surface — so the registry is <b>curated</b>, and the census is a figure to watch, not a gate to trip.
+  Publishing 3,658 findings would bury the six that are real, which is the same noise problem
+  <code>SR-41</code> was careful to avoid.
+  <br><b>★ THE CHECK WAS WRONG TWICE WHILE BEING BUILT, both times in the dangerous direction</b> — a dead
+  control reading as <i>wired</i>. (1) String literals were not stripped, so <code>auth/acl.ts:112</code>'s
+  sentence <b>"Emphatically not itself delegable:"</b> read as a declaration site — a raw grep reports 29
+  declarations for <code>.delegable</code> where the true count is <b>24</b>, five of them prose inside
+  <code>note:</code> strings. (2) Regex literals were not stripped, so the registry's own
+  <code>consumer: /\\.delegable\\b|\\['"\\]delegable['"\\]\\]/</code> — a quote inside a character class —
+  read as a string delimiter, the <code>\\.delegable</code> before it survived, and <b>the check reported
+  itself as the control's consumer</b>. On a real run that made <code>.delegable</code> look COVERED.
+  <code>strip()</code> now removes string, comment <b>and</b> regex-literal contents before any pattern is
+  applied, keeping length and newlines so line numbers stay true. <b>Six mutations prove the suite has
+  teeth.</b>
+  <br><b>★ AND A NAMING CORRECTION ON MY OWN WORK (<code>C-07</code>):</b> the triage's §4 ranking called
+  this <code>SR-42</code>, which was <b>already assigned</b> in the SRS to <i>openrig's exclusion ledger with
+  mechanical expiry</i>. One ID, two unrelated requirements, and the second would have been silently
+  overwritten the moment anyone built the first. Corrected to <code>SR-47</code> (the next free number) in
+  all four documents; the two legitimate <code>SR-42</code> rows are untouched. <b>A document that exists
+  to enforce "one name, one thing" cannot afford to break that rule itself.</b>
+  <br><b>WHAT REMAINS OPEN:</b> <b>T-01, T-02, T-08, T-29 and T-43</b> — the check reports them, it does
+  not fix them. T-03 itself is closed.
+  <br><b>▶ NEXT — the two CRITICALs (T-01, T-02):</b> both are <b>one function to close</b>, and the code to
+  copy already exists in the repo — <code>getCapabilityDescriptor</code> for T-01,
+  <code>authorizeEntityAccess</code> (<code>search/ai-tools.ts:86</code>, 53 entities'
+  <code>aclFeatures</code> behind it) for T-02. <b>Then the one-character fix</b> (T-32:
+  <code>UUID_PATTERN</code>'s <code>[1-5]</code> → <code>[0-9a-f]</code> — a v7 id currently fails the match,
+  so no lock lookup runs and a locked record is writable), <b>and the two live compose defects</b> (T-13
+  <code>--jinja</code>, absent from every compose file; T-14 the <code>mcp</code> service's missing base
+  URL, which is the difference between the embedding lane working and it silently calling
+  <code>api.openai.com</code>). <b><code>SR-47</code> does not delay any of these</b> — it is the item that
+  makes them arrive as a build failure instead of a discovery, and it now runs
+  <code>check:declared-controls</code> on demand.
+  <br><b>AND EARLIER (2026-10-16, late) — the <code>preview/</code> audit, triaged and validated —
   <code>CC-92</code>.</b> 13 documents, 45,652 words, written 11–14 Oct by an agent brought in cold, and
   <b>never triaged</b>. <b>46 findings re-measured against the code at <code>b183df58</code>: zero false.</b>
   <br><b>BOTH CRITICALS CONFIRMED AND STILL OPEN.</b> <b>T-01</b> — the delegation route's guard is
@@ -378,26 +442,18 @@ const FRONTIER = `<b>LAST DONE — 2026-10-16 (late): the <code>preview/</code> 
   largest being the RTL ratio: <b>70:1 → 15.1:1</b>. Measured token-level over string literals — 4,320
   files, 472,110 class-like tokens, <b>878 physical vs 58 logical</b> — against the audit's word-boundary
   count of 1,129/16. <b>The finding and its severity are unchanged.</b>
-  <br><b>★ THE RANKING'S OWN FINDING, and the one substantive addition to the audit's §17 order:</b> rank
-  <b><code>SR-42</code> — a declared-control coverage check — FIRST, ahead of both CRITICAL patches.</b>
-  Because <b>six findings in the register are the SAME finding</b>: <code>.delegable</code>,
-  <code>demoteIfEvidenceDemands</code>, the C6 command contract, <code>authorityPolicyProblems</code>,
-  <code>findFrontendVocabulary</code>, <code>detectRepeatedRequest</code> — every one declared, every one
-  with <b>zero production readers</b>, every one <b>invisible to the build</b>. A patch closes an instance;
-  <code>SR-42</code> closes the class — <b>and the workshop already owns the mechanism</b>
-  (<code>SR-39</code>'s one-truth check + <code>SR-41</code>'s escape-hatch census, both committed today).
-  <br><b>▶ NEXT — <code>SR-42</code>, then the two CRITICALs (T-01, T-02):</b> both are <b>one function to
-  close</b>, and the code to copy already exists in the repo —
-  <code>getCapabilityDescriptor</code> for T-01, <code>authorizeEntityAccess</code>
-  (<code>search/ai-tools.ts:86</code>, 53 entities' <code>aclFeatures</code> behind it) for T-02. <b>Then
-  the one-character fix</b> (T-32: <code>UUID_PATTERN</code>'s <code>[1-5]</code> → <code>[0-9a-f]</code> —
-  a v7 id currently fails the match, so no lock lookup runs and a locked record is writable), <b>and the two
-  live compose defects</b> (T-13 <code>--jinja</code>, absent from every compose file; T-14 the
-  <code>mcp</code> service's missing base URL, which is the difference between the embedding lane working
-  and it silently calling <code>api.openai.com</code>).
+  <br><b>★ THE RANKING'S OWN FINDING, and the one substantive addition to the audit's §17 order:</b> rank a
+  <b>declared-control coverage check FIRST, ahead of both CRITICAL patches</b> — <b>✅ which is now built, as
+  <code>SR-47</code>.</b> Because <b>six findings in the register are the SAME finding</b>:
+  <code>.delegable</code>, <code>demoteIfEvidenceDemands</code>, the C6 command contract,
+  <code>authorityPolicyProblems</code>, <code>findFrontendVocabulary</code>,
+  <code>detectRepeatedRequest</code> — every one declared, every one with <b>zero production readers</b>,
+  every one <b>invisible to the build</b>. A patch closes an instance; <code>SR-47</code> closes the class —
+  <b>and the workshop already owns the mechanism</b> (<code>SR-39</code>'s one-truth check +
+  <code>SR-41</code>'s escape-hatch census, both committed the day before).
   <br><b>STILL QUEUED BEHIND IT (unchanged):</b> the rest of the tooling set (<code>CC-91</code> —
   <code>SR-38</code>/<code>SR-46</code>), then identity (<code>SR-02</code>/<code>SR-07</code>) →
-  <code>SR-12</code> → <code>P2-9b</code>. <b><code>SR-42</code> does not displace that order</b> — it is
+  <code>SR-12</code> → <code>P2-9b</code>. <b><code>SR-47</code> does not displace that order</b> — it is
   the SRS's own <i>"land FIRST; make everything after cheaper"</i> item, and it is the item that makes the
   next three findings arrive as a build failure instead of a discovery.
   <br><b>AND WHAT WAS DELIBERATELY NOT DONE:</b> the hosted-login defect (<code>06 §3.5</code> — needs the
@@ -547,7 +603,8 @@ const REGISTER = [
  ["CC-89","The stack ran on 4 of the host's 8 CPUs (.wslconfig), so the model's -tb 8 was silently clamped. Raised to 8 — and a Docker Desktop restart does NOT reboot the WSL VM, so the file only applies via docker desktop stop/start. Measured: +56 % at the 2,048-token point (7.81 to 12.18 tok/s), but only +10 % on the whole 16,560-token cold fill (2,264 s @ 7.32 -> 2,051 s @ 8.07 tok/s) — the prefill rate is length-dependent, so the early-fill sample flatters","closed"],
  ["CC-90","The container's pin verifier carried a stale default digest. After the 2026-10-16 re-pin, library/.hermes_pin.py, HERMES-PIN.md and the compose HERMES_PIN_DIGEST default all moved to db44c462…/07ee857b… — but docker/hermes/verify_pin.py's DEFAULT_EXPECTED_DIGEST still named the previous revision (3569e846…/ca760e97…), though its own docstring says to update it in the same change. Effect: any invocation without HERMES_PIN_DIGEST — a manual docker run, a test, the handshake gate — rejected the correctly-pinned tree with PIN BROKEN (19,728 files hashing to 07ee857b…). Source corrected; the image must be rebuilt to carry it — until then callers pass --pin-digest 07ee857bdab59a875317035d8aaad4d6","open"],
  ["CC-91","The tooling set (SR-38/39/41/46) — the SRS's 'land FIRST; make everything after cheaper' item, and now the frontier. It is why the switchover is NOT next: the SRS sequences SR-12 (per-tenant engine home) as gating P2-9b, and SR-12 is the fix for the OPEN CC-84 (a Hermes turn runs platform tools as ONE superadmin identity, outside the chat's tenant) — so flipping the default first would make that hole the DEFAULT path. First slice DONE 2026-10-16: the one-truth check (SR-39) — scripts/check-one-truth.mjs + a mutation-proof test (4/4) + the check:one-truth script — with the Hermes pin digest as its first fact, i.e. the fact that actually drifted (CC-90). Second slice DONE 2026-10-16 (evening): the escape-hatch census (SR-41) — scripts/check-escape-hatches.mjs + a 5/5 test (the trap: a bare rule list is NOT a reason; the precision case: prose is NOT a hole) + check:escape-hatches / :fail. Measured on the real repo: 7,968 files, 202 holes, 33 named, 169 unnamed — and the finding is ONE-SIDED: every @ts-expect-error/@ts-ignore carries a reason (24 of 24) but only 8 of 168 eslint-disables do, so the backlog is a convention gap (nobody was told to write a reason after --), not a discipline failure. Finding: the SRS marks all four BORROW, but the repo ALREADY runs the pattern (check-version-alignment.sh = one-truth; check-agents-md-budget.mjs + baseline = the ratchet SR-40), so the work is generalise, not import. Remainder: SR-38 (digital-twin harness), SR-46 (two-reads lint — and its stated home needs a correction: packages/eslint-plugin-ds runs only on backend-UI files via eslint.ds.config.mjs, so a settings-read lint there would never fire on the files that read settings; it belongs in the scripts/check-*.mjs family, where cross-file drift is visible)","open"],
- ["CC-92","The preview/ folder's 13 documents (45,652 words, written 11–14 Oct by an agent brought in cold) were never triaged — 08-FORENSIC-AUDIT.md alone carries 20 numbered sections with 2 CRITICAL authorization defects. TRIAGED AND VALIDATED 2026-10-16 in library/development/PREVIEW-AUDIT-TRIAGE.md: 46 findings re-measured against the code at b183df58, ZERO false. Both CRITICALs CONFIRMED and still open — T-01 (the delegation route requires auth.delegations.manage but never the capability being granted; .delegable has 0 production readers repo-wide) and T-02 (business_ir.run_query passes features: ctx.userFeatures into the Business-IR chain and nothing reads it; engine.query runs unguarded). Also CONFIRMED: the count-gap-verifies-as-passed (§3), the pending-act double-approve with no CAS (§4), undo bypassing the ledger (§5), nine modules' commands ungated (§6 — and my OWN first census was the measurement error: grepping the bare word 'capability' matched the prose 'adapter capability' in a comment; re-measured with ^\\s*capability\\s*: gives 15 core modules with commands/, 8 declaring one), demoteIfEvidenceDemands with 4 callers all its own test (§7), the broken DS lint + all six rules at warn (11 §1), and 878 physical vs 58 logical direction utilities = 15.1:1 (11 §3). FOUR claims now FIXED and recorded so nobody re-fixes them: ledger:verify HAS a caller (audit_logs/cli.ts:91,115), OPENAI_BASE_URL IS forwarded to hermes-gateway (docker-compose.hermes.yml:107, P2-7/§2.13), HERMES-PIN.md EXISTS (29,340 bytes, digest 07ee857b… = the one SR-39 verifies), and run.ts gate 3 gained || !fn.businessIr. FIVE of the audit's own numbers corrected by name (C-01…C-05), the largest being the RTL ratio 70:1 → 15.1:1 (token-level count of string literals, 4,320 files, 472,110 class-like tokens, vs the audit's word-boundary count). THE RANKING'S OWN FINDING, and the one substantive addition to the audit's §17 order: rank SR-42 — a declared-control coverage check — FIRST, ahead of both CRITICAL patches, because six findings in the register are the SAME finding (.delegable, demoteIfEvidenceDemands, the C6 command contract, authorityPolicyProblems, findFrontendVocabulary, detectRepeatedRequest: all declared, all with zero production readers, all invisible to the build) and the workshop already owns the mechanism (SR-39's one-truth check + SR-41's escape-hatch census, both committed today). UNVALIDATED and recorded as such rather than guessed: the hosted login (06 §3.5, environmental), the green-suite claims (a full run was not in scope), the @deprecated pair's 106 call sites (could not locate the audit's cited file), and F10's byte-level locale divergence","open"],
+ ["CC-92","The preview/ folder's 13 documents (45,652 words, written 11–14 Oct by an agent brought in cold) were never triaged — 08-FORENSIC-AUDIT.md alone carries 20 numbered sections with 2 CRITICAL authorization defects. TRIAGED AND VALIDATED 2026-10-16 in library/development/PREVIEW-AUDIT-TRIAGE.md: 46 findings re-measured against the code at b183df58, ZERO false. Both CRITICALs CONFIRMED and still open — T-01 (the delegation route requires auth.delegations.manage but never the capability being granted; .delegable has 0 production readers repo-wide) and T-02 (business_ir.run_query passes features: ctx.userFeatures into the Business-IR chain and nothing reads it; engine.query runs unguarded). Also CONFIRMED: the count-gap-verifies-as-passed (§3), the pending-act double-approve with no CAS (§4), undo bypassing the ledger (§5), nine modules' commands ungated (§6 — and my OWN first census was the measurement error: grepping the bare word 'capability' matched the prose 'adapter capability' in a comment; re-measured with ^\\s*capability\\s*: gives 15 core modules with commands/, 8 declaring one), demoteIfEvidenceDemands with 4 callers all its own test (§7), the broken DS lint + all six rules at warn (11 §1), and 878 physical vs 58 logical direction utilities = 15.1:1 (11 §3). FOUR claims now FIXED and recorded so nobody re-fixes them: ledger:verify HAS a caller (audit_logs/cli.ts:91,115), OPENAI_BASE_URL IS forwarded to hermes-gateway (docker-compose.hermes.yml:107, P2-7/§2.13), HERMES-PIN.md EXISTS (29,340 bytes, digest 07ee857b… = the one SR-39 verifies), and run.ts gate 3 gained || !fn.businessIr. FIVE of the audit's own numbers corrected by name (C-01…C-05), the largest being the RTL ratio 70:1 → 15.1:1 (token-level count of string literals, 4,320 files, 472,110 class-like tokens, vs the audit's word-boundary count). THE RANKING'S OWN FINDING, and the one substantive addition to the audit's §17 order: rank a declared-control coverage check FIRST, ahead of both CRITICAL patches, because six findings in the register are the SAME finding (.delegable, demoteIfEvidenceDemands, the C6 command contract, authorityPolicyProblems, findFrontendVocabulary, detectRepeatedRequest: all declared, all with zero production readers, all invisible to the build) and the workshop already owns the mechanism (SR-39's one-truth check + SR-41's escape-hatch census, both committed the day before). THIS ROW FIRST CALLED THAT CHECK SR-42, WHICH WAS WRONG — corrected by name as C-07 on 2026-10-17: SR-42 was already assigned in the SRS to openrig's exclusion ledger with mechanical expiry, so one ID pointed at two unrelated requirements and the second would have been silently overwritten the moment anyone built the first. The correct ID is SR-47. AND IT IS BUILT (52383e09, 2026-10-17): scripts/check-declared-controls.mjs registers the six and reports five UNCOVERED and one DEAD-INPUT — every one with a full test suite and zero production consumers (capability-delegable 24 decl / 0 prod; demoteIfEvidenceDemands 1/0 with 4 test callers; authorityPolicyProblems 1/0 with 3; findFrontendVocabulary 1/0 with 5, and ir.ts:217/:227 are self-calls; detectRepeatedRequest 1/0 with 13, the most-tested dead control in the repo; command-contract-c6 reader wired at command-bus.ts:452 with 0 producers). A SECOND FINDING FROM THE BUILD: a census puts the whole class at 3,658 of 14,311 exported symbols (25.6%) with no production consumer — a figure to watch, not a gate to trip, and the reason the registry is curated rather than automatic. THE CHECK WAS WRONG TWICE WHILE BEING BUILT, both times a dead control reading as wired: prose inside note: strings read as declarations (a raw grep reports 29 .delegable declarations where the true count is 24, five of them prose), and the registry's own regex literal read as a string delimiter so the check reported ITSELF as the control's consumer. strip() now removes string, comment AND regex-literal contents before matching, and six mutations prove the suite has teeth. T-03 is closed; T-01, T-02, T-08, T-29 and T-43 remain open and are still the work. UNVALIDATED and recorded as such rather than guessed: the hosted login (06 §3.5, environmental), the green-suite claims (a full run was not in scope), the @deprecated pair's 106 call sites (could not locate the audit's cited file), and F10's byte-level locale divergence","open"],
+ ["CC-93","SR-47 — the declared-control coverage check — BUILT 2026-10-17 (52383e09). The item the triage's own ranking put FIRST, ahead of both CRITICAL patches, and the reason it went first: six findings were the same finding, and a patch closes an instance while this closes the class. WHAT SHIPPED: scripts/check-declared-controls.mjs (a registry of six controls), scripts/__tests__/check-declared-controls.test.mjs (10/10), scripts/verify-declared-controls-mutations.mjs (a mutation-proof harness), and check:declared-controls / :fail in package.json. MEASURED ON THE REAL REPO at b183df58: capability-delegable UNCOVERED (24 declarations, 0 production, 0 test); trust-demote-if-evidence-demands UNCOVERED (1/0/4 — a public TrustService method whose only callers are its own test); authority-policy-problems UNCOVERED (1/0/3); business-widget-frontend-vocabulary UNCOVERED (1/0/5); request-repeat-detector UNCOVERED (1/0/13 — the most-tested dead control in the repo); command-contract-c6 DEAD-INPUT (reader wired at command-bus.ts:452, 0 producers). THE TEST COLUMN IS THE FINDING: every one of these controls has a full test suite and not one production consumer — tested and wired are different things, and only the second is protection. THREE SHAPES, because 'nobody calls it' is not the only way a control dies: field (declared, never read), export (exported, called only by its own test), and input — new, and the one that most deserves a check — where the reader is wired and the producer is absent, so the C6 contract returns null for every handler while looking completely alive. A SECOND FINDING FROM THE BUILD: a census of every exported symbol with no production consumer puts the whole class at 3,658 of 14,311 (25.6%) — NOT a defect count (most of it is zod schemas and type aliases exported as a module's declared surface), which is why the registry is curated and the census is a figure to watch, not a gate to trip. THE CHECK WAS WRONG TWICE WHILE BEING BUILT, both times in the dangerous direction (a dead control reading as wired): (1) string literals were not stripped, so auth/acl.ts:112's sentence 'Emphatically not itself delegable:' read as a declaration site — a raw grep reports 29 .delegable declarations where the true count is 24, five of them prose inside note: strings; (2) regex literals were not stripped, so the registry's own consumer regex — a quote inside a character class — read as a string delimiter, the \\.delegable before it survived, and the check reported ITSELF as the control's consumer. strip() now removes string, comment AND regex-literal contents before any pattern is applied, keeping length and newlines so line numbers stay true. SIX MUTATIONS PROVE THE SUITE HAS TEETH — regex, string and comment stripping disabled; same-file consumers always counted; a declaration counting as its own consumer; test files never walked. Each must fail the suite in the RIGHT case; a mutation caught in the wrong case is reported NOT PROVEN, not as a pass. Default mode reports and exits 0, because all six controls are currently uncovered and a check that is red from its first commit gets switched off — the exact failure this script exists to catch. --fail is the enforcement mode, for when the backlog is cleared. The 7 failures in the wider scripts suite are pre-existing and environmental (dev-memory-sampler reads /proc; dev-splash and watch-packages have their own) — proven by stashing this commit's only tracked change and re-running the same files: they fail identically at HEAD. REMAINDER: the six findings themselves are still open — T-01, T-02, T-08, T-29, T-43. The check reports them; it does not fix them","closed"],
 ];
 
 /* ---------- SR REGISTER (mirrors 08-THE-SRS.md, read straight from the register, 2026-10-16) ---------- */
@@ -605,6 +662,7 @@ const SRSREG = [
  ["SR-44","PZ","Retirement ledger; renames are tracked hazards","borrow","buzz, openrig"],
  ["SR-45","out","Kinds-over-endpoints policy with conformance test","borrow","buzz"],
  ["SR-46","out","Two-reads lint: any setting read twice must be read once","borrow","openrig"],
+ ["SR-47","PZ","Declared-control coverage: a control nobody reads is reported, not shipped","build","mercato (the preview/ audit's §18 class)"],
 ];
 
 /* ---------- RENDER ---------- */
